@@ -114,8 +114,13 @@ export function isApplicableOn(
 ): boolean {
   if (c.status !== "active") return false;
   if (!workDay) return true;
-  if (c.startedAt && workDay < c.startedAt) return false;
-  if (c.endedAt && workDay > c.endedAt) return false;
+  // Day granularity: a timestamp bound ("2026-10-01T00:00:00+00:00") is cut
+  // to its day, so a context applies ON its first and last day.
+  const day = workDay.slice(0, 10);
+  const start = c.startedAt ? c.startedAt.slice(0, 10) : null;
+  const end = c.endedAt ? c.endedAt.slice(0, 10) : null;
+  if (start && day < start) return false;
+  if (end && day > end) return false;
   return true;
 }
 

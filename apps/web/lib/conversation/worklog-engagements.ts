@@ -12,6 +12,7 @@ import {
   orderContextsForChoice,
   resolveEngagementContext,
   type ContextResolution,
+  type EngagementCandidate,
 } from "@/lib/journal/engagement-context-selection";
 import {
   composeDistinctEngagementLabels,
@@ -64,17 +65,30 @@ export type WorkLogEngagementsResult =
        *  active) — names only, through the narrow historical-names read. A
        *  sentence naming one of these must not be filed under another org. */
       endedOrgNames?: string[];
-      /** Localized sentence when the person ACTS FOR an organization where no
-       *  work relationship is recorded (a membership is access, not a work
-       *  relationship — owner P0 2026-10-29). Null otherwise. The flow shows
-       *  it so that organization is never silently missing from the choice. */
+      /** Localized sentence for the organization the person ACTS FOR ("…no
+       *  work relationship with X is recorded" — a membership is access, not a
+       *  work relationship; owner P0 2026-10-29). Null in the personal space.
+       *  Shown only while the resolution for the work date says
+       *  `activeWorkspaceWithoutContext`, so that organization is never
+       *  silently missing from the choice. */
       activeWorkspaceNotice?: string | null;
+      /** The facts `resolution` was computed from, so the flow re-resolves
+       *  with the SAME pure resolver when the person changes the work date —
+       *  applicability is bounded by the day (Codex P2 on #2884). */
+      candidates?: EngagementCandidate[];
+      activeOrganizationId?: string | null;
     }
   | { kind: "no-worker" }
   | { kind: "no-context" }
   | { kind: "not-authed" };
 
-export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult> {
+export async function listWorkLogEngagements(
+  workDay?: string | null,
+): Promise<WorkLogEngagementsResult> {
+  // The day the work happened, when the caller knows it. A malformed value is
+  // no signal (never an error): the resolution then ignores day bounds, as
+  // before.
+  const day = typeof workDay === "string" && /^\d{4}-\d{2}-\d{2}$/.test(workDay) ? workDay : null;
   const supabase = await createClient();
   const {
     data: { user },
@@ -220,8 +234,7 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
   // asks. This is the second of the two work-log entry points; the journal
   // composer is the other, and both must resolve identically or the same
   // hours land in different places depending on where they were typed.
-  const resolution = resolveEngagementContext({
-    candidates: (ecRows ?? []).map((e) => {
+  const candidates: EngagementCandidate[] = (ecRows ?? []).map((e) => {
       const r = e as {
         id: string;
         relationship_slug: string;
@@ -240,7 +253,10 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
         endedAt: r.ended_at ?? null,
         isPrimary: r.is_primary === true,
       };
-    }),
+    });
+  const resolution = resolveEngagementContext({
+    candidates,
+    workDay: day,
     activeOrganizationId: activeOrgId,
   });
 
@@ -248,7 +264,7 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
   // it plainly. Nothing is created — the person picks among their real
   // contexts (or records the relationship where the product offers it).
   let activeWorkspaceNotice: string | null = null;
-  if (resolution.activeWorkspaceWithoutContext) {
+  if (activeOrgId) {
     const acting = workspace.workspaces.find((w) => w.id === activeOrgId) ?? null;
     activeWorkspaceNotice = tJournal("activeWorkspaceNoRelationship", {
       org:
@@ -303,5 +319,7 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
     resolution,
     endedOrgNames,
     activeWorkspaceNotice,
+    candidates,
+    activeOrganizationId: activeOrgId,
   };
 }

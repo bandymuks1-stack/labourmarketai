@@ -2,6 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { mentionsOrganization } from "@/lib/journal/org-mention";
+import {
+  resolveEngagementContext,
+  type EngagementCandidate,
+} from "@/lib/journal/engagement-context-selection";
 import { useTranslations } from "next-intl";
 import {
   PROJECT_FIELD_NONE,
@@ -353,6 +357,15 @@ export function WorkerWorkLogFlow({
   // Acting for an organization with no recorded work relationship (owner P0
   // 2026-10-29): the server's localized sentence, shown under the picker.
   const [activeWorkspaceNotice, setActiveWorkspaceNotice] = useState<string | null>(null);
+  // The facts the server resolved from, so a changed WORK DATE re-resolves
+  // with the same pure resolver (applicability is bounded by the day — Codex
+  // P2 on #2884). Until the person picks, or their sentence named an org.
+  const [contextFacts, setContextFacts] = useState<{
+    candidates: EngagementCandidate[];
+    activeOrganizationId: string | null;
+  } | null>(null);
+  const contextDecidedByPerson = useRef(false);
+  const resolvedForDate = useRef<string | null>(null);
   const [workDate, setWorkDate] = useState(draft.date);
   const [site, setSite] = useState(draft.site ?? "");
   const [notes, setNotes] = useState(draft.notes);
@@ -488,7 +501,7 @@ export function WorkerWorkLogFlow({
 
   useEffect(() => {
     let alive = true;
-    listWorkLogEngagements()
+    listWorkLogEngagements(draft.date)
       .then((res) => {
         if (!alive) return;
         if (res.kind === "ok") {
@@ -512,6 +525,13 @@ export function WorkerWorkLogFlow({
             : ((res.endedOrgNames ?? []).find((n) => mentionsOrganization(said, n)) ?? null);
           setEndedOrgNamed(endedNamed);
           setActiveWorkspaceNotice(res.activeWorkspaceNotice ?? null);
+          contextDecidedByPerson.current = Boolean(named || endedNamed);
+          resolvedForDate.current = draft.date;
+          setContextFacts(
+            res.candidates
+              ? { candidates: res.candidates, activeOrganizationId: res.activeOrganizationId ?? null }
+              : null,
+          );
           setEngagementId(named ? named.id : endedNamed ? "" : (res.resolution.selectedId ?? ""));
           setMustChooseEngagement(!named && (endedNamed !== null || res.resolution.rule === "C"));
           setPhase({ kind: "ready", token: null });
@@ -531,6 +551,29 @@ export function WorkerWorkLogFlow({
       alive = false;
     };
   }, [labels.errorGeneric]);
+
+  // The resolution for the CURRENT work date (null until the facts arrive).
+  const liveResolution = useMemo(
+    () =>
+      contextFacts
+        ? resolveEngagementContext({
+            candidates: contextFacts.candidates,
+            workDay: workDate,
+            activeOrganizationId: contextFacts.activeOrganizationId,
+          })
+        : null,
+    [contextFacts, workDate],
+  );
+  useEffect(() => {
+    if (!liveResolution || contextDecidedByPerson.current) return;
+    if (resolvedForDate.current === workDate) return;
+    resolvedForDate.current = workDate;
+    setEngagementId(liveResolution.selectedId ?? "");
+    setMustChooseEngagement(liveResolution.rule === "C");
+  }, [liveResolution, workDate]);
+  const showActiveWorkspaceNotice = Boolean(
+    activeWorkspaceNotice && liveResolution?.activeWorkspaceWithoutContext,
+  );
 
   const contextProjects: AssignedProject[] =
     engagements.find((e) => e.id === engagementId)?.projects ?? [];
@@ -1159,6 +1202,7 @@ export function WorkerWorkLogFlow({
             value={engagementId}
             disabled={confirming || pending}
             onChange={(e) => {
+              contextDecidedByPerson.current = true;
               setEngagementId(e.target.value);
               clearError();
             }}
@@ -1194,7 +1238,7 @@ export function WorkerWorkLogFlow({
           ) : null}
         </label>
       )}
-      {activeWorkspaceNotice ? (
+      {showActiveWorkspaceNotice ? (
         <p
           className="text-meta leading-relaxed text-text-secondary"
           data-testid="worklog-context-active-workspace-notice"

@@ -364,36 +364,45 @@ export default async function JournalPage({
     (e) => (e as { organization_id?: string | null }).organization_id ?? null,
   );
 
+  const contextCandidates = (ecRows ?? []).map((e) => {
+    const r = e as {
+      id: string;
+      relationship_slug: string;
+      organization_id?: string | null;
+      status?: string | null;
+      started_at?: string | null;
+      ended_at?: string | null;
+      is_primary?: boolean | null;
+    };
+    return {
+      id: r.id,
+      relationshipSlug: r.relationship_slug,
+      organizationId: r.organization_id ?? null,
+      // The query already filters to status='active'; carry it explicitly so
+      // the pure model needs no knowledge of how it was fetched.
+      status: r.status ?? "active",
+      startedAt: r.started_at ?? null,
+      endedAt: r.ended_at ?? null,
+      isPrimary: r.is_primary === true,
+    };
+  });
+  // Bounded by the day the work happened (Codex P2 on #2884): the selected
+  // calendar day when there is one. The composer re-resolves on its own date
+  // with the same candidates, so a changed date never keeps a context whose
+  // bounds exclude it.
   const contextResolution = resolveEngagementContext({
-    candidates: (ecRows ?? []).map((e) => {
-      const r = e as {
-        id: string;
-        relationship_slug: string;
-        organization_id?: string | null;
-        status?: string | null;
-        started_at?: string | null;
-        ended_at?: string | null;
-        is_primary?: boolean | null;
-      };
-      return {
-        id: r.id,
-        relationshipSlug: r.relationship_slug,
-        organizationId: r.organization_id ?? null,
-        // The query already filters to status='active'; carry it explicitly so
-        // the pure model needs no knowledge of how it was fetched.
-        status: r.status ?? "active",
-        startedAt: r.started_at ?? null,
-        endedAt: r.ended_at ?? null,
-        isPrimary: r.is_primary === true,
-      };
-    }),
+    candidates: contextCandidates,
+    workDay: selectedDate,
     activeOrganizationId,
   });
   // Acting for an organization with NO recorded work relationship there (a
   // membership is access, not a work relationship): said plainly in the
   // composer instead of that organization silently missing from the choice.
   // Nothing is created — the person picks among their real contexts.
-  const activeWorkspaceNotice = contextResolution.activeWorkspaceWithoutContext
+  // The sentence is prepared whenever the person acts for an organization;
+  // the composer shows it only while the resolution for ITS work date says
+  // there is no applicable relationship there.
+  const activeWorkspaceNotice = actingWorkspace
     ? t("activeWorkspaceNoRelationship", {
         org:
           actingOrgName ??
@@ -1416,6 +1425,8 @@ export default async function JournalPage({
               engagements={composerEngagements}
               contextResolution={contextResolution}
               activeWorkspaceNotice={activeWorkspaceNotice}
+              contextCandidates={contextCandidates}
+              activeOrganizationId={activeOrganizationId}
               directions={directions}
               workerSkills={workerSkills}
               editingEntry={editingEntry}
@@ -1430,6 +1441,8 @@ export default async function JournalPage({
               engagements={composerEngagements}
               contextResolution={contextResolution}
               activeWorkspaceNotice={activeWorkspaceNotice}
+              contextCandidates={contextCandidates}
+              activeOrganizationId={activeOrganizationId}
               directions={directions}
               workerSkills={workerSkills}
               templates={journalTemplates}

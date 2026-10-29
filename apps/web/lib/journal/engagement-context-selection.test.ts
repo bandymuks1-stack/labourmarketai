@@ -293,6 +293,41 @@ describe("rule W — the active workspace is a preselect signal", () => {
     expect(r).toEqual({ rule: "D", selectedId: "personal", activeWorkspaceWithoutContext: true });
   });
 
+  it("Codex P2 #2884: a September day logged while acting for an org joined in OCTOBER is NOT preselected into it", () => {
+    const joinedOctober = ctx({ id: "octCtx", organizationId: "orgCo", startedAt: "2026-10-01" });
+    const r = resolveEngagementContext({
+      candidates: [PERSONAL, joinedOctober, UNNAMED_AGENCY],
+      activeOrganizationId: "orgCo",
+      workDay: "2026-09-15",
+    });
+    expect(r.selectedId).not.toBe("octCtx");
+    expect(r.rule).not.toBe("W");
+    // The person IS told they have no relationship there on that day.
+    expect(r.activeWorkspaceWithoutContext).toBe(true);
+    // On a day inside the bounds the same context is the answer.
+    expect(
+      resolveEngagementContext({
+        candidates: [PERSONAL, joinedOctober, UNNAMED_AGENCY],
+        activeOrganizationId: "orgCo",
+        workDay: "2026-10-20",
+      }),
+    ).toEqual({ rule: "W", selectedId: "octCtx" });
+  });
+
+  it("timestamp bounds are compared by DAY: a context applies on its first and last day", () => {
+    const stamped = ctx({
+      id: "stamped",
+      organizationId: "orgCo",
+      startedAt: "2026-10-01T00:00:00+00:00",
+      endedAt: "2026-10-31T23:59:59+00:00",
+    });
+    for (const day of ["2026-10-01", "2026-10-31"]) {
+      expect(isApplicableOn(stamped, day), day).toBe(true);
+    }
+    expect(isApplicableOn(stamped, "2026-09-30")).toBe(false);
+    expect(isApplicableOn(stamped, "2026-11-01")).toBe(false);
+  });
+
   it("W never returns a context outside the active organization", () => {
     const cands = [PERSONAL, EMPLOYER_A, EMPLOYER_B, OWNED_COMPANY, UNNAMED_AGENCY];
     for (const org of ["orgA", "orgB", "orgCo", "orgAg", "orgNone"]) {
