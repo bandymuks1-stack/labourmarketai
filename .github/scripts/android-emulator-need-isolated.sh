@@ -5,7 +5,8 @@
 # as 10.0.2.2). Usage: android-emulator-need-isolated.sh <apk>
 #
 # Signs in as the job's seeded QA-SYNTHETIC company, searches jobs, has an
-# empty need refused, then drafts, confirms and sends ONE need (NEED_SUBMIT=1).
+# empty need refused, then drafts, confirms and sends a need (NEED_SUBMIT=1),
+# returns, and sends a SECOND need from a fresh form (need-second-journey.yaml).
 # The stored row is checked by the next workflow step, in the local database.
 # Nothing from the session is written to disk or uploaded.
 set -euo pipefail
@@ -30,3 +31,8 @@ maestro test \
   -e NEED_SUBMIT=1 \
   apps/mobile/.maestro/jobs-need-journey.yaml
 echo "ANDROID_NEED_JOURNEY_ON_DEVICE: jobs search loaded; empty need refused; need drafted, confirmed, sent"
+
+# The SECOND need: Done → Today → a fresh form (not the first need's sent state)
+# → drafted, confirmed, sent. The next workflow step expects two rows.
+maestro test apps/mobile/.maestro/need-second-journey.yaml
+echo "ANDROID_SECOND_NEED_ON_DEVICE: Done returned to Today; Post a need opened a fresh form; second need sent"
