@@ -68,9 +68,6 @@ jobs:
       APP_ORIGIN: http://127.0.0.1:3000
       # Both walks share this one throwaway stack: self-serve sign-up and the
       # agency roles / permissions walk (agency-roles-isolated.spec.ts).
-      # role-journeys-isolated.spec.ts: the cross-role integration journeys
-      # (company -> agency -> placed worker -> journal confirmation, isolation,
-      # idempotency) on the same stack.
       SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/role-journeys-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
@@ -101,19 +98,15 @@ jobs:
       - name: Guard — production hosts resolve to nowhere on this runner
         run: |
           set -euo pipefail
-          # Both address families: with only IPv4 entries the AAAA lookup still
-          # goes to DNS, and a production host with an IPv6 record would stay
-          # reachable (seen on a run 2026-10-29: `getent hosts` answered the
-          # real address first).
-          for h in gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app; do
-            printf '0.0.0.0 %s\n:: %s\n' "$h" "$h"
-          done | sudo tee -a /etc/hosts >/dev/null
-          for h in gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app; do
-            addrs="$(getent ahosts "$h" | awk '{print $1}' | sort -u | tr '\n' ' ')"
-            for a in $addrs; do
-              case "$a" in 0.0.0.0|::|::ffff:0.0.0.0) ;; *) echo "::error::$h still resolves"; exit 1 ;; esac
-            done
-            [ -n "$addrs" ] || { echo "::error::$h has no blackhole entry"; exit 1; }
+          HOSTS="gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app"
+          # Leading newline: a hosts file without a trailing newline would glue the
+          # first entry onto its last line (and that line's address). IPv4 AND IPv6
+          # blackholes, so neither address family reaches real DNS.
+          { printf '\n'; for h in $HOSTS; do printf '0.0.0.0 %s\n:: %s\n' "$h" "$h"; done; } | sudo tee -a /etc/hosts >/dev/null
+          for h in gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai; do
+            addrs="$(getent ahosts "$h" | awk '{print $1}' | sort -u)"
+            bad="$(printf '%s\n' "$addrs" | grep -vxE '0\.0\.0\.0|::' || true)"
+            [ -n "$addrs" ] && [ -z "$bad" ] || { echo "::error::$h still resolves (${bad:-no answer})"; exit 1; }
           done
 
       - name: Set up pnpm

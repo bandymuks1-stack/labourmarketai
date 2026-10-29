@@ -66,7 +66,7 @@ describe("2 · one backbone — the SAME actions the chat executes, with readbac
 
   for (const [symbol, module, chatAction] of REUSED) {
     it(`${symbol} — imported from ${module}, the executor of ${chatAction} uses the same symbol`, () => {
-      expect(FIELD).toMatch(new RegExp(`import \\{[^}]*\\b${symbol}\\b[^}]*\\} from "${module.replace(/\//g, "\\/")}"`));
+      expect(FIELD).toMatch(new RegExp(`import \\{[^}]*\\b${symbol}\\b[^}]*\\} from "${escapeRegExp(module)}"`));
       expect(FIELD).toMatch(new RegExp(`\\b${symbol}\\(`));
       expect(EXECUTORS).toMatch(new RegExp(`\\b${symbol}\\b`));
       expect(EXECUTORS).toContain(`"${chatAction}"`);
@@ -225,3 +225,8 @@ describe("6 · i18n — the namespace exists in the five active locales with hon
     expect(en).toMatch(/derived from dates/);
   });
 });
+
+/** Every RegExp metacharacter escaped (a partial escape is a different pattern). */
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+}

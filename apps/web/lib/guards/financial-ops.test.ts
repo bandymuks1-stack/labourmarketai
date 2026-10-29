@@ -540,7 +540,7 @@ describe("4. append-only history and immutability", () => {
       ["business_trip_events", TRIPS_SQL],
     ] as const) {
       expect(src).toMatch(
-        new RegExp(`create trigger ${tbl.replace(/s$/, "s")}_append_only`),
+        new RegExp(`create trigger ${tbl}_append_only`),
       );
       expect(src).toMatch(/before update or delete on public\.\w+_events/);
       expect(src).toContain("is append-only");
