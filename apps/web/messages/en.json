@@ -9914,7 +9914,11 @@
       },
       "basis": "{matched} of {total} required skills match ({confirmed} manager-confirmed)",
       "recognizedNote": "requirements recognized from the demand text — not confirmed yet",
-      "missingPrefix": "missing:"
+      "missingPrefix": "missing:",
+      "formalTitle": "Formal requirements",
+      "formalLicence": "Driving licence {categories}: a formal requirement. Recorded work does not replace it.",
+      "formalLicenceHeld": "Driving licence {categories}: you stated you hold it (not verified).",
+      "formalQualification": "A professional qualification or licence may be legally required for this work. Recorded work does not replace it."
     },
     "recommendations": {
       "basisCompact": "{matched} of {total} skills, {confirmed} confirmed",

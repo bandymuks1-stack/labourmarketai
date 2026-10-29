@@ -9914,7 +9914,11 @@
       },
       "basis": "{matched} van {total} vereiste vaardigheden komen overeen ({confirmed} door manager bevestigd)",
       "recognizedNote": "eisen herkend uit de aanvraagtekst — nog niet bevestigd",
-      "missingPrefix": "ontbreekt:"
+      "missingPrefix": "ontbreekt:",
+      "formalTitle": "Formele eisen",
+      "formalLicence": "Rijbewijs {categories}: een formele eis. Vastgelegd werk vervangt het niet.",
+      "formalLicenceHeld": "Rijbewijs {categories}: je hebt aangegeven dat je het hebt (niet gecontroleerd).",
+      "formalQualification": "Voor dit werk kan een beroepskwalificatie of vergunning wettelijk verplicht zijn. Vastgelegd werk vervangt die niet."
     },
     "recommendations": {
       "basisCompact": "{matched} van {total} vaardigheden, {confirmed} bevestigd",

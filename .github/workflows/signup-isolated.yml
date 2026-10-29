@@ -63,6 +63,12 @@ on:
       - "apps/web/components/app/company-need-form.tsx"
       - "apps/web/lib/staffing/company-need-*"
       - "apps/web/lib/demand/demand-lifecycle*"
+      - "apps/web/tests/e2e/job-fit-evidence-isolated.spec.ts"
+      - "apps/web/lib/opportunities/opportunity-need.ts"
+      - "apps/web/lib/opportunities/formal-requirements.ts"
+      - "apps/web/lib/market/need-skills*"
+      - "apps/web/lib/demand/demand-request.ts"
+      - "supabase/migrations/20261029190000_worker_board_need_skill_slugs_v1.sql"
 
 permissions:
   contents: read
@@ -79,7 +85,7 @@ jobs:
       APP_ORIGIN: http://127.0.0.1:3000
       # Both walks share this one throwaway stack: self-serve sign-up and the
       # agency roles / permissions walk (agency-roles-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
