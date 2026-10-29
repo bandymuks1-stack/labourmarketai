@@ -17,7 +17,7 @@ import { expect, test, type Browser, type Locator, type Page } from "@playwright
  *   F-2 a company posts a free-text need under a title that names no trade
  *       ("wet-room finishing specialist"); the need's required CATALOGUE
  *       skills are stored at intake — slugs only, none of the employer's text;
- *       a second need requires a C driving licence;
+ *       a second organization's need requires a C driving licence;
  *   F-3 an organization that is a synthetic QA fixture posts a tiling need;
  *   F-4 the worker's gated reader returns the free-text need WITH its derived
  *       skills, projects no private column, hides the synthetic need, and the
@@ -56,12 +56,16 @@ const email = (who: string) => `jobfit.${who}.${RUN}@local.test`;
 const WORKER = email("worker");
 const COMPANY = email("company");
 const FIXTURE = email("fixture");
+// A second real organization posts the licence need (one open need per
+// organization on the free plan; the intake form is not offered for a second).
+const LOGISTICS = email("logistics");
 const ADMIN = email("admin");
 const PRIVATE_WORD = `cottage${RUN}`;
 const WORK_TEXT = `Tiled the bathroom floor, waterproofing in the shower at the ${PRIVATE_WORD}, 7 hours`;
 // A real-looking organization (no fixture marker) — its needs are market reality.
 const COMPANY_ORG = `Fit Proof Bathrooms ${RUN}`;
 // A synthetic QA fixture organization (lib/qa/synthetic-fixture.ts marker).
+const LOGISTICS_ORG = `Fit Proof Logistics ${RUN}`;
 const FIXTURE_ORG = `QA-SYNTHETIC Fit Fixture ${RUN}`;
 const FREE_ROLE = `Wet-room finishing specialist ${RUN}`;
 const FREE_TEXT = `Tiling and waterproofing of bathrooms near the ${RUN}harbour`;
@@ -324,8 +328,10 @@ test("F-1. a 'warehouse worker' records a day of tiling; the work is linked to t
 test("F-2. a free-text need stores its required catalogue skills at intake — slugs only, no employer text", async ({ browser }) => {
   const page = await newCompany(browser, COMPANY, COMPANY_ORG);
   state.freeNeed = await postNeed(page, FREE_ROLE, FREE_TEXT);
-  state.licenceNeed = await postNeed(page, LICENCE_ROLE, LICENCE_TEXT);
   await page.context().close();
+  const logistics = await newCompany(browser, LOGISTICS, LOGISTICS_ORG);
+  state.licenceNeed = await postNeed(logistics, LICENCE_ROLE, LICENCE_TEXT);
+  await logistics.context().close();
 
   const [row] = await db<Array<{ payload: { need_skills?: { slugs: string[]; source: string; contract: number } } }>>(
     `customer_requests?id=eq.${state.freeNeed}&select=payload`,
@@ -345,6 +351,7 @@ test("F-2. a free-text need stores its required catalogue skills at intake — s
   );
 
   await verifyCompany(COMPANY);
+  await verifyCompany(LOGISTICS);
 });
 
 // ── F-3 ─────────────────────────────────────────────────────────────────────
