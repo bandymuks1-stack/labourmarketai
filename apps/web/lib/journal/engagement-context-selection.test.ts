@@ -314,6 +314,22 @@ describe("rule W — the active workspace is a preselect signal", () => {
     ).toEqual({ rule: "W", selectedId: "octCtx" });
   });
 
+  it("document import (Codex P2 #2884): the context preselected WITHOUT a day must not survive a chosen day before it starts", () => {
+    // The import form first renders without a day (the document states none);
+    // once the person chooses one the form re-resolves with these facts.
+    const startsLater = ctx({ id: "later", organizationId: "orgCo", startedAt: "2026-10-01" });
+    const facts = [PERSONAL, startsLater, UNNAMED_AGENCY];
+    expect(
+      resolveEngagementContext({ candidates: facts, activeOrganizationId: "orgCo" }).selectedId,
+    ).toBe("later");
+    const chosenDay = resolveEngagementContext({
+      candidates: facts,
+      activeOrganizationId: "orgCo",
+      workDay: "2026-09-03",
+    });
+    expect(chosenDay.selectedId).not.toBe("later");
+  });
+
   it("timestamp bounds are compared by DAY: a context applies on its first and last day", () => {
     const stamped = ctx({
       id: "stamped",

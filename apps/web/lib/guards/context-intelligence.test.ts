@@ -279,6 +279,13 @@ describe("CIE integration — the workspace resolves defaults, the user re-picks
     const flowSrc = read("components/app/conversation/worker-worklog-flow.tsx");
     expect(flowSrc).toMatch(/listWorkLogEngagements\(draft\.date\)/);
     expect(flowSrc).toMatch(/workDay: workDate/);
+    // The document-import form re-resolves on the day the person chooses.
+    const docForm = read("components/app/document-journal-draft-form.tsx");
+    expect(docForm).toMatch(/resolveEngagementContext\(\{/);
+    expect(docForm).toMatch(/workDay: workDate/);
+    expect(read("components/app/document-journal-draft-review.tsx")).toMatch(
+      /contextCandidates=\{eng\.candidates\}/,
+    );
 
     // The MCP path takes the workspace from the transport-neutral core.
     expect(callers.capability).toMatch(/resolveActiveWorkspaceForCaller\(caller, null\)/);
