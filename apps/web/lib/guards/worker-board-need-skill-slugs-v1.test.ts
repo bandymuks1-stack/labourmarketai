@@ -108,3 +108,44 @@ describe(`${NAME} — the rollback`, () => {
     expect(down.replace(/^--.*$/gm, "")).not.toContain("need_skill");
   });
 });
+
+// The ONE SQL dependant of the function (production pg_depend): the RLS
+// policy demand_interest_signals_worker_insert of 20261021095100. DROP FUNCTION
+// refuses while it exists, so both directions drop it first and recreate it
+// VERBATIM after the function — never loosened, never left out.
+describe(`${NAME} — the dependent worker-insert policy`, () => {
+  const source = read("supabase/migrations/20261021095100_demand_interest_worker_writes_v1.sql");
+  const start = source.indexOf("drop policy if exists demand_interest_signals_worker_insert");
+  const create = source.indexOf("create policy demand_interest_signals_worker_insert", start);
+  const end = source.indexOf("  );\n", create) + "  );".length;
+  const DROP = source.slice(start, create).trimEnd();
+  const CREATE = source.slice(create, end);
+
+  it("is the latest definition of the policy (no later migration redefines it)", () => {
+    expect(CREATE).toContain("public.list_open_demand_for_workers() b");
+    expect(CREATE).toContain("to authenticated");
+  });
+
+  for (const [label, sql] of [
+    ["forward", up],
+    ["rollback", down],
+  ] as const) {
+    it(`${label}: drop policy → drop function → create function → grants → the SAME policy text`, () => {
+      const body = sql.replace(/^--.*$/gm, "");
+      const iDropPolicy = body.indexOf(DROP);
+      const iDropFn = body.indexOf("drop function if exists public.list_open_demand_for_workers();");
+      const iCreateFn = body.indexOf("CREATE OR REPLACE FUNCTION public.list_open_demand_for_workers()");
+      const iGrant = body.indexOf(GRANTS);
+      const iCreatePolicy = body.indexOf(CREATE);
+      expect(iDropPolicy).toBeGreaterThan(body.indexOf("begin;"));
+      expect(iDropFn).toBeGreaterThan(iDropPolicy);
+      expect(iCreateFn).toBeGreaterThan(iDropFn);
+      expect(iGrant).toBeGreaterThan(iCreateFn);
+      expect(iCreatePolicy).toBeGreaterThan(iGrant);
+      expect(body.indexOf("commit;")).toBeGreaterThan(iCreatePolicy);
+      // Exactly one policy touched, exactly once.
+      expect(body.match(/create policy/gi)).toHaveLength(1);
+      expect(body.match(/drop policy/gi)).toHaveLength(1);
+    });
+  }
+});

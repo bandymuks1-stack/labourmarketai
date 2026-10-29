@@ -6,11 +6,21 @@
 -- synthetic-fixture predicate, signature, STABLE SECURITY DEFINER,
 -- search_path and grants are back as they were. DROP first: the forward
 -- migration widened RETURNS TABLE, which CREATE OR REPLACE cannot narrow.
+-- The dependent RLS policy demand_interest_signals_worker_insert is dropped
+-- and recreated verbatim (20261021095100) around it, in the same transaction.
 -- No data impact (neither direction writes a row). Rows that carry
 -- payload.need_skills keep it; the restored reader simply does not read it.
 -- Apply via Supabase MCP apply_migration — never `supabase db push`.
 
 begin;
+
+-- THE ONE SQL DEPENDANT: the worker-insert policy of demand_interest_signals
+-- (20261021095100) reads this function, so DROP FUNCTION refuses while it
+-- exists. It is dropped and recreated VERBATIM around the recreate, in this
+-- same transaction (the table lock is held until commit — no session ever
+-- sees the table without it). Its check reads only b.id, which is unchanged.
+drop policy if exists demand_interest_signals_worker_insert
+  on public.demand_interest_signals;
 
 drop function if exists public.list_open_demand_for_workers();
 
@@ -111,5 +121,21 @@ $function$;
 
 revoke all on function public.list_open_demand_for_workers() from public, anon;
 grant execute on function public.list_open_demand_for_workers() to authenticated;
+
+-- The worker-insert policy, exactly as 20261021095100 created it.
+create policy demand_interest_signals_worker_insert
+  on public.demand_interest_signals for insert
+  to authenticated
+  with check (
+    worker_id in (select w.id from public.workers w where w.profile_id = auth.uid())
+    and status = 'interested'
+    and (
+      (demand_interest_signals.request_id is not null
+       and exists (select 1 from public.list_open_demand_for_workers() b
+                    where b.id = demand_interest_signals.request_id))
+      or (demand_interest_signals.request_id is null
+          and demand_interest_signals.public_vacancy_id is not null)
+    )
+  );
 
 commit;

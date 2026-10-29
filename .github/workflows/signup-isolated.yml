@@ -165,7 +165,9 @@ jobs:
 
       - name: Start local Supabase (migrations replayed from scratch)
         run: |
-          set -uo pipefail
+          # The runner shell is `bash -e`: without +e a failed start exits before
+          # its log is printed and the cause (e.g. a migration error) is lost.
+          set +e -uo pipefail
           supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
           rc=$?
           grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | tail -n 60

@@ -41,9 +41,12 @@
 -- search_path 'public'.
 --
 -- WHY DROP + CREATE. Adding columns to RETURNS TABLE changes the return type,
--- which CREATE OR REPLACE refuses. Nothing in SQL depends on the function
--- (no view, no SQL caller — only plpgsql-free PostgREST callers in the app,
--- which read columns by name and ignore extra ones). Precedent:
+-- which CREATE OR REPLACE refuses. ONE SQL object depends on the function:
+-- the RLS policy demand_interest_signals_worker_insert (20261021095100), whose
+-- WITH CHECK reads b.id from it — dropped and recreated VERBATIM in this same
+-- transaction (no loosening; its check reads only the unchanged id column).
+-- No view or other SQL caller; the app reads columns by name through
+-- PostgREST and ignores extra ones. Precedent:
 -- 20260702170000 / 20260705130000 / 20260705200000 dropped and recreated it.
 -- The DROP and CREATE run in ONE transaction, so no caller ever sees it absent.
 --
@@ -55,6 +58,14 @@
 -- (drop + recreate the 20261028123000 body byte-for-byte, same grants).
 
 begin;
+
+-- THE ONE SQL DEPENDANT: the worker-insert policy of demand_interest_signals
+-- (20261021095100) reads this function, so DROP FUNCTION refuses while it
+-- exists. It is dropped and recreated VERBATIM around the recreate, in this
+-- same transaction (the table lock is held until commit — no session ever
+-- sees the table without it). Its check reads only b.id, which is unchanged.
+drop policy if exists demand_interest_signals_worker_insert
+  on public.demand_interest_signals;
 
 drop function if exists public.list_open_demand_for_workers();
 
@@ -201,5 +212,21 @@ $function$;
 
 revoke all on function public.list_open_demand_for_workers() from public, anon;
 grant execute on function public.list_open_demand_for_workers() to authenticated;
+
+-- The worker-insert policy, exactly as 20261021095100 created it.
+create policy demand_interest_signals_worker_insert
+  on public.demand_interest_signals for insert
+  to authenticated
+  with check (
+    worker_id in (select w.id from public.workers w where w.profile_id = auth.uid())
+    and status = 'interested'
+    and (
+      (demand_interest_signals.request_id is not null
+       and exists (select 1 from public.list_open_demand_for_workers() b
+                    where b.id = demand_interest_signals.request_id))
+      or (demand_interest_signals.request_id is null
+          and demand_interest_signals.public_vacancy_id is not null)
+    )
+  );
 
 commit;
