@@ -44,11 +44,11 @@ function watch(page: Page) {
     // OSM community tiles are an external best-effort source — a single tile
     // abort must not fail the suite; anything else does.
     if (why.includes("ERR_ABORTED")) return;
-    if (r.url().includes("tile.openstreetmap.org")) return;
+    if (isOsmTile(r.url())) return;
     failed.push(`${r.url()} — ${why}`);
   });
   page.on("response", (r) => {
-    if (r.status() >= 400 && !r.url().includes("tile.openstreetmap.org")) {
+    if (r.status() >= 400 && !isOsmTile(r.url())) {
       failed.push(`${r.status()} ${r.url()}`);
     }
   });
@@ -126,3 +126,14 @@ test("375px: the map route fits one-handed", async ({ browser }) => {
   w.assertClean();
   await ctx.close();
 });
+
+/** An OSM community tile, judged by the request's HOST — a substring test
+ *  would also excuse any URL that merely mentions the tile server. */
+function isOsmTile(url: string): boolean {
+  try {
+    const host = new URL(url).hostname;
+    return host === "tile.openstreetmap.org" || host.endsWith(".tile.openstreetmap.org");
+  } catch {
+    return false;
+  }
+}
