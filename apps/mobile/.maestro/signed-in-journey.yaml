@@ -146,9 +146,11 @@ name: signed-in-journey
       - swipe:
           direction: UP
           duration: 400
+# Scroll to the button BELOW Review, so Review sits clear of the bottom edge
+# (on iOS the tab bar covers the last strip of the screen).
 - scrollUntilVisible:
     element:
-      id: "journal-compose-review"
+      id: "journal-compose-back"
     direction: DOWN
     timeout: 20000
 - waitForAnimationToEnd

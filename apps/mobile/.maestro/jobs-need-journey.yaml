@@ -141,7 +141,7 @@ name: jobs-need-journey
 # The form is taller than a phone screen and tapOn does not scroll.
 - scrollUntilVisible:
     element:
-      id: "need-review"
+      id: "need-cancel"
     direction: DOWN
     timeout: 20000
 - waitForAnimationToEnd
@@ -224,7 +224,7 @@ name: jobs-need-journey
                 duration: 400
       - scrollUntilVisible:
           element:
-            id: "need-review"
+            id: "need-cancel"
           direction: DOWN
           timeout: 20000
       - waitForAnimationToEnd
