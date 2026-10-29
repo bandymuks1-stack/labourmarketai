@@ -260,8 +260,23 @@ test("M-5. a saved-search alert: a new matching need appears and the worker is n
   await signUp(company, BASE, COMPANY);
   await onboard(company, "hire", "Synthetic Notify Company Owner");
   await setUpCompany(company, `Synthetic Notify Co ${RUN}`);
-  await publishNeed(company, BASE, `Notify tiler ${RUN}`);
+  await publishNeed(company, BASE, `Notify tiler ${RUN}`, "LT");
   await c.close();
+  const companyOwner = await userId(COMPANY);
+  const [need] = sql<{ country: string | null; status: string }>(
+    `select country, status from public.customer_requests where title ilike ${lit(`%Notify tiler ${RUN}%`)}`,
+  );
+  expect(need?.country, "the need states its country").toBe("LT");
+  expect(need?.status).toBe("submitted");
+  // The worker board serves needs of VERIFIED companies only
+  // (list_open_demand_for_workers). Verification is an operator act with no
+  // self-serve door, so the walk records it in the THROWAWAY database — the
+  // same single column the operator's verification sets.
+  sqlExec(
+    `update public.companies set verification_status = 'verified'
+      where id in (select legacy_company_id from public.organizations where owner_profile_id = ${lit(companyOwner)})
+         or profile_id = ${lit(companyOwner)}`,
+  );
 
   // The worker's own board render counts the new match and records the alert.
   const w = await browser.newContext();

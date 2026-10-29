@@ -107,7 +107,7 @@ export async function setUpCompany(page: Page, legalName: string): Promise<void>
 }
 
 /** The company's free need, through the needs page's own intake. */
-export async function publishNeed(page: Page, origin: string, role: string): Promise<void> {
+export async function publishNeed(page: Page, origin: string, role: string, country?: "LT"): Promise<void> {
   await page.goto(`${origin}/en/dashboard/company/needs?audience=need#demand-intake`);
   const main = page.getByRole("main");
   await main.getByTestId("demand-role").fill(role);
@@ -115,6 +115,10 @@ export async function publishNeed(page: Page, origin: string, role: string): Pro
   await main.getByTestId("demand-next").click();
   const size = main.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("2");
+  if (country) {
+    await main.getByTestId("demand-country-select").click();
+    await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  }
   await main.getByTestId("demand-next").click();
   await main.getByTestId("demand-create").click();
   await expect(main.getByTestId("demand-done"), "the need is accepted").toBeVisible({ timeout: 30_000 });
