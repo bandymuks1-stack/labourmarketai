@@ -191,6 +191,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261028123000_",
       // 2026-10-29 (RED, needs-human-gate, NOT applied): aggregate daily growth counts for Agentai OS.
       "20261029120000_",
+      // 2026-10-29 (RED, owner-approved, APPLIED ledger 20261029180012): the worker reader projects the need's required skills as catalogue slugs.
+      "20261029190000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

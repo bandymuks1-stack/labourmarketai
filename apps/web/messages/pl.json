@@ -9914,7 +9914,11 @@
       },
       "basis": "{matched} z {total} wymaganych umiejętności pasuje ({confirmed} potwierdzonych przez kierownika)",
       "recognizedNote": "wymagania rozpoznane z treści zapytania — jeszcze niepotwierdzone",
-      "missingPrefix": "brakuje:"
+      "missingPrefix": "brakuje:",
+      "formalTitle": "Wymagania formalne",
+      "formalLicence": "Prawo jazdy {categories}: wymaganie formalne. Zapisana praca go nie zastępuje.",
+      "formalLicenceHeld": "Prawo jazdy {categories}: podałeś, że je masz (niezweryfikowane).",
+      "formalQualification": "Do tej pracy prawnie mogą być wymagane kwalifikacje zawodowe lub licencja. Zapisana praca ich nie zastępuje."
     },
     "recommendations": {
       "basisCompact": "{matched} z {total} umiejętności, {confirmed} potwierdzonych",

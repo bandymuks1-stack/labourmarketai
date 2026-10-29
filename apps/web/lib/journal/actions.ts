@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { recordEntrySkillDecision } from "@/lib/journal/entry-skill-retraction";
 import { failedPipelineResult } from "@/lib/journal/skill-pipeline";
 import {
   collectUnitSlugs,
@@ -361,6 +362,27 @@ export async function supersedeJournalEntry(
         reason: error?.message ?? t("unknownReason"),
       }),
     };
+  }
+
+  // A slug the person EXPLICITLY added or re-ticked in this edit (never a
+  // preloaded row an untouched re-save carries) supersedes an
+  // earlier dispute of it in the entry's chain: recorded as their later
+  // decision BEFORE the pipeline applies chain-wide decisions (otherwise the
+  // predecessor's rejection would withdraw the link they just chose). A
+  // no-op where nothing was disputed (entry-skill-retraction.ts).
+  const reselectedSlugs = [
+    ...new Set(
+      fragments
+        .filter((f) => f.selected === true && f.reselected === true)
+        .map((f) => f.activitySlug ?? null)
+        .filter((s): s is string => typeof s === "string" && selectedSlugs.includes(s)),
+    ),
+  ];
+  for (const slug of reselectedSlugs) {
+    const recorded = await recordEntrySkillDecision(supabase, newEntryId, slug, "reaffirmed");
+    if (!recorded) {
+      console.error("[journal] re-selection decision not recorded", { entry: newEntryId });
+    }
   }
 
   // P0 Track B: run the canonical pipeline for the NEW entry id with the new

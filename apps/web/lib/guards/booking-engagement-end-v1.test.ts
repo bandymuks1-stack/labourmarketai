@@ -1742,6 +1742,9 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261028123000_synthetic_demand_cross_org_readers_v1.sql",
       // 2026-10-29 (RED, needs-human-gate, NOT applied): aggregate daily growth counts for Agentai OS (SECURITY DEFINER + GRANT).
       "20261029120000_agentai_daily_growth_aggregate_v1.sql",
+      // 2026-10-29: owner approved #2887 in chat (production apply, at dbd1363ef).
+      // The worker reader projects the need's required skills as catalogue slugs.
+      "20261029190000_worker_board_need_skill_slugs_v1.sql",
 ]);
   });
 

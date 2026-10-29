@@ -12106,6 +12106,8 @@ export type Database = {
           created_at: string
           id: string
           location_label: string
+          need_skill_slugs: string[]
+          need_skill_source: string
           required_tools: string[]
           role_text: string
           route_status: string
