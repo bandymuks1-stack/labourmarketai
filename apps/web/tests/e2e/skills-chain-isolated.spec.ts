@@ -525,11 +525,23 @@ test("K-7. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
     )
     .toContain("flooring");
   // Withdrawn: the link is gone, the other readings stay, the tier falls.
+  // (The dispute is recorded FIRST and the link removed after it, so the
+  // withdrawal is awaited on its own rather than read in the same instant.)
+  await expect
+    .poll(async () => (await entryLinks(state.tilerEntry)).has("flooring"), {
+      message: "the disputed evidence link is withdrawn",
+      timeout: 60_000,
+    })
+    .toBe(false);
   let links = await entryLinks(state.tilerEntry);
-  expect(links.has("flooring"), "the disputed evidence link is withdrawn").toBe(false);
   expect(links.has("tiling"), "the undisputed readings stay").toBe(true);
+  await expect
+    .poll(async () => (await workerSkills(state.tilerWorker)).get("flooring")?.source ?? null, {
+      message: "no longer journal evidence",
+      timeout: 60_000,
+    })
+    .toBe("self_declared");
   const skills = await workerSkills(state.tilerWorker);
-  expect(skills.get("flooring")?.source, "no longer journal evidence").toBe("self_declared");
   expect(skills.get("tiling")?.source).toBe("work_journal");
   // The basis is kept: the person's own words are untouched.
   const [entry] = await db<Array<{ original_text: string; deleted_at: string | null }>>(
