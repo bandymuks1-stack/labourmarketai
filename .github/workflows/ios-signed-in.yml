@@ -153,7 +153,24 @@ jobs:
               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
               apps/mobile/.maestro/signed-in-journey.yaml &&             maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               -e NEED_SUBMIT=0               apps/mobile/.maestro/jobs-need-journey.yaml
           }
-          if journey || { echo "::warning::attempt 1 failed - retrying once (driver)"; sleep 15; journey; }; then
+          # On a failed attempt, print ONLY the test ids on screen (our own testID
+          # strings, never text, values or a screenshot).
+          on_screen_ids() {
+            echo "::group::test ids on screen at the failure"
+            maestro hierarchy 2>/dev/null | node -e '
+              let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
+                const ids = new Set();
+                const walk = (n) => {
+                  const id = n?.attributes?.["resource-id"] ?? n?.attributes?.identifier;
+                  if (id) ids.add(String(id).split("/").pop());
+                  (n?.children ?? []).forEach(walk);
+                };
+                try { walk(JSON.parse(s.slice(s.indexOf("{")))); } catch { console.log("(no hierarchy)"); }
+                console.log([...ids].sort().join("\n"));
+              });' || true
+            echo "::endgroup::"
+          }
+          if journey || { on_screen_ids; echo "::warning::attempt 1 failed - retrying once (driver)"; sleep 15; journey; }; then
             echo "IOS_SIGNED_IN_JOURNEY_PROVEN: sign-in, Today figures read, journal entry drafted and confirmed, profile skills read, sign-out"
           else
             echo "::error::iOS signed-in journey failed twice"; exit 1
