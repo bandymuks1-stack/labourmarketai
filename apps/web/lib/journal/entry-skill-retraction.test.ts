@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { retractEntrySkillEvidence } from "./entry-skill-retraction";
+import { applyWorkerSkillSourceReconcile } from "./skill-source-apply";
+import { withoutDisputedLinks, disputeKey } from "./entry-skill-disputes";
 
 /**
  * A disputed journal reading is recorded AND withdrawn (owner requirement
@@ -147,6 +149,54 @@ describe("retractEntrySkillEvidence", () => {
     expect(res.ok).toBe(false);
     expect(db.log.some((l) => l.startsWith("delete:journal_entry_skills"))).toBe(false);
     expect(db.tables.journal_entry_skills).toHaveLength(3);
+  });
+
+  it("marker recorded + link delete failed → a retry completes the withdrawal", async () => {
+    const db = fakeDb(seed());
+    let failDelete = true;
+    const flaky = {
+      from(table: string) {
+        const q = db.client.from(table);
+        if (table === "journal_entry_skills" && failDelete) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (q as any).delete = () => ({ eq: () => ({ eq: () => ({ in: () => Promise.resolve({ error: { code: "57014" } }) }) }) });
+        }
+        return q;
+      },
+    };
+    const first = await retractEntrySkillEvidence(flaky, { entryId: ENTRY, workerId: WORKER, slugs: ["welding-blueprint"] });
+    expect(first.ok).toBe(false);
+    expect(db.tables.journal_entry_metrics).toHaveLength(1); // the dispute is on record
+    failDelete = false;
+    const retry = await retractEntrySkillEvidence(flaky, { entryId: ENTRY, workerId: WORKER, slugs: ["welding-blueprint"] });
+    expect(retry.ok).toBe(true);
+    expect(db.tables.journal_entry_metrics).toHaveLength(1); // still one marker
+    expect(db.tables.journal_entry_skills.some((r) => r.skill_id === "s-blue")).toBe(false);
+  });
+
+  it("a leftover link under a dispute is never evidence: the tier reads it as unsupported", async () => {
+    const tables = seed();
+    // The dispute is recorded, the link row is still there.
+    tables.journal_entry_metrics.push({
+      entry_id: ENTRY,
+      metric_slug: "skill_rejected",
+      value_text: "welding-blueprint",
+      "journal_entries.worker_id": WORKER,
+    });
+    const db = fakeDb(tables);
+    await applyWorkerSkillSourceReconcile(db.client, WORKER);
+    expect(db.tables.journal_entry_skills.some((r) => r.skill_id === "s-blue")).toBe(true);
+    expect(db.tables.worker_skills.find((r) => r.skill_id === "s-blue")!.source).toBe("self_declared");
+    expect(db.tables.worker_skills.find((r) => r.skill_id === "s-weld")!.source).toBe("work_journal");
+    // The same pure filter feeds the Living CV and the journal page.
+    const links = [
+      { journal_entry_id: ENTRY, skill_id: "s-blue" },
+      { journal_entry_id: "e2", skill_id: "s-blue" },
+    ];
+    expect(withoutDisputedLinks(links, new Set([disputeKey(ENTRY, "s-blue")]))).toEqual([
+      { journal_entry_id: "e2", skill_id: "s-blue" },
+    ]);
+    expect(withoutDisputedLinks(links, null)).toEqual(links);
   });
 
   it("both dispute doors route through it (no second copy of the rule)", () => {

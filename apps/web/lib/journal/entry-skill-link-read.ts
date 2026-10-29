@@ -6,6 +6,7 @@ import {
 } from "@/lib/journal/entry-skill-source";
 import type { EntrySkillLinkRow } from "@/lib/journal/journal-entry-skills";
 import { readAllPages } from "@/lib/journal/journal-list-core";
+import { readDisputedEntrySkills, withoutDisputedLinks } from "@/lib/journal/entry-skill-disputes";
 
 /**
  * Read side of the journal entry ↔ skill link table (PR-C).
@@ -79,9 +80,15 @@ export async function readWorkerEntrySkillLinks(
   if (res.error) {
     return { ok: false, rows: [], provenanceByEntry: new Map(), truncated: false };
   }
+  // A disputed link is never shown as the entry's evidence, even while its
+  // row still exists (entry-skill-disputes.ts).
+  const disputed = await readDisputedEntrySkills(supabase, workerId);
   return {
     ok: true,
-    rows: res.rows.map((r) => ({ journal_entry_id: r.journal_entry_id, skill_id: r.skill_id })),
+    rows: withoutDisputedLinks(
+      res.rows.map((r) => ({ journal_entry_id: r.journal_entry_id, skill_id: r.skill_id })),
+      disputed,
+    ),
     provenanceByEntry,
     truncated: res.truncated,
   };

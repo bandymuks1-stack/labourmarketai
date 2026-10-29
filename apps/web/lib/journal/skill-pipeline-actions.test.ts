@@ -365,6 +365,18 @@ describe("legitimate flows — honest writes only", () => {
     expect(reconcileMock).toHaveBeenCalled();
   });
 
+  it("a RETRY of a recorded rejection finishes the withdrawal (the marker is the source of truth)", async () => {
+    // The marker landed earlier; the link delete that followed did not.
+    WORLD.metrics.set("e-A", [{ metric_slug: "skill_rejected", value_text: "programming" }]);
+    const res = await rejectJournalSkillCandidate("e-A", "programming", V);
+    expect(res).toEqual({ ok: true });
+    const linkDelete = deletes.find((d) => d.table === "journal_entry_skills");
+    expect(linkDelete, "the retry withdraws the leftover link").toBeTruthy();
+    expect(linkDelete!.calls).toEqual(
+      expect.arrayContaining([{ method: "in", args: ["skill_id", ["s-prog"]] }]),
+    );
+  });
+
   it("valid ambiguous outright-rejection appends the marker + closes the clarification", async () => {
     const res = await rejectJournalAmbiguousCandidate(
       "e-A",

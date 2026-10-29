@@ -535,6 +535,41 @@ export async function processJournalEntrySkills(opts: {
       }
     }
 
+    // ── 6b. The person's disputes win over any leftover link ──────────────
+    // A `skill_rejected` marker is the source of truth for this entry: a
+    // link for a disputed skill that is still here (a withdrawal that did
+    // not land, or a link written before the dispute) is removed on every
+    // run, so "refresh recognition" also repairs a half-finished dispute.
+    if (rejectedSlugUnion.size > 0) {
+      const [{ data: disputedRows, error: disputedErr }, { data: present, error: presentErr }] =
+        await Promise.all([
+          supabase.from("skills").select("id, slug").in("slug", [...rejectedSlugUnion]),
+          sb.from("journal_entry_skills").select("skill_id").eq("journal_entry_id", entryId),
+        ]);
+      const presentIds = new Set(((present ?? []) as { skill_id: string }[]).map((r) => r.skill_id));
+      const disputedIds = ((disputedRows ?? []) as { id: string; slug: string | null }[])
+        .filter((r) => typeof r.slug === "string" && rejectedSlugUnion.has(r.slug))
+        .map((r) => r.id)
+        .filter((id) => presentIds.has(id)); // only a link that is really still there
+      if (disputedErr || presentErr) {
+        logError(trace, "resolve_disputed", disputedErr ?? presentErr);
+        writeFailures += 1;
+      } else if (disputedIds.length > 0) {
+        const del = await sb
+          .from("journal_entry_skills")
+          .delete()
+          .eq("journal_entry_id", entryId)
+          .eq("worker_id", worker.id)
+          .in("skill_id", disputedIds);
+        if (del.error) {
+          logError(trace, "withdraw_disputed_links", del.error);
+          writeFailures += 1;
+        } else {
+          writeSuccesses += 1;
+        }
+      }
+    }
+
     // ── 6a. WHERE each link came from — fragment-level skill evidence ────
     // For every skill linked to this entry (new or already linked), record
     // the persisted fragment(s) the derivation recognised it on, as

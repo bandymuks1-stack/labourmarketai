@@ -548,7 +548,21 @@ export async function rejectJournalSkillCandidate(
         (c.kind === "ambiguous" &&
           (c.choices ?? []).some((ch) => ch.slug === slug)),
     );
-  if (!member) return { ok: false, code: "candidate_not_found" };
+  // IDEMPOTENT: a slug the person already rejected on this entry is no
+  // longer a member, but the withdrawal that followed the marker may not
+  // have landed. A retry finishes it (the marker is the source of truth).
+  const alreadyRejected = ctx.recognition.rejected.some(
+    (r) => r.slug === slug && r.reason === "user_rejected",
+  );
+  if (!member && !alreadyRejected) return { ok: false, code: "candidate_not_found" };
+  if (alreadyRejected) {
+    const finished = await retractEntrySkillEvidence(ctx.sb, {
+      entryId: ctx.entryId,
+      workerId: ctx.workerId,
+      slugs: [slug],
+    });
+    return finished.ok ? { ok: true } : { ok: false, code: "write_failed" };
+  }
 
   const ok = await appendEntryMarker(
     ctx.sb,
