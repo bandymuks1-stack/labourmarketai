@@ -3,7 +3,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { recordEntrySkillDecision, retractEntrySkillEvidence } from "./entry-skill-retraction";
 import { applyWorkerSkillSourceReconcile } from "./skill-source-apply";
-import { withoutDisputedLinks, disputeKey } from "./entry-skill-disputes";
+import { withoutDisputedLinks, disputeKey, readEntryChainDecisionRows } from "./entry-skill-disputes";
+import { latestSkillDecisions } from "./entry-recognition-markers";
 
 /**
  * A disputed journal reading is recorded AND withdrawn (owner requirement
@@ -227,6 +228,28 @@ describe("retractEntrySkillEvidence", () => {
     // A dispute after the re-link is recorded again (decisions alternate).
     await recordEntrySkillDecision(db.client, ENTRY, "welding-blueprint", "rejected");
     expect(db.tables.journal_entry_metrics.filter((r) => r.metric_slug === "skill_rejected")).toHaveLength(2);
+  });
+
+  it("dispute → re-link → text-only edit: the post-save pipeline input still reads the re-link", async () => {
+    const tables = seed() as Record<string, Row[]>;
+    tables.journal_entries = [
+      { id: "e-old", superseded_by: "e-new", correction_of: null },
+      { id: "e-new", superseded_by: null, correction_of: null },
+    ];
+    tables.journal_entry_metrics = [
+      { entry_id: "e-old", metric_slug: "skill_rejected", value_text: "flooring", value_numeric: 100 },
+      { entry_id: "e-old", metric_slug: "skill_reaffirmed", value_text: "flooring", value_numeric: 200 },
+      // what journal_entry_supersede_v2 carried: the rejection only
+      { entry_id: "e-new", metric_slug: "skill_rejected", value_text: "flooring", value_numeric: 100 },
+    ];
+    const db = fakeDb(tables);
+    const rows = await readEntryChainDecisionRows(db.client, "e-new");
+    expect(rows).not.toBeNull();
+    // the decisions the pipeline's derivation uses for e-new
+    expect(latestSkillDecisions(rows!).get("flooring")).toBe("reaffirmed");
+    // and a NEW dispute on the edited entry is recorded (latest is the re-link)
+    await recordEntrySkillDecision(db.client, "e-new", "flooring", "rejected");
+    expect(db.tables.journal_entry_metrics.filter((r) => r.entry_id === "e-new")).toHaveLength(2);
   });
 
   it("both dispute doors route through it (no second copy of the rule)", () => {

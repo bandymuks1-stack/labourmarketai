@@ -61,8 +61,24 @@ export async function readDisputedEntrySkills(
       list.push({ metric_slug: m.metric_slug ?? ENTRY_MARKER_SLUGS.skillRejected, value_text: m.value_text, value_numeric: m.value_numeric ?? null });
       byEntry.set(m.entry_id, list);
     }
+    // ...read across each entry's edit chain (readEntryPredecessors below):
+    // an edit carries a rejection forward but not a later re-link.
+    let preds = new Map<string, string[]>();
+    if (byEntry.size > 0) {
+      const chain = await readAllPages<{ id: string; superseded_by: string | null; correction_of: string | null }>(() =>
+        sb
+          .from("journal_entries")
+          .select("id, superseded_by, correction_of")
+          .eq("worker_id", workerId)
+          .order("id", { ascending: true }),
+      );
+      if (!chain.error && !chain.truncated) preds = predecessorsByEntry(chain.rows);
+    }
+    const toJudge = new Set<string>(byEntry.keys());
+    for (const [id, ps] of preds) if (ps.some((x) => byEntry.has(x))) toJudge.add(id);
     const rows: { entry_id: string; value_text: string }[] = [];
-    for (const [entryId, list] of byEntry) {
+    for (const entryId of toJudge) {
+      const list = [entryId, ...(preds.get(entryId) ?? [])].flatMap((id) => byEntry.get(id) ?? []);
       for (const [slug, decision] of latestSkillDecisions(list)) {
         if (decision === "rejected") rows.push({ entry_id: entryId, value_text: slug });
       }
@@ -94,4 +110,106 @@ export function withoutDisputedLinks<T extends { journal_entry_id: string; skill
 ): T[] {
   if (!disputed || disputed.size === 0) return [...links];
   return links.filter((l) => !disputed.has(disputeKey(l.journal_entry_id, l.skill_id)));
+}
+
+// ── The entry's EDIT CHAIN ─────────────────────────────────────────────────
+// An edit supersedes an entry (old.superseded_by = new) and a correction of a
+// confirmed entry points back at it (new.correction_of = old). The database
+// carries an entry's `skill_rejected` markers onto its successor but not a
+// later `skill_reaffirmed` (journal_entry_supersede_v2), so the person's
+// decision is read across the WHOLE chain, latest decision winning — never
+// from the newest entry's own copies alone.
+
+const MAX_CHAIN = 50;
+
+/** Every predecessor of `entryId` in its edit/correction chain (bounded). */
+export async function readEntryPredecessors(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sb: any,
+  entryId: string,
+): Promise<string[]> {
+  const seen = new Set<string>([entryId]);
+  const out: string[] = [];
+  let frontier = [entryId];
+  try {
+    for (let hop = 0; hop < MAX_CHAIN && frontier.length > 0; hop += 1) {
+      const [byEdit, self] = await Promise.all([
+        sb.from("journal_entries").select("id").in("superseded_by", frontier),
+        sb.from("journal_entries").select("correction_of").in("id", frontier),
+      ]);
+      const next: string[] = [];
+      for (const r of (byEdit?.data ?? []) as { id?: unknown }[]) {
+        if (typeof r.id === "string" && !seen.has(r.id)) next.push(r.id);
+      }
+      for (const r of (self?.data ?? []) as { correction_of?: unknown }[]) {
+        if (typeof r.correction_of === "string" && !seen.has(r.correction_of)) next.push(r.correction_of);
+      }
+      for (const id of next) {
+        seen.add(id);
+        out.push(id);
+      }
+      frontier = [...new Set(next)];
+    }
+  } catch {
+    // Unreadable chain: the entry's own decisions stand (its carried
+    // rejection — the cautious reading).
+  }
+  return out;
+}
+
+/** The person's skill decisions on `entryId` AND its predecessors. */
+export async function readEntryChainDecisionRows(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sb: any,
+  entryId: string,
+): Promise<EntryMarkerRow[] | null> {
+  const chain = [entryId, ...(await readEntryPredecessors(sb, entryId))];
+  const { data, error } = await sb
+    .from("journal_entry_metrics")
+    .select("entry_id, metric_slug, value_text, value_numeric")
+    .in("entry_id", chain)
+    .in("metric_slug", [ENTRY_MARKER_SLUGS.skillRejected, ENTRY_MARKER_SLUGS.skillReaffirmed]);
+  if (error) return null;
+  return ((data ?? []) as (EntryMarkerRow & { entry_id?: string })[]).filter(
+    (r) =>
+      (r.entry_id === undefined || chain.includes(r.entry_id)) &&
+      (r.metric_slug === ENTRY_MARKER_SLUGS.skillRejected ||
+        r.metric_slug === ENTRY_MARKER_SLUGS.skillReaffirmed),
+  );
+}
+
+/** Pure: each entry's predecessors from (id, superseded_by, correction_of) rows. */
+export function predecessorsByEntry(
+  rows: readonly { id: string; superseded_by: string | null; correction_of: string | null }[],
+): Map<string, string[]> {
+  const direct = new Map<string, string[]>();
+  const add = (child: string, parent: string) => {
+    const list = direct.get(child) ?? [];
+    if (!list.includes(parent)) list.push(parent);
+    direct.set(child, list);
+  };
+  for (const r of rows) {
+    if (r.superseded_by) add(r.superseded_by, r.id);
+    if (r.correction_of) add(r.id, r.correction_of);
+  }
+  const all = new Map<string, string[]>();
+  for (const id of new Set(rows.map((r) => r.id))) {
+    const seen = new Set<string>([id]);
+    const out: string[] = [];
+    let frontier = [id];
+    for (let hop = 0; hop < MAX_CHAIN && frontier.length > 0; hop += 1) {
+      const next: string[] = [];
+      for (const f of frontier) {
+        for (const p of direct.get(f) ?? []) {
+          if (seen.has(p)) continue;
+          seen.add(p);
+          out.push(p);
+          next.push(p);
+        }
+      }
+      frontier = next;
+    }
+    all.set(id, out);
+  }
+  return all;
 }

@@ -3,10 +3,10 @@ import { normalizeClaimLabel } from "@/lib/profile/skill-claim-extractor";
 import {
   ENTRY_MARKER_SLUGS,
   latestSkillDecisions,
-  type EntryMarkerRow,
   type EntrySkillDecision,
 } from "@/lib/journal/entry-recognition-markers";
 import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
+import { readEntryChainDecisionRows } from "@/lib/journal/entry-skill-disputes";
 
 /**
  * A PERSON DISPUTES WHAT ONE OF THEIR ENTRIES WAS READ AS SHOWING.
@@ -90,17 +90,10 @@ export async function recordEntrySkillDecision(
   slug: string,
   decision: EntrySkillDecision,
 ): Promise<boolean> {
-  const { data, error } = await sb
-    .from("journal_entry_metrics")
-    .select("metric_slug, value_text, value_numeric")
-    .eq("entry_id", entryId)
-    .in("metric_slug", [ENTRY_MARKER_SLUGS.skillRejected, ENTRY_MARKER_SLUGS.skillReaffirmed]);
-  if (error) return false;
-  const rows = ((data ?? []) as EntryMarkerRow[]).filter(
-    (r) =>
-      r.metric_slug === ENTRY_MARKER_SLUGS.skillRejected ||
-      r.metric_slug === ENTRY_MARKER_SLUGS.skillReaffirmed,
-  );
+  // The decision history of this entry AND its edit chain (an edit carries
+  // the rejections but not a re-link - entry-skill-disputes.ts).
+  const rows = await readEntryChainDecisionRows(sb, entryId);
+  if (!rows) return false;
   const latest = latestSkillDecisions(rows).get(slug) ?? null;
   if (latest === decision) return true;
   if (decision === "reaffirmed" && latest !== "rejected") return true;

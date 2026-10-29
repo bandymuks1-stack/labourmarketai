@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { disputeKey, readDisputedEntrySkills, withoutDisputedLinks } from "./entry-skill-disputes";
+import { disputeKey, predecessorsByEntry, readDisputedEntrySkills, withoutDisputedLinks } from "./entry-skill-disputes";
 
 /**
  * The person's disputes are read COMPLETELY: PostgREST caps an unbounded
@@ -9,7 +9,8 @@ import { disputeKey, readDisputedEntrySkills, withoutDisputedLinks } from "./ent
 
 type Marker = { entry_id: string; value_text: string; metric_slug?: string };
 
-function markerClient(markers: Marker[], opts: { failPage?: number } = {}) {
+type ChainRow = { id: string; superseded_by: string | null; correction_of: string | null };
+function markerClient(markers: Marker[], opts: { failPage?: number; chain?: ChainRow[] } = {}) {
   const ranges: [number, number][] = [];
   const client = {
     from(table: string) {
@@ -24,6 +25,7 @@ function markerClient(markers: Marker[], opts: { failPage?: number } = {}) {
           return q;
         },
         range: async (from: number, to: number) => {
+          if (table === "journal_entries") return { data: (opts.chain ?? []).slice(from, to + 1), error: null };
           ranges.push([from, to]);
           if (opts.failPage !== undefined && from === opts.failPage * 1000) {
             return { data: null, error: { code: "57014" } };
@@ -95,6 +97,47 @@ describe("readDisputedEntrySkills", () => {
     const disputed = await readDisputedEntrySkills(client, "w1");
     expect(disputed?.has(disputeKey("e1", "s-flooring"))).toBe(false);
     expect(disputed?.has(disputeKey("e2", "s-flooring"))).toBe(true);
+  });
+
+  it("dispute → re-link → text-only edit: the re-link on the predecessor still wins over the carried rejection", async () => {
+    // e-old: disputed at 100, re-linked at 200; edited into e-new, onto which
+    // the database carried ONLY the rejection (its old decision time, 100).
+    const markers = [
+      { entry_id: "e-old", metric_slug: "skill_rejected", value_text: "flooring", value_numeric: 100 },
+      { entry_id: "e-old", metric_slug: "skill_reaffirmed", value_text: "flooring", value_numeric: 200 },
+      { entry_id: "e-new", metric_slug: "skill_rejected", value_text: "flooring", value_numeric: 100 },
+    ] as unknown as Marker[];
+    const chain = [
+      { id: "e-old", superseded_by: "e-new", correction_of: null },
+      { id: "e-new", superseded_by: null, correction_of: null },
+    ];
+    const { client } = markerClient(markers, { chain });
+    const disputed = await readDisputedEntrySkills(client, "w1");
+    expect(disputed?.has(disputeKey("e-new", "s-flooring")), "the person's re-link stands after the edit").toBe(false);
+  });
+
+  it("dispute → text-only edit (no re-link): the dispute stays on the new entry", async () => {
+    const markers = [
+      { entry_id: "e-old", metric_slug: "skill_rejected", value_text: "flooring", value_numeric: 100 },
+      { entry_id: "e-new", metric_slug: "skill_rejected", value_text: "flooring", value_numeric: 100 },
+    ] as unknown as Marker[];
+    const chain = [
+      { id: "e-old", superseded_by: "e-new", correction_of: null },
+      { id: "e-new", superseded_by: null, correction_of: null },
+    ];
+    const { client } = markerClient(markers, { chain });
+    expect((await readDisputedEntrySkills(client, "w1"))?.has(disputeKey("e-new", "s-flooring"))).toBe(true);
+  });
+
+  it("the edit/correction chain is walked both ways it is stored", () => {
+    const preds = predecessorsByEntry([
+      { id: "a", superseded_by: "b", correction_of: null },
+      { id: "b", superseded_by: null, correction_of: null },
+      { id: "c", superseded_by: null, correction_of: "b" },
+    ]);
+    expect(preds.get("b")).toEqual(["a"]);
+    expect(preds.get("c")?.sort()).toEqual(["a", "b"]);
+    expect(preds.get("a")).toEqual([]);
   });
 
   it("no markers → an empty set (nothing disputed)", async () => {

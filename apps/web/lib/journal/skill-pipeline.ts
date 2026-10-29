@@ -135,8 +135,10 @@ export {
 } from "@/lib/journal/entry-recognition-markers";
 import {
   ENTRY_MARKER_SLUGS,
+  latestSkillDecisions,
   readEntryRecognitionMarkers,
 } from "@/lib/journal/entry-recognition-markers";
+import { readEntryChainDecisionRows } from "@/lib/journal/entry-skill-disputes";
 
 function newTrace(): string {
   return randomBytes(6).toString("hex");
@@ -270,6 +272,17 @@ export async function loadEntryRecognitionInputs(
   // ONE reader of the entry's markers — the journal page reads the same one
   // at render time for the entry card's pending candidates.
   const markers = readEntryRecognitionMarkers(metricRows);
+  // The person's skill decisions are judged across the entry's EDIT CHAIN:
+  // an edit carries a rejection onto the new entry but not a later re-link,
+  // so the newest entry's own copies alone could revive a superseded dispute.
+  const chainDecisions = await readEntryChainDecisionRows(sb, entryId);
+  if (chainDecisions) {
+    markers.rejectedSlugs = new Set(
+      [...latestSkillDecisions(chainDecisions)]
+        .filter(([, d]) => d === "rejected")
+        .map(([slug]) => slug),
+    );
+  }
 
   return {
     declaredSlugs,
