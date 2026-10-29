@@ -1,4 +1,7 @@
 import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 
@@ -416,4 +419,245 @@ test("F-5. the board: a real fit band from the work; the licence is a missing FO
   const text = (await page.getByRole("main").textContent()) ?? "";
   expect(text, "no employer free text on the worker board").not.toContain(`${RUN}harbour`);
   await ctx.close();
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// MIGRATION PROOF (owner gate, 2026-10-29) — on the SAME throwaway stack.
+//
+//   G-1 the rollback (twice) restores production's current state: the reader
+//       body (pg_get_functiondef md5 = production's), its ACL, the dependent
+//       worker-insert policy (command / permissive / roles / WITH CHECK as
+//       production deparses it);
+//   G-2 in that production-equivalent state, needs of every relevant shape are
+//       seeded and the "before" is captured: every customer_requests row
+//       (count + md5), the worker reader's rows, and the board's fit per need;
+//   G-3 the forward migration is applied TWICE in a row (it is idempotent):
+//       no customer_requests row changes, the function / ACL / policy equal the
+//       replayed forward state, and no OTHER function or policy changes;
+//   G-4 after: old-shape needs keep their fit exactly, the confirmed need
+//       changes, every pre-existing reader column is identical; the recreated
+//       policy still lets a worker register interest in a visible real need
+//       and refuses a synthetic or closed one;
+//   G-5 the reader's only SQL dependant is that policy (pg_depend);
+//   G-6 the walk's identities and needs are handed to the production-code
+//       compatibility walk (job-fit-main-compat-isolated.spec.ts, run against
+//       a build of origin/main on the migrated database).
+// ════════════════════════════════════════════════════════════════════════════
+
+const PROD_FN_MD5 = "964b1b5405c59fa9578e4a7a2aefe27b";
+const PROD_ACL = "{postgres=X/postgres,authenticated=X/postgres}";
+/** production pg_policies.with_check of demand_interest_signals_worker_insert (2026-10-29). */
+const PROD_POLICY_CHECK =
+  "((worker_id IN ( SELECT w.id\n   FROM workers w\n  WHERE (w.profile_id = auth.uid()))) AND (status = 'interested'::text) AND (((request_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM list_open_demand_for_workers() b(id, role_text, country, team_size, start_period, accommodation, created_at, company_name, route_status, location_label, transport, required_tools, structured)\n  WHERE (b.id = demand_interest_signals.request_id)))) OR ((request_id IS NULL) AND (public_vacancy_id IS NOT NULL))))";
+const FWD_POLICY_CHECK = PROD_POLICY_CHECK.replace("required_tools, structured)", "required_tools, structured, need_skill_slugs, need_skill_source)");
+const MIGRATION_FILE = "../../supabase/migrations/20261029190000_worker_board_need_skill_slugs_v1.sql";
+const ROLLBACK_FILE = "../../supabase/rollbacks/20261029190000_worker_board_need_skill_slugs_v1.down.sql";
+const FN = "public.list_open_demand_for_workers()";
+
+function sqlRows<T>(query: string): T[] {
+  const wrapped = `select coalesce(json_agg(t), '[]'::json) from (${query}) t`;
+  const out = execFileSync("docker", ["exec", DB_CONTAINER, "psql", "-U", "postgres", "-tA", "-c", wrapped], { encoding: "utf8" });
+  return JSON.parse(out.trim() || "[]") as T[];
+}
+
+/** Run one repo SQL file on the local database exactly as apply_migration would: one psql session, stop on error. */
+function runFile(relPath: string): void {
+  execFileSync("docker", ["exec", "-i", DB_CONTAINER, "psql", "-U", "postgres", "-v", "ON_ERROR_STOP=1", "-q", "-f", "-"], {
+    encoding: "utf8",
+    input: readFileSync(join(process.cwd(), relPath), "utf8"),
+  });
+}
+
+type DbState = { fnMd5: string; acl: string; cmd: string; permissive: boolean; roles: string; check: string; others: string };
+function dbState(): DbState {
+  const [s] = sqlRows<DbState>(`
+    select md5(pg_get_functiondef('${FN}'::regprocedure)) as "fnMd5",
+           (select proacl::text from pg_proc where oid = '${FN}'::regprocedure) as acl,
+           p.polcmd::text as cmd, p.polpermissive as permissive,
+           (select string_agg(r.rolname, ',' order by r.rolname) from pg_roles r where r.oid = any (p.polroles)) as roles,
+           pg_get_expr(p.polwithcheck, p.polrelid) as check,
+           md5(coalesce((select string_agg(pg_get_functiondef(f.oid), '|' order by f.oid::regprocedure::text)
+                           from pg_proc f join pg_namespace n on n.oid = f.pronamespace
+                          where n.nspname = 'public' and f.prokind = 'f' and f.oid <> '${FN}'::regprocedure), '')
+               || coalesce((select string_agg(x.policyname || ':' || coalesce(x.qual, '') || ':' || coalesce(x.with_check, '') || ':' || x.roles::text,
+                                              '|' order by x.tablename, x.policyname)
+                              from pg_policies x
+                             where not (x.tablename = 'demand_interest_signals' and x.policyname = 'demand_interest_signals_worker_insert')), '')) as others
+      from pg_policy p
+     where p.polname = 'demand_interest_signals_worker_insert'`);
+  if (!s) throw new Error("the worker-insert policy is missing");
+  return s;
+}
+
+function requestsFingerprint(): { n: number; md5: string } {
+  return sqlRows<{ n: number; md5: string }>(
+    `select count(*)::int as n, md5(coalesce(string_agg(t::text, '|' order by t.id), '')) as md5 from public.customer_requests t`,
+  )[0]!;
+}
+
+/** The board's whole fit reading for one need, as the worker sees it. */
+async function fitOf(page: Page, id: string): Promise<string | null> {
+  const li = page.locator(`li[id="opp-${id}"]`).first();
+  if ((await li.count()) === 0) return null;
+  const text = async (testId: string) => {
+    const el = li.getByTestId(testId).first();
+    return (await el.count()) > 0 ? ((await el.textContent()) ?? "").replace(/\s+/g, " ").trim() : null;
+  };
+  return JSON.stringify({
+    band: await li.getAttribute("data-band"),
+    status: await li.getAttribute("data-status"),
+    skill: await text("opportunity-skill-match"),
+    matched: await text("opportunity-matched-skills"),
+    missing: await text("opportunity-missing-skills"),
+    tiers: await text("opportunity-match-tiers"),
+    formal: await text("opportunity-formal-requirements"),
+  });
+}
+
+async function boardFits(browser: Browser, ids: readonly string[]): Promise<Record<string, string | null>> {
+  const ctx = await browser.newContext({ timezoneId: "UTC" });
+  const page = await ctx.newPage();
+  await signIn(page, WORKER);
+  await page.goto(`${BASE}/en/dashboard/opportunities?view=all`);
+  await expect(page.locator(`li[id="opp-${state.freeNeed}"]`).first(), "the board rendered").toBeVisible({ timeout: 60_000 });
+  const out: Record<string, string | null> = {};
+  for (const id of ids) out[id] = await fitOf(page, id);
+  await ctx.close();
+  return out;
+}
+
+/** Clone a stored need (same verified company) with a changed title / summary / payload / status. */
+function cloneNeed(fromId: string, patch: { role: string; summary: string; payloadSql: string; status?: string }): string {
+  const [row] = sqlRows<{ id: string }>(`
+    with src as (select * from public.customer_requests where id = ${lit(fromId)}),
+    ins as (
+      insert into public.customer_requests
+      select (jsonb_populate_record(null::public.customer_requests,
+                to_jsonb(src) || jsonb_build_object(
+                  'id', gen_random_uuid(), 'title', ${lit(patch.role)}, 'role_or_work_type', ${lit(patch.role)},
+                  'need_summary', ${lit(patch.summary)}, 'status', ${lit(patch.status ?? "submitted")},
+                  'created_at', now(), 'updated_at', now(),
+                  'payload', (select ${patch.payloadSql} from src)))).*
+        from src
+      returning id)
+    select id from ins`);
+  if (!row) throw new Error("the seeded need was not stored");
+  return row.id;
+}
+
+const before: { state?: DbState; fwd?: DbState; requests?: { n: number; md5: string }; rows?: ReaderRow[]; fits?: Record<string, string | null> } = {};
+
+test("G-1. the rollback (run twice) restores production's current reader, ACL and dependent policy", async () => {
+  before.fwd = dbState();
+  expect(before.fwd.check, "replayed forward state: the policy reads the widened reader").toBe(FWD_POLICY_CHECK);
+  runFile(ROLLBACK_FILE);
+  runFile(ROLLBACK_FILE); // idempotent: drop … if exists, create or replace, create policy after its drop
+  const s = dbState();
+  test.info().annotations.push({ type: "rollback-acl", description: s.acl });
+  expect(s.fnMd5, "the reader body equals production's (pg_get_functiondef md5)").toBe(PROD_FN_MD5);
+  expect(s.acl, "the reader ACL equals production's").toBe(PROD_ACL);
+  expect(s.cmd, "policy command: INSERT").toBe("a");
+  expect(s.permissive, "policy: permissive").toBe(true);
+  expect(s.roles, "policy role: authenticated").toBe("authenticated");
+  expect(s.check, "policy WITH CHECK equals production's deparse").toBe(PROD_POLICY_CHECK);
+  expect(s.others, "no other function or policy is touched by the rollback").toBe(before.fwd.others);
+  before.state = s;
+});
+
+test("G-2. production-equivalent state: needs of every shape are seeded; the before is captured", async ({ browser }) => {
+  // Old-shape need (no payload.need_skills — every production need today).
+  state.oldNeed = cloneNeed(state.freeNeed, {
+    role: `Tiler for bathrooms ${RUN}`,
+    summary: "Bathroom renovation work",
+    payloadSql: "coalesce(src.payload, '{}'::jsonb) - 'need_skills'",
+  });
+  // Old-shape need whose company CONFIRMED its requirement set (confirmRecognizedNeed).
+  state.confirmedNeed = cloneNeed(state.freeNeed, {
+    role: `General site help ${RUN}`,
+    summary: "Help on site",
+    payloadSql:
+      "(coalesce(src.payload, '{}'::jsonb) - 'need_skills') || '{\"structured_need\":{\"skill_slugs\":[\"tiling\",\"waterproofing\"],\"confirmed_by\":\"company\",\"confirmed_at_source\":\"recognized_from_text\"}}'::jsonb",
+  });
+  // A closed need (never on a board).
+  state.closedNeed = cloneNeed(state.freeNeed, {
+    role: `Closed tiling need ${RUN}`,
+    summary: "Tiling and waterproofing",
+    payloadSql: "src.payload",
+    status: "closed",
+  });
+  before.requests = requestsFingerprint();
+  before.rows = await rpcAs<ReaderRow[]>(WORKER, "list_open_demand_for_workers");
+  expect(Object.keys(before.rows[0] ?? {}), "the production reader has no need-skill columns").not.toContain("need_skill_slugs");
+  const ids = before.rows.map((r) => r.id);
+  for (const k of ["oldNeed", "confirmedNeed", "freeNeed", "licenceNeed"]) expect(ids, `${k} is visible`).toContain(state[k]);
+  for (const k of ["fixtureNeed", "closedNeed"]) expect(ids, `${k} is not visible`).not.toContain(state[k]);
+  before.fits = await boardFits(browser, [state.oldNeed, state.confirmedNeed, state.freeNeed, state.licenceNeed]);
+  test.info().annotations.push({ type: "fits-before", description: JSON.stringify(before.fits) });
+});
+
+test("G-3. the forward migration applied twice in a row: nothing else changes, no row changes", async () => {
+  runFile(MIGRATION_FILE);
+  runFile(MIGRATION_FILE); // idempotent: it succeeds a second time and lands in the same state
+  const s = dbState();
+  expect(s.fnMd5, "the reader equals the replayed forward state").toBe(before.fwd!.fnMd5);
+  expect(s.acl, "ACL unchanged by the migration").toBe(before.state!.acl);
+  expect([s.cmd, s.permissive, s.roles], "policy command / permissive / roles unchanged").toEqual(["a", true, "authenticated"]);
+  expect(s.check, "the policy is recreated verbatim (only the reader's column alias list grows)").toBe(FWD_POLICY_CHECK);
+  expect(s.others, "no other function or policy changes").toBe(before.state!.others);
+  expect(requestsFingerprint(), "no customer_requests row is changed or lost").toEqual(before.requests);
+});
+
+test("G-4. after: old needs keep their fit exactly, only confirmed (and newly derived) needs change; the policy still gates interest", async ({ browser }) => {
+  const rows = await rpcAs<ReaderRow[]>(WORKER, "list_open_demand_for_workers");
+  // Every pre-existing column of every row is identical; the order too.
+  const strip = (r: ReaderRow) =>
+    Object.fromEntries(Object.entries(r).filter(([k]) => k !== "need_skill_slugs" && k !== "need_skill_source"));
+  expect(rows.map(strip), "every pre-existing reader column is unchanged").toEqual(before.rows);
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  expect(byId.get(state.oldNeed)?.need_skill_slugs, "an old-shape need carries no set").toBeNull();
+  expect(byId.get(state.confirmedNeed)).toMatchObject({ need_skill_slugs: ["tiling", "waterproofing"], need_skill_source: "human_structured" });
+
+  const after = await boardFits(browser, [state.oldNeed, state.confirmedNeed, state.freeNeed, state.licenceNeed]);
+  test.info().annotations.push({ type: "fits-after", description: JSON.stringify(after) });
+  expect(after[state.oldNeed], "an old-shape need keeps its fit exactly").toBe(before.fits![state.oldNeed]);
+  expect(after[state.confirmedNeed], "the confirmed need changes").not.toBe(before.fits![state.confirmedNeed]);
+  expect(JSON.parse(after[state.confirmedNeed]!).band, "…to a real band from the confirmed set").toMatch(/^(strong|possible)$/);
+  if (!byId.get(state.licenceNeed)?.need_skill_slugs) {
+    expect(after[state.licenceNeed], "a need with no stored set keeps its fit exactly").toBe(before.fits![state.licenceNeed]);
+  }
+
+  // The recreated worker-insert policy, exercised under the worker's own token.
+  const workerId = state.worker;
+  const insert = async (requestId: string) =>
+    fetch(`${SB_URL}/rest/v1/demand_interest_signals`, {
+      method: "POST",
+      headers: {
+        apikey: SB_ANON,
+        Authorization: `Bearer ${await tokenOf(WORKER)}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({ worker_id: workerId, request_id: requestId, status: "interested" }),
+    });
+  expect((await insert(state.confirmedNeed)).status, "interest in a visible real need is accepted").toBe(201);
+  expect((await insert(state.fixtureNeed)).status, "interest in a hidden synthetic need is refused by the policy").toBe(403);
+  expect((await insert(state.closedNeed)).status, "interest in a closed need is refused by the policy").toBe(403);
+  const stored = sqlRows<{ request_id: string }>(
+    `select request_id from public.demand_interest_signals where worker_id = ${lit(workerId)} order by request_id`,
+  ).map((r) => r.request_id);
+  expect(stored, "only the visible need's interest exists").toEqual([state.confirmedNeed]);
+});
+
+test("G-5. the reader's only SQL dependant is the worker-insert policy (pg_depend)", async () => {
+  const deps = sqlRows<{ d: string }>(
+    `select pg_describe_object(classid, objid, objsubid) as d from pg_depend
+      where refobjid = '${FN}'::regprocedure and deptype = 'n' order by 1`,
+  ).map((r) => r.d);
+  expect(deps).toEqual(["policy demand_interest_signals_worker_insert on table demand_interest_signals"]);
+});
+
+test("G-6. hand the identities and needs to the production-code compatibility walk", async () => {
+  const file = join(process.env.RUNNER_TEMP ?? tmpdir(), "jobfit-compat-state.json");
+  writeFileSync(file, JSON.stringify({ RUN, WORKER, PASSWORD, ...state, fitsBefore: before.fits }));
+  expect(existsSync(file)).toBe(true);
 });
