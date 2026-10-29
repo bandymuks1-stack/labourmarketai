@@ -72,6 +72,7 @@ const OFFER_NOTE = `QA-SYNTHETIC offer ${RUN}: can start on Monday`;
 const PROJECT = `QA-SYNTHETIC journey project ${RUN}`;
 const ENTRY_MARK = `QA-SYNTHETIC entry ${RUN}`;
 const ENTRY = `${ENTRY_MARK}: tiled 14 m2 of bathroom wall, 6 hours`;
+const SITE = `QA-SYNTHETIC journey site ${RUN}`;
 const ENTRY2_MARK = `QA-SYNTHETIC second entry ${RUN}`;
 const ENTRY2 = `${ENTRY2_MARK}: grouted the bathroom floor, 4 hours`;
 
@@ -296,10 +297,12 @@ async function mainText(page: Page): Promise<string> {
   return text;
 }
 
-/** Open the People page's folded "more tools" section (`<details>`) when the
- *  hash did not; the member list (#org-members) lives inside it. */
-async function openPeopleFold(page: Page): Promise<void> {
-  const fold = page.getByRole("main").getByTestId("people-more").first();
+/** Open a page's folded "more tools" section (`<details>`) when the hash did
+ *  not: the member list (#org-members) lives in the People fold, the sites
+ *  (#company-locations) in the Projects fold. */
+async function openFold(page: Page, which: "people" | "projects"): Promise<void> {
+  const main = page.getByRole("main");
+  const fold = (which === "people" ? main.getByTestId("people-more") : main.getByTestId("projects-more")).first();
   await expect(fold).toBeAttached({ timeout: 30_000 });
   if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
   await expect(fold).toHaveAttribute("open", /.*/);
@@ -697,7 +700,7 @@ test("J-WRK. the placed worker records work on the company's project; the compan
 
   // The company opens that relationship's journal for review.
   await co.goto(`${BASE}/en/dashboard/company/people#org-members`);
-  await openPeopleFold(co);
+  await openFold(co, "people");
   const toggle = co.getByRole("main").getByTestId(`toggle-review-${s.collabEngagementId}`);
   await expect(toggle, "journal review is offered for the placed worker").toBeVisible({ timeout: 30_000 });
   await toggle.click();
@@ -798,12 +801,39 @@ test("J-ISO. an unrelated company sees nothing of it; ending the employee's memb
     "control: own people",
   ).toBeGreaterThanOrEqual(2);
 
-  // Revocation: the company ends its employee's membership.
-  const before = await readAs(EMP, `engagement_contexts?organization_id=eq.${s.coOrgId}&status=eq.active&select=id`);
-  expect(before.length, "before: the employee holds an active relationship").toBeGreaterThan(0);
+  // Revocation. The protected read: a work site of the company, which RLS
+  // shows only to its active members and engaged people
+  // (work_objects_select → is_org_member_or_engaged_v1). The company adds one.
+  const coPage = as(CO);
+  await coPage.goto(`${BASE}/en/dashboard/projects#company-locations`);
+  await openFold(coPage, "projects");
+  const add = coPage.getByRole("main").getByTestId("work-object-add-form");
+  await expect(add, "the company's site form").toBeVisible({ timeout: 30_000 });
+  await add.locator('input[name="name"]').fill(SITE);
+  await add.getByTestId("work-object-add-submit").click();
+  let siteId = "";
+  await expect
+    .poll(
+      async () => {
+        const rows = await db<Array<{ id: string; organization_id: string }>>(
+          `work_objects?name=eq.${encodeURIComponent(SITE)}&select=id,organization_id`,
+        );
+        siteId = rows[0]?.id ?? "";
+        return rows.map((r) => r.organization_id);
+      },
+      { message: "the site is stored for the company", timeout: 30_000 },
+    )
+    .toEqual([s.coOrgId]);
+  // Before: the employee, with their OWN token, reads it; the outsider does not.
+  expect(
+    (await readAs(EMP, `work_objects?id=eq.${siteId}&select=id`)).length,
+    "before: the employee reads the company's site",
+  ).toBe(1);
+  expect((await readAs(OUT, `work_objects?id=eq.${siteId}&select=id`)).length, "the outsider never does").toBe(0);
+
   const co = as(CO);
   await co.goto(`${BASE}/en/dashboard/company/people#org-members`);
-  await openPeopleFold(co);
+  await openFold(co, "people");
   const main = co.getByRole("main");
   await main.getByTestId(`remove-member-${s.empEngagementId}`).click();
   await main.getByTestId(`remove-reason-${s.empEngagementId}`).fill(`QA-SYNTHETIC ${RUN}: contract ended`);
@@ -815,9 +845,15 @@ test("J-ISO. an unrelated company sees nothing of it; ending the employee's memb
       { message: "the membership is ended (an update, the row stays)", timeout: 30_000 },
     )
     .toBe("ended");
-  // The employee's next request: no active relationship, no company context.
-  const after = await readAs(EMP, `engagement_contexts?organization_id=eq.${s.coOrgId}&status=eq.active&select=id`);
-  expect(after, "after: the employee's access to the company is gone").toEqual([]);
+  // After: the SAME token's next request is refused by RLS — access went with
+  // the membership, not just the row's status.
+  expect(
+    await readAs(EMP, `work_objects?id=eq.${siteId}&select=id`),
+    "after: the employee no longer reads the company's site",
+  ).toEqual([]);
+  // The control: the company still reads it.
+  expect((await readAs(CO, `work_objects?id=eq.${siteId}&select=id`)).length, "control: the company reads its site").toBe(1);
+  // And the journal no longer offers the ended relationship for new work.
   const emp = as(EMP);
   await emp.goto(`${BASE}/en/dashboard/journal`);
   const em = emp.getByRole("main");
