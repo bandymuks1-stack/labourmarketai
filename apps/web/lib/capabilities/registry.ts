@@ -68,9 +68,15 @@ import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-
 import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
 import { companyCreateDemandFields } from "@/lib/conversation/company-schemas";
 import {
+  activeOrganizationOf,
+  orderContextsForChoice,
   resolveEngagementContext,
   type EngagementCandidate,
 } from "@/lib/journal/engagement-context-selection";
+import {
+  composeDistinctEngagementLabels,
+  unnamedOrganizationKind,
+} from "@/lib/journal/engagement-label";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import { orgDisplayName } from "@/lib/company/org-display";
 import type { ExecResult } from "@/lib/conversation/executor-contract";
@@ -448,7 +454,9 @@ function normalizedDraftForHash(draft: {
  * `engagementContextId` is an internal id no external client can discover, so
  * the draft capability resolves it the SAME way the web work-log flow does:
  * the caller's own active professional contexts under their own RLS, decided
- * by the canonical rule hierarchy (`resolveEngagementContext`, rules B/C/D).
+ * by the canonical rule hierarchy (`resolveEngagementContext`, rules W/B/C/D)
+ * — with the SAME active-workspace signal the web surfaces pass (rule W, owner
+ * P0 2026-10-29), resolved by the one transport-neutral workspace core.
  * On real ambiguity (rule C) it returns the labeled options and mints NO
  * token — the client must ask the human, exactly like the web flow. A
  * requested id that is NOT one of the caller's own contexts gets the same
@@ -456,11 +464,12 @@ function normalizedDraftForHash(draft: {
  * draft anyway, and a token for an unconfirmable draft is a lie in waiting.
  */
 type DraftEngagementOutcome =
-  | { kind: "selected"; id: string; label: string | null }
+  | { kind: "selected"; id: string; label: string | null; activeWorkspaceNotice?: string | null }
   | {
       kind: "choice";
       reason: "ambiguous" | "unknown_requested_id";
       options: { id: string; label: string }[];
+      activeWorkspaceNotice?: string | null;
     }
   | { kind: "refused"; result: ExecResult };
 
@@ -472,7 +481,7 @@ async function resolveDraftEngagementContext(
   const { data: rows, error } = await caller.supabase
     .from("engagement_contexts")
     .select(
-      "id, relationship_slug, title, is_primary, organization_id, status, started_at, ended_at, organizations(display_name, legal_name)",
+      "id, relationship_slug, title, is_primary, organization_id, status, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
     )
     .eq("profile_id", caller.userId)
     .eq("status", "active")
@@ -491,6 +500,7 @@ async function resolveDraftEngagementContext(
   });
   const relationshipLabel = (slug: string): string =>
     tRelationships.has(slug) ? tRelationships(slug) : slug;
+  const tJournal = await getTranslations({ locale: caller.locale, namespace: "journal" });
 
   type Row = {
     id: string;
@@ -501,35 +511,57 @@ async function resolveDraftEngagementContext(
     status: string | null;
     started_at: string | null;
     ended_at: string | null;
-    organizations: { display_name: string | null; legal_name: string | null } | null;
+    organizations: {
+      display_name: string | null;
+      legal_name: string | null;
+      organization_type?: string | null;
+    } | null;
   };
-  const contexts = (rows ?? []) as unknown as Row[];
 
-  // Same qualification rule as the web work-log selector
-  // (lib/conversation/worklog-engagements.ts): a base label that occurs more
-  // than once is qualified by its relationship, a unique one is left as-is.
-  // Without it, two contexts at the same organization (or two org-less ones
-  // sharing a relationship) render as the identical word and the choice the
-  // options exist to offer cannot actually be made.
-  const withBase = contexts.map((row) => ({
-    row,
-    base:
-      orgDisplayName(row.organizations?.display_name, row.organizations?.legal_name) ??
-      row.title ??
-      relationshipLabel(row.relationship_slug),
-  }));
-  const baseCounts = new Map<string, number>();
-  for (const { base } of withBase) {
-    baseCounts.set(base, (baseCounts.get(base) ?? 0) + 1);
+  // The ACTIVE WORKSPACE, from the one transport-neutral core (the same one
+  // `context.list` reads). `identity: null` — a bearer token carries no
+  // person/company signal, so an unset pointer stays personal and no
+  // organization is inferred. A failed read is no signal: the rules then run
+  // exactly as before.
+  let activeOrganizationId: string | null = null;
+  let actingWorkspace: { name: string; organizationType?: string } | null = null;
+  try {
+    const workspace = await resolveActiveWorkspaceForCaller(caller, null);
+    activeOrganizationId = activeOrganizationOf(workspace);
+    actingWorkspace = workspace.workspaces.find((w) => w.id === activeOrganizationId) ?? null;
+  } catch {
+    activeOrganizationId = null;
   }
-  const labelById = new Map<string, string>();
-  for (const { row, base } of withBase) {
-    const duplicated = (baseCounts.get(base) ?? 0) > 1;
-    labelById.set(
-      row.id,
-      duplicated ? `${base} — ${relationshipLabel(row.relationship_slug)}` : base,
-    );
-  }
+
+  // The ONE choice order (owner P0 2026-10-29): the active workspace's
+  // organization first, other organizations next, personal last.
+  const contexts = orderContextsForChoice(
+    (rows ?? []) as unknown as Row[],
+    activeOrganizationId,
+    (r) => r.organization_id,
+  );
+
+  // THE ONE LABEL COMPOSER (lib/journal/engagement-label.ts) — the same one
+  // the journal composer and the web work-log selector use, so an MCP client
+  // reads a context by the very name the person sees on the web. An
+  // organization without a name says so ("Agency without a name · Owner"),
+  // never its bare type or relationship alone — that read like a real choice.
+  const labels = composeDistinctEngagementLabels(
+    contexts.map((row) => ({
+      orgName: orgDisplayName(row.organizations?.display_name, row.organizations?.legal_name),
+      orgTypeLabel: row.organizations
+        ? tJournal(
+            `unnamedOrganization.${unnamedOrganizationKind(row.organizations.organization_type)}`,
+          )
+        : null,
+      title: row.title,
+      relationshipLabel: relationshipLabel(row.relationship_slug),
+      personalEntryLabel: tJournal("personalEntry"),
+      isPersonal: !row.organizations,
+      startedAt: row.started_at,
+    })),
+  );
+  const labelById = new Map<string, string>(contexts.map((row, i) => [row.id, labels[i]]));
 
   // An explicitly named context must be one of the caller's OWN — the real
   // ChatGPT write E2E (2026-08-30) showed a model fabricating a nil-UUID id,
@@ -572,12 +604,28 @@ async function resolveDraftEngagementContext(
     endedAt: r.ended_at,
     isPrimary: r.is_primary === true,
   }));
-  const resolution = resolveEngagementContext({ candidates, workDay: workDate });
+  const resolution = resolveEngagementContext({
+    candidates,
+    workDay: workDate,
+    activeOrganizationId,
+  });
+  // Acting for an organization with no recorded work relationship: said
+  // plainly to the client (and so to the human), never silently omitted.
+  const activeWorkspaceNotice = resolution.activeWorkspaceWithoutContext
+    ? tJournal("activeWorkspaceNoRelationship", {
+        org:
+          actingWorkspace?.name ||
+          tJournal(
+            `unnamedOrganization.${unnamedOrganizationKind(actingWorkspace?.organizationType)}`,
+          ),
+      })
+    : null;
   if (resolution.selectedId) {
     return {
       kind: "selected",
       id: resolution.selectedId,
       label: labelById.get(resolution.selectedId) ?? null,
+      activeWorkspaceNotice,
     };
   }
   if (resolution.rule === "C") {
@@ -588,6 +636,7 @@ async function resolveDraftEngagementContext(
       options: contexts
         .filter((r) => applicable.has(r.id))
         .map((r) => ({ id: r.id, label: labelById.get(r.id)! })),
+      activeWorkspaceNotice,
     };
   }
   return {
@@ -649,6 +698,9 @@ const journalCreateDraft: CapabilityDescriptor = {
         data: {
           status: "engagement_choice_required",
           options: engagement.options,
+          ...(engagement.activeWorkspaceNotice
+            ? { activeWorkspaceNotice: engagement.activeWorkspaceNotice }
+            : {}),
           note:
             engagement.reason === "unknown_requested_id"
               ? "The given engagementContextId is not one of this account's active work contexts — nothing was drafted. Ask the user to choose one of these options, then draft again with the chosen engagementContextId."
@@ -701,6 +753,9 @@ const journalCreateDraft: CapabilityDescriptor = {
           engagementLabel: engagement.label,
         },
         confirmationToken: token,
+        ...(engagement.activeWorkspaceNotice
+          ? { activeWorkspaceNotice: engagement.activeWorkspaceNotice }
+          : {}),
         note: "Nothing was saved. Confirming requires journal.confirm with this exact draft and token.",
       },
     };

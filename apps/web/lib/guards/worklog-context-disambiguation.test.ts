@@ -48,6 +48,7 @@ const JOURNAL_PAGE = readFileSync(
   join(WEB, "app", "[locale]", "dashboard", "journal", "page.tsx"),
   "utf8",
 );
+const CAPABILITIES = readFileSync(join(WEB, "lib", "capabilities", "registry.ts"), "utf8");
 const flat = SELECTOR.replace(/\s+/g, " ");
 
 describe("work-log context labels", () => {
@@ -57,16 +58,19 @@ describe("work-log context labels", () => {
     expect(JOURNAL_PAGE.length).toBeGreaterThan(2000);
   });
 
-  it("BOTH surfaces compose labels through the ONE composer", () => {
+  it("EVERY surface (web composer, chat work-log, MCP draft) composes labels through the ONE composer", () => {
     for (const [name, src] of [
       ["worklog-engagements.ts", SELECTOR],
       ["journal/page.tsx", JOURNAL_PAGE],
+      ["capabilities/registry.ts", CAPABILITIES],
     ] as const) {
-      expect(src, name).toContain(
-        'import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label"',
+      expect(src, name).toMatch(
+        /import \{[^}]*\bcomposeDistinctEngagementLabels\b[^}]*\} from "@\/lib\/journal\/engagement-label"/,
       );
       expect(src, name).toMatch(/composeDistinctEngagementLabels\(/);
     }
+    // The MCP draft used to keep its own "base — relationship" composition.
+    expect(CAPABILITIES).not.toContain("baseCounts");
   });
 
   it("the superseded per-surface compositions are gone", () => {
@@ -105,9 +109,11 @@ describe("work-log context labels", () => {
       ]) {
         expect(src).toContain(field);
       }
-      // The org TYPE label reuses the existing role labels (no new key).
-      expect(src).toContain('tRole("company")');
-      expect(src).toContain('tRole("agency")');
+      // An organization with no name SAYS so (owner P0 2026-10-29): the bare
+      // type ("Agentūra · Savininkas") read like a real, named choice.
+      expect(src).toContain("unnamedOrganizationKind(");
+      expect(src).toContain("unnamedOrganization.");
+      expect(src).not.toContain('tRole("agency")');
     }
   });
 
@@ -171,6 +177,27 @@ describe("the canonical catalogue can actually name a placement", () => {
           `${loc}: relationship-types.json cannot name "${slug}"`,
         ).toBe(true);
       }
+    }
+  });
+
+  it("the unnamed-organization phrases and the no-relationship sentence exist in every active locale", () => {
+    const journal = (loc: string) =>
+      JSON.parse(readFileSync(join(__dirname, "..", "..", "messages", loc, "journal.json"), "utf8"));
+    for (const loc of ACTIVE) {
+      const j = journal(loc);
+      for (const kind of ["company", "agency", "other"]) {
+        const v = j.unnamedOrganization?.[kind];
+        expect(typeof v === "string" && v.trim() !== "", `${loc}.journal.unnamedOrganization.${kind}`).toBe(true);
+      }
+      expect(
+        String(j.activeWorkspaceNoRelationship ?? ""),
+        `${loc}.journal.activeWorkspaceNoRelationship`,
+      ).toContain("{org}");
+    }
+    // Not the English words copied into another locale.
+    const en = journal("en");
+    for (const loc of ACTIVE.filter((l) => l !== "en")) {
+      expect(journal(loc).unnamedOrganization.agency, loc).not.toBe(en.unnamedOrganization.agency);
     }
   });
 
