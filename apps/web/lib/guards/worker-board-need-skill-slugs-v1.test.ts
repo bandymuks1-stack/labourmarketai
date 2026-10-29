@@ -4,8 +4,8 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 // Pins 20261029190000_worker_board_need_skill_slugs_v1 (RED, PREPARED for the
-// owner gate — owner decision 2026-10-29 "APPROVED — PREPARE RED MIGRATION
-// ONLY"; NOT applied). The worker reader gains the need's required skills as
+// owner gate — owner decisions 2026-10-29 "APPROVED — PREPARE RED MIGRATION
+// ONLY", then "APPROVED — PRODUCTION APPLY" at dbd1363ef). The worker reader gains the need's required skills as
 // CATALOGUE SLUGS and changes nothing else; its rollback restores the
 // 20261028123000 body byte-for-byte.
 const ROOT = join(__dirname, "..", "..", "..", "..");
@@ -54,8 +54,8 @@ describe(`${NAME} — the forward migration`, () => {
     expect(body.trimEnd().endsWith("commit;")).toBe(true);
   });
 
-  it("is NOT annotated as human-gate-approved (RED: the owner approves the apply separately)", () => {
-    expect(up).not.toContain("@human-gate-approved");
+  it("carries the owner's production-apply approval for this migration only", () => {
+    expect(up).toMatch(/^-- @human-gate-approved \(owner, 2026-10-29, .*#2887 at dbd1363ef.*this migration only.*\)$/m);
   });
 
   it("keeps the caller gate, SECURITY DEFINER, search_path, verified-company join and the synthetic predicate", () => {

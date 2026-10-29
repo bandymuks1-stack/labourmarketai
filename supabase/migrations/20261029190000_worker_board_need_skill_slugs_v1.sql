@@ -1,4 +1,5 @@
 -- 20261029190000_worker_board_need_skill_slugs_v1
+-- @human-gate-approved (owner, 2026-10-29, in chat: "APPROVED — PRODUCTION APPLY" of #2887 at dbd1363ef — this migration only, via Supabase MCP apply_migration; no backfill)
 --
 -- RED class (recreates a SECURITY DEFINER worker reader; return type
 -- changes). Owner decision 2026-10-29: "APPROVED — PREPARE RED MIGRATION
