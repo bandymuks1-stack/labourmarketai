@@ -131,6 +131,24 @@ describe("retractEntrySkillEvidence", () => {
     expect(db.tables.journal_entry_metrics).toHaveLength(1);
   });
 
+  it("a failed marker withdraws nothing (the link stays for the retry)", async () => {
+    const db = fakeDb(seed());
+    const failing = {
+      from(table: string) {
+        const q = db.client.from(table);
+        if (table === "journal_entry_metrics") {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (q as any).insert = () => Promise.resolve({ error: { code: "42501" } });
+        }
+        return q;
+      },
+    };
+    const res = await retractEntrySkillEvidence(failing, { entryId: ENTRY, workerId: WORKER, slugs: ["welding-blueprint"] });
+    expect(res.ok).toBe(false);
+    expect(db.log.some((l) => l.startsWith("delete:journal_entry_skills"))).toBe(false);
+    expect(db.tables.journal_entry_skills).toHaveLength(3);
+  });
+
   it("both dispute doors route through it (no second copy of the rule)", () => {
     const read = (p: string) => readFileSync(join(__dirname, p), "utf8");
     expect(read("skill-pipeline-actions.ts")).toMatch(/retractEntrySkillEvidence\(ctx\.sb,/);

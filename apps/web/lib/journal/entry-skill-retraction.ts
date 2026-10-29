@@ -124,7 +124,9 @@ export async function retractEntrySkillEvidence(
     else ok = false;
   }
 
-  if (opts.deleteLinks !== false && skillIds.length > 0) {
+  // The evidence is withdrawn only once the dispute is on record: a failed
+  // marker leaves the link in place, so the person's retry still sees it.
+  if (ok && opts.deleteLinks !== false && skillIds.length > 0) {
     const del = await sb
       .from("journal_entry_skills")
       .delete()

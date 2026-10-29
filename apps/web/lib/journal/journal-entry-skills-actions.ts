@@ -83,10 +83,36 @@ export async function setJournalEntrySkillLinks(
   // What the entry evidenced BEFORE this save: a link the person now takes
   // away is their dispute of that reading, and must survive the next
   // pipeline run (see below).
-  const { data: before } = await linkTable()
+  const { data: before, error: beforeErr } = await linkTable()
     .select("skill_id")
     .eq("journal_entry_id", entryId)
     .eq("worker_id", worker.id);
+  // Without knowing what is being taken away, nothing is removed.
+  if (beforeErr) return { ok: false, code: "link_write_failed", message: beforeErr.message };
+
+  // A link the person removes is a DISPUTE of what the entry shows, not a
+  // UI toggle: it is recorded FIRST as the entry-scoped, append-only
+  // `skill_rejected` marker, so a later pipeline run over the same text
+  // (version upgrade, "refresh recognition") no longer puts the link back.
+  // Only once the dispute is recorded are links removed — a failed record
+  // leaves every link in place, so the same save stays retryable. The entry
+  // text and the marker keep the basis; the skill row itself is untouched
+  // (whether the person holds the skill is their profile's call).
+  const kept = new Set(unique);
+  const removed = ((before ?? []) as { skill_id: string }[])
+    .map((r) => r.skill_id)
+    .filter((id) => typeof id === "string" && !kept.has(id));
+  if (removed.length > 0) {
+    const recorded = await retractEntrySkillEvidence(supabase, {
+      entryId,
+      workerId: worker.id,
+      skillIds: removed,
+      deleteLinks: false, // the replace below removes them
+    });
+    if (!recorded.ok || recorded.markedSlugs.length !== removed.length) {
+      return { ok: false, code: "link_write_failed", message: "dispute_not_recorded" };
+    }
+  }
 
   const del = await linkTable()
     .delete()
@@ -109,28 +135,6 @@ export async function setJournalEntrySkillLinks(
         code: "link_write_failed",
         message: ins.error.message ?? "link_write_failed",
       };
-    }
-  }
-
-  // A link the person removed is a DISPUTE of what the entry shows, not a
-  // UI toggle: it is recorded as the entry-scoped, append-only
-  // `skill_rejected` marker, so a later pipeline run over the same text
-  // (version upgrade, "refresh recognition") no longer puts the link back.
-  // The entry text and the marker keep the basis; the skill row itself is
-  // untouched (whether the person holds the skill is their profile's call).
-  const kept = new Set(unique);
-  const removed = ((before ?? []) as { skill_id: string }[])
-    .map((r) => r.skill_id)
-    .filter((id) => typeof id === "string" && !kept.has(id));
-  if (removed.length > 0) {
-    const retracted = await retractEntrySkillEvidence(supabase, {
-      entryId,
-      workerId: worker.id,
-      skillIds: removed,
-      deleteLinks: false, // the replace above already removed them
-    });
-    if (!retracted.ok) {
-      return { ok: false, code: "link_write_failed", message: "dispute_not_recorded" };
     }
   }
 
