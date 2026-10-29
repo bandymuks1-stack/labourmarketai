@@ -146,6 +146,23 @@ name: signed-in-journey
       - swipe:
           direction: UP
           duration: 400
+# iOS: the keyboard lives in its own window, so Review can be "visible" in the
+# app's layout and still sit under it — a tap there lands on the keyboard and
+# never reaches the button (run 40846299984: Review press count 0, no request
+# started). The composer's test id carries -kb1 while the keyboard is up; if
+# the swipe left it up, Return on the one-line site box ("Done") puts it away.
+- runFlow:
+    when:
+      platform: iOS
+      visible:
+        id: "journal-compose-form-.*-kb1"
+    commands:
+      - pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: "journal-compose-form-.*-kb0"
+    timeout: 5000
+    optional: true
 # Scroll to the button BELOW Review, so Review sits clear of the bottom edge
 # (on iOS the tab bar covers the last strip of the screen).
 - scrollUntilVisible:

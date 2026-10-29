@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Keyboard, StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../auth-context";
 import type {
@@ -109,6 +109,17 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
   // journey can tell a tap that never landed from a request that never came
   // back (state words and a count only; see request-trace.ts).
   const [reviewPresses, setReviewPresses] = useState(0);
+  // Whether the software keyboard is up — on iOS it sits in its own window, so
+  // a control "visible" in the app's layout can still be under it.
+  const [keyboardUp, setKeyboardUp] = useState(() => Keyboard.isVisible());
+  useEffect(() => {
+    const shown = Keyboard.addListener("keyboardDidShow", () => setKeyboardUp(true));
+    const hidden = Keyboard.addListener("keyboardDidHide", () => setKeyboardUp(false));
+    return () => {
+      shown.remove();
+      hidden.remove();
+    };
+  }, []);
 
   const [workDate, setWorkDate] = useState(() => deviceDay(0));
   const [notes, setNotes] = useState("");
@@ -342,7 +353,7 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
       style={styles.stack}
       testID={`journal-compose-form-${state.kind}${
         state.kind === "draft_failed" ? `-${state.failure.kind}` : ""
-      }-p${reviewPresses}`}
+      }-p${reviewPresses}-kb${keyboardUp ? 1 : 0}`}
     >
       <View testID={traceTestId(trace, "journal.create_draft")}>
         <View testID={traceTestId(trace, "journal.list")}>
@@ -398,6 +409,10 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
         value={siteName}
         onChangeText={setSiteName}
         maxLength={200}
+        // The last one-line box before Review: its Return key says "Done" and
+        // puts the keyboard away, so Review is never left under it.
+        returnKeyType="done"
+        submitBehavior="blurAndSubmit"
       />
 
       {state.kind === "writing" && state.localError !== null ? (
