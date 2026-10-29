@@ -7,6 +7,7 @@ import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
 import { writeEntrySkillLinks } from "@/lib/journal/entry-skill-link-write";
+import { retractEntrySkillEvidence } from "@/lib/journal/entry-skill-retraction";
 import { recognizeSkills } from "@/lib/structuring/skill-recognition";
 
 /**
@@ -79,6 +80,14 @@ export async function setJournalEntrySkillLinks(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const linkTable = () => (supabase as any).from("journal_entry_skills");
 
+  // What the entry evidenced BEFORE this save: a link the person now takes
+  // away is their dispute of that reading, and must survive the next
+  // pipeline run (see below).
+  const { data: before } = await linkTable()
+    .select("skill_id")
+    .eq("journal_entry_id", entryId)
+    .eq("worker_id", worker.id);
+
   const del = await linkTable()
     .delete()
     .eq("journal_entry_id", entryId)
@@ -100,6 +109,28 @@ export async function setJournalEntrySkillLinks(
         code: "link_write_failed",
         message: ins.error.message ?? "link_write_failed",
       };
+    }
+  }
+
+  // A link the person removed is a DISPUTE of what the entry shows, not a
+  // UI toggle: it is recorded as the entry-scoped, append-only
+  // `skill_rejected` marker, so a later pipeline run over the same text
+  // (version upgrade, "refresh recognition") no longer puts the link back.
+  // The entry text and the marker keep the basis; the skill row itself is
+  // untouched (whether the person holds the skill is their profile's call).
+  const kept = new Set(unique);
+  const removed = ((before ?? []) as { skill_id: string }[])
+    .map((r) => r.skill_id)
+    .filter((id) => typeof id === "string" && !kept.has(id));
+  if (removed.length > 0) {
+    const retracted = await retractEntrySkillEvidence(supabase, {
+      entryId,
+      workerId: worker.id,
+      skillIds: removed,
+      deleteLinks: false, // the replace above already removed them
+    });
+    if (!retracted.ok) {
+      return { ok: false, code: "link_write_failed", message: "dispute_not_recorded" };
     }
   }
 

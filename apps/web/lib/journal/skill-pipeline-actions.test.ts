@@ -352,6 +352,17 @@ describe("legitimate flows — honest writes only", () => {
     ).toMatchObject([
       { entry_id: "e-A", metric_slug: "skill_rejected", value_text: "programming" },
     ]);
+    // The dispute also WITHDRAWS the evidence link the pipeline wrote for it
+    // on this entry (owner requirement 2026-10-29), and the tier is recomputed.
+    const linkDelete = deletes.find((d) => d.table === "journal_entry_skills");
+    expect(linkDelete, "the disputed entry link is withdrawn").toBeTruthy();
+    expect(linkDelete!.calls).toEqual(
+      expect.arrayContaining([
+        { method: "eq", args: ["journal_entry_id", "e-A"] },
+        { method: "in", args: ["skill_id", ["s-prog"]] },
+      ]),
+    );
+    expect(reconcileMock).toHaveBeenCalled();
   });
 
   it("valid ambiguous outright-rejection appends the marker + closes the clarification", async () => {
