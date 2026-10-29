@@ -101,9 +101,19 @@ jobs:
       - name: Guard — production hosts resolve to nowhere on this runner
         run: |
           set -euo pipefail
-          printf '0.0.0.0 %s\n' gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app | sudo tee -a /etc/hosts >/dev/null
-          for h in gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai; do
-            getent hosts "$h" | grep -q '^0\.0\.0\.0' || { echo "::error::$h still resolves"; exit 1; }
+          # Both address families: with only IPv4 entries the AAAA lookup still
+          # goes to DNS, and a production host with an IPv6 record would stay
+          # reachable (seen on a run 2026-10-29: `getent hosts` answered the
+          # real address first).
+          for h in gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app; do
+            printf '0.0.0.0 %s\n:: %s\n' "$h" "$h"
+          done | sudo tee -a /etc/hosts >/dev/null
+          for h in gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app; do
+            addrs="$(getent ahosts "$h" | awk '{print $1}' | sort -u | tr '\n' ' ')"
+            for a in $addrs; do
+              case "$a" in 0.0.0.0|::|::ffff:0.0.0.0) ;; *) echo "::error::$h still resolves"; exit 1 ;; esac
+            done
+            [ -n "$addrs" ] || { echo "::error::$h has no blackhole entry"; exit 1; }
           done
 
       - name: Set up pnpm
