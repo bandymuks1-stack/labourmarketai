@@ -67,6 +67,13 @@ on:
       - "apps/web/components/app/company-need-form.tsx"
       - "apps/web/lib/staffing/company-need-*"
       - "apps/web/lib/demand/demand-lifecycle*"
+      - "apps/web/tests/e2e/job-fit-evidence-isolated.spec.ts"
+      - "apps/web/tests/e2e/job-fit-main-compat-isolated.spec.ts"
+      - "apps/web/lib/opportunities/opportunity-need.ts"
+      - "apps/web/lib/opportunities/formal-requirements.ts"
+      - "apps/web/lib/market/need-skills*"
+      - "apps/web/lib/demand/demand-request.ts"
+      - "supabase/migrations/20261029190000_worker_board_need_skill_slugs_v1.sql"
 
 permissions:
   contents: read
@@ -84,8 +91,9 @@ jobs:
       # The walks share this one throwaway stack: self-serve sign-up, the
       # agency roles / permissions walk (agency-roles-isolated.spec.ts), the
       # Web A walks, the role journeys, and the journal -> skills -> Living CV
-      # -> matching -> dispute chain (skills-chain-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts
+      # -> matching -> dispute chain (skills-chain-isolated.spec.ts), and job fit from evidence
+      # (job-fit-evidence-isolated.spec.ts).
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -158,7 +166,9 @@ jobs:
 
       - name: Start local Supabase (migrations replayed from scratch)
         run: |
-          set -uo pipefail
+          # The runner shell is `bash -e`: without +e a failed start exits before
+          # its log is printed and the cause (e.g. a migration error) is lost.
+          set +e -uo pipefail
           supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
           rc=$?
           grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | tail -n 60
@@ -259,17 +269,51 @@ jobs:
           APP_MAIL_API: http://127.0.0.1:54334
         run: pnpm exec playwright test $SPEC --reporter=list --trace=off
 
+      # PRODUCTION-CODE COMPATIBILITY (owner gate for 20261029190000, deploy order
+      # migration -> app): the CURRENT production code (origin/main) is built
+      # and run against this stack, whose database now carries the migrated
+      # reader (job-fit-evidence-isolated.spec.ts G-3 re-applied it). Same
+      # local-only env; nothing leaves the runner.
+      - name: Production-code compatibility — build origin/main against the migrated stack
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin main
+          echo "origin/main = $(git rev-parse FETCH_HEAD)"
+          mkdir -p "$RUNNER_TEMP/main"
+          git archive FETCH_HEAD | tar -x -C "$RUNNER_TEMP/main"
+          cd "$RUNNER_TEMP/main"
+          pnpm install --frozen-lockfile --filter=!mobile > "$RUNNER_TEMP/main-install.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/main-install.log"; exit 1; }
+          pnpm -F web build > "$RUNNER_TEMP/main-build.log" 2>&1 || { grep -viE "key|secret|jwt|token|password|eyJ" "$RUNNER_TEMP/main-build.log" | tail -n 60; exit 1; }
+          grep -rqF "127.0.0.1:54321" apps/web/.next/static apps/web/.next/server || { echo "::error::main build lacks the local Supabase URL"; exit 1; }
+          pnpm -F web exec next start -H 127.0.0.1 -p 3002 > "$RUNNER_TEMP/next-main.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/next-main.pid"
+          for i in $(seq 1 60); do curl -fsS -o /dev/null "http://127.0.0.1:3002/en" && break; sleep 2; done
+          curl -fsS -o /dev/null "http://127.0.0.1:3002/en"
+
+      - name: Run the compatibility walk (production code, migrated database)
+        working-directory: apps/web
+        env:
+          SIGNUP_ISOLATED: "1"
+          JOBFIT_COMPAT: "1"
+          E2E_BASE_URL: http://127.0.0.1:3002
+          E2E_NO_SERVER: "1"
+          E2E_LOCAL_STACK: "1"
+        run: pnpm exec playwright test tests/e2e/job-fit-main-compat-isolated.spec.ts --reporter=list --trace=off
+
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()
         run: |
           grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/next.log" | tail -n 60 || true
           echo "--- mail-enabled instance"
           grep -viE 'key|secret|jwt|token|password|eyJ|@' "$RUNNER_TEMP/next-mail.log" | tail -n 40 || true
+          echo "--- production-code instance"
+          grep -viE 'key|secret|jwt|token|password|eyJ|@' "$RUNNER_TEMP/next-main.log" 2>/dev/null | tail -n 40 || true
 
       - name: Stop app and local Supabase
         if: always()
         run: |
           if [ -f "$RUNNER_TEMP/next.pid" ]; then kill "$(cat "$RUNNER_TEMP/next.pid")" 2>/dev/null || true; fi
           if [ -f "$RUNNER_TEMP/next-mail.pid" ]; then kill "$(cat "$RUNNER_TEMP/next-mail.pid")" 2>/dev/null || true; fi
+          if [ -f "$RUNNER_TEMP/next-main.pid" ]; then kill "$(cat "$RUNNER_TEMP/next-main.pid")" 2>/dev/null || true; fi
           docker rm -f ci_app_mailpit >/dev/null 2>&1 || true
           supabase stop --no-backup || true
