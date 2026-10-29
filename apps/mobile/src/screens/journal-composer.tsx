@@ -19,7 +19,11 @@ import { useLocale } from "../i18n/locale-context";
 import type { MessageKey } from "../i18n/messages";
 import { Body, Button, Divider, Field, NotAvailable } from "../ui/primitives";
 import { theme } from "../ui/theme";
-import { traceTestId, useRequestTrace } from "../request-trace";
+import {
+  traceTestId,
+  useRequestTrace,
+  useRootTouchTrace,
+} from "../request-trace";
 import { CapabilityFailureNotice } from "./capability-failure";
 
 /**
@@ -111,6 +115,7 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
   const { locale } = useLocale();
   const { accessToken } = useAuth();
   const trace = useRequestTrace();
+  const rootTouch = useRootTouchTrace();
   // How many times Review reached our code — with the trace below, the CI
   // journey can tell a tap that never landed from a request that never came
   // back (state words and a count only; see request-trace.ts).
@@ -379,7 +384,7 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
       style={styles.stack}
       testID={`journal-compose-form-${state.kind}${
         state.kind === "draft_failed" ? `-${state.failure.kind}` : ""
-      }-p${reviewPresses}-i${reviewPressIns}-t${formTouches}-kb${keyboardUp ? 1 : 0}-at${touchAt}-rv${reviewAt}`}
+      }-p${reviewPresses}-i${reviewPressIns}-t${formTouches}-kb${keyboardUp ? 1 : 0}-at${touchAt}-rv${reviewAt}-${rootTouch}`}
       onTouchStart={onFormTouch}
     >
       <View testID={traceTestId(trace, "journal.create_draft")}>

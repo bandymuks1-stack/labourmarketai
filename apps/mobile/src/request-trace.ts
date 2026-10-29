@@ -88,6 +88,35 @@ export function useRequestTrace(): Readonly<Record<string, Entry>> {
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
 
+// ── touches that reached React Native at all ───────────────────────────────
+
+let rootTouches = { count: 0, at: "none" };
+const touchListeners = new Set<() => void>();
+
+/** Record one touch at the app root: a count and a rounded point only. */
+export function traceRootTouch(pageX: number, pageY: number) {
+  rootTouches = {
+    count: rootTouches.count + 1,
+    at: `${Math.round(pageX)}x${Math.round(pageY)}`,
+  };
+  for (const listener of touchListeners) listener();
+}
+
+/** `rt12at201x653` — for a test id. */
+export function useRootTouchTrace(): string {
+  const value = useSyncExternalStore(
+    (listener) => {
+      touchListeners.add(listener);
+      return () => {
+        touchListeners.delete(listener);
+      };
+    },
+    () => rootTouches,
+    () => rootTouches,
+  );
+  return `rt${value.count}at${value.at}`;
+}
+
 /** Test-only: forget every call. */
 export function resetRequestTrace() {
   seq = 0;
