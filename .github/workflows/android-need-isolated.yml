@@ -266,9 +266,9 @@ jobs:
           [ "$N" = "2" ] || { echo "::error::expected exactly two submitted needs from the journey (first + second), found $N"; exit 1; }
           # The role is stored normalized (not as typed), so the two needs are told
           # apart by the descriptions the journey typed: one row each.
-          M="(coalesce(role_or_work_type,'') || ' ' || coalesce(title,'') || ' ' || coalesce(payload::text,''))"
-          T="$(q "select count(*) from public.customer_requests where profile_id = '$SEED' and status = 'submitted' and $M like '%two tilers%'")"
-          E="$(q "select count(*) from public.customer_requests where profile_id = '$SEED' and status = 'submitted' and $M like '%one electrician%'")"
+          # The whole row as text: the description lands in its own column.
+          T="$(q "select count(*) from public.customer_requests cr where cr.profile_id = '$SEED' and cr.status = 'submitted' and row_to_json(cr)::text ilike '%two tilers%'")"
+          E="$(q "select count(*) from public.customer_requests cr where cr.profile_id = '$SEED' and cr.status = 'submitted' and row_to_json(cr)::text ilike '%one electrician%'")"
           echo "first need rows=$T; second need rows=$E"
           [ "$T" = "1" ] && [ "$E" = "1" ] || { echo "::error::expected the first and the second need once each (first=$T second=$E)"; exit 1; }
           echo "ANDROID_NEED_SUBMIT_ISOLATED_PROVEN: on-device draft + confirm stored the first AND the second need (two distinct rows, one each) for the synthetic company (local stack, production untouched)"
