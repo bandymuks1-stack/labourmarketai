@@ -1,5 +1,6 @@
-import { execFileSync } from "node:child_process";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
+
+import { verifyCompanyAsLocalAdmin } from "./isolated-web-a-helpers";
 
 /**
  * WORK JOURNAL → SKILLS → LIVING CV → TWO-WAY MATCHING → DISPUTE, end to end,
@@ -78,37 +79,6 @@ async function db<T>(path: string): Promise<T> {
   });
   if (!r.ok) throw new Error(`local db read ${path.split("?")[0]} → ${r.status}`);
   return (await r.json()) as T;
-}
-
-/** The platform's company verification, done here as the admin would. The
- *  worker board shows needs of VERIFIED companies only (the
- *  list_open_demand_for_workers rule); verifying is an admin act and not what
- *  this walk proves, so it is the one direct database write in this spec, on
- *  the local stack only. */
-async function verifyCompanyOf(address: string): Promise<void> {
-  const owner = await userId(address);
-  const [org] = await db<Array<{ legacy_company_id: string | null }>>(
-    `organizations?owner_profile_id=eq.${owner}&select=legacy_company_id`,
-  );
-  if (!org?.legacy_company_id) throw new Error("the company has no company record");
-  // The local service role holds no table grants (by design), so the admin
-  // act runs as the local database superuser inside the throwaway container.
-  const id = org.legacy_company_id;
-  if (!/^[0-9a-f-]{36}$/.test(id)) throw new Error("unexpected company id shape");
-  const out = execFileSync(
-    "docker",
-    [
-      "exec",
-      "supabase_db_labourmarketai",
-      "psql",
-      "-U",
-      "postgres",
-      "-tAc",
-      `update public.companies set verification_status = 'verified' where id = '${id}' returning id`,
-    ],
-    { encoding: "utf8" },
-  );
-  if (!out.includes(id)) throw new Error("local company verification wrote nothing");
 }
 
 async function userId(address: string): Promise<string> {
@@ -418,7 +388,7 @@ test("K-4. a company needs a 'wet-room finishing specialist': the tiler sees the
 
   // WORKER → JOB: the tiler sees the need as a fitting opportunity (on the
   // board once the platform has verified the company).
-  await verifyCompanyOf(COMPANY);
+  await verifyCompanyAsLocalAdmin(COMPANY, email("admin"));
   const tiler = await as(browser, TILER);
   await tiler.page.goto(`${BASE}/en/dashboard/opportunities?view=all`);
   const card = tiler.page.locator(`li[id="opp-${state.companyNeed}"]`).first();
