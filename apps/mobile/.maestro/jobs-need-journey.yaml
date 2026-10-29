@@ -43,6 +43,21 @@ name: jobs-need-journey
     visible:
       id: "tab-today"
     timeout: 60000
+# iOS offers to save the password after a sign-in ("Save Password?"), a system
+# sheet over the whole app (the on-screen ids show only the status bar under
+# it). It is useful to people and stays; the journey answers it "Not Now".
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible:
+            text: "Not Now"
+          timeout: 10000
+          optional: true
+      - tapOn:
+          text: "Not Now"
+          optional: true
 - scrollUntilVisible:
     element:
       id: "today-open-jobs"
