@@ -164,7 +164,8 @@ jobs:
               apps/mobile/.maestro/signed-in-journey.yaml &&             maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               -e NEED_SUBMIT=0               apps/mobile/.maestro/jobs-need-journey.yaml
           }
           # On a failed attempt, print ONLY the test ids on screen (our own testID
-          # strings, never text, values or a screenshot).
+          # strings, never text, values or a screenshot; at most ten averaged
+          # band colours, see ios-screen-bands.py).
           on_screen_ids() {
             echo "::group::test ids on screen at the failure"
             maestro hierarchy 2>/dev/null | node -e '
@@ -186,6 +187,8 @@ jobs:
                 } catch { console.log("(no hierarchy)"); }
                 console.log([...ids].sort().join("\n"));
               });' || true
+            # Ten averaged band colours, never an image (the script deletes it).
+            python3 .github/scripts/ios-screen-bands.py "$SIM_UDID" "$RUNNER_TEMP" || true
             echo "::endgroup::"
           }
           # The session lives in the iOS keychain, which clearState does not

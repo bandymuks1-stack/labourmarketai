@@ -139,25 +139,16 @@ name: signed-in-journey
       platform: Android
     commands:
       - hideKeyboard
+# iOS: NO swipe here. Runs 40846299984..40882239578 show that after the swipe
+# that follows this box, no further tap reached the app at all (app-root touch
+# count frozen at that swipe's start point); Return ("Done") puts the keyboard
+# away without a drag.
 - runFlow:
     when:
       platform: iOS
-    commands:
-      - swipe:
-          direction: UP
-          duration: 400
-# iOS: the keyboard lives in its own window, so Review can be "visible" in the
-# app's layout and still sit under it — a tap there lands on the keyboard and
-# never reaches the button (run 40846299984: Review press count 0, no request
-# started). The composer's test id carries -kb1 while the keyboard is up; if
-# the swipe left it up, Return on the one-line site box ("Done") puts it away.
-- runFlow:
-    when:
-      platform: iOS
-      visible:
-        id: "journal-compose-form-.*-kb1"
     commands:
       - pressKey: Enter
+# The composer's test id carries -kb0 once the keyboard is down.
 - extendedWaitUntil:
     visible:
       id: "journal-compose-form-.*-kb0"
