@@ -428,6 +428,15 @@ audit.
   (`lib/api/capability-readback.ts`); no row, name, id or address. Touches no
   chat table and sends nothing.
 
+- `app/api/internal/growth-daily/v1/route.ts` (2026-10-29) — the Agentai OS
+  daily growth export (real registrations by first-touch utm, active Living
+  CVs). Same `SUPPLY_FEED_BEARER_TOKEN` machine secret (503 while unset, 401 on
+  a wrong token). Service role is needed because the answer is whole-population
+  aggregate COUNTS; all from `agentai_daily_growth_aggregate_v1(date)` (SECURITY
+  DEFINER, EXECUTE for service_role only). The body is counts with attribution
+  groups below 3 rolled up (`lib/api/growth-daily.ts`); no row, name, id, e-mail
+  or address. Touches no chat table and sends nothing.
+
 - **2026-10-06 — `lib/invitations/signup-bridge.ts`** (frictionless addressed
   invite, PR #2167). Calls ONE service_role-only SECURITY DEFINER read,
   `get_invitation_signup_context_v1` (migration `20261006100500`, RED, not
