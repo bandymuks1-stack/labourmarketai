@@ -24,6 +24,7 @@ on:
       - ".github/workflows/signup-isolated.yml"
       - "apps/web/tests/e2e/signup-isolated.spec.ts"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
+      - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
       - "apps/web/app/*/dashboard/company/people/**"
       - "apps/web/app/*/dashboard/company/settings/**"
       - "apps/web/app/*/dashboard/network/**"
@@ -67,7 +68,10 @@ jobs:
       APP_ORIGIN: http://127.0.0.1:3000
       # Both walks share this one throwaway stack: self-serve sign-up and the
       # agency roles / permissions walk (agency-roles-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts
+      # role-journeys-isolated.spec.ts: the cross-role integration journeys
+      # (company -> agency -> placed worker -> journal confirmation, isolation,
+      # idempotency) on the same stack.
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/role-journeys-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
