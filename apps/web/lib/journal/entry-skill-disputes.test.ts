@@ -129,8 +129,23 @@ describe("readDisputedEntrySkills", () => {
     expect((await readDisputedEntrySkills(client, "w1"))?.has(disputeKey("e-new", "s-flooring"))).toBe(true);
   });
 
+  it("a chain of exactly 50 predecessors is complete; 51 is reported incomplete", () => {
+    const chainOf = (n: number) =>
+      Array.from({ length: n + 1 }, (_, i) => ({
+        id: `x${i}`,
+        superseded_by: i < n ? `x${i + 1}` : null,
+        correction_of: null,
+      }));
+    const at50 = predecessorsByEntry(chainOf(50));
+    expect(at50.preds.get("x50")).toHaveLength(50);
+    expect(at50.truncated.has("x50")).toBe(false);
+    const at51 = predecessorsByEntry(chainOf(51));
+    expect(at51.truncated.has("x51")).toBe(true);
+    expect(at51.truncated.has("x50")).toBe(false);
+  });
+
   it("the edit/correction chain is walked both ways it is stored", () => {
-    const preds = predecessorsByEntry([
+    const { preds } = predecessorsByEntry([
       { id: "a", superseded_by: "b", correction_of: null },
       { id: "b", superseded_by: null, correction_of: null },
       { id: "c", superseded_by: null, correction_of: "b" },

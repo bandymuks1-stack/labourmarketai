@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { recordEntrySkillDecision, retractEntrySkillEvidence } from "./entry-skill-retraction";
 import { applyWorkerSkillSourceReconcile } from "./skill-source-apply";
-import { withoutDisputedLinks, disputeKey, readEntryChainDecisionRows } from "./entry-skill-disputes";
+import { withoutDisputedLinks, disputeKey, readEntryChainDecisionRows, readEntryPredecessors } from "./entry-skill-disputes";
 import { latestSkillDecisions } from "./entry-recognition-markers";
 
 /**
@@ -304,6 +304,19 @@ describe("retractEntrySkillEvidence", () => {
     const before = db.tables.journal_entry_metrics.length;
     expect(await recordEntrySkillDecision(failing, ENTRY, "filler-1", "reaffirmed")).toBe(false);
     expect(db.tables.journal_entry_metrics).toHaveLength(before);
+  });
+
+  it("the writer's chain walk agrees at the bound: 50 predecessors complete, 51 incomplete", async () => {
+    const chainOf = (n: number) =>
+      Array.from({ length: n + 1 }, (_, i) => ({
+        id: `x${i}`,
+        superseded_by: i < n ? `x${i + 1}` : null,
+        correction_of: null,
+      }));
+    const at50 = fakeDb({ journal_entries: chainOf(50) });
+    expect(await readEntryPredecessors(at50.client, "x50")).toHaveLength(50);
+    const at51 = fakeDb({ journal_entries: chainOf(51) });
+    expect(await readEntryPredecessors(at51.client, "x51")).toBeNull();
   });
 
   it("both dispute doors route through it (no second copy of the rule)", () => {

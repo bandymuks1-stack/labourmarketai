@@ -72,7 +72,14 @@ export async function readDisputedEntrySkills(
           .eq("worker_id", workerId)
           .order("id", { ascending: true }),
       );
-      if (!chain.error && !chain.truncated) preds = predecessorsByEntry(chain.rows);
+      if (!chain.error && !chain.truncated) {
+        const walked = predecessorsByEntry(chain.rows);
+        // An entry whose chain is longer than the bound is judged on its own
+        // carried decisions only (the cautious reading) — the same entry on
+        // which the decision writer refuses to append anything.
+        preds = walked.preds;
+        for (const id of walked.truncated) preds.set(id, []);
+      }
     }
     const toJudge = new Set<string>(byEntry.keys());
     for (const [id, ps] of preds) if (ps.some((x) => byEntry.has(x))) toJudge.add(id);
@@ -134,7 +141,9 @@ export async function readEntryPredecessors(
   const out: string[] = [];
   let frontier = [entryId];
   try {
-    for (let hop = 0; hop < MAX_CHAIN && frontier.length > 0; hop += 1) {
+    // One probe hop past the bound: a chain of exactly MAX_CHAIN
+    // predecessors is complete; only one that keeps going is not.
+    for (let hop = 0; hop <= MAX_CHAIN && frontier.length > 0; hop += 1) {
       const [byEdit, self] = await Promise.all([
         sb.from("journal_entries").select("id").in("superseded_by", frontier),
         sb.from("journal_entries").select("correction_of").in("id", frontier),
@@ -148,12 +157,13 @@ export async function readEntryPredecessors(
         if (typeof r.correction_of === "string" && !seen.has(r.correction_of)) next.push(r.correction_of);
       }
       frontier = [...new Set(next)];
+      if (hop === MAX_CHAIN) break; // the probe hop: record nothing past the bound
       for (const id of frontier) {
         seen.add(id);
         out.push(id);
       }
     }
-    if (frontier.length > 0) return null; // the bound was hit: incomplete
+    if (frontier.length > 0) return null; // longer than the bound: incomplete
   } catch {
     return null;
   }
@@ -201,10 +211,13 @@ async function readChainDecisions(
   );
 }
 
-/** Pure: each entry's predecessors from (id, superseded_by, correction_of) rows. */
+/** Pure: each entry's predecessors from (id, superseded_by, correction_of)
+ *  rows, with the SAME bound as `readEntryPredecessors`: up to MAX_CHAIN
+ *  predecessors are complete; an entry whose chain goes on past that is
+ *  listed in `truncated` (incomplete), exactly where the writer refuses. */
 export function predecessorsByEntry(
   rows: readonly { id: string; superseded_by: string | null; correction_of: string | null }[],
-): Map<string, string[]> {
+): { preds: Map<string, string[]>; truncated: Set<string> } {
   const direct = new Map<string, string[]>();
   const add = (child: string, parent: string) => {
     const list = direct.get(child) ?? [];
@@ -215,24 +228,29 @@ export function predecessorsByEntry(
     if (r.superseded_by) add(r.superseded_by, r.id);
     if (r.correction_of) add(r.id, r.correction_of);
   }
-  const all = new Map<string, string[]>();
+  const preds = new Map<string, string[]>();
+  const truncated = new Set<string>();
   for (const id of new Set(rows.map((r) => r.id))) {
     const seen = new Set<string>([id]);
     const out: string[] = [];
     let frontier = [id];
-    for (let hop = 0; hop < MAX_CHAIN && frontier.length > 0; hop += 1) {
+    for (let hop = 0; hop <= MAX_CHAIN && frontier.length > 0; hop += 1) {
       const next: string[] = [];
       for (const f of frontier) {
         for (const p of direct.get(f) ?? []) {
-          if (seen.has(p)) continue;
-          seen.add(p);
-          out.push(p);
+          if (seen.has(p) || next.includes(p)) continue;
           next.push(p);
         }
       }
       frontier = next;
+      if (hop === MAX_CHAIN) break; // the probe hop
+      for (const p of next) {
+        seen.add(p);
+        out.push(p);
+      }
     }
-    all.set(id, out);
+    if (frontier.length > 0) truncated.add(id);
+    preds.set(id, out);
   }
-  return all;
+  return { preds, truncated };
 }
