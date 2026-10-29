@@ -143,7 +143,7 @@ jobs:
 
       - name: Signed-in journey (sign-in → Today read → journal write → profile read → sign-out)
         env:
-          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "480000"
           MAESTRO_CLI_NO_ANALYTICS: "1"
         run: |
           # No --debug-output: nothing from a signed-in session is written to disk.
@@ -173,6 +173,7 @@ jobs:
           if journey || { on_screen_ids; echo "::warning::attempt 1 failed - retrying once (driver)"; sleep 15; journey; }; then
             echo "IOS_SIGNED_IN_JOURNEY_PROVEN: sign-in, Today figures read, journal entry drafted and confirmed, profile skills read, sign-out"
           else
+            on_screen_ids
             echo "::error::iOS signed-in journey failed twice"; exit 1
           fi
 
