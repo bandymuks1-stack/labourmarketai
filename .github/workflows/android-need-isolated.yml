@@ -258,8 +258,13 @@ jobs:
           ALL="$(q "select count(*) from public.customer_requests")"
           echo "submitted marked needs by the seed=$N; all needs in the local database=$ALL"
           [ "$N" = "2" ] || { echo "::error::expected exactly two submitted needs from the journey (first + second), found $N"; exit 1; }
-          D="$(q "select count(distinct role_or_work_type) from public.customer_requests where profile_id = '$SEED' and status = 'submitted' and coalesce(role_or_work_type,'') like 'QA-SYNTHETIC mobile%'")"
-          [ "$D" = "2" ] || { echo "::error::the two needs are not the two distinct roles the journey typed (distinct=$D)"; exit 1; }
+          # The role is stored normalized (not as typed), so the two needs are told
+          # apart by the descriptions the journey typed: one row each.
+          M="(coalesce(role_or_work_type,'') || ' ' || coalesce(title,'') || ' ' || coalesce(payload::text,''))"
+          T="$(q "select count(*) from public.customer_requests where profile_id = '$SEED' and status = 'submitted' and $M like '%two tilers%'")"
+          E="$(q "select count(*) from public.customer_requests where profile_id = '$SEED' and status = 'submitted' and $M like '%one electrician%'")"
+          echo "first need rows=$T; second need rows=$E"
+          [ "$T" = "1" ] && [ "$E" = "1" ] || { echo "::error::expected the first and the second need once each (first=$T second=$E)"; exit 1; }
           echo "ANDROID_NEED_SUBMIT_ISOLATED_PROVEN: on-device draft + confirm stored the first AND the second need (two distinct rows, one each) for the synthetic company (local stack, production untouched)"
           echo "- ANDROID_NEED_SUBMIT_ISOLATED_PROVEN: sign-in → jobs search → empty need refused → first need sent → Done → fresh form → second need sent → two submitted rows (local stack)" >> "$GITHUB_STEP_SUMMARY"
 
