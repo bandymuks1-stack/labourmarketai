@@ -440,6 +440,13 @@ jobs:
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
           "$HOME/.maestro/bin/maestro" --version
 
+      # The same evidence ios-signed-in.yml records from the macOS runner, so
+      # the two runners' paths to the origin can be laid side by side.
+      - name: Origin probe from the ubuntu runner (before the journey)
+        env:
+          ORIGIN: ${{ inputs.origin || 'https://labourmarket.ai' }}
+        run: bash .github/scripts/mobile-origin-probe.sh "$ORIGIN" before-journey
+
       - name: Emulator — install, sign in, read, write, sign out
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         env:

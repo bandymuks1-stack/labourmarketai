@@ -141,8 +141,18 @@ jobs:
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
           "$HOME/.maestro/bin/maestro" --version
 
+      # Evidence, not a gate: can THIS runner reach the origin? Status codes,
+      # protocol versions and timings only (no bodies, no tokens). Run again
+      # after a failed attempt, so a stalled journey can be laid next to what
+      # the runner's own network saw at that moment.
+      - name: Origin probe from the macOS runner (before the journey)
+        env:
+          ORIGIN: ${{ inputs.origin }}
+        run: bash .github/scripts/mobile-origin-probe.sh "$ORIGIN" before-journey
+
       - name: Signed-in journey (sign-in → Today read → journal write → profile read → sign-out)
         env:
+          ORIGIN: ${{ inputs.origin }}
           MAESTRO_DRIVER_STARTUP_TIMEOUT: "480000"
           MAESTRO_CLI_NO_ANALYTICS: "1"
         run: |
@@ -172,10 +182,11 @@ jobs:
           }
           # The session lives in the iOS keychain, which clearState does not
           # touch: reset it before the retry so attempt 2 starts signed out.
-          if journey || { on_screen_ids; echo "::warning::attempt 1 failed - retrying once (driver)"; xcrun simctl keychain "$SIM_UDID" reset || true; sleep 15; journey; }; then
+          if journey || { on_screen_ids; bash .github/scripts/mobile-origin-probe.sh "$ORIGIN" after-attempt-1; echo "::warning::attempt 1 failed - retrying once (driver)"; xcrun simctl keychain "$SIM_UDID" reset || true; sleep 15; journey; }; then
             echo "IOS_SIGNED_IN_JOURNEY_PROVEN: sign-in, Today figures read, journal entry drafted and confirmed, profile skills read, sign-out"
           else
             on_screen_ids
+            bash .github/scripts/mobile-origin-probe.sh "$ORIGIN" after-attempt-2
             echo "::error::iOS signed-in journey failed twice"; exit 1
           fi
 

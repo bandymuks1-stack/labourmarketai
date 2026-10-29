@@ -11,6 +11,7 @@ import {
 
 import { CONFIG } from "./config";
 import type { MessageKey } from "./i18n/messages";
+import { tracePhase, traceStart } from "./request-trace";
 
 /**
  * THE ONLY WAY THIS APP READS OR WRITES PRODUCT DATA.
@@ -57,10 +58,29 @@ export async function capability<T>(
   input: CapabilityRequest,
 ): Promise<DomainResult<T>> {
   if (CONFIG === null) return NOT_CONFIGURED;
-  return callCapability<T>(
-    { apiBaseUrl: CONFIG.apiBaseUrl, fetch: globalThis.fetch },
+  // State names only (request-trace.ts): where this call got to, never what
+  // it carried.
+  const name = input.name;
+  const callSeq = traceStart(name);
+  const tracedFetch = ((...args: Parameters<typeof fetch>) => {
+    tracePhase(name, callSeq, "sent");
+    return globalThis.fetch(...args).then(
+      (response) => {
+        tracePhase(name, callSeq, "answered");
+        return response;
+      },
+      (error: unknown) => {
+        tracePhase(name, callSeq, "rejected");
+        throw error;
+      },
+    );
+  }) as typeof fetch;
+  const result = await callCapability<T>(
+    { apiBaseUrl: CONFIG.apiBaseUrl, fetch: tracedFetch },
     input,
   );
+  tracePhase(name, callSeq, result.ok ? "ok" : result.failure.kind);
+  return result;
 }
 
 /**

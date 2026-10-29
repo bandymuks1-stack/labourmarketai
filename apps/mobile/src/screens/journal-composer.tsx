@@ -13,6 +13,7 @@ import { useLocale } from "../i18n/locale-context";
 import type { MessageKey } from "../i18n/messages";
 import { Body, Button, Divider, Field, NotAvailable } from "../ui/primitives";
 import { theme } from "../ui/theme";
+import { traceTestId, useRequestTrace } from "../request-trace";
 import { CapabilityFailureNotice } from "./capability-failure";
 
 /**
@@ -103,6 +104,11 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
   const { t } = useLocale();
   const { locale } = useLocale();
   const { accessToken } = useAuth();
+  const trace = useRequestTrace();
+  // How many times Review reached our code — with the trace below, the CI
+  // journey can tell a tap that never landed from a request that never came
+  // back (state words and a count only; see request-trace.ts).
+  const [reviewPresses, setReviewPresses] = useState(0);
 
   const [workDate, setWorkDate] = useState(() => deviceDay(0));
   const [notes, setNotes] = useState("");
@@ -254,12 +260,14 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
     const busy = state.kind === "saving";
     return (
       <View style={styles.stack} testID="journal-compose-preview">
-        <NotAvailable
-          title={t("journal.compose.previewTitle")}
-          body={t("journal.compose.previewNothingSaved")}
-        >
-          <PreviewFacts preview={state.preview} />
-        </NotAvailable>
+        <View testID={traceTestId(trace, "journal.confirm")}>
+          <NotAvailable
+            title={t("journal.compose.previewTitle")}
+            body={t("journal.compose.previewNothingSaved")}
+          >
+            <PreviewFacts preview={state.preview} />
+          </NotAvailable>
+        </View>
 
         {state.kind === "save_failed" ? (
           state.failure.kind === "unreachable" ? (
@@ -330,8 +338,17 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
 
   // ── writing / drafting / draft failure ──────────────────────────────────
   return (
-    <View style={styles.stack}>
-      <Body muted>{t("journal.compose.intro")}</Body>
+    <View
+      style={styles.stack}
+      testID={`journal-compose-form-${state.kind}${
+        state.kind === "draft_failed" ? `-${state.failure.kind}` : ""
+      }-p${reviewPresses}`}
+    >
+      <View testID={traceTestId(trace, "journal.create_draft")}>
+        <View testID={traceTestId(trace, "journal.list")}>
+          <Body muted>{t("journal.compose.intro")}</Body>
+        </View>
+      </View>
 
       <Field
         testID="journal-compose-date"
@@ -406,7 +423,10 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
         testID="journal-compose-review"
         busy={state.kind === "drafting"}
         label={t("journal.compose.review")}
-        onPress={() => void draft()}
+        onPress={() => {
+          setReviewPresses((n) => n + 1);
+          void draft();
+        }}
       />
       <Button
         variant="quiet"
