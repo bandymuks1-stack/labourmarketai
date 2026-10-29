@@ -449,9 +449,15 @@ test("K-6. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
   await expect(chip, "the reading is shown on the entry it came from").toHaveAttribute("aria-pressed", "true", {
     timeout: 60_000,
   });
+  // Un-ticked, the chip leaves the entry's evidence list (only linked
+  // readings are shown there); the stored rows below are the proof.
+  const unlinked = page
+    .getByTestId(`entry-skill-links-${state.tilerEntry}`)
+    .first()
+    .locator(`[data-testid="entry-skill-toggle-${state.tilerEntry}-${flooring}"][aria-pressed="true"]`);
   await expect(async () => {
-    if ((await chip.getAttribute("aria-pressed")) === "true") await chip.click({ timeout: 5_000 });
-    await expect(chip).toHaveAttribute("aria-pressed", "false", { timeout: 5_000 });
+    if ((await unlinked.count()) > 0) await unlinked.first().click({ timeout: 5_000 });
+    await expect(unlinked).toHaveCount(0, { timeout: 5_000 });
   }).toPass({ timeout: 60_000 });
 
   // Recorded: the dispute is an append-only marker on THIS entry.
