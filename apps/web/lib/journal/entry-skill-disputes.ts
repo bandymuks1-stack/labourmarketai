@@ -122,12 +122,14 @@ export function withoutDisputedLinks<T extends { journal_entry_id: string; skill
 
 const MAX_CHAIN = 50;
 
-/** Every predecessor of `entryId` in its edit/correction chain (bounded). */
+/** Every predecessor of `entryId` in its edit/correction chain (bounded).
+ *  `null` = the chain could not be read completely (a failure, never a
+ *  shorter history). */
 export async function readEntryPredecessors(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sb: any,
   entryId: string,
-): Promise<string[]> {
+): Promise<string[] | null> {
   const seen = new Set<string>([entryId]);
   const out: string[] = [];
   let frontier = [entryId];
@@ -137,6 +139,7 @@ export async function readEntryPredecessors(
         sb.from("journal_entries").select("id").in("superseded_by", frontier),
         sb.from("journal_entries").select("correction_of").in("id", frontier),
       ]);
+      if (byEdit?.error || self?.error) return null;
       const next: string[] = [];
       for (const r of (byEdit?.data ?? []) as { id?: unknown }[]) {
         if (typeof r.id === "string" && !seen.has(r.id)) next.push(r.id);
@@ -144,15 +147,15 @@ export async function readEntryPredecessors(
       for (const r of (self?.data ?? []) as { correction_of?: unknown }[]) {
         if (typeof r.correction_of === "string" && !seen.has(r.correction_of)) next.push(r.correction_of);
       }
-      for (const id of next) {
+      frontier = [...new Set(next)];
+      for (const id of frontier) {
         seen.add(id);
         out.push(id);
       }
-      frontier = [...new Set(next)];
     }
+    if (frontier.length > 0) return null; // the bound was hit: incomplete
   } catch {
-    // Unreadable chain: the entry's own decisions stand (its carried
-    // rejection — the cautious reading).
+    return null;
   }
   return out;
 }
@@ -163,14 +166,34 @@ export async function readEntryChainDecisionRows(
   sb: any,
   entryId: string,
 ): Promise<EntryMarkerRow[] | null> {
-  const chain = [entryId, ...(await readEntryPredecessors(sb, entryId))];
-  const { data, error } = await sb
-    .from("journal_entry_metrics")
-    .select("entry_id, metric_slug, value_text, value_numeric")
-    .in("entry_id", chain)
-    .in("metric_slug", [ENTRY_MARKER_SLUGS.skillRejected, ENTRY_MARKER_SLUGS.skillReaffirmed]);
-  if (error) return null;
-  return ((data ?? []) as (EntryMarkerRow & { entry_id?: string })[]).filter(
+  try {
+    return await readChainDecisions(sb, entryId);
+  } catch {
+    return null;
+  }
+}
+
+async function readChainDecisions(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sb: any,
+  entryId: string,
+): Promise<EntryMarkerRow[] | null> {
+  const preds = await readEntryPredecessors(sb, entryId);
+  if (preds === null) return null;
+  const chain = [entryId, ...preds];
+  // PAGED under a total order; an incomplete read is a FAILURE (null): no
+  // decision is applied from it and no reversal is appended on it.
+  const read = await readAllPages<EntryMarkerRow & { entry_id?: string }>(() =>
+    sb
+      .from("journal_entry_metrics")
+      .select("entry_id, metric_slug, value_text, value_numeric")
+      .in("entry_id", chain)
+      .in("metric_slug", [ENTRY_MARKER_SLUGS.skillRejected, ENTRY_MARKER_SLUGS.skillReaffirmed])
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true }),
+  );
+  if (read.error || read.truncated) return null;
+  return read.rows.filter(
     (r) =>
       (r.entry_id === undefined || chain.includes(r.entry_id)) &&
       (r.metric_slug === ENTRY_MARKER_SLUGS.skillRejected ||

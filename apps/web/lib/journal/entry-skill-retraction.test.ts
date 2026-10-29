@@ -252,6 +252,60 @@ describe("retractEntrySkillEvidence", () => {
     expect(db.tables.journal_entry_metrics.filter((r) => r.entry_id === "e-new")).toHaveLength(2);
   });
 
+  it("an explicit re-selection in an edit records the re-link over the predecessor's dispute", async () => {
+    // The supersede did NOT carry the rejection (the slug was selected), so
+    // only the predecessor holds it: the chain still reads "rejected" until
+    // the person's re-selection is recorded on the new entry.
+    const tables = seed() as Record<string, Row[]>;
+    tables.journal_entries = [
+      { id: "e-old", superseded_by: "e-new", correction_of: null },
+      { id: "e-new", superseded_by: null, correction_of: null },
+    ];
+    tables.journal_entry_metrics = [
+      { entry_id: "e-old", metric_slug: "skill_rejected", value_text: "flooring", value_numeric: 100 },
+    ];
+    const db = fakeDb(tables);
+    expect(latestSkillDecisions((await readEntryChainDecisionRows(db.client, "e-new"))!).get("flooring")).toBe("rejected");
+    expect(await recordEntrySkillDecision(db.client, "e-new", "flooring", "reaffirmed")).toBe(true);
+    expect(latestSkillDecisions((await readEntryChainDecisionRows(db.client, "e-new"))!).get("flooring")).toBe("reaffirmed");
+    // supersedeJournalEntry records it right after the save, BEFORE the pipeline.
+    const actions = readFileSync(join(__dirname, "actions.ts"), "utf8");
+    const at = actions.indexOf('recordEntrySkillDecision(supabase, newEntryId, slug, "reaffirmed")');
+    expect(at).toBeGreaterThan(0);
+    expect(at).toBeLessThan(actions.indexOf("const skills = await runSkillPipeline({\n    entryId: newEntryId"));
+  });
+
+  it("the chain's decisions are read across pages; an incomplete read is a failure and appends nothing", async () => {
+    const tables = seed() as Record<string, Row[]>;
+    tables.journal_entries = [{ id: ENTRY, superseded_by: null, correction_of: null }];
+    tables.journal_entry_metrics = Array.from({ length: 1001 }, (_, i) => ({
+      entry_id: ENTRY,
+      metric_slug: "skill_rejected",
+      value_text: `filler-${i}`,
+      value_numeric: i,
+    }));
+    tables.journal_entry_metrics.push({ entry_id: ENTRY, metric_slug: "skill_reaffirmed", value_text: "filler-0", value_numeric: 5000 });
+    const db = fakeDb(tables);
+    const rows = await readEntryChainDecisionRows(db.client, ENTRY);
+    expect(rows).toHaveLength(1002); // the row past the first 1000 is read
+    expect(latestSkillDecisions(rows!).get("filler-0")).toBe("reaffirmed");
+    // A failing page: UNKNOWN, and the writer appends nothing on it.
+    const failing = {
+      from(table: string) {
+        const q = db.client.from(table);
+        if (table === "journal_entry_metrics") {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (q as any).range = () => Promise.resolve({ data: null, error: { code: "57014" } });
+        }
+        return q;
+      },
+    };
+    expect(await readEntryChainDecisionRows(failing, ENTRY)).toBeNull();
+    const before = db.tables.journal_entry_metrics.length;
+    expect(await recordEntrySkillDecision(failing, ENTRY, "filler-1", "reaffirmed")).toBe(false);
+    expect(db.tables.journal_entry_metrics).toHaveLength(before);
+  });
+
   it("both dispute doors route through it (no second copy of the rule)", () => {
     const read = (p: string) => readFileSync(join(__dirname, p), "utf8");
     expect(read("skill-pipeline-actions.ts")).toMatch(/retractEntrySkillEvidence\(ctx\.sb,/);

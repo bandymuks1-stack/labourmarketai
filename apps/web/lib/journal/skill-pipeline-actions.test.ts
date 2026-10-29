@@ -61,7 +61,7 @@ function makeSupabase() {
       const calls: Call[] = [];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const builder: any = {};
-      for (const m of ["select", "eq", "in", "order", "limit", "maybeSingle", "single"]) {
+      for (const m of ["select", "eq", "in", "order", "limit", "range", "maybeSingle", "single"]) {
         builder[m] = (...args: unknown[]) => {
           calls.push({ method: m, args });
           return builder;
