@@ -6,6 +6,7 @@ import { useLocalSearchParams } from "expo-router";
 import type { JobsGetData, JobsSearchData, PublicJob } from "../../src/capability-shapes";
 import { CONFIG } from "../../src/config";
 import { useLocale } from "../../src/i18n/locale-context";
+import { tracePhase, traceStart, useRequestTrace } from "../../src/request-trace";
 import { CapabilityGate } from "../../src/screens/capability-gate";
 import { Body, Button, Divider, Field, Title } from "../../src/ui/primitives";
 import { theme } from "../../src/ui/theme";
@@ -158,6 +159,12 @@ function LinkedJob({ id }: { id: string }) {
 
 function JobRow({ job, index }: { job: PublicJob; index: number }) {
   const { t } = useLocale();
+  // Whether the hand-off to the browser happened, as a state word only (no
+  // URL): the journeys require `jobs-open-<n>-result-ok` after the tap.
+  const trace = useRequestTrace();
+  const key = index < 0 ? "linked" : String(index);
+  const openTrace = `jobs.open.${key}`;
+  const openPhase = trace[openTrace]?.phase ?? "none";
   // The server's webPath already carries the caller's locale; the origin is
   // the one this build talks to, so a preview build never sends a person to
   // production (mobile-account-controls rule).
@@ -177,14 +184,20 @@ function JobRow({ job, index }: { job: PublicJob; index: number }) {
     <View style={styles.row} testID={index < 0 ? "jobs-linked-row" : `jobs-row-${index}`}>
       <Body>{job.occupation ?? job.professionSlug ?? t("jobs.untitled")}</Body>
       {facts.length > 0 ? <Body muted>{facts.join(" · ")}</Body> : null}
-      <Button
-        variant="quiet"
-        testID={index < 0 ? "jobs-linked-open" : `jobs-open-${index}`}
-        label={t("jobs.openWeb")}
-        onPress={() => {
-          void Linking.openURL(`${origin}${job.webPath}`);
-        }}
-      />
+      <View testID={`jobs-open-${key}-result-${openPhase}`}>
+        <Button
+          variant="quiet"
+          testID={index < 0 ? "jobs-linked-open" : `jobs-open-${index}`}
+          label={t("jobs.openWeb")}
+          onPress={() => {
+            const seq = traceStart(openTrace);
+            Linking.openURL(`${origin}${job.webPath}`).then(
+              () => tracePhase(openTrace, seq, "ok"),
+              () => tracePhase(openTrace, seq, "failed"),
+            );
+          }}
+        />
+      </View>
       <Divider />
     </View>
   );

@@ -157,11 +157,16 @@ jobs:
           MAESTRO_CLI_NO_ANALYTICS: "1"
         run: |
           # No --debug-output: nothing from a signed-in session is written to disk.
+          # The Maestro console (step names and statuses — what this log
+          # already shows) is also kept on the runner so the claim line can
+          # name a degraded Today read; the file is never uploaded.
+          CONSOLE="$RUNNER_TEMP/maestro-console.txt"
+          ATTEMPT=0
           journey() {
-            maestro test \
-              -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
-              -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
-              apps/mobile/.maestro/signed-in-journey.yaml &&             maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               -e NEED_SUBMIT=0               apps/mobile/.maestro/jobs-need-journey.yaml
+            ATTEMPT=$((ATTEMPT + 1))
+            : > "$CONSOLE"
+            maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               apps/mobile/.maestro/signed-in-journey.yaml | tee -a "$CONSOLE" &&
+            maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               -e NEED_SUBMIT=0               apps/mobile/.maestro/jobs-need-journey.yaml | tee -a "$CONSOLE"
           }
           # On a failed attempt, print ONLY the test ids on screen (our own testID
           # strings, never text, values or a screenshot; at most ten averaged
@@ -194,7 +199,12 @@ jobs:
           # The session lives in the iOS keychain, which clearState does not
           # touch: reset it before the retry so attempt 2 starts signed out.
           if journey || { on_screen_ids; bash .github/scripts/mobile-origin-probe.sh "$ORIGIN" after-attempt-1; echo "::warning::attempt 1 failed - retrying once (driver)"; xcrun simctl keychain "$SIM_UDID" reset || true; sleep 15; journey; }; then
-            echo "IOS_SIGNED_IN_JOURNEY_PROVEN: sign-in, Today figures read, journal entry drafted and confirmed, profile skills read, sign-out"
+            echo "IOS_SIGNED_IN_JOURNEY_PROVEN: sign-in, Today figures read, journal entry drafted and confirmed, profile skills read, sign-out (passed on attempt $ATTEMPT of 2)"
+            if grep -q "TODAY_READ_DEGRADED.*COMPLETED" "$CONSOLE"; then
+              echo "IOS_JOBS_READ_JOURNEY_PROVEN_DEGRADED: job opened (hand-off ok) and empty need refused, BUT Today's figures read FAILED during the jobs journey (capability-retry shown) - not a full read"
+            else
+              echo "IOS_JOBS_READ_JOURNEY_PROVEN: Today read, jobs search loaded, job opened (hand-off ok), empty need refused (no need written)"
+            fi
           else
             on_screen_ids
             bash .github/scripts/mobile-origin-probe.sh "$ORIGIN" after-attempt-2
