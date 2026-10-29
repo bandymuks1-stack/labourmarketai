@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 import {
@@ -41,9 +41,10 @@ function collectSources(): Array<{ path: string; text: string }> {
   const out: Array<{ path: string; text: string }> = [];
   for (const dir of SCANNED_DIRS) {
     const abs = join(APP_ROOT, dir);
-    for (const name of readdirSync(abs)) {
+    for (const dirent of readdirSync(abs, { withFileTypes: true })) {
+      const name = dirent.name;
       const p = join(abs, name);
-      if (statSync(p).isFile() && /\.tsx?$/.test(name)) {
+      if (dirent.isFile() && /\.tsx?$/.test(name)) {
         out.push({ path: `${dir}/${name}`, text: readFileSync(p, "utf8") });
       }
     }

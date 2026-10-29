@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -69,10 +69,11 @@ describe("write-path notification emitters are awaited at every call site", () =
   it("no file anywhere in lib/ or components/ reintroduces `void emit...`", () => {
     const offenders: string[] = [];
     const walk = (rel: string): void => {
-      for (const name of readdirSync(join(WEB, rel))) {
+      for (const dirent of readdirSync(join(WEB, rel), { withFileTypes: true })) {
+        const name = dirent.name;
         const relPath = `${rel}/${name}`;
         const full = join(WEB, relPath);
-        if (statSync(full).isDirectory()) {
+        if (dirent.isDirectory()) {
           walk(relPath);
           continue;
         }
