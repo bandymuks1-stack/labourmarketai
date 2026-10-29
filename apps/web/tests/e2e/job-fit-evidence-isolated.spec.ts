@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -527,19 +528,19 @@ async function boardFits(browser: Browser, ids: readonly string[]): Promise<Reco
 
 /** Clone a stored need (same verified company) with a changed title / summary / payload / status. */
 function cloneNeed(fromId: string, patch: { role: string; summary: string; payloadSql: string; status?: string }): string {
-  const [row] = sqlRows<{ id: string }>(`
-    with src as (select * from public.customer_requests where id = ${lit(fromId)}),
-    ins as (
-      insert into public.customer_requests
-      select (jsonb_populate_record(null::public.customer_requests,
-                to_jsonb(src) || jsonb_build_object(
-                  'id', gen_random_uuid(), 'title', ${lit(patch.role)}, 'role_or_work_type', ${lit(patch.role)},
-                  'need_summary', ${lit(patch.summary)}, 'status', ${lit(patch.status ?? "submitted")},
-                  'created_at', now(), 'updated_at', now(),
-                  'payload', (select ${patch.payloadSql} from src)))).*
-        from src
-      returning id)
-    select id from ins`);
+  // A top-level INSERT (a data-modifying WITH cannot sit inside the JSON wrapper of sqlRows).
+  const id = randomUUID();
+  sqlExec(`
+    insert into public.customer_requests
+    select (jsonb_populate_record(null::public.customer_requests,
+              to_jsonb(src) || jsonb_build_object(
+                'id', ${lit(id)}::uuid, 'title', ${lit(patch.role)}, 'role_or_work_type', ${lit(patch.role)},
+                'need_summary', ${lit(patch.summary)}, 'status', ${lit(patch.status ?? "submitted")},
+                'created_at', now(), 'updated_at', now(),
+                'payload', ${patch.payloadSql}))).*
+      from public.customer_requests src
+     where src.id = ${lit(fromId)}`);
+  const [row] = sqlRows<{ id: string }>(`select id from public.customer_requests where id = ${lit(id)}`);
   if (!row) throw new Error("the seeded need was not stored");
   return row.id;
 }
