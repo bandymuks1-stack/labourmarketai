@@ -97,9 +97,15 @@ jobs:
       - name: Guard — production hosts resolve to nowhere on this runner
         run: |
           set -euo pipefail
-          printf '0.0.0.0 %s\n' gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app | sudo tee -a /etc/hosts >/dev/null
+          HOSTS="gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app"
+          # Leading newline: a hosts file without a trailing newline would glue the
+          # first entry onto its last line (and that line's address). IPv4 AND IPv6
+          # blackholes, so neither address family reaches real DNS.
+          { printf '\n'; for h in $HOSTS; do printf '0.0.0.0 %s\n:: %s\n' "$h" "$h"; done; } | sudo tee -a /etc/hosts >/dev/null
           for h in gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai; do
-            getent hosts "$h" | grep -q '^0\.0\.0\.0' || { echo "::error::$h still resolves"; exit 1; }
+            addrs="$(getent ahosts "$h" | awk '{print $1}' | sort -u)"
+            bad="$(printf '%s\n' "$addrs" | grep -vxE '0\.0\.0\.0|::' || true)"
+            [ -n "$addrs" ] && [ -z "$bad" ] || { echo "::error::$h still resolves (${bad:-no answer})"; exit 1; }
           done
 
       - name: Set up pnpm
