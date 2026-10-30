@@ -200,7 +200,7 @@ export async function supersedeJournalEntry(
   // owner-gated migration follow-up; this closes every app path today.
   const { data: oldEntry } = await supabase
     .from("journal_entries")
-    .select("id, superseded_by, deleted_at")
+    .select("id, superseded_by, deleted_at, original_text, original_language")
     .eq("id", oldEntryId)
     .maybeSingle();
   if (!oldEntry) {
@@ -248,6 +248,18 @@ export async function supersedeJournalEntry(
   }
 
   const originalText = notes;
+  // The language of the WORDS, not of the screen: when the words are the
+  // stored ones (a date / site / hours correction), they keep the language
+  // they were recorded in. The request locale labelled them before, so a
+  // Russian entry corrected from an English screen read as English
+  // everywhere (export, recognition) — P0-A 2026-10-30. New words still
+  // take the request locale (the composer has no other signal).
+  const storedText = (oldEntry as { original_text?: string | null }).original_text ?? null;
+  const storedLanguage = (oldEntry as { original_language?: string | null }).original_language ?? null;
+  const originalLanguage =
+    storedText !== null && storedLanguage && storedText.trim() === originalText
+      ? storedLanguage
+      : locale.slice(0, 2);
   const hashSelf = createHash("sha256")
     .update(
       [
@@ -326,7 +338,7 @@ export async function supersedeJournalEntry(
     p_entry_type_slug: hasStructured ? "hybrid" : "freeform",
     p_profession_id: professionId,
     p_original_text: originalText,
-    p_original_language: locale.slice(0, 2),
+    p_original_language: originalLanguage,
     p_hash_self: hashSelf,
     p_visibility_scope: "closed",
     p_metrics: metrics,
