@@ -59,6 +59,7 @@ function rec(over: Partial<JobRecommendation> = {}): JobRecommendation {
     salary: "unknown",
     matchedSkillSlugs: ["welding-mig"],
     missingSkillSlugs: [],
+    needSkillsUnconfirmed: false,
     unseen: false,
     isNew: false,
     recentlyCreated: false,

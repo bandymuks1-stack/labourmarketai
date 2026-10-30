@@ -21,8 +21,10 @@ appId: ai.labourmarket.app
 name: jobs-need-journey
 ---
 # The keyboard is put away on BOTH platforms after typing: Android by
-# hideKeyboard; iOS by a short scroll (the form screens close the keyboard on
-# drag; Maestro's hideKeyboard fails on an iOS multi-line box or number pad).
+# hideKeyboard; iOS WITHOUT a drag — Return on a one-line box, or a tap on a
+# plain label (`<field>-label`) for the multi-line box and the number pad,
+# where Maestro's hideKeyboard fails. The app no longer closes the keyboard on
+# drag (#2878: after a drag closed it, no tap reached the app again in CI).
 # A tap during scroll momentum only stops the scroll on Android, so every
 # scrollUntilVisible is followed by waitForAnimationToEnd before the tap.
 - extendedWaitUntil:
@@ -213,6 +215,16 @@ name: jobs-need-journey
             platform: Android
           commands:
             - hideKeyboard
+      # iOS: Return in a multi-line box is a new line, so tap the box's own
+      # label (it sits right above the box, which was just tapped, so it is on
+      # screen) — no drag.
+      - runFlow:
+          when:
+            platform: iOS
+          commands:
+            - tapOn:
+                id: "need-description-label"
+            - waitForAnimationToEnd
       - scrollUntilVisible:
           element:
             id: "need-role"
@@ -226,13 +238,13 @@ name: jobs-need-journey
             platform: Android
           commands:
             - hideKeyboard
+      # iOS: Return on a one-line box puts the keyboard away — no drag.
       - runFlow:
           when:
             platform: iOS
           commands:
-            - swipe:
-                direction: UP
-                duration: 400
+            - pressKey: Enter
+            - waitForAnimationToEnd
       - scrollUntilVisible:
           element:
             id: "need-location"
@@ -247,16 +259,18 @@ name: jobs-need-journey
             platform: Android
           commands:
             - hideKeyboard
+      # iOS: Return on a one-line box puts the keyboard away — no drag.
       - runFlow:
           when:
             platform: iOS
           commands:
-            - swipe:
-                direction: UP
-                duration: 400
+            - pressKey: Enter
+            - waitForAnimationToEnd
+      # Scroll to the END of the form (not just to the team-size box), so the
+      # box and its label sit well above where the number pad will rise.
       - scrollUntilVisible:
           element:
-            id: "need-team-size"
+            id: "need-cancel"
           direction: DOWN
           timeout: 20000
       - waitForAnimationToEnd
@@ -268,13 +282,15 @@ name: jobs-need-journey
             platform: Android
           commands:
             - hideKeyboard
+      # iOS: the number pad has no Return key; a tap on the box's own label
+      # puts it away — no drag.
       - runFlow:
           when:
             platform: iOS
           commands:
-            - swipe:
-                direction: UP
-                duration: 400
+            - tapOn:
+                id: "need-team-size-label"
+            - waitForAnimationToEnd
       - scrollUntilVisible:
           element:
             id: "need-cancel"
