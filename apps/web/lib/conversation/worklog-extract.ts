@@ -90,6 +90,78 @@ const SPAN_RE =
 // saved the 30-minute break as the day's work.
 const PL_SPAN_RE =
   /(?<![\p{L}\p{N}_])od\s*(\d{1,2})(?:[:.](\d{2}))?\s*do\s*(\d{1,2})(?:[:.](\d{2}))?(?!\p{N}|[-–—/]\p{N})/iu;
+
+const DAY_MINUTES = 24 * 60;
+/** A span may run past midnight only when it STARTS in the afternoon or
+ *  evening: "nuo 22 iki 6" is a night shift, while "8-5" could as well be a
+ *  12-hour clock day (8 am–5 pm) — that reading is left unparsed, never
+ *  guessed (the person states the time instead). */
+const OVERNIGHT_EARLIEST_START = 12 * 60;
+/** What may stand between two spans for the second to be part of the SAME
+ *  working day: a comma/semicolon/plus or one "and" word, nothing else.
+ *  "8-12 ir 13-17" is a split shift; "8-17, sumontavau 3-4 langus" is one
+ *  span followed by a count. */
+const SPAN_JOINER_RE = /^\s*(?:[,;+&/]\s*)?(?:(?:ir|and|и|und|en|i|oraz|a|bei)\s+)?$/iu;
+
+type ResolvedSpans = {
+  /** Minutes since midnight of the first span's start. */
+  readonly start: number;
+  /** Minutes since the first span's day midnight — may exceed 24 h - 1 when
+   *  the work ran past midnight; read `% DAY_MINUTES` for the clock time. */
+  readonly end: number;
+  /** Sum of the spans' own minutes (the gaps between them are not in it). */
+  readonly worked: number;
+  /** Sum of the gaps between joined spans. */
+  readonly gap: number;
+  readonly count: number;
+};
+
+/**
+ * Every clock span the sentence states for ONE working day, resolved on one
+ * time line: a night shift ends on the next day ("nuo 22 iki 6" = 8 h, was
+ * 0 h), and joined spans add up ("8-12 ir 13-17" = 8 h, was the first 4 h).
+ * The second and later spans count only while they are joined to the
+ * previous one (SPAN_JOINER_RE) and follow it in time; the first span that
+ * does not ends the chain, so a later stray range is never added. `null` when
+ * no span resolves.
+ */
+function resolveClockSpans(raw: string): ResolvedSpans | null {
+  const pick = (re: RegExp) => [...raw.matchAll(new RegExp(re.source, "giu"))];
+  let matches = pick(SPAN_RE);
+  if (matches.length === 0) matches = pick(PL_SPAN_RE);
+  if (matches.length === 0) return null;
+
+  let first = 0;
+  let prevEnd = 0;
+  let prevIndexEnd = 0;
+  let worked = 0;
+  let gap = 0;
+  let count = 0;
+  for (const m of matches) {
+    const s = toMinutes(m[1]!, m[2]);
+    const e = toMinutes(m[3]!, m[4]);
+    if (s == null || e == null || s === e) break;
+    // Past midnight only from the afternoon on, and only when the span reads
+    // as clock time — written with minutes ("22:00-06:00") or with words
+    // ("nuo 22 iki 6") — so a bare descending pair ("20-5 cm") stays a range.
+    if (e < s && (s < OVERNIGHT_EARLIEST_START || (m[2] == null && m[4] == null && /[-–—]/u.test(m[0])))) break;
+    if (count > 0 && !SPAN_JOINER_RE.test(raw.slice(prevIndexEnd, m.index))) break;
+    // Place the span on the time line of the day the previous one ended on
+    // (the first span on its own day); it may itself cross midnight.
+    const ls = Math.floor(prevEnd / DAY_MINUTES) * DAY_MINUTES + s;
+    const le = ls + (e > s ? e - s : e + DAY_MINUTES - s);
+    if (count > 0 && (ls < prevEnd || le - first > DAY_MINUTES)) break;
+    if (count === 0) first = ls;
+    else gap += ls - prevEnd;
+    worked += le - ls;
+    prevEnd = le;
+    prevIndexEnd = m.index + m[0].length;
+    count += 1;
+  }
+  if (count === 0) return null;
+  return { start: first, end: prevEnd, worked, gap, count };
+}
+
 // "45 min", "45 minučių", "45 мин", optionally near a break word.
 const BREAK_RE =
   /(\d{1,3})\s*(?:min|минут|мин)\w*/iu;
@@ -261,15 +333,14 @@ export function extractWorkLog(
   let start: string | null = null;
   let end: string | null = null;
   let spanMinutes: number | null = null;
-  const span = raw.match(SPAN_RE) ?? raw.match(PL_SPAN_RE);
-  if (span) {
-    const s = toMinutes(span[1], span[2]);
-    const e = toMinutes(span[3], span[4]);
-    if (s != null && e != null && e > s) {
-      start = hhmm(s);
-      end = hhmm(e);
-      spanMinutes = e - s;
-    }
+  // Gap between joined spans ("8-12 ir 13-17" → 60), read as the break.
+  let spanGapMinutes: number | null = null;
+  const spans = resolveClockSpans(raw);
+  if (spans) {
+    start = hhmm(spans.start);
+    end = hhmm(spans.end % DAY_MINUTES);
+    spanMinutes = spans.worked;
+    if (spans.count > 1) spanGapMinutes = spans.gap;
   }
 
   // ── break ─────────────────────────────────────────────────────────────────
@@ -292,9 +363,26 @@ export function extractWorkLog(
     }
   }
 
+  // Joined spans already leave the pause OUT ("8-12 ir 13-17": the hour
+  // between them is the break). A break stated on top of them may be that
+  // same pause or another one — the sentence does not say, so no span figure
+  // is recorded at all (never a guess; the person states the time instead).
+  if (spanGapMinutes != null) {
+    if (breakMinutes > 0) {
+      start = null;
+      end = null;
+      spanMinutes = null;
+    } else {
+      breakMinutes = spanGapMinutes;
+    }
+  }
+
   // ── worked minutes ────────────────────────────────────────────────────────
   let workedMinutes: number | null = null;
-  if (spanMinutes != null) {
+  if (spanMinutes != null && spanGapMinutes != null) {
+    // the spans' own sum — the gap between them is already not in it
+    workedMinutes = spanMinutes;
+  } else if (spanMinutes != null) {
     workedMinutes = Math.max(0, spanMinutes - breakMinutes);
   } else {
     const eh = raw.match(EXPLICIT_HOURS_RE);

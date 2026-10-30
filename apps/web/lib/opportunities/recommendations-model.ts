@@ -107,6 +107,9 @@ export interface JobRecommendation {
   /** Canonical skill slugs — required and held / required but missing. */
   readonly matchedSkillSlugs: readonly string[];
   readonly missingSkillSlugs: readonly string[];
+  /** The engine flagged the need's skill set as recognized from the demand
+   *  text, not confirmed by the company (`need_recognized_not_confirmed`). */
+  readonly needSkillsUnconfirmed: boolean;
   /** Never rendered to this worker before (seen store applied + no marker). */
   readonly unseen: boolean;
   /** Posted within the last 7 days OR unseen (spec: created recently OR not
@@ -189,6 +192,9 @@ export function deriveJobRecommendations(
         salary: salaryOutcome(s.match),
         matchedSkillSlugs: fit.matchedUris,
         missingSkillSlugs: fit.missingUris,
+        needSkillsUnconfirmed: (s.match.missingData ?? []).includes(
+          "need_recognized_not_confirmed",
+        ),
         unseen,
         isNew: recentlyCreated || unseen,
         recentlyCreated,

@@ -978,9 +978,9 @@ export function deriveProfessionalExperience(input: {
     for (const r of wi.organizationPendingRecords ?? []) {
       const first = r.workDate ?? r.periodStart;
       const last = r.workDate ?? r.periodEnd;
-      const { label: periodLabel } = first
-        ? periodOf(r.organizationId, r.context?.source.label, first, last ?? first)
-        : { label: null };
+      // Source label first, then dates (periodOf accepts none): an undated
+      // record whose sheet names a business period is still placed in it.
+      const { label: periodLabel } = periodOf(r.organizationId, r.context?.source.label, first, last ?? first);
       const key = `pending:${r.organizationId}|${periodLabel ?? ""}`;
       let a = acc.get(key);
       if (!a) {

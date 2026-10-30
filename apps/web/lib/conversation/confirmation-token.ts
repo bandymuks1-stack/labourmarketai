@@ -79,6 +79,30 @@ export function issueConfirmationToken(
   return `${body}.${sign(secret, body)}`;
 }
 
+/**
+ * The issue time of a GENUINE token — signed by us, unexpired, for this exact
+ * action, input and user — whether or not the state has moved since (a
+ * `stale_state` refusal) and whether or not it was already spent. `null` for
+ * every other token. Grants nothing by itself: a caller uses it only to ask
+ * "did the write this token was minted for already happen?" — a retry after a
+ * lost response (P0-A 2026-10-30) — and never to run a write.
+ */
+export function genuineTokenIssuedAt(
+  secret: string,
+  token: string,
+  ctx: VerifyInput,
+): number | null {
+  const verdict = verifyConfirmationToken(secret, token, ctx);
+  if (!verdict.ok && verdict.reason !== "stale_state") return null;
+  try {
+    const body = token.slice(0, token.indexOf("."));
+    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as ConfirmationPayload;
+    return typeof payload.issuedAtMs === "number" ? payload.issuedAtMs : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Verify a token against the live execution context. */
 export function verifyConfirmationToken(
   secret: string,

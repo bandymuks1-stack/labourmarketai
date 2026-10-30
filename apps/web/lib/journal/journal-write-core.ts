@@ -165,6 +165,157 @@ export async function findRecentDuplicateEntry(
   }
 }
 
+/**
+ * The FormData fields a confirm sends to `createJournalEntryCore` that the
+ * core does NOT persist as a metric row: they are compared elsewhere
+ * (`engagement_context_id`, `notes`, `project_id` are entry columns), or are
+ * transport / provenance details of rows that are compared (`unit_slug`,
+ * `*_source`, `locale`, `voice_disclosure_version`). Every OTHER field in a
+ * confirm's mapping must be covered by `DRAFT_FACT_SLUGS` — a guard test
+ * walks both transports' mappings, so a new signed field cannot be missed.
+ */
+export const DRAFT_FIELDS_NOT_METRICS: ReadonlySet<string> = new Set([
+  "locale",
+  "engagement_context_id",
+  "notes",
+  "project_id",
+  "unit_slug",
+  "quantity_source",
+  "work_time_source",
+  "voice_disclosure_version",
+]);
+
+/** The metric rows a confirmed draft persists, compared one by one. */
+export const DRAFT_FACT_SLUGS: ReadonlySet<string> = new Set([
+  "work_date",
+  "site_name",
+  "input_origin",
+  "voice_language",
+  "quantity",
+  // the fragments field persists as fragment rows; their phrases and
+  // activities derive from the notes (compared), their TIMES are compared
+  "fragments_json",
+  "fragment_time",
+  "work_start",
+  "work_end",
+  "break_minutes",
+]);
+
+const num = (v: unknown): string => {
+  const n = Number(v);
+  return Number.isFinite(n) ? String(n) : "";
+};
+
+/** One comparable string for the facts an entry carries as metric rows —
+ *  day, site, input origin, durations (entry and per fragment, value + unit),
+ *  the fragments' own phrases and activities, and the clock span. */
+export function draftFactsKeyOfRows(rows: readonly DuplicateKeyMetric[]): string {
+  const parts: string[] = [];
+  for (const m of rows) {
+    if (!DRAFT_FACT_SLUGS.has(m.metric_slug)) continue;
+    if (m.metric_slug === "quantity" || m.metric_slug === "fragment_time") {
+      parts.push(`${m.metric_slug}|${num(m.value_numeric)}|${m.unit_slug ?? ""}|${(m.value_text ?? "").trim()}`);
+    } else if (m.metric_slug === "break_minutes") {
+      parts.push(`break_minutes|${num(m.value_numeric)}`);
+    } else {
+      parts.push(`${m.metric_slug}|${(m.value_text ?? "").trim()}`);
+    }
+  }
+  return parts.sort().join(";");
+}
+
+/** The same key for the FormData fields a confirm sends — what the signed
+ *  draft would have recorded, built with the write core's own parsing
+ *  (`parseFragments` → `fragmentMetricRows`, `parseClockTime`). */
+export function draftFactsKeyOfFields(fields: Readonly<Record<string, string>>): string {
+  const rows: DuplicateKeyMetric[] = [];
+  const text = (k: string) => String(fields[k] ?? "").trim();
+  if (text("work_date")) rows.push({ metric_slug: "work_date", value_text: text("work_date") });
+  if (text("site_name")) rows.push({ metric_slug: "site_name", value_text: text("site_name") });
+  if (fields.input_origin === "voice") {
+    rows.push({ metric_slug: "input_origin", value_text: "voice" });
+    const lang = text("voice_language").slice(0, 8);
+    if (lang) rows.push({ metric_slug: "voice_language", value_text: lang });
+  }
+  if (text("quantity")) {
+    rows.push({ metric_slug: "quantity", value_numeric: Number(text("quantity")), unit_slug: text("unit_slug") || "square_meters" });
+  }
+  // Fragment rows come from THE one builder both writers use.
+  rows.push(...fragmentMetricRows(parseFragments(fields.fragments_json ?? null)));
+  const start = parseClockTime(fields.work_start ?? "");
+  const end = parseClockTime(fields.work_end ?? "");
+  if (start) rows.push({ metric_slug: "work_start", value_text: start });
+  if (end) rows.push({ metric_slug: "work_end", value_text: end });
+  if (/^\d{1,4}$/.test(text("break_minutes"))) {
+    rows.push({ metric_slug: "break_minutes", value_numeric: Number(text("break_minutes")) });
+  }
+  return draftFactsKeyOfRows(rows);
+}
+
+/** Clock tolerance between the app server that minted a token and the
+ *  database clock that stamped the entry's `created_at`. */
+const CONFIRMED_DRAFT_CLOCK_SKEW_MS = 5_000;
+
+/**
+ * THE ENTRY A CONFIRMED DRAFT ALREADY BECAME (P0-A 2026-10-30) — id of the
+ * LIVE entry this worker recorded AFTER `issuedAtMs` that carries EVERY fact
+ * the signed draft's FormData mapping would have written: the context, the
+ * words, the project choice (entry columns) and every persisted metric row
+ * (day, site, origin, durations, fragments, clock span — `draftFactsKey*`).
+ * Else null.
+ *
+ * Why: a confirm whose response is lost (mobile network drop, an MCP client
+ * timeout) is retried with the same token. The token is single-use, so the
+ * retry was refused as stale and the person was told "This was not saved"
+ * — false — and invited to draft again, which wrote the day a second time.
+ * The confirm now asks this read first and answers with the entry that
+ * exists. Read-only, RLS-scoped as the caller; a failed read is "none".
+ */
+export async function findConfirmedDraftEntry(
+  supabase: ServerSupabase,
+  q: {
+    workerId: string;
+    /** The exact FormData mapping the confirm sends to the write core. */
+    fields: Readonly<Record<string, string>>;
+    issuedAtMs: number;
+  },
+): Promise<string | null> {
+  try {
+    const engagementId = String(q.fields.engagement_context_id ?? "").trim();
+    const originalText = String(q.fields.notes ?? "").trim();
+    const projectId = String(q.fields.project_id ?? "").trim();
+    if (!engagementId || !originalText) return null;
+    const want = draftFactsKeyOfFields(q.fields);
+    const since = new Date(q.issuedAtMs - CONFIRMED_DRAFT_CLOCK_SKEW_MS).toISOString();
+    const { data, error } = await supabase
+      .from("journal_entries")
+      .select("id, project_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug)")
+      .eq("worker_id", q.workerId)
+      .eq("engagement_context_id", engagementId)
+      .eq("original_text", originalText)
+      .is("deleted_at", null)
+      .is("superseded_by", null)
+      .gte("created_at", since)
+      .order("created_at", { ascending: true })
+      .limit(5);
+    if (error || !Array.isArray(data)) return null;
+    for (const row of data as {
+      id?: string;
+      project_id?: string | null;
+      journal_entry_metrics?: DuplicateKeyMetric[] | null;
+    }[]) {
+      if (!row.id) continue;
+      if (draftFactsKeyOfRows(row.journal_entry_metrics ?? []) !== want) continue;
+      if (projectId === "none" && row.project_id != null) continue;
+      if (projectId && projectId !== "none" && row.project_id !== projectId) continue;
+      return row.id;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export type JournalWriteCaller = {
   /** The caller's OWN RLS-scoped client. Every read and write below runs as
    *  them — this module adds no authority and no admin/elevated path. */

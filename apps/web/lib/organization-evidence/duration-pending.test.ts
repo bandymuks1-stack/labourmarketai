@@ -157,3 +157,59 @@ describe("model + one history — shown as 'duration to be confirmed', totals un
     expect(exp.durationPending).toEqual([]);
   });
 });
+
+describe("an undated no-duration record is still placed by its source label (Codex P2 #2894)", () => {
+  // NEGATIVE CONTROL: the first cut skipped the period lookup when the record
+  // had no date or span, so a record whose sheet names an earlier entity's
+  // period fell into the holder's unplaced group and lost the period label.
+  it("source label → that period; no date is invented", () => {
+    const wi = deriveWorkIntelligence({
+      entries: [],
+      skills: [],
+      todayIso: "2026-10-30",
+      organizationRecords: [],
+      organizationPendingRecords: [
+        {
+          id: "u1",
+          organizationId: "org1",
+          workDate: null,
+          periodStart: null,
+          periodEnd: null,
+          source: "import",
+          context: { source: { label: "Earlier Works sheet", supplierName: null } } as never,
+        },
+      ],
+    });
+    const exp = deriveProfessionalExperience({
+      wi,
+      relationships: [
+        {
+          engagementContextId: null,
+          organizationId: "org1",
+          organizationName: "Example Org",
+          relationship: "employee",
+          title: null,
+          startedAt: null,
+          endedAt: null,
+          current: false,
+          source: "membership",
+          businessPeriods: [
+            {
+              id: "bp1",
+              label: "Earlier Works",
+              from: "2022-01-01",
+              to: "2026-02-22",
+              basis: "contract",
+              legalEntityRelation: "not_asserted",
+              legalEntityLabel: "Earlier Works",
+              sourceLabels: ["Earlier Works sheet"],
+            },
+          ],
+        },
+      ],
+    });
+    expect(exp.durationPending).toHaveLength(1);
+    expect(exp.durationPending[0]).toMatchObject({ periodLabel: "Earlier Works", records: 1, undated: 1, from: null, to: null });
+    expect(exp.hours?.total ?? 0).toBe(0);
+  });
+});

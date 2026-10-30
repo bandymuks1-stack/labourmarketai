@@ -273,6 +273,18 @@ test("A-2. SERVICE SEARCH: the buyer's discovery and matching tools answer", asy
   }
   const work = await tool(tok.worker, "work_find", { country: "LT" });
   ok(work);
+  // The worker's own board rows travel with the sentence (an external assistant
+  // has no panel): 'matches' carries rows with the demand id and the engine's
+  // verdict; 'empty' is an honest answer, distinct from an error.
+  expect(["matches", "empty"], JSON.stringify(work.data).slice(0, 300)).toContain(String(work.data?.kind));
+  const rows = work.data?.matches;
+  expect(rows === null || Array.isArray(rows), "matches is a list (or null when unreadable), never absent").toBe(true);
+  for (const m of (Array.isArray(rows) ? rows : []) as { requestId?: unknown; fitStatus?: unknown; matchedSkillSlugs?: unknown }[]) {
+    expect(String(m.requestId)).toMatch(/^[0-9a-f-]{36}$/);
+    expect(typeof m.fitStatus).toBe("string");
+    expect(Array.isArray(m.matchedSkillSlugs)).toBe(true);
+  }
+  test.info().annotations.push({ type: "work_find", description: `${String(work.data?.kind)} rows=${Array.isArray(rows) ? rows.length : "null"}` });
 });
 
 test("A-3. SUPPLIER AGENT: the provider publishes a service, the buyer requests it, the provider answers, the buyer sees it", async () => {
