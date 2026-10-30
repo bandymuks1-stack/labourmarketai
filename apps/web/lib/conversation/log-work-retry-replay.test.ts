@@ -43,6 +43,12 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/auth/profile-roles", () => ({ readActiveProfileRoles: async () => [{ role: "worker" }] }));
 vi.mock("@/lib/conversation/worker-executors", () => ({
   WORKER_EXECUTORS: { "worker.log-work": h.logWork },
+  logWorkFields: (locale: string, i: { engagementContextId: string; notes: string; workDate: string }) => ({
+    locale,
+    engagement_context_id: i.engagementContextId,
+    notes: i.notes,
+    work_date: i.workDate,
+  }),
   logWorkResultData: (entryId: string, _skills: unknown, _day: unknown, already?: boolean) => ({
     entryId,
     ...(already ? { alreadyRecorded: true } : {}),
@@ -98,8 +104,13 @@ describe("worker.log-work — a retried confirm never records the day twice", ()
     h.lookup.mockResolvedValueOnce({ entryId: "e-first", skills: {} });
     expect(await run(token)).toEqual({ ok: true, data: { entryId: "e-first", alreadyRecorded: true } });
     expect(h.logWork).toHaveBeenCalledTimes(1);
-    const [, draft, issuedAtMs] = h.lookup.mock.calls[0] as [unknown, Record<string, unknown>, number];
-    expect(draft).toMatchObject(INPUT);
+    // the lookup gets the executor's OWN FormData mapping of this draft
+    const [, fields, issuedAtMs] = h.lookup.mock.calls[0] as [unknown, Record<string, unknown>, number];
+    expect(fields).toMatchObject({
+      engagement_context_id: INPUT.engagementContextId,
+      notes: INPUT.notes,
+      work_date: INPUT.workDate,
+    });
     expect(typeof issuedAtMs).toBe("number");
   });
 

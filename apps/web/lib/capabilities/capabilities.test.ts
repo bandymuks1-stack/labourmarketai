@@ -39,7 +39,6 @@ vi.mock("@/lib/journal/journal-write-core", () => ({
   createJournalEntryCore: (...args: unknown[]) => coreWrite(...(args as [])),
   projectsToChooseFrom: async () => null,
   findConfirmedDraftEntry: (...args: unknown[]) => confirmedDraftLookup(...args),
-  timeFactsKeyOfIntake: () => "time-facts-key",
   runSkillPipeline: async () => ({
     status: "completed",
     added: 0,
@@ -1821,14 +1820,16 @@ describe("journal draft → confirm", () => {
     // The lookup is bound to THIS draft: worker, context, words, day, project
     // and only entries recorded after the token was issued.
     const [, q] = confirmedDraftLookup.mock.calls[0] as unknown as [unknown, Record<string, unknown>];
-    expect(q).toMatchObject({
-      workerId: "worker-1",
-      engagementId: DRAFT.engagementContextId,
-      originalText: DRAFT.notes,
-      workDate: DRAFT.workDate,
-      projectId: null,
-      // the draft's own durations / clock times must match too
-      timeFactsKey: "time-facts-key",
+    // …with the confirm's OWN FormData mapping: every signed field it writes.
+    expect(q).toMatchObject({ workerId: "worker-1" });
+    expect(q.fields).toEqual({
+      locale: "lt",
+      engagement_context_id: DRAFT.engagementContextId,
+      notes: DRAFT.notes,
+      work_date: DRAFT.workDate,
+      site_name: DRAFT.siteName,
+      project_id: "",
+      ...intakeWorkTimeFields(DRAFT.notes, DRAFT.workDate),
     });
     expect(typeof q.issuedAtMs).toBe("number");
   });

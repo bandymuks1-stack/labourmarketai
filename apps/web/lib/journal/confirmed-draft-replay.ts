@@ -3,12 +3,7 @@ import "server-only";
 import { readWorkerCoreRow } from "@/lib/data/worker-core";
 import type { DomainCaller } from "@/lib/domain/caller";
 import type { JournalSkillPipelineResult } from "@/lib/journal/skill-pipeline";
-import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
-import {
-  findConfirmedDraftEntry,
-  runSkillPipeline,
-  timeFactsKeyOfIntake,
-} from "@/lib/journal/journal-write-core";
+import { findConfirmedDraftEntry, runSkillPipeline } from "@/lib/journal/journal-write-core";
 
 /**
  * THE ONE "ALREADY RECORDED" ANSWER for a confirmed journal draft whose
@@ -18,40 +13,30 @@ import {
  * response the same way.
  *
  * The caller has ALREADY established that the token is genuine for this
- * exact draft and caller (`genuineTokenIssuedAt`); this only asks whether the
- * write it was minted for happened (`findConfirmedDraftEntry`: live entry,
- * same worker / context / words / day / project, recorded after the token)
- * and, if so, returns it with the skill pipeline's outcome. The pipeline is
+ * exact draft and caller (`genuineTokenIssuedAt`) and passes the EXACT
+ * FormData mapping its confirm sends to the write core; this only asks
+ * whether that write happened (`findConfirmedDraftEntry`: a live entry
+ * recorded after the token that carries every one of those facts) and, if
+ * so, returns it with the skill pipeline's outcome. The pipeline is
  * idempotent — the create core's duplicate path runs it the same way. No
  * entry is written here.
  */
 export async function alreadyRecordedJournalEntry(
   caller: DomainCaller,
-  draft: {
-    engagementContextId: string;
-    notes: string;
-    workDate: string;
-    projectId?: string | null;
-  },
+  fields: Readonly<Record<string, string>>,
   issuedAtMs: number,
 ): Promise<{ entryId: string; skills: JournalSkillPipelineResult } | null> {
   const workerRead = await readWorkerCoreRow(caller);
   if (!workerRead.ok || !workerRead.value) return null;
   const entryId = await findConfirmedDraftEntry(caller.supabase, {
     workerId: workerRead.value.id,
-    engagementId: draft.engagementContextId,
-    originalText: draft.notes,
-    workDate: draft.workDate,
-    projectId: draft.projectId ?? null,
+    fields,
     issuedAtMs,
-    // The SAME derivation both confirms write with — so only an entry that
-    // carries exactly this draft's durations and clock times is it.
-    timeFactsKey: timeFactsKeyOfIntake(intakeWorkTimeFields(draft.notes, draft.workDate)),
   });
   if (!entryId) return null;
   const skills = await runSkillPipeline({
     entryId,
-    text: draft.notes,
+    text: String(fields.notes ?? "").trim(),
     locale: caller.locale ?? "lt",
     excludeSlugs: [],
     caller: { supabase: caller.supabase, userId: caller.userId },

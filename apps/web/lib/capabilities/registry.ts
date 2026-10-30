@@ -764,6 +764,26 @@ const journalCreateDraft: CapabilityDescriptor = {
   },
 };
 
+/** THE FormData mapping journal.confirm sends to the write core — one
+ *  function, so the "already recorded" lookup compares exactly what the
+ *  confirm writes (every signed field). */
+function journalConfirmFields(
+  locale: string,
+  draft: z.infer<typeof workerLogWorkSchema>,
+): Record<string, string> {
+  return {
+    locale,
+    engagement_context_id: draft.engagementContextId,
+    notes: draft.notes,
+    work_date: draft.workDate,
+    site_name: draft.siteName ?? "",
+    project_id: draft.projectId ?? "",
+    // The stated time becomes time on the record — the same derivation
+    // the conversation executor applies (issue #1689).
+    ...intakeWorkTimeFields(draft.notes, draft.workDate),
+  };
+}
+
 /**
  * The entry a refused confirm's draft ALREADY became, as a confirm result —
  * or null. Only for a GENUINE token of this caller for this exact draft
@@ -785,7 +805,7 @@ async function alreadyRecordedEntry(
     userId: caller.userId,
   });
   if (issuedAtMs === null) return null;
-  const found = await alreadyRecordedJournalEntry(caller, draft, issuedAtMs);
+  const found = await alreadyRecordedJournalEntry(caller, journalConfirmFields(caller.locale, draft), issuedAtMs);
   if (!found) return null;
   const { entryId, skills } = found;
   return {
@@ -870,17 +890,7 @@ const journalConfirm: CapabilityDescriptor = {
     });
     const result = await createJournalEntryCore(
       { supabase: caller.supabase, userId: caller.userId, t },
-      fd({
-        locale: caller.locale,
-        engagement_context_id: draft.engagementContextId,
-        notes: draft.notes,
-        work_date: draft.workDate,
-        site_name: draft.siteName ?? "",
-        project_id: draft.projectId ?? "",
-        // The stated time becomes time on the record — the same derivation
-        // the conversation executor applies (issue #1689).
-        ...intakeWorkTimeFields(draft.notes, draft.workDate),
-      }),
+      fd(journalConfirmFields(caller.locale, draft)),
     );
     if (!result.ok) {
       if (result.code === "project_required" && result.projects) {

@@ -247,28 +247,36 @@ export const WORKER_EXECUTORS: {
     // the same deterministic parse the composer persists as fragments, with
     // machine-extraction provenance. Without this every chat-logged day read
     // 0 h downstream (lib/journal/intake-work-time.ts).
-    const r = await createJournalEntry(
-      fd({
-        locale: ctx.locale,
-        engagement_context_id: input.engagementContextId,
-        notes: input.notes,
-        work_date: input.workDate,
-        site_name: input.siteName ?? "",
-        project_id: input.projectId ?? "",
-        ...(input.voice
-          ? {
-              input_origin: "voice",
-              voice_language: input.voice.language,
-              voice_disclosure_version: input.voice.disclosureVersion,
-            }
-          : {}),
-        ...intakeWorkTimeFields(input.notes, input.workDate),
-      }),
-    );
+    const r = await createJournalEntry(fd(logWorkFields(ctx.locale, input)));
     if (!r.ok) return { ok: false, code: r.code, message: r.message };
     return { ok: true, data: logWorkResultData(r.entryId, r.skills, r.dayCheck ?? null) };
   },
 });
+
+/** THE FormData mapping worker.log-work sends to the canonical save — one
+ *  function, so the dispatcher's "already recorded" lookup compares exactly
+ *  what the executor writes (every signed field). */
+export function logWorkFields(
+  locale: string,
+  input: z.infer<(typeof WORKER_ACTION_SCHEMAS)["worker.log-work"]>,
+): Record<string, string> {
+  return {
+    locale,
+    engagement_context_id: input.engagementContextId,
+    notes: input.notes,
+    work_date: input.workDate,
+    site_name: input.siteName ?? "",
+    project_id: input.projectId ?? "",
+    ...(input.voice
+      ? {
+          input_origin: "voice",
+          voice_language: input.voice.language,
+          voice_disclosure_version: input.voice.disclosureVersion,
+        }
+      : {}),
+    ...intakeWorkTimeFields(input.notes, input.workDate),
+  };
+}
 
 /** The chat's `worker.log-work` result for a recorded entry — the executor's
  *  own answer, and the dispatcher's "already recorded" answer to a retried

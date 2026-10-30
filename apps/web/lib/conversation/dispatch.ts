@@ -28,6 +28,7 @@ import {
 } from "@/lib/engagements/engagement-schemas";
 import {
   WORKER_EXECUTORS,
+  logWorkFields,
   logWorkResultData,
   type ExecResult,
 } from "@/lib/conversation/worker-executors";
@@ -574,15 +575,11 @@ export async function dispatchWorkerAction(
         nowMs: Date.now(),
       });
       if (issuedAtMs === null) return null;
-      const draft = parsed.data as {
-        engagementContextId: string;
-        notes: string;
-        workDate: string;
-        projectId?: string | null;
-      };
+      const locale = opts?.locale ?? "lt";
       const found = await alreadyRecordedJournalEntry(
-        { supabase, userId: user.id, locale: opts?.locale ?? "lt" },
-        draft,
+        { supabase, userId: user.id, locale },
+        // the executor's OWN mapping — every signed field it would write
+        logWorkFields(locale, parsed.data as Parameters<typeof logWorkFields>[1]),
         issuedAtMs,
       );
       return found
