@@ -193,11 +193,8 @@ export function timeFactsKeyOfIntake(fields: Readonly<Record<string, string>>): 
   if (fields.quantity) {
     rows.push({ metric_slug: "quantity", value_numeric: Number(fields.quantity), unit_slug: fields.unit_slug ?? "square_meters" });
   }
-  for (const f of parseFragments(fields.fragments_json ?? null)) {
-    if (f.timeValue !== null && f.timeValue !== undefined && f.timeUnit) {
-      rows.push({ metric_slug: "fragment_time", value_numeric: f.timeValue, unit_slug: f.timeUnit });
-    }
-  }
+  // Fragment rows come from THE one builder both writers use.
+  rows.push(...fragmentMetricRows(parseFragments(fields.fragments_json ?? null)));
   const start = parseClockTime(fields.work_start ?? "");
   const end = parseClockTime(fields.work_end ?? "");
   if (start) rows.push({ metric_slug: "work_start", value_text: start });

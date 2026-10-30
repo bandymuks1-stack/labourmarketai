@@ -163,3 +163,30 @@ describe("the web review offers the same time the chat / MCP record", () => {
     expect(r.fragments.filter((f) => f.time !== null).map((f) => f.time?.value)).toEqual([2, 3]);
   });
 });
+
+describe("a work clause that mentions or negates a break keeps its duration (Codex review on #2893)", () => {
+  const review = (text: string) => reviewTimeSuggestion(text, DAY, extractJournalSuggestions(text));
+  const total = (fs: readonly { time: { value: number } | null }[]) =>
+    fs.reduce((s, f) => s + (f.time?.value ?? 0), 0);
+
+  it("lt: 'be pertraukos' is work — 6 + 1 + 1 = 8 h on review AND on the chat/MCP record", () => {
+    const text = "Klijavau plyteles 6 val. be pertraukos, glaisčiau sienas 1 val., dažiau sienas 1 val.";
+    expect(total(review(text).fragments)).toBe(8);
+    expect(deriveIntakeWorkTime(text, DAY).fragments.reduce((s, f) => s + f.timeValue, 0)).toBe(8);
+  });
+
+  it("en: 'without a break' / 'no break' are work", () => {
+    expect(total(review("Laid tiles 6 hours without a break, plastered walls 2 hours").fragments)).toBe(8);
+    expect(total(review("Laid tiles 6 hours no break, plastered walls 2 hours").fragments)).toBe(8);
+  });
+
+  it("ru: 'без перерыва' is work", () => {
+    expect(total(review("Клал плитку 6 часов без перерыва, штукатурил стены 2 часа").fragments)).toBe(8);
+  });
+
+  it("a real break clause with its own duration is still removed", () => {
+    const r = review("Klijavau plyteles 6 val., glaisčiau sienas 2 val., pietų pertrauka 1 val.");
+    expect(total(r.fragments)).toBe(8);
+    expect(r.fragments.some((f) => /pertrauk/i.test(f.rawPhrase))).toBe(false);
+  });
+});
