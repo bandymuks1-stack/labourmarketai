@@ -7,10 +7,9 @@
  * discarded the session's accounting document. Observed 2026-10-15 (run
  * 38689419280, issue #2402): the session imported and advanced the stream
  * cursor at 05:58:35, then the AFTER count hit the 8 s `statement_timeout`
- * at 05:58:44. Measured 2026-10-30 (read-only EXPLAIN on production): the
- * cause was `select("*")` — PostgREST builds every full row (incl. long
- * descriptions) even for a HEAD count — not heap fetches; `select("*")` took
- * 20 s, `select("external_id")` 68 ms for the same count. A HEAD response has
+ * at 05:58:44. The cause was `select("*")` — PostgREST builds every full row
+ * (incl. long descriptions) even for a HEAD count — not heap fetches; counting
+ * one indexed key column is answered from the index alone. A HEAD response has
  * no body, so PostgREST's error carried no code and the script printed
  * `count_failed:unknown` and exited 1 with an empty artifact.
  *
@@ -60,7 +59,7 @@ export async function countStoredRows(
         .from("public_vacancies")
         // Only the indexed key column: the count is answered from the
         // (provider_key, external_id) index alone. `*` made PostgREST build
-        // every full row (incl. long descriptions) and timed out at 8 s.
+        // every full row (incl. long descriptions) and hit the timeout.
         .select("external_id", { count: "exact", head: true })
         .eq("provider_key", providerKey)) as CountResponse;
     } catch (err) {

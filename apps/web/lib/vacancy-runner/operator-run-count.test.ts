@@ -46,7 +46,7 @@ describe("countStoredRows", () => {
     await expect(countStoredRows(client, "arbetsformedlingen", noSleep)).resolves.toBe(141345);
   });
 
-  it("counts only the indexed key column, never full rows (index-only, no 8 s timeout)", async () => {
+  it("counts only the indexed key column, never full rows (index-only, no timeout)", async () => {
     const { client, selects } = clientReturning({ count: 3, error: null, status: 200 });
     await countStoredRows(client, "nav", noSleep);
     expect(selects).toEqual([["external_id", { count: "exact", head: true }]]);
