@@ -71,6 +71,9 @@ export function SaveVacancyButton({
         onClick={toggle}
         disabled={pending}
         aria-pressed={saved}
+        data-testid="public-job-save"
+        data-saved={saved ? "true" : "false"}
+        data-pending={pending ? "true" : "false"}
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
         onFocus={() => setHovering(true)}
