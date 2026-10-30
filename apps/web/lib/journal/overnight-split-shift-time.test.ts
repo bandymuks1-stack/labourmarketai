@@ -156,4 +156,10 @@ describe("the web review offers the same time the chat / MCP record", () => {
     const r = review("Nuo 8 iki 16 klijavau plyteles 2 val.");
     expect(r.fragments.every((f) => f.time === null)).toBe(true);
   });
+
+  it("with a span AND a stated output the fragment times stay — the output may take the one entry slot (Codex P2)", () => {
+    const r = review("Nuo 8 iki 16 klijavau plyteles 2 val., glaisčiau sienas 3 val., paklojau 35 m²");
+    expect(r.time).toEqual({ value: 8, unitSlug: "hours" });
+    expect(r.fragments.filter((f) => f.time !== null).map((f) => f.time?.value)).toEqual([2, 3]);
+  });
 });

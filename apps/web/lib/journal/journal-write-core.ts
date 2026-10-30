@@ -165,6 +165,49 @@ export async function findRecentDuplicateEntry(
   }
 }
 
+const num = (v: unknown): string => {
+  const n = Number(v);
+  return Number.isFinite(n) ? String(n) : "";
+};
+
+/** One comparable string for an entry's TIME facts — durations (entry and
+ *  per fragment, value + unit) and the clock span — from stored metric rows. */
+export function timeFactsKeyOfRows(rows: readonly DuplicateKeyMetric[]): string {
+  const parts: string[] = [];
+  for (const m of rows) {
+    if (m.metric_slug === "quantity" || m.metric_slug === "fragment_time") {
+      parts.push(`${m.metric_slug}|${num(m.value_numeric)}|${m.unit_slug ?? ""}`);
+    } else if (m.metric_slug === "work_start" || m.metric_slug === "work_end") {
+      parts.push(`${m.metric_slug}|${(m.value_text ?? "").trim()}`);
+    } else if (m.metric_slug === "break_minutes") {
+      parts.push(`break_minutes|${num(m.value_numeric)}`);
+    }
+  }
+  return parts.sort().join(";");
+}
+
+/** The same key for the FormData fields an intake write sends
+ *  (`intakeWorkTimeFields`) — what the confirmed draft would have recorded. */
+export function timeFactsKeyOfIntake(fields: Readonly<Record<string, string>>): string {
+  const rows: DuplicateKeyMetric[] = [];
+  if (fields.quantity) {
+    rows.push({ metric_slug: "quantity", value_numeric: Number(fields.quantity), unit_slug: fields.unit_slug ?? "square_meters" });
+  }
+  for (const f of parseFragments(fields.fragments_json ?? null)) {
+    if (f.timeValue !== null && f.timeValue !== undefined && f.timeUnit) {
+      rows.push({ metric_slug: "fragment_time", value_numeric: f.timeValue, unit_slug: f.timeUnit });
+    }
+  }
+  const start = parseClockTime(fields.work_start ?? "");
+  const end = parseClockTime(fields.work_end ?? "");
+  if (start) rows.push({ metric_slug: "work_start", value_text: start });
+  if (end) rows.push({ metric_slug: "work_end", value_text: end });
+  if (fields.break_minutes !== undefined && /^\d{1,4}$/.test(fields.break_minutes)) {
+    rows.push({ metric_slug: "break_minutes", value_numeric: Number(fields.break_minutes) });
+  }
+  return timeFactsKeyOfRows(rows);
+}
+
 /** Clock tolerance between the app server that minted a token and the
  *  database clock that stamped the entry's `created_at`. */
 const CONFIRMED_DRAFT_CLOCK_SKEW_MS = 5_000;
@@ -191,13 +234,17 @@ export async function findConfirmedDraftEntry(
     /** The draft's project choice: a uuid, "none", or absent (DB rule). */
     projectId?: string | null;
     issuedAtMs: number;
+    /** `timeFactsKeyOfIntake` of the fields the confirm would have written:
+     *  an entry with the same words but other durations or clock times (the
+     *  same notes saved elsewhere with reviewed hours) is NOT this draft. */
+    timeFactsKey: string;
   },
 ): Promise<string | null> {
   try {
     const since = new Date(q.issuedAtMs - CONFIRMED_DRAFT_CLOCK_SKEW_MS).toISOString();
     const { data, error } = await supabase
       .from("journal_entries")
-      .select("id, project_id, journal_entry_metrics(metric_slug, value_text)")
+      .select("id, project_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug)")
       .eq("worker_id", q.workerId)
       .eq("engagement_context_id", q.engagementId)
       .eq("original_text", q.originalText)
@@ -210,11 +257,12 @@ export async function findConfirmedDraftEntry(
     for (const row of data as {
       id?: string;
       project_id?: string | null;
-      journal_entry_metrics?: { metric_slug: string; value_text?: string | null }[] | null;
+      journal_entry_metrics?: DuplicateKeyMetric[] | null;
     }[]) {
       if (!row.id) continue;
       const day = (row.journal_entry_metrics ?? []).find((m) => m.metric_slug === "work_date")?.value_text;
       if ((day ?? "").trim() !== q.workDate) continue;
+      if (timeFactsKeyOfRows(row.journal_entry_metrics ?? []) !== q.timeFactsKey) continue;
       if (q.projectId === "none" && row.project_id != null) continue;
       if (q.projectId && q.projectId !== "none" && row.project_id !== q.projectId) continue;
       return row.id;

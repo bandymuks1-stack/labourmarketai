@@ -39,6 +39,7 @@ vi.mock("@/lib/journal/journal-write-core", () => ({
   createJournalEntryCore: (...args: unknown[]) => coreWrite(...(args as [])),
   projectsToChooseFrom: async () => null,
   findConfirmedDraftEntry: (...args: unknown[]) => confirmedDraftLookup(...args),
+  timeFactsKeyOfIntake: () => "time-facts-key",
   runSkillPipeline: async () => ({
     status: "completed",
     added: 0,
@@ -1826,6 +1827,8 @@ describe("journal draft → confirm", () => {
       originalText: DRAFT.notes,
       workDate: DRAFT.workDate,
       projectId: null,
+      // the draft's own durations / clock times must match too
+      timeFactsKey: "time-facts-key",
     });
     expect(typeof q.issuedAtMs).toBe("number");
   });

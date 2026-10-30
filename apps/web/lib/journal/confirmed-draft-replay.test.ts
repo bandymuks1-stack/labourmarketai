@@ -5,7 +5,14 @@ import {
   genuineTokenIssuedAt,
   issueConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
-import { findConfirmedDraftEntry } from "./journal-write-core";
+import {
+  findConfirmedDraftEntry,
+  fragmentMetricRows,
+  parseFragments,
+  timeFactsKeyOfIntake,
+  timeFactsKeyOfRows,
+} from "./journal-write-core";
+import { intakeWorkTimeFields } from "./intake-work-time";
 
 /**
  * P0-A (owner, 2026-10-30) — a confirm retried after its response was lost
@@ -75,13 +82,16 @@ describe("findConfirmedDraftEntry", () => {
     };
     return { client: { from: () => b } as never, calls };
   }
-  const day = (d: string) => [{ metric_slug: "work_date", value_text: d }];
+  // What the confirm writes for "Klijavau plyteles 6 val.": one fragment, 6 h.
+  const sixHours = [{ metric_slug: "fragment_time", value_numeric: 6, unit_slug: "hours", value_text: "1" }];
+  const day = (d: string, time: unknown[] = sixHours) => [{ metric_slug: "work_date", value_text: d }, ...time];
   const q = {
     workerId: "worker-1",
     engagementId: "ctx-1",
     originalText: INPUT.notes,
     workDate: "2026-10-29",
     issuedAtMs: NOW - 10_000,
+    timeFactsKey: timeFactsKeyOfIntake(intakeWorkTimeFields(INPUT.notes, "2026-10-29")),
   };
 
   it("finds the live entry with the draft's words and day, recorded after the token (5 s clock skew)", async () => {
@@ -100,6 +110,14 @@ describe("findConfirmedDraftEntry", () => {
     expect(await findConfirmedDraftEntry(client, q)).toBeNull();
   });
 
+  it("the same words saved elsewhere with OTHER reviewed hours are not this draft (Codex P2)", async () => {
+    const fourHours = [{ metric_slug: "fragment_time", value_numeric: 4, unit_slug: "hours", value_text: "1" }];
+    const { client } = sb({ data: [{ id: "e-1", journal_entry_metrics: day("2026-10-29", fourHours) }], error: null });
+    expect(await findConfirmedDraftEntry(client, q)).toBeNull();
+    const none = sb({ data: [{ id: "e-1", journal_entry_metrics: day("2026-10-29", []) }], error: null });
+    expect(await findConfirmedDraftEntry(none.client, q)).toBeNull();
+  });
+
   it("the project choice must match: a project, 'none', or the database's own rule", async () => {
     const rows = { data: [{ id: "e-1", project_id: "p1", journal_entry_metrics: day("2026-10-29") }], error: null };
     expect(await findConfirmedDraftEntry(sb(rows).client, { ...q, projectId: "p1" })).toBe("e-1");
@@ -114,4 +132,25 @@ describe("findConfirmedDraftEntry", () => {
     expect(await findConfirmedDraftEntry(sb({ data: null, error: { message: "e" } }).client, q)).toBeNull();
     expect(await findConfirmedDraftEntry(sb("throw").client, q)).toBeNull();
   });
+});
+
+describe("time facts key — the intake fields and the rows the write core stores agree", () => {
+  const rowsFor = (fields: Record<string, string>) => [
+    ...fragmentMetricRows(parseFragments(fields.fragments_json ?? null)),
+    ...(fields.quantity ? [{ metric_slug: "quantity", value_numeric: Number(fields.quantity), unit_slug: fields.unit_slug }] : []),
+    ...(fields.work_start ? [{ metric_slug: "work_start", value_text: fields.work_start }] : []),
+    ...(fields.work_end ? [{ metric_slug: "work_end", value_text: fields.work_end }] : []),
+    ...(fields.break_minutes ? [{ metric_slug: "break_minutes", value_numeric: Number(fields.break_minutes), unit_slug: "minutes" }] : []),
+  ];
+  for (const notes of [
+    "Klijavau plyteles 6 val., glaisčiau sienas 2 val.",
+    "Dirbau nuo 22 iki 6, 30 min pertrauka",
+    "Nuvažiavau 320 km",
+    "Montavau lentynas",
+  ]) {
+    it(notes, () => {
+      const fields = intakeWorkTimeFields(notes, "2026-10-29");
+      expect(timeFactsKeyOfRows(rowsFor(fields))).toBe(timeFactsKeyOfIntake(fields));
+    });
+  }
 });

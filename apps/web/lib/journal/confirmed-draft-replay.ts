@@ -3,7 +3,12 @@ import "server-only";
 import { readWorkerCoreRow } from "@/lib/data/worker-core";
 import type { DomainCaller } from "@/lib/domain/caller";
 import type { JournalSkillPipelineResult } from "@/lib/journal/skill-pipeline";
-import { findConfirmedDraftEntry, runSkillPipeline } from "@/lib/journal/journal-write-core";
+import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
+import {
+  findConfirmedDraftEntry,
+  runSkillPipeline,
+  timeFactsKeyOfIntake,
+} from "@/lib/journal/journal-write-core";
 
 /**
  * THE ONE "ALREADY RECORDED" ANSWER for a confirmed journal draft whose
@@ -39,6 +44,9 @@ export async function alreadyRecordedJournalEntry(
     workDate: draft.workDate,
     projectId: draft.projectId ?? null,
     issuedAtMs,
+    // The SAME derivation both confirms write with — so only an entry that
+    // carries exactly this draft's durations and clock times is it.
+    timeFactsKey: timeFactsKeyOfIntake(intakeWorkTimeFields(draft.notes, draft.workDate)),
   });
   if (!entryId) return null;
   const skills = await runSkillPipeline({

@@ -182,14 +182,23 @@ export function reviewTimeSuggestion<
 >(
   notes: string,
   todayIso: string,
-  suggestions: { readonly time: SuggestedTime | null; readonly fragments: readonly F[] },
+  suggestions: {
+    readonly time: SuggestedTime | null;
+    readonly fragments: readonly F[];
+    /** A stated output; present → the entry-level slot may go to it. */
+    readonly quantity?: unknown;
+  },
 ): { time: SuggestedTime | null; fragments: F[] } {
   const work = suggestions.fragments.filter((f) => !BREAK_RX.test(f.rawPhrase));
   const derived = deriveIntakeWorkTime(notes, todayIso);
   if (derived.span && derived.quantityMinutes !== null && derived.quantityMinutes > 0) {
     return {
       time: minutesAsSuggestedTime(derived.quantityMinutes),
-      fragments: work.map((f) => ({ ...f, time: null })),
+      // The span is the day's time, so per-fragment times are dropped — but
+      // only while the entry-level slot can carry it: a stated OUTPUT
+      // ("35 m²") takes that one slot when confirmed, and dropping the
+      // fragment times then would leave the record with no time at all.
+      fragments: suggestions.quantity ? work : work.map((f) => ({ ...f, time: null })),
     };
   }
   return {
