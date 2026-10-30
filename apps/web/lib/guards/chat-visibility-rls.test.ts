@@ -521,6 +521,8 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       // inside the database, by the reviewed registry).
       "app/api/cron/privacy-erasure/route.ts",
       "app/api/internal/capability-readback/v1/route.ts",
+      // 2026-10-29: Agentai OS daily growth export — aggregate counts only, small cells rolled up.
+      "app/api/internal/growth-daily/v1/route.ts",
       "components/admin/product-metrics-section.tsx",
       "components/admin/vacancy-sources-section.tsx",
       "lib/admin/billing-actions.ts",
