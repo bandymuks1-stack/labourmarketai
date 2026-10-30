@@ -10989,6 +10989,32 @@
     "graceNotice": "Ostatnia płatność nie powiodła się — subskrypcja jest w okresie karencji do czasu ponowienia próby.",
     "endsOn": "Anulowano — plan pozostaje aktywny do {date} i nie zostanie odnowiony.",
     "endsAtPeriodEnd": "Anulowano — plan pozostaje aktywny do końca opłaconego okresu i nie zostanie odnowiony.",
+    "invoices": {
+      "title": "Faktury",
+      "billingOff": "Dopóki płatności dla tej organizacji są wyłączone, faktury nie są wyświetlane.",
+      "noCustomer": "Nie ma jeszcze faktur: ta organizacja nie płaciła jeszcze przez dostawcę płatności.",
+      "unknown": "Nie udało się teraz odczytać faktur od dostawcy płatności. To nie znaczy, że ich nie ma — spróbuj ponownie później.",
+      "empty": "Dostawca płatności nie ma jeszcze faktur tej organizacji.",
+      "incomplete": "Ta lista może być niepełna: nie wszystkie faktury udało się odczytać od dostawcy płatności.",
+      "number": "Numer faktury",
+      "noNumber": "Faktura bez numeru",
+      "date": "Data",
+      "period": "Okres",
+      "oneTime": "Płatność jednorazowa",
+      "excludingVat": "Kwota netto (bez VAT)",
+      "vat": "Podatek VAT",
+      "total": "Razem",
+      "notReported": "nie podano",
+      "view": "Zobacz fakturę",
+      "pdf": "Pobierz PDF",
+      "opensStripe": "Stripe otworzy się w nowej karcie",
+      "status": {
+        "paid": "Opłacona",
+        "open": "Oczekuje na płatność",
+        "void": "Unieważniona",
+        "uncollectible": "Nieściągalna"
+      }
+    },
     "manage": {
       "open": "Zarządzaj subskrypcją",
       "opening": "Otwieranie…",

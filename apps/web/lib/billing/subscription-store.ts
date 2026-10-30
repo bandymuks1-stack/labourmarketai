@@ -617,3 +617,54 @@ export async function hasRecentUserRefreshForSubject(input: {
     return false;
   }
 }
+
+// ─── Organization invoice links (registry 7.20) ─────────────────────────────
+
+export type OrganizationBillingLinks =
+  | { status: "ok"; customerIds: string[]; subscriptionIds: string[] }
+  | { status: "needs-migration" }
+  | { status: "error" };
+
+/**
+ * READ-ONLY: the provider customers and subscriptions STORED for one
+ * organization in the adapter's MODE — the keys the account billing section
+ * reads the organization's invoices with. Org-keyed, not payer-keyed: every
+ * billing manager of the organization resolves the SAME customers, whoever
+ * paid. The organization id is the server-resolved billing subject
+ * (resolveBillingSubject); the caller never supplies it. `manual_*` override
+ * rows have no provider customer and are skipped. The ids never leave the
+ * server (they key a provider read; nothing here is rendered).
+ */
+export async function readOrganizationBillingLinks(input: {
+  organizationId: string;
+  testMode: boolean;
+}): Promise<OrganizationBillingLinks> {
+  try {
+    const { data, error } = await admin()
+      .from("billing_subscriptions")
+      .select("provider_customer_id, provider_subscription_id")
+      .eq("provider", "stripe")
+      .eq("organization_id", input.organizationId)
+      .eq("test_mode", input.testMode)
+      .limit(50);
+    if (error) {
+      if (error.code === RELATION_ABSENT || error.code === UNDEFINED_COLUMN) return { status: "needs-migration" };
+      return { status: "error" };
+    }
+    const rows = (data as Array<{ provider_customer_id: unknown; provider_subscription_id: unknown }> | null) ?? [];
+    const customerIds = new Set<string>();
+    const subscriptionIds = new Set<string>();
+    for (const r of rows) {
+      const sub = typeof r.provider_subscription_id === "string" ? r.provider_subscription_id : null;
+      if (sub?.startsWith("manual_")) continue;
+      if (typeof r.provider_customer_id === "string" && r.provider_customer_id.startsWith("cus_")) {
+        customerIds.add(r.provider_customer_id);
+      }
+      if (sub?.startsWith("sub_")) subscriptionIds.add(sub);
+    }
+    return { status: "ok", customerIds: [...customerIds], subscriptionIds: [...subscriptionIds] };
+  } catch {
+    // No service key (local / preview) or a client fault: unknown, never "none".
+    return { status: "error" };
+  }
+}

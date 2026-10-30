@@ -10989,6 +10989,32 @@
     "graceNotice": "The last payment failed — the subscription is in a grace period until it is retried.",
     "endsOn": "Cancelled — the plan stays active until {date} and will not renew.",
     "endsAtPeriodEnd": "Cancelled — the plan stays active until the end of the paid period and will not renew.",
+    "invoices": {
+      "title": "Invoices",
+      "billingOff": "Invoices are not shown while payments are off for this organization.",
+      "noCustomer": "No invoices yet: this organization has not paid through the payment provider.",
+      "unknown": "The invoices could not be read from the payment provider right now. This does not mean there are none — please try again later.",
+      "empty": "The payment provider holds no invoices for this organization yet.",
+      "incomplete": "This list may be incomplete: not every invoice could be read from the payment provider.",
+      "number": "Invoice number",
+      "noNumber": "Invoice without a number",
+      "date": "Date",
+      "period": "Period",
+      "oneTime": "One-time payment",
+      "excludingVat": "Amount excl. VAT",
+      "vat": "VAT",
+      "total": "Total",
+      "notReported": "not reported",
+      "view": "View invoice",
+      "pdf": "Download PDF",
+      "opensStripe": "opens Stripe in a new tab",
+      "status": {
+        "paid": "Paid",
+        "open": "Awaiting payment",
+        "void": "Voided",
+        "uncollectible": "Uncollectible"
+      }
+    },
     "manage": {
       "open": "Manage subscription",
       "opening": "Opening…",

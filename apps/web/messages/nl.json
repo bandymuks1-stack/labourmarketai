@@ -10989,6 +10989,32 @@
     "graceNotice": "De laatste betaling is mislukt — het abonnement zit in een respijtperiode tot een nieuwe poging.",
     "endsOn": "Opgezegd — het abonnement blijft actief tot {date} en wordt niet verlengd.",
     "endsAtPeriodEnd": "Opgezegd — het abonnement blijft actief tot het einde van de betaalde periode en wordt niet verlengd.",
+    "invoices": {
+      "title": "Facturen",
+      "billingOff": "Zolang betalingen voor deze organisatie uit staan, worden er geen facturen getoond.",
+      "noCustomer": "Nog geen facturen: deze organisatie heeft nog niet via de betaalprovider betaald.",
+      "unknown": "De facturen konden nu niet bij de betaalprovider worden gelezen. Dat betekent niet dat er geen zijn — probeer het later opnieuw.",
+      "empty": "De betaalprovider heeft nog geen facturen voor deze organisatie.",
+      "incomplete": "Deze lijst is mogelijk onvolledig: niet elke factuur kon bij de betaalprovider worden gelezen.",
+      "number": "Factuurnummer",
+      "noNumber": "Factuur zonder nummer",
+      "date": "Datum",
+      "period": "Periode",
+      "oneTime": "Eenmalige betaling",
+      "excludingVat": "Bedrag excl. btw",
+      "vat": "Btw",
+      "total": "Totaal",
+      "notReported": "niet opgegeven",
+      "view": "Factuur bekijken",
+      "pdf": "PDF downloaden",
+      "opensStripe": "Stripe opent in een nieuw tabblad",
+      "status": {
+        "paid": "Betaald",
+        "open": "Wacht op betaling",
+        "void": "Geannuleerd",
+        "uncollectible": "Oninbaar"
+      }
+    },
     "manage": {
       "open": "Abonnement beheren",
       "opening": "Openen…",
