@@ -1,0 +1,18 @@
+# Only the transcription API is proxied; everything else is a 404.
+{$TRANSCRIBE_HOSTNAME} {
+	encode off
+	request_body {
+		max_size 26MB
+	}
+	@api path /healthz /v1/transcribe
+	handle @api {
+		reverse_proxy transcribe:8085 {
+			transport http {
+				response_header_timeout 330s
+			}
+		}
+	}
+	handle {
+		respond 404
+	}
+}
