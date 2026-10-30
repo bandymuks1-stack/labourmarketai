@@ -931,6 +931,8 @@ describe("living_cv.skills.get", () => {
       ok: true,
       data: {
         workerId: "worker-1",
+        // no journal scripted here → the practice read is UNKNOWN, never zero
+        practiceStatus: "unavailable",
         skills: [
           {
             skillId: "s-1",
@@ -938,6 +940,7 @@ describe("living_cv.skills.get", () => {
             verified: true,
             source: "work_journal",
             verifiedAt: "2026-08-01T00:00:00Z",
+            practice: null,
           },
         ],
       },

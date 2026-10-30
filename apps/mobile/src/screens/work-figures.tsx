@@ -160,7 +160,17 @@ export function SkillFigureList({
                   : item.figures === null ||
                       (item.figures.attributedHours === 0 && item.figures.entries === 0)
                     ? t("profile.noFigures")
-                    : `${formatHours(item.figures.attributedHours)} ${t("profile.hoursShort")} · ${formatShare(item.figures.share)} · ${item.figures.entries} ${t("profile.entriesLabel")}`}
+                    : // P0-B (same as the web Living CV chip): the skill's own
+                      // hours and the whole time of sessions it shared with
+                      // other skills are stated apart, never summed — a skill
+                      // used only in shared sessions no longer reads "0 h".
+                      item.figures.attributedHours === 0 && item.figures.sharedHours > 0
+                      ? `${formatHours(item.figures.sharedHours)} ${t("profile.hoursShort")} ${t("profile.sessionShared")} · ${item.figures.entries} ${t("profile.entriesLabel")}`
+                      : `${formatHours(item.figures.attributedHours)} ${t("profile.hoursShort")} · ${formatShare(item.figures.share)} · ${item.figures.entries} ${t("profile.entriesLabel")}${
+                          item.figures.sharedHours > 0
+                            ? ` · +${formatHours(item.figures.sharedHours)} ${t("profile.hoursShort")} ${t("profile.sessionShared")}`
+                            : ""
+                        }`}
               </Text>
             </View>
           ))}

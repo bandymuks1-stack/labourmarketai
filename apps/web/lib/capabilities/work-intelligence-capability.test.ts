@@ -160,6 +160,8 @@ describe("journal.work_intelligence.get", () => {
         firstWorkedDay: "2026-09-03",
         lastWorkedDay: "2026-09-10",
         trend: "new",
+        tier: "manager_confirmed",
+        linkProvenance: { recognized: 0, manual: 0, confirmed: 0, unrecorded: 2 },
       },
     ]);
     // trend "up": 10 h in the last 30 days against the unlinked 8 h in the 30 before
@@ -214,5 +216,60 @@ describe("journal.work_intelligence.get", () => {
     const r = await runCapability("journal.work_intelligence.get", caller(WORKER), { period: "decade" });
     expect(r).toMatchObject({ ok: false, code: "invalid" });
     expect(loadMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("living_cv.skills.get — the Living CV chip's figures, same reader (P0-B parity)", () => {
+  // NEGATIVE CONTROL: on the pre-change tree the capability returned only
+  // the worker_skills rows (id, slug, verified, source) — no hours at all, so
+  // an assistant could not say what the web Living CV says about a skill.
+  const SKILL_ROWS = {
+    worker_skills: {
+      data: [
+        { id: "ws-1", skill_id: "s-tiling", verified: false, verified_by: null, source: "work_journal", verified_at: null, confidence_bin: null, skills: { slug: "tiling" } },
+        { id: "ws-2", skill_id: "s-plaster", verified: false, verified_by: null, source: "work_journal", verified_at: null, confidence_bin: null, skills: { slug: "plastering" } },
+        { id: "ws-3", skill_id: "s-paint", verified: false, verified_by: null, source: "self_declared", verified_at: null, confidence_bin: null, skills: { slug: "painting" } },
+      ],
+      error: null,
+    },
+  };
+
+  function sharedModel() {
+    // one 8 h session linked to TWO skills: 8 h of work, 0 h attributable to
+    // either, 8 h of whole-session time for each — never 16.
+    return deriveWorkIntelligence({
+      todayIso: TODAY,
+      focus: "all",
+      skills: [
+        { skillId: "s-tiling", slug: "tiling", verified: false, source: "work_journal" },
+        { skillId: "s-plaster", slug: "plastering", verified: false, source: "work_journal" },
+        { skillId: "s-paint", slug: "painting", verified: false, source: "self_declared" },
+      ],
+      entries: [entry("a", "2026-09-10", 8, ["s-tiling", "s-plaster"], null)],
+    });
+  }
+
+  it("every skill carries the journal's own figures: attributed, whole-session time apart, never summed", async () => {
+    loadMock.mockImplementation(async () => sharedModel());
+    const r = await runCapability("living_cv.skills.get", caller({ ...WORKER, ...SKILL_ROWS }), {});
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const data = r.data as { practiceStatus: string; skills: { slug: string; practice: Record<string, unknown> | null }[] };
+    expect(data.practiceStatus).toBe("known");
+    const bySlug = Object.fromEntries(data.skills.map((s) => [s.slug, s.practice]));
+    expect(bySlug.tiling).toMatchObject({ attributedHours: 0, wholeSessionHours: 8, entries: 1, tier: "work_journal" });
+    expect(bySlug.plastering).toMatchObject({ attributedHours: 0, wholeSessionHours: 8, entries: 1 });
+    // a declared skill with nothing recorded: zero, read from a readable journal
+    expect(bySlug.painting).toMatchObject({ attributedHours: 0, wholeSessionHours: 0, entries: 0 });
+    // the person's total is the model's, once: 8 h, never 16
+    expect(sharedModel().periods.find((p) => p.key === "all")!.hours).toBe(8);
+  });
+
+  it("an unreadable journal is practiceStatus 'unavailable' with practice null — never zero hours (SEP-7)", async () => {
+    loadMock.mockResolvedValue(null);
+    const r = await runCapability("living_cv.skills.get", caller({ ...WORKER, ...SKILL_ROWS }), {});
+    expect(r).toMatchObject({ ok: true, data: { practiceStatus: "unavailable" } });
+    if (!r.ok) return;
+    for (const s of (r.data as { skills: { practice: unknown }[] }).skills) expect(s.practice).toBeNull();
   });
 });

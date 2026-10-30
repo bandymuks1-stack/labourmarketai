@@ -138,7 +138,23 @@ export type LivingCvSkillsData = {
     readonly verified: boolean;
     readonly source: string | null;
     readonly verifiedAt: string | null;
+    /** The journal's own figures for this skill (P0-B parity with the web
+     *  Living CV): own hours, whole-session time shared with other skills
+     *  (never summed), entries, days, evidence tier. `null` = unread. Optional
+     *  so an older server stays readable. */
+    readonly practice?: {
+      readonly attributedHours: number;
+      readonly confirmedHours: number;
+      readonly wholeSessionHours: number;
+      readonly entries: number;
+      readonly days: number;
+      readonly firstWorkedDay: string | null;
+      readonly lastWorkedDay: string | null;
+      readonly tier: string | null;
+    } | null;
   }[];
+  /** `unavailable` = the journal could not be read (unknown, never zero). */
+  readonly practiceStatus?: "known" | "unavailable";
 };
 
 /**
