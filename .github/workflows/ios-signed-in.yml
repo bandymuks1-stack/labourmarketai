@@ -160,6 +160,10 @@ jobs:
           # The Maestro console (step names and statuses — what this log
           # already shows) is also kept on the runner so the claim line can
           # name a degraded Today read; the file is never uploaded.
+          # REQUIRED with the tee below: this step's shell is `bash -e` without
+          # pipefail, and without it a failed `maestro test | tee` passed as green
+          # (run 40951503104 printed PROVEN after the jobs flow had FAILED).
+          set -o pipefail
           CONSOLE="$RUNNER_TEMP/maestro-console.txt"
           ATTEMPT=0
           journey() {
