@@ -175,7 +175,12 @@ async function closeNeed(page: Page, id: string): Promise<"closed" | "already-cl
 async function submitNeed(page: Page): Promise<"done" | "limit"> {
   await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
   await inMain(page).getByTestId("demand-role").fill(NEED_ROLE);
-  await inMain(page).getByTestId("demand-description").fill(`${TAG}: synthetic need for the production talent walk, 1 mūrininkas.`);
+  // The description names work the title does not (tiling, waterproofing): the
+  // intake derives the need's skills from the whole text (#2887), so the
+  // worker board can judge the need by the work, not by the title alone (K-2).
+  await inMain(page).getByTestId("demand-description").fill(
+    `${TAG}: synthetic need for the production talent walk, 1 mūrininkas; plytelių klojimas ir hidroizoliacija vonios kambaryje.`,
+  );
   await inMain(page).getByTestId("demand-next").click();
   const size = inMain(page).getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
@@ -232,6 +237,16 @@ test("K-2 (4.12). the worker raises a hand on that need", async ({ browser }) =>
   const card = page.locator(`li[id="opp-${requestId}"]`);
   await expect(card.locator('[data-testid^="interest-"]').first(), "the need's card offers interest").toBeVisible({ timeout: 60_000 });
   await settle(page);
+  // Skill-based fit in the real UI (#2887): the need is assessed from the
+  // skills the intake derived from its text against the worker's recorded
+  // skills — a real band, never 'not assessed' — and the derived set is said
+  // to be recognized, not confirmed by the company.
+  await expect(card, "the need is judged by the work: a real fit band").toHaveAttribute("data-band", /^(strong|possible)$/, { timeout: 30_000 });
+  const skillFit = card.getByTestId("opportunity-skill-match");
+  await expect(skillFit, "the card carries the skill basis").toBeAttached();
+  await expect(skillFit).toHaveAttribute("data-band", /^(strong|possible)$/);
+  await expect(skillFit, "a derived requirement set is not presented as confirmed").toContainText("dar nepatvirtinti");
+  test.info().annotations.push({ type: "skill-fit-band", description: (await skillFit.getAttribute("data-band")) ?? "none" });
   const withdraw = card.getByTestId("interest-withdraw");
   if (await withdraw.isVisible().catch(() => false)) {
     await withdraw.click();
