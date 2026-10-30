@@ -26,11 +26,17 @@ import {
   ENGAGEMENT_ACTION_SCHEMAS,
   type EngagementActionId,
 } from "@/lib/engagements/engagement-schemas";
-import { WORKER_EXECUTORS, type ExecResult } from "@/lib/conversation/worker-executors";
+import {
+  WORKER_EXECUTORS,
+  logWorkResultData,
+  type ExecResult,
+} from "@/lib/conversation/worker-executors";
+import { alreadyRecordedJournalEntry } from "@/lib/journal/confirmed-draft-replay";
 import { COMPANY_EXECUTORS } from "@/lib/conversation/company-executors";
 import { ENGAGEMENT_EXECUTORS } from "@/lib/engagements/engagement-executors";
 import {
   canonicalInputHash,
+  genuineTokenIssuedAt,
   issueConfirmationToken,
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
@@ -555,14 +561,46 @@ export async function dispatchWorkerAction(
       currentStateFingerprint: currentFp,
       nowMs: Date.now(),
     });
+    // A journal confirm retried after a lost response: the first call wrote,
+    // so answer with that entry rather than "stale" (P0-A 2026-10-30; the
+    // same lookup the journal.confirm capability uses). Writes nothing.
+    const alreadyRecorded = async (): Promise<ExecResult | null> => {
+      if (actionId !== "worker.log-work") return null;
+      const issuedAtMs = genuineTokenIssuedAt(tokenSecret(), token, {
+        actionId,
+        input: parsed.data,
+        userId: user.id,
+        currentStateFingerprint: "",
+        nowMs: Date.now(),
+      });
+      if (issuedAtMs === null) return null;
+      const draft = parsed.data as {
+        engagementContextId: string;
+        notes: string;
+        workDate: string;
+        projectId?: string | null;
+      };
+      const found = await alreadyRecordedJournalEntry(
+        { supabase, userId: user.id, locale: opts?.locale ?? "lt" },
+        draft,
+        issuedAtMs,
+      );
+      return found
+        ? { ok: true, data: logWorkResultData(found.entryId, found.skills, null, true) }
+        : null;
+    };
     if (!verdict.ok) {
+      if (verdict.reason === "stale_state") {
+        const replay = await alreadyRecorded();
+        if (replay) return replay;
+      }
       return { ok: false, code: verdict.reason === "stale_state" ? "stale_confirmation" : "confirmation_invalid" };
     }
     // SINGLE USE, atomically (decision 0024): a genuine token is spent before
     // the executor runs, so a retried or concurrent second submission of the
     // same token is refused as stale and never reaches the write.
     const spend = await spendConfirmation(supabase, token, actionId);
-    if (spend === "already_spent") return { ok: false, code: "stale_confirmation" };
+    if (spend === "already_spent") return (await alreadyRecorded()) ?? { ok: false, code: "stale_confirmation" };
     if (spend === "error") return { ok: false, code: "error" };
   }
 

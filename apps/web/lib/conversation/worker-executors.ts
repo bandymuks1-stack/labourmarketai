@@ -15,6 +15,7 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { expressInterestAction } from "@/lib/opportunities/interest-actions";
 import { createJournalEntry } from "@/lib/journal/actions";
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
+import type { JournalSkillPipelineResult } from "@/lib/journal/skill-pipeline";
 import { z } from "zod";
 
 import {
@@ -265,13 +266,26 @@ export const WORKER_EXECUTORS: {
       }),
     );
     if (!r.ok) return { ok: false, code: r.code, message: r.message };
-    // PR-C "what changed" visibility: pass the REAL awaited pipeline outcome
-    // through to the chat surface (a read-through of the canonical result —
-    // nothing computed or invented here; §7 the UI may only show these facts).
-    return {
-      ok: true,
-      data: {
+    return { ok: true, data: logWorkResultData(r.entryId, r.skills, r.dayCheck ?? null) };
+  },
+});
+
+/** The chat's `worker.log-work` result for a recorded entry — the executor's
+ *  own answer, and the dispatcher's "already recorded" answer to a retried
+ *  confirm (P0-A 2026-10-30), so the chat renders both the same way. */
+export function logWorkResultData(
+  entryId: string,
+  skills: JournalSkillPipelineResult,
+  dayCheck: unknown,
+  alreadyRecorded = false,
+): Record<string, unknown> {
+  const r = { entryId, skills, dayCheck };
+  // PR-C "what changed" visibility: pass the REAL awaited pipeline outcome
+  // through to the chat surface (a read-through of the canonical result —
+  // nothing computed or invented here; §7 the UI may only show these facts).
+  return {
         entryId: r.entryId,
+        ...(alreadyRecorded ? { alreadyRecorded: true } : {}),
         skills: {
           status: r.skills.status,
           addedSkills: r.skills.addedSkills.map((s) => s.slug),
@@ -293,7 +307,5 @@ export const WORKER_EXECUTORS: {
         // takes part in (read-through of the canonical result; null = none
         // or not readable — never invented).
         dayCheck: r.dayCheck ?? null,
-      },
-    };
-  },
-});
+  };
+}

@@ -6,10 +6,9 @@ import { getTranslations } from "next-intl/server";
 
 import {
   createJournalEntryCore,
-  findConfirmedDraftEntry,
   projectsToChooseFrom,
-  runSkillPipeline,
 } from "@/lib/journal/journal-write-core";
+import { alreadyRecordedJournalEntry } from "@/lib/journal/confirmed-draft-replay";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
@@ -786,24 +785,9 @@ async function alreadyRecordedEntry(
     userId: caller.userId,
   });
   if (issuedAtMs === null) return null;
-  const workerRead = await readWorkerCoreRow(caller);
-  if (!workerRead.ok || !workerRead.value) return null;
-  const entryId = await findConfirmedDraftEntry(caller.supabase, {
-    workerId: workerRead.value.id,
-    engagementId: draft.engagementContextId,
-    originalText: draft.notes,
-    workDate: draft.workDate,
-    projectId: draft.projectId ?? null,
-    issuedAtMs,
-  });
-  if (!entryId) return null;
-  const skills = await runSkillPipeline({
-    entryId,
-    text: draft.notes,
-    locale: caller.locale,
-    excludeSlugs: [],
-    caller: { supabase: caller.supabase, userId: caller.userId },
-  });
+  const found = await alreadyRecordedJournalEntry(caller, draft, issuedAtMs);
+  if (!found) return null;
+  const { entryId, skills } = found;
   return {
     ok: true,
     data: {
