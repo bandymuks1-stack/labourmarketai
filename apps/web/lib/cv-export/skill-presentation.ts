@@ -335,3 +335,52 @@ export function topPresentedSkills(
   }
   return out;
 }
+
+/**
+ * THE TWO KINDS OF SKILL TIME, AS A CHIP STATES THEM (owner P0-B 2026-10-30).
+ *
+ * `attributedHours` is time the skill itself can claim (the only linked skill
+ * on the entry, or the fragment its link sits on). `sharedHours` is the WHOLE
+ * duration of sessions the skill took part in together with other skills —
+ * the skill's own part of those sessions is unknown, so it is shown as
+ * whole-session time, labelled as such, never split between skills, never
+ * added into a total, and never dressed up as the skill's own hours.
+ *
+ * Before this reading the Living CV showed attributed hours only, so a skill
+ * whose every session also used other skills showed no time at all — even
+ * though the person's records hold the sessions (the common case: one day of
+ * work, two or three skills recognised).
+ *
+ * `null` facts = the journal could not be read → `unknown` (SEP-7, never 0).
+ */
+export type SkillTimeReading =
+  | { readonly kind: "unknown" }
+  | { readonly kind: "none" }
+  | {
+      readonly kind: "attributed";
+      readonly attributedHours: number;
+      readonly confirmedHours: number;
+      /** Whole-session time on top, from sessions shared with other skills
+       *  (0 when none) — stated separately, never added. */
+      readonly sessionHours: number;
+    }
+  | { readonly kind: "session_only"; readonly sessionHours: number };
+
+export function skillTimeReading(
+  facts: SkillPracticeFacts | null | undefined,
+  journalReadable: boolean,
+): SkillTimeReading {
+  if (!journalReadable) return { kind: "unknown" };
+  if (!facts) return { kind: "none" };
+  const session = facts.sharedHours > 0 ? facts.sharedHours : 0;
+  if (facts.attributedHours > 0) {
+    return {
+      kind: "attributed",
+      attributedHours: facts.attributedHours,
+      confirmedHours: facts.confirmedHours,
+      sessionHours: session,
+    };
+  }
+  if (session > 0) return { kind: "session_only", sessionHours: session };
+  return { kind: "none" };
+}

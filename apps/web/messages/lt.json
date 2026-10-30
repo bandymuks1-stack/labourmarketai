@@ -8544,6 +8544,9 @@
     "skillHoursOwn": "{hours} val., tavo įrašas",
     "skillHoursConfirmed": "{hours} val., iš jų vadovo patvirtinta {confirmed} val.",
     "skillHoursHint": "valandos iš darbo žurnalo įrašų, susietų tik su šiuo įgūdžiu",
+    "skillSessionHours": "{hours} val. visų sesijų, kuriose naudoti ir kiti įgūdžiai — šio įgūdžio dalis nežinoma",
+    "skillSessionHoursAlso": "ir {hours} val. visų sesijų, kuriose naudoti ir kiti įgūdžiai",
+    "skillSessionHoursHint": "Visas žurnalo sesijų laikas, kai šis įgūdis naudotas kartu su kitais. Jis nedalijamas tarp įgūdžių ir niekada nepridedamas prie tavo bendros sumos.",
     "selfStatedTitle": "Nurodyta paties, įrašų dar nėra",
     "variantsFolded": "{count} rašybos",
     "skillShare": "{share} % užfiksuoto darbo",
@@ -8573,7 +8576,8 @@
         "both": "{confirmed} val. su vadovo įrašu · {recorded} val. užfiksuota",
         "recorded": "{hours} val. užfiksuota",
         "shown": "Rodo tavo įrašai",
-        "declared": "Nurodei tu; kol kas neparodyta"
+        "declared": "Nurodei tu; kol kas neparodyta",
+        "session": "Naudotas {hours} val. sesijose kartu su kitais įgūdžiais"
       },
       "source": {
         "own": "Tavo įrašas",

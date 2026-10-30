@@ -8544,6 +8544,9 @@
     "skillHoursOwn": "{hours} u, je eigen registratie",
     "skillHoursConfirmed": "{hours} u, waarvan {confirmed} u bevestigd door een manager",
     "skillHoursHint": "uren uit werkjournaalregistraties die alleen aan deze vaardigheid gekoppeld zijn",
+    "skillSessionHours": "{hours} u aan hele sessies gedeeld met andere vaardigheden — het eigen deel van deze vaardigheid is niet bekend",
+    "skillSessionHoursAlso": "plus {hours} u aan hele sessies gedeeld met andere vaardigheden",
+    "skillSessionHoursHint": "De volledige tijd van journaalsessies waarin deze vaardigheid samen met andere werd gebruikt. Die wordt niet verdeeld over vaardigheden en nooit bij je totaal opgeteld.",
     "selfStatedTitle": "Zelf opgegeven, nog geen registraties",
     "variantsFolded": "{count} spellingen",
     "skillShare": "{share}% van het geregistreerde werk",
@@ -8573,7 +8576,8 @@
         "both": "{confirmed} u met registratie van een leidinggevende · {recorded} u vastgelegd",
         "recorded": "{hours} u vastgelegd",
         "shown": "Blijkt uit je registraties",
-        "declared": "Door jou opgegeven; nog niet aangetoond"
+        "declared": "Door jou opgegeven; nog niet aangetoond",
+        "session": "Gebruikt in {hours} u aan sessies gedeeld met andere vaardigheden"
       },
       "source": {
         "own": "Jouw registratie",

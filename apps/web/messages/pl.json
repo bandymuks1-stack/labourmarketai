@@ -8544,6 +8544,9 @@
     "skillHoursOwn": "{hours} h, Twój własny zapis",
     "skillHoursConfirmed": "{hours} h, w tym {confirmed} h potwierdzonych przez kierownika",
     "skillHoursHint": "godziny z wpisów w dzienniku pracy powiązanych wyłącznie z tą umiejętnością",
+    "skillSessionHours": "{hours} h całych sesji wspólnych z innymi umiejętnościami — udział tej umiejętności nie jest znany",
+    "skillSessionHoursAlso": "oraz {hours} h całych sesji wspólnych z innymi umiejętnościami",
+    "skillSessionHoursHint": "Cały czas wpisów w dzienniku, w których ta umiejętność była używana razem z innymi. Nie jest dzielony między umiejętności i nigdy nie jest doliczany do Twojej sumy.",
     "selfStatedTitle": "Zadeklarowane samodzielnie, brak jeszcze zapisów",
     "variantsFolded": "{count} wariantów zapisu",
     "skillShare": "{share}% zarejestrowanej pracy",
@@ -8573,7 +8576,8 @@
         "both": "{confirmed} godz. z wpisem kierownika · {recorded} godz. zapisane",
         "recorded": "{hours} godz. zapisane",
         "shown": "Widać w Twoich zapisach",
-        "declared": "Podane przez Ciebie; jeszcze nie pokazane"
+        "declared": "Podane przez Ciebie; jeszcze nie pokazane",
+        "session": "Użyta w {hours} h sesji wspólnych z innymi umiejętnościami"
       },
       "source": {
         "own": "Twój zapis",

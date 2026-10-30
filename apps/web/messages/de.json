@@ -8544,6 +8544,9 @@
     "skillHoursOwn": "{hours} Std., Ihr eigener Eintrag",
     "skillHoursConfirmed": "{hours} Std., davon {confirmed} Std. vom Vorgesetzten bestätigt",
     "skillHoursHint": "Stunden aus Arbeitsjournal-Einträgen, die nur mit dieser Fähigkeit verknüpft sind",
+    "skillSessionHours": "{hours} Std. ganzer Einsätze, geteilt mit anderen Fähigkeiten — der eigene Anteil dieser Fähigkeit ist nicht bekannt",
+    "skillSessionHoursAlso": "dazu {hours} Std. ganzer Einsätze, geteilt mit anderen Fähigkeiten",
+    "skillSessionHoursHint": "Gesamte Zeit der Journaleinträge, in denen diese Fähigkeit zusammen mit anderen eingesetzt wurde. Sie wird nicht auf Fähigkeiten aufgeteilt und nie zu Ihrer Gesamtsumme addiert.",
     "selfStatedTitle": "Selbst angegeben, noch keine Einträge",
     "variantsFolded": "{count} Schreibweisen",
     "skillShare": "{share} % der erfassten Arbeit",
@@ -8573,7 +8576,8 @@
         "both": "{confirmed} Std. mit Eintrag der Leitung · {recorded} Std. erfasst",
         "recorded": "{hours} Std. erfasst",
         "shown": "Durch Ihre Einträge belegt",
-        "declared": "Von Ihnen angegeben; noch nicht belegt"
+        "declared": "Von Ihnen angegeben; noch nicht belegt",
+        "session": "Eingesetzt in {hours} Std., geteilt mit anderen Fähigkeiten"
       },
       "source": {
         "own": "Ihr Eintrag",

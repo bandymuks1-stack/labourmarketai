@@ -8544,6 +8544,9 @@
     "skillHoursOwn": "{hours} h, your own record",
     "skillHoursConfirmed": "{hours} h, {confirmed} h of it confirmed by a manager",
     "skillHoursHint": "hours from work-journal entries linked to this skill alone",
+    "skillSessionHours": "{hours} h of whole sessions shared with other skills — this skill's own part is not known",
+    "skillSessionHoursAlso": "plus {hours} h of whole sessions shared with other skills",
+    "skillSessionHoursHint": "Whole time of journal sessions this skill was used in together with other skills. It is not split between skills and never added to your total.",
     "selfStatedTitle": "Self-stated, no records yet",
     "variantsFolded": "{count} spellings",
     "skillShare": "{share}% of recorded work",
@@ -8573,7 +8576,8 @@
         "both": "{confirmed} h with a manager's record · {recorded} h recorded",
         "recorded": "{hours} h recorded",
         "shown": "Shown by your records",
-        "declared": "You say so; nothing shows it yet"
+        "declared": "You say so; nothing shows it yet",
+        "session": "Used in {hours} h of sessions shared with other skills"
       },
       "source": {
         "own": "Your record",

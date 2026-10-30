@@ -18,7 +18,7 @@ import { HomeTrace } from "@/components/app/home/home-trace";
 import { toActiveLocale } from "@/lib/i18n/config";
 import type { CvSkillTier } from "@/lib/cv-export/skill-tiers";
 import { derivePotentialSkills } from "@/lib/skills/potential-skills";
-import { presentSkills, type SkillMagnitude } from "@/lib/cv-export/skill-presentation";
+import { presentSkills, skillTimeReading, type SkillMagnitude } from "@/lib/cv-export/skill-presentation";
 import {
   cvSectionVisibility,
   orderSkillsForNeed,
@@ -646,9 +646,11 @@ export default async function VerifiedCvPage({
           ? tPremium("evidence.both", { confirmed: fmtNum.format(roundHours(confirmedHours)), recorded: fmtNum.format(roundHours(hours)) })
           : hours !== null
             ? tPremium("evidence.recorded", { hours: fmtNum.format(roundHours(hours)) })
-            : tier === "declared"
-              ? tPremium("evidence.declared")
-              : tPremium("evidence.shown");
+            : practice && practice.sharedHours > 0
+              ? tPremium("evidence.session", { hours: fmtNum.format(roundHours(practice.sharedHours)) })
+              : tier === "declared"
+                ? tPremium("evidence.declared")
+                : tPremium("evidence.shown");
       return { key: `${tier}:${slug}`, label: skillLabel(slug), level: tierLevel[tier], hours, confirmedHours, evidenceText };
     }),
   );
@@ -1555,6 +1557,12 @@ export default async function VerifiedCvPage({
                     const facts = item.practice;
                     const hours = facts?.attributedHours ?? 0;
                     const confirmed = facts?.confirmedHours ?? 0;
+                    // P0-B: the skill's own hours and the WHOLE time of
+                    // sessions it shared with other skills are two readings,
+                    // stated apart and never summed (skillTimeReading).
+                    const time = skillTimeReading(facts, cv.skillPractice !== null);
+                    const sessionHours =
+                      time.kind === "attributed" || time.kind === "session_only" ? time.sessionHours : 0;
                     return (
                       <span
                         key={item.key}
@@ -1611,6 +1619,28 @@ export default async function VerifiedCvPage({
                             {facts && facts.share > 0
                               ? ` · ${t("skillShare", { share: Math.round(facts.share * 100) })}`
                               : ""}
+                            {facts && facts.entries > 0
+                              ? ` · ${t("skillEntries", { count: facts.entries })}`
+                              : ""}
+                            {sessionHours > 0 ? (
+                              <span
+                                className="block"
+                                title={t("skillSessionHoursHint")}
+                                data-testid={`cv-skill-session-hours-${slug}`}
+                                data-session-hours={sessionHours}
+                              >
+                                {t("skillSessionHoursAlso", { hours: fmtHours(sessionHours) })}
+                              </span>
+                            ) : null}
+                          </span>
+                        ) : sessionHours > 0 && slug !== null ? (
+                          <span
+                            className="tabular-nums text-meta text-text-muted"
+                            title={t("skillSessionHoursHint")}
+                            data-testid={`cv-skill-session-hours-${slug}`}
+                            data-session-hours={sessionHours}
+                          >
+                            {t("skillSessionHours", { hours: fmtHours(sessionHours) })}
                             {facts && facts.entries > 0
                               ? ` · ${t("skillEntries", { count: facts.entries })}`
                               : ""}
