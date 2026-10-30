@@ -9,9 +9,12 @@
  * never presents the all-period total as the holding organization's own
  * history. It reads the periods apart instead:
  *
- *   own        a period stated under THIS organization's legal entity (its
- *              label is the organization's name, or the statement says it is
- *              the same entity / the same entity renamed);
+ *   own        a period stated under THIS organization's legal entity: the
+ *              statement names this organization as its legal entity
+ *              (`legal_entity_organization_id`), its label is the
+ *              organization's LEGAL name (or its display name — a
+ *              presentation name is never the only key), or the statement
+ *              says it is the same entity / the same entity renamed;
  *   earlier    a period stated under another legal entity;
  *   unstated   a period with no legal entity named — whose it is is not
  *              stated, so it is never counted as the organization's own;
@@ -54,23 +57,34 @@ export function entityNameKey(s: string | null | undefined): string {
     .replace(/[^\p{L}\p{N}]+/gu, "");
 }
 
+/** Who the holding organization legally is (read beside the history). */
+export type BusinessHistoryIdentity = {
+  /** Canonical legal name; null when none is stored or it could not be read. */
+  readonly legalName: string | null;
+  /** Presentation name — a fallback key, never the only one. */
+  readonly displayName: string | null;
+  /** Statements whose legal entity IS this organization (by id). */
+  readonly ownStatementIds: readonly string[];
+};
+
 export function periodOwnership(
-  p: Pick<HistoryPeriodStatement, "legalEntityLabel" | "legalEntityRelation">,
-  organizationName: string,
+  p: Pick<HistoryPeriodStatement, "id" | "legalEntityLabel" | "legalEntityRelation">,
+  identity: BusinessHistoryIdentity,
 ): HeaderPeriodOwnership {
+  if (identity.ownStatementIds.includes(p.id)) return "own";
   if (p.legalEntityRelation === "same_entity" || p.legalEntityRelation === "renamed") return "own";
   const label = entityNameKey(p.legalEntityLabel);
   if (!label) return "unstated";
-  const name = entityNameKey(organizationName);
-  return name && label === name ? "own" : "earlier";
+  const names = [identity.legalName, identity.displayName].map(entityNameKey).filter((k) => k.length > 0);
+  return names.includes(label) ? "own" : "earlier";
 }
 
-export function businessHistoryHeader(business: BusinessHistory, organizationName: string): BusinessHistoryHeader {
+export function businessHistoryHeader(business: BusinessHistory, identity: BusinessHistoryIdentity): BusinessHistoryHeader {
   const rows: HeaderPeriodRow[] = business.periods.map(({ statement, totals }) => ({
     statementId: statement.id,
     label: statement.periodLabel,
     legalEntityLabel: statement.legalEntityLabel,
-    ownership: periodOwnership(statement, organizationName),
+    ownership: periodOwnership(statement, identity),
     legalEntityRelation: statement.legalEntityRelation,
     continuity: statement.continuity,
     totals,

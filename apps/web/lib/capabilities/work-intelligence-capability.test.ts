@@ -236,7 +236,7 @@ describe("living_cv.skills.get — the Living CV chip's figures, same reader (P0
 
   function sharedModel() {
     // one 8 h session linked to TWO skills: 8 h of work, 0 h attributable to
-    // either, 8 h of whole-session time for each — never 16.
+    // either, 8 h of unattributed involvement for each — never 16.
     return deriveWorkIntelligence({
       todayIso: TODAY,
       focus: "all",
@@ -249,7 +249,7 @@ describe("living_cv.skills.get — the Living CV chip's figures, same reader (P0
     });
   }
 
-  it("every skill carries the journal's own figures: attributed, whole-session time apart, never summed", async () => {
+  it("every skill carries the journal's own figures: attributed, unattributed involvement apart, never summed", async () => {
     loadMock.mockImplementation(async () => sharedModel());
     const r = await runCapability("living_cv.skills.get", caller({ ...WORKER, ...SKILL_ROWS }), {});
     expect(r.ok).toBe(true);
@@ -257,10 +257,10 @@ describe("living_cv.skills.get — the Living CV chip's figures, same reader (P0
     const data = r.data as { practiceStatus: string; skills: { slug: string; practice: Record<string, unknown> | null }[] };
     expect(data.practiceStatus).toBe("known");
     const bySlug = Object.fromEntries(data.skills.map((s) => [s.slug, s.practice]));
-    expect(bySlug.tiling).toMatchObject({ attributedHours: 0, wholeSessionHours: 8, entries: 1, tier: "work_journal" });
-    expect(bySlug.plastering).toMatchObject({ attributedHours: 0, wholeSessionHours: 8, entries: 1 });
+    expect(bySlug.tiling).toMatchObject({ attributedHours: 0, involvedUnattributedHours: 8, entries: 1, tier: "work_journal" });
+    expect(bySlug.plastering).toMatchObject({ attributedHours: 0, involvedUnattributedHours: 8, entries: 1 });
     // a declared skill with nothing recorded: zero, read from a readable journal
-    expect(bySlug.painting).toMatchObject({ attributedHours: 0, wholeSessionHours: 0, entries: 0 });
+    expect(bySlug.painting).toMatchObject({ attributedHours: 0, involvedUnattributedHours: 0, entries: 0 });
     // the person's total is the model's, once: 8 h, never 16
     expect(sharedModel().periods.find((p) => p.key === "all")!.hours).toBe(8);
   });

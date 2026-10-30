@@ -340,15 +340,17 @@ export function topPresentedSkills(
  * THE TWO KINDS OF SKILL TIME, AS A CHIP STATES THEM (owner P0-B 2026-10-30).
  *
  * `attributedHours` is time the skill itself can claim (the only linked skill
- * on the entry, or the fragment its link sits on). `sharedHours` is the WHOLE
- * duration of sessions the skill took part in together with other skills —
- * the skill's own part of those sessions is unknown, so it is shown as
- * whole-session time, labelled as such, never split between skills, never
- * added into a total, and never dressed up as the skill's own hours.
+ * on the entry, or the fragment its link sits on). `sharedHours` is the
+ * model's UNATTRIBUTED REMAINDER of entries the skill took part in — time the
+ * evidence cannot give to this skill alone: the entry also used other skills,
+ * or its own timed parts split the time between kinds of work without saying
+ * where (work-intelligence.ts, basis `shared` / `multi_activity`). It is
+ * INVOLVEMENT, not whole-session time and not the skill's own hours: stated
+ * as "involved, not attributed to this skill", never split, never added.
  *
  * Before this reading the Living CV showed attributed hours only, so a skill
- * whose every session also used other skills showed no time at all — even
- * though the person's records hold the sessions (the common case: one day of
+ * whose every entry also used other skills showed no time at all — even
+ * though the person's records hold the work (the common case: one day of
  * work, two or three skills recognised).
  *
  * `null` facts = the journal could not be read → `unknown` (SEP-7, never 0).
@@ -360,11 +362,11 @@ export type SkillTimeReading =
       readonly kind: "attributed";
       readonly attributedHours: number;
       readonly confirmedHours: number;
-      /** Whole-session time on top, from sessions shared with other skills
-       *  (0 when none) — stated separately, never added. */
-      readonly sessionHours: number;
+      /** Involved-but-unattributed time on top (0 when none) — stated
+       *  separately, never added. */
+      readonly involvedHours: number;
     }
-  | { readonly kind: "session_only"; readonly sessionHours: number };
+  | { readonly kind: "involvement_only"; readonly involvedHours: number };
 
 export function skillTimeReading(
   facts: SkillPracticeFacts | null | undefined,
@@ -372,15 +374,15 @@ export function skillTimeReading(
 ): SkillTimeReading {
   if (!journalReadable) return { kind: "unknown" };
   if (!facts) return { kind: "none" };
-  const session = facts.sharedHours > 0 ? facts.sharedHours : 0;
+  const involved = facts.sharedHours > 0 ? facts.sharedHours : 0;
   if (facts.attributedHours > 0) {
     return {
       kind: "attributed",
       attributedHours: facts.attributedHours,
       confirmedHours: facts.confirmedHours,
-      sessionHours: session,
+      involvedHours: involved,
     };
   }
-  if (session > 0) return { kind: "session_only", sessionHours: session };
+  if (involved > 0) return { kind: "involvement_only", involvedHours: involved };
   return { kind: "none" };
 }

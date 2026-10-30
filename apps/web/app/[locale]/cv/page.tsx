@@ -647,7 +647,7 @@ export default async function VerifiedCvPage({
           : hours !== null
             ? tPremium("evidence.recorded", { hours: fmtNum.format(roundHours(hours)) })
             : practice && practice.sharedHours > 0
-              ? tPremium("evidence.session", { hours: fmtNum.format(roundHours(practice.sharedHours)) })
+              ? tPremium("evidence.involved", { hours: fmtNum.format(roundHours(practice.sharedHours)) })
               : tier === "declared"
                 ? tPremium("evidence.declared")
                 : tPremium("evidence.shown");
@@ -1580,12 +1580,12 @@ export default async function VerifiedCvPage({
                     const facts = item.practice;
                     const hours = facts?.attributedHours ?? 0;
                     const confirmed = facts?.confirmedHours ?? 0;
-                    // P0-B: the skill's own hours and the WHOLE time of
-                    // sessions it shared with other skills are two readings,
-                    // stated apart and never summed (skillTimeReading).
+                    // P0-B: the skill's own hours and the time it was involved
+                    // in but the records cannot attribute to it are two
+                    // readings, stated apart, never summed (skillTimeReading).
                     const time = skillTimeReading(facts, cv.skillPractice !== null);
-                    const sessionHours =
-                      time.kind === "attributed" || time.kind === "session_only" ? time.sessionHours : 0;
+                    const involvedHours =
+                      time.kind === "attributed" || time.kind === "involvement_only" ? time.involvedHours : 0;
                     return (
                       <span
                         key={item.key}
@@ -1645,25 +1645,25 @@ export default async function VerifiedCvPage({
                             {facts && facts.entries > 0
                               ? ` · ${t("skillEntries", { count: facts.entries })}`
                               : ""}
-                            {sessionHours > 0 ? (
+                            {involvedHours > 0 ? (
                               <span
                                 className="block"
-                                title={t("skillSessionHoursHint")}
-                                data-testid={`cv-skill-session-hours-${slug}`}
-                                data-session-hours={sessionHours}
+                                title={t("skillInvolvedHoursHint")}
+                                data-testid={`cv-skill-involved-hours-${slug}`}
+                                data-involved-hours={involvedHours}
                               >
-                                {t("skillSessionHoursAlso", { hours: fmtHours(sessionHours) })}
+                                {t("skillInvolvedHoursAlso", { hours: fmtHours(involvedHours) })}
                               </span>
                             ) : null}
                           </span>
-                        ) : sessionHours > 0 && slug !== null ? (
+                        ) : involvedHours > 0 && slug !== null ? (
                           <span
                             className="tabular-nums text-meta text-text-muted"
-                            title={t("skillSessionHoursHint")}
-                            data-testid={`cv-skill-session-hours-${slug}`}
-                            data-session-hours={sessionHours}
+                            title={t("skillInvolvedHoursHint")}
+                            data-testid={`cv-skill-involved-hours-${slug}`}
+                            data-involved-hours={involvedHours}
                           >
-                            {t("skillSessionHours", { hours: fmtHours(sessionHours) })}
+                            {t("skillInvolvedHours", { hours: fmtHours(involvedHours) })}
                             {facts && facts.entries > 0
                               ? ` · ${t("skillEntries", { count: facts.entries })}`
                               : ""}

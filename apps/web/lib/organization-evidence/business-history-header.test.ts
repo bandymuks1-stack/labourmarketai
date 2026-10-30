@@ -10,7 +10,8 @@ import { businessHistoryHeader, entityNameKey, periodOwnership } from "./busines
  * read as the new owner's own. These tests pin the split.
  */
 
-const HOLDER = "Example Labs Sp. z o.o.";
+const HOLDER_NAME = "Example Labs Sp. z o.o.";
+const HOLDER = { legalName: HOLDER_NAME, displayName: HOLDER_NAME, ownStatementIds: [] as string[] };
 
 function period(over: Partial<HistoryPeriodStatement> & Pick<HistoryPeriodStatement, "id">): HistoryPeriodStatement {
   return {
@@ -88,22 +89,39 @@ describe("business history header — the earlier entity's work is never the hol
   });
 });
 
+describe("period ownership — the legal identity, not the presentation name (Codex P2 #2894)", () => {
+  const branded = { legalName: "Example Labs Sp. z o.o.", displayName: "ExLabs", ownStatementIds: [] as string[] };
+  it("a display name that differs from the legal name still sees its legally named period as its own", () => {
+    expect(periodOwnership({ id: "p", legalEntityLabel: "Example Labs Sp. z o.o.", legalEntityRelation: "not_asserted" }, branded)).toBe("own");
+    const b = buildBusinessHistory([rec("x", "2026-03-01", 4, "c")], [OWN]);
+    expect(businessHistoryHeader(b, { ...branded, legalName: "example labs sp z o o" }).split).toBe(false);
+  });
+  it("a statement that names this organization as its legal entity is own whatever its label", () => {
+    expect(
+      periodOwnership({ id: "p-own", legalEntityLabel: "Old spelling Ltd", legalEntityRelation: "not_asserted" }, { ...branded, ownStatementIds: ["p-own"] }),
+    ).toBe("own");
+  });
+  it("another entity stays earlier even with a branded display name", () => {
+    expect(periodOwnership({ id: "p", legalEntityLabel: "Earlier Works", legalEntityRelation: "not_asserted" }, branded)).toBe("earlier");
+  });
+});
+
 describe("period ownership", () => {
   it("own by name (case, accents, punctuation ignored) or by a stated same-entity relation", () => {
-    expect(periodOwnership({ legalEntityLabel: "EXAMPLE LABS sp. z o.o", legalEntityRelation: "not_asserted" }, HOLDER)).toBe("own");
-    expect(periodOwnership({ legalEntityLabel: "Old Name", legalEntityRelation: "renamed" }, HOLDER)).toBe("own");
-    expect(periodOwnership({ legalEntityLabel: "Old Name", legalEntityRelation: "same_entity" }, HOLDER)).toBe("own");
+    expect(periodOwnership({ id: "p", legalEntityLabel: "EXAMPLE LABS sp. z o.o", legalEntityRelation: "not_asserted" }, HOLDER)).toBe("own");
+    expect(periodOwnership({ id: "p", legalEntityLabel: "Old Name", legalEntityRelation: "renamed" }, HOLDER)).toBe("own");
+    expect(periodOwnership({ id: "p", legalEntityLabel: "Old Name", legalEntityRelation: "same_entity" }, HOLDER)).toBe("own");
   });
 
   it("another entity — including a stated successor or a sale — is 'earlier', never own", () => {
     for (const rel of ["not_asserted", "successor", "sold_and_continued_by_new_entity", "other"] as const) {
-      expect(periodOwnership({ legalEntityLabel: "Earlier Works", legalEntityRelation: rel }, HOLDER)).toBe("earlier");
+      expect(periodOwnership({ id: "p", legalEntityLabel: "Earlier Works", legalEntityRelation: rel }, HOLDER)).toBe("earlier");
     }
   });
 
   it("no legal entity named = unstated, never own", () => {
-    expect(periodOwnership({ legalEntityLabel: null, legalEntityRelation: "not_asserted" }, HOLDER)).toBe("unstated");
-    expect(periodOwnership({ legalEntityLabel: "  ", legalEntityRelation: "not_asserted" }, HOLDER)).toBe("unstated");
+    expect(periodOwnership({ id: "p", legalEntityLabel: null, legalEntityRelation: "not_asserted" }, HOLDER)).toBe("unstated");
+    expect(periodOwnership({ id: "p", legalEntityLabel: "  ", legalEntityRelation: "not_asserted" }, HOLDER)).toBe("unstated");
   });
 
   it("name key folds Lithuanian and Polish letters", () => {

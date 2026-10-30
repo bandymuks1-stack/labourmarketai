@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { formatUtcDate } from "@/lib/time/display";
 import type { BusinessHistory, HistoryBucketTotals } from "@/lib/organization-evidence/business-history";
-import { businessHistoryHeader } from "@/lib/organization-evidence/business-history-header";
+import { businessHistoryHeader, type BusinessHistoryIdentity } from "@/lib/organization-evidence/business-history-header";
 
 /**
  * THE BUSINESS HISTORY, AT A GLANCE — one continuous history read in periods
@@ -25,11 +25,14 @@ export async function BusinessHistoryOverview({
   business,
   organizationId,
   organizationName,
+  identity,
   locale,
 }: {
   readonly business: BusinessHistory | null;
   readonly organizationId: string;
   readonly organizationName: string;
+  /** Legal identity for the own-vs-earlier split; absent = the display name only. */
+  readonly identity?: BusinessHistoryIdentity;
   readonly locale: string;
 }) {
   const t = await getTranslations("companyWorkHistory.business");
@@ -48,7 +51,10 @@ export async function BusinessHistoryOverview({
   // people's history — the header never presents it as this organization's
   // own. When any record sits outside an own period, the header reads the
   // periods apart and the all-period total is labelled as records HELD.
-  const header = businessHistoryHeader(business, organizationName);
+  const header = businessHistoryHeader(
+    business,
+    identity ?? { legalName: null, displayName: organizationName, ownStatementIds: [] },
+  );
 
   const figures = (b: HistoryBucketTotals) =>
     t("figures", {

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { deriveProfessionalExperience } from "@/lib/journal/professional-experience";
 import { deriveWorkIntelligence } from "@/lib/journal/work-intelligence";
-import { organizationLedgerFrom } from "@/lib/journal/work-intelligence-read";
+import { organizationLedgerFrom, organizationPendingFrom } from "@/lib/journal/work-intelligence-read";
 import { readEvidenceRecordsForWorker } from "./worker-evidence-read";
 
 /**
@@ -101,7 +101,11 @@ describe("model + one history — shown as 'duration to be confirmed', totals un
     const out = await readFixture();
     if (out.kind !== "ok") throw new Error("read failed");
     const ledger = organizationLedgerFrom({ kind: "needs-migration" }, out);
-    expect(ledger.pendingRecords).toHaveLength(3);
+    const pending = organizationPendingFrom(out);
+    expect(pending).toHaveLength(3);
+    // a list of its own: never a day row, never a period row
+    expect(ledger.records.map((r) => r.id)).toEqual(["d8"]);
+    expect(ledger.periodRecords).toEqual([]);
 
     const base = {
       entries: [],
@@ -112,7 +116,7 @@ describe("model + one history — shown as 'duration to be confirmed', totals un
       organizationPeriodRecords: ledger.periodRecords,
     };
     const without = deriveWorkIntelligence(base);
-    const withPending = deriveWorkIntelligence({ ...base, organizationPendingRecords: ledger.pendingRecords });
+    const withPending = deriveWorkIntelligence({ ...base, organizationPendingRecords: pending });
     expect(withPending.organizationPendingRecords).toHaveLength(3);
     // nothing in the model moves
     expect(withPending.periods).toEqual(without.periods);

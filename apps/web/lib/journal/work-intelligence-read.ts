@@ -183,8 +183,10 @@ export function assembleWorkIntelligence(input: {
 export type OrganizationLedgerRead = {
   readonly records: readonly WorkIntelligenceOrganizationRecord[];
   readonly periodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[];
-  /** Records with NO stated duration (SEP-7) — shown, summed nowhere. */
-  readonly pendingRecords: readonly WorkIntelligenceOrganizationPendingRecord[];
+  /** Records with NO stated duration (SEP-7) — shown, summed nowhere.
+   *  A list of its own (`organizationPendingFrom`), never a day or period
+   *  record; absent = none. */
+  readonly pendingRecords?: readonly WorkIntelligenceOrganizationPendingRecord[];
 };
 
 /**
@@ -210,7 +212,7 @@ export async function readOrganizationRecords(
     readEvidenceRecordsForWorker(supabase, workerId),
   ]);
   if (allocations.kind === "error" || evidence.kind === "error") return null;
-  return organizationLedgerFrom(allocations, evidence);
+  return { ...organizationLedgerFrom(allocations, evidence), pendingRecords: organizationPendingFrom(evidence) };
 }
 
 /**
@@ -281,21 +283,27 @@ export function organizationLedgerFrom(
           hoursBasis: r.hoursBasis ?? null,
           context: r.context,
         }));
-  // Records with NO stated duration: the work is recorded, its length is
-  // unknown — carried beside both ledgers, never an hour (SEP-7).
-  const pendingRecords: WorkIntelligenceOrganizationPendingRecord[] =
-    evidence.kind === "needs-migration"
-      ? []
-      : (evidence.pendingRows ?? []).map((r) => ({
-          id: r.id,
-          organizationId: r.organizationId,
-          workDate: r.workDate,
-          periodStart: r.periodStart,
-          periodEnd: r.periodEnd,
-          source: "import",
-          context: r.context,
-        }));
-  return { records: [...fromAllocations, ...fromEvidence], periodRecords, pendingRecords };
+  return { records: [...fromAllocations, ...fromEvidence], periodRecords };
+}
+
+/**
+ * Records with NO stated duration (SEP-7): the work is recorded, its length
+ * is unknown. A list of their own beside both ledgers — never a day record,
+ * never a period record, never an hour. Shown as "duration not stated yet".
+ */
+export function organizationPendingFrom(
+  evidence: Exclude<WorkerEvidenceRead, { kind: "error" }>,
+): WorkIntelligenceOrganizationPendingRecord[] {
+  if (evidence.kind === "needs-migration") return [];
+  return (evidence.pendingRows ?? []).map((r) => ({
+    id: r.id,
+    organizationId: r.organizationId,
+    workDate: r.workDate,
+    periodStart: r.periodStart,
+    periodEnd: r.periodEnd,
+    source: "import",
+    context: r.context,
+  }));
 }
 
 /**
@@ -325,7 +333,7 @@ export function historicalPersonIntelligence(
     focus: opts.focus,
     organizationRecords: ledger.records,
     organizationPeriodRecords: ledger.periodRecords,
-    organizationPendingRecords: ledger.pendingRecords,
+    organizationPendingRecords: organizationPendingFrom(evidence),
   });
 }
 

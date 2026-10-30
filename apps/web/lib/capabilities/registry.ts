@@ -199,9 +199,11 @@ const livingCvSkillsGet: CapabilityDescriptor = {
     "and, per skill, what the caller's own Work Journal records for it " +
     "(`practice`, the same figures the Living CV chip shows): the skill's OWN " +
     "hours (`attributedHours`, of which `confirmedHours` a manager confirmed), " +
-    "`wholeSessionHours` — the whole time of sessions it shared with other " +
-    "skills, whose own part is unknown (never split, never a total, never " +
-    "added to attributed hours) — entries, days, first and last worked day, " +
+    "`involvedUnattributedHours` — time of entries the skill took part in " +
+    "that could not be attributed to it (shared with other skills, or split " +
+    "between kinds of work without saying where; its own part is unknown — " +
+    "never split, never a total, never added to attributed hours) — entries, " +
+    "days, first and last worked day, " +
     "the evidence tier of the skill row and how the links came to be. " +
     "`practiceStatus` is `unavailable` when the journal could not be read " +
     "(unknown, never zero).",
@@ -262,7 +264,7 @@ const livingCvSkillsGet: CapabilityDescriptor = {
                 ? {
                     attributedHours: sk.attributedHours,
                     confirmedHours: sk.confirmedHours,
-                    wholeSessionHours: sk.sharedHours,
+                    involvedUnattributedHours: sk.sharedHours,
                     entries: sk.entries,
                     days: sk.days,
                     firstWorkedDay: sk.firstWorkedDay,
@@ -273,7 +275,7 @@ const livingCvSkillsGet: CapabilityDescriptor = {
                 : {
                     attributedHours: 0,
                     confirmedHours: 0,
-                    wholeSessionHours: 0,
+                    involvedUnattributedHours: 0,
                     entries: 0,
                     days: 0,
                     firstWorkedDay: null,

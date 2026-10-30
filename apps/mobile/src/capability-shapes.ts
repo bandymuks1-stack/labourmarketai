@@ -139,13 +139,12 @@ export type LivingCvSkillsData = {
     readonly source: string | null;
     readonly verifiedAt: string | null;
     /** The journal's own figures for this skill (P0-B parity with the web
-     *  Living CV): own hours, whole-session time shared with other skills
-     *  (never summed), entries, days, evidence tier. `null` = unread. Optional
+     *  Living CV): own hours, involved-but-unattributed time (never summed), entries, days, evidence tier. `null` = unread. Optional
      *  so an older server stays readable. */
     readonly practice?: {
       readonly attributedHours: number;
       readonly confirmedHours: number;
-      readonly wholeSessionHours: number;
+      readonly involvedUnattributedHours: number;
       readonly entries: number;
       readonly days: number;
       readonly firstWorkedDay: string | null;
