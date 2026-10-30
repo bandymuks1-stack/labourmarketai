@@ -15,6 +15,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const loadViewMock = vi.fn();
 const projectMock = vi.fn();
+const externalMock = vi.fn();
 
 vi.mock("server-only", () => ({}));
 vi.mock("next-intl/server", () => ({
@@ -30,6 +31,7 @@ vi.mock("@/lib/marketplace/worker-opportunities", () => ({
 }));
 vi.mock("@/lib/marketplace/opportunities-result", () => ({
   projectOpportunitiesResult: (...args: unknown[]) => projectMock(...args),
+  projectExternalVacancies: (...args: unknown[]) => externalMock(...args),
 }));
 
 const { findWorkForCapability } = await import("./find-work-capability");
@@ -54,7 +56,7 @@ const ROW = {
   interestStatus: null,
 };
 
-function view(matches: { status: string }[], boardAvailable = true) {
+function view(matches: { status: string }[], boardAvailable = true, externalCards: unknown[] = []) {
   return {
     kind: "ready",
     surface: "conversation",
@@ -63,8 +65,8 @@ function view(matches: { status: string }[], boardAvailable = true) {
     matches,
     totalRecommendable: matches.length,
     newCount: 0,
-    externalCards: [],
-    totalExternal: 0,
+    externalCards,
+    totalExternal: externalCards.length,
   };
 }
 
@@ -85,6 +87,7 @@ function projected(over: Record<string, unknown> = {}) {
 beforeEach(() => {
   loadViewMock.mockReset();
   projectMock.mockReset();
+  externalMock.mockReset();
 });
 
 describe("work.find capability adapter", () => {
@@ -140,5 +143,26 @@ describe("work.find capability adapter", () => {
     projectMock.mockResolvedValue({ kind: "unavailable" });
     const res = await findWorkForCapability();
     expect(res).toMatchObject({ ok: false, code: "unavailable" });
+  });
+
+  it("platform demand unreadable but public ads found: the ads are returned, only the platform rows are null", async () => {
+    // A card the ONE engine judged; the readback counts it as found work.
+    const card = {
+      key: "src:1",
+      match: { status: "possible", eligible: true, gaps: [], missingData: [], reasons: [], skillFit: null },
+    };
+    const v = view([], false, [card]);
+    loadViewMock.mockResolvedValue(v);
+    projectMock.mockResolvedValue({ kind: "unavailable" });
+    const AD = { key: "src:1", title: "Tiler", band: "possible", originalUrl: "https://example.invalid/ad" };
+    externalMock.mockResolvedValue([AD]);
+    const res = await findWorkForCapability();
+    expect(res.ok).toBe(true);
+    const data = (res as { data: Record<string, unknown> }).data;
+    expect(data.kind).toBe("matches");
+    expect(externalMock).toHaveBeenCalledWith(v);
+    expect(data.external).toEqual([AD]);
+    expect(data.totalExternal).toBe(1);
+    expect(data.matches).toBeNull();
   });
 });

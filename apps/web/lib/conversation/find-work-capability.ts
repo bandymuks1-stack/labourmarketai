@@ -3,7 +3,10 @@ import "server-only";
 import { getTranslations } from "next-intl/server";
 
 import type { ExecResult } from "@/lib/conversation/executor-contract";
-import { projectOpportunitiesResult } from "@/lib/marketplace/opportunities-result";
+import {
+  projectExternalVacancies,
+  projectOpportunitiesResult,
+} from "@/lib/marketplace/opportunities-result";
 import {
   loadWorkerOpportunityMatches,
   type MarketplaceMatchesView,
@@ -130,6 +133,17 @@ export async function findWorkForCapability(
   // The panel's UI copy (interest button labels) means nothing to an external
   // client and is not carried; everything else crosses as the panel gets it.
   const ready = rows.kind === "ready" ? rows : null;
+  // External public ads come from their own store: when the gated platform
+  // demand source is unreadable they are still real, and the sentence above
+  // counted them — so they are projected from the SAME view, not dropped.
+  const external =
+    ready !== null
+      ? ready.external
+      : view.kind === "ready"
+        ? await projectExternalVacancies(view)
+        : null;
+  const totalExternal =
+    ready !== null ? ready.totalExternal : view.kind === "ready" ? view.totalExternal : null;
   return {
     ok: true,
     data: {
@@ -137,12 +151,11 @@ export async function findWorkForCapability(
       ...(said.kind === "matches"
         ? { count: said.count, intro: said.intro }
         : { message: said.message }),
-      // `null` = the platform demand rows could not be read (external public
-      // ads may still have been counted) — not "none".
+      // `null` = the platform demand rows could not be read — not "none".
       matches: ready ? ready.matches : null,
       totalRecommendable: ready ? ready.totalRecommendable : null,
-      external: ready ? ready.external : null,
-      totalExternal: ready ? ready.totalExternal : null,
+      external,
+      totalExternal,
       interestAvailable: ready ? ready.interestLabels !== null : null,
       note:
         "fitStatus is the matching engine's verdict; only 'strong' and 'possible' may be called a fit. " +
