@@ -95,7 +95,11 @@ jobs:
         working-directory: apps/mobile/ios
         run: |
           WS=$(ls -d *.xcworkspace | head -1)
-          SCHEME=$(xcodebuild -workspace "$WS" -list -json | python3 -c 'import json,sys; s=json.load(sys.stdin)["workspace"]["schemes"]; print([x for x in s if x!="Pods"][0])')
+          # NOT the first listed scheme: the workspace lists every Pods library
+          # scheme too, and building one "succeeds" with no .app. The app scheme
+          # matches the .xcodeproj name (the same rule as ios.yml).
+          SCHEME=$(basename "$(ls -d *.xcodeproj | head -1)" .xcodeproj)
+          echo "workspace=$WS scheme=$SCHEME"
           echo "workspace=$WS" >> "$GITHUB_OUTPUT"
           echo "scheme=$SCHEME" >> "$GITHUB_OUTPUT"
 
@@ -137,21 +141,77 @@ jobs:
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
           "$HOME/.maestro/bin/maestro" --version
 
+      # Evidence, not a gate: can THIS runner reach the origin? Status codes,
+      # protocol versions and timings only (no bodies, no tokens). Run again
+      # after a failed attempt, so a stalled journey can be laid next to what
+      # the runner's own network saw at that moment.
+      - name: Origin probe from the macOS runner (before the journey)
+        env:
+          ORIGIN: ${{ inputs.origin }}
+        run: bash .github/scripts/mobile-origin-probe.sh "$ORIGIN" before-journey
+
       - name: Signed-in journey (sign-in → Today read → journal write → profile read → sign-out)
         env:
-          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
+          ORIGIN: ${{ inputs.origin }}
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "480000"
           MAESTRO_CLI_NO_ANALYTICS: "1"
         run: |
           # No --debug-output: nothing from a signed-in session is written to disk.
+          # The Maestro console (step names and statuses — what this log
+          # already shows) is also kept on the runner so the claim line can
+          # name a degraded Today read; the file is never uploaded.
+          # REQUIRED with the tee below: this step's shell is `bash -e` without
+          # pipefail, and without it a failed `maestro test | tee` passed as green
+          # (run 40951503104 printed PROVEN after the jobs flow had FAILED).
+          set -o pipefail
+          CONSOLE="$RUNNER_TEMP/maestro-console.txt"
+          ATTEMPT=0
           journey() {
-            maestro test \
-              -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
-              -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
-              apps/mobile/.maestro/signed-in-journey.yaml &&             maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               -e NEED_SUBMIT=0               apps/mobile/.maestro/jobs-need-journey.yaml
+            ATTEMPT=$((ATTEMPT + 1))
+            : > "$CONSOLE"
+            maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               apps/mobile/.maestro/signed-in-journey.yaml | tee -a "$CONSOLE" &&
+            maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               -e NEED_SUBMIT=0               apps/mobile/.maestro/jobs-need-journey.yaml | tee -a "$CONSOLE"
           }
-          if journey || { echo "::warning::attempt 1 failed - retrying once (driver)"; sleep 15; journey; }; then
-            echo "IOS_SIGNED_IN_JOURNEY_PROVEN: sign-in, Today figures read, journal entry drafted and confirmed, profile skills read, sign-out"
+          # On a failed attempt, print ONLY the test ids on screen (our own testID
+          # strings, never text, values or a screenshot; at most ten averaged
+          # band colours, see ios-screen-bands.py).
+          on_screen_ids() {
+            echo "::group::test ids on screen at the failure"
+            maestro hierarchy 2>/dev/null | node -e '
+              let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
+                const ids = new Set();
+                const walk = (n) => {
+                  const id = n?.attributes?.["resource-id"] ?? n?.attributes?.identifier;
+                  if (id) ids.add(String(id).split("/").pop());
+                  // Geometry of the controls a tap aims at (our own ids only).
+                  const short = id ? String(id).split("/").pop() : "";
+                  const aimed = ["journal-compose-review", "journal-compose-back", "journal-compose-site", "tab-today"];
+                  if (aimed.includes(short) && n?.attributes?.bounds) ids.add(short + " bounds=" + n.attributes.bounds);
+                  (n?.children ?? []).forEach(walk);
+                };
+                try {
+                  const root = JSON.parse(s.slice(s.indexOf("{")));
+                  if (root?.attributes?.bounds) ids.add("(root) bounds=" + root.attributes.bounds);
+                  walk(root);
+                } catch { console.log("(no hierarchy)"); }
+                console.log([...ids].sort().join("\n"));
+              });' || true
+            # Ten averaged band colours, never an image (the script deletes it).
+            python3 .github/scripts/ios-screen-bands.py "$SIM_UDID" "$RUNNER_TEMP" || true
+            echo "::endgroup::"
+          }
+          # The session lives in the iOS keychain, which clearState does not
+          # touch: reset it before the retry so attempt 2 starts signed out.
+          if journey || { on_screen_ids; bash .github/scripts/mobile-origin-probe.sh "$ORIGIN" after-attempt-1; echo "::warning::attempt 1 failed - retrying once (driver)"; xcrun simctl keychain "$SIM_UDID" reset || true; sleep 15; journey; }; then
+            echo "IOS_SIGNED_IN_JOURNEY_PROVEN: sign-in, Today figures read, journal entry drafted and confirmed, profile skills read, sign-out (passed on attempt $ATTEMPT of 2)"
+            if grep -q "TODAY_READ_DEGRADED.*COMPLETED" "$CONSOLE"; then
+              echo "IOS_JOBS_READ_JOURNEY_PROVEN_DEGRADED: job opened (hand-off ok) and empty need refused, BUT Today's figures read FAILED during the jobs journey (capability-retry shown) - not a full read"
+            else
+              echo "IOS_JOBS_READ_JOURNEY_PROVEN: Today read, jobs search loaded, job opened (hand-off ok), empty need refused (no need written)"
+            fi
           else
+            on_screen_ids
+            bash .github/scripts/mobile-origin-probe.sh "$ORIGIN" after-attempt-2
             echo "::error::iOS signed-in journey failed twice"; exit 1
           fi
 

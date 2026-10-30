@@ -1,10 +1,11 @@
 import React from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 import type { JournalListData } from "../../src/capability-shapes";
 import { useLocale } from "../../src/i18n/locale-context";
+import { traceTestId, useRequestTrace } from "../../src/request-trace";
 import { CapabilityGate } from "../../src/screens/capability-gate";
 import { JournalEntryList } from "../../src/screens/journal-entries";
 import { Button, Title } from "../../src/ui/primitives";
@@ -26,11 +27,21 @@ export default function Screen() {
   const { t } = useLocale();
   const router = useRouter();
   const journal = useCapability<JournalListData>("journal.list", PAGE);
+  // State words only, for the CI journeys (src/request-trace.ts).
+  const trace = useRequestTrace();
+  const readState =
+    journal.state.status === "failed"
+      ? `failed-${journal.state.failure.kind}`
+      : journal.state.status;
 
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Title>{t("nav.journal")}</Title>
+        <View testID={`journal-read-${readState}`}>
+          <View testID={traceTestId(trace, "journal.list")}>
+            <Title>{t("nav.journal")}</Title>
+          </View>
+        </View>
         <Button
           testID="journal-log-work"
           label={t("journal.logWork")}

@@ -20,6 +20,9 @@
 appId: ai.labourmarket.app
 name: jobs-need-journey
 ---
+# The keyboard is put away on BOTH platforms after typing: Android by
+# hideKeyboard; iOS by a short scroll (the form screens close the keyboard on
+# drag; Maestro's hideKeyboard fails on an iOS multi-line box or number pad).
 # A tap during scroll momentum only stops the scroll on Android, so every
 # scrollUntilVisible is followed by waitForAnimationToEnd before the tap.
 - extendedWaitUntil:
@@ -39,10 +42,59 @@ name: jobs-need-journey
       - hideKeyboard
 - tapOn:
     id: "submit"
+# iOS offers to save the password after a sign-in ("Save Password?"), a system
+# sheet over the whole app (the on-screen ids show only the status bar under
+# it). It is useful to people and stays; the journey answers it "Not Now".
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible:
+            text: "Not Now"
+          timeout: 10000
+          optional: true
+      - tapOn:
+          text: "Not Now"
+          optional: true
 - extendedWaitUntil:
     visible:
       id: "tab-today"
     timeout: 60000
+# …and again if it only appeared after Today rendered.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible:
+            text: "Not Now"
+          timeout: 10000
+          optional: true
+      - tapOn:
+          text: "Not Now"
+          optional: true
+# Today's figures load ABOVE the station buttons: when they arrive after the
+# scroll found a button, the layout grows and the button moves off screen
+# before the tap ("today-open-jobs not found" right after the scroll found it:
+# android.yml 40922440308, android-need-isolated 40869901855 / 40904995024).
+# Wait for the figures — or their failure notice — to settle first (iOS
+# 40934266154: the figures read failed, the retry notice arrived after the
+# scroll, and the tap meant for Jobs opened Profile).
+- extendedWaitUntil:
+    visible:
+      id: "today-figures|capability-retry"
+    timeout: 30000
+    optional: true
+# A failed Today read is reported, never passed off as a full read: the CI
+# claim line names it when this label COMPLETED.
+- runFlow:
+    label: "TODAY_READ_DEGRADED (capability-retry on Today)"
+    when:
+      visible:
+        id: "capability-retry"
+    commands:
+      - waitForAnimationToEnd
 - scrollUntilVisible:
     element:
       id: "today-open-jobs"
@@ -77,21 +129,40 @@ name: jobs-need-journey
     commands:
       - tapOn:
           id: "jobs-open-0"
-      - extendedWaitUntil:
-          notVisible:
-            id: "jobs-loaded"
-          timeout: 20000
+      # Back to the app WITHOUT stopping it, so the board is still there.
       - launchApp:
           clearState: false
+          stopApp: false
+      # REQUIRED, positive: the row records that the system accepted the hand-off
+      # to the browser (Linking.openURL resolved) — a state word, no URL.
       - extendedWaitUntil:
           visible:
-            id: "jobs-loaded"
+            id: "jobs-open-0-result-ok"
+          timeout: 30000
+      # …and the app is in the foreground and still signed in (its tab bar).
+      - extendedWaitUntil:
+          visible:
+            id: "tab-today"
           timeout: 30000
 # Back to Today by its tab (Maestro's `back` is Android-only; this flow runs on iOS too).
 - tapOn:
     id: "tab-today"
 
 # --- 3. Need: an empty need is refused in place ---
+- extendedWaitUntil:
+    visible:
+      id: "today-figures|capability-retry"
+    timeout: 30000
+    optional: true
+# A failed Today read is reported, never passed off as a full read: the CI
+# claim line names it when this label COMPLETED.
+- runFlow:
+    label: "TODAY_READ_DEGRADED (capability-retry on Today)"
+    when:
+      visible:
+        id: "capability-retry"
+    commands:
+      - waitForAnimationToEnd
 - scrollUntilVisible:
     element:
       id: "today-open-need"
@@ -107,7 +178,7 @@ name: jobs-need-journey
 # The form is taller than a phone screen and tapOn does not scroll.
 - scrollUntilVisible:
     element:
-      id: "need-review"
+      id: "need-cancel"
     direction: DOWN
     timeout: 20000
 - waitForAnimationToEnd
@@ -155,6 +226,13 @@ name: jobs-need-journey
             platform: Android
           commands:
             - hideKeyboard
+      - runFlow:
+          when:
+            platform: iOS
+          commands:
+            - swipe:
+                direction: UP
+                duration: 400
       - scrollUntilVisible:
           element:
             id: "need-location"
@@ -169,6 +247,13 @@ name: jobs-need-journey
             platform: Android
           commands:
             - hideKeyboard
+      - runFlow:
+          when:
+            platform: iOS
+          commands:
+            - swipe:
+                direction: UP
+                duration: 400
       - scrollUntilVisible:
           element:
             id: "need-team-size"
@@ -183,9 +268,16 @@ name: jobs-need-journey
             platform: Android
           commands:
             - hideKeyboard
+      - runFlow:
+          when:
+            platform: iOS
+          commands:
+            - swipe:
+                direction: UP
+                duration: 400
       - scrollUntilVisible:
           element:
-            id: "need-review"
+            id: "need-cancel"
           direction: DOWN
           timeout: 20000
       - waitForAnimationToEnd

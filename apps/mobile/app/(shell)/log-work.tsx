@@ -4,6 +4,7 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -39,9 +40,19 @@ export default function Screen() {
       >
         <ScrollView
           contentContainerStyle={styles.content}
+          // A tap outside the boxes puts the keyboard away ("handled"); the
+          // site box's Return says Done. NOT keyboardDismissMode="on-drag": on
+          // iOS, after a drag put the keyboard away, no tap reached the app
+          // again in CI (runs 40846299984..40904991200) — a possible real-user
+          // freeze outweighs closing the keyboard by scrolling.
           keyboardShouldPersistTaps="handled"
         >
-          <Title>{t("journal.compose.title")}</Title>
+          {/* A plain, non-input spot to tap: with keyboardShouldPersistTaps
+              "handled", a tap here puts the keyboard away (the iOS journeys
+              use it; a person can do the same). */}
+          <View testID="journal-compose-title">
+            <Title>{t("journal.compose.title")}</Title>
+          </View>
           <JournalComposer
             onDone={() => {
               // Back where they came from when there is a back to go to; the
