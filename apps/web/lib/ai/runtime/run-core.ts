@@ -60,6 +60,7 @@ import {
   mistralCompletionProvider,
 } from "./providers/free-tier";
 import type { ProviderCooldown } from "./provider-cooldown";
+import type { ProviderCounters } from "./provider-counters";
 import {
   advancePolicyFor,
   classifyCompletionFailure,
@@ -185,7 +186,14 @@ export interface ChainDispatchContext {
    * tried LAST, never removed — a cooldown reorders, it cannot empty a chain.
    */
   readonly cooldown?: ProviderCooldown;
-  /** Clock seam for the cooldown; defaults to Date.now. */
+  /**
+   * Per-provider attempt counters (provider-counters.ts): requests, latency,
+   * rate limits and errors by class. The server boundary passes the
+   * process-wide instance; absent (tests, evals) = nothing counted. Counting
+   * never changes routing.
+   */
+  readonly counters?: ProviderCounters;
+  /** Clock seam for the cooldown and the counters; defaults to Date.now. */
   readonly now?: () => number;
 }
 
@@ -465,8 +473,11 @@ export async function dispatchAiCompletion(
       };
       continue;
     }
+    const startedAt = clock();
     const result = await adapter.complete(candidateRequest, cfg);
+    const finishedAt = clock();
     if (result.status === "ok") {
+      chain.counters?.noteAttempt(candidate.id, "ok", finishedAt - startedAt, finishedAt);
       chain.cooldown?.noteSuccess(candidate.id);
       return result;
     }
@@ -477,6 +488,12 @@ export async function dispatchAiCompletion(
     last = { ...result, provider: candidate.id };
 
     const failure = classifyCompletionFailure(result);
+    chain.counters?.noteAttempt(
+      candidate.id,
+      failure ?? "PROVIDER_ERROR",
+      finishedAt - startedAt,
+      finishedAt,
+    );
     if (failure === null) return result;
     chain.cooldown?.noteFailure(
       candidate.id,
