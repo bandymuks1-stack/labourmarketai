@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>C · Team Performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a training-day board. Heavy condensed numerals carry goals and splits; the project is a course
+   with stages as checkpoints; the team is a lineup of roles, never a leaderboard. Daylight concrete, single theme by choice. */
+:root{
+  color-scheme: light;
+  --ground:#E6E8E2;      /* concrete, faint green bias */
+  --slab:#F6F7F3;        /* raised panel */
+  --white:#FFFFFF;
+  --line:#C5C9BF;
+  --edge:#878C80;
+  --ink:#101310; --ink-2:#3F453D; --muted:#596055;
+  --gold:#D4AF37; --gold-ink:#7A5E0E;   /* action / pending */
+  --confirmed:#107A53;
+  --derived:#00759C;
+  --attention:#965808;
+  --display:"Bricolage Grotesque", "Inter", system-ui, sans-serif;
+  --body:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+*{box-sizing:border-box}
+html,body{background:var(--ground);color:var(--ink)}
+body{margin:0;font:15px/1.55 var(--body);-webkit-font-smoothing:antialiased;padding-inline:clamp(16px,4vw,56px);padding-block:0 80px}
+a{color:var(--gold-ink)}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px;border-radius:6px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.num{font-family:var(--display);font-stretch:75%;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:.85}
+.ribbon{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;margin-inline:calc(-1*clamp(16px,4vw,56px));padding:8px clamp(16px,4vw,56px);background:var(--ink);color:#C9CDC3;display:flex;gap:14px;flex-wrap:wrap;align-items:center;font:500 12px/1.4 var(--mono);letter-spacing:.04em}
+.ribbon b{color:#fff;font-weight:600}
+.ribbon nav{margin-left:auto;display:flex;gap:14px;flex-wrap:wrap}
+.ribbon nav a{color:#C9CDC3;text-decoration:none}
+.ribbon nav a[aria-current]{color:var(--gold);font-weight:600}
+
+.hero{padding-block:60px 36px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:48px;align-items:end;max-width:1360px;margin-inline:auto}
+.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.hero h1{font:800 clamp(56px,8.6vw,132px)/.84 var(--display);font-stretch:75%;letter-spacing:-.025em;margin:16px 0 22px;text-transform:uppercase;text-wrap:balance}
+.hero p{max-width:60ch;color:var(--ink-2);font-size:17px;margin:0}
+.rules{display:grid;gap:10px}
+.rule{display:grid;grid-template-columns:56px 1fr;gap:14px;align-items:baseline;border-top:2px solid var(--ink);padding-top:10px;font-size:14px;color:var(--ink-2)}
+.rule b{font:800 30px/.9 var(--display);font-stretch:75%;color:var(--ink)}
+.rule.no b{color:var(--attention)}
+
+section.block{max-width:1360px;margin-inline:auto;padding-block:56px;border-top:2px solid var(--ink)}
+.block-head{display:flex;gap:24px;align-items:baseline;flex-wrap:wrap;margin-bottom:28px}
+.block-head h2{font:800 clamp(30px,3.6vw,48px)/.95 var(--display);font-stretch:80%;margin:0;text-transform:uppercase;letter-spacing:-.01em;text-wrap:balance}
+.block-head .eyebrow{min-width:160px}
+.block-head p{flex:1 1 360px;margin:0;color:var(--ink-2);max-width:68ch}
+.stage{width:100%;overflow:hidden}
+.scaler{transform-origin:top left}
+
+/* ---------- PHONE ---------- */
+.phone-row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:56px;align-items:start}
+.phone-wrap{width:min(100%,410px)}
+.phone{width:390px;height:844px;border-radius:52px;background:var(--ground);border:10px solid var(--ink);position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 40px 70px -40px rgba(16,19,16,.6)}
+.sbar{height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font:600 13px var(--body)}
+.sbar i{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.ptop{display:flex;justify-content:space-between;align-items:flex-end;padding:0 18px 10px}
+.ptop .t{font:800 30px/.9 var(--display);font-stretch:75%;text-transform:uppercase}
+.ptop .s{font:500 11px var(--mono);color:var(--muted);margin-top:4px}
+.ptop .who{width:38px;height:38px;border-radius:12px;background:var(--ink);color:#fff;display:grid;place-items:center;font:700 13px var(--display)}
+.pbody{flex:1;overflow:hidden;padding:0 12px;display:flex;flex-direction:column;gap:10px}
+.goalcard{background:var(--ink);color:#fff;border-radius:22px;padding:16px 16px 14px;display:grid;gap:10px}
+.goalcard .eyebrow{color:#B9BEB3}
+.goalrow{display:flex;align-items:flex-end;gap:12px}
+.goalrow .num{font-size:84px;color:#fff}
+.goalrow .num small{font-size:40px;color:#8D9387}
+.goalrow p{margin:0 0 6px;font-size:13px;line-height:1.3;color:#D9DCD4}
+.goalrow p b{color:#fff;display:block;font-size:15px}
+.splits{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.splits div{height:34px;border-radius:7px;background:#2A2F29;display:flex;align-items:center;justify-content:center;font:600 11px var(--mono);color:#8D9387;transition:background .4s,color .4s}
+.splits div.done{background:var(--confirmed);color:#fff}
+.splits div.now{background:transparent;border:2px dashed var(--gold);color:var(--gold)}
+.goalcard .meta{display:flex;justify-content:space-between;font:500 11px var(--mono);color:#B9BEB3}
+.btn-gold{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:52px;border-radius:16px;border:0;background:var(--gold);color:#0a0a0a;font:700 15px var(--body);cursor:pointer}
+.btn-gold:hover{filter:brightness(1.06)}
+.btn-gold[disabled]{opacity:.5;cursor:default}
+.btn-line{height:42px;padding:0 14px;border-radius:12px;border:2px solid var(--ink);background:transparent;color:var(--ink);font:650 13.5px var(--body);cursor:pointer}
+.twin{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:var(--slab);border:1px solid var(--line);border-radius:18px;padding:12px 14px;display:grid;gap:4px;align-content:start}
+.tile .num{font-size:44px}
+.tile .num.ok{color:var(--confirmed)}
+.tile small{font:500 10.5px var(--mono);color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+.tile p{margin:0;font-size:12px;color:var(--ink-2);line-height:1.3}
+.pb{display:flex;gap:12px;align-items:center;background:var(--white);border:2px solid var(--ink);border-radius:18px;padding:10px 14px}
+.pb .num{font-size:40px}
+.pb div{font-size:12.5px;line-height:1.3;color:var(--ink-2)}
+.pb b{color:var(--ink);display:block;font-size:13.5px}
+.lineup{display:flex;gap:6px;align-items:center;background:var(--slab);border:1px solid var(--line);border-radius:18px;padding:10px 12px}
+.pl{width:40px;text-align:center;font:500 9.5px var(--mono);color:var(--muted)}
+.pl b{display:grid;place-items:center;width:34px;height:34px;margin:0 auto 3px;border-radius:11px;background:var(--ink);color:#fff;font:700 11.5px var(--display)}
+.pl.me b{background:var(--gold);color:#0a0a0a}
+.pl.free b{background:transparent;border:2px dashed var(--ink);color:var(--ink)}
+.help{flex:1;font-size:12px;line-height:1.3;color:var(--ink-2);padding-left:6px;border-left:1px solid var(--line)}
+.help b{color:var(--attention);display:block}
+.dock{flex:none;padding:8px 12px 22px;display:grid;gap:8px;background:var(--ground)}
+.composer{display:flex;align-items:center;gap:8px;height:54px;border-radius:20px;background:var(--white);border:2px solid var(--ink);padding:0 6px 0 16px}
+.composer span{flex:1;color:var(--muted);font-size:14px}
+.ic{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;border:0;background:var(--ground);color:var(--ink);cursor:pointer}
+.ic.dark{background:var(--ink);color:#fff}
+.ic svg{width:19px;height:19px}
+.toast{position:absolute;left:12px;right:12px;top:52px;background:var(--white);border:2px solid var(--ink);border-radius:18px;padding:12px 14px;display:grid;gap:6px;transform:translateY(-260%);transition:transform .45s cubic-bezier(.2,.8,.2,1);z-index:4;box-shadow:0 18px 40px -20px rgba(0,0,0,.5)}
+.toast.show{transform:none}
+.toast b{font-size:14px}
+.chainline{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:12px}
+.chainline span{padding:2px 8px;border-radius:7px;background:var(--ground)}
+.chainline span.ok{background:rgba(16,122,83,.12);color:var(--confirmed);font-weight:600}
+.chainline span.pend{background:rgba(212,175,55,.18);color:var(--gold-ink);font-weight:600}
+.chainline i{font-style:normal;color:var(--muted);font-family:var(--mono)}
+
+.notes{display:grid;gap:18px;align-content:start}
+.note{display:grid;grid-template-columns:40px 1fr;gap:14px}
+.note .k{font:800 24px/1 var(--display);font-stretch:75%;color:var(--ink);border-top:3px solid var(--gold);padding-top:4px}
+.note h3{margin:2px 0 4px;font:650 16px/1.3 var(--body)}
+.note p{margin:0;color:var(--ink-2);font-size:14px;max-width:62ch}
+
+.since{background:var(--slab);border:1px solid var(--line);border-radius:18px;padding:10px 12px;display:grid;gap:6px}
+.since > b{font:600 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+/* ---------- DESKTOP ARENA ---------- */
+.desk{width:1440px;height:900px;border-radius:18px;background:var(--ground);border:2px solid var(--ink);overflow:hidden;display:grid;grid-template-rows:56px 196px 1fr}
+.dbar{display:flex;align-items:center;gap:16px;padding:0 20px;background:var(--ink);color:#fff}
+.mark{width:28px;height:28px;border-radius:8px;background:var(--gold);display:grid;place-items:center;font:800 13px var(--display);color:#0a0a0a}
+.dbar .ctx{font:600 14px var(--body)}
+.dbar .ctx span{font:500 12px var(--mono);color:#9EA399;margin-left:8px}
+.dbar .search{margin-left:24px;flex:0 1 460px;height:36px;border-radius:12px;background:#22261F;display:flex;align-items:center;gap:10px;padding:0 12px;color:#9EA399;font-size:13px}
+.dbar .r{margin-left:auto;font:500 12px var(--mono);color:#9EA399}
+.course{background:var(--slab);border-bottom:2px solid var(--ink);padding:18px 24px 14px;display:grid;grid-template-columns:280px minmax(0,1fr) 220px;gap:28px;align-items:center}
+.course h3{margin:0;font:800 34px/.92 var(--display);font-stretch:75%;text-transform:uppercase}
+.course .sub{font:500 11.5px var(--mono);color:var(--muted);margin-top:6px}
+.course svg{display:block;width:100%;height:auto}
+.countdown .num{font-size:96px}
+.countdown small{display:block;font:500 11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.arena{display:grid;grid-template-columns:360px minmax(0,1fr) 400px;min-height:0}
+.acol{padding:20px;display:flex;flex-direction:column;gap:12px;min-height:0;overflow:hidden}
+.acol + .acol{border-left:1px solid var(--line)}
+.colh{display:flex;justify-content:space-between;align-items:baseline;font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.mate{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;background:var(--slab);border:1px solid var(--line);border-radius:16px;padding:9px 12px}
+.mate > b{width:40px;height:40px;border-radius:12px;background:var(--ink);color:#fff;display:grid;place-items:center;font:700 13px var(--display)}
+.mate.me > b{background:var(--gold);color:#0a0a0a}
+.mate div{font-size:13px;line-height:1.3;min-width:0}
+.mate div strong{display:block;font-size:14px}
+.mate div span{color:var(--ink-2)}
+.avail{display:flex;gap:3px}
+.avail i{width:10px;height:22px;border-radius:3px;background:var(--ink)}
+.avail i.f{background:transparent;border:1.5px dashed var(--ink)}
+.avail i.x{background:var(--line)}
+.goals{display:grid;gap:10px}
+.goal{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;align-items:center}
+.goal h4{margin:0;font:650 15px/1.3 var(--body)}
+.goal .who{font:500 11.5px var(--mono);color:var(--muted)}
+.goal .num{font-size:46px;grid-row:span 2;text-align:right}
+.goal .num small{font-size:24px;color:var(--muted)}
+.pbar{grid-column:1/-1;display:flex;gap:3px}
+.pbar i{flex:1;height:10px;border-radius:3px;background:var(--line)}
+.pbar i.d{background:var(--confirmed)}
+.pbar i.r{background:var(--ink-2)}
+.wins{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.win{background:var(--ink);color:#fff;border-radius:16px;padding:12px 14px;display:grid;gap:4px}
+.win .num{font-size:34px;color:#fff}
+.win span{font-size:12px;color:#C9CDC3;line-height:1.3}
+.win em{font-style:normal;font:500 10.5px var(--mono);color:#8DD9B5}
+.needs{display:grid;gap:8px}
+.need{display:grid;grid-template-columns:6px 1fr auto;gap:12px;align-items:center;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:10px 12px 10px 0;overflow:hidden}
+.need::before{content:"";align-self:stretch;background:var(--attention)}
+.need b{display:block;font-size:13.5px}
+.need span{font-size:12.5px;color:var(--ink-2)}
+.ai{background:var(--white);border:2px solid var(--ink);border-radius:18px;padding:14px 16px;display:grid;gap:10px}
+.ai .q{justify-self:end;background:var(--ground);border-radius:14px 14px 4px 14px;padding:8px 12px;font-size:13.5px}
+.ai .tag{font:600 10.5px var(--mono);letter-spacing:.08em;color:#6A45F0;text-transform:uppercase}
+.ai p{margin:0;font-size:13.5px;line-height:1.45}
+.ai .row{display:flex;gap:8px;flex-wrap:wrap}
+.heat{display:grid;grid-template-columns:44px repeat(5,1fr);gap:3px;font:500 10.5px var(--mono);color:var(--muted)}
+.heat span{display:grid;place-items:center;height:22px}
+.heat i{height:22px;border-radius:4px;background:var(--ink)}
+.heat i.f{background:transparent;border:1.5px dashed var(--ink)}
+.heat i.x{background:var(--line)}
+
+/* ---------- PERSONAL SEASON ---------- */
+.season{width:1440px;height:780px;border-radius:18px;background:var(--ground);border:2px solid var(--ink);overflow:hidden;display:grid;grid-template-columns:420px minmax(0,1fr) 380px}
+.scol{padding:26px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.scol + .scol{border-left:1px solid var(--line)}
+.scol.dark{background:var(--ink);color:#fff}
+.scol.dark .eyebrow{color:#9EA399}
+.scol h3{margin:0;font:800 52px/.86 var(--display);font-stretch:75%;text-transform:uppercase}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.big div small{display:block;font:500 10.5px var(--mono);color:#9EA399;text-transform:uppercase;letter-spacing:.06em;margin-top:6px}
+.big .num{font-size:76px;color:#fff}
+.big .num.ok{color:#5FD3A2}
+.spark svg{display:block;width:100%;height:auto}
+.records{display:grid;gap:10px}
+.rec{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;background:var(--white);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.rec .num{font-size:48px;min-width:64px}
+.rec b{display:block;font-size:14px}
+.rec span{font-size:12.5px;color:var(--ink-2)}
+.rec em{font-style:normal;font:500 10.5px var(--mono);color:var(--muted)}
+.mile{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.m{border:2px solid var(--ink);border-radius:16px;padding:12px;display:grid;gap:4px;background:var(--slab)}
+.m.next{border-style:dashed;background:transparent}
+.m b{font-size:13.5px}
+.m span{font-size:12px;color:var(--ink-2)}
+.m em{font-style:normal;font:500 10.5px var(--mono);color:var(--confirmed)}
+.m.next em{color:var(--gold-ink)}
+.plan{display:grid;gap:0}
+.pstep{display:grid;grid-template-columns:28px 1fr;gap:12px;padding-bottom:14px;position:relative}
+.pstep::before{content:"";position:absolute;left:13px;top:28px;bottom:0;width:2px;background:var(--line)}
+.pstep:last-child::before{display:none}
+.pstep i{width:28px;height:28px;border-radius:50%;border:2px solid var(--ink);display:grid;place-items:center;font:700 11px var(--mono);font-style:normal;background:var(--ground)}
+.pstep.done i{background:var(--confirmed);border-color:var(--confirmed);color:#fff}
+.pstep.next i{background:var(--gold);border-color:var(--gold)}
+.pstep b{display:block;font-size:14px}
+.pstep span{font-size:12.5px;color:var(--ink-2)}
+.together{display:grid;gap:8px}
+.tg{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink-2)}
+.tg b{width:32px;height:32px;border-radius:10px;background:var(--ink);color:#fff;display:grid;place-items:center;font:700 11px var(--display);flex:none}
+.fine{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+
+/* ---------- assessment ---------- */
+.assess{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.card{background:var(--slab);border:1px solid var(--line);border-radius:18px;padding:20px;min-width:0}
+.card h3{margin:0 0 12px;font:800 24px/1 var(--display);font-stretch:80%;text-transform:uppercase}
+.card ul{margin:0;padding-left:18px;display:grid;gap:8px;color:var(--ink-2);font-size:14px}
+.card li b{color:var(--ink)}
+.tbl-wrap{overflow-x:auto;border:2px solid var(--ink);border-radius:16px;background:var(--white)}
+table.map{border-collapse:collapse;width:100%;min-width:760px;font-size:13.5px}
+table.map th,table.map td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+table.map th{font:600 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--ink)}
+.lvl{font:600 11px var(--mono);padding:2px 7px;border-radius:6px;border:1px solid var(--edge)}
+footer{max-width:1360px;margin:40px auto 0;color:var(--muted);font-size:12.5px;border-top:2px solid var(--ink);padding-top:18px}
+@media (max-width:1100px){.hero{grid-template-columns:1fr}.phone-row{grid-template-columns:1fr}.assess{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="ribbon" role="note">
+  <span><b>Koncepcija C · Team Performance</b></span>
+  <span>Ne produkcija · visi duomenys iliustraciniai</span>
+  <nav aria-label="Koncepcijos">
+    <a href="index.html">Palyginimas</a>
+    <a href="a-future-command.html">A</a>
+    <a href="b-career-universe.html">B</a>
+    <a href="c-team-performance.html" aria-current="page">C</a>
+  </nav>
+</div>
+
+<header class="hero">
+  <div>
+    <div class="eyebrow">Sporto įkvėpta komandos ir asmeninės pažangos aplinka</div>
+    <h1>Komanda žaidžia prieš tikslą, ne prieš save.</h1>
+    <p>Kaip gera treniruočių programa: aiškus savaitės tikslas, matomi etapai, sudėtis su vaidmenimis, pasiekti rezultatai ir asmeniniai rekordai, pagrįsti tik tavo pačios patvirtintais darbais. Komanda mato, kur reikia pagalbos, ir gali pasisiūlyti vienu bakstelėjimu.</p>
+  </div>
+  <div class="rules">
+    <div class="rule"><b>✓</b><span>Tikslai, etapai, pažanga, pasiekimai: tik iš patvirtintų faktų.</span></div>
+    <div class="rule"><b>✓</b><span>Asmeninis rekordas lyginamas tik su tavo pačios istorija.</span></div>
+    <div class="rule"><b>✓</b><span>Komanda rodoma kaip sudėtis su vaidmenimis ir pajėgumu.</span></div>
+    <div class="rule no"><b>✕</b><span>Jokių reitingų, žvaigždučių, lyderių lentelių ar žmonių vertės balų.</span></div>
+  </div>
+</header>
+
+<!-- =========================== 1. PHONE =========================== -->
+<section class="block" id="mobile">
+  <div class="block-head">
+    <div class="eyebrow">1 · Telefonas</div>
+    <h2>Pradinis ekranas: šios savaitės tikslas</h2>
+    <p>Spausk auksinį mygtuką: skydas P-3 pažymimas baigtu, komandos tikslo atkarpa užsipildo, o viršuje matai, kur nukeliavo rezultatas.</p>
+  </div>
+  <div class="phone-row">
+    <div class="phone-wrap stage" data-w="390" data-h="844">
+      <div class="scaler">
+        <div class="phone">
+          <div class="sbar"><span>11:42</span><i>5G · 78%</i></div>
+          <div class="ptop"><div><div class="t">42 savaitė</div><div class="s">Komanda Šiaurė · Mokykla Malmö</div></div><div class="who">RK</div></div>
+          <div class="pbody">
+            <div class="goalcard">
+              <div class="eyebrow">Komandos savaitės tikslas</div>
+              <div class="goalrow"><div class="num" id="gNum">2<small>/4</small></div><p><b>Skydai P-3 – P-6</b>sujungti, pažymėti ir nufotografuoti iki penktadienio</p></div>
+              <div class="splits" aria-label="Skydų būsena"><div class="done">P-3</div><div class="done">P-4</div><div class="now" id="sNow">P-5</div><div>P-6</div></div>
+              <div class="meta"><span>Etapas „Skydai" <span id="stagePct">68</span> %</span><span>Šviesa po 9 d.</span></div>
+              <button class="btn-gold" id="doneBtn" type="button">Pažymėti P-5 baigtu</button>
+            </div>
+            <div class="twin">
+              <div class="tile"><small>Tavo savaitė</small><div class="num">31,5</div><p>val. įrašyta</p></div>
+              <div class="tile"><small>Patvirtino Tomas</small><div class="num ok">24</div><p>val. · likusios laukia</p></div>
+            </div>
+            <div class="pb">
+              <div class="num">5<span style="font-size:22px;color:var(--muted)">/6</span></div>
+              <div><b>Asmeninis rekordas arti</b>Šį mėnesį 5 patvirtinti skydai. Tavo rekordas: 6 (2025 rugsėjis).</div>
+            </div>
+            <div class="lineup" aria-label="Komandos sudėtis">
+              <div class="pl"><b>TM</b>vadov.</div><div class="pl me"><b>RK</b>skydai</div><div class="pl"><b>AS</b>laikikl.</div><div class="pl free"><b>JP</b>14:00</div>
+              <div class="help"><b>Reikia pagalbos</b>Penktadienį 2 žm. apšvietimui</div>
+            </div>
+            <div class="since"><b>Nuo vakar</b><div class="chainline"><span class="ok">✓ P-1, P-2 perduoti</span><i>→</i><span>etapas 68 %</span><i>→</i><span>užsakovas mato rezultatą</span></div></div>
+          </div>
+          <div class="dock">
+            <div class="composer">
+              <span>Ką komanda gali kitą savaitę?</span>
+              <button class="ic" type="button" aria-label="Įrašyti su nuotrauka"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+              <button class="ic dark" type="button" aria-label="Kalbėti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+            </div>
+          </div>
+          <div class="toast" id="toast" role="status" aria-live="polite">
+            <b>P-5 pažymėtas baigtu</b>
+            <div class="chainline"><span class="pend">Laukia Tomo</span><i>→</i><span>tikslas 3/4</span><i>→</i><span>etapas 75 %</span><i>→</i><span>užsakovas mato po patvirtinimo</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes">
+      <div class="note"><div class="k">01</div><div><h3>Komandos tikslas pirmiausia</h3><p>Didžiausias skaičius ekrane yra komandos savaitės tikslas, ne asmeninis balas. Atkarpos yra realūs darbo vienetai iš projekto plano: skydai, aukštai, objektai.</p></div></div>
+      <div class="note"><div class="k">02</div><div><h3>Vienas veiksmas užbaigia atkarpą</h3><p>Pažymėjus darbą baigtu, atkarpa tampa „laukia patvirtinimo". Žalia ji tampa tik patvirtinus. Etapo procentas skaičiuojamas iš patvirtintų darbų.</p></div></div>
+      <div class="note"><div class="k">03</div><div><h3>Tavo savaitė kaip treniruotės suvestinė</h3><p>Įrašytos ir patvirtintos valandos rodomos atskirai. Tai tavo duomenys, kiti komandos nariai jų nemato šalia savųjų.</p></div></div>
+      <div class="note"><div class="k">04</div><div><h3>Asmeninis rekordas be lyginimo</h3><p>Rekordas skaičiuojamas tik iš tavo pačios patvirtintos istorijos. Jis motyvuoja, bet niekada nerodomas kitiems kaip reitingas.</p></div></div>
+      <div class="note"><div class="k">05</div><div><h3>Sudėtis ir pagalba</h3><p>Komanda rodoma kaip sudėtis: vaidmuo, šiandienos užduotis, laisvas nuo. Spraga „reikia pagalbos" kviečia veikti: pasisiūlyti, pakviesti partnerį, perplanuoti.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== 2. DESKTOP =========================== -->
+<section class="block" id="desktop">
+  <div class="block-head">
+    <div class="eyebrow">2 · Kompiuteris</div>
+    <h2>Komandos arena</h2>
+    <p>Viršuje projekto trasa su etapais ir atgaline atskaita. Kairėje sudėtis ir kitos savaitės prieinamumas. Centre tikslai, pasiekimai ir kur reikia pagalbos. Dešinėje AI atsako, ką komanda gali atlikti kitą savaitę.</p>
+  </div>
+  <div class="stage" data-w="1440" data-h="900">
+    <div class="scaler">
+      <div class="desk">
+        <div class="dbar">
+          <div class="mark" aria-hidden="true">L</div>
+          <div class="ctx">Komanda Šiaurė<span>Tomo brigada ▾</span></div>
+          <div class="search">Paklausk komandos arba įrašyk darbą<span style="margin-left:auto;font:500 10.5px var(--mono)">Ctrl K</span></div>
+          <div class="r">antradienis, spalio 14 · 42 sav.</div>
+        </div>
+        <div class="course">
+          <div><div class="eyebrow">Projekto trasa</div><h3>Mokyklos renovacija · Malmö</h3><div class="sub">elektros darbai · 6 žmonės · užsakovas mato pažangą</div></div>
+          <svg id="courseSvg" viewBox="0 0 760 150" role="img" aria-label="Projekto etapai: trasos užbaigtos, skydai 68 procentai, šviesa ir perdavimas laukia"></svg>
+          <div class="countdown"><div class="num">45</div><small>dienos iki perdavimo · 11-28</small></div>
+        </div>
+        <div class="arena">
+          <div class="acol">
+            <div class="colh"><span>Sudėtis</span><span>kita sav. · P A T K P</span></div>
+            <div class="mate"><b>TM</b><div><strong>Tomas</strong><span>Brigadininkas · planas ir patvirtinimai</span></div><div class="avail" aria-label="Prieinamumas: visa savaitė"><i></i><i></i><i></i><i></i><i></i></div></div>
+            <div class="mate me"><b>RK</b><div><strong>Rasa (tu)</strong><span>Skydai P-5, P-6 · moko Joną</span></div><div class="avail" aria-label="Prieinamumas: visa savaitė"><i></i><i></i><i></i><i></i><i></i></div></div>
+            <div class="mate"><b>AS</b><div><strong>Aistė</strong><span>Laikikliai ir kabelių lovių tvirtinimas</span></div><div class="avail" aria-label="Prieinamumas: penktadienį nėra"><i></i><i></i><i></i><i></i><i class="x"></i></div></div>
+            <div class="mate"><b>MJ</b><div><strong>Mindaugas</strong><span>Apšvietimo trasos, 2 aukštas</span></div><div class="avail" aria-label="Prieinamumas: penktadienį nėra"><i></i><i></i><i></i><i></i><i class="x"></i></div></div>
+            <div class="mate"><b>JP</b><div><strong>Jonas</strong><span>Mokinys · dirba su Rasa</span></div><div class="avail" aria-label="Prieinamumas: laisvas trečiadienį"><i></i><i></i><i class="f"></i><i></i><i></i></div></div>
+            <div class="mate"><b>OL</b><div><strong>Olga</strong><span>Medžiagų logistika</span></div><div class="avail" aria-label="Prieinamumas: pirmadienį ir antradienį"><i></i><i></i><i class="x"></i><i class="x"></i><i class="x"></i></div></div>
+            <div style="font-size:11.5px;color:var(--muted)">Pilnas = suplanuota · punktyras = laisvas · pilka = nedirba</div>
+          </div>
+          <div class="acol">
+            <div class="colh"><span>Savaitės tikslai</span><span>2 iš 3 vyksta</span></div>
+            <div class="goals">
+              <div class="goal"><div><h4>Skydai P-3 – P-6</h4><div class="who">Rasa, Jonas · iki penktadienio</div></div><div class="num">2<small>/4</small></div><div class="pbar"><i class="d"></i><i class="d"></i><i class="r"></i><i></i></div></div>
+              <div class="goal"><div><h4>Apšvietimo trasos, 2 aukštas</h4><div class="who">Mindaugas, Aistė · iki ketvirtadienio</div></div><div class="num">7<small>/10</small></div><div class="pbar"><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="r"></i><i></i><i></i><i></i></div></div>
+            </div>
+            <div class="colh" style="margin-top:4px"><span>Pasiekta kartu</span><span>patvirtinta</span></div>
+            <div class="wins">
+              <div class="win"><div class="num">100%</div><span>Kabelių trasos užbaigtos 3 d. anksčiau nei planuota</span><em>✓ užsakovas · 09-30</em></div>
+              <div class="win"><div class="num">2</div><span>Skydai P-1, P-2 perduoti be pastabų</span><em>✓ Tomas · 10-13</em></div>
+              <div class="win"><div class="num">1</div><span>Jonas įrašė pirmą savarankišką darbą</span><em>✓ Rasa · 10-10</em></div>
+            </div>
+            <div class="colh" style="margin-top:4px"><span>Kur reikia pagalbos</span><span>2</span></div>
+            <div class="needs">
+              <div class="need"><div><b>Penktadienį trūksta 2 žmonių apšvietimui</b><span>Aistė ir Mindaugas nedirba · planas: 16 val.</span></div><button class="btn-line" type="button">Rasti pagalbą</button></div>
+              <div class="need"><div><b>Liftų šachtos kabeliai: nėra medžiagų</b><span>Olga laukia tiekėjo · blokuoja 1 užduotį</span></div><button class="btn-line" type="button">Atidaryti</button></div>
+            </div>
+          </div>
+          <div class="acol">
+            <div class="colh"><span>Kita savaitė</span><span>172 val. pajėgumas</span></div>
+            <div class="heat" aria-label="Kitos savaitės prieinamumas pagal dieną">
+              <span></span><span>P</span><span>A</span><span>T</span><span>K</span><span>Pn</span>
+              <span>TM</span><i></i><i></i><i></i><i></i><i></i>
+              <span>RK</span><i></i><i></i><i></i><i></i><i></i>
+              <span>AS</span><i></i><i></i><i></i><i></i><i class="x"></i>
+              <span>MJ</span><i></i><i></i><i></i><i></i><i class="x"></i>
+              <span>JP</span><i></i><i></i><i class="f"></i><i></i><i></i>
+              <span>OL</span><i></i><i></i><i class="x"></i><i class="x"></i><i class="x"></i>
+            </div>
+            <div class="ai">
+              <div class="q">Ką mūsų komanda gali atlikti kitą savaitę?</div>
+              <div class="tag">AI · iš plano ir prieinamumo</div>
+              <p>Su 172 suplanuotomis valandomis galite <b>užbaigti skydus P-7 ir P-8</b> ir <b>pradėti apšvietimą 1 aukšte</b>. Penktadienį liks 2 žmonių spraga.</p>
+              <p style="color:var(--ink-2)"><b>Ko trūksta:</b> liftų šachtos medžiagų datos. Be jos negaliu įtraukti šachtos darbų.</p>
+              <div class="row"><button class="btn-line" type="button">Paskelbti poreikį partneriams</button><button class="btn-line" type="button">Paruošti pasiūlymą užsakovui</button></div>
+              <div style="font-size:11.5px;color:var(--muted)">Abu veiksmai pirmiausia parodo juodraštį. Niekas neišsiunčiama be tavo patvirtinimo.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== 3. PERSONAL SEASON =========================== -->
+<section class="block" id="season">
+  <div class="block-head">
+    <div class="eyebrow">3 · Living CV</div>
+    <h2>Mano sezonas</h2>
+    <p>Living CV kaip sportininko sezono apžvalga: bendra apimtis, asmeniniai rekordai, pasiekti etapai, treniruočių planas kitai galimybei ir žmonės, su kuriais tai pasiekta. Viskas iš patvirtintų įrašų; kas nepatvirtinta, pažymėta.</p>
+  </div>
+  <div class="stage" data-w="1440" data-h="780">
+    <div class="scaler">
+      <div class="season">
+        <div class="scol dark">
+          <div class="eyebrow">Living CV · Rasa K. · 2019–2026</div>
+          <h3>Elektros montuotoja</h3>
+          <div class="big">
+            <div><div class="num">9 412</div><small>val. įrašyta</small></div>
+            <div><div class="num ok">8 236</div><small>val. patvirtinta</small></div>
+            <div><div class="num">6</div><small>projektai</small></div>
+            <div><div class="num">3</div><small>šalys</small></div>
+          </div>
+          <div class="spark">
+            <div class="eyebrow" style="margin-bottom:8px">Patvirtintos val. per mėnesį · paskutiniai 12 mėn.</div>
+            <svg id="spark" viewBox="0 0 360 90" role="img" aria-label="Patvirtintos valandos per mėnesį per paskutinius 12 mėnesių"></svg>
+          </div>
+        </div>
+        <div class="scol">
+          <div class="colh"><span>Asmeniniai rekordai</span><span>tik tavo istorija</span></div>
+          <div class="records">
+            <div class="rec"><div class="num">6</div><div><b>Daugiausia patvirtintų skydų per mėnesį</b><span>Göteborg uostas</span> <em>· 2025 rugsėjis</em></div></div>
+            <div class="rec"><div class="num">168</div><div><b>Daugiausia patvirtintų valandų per mėnesį</b><span>Malmö mokykla</span> <em>· 2026 sausis</em></div></div>
+            <div class="rec"><div class="num">22</div><div><b>Ilgiausias projektas, mėnesiais</b><span>Oslo ligoninė</span> <em>· 2021–2023</em></div></div>
+          </div>
+          <div class="colh"><span>Pasiekti etapai</span><span>4 + 1 kitas</span></div>
+          <div class="mile">
+            <div class="m"><b>Pirmas patvirtintas skydas</b><span>Kaunas, gamykla</span><em>✓ 2020-06</em></div>
+            <div class="m"><b>ES elektros saugos pažymėjimas</b><span>galioja iki 2027-03</span><em>✓ sertifikuota</em></div>
+            <div class="m"><b>2 500 patvirtintų skydų valandų</b><span>Göteborg uostas</span><em>✓ 2025-11</em></div>
+            <div class="m"><b>Pirmas mokinys</b><span>Jonas · 3 mėn.</span><em>✓ 10-10</em></div>
+            <div class="m next" style="grid-column:1/-1"><b>Saulės elektrinių montuotoja</b><span>64 val. DC darbų jau įrašyta · liko kursas ir 1 projektas</span><em>kitas etapas · išvesta</em></div>
+          </div>
+        </div>
+        <div class="scol">
+          <div class="colh"><span>Treniruočių planas</span><span>Saulės parkas</span></div>
+          <div class="plan">
+            <div class="pstep done"><i>✓</i><div><b>DC laidų darbai 2 projektuose</b><span>64 val., įrašai su nuotraukomis</span></div></div>
+            <div class="pstep next"><i>2</i><div><b>Švedijos elektros saugos kursas</b><span>2 d. · srautas 11-06 · atvertų galimybę</span></div></div>
+            <div class="pstep"><i>3</i><div><b>Pirmas saulės projektas</b><span>Saulės parkas, Skåne · nuo 12-01</span></div></div>
+          </div>
+          <div class="colh"><span>Pasiekta kartu</span><span>bendri projektai</span></div>
+          <div class="together">
+            <div class="tg"><b>TM</b>Tomas · 3 projektai · 1 840 bendrų komandos val.</div>
+            <div class="tg"><b>AS</b>Aistė · 2 projektai</div>
+            <div class="tg"><b>MJ</b>Mindaugas · 2 projektai</div>
+          </div>
+          <button class="btn-gold" type="button" style="margin-top:auto">Registruotis į kursą</button>
+          <div class="fine">Rekordai ir etapai rodomi tik tau. Darbdaviui matomas Living CV rodo faktus, ne rekordus.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== 4. ASSESSMENT =========================== -->
+<section class="block" id="assessment">
+  <div class="block-head">
+    <div class="eyebrow">4 · Įvertinimas</div>
+    <h2>Kaip tai sukurti iš to, kas jau yra</h2>
+    <p>Komandos arena remiasi projektų etapais, priskyrimais ir planu. Nauja yra „savaitės tikslo" sąvoka ir asmeninių rekordų skaičiavimas iš patvirtintos istorijos.</p>
+  </div>
+  <div class="tbl-wrap" style="margin-bottom:24px">
+    <table class="map">
+      <thead><tr><th>Ekrano elementas</th><th>Esami duomenys ir funkcijos</th><th>Kas nauja</th><th>Sudėtingumas</th></tr></thead>
+      <tbody id="mapC"></tbody>
+    </table>
+  </div>
+  <div class="assess">
+    <div class="card"><h3>Pagrindinės sąveikos</h3><ul>
+      <li><b>Pažymėk baigtu</b>: atkarpa → laukia → patvirtinta, etapas atsinaujina.</li>
+      <li><b>Pasisiūlyk</b> į spragą „reikia pagalbos" vienu bakstelėjimu.</li>
+      <li><b>Klausk komandos</b>: AI skaičiuoja iš plano ir prieinamumo.</li>
+      <li><b>Bakstelk rekordą</b>: matai įrašus, iš kurių jis susidarė.</li>
+      <li><b>Treniruočių planas</b>: kiekvienas žingsnis atveda prie realios galimybės.</li>
+    </ul></div>
+    <div class="card"><h3>Techninis sudėtingumas</h3><ul>
+      <li><b>Vidutinis–didelis.</b> Etapai, priskyrimai ir planas jau yra; reikia „savaitės tikslo" kaip projekto darbų rinkinio su terminu.</li>
+      <li>„Savaitės tikslas" gali būti work_tasks rinkinys, ne nauja lentelė; jei nepakaks, reikės savininko sprendimo dėl schemos.</li>
+      <li>Asmeniniai rekordai: tik skaitymo skaičiavimas iš patvirtintų įrašų.</li>
+      <li>Apytiksliai 6–8 PR po savininko pasirinkimo.</li>
+    </ul></div>
+    <div class="card"><h3>Rizikos</h3><ul>
+      <li><b>Lyginimo pavojus:</b> sporto kalba lengvai virsta reitingu. Būtini guard'ai: jokio asmenų rikiavimo pagal valandas ar rezultatus.</li>
+      <li><b>Spaudimas:</b> rekordai neturi skatinti viršvalandžių; rekordas skaičiuojamas tik iš teisėtų, patvirtintų valandų.</li>
+      <li><b>Pavieniai žmonės:</b> asmuo be komandos turi gauti asmeninę versiją, ne tuščią areną.</li>
+      <li><b>Prieinamumas:</b> didelių skaičių kontrastas geras; progreso juostos turi tekstinį atitikmenį.</li>
+    </ul></div>
+  </div>
+</section>
+
+<footer>Koncepcija C iš trijų · LabourMarket.ai Future Experience 2030 · 2026-10-14. Vardai, valandos, projektai ir galimybės yra iliustraciniai. Prieš įgyvendinant visi skaičiai ateina iš kanoninių skaitytuvų; jokių sugalvotų reikšmių.</footer>
+
+<script>
+(function(){
+  function fit(){
+    document.querySelectorAll('.stage').forEach(function(st){
+      var w=+st.dataset.w,h=+st.dataset.h,sc=st.querySelector('.scaler');
+      var s=Math.min(1,st.clientWidth/w);
+      sc.style.transform='scale('+s+')';sc.style.width=w+'px';st.style.height=(h*s)+'px';
+    });
+  }
+  window.addEventListener('resize',fit);fit();
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+  var NS='http://www.w3.org/2000/svg';
+  function el(tag,a,p,t){var e=document.createElementNS(NS,tag);for(var k in a)e.setAttribute(k,a[k]);if(t!=null)e.textContent=t;if(p)p.appendChild(e);return e;}
+
+  /* course profile */
+  var cs=document.getElementById('courseSvg');
+  var stages=[['Trasos',0,.30,1],['Skydai',.30,.62,.68],['Šviesa',.62,.86,0],['Perdavimas',.86,1,0]];
+  var W=740,x0=10,base=110;
+  // rising course: each stage a block whose height grows (course elevation)
+  stages.forEach(function(s,i){
+    var x=x0+s[1]*W,w=(s[2]-s[1])*W-6,h=34+i*16;
+    el('rect',{x:x,y:base-h,width:w,height:h,rx:6,fill:'#C5C9BF'},cs);
+    if(s[3]>0)el('rect',{x:x,y:base-h,width:w*s[3],height:h,rx:6,fill:s[3]===1?'#107A53':'#101310'},cs);
+    el('text',{x:x+8,y:base+20,'font-family':'Inter, sans-serif','font-size':13,'font-weight':650,fill:'#101310'},cs,s[0]);
+    el('text',{x:x+8,y:base+36,'font-family':'JetBrains Mono, monospace','font-size':10.5,fill:'#596055'},cs,s[3]===1?'✓ patvirtinta':(s[3]>0?Math.round(s[3]*100)+' % · vyksta':'laukia'));
+  });
+  var nx=x0+(.30+.32*.68)*W;
+  el('line',{x1:nx,y1:20,x2:nx,y2:base,stroke:'#D4AF37','stroke-width':3},cs);
+  el('rect',{x:nx-52,y:2,width:104,height:20,rx:10,fill:'#D4AF37'},cs);
+  el('text',{x:nx,y:16,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':11,'font-weight':600,fill:'#0a0a0a'},cs,'MES ČIA');
+
+  /* sparkline */
+  var sp=document.getElementById('spark');
+  var vals=[142,150,168,160,120,96,138,152,160,148,155,142];
+  var mx=180,bw=360/vals.length;
+  vals.forEach(function(v,i){
+    var h=v/mx*72;
+    el('rect',{x:i*bw+2,y:80-h,width:bw-5,height:h,rx:2,fill:v===168?'#D4AF37':'#5FD3A2','fill-opacity':v===168?1:.75},sp);
+  });
+  el('line',{x1:0,y1:80,x2:360,y2:80,stroke:'#3F453D'},sp);
+  el('text',{x:2*bw+2,y:8,'font-family':'JetBrains Mono, monospace','font-size':10,fill:'#E6E8E2'},sp,'rekordas 168');
+
+  /* phone interaction */
+  var btn=document.getElementById('doneBtn'),toast=document.getElementById('toast');
+  btn.addEventListener('click',function(){
+    var s=document.getElementById('sNow');
+    s.classList.remove('now');s.style.background='rgba(212,175,55,.25)';s.style.color='#D4AF37';s.textContent='P-5 · laukia';
+    document.getElementById('gNum').innerHTML='3<small>/4</small>';
+    document.getElementById('stagePct').textContent='75';
+    btn.textContent='Laukia Tomo patvirtinimo';btn.disabled=true;
+    toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},4200);
+  });
+
+  var rows=[
+    ['Projekto trasa ir etapai','projects, project_stages (planned / in_progress / blocked / done), project_handover_entries','Trasos vizualizacija; „mes čia" iš patvirtintų darbų','Mažas'],
+    ['Savaitės tikslas ir atkarpos','work_tasks, work_task_events, task_dependencies, work_objects','Tikslas = užduočių rinkinys su terminu; jei reikia naujo lauko, savininko sprendimas','Didelis'],
+    ['Pažymėti baigtu → patvirtinta','work_task_events, journal_entry_confirmations, confirm-work.ts, notification_events','Vienas veiksmas, kurio pasekmė matoma iškart','Vidutinis'],
+    ['Sudėtis ir prieinamumas','organizations (type=team), team_assignments, project_worker_assignments, planavimo savaitė, capacity.ts','Vaidmens ir šiandienos užduoties eilutė; 5 dienų prieinamumas','Vidutinis'],
+    ['Kur reikia pagalbos','project-risk.ts, capacity.ts, project_stages.blocked_reason, team_demand_offers','Spragos kortelė su veiksmu „rasti pagalbą"','Vidutinis'],
+    ['AI: ką komanda gali kitą savaitę','pokalbio intent maršrutizatorius, capacity.ts, MCP įrankiai; siuntimas tik per patvirtinimo žetoną','Rezultato šablonas „pajėgumas → kas įmanoma → ko trūksta"','Vidutinis'],
+    ['Asmeniniai rekordai','journal_entry_metrics + journal_entry_confirmations (tik patvirtinta), Living CV skaitytuvai','Tik skaitymo skaičiavimas; matomas tik pačiam žmogui','Mažas'],
+    ['Pasiekti etapai','worker_achievements, worker_documents (sertifikatai), evidence-tier.ts','Etapų kortelės iš esamų faktų; „kitas etapas" pažymėtas kaip išvestas','Mažas']
+  ];
+  var tb=document.getElementById('mapC');
+  rows.forEach(function(r){var tr=document.createElement('tr');r.forEach(function(c,i){var td=document.createElement('td');if(i===3){var s=document.createElement('span');s.className='lvl';s.textContent=c;td.appendChild(s);}else td.textContent=c;tr.appendChild(td);});tb.appendChild(tr);});
+})();
+</script>
+</body>
+</html>
