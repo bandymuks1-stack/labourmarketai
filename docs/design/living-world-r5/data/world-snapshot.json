@@ -1,0 +1,131 @@
+{
+  "$schema": "./world-snapshot.schema.md",
+  "provenance": {
+    "source": "labourmarket.ai production Postgres (project gorgitwvdzxbnaxhrsrw), read-only SELECT",
+    "table": "public.public_vacancies",
+    "supplier": "Arbetsförmedlingen public job ads (CC0, attribution required, owner-activated 2026-08-09)",
+    "queriedAtIso": "2026-08-15T21:20:00Z",
+    "inventoryLastSeenAtIso": "2026-08-15T17:34:02.505Z",
+    "newestPublishedAtIso": "2026-08-15T19:31:10Z",
+    "generator": "docs/design/living-world-r5/tools/build-snapshot.mjs",
+    "note": "Every number in this file is a COUNT returned by production. Nothing is rounded, smoothed, or invented. Counts go stale — regenerate before any reuse."
+  },
+  "country": {
+    "iso2": "SE",
+    "activeVacancies": 41432,
+    "totalRows": 41461,
+    "regions": 21,
+    "cities": 290,
+    "employers": 7782,
+    "publishedLast7Days": 10260,
+    "classifiedRows": 17217,
+    "classifiedSharePct": 41.5,
+    "geocodedRows": 0
+  },
+  "honesty": {
+    "classification": "Only 17,217 of 41,461 rows (41.5%) carry a profession_slug. EVERY profession count in this file is a count of the CLASSIFIED subset and must be rendered as such — never as a share of the whole inventory.",
+    "geocoding": "lat/lng is NULL on 100% of rows. The platform holds no vacancy coordinates. City-level placement in any visualization is derived from the city NAME only; a pin is a city, never a workplace.",
+    "categorizationVersion": "41,297 rows are transform_version vacancy-arbetsformedlingen-v2. 164 rows remain v1; pre-v2 profession slugs are known-polluted and are excluded from every profession figure here.",
+    "employers": "employer_name is the raw supplier string. No employer is named anywhere in the prototypes — only counted."
+  },
+  "region": {
+    "name": "Västra Götalands län",
+    "activeVacancies": 6289,
+    "cities": 49
+  },
+  "city": {
+    "name": "Göteborg",
+    "region": "Västra Götalands län",
+    "lat": 57.7089,
+    "lng": 11.9746,
+    "latLngSource": "Geographic coordinate of the CITY (public knowledge), used to place the camera. NOT derived from vacancy data — vacancies carry no coordinates.",
+    "activeVacancies": 3078,
+    "employers": 1036,
+    "classifiedVacancies": 1257,
+    "distinctProfessions": 36
+  },
+  "citySelection": {
+    "decidedBy": "evidence, per R5 §6 — not taste",
+    "criteria": {
+      "volume": "Göteborg 3,078 active (2nd of 290 cities); 1,036 employers",
+      "professionInteraction": "highest profession evenness among high-volume cities: 0.841 (Stockholm 0.815); 17 professions with >=20 active, 12 with >=50",
+      "territory": "working river port, shipyard cranes, Göta älv, Ringön industry — real economic activity is visible in a real establishing frame",
+      "journalToMatching": "the chain professions all carry real catalogue skills in production (profession_skills)",
+      "cinematic": "one continuous geography from river mouth to city block; no impossible adjacency needed"
+    },
+    "runnersUp": [
+      { "city": "Stockholm", "activeVacancies": 6523, "evenness": 0.815, "professionsGe20": 20, "rejectedBecause": "largest volume, but care+education and services concentrate 47% of the classified subset — a weaker economic-chain demonstration; also the owner reference frame, so a second city proves the engine is not tied to one plate" },
+      { "city": "Malmö", "activeVacancies": 1522, "evenness": 0.868, "professionsGe20": 11, "rejectedBecause": "best evenness but only 3 professions above 50 — the chain breaks" }
+    ]
+  },
+  "chain": {
+    "note": "The Göteborg economic chain the flagship camera follows. Each link is a real active-vacancy count for city='Göteborg' in the classified v2 subset.",
+    "links": [
+      { "step": 1, "professionSlug": "warehouse_worker", "activeVacancies": 98, "employers": 40 },
+      { "step": 2, "professionSlug": "driver", "activeVacancies": 78, "employers": 61 },
+      { "step": 3, "professionSlug": "kitchen_helper", "activeVacancies": 55, "employers": 34 },
+      { "step": 4, "professionSlug": "cook", "activeVacancies": 72, "employers": 56 },
+      { "step": 5, "professionSlug": "waiter", "activeVacancies": 51, "employers": 35 },
+      { "step": 6, "professionSlug": "electrician", "activeVacancies": 71, "employers": 47 },
+      { "step": 7, "professionSlug": "sales_assistant", "activeVacancies": 62, "employers": 41 }
+    ]
+  },
+  "cityProfessions": [
+    { "slug": "software_developer", "n": 145, "employers": 73 },
+    { "slug": "caregiver", "n": 140, "employers": 59 },
+    { "slug": "warehouse_worker", "n": 98, "employers": 40 },
+    { "slug": "teacher", "n": 83, "employers": 22 },
+    { "slug": "driver", "n": 78, "employers": 61 },
+    { "slug": "cook", "n": 72, "employers": 56 },
+    { "slug": "electrician", "n": 71, "employers": 47 },
+    { "slug": "office_administrator", "n": 65, "employers": 52 },
+    { "slug": "sales_assistant", "n": 62, "employers": 41 },
+    { "slug": "kitchen_helper", "n": 55, "employers": 34 },
+    { "slug": "auto_mechanic", "n": 53, "employers": 30 },
+    { "slug": "waiter", "n": 51, "employers": 35 },
+    { "slug": "cleaner", "n": 47, "employers": 34 },
+    { "slug": "customer_service_specialist", "n": 39, "employers": 24 },
+    { "slug": "carpenter", "n": 38, "employers": 33 },
+    { "slug": "production_worker", "n": 22, "employers": 14 },
+    { "slug": "receptionist", "n": 20, "employers": 16 },
+    { "slug": "baker", "n": 19, "employers": 13 }
+  ],
+  "nationalProfessions": [
+    { "slug": "caregiver", "n": 4152, "cities": 282, "employers": 817 },
+    { "slug": "teacher", "n": 1527, "cities": 230, "employers": 439 },
+    { "slug": "sales_assistant", "n": 1060, "cities": 166, "employers": 289 },
+    { "slug": "warehouse_worker", "n": 923, "cities": 143, "employers": 246 },
+    { "slug": "driver", "n": 870, "cities": 151, "employers": 443 },
+    { "slug": "cleaner", "n": 839, "cities": 168, "employers": 365 },
+    { "slug": "software_developer", "n": 801, "cities": 65, "employers": 348 },
+    { "slug": "cook", "n": 789, "cities": 171, "employers": 551 },
+    { "slug": "production_worker", "n": 755, "cities": 186, "employers": 271 },
+    { "slug": "kitchen_helper", "n": 745, "cities": 149, "employers": 346 },
+    { "slug": "electrician", "n": 648, "cities": 154, "employers": 314 },
+    { "slug": "gardener", "n": 104, "cities": 72, "employers": 33 }
+  ],
+  "topCities": [
+    { "name": "Stockholm", "region": "Stockholms län", "n": 6523 },
+    { "name": "Göteborg", "region": "Västra Götalands län", "n": 3066 },
+    { "name": "Malmö", "region": "Skåne län", "n": 1522 },
+    { "name": "Uppsala", "region": "Uppsala län", "n": 1073 },
+    { "name": "Linköping", "region": "Östergötlands län", "n": 1051 },
+    { "name": "Jönköping", "region": "Jönköpings län", "n": 805 },
+    { "name": "Örebro", "region": "Örebro län", "n": 716 },
+    { "name": "Umeå", "region": "Västerbottens län", "n": 692 },
+    { "name": "Västerås", "region": "Västmanlands län", "n": 684 },
+    { "name": "Luleå", "region": "Norrbottens län", "n": 625 },
+    { "name": "Norrköping", "region": "Östergötlands län", "n": 618 },
+    { "name": "Lund", "region": "Skåne län", "n": 600 },
+    { "name": "Helsingborg", "region": "Skåne län", "n": 571 }
+  ],
+  "professionSkills": {
+    "note": "Real rows from production professions x profession_skills x skills. These are the canonical skill slugs the one match engine (lib/market/fit.ts) computes over.",
+    "warehouse_worker": ["barcode-scanning", "forklift-operation", "order-picking", "packaging", "pallet-handling", "stock-taking", "warehouse-operations"],
+    "driver": ["cargo-transport", "delivery-driving", "driving", "forklift-operation"],
+    "cook": ["cooking", "waiting-tables"],
+    "kitchen_helper": ["cleaning-services", "dishwashing", "kitchen-help"],
+    "electrician": ["cable-pulling", "electrical-install", "electrical-testing", "industrial-electric", "lighting-install", "low-voltage", "panel-install"],
+    "sales_assistant": ["cashier", "customer-service", "sales-assistant"]
+  }
+}
