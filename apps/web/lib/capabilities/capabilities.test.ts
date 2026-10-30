@@ -32,9 +32,21 @@ const coreWrite = vi.fn(async () => ({
     cvUpdated: true,
   },
 }));
+// The entry a refused confirm's draft already became (P0-A retry replay);
+// none by default, so every refusal test below stays a refusal.
+const confirmedDraftLookup = vi.fn(async (..._a: unknown[]): Promise<string | null> => null);
 vi.mock("@/lib/journal/journal-write-core", () => ({
   createJournalEntryCore: (...args: unknown[]) => coreWrite(...(args as [])),
   projectsToChooseFrom: async () => null,
+  findConfirmedDraftEntry: (...args: unknown[]) => confirmedDraftLookup(...args),
+  runSkillPipeline: async () => ({
+    status: "completed",
+    added: 0,
+    strengthened: 1,
+    reviewNeeded: 0,
+    claimsSaved: 0,
+    cvUpdated: false,
+  }),
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -1784,6 +1796,70 @@ describe("journal draft → confirm", () => {
     expect(replayed).toMatchObject({ ok: false, code: "confirmation_rejected" });
     expect(replayed.ok === false && /stale_state/.test(replayed.message ?? "")).toBe(true);
     expect(coreWrite).not.toHaveBeenCalled();
+  });
+
+  // P0-A 2026-10-30: the first confirm WROTE, its response was lost (mobile
+  // network drop, client timeout) and the client retried the same token. It
+  // used to answer "not saved — draft again", inviting a second copy.
+  it("RETRY AFTER A LOST RESPONSE: the spent token answers with the entry the first call recorded — and writes nothing", async () => {
+    coreWrite.mockClear();
+    confirmedDraftLookup.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    confirmedDraftLookup.mockResolvedValueOnce("e-first");
+
+    const retried = await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(retried).toMatchObject({
+      ok: true,
+      data: { entryId: "e-first", alreadyRecorded: true, skills: { status: "completed" } },
+    });
+    expect(coreWrite).not.toHaveBeenCalled();
+    // The lookup is bound to THIS draft: worker, context, words, day, project
+    // and only entries recorded after the token was issued.
+    const [, q] = confirmedDraftLookup.mock.calls[0] as unknown as [unknown, Record<string, unknown>];
+    // …with the confirm's OWN FormData mapping: every signed field it writes.
+    expect(q).toMatchObject({ workerId: "worker-1" });
+    expect(q.fields).toEqual({
+      locale: "lt",
+      engagement_context_id: DRAFT.engagementContextId,
+      notes: DRAFT.notes,
+      work_date: DRAFT.workDate,
+      site_name: DRAFT.siteName,
+      project_id: "",
+      ...intakeWorkTimeFields(DRAFT.notes, DRAFT.workDate),
+    });
+    expect(typeof q.issuedAtMs).toBe("number");
+  });
+
+  it("a stale token whose draft was NOT recorded stays refused (draft again)", async () => {
+    coreWrite.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const r = await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(r).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(coreWrite).not.toHaveBeenCalled();
+  });
+
+  it("a forged or tampered token never even asks whether the entry exists", async () => {
+    confirmedDraftLookup.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      notes: "Different notes than were previewed",
+      confirmationToken: token,
+    });
+    await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      confirmationToken: "not-a-real.token",
+    });
+    expect(confirmedDraftLookup).not.toHaveBeenCalled();
   });
 });
 

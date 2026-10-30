@@ -8,6 +8,7 @@ import {
   createJournalEntryCore,
   projectsToChooseFrom,
 } from "@/lib/journal/journal-write-core";
+import { alreadyRecordedJournalEntry } from "@/lib/journal/confirmed-draft-replay";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
@@ -32,6 +33,7 @@ import {
 import { safeApprovedCompanyName } from "@/lib/opportunities/opportunity-fit";
 
 import {
+  capabilityTokenIssuedAt,
   mintCapabilityConfirmation,
   verifyCapabilityConfirmation,
 } from "./confirmable";
@@ -762,6 +764,68 @@ const journalCreateDraft: CapabilityDescriptor = {
   },
 };
 
+/** THE FormData mapping journal.confirm sends to the write core — one
+ *  function, so the "already recorded" lookup compares exactly what the
+ *  confirm writes (every signed field). */
+function journalConfirmFields(
+  locale: string,
+  draft: z.infer<typeof workerLogWorkSchema>,
+): Record<string, string> {
+  return {
+    locale,
+    engagement_context_id: draft.engagementContextId,
+    notes: draft.notes,
+    work_date: draft.workDate,
+    site_name: draft.siteName ?? "",
+    project_id: draft.projectId ?? "",
+    // The stated time becomes time on the record — the same derivation
+    // the conversation executor applies (issue #1689).
+    ...intakeWorkTimeFields(draft.notes, draft.workDate),
+  };
+}
+
+/**
+ * The entry a refused confirm's draft ALREADY became, as a confirm result —
+ * or null. Only for a GENUINE token of this caller for this exact draft
+ * (signature, input, user, TTL all verified; only the state moved or the
+ * token was spent), and only when a live entry with the draft's exact
+ * engagement, words, day and project was recorded after the token was
+ * issued (`findConfirmedDraftEntry`). Writes no entry: the skill pipeline it
+ * re-reads is idempotent (the create core's duplicate path does the same).
+ */
+async function alreadyRecordedEntry(
+  caller: CapabilityCaller,
+  draft: z.infer<typeof workerLogWorkSchema>,
+  confirmationToken: string,
+): Promise<ExecResult | null> {
+  const issuedAtMs = capabilityTokenIssuedAt({
+    actionId: "journal.confirm",
+    token: confirmationToken,
+    input: normalizedDraftForHash(draft),
+    userId: caller.userId,
+  });
+  if (issuedAtMs === null) return null;
+  const found = await alreadyRecordedJournalEntry(caller, journalConfirmFields(caller.locale, draft), issuedAtMs);
+  if (!found) return null;
+  const { entryId, skills } = found;
+  return {
+    ok: true,
+    data: {
+      entryId,
+      // This confirm wrote nothing: the entry was recorded by the first call.
+      alreadyRecorded: true,
+      skills: {
+        status: skills.status,
+        added: skills.added,
+        strengthened: skills.strengthened,
+        reviewNeeded: skills.reviewNeeded,
+        claimsSaved: skills.claimsSaved,
+        cvUpdated: skills.cvUpdated,
+      },
+    },
+  };
+}
+
 const journalConfirmInput = workerLogWorkSchema.extend({
   confirmationToken: z.string().min(10),
 });
@@ -804,6 +868,15 @@ const journalConfirm: CapabilityDescriptor = {
       currentStateFingerprint: state.fingerprint,
     });
     if (!verdict.ok) {
+      // A retry after a lost response (mobile network drop, client timeout):
+      // the single-use token was spent by the FIRST call, which did write.
+      // Answer with that entry instead of "not saved — draft again", which
+      // invited a second copy of the same day (P0-A 2026-10-30).
+      const replay =
+        verdict.reason === "stale_state"
+          ? await alreadyRecordedEntry(caller, draft, confirmationToken)
+          : null;
+      if (replay) return replay;
       return {
         ok: false,
         code: "confirmation_rejected",
@@ -817,17 +890,7 @@ const journalConfirm: CapabilityDescriptor = {
     });
     const result = await createJournalEntryCore(
       { supabase: caller.supabase, userId: caller.userId, t },
-      fd({
-        locale: caller.locale,
-        engagement_context_id: draft.engagementContextId,
-        notes: draft.notes,
-        work_date: draft.workDate,
-        site_name: draft.siteName ?? "",
-        project_id: draft.projectId ?? "",
-        // The stated time becomes time on the record — the same derivation
-        // the conversation executor applies (issue #1689).
-        ...intakeWorkTimeFields(draft.notes, draft.workDate),
-      }),
+      fd(journalConfirmFields(caller.locale, draft)),
     );
     if (!result.ok) {
       if (result.code === "project_required" && result.projects) {
