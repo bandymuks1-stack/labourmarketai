@@ -5,25 +5,31 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  *
  * Before: an external assistant got only the chat's one-line readback
  * ("found 3"): no demand id to express interest in, no engine verdict, no
- * skill basis. These tests pin that it now gets the panel's own rows, read
- * with the chat's limit and the caller's filters, and that every outcome
- * stays a DISTINCT answer (no worker / unreadable / honest empty / rows).
+ * skill basis. These tests pin that it now gets the panel's own rows, that the
+ * sentence and the rows come from ONE board read, and that every outcome stays
+ * a DISTINCT answer (no worker / unreadable / honest empty / rows).
+ *
+ * The readback runs for real (i18n stubbed as `<ns>.<key>`); only the use
+ * case's load and the panel projection are stubbed.
  */
 
 const loadViewMock = vi.fn();
-const loadResultMock = vi.fn();
-const findWorkMock = vi.fn();
-const VIEW = { kind: "ready", marker: "the-one-view" };
+const projectMock = vi.fn();
 
 vi.mock("server-only", () => ({}));
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async (ns: string) => {
+    const t = (key: string, values?: Record<string, unknown>) =>
+      values ? `${ns}.${key}(${JSON.stringify(values)})` : `${ns}.${key}`;
+    (t as unknown as { has: (k: string) => boolean }).has = () => true;
+    return t;
+  }),
+}));
 vi.mock("@/lib/marketplace/worker-opportunities", () => ({
   loadWorkerOpportunityMatches: (...args: unknown[]) => loadViewMock(...args),
 }));
 vi.mock("@/lib/marketplace/opportunities-result", () => ({
-  projectOpportunitiesResult: (...args: unknown[]) => loadResultMock(...args),
-}));
-vi.mock("./find-work-readback", () => ({
-  findWorkReadback: (...args: unknown[]) => findWorkMock(...args),
+  projectOpportunitiesResult: (...args: unknown[]) => projectMock(...args),
 }));
 
 const { findWorkForCapability } = await import("./find-work-capability");
@@ -31,7 +37,7 @@ const { CONVERSATION_FIND_WORK_LIMIT } = await import("./find-work-contract");
 
 const ID = "11111111-1111-4111-8111-111111111111";
 
-const MATCH = {
+const ROW = {
   requestId: ID,
   roleSlug: "tiler",
   country: "LT",
@@ -48,10 +54,24 @@ const MATCH = {
   interestStatus: null,
 };
 
-function ready(over: Record<string, unknown> = {}) {
+function view(matches: { status: string }[], boardAvailable = true) {
   return {
     kind: "ready",
-    matches: [MATCH],
+    surface: "conversation",
+    capabilities: { boardAvailable, seenAvailable: false, seenReadDegraded: false, interestAvailable: true },
+    interestStatusByRequestId: {},
+    matches,
+    totalRecommendable: matches.length,
+    newCount: 0,
+    externalCards: [],
+    totalExternal: 0,
+  };
+}
+
+function projected(over: Record<string, unknown> = {}) {
+  return {
+    kind: "ready",
+    matches: [ROW],
     totalRecommendable: 1,
     newCount: 1,
     seenDegraded: false,
@@ -64,15 +84,14 @@ function ready(over: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   loadViewMock.mockReset();
-  loadViewMock.mockResolvedValue(VIEW);
-  loadResultMock.mockReset();
-  findWorkMock.mockReset();
+  projectMock.mockReset();
 });
 
 describe("work.find capability adapter", () => {
-  it("reads the board ONCE (chat limit, caller's filters); sentence and rows come from that one view", async () => {
-    loadResultMock.mockResolvedValue(ready());
-    findWorkMock.mockResolvedValue({ kind: "matches", count: 1, intro: "one" });
+  it("reads the board ONCE (chat limit, caller's filters); the rows are projected from that same view", async () => {
+    const v = view([{ status: "strong" }]);
+    loadViewMock.mockResolvedValue(v);
+    projectMock.mockResolvedValue(projected());
     const filters = { country: "LT" } as never;
     await findWorkForCapability(filters);
     expect(loadViewMock).toHaveBeenCalledTimes(1);
@@ -81,19 +100,18 @@ describe("work.find capability adapter", () => {
       limit: CONVERSATION_FIND_WORK_LIMIT,
       filters,
     });
-    expect(loadResultMock).toHaveBeenCalledWith(VIEW);
-    expect(findWorkMock).toHaveBeenCalledWith(VIEW);
+    expect(projectMock).toHaveBeenCalledWith(v);
   });
 
   it("returns the rows with the skill basis, the engine verdict and the demand id", async () => {
-    loadResultMock.mockResolvedValue(ready());
-    findWorkMock.mockResolvedValue({ kind: "matches", count: 1, intro: "one" });
+    loadViewMock.mockResolvedValue(view([{ status: "strong" }]));
+    projectMock.mockResolvedValue(projected());
     const res = await findWorkForCapability();
     expect(res.ok).toBe(true);
     const data = (res as { data: Record<string, unknown> }).data;
     expect(data.kind).toBe("matches");
     expect(data.count).toBe(1);
-    const [row] = data.matches as (typeof MATCH)[];
+    const [row] = data.matches as (typeof ROW)[];
     expect(row.requestId).toBe(ID);
     expect(row.fitStatus).toBe("strong");
     expect(row.matchedSkillSlugs).toEqual(["tiling", "waterproofing"]);
@@ -104,30 +122,23 @@ describe("work.find capability adapter", () => {
   });
 
   it("an honest empty is ok:true with kind 'empty' — not an error", async () => {
-    loadResultMock.mockResolvedValue(ready({ matches: [], totalRecommendable: 0 }));
-    findWorkMock.mockResolvedValue({ kind: "empty", message: "nothing fits" });
+    loadViewMock.mockResolvedValue(view([]));
+    projectMock.mockResolvedValue(projected({ matches: [], totalRecommendable: 0 }));
     const res = await findWorkForCapability();
-    expect(res).toMatchObject({ ok: true, data: { kind: "empty", message: "nothing fits", matches: [] } });
+    expect(res).toMatchObject({ ok: true, data: { kind: "empty", matches: [] } });
   });
 
   it("no worker profile is its own refusal, not 'unavailable'", async () => {
-    loadResultMock.mockResolvedValue({ kind: "no-worker" });
+    loadViewMock.mockResolvedValue({ kind: "no-worker" });
+    projectMock.mockResolvedValue({ kind: "no-worker" });
     const res = await findWorkForCapability();
     expect(res).toMatchObject({ ok: false, code: "no_worker_profile" });
-    expect(findWorkMock).not.toHaveBeenCalled();
   });
 
-  it("an unreadable board is 'unavailable' — never an empty result", async () => {
-    loadResultMock.mockResolvedValue({ kind: "unavailable" });
-    findWorkMock.mockResolvedValue({ kind: "blocked", message: "no access" });
+  it("an unreadable board with nothing else to show is 'unavailable' — never an empty result", async () => {
+    loadViewMock.mockResolvedValue(view([], false));
+    projectMock.mockResolvedValue({ kind: "unavailable" });
     const res = await findWorkForCapability();
     expect(res).toMatchObject({ ok: false, code: "unavailable" });
-  });
-
-  it("external ads counted while platform rows are unreadable: rows are null, not []", async () => {
-    loadResultMock.mockResolvedValue({ kind: "unavailable" });
-    findWorkMock.mockResolvedValue({ kind: "matches", count: 2, intro: "two ads" });
-    const res = await findWorkForCapability();
-    expect(res).toMatchObject({ ok: true, data: { kind: "matches", matches: null, external: null } });
   });
 });

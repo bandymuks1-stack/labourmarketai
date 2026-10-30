@@ -8,7 +8,7 @@ import {
   CONVERSATION_FIND_WORK_LIMIT,
   type FindWorkResult,
 } from "./find-work-contract";
-import { findWorkReadback } from "./find-work-readback";
+import { findWorkReadback } from "./find-work-capability";
 
 /**
  * Conversation "find work" — a THIN INTENT ADAPTER over the canonical

@@ -192,7 +192,7 @@ export function deriveJobRecommendations(
         salary: salaryOutcome(s.match),
         matchedSkillSlugs: fit.matchedUris,
         missingSkillSlugs: fit.missingUris,
-        needSkillsUnconfirmed: s.match.missingData.includes(
+        needSkillsUnconfirmed: (s.match.missingData ?? []).includes(
           "need_recognized_not_confirmed",
         ),
         unseen,
