@@ -10,15 +10,20 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  * stays a DISTINCT answer (no worker / unreadable / honest empty / rows).
  */
 
+const loadViewMock = vi.fn();
 const loadResultMock = vi.fn();
 const findWorkMock = vi.fn();
+const VIEW = { kind: "ready", marker: "the-one-view" };
 
 vi.mock("server-only", () => ({}));
-vi.mock("@/lib/marketplace/opportunities-result", () => ({
-  loadOpportunitiesResult: (...args: unknown[]) => loadResultMock(...args),
+vi.mock("@/lib/marketplace/worker-opportunities", () => ({
+  loadWorkerOpportunityMatches: (...args: unknown[]) => loadViewMock(...args),
 }));
-vi.mock("./find-work", () => ({
-  findWorkForChat: (...args: unknown[]) => findWorkMock(...args),
+vi.mock("@/lib/marketplace/opportunities-result", () => ({
+  projectOpportunitiesResult: (...args: unknown[]) => loadResultMock(...args),
+}));
+vi.mock("./find-work-readback", () => ({
+  findWorkReadback: (...args: unknown[]) => findWorkMock(...args),
 }));
 
 const { findWorkForCapability } = await import("./find-work-capability");
@@ -58,21 +63,26 @@ function ready(over: Record<string, unknown> = {}) {
 }
 
 beforeEach(() => {
+  loadViewMock.mockReset();
+  loadViewMock.mockResolvedValue(VIEW);
   loadResultMock.mockReset();
   findWorkMock.mockReset();
 });
 
 describe("work.find capability adapter", () => {
-  it("reads the panel projection with the chat's limit and the caller's filters", async () => {
+  it("reads the board ONCE (chat limit, caller's filters); sentence and rows come from that one view", async () => {
     loadResultMock.mockResolvedValue(ready());
     findWorkMock.mockResolvedValue({ kind: "matches", count: 1, intro: "one" });
     const filters = { country: "LT" } as never;
     await findWorkForCapability(filters);
-    expect(loadResultMock).toHaveBeenCalledWith({
+    expect(loadViewMock).toHaveBeenCalledTimes(1);
+    expect(loadViewMock).toHaveBeenCalledWith({
+      surface: "conversation",
       limit: CONVERSATION_FIND_WORK_LIMIT,
       filters,
     });
-    expect(findWorkMock).toHaveBeenCalledWith(filters);
+    expect(loadResultMock).toHaveBeenCalledWith(VIEW);
+    expect(findWorkMock).toHaveBeenCalledWith(VIEW);
   });
 
   it("returns the rows with the skill basis, the engine verdict and the demand id", async () => {

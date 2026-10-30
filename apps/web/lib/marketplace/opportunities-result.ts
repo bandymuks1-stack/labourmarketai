@@ -9,7 +9,10 @@ import {
   OPPORTUNITIES_RESULT_EXTERNAL_LIMIT,
   type OpportunitiesResultView,
 } from "./worker-opportunities-contract";
-import { loadWorkerOpportunityMatches } from "./worker-opportunities";
+import {
+  loadWorkerOpportunityMatches,
+  type MarketplaceMatchesView,
+} from "./worker-opportunities";
 
 /**
  * The opportunities RESULT projection — ONE place for both of its readers:
@@ -39,6 +42,14 @@ export async function loadOpportunitiesResult(input: {
     limit: input.limit,
     filters: input.filters,
   });
+  return projectOpportunitiesResult(view);
+}
+
+/** The projection itself, over an already-loaded view — so a caller that also
+ *  needs the chat's sentence (`work.find`) reads the board ONCE. */
+export async function projectOpportunitiesResult(
+  view: MarketplaceMatchesView,
+): Promise<OpportunitiesResultView> {
   if (view.kind !== "ready") return { kind: "no-worker" };
   if (!view.capabilities.boardAvailable) return { kind: "unavailable" };
 

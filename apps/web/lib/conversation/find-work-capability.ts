@@ -1,10 +1,11 @@
 import "server-only";
 
 import type { ExecResult } from "@/lib/conversation/executor-contract";
-import { loadOpportunitiesResult } from "@/lib/marketplace/opportunities-result";
+import { projectOpportunitiesResult } from "@/lib/marketplace/opportunities-result";
+import { loadWorkerOpportunityMatches } from "@/lib/marketplace/worker-opportunities";
 import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
-import { findWorkForChat } from "./find-work";
 import { CONVERSATION_FIND_WORK_LIMIT } from "./find-work-contract";
+import { findWorkReadback } from "./find-work-readback";
 
 /**
  * `work.find` for the capability door (MCP / external assistants).
@@ -12,10 +13,11 @@ import { CONVERSATION_FIND_WORK_LIMIT } from "./find-work-contract";
  * The web chat says ONE sentence and opens the Context Panel, which renders
  * the rows. An external assistant has no panel: a bare sentence ("found 3")
  * gave it no demand id to express interest in, no fit, and no skill basis to
- * explain — so it could only repeat a count. This adapter returns the chat's
- * sentence AND the panel's own rows, read through the SAME projection
- * (`loadOpportunitiesResult`) with the chat's limit and the caller's filters,
- * so the count the sentence states is the rows it carries.
+ * explain — so it could only repeat a count. This adapter reads the board ONCE
+ * (the chat's limit, the caller's filters) and derives from that one view both
+ * the chat's sentence (`findWorkReadback`) and the panel's own rows
+ * (`projectOpportunitiesResult`), so the sentence and the rows can never
+ * describe two different reads.
  *
  * Every outcome stays distinct (SEP-7): no worker profile, the demand source
  * not readable, an honest empty ("the read worked, nothing fits"), and real
@@ -25,10 +27,12 @@ import { CONVERSATION_FIND_WORK_LIMIT } from "./find-work-contract";
 export async function findWorkForCapability(
   filters?: DiscoveryFilterState,
 ): Promise<ExecResult> {
-  const rows = await loadOpportunitiesResult({
+  const view = await loadWorkerOpportunityMatches({
+    surface: "conversation",
     limit: CONVERSATION_FIND_WORK_LIMIT,
     filters,
   });
+  const rows = await projectOpportunitiesResult(view);
   if (rows.kind === "no-worker") {
     return {
       ok: false,
@@ -37,7 +41,7 @@ export async function findWorkForCapability(
     };
   }
 
-  const said = await findWorkForChat(filters);
+  const said = await findWorkReadback(view);
   if (said.kind === "blocked") {
     return {
       ok: false,
