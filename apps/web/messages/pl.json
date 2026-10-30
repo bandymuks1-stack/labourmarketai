@@ -17405,7 +17405,30 @@
     "approve": "Zezwól",
     "deny": "Odmów",
     "errorMissingId": "Brak żądania autoryzacji. Wróć do aplikacji i spróbuj ponownie.",
-    "errorUnresolved": "Nie udało się rozwiązać żądania autoryzacji. Mogło wygasnąć (żądania są ważne kilka minut) lub zostało już użyte. Wróć do aplikacji i połącz się ponownie."
+    "errorUnresolved": "Nie udało się rozwiązać żądania autoryzacji. Mogło wygasnąć (żądania są ważne kilka minut) lub zostało już użyte. Wróć do aplikacji i połącz się ponownie.",
+    "scope": {
+      "readProfile": "Widzieć Twój profil i Living CV",
+      "writeProfile": "Zmieniać Twój profil, żywe CV, dokumenty, ustawienia i powiadomienia; przyjmować rezerwacje i zaproszenia; przełączać obszar roboczy",
+      "readJournal": "Widzieć Twój dziennik pracy, godziny, nieobecności i dowody",
+      "writeJournal": "Dodawać i zmieniać wpisy dziennika pracy, dowody i wnioski o nieobecność — a tam, gdzie kierujesz ludźmi, decydować o ich wpisach i nieobecnościach",
+      "readDemand": "Widzieć potrzeby, oferty pracy, profile kandydatów i listy wyboru",
+      "writeDemand": "Publikować i zamykać potrzeby, wyrażać zainteresowanie, zarządzać listami wyboru i proponować kandydatów klientom",
+      "readOrganization": "Widzieć projekty, ludzi, rezerwacje, kalendarz, raporty i zapisy finansowe Twojej organizacji",
+      "writeOrganization": "Wprowadzać zmiany w organizacji: projekty, przydziały, zespoły, rezerwacje, zadania, potwierdzanie pracy, zapraszanie ludzi, masowy import ludzi i publikowanie jej publicznego profilu",
+      "messages": "Czytać Twoje rozmowy i wysyłać wiadomości",
+      "marketplace": "Widzieć i zarządzać ogłoszeniami na rynku, ofertami usług, propozycjami i umowami",
+      "oidcOpenid": "Potwierdzić, kim jesteś (identyfikator Twojego konta)",
+      "oidcEmail": "Widzieć Twój adres e-mail",
+      "oidcProfile": "Widzieć Twoje imię i zdjęcie profilowe",
+      "oidcPhone": "Widzieć Twój numer telefonu",
+      "oidcOfflineAccess": "Pozostać połączona bez ponownego logowania",
+      "billingNone": "Płatności: niedostępne. Żadna połączona aplikacja nie może płacić, obciążać ani przelewać pieniędzy."
+    },
+    "scopeUnknown": "Nierozpoznane przez LabourMarket.ai. Niczego tutaj nie przyznaje.",
+    "noProductScopes": "Ta aplikacja nie poprosiła o konkretne uprawnienia LabourMarket.ai. Jeśli zezwolisz, będzie mogła używać każdej akcji asystenta, na którą pozwala Twoje konto, zawsze jako Ty.",
+    "noProductScopesEnforced": "Ta aplikacja nie poprosiła o konkretne uprawnienia LabourMarket.ai, więc nie będzie mogła tutaj niczego zobaczyć ani zmienić. Poproś aplikację o zażądanie potrzebnych uprawnień.",
+    "scopesNotEnforced": "Te uprawnienia jeszcze nie ograniczają aplikacji. Jeśli zezwolisz, aplikacja będzie mogła używać każdej akcji asystenta, na którą pozwala Twoje konto, zawsze jako Ty.",
+    "importantChangesConfirm": "Aplikacja będzie mogła korzystać tylko z wymienionych wyżej uprawnień. Zmiany przechodzą przez szkic i potwierdzenie, ale aplikacja może sama wykonać oba kroki — zezwalaj tylko aplikacjom, którym ufasz."
   },
   "capabilities": {
     "interestChooseDemand": "Wybierz zapotrzebowanie, którym jesteś zainteresowany: {options}.",

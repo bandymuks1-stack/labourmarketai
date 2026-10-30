@@ -17405,7 +17405,30 @@
     "approve": "Toestaan",
     "deny": "Weigeren",
     "errorMissingId": "Het autorisatieverzoek ontbreekt. Ga terug naar de applicatie en probeer het opnieuw.",
-    "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Het is mogelijk verlopen (verzoeken blijven enkele minuten geldig) of al gebruikt. Ga terug naar de toepassing en verbind opnieuw."
+    "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Het is mogelijk verlopen (verzoeken blijven enkele minuten geldig) of al gebruikt. Ga terug naar de toepassing en verbind opnieuw.",
+    "scope": {
+      "readProfile": "Je profiel en Living CV bekijken",
+      "writeProfile": "Je profiel, Living CV, documenten, voorkeuren en meldingen wijzigen; boekingen en uitnodigingen accepteren; van werkruimte wisselen",
+      "readJournal": "Je werkjournaal, uren, afwezigheden en bewijs bekijken",
+      "writeJournal": "Werkjournaalregistraties, bewijs en afwezigheidsaanvragen toevoegen en wijzigen — en, waar je mensen aanstuurt, beslissen over hun registraties en afwezigheden",
+      "readDemand": "Behoeften, vacatures, kandidaatprofielen en shortlists bekijken",
+      "writeDemand": "Behoeften plaatsen en sluiten, interesse tonen, shortlists beheren en kandidaten aan klanten voorstellen",
+      "readOrganization": "Projecten, mensen, boekingen, agenda, rapporten en financiële registraties van je organisatie bekijken",
+      "writeOrganization": "Wijzigingen in je organisatie aanbrengen: projecten, toewijzingen, teams, boekingen, taken, werk bevestigen, mensen uitnodigen, mensen in bulk importeren en het openbare profiel publiceren",
+      "messages": "Je gesprekken lezen en berichten versturen",
+      "marketplace": "Marktplaatsadvertenties, dienstaanbiedingen, voorstellen en contracten bekijken en beheren",
+      "oidcOpenid": "Bevestigen wie je bent (je account-ID)",
+      "oidcEmail": "Je e-mailadres bekijken",
+      "oidcProfile": "Je naam en profielfoto bekijken",
+      "oidcPhone": "Je telefoonnummer bekijken",
+      "oidcOfflineAccess": "Verbonden blijven zonder je opnieuw te laten inloggen",
+      "billingNone": "Betalingen: niet beschikbaar. Geen enkele verbonden applicatie kan betalen, afschrijven of geld overmaken."
+    },
+    "scopeUnknown": "Niet herkend door LabourMarket.ai. Het geeft hier niets.",
+    "noProductScopes": "Deze applicatie heeft niet om specifieke LabourMarket.ai-rechten gevraagd. Als je het toestaat, kan ze elke assistentactie gebruiken die je account toestaat, altijd namens jou.",
+    "noProductScopesEnforced": "Deze applicatie heeft niet om specifieke LabourMarket.ai-rechten gevraagd en kan hier daarom niets bekijken of wijzigen. Vraag de applicatie om de rechten aan te vragen die ze nodig heeft.",
+    "scopesNotEnforced": "Deze rechten beperken de applicatie nog niet. Als je het toestaat, kan de applicatie elke assistentactie gebruiken die je account toestaat, altijd namens jou.",
+    "importantChangesConfirm": "De app kan alleen de hierboven genoemde rechten gebruiken. Wijzigingen gaan via een concept en een bevestiging, maar de app kan beide stappen zelf zetten — sta alleen apps toe die je vertrouwt."
   },
   "capabilities": {
     "interestChooseDemand": "Kies de vraag waarin je geïnteresseerd bent: {options}.",

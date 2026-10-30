@@ -17405,7 +17405,30 @@
     "approve": "Leisti",
     "deny": "Atmesti",
     "errorMissingId": "Trūksta autorizacijos užklausos. Grįžk į programą ir bandyk dar kartą.",
-    "errorUnresolved": "Nepavyko išspręsti autorizacijos užklausos. Ji galėjo pasibaigti (užklausos galioja kelias minutes) arba jau buvo panaudota. Grįžk į programą ir prisijunk iš naujo."
+    "errorUnresolved": "Nepavyko išspręsti autorizacijos užklausos. Ji galėjo pasibaigti (užklausos galioja kelias minutes) arba jau buvo panaudota. Grįžk į programą ir prisijunk iš naujo.",
+    "scope": {
+      "readProfile": "Matyti tavo profilį ir Gyvą CV",
+      "writeProfile": "Keisti tavo profilį, gyvą CV, dokumentus, nustatymus ir pranešimus; priimti rezervacijas ir kvietimus; perjungti darbo erdvę",
+      "readJournal": "Matyti tavo darbo žurnalą, valandas, nebuvimus ir įrodymus",
+      "writeJournal": "Pridėti ir keisti darbo žurnalo įrašus, įrodymus ir neatvykimo prašymus — o kur vadovauji žmonėms, priimti sprendimus dėl jų įrašų ir neatvykimų",
+      "readDemand": "Matyti poreikius, darbo skelbimus, kandidatų profilius ir atrankos sąrašus",
+      "writeDemand": "Skelbti ir uždaryti poreikius, reikšti susidomėjimą, tvarkyti atrankos sąrašus ir siūlyti kandidatus klientams",
+      "readOrganization": "Matyti tavo organizacijos projektus, žmones, rezervacijas, kalendorių, ataskaitas ir finansų įrašus",
+      "writeOrganization": "Keisti tavo organizaciją: projektus, priskyrimus, komandas, rezervacijas, užduotis, darbo patvirtinimą, žmonių kvietimą, masinį žmonių importą ir viešo profilio skelbimą",
+      "messages": "Skaityti tavo pokalbius ir siųsti žinutes",
+      "marketplace": "Matyti ir tvarkyti prekyvietės skelbimus, paslaugų pasiūlymus, pasiūlymus ir sutartis",
+      "oidcOpenid": "Patvirtinti, kas tu esi (tavo paskyros identifikatorius)",
+      "oidcEmail": "Matyti tavo el. pašto adresą",
+      "oidcProfile": "Matyti tavo vardą ir profilio nuotrauką",
+      "oidcPhone": "Matyti tavo telefono numerį",
+      "oidcOfflineAccess": "Išlaikyti ryšį, neprašant tavęs prisijungti iš naujo",
+      "billingNone": "Mokėjimai: negalimi. Jokia prijungta programa negali mokėti, nuskaityti ar pervesti pinigų."
+    },
+    "scopeUnknown": "LabourMarket.ai šios teisės neatpažįsta. Ji čia nieko nesuteikia.",
+    "noProductScopes": "Ši programa neprašė konkrečių LabourMarket.ai teisių. Jei leisi, ji galės naudoti visus asistento veiksmus, kuriuos leidžia tavo paskyra, visada tavo vardu.",
+    "noProductScopesEnforced": "Ši programa neprašė konkrečių LabourMarket.ai teisių, todėl čia nieko negalės nei matyti, nei keisti. Paprašyk programos užklausti reikalingų teisių.",
+    "scopesNotEnforced": "Šios teisės programos dar neriboja. Jei leisi, programa galės naudoti visus asistento veiksmus, kuriuos leidžia tavo paskyra, visada tavo vardu.",
+    "importantChangesConfirm": "Programa galės naudoti tik aukščiau išvardytus leidimus. Pakeitimai eina per juodraštį ir patvirtinimą, bet abu žingsnius programa gali atlikti pati — leisk tik programoms, kuriomis pasitiki."
   },
   "capabilities": {
     "interestChooseDemand": "Pasirink poreikį, kuris tave domina: {options}.",

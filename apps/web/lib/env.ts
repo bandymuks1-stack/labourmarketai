@@ -36,6 +36,12 @@ export function blankAsAbsent(value: unknown): unknown {
   return trimmed === "" ? undefined : trimmed;
 }
 
+/** `blankAsAbsent`, then lower-cased — for on/off style mode switches. */
+export function blankAsAbsentLowercase(value: unknown): unknown {
+  const v = blankAsAbsent(value);
+  return typeof v === "string" ? v.toLowerCase() : v;
+}
+
 const schema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z
     .string()
@@ -220,6 +226,27 @@ const schema = z.object({
   // proxied through a server action. See services/transcribe/README.md.
   VOICE_TRANSCRIBE_URL: z.string().url().optional(),
   VOICE_TRANSCRIBE_TOKEN: z.string().min(32).optional(),
+
+  // ── MCP permission scopes (lib/mcp/scopes.ts) ──────────────────────────────
+  // How the MCP door treats an OAuth client's scopes. `off` (default) = today's
+  // behaviour, nothing evaluated; `log` = every call runs, a call the scope
+  // would refuse writes one `external_client.scope` log line; `enforce` = such
+  // a call is refused with `insufficient_scope` and an audit receipt. The
+  // person's own web / Android / iOS session is never scoped. Changing it is a
+  // security decision (needs-human-gate). Case and surrounding space are
+  // forgiven; an unknown value fails the boot loudly rather than guessing.
+  MCP_SCOPE_ENFORCEMENT: z.preprocess(
+    blankAsAbsentLowercase,
+    z.enum(["off", "log", "enforce"]).default("off"),
+  ),
+  // Whether the RFC 9728 document lists `scopes_supported`. `off` (default)
+  // until the authorization server can issue the product scopes: clients
+  // request exactly what is listed, and an authorization server that does not
+  // know the names may refuse the sign-in.
+  MCP_PRM_ADVERTISE_SCOPES: z.preprocess(
+    blankAsAbsentLowercase,
+    z.enum(["on", "off"]).default("off"),
+  ),
 });
 
 const parsed = schema.safeParse({
@@ -285,6 +312,8 @@ const parsed = schema.safeParse({
   AGENTAI_OS_ALERT_TOKEN: process.env.AGENTAI_OS_ALERT_TOKEN,
   VOICE_TRANSCRIBE_URL: process.env.VOICE_TRANSCRIBE_URL,
   VOICE_TRANSCRIBE_TOKEN: process.env.VOICE_TRANSCRIBE_TOKEN,
+  MCP_SCOPE_ENFORCEMENT: process.env.MCP_SCOPE_ENFORCEMENT,
+  MCP_PRM_ADVERTISE_SCOPES: process.env.MCP_PRM_ADVERTISE_SCOPES,
 });
 
 if (!parsed.success) {

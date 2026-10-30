@@ -17405,7 +17405,30 @@
     "approve": "Allow",
     "deny": "Deny",
     "errorMissingId": "The authorization request is missing. Go back to the application and try again.",
-    "errorUnresolved": "The authorization request could not be resolved. It may have expired (requests stay valid for a few minutes) or was already used. Go back to the application and connect again."
+    "errorUnresolved": "The authorization request could not be resolved. It may have expired (requests stay valid for a few minutes) or was already used. Go back to the application and connect again.",
+    "scope": {
+      "readProfile": "See your profile and Living CV",
+      "writeProfile": "Change your profile, Living CV, documents, preferences and notifications; accept bookings and invitations; switch workspace",
+      "readJournal": "See your work journal, hours, absences and evidence",
+      "writeJournal": "Add and change work journal entries, evidence and absence requests — and, where you manage people, decide on their entries and absences",
+      "readDemand": "See needs, jobs, candidate profiles and shortlists",
+      "writeDemand": "Post and close needs, express interest, manage shortlists and propose candidates to clients",
+      "readOrganization": "See your organization's projects, people, bookings, calendar, reports and finance records",
+      "writeOrganization": "Make changes in your organization: projects, assignments, teams, bookings, tasks, confirming work, inviting people, importing people in bulk and publishing its public profile",
+      "messages": "Read your conversations and send messages",
+      "marketplace": "See and manage marketplace listings, service offers, proposals and contracts",
+      "oidcOpenid": "Confirm who you are (your account identifier)",
+      "oidcEmail": "See your email address",
+      "oidcProfile": "See your name and profile picture",
+      "oidcPhone": "See your phone number",
+      "oidcOfflineAccess": "Stay connected without asking you to sign in again",
+      "billingNone": "Payments: not available. No connected app can pay, charge or move money."
+    },
+    "scopeUnknown": "Not recognised by LabourMarket.ai. It grants nothing here.",
+    "noProductScopes": "This app did not ask for specific LabourMarket.ai permissions. If you allow it, it can use every assistant action your account allows, always as you.",
+    "noProductScopesEnforced": "This app did not ask for specific LabourMarket.ai permissions, so it will not be able to read or change anything here. Ask the app to request the permissions it needs.",
+    "scopesNotEnforced": "These permissions do not limit the app yet. If you allow it, the app can use every assistant action your account allows, always as you.",
+    "importantChangesConfirm": "The app can use only the permissions listed above. Changes go through a draft and a confirmation, but the app itself can take both steps — allow only apps you trust."
   },
   "capabilities": {
     "interestChooseDemand": "Choose the demand you are interested in: {options}.",

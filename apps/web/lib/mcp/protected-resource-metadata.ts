@@ -38,6 +38,8 @@
  * system.
  */
 
+import { advertisedScopes } from "./scopes";
+
 /** The path of the one protected resource. Pinned by the conformance guard. */
 export const MCP_RESOURCE_PATH = "/api/mcp" as const;
 
@@ -52,14 +54,33 @@ export type ProtectedResourceMetadata = {
   readonly authorization_servers: readonly [string];
   readonly bearer_methods_supported: readonly ["header"];
   readonly resource_name: "LabourMarket.ai";
+  /** RFC 9728 §2 (RECOMMENDED): the product scopes of `lib/mcp/scopes.ts`.
+   *  Present only with `advertiseScopes` (MCP_PRM_ADVERTISE_SCOPES=on). */
+  readonly scopes_supported?: readonly string[];
 };
 
 /**
  * @param origin        the deployment origin the request arrived at, e.g.
  *                      `https://labourmarket.ai` (no trailing slash)
  * @param supabaseUrl   `NEXT_PUBLIC_SUPABASE_URL`
+ * @param options.advertiseScopes  list `scopes_supported`. OFF by default:
+ *                      Claude requests exactly the scopes listed here, and an
+ *                      authorization server that cannot issue them may refuse
+ *                      the sign-in — so they are advertised only once the
+ *                      owner has made the authorization server issue them.
  */
 export function protectedResourceMetadata(
+  origin: string,
+  supabaseUrl: string,
+  options: { readonly advertiseScopes?: boolean } = {},
+): ProtectedResourceMetadata {
+  return {
+    ...protectedResourceMetadataCore(origin, supabaseUrl),
+    ...(options.advertiseScopes ? { scopes_supported: [...advertisedScopes()] } : {}),
+  };
+}
+
+function protectedResourceMetadataCore(
   origin: string,
   supabaseUrl: string,
 ): ProtectedResourceMetadata {
