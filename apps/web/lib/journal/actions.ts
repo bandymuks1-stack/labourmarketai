@@ -11,6 +11,7 @@ import {
   collectUnitSlugs,
   createJournalEntryCore,
   fragmentMetricRows,
+  parseClockTime,
   parseFragments,
   parseRejectedSlugs,
   resolveEntryLanguage,
@@ -138,6 +139,18 @@ export async function supersedeJournalEntry(
     String(formData.get("rejected_slugs_json") ?? ""),
   );
   const quantity = quantityRaw === "" ? null : Number(quantityRaw);
+  // The same time fields the create core reads (journal-write-core): the
+  // entry-level quantity's provenance and the clock span. Before, an edit
+  // turned an `ai_extracted` duration into the worker's input and dropped
+  // the span's clock times (P0-A 2026-10-30).
+  const quantitySource: RpcMetricRow["source"] =
+    String(formData.get("quantity_source") ?? "") === "ai_extracted" ? "ai_extracted" : "worker_input";
+  const workStart = parseClockTime(String(formData.get("work_start") ?? ""));
+  const workEnd = parseClockTime(String(formData.get("work_end") ?? ""));
+  const breakMinutesRaw = String(formData.get("break_minutes") ?? "").trim();
+  const breakMinutes = /^\d{1,4}$/.test(breakMinutesRaw) ? Number(breakMinutesRaw) : null;
+  const workTimeSource: RpcMetricRow["source"] =
+    String(formData.get("work_time_source") ?? "") === "ai_extracted" ? "ai_extracted" : "worker_input";
 
   if (!engagementId) {
     return {
@@ -274,7 +287,13 @@ export async function supersedeJournalEntry(
       institutionName,
       topic,
       fragments,
+      quantitySource,
     }),
+    ...(workStart ? [{ metric_slug: "work_start", value_text: workStart, source: workTimeSource }] : []),
+    ...(workEnd ? [{ metric_slug: "work_end", value_text: workEnd, source: workTimeSource }] : []),
+    ...(breakMinutes !== null
+      ? [{ metric_slug: "break_minutes", value_numeric: breakMinutes, unit_slug: "minutes", source: workTimeSource }]
+      : []),
     ...moduleRows.rows,
   ];
 
@@ -416,6 +435,8 @@ function buildMetricsForSave(args: {
   institutionName: string;
   topic: string;
   fragments: ParsedFragmentInput[];
+  /** Provenance of the entry-level quantity (default: the worker's input). */
+  quantitySource?: RpcMetricRow["source"];
 }): RpcMetricRow[] {
   const {
     workDirection,
@@ -452,7 +473,7 @@ function buildMetricsForSave(args: {
             metric_slug: "quantity",
             value_numeric: quantity,
             unit_slug: unitSlug,
-            source: "worker_input" as const,
+            source: args.quantitySource ?? ("worker_input" as const),
           },
         ]
       : []),

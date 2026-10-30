@@ -40,6 +40,7 @@ import {
 import { demandContextRefusal } from "./employer-context-refusal";
 import { EMPLOYER_OPERATIONS_CAPABILITIES } from "./employer-operations-capabilities";
 import { COUNTERPARTY_REVIEW_CAPABILITIES } from "./counterparty-review-capabilities";
+import { JOURNAL_CORRECTION_CAPABILITIES } from "./journal-correction-capabilities";
 import { MARKETPLACE_CAPABILITIES } from "./marketplace-capabilities";
 import { TEAM_ASSIGNMENT_CAPABILITIES } from "./team-assignment-capabilities";
 import { MESSAGING_CAPABILITIES } from "./messaging-capabilities";
@@ -1858,6 +1859,9 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   journalWorkIntelligenceGet,
   journalCreateDraft,
   journalConfirm,
+  // A worker corrects their OWN entry through the web journal's own
+  // supersede (`journal-correction-capabilities.ts`, P0-A parity).
+  ...JOURNAL_CORRECTION_CAPABILITIES,
   interestExpressDraft,
   interestExpressConfirm,
   workCardSaveDraft,
