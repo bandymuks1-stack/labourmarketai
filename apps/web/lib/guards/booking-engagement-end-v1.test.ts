@@ -1721,6 +1721,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-23: owner approved #2719 in chat (apply before deploy, then merge). Runtime
       // stall sampler evidence table — numbers only, service_role only, 14-day retention.
       "20261023190000_ops_runtime_samples_v1.sql",
+      // 2026-10-24 (RED, needs-human-gate, #2746): listing closed outcome + a discarded demand draft never
+      // reopens (set_marketplace_listing_status_v3 SECURITY DEFINER + GRANT, trigger guard).
+      "20261024100000_market_lifecycle_listing_outcome_and_discard_guard_v1.sql",
       // 2026-10-27: owner approved #2841 in chat (apply + merge). Two service_role-only
       // SECURITY DEFINER functions that rotate one unsent partner referral token; ledger
       // 20261027193124.

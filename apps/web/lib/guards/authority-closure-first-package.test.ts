@@ -171,6 +171,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-10-24 (GREEN strict superset): one market lifecycle contract —
       // closed_outcome on customer_requests + service_offerings, services closed.
       "20261024090000_",
+      // 2026-10-24 (RED, needs-human-gate, NOT applied): listing closed outcome
+      // (set_marketplace_listing_status_v3) + discarded demand draft never reopens.
+      "20261024100000_",
       // 2026-10-25 (RED, owner-gated, APPLIED): Vivat Rex + Labour Market AI business-history period bounds.
       "20261025120000_",
       // 2026-10-25 (RED, owner-gated, APPLIED): employer party labels for Vivat Rex records.
