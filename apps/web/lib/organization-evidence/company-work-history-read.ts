@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { withSessionWorkspacePointer, listWorkspaceMemberships } from "@/lib/company/active-organization";
 import type { DomainCaller } from "@/lib/domain/caller";
+import type { BusinessHistoryIdentity } from "./business-history-header";
 import { resolveEvidenceOrganization } from "./evidence-org-context";
 import { untypedClient } from "./evidence-store";
 import { listEvidenceRecords, listRecordIdsAttributedTo } from "./import-core";
@@ -41,6 +42,11 @@ export type CompanyWorkHistoryLoad =
       /** The business history read in periods (owner model 2026-09-30); null
        *  when the period or source-label read failed (UNKNOWN, never empty). */
       readonly business: BusinessHistory | null;
+      /** WHO this organization legally is, for the business-history header's
+       *  own-vs-earlier split: its canonical legal name (display name only as
+       *  a fallback) and the period statements that name THIS organization as
+       *  their legal entity. A failed read leaves the names only. */
+      readonly identity: BusinessHistoryIdentity;
       readonly history: CompanyWorkHistory;
       readonly elsewhere: readonly { readonly id: string; readonly name: string; readonly count: number }[];
       /** Roster person id → linked worker id (only `linked` rows). */
@@ -161,7 +167,10 @@ export async function loadCompanyWorkHistory(
   }
   const history = buildCompanyWorkHistory([...recs.records, ...attributed], objects);
 
-  const business = await readBusinessHistory(supabase, org.organizationId, recs.records, objects);
+  const [business, identity] = await Promise.all([
+    readBusinessHistory(supabase, org.organizationId, recs.records, objects),
+    readBusinessHistoryIdentity(supabase, org.organizationId, org.organizationName),
+  ]);
 
   // Where is the work if not here? Only when this organization holds none.
   const elsewhere: { id: string; name: string; count: number }[] = [];
@@ -185,6 +194,7 @@ export async function loadCompanyWorkHistory(
     organizationId: org.organizationId,
     organizationName: org.organizationName,
     business,
+    identity,
     history,
     elsewhere,
     linkedWorkers,
@@ -215,6 +225,36 @@ type PeriodRow = {
  * RLS reads; either failing makes the whole reading UNKNOWN (null) - a history
  * read without its periods would place every record as "not placed".
  */
+/** The organization's legal identity for the header split (Codex P2 on
+ *  #2894): the presentation name is not the legal entity — an organization
+ *  whose display and legal names differ must still see its OWN legally named
+ *  period as its own. Best-effort: a failed read keeps the display name. */
+async function readBusinessHistoryIdentity(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  organizationId: string,
+  displayName: string,
+): Promise<BusinessHistoryIdentity> {
+  try {
+    const [org, own] = await Promise.all([
+      db(supabase).from("organizations").select("legal_name, display_name").eq("id", organizationId).maybeSingle(),
+      db(supabase)
+        .from("organization_history_periods")
+        .select("id")
+        .eq("organization_id", organizationId)
+        .eq("legal_entity_organization_id", organizationId)
+        .limit(200),
+    ]);
+    const row = (org?.data ?? null) as { legal_name: string | null; display_name: string | null } | null;
+    return {
+      legalName: row?.legal_name?.trim() || null,
+      displayName: row?.display_name?.trim() || displayName || null,
+      ownStatementIds: own?.error ? [] : ((own?.data ?? []) as { id: string }[]).map((r) => r.id),
+    };
+  } catch {
+    return { legalName: null, displayName: displayName || null, ownStatementIds: [] };
+  }
+}
+
 async function readBusinessHistory(
   supabase: Awaited<ReturnType<typeof createClient>>,
   organizationId: string,

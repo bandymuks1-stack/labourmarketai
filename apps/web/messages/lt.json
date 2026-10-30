@@ -8544,6 +8544,9 @@
     "skillHoursOwn": "{hours} val., tavo įrašas",
     "skillHoursConfirmed": "{hours} val., iš jų vadovo patvirtinta {confirmed} val.",
     "skillHoursHint": "valandos iš darbo žurnalo įrašų, susietų tik su šiuo įgūdžiu",
+    "skillInvolvedHours": "dalyvavo {hours} val. darbo, nepriskirto vien šiam įgūdžiui — jo dalis nežinoma",
+    "skillInvolvedHoursAlso": "ir dalyvavo {hours} val., nepriskirtų vien jam",
+    "skillInvolvedHoursHint": "Žurnalo įrašų laikas, kuriuose šis įgūdis dalyvavo, bet įrašai negali jo priskirti vien jam — įraše naudoti ir kiti įgūdžiai arba laikas padalytas tarp darbų nenurodant kur. Niekada nedalijamas tarp įgūdžių ir nepridedamas prie tavo bendros sumos.",
     "selfStatedTitle": "Nurodyta paties, įrašų dar nėra",
     "variantsFolded": "{count} rašybos",
     "skillShare": "{share} % užfiksuoto darbo",
@@ -8555,6 +8558,9 @@
     "organizationRecordedHoursWithPeriods": "Organizacijų įrašai: iš viso {total} val. — {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} ir {periodHours} val., nurodytos kaip laikotarpio suma ({from} – {to}), darbo laiko žiniaraščiuose ar importuotuose dokumentuose ({approved} val. patvirtinta). Laikoma atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam gebėjimui.",
     "professionalExperienceTotal": "Profesinė patirtis iš viso: {total} val. — darbo žurnale {journal} val. ir organizacijų istorijoje {organization} val. Kiekvienas darbas skaičiuojamas vieną kartą; šaltiniai rodomi atskirai.",
     "professionalExperienceNotCounted": "Dar {hours} val. rodoma, bet į sumą neįtraukta, nes tas pats darbas jau suskaičiuotas.",
+    "durationPending": "{organization} užrašė {records, plural, one {# darbo įrašą} few {# darbo įrašus} many {# darbo įrašo} other {# darbo įrašų}} ({span}), kurių trukmė dar nenurodyta — rodoma be valandų; neįskaičiuota į jokią sumą.",
+    "durationPendingUnnamed": "organizacija",
+    "durationPendingUndated": "datos neužrašytos",
     "premium": {
       "eyebrowFallback": "Gyvas CV",
       "facts": {
@@ -8573,7 +8579,8 @@
         "both": "{confirmed} val. su vadovo įrašu · {recorded} val. užfiksuota",
         "recorded": "{hours} val. užfiksuota",
         "shown": "Rodo tavo įrašai",
-        "declared": "Nurodei tu; kol kas neparodyta"
+        "declared": "Nurodei tu; kol kas neparodyta",
+        "involved": "Dalyvavo {hours} val., nepriskirtų vien jam"
       },
       "source": {
         "own": "Tavo įrašas",
@@ -18799,6 +18806,14 @@
       "eyebrow": "Verslo istorija",
       "title": "{name}: viena tęstinė istorija",
       "subtitle": "Kiekvienas skaičius žemiau skaičiuoja organizacijos užfiksuotą darbą vieną kartą. Laikotarpiai rodo, kas pasakyta apie ankstesnius juridinius asmenis ir kuo tas teiginys grindžiamas.",
+      "titleHeld": "{name}: turimi darbo įrašai pagal laikotarpius",
+      "subtitleHeld": "Ankstesnio juridinio asmens laikotarpio darbas priklauso tam asmeniui ir jį atlikusiems žmonėms. {name} šiuos įrašus saugo kaip dokumentuotą tęstinumą; jie nerodomi kaip paties {name} darbas.",
+      "headerOwn": "Paties {name} laikotarpis",
+      "headerEarlier": "Ankstesnis juridinis asmuo: {name}",
+      "headerUnstated": "Laikotarpis „{label}“ — juridinis asmuo nenurodytas",
+      "headerNotPlaced": "Įrašai, nepriskirti jokiam nurodytam laikotarpiui",
+      "continuityNotSuccession": "Tęstinumas dokumentuotas; teisių perėmimas nepatvirtintas.",
+      "totalsHeld": "Visi {name} turimi įrašai per visus laikotarpius, kiekvienas skaičiuojamas vieną kartą — ne visa tai yra paties {name} darbas.",
       "figures": "{records} įrašai · {hours} val. · {people} žmonės · {places} vietos",
       "totals": {
         "records": "Įrašai",

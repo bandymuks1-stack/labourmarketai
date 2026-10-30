@@ -8544,6 +8544,9 @@
     "skillHoursOwn": "{hours} h, your own record",
     "skillHoursConfirmed": "{hours} h, {confirmed} h of it confirmed by a manager",
     "skillHoursHint": "hours from work-journal entries linked to this skill alone",
+    "skillInvolvedHours": "involved in {hours} h of work not attributed to this skill alone — its own part is not known",
+    "skillInvolvedHoursAlso": "plus involved in {hours} h not attributed to it",
+    "skillInvolvedHoursHint": "Time of journal entries this skill took part in that the records cannot give to it alone — the entry also used other skills, or its time was split between kinds of work without saying where. Never split between skills and never added to your total.",
     "selfStatedTitle": "Self-stated, no records yet",
     "variantsFolded": "{count} spellings",
     "skillShare": "{share}% of recorded work",
@@ -8555,6 +8558,9 @@
     "organizationRecordedHoursWithPeriods": "Organization records: {total} h in total — {hours} h on {days, plural, one {# day} other {# days}} and {periodHours} h stated as period totals ({from} – {to}) in timesheets or imported documents ({approved} h approved). Kept apart from the journal figure and attributed to no skill.",
     "professionalExperienceTotal": "Professional experience in total: {total} h — {journal} h in the work journal and {organization} h in organisation history. Every piece of work counted once; sources shown separately.",
     "professionalExperienceNotCounted": "A further {hours} h is shown but not added, because the same work is already counted.",
+    "durationPending": "{organization} recorded {records, plural, one {# work record} other {# work records}} ({span}) whose duration is not stated yet — shown without hours; not counted in any total.",
+    "durationPendingUnnamed": "an organization",
+    "durationPendingUndated": "dates not recorded",
     "premium": {
       "eyebrowFallback": "Living CV",
       "facts": {
@@ -8573,7 +8579,8 @@
         "both": "{confirmed} h with a manager's record · {recorded} h recorded",
         "recorded": "{hours} h recorded",
         "shown": "Shown by your records",
-        "declared": "You say so; nothing shows it yet"
+        "declared": "You say so; nothing shows it yet",
+        "involved": "Involved in {hours} h, not attributed to it alone"
       },
       "source": {
         "own": "Your record",
@@ -18799,6 +18806,14 @@
       "eyebrow": "Business history",
       "title": "{name}: one continuous history",
       "subtitle": "Every figure below counts the organisation's own recorded work, once. Periods show what was stated about earlier legal entities and what that statement rests on.",
+      "titleHeld": "{name}: work records it holds, by period",
+      "subtitleHeld": "Work done under an earlier legal entity belongs to that entity and the people who did it. {name} holds these records as documented continuity; they are not shown as {name}'s own work.",
+      "headerOwn": "{name}'s own period",
+      "headerEarlier": "Earlier legal entity: {name}",
+      "headerUnstated": "Period “{label}” — legal entity not stated",
+      "headerNotPlaced": "Records no stated period places",
+      "continuityNotSuccession": "Continuity documented; legal succession not asserted.",
+      "totalsHeld": "All records {name} holds, across every period, each counted once — not all of it is {name}'s own work.",
       "figures": "{records} records · {hours} h · {people} people · {places} places",
       "totals": {
         "records": "Records",

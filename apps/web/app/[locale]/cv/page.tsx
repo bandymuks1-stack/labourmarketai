@@ -18,7 +18,7 @@ import { HomeTrace } from "@/components/app/home/home-trace";
 import { toActiveLocale } from "@/lib/i18n/config";
 import type { CvSkillTier } from "@/lib/cv-export/skill-tiers";
 import { derivePotentialSkills } from "@/lib/skills/potential-skills";
-import { presentSkills, type SkillMagnitude } from "@/lib/cv-export/skill-presentation";
+import { presentSkills, skillTimeReading, type SkillMagnitude } from "@/lib/cv-export/skill-presentation";
 import {
   cvSectionVisibility,
   orderSkillsForNeed,
@@ -646,9 +646,11 @@ export default async function VerifiedCvPage({
           ? tPremium("evidence.both", { confirmed: fmtNum.format(roundHours(confirmedHours)), recorded: fmtNum.format(roundHours(hours)) })
           : hours !== null
             ? tPremium("evidence.recorded", { hours: fmtNum.format(roundHours(hours)) })
-            : tier === "declared"
-              ? tPremium("evidence.declared")
-              : tPremium("evidence.shown");
+            : practice && practice.sharedHours > 0
+              ? tPremium("evidence.involved", { hours: fmtNum.format(roundHours(practice.sharedHours)) })
+              : tier === "declared"
+                ? tPremium("evidence.declared")
+                : tPremium("evidence.shown");
       return { key: `${tier}:${slug}`, label: skillLabel(slug), level: tierLevel[tier], hours, confirmedHours, evidenceText };
     }),
   );
@@ -1485,6 +1487,29 @@ export default async function VerifiedCvPage({
                   : ""}
               </p>
             )}
+          {/* SEP-7: work an organization recorded with NO stated duration —
+              the work is shown, its length "to be confirmed"; never 0 h and
+              never in the total above. */}
+          {(cv.professionalExperience?.durationPending ?? []).map((p) => (
+            <p
+              key={p.key}
+              className="text-meta text-text-muted"
+              data-testid="cv-duration-pending"
+              data-records={p.records}
+            >
+              {t("durationPending", {
+                organization: p.organizationName ?? t("durationPendingUnnamed"),
+                records: p.records,
+                span:
+                  p.from && p.to && p.from !== p.to
+                    ? `${formatUtcDate(p.from, locale)} – ${formatUtcDate(p.to, locale)}`
+                    : p.from
+                      ? (formatUtcDate(p.from, locale) ?? "")
+                      : t("durationPendingUndated"),
+              })}
+              {p.periodLabel ? ` · ${p.periodLabel}` : ""}
+            </p>
+          ))}
           {/* The organization's own hour records (owner §19) — the second
               ledger, named beside the journal figure and added to nothing:
               an hour record proves attendance, not a skill. Shown only when
@@ -1555,6 +1580,12 @@ export default async function VerifiedCvPage({
                     const facts = item.practice;
                     const hours = facts?.attributedHours ?? 0;
                     const confirmed = facts?.confirmedHours ?? 0;
+                    // P0-B: the skill's own hours and the time it was involved
+                    // in but the records cannot attribute to it are two
+                    // readings, stated apart, never summed (skillTimeReading).
+                    const time = skillTimeReading(facts, cv.skillPractice !== null);
+                    const involvedHours =
+                      time.kind === "attributed" || time.kind === "involvement_only" ? time.involvedHours : 0;
                     return (
                       <span
                         key={item.key}
@@ -1611,6 +1642,28 @@ export default async function VerifiedCvPage({
                             {facts && facts.share > 0
                               ? ` · ${t("skillShare", { share: Math.round(facts.share * 100) })}`
                               : ""}
+                            {facts && facts.entries > 0
+                              ? ` · ${t("skillEntries", { count: facts.entries })}`
+                              : ""}
+                            {involvedHours > 0 ? (
+                              <span
+                                className="block"
+                                title={t("skillInvolvedHoursHint")}
+                                data-testid={`cv-skill-involved-hours-${slug}`}
+                                data-involved-hours={involvedHours}
+                              >
+                                {t("skillInvolvedHoursAlso", { hours: fmtHours(involvedHours) })}
+                              </span>
+                            ) : null}
+                          </span>
+                        ) : involvedHours > 0 && slug !== null ? (
+                          <span
+                            className="tabular-nums text-meta text-text-muted"
+                            title={t("skillInvolvedHoursHint")}
+                            data-testid={`cv-skill-involved-hours-${slug}`}
+                            data-involved-hours={involvedHours}
+                          >
+                            {t("skillInvolvedHours", { hours: fmtHours(involvedHours) })}
                             {facts && facts.entries > 0
                               ? ` · ${t("skillEntries", { count: facts.entries })}`
                               : ""}

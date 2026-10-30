@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { formatUtcDate } from "@/lib/time/display";
 import type { BusinessHistory, HistoryBucketTotals } from "@/lib/organization-evidence/business-history";
+import { businessHistoryHeader, type BusinessHistoryIdentity } from "@/lib/organization-evidence/business-history-header";
 
 /**
  * THE BUSINESS HISTORY, AT A GLANCE — one continuous history read in periods
@@ -24,11 +25,14 @@ export async function BusinessHistoryOverview({
   business,
   organizationId,
   organizationName,
+  identity,
   locale,
 }: {
   readonly business: BusinessHistory | null;
   readonly organizationId: string;
   readonly organizationName: string;
+  /** Legal identity for the own-vs-earlier split; absent = the display name only. */
+  readonly identity?: BusinessHistoryIdentity;
   readonly locale: string;
 }) {
   const t = await getTranslations("companyWorkHistory.business");
@@ -43,6 +47,14 @@ export async function BusinessHistoryOverview({
   const { totals } = business;
   const maxYearHours = Math.max(1, ...business.years.map((y) => y.hours));
   const orgQuery = `?org=${organizationId}`;
+  // P0-B: work done under an earlier legal entity is that entity's and its
+  // people's history — the header never presents it as this organization's
+  // own. When any record sits outside an own period, the header reads the
+  // periods apart and the all-period total is labelled as records HELD.
+  const header = businessHistoryHeader(
+    business,
+    identity ?? { legalName: null, displayName: organizationName, ownStatementIds: [] },
+  );
 
   const figures = (b: HistoryBucketTotals) =>
     t("figures", {
@@ -59,16 +71,68 @@ export async function BusinessHistoryOverview({
       data-records={totals.records}
       data-hours={totals.hours}
       data-periods={business.periods.length}
+      data-header-split={header.split ? "true" : "false"}
     >
       <header className="flex flex-col gap-2">
         <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-text-muted">{t("eyebrow")}</span>
         <h2 className="font-display text-[clamp(1.55rem,2.6vw,2.15rem)] font-semibold leading-[1.05] tracking-[-0.04em] text-text-primary">
-          {t("title", { name: organizationName })}
+          {header.split ? t("titleHeld", { name: organizationName }) : t("title", { name: organizationName })}
         </h2>
-        <p className="max-w-[60ch] text-sm leading-relaxed text-text-secondary">{t("subtitle")}</p>
+        <p className="max-w-[60ch] text-sm leading-relaxed text-text-secondary">
+          {header.split ? t("subtitleHeld", { name: organizationName }) : t("subtitle")}
+        </p>
       </header>
 
-      {/* Totals — the whole continuous history. */}
+      {/* P0-B: whose work — each period with its own figures, before any total. */}
+      {header.split ? (
+        <ul className="flex flex-col gap-2" data-testid="business-history-header-periods">
+          {header.rows
+            .filter((r) => r.totals.records > 0)
+            .map((r) => (
+              <li
+                key={r.statementId}
+                className="flex flex-col gap-0.5 border-t border-text-primary/10 pt-3"
+                data-testid="business-history-header-period"
+                data-ownership={r.ownership}
+                data-period-records={r.totals.records}
+                data-period-hours={r.totals.hours}
+              >
+                <p className="text-sm font-semibold text-text-primary">
+                  {r.ownership === "own"
+                    ? t("headerOwn", { name: organizationName })
+                    : r.ownership === "earlier"
+                      ? t("headerEarlier", { name: r.legalEntityLabel ?? r.label })
+                      : t("headerUnstated", { label: r.label })}
+                </p>
+                <p className="text-sm tabular-nums text-text-secondary">{figures(r.totals)}</p>
+                {r.ownership !== "own" && r.legalEntityRelation === "not_asserted" ? (
+                  <p className="text-meta text-text-muted" data-testid="business-history-header-not-asserted">
+                    {t("continuityNotSuccession")}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          {header.notPlaced.records > 0 ? (
+            <li
+              className="flex flex-col gap-0.5 border-t border-text-primary/10 pt-3"
+              data-testid="business-history-header-period"
+              data-ownership="not_placed"
+              data-period-records={header.notPlaced.records}
+            >
+              <p className="text-sm font-semibold text-text-primary">{t("headerNotPlaced")}</p>
+              <p className="text-sm tabular-nums text-text-secondary">{figures(header.notPlaced)}</p>
+            </li>
+          ) : null}
+        </ul>
+      ) : null}
+
+      {/* Totals — every record held, each counted once. In a split header
+          they are labelled as held across all periods, never as own work. */}
+      {header.split ? (
+        <p className="-mb-3 text-meta text-text-muted" data-testid="business-history-totals-held">
+          {t("totalsHeld", { name: organizationName })}
+        </p>
+      ) : null}
       <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 lg:grid-cols-6" data-testid="business-history-totals">
         {(
           [

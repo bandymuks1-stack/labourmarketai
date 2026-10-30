@@ -112,6 +112,20 @@ export function hoursBasisFrom(derived: Record<string, unknown> | null | undefin
   };
 }
 
+/** A committed record whose DURATION IS NOT STATED (`hours` null): the work
+ *  happened and was recorded, its length is unknown. UNKNOWN is never zero
+ *  (SEP-7): it is history to show ("duration to be confirmed"), never an hour
+ *  in any sum. `workDate` for a day record; the span for a period record;
+ *  both null when the record carries no usable date. */
+export interface WorkerEvidencePendingRow {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly workDate: string | null;
+  readonly periodStart: string | null;
+  readonly periodEnd: string | null;
+  readonly context: HistoryContext;
+}
+
 export type WorkerEvidenceRead =
   | {
       readonly kind: "ok";
@@ -119,6 +133,9 @@ export type WorkerEvidenceRead =
       readonly rows: readonly WorkerEvidenceRecordRow[];
       /** Period rows — beside the day ledger, added to nothing. */
       readonly periodRows: readonly WorkerEvidencePeriodRow[];
+      /** Records with no stated duration — shown, summed nowhere. Absent on
+       *  readers that predate it (treated as none). */
+      readonly pendingRows?: readonly WorkerEvidencePendingRow[];
     }
   | { readonly kind: "needs-migration" }
   | { readonly kind: "error" };
@@ -237,10 +254,14 @@ export async function readEvidenceRecordsForPeople(
   type Raw = Omit<HistoryContextInput, "workObjectName" | "projectName" | "organizationNames">;
   const rows: (Omit<WorkerEvidenceRecordRow, "context"> & { raw: Raw })[] = [];
   const periodRows: (Omit<WorkerEvidencePeriodRow, "context"> & { raw: Raw })[] = [];
+  const pendingRows: (Omit<WorkerEvidencePendingRow, "context"> & { raw: Raw })[] = [];
   const seen = new Set<string>();
   for (const r of (res.data ?? []) as Record<string, unknown>[]) {
     const hours = r.hours === null || r.hours === undefined ? null : Number(r.hours);
-    if (hours === null || !Number.isFinite(hours) || hours <= 0) continue;
+    // A STATED figure that is not a positive number carries no hour. An
+    // ABSENT figure (null) is different: the duration is unknown, the work is
+    // not — it travels on as a pending row below (SEP-7, never dropped).
+    if (hours !== null && (!Number.isFinite(hours) || hours <= 0)) continue;
     const events = ((r.organization_evidence_events as Record<string, unknown>[] | null) ?? []).map(
       (e): RecordLifecycleEvent => ({
         eventType: e.event_type as RecordLifecycleEvent["eventType"],
@@ -302,6 +323,19 @@ export async function readEvidenceRecordsForPeople(
       independentlyVerified: standing.independentlyVerified,
       contested: anyStandingDispute(events),
     };
+    if (hours === null) {
+      const day = (r.activity_date as string | null) ?? null;
+      const span = periodStart && periodEnd && ISO_DAY.test(periodStart) && ISO_DAY.test(periodEnd);
+      pendingRows.push({
+        id: r.id as string,
+        organizationId: r.organization_id as string,
+        workDate: day && ISO_DAY.test(day) ? day : null,
+        periodStart: span ? periodStart : null,
+        periodEnd: span ? periodEnd : null,
+        raw,
+      });
+      continue;
+    }
     if (periodStart && periodEnd && ISO_DAY.test(periodStart) && ISO_DAY.test(periodEnd)) {
       // A period aggregate: one figure over a span. Never a day.
       periodRows.push({
@@ -339,16 +373,20 @@ export async function readEvidenceRecordsForPeople(
   // caller's RLS. A failed or invisible lookup leaves the name absent; it
   // never fails the history read and never changes a row, an hour or a count.
   const lookups =
-    rows.length + periodRows.length === 0
+    rows.length + periodRows.length + pendingRows.length === 0
       ? EMPTY_HISTORY_LOOKUPS
       : await readHistoryLookups(
           supabase,
-          lookupIdsOf([...rows, ...periodRows].map((x) => x.raw)),
+          lookupIdsOf([...rows, ...periodRows, ...pendingRows].map((x) => x.raw)),
         );
   return {
     kind: "ok",
     rows: rows.map(({ raw, ...row }) => ({ ...row, context: contextWithLookups(raw, lookups) })),
     periodRows: periodRows.map(({ raw, ...row }) => ({
+      ...row,
+      context: contextWithLookups(raw, lookups),
+    })),
+    pendingRows: pendingRows.map(({ raw, ...row }) => ({
       ...row,
       context: contextWithLookups(raw, lookups),
     })),
