@@ -26,11 +26,11 @@ a security/permission row says only that an item is open.
 | `NOT_IMPLEMENTED` | not built |
 | `OPTIONAL_TEST` | an extra test scenario that does not block launch |
 
-## Totals (275 functions, 2026-10-28)
+## Totals (277 functions, 2026-10-30)
 
 | LIVE_VERIFIED | PASS_CI_ONLY | FAIL | BLOCKED | NOT_VERIFIED | NOT_IMPLEMENTED | OPTIONAL_TEST |
 |---|---|---|---|---|---|---|
-| 189 | 5 | 8 | 39 | 17 | 16 | 1 |
+| 191 | 10 | 8 | 40 | 12 | 15 | 1 |
 
 Seeded 2026-10-28 from the 275-row QA matrix of 2026-10-23…28 plus the 2026-10-28 production results; a `PASS` row
 whose evidence names a production run or production use became `LIVE_VERIFIED`, any other `PASS` became `PASS_CI_ONLY`.
@@ -49,7 +49,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 1.8 | Multi-capability organization | BLOCKED | — | owner decision ORG-2 | unproven |  |
 | 1.9 | Memberships, invitations, roles | LIVE_VERIFIED | 2026-10-28 | isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-9 invitation link → sign-up through it → stored accepted by that person; brigade-formation 39795574869 10-22 | yes |  |
 | 1.10 | Workspace context + switching | LIVE_VERIFIED | 2026-10-23 | org-roster R-7 workspace switching run 39969976834 10-23 | yes |  |
-| 1.11 | Cross-org isolation | LIVE_VERIFIED | — | worker-identity-split 39602569732; anon 401 | yes |  |
+| 1.11 | Cross-org isolation | LIVE_VERIFIED | 2026-10-28 | #2876 applied (ledger 20261028161106), verified in production 2026-10-28; earlier: worker-identity-split 39602569732 — isolation details in the private record (owner rule) | yes |  |
 | 1.12 | Invitation / referral network | LIVE_VERIFIED | 2026-10-28 | #2855 (ledger 20261028081810) + #2858 (20261028091725) applied, verified, deployed a4cbc9b9; send ledger shows no duplicate recipient; earlier: 2026-10-27 production: partner referrals arrive through the referral door (pending join_platform with consent, latest 2026-10-27), are e-mailed (41 sent) an | yes |  |
 | 1.13 | Transactional e-mail | LIVE_VERIFIED | 2026-10-28 | partner invitation mails delivered via the ledgered provider path (10-27/28); earlier: 2026-10-27 production: owner configured SMTP (LM_SMTP_PASS + INVITE_EMAIL_PROVIDER=smtp); [volume withheld] e-mails accepted by the provider 20:11-20:13 UTC (email_send_ledger_v1 [volume withheld], delivery_status | yes |  |
 | 1.14 | Staff review notice | LIVE_VERIFIED | 2026-10-21 | staff-review-notice 39604913210 10-21 | yes |  |
@@ -71,13 +71,13 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 2.10 | External profile links | BLOCKED | — | RED #2471 | unproven |  |
 | 2.11 | Requirement ledger | LIVE_VERIFIED | 2026-10-25 | requirements-countries run 40209522348 10-25 (9/9): R-1/R-2 DE+NL ledger reads have/missing (LT, EN, 390 px), no gate wording; R-3 signed-out + other org see none | yes |  |
 | 2.12 | Skill catalogue + professions | LIVE_VERIFIED | 2026-10-25 | profile-cv-history run 40182648408 10-25 (21/21 green) | yes |  |
-| 2.13 | Deterministic recognition journal->skill | LIVE_VERIFIED | 2026-10-24 | sectors-languages run 40083930868 10-24: 5 sector/locale days (lt warehouse, en restaurant, ru manufacturing, en accounting, pl construction) recognised journal->skill | yes |  |
+| 2.13 | Deterministic recognition journal->skill | LIVE_VERIFIED | 2026-10-30 | #2885 merged 88a60b567: isolated skills chain K-1..K-7 (PASS_CI_ONLY); earlier: sectors-languages run 40083930868 10-24 | yes |  |
 | 2.14 | Evidence tier ladder | LIVE_VERIFIED | 2026-10-25 | profile-cv-history run 40182648408 10-25 (21/21 green) | yes |  |
 | 2.15 | Free-label skill claims | LIVE_VERIFIED | 2026-10-25 | profile-cv-history run 40182648408 10-25 (21/21 green): P-13 claim saved and chip shown in place + on Living CV as self-declared (after #2754) | yes |  |
 | 2.16 | Transversal capabilities | LIVE_VERIFIED | 2026-10-25 | profile-cv-history run 40182648408 10-25 (21/21 green): P-14 transversal capabilities read like other skills | yes |  |
 | 2.17 | ESCO taxonomy | NOT_VERIFIED | — | quota / RED #2463 | unproven |  |
 | 2.18 | Documents / credential validity | LIVE_VERIFIED | 2026-10-25 | documents-approvals 40152566232 10-25 (walk passed) | yes |  |
-| 2.19 | Work Journal | BLOCKED | 2026-10-26 | ai-off-honesty run 40191899327 10-25: B-1 journal AI suggestions answer with the honest off line, nothing to confirm; re-proven 2026-10-26 prod walk ai-off-honesty run 40301607964 13/13 (honest off state; #2771 one <main… | unproven | AI provider keys (owner) — honest off-state proven, the AI function itself not |
+| 2.19 | Work Journal | BLOCKED | 2026-10-29 | #2884 live 91a1a39c: work-context choice fix, verified on a production draft; earlier: ai-off-honesty run 40191899327 10-25 | unproven | AI provider keys (owner) — honest off-state proven, the AI function itself not |
 | 2.20 | Manager review / confirm | LIVE_VERIFIED | 2026-10-22 | journal-confirm run 39788692498 (green) 10-22 | yes |  |
 | 2.21 | Work verification 8 states | LIVE_VERIFIED | 2026-10-26 | prod walk work-verification run 40300016332 (2026-10-26): V-1..V-6 6/6 — sent to manager, review queue with authority only, changes requested, correction pending (counted once, correction card names the decision it answe… | yes |  |
 | 2.22 | Photos / task evidence | LIVE_VERIFIED | 2026-10-25 | worker-records-exports run 40186822215 10-25 (8/8 green): P-1 a journal entry with a photo saved and shown on fresh load | yes |  |
@@ -141,11 +141,11 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 4.2 | Demand != supply direction | LIVE_VERIFIED | 2026-10-25 | public-market-direction run 40186517027 (green) 10-25: demand vs supply direction on public market, LT/EN/RU at 390+1280 px; anon refused from scouting + journal export | yes |  |
 | 4.3 | Worker opportunity board + interest | LIVE_VERIFIED | 2026-10-26 | company-chain C-1 run 40315387466 (success; replaces 39960149411, which concluded failure — register D-7) | yes |  |
 | 4.4 | Public /jobs board | LIVE_VERIFIED | 2026-10-28 | jobs-search 40645813917 J-1..J-6 6/6 (board, filter, page bounds, job page, signed-in save → saved view → remove); earlier: public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-4 public job board renders a vacancy count | yes |  |
-| 4.5 | Matching engine both directions | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): M-[volume withheld] sees why Gama's need fits (rule-based) | yes |  |
+| 4.5 | Matching engine both directions | LIVE_VERIFIED | 2026-10-30 | #2887 RED applied (ledger 20261029180012) + app e506e98b, verified in production; isolated job-fit 46/46 + compat 2/2; earlier: search-support-privacy run 40215640433 10-25 | yes | older needs await an owner-approved backfill |
 | 4.6 | Team matching + team offer | LIVE_VERIFIED | 2026-10-22 | brigade-formation run 39795574869 (green) 10-22 | yes | pricing note fixed #2687 |
 | 4.7 | B2B negotiation | LIVE_VERIFIED | 2026-10-22 | brigade-formation run 39795574869 (green) 10-22 | yes |  |
-| 4.8 | Anonymous public need intake | NOT_VERIFIED | — | form renders; submit needs permission | unproven |  |
-| 4.9 | Saved searches + alerts | NOT_VERIFIED | — | worker-records-exports run 40186822215 S-1/S-2: saved searches save + reopen PASS; alert delivery not proven | unproven | alert e-mail needs SMTP (owner) |
+| 4.8 | Anonymous public need intake | PASS_CI_ONLY | 2026-10-30 | isolated public-need walk (signup-isolated 40833394554, #2883): anonymous intake stores one row; earlier: form renders | unproven | not walked in production |
+| 4.9 | Saved searches + alerts | PASS_CI_ONLY | 2026-10-30 | isolated saved-search walk (40833394554, #2883): search stored, match notification + alert mail delivered; earlier: worker-records-exports run 40186822215 S-1/S-2: saved searches save + reopen PASS; alert delivery not proven | unproven | not walked in production |
 | 4.10 | Organizational supply discovery | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): M-2 Gama discovers supply for its need: candidates + available workforce | yes |  |
 | 4.11 | Candidates / scouting | LIVE_VERIFIED | 2026-10-27 | fresh-activation run 40546035425 2026-10-27: scouting room for a brand-new company's own need opens, 48 candidates listed; earlier company-chain C-2 + U-1..U-3 run 39960149411 | yes |  |
 | 4.12 | Shortlist + notes | LIVE_VERIFIED | 2026-10-25 | company-talent-history run 40187168804 10-25: K-1..K-5 green — need posted, worker raises hand, Gama shortlists with internal note (persists), worker + other org see nothing, note cleared + need closed with history | yes |  |
@@ -174,9 +174,9 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 5.4 | Conversations / threads | LIVE_VERIFIED | 2026-10-21 | agency-chain 39601269995 10-21 | yes |  |
 | 5.5 | Message translation | BLOCKED | 2026-10-26 | ai-off-honesty run 40191899327 10-25: A-4/A-5 original English words shown labelled 'no translation' on phone; outsiders refused; re-proven 2026-10-26 prod walk ai-off-honesty run 40301607964 13/13 (honest off state; #27… | unproven | AI provider keys (owner) — honest off-state proven, the AI function itself not |
 | 5.6 | In-app notifications | LIVE_VERIFIED | 2026-10-25 | notifications-inapp runs 40012716741 (10-23) + 40204616787 (10-25), 8/8 green both | yes |  |
-| 5.7 | E-mail notifications | NOT_VERIFIED | 2026-10-27 | SMTP live since 2026-10-27 (invitation mails delivered to the provider); a notification e-mail (non-invitation kind) not yet observed in the send ledger | unproven | prove one notification e-mail end to end (synthetic recipient) |
+| 5.7 | E-mail notifications | PASS_CI_ONLY | 2026-10-30 | isolated notification walk (40833394554, #2883): per-kind e-mail consent stored, invitation_accepted mail delivered; earlier: SMTP live since 2026-10-27 (invitation mails delivered to the provider); a notification e-mail (non-invitation kind) not yet observed in the send ledger | unproven | not walked in production |
 | 5.8 | Push | BLOCKED | — | #2712 merged; migration 20261023190255 applied (0 subscriptions, RLS on, no anon grant); channel OFF unless WEB_PUSH_ENABLED=true (code-verified) | unproven | owner: VAPID keys + real delivery test |
-| 5.9 | Weekly digest | NOT_VERIFIED | — | search-support-privacy run 40215640433 S-4: the weekly digest's in-app channel control exists; a digest itself not seen (email needs SMTP) | unproven | digest delivery unproven |
+| 5.9 | Weekly digest | PASS_CI_ONLY | 2026-10-30 | isolated digest walk (40833394554, #2883): one digest per week, mail delivered; earlier: search-support-privacy run 40215640433 S-4: the weekly digest's in-app channel control exists; a digest itself not seen (email needs SMTP) | unproven | by design a worker who visited that week gets the digest in-app only |
 | 5.10 | Attention / activity centre | LIVE_VERIFIED | 2026-10-25 | notifications-inapp run 40204616787 10-25 (8/8 green): N-5 activity centre lists the same stored event as read; N-3/N-4 bell row opens the thread and stays read after reload; N-6 phone 'mark all read'; N-7 no role detour | yes |  |
 | 5.11 | Worker calendar | LIVE_VERIFIED | 2026-10-23 | calendar-planning run 40007491242 (green) 10-23 | yes |  |
 | 5.12 | Availability | LIVE_VERIFIED | — | owner session write+revert | yes |  |
@@ -262,10 +262,12 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 8.10 | Marketing site | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-1 landing + 4 marketing pages LT/EN/RU at 390 and 1280 | yes |  |
 | 8.11 | Mobile web | LIVE_VERIFIED | 2026-10-26 | mobile-surfaces run 40195784343 10-25 (5/5 green, after #2751/#2755/#2759): worker + manager at 390 px — 0 boxes past the edge on lt/ru dashboard, nl/de cv, hours, project operations (project-first), planning (notice in … | yes |  |
 | 8.12 | PWA installability | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-10 every locale home links the manifest; served | yes |  |
-| 8.13 | Native app | BLOCKED | — | ARCH-6 + store accounts | unproven |  |
+| 8.13 | Native app | BLOCKED | 2026-10-30 | shared native client proven per platform in 8.17 (Android) and 8.18 (iOS) on production build 84cc2f85; earlier: ARCH-6 + store accounts | unproven |  |
 | 8.14 | App links | BLOCKED | — | store accounts | unproven |  |
-| 8.15 | Mobile store release | NOT_IMPLEMENTED | — | no Play/App Store listing exists | no | owner store accounts + ARCH-6 |
+| 8.15 | Mobile store release | BLOCKED | 2026-10-30 | apps run against production (8.17 Android, 8.18 iOS); no store listing; earlier: no Play/App Store listing exists | unproven | owner store accounts (Google Play, Apple, EAS) + ARCH-6 |
 | 8.16 | Language feedback | LIVE_VERIFIED | 2026-10-26 | public-org-locales run 40371836163 2026-10-26: S-12 the synthetic owner sends a language report from the account menu, sees 'Ačiū — pranešimas užfiksuotas'; DB: exactly 1 language_feedback row of this run (17:54 UTC, QA-… | yes |  |
+| 8.17 | Android app (native) | LIVE_VERIFIED | 2026-10-30 | Android signed-in journey on production build 84cc2f85 (run 41014999978): sign-in, Today read, journal entry drafted + confirmed (row in DB), profile, jobs search, job opened (hand-off ok), empty need refused, sign-out; … | yes | not in Google Play (see 8.15) |
+| 8.18 | iOS app (native) | LIVE_VERIFIED | 2026-10-30 | iOS signed-in journey on production build 84cc2f85 (run 41015011284, passed on attempt 2 of 2): sign-in, Today read, journal draft + confirm, profile, jobs search, job opened (hand-off ok), empty need refused, sign-out | yes | need submission not tested on iOS (open, owner decision); first attempt can stall on the system Save-Password sheet; not in the App Store (see 8.15) |
 
 ## Admin, privacy & security
 
@@ -279,7 +281,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 9.6 | GDPR erasure executor | LIVE_VERIFIED | 2026-10-19 | prod DB: privacy_erasure_receipts_v3 executed receipt 2026-10-19 15:23 UTC | yes |  |
 | 9.7 | Worker row access identity split | LIVE_VERIFIED | 2026-10-21 | worker-identity-split 39602569732 10-21 | yes |  |
 | 9.8 | RLS on every table | LIVE_VERIFIED | 2026-10-23 | prod catalog 10-23: 243/243 public tables RLS on; 15 no-policy tables sealed; anon probes 401/404 | yes | cleanup candidate backfill snapshot (RED) |
-| 9.9 | Audit trail | NOT_VERIFIED | — | RED #2439 | unproven |  |
+| 9.9 | Audit trail | PASS_CI_ONLY | 2026-10-30 | isolated walk 40833394554 (#2883) | unproven | open security/permission item — details kept out of the public repository (owner rule) |
 | 9.10 | Rate limiting | LIVE_VERIFIED | 2026-10-23 | live 10-23: 6 anon POST /api/waitlist (non-JSON) -> 5x400 then 429 retry-after 600 (5/10 min) | yes | in-memory per instance; real-IP depends on VPS cloudflare.inc |
 | 9.11 | Same-origin checks | LIVE_VERIFIED | — | prod build 711745d0 (waitlist 403, logout 303) + lmc-csrf run 40210854856 O-1..O-3: cross-origin transcript POST refused, same-origin validated (LT/EN/390), foreign Server Action POST aborted before lookup | yes |  |
 | 9.12 | Legal pages | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-6 legal pages render | yes |  |
@@ -294,7 +296,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 9.22 | Env schema validation | LIVE_VERIFIED | — | zod env validation at load; deploy 39952179926 health=healthy, build 431385cf; rollback on unhealthy | yes | open security/permission item — details kept out of the public repository (owner rule) |
 | 9.23 | Security-definer governance | LIVE_VERIFIED | 2026-10-23 | prod 10-23: anon SECURITY DEFINER set = allowlist 9/9; PUBLIC exec 0/589 | yes | 3 functions mutable search_path (RED R-2) |
 | 9.24 | Security incident handling | LIVE_VERIFIED | — | live headers HSTS preload, CSP report-only, XFO DENY, nosniff, Referrer/Permissions-Policy; monitor issues + health probe + onRequestError + client-errors | yes | CSP has no report-uri |
-| 9.25 | CodeQL / dependency alerts | FAIL | 2026-10-27 | 77->75 open CodeQL alerts; runtime only #9 (oauth-trace sessionStorage of crypto-random debug id) and #63 (auth/callback ?error= branch: getUser() then getSafeReturnPath redirect only for an existing session) - both tech… | no | OWNER: dismiss #9/#63 as false positive (not automatic); enable Dependabot |
+| 9.25 | CodeQL / dependency alerts | FAIL | 2026-10-30 | #2879, #2880, #2881 merged | no | open security/permission item — details kept out of the public repository (owner rule) |
 
 ## MCP & AI agents
 
