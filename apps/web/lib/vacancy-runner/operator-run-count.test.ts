@@ -15,23 +15,27 @@ type Resp = { count: number | null; error: { code?: string } | null; status?: nu
 
 function clientReturning(...responses: Array<Resp | Error>) {
   const calls: string[] = [];
+  const selects: unknown[][] = [];
   let i = 0;
   const client = {
     from(table: string) {
       calls.push(table);
       return {
-        select: () => ({
+        select: (...args: unknown[]) => {
+          selects.push(args);
+          return {
           eq: async () => {
             const r = responses[Math.min(i, responses.length - 1)];
             i += 1;
             if (r instanceof Error) throw r;
             return r;
           },
-        }),
+          };
+        },
       };
     },
   };
-  return { client, calls };
+  return { client, calls, selects };
 }
 
 const noSleep = { sleep: vi.fn(async () => {}), backoffMs: [1, 1] };
@@ -40,6 +44,12 @@ describe("countStoredRows", () => {
   it("returns the exact count on success", async () => {
     const { client } = clientReturning({ count: 141345, error: null, status: 200 });
     await expect(countStoredRows(client, "arbetsformedlingen", noSleep)).resolves.toBe(141345);
+  });
+
+  it("counts only the indexed key column, never full rows (index-only, no 8 s timeout)", async () => {
+    const { client, selects } = clientReturning({ count: 3, error: null, status: 200 });
+    await countStoredRows(client, "nav", noSleep);
+    expect(selects).toEqual([["external_id", { count: "exact", head: true }]]);
   });
 
   it("keeps not_provisioned for a missing table", async () => {
