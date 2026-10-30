@@ -85,6 +85,7 @@ import {
   reviewUnconfirmedWorkTime,
   statedDurationCount,
 } from "@/lib/journal/unconfirmed-work-time";
+import { reviewTimeSuggestion } from "@/lib/journal/intake-work-time";
 import { cn } from "@/lib/utils";
 import { Link } from "@/lib/i18n/navigation";
 import type { WorkDayCheck } from "@/lib/journal/work-time-plausibility";
@@ -534,9 +535,17 @@ export function JournalEntryComposer({
   const selectedIscoGroup =
     (dirSlug ? directionBySlug.get(dirSlug) : directions[0])?.iscoGroup ?? null;
 
+  function reviewedSuggestions(raw: string) {
+    const parsed = extractJournalSuggestions(raw);
+    const reviewed = reviewTimeSuggestion(raw, workDate || today, parsed);
+    return { ...parsed, time: reviewed.time, fragments: reviewed.fragments };
+  }
+
   function analyse(raw: string) {
     setError(null);
-    const s = extractJournalSuggestions(raw);
+    // The review offers the time the chat / MCP intake would record for the
+    // same sentence (a stated span, never the break) — reviewTimeSuggestion.
+    const s = reviewedSuggestions(raw);
     // Pilot telemetry: a journal entry begins when the worker asks for
     // structure suggestions. Edit mode lets us tell create vs supersede
     // apart downstream.
@@ -1010,7 +1019,7 @@ export function JournalEntryComposer({
     // does the same by opening the existing review step first (doctrine §7 —
     // never confirmed for them).
     if (stage === "compose" && !editingEntry) {
-      const stated = statedDurationCount(extractJournalSuggestions(text));
+      const stated = statedDurationCount(reviewedSuggestions(text));
       if (stated > 0) {
         analyse(text);
         setError(t("unconfirmedTimeBlocked", { count: stated }));

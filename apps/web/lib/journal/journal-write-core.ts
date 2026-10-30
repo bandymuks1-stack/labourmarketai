@@ -165,6 +165,66 @@ export async function findRecentDuplicateEntry(
   }
 }
 
+/** Clock tolerance between the app server that minted a token and the
+ *  database clock that stamped the entry's `created_at`. */
+const CONFIRMED_DRAFT_CLOCK_SKEW_MS = 5_000;
+
+/**
+ * THE ENTRY A CONFIRMED DRAFT ALREADY BECAME (P0-A 2026-10-30) — id of the
+ * LIVE entry this worker recorded AFTER `issuedAtMs` with the draft's exact
+ * engagement, words, work date and project choice, else null.
+ *
+ * Why: a confirm whose response is lost (mobile network drop, an MCP client
+ * timeout) is retried with the same token. The token is single-use, so the
+ * retry was refused as stale and the person was told "This was not saved"
+ * — false — and invited to draft again, which wrote the day a second time.
+ * The confirm now asks this read first and answers with the entry that
+ * exists. Read-only, RLS-scoped as the caller; a failed read is "none".
+ */
+export async function findConfirmedDraftEntry(
+  supabase: ServerSupabase,
+  q: {
+    workerId: string;
+    engagementId: string;
+    originalText: string;
+    workDate: string;
+    /** The draft's project choice: a uuid, "none", or absent (DB rule). */
+    projectId?: string | null;
+    issuedAtMs: number;
+  },
+): Promise<string | null> {
+  try {
+    const since = new Date(q.issuedAtMs - CONFIRMED_DRAFT_CLOCK_SKEW_MS).toISOString();
+    const { data, error } = await supabase
+      .from("journal_entries")
+      .select("id, project_id, journal_entry_metrics(metric_slug, value_text)")
+      .eq("worker_id", q.workerId)
+      .eq("engagement_context_id", q.engagementId)
+      .eq("original_text", q.originalText)
+      .is("deleted_at", null)
+      .is("superseded_by", null)
+      .gte("created_at", since)
+      .order("created_at", { ascending: true })
+      .limit(5);
+    if (error || !Array.isArray(data)) return null;
+    for (const row of data as {
+      id?: string;
+      project_id?: string | null;
+      journal_entry_metrics?: { metric_slug: string; value_text?: string | null }[] | null;
+    }[]) {
+      if (!row.id) continue;
+      const day = (row.journal_entry_metrics ?? []).find((m) => m.metric_slug === "work_date")?.value_text;
+      if ((day ?? "").trim() !== q.workDate) continue;
+      if (q.projectId === "none" && row.project_id != null) continue;
+      if (q.projectId && q.projectId !== "none" && row.project_id !== q.projectId) continue;
+      return row.id;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export type JournalWriteCaller = {
   /** The caller's OWN RLS-scoped client. Every read and write below runs as
    *  them — this module adds no authority and no admin/elevated path. */

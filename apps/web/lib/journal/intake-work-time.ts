@@ -161,6 +161,59 @@ export function deriveIntakeWorkTime(notes: string, todayIso: string): IntakeWor
   return NOTHING;
 }
 
+type SuggestedTime = { value: number; unitSlug: "hours" | "days" | "minutes" };
+
+/**
+ * THE SAME TIME IN THE WEB REVIEW STEP AS ON THE CHAT / MCP RECORD (P0-A
+ * 2026-10-30). The composer's review read only the fragment recognizer, so
+ * "Dirbau nuo 8 iki 17, 30 min pertrauka" offered the 30-minute BREAK as the
+ * day's time (the span was never read), while the chat and MCP recorded the
+ * 8 h 30 min the span states. This takes the recognizer's suggestions and
+ * returns what the review should offer instead, by the intake's own rule:
+ *  - a stated span wins outright: its worked minutes (break subtracted)
+ *    become the entry's time, and per-fragment times are dropped so the
+ *    canonical rule never counts them instead of the span;
+ *  - a fragment that names the break is never work time (BREAK_RX) — it is
+ *    removed, and a break that was the only "time" is no time at all.
+ * Pure; nothing is confirmed here — the person still reviews every value.
+ */
+export function reviewTimeSuggestion<
+  F extends { readonly rawPhrase: string; readonly time: SuggestedTime | null },
+>(
+  notes: string,
+  todayIso: string,
+  suggestions: { readonly time: SuggestedTime | null; readonly fragments: readonly F[] },
+): { time: SuggestedTime | null; fragments: F[] } {
+  const work = suggestions.fragments.filter((f) => !BREAK_RX.test(f.rawPhrase));
+  const derived = deriveIntakeWorkTime(notes, todayIso);
+  if (derived.span && derived.quantityMinutes !== null && derived.quantityMinutes > 0) {
+    return {
+      time: minutesAsSuggestedTime(derived.quantityMinutes),
+      fragments: work.map((f) => ({ ...f, time: null })),
+    };
+  }
+  return {
+    time: suggestions.time !== null && breakIsTheOnlyTime(notes) ? null : suggestions.time,
+    fragments: work,
+  };
+}
+
+/** True when every duration the sentence states sits in a clause that names
+ *  the break ("…, 30 min pertrauka") — read with the same recognizer. */
+function breakIsTheOnlyTime(notes: string): boolean {
+  const clauses = notes.split(/[,;\n]|\.(?:\s|$)/u).map((c) => c.trim()).filter(Boolean);
+  const timed = clauses.filter((c) => extractJournalSuggestions(c).time !== null);
+  return timed.length > 0 && timed.every((c) => BREAK_RX.test(c));
+}
+
+/** Minutes in the unit a person reads best: whole or quarter hours as hours,
+ *  anything else as minutes — the value is exact either way. */
+function minutesAsSuggestedTime(minutes: number): SuggestedTime {
+  return minutes % 15 === 0
+    ? { value: minutes / 60, unitSlug: "hours" }
+    : { value: minutes, unitSlug: "minutes" };
+}
+
 const NOTHING: IntakeWorkTime = {
   fragmentsJson: null,
   fragments: [],

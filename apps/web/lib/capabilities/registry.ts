@@ -6,7 +6,9 @@ import { getTranslations } from "next-intl/server";
 
 import {
   createJournalEntryCore,
+  findConfirmedDraftEntry,
   projectsToChooseFrom,
+  runSkillPipeline,
 } from "@/lib/journal/journal-write-core";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
@@ -32,6 +34,7 @@ import {
 import { safeApprovedCompanyName } from "@/lib/opportunities/opportunity-fit";
 
 import {
+  capabilityTokenIssuedAt,
   mintCapabilityConfirmation,
   verifyCapabilityConfirmation,
 } from "./confirmable";
@@ -762,6 +765,63 @@ const journalCreateDraft: CapabilityDescriptor = {
   },
 };
 
+/**
+ * The entry a refused confirm's draft ALREADY became, as a confirm result —
+ * or null. Only for a GENUINE token of this caller for this exact draft
+ * (signature, input, user, TTL all verified; only the state moved or the
+ * token was spent), and only when a live entry with the draft's exact
+ * engagement, words, day and project was recorded after the token was
+ * issued (`findConfirmedDraftEntry`). Writes no entry: the skill pipeline it
+ * re-reads is idempotent (the create core's duplicate path does the same).
+ */
+async function alreadyRecordedEntry(
+  caller: CapabilityCaller,
+  draft: z.infer<typeof workerLogWorkSchema>,
+  confirmationToken: string,
+): Promise<ExecResult | null> {
+  const issuedAtMs = capabilityTokenIssuedAt({
+    actionId: "journal.confirm",
+    token: confirmationToken,
+    input: normalizedDraftForHash(draft),
+    userId: caller.userId,
+  });
+  if (issuedAtMs === null) return null;
+  const workerRead = await readWorkerCoreRow(caller);
+  if (!workerRead.ok || !workerRead.value) return null;
+  const entryId = await findConfirmedDraftEntry(caller.supabase, {
+    workerId: workerRead.value.id,
+    engagementId: draft.engagementContextId,
+    originalText: draft.notes,
+    workDate: draft.workDate,
+    projectId: draft.projectId ?? null,
+    issuedAtMs,
+  });
+  if (!entryId) return null;
+  const skills = await runSkillPipeline({
+    entryId,
+    text: draft.notes,
+    locale: caller.locale,
+    excludeSlugs: [],
+    caller: { supabase: caller.supabase, userId: caller.userId },
+  });
+  return {
+    ok: true,
+    data: {
+      entryId,
+      // This confirm wrote nothing: the entry was recorded by the first call.
+      alreadyRecorded: true,
+      skills: {
+        status: skills.status,
+        added: skills.added,
+        strengthened: skills.strengthened,
+        reviewNeeded: skills.reviewNeeded,
+        claimsSaved: skills.claimsSaved,
+        cvUpdated: skills.cvUpdated,
+      },
+    },
+  };
+}
+
 const journalConfirmInput = workerLogWorkSchema.extend({
   confirmationToken: z.string().min(10),
 });
@@ -804,6 +864,15 @@ const journalConfirm: CapabilityDescriptor = {
       currentStateFingerprint: state.fingerprint,
     });
     if (!verdict.ok) {
+      // A retry after a lost response (mobile network drop, client timeout):
+      // the single-use token was spent by the FIRST call, which did write.
+      // Answer with that entry instead of "not saved — draft again", which
+      // invited a second copy of the same day (P0-A 2026-10-30).
+      const replay =
+        verdict.reason === "stale_state"
+          ? await alreadyRecordedEntry(caller, draft, confirmationToken)
+          : null;
+      if (replay) return replay;
       return {
         ok: false,
         code: "confirmation_rejected",
