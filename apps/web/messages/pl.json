@@ -5780,6 +5780,7 @@
             "Stripe — obsługa płatności za płatne usługi platformy. Gdy organizacja rozpoczyna płatność, Stripe otrzymuje adres e-mail płacącego użytkownika i wewnętrzny identyfikator konta; dane karty są wprowadzane na własnej stronie płatności Stripe i nie są przechowywane przez platformę.",
             "Google, Facebook (Meta) i LinkedIn — tylko jeśli zdecydujesz się logować przez nich, jak opisano powyżej.",
             "Google (Gemini API) — tylko w sposób opisany poniżej w części o AI.",
+            "Cloudflare (Workers AI), Mistral AI i Groq — dopiero po włączeniu i wyłącznie do objaśniania publicznych, zagregowanych statystyk rynku pracy (na przykład ile ofert pracy ma dany zawód). Nie przesyłamy im treści wiadomości ani danych osobowych.",
             "Pełna lista dostawców infrastruktury znajduje się na stronie „Ochrona danych”."
           ]
         },
@@ -5891,6 +5892,7 @@
             "Cloudflare — sieć przed stroną: usługa nazw domen, szyfrowanie podczas przesyłania, pamięć podręczna i ochrona przed atakami. Przez nią przechodzi każde żądanie do strony.",
             "GitHub — hosting kodu źródłowego. Nie są tam przechowywane żadne dane użytkowników.",
             "Google (Gemini API) — przetwarzanie AI do tłumaczenia wiadomości i ogłoszeń o pracy oraz do podpowiadania, o co prosi zdanie wpisane na czacie. Wysyłany jest tylko tekst potrzebny do zadania.",
+            "Cloudflare (Workers AI), Mistral AI i Groq — dopiero po włączeniu i wyłącznie do objaśniania publicznych, zagregowanych statystyk rynku pracy (na przykład ile ofert pracy ma dany zawód). Nie przesyłamy im treści wiadomości ani danych osobowych.",
             "Stripe — obsługa płatności. Rekord klienta powstaje tylko wtedy, gdy organizacja rozpoczyna płatność za subskrypcję.",
             "Żaden inny dostawca poczty e-mail, AI, tłumaczeń ani płatności nie jest aktywny. Jeśli któryś zostanie uruchomiony, ta lista zostanie wcześniej zaktualizowana."
           ]
