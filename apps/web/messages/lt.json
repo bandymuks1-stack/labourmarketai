@@ -8558,6 +8558,9 @@
     "organizationRecordedHoursWithPeriods": "Organizacijų įrašai: iš viso {total} val. — {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} ir {periodHours} val., nurodytos kaip laikotarpio suma ({from} – {to}), darbo laiko žiniaraščiuose ar importuotuose dokumentuose ({approved} val. patvirtinta). Laikoma atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam gebėjimui.",
     "professionalExperienceTotal": "Profesinė patirtis iš viso: {total} val. — darbo žurnale {journal} val. ir organizacijų istorijoje {organization} val. Kiekvienas darbas skaičiuojamas vieną kartą; šaltiniai rodomi atskirai.",
     "professionalExperienceNotCounted": "Dar {hours} val. rodoma, bet į sumą neįtraukta, nes tas pats darbas jau suskaičiuotas.",
+    "durationPending": "{organization} užrašė {records, plural, one {# darbo įrašą} few {# darbo įrašus} many {# darbo įrašo} other {# darbo įrašų}} ({span}), kurių trukmė dar nenurodyta — trukmė bus patvirtinta; neįskaičiuota į jokią sumą.",
+    "durationPendingUnnamed": "organizacija",
+    "durationPendingUndated": "datos neužrašytos",
     "premium": {
       "eyebrowFallback": "Gyvas CV",
       "facts": {

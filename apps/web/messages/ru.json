@@ -8558,6 +8558,9 @@
     "organizationRecordedHoursWithPeriods": "Записи организаций: всего {total} ч — {hours} ч за {days, plural, one {# день} few {# дня} other {# дней}} и {periodHours} ч, указанные как итог за период ({from} – {to}), в табелях или импортированных документах ({approved} ч утверждено). Учитывается отдельно от журнала и не относится ни к одному навыку.",
     "professionalExperienceTotal": "Профессиональный опыт всего: {total} ч — {journal} ч в рабочем журнале и {organization} ч в истории организаций. Каждая работа учтена один раз; источники показаны отдельно.",
     "professionalExperienceNotCounted": "Ещё {hours} ч показано, но не добавлено, потому что та же работа уже учтена.",
+    "durationPending": "{organization} записала {records, plural, one {# запись о работе} few {# записи о работе} many {# записей о работе} other {# записи о работе}} ({span}) без указанной продолжительности — продолжительность будет подтверждена; не входит ни в какой итог.",
+    "durationPendingUnnamed": "организация",
+    "durationPendingUndated": "даты не записаны",
     "premium": {
       "eyebrowFallback": "Живое резюме",
       "facts": {

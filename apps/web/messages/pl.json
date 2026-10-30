@@ -8558,6 +8558,9 @@
     "organizationRecordedHoursWithPeriods": "Zapisy organizacji: łącznie {total} godz. — {hours} godz. w {days, plural, one {# dniu} few {# dniach} many {# dniach} other {# dnia}} oraz {periodHours} godz. podane jako suma za okres ({from} – {to}) w ewidencjach czasu pracy lub zaimportowanych dokumentach ({approved} godz. zatwierdzonych). Liczone oddzielnie od dziennika i nieprzypisane do żadnej umiejętności.",
     "professionalExperienceTotal": "Doświadczenie zawodowe łącznie: {total} godz. — {journal} godz. w dzienniku pracy i {organization} godz. w historii organizacji. Każda praca liczona raz; źródła pokazane osobno.",
     "professionalExperienceNotCounted": "Kolejne {hours} godz. jest pokazane, ale nie dodane, ponieważ ta sama praca jest już policzona.",
+    "durationPending": "{organization} zapisała {records, plural, one {# zapis pracy} few {# zapisy pracy} many {# zapisów pracy} other {# zapisu pracy}} ({span}) bez podanego czasu trwania — czas do potwierdzenia; nie wliczono do żadnej sumy.",
+    "durationPendingUnnamed": "organizacja",
+    "durationPendingUndated": "daty nie zapisane",
     "premium": {
       "eyebrowFallback": "Żywe CV",
       "facts": {

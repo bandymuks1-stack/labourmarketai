@@ -8558,6 +8558,9 @@
     "organizationRecordedHoursWithPeriods": "Aufzeichnungen von Organisationen: insgesamt {total} Std. — {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} und {periodHours} Std. als Zeitraumsumme ({from} – {to}) in Stundenzetteln oder importierten Dokumenten ({approved} Std. bestätigt). Getrennt von der Journalzahl geführt und keiner Fähigkeit zugeordnet.",
     "professionalExperienceTotal": "Berufserfahrung insgesamt: {total} Std. — {journal} Std. im Arbeitsjournal und {organization} Std. in der Organisationshistorie. Jede Arbeit einmal gezählt; Quellen getrennt ausgewiesen.",
     "professionalExperienceNotCounted": "Weitere {hours} Std. werden angezeigt, aber nicht addiert, weil dieselbe Arbeit bereits gezählt ist.",
+    "durationPending": "{organization} hat {records, plural, one {# Arbeitsnachweis} other {# Arbeitsnachweise}} ({span}) ohne angegebene Dauer erfasst — Dauer noch zu bestätigen; in keiner Summe gezählt.",
+    "durationPendingUnnamed": "eine Organisation",
+    "durationPendingUndated": "Daten nicht erfasst",
     "premium": {
       "eyebrowFallback": "Lebendiger Lebenslauf",
       "facts": {

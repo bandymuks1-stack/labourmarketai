@@ -32,6 +32,7 @@ import {
   type WorkIntelligenceCoverage,
   type WorkIntelligenceEntry,
   type WorkIntelligenceOrganizationPeriodRecord,
+  type WorkIntelligenceOrganizationPendingRecord,
   type WorkIntelligenceOrganizationRecord,
   type WorkIntelligenceSkillRow,
   type WorkPeriodKey,
@@ -114,6 +115,8 @@ export function assembleWorkIntelligence(input: {
   /** The organization's PERIOD records from the same read — beside the
    *  day records, summed into nothing. */
   organizationPeriodRecords?: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** Records with no stated duration, from the same read — summed nowhere. */
+  organizationPendingRecords?: readonly WorkIntelligenceOrganizationPendingRecord[] | null;
   /** The person whose entries these are. With it, a decision the person made
    *  on their own entry is not a confirmation (review-status.ts); without it
    *  the result is the plain latest decision, as before. */
@@ -156,6 +159,7 @@ export function assembleWorkIntelligence(input: {
     coverage: input.coverage,
     organizationRecords: input.organizationRecords ?? null,
     organizationPeriodRecords: input.organizationPeriodRecords ?? null,
+    organizationPendingRecords: input.organizationPendingRecords ?? null,
   });
   // Entries whose written hours never became recorded time (the pre-2026-08-20
   // composer dropped them) — counted, never summed, from the SAME entries.
@@ -179,6 +183,8 @@ export function assembleWorkIntelligence(input: {
 export type OrganizationLedgerRead = {
   readonly records: readonly WorkIntelligenceOrganizationRecord[];
   readonly periodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[];
+  /** Records with NO stated duration (SEP-7) — shown, summed nowhere. */
+  readonly pendingRecords: readonly WorkIntelligenceOrganizationPendingRecord[];
 };
 
 /**
@@ -275,7 +281,21 @@ export function organizationLedgerFrom(
           hoursBasis: r.hoursBasis ?? null,
           context: r.context,
         }));
-  return { records: [...fromAllocations, ...fromEvidence], periodRecords };
+  // Records with NO stated duration: the work is recorded, its length is
+  // unknown — carried beside both ledgers, never an hour (SEP-7).
+  const pendingRecords: WorkIntelligenceOrganizationPendingRecord[] =
+    evidence.kind === "needs-migration"
+      ? []
+      : (evidence.pendingRows ?? []).map((r) => ({
+          id: r.id,
+          organizationId: r.organizationId,
+          workDate: r.workDate,
+          periodStart: r.periodStart,
+          periodEnd: r.periodEnd,
+          source: "import",
+          context: r.context,
+        }));
+  return { records: [...fromAllocations, ...fromEvidence], periodRecords, pendingRecords };
 }
 
 /**
@@ -305,6 +325,7 @@ export function historicalPersonIntelligence(
     focus: opts.focus,
     organizationRecords: ledger.records,
     organizationPeriodRecords: ledger.periodRecords,
+    organizationPendingRecords: ledger.pendingRecords,
   });
 }
 
@@ -442,6 +463,7 @@ export async function loadWorkIntelligence(
     photoCountByEntry,
     organizationRecords: organizationLedger?.records ?? null,
     organizationPeriodRecords: organizationLedger?.periodRecords ?? null,
+    organizationPendingRecords: organizationLedger?.pendingRecords ?? null,
     subjectProfileId,
   });
 }

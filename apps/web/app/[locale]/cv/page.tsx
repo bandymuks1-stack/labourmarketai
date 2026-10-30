@@ -1487,6 +1487,29 @@ export default async function VerifiedCvPage({
                   : ""}
               </p>
             )}
+          {/* SEP-7: work an organization recorded with NO stated duration —
+              the work is shown, its length "to be confirmed"; never 0 h and
+              never in the total above. */}
+          {(cv.professionalExperience?.durationPending ?? []).map((p) => (
+            <p
+              key={p.key}
+              className="text-meta text-text-muted"
+              data-testid="cv-duration-pending"
+              data-records={p.records}
+            >
+              {t("durationPending", {
+                organization: p.organizationName ?? t("durationPendingUnnamed"),
+                records: p.records,
+                span:
+                  p.from && p.to && p.from !== p.to
+                    ? `${formatUtcDate(p.from, locale)} – ${formatUtcDate(p.to, locale)}`
+                    : p.from
+                      ? (formatUtcDate(p.from, locale) ?? "")
+                      : t("durationPendingUndated"),
+              })}
+              {p.periodLabel ? ` · ${p.periodLabel}` : ""}
+            </p>
+          ))}
           {/* The organization's own hour records (owner §19) — the second
               ledger, named beside the journal figure and added to nothing:
               an hour record proves attendance, not a skill. Shown only when

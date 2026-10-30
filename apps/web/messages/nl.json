@@ -8558,6 +8558,9 @@
     "organizationRecordedHoursWithPeriods": "Registraties van organisaties: {total} u in totaal — {hours} u op {days, plural, one {# dag} other {# dagen}} en {periodHours} u vermeld als periodetotaal ({from} – {to}) in urenstaten of geïmporteerde documenten ({approved} u goedgekeurd). Apart gehouden van het journaalcijfer en aan geen vaardigheid toegekend.",
     "professionalExperienceTotal": "Beroepservaring in totaal: {total} u — {journal} u in het werkjournaal en {organization} u in de organisatiehistorie. Elk stuk werk één keer geteld; bronnen apart getoond.",
     "professionalExperienceNotCounted": "Nog {hours} u wordt getoond maar niet opgeteld, omdat hetzelfde werk al is geteld.",
+    "durationPending": "{organization} legde {records, plural, one {# werkregistratie} other {# werkregistraties}} vast ({span}) zonder vermelde duur — duur nog te bevestigen; in geen totaal geteld.",
+    "durationPendingUnnamed": "een organisatie",
+    "durationPendingUndated": "data niet vastgelegd",
     "premium": {
       "eyebrowFallback": "Levend cv",
       "facts": {

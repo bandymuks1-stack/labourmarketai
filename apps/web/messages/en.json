@@ -8558,6 +8558,9 @@
     "organizationRecordedHoursWithPeriods": "Organization records: {total} h in total — {hours} h on {days, plural, one {# day} other {# days}} and {periodHours} h stated as period totals ({from} – {to}) in timesheets or imported documents ({approved} h approved). Kept apart from the journal figure and attributed to no skill.",
     "professionalExperienceTotal": "Professional experience in total: {total} h — {journal} h in the work journal and {organization} h in organisation history. Every piece of work counted once; sources shown separately.",
     "professionalExperienceNotCounted": "A further {hours} h is shown but not added, because the same work is already counted.",
+    "durationPending": "{organization} recorded {records, plural, one {# work record} other {# work records}} ({span}) whose duration is not stated yet — duration to be confirmed; not counted in any total.",
+    "durationPendingUnnamed": "an organization",
+    "durationPendingUndated": "dates not recorded",
     "premium": {
       "eyebrowFallback": "Living CV",
       "facts": {

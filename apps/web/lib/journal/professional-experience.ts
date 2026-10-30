@@ -332,6 +332,25 @@ export type ProfessionalExperienceHours = {
   readonly organizationUnknown: boolean;
 };
 
+/** Work an organization recorded about the person with NO stated duration,
+ *  grouped per organization and stated period (SEP-7: unknown, never zero).
+ *  Shown as "duration to be confirmed"; never a line, never in `hours`,
+ *  never in the ledger — decision 0025 totals are unchanged by it. */
+export type ExperienceDurationPending = {
+  readonly key: string;
+  readonly organizationId: string;
+  readonly organizationName: string | null;
+  readonly periodLabel: string | null;
+  readonly records: number;
+  /** Distinct recorded work days (day records only). */
+  readonly days: number;
+  /** Earliest / latest day the records cover (day or span), or null. */
+  readonly from: string | null;
+  readonly to: string | null;
+  /** Records with no usable date at all (counted in `records`). */
+  readonly undated: number;
+};
+
 export type ProfessionalExperience = {
   /** null = the journal could not be read (UNKNOWN, never zero). */
   readonly hours: ProfessionalExperienceHours | null;
@@ -345,6 +364,9 @@ export type ProfessionalExperience = {
   /** The ONE hours ledger over these lines: states, confidence, capacity,
    *  skill split. `ledger.total === hours.total` whenever `hours` is known. */
   readonly ledger: HoursLedger;
+  /** Recorded work whose duration is not stated yet — beside the lines,
+   *  added to nothing. Empty when the organization ledger is unknown. */
+  readonly durationPending: readonly ExperienceDurationPending[];
 };
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -936,6 +958,66 @@ export function deriveProfessionalExperience(input: {
         x.key.localeCompare(y.key),
     );
 
+  // ── recorded work with no stated duration (SEP-7) ─────────────────────
+  // The work happened and an organization recorded it; its length is
+  // unknown. Shown beside the history, never an hour: not a line, not in
+  // `hours`, not in the ledger, so every total above is unchanged.
+  const durationPending: ExperienceDurationPending[] = [];
+  if (wi && wi.organizationRecords !== null) {
+    type PendAcc = {
+      organizationId: string;
+      supplierName: string | null;
+      periodLabel: string | null;
+      records: number;
+      days: Set<string>;
+      from: string | null;
+      to: string | null;
+      undated: number;
+    };
+    const acc = new Map<string, PendAcc>();
+    for (const r of wi.organizationPendingRecords ?? []) {
+      const first = r.workDate ?? r.periodStart;
+      const last = r.workDate ?? r.periodEnd;
+      const { label: periodLabel } = first
+        ? periodOf(r.organizationId, r.context?.source.label, first, last ?? first)
+        : { label: null };
+      const key = `pending:${r.organizationId}|${periodLabel ?? ""}`;
+      let a = acc.get(key);
+      if (!a) {
+        a = {
+          organizationId: r.organizationId,
+          supplierName: r.context?.source.supplierName ?? null,
+          periodLabel,
+          records: 0,
+          days: new Set(),
+          from: null,
+          to: null,
+          undated: 0,
+        };
+        acc.set(key, a);
+      }
+      a.records += 1;
+      if (r.workDate) a.days.add(r.workDate);
+      if (!first) a.undated += 1;
+      a.from = minDay(a.from, first);
+      a.to = maxDay(a.to, last);
+    }
+    for (const [key, a] of acc) {
+      durationPending.push({
+        key,
+        organizationId: a.organizationId,
+        organizationName: nameOf(a.organizationId, a.supplierName),
+        periodLabel: a.periodLabel,
+        records: a.records,
+        days: a.days.size,
+        from: a.from,
+        to: a.to,
+        undated: a.undated,
+      });
+    }
+    durationPending.sort((x, y) => (y.to ?? "").localeCompare(x.to ?? "") || x.key.localeCompare(y.key));
+  }
+
   return {
     hours,
     from,
@@ -945,5 +1027,6 @@ export function deriveProfessionalExperience(input: {
     projects,
     roles: relationships,
     ledger,
+    durationPending,
   };
 }
