@@ -8544,6 +8544,9 @@
     "skillHoursOwn": "{hours} h, Twój własny zapis",
     "skillHoursConfirmed": "{hours} h, w tym {confirmed} h potwierdzonych przez kierownika",
     "skillHoursHint": "godziny z wpisów w dzienniku pracy powiązanych wyłącznie z tą umiejętnością",
+    "skillInvolvedHours": "udział w {hours} h pracy nieprzypisanej wyłącznie tej umiejętności — jej własna część nie jest znana",
+    "skillInvolvedHoursAlso": "oraz udział w {hours} h nieprzypisanych wyłącznie jej",
+    "skillInvolvedHoursHint": "Czas wpisów w dzienniku, w których ta umiejętność brała udział, ale zapisy nie mogą przypisać go wyłącznie jej — wpis wykorzystywał też inne umiejętności lub czas podzielono między rodzaje pracy bez wskazania gdzie. Nigdy nie dzielony i nigdy nie doliczany do Twojej sumy.",
     "selfStatedTitle": "Zadeklarowane samodzielnie, brak jeszcze zapisów",
     "variantsFolded": "{count} wariantów zapisu",
     "skillShare": "{share}% zarejestrowanej pracy",
@@ -8555,6 +8558,9 @@
     "organizationRecordedHoursWithPeriods": "Zapisy organizacji: łącznie {total} godz. — {hours} godz. w {days, plural, one {# dniu} few {# dniach} many {# dniach} other {# dnia}} oraz {periodHours} godz. podane jako suma za okres ({from} – {to}) w ewidencjach czasu pracy lub zaimportowanych dokumentach ({approved} godz. zatwierdzonych). Liczone oddzielnie od dziennika i nieprzypisane do żadnej umiejętności.",
     "professionalExperienceTotal": "Doświadczenie zawodowe łącznie: {total} godz. — {journal} godz. w dzienniku pracy i {organization} godz. w historii organizacji. Każda praca liczona raz; źródła pokazane osobno.",
     "professionalExperienceNotCounted": "Kolejne {hours} godz. jest pokazane, ale nie dodane, ponieważ ta sama praca jest już policzona.",
+    "durationPending": "{organization} zapisała {records, plural, one {# zapis pracy} few {# zapisy pracy} many {# zapisów pracy} other {# zapisu pracy}} ({span}), których czas trwania nie został jeszcze podany — pokazane bez godzin; nie wliczono do żadnej sumy.",
+    "durationPendingUnnamed": "organizacja",
+    "durationPendingUndated": "daty nie zapisane",
     "premium": {
       "eyebrowFallback": "Żywe CV",
       "facts": {
@@ -8573,7 +8579,8 @@
         "both": "{confirmed} godz. z wpisem kierownika · {recorded} godz. zapisane",
         "recorded": "{hours} godz. zapisane",
         "shown": "Widać w Twoich zapisach",
-        "declared": "Podane przez Ciebie; jeszcze nie pokazane"
+        "declared": "Podane przez Ciebie; jeszcze nie pokazane",
+        "involved": "Udział w {hours} h, nieprzypisanych wyłącznie jej"
       },
       "source": {
         "own": "Twój zapis",
@@ -18799,6 +18806,14 @@
       "eyebrow": "Historia firmy",
       "title": "{name}: jedna ciągła historia",
       "subtitle": "Każda liczba poniżej liczy zarejestrowaną pracę organizacji dokładnie raz. Okresy pokazują, co zadeklarowano o wcześniejszych podmiotach prawnych i na czym ta deklaracja się opiera.",
+      "titleHeld": "{name}: posiadane zapisy pracy według okresów",
+      "subtitleHeld": "Praca wykonana w ramach wcześniejszego podmiotu prawnego należy do tego podmiotu i ludzi, którzy ją wykonali. {name} przechowuje te zapisy jako udokumentowaną ciągłość; nie są pokazywane jako własna praca {name}.",
+      "headerOwn": "Własny okres {name}",
+      "headerEarlier": "Wcześniejszy podmiot prawny: {name}",
+      "headerUnstated": "Okres „{label}” — podmiot prawny nie został podany",
+      "headerNotPlaced": "Zapisy nieprzypisane do żadnego podanego okresu",
+      "continuityNotSuccession": "Ciągłość udokumentowana; następstwo prawne nie zostało stwierdzone.",
+      "totalsHeld": "Wszystkie zapisy, które przechowuje {name}, ze wszystkich okresów, każdy liczony raz — nie wszystko to własna praca {name}.",
       "figures": "{records} wpisów · {hours} godz. · {people} osób · {places} miejsc",
       "totals": {
         "records": "Wpisy",

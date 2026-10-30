@@ -736,8 +736,8 @@ describe("the organization's hour records — a ledger beside the journal, never
       entries: journal,
       organizationRecords: imported,
     });
-    const { organizationRecords: a, organizationPeriodRecords: pa, organizationContextRecords: xa, organizationDayRecords: da, checks: ca, ...restA } = without;
-    const { organizationRecords: b, organizationPeriodRecords: pb, organizationContextRecords: xb, organizationDayRecords: db, checks: cb, ...restB } = withLedger;
+    const { organizationRecords: a, organizationPeriodRecords: pa, organizationContextRecords: xa, organizationDayRecords: da, organizationPendingRecords: na, checks: ca, ...restA } = without;
+    const { organizationRecords: b, organizationPeriodRecords: pb, organizationContextRecords: xb, organizationDayRecords: db, organizationPendingRecords: nb, checks: cb, ...restB } = withLedger;
     // the day-record pass-through (#2169 all-time rule) follows the ledger:
     // UNKNOWN without it, every live day record with it, summed nowhere here.
     expect(da).toBeNull();
@@ -751,6 +751,9 @@ describe("the organization's hour records — a ledger beside the journal, never
     // the period list follows the ledger: UNKNOWN with it, read-and-empty with it
     expect(pa).toBeNull();
     expect(pb).toEqual([]);
+    // the no-duration pass-through (SEP-7) follows the ledger the same way
+    expect(na).toBeNull();
+    expect(nb).toEqual([]);
     expect(withLedger.totalHours).toBe(14);
     expect(withLedger.periods.find((p) => p.key === "all")!.hours).toBe(14);
     // the skill reading is untouched: 38 recorded hours reach no skill
