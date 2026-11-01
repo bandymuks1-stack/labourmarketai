@@ -2,7 +2,18 @@
 -- RECONSTRUCTED after the production apply; the production ledger stored NO rollback.
 -- LOCAL RESETS ONLY. In production the forecast tables hold append-only forecast versions;
 -- the incident path there is forward-fix, never this file.
+-- Refuses while any forecast table holds a row, so no forecast version, cadence setting,
+-- state or pending signal is ever discarded: the whole transaction aborts first.
 begin;
+do $$
+begin
+  if exists (select 1 from public.organization_forecast_settings)
+     or exists (select 1 from public.project_forecasts)
+     or exists (select 1 from public.project_forecast_state)
+     or exists (select 1 from public.project_forecast_signals) then
+    raise exception 'rollback refused: forecast tables contain records';
+  end if;
+end $$;
 do $$
 declare t text;
 begin
