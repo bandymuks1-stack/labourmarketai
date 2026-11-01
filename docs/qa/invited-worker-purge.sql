@@ -1,7 +1,7 @@
 -- OWNER-RUN in the Supabase SQL editor, AFTER `prod-qa-invited-provision revoke-invited`.
 -- FALLBACK ONLY (2026-11-01): once the walk has recorded a Work Journal entry this script
 -- aborts — journal entries are append-only evidence that only the sanctioned erasure path
--- may delete (journal_entries_evidence_guard_v1). The walk's own I-5 step requests and
+-- may delete (journal_entries_evidence_guard_v1). The walk's own I-6 step requests and
 -- confirms the account deletion so the system erasure runner removes the account; run this
 -- script only for an account that never reached the journal. After the erasure runner,
 -- docs/qa/invited-worker-invitation-cleanup.sql removes the one synthetic invitation that

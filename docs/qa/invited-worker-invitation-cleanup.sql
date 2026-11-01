@@ -1,5 +1,5 @@
 -- OWNER-RUN in the Supabase SQL editor, AFTER the erasure runner has removed the synthetic
--- invited worker (the walk's I-5 / clean-up requested and confirmed it).
+-- invited worker (the walk's I-6 / clean-up requested and confirmed it).
 -- Erasure keeps an invitation addressed to an erased person (address pseudonymised,
 -- accepted_by_profile_id nulled) so the inviter keeps the fact that an invitation existed.
 -- For the ONE synthetic partner referral that fact is test data: this deletes exactly that
