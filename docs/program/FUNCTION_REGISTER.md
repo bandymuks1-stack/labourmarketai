@@ -30,7 +30,7 @@ a security/permission row says only that an item is open.
 
 | LIVE_VERIFIED | PASS_CI_ONLY | FAIL | BLOCKED | NOT_VERIFIED | NOT_IMPLEMENTED | OPTIONAL_TEST |
 |---|---|---|---|---|---|---|
-| 191 | 10 | 9 | 39 | 12 | 15 | 1 |
+| 192 | 10 | 8 | 39 | 12 | 15 | 1 |
 
 Seeded 2026-10-28 from the 275-row QA matrix of 2026-10-23…28 plus the 2026-10-28 production results; a `PASS` row
 whose evidence names a production run or production use became `LIVE_VERIFIED`, any other `PASS` became `PASS_CI_ONLY`.
@@ -39,6 +39,10 @@ Changes on 2026-11-01 (function audit, production walks on build 38bfb9d93): **3
 project-execution E-5); **2.19 → `LIVE_VERIFIED`** (the core journal is proven in production; its AI part was already
 counted separately as row 10.9, so 2.19 no longer double-counts the AI block). 58 further rows got a fresh 2026-11-01
 production proof without a status change. Not run: invited-worker (identity not provisioned — owner step).
+
+Later on 2026-11-01 (build 3b7eafbe4, after #2897): **3.6 → `LIVE_VERIFIED`** again — prod walk project-execution
+41295981934 green end to end (the 2026-11-01 E-5 failure was the walk reading the answer before it arrived, not a lost
+assignment); prod walk mcp-agents 41296658531 green on the build that carries #2895 (no MCP regression). J-7 → complete.
 
 ### Reconciliation — where 275 and 277 come from
 
@@ -62,8 +66,8 @@ Denominator = 276 functions (277 rows minus the one `OPTIONAL_TEST` scenario, 7.
 | Measure | Method | Result |
 |---|---|---|
 | **Technical implementation** | every row except `NOT_IMPLEMENTED` (a `BLOCKED` row is built but waits for an owner step) | **261 / 276 = 94.6 %** |
-| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **191 / 276 = 69.2 %** (73.2 % of the built 261) |
-| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **10 / 19 = 52.6 %** complete · 4 partial · 1 broken · 2 blocked · 2 unverified |
+| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **192 / 276 = 69.6 %** (73.6 % of the built 261) |
+| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **11 / 19 = 57.9 %** complete · 4 partial · 0 broken · 2 blocked · 2 unverified |
 
 Per area (technical / production-verified):
 
@@ -71,7 +75,7 @@ Per area (technical / production-verified):
 |---|---|---|---|
 | 1 Identity, sign-up, organizations | 15 | 100 % | 87 % |
 | 2 Worker profile, Work Journal, Living CV | 35 | 100 % | 86 % |
-| 3 Company operations & projects | 33 | 100 % | 97 % (3.6 FAIL) |
+| 3 Company operations & projects | 33 | 100 % | 100 % |
 | 4 Demand, jobs & matching | 26 | 96 % | 85 % |
 | 5 Chat & communication | 19 | 100 % | 68 % |
 | 6 Marketplace | 19 | 84 % | 74 % |
@@ -93,7 +97,7 @@ The 19 journeys (rows in brackets):
 | J-4 | Public job search → job page → save / hand-off to the source (4.4, 4.29) | complete | jobs-search 2026-10-28 |
 | J-5 | Company joins → organization → first need → candidates → shortlist → contact (1.6, 4.1, 4.11, 4.12, 4.16) | complete | fresh-activation, company-talent-history 2026-11-01 |
 | J-6 | Company invites a person → the person accepts → member (1.9, 1.4) | partial | invited path not walked in production (identity not provisioned) |
-| J-7 | Project → assign worker → hours on site → board → report (3.2, 3.6, 3.3, 2.23, 3.13) | **broken** | 3.6 FAIL 2026-11-01 |
+| J-7 | Project → assign worker → hours on site → board → report (3.2, 3.6, 3.3, 2.23, 3.13) | complete | project-execution 41295981934 2026-11-01 |
 | J-8 | Need → dates proposed → worker accepts → engagement (5.13) | complete | orders-bookings 2026-10-26 |
 | J-9 | Agency declares supply → client bridge → offer (4.15, 4.28) | complete | agency-chain 2026-10-26, search-support-privacy 2026-11-01 |
 | J-10 | Brigade offered and matched as a unit (3.7, 4.6, 4.7) | partial | product-truth: unit matching link BROKEN |
@@ -149,9 +153,9 @@ The 19 journeys (rows in brackets):
 | 2.16 | Transversal capabilities | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-14; earlier: profile-cv-history run 40182648408 10-25 (21/21 green): P-14 transversal capabilities read like other skills | yes |  |
 | 2.17 | ESCO taxonomy | NOT_VERIFIED | — | quota / RED #2463 | unproven |  |
 | 2.18 | Documents / credential validity | LIVE_VERIFIED | 2026-10-25 | documents-approvals 40152566232 10-25 (walk passed) | yes |  |
-| 2.19 | Work Journal | LIVE_VERIFIED | 2026-11-01 | prod walk fresh-activation 41279196446 2026-11-01 on 38bfb9d93: a fresh worker's first journal entry is saved and reaches the Living CV; prod walk journal-confirm 41281666555 2026-11-01 on 38bfb9d93 (3/3); #2893 night/split shifts + retried confirm (CI); #2895 own-entry correction over MCP/mobile merged 2026-11-01 (CI, deploy pending). Reclassified 2026-11-01: the core journal is proven; the AI part is row 10.9; earlier: #2884 live 91a1a39c: work-context choice fix, verified on a production draft; earlier: ai-off-honesty run 40191899327 10-25 | yes | AI suggestions stay BLOCKED in 10.9 (owner AI keys); the honest off-state is proven |
+| 2.19 | Work Journal | LIVE_VERIFIED | 2026-11-01 | prod walk fresh-activation 41279196446 2026-11-01 on 38bfb9d93: a fresh worker's first journal entry is saved and reaches the Living CV; prod walk journal-confirm 41281666555 2026-11-01 on 38bfb9d93 (3/3); #2893 night/split shifts + retried confirm (CI); #2895 own-entry correction over MCP/mobile merged and deployed 2026-11-01 (3b7eafbe4; CI-proven, not a production walk step yet). Reclassified 2026-11-01: the core journal is proven; the AI part is row 10.9; earlier: #2884 live 91a1a39c: work-context choice fix, verified on a production draft; earlier: ai-off-honesty run 40191899327 10-25 | yes | AI suggestions stay BLOCKED in 10.9 (owner AI keys); the honest off-state is proven |
 | 2.20 | Manager review / confirm | LIVE_VERIFIED | 2026-11-01 | prod walk journal-confirm 41281666555 2026-11-01 on 38bfb9d93 (3/3); earlier: journal-confirm run 39788692498 (green) 10-22 | yes |  |
-| 2.21 | Work verification 8 states | LIVE_VERIFIED | 2026-11-01 | prod walk work-verification 41280396705 2026-11-01 on 38bfb9d93 (6/6); #2895 correction door over MCP/mobile (CI only); earlier: prod walk work-verification run 40300016332 (2026-10-26): V-1..V-6 6/6 — sent to manager, review queue with authority only, changes requested, correction pending (counted once, correction card names the decision it answe… | yes |  |
+| 2.21 | Work verification 8 states | LIVE_VERIFIED | 2026-11-01 | prod walk work-verification 41280396705 2026-11-01 on 38bfb9d93 (6/6); #2895 correction door over MCP/mobile (deployed 3b7eafbe4; CI-proven only); earlier: prod walk work-verification run 40300016332 (2026-10-26): V-1..V-6 6/6 — sent to manager, review queue with authority only, changes requested, correction pending (counted once, correction card names the decision it answe… | yes |  |
 | 2.22 | Photos / task evidence | LIVE_VERIFIED | 2026-10-25 | worker-records-exports run 40186822215 10-25 (8/8 green): P-1 a journal entry with a photo saved and shown on fresh load | yes |  |
 | 2.23 | Hours metrics/allocations/timesheets | LIVE_VERIFIED | 2026-10-23 | project-execution E-11 run 39968362991 10-23 | yes |  |
 | 2.24 | Experience records + disputes | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-15; earlier: profile-cv-history run 40182648408 10-25 (21/21 green): P-15 experience records open with right of reply | yes |  |
@@ -176,7 +180,7 @@ The 19 journeys (rows in brackets):
 | 3.3 | Objects / sites | LIVE_VERIFIED | 2026-10-23 | project-execution E-11 run 39968362991 10-23 | yes |  |
 | 3.4 | Stages | LIVE_VERIFIED | 2026-11-01 | prod walk project-execution 41283540387 2026-11-01 on 38bfb9d93 E-3 PASS; earlier: project-execution run 40085615921 (green) 10-24 | yes |  |
 | 3.5 | Tasks | LIVE_VERIFIED | 2026-11-01 | prod walk project-execution 41283540387 2026-11-01 on 38bfb9d93 E-4 PASS; earlier: project-execution run 40081437313 10-24: E-4 the walk starts and completes ITS OWN task (card matched by its own title inside main, after #2724) | yes |  |
-| 3.6 | Worker->project assignment | FAIL | 2026-11-01 | REGRESSION: prod walk project-execution 41283540387 2026-11-01 on 38bfb9d93 E-5 FAIL — the assignment does not persist; E-6..E-14 did not run; earlier: project-execution E-5 run 39968362991 10-23 | no | REGRESSION 2026-11-01: worker assignment not persisted (fix in progress in another lane); rows 3.3, 3.9-3.12, 3.17, 2.23, 3.13 export, 3.14/5.11 worker view were not re-run and keep their earlier proof |
+| 3.6 | Worker->project assignment | LIVE_VERIFIED | 2026-11-01 | prod walk project-execution 41295981934 2026-11-01 on 3b7eafbe4 green end to end (after #2897: the walk now waits for the assign answer; the assignment was stored all along); earlier: run 41283540387 on 38bfb9d93 E-5 FAIL (walk timing), project-execution E-5 run 39968362991 10-23 | yes |  |
 | 3.7 | Brigades | LIVE_VERIFIED | 2026-10-22 | brigade-formation 39795574869 10-22 | yes |  |
 | 3.8 | Team->project assignment | LIVE_VERIFIED | 2026-10-22 | brigade-formation run 39795574869 (green) 10-22 | yes |  |
 | 3.9 | Readiness | LIVE_VERIFIED | 2026-10-23 | project-execution E-7 run 39968362991 10-23 | yes |  |
@@ -374,7 +378,7 @@ The 19 journeys (rows in brackets):
 
 | ID | Function | Status | Last checked | Evidence (PR / commit / run) | In production | Remaining issue |
 |---|---|---|---|---|---|---|
-| 10.1 | MCP door 229 tools | LIVE_VERIFIED | 2026-10-23 | mcp-chain 39606986334; mcp-agents 10-23; live anon | yes | #2895 adds the journal correction pair (CI, deploy pending); the tool count in this row predates it |
+| 10.1 | MCP door 229 tools | LIVE_VERIFIED | 2026-11-01 | mcp-agents 41296658531 2026-11-01 on 3b7eafbe4; mcp-chain 39606986334; mcp-agents 10-23; live anon | yes | mcp-agents 41296658531 green 2026-11-01 on 3b7eafbe4 (carries #2895); the journal correction pair is CI-proven only and not yet a step of the production MCP walk; the tool count in this row predates it |
 | 10.2 | Agent scenarios over MCP | LIVE_VERIFIED | 2026-10-23 | mcp-agents 9/9 39885097311 10-23 | yes |  |
 | 10.3 | OAuth 2.1 for MCP clients | NOT_VERIFIED | — | discovery live (401 challenge, PRM, DCR, S256); walk #2454 runs without owner creds | unproven | merge or dispatch #2454 |
 | 10.4 | MCP scopes | NOT_IMPLEMENTED | — | registry NOT_BUILT: MCP OAuth scope enforcement (bearer has full user scope) | no | auth path = RED; buildable as draft |
