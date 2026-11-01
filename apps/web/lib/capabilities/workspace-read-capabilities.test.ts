@@ -28,7 +28,7 @@ import { WORKSPACE_READ_CAPABILITIES } from "./workspace-read-capabilities";
 
 const supabase = {} as CapabilityCaller["supabase"];
 const bearer: CapabilityCaller = { userId: "u-1", transport: "bearer", supabase, locale: "lt", actorKind: "agent" };
-const inScope = <T>(fn: () => Promise<T>) => runAsBearerCaller({ userId: "u-1", transport: "bearer", supabase }, fn);
+const inScope = <T>(fn: () => Promise<T>) => runAsBearerCaller({ userId: "u-1", transport: "bearer", oauthClientId: null, supabase }, fn);
 
 beforeEach(() => {
   loadAgenda.mockClear();

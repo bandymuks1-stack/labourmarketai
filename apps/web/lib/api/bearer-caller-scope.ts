@@ -69,10 +69,7 @@ function store(): AsyncLocalStorage<BearerCallerScope> {
  * Run `fn` as the verified bearer caller. A cookie identity runs `fn`
  * unchanged — its `createClient()` already IS the caller.
  */
-export function runAsBearerCaller<T>(
-  identity: Pick<ApiIdentity, "userId" | "transport" | "supabase">,
-  fn: () => Promise<T>,
-): Promise<T> {
+export function runAsBearerCaller<T>(identity: ApiIdentity, fn: () => Promise<T>): Promise<T> {
   if (identity.transport !== "bearer") return fn();
   return store().run({ userId: identity.userId, supabase: identity.supabase }, fn);
 }

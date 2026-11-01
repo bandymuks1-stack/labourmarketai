@@ -46,7 +46,7 @@ import { join } from "node:path";
 const supabase = {} as CapabilityCaller["supabase"];
 const bearer: CapabilityCaller = { userId: "user-1", transport: "bearer", supabase, locale: "en", actorKind: "agent" };
 const inScope = <T>(fn: () => Promise<T>) =>
-  runAsBearerCaller({ userId: "user-1", transport: "bearer", supabase }, fn);
+  runAsBearerCaller({ userId: "user-1", transport: "bearer", oauthClientId: null, supabase }, fn);
 
 const EXECUTABLE = new Set([
   ...Object.keys(WORKER_ACTION_SCHEMAS),
@@ -191,7 +191,7 @@ describe("conversation-action bridge — execution goes through the ONE dispatch
   });
 
   it("a scope for ANOTHER user is refused (the scope must be this caller)", async () => {
-    const r = await runAsBearerCaller({ userId: "someone-else", transport: "bearer", supabase }, () =>
+    const r = await runAsBearerCaller({ userId: "someone-else", transport: "bearer", oauthClientId: null, supabase }, () =>
       runCapability("engagement.end.prepare", bearer, { engagementId: "22222222-2222-4222-8222-222222222222" }),
     );
     expect(r).toMatchObject({ ok: false, code: "not_supported" });
