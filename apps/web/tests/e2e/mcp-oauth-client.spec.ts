@@ -477,8 +477,15 @@ test("O-4. use the OAuth-issued bearer: initialize, tools/list, a read, a draft 
   const confirm = await tool(accessToken, "journal_confirm", confirmInput);
   expect(confirm.ok, `confirm: ${JSON.stringify(confirm).slice(0, 300)}`).toBe(true);
   confirmedEntryId = typeof confirm.data?.entryId === "string" ? (confirm.data.entryId as string) : undefined;
+  // A spent token never writes twice. The door answers a repeat of the SAME
+  // confirm idempotently (registry `alreadyRecordedEntry`: the first call's
+  // entry, `alreadyRecorded: true`) — a client retrying after a lost
+  // response must not see an error for a write that happened.
   const replay = await tool(accessToken, "journal_confirm", confirmInput);
-  expect(replay.ok, "a spent confirmation is refused").toBe(false);
+  if (replay.ok) {
+    expect(replay.data?.alreadyRecorded, `replay wrote again: ${JSON.stringify(replay.data).slice(0, 200)}`).toBe(true);
+    expect(replay.data?.entryId, "replay answers the first call's entry").toBe(confirmedEntryId);
+  }
 });
 
 test("O-5. refresh: the refresh grant answers; rotation of the old token is recorded", async () => {
