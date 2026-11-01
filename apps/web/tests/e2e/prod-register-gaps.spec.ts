@@ -17,8 +17,8 @@ import { test, expect, type Browser, type BrowserContext, type Page } from "./pr
  *   G-2 (9.18)  the public JSON APIs answer as designed: /api/health and the
  *               public claims contract are open JSON; the signed-in search API
  *               refuses an anonymous caller and answers JSON to a signed-in one.
- *   G-3 (2.36)  the profession journal templates: when the worker's journal
- *               shows the template picker, picking one prefills the entry
+ *   G-3 (2.36)  the profession journal templates: when the worker's FULL
+ *               composer (?compose=full) shows the template picker, picking one prefills the entry
  *               (nothing is saved). When no template is active for that worker
  *               the run records that fact — the seeds ship inactive and are
  *               activated by the owner — and the row stays unproven.
@@ -97,8 +97,11 @@ test("G-2 (9.18). the public JSON APIs answer as designed, anonymous and signed 
 
 test("G-3 (2.36). a profession journal template prefills the entry when one is active for the worker", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
-  await page.goto("/lt/dashboard/journal");
+  // Templates belong to the FULL composer (the "detaliau" door); the default
+  // journal page is the compact quick record and never shows them.
+  await page.goto("/lt/dashboard/journal?compose=full");
   await expect(page.getByRole("main"), "the journal renders").toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("journal-compose-full"), "the full composer is open").toBeVisible({ timeout: 30_000 });
   const picker = page.getByTestId("journal-template-picker");
   // The composer may need a moment to hydrate; the picker is server data.
   const shown = await picker.isVisible({ timeout: 15_000 }).catch(() => false);
