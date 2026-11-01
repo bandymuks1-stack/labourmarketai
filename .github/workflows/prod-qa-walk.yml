@@ -370,10 +370,11 @@ jobs:
           # The addressed invitee of staff-review-notice: the second synthetic
           # worker minted above (same allowlisted identity, no new account).
           PROD_QA_INVITEE_EMAIL: qa.worker+goal3@labourmarket.ai
-          # mail-reset only: the read-only synthetic QA mailbox (owner D-4). Names only here.
-          PROD_QA_IMAP_HOST: ${{ secrets.PROD_QA_IMAP_HOST }}
-          PROD_QA_IMAP_USER: ${{ secrets.PROD_QA_IMAP_USER }}
-          PROD_QA_IMAP_PASS: ${{ secrets.PROD_QA_IMAP_PASS }}
+          # mail-reset only: the read-only synthetic QA mailbox (owner D-4). Every other spec gets
+          # empty values, so no other walk ever holds the mailbox credentials.
+          PROD_QA_IMAP_HOST: ${{ needs.debounce.outputs.spec == 'mail-reset' && secrets.PROD_QA_IMAP_HOST || '' }}
+          PROD_QA_IMAP_USER: ${{ needs.debounce.outputs.spec == 'mail-reset' && secrets.PROD_QA_IMAP_USER || '' }}
+          PROD_QA_IMAP_PASS: ${{ needs.debounce.outputs.spec == 'mail-reset' && secrets.PROD_QA_IMAP_PASS || '' }}
           PROD_QA_MAIL_ADDRESS: qa.worker+goal3@labourmarket.ai
         run: |
           set -uo pipefail

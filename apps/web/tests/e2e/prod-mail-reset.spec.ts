@@ -20,17 +20,31 @@ import { assertSyntheticAddress, imapConfigured, nextUid, waitForMailLink } from
  *        password: the R-1 password is now refused by auth, the new one works.
  *
  * The passwords are random per run, held only in memory and never printed.
- * Nothing else about the account changes.
+ * Nothing else about the account changes — except that this passwordless
+ * synthetic account keeps the last random password, which nobody knows.
  */
 const ADDRESS = process.env.PROD_QA_MAIL_ADDRESS ?? "qa.worker+goal3@labourmarket.ai";
-const ENABLED = process.env.PROD_QA_WALK === "1" && imapConfigured();
+const ENABLED = process.env.PROD_QA_WALK === "1" && imapConfigured() && Boolean(process.env.PROD_QA_SUPABASE_URL);
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with the QA mailbox secrets (owner D-4)");
 // Two mails, each up to 3 min, plus the 65 s cool-down between them.
 test.describe.configure({ mode: "serial", timeout: 420_000, retries: 0 });
 test.use({ actionTimeout: 30_000 });
 
 const PHONE = { width: 390, height: 844 };
-const RESET_LINK = (u: string) => /verify|callback|recovery|reset-password|token/.test(u);
+// Anyone can send mail TO the synthetic address, so only a link to this site or
+// to its auth project is ever followed.
+const TRUSTED_HOSTS = [process.env.E2E_BASE_URL, process.env.PROD_QA_SUPABASE_URL]
+  .filter((v): v is string => Boolean(v))
+  .map((v) => new URL(v).host);
+const RESET_LINK = (u: string) => {
+  let host = "";
+  try {
+    host = new URL(u).host;
+  } catch {
+    return false;
+  }
+  return TRUSTED_HOSTS.includes(host) && /verify|callback|recovery|reset-password|token/.test(u);
+};
 const password = () => `Qa-${randomBytes(18).toString("base64url")}!9`;
 
 async function phone(browser: Browser): Promise<{ page: Page; close: () => Promise<void> }> {

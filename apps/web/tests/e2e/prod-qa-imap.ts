@@ -30,10 +30,16 @@ class Session {
   private buf = Buffer.alloc(0);
   private waiters: Array<() => void> = [];
   private seq = 0;
+  /** A socket error after connect, as a code only (never a host or message). */
+  private failed: string | null = null;
 
   private constructor(private readonly sock: TLSSocket) {
     sock.on("data", (d: Buffer) => {
       this.buf = Buffer.concat([this.buf, d]);
+      for (const w of this.waiters.splice(0)) w();
+    });
+    sock.on("error", (err: NodeJS.ErrnoException) => {
+      this.failed = err.code ?? "socket_error";
       for (const w of this.waiters.splice(0)) w();
     });
   }
@@ -41,10 +47,17 @@ class Session {
   static async open(): Promise<Session> {
     const host = process.env.PROD_QA_IMAP_HOST as string;
     const sock = connect({ host, port: Number(process.env.PROD_QA_IMAP_PORT ?? 993), servername: host });
-    await new Promise<void>((ok, fail) => {
-      sock.once("secureConnect", () => ok());
-      sock.once("error", fail);
-    });
+    // Node's own messages name the host and the certificate's names, and test
+    // errors land in public artefacts: only the error code is kept.
+    try {
+      await new Promise<void>((ok, fail) => {
+        sock.once("secureConnect", () => ok());
+        sock.once("error", fail);
+      });
+    } catch (err) {
+      sock.destroy();
+      throw new Error(`IMAP: connection failed (${(err as NodeJS.ErrnoException).code ?? "error"})`);
+    }
     const s = new Session(sock);
     await s.until((text) => /^\* OK/m.test(text));
     return s;
@@ -53,6 +66,7 @@ class Session {
   private async until(done: (text: string) => boolean, ms = 30_000): Promise<string> {
     const end = Date.now() + ms;
     for (;;) {
+      if (this.failed) throw new Error(`IMAP: connection lost (${this.failed})`);
       const text = this.buf.toString("latin1");
       if (done(text)) {
         this.buf = Buffer.alloc(0);
