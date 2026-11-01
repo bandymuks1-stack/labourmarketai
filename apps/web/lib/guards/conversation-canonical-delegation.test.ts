@@ -116,7 +116,16 @@ describe("B — acting on a match uses the ONE canonical interest path", () => {
      invariants moved with the rows to the Context Panel result and its
      projection. The guarantees are unchanged — only where they are enforced. */
   const messages = read("components/app/workspace/opportunities-result.tsx");
-  const findWork = read("lib/marketplace/worker-opportunities-actions.ts");
+  // The projection lives in ONE module shared by the panel's argument-free
+  // action and the `work.find` capability (#2889); the action must delegate to
+  // it, so these invariants still hold for every row the panel renders.
+  const findWork = read("lib/marketplace/opportunities-result.ts");
+
+  it("the panel action delegates to the ONE projection module", () => {
+    expect(read("lib/marketplace/worker-opportunities-actions.ts")).toMatch(
+      /from\s+["']\.\/opportunities-result["']/,
+    );
+  });
 
   it("the chat renders the canonical control, not a chat-local one", () => {
     expect(messages).toMatch(
@@ -141,9 +150,11 @@ describe("B — acting on a match uses the ONE canonical interest path", () => {
   it("the interest status shown is the use case's, never recomputed", () => {
     expect(findWork).toMatch(/view\.interestStatusByRequestId\[/);
     // No local defaulting of an absent signal into a concrete status.
-    expect(codeOf(join(APP_ROOT, "lib", "marketplace", "worker-opportunities-actions.ts"))).not.toMatch(
-      /\?\?\s*["']interested["']|\?\?\s*["']withdrawn["']/,
-    );
+    for (const f of ["worker-opportunities-actions.ts", "opportunities-result.ts"]) {
+      expect(codeOf(join(APP_ROOT, "lib", "marketplace", f))).not.toMatch(
+        /\?\?\s*["']interested["']|\?\?\s*["']withdrawn["']/,
+      );
+    }
   });
 
   it("no dead button: the control is offered only when the store exists", () => {
@@ -264,7 +275,7 @@ describe("honesty — the chat never promises a mechanism it lacks", () => {
     expect(messages).toMatch(/weak:\s*["'][^"']*state-warning/);
     expect(messages).toMatch(/insufficient:\s*["'](?![^"']*state-success)/);
     // …and the status really travels from the use case to the card.
-    expect(read("lib/marketplace/worker-opportunities-actions.ts")).toMatch(/fitStatus:\s*m\.status/);
+    expect(read("lib/marketplace/opportunities-result.ts")).toMatch(/fitStatus:\s*m\.status/);
   });
 
   it("the chat answers state questions from the server, not from canned copy", () => {

@@ -23,11 +23,19 @@ import { bearerOf, qaApi } from "./prod-qa-api";
  *   I-2  API: the invitation is no longer pending and the role is worker;
  *   I-3  1280 desktop: the first Work Journal entry reaches the Living CV with
  *        the exact hours the person's own journal holds;
- *   I-4  768 tablet + 390 phone: home and Living CV never scroll sideways.
+ *   I-4  768 tablet + 390 phone: home and Living CV never scroll sideways;
+ *   I-5  390 phone: the person asks to delete the account and confirms it
+ *        with the fresh sign-in this walk was minted with.
  *
- * Only synthetic text (QA-SYNTHETIC). Afterwards the owner revokes and purges
- * the account (prod-qa-invited-provision revoke-invited +
- * docs/qa/invited-worker-purge.sql); the walk's sessions are revoked at its end.
+ * Only synthetic text (QA-SYNTHETIC). Clean-up goes through the platform's own
+ * erasure (I-5 → the system erasure runner), because a Work Journal entry is
+ * append-only evidence that only the sanctioned erasure path may remove — a
+ * plain SQL delete of the account is refused by the journal guard. The
+ * deletion is also requested in afterAll when an earlier step failed. Erasure
+ * keeps the invitation (pseudonymised); the owner removes that one synthetic
+ * row with docs/qa/invited-worker-invitation-cleanup.sql, then
+ * docs/qa/invited-worker-orphans.sql checks nothing is left; the
+ * walk's sessions are revoked at its end.
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const SLOT = "invited";
@@ -209,5 +217,62 @@ test("I-4. 768 tablet and 390 phone: home and Living CV never scroll sideways", 
     } finally {
       await ctx.close();
     }
+  }
+});
+
+/** Requests and confirms the synthetic person's account deletion on a phone,
+ *  so the system erasure runner removes the account. Returns false when the
+ *  confirmation window has passed (the owner then confirms by hand). */
+async function deleteOwnAccount(browser: Browser): Promise<boolean> {
+  const { ctx, page } = await open(browser, PHONE, true);
+  try {
+    await page.goto("/lt/dashboard/privacy#privacy-deletion");
+    await settle(page);
+    const section = page.getByTestId("privacy-deletion");
+    await expect(section, "the deletion section is on the privacy page").toBeVisible({ timeout: 30_000 });
+    if (await section.getByTestId("privacy-deletion-confirmed").isVisible().catch(() => false)) return true;
+    if (await section.getByTestId("privacy-deletion-submit").isVisible().catch(() => false)) {
+      await section.getByTestId("privacy-deletion-confirm").check();
+      await section.getByTestId("privacy-deletion-submit").click();
+      // The submitted note is transient: the page refreshes into the
+      // confirmation step as soon as it reads the open request.
+      await expect(
+        section.getByTestId("privacy-deletion-submitted").or(section.getByTestId("privacy-deletion-confirm-step")),
+      ).toBeVisible({ timeout: 30_000 });
+      await page.reload();
+      await settle(page);
+    }
+    // The confirmation needs a sign-in from the last 15 minutes; a re-auth
+    // door instead means the walk outlasted it.
+    const final = section.getByTestId("privacy-deletion-confirm-final");
+    const reauth = section.getByTestId("privacy-deletion-reauth");
+    await expect(final.or(reauth), "the confirmation step is shown").toBeVisible({ timeout: 30_000 });
+    if (await reauth.isVisible()) return false;
+    await final.click();
+    await expect(section.getByTestId("privacy-deletion-confirmed")).toBeVisible({ timeout: 30_000 });
+    await expectNoSidewaysScroll(page, "privacy deletion (390)");
+    return true;
+  } finally {
+    await ctx.close();
+  }
+}
+
+let deletionConfirmed = false;
+
+test("I-5. 390 phone: the person deletes the account through the privacy page (the walk's clean-up)", async ({ browser }) => {
+  deletionConfirmed = await deleteOwnAccount(browser);
+  expect(deletionConfirmed, "the walk's sign-in is older than the confirmation window").toBe(true);
+  console.info("[invited] I-5 account deletion requested and confirmed; the erasure runner removes the account");
+});
+
+// A serial suite skips I-5 after any earlier failure — exactly the runs that
+// most need the clean-up — so the deletion is also requested here, always.
+test.afterAll(async ({ browser }) => {
+  if (deletionConfirmed) return;
+  try {
+    deletionConfirmed = await deleteOwnAccount(browser);
+    console.info(`[invited] clean-up: account deletion ${deletionConfirmed ? "confirmed" : "needs the owner's confirmation"}`);
+  } catch {
+    console.info("[invited] clean-up: the account deletion could not be requested; the owner confirms it by hand");
   }
 });

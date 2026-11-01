@@ -22,6 +22,7 @@ adapter (boundary guard, property d).
 | `runtime/data-sensitivity.ts` + `runtime/data-egress.ts` | The data veto: PUBLIC → SENSITIVE_FREE_TEXT classes, default-deny egress grants (grant table empty), free-tier ceiling. |
 | `runtime/provider-chain.ts` + `runtime/providers/` | Cheapest-sufficient provider selection; adapters for anthropic / openai / gemini / xai / deepl / local / mock / disabled. |
 | `runtime/model-pricing.ts` / `model-candidates.ts` | Owner-reviewed prices + alias→model tables; an unpriced model blocks rather than spends. |
+| `runtime/provider-cooldown.ts` / `provider-counters.ts` | In-memory, per process: a provider that just failed is tried last; every chain attempt is counted per provider (requests, latency, rate limits, errors by class). No payload, no export. |
 | `runtime/audit-store.ts` | Best-effort persistence into the applied `ai_runs` table. |
 | `evals/` | Offline eval harness over the registered agents (mock provider). |
 

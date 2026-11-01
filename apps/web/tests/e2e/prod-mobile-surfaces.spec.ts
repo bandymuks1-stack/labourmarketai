@@ -270,7 +270,7 @@ test("M-5. hydration claims the server HTML once: no #418, no hidden S:n copy", 
     ...(await coldLoads(browser, ["/lt/jobs", "/ru/jobs", "/nl/jobs", "/de/jobs"], 5)),
     ...(await coldLoads(browser, ["/en/for-workers", "/pl/pricing"], 3)),
     ...(await coldLoads(browser, ["/lt/dashboard", "/lt/dashboard/journal", "/lt/cv"], 2, "worker")),
-    ...(await coldLoads(browser, ["/lt/dashboard/hours", "/lt/dashboard/projects", "/lt/dashboard/company/planning"], 2, "owner")),
+    ...(await coldLoads(browser, ["/lt/dashboard/hours", "/lt/dashboard/projects", "/lt/dashboard/company/planning", "/lt/dashboard/bookings"], 2, "owner")),
   ];
   expect(failures, `hydration failed:\n${failures.join("\n")}`).toEqual([]);
 });

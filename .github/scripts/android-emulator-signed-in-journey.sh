@@ -68,16 +68,23 @@ maestro test \
 # The beta screens: jobs search → loaded board → open a job; an empty need is refused.
 # The need SUBMIT runs only with NEED_SUBMIT=1 (isolated runs): cross-org readers are not
 # yet proven to exclude synthetic needs, so production writes no need.
+# The console (step names and statuses, as this log already shows) is kept on
+# the runner so the claim can name a degraded Today read; it is never uploaded.
+CONSOLE="${RUNNER_TEMP:-/tmp}/maestro-jobs-console.txt"
 maestro test \
   -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
   -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
   -e NEED_SUBMIT="${NEED_SUBMIT:-0}" \
-  apps/mobile/.maestro/jobs-need-journey.yaml || { on_screen_ids; exit 1; }
+  apps/mobile/.maestro/jobs-need-journey.yaml | tee "$CONSOLE" || { on_screen_ids; exit 1; }
+if grep -q "TODAY_READ_DEGRADED.*COMPLETED" "$CONSOLE"; then
+  echo "ANDROID_TODAY_READ_DEGRADED: Today's figures read FAILED during the jobs journey (capability-retry shown) - the jobs claim below is NOT a full read"
+  summary "- ANDROID_TODAY_READ_DEGRADED: Today figures read failed during the jobs journey (capability-retry)"
+fi
 if [ "${NEED_SUBMIT:-0}" = "1" ]; then
-  echo "ANDROID_JOBS_NEED_JOURNEY_PROVEN: jobs.search loaded; job opened; empty need refused; need drafted, confirmed, sent"
+  echo "ANDROID_JOBS_NEED_JOURNEY_PROVEN: jobs.search loaded; job opened (hand-off ok); empty need refused; need drafted, confirmed, sent"
   summary "- ANDROID_JOBS_NEED_JOURNEY_PROVEN: jobs search (read) → job opened → empty need refused → need draft + confirm (write)"
 else
-  echo "ANDROID_JOBS_READ_JOURNEY_PROVEN: jobs.search loaded; job opened; empty need refused (no need written)"
+  echo "ANDROID_JOBS_READ_JOURNEY_PROVEN: jobs.search loaded; job opened (hand-off ok); empty need refused (no need written)"
   summary "- ANDROID_JOBS_READ_JOURNEY_PROVEN: jobs search (read) → job opened → empty need refused; need submit NOT run (NEED_SUBMIT=0)"
 fi
 

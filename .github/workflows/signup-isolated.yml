@@ -269,16 +269,20 @@ jobs:
           APP_MAIL_API: http://127.0.0.1:54334
         run: pnpm exec playwright test $SPEC --reporter=list --trace=off
 
-      # PRODUCTION-CODE COMPATIBILITY (owner gate for 20261029190000, deploy order
-      # migration -> app): the CURRENT production code (origin/main) is built
-      # and run against this stack, whose database now carries the migrated
-      # reader (job-fit-evidence-isolated.spec.ts G-3 re-applied it). Same
-      # local-only env; nothing leaves the runner.
-      - name: Production-code compatibility — build origin/main against the migrated stack
+      # APP-ROLLBACK COMPATIBILITY (owner gate for 20261029190000, deploy order
+      # migration -> app): the LAST app build before the job-fit code (#2887)
+      # is built and run against this stack, whose database carries the
+      # migrated reader (job-fit-evidence-isolated.spec.ts G-3 re-applied it).
+      # It proves the app can still be rolled back past #2887 while the
+      # migration stays applied. Pinned, because origin/main now contains #2887
+      # and reads the new columns by design. Local-only; nothing leaves the runner.
+      - name: App-rollback compatibility — build the pre-#2887 app against the migrated stack
+        env:
+          PRE_JOBFIT_SHA: 88a60b567edbe5c6894d087d0c679da54c90ea67
         run: |
           set -euo pipefail
-          git fetch --no-tags --depth=1 origin main
-          echo "origin/main = $(git rev-parse FETCH_HEAD)"
+          git fetch --no-tags --depth=1 origin "$PRE_JOBFIT_SHA"
+          echo "pre-#2887 app = $(git rev-parse FETCH_HEAD)"
           mkdir -p "$RUNNER_TEMP/main"
           git archive FETCH_HEAD | tar -x -C "$RUNNER_TEMP/main"
           cd "$RUNNER_TEMP/main"
@@ -290,7 +294,7 @@ jobs:
           for i in $(seq 1 60); do curl -fsS -o /dev/null "http://127.0.0.1:3002/en" && break; sleep 2; done
           curl -fsS -o /dev/null "http://127.0.0.1:3002/en"
 
-      - name: Run the compatibility walk (production code, migrated database)
+      - name: Run the compatibility walk (pre-#2887 app, migrated database)
         working-directory: apps/web
         env:
           SIGNUP_ISOLATED: "1"

@@ -26,6 +26,7 @@ import { randomUUID } from "node:crypto";
 import { readRequestHost } from "@/lib/config/request-host";
 import { getAiRuntimeConfig, getAiProviderStates } from "./runtime/config";
 import { sharedProviderCooldown } from "./runtime/provider-cooldown";
+import { sharedProviderCounters } from "./runtime/provider-counters";
 import {
   auditDispositionFor,
   countAiRunsTodayBestEffort,
@@ -93,6 +94,10 @@ export async function runAiAgent<T = unknown>(
     // their own states keep their own (absent) cooldown.
     providerCooldown:
       opts.providerCooldown ?? (opts.providerStates ? undefined : sharedProviderCooldown),
+    // Per-provider requests / latency / rate limits / errors, in memory only
+    // (no payload, no export). Same rule as the cooldown for injected states.
+    providerCounters:
+      opts.providerCounters ?? (opts.providerStates ? undefined : sharedProviderCounters),
   });
 
   // Append-only audit trail for REAL runs — never blocks the outcome.

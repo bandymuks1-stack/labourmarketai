@@ -8,10 +8,11 @@ import { expect, test, type Page } from "@playwright/test";
  * PRODUCTION-CODE COMPATIBILITY for the RED migration
  * 20261029190000_worker_board_need_skill_slugs_v1 (owner gate, 2026-10-29).
  *
- * The deploy order is migration → app, so the code production runs TODAY
- * (origin/main, built and started on 127.0.0.1:3002 by
- * .github/workflows/signup-isolated.yml) must keep working against the
- * WIDENED reader. This walk drives that build on the same throwaway stack,
+ * The deploy order is migration → app, so the app build from BEFORE the
+ * job-fit code (#2887; pinned commit 88a60b567, built and started on
+ * 127.0.0.1:3002 by .github/workflows/signup-isolated.yml) must keep working
+ * against the WIDENED reader — that keeps an app rollback past #2887 safe
+ * while the migration stays applied. ("production code" below = that build.) This walk drives that build on the same throwaway stack,
  * after job-fit-evidence-isolated.spec.ts G-3 re-applied the migration. It
  * finds that walk's worker and needs by their run-unique titles in the LOCAL
  * database (nothing is handed over through a file):
