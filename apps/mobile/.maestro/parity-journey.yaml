@@ -217,6 +217,7 @@ name: parity-journey
       id: "today-open-notifications"
     direction: DOWN
     timeout: 30000
+    centerElement: true
 - waitForAnimationToEnd
 - tapOn:
     id: "today-open-notifications"
