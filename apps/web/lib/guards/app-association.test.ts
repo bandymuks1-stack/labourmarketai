@@ -184,6 +184,7 @@ describe("deep-link claim — exactly the screens the app has", () => {
       [
         "/",
         "/availability",
+        "/correct-entry",
         "/jobs",
         "/journal",
         "/log-work",

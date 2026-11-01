@@ -1,0 +1,132 @@
+# PARITY JOURNEY — the web-parity screens (owner directive 2026-11-01), on a
+# device, signed in.
+#
+# Runs ONLY from the dispatch jobs that run signed-in-journey.yaml and
+# jobs-need-journey.yaml (production-qa environment, the owner's ONE synthetic
+# review identity), AFTER them: the session they left in the keychain is
+# reused, so this flow relaunches WITHOUT clearing state and lands on Today.
+# No screenshot and no debug output (the repository is public).
+#
+# What a green run proves:
+#   1. Work Journal correction: the newest entry of the synthetic identity
+#      (the one signed-in-journey.yaml just wrote) is opened from the journal,
+#      its site is changed, the correction is DRAFTED (journal.correct_draft,
+#      before/after preview) and CONFIRMED (journal.correct_confirm, the web's
+#      own supersede); the saved state renders.
+#   last. sign-out returns to the sign-in form.
+# Every step navigates by testID, never by a label that changes with the
+# device language. Keyboards are put away as in signed-in-journey.yaml:
+# Android by hideKeyboard; iOS by Return on a one-line box or a tap on the
+# screen title — never a drag.
+appId: ai.labourmarket.app
+name: parity-journey
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "tab-today"
+    timeout: 60000
+
+# --- 1. Correct the newest journal entry ---
+- tapOn:
+    id: "tab-journal"
+- extendedWaitUntil:
+    visible:
+      id: "journal-entry-correct-0"
+    timeout: 60000
+- waitForAnimationToEnd
+- tapOn:
+    id: "journal-entry-correct-0"
+- extendedWaitUntil:
+    visible:
+      id: "journal-correct-site"
+    timeout: 60000
+- tapOn:
+    id: "journal-correct-site"
+# Whatever the cursor position, anything left of it goes and a new site is
+# typed: the site then differs from the stored one, which is all a
+# correction needs.
+- eraseText: 60
+- inputText: "CI site corrected"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - pressKey: Enter
+- scrollUntilVisible:
+    element:
+      id: "journal-correct-back"
+    direction: DOWN
+    timeout: 20000
+- waitForAnimationToEnd
+- tapOn:
+    id: "journal-correct-review"
+# A tap that landed while the layout moved under a closing keyboard is
+# retried once, as the compose flow does.
+- runFlow:
+    when:
+      notVisible:
+        id: "journal-correct-save"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "journal-correct-save"
+          timeout: 20000
+          optional: true
+      - runFlow:
+          when:
+            visible:
+              id: "journal-correct-review"
+          commands:
+            - waitForAnimationToEnd
+            - tapOn:
+                id: "journal-correct-review"
+- extendedWaitUntil:
+    visible:
+      id: "journal-correct-preview"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "journal-correct-save"
+    direction: DOWN
+    timeout: 20000
+- waitForAnimationToEnd
+- tapOn:
+    id: "journal-correct-save"
+- extendedWaitUntil:
+    visible:
+      id: "journal-correct-saved"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "journal-correct-back"
+    direction: DOWN
+    timeout: 20000
+- waitForAnimationToEnd
+- tapOn:
+    id: "journal-correct-back"
+- extendedWaitUntil:
+    visible:
+      id: "journal-log-work"
+    timeout: 30000
+
+# --- last. Sign out, back to the form ---
+- tapOn:
+    id: "tab-settings"
+- scrollUntilVisible:
+    element:
+      id: "sign-out"
+    direction: DOWN
+    timeout: 30000
+- waitForAnimationToEnd
+- tapOn:
+    id: "sign-out"
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
