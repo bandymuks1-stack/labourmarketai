@@ -178,6 +178,21 @@ without an owner approval naming it.
 #2701 #2693 #2685 #2682 #2647 #2474 #2471 #2463 #2454 #2441 #2440 #2420 #2418 #2410
 #2362 #2235 #2227 #2209 #2203.
 
+### 3.3a Owner-approved, QUEUED — not started (do not begin before the start conditions)
+
+| Item | Approved | Priority | State | Start conditions |
+|---|---|---|---|---|
+| Job-offer intake → public listing → candidate sign-up → Living CV → application → employer review (growth mechanism of the existing platform, not a new product; LabourMarket.ai + Agentai OS data processing + Nonstop Group commercial links) | owner, 2026-11-01 | P1, after current P0 | QUEUED, NOT STARTED — owner: coordinator `local_8d793dee` | (1) current P0 work finished; (2) core user journeys verified in production; (3) no open P0 blocker; (4) this register checked; (5) proven no duplication of existing intake / vacancy store / opportunities / interest / Living CV components |
+
+Binding notes for that item: reuse the existing ingestion and vacancy store; keep source,
+link, fetch date and publishing-right status per listing; never invent missing fields;
+auto-publish only with a confirmed lawful basis, everything else to a review queue; no
+full copying of third-party ads without permission; Agentai OS may process data only —
+the ban on automatic replies to company mail stays; core publishing and candidate sign-up
+stay free; no revenue projections from unconfirmed placement commissions; first pilot =
+50 real offers, staged, browser-verified (desktop + mobile), with measured views,
+sign-ups, applications and returning users. No new agent, radar or parallel project.
+
 ### 3.4 Stale non-draft PRs (`STALE?`, >7 days no push)
 
 #2642 (owner waiver needed), #2455, #2449, #2447 (draft, owner hold), #2438, #2419,
