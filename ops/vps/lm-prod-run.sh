@@ -40,8 +40,13 @@ case "$CUR_PORT" in 3200) NEW_PORT=3201;; 3201) NEW_PORT=3200;; *) CUR_PORT=3200
 
 keep_logs labourmarket-prod-next leftover
 docker rm -f labourmarket-prod-next >/dev/null 2>&1 || true
+# CPU (owner decision A, 2026-11-01): the host has ONE vCPU, shared with Agentai OS. A hard
+# --cpus=0.5 held this app at half a core even on an idle host, and the host's bursts (Agentai
+# redeploys and its four daily cycles) then starved user requests. The app may now use the whole
+# core and wins contention by weight: --cpu-shares=1024 here against 256 on the Agentai
+# containers (their compose file), 4:1 when both want CPU. Rollback: --cpus=0.5 and no shares.
 docker run -d --name labourmarket-prod-next \
-  --memory=768m --memory-swap=768m --cpus=0.5 --pids-limit=256 \
+  --memory=768m --memory-swap=768m --cpus=1 --cpu-shares=1024 --pids-limit=256 \
   --user 1000:1000 --cap-drop ALL --security-opt no-new-privileges \
   -p "127.0.0.1:$NEW_PORT:3000" \
   --restart=unless-stopped \
