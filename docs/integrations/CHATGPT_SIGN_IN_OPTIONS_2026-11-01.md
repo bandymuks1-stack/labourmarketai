@@ -11,7 +11,7 @@ below is dated by the day it was read (2026-11-01). Re-read before acting.
 | | A. ChatGPT app / connector over MCP + OAuth | B. "Sign in with ChatGPT" |
 |---|---|---|
 | Direction | ChatGPT calls **our** MCP server on the person's behalf | a person signs in **to our product** with their ChatGPT account |
-| Authorization server | **ours** — Supabase Auth's OAuth 2.1 server for project `gorgitwvdzxbnaxhrsrw` | **OpenAI's** |
+| Authorization server | **ours** — Supabase Auth's OAuth 2.1 server | **OpenAI's** |
 | Identity provider | LabourMarket.ai (the person's LabourMarket.ai account) | OpenAI (the person's ChatGPT account) |
 | Who registers whom | ChatGPT registers as a client **at our** AS (CIMD, DCR or predefined client) | OpenAI issues **us** a client ID |
 | What the other side gets | an access token for `https://labourmarket.ai/api/mcp`, RLS-bound to that person | verified account info (identity); optionally the person's ChatGPT plan allowance for AI requests |
@@ -54,18 +54,12 @@ Source: OpenAI, "Authentication", Apps SDK —
   authorization response (success and error) carries an `iss` equal to the
   metadata `issuer`.
 
-### Our authorization server, measured against that (metadata read 2026-11-01)
+### Our side
 
-`https://gorgitwvdzxbnaxhrsrw.supabase.co/.well-known/oauth-authorization-server/auth/v1`:
-
-| Requirement | Observed | Consequence |
-|---|---|---|
-| `S256` advertised | `["S256","plain"]` | meets the rule. `plain` is also advertised; Supabase documents both methods and **no setting to turn `plain` off** (<https://supabase.com/docs/guides/auth/oauth-server/oauth-flows>). Clients choose S256 (ChatGPT, Claude, our walk); `plain` cannot be removed from our side. |
-| CIMD (C-1) | `client_id_metadata_document_supported` absent | DCR is used (works). Not configurable by us. |
-| RFC 9207 `iss` (C-2) | flag absent; Supabase documents the success response as `code` + `state` only | ChatGPT uses the per-connector `callback_id` redirect. We must **not** advertise the flag; it is not ours to advertise (the AS metadata is Supabase's). |
-| Revocation endpoint | `revocation_endpoint` absent | no RFC 7009 endpoint. The supported revoke path is the person's own: Connected apps → `supabase.auth.oauth.revokeGrant(clientId)`, which per Supabase "immediately" invalidates the client's sessions and refresh tokens. |
-| Audience (`resource` → `aud`) | Supabase tokens carry `aud: "authenticated"` and an OAuth-specific `client_id` claim (<https://supabase.com/docs/guides/auth/oauth-server/token-security>); RFC 8707 is not mentioned | handled by C-3 in `lib/api/api-identity.ts`: an OAuth-client token is accepted only by the MCP door, and a token bound to any other `aud` is refused everywhere. |
-| Scopes | `openid profile email phone offline_access`; "Custom scopes are not currently supported" (Supabase) | product-level scopes (register 10.4) cannot be AS-issued today; they must be enforced at our resource server (see the 10.4 design PR). |
+How LabourMarket.ai's authorization server and MCP door measure against
+these requirements is a security assessment. It is kept in the private
+record (AGENTS.md: no security detail in this public repository), not here.
+The OAuth chain itself is proven in production (register 10.3).
 
 ## B. "Sign in with ChatGPT" — what is published
 
@@ -95,8 +89,8 @@ What the pages say:
 1. The integration path is **A** (our AS, our consent, our RLS). No OpenAI
    product is needed to let a person connect ChatGPT.
 2. Before any public listing (register 10.5, owner-gated, NOT submitted):
-   C-3 merged and live (RED, awaiting owner), 10.3 walk green, 10.4 scopes
-   decided (X-2), minimisation + consent PR merged.
+   the open security items closed (owner-gated), 10.4 scopes decided (X-2),
+   and the minimisation and consent changes merged.
 3. **B** is optional, partner-gated, and adds a second identity provider;
    it needs its own owner decision and an application to OpenAI. Nothing in
    this repo assumes it.
