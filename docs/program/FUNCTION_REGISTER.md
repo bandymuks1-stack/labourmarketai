@@ -30,7 +30,7 @@ a security/permission row says only that an item is open.
 
 | LIVE_VERIFIED | PASS_CI_ONLY | FAIL | BLOCKED | NOT_VERIFIED | NOT_IMPLEMENTED | OPTIONAL_TEST |
 |---|---|---|---|---|---|---|
-| 192 | 10 | 8 | 39 | 12 | 15 | 1 |
+| 193 | 10 | 8 | 39 | 11 | 15 | 1 |
 
 Seeded 2026-10-28 from the 275-row QA matrix of 2026-10-23…28 plus the 2026-10-28 production results; a `PASS` row
 whose evidence names a production run or production use became `LIVE_VERIFIED`, any other `PASS` became `PASS_CI_ONLY`.
@@ -392,8 +392,8 @@ The 19 journeys (rows in brackets):
 |---|---|---|---|---|---|---|
 | 10.1 | MCP door 229 tools | LIVE_VERIFIED | 2026-11-01 | prod walk mcp-agents 41307643008 2026-11-01 on c3df7431d (10/10, A-9: entry recorded and corrected over MCP, one live version, spent token and replaced version refused); mcp-chain 39606986334; mcp-agents 10-23; live anon | yes | tools/list 233 tools on c3df7431d; the row title's 229 predates #2889/#2895 |
 | 10.2 | Agent scenarios over MCP | LIVE_VERIFIED | 2026-10-23 | mcp-agents 9/9 39885097311 10-23 | yes |  |
-| 10.3 | OAuth 2.1 for MCP clients | NOT_VERIFIED | — | discovery live (401 challenge, PRM, DCR, S256); walk #2454 runs without owner creds | unproven | merge or dispatch #2454 |
-| 10.4 | MCP scopes | NOT_IMPLEMENTED | — | registry NOT_BUILT: MCP OAuth scope enforcement (bearer has full user scope) | no | auth path = RED; buildable as draft |
+| 10.3 | OAuth 2.1 for MCP clients | LIVE_VERIFIED | 2026-11-02 | prod walk mcp-oauth-client 41354839810 2026-11-02 (6/6, from #2454 branch) | yes | #2454 (the spec) awaits owner merge; a security item is open (details in the private record) |
+| 10.4 | MCP scopes | NOT_IMPLEMENTED | 2026-11-02 | registry NOT_BUILT: MCP OAuth scope enforcement | no | auth path = RED; design draft #2923; final set = owner decision X-2 |
 | 10.5 | ChatGPT/Claude listings | BLOCKED | — | owner portals | unproven |  |
 | 10.6 | AI runtime | BLOCKED | 2026-10-26 | ai-off-honesty run 40191899327 10-25: B-4 provider state shown as off; re-proven 2026-10-26 prod walk ai-off-honesty run 40301607964 13/13 (honest off state; #2771 one <main> on job pages) | unproven | AI provider keys (owner) — honest off-state proven, the AI function itself not |
 | 10.7 | Conversation intent LLM | BLOCKED | — | 10.6 | unproven |  |

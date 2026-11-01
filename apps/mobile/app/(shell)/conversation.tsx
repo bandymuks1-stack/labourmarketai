@@ -87,7 +87,7 @@ function Thread({ conversationId }: { conversationId: string }) {
         )}
       </CapabilityGate>
       <Divider />
-      <MessageComposer conversationId={conversationId} onSent={read.reload} />
+      <MessageComposer conversationId={conversationId} reloadThread={read.reload} />
     </View>
   );
 }

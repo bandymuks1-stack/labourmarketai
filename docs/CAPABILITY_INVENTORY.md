@@ -553,6 +553,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | WRK-8 | Defects / corrections | `defects`, `defect_corrections` | IMPL (0 rows) | — | 3 | assignee read APPLIED 2026-09-14 (ledger `20260914195053`), proven per-row on prod; `defect_corrections` stays manager-only (owner 2b DEFER) |
 | WRK-9 | Handover passport | `project_handover_entries` (1 row) | IMPL | — | 3 | reachable on `/dashboard/projects/[id]/operations`; written once in prod — no nav tile of its own |
 | WRK-10 | Project economics | `project_budgets` (0 rows) | IMPL | — | 3 | `ProjectEconomicsPanel` renders on project operations; 0 rows is adoption, not disconnection |
+| WRK-11 | Project forecast | `project_forecasts` (no writer yet; computed on read) | IMPL | — | 3 | Forecast panel on the manager project page beside the course, computed on read from `forecast_project_facts_v1` after `can_manage_project`; storage, scheduler and cadence modes not wired (#2738) |
 
 #### E. EVIDENCE · JOURNAL
 

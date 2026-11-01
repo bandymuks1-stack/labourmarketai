@@ -3,7 +3,7 @@
 import "server-only";
 
 import { firstRecordableAsk } from "@/lib/projects/worker-project-asks";
-import { listWorkerProjects, loadOwnProjectAsks } from "@/lib/projects/worker-project-access";
+import { listWorkerProjectsResult, loadOwnProjectAsks } from "@/lib/projects/worker-project-access";
 
 import {
   WORKER_PROJECTS_CHAT_LIMIT,
@@ -27,7 +27,12 @@ import {
  */
 export async function loadWorkerProjectsForChat(): Promise<WorkerProjectsChatResult> {
   try {
-    const rows = await listWorkerProjects();
+    // The failure-keeping read: an assignments read that failed is "error",
+    // never "you have no projects" (#1314) — the chat, the
+    // `worker.projects.list` capability and the native app all say so.
+    const read = await listWorkerProjectsResult();
+    if (read.status !== "ok") return { kind: "error" };
+    const rows = read.rows;
     if (rows.length === 0) return { kind: "empty" };
     const shown = rows
       .slice()
