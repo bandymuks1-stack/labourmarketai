@@ -157,6 +157,7 @@ function resultError(
   r: ProjectActionResult | null,
   l: ProjectManagerLabels,
   notAuthorized: string = l.notAuthorized,
+  testId?: string,
 ) {
   if (!r || r.ok) return null;
   const msg =
@@ -168,7 +169,7 @@ function resultError(
           ? l.noCompany
           : l.errorMsg;
   return (
-    <span className="text-xs text-state-danger" role="status">
+    <span className="text-xs text-state-danger" role="status" data-testid={testId}>
       {msg}
     </span>
   );
@@ -640,7 +641,7 @@ export function ProjectAssignmentManager({
             {assignState?.ok && !decided && (
               <span className="text-xs text-state-success" role="status" data-testid="assign-worker-done">{labels.assigned}</span>
             )}
-            {resultError(assignState, labels)}
+            {resultError(assignState, labels, labels.notAuthorized, "assign-worker-failed")}
           </div>
           {decided ? (
             <p className="text-xs text-state-success" role="status" data-testid="assign-reservation-decided">

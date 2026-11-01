@@ -172,6 +172,8 @@ test("E-2 (3.13). both projects get the same dates on their operations board", a
 });
 
 const STAGE = `${MARK} etapas`;
+/** Any run's stage of this walk (STAGE is `QA-SYNTHETIC <run> etapas`). */
+const WALK_STAGE = /QA-SYNTHETIC \d+ etapas/;
 
 test("E-3 (3.4). a stage is added to project A and its status persists", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
@@ -246,15 +248,35 @@ async function assign(page: Page, projectId: string): Promise<void> {
   await form.locator('select[name="project_id"]').selectOption(projectId);
   await form.getByTestId("assign-worker-select").selectOption(workerProfileId);
   await form.locator("#assign-worker-submit").click();
+  // Wait for the action's OWN answer before anyone navigates. A fixed 2 s
+  // sleep and then a fresh load raced the write (project-execution
+  // 41283540387 E-5): the assign action queues behind the pre-save clash
+  // check, so the reload rendered before the RPC committed, and a static page
+  // never shows a chip that was written a second later. A refusal now fails
+  // here, with its own message, instead of as a missing chip 30 s on.
+  const done = form.getByTestId("assign-worker-done");
+  const failed = form.getByTestId("assign-worker-failed");
+  await expect(done.or(failed), "the assign action answered").toBeVisible({ timeout: 60_000 });
+  if (await failed.isVisible()) throw new Error(`assign refused: ${(await failed.innerText()).slice(0, 160)}`);
+}
+
+/** Fresh loads of the projects page until `check` holds (the read side of a
+ *  write that already answered; never a substitute for that answer). */
+async function onFreshProjectsPage(page: Page, check: () => Promise<void>): Promise<void> {
+  await expect(async () => {
+    await page.goto("/lt/dashboard/projects");
+    await check();
+  }).toPass({ timeout: 60_000, intervals: [1_000, 3_000, 5_000] });
 }
 
 test("E-5 (3.6). the worker is assigned to project A, and it persists", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await assign(page, projectA);
-  await page.waitForTimeout(2_000);
-  await page.goto("/lt/dashboard/projects");
-  await expect(assignmentRow(page, PROJECT_A), "Vytas is on project A").toHaveCount(1, { timeout: 30_000 });
+  // Persisted = visible after a FRESH load, not in the action's own render.
+  await onFreshProjectsPage(page, () =>
+    expect(assignmentRow(page, PROJECT_A), "Vytas is on project A").toHaveCount(1, { timeout: 10_000 }),
+  );
   await ctx.close();
 });
 
@@ -499,29 +521,43 @@ test("E-13 (3.13). the operations report downloads for the owner and for nobody 
 async function cleanUp(page: Page): Promise<void> {
   await useWorkspace(page, ALFA);
   if (projectA) {
-    await page.goto(ops(projectA));
-    const stage = inMain(page).getByTestId("project-stage-row").filter({ hasText: STAGE });
-    if ((await stage.count()) > 0) {
-      await stage.getByTestId("project-stage-delete").click();
-      await page.waitForTimeout(2_000);
+    // Every stage this walk ever left on project A (`QA-SYNTHETIC <run> etapas`
+    // — this run's and any earlier run's whose cleanup did not finish), never
+    // another walk's stage (`… plano ir fakto etapas` does not match).
+    const walkStages = () => inMain(page).getByTestId("project-stage-row").filter({ hasText: WALK_STAGE });
+    for (let i = 0; i < 12; i += 1) {
       await page.goto(ops(projectA));
+      await expect(inMain(page).getByTestId("project-stages-panel")).toBeVisible({ timeout: 30_000 });
+      if ((await walkStages().count()) === 0) break;
+      await walkStages().first().getByTestId("project-stage-delete").click();
+      // The delete's own answer, then the next fresh load (no fixed sleep). A
+      // refused delete leaves the count unchanged and the final check says so.
+      await expect(inMain(page).getByTestId("project-stages-msg")).toBeVisible({ timeout: 30_000 });
     }
-    await expect(inMain(page).getByTestId("project-stage-row").filter({ hasText: STAGE })).toHaveCount(0, { timeout: 30_000 });
+    await expect(async () => {
+      await page.goto(ops(projectA));
+      await expect(walkStages(), "no stage of this walk is left on A").toHaveCount(0, { timeout: 10_000 });
+    }).toPass({ timeout: 60_000, intervals: [1_000, 3_000, 5_000] });
   }
 
   for (const title of [PROJECT_B, PROJECT_A]) {
     await page.goto("/lt/dashboard/projects");
     const row = assignmentRow(page, title);
     if ((await row.count()) === 0) continue;
-    await row.locator("button").last().click();
-    await page.waitForTimeout(2_000);
+    await row.getByTestId("assignment-end").click();
+    // The end action's own answer: the chip is marked ended, or says it failed.
+    await expect(
+      row.and(page.locator('[data-ended="true"]')).or(row.getByTestId("assignment-end-failed")),
+      `the end of ${title === PROJECT_A ? "A" : "B"} answered`,
+    ).toBeVisible({ timeout: 30_000 });
   }
-  await page.goto("/lt/dashboard/projects");
-  for (const title of [PROJECT_A, PROJECT_B]) {
-    await expect(assignmentRow(page, title), `Vytas is no longer on ${title === PROJECT_A ? "A" : "B"}`).toHaveCount(0, {
-      timeout: 30_000,
-    });
-  }
+  await onFreshProjectsPage(page, async () => {
+    for (const title of [PROJECT_A, PROJECT_B]) {
+      await expect(assignmentRow(page, title), `Vytas is no longer on ${title === PROJECT_A ? "A" : "B"}`).toHaveCount(0, {
+        timeout: 10_000,
+      });
+    }
+  });
 }
 
 let cleanedUp = false;
