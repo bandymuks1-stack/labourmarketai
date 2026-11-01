@@ -19,11 +19,7 @@
 --                             production apply; the ledger stored no rollback. Local
 --                             development resets and repo governance only.
 --
--- @human-gate-approved
--- HUMAN GATE SCOPE: restoration of HISTORICAL, ALREADY-PRODUCTION-APPLIED SQL only
--- (owner decision 2026-11-01, option 2; RED draft PR, owner approves the merge).
--- migration-safety findings expected for this file: drop-constraint with matching add-constraint (CHECK widening).
--- This annotation grants NO right to apply, re-apply or change anything in production.
+-- No migration-safety risk finding: this file carries NO human-gate annotation.
 -- ============================================================================
 -- >>> PRODUCTION STATEMENTS BELOW (byte-exact; do not edit) <<<
 alter table public.workspace_pins drop constraint if exists workspace_pins_original_language_chk;
