@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -28,6 +28,9 @@ import { useReloadOnReturn } from "../../src/use-reload-on-return";
 export default function Screen() {
   const { t } = useLocale();
   const { id } = useLocalSearchParams<{ id?: string }>();
+  // A thread opens at its newest message, where the reply box is — as any
+  // chat does; with a long thread the box would otherwise sit far below.
+  const scroll = useRef<ScrollView>(null);
 
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
@@ -36,8 +39,10 @@ export default function Screen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
+          ref={scroll}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
+          onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: false })}
         >
           {typeof id === "string" && id !== "" ? (
             <Thread key={id} conversationId={id} />
