@@ -30,7 +30,7 @@ a security/permission row says only that an item is open.
 
 | LIVE_VERIFIED | PASS_CI_ONLY | FAIL | BLOCKED | NOT_VERIFIED | NOT_IMPLEMENTED | OPTIONAL_TEST |
 |---|---|---|---|---|---|---|
-| 192 | 10 | 8 | 39 | 12 | 15 | 1 |
+| 193 | 9 | 7 | 40 | 12 | 15 | 1 |
 
 Seeded 2026-10-28 from the 275-row QA matrix of 2026-10-23…28 plus the 2026-10-28 production results; a `PASS` row
 whose evidence names a production run or production use became `LIVE_VERIFIED`, any other `PASS` became `PASS_CI_ONLY`.
@@ -78,8 +78,8 @@ Denominator = 276 functions (277 rows minus the one `OPTIONAL_TEST` scenario, 7.
 | Measure | Method | Result |
 |---|---|---|
 | **Technical implementation** | every row except `NOT_IMPLEMENTED` (a `BLOCKED` row is built but waits for an owner step) | **261 / 276 = 94.6 %** |
-| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **192 / 276 = 69.6 %** (73.6 % of the built 261) |
-| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **11 / 19 = 57.9 %** complete · 4 partial · 0 broken · 2 blocked · 2 unverified |
+| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **193 / 276 = 69.9 %** (73.9 % of the built 261) |
+| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **12 / 19 = 63.2 %** complete · 4 partial · 0 broken · 2 blocked · 1 unverified |
 
 Per area (technical / production-verified):
 
@@ -118,7 +118,7 @@ The 19 journeys (rows in brackets):
 | J-13 | Buyer workspace → request → provider (6.4, 6.1) | partial | 6.4 carries an open item (details private) |
 | J-14 | Organization buys a plan without help (7.1, 7.5, 7.15, 7.28) | blocked | 7.15 hidden by design, 7.28 FAIL (owner/legal) |
 | J-15 | Alert / e-mail about a new matching job without signing in (4.9, 5.7, 5.9) | unverified | `PASS_CI_ONLY` |
-| J-16 | Forgotten password → reset mail → new password (1.3) | unverified | `PASS_CI_ONLY` |
+| J-16 | Forgotten password → reset mail → new password (1.3) | complete | production use 2026-11-01 (1.3) |
 | J-17 | Install the native app from a store (8.15, 8.17, 8.18) | blocked | no store listing (owner accounts) |
 | J-18 | Own data export / erasure request (9.4, 9.5, 9.6) | complete | search-support-privacy 2026-11-01, erasure 2026-10-19 |
 | J-19 | Growth: potential capabilities + learning compass (2.29, 11.3) | complete | living-cv-growth 2026-11-01, learning-practice 2026-10-25 |
@@ -129,7 +129,7 @@ The 19 journeys (rows in brackets):
 |---|---|---|---|---|---|---|
 | 1.1 | E-mail+password sign-up / sign-in | LIVE_VERIFIED | 2026-10-28 | isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-1..S-3 form sign-up worker/company/agency, S-4 existing address → sign-in, S-5 sign-out/sign-in; role-routes 39849107061; #2854 deployed f5c0e88f (sign-up skeleton LIVE; closed-invite / existing-address  | yes | self-serve sign-up through the form proven in CI only (no synthetic production accounts, owner rule) |
 | 1.2 | Google OAuth | LIVE_VERIFIED | 2026-10-18 | owner Google sign-in 10-18/19; buttons x6 live | yes |  |
-| 1.3 | Password reset | PASS_CI_ONLY | 2026-10-28 | isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-6 reset mail → link → new password works, old refused (HTTP 400); profile-cv-history P-1 run 40166272659 10-25: reset form renders; mail delivery still unproven (SMTP) | unproven | production reset-mail delivery not walked |
+| 1.3 | Password reset | LIVE_VERIFIED | 2026-11-01 | production use 2026-11-01: a real (non-synthetic) account requested a reset, opened the mailed link and updated the account within 12 minutes; auth-log sequence in the private record; earlier: isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-6 reset mail → link → new password works, old refused (HTTP 400); profile-cv-history P-1 run 40166272659 10-25: reset form renders; mail delivery still unproven (SMTP) | yes | no repeatable production walk yet (D-4 mailbox walk #2903 pending the owner) |
 | 1.4 | Onboarding + setup hub | LIVE_VERIFIED | 2026-11-01 | prod walk fresh-activation 41279196446 2026-11-01 on 38bfb9d93: fresh worker + fresh company onboarding (owner-created accounts); earlier: fresh-activation walks (owner-created accounts) PASS; invited-worker path: onboarding finds the invitation without the link (#2845, live 2e4ae2b4b), server settles the role and accepts after it (#2846, live 51a35183, mig… | yes |  |
 | 1.5 | Multi-role identity | LIVE_VERIFIED | 2026-11-01 | prod walk role-routes 41280157502 2026-11-01 on 38bfb9d93 (5/5 roles); earlier: role-routes run 39783147517 (green) 10-22; 5 roles | yes |  |
 | 1.6 | Organization creation + identity | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): S-[volume withheld] identity page shows Alfa's own record | yes |  |
@@ -451,7 +451,7 @@ The 19 journeys (rows in brackets):
 | 13.2 | Health probe + monitor | LIVE_VERIFIED | — | live | yes |  |
 | 13.3 | Prod QA walk harness | LIVE_VERIFIED | 2026-10-22 | role-routes run 39783147517 (green) 10-22 | yes |  |
 | 13.4 | Supabase capacity | PASS_CI_ONLY | 2026-10-25 | Supabase org plan=pro (get_organization 2026-10-25) | unproven |  |
-| 13.5 | Database backup | FAIL | 2026-10-27 | 2026-10-27 read-only: db-backup.yml stops at 'Require secrets' nightly since 10-18 (10-17 drills: permission denied); repo has VPS_DEPLOY_* but neither SUPABASE_ACCESS_TOKEN nor SUPABASE_BACKUP_DB_URL; 0 successful runs … | no | open security/permission item — details kept out of the public repository (owner rule) |
+| 13.5 | Database backup | BLOCKED | 2026-11-01 | 2026-11-01: the repository backup pipeline with its restore proof (#2906) has never completed (owner secret missing); the hosting plan includes provider backups whose latest date could not be read without that same credential; details in the private record; earlier: 2026-10-27 read-only: db-backup.yml stops at 'Require secrets' nightly since 10-18 (10-17 drills: permission denied); repo has VPS_DEPLOY_* but neither SUPABASE_ACCESS_TOKEN nor SUPABASE_BACKUP_DB_URL; 0 successful runs … | no | open security/permission item — details kept out of the public repository (owner rule) |
 | 13.6 | VPS cron bundle | LIVE_VERIFIED | 2026-10-23 | prod data 10-23: all 4 VPS cron entries ran (handoffs 06:00, job-alerts, weekly digest Mon, erasure every 10 min); pg_cron booking expiry ran | yes | 1 erasure notice queued (no SMTP) |
 | 13.7 | Migration safety + parity | LIVE_VERIFIED | 2026-10-23 | parity tool vs prod ledger 10-23 | yes |  |
 | 13.8 | Migration ledger parity | LIVE_VERIFIED | 2026-10-23 | prod ledger 10-23: 396 match; all drift documented except ESCO fn applied with file only in open #2410 | yes | record/merge #2410 |
