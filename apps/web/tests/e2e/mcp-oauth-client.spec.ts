@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { type Browser, expect, test } from "@playwright/test";
+import { type Browser, expect, test } from "./prod-walk";
 
 /**
  * EXTERNAL MCP CLIENT CONFORMANCE — the OAuth chain a real assistant runs,
