@@ -384,7 +384,7 @@ The 19 journeys (rows in brackets):
 | 9.22 | Env schema validation | LIVE_VERIFIED | — | zod env validation at load; deploy 39952179926 health=healthy, build 431385cf; rollback on unhealthy | yes | open security/permission item — details kept out of the public repository (owner rule) |
 | 9.23 | Security-definer governance | LIVE_VERIFIED | 2026-10-23 | prod 10-23: anon SECURITY DEFINER set = allowlist 9/9; PUBLIC exec 0/589 | yes | 3 functions mutable search_path (RED R-2) |
 | 9.24 | Security incident handling | LIVE_VERIFIED | — | live headers HSTS preload, CSP report-only, XFO DENY, nosniff, Referrer/Permissions-Policy; monitor issues + health probe + onRequestError + client-errors | yes | CSP has no report-uri |
-| 9.25 | CodeQL / dependency alerts | FAIL | 2026-11-01 | 2026-11-01: code-scanning alerts triaged (details in the private record); Dependabot alerts are disabled for the repository (owner setting); earlier: #2879, #2880, #2881 merged | no | open security/permission item — details kept out of the public repository (owner rule) |
+| 9.25 | CodeQL / dependency alerts | FAIL | 2026-11-01 | 2026-11-01: triaged, details in the private record; earlier: #2879, #2880, #2881 merged | no | open security/permission item — details kept out of the public repository (owner rule) |
 
 ## MCP & AI agents
 
