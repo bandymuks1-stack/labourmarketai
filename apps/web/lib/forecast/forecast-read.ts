@@ -43,6 +43,17 @@ export type ProjectForecastRead =
   | { readonly state: "unavailable" };
 
 export async function readProjectForecast(projectId: string, todayIso: string): Promise<ProjectForecastRead> {
+  // Whatever fails here (a missing service env, a thrown client, the engine)
+  // is the panel's "unavailable" state — never a broken project page.
+  try {
+    return await readProjectForecastUnguarded(projectId, todayIso);
+  } catch (err) {
+    console.error("[forecast] read failed:", err instanceof Error ? err.name : "unknown");
+    return { state: "unavailable" };
+  }
+}
+
+async function readProjectForecastUnguarded(projectId: string, todayIso: string): Promise<ProjectForecastRead> {
   const session = await createClient();
   const manages = await rpcOf(session as unknown as SupabaseClient)("can_manage_project", { p_project_id: projectId });
   if (manages.error) {
@@ -57,11 +68,6 @@ export async function readProjectForecast(projectId: string, todayIso: string): 
     if (facts.error) console.error("[forecast] facts read failed:", facts.error.code);
     return { state: "unavailable" };
   }
-  try {
-    const forecast = computeProjectForecast(buildForecastFacts(projectId, todayIso, facts.data as ForecastFactRows));
-    return { state: "ok", forecast };
-  } catch (err) {
-    console.error("[forecast] engine failed:", err instanceof Error ? err.name : "unknown");
-    return { state: "unavailable" };
-  }
+  const forecast = computeProjectForecast(buildForecastFacts(projectId, todayIso, facts.data as ForecastFactRows));
+  return { state: "ok", forecast };
 }

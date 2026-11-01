@@ -67,4 +67,12 @@ describe("readProjectForecast — authority first, then the service-only facts d
     adminRpc.mockResolvedValue({ data: null, error: { code: "42883" } });
     expect(await readProjectForecast(PROJECT, "2026-11-01")).toEqual({ state: "unavailable" });
   });
+
+  it("a service client that cannot be created (missing env) is unavailable, not a broken page", async () => {
+    sessionRpc.mockResolvedValue({ data: true, error: null });
+    adminRpc.mockImplementation(() => {
+      throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
+    });
+    expect(await readProjectForecast(PROJECT, "2026-11-01")).toEqual({ state: "unavailable" });
+  });
 });
