@@ -181,6 +181,50 @@ const en = {
   "journal.compose.reviewOnWeb":
     "What is waiting for review is confirmed on the website.",
   "profile.skillsEmpty": "No skills recorded yet.",
+  "journal.correct.action":
+    "Correct this entry",
+  "journal.correct.title":
+    "Correct an entry",
+  "journal.correct.intro":
+    "Change what is wrong — the words, the day or the site. The previous version stays in your history; your totals count the corrected one.",
+  "journal.correct.nothingChanged":
+    "Nothing was changed yet. Edit the words, the day or the site first.",
+  "journal.correct.previewTitle":
+    "Check the correction before it is saved",
+  "journal.correct.before":
+    "Now",
+  "journal.correct.after":
+    "After the correction",
+  "journal.correct.hours":
+    "Hours",
+  "journal.correct.output":
+    "Output",
+  "journal.correct.wasConfirmed":
+    "A manager confirmed this entry. That confirmation stays on the earlier version; the corrected version is saved as not yet confirmed.",
+  "journal.correct.save":
+    "Save the correction",
+  "journal.correct.savedTitle":
+    "Correction saved",
+  "journal.correct.savedBody":
+    "Your journal and your totals now show the corrected version.",
+  "journal.correct.savedConfirmedBody":
+    "The corrected version is saved and waits for a manager's confirmation; the earlier confirmed version stays in your history.",
+  "journal.correct.draftFailedTitle":
+    "We could not prepare this correction",
+  "journal.correct.saveFailedTitle":
+    "We could not save this correction",
+  "journal.correct.unsureSaved":
+    "The correction was sent but no answer came back, so we cannot tell whether it was saved. Trying again is safe: a correction that already landed is refused, never saved twice.",
+  "journal.correct.staleDraft":
+    "This was not saved: your journal changed after the correction was prepared. Review it again.",
+  "journal.correct.superseded":
+    "This entry was already corrected or removed. Open the journal again and correct the current version.",
+  "journal.correct.notFound":
+    "This entry is not among your latest journal entries. It may have been corrected already.",
+  "journal.correct.conflict":
+    "The new words state one duration for the whole entry, but the entry also records an output, and both need the same field. State the time per activity, or correct this entry on the website.",
+  "journal.correct.missingTitle":
+    "This entry cannot be corrected here",
   "profile.noWorkerProfile": "This account has no worker profile yet.",
   "profile.figuresTitle": "Skills, with your recorded hours",
   "profile.groupManagerConfirmed": "Confirmed by a manager",
@@ -471,6 +515,50 @@ const lt: Catalogue = {
   "journal.compose.reviewOnWeb":
     "Tai, kas laukia peržiūros, patvirtinama svetainėje.",
   "profile.skillsEmpty": "Įgūdžių dar neužfiksuota.",
+  "journal.correct.action":
+    "Taisyti šį įrašą",
+  "journal.correct.title":
+    "Taisyti įrašą",
+  "journal.correct.intro":
+    "Pakeisk tai, kas neteisinga – žodžius, dieną ar vietą. Ankstesnė versija lieka tavo istorijoje; sumos skaičiuoja pataisytą.",
+  "journal.correct.nothingChanged":
+    "Kol kas niekas nepakeista. Pirmiausia pataisyk žodžius, dieną ar vietą.",
+  "journal.correct.previewTitle":
+    "Patikrink pataisymą prieš įrašant",
+  "journal.correct.before":
+    "Dabar",
+  "journal.correct.after":
+    "Po pataisymo",
+  "journal.correct.hours":
+    "Valandos",
+  "journal.correct.output":
+    "Atlikta",
+  "journal.correct.wasConfirmed":
+    "Šį įrašą patvirtino vadovas. Patvirtinimas lieka ankstesnei versijai; pataisyta versija įrašoma kaip dar nepatvirtinta.",
+  "journal.correct.save":
+    "Įrašyti pataisymą",
+  "journal.correct.savedTitle":
+    "Pataisymas įrašytas",
+  "journal.correct.savedBody":
+    "Tavo dienoraštis ir sumos dabar rodo pataisytą versiją.",
+  "journal.correct.savedConfirmedBody":
+    "Pataisyta versija įrašyta ir laukia vadovo patvirtinimo; ankstesnė patvirtinta versija lieka tavo istorijoje.",
+  "journal.correct.draftFailedTitle":
+    "Nepavyko paruošti pataisymo",
+  "journal.correct.saveFailedTitle":
+    "Nepavyko įrašyti pataisymo",
+  "journal.correct.unsureSaved":
+    "Pataisymas išsiųstas, bet atsakymas negrįžo, todėl nežinome, ar jis įrašytas. Bandyti dar kartą saugu: jau įrašytas pataisymas atmetamas, dvigubai neįrašomas.",
+  "journal.correct.staleDraft":
+    "Neįrašyta: po pataisymo paruošimo tavo dienoraštis pasikeitė. Peržiūrėk dar kartą.",
+  "journal.correct.superseded":
+    "Šis įrašas jau pataisytas arba pašalintas. Atidaryk dienoraštį iš naujo ir taisyk dabartinę versiją.",
+  "journal.correct.notFound":
+    "Šio įrašo nėra tarp naujausių tavo dienoraščio įrašų. Galbūt jis jau pataisytas.",
+  "journal.correct.conflict":
+    "Nauji žodžiai nurodo vieną trukmę visam įrašui, bet įraše dar yra atliktas kiekis, o abiem reikia to paties lauko. Nurodyk laiką kiekvienai veiklai arba pataisyk įrašą svetainėje.",
+  "journal.correct.missingTitle":
+    "Šio įrašo čia pataisyti negalima",
   "profile.noWorkerProfile": "Ši paskyra dar neturi darbuotojo profilio.",
   "profile.figuresTitle": "Įgūdžiai su tavo užrašytomis valandomis",
   "profile.groupManagerConfirmed": "Vadovo patvirtinta",
@@ -757,6 +845,50 @@ const ru: Catalogue = {
   "journal.compose.reviewOnWeb":
     "То, что ждёт проверки, подтверждается на сайте.",
   "profile.skillsEmpty": "Навыки пока не записаны.",
+  "journal.correct.action":
+    "Исправить эту запись",
+  "journal.correct.title":
+    "Исправить запись",
+  "journal.correct.intro":
+    "Измените то, что неверно, — текст, день или место. Прежняя версия остаётся в истории; итоги считают исправленную.",
+  "journal.correct.nothingChanged":
+    "Пока ничего не изменено. Сначала исправьте текст, день или место.",
+  "journal.correct.previewTitle":
+    "Проверьте исправление перед сохранением",
+  "journal.correct.before":
+    "Сейчас",
+  "journal.correct.after":
+    "После исправления",
+  "journal.correct.hours":
+    "Часы",
+  "journal.correct.output":
+    "Выполнено",
+  "journal.correct.wasConfirmed":
+    "Эту запись подтвердил руководитель. Подтверждение остаётся у прежней версии; исправленная сохраняется как ещё не подтверждённая.",
+  "journal.correct.save":
+    "Сохранить исправление",
+  "journal.correct.savedTitle":
+    "Исправление сохранено",
+  "journal.correct.savedBody":
+    "Журнал и итоги теперь показывают исправленную версию.",
+  "journal.correct.savedConfirmedBody":
+    "Исправленная версия сохранена и ждёт подтверждения руководителя; прежняя подтверждённая версия остаётся в истории.",
+  "journal.correct.draftFailedTitle":
+    "Не удалось подготовить исправление",
+  "journal.correct.saveFailedTitle":
+    "Не удалось сохранить исправление",
+  "journal.correct.unsureSaved":
+    "Исправление отправлено, но ответ не пришёл, поэтому неизвестно, сохранено ли оно. Повторить безопасно: уже сохранённое исправление будет отклонено, а не сохранено дважды.",
+  "journal.correct.staleDraft":
+    "Не сохранено: журнал изменился после подготовки исправления. Проверьте ещё раз.",
+  "journal.correct.superseded":
+    "Эта запись уже исправлена или удалена. Откройте журнал снова и исправьте текущую версию.",
+  "journal.correct.notFound":
+    "Этой записи нет среди ваших последних записей журнала. Возможно, она уже исправлена.",
+  "journal.correct.conflict":
+    "Новый текст указывает одну длительность на всю запись, но в записи есть и объём работы, а обоим нужно одно и то же поле. Укажите время по каждому виду работ или исправьте запись на сайте.",
+  "journal.correct.missingTitle":
+    "Эту запись здесь исправить нельзя",
   "profile.noWorkerProfile": "У этого аккаунта пока нет профиля работника.",
   "profile.figuresTitle": "Навыки с вашими записанными часами",
   "profile.groupManagerConfirmed": "Подтверждено руководителем",
@@ -1043,6 +1175,50 @@ const nl: Catalogue = {
   "journal.compose.reviewOnWeb":
     "Wat op beoordeling wacht, bevestig je op de website.",
   "profile.skillsEmpty": "Nog geen vaardigheden vastgelegd.",
+  "journal.correct.action":
+    "Deze invoer corrigeren",
+  "journal.correct.title":
+    "Invoer corrigeren",
+  "journal.correct.intro":
+    "Wijzig wat niet klopt: de tekst, de dag of de locatie. De vorige versie blijft in je geschiedenis; je totalen tellen de gecorrigeerde.",
+  "journal.correct.nothingChanged":
+    "Er is nog niets gewijzigd. Pas eerst de tekst, de dag of de locatie aan.",
+  "journal.correct.previewTitle":
+    "Controleer de correctie voordat die wordt opgeslagen",
+  "journal.correct.before":
+    "Nu",
+  "journal.correct.after":
+    "Na de correctie",
+  "journal.correct.hours":
+    "Uren",
+  "journal.correct.output":
+    "Productie",
+  "journal.correct.wasConfirmed":
+    "Een leidinggevende heeft deze invoer bevestigd. Die bevestiging blijft bij de vorige versie; de gecorrigeerde versie wordt opgeslagen als nog niet bevestigd.",
+  "journal.correct.save":
+    "Correctie opslaan",
+  "journal.correct.savedTitle":
+    "Correctie opgeslagen",
+  "journal.correct.savedBody":
+    "Je logboek en je totalen tonen nu de gecorrigeerde versie.",
+  "journal.correct.savedConfirmedBody":
+    "De gecorrigeerde versie is opgeslagen en wacht op bevestiging door een leidinggevende; de eerder bevestigde versie blijft in je geschiedenis.",
+  "journal.correct.draftFailedTitle":
+    "We konden deze correctie niet voorbereiden",
+  "journal.correct.saveFailedTitle":
+    "We konden deze correctie niet opslaan",
+  "journal.correct.unsureSaved":
+    "De correctie is verstuurd maar er kwam geen antwoord, dus we weten niet of ze is opgeslagen. Opnieuw proberen is veilig: een correctie die al is opgeslagen wordt geweigerd, nooit dubbel opgeslagen.",
+  "journal.correct.staleDraft":
+    "Niet opgeslagen: je logboek is gewijzigd nadat de correctie was voorbereid. Bekijk het opnieuw.",
+  "journal.correct.superseded":
+    "Deze invoer is al gecorrigeerd of verwijderd. Open het logboek opnieuw en corrigeer de huidige versie.",
+  "journal.correct.notFound":
+    "Deze invoer staat niet bij je laatste logboekinvoer. Misschien is ze al gecorrigeerd.",
+  "journal.correct.conflict":
+    "De nieuwe tekst noemt één duur voor de hele invoer, maar de invoer bevat ook een productie, en beide hebben hetzelfde veld nodig. Geef de tijd per activiteit op, of corrigeer deze invoer op de website.",
+  "journal.correct.missingTitle":
+    "Deze invoer kan hier niet worden gecorrigeerd",
   "profile.noWorkerProfile": "Dit account heeft nog geen werkersprofiel.",
   "profile.figuresTitle": "Vaardigheden, met je vastgelegde uren",
   "profile.groupManagerConfirmed": "Bevestigd door een leidinggevende",
@@ -1332,6 +1508,50 @@ const de: Catalogue = {
   "journal.compose.reviewOnWeb":
     "Was auf Prüfung wartet, wird auf der Website bestätigt.",
   "profile.skillsEmpty": "Noch keine Fähigkeiten erfasst.",
+  "journal.correct.action":
+    "Diesen Eintrag korrigieren",
+  "journal.correct.title":
+    "Eintrag korrigieren",
+  "journal.correct.intro":
+    "Ändern Sie, was nicht stimmt – den Text, den Tag oder den Ort. Die vorige Fassung bleibt in Ihrem Verlauf; Ihre Summen zählen die korrigierte.",
+  "journal.correct.nothingChanged":
+    "Noch nichts geändert. Bearbeiten Sie zuerst den Text, den Tag oder den Ort.",
+  "journal.correct.previewTitle":
+    "Korrektur vor dem Speichern prüfen",
+  "journal.correct.before":
+    "Jetzt",
+  "journal.correct.after":
+    "Nach der Korrektur",
+  "journal.correct.hours":
+    "Stunden",
+  "journal.correct.output":
+    "Leistung",
+  "journal.correct.wasConfirmed":
+    "Eine Führungskraft hat diesen Eintrag bestätigt. Die Bestätigung bleibt bei der vorigen Fassung; die korrigierte Fassung wird als noch nicht bestätigt gespeichert.",
+  "journal.correct.save":
+    "Korrektur speichern",
+  "journal.correct.savedTitle":
+    "Korrektur gespeichert",
+  "journal.correct.savedBody":
+    "Ihr Arbeitsjournal und Ihre Summen zeigen jetzt die korrigierte Fassung.",
+  "journal.correct.savedConfirmedBody":
+    "Die korrigierte Fassung ist gespeichert und wartet auf die Bestätigung einer Führungskraft; die zuvor bestätigte Fassung bleibt in Ihrem Verlauf.",
+  "journal.correct.draftFailedTitle":
+    "Diese Korrektur konnte nicht vorbereitet werden",
+  "journal.correct.saveFailedTitle":
+    "Diese Korrektur konnte nicht gespeichert werden",
+  "journal.correct.unsureSaved":
+    "Die Korrektur wurde gesendet, aber es kam keine Antwort, daher wissen wir nicht, ob sie gespeichert wurde. Ein erneuter Versuch ist sicher: Eine bereits gespeicherte Korrektur wird abgelehnt, nie doppelt gespeichert.",
+  "journal.correct.staleDraft":
+    "Nicht gespeichert: Ihr Journal hat sich geändert, nachdem die Korrektur vorbereitet wurde. Bitte erneut prüfen.",
+  "journal.correct.superseded":
+    "Dieser Eintrag wurde bereits korrigiert oder entfernt. Öffnen Sie das Journal erneut und korrigieren Sie die aktuelle Fassung.",
+  "journal.correct.notFound":
+    "Dieser Eintrag ist nicht unter Ihren neuesten Journaleinträgen. Vielleicht wurde er bereits korrigiert.",
+  "journal.correct.conflict":
+    "Der neue Text nennt eine Dauer für den ganzen Eintrag, der Eintrag enthält aber auch eine Leistungsmenge, und beide brauchen dasselbe Feld. Geben Sie die Zeit je Tätigkeit an oder korrigieren Sie den Eintrag auf der Website.",
+  "journal.correct.missingTitle":
+    "Dieser Eintrag kann hier nicht korrigiert werden",
   "profile.noWorkerProfile": "Dieses Konto hat noch kein Arbeiterprofil.",
   "profile.figuresTitle": "Fähigkeiten mit Ihren erfassten Stunden",
   "profile.groupManagerConfirmed": "Von einer Führungskraft bestätigt",
@@ -1608,6 +1828,50 @@ const pl: Catalogue = {
   "journal.compose.reviewOnWeb":
     "To, co czeka na sprawdzenie, potwierdza się na stronie internetowej.",
   "profile.skillsEmpty": "Nie zapisano jeszcze żadnych umiejętności.",
+  "journal.correct.action":
+    "Popraw ten wpis",
+  "journal.correct.title":
+    "Popraw wpis",
+  "journal.correct.intro":
+    "Zmień to, co jest błędne — treść, dzień lub miejsce. Poprzednia wersja zostaje w historii; sumy liczą poprawioną.",
+  "journal.correct.nothingChanged":
+    "Nic jeszcze nie zmieniono. Najpierw popraw treść, dzień lub miejsce.",
+  "journal.correct.previewTitle":
+    "Sprawdź poprawkę przed zapisaniem",
+  "journal.correct.before":
+    "Teraz",
+  "journal.correct.after":
+    "Po poprawce",
+  "journal.correct.hours":
+    "Godziny",
+  "journal.correct.output":
+    "Wykonano",
+  "journal.correct.wasConfirmed":
+    "Ten wpis potwierdził kierownik. Potwierdzenie zostaje przy poprzedniej wersji; poprawiona wersja zostaje zapisana jako jeszcze niepotwierdzona.",
+  "journal.correct.save":
+    "Zapisz poprawkę",
+  "journal.correct.savedTitle":
+    "Poprawka zapisana",
+  "journal.correct.savedBody":
+    "Dziennik i sumy pokazują teraz poprawioną wersję.",
+  "journal.correct.savedConfirmedBody":
+    "Poprawiona wersja jest zapisana i czeka na potwierdzenie kierownika; poprzednia potwierdzona wersja zostaje w historii.",
+  "journal.correct.draftFailedTitle":
+    "Nie udało się przygotować poprawki",
+  "journal.correct.saveFailedTitle":
+    "Nie udało się zapisać poprawki",
+  "journal.correct.unsureSaved":
+    "Poprawka została wysłana, ale nie wróciła odpowiedź, więc nie wiemy, czy została zapisana. Ponowna próba jest bezpieczna: poprawka, która już została zapisana, zostanie odrzucona, a nie zapisana dwa razy.",
+  "journal.correct.staleDraft":
+    "Nie zapisano: dziennik zmienił się po przygotowaniu poprawki. Sprawdź ją ponownie.",
+  "journal.correct.superseded":
+    "Ten wpis został już poprawiony lub usunięty. Otwórz dziennik ponownie i popraw bieżącą wersję.",
+  "journal.correct.notFound":
+    "Tego wpisu nie ma wśród Twoich najnowszych wpisów w dzienniku. Możliwe, że został już poprawiony.",
+  "journal.correct.conflict":
+    "Nowa treść podaje jeden czas dla całego wpisu, ale wpis zawiera też ilość wykonanej pracy, a oba wymagają tego samego pola. Podaj czas dla każdej czynności albo popraw wpis na stronie.",
+  "journal.correct.missingTitle":
+    "Tego wpisu nie można tu poprawić",
   "profile.noWorkerProfile": "To konto nie ma jeszcze profilu pracownika.",
   "profile.figuresTitle": "Umiejętności wraz z Twoimi zapisanymi godzinami",
   "profile.groupManagerConfirmed": "Potwierdzone przez kierownika",

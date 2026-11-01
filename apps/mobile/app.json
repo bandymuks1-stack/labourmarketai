@@ -116,6 +116,7 @@
             { "scheme": "https", "host": "labourmarket.ai", "path": "/availability" },
             { "scheme": "https", "host": "labourmarket.ai", "path": "/jobs" },
             { "scheme": "https", "host": "labourmarket.ai", "path": "/need" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/correct-entry" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/sign-in" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/register" },
@@ -127,7 +128,8 @@
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/opportunities" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/availability" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/jobs" },
-            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/need" }
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/need" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/correct-entry" }
           ],
           "category": [
             "BROWSABLE",

@@ -81,6 +81,10 @@ export default function ShellLayout() {
         name="log-work"
         options={{ href: null, title: t("journal.compose.title") }}
       />
+      <Tabs.Screen
+        name="correct-entry"
+        options={{ href: null, title: t("journal.correct.title") }}
+      />
       {/* Two more STATIONS reached from Today, for the same reason: */}
       <Tabs.Screen
         name="opportunities"
