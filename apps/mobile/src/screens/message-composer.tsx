@@ -40,11 +40,16 @@ type ComposerState =
 
 export function MessageComposer({
   conversationId,
-  onSent,
+  reloadThread,
 }: {
   conversationId: string;
-  /** Re-read the thread so the sent message shows where it now lives. */
-  onSent: () => void;
+  /**
+   * Re-read the thread: after a send, so the message shows where it now
+   * lives; after a stale-token refusal, so the message that arrived in
+   * between is on screen BEFORE the person drafts again (a new draft binds
+   * to the server's latest message, seen or not).
+   */
+  reloadThread: () => void;
 }) {
   const { t, locale } = useLocale();
   const { accessToken } = useAuth();
@@ -101,13 +106,19 @@ export function MessageComposer({
       if (!live.current) return;
       if (!result.ok) {
         setState({ kind: "send_failed", draft: drafted, failure: result.failure });
+        if (
+          result.failure.kind === "capability_refused" &&
+          result.failure.code === "confirmation_rejected"
+        ) {
+          reloadThread();
+        }
         return;
       }
       setBody("");
       setState({ kind: "sent", result: result.data });
-      onSent();
+      reloadThread();
     },
-    [accessToken, conversationId, locale, onSent],
+    [accessToken, conversationId, locale, reloadThread],
   );
 
   if (state.kind === "sent") {
@@ -169,6 +180,8 @@ export function MessageComposer({
         <Button
           variant="quiet"
           testID="message-edit"
+          // While the send is in flight its result would overwrite a new edit.
+          disabled={state.kind === "sending"}
           label={t("journal.compose.edit")}
           onPress={() => setState({ kind: "writing", localError: null })}
         />
