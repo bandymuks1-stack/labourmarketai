@@ -178,15 +178,18 @@ jobs:
           # every table inside that window - "the file restored" is not proof that the
           # data did. Counts only; no row content leaves the database.
           KEY_TABLES="public.profiles public.workers public.organizations public.journal_entries public.journal_entry_confirmations auth.users"
+          # One table per query, so a table this role cannot read (auth.* for a
+          # public-only URL role) leaves only ITS line out; -q keeps the `SET`
+          # command status out of the output; only "<table>\t<number>" lines
+          # are kept.
           count_source() {
-            local t sql=""
-            for t in $KEY_TABLES; do sql="${sql}select '$t', count(*) from $t union all "; done
-            sql="${sql% union all }"
-            if [ "$MODE" = "pat" ]; then
-              psql "$CONN" -v ON_ERROR_STOP=1 -tA -F $'\t' -c "set role postgres" -c "$sql" 2>/dev/null
-            else
-              psql "$CONN" -v ON_ERROR_STOP=1 -tA -F $'\t' -c "$sql" 2>/dev/null
-            fi
+            local t n pre=""
+            [ "$MODE" = "pat" ] && pre="set role postgres; "
+            for t in $KEY_TABLES; do
+              n=$(psql "$CONN" -q -v ON_ERROR_STOP=1 -tA -c "${pre}select count(*) from $t" 2>/dev/null | tail -1) || continue
+              case "$n" in ''|*[!0-9]*) continue ;; esac
+              printf '%s\t%s\n' "$t" "$n"
+            done
           }
           SCOPE="public+auth"
           connect && { count_source > "$T/counts.before" || : > "$T/counts.before"; }
@@ -199,6 +202,7 @@ jobs:
           connect && { count_source > "$T/counts.after" || : > "$T/counts.after"; }
           rm -f "$PGPASSFILE" "$T/dump.err"
           echo "SCOPE=$SCOPE" >> "$GITHUB_ENV"
+          echo "KEY_TABLES=$KEY_TABLES" >> "$GITHUB_ENV"
           echo "source key-table counts read: before=$(wc -l < "$T/counts.before") after=$(wc -l < "$T/counts.after") tables"
           size=$(stat -c %s "$out"); echo "dump scope=$SCOPE bytes=$size" | tee -a "$GITHUB_STEP_SUMMARY"
           [ "$size" -gt 100000 ] || { echo "::error::dump is suspiciously small ($size bytes)"; exit 1; }
@@ -242,9 +246,11 @@ jobs:
           B="$RUNNER_TEMP/lmdb/counts.before"; A="$RUNNER_TEMP/lmdb/counts.after"
           [ -s "$B" ] && [ -s "$A" ] || { echo "::error::restore proof: the source key-table counts could not be read"; exit 1; }
           bad=0
-          while IFS=$'\t' read -r t before; do
+          for t in $KEY_TABLES; do
             case "$t" in auth.*) [ "$SCOPE" = "public+auth" ] || continue ;; esac
+            before=$(awk -F'\t' -v t="$t" '$1==t{print $2}' "$B")
             after=$(awk -F'\t' -v t="$t" '$1==t{print $2}' "$A")
+            if [ -z "$before" ]; then echo "::error::restore proof: the source count of $t could not be read"; bad=1; continue; fi
             got=$(q "select count(*) from $t" 2>/dev/null || echo missing)
             [ -n "$after" ] || after="$before"
             lo=$(( before < after ? before : after )); hi=$(( before > after ? before : after ))
@@ -253,7 +259,7 @@ jobs:
             else
               echo "restore proof: $t restored $got rows, source window [$lo, $hi]" | tee -a "$GITHUB_STEP_SUMMARY"
             fi
-          done < "$B"
+          done
           [ "$bad" = "0" ] || exit 1
           # Append-only evidence must come back whole: no journal entry without its worker.
           orphans=$(q "select count(*) from public.journal_entries j where not exists (select 1 from public.workers w where w.id = j.worker_id)")
