@@ -162,6 +162,10 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
    */
   const CONSUMERS = [
     LIFECYCLE_READER,
+    // 20261025045152 project_forecasts_v1 (restored byte-exact by #2913, production-applied 2026-10-25):
+    // reads public.work_tasks for forecast facts and attaches its forecast_signal trigger to it.
+    // Creates/alters/writes/policies nothing on work_tasks and defines no task RPC.
+    "20261025045152_project_forecasts_v1",
     "20260817232000_management_decisions_v1",
     // 20261003150600 — team_assignments (WRK-6): holds an FK to public.work_tasks and reads it to
     // check a task belongs to the project a team is assigned to. Creates/alters/writes nothing on it.
