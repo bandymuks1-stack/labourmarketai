@@ -248,6 +248,7 @@ name: parity-journey
       id: "today-open-projects"
     direction: DOWN
     timeout: 30000
+    centerElement: true
 - waitForAnimationToEnd
 - tapOn:
     id: "today-open-projects"
