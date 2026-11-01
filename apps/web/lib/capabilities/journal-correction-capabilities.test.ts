@@ -222,3 +222,62 @@ describe("correctionFields — only what the person changed changes", () => {
     });
   });
 });
+
+describe("a correction starts from the stored entry and overlays only the change (Codex on #2895)", () => {
+  const withOutput = () => ({
+    id: ENTRY_ID,
+    originalText: "Klijavau plyteles 6 val.",
+    engagementContextId: CTX,
+    createdAt: "2026-10-29T15:00:00Z",
+    confirmed: false,
+    metrics: [
+      ...storedEntry().journal_entry_metrics,
+      { metric_slug: "quantity", value_text: null, value_numeric: 35, unit_slug: "square_meters", source: "worker_input" },
+    ],
+  });
+
+  it("a typo fix keeps the separately entered 35 m² output and the 6 h", () => {
+    const f = correctionFields("lt", withOutput(), { entryId: ENTRY_ID, notes: "Klijavau plyteles 6 val" });
+    expect(f).toMatchObject({ quantity: "35", unit_slug: "square_meters", notes: "Klijavau plyteles 6 val" });
+    expect(JSON.parse(f.fragments_json!)[0]).toMatchObject({ timeValue: 6, timeUnit: "hours" });
+  });
+
+  it("new words that state no time keep the stored time; new per-activity times replace it, output kept", () => {
+    const noTime = correctionFields("lt", withOutput(), { entryId: ENTRY_ID, notes: "Klijavau plyteles virtuvėje" });
+    expect(JSON.parse(noTime.fragments_json!)[0]).toMatchObject({ timeValue: 6 });
+    expect(noTime.quantity).toBe("35");
+    const newTime = correctionFields("lt", withOutput(), { entryId: ENTRY_ID, notes: "Klijavau plyteles 4 val., glaisčiau 2 val." });
+    expect(JSON.parse(newTime.fragments_json!).map((x: { timeValue: number }) => x.timeValue)).toEqual([4, 2]);
+    expect(newTime).toMatchObject({ quantity: "35", unit_slug: "square_meters" });
+  });
+
+  it("new words stating a new output replace the stored one", () => {
+    const f = correctionFields("lt", withOutput(), { entryId: ENTRY_ID, notes: "Klijavau plyteles 6 val., paklojau 40 m²" });
+    expect(f).toMatchObject({ quantity: "40", unit_slug: "square_meters" });
+  });
+
+  it("a single whole-entry duration AND the stored output cannot share the one slot — refused, never dropped", async () => {
+    h.entry = storedEntry({
+      journal_entry_metrics: [
+        ...storedEntry().journal_entry_metrics,
+        { metric_slug: "quantity", value_text: null, value_numeric: 35, unit_slug: "square_meters", source: "worker_input" },
+      ],
+    });
+    const r = await run("journal.correct_draft", { entryId: ENTRY_ID, notes: "Dirbau nuo 8 iki 16, klijavau plyteles" });
+    expect(r).toMatchObject({ ok: false, code: "output_and_time_conflict" });
+  });
+
+  it("the draft preview names the output before and after", async () => {
+    h.entry = storedEntry({
+      journal_entry_metrics: [
+        ...storedEntry().journal_entry_metrics,
+        { metric_slug: "quantity", value_text: null, value_numeric: 35, unit_slug: "square_meters", source: "worker_input" },
+      ],
+    });
+    const r = await run("journal.correct_draft", { entryId: ENTRY_ID, notes: "Klijavau plyteles 6 val" });
+    expect(r.ok && r.data?.preview).toMatchObject({
+      before: { output: { value: 35, unitSlug: "square_meters" }, hours: 6 },
+      after: { output: { value: 35, unitSlug: "square_meters" }, hours: 6 },
+    });
+  });
+});

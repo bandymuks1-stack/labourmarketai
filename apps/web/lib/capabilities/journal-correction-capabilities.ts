@@ -7,7 +7,7 @@ import { fd } from "@/lib/conversation/executor-contract";
 import { isJournalMetaRequest } from "@/lib/conversation/worklog-extract";
 import { readWorkerCoreRow } from "@/lib/data/worker-core";
 import { supersedeJournalEntry } from "@/lib/journal/actions";
-import { buildEditingEntry, type EditEntryMetricRow } from "@/lib/journal/edit-entry";
+import { TIME_UNIT_SLUGS, buildEditingEntry, type EditEntryMetricRow } from "@/lib/journal/edit-entry";
 import { seedFragmentsFromEntry } from "@/lib/journal/edit-fragment-seed";
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
@@ -186,24 +186,69 @@ export function correctionFields(
   const modules = serializeModuleFields(editing.moduleFields);
   if (modules) fields[MODULE_METRICS_FIELD] = modules;
 
+  // START FROM THE STORED ENTRY, overlay only what changed (Codex on #2895):
+  // the supersede rebuilds an entry from the form alone, so every stored
+  // fact not re-sent would vanish — a typo fix deleted a "35 m²" output.
+  const stored = storedTimeAndOutput(entry, editing);
   const wordsChanged = resolved.notes.trim() !== entry.originalText.trim();
-  if (wordsChanged) {
-    // New words: their time by the SAME rule journal.confirm records with.
-    return { ...fields, ...intakeWorkTimeFields(resolved.notes, resolved.workDate) };
+  if (!wordsChanged) return { ...fields, ...stored.time, ...stored.output };
+
+  // New words: their time by the SAME rule journal.confirm records with —
+  // when they state any. Words that state no time keep the stored time (the
+  // preview shows the hours unchanged); words that state no output keep the
+  // stored output.
+  const intake = intakeWorkTimeFields(resolved.notes, resolved.workDate);
+  const intakeQty = intake.quantity ? { quantity: intake.quantity, unit_slug: intake.unit_slug ?? "" } : null;
+  const intakeTimeQty = !!intakeQty && TIME_UNIT_SLUGS.has(intakeQty.unit_slug);
+  const intakeHasTime = !!intake.fragments_json || intakeTimeQty;
+  const QTY_KEYS = ["quantity", "unit_slug", "quantity_source"];
+  const time: Record<string, string> = intakeHasTime
+    ? Object.fromEntries(Object.entries(intake).filter(([k]) => intakeTimeQty || !QTY_KEYS.includes(k)))
+    : stored.time;
+  const output: Record<string, string> =
+    intakeQty && !intakeTimeQty
+      ? Object.fromEntries(Object.entries(intake).filter(([k]) => QTY_KEYS.includes(k)))
+      : stored.output;
+  if (time.quantity && output.quantity) {
+    // One entry-level slot cannot hold the new words' duration AND the
+    // output; never drop either silently.
+    throw new CorrectionConflict();
   }
-  // Same words: the reviewed durations stay exactly as stored, each with
-  // its own provenance.
-  const amount = editing.time ?? editing.quantity;
-  if (amount) {
-    fields.quantity = String(amount.value);
-    fields.unit_slug = amount.unitSlug;
-    if (sourceOf(entry.metrics, "quantity") === "ai_extracted") fields.quantity_source = "ai_extracted";
+  return { ...fields, ...time, ...output };
+}
+
+/** A correction whose new duration and the output both need the one
+ *  entry-level quantity slot. */
+class CorrectionConflict extends Error {}
+
+const CONFLICT_RESULT: ExecResult = {
+  ok: false,
+  code: "output_and_time_conflict",
+  message:
+    "The new words state one duration for the whole entry while the entry also records an output quantity, and both " +
+    "need the same field. State the time per activity (for example \"klijavau 6 val.\") or correct this entry on the website.",
+};
+
+/** The stored TIME facts (entry-level duration, fragments with their own
+ *  provenance, clock span) and the stored OUTPUT (a non-time quantity), as
+ *  the FormData the supersede reads. */
+function storedTimeAndOutput(
+  entry: LoadedEntry,
+  editing: ReturnType<typeof resolveChange>["editing"],
+): { time: Record<string, string>; output: Record<string, string> } {
+  const time: Record<string, string> = {};
+  const output: Record<string, string> = {};
+  const qtySource: Record<string, string> =
+    sourceOf(entry.metrics, "quantity") === "ai_extracted" ? { quantity_source: "ai_extracted" } : {};
+  if (editing.time) Object.assign(time, { quantity: String(editing.time.value), unit_slug: editing.time.unitSlug, ...qtySource });
+  if (editing.quantity) {
+    Object.assign(output, { quantity: String(editing.quantity.value), unit_slug: editing.quantity.unitSlug, ...qtySource });
   }
   // The SAME seed the web editor preloads its rows from — each fragment
   // keeps its own time, label, clarification and provenance.
   const seeded = seedFragmentsFromEntry(editing);
   if (seeded.length > 0) {
-    fields.fragments_json = JSON.stringify(
+    time.fragments_json = JSON.stringify(
       seeded.map((f) => ({
         rawPhrase: f.rawPhrase,
         timeValue: f.time?.value ?? null,
@@ -218,12 +263,19 @@ export function correctionFields(
   }
   for (const slug of ["work_start", "work_end"] as const) {
     const v = entry.metrics.find((m) => m.metric_slug === slug)?.value_text;
-    if (v) fields[slug] = v;
+    if (v) time[slug] = v;
   }
   const brk = entry.metrics.find((m) => m.metric_slug === "break_minutes")?.value_numeric;
-  if (typeof brk === "number") fields.break_minutes = String(brk);
-  if (fields.work_start && sourceOf(entry.metrics, "work_start") === "ai_extracted") fields.work_time_source = "ai_extracted";
-  return fields;
+  if (typeof brk === "number") time.break_minutes = String(brk);
+  if (time.work_start && sourceOf(entry.metrics, "work_start") === "ai_extracted") time.work_time_source = "ai_extracted";
+  return { time, output };
+}
+
+/** The output quantity the fields record (a non-time unit), or null. */
+function outputOf(fields: Record<string, string>): { value: number; unitSlug: string } | null {
+  return fields.quantity && fields.unit_slug && !TIME_UNIT_SLUGS.has(fields.unit_slug)
+    ? { value: Number(fields.quantity), unitSlug: fields.unit_slug }
+    : null;
 }
 
 /** Hours the fields would record, by the canonical work-time rule. */
@@ -277,7 +329,13 @@ const journalCorrectDraft: CapabilityDescriptor = {
     if (dateProblem) return dateProblem;
     const state = await journalChainFingerprint(caller);
     if (!state.ok) return state.result;
-    const after = correctionFields(caller.locale, entry, change);
+    let after: Record<string, string>;
+    try {
+      after = correctionFields(caller.locale, entry, change);
+    } catch (e) {
+      if (e instanceof CorrectionConflict) return CONFLICT_RESULT;
+      throw e;
+    }
     const token = mintCapabilityConfirmation({
       actionId: "journal.correct_confirm",
       input: normalizedForHash(resolved),
@@ -294,12 +352,14 @@ const journalCorrectDraft: CapabilityDescriptor = {
             workDate: editing.workDate,
             siteName: editing.siteName,
             hours: deriveEntryWorkTime({ entryId: entry.id, createdAt: entry.createdAt, metrics: entry.metrics }).totalHours,
+            output: editing.quantity,
           },
           after: {
             notes: resolved.notes,
             workDate: resolved.workDate,
             siteName: resolved.siteName,
             hours: hoursOfFields(after, entry.createdAt),
+            output: outputOf(after),
           },
           wasConfirmed: entry.confirmed,
         },
@@ -347,7 +407,14 @@ const journalCorrectConfirm: CapabilityDescriptor = {
     }
     const dateProblem = badDate(resolved.workDate);
     if (dateProblem) return dateProblem;
-    const result = await supersedeJournalEntry(entry.id, fd(correctionFields(caller.locale, entry, change)));
+    let fields: Record<string, string>;
+    try {
+      fields = correctionFields(caller.locale, entry, change);
+    } catch (e) {
+      if (e instanceof CorrectionConflict) return CONFLICT_RESULT;
+      throw e;
+    }
+    const result = await supersedeJournalEntry(entry.id, fd(fields));
     if (!result.ok) return { ok: false, code: result.code, message: result.message };
     return {
       ok: true,
