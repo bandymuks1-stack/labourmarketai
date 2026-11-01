@@ -234,7 +234,11 @@ async function deleteOwnAccount(browser: Browser): Promise<boolean> {
     if (await section.getByTestId("privacy-deletion-submit").isVisible().catch(() => false)) {
       await section.getByTestId("privacy-deletion-confirm").check();
       await section.getByTestId("privacy-deletion-submit").click();
-      await expect(section.getByTestId("privacy-deletion-submitted")).toBeVisible({ timeout: 30_000 });
+      // The submitted note is transient: the page refreshes into the
+      // confirmation step as soon as it reads the open request.
+      await expect(
+        section.getByTestId("privacy-deletion-submitted").or(section.getByTestId("privacy-deletion-confirm-step")),
+      ).toBeVisible({ timeout: 30_000 });
       await page.reload();
       await settle(page);
     }
