@@ -162,6 +162,17 @@ servers **MUST NOT** accept or pass through tokens not issued for them.
 | **C-9** | **Advertised origin on self-hosting** — the MCP door and the RFC 9728 document derived their origin from `new URL(req.url).origin`, which on `next start` is the BIND host (the hosting session's isolated container answered `resource_metadata="http://0.0.0.0:3000/…"` and `resource: "http://0.0.0.0:3000"`); Vercel masked it | **high** (no client could find the authorization server behind a proxy) | **Fixed in PR-1 (#2450, open, not deployed):** `lib/mcp/public-origin.ts` — `PUBLIC_ORIGIN` env when set (self-hosted staging on its own domain), else the repository's `outboundLinkOrigin(x-forwarded-host ?? host, x-forwarded-proto)` rule: canonical `https://labourmarket.ai` for production and for any foreign or forged host, the request host kept for localhost / 127.0.0.1 / previews; the scheme's default port dropped; seven guard cases | PR-1 (#2450) |
 | C-8 | Prompt-injection resistance — tool results are data; descriptions must not instruct the model; consequential writes always confirm | present by construction (draft → confirm; refusal copy) | add the negative tests N1–N3 of the pack as automated guards over the registry (no tool deletes another person, no payment tool, no contact fields in search projections) | PR-1 |
 
+**Status 2026-11-02.** C-3: fixed in RED draft #2918 (an OAuth-client token —
+Supabase `client_id` claim — is accepted only at `/api/mcp`; any other `aud`
+is refused everywhere), awaiting owner. Production walk 41354839810 (6/6)
+recorded the real token: `aud: "authenticated"` + `client_id`, so the rule
+admits ChatGPT/Claude tokens. C-1 (CIMD) and C-2 (RFC 9207 `iss`) are absent
+from the Supabase-hosted AS metadata and are not configurable from the app;
+DCR and the `callback_id` redirect keep working. No RFC 7009 revocation
+endpoint; revoke = Connected apps. PKCE advertises `S256` and `plain`
+(Supabase documents both, no switch). Official sign-in options:
+[`CHATGPT_SIGN_IN_OPTIONS_2026-11-01.md`](CHATGPT_SIGN_IN_OPTIONS_2026-11-01.md).
+
 ### D.3 Security review verdict
 
 - **Credentials**: no service-role key, database secret or unrestricted bearer
