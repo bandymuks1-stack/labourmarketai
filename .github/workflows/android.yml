@@ -367,9 +367,11 @@ jobs:
   signed-in:
     name: Signed-in journey (dispatch only, production-qa)
     # ONE review identity, ONE password at a time: every job that issues and
-    # scrambles it (Android and iOS, any ref) waits for the others.
+    # scrambles it (Android and iOS, any ref) waits for the others. Only a
+    # DISPATCHED run joins the group: a pull_request run (this job skipped)
+    # would otherwise take the one pending slot and cancel a waiting iOS job.
     concurrency:
-      group: mobile-qa-review-identity
+      group: ${{ github.event_name == 'workflow_dispatch' && 'mobile-qa-review-identity' || format('mobile-qa-skip-{0}', github.run_id) }}
       cancel-in-progress: false
     if: github.event_name == 'workflow_dispatch'
     needs: build
@@ -408,6 +410,13 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
           "$HOME/.maestro/bin/maestro" --version
+
+      # The same evidence ios-signed-in.yml records from the macOS runner, so
+      # the two runners' paths to the origin can be laid side by side.
+      - name: Origin probe from the ubuntu runner (before the journey)
+        env:
+          ORIGIN: ${{ inputs.origin || 'https://labourmarket.ai' }}
+        run: bash .github/scripts/mobile-origin-probe.sh "$ORIGIN" before-journey
 
       - name: Emulator — install, sign in, read, write, sign out
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0

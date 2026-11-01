@@ -8544,6 +8544,9 @@
     "skillHoursOwn": "{hours} Std., Ihr eigener Eintrag",
     "skillHoursConfirmed": "{hours} Std., davon {confirmed} Std. vom Vorgesetzten bestätigt",
     "skillHoursHint": "Stunden aus Arbeitsjournal-Einträgen, die nur mit dieser Fähigkeit verknüpft sind",
+    "skillInvolvedHours": "beteiligt an {hours} Std. Arbeit, die nicht allein dieser Fähigkeit zugeordnet ist — ihr eigener Anteil ist unbekannt",
+    "skillInvolvedHoursAlso": "dazu beteiligt an {hours} Std., nicht allein ihr zugeordnet",
+    "skillInvolvedHoursHint": "Zeit von Journaleinträgen, an denen diese Fähigkeit beteiligt war, die die Nachweise ihr aber nicht allein zuordnen können — der Eintrag nutzte auch andere Fähigkeiten, oder die Zeit wurde ohne Angabe auf Tätigkeiten verteilt. Nie aufgeteilt und nie zu Ihrer Gesamtsumme addiert.",
     "selfStatedTitle": "Selbst angegeben, noch keine Einträge",
     "variantsFolded": "{count} Schreibweisen",
     "skillShare": "{share} % der erfassten Arbeit",
@@ -8555,6 +8558,9 @@
     "organizationRecordedHoursWithPeriods": "Aufzeichnungen von Organisationen: insgesamt {total} Std. — {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} und {periodHours} Std. als Zeitraumsumme ({from} – {to}) in Stundenzetteln oder importierten Dokumenten ({approved} Std. bestätigt). Getrennt von der Journalzahl geführt und keiner Fähigkeit zugeordnet.",
     "professionalExperienceTotal": "Berufserfahrung insgesamt: {total} Std. — {journal} Std. im Arbeitsjournal und {organization} Std. in der Organisationshistorie. Jede Arbeit einmal gezählt; Quellen getrennt ausgewiesen.",
     "professionalExperienceNotCounted": "Weitere {hours} Std. werden angezeigt, aber nicht addiert, weil dieselbe Arbeit bereits gezählt ist.",
+    "durationPending": "{organization} hat {records, plural, one {# Arbeitsnachweis} other {# Arbeitsnachweise}} ({span}) erfasst, deren Dauer noch nicht angegeben ist — ohne Stunden gezeigt; in keiner Summe gezählt.",
+    "durationPendingUnnamed": "eine Organisation",
+    "durationPendingUndated": "Daten nicht erfasst",
     "premium": {
       "eyebrowFallback": "Lebendiger Lebenslauf",
       "facts": {
@@ -8573,7 +8579,8 @@
         "both": "{confirmed} Std. mit Eintrag der Leitung · {recorded} Std. erfasst",
         "recorded": "{hours} Std. erfasst",
         "shown": "Durch Ihre Einträge belegt",
-        "declared": "Von Ihnen angegeben; noch nicht belegt"
+        "declared": "Von Ihnen angegeben; noch nicht belegt",
+        "involved": "Beteiligt an {hours} Std., nicht allein ihr zugeordnet"
       },
       "source": {
         "own": "Ihr Eintrag",
@@ -18799,6 +18806,14 @@
       "eyebrow": "Unternehmensgeschichte",
       "title": "{name}: eine durchgehende Geschichte",
       "subtitle": "Jede Zahl unten zählt die erfasste Arbeit der Organisation genau einmal. Zeiträume zeigen, was über frühere Rechtsträger erklärt wurde und worauf diese Erklärung beruht.",
+      "titleHeld": "{name}: gehaltene Arbeitsnachweise nach Zeiträumen",
+      "subtitleHeld": "Arbeit unter einer früheren juristischen Person gehört dieser und den Menschen, die sie geleistet haben. {name} hält diese Nachweise als dokumentierte Kontinuität; sie werden nicht als eigene Arbeit von {name} gezeigt.",
+      "headerOwn": "Eigener Zeitraum von {name}",
+      "headerEarlier": "Frühere juristische Person: {name}",
+      "headerUnstated": "Zeitraum „{label}“ — juristische Person nicht angegeben",
+      "headerNotPlaced": "Nachweise ohne angegebenen Zeitraum",
+      "continuityNotSuccession": "Kontinuität dokumentiert; Rechtsnachfolge nicht behauptet.",
+      "totalsHeld": "Alle Nachweise, die {name} hält, über alle Zeiträume, jeder einmal gezählt — nicht alles davon ist eigene Arbeit von {name}.",
       "figures": "{records} Einträge · {hours} Std. · {people} Personen · {places} Orte",
       "totals": {
         "records": "Einträge",

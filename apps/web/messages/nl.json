@@ -8544,6 +8544,9 @@
     "skillHoursOwn": "{hours} u, je eigen registratie",
     "skillHoursConfirmed": "{hours} u, waarvan {confirmed} u bevestigd door een manager",
     "skillHoursHint": "uren uit werkjournaalregistraties die alleen aan deze vaardigheid gekoppeld zijn",
+    "skillInvolvedHours": "betrokken bij {hours} u werk dat niet alleen aan deze vaardigheid is toegeschreven — het eigen deel is onbekend",
+    "skillInvolvedHoursAlso": "plus betrokken bij {hours} u, niet alleen aan haar toegeschreven",
+    "skillInvolvedHoursHint": "Tijd van journaalitems waarin deze vaardigheid meedeed, maar die de registraties niet alleen aan haar kunnen geven — het item gebruikte ook andere vaardigheden, of de tijd is over soorten werk verdeeld zonder te zeggen waar. Nooit verdeeld en nooit bij je totaal opgeteld.",
     "selfStatedTitle": "Zelf opgegeven, nog geen registraties",
     "variantsFolded": "{count} spellingen",
     "skillShare": "{share}% van het geregistreerde werk",
@@ -8555,6 +8558,9 @@
     "organizationRecordedHoursWithPeriods": "Registraties van organisaties: {total} u in totaal — {hours} u op {days, plural, one {# dag} other {# dagen}} en {periodHours} u vermeld als periodetotaal ({from} – {to}) in urenstaten of geïmporteerde documenten ({approved} u goedgekeurd). Apart gehouden van het journaalcijfer en aan geen vaardigheid toegekend.",
     "professionalExperienceTotal": "Beroepservaring in totaal: {total} u — {journal} u in het werkjournaal en {organization} u in de organisatiehistorie. Elk stuk werk één keer geteld; bronnen apart getoond.",
     "professionalExperienceNotCounted": "Nog {hours} u wordt getoond maar niet opgeteld, omdat hetzelfde werk al is geteld.",
+    "durationPending": "{organization} legde {records, plural, one {# werkregistratie} other {# werkregistraties}} vast ({span}) waarvan de duur nog niet is vermeld — getoond zonder uren; in geen totaal geteld.",
+    "durationPendingUnnamed": "een organisatie",
+    "durationPendingUndated": "data niet vastgelegd",
     "premium": {
       "eyebrowFallback": "Levend cv",
       "facts": {
@@ -8573,7 +8579,8 @@
         "both": "{confirmed} u met registratie van een leidinggevende · {recorded} u vastgelegd",
         "recorded": "{hours} u vastgelegd",
         "shown": "Blijkt uit je registraties",
-        "declared": "Door jou opgegeven; nog niet aangetoond"
+        "declared": "Door jou opgegeven; nog niet aangetoond",
+        "involved": "Betrokken bij {hours} u, niet alleen aan haar toegeschreven"
       },
       "source": {
         "own": "Jouw registratie",
@@ -18799,6 +18806,14 @@
       "eyebrow": "Bedrijfsgeschiedenis",
       "title": "{name}: één doorlopende geschiedenis",
       "subtitle": "Elk cijfer hieronder telt het vastgelegde werk van de organisatie precies één keer. Periodes tonen wat er over eerdere rechtspersonen is verklaard en waarop die verklaring rust.",
+      "titleHeld": "{name}: werkregistraties in bezit, per periode",
+      "subtitleHeld": "Werk onder een eerdere rechtspersoon hoort bij die rechtspersoon en de mensen die het deden. {name} bewaart deze registraties als gedocumenteerde continuïteit; ze worden niet getoond als eigen werk van {name}.",
+      "headerOwn": "Eigen periode van {name}",
+      "headerEarlier": "Eerdere rechtspersoon: {name}",
+      "headerUnstated": "Periode ‘{label}’ — rechtspersoon niet vermeld",
+      "headerNotPlaced": "Registraties die geen vermelde periode plaatst",
+      "continuityNotSuccession": "Continuïteit gedocumenteerd; rechtsopvolging niet gesteld.",
+      "totalsHeld": "Alle registraties die {name} bewaart, over alle perioden, elk één keer geteld — niet alles is eigen werk van {name}.",
       "figures": "{records} registraties · {hours} u · {people} personen · {places} plaatsen",
       "totals": {
         "records": "Registraties",

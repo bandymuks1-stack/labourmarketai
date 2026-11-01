@@ -192,6 +192,7 @@ const en = {
     "Hours · share of the hours attributed to a skill · entries, all time. The same figures as the website.",
   "profile.figuresNotRead": "figures could not be read",
   "profile.noFigures": "no recorded hours",
+  "profile.involvedUnattributed": "involved; time not attributed to this skill alone",
   "profile.hoursShort": "h",
   "profile.entriesLabel": "entries",
   "profile.selfStatedMissing":
@@ -481,6 +482,7 @@ const lt: Catalogue = {
     "Valandos · dalis iš įgūdžiams priskirtų valandų · įrašai, per visą laiką. Tie patys skaičiai kaip svetainėje.",
   "profile.figuresNotRead": "skaičių perskaityti nepavyko",
   "profile.noFigures": "užrašytų valandų nėra",
+  "profile.involvedUnattributed": "dalyvavo; laikas nepriskirtas vien šiam įgūdžiui",
   "profile.hoursShort": "val.",
   "profile.entriesLabel": "įr.",
   "profile.selfStatedMissing":
@@ -766,6 +768,7 @@ const ru: Catalogue = {
     "Часы · доля от часов, отнесённых к навыкам · записи, за всё время. Те же цифры, что и на сайте.",
   "profile.figuresNotRead": "цифры прочитать не удалось",
   "profile.noFigures": "записанных часов нет",
+  "profile.involvedUnattributed": "участвовал; время не отнесено только к этому навыку",
   "profile.hoursShort": "ч",
   "profile.entriesLabel": "зап.",
   "profile.selfStatedMissing":
@@ -1051,6 +1054,7 @@ const nl: Catalogue = {
     "Uren · aandeel van de aan een vaardigheid toegekende uren · items, alle tijd. Dezelfde cijfers als op de website.",
   "profile.figuresNotRead": "cijfers konden niet worden gelezen",
   "profile.noFigures": "geen vastgelegde uren",
+  "profile.involvedUnattributed": "betrokken; tijd niet alleen aan deze vaardigheid toegeschreven",
   "profile.hoursShort": "u",
   "profile.entriesLabel": "items",
   "profile.selfStatedMissing":
@@ -1339,6 +1343,7 @@ const de: Catalogue = {
     "Stunden · Anteil an den einer Fähigkeit zugeordneten Stunden · Einträge, gesamt. Dieselben Zahlen wie auf der Website.",
   "profile.figuresNotRead": "Zahlen konnten nicht gelesen werden",
   "profile.noFigures": "keine erfassten Stunden",
+  "profile.involvedUnattributed": "beteiligt; Zeit nicht allein dieser Fähigkeit zugeordnet",
   "profile.hoursShort": "Std.",
   "profile.entriesLabel": "Einträge",
   "profile.selfStatedMissing":
@@ -1614,6 +1619,7 @@ const pl: Catalogue = {
     "Godziny · udział w godzinach przypisanych do umiejętności · wpisy, od początku. Te same liczby co na stronie internetowej.",
   "profile.figuresNotRead": "nie udało się odczytać liczb",
   "profile.noFigures": "brak zapisanych godzin",
+  "profile.involvedUnattributed": "udział; czas nieprzypisany wyłącznie tej umiejętności",
   "profile.hoursShort": "godz.",
   "profile.entriesLabel": "wpisy",
   "profile.selfStatedMissing":

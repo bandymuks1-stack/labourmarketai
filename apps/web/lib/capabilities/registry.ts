@@ -8,6 +8,7 @@ import {
   createJournalEntryCore,
   projectsToChooseFrom,
 } from "@/lib/journal/journal-write-core";
+import { alreadyRecordedJournalEntry } from "@/lib/journal/confirmed-draft-replay";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
@@ -32,12 +33,14 @@ import {
 import { safeApprovedCompanyName } from "@/lib/opportunities/opportunity-fit";
 
 import {
+  capabilityTokenIssuedAt,
   mintCapabilityConfirmation,
   verifyCapabilityConfirmation,
 } from "./confirmable";
 import { demandContextRefusal } from "./employer-context-refusal";
 import { EMPLOYER_OPERATIONS_CAPABILITIES } from "./employer-operations-capabilities";
 import { COUNTERPARTY_REVIEW_CAPABILITIES } from "./counterparty-review-capabilities";
+import { JOURNAL_CORRECTION_CAPABILITIES } from "./journal-correction-capabilities";
 import { MARKETPLACE_CAPABILITIES } from "./marketplace-capabilities";
 import { TEAM_ASSIGNMENT_CAPABILITIES } from "./team-assignment-capabilities";
 import { MESSAGING_CAPABILITIES } from "./messaging-capabilities";
@@ -195,7 +198,18 @@ const livingCvSkillsGet: CapabilityDescriptor = {
   title: "My Living CV skills",
   description:
     "The caller's own declared and journal-backed skills with their " +
-    "verification state and source — the same rows the web Living CV reads.",
+    "verification state and source — the same rows the web Living CV reads — " +
+    "and, per skill, what the caller's own Work Journal records for it " +
+    "(`practice`, the same figures the Living CV chip shows): the skill's OWN " +
+    "hours (`attributedHours`, of which `confirmedHours` a manager confirmed), " +
+    "`involvedUnattributedHours` — time of entries the skill took part in " +
+    "that could not be attributed to it (shared with other skills, or split " +
+    "between kinds of work without saying where; its own part is unknown — " +
+    "never split, never a total, never added to attributed hours) — entries, " +
+    "days, first and last worked day, " +
+    "the evidence tier of the skill row and how the links came to be. " +
+    "`practiceStatus` is `unavailable` when the journal could not be read " +
+    "(unknown, never zero).",
   exposed: true,
   annotations: {
     readOnlyHint: true,
@@ -226,17 +240,54 @@ const livingCvSkillsGet: CapabilityDescriptor = {
       return { ok: false, code: "unavailable", message: "Skills read failed." };
     }
 
+    // P0-B parity: the Living CV chip's figures come from the ONE work
+    // intelligence reader; MCP reads the same model, so a skill's hours are
+    // the same number on the web, in the app and to an assistant. A failed
+    // read is UNKNOWN (`practiceStatus: unavailable`), never zero (SEP-7).
+    const wi = await loadWorkIntelligence(caller, worker.id).catch(() => null);
+    const practiceBySlug = new Map((wi?.skills ?? []).map((sk) => [sk.slug, sk] as const));
+
     return {
       ok: true,
       data: {
         workerId: worker.id,
-        skills: skillsRead.value.map((r) => ({
-          skillId: r.skill_id,
-          slug: r.skills?.slug ?? null,
-          verified: r.verified,
-          source: r.source,
-          verifiedAt: r.verified_at,
-        })),
+        practiceStatus: wi ? ("known" as const) : ("unavailable" as const),
+        skills: skillsRead.value.map((r) => {
+          const slug = r.skills?.slug ?? null;
+          const sk = wi && slug ? (practiceBySlug.get(slug) ?? null) : null;
+          return {
+            skillId: r.skill_id,
+            slug,
+            verified: r.verified,
+            source: r.source,
+            verifiedAt: r.verified_at,
+            practice: !wi
+              ? null
+              : sk
+                ? {
+                    attributedHours: sk.attributedHours,
+                    confirmedHours: sk.confirmedHours,
+                    involvedUnattributedHours: sk.sharedHours,
+                    entries: sk.entries,
+                    days: sk.days,
+                    firstWorkedDay: sk.firstWorkedDay,
+                    lastWorkedDay: sk.lastWorkedDay,
+                    tier: sk.tier,
+                    linkProvenance: sk.provenance,
+                  }
+                : {
+                    attributedHours: 0,
+                    confirmedHours: 0,
+                    involvedUnattributedHours: 0,
+                    entries: 0,
+                    days: 0,
+                    firstWorkedDay: null,
+                    lastWorkedDay: null,
+                    tier: null,
+                    linkProvenance: null,
+                  },
+          };
+        }),
       },
     };
   },
@@ -393,6 +444,11 @@ const journalWorkIntelligenceGet: CapabilityDescriptor = {
           firstWorkedDay: sk.firstWorkedDay,
           lastWorkedDay: sk.lastWorkedDay,
           trend: sk.trend,
+          // P0-B parity with the Living CV: the evidence tier of the skill
+          // row and how its links came to be (recognized / manual /
+          // confirmed / unrecorded) — counts, never a person score.
+          tier: sk.tier,
+          linkProvenance: sk.provenance,
         })),
         activities: wi.activities.map((a) => ({
           key: a.key,
@@ -762,6 +818,68 @@ const journalCreateDraft: CapabilityDescriptor = {
   },
 };
 
+/** THE FormData mapping journal.confirm sends to the write core — one
+ *  function, so the "already recorded" lookup compares exactly what the
+ *  confirm writes (every signed field). */
+function journalConfirmFields(
+  locale: string,
+  draft: z.infer<typeof workerLogWorkSchema>,
+): Record<string, string> {
+  return {
+    locale,
+    engagement_context_id: draft.engagementContextId,
+    notes: draft.notes,
+    work_date: draft.workDate,
+    site_name: draft.siteName ?? "",
+    project_id: draft.projectId ?? "",
+    // The stated time becomes time on the record — the same derivation
+    // the conversation executor applies (issue #1689).
+    ...intakeWorkTimeFields(draft.notes, draft.workDate),
+  };
+}
+
+/**
+ * The entry a refused confirm's draft ALREADY became, as a confirm result —
+ * or null. Only for a GENUINE token of this caller for this exact draft
+ * (signature, input, user, TTL all verified; only the state moved or the
+ * token was spent), and only when a live entry with the draft's exact
+ * engagement, words, day and project was recorded after the token was
+ * issued (`findConfirmedDraftEntry`). Writes no entry: the skill pipeline it
+ * re-reads is idempotent (the create core's duplicate path does the same).
+ */
+async function alreadyRecordedEntry(
+  caller: CapabilityCaller,
+  draft: z.infer<typeof workerLogWorkSchema>,
+  confirmationToken: string,
+): Promise<ExecResult | null> {
+  const issuedAtMs = capabilityTokenIssuedAt({
+    actionId: "journal.confirm",
+    token: confirmationToken,
+    input: normalizedDraftForHash(draft),
+    userId: caller.userId,
+  });
+  if (issuedAtMs === null) return null;
+  const found = await alreadyRecordedJournalEntry(caller, journalConfirmFields(caller.locale, draft), issuedAtMs);
+  if (!found) return null;
+  const { entryId, skills } = found;
+  return {
+    ok: true,
+    data: {
+      entryId,
+      // This confirm wrote nothing: the entry was recorded by the first call.
+      alreadyRecorded: true,
+      skills: {
+        status: skills.status,
+        added: skills.added,
+        strengthened: skills.strengthened,
+        reviewNeeded: skills.reviewNeeded,
+        claimsSaved: skills.claimsSaved,
+        cvUpdated: skills.cvUpdated,
+      },
+    },
+  };
+}
+
 const journalConfirmInput = workerLogWorkSchema.extend({
   confirmationToken: z.string().min(10),
 });
@@ -804,6 +922,15 @@ const journalConfirm: CapabilityDescriptor = {
       currentStateFingerprint: state.fingerprint,
     });
     if (!verdict.ok) {
+      // A retry after a lost response (mobile network drop, client timeout):
+      // the single-use token was spent by the FIRST call, which did write.
+      // Answer with that entry instead of "not saved — draft again", which
+      // invited a second copy of the same day (P0-A 2026-10-30).
+      const replay =
+        verdict.reason === "stale_state"
+          ? await alreadyRecordedEntry(caller, draft, confirmationToken)
+          : null;
+      if (replay) return replay;
       return {
         ok: false,
         code: "confirmation_rejected",
@@ -817,17 +944,7 @@ const journalConfirm: CapabilityDescriptor = {
     });
     const result = await createJournalEntryCore(
       { supabase: caller.supabase, userId: caller.userId, t },
-      fd({
-        locale: caller.locale,
-        engagement_context_id: draft.engagementContextId,
-        notes: draft.notes,
-        work_date: draft.workDate,
-        site_name: draft.siteName ?? "",
-        project_id: draft.projectId ?? "",
-        // The stated time becomes time on the record — the same derivation
-        // the conversation executor applies (issue #1689).
-        ...intakeWorkTimeFields(draft.notes, draft.workDate),
-      }),
+      fd(journalConfirmFields(caller.locale, draft)),
     );
     if (!result.ok) {
       if (result.code === "project_required" && result.projects) {
@@ -1795,6 +1912,9 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   journalWorkIntelligenceGet,
   journalCreateDraft,
   journalConfirm,
+  // A worker corrects their OWN entry through the web journal's own
+  // supersede (`journal-correction-capabilities.ts`, P0-A parity).
+  ...JOURNAL_CORRECTION_CAPABILITIES,
   interestExpressDraft,
   interestExpressConfirm,
   workCardSaveDraft,

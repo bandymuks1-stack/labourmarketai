@@ -23,6 +23,9 @@
 appId: ai.labourmarket.app
 name: signed-in-journey
 ---
+# The keyboard is put away on BOTH platforms after typing: Android by
+# hideKeyboard; iOS by a short scroll (the form screens close the keyboard on
+# drag; Maestro's hideKeyboard fails on an iOS multi-line box or number pad).
 # A tap during scroll momentum only stops the scroll on Android, so every
 # scrollUntilVisible is followed by waitForAnimationToEnd before the tap.
 - launchApp:
@@ -50,10 +53,38 @@ name: signed-in-journey
 # --- 1. Signed in: the shell's tab bar renders only for a live session ---
 # (split from step 2 so a red run says WHICH failed — sign-in, or Today's read —
 # without any debug output from a signed-in session)
+# iOS offers to save the password after a sign-in ("Save Password?"), a system
+# sheet over the whole app (the on-screen ids show only the status bar under
+# it). It is useful to people and stays; the journey answers it "Not Now".
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible:
+            text: "Not Now"
+          timeout: 10000
+          optional: true
+      - tapOn:
+          text: "Not Now"
+          optional: true
 - extendedWaitUntil:
     visible:
       id: "tab-today"
     timeout: 60000
+# …and again if it only appeared after Today rendered.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible:
+            text: "Not Now"
+          timeout: 10000
+          optional: true
+      - tapOn:
+          text: "Not Now"
+          optional: true
 
 # --- 2. Today, with figures actually read through the door ---
 - extendedWaitUntil:
@@ -87,6 +118,19 @@ name: signed-in-journey
       platform: Android
     commands:
       - hideKeyboard
+# iOS: NOT a swipe. In every run from 40846299984 to 40904991200 the first
+# swipe here — a drag that also put the keyboard away (keyboardDismissMode
+# on-drag) — was followed by no tap ever reaching the app again (the form's
+# touch trace held only swipe start points, 201,437). A tap on the screen
+# title (not an input) puts the keyboard away without a drag. The app no
+# longer closes the keyboard on drag at all.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          id: "journal-compose-title"
+      - waitForAnimationToEnd
 - scrollUntilVisible:
     element:
       id: "journal-compose-site"
@@ -101,23 +145,127 @@ name: signed-in-journey
       platform: Android
     commands:
       - hideKeyboard
-- scrollUntilVisible:
-    element:
-      id: "journal-compose-review"
-    direction: DOWN
-    timeout: 20000
-- waitForAnimationToEnd
-- tapOn:
-    id: "journal-compose-review"
-# When the identity holds more than one work context the server asks the
-# human to choose; the first option is as good as any for a synthetic cast.
+# iOS: NO swipe here. Runs 40846299984..40882239578 show that after the swipe
+# that follows this box, no further tap reached the app at all (app-root touch
+# count frozen at that swipe's start point); Return ("Done") puts the keyboard
+# away without a drag.
 - runFlow:
     when:
-      visible:
-        id: "journal-compose-choose"
+      platform: iOS
     commands:
-      - tapOn:
-          id: "journal-compose-option-0"
+      - pressKey: Enter
+# Android: scroll to the button BELOW Review, so Review sits clear of the
+# bottom edge.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "journal-compose-back"
+          direction: DOWN
+          timeout: 20000
+# iOS: scroll only until Review itself shows. Runs 40846299984..40889181123:
+# after the driver's swipe that carried the form to its END (Back at the
+# bottom, rubber-band bounce), not one later tap reached the app — the
+# app-root touch count stayed at that swipe's start (201,437), on Review,
+# Back, the Today tab and a tap 30% down alike, while the screen showed the
+# app untouched (band colours: dark background, the gold Review band).
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "journal-compose-review"
+          direction: DOWN
+          timeout: 20000
+- waitForAnimationToEnd
+# Closing the keyboard moves the layout, so a tap can land where Review used to
+# be. Tap until the next state shows (a preview to save, or a context to
+# choose), at most three times — written out, because a Maestro `repeat`
+# with `while` stopped after one pass on iOS (runs 40846299984, 40852141743).
+- runFlow:
+    when:
+      notVisible:
+        id: "journal-compose-save"
+    commands:
+      # When the identity holds more than one work context the server asks the
+      # human to choose; the first option is as good as any for a synthetic cast.
+      - runFlow:
+          when:
+            visible:
+              id: "journal-compose-choose"
+          commands:
+            - tapOn:
+                id: "journal-compose-option-0"
+      - runFlow:
+          when:
+            visible:
+              id: "journal-compose-review"
+          commands:
+            - waitForAnimationToEnd
+            - tapOn:
+                id: "journal-compose-review"
+      - extendedWaitUntil:
+          visible:
+            id: "journal-compose-save"
+          timeout: 20000
+          optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: "journal-compose-save"
+    commands:
+      # When the identity holds more than one work context the server asks the
+      # human to choose; the first option is as good as any for a synthetic cast.
+      - runFlow:
+          when:
+            visible:
+              id: "journal-compose-choose"
+          commands:
+            - tapOn:
+                id: "journal-compose-option-0"
+      - runFlow:
+          when:
+            visible:
+              id: "journal-compose-review"
+          commands:
+            - waitForAnimationToEnd
+            - tapOn:
+                id: "journal-compose-review"
+      - extendedWaitUntil:
+          visible:
+            id: "journal-compose-save"
+          timeout: 20000
+          optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: "journal-compose-save"
+    commands:
+      # When the identity holds more than one work context the server asks the
+      # human to choose; the first option is as good as any for a synthetic cast.
+      - runFlow:
+          when:
+            visible:
+              id: "journal-compose-choose"
+          commands:
+            - tapOn:
+                id: "journal-compose-option-0"
+      - runFlow:
+          when:
+            visible:
+              id: "journal-compose-review"
+          commands:
+            - waitForAnimationToEnd
+            - tapOn:
+                id: "journal-compose-review"
+      - extendedWaitUntil:
+          visible:
+            id: "journal-compose-save"
+          timeout: 20000
+          optional: true
 - scrollUntilVisible:
     element:
       id: "journal-compose-save"
