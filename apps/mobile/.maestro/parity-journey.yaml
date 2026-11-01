@@ -13,6 +13,11 @@
 #      its site is changed, the correction is DRAFTED (journal.correct_draft,
 #      before/after preview) and CONFIRMED (journal.correct_confirm, the web's
 #      own supersede); the saved state renders.
+#   2. Messages: Today opens Messages; conversation.list renders a LOADED
+#      read (messages-loaded; a failed read renders capability-retry and the
+#      step fails). When the identity has a conversation, it is opened
+#      (conversation.get) and a reply is DRAFTED (message.send_draft) and
+#      previewed; it is SENT (message.send_confirm) only with MESSAGE_SEND=1.
 #   last. sign-out returns to the sign-in form.
 # Every step navigates by testID, never by a label that changes with the
 # device language. Keyboards are put away as in signed-in-journey.yaml:
@@ -114,6 +119,87 @@ name: parity-journey
     visible:
       id: "journal-log-work"
     timeout: 30000
+
+# --- 2. Messages: the conversation list is read; a reply is drafted ---
+# The reply is SENT only with MESSAGE_SEND=1: a sent message reaches whoever
+# is on the other side, and the review identity's conversations are not
+# proven to be with synthetic people only. By default the draft round trip
+# (message.send_draft: permission check + preview + token, nothing sent)
+# runs and the draft is dropped.
+- tapOn:
+    id: "tab-today"
+- scrollUntilVisible:
+    element:
+      id: "today-open-messages"
+    direction: DOWN
+    timeout: 30000
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-messages"
+- extendedWaitUntil:
+    visible:
+      id: "messages-loaded"
+    timeout: 60000
+- runFlow:
+    when:
+      visible:
+        id: "messages-open-0"
+    commands:
+      - tapOn:
+          id: "messages-open-0"
+      - extendedWaitUntil:
+          visible:
+            id: "conversation-loaded"
+          timeout: 60000
+      - scrollUntilVisible:
+          element:
+            id: "message-review"
+          direction: DOWN
+          timeout: 20000
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "message-body"
+      - inputText: "QA-SYNTHETIC parity journey reply"
+      - runFlow:
+          when:
+            platform: Android
+          commands:
+            - hideKeyboard
+      - runFlow:
+          when:
+            platform: iOS
+          commands:
+            - tapOn:
+                id: "message-body-label"
+            - waitForAnimationToEnd
+      - scrollUntilVisible:
+          element:
+            id: "message-review"
+          direction: DOWN
+          timeout: 20000
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "message-review"
+      - extendedWaitUntil:
+          visible:
+            id: "message-preview"
+          timeout: 60000
+      - runFlow:
+          when:
+            true: ${MESSAGE_SEND == '1'}
+          commands:
+            - scrollUntilVisible:
+                element:
+                  id: "message-send"
+                direction: DOWN
+                timeout: 20000
+            - waitForAnimationToEnd
+            - tapOn:
+                id: "message-send"
+            - extendedWaitUntil:
+                visible:
+                  id: "message-sent"
+                timeout: 60000
 
 # --- last. Sign out, back to the form ---
 - tapOn:

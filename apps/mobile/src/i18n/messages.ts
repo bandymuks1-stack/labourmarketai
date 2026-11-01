@@ -225,6 +225,56 @@ const en = {
     "The new words state one duration for the whole entry, but the entry also records an output, and both need the same field. State the time per activity, or correct this entry on the website.",
   "journal.correct.missingTitle":
     "This entry cannot be corrected here",
+  "today.openMessages":
+    "Messages",
+  "messages.title":
+    "Messages",
+  "messages.conversation":
+    "Conversation",
+  "messages.intro":
+    "Your conversations inside LabourMarket.ai. Messages stay in the app — nothing is sent by email or SMS. New messages show when you open this screen.",
+  "messages.none":
+    "You have no conversations yet.",
+  "messages.untitled":
+    "Conversation",
+  "messages.threadEmpty":
+    "No messages in this conversation yet.",
+  "messages.fromMe":
+    "You",
+  "messages.fromThem":
+    "Them",
+  "messages.replyLabel":
+    "Your reply",
+  "messages.review":
+    "Review before sending",
+  "messages.emptyBody":
+    "Write a message first.",
+  "messages.previewTitle":
+    "Check this before it is sent",
+  "messages.previewNothingSent":
+    "Nothing has been sent yet. This is exactly the text the other person will see.",
+  "messages.send":
+    "Send",
+  "messages.sentTitle":
+    "Sent",
+  "messages.sentBody":
+    "Your message is in the conversation.",
+  "messages.sentUnverified":
+    "The server accepted your message, but reading it back did not match. Open the conversation again to check it.",
+  "messages.writeAnother":
+    "Write another message",
+  "messages.draftFailedTitle":
+    "We could not prepare this message",
+  "messages.sendFailedTitle":
+    "We could not send this message",
+  "messages.unsureSent":
+    "The message was sent but no answer came back, so we cannot tell whether it arrived. Open the conversation again before sending it a second time.",
+  "messages.staleDraft":
+    "Not sent: a new message arrived in this conversation after you prepared yours. Read it, then review your reply again.",
+  "messages.notFound":
+    "This conversation is not one of yours, or it no longer exists.",
+  "messages.noPermission":
+    "You may not write in this conversation.",
   "profile.noWorkerProfile": "This account has no worker profile yet.",
   "profile.figuresTitle": "Skills, with your recorded hours",
   "profile.groupManagerConfirmed": "Confirmed by a manager",
@@ -559,6 +609,56 @@ const lt: Catalogue = {
     "Nauji žodžiai nurodo vieną trukmę visam įrašui, bet įraše dar yra atliktas kiekis, o abiem reikia to paties lauko. Nurodyk laiką kiekvienai veiklai arba pataisyk įrašą svetainėje.",
   "journal.correct.missingTitle":
     "Šio įrašo čia pataisyti negalima",
+  "today.openMessages":
+    "Žinutės",
+  "messages.title":
+    "Žinutės",
+  "messages.conversation":
+    "Pokalbis",
+  "messages.intro":
+    "Tavo pokalbiai LabourMarket.ai viduje. Žinutės lieka programėlėje – nieko nesiunčiame el. paštu ar SMS. Naujos žinutės matomos atidarius šį ekraną.",
+  "messages.none":
+    "Kol kas neturi pokalbių.",
+  "messages.untitled":
+    "Pokalbis",
+  "messages.threadEmpty":
+    "Šiame pokalbyje dar nėra žinučių.",
+  "messages.fromMe":
+    "Tu",
+  "messages.fromThem":
+    "Pašnekovas",
+  "messages.replyLabel":
+    "Tavo atsakymas",
+  "messages.review":
+    "Peržiūrėti prieš siunčiant",
+  "messages.emptyBody":
+    "Pirmiausia parašyk žinutę.",
+  "messages.previewTitle":
+    "Patikrink prieš siunčiant",
+  "messages.previewNothingSent":
+    "Kol kas niekas neišsiųsta. Būtent šį tekstą matys kitas žmogus.",
+  "messages.send":
+    "Siųsti",
+  "messages.sentTitle":
+    "Išsiųsta",
+  "messages.sentBody":
+    "Tavo žinutė yra pokalbyje.",
+  "messages.sentUnverified":
+    "Serveris žinutę priėmė, bet nuskaityta ji nesutapo. Atidaryk pokalbį iš naujo ir patikrink.",
+  "messages.writeAnother":
+    "Rašyti kitą žinutę",
+  "messages.draftFailedTitle":
+    "Nepavyko paruošti žinutės",
+  "messages.sendFailedTitle":
+    "Nepavyko išsiųsti žinutės",
+  "messages.unsureSent":
+    "Žinutė išsiųsta, bet atsakymas negrįžo, todėl nežinome, ar ji pasiekė. Prieš siųsdamas antrą kartą, atidaryk pokalbį iš naujo.",
+  "messages.staleDraft":
+    "Neišsiųsta: tau ruošiant atsakymą, pokalbyje atsirado nauja žinutė. Perskaityk ją ir peržiūrėk atsakymą dar kartą.",
+  "messages.notFound":
+    "Šis pokalbis nėra tavo arba jo nebėra.",
+  "messages.noPermission":
+    "Šiame pokalbyje rašyti negali.",
   "profile.noWorkerProfile": "Ši paskyra dar neturi darbuotojo profilio.",
   "profile.figuresTitle": "Įgūdžiai su tavo užrašytomis valandomis",
   "profile.groupManagerConfirmed": "Vadovo patvirtinta",
@@ -889,6 +989,56 @@ const ru: Catalogue = {
     "Новый текст указывает одну длительность на всю запись, но в записи есть и объём работы, а обоим нужно одно и то же поле. Укажите время по каждому виду работ или исправьте запись на сайте.",
   "journal.correct.missingTitle":
     "Эту запись здесь исправить нельзя",
+  "today.openMessages":
+    "Сообщения",
+  "messages.title":
+    "Сообщения",
+  "messages.conversation":
+    "Разговор",
+  "messages.intro":
+    "Ваши разговоры внутри LabourMarket.ai. Сообщения остаются в приложении — ничего не отправляется по e-mail или SMS. Новые сообщения видны при открытии этого экрана.",
+  "messages.none":
+    "У вас пока нет разговоров.",
+  "messages.untitled":
+    "Разговор",
+  "messages.threadEmpty":
+    "В этом разговоре пока нет сообщений.",
+  "messages.fromMe":
+    "Вы",
+  "messages.fromThem":
+    "Собеседник",
+  "messages.replyLabel":
+    "Ваш ответ",
+  "messages.review":
+    "Проверить перед отправкой",
+  "messages.emptyBody":
+    "Сначала напишите сообщение.",
+  "messages.previewTitle":
+    "Проверьте перед отправкой",
+  "messages.previewNothingSent":
+    "Пока ничего не отправлено. Именно этот текст увидит собеседник.",
+  "messages.send":
+    "Отправить",
+  "messages.sentTitle":
+    "Отправлено",
+  "messages.sentBody":
+    "Ваше сообщение в разговоре.",
+  "messages.sentUnverified":
+    "Сервер принял сообщение, но при обратном чтении текст не совпал. Откройте разговор снова и проверьте.",
+  "messages.writeAnother":
+    "Написать ещё",
+  "messages.draftFailedTitle":
+    "Не удалось подготовить сообщение",
+  "messages.sendFailedTitle":
+    "Не удалось отправить сообщение",
+  "messages.unsureSent":
+    "Сообщение отправлено, но ответ не пришёл, поэтому неизвестно, дошло ли оно. Перед повторной отправкой откройте разговор снова.",
+  "messages.staleDraft":
+    "Не отправлено: пока вы готовили ответ, в разговоре появилось новое сообщение. Прочитайте его и проверьте ответ ещё раз.",
+  "messages.notFound":
+    "Этот разговор не ваш или больше не существует.",
+  "messages.noPermission":
+    "Вы не можете писать в этом разговоре.",
   "profile.noWorkerProfile": "У этого аккаунта пока нет профиля работника.",
   "profile.figuresTitle": "Навыки с вашими записанными часами",
   "profile.groupManagerConfirmed": "Подтверждено руководителем",
@@ -1219,6 +1369,56 @@ const nl: Catalogue = {
     "De nieuwe tekst noemt één duur voor de hele invoer, maar de invoer bevat ook een productie, en beide hebben hetzelfde veld nodig. Geef de tijd per activiteit op, of corrigeer deze invoer op de website.",
   "journal.correct.missingTitle":
     "Deze invoer kan hier niet worden gecorrigeerd",
+  "today.openMessages":
+    "Berichten",
+  "messages.title":
+    "Berichten",
+  "messages.conversation":
+    "Gesprek",
+  "messages.intro":
+    "Je gesprekken binnen LabourMarket.ai. Berichten blijven in de app — er wordt niets per e-mail of sms verstuurd. Nieuwe berichten zie je als je dit scherm opent.",
+  "messages.none":
+    "Je hebt nog geen gesprekken.",
+  "messages.untitled":
+    "Gesprek",
+  "messages.threadEmpty":
+    "Nog geen berichten in dit gesprek.",
+  "messages.fromMe":
+    "Jij",
+  "messages.fromThem":
+    "De ander",
+  "messages.replyLabel":
+    "Je antwoord",
+  "messages.review":
+    "Bekijken voor verzenden",
+  "messages.emptyBody":
+    "Schrijf eerst een bericht.",
+  "messages.previewTitle":
+    "Controleer dit voordat het wordt verstuurd",
+  "messages.previewNothingSent":
+    "Er is nog niets verstuurd. Dit is precies de tekst die de ander ziet.",
+  "messages.send":
+    "Versturen",
+  "messages.sentTitle":
+    "Verstuurd",
+  "messages.sentBody":
+    "Je bericht staat in het gesprek.",
+  "messages.sentUnverified":
+    "De server heeft je bericht aangenomen, maar bij het teruglezen kwam het niet overeen. Open het gesprek opnieuw om het te controleren.",
+  "messages.writeAnother":
+    "Nog een bericht schrijven",
+  "messages.draftFailedTitle":
+    "We konden dit bericht niet voorbereiden",
+  "messages.sendFailedTitle":
+    "We konden dit bericht niet versturen",
+  "messages.unsureSent":
+    "Het bericht is verstuurd maar er kwam geen antwoord, dus we weten niet of het is aangekomen. Open het gesprek opnieuw voordat je het nog eens verstuurt.",
+  "messages.staleDraft":
+    "Niet verstuurd: er kwam een nieuw bericht in dit gesprek nadat je het jouwe had voorbereid. Lees het en bekijk je antwoord opnieuw.",
+  "messages.notFound":
+    "Dit gesprek is niet van jou of bestaat niet meer.",
+  "messages.noPermission":
+    "Je mag niet in dit gesprek schrijven.",
   "profile.noWorkerProfile": "Dit account heeft nog geen werkersprofiel.",
   "profile.figuresTitle": "Vaardigheden, met je vastgelegde uren",
   "profile.groupManagerConfirmed": "Bevestigd door een leidinggevende",
@@ -1552,6 +1752,56 @@ const de: Catalogue = {
     "Der neue Text nennt eine Dauer für den ganzen Eintrag, der Eintrag enthält aber auch eine Leistungsmenge, und beide brauchen dasselbe Feld. Geben Sie die Zeit je Tätigkeit an oder korrigieren Sie den Eintrag auf der Website.",
   "journal.correct.missingTitle":
     "Dieser Eintrag kann hier nicht korrigiert werden",
+  "today.openMessages":
+    "Nachrichten",
+  "messages.title":
+    "Nachrichten",
+  "messages.conversation":
+    "Unterhaltung",
+  "messages.intro":
+    "Ihre Unterhaltungen in LabourMarket.ai. Nachrichten bleiben in der App – nichts wird per E-Mail oder SMS versendet. Neue Nachrichten erscheinen, wenn Sie diese Seite öffnen.",
+  "messages.none":
+    "Sie haben noch keine Unterhaltungen.",
+  "messages.untitled":
+    "Unterhaltung",
+  "messages.threadEmpty":
+    "In dieser Unterhaltung gibt es noch keine Nachrichten.",
+  "messages.fromMe":
+    "Sie",
+  "messages.fromThem":
+    "Gegenüber",
+  "messages.replyLabel":
+    "Ihre Antwort",
+  "messages.review":
+    "Vor dem Senden prüfen",
+  "messages.emptyBody":
+    "Schreiben Sie zuerst eine Nachricht.",
+  "messages.previewTitle":
+    "Vor dem Senden prüfen",
+  "messages.previewNothingSent":
+    "Noch wurde nichts gesendet. Genau diesen Text sieht die andere Person.",
+  "messages.send":
+    "Senden",
+  "messages.sentTitle":
+    "Gesendet",
+  "messages.sentBody":
+    "Ihre Nachricht ist in der Unterhaltung.",
+  "messages.sentUnverified":
+    "Der Server hat Ihre Nachricht angenommen, aber beim Zurücklesen stimmte sie nicht überein. Öffnen Sie die Unterhaltung erneut, um sie zu prüfen.",
+  "messages.writeAnother":
+    "Weitere Nachricht schreiben",
+  "messages.draftFailedTitle":
+    "Diese Nachricht konnte nicht vorbereitet werden",
+  "messages.sendFailedTitle":
+    "Diese Nachricht konnte nicht gesendet werden",
+  "messages.unsureSent":
+    "Die Nachricht wurde gesendet, aber es kam keine Antwort, daher wissen wir nicht, ob sie angekommen ist. Öffnen Sie die Unterhaltung erneut, bevor Sie sie noch einmal senden.",
+  "messages.staleDraft":
+    "Nicht gesendet: Nachdem Sie Ihre Antwort vorbereitet haben, kam eine neue Nachricht in diese Unterhaltung. Lesen Sie sie und prüfen Sie Ihre Antwort erneut.",
+  "messages.notFound":
+    "Diese Unterhaltung gehört nicht Ihnen oder existiert nicht mehr.",
+  "messages.noPermission":
+    "Sie dürfen in dieser Unterhaltung nicht schreiben.",
   "profile.noWorkerProfile": "Dieses Konto hat noch kein Arbeiterprofil.",
   "profile.figuresTitle": "Fähigkeiten mit Ihren erfassten Stunden",
   "profile.groupManagerConfirmed": "Von einer Führungskraft bestätigt",
@@ -1872,6 +2122,56 @@ const pl: Catalogue = {
     "Nowa treść podaje jeden czas dla całego wpisu, ale wpis zawiera też ilość wykonanej pracy, a oba wymagają tego samego pola. Podaj czas dla każdej czynności albo popraw wpis na stronie.",
   "journal.correct.missingTitle":
     "Tego wpisu nie można tu poprawić",
+  "today.openMessages":
+    "Wiadomości",
+  "messages.title":
+    "Wiadomości",
+  "messages.conversation":
+    "Rozmowa",
+  "messages.intro":
+    "Twoje rozmowy w LabourMarket.ai. Wiadomości zostają w aplikacji — nic nie jest wysyłane e-mailem ani SMS-em. Nowe wiadomości widać po otwarciu tego ekranu.",
+  "messages.none":
+    "Nie masz jeszcze żadnych rozmów.",
+  "messages.untitled":
+    "Rozmowa",
+  "messages.threadEmpty":
+    "W tej rozmowie nie ma jeszcze wiadomości.",
+  "messages.fromMe":
+    "Ty",
+  "messages.fromThem":
+    "Rozmówca",
+  "messages.replyLabel":
+    "Twoja odpowiedź",
+  "messages.review":
+    "Sprawdź przed wysłaniem",
+  "messages.emptyBody":
+    "Najpierw napisz wiadomość.",
+  "messages.previewTitle":
+    "Sprawdź przed wysłaniem",
+  "messages.previewNothingSent":
+    "Nic jeszcze nie wysłano. Dokładnie ten tekst zobaczy druga osoba.",
+  "messages.send":
+    "Wyślij",
+  "messages.sentTitle":
+    "Wysłano",
+  "messages.sentBody":
+    "Twoja wiadomość jest w rozmowie.",
+  "messages.sentUnverified":
+    "Serwer przyjął wiadomość, ale po odczytaniu nie zgadzała się. Otwórz rozmowę ponownie, aby ją sprawdzić.",
+  "messages.writeAnother":
+    "Napisz kolejną wiadomość",
+  "messages.draftFailedTitle":
+    "Nie udało się przygotować wiadomości",
+  "messages.sendFailedTitle":
+    "Nie udało się wysłać wiadomości",
+  "messages.unsureSent":
+    "Wiadomość została wysłana, ale nie wróciła odpowiedź, więc nie wiemy, czy dotarła. Zanim wyślesz ją ponownie, otwórz rozmowę jeszcze raz.",
+  "messages.staleDraft":
+    "Nie wysłano: po przygotowaniu Twojej odpowiedzi w rozmowie pojawiła się nowa wiadomość. Przeczytaj ją i sprawdź odpowiedź ponownie.",
+  "messages.notFound":
+    "Ta rozmowa nie jest Twoja albo już nie istnieje.",
+  "messages.noPermission":
+    "Nie możesz pisać w tej rozmowie.",
   "profile.noWorkerProfile": "To konto nie ma jeszcze profilu pracownika.",
   "profile.figuresTitle": "Umiejętności wraz z Twoimi zapisanymi godzinami",
   "profile.groupManagerConfirmed": "Potwierdzone przez kierownika",
