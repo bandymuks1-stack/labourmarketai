@@ -1495,6 +1495,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260928181000_booking_reopen_lifecycle_edges_v1.sql",
       // owner-approved RED 2026-09-28: agency drafts client need / share-scoped read / placement lifecycle.
       "20260928190000_agency_delegated_demand_and_placement_v1.sql",
+      // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
+      "20260928190100_agency_drafted_needs_output_column_v1.sql",
       // walk 2026-09-28: a re-accepted booking restores the engagement it minted.
       "20260928200000_booking_reaccept_restores_engagement_v1.sql",
       // walk 2026-09-28: an agency placement booking carries the need's role.
@@ -1606,6 +1608,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261007140000_work_plan_scope_roster_engagement_v1.sql",
       // 2026-10-07 (E6, owner decision): a team/brigade offered against one demand (new table + SECURITY DEFINER doors + GRANT) - marker is the human-gate acknowledgement; owner-approved 2026-10-08 (separate hand-off RPC).
       "20261007150000_team_demand_offer_v1.sql",
+      // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
+      "20261007155339_20261006100100_conversation_participants_service_role_insert_grant_v1.sql",
       // 2026-10-07: private evidence-media bucket + storage.objects policies (RED storage policy) - marker is the human-gate acknowledgement; owner-approved in chat 2026-10-08 (PR #2189).
       "20261007180000_evidence_media_bucket_v1.sql",
       // 2026-10-08 (#2195, owner-approved RED, narrower audience: subject + CURRENT engagement only): company-side recognitions read (SECURITY DEFINER + GRANT) - marker is the human-gate acknowledgement.
@@ -1643,6 +1647,110 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261014090100_historical_consolidation_package_v1.sql",
       // 2026-10-14 (RED, needs-human-gate, NOT applied): brigade disband v1.
       "20261014190000_team_disband_v1.sql",
+      // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
+      "20261015193211_20261015120000_esco_label_search_v1.sql",
+      // 2026-10-18: the worker identity split (RED RLS policy + SECURITY DEFINER + GRANT). The
+      // annotation acknowledges the RED class so CI can run; the PR stays a draft with
+      // needs-human-gate and is applied only on the owner's explicit approval.
+      "20261018160000_worker_identity_split_v1.sql",
+      // 2026-10-19 (RED, needs-human-gate, NOT applied): an open account deletion request pauses discoverability.
+      "20261019070000_discoverability_paused_by_open_deletion_request_v1.sql",
+      "20261019140000_privacy_erasure_executor_v3.sql",
+      // 2026-10-19 (RED by data UPDATE, owner-approved with the executor): two registry rows.
+      "20261019150000_privacy_erasure_registry_not_null_authors_v1.sql",
+      // 2026-10-19 (RED by SECURITY DEFINER + GRANT): the person's own public summary (PER-2).
+      "20261019160000_worker_public_summary_v1.sql",
+      // 2026-10-19 (RED by SECURITY DEFINER replace): the language save RPC accepts uk.
+      "20261019180000_worker_language_uk_rpc_v1.sql",
+      // 2026-10-19 incident fix (RED by auth.users update): sentinel banned until 2999.
+      "20261019190000_erasure_sentinel_finite_ban_v1.sql",
+      // 2026-10-19 (RED by SECURITY DEFINER replace): worker board company via the need's organization.
+      "20261019200000_worker_board_org_company_v1.sql",
+      // 2026-10-19 (RED by SECURITY DEFINER + GRANT): B2B-9 hours-only door for the project manager.
+      "20261019210000_project_team_journal_hours_v1.sql",
+      // 2026-10-19 (RED by SECURITY DEFINER replace): B2B-9 review fixes.
+      "20261019220000_project_team_journal_hours_v2.sql",
+      // 2026-10-20 (RED by SECURITY DEFINER replace): one demand-company rule.
+      "20261020010000_demand_company_one_rule_v1.sql",
+      // 2026-10-20 (RED by helper replace): org-less need → no company (review fix).
+      "20261020015000_demand_company_one_rule_v2.sql",
+      // 2026-10-20 (RED by GRANT + RLS policies on a new table): My Space pins restored.
+      "20261020020000_workspace_pins_v1.sql",
+      // 2026-10-20 (RED by SECURITY DEFINER replace; owner-approved #2558): counterparty metrics carry their order.
+      "20261020080000_counterparty_detail_metric_order_v1.sql",
+      // 2026-10-20 (RED by SECURITY DEFINER + GRANT; owner-approved #2563 principle): worked-organization names + periods.
+      "20261020100000_worked_organization_history_v1.sql",
+      // 2026-10-20 (RED by CREATE TRIGGER; owner-approved #2589 with conditions): a roster link is cleared whole.
+      "20261020170000_roster_link_clears_both_sides_v1.sql",
+      // 2026-10-20 (RED by SECURITY DEFINER trigger + backfill; owner-approved #2590 with conditions): thread last activity.
+      "20261020171000_conversation_last_activity_v1.sql",
+      // 2026-10-20 (RED by SECURITY DEFINER + GRANT; owner-approved #2591 with conditions): Agree names the version seen.
+      "20261020172000_team_offer_agree_seen_terms_v1.sql",
+      // 2026-10-21 (RED by SECURITY DEFINER replace + trigger; owner-approved #2596): server clock + offer lock.
+      "20261020173000_conversation_activity_server_clock_v1.sql",
+      "20261020174000_team_offer_agree_lock_offer_v1.sql",
+      // 2026-10-21 (owner-approved #2601): atomic hours correction + edit-only-by-correction guard.
+      "20261021090000_work_hours_corrections_atomic_v1.sql",
+      // 2026-10-21 (owner-approved #2604): B2B hours supersede walk + team assignment names.
+      "20261021091000_project_team_journal_hours_v3.sql",
+      "20261021092000_team_assignment_names_v1.sql",
+      // 2026-10-21 (owner-approved #2607): membership end closes owner authority + invitations follow authority.
+      "20261021093000_membership_end_closes_owner_authority_v1.sql",
+      "20261021094000_invitations_follow_org_authority_v1.sql",
+      // 2026-10-21 (owner-approved #2606): interest org managers + worker interest writes + booking proposal reach/open/declined.
+      "20261021095000_demand_interest_org_managers_v1.sql",
+      "20261021095100_demand_interest_worker_writes_v1.sql",
+      "20261021095200_booking_propose_reachable_open_v1.sql",
+      // 2026-10-22: owner approved #2608 in chat ("I approve PR #2608 migration
+      // 20261021095500_worker_skill_confirmation_standing_v1.sql, including its
+      // reviewed SECURITY DEFINER function and GRANT permissions").
+      "20261021095500_worker_skill_confirmation_standing_v1.sql",
+      // 2026-10-21 (owner-approved #2613): a brigade whose only offer is on a closed need can be disbanded
+      "20261021120000_team_disband_closed_need_offers_v1.sql",
+      // 2026-10-21 (RED, needs-human-gate): stale booking proposals expire daily (system function + pg_cron).
+      "20261021130000_booking_expiry_system_schedule_v1.sql",
+      // 2026-10-22 (RED, needs-human-gate): aggregate counts for the Agentai OS capability readback (SECURITY DEFINER + GRANT).
+      "20261022150000_agentai_capability_readback_counts_v1.sql",
+      // 2026-10-23: owner approved #2439 in chat (same approval as #2709/#2712; owner decision N-9;
+      // authorized GDPR erasure must keep working): server-side journal hash
+      // chain + immutable evidence, erasure-executor-v3 compatible (renumbered from 20261016190000).
+      "20261023132610_journal_evidence_integrity_v1.sql",
+      // 2026-10-23: owner approved #2709 in chat ("I APPROVE deploying the features of
+      // #2709, #2439 and #2712 and their required migrations"; conflicts warn, never block).
+      // CAL-8 shift patterns — one nullable column on work_plan_entries,
+      // create_work_plan_entry_v2, plan branch of the override validator.
+      "20261023160000_work_plan_shift_patterns_v1.sql",
+      // 2026-10-23: owner approved #2712 in chat (same approval as #2709; WEB_PUSH_ENABLED stays
+      // false until keys + a real delivery test). COM-3 web push channel — device
+      // subscriptions table, register command, 'push' value on the preferences channel CHECK.
+      "20261023171500_web_push_subscriptions_v1.sql",
+      // 2026-10-23: owner approved #2719 in chat (apply before deploy, then merge). Runtime
+      // stall sampler evidence table — numbers only, service_role only, 14-day retention.
+      "20261023190000_ops_runtime_samples_v1.sql",
+      // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
+      "20261025045152_project_forecasts_v1.sql",
+      // 2026-10-27: owner approved #2841 in chat (apply + merge). Two service_role-only
+      // SECURITY DEFINER functions that rotate one unsent partner referral token; ledger
+      // 20261027193124.
+      "20261027120000_reissue_external_referral_v1.sql",
+      // 2026-10-28: owner approved #2843 in chat (apply + merge). Read-only service_role
+      // candidate list that flags already-mailed addresses; ledger 20261028044705.
+      "20261027210000_external_referral_reprocess_candidates_v2.sql",
+      // 2026-10-28: owner approved #2846 in chat (apply + merge). The caller-scoped
+      // invitations read carries the partner source; ledger 20261028034356.
+      "20261027231000_list_invitations_for_me_source_slug_v1.sql",
+      // 2026-10-28: owner approved #2855 in chat (apply + merge, at 35e749fc3).
+      // Address lock + send reservation for partner referral sends; ledger 20261028081810.
+      "20261028070000_referral_send_address_guard_v1.sql",
+      // 2026-10-28: owner approved #2858 in chat (apply + merge, at d0159eb).
+      // Recovery counts only this reservation's ledger row; ledger 20261028091725.
+      "20261028090000_resolve_reservation_exact_window_v1.sql",
+      // 2026-10-28: owner approved #2876 in chat (conditional apply, at a3a10eb7d).
+      // Synthetic QA needs out of the three cross-org demand readers.
+      "20261028123000_synthetic_demand_cross_org_readers_v1.sql",
+      // 2026-10-29: owner approved #2887 in chat (production apply, at dbd1363ef).
+      // The worker reader projects the need's required skills as catalogue slugs.
+      "20261029190000_worker_board_need_skill_slugs_v1.sql",
 ]);
   });
 

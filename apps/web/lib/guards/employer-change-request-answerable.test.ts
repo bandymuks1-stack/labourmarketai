@@ -23,9 +23,18 @@ const row = readFileSync(join(APP, "components", "app", "journal-entry-row.tsx")
 
 describe("employer change requests are answerable", () => {
   it("the page derives the employer request from the latest decision", () => {
-    expect(page).toMatch(/timeline\.at\(-1\)\?\.result === "changes_requested"/);
+    expect(page).toMatch(/const latestEmployerDecision = timeline\.at\(-1\)\?\.result;/);
+    expect(page).toMatch(/latestEmployerDecision === "changes_requested"/);
     expect(page).toMatch(/!correctedOriginalIds\.has\(e\.id\)/);
     expect(page).toMatch(/correctionSlot=\{\s*employerAskedChanges \?/);
+  });
+
+  it("a REJECTED entry gets the same correction path — never a dead end (walk-spec 2026-10-25)", () => {
+    // Same control, same RPC: a decided original keeps its row and decision;
+    // the correction is a new entry pointing at it (`correction_of`).
+    expect(page).toMatch(
+      /\(latestEmployerDecision === "changes_requested" \|\|\s*latestEmployerDecision === "rejected"\) &&/,
+    );
   });
 
   it("the row renders the correction control where edit and delete are blocked", () => {

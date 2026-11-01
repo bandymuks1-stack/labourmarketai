@@ -25,6 +25,12 @@ import {
 } from "@/components/app/marketplace-loop-section";
 import { MarkServiceRequestsSeen } from "@/components/app/mark-service-requests-seen";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/service-requests");
+
 
 /**
  * Service requests — P0 marketplace request loop (Phase 1). Authenticated
@@ -77,6 +83,7 @@ export default async function ServiceRequestsPage({
   const isCompany = employer.kind === "ok";
   const needsMigration =
     disc.kind === "needs-migration" ||
+    disc.kind === "unavailable" ||
     out.kind === "needs-migration" ||
     inc.kind === "needs-migration";
   const ownActive =
@@ -158,6 +165,9 @@ export default async function ServiceRequestsPage({
         <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{t("pageLead")}</p>
       </header>
+      {/* Mutual, neutral pre-agreement recommendation — advice to both
+          parties, never a gate (decision 0021 extension, 2026-10-24). */}
+      <CollaborationChecksNote context={{ dealKind: "service" }} testId="service-requests-collaboration-checks" />
       {out.kind === "error" || inc.kind === "error" ? (
         <p role="alert" className="text-sm text-state-warning" data-testid="service-requests-read-failed">
           {t("loopReadFailed")}

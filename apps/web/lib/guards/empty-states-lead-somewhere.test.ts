@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * ZERO DATA LEADS TO THE NEXT CANONICAL ACTION (2026-09-19 completion queue).
@@ -15,7 +16,7 @@ import { describe, expect, it } from "vitest";
  */
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
-const LOCALES = ["en", "lt", "ru", "nl", "de"] as const;
+const LOCALES = activeLocales;
 const msgs = Object.fromEntries(
   LOCALES.map((l) => [l, JSON.parse(read(`messages/${l}.json`)) as Record<string, unknown>]),
 ) as Record<(typeof LOCALES)[number], Record<string, unknown>>;

@@ -130,11 +130,18 @@ async function openDashboard(
 /** The primary surface, committed: chat visible (a node inside a hidden
  *  streaming holder is NOT visible), no route skeleton, live composer. */
 async function expectCommitted(page: Page): Promise<void> {
-  await expect(page.getByTestId("conversation-chat")).toBeVisible({
+  // Strict over the VISIBLE nodes: in a never-painting tab the DOM also holds a
+  // second, hidden copy of the chat and its composer (measured 2026-10-23 —
+  // Next parks streamed content in a `<div hidden id="S:n">` holder), and a
+  // bare testid locator then fails strict mode before it can judge visibility.
+  // The claim is unchanged — exactly one chat is VISIBLE (committed), the route
+  // skeleton is gone; a node that only exists inside a hidden holder still
+  // does not count.
+  await expect(page.getByTestId("conversation-chat").filter({ visible: true })).toBeVisible({
     // Generous: first hit may compile the route in dev.
     timeout: 60_000,
   });
-  await expect(page.getByTestId("composer-input")).toBeVisible();
+  await expect(page.getByTestId("composer-input").filter({ visible: true })).toBeVisible();
   await expect(page.getByTestId("dashboard-section-loading")).toHaveCount(0);
 }
 

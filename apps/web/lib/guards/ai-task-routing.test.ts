@@ -155,8 +155,14 @@ describe("(d) adapter registry — anthropic is the only active adapter", () => 
 // The fetch-based adapters are the ONLY files that may reference the external
 // provider API hosts — business logic can never call a vendor directly.
 const PROVIDER_HOSTS =
-  /api\.openai\.com|api\.deepl\.com|api-free\.deepl\.com|generativelanguage\.googleapis\.com|api\.x\.ai/;
+  /api\.openai\.com|api\.deepl\.com|api-free\.deepl\.com|generativelanguage\.googleapis\.com|api\.x\.ai|api\.cloudflare\.com\/client\/v4\/accounts\/[^"'`]*\/ai\/|api\.mistral\.ai|api\.groq\.com/;
 const PROVIDER_HOST_ALLOWLIST_PREFIX = "lib/ai/runtime/providers/";
+/**
+ * The provider CATALOGUE (2026-10-25) names each vendor's API base URL as a
+ * documented FACT, next to its terms. It is pure data — the test below proves
+ * it cannot call anything — so naming a host there is a citation, not a call.
+ */
+const PROVIDER_HOST_DATA_FILES = ["lib/ai/runtime/provider-catalogue.ts"];
 
 describe("(f) provider API hosts appear ONLY under lib/ai/runtime/providers", () => {
   it("no file outside runtime/providers references a provider API host", () => {
@@ -166,6 +172,7 @@ describe("(f) provider API hosts appear ONLY under lib/ai/runtime/providers", ()
         if (/\.test\.tsx?$/.test(file)) continue; // guards may quote hosts
         const r = rel(file);
         if (r.startsWith(PROVIDER_HOST_ALLOWLIST_PREFIX)) continue;
+        if (PROVIDER_HOST_DATA_FILES.includes(r)) continue;
         if (PROVIDER_HOSTS.test(code(read(file)))) offenders.push(r);
       }
     }
@@ -173,6 +180,14 @@ describe("(f) provider API hosts appear ONLY under lib/ai/runtime/providers", ()
       offenders,
       `provider API host referenced outside runtime/providers:\n${offenders.join("\n")}`,
     ).toEqual([]);
+  });
+
+  it("the catalogue that may NAME hosts can never CALL one", () => {
+    for (const r of PROVIDER_HOST_DATA_FILES) {
+      const src = code(read(join(APP_ROOT, r)));
+      expect(/\bfetch\s*\(|XMLHttpRequest|node:https?|process\.env/.test(src), r).toBe(false);
+      expect(LLM_SDK_IMPORT.test(src), r).toBe(false);
+    }
   });
 
   it("the detector survives the comment stripper (regression)", () => {
@@ -197,6 +212,12 @@ describe("(f) provider API hosts appear ONLY under lib/ai/runtime/providers", ()
       PROVIDER_HOSTS.test("https://generativelanguage.googleapis.com/v1beta/models"),
     ).toBe(true);
     expect(PROVIDER_HOSTS.test("https://api.x.ai/v1/chat/completions")).toBe(true);
+    // Free API tiers (2026-10-25): pinned to runtime/providers like the rest.
+    expect(PROVIDER_HOSTS.test("https://api.mistral.ai/v1/chat/completions")).toBe(true);
+    expect(PROVIDER_HOSTS.test("https://api.groq.com/openai/v1/chat/completions")).toBe(true);
+    expect(
+      PROVIDER_HOSTS.test("https://api.cloudflare.com/client/v4/accounts/${a}/ai/v1/chat/completions"),
+    ).toBe(true);
     expect(PROVIDER_HOSTS.test("https://example.com/api")).toBe(false);
   });
 });

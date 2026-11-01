@@ -18,7 +18,7 @@
  * windows.
  */
 import { foldText } from "./normalize";
-import { COUNTRY_RULES, WORK_TYPE_RULES } from "./structure-need";
+import { COUNTRY_RULES, WORK_TYPE_RULES, hayHasNeedle } from "./structure-need";
 import { parseTimeWindow, type TimeWindow } from "./time-window";
 import type {
   ValueOfferMode,
@@ -146,7 +146,7 @@ export function applyCorrection(
 
   // 3. Location — COUNTRY granularity only (the model holds no city).
   for (const r of COUNTRY_RULES) {
-    if (r.needles.some((n) => foldedTail.includes(n))) {
+    if (r.needles.some((n) => hayHasNeedle(foldedTail, n))) {
       if (r.code !== prev.country) {
         changes.push({ field: "country", previous: prev.country, next: r.code });
         country = r.code;

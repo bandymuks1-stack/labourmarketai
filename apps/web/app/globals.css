@@ -236,6 +236,15 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* ONE LONG WORD MUST NEVER WIDEN A PHONE. Six locales put compound words
+     and unbroken tokens into narrow boxes ("Dagboekregistraties" in a third
+     of a 390px screen, an e-mail address, a pasted reference) and each one
+     overflowed its box until someone met it (UX review 2026-10-24).
+     `break-word` breaks a word ONLY when it would otherwise overflow, and it
+     does not change min-content sizing, so normal text and table layout are
+     untouched. Inherited, so it covers every surface; a box that must not
+     break (code, the identity-stage name) opts out explicitly. */
+  overflow-wrap: break-word;
 }
 
 * {

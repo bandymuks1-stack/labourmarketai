@@ -64,10 +64,15 @@ export async function loadProjectReadinessForChat(input: {
       return {
         workerProfileId: w.workerProfileId,
         name: w.name,
-        ready: w.ready && w.docsMissing === 0 && w.docsBlocked === 0,
+        // Readiness is competencies + recorded work (deriveWorkerOps). Documents
+        // never lower it (decision 0021 extension, 2026-10-24): rows to agree
+        // and rows a manager marked are listed below, beside it, not inside it.
+        ready: w.ready,
         missing: w.missing.filter((c): c is ReadinessMissingCode => (MISSING_CODES as readonly string[]).includes(c)),
         itemsMissing: w.readinessItems
-          .filter((i) => i.status === "needed" || i.status === "missing")
+          // only rows the manager EXPLICITLY marked missing; a suggested row
+          // ("needed" = to agree before the agreement) is not a gap
+          .filter((i) => i.status === "missing")
           .map((i) => ({ key: i.itemKey, label: i.label }))
           .slice(0, READINESS_CHAT_ITEM_LIMIT),
         itemsReceived: w.readinessItems

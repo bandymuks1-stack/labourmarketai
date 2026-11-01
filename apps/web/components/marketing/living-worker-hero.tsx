@@ -916,7 +916,11 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
 
   return (
     <section
-      className="relative isolate -mx-6 flex flex-col overflow-hidden bg-ink-900 sm:-mx-12 md:block"
+      /* -mt-14 pt-14: the landing wrapper's py-14 top padding left a 56px band of page
+         background between the header and the hero's own black (a visible seam on phone
+         and desktop). The hero now bleeds up to the header while its content keeps its place;
+         the desktop overlay centres on calc(50% + 1.75rem), the photograph's own midpoint. */
+      className="relative isolate -mx-6 -mt-14 flex flex-col overflow-hidden bg-ink-900 pt-14 sm:-mx-12 md:block"
       aria-roledescription="carousel"
       aria-label={capM.story.name}
       data-testid="living-worker-hero"
@@ -959,7 +963,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
           <div ref={poseLight} aria-hidden className="pointer-events-none absolute inset-0 opacity-0 mix-blend-screen" />
           {/* light falls off to the words: bottom and left, never across the face */}
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900 via-ink-900/10 via-35% to-transparent" />
-          <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 hidden w-[28%] bg-gradient-to-r from-ink-900 via-ink-900/60 to-transparent md:block" />
+          <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 hidden w-[46%] bg-gradient-to-r from-ink-900 via-ink-900/70 via-50% to-transparent md:block" />
           {/* holding the person: the world quietly steps back */}
           <div ref={vignette} aria-hidden className="pointer-events-none absolute inset-0 opacity-0" />
           {/* the scene settles and dims while the identity forms */}
@@ -1053,7 +1057,9 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
         {/* quiet controls: bottom right on a phone; top right on a wide screen,
             clear of the landing's own corner switcher */}
         <div className="absolute bottom-3 right-3 sm:bottom-5 sm:right-6 md:bottom-auto md:top-4">
-          <div className="flex shrink-0 items-center gap-1">
+          {/* the pill keeps the controls legible over a bright frame (the van and the
+              site photographs washed them out on production, 2026-10-18) */}
+          <div className="flex shrink-0 items-center gap-1 rounded-full border border-ink-500/60 bg-ink-900/70 px-1 backdrop-blur-md">
             <button type="button" onClick={() => go(-1)} className="min-h-11 min-w-11 rounded-full text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue" aria-label={data.controls.previous}>
               ‹
             </button>
@@ -1079,7 +1085,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
           a phone (owner 2026-10-10: below the 78svh photograph the first
           primary action sat at ~1,035 px on a 375x812 screen — out of the
           first view; the photograph and its motion are unchanged) */}
-      <div className="relative z-10 order-first px-6 pb-6 pt-2 sm:px-12 md:order-none md:pointer-events-none md:absolute md:left-0 md:top-1/2 md:w-[40%] md:-translate-y-1/2 md:p-0 md:pl-12 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
+      <div className="relative z-10 order-first px-6 pb-6 pt-2 sm:px-12 md:order-none md:pointer-events-none md:absolute md:left-0 md:top-[calc(50%+1.75rem)] md:w-[40%] md:-translate-y-1/2 md:p-0 md:pl-12 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
         {children}
       </div>
     </section>

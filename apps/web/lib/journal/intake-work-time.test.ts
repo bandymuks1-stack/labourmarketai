@@ -110,6 +110,11 @@ describe("deriveIntakeWorkTime — the stated time becomes time on the record", 
       quantity: "510",
       unit_slug: "minutes",
       quantity_source: "ai_extracted",
+      // the clock times reach the record too (audit 2026-10-16, J-4)
+      work_start: "08:00",
+      work_end: "17:00",
+      break_minutes: "30",
+      work_time_source: "ai_extracted",
     });
   });
 
@@ -138,6 +143,7 @@ describe("deriveIntakeWorkTime — the stated time becomes time on the record", 
       fragments: [],
       quantityMinutes: null,
       statedTotalMinutes: null,
+      span: null,
     });
     expect(intakeWorkTimeFields("Montavau langus objekte", TODAY)).toEqual({});
     expect(intakeWorkTimeFields("", TODAY)).toEqual({});
@@ -230,7 +236,15 @@ describe("intakeOutputFields — what the work produced rides the same intake (r
 
   it("a span owns the quantity slot: the day's minutes are written and the output is NOT written as time", () => {
     const fields = intakeWorkTimeFields("Dirbau nuo 8 iki 17, 30 min pertrauka, nuvažiavau 200 km", TODAY);
-    expect(fields).toEqual({ quantity: "510", unit_slug: "minutes", quantity_source: "ai_extracted" });
+    expect(fields).toEqual({
+      quantity: "510",
+      unit_slug: "minutes",
+      quantity_source: "ai_extracted",
+      work_start: "08:00",
+      work_end: "17:00",
+      break_minutes: "30",
+      work_time_source: "ai_extracted",
+    });
   });
 
   it("nothing stated → nothing; a time figure is never an output", () => {

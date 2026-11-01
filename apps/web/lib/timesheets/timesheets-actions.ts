@@ -244,7 +244,7 @@ export async function submitTimesheetAction(formData: FormData): Promise<void> {
           p_instance_id: instanceId,
           p_reason: "timesheet submit failed",
         })
-        .catch(() => undefined);
+        .then(() => undefined, () => undefined);
     }
     if (submitRes.error) finish(ctx, noticeForRpcError(submitRes.error));
     finish(ctx, timesheetNoticeForOutcome(String(submitOutcome ?? "error")));

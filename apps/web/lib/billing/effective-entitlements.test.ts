@@ -70,7 +70,10 @@ vi.mock("@/lib/auth/superadmin", () => ({
   isSuperadmin: vi.fn(async () => false),
   isSuperadminFor: vi.fn(async () => false),
 }));
-vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => state.config }));
+vi.mock("@/lib/billing/config", () => ({
+  getBillingConfig: () => state.config,
+  getBillingConfigFor: () => state.config,
+}));
 vi.mock("@/lib/billing/billing-subject", () => ({
   resolveBillingSubject: vi.fn(async () => state.subject),
 }));

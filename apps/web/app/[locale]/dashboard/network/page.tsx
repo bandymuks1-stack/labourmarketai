@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import { workspaceDisplayLabels } from "@/lib/company/organization-switch";
 import { redirect } from "next/navigation";
 
@@ -44,6 +45,11 @@ import { ManagementDecisionsSection } from "@/components/app/management-decision
 import { ApprovalsSection } from "./approvals-section";
 import { RequestsSection } from "./requests-section";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/network", "network.title");
+
 
 /**
  * "Mano tinklas" (core-network area B) — a SUB-SURFACE of the person /
@@ -316,13 +322,7 @@ export default async function NetworkPage({
     return (
       <div className="flex flex-col gap-6" data-testid="network-page">
         <header className="flex flex-col gap-1">
-          <Link
-            href={"/dashboard/network" as "/dashboard"}
-            className="inline-flex min-h-11 items-center gap-1 self-start font-mono text-meta uppercase tracking-label text-text-muted transition-colors hover:text-text-primary"
-            data-testid="network-admin-back"
-          >
-            ← {t("admin.back")}
-          </Link>
+          <PageBack href={"/dashboard/network" as "/dashboard"} data-testid="network-admin-back">{t("admin.back")}</PageBack>
         </header>
         {openArea === "approvals" && (
           <ApprovalsSection

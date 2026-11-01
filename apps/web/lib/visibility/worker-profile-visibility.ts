@@ -160,8 +160,17 @@ export function toProfileSafePreview(raw: WorkerRecordInput): WorkerProfileSafeP
  * randomness). Stable across calls so the same worker reads the same label.
  */
 export function anonymizedWorkerLabel(workerId: string): string {
-  const token = (workerId || "").replace(/[^a-zA-Z0-9]/g, "").slice(0, 6).toUpperCase();
+  const token = anonymizedWorkerToken(workerId);
   return token.length > 0 ? `Candidate ${token}` : "Candidate";
+}
+
+/**
+ * The anonymized TOKEN alone (no word). A screen a person reads wraps it in its
+ * own catalogue word — `people.anonymousName` / `privacyConsent.preview.anonymousValue`
+ * ("Kandidatas {token}", "Кандидат {token}", …) — never the English label above.
+ */
+export function anonymizedWorkerToken(workerId: string): string {
+  return (workerId || "").replace(/[^a-zA-Z0-9]/g, "").slice(0, 6).toUpperCase();
 }
 
 /** Shortlist-safe preview: profile-safe fields + anonymized label. */

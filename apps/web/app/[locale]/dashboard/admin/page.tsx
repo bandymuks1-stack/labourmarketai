@@ -18,6 +18,11 @@ import { SalesIntakePanel } from "@/components/app/sales-intake-panel";
 import type { AdminReviewPriorityStatus } from "@/lib/buyer/admin-review-priority";
 import type { ExtractionReadiness } from "@/lib/buyer/attachment-readiness";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin");
+
 
 /** Stable display order for the file-readiness summary. */
 const READINESS_KINDS: readonly ExtractionReadiness[] = [

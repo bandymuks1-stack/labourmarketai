@@ -3,6 +3,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { confirmedSkillWorkerIds } from "@/lib/evidence/skill-confirmation-standing";
+import { readCrossPartyStandingStates } from "@/lib/evidence/skill-confirmation-standing-read";
 
 /**
  * Market analysis v1 (S4 item 4) — admin-only read model. ONLY real counts of
@@ -79,15 +81,21 @@ export async function getMarketAnalysis(): Promise<MarketAnalysis> {
   const { data: wpRows } = await asAny(supabase)
     .from("worker_professions")
     .select("worker_id, professions(slug), workers(id, current_location_country)");
-  // Confirmed-skill workers (factual signal, never a score).
+  // Confirmed-skill workers (factual signal, never a score): at least one
+  // recorded confirmation that still STANDS
+  // (lib/evidence/skill-confirmation-standing.ts).
   const { data: confirmedRows } = await asAny(supabase)
     .from("worker_skills")
-    .select("worker_id")
+    .select("worker_id, skill_id, verified")
     .eq("verified", true);
-  const confirmedWorkers = new Set(
-    ((confirmedRows ?? []) as { worker_id: string | null }[])
-      .map((r) => r.worker_id)
-      .filter((v): v is string => !!v),
+  const recorded = (confirmedRows ?? []) as {
+    worker_id: string | null;
+    skill_id: string | null;
+    verified: boolean | null;
+  }[];
+  const confirmedWorkers = confirmedSkillWorkerIds(
+    recorded,
+    await readCrossPartyStandingStates(supabase, recorded.map((r) => r.worker_id)),
   );
 
   const supplyMap = new Map<

@@ -9,6 +9,7 @@ import {
   getCountryReadinessOrNull,
 } from "@/lib/country-readiness";
 import { SUPPORTED_COUNTRIES } from "@/lib/labour-market/country-evidence";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * B1 — SKL-8 (what a country requires) + GEO-3 (mobility) REACH A PERSON.
@@ -120,7 +121,7 @@ describe("nothing is claimed that the matrix cannot back", () => {
 });
 
 describe("the copy the matrix was built to consume now exists", () => {
-  const LOCALES = ["en", "lt", "ru", "nl", "de"] as const;
+  const LOCALES = activeLocales;
 
   /** Every explanationKey the matrix actually uses, across all countries. */
   const explanationKeys = [

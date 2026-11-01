@@ -4,8 +4,8 @@ import { authorizeCronRequest } from "@/lib/api/cron-auth";
 import { emitWeeklyDigestNotificationsForCron } from "@/lib/notifications/event-emitters";
 
 /**
- * WEEKLY DIGEST CRON (completion v1) — invoked by the Vercel cron entry in
- * apps/web/vercel.json (Mondays 07:00 UTC). Sweeps recently-active workers
+ * WEEKLY DIGEST CRON (completion v1) — invoked by the VPS cron
+ * (ops/vps/labourmarket.cron, Mondays 07:00 UTC). Sweeps recently-active workers
  * and materializes this ISO week's digest event for those the read-time
  * emitter has not reached; the deterministic per-week entity id + the
  * store's UNIQUE (recipient, dedupe_key) keep the digest exactly-once per

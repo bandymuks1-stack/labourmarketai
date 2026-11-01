@@ -45,6 +45,8 @@ export interface WorkerLanguagesLabels {
   levelNative: string;
   add: string;
   adding: string;
+  /** Shown once the server stored the new language. */
+  added: string;
   remove: string;
   empty: string;
   /** Calm not-enabled copy — same convention as the v1 prefs card. */
@@ -212,6 +214,18 @@ export function WorkerLanguagesSection({
               >
                 {addPending ? labels.adding : labels.add}
               </Button>
+              {/* The save re-renders the whole profile (a few seconds); this
+                  line says what is happening and that it landed (production
+                  audit 2026-10-22: nothing showed either). */}
+              <span
+                className="text-xs text-text-secondary"
+                role="status"
+                aria-live="polite"
+                data-testid="worker-languages-status"
+                data-state={addPending ? "saving" : addState?.ok ? "added" : "idle"}
+              >
+                {addPending ? labels.adding : addState?.ok ? labels.added : null}
+              </span>
               {addState && !addState.ok && (
                 <span
                   className="text-xs text-state-danger"

@@ -21,6 +21,8 @@ import { communicationLocales } from "@/lib/i18n/config";
 vi.mock("server-only", () => ({}));
 const runAiAgent = vi.fn();
 vi.mock("@/lib/ai/run-agent-server", () => ({ runAiAgent: (...a: unknown[]) => runAiAgent(...a) }));
+// The egress pre-check (audit 2026-10-16) is answered by the faked runtime here.
+vi.mock("@/lib/ai/egress-precheck-server", () => ({ aiTaskServableNow: async () => true }));
 
 const { resolveViewerTexts, __clearTranslationCache } = await import("./translation-read");
 

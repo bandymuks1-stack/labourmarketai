@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Guard: the Calendar states temporal reality with the work-world grammar —
@@ -50,7 +51,7 @@ describe("Guard: the Calendar states temporal reality (CALENDAR_REACHABLE + PERI
   });
 
   it("the calendar chip labels exist in every active locale that carries the planning namespace", () => {
-    for (const loc of ["en", "lt", "ru", "de", "nl"]) {
+    for (const loc of activeLocales) {
       const j = JSON.parse(read(`messages/${loc}.json`)) as {
         planning: { reality: Record<string, string>; derived: Record<string, string> };
       };

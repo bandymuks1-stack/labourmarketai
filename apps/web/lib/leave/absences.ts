@@ -1,7 +1,11 @@
 import "server-only";
 
+import { cache } from "react";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { getSessionProfile } from "@/lib/auth/session-profile";
+import { getWorkerCoreRow } from "@/lib/data/worker-core";
 import { createClient } from "@/lib/supabase/server";
 import {
   ABSENCE_STATUSES,
@@ -74,12 +78,7 @@ export async function getMyAbsences(): Promise<MyAbsencesData> {
   } = await supabase.auth.getUser();
   if (!user) return { applied: false };
 
-  const { data: worker } = await asAny(supabase)
-    .from("workers")
-    .select("id")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-  const workerId: string | null = worker?.id ?? null;
+  const workerId = await callerWorkerId();
   if (!workerId) return { applied: true, workerId: null, absences: [] };
 
   const res = await asAny(supabase)
@@ -101,35 +100,43 @@ export async function getMyAbsences(): Promise<MyAbsencesData> {
   return { applied: true, workerId, absences };
 }
 
-/** The caller's own worker row id, or null when they have none. */
-async function callerWorkerId(
-  supabase: SupabaseClient,
-  userId: string,
-): Promise<string | null> {
-  const { data } = await asAny(supabase)
-    .from("workers")
-    .select("id")
-    .eq("profile_id", userId)
-    .maybeSingle();
-  return data?.id ?? null;
+/** The caller's own worker row id, or null when they have none (an
+ *  unanswered read included — exactly as before). It is the `id` of THE
+ *  request-cached session `workers` row (`getWorkerCoreRow`, perf 2026-10-23):
+ *  the bell, the company home, the opening brief and the worker surfaces read
+ *  that row in the same render, so this no longer adds an id-only query. */
+async function callerWorkerId(): Promise<string | null> {
+  return (await getWorkerCoreRow())?.id ?? null;
 }
 
-/** Pending absence requests for workers the caller manages (RLS-scoped). */
+/** Pending absence requests for workers the caller manages (RLS-scoped).
+ *  ONE read per server render per client (perf 2026-10-23: the bell, the
+ *  company home and the opening brief each read the same list) — request
+ *  deduplication only; a decision is a server action and the next render
+ *  reads again. Callers treat the result as read-only. */
 export async function getManagerPendingAbsences(): Promise<ManagerAbsencesData> {
-  const supabase = await createClient();
+  return readManagerPendingAbsencesOnce(await createClient());
+}
+
+const readManagerPendingAbsencesOnce = cache(async function readManagerPendingAbsences(
+  supabase: SupabaseClient,
+): Promise<ManagerAbsencesData> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { applied: false };
 
-  const selfWorkerId = await callerWorkerId(supabase, user.id);
-
-  const res = await asAny(supabase)
-    .from("worker_absences")
-    .select("id, worker_id, absence_type, start_date, end_date, half_day, note, status, workers(display_name)")
-    .eq("status", "requested")
-    .order("start_date", { ascending: true })
-    .limit(200);
+  // The own worker id only filters the result (nobody reviews their own time
+  // off), so it is read alongside the list, not before it.
+  const [selfWorkerId, res] = await Promise.all([
+    callerWorkerId(),
+    asAny(supabase)
+      .from("worker_absences")
+      .select("id, worker_id, absence_type, start_date, end_date, half_day, note, status, workers(display_name)")
+      .eq("status", "requested")
+      .order("start_date", { ascending: true })
+      .limit(200),
+  ]);
 
   if (res.error) {
     if (res.error.code === RELATION_NOT_FOUND || res.error.code === UNDEFINED_COLUMN) {
@@ -143,7 +150,7 @@ export async function getManagerPendingAbsences(): Promise<ManagerAbsencesData> 
   // The `self` branch of the SELECT policy hands back the caller's OWN
   // request; nobody reviews their own time off. See pendingAbsenceReviews.
   return { applied: true, pending: pendingAbsenceReviews(rows, selfWorkerId) };
-}
+});
 
 /**
  * How many absence requests are waiting on THIS person — the notification
@@ -165,11 +172,11 @@ export async function getPendingAbsenceReviewCount(): Promise<number> {
   } = await supabase.auth.getUser();
   if (!user) return 0;
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The role comes from the request-cached session profile row (perf
+  // 2026-10-23) — the same `profiles.active_role` this used to re-read. A
+  // failed profile read is `profile: null` there, which reviews nothing:
+  // exactly what the old `.single()` read answered on an error.
+  const { profile } = await getSessionProfile();
   if (!canReviewAbsences(profile?.active_role)) return 0;
 
   const data = await getManagerPendingAbsences();

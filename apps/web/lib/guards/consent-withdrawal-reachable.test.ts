@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * A PERMISSION THAT CANNOT BE TAKEN BACK IS NOT A PERMISSION.
@@ -48,7 +49,7 @@ describe("contact-detail disclosure can be withdrawn by the worker", () => {
   });
 
   it("the five active locales carry the withdrawal wording", () => {
-    for (const locale of ["en", "lt", "ru", "nl", "de"]) {
+    for (const locale of activeLocales) {
       const messages = JSON.parse(read(`messages/${locale}.json`)) as {
         privacyConsent?: { contactRequests?: Record<string, string> };
       };
@@ -95,7 +96,7 @@ describe("a confirmed roster link can be withdrawn by the subject", () => {
   });
 
   it("the five active locales carry the withdrawal wording", () => {
-    for (const locale of ["en", "lt", "ru", "nl", "de"]) {
+    for (const locale of activeLocales) {
       const messages = JSON.parse(read(`messages/${locale}.json`)) as {
         evidenceImport?: { mine?: Record<string, string> };
       };

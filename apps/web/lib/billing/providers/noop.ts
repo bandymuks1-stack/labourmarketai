@@ -19,6 +19,9 @@ export function noopProvider(): BillingProvider {
     async createCheckoutSession(): Promise<CheckoutSessionResult> {
       return { ok: false, reason: "payments_disabled" };
     },
+    async createOneTimeCheckoutSession(): Promise<CheckoutSessionResult> {
+      return { ok: false, reason: "payments_disabled" };
+    },
     async createCustomer(): Promise<CreateCustomerResult> {
       return { ok: false, reason: "payments_disabled" };
     },

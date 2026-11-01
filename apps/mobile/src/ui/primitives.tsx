@@ -97,7 +97,16 @@ export function Field({
 }: TextInputProps & { label: string; hint?: string }) {
   return (
     <View style={styles.field}>
-      <Text style={styles.fieldLabel}>{label}</Text>
+      {/* `<testID>-label`: a plain, non-input spot right above the box. With a
+          ScrollView's keyboardShouldPersistTaps="handled", a tap here puts the
+          keyboard away without a drag (the iOS journeys use it; a person can
+          do the same). */}
+      <Text
+        style={styles.fieldLabel}
+        testID={typeof props.testID === "string" ? `${props.testID}-label` : undefined}
+      >
+        {label}
+      </Text>
       <TextInput
         // The label is the accessible name; a hint that exists is the
         // accessible HINT, so a screen-reader user hears the format rule the

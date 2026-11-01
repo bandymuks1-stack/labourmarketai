@@ -51,6 +51,9 @@ export function DominantLead({
         });
     }
   })();
+  // Several sentences open with the scope ("visas laikas: 25 įrašai, …");
+  // a sentence still starts with a capital letter.
+  const shown = sentence.charAt(0).toLocaleUpperCase(locale) + sentence.slice(1);
   return (
     <div
       className="flex flex-col gap-1.5"
@@ -66,7 +69,7 @@ export function DominantLead({
         }
         data-testid="wi-dominant-sentence"
       >
-        {sentence}
+        {shown}
       </p>
       {period && answer.kind !== "unknown" && answer.kind !== "no_entries" ? (
         <p

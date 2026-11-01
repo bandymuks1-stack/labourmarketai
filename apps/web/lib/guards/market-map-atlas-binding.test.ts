@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { MAP_LAYER_KINDS } from "@/lib/work-market/atlas";
 import { canDrawMarker } from "@/lib/work-market/map-layers";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Live Market Map atlas binding guard (full-completion train PR 5).
@@ -43,7 +44,7 @@ describe("map stays signal-only — no fake markers", () => {
 });
 
 describe("atlas layer copy exists in every active locale", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: marketMap.atlas has title + signalOnlyNote + every kind`, () => {
       const a = JSON.parse(read(`messages/${loc}.json`)).marketMap.atlas;
       expect(a?.title && a?.intro && a?.signalOnlyNote).toBeTruthy();

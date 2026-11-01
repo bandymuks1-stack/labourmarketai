@@ -332,7 +332,7 @@ export const WORKSPACE_READ_CAPABILITIES: readonly CapabilityDescriptor[] = [
   read(
     "work.find",
     "Find work for me",
-    "Work opportunities matching the caller's profile, through the ONE ranking path of the opportunity board. Optional filters narrow it (profession = work-type slug, country = ISO-2, opportunityType e.g. internship).",
+    "Work opportunities matching the caller's profile, through the ONE ranking path of the opportunity board. Returns the readback sentence AND the same rows the web panel renders: per platform demand its requestId (usable with interest.express_draft), the engine's fit status, the skill basis (matched/needed/confirmed counts, matched and missing skill slugs) and whether the need's skills are only recognized from its text; external public ads carry their source and original link. 'empty' (the read worked, nothing fits) is different from an error. Optional filters narrow it (profession = work-type slug, country = ISO-2, opportunityType e.g. internship).",
     z
       .object({
         profession: z.string().max(64).optional(),
@@ -345,23 +345,20 @@ export const WORKSPACE_READ_CAPABILITIES: readonly CapabilityDescriptor[] = [
       })
       .strict(),
     async (f) => {
-      const { findWorkForChat } = await import("@/lib/conversation/find-work");
       const any = Object.values(f).some((v) => v !== undefined);
-      return fromLoader(
-        await findWorkForChat(
-          any
-            ? {
-                profession: f.profession ?? null,
-                country: f.country?.toUpperCase() ?? null,
-                start: f.start ?? null,
-                accommodation: f.accommodation ?? null,
-                transport: f.transport ?? null,
-                tool: f.tool ?? null,
-                opportunityType: f.opportunityType ?? null,
-              }
-            : undefined,
-        ),
-      );
+      const filters = any
+        ? {
+            profession: f.profession ?? null,
+            country: f.country?.toUpperCase() ?? null,
+            start: f.start ?? null,
+            accommodation: f.accommodation ?? null,
+            transport: f.transport ?? null,
+            tool: f.tool ?? null,
+            opportunityType: f.opportunityType ?? null,
+          }
+        : undefined;
+      const { findWorkForCapability } = await import("@/lib/conversation/find-work-capability");
+      return findWorkForCapability(filters);
     },
   ),
   read(

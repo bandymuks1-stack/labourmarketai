@@ -1,0 +1,72 @@
+name: Post-merge orphan commits
+
+# A commit pushed to a PR branch AFTER GitHub auto-merge already merged the PR
+# never reaches `main` — the PR is closed and nothing else picks it up.
+# It happened twice: #2500/#2501 (2026-10-19, repaired by #2502) and
+# #2556/#2557 (2026-10-20, repaired by #2557/#2559): review-fix commits for
+# findings that arrived after the green auto-merge sat on dead branches.
+#
+# On every push to a non-main branch: if that branch has a MERGED pull request
+# and the pushed head is ahead of the head GitHub merged, this run FAILS and
+# comments on the merged PR naming the orphaned commits, so they are carried
+# into a new PR instead of silently lost. Read-only on code; the only write is
+# that one PR comment. No secrets beyond the workflow token.
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: post-merge-orphans-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  orphans:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # A branch DELETION also fires `push`, with github.sha set to the default
+    # branch tip — not a pushed head. Nothing was pushed; nothing to check.
+    if: ${{ !github.event.deleted }}
+    steps:
+      - name: Commits pushed after the PR merged
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          # The most recently merged PR whose head was this branch (if any).
+          # A failed lookup FAILS the run (set -e): an API error must never
+          # read as "no merged PR" and let the one orphaning push pass.
+          found=$(gh pr list --repo "$REPO" --head "$BRANCH" --state merged \
+            --json number,headRefOid,mergedAt \
+            --jq 'sort_by(.mergedAt) | last | if . == null then "" else "\(.number) \(.headRefOid)" end')
+          read -r pr merged_head <<< "$found" || true
+          if [ -z "${pr:-}" ]; then
+            echo "No merged PR for this branch — nothing to check."
+            exit 0
+          fi
+          if [ "$HEAD_SHA" = "$merged_head" ]; then
+            echo "Head is exactly what #$pr merged."
+            exit 0
+          fi
+          status=$(gh api "repos/$REPO/compare/$merged_head...$HEAD_SHA" --jq .status)
+          if [ "$status" = "behind" ] || [ "$status" = "identical" ]; then
+            echo "Head is not ahead of what #$pr merged ($status)."
+            exit 0
+          fi
+          commits=$(gh api "repos/$REPO/compare/$merged_head...$HEAD_SHA" \
+            --jq '.commits[] | "- `\(.sha[0:9])` \(.commit.message | split("\n")[0])"')
+          body=$(printf '%s\n\n%s\n\n%s\n' \
+            "**Commits pushed after this PR merged — they are NOT in \`main\`.**" \
+            "$commits" \
+            "Carry them into a new PR from \`main\` (cherry-pick); this branch is closed. — post-merge-orphans")
+          gh pr comment "$pr" --repo "$REPO" --body "$body"
+          echo "::error::$(echo "$commits" | wc -l) commit(s) on $BRANCH were pushed after #$pr merged and are not in main."
+          exit 1

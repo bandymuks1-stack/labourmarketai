@@ -113,7 +113,12 @@ describe("server-side sourcing (tests 7, 8, 21, 26)", () => {
         new RegExp(`select\\([^)]*${banned}`),
       );
     }
-    expect(preview).toMatch(/display_name, experience_years, preferred_countries, availability_status, salary_min_eur, salary_max_eur/);
+    // 2026-10-18: the preview lists exactly what the discovery projection returns — and companies
+    // see the anonymous label, never the name (list_discoverable_worker_profiles_v1).
+    expect(preview).toMatch(/"id, experience_years, current_location_country, preferred_countries, availability_status, available_from, salary_min_eur, salary_max_eur, preferred_contract_type, pay_basis_preference, night_shifts_ok, weekend_shifts_ok, overtime_ok, driving_licence_categories, own_vehicle, own_tools"/);
+    expect(preview).not.toMatch(/display_name|headline|availability_note|\bbio\b/);
+    // The token only — the view wraps it in the reader's catalogue word, never English.
+    expect(preview).toMatch(/key: "anonymousLabel", value: anonymizedWorkerToken\(/);
   });
 
   it("no fixture PII or secrets in the new modules (test 26)", () => {

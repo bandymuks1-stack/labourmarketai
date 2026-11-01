@@ -601,6 +601,7 @@ second document reads as the canonical architecture.
 | `docs/audits/**` | Point-in-time findings | Evidence |
 | `docs/product/*-contract-v1.md` | Feature-level contracts under §1 | Detail |
 | `docs/integrations/AI_AGENT_PARTICIPANTS_V1.md` | Coverage and phased plan for §1.13 (AI agents as participants); adds no graph node — agents are a subject KIND on the existing ACTOR model | AGENT-1..4, data minimization §4a, phases P0–P7 |
+| `docs/plans/not-implemented-architecture-2026-10-23.md` | Implementation plans for capabilities not built yet (goods purchases + delivery, the cross-border-deals memo, LMC / paid tiers, agents runtime, AI agent providers, voice door, RPL structure, store release); adds no graph node and settles no §10 decision | The exact owner question each plan waits on |
 | `docs/design/historical-timesheet-import-v3.md` + `docs/design/historical-timesheet-fixture-v3.md` | A PROPOSED feature design under §1.6 (historical timesheet import, owner rules 2026-09-23); adds no graph node; its migrations are owner-gated. Its v2 commercial expansion (invoices, payments, payroll) is SUPERSEDED by owner decision A | Historical import slices PR-2 to PR-7 |
 
 ### SUPERSEDED AS ARCHITECTURE — historical evidence only
@@ -623,6 +624,10 @@ second architecture.
 ## 10. UNRESOLVED OWNER DECISIONS — no agent may settle these
 
 Six carried forward, plus four surfaced by this reconciliation.
+
+*Pointer (SUPPORTING, §9):* the implementation plans that wait on these
+decisions, each with its exact owner question, are in
+[`docs/plans/not-implemented-architecture-2026-10-23.md`](plans/not-implemented-architecture-2026-10-23.md).
 
 | Id | Decision |
 |---|---|

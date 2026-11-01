@@ -4,7 +4,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { runAiAgent } from "@/lib/ai/run-agent-server";
-import type { AiLocale } from "@/lib/ai/runtime/types";
+import { aiLocaleFor, type AiLocale } from "@/lib/ai/runtime/types";
 import {
   mapWorkJournalSuggestions,
   type JournalAiSuggestions,
@@ -43,8 +43,6 @@ export type JournalAiSuggestionsResult =
   | ({ status: "ok" } & JournalAiSuggestions)
   | { status: "off" };
 
-const SUPPORTED: ReadonlySet<string> = new Set(["en", "lt", "ru"]);
-
 export async function aiJournalEntrySuggestions(
   text: string,
   locale: string,
@@ -69,7 +67,7 @@ export async function aiJournalEntrySuggestions(
   }).limited;
   if (limited) return { status: "off" };
 
-  const aiLocale: AiLocale = SUPPORTED.has(locale) ? (locale as AiLocale) : "en";
+  const aiLocale: AiLocale = aiLocaleFor(locale);
   try {
     const outcome = await runAiAgent(
       "work_journal",

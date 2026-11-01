@@ -15,6 +15,12 @@ import {
   toIsoDay,
   type PlanningItem,
 } from "@/lib/planning/planning-model";
+import {
+  countShiftDays,
+  expandShiftRuns,
+  shiftPatternFromForm,
+  type ShiftPattern,
+} from "@/lib/planning/shift-pattern";
 
 export const WORK_PLAN_STATUSES = ["planned", "cancelled"] as const;
 export type WorkPlanStatus = (typeof WORK_PLAN_STATUSES)[number];
@@ -32,6 +38,12 @@ export const WORK_PLAN_OUTCOMES = [
   "planned_unknown",
   "cancelled",
   "invalid",
+  // CAL-8: the repeat fields were incomplete or out of range.
+  "recurrence_invalid",
+  // CAL-8: the pattern has no working day inside the chosen dates.
+  "recurrence_empty",
+  // CAL-8: shift patterns are not provisioned here yet (migration pending).
+  "recurrence_unavailable",
   "not_allowed",
   "worker_not_in_scope",
   "project_not_in_organization",
@@ -67,6 +79,9 @@ export type WorkPlanEntry = {
   readonly note: string | null;
   readonly status: WorkPlanStatus;
   readonly createdAt: string;
+  /** CAL-8: the shift pattern inside the window, or null/absent for a
+   *  one-off window that holds every day of it (the original behaviour). */
+  readonly recurrence?: ShiftPattern | null;
 };
 
 const DAY_RX = /^\d{4}-\d{2}-\d{2}$/;
@@ -85,6 +100,8 @@ export type WorkPlanInput = {
   readonly startTime: string | null;
   readonly endTime: string | null;
   readonly note: string | null;
+  /** CAL-8: null = a one-off window (written through the unchanged v1 RPC). */
+  readonly recurrence: ShiftPattern | null;
 };
 
 export type WorkPlanValidation =
@@ -102,7 +119,9 @@ export type WorkPlanValidation =
         | "time_order"
         | "note_too_long"
         | "project"
-        | "work_object";
+        | "work_object"
+        | "recurrence"
+        | "recurrence_empty";
     };
 
 function str(v: unknown): string {
@@ -135,6 +154,12 @@ export function validateWorkPlanInput(raw: {
   startTime?: unknown;
   endTime?: unknown;
   note?: unknown;
+  /** CAL-8 repeat fields — all optional; absent = a one-off window. */
+  repeat?: unknown;
+  weekdays?: readonly unknown[];
+  cycleOn?: unknown;
+  cycleOff?: unknown;
+  cycleOffset?: unknown;
 }): WorkPlanValidation {
   const organizationId = str(raw.organizationId);
   if (!UUID_RX.test(organizationId)) return { ok: false, code: "organization" };
@@ -160,6 +185,19 @@ export function validateWorkPlanInput(raw: {
   if (projectId === undefined) return { ok: false, code: "project" };
   const workObjectId = optionalId(raw.workObjectId);
   if (workObjectId === undefined) return { ok: false, code: "work_object" };
+  const repeat = shiftPatternFromForm({
+    repeat: raw.repeat,
+    weekdays: raw.weekdays,
+    cycleOn: raw.cycleOn,
+    cycleOff: raw.cycleOff,
+    cycleOffset: raw.cycleOffset,
+  });
+  if (!repeat.ok) return { ok: false, code: "recurrence" };
+  // A pattern whose window holds no working day plans nothing — say so
+  // before the round trip (the RPC refuses it too).
+  if (repeat.pattern && countShiftDays(repeat.pattern, startDate, endDate) === 0) {
+    return { ok: false, code: "recurrence_empty" };
+  }
   return {
     ok: true,
     value: {
@@ -172,6 +210,7 @@ export function validateWorkPlanInput(raw: {
       startTime,
       endTime,
       note,
+      recurrence: repeat.pattern,
     },
   };
 }
@@ -187,8 +226,43 @@ export function projectWorkPlanItem(
   const start = toIsoDay(entry.startDate);
   if (!start) return null;
   const end = toIsoDay(entry.endDate) ?? start;
+  return projectPlanBand(entry, roleContext, start, end, `plan:${entry.id}`);
+}
+
+/**
+ * CAL-8: project a stored entry as the bands it actually holds. A one-off
+ * window is one band (exactly `projectWorkPlanItem`); a shift pattern is one
+ * band per run of consecutive shift days, computed here from the rule and
+ * never stored. `range` clips to the calendar range being drawn so a
+ * year-long rota does not project a year of bands into a week view.
+ */
+export function projectWorkPlanItems(
+  entry: WorkPlanEntry,
+  roleContext: PlanningItem["roleContext"],
+  range?: { readonly startDate: string; readonly endDate: string },
+): PlanningItem[] {
+  if (entry.status !== "planned") return [];
+  const start = toIsoDay(entry.startDate);
+  if (!start) return [];
+  const end = toIsoDay(entry.endDate) ?? start;
+  if (!entry.recurrence) {
+    const item = projectWorkPlanItem(entry, roleContext);
+    return item ? [item] : [];
+  }
+  return expandShiftRuns(entry.recurrence, start, end, range).map((run) =>
+    projectPlanBand(entry, roleContext, run.startDate, run.endDate, `plan:${entry.id}:${run.startDate}`),
+  );
+}
+
+function projectPlanBand(
+  entry: WorkPlanEntry,
+  roleContext: PlanningItem["roleContext"],
+  start: string,
+  end: string,
+  id: string,
+): PlanningItem {
   return {
-    id: `plan:${entry.id}`,
+    id,
     sourceType: "plan",
     sourceId: entry.id,
     // The worker's own calendar never names the worker back to them (walk

@@ -23,6 +23,7 @@ import { createClient } from "@/lib/supabase/server";
  * faked.
  */
 
+import { workerDisplayNamesByProfile } from "@/lib/operations/member-display-names";
 import {
   LIFECYCLE_READ_LIMIT,
   deriveLifecycleStage,
@@ -116,29 +117,17 @@ export async function getLifecycleOverview(
   } = await supabase.auth.getUser();
   if (!user) return { status: "not-authed" };
 
-  // One probe read decides applied-vs-not (established feature-detect shape).
-  const probe = await asAny(supabase)
-    .from("engagement_contexts")
-    .select("id, lifecycle_stage")
-    .eq("organization_id", orgId)
-    .limit(1);
-  if (probe.error && isLifecycleMigrationMissingCode(errCode(probe.error))) {
-    return { status: "needs-migration" };
-  }
-
-  // Registered owner (last-owner protection mirror in the UI — the RPC is
-  // the enforcing truth). RLS-scoped read; null when not visible.
-  const orgRes = await asAny(supabase)
-    .from("organizations")
-    .select("owner_profile_id")
-    .eq("id", orgId)
-    .maybeSingle();
-  const ownerProfileId: string | null =
-    (orgRes.data?.owner_profile_id as string | null) ?? null;
-
+  // ONE STAGE (perf 2026-10-23). Applied-vs-not is decided by the engagement
+  // read itself: it selects `lifecycle_stage` from the same table, for the
+  // same organization, that the separate one-row probe used to read first —
+  // an unapplied migration answers it with the same code, and the loop below
+  // returns "needs-migration" exactly as the probe did. The registered owner
+  // (last-owner protection mirror in the UI — the RPC is the enforcing truth;
+  // RLS-scoped, null when not visible) rides the same stage.
   let loadError = false;
 
-  const [ecRes, tplRes, onbRes, offRes] = await Promise.all([
+  const [orgRes, ecRes, tplRes, onbRes, offRes] = await Promise.all([
+    asAny(supabase).from("organizations").select("owner_profile_id").eq("id", orgId).maybeSingle(),
     asAny(supabase)
       .from("engagement_contexts")
       .select(
@@ -183,6 +172,9 @@ export async function getLifecycleOverview(
           .limit(25)
       : { data: [], error: null };
 
+  const ownerProfileId: string | null =
+    (orgRes.data?.owner_profile_id as string | null) ?? null;
+
   for (const res of [ecRes, tplRes, onbRes, offRes, evRes]) {
     if (res.error) {
       if (isLifecycleMigrationMissingCode(errCode(res.error))) {
@@ -207,13 +199,26 @@ export async function getLifecycleOverview(
     offboardingByEc.set(String(r.engagement_context_id), String(r.id));
   }
 
-  const members: LifecycleMemberRow[] = ((ecRes.data ?? []) as RawRow[]).map(
+  // An owner/manager cannot read another person's `profiles` row, so the
+  // embed is empty for everyone but the caller and the employee read "—"
+  // (local UX review 2026-10-24, row 3.23). Same fallback as the members
+  // panel on this page: the worker row's own display name.
+  const ecRows = (ecRes.data ?? []) as RawRow[];
+  const displayByProfile = await workerDisplayNamesByProfile(
+    supabase,
+    ecRows
+      .filter((r) => profName(r.profiles) === "—" && r.profile_id)
+      .map((r) => String(r.profile_id)),
+  );
+
+  const members: LifecycleMemberRow[] = ecRows.map(
     (r) => {
       const endedReason = String(r.ended_reason ?? "");
+      const ownName = profName(r.profiles);
       return {
         engagementId: String(r.id),
         profileId: String(r.profile_id),
-        name: profName(r.profiles),
+        name: ownName === "—" ? (displayByProfile.get(String(r.profile_id)) ?? "—") : ownName,
         relationshipSlug: String(r.relationship_slug ?? "other"),
         engagementStatus: String(r.status ?? "active"),
         stage: deriveLifecycleStage(

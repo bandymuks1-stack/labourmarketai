@@ -1,10 +1,12 @@
 # Universal LLM integration — coverage map V1 (2026-10-13)
 
-> Status: **BUILT, TEST_PROVEN, NOT YET OWNER-ACCEPTED.** The integration is
-> ready for the owner's real-data acceptance through ChatGPT once the RED PR
-> (auth-core: bearer caller scope) is approved, merged and deployed. Nothing in
-> this document claims a human-proven or production-proven result for the new
-> tools. Proof levels follow the §20 vocabulary of `CHATGPT_MCP_CLIENT_V1.md`.
+> Status: **BUILT, TEST_PROVEN, NOT YET OWNER-ACCEPTED.** The bearer-caller-scope
+> RED PR (#2336) is on `main` (`d37e956a5`, 2026-10-13); the integration now
+> waits for a reachable production origin and the owner's real-client walk
+> (ChatGPT refresh to the current toolset; the first Claude connection) — see
+> `EXTERNAL_LLM_CLIENTS_PROGRAMME_2026-10-17.md` §H. Nothing in this document
+> claims a human-proven or production-proven result for the new tools. Proof
+> levels follow the §20 vocabulary of `CHATGPT_MCP_CLIENT_V1.md`.
 
 ## 1. One architecture — nothing new beside it
 

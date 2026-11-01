@@ -141,14 +141,17 @@ export const CAPABILITY_LABEL_I18N: Readonly<Record<string, LocalizedLabel>> = {
 
 /**
  * Resolve a canonical LT capability/activity label to its display label for the
- * given locale. LT (or any unknown locale) returns the LT label unchanged; EN/RU
- * return the translation when present, else the LT label (documented fallback).
+ * given locale. LT returns the LT label unchanged; RU returns its translation;
+ * EVERY OTHER locale (EN, and the active NL / DE / PL that have no curated
+ * capability label yet) reads the EN translation — a German reader must not be
+ * served Lithuanian. Without any translation the LT label stands (documented
+ * fallback, never a raw slug).
  */
 export function localizeCapabilityLabel(
   ltLabel: string,
   locale: string,
 ): string {
-  if (locale === "en") return CAPABILITY_LABEL_I18N[ltLabel]?.en ?? ltLabel;
+  if (locale === "lt") return ltLabel;
   if (locale === "ru") return CAPABILITY_LABEL_I18N[ltLabel]?.ru ?? ltLabel;
-  return ltLabel;
+  return CAPABILITY_LABEL_I18N[ltLabel]?.en ?? ltLabel;
 }

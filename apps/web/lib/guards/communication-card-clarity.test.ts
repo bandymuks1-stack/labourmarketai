@@ -5,6 +5,7 @@ import {
   describeConversationCard,
   normalizeKind,
 } from "@/lib/communication/conversation-display";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Communication clarity guard (PR A).
@@ -76,7 +77,7 @@ describe("Guard: the communication page renders all three from the model", () =>
 });
 
 describe("Guard: honest-unknown + support copy exists in all active locales", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: communication.counterparty.* and scope.* are present and non-empty`, () => {
       const j = JSON.parse(read(`messages/${loc}.json`)) as Record<string, unknown>;
       const comm = j.communication as Record<string, Record<string, string>>;

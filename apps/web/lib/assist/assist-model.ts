@@ -50,7 +50,8 @@ import type { EvidenceReport } from "@/lib/reports/evidence-report";
 export type AttentionSourceKey =
   | "notificationSpine"
   | "workerDocuments"
-  | "financeRecords";
+  | "financeRecords"
+  | "journalReviewQueue";
 
 export interface AttentionItem {
   /** Stable row id (testids, React keys). */
@@ -77,8 +78,27 @@ export interface FinanceAttentionInput {
   readonly overdueCount: number;
 }
 
+/** Work entries waiting on the caller's decision — the SAME gated reads the
+ *  projects pulse and the opening brief show (`countReviewablePendingEntries`,
+ *  `countCounterpartyToDecide`). `null` on either = that queue could not be
+ *  read: UNKNOWN IS NOT ZERO (SEP-7), so the page never answers "nothing
+ *  waits" over a failed read. Local UX review 2026-10-24 (row 10.13): the
+ *  assist page said nothing needed attention while 17–31 entries waited for
+ *  the owner's approval, because this queue was never part of the answer. */
+export interface JournalReviewAttentionInput {
+  readonly pending: number | null;
+  readonly clientToDecide: number | null;
+}
+
+/** The quick confirm queue — the projects pulse's own CTA target. */
+export const JOURNAL_REVIEW_HREF = "/dashboard/inbox/quick";
+/** Entries submitted to the caller as a client (decision 0018). */
+export const JOURNAL_CLIENT_DECIDE_HREF = "/dashboard/inbox/counterparty";
+
 export interface AttentionInputs {
   readonly counts: SpineCounts;
+  /** Absent / null = no journal review queue read for this caller. */
+  readonly journalReviews?: JournalReviewAttentionInput | null;
   /** null = no worker document inventory readable for this caller. */
   readonly documents: DocumentAttention | null;
   /** null = finance records not readable for this caller. */
@@ -99,6 +119,32 @@ export function buildAttentionItems(
   inputs: AttentionInputs,
 ): readonly AttentionItem[] {
   const items: AttentionItem[] = [];
+
+  // People's recorded work waiting on the caller's decision comes first: it is
+  // the one queue where someone else's evidence is blocked on this person.
+  const reviews = inputs.journalReviews;
+  if (reviews) {
+    if (reviews.pending !== null && reviews.pending > 0) {
+      items.push({
+        id: "journal-reviews",
+        labelKey: "assist.attention.journalReviews",
+        href: JOURNAL_REVIEW_HREF,
+        count: reviews.pending,
+        sourceKey: "journalReviewQueue",
+        moduleLabelKey: null,
+      });
+    }
+    if (reviews.clientToDecide !== null && reviews.clientToDecide > 0) {
+      items.push({
+        id: "journal-client-decide",
+        labelKey: "assist.attention.journalClientDecide",
+        href: JOURNAL_CLIENT_DECIDE_HREF,
+        count: reviews.clientToDecide,
+        sourceKey: "journalReviewQueue",
+        moduleLabelKey: null,
+      });
+    }
+  }
 
   for (const s of SPINE_SIGNALS) {
     const count = s.count(inputs.counts);
@@ -159,6 +205,15 @@ export function buildAttentionItems(
   }
 
   return items;
+}
+
+/** True when a queue the attention answer depends on could not be read — the
+ *  page must then not say "nothing waits" (UNKNOWN IS NOT ZERO). */
+export function attentionPartlyUnreadable(
+  inputs: Pick<AttentionInputs, "journalReviews">,
+): boolean {
+  const r = inputs.journalReviews;
+  return !!r && (r.pending === null || r.clientToDecide === null);
 }
 
 /* ------------------------------------------------------------------ */

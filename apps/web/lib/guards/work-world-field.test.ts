@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Guard: the Project Field reads with the work-world grammar — people ×
@@ -34,7 +35,7 @@ describe("Guard: the Field states capacity with the work-world grammar (FIELD_RE
   });
 
   it("the capacity labels exist as ICU plurals in every active locale", () => {
-    for (const loc of ["en", "lt", "ru", "de", "nl"]) {
+    for (const loc of activeLocales) {
       const j = JSON.parse(read(`messages/${loc}.json`)) as { projectField: { capacity: Record<string, string> } };
       for (const k of ["people", "open"]) {
         expect(j.projectField.capacity[k], `${loc} capacity.${k}`).toMatch(/\{n, plural,/);

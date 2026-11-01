@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Guard: journal entry card + edit flow are immediately understandable
@@ -120,7 +121,7 @@ describe("Guard: capability signals are localized for display (no LT leak)", () 
 });
 
 describe("Guard: new card copy is neutral (no certification wording)", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: textLabel / understoodLabel / signalsHeading present + neutral`, () => {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
         entry: Record<string, string>;

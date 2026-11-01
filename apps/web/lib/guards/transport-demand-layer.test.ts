@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * TRANSPORT DEMAND LAYER guards (product-tree branch 15, train §8.5).
@@ -191,7 +192,7 @@ describe("worker board — honest degradation + enum-only display", () => {
 });
 
 describe("i18n — transport keys present and non-empty in en/lt/ru", () => {
-  for (const locale of ["en", "lt", "ru"]) {
+  for (const locale of activeLocales) {
     it(`${locale}.json carries the board + wizard transport catalogue`, () => {
       const messages = JSON.parse(readWeb(`messages/${locale}.json`));
       // Worker board.

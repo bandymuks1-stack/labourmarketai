@@ -52,7 +52,10 @@ test.describe("pilot — interest reaches the employer", () => {
     page,
   }) => {
     await loginAs(page, WORKER);
-    await page.goto("/lt/dashboard/opportunities", {
+    // The pristine page is "Your opportunities" — three explained personal
+    // picks (#2225). The full worker board, where every demand card carries
+    // its interest control, is the page's own ?view=all door.
+    await page.goto("/lt/dashboard/opportunities?view=all", {
       waitUntil: "domcontentloaded",
     });
 

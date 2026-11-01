@@ -12,6 +12,12 @@ import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { HistoryQualitySection } from "@/components/app/organization/history-quality-section";
+import { HistoryDuplicateReview } from "@/components/app/organization/history-duplicate-review";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/history");
+
 
 /**
  * ISTORIJA — the historical import door (owner IA correction 2026-09-16,
@@ -51,6 +57,7 @@ export default async function CompanyHistoryPage({
   const org = typeof sp.org === "string" && sp.org.trim() !== "" ? sp.org.trim() : null;
   const t = await getTranslations("organizationDoors.pages.history");
   const tQuality = await getTranslations("historyQuality");
+  const tDup = await getTranslations("historyDuplicates");
 
   return (
     <div className="flex flex-col gap-6" data-testid="company-history">
@@ -75,6 +82,13 @@ export default async function CompanyHistoryPage({
       <DetailsHashOpener targetId="history-quality" />
       <Fold id="history-quality" title={tQuality("title")} hint={tQuality("link")} testId="history-quality-fold">
         <HistoryQualitySection locale={locale} />
+      </Fold>
+
+      {/* POSSIBLE DUPLICATES — the organization decides record by record;
+          nothing changes automatically (owner 2026-10-21). */}
+      <DetailsHashOpener targetId="history-duplicates" />
+      <Fold id="history-duplicates" title={tDup("title")} hint={tDup("hint")} testId="history-duplicates-fold">
+        <HistoryDuplicateReview locale={locale} />
       </Fold>
 
       {/* WHO PERFORMED IT — only when this organization's books hold work that

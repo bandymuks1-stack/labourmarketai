@@ -29,7 +29,7 @@
  *   4. `identityDisclosureAuthority` must be DENIED while the person is
  *      perfectly matchable — the case the whole four-authority split exists for.
  */
-import { test, expect as baseExpect } from "@playwright/test";
+import { test, expect as baseExpect, type Page } from "@playwright/test";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -108,6 +108,44 @@ async function readFeed(): Promise<FeedRow[] | null> {
   return Array.isArray(rows) ? (rows as FeedRow[]) : null;
 }
 
+/**
+ * Return the fixture worker to "not represented" through the product's OWN
+ * withdrawal controls. The fixture database is not reset between runs, and a
+ * run that stopped half-way (measured 2026-10-23: consent left granted, a
+ * declaration left in the feed) made the next run fail at "the screen offers a
+ * choice" and hid the new declaration among the "pre-existing" feed rows —
+ * failures about leftover state, not about the product. Withdrawal is the
+ * person's own path (§ GDPR: never harder than granting), so this exercises
+ * the product rather than reaching into its tables.
+ */
+async function withdrawAnythingLeftOver(page: Page): Promise<void> {
+  await page.goto("/lt/dashboard/privacy");
+  await expect(page.getByTestId("privacy-partner-supply")).toBeVisible();
+  const withdrawDeclaration = page.getByTestId("partner-supply-withdraw-declaration");
+  // A click before hydration is a silent no-op, so each step retries until the
+  // screen moved on.
+  //
+  // NOTE: this cannot make the subject PRISTINE. The form pre-fills from the
+  // person's own earlier answers even once withdrawn ("Existing answers are
+  // the person's OWN, so editing prefills from them" —
+  // partner-supply-representation.tsx), so the first test's "NOTHING is
+  // preselected" holds only for a worker who never declared. On a fixture
+  // database reused across runs, run it against a fresh stack.
+  if (await withdrawDeclaration.isVisible()) {
+    await expect(async () => {
+      if (await withdrawDeclaration.isVisible()) await withdrawDeclaration.click();
+      await expect(page.getByTestId("partner-supply-form")).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: 30_000 });
+  }
+  const withdrawConsent = page.getByTestId("partner-supply-withdraw-consent");
+  if (await withdrawConsent.isVisible()) {
+    await expect(async () => {
+      if (await withdrawConsent.isVisible()) await withdrawConsent.click();
+      await expect(page.getByTestId("partner-supply-choice")).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: 30_000 });
+  }
+}
+
 /** Rows belonging to the signed-in fixture worker, by their opaque signal id. */
 function rowsFor(feed: FeedRow[], signalIds: Set<string>): FeedRow[] {
   return feed.filter((r) => signalIds.has(r.signalId));
@@ -117,6 +155,7 @@ test.describe("representation outside LabourMarket.ai — the worker's own path"
   test("consent, declare, get exported, withdraw, stop being exported", async ({
     page,
   }) => {
+    await withdrawAnythingLeftOver(page);
     const before = await readFeed();
     expect(before, "the feed RPC must be applied to the local stack").not.toBeNull();
     const preExistingIds = new Set((before ?? []).map((r) => r.signalId));
@@ -178,16 +217,19 @@ test.describe("representation outside LabourMarket.ai — the worker's own path"
     await page.getByTestId("partner-supply-save").click();
     await expect(page.getByTestId("partner-supply-error")).toBeVisible();
 
-    // NEGATIVE: a country that is not an ISO-3166-1 alpha-2 code is refused
-    // rather than dropped — dropping would narrow reach without saying so.
-    await page.getByTestId("partner-supply-work-countries").fill("Germany");
+    // NEGATIVE: an entry that resolves to NO country is refused rather than
+    // dropped — dropping would narrow reach without saying so. Since #1824 a
+    // country NAME ("Germany") is a country, never a refusal, so the negative
+    // uses what the canonical resolver documents as unresolvable: a city.
+    await page.getByTestId("partner-supply-work-countries").fill("Hanoi");
     await page.getByTestId("partner-supply-markets").fill("");
     await page.getByTestId("partner-supply-save").click();
     await expect(page.getByTestId("partner-supply-error")).toBeVisible();
 
     // The real answer: legally able to work in LT/DE/NL, agrees to be offered
-    // in DE only, contact permitted, presentation and naming refused.
-    await page.getByTestId("partner-supply-work-countries").fill("LT, DE, NL");
+    // in DE only, contact permitted, presentation and naming refused. Germany
+    // is written as a NAME on purpose (#1824): it must arrive as DE below.
+    await page.getByTestId("partner-supply-work-countries").fill("LT, Germany, NL");
     await page.getByTestId("partner-supply-markets").fill("DE");
     await page.getByTestId("partner-supply-contact-authority").check();
     await page.getByTestId("partner-supply-save").click();
@@ -249,6 +291,7 @@ test.describe("representation outside LabourMarket.ai — the worker's own path"
     // The declaration and the consent are two acts, and revoking either must be
     // enough. A build where only the declaration's own withdrawal worked would
     // pass the first test and leak here.
+    await withdrawAnythingLeftOver(page);
     const before = await readFeed();
     expect(before).not.toBeNull();
     const preExistingIds = new Set((before ?? []).map((r) => r.signalId));
@@ -258,13 +301,30 @@ test.describe("representation outside LabourMarket.ai — the worker's own path"
 
     // Consent, then declare.
     const choice = page.getByTestId("partner-supply-choice");
-    if (await choice.isVisible()) {
-      await page.getByTestId("partner-supply-open").click();
-      await page.getByTestId("partner-supply-grant").click();
-    }
     const form = page.getByTestId("partner-supply-form");
+    const edit = page.getByTestId("partner-supply-edit");
+    if (await choice.isVisible()) {
+      // The grant button can be in the markup before React owns it; a click
+      // then is a silent no-op (measured 2026-10-23: the screen stayed on the
+      // choice). Retry until the granted view rendered.
+      // Two separate waits: "open" toggles the consent text, so re-clicking it
+      // while it is still opening would close it again.
+      const grant = page.getByTestId("partner-supply-grant");
+      await expect(async () => {
+        if (!(await grant.isVisible())) await page.getByTestId("partner-supply-open").click();
+        await expect(grant).toBeVisible({ timeout: 3_000 });
+      }).toPass({ timeout: 30_000 });
+      await expect(async () => {
+        if (await grant.isVisible()) await grant.click();
+        await expect(form.or(edit).first()).toBeVisible({ timeout: 5_000 });
+      }).toPass({ timeout: 30_000 });
+    }
+    // Decide only once the granted view rendered: read right after the grant
+    // click, the form is not there YET and the old branch clicked an `edit`
+    // control that a never-live declaration does not have.
+    await expect(form.or(edit).first()).toBeVisible();
     if (!(await form.isVisible())) {
-      await page.getByTestId("partner-supply-edit").click();
+      await edit.click();
     }
     await page.getByTestId("partner-supply-intent-OPEN_TO_OFFERS").check();
     await page.getByTestId("partner-supply-work-countries").fill("LT");

@@ -19,6 +19,7 @@ import type {
 } from "../types";
 import type { AiRuntimeConfig } from "../config-core";
 import { AI_MODEL_CANDIDATES } from "../model-candidates";
+import { geminiPaidTierConfirmed } from "../data-egress";
 import {
   extractJson,
   fetchErrorResult,
@@ -51,6 +52,16 @@ export const geminiCompletionProvider: AiCompletionProvider = {
     if (!enabled()) return { status: "disabled", reason: "mode_disabled" };
     const apiKey = liveApiKey();
     if (!apiKey) return { status: "disabled", reason: "missing_api_key" };
+    // EEA RULE (Gemini API Additional Terms, effective 2026-03-23, read
+    // 2026-10-25): "You may use only Paid Services when making API Clients
+    // available to users in the European Economic Area, Switzerland, or the
+    // United Kingdom." This product serves EEA users, so a free-tier Gemini key
+    // is not a lawful option for ANY task, public ones included. Without the
+    // owner's paid-tier confirmation the adapter stays disabled and the chain
+    // moves on to the free providers whose terms allow it.
+    if (!geminiPaidTierConfirmed()) {
+      return { status: "disabled", reason: "paid_tier_unconfirmed" };
+    }
 
     const model = resolveModel(request, cfg);
     const maxTokens = Math.min(

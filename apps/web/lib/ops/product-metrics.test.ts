@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- a PostgREST-shaped fake client */
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -101,6 +102,32 @@ describe("computeProductMetrics", () => {
     expect(metricReal(split(2, 5, 1))).toBe(2);
   });
 
+  it("counts the runs no AI provider answered", async () => {
+    const s = await computeProductMetrics(
+      fakeClient(
+        { data: {}, error: null },
+        {
+          ai_runs: [
+            { provider: "disabled", schema_validation: "skipped", fallback_applied: false, blocked_reason: null, latency_ms: null },
+            { provider: "disabled", schema_validation: "skipped", fallback_applied: false, blocked_reason: null, latency_ms: null },
+            { provider: "gemini", schema_validation: "passed", fallback_applied: false, blocked_reason: null, latency_ms: 900 },
+            { provider: "none", schema_validation: "skipped", fallback_applied: false, blocked_reason: "cost_unpriced", latency_ms: null },
+          ],
+        },
+      ),
+      NOW,
+    );
+    const v = (k: string) => s.metrics.find((m) => m.key === k)!.value;
+    expect(v("ai_runs_7d")).toBe(4);
+    expect(v("ai_runs_runtime_disabled_7d")).toBe(2);
+    expect(v("ai_runs_blocked_7d")).toBe(1);
+  });
+
+  it("an unreadable ai_runs leaves the disabled count UNKNOWN, not 0", async () => {
+    const s = await computeProductMetrics(fakeClient({ data: {}, error: null }, { ai_runs: "error" }), NOW);
+    expect(s.metrics.find((m) => m.key === "ai_runs_runtime_disabled_7d")!.value).toBeNull();
+  });
+
   it("vacancy lag takes each provider's freshest cursor", async () => {
     const s = await computeProductMetrics(
       fakeClient(
@@ -166,6 +193,21 @@ describe("monitor signals", () => {
     expect(st("metrics-unreadable")).toBe("OK");
   });
 
+  it("a switched-off AI runtime is a breach, not silence (provider 'disabled' carries no blocked_reason)", () => {
+    const at = (runs: number, off: number | null) =>
+      evaluateSignals(snap({ ai_runs_7d: runs, ai_runs_runtime_disabled_7d: off, ai_runs_failed_validation_7d: 0, ai_runs_blocked_7d: 0 }), { searchMedianMs: 700 });
+    const st = (res: ReturnType<typeof evaluateSignals>, id: string) => res.find((r) => r.id === id)!;
+    // Every run unanswered: the old rule (failed validation + blocked) stays OK — the blind spot.
+    const allOff = at(40, 40);
+    expect(st(allOff, "ai-failing").state).toBe("OK");
+    expect(st(allOff, "ai-runtime-disabled").state).toBe("BREACH");
+    expect(st(allOff, "ai-runtime-disabled").observed).toBe("40 of 40 runs had no AI provider (7 d)");
+    // A single unanswered run already counts; none is OK; an unread count is UNKNOWN, never OK.
+    expect(st(at(25, 1), "ai-runtime-disabled").state).toBe("BREACH");
+    expect(st(at(25, 0), "ai-runtime-disabled").state).toBe("OK");
+    expect(st(at(25, null), "ai-runtime-disabled").state).toBe("UNKNOWN");
+  });
+
   it("observed text is aggregate numbers only, and an unreadable source is itself a breach", () => {
     const res = evaluateSignals(snap({}, {}, [{ source: "ops_product_metrics_v1", reason: "42501" }]), { searchMedianMs: 700 });
     for (const r of res) expect(r.observed).not.toMatch(/@|[0-9a-f]{8}-[0-9a-f]{4}/i);
@@ -174,23 +216,40 @@ describe("monitor signals", () => {
 });
 
 describe("the service-role metrics section stays behind the superadmin gate", () => {
-  it("is rendered only by the launch-readiness page, which calls requireSuperadmin first", () => {
+  /**
+   * This check reads every non-test .ts/.tsx under app/, components/ and lib/
+   * (~2,200 files, ~21 MB). Measured on Windows 2026-10-23: the directory walk
+   * is ~0.2-0.4 s; the READ pass is the cost — 4.2-8.6 s when the files are read
+   * one by one with readFileSync (an antivirus scan on every open), 1.8 s when
+   * they are read concurrently. So the walk uses dirents (no stat per entry)
+   * and the reads run in parallel. The test still reads the whole tree — a
+   * narrower glob would let an importer outside it slip past — so it keeps an
+   * explicit ceiling equal to the guards project's CI ceiling (vitest.config.ts):
+   * it is a whole-tree structural scan like those guards, and under a full
+   * local suite's contention the parallel read can still pass the 5 s unit
+   * default with nothing wrong. A slow scan can only time out; a real importer
+   * still fails on the assertion.
+   */
+  it("is rendered only by the launch-readiness page, which calls requireSuperadmin first", async () => {
     const walk = (d: string, out: string[] = []): string[] => {
-      for (const e of readdirSync(d)) {
-        if (e === "node_modules" || e.startsWith(".")) continue;
-        const p = join(d, e);
-        if (statSync(p).isDirectory()) walk(p, out);
-        else if (/\.tsx?$/.test(e) && !/\.test\./.test(e)) out.push(p);
+      for (const e of readdirSync(d, { withFileTypes: true })) {
+        if (e.name === "node_modules" || e.name.startsWith(".")) continue;
+        const p = join(d, e.name);
+        if (e.isDirectory()) walk(p, out);
+        else if (/\.tsx?$/.test(e.name) && !/\.test\./.test(e.name)) out.push(p);
       }
       return out;
     };
-    const importers = ["app", "components", "lib"]
-      .flatMap((d) => walk(join(WEB, d)))
-      .filter((f) => /from "@\/components\/admin\/product-metrics-section"/.test(readFileSync(f, "utf8")))
+    const files = ["app", "components", "lib"].flatMap((d) => walk(join(WEB, d)));
+    const imports = await Promise.all(
+      files.map(async (f) => /from "@\/components\/admin\/product-metrics-section"/.test(await readFile(f, "utf8"))),
+    );
+    const importers = files
+      .filter((_, i) => imports[i])
       .map((f) => f.slice(WEB.length + 1).split("\\").join("/"));
     expect(importers).toEqual(["app/[locale]/dashboard/admin/launch-readiness/page.tsx"]);
     const page = readFileSync(join(WEB, importers[0]!), "utf8");
     expect(page.indexOf("await requireSuperadmin(locale)")).toBeGreaterThan(-1);
     expect(page.indexOf("await requireSuperadmin(locale)")).toBeLessThan(page.indexOf("<ProductMetricsSection />"));
-  });
+  }, 30_000);
 });

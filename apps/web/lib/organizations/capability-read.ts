@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -33,6 +35,23 @@ export async function readOrganizationCapabilities(
   organizationId: string,
 ): Promise<readonly string[]> {
   if (!organizationId) return [];
+  // A fresh array per caller: the request-shared read is never handed out
+  // for a caller to change in place.
+  return [...(await readOrganizationCapabilitiesOnce(organizationId))];
+}
+
+/**
+ * REQUEST-SCOPED (perf 2026-10-22): the organization doors, the company page,
+ * the chat starter context and the bridge spine each asked the same
+ * organization's capabilities — four identical `organization_roles` round
+ * trips in one `/dashboard/company` render. React `cache()` deduplicates
+ * within ONE render only; every navigation reads again and a server action
+ * (no render) reads itself, so a capability just saved is never answered
+ * from an older read.
+ */
+const readOrganizationCapabilitiesOnce = cache(async function readOrganizationCapabilitiesOnce(
+  organizationId: string,
+): Promise<readonly string[]> {
   try {
     const supabase = await createClient();
     const { data, error } = await asAny(supabase)
@@ -46,4 +65,4 @@ export async function readOrganizationCapabilities(
   } catch {
     return [];
   }
-}
+});

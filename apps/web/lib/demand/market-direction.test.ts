@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   DEMAND_KIND_OR_FILTER,
   isDemandKind,
+  isLabourDemandRow,
+  isOperatorRequestPayload,
   isSupplyKind,
   marketDirection,
 } from "@/lib/demand/market-direction";
@@ -86,5 +88,29 @@ describe("DEMAND_KIND_OR_FILTER", () => {
       if (clause === "kind.is.null") continue;
       expect(marketDirection(kind)).toBe("demand");
     }
+  });
+});
+
+describe("isLabourDemandRow — a request to the platform is not a labour need", () => {
+  it("a help-desk request (customer_request + payload.help_type) is not a need", () => {
+    const row = { kind: "customer_request", payload: { source: "company_help_panel", help_type: "billing" } };
+    expect(isOperatorRequestPayload(row.payload)).toBe(true);
+    expect(isLabourDemandRow(row)).toBe(false);
+  });
+
+  it("a privacy self-service request is not a need, by either marker", () => {
+    expect(isLabourDemandRow({ kind: "customer_request", payload: { privacy_request_type: "export" } })).toBe(false);
+    expect(isLabourDemandRow({ kind: "customer_request", payload: { source: "privacy_self_service" } })).toBe(false);
+  });
+
+  it("a genuine buyer or company need still is one", () => {
+    expect(isLabourDemandRow({ kind: "customer_request", payload: { role: "welder" } })).toBe(true);
+    expect(isLabourDemandRow({ kind: "company_request", payload: null })).toBe(true);
+    expect(isLabourDemandRow({ kind: null })).toBe(true);
+  });
+
+  it("supply and unknown kinds stay out, whatever the payload", () => {
+    expect(isLabourDemandRow({ kind: "agency_offer", payload: {} })).toBe(false);
+    expect(isLabourDemandRow({ kind: "worker_offer", payload: {} })).toBe(false);
   });
 });

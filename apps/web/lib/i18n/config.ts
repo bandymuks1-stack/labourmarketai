@@ -40,7 +40,9 @@ export type Locale = (typeof locales)[number];
 // + 6 taxonomy files) reached full parity with EN — zero `[EN]` markers,
 // guarded by lib/guards/i18n-lt-en-parity.test.ts and the i18n-debt
 // zero baselines. RU/NL/DE are AI-seeded full translations pending human
-// review (§7.4) — the language selector preview-tags non-Tier-1 locales.
+// review (§7.4). The selector shows plain language names (owner ruling
+// 2026-09-22, see components/marketing/locale-switcher.tsx); the Tier 1 vs
+// Tier 2 review state is tracked here and in docs/LANGUAGE_MATRIX.md.
 // PL activated 2026-09-20 (owner approval, acquisition loop P0): the first
 // Polish-language campaign for a Swedish welder job sent every Polish reader
 // to /en because /pl was not routed. Same rule as NL/DE: activated only
@@ -50,6 +52,20 @@ export const activeLocales = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 export type ActiveLocale = (typeof activeLocales)[number];
 
 export const defaultLocale: ActiveLocale = "lt";
+
+/**
+ * Is this a routed UI locale? The ONE membership test against `activeLocales`.
+ *
+ * Use it instead of a hand-written subset (`new Set(["en", "lt", "ru"])`,
+ * `locale === "lt" || locale === "ru" ? … : "en"`): a hard-coded subset
+ * silently serves English to every locale it forgot (NL, DE and PL readers
+ * got English AI output for exactly that reason) and has to be found and
+ * edited again each time a locale is activated. Guarded by
+ * lib/guards/locale-subset-hardcode.test.ts. Pure.
+ */
+export function isActiveLocale(value: string | null | undefined): value is ActiveLocale {
+  return typeof value === "string" && (activeLocales as readonly string[]).includes(value);
+}
 
 /**
  * Clamp a caller-supplied locale to the closed ACTIVE set, else the default.

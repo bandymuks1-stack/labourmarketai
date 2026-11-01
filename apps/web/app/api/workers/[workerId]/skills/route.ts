@@ -6,11 +6,16 @@ import {
   saveSkillsSchema,
   uuidSchema,
 } from "@/lib/skills";
+import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** GET /api/workers/:workerId/skills — the worker's declared skills. */
+/** GET /api/workers/:workerId/skills — the worker's declared skills.
+ *  OWN read (ownsWorker): `verified` is the STANDING confirmation
+ *  (lib/evidence/skill-confirmation-standing.ts), the stored flag is
+ *  `verifiedRecorded`. The writes below keep reading the stored flag. */
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ workerId: string }> },
@@ -33,7 +38,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from("worker_skills")
-    .select("skill_id, verified, source, verified_at")
+    .select("skill_id, verified, verified_by, source, verified_at")
     .eq("worker_id", workerId);
 
   if (error) {
@@ -41,11 +46,21 @@ export async function GET(
     return NextResponse.json({ ok: false, message: "Failed to load" }, { status: 500 });
   }
 
+  // The person's own journal decides whether each recorded confirmation still
+  // stands (read only when there is one). `verified_by` classifies a
+  // self-confirmation and is never handed out.
+  const stored = data ?? [];
+  const rows = withStandingConfirmation(
+    stored,
+    anyRecordedConfirmation(stored) ? await readStandingConfirmedSkillIds(supabase, workerId) : null,
+  );
+
   return NextResponse.json({
     ok: true,
-    skills: (data ?? []).map((r) => ({
+    skills: rows.map((r) => ({
       skillId: r.skill_id,
       verified: r.verified,
+      verifiedRecorded: r.verifiedRecorded,
       source: r.source,
       verifiedAt: r.verified_at,
     })),

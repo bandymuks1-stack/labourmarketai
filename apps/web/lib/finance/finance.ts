@@ -27,6 +27,7 @@ import {
   FINANCE_READ_LIMIT,
   ZERO_FINANCE_SUMMARY,
   deriveFinanceSummary,
+  financeWorkspaceOrFilter,
   isMigrationMissingCode,
   isValidFinanceApprovalStatus,
   isValidFinanceRecordStatus,
@@ -116,17 +117,30 @@ function toRecord(r: Row): FinanceRecord | null {
  * The caller's finance records (RLS: creator / admin / company owner) —
  * bounded and deterministically ordered: nearest due date first (nulls
  * last), then newest created.
+ *
+ * `workspace` (optional): narrow the read to ONE workspace — the active
+ * company's records plus the caller's own company-less records
+ * (`financeWorkspaceOrFilter`, decision 0024). The finance page and its CSV
+ * export pass it, so a person who governs two organizations never sees or
+ * exports both in one place. `companyId: null` = a personal workspace.
  */
-export async function listMyFinanceRecords(): Promise<MyFinanceRecordsResult> {
+export async function listMyFinanceRecords(
+  workspace?: { readonly companyId: string | null },
+): Promise<MyFinanceRecordsResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { status: "not-authed" };
 
-  const res = await asAny(supabase)
-    .from("finance_records")
-    .select(SELECT_COLUMNS)
+  let query = asAny(supabase).from("finance_records").select(SELECT_COLUMNS);
+  if (workspace) {
+    const filter = financeWorkspaceOrFilter({ userId: user.id, companyId: workspace.companyId });
+    // A malformed id reads nothing rather than everything (fail closed).
+    if (filter === null) return { status: "ok", records: [], error: null };
+    query = query.or(filter);
+  }
+  const res = await query
     .order("due_date", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
     .limit(FINANCE_READ_LIMIT);

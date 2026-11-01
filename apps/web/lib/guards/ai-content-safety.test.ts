@@ -6,18 +6,40 @@
  * provider key, so this checks the DEFINITIONS — schemas, prompts, allowed
  * fields — not live output):
  *   1. no-ai-verifies-skills      — no "verified/confirmed" field or level.
- *   2. no-ai-verifies-documents   — document agent never carries verification.
+ *   2. no-ai-verifies-documents   — no agent output carries verification.
  *   3. no-ai-legal-guarantee      — legal/guarantee fields forbidden; prompts ban it.
  *   4. no-unsourced-country-answer — country output requires ≥1 evidence_ref.
  *   5. no-private-document-leak    — no agent INPUT/OUTPUT carries raw doc content.
- *   6. no-ai-live-payment-claim    — support/translation agents ban pay/checkout.
+ *   6. no-ai-live-payment-claim    — no agent output carries a payment field;
+ *                                    translation bans pay/guarantee.
  */
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
-import { AI_PROMPT_REGISTRY, ALL_AGENT_KEYS } from "../ai/registry/registry";
+import {
+  AI_PROMPT_REGISTRY,
+  ALL_AGENT_KEYS,
+  RETIRED_AGENT_KEYS,
+} from "../ai/registry/registry";
 import { FORBIDDEN_DATA_FIELDS } from "../ai/schemas/envelope";
-import { SKILL_EVIDENCE_LEVELS } from "../ai/registry/agents/skill-evidence";
 import { countryReadinessOutputSchema } from "../ai/registry/agents/country-readiness";
+
+/**
+ * 2026-10-25 (owner decision, registry row 10.11): skill_evidence,
+ * document_assistant and support_onboarding — the agents guards 1, 2 and 6
+ * used to inspect by name — were RETIRED, because connected deterministic
+ * code already gives their whole output. The doctrine those guards defend is
+ * unchanged, so each now asserts it over EVERY registered agent instead of
+ * one: no agent can verify a skill or a document, and no agent's output can
+ * carry a payment instruction. That is stronger, not weaker — the old form
+ * only covered the agent it named.
+ */
+const PAYMENT_FIELD = /pay|checkout|invoice|charge|price/i;
+
+function dataKeys(e: { outputSchema: z.ZodTypeAny }): string[] {
+  const dataSchema = (e.outputSchema as unknown as { shape?: { data?: z.ZodTypeAny } })
+    .shape?.data;
+  return dataSchema ? objectKeys(dataSchema) : [];
+}
 
 const entries = ALL_AGENT_KEYS.map((k) => {
   const e = AI_PROMPT_REGISTRY[k];
@@ -36,31 +58,36 @@ function objectKeys(schema: z.ZodTypeAny): string[] {
 const CONTENT_FIELD = /content|filebytes|filedata|rawfile|documenttext|ocr|base64|binary/i;
 
 describe("AI content safety (structural, over the registry)", () => {
-  it("covers all thirteen agents", () => {
-    expect(entries.length).toBe(13);
+  it("covers all nine registered agents (thirteen until the 2026-10-25 retirements)", () => {
+    expect(entries.length).toBe(9);
+    for (const key of RETIRED_AGENT_KEYS) {
+      expect(Object.keys(AI_PROMPT_REGISTRY)).not.toContain(key);
+    }
   });
 
   // 1 — no AI verifies skills.
-  it("no-ai-verifies-skills: 'verified'/'confirmed' are forbidden data fields, and skill levels exclude confirmed", () => {
+  it("no-ai-verifies-skills: 'verified'/'confirmed' are forbidden data fields, and no agent outputs a confirmed level", () => {
     expect(FORBIDDEN_DATA_FIELDS).toContain("verified");
     expect(FORBIDDEN_DATA_FIELDS).toContain("confirmed");
-    expect(SKILL_EVIDENCE_LEVELS as readonly string[]).not.toContain(
-      "manager_or_client_confirmed",
-    );
-    for (const key of ["worker_profile", "skill_evidence"] as const) {
-      expect(AI_PROMPT_REGISTRY[key]!.blockedClaims).toContain("verified");
+    expect(AI_PROMPT_REGISTRY.worker_profile!.blockedClaims).toContain("verified");
+    for (const e of entries) {
+      for (const k of dataKeys(e)) {
+        expect(
+          (FORBIDDEN_DATA_FIELDS as readonly string[]).includes(k),
+          `${e.agent} output field ${k} is a record-like field`,
+        ).toBe(false);
+      }
+      // The excluded level may not even be NAMED in an output schema.
+      expect(JSON.stringify(dataKeys(e))).not.toMatch(/manager_or_client_confirmed/);
     }
   });
 
   // 2 — no AI verifies documents.
-  it("no-ai-verifies-documents: the document agent bans verification + reads only metadata", () => {
-    const doc = AI_PROMPT_REGISTRY.document_assistant!;
-    expect(doc.blockedClaims).toContain("verified");
-    expect(doc.system.toLowerCase()).toMatch(/never/);
-    expect(doc.system.toLowerCase()).toMatch(/verif/);
-    // its input carries NO content-bearing field (metadata only).
-    for (const k of objectKeys(doc.inputSchema)) {
-      expect(CONTENT_FIELD.test(k), `document input field ${k} must not carry content`).toBe(false);
+  it("no-ai-verifies-documents: no agent output carries a verification field", () => {
+    for (const e of entries) {
+      for (const k of dataKeys(e)) {
+        expect(/verif|genuine|authentic/i.test(k), `${e.agent} output field ${k}`).toBe(false);
+      }
     }
   });
 
@@ -81,17 +108,15 @@ describe("AI content safety (structural, over the registry)", () => {
       suggestion: true,
       agent: "country_readiness",
       confidence: "medium",
-      evidence_refs: [{ source: "country_source", ref: "nl:2026" }],
+      evidence_refs: [{ source: "country_readiness_matrix", ref: "a1_certificate" }],
       missing_information: [],
       needs_human_review: true,
       blocked_claims: [],
       data: {
-        missing_items: ["A1"],
-        likely_required_items: [],
+        summary: "The A1 matters first.",
+        steps: [{ ref: "a1_certificate", step: "Ask for an A1 before you travel." }],
         needs_legal_review: true,
-        risk_level: "medium",
-        explanation_worker: null,
-        explanation_company: null,
+        limitations: ["Not legal advice."],
       },
     };
     expect(countryReadinessOutputSchema.safeParse(valid).success).toBe(true);
@@ -119,11 +144,12 @@ describe("AI content safety (structural, over the registry)", () => {
   });
 
   // 6 — no AI live payment claim.
-  it("no-ai-live-payment-claim: support + translation agents ban pay/checkout claims", () => {
-    const support = AI_PROMPT_REGISTRY.support_onboarding!;
-    const joined = (support.system + " " + support.blockedClaims.join(" ")).toLowerCase();
-    expect(joined).toMatch(/pay|checkout/);
-    expect(support.system.toLowerCase()).toMatch(/never/);
+  it("no-ai-live-payment-claim: no agent output carries a payment field; translation bans pay/guarantee", () => {
+    for (const e of entries) {
+      for (const k of dataKeys(e)) {
+        expect(PAYMENT_FIELD.test(k), `${e.agent} output field ${k} reads like a payment`).toBe(false);
+      }
+    }
     expect(AI_PROMPT_REGISTRY.translation_copy!.blockedClaims.join(" ").toLowerCase()).toMatch(
       /pay|guarantee/,
     );

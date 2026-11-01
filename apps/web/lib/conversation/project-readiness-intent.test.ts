@@ -55,7 +55,11 @@ describe("what a project still needs, by sentence", () => {
     expect(LOADER).toContain("deriveReadinessRatio(w.readinessItems)");
     expect(LOADER).toContain('p.status !== "completed"');
     expect(LOADER).toContain('return { kind: "ask", projects: named.slice(0, READINESS_CHAT_ASK_LIMIT) }');
-    expect(LOADER).toContain('i.status === "needed" || i.status === "missing"');
+    // a suggested row ("needed" = to agree) is never listed as missing, and
+    // readiness never reads documents (decision 0021 extension, 2026-10-24)
+    expect(LOADER).toContain('.filter((i) => i.status === "missing")');
+    expect(LOADER).not.toContain('i.status === "needed" || i.status === "missing"');
+    expect(LOADER).toContain("ready: w.ready,");
     expect(LOADER).toContain('i.status === "rejected" || i.status === "expired"');
     expect(LOADER).not.toMatch(/\.rpc\(|\.from\(/);
     // the loader may SAY what it refuses; it may not compute one

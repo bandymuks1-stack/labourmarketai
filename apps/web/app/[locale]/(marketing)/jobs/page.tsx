@@ -435,7 +435,7 @@ export default async function JobsPage({
   }
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       {/* Anonymous-safe structured data (owner 2026-10-14 §8; port of #1433):
           a CollectionPage/ItemList of positions by occupation label, built
           ONLY from the anonymous preview shape — employer, location, title,
@@ -507,7 +507,7 @@ export default async function JobsPage({
           id="profession"
           name="profession"
           defaultValue={profession ?? ""}
-          className="min-w-0 rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm"
+          className="min-w-0 flex-1 rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm sm:flex-none"
         >
           <option value="">{PROFESSION_ANY[active]}</option>
           {professionOptions.map((o) => (
@@ -570,6 +570,7 @@ export default async function JobsPage({
                     headingFallback={
                       v.professionSlug ? professionName(v.professionSlug) : undefined
                     }
+                    genericTitle={GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
                     savedLabel={SAVED_BADGE[active]}
                   />
@@ -632,6 +633,7 @@ export default async function JobsPage({
                     headingFallback={
                       v.professionSlug ? professionName(v.professionSlug) : undefined
                     }
+                    genericTitle={GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
                     savedLabel={
                       mySaved.vacancyIds.has(v.id)
@@ -668,7 +670,7 @@ export default async function JobsPage({
           )}
         </>
       )}
-    </main>
+    </div>
   );
 }
 

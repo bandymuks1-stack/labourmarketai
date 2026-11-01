@@ -97,6 +97,10 @@ export const companyCreateDemandSchema = z
       .regex(/^\d{4}-\d{2}-\d{2}$/)
       .nullable()
       .optional(),
+    /** Teams of a stated size → `structured_v2.team` (only while
+     *  `teamSize` = teamCount × perTeamSize; the executor checks). */
+    teamCount: z.number().int().min(1).max(100).nullable().optional(),
+    perTeamSize: z.number().int().min(1).max(100).nullable().optional(),
   })
   .refine((v) => v.mode !== "draft" || v.intent === "hire_workers", {
     message: "drafts exist only for the hire_workers intent",

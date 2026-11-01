@@ -12,7 +12,7 @@
 import { getLocale } from "next-intl/server";
 import { draftWorkerProfileFromIntake } from "./worker-intake-actions";
 import { aiActionRateLimited } from "../security/ai-action-throttle";
-import type { AiLocale } from "../ai/runtime/types";
+import { aiLocaleFor, type AiLocale } from "../ai/runtime/types";
 
 export interface WorkerIntakeFormState {
   readonly ok: boolean;
@@ -24,9 +24,8 @@ export interface WorkerIntakeFormState {
   readonly message?: string;
 }
 
-function toAiLocale(value: string): AiLocale {
-  return value === "lt" || value === "ru" ? value : "en";
-}
+/** Every routed UI locale is an AI locale; anything else is answered in EN. */
+const toAiLocale = (value: string): AiLocale => aiLocaleFor(value);
 
 function csv(value: FormDataEntryValue | null): string[] {
   return String(value ?? "")

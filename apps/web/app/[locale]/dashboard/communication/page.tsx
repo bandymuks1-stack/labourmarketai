@@ -13,6 +13,7 @@ import { readCounterpartIdentities } from "@/lib/communication/contact-permissio
 import { readConversationSourceContexts } from "@/lib/communication/conversation-source";
 import { getUnreadConversationIds } from "@/lib/communication/unread";
 import { getConversationPreviews } from "@/lib/communication/inbox-preview";
+import { isSyntheticFixtureLabel, isSyntheticViewer } from "@/lib/qa/synthetic-fixture";
 import {
   deriveInboxPriority,
   sortByInboxPriority,
@@ -21,6 +22,11 @@ import { ConversationQuickReply } from "@/components/app/conversation-quick-repl
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 import { formatUtcDateTime } from "@/lib/time/display";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/communication", "communication.title");
+
 
 /**
  * Communication v1 — thread list page.
@@ -69,9 +75,15 @@ export default async function CommunicationListPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/communication`);
 
+  // A PERSONAL inbox (2026-10-18): only threads the viewer actively takes part
+  // in. `conversations_select` also admits `is_admin()`, so a platform admin's
+  // inbox listed every other person's private threads (and every QA walk's
+  // synthetic thread). Admin oversight belongs on admin surfaces, never here.
   const conversationsRes = await asAny(supabase)
     .from("conversations")
-    .select("id, subject, kind, created_by, updated_at")
+    .select("id, subject, kind, created_by, updated_at, conversation_participants!inner(profile_id)")
+    .eq("conversation_participants.profile_id", user.id)
+    .is("conversation_participants.revoked_at", null)
     .order("updated_at", { ascending: false })
     .limit(100);
   // FAILED ≠ EMPTY: a read that errored must not render as "no conversations
@@ -92,15 +104,19 @@ export default async function CommunicationListPage({
   // recently-bumped read threads. Owner UX recovery v1: the two groups now
   // render as LABELLED sections (unread / earlier) so prioritisation is
   // visible structure, not just an invisible sort.
-  const unreadConversations = fetched.filter((c) => unreadIds.has(c.id));
-  const readConversations = fetched.filter((c) => !unreadIds.has(c.id));
-
   // Newest-message preview per thread (sender + first line) — WHAT is new,
   // visible without opening every thread.
   const previews = await getConversationPreviews(
     fetched.map((c) => c.id),
     user.id,
   );
+  // Synthetic QA threads never reach a real person's inbox (the one rule in
+  // lib/qa/synthetic-fixture.ts); a documented QA identity still sees them.
+  const listed = isSyntheticViewer(user)
+    ? fetched
+    : fetched.filter((c) => !isSyntheticFixtureLabel(c.subject, previews.get(c.id)?.text));
+  const unreadConversations = listed.filter((c) => unreadIds.has(c.id));
+  const readConversations = listed.filter((c) => !unreadIds.has(c.id));
 
   // §8.1 PRIORITY — derived from real thread state (who wrote last, is it
   // unread, how long has it waited). No priority column is invented: the
@@ -511,17 +527,31 @@ export default async function CommunicationListPage({
             conversations own the first place) and the one privacy line. No
             composer here: a composer needs a real conversation to send into,
             and a disabled one would pretend otherwise. */}
-        {/* With nothing to open, the pane is only a support card; on a phone it
-            stacked a second, unrelated call to action under the real one. */}
+        {/* With nothing to open, the pane is only a support card. It used to be
+            hidden below `lg` so it would not stack a second call to action on a
+            phone — which left a phone with an empty inbox no support door at
+            all (local UX review 2026-10-24, row 5.17). It stays visible at
+            every width; on a phone it is compact (no icon, less padding), so
+            the empty state's own CTA keeps the first place. */}
         <section
           data-testid="communication-thread-pane"
-          className={conversations.length === 0 ? "hidden min-w-0 flex-col lg:flex" : "flex min-w-0 flex-col"}
+          className="flex min-w-0 flex-col"
         >
           {/* Card wraps its children in one block, so the pane's own column
               lives inside it: icon, the pick prompt, support, privacy. */}
           <Card className="flex flex-1 flex-col justify-center">
-            <div className="flex flex-col items-center gap-4 py-6 text-center">
-              <MessageSquare className="h-8 w-8 text-text-muted" strokeWidth={1.5} aria-hidden />
+            <div
+              className={
+                conversations.length === 0
+                  ? "flex flex-col items-center gap-3 py-2 text-center lg:gap-4 lg:py-6"
+                  : "flex flex-col items-center gap-4 py-6 text-center"
+              }
+            >
+              <MessageSquare
+                className={conversations.length === 0 ? "hidden h-8 w-8 text-text-muted lg:block" : "h-8 w-8 text-text-muted"}
+                strokeWidth={1.5}
+                aria-hidden
+              />
               {conversations.length > 0 && (
                 <p className="text-sm text-text-secondary" data-testid="communication-pane-pick">
                   {t("panePick")}

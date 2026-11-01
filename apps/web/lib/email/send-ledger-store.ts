@@ -93,9 +93,16 @@ export async function guardedSendTransactionalEmail(
     kind: EmailSendKind;
     organizationId?: string | null;
     recipientProfileId?: string | null;
+    /** Partner referral sends (migration 20261028070000): never send when the
+     *  ledger row could not be written. Their stuck-reservation recovery reads
+     *  "no ledger row" as "no provider call happened"; the default fail-open
+     *  degraded path would break that. */
+    requireLedger?: boolean;
   },
 ): Promise<TransactionalSendResult> {
-  const decision = await reserveEmailSend({ recipientEmail: message.to, ...ctx });
+  const { requireLedger, ...reserveCtx } = ctx;
+  const decision = await reserveEmailSend({ recipientEmail: message.to, ...reserveCtx });
   if (!decision.allowed) return { status: "failed", reason: "rate_limited" };
+  if (requireLedger && decision.degraded) return { status: "failed", reason: "ledger_unavailable" };
   return sendTransactionalEmail(message);
 }

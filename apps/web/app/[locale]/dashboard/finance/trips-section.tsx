@@ -78,12 +78,17 @@ export async function TripsSection({
   locale,
   notice,
   financeRecords,
+  activeOrganizationId = null,
 }: {
   locale: string;
   notice: TripNotice | null;
   /** The caller's own finance records (for the expense-link select) —
    *  passed in so the page reads them exactly once. */
   financeRecords: readonly FinanceRecord[];
+  /** The ACTIVE workspace's organization (server-resolved) — the default
+   *  choice in the organization picker, so a trip is filed for the workspace
+   *  the person is in, not for whichever membership sorts first. */
+  activeOrganizationId?: string | null;
 }) {
   const t = await getTranslations("trips");
   const dateFmt = createUtcFormatter(locale, { dateStyle: "medium" });
@@ -157,7 +162,12 @@ export async function TripsSection({
         <form action={createStandardTripTemplateAction}>
           {hidden()}
           <input type="hidden" name="organizationId" value={organizationId} />
-          <Button type="submit" variant="secondary" size="sm">
+          <Button
+            type="submit"
+            variant="secondary"
+            size="sm"
+            data-testid={`trips-create-template-${organizationId}`}
+          >
             {t("actions.createTemplate")}
           </Button>
         </form>
@@ -172,6 +182,7 @@ export async function TripsSection({
       <li
         className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/30 p-3"
         data-testid={`trip-${trip.id}`}
+        data-status={trip.status}
       >
         <div className="flex flex-wrap items-start justify-between gap-2">
           <p className="min-w-0 break-words text-sm font-semibold text-text-primary">
@@ -249,7 +260,12 @@ export async function TripsSection({
                 </option>
               ))}
             </Select>
-            <Button type="submit" variant="secondary" size="sm">
+            <Button
+              type="submit"
+              variant="secondary"
+              size="sm"
+              data-testid={`trip-link-expense-${trip.id}`}
+            >
               {t("actions.linkExpense")}
             </Button>
           </form>
@@ -330,7 +346,12 @@ export async function TripsSection({
           {trip.status === "submitted" ? (
             <form action={syncTripDecisionAction}>
               {hidden(trip.id)}
-              <Button type="submit" variant="secondary" size="sm">
+              <Button
+                type="submit"
+                variant="secondary"
+                size="sm"
+                data-testid={`trip-check-decision-${trip.id}`}
+              >
                 {t("actions.checkDecision")}
               </Button>
             </form>
@@ -346,7 +367,12 @@ export async function TripsSection({
           {isTripCancellable(trip.status) ? (
             <form action={cancelTripAction}>
               {hidden(trip.id)}
-              <Button type="submit" variant="secondary" size="sm">
+              <Button
+                type="submit"
+                variant="secondary"
+                size="sm"
+                data-testid={`trip-cancel-${trip.id}`}
+              >
                 {t("actions.cancel")}
               </Button>
             </form>
@@ -387,7 +413,10 @@ export async function TripsSection({
               <Label>{t("form.orgLabel")}</Label>
               <Select
                 name="organizationId"
-                defaultValue={orgOptions[0]!.organizationId}
+                defaultValue={
+                  orgOptions.find((o) => o.organizationId === activeOrganizationId)?.organizationId ??
+                  orgOptions[0]!.organizationId
+                }
               >
                 {orgOptions.map((o) => (
                   <option key={o.organizationId} value={o.organizationId}>

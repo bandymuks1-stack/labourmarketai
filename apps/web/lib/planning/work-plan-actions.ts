@@ -11,6 +11,11 @@ import {
 } from "@/lib/planning/work-plan-model";
 import { toActiveLocale } from "@/lib/i18n/config";
 import { checkWorkerReservation } from "@/lib/planning/worker-reservation";
+import {
+  expandShiftRuns,
+  narrowVerdictToShiftRuns,
+  shiftPatternToJson,
+} from "@/lib/planning/shift-pattern";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -25,7 +30,12 @@ function back(locale: string, outcome: WorkPlanOutcome): never {
   redirect(`/${locale}/dashboard/company/planning?plan=${outcome}#work-plan`);
 }
 
-function classify(message: string, code?: string): WorkPlanOutcome {
+function classify(message: string, code?: string, recurring = false): WorkPlanOutcome {
+  // CAL-8: the v2 command (shift patterns) not provisioned yet. A one-off
+  // window never reaches v2, so this can only answer a pattern request.
+  if (recurring && (code === "PGRST202" || code === "42883")) return "recurrence_unavailable";
+  if (/invalid_recurrence/.test(message)) return "recurrence_invalid";
+  if (/recurrence_without_shift/.test(message)) return "recurrence_empty";
   if (code === "42P01" || code === "PGRST202" || code === "PGRST205") return "unavailable";
   if (/worker_not_in_scope/.test(message)) return "worker_not_in_scope";
   if (/project_not_in_organization/.test(message)) return "project_not_in_organization";
@@ -46,8 +56,22 @@ export async function createWorkPlanEntryAction(formData: FormData): Promise<voi
     startTime: formData.get("start_time"),
     endTime: formData.get("end_time"),
     note: formData.get("note"),
+    repeat: formData.get("repeat"),
+    weekdays: formData.getAll("weekday"),
+    cycleOn: formData.get("cycle_on"),
+    cycleOff: formData.get("cycle_off"),
+    cycleOffset: formData.get("cycle_offset"),
   });
-  if (!v.ok) back(locale, "invalid");
+  if (!v.ok) {
+    back(
+      locale,
+      v.code === "recurrence"
+        ? "recurrence_invalid"
+        : v.code === "recurrence_empty"
+          ? "recurrence_empty"
+          : "invalid",
+    );
+  }
 
   const supabase = await createClient();
   const {
@@ -55,8 +79,7 @@ export async function createWorkPlanEntryAction(formData: FormData): Promise<voi
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login?next=${encodeURIComponent(`/${locale}/dashboard/company/planning`)}`);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: newId, error } = await (supabase as any).rpc("create_work_plan_entry_v1", {
+  const args = {
     p_organization_id: v.value.organizationId,
     p_worker_id: v.value.workerId,
     p_start_date: v.value.startDate,
@@ -66,9 +89,17 @@ export async function createWorkPlanEntryAction(formData: FormData): Promise<voi
     p_start_time: v.value.startTime,
     p_end_time: v.value.endTime,
     p_note: v.value.note,
-  });
+  };
+  const pattern = v.value.recurrence;
+  // A one-off window keeps the unchanged v1 command; only a shift pattern
+  // (CAL-8) uses v2, which is v1 plus the validated pattern.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: newId, error } = await (supabase as any).rpc(
+    pattern ? "create_work_plan_entry_v2" : "create_work_plan_entry_v1",
+    pattern ? { ...args, p_recurrence: shiftPatternToJson(pattern) } : args,
+  );
   if (error) {
-    const outcome = classify(error.message ?? "", error.code);
+    const outcome = classify(error.message ?? "", error.code, pattern !== null);
     console.error("[work-plan] create failed", { code: error.code, outcome });
     back(locale, outcome);
   }
@@ -81,11 +112,19 @@ export async function createWorkPlanEntryAction(formData: FormData): Promise<voi
   // Any failure here degrades to "could not confirm", never to "free".
   let outcome: WorkPlanOutcome = "planned_unknown";
   try {
-    const verdict = await checkWorkerReservation({
+    const windowVerdict = await checkWorkerReservation({
       workerId: v.value.workerId,
       window: { startDate: v.value.startDate, endDate: v.value.endDate },
       exclude: typeof newId === "string" ? [newId] : [],
     });
+    // CAL-8: a rota holds only its shift days, so the warning is narrowed to
+    // them — leave that falls on rest days is not a collision.
+    const verdict = pattern
+      ? narrowVerdictToShiftRuns(
+          windowVerdict,
+          expandShiftRuns(pattern, v.value.startDate, v.value.endDate),
+        )
+      : windowVerdict;
     outcome =
       verdict.state === "clear"
         ? "planned"

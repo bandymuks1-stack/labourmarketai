@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Buyer-side next-action summary — an honest summary of the caller's OWN
@@ -34,7 +35,7 @@ describe("getOutgoingRequestSummary is an honest real-status summary", () => {
 });
 
 describe("buyer status copy exists across active locales (no panic / no payment)", () => {
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: dashboardOutgoing.{accepted,waiting,declined}.{title,note} present`, () => {
       const m = (JSON.parse(read(`messages/${loc}.json`)) as {
         marketplace?: { dashboardOutgoing?: Record<string, { title?: unknown; note?: unknown }> };

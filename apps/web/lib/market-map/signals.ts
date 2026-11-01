@@ -94,15 +94,21 @@ export async function getOwnMarketSignals(): Promise<NormalizedSignal[] | null> 
     }
   }
 
-  // company_location ─ company_only
+  // company_location ─ company_only. Every company the person owns, one
+  // signal each (`.maybeSingle()` errored for an owner of two and dropped all).
   {
-    const { data } = await asAny(supabase)
+    const { data: rows } = await asAny(supabase)
       .from("companies")
       .select("id, country, updated_at")
       .eq("profile_id", uid)
-      .maybeSingle();
-    const country = norm(data?.country);
-    if (country) {
+      .limit(50);
+    for (const data of (Array.isArray(rows) ? rows : []) as {
+      id: string;
+      country: string | null;
+      updated_at: string | null;
+    }[]) {
+      const country = norm(data.country);
+      if (!country) continue;
       out.push({
         signalId: `company:${data.id}`,
         signalType: "company_location",
@@ -117,7 +123,7 @@ export async function getOwnMarketSignals(): Promise<NormalizedSignal[] | null> 
         aggregatedCount: null,
         canShowExact: false,
         sourceStatus: "registration",
-        updatedAt: (data?.updated_at as string | null) ?? null,
+        updatedAt: data.updated_at ?? null,
       });
     }
   }
@@ -219,20 +225,21 @@ export async function getOwnMarketSignals(): Promise<NormalizedSignal[] | null> 
     }
   }
 
-  // project_location ─ owned via the caller's company
+  // project_location ─ owned via the caller's companies (all of them)
   {
-    const { data: company } = await asAny(supabase)
+    const { data: owned } = await asAny(supabase)
       .from("companies")
       .select("id")
       .eq("profile_id", uid)
-      .maybeSingle();
-    if (company?.id) {
+      .limit(50);
+    const companyIds = ((Array.isArray(owned) ? owned : []) as { id: string }[]).map((c) => c.id);
+    if (companyIds.length > 0) {
       const { data } = await asAny(supabase)
         .from("projects")
         .select(
           "id, country, city, granularity, visibility_level, location_confirmed, status, updated_at",
         )
-        .eq("company_id", company.id);
+        .in("company_id", companyIds);
       for (const r of Array.isArray(data) ? data : []) {
         const country = norm(r.country);
         if (!country) continue;

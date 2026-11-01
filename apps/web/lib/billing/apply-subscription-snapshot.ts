@@ -1,4 +1,5 @@
 import "server-only";
+import { parsePilotPassGrant } from "@/lib/billing/pilot-pass-core";
 
 import {
   parseCheckoutSessionObject,
@@ -70,6 +71,37 @@ export async function applyRawSubscriptionObject(
  * already set (never active -> incomplete). Returns null when the session
  * carries no subscription.
  */
+/**
+ * Organization pilot pass (pilot-pass-core): a completed, PAID one-time
+ * session becomes the organization's ACTIVE plan row for the fixed period —
+ * the entitlement read picks it up on the next request, no further event
+ * needed. Null when the session is not a paid pilot pass.
+ */
+export async function applyPilotPass(
+  session: Record<string, unknown> | null | undefined,
+  input: { readonly testMode: boolean; readonly evidence: SnapshotEvidence },
+): Promise<ApplyResult | null> {
+  const grant = parsePilotPassGrant(session, input.evidence.created);
+  if (!grant) return null;
+  return upsertSubscription({
+    providerSubscriptionId: grant.providerSubscriptionId,
+    providerCustomerId: grant.providerCustomerId,
+    ownerId: grant.ownerId,
+    planKey: grant.planKey,
+    organizationId: grant.organizationId,
+    status: "active",
+    currentPeriodStart: grant.periodStart,
+    currentPeriodEnd: grant.periodEnd,
+    // Nothing renews a pass: the account section reads "active until …".
+    cancelAtPeriodEnd: true,
+    testMode: input.testMode,
+    eventId: input.evidence.id,
+    eventCreated: input.evidence.created,
+    unitAmountCents: grant.amountTotal,
+    currency: grant.currency,
+  });
+}
+
 export async function applyCheckoutLink(
   session: Record<string, unknown> | null | undefined,
   input: { readonly testMode: boolean; readonly evidence: SnapshotEvidence },

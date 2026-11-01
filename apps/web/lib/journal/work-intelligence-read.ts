@@ -8,6 +8,18 @@ import { readWorkerCoreRow } from "@/lib/data/worker-core";
 import type { DomainCaller } from "@/lib/domain/caller";
 import { createClient } from "@/lib/supabase/server";
 import { readWorkerEntrySkillLinks } from "@/lib/journal/entry-skill-link-read";
+import {
+  anyRecordedConfirmation,
+  withCrossPartyStandingConfirmation,
+  withStandingConfirmation,
+  type CrossPartyConfirmationState,
+} from "@/lib/evidence/skill-confirmation-standing";
+import {
+  readCrossPartyStandingStates,
+  readStandingConfirmedSkillIds,
+} from "@/lib/evidence/skill-confirmation-standing-read";
+import { summarizeUnrecordedHours } from "@/lib/journal/unrecorded-hours";
+import { resolveWorkDay } from "@/lib/journal/work-time";
 import type { EntrySkillProvenance } from "@/lib/journal/entry-skill-source";
 import {
   listJournalEntries,
@@ -20,6 +32,7 @@ import {
   type WorkIntelligenceCoverage,
   type WorkIntelligenceEntry,
   type WorkIntelligenceOrganizationPeriodRecord,
+  type WorkIntelligenceOrganizationPendingRecord,
   type WorkIntelligenceOrganizationRecord,
   type WorkIntelligenceSkillRow,
   type WorkPeriodKey,
@@ -72,6 +85,10 @@ export type WorkerSkillSourceRow = {
   verified?: boolean | null;
   source?: string | null;
   skills: { slug: string | null } | null;
+  /** What a recorded confirmation is worth NOW (skill-confirmation-standing),
+   *  set by the standing read; absent when nothing was flagged. Carried so an
+   *  UNKNOWN confirmation stays journal-level evidence downstream. */
+  confirmation?: CrossPartyConfirmationState;
 };
 
 export function assembleWorkIntelligence(input: {
@@ -98,6 +115,8 @@ export function assembleWorkIntelligence(input: {
   /** The organization's PERIOD records from the same read — beside the
    *  day records, summed into nothing. */
   organizationPeriodRecords?: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** Records with no stated duration, from the same read — summed nowhere. */
+  organizationPendingRecords?: readonly WorkIntelligenceOrganizationPendingRecord[] | null;
   /** The person whose entries these are. With it, a decision the person made
    *  on their own entry is not a confirmation (review-status.ts); without it
    *  the result is the plain latest decision, as before. */
@@ -109,6 +128,7 @@ export function assembleWorkIntelligence(input: {
     originalText: e.original_text,
     metrics: e.journal_entry_metrics ?? [],
     engagementContextId: e.engagement_context_id ?? null,
+    projectId: e.project_id ?? null,
     reviewResult: deriveIndependentReviewResult(
       e.journal_entry_confirmations,
       input.subjectProfileId ?? null,
@@ -126,9 +146,10 @@ export function assembleWorkIntelligence(input: {
       slug,
       verified: r.verified ?? null,
       source: r.source ?? null,
+      ...(r.confirmation ? { confirmation: r.confirmation } : {}),
     });
   }
-  return deriveWorkIntelligence({
+  const derived = deriveWorkIntelligence({
     entries,
     skills,
     todayIso: input.todayIso,
@@ -138,7 +159,20 @@ export function assembleWorkIntelligence(input: {
     coverage: input.coverage,
     organizationRecords: input.organizationRecords ?? null,
     organizationPeriodRecords: input.organizationPeriodRecords ?? null,
+    organizationPendingRecords: input.organizationPendingRecords ?? null,
   });
+  // Entries whose written hours never became recorded time (the pre-2026-08-20
+  // composer dropped them) — counted, never summed, from the SAME entries.
+  return {
+    ...derived,
+    unrecordedHours: summarizeUnrecordedHours(
+      entries.map((e) => ({
+        originalText: e.originalText,
+        metrics: e.metrics,
+        day: resolveWorkDay(e.metrics, e.createdAt),
+      })),
+    ),
+  };
 }
 
 /**
@@ -149,6 +183,10 @@ export function assembleWorkIntelligence(input: {
 export type OrganizationLedgerRead = {
   readonly records: readonly WorkIntelligenceOrganizationRecord[];
   readonly periodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[];
+  /** Records with NO stated duration (SEP-7) — shown, summed nowhere.
+   *  A list of its own (`organizationPendingFrom`), never a day or period
+   *  record; absent = none. */
+  readonly pendingRecords?: readonly WorkIntelligenceOrganizationPendingRecord[];
 };
 
 /**
@@ -174,7 +212,7 @@ export async function readOrganizationRecords(
     readEvidenceRecordsForWorker(supabase, workerId),
   ]);
   if (allocations.kind === "error" || evidence.kind === "error") return null;
-  return organizationLedgerFrom(allocations, evidence);
+  return { ...organizationLedgerFrom(allocations, evidence), pendingRecords: organizationPendingFrom(evidence) };
 }
 
 /**
@@ -241,9 +279,31 @@ export function organizationLedgerFrom(
           organizationId: r.organizationId,
           // How the SPAN came to be travels with it (owner rule 2026-09-23).
           provenance: r.provenance,
+          // The figure's stated basis travels with it (one hours ledger).
+          hoursBasis: r.hoursBasis ?? null,
           context: r.context,
         }));
   return { records: [...fromAllocations, ...fromEvidence], periodRecords };
+}
+
+/**
+ * Records with NO stated duration (SEP-7): the work is recorded, its length
+ * is unknown. A list of their own beside both ledgers — never a day record,
+ * never a period record, never an hour. Shown as "duration not stated yet".
+ */
+export function organizationPendingFrom(
+  evidence: Exclude<WorkerEvidenceRead, { kind: "error" }>,
+): WorkIntelligenceOrganizationPendingRecord[] {
+  if (evidence.kind === "needs-migration") return [];
+  return (evidence.pendingRows ?? []).map((r) => ({
+    id: r.id,
+    organizationId: r.organizationId,
+    workDate: r.workDate,
+    periodStart: r.periodStart,
+    periodEnd: r.periodEnd,
+    source: "import",
+    context: r.context,
+  }));
 }
 
 /**
@@ -273,6 +333,7 @@ export function historicalPersonIntelligence(
     focus: opts.focus,
     organizationRecords: ledger.records,
     organizationPeriodRecords: ledger.periodRecords,
+    organizationPendingRecords: organizationPendingFrom(evidence),
   });
 }
 
@@ -360,7 +421,10 @@ export async function loadWorkIntelligence(
     readWorkerEntrySkillLinks(caller.supabase, workerId),
     caller.supabase
       .from("worker_skills")
-      .select("skill_id, verified, source, skills(slug)")
+      // verified_at: a self-confirmation STANDS once an independent approval
+      // postdates the flag (skillConfirmationState) — without it the own
+      // reading said self_confirmed where every other reader said standing.
+      .select("skill_id, verified, verified_by, verified_at, source, skills(slug)")
       .eq("worker_id", workerId),
     readOrganizationRecords(caller.supabase, workerId),
     // Whose entries these are — "confirmed" excludes the subject's own
@@ -368,10 +432,20 @@ export async function loadWorkIntelligence(
     caller.supabase.from("workers").select("profile_id").eq("id", workerId).limit(1),
   ]);
   if (!entriesRead.ok || !linkRead.ok || skillsRead.error) return null;
-  const photoCountByEntry = await readPhotoCountsByEntry(
-    caller.supabase,
-    entriesRead.entries.map((e) => e.id),
-  );
+  const subjectProfileId = subjectRead.error
+    ? null
+    : (((subjectRead.data ?? []) as { profile_id: string | null }[])[0]?.profile_id ?? null);
+  const storedSkillRows = (skillsRead.data ?? []) as unknown as (WorkerSkillSourceRow & {
+    verified_by?: string | null;
+    verified_at?: string | null;
+  })[];
+  const [photoCountByEntry, skillRows] = await Promise.all([
+    readPhotoCountsByEntry(
+      caller.supabase,
+      entriesRead.entries.map((e) => e.id),
+    ),
+    standingSkillRowsFor(caller, workerId, subjectProfileId, storedSkillRows),
+  ]);
 
   const linksByEntry = new Map<string, string[]>();
   for (const r of linkRead.rows) {
@@ -384,7 +458,7 @@ export async function loadWorkIntelligence(
     entries: entriesRead.entries,
     linksByEntry,
     provenanceByEntry: linkRead.provenanceByEntry,
-    skillRows: (skillsRead.data ?? []) as unknown as WorkerSkillSourceRow[],
+    skillRows,
     todayIso: today.todayIso,
     horizonIso: today.horizonIso,
     focus: opts.focus,
@@ -397,10 +471,42 @@ export async function loadWorkIntelligence(
     photoCountByEntry,
     organizationRecords: organizationLedger?.records ?? null,
     organizationPeriodRecords: organizationLedger?.periodRecords ?? null,
-    subjectProfileId: subjectRead.error
-      ? null
-      : (((subjectRead.data ?? []) as { profile_id: string | null }[])[0]?.profile_id ?? null),
+    organizationPendingRecords: organizationLedger?.pendingRecords ?? null,
+    subjectProfileId,
   });
+}
+
+/**
+ * A recorded skill confirmation reads as confirmed only while it STANDS
+ * (lib/evidence/skill-confirmation-standing.ts). ONE reader, two audiences:
+ * the person reads their own journal (the own RLS read, exact); anyone else —
+ * a manager's organization view, the team roster — cannot, so the
+ * cross-party DB door decides. Asked beside the photo read (no added stage),
+ * and only when a stored flag exists. `verified_by` is read to classify a
+ * self-confirmation (with `verified_at`, to date it) and neither is handed
+ * on; the resulting `confirmation` is, so an UNKNOWN one keeps its tier.
+ */
+async function standingSkillRowsFor(
+  caller: DomainCaller,
+  workerId: string,
+  subjectProfileId: string | null,
+  rows: readonly (WorkerSkillSourceRow & { verified_by?: string | null; verified_at?: string | null })[],
+): Promise<WorkerSkillSourceRow[]> {
+  const strip = (
+    r: WorkerSkillSourceRow & { verified_by?: string | null; verified_at?: string | null },
+  ): WorkerSkillSourceRow => {
+    const row = { ...r };
+    delete row.verified_by;
+    delete row.verified_at;
+    return row;
+  };
+  if (!anyRecordedConfirmation(rows)) return rows.map(strip);
+  const own = subjectProfileId !== null && subjectProfileId === caller.userId;
+  const supabase = caller.supabase as SupabaseClient;
+  const judged = own
+    ? withStandingConfirmation(rows, await readStandingConfirmedSkillIds(supabase, workerId))
+    : withCrossPartyStandingConfirmation(rows, await readCrossPartyStandingStates(supabase, [workerId]), workerId);
+  return judged.map(strip);
 }
 
 /**

@@ -87,3 +87,94 @@ describe("'checked' wording never claims a stored copy or independent verificati
     }
   });
 });
+
+/**
+ * Decision 0021 EXTENSION (owner correction 2026-10-24, P0): not uploading a
+ * document never means "not ready"; missing-document counts are never an
+ * automatic negative readiness signal; there is no universal mandatory list;
+ * a mutual, neutral recommendation is shown where two parties consider a
+ * concrete collaboration. Each block pins one root.
+ */
+describe("decision 0021 extension — documents never lower readiness, and both parties get the same recommendation", () => {
+  it("operations: only a row a manager EXPLICITLY marked missing counts as missing; a suggested row is 'to agree'", async () => {
+    const { deriveWorkerOps } = await import("@/lib/projects/operations-derive");
+    const w = deriveWorkerOps({
+      workerId: "w",
+      workerProfileId: "p",
+      name: "N",
+      hasRealName: true,
+      assignedAt: "2026-10-01",
+      readiness: {
+        journalEntries: 1,
+        declaredSkills: 1,
+        confirmedSkills: 0,
+        openReviewItems: 0,
+        lastActivity: "2026-10-01",
+      } as never,
+      readinessItems: [
+        { itemKey: "identity_document", label: "ID", status: "needed", note: null },
+        { itemKey: "client_specific_requirement", label: "C", status: "needed", note: null },
+      ],
+    });
+    expect(w.ready).toBe(true);
+    expect(w.docsMissing).toBe(0);
+    expect(w.docsToAgree).toBe(2);
+  });
+
+  it("the chat readiness verdict and the project risk order never read documents", () => {
+    const readiness = read("lib/conversation/project-readiness.ts");
+    expect(readiness).toMatch(/ready: w\.ready,/);
+    expect(readiness).not.toMatch(/ready: w\.ready && w\.docsMissing/);
+    const risk = read("lib/conversation/project-risk.ts");
+    expect(risk).not.toMatch(/tasksOverdue \+ pulse\.workersWithMissingDocs/);
+  });
+
+  it("no universal list: A1 / posting is suggested only when the work is KNOWN to cross a border", async () => {
+    const { suggestedReadinessItemKeys } = await import("@/lib/projects/readiness-items");
+    expect(suggestedReadinessItemKeys({ crossBorder: false })).not.toContain("a1_or_posting_document");
+    expect(suggestedReadinessItemKeys({ crossBorder: true })).toContain("a1_or_posting_document");
+    for (const f of [
+      "app/[locale]/dashboard/projects/[id]/operations/page.tsx",
+      "lib/conversation/company-executors.ts",
+      "lib/conversation/project-move.ts",
+    ]) {
+      expect(read(f), f).not.toMatch(/DEFAULT_READINESS_ITEM_KEYS\.(map|length)/);
+      expect(read(f), f).toMatch(/suggestedReadinessItemKeys\(/);
+    }
+  });
+
+  it("a country's document rules never enter the person's 'N of M'", () => {
+    expect(read("lib/player-card/requirement-ledger.ts")).toContain(
+      'if (r.reason === "country_requirement") continue;',
+    );
+  });
+
+  it("the mutual recommendation is on every surface where a concrete collaboration is considered", () => {
+    for (const f of [
+      "app/[locale]/dashboard/projects/[id]/operations/page.tsx",
+      "app/[locale]/dashboard/company/scouting/page.tsx",
+      "app/[locale]/dashboard/bookings/page.tsx",
+      "app/[locale]/dashboard/commercial/page.tsx",
+      "app/[locale]/dashboard/service-requests/page.tsx",
+    ]) {
+      expect(read(f), f).toMatch(/<CollaborationChecksNote/);
+    }
+    // advice, never a gate: the note renders no control that could block
+    const note = read("components/app/collaboration-checks-note.tsx");
+    expect(note).not.toMatch(/<button|disabled=|onClick|<form/);
+  });
+
+  it("no active locale tells a person they are not ready without documents, or offers a 'standard' list", () => {
+    for (const loc of ["en", "lt", "de", "nl", "pl", "ru"]) {
+      const m = JSON.parse(read("messages", `${loc}.json`));
+      const countryFit = String(m.playerCard.readinessPanel.countryFit);
+      expect(countryFit, loc).not.toMatch(
+        /not shown as ready|nerodoma kaip pasiruošusi|не показ|nicht als bereit|niet als klaar|nie jest pokazywan/i,
+      );
+      expect(String(m.projectOps.checklist.seed), loc).not.toMatch(/standard|standartin|стандарт/i);
+      expect(String(m.projectOps.readinessStatuses.needed), loc).not.toMatch(
+        /^(Needed|Reikalingas|Нужен|Erforderlich|Nodig|Wymagany)$/,
+      );
+    }
+  });
+});

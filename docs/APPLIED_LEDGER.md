@@ -2799,3 +2799,51 @@ replace` cannot change a function's OUT columns), with `revoke all ... from publ
 `20260928190000_agency_delegated_demand_and_placement_v1.sql` (same signature and return columns). Recorded
 here so the ledger entry is not an unexplained apply.
 
+
+## apply_migration version reconciliation — 2026-10-19 / 2026-10-20 (16 entries)
+
+Read from `supabase_migrations.schema_migrations` on 2026-10-20 and paired with the repo files by
+`.github/scripts/migration-ledger-parity.mjs` (name + content fingerprint). Documentation only — the
+ledger is not rewritten (owner rule) and nothing here is replayed. `supabase db push` stays forbidden:
+versions never match file prefixes by construction, so a push would re-run every applied migration.
+
+| Repo file timestamp | Production ledger version | Name | Parity |
+|---|---|---|---|
+| `20261018160000` | `20261019072804` | worker_identity_split_v1 | MATCH (older ledger slice) |
+| `20261019070000` | `20261019074449` | discoverability_paused_by_open_deletion_request_v1 | MATCH |
+| `20261019140000` | `20261019141852` | privacy_erasure_executor_v3 | MATCH |
+| `20261019150000` | `20261019143805` | privacy_erasure_registry_not_null_authors_v1 | MATCH |
+| `20261019160000` | `20261019165017` | worker_public_summary_v1 | MATCH |
+| `20261019170000` | `20261019171414` | worker_language_uk_v1 | MATCH |
+| `20261019180000` | `20261019171633` | worker_language_uk_rpc_v1 | DIFFERS — see note 1 |
+| `20261019190000` | `20261019180015` | erasure_sentinel_finite_ban_v1 | MATCH |
+| `20261019200000` | `20261019200739` | worker_board_org_company_v1 | MATCH |
+| `20261019210000` | `20261019202041` | project_team_journal_hours_v1 | MATCH |
+| `20261019220000` | `20261019202926` | project_team_journal_hours_v2 | MATCH |
+| `20261020010000` | `20261020022321` | demand_company_one_rule_v1 | MATCH |
+| `20261020015000` | `20261020034459` | demand_company_one_rule_v2 | MATCH |
+| `20261020020000` | `20261020024645` | workspace_pins_v1 | DIFFERS — see note 2 |
+| `20261020025000` | `20261020035746` | workspace_pins_original_language_v1 | MATCH |
+| `20261020025900` | `20261020040457` | workspace_pins_language_set_v2 | CONTENT_ONLY — see note 3 |
+
+1. `worker_language_uk_rpc_v1`: the file carries an explicit `revoke … from public, anon; grant … to
+   authenticated` added after the apply for the secdef guard; the ledger statements do not. Production
+   state equals the file: `pg_get_functiondef` md5 `97f52d5da7753ba3496d73bb2b93e9eb` (= a local PG16 apply of
+   the file) and ACL `{postgres=X/postgres,authenticated=X/postgres}` (anon/public already had no EXECUTE).
+2. `workspace_pins_v1`: the only difference is a `/** … */` block comment inside the CREATE TABLE (the
+   parity normaliser strips `--` comments only). Production has every column, all four RLS policies, the
+   cap trigger, both indexes and the erasure registry row of the file.
+3. `workspace_pins_language_set_v2`: applied under the name `20261020026000_workspace_pins_language_set_v2`,
+   then the FILE was renamed to `20261020025900_…` because 02:60 is not a valid §16 timestamp
+   (migration-safety). Content fingerprint identical (`a8d20a560d277a0b`); the ledger keeps the original
+   name string. Not re-applied, not edited.
+
+| Repo file timestamp | Production ledger version | Name | Parity |
+|---|---|---|---|
+| `20261027120000` | `20261027193124` | reissue_external_referral_v1 | CONTENT_ONLY — header comments shortened in the applied text; both function bodies and GRANT/REVOKE identical (owner approval 2026-10-27, #2841) |
+| `20261027231000` | `20261028034356` | list_invitations_for_me_source_slug_v1 | CONTENT_ONLY — the approval comment is not in the applied text; function body (production body + one `external_source_slug` key, verified by md5 of the body without it) and REVOKE/GRANT identical (owner approval 2026-10-28, #2846) |
+| `20261027210000` | `20261028044705` | external_referral_reprocess_candidates_v2 | CONTENT_ONLY — header comments shortened in the applied text; function body and REVOKE/GRANT identical (owner approval 2026-10-28, #2843) |
+| `20261028070000` | `20261028081810` | referral_send_address_guard_v1 | CONTENT_ONLY — header comments and the `begin;`/`commit;` wrapper not in the applied text; all six function bodies identical to the repo (md5 of `prosrc` checked 2026-10-28 08:18Z), REVOKE/GRANT identical; partner-row fingerprint unchanged by the apply (owner approval 2026-10-28, #2855 at 35e749fc3) |
+| `20261028090000` | `20261028091725` | resolve_reservation_exact_window_v1 | CONTENT_ONLY — header comments and the `begin;`/`commit;` wrapper not in the applied text; function body identical to the repo (md5 of `prosrc` 34e81b4d, checked 2026-10-28 09:17Z), REVOKE/GRANT identical; partner-row fingerprint unchanged (owner approval 2026-10-28, #2858 at d0159eb) |
+| `20261028123000` | `20261028161106` | synthetic_demand_cross_org_readers_v1 | CONTENT_ONLY — header comments and the `begin;`/`commit;` wrapper not in the applied text; all six function bodies identical to the repo (md5 of normalized `prosrc` checked 2026-10-28 16:11Z), REVOKE/GRANT identical (readers: authenticated only; helpers: owner only); before/after role simulation: real agency, worker and team readers lose exactly the synthetic needs, the QA identity keeps them, anon 42501 (owner approval 2026-10-28, #2876 at a3a10eb7d) |
+| `20261029190000` | `20261029180012` | worker_board_need_skill_slugs_v1 | CONTENT_ONLY — header comments and the `begin;`/`commit;` wrapper not in the applied text; function body identical to the repo (normalized `prosrc` md5 a9a3744c, checked 2026-10-29 18:00Z), ACL `postgres`+`authenticated` unchanged, the one dependent RLS policy recreated with the same INSERT/permissive/authenticated check; pre-apply state equalled the tested one (body md5 964b1b54, no migration since 20261028161106); after apply, a real-worker role simulation reads the board with synthetic needs hidden, an interest insert on a visible need is accepted and on a synthetic need refused (42501), and no row is left behind. No backfill (owner approval 2026-10-29, #2887 at dbd1363ef) |

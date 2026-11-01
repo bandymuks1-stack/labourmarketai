@@ -9,5 +9,6 @@
   "unemployed": "[EN] Unemployed",
   "volunteer": "[EN] Volunteer",
   "intern": "Praktikant",
-  "external_manager": "Extern chef (beställare)"
+  "external_manager": "Extern chef (beställare)",
+  "other": "Annan relation"
 }

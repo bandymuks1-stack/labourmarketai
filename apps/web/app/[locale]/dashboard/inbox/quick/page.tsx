@@ -8,6 +8,11 @@ import { fetchBatchExceptions } from "@/lib/journal/batch-review";
 import { createClient } from "@/lib/supabase/server";
 import { utcDayKey, utcTodayKey } from "@/lib/time/display";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/inbox/quick");
+
 
 /** One-Tap Confirm (S3.5) — the manager's mobile-first confirm queue. Same
  *  gated reviewable set as the inbox, same write RPCs; this view only cuts

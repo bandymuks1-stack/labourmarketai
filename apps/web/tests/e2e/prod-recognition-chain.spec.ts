@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { inviteCapGate } from "./invite-cap";
-import { test, expect, type Browser, type Page } from "@playwright/test";
+import { test, expect, type Browser, type Page } from "./prod-walk";
 
 /**
  * PRODUCTION — A POSITIVE RECOGNITION FROM REAL EVIDENCE (owner 2026-10-12 §4: prove it with a

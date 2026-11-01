@@ -195,6 +195,48 @@ export type ProjectTeamAssignmentsResult =
   | { readonly status: "unavailable" };
 
 const MISSING = new Set(["42P01", "42703", "PGRST205", "42883", "PGRST202"]);
+/** The names door (20261021092000) is not installed yet. */
+const NAMES_DOOR_MISSING = new Set(["42883", "PGRST202"]);
+
+/**
+ * Each team's name, keyed by team organization. A buyer's project manager is
+ * not a member of the brigade it hired, so `organizations_select` hides the
+ * team's row and a direct read names nobody ("Komanda" for every team). The
+ * database answers the manager of the PROJECT through
+ * `list_team_assignment_names_v1` (can_manage_project, names only). A team the
+ * door did not name — the caller is the team's own member or owner rather than
+ * a manager of the project, or the door is not installed yet — is read as
+ * before, through `organizations` under the caller's RLS.
+ */
+async function teamNamesOf(
+  supabase: SupabaseClient,
+  rows: readonly { id: string; team_org_id: string }[],
+  namesRes: { data: unknown; error: { code?: string } | null },
+): Promise<Map<string, string | null>> {
+  const names = new Map<string, string | null>();
+  if (namesRes.error) {
+    if (!NAMES_DOOR_MISSING.has(namesRes.error.code ?? "")) {
+      console.error("[projects] team names read failed:", namesRes.error.code);
+    }
+  } else {
+    const teamOf = new Map(rows.map((r) => [r.id, r.team_org_id]));
+    for (const n of (namesRes.data ?? []) as { assignment_id: string; team_name: string | null }[]) {
+      const team = teamOf.get(n.assignment_id);
+      if (team && n.team_name) names.set(team, n.team_name);
+    }
+  }
+  const unnamed = [...new Set(rows.map((r) => r.team_org_id))].filter((id) => !names.has(id));
+  if (unnamed.length === 0) return names;
+  const teamsRes = await asAny(supabase)
+    .from("organizations")
+    .select("id, display_name")
+    .in("id", unnamed)
+    .limit(READ_LIMIT);
+  for (const t of (teamsRes.data ?? []) as { id: string; display_name: string | null }[]) {
+    names.set(t.id, t.display_name);
+  }
+  return names;
+}
 
 /**
  * The ACTIVE team assignments on these projects, each with the members the
@@ -226,22 +268,15 @@ export async function getProjectTeamAssignments(
   }[];
   if (rows.length === 0) return { status: "ok", byProject: new Map() };
 
-  const [membersRes, teamsRes] = await Promise.all([
+  const [membersRes, namesRes] = await Promise.all([
     asAny(supabase).rpc("list_team_assignment_members_v1", { p_assignment_ids: rows.map((r) => r.id) }),
-    asAny(supabase)
-      .from("organizations")
-      .select("id, display_name")
-      .in("id", [...new Set(rows.map((r) => r.team_org_id))])
-      .limit(READ_LIMIT),
+    asAny(supabase).rpc("list_team_assignment_names_v1", { p_assignment_ids: rows.map((r) => r.id) }),
   ]);
   // Members that could not be read are NOT "no members": an unreadable list is unavailable.
   if (membersRes.error) {
     return MISSING.has(membersRes.error.code ?? "") ? { status: "needs_migration" } : { status: "unavailable" };
   }
-  const names = new Map<string, string | null>();
-  for (const t of (teamsRes.data ?? []) as { id: string; display_name: string | null }[]) {
-    names.set(t.id, t.display_name);
-  }
+  const names = await teamNamesOf(supabase, rows, namesRes);
   const members = groupMembers(
     (membersRes.data ?? []) as {
       assignment_id: string;

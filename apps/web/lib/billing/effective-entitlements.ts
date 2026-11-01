@@ -1,10 +1,11 @@
 import "server-only";
+import { effectivePilotPassStatus } from "@/lib/billing/pilot-pass-core";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSuperadmin, isSuperadminFor } from "@/lib/auth/superadmin";
-import { getBillingConfig } from "@/lib/billing/config";
+import { getBillingConfigFor } from "@/lib/billing/config";
 import {
   resolveEntitlements,
   entitlementAllows,
@@ -39,6 +40,10 @@ function pickAudience(roles: readonly string[]): PlanAudience {
 
 export interface EffectiveEntitlements extends EntitlementContext {
   readonly profileId: string | null;
+  /** The provider subscription ends at the period end instead of renewing (cancelled in the portal). */
+  readonly cancelAtPeriodEnd: boolean;
+  /** End of the current paid period (ISO), as the provider reported it; null when unknown. */
+  readonly currentPeriodEnd: string | null;
 }
 
 /**
@@ -58,9 +63,12 @@ export type EntitlementCaller = {
 };
 
 export async function getEffectiveEntitlements(caller?: EntitlementCaller): Promise<EffectiveEntitlements> {
-  const config = getBillingConfig();
-  // Enforcement is on under either active adapter state (test, or owner-armed live).
-  const billingActive = config.state === "stripe_test" || config.state === "stripe_live";
+  // Enforcement is on under either active adapter state (test, or owner-armed live)
+  // — and, under a pilot list, only for a listed organization: the config is
+  // re-read for the resolved subject below. A person / signed-out reader is never
+  // in a pilot (only the organization plan is sold).
+  let config = getBillingConfigFor(null);
+  let billingActive = config.state === "stripe_test" || config.state === "stripe_live";
 
   const supabase = caller?.supabase ?? (await createClient());
   const user = caller
@@ -76,7 +84,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
       subscriptionStatus: null,
       manualOverridePlanKey: null,
     });
-    return { ...ctx, profileId: null };
+    return { ...ctx, profileId: null, cancelAtPeriodEnd: false, currentPeriodEnd: null };
   }
 
   const isAdmin = caller ? await isSuperadminFor(supabase, user.id) : await isSuperadmin();
@@ -104,6 +112,8 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
   const subject: BillingSubject | null = caller
     ? { type: "organization", id: caller.organizationId }
     : (await resolveBillingSubject()).subject;
+  config = getBillingConfigFor(subject?.type === "organization" ? subject.id : null);
+  billingActive = config.state === "stripe_test" || config.state === "stripe_live";
 
   // THE ORGANIZATION'S CAPABILITY, NOT THE PERSON'S LEGACY ROLE ROW. An
   // organization subject was proven from the caller's own active governance
@@ -121,6 +131,8 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
   // not applied yet → null, i.e. free/permissive).
   let subscriptionPlanKey: string | null = null;
   let subscriptionStatus: SubStatus | null = null;
+  let cancelAtPeriodEnd = false;
+  let currentPeriodEnd: string | null = null;
   let manualOverridePlanKey: string | null = null;
   // MODE SCOPE (production defect measured 2026-09-22): admission
   // (`findScopedSubscription`) and the customer lookup filter by the
@@ -162,7 +174,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
     }
     subsQueryResult = await asAny(reader)
       .from("billing_subscriptions")
-      .select("plan_key, status, provider_subscription_id, updated_at")
+      .select("plan_key, status, provider_subscription_id, updated_at, cancel_at_period_end, current_period_end")
       .eq("organization_id", subject.id)
       .eq("test_mode", config.testMode)
       .order("updated_at", { ascending: false });
@@ -173,7 +185,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
   } else {
     subsQueryResult = await asAny(supabase)
       .from("billing_subscriptions")
-      .select("plan_key, status, provider_subscription_id, updated_at, origin_organization_id")
+      .select("plan_key, status, provider_subscription_id, updated_at, cancel_at_period_end, current_period_end, origin_organization_id")
       .eq("owner_id", user.id)
       .eq("test_mode", config.testMode)
       .is("origin_organization_id", null)
@@ -182,7 +194,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
       // legacy schema — every row is personal by definition
       subsQueryResult = await asAny(supabase)
         .from("billing_subscriptions")
-        .select("plan_key, status, provider_subscription_id, updated_at")
+        .select("plan_key, status, provider_subscription_id, updated_at, cancel_at_period_end, current_period_end")
         .eq("owner_id", user.id)
         .eq("test_mode", config.testMode)
         .order("updated_at", { ascending: false });
@@ -203,7 +215,11 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
     );
     if (real) {
       subscriptionPlanKey = real.plan_key ?? null;
-      subscriptionStatus = (real.status as SubStatus) ?? null;
+      // A pilot pass past its end reads `expired` (nothing renews it and no
+      // provider event will arrive to end it — pilot-pass-core).
+      subscriptionStatus = (effectivePilotPassStatus(real, new Date()) as SubStatus) ?? null;
+      cancelAtPeriodEnd = real.cancel_at_period_end === true;
+      currentPeriodEnd = typeof real.current_period_end === "string" ? real.current_period_end : null;
     }
   } else if (error.code !== RELATION_ABSENT) {
     // a non-absent error → stay free/permissive, never throw into a page
@@ -217,7 +233,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
     subscriptionStatus,
     manualOverridePlanKey,
   });
-  return { ...ctx, profileId: user.id };
+  return { ...ctx, profileId: user.id, cancelAtPeriodEnd, currentPeriodEnd };
 }
 
 /** Server enforcement helper for routes/actions (not just UI hiding). */

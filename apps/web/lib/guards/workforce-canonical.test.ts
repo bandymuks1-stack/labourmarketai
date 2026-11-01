@@ -57,6 +57,10 @@ const PURE_MODULES = [
   // denominator (calendar days) because the schema records no contracted
   // hours, and it withholds a ratio rather than build one on a floor.
   "utilisation.ts",
+  // UX review 2026-10-24 (row 3.6): the CAL-7 `unknown` verdict in words.
+  // Pure: it only picks a sentence from the verdict's own `gaps`; it reads
+  // nothing, writes nothing and restates no overlap rule.
+  "reservation-unknown-reason.ts",
 ] as const;
 
 const sourceFiles = readdirSync(WORKFORCE_DIR).filter(

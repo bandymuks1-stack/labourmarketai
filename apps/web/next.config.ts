@@ -171,6 +171,8 @@ const ENTRY_SHORTCUT_REDIRECTS = [
   // Commonly guessed legal URLs (and what OAuth app consoles ask for). The
   // canonical pages live under /legal/…; these 404'd before.
   { source: `/${LOCALE}/privacy`, destination: "/:locale/legal/privacy", permanent: true },
+  // The privacy policy URL an OAuth console (e.g. Meta) may hold.
+  { source: `/${LOCALE}/privacy-policy`, destination: "/:locale/legal/privacy", permanent: true },
   { source: `/${LOCALE}/terms`, destination: "/:locale/legal/terms", permanent: true },
 ] as const;
 
@@ -194,6 +196,10 @@ const nextConfig: NextConfig = {
     // actions; Next's 1 MB default rejected anything larger before the handler
     // ran. Voice (25 MB) does NOT fit here — it needs a non-action upload path.
     serverActions: { bodySizeLimit: "5mb" },
+    // Audit 2026-10-16 (U-9): the two libraries every page imports by named
+    // export are tree-shaken per import instead of pulling their barrels into
+    // the client graph. Build-time only; no runtime behaviour changes.
+    optimizePackageImports: ["lucide-react", "framer-motion"],
   },
   async redirects() {
     return [...LEGACY_HOST_REDIRECTS, ...W1_CANONICAL_REDIRECTS, ...ENTRY_SHORTCUT_REDIRECTS];

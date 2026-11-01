@@ -53,19 +53,21 @@ function workLogDateField(page: Page) {
 }
 
 async function saveThroughConfirm(page: Page): Promise<void> {
-  // preview -> explicit confirm: the first "Išsaugoti" shows "Patvirtinti
-  // įrašą?", the second commits. Never auto-confirm in product code; the
-  // test simply performs both human steps.
+  // preview -> explicit confirm: "Toliau" shows "Patvirtinti įrašą?", and
+  // "Išsaugoti" commits (the first button saves nothing, so it no longer
+  // says "Išsaugoti" — activation audit fix #5). Never auto-confirm in
+  // product code; the test simply performs both human steps.
   //
   // It WAITS FOR EACH STEP instead of sleeping a fixed 2 s. The old loop
   // read "no confirm prompt after 2 s" as "already saved" and stopped, so on
   // a loaded machine (the prompt arriving at 2.5 s) nothing was committed and
   // the read-back later failed as if the entry had been lost (isolated run
   // 2026-10-16: no row in journal_entries for that marker).
+  const next = () => page.getByRole("button", { name: /^Toliau$/ }).last();
   const save = () => page.getByRole("button", { name: /^Išsaugoti$/ }).last();
   const confirmStep = page.getByText(/Patvirtinti įrašą/i);
   const done = page.locator('[data-testid="worklog-done"]');
-  await save().click();
+  await next().click();
   await expect(confirmStep.or(done).first()).toBeVisible({ timeout: 30_000 });
   if (!(await done.isVisible())) await save().click();
   await expect(done, "the work-log save never reached its saved state").toBeVisible({

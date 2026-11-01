@@ -48,6 +48,7 @@ function worker(p: Partial<WorkerOps> & { workerId: string }): WorkerOps {
     operationalStatus: null,
     readinessItems: [],
     docsMissing: 0,
+    docsToAgree: 0,
     docsReceived: 0,
     docsChecked: 0,
     docsBlocked: 0,
