@@ -1,17 +1,9 @@
 -- ROLLBACK for 20261020040457_20261020026000_workspace_pins_language_set_v2.sql
 -- RECONSTRUCTED after the production apply; the production ledger stored NO rollback.
--- Same change as supabase/migrations/20261020025900_workspace_pins_language_set_v2.sql
--- (the renumbered repo copy); back to the 11-code set. Refuses while a label is stored in uk or ka.
-begin;
-do $$
-begin
-  if exists (select 1 from public.workspace_pins where original_language in ('uk','ka')) then
-    raise exception 'rollback refused: pin labels exist in uk/ka';
-  end if;
-end $$;
-alter table public.workspace_pins drop constraint if exists workspace_pins_original_language_chk;
-alter table public.workspace_pins
-  add constraint workspace_pins_original_language_chk
-    check (original_language is null
-           or original_language in ('lt','en','pl','de','nl','lv','et','da','no','sv','ru'));
-commit;
+-- Intentionally a no-op. This restored migration REPEATS the change of the renumbered repo
+-- copy 20261020025900_workspace_pins_language_set_v2.sql, which sorts before it and already
+-- sets workspace_pins_original_language_chk to the same 13-code list. The state before this
+-- migration therefore already holds that constraint; returning to the 11-code set is the
+-- rollback of 20261020025900 (supabase/rollbacks/20261020025900_workspace_pins_language_set_v2.down.sql),
+-- not of this file.
+select 1;
