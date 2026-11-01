@@ -45,6 +45,17 @@ Later on 2026-11-01 (build 3b7eafbe4, after #2897): **3.6 → `LIVE_VERIFIED`** 
 assignment); prod walk mcp-agents 41296658531 green on the build that carries #2895 (no MCP regression). J-7 → complete. Then #2900/#2901: the production MCP walk records and corrects a Work Journal entry —
 mcp-agents 41307643008 on c3df7431d 10/10, so the #2895 correction over MCP is production-verified (2.19, 2.21, 10.1).
 
+Later on 2026-11-01 (builds 7f8bfaa2a, 681e6678f, 4a5b45828), fresh production proof without a status change:
+- mobile web at 390 px (8.11): mobile-surfaces 6/6, run twice;
+- notifications (5.10): notifications-inapp 8/8;
+- worker records and exports (2.22, 2.33, 2.34): worker-records-exports 8/8;
+- bookings (5.13, 6.7-6.9): orders-bookings 16/17, with B-1 skipped for want of a synthetic customer;
+- roster and workspace isolation (3.21-3.32, 1.10): org-roster 7/7;
+- worker data isolation (1.11): worker-identity-split 5/5;
+- chat continuity (5.2): chat-continuity.
+
+The orders-bookings failures on the way were test defects (#2905, #2907). The gate that keeps such defects out is #2908: every Playwright spec must load in `quality`.
+
 ### Reconciliation — where 275 and 277 come from
 
 | Step | Rows | Evidence |
@@ -125,8 +136,8 @@ The 19 journeys (rows in brackets):
 | 1.7 | Organization verification | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): S-2 verification status shown, honest | yes |  |
 | 1.8 | Multi-capability organization | BLOCKED | — | owner decision ORG-2 | unproven |  |
 | 1.9 | Memberships, invitations, roles | LIVE_VERIFIED | 2026-10-28 | isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-9 invitation link → sign-up through it → stored accepted by that person; brigade-formation 39795574869 10-22 | yes | invited-worker production walk 41280970767 (2026-11-01) did not run: the synthetic invited identity is not provisioned (owner step, parked) — invited path proven in isolated CI only |
-| 1.10 | Workspace context + switching | LIVE_VERIFIED | 2026-10-23 | org-roster R-7 workspace switching run 39969976834 10-23 | yes |  |
-| 1.11 | Cross-org isolation | LIVE_VERIFIED | 2026-10-28 | #2876 applied (ledger 20261028161106), verified in production 2026-10-28; earlier: worker-identity-split 39602569732 — isolation details in the private record (owner rule) | yes |  |
+| 1.10 | Workspace context + switching | LIVE_VERIFIED | 2026-11-01 | prod walk org-roster 41318490491 2026-11-01 on 681e6678f (7/7) R-7: another organization sees none of the roster, anonymous refused; earlier: org-roster R-7 workspace switching run 39969976834 10-23 | yes |  |
+| 1.11 | Cross-org isolation | LIVE_VERIFIED | 2026-11-01 | prod walk worker-identity-split 41318189146 2026-11-01 on 681e6678f (5/5): owner, manager and agency get only workers they have a working relationship with; anonymous none; earlier: #2876 applied (ledger 20261028161106), verified in production 2026-10-28; earlier: worker-identity-split 39602569732 — isolation details in the private record (owner rule) | yes |  |
 | 1.12 | Invitation / referral network | LIVE_VERIFIED | 2026-10-28 | #2855 (ledger 20261028081810) + #2858 (20261028091725) applied, verified, deployed a4cbc9b9; send ledger shows no duplicate recipient; earlier: 2026-10-27 production: partner referrals arrive through the referral door (pending join_platform with consent, latest 2026-10-27), are e-mailed (41 sent) an | yes |  |
 | 1.13 | Transactional e-mail | LIVE_VERIFIED | 2026-10-28 | partner invitation mails delivered via the ledgered provider path (10-27/28); earlier: 2026-10-27 production: owner configured SMTP (LM_SMTP_PASS + INVITE_EMAIL_PROVIDER=smtp); [volume withheld] e-mails accepted by the provider 20:11-20:13 UTC (email_send_ledger_v1 [volume withheld], delivery_status | yes |  |
 | 1.14 | Staff review notice | LIVE_VERIFIED | 2026-10-21 | staff-review-notice 39604913210 10-21 | yes |  |
@@ -157,7 +168,7 @@ The 19 journeys (rows in brackets):
 | 2.19 | Work Journal | LIVE_VERIFIED | 2026-11-01 | prod walk fresh-activation 41279196446 2026-11-01 on 38bfb9d93: a fresh worker's first journal entry is saved and reaches the Living CV; prod walk journal-confirm 41281666555 2026-11-01 on 38bfb9d93 (3/3); #2893 night/split shifts + retried confirm (CI); #2895 own-entry correction over MCP/mobile LIVE over MCP — prod walk mcp-agents 41307643008 2026-11-01 on c3df7431d (10/10, A-9: entry recorded and corrected over MCP, one live version, spent token and replaced version refused). Reclassified 2026-11-01: the core journal is proven; the AI part is row 10.9; earlier: #2884 live 91a1a39c: work-context choice fix, verified on a production draft; earlier: ai-off-honesty run 40191899327 10-25 | yes | AI suggestions stay BLOCKED in 10.9 (owner AI keys); the honest off-state is proven |
 | 2.20 | Manager review / confirm | LIVE_VERIFIED | 2026-11-01 | prod walk journal-confirm 41281666555 2026-11-01 on 38bfb9d93 (3/3); earlier: journal-confirm run 39788692498 (green) 10-22 | yes |  |
 | 2.21 | Work verification 8 states | LIVE_VERIFIED | 2026-11-01 | prod walk work-verification 41280396705 2026-11-01 on 38bfb9d93 (6/6); #2895 correction door over MCP: prod walk mcp-agents 41307643008 2026-11-01 on c3df7431d (10/10, A-9: entry recorded and corrected over MCP, one live version, spent token and replaced version refused); earlier: prod walk work-verification run 40300016332 (2026-10-26): V-1..V-6 6/6 — sent to manager, review queue with authority only, changes requested, correction pending (counted once, correction card names the decision it answe… | yes |  |
-| 2.22 | Photos / task evidence | LIVE_VERIFIED | 2026-10-25 | worker-records-exports run 40186822215 10-25 (8/8 green): P-1 a journal entry with a photo saved and shown on fresh load | yes |  |
+| 2.22 | Photos / task evidence | LIVE_VERIFIED | 2026-11-01 | prod walk worker-records-exports 41312948857 2026-11-01 on 7f8bfaa2a (8/8) P-1; earlier: worker-records-exports run 40186822215 10-25 (8/8 green): P-1 a journal entry with a photo saved and shown on fresh load | yes |  |
 | 2.23 | Hours metrics/allocations/timesheets | LIVE_VERIFIED | 2026-10-23 | project-execution E-11 run 39968362991 10-23 | yes |  |
 | 2.24 | Experience records + disputes | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-15; earlier: profile-cv-history run 40182648408 10-25 (21/21 green): P-15 experience records open with right of reply | yes |  |
 | 2.25 | Work in numbers | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-17; earlier: profile-cv-history run 40182648408 10-25 (21/21 green): P-17 work in numbers from own recorded work | yes |  |
@@ -168,8 +179,8 @@ The 19 journeys (rows in brackets):
 | 2.30 | Voice Work Journal | BLOCKED | — | STT host (owner) | unproven |  |
 | 2.31 | Journal hash chain | LIVE_VERIFIED | 2026-10-24 | journal-confirm run 40083466362 10-24 (3/3): worker records entry, employer approves, worker sees it confirmed on Living CV and Work in Numbers; DB: the walk's entries are hash_version 2 (chained); integrity guards prove… | yes |  |
 | 2.32 | Counterparty review | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-16; earlier: profile-cv-history run 40182648408 10-25 (21/21 green): P-16 counterparty review readable on both sides | yes |  |
-| 2.33 | Gallery | LIVE_VERIFIED | 2026-10-25 | worker-records-exports run 40186822215 10-25 (8/8 green): G-1/G-2 gallery shows the worker's own photos (390 px), other worker's gallery never carries them | yes |  |
-| 2.34 | Journal + hours export | LIVE_VERIFIED | 2026-10-25 | worker-records-exports run 40186822215 10-25 (8/8 green): E-1/E-2 journal + hours CSV export downloads; another worker's export never carries this day; anonymous refused | yes |  |
+| 2.33 | Gallery | LIVE_VERIFIED | 2026-11-01 | prod walk worker-records-exports 41312948857 2026-11-01 on 7f8bfaa2a (8/8) G-1/G-2 on the phone; earlier: worker-records-exports run 40186822215 10-25 (8/8 green): G-1/G-2 gallery shows the worker's own photos (390 px), other worker's gallery never carries them | yes |  |
+| 2.34 | Journal + hours export | LIVE_VERIFIED | 2026-11-01 | prod walk worker-records-exports 41312948857 2026-11-01 on 7f8bfaa2a (8/8) E-1/E-2; earlier: worker-records-exports run 40186822215 10-25 (8/8 green): E-1/E-2 journal + hours CSV export downloads; another worker's export never carries this day; anonymous refused | yes |  |
 | 2.35 | Discoverability consent | LIVE_VERIFIED | 2026-11-01 | prod walk search-support-privacy 41283989921 2026-11-01 on 38bfb9d93 (20 green, 2 planned skips) P-8; earlier: search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): P-8 discoverability consent off/on persists | yes |  |
 
 ## Company operations & projects
@@ -196,18 +207,18 @@ The 19 journeys (rows in brackets):
 | 3.18 | Utilisation | LIVE_VERIFIED | 2026-10-26 | prod walk utilisation-planned-actual run 40295307338 (2026-10-26): U-0..U-3 8/8 — owner commits worker to dated project, committed days move on fresh load; EN + phone; employee and other org refused | yes |  |
 | 3.19 | Planned vs actual | LIVE_VERIFIED | 2026-10-26 | prod walk run 40295307338 (2026-10-26): P-1..P-4 — three stages planned 5 days, started+finished; fresh load shows planned vs actual gap; EN + phone; other org + employee refused | yes |  |
 | 3.20 | Shifts / rotas | LIVE_VERIFIED | 2026-10-28 | rota-repeat 40659497014; earlier: prod-qa-walk rota-repeat 40018016745 10-23 (5/5): weekly Mon/Wed/Fri + 2-on/1-off saved via Repeat UI, clash WARNS but saves (planned_collides), persists after reload, bands correct on worker calendar, cancel clears; DB:… | yes |  |
-| 3.21 | Roster | LIVE_VERIFIED | 2026-10-22 | org-roster R-1 39800182427 10-22 | yes |  |
-| 3.22 | People import | LIVE_VERIFIED | 2026-10-24 | org-roster run 40052543761 (green) 10-24 | yes | spec fault fixed #2667 |
-| 3.23 | On/offboarding runs | LIVE_VERIFIED | 2026-10-23 | org-roster R-3 run 39969976834 10-23 | yes |  |
+| 3.21 | Roster | LIVE_VERIFIED | 2026-11-01 | prod walk org-roster 41318490491 2026-11-01 on 681e6678f (7/7) R-1; earlier: org-roster R-1 39800182427 10-22 | yes |  |
+| 3.22 | People import | LIVE_VERIFIED | 2026-11-01 | prod walk org-roster 41318490491 2026-11-01 on 681e6678f (7/7) R-2; earlier: org-roster run 40052543761 (green) 10-24 | yes | spec fault fixed #2667 |
+| 3.23 | On/offboarding runs | LIVE_VERIFIED | 2026-11-01 | prod walk org-roster 41318490491 2026-11-01 on 681e6678f (7/7) R-3; earlier: org-roster R-3 run 39969976834 10-23 | yes |  |
 | 3.24 | Approvals / workflows | LIVE_VERIFIED | 2026-10-28 | documents-approvals 40663181329; earlier: documents-approvals 40152566232 10-25 (walk passed) | yes |  |
 | 3.25 | Management decisions + reviews | LIVE_VERIFIED | 2026-10-28 | company-governance 40687308231 (2026-10-28) D-1..D-5 green; prod walk company-governance run 40296167812 (2026-10-26): D-1..D-5 — decision draft, sent via approval template, approved in inbox, outcome persists RU + phone, employee and other org refused | yes |  |
-| 3.26 | Instructions | LIVE_VERIFIED | 2026-10-24 | org-roster run 40052543761 (green) 10-24 | yes |  |
+| 3.26 | Instructions | LIVE_VERIFIED | 2026-11-01 | prod walk org-roster 41318490491 2026-11-01 on 681e6678f (7/7) R-5; earlier: org-roster run 40052543761 (green) 10-24 | yes |  |
 | 3.27 | Company history + data quality | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-20; #2894 company period split (CI); earlier: profile-cv-history run 40182648408 10-25 (21/21 green): P-20 company history opens in Alfa workspace | yes |  |
 | 3.28 | Manager chat answers | LIVE_VERIFIED | 2026-10-24 | manager-chat run 40054481359 10-24 (5/5) | yes |  |
 | 3.29 | Organization documents register | LIVE_VERIFIED | 2026-10-25 | documents-approvals 40152566232 10-25 (walk passed) | yes |  |
-| 3.30 | Company settings + help request | LIVE_VERIFIED | 2026-10-24 | org-roster R-4 run 40052543761 10-24 (7/7): settings + help request | yes | 10-23 failure was a walk-spec defect (#2702) |
+| 3.30 | Company settings + help request | LIVE_VERIFIED | 2026-11-01 | prod walk org-roster 41318490491 2026-11-01 on 681e6678f (7/7) R-4; earlier: org-roster R-4 run 40052543761 10-24 (7/7): settings + help request | yes | 10-23 failure was a walk-spec defect (#2702) |
 | 3.31 | Reporting / export | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-21; earlier: profile-cv-history run 40182648408 10-25 (21/21 green): P-21 company report opens, export downloads | yes |  |
-| 3.32 | Assets / tools | LIVE_VERIFIED | 2026-10-23 | org-roster R-6 assets issue/return run 39969976834 10-23 | yes | D-2 fixed |
+| 3.32 | Assets / tools | LIVE_VERIFIED | 2026-11-01 | prod walk org-roster 41318490491 2026-11-01 on 681e6678f (7/7) R-6; earlier: org-roster R-6 assets issue/return run 39969976834 10-23 | yes | D-2 fixed |
 | 3.33 | Hours page | LIVE_VERIFIED | 2026-11-01 | prod walk company-chain 41283188592 2026-11-01 on 38bfb9d93 (13/13) H-1/H-2 company + agency; earlier: company-chain 39569833029 10-21; owner #2673 | yes |  |
 
 ## Demand, jobs & matching
@@ -246,7 +257,7 @@ The 19 journeys (rows in brackets):
 | ID | Function | Status | Last checked | Evidence (PR / commit / run) | In production | Remaining issue |
 |---|---|---|---|---|---|---|
 | 5.1 | Chat-first home | LIVE_VERIFIED | 2026-10-25 | ai-off-honesty run 40191899327 10-25 (12/13 green): B-3 chat opens the door for a known sentence, says 'not understood' for an unreadable one | yes |  |
-| 5.2 | Transcript persistence | LIVE_VERIFIED | 2026-10-28 | chat-continuity 40662743591; earlier: chat-continuity run 40042455002 (green) 10-23 | yes |  |
+| 5.2 | Transcript persistence | LIVE_VERIFIED | 2026-11-01 | prod walk chat-continuity 41322286924 2026-11-01 on 4a5b45828: a question survives a brand-new session; a thread never shows in another workspace; earlier: chat-continuity 40662743591; earlier: chat-continuity run 40042455002 (green) 10-23 | yes |  |
 | 5.3 | Single-use confirmations | LIVE_VERIFIED | 2026-10-21 | chat-confirm-once 39604342494 10-21 | yes |  |
 | 5.4 | Conversations / threads | LIVE_VERIFIED | 2026-10-21 | agency-chain 39601269995 10-21 | yes |  |
 | 5.5 | Message translation | BLOCKED | 2026-10-26 | ai-off-honesty run 40191899327 10-25: A-4/A-5 original English words shown labelled 'no translation' on phone; outsiders refused; re-proven 2026-10-26 prod walk ai-off-honesty run 40301607964 13/13 (honest off state; #27… | unproven | AI provider keys (owner) — honest off-state proven, the AI function itself not |
@@ -254,10 +265,10 @@ The 19 journeys (rows in brackets):
 | 5.7 | E-mail notifications | PASS_CI_ONLY | 2026-10-30 | isolated notification walk (40833394554, #2883): per-kind e-mail consent stored, invitation_accepted mail delivered; earlier: SMTP live since 2026-10-27 (invitation mails delivered to the provider); a notification e-mail (non-invitation kind) not yet observed in the send ledger | unproven | not walked in production |
 | 5.8 | Push | BLOCKED | — | #2712 merged; migration 20261023190255 applied (0 subscriptions, RLS on, no anon grant); channel OFF unless WEB_PUSH_ENABLED=true (code-verified) | unproven | owner: VAPID keys + real delivery test |
 | 5.9 | Weekly digest | PASS_CI_ONLY | 2026-10-30 | isolated digest walk (40833394554, #2883): one digest per week, mail delivered; earlier: search-support-privacy run 40215640433 S-4: the weekly digest's in-app channel control exists; a digest itself not seen (email needs SMTP) | unproven | by design a worker who visited that week gets the digest in-app only |
-| 5.10 | Attention / activity centre | LIVE_VERIFIED | 2026-10-25 | notifications-inapp run 40204616787 10-25 (8/8 green): N-5 activity centre lists the same stored event as read; N-3/N-4 bell row opens the thread and stays read after reload; N-6 phone 'mark all read'; N-7 no role detour | yes |  |
+| 5.10 | Attention / activity centre | LIVE_VERIFIED | 2026-11-01 | prod walk notifications-inapp 41312513056 2026-11-01 on 7f8bfaa2a (8/8), incl. N-6 mark-all-read on the phone; earlier: notifications-inapp run 40204616787 10-25 (8/8 green): N-5 activity centre lists the same stored event as read; N-3/N-4 bell row opens the thread and stays read after reload; N-6 phone 'mark all read'; N-7 no role detour | yes |  |
 | 5.11 | Worker calendar | LIVE_VERIFIED | 2026-10-23 | calendar-planning run 40007491242 (green) 10-23 | yes |  |
 | 5.12 | Availability | LIVE_VERIFIED | — | owner session write+revert | yes |  |
-| 5.13 | Booking request->accept->engagement | LIVE_VERIFIED | 2026-10-26 | orders-bookings run 40361384432 2026-10-26: O-0..O-8 all green - need posted, hand raised, dates proposed, withdrawn + re-proposed, worker ACCEPTS on the phone, company sees it and opens the conversation, booking in the … | yes | the acknowledged-overlap path stays RED #2795 (constraint not relaxed); plain accept works |
+| 5.13 | Booking request->accept->engagement | LIVE_VERIFIED | 2026-11-01 | prod walk orders-bookings 41321294873 2026-11-01 on 4a5b45828 (16/17; B-1 skipped: no synthetic customer identity, 6.4 has its own proof): need, hand raised, dates proposed, withdrawn + re-proposed, worker accepts on the phone, company opens the conversation, booking in the worker plan; earlier run 41311931938 stopped at O-4 on a test locator (fixed #2905/#2907, no product change); earlier: orders-bookings run 40361384432 2026-10-26: O-0..O-8 all green - need posted, hand raised, dates proposed, withdrawn + re-proposed, worker ACCEPTS on the phone, company sees it and opens the conversation, booking in the … | yes | the acknowledged-overlap path stays RED #2795 (constraint not relaxed); plain accept works |
 | 5.14 | Command finder + voice | LIVE_VERIFIED | — | owner #2673/#2679 (finder only) | yes |  |
 | 5.15 | Voice as equal door | NOT_VERIFIED | — | COM-8 corrected to PARTIAL/CODE_PROVEN (#2714): voice capture panel + turn policy exist | unproven | no prod voice walk |
 | 5.16 | Owner Telegram alerts | BLOCKED | — | owner bot token | unproven |  |
@@ -274,9 +285,9 @@ The 19 journeys (rows in brackets):
 | 6.3 | One discovery index | LIVE_VERIFIED | 2026-11-01 | prod walk marketplace 41284728549 2026-11-01 on 38bfb9d93 (6/6) M-3/M-5; earlier: marketplace-goods-services run 40164310896 10-25: listings and services found in the one market discovery | yes |  |
 | 6.4 | Buyer workspace | LIVE_VERIFIED | 2026-10-26 | buyer-workspace run 40377604733 2026-10-26 (owner-created synthetic buyer): B-0 onboarding via shipped wizard, B-[volume withheld] record saves + reads back, B-2 DRAFT request listed once, B-3 390 px no sideways scroll; … | yes | open security/permission item — details kept out of the public repository (owner rule) |
 | 6.6 | Proposals/contracts | LIVE_VERIFIED | 2026-10-25 | documents-approvals 40152566232 10-25 (walk passed) | yes |  |
-| 6.7 | Procurement | LIVE_VERIFIED | 2026-10-26 | orders-bookings run 40361384432 2026-10-26 PASS (re-proven) | yes |  |
-| 6.8 | Business trips | LIVE_VERIFIED | 2026-10-26 | orders-bookings run 40361384432 2026-10-26 PASS (re-proven) | yes | fixed by #2706 (rpc .catch crash) |
-| 6.9 | Finance records | LIVE_VERIFIED | 2026-10-26 | orders-bookings run 40361384432 2026-10-26 PASS (re-proven) | yes |  |
+| 6.7 | Procurement | LIVE_VERIFIED | 2026-11-01 | prod walk orders-bookings 41321294873 2026-11-01 on 4a5b45828 P-1; earlier: orders-bookings run 40361384432 2026-10-26 PASS (re-proven) | yes |  |
+| 6.8 | Business trips | LIVE_VERIFIED | 2026-11-01 | prod walk orders-bookings 41321294873 2026-11-01 on 4a5b45828 T-1; earlier: orders-bookings run 40361384432 2026-10-26 PASS (re-proven) | yes | fixed by #2706 (rpc .catch crash) |
+| 6.9 | Finance records | LIVE_VERIFIED | 2026-11-01 | prod walk orders-bookings 41321294873 2026-11-01 on 4a5b45828 F-1..F-4 (another organization export never carries the record); earlier: orders-bookings run 40361384432 2026-10-26 PASS (re-proven) | yes |  |
 | 6.10 | Project-cost calculator | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-7 project-cost calculator computes a result | yes |  |
 | 6.11 | Cross-border readiness | LIVE_VERIFIED | 2026-10-23 | live 10-23 public part | yes | copy D-2 |
 | 6.12 | Cross-border deals | NOT_IMPLEMENTED | — | registry NOT_BUILT: cross-border deals module | no | owner: decide whether 6.6 contracts + 6.11 cross-border readiness suffice |
@@ -337,7 +348,7 @@ The 19 journeys (rows in brackets):
 | 8.8 | SEO plumbing | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-9 robots, sitemap, canonical + hreflang to the apex | yes |  |
 | 8.9 | Public org profile | BLOCKED | 2026-10-26 | public-org-locales run 40205429467 10-25: S-10 skipped honestly - no organization has a published public profile (production count 0, 2026-10-26); publishing the synthetic Alfa profile would put a test object on a public… | unproven | owner: allow a synthetic public profile for the walk, or wait for a real organization to opt in |
 | 8.10 | Marketing site | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-1 landing + 4 marketing pages LT/EN/RU at 390 and 1280 | yes |  |
-| 8.11 | Mobile web | LIVE_VERIFIED | 2026-10-26 | mobile-surfaces run 40195784343 10-25 (5/5 green, after #2751/#2755/#2759): worker + manager at 390 px — 0 boxes past the edge on lt/ru dashboard, nl/de cv, hours, project operations (project-first), planning (notice in … | yes |  |
+| 8.11 | Mobile web | LIVE_VERIFIED | 2026-11-01 | prod walk mobile-surfaces 41311144346 2026-11-01 on 7f8bfaa2a (6/6) and 41317177981 on 681e6678f (6/6, bookings page added to the hydration check): manager and worker daily surfaces at 390 px; mobile WEB only, the native apps are 8.17/8.18; earlier: mobile-surfaces run 40195784343 10-25 (5/5 green, after #2751/#2755/#2759): worker + manager at 390 px — 0 boxes past the edge on lt/ru dashboard, nl/de cv, hours, project operations (project-first), planning (notice in … | yes |  |
 | 8.12 | PWA installability | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-10 every locale home links the manifest; served | yes |  |
 | 8.13 | Native app | BLOCKED | 2026-10-30 | shared native client proven per platform in 8.17 (Android) and 8.18 (iOS) on production build 84cc2f85; earlier: ARCH-6 + store accounts | unproven |  |
 | 8.14 | App links | BLOCKED | — | store accounts | unproven |  |
@@ -373,7 +384,7 @@ The 19 journeys (rows in brackets):
 | 9.22 | Env schema validation | LIVE_VERIFIED | — | zod env validation at load; deploy 39952179926 health=healthy, build 431385cf; rollback on unhealthy | yes | open security/permission item — details kept out of the public repository (owner rule) |
 | 9.23 | Security-definer governance | LIVE_VERIFIED | 2026-10-23 | prod 10-23: anon SECURITY DEFINER set = allowlist 9/9; PUBLIC exec 0/589 | yes | 3 functions mutable search_path (RED R-2) |
 | 9.24 | Security incident handling | LIVE_VERIFIED | — | live headers HSTS preload, CSP report-only, XFO DENY, nosniff, Referrer/Permissions-Policy; monitor issues + health probe + onRequestError + client-errors | yes | CSP has no report-uri |
-| 9.25 | CodeQL / dependency alerts | FAIL | 2026-10-30 | #2879, #2880, #2881 merged | no | open security/permission item — details kept out of the public repository (owner rule) |
+| 9.25 | CodeQL / dependency alerts | FAIL | 2026-11-01 | 2026-11-01: code-scanning alerts triaged (details in the private record); Dependabot alerts are disabled for the repository (owner setting); earlier: #2879, #2880, #2881 merged | no | open security/permission item — details kept out of the public repository (owner rule) |
 
 ## MCP & AI agents
 
@@ -436,7 +447,7 @@ The 19 journeys (rows in brackets):
 
 | ID | Function | Status | Last checked | Evidence (PR / commit / run) | In production | Remaining issue |
 |---|---|---|---|---|---|---|
-| 13.1 | VPS hosting + auto-deploy | FAIL | 2026-10-28 | 10-28 recurrence: admin-console 40668817886 (worker page timeout) and company-governance 40678088257 (D-1 chunk load timeout, ChunkLoadError in the app log) while the server answered normally; deploys green; 10-28 intermittent inbound loss from GitHub-hosted networks, host healthy; earlier: external | no | REGRESSION-class infra: GitHub-runner → VPS inbound loss now fails production walks; provider network fault probable, not proven; Hostinger ticket pending owner |
+| 13.1 | VPS hosting + auto-deploy | FAIL | 2026-11-01 | 2026-11-01: recurring VPS host CPU/memory exhaustion by a workload other than the app (the app itself stays within its own limit and uses little CPU in those windows), recurring several times a day since 2026-10-29; coincides with the 07:01 and 15:00 health-brake refusals (in-app runtime sampler; numbers in the private record); earlier: 10-28 recurrence: admin-console 40668817886 (worker page timeout) and company-governance 40678088257 (D-1 chunk load timeout, ChunkLoadError in the app log) while the server answered normally; deploys green; 10-28 intermittent inbound loss from GitHub-hosted networks, host healthy; earlier: external | no | REGRESSION-class infra: GitHub-runner → VPS inbound loss now fails production walks; provider network fault probable, not proven; Hostinger ticket pending owner |
 | 13.2 | Health probe + monitor | LIVE_VERIFIED | — | live | yes |  |
 | 13.3 | Prod QA walk harness | LIVE_VERIFIED | 2026-10-22 | role-routes run 39783147517 (green) 10-22 | yes |  |
 | 13.4 | Supabase capacity | PASS_CI_ONLY | 2026-10-25 | Supabase org plan=pro (get_organization 2026-10-25) | unproven |  |
