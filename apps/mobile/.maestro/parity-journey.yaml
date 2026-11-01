@@ -23,9 +23,10 @@
 #      re-read shows the newest one read.
 #   last. sign-out returns to the sign-in form.
 # Every step navigates by testID, never by a label that changes with the
-# device language. Keyboards are put away as in signed-in-journey.yaml:
-# Android by hideKeyboard; iOS by Return on a one-line box or a tap on the
-# screen title — never a drag.
+# device language. Every scroll CENTRES its target: one that stops at the
+# bottom edge sits under the iOS tab bar, which takes the tap. Keyboards are
+# put away as in signed-in-journey.yaml: Android by hideKeyboard; iOS by
+# Return on a one-line box or a tap on the screen title — never a drag.
 appId: ai.labourmarket.app
 name: parity-journey
 ---
@@ -71,6 +72,7 @@ name: parity-journey
       id: "journal-correct-back"
     direction: DOWN
     timeout: 20000
+    centerElement: true
 - waitForAnimationToEnd
 - tapOn:
     id: "journal-correct-review"
@@ -103,6 +105,7 @@ name: parity-journey
       id: "journal-correct-save"
     direction: DOWN
     timeout: 20000
+    centerElement: true
 - waitForAnimationToEnd
 - tapOn:
     id: "journal-correct-save"
@@ -115,6 +118,7 @@ name: parity-journey
       id: "journal-correct-back"
     direction: DOWN
     timeout: 20000
+    centerElement: true
 - waitForAnimationToEnd
 - tapOn:
     id: "journal-correct-back"
@@ -183,6 +187,7 @@ name: parity-journey
             id: "message-review"
           direction: DOWN
           timeout: 20000
+          centerElement: true
       - waitForAnimationToEnd
       - tapOn:
           id: "message-review"
@@ -199,6 +204,7 @@ name: parity-journey
                   id: "message-send"
                 direction: DOWN
                 timeout: 20000
+                centerElement: true
             - waitForAnimationToEnd
             - tapOn:
                 id: "message-send"
@@ -245,6 +251,7 @@ name: parity-journey
       id: "sign-out"
     direction: DOWN
     timeout: 30000
+    centerElement: true
 - waitForAnimationToEnd
 - tapOn:
     id: "sign-out"
