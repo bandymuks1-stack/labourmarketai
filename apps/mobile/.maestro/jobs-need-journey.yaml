@@ -165,11 +165,14 @@ name: jobs-need-journey
         id: "capability-retry"
     commands:
       - waitForAnimationToEnd
+# Centred: the last Today station can stop right at the bottom edge, where
+# the iOS tab bar takes the tap.
 - scrollUntilVisible:
     element:
       id: "today-open-need"
     direction: DOWN
     timeout: 30000
+    centerElement: true
 - waitForAnimationToEnd
 - tapOn:
     id: "today-open-need"

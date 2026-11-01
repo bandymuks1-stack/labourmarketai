@@ -171,7 +171,7 @@ jobs:
             : > "$CONSOLE"
             maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               apps/mobile/.maestro/signed-in-journey.yaml | tee -a "$CONSOLE" &&
             maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               -e NEED_SUBMIT=0               apps/mobile/.maestro/jobs-need-journey.yaml | tee -a "$CONSOLE" &&
-            maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               apps/mobile/.maestro/parity-journey.yaml | tee -a "$CONSOLE"
+            maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               -e MESSAGE_SEND=0               apps/mobile/.maestro/parity-journey.yaml | tee -a "$CONSOLE"
           }
           # On a failed attempt, print ONLY the test ids on screen (our own testID
           # strings, never text, values or a screenshot; at most ten averaged
@@ -210,7 +210,7 @@ jobs:
             else
               echo "IOS_JOBS_READ_JOURNEY_PROVEN: Today read, jobs search loaded, job opened (hand-off ok), empty need refused (no need written)"
             fi
-            echo "IOS_PARITY_JOURNEY_PROVEN: journal entry corrected (journal.correct_draft -> journal.correct_confirm); sign-out"
+            echo "IOS_PARITY_JOURNEY_PROVEN: journal entry corrected (journal.correct_draft -> journal.correct_confirm); conversation.list loaded, reply drafted when a conversation exists (not sent); sign-out"
           else
             on_screen_ids
             bash .github/scripts/mobile-origin-probe.sh "$ORIGIN" after-attempt-2
