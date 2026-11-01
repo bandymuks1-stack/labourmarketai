@@ -536,12 +536,19 @@ test("A-9. JOURNAL: the worker records an entry and corrects it — one live ver
   const workDate = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
   // "none": the synthetic worker may hold a walk's project assignment; these
   // hours are not that project's.
-  const draft = await tool(tok.worker, "journal_create_draft", {
-    notes: `${JOURNAL_TAG} klijavau plyteles vonios sienoje`,
-    workDate,
-    projectId: "none",
-  });
+  const input = { notes: `${JOURNAL_TAG} klijavau plyteles vonios sienoje`, workDate, projectId: "none" };
+  let draft = await tool(tok.worker, "journal_create_draft", input);
   ok(draft);
+  // The synthetic worker works in several synthetic organizations, so the
+  // assistant is asked which one the entry belongs to (nothing is saved yet);
+  // it answers as the person would — the stable QA-SYNTHETIC Alfa context.
+  if (draft.data?.status === "engagement_choice_required") {
+    const options = (draft.data.options ?? []) as Array<{ id: string; label: string }>;
+    const pick = options.find((o) => o.label.startsWith("QA-SYNTHETIC Alfa ")) ?? options[0];
+    expect(pick, `no engagement option offered: ${JSON.stringify(draft.data).slice(0, 300)}`).toBeTruthy();
+    draft = await tool(tok.worker, "journal_create_draft", { ...input, engagementContextId: pick.id });
+    ok(draft);
+  }
   const preview = draft.data?.preview as Record<string, unknown> | undefined;
   const confirmationToken = String(draft.data?.confirmationToken ?? "");
   expect(preview, `journal_create_draft gave no preview: ${JSON.stringify(draft.data)}`).toBeTruthy();
