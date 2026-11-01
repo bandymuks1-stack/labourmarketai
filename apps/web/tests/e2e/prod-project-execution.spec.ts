@@ -545,11 +545,16 @@ async function cleanUp(page: Page): Promise<void> {
     const row = assignmentRow(page, title);
     if ((await row.count()) === 0) continue;
     await row.getByTestId("assignment-end").click();
-    // The end action's own answer: the chip is marked ended, or says it failed.
-    await expect(
-      row.and(page.locator('[data-ended="true"]')).or(row.getByTestId("assignment-end-failed")),
-      `the end of ${title === PROJECT_A ? "A" : "B"} answered`,
-    ).toBeVisible({ timeout: 30_000 });
+    // The end action's own answer, in any of its shapes: the revalidated page
+    // reads active assignments only, so a successful end usually REMOVES the
+    // chip; before that re-render lands it is marked `data-ended="true"`; a
+    // refusal says so in the row. Persistence is proven below on a fresh load.
+    await expect(async () => {
+      const gone = (await row.count()) === 0;
+      const markedEnded = (await row.and(page.locator('[data-ended="true"]')).count()) > 0;
+      const refused = (await row.getByTestId("assignment-end-failed").count()) > 0;
+      expect(gone || markedEnded || refused, `the end of ${title === PROJECT_A ? "A" : "B"} answered`).toBe(true);
+    }).toPass({ timeout: 30_000, intervals: [500, 1_000, 2_000] });
   }
   await onFreshProjectsPage(page, async () => {
     for (const title of [PROJECT_A, PROJECT_B]) {
