@@ -84,6 +84,12 @@ export default function Screen() {
           />
           <Button
             variant="quiet"
+            testID="today-open-notifications"
+            label={t("today.openNotifications")}
+            onPress={() => router.push("/(shell)/notifications")}
+          />
+          <Button
+            variant="quiet"
             testID="today-open-messages"
             label={t("today.openMessages")}
             onPress={() => router.push("/(shell)/messages")}

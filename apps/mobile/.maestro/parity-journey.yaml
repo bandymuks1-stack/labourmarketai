@@ -18,6 +18,9 @@
 #      step fails). When the identity has a conversation, it is opened
 #      (conversation.get) and a reply is DRAFTED (message.send_draft) and
 #      previewed; it is SENT (message.send_confirm) only with MESSAGE_SEND=1.
+#   3. Notifications: Today opens Notifications; notification.list renders a
+#      LOADED read; when any is unread, notification.mark_all_read runs and the
+#      re-read shows the newest one read.
 #   last. sign-out returns to the sign-in form.
 # Every step navigates by testID, never by a label that changes with the
 # device language. Keyboards are put away as in signed-in-journey.yaml:
@@ -200,6 +203,35 @@ name: parity-journey
                 visible:
                   id: "message-sent"
                 timeout: 60000
+
+# --- 3. Notifications: the list is read; unread ones are marked read ---
+# Opening a row would hand some of them to the browser, so the journey uses
+# the bell's "mark all as read" (the synthetic identity's own read state).
+- tapOn:
+    id: "tab-today"
+- scrollUntilVisible:
+    element:
+      id: "today-open-notifications"
+    direction: DOWN
+    timeout: 30000
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-notifications"
+- extendedWaitUntil:
+    visible:
+      id: "notifications-loaded"
+    timeout: 60000
+- runFlow:
+    when:
+      visible:
+        id: "notifications-mark-all"
+    commands:
+      - tapOn:
+          id: "notifications-mark-all"
+      - extendedWaitUntil:
+          visible:
+            id: "notification-0-read"
+          timeout: 60000
 
 # --- last. Sign out, back to the form ---
 - tapOn:
