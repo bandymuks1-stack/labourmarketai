@@ -56,12 +56,29 @@ async function resetTo(page: Page, secret: string): Promise<number> {
   await page.locator('input[type="email"][name="email"]').fill(ADDRESS);
   await page.locator('form button[type="submit"]').first().click();
   const mail = await waitForMailLink(ADDRESS, since, RESET_LINK);
-  await page.goto(mail.link);
-  await page.waitForURL(/reset-password/, { timeout: 60_000 });
-  await page.locator('input[name="password"]').fill(secret);
-  await page.locator('input[name="confirm_password"]').fill(secret);
-  await page.locator('form button[type="submit"]').first().click();
-  await page.waitForURL(/\/lt\/(auth\/login|dashboard)/, { timeout: 60_000 });
+  // The link carries a live recovery token, and a Playwright navigation error
+  // repeats the URL in its message and call log, which the walk publishes as
+  // an artefact. Replace any such error with one that keeps neither.
+  let opened = true;
+  try {
+    await page.goto(mail.link);
+    await page.waitForURL(/reset-password/, { timeout: 60_000 });
+  } catch {
+    opened = false;
+  }
+  if (!opened) throw new Error("the reset link did not open the new-password form (URL withheld: it carries a token)");
+  // The form page's own URL may still carry the recovery session, so its
+  // errors are withheld the same way.
+  let saved = true;
+  try {
+    await page.locator('input[name="password"]').fill(secret);
+    await page.locator('input[name="confirm_password"]').fill(secret);
+    await page.locator('form button[type="submit"]').first().click();
+    await page.waitForURL(/\/lt\/(auth\/login|dashboard)/, { timeout: 60_000 });
+  } catch {
+    saved = false;
+  }
+  if (!saved) throw new Error("the new password was not saved (details withheld: the page URL may carry a token)");
   const { scroll, inner } = await page.evaluate(() => ({
     scroll: document.documentElement.scrollWidth,
     inner: window.innerWidth,
