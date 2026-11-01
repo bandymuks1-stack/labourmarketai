@@ -544,7 +544,7 @@ test("A-9. JOURNAL: the worker records an entry and corrects it — one live ver
   // it answers as the person would — the stable QA-SYNTHETIC Alfa context.
   if (draft.data?.status === "engagement_choice_required") {
     const options = (draft.data.options ?? []) as Array<{ id: string; label: string }>;
-    const pick = options.find((o) => /^QA-SYNTHETIC Alfa/.test(o.label)) ?? options[0];
+    const pick = options.find((o) => o.label.startsWith("QA-SYNTHETIC Alfa ")) ?? options[0];
     expect(pick, `no engagement option offered: ${JSON.stringify(draft.data).slice(0, 300)}`).toBeTruthy();
     draft = await tool(tok.worker, "journal_create_draft", { ...input, engagementContextId: pick.id });
     ok(draft);
