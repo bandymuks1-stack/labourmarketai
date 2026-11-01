@@ -279,6 +279,14 @@ Only items that genuinely need the owner. Resolved or reclassified items are rem
 - D-6 product question: training for engaged (non-member) workers (RED #2816).
 - #2844 legal wording; #2842 paid terms (legal).
 - `GOV-1` read-only DB secret for CI gates; product-truth owner decisions ORG-2, EVID-2, MKT-7, COM-6, COM-8.
+- **Open security blocker (2026-11-01): the live `migration-parity` gate in `quality` is SKIPPED.** The
+  read-only CI role cannot read the migration ledger, so repo ↔ production parity is never verified. The fix
+  is one column-level read grant to that role, with no other privilege. The exact SQL is in the private record.
+- **Backups (13.5):** add the scoped `SUPABASE_ACCESS_TOKEN` secret, so that `db-backup.yml` runs its restore proof (#2906).
+- **D-4 / D-5:** QA mailbox secrets plus merging RED #2903; dispatch `prod-qa-invited-provision` → `provision-invited`.
+- **Shared VPS (13.1):** option A (CPU weights) is LIVE since 2026-11-01 17:00 UTC (#2911, agentai#1226). The
+  72 h verdict is due 2026-11-04; the next free step (option C, Agentai CI-built images and staggered cycles)
+  is briefed and needs an Agentai session.
 
 Removed as resolved: #2855 and #2858 (APPLIED, LIVE_VERIFIED 2026-10-28, ledgers 20261028081810 /
 20261028091725); D-3 hardening (= #2855); Stripe TEST arming (OPTIONAL_TEST, not a launch blocker);
