@@ -43,10 +43,10 @@ export default function Screen() {
   const [visit, setVisit] = useState(0);
   useFocusEffect(useCallback(() => setVisit((n) => n + 1), []));
 
-  const done = () => {
-    if (router.canGoBack()) router.back();
-    else router.replace("/(shell)/journal");
-  };
+  // Always the journal, never `back()`: in the tab navigator "back" from a
+  // hidden station lands on the FIRST tab (Today), not the journal the
+  // person came from (Android signed-in run 41351579158).
+  const done = () => router.navigate("/(shell)/journal");
 
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
