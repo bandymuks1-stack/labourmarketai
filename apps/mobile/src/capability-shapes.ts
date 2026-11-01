@@ -474,3 +474,38 @@ export type NotificationItem = {
 };
 
 export type NotificationListData = { readonly items: readonly NotificationItem[] };
+
+/**
+ * `worker.projects.list` — the projects the caller is assigned to, the same
+ * read the worker's project page uses (RLS-scoped to their own assignments):
+ * active first, at most a handful, each with what the project still needs
+ * from THIS person (the manager's open checklist rows, labels verbatim) and
+ * the manager's latest instruction. `kind: "empty"` is a LOADED answer of
+ * no assignments; a failed read arrives as a failure, never as empty.
+ */
+export type WorkerProjectAsk = {
+  readonly itemKey: string;
+  readonly label: string;
+  readonly status: "needed" | "missing" | "rejected" | "expired";
+};
+
+export type WorkerProject = {
+  readonly projectId: string;
+  readonly title: string;
+  readonly place: string | null;
+  readonly assignmentStatus: "active" | "ended";
+  readonly asks: readonly WorkerProjectAsk[];
+  readonly instruction: {
+    readonly conversationId: string;
+    readonly authorName: string | null;
+    readonly text: string;
+  } | null;
+};
+
+export type WorkerProjectsData =
+  | {
+      readonly kind: "ok";
+      readonly projects: readonly WorkerProject[];
+      readonly activeCount: number;
+    }
+  | { readonly kind: "empty" };

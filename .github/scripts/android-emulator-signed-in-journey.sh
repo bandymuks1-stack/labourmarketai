@@ -92,8 +92,8 @@ echo "ANDROID_SIGNED_IN_JOURNEY_PROVEN: sign-in, Today figures read, journal ent
 summary "- ANDROID_SIGNED_IN_JOURNEY_PROVEN: sign-in → Today figures (read) → journal draft + confirm (write) → profile skills (read) → sign-out"
 
 # The web-parity screens (owner directive 2026-11-01): journal correction,
-# messages (reply SENT only with MESSAGE_SEND=1), notifications, …
+# messages (reply SENT only with MESSAGE_SEND=1), notifications, projects.
 # Reuses the session the flows above left signed in, and signs out at the end.
 maestro test   -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"   -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"   -e MESSAGE_SEND="${MESSAGE_SEND:-0}" apps/mobile/.maestro/parity-journey.yaml || { on_screen_ids; exit 1; }
-echo "ANDROID_PARITY_JOURNEY_PROVEN: journal entry corrected (journal.correct_draft -> journal.correct_confirm); conversation.list loaded, reply drafted when a conversation exists (sent only with MESSAGE_SEND=1); notification.list loaded, unread marked read; sign-out"
-summary "- ANDROID_PARITY_JOURNEY_PROVEN: journal correction (draft + confirm) → messages read + reply draft → notifications read + mark all read → sign-out"
+echo "ANDROID_PARITY_JOURNEY_PROVEN: journal entry corrected (journal.correct_draft -> journal.correct_confirm); conversation.list loaded, reply drafted when a conversation exists (sent only with MESSAGE_SEND=1); notification.list loaded, unread marked read; worker.projects.list loaded, first project opened when assigned; sign-out"
+summary "- ANDROID_PARITY_JOURNEY_PROVEN: journal correction (draft + confirm) → messages read + reply draft → notifications read + mark all read → projects read + detail → sign-out"

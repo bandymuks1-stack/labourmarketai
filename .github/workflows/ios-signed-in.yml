@@ -210,7 +210,7 @@ jobs:
             else
               echo "IOS_JOBS_READ_JOURNEY_PROVEN: Today read, jobs search loaded, job opened (hand-off ok), empty need refused (no need written)"
             fi
-            echo "IOS_PARITY_JOURNEY_PROVEN: journal entry corrected (journal.correct_draft -> journal.correct_confirm); conversation.list loaded, reply drafted when a conversation exists (not sent); notification.list loaded, unread marked read; sign-out"
+            echo "IOS_PARITY_JOURNEY_PROVEN: journal entry corrected (journal.correct_draft -> journal.correct_confirm); conversation.list loaded, reply drafted when a conversation exists (not sent); notification.list loaded, unread marked read; worker.projects.list loaded, first project opened when assigned; sign-out"
           else
             on_screen_ids
             bash .github/scripts/mobile-origin-probe.sh "$ORIGIN" after-attempt-2

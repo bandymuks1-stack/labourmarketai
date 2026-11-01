@@ -21,6 +21,9 @@
 #   3. Notifications: Today opens Notifications; notification.list renders a
 #      LOADED read; when any is unread, notification.mark_all_read runs and the
 #      re-read shows the newest one read.
+#   4. Projects: Today opens My projects; worker.projects.list renders a
+#      LOADED read; when the identity is assigned to a project, its detail
+#      (what it still needs from the person, the latest instruction) renders.
 #   last. sign-out returns to the sign-in form.
 # Every step navigates by testID, never by a label that changes with the
 # device language. Keyboards are put away as in signed-in-journey.yaml:
@@ -231,6 +234,33 @@ name: parity-journey
       - extendedWaitUntil:
           visible:
             id: "notification-0-read"
+          timeout: 60000
+
+# --- 4. Projects: the worker's projects are read; the first one opens ---
+- tapOn:
+    id: "tab-today"
+- scrollUntilVisible:
+    element:
+      id: "today-open-projects"
+    direction: DOWN
+    timeout: 30000
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-projects"
+- extendedWaitUntil:
+    visible:
+      id: "projects-loaded"
+    timeout: 60000
+- runFlow:
+    when:
+      visible:
+        id: "projects-open-0"
+    commands:
+      - tapOn:
+          id: "projects-open-0"
+      - extendedWaitUntil:
+          visible:
+            id: "project-loaded"
           timeout: 60000
 
 # --- last. Sign out, back to the form ---

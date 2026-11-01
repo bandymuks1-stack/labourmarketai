@@ -353,6 +353,42 @@ const en = {
     "An approval round passed its deadline",
   "notifications.type.event_workflow_step_pending":
     "An approval request is waiting for your decision",
+  "today.openProjects":
+    "My projects",
+  "projects.title":
+    "My projects",
+  "projects.detailTitle":
+    "Project",
+  "projects.none":
+    "You are not assigned to any project.",
+  "projects.active":
+    "Active",
+  "projects.ended":
+    "Ended",
+  "projects.asksCount":
+    "Still needed from you",
+  "projects.moreOnWeb":
+    "Only your first projects are shown here. The website lists all of them.",
+  "projects.notFound":
+    "This project is not one of yours, or it is not among the projects shown here.",
+  "projects.asksTitle":
+    "Still needed from you",
+  "projects.asksNone":
+    "Nothing is open for you on this project.",
+  "projects.ask.needed":
+    "Needed",
+  "projects.ask.missing":
+    "Missing",
+  "projects.ask.rejected":
+    "Rejected — needs a new one",
+  "projects.ask.expired":
+    "Expired",
+  "projects.instructionTitle":
+    "Latest instruction",
+  "projects.answerInstruction":
+    "Answer in Messages",
+  "projects.webDetail":
+    "The full project page — stages, documents and the team — is on the website.",
   "profile.noWorkerProfile": "This account has no worker profile yet.",
   "profile.figuresTitle": "Skills, with your recorded hours",
   "profile.groupManagerConfirmed": "Confirmed by a manager",
@@ -815,6 +851,42 @@ const lt: Catalogue = {
     "Tvirtinimo etapas viršijo terminą",
   "notifications.type.event_workflow_step_pending":
     "Tvirtinimo prašymas laukia tavo sprendimo",
+  "today.openProjects":
+    "Mano projektai",
+  "projects.title":
+    "Mano projektai",
+  "projects.detailTitle":
+    "Projektas",
+  "projects.none":
+    "Tau nepriskirtas joks projektas.",
+  "projects.active":
+    "Aktyvus",
+  "projects.ended":
+    "Baigtas",
+  "projects.asksCount":
+    "Dar reikia iš tavęs",
+  "projects.moreOnWeb":
+    "Čia rodomi tik pirmieji tavo projektai. Svetainėje matysi visus.",
+  "projects.notFound":
+    "Šis projektas nėra tavo arba jo nėra tarp čia rodomų projektų.",
+  "projects.asksTitle":
+    "Dar reikia iš tavęs",
+  "projects.asksNone":
+    "Šiame projekte tau nieko neliko atlikti.",
+  "projects.ask.needed":
+    "Reikia",
+  "projects.ask.missing":
+    "Trūksta",
+  "projects.ask.rejected":
+    "Atmesta – reikia naujo",
+  "projects.ask.expired":
+    "Nebegalioja",
+  "projects.instructionTitle":
+    "Naujausias nurodymas",
+  "projects.answerInstruction":
+    "Atsakyti žinutėse",
+  "projects.webDetail":
+    "Visas projekto puslapis – etapai, dokumentai ir komanda – yra svetainėje.",
   "profile.noWorkerProfile": "Ši paskyra dar neturi darbuotojo profilio.",
   "profile.figuresTitle": "Įgūdžiai su tavo užrašytomis valandomis",
   "profile.groupManagerConfirmed": "Vadovo patvirtinta",
@@ -1273,6 +1345,42 @@ const ru: Catalogue = {
     "Этап согласования превысил срок",
   "notifications.type.event_workflow_step_pending":
     "Запрос на согласование ждёт вашего решения",
+  "today.openProjects":
+    "Мои проекты",
+  "projects.title":
+    "Мои проекты",
+  "projects.detailTitle":
+    "Проект",
+  "projects.none":
+    "У вас нет назначенных проектов.",
+  "projects.active":
+    "Активный",
+  "projects.ended":
+    "Завершён",
+  "projects.asksCount":
+    "Ещё нужно от вас",
+  "projects.moreOnWeb":
+    "Здесь показаны только первые ваши проекты. На сайте видны все.",
+  "projects.notFound":
+    "Этот проект не ваш или его нет среди показанных здесь.",
+  "projects.asksTitle":
+    "Ещё нужно от вас",
+  "projects.asksNone":
+    "По этому проекту от вас ничего не требуется.",
+  "projects.ask.needed":
+    "Нужно",
+  "projects.ask.missing":
+    "Отсутствует",
+  "projects.ask.rejected":
+    "Отклонено — нужен новый",
+  "projects.ask.expired":
+    "Истёк срок",
+  "projects.instructionTitle":
+    "Последнее указание",
+  "projects.answerInstruction":
+    "Ответить в сообщениях",
+  "projects.webDetail":
+    "Полная страница проекта — этапы, документы и команда — на сайте.",
   "profile.noWorkerProfile": "У этого аккаунта пока нет профиля работника.",
   "profile.figuresTitle": "Навыки с вашими записанными часами",
   "profile.groupManagerConfirmed": "Подтверждено руководителем",
@@ -1731,6 +1839,42 @@ const nl: Catalogue = {
     "Een goedkeuringsronde heeft haar termijn overschreden",
   "notifications.type.event_workflow_step_pending":
     "Een goedkeuringsverzoek wacht op je beslissing",
+  "today.openProjects":
+    "Mijn projecten",
+  "projects.title":
+    "Mijn projecten",
+  "projects.detailTitle":
+    "Project",
+  "projects.none":
+    "Je bent aan geen enkel project toegewezen.",
+  "projects.active":
+    "Actief",
+  "projects.ended":
+    "Beëindigd",
+  "projects.asksCount":
+    "Nog nodig van jou",
+  "projects.moreOnWeb":
+    "Hier staan alleen je eerste projecten. De website toont ze allemaal.",
+  "projects.notFound":
+    "Dit project is niet van jou, of het staat niet bij de projecten die hier worden getoond.",
+  "projects.asksTitle":
+    "Nog nodig van jou",
+  "projects.asksNone":
+    "Voor jou staat er op dit project niets open.",
+  "projects.ask.needed":
+    "Nodig",
+  "projects.ask.missing":
+    "Ontbreekt",
+  "projects.ask.rejected":
+    "Afgewezen — er is een nieuwe nodig",
+  "projects.ask.expired":
+    "Verlopen",
+  "projects.instructionTitle":
+    "Laatste instructie",
+  "projects.answerInstruction":
+    "Antwoorden in Berichten",
+  "projects.webDetail":
+    "De volledige projectpagina — fasen, documenten en het team — staat op de website.",
   "profile.noWorkerProfile": "Dit account heeft nog geen werkersprofiel.",
   "profile.figuresTitle": "Vaardigheden, met je vastgelegde uren",
   "profile.groupManagerConfirmed": "Bevestigd door een leidinggevende",
@@ -2192,6 +2336,42 @@ const de: Catalogue = {
     "Eine Freigaberunde hat ihre Frist überschritten",
   "notifications.type.event_workflow_step_pending":
     "Eine Freigabeanfrage wartet auf Ihre Entscheidung",
+  "today.openProjects":
+    "Meine Projekte",
+  "projects.title":
+    "Meine Projekte",
+  "projects.detailTitle":
+    "Projekt",
+  "projects.none":
+    "Sie sind keinem Projekt zugewiesen.",
+  "projects.active":
+    "Aktiv",
+  "projects.ended":
+    "Beendet",
+  "projects.asksCount":
+    "Noch von Ihnen benötigt",
+  "projects.moreOnWeb":
+    "Hier werden nur Ihre ersten Projekte angezeigt. Die Website zeigt alle.",
+  "projects.notFound":
+    "Dieses Projekt gehört nicht zu Ihren oder ist nicht unter den hier gezeigten Projekten.",
+  "projects.asksTitle":
+    "Noch von Ihnen benötigt",
+  "projects.asksNone":
+    "Für Sie ist in diesem Projekt nichts offen.",
+  "projects.ask.needed":
+    "Benötigt",
+  "projects.ask.missing":
+    "Fehlt",
+  "projects.ask.rejected":
+    "Abgelehnt – ein neues wird benötigt",
+  "projects.ask.expired":
+    "Abgelaufen",
+  "projects.instructionTitle":
+    "Letzte Anweisung",
+  "projects.answerInstruction":
+    "In Nachrichten antworten",
+  "projects.webDetail":
+    "Die vollständige Projektseite – Phasen, Dokumente und Team – finden Sie auf der Website.",
   "profile.noWorkerProfile": "Dieses Konto hat noch kein Arbeiterprofil.",
   "profile.figuresTitle": "Fähigkeiten mit Ihren erfassten Stunden",
   "profile.groupManagerConfirmed": "Von einer Führungskraft bestätigt",
@@ -2640,6 +2820,42 @@ const pl: Catalogue = {
     "Etap zatwierdzania przekroczył termin",
   "notifications.type.event_workflow_step_pending":
     "Wniosek o zatwierdzenie czeka na Twoją decyzję",
+  "today.openProjects":
+    "Moje projekty",
+  "projects.title":
+    "Moje projekty",
+  "projects.detailTitle":
+    "Projekt",
+  "projects.none":
+    "Nie masz przypisanego żadnego projektu.",
+  "projects.active":
+    "Aktywny",
+  "projects.ended":
+    "Zakończony",
+  "projects.asksCount":
+    "Jeszcze potrzebne od Ciebie",
+  "projects.moreOnWeb":
+    "Tutaj widać tylko Twoje pierwsze projekty. Na stronie widać wszystkie.",
+  "projects.notFound":
+    "Ten projekt nie jest Twój albo nie ma go wśród pokazanych tutaj.",
+  "projects.asksTitle":
+    "Jeszcze potrzebne od Ciebie",
+  "projects.asksNone":
+    "W tym projekcie nic nie czeka na Ciebie.",
+  "projects.ask.needed":
+    "Potrzebne",
+  "projects.ask.missing":
+    "Brakuje",
+  "projects.ask.rejected":
+    "Odrzucone — potrzebny nowy",
+  "projects.ask.expired":
+    "Wygasło",
+  "projects.instructionTitle":
+    "Najnowsze polecenie",
+  "projects.answerInstruction":
+    "Odpowiedz w wiadomościach",
+  "projects.webDetail":
+    "Pełna strona projektu — etapy, dokumenty i zespół — jest na stronie internetowej.",
   "profile.noWorkerProfile": "To konto nie ma jeszcze profilu pracownika.",
   "profile.figuresTitle": "Umiejętności wraz z Twoimi zapisanymi godzinami",
   "profile.groupManagerConfirmed": "Potwierdzone przez kierownika",
