@@ -53,9 +53,17 @@ vi.mock("@/lib/env", () => ({
   }),
 }));
 
-import { refusalStatus, resolveApiIdentity } from "./api-identity";
+import { audienceAccepts, audienceClaimsOf, refusalStatus, resolveApiIdentity } from "./api-identity";
 
-const WELL_FORMED = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ4In0.c2lnbmF0dXJl";
+/** A well-formed compact JWS with the given payload. The signature is not
+ *  real — verification is the stubbed auth server's job. */
+function jwt(payload: Record<string, unknown>): string {
+  const b64 = (v: unknown) => Buffer.from(JSON.stringify(v)).toString("base64url");
+  return `${b64({ alg: "ES256" })}.${b64(payload)}.c2lnbmF0dXJl`;
+}
+
+// A first-party Supabase session token: `aud: authenticated`, no `client_id`.
+const WELL_FORMED = `Bearer ${jwt({ sub: "x", aud: "authenticated" })}`;
 
 // Each request gets its own forwarded-for so the failure limiter judges each
 // test alone — the limiter itself is real and stays in the path on purpose.
@@ -188,5 +196,90 @@ describe("refusalStatus — the one refusal→HTTP mapping", () => {
   it("a brake is 429 and an unasked question is 503 — neither says anything about the token", () => {
     expect(refusalStatus("rate-limited")).toBe(429);
     expect(refusalStatus("identity-unavailable")).toBe(503);
+  });
+});
+
+describe("audience binding (C-3): a verified token is spent only where it was issued for", () => {
+  const MCP = "https://labourmarket.ai/api/mcp";
+  const USER = { id: "00000000-0000-4000-8000-000000000003" };
+
+  function request(token: string, key: string): Request {
+    const headers = new Headers();
+    headers.set("authorization", `Bearer ${token}`);
+    headers.set("x-forwarded-for", `aud-${key}`);
+    return new Request("https://app.invalid/api/x", { headers });
+  }
+
+  beforeEach(() => {
+    bearerAuthResult = { data: { user: USER }, error: null };
+  });
+
+  const firstParty = jwt({ sub: USER.id, aud: "authenticated" });
+  const oauthClient = jwt({ sub: USER.id, aud: "authenticated", client_id: "chatgpt-dcr-client" });
+  const boundToMcp = jwt({ sub: USER.id, aud: [MCP], client_id: "chatgpt-dcr-client" });
+  const boundElsewhere = jwt({ sub: USER.id, aud: "https://other.example/api", client_id: "c" });
+  const mixedAud = jwt({ sub: USER.id, aud: ["authenticated", "https://other.example/api"], client_id: "c" });
+  const noAud = jwt({ sub: USER.id });
+
+  it("a first-party session is accepted at an app route and at the MCP door (unchanged)", async () => {
+    expect((await resolveApiIdentity(request(firstParty, "fp-app"))).ok).toBe(true);
+    expect((await resolveApiIdentity(request(firstParty, "fp-mcp"), { resource: MCP })).ok).toBe(true);
+  });
+
+  it("an OAuth-client token is accepted at the MCP door", async () => {
+    expect((await resolveApiIdentity(request(oauthClient, "oc-mcp"), { resource: MCP })).ok).toBe(true);
+    expect((await resolveApiIdentity(request(boundToMcp, "bm-mcp"), { resource: MCP })).ok).toBe(true);
+    // trailing slash on either side is the same resource
+    expect((await resolveApiIdentity(request(boundToMcp, "bm-mcp2"), { resource: `${MCP}/` })).ok).toBe(true);
+  });
+
+  it("an OAuth-client token is REFUSED at every route that is not an OAuth protected resource", async () => {
+    expect(await resolveApiIdentity(request(oauthClient, "oc-app"))).toEqual({ ok: false, reason: "wrong-audience" });
+    expect(await resolveApiIdentity(request(boundToMcp, "bm-app"))).toEqual({ ok: false, reason: "wrong-audience" });
+  });
+
+  it("a token bound to ANOTHER resource is refused, even at the MCP door", async () => {
+    expect(await resolveApiIdentity(request(boundElsewhere, "be-mcp"), { resource: MCP })).toEqual({
+      ok: false,
+      reason: "wrong-audience",
+    });
+    expect(await resolveApiIdentity(request(mixedAud, "mx-mcp"), { resource: MCP })).toEqual({
+      ok: false,
+      reason: "wrong-audience",
+    });
+    // a different path on the same origin is a different resource
+    const sibling = jwt({ sub: USER.id, aud: "https://labourmarket.ai/api/other", client_id: "c" });
+    expect(await resolveApiIdentity(request(sibling, "sib-mcp"), { resource: MCP })).toEqual({
+      ok: false,
+      reason: "wrong-audience",
+    });
+  });
+
+  it("a verified token with no readable audience is refused (fail closed)", async () => {
+    expect(await resolveApiIdentity(request(noAud, "na-app"))).toEqual({ ok: false, reason: "wrong-audience" });
+    expect(await resolveApiIdentity(request(noAud, "na-mcp"), { resource: MCP })).toEqual({
+      ok: false,
+      reason: "wrong-audience",
+    });
+  });
+
+  it("an auth-server rejection still wins: claims are never read for an unverified token", async () => {
+    bearerAuthResult = { data: { user: null }, error: verdictError };
+    expect(await resolveApiIdentity(request(boundToMcp, "rej-mcp"), { resource: MCP })).toEqual({
+      ok: false,
+      reason: "invalid-bearer",
+    });
+  });
+
+  it("wrong-audience is the same 401 as every other credential judgement (no oracle)", () => {
+    expect(refusalStatus("wrong-audience")).toBe(401);
+  });
+
+  it("the pure rule: empty or non-string audiences never pass", () => {
+    expect(audienceAccepts({ aud: [], clientId: null }, {})).toBe(false);
+    expect(audienceAccepts(null, { resource: MCP })).toBe(false);
+    expect(audienceClaimsOf(jwt({ aud: [1, 2] }))).toBeNull();
+    expect(audienceClaimsOf("not.a-jwt.x")).toBeNull();
+    expect(audienceClaimsOf(jwt({ aud: "authenticated", client_id: "" }))).toEqual({ aud: ["authenticated"], clientId: null });
   });
 });

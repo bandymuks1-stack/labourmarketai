@@ -54,7 +54,7 @@ describe("resource-server refusals map to a next action, never to an oracle", ()
   });
 
   it("status always comes from api-identity's ONE mapping", () => {
-    for (const reason of ["no-credentials", "malformed-bearer", "invalid-bearer", "rate-limited", "identity-unavailable"] as const) {
+    for (const reason of ["no-credentials", "malformed-bearer", "invalid-bearer", "wrong-audience", "rate-limited", "identity-unavailable"] as const) {
       expect(classifyRefusal(reason).status).toBe(refusalStatus(reason));
     }
   });
