@@ -80,7 +80,13 @@ function withoutForecastSignalHooks(src: string): string {
   return src
     .replace(/forecast_signal (after [a-z ]+ )?on public\.\w+/g, "forecast_signal on <table>")
     .replace(/tg_table_name = '\w+'/g, "tg_table_name = <table>")
-    .replace(/foreach t in array array\[[^\]]*\]/g, "foreach t in array <tables>");
+    // Only the EXACT trigger-drop loop of the rollback is removed. Any other loop body (for
+    // example an `alter table public.%I ...`) keeps its table list, so the owned names
+    // stay visible and the assertion below rejects it.
+    .replace(
+      /foreach t in array array\[[^\]]*\] loop\s+execute format\('drop trigger if exists forecast_signal on public\.%I', t\);\s+end loop;/g,
+      "<forecast_signal trigger-drop loop>",
+    );
 }
 
 const TRIP_READERS = [

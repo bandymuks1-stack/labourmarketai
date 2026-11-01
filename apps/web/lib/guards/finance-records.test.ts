@@ -159,7 +159,9 @@ describe("1. exactly one migration owns finance_records — the human-gated I2 p
           if (f.startsWith("20261025045152_project_forecasts_v1")) {
             // The forecast migration is a READER only: no alter, no write, no policy.
             expect(src, `${dir}/${f} must not alter or write finance_records`).not.toMatch(
-              /(alter\s+table[^;]*\bfinance_records\b|(insert\s+into|update|delete\s+from)\s+public\.finance_records\b|policy[^;]*\bon\s+public\.finance_records\b)/i,
+              // Qualified OR unqualified: its functions set `search_path = public`, so a bare
+              // `finance_records` is the same table.
+              /(alter\s+table[^;]*\bfinance_records\b|(insert\s+into|update|delete\s+from|truncate(\s+table)?)\s+(only\s+)?(public\.)?finance_records\b|policy[^;]*\bon\s+(public\.)?finance_records\b)/i,
             );
           }
           expect(
