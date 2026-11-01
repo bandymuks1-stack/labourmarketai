@@ -438,17 +438,31 @@ test("O-4. use the OAuth-issued bearer: initialize, tools/list, a read, a draft 
     siteName: `${TAG} site`,
     notes: `${TAG}: one hour of conformance work, dictated through an OAuth client; synthetic record.`,
   };
-  let draft = await tool(accessToken, "journal_create_draft", draftInput);
-  if (draft.ok && Array.isArray(draft.data?.options) && !draft.data?.preview) {
-    // Real ambiguity between the person's work contexts: a client asks the
-    // person; here the first labelled option stands in for that answer.
-    const first = (draft.data.options as { engagementContextId?: string; id?: string }[])[0];
-    const chosen = first?.engagementContextId ?? first?.id;
-    expect(chosen, `context choice offered without an id: ${JSON.stringify(draft.data).slice(0, 300)}`).toBeTruthy();
-    draft = await tool(accessToken, "journal_create_draft", { ...draftInput, engagementContextId: chosen });
+  // The draft may ask up to two questions a client would put to the person:
+  // which work context, then which project. Each is answered and the draft
+  // repeated — the same loop an assistant runs.
+  let input: Json = { ...draftInput };
+  let draft = await tool(accessToken, "journal_create_draft", input);
+  for (let turn = 0; turn < 2 && draft.ok && !draft.data?.preview; turn += 1) {
+    const status = draft.data?.status;
+    if (status === "project_required") {
+      // "none" = not project work: the synthetic hour never lands on a
+      // project's books (the QA projects are shared with other walks).
+      input = { ...input, projectId: "none" };
+    } else if (Array.isArray(draft.data?.options)) {
+      // Real ambiguity between the person's work contexts: the first
+      // labelled option stands in for the person's answer.
+      const first = (draft.data.options as { engagementContextId?: string; id?: string }[])[0];
+      const chosen = first?.engagementContextId ?? first?.id;
+      expect(chosen, `context choice offered without an id: ${JSON.stringify(draft.data).slice(0, 300)}`).toBeTruthy();
+      input = { ...input, engagementContextId: chosen };
+    } else break;
+    draft = await tool(accessToken, "journal_create_draft", input);
   }
   expect(draft.ok, `draft: ${JSON.stringify(draft).slice(0, 300)}`).toBe(true);
-  const preview = draft.data?.preview as { engagementContextId: string; notes: string; workDate: string; siteName: string | null } | undefined;
+  const preview = draft.data?.preview as
+    | { engagementContextId: string; notes: string; workDate: string; siteName: string | null; projectId?: string | null }
+    | undefined;
   const confirmationToken = String(draft.data?.confirmationToken ?? "");
   expect(preview, `draft returned a preview: ${JSON.stringify(draft.data).slice(0, 300)}`).toBeTruthy();
   expect(confirmationToken).toBeTruthy();
@@ -457,6 +471,7 @@ test("O-4. use the OAuth-issued bearer: initialize, tools/list, a read, a draft 
     notes: preview!.notes,
     workDate: preview!.workDate,
     siteName: preview!.siteName ?? null,
+    ...(preview!.projectId !== undefined ? { projectId: preview!.projectId } : {}),
     confirmationToken,
   };
   const confirm = await tool(accessToken, "journal_confirm", confirmInput);
