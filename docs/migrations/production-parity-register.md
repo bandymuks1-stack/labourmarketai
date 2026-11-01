@@ -16,8 +16,7 @@
 
 ## Refresh — 2026-11-01 (#2913: six production-applied migrations restored; live gate PASS)
 
-**Method:** live read by the `quality` gate (read-only CI role; column-level read of the
-ledger's `version` and `name` only). Run 41342643253 on `main` at `7c46946c3`:
+**Method:** live read by the `quality` gate (access details in the private record). Run 41342643253 on `main` at `7c46946c3`:
 **PASS — every production migration has a repository file.** 457 applied in production,
 457 files in `supabase/migrations`, 448 matched by name, 9 by the reviewed shapes, 0 orphans.
 
