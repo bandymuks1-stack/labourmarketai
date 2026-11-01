@@ -23,11 +23,16 @@ import { bearerOf, qaApi } from "./prod-qa-api";
  *   I-2  API: the invitation is no longer pending and the role is worker;
  *   I-3  1280 desktop: the first Work Journal entry reaches the Living CV with
  *        the exact hours the person's own journal holds;
- *   I-4  768 tablet + 390 phone: home and Living CV never scroll sideways.
+ *   I-4  768 tablet + 390 phone: home and Living CV never scroll sideways;
+ *   I-5  390 phone: the person asks to delete the account and confirms it
+ *        with the fresh sign-in this walk was minted with.
  *
- * Only synthetic text (QA-SYNTHETIC). Afterwards the owner revokes and purges
- * the account (prod-qa-invited-provision revoke-invited +
- * docs/qa/invited-worker-purge.sql); the walk's sessions are revoked at its end.
+ * Only synthetic text (QA-SYNTHETIC). Clean-up goes through the platform's own
+ * erasure (I-5 → the system erasure runner), because a Work Journal entry is
+ * append-only evidence that only the sanctioned erasure path may remove — a
+ * plain SQL delete of the account is refused by the journal guard. The
+ * owner's docs/qa/invited-worker-orphans.sql then checks nothing is left; the
+ * walk's sessions are revoked at its end.
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const SLOT = "invited";
@@ -209,5 +214,34 @@ test("I-4. 768 tablet and 390 phone: home and Living CV never scroll sideways", 
     } finally {
       await ctx.close();
     }
+  }
+});
+
+test("I-5. 390 phone: the person deletes the account through the privacy page (the walk's clean-up)", async ({ browser }) => {
+  const { ctx, page } = await open(browser, PHONE, true);
+  try {
+    await page.goto("/lt/dashboard/privacy#privacy-deletion");
+    await settle(page);
+    const section = page.getByTestId("privacy-deletion");
+    await expect(section, "the deletion section is on the privacy page").toBeVisible({ timeout: 30_000 });
+    if (await section.getByTestId("privacy-deletion-submit").isVisible().catch(() => false)) {
+      await section.getByTestId("privacy-deletion-confirm").check();
+      await section.getByTestId("privacy-deletion-submit").click();
+      await expect(section.getByTestId("privacy-deletion-submitted")).toBeVisible({ timeout: 30_000 });
+      await page.reload();
+      await settle(page);
+    }
+    // The confirmation needs a sign-in from the last 15 minutes; a re-auth
+    // door instead means the walk outlasted it, and the owner confirms by hand.
+    const final = section.getByTestId("privacy-deletion-confirm-final");
+    const reauth = section.getByTestId("privacy-deletion-reauth");
+    await expect(final.or(reauth), "the confirmation step is shown").toBeVisible({ timeout: 30_000 });
+    expect(await reauth.isVisible(), "the walk's sign-in is older than the confirmation window").toBe(false);
+    await final.click();
+    await expect(section.getByTestId("privacy-deletion-confirmed")).toBeVisible({ timeout: 30_000 });
+    await expectNoSidewaysScroll(page, "privacy deletion (390)");
+    console.info("[invited] I-5 account deletion requested and confirmed; the erasure runner removes the account");
+  } finally {
+    await ctx.close();
   }
 });
