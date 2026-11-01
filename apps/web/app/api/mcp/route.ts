@@ -24,6 +24,7 @@ import {
 import { localeFromAcceptLanguage } from "@/lib/mcp/accept-language";
 import { MCP_RESOURCE_PATH } from "@/lib/mcp/protected-resource-metadata";
 import { requestPublicOrigin } from "@/lib/mcp/public-origin";
+import { assistantToolNames } from "@/lib/mcp/assistant-scopes";
 import { toolDefsOf, toolName, toolsetVersionOf } from "@/lib/mcp/toolset";
 import { summarizeCapabilityResult } from "@/lib/capabilities/presentation";
 
@@ -93,6 +94,21 @@ function toolDefs(): McpToolDef[] {
   if (TOOL_DEFS) return TOOL_DEFS;
   TOOL_DEFS = toolDefsOf(exposedCapabilities());
   return TOOL_DEFS;
+}
+
+/**
+ * The curated toolset an OAUTH CLIENT (ChatGPT, Claude, any DCR client) is
+ * shown — register 10.4, `lib/mcp/assistant-scopes.ts`. A subset of
+ * `toolDefs()`, memoized for the same reason; a first-party session (web,
+ * the phone) keeps the whole list.
+ */
+let ASSISTANT_TOOL_DEFS: McpToolDef[] | null = null;
+
+function assistantToolDefs(): McpToolDef[] {
+  if (ASSISTANT_TOOL_DEFS) return ASSISTANT_TOOL_DEFS;
+  const allowed = assistantToolNames();
+  ASSISTANT_TOOL_DEFS = toolDefs().filter((d) => allowed.has(d.name));
+  return ASSISTANT_TOOL_DEFS;
 }
 
 /** Capability lookup by MCP tool name, memoized for the same reason. */
@@ -321,6 +337,8 @@ export async function POST(req: Request) {
   };
 
   const marks: Record<string, number> = { auth: authMs };
+  // A token issued to an OAuth client sees the curated assistant toolset only.
+  const isAssistant = typeof auth.identity.oauthClientId === "string";
   const response = await handleMcpMessage(message, {
     // 2026-07-28 carries the protocol version per request. `Mcp-Session-Id`
     // is deliberately NOT read: the revision removed protocol-level sessions,
@@ -352,8 +370,13 @@ export async function POST(req: Request) {
       "publishing, deciding, sending, deleting and legal data always go " +
       "through _draft/_confirm. Everything acts in the " +
       "caller's active workspace (context_list, context_switch).",
-    tools: toolDefs(),
+    tools: isAssistant ? assistantToolDefs() : toolDefs(),
     callTool: async (name, args) => {
+      // An OAuth client may call only the curated set it was shown, even by
+      // guessing a name it was not (register 10.4).
+      if (isAssistant && !assistantToolNames().has(name)) {
+        return { isError: true, payload: { ok: false, code: "outside_assistant_scope" } };
+      }
       const capabilityId = capabilityIdForTool(name);
       // Unknown names are already refused by the protocol layer; this guard
       // is for the race where exposure changes between list and call.
@@ -449,6 +472,8 @@ export async function GET() {
       // release can be verified without a credential.
       toolsetVersion: toolsetVersion(),
       toolCount: toolDefs().length,
+      // What a third-party assistant (OAuth client token) is shown — 10.4.
+      assistantToolCount: assistantToolDefs().length,
     },
     { status: 405, headers: { ...CORS_HEADERS, Allow: "POST, OPTIONS" } },
   );

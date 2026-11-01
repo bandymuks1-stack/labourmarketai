@@ -66,6 +66,10 @@ export type ApiIdentity = {
   /** `auth.users.id` of the verified caller. Never client-supplied. */
   readonly userId: string;
   readonly transport: ApiTransport;
+  /** The OAuth client the token was issued to (Supabase `client_id` claim),
+   *  or null for a first-party session. Set only after verification and the
+   *  audience check. A door uses it to NARROW (register 10.4), never to widen. */
+  readonly oauthClientId: string | null;
   /** The caller's own client. Every query through it is subject to RLS as
    *  that user — exactly as the cookie-backed client always was. */
   readonly supabase: SupabaseClient<Database>;
@@ -315,7 +319,8 @@ async function identityFromBearer(
     }
     if (!data?.user) return { ok: false, reason: "invalid-bearer" };
     // Verified as ours; now: issued for THIS resource? (C-3, see above.)
-    if (!audienceAccepts(audienceClaimsOf(token), options)) {
+    const claims = audienceClaimsOf(token);
+    if (!audienceAccepts(claims, options)) {
       return { ok: false, reason: "wrong-audience" };
     }
     // The no-argument `auth.getUser()` of a session-less client has no session
@@ -331,7 +336,7 @@ async function identityFromBearer(
       jwt !== undefined ? realGetUser(jwt) : Promise.resolve(verified)) as typeof supabase.auth.getUser;
     return {
       ok: true,
-      identity: { userId: data.user.id, transport: "bearer", supabase },
+      identity: { userId: data.user.id, transport: "bearer", oauthClientId: claims?.clientId ?? null, supabase },
     };
   } catch {
     return { ok: false, reason: "identity-unavailable" };
@@ -394,5 +399,5 @@ export async function resolveApiIdentity(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, reason: "no-credentials" };
 
-  return { ok: true, identity: { userId: user.id, transport: "cookie", supabase } };
+  return { ok: true, identity: { userId: user.id, transport: "cookie", oauthClientId: null, supabase } };
 }
