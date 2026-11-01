@@ -87,6 +87,14 @@ describe("/api/mcp narrows OAuth clients to the assistant toolset", () => {
     expect(ran).toEqual([]);
   });
 
+  it("the door never lets a shared cache keep its tool list (it varies by caller)", async () => {
+    for (const oauthClientId of ["dcr-client", null]) {
+      identity = { ...identity, transport: "bearer", oauthClientId };
+      const body = (await (await POST(rpc("tools/list"))).json()) as { result: { cacheScope: string } };
+      expect(body.result.cacheScope).toBe("private");
+    }
+  });
+
   it("a first-party bearer session (the phone) keeps the whole list", async () => {
     identity = { ...identity, transport: "bearer", oauthClientId: null };
     expect(await names()).toEqual(["profile_get", "company_today"]);

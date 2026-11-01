@@ -371,6 +371,8 @@ export async function POST(req: Request) {
       "through _draft/_confirm. Everything acts in the " +
       "caller's active workspace (context_list, context_switch).",
     tools: isAssistant ? assistantToolDefs() : toolDefs(),
+    // The list now depends on WHO asks (10.4), so no shared cache may keep it.
+    toolsCacheScope: "private",
     callTool: async (name, args) => {
       // An OAuth client may call only the curated set it was shown, even by
       // guessing a name it was not (register 10.4).
