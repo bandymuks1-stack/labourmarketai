@@ -275,6 +275,10 @@ const en = {
     "This conversation is not one of yours, or it no longer exists.",
   "messages.noPermission":
     "You may not write in this conversation.",
+  "messages.threadNotShown":
+    "The conversation is not on screen yet. Wait for it to load, read it, then review your reply.",
+  "messages.newBeforeReview":
+    "A new message arrived in this conversation. It is now shown above — read it, then review your reply again.",
   "profile.noWorkerProfile": "This account has no worker profile yet.",
   "profile.figuresTitle": "Skills, with your recorded hours",
   "profile.groupManagerConfirmed": "Confirmed by a manager",
@@ -659,6 +663,10 @@ const lt: Catalogue = {
     "Šis pokalbis nėra tavo arba jo nebėra.",
   "messages.noPermission":
     "Šiame pokalbyje rašyti negali.",
+  "messages.threadNotShown":
+    "Pokalbis dar neparodytas. Palauk, kol jis įsikels, perskaityk jį ir tada peržiūrėk savo atsakymą.",
+  "messages.newBeforeReview":
+    "Šiame pokalbyje atėjo nauja žinutė. Ji jau rodoma aukščiau – perskaityk ją ir dar kartą peržiūrėk savo atsakymą.",
   "profile.noWorkerProfile": "Ši paskyra dar neturi darbuotojo profilio.",
   "profile.figuresTitle": "Įgūdžiai su tavo užrašytomis valandomis",
   "profile.groupManagerConfirmed": "Vadovo patvirtinta",
@@ -1039,6 +1047,10 @@ const ru: Catalogue = {
     "Этот разговор не ваш или больше не существует.",
   "messages.noPermission":
     "Вы не можете писать в этом разговоре.",
+  "messages.threadNotShown":
+    "Разговор ещё не показан. Дождитесь загрузки, прочитайте его, затем проверьте свой ответ.",
+  "messages.newBeforeReview":
+    "В этом разговоре пришло новое сообщение. Оно уже показано выше — прочитайте его и проверьте свой ответ ещё раз.",
   "profile.noWorkerProfile": "У этого аккаунта пока нет профиля работника.",
   "profile.figuresTitle": "Навыки с вашими записанными часами",
   "profile.groupManagerConfirmed": "Подтверждено руководителем",
@@ -1419,6 +1431,10 @@ const nl: Catalogue = {
     "Dit gesprek is niet van jou of bestaat niet meer.",
   "messages.noPermission":
     "Je mag niet in dit gesprek schrijven.",
+  "messages.threadNotShown":
+    "Het gesprek staat nog niet op het scherm. Wacht tot het geladen is, lees het en bekijk dan je antwoord.",
+  "messages.newBeforeReview":
+    "Er is een nieuw bericht in dit gesprek binnengekomen. Het staat nu hierboven — lees het en bekijk je antwoord opnieuw.",
   "profile.noWorkerProfile": "Dit account heeft nog geen werkersprofiel.",
   "profile.figuresTitle": "Vaardigheden, met je vastgelegde uren",
   "profile.groupManagerConfirmed": "Bevestigd door een leidinggevende",
@@ -1802,6 +1818,10 @@ const de: Catalogue = {
     "Diese Unterhaltung gehört nicht Ihnen oder existiert nicht mehr.",
   "messages.noPermission":
     "Sie dürfen in dieser Unterhaltung nicht schreiben.",
+  "messages.threadNotShown":
+    "Das Gespräch wird noch nicht angezeigt. Warten Sie, bis es geladen ist, lesen Sie es und prüfen Sie dann Ihre Antwort.",
+  "messages.newBeforeReview":
+    "In diesem Gespräch ist eine neue Nachricht eingegangen. Sie wird jetzt oben angezeigt – lesen Sie sie und prüfen Sie Ihre Antwort erneut.",
   "profile.noWorkerProfile": "Dieses Konto hat noch kein Arbeiterprofil.",
   "profile.figuresTitle": "Fähigkeiten mit Ihren erfassten Stunden",
   "profile.groupManagerConfirmed": "Von einer Führungskraft bestätigt",
@@ -2172,6 +2192,10 @@ const pl: Catalogue = {
     "Ta rozmowa nie jest Twoja albo już nie istnieje.",
   "messages.noPermission":
     "Nie możesz pisać w tej rozmowie.",
+  "messages.threadNotShown":
+    "Rozmowa nie jest jeszcze widoczna. Poczekaj, aż się wczyta, przeczytaj ją, a potem sprawdź swoją odpowiedź.",
+  "messages.newBeforeReview":
+    "W tej rozmowie pojawiła się nowa wiadomość. Jest teraz widoczna powyżej — przeczytaj ją i sprawdź swoją odpowiedź jeszcze raz.",
   "profile.noWorkerProfile": "To konto nie ma jeszcze profilu pracownika.",
   "profile.figuresTitle": "Umiejętności wraz z Twoimi zapisanymi godzinami",
   "profile.groupManagerConfirmed": "Potwierdzone przez kierownika",

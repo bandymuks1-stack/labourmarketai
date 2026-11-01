@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../auth-context";
 import type {
+  ConversationGetData,
   MessageSendConfirmData,
   MessageSendDraftData,
 } from "../capability-shapes";
@@ -40,9 +41,16 @@ type ComposerState =
 
 export function MessageComposer({
   conversationId,
+  shownLastMessageId,
   reloadThread,
 }: {
   conversationId: string;
+  /**
+   * The newest message the person has on screen ("none" for an empty
+   * thread), or null while the thread is not shown. A reply is only ever
+   * previewed against the thread the person actually read.
+   */
+  shownLastMessageId: string | null;
   /**
    * Re-read the thread: after a send, so the message shows where it now
    * lives; after a stale-token refusal, so the message that arrived in
@@ -74,6 +82,10 @@ export function MessageComposer({
       setState({ kind: "writing", localError: "messages.emptyBody" });
       return;
     }
+    if (shownLastMessageId === null) {
+      setState({ kind: "writing", localError: "messages.threadNotShown" });
+      return;
+    }
     setState({ kind: "drafting" });
     const result = await capability<MessageSendDraftData>({
       name: "message.send_draft",
@@ -82,12 +94,32 @@ export function MessageComposer({
       locale,
     });
     if (!live.current) return;
-    setState(
-      result.ok
-        ? { kind: "ready", draft: result.data }
-        : { kind: "draft_failed", failure: result.failure },
-    );
-  }, [accessToken, body, conversationId, locale]);
+    if (!result.ok) {
+      setState({ kind: "draft_failed", failure: result.failure });
+      return;
+    }
+    // The token is bound to the thread's newest message AT DRAFT TIME, which
+    // the server does not name. Reading the newest message AFTER the draft
+    // and finding the one on screen proves the token is bound to the thread
+    // the person read; anything arriving later voids the token at confirm.
+    const newest = await capability<ConversationGetData>({
+      name: "conversation.get",
+      args: { conversationId, limit: 1 },
+      accessToken,
+      locale,
+    });
+    if (!live.current) return;
+    if (!newest.ok) {
+      setState({ kind: "draft_failed", failure: newest.failure });
+      return;
+    }
+    if ((newest.data.messages[0]?.id ?? "none") !== shownLastMessageId) {
+      reloadThread();
+      setState({ kind: "writing", localError: "messages.newBeforeReview" });
+      return;
+    }
+    setState({ kind: "ready", draft: result.data });
+  }, [accessToken, body, conversationId, locale, reloadThread, shownLastMessageId]);
 
   const send = useCallback(
     async (drafted: MessageSendDraftData) => {

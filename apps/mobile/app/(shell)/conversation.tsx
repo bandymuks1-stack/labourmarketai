@@ -68,6 +68,8 @@ function Thread({ conversationId }: { conversationId: string }) {
     limit: THREAD_LIMIT,
   });
   useReloadOnReturn(read.reload);
+  const shownLastMessageId =
+    read.state.status === "loaded" ? (read.state.data.messages.at(-1)?.id ?? "none") : null;
 
   return (
     <View style={styles.stack}>
@@ -87,7 +89,11 @@ function Thread({ conversationId }: { conversationId: string }) {
         )}
       </CapabilityGate>
       <Divider />
-      <MessageComposer conversationId={conversationId} reloadThread={read.reload} />
+      <MessageComposer
+        conversationId={conversationId}
+        shownLastMessageId={shownLastMessageId}
+        reloadThread={read.reload}
+      />
     </View>
   );
 }
