@@ -22,6 +22,10 @@ import { test, expect, type Browser, type BrowserContext, type Page } from "./pr
  *               (nothing is saved). When no template is active for that worker
  *               the run records that fact — the seeds ship inactive and are
  *               activated by the owner — and the row stays unproven.
+ *   G-4 (3.34)  the project forecast: the organization owner opens one of
+ *               its own projects and the forecast panel beside the course is
+ *               READ (ok / too little evidence / nothing open — never
+ *               "unavailable") and labelled a forecast, not a fact. Read only.
  *
  * Synthetic data only: the waitlist address is a reserved example.com
  * address tagged with this run id; no person's data is read or written.
@@ -29,7 +33,7 @@ import { test, expect, type Browser, type BrowserContext, type Page } from "./pr
 
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
-const ENABLED = process.env.PROD_QA_WALK === "1" && ["worker"].every((s) => existsSync(state(s)));
+const ENABLED = process.env.PROD_QA_WALK === "1" && ["worker", "owner"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 test.describe.configure({ mode: "serial", timeout: 180_000, retries: 0 });
 test.use({ actionTimeout: 30_000 });
@@ -118,5 +122,27 @@ test("G-3 (2.36). a profession journal template prefills the entry when one is a
   await first.click();
   await expect.poll(async () => (await text.inputValue()).length, { message: "the template prefilled the entry" }).toBeGreaterThan(before);
   console.log(`[templates] template ${slug} prefilled the entry (not saved)`);
+  await ctx.close();
+});
+
+test("G-4 (3.34). the owner reads a project forecast beside the course, labelled a forecast", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner");
+  await page.goto("/lt/dashboard/projects");
+  await expect(page.getByTestId("company-ops-projects"), "the organization's projects render").toBeVisible({ timeout: 30_000 });
+  // Any link to one of the organization's projects (its page or its board).
+  const hrefs = await page
+    .getByRole("main")
+    .locator("a[href*=\"/dashboard/projects/\"]")
+    .evaluateAll((as) => as.map((a) => a.getAttribute("href") ?? ""));
+  const id = hrefs.map((h) => /\/dashboard\/projects\/([0-9a-f-]{36})(?:\/operations)?(?:[?#].*)?$/.exec(h)?.[1]).find(Boolean);
+  expect(id, "at least one of the owner's own projects is linked").toBeTruthy();
+  const res = await page.goto(`/lt/dashboard/projects/${id}`);
+  expect(res?.status() ?? 0, "the project page answered").toBeLessThan(500);
+  const panel = page.getByRole("main").getByTestId("project-forecast");
+  await expect(panel, "the forecast panel renders for the project's manager").toBeVisible({ timeout: 30_000 });
+  const state = await panel.getAttribute("data-state");
+  console.log(`[forecast] owner project forecast state: ${state}`);
+  expect(["ok", "insufficient_data", "not_applicable"], `the forecast was read in production (got ${state})`).toContain(state);
+  await expect(panel.getByTestId("project-forecast-note"), "labelled a forecast, not a fact").toBeVisible();
   await ctx.close();
 });
