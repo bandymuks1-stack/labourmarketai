@@ -19,9 +19,7 @@ Supabase Auth's OAuth 2.1 server issues only OIDC scopes (`openid email
 profile phone`, plus `offline_access` in the metadata). Its docs say "Custom
 scopes are not currently supported"
 (<https://supabase.com/docs/guides/auth/oauth-server/oauth-flows>, read
-2026-11-01). Production walk 41354839810 confirms the issued token carries
-no product scope (`scope: null`). So product scopes **cannot** ride in the
-token. They are enforced at the resource server, `/api/mcp`.
+2026-11-01). So product scopes **cannot** ride in the token. They are enforced at the resource server, `/api/mcp`.
 
 ## Design
 
