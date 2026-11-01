@@ -14,6 +14,46 @@
 
 ---
 
+## Refresh — 2026-11-01 (#2913: six production-applied migrations restored; live gate PASS)
+
+**Method:** live read by the `quality` gate (read-only CI role; column-level read of the
+ledger's `version` and `name` only). Run 41342643253 on `main` at `7c46946c3`:
+**PASS — every production migration has a repository file.** 457 applied in production,
+457 files in `supabase/migrations`, 448 matched by name, 9 by the reviewed shapes, 0 orphans.
+
+**What was missing and how it was closed.** The gate, once active, found six ledger rows with
+no repository file. #2913 restored each one from production's own stored statements,
+byte-exact, marked ALREADY APPLIED, with a reconstructed rollback. Nothing was applied, re-run
+or changed in production: the ledger read before and after the merge is identical
+(457 rows, max version `20261029180012`).
+
+| Ledger version | Ledger name | Repository file | md5 of the stored statements |
+|---|---|---|---|
+| 20260928182413 | agency_drafted_needs_output_column_v1 | `20260928190100_agency_drafted_needs_output_column_v1.sql` (sorts after its dependency 20260928190000) | 2cf04bd4f272824cad1c2a5e8716bed3 |
+| 20261007155339 | 20261006100100_conversation_participants_service_role_insert_grant_v1 | `20261007155339_20261006100100_conversation_participants_service_role_insert_grant_v1.sql` | 2567d5b2ee849b432b929b7e5d43edb5 |
+| 20261015193211 | 20261015120000_esco_label_search_v1 | `20261015193211_20261015120000_esco_label_search_v1.sql` | 5e8361897248d8704cd2a3817592b030 |
+| 20261020040457 | 20261020026000_workspace_pins_language_set_v2 | `20261020040457_20261020026000_workspace_pins_language_set_v2.sql` | 42787c90ab1a569a0112199aacee5ccb |
+| 20261025045152 | project_forecasts_v1 | `20261025045152_project_forecasts_v1.sql` | 78669002d230f1733119123de3b9ebe1 |
+| 20261025050302 | history_period_precision_and_registry_v1 | `20261025050302_history_period_precision_and_registry_v1.sql` | 2018655993c11548dcd6354449141042 |
+
+**Repository files with no production ledger row (7, unapplied, informational):**
+- `20260713120000_company_locations_v1`
+- `20260713210000_multi_source_talent_v1`
+- `20260714210000_company_memberships_v1`
+- `20260714211000_dashboard_preferences_v1`
+- `20260717130000_open_markets_countries_draft_v1`
+- `20260717150000_demand_interest_seen_v1`
+- `20261020025900_workspace_pins_language_set_v2` — the renumbered copy of the same change
+  that production recorded as `20261020026000_workspace_pins_language_set_v2`
+
+**Review record.**
+- Independent Codex code review: no findings on the merged head `78fff8411`, after several
+  rounds fixed rollback and guard precision.
+- The separately requested Codex SECURITY review did **not** run: its status stayed empty
+  after two requests. It is recorded here as not performed.
+
+---
+
 ## Refresh — 2026-09-08 (post #1572 apply; supersedes the earlier 2026-09-08 refresh below)
 
 Appended `20260908110702 search_public_vacancy_previews_count_v2` — #1572, applied

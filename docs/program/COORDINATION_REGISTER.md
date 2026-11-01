@@ -279,7 +279,7 @@ Only items that genuinely need the owner. Resolved or reclassified items are rem
 - D-6 product question: training for engaged (non-member) workers (RED #2816).
 - #2844 legal wording; #2842 paid terms (legal).
 - `GOV-1` read-only DB secret for CI gates; product-truth owner decisions ORG-2, EVID-2, MKT-7, COM-6, COM-8.
-- **Open security blocker (2026-11-01):** one CI live gate is not active; owner action pending. Details and the exact step are in the private record.
+- **Resolved 2026-11-01:** the live migration-parity gate is active and PASSES on `main` (run 41342643253, 457/457). The six missing repository files were restored by #2913, with no production change. The separate Codex security review of #2913 did not run; the code review passed.
 - **Backups (13.5):** add the scoped `SUPABASE_ACCESS_TOKEN` secret, so that `db-backup.yml` runs its restore proof (#2906).
 - **D-4 / D-5:** QA mailbox secrets plus merging RED #2903; dispatch `prod-qa-invited-provision` → `provision-invited`.
 - **Shared VPS (13.1):** remediation #2911 + agentai#1226 live since 2026-11-01; 72 h verdict due 2026-11-04 (details private).
