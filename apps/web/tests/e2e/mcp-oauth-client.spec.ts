@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { expect, test } from "@playwright/test";
+import { type Browser, expect, test } from "@playwright/test";
 
 /**
  * EXTERNAL MCP CLIENT CONFORMANCE — the OAuth chain a real assistant runs,
@@ -228,6 +228,28 @@ test.beforeAll(async () => {
     discoveryError = e instanceof Error ? e.message : String(e);
   }
 });
+/** Disconnect this run's client in Connected apps, as the person would.
+ *  Used by O-6 and, when an earlier step failed, by `afterAll` — so a failed
+ *  run never leaves its OAuth grant active. */
+let grantRevoked = false;
+async function revokeInConnectedApps(browser: Browser): Promise<void> {
+  const ctx = await browser.newContext({ storageState: stateFile, locale: "en-GB" });
+  try {
+    const page = await ctx.newPage();
+    await page.goto(`${ORIGIN}/en/dashboard/account#connected-apps`, { waitUntil: "domcontentloaded" });
+    const section = page.getByTestId("account-connected-apps");
+    await expect(section).toBeVisible({ timeout: 30_000 });
+    const row = section.getByTestId("connected-apps-list").locator("li", { hasText: CLIENT_NAME }).first();
+    await expect(row, "the grant for this run's client is listed").toBeVisible({ timeout: 15_000 });
+    await row.getByTestId("connected-app-disconnect").click();
+    await page.getByTestId("connected-app-confirm-yes").click();
+    await expect(page.getByTestId("connected-apps-revoked")).toBeVisible({ timeout: 30_000 });
+    grantRevoked = true;
+  } finally {
+    await ctx.close();
+  }
+}
+
 const NO_DCR = "authorization server has no registration_endpoint (DCR off — local Supabase needs [auth.oauth_server] allow_dynamic_registration = true)";
 
 test("O-1. discovery: 401 pointer → protected resource metadata → authorization server metadata", async () => {
@@ -253,7 +275,9 @@ test("O-1. discovery: 401 pointer → protected resource metadata → authorizat
   expect(prm.bearer_methods_supported).toEqual(["header"]);
 
   // Path-suffixed location (RFC 9728 §3; Claude probes it first without a pointer).
-  const suffixed = await getJson(`${ORIGIN}/.well-known/oauth-protected-resource/api/mcp`);
+  const sfx = await timed("prm-suffixed", () => getJson(`${ORIGIN}/.well-known/oauth-protected-resource/api/mcp`));
+  const suffixed = sfx.value;
+  expect(sfx.ms, "the path-suffixed metadata answers within the discovery limit").toBeLessThan(LIMIT_MS.discovery);
   expect(suffixed.status, "path-suffixed PRM location is served (PR #2450)").toBe(200);
   expect(suffixed.json).toEqual(prm);
 
@@ -409,7 +433,7 @@ test("O-3. authorization: PKCE S256 + resource; the signed-in person approves on
   note("token-claims", JSON.stringify({ aud: claims.aud ?? null, client_id: claims.client_id ?? null, iss: claims.iss ?? null, scope: t.value.json?.scope ?? null, expires_in: t.value.json?.expires_in ?? null, refresh_token_issued: Boolean(refreshToken) }));
 });
 
-test("O-4. use the OAuth-issued bearer: initialize, tools/list, a read, a draft → confirm → replay refused", async () => {
+test("O-4. use the OAuth-issued bearer: initialize, tools/list, a read, a draft → confirm → idempotent replay", async () => {
   test.skip(!hasDcr, NO_DCR);
   const init = await rpc(accessToken, "initialize", { protocolVersion: "2026-07-28", capabilities: {}, clientInfo: { name: "conformance", version: "0" } });
   expect(init.status, init.text.slice(0, 200)).toBe(200);
@@ -482,10 +506,9 @@ test("O-4. use the OAuth-issued bearer: initialize, tools/list, a read, a draft 
   // entry, `alreadyRecorded: true`) — a client retrying after a lost
   // response must not see an error for a write that happened.
   const replay = await tool(accessToken, "journal_confirm", confirmInput);
-  if (replay.ok) {
-    expect(replay.data?.alreadyRecorded, `replay wrote again: ${JSON.stringify(replay.data).slice(0, 200)}`).toBe(true);
-    expect(replay.data?.entryId, "replay answers the first call's entry").toBe(confirmedEntryId);
-  }
+  expect(replay.ok, `replay must answer the recorded entry: ${JSON.stringify(replay).slice(0, 200)}`).toBe(true);
+  expect(replay.data?.alreadyRecorded, `replay wrote again: ${JSON.stringify(replay.data).slice(0, 200)}`).toBe(true);
+  expect(replay.data?.entryId, "replay answers the first call's entry").toBe(confirmedEntryId);
 });
 
 test("O-5. refresh: the refresh grant answers; rotation of the old token is recorded", async () => {
@@ -510,17 +533,7 @@ test("O-5. refresh: the refresh grant answers; rotation of the old token is reco
 
 test("O-6. revoke in Connected apps: the next call with the still-unexpired access token is 401 invalid_token", async ({ browser }) => {
   test.skip(!hasDcr, NO_DCR);
-  const ctx = await browser.newContext({ storageState: stateFile, locale: "en-GB" });
-  const page = await ctx.newPage();
-  await page.goto(`${ORIGIN}/en/dashboard/account#connected-apps`, { waitUntil: "domcontentloaded" });
-  const section = page.getByTestId("account-connected-apps");
-  await expect(section).toBeVisible({ timeout: 30_000 });
-  const row = section.getByTestId("connected-apps-list").locator("li", { hasText: CLIENT_NAME }).first();
-  await expect(row, "the grant for this run's client is listed").toBeVisible({ timeout: 15_000 });
-  await row.getByTestId("connected-app-disconnect").click();
-  await page.getByTestId("connected-app-confirm-yes").click();
-  await expect(page.getByTestId("connected-apps-revoked")).toBeVisible({ timeout: 30_000 });
-  await ctx.close();
+  await revokeInConnectedApps(browser);
 
   const after = await rpc(accessToken, "ping");
   expect(after.status, `after revoke: ${after.text.slice(0, 200)}`).toBe(401);
@@ -531,7 +544,16 @@ test("O-6. revoke in Connected apps: the next call with the still-unexpired acce
   }
 });
 
-test.afterAll(async () => {
+test.afterAll(async ({ browser }) => {
+  // A grant was issued (O-3 reached the token) but O-6 never revoked it:
+  // revoke now, best effort, and say in the residue whether it worked.
+  if (clientId && accessToken && !grantRevoked) {
+    try {
+      await revokeInConnectedApps(browser);
+    } catch {
+      // reported below as an unrevoked grant
+    }
+  }
   // The journal is append-only and has no delete tool: the one tagged entry
   // stays, exactly as the `journal-confirm` walk's entries do (see the header,
   // "what a run leaves behind"). The artefact names it.
@@ -540,7 +562,7 @@ test.afterAll(async () => {
     description: [
       confirmedEntryId ? `journal entry ${confirmedEntryId} (QA-SYNTHETIC, ${TAG})` : "no journal entry written",
       clientId ? `DCR client ${clientId} (public client, no secret)` : "no client registered",
-      "one revoked grant",
+      !accessToken ? "no grant issued" : grantRevoked ? "one revoked grant" : "ONE GRANT NOT REVOKED — disconnect it in Connected apps",
     ].join("; "),
   });
 });
