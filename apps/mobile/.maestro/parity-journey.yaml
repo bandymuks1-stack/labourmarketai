@@ -136,6 +136,7 @@ name: parity-journey
       id: "today-open-messages"
     direction: DOWN
     timeout: 30000
+    centerElement: true
 - waitForAnimationToEnd
 - tapOn:
     id: "today-open-messages"
@@ -154,11 +155,13 @@ name: parity-journey
           visible:
             id: "conversation-loaded"
           timeout: 60000
+      # The thread opens at its newest message, the reply box below it.
       - scrollUntilVisible:
           element:
             id: "message-review"
           direction: DOWN
-          timeout: 20000
+          timeout: 60000
+          centerElement: true
       - waitForAnimationToEnd
       - tapOn:
           id: "message-body"
