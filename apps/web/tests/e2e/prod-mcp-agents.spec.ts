@@ -527,13 +527,17 @@ const ownEntries = async (token: string) => {
   return listOf<JournalEntry>(r, "entries");
 };
 
+// A re-run keeps GITHUB_RUN_ID (and TAG) while an earlier attempt's entry stays
+// in the append-only journal, so the journal marker names this execution.
+const JOURNAL_TAG = `${TAG} ${process.env.GITHUB_RUN_ATTEMPT ?? "1"}-${Date.now().toString(36)}`;
+
 test("A-9. JOURNAL: the worker records an entry and corrects it — one live version, a spent token refused", async () => {
   // Yesterday (UTC): never "in the future" in any time zone the server reads.
   const workDate = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
   // "none": the synthetic worker may hold a walk's project assignment; these
   // hours are not that project's.
   const draft = await tool(tok.worker, "journal_create_draft", {
-    notes: `${TAG} klijavau plyteles vonios sienoje`,
+    notes: `${JOURNAL_TAG} klijavau plyteles vonios sienoje`,
     workDate,
     projectId: "none",
   });
@@ -556,16 +560,16 @@ test("A-9. JOURNAL: the worker records an entry and corrects it — one live ver
   // A retried confirm answers with the SAME entry or is refused — never a second row.
   const retry = await tool(tok.worker, "journal_confirm", { ...exact, confirmationToken });
   if (retry.ok) expect(String(retry.data?.entryId ?? ""), "a retried confirm wrote a second entry").toBe(entryId);
-  const mine = (await ownEntries(tok.worker)).filter((e) => (e.text ?? "").includes(TAG));
+  const mine = (await ownEntries(tok.worker)).filter((e) => (e.text ?? "").includes(JOURNAL_TAG));
   expect(mine.map((e) => e.entryId), "exactly one live entry of this run").toEqual([entryId]);
 
-  const correctedWords = `${TAG} klijavau plyteles vonios ir virtuvės sienose`;
+  const correctedWords = `${JOURNAL_TAG} klijavau plyteles vonios ir virtuvės sienose`;
   const fix = await prepareConfirm(tok.worker, "journal_correct", { entryId, notes: correctedWords });
   ok(fix.done);
   const newId = String(fix.done.data?.entryId ?? "");
   expect(newId, "journal_correct_confirm returned no entry id").toMatch(/^[0-9a-f-]{36}$/);
   expect(newId, "a correction is a new version, not an in-place edit").not.toBe(entryId);
-  const after = (await ownEntries(tok.worker)).filter((e) => (e.text ?? "").includes(TAG));
+  const after = (await ownEntries(tok.worker)).filter((e) => (e.text ?? "").includes(JOURNAL_TAG));
   expect(after.map((e) => e.entryId), "the correction replaced the original: one live version").toEqual([newId]);
   expect(after[0]?.text).toBe(correctedWords);
   // The replaced version is no longer correctable.
