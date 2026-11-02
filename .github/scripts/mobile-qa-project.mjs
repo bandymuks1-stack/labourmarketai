@@ -96,11 +96,22 @@ try {
 
   const roster = await call("roster.list");
   if (!(roster.people ?? []).some((p) => p.workerProfileId === profileId)) {
-    await twoStep("company.invite-worker_prepare", "company.invite-worker_confirm", { email, note: `${TITLE} — review identity` }, "action");
-    steps.push("invited");
-    await call("context.switch", { workspace: "personal" });
-    const inv = await call("invitations.list");
-    const item = (inv.items ?? []).find((i) => i.ref?.source === "company_roster" && String(i.organizationName ?? "").startsWith("QA-SYNTHETIC Alfa"));
+    // A pending invitation from an earlier run is answered, not duplicated:
+    // while the accept is refused every run would otherwise add one more.
+    const pendingAlfa = async () => {
+      await call("context.switch", { workspace: "personal" });
+      const inv = await call("invitations.list");
+      return (inv.items ?? []).find((i) => i.ref?.source === "company_roster" && String(i.organizationName ?? "").startsWith("QA-SYNTHETIC Alfa"));
+    };
+    let item = await pendingAlfa();
+    if (item) {
+      steps.push("invitation already pending");
+    } else {
+      await call("context.switch", { workspace: alfa.id });
+      await twoStep("company.invite-worker_prepare", "company.invite-worker_confirm", { email, note: `${TITLE} — review identity` }, "action");
+      steps.push("invited");
+      item = await pendingAlfa();
+    }
     if (!item) throw new Error("invitations.list: the roster invitation did not arrive");
     await twoStep("worker.respond-invitation_prepare", "worker.respond-invitation_confirm", { ...item.ref, decision: "accepted" }, "wrapped");
     steps.push("accepted");
