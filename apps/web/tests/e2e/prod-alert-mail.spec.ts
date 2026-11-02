@@ -31,7 +31,7 @@ import { assertSyntheticAddress, imapConfigured, nextUid, waitForMailLink } from
  *   A-1  390 px: onboarding as a cleaner (work type `cleaner`);
  *   A-2  390 px: e-mail switched on for job alerts, saved-search alerts and
  *        the weekly digest — the consent rows are stored per kind;
- *   A-3  390 px: the work card says "Sweden"; the next dashboard visit writes
+ *   A-3  390 px: the work card says "Sweden"; the save (or the next visit) writes
  *        the job alert(s) and the alert e-mail (5.7: a non-invitation kind)
  *        arrives in the QA mailbox;
  *   A-4  390 px, SIGNED OUT: the mailed link opens that very job's public page
@@ -231,20 +231,22 @@ test("A-3. 390 px: the work card says Sweden; the next visit writes the job aler
     await expect(editor).toBeVisible({ timeout: 30_000 });
     await editor.locator('input[name="preferred_countries"]').fill(COUNTRY);
     await expectNoSidewaysScroll(page, "profile, work card (390)");
+    // Read the mailbox position BEFORE the save: the save clears the alert
+    // throttle and revalidates the layout, whose re-render can already write
+    // the alert and send its mail — the dashboard visit below would then send
+    // nothing new (dedupe). Only mail that arrives after this point counts.
+    shared.since = await nextUid();
+    const t0 = Date.now();
     await editor.getByTestId("work-card-save").click();
     await expect(inMain(page).getByTestId("work-card-saved").or(inMain(page).getByTestId("work-card-error"))).toBeVisible({ timeout: 30_000 });
     expect(await inMain(page).getByTestId("work-card-error").isVisible(), "the work card was refused").toBe(false);
 
-    // Read the mailbox position BEFORE the visit that computes the alert, so
-    // only mail that arrives after it counts.
-    shared.since = await nextUid();
-    const t0 = Date.now();
     await page.goto("/lt/dashboard");
     await settle(page);
     await expectNoSidewaysScroll(page, "worker home (390)");
     await expect
       .poll(async () => (await myEvents("job_alert")).length, {
-        message: "the dashboard visit writes the job alert (live Swedish cleaner ads from the last 3 days)",
+        message: "the save or the next dashboard visit writes the job alert (live Swedish cleaner ads from the last 3 days)",
         timeout: 90_000,
         intervals: [5_000],
       })
