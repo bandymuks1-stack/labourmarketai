@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { notificationEventHref } from "@/lib/notifications/events";
+import { notificationEventHref, notificationRenderedType } from "@/lib/notifications/events";
 
 import { notificationDestination } from "../../../mobile/src/notification-destination";
 
@@ -31,15 +31,22 @@ describe("mobile notification destination", () => {
     });
   });
 
-  it("the journal digest and a review decision open the journal", () => {
-    expect(notificationDestination(notificationEventHref("weekly_digest", { focus: "journal" }))).toEqual({
-      kind: "native",
-      pathname: "/(shell)/journal",
-    });
-    expect(notificationDestination(notificationEventHref("journal_entry"))).toEqual({
-      kind: "native",
-      pathname: "/(shell)/journal",
-    });
+  it("the journal digest opens the journal in the app", () => {
+    const meta = { focus: "journal" } as const;
+    expect(
+      notificationDestination(notificationEventHref("weekly_digest", meta), notificationRenderedType("weekly_digest", meta)),
+    ).toEqual({ kind: "native", pathname: "/(shell)/journal" });
+  });
+
+  it("a review decision opens on the website, where the reviewer's note is shown", () => {
+    // Same href as the digest; the phone's journal does not show the decision
+    // or the note, so every decision goes to the web journal.
+    for (const decision of ["approved", "changes_requested", "rejected"] as const) {
+      const meta = { decision };
+      expect(
+        notificationDestination(notificationEventHref("journal_entry", meta), notificationRenderedType("journal_review_decided", meta)),
+      ).toEqual({ kind: "web", path: "/dashboard/journal" });
+    }
   });
 
   it("profile notifications stay on the website, where their decisions live", () => {
