@@ -149,6 +149,10 @@ on:
   # plus the debounced post-merge role-routes walk; the full catalogue is still available on dispatch.
   schedule:
     - cron: "41 3 * * 0"
+    # J-15 / row 5.9 (owner 2026-11-02): the Monday check of the weekly digest e-mail, after the 07:00 UTC
+    # sweep, on CI so it does not depend on an open desktop app. Resolves to digest-check ONLY on
+    # 2026-11-09; on any other date this cron picks nothing (no budget, no walk). Same brakes.
+    - cron: "20 7 9 11 *"
 
 permissions:
   contents: read
@@ -176,13 +180,20 @@ jobs:
         env:
           INPUT_SPEC: ${{ inputs.spec }}
           EVENT: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
         run: |
           set -euo pipefail
           ROTATION=(brigade-formation employee-beta-gate role-routes chat-continuity journal-confirm calendar-planning marketplace agency-chain learning-practice sectors-languages chat-confirm-once living-cv-growth staff-review-notice manager-chat mobile-surfaces recognition-chain mcp-chain mcp-agents project-context worker-identity-split company-chain project-execution org-roster marketplace-goods-services orders-bookings documents-approvals jobs-search notifications-inapp profile-cv-history search-support-privacy public-org-locales)
           case "$EVENT" in
             workflow_dispatch) spec="$INPUT_SPEC" ;;
             push) spec=role-routes ;;
-            schedule) spec="${ROTATION[$(( 10#$(date -u +%U) % ${#ROTATION[@]} ))]}" ;;
+            schedule)
+              if [ "$SCHEDULE" = "20 7 9 11 *" ]; then
+                # The one dated digest-check (row 5.9); any other year/date: nothing.
+                if [ "$(date -u +%F)" = "2026-11-09" ]; then spec=digest-check; else spec=none; fi
+              else
+                spec="${ROTATION[$(( 10#$(date -u +%U) % ${#ROTATION[@]} ))]}"
+              fi ;;
             *) echo "::error::unexpected event $EVENT"; exit 1 ;;
           esac
           echo "spec=$spec" >> "$GITHUB_OUTPUT"
@@ -202,6 +213,8 @@ jobs:
   budget:
     # After the debounce, so a cancelled merge-burst run never counts or spends the budget.
     needs: debounce
+    # `none`: the dated digest-check cron fired on another date — no walk (the walk job needs this one).
+    if: needs.debounce.outputs.spec != 'none'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     permissions:
