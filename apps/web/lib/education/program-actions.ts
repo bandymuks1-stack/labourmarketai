@@ -24,9 +24,15 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function mapErr(code: string | undefined, message: string | undefined): ProgramActionState {
   const m = (message ?? "").toLowerCase();
-  if (m.includes("not_manager") || m.includes("not_education_institution") || m.includes("not_a_linked_learner"))
+  if (
+    m.includes("not_manager") ||
+    m.includes("not_education_institution") ||
+    m.includes("not_a_linked_learner") ||
+    m.includes("self_decision_not_allowed")
+  )
     return { status: "forbidden" };
-  if (m.includes("unknown_") || m.includes("invalid") || m.includes("not_found")) return { status: "invalid" };
+  if (m.includes("unknown_") || m.includes("invalid") || m.includes("not_found") || m.includes("no_pending_request"))
+    return { status: "invalid" };
   return { status: "error", reason: code };
 }
 
@@ -128,4 +134,47 @@ export async function updateProgramAction(_prev: ProgramActionState, formData: F
   if (error) return mapErr(error.code, error.message);
   revalidatePath("/[locale]/dashboard/company", "layout");
   return { status: "ok", id: programId };
+}
+
+/**
+ * J-12: the institution opens or closes a group for learners' join requests
+ * (`set_education_cohort_join_requests_v1`, migration 20261102160000). Closing
+ * never touches a request already made; it only stops new ones.
+ */
+export async function setCohortJoinRequestsAction(_prev: ProgramActionState, formData: FormData): Promise<ProgramActionState> {
+  const cohortId = String(formData.get("cohortId") ?? "");
+  const open = String(formData.get("open") ?? "");
+  if (!UUID.test(cohortId) || (open !== "true" && open !== "false")) return { status: "invalid" };
+  const supabase = await createClient();
+  const { error } = await rpc(supabase).rpc("set_education_cohort_join_requests_v1", {
+    p_cohort_id: cohortId,
+    p_open: open === "true",
+  });
+  if (error) return mapErr(error.code, error.message);
+  revalidatePath("/[locale]/dashboard/company", "layout");
+  return { status: "ok" };
+}
+
+/**
+ * J-12: the institution's authorised person (a manager of the institution — the
+ * same authority that confirms a learner's journal under decision 0028) accepts
+ * or declines a learner's request. Accepting creates the student relationship
+ * the learner asked for and the membership in one command; nobody decides their
+ * own request (`self_decision_not_allowed`).
+ */
+export async function decideCohortJoinAction(_prev: ProgramActionState, formData: FormData): Promise<ProgramActionState> {
+  const cohortId = String(formData.get("cohortId") ?? "");
+  const profileId = String(formData.get("profileId") ?? "");
+  const decision = String(formData.get("decision") ?? "");
+  if (!UUID.test(cohortId) || !UUID.test(profileId)) return { status: "invalid" };
+  if (decision !== "accept" && decision !== "decline") return { status: "invalid" };
+  const supabase = await createClient();
+  const { error } = await rpc(supabase).rpc("decide_education_cohort_join_v1", {
+    p_cohort_id: cohortId,
+    p_profile_id: profileId,
+    p_decision: decision,
+  });
+  if (error) return mapErr(error.code, error.message);
+  revalidatePath("/[locale]/dashboard/company", "layout");
+  return { status: "ok" };
 }

@@ -5,6 +5,8 @@ import { useActionState } from "react";
 import {
   createCohortAction,
   createProgramAction,
+  decideCohortJoinAction,
+  setCohortJoinRequestsAction,
   setCohortMemberAction,
   updateProgramAction,
   type ProgramActionState,
@@ -31,6 +33,11 @@ export type ProgramFormLabels = {
   readonly chooseLearner: string;
   readonly assign: string;
   readonly remove: string;
+  readonly openRequests: string;
+  readonly closeRequests: string;
+  readonly requestsOpenHint: string;
+  readonly accept: string;
+  readonly decline: string;
   readonly saving: string;
   readonly saved: string;
   readonly forbidden: string;
@@ -275,6 +282,75 @@ export function RemoveMemberButton({
       <button type="submit" disabled={pending} className="text-xs text-text-muted hover:text-text-secondary hover:underline">
         {labels.remove}
       </button>
+    </form>
+  );
+}
+
+/** J-12: open or close this group for learners' join requests. */
+export function JoinRequestsToggle({
+  cohortId,
+  open,
+  labels,
+}: {
+  readonly cohortId: string;
+  readonly open: boolean;
+  readonly labels: ProgramFormLabels;
+}) {
+  const [state, action, pending] = useActionState(setCohortJoinRequestsAction, IDLE);
+  return (
+    <form action={action} className="flex flex-wrap items-center gap-2" data-testid={`cohort-join-toggle-${cohortId}`}>
+      <input type="hidden" name="cohortId" value={cohortId} readOnly />
+      <input type="hidden" name="open" value={open ? "false" : "true"} readOnly />
+      {open ? <span className="text-meta text-text-secondary">{labels.requestsOpenHint}</span> : null}
+      <button
+        type="submit"
+        disabled={pending}
+        className="text-xs text-brand-blue hover:underline disabled:opacity-60"
+        data-testid={`cohort-join-toggle-submit-${cohortId}`}
+      >
+        {pending ? labels.saving : open ? labels.closeRequests : labels.openRequests}
+      </button>
+      <StateLine state={state} labels={labels} />
+    </form>
+  );
+}
+
+/** J-12: the institution's authorised person accepts or declines one learner's request. */
+export function DecideJoinRequest({
+  cohortId,
+  profileId,
+  labels,
+}: {
+  readonly cohortId: string;
+  readonly profileId: string;
+  readonly labels: ProgramFormLabels;
+}) {
+  const [state, action, pending] = useActionState(decideCohortJoinAction, IDLE);
+  return (
+    <form action={action} className="flex flex-wrap items-center gap-2" data-testid={`cohort-join-decide-${cohortId}-${profileId}`}>
+      <input type="hidden" name="cohortId" value={cohortId} readOnly />
+      <input type="hidden" name="profileId" value={profileId} readOnly />
+      <button
+        type="submit"
+        name="decision"
+        value="accept"
+        disabled={pending}
+        className={btnCls}
+        data-testid={`cohort-join-accept-${cohortId}-${profileId}`}
+      >
+        {labels.accept}
+      </button>
+      <button
+        type="submit"
+        name="decision"
+        value="decline"
+        disabled={pending}
+        className="text-xs text-text-muted hover:text-text-secondary hover:underline disabled:opacity-60"
+        data-testid={`cohort-join-decline-${cohortId}-${profileId}`}
+      >
+        {labels.decline}
+      </button>
+      <StateLine state={state} labels={labels} />
     </form>
   );
 }

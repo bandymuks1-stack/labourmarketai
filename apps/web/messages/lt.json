@@ -2049,7 +2049,12 @@
           "saved": "Išsaugota.",
           "forbidden": "Tai gali daryti tik šios įstaigos vadovas.",
           "invalid": "Patikrink reikšmes.",
-          "error": "Kažkas nepavyko. Bandyk dar kartą."
+          "error": "Kažkas nepavyko. Bandyk dar kartą.",
+          "openRequests": "Leisti besimokantiesiems prašyti prisijungti",
+          "closeRequests": "Nebepriimti naujų prašymų",
+          "requestsOpenHint": "Besimokantieji gali rasti šią grupę ir paprašyti prisijungti.",
+          "accept": "Priimti",
+          "decline": "atmesti"
         },
         "unavailable": "Šiuo metu programų įkelti nepavyko. Perkrauk puslapį; tai, ką sukūrei, neprarasta.",
         "inviteLearners": "Pakviesti besimokančiuosius",
@@ -2087,7 +2092,8 @@
           "evidenceUnavailable": "Besimokančiojo praktikos įrašų šiuo metu nepavyko nuskaityti. Nieko neįrašyta.",
           "evidenceRecorded": "Įrašyta",
           "evidenceConfirmed": "pažymėta"
-        }
+        },
+        "requestFrom": "Prašo prisijungti: {name}"
       },
       "learners": {
         "title": "Besimokantieji",
@@ -20054,6 +20060,32 @@
       "business_details": "Įmonės ar veiklos registracijos ir sąskaitų išrašymo duomenys.",
       "insurance": "Civilinės atsakomybės ar kitas draudimas, jei jo reikia šiam darbui.",
       "client_requirements": "Konkretūs užsakovo ar objekto reikalavimai, jei tokių yra."
+    }
+  },
+  "learnerCohortJoin": {
+    "title": "Mokymo grupė",
+    "declaredNote": "Savo praktiką ir atliktus darbus gali pildyti visada, net jei įstaiga tavęs dar nepriėmė. Kol įstaigos įgaliotas asmuo jų nepatvirtino, jie rodomi kaip tavo paties deklaruoti, ne kaip patvirtinti.",
+    "journalLink": "Pildyti žurnalą",
+    "find": "{count, plural, one {Atvira # grupė} few {Atviros # grupės} other {Atvirų grupių: #}}",
+    "empty": "Šiuo metu nė viena mokymo įstaiga nepriima prašymų prisijungti.",
+    "unavailable": "Mokymo grupių dabar nepavyko įkelti. Pabandyk vėliau.",
+    "status": {
+      "requested": "Prašymas išsiųstas, laukia įstaigos sprendimo.",
+      "declined": "Įstaiga šio prašymo nepriėmė."
+    },
+    "form": {
+      "nameLabel": "Tavo vardas, kaip tave pažįsta įstaiga",
+      "nameHint": "Įstaiga matys tik šį vardą ir žinutę, ne tavo profilį ar žurnalą.",
+      "noteLabel": "Žinutė įstaigai (neprivaloma)",
+      "send": "Prašyti prisijungti",
+      "withdraw": "atšaukti prašymą",
+      "saving": "Siunčiama…",
+      "requested": "Prašymas išsiųstas.",
+      "alreadyMember": "Tu jau esi šios grupės narys.",
+      "withdrawn": "Prašymas atšauktas.",
+      "closed": "Ši grupė nebepriima naujų prašymų.",
+      "invalid": "Patikrink vardą ir žinutę.",
+      "error": "Kažkas nepavyko. Bandyk dar kartą."
     }
   }
 }

@@ -9,7 +9,9 @@ import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
 
 import {
   AssignLearnerForm,
+  DecideJoinRequest,
   EditProgramForm,
+  JoinRequestsToggle,
   CreateCohortForm,
   CreateProgramForm,
   RemoveMemberButton,
@@ -50,6 +52,11 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
     chooseLearner: t("form.chooseLearner"),
     assign: t("form.assign"),
     remove: t("form.remove"),
+    openRequests: t("form.openRequests"),
+    closeRequests: t("form.closeRequests"),
+    requestsOpenHint: t("form.requestsOpenHint"),
+    accept: t("form.accept"),
+    decline: t("form.decline"),
     saving: t("form.saving"),
     saved: t("form.saved"),
     forbidden: t("form.forbidden"),
@@ -173,6 +180,29 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                                       </li>
                                     ))}
                                 </ul>
+                              ) : null}
+                              {/* J-12: learners' own requests to join, decided here by
+                                  the institution's authorised person. The learner
+                                  is named only by what they typed on the request. */}
+                              {c.requests.length > 0 ? (
+                                <ul className="flex flex-col gap-1.5" data-testid={`cohort-join-requests-${c.id}`}>
+                                  {c.requests.map((r) => (
+                                    <li
+                                      key={r.profileId}
+                                      className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-600 px-2 py-1.5 text-xs"
+                                      data-testid={`cohort-join-request-${c.id}-${r.profileId}`}
+                                    >
+                                      <span className="flex flex-col">
+                                        <span className="text-text-primary">{t("requestFrom", { name: r.label })}</span>
+                                        {r.note ? <span className="text-text-secondary">{r.note}</span> : null}
+                                      </span>
+                                      <DecideJoinRequest cohortId={c.id} profileId={r.profileId} labels={labels} />
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : null}
+                              {c.joinRequestsOpen !== null ? (
+                                <JoinRequestsToggle cohortId={c.id} open={c.joinRequestsOpen} labels={labels} />
                               ) : null}
                               <AssignLearnerForm
                                 cohortId={c.id}

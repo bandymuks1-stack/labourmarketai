@@ -7886,5 +7886,31 @@
     "error": "That didn't work. Nothing was changed.",
     "notAllowed": "The organization's owner or a manager can do this.",
     "notSameWork": "These records no longer match — refresh the page."
+  },
+  "learnerCohortJoin": {
+    "title": "Læringsgruppe",
+    "declaredNote": "Du kan altid registrere din praktik og dit arbejde, også før en institution har optaget dig. Indtil institutionens bemyndigede person bekræfter det, vises det som erklæret af dig, ikke som bekræftet.",
+    "journalLink": "Åbn journalen",
+    "find": "{count, plural, one {# åben gruppe} other {# åbne grupper}}",
+    "empty": "Ingen institution modtager anmodninger om at deltage lige nu.",
+    "unavailable": "Læringsgrupperne kunne ikke indlæses lige nu. Prøv igen senere.",
+    "status": {
+      "requested": "Anmodning sendt, venter på institutionens beslutning.",
+      "declined": "Institutionen godkendte ikke denne anmodning."
+    },
+    "form": {
+      "nameLabel": "Dit navn, som institutionen kender dig",
+      "nameHint": "Institutionen ser kun dette navn og din besked, ikke din profil eller journal.",
+      "noteLabel": "Besked til institutionen (valgfri)",
+      "send": "Bed om at deltage",
+      "withdraw": "træk anmodningen tilbage",
+      "saving": "Sender…",
+      "requested": "Anmodning sendt.",
+      "alreadyMember": "Du er allerede medlem af denne gruppe.",
+      "withdrawn": "Anmodningen er trukket tilbage.",
+      "closed": "Denne gruppe modtager ikke flere anmodninger.",
+      "invalid": "Tjek navn og besked.",
+      "error": "Noget gik galt. Prøv igen."
+    }
   }
 }

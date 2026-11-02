@@ -2049,7 +2049,12 @@
           "saved": "Gespeichert.",
           "forbidden": "Das kann nur eine Leitung dieser Einrichtung.",
           "invalid": "Bitte prüfen Sie die Werte.",
-          "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+          "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+          "openRequests": "Lernende um Aufnahme bitten lassen",
+          "closeRequests": "Keine neuen Anfragen mehr annehmen",
+          "requestsOpenHint": "Lernende können diese Gruppe finden und um Aufnahme bitten.",
+          "accept": "Annehmen",
+          "decline": "ablehnen"
         },
         "unavailable": "Die Studiengänge konnten gerade nicht geladen werden. Laden Sie die Seite neu; nichts von dem, was Sie angelegt haben, ist verloren.",
         "inviteLearners": "Lernende einladen",
@@ -2087,7 +2092,8 @@
           "evidenceUnavailable": "Die Praxiseinträge konnten gerade nicht gelesen werden. Es wurde nichts erfasst.",
           "evidenceRecorded": "Erfasst",
           "evidenceConfirmed": "bestätigt"
-        }
+        },
+        "requestFrom": "Bittet um Aufnahme: {name}"
       },
       "learners": {
         "title": "Lernende",
@@ -20054,6 +20060,32 @@
       "business_details": "Angaben zur Unternehmens- oder Gewerberegistrierung und zur Rechnungsstellung.",
       "insurance": "Eine Haftpflicht- oder andere Versicherung, falls diese Arbeit sie braucht.",
       "client_requirements": "Besondere Anforderungen des Auftraggebers oder der Baustelle, falls vorhanden."
+    }
+  },
+  "learnerCohortJoin": {
+    "title": "Lerngruppe",
+    "declaredNote": "Du kannst deine Praxis und deine Arbeit jederzeit eintragen, auch bevor eine Einrichtung dich aufnimmt. Bis die befugte Person der Einrichtung sie bestätigt, gilt sie als von dir angegeben, nicht als bestätigt.",
+    "journalLink": "Journal öffnen",
+    "find": "{count, plural, one {# offene Gruppe} other {# offene Gruppen}}",
+    "empty": "Derzeit nimmt keine Einrichtung Aufnahmeanfragen an.",
+    "unavailable": "Die Lerngruppen konnten gerade nicht geladen werden. Versuche es später erneut.",
+    "status": {
+      "requested": "Anfrage gesendet, wartet auf die Entscheidung der Einrichtung.",
+      "declined": "Die Einrichtung hat diese Anfrage nicht angenommen."
+    },
+    "form": {
+      "nameLabel": "Dein Name, wie die Einrichtung dich kennt",
+      "nameHint": "Die Einrichtung sieht nur diesen Namen und deine Nachricht, nicht dein Profil oder Journal.",
+      "noteLabel": "Nachricht an die Einrichtung (optional)",
+      "send": "Um Aufnahme bitten",
+      "withdraw": "Anfrage zurückziehen",
+      "saving": "Wird gesendet…",
+      "requested": "Anfrage gesendet.",
+      "alreadyMember": "Du bist bereits Mitglied dieser Gruppe.",
+      "withdrawn": "Anfrage zurückgezogen.",
+      "closed": "Diese Gruppe nimmt keine neuen Anfragen mehr an.",
+      "invalid": "Prüfe Name und Nachricht.",
+      "error": "Etwas ist schiefgelaufen. Versuche es erneut."
     }
   }
 }

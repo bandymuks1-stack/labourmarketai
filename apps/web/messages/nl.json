@@ -2049,7 +2049,12 @@
           "saved": "Opgeslagen.",
           "forbidden": "Alleen een beheerder van deze instelling kan dit doen.",
           "invalid": "Controleer de waarden.",
-          "error": "Er ging iets mis. Probeer het opnieuw."
+          "error": "Er ging iets mis. Probeer het opnieuw.",
+          "openRequests": "Laat lerenden vragen om deel te nemen",
+          "closeRequests": "Geen nieuwe verzoeken meer aannemen",
+          "requestsOpenHint": "Lerenden kunnen deze groep vinden en vragen om deel te nemen.",
+          "accept": "Accepteren",
+          "decline": "afwijzen"
         },
         "unavailable": "De opleidingen konden nu niet worden geladen. Vernieuw de pagina; wat je hebt aangemaakt is niet verloren.",
         "inviteLearners": "Lerenden uitnodigen",
@@ -2087,7 +2092,8 @@
           "evidenceUnavailable": "De praktijkvermeldingen konden nu niet worden gelezen. Er is niets vastgelegd.",
           "evidenceRecorded": "Vastgelegd",
           "evidenceConfirmed": "bevestigd"
-        }
+        },
+        "requestFrom": "Vraagt om deel te nemen: {name}"
       },
       "learners": {
         "title": "Lerenden",
@@ -20054,6 +20060,32 @@
       "business_details": "Gegevens over de inschrijving van het bedrijf en voor facturatie.",
       "insurance": "Een aansprakelijkheids- of andere verzekering, als dit werk die nodig heeft.",
       "client_requirements": "Specifieke eisen van de opdrachtgever of de locatie, als die er zijn."
+    }
+  },
+  "learnerCohortJoin": {
+    "title": "Leergroep",
+    "declaredNote": "Je kunt je praktijk en je werk altijd vastleggen, ook voordat een instelling je heeft aangenomen. Tot de bevoegde persoon van de instelling het bevestigt, staat het als door jou opgegeven, niet als bevestigd.",
+    "journalLink": "Journaal openen",
+    "find": "{count, plural, one {# open groep} other {# open groepen}}",
+    "empty": "Er is nu geen instelling die verzoeken om deel te nemen aanneemt.",
+    "unavailable": "De leergroepen konden nu niet worden geladen. Probeer het later opnieuw.",
+    "status": {
+      "requested": "Verzoek verstuurd, wacht op de beslissing van de instelling.",
+      "declined": "De instelling heeft dit verzoek niet geaccepteerd."
+    },
+    "form": {
+      "nameLabel": "Je naam zoals de instelling je kent",
+      "nameHint": "De instelling ziet alleen deze naam en je bericht, niet je profiel of journaal.",
+      "noteLabel": "Bericht aan de instelling (optioneel)",
+      "send": "Vragen om deel te nemen",
+      "withdraw": "verzoek intrekken",
+      "saving": "Bezig met versturen…",
+      "requested": "Verzoek verstuurd.",
+      "alreadyMember": "Je bent al lid van deze groep.",
+      "withdrawn": "Verzoek ingetrokken.",
+      "closed": "Deze groep neemt geen nieuwe verzoeken meer aan.",
+      "invalid": "Controleer de naam en het bericht.",
+      "error": "Er ging iets mis. Probeer het opnieuw."
     }
   }
 }

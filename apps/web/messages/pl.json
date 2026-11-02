@@ -2049,7 +2049,12 @@
           "saved": "Zapisano.",
           "forbidden": "Może to zrobić tylko kierownik tej instytucji.",
           "invalid": "Sprawdź wprowadzone wartości.",
-          "error": "Coś poszło nie tak. Spróbuj ponownie."
+          "error": "Coś poszło nie tak. Spróbuj ponownie.",
+          "openRequests": "Pozwól uczącym się prosić o dołączenie",
+          "closeRequests": "Nie przyjmuj nowych próśb",
+          "requestsOpenHint": "Uczący się mogą znaleźć tę grupę i poprosić o dołączenie.",
+          "accept": "Przyjmij",
+          "decline": "odrzuć"
         },
         "unavailable": "Nie udało się teraz wczytać programów. Odśwież stronę — nic z tego, co utworzyłeś, nie zostało utracone.",
         "inviteLearners": "Zaproś uczestników",
@@ -2087,7 +2092,8 @@
           "evidenceUnavailable": "Nie udało się teraz odczytać wpisów praktyki. Nic nie zapisano.",
           "evidenceRecorded": "Zapisano",
           "evidenceConfirmed": "potwierdzono"
-        }
+        },
+        "requestFrom": "Prosi o dołączenie: {name}"
       },
       "learners": {
         "title": "Uczestnicy",
@@ -20054,6 +20060,32 @@
       "business_details": "Dane rejestracyjne firmy lub działalności oraz dane do faktur.",
       "insurance": "Ubezpieczenie OC lub inne, jeśli ta praca go wymaga.",
       "client_requirements": "Szczególne wymagania zleceniodawcy lub obiektu, jeśli są."
+    }
+  },
+  "learnerCohortJoin": {
+    "title": "Grupa szkoleniowa",
+    "declaredNote": "Swoją praktykę i wykonaną pracę możesz zapisywać zawsze, także zanim placówka cię przyjmie. Dopóki upoważniona osoba placówki ich nie potwierdzi, są pokazywane jako zadeklarowane przez ciebie, nie jako potwierdzone.",
+    "journalLink": "Otwórz dziennik",
+    "find": "{count, plural, one {# otwarta grupa} few {# otwarte grupy} many {# otwartych grup} other {# otwartej grupy}}",
+    "empty": "Żadna placówka nie przyjmuje teraz próśb o dołączenie.",
+    "unavailable": "Nie udało się teraz wczytać grup szkoleniowych. Spróbuj później.",
+    "status": {
+      "requested": "Prośba wysłana, czeka na decyzję placówki.",
+      "declined": "Placówka nie przyjęła tej prośby."
+    },
+    "form": {
+      "nameLabel": "Twoje imię i nazwisko, pod którym zna cię placówka",
+      "nameHint": "Placówka widzi tylko to imię i twoją wiadomość, nie twój profil ani dziennik.",
+      "noteLabel": "Wiadomość do placówki (opcjonalnie)",
+      "send": "Poproś o dołączenie",
+      "withdraw": "wycofaj prośbę",
+      "saving": "Wysyłanie…",
+      "requested": "Prośba wysłana.",
+      "alreadyMember": "Jesteś już członkiem tej grupy.",
+      "withdrawn": "Prośba wycofana.",
+      "closed": "Ta grupa nie przyjmuje już nowych próśb.",
+      "invalid": "Sprawdź imię i wiadomość.",
+      "error": "Coś poszło nie tak. Spróbuj ponownie."
     }
   }
 }
