@@ -18,7 +18,7 @@ import { test, expect, type Browser, type BrowserContext, type Page } from "./pr
  *               public claims contract are open JSON; the signed-in search API
  *               refuses an anonymous caller and answers JSON to a signed-in one.
  *   G-3 (2.36)  the profession journal templates: when the worker's FULL
- *               composer (?compose=full) shows the template picker, picking one prefills the entry
+ *               composer (?compose=full), with its "more options" disclosure opened, shows the template picker, picking one prefills the entry
  *               (nothing is saved). When no template is active for that worker
  *               the run records that fact — the seeds ship inactive and are
  *               activated by the owner — and the row stays unproven.
@@ -108,9 +108,16 @@ test("G-3 (2.36). a profession journal template prefills the entry when one is a
   await page.goto("/lt/dashboard/journal?compose=full");
   await expect(page.getByRole("main"), "the journal renders").toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("journal-compose-full"), "the full composer is open").toBeVisible({ timeout: 30_000 });
-  const picker = page.getByTestId("journal-template-picker");
-  // The composer may need a moment to hydrate; the picker is server data.
-  const shown = await picker.isVisible({ timeout: 15_000 }).catch(() => false);
+  // The picker lives inside the composer's closed "more options" disclosure.
+  // It is server data, so its presence in the DOM is the answer; the
+  // disclosure is opened so a template can be clicked. (isVisible() would not
+  // wait — it returns at once whatever its timeout says.)
+  const more = page.getByTestId("journal-more-options");
+  await expect(more, "the composer's more-options disclosure renders").toBeAttached({ timeout: 30_000 });
+  await more.locator("summary").click();
+  await expect(more, "the disclosure opened").toHaveAttribute("open", "");
+  const picker = more.getByTestId("journal-template-picker");
+  const shown = (await picker.count()) > 0;
   if (!shown) {
     console.log("[templates] no active journal template for this worker — 2.36 stays unproven (seeds ship inactive)");
     test.info().annotations.push({ type: "unproven", description: "no active journal template in production for the QA worker" });
