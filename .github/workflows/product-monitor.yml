@@ -57,7 +57,7 @@ jobs:
           for l in monitor sev:P1 sev:P2 sev:P3 monitor:signup-broken monitor:signup-unfinished monitor:invites-failing \
                    monitor:invites-expiring-unused monitor:team-formation-stalled monitor:b2b-offers-unanswered \
                    monitor:review-queue-stale monitor:living-cv-not-refreshing monitor:search-slow monitor:ai-failing \
-                   monitor:vacancy-sync-lagging monitor:data-integrity monitor:metrics-unreadable; do
+                   monitor:ai-runtime-disabled monitor:vacancy-sync-lagging monitor:data-integrity monitor:metrics-unreadable; do
             gh label create "$l" --color BFD4F2 >/dev/null 2>&1 || true
           done
       - name: Evaluate + alert

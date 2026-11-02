@@ -5,6 +5,7 @@ import { getBillingConfig } from "@/lib/billing/config";
 import { getBillingProvider } from "@/lib/billing/provider";
 import { evaluatePortalRequest } from "@/lib/billing/portal-core";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
+import { requestPublicOrigin } from "@/lib/mcp/public-origin";
 
 /**
  * Customer Portal route (Stripe TEST subscriptions v1) — server-side only.
@@ -18,7 +19,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const origin = new URL(req.url).origin;
+  // The public origin, not req.url: behind the VPS proxy req.url is the bind host (0.0.0.0:3000).
+  const origin = requestPublicOrigin(req);
 
   const supabase = await createClient();
   const {

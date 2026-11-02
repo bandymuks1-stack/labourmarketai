@@ -13,11 +13,11 @@ import { CANONICAL_HOME, dashboardChromeMode as modeFor } from "@/lib/config/nav
  * role-specific dashboard, never a nested profile, never another dashboard
  * generation.
  *
- * The contract has exactly two authenticated shells that carry a mark, and
- * both are pinned here at the source:
- *   · the ONE top bar (`ConversationHeader`) — the conversation itself and
- *     every contextual workspace (`panel` mode);
- *   · the admin console's full chrome (`dashboard/layout.tsx`).
+ * The contract has exactly ONE authenticated shell that carries a mark, pinned
+ * here at the source: the ONE top bar (`ConversationHeader`) — the
+ * conversation itself, every contextual workspace (`panel` mode) and, since
+ * 2026-10-25, the admin console (`full` mode), whose private header in
+ * `dashboard/layout.tsx` was retired for the one navigation system.
  * The public marketing header (`SiteNav`) keeps `/` — a visitor is not in
  * the product yet.
  *
@@ -89,16 +89,22 @@ describe("the logo is the way home from every authenticated route", () => {
     expect("<span>LabourMarket</span>").not.toMatch(LETTER_TILE);
   });
 
-  it("the admin console's full chrome links its mark to /dashboard", () => {
+  it("the admin console renders the SAME header, so its mark leads home too", () => {
+    // The full chrome no longer authors its own logo: it renders the one
+    // header, whose mark is pinned above. A second logo Link in the layout
+    // would be a second header coming back.
+    const chrome = read("components/app/dashboard-chrome.tsx");
+    const full = chrome.slice(chrome.indexOf('data-chrome="full"'));
+    expect(full).toMatch(/<ConversationHeader title=\{headerTitle\} nav=\{nav\} \/>/);
     const layout = read("app/[locale]/dashboard/layout.tsx");
-    expect(layout).toMatch(/<Link\s+href="\/dashboard"\s+data-testid="shell-logo-home"/);
-    // The mark sits beside the wordmark there too (the auth shell's pattern).
-    const logo = layout.match(
-      /<Link\s+href="\/dashboard"\s+data-testid="shell-logo-home"[\s\S]*?<\/Link>/,
-    );
-    expect(logo, "full-chrome logo Link").not.toBeNull();
+    expect(layout).not.toMatch(/data-testid="shell-logo-home"/);
+    // The mark sits beside the wordmark, which never truncates ("Labour…").
+    const header = read("components/app/conversation/chat/conversation-header.tsx");
+    const logo = header.match(/<Link\s+href="\/dashboard"\s+data-testid="shell-logo-home"[\s\S]*?<\/Link>/);
+    expect(logo, "header logo Link").not.toBeNull();
     expect(logo![0]).toMatch(/<LmLogo\s+title=""/);
-    expect(logo![0]).toMatch(/LabourMarket<span/);
+    expect(logo![0]).toMatch(/whitespace-nowrap/);
+    expect(logo![0]).not.toMatch(/truncate/);
   });
 
   it("no authenticated shell links the mark to the public landing or a role home", () => {

@@ -42,7 +42,7 @@ export async function WorkLifecycleSection({ audience }: { audience: "workers" |
   return (
     <WorkLifecycleGraph
       title={audience === "workers" ? t("title") : t("titleCompany")}
-      hint={t("hint")}
+      hint={audience === "workers" ? t("hintWorkers") : t("hint")}
       openLabel={t("open")}
       listLabel={t("list")}
       pendingLabel={t("pending")}

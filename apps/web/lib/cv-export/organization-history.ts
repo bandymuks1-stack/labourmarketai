@@ -48,6 +48,10 @@ export interface CvOrganizationHistoryEntry {
    *  localizes it. */
   readonly relationshipKind: string | null;
   readonly sourceKind: string | null;
+  /** The source's dataset label the group's records carry (e.g. the sheet
+   *  "Vivat Rex PL") — the entity-at-the-time provenance a surface resolves
+   *  to a stated business period. Data; never rendered raw. */
+  readonly sourceLabel: string | null;
   readonly reconstructed: boolean;
   /** Sum of DAY records' stated hours; null = no day record in the group. */
   readonly dayHours: number | null;
@@ -77,6 +81,9 @@ function groupKey(c: Ctx): string {
     norm(c.place?.name),
     c.clients.map((x) => `${x.role}:${norm(x.label)}`).sort().join(","),
     norm(c.relationshipKind),
+    // Work made under another dataset label (an earlier trading name of the
+    // same business) is its own band — never merged across periods.
+    norm(c.source.label),
   ].join("|");
 }
 
@@ -190,6 +197,7 @@ export function buildCvOrganizationHistory(
       clients: c.clients,
       relationshipKind: c.relationshipKind,
       sourceKind: c.source.kind,
+      sourceLabel: c.source.label,
       reconstructed: a.reconstructed,
       dayHours: a.dayRecords > 0 ? round(a.dayHours) : null,
       dayRecords: a.dayRecords,

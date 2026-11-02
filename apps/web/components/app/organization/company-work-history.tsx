@@ -142,6 +142,7 @@ export async function CompanyWorkHistory({
         business={load.business}
         organizationId={load.organizationId}
         organizationName={organizationName}
+        identity={load.identity}
         locale={locale}
       />
 

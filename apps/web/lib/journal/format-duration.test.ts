@@ -83,6 +83,18 @@ describe("durationLocale — a reader never sees another language's unit", () =>
     }
   });
 
+  it("every locale writes its OWN decimal separator, not a hard-coded LT/RU list", () => {
+    const half = (l: string) =>
+      formatDuration(1.5, "hours", durationLocale(l), { splitFractions: false });
+    expect(half("en")).toBe("1.5 h");
+    expect(half("lt")).toBe("1,5 val.");
+    expect(half("ru")).toBe("1,5 ч");
+    for (const l of ["de", "nl", "pl"]) expect(half(l)).toBe("1,5 h");
+    // An unknown or malformed code never borrows Lithuanian labels.
+    expect(half("xx-invalid-tag-!!")).toBe("1.5 h");
+    expect(durationLocale("")).toBe("en");
+  });
+
   it("no caller maps a non-LT locale onto the LT labels (found 2026-10-11: RU chat card read '8 val.')", async () => {
     const { readFileSync } = await import("node:fs");
     const { join } = await import("node:path");

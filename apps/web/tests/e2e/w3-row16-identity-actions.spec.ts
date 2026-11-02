@@ -67,7 +67,7 @@ function watch(page: Page) {
 async function assertDirectlyReachable(page: Page, path: string): Promise<void> {
   await page.goto(path);
   await expect(page).not.toHaveURL(/\/auth\/login/);
-  await expect(page).toHaveURL(new RegExp(path.replace(/\//g, "\\/")));
+  await expect(page).toHaveURL(new RegExp(escapeRegExp(path)));
   await expect(page.locator("main, [role=main]").first()).toContainText(/\S/, {
     timeout: 60_000,
   });
@@ -207,3 +207,8 @@ test.describe("row 16 — company destinations survive without the catalogue", (
     w.assertClean();
   });
 });
+
+/** Every RegExp metacharacter escaped (a partial escape is a different pattern). */
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+}

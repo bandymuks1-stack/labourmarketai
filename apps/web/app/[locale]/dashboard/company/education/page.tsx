@@ -14,6 +14,11 @@ import { InstitutionProgramsSection } from "@/components/app/institution-program
 import { InstitutionRecognitionSection } from "@/components/app/institution-recognition-section";
 import { PublicDemandSection } from "@/components/app/public-demand-section";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/education");
+
 
 /**
  * MOKYMAI — the education door (owner IA correction 2026-09-16,

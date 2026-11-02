@@ -601,6 +601,7 @@ second document reads as the canonical architecture.
 | `docs/audits/**` | Point-in-time findings | Evidence |
 | `docs/product/*-contract-v1.md` | Feature-level contracts under §1 | Detail |
 | `docs/integrations/AI_AGENT_PARTICIPANTS_V1.md` | Coverage and phased plan for §1.13 (AI agents as participants); adds no graph node — agents are a subject KIND on the existing ACTOR model | AGENT-1..4, data minimization §4a, phases P0–P7 |
+| `docs/plans/not-implemented-architecture-2026-10-23.md` | Implementation plans for capabilities not built yet (goods purchases + delivery, the cross-border-deals memo, LMC / paid tiers, agents runtime, AI agent providers, voice door, RPL structure, store release); adds no graph node and settles no §10 decision | The exact owner question each plan waits on |
 | `docs/design/historical-timesheet-import-v3.md` + `docs/design/historical-timesheet-fixture-v3.md` | A PROPOSED feature design under §1.6 (historical timesheet import, owner rules 2026-09-23); adds no graph node; its migrations are owner-gated. Its v2 commercial expansion (invoices, payments, payroll) is SUPERSEDED by owner decision A | Historical import slices PR-2 to PR-7 |
 
 ### SUPERSEDED AS ARCHITECTURE — historical evidence only
@@ -624,11 +625,15 @@ second architecture.
 
 Six carried forward, plus four surfaced by this reconciliation.
 
+*Pointer (SUPPORTING, §9):* the implementation plans that wait on these
+decisions, each with its exact owner question, are in
+[`docs/plans/not-implemented-architecture-2026-10-23.md`](plans/not-implemented-architecture-2026-10-23.md).
+
 | Id | Decision |
 |---|---|
 | **PER-11** | Apply a split `external_profiles_v1` carrying only the one table its live UI needs, or retire the section |
 | **ORG-2** | Migrate the seven gates to `organization_roles`, or keep the industry lock deliberately |
-| **EVID-2** | Block self-confirmation in `review_journal_entry`, or rely on the weaker classification |
+| ~~**EVID-2**~~ | ✅ **RESOLVED — owner, 2026-11-02 ([decision 0028](DECISIONS/0028-self-declared-and-independently-confirmed-work.md)).** A person may create, correct and confirm their own journal as a lawful personal declaration, with or without a registered employer; what is forbidden is presenting oneself as the independent confirmer. Self-declared and independently confirmed experience stay apart on the Living CV, the same hours are never counted twice, a later-joining employer can confirm earlier declared work with history kept. Institutions (J-12): an authorised teacher / practice supervisor confirms the learner's declared work bound to work, hours, competency and confirmer; no formal qualification without an assessment procedure. One person — one journal — one hours ledger |
 | **EVID-6** | The v1 select policy resolves `moderation_status` to the RECORD's status and hands the experience author a reply moderation has not published. Correcting it is a schema change (RED) |
 | **MKT-7** | Two independent owner acts arm real charging |
 | **GOV-1** | Add a READ-ONLY `SUPABASE_DB_URL` GitHub Actions secret. Two live security gates stay inactive without it |

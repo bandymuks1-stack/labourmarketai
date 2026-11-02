@@ -4,6 +4,7 @@ import { join } from "node:path";
 
 import { deriveEconomics } from "@/lib/economics/economics-model";
 import type { ProjectBudgetLine } from "@/lib/economics/economics-model";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Wagon 8 — Project Economics guard. Budget lives in the new project_budgets;
@@ -60,6 +61,13 @@ describe("actual cost reuses the canonical ledger — no second cost ledger", ()
     expect(model).not.toMatch(/CREATE\s+TABLE/i);
     expect(migration).not.toMatch(/create table[^;]*cost_actuals/i);
   });
+  it("a FAILED ledger read is an unknown actual, never a measured €0", () => {
+    // listMyFinanceRecords answers a read error as status "ok" + records [] +
+    // error; summing that empty list reported €0 actual and a full-budget
+    // "under budget" variance. The reader must refuse the errored answer.
+    const model = read("lib/economics/economics.ts");
+    expect(model).toMatch(/finance\.status === "ok" && !finance\.error/);
+  });
   it("read model degrades honestly on a missing project_budgets relation", () => {
     const model = read("lib/economics/economics.ts");
     expect(model).toMatch(/42P01/);
@@ -108,7 +116,7 @@ describe("deriveEconomics is pure and honest", () => {
 });
 
 describe("project economics strings exist in every active-parity locale", () => {
-  for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+  for (const loc of activeLocales) {
     it(`${loc} has projectEconomics with all categories + states`, () => {
       const msgs = JSON.parse(read(`messages/${loc}.json`));
       expect(msgs.projectEconomics?.title, loc).toBeTruthy();

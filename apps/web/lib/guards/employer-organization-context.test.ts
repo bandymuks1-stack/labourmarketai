@@ -102,11 +102,14 @@ describe("3. callerCompanyId is no longer a silent-empty", () => {
 
 describe("4. the active workspace is visible where the employer works", () => {
   it("the FULL dashboard chrome mounts the canonical WorkspaceChip", () => {
-    const layout = read("app/[locale]/dashboard/layout.tsx");
-    expect(layout).toMatch(
-      /import \{ WorkspaceChip \} from "@\/components\/app\/conversation\/chat\/workspace-chip"/,
-    );
-    expect(layout).toMatch(/<WorkspaceChip \/>/);
+    // Since 2026-10-25 the full chrome renders THE ONE header, which mounts
+    // the chip — one component, one workspace selector, on every route.
+    const chrome = read("components/app/dashboard-chrome.tsx");
+    const full = chrome.slice(chrome.indexOf('data-chrome="full"'));
+    expect(full).toMatch(/<ConversationHeader\b/);
+    const header = read("components/app/conversation/chat/conversation-header.tsx");
+    expect(header).toMatch(/import \{ WorkspaceChip \} from "\.\/workspace-chip"/);
+    expect(header).toMatch(/<WorkspaceChip \/>/);
   });
 
   it("it is the SAME component the conversation header uses — not a second switcher", () => {

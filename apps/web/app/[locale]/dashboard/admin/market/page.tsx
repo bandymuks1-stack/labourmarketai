@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 
-import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import {
   getMarketAnalysis,
@@ -13,6 +13,11 @@ import {
 } from "@/components/app/market-average-form";
 import { MarketPulseBoard } from "@/components/app/market-pulse-board";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/market");
+
 
 /**
  * "Kokia situacija rinkoje" — admin market analysis v1 (S4 item 4).
@@ -90,12 +95,7 @@ export default async function AdminMarketPage({
         >
           {t("methodNote")}
         </p>
-        <Link
-          href={"/dashboard/admin" as "/dashboard"}
-          className="mt-1 self-start text-xs text-text-secondary hover:underline"
-        >
-          ← {t("back")}
-        </Link>
+        <PageBack href={"/dashboard/admin" as "/dashboard"}>{t("back")}</PageBack>
       </header>
 
       {/* ── S8: the living market pulse — the SAME real aggregates, visual ── */}

@@ -17,6 +17,7 @@ import {
   inviteTokenFromNextPath,
   invitationImpliesWorkerContext,
 } from "@/lib/invitations/model";
+import { resolveInvitedWorkerContext } from "@/lib/onboarding/invited-worker-context";
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
 import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
 import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
@@ -90,6 +91,19 @@ export default async function OnboardingPage({
     }
   }
 
+  // NO TOKEN, STILL INVITED (2026-10-27). A person who registered without the
+  // invitation link in `?next=` — mail opened in one browser, registration in
+  // another, or a later visit — is still the addressee: the pending
+  // `join_platform` invitation for their verified e-mail is found here, so
+  // onboarding uses it exactly as it uses a token (worker implied only for a
+  // partner referral; accepted when the person finishes).
+  if (!inviteToken) {
+    // The role question is skipped from the same server decision that
+    // completeOnboarding enforces (and that accepts the invitation there).
+    const invited = await resolveInvitedWorkerContext(null);
+    impliedWorker = invited.workerImplied;
+  }
+
   const supabase = await createClient();
   // ONE `profiles` read per request. This used to be its own SELECT; it is now
   // the same request-cached `getSessionProfile()` the layout above already
@@ -145,9 +159,12 @@ export default async function OnboardingPage({
   const metaFullName =
     typeof meta.full_name === "string" ? meta.full_name : "";
   const metaName = typeof meta.name === "string" ? meta.name : "";
-  const emailLocal = user.email ? user.email.split("@")[0] : "";
+  // Never the e-mail handle: "uxv-d1-w-m" is not a name, and a prefilled
+  // field gets accepted as-is (UX review 2026-10-24, 1.4). Only a name the
+  // person or their identity provider actually gave is offered; otherwise
+  // the field starts empty and the person types it.
   const defaultName =
-    [profile?.full_name, metaFullName, metaName, emailLocal]
+    [profile?.full_name, metaFullName, metaName]
       .map((v) => (v ?? "").trim())
       .find((v) => v.length > 0) ?? "";
 

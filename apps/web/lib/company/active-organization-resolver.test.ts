@@ -70,7 +70,10 @@ vi.mock("next/headers", () => ({
     get: () => (state.cookie === undefined ? undefined : { value: state.cookie }),
   }),
 }));
-vi.mock("@/lib/auth/session-profile", () => ({
+vi.mock("@/lib/auth/session-profile", async (orig) => ({
+  // The REAL durable-pointer read (it rides the profile row read, perf
+  // 2026-10-23) over the stubbed `profiles` table below.
+  ...(await orig<typeof import("@/lib/auth/session-profile")>()),
   getSessionProfile: async () => ({
     user: { id: USER },
     profile: { id: USER, active_role: state.activeRole },

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   ALLOCATION_HOURS_MAX,
+  duplicateSavePress,
   isAllocationMigrationMissingCode,
   isValidAllocationStatus,
   isValidWorkDate,
@@ -229,5 +230,18 @@ describe("degradation is honest", () => {
     expect(isValidAllocationStatus("recorded")).toBe(true);
     expect(isValidAllocationStatus("approved")).toBe(true);
     expect(isValidAllocationStatus("deleted")).toBe(false);
+  });
+});
+
+describe("duplicateSavePress — the first repeat press writes nothing", () => {
+  it("a repeat of the exact last save is held once (arm), never written on that press", () => {
+    expect(duplicateSavePress(true, false)).toBe("arm");
+  });
+  it("the second press on the same repeat goes through — the operator decides", () => {
+    expect(duplicateSavePress(true, true)).toBe("submit");
+  });
+  it("a save that is not a repeat is never held", () => {
+    expect(duplicateSavePress(false, false)).toBe("submit");
+    expect(duplicateSavePress(false, true)).toBe("submit");
   });
 });

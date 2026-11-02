@@ -64,6 +64,63 @@ describe("Guard: mobile tap floor lives once in globals.css", () => {
     expect(rule).toMatch(/min-height:\s*2\.5rem/);
   });
 
+  /**
+   * THE FLOOR MUST NOT BE A CEILING (isolated QA run, 2026-10-16).
+   *
+   * The floor rule's specificity (0,3,0) beats any single utility (0,1,0), so
+   * on phones it did not only RAISE small controls to 40 px — it also LOWERED
+   * every control that asked for more. `min-h-11` / `min-h-[2.75rem]` (44 px,
+   * ~530 call sites) rendered at 40 px below `md`; the calendar toolbar's own
+   * e2e (calendar-journal-history.spec.ts, "44px touch minimum") measured 40.
+   *
+   * The block therefore restores every declared minimum above the floor in
+   * the control range (≤ 4rem) with an equally specific, later rule. This
+   * test derives the list from the source, so a new `min-h-[3.75rem]` on a
+   * button cannot be silently clamped again.
+   */
+  it("restores every larger declared min-height the floor would otherwise clamp", () => {
+    const REM_PER_STEP = 0.25; // Tailwind spacing scale: min-h-11 = 2.75rem
+    const remOf = (token: string): number | null => {
+      const v = token.slice("min-h-".length);
+      if (/^\d+(\.5)?$/.test(v)) return Number(v) * REM_PER_STEP;
+      const rem = v.match(/^\[(\d+(?:\.\d+)?)rem\]$/);
+      if (rem) return Number(rem[1]);
+      const px = v.match(/^\[(\d+)px\]$/);
+      if (px) return Number(px[1]) / 16;
+      return null; // screen, dvh, vh, 0 … — not a control size
+    };
+    const used = new Set<string>();
+    for (const f of [...walk(join(APP, "app")), ...walk(join(APP, "components"))]) {
+      for (const m of readFileSync(f, "utf8").matchAll(/(?<![\w:-])min-h-(?:\d+(?:\.5)?|\[[^\]\s]+\])/g)) {
+        used.add(m[0]);
+      }
+    }
+    const needRestore = [...used].filter((t) => {
+      const r = remOf(t);
+      return r !== null && r > 2.5 && r <= 4;
+    });
+    expect(needRestore.length, "scan found no 44px+ controls — the walker is broken").toBeGreaterThan(0);
+
+    const escape = (t: string) => "." + t.replace(/[[\].]/g, (c) => `\\${c}`);
+    const missing: string[] = [];
+    for (const t of needRestore) {
+      const sel = escape(t);
+      const idx = block.indexOf(sel);
+      const rule = idx >= 0 ? block.slice(idx, block.indexOf("}", idx)) : "";
+      const declared = rule.match(/min-height:\s*([\d.]+)rem/)?.[1];
+      if (!declared || Number(declared) !== remOf(t)) missing.push(`${t} (${remOf(t)}rem)`);
+    }
+    expect(missing, `the tap floor clamps these on phones:\n${missing.join("\n")}`).toEqual([]);
+
+    // The restore must be at least as specific as the floor AND come after it.
+    const floorAt = block.indexOf('[data-tap-floor="off"]');
+    const restoreAt = block.indexOf(escape(needRestore[0]));
+    expect(restoreAt).toBeGreaterThan(floorAt);
+    expect(block).toMatch(
+      /:is\(\[data-chrome\], \[data-mobile-sheet\]\)\s*:is\(button, \[role="button"\], a\[href\], label\):is\(/,
+    );
+  });
+
   it("the floor is mobile-only (nothing under 767.98px is redefined for desktop)", () => {
     expect(css.match(/@media \(max-width: 767\.98px\)/g)?.length).toBe(1);
   });

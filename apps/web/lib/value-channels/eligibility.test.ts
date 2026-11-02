@@ -47,22 +47,27 @@ describe("registry construction", () => {
 });
 
 describe("fixtures route honestly", () => {
-  it("A (cucumbers): LEGAL_CHECK_REQUIRED on the marketplace — net gated", () => {
+  it("A (cucumbers): LEGAL_CHECK_REQUIRED on the marketplace — named check, with the route (TEST B)", () => {
     const v = verdictFor(
       "Turiu 30 kg savo darže užaugintų agurkų ir noriu parduoti",
       "internal_marketplace_listings",
     );
     expect(v.kind).toBe("LEGAL_CHECK_REQUIRED");
     expect(v.legalCheckKey).toBe("food_sale_rules");
+    // The goods domain exists (Option C): the verdict names WHERE the draft
+    // goes, so the chat can open the board instead of saying "no channel".
+    expect(v.listingCategory).toBe("goods_food_homegrown");
+    expect(v.listingKind).toBe("sale");
   });
 
-  it("A' (wooden pallets): CHANNEL_RESTRICTED — category honestly unsupported", () => {
+  it("A' (wooden pallets): CAN_ROUTE as a goods listing — lawful goods are no longer refused (M-1)", () => {
     const v = verdictFor(
       "Pagaminome 500 medinių palečių ir norime jas parduoti.",
       "internal_marketplace_listings",
     );
-    expect(v.kind).toBe("CHANNEL_RESTRICTED");
-    expect(v.reasonKey).toBe("category_not_supported");
+    expect(v.kind).toBe("CAN_ROUTE");
+    expect(v.listingCategory).toBe("goods_other");
+    expect(v.listingKind).toBe("sale");
   });
 
   it("B' (excavator free three days): CAN_ROUTE marketplace as machinery RENTAL", () => {

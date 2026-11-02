@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * BUILT_NOT_CONNECTED sweep — a person could state a work-history entry about
@@ -61,7 +62,9 @@ describe("2. every limit is the RPC's own", () => {
 
   it("the control is offered only where those preconditions hold", () => {
     expect(CARD).toMatch(/selfDeclared\?: boolean;/);
-    expect(PAGE).toMatch(/selfDeclared: org === null && e\.is_primary !== true/);
+    // 2026-10-20: the RPC's precondition is `organization_id is null` — read the
+    // column itself; the organizations embed is empty for an ENDED relationship.
+    expect(PAGE).toMatch(/selfDeclared: e\.organization_id === null && e\.is_primary !== true/);
     expect(UI).toMatch(/c\.selfDeclared &&/);
   });
 });
@@ -84,7 +87,7 @@ describe("3. the refusals reach the person", () => {
 });
 
 describe("4. copy exists where the section does", () => {
-  const LOCALES = ["en", "lt", "de", "nl", "ru"] as const;
+  const LOCALES = activeLocales;
   for (const loc of LOCALES) {
     it(`${loc} carries the three keys`, () => {
       const j = JSON.parse(read(`messages/${loc}.json`)) as {

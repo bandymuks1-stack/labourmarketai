@@ -25,6 +25,8 @@ import {
   type ChainDispatchContext,
 } from "./runtime/run-core";
 import type { AiProviderState } from "./runtime/provider-chain";
+import type { ProviderCooldown } from "./runtime/provider-cooldown";
+import type { ProviderCounters } from "./runtime/provider-counters";
 import { providerKindFor, type AiRuntimeConfig, type AiDisabledReason } from "./runtime/config-core";
 import type { AiCompletionRequest, AiCompletionResult, AiLocale, AiErrorCode } from "./runtime/types";
 import type { PromptRegistryEntry, AiAgentKey } from "./registry/types";
@@ -129,6 +131,16 @@ export interface RunAgentOptions {
    * test stays on the path it was written for.
    */
   readonly providerStates?: readonly AiProviderState[];
+  /**
+   * Runtime provider health from real failures (runtime/provider-cooldown.ts).
+   * The server wrapper passes the process-wide instance; absent = no cooldown.
+   */
+  readonly providerCooldown?: ProviderCooldown;
+  /**
+   * Per-provider attempt counters (runtime/provider-counters.ts). The server
+   * wrapper passes the process-wide instance; absent = nothing counted.
+   */
+  readonly providerCounters?: ProviderCounters;
   /** Test seam: replaces the real run-core dispatcher. */
   readonly dispatchOverride?: AiDispatcher;
 }
@@ -387,7 +399,12 @@ export async function runAiAgentCore<T = unknown>(
   // Without it run-core keeps its legacy single-provider behaviour.
   const chainFor = (d: TaskRouteDecision): ChainDispatchContext | undefined =>
     opts.providerStates
-      ? { decision: d, states: opts.providerStates }
+      ? {
+          decision: d,
+          states: opts.providerStates,
+          cooldown: opts.providerCooldown,
+          counters: opts.providerCounters,
+        }
       : undefined;
 
   let effectiveDecision = decision;
@@ -424,12 +441,21 @@ export async function runAiAgentCore<T = unknown>(
   }
   const latencyMs = Date.now() - startedAt;
 
+  // A data-egress refusal is a ROUTER-level outcome, not a vendor failure:
+  // no provider was engaged. It is recorded under its own block reason so the
+  // budget counters (which count non-blocked rows) and the money ledger
+  // (vendor runs only) never see it as a run (audit 2026-10-16, AI-1).
+  const egressRefused = isEgressRefusal(result);
+  const auditDecision: TaskRouteDecision = egressRefused
+    ? { ...effectiveDecision, blocked: "egress_refused" }
+    : effectiveDecision;
+
   const audit = (
     schemaValidation: AiRoutingRunOutcome["schemaValidation"],
     confidence: string | null,
     outputExcerpt: string | null = null,
   ): AiRoutingAuditRecord =>
-    buildRoutingAuditRecord(effectiveDecision, {
+    buildRoutingAuditRecord(auditDecision, {
       ...auditBase,
       // FALLBACK RE-PRICING. `auditBase.estimatedCostUsd` was priced against
       // the PRIMARY provider's candidate model on the ORIGINAL decision's
@@ -551,4 +577,26 @@ export async function runAiAgentCore<T = unknown>(
     value: parsedOutput.data as T,
     routing: audit("passed", envelopeConfidence, outputExcerpt),
   };
+}
+
+/**
+ * True when the dispatcher answered with the data egress gate's own refusal.
+ * The literal "data egress gate" is built only by `data-egress.ts`; on the
+ * legacy (no-chain) path it is the whole message, on the CHAIN path — the one
+ * every production run takes — it is folded into the per-provider summary
+ * ("no provider may receive … — gemini: data egress gate: …"), so the match
+ * is `includes`, not a prefix (independent review of #2433, 2026-10-16).
+ * Structural, never payload (audit 2026-10-16, AI-1).
+ */
+export function isEgressRefusal(result: {
+  readonly status: string;
+  readonly code?: string;
+  readonly message?: string;
+}): boolean {
+  return (
+    result.status === "error" &&
+    result.code === "unsupported" &&
+    typeof result.message === "string" &&
+    result.message.includes("data egress gate")
+  );
 }

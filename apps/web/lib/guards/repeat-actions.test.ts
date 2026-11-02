@@ -15,7 +15,7 @@ import {
  *
  * Both affordances are pure derivations over the row's DB status,
  * default-closed:
- *   - rebook: ONLY terminal declined/withdrawn OUTGOING bookings — never
+ *   - rebook: ONLY withdrawn OUTGOING bookings (never declined: the worker's "no" stands, owner 2026-10-21) — never
  *     `proposed` (still open, withdraw instead), never `accepted` (a real
  *     engagement), never `expired` (unreachable, no scheduler writes it).
  *   - request again: ONLY concluded (declined/withdrawn) outgoing service
@@ -40,11 +40,11 @@ const ALL_BOOKING_STATUSES: readonly BookingStatus[] = [
 ];
 
 describe("canProposeAgain — pure, default-closed, exhaustive", () => {
-  it("is true ONLY for the terminal declined/withdrawn statuses", () => {
+  it("is true ONLY for withdrawn (the company's own take-back)", () => {
     const expected: Record<BookingStatus, boolean> = {
       proposed: false, // still open — the affordance there is withdraw
       accepted: false, // a real engagement — message/plan, never re-propose
-      declined: true, // worker said no → the company may re-open with new dates
+      declined: false, // worker said no → stands without the worker's new consent
       withdrawn: true, // company took it back → may re-open with new dates
       expired: false, // unreachable status — no affordance for it
     };

@@ -25,6 +25,7 @@
 import {
   deriveNeedSkills,
   detectNeedProfession,
+  namesOccupationOutsideCatalogue,
   type NeedSkillSource,
   type RecognizedNeedSkill,
 } from "@/lib/market/need-skills";
@@ -84,8 +85,15 @@ export function categorizeVacancy(
   //    systematic mistags from exactly this — hundreds of nurse/retail ads
   //    tagged cook or driver by their body text. A title is short and, when
   //    it names a profession, names THIS ad's profession.
+  //    Not when the publisher's label names an occupation the catalogue
+  //    positively knows it lacks (production 2026-10-26: "Systemadministratör"
+  //    ads titled "Administratör" fell back to office_administrator, one to
+  //    receptionist). The publisher already said what the job is; a title
+  //    guess would contradict it.
+  const knownOutside =
+    fromOccupation === null && occupation.length > 0 && namesOccupationOutsideCatalogue(occupation);
   const fromTitle =
-    fromOccupation ?? (title.length > 0 ? detectNeedProfession(title) : null);
+    fromOccupation ?? (!knownOutside && title.length > 0 ? detectNeedProfession(title) : null);
   const professionSlug = fromTitle;
 
   // 3. The shared derivation over the ad's own words — for SKILLS only.

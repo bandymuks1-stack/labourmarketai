@@ -46,6 +46,7 @@ import {
   featureKeysUsedByPlans,
   summarizeEntitlementCoverage,
 } from "../billing/readiness";
+import { activeLocales } from "@/lib/i18n/config";
 
 const here = resolve(fileURLToPath(import.meta.url), "..");
 const webRoot = resolve(here, "..", "..");
@@ -414,7 +415,7 @@ describe("readiness state model + claim ledger", () => {
   });
 
   it("readiness i18n exists in en/lt/ru and makes no live-payment claim", () => {
-    for (const loc of ["en", "lt", "ru"] as const) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(read(`messages/${loc}.json`));
       const readiness = m.adminBilling?.readiness;
       expect(readiness, `${loc}: adminBilling.readiness missing`).toBeTruthy();
@@ -510,7 +511,7 @@ describe("WAGON 4 — plan boundary rendering derives from the registry", () => 
     // registry entry is a phantom claim; a registry key without a label
     // renders raw. Both directions fail here.
     const registryKeys = [...Object.keys(FEATURE_ENFORCEMENT)].sort();
-    for (const loc of ["en", "lt", "ru"] as const) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(read(`messages/${loc}.json`));
       const labels = m.planBoundary?.features ?? {};
       expect(
@@ -570,7 +571,7 @@ describe("WAGON 4 — price slots and account page stay honest", () => {
 
   it("all WAGON 4 copy (en/lt/ru) carries no live-payment claim and no price figure", () => {
     const PRICE_FIGURE = /\d+\s*(?:€|EUR|\$|USD)|(?:€|\$)\s*\d+/;
-    for (const loc of ["en", "lt", "ru"] as const) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(read(`messages/${loc}.json`));
       const surfaces = [
         m.planBoundary,

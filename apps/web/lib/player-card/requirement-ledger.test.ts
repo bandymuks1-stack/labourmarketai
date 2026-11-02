@@ -207,7 +207,7 @@ describe("every unsatisfied row has ≥ 1 resolution that exists, or the honest 
     }
   });
 
-  it("a document row: the add-document action first (the ONE existing write path), then the rows that exist and fit, and the issuing authority the matrix names", () => {
+  it("a document row: the add-document action first (the ONE existing write path), then the rows that exist and fit, and the information source the matrix names", () => {
     const ledger = deriveRequirementLedger(PROJECT);
     const a1 = ledger.rows.find((r) => r.id === "checklist:a1_or_posting_document");
     expect(a1?.resolutions[0]).toEqual({
@@ -217,10 +217,10 @@ describe("every unsatisfied row has ≥ 1 resolution that exists, or the honest 
       why: "records_it",
     });
     const kinds = a1?.resolutions.map((r) => r.kind);
-    // The A1 service offering fits by name; the issuing authority comes from the LT requirement row.
+    // The A1 service offering fits by name; the information source comes from the LT requirement row.
     expect(kinds).toContain("service_offering");
     expect(a1?.resolutions.find((r) => r.kind === "service_offering")).toMatchObject({ id: "s1", why: "name_matches", rateText: "nuo 40 EUR" });
-    expect(a1?.resolutions.find((r) => r.kind === "issuing_authority")).toEqual({ kind: "issuing_authority", title: "Sodra (A1)", url: "https://example.invalid/a1", why: "names_the_issuer" });
+    expect(a1?.resolutions.find((r) => r.kind === "information_source")).toEqual({ kind: "information_source", title: "Sodra (A1)", url: "https://example.invalid/a1", why: "names_the_source" });
     // A course is never offered for a posting paper; the 3 programmes + 1 non-fitting service were read and rejected.
     expect(kinds).not.toContain("training_program");
     expect(a1?.rejectedCandidates).toBe(4);
@@ -235,13 +235,14 @@ describe("every unsatisfied row has ≥ 1 resolution that exists, or the honest 
       }),
     );
     const row = ledger.rows.find((r) => r.id === "checklist:qualification_or_skill_evidence");
-    expect(row?.state).toBe("missing");
+    // `needed` = to agree before the agreement — not a gap (decision 0021).
+    expect(row?.state).toBe("unknown");
     expect(row?.resolutions.map((r) => r.kind)).toEqual(["add_document", "training_program"]);
     expect(row?.resolutions[1]).toMatchObject({ id: "t1", why: "name_matches" });
     expect(row?.rejectedCandidates).toBe(2);
 
     const idRow = deriveRequirementLedger(base({ documents: [], serviceOfferings: [] })).rows.find((r) => r.id === "document:id_document");
-    expect(idRow?.resolutions.map((r) => r.kind)).toEqual(["add_document", "issuing_authority"]);
+    expect(idRow?.resolutions.map((r) => r.kind)).toEqual(["add_document", "information_source"]);
   });
 
   it("a skill row: the assigned course that names it comes first, then the work journal (evidence makes a skill real)", () => {
@@ -280,21 +281,23 @@ describe("every unsatisfied row has ≥ 1 resolution that exists, or the honest 
 describe("the ratio recomputes after a state change — the person's side of the same N of M", () => {
   it("recording the missing document moves the ratio; the manager's checked row moves it too", () => {
     const before = deriveRequirementLedger(PROJECT);
-    expect(before.ratio).toEqual({ have: 3, total: 6 });
+    // 6 counted rows, one of them UNKNOWN (the client's own rule): 3 of 5
+    // known, the unknown said apart — never "3 of 6".
+    expect(before.ratio).toEqual({ have: 3, total: 5, unknown: 1 });
     expect(deriveLedgerRatio(before.rows)).toEqual(before.ratio);
 
     const after = deriveRequirementLedger({
       ...PROJECT,
       documents: [...PERSON.documents, doc({ id: "d3", documentTypeSlug: "a1_certificate", country: "LT" })],
     });
-    expect(after.ratio).toEqual({ have: 4, total: 6 });
+    expect(after.ratio).toEqual({ have: 4, total: 5, unknown: 1 });
     expect(after.rows.find((r) => r.id === "checklist:a1_or_posting_document")).toMatchObject({ state: "valid", provenance: { source: "own_document", validUntil: null, verified: false }, resolutions: [] });
 
     const managerChecked = deriveRequirementLedger({
       ...PROJECT,
       checklistItems: PROJECT.checklistItems.map((i) => (i.itemKey === "client_specific_requirement" ? { ...i, status: "checked" as const } : i)),
     });
-    expect(managerChecked.ratio).toEqual({ have: 4, total: 6 });
+    expect(managerChecked.ratio).toEqual({ have: 4, total: 6, unknown: 0 });
     // Open = still needs something: the expiring contract, the missing A1, the rejected qualification.
     expect(openLedgerRows(managerChecked).map((r) => r.id)).toEqual([
       "checklist:a1_or_posting_document",
@@ -317,6 +320,54 @@ describe("the ratio recomputes after a state change — the person's side of the
     const many = Array.from({ length: 60 }, (_, i) => `skill-${i}`);
     const ledger = deriveRequirementLedger(base({ requiredSkillSlugs: many, ownSkills: [] }));
     expect(ledger.rows.length).toBeLessThanOrEqual(REQUIREMENT_LEDGER_ROW_LIMIT);
-    expect(ledger.ratio.total).toBe(ledger.rows.length);
+    // country-law rows are listed but never part of the person's N of M
+    expect(ledger.ratio.total).toBe(
+      ledger.rows.filter((r) => r.reason !== "country_requirement" && r.state !== "unknown").length,
+    );
+  });
+
+  it("a country's document rules are information, never a gap in the ratio (decision 0021 extension, 2026-10-24)", () => {
+    const ledger = deriveRequirementLedger(PROJECT);
+    const countryRows = ledger.rows.filter((r) => r.reason === "country_requirement");
+    const counted = ledger.rows.filter((r) => r.reason !== "country_requirement");
+    expect(ledger.ratio.total + ledger.ratio.unknown).toBe(counted.length);
+    // removing every country row leaves the ratio unchanged
+    expect(deriveLedgerRatio(counted)).toEqual(ledger.ratio);
+    expect(deriveLedgerRatio([...counted, ...countryRows])).toEqual(ledger.ratio);
+  });
+});
+
+describe("documents never gate or lower readiness; unknown is never a gap (walk-spec 2026-10-25)", () => {
+  it("a manager's `needed` document row without an own document is to agree, NOT missing", () => {
+    const ledger = deriveRequirementLedger(
+      base({
+        documents: [],
+        checklistItems: [{ itemKey: "a1_or_posting_document", label: "A1", status: "needed" }],
+      }),
+    );
+    const row = ledger.rows.find((r) => r.id === "checklist:a1_or_posting_document");
+    expect(row?.state).toBe("unknown");
+    expect(row?.provenance).toEqual({ source: "manager_checklist", status: "needed" });
+    // still answerable: the add-document path is offered
+    expect(row?.resolutions[0]).toMatchObject({ kind: "add_document" });
+    expect(ledger.ratio).toEqual({ have: 0, total: 0, unknown: 1 });
+  });
+
+  it("only the manager's EXPLICIT `missing` is a gap", () => {
+    const ledger = deriveRequirementLedger(
+      base({
+        documents: [],
+        checklistItems: [{ itemKey: "a1_or_posting_document", label: "A1", status: "missing" }],
+      }),
+    );
+    expect(ledger.rows.find((r) => r.id === "checklist:a1_or_posting_document")?.state).toBe("missing");
+    expect(ledger.ratio).toEqual({ have: 0, total: 1, unknown: 0 });
+  });
+
+  it("a ledger of only country rules counts nothing: total 0, so the surface says so instead of '0 of 0'", () => {
+    const ledger = deriveRequirementLedger(base({ documents: [] }));
+    expect(ledger.rows.length).toBeGreaterThan(0);
+    expect(ledger.rows.every((r) => r.reason === "country_requirement")).toBe(true);
+    expect(ledger.ratio).toEqual({ have: 0, total: 0, unknown: 0 });
   });
 });

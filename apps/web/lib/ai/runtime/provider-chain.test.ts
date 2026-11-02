@@ -10,6 +10,7 @@ import {
 } from "./provider-chain";
 import { resolveTaskRoute, type AiTaskType } from "./task-routing";
 import type { AiEgressGrant } from "./data-egress";
+import { MODEL_REGISTRY, isSelectable } from "./model-registry";
 
 /**
  * FREE-FIRST PROVIDER CHAIN.
@@ -242,8 +243,25 @@ describe("the profile table cannot silently start spending money", () => {
     // Placing a cloud vendor in `free_tier` is a claim about TODAY's terms.
     // Until each is verified against current documentation the honest default
     // is `paid`, so the chain never routes expecting a bill that isn't there.
+    //
+    // 2026-10-25 (owner order: free quotas first): exactly three cloud vendors
+    // are free_tier, each verified first-hand that day — and each carries that
+    // source on EVERY one of its registry rows, with the metered price (never
+    // €0), so a key moved onto billing can never spend past a ceiling.
+    const FREE_TIER = ["cloudflare", "mistral", "groq"];
     for (const p of AI_PROVIDER_PROFILES) {
-      if (p.locality === "cloud") expect(p.costClass).toBe("paid");
+      if (p.locality !== "cloud") continue;
+      expect(p.costClass, p.id).toBe(FREE_TIER.includes(p.id) ? "free_tier" : "paid");
+    }
+    for (const id of FREE_TIER) {
+      const rows = MODEL_REGISTRY.filter((e) => e.provider === id);
+      expect(rows.length, id).toBeGreaterThan(0);
+      for (const e of rows) {
+        expect(e.freeTier, e.model).toBe(true);
+        expect(isSelectable(e), e.model).toBe(true);
+        expect(e.pricingSource, e.model).toMatch(/^.+https:\/\/.+read 2026-10-25/);
+        expect(e.inputUsdPerMTok ?? 0, e.model).toBeGreaterThan(0);
+      }
     }
   });
 

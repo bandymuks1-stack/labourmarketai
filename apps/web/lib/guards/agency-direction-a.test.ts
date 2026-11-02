@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Agency Direction A guard (owner decision, 2026-07-05).
@@ -137,7 +138,7 @@ describe("route-truth-map ratchet honoured", () => {
 });
 
 describe("agency-mode copy: present (en/lt/ru), honest, no old terminology", () => {
-  for (const locale of ["en", "lt", "ru"] as const) {
+  for (const locale of activeLocales) {
     const json = JSON.parse(read(`messages/${locale}.json`)) as {
       roleDashboards?: { company?: { agencyMode?: Record<string, unknown> } };
     };

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { withoutErasureRegistrySeed } from "./erasure-registry-seed";
 import { join } from "node:path";
 
 import { activeLocales, locales } from "@/lib/i18n/config";
@@ -66,8 +67,32 @@ const TRAIN_J = [INVOICE_MIGRATION, PROCUREMENT_MIGRATION, TRIPS_MIGRATION];
 
 /** Migrations that only READ the trips table (never define it). The override
  *  receipt validator verifies each claimed trip clash against its real
- *  `business_trips` row. Every occurrence must be a read position. */
-const TRIP_READERS = ["20261003150950_commitment_override_collision_validation_v1"];
+ *  `business_trips` row. Every occurrence must be a read position.
+ *  20261023160000 (CAL-8) redefines that same validator — its trip branch
+ *  verbatim, only the plan branch changes — and its rollback restores the
+ *  validator verbatim, so both files carry the identical read. */
+/** 20261025045152 project_forecasts_v1 (restored byte-exact by #2913, production-applied
+ *  2026-10-25) attaches its forecast_signal trigger to procurement_inquiries and branches on
+ *  it in the trigger function; its rollback drops that trigger. Those are the ONLY positions
+ *  it may name an owned table in; after removing them nothing owned may remain. */
+const FORECAST_SIGNAL_HOOKS = ["20261025045152_project_forecasts_v1"];
+function withoutForecastSignalHooks(src: string): string {
+  return src
+    .replace(/forecast_signal (after [a-z ]+ )?on public\.\w+/g, "forecast_signal on <table>")
+    .replace(/tg_table_name = '\w+'/g, "tg_table_name = <table>")
+    // Only the EXACT trigger-drop loop of the rollback is removed. Any other loop body (for
+    // example an `alter table public.%I ...`) keeps its table list, so the owned names
+    // stay visible and the assertion below rejects it.
+    .replace(
+      /foreach t in array array\[[^\]]*\] loop\s+execute format\('drop trigger if exists forecast_signal on public\.%I', t\);\s+end loop;/g,
+      "<forecast_signal trigger-drop loop>",
+    );
+}
+
+const TRIP_READERS = [
+  "20261003150950_commitment_override_collision_validation_v1",
+  "20261023160000_work_plan_shift_patterns_v1",
+];
 
 /**
  * CRLF IS NORMALISED AT THE READ, deliberately.
@@ -226,8 +251,9 @@ describe("1. exactly three human-gated migration pairs own the financial-ops sli
       const abs = join(REPO, "supabase", dir);
       for (const f of readdirSync(abs).filter((n) => n.endsWith(".sql"))) {
         if (TRAIN_J.some((p) => f.startsWith(p))) continue;
-        const src = readFileSync(join(abs, f), "utf8");
-        if (dir === "migrations" && TRIP_READERS.some((p) => f.startsWith(p))) {
+        const raw = withoutErasureRegistrySeed(readFileSync(join(abs, f), "utf8"));
+        const src = FORECAST_SIGNAL_HOOKS.some((p) => f.startsWith(p)) ? withoutForecastSignalHooks(raw) : raw;
+        if (TRIP_READERS.some((p) => f.startsWith(p))) {
           // A reader may name business_trips ONLY to read it: `to_regclass(...)`
           // or `from public.business_trips`. Nothing else it names may be owned.
           const code = src.replace(/\r/g, "").replace(/--.*$/gm, "");
@@ -533,7 +559,7 @@ describe("4. append-only history and immutability", () => {
       ["business_trip_events", TRIPS_SQL],
     ] as const) {
       expect(src).toMatch(
-        new RegExp(`create trigger ${tbl.replace(/s$/, "s")}_append_only`),
+        new RegExp(`create trigger ${tbl}_append_only`),
       );
       expect(src).toMatch(/before update or delete on public\.\w+_events/);
       expect(src).toContain("is append-only");

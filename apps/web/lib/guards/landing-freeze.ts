@@ -616,6 +616,17 @@ import { join } from "node:path";
  * the real card over every combination of the varying facts (same markup
  * exactly when same facts) and by reading the card's own table keys from
  * its source and pinning the declared key sets to them.
+ *
+ * LT informal "tu" register (owner order 2026-10-28) — the Lithuanian UI is
+ * unified to the informal singular address (tu/tavo/tau; gali, pasirink,
+ * prisijunk …) instead of the formal plural (jūs/jūsų; galite, pasirinkite,
+ * prisijunkite …). Legal texts (`legal.*`) were explicitly excluded. Every key
+ * and every ICU placeholder / plural skeleton is unchanged; only LT wording
+ * moved. The regeneration moved EXACTLY FIVE namespace hashes — `lt.landing`,
+ * `lt.hero`, `lt.livingMarketReview`, `lt.workEntryReview`,
+ * `lt.landingJourney` — and ZERO file hashes; `en.*` and `ru.*` are
+ * byte-identical, which is the proof that no component, layout or other
+ * locale changed.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
@@ -647,6 +658,8 @@ export const FROZEN_LANDING_FILES = [
   // pure read-only hook into the conversation router) replaces the scripted
   // hero scenario at the top of the render tree.
   "components/marketing/public-entry.tsx",
+  // Owner positioning 2026-10-21: the three ways under the promise.
+  "components/marketing/landing-three-ways.tsx",
   "lib/marketing/public-entry.ts",
   "components/marketing/product-chain-band.tsx",
   "components/marketing/market-proof-band.tsx",
@@ -705,6 +718,15 @@ export const FROZEN_LANDING_FILES = [
   // untouched — the promise stays absolute over the picture). The first CTA
   // had been at ~1,035 px on 375x812. The regeneration touched EXACTLY ONE
   // hash — living-worker-hero.tsx; no copy, photograph or motion moved.
+  // 2026-10-18 (owner directive, final product completion: "Išsaugok esamą
+  // dizaino sistemą, bet pašalink nenuoseklumus"; the 2026-10-10 rule that the
+  // freeze protects the approved design, not its defects): three defects seen
+  // on production — a 56px two-tone seam between the header and the hero
+  // (-mt-14 pt-14 on the section), the subline running past the 28% left
+  // gradient onto bright frames (gradient 46%), and carousel controls with no
+  // backdrop (the hero chips' own translucent pill). The regeneration touched
+  // EXACTLY ONE hash — living-worker-hero.tsx; no copy, photograph, motion or
+  // structure moved.
   "components/marketing/living-worker-hero.tsx",
   "lib/marketing/living-worker-hero.ts",
 ] as const;

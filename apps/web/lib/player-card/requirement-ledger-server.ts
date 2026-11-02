@@ -216,6 +216,51 @@ export async function loadOwnOpportunityLedgers(
   return out;
 }
 
+/**
+ * PER-13 on the ROLE context — the third and last mount. "What is missing for
+ * me to work as <my profession> in <a country I aim at>", answered on the
+ * person's own profile from what they already declared (primary profession +
+ * target countries). No new derivation: `loadRequirementLedger` with
+ * `kind: "role"`, the branch that existed with no caller. Bounded like the
+ * other two loaders; a role whose ledger does not answer is simply absent.
+ */
+export const OWN_ROLE_LEDGERS_LIMIT = 3;
+
+export async function loadOwnRoleLedgers(
+  roles: readonly { readonly professionSlug: string; readonly country: string | null }[],
+): Promise<{ readonly professionSlug: string; readonly country: string | null; readonly ledger: RequirementLedger }[]> {
+  const seen = new Set<string>();
+  const distinct = roles
+    .filter((r) => {
+      const key = `${r.professionSlug}|${r.country ?? ""}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, OWN_ROLE_LEDGERS_LIMIT);
+  if (distinct.length === 0) return [];
+  // A country whose document requirements are not curated is UNKNOWN, not "nothing
+  // required" (the readiness model's requirementsKnown=false). Deriving a ledger for it
+  // would render an empty requirement slice as a complete ratio — so it gets none.
+  const docs = await cachedDocuments().catch(() => null);
+  const knownCountries = new Set(
+    docs && docs.kind === "ok" ? docs.requirements.map((r) => r.country.toUpperCase()) : [],
+  );
+  const answerable = distinct.filter((r) => r.country !== null && knownCountries.has(r.country.toUpperCase()));
+  if (answerable.length === 0) return [];
+  const personId = await getOwnWorkerId();
+  if (!personId) return [];
+  const results = await Promise.all(
+    answerable.map((r) =>
+      loadRequirementLedger({
+        personId,
+        context: { kind: "role", professionSlug: r.professionSlug, country: r.country },
+      }).catch(() => null),
+    ),
+  );
+  return results.flatMap((res, i) => (res && res.kind === "ok" ? [{ ...answerable[i], ledger: res.ledger }] : []));
+}
+
 export async function loadRequirementLedger(args: {
   /** The person's worker id — must be the caller's own. */
   readonly personId: string;

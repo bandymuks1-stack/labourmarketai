@@ -15,7 +15,10 @@ import {
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
-import { signUpAddressedInviteAction } from "@/lib/invitations/signup-accept-action";
+import {
+  resendAddressedInviteConfirmationAction,
+  signUpAddressedInviteAction,
+} from "@/lib/invitations/signup-accept-action";
 import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
 import { StaffReviewNotice } from "@/components/app/staff-review-notice";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
@@ -40,17 +43,23 @@ const MIN_PASSWORD = 8;
 
 /** Signup form. Social OAuth (shared same-tab buttons) + email/password/
  *  confirm (`signUp`). Role is no longer picked here — it moves to
- *  /onboarding. Launch-stage registration is FRICTIONLESS (owner requirement
- *  WORKER_REGISTRATION_FRICTION_REMOVAL): with Supabase "Confirm email" OFF,
- *  signUp returns a live session and we route straight to /onboarding — no
- *  email step, ever. That session proves nothing about the mailbox: the
- *  SEPARATE verified-email state (migration 20261003151000) gates only
- *  trust-sensitive actions, and is requested progressively where they happen
- *  (see lib/auth/email-verification.ts). The `check_email` branch below stays as
- *  a DEFENSIVE fallback for the period before the production setting is flipped
- *  (docs/human-gates/worker-registration-friction-gate.md) and as the rollback
- *  path; it is never reached once the session is live. Magic link was removed
- *  in M1.
+ *  /onboarding. CURRENT PRODUCTION FLOW (verified 2026-10-21 from auth.users):
+ *  Supabase "Confirm email" is ON (since 2026-09-02), so `signUp` returns NO
+ *  session, the form shows the `check_email` state, and the mailed link
+ *  finishes the signup through the auth callback. That is the normal path for
+ *  every email signup today, not a fallback. The session branch below is what
+ *  the local stack (Confirm email OFF) takes.
+ *
+ *  PREPARED, NOT EXECUTED: the frictionless flow (owner requirement
+ *  WORKER_REGISTRATION_FRICTION_REMOVAL; docs/runbooks/frictionless-invite-cutover-v1.md,
+ *  docs/human-gates/worker-registration-friction-gate.md, state
+ *  AWAITING_OWNER_APPLY) would flip "Confirm email" OFF so signUp returns a live
+ *  session and routes straight to /onboarding. That session would prove nothing
+ *  about the mailbox: the SEPARATE verified-email state (migration
+ *  20261003151000) gates only trust-sensitive actions and is requested
+ *  progressively where they happen (see lib/auth/email-verification.ts). After
+ *  that flip the `check_email` branch remains the rollback path. Magic link was
+ *  removed in M1.
  *
  *  `linkedinEnabled` / `facebookEnabled` come from the SERVER page component
  *  (lib/auth/enabled-providers.ts). Default FALSE = fail-closed: a provider
@@ -101,9 +110,9 @@ export function SignupForm({
   const [errorKind, setErrorKind] = useState<"generic" | "alreadyRegistered">(
     "generic",
   );
-  // DEFENSIVE state only: it is reachable solely while Supabase still withholds
-  // the session ("Confirm email" ON — production from 2026-09-02 until the
-  // registration-friction flip). The check-your-email
+  // The normal production state today: Supabase withholds the session while
+  // "Confirm email" is ON (production since 2026-09-02; the frictionless flip
+  // is prepared, not executed). The check-your-email
   // state offers ONE way forward when the mail is slow or lost: a resend,
   // throttled to the auth server's own per-address limit so the button never
   // offers what the server would refuse.
@@ -136,13 +145,27 @@ export function SignupForm({
     setResendState("sending");
     setResendError(null);
     try {
-      const supabase = createClient();
-      const { error: err } = await supabase.auth.resend({
-        type: "signup",
-        email: email.trim(),
-        options: { emailRedirectTo: emailRedirectTo() },
-      });
-      if (err) throw err;
+      if (invitation) {
+        // The form holds only the masked address; the server resolves the
+        // invited one from the token (a browser resend to "x***@…" reached nobody).
+        const res = await resendAddressedInviteConfirmationAction({
+          token: invitation.token,
+          emailRedirectTo: emailRedirectTo(),
+        });
+        if (res.status === "error") throw { code: res.code, message: res.message, status: res.httpStatus };
+        if (res.status === "unavailable") {
+          window.location.assign(`/${locale}/auth/signup`);
+          return;
+        }
+      } else {
+        const supabase = createClient();
+        const { error: err } = await supabase.auth.resend({
+          type: "signup",
+          email: email.trim(),
+          options: { emailRedirectTo: emailRedirectTo() },
+        });
+        if (err) throw err;
+      }
       setResendState("sent");
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (e) {
@@ -248,6 +271,14 @@ export function SignupForm({
         },
       });
       if (err) throw err;
+      // With "Confirm email" ON, an address that already has an account gets
+      // NO error either: Supabase returns a user with an empty identities
+      // list and sends nothing. Treat it as "already registered" so the
+      // person sees the sign-in door instead of waiting for a mail that never
+      // comes.
+      if (!data.session && data.user && data.user.identities?.length === 0) {
+        throw { code: "user_already_exists", message: "", status: undefined };
+      }
       // "Confirm email" ON (production since 2026-09-02): signUp returns NO
       // session and no error. Show the explicit "check your email" state —
       // the callback finishes the signup when the link is opened. Without
@@ -341,7 +372,7 @@ export function SignupForm({
   return (
     /* `method="post"` — pre-hydration fallback only. See login-form.tsx: without
        it an early submit GETs the password into the URL. */
-    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-6" noValidate>
+    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-5 sm:gap-6" noValidate>
       <header>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("headline")}
@@ -355,29 +386,21 @@ export function SignupForm({
           landing travels in `?next=`; this is where they can see that it did. */}
       <AuthCarriedIntent next={nextParam} />
 
-      {/* GDPR Art. 13 first-layer notice, rendered ONCE and before the first
-          account-creating control (the Google path collects account data
-          too); the e-mail form below is read past it in document order. A
-          second copy above the submit used to render — a real person read the
-          same paragraph twice on one short form (window 6 walk, 2026-09-06). */}
-      <AuthLegalNotice variant="signup" />
+      {/* One social group (UX friction batch 2026-10-28): the notice and the
+          provider buttons sit tight together (gap-3) instead of each taking
+          the form's gap-6, so the e-mail form and its one primary action
+          move up on a phone. The notice still precedes every account-creating
+          button in document order. */}
+      <div className="flex flex-col gap-3" data-testid="auth-social-group">
+        {/* GDPR Art. 13 first-layer notice, rendered ONCE and before the first
+            account-creating control (the Google path collects account data
+            too); the e-mail form below is read past it in document order. A
+            second copy above the submit used to render — a real person read the
+            same paragraph twice on one short form (window 6 walk, 2026-09-06). */}
+        <AuthLegalNotice variant="signup" />
 
-      <GoogleButton
-        label={t("google_label")}
-        redirectingLabel={t("google_redirecting")}
-        errorLabel={t("error_generic")}
-        disabled={disabled}
-        nextPath={nextPath}
-        context="signup"
-        registrationStep="signup_page"
-      />
-
-      {/* LinkedIn/Facebook render ONLY when the auth server reports the
-          provider enabled — the same account-creating same-tab flow, behind
-          the same GDPR notice above. */}
-      {linkedinEnabled && (
-        <LinkedInButton
-          label={tSocial("continueWithLinkedIn")}
+        <GoogleButton
+          label={t("google_label")}
           redirectingLabel={t("google_redirecting")}
           errorLabel={t("error_generic")}
           disabled={disabled}
@@ -385,18 +408,33 @@ export function SignupForm({
           context="signup"
           registrationStep="signup_page"
         />
-      )}
-      {facebookEnabled && (
-        <FacebookButton
-          label={tSocial("continueWithFacebook")}
-          redirectingLabel={t("google_redirecting")}
-          errorLabel={t("error_generic")}
-          disabled={disabled}
-          nextPath={nextPath}
-          context="signup"
-          registrationStep="signup_page"
-        />
-      )}
+
+        {/* LinkedIn/Facebook render ONLY when the auth server reports the
+            provider enabled — the same account-creating same-tab flow, behind
+            the same GDPR notice above. */}
+        {linkedinEnabled && (
+          <LinkedInButton
+            label={tSocial("continueWithLinkedIn")}
+            redirectingLabel={t("google_redirecting")}
+            errorLabel={t("error_generic")}
+            disabled={disabled}
+            nextPath={nextPath}
+            context="signup"
+            registrationStep="signup_page"
+          />
+        )}
+        {facebookEnabled && (
+          <FacebookButton
+            label={tSocial("continueWithFacebook")}
+            redirectingLabel={t("google_redirecting")}
+            errorLabel={t("error_generic")}
+            disabled={disabled}
+            nextPath={nextPath}
+            context="signup"
+            registrationStep="signup_page"
+          />
+        )}
+      </div>
 
       <div className="flex items-center gap-3" aria-hidden>
         <span className="h-px flex-1 bg-ink-500" />
@@ -505,8 +543,10 @@ export function SignupForm({
         </div>
       )}
 
-      <div className="flex items-center justify-between">
-        <Button type="submit" disabled={disabled}>
+      {/* One primary action: full width on a phone (the sign-in/sign-up
+          link drops beneath it instead of squeezing it), inline from sm up. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Button type="submit" className="w-full sm:w-auto" disabled={disabled}>
           {disabled ? t("signing") : t("submit_label")}
         </Button>
         <span className="text-xs text-text-muted">
@@ -517,7 +557,10 @@ export function SignupForm({
                 ? `/auth/login?next=${encodeURIComponent(nextPath)}`
                 : "/auth/login"
             }
-            className="text-brand-blue hover:text-brand-champagne"
+            // Underlined: inside a sentence the gold link is 1.3:1 against the
+            // muted text around it, so colour alone does not mark it as a link
+            // (WCAG 1.4.1, axe link-in-text-block, 390 px audit).
+            className="text-brand-blue underline underline-offset-2 hover:text-brand-champagne"
           >
             {t("login_link")}
           </Link>

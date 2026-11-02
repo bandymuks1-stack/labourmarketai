@@ -3,6 +3,8 @@
 import "server-only";
 
 import { loadProjectDetailForResult, loadProjectsForResult } from "@/lib/projects/project-workspace";
+import { loadProjectScanDetails } from "@/lib/projects/project-scan";
+import type { ProjectListRow, ProjectScanDetailResult } from "@/lib/projects/project-result-contract";
 
 import {
   PROJECT_RISK_SCAN_LIMIT,
@@ -20,6 +22,24 @@ import {
  * signals they carry, most first. Bounded.
  */
 export async function loadProjectRiskForChat(): Promise<ProjectRiskChatResult> {
+  return scanProjectRisk((scanned) => Promise.all(scanned.map((p) => loadProjectDetailForResult(p.projectId))));
+}
+
+/**
+ * The SAME answer for the company home's project field (perf 2026-10-22):
+ * identical rows, built by the same derivation below, but every scanned
+ * project's roster, teams, checklist, tasks and stages are read in ONE batched
+ * read each (`loadProjectScanDetails`) instead of one full panel detail read
+ * per project — the per-project fan-out that made a large organization's
+ * company home take 13–24 s.
+ */
+export async function loadProjectRiskForHome(): Promise<ProjectRiskChatResult> {
+  return scanProjectRisk((scanned) => loadProjectScanDetails(scanned));
+}
+
+async function scanProjectRisk(
+  readDetails: (scanned: readonly ProjectListRow[]) => Promise<readonly ProjectScanDetailResult[]>,
+): Promise<ProjectRiskChatResult> {
   const projects = await loadProjectsForResult();
   if (projects.kind === "no-company-context") return { kind: "no-company" };
   if (projects.kind === "empty") return { kind: "empty" };
@@ -28,17 +48,21 @@ export async function loadProjectRiskForChat(): Promise<ProjectRiskChatResult> {
     const live = projects.projects.filter((p) => p.status !== "completed");
     if (live.length === 0) return { kind: "empty" };
     const scanned = live.slice(0, PROJECT_RISK_SCAN_LIMIT);
-    const details = await Promise.all(scanned.map((p) => loadProjectDetailForResult(p.projectId)));
+    const details = await readDetails(scanned);
     const rows: ProjectRiskRow[] = [];
     scanned.forEach((p, i) => {
       const d = details[i];
-      if (d.kind !== "project") return;
+      if (!d || d.kind !== "project") return;
       const pr = d.project;
       const pulse = pr.pulse;
       const stagesBlocked = pr.stages === null ? null : pr.stages.filter((s) => s.status === "blocked").length;
       const nobodyOnLiveProject = pr.status === "live" && pr.assignmentTotal === 0;
+      // Documents are not a project risk score (decision 0021 extension,
+      // 2026-10-24): the count of people with rows a manager marked missing
+      // is still SHOWN (workersWithMissingDocs below), never summed into the
+      // order.
       const signals =
-        (pulse ? pulse.tasksOverdue + pulse.workersWithMissingDocs : 0) +
+        (pulse ? pulse.tasksOverdue : 0) +
         (stagesBlocked ?? 0) +
         (nobodyOnLiveProject ? 1 : 0);
       rows.push({

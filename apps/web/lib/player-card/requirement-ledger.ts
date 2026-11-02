@@ -14,7 +14,7 @@ import { foldText } from "@/lib/structuring/normalize";
  * the person's CURRENT STATE from their own canonical rows · the PROVENANCE
  * of that state · and, for every row that is not satisfied, at least one
  * RESOLUTION that exists in the data (a training programme row, a service
- * offering row, the issuing authority the country matrix already names, the
+ * offering row, the information source the country matrix already names, the
  * add-document action) or the honest "no resolution recorded yet" with the
  * existing ask action.
  *
@@ -91,11 +91,11 @@ export type RequirementProvenance =
   /** The read answered and holds nothing for this requirement. */
   | { readonly source: "none" };
 
-export type ResolutionWhy = "assigned_to_you" | "name_matches" | "names_the_issuer" | "records_it" | "evidence_makes_it_real" | "profile_setting" | "nothing_recorded";
+export type ResolutionWhy = "assigned_to_you" | "name_matches" | "names_the_source" | "records_it" | "evidence_makes_it_real" | "profile_setting" | "nothing_recorded";
 
 export type RequirementResolution =
   | { readonly kind: "add_document"; readonly documentTypeSlug: string; readonly href: string; readonly why: "records_it" }
-  | { readonly kind: "issuing_authority"; readonly title: string; readonly url: string | null; readonly why: "names_the_issuer" }
+  | { readonly kind: "information_source"; readonly title: string; readonly url: string | null; readonly why: "names_the_source" }
   | { readonly kind: "training_program"; readonly id: string; readonly title: string; readonly why: "assigned_to_you" | "name_matches" }
   | {
       readonly kind: "service_offering";
@@ -135,8 +135,10 @@ export interface RequirementLedger {
   readonly contextLabel: string | null;
   readonly country: string | null;
   readonly rows: readonly RequirementLedgerRow[];
-  /** have (valid + expiring) of total — recomputed from the rows, never stored. */
-  readonly ratio: { readonly have: number; readonly total: number };
+  /** have (valid + expiring) of total — recomputed from the rows, never stored.
+   *  `total` counts only rows whose state is KNOWN; `unknown` is said apart
+   *  (SEP-7: unknown is neither a have nor a gap). */
+  readonly ratio: LedgerRatio;
   /** Which reads answered — an unanswered read makes its rows UNKNOWN. */
   readonly reads: {
     readonly documents: "ok" | "unknown";
@@ -326,7 +328,7 @@ interface Draft {
   readonly managerStatus: ManagerChecklistStatus | null;
   /** Text the manager typed (project rows) — matching terms and nothing else. */
   readonly verbatim: string | null;
-  /** The country requirement row (issuing authority), when one backs the row. */
+  /** The country requirement row (and its information source), when one backs the row. */
   readonly requirement: RequirementRow | null;
   /** Document types that would answer the row (first = the one to record). */
   readonly documentTypeSlugs: readonly string[];
@@ -404,12 +406,17 @@ function resolve(
     rejected += input.serviceOfferings.length;
   }
 
+  // The requirement row's SOURCE — the official page the rule was read from
+  // (for the country matrix: an EU "Your Europe" / ELA information page). It
+  // is where to read about the rule, NOT who issues the document: calling an
+  // information page the issuer ("Išduoda: Your Europe") told the person to
+  // ask the wrong body for their A1 (walk-spec 2026-10-25).
   if (d.requirement?.sourceTitle) {
     out.push({
-      kind: "issuing_authority",
+      kind: "information_source",
       title: d.requirement.sourceTitle,
       url: d.requirement.sourceUrl ?? null,
-      why: "names_the_issuer",
+      why: "names_the_source",
     });
   }
 
@@ -470,6 +477,13 @@ export function deriveRequirementLedger(input: RequirementLedgerInput): Requirem
         if (best && best.state !== "missing") {
           state = best.state;
           provenance = { source: "own_document", validUntil: best.validUntil, verified: best.verified };
+        } else if (it.status === "needed") {
+          // A `needed` row is a SUGGESTED check "to agree before the
+          // agreement" — never missing (decision 0021 extension, 2026-10-24;
+          // the same reading `operations-derive.ts` gives it: `docsToAgree`,
+          // not `docsMissing`). Only a manager's explicit `missing` is a gap.
+          state = "unknown";
+          provenance = { source: "manager_checklist", status: it.status };
         } else {
           state = "missing";
           provenance = { source: "none" };
@@ -661,12 +675,37 @@ export function deriveRequirementLedger(input: RequirementLedgerInput): Requirem
   };
 }
 
+export interface LedgerRatio {
+  readonly have: number;
+  /** Rows with a KNOWN state (valid / expiring / missing). */
+  readonly total: number;
+  /** Rows whose state is not known — said apart, never folded into total. */
+  readonly unknown: number;
+}
+
 /** Pure: have (valid + expiring) of total — the person's side of the same
  *  "N of M" the manager's readiness line shows; recomputed from rows. */
-export function deriveLedgerRatio(rows: readonly RequirementLedgerRow[]): { have: number; total: number } {
+export function deriveLedgerRatio(rows: readonly RequirementLedgerRow[]): LedgerRatio {
   let have = 0;
-  for (const r of rows) if (r.state === "valid" || r.state === "expiring") have += 1;
-  return { have, total: rows.length };
+  let total = 0;
+  let unknown = 0;
+  for (const r of rows) {
+    // A country's document rules are INFORMATION about the law, listed so the
+    // person knows them — never a gap in the person's own "N of M" (decision
+    // 0021 extension, 2026-10-24: not uploading documents never lowers a
+    // readiness figure). The rows stay in the ledger, outside the ratio.
+    if (r.reason === "country_requirement") continue;
+    // UNKNOWN is neither a have nor a gap (SEP-7). Counting it in the total
+    // read "3 of 6" when only 5 states were known — one row the person could
+    // not act on became one row they apparently lacked (walk-spec 2026-10-25).
+    if (r.state === "unknown") {
+      unknown += 1;
+      continue;
+    }
+    total += 1;
+    if (r.state === "valid" || r.state === "expiring") have += 1;
+  }
+  return { have, total, unknown };
 }
 
 /** The rows that still need something from the person, in ledger order. */

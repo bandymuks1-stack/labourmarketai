@@ -32,6 +32,7 @@ import {
   SEEK_VERB_SOURCE,
 } from "@/lib/structuring/role-label";
 import { PRESENT_ACTIVITY_VERB_SOURCE } from "@/lib/structuring/value-statement";
+import { UNICODE_WORD_BOUNDARY } from "@/lib/structuring/unicode-word-boundary";
 import { HELP_TOPICS } from "./product-help-topics";
 
 export type ConversationIntent =
@@ -297,24 +298,12 @@ type Pattern = {
 type IntentRule = { intent: ConversationIntent; patterns: Pattern[] };
 
 /**
- * A Unicode-aware word boundary. JS `\b` is ASCII-only, so it misfires at every
- * non-ASCII boundary (Lithuanian ąčęėįšųūž, Cyrillic): `darbą\b` never matches
- * after `ą`, and `\bcv\b` still lets `zxcv` match. This asserts a real
- * letter↔non-letter transition using Unicode letter/number classes (requires
- * the `u` flag), so short stems like `cv`/`job` stay properly bounded across
- * every launch language.
+ * A Unicode-aware word boundary (JS `\b` is ASCII-only). The ONE definition
+ * lives in lib/structuring/unicode-word-boundary.ts — with the compact
+ * letter class and the compile-cost rationale — so a client surface can use
+ * it without importing this router; re-exported here for existing callers.
  */
-// A COMPACT letter/number class over the scripts the product speaks (Latin
-// incl. extended + additional, Greek, Cyrillic, Georgian, digits). It replaced
-// `[\p{L}\p{N}]` inside the boundary because V8 expands the property classes
-// into hundreds of ranges, eight times per boundary, across ~700 patterns: the
-// first sentence of a process cost ~2.8 s to compile and now costs ~90 ms
-// (router-boundary-cost.test.ts). Do not put `\p{...}` back in the boundary.
-const WORD_CLASS =
-  "[0-9A-Za-z\\u00C0-\\u024F\\u0370-\\u03FF\\u0400-\\u052F\\u10A0-\\u10FF\\u1C90-\\u1CBF\\u1E00-\\u1EFF]";
-
-export const UNICODE_WORD_BOUNDARY =
-  "(?:(?<!" + WORD_CLASS + ")(?=" + WORD_CLASS + ")|(?<=" + WORD_CLASS + ")(?!" + WORD_CLASS + "))";
+export { UNICODE_WORD_BOUNDARY };
 
 const UB = UNICODE_WORD_BOUNDARY;
 
@@ -986,6 +975,24 @@ const RULES: IntentRule[] = [
       // Deliberately NO Lithuanian "kas laukia" here: it usually means "what
       // awaits (me)" — a day question, not a hiring one.
       p("(who\\s+is\\s+waiting|wer\\s+wartet|wie\\s+wacht|кто\\s+(ждет|ожидает)|kto\\s+czeka)", 4),
+      // A QUESTION ABOUT THE NEEDS WE ALREADY HAVE. "Kiek darbuotojų
+      // poreikių šiuo metu turime atvirų?" scored need-workers (darbuotoj 4 +
+      // poreik 2) and opened the CREATION form — a count question answered
+      // with "write a new one" (production audit 2026-10-22). Asking how many
+      // / which needs, or naming our open ones in the plural, is the review
+      // of existing demands this panel lists; weight 8 outranks the 6 a
+      // statement scores. "reikia 3 mūrininkų" / "darbuotojų poreikis: 5
+      // suvirintojai" (a new need) stay need-workers.
+      p("(kiek|kokie|kokius|kokiu|kokių)\\s+(?:[^\\s]+\\s+){0,3}?poreik", 8),
+      // Nominative/accusative plural only: the pattern source is FOLDED, so a
+      // genitive "poreikių" would become "poreikiu" — also the SINGULAR
+      // instrumental of "Kas susidomėjo mano poreikiu?" (interest-inbox).
+      p("(musu|mūsų|mano|atvir|aktyv|esam)\\w*\\s+(?:[^\\s]+\\s+){0,2}?poreik(iai|ius)", 8),
+      p("(how\\s+many|which|our|open|active)\\s+(?:[^\\s]+\\s+){0,2}?(needs|requests|demands)\\b", 8),
+      p("(сколько|какие|наши|открыт)[^?.!]{0,30}(потребност|заяв)", 8), // "заявок" carries no "заявк"
+      p("(wie\\s+viele|welche|unsere|offenen?)\\s+(?:[^\\s]+\\s+){0,2}?(bedarfe|anfragen)\\b", 8),
+      p("(hoeveel|welke|onze|openstaande)\\s+(?:[^\\s]+\\s+){0,2}?(aanvragen|behoeften)\\b", 8),
+      p("(ile|jakie|nasze|otwarte)\\s+(?:[^\\s]+\\s+){0,2}?(zapotrzebowa|zlece)", 8),
     ],
   },
   {

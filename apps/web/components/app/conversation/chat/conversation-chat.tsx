@@ -135,6 +135,7 @@ import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { NEED_DOOR_HREF } from "@/lib/company/need-door";
 import type { BaseIdentity } from "@/lib/config/roles";
 import { useRouter } from "@/lib/i18n/navigation";
 import {
@@ -274,6 +275,25 @@ function PersonalWorkspaceIntroStream({
   const { intro, labels } = use(payload);
   if (intro.kind === "hidden" || !labels) return null;
   return <PersonalWorkspaceIntro intro={intro} labels={labels} onAction={onAction} />;
+}
+
+/** The S2 block's place while its slow readiness read streams (home CLS P0,
+ *  2026-10-26). It used to be `fallback={null}`: the block (a compact card,
+ *  ~250–300 px) then appeared out of nothing above the greeting and pushed
+ *  the greeting and the centred composer down. The page hands a payload ONLY
+ *  when the block can render at all (`personalIntroMayShow`, decided from
+ *  facts it already holds), so this reservation is drawn only where a block
+ *  is genuinely coming — never a placeholder for something that cannot. */
+function PersonalWorkspaceIntroPending() {
+  return (
+    <div
+      aria-hidden
+      data-testid="personal-workspace-intro-pending"
+      className="min-h-64 rounded-card border border-ink-600/70 bg-ink-800/40 p-4"
+    >
+      <SkeletonText lines={4} />
+    </div>
+  );
 }
 
 /**
@@ -1316,6 +1336,12 @@ export function ConversationChat({
    *  thing — prod walk 2026-09-04: "Kas turėtų jame dirbti?" and its chips
    *  sat under the open project sheet and could not be tapped. */
   const [chipsPostedAt, setChipsPostedAt] = useState<number | null>(null);
+  /** The moment the OPENING BRIEF posted its chips. Kept apart from
+   *  `chipsPostedAt`: the brief is not an answer about what the sheet shows,
+   *  so it may close a sheet that opened on its own (a pending invitation) but
+   *  never a result or selection the person asked for — sharing the stamp
+   *  collapsed every `?result=` deep link on a phone (QA 2026-10-16). */
+  const [briefChipsPostedAt, setBriefChipsPostedAt] = useState<number | null>(null);
 
   /**
    * THE ACTIVE CONVERSATION GOAL (owner P0 §1/§5, 2026-09-06).
@@ -1463,6 +1489,15 @@ export function ConversationChat({
         const actionId = spec.actionId;
         const isEmployer =
           actionId.startsWith("company.") || actionId.startsWith("agency.");
+        // The chat's demand intake rendered (activation audit 2026-10-26 §2):
+        // the same `demand_form_viewed` the Needs door's intake sends, with
+        // the chat as its surface — whichever chip or sentence opened it.
+        if (actionId === "company.create-demand") {
+          trackFunnel(FUNNEL_EVENTS.demandFormViewed, {
+            surface: "chat",
+            role_context: "company",
+          });
+        }
         const render = (values?: Record<string, string | boolean>) => pushEmbed(
           <InlineActionForm
             spec={spec}
@@ -1829,7 +1864,7 @@ export function ConversationChat({
         // The brief asks with chips like any assistant() turn, so the phone
         // sheet (auto-opened for a pending invitation) yields to it the same
         // way instead of staying over the home.
-        if (brief.chips.length > 0) setChipsPostedAt(Date.now());
+        if (brief.chips.length > 0) setBriefChipsPostedAt(Date.now());
       })
       .catch(() => {
         /* the greeting stands on its own — never a fabricated brief */
@@ -5474,6 +5509,17 @@ export function ConversationChat({
     (chip: ChoiceChip) => {
       if (runPinChip(chip.id)) return;
       noteUsage(chip.id, chip.label);
+      // A "describe a need" door was tapped — the starter chip, the follow-up
+      // after a saved need, or the employer bridge's link to the Needs door.
+      // Same event and the same bounded surface as every other need door
+      // (`lib/company/need-door.ts`); the form's own view is counted in
+      // `openForm`.
+      if (chip.id.split("?")[0] === "f:company.create-demand" || chip.id === `link:${NEED_DOOR_HREF}`) {
+        trackFunnel(FUNNEL_EVENTS.companyDemandActionClicked, {
+          surface: "chat",
+          role_context: "company",
+        });
+      }
       // PERSONAL ACTS ARE NOT COMPANY ACTS (owner 2026-10-01). The CV, the
       // personal profile and the person's own work log belong to the PERSON;
       // in a company workspace the chip says so and offers the personal space
@@ -6148,7 +6194,13 @@ export function ConversationChat({
       else if (v.workType) parts.push(workTypeLabels[v.workType] ?? v.workType);
       if (v.subject === "goods" && v.quantity) parts.push(v.quantity.raw);
       if (v.headcount !== null) {
-        parts.push(t("valueIntent.people", { count: v.headcount }));
+        // Teams of a stated size read back as both: "12 žmonių (3 brigados po 4)".
+        const people = t("valueIntent.people", { count: v.headcount });
+        parts.push(
+          v.teamCount != null && v.perTeamSize != null
+            ? `${people} (${t("valueIntent.teams", { teams: v.teamCount, perTeam: v.perTeamSize })})`
+            : people,
+        );
       }
       if (v.window) {
         if (v.window.kind === "days_count") {
@@ -6211,6 +6263,13 @@ export function ConversationChat({
       if (v.workType) out.workType = v.workType;
       if (v.country) out.country = v.country;
       if (v.headcount !== null) out.teamSize = String(v.headcount);
+      // Teams of a stated size ride the form state unrendered, like the work
+      // type: the executor stores them in `structured_v2.team` only while the
+      // number of workers still equals teams × size.
+      if (v.teamCount != null && v.perTeamSize != null) {
+        out.teamCount = String(v.teamCount);
+        out.perTeamSize = String(v.perTeamSize);
+      }
       if (v.window) {
         if (v.window.kind === "from_date" && v.window.startIso) {
           out.startDate = v.window.startIso;
@@ -6252,11 +6311,13 @@ export function ConversationChat({
         : null;
       const questions = v.missing
         .filter(
-          (m): m is "location" | "window" | "quantity" | "headcount" =>
+          (m): m is "location" | "window" | "quantity" | "headcount" | "team_size" =>
             m === "location" ||
             m === "window" ||
             m === "quantity" ||
-            m === "headcount",
+            m === "headcount" ||
+            // Teams named without a size or as a range: ask about the teams.
+            m === "team_size",
         )
         .map((m) => t(`valueIntent.ask.${m}` as Parameters<typeof t>[0]));
 
@@ -6287,9 +6348,14 @@ export function ConversationChat({
           assistant(
             [
               understood,
-              verdict.listingKind === "rental"
-                ? t("valueIntent.goodsListableRental")
-                : t("valueIntent.goodsListable"),
+              // review of #2434: a goods subject (produce, handmade, household,
+              // other) is not a "work-related resource" — say Goods.
+              typeof verdict.listingCategory === "string" &&
+              verdict.listingCategory.startsWith("goods_")
+                ? t("valueIntent.goodsListableGoods")
+                : verdict.listingKind === "rental"
+                  ? t("valueIntent.goodsListableRental")
+                  : t("valueIntent.goodsListable"),
               ...questions,
             ]
               .filter((l): l is string => Boolean(l))
@@ -6304,8 +6370,10 @@ export function ConversationChat({
           return;
         }
         if (verdict?.kind === "LEGAL_CHECK_REQUIRED") {
-          // Food/produce: name plainly WHAT would have to be checked, then
-          // the channel truth — no approved produce channel, nothing saved.
+          // Food/produce: name plainly WHAT has to be checked, then the
+          // channel truth — the goods board accepts a draft and asks for the
+          // legal acknowledgement on publish (audit 2026-10-16, M-1). Nothing
+          // is saved here; the chip opens the board.
           assistant(
             [
               understood,
@@ -6314,20 +6382,17 @@ export function ConversationChat({
             ]
               .filter((l): l is string => Boolean(l))
               .join("\n"),
+            [
+              {
+                id: "link:/dashboard/listings",
+                label: t("valueIntent.chipListings"),
+              },
+            ],
           );
           return;
         }
-        if (
-          verdict?.kind === "CHANNEL_RESTRICTED" &&
-          verdict.reasonKey === "category_not_supported"
-        ) {
-          assistant(
-            [understood, t("valueIntent.goodsCategoryUnsupported")]
-              .filter((l): l is string => Boolean(l))
-              .join("\n"),
-          );
-          return;
-        }
+        // (The former category_not_supported branch is gone: since M-1 the
+        // marketplace channel never emits it for a lawful goods statement.)
         // NEEDS_MORE_INFORMATION → the unclear branch below asks for it.
       }
 
@@ -8231,11 +8296,13 @@ export function ConversationChat({
                 openingContext && !script ? (
                   openingContext
                 ) : personalIntroPayload && !script ? (
-                  /* Invisible boundary (#1011): the intro's slow readiness
-                     reads stream in AFTER the shell — the opening composition
-                     renders immediately and the block appears when known,
-                     exactly like the layout's SpineStream. */
-                  <Suspense fallback={null}>
+                  /* Own boundary (#1011): the intro's slow readiness reads
+                     stream in AFTER the shell — the opening composition
+                     renders immediately, exactly like the layout's
+                     SpineStream. The pending state RESERVES the block's
+                     space (home CLS P0): a payload only exists when the
+                     block can render, so nothing is reserved in vain. */
+                  <Suspense fallback={<PersonalWorkspaceIntroPending />}>
                     <PersonalWorkspaceIntroStream
                       payload={personalIntroPayload}
                       onAction={handlePanelChip}
@@ -8311,6 +8378,7 @@ export function ConversationChat({
             wide={panelWide}
             full={resultFull}
             chipsPostedAt={chipsPostedAt}
+            briefChipsPostedAt={briefChipsPostedAt}
             onCloseResult={closeResult}
             // Two different verbs, two different callbacks: the station door
             // navigates and says where; "full screen" expands in place.

@@ -122,6 +122,11 @@ export const HOUR_UNIT_SOURCES: readonly string[] = [
   "u\\.?(?![\\p{L}\\p{N}])",
   "stunden?(?![\\p{L}])",
   "std\\.?(?![\\p{L}])",
+  // PL "6 godzin" / "8 godziny" / "2 godz." (UX review 2026-10-24, row 8.2):
+  // without them a Polish day carried its hours only on the whole entry, and
+  // the fragment that names the work rode on no time at all.
+  "godzin[\\p{L}]*",
+  "godz\\.?(?![\\p{L}])",
 ];
 export const MINUTE_UNIT_SOURCES: readonly string[] = [
   "minu[čct][\\p{L}]*",
@@ -136,6 +141,8 @@ export const DAY_UNIT_SOURCES: readonly string[] = [
   "days?(?![\\p{L}])",
   "dag(?:en)?(?![\\p{L}])",
   "tage?(?![\\p{L}])",
+  "dni(?![\\p{L}])",
+  "dzie[nń](?![\\p{L}])",
 ];
 
 const HOUR_UNIT_RX_SRC = HOUR_UNIT_SOURCES.join("|");
@@ -1009,7 +1016,10 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
   const siteMatch = text.match(
     /\b(?:objekt(?:as|e)?|aikštel(?:ė|ėje|eje)|vietoj(?:e)?|adres(?:as|u))[:\s]+([A-ZĄČĘĖĮŠŲŪŽ][^.,;\n]{1,60})/iu,
   );
-  if (siteMatch) siteName = siteMatch[1].trim();
+  // The pattern is case-insensitive for the marker word, which also let a
+  // lower-case verb through as the "name" ("objekte dirbau 6 val"). A site
+  // suggestion must START with a capital letter, as the pattern meant.
+  if (siteMatch && /^\p{Lu}/u.test(siteMatch[1])) siteName = siteMatch[1].trim();
 
   // 5) Institution and topic (v3).
   const institutionName = detectInstitution(text);

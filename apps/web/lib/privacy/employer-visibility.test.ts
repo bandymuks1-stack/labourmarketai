@@ -146,7 +146,11 @@ describe("consent provenance — the ledger's source is a closed set", () => {
       "conversation",
       "onboarding",
       "work_card",
+      "profile",
+      "home",
     ]);
+    expect(discoverabilityConsentSourceOf("profile")).toBe("profile");
+    expect(discoverabilityConsentSourceOf("home")).toBe("home");
     expect(discoverabilityConsentSourceOf("conversation")).toBe("conversation");
     expect(discoverabilityConsentSourceOf("onboarding")).toBe("onboarding");
     expect(discoverabilityConsentSourceOf("work_card")).toBe("work_card");

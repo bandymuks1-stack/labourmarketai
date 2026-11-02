@@ -70,7 +70,8 @@ describe("mobile store-release config — the generated native project is only a
     // is the very false declaration this pin exists to prevent. Each type is
     // named, because each answers for something the client demonstrably
     // handles: the account it signs in with, the name and user id on the
-    // profile it reads, and the journal content it writes.
+    // profile it reads, the journal content it writes, and the in-app
+    // message replies it sends (message.send_confirm, #2928).
     const declared = new Set(
       collected.map((t: Record<string, unknown>) => t.NSPrivacyCollectedDataType as string),
     );
@@ -79,6 +80,7 @@ describe("mobile store-release config — the generated native project is only a
       "NSPrivacyCollectedDataTypeName",
       "NSPrivacyCollectedDataTypeUserID",
       "NSPrivacyCollectedDataTypeOtherUserContent",
+      "NSPrivacyCollectedDataTypeEmailsOrTextMessages",
     ]) {
       expect(
         declared.has(required),

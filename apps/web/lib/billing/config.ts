@@ -6,6 +6,8 @@ import {
   isTestSecret,
   isLiveSecret,
   isStripeActive,
+  billingConfigForSubject,
+  parsePilotOrganizations,
   type BillingConfig,
 } from "@/lib/billing/config-core";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
@@ -44,6 +46,36 @@ export function getBillingConfig(): BillingConfig {
       token: env.STRIPE_LIVE_ACTIVATION,
     },
   });
+}
+
+/**
+ * Server-only: the billing config for ONE organization, or for a person / a
+ * public page (null). Under a pilot list only the listed organizations see an
+ * active adapter; everyone else reads billing as off. Webhook, portal and
+ * reconciliation keep `getBillingConfig()`: they act on sessions that only a
+ * pilot organization could have created.
+ */
+export function getBillingConfigFor(organizationId: string | null): BillingConfig {
+  return billingConfigForSubject(
+    getBillingConfig(),
+    parsePilotOrganizations(env.BILLING_PILOT_ORGANIZATION_IDS),
+    organizationId,
+  );
+}
+
+/** Server-only: whether a NEW organization subscription starts with the 14-day trial. */
+export function billingTrialEnabled(): boolean {
+  return env.BILLING_TRIAL_ENABLED !== "false";
+}
+
+/** Server-only: whether the organization pilot pass (1 € → the plan for the pilot period) is on. */
+export function billingPilotPassEnabled(): boolean {
+  return env.BILLING_PILOT_PASS_ENABLED === "true";
+}
+
+/** Server-only: whether billing is restricted to a pilot list (true unless ALL_ORGANIZATIONS). */
+export function billingPilotActive(): boolean {
+  return parsePilotOrganizations(env.BILLING_PILOT_ORGANIZATION_IDS) !== null;
 }
 
 /**

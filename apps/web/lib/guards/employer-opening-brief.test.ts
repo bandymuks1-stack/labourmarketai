@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * V8 employer daily loop, GAP 1 — the employer no longer opens to silence.
@@ -71,7 +72,7 @@ describe("the employer opening brief", () => {
   });
 
   it("the employer lines exist in every ROUTED locale", () => {
-    for (const l of ["en", "lt", "ru", "nl", "de"]) {
+    for (const l of activeLocales) {
       const m = JSON.parse(read("messages", `${l}.json`));
       const chat = m.conversation.chat;
       for (const key of [

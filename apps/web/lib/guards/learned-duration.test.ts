@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * CAL-10 — the learning loop closes, and a forecast never becomes a fact.
@@ -112,7 +113,7 @@ describe("provenance rides with the number", () => {
   it("the rendered line states the count, never a bare number", () => {
     const c = code(read(PANEL));
     expect(c).toMatch(/count: reading\.observations/);
-    for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+    for (const loc of activeLocales) {
       const learned = JSON.parse(read(`messages/${loc}.json`)).projectStages?.learned;
       expect(learned?.median, `${loc}.projectStages.learned.median`).toBeTruthy();
       expect(learned.median, `${loc} must render the observation count`).toContain("{count}");

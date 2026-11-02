@@ -36,11 +36,17 @@ describe("stadium read service is real-data-only", () => {
     // the inline `deleted_at`-only filter this used to pin counted a
     // correction and the entry it replaced as two days of work.
     expect(lib).toMatch(/liveJournalEntriesOnly\(/);
-    expect(lib).toMatch(/\.gte\("created_at", dayStartIso\(\)\)/);
+    // Audit 2026-10-16 (C-3): "today" is the VIEWER's day (lm_tz), not the
+    // server's UTC midnight — the same rule as the journal and planning.
+    expect(lib).toMatch(/\.gte\("created_at", dayStart\)/);
+    expect(lib).toMatch(/const dayStart = await viewerDayStartIso\(\);/);
+    expect(lib).toMatch(/dayStartInstantIso\(today\.todayIso, today\.timeZone\)/);
   });
   it("degrades to nulls/0 on error — never fabricates", () => {
     expect(lib).toMatch(/catch \{/);
-    expect(lib).toMatch(/let entriesToday = 0;/);
+    // A count that could not be read is null, never 0 (SEP-7, audit 2026-10-16).
+    expect(lib).toMatch(/let entriesToday: number \| null = workerIds\.length > 0 \? null : 0;/);
+    expect(lib).toMatch(/if \(!todayRes\.error && typeof todayRes\.count === "number"\) entriesToday = todayRes\.count;/);
   });
 });
 

@@ -29,6 +29,7 @@ const state = vi.hoisted(() => ({
   config: { state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" },
   subject: null as unknown,
   adminThrows: false,
+  isAdmin: false,
   calls: [] as Call[],
   handler: (() => ({ data: [] })) as (c: Call) => Outcome,
 }));
@@ -67,15 +68,19 @@ vi.mock("@/lib/supabase/admin", () => ({
   }),
 }));
 vi.mock("@/lib/auth/superadmin", () => ({
-  isSuperadmin: vi.fn(async () => false),
-  isSuperadminFor: vi.fn(async () => false),
+  isSuperadmin: vi.fn(async () => state.isAdmin),
+  isSuperadminFor: vi.fn(async () => state.isAdmin),
 }));
-vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => state.config }));
+vi.mock("@/lib/billing/config", () => ({
+  getBillingConfig: () => state.config,
+  getBillingConfigFor: () => state.config,
+}));
 vi.mock("@/lib/billing/billing-subject", () => ({
   resolveBillingSubject: vi.fn(async () => state.subject),
 }));
 
 import { getEffectiveEntitlements } from "./effective-entitlements";
+import { entitlementAllows } from "./entitlements-v1";
 
 const ORG_ROW = {
   plan_key: "company_pilot",
@@ -109,6 +114,7 @@ beforeEach(() => {
   state.config = { state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" };
   state.subject = coManagerSubject;
   state.adminThrows = false;
+  state.isAdmin = false;
   state.handler = () => ({ data: [] });
 });
 
@@ -239,5 +245,48 @@ describe("organization subject — the fallback plan follows the ORGANIZATION, n
     state.handler = () => ({ data: [] });
     const ent = await getEffectiveEntitlements();
     expect(ent.effectivePlanKey).toBe("free_worker");
+  });
+});
+
+describe("platform admin acting inside an organization — the ORGANIZATION's plan, never admin_internal (defect 2026-11-02)", () => {
+  // Measured in production: a manager of an organization holding the paid
+  // pilot pass also held the platform `admin` role; the admin shortcut
+  // resolved them to `admin_internal` (no organization features) and the
+  // open-needs gate refused every new need with limit 0.
+  const PASS_ROW = {
+    plan_key: "company_pilot",
+    status: "active",
+    provider_subscription_id: "pilotpass_cs_1",
+    updated_at: "2026-10-23T05:34:49.000Z",
+    cancel_at_period_end: true,
+    current_period_end: "2999-01-01T00:00:00.000Z",
+  };
+
+  it("a bearer/web caller with the admin role resolves the organization's paid pilot pass and may create needs", async () => {
+    state.isAdmin = true;
+    state.roles = [{ role: "worker" }, { role: "company" }, { role: "agency" }, { role: "admin" }];
+    state.handler = (c) => (c.table === "billing_subscriptions" ? { data: [PASS_ROW] } : { data: [] });
+    const caller = { supabase: fakeClient("user") as never, userId: "manager-1", organizationId: "org-1" };
+    const ctx = await getEffectiveEntitlements(caller);
+    expect(ctx.effectivePlanKey).toBe("company_pilot");
+    expect(ctx.source).toBe("subscription");
+    expect(entitlementAllows(ctx, "company_create_needs")).toBe(true);
+  });
+
+  it("an admin in an organization with no plan row resolves ORGANIZATION FREE (its real ceiling), not admin_internal", async () => {
+    state.isAdmin = true;
+    state.roles = [{ role: "admin" }];
+    const ent = await getEffectiveEntitlements();
+    expect(ent.effectivePlanKey).toBe("free_organization");
+    expect(entitlementAllows(ent, "company_create_needs")).toBe(true);
+  });
+
+  it("the admin's PERSONAL workspace keeps the internal admin plan", async () => {
+    state.isAdmin = true;
+    state.roles = [{ role: "admin" }];
+    state.subject = personalSubject;
+    const ent = await getEffectiveEntitlements();
+    expect(ent.effectivePlanKey).toBe("admin_internal");
+    expect(ent.source).toBe("admin");
   });
 });

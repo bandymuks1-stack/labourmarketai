@@ -1,5 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { getEmployerOwnerProfileId } from "./employer-resolution";
@@ -8,6 +9,7 @@ import {
   evaluateContactPermission,
   type ContactPermissionState,
 } from "./communication-eligibility";
+import { localizePseudonymousName } from "./pseudonymous-name";
 
 /**
  * Contact permission resolver + safe counterpart identity reader
@@ -101,16 +103,19 @@ async function callerCompanyEmploysProfile(
   callerId: string,
   otherProfileId: string,
 ): Promise<boolean> {
-  const { data: company } = await supabase
+  // EVERY company the caller owns (a person may own several since
+  // 20260805170000): `.maybeSingle()` errored on two rows and answered "no".
+  const { data: companies } = await supabase
     .from("companies")
     .select("id")
     .eq("profile_id", callerId)
-    .maybeSingle();
-  if (!company?.id) return false;
+    .limit(50);
+  const companyIds = ((companies ?? []) as { id: string }[]).map((c) => c.id);
+  if (companyIds.length === 0) return false;
   const { data, error } = await asAny(supabase)
     .from("company_workers")
     .select("worker_id, workers!inner(profile_id)")
-    .eq("company_id", company.id)
+    .in("company_id", companyIds)
     .eq("workers.profile_id", otherProfileId)
     .limit(1);
   if (error) {
@@ -161,13 +166,28 @@ export async function readCounterpartIdentities(
     { p_conversation_ids: ids },
   );
   if (error || !Array.isArray(data)) return out;
+  // The RPC names a not-yet-disclosed candidate with the fixed English
+  // pseudonym "Candidate XXXXXX" (SQL has no locale). A screen a person reads
+  // wraps the token in its own catalogue word — `people.anonymousName` — so a
+  // Lithuanian employer reads "Kandidatas XXXXXX", never English (UX review
+  // 2026-10-24, 4.16). A real name is returned unchanged.
+  let candidateName: (token: string) => string = (token) => `Candidate ${token}`;
+  try {
+    const t = await getTranslations("people");
+    candidateName = (token) => t("anonymousName", { token });
+  } catch {
+    // outside a request (tests, scripts): keep the neutral fallback
+  }
   for (const row of data as Array<{
     conversation_id?: string | null;
     display_name?: string | null;
   }>) {
     const id = typeof row?.conversation_id === "string" ? row.conversation_id : null;
-    const name =
+    const stored =
       typeof row?.display_name === "string" ? row.display_name.trim() : "";
+    // Only the stored pseudonym's WORD is translated — an empty value stays
+    // empty, so nothing is ever fabricated.
+    const name = stored ? localizePseudonymousName(stored, candidateName) : "";
     if (id && name) out.set(id, name);
   }
   return out;

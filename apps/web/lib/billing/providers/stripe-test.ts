@@ -16,6 +16,7 @@ import type {
   CreateCustomerInput,
   CreateCustomerResult,
   ListSubscriptionsResult,
+  OneTimeCheckoutInput,
   RetrieveRawSubscriptionResult,
   PortalSessionInput,
   PortalSessionResult,
@@ -182,6 +183,49 @@ export function createStripeProvider(): BillingProvider {
           input.idempotencyKey
             ? { idempotencyKey: input.idempotencyKey }
             : undefined,
+        );
+        if (!session.url) return { ok: false, reason: "no_session_url" };
+        return { ok: true, url: session.url, sessionId: session.id, testMode };
+      } catch (e) {
+        return { ok: false, reason: reasonFrom(e) };
+      }
+    },
+
+    async createOneTimeCheckoutSession(
+      input: OneTimeCheckoutInput,
+    ): Promise<CheckoutSessionResult> {
+      try {
+        const metadata: Record<string, string> = { ...input.metadata, ...environmentStamp };
+        const session = await client().checkout.sessions.create(
+          {
+            // One payment, a server-fixed amount: no subscription, no saved
+            // price, no tax computation (the pilot pass is exactly 1 €).
+            mode: "payment",
+            line_items: [
+              {
+                quantity: 1,
+                price_data: {
+                  currency: input.currency,
+                  unit_amount: input.amountCents,
+                  product_data: { name: input.productName },
+                },
+              },
+            ],
+            client_reference_id: input.clientReferenceId,
+            // The payer's stored customer, so the payment and its invoice sit
+            // in the same billing history and customer portal as a plan;
+            // otherwise Stripe creates one for this payment.
+            ...(input.providerCustomerId
+              ? { customer: input.providerCustomerId }
+              : { customer_creation: "always" as const, customer_email: input.customerEmail ?? undefined }),
+            // A real invoice/receipt for the 1 € — payment history, not just a charge.
+            invoice_creation: { enabled: true, invoice_data: { metadata } },
+            success_url: input.successUrl,
+            cancel_url: input.cancelUrl,
+            metadata,
+            payment_intent_data: { metadata },
+          },
+          { idempotencyKey: input.idempotencyKey },
         );
         if (!session.url) return { ok: false, reason: "no_session_url" };
         return { ok: true, url: session.url, sessionId: session.id, testMode };

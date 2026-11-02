@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { buildWorldMapZones, type WorldMapInput } from "@/lib/work-market/world-map";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * World-map zones are TAPPABLE (owner feedback, 2026-06-23).
@@ -73,7 +74,7 @@ describe("component renders each zone card as a tappable Link", () => {
 });
 
 describe("CTA labels present in active locales (lt/en/ru)", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: worldMap.cta.fill + worldMap.cta.open are non-empty`, () => {
       const cta = JSON.parse(read(`messages/${loc}.json`)).worldMap?.cta;
       expect(typeof cta?.fill === "string" && cta.fill.length > 0).toBe(true);

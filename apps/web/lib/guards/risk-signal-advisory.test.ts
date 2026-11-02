@@ -3,8 +3,8 @@ import { readFileSync, existsSync } from "node:fs";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 
-import { adminRiskEntry } from "@/lib/ai/registry/agents/admin-risk";
-import { bookingRiskEntry } from "@/lib/ai/registry/agents/booking-risk";
+import { AI_PROMPT_REGISTRY } from "@/lib/ai/registry/registry";
+import { AGENT_TASK_TYPES } from "@/lib/ai/runtime/task-routing";
 import {
   MESSAGE_RATE_CAP,
   CONVERSATION_RATE_CAP,
@@ -155,36 +155,31 @@ const MIGRATION_FILES = existsSync(MIGRATIONS)
   ? readdirSync(MIGRATIONS).filter((f) => f.endsWith(".sql"))
   : [];
 
-// ── 1. The admin-risk agent is ADVISORY, and cannot be anything else ────────
+// ── 1. There is no AI risk agent at all (retired 2026-10-25) ─────────────────
+//
+// The admin-risk and booking-risk agents were pinned here as ADVISORY: never
+// auto-reject, a bounded severity enum, no decision field. On 2026-10-25 the
+// owner retired both (registry row 10.11): `lib/admin/readiness-overview.ts`
+// already aggregates exactly admin_risk's input schema, and the booking RPC
+// plus `lib/planning/roster-conflicts.ts` already refuse and name every
+// conflict booking_risk would have described. An LLM-written severity over
+// named people adds only a ranking, which doctrine §2.7 forbids.
+//
+// So the strongest form of "the risk agent is advisory" is now true: there is
+// no risk agent. If one is ever re-introduced, the old pins are its checklist —
+// safety rules that say "never auto-reject" and "the admin decides", blocked
+// claims "auto-reject"/"banned", a `suggested_*_action` field, severity as
+// `z.enum(AI_CONFIDENCE)` and never a number, and no
+// decision/verdict/enforcement/action_taken/applied field.
 
-describe("slice 4 — the admin-risk agent is advisory", () => {
-  it("declares, in its own registry entry, that it never blocks anyone", () => {
-    const rules = adminRiskEntry.safetyRules.join(" ").toLowerCase();
-    expect(rules).toContain("never auto-reject");
-    expect(rules).toMatch(/ban|block/);
-    expect(rules).toContain("the admin decides");
-    // The words it may never emit as an outcome.
-    const blocked = adminRiskEntry.blockedClaims.map((c) => c.toLowerCase());
-    expect(blocked).toContain("auto-reject");
-    expect(blocked).toContain("banned");
-  });
-
-  it("emits a SUGGESTION and a severity — never a decision field", () => {
-    const src = readSource("lib/ai/registry/agents/admin-risk.ts");
-    expect(src).toContain("suggested_admin_action");
-    // No field that could be read as an executed outcome.
-    expect(src).not.toMatch(/\b(decision|verdict|enforcement|action_taken|applied)\s*:/);
-    // Severity is a bounded advisory enum, never a number that could be
-    // thresholded into an automatic action.
-    expect(src).toMatch(/severity: z\.enum\(AI_CONFIDENCE\)/);
-    expect(src).not.toMatch(/severity: z\.number/);
-  });
-
-  it("booking-risk is advisory on the same terms", () => {
-    const rules = bookingRiskEntry.safetyRules.join(" ").toLowerCase();
-    expect(rules.length).toBeGreaterThan(0);
-    const src = readSource("lib/ai/registry/agents/booking-risk.ts");
-    expect(src).not.toMatch(/\b(decision|verdict|enforcement|action_taken|applied)\s*:/);
+describe("slice 4 — no AI risk agent exists to become a verdict", () => {
+  it("neither risk agent has a registry entry, a prompt file or a task mapping", () => {
+    for (const key of ["admin_risk", "booking_risk"]) {
+      expect(Object.keys(AI_PROMPT_REGISTRY)).not.toContain(key);
+      expect(Object.keys(AGENT_TASK_TYPES)).not.toContain(key);
+    }
+    expect(existsSync(join(APP, "lib/ai/registry/agents/admin-risk.ts"))).toBe(false);
+    expect(existsSync(join(APP, "lib/ai/registry/agents/booking-risk.ts"))).toBe(false);
   });
 
   it("no runtime code consumes either agent's OUTPUT", () => {
@@ -200,10 +195,12 @@ describe("slice 4 — the admin-risk agent is advisory", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("the only non-registry reference is routing metadata, and it stays inert", () => {
-    // Pinned explicitly so the exemption above cannot silently widen.
+  it("routing metadata no longer maps a risk agent, and stays inert", () => {
+    // Until 2026-10-25 task-routing.ts was the one non-registry reference (a
+    // static key → task map). The mapping went with the agents.
     const routing = readSource("lib/ai/runtime/task-routing.ts");
-    expect(routing).toMatch(/admin_risk:\s*"explain_match"/);
+    expect(routing).not.toMatch(/admin_risk:\s*"/);
+    expect(routing).not.toMatch(/booking_risk:\s*"/);
     expect(routing).not.toMatch(/\.(insert|update|upsert|delete)\(|\.rpc\(/);
     expect(routing).not.toMatch(/["']server-only["']/);
   });

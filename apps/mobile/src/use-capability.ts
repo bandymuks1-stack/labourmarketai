@@ -5,6 +5,7 @@ import type { DomainFailure } from "@labourmarket/client-core";
 import { useAuth } from "./auth-context";
 import { capability } from "./domain";
 import { useLocale } from "./i18n/locale-context";
+import { useWorkspaceEpoch } from "./workspace-epoch";
 
 /**
  * One capability read, as React state — presentation wiring only.
@@ -26,6 +27,8 @@ export function useCapability<T>(
 ): { state: CapabilityState<T>; reload: () => void } {
   const { accessToken } = useAuth();
   const { locale } = useLocale();
+  // A confirmed workspace switch re-reads every mounted station (workspace-epoch.tsx).
+  const { epoch } = useWorkspaceEpoch();
   const [state, setState] = useState<CapabilityState<T>>({ status: "loading" });
   const [attempt, setAttempt] = useState(0);
 
@@ -53,7 +56,7 @@ export function useCapability<T>(
     return () => {
       cancelled = true;
     };
-  }, [name, argsKey, accessToken, locale, attempt]);
+  }, [name, argsKey, accessToken, locale, attempt, epoch]);
 
   const reload = useCallback(() => setAttempt((n) => n + 1), []);
   return { state, reload };

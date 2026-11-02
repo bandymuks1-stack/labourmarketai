@@ -55,6 +55,13 @@ import {
 } from "./providers/cloudflare";
 import { localCompletionProvider } from "./providers/local";
 import {
+  cloudflareLlmCompletionProvider,
+  groqCompletionProvider,
+  mistralCompletionProvider,
+} from "./providers/free-tier";
+import type { ProviderCooldown } from "./provider-cooldown";
+import type { ProviderCounters } from "./provider-counters";
+import {
   advancePolicyFor,
   classifyCompletionFailure,
   resolveProviderChain,
@@ -68,6 +75,7 @@ import { taskTypeForAgent, type TaskRouteDecision, type AiTaskType } from "./tas
 import { AI_MODEL_CANDIDATES } from "./model-candidates";
 import { registryEntryForModel } from "./model-registry";
 import type { AiAgentKey } from "../registry/types";
+import { blockedByZeroPaidBudget, paidProvidersAllowed, ZERO_PAID_BUDGET_REASON } from "./paid-budget";
 
 export function selectCompletionProvider(
   kind: ReturnType<typeof providerKindFor>,
@@ -85,6 +93,12 @@ export function selectCompletionProvider(
       return geminiCompletionProvider;
     case "xai":
       return xaiCompletionProvider;
+    case "cloudflare":
+      return cloudflareLlmCompletionProvider;
+    case "mistral":
+      return mistralCompletionProvider;
+    case "groq":
+      return groqCompletionProvider;
     case "disabled":
     default:
       return disabledCompletionProvider;
@@ -126,6 +140,11 @@ const ADAPTER_BY_PROVIDER: Readonly<Record<string, AiCompletionProvider>> = {
   openai: openaiCompletionProvider,
   gemini: geminiCompletionProvider,
   xai: xaiCompletionProvider,
+  // Free API tiers (2026-10-25): each its OWN binding on the shared
+  // OpenAI-compatible wire — own endpoint, own key, own model table.
+  cloudflare: cloudflareLlmCompletionProvider,
+  mistral: mistralCompletionProvider,
+  groq: groqCompletionProvider,
 };
 
 function adapterForChainId(id: AiChainProviderId): AiCompletionProvider | null {
@@ -160,6 +179,22 @@ export interface ChainDispatchContext {
    * adapters to prove the fallback order (a controlled hook, never an env flag).
    */
   readonly secondaries?: readonly SecondaryTranslationProvider[];
+  /**
+   * Runtime health from REAL failures (provider-cooldown.ts). The server
+   * boundary passes the process-wide instance; absent (tests, evals) = no
+   * cooldown, so the chain behaves exactly as before. A cooling provider is
+   * tried LAST, never removed — a cooldown reorders, it cannot empty a chain.
+   */
+  readonly cooldown?: ProviderCooldown;
+  /**
+   * Per-provider attempt counters (provider-counters.ts): requests, latency,
+   * rate limits and errors by class. The server boundary passes the
+   * process-wide instance; absent (tests, evals) = nothing counted. Counting
+   * never changes routing.
+   */
+  readonly counters?: ProviderCounters;
+  /** Clock seam for the cooldown and the counters; defaults to Date.now. */
+  readonly now?: () => number;
 }
 
 /**
@@ -190,8 +225,8 @@ export interface SecondaryTranslationProvider {
  */
 export const SECONDARY_TRANSLATION_PROVIDERS: readonly SecondaryTranslationProvider[] = [
   { id: "libretranslate", adapter: libretranslateCompletionProvider, profile: libretranslateEgressProfile },
-  { id: "deepl", adapter: deeplCompletionProvider, profile: () => DEEPL_PROFILE },
   { id: "cloudflare", adapter: cloudflareCompletionProvider, profile: cloudflareEgressProfile },
+  { id: "deepl", adapter: deeplCompletionProvider, profile: () => deeplEgressProfile() },
 ];
 
 /**
@@ -210,7 +245,11 @@ async function tryPreferredSecondary(
 ): Promise<AiCompletionResult | null> {
   // The policy marker names a dedicated engine class, not one vendor.
   if (!request.preferredProvider) return null;
+  const allowPaid = paidProvidersAllowed();
   for (const secondary of secondaries) {
+    // ZERO PAID API BUDGET: a metered engine (DeepL Pro) is skipped, a free
+    // one (`deepl_free`, LibreTranslate, Cloudflare m2m100) may still serve.
+    if (blockedByZeroPaidBudget(secondary.profile().costClass, allowPaid)) continue;
     // Each secondary is an EXTERNAL provider (unless it declares itself local)
     // and this call sits ahead of the chain's candidate loop, so the chain's
     // veto never saw it. Without this check the one task that prefers a
@@ -243,6 +282,21 @@ const DEEPL_PROFILE = {
   locality: "cloud",
   costClass: "paid",
 } as const;
+
+/**
+ * DeepL's egress identity, by PLAN. A Free / Developer key (suffix ":fx") is a
+ * different contract: DeepL "reserves the right to perpetually store any
+ * Content" and forbids personal data on it (pro-license §3.3.2, §8.3.11). It is
+ * therefore its own catalogue id, `deepl_free`, capped at PUBLIC by its terms —
+ * a grant written for DeepL Pro can never be stretched over a free key.
+ */
+export function deeplEgressProfile(
+  key: string | undefined = process.env.DEEPL_API_KEY,
+): { readonly id: string; readonly locality: "cloud"; readonly costClass: string } {
+  return key?.trim().endsWith(":fx")
+    ? { id: "deepl_free", locality: "cloud", costClass: "free_tier" }
+    : DEEPL_PROFILE;
+}
 
 /**
  * What this request's payload carries, for the egress gate.
@@ -306,6 +360,13 @@ export async function dispatchAiCompletion(
      * check moved onto the PATH: it now runs whether or not a chain was
      * supplied, and the grant table is consulted either way.
      */
+    // ZERO PAID API BUDGET: the single configured provider is refused before
+    // any payload is built for it when it is metered and the owner has not
+    // opened the paid budget.
+    const legacyCost = AI_PROVIDER_PROFILES.find((p) => p.id === kind)?.costClass ?? (kind === "local" ? "free_local" : "paid");
+    if (blockedByZeroPaidBudget(legacyCost, paidProvidersAllowed())) {
+      return { status: "error", code: "unsupported", message: ZERO_PAID_BUDGET_REASON, provider: kind };
+    }
     const verdict = legacyEgressVerdict(request, kind);
     if (!verdict.permitted) {
       return { status: "error", code: "unsupported", message: verdict.reason, provider: kind };
@@ -321,6 +382,7 @@ export async function dispatchAiCompletion(
     chain.states,
     chain.profiles ?? AI_PROVIDER_PROFILES,
     chain.grants,
+    paidProvidersAllowed(),
   );
 
   if (outcome.kind === "deterministic") {
@@ -349,7 +411,11 @@ export async function dispatchAiCompletion(
   const preferred = await tryPreferredSecondary(request, cfg, chain.grants, chain.secondaries);
   if (preferred) return preferred;
 
-  const candidates: ChainCandidate[] = [outcome.selected, ...outcome.remaining];
+  const clock = chain.now ?? Date.now;
+  const ordered: ChainCandidate[] = [outcome.selected, ...outcome.remaining];
+  const candidates: ChainCandidate[] = chain.cooldown
+    ? chain.cooldown.order(ordered, clock())
+    : ordered;
   let invalidOutputRetries = 0;
   let last: AiCompletionResult = {
     status: "error",
@@ -407,8 +473,14 @@ export async function dispatchAiCompletion(
       };
       continue;
     }
+    const startedAt = clock();
     const result = await adapter.complete(candidateRequest, cfg);
-    if (result.status === "ok") return result;
+    const finishedAt = clock();
+    if (result.status === "ok") {
+      chain.counters?.noteAttempt(candidate.id, "ok", finishedAt - startedAt, finishedAt);
+      chain.cooldown?.noteSuccess(candidate.id);
+      return result;
+    }
 
     // Attribute the failure to the provider that produced it, so an audit
     // record cannot claim the primary provider failed when a different
@@ -416,7 +488,19 @@ export async function dispatchAiCompletion(
     last = { ...result, provider: candidate.id };
 
     const failure = classifyCompletionFailure(result);
+    chain.counters?.noteAttempt(
+      candidate.id,
+      failure ?? "PROVIDER_ERROR",
+      finishedAt - startedAt,
+      finishedAt,
+    );
     if (failure === null) return result;
+    chain.cooldown?.noteFailure(
+      candidate.id,
+      failure,
+      result.status === "error" ? result.message : undefined,
+      clock(),
+    );
     const policy = advancePolicyFor(failure);
     if (policy === "stop") break;
     if (policy === "advance_once") {

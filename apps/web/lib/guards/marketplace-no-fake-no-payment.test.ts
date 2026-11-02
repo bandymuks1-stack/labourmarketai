@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * P0 marketplace — no payment / no rating / no fake-data guard.
@@ -56,7 +57,7 @@ describe("no payment / no rating / no fake data in the marketplace surface", () 
     expect(code).not.toMatch(/insert into public\.service_offering_requests[\s\S]*?values\s*\(\s*'[0-9a-f]{8}-/i);
   });
 
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: marketplace copy has no payment/rating wording`, () => {
       const block = (
         JSON.parse(read(join(ROOT, "messages", `${loc}.json`))) as { marketplace?: unknown }

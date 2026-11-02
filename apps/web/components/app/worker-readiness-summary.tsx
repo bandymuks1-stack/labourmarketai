@@ -54,7 +54,7 @@ export async function WorkerReadinessSummary({ rows }: { rows: ReadinessRow[] })
                 </th>
                 <td className="py-2 pr-3 text-right tabular-nums">{r.readiness.journalEntries}</td>
                 <td className="py-2 pr-3 text-right tabular-nums">{r.readiness.declaredSkills}</td>
-                <td className="py-2 pr-3 text-right tabular-nums">{r.readiness.confirmedSkills}</td>
+                <td className="py-2 pr-3 text-right tabular-nums">{r.readiness.confirmedSkills ?? "—"}</td>
                 <td className="py-2 pr-3 text-right tabular-nums">{r.readiness.openReviewItems}</td>
                 <td className="py-2">
                   {r.readiness.lastActivity ? formatUtcDate(r.readiness.lastActivity, locale) : "—"}

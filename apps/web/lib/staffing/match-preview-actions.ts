@@ -16,6 +16,7 @@
  */
 import { getLocale } from "next-intl/server";
 import { runAiAgent } from "../ai/run-agent-server";
+import { aiTaskServableNow } from "../ai/egress-precheck-server";
 import { aiActionRateLimited } from "../security/ai-action-throttle";
 import { workerIntakeSchema } from "./worker-intake";
 import { companyNeedSchema } from "./company-need";
@@ -24,7 +25,7 @@ import {
   buildMatchingExplanationInput,
   type MatchScore,
 } from "./match-preview";
-import type { AiLocale } from "../ai/runtime/types";
+import { aiLocaleFor, type AiLocale } from "../ai/runtime/types";
 
 export interface MatchPreviewDimension {
   readonly dimension: string;
@@ -43,9 +44,8 @@ export interface MatchPreviewState {
   readonly message?: string;
 }
 
-function toAiLocale(value: string): AiLocale {
-  return value === "lt" || value === "ru" ? value : "en";
-}
+/** Every routed UI locale is an AI locale; anything else is answered in EN. */
+const toAiLocale = (value: string): AiLocale => aiLocaleFor(value);
 
 function str(value: FormDataEntryValue | null): string | undefined {
   const s = String(value ?? "").trim();
@@ -106,6 +106,10 @@ export async function previewMatchAction(
   let explanation: string | null = null;
   let explanationStatus: MatchPreviewState["explanationStatus"];
   if (limited) {
+    explanationStatus = "disabled";
+  } else if (!(await aiTaskServableNow("explain_match"))) {
+    // An anonymous marketing surface must not write audit/ledger rows for a
+    // PERSONAL-class task the gate refuses by construction (audit 2026-10-16).
     explanationStatus = "disabled";
   } else {
     const explainOutcome = await runAiAgent(

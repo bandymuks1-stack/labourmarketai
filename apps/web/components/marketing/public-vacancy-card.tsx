@@ -114,6 +114,7 @@ export function PublicVacancyCard({
   locale,
   savedLabel,
   headingFallback,
+  genericTitle,
   sourceLanguageLabel,
 }: {
   readonly vacancy: PublicVacancyPreview;
@@ -123,6 +124,11 @@ export function PublicVacancyCard({
    *  location wording, so anonymous cards head with the profession in the
    *  reader's language, falling back to the source occupation label. */
   readonly headingFallback?: string;
+  /** Localized generic noun ("Darbo pasiūlymas") for the last case: an ad with
+   *  no profession match AND no source occupation label (a Norwegian stream ad
+   *  can carry only its raw title, which is member-only). Without it the card
+   *  headed with a bare "—" (production /lt/jobs, 2026-10-18). */
+  readonly genericTitle?: string;
   /** Rendered only when the viewer has this ad in their OWN private bookmark
    *  list. It is a note to the person looking at their own screen — it reaches
    *  no employer and is never rendered for anyone else. */
@@ -163,8 +169,10 @@ export function PublicVacancyCard({
   // occupation had to become the heading, repeating it as the subline below
   // would say the same thing twice, so it is suppressed there.
   const heading =
-    vacancy.title ?? headingFallback ?? vacancy.occupation ?? "—";
-  const headingIsPublisherText = vacancy.title !== null || !headingFallback;
+    vacancy.title ?? headingFallback ?? vacancy.occupation ?? genericTitle ?? "—";
+  // The generic noun is OUR text in the reader's language, never the publisher's.
+  const headingIsPublisherText =
+    vacancy.title !== null || (!headingFallback && vacancy.occupation !== null);
   const occupationSubline =
     vacancy.occupation && heading !== vacancy.occupation
       ? vacancy.occupation

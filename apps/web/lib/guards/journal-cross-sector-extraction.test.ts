@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Guard: Work Journal extraction is cross-sector (whole labour market), not
@@ -81,7 +82,7 @@ describe("UI separates the required buckets", () => {
 });
 
 describe("i18n parity for the new review copy (lt/en/ru)", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: workEntryReview has the cross-sector keys + 14 domains`, () => {
       const w = JSON.parse(read(`messages/${loc}.json`)).workEntryReview;
       for (const k of ["existingTitle", "newTitle", "activitiesTitle", "evidenceLabel", "evidenceJournal", "verificationNote", "existingBadge"]) {

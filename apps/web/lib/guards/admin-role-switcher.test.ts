@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const APP_ROOT = join(__dirname, "..", "..");
@@ -72,35 +72,35 @@ describe("Guard: dashboard layout derives isAdmin from a DUAL signal", () => {
   });
 });
 
-describe("Guard: RoleSwitcher renders the admin badge separately", () => {
-  const sw = read("components/app/role-switcher.tsx");
+// RE-ANCHORED 2026-10-25 (owner order: ONE navigation system). The role
+// switcher carried the admin-mode badge; it was retired as a SECOND workspace
+// selector and its file is deleted. The intent survives on the surfaces that
+// replaced it: admin is a permission dimension read from useAuth(), shown ONLY
+// to admins, leading to /dashboard/admin, never labelled as a user role — and
+// the elevated mode is announced on every admin page by the context banner.
+describe("Guard: the admin entry is a separate, admin-only destination", () => {
+  const header = read("components/app/conversation/chat/conversation-header.tsx");
+  const nav = read("lib/config/navigation.ts");
+  const banner = read("components/app/admin-context-banner.tsx");
 
-  it("reads isAdmin from useAuth()", () => {
-    expect(sw).toMatch(/isAdmin[\s\S]{0,40}=\s*useAuth\(\)/);
+  it("reads isAdmin (and the hide-admin preference) from the auth context", () => {
+    expect(header).toMatch(/const isAdmin = Boolean\(auth\?\.isAdmin && !auth\?\.adminUiHidden\)/);
+    expect(header).toMatch(/getHeaderOverflowNavItems\(\{ isAdmin \}\)/);
   });
 
-  it("renders an explicit Admin Mode badge with the data-testid", () => {
-    // The badge MUST live outside the workspace switcher dropdown
-    // (the dropdown handles only worker/company/agency/customer
-    // chips). Source-level: the testid lives in a JSX block guarded
-    // by `isAdmin &&`.
-    expect(sw).toMatch(
-      /\{\s*isAdmin\s*&&[\s\S]{0,500}data-testid=["']role-switcher-admin-badge["']/,
-    );
+  it("the admin destination joins the nav ONLY for admins and links to /dashboard/admin", () => {
+    expect(nav).toMatch(/return isAdmin \? \[\.\.\.extras, ADMIN_NAV_ITEM\] : extras;/);
+    expect(nav).toMatch(/href: "\/dashboard\/admin"/);
   });
 
-  it("admin badge links to /dashboard/admin", () => {
-    expect(sw).toMatch(
-      /\{\s*isAdmin\s*&&[\s\S]{0,500}href=["']\/dashboard\/admin["']/,
-    );
+  it("the admin label is its own key, NOT a user-facing role label", () => {
+    expect(nav).toMatch(/tabLabelKey: "auth\.dashboard\.tabs\.admin"/);
   });
 
-  it("admin badge label uses the new i18n key, NOT a user-facing role label", () => {
-    // The badge must read t('adminMode'), not signup.role.worker /
-    // signup.role.company / signup.role.admin (no such key exists).
-    expect(sw).toMatch(
-      /\{\s*isAdmin\s*&&[\s\S]{0,800}tSwitcher\(\s*["']adminMode["']\s*\)/,
-    );
+  it("every admin page announces the elevated mode with a way back", () => {
+    expect(banner).toMatch(/data-testid="admin-context-banner"/);
+    expect(banner).toMatch(/data-testid="admin-context-exit"/);
+    expect(existsSync(join(APP_ROOT, "components/app/role-switcher.tsx"))).toBe(false);
   });
 });
 

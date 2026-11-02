@@ -215,3 +215,41 @@ describe("i18n — every active locale carries the same keys, in the product's o
     }
   });
 });
+
+describe("a hired team is named for the buyer's project manager (20261021092000)", () => {
+  const NAMES = "supabase/migrations/20261021092000_team_assignment_names_v1.sql";
+  const NAMES_DOWN = "supabase/rollbacks/20261021092000_team_assignment_names_v1.down.sql";
+  const sql = strip(readRepo(NAMES));
+  const core = strip(read("lib/projects/team-assignment.ts"));
+
+  it("is a definer read door, closed to anon, authenticated only, identity required", () => {
+    expect(sql).toMatch(/create or replace function public\.list_team_assignment_names_v1\(p_assignment_ids uuid\[\]\)/);
+    expect(sql).toMatch(/returns table\(assignment_id uuid, team_name text\)/);
+    expect(sql).toMatch(/security definer\s+set search_path to 'public'/);
+    expect(sql).toMatch(/if auth\.uid\(\) is null then\s+raise exception 'Not authenticated' using errcode = '42501'/);
+    expect(sql).toMatch(/revoke all on function public\.list_team_assignment_names_v1\(uuid\[\]\) from public, anon;/);
+    expect(sql).toMatch(/grant execute on function public\.list_team_assignment_names_v1\(uuid\[\]\) to authenticated;/);
+    expect(sql).not.toMatch(/to anon|create policy|alter policy|drop policy|insert into|update public\.|delete from/i);
+  });
+
+  it("answers only a manager of the assignment's project, null-safe, names only, at most 200 ids", () => {
+    expect(sql).toMatch(/and coalesce\(public\.can_manage_project\(ta\.project_id\), false\)/);
+    expect(sql).toMatch(/coalesce\(o\.display_name, o\.legal_name\)/);
+    expect(sql).toMatch(/o\.organization_type = 'team'/);
+    expect(sql).toMatch(/\(coalesce\(p_assignment_ids, '\{\}'::uuid\[\]\)\)\[1:200\]/);
+    expect(sql).not.toMatch(/owner_profile_id|vat_number|website|description|profile_id/);
+  });
+
+  it("ships its rollback", () => {
+    expect(readRepo(NAMES_DOWN)).toMatch(/drop function if exists public\.list_team_assignment_names_v1\(uuid\[\]\)/);
+  });
+
+  it("the app asks the door first and keeps the RLS read of organizations as the fallback", () => {
+    expect(core).toMatch(/rpc\("list_team_assignment_names_v1", \{ p_assignment_ids: rows\.map\(\(r\) => r\.id\) \}\)/);
+    expect(core).toMatch(/const NAMES_DOOR_MISSING = new Set\(\["42883", "PGRST202"\]\)/);
+    // only the teams the door did not name are read directly, under the caller's RLS
+    expect(core).toMatch(/filter\(\(id\) => !names\.has\(id\)\)/);
+    expect(core).toMatch(/\.from\("organizations"\)\s*\.select\("id, display_name"\)\s*\.in\("id", unnamed\)/);
+    expect(core).not.toMatch(/createAdminClient|service_role|supabase\/admin/);
+  });
+});

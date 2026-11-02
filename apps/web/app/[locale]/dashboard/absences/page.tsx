@@ -18,6 +18,11 @@ import { MyAbsencesPanel, ManagerAbsencesPanel } from "@/components/app/absence-
 import { AbsentNowPanel } from "@/components/app/absent-now-panel";
 import { LeaveBalancePanel } from "./balance-panel";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/absences", "absences.pageTitle");
+
 
 export const dynamic = "force-dynamic";
 

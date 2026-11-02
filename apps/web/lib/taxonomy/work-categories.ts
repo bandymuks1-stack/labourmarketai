@@ -220,22 +220,22 @@ export const WORK_CATEGORIES: readonly WorkCategory[] = [
   },
 ];
 
-export type WorkLocale = "lt" | "en" | "ru" | "nl" | "de";
-
 /** Resolve a label for a UI locale.
  *
  *  2026-09-20 locale-leak fix: NL and DE have been ACTIVE UI locales since
  *  2026-07-11, but this resolver had no branch for them, so every Dutch and
  *  German visitor was served the LITHUANIAN sector / work-type names in the
- *  worker-intake and company-need selects. lt / en / ru behaviour is
- *  unchanged, and any other locale keeps the existing Lithuanian fallback. */
+ *  worker-intake and company-need selects. (The unused closed
+ *  `WorkLocale = "lt" | "en" | "ru" | "nl" | "de"` type, which had already
+ *  forgotten PL, is gone.) A locale with no curated label column — e.g. one
+ *  activated later — reads ENGLISH, never another reader's Lithuanian. */
 function pick(label: WorkLabel, locale: string): string {
-  if (locale === "en") return label.en;
+  if (locale === "lt") return label.lt;
   if (locale === "ru") return label.ru;
   if (locale === "nl") return label.nl;
   if (locale === "de") return label.de;
   if (locale === "pl") return label.pl;
-  return label.lt;
+  return label.en;
 }
 
 export interface WorkCategoryOptionGroup {

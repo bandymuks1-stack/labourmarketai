@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Login UX guard: Google-account users must not get stuck on the password form.
@@ -40,7 +41,7 @@ describe("login form surfaces the Google path after a password failure", () => {
 });
 
 describe("google_hint copy exists in every active locale", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: auth.login.google_hint is present and mentions Google`, () => {
       const m = JSON.parse(read(`messages/${loc}.json`));
       const hint = m.auth.login.google_hint as string;

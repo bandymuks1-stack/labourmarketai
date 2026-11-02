@@ -42,6 +42,8 @@
  * into each of them.
  */
 
+import { isPrivacyRequestPayload } from "@/lib/privacy/privacy-request-model";
+
 export type MarketDirection = "demand" | "supply" | "other";
 
 /**
@@ -113,6 +115,32 @@ export const NON_EMPLOYER_DEMAND_KIND_OR_FILTER: string = [
 /** True only for a row a demand surface may render. */
 export function isDemandKind(kind: string | null | undefined): boolean {
   return marketDirection(kind) === "demand";
+}
+
+/**
+ * A request TO THE PLATFORM, not to the market. The help desk
+ * (`submit_help_request_v1`, payload.help_type) and privacy self-service
+ * (`privacy_self_service`, payload.privacy_request_type) both write
+ * `customer_requests` rows as `kind = 'customer_request'` under the caller's
+ * own profile — the demand alias. Classified by kind alone they read as the
+ * caller's own labour needs: an employer who asked the help desk a question
+ * saw it on the scouting page as a need to find people for, and could have it
+ * auto-selected. The database boards already exclude them; this is the same
+ * fact for the own-rows reads.
+ */
+export function isOperatorRequestPayload(payload: unknown): boolean {
+  if (!payload || typeof payload !== "object") return false;
+  const p = payload as Record<string, unknown>;
+  return typeof p.help_type === "string" || isPrivacyRequestPayload(p);
+}
+
+/** A row an employer's own NEEDS list may render: a demand kind, and not a
+ *  help-desk or privacy request to the platform. */
+export function isLabourDemandRow(row: {
+  readonly kind: string | null | undefined;
+  readonly payload?: unknown;
+}): boolean {
+  return isDemandKind(row.kind) && !isOperatorRequestPayload(row.payload);
 }
 
 /** True only for a row a supply surface may render. */

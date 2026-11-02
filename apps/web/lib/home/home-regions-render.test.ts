@@ -18,7 +18,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { activeLocales } from "@/lib/i18n/config";
 import type { NotificationEventRow } from "@/lib/notifications/events";
-import { deriveTodayModel } from "@/lib/today/today-model";
+import { deriveTodayModel, deriveTodayNext } from "@/lib/today/today-model";
+import { deriveWorkCardState } from "@/lib/worker/work-card-state";
 
 import { composeHomeState, deriveBecause, deriveOutside, deriveRunning, deriveWaiting } from "./home-state";
 
@@ -351,5 +352,63 @@ describe("personal record line — self-only, quiet, never shown without a recor
       const h = html(await HomeRunningView({ locale: "en", running: RUNNING, record }));
       expect(h).not.toContain("home-personal-record");
     }
+  });
+});
+
+describe("evidence first — a new worker's ONE gold action is the first work entry (activation audit #4)", () => {
+  // The onboarded worker as production has them: a profession, no skills,
+  // no entries. Built with the REAL engine, not a literal.
+  const FIRST = deriveTodayNext(
+    deriveWorkCardState(
+      {
+        hasProfession: true,
+        skillsCount: 0,
+        availabilitySet: false,
+        locationSet: false,
+        paySet: false,
+        evidenceCount: 0,
+        confirmedAtMs: null,
+      },
+      0,
+    ),
+  );
+
+  it("the gold action opens the journal; the profession stays reachable as a quiet link — every active locale", async () => {
+    for (const loc of activeLocales) {
+      state.locale = loc;
+      const w = html(
+        await HomeWaitingView({ locale: loc, region: deriveWaiting(FIRST, { kind: "known", items: [] }), unknownDoors: [] }),
+      );
+      expect(w, loc).not.toContain("MISSING:");
+      // ONE gold action, and it leads to the journal.
+      expect(w.match(/bg-gradient-cta/g), loc).toHaveLength(1);
+      expect(w, loc).toMatch(/<a href="\/dashboard\/journal"[^>]*data-testid="today-next-cta"/);
+      expect(w, loc).toContain(lookup(loc, "auth.dashboard.workCard.why.evidenceFirst") as string);
+      // Nothing hidden: the profile step is a plain text link, not a button.
+      expect(w, loc).toMatch(/<a href="\/dashboard\/profile#profile-edit"[^>]*data-testid="today-next-secondary"[^>]*data-dim="work"/);
+      const secondary = w.match(/<a [^>]*data-testid="today-next-secondary"[^>]*>/)?.[0] ?? "";
+      expect(secondary, loc).not.toMatch(/bg-gradient-cta|rounded-control|border-/);
+      expect(w, loc).toContain(lookup(loc, "auth.dashboard.workCard.next.work") as string);
+    }
+  });
+
+  it("after the first entry nothing is displaced — no secondary link", async () => {
+    const after = deriveTodayNext(
+      deriveWorkCardState(
+        {
+          hasProfession: true,
+          skillsCount: 0,
+          availabilitySet: false,
+          locationSet: false,
+          paySet: false,
+          evidenceCount: 1,
+          confirmedAtMs: null,
+        },
+        0,
+      ),
+    );
+    const w = html(await HomeWaitingView({ locale: "en", region: deriveWaiting(after, { kind: "known", items: [] }), unknownDoors: [] }));
+    expect(w).toContain('data-testid="today-next-cta"');
+    expect(w).not.toContain('data-testid="today-next-secondary"');
   });
 });
