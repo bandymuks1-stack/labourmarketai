@@ -158,6 +158,11 @@ describe("MCP 2026-07-28 — the current revision is served", () => {
     expect(r.cacheScope).toBe("public");
   });
 
+  it("a transport whose list varies by caller marks tools/list private (10.4)", async () => {
+    const r = resultOf(await handleMcpMessage(req("tools/list"), { ...deps(), toolsCacheScope: "private" }));
+    expect(r.cacheScope).toBe("private");
+  });
+
   it("never mints or echoes a session id, on any method", async () => {
     // 2026-07-28 removed protocol-level sessions. This server was already
     // stateless, so the rule is "never start", and it is worth pinning

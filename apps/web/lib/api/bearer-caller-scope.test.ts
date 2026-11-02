@@ -25,7 +25,7 @@ describe("bearer caller scope", () => {
   });
 
   it("inside the scope createClient() is the verified bearer caller's own client", async () => {
-    const identity: ApiIdentity = { userId: "bearer-user", transport: "bearer", supabase: bearerClient };
+    const identity: ApiIdentity = { userId: "bearer-user", transport: "bearer", oauthClientId: null, supabase: bearerClient };
     await runAsBearerCaller(identity, async () => {
       expect(currentBearerCaller()?.userId).toBe("bearer-user");
       // Survives an await — the scope follows the request's async continuation.
@@ -38,15 +38,15 @@ describe("bearer caller scope", () => {
   });
 
   it("a cookie identity never enters the scope", async () => {
-    const identity: ApiIdentity = { userId: "cookie-user", transport: "cookie", supabase: bearerClient };
+    const identity: ApiIdentity = { userId: "cookie-user", transport: "cookie", oauthClientId: null, supabase: bearerClient };
     await runAsBearerCaller(identity, async () => {
       expect(currentBearerCaller()).toBeUndefined();
     });
   });
 
   it("two concurrent requests each see only their own caller", async () => {
-    const a: ApiIdentity = { userId: "user-a", transport: "bearer", supabase: { kind: "a" } as never };
-    const b: ApiIdentity = { userId: "user-b", transport: "bearer", supabase: { kind: "b" } as never };
+    const a: ApiIdentity = { userId: "user-a", transport: "bearer", oauthClientId: null, supabase: { kind: "a" } as never };
+    const b: ApiIdentity = { userId: "user-b", transport: "bearer", oauthClientId: null, supabase: { kind: "b" } as never };
     const seen = await Promise.all([
       runAsBearerCaller(a, async () => {
         await new Promise((r) => setTimeout(r, 5));

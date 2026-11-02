@@ -147,6 +147,14 @@ export type McpServerDeps = {
    * passes it through; this module decides what it means.
    */
   readonly transportProtocolVersion?: string | null;
+  /**
+   * Cache scope of the `tools/list` result. Defaults to `public`, which is
+   * true only while every caller is shown the same list. A transport that
+   * shows different callers different lists (the MCP door since register
+   * 10.4: OAuth clients see the curated assistant set) MUST pass `private`,
+   * or a shared cache could hand one caller's list to another.
+   */
+  readonly toolsCacheScope?: "public" | "private";
 };
 
 type JsonRpcId = string | number | null;
@@ -294,7 +302,7 @@ export async function handleMcpMessage(
           // 2026-07-28 cache directives. Additive: an older client ignores
           // unknown result fields, exactly as JSON has always worked.
           ttlMs: LIST_CACHE_TTL_MS,
-          cacheScope: LIST_CACHE_SCOPE,
+          cacheScope: deps.toolsCacheScope ?? LIST_CACHE_SCOPE,
         },
       };
     case "tools/call": {

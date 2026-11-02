@@ -44,7 +44,7 @@ import { runCapability } from "./registry";
 
 const supabase = {} as CapabilityCaller["supabase"];
 const bearer: CapabilityCaller = { userId: "u-1", transport: "bearer", supabase, locale: "en", actorKind: "agent" };
-const inScope = <T>(fn: () => Promise<T>) => runAsBearerCaller({ userId: "u-1", transport: "bearer", supabase }, fn);
+const inScope = <T>(fn: () => Promise<T>) => runAsBearerCaller({ userId: "u-1", transport: "bearer", oauthClientId: null, supabase }, fn);
 const OFFER = "11111111-1111-4111-8111-111111111111";
 
 beforeEach(() => {
