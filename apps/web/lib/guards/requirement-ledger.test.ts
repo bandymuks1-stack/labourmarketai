@@ -62,7 +62,11 @@ describe("no second readiness model — the ledger derives from the existing der
   it("the existing checklist read is EXTENDED (optional statuses), its default stays the open rows only, and its anchors for the privacy guard are intact", () => {
     expect(ACCESS).toContain('const OPEN_READINESS_STATUSES = ["needed", "missing", "rejected", "expired"] as const;');
     expect(ACCESS).toContain('export const LEDGER_READINESS_STATUSES = ["needed", "missing", "received", "checked", "rejected", "expired"] as const;');
-    expect(ACCESS).toContain(".in(\"status\", [...(options?.statuses ?? OPEN_READINESS_STATUSES)])");
+    // The query moved into queryOwnReadinessItems (#2941: a failed read is
+    // null there, so the asks can say "unknown"); the public read still
+    // takes the optional statuses and still answers [] on failure.
+    expect(ACCESS).toContain("return (await queryOwnReadinessItems(workerId, projectIds, options?.statuses)) ?? [];");
+    expect(ACCESS).toContain(".in(\"status\", [...(statuses ?? OPEN_READINESS_STATUSES)])");
     expect(ACCESS).toMatch(/\.eq\("worker_id", workerId\)/);
     expect(ACCESS).not.toContain('"not_required"');
   });

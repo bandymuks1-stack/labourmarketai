@@ -160,32 +160,33 @@ active session and window works from THIS file. No second coordination register,
 | `local_50daa866` nonstop-pilot-limit | #2933 LIVE_VERIFIED; worker role from the own worker profile in chat/MCP dispatch | #2937 (RED) | owner: RED approval | WAITING (owner) |
 | `local_14a855e7` growth export | daily aggregate registrations / Living CV export | #2886 (RED) | — | BLOCKED by owner order (no merge, deploy or apply); idle |
 | `local_aa901800` "projekto perėmimas" | ESCO cold locales | #2463 (RED) | owner approval | WAITING (owner) — conflict upkeep only, no new work |
-| `local_056d9f7f` (Agentai OS coordinator) | other repository; its labourmarketai work (#2886) is assigned through this file | — | — | n/a here |
+| `local_056d9f7f` (Agentai OS coordinator) | other repository; its labourmarketai work (#2886) is assigned through this file. **INFRA P0 handed over 2026-11-02 18:40Z:** host OOM evidence (12:06 and 15:01 UTC kills in `agentai-scheduler`, no memory limit) — required: a hard memory limit + the cause of the growing scheduled job fixed (owner: a bigger server alone is not enough) | — | Agentai OS reply: job, PR, deploy time | WAITING (Agentai OS) |
 
 Older sessions (`…16CYcDu`, `…AygGqFo3`, cloud `…hnVKqGvExp`, `local_07992559`, `local_430c3337`) are idle and
 hand-over complete; they start nothing without an assignment here.
 
 ### 3.1a The six open user journeys (owner order 2026-11-02 "19/19") — one executor each
 
-13 / 19 complete. NOT_VERIFIED is never counted as FAIL without evidence.
+15 / 19 complete (J-2 and J-13 proven 2026-11-02). NOT_VERIFIED is never counted as FAIL without evidence.
 
 | Journey | State | Works in production | Missing / blocker | Kind of work | Executor | Shortest path to LIVE_VERIFIED |
 |---|---|---|---|---|---|---|
-| J-2 journal → manager confirms | broken (2.20 FAIL) | record → send → manager confirms / returns → Living CV (journal-confirm 41281666555, 3/3) | open integrity item EVID-2 (details in the private record) | RED migration + owner decision | `local_b55e3e39` | RED draft → owner EVID-2 → apply → journal-confirm walk (steps in the private record) |
-| J-12 institution → qualification | partial (11.2, 11.7 NOT_VERIFIED; 11.10 NOT_IMPLEMENTED) | institution, learner link, compass, practice, outcomes, reporting (11.1, 11.3–11.6) | learners cannot join a cohort themselves (ARCH-3); practice not recognised against a formal requirement (SKL-9); RPL equivalence not built (ARCH-2, D-15) | owner decisions, then RED schema | coordinator (owner decisions) | owner ARCH-3 + D-15 scope for RPL → Education executor |
-| J-13 buyer → provider | partial | buyer workspace record + draft request (buyer-workspace 40377604733); service request loop (marketplace 41284728549) | non-customer → customer path never walked in production; accepted request does not become an offer/contract (RED-1) | test + small UX + RED draft | `local_1a4a2a4f` | extended buyer-workspace walk; RED-1 owner decision |
-| J-14 organization buys a plan | blocked | plan catalogue (7.1); paid pilot (7.5 pilot only) | live terms lack renewal / withdrawal / refund clauses (7.28 FAIL); EUR 99 hidden, Stripe Tax RED #2685; two owner acts (MKT-7) | owner + legal | coordinator (owner decisions) | legal terms → #2685 → MKT-7 → billing walk |
-| J-15 alert / e-mail without signing in | unverified (PASS_CI_ONLY) | isolated walk 40833394554 (#2883): alert mail, notification mail, digest | never walked in production; was waiting for the QA mailbox, which is now proven (D-4 / D-5) | test (production walk) | `local_816618a9` | alert-mail walk via the QA mailbox |
-| J-17 install from a store | blocked | Android and iOS apps run against production (8.17, 8.18) | no store listing: Google Play / Apple / EAS accounts (8.15) | owner accounts | `local_00be3967` after owner | owner store accounts → closed-test listing → install walk |
+| J-2 journal → manager confirms | **complete** — journal-confirm 41478434884 (4/4); was unverified | record → send → manager confirms / returns → Living CV (journal-confirm 41281666555, 3/3) | EVID-2 RESOLVED by owner decision 0028 (2026-11-02): self-declaration is lawful and never a block; the lane checks the data model against each 0028 rule and proposes only the minimal change for a rule not met | test (#2942) + only-if-needed minimal change | `local_b55e3e39` | rule check → journal-confirm walk proving self-declaration, separation and independent confirmation |
+| J-12 institution → qualification | partial (11.2, 11.7 NOT_VERIFIED; 11.10 NOT_IMPLEMENTED) | institution, learner link, compass, practice, outcomes, reporting (11.1, 11.3–11.6) | **ARCH-3 decided by the owner 2026-11-02:** a learner may ASK to join a cohort; the institution's authorised person accepts membership and confirms practice and work done; the learner may keep their own history without confirmation, labelled self-declared (decision 0028). **D-15 decided:** recording work experience stays existing functionality; formal recognition of prior learning (RPL) is a separate later stage, an assessor's procedure, never an automatic qualification. Practice against a formal requirement (SKL-9) stays open **Built 2026-11-02:** RED draft #2959 (learner join request + institution accept, migration 20261102160000, NOT applied; scratch-PG proof 43/43; walk spec `cohort-join-request` included, dispatch only). GREEN #2960 records J-12 and the D-15 RPL design in decision 0028 | owner approval + apply of #2959 (RED); RPL: owner names the first assessor and requirement set | `local_b55e3e39` (assigned 2026-11-02) | apply #2959 → dispatch `prod-qa-walk.yml -f spec=cohort-join-request` (pass = 5/5) |
+| J-13 buyer → provider | **complete** — buyer-workspace 41480104268 (9/9); RED-1 #2946 is the next extension; was partial | buyer workspace record + draft request (buyer-workspace 40377604733); service request loop (marketplace 41284728549) | non-customer → customer path never walked in production; accepted request does not become an offer/contract (RED-1) | test + small UX + RED draft | `local_1a4a2a4f` | extended buyer-workspace walk; RED-1 owner decision |
+| J-14 organization buys a plan | blocked | plan catalogue (7.1); paid pilot (7.5 pilot only) | **7.28 missing in the live terms (2026-11-02 read):** price VAT basis, billing period, automatic renewal, how to cancel and when, refund rules, B2C 14-day withdrawal + waiver for an immediately started service (checkout checkbox + e-mailed confirmation do not exist yet), complaint handling, consumer authority (VVTAT), liability limitation, notice of term/price changes, chargebacks. Present: seller identity, governing law. Draft #2842 covers most but not liability or change notice, and has placeholders. **Stripe Tax #2685**: RED draft (migration-safety on a GRANT), switch `BILLING_STRIPE_TAX_ENABLED` off; needs owner Stripe-dashboard acts (live VAT registration, seller tax id, tax behaviour on the price, webhook events), migration apply, switch last; companion #2701 (drop the unproven VAT promise). **MKT-7** = gate G-7 pricing readiness (done 2026-09-05) + gate G-8 live-activation env (recorded as set); charging is limited by the pilot organisation list. No new payments are activated without a separate owner approval | owner + legal | coordinator (owner decisions) | terms text (legal) → #2701 + #2685 → billing walk |
+| J-15 alert / e-mail without signing in | partial — **instant job alerts + alert e-mail LIVE_VERIFIED** (4.9, 5.7: alert-mail 41488266687, 9/9); **weekly digest e-mail (5.9) is a separate mandatory check, PASS_CI_ONLY** | alerts, alert e-mail, saved search, in-app digest; the Monday 07:00 UTC digest run itself ran 2026-11-02 (13 in-app digests) | digest e-mail never sent because nobody in production has turned on digest e-mail (consent-first, default off) — not a defect; an e-mail proof needs a consenting synthetic account that logged work and did not visit before the Monday run | test (two-part walk: setup this week, check Mon 2026-11-09 after 07:05 UTC) + owner approval for the QA account | `local_816618a9` | digest-setup walk → Monday run → digest-check walk |
+| J-17 install from a store | blocked | Android and iOS apps run against production (8.17, 8.18) | owner accounts: Google Play (US$25 one-time; a personal account needs a 12-tester / 14-day closed test, an organisation account needs a free D-U-N-S number), Apple Developer (US$99/year; organisation needs D-U-N-S + legal entity), Expo EAS (free plan is enough to build and submit once; no Mac needed). Minimum first year US$124. Repo already has bundle ids, EAS profiles, privacy labels, listing texts (pack 2026-10-14, being refreshed for messages / notifications / projects); missing: `eas init`, submit profile, signing keys, review account, real screenshots, owner approval of icon and listing. Nothing is published without permission | owner accounts; mobile QA continues (#2940 auto-merge, #2941 Codex P2 fix) | `local_00be3967` | owner store accounts → closed-test listing → install walk |
 
 ### 3.2 In flight and last 24 h (status stages kept apart)
 
 | PR | Goal | Executor | CODE_COMPLETE | MERGED | DEPLOYED | LIVE_VERIFIED |
 |---|---|---|---|---|---|---|
 | #2917 | brigade offered and matched as a unit | lane A | ✓ | ✓ | ✓ | ✓ walk 41350506578 (19/19) |
+| #2933 | an organization's plan applies to a platform admin acting in it (RED, owner-approved) | nonstop-pilot-need-limit | ✓ | ✓ `233b2e7c8` | ✓ | ✓ 2026-11-02 — MCP create + Chrome as the affected member (details private) |
 | #2913 | six production-applied migrations restored byte-exact (RED, approved) | coordinator | ✓ | ✓ | ✓ (no production change) | ✓ parity gate 41342643253 |
-| #2916 | mobile: correct a journal entry | mobile | ✓ | ✓ | n/a (app build) | Android vs production ✓; iOS: the whole correction flow passed against production in run 41408063016 (from a feature branch; the earlier refusal was the test driver mistyping the address, not a rate limit) — the run on main is still pending |
-| #2928 | mobile: messages | mobile | ✓ | ✓ | n/a (app build) | NOT_VERIFIED |
+| #2916 | mobile: correct a journal entry | mobile | ✓ | ✓ | n/a (app build) | Android vs production ✓; ✓ from `main` @bdb27bb88: Android 41451882387, iOS 41451829006 (attempt 2 of 2; attempt 1 lost the simulator screen after sign-in, not a product defect) — correction draft → confirm passed on both |
+| #2928 | mobile: messages | mobile | ✓ | ✓ | n/a (app build) | ✓ list, conversation opened, reply draft previewed (not sent) — Android 41451882387, iOS 41451829006 from `main` |
 | #2919 | failed notification/project reads never answer empty | coordinator | ✓ | ✓ | ✓ | NOT_VERIFIED |
 | #2920 | project forecast beside the course, computed on read | lane A | ✓ | ✓ | ✓ | NOT_VERIFIED |
 | #2922 | MCP profile.get description; ChatGPT sign-in note | ChatGPT security | ✓ | ✓ | ✓ | NOT_VERIFIED |
@@ -193,22 +194,110 @@ hand-over complete; they start nothing without an assignment here.
 | #2914 | full scope 288, parity refresh | coordinator | ✓ (Codex re-review) | — | — | — |
 | #2915 | completion map | coordinator | ✓ | — | — | — |
 | #2927 / #2930 | register evidence 3.8, 4.6, 6.18, 9.18; G-3 fix | lane A | ✓ | — | — | evidence runs named in the PR |
-| #2929 | mobile in-app notifications | mobile | CI running | — | — | — |
+| #2929 | mobile in-app notifications | mobile | ✓ | ✓ `bdb27bb88` | n/a (app build) | list ✓ on both platforms (same runs); mark-all-read not exercised (nothing unread) |
+| #2940 / #2941 | mobile: driver address read-back; projects list + detail | mobile | Codex requested | — | — | project detail BLOCKED until RED #2937 |
 | #2903 → #2921 | D-4 reset by real mail → D-5 invited path by real mail | coordinator | ✓ | ✓ `3543c13bc` / `c2580a328` | ✓ (test code) | ✓ mail-reset 41428606490 (2/2), invited-worker 41430482903 (7/7) |
 | #2918 / #2923 / #2924 | C-3, X-2, consent wording | ChatGPT security | ✓ (CI green, Codex clean) | — | — | owner gate |
 
-### 3.3 Owner-gated (RED, draft, `needs-human-gate`) — 39 open (2026-11-02)
+### 3.3 Open-PR audit (owner order 2026-11-02 "visų atvirų PR patikrų ir blokavimų auditas")
 
-Conflict upkeep by the session that opened each (§3.1), otherwise by the coordinator. None may be
-applied or merged without an owner approval naming it.
-#2923 #2918 #2903 #2886 #2816 #2812 #2811 #2809 #2806 #2795 #2752 #2747 #2746 #2739 #2738
-#2713 #2707 #2704 #2701 #2693 #2685 #2682 #2647 #2474 #2471 #2463 #2454 #2441 #2440 #2420
-#2418 #2410 #2362 #2235 #2227 #2209 #2203 #2165 #1816.
+77 PRs open at the audit (79 found; #2935, #1421 closed as superseded, evidence kept on the PRs).
+A failing `Vercel` status is stale (Vercel was removed) and blocks nothing. RED / `needs-human-gate`
+PRs are never merged or applied without an owner approval naming them.
 
-### 3.3a Owner-approved, QUEUED — not started (do not begin before the start conditions)
+**Technical — fixed in the current flow by an existing executor**
 
-| Item | Approved | Priority | State | Start conditions |
+| PR | Blocker | Executor | Action | Owner OK |
 |---|---|---|---|---|
+| #2959 | `quality`: 4 migration guards (new migration file vs baselines / ordering) | `local_b55e3e39` | guard baselines + timestamp order; stays RED draft | yes (apply) |
+| #2941 | CI running after 3 Codex P2 fixes | `local_00be3967` | auto-merge once Codex is clean | no |
+| #2961, #2962 | CI running | mobile / J-12 executors | auto-merge on | no |
+| #2844 | was behind main (all checks green 10-27) | coordinator | branch updated, auto-merge on | no |
+| #2154, #2455 | behind main | coordinator | branch updated, auto-merge | no |
+| #2738, #2739, #2410 | conflicts; their migrations are already on main via #2913 | `local_13cb59b3` | rebase without the migration, land the app code; GREEN only if nothing RED remains | no if GREEN |
+| #2454 | `signup-isolated` fails | `local_3951ad81` | fix the walk; stays RED (edits a prod-qa workflow) | yes |
+| #2682 | conflicts (pilot pass name / term / amount display) | coordinator | rebase; billing = RED class | yes |
+| #1617 + #1619 | CodeQL `Analyze` fails because init and analyze must move together | — | merge as a pair after rebase (low priority) | no |
+| #1620, #1622–#1625, #2356 | Dependabot bumps behind main, not on main | — | regroup / rebase in one dependency batch after P0 | no |
+
+**Owner decisions (RED / waiver / strategy)** — by product value: #2693 (read grant so vacancy retention
+can run), #2747 (free workers discoverable by default), #2474 (free plan 3 profiles + VIP), billing chain
+#2441 → #2647 → #2685 (+ #2701 copy) → #2704, #2209 (country filter), #2746 → #2713 (listing lifecycle,
+goods purchases), #2471 (external profile links consent v3), #2707 (MCP scopes + gate waiver), #2362 (165
+dates), DB batch #2420 / #2418 / #2440 / #1045, J-12 #2959, RED-1 #2946, #2937 (worker role in chat/MCP),
+C-3 #2918 → X-2 #2923, #2924 / #2642 / #2403 (product-gate waivers), #2886 (owner hold), #2463 (ESCO cold
+locales), #2235, #2227, #2203, #2165, #1816, #2816, #2812, #2811, #2809, #2806, #2795, #2752 (legal),
+#2842 (paid terms draft, legal).
+
+### 3.4 Stale / superseded — owner decides keep or close (nobody closes them on the coordinator's say-so)
+
+**Closed 2026-11-02 under the owner's conditional approval** (branches, migrations and history kept; each PR
+carries a closing comment). Unique, not-yet-built requirements are carried here with their origin PR:
+
+| Closed PR | Why | Carried requirement (origin) |
+|---|---|---|
+| #1225 landing FOCUS | already on main: #1231 (FOCUS = restored previous landing) and #1232 (FOCUS default) | none |
+| #2438 master audit 2026-10-16 | its owner decisions N-1…N-13 are resolved or tracked elsewhere (#2439, #2442, #2433, #2432 merged; #2444 superseded by #2451; #2440, #2441 open in §3.3) | **reference only, never merged:** growth strategy F-1 (shareable, consent-based confirmed work record), F-2 (company side as weekly operations + crew-lead invite loop), F-3 (finish the money path first), cold-start per participant group, ten country plans, KPI definitions, 30/60/90 roadmap, PRODUCT_MASTER_SPEC (SUPPORTING) — on branch `docs/cc/master-audit-2026-10-16` (origin #2438); reuse when growth work starts (§3.3a) |
+| #740 voice_journal_jobs migration | voice is deferred (no transcription host; COM-6, V-2) | when voice reopens: one owner-scoped job table, disclosure acknowledged before recording, transcript ≤ 60k, audio retention ≤ 30 days, one job → at most one journal entry, worker/admin read only, RPC-only writes, right-to-erase RPC — design on branch `feat/voice-journal-jobs-migration-v1` (origin #740) |
+| #2915 completion map 2026-11-01 | the 288 statuses live only in FUNCTION_REGISTER (one register) | planning columns not in the register: effort per function, critical path, about 185–295 agent days, conditional targets (core mid-December 2026, full scope February 2027, preliminary) — on branch `docs/cc/completion-map-288` (origin #2915) |
+
+**Kept open for the owner** — independent read-only reviews 2026-11-03 (not by the PRs' authors):
+
+- **#2937** (worker role from the caller's own worker profile in chat/MCP; RED, 5 files, no migration, CI green) —
+  review verdict **APPROVE-SAFE**: the role comes only from `workers.profile_id = auth.uid()` (server-resolved, also
+  under an OAuth bearer); every newly reachable worker action re-checks ownership in its own RPC; only `worker` is
+  added, no company/agency/admin gate and no confirmation-token change. Residual risk low. Non-blocking follow-ups:
+  a behavioural test for a failed worker read and for an agency-only caller with an own worker row; the
+  opportunities page (`requireRoleOrRedirect("worker")`) should reuse the same rule.
+- **#2959** (J-12 learner join request; RED, unapplied) — verdict **APPROVE-WITH-CONDITIONS**: proof 43/43 re-run +
+  11 attack probes correct; definer functions, auth.uid() bound, authenticated-only grants, no RLS change; only
+  `manages_organization` may decide, never one's own request. Conditions being fixed by `local_b55e3e39` before the
+  owner decides: unverified typed name labelled + confirm on accept; re-request cooldown after a decline; `added_by`
+  hidden from the learner; archived organization refused; walk checks the switch first and archives its group.
+  Owner must confirm that `external_manager` (possibly an agency) counts as an authorised decider. Shared follow-up:
+  `engagement_contexts` duplicate race (same as invitations).
+- **#2419** (AI monitoring) — CONFLICTING and failing typecheck; its egress premise is superseded by #2433. Unique,
+  not on main: classify quota / timeout / provider-unavailable from `route_reason`, split price-missing from
+  budget-blocked, `ai-failing` = technical failures ÷ attempted runs (privacy refusals and the disabled runtime
+  excluded), `ai_outcome_*_7d` metric rows. Agentai OS has no LabourMarket AI-health monitor (no duplicate).
+  Recommended: close #2419 and carry exactly that into one small GREEN PR off main (≈1–2 h, 4 files, no migration),
+  reusing the provider-chain failure vocabulary — owner go-ahead.
+- **#896 + #897** — main's gates G-7/G-8 decide WHEN selling is allowed, never WHETHER it pays for itself; that second
+  question exists only in these PRs. **One requirements list (origin #896/#897, 2026-07-28):**
+
+| ID | Requirement | On main |
+|---|---|---|
+| CSP-001 | no deliberate long-term loss; a subsidy names its funding source | absent |
+| CSP-002 | economic model before anything paid goes public | partly (activation gates, no model recorded) |
+| CSP-003 | free tier ≈ 60–70 % of base value, funded by the paid model | absent |
+| CSP-004 | natural free → paid progression, no artificial blocking (review only) | absent |
+| CSP-005 | LMC is an internal economy, not a discount | partly (LMC flags off; 1 LMC = €1 invariant) |
+| FSR-001 | unit cost known before launch | partly (AI cost metering only) |
+| FSR-002 | no "unlimited" without a technical abuse bound | partly (AI run cap; paid plan has no numeric bound on open positions) |
+| FSR-003 | growth must not scale losses | partly (AI cap only) |
+| FSR-004 | no subsidy funded by future investment | absent |
+| FSR-005 | before paid activation: payer, what is paid for, unit cost, margin | partly (payer only) |
+| Gate ×11 | commercial gate conditions (assessment, unit cost, margin, payer, unlimited bound, scaling losses, negative margin, future-funded subsidy, LMC as discount) | absent |
+| Fields | economic-model fields per sellable item; feature-economics fields (owner, payer, cost/revenue driver, margin model, decision) | absent |
+| BHE-39 | 39 health metrics: revenue (MRR excludes top-ups), unit economics, margin, cost (12; only AI measured), LMC (6), adoption (6), composite | raw data only |
+| Plan / LMC health | per-plan margin and risk; LMC liability + backing ratio | absent |
+| Warnings ×8 | LOSS_RISK, NEGATIVE_MARGIN, LOW_MARGIN < 30 %, UNLIMITED_RISK, HIGH_AI_COST > 25 %, EXPENSIVE_FEATURE, LMC_LIABILITY_GROWING, SUBSIDY_RISK | absent |
+| Score | 8 weighted parts = 100; refuses to score below 5 measurable parts; unmeasured ≠ 0 | absent |
+
+  Already enforced, never rebuild: G-7/G-8 + live-key block, LMC kill switches, no money in code / null never
+  unlimited, AI cost metering, per-organization AI run cap. Overlapping open PRs (none duplicates): #2441, #2647,
+  #2474 (VIP = subsidy), #2682 (pilot amount for revenue), #2704 / #2685 / #2701 (net-of-VAT basis).
+  Recommended carrying path: one decision file with CSP/FSR verbatim + the list above, a pointer under MKT-7, an
+  owner row for the economic model of the live Organization plan / trial / pilot pass / VIP grant; re-point the
+  citations of unmerged PRs in `apps/web/lib/product-gate/axioms.ts` (:119, :122, :128, :137, :140) and
+  `docs/PRODUCT_CONSTITUTION.md:239-241`; then close #896/#897. Their code is not rebased (it imports the closed
+  #895's catalogue); a faithful gate would turn RED on the live paid plan until an owner assessment or dated
+  exception exists.
+
+Still recommended for an owner keep/close decision: rescope #2165 (referral pipeline already on main),
+#1577, #1835. Leave parked: #2198 (voice), #2377, #2370 (owner visual), #1211, #1166.
+
+---|---|---|---|---|
 | Job-offer intake → public listing → candidate sign-up → Living CV → application → employer review (growth mechanism of the existing platform, not a new product; LabourMarket.ai + Agentai OS data processing + Nonstop Group commercial links) | owner, 2026-11-01 | P1, after current P0 | QUEUED, NOT STARTED — owner: coordinator `local_8d793dee` | (1) current P0 work finished; (2) core user journeys verified in production; (3) no open P0 blocker; (4) this register checked; (5) proven no duplication of existing intake / vacancy store / opportunities / interest / Living CV components |
 
 Binding notes for that item: reuse the existing ingestion and vacancy store; keep source,
@@ -219,12 +308,6 @@ the ban on automatic replies to company mail stays; core publishing and candidat
 stay free; no revenue projections from unconfirmed placement commissions; first pilot =
 50 real offers, staged, browser-verified (desktop + mobile), with measured views,
 sign-ups, applications and returning users. No new agent, radar or parallel project.
-
-### 3.4 Stale non-draft PRs (`STALE?`, >7 days no push)
-
-#2642 (owner waiver needed), #2455, #2449, #2447 (draft, owner hold), #2438, #2419,
-#2403 (waiver), #2377, #2370, #2356 (dependabot). Owner decides keep/close; nobody
-closes them on the coordinator's say-so.
 
 ---
 

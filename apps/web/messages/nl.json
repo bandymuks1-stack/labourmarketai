@@ -2858,7 +2858,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Vind een aanbieder voor een dienst"
     }
   },
   "jobPostings": {
@@ -6842,7 +6843,9 @@
       "listings": "Advertenties",
       "listingsNote": "Ruimtes, uitrusting, voertuigen – aanbieden of zoeken",
       "needs": "Vraag & aanbod",
-      "needsNote": "Publiceer wat je nodig hebt of kunt bieden"
+      "needsNote": "Publiceer wat je nodig hebt of kunt bieden",
+      "buyer": "Mijn aanvragen",
+      "buyerNote": "Bewaar je klantgegevens en houd je aanvragen op één plek"
     },
     "loopReadFailed": "Je aanvragen konden niet worden geladen — de lijst is mogelijk onvolledig. Vernieuw de pagina."
   },

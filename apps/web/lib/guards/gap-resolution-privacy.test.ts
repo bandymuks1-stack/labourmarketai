@@ -66,7 +66,10 @@ describe("one backbone: chat and visual surfaces share the reads and the writes"
   const READ = read("lib/conversation/worker-projects.ts");
 
   it("the person's asks come from ONE domain read in both the chat and the instructions page", () => {
-    expect(READ).toContain("loadOwnProjectAsks(activeIds)");
+    // The chat reads the same domain read in its failure-keeping form
+    // (#2941); the page's loadOwnProjectAsks IS that read's map.
+    expect(READ).toContain("loadOwnProjectAsksResult(activeIds)");
+    expect(read("lib/projects/worker-project-access.ts")).toContain("return (await loadOwnProjectAsksResult(projectIds)).byProject;");
     expect(PAGE).toContain("loadOwnProjectAsks(read.instructions.map((i) => i.projectId)");
     expect(read("lib/conversation/worker-projects-contract.ts")).not.toMatch(/\.from\(|\.rpc\(/);
   });
