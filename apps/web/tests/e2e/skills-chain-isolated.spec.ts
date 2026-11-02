@@ -398,10 +398,13 @@ test("K-3. the Living CV shows the skills as recorded work, with their basis", a
   await expect(tiling, "at the recorded level — not confirmed").toHaveAttribute("data-level", "recorded");
   await expect(caps.locator('li[data-level="confirmed"]'), "nothing reads as confirmed").toHaveCount(0);
   // The basis is said on the line: the recorded hours when the entry's time
-  // can be given to this skill, otherwise "shown by your records" (one total
-  // over several skills is never split by guesswork, #1689) — never the
-  // "you say so" line of a bare declaration.
-  await expect(tiling, "the basis is stated").toContainText(/\d+(\.\d+)? h recorded|Shown by your records/);
+  // can be given to this skill; since #2894 (P0-B) a session shared by
+  // several skills says "Involved in N h, not attributed to it alone" (one
+  // total is never split by guesswork, #1689); otherwise "shown by your
+  // records" — never the "you say so" line of a bare declaration.
+  await expect(tiling, "the basis is stated").toContainText(
+    /\d+(\.\d+)? h recorded|Involved in \d+(\.\d+)? h, not attributed to it alone|Shown by your records/,
+  );
   await expect(tiling).not.toContainText(/nothing shows it yet/);
   await tiler.close();
 });
