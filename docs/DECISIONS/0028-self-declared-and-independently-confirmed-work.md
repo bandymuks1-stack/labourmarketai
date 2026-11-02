@@ -60,3 +60,65 @@ recorded / declared / potential / confirmed / certified stay apart).
 
 J-2 is not counted as blocked or broken merely because a person confirms their own declared
 history. Row 2.20 is re-proven against this decision by a production walk.
+
+## J-12 — a learner may ask to join (owner decision, 2026-11-02)
+
+Owner, 2026-11-02: *"J-12: parengti besimokančiojo savarankiško prašymo prisijungti prie mokymo
+grupės procesą. Mokymo įstaigos įgaliotas asmuo patvirtina narystę, praktiką ir atliktus darbus.
+Besimokantysis gali pildyti savo istoriją ir be įstaigos patvirtinimo, aiškiai nurodant deklaravimo
+lygį."*
+
+This settles ARCH-3 for EDU-2: a learner joins a cohort either by the institution's invitation
+(existing) or by **their own request**, which the institution's authorised person accepts or
+declines. Rules:
+
+1. The request is a state of the one membership row (`education_cohort_members`), never a second
+   store. A request grants nothing: no programme or cohort read, no member count, no relationship.
+2. Only groups the institution has opened for requests are findable, and only by signed-in people.
+3. The authorised person is the same authority that confirms the learner's journal (rule J-12.2
+   above): a manager of the institution. Nobody decides their own request.
+4. Accepting creates the `student` relationship the learner asked for, exactly as an accepted
+   invitation does; journal entries in that context then become reviewable by the institution.
+5. The institution sees only the name the learner typed on the request and an optional note.
+6. With or without an institution, the learner keeps recording their own practice, and it reads
+   as their own declaration until the institution confirms it (J-12.3).
+
+Build: PR #2959, migration `20261102160000_education_cohort_join_requests_v1` (RED draft, not applied; owner apply, then a production walk).
+
+## D-15 — recognition of prior learning is a separate, later stage (design only, 2026-11-02)
+
+Owner, 2026-11-02: *"D-15: darbo patirties registravimas lieka esamo funkcionalumo dalimi.
+Formalų ankstesnės patirties pripažinimą kvalifikacijai projektuoti kaip atskirą etapą,
+nesuteikiant kvalifikacijų automatiškai."*
+
+**Recording stays where it is.** Work experience is recorded by the existing journal, organization
+history and Living CV (decisions 0023, 0025) — no new recording path, no RPL-specific journal.
+
+**Recognition is a different act, by a different person, at a different time.** It extends the
+RECOGNITION / RPL node of the canonical architecture (§1.9, realised by SKL-9 / SKL-10 / EDU-4)
+under the §1.10 authority rule (ARCH-2). No new module, route or store is introduced by this
+design; the parts below name what already exists and the one structure §1.10 already defers.
+
+The procedure, in order:
+
+| Step | Who | What it reads or writes | Exists today |
+|---|---|---|---|
+| 1. Request (optional) | the person | asks a named assessing organisation to assess them against one formal requirement | not built — a later, owner-gated step |
+| 2. Evidence | the system | the person's existing journal entries and Living CV, each with its evidence state kept (recorded / declared / confirmed / certified — decision 0023); declared work may be shown to the assessor as context, but only independently confirmed entries may be **cited** | yes — `competency_recognitions` refuses citing an unconfirmed entry |
+| 3. Assessment | an authorised independent assessor (training/education provider, sector body, public body — never the beneficiary, never a self-interested employer) | the assessor's own method (interview, practical test, portfolio review) — the platform records that it happened and by whom, it does not perform it | partly — the assessor role and independence checks exist in `record_competency_recognition_v1` |
+| 4. Decision | the same assessor | one recorded act: recognised / not recognised, against which requirement, on which evidence, valid until when, revocable with a reason; the person always sees it | yes for competencies (`competency_recognitions`); the formal-requirement equivalence structure (`11.10`) stays deferred under §1.10 |
+| 5. Qualification | the competent body, outside the platform unless it acts on it | a formal qualification is awarded only by the body entitled to award it, under its procedure | never by the platform |
+
+**Never automatic.** No count of hours, no number of confirmations, no AI reading and no skill
+level ever produces a recognition or a qualification. `apply_learning_auto_confirmation` may at
+most mark a skill confirmed under an organisation's own policy; it never writes a recognition and
+never a qualification. SEP-6 holds: demonstrated capability alone never satisfies a formal
+requirement (`hasRecognizedEquivalence` stays false until step 4 exists for that requirement).
+
+**One ledger.** Recognition reads the hours; it never adds, moves or re-counts them (the common
+principle above).
+
+**What is still the owner's.** The first assessing organisation and the requirement set
+(country, sector) it assesses against — the open question in
+`docs/plans/not-implemented-architecture-2026-10-23.md` §H. Building step 1 or the 11.10
+structure before that answer serves nobody.
