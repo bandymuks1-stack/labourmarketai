@@ -127,6 +127,22 @@ describe("walk verdicts", () => {
     });
     expect(fromLog.bad).toBe(true);
   });
+  it("a step on line 500–504 of its spec is not a 5xx (2026-11-01 false trip)", () => {
+    const r = judgeWalkRun({
+      walkConclusion: "failure",
+      provisionFailed: false,
+      result: report(["passed"], ["failed", "expect(locator).toBeVisible() failed\n\n  502 |   const failed = form;\n> 503 |   await expect(done).toBeVisible();"]),
+      log: "  -  15 [chromium] › tests/e2e/prod-project-execution.spec.ts:504:5 › E-13 (3.13). the report\n      at tests/e2e/prod-x.spec.ts:500:12",
+    });
+    expect(r).toEqual({ bad: false, why: "a product assertion failed (not an infrastructure signal)" });
+    const real = judgeWalkRun({
+      walkConclusion: "failure",
+      provisionFailed: false,
+      result: report(["passed"], ["failed", "assertion"]),
+      log: "page.goto: 504 Gateway Timeout at tests/e2e/prod-x.spec.ts:12:3",
+    });
+    expect(real.bad, "a real 504 still counts").toBe(true);
+  });
   it("a product assertion failing later is NOT an infrastructure signal", () => {
     const r = judgeWalkRun({
       walkConclusion: "failure",

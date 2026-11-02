@@ -163,11 +163,26 @@ export function judgeWalkRun({ walkConclusion, provisionFailed, result, log = ""
   if (first && first.status !== "passed" && first.status !== "expected" && first.status !== "flaky") {
     return { bad: true, why: `the first step failed (${first.status})` };
   }
-  const messages = tests.flatMap((x) => x.errors).join("\n");
-  if (INFRA_PATTERN.test(messages) || INFRA_PATTERN.test(log)) {
+  const messages = withoutSourceLocations(tests.flatMap((x) => x.errors).join("\n"));
+  if (INFRA_PATTERN.test(messages) || INFRA_PATTERN.test(withoutSourceLocations(log))) {
     return { bad: true, why: "infrastructure / 5xx error in the walk" };
   }
   return { bad: false, why: "a product assertion failed (not an infrastructure signal)" };
+}
+
+/**
+ * Source positions are not HTTP statuses. A failed walk's log names its
+ * steps as `prod-x.spec.ts:504:5` and prints numbered code frames
+ * (`> 504 |   await …`); a step that happened to sit on line 500–504
+ * tripped the 5xx pattern and the circuit breaker paused every walk for an
+ * hour (project-execution 41359872373 / 41360971243, 2026-11-01: E-13 had
+ * moved to line 504). File:line positions and code-frame gutters are removed
+ * before the pattern is applied; a real "504 Gateway Timeout" still matches.
+ */
+export function withoutSourceLocations(text) {
+  return String(text)
+    .replace(/\.(?:[cm]?[jt]sx?):\d+(?::\d+)?/g, ".$SRC")
+    .replace(/^[ \t>]*\d+ \|/gm, "|");
 }
 
 /** Tests of a Playwright JSON report in file order: { status, errors[] }. */
