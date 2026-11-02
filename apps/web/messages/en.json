@@ -2049,7 +2049,14 @@
           "saved": "Saved.",
           "forbidden": "Only a manager of this institution can do this.",
           "invalid": "Please check the values.",
-          "error": "Something went wrong. Please try again."
+          "error": "Something went wrong. Please try again.",
+          "openRequests": "Let learners ask to join",
+          "closeRequests": "Stop taking new requests",
+          "requestsOpenHint": "Learners can find this group and ask to join.",
+          "accept": "Accept",
+          "decline": "decline",
+          "acceptConfirm": "Yes, accept and add to the group",
+          "cancelDecision": "Cancel"
         },
         "unavailable": "Programmes could not be loaded right now. Reload the page; nothing you created is lost.",
         "inviteLearners": "Invite learners",
@@ -2087,7 +2094,9 @@
           "evidenceUnavailable": "The learner's practice entries could not be read right now. Nothing is recorded.",
           "evidenceRecorded": "Recorded",
           "evidenceConfirmed": "signed off"
-        }
+        },
+        "requestFrom": "Asks to join: {name}",
+        "requestUnverified": "Name typed by the learner — not checked by anyone."
       },
       "learners": {
         "title": "Learners",
@@ -20054,6 +20063,33 @@
       "business_details": "Company or business registration and invoicing details.",
       "insurance": "Liability or other insurance, if this work needs it.",
       "client_requirements": "Any specific requirements of the client or the site."
+    }
+  },
+  "learnerCohortJoin": {
+    "title": "Learning group",
+    "declaredNote": "You can record your practice and the work you did at any time, even before an institution accepts you. Until the institution's authorised person confirms it, it shows as declared by you, not as confirmed.",
+    "journalLink": "Open the journal",
+    "find": "{count, plural, one {# open group} other {# open groups}}",
+    "empty": "No institution is taking join requests right now.",
+    "unavailable": "Learning groups could not be loaded right now. Try again later.",
+    "status": {
+      "requested": "Request sent, waiting for the institution's decision.",
+      "declined": "The institution did not accept this request."
+    },
+    "form": {
+      "nameLabel": "Your name as the institution knows you",
+      "nameHint": "The institution sees only this name and your message, not your profile or journal.",
+      "noteLabel": "Message to the institution (optional)",
+      "send": "Ask to join",
+      "withdraw": "withdraw request",
+      "saving": "Sending…",
+      "requested": "Request sent.",
+      "alreadyMember": "You are already a member of this group.",
+      "withdrawn": "Request withdrawn.",
+      "closed": "This group no longer takes new requests.",
+      "invalid": "Check the name and message.",
+      "error": "Something went wrong. Try again.",
+      "cooldown": "You were declined recently. You can ask this group again 30 days after the decision."
     }
   }
 }

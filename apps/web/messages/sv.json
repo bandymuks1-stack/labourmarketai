@@ -7886,5 +7886,32 @@
     "error": "That didn't work. Nothing was changed.",
     "notAllowed": "The organization's owner or a manager can do this.",
     "notSameWork": "These records no longer match — refresh the page."
+  },
+  "learnerCohortJoin": {
+    "title": "Lärgrupp",
+    "declaredNote": "Du kan alltid registrera din praktik och ditt arbete, även innan en utbildningsanordnare har antagit dig. Tills anordnarens behöriga person bekräftar det visas det som angivet av dig, inte som bekräftat.",
+    "journalLink": "Öppna journalen",
+    "find": "{count, plural, one {# öppen grupp} other {# öppna grupper}}",
+    "empty": "Ingen utbildningsanordnare tar emot förfrågningar om att gå med just nu.",
+    "unavailable": "Lärgrupperna kunde inte laddas just nu. Försök igen senare.",
+    "status": {
+      "requested": "Förfrågan skickad, väntar på anordnarens beslut.",
+      "declined": "Anordnaren godkände inte den här förfrågan."
+    },
+    "form": {
+      "nameLabel": "Ditt namn som anordnaren känner dig",
+      "nameHint": "Anordnaren ser bara det här namnet och ditt meddelande, inte din profil eller journal.",
+      "noteLabel": "Meddelande till anordnaren (valfritt)",
+      "send": "Be om att gå med",
+      "withdraw": "dra tillbaka förfrågan",
+      "saving": "Skickar…",
+      "requested": "Förfrågan skickad.",
+      "alreadyMember": "Du är redan medlem i den här gruppen.",
+      "withdrawn": "Förfrågan har dragits tillbaka.",
+      "closed": "Den här gruppen tar inte emot nya förfrågningar.",
+      "invalid": "Kontrollera namnet och meddelandet.",
+      "error": "Något gick fel. Försök igen.",
+      "cooldown": "Din förfrågan avslogs nyligen. Du kan fråga den här gruppen igen 30 dagar efter beslutet."
+    }
   }
 }

@@ -7886,5 +7886,32 @@
     "error": "That didn't work. Nothing was changed.",
     "notAllowed": "The organization's owner or a manager can do this.",
     "notSameWork": "These records no longer match — refresh the page."
+  },
+  "learnerCohortJoin": {
+    "title": "Mācību grupa",
+    "declaredNote": "Savu praksi un paveikto darbu vari ierakstīt jebkurā laikā, arī pirms iestāde tevi ir uzņēmusi. Kamēr iestādes pilnvarotā persona to nav apstiprinājusi, tas tiek rādīts kā tevis paša deklarēts, nevis apstiprināts.",
+    "journalLink": "Atvērt žurnālu",
+    "find": "{count, plural, zero {# atvērtu grupu} one {# atvērta grupa} other {# atvērtas grupas}}",
+    "empty": "Pašlaik neviena iestāde nepieņem lūgumus pievienoties.",
+    "unavailable": "Mācību grupas pašlaik neizdevās ielādēt. Mēģini vēlāk.",
+    "status": {
+      "requested": "Lūgums nosūtīts, gaida iestādes lēmumu.",
+      "declined": "Iestāde šo lūgumu nepieņēma."
+    },
+    "form": {
+      "nameLabel": "Tavs vārds, kā tevi pazīst iestāde",
+      "nameHint": "Iestāde redz tikai šo vārdu un tavu ziņu, nevis tavu profilu vai žurnālu.",
+      "noteLabel": "Ziņa iestādei (nav obligāta)",
+      "send": "Lūgt pievienoties",
+      "withdraw": "atsaukt lūgumu",
+      "saving": "Sūta…",
+      "requested": "Lūgums nosūtīts.",
+      "alreadyMember": "Tu jau esi šīs grupas dalībnieks.",
+      "withdrawn": "Lūgums atsaukts.",
+      "closed": "Šī grupa vairs nepieņem jaunus lūgumus.",
+      "invalid": "Pārbaudi vārdu un ziņu.",
+      "error": "Kaut kas nogāja greizi. Mēģini vēlreiz.",
+      "cooldown": "Tavs pieprasījums nesen tika noraidīts. Šai grupai vari jautāt vēlreiz 30 dienas pēc lēmuma."
+    }
   }
 }

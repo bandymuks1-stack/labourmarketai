@@ -7886,5 +7886,32 @@
     "error": "That didn't work. Nothing was changed.",
     "notAllowed": "The organization's owner or a manager can do this.",
     "notSameWork": "These records no longer match — refresh the page."
+  },
+  "learnerCohortJoin": {
+    "title": "Õpperühm",
+    "declaredNote": "Saad oma praktikat ja tehtud tööd alati kirja panna, ka enne kui õppeasutus sind vastu võtab. Kuni õppeasutuse volitatud isik seda ei kinnita, näidatakse seda sinu enda deklareeritud, mitte kinnitatuna.",
+    "journalLink": "Ava päevik",
+    "find": "{count, plural, one {# avatud rühm} other {# avatud rühma}}",
+    "empty": "Ükski õppeasutus ei võta praegu liitumistaotlusi vastu.",
+    "unavailable": "Õpperühmi ei õnnestunud praegu laadida. Proovi hiljem uuesti.",
+    "status": {
+      "requested": "Taotlus saadetud, ootab õppeasutuse otsust.",
+      "declined": "Õppeasutus ei võtnud seda taotlust vastu."
+    },
+    "form": {
+      "nameLabel": "Sinu nimi, nagu õppeasutus sind tunneb",
+      "nameHint": "Õppeasutus näeb ainult seda nime ja sinu sõnumit, mitte sinu profiili ega päevikut.",
+      "noteLabel": "Sõnum õppeasutusele (valikuline)",
+      "send": "Palu liituda",
+      "withdraw": "võta taotlus tagasi",
+      "saving": "Saatmine…",
+      "requested": "Taotlus saadetud.",
+      "alreadyMember": "Oled juba selle rühma liige.",
+      "withdrawn": "Taotlus võeti tagasi.",
+      "closed": "See rühm ei võta enam uusi taotlusi vastu.",
+      "invalid": "Kontrolli nime ja sõnumit.",
+      "error": "Midagi läks valesti. Proovi uuesti.",
+      "cooldown": "Sinu taotlus lükati hiljuti tagasi. Seda rühma saad uuesti paluda 30 päeva pärast otsust."
+    }
   }
 }
