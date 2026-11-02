@@ -14,8 +14,9 @@ The older store-asset packs (`mobile-store-assets-*-v1.md`, `mobile-store-readin
 **Scope update 2026-11-02.** The native app has grown since 10-14:
 - work-journal correction (#2916);
 - messages (#2928);
-- in-app notifications (#2929);
-- the person's projects (#2941).
+- in-app notifications (#2929).
+
+**The person's projects (#2941) are NOT in this list until that PR is merged.** Until then projects stay website-only in every listing below; #2941 adds them to §1, §2 and §3 in the same change as the screen.
 
 These sit next to the jobs, opportunities, post-a-need and availability screens already on `main`. §1, §2 and §3 below are updated to that scope. **Nothing has been submitted or published. No store account, EAS project or signing key was created.** Those stay owner actions (§6).
 
@@ -34,7 +35,6 @@ Expo / React Native app `apps/mobile`, id `ai.labourmarket.app`, version 0.1.0. 
 | Correct an entry | Change a confirmed entry: draft → before/after preview → confirm. The earlier version is kept as superseded, never overwritten. |
 | Messages | Their own in-app conversations. Open a thread and reply. A reply is drafted, previewed and only then sent (draft → confirm). |
 | Notifications | Their own in-app notifications, read when the screen is opened. Mark one or all as read. Some open the matching web page. **No push.** |
-| My projects | The projects they are assigned to: active or ended, what is still needed from them, and the latest instruction (answered in Messages). The full project page (stages, documents, team) is on the website. |
 | Jobs | Search the public vacancy board (the same anonymous view as the website). A job's full page opens on the website. |
 | Opportunities | Open opportunities. Tell the other side they are interested (draft → confirm). |
 | Post a need | For the organization they act for: describe a need → draft → confirm. |
@@ -43,7 +43,7 @@ Expo / React Native app `apps/mobile`, id `ai.labourmarket.app`, version 0.1.0. 
 | Settings | Language (6), workspace switch, privacy / deletion / terms / support links, sign out. |
 
 **Not in the native app:**
-- calendar, AI chat, marketplace;
+- projects, calendar, AI chat, marketplace;
 - push notifications, camera, offline queue;
 - Google / Apple sign-in.
 
@@ -86,13 +86,12 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
 > • Made a mistake? Correct an entry. You see the before and after and confirm the change; the earlier version is kept.
 > • Messages: read your conversations and reply. You see your reply before it is sent.
 > • Notifications: what happened for you, in the app. Mark them read once you have seen them.
-> • My projects: where you are assigned, what is still needed from you, and the latest instruction.
 > • Search jobs, see opportunities and tell an employer you are interested.
 > • Switch between the workspaces you belong to, in six languages (English, Lithuanian, Russian, Dutch, German, Polish).
 >
 > Your data is closed by default: other people see nothing unless you allow it. You can download your data and request account deletion at any time.
 >
-> More of the platform — full project pages, the calendar and the marketplace — is available at labourmarket.ai.
+> More of the platform — projects, the calendar and the marketplace — is available at labourmarket.ai.
 
 **Full description (LT):**
 
@@ -105,13 +104,12 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
 > • Suklydai? Pataisyk įrašą. Matai, kas buvo ir kas bus, ir patvirtini pakeitimą; ankstesnė versija išlieka.
 > • Žinutės: skaityk savo pokalbius ir atsakyk. Atsakymą matai prieš jį išsiunčiant.
 > • Pranešimai: kas tau nutiko, tiesiai programėlėje. Pažymėk perskaitytais, kai juos pamatai.
-> • Mano projektai: kur esi priskirtas, ko dar reikia iš tavęs ir naujausias nurodymas.
 > • Ieškok darbo, matyk galimybes ir pranešk darbdaviui, kad tau įdomu.
 > • Perjunk darbo erdves, kurioms priklausai; šešios kalbos.
 >
 > Tavo duomenys uždari pagal nutylėjimą: kiti nemato nieko, kol pats neleidi. Savo duomenis gali atsisiųsti ir paprašyti ištrinti paskyrą bet kada.
 >
-> Daugiau platformos galimybių — visi projektų puslapiai, kalendorius ir prekyvietė — svetainėje labourmarket.ai.
+> Daugiau platformos galimybių — projektai, kalendorius ir prekyvietė — svetainėje labourmarket.ai.
 
 **URLs:**
 - Privacy policy: `https://labourmarket.ai/en/legal/privacy`
@@ -159,7 +157,7 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
   - Settings → "Privacy, your data and deleting your account" opens the in-account request.
   - Deletion is a reviewed request, answered within one month. Apple accepts request-based deletion when the process is explained.
   - **Review note to paste:** "Account deletion: Settings → 'Privacy, your data and deleting your account' (opens the web account page, sign in with the same credentials) or Settings → 'How account deletion works' (public page, no sign-in). Deletion is processed by a person within one month; the request is recorded immediately."
-- **Minimum functionality (4.2):** the app is a focused work client (journal and corrections, messages, notifications, projects, jobs), not a web wrapper. Screens are native, and data comes through the MCP API. State this in the review notes.
+- **Minimum functionality (4.2):** the app is a focused work client (journal and corrections, messages, notifications, jobs), not a web wrapper. Screens are native, and data comes through the MCP API. State this in the review notes.
 
 ---
 
