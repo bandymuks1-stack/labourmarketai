@@ -194,6 +194,26 @@ name: parity-journey
       - waitForAnimationToEnd
       - tapOn:
           id: "message-review"
+      # A tap that landed while the layout moved under a closing keyboard is
+      # retried once, as the correction above does.
+      - runFlow:
+          when:
+            notVisible:
+              id: "message-preview"
+          commands:
+            - extendedWaitUntil:
+                visible:
+                  id: "message-preview"
+                timeout: 20000
+                optional: true
+            - runFlow:
+                when:
+                  visible:
+                    id: "message-review"
+                commands:
+                  - waitForAnimationToEnd
+                  - tapOn:
+                      id: "message-review"
       - extendedWaitUntil:
           visible:
             id: "message-preview"
