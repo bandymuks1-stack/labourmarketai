@@ -201,7 +201,13 @@ test("B-4 (6.1). the provider offers a service and makes it discoverable", async
   if (!/aktyv|active/i.test(await status.innerText())) {
     await page.getByTestId(`service-offering-toggle-${serviceId}`).click();
   }
-  await expect(page.getByTestId(`service-offering-discoverability-${serviceId}`)).toBeVisible({ timeout: 30_000 });
+  // The visibility line renders for a draft too; wait until it says others
+  // can find it, so the context never closes while the publish is in flight.
+  await expect(page.getByTestId(`service-offering-discoverability-${serviceId}`)).toHaveAttribute(
+    "data-visibility",
+    "visible",
+    { timeout: 30_000 },
+  );
   await close();
 });
 
