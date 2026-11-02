@@ -45,8 +45,12 @@ function StateLine({ state, labels }: { state: CohortJoinActionState; labels: Co
             : state.status === "invalid"
               ? labels.invalid
               : labels.error;
-  return (
-    <p className={`text-xs ${ok ? "text-text-secondary" : "text-state-danger"}`} role={ok ? "status" : "alert"} data-testid="cohort-join-state">
+  return ok ? (
+    <p className="text-xs text-text-secondary" role="status" data-testid="cohort-join-state">
+      {text}
+    </p>
+  ) : (
+    <p className="text-xs text-state-danger" role="alert" data-testid="cohort-join-state">
       {text}
     </p>
   );
