@@ -234,6 +234,9 @@ export type ApiIdentityOptions = {
 
 const SUPABASE_USER_AUDIENCE = "authenticated";
 
+/** A plain OAuth client id: 1–200 characters, no whitespace. */
+const CLIENT_ID_RX = /^\S{1,200}$/;
+
 type AudienceClaims = { readonly aud: readonly string[]; readonly clientId: string | null };
 
 /** The audience-relevant claims of an ALREADY VERIFIED JWT; null if the
@@ -251,7 +254,12 @@ export function audienceClaimsOf(token: string): AudienceClaims | null {
           ? (payload.aud as string[])
           : null;
     if (!aud) return null;
-    const clientId = typeof payload.client_id === "string" && payload.client_id.length > 0 ? payload.client_id : null;
+    // Absent = a first-party session. PRESENT but not a plain id (empty, not a
+    // string, whitespace, oversized) fails CLOSED — it must never read as the
+    // person's own session (carried over from #2806's `tokenClientOf`).
+    if (!Object.prototype.hasOwnProperty.call(payload, "client_id")) return { aud, clientId: null };
+    const clientId = payload.client_id;
+    if (typeof clientId !== "string" || !CLIENT_ID_RX.test(clientId)) return null;
     return { aud, clientId };
   } catch {
     return null;
