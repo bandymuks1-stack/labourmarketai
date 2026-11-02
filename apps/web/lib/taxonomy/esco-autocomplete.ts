@@ -16,7 +16,7 @@ import { ESCO_AUTOCOMPLETE_ENABLED } from "@/lib/config/esco";
  */
 
 const RELATION_NOT_FOUND_CODE = "42P01";
-/** Indexed prefix search (migration 20261015120000). */
+/** Indexed prefix search (migration 20261015193211, applied in production). */
 export const SEARCH_RPC = "search_esco_labels_v1";
 /** The function is not there yet (unapplied environment). */
 export function isMissingSearchRpc(code: string | undefined): boolean {
