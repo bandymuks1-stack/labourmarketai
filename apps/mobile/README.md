@@ -39,8 +39,22 @@ cannot list contexts yet — never an invented single context).~~
 arrive on `profile.get` and `holdingsFromHeldRoles` (client-core) maps them;
 `unknown` only while the profile loads, `unavailable` on a failed read.
 
+**Correcting an entry is wired** (2026-11-01): each entry in the Work journal
+offers "Correct", which opens `/(shell)/correct-entry` — `journal.correct_draft`
+(before/after preview, hours by the server's rule) → `journal.correct_confirm`,
+the web journal's own supersede. The earlier version stays in the history.
+
+**Messages are wired** (2026-11-01): Today → Messages (`conversation.list`) →
+one conversation (`conversation.get`) with a reply box —
+`message.send_draft` (nothing sent; permission check, exact text, a token
+bound to the thread's last message) → `message.send_confirm`. In-app only.
+Starting a NEW conversation with a person is not on the phone yet (the web
+starts it from a project or a profile).
+
 **Deep links claim exactly the screens this app has** (`/`, `/sign-in`,
-`/register`, `/today`, `/journal`, `/log-work`, `/profile`, `/settings`) —
+`/register`, `/today`, `/journal`, `/log-work`, `/correct-entry`, `/profile`,
+`/settings`, `/opportunities`, `/availability`, `/jobs`, `/need`, `/messages`,
+`/conversation`) —
 `NATIVE_APP_PATHS` in `apps/web/lib/mobile/app-association.ts` drives both
 the Apple document and `app.json`'s Android intent filter, pinned to the route
 files by `apps/web/lib/guards/app-association.test.ts`. A web link such as

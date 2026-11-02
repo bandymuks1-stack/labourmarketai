@@ -31,9 +31,9 @@ a security/permission row says only that an item is open.
 
 | LIVE_VERIFIED | PASS_CI_ONLY | FAIL | BLOCKED | NOT_VERIFIED | NOT_IMPLEMENTED | OPTIONAL_TEST |
 |---|---|---|---|---|---|---|
-| 185 | 9 | 9 | 40 | 22 | 22 | 1 |
+| 186 | 9 | 9 | 40 | 21 | 22 | 1 |
 
-Full planned scope 2026-11-01: 277 rows − 2 DUPLICATE (7.10 = 4.22, 4.17 = 2.35; kept, not counted) + 13 functions found in the vision, architecture and decision documents with no row before (2.36, 2.37, 3.34–3.36, 4.30, 5.20, 5.21, 6.22–6.24, 7.30, 7.31) = **288**. Seven rows were reconciled with product-truth (3.8, 4.6, 11.2, 11.7, 7.5 → NOT_VERIFIED; 2.20, 2.24 → FAIL); their earlier proof stays in the row. Production-verified share of the full scope: **185 / 288 = 64.2 %**. Targets (conditional, not guaranteed): core product complete and public mid-December 2026; full historical scope February 2027 (preliminary).
+Full planned scope 2026-11-01: 277 rows − 2 DUPLICATE (7.10 = 4.22, 4.17 = 2.35; kept, not counted) + 13 functions found in the vision, architecture and decision documents with no row before (2.36, 2.37, 3.34–3.36, 4.30, 5.20, 5.21, 6.22–6.24, 7.30, 7.31) = **288**. Seven rows were reconciled with product-truth (3.8, 4.6, 11.2, 11.7, 7.5 → NOT_VERIFIED; 2.20, 2.24 → FAIL); their earlier proof stays in the row. Production-verified share of the full scope: **186 / 288 = 64.6 %**. Targets (conditional, not guaranteed): core product complete and public mid-December 2026; full historical scope February 2027 (preliminary).
 
 Seeded 2026-10-28 from the 275-row QA matrix of 2026-10-23…28 plus the 2026-10-28 production results; a `PASS` row
 whose evidence names a production run or production use became `LIVE_VERIFIED`, any other `PASS` became `PASS_CI_ONLY`.
@@ -81,7 +81,7 @@ Denominator = 287 functions (288 planned minus the one `OPTIONAL_TEST` scenario,
 | Measure | Method | Result |
 |---|---|---|
 | **Technical implementation** | every row except `NOT_IMPLEMENTED` (a `BLOCKED` row is built but waits for an owner step) | **265 / 287 = 92.3 %** |
-| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **185 / 287 = 64.5 %** (69.8 % of the built 265) |
+| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **186 / 287 = 64.8 %** (70.2 % of the built 265) |
 | **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **11 / 19 = 57.9 %** complete · 4 partial · 1 broken · 2 blocked · 1 unverified |
 
 Per area (technical / production-verified) — as of the 277-row register, before the 2026-11-01 full-scope update; recomputed at the next weekly progress report:
@@ -408,8 +408,8 @@ The 19 journeys (rows in brackets):
 |---|---|---|---|---|---|---|
 | 10.1 | MCP door 229 tools | LIVE_VERIFIED | 2026-11-01 | prod walk mcp-agents 41307643008 2026-11-01 on c3df7431d (10/10, A-9 — details in the private record); mcp-chain 39606986334; mcp-agents 10-23 | yes | tools/list 233 tools on c3df7431d; the row title's 229 predates #2889/#2895 |
 | 10.2 | Agent scenarios over MCP | LIVE_VERIFIED | 2026-10-23 | mcp-agents 9/9 39885097311 10-23 | yes |  |
-| 10.3 | OAuth 2.1 for MCP clients | NOT_VERIFIED | — | discovery live (401 challenge, PRM, DCR, S256); walk #2454 runs without owner creds | unproven | merge or dispatch #2454 |
-| 10.4 | MCP scopes | NOT_IMPLEMENTED | — | registry NOT_BUILT: MCP OAuth scope enforcement (bearer has full user scope) | no | auth path = RED; buildable as draft |
+| 10.3 | OAuth 2.1 for MCP clients | LIVE_VERIFIED | 2026-11-02 | prod walk mcp-oauth-client 41354839810 2026-11-02 (6/6, from #2454 branch) | yes | #2454 (the spec) awaits owner merge; a security item is open (details in the private record) |
+| 10.4 | MCP scopes | NOT_IMPLEMENTED | 2026-11-02 | registry NOT_BUILT: MCP OAuth scope enforcement | no | auth path = RED; design draft #2923; final set = owner decision X-2 |
 | 10.5 | ChatGPT/Claude listings | BLOCKED | — | owner portals | unproven |  |
 | 10.6 | AI runtime | BLOCKED | 2026-10-26 | ai-off-honesty run 40191899327 10-25: B-4 provider state shown as off; re-proven 2026-10-26 prod walk ai-off-honesty run 40301607964 13/13 (honest off state; #2771 one <main> on job pages) | unproven | AI provider keys (owner) — honest off-state proven, the AI function itself not |
 | 10.7 | Conversation intent LLM | BLOCKED | — | 10.6 | unproven |  |
