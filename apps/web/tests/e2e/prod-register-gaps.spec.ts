@@ -114,7 +114,8 @@ test("G-3 (2.36). a profession journal template prefills the entry when one is a
   // wait — it returns at once whatever its timeout says.)
   const more = page.getByTestId("journal-more-options");
   await expect(more, "the composer's more-options disclosure renders").toBeAttached({ timeout: 30_000 });
-  await more.locator("summary").click();
+  // Direct child only: a nested examples disclosure has its own summary.
+  await more.locator(":scope > summary").click();
   await expect(more, "the disclosure opened").toHaveAttribute("open", "");
   const picker = more.getByTestId("journal-template-picker");
   const shown = (await picker.count()) > 0;
