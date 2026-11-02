@@ -282,6 +282,17 @@ name: parity-journey
     visible:
       id: "projects-loaded"
     timeout: 60000
+# With PROJECT_EXPECTED=1 the run prepared a synthetic project the identity
+# is assigned to (mobile-qa-project.mjs): its row MUST be there, so a lost
+# assignment fails the step instead of skipping the detail below.
+- runFlow:
+    when:
+      true: ${PROJECT_EXPECTED == '1'}
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "projects-open-0"
+          timeout: 30000
 - runFlow:
     when:
       visible:
