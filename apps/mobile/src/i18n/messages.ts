@@ -379,6 +379,8 @@ const en = {
     "What is still needed from you could not be read just now. Try again, or open the project on the website.",
   "projects.asksNotRead":
     "This assignment has ended. What was asked of you on it is on the project's web page.",
+  "projects.asksIncomplete":
+    "More is open across your projects than the app can list, so this project's part may not be shown. Its web page has the full list.",
   "projects.asksNone":
     "Nothing is open for you on this project.",
   "projects.ask.needed":
@@ -887,6 +889,8 @@ const lt: Catalogue = {
     "Šiuo metu nepavyko nuskaityti, ko dar reikia iš tavęs. Bandyk dar kartą arba atidaryk projektą svetainėje.",
   "projects.asksNotRead":
     "Šis priskyrimas baigtas. Kas jame buvo prašyta iš tavęs, matysi projekto puslapyje svetainėje.",
+  "projects.asksIncomplete":
+    "Tavo projektuose atvira daugiau, nei programėlė gali išvardyti, todėl šio projekto dalis gali būti neparodyta. Visas sąrašas – projekto puslapyje svetainėje.",
   "projects.asksNone":
     "Šiame projekte tau nieko neliko atlikti.",
   "projects.ask.needed":
@@ -1391,6 +1395,8 @@ const ru: Catalogue = {
     "Сейчас не удалось прочитать, что ещё нужно от вас. Попробуйте ещё раз или откройте проект на сайте.",
   "projects.asksNotRead":
     "Это назначение завершено. Что по нему требовалось от вас, видно на странице проекта на сайте.",
+  "projects.asksIncomplete":
+    "В ваших проектах открыто больше, чем приложение может показать, поэтому часть этого проекта может быть не видна. Полный список — на странице проекта на сайте.",
   "projects.asksNone":
     "По этому проекту от вас ничего не требуется.",
   "projects.ask.needed":
@@ -1895,6 +1901,8 @@ const nl: Catalogue = {
     "Wat er nog van je nodig is, kon nu niet worden gelezen. Probeer het opnieuw of open het project op de website.",
   "projects.asksNotRead":
     "Deze toewijzing is beëindigd. Wat er daarbij van je werd gevraagd, staat op de projectpagina op de website.",
+  "projects.asksIncomplete":
+    "Er staat in je projecten meer open dan de app kan tonen, dus het deel van dit project wordt mogelijk niet getoond. De projectpagina op de website heeft de volledige lijst.",
   "projects.asksNone":
     "Voor jou staat er op dit project niets open.",
   "projects.ask.needed":
@@ -2402,6 +2410,8 @@ const de: Catalogue = {
     "Was noch von Ihnen benötigt wird, konnte gerade nicht gelesen werden. Versuchen Sie es erneut oder öffnen Sie das Projekt auf der Website.",
   "projects.asksNotRead":
     "Dieser Einsatz ist beendet. Was dabei von Ihnen verlangt wurde, steht auf der Projektseite der Website.",
+  "projects.asksIncomplete":
+    "In Ihren Projekten ist mehr offen, als die App anzeigen kann; der Teil dieses Projekts wird daher möglicherweise nicht gezeigt. Die vollständige Liste steht auf der Projektseite der Website.",
   "projects.asksNone":
     "Für Sie ist in diesem Projekt nichts offen.",
   "projects.ask.needed":
@@ -2896,6 +2906,8 @@ const pl: Catalogue = {
     "Nie udało się teraz odczytać, co jeszcze jest potrzebne od Ciebie. Spróbuj ponownie albo otwórz projekt na stronie internetowej.",
   "projects.asksNotRead":
     "To przypisanie się zakończyło. Co było w nim od Ciebie wymagane, zobaczysz na stronie projektu.",
+  "projects.asksIncomplete":
+    "W Twoich projektach otwartych jest więcej, niż aplikacja może pokazać, więc część tego projektu może nie być widoczna. Pełna lista jest na stronie projektu.",
   "projects.asksNone":
     "W tym projekcie nic nie czeka na Ciebie.",
   "projects.ask.needed":

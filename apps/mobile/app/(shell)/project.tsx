@@ -80,6 +80,8 @@ export default function Screen() {
                   <Body muted>{t("projects.asksUnavailable")}</Body>
                 ) : asksState(project) === "not_read" ? (
                   <Body muted>{t("projects.asksNotRead")}</Body>
+                ) : asksState(project) === "incomplete" ? (
+                  <Body muted>{t("projects.asksIncomplete")}</Body>
                 ) : project.asks.length === 0 ? (
                   <Body muted>{t("projects.asksNone")}</Body>
                 ) : (
@@ -90,7 +92,8 @@ export default function Screen() {
                     </View>
                   ))
                 )}
-                {asksTotal(project) > project.asks.length || project.asksTotalAtLeast === true ? (
+                {project.asks.length > 0 &&
+                (asksTotal(project) > project.asks.length || project.asksTotalAtLeast === true) ? (
                   // The read names only the first asks; never let them pass
                   // for everything still open.
                   <Body muted>

@@ -41,6 +41,9 @@ describe("capability reads keep their failure", () => {
     const screen = read("../mobile/app/(shell)/project.tsx");
     expect(screen).toContain('asksState(project) === "unavailable"');
     const shapes = read("../mobile/src/capability-shapes.ts");
-    expect(shapes).toContain('return p.asksRead ?? "unavailable";');
+    expect(shapes).toContain('const read = p.asksRead ?? "unavailable";');
+    // A capped read (asksTotalAtLeast) is not proof of an empty checklist.
+    expect(shapes).toContain('if (read === "ok" && p.asksTotalAtLeast === true) return "incomplete";');
+    expect(screen).toContain('asksState(project) === "incomplete"');
   });
 });

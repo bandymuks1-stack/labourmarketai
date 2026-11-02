@@ -523,10 +523,14 @@ export function asksTotalLabel(p: WorkerProject): string {
   return `${asksTotal(p)}${p.asksTotalAtLeast === true ? "+" : ""}`;
 }
 
-/** What may be said about the asks: only a read checklist may say "none". */
-export function asksState(p: WorkerProject): "ok" | "unavailable" | "not_read" {
+/** What may be said about the asks: only a COMPLETE read checklist may say
+ *  "none". "incomplete" = the read answered but hit its row cap
+ *  (`asksTotalAtLeast`), so a project with no row in it may still have some. */
+export function asksState(p: WorkerProject): "ok" | "unavailable" | "not_read" | "incomplete" {
   if (p.asks.length > 0) return "ok";
-  return p.asksRead ?? "unavailable";
+  const read = p.asksRead ?? "unavailable";
+  if (read === "ok" && p.asksTotalAtLeast === true) return "incomplete";
+  return read;
 }
 
 export type WorkerProjectsData =
