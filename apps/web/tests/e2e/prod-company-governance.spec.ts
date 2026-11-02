@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
-import { PROD_QA_SECOND_WORKER_EMAIL } from "../../lib/testing/prod-qa-guard";
+import { PROD_QA_MANAGER_EMAIL } from "../../lib/testing/prod-qa-guard";
 
 /**
  * PRODUCTION — A COMPANY'S GOVERNANCE REGISTERS (registry rows that had no
@@ -23,9 +23,14 @@ import { PROD_QA_SECOND_WORKER_EMAIL } from "../../lib/testing/prod-qa-guard";
  * Cast (`lib/testing/prod-qa-guard.ts`, all synthetic):
  *   owner    qa.owner+multiw   — owns "QA-SYNTHETIC Alfa" (also the approver:
  *                                Alfa's template asks an owner/admin)
- *   worker   qa.worker+multiw  — Vytas, employee of Alfa (the trainee)
+ *   worker   qa.worker+multiw  — engaged by Alfa, NOT a member: the decisions
+ *                                "employee sees none of it" check (D-*)
  *   worker2  qa.worker+goal3   — not assigned (forbidden check)
- *   manager  qa.manager+multiw — runs "QA-SYNTHETIC Gama" (forbidden checks)
+ *   manager  qa.manager+multiw — runs "QA-SYNTHETIC Gama" (forbidden checks) and is
+ *                                an active MANAGER member of Alfa: the trainee.
+ *                                `assign_training_v1` assigns only active members
+ *                                of the course's organization; an engagement is
+ *                                not a membership (run 40296167812: invalid_assignee).
  *
  * WHAT STAYS. Neither register deletes: a decision is a governance record
  * (this run's ends "recorded", tagged `QA-SYNTHETIC <run>`), and a course is
@@ -327,7 +332,7 @@ test("T-2 (11.8). the owner assigns the course to Alfa's employee with a due dat
   await useWorkspace(page, ALFA);
   const row = programRow(await register(page), COURSE);
   const assign = row.locator("form").filter({ has: page.locator('input[name="assigneeEmail"]') });
-  await assign.locator('input[name="assigneeEmail"]').fill(PROD_QA_SECOND_WORKER_EMAIL);
+  await assign.locator('input[name="assigneeEmail"]').fill(PROD_QA_MANAGER_EMAIL);
   await assign.locator('input[name="requiredBy"]').fill(dayFromToday(14));
   await act(page, assign.getByRole("button"), "trn", ["assigned", "already_assigned"]);
   courseAssigned = true;
@@ -339,7 +344,8 @@ test("T-2 (11.8). the owner assigns the course to Alfa's employee with a due dat
 
 test("T-3 (11.8). the employee completes the course on the phone; it persists", async ({ browser }) => {
   test.skip(!courseAssigned, "T-2 did not assign the course");
-  const { ctx, page } = await as(browser, "worker", { phone: true });
+  const { ctx, page } = await as(browser, "manager", { phone: true });
+  await useWorkspace(page, ALFA);
   let mine = (await register(page)).getByTestId("training-mine-row").filter({ hasText: COURSE });
   await expect(mine, "the employee sees what they were asked to complete").toHaveCount(1, { timeout: 30_000 });
   await fitsPhone(page, "documents with the training register");

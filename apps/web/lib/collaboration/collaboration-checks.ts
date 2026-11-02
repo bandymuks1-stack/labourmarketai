@@ -79,6 +79,12 @@ const OFTEN_REGULATED_PROFESSIONS: ReadonlySet<string> = new Set([
   "caregiver",
 ]);
 
+/** The ONE list above, readable by other surfaces (the worker board's formal
+ *  requirements layer) — never a second copy of it. */
+export function isOftenRegulatedProfession(slug: string | null | undefined): boolean {
+  return OFTEN_REGULATED_PROFESSIONS.has((slug ?? "").trim());
+}
+
 const CONSTRUCTION_PROFESSIONS: ReadonlySet<string> = new Set([
   "tiler",
   "mason",

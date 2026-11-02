@@ -7714,6 +7714,73 @@
     },
     "helpNeeded": "Abi on vaja — {stage}:"
   },
+  "projectForecast": {
+    "title": "Prognoos",
+    "notFact": "Prognoos selle projekti salvestatud töö põhjal seisuga {date} — mitte fakt ega lubadus. See arvutatakse uuesti iga kord, kui see leht avaneb.",
+    "unavailable": "Prognoosi ei õnnestunud praegu lugeda.",
+    "insufficient": "Salvestatud tööd on veel liiga vähe, et seda projekti prognoosida.",
+    "notApplicable": "Pole midagi prognoosida: projektis pole avatud tööd.",
+    "unknown": "Teadmata",
+    "beyondHorizon": "Praeguse tempoga rohkem kui kolme aasta pärast",
+    "completionLabel": "Eeldatav lõpp",
+    "deadlineLabel": "Tähtaeg",
+    "leftLabel": "Tööd jäänud",
+    "leftTasks": "{left} / {total} ülesannet",
+    "leftStages": "{left} / {total} etappi",
+    "peopleLabel": "Vaja inimesi",
+    "peopleValue": "{needed} (praegu {active})",
+    "qualityLabel": "Kvaliteedirisk",
+    "confidenceLabel": "Usaldusväärsus",
+    "actionsTitle": "Mis seda muudaks",
+    "assumptionsTitle": "Eeldused",
+    "risk": {
+      "on_track": "Graafikus",
+      "tight": "Napilt",
+      "likely_miss": "Tõenäoliselt ei jõua",
+      "overdue": "Hilinenud",
+      "unknown": "Teadmata"
+    },
+    "quality": {
+      "none": "Avatuid pole",
+      "low": "Madal",
+      "elevated": "Kõrgenenud",
+      "high": "Kõrge",
+      "unknown": "Teadmata"
+    },
+    "confidence": {
+      "insufficient": "liiga vähe tõendeid",
+      "low": "madal",
+      "medium": "keskmine",
+      "high": "kõrge"
+    },
+    "action": {
+      "add_workers": "Lisa meeskonda inimesi",
+      "find_partner_capacity": "Leia partneri võimekust",
+      "unblock_stages": "Vabasta blokeeritud etapid",
+      "unblock_tasks": "Vabasta blokeeritud ülesanded",
+      "close_serious_defects": "Sulge tõsised puudused",
+      "complete_readiness": "Täida meeskonna puuduvad valmisolekupunktid",
+      "record_hours": "Salvesta selles projektis töötatud tunnid",
+      "set_planned_end": "Määra planeeritud lõppkuupäev",
+      "break_down_scope": "Jaga töö ülesanneteks",
+      "review_budget": "Vaata eelarve üle",
+      "replan_deadline": "Planeeri tähtaeg ümber"
+    },
+    "assumption": {
+      "trailing_window_days": "Tempo loetakse viimase 28 päeva põhjal.",
+      "calendar_day_rate": "Tunnid jaotatakse kalendripäevadele; töökalendrit ei eeldata.",
+      "equal_unit_weight": "Iga ülesanne loeb võrdselt.",
+      "unit_is_stage": "Projektis pole ülesandeid, seega loetakse etappe.",
+      "team_stays_as_is": "Meeskond jääb selliseks, nagu see praegu on.",
+      "absences_as_approved": "Arvesse võetakse ainult kinnitatud puudumised.",
+      "throughput_without_hours": "Tunde pole salvestatud, seega loetakse lõpp ainult tehtud tööst.",
+      "cost_continues_at_observed_rate": "Kulud jätkuvad seni nähtud tempos.",
+      "single_hours_ledger": "Kasutatakse üht tundide arvestust; teist näidatakse kõrval ja seda ei liideta.",
+      "hours_partly_unconfirmed": "Osa tunde pole veel kinnitatud.",
+      "hours_read_truncated": "Kõiki tunde ei õnnestunud lugeda; arvud võivad olla liiga väikesed.",
+      "free_internal_people_unknown": "Pole teada, kes veel organisatsioonis vaba on."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "Selle nädala eesmärk",
     "titleMine": "Sinu selle nädala ülesanded",

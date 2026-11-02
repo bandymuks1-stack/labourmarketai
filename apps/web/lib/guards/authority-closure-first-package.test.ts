@@ -171,9 +171,6 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-10-24 (GREEN strict superset): one market lifecycle contract —
       // closed_outcome on customer_requests + service_offerings, services closed.
       "20261024090000_",
-      // 2026-10-24 (RED draft, needs-human-gate, NOT applied): bound precision, per-bound
-      // basis and register id on the existing period statement table (Stage 3).
-      "20261024100000_",
       // 2026-10-25 (RED, owner-gated, APPLIED): Vivat Rex + Labour Market AI business-history period bounds.
       "20261025120000_",
       // 2026-10-25 (RED, owner-gated, APPLIED): employer party labels for Vivat Rex records.
@@ -186,6 +183,20 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261027231000_",
       // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028044705): candidates v2 flags already-mailed addresses.
       "20261027210000_",
+      // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028081810): address lock + send reservation in the referral reissue.
+      "20261028070000_",
+      // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028091725): recovery counts only this reservation's ledger row.
+      "20261028090000_",
+      // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028161106): synthetic QA needs out of the three cross-org demand readers.
+      "20261028123000_",
+      // 2026-10-29 (RED, owner-approved, APPLIED ledger 20261029180012): the worker reader projects the need's required skills as catalogue slugs.
+      "20261029190000_",
+      // #2913 restored six production-applied migrations byte-exact (owner option 2, 2026-11-01): historical restorations dated after the package, not pending work of it.
+      "20261007155339_",
+      "20261015193211_",
+      "20261020040457_",
+      "20261025045152_",
+      "20261025050302_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

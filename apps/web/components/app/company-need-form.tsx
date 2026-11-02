@@ -300,7 +300,10 @@ export function CompanyNeedForm({
         <button
           type="submit"
           disabled={isPending}
-          className="self-start rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
+          // 44 px tap floor and full width on a phone (UX friction batch
+          // 2026-10-28): the form's own action was a 36 px chip at the end of
+          // a long form; from sm up it keeps its inline size.
+          className="min-h-11 w-full rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50 sm:w-auto sm:self-start"
           data-testid="company-need-submit"
         >
           {labels.submit}

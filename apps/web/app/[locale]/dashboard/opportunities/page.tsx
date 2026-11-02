@@ -1418,7 +1418,7 @@ export default async function OpportunitiesPage({
                               />
                             ) : (
                               (() => {
-                                const { need, fit, match, nextAction, interestStatus, structured, saved } = row.card;
+                                const { need, fit, match, nextAction, interestStatus, structured, saved, formalRequirements } = row.card;
                                 const rankIndex = row.rankIndex;
                                 const whyLines = whyCodesFor(row)
                                   .map(whyText)
@@ -1786,6 +1786,34 @@ export default async function OpportunitiesPage({
                                           labels={tierLabels}
                                           testId="opportunity-match-tiers"
                                         />
+
+                                        {/* FORMAL REQUIREMENTS — apart from skill fit (owner
+                                            decision 2026-10-29, SEP-6): a licence or a regulated
+                                            qualification is never satisfied by recorded work. */}
+                                        {formalRequirements && formalRequirements.length > 0 ? (
+                                          <div className="flex flex-col gap-1" data-testid="opportunity-formal-requirements">
+                                            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                                              {t("skillMatch.formalTitle")}
+                                            </span>
+                                            <ul className="flex flex-col gap-1">
+                                              {formalRequirements.map((f) => (
+                                                <li
+                                                  key={f.kind}
+                                                  className={`text-basis ${f.standing === "missing_requirement" ? "text-state-amber" : "text-text-secondary"}`}
+                                                  data-testid="opportunity-formal-requirement"
+                                                  data-formal-kind={f.kind}
+                                                  data-standing={f.standing}
+                                                >
+                                                  {f.kind === "driving_licence"
+                                                    ? t(f.standing === "stated_held" ? "skillMatch.formalLicenceHeld" : "skillMatch.formalLicence", {
+                                                        categories: f.categories.join(", "),
+                                                      })
+                                                    : t("skillMatch.formalQualification")}
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        ) : null}
 
                                         <div className="flex flex-wrap items-center gap-3">
                                           <Link

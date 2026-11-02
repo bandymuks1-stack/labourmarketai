@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -84,9 +84,10 @@ function tablesMatching(pattern: RegExp): string[] {
 function collectAppSources(): Array<{ rel: string; code: string }> {
   const out: Array<{ rel: string; code: string }> = [];
   const walk = (dir: string) => {
-    for (const entry of readdirSync(dir)) {
+    for (const dirent of readdirSync(dir, { withFileTypes: true })) {
+      const entry = dirent.name;
       const full = join(dir, entry);
-      if (statSync(full).isDirectory()) {
+      if (dirent.isDirectory()) {
         if (entry === "node_modules" || entry === ".next") continue;
         walk(full);
       } else if (/\.(ts|tsx)$/.test(entry) && !/\.test\.tsx?$/.test(entry)) {
