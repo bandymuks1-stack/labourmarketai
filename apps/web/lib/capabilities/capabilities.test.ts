@@ -185,6 +185,8 @@ const DOMAIN_DESTRUCTIVE: readonly string[] = [
   "marketplace_listing.delete_confirm",
   "proposal.delete_confirm",
   "contract.delete_confirm",
+  // Overwrites the organization's stored recompute cadence (audited).
+  "forecast.mode.set_confirm",
 ];
 
 describe("the registry itself", () => {
@@ -461,6 +463,10 @@ describe("the registry itself", () => {
       // read the website's /jobs page performs, anonymous projection only.
       "jobs.search",
       "jobs.get",
+      // Stage 7 forecasts (2026-10-24): forecast read + cadence draft → confirm.
+      "project.forecast.get",
+      "forecast.mode.set_draft",
+      "forecast.mode.set_confirm",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
@@ -728,6 +734,10 @@ describe("the registry itself", () => {
       // read the website's /jobs page performs, anonymous projection only.
       "jobs.search",
       "jobs.get",
+      // Stage 7 forecasts (2026-10-24): forecast read + cadence draft → confirm.
+      "project.forecast.get",
+      "forecast.mode.set_draft",
+      "forecast.mode.set_confirm",
     ]);
   });
 
