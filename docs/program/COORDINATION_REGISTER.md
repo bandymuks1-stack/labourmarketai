@@ -184,8 +184,8 @@ hand-over complete; they start nothing without an assignment here.
 |---|---|---|---|---|---|---|
 | #2917 | brigade offered and matched as a unit | lane A | ✓ | ✓ | ✓ | ✓ walk 41350506578 (19/19) |
 | #2913 | six production-applied migrations restored byte-exact (RED, approved) | coordinator | ✓ | ✓ | ✓ (no production change) | ✓ parity gate 41342643253 |
-| #2916 | mobile: correct a journal entry | mobile | ✓ | ✓ | n/a (app build) | Android vs production ✓; iOS: the whole correction flow passed against production in run 41408063016 (from a feature branch; the earlier refusal was the test driver mistyping the address, not a rate limit) — the run on main is still pending |
-| #2928 | mobile: messages | mobile | ✓ | ✓ | n/a (app build) | NOT_VERIFIED |
+| #2916 | mobile: correct a journal entry | mobile | ✓ | ✓ | n/a (app build) | Android vs production ✓; ✓ from `main` @bdb27bb88: Android 41451882387, iOS 41451829006 (attempt 2 of 2; attempt 1 lost the simulator screen after sign-in, not a product defect) — correction draft → confirm passed on both |
+| #2928 | mobile: messages | mobile | ✓ | ✓ | n/a (app build) | ✓ list, conversation opened, reply draft previewed (not sent) — Android 41451882387, iOS 41451829006 from `main` |
 | #2919 | failed notification/project reads never answer empty | coordinator | ✓ | ✓ | ✓ | NOT_VERIFIED |
 | #2920 | project forecast beside the course, computed on read | lane A | ✓ | ✓ | ✓ | NOT_VERIFIED |
 | #2922 | MCP profile.get description; ChatGPT sign-in note | ChatGPT security | ✓ | ✓ | ✓ | NOT_VERIFIED |
@@ -193,7 +193,8 @@ hand-over complete; they start nothing without an assignment here.
 | #2914 | full scope 288, parity refresh | coordinator | ✓ (Codex re-review) | — | — | — |
 | #2915 | completion map | coordinator | ✓ | — | — | — |
 | #2927 / #2930 | register evidence 3.8, 4.6, 6.18, 9.18; G-3 fix | lane A | ✓ | — | — | evidence runs named in the PR |
-| #2929 | mobile in-app notifications | mobile | CI running | — | — | — |
+| #2929 | mobile in-app notifications | mobile | ✓ | ✓ `bdb27bb88` | n/a (app build) | list ✓ on both platforms (same runs); mark-all-read not exercised (nothing unread) |
+| #2940 / #2941 | mobile: driver address read-back; projects list + detail | mobile | Codex requested | — | — | project detail BLOCKED until RED #2937 |
 | #2903 → #2921 | D-4 reset by real mail → D-5 invited path by real mail | coordinator | ✓ | ✓ `3543c13bc` / `c2580a328` | ✓ (test code) | ✓ mail-reset 41428606490 (2/2), invited-worker 41430482903 (7/7) |
 | #2918 / #2923 / #2924 | C-3, X-2, consent wording | ChatGPT security | ✓ (CI green, Codex clean) | — | — | owner gate |
 
