@@ -16,8 +16,8 @@ begin;
 
 do $$
 declare
-  c_email constant text := 'qa.invited+act1@labourmarket.ai';
-  c_ref   constant text := 'QA-SYNTHETIC-invited-act1';
+  c_email constant text := 'qa.invited@labourmarket.ai';
+  c_ref   constant text := 'QA-SYNTHETIC-invited-mbx1';
   v_n int;
 begin
   if exists (select 1 from auth.users where lower(email) = c_email) then

@@ -362,7 +362,7 @@ jobs:
             mint_existing "qa.buyer+act1@labourmarket.ai" buyer
           fi
           if [ "${{ needs.debounce.outputs.spec }}" = "invited-worker" ]; then
-            mint_existing "qa.invited+act1@labourmarket.ai" invited
+            mint_existing "qa.invited@labourmarket.ai" invited
           fi
           # employee-beta-gate.spec.ts reads the original single-worker file.
           install -m 600 tests/e2e/.storage-state.prod-qa.worker2.json tests/e2e/.storage-state.prod-qa.json
@@ -379,7 +379,7 @@ jobs:
           PROD_QA_IMAP_HOST: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker') && secrets.PROD_QA_IMAP_HOST || '' }}
           PROD_QA_IMAP_USER: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker') && secrets.PROD_QA_IMAP_USER || '' }}
           PROD_QA_IMAP_PASS: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker') && secrets.PROD_QA_IMAP_PASS || '' }}
-          PROD_QA_MAIL_ADDRESS: qa.worker+goal3@labourmarket.ai
+          PROD_QA_MAIL_ADDRESS: qa.invited@labourmarket.ai
         run: |
           set -uo pipefail
           cd apps/web

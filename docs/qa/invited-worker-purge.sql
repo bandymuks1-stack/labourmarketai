@@ -6,13 +6,13 @@
 -- script only for an account that never reached the journal. After the erasure runner,
 -- docs/qa/invited-worker-invitation-cleanup.sql removes the one synthetic invitation that
 -- erasure deliberately keeps (pseudonymised); then the orphans check.
--- Deletes the synthetic invited worker `qa.invited+act1@labourmarket.ai` and every row of
+-- Deletes the synthetic invited worker `qa.invited@labourmarket.ai` and every row of
 -- its walk. Touches NOTHING else. Any guard failure raises, the transaction aborts and the
 -- final COMMIT becomes a ROLLBACK — nothing changes.
 --
 --   G1  exactly ONE auth user with that address AND app_metadata.qa_synthetic = true
 --   G2  the only invitations deleted are addressed to it AND carry the synthetic reference
---       (QA-SYNTHETIC-invited-act1); no other invitation names the account
+--       (QA-SYNTHETIC-invited-mbx1); no other invitation names the account
 --   G3  afterwards: no auth user, profile, worker, role, journal row, acceptance or
 --       synthetic invitation is left for it
 -- Order matters: invitations FIRST (`invitations.accepted_by_profile_id` is NO ACTION and
@@ -23,8 +23,8 @@ begin;
 
 do $$
 declare
-  c_email constant text := 'qa.invited+act1@labourmarket.ai';
-  c_ref   constant text := 'QA-SYNTHETIC-invited-act1';
+  c_email constant text := 'qa.invited@labourmarket.ai';
+  c_ref   constant text := 'QA-SYNTHETIC-invited-mbx1';
   v_uid uuid;
   v_n int;
   v_other int;

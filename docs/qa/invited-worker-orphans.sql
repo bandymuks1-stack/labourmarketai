@@ -1,8 +1,10 @@
--- READ-ONLY orphan and integrity check after docs/qa/invited-worker-purge.sql. Counts only.
+-- READ-ONLY orphan and integrity check after docs/qa/invited-worker-purge.sql (or the
+-- invitation clean-up, or the one-off legacy-act1 purge). Counts only. Both synthetic
+-- addresses are counted: the current one and the retired plus address.
 -- Every value must be 0.
 select
-  (select count(*) from auth.users where lower(email) = 'qa.invited+act1@labourmarket.ai')                    as synthetic_account,
-  (select count(*) from public.invitations where external_reference = 'QA-SYNTHETIC-invited-act1')         as synthetic_invitation,
+  (select count(*) from auth.users where lower(email) in ('qa.invited@labourmarket.ai', 'qa.invited+act1@labourmarket.ai'))                    as synthetic_account,
+  (select count(*) from public.invitations where external_reference in ('QA-SYNTHETIC-invited-mbx1', 'QA-SYNTHETIC-invited-act1'))         as synthetic_invitation,
   (select count(*) from public.profiles p where not exists (select 1 from auth.users u where u.id = p.id)) as profiles_without_account,
   (select count(*) from public.workers w where not exists (select 1 from public.profiles p where p.id = w.profile_id)) as workers_without_profile,
   (select count(*) from public.journal_entries j where not exists (select 1 from public.workers w where w.id = j.worker_id)) as journal_without_worker,

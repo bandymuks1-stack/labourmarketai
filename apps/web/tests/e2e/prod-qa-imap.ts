@@ -13,12 +13,17 @@ import { connect, type TLSSocket } from "node:tls";
  * - Only mail addressed to an allowlisted synthetic address is ever read
  *   (`assertSyntheticAddress`); a real person's address is refused before any
  *   connection is made.
+ * - The mailbox host refuses plus addresses (owner D-4 result 2026-11-02), so
+ *   the mailbox's own address `qa.invited@labourmarket.ai` is allowlisted by
+ *   exact equality beside the qa.<name>+<tag> pattern.
  */
 
 const SYNTHETIC = /^qa\.[a-z0-9]+\+[a-z0-9]+@labourmarket\.ai$/;
+export const QA_MAILBOX_ADDRESS = "qa.invited@labourmarket.ai";
 
 export function assertSyntheticAddress(address: string): void {
-  if (!SYNTHETIC.test(address)) throw new Error("refused: the QA mailbox reader reads only qa.<name>+<tag>@labourmarket.ai mail");
+  if (address !== QA_MAILBOX_ADDRESS && !SYNTHETIC.test(address))
+    throw new Error("refused: the QA mailbox reader reads only qa.invited@ or qa.<name>+<tag>@labourmarket.ai mail");
 }
 
 export function imapConfigured(): boolean {

@@ -11,10 +11,10 @@ import { assertSyntheticAddress, imapConfigured, nextUid, waitForMailLink } from
  * D-5 approval 2026-11-01).
  *
  * Runs only in `.github/workflows/prod-qa-walk.yml` (spec=invited-worker),
- * signed in to `qa.invited+act1@labourmarket.ai`, and only when the owner's
+ * signed in to `qa.invited@labourmarket.ai`, and only when the owner's
  * read-only synthetic QA mailbox (D-4, `prod-qa-imap.ts`) is configured. The
  * owner's `prod-qa-invited-provision.yml` stored ONE synthetic partner
- * referral addressed to it (`QA-SYNTHETIC-invited-act1`) and created the
+ * referral addressed to it (`QA-SYNTHETIC-invited-mbx1`) and created the
  * account (confirmed, passwordless, no role). The walk never creates either,
  * and it arrives at the site WITHOUT `?next=/invite/<token>` — the token was
  * discarded at provisioning, exactly like a person who opened the mail
@@ -56,7 +56,7 @@ import { assertSyntheticAddress, imapConfigured, nextUid, waitForMailLink } from
  * with docs/qa/invited-worker-invitation-cleanup.sql, then
  * docs/qa/invited-worker-orphans.sql checks nothing is left.
  */
-const ADDRESS = "qa.invited+act1@labourmarket.ai";
+const ADDRESS = "qa.invited@labourmarket.ai";
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const SLOT = "invited";
 const state = resolve(__dirname, `.storage-state.prod-qa.${SLOT}.json`);
