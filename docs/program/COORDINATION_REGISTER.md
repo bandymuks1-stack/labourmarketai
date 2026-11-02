@@ -101,7 +101,7 @@ independent work or launch of other features (owner order 2026-10-28).
 | coordination (this file) | **session `local_8d793dee` "LabourMarket.ai projekto koordinavimas" — the ONE main coordinator** | 2026-10-28 06:37Z (owner order: single control centre) | keeps §2–§5 current, integrates PRs into `main`, owns deploy follow-up. Earlier holders `…16CYcDu` / `…AygGqFo3` / cloud `…hnVKqGvExp` handed over (§2b) and become executors only on this coordinator's assignment |
 | migration (prod DB) | — free — | | last: `referral_send_address_guard_v1` (#2855) applied 2026-10-28 08:18Z, ledger `20261028081810`, by `local_8d793dee` on owner approval of #2855 at `35e749fc3`. Pending RED (needs its own approval): #2858 |
 | live sends (e-mail to real people) | reprocess: manual only, under `flock`; **do not run `resolve_reservations` until #2858 is applied** | 2026-10-28 09:00Z | partner intake mails live (each through the address lock since `ae60b244`). Ledger `invitation` since 10-26: 51 mails / 51 recipients, 0 duplicates; 15 rows `pending/not_sent` |
-| deploy | — serial via `deploy-vps.yml` — | | production = `ae60b244` (#2855) 08:58Z, healthy. Walks: use a sequential queue that waits ≥6 min after each deploy (brake e) |
+| deploy | — serial via `deploy-vps.yml` — | | production = `0e5f4b3e0` (#2925), deployed 2026-11-02 06:26Z, healthy. Walks: sequential queue, ≥6 min after each deploy (brake e) |
 
 
 ### 2a. Handover `…16CYcDu` → `…AygGqFo3` (owner order, 2026-10-28 ~06:30Z)
@@ -129,54 +129,64 @@ independent work or launch of other features (owner order 2026-10-28).
 
 ---
 
-## 3. Work register — snapshot 2026-10-28 ~06:45Z
+## 3. Work register — snapshot 2026-11-02 ~08:50Z
 
-Sources: GitHub PRs/Actions, production migration ledger, session list and
-transcripts readable from the coordinator session. Status per §1.4.
+Owner order 2026-11-02 ("vieningas koordinavimas"): `local_8d793dee` stays the ONE coordinator; every
+active session and window works from THIS file. No second coordination register, no new overall audit.
+
+### 3.0 Rules for every executor (binding)
+1. **One task = one executor.** The row in §3.1 names it. Nobody else starts the same work; a duplicate
+   is merged into the row's owner or stopped only after its results are handed over (PR, branch, note).
+2. **Before starting any work:** `git fetch origin`, read this §3 on `main`, read
+   [`FUNCTION_REGISTER.md`](FUNCTION_REGISTER.md), run `gh pr list --state open` and check the area is not
+   already claimed (§1.1). Work outside your row → ask the coordinator first.
+3. **Status words stay separate** (owner, binding): `CODE_COMPLETE` (code + CI green) ≠ `MERGED` (on
+   `main`) ≠ `DEPLOYED` (a `Deploy to VPS` run contains it) ≠ `LIVE_VERIFIED` (walked in production).
+4. Every significant state change goes to the coordinator, who publishes ONE consolidated report
+   (live / being fixed / blocked / waiting for the owner) and keeps this file current.
+5. Priority: P0 = the real core product working and critical defects; extra features run in parallel.
 
 ### 3.1 Active executors
 
-| Session | Where | Doing | State |
-|---|---|---|---|
-| `session_016CYcDuhGGEA75ruJ3zXD99` "projekto perėmimas" | owner's computer | was: platform functional + UX audit, regression queue (stopped at handover §2a) | HANDED OVER — executor on assignment only |
-| `session_011vBC1iAygGqFo3aoB76NrV` "darbų perimimas" | owner's computer | was: #2843 sends (done), D-1 proof, #2839/#2840 review | HANDED OVER — idle |
-| `session_011vBC1hnVKqGvExp129bfjT` coordinator | cloud | was: this register, D-1/D-3 evidence, QA-evidence recovery (#2851, folded in here) | HANDED OVER |
-| `local_8d793dee` "projekto koordinavimas" | owner's computer | **main coordinator** (§2b): PR integration, deploy, P1 fixes, executor assignment | IN_PROGRESS |
-| `session_011vBC1hntPRyoM4yRJKKcG2` | owner's computer | other repository (Agentai OS) — not this repo | n/a here |
-
-~45 older sessions are idle; most end with an owner question (merge, secret, billing).
-Those questions are collected in §5, not re-asked per session.
-
-### 3.2 Recent work (last 48 h)
-
-| PR | Goal | Owner of work | State | Prod |
+| Session | Owns (single executor) | Open PRs | Depends on | State |
 |---|---|---|---|---|
-| #2841 | safe reprocess of unsent partner referrals (RED, approved) | `…AygGqFo3` | DONE | migration + code live |
-| #2845 | invited person arriving without link is still the addressee | `…16CYcDu` | DONE | live |
-| #2846 | invitations-for-me carries partner source (RED, approved for this one) | `…16CYcDu` | DONE | live, `51a3518` |
-| #2847 | synthetic invited-worker provision/revoke/purge mechanism | `…16CYcDu` | DONE (code) | workflow `prod-qa-invited-provision` never run → invited-worker E2E **NOT_VERIFIED** (owner: parked, do not ask again) |
-| #2848 | public header brand not cut on phones | `…16CYcDu` | DONE | LIVE_VERIFIED 320/360/375 |
-| #2843 | never re-mail an address from an older duplicate referral (RED, approved 10-28) | `…AygGqFo3` | DONE | merged `7e64b332`, deployed `c3f440fc`; ledger `20261028044705`; sends finished (D-3) |
-| #2849 | public site opens light; one-sentence sign-up intro (11 locales); theme follows in-app navigation | `…16CYcDu` | merged `5c8e61b3` | NOT DEPLOYED: production `c3f440fc` at 06:31Z → visual check after deploy |
-| #2844 | synthetic data instead of personal e-mails in tests/docs | unknown | WAITING (owner: legal wording) | CI green; touches `docs/legal/*` — owner decides |
-| #2840 | zero paid AI budget — metered providers off unless owner opens | coordinator `local_8d793dee` | MERGED `99b7db82` 2026-10-28 07:12Z | updated with `main`, CI green on the fresh base; no production behaviour change (paid providers already off) — DEPLOYED with the next deploy after `83af6a82` |
-| #2839 | DB restore procedure doc | coordinator `local_8d793dee` | MERGED `c8e08bf5` 06:54Z, DEPLOYED | docs only |
-| #2853 | coordination register: single main coordinator, #2851 folded in | coordinator | MERGED `83af6a82`, DEPLOYED 07:16Z | #2851 CLOSED as duplicate |
-| #2854 | invite/signup UX (audit P1-1, P1-2, P2-3, P2-4) | coordinator | MERGED `f5c0e88f`, DEPLOYED | signup skeleton LIVE_VERIFIED (SSR); closed-invite + existing-address branches NOT_VERIFIED live (need a closed token) |
-| #2855 | D-3 address-level send guard: advisory lock, reservation, intake reserve, v3 candidates, recovery, fail-closed ledger, `flock` | coordinator | **APPLIED** 08:18Z (ledger `20261028081810`) · **VERIFIED** · **MERGED** `ae60b244` 08:40Z · **DEPLOYED** 08:58Z | evidence below (D-3) |
-| #2857 | training register shows only the active workspace's courses (governance T-5) | coordinator | MERGED, deploy pending | proof = company-governance re-run (queued) |
-| #2858 | recovery counts only THIS reservation's ledger row (Codex P2 on #2855) | coordinator | **RED draft, NOT applied** | latent: 0 reservations; needs owner approval naming #2858 |
-| #2859 | missing job → board link; invite resend reaches the invited address (audit P2-2, P2-7) | coordinator | auto-merge on CI | — |
-| #2842 | paid-terms legal draft | unknown | WAITING (legal/owner) | — |
-| #2828 | premium action cards visual proposal | unknown | WAITING (owner visual) | — |
+| `local_8d793dee` coordinator | PR integration, CI, Codex, deploy, production verification, both registers; D-4/D-5 mailbox walks | #2903 (RED), #2921, #2914, #2915 | owner: D-4 secrets, RED OK for #2903 | IN_PROGRESS |
+| `local_13cb59b3` lane A | the 7 reconciled rows + production proof of partial rows; brigade as a unit (DEM-6) | #2927 (stacked on #2914), #2930 | #2914 | IN_PROGRESS |
+| `local_00be3967` mobile | web parity (journal correction, messages, notifications, projects); store-submission preparation | #2929 | owner: store accounts | IN_PROGRESS |
+| `local_3951ad81` ChatGPT security | C-3 token audience, X-2 curated toolset, consent wording, data minimisation | #2918 (RED), #2923 (RED), #2924 | owner: D-10, X-2, waiver for #2924 | WAITING (owner) |
+| `local_14a855e7` growth export | daily aggregate registrations / Living CV export | #2886 (RED) | — | BLOCKED by owner order (no merge, deploy or apply); idle |
+| `local_aa901800` "projekto perėmimas" | ESCO cold locales | #2463 (RED) | owner approval | WAITING (owner) — conflict upkeep only, no new work |
+| `local_056d9f7f` (Agentai OS coordinator) | other repository; its labourmarketai work (#2886) is assigned through this file | — | — | n/a here |
 
-### 3.3 Owner-gated (RED, draft, `needs-human-gate`) — 33 open
+Older sessions (`…16CYcDu`, `…AygGqFo3`, cloud `…hnVKqGvExp`, `local_07992559`, `local_430c3337`) are idle and
+hand-over complete; they start nothing without an assignment here.
 
-Kept mergeable by `…16CYcDu` (conflict upkeep only). None may be applied or merged
-without an owner approval naming it.
-#2816 #2812 #2811 #2809 #2806 #2795 #2752 #2747 #2746 #2739 #2738 #2713 #2707 #2704
-#2701 #2693 #2685 #2682 #2647 #2474 #2471 #2463 #2454 #2441 #2440 #2420 #2418 #2410
-#2362 #2235 #2227 #2209 #2203.
+### 3.2 In flight and last 24 h (status stages kept apart)
+
+| PR | Goal | Executor | CODE_COMPLETE | MERGED | DEPLOYED | LIVE_VERIFIED |
+|---|---|---|---|---|---|---|
+| #2917 | brigade offered and matched as a unit | lane A | ✓ | ✓ | ✓ | ✓ walk 41350506578 (19/19) |
+| #2913 | six production-applied migrations restored byte-exact (RED, approved) | coordinator | ✓ | ✓ | ✓ (no production change) | ✓ parity gate 41342643253 |
+| #2916 | mobile: correct a journal entry | mobile | ✓ | ✓ | n/a (app build) | Android vs production ✓; iOS NOT_VERIFIED (sign-in refused, likely rate) |
+| #2928 | mobile: messages | mobile | ✓ | ✓ | n/a (app build) | NOT_VERIFIED |
+| #2919 | failed notification/project reads never answer empty | coordinator | ✓ | ✓ | ✓ | NOT_VERIFIED |
+| #2920 | project forecast beside the course, computed on read | lane A | ✓ | ✓ | ✓ | NOT_VERIFIED |
+| #2922 | MCP profile.get description; ChatGPT sign-in note | ChatGPT security | ✓ | ✓ | ✓ | NOT_VERIFIED |
+| #2925 / #2926 | register-gaps walk; circuit-breaker fix | lane A | ✓ | ✓ | ✓ | walk runs feed #2927 |
+| #2914 | full scope 288, parity refresh | coordinator | ✓ (Codex re-review) | — | — | — |
+| #2915 | completion map | coordinator | ✓ | — | — | — |
+| #2927 / #2930 | register evidence 3.8, 4.6, 6.18, 9.18; G-3 fix | lane A | ✓ | — | — | evidence runs named in the PR |
+| #2929 | mobile in-app notifications | mobile | CI running | — | — | — |
+| #2903 → #2921 | D-4 reset by real mail → D-5 invited path by real mail | coordinator | ✓ (Codex clean) | — | — | BLOCKED on D-4 secrets |
+| #2918 / #2923 / #2924 | C-3, X-2, consent wording | ChatGPT security | ✓ (CI green, Codex clean) | — | — | owner gate |
+
+### 3.3 Owner-gated (RED, draft, `needs-human-gate`) — 39 open (2026-11-02)
+
+Conflict upkeep by the session that opened each (§3.1), otherwise by the coordinator. None may be
+applied or merged without an owner approval naming it.
+#2923 #2918 #2903 #2886 #2816 #2812 #2811 #2809 #2806 #2795 #2752 #2747 #2746 #2739 #2738
+#2713 #2707 #2704 #2701 #2693 #2685 #2682 #2647 #2474 #2471 #2463 #2454 #2441 #2440 #2420
+#2418 #2410 #2362 #2235 #2227 #2209 #2203 #2165 #1816.
 
 ### 3.3a Owner-approved, QUEUED — not started (do not begin before the start conditions)
 
@@ -214,6 +224,7 @@ closes them on the coordinator's say-so.
 | D-7 | Two counts of the function matrix: local 275-row matrix (`_agent-workspaces/labourmarketai/matrix/functionality-matrix-2026-10-23.md`, not in git) PASS 194 / FAIL 8 / BLOCKED 39 / NOT_VERIFIED 18 / NOT_IMPLEMENTED 16; public `docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md` 71/274 LIVE_PROVEN (stale since #2640, 10-21). Matrix rows 4.3/4.16 cite run 39960149411, which concluded failure. | two truths | regenerate the public summary from the matrix (counts and run ids only); re-cite 4.3/4.16 to 40315387466 |
 | D-8 | `jobs-search` 40640097643 (05:48Z) J-6 "save job" failed. **Re-run 40645813917 (06:47Z, `b0747e50`): 6/6 PASS incl. J-6** (save, find in saved view, remove). | intermittent, not reproduced — cause NOT_VERIFIED | LIVE_VERIFIED 06:47Z; if J-6 fails again, trace button → `saveVacancyAction` → `savePublicVacancy` |
 | D-9 | Inactive locales da/et/lv/no/sv: 5 817 of 15 191 keys, 22–44 % `[EN]` placeholders. Active six (lt/en/ru/nl/de/pl) complete, 0 placeholders, no untranslated prose (catalog audit 2026-10-28). | blocks only those five markets (they redirect to /en) | coordinator: translation pipeline without paid APIs (owner order 2026-10-28), with placeholder/ICU/length QC — not started |
+| D-11 | Possible overlaps in the OAuth/MCP area: #2806 (tokens only at the connector door) vs #2918 (C-3 audience binding); #2707 (scopes behind a flag) vs #2923 (curated assistant toolset); #2812 (user-controlled grants) vs #2924 (consent wording). | two competing implementations | owner of the comparison: `local_3951ad81`; it proposes supersede / keep per pair; nothing is closed before its content is handed over |
 | D-10 | **Inbound reachability from GitHub runners, 2026-10-28 only** (none in the 80 walk runs before): ≈06:23–06:36Z (deploy SSH connect timeout; walk health no answer), ≈06:59Z (T-3 `ERR_TIMED_OUT`), 07:57Z (walk health no answer). Every event seen from GitHub-hosted runners; the coordinator's browser samples (3 s, incl. across a deploy at 07:16Z) never failed; Supabase edge logs show the VPS app calling the DB at its normal rate throughout. | P1 INFRA (GitHub→VPS path; users not shown affected) | owner: VPS logs (nginx/sshd/firewall, fail2ban) or provider network for those minutes; read-only SSH for the coordinator was requested |
 
 ---
@@ -281,7 +292,7 @@ Only items that genuinely need the owner. Resolved or reclassified items are rem
 - `GOV-1` read-only DB secret for CI gates; product-truth owner decisions ORG-2, EVID-2, MKT-7, COM-6, COM-8.
 - **Open security blocker (2026-11-01):** one CI live gate is not active; owner action pending. Details and the exact step are in the private record.
 - **Backups (13.5):** add the scoped `SUPABASE_ACCESS_TOKEN` secret, so that `db-backup.yml` runs its restore proof (#2906).
-- **D-4 / D-5:** QA mailbox secrets plus merging RED #2903; dispatch `prod-qa-invited-provision` → `provision-invited`.
+- **D-4 / D-5:** the QA mailbox is the mailbox's own address (the host refuses plus addresses); owner adds the three `production-qa` secrets. The old synthetic invitation was REVOKED 2026-11-02 (owner-approved, exactly one row); deleting the old synthetic account waits for the owner after the read-only scope check (private record). Then RED #2903 → #2921 → `provision-invited` → walks.
 - **Shared VPS (13.1):** remediation #2911 + agentai#1226 live since 2026-11-01; 72 h verdict due 2026-11-04 (details private).
 
 Removed as resolved: #2855 and #2858 (APPLIED, LIVE_VERIFIED 2026-10-28, ledgers 20261028081810 /
