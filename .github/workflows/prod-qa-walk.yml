@@ -103,6 +103,10 @@ on:
           - invited-worker
           # Owner decision 2026-10-26: the buyer workspace (6.4) with the one owner-created buyer. Dispatch only.
           - buyer-workspace
+          # Owner decision D-4 (2026-11-01): password reset proven by the mail that really arrives in
+          # the owner's synthetic QA mailbox (read-only). Dispatch only, never in the rotation; skips
+          # itself until the PROD_QA_IMAP_* secrets exist in the production-qa environment.
+          - mail-reset
           # 2026-11-01 register reconciliation: waitlist real submit (6.18), public JSON APIs (9.18),
           # journal templates (2.36). Synthetic data only. Dispatch only, never in the rotation.
           - register-gaps
@@ -369,6 +373,12 @@ jobs:
           # The addressed invitee of staff-review-notice: the second synthetic
           # worker minted above (same allowlisted identity, no new account).
           PROD_QA_INVITEE_EMAIL: qa.worker+goal3@labourmarket.ai
+          # mail-reset only: the read-only synthetic QA mailbox (owner D-4). Every other spec gets
+          # empty values, so no other walk ever holds the mailbox credentials.
+          PROD_QA_IMAP_HOST: ${{ needs.debounce.outputs.spec == 'mail-reset' && secrets.PROD_QA_IMAP_HOST || '' }}
+          PROD_QA_IMAP_USER: ${{ needs.debounce.outputs.spec == 'mail-reset' && secrets.PROD_QA_IMAP_USER || '' }}
+          PROD_QA_IMAP_PASS: ${{ needs.debounce.outputs.spec == 'mail-reset' && secrets.PROD_QA_IMAP_PASS || '' }}
+          PROD_QA_MAIL_ADDRESS: qa.worker+goal3@labourmarket.ai
         run: |
           set -uo pipefail
           cd apps/web
@@ -423,6 +433,7 @@ jobs:
             fresh-activation) SPEC=tests/e2e/prod-fresh-activation.spec.ts ;;
             invited-worker) SPEC=tests/e2e/prod-invited-worker.spec.ts ;;
             buyer-workspace) SPEC=tests/e2e/prod-buyer-workspace.spec.ts ;;
+            mail-reset) SPEC=tests/e2e/prod-mail-reset.spec.ts ;;
             register-gaps) SPEC=tests/e2e/prod-register-gaps.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
