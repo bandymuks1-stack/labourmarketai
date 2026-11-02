@@ -43,7 +43,7 @@ export type HistoryPeriodStatement = {
   readonly basisReference: string | null;
   readonly statement: string | null;
   readonly createdAt: string;
-  /** How precisely each bound is known (migration 20261024100000); absent /
+  /** How precisely each bound is known (migration 20261025050302); absent /
    *  null = as stated, to the day. */
   readonly periodStartPrecision?: PeriodBoundPrecision | null;
   readonly periodEndPrecision?: PeriodBoundPrecision | null;
