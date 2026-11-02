@@ -154,6 +154,7 @@ active session and window works from THIS file. No second coordination register,
 | `local_13cb59b3` lane A | the 7 reconciled rows + production proof of partial rows; brigade as a unit (DEM-6) | #2927 (stacked on #2914), #2930 | #2914 | IN_PROGRESS |
 | `local_00be3967` mobile | web parity (journal correction, messages, notifications, projects); store-submission preparation | #2929 | owner: store accounts | IN_PROGRESS |
 | `local_3951ad81` ChatGPT security | C-3 token audience, X-2 curated toolset, consent wording, data minimisation | #2918 (RED), #2923 (RED), #2924 | owner: D-10, X-2, waiver for #2924 | WAITING (owner) |
+| `nonstop-pilot-need-limit` (P0, assigned by coordinator) | paid pilot organization refused `over_open_need_limit`: a member holding the platform admin role resolved to `admin_internal` instead of the organization's plan | this PR (RED) | owner: RED approval | CODE_COMPLETE pending CI |
 | `local_14a855e7` growth export | daily aggregate registrations / Living CV export | #2886 (RED) | — | BLOCKED by owner order (no merge, deploy or apply); idle |
 | `local_aa901800` "projekto perėmimas" | ESCO cold locales | #2463 (RED) | owner approval | WAITING (owner) — conflict upkeep only, no new work |
 | `local_056d9f7f` (Agentai OS coordinator) | other repository; its labourmarketai work (#2886) is assigned through this file | — | — | n/a here |
