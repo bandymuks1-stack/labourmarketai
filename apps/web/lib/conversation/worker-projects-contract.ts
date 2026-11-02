@@ -16,6 +16,8 @@ export interface WorkerChatProject {
    *  joined with the person's own documents (§12: what the project still
    *  needs from me). Empty when nothing is open or nothing is tracked. */
   readonly asks: readonly WorkerProjectAsk[];
+  /** All open rows for the person; `asks` is capped (WORKER_PROJECT_ASK_LIMIT). */
+  readonly asksTotal: number;
   /** The manager's latest instruction for this project (the instructions
    *  page's own read: only threads the person participates in), so the person
    *  can ANSWER it from the chat after recording what was asked. */

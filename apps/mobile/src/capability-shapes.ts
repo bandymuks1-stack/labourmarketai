@@ -495,12 +495,21 @@ export type WorkerProject = {
   readonly place: string | null;
   readonly assignmentStatus: "active" | "ended";
   readonly asks: readonly WorkerProjectAsk[];
+  /** Every open ask; `asks` names only the first few. Absent from a server
+   *  older than the field: then only `asks.length` is known. */
+  readonly asksTotal?: number;
   readonly instruction: {
     readonly conversationId: string;
     readonly authorName: string | null;
     readonly text: string;
   } | null;
 };
+
+/** All asks still open on a project: the server's total, never fewer than
+ *  the asks it named. */
+export function asksTotal(p: WorkerProject): number {
+  return Math.max(p.asksTotal ?? 0, p.asks.length);
+}
 
 export type WorkerProjectsData =
   | {

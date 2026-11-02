@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
-import type { WorkerProjectAsk, WorkerProjectsData } from "../../src/capability-shapes";
+import { asksTotal, type WorkerProjectAsk, type WorkerProjectsData } from "../../src/capability-shapes";
 import { useLocale } from "../../src/i18n/locale-context";
 import type { MessageKey } from "../../src/i18n/messages";
 import { CapabilityGate } from "../../src/screens/capability-gate";
@@ -78,6 +78,13 @@ export default function Screen() {
                     </View>
                   ))
                 )}
+                {asksTotal(project) > project.asks.length ? (
+                  // The read names only the first asks; never let them pass
+                  // for everything still open.
+                  <Body muted>
+                    {t("projects.asksShownOf")}: {project.asks.length} / {asksTotal(project)}
+                  </Body>
+                ) : null}
                 {instruction !== null ? (
                   <>
                     <Divider />

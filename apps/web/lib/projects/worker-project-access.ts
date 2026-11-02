@@ -320,6 +320,10 @@ export async function listOwnReadinessItems(
  */
 export interface OwnProjectAsks {
   readonly asks: readonly WorkerProjectAsk[];
+  /** How many open rows the project has for the person. `asks` names at
+   *  most WORKER_PROJECT_ASK_LIMIT of them, so a surface that shows a count
+   *  says "N of total", never the preview length as the total. */
+  readonly asksTotal: number;
   readonly instruction: { readonly conversationId: string; readonly authorName: string | null; readonly text: string } | null;
 }
 
@@ -384,10 +388,12 @@ export async function loadOwnProjectAsks(projectIds: readonly string[]): Promise
       }
     }
   }
+  const totals = new Map<string, number>();
+  for (const it of items) totals.set(it.projectId, (totals.get(it.projectId) ?? 0) + 1);
   for (const id of ids) {
     const a = asks.get(id) ?? [];
     const ins = instructions.get(id) ?? null;
-    if (a.length > 0 || ins) out.set(id, { asks: a, instruction: ins });
+    if (a.length > 0 || ins) out.set(id, { asks: a, asksTotal: totals.get(id) ?? a.length, instruction: ins });
   }
   return out;
 }

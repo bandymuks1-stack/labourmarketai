@@ -46,6 +46,7 @@ export async function loadWorkerProjectsForChat(): Promise<WorkerProjectsChatRes
       place: [r.city, r.country].filter(Boolean).join(", ") || null,
       assignmentStatus: r.assignmentStatus,
       asks: own.get(r.projectId)?.asks ?? [],
+      asksTotal: own.get(r.projectId)?.asksTotal ?? 0,
       instruction: own.get(r.projectId)?.instruction ?? null,
     }));
     const firstProject = projects.find((p) => firstRecordableAsk([p.asks]) !== null) ?? null;

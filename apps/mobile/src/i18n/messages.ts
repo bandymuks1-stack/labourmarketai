@@ -373,6 +373,8 @@ const en = {
     "This project is not one of yours, or it is not among the projects shown here.",
   "projects.asksTitle":
     "Still needed from you",
+  "projects.asksShownOf":
+    "Shown here / still open in all — the full list is on the website",
   "projects.asksNone":
     "Nothing is open for you on this project.",
   "projects.ask.needed":
@@ -875,6 +877,8 @@ const lt: Catalogue = {
     "Šis projektas nėra tavo arba jo nėra tarp čia rodomų projektų.",
   "projects.asksTitle":
     "Dar reikia iš tavęs",
+  "projects.asksShownOf":
+    "Rodoma čia / iš viso dar atvira – visas sąrašas svetainėje",
   "projects.asksNone":
     "Šiame projekte tau nieko neliko atlikti.",
   "projects.ask.needed":
@@ -1373,6 +1377,8 @@ const ru: Catalogue = {
     "Этот проект не ваш или его нет среди показанных здесь.",
   "projects.asksTitle":
     "Ещё нужно от вас",
+  "projects.asksShownOf":
+    "Показано здесь / всего открыто — полный список на сайте",
   "projects.asksNone":
     "По этому проекту от вас ничего не требуется.",
   "projects.ask.needed":
@@ -1871,6 +1877,8 @@ const nl: Catalogue = {
     "Dit project is niet van jou, of het staat niet bij de projecten die hier worden getoond.",
   "projects.asksTitle":
     "Nog nodig van jou",
+  "projects.asksShownOf":
+    "Hier getoond / in totaal nog open — de volledige lijst staat op de website",
   "projects.asksNone":
     "Voor jou staat er op dit project niets open.",
   "projects.ask.needed":
@@ -2372,6 +2380,8 @@ const de: Catalogue = {
     "Dieses Projekt gehört nicht zu Ihren oder ist nicht unter den hier gezeigten Projekten.",
   "projects.asksTitle":
     "Noch von Ihnen benötigt",
+  "projects.asksShownOf":
+    "Hier angezeigt / insgesamt noch offen – die vollständige Liste finden Sie auf der Website",
   "projects.asksNone":
     "Für Sie ist in diesem Projekt nichts offen.",
   "projects.ask.needed":
@@ -2860,6 +2870,8 @@ const pl: Catalogue = {
     "Ten projekt nie jest Twój albo nie ma go wśród pokazanych tutaj.",
   "projects.asksTitle":
     "Jeszcze potrzebne od Ciebie",
+  "projects.asksShownOf":
+    "Pokazane tutaj / łącznie otwarte — pełna lista jest na stronie internetowej",
   "projects.asksNone":
     "W tym projekcie nic nie czeka na Ciebie.",
   "projects.ask.needed":
