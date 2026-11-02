@@ -280,6 +280,14 @@ describe("audience binding (C-3): a verified token is spent only where it was is
     expect(audienceAccepts(null, { resource: MCP })).toBe(false);
     expect(audienceClaimsOf(jwt({ aud: [1, 2] }))).toBeNull();
     expect(audienceClaimsOf("not.a-jwt.x")).toBeNull();
-    expect(audienceClaimsOf(jwt({ aud: "authenticated", client_id: "" }))).toEqual({ aud: ["authenticated"], clientId: null });
+  });
+
+  it("a client_id that is present but not a plain id fails closed, never reads as first-party", () => {
+    for (const bad of ["", " ", "a b", "x".repeat(201), 7, null, ["c"], { id: "c" }]) {
+      expect(audienceClaimsOf(jwt({ aud: "authenticated", client_id: bad })), JSON.stringify(bad)).toBeNull();
+    }
+    expect(audienceClaimsOf(jwt({ aud: "authenticated" }))).toEqual({ aud: ["authenticated"], clientId: null });
+    expect(audienceClaimsOf(jwt({ aud: "authenticated", client_id: "c-1" }))).toEqual({ aud: ["authenticated"], clientId: "c-1" });
+    expect(audienceClaimsOf(jwt({ aud: "authenticated", client_id: "x".repeat(200) }))?.clientId).toHaveLength(200);
   });
 });
