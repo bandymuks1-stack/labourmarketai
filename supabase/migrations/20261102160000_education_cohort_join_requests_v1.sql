@@ -368,7 +368,10 @@ begin
   end if;
 
   update public.education_cohort_members
-     set status = 'active', added_by = null, added_at = now(), decided_at = now(), left_at = null
+     set status = 'active', added_by = null, added_at = now(), decided_at = now(), left_at = null,
+         -- Request content ends with the request: an active row is visible to
+         -- external managers (unchanged rule), so it carries no learner-typed text.
+         request_label = null, request_note = null
    where cohort_id = p_cohort_id and profile_id = p_profile_id;
   insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
   values (v_uid, 'education_cohort_join_accepted_v1', 'education_cohorts', p_cohort_id,

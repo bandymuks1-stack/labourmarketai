@@ -160,9 +160,11 @@ test("J-3. the institution's authorised person sees the request by the typed nam
       { timeout: 60_000, intervals: [3_000] },
     )
     .toBe(0);
-  // The member chip names the learner by the institution's own invitation (an
-  // earlier learning-practice run) or by the name typed on this request.
-  await expect(cohortRow(page)).toContainText(/QA-SYNTHETIC (Worker|mokinys|besimokantis)/, { timeout: 30_000 });
+  // Accept clears the learner-typed name from the member row, so the chip names
+  // the learner by the institution's own invitation (an earlier
+  // learning-practice run) or, without one, by the id prefix.
+  await expect(cohortRow(page)).toContainText(new RegExp(`QA-SYNTHETIC (Worker|mokinys)|${learnerId.slice(0, 8)}`), { timeout: 30_000 });
+  await expect(cohortRow(page)).not.toContainText(TYPED);
   await close();
 });
 

@@ -62,6 +62,7 @@ describe("authority", () => {
   it("accepting writes only the membership, the student relationship and an audit row — no confirmation, hours or recognition", () => {
     const decide = fn("decide_education_cohort_join_v1");
     const targets = [...decide.matchAll(/(?:insert into|update)\s+public\.([a-z_]+)/g)].map((m) => m[1]);
+    expect(decide).toMatch(/request_label = null, request_note = null/);
     expect(new Set(targets)).toEqual(new Set(["education_cohort_members", "engagement_contexts", "audit_logs"]));
   });
 
