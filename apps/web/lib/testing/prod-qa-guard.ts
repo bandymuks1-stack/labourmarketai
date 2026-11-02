@@ -106,8 +106,12 @@ export const PROD_QA_BUYER_EMAIL = "qa.buyer+act1@labourmarket.ai" as const;
  * synthetic partner referral addressed to it (marked `QA-SYNTHETIC-…`), then
  * creates the account — confirmed, passwordless, no role — so the walk proves
  * the path a real referred person takes when they register WITHOUT the link.
+ *
+ * The address is the owner's real QA mailbox itself, without a plus tag: the
+ * mailbox host refuses plus addresses (owner D-4 result 2026-11-02, 550 user
+ * unknown), and the walk must read the verification mail there.
  */
-export const PROD_QA_INVITED_EMAIL = "qa.invited+act1@labourmarket.ai" as const;
+export const PROD_QA_INVITED_EMAIL = "qa.invited@labourmarket.ai" as const;
 
 /** The owner-created identities — minted only if the owner has created them. */
 export const PROD_QA_FRESH_IDENTITIES: readonly string[] = [
