@@ -231,16 +231,30 @@ locales), #2235, #2227, #2203, #2165, #1816, #2816, #2812, #2811, #2809, #2806, 
 
 ### 3.4 Stale / superseded — owner decides keep or close (nobody closes them on the coordinator's say-so)
 
-Recommended CLOSE (evidence stays on the PR): #2438 (superseded by the program registers), #740 (voice
-deferred), #2419 (privacy-refusal part landed in #2433; only 429/timeout remains), #1225 (landing moved
-on), #897 + #896 (stacked financial-layer drafts), #2915 (second register-like snapshot; the 288 statuses
-live in FUNCTION_REGISTER). Rescope: #2165 (referral pipeline already on main), #1577, #1835.
-Leave parked: #2198 (voice), #2377, #2370 (owner visual), #1211, #1166.
+**Closed 2026-11-02 under the owner's conditional approval** (branches, migrations and history kept; each PR
+carries a closing comment). Unique, not-yet-built requirements are carried here with their origin PR:
 
-### 3.3a Owner-approved, QUEUED — not started (do not begin before the start conditions)
+| Closed PR | Why | Carried requirement (origin) |
+|---|---|---|
+| #1225 landing FOCUS | already on main: #1231 (FOCUS = restored previous landing) and #1232 (FOCUS default) | none |
+| #2438 master audit 2026-10-16 | its owner decisions N-1…N-13 are resolved or tracked elsewhere (#2439, #2442, #2433, #2432 merged; #2444 superseded by #2451; #2440, #2441 open in §3.3) | **reference only, never merged:** growth strategy F-1 (shareable, consent-based confirmed work record), F-2 (company side as weekly operations + crew-lead invite loop), F-3 (finish the money path first), cold-start per participant group, ten country plans, KPI definitions, 30/60/90 roadmap, PRODUCT_MASTER_SPEC (SUPPORTING) — on branch `docs/cc/master-audit-2026-10-16` (origin #2438); reuse when growth work starts (§3.3a) |
+| #740 voice_journal_jobs migration | voice is deferred (no transcription host; COM-6, V-2) | when voice reopens: one owner-scoped job table, disclosure acknowledged before recording, transcript ≤ 60k, audio retention ≤ 30 days, one job → at most one journal entry, worker/admin read only, RPC-only writes, right-to-erase RPC — design on branch `feat/voice-journal-jobs-migration-v1` (origin #740) |
+| #2915 completion map 2026-11-01 | the 288 statuses live only in FUNCTION_REGISTER (one register) | planning columns not in the register: effort per function, critical path, about 185–295 agent days, conditional targets (core mid-December 2026, full scope February 2027, preliminary) — on branch `docs/cc/completion-map-288` (origin #2915) |
 
-| Item | Approved | Priority | State | Start conditions |
-|---|---|---|---|---|
+**Kept open for the owner** (the check found unique code or a real ambiguity):
+- **#2419** AI monitoring — classifying quota (429) and timeout failures, and the technical failure rate,
+  is still absent from main (only the privacy-refusal part landed in #2433). Options: rebase to cover
+  only 429/timeout (GREEN), or close.
+- **#896 + #897** financial safety layer and business health engine — the principles CSP-001…005 /
+  FSR-001…005, the commercial gate (11 conditions) and the 39 health metrics exist nowhere on main, and
+  `apps/web/lib/product-gate/axioms.ts:128` still cites #896 as the source of a rule. Their base #895
+  is closed, so they cannot merge as they are. Owner decision: carry these requirements into the
+  canonical architecture (then close) or keep them parked.
+
+Still recommended for an owner keep/close decision: rescope #2165 (referral pipeline already on main),
+#1577, #1835. Leave parked: #2198 (voice), #2377, #2370 (owner visual), #1211, #1166.
+
+---|---|---|---|---|
 | Job-offer intake → public listing → candidate sign-up → Living CV → application → employer review (growth mechanism of the existing platform, not a new product; LabourMarket.ai + Agentai OS data processing + Nonstop Group commercial links) | owner, 2026-11-01 | P1, after current P0 | QUEUED, NOT STARTED — owner: coordinator `local_8d793dee` | (1) current P0 work finished; (2) core user journeys verified in production; (3) no open P0 blocker; (4) this register checked; (5) proven no duplication of existing intake / vacancy store / opportunities / interest / Living CV components |
 
 Binding notes for that item: reuse the existing ingestion and vacancy store; keep source,
