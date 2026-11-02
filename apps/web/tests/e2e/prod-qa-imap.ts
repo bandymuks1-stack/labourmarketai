@@ -146,21 +146,27 @@ export async function nextUid(): Promise<number> {
 /**
  * Waits (polling, read-only) for a mail to `address` with UID >= `sinceUid`
  * and returns its first link that `pick` accepts. Throws when none arrives.
+ * `sinceDay` also limits the search to mail received on or after that day —
+ * for a mail sent by a schedule before the walk started (the weekly digest),
+ * where no "before the trigger" UID can be read.
  */
 export async function waitForMailLink(
   address: string,
   sinceUid: number,
   pick: (url: string) => boolean,
   timeoutMs = 180_000,
+  sinceDay?: Date,
 ): Promise<{ uid: number; link: string; seconds: number }> {
   assertSyntheticAddress(address);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const since = sinceDay ? ` SINCE ${sinceDay.getUTCDate()}-${months[sinceDay.getUTCMonth()]}-${sinceDay.getUTCFullYear()}` : "";
   const started = Date.now();
   while (Date.now() - started < timeoutMs) {
     const s = await Session.open();
     try {
       await s.run(`LOGIN ${quote(process.env.PROD_QA_IMAP_USER as string)} ${quote(process.env.PROD_QA_IMAP_PASS as string)}`);
       await s.run("EXAMINE INBOX");
-      const found = await s.run(`UID SEARCH UID ${sinceUid}:* TO ${quote(address)}`);
+      const found = await s.run(`UID SEARCH UID ${sinceUid}:*${since} TO ${quote(address)}`);
       const uids = (/^\* SEARCH([\d ]*)$/m.exec(found)?.[1] ?? "")
         .trim()
         .split(/\s+/)

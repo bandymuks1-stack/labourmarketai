@@ -111,6 +111,13 @@ on:
           # and its link opens the public job page signed out. Dispatch only, never in the rotation; signs
           # in to the owner-created qa.invited@ account (prod-qa-invited-provision.yml) and erases it at the end.
           - alert-mail
+          # Register row 5.9 (owner 2026-11-02): the weekly digest E-MAIL, proven by the real Monday 07:00 UTC
+          # sweep, in two dispatches on the owner-created qa.invited@ account. digest-setup (Tue..Sun) stores the
+          # digest e-mail consent and one journal entry and KEEPS the account; digest-check (the Monday after,
+          # after 07:05 UTC, no sign-in that day before it) reads the mail, opens its link and erases the account.
+          # Dispatch only, never in the rotation.
+          - digest-setup
+          - digest-check
           # 2026-11-01 register reconciliation: waitlist real submit (6.18), public JSON APIs (9.18),
           # journal templates (2.36). Synthetic data only. Dispatch only, never in the rotation.
           - register-gaps
@@ -369,7 +376,7 @@ jobs:
             mint_existing "qa.freshworker+act1@labourmarket.ai" freshworker \
               || echo "::warning::qa.freshworker+act1 not mintable — the J-13 steps of buyer-workspace will skip"
           fi
-          if [ "${{ needs.debounce.outputs.spec }}" = "invited-worker" ] || [ "${{ needs.debounce.outputs.spec }}" = "alert-mail" ]; then
+          if [ "${{ needs.debounce.outputs.spec }}" = "invited-worker" ] || [ "${{ needs.debounce.outputs.spec }}" = "alert-mail" ] || [ "${{ needs.debounce.outputs.spec }}" = "digest-setup" ] || [ "${{ needs.debounce.outputs.spec }}" = "digest-check" ]; then
             mint_existing "qa.invited@labourmarket.ai" invited
           fi
           # employee-beta-gate.spec.ts reads the original single-worker file.
@@ -382,11 +389,11 @@ jobs:
           # worker minted above (same allowlisted identity, no new account).
           PROD_QA_INVITEE_EMAIL: qa.worker+goal3@labourmarket.ai
           # mail-reset, invited-worker and alert-mail only: the read-only synthetic QA mailbox (owner D-4;
-          # D-5 proves the invited address with the mailed one-time link; J-15 reads the job-alert mail). Every other spec gets empty values, so no
+          # D-5 proves the invited address with the mailed one-time link; J-15 reads the job-alert and digest mail). Every other spec gets empty values, so no
           # other walk ever holds the mailbox credentials.
-          PROD_QA_IMAP_HOST: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail') && secrets.PROD_QA_IMAP_HOST || '' }}
-          PROD_QA_IMAP_USER: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail') && secrets.PROD_QA_IMAP_USER || '' }}
-          PROD_QA_IMAP_PASS: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail') && secrets.PROD_QA_IMAP_PASS || '' }}
+          PROD_QA_IMAP_HOST: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check') && secrets.PROD_QA_IMAP_HOST || '' }}
+          PROD_QA_IMAP_USER: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check') && secrets.PROD_QA_IMAP_USER || '' }}
+          PROD_QA_IMAP_PASS: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check') && secrets.PROD_QA_IMAP_PASS || '' }}
           PROD_QA_MAIL_ADDRESS: qa.invited@labourmarket.ai
         run: |
           set -uo pipefail
@@ -444,6 +451,8 @@ jobs:
             buyer-workspace) SPEC=tests/e2e/prod-buyer-workspace.spec.ts ;;
             mail-reset) SPEC=tests/e2e/prod-mail-reset.spec.ts ;;
             alert-mail) SPEC=tests/e2e/prod-alert-mail.spec.ts ;;
+            digest-setup) SPEC=tests/e2e/prod-digest-setup.spec.ts ;;
+            digest-check) SPEC=tests/e2e/prod-digest-check.spec.ts ;;
             register-gaps) SPEC=tests/e2e/prod-register-gaps.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac

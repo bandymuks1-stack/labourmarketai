@@ -1,9 +1,25 @@
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
-
-import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { test, expect, type Browser, type Locator, type Page } from "./prod-walk";
 import { bearerOf, qaApi } from "./prod-qa-api";
-import { assertSyntheticAddress, imapConfigured, nextUid, waitForMailLink } from "./prod-qa-imap";
+import { nextUid, waitForMailLink } from "./prod-qa-imap";
+import {
+  ADDRESS,
+  APP_HOST,
+  INVITED_WALK_ENABLED,
+  RUN,
+  SLOT,
+  assertSyntheticSession,
+  deleteOwnAccount as deleteAccountOnPhone,
+  deleteOwnAccountByApi,
+  expectNoSidewaysScroll as noSidewaysScroll,
+  myEmailConsents,
+  myEvents,
+  myWorkerId,
+  onboardAsWorker,
+  openPhone,
+  settle,
+  switchEmailOn,
+} from "./prod-qa-invited";
+
 
 /**
  * PRODUCTION — A NEW MATCHING JOB REACHES THE PERSON BY E-MAIL, AND THE MAILED
@@ -42,7 +58,7 @@ import { assertSyntheticAddress, imapConfigured, nextUid, waitForMailLink } from
  *   A-6  digest: what one walk CAN prove — the e-mail consent (A-2) and this
  *        week's in-app digest row. The digest e-mail is the Monday 07:00 UTC
  *        sweep, for workers who did NOT visit that week; a walk that visits
- *        cannot observe it, and says so;
+ *        cannot observe it — prod-digest-setup/-check.spec.ts prove it;
  *   A-7  every signed-in page of the walk: no console error, no 401/403;
  *   A-8  clean-up: the saved search is deleted, then the account deletion is
  *        requested and confirmed on the privacy page (as I-6 of
@@ -51,23 +67,17 @@ import { assertSyntheticAddress, imapConfigured, nextUid, waitForMailLink } from
  * Only synthetic text (QA-SYNTHETIC). The run log carries counts, kinds,
  * seconds and paths only — never an address, a token or an ad's content.
  */
-const ADDRESS = "qa.invited@labourmarket.ai";
-const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
-const SLOT = "invited";
-const state = resolve(__dirname, `.storage-state.prod-qa.${SLOT}.json`);
-const ENABLED = process.env.PROD_QA_WALK === "1" && existsSync(state) && imapConfigured();
-test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with the owner-created synthetic account and the QA mailbox (owner D-4)");
+test.skip(!INVITED_WALK_ENABLED, "production walk: runs only in prod-qa-walk.yml with the owner-created synthetic account and the QA mailbox (owner D-4)");
 test.describe.configure({ mode: "serial", timeout: 420_000, retries: 0 });
 test.use({ actionTimeout: 30_000 });
 
-const PHONE = { width: 390, height: 844 };
+const TAG = "alert-mail";
 const NAME = "QA-SYNTHETIC Įspėjimų darbuotojas";
 const PROFESSION = "cleaner";
 const COUNTRY = "SE";
 const SAVED_LABEL = `QA-SYNTHETIC valytojas SE ${RUN}`.slice(0, 80);
 const inMain = (page: Page): Locator => page.getByRole("main");
 
-const APP_HOST = new URL(process.env.E2E_BASE_URL ?? "https://labourmarket.ai").host;
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 /** Only an HTTPS link to this site's own public job page is ever followed. */
 const JOB_LINK = (u: string) => {
@@ -79,60 +89,12 @@ const JOB_LINK = (u: string) => {
   }
 };
 
-function claims(): { sub: string; email?: string } {
-  const token = bearerOf(SLOT);
-  return JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8")) as { sub: string; email?: string };
-}
-const subOf = (): string => claims().sub;
-
-/** Every write and every clean-up acts only on the synthetic person's own session. */
-function assertSyntheticSession(): void {
-  assertSyntheticAddress(ADDRESS);
-  if ((claims().email ?? "").toLowerCase() !== ADDRESS) throw new Error("refused: the walk session is not the synthetic QA mailbox account");
-}
-
-type EventRow = { event_type: string; metadata: Record<string, unknown> | null; created_at: string };
-async function myEvents(type: string): Promise<EventRow[]> {
-  const r = await qaApi(
-    `/rest/v1/notification_events?select=event_type,metadata,created_at&recipient_profile_id=eq.${encodeURIComponent(subOf())}&event_type=eq.${type}`,
-    bearerOf(SLOT),
-  );
-  expect(r.status, `my ${type} notifications answered`).toBe(200);
-  return (await r.json()) as EventRow[];
-}
-
 /** Console errors and 401/403 answers seen on the walk's signed-in pages (A-7). */
 const problems: string[] = [];
+const open = (browser: Browser, signedIn = true) => openPhone(browser, problems, signedIn);
+const expectNoSidewaysScroll = (page: Page, where: string) => noSidewaysScroll(page, where, TAG);
+const deleteOwnAccount = (browser: Browser) => deleteAccountOnPhone(browser, problems, TAG);
 
-async function open(browser: Browser, signedIn = true): Promise<{ ctx: BrowserContext; page: Page }> {
-  const ctx = await browser.newContext({
-    ...(signedIn ? { storageState: state } : {}),
-    locale: "lt-LT",
-    viewport: PHONE,
-    isMobile: true,
-    hasTouch: true,
-  });
-  const page = await ctx.newPage();
-  if (signedIn) {
-    page.on("console", (m) => {
-      if (m.type() === "error") problems.push(`console error on ${new URL(page.url()).pathname}`);
-    });
-    page.on("response", (r) => {
-      if (r.status() === 401 || r.status() === 403) problems.push(`${r.status()} ${new URL(r.url()).pathname}`);
-    });
-  }
-  return { ctx, page };
-}
-
-async function settle(page: Page): Promise<void> {
-  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
-}
-
-async function expectNoSidewaysScroll(page: Page, where: string): Promise<void> {
-  const { scroll, inner } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: window.innerWidth }));
-  console.info(`[alert-mail] ${where}: scrollWidth=${scroll} innerWidth=${inner}`);
-  expect(scroll, `${where} is wider than the viewport`).toBeLessThanOrEqual(inner + 1);
-}
 
 const shared: { since?: number; alertIds: string[]; jobPath?: string; searchId?: string } = { alertIds: [] };
 
@@ -150,34 +112,12 @@ test("A-0. API: no job alert yet, and an anonymous caller reads no notifications
 test("A-1. 390 px: onboarding as a cleaner", async ({ browser }) => {
   const { ctx, page } = await open(browser);
   try {
-    await page.goto("/lt/dashboard");
-    await settle(page);
-    if (/\/onboarding$/.test(new URL(page.url()).pathname)) {
-      if (await page.getByTestId("onboarding-intent-work").isVisible().catch(() => false)) {
-        await page.getByTestId("onboarding-intent-work").click();
-        await page.getByTestId("onboarding-intents-continue").click();
-      }
-      await expect(page.getByTestId("onboarding-display-name")).toBeVisible();
-      await page.getByTestId("onboarding-display-name").fill(NAME);
-      await page.getByTestId("onboarding-country").click();
-      await page.getByTestId("onboarding-country-field").locator('input:not([type="hidden"])').first().fill("Liet");
-      await page.getByRole("option", { name: /^Lietuva$/ }).first().click();
-      await page.getByTestId("onboarding-profession-input").fill("Valytoj");
-      await page.getByTestId(`onboarding-profession-suggestion-${PROFESSION}`).click();
-      await expectNoSidewaysScroll(page, "onboarding (390)");
-      await page.getByTestId("onboarding-submit").click();
-      await page.waitForURL((u) => !/\/onboarding/.test(u.pathname), { timeout: 60_000 });
-      await settle(page);
-    }
+    await onboardAsWorker(page, { name: NAME, professionQuery: "Valytoj", professionSlug: PROFESSION }, TAG);
   } finally {
     await ctx.close();
   }
-  const token = bearerOf(SLOT);
-  const w = await qaApi(`/rest/v1/workers?select=id&profile_id=eq.${encodeURIComponent(subOf())}`, token);
-  expect(w.status).toBe(200);
-  const [worker] = (await w.json()) as { id: string }[];
-  expect(worker, "onboarding created the worker").toBeTruthy();
-  const p = await qaApi(`/rest/v1/worker_professions?select=professions(slug)&worker_id=eq.${worker.id}`, token);
+  const workerId = await myWorkerId();
+  const p = await qaApi(`/rest/v1/worker_professions?select=professions(slug)&worker_id=eq.${workerId}`, bearerOf(SLOT));
   expect(p.status).toBe(200);
   const slugs = ((await p.json()) as { professions: { slug: string } | null }[]).map((r) => r.professions?.slug);
   console.info(`[alert-mail] declared work types: ${slugs.join(",")}`);
@@ -189,34 +129,12 @@ test("A-2. 390 px: e-mail on for job alerts, saved-search alerts and the digest;
   const kinds = ["job_alert", "saved_search_match", "weekly_digest"];
   const { ctx, page } = await open(browser);
   try {
-    await page.goto("/lt/dashboard/account");
-    await settle(page);
-    const section = page.getByTestId("account-notification-preferences");
-    await expect(section).toBeVisible({ timeout: 30_000 });
-    if ((await section.getAttribute("open")) === null) await section.locator("summary").first().click();
-    await expect(page.getByTestId("notification-prefs-email-inactive"), "production has a configured mailbox").toHaveCount(0);
-    for (const kind of kinds) {
-      const box = page.getByTestId(`notification-pref-${kind}-email`);
-      await expect(box, `the ${kind} e-mail switch is offered`).toBeVisible({ timeout: 30_000 });
-      if (!(await box.isChecked())) await box.click();
-      await expect(box).toBeChecked();
-      await expect(page.getByTestId("notification-prefs-notice")).toHaveAttribute("data-state", "saved", { timeout: 30_000 });
-    }
-    await expectNoSidewaysScroll(page, "account, notification settings (390)");
+    await switchEmailOn(page, kinds, TAG);
   } finally {
     await ctx.close();
   }
   await expect
-    .poll(
-      async () => {
-        const r = await qaApi(
-          `/rest/v1/notification_preferences?select=notification_type&profile_id=eq.${encodeURIComponent(subOf())}&channel=eq.email&enabled=is.true`,
-          bearerOf(SLOT),
-        );
-        return r.status === 200 ? ((await r.json()) as { notification_type: string }[]).map((x) => x.notification_type).sort() : [];
-      },
-      { message: "explicit e-mail consent is stored per kind", timeout: 30_000 },
-    )
+    .poll(myEmailConsents, { message: "explicit e-mail consent is stored per kind", timeout: 30_000 })
     .toEqual([...kinds].sort());
 });
 
@@ -339,7 +257,7 @@ test("A-6. digest: the e-mail consent is stored (A-2); this week's in-app digest
   const digests = await myEvents("weekly_digest");
   console.info(
     `[alert-mail] this week's in-app digest rows=${digests.length}. The digest E-MAIL is the Monday 07:00 UTC sweep for ` +
-      "workers who did not visit that week; a walk that visits cannot observe it (by design).",
+      "workers who did not visit that week; a walk that visits cannot observe it — digest-setup + digest-check prove it.",
   );
   expect(digests.length, "at most one digest a week").toBeLessThanOrEqual(1);
 });
@@ -369,56 +287,6 @@ async function deleteSavedSearch(browser: Browser): Promise<void> {
   const left = r.status === 200 ? ((await r.json()) as unknown[]).length : -1;
   console.info(`[alert-mail] saved search left after delete=${left}`);
   expect(left, "the saved search is removed").toBe(0);
-}
-
-/** Requests and confirms the synthetic person's account deletion on a phone
- *  (the same path as I-6 of prod-invited-worker.spec.ts). False when the
- *  15-minute sign-in window has passed. */
-async function deleteOwnAccount(browser: Browser): Promise<boolean> {
-  assertSyntheticSession();
-  const { ctx, page } = await open(browser);
-  try {
-    await page.goto("/lt/dashboard/privacy#privacy-deletion");
-    await settle(page);
-    const section = page.getByTestId("privacy-deletion");
-    await expect(section, "the deletion section is on the privacy page").toBeVisible({ timeout: 30_000 });
-    if (await section.getByTestId("privacy-deletion-confirmed").isVisible().catch(() => false)) return true;
-    if (await section.getByTestId("privacy-deletion-submit").isVisible().catch(() => false)) {
-      await section.getByTestId("privacy-deletion-confirm").check();
-      await section.getByTestId("privacy-deletion-submit").click();
-      await expect(
-        section.getByTestId("privacy-deletion-submitted").or(section.getByTestId("privacy-deletion-confirm-step")),
-      ).toBeVisible({ timeout: 30_000 });
-      await page.reload();
-      await settle(page);
-    }
-    const final = section.getByTestId("privacy-deletion-confirm-final");
-    const reauth = section.getByTestId("privacy-deletion-reauth");
-    await expect(final.or(reauth), "the confirmation step is shown").toBeVisible({ timeout: 30_000 });
-    if (await reauth.isVisible()) return false;
-    await final.click();
-    await expect(section.getByTestId("privacy-deletion-confirmed")).toBeVisible({ timeout: 30_000 });
-    await expectNoSidewaysScroll(page, "privacy deletion (390)");
-    return true;
-  } finally {
-    await ctx.close();
-  }
-}
-
-/** The same deletion through the two functions the privacy page calls, for an
- *  account the page cannot reach (no role: it is sent to onboarding). */
-async function deleteOwnAccountByApi(): Promise<"confirmed" | "reauth_required" | "failed"> {
-  assertSyntheticSession();
-  const token = bearerOf(SLOT);
-  const submitted = await qaApi("/rest/v1/rpc/submit_privacy_request_v1", token, {
-    method: "POST",
-    body: { p_request_type: "account_deletion", p_note: `QA-SYNTHETIC walk clean-up (${RUN})` },
-  });
-  if (submitted.status !== 200 && !/too_many_open/.test(await submitted.text())) return "failed";
-  const confirmed = await qaApi("/rest/v1/rpc/privacy_confirm_account_deletion_v1", token, { method: "POST", body: {} });
-  if (confirmed.status !== 200) return "failed";
-  const body = (await confirmed.json()) as { ok?: boolean; error?: string };
-  return body.ok ? "confirmed" : body.error === "reauth_required" ? "reauth_required" : "failed";
 }
 
 let deletionConfirmed = false;
