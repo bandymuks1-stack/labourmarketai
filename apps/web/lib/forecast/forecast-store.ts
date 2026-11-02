@@ -9,7 +9,7 @@ import type { ForecastFactRows } from "./forecast-facts";
 import type { ForecastCandidate, ForecastRecord, ForecastStore } from "./forecast-scheduler-core";
 
 /**
- * The scheduler's database doors (forecast migration 20261024130000). The
+ * The scheduler's database doors (forecast migration 20261025045152, applied in production). The
  * service role holds no table privilege here (least privilege): it reaches
  * the forecast tables and the fact rows ONLY through three SECURITY DEFINER
  * functions granted to it alone. No person's session is involved, and
