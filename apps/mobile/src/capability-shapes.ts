@@ -352,3 +352,107 @@ export type DemandCreateConfirmData = {
   readonly actingFor: string;
   readonly structuredDestination: string;
 };
+
+/**
+ * `journal.correct_draft` / `journal.correct_confirm` — correcting one of the
+ * caller's OWN live entries (the web journal's edit, the same atomic
+ * supersede). The draft writes nothing and returns the entry BEFORE and
+ * AFTER — hours by the canonical work-time rule on both sides, so a person
+ * sees what their total will do before saving — and a one-time token bound
+ * to the exact change and the journal's head.
+ */
+export type JournalCorrectionChange = {
+  readonly entryId: string;
+  readonly notes?: string;
+  readonly workDate?: string;
+  /** A new site; `null` removes it; absent keeps the stored one. */
+  readonly siteName?: string | null;
+};
+
+export type JournalCorrectionSide = {
+  readonly notes: string;
+  readonly workDate: string | null;
+  readonly siteName: string | null;
+  readonly hours: number;
+  readonly output: { readonly value: number; readonly unitSlug: string } | null;
+};
+
+export type JournalCorrectDraftData = {
+  readonly preview: {
+    readonly entryId: string;
+    readonly before: JournalCorrectionSide;
+    readonly after: JournalCorrectionSide;
+    /** A confirmed entry keeps its confirmation; the correction becomes a
+     *  new, unconfirmed version that replaces it in every total. */
+    readonly wasConfirmed: boolean;
+  };
+  readonly confirmationToken: string;
+  readonly note: string;
+};
+
+export type JournalCorrectConfirmData = {
+  readonly entryId: string;
+  readonly correctedEntryId: string;
+  readonly wasConfirmed: boolean;
+  readonly skills: JournalConfirmData["skills"];
+};
+
+/**
+ * `conversation.list` / `conversation.get` — the caller's own in-app
+ * conversations (those they participate in, under their RLS), and the latest
+ * messages of one, oldest first. `withName` is the other party's name only
+ * when the product may show it.
+ */
+export type ConversationListData = {
+  readonly conversations: readonly {
+    readonly conversationId: string;
+    readonly subject: string | null;
+    readonly kind: string;
+    readonly withName: string | null;
+    readonly lastActivityAt: string;
+  }[];
+};
+
+export type ConversationMessage = {
+  readonly id: string;
+  readonly fromMe: boolean;
+  readonly body: string;
+  readonly language: string | null;
+  readonly at: string;
+};
+
+export type ConversationGetData = {
+  readonly conversation: {
+    readonly id: string;
+    readonly subject: string | null;
+    readonly kind: string;
+  };
+  readonly messages: readonly ConversationMessage[];
+};
+
+/**
+ * `message.send_draft` / `message.send_confirm` — one in-app message, never
+ * email or SMS. The draft sends NOTHING: it checks the contact permission and
+ * mints a token bound to the exact text and the conversation's current last
+ * message (a message arriving in between voids it).
+ */
+export type MessageSendDraftData = {
+  readonly preview: {
+    readonly conversation: "existing" | "new";
+    readonly permission: string;
+    readonly subject: string | null;
+    readonly body: string;
+  };
+  readonly confirmationToken: string;
+  readonly note: string;
+};
+
+export type MessageSendConfirmData = {
+  readonly status: "sent";
+  readonly conversationId: string;
+  readonly readBack: {
+    readonly id: string;
+    readonly sentAt: string;
+    readonly bodyMatches: boolean;
+  } | null;
+};

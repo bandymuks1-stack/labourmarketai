@@ -279,6 +279,10 @@ Only items that genuinely need the owner. Resolved or reclassified items are rem
 - D-6 product question: training for engaged (non-member) workers (RED #2816).
 - #2844 legal wording; #2842 paid terms (legal).
 - `GOV-1` read-only DB secret for CI gates; product-truth owner decisions ORG-2, EVID-2, MKT-7, COM-6, COM-8.
+- **Open security blocker (2026-11-01):** one CI live gate is not active; owner action pending. Details and the exact step are in the private record.
+- **Backups (13.5):** add the scoped `SUPABASE_ACCESS_TOKEN` secret, so that `db-backup.yml` runs its restore proof (#2906).
+- **D-4 / D-5:** QA mailbox secrets plus merging RED #2903; dispatch `prod-qa-invited-provision` → `provision-invited`.
+- **Shared VPS (13.1):** remediation #2911 + agentai#1226 live since 2026-11-01; 72 h verdict due 2026-11-04 (details private).
 
 Removed as resolved: #2855 and #2858 (APPLIED, LIVE_VERIFIED 2026-10-28, ledgers 20261028081810 /
 20261028091725); D-3 hardening (= #2855); Stripe TEST arming (OPTIONAL_TEST, not a launch blocker);

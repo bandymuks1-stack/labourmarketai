@@ -107,6 +107,9 @@ on:
           # the owner's synthetic QA mailbox (read-only). Dispatch only, never in the rotation; skips
           # itself until the PROD_QA_IMAP_* secrets exist in the production-qa environment.
           - mail-reset
+          # 2026-11-01 register reconciliation: waitlist real submit (6.18), public JSON APIs (9.18),
+          # journal templates (2.36). Synthetic data only. Dispatch only, never in the rotation.
+          - register-gaps
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -431,6 +434,7 @@ jobs:
             invited-worker) SPEC=tests/e2e/prod-invited-worker.spec.ts ;;
             buyer-workspace) SPEC=tests/e2e/prod-buyer-workspace.spec.ts ;;
             mail-reset) SPEC=tests/e2e/prod-mail-reset.spec.ts ;;
+            register-gaps) SPEC=tests/e2e/prod-register-gaps.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that

@@ -20,6 +20,8 @@ import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { getProjectStadium } from "@/lib/projects/stadium";
 import { ProjectCourseTrack } from "@/components/app/projects/project-course-track";
 import { deriveProjectCourse } from "@/lib/projects/project-course";
+import { ProjectForecastPanel } from "@/components/app/projects/project-forecast-panel";
+import { readProjectForecast } from "@/lib/forecast/forecast-read";
 import { ProjectWeekGoal } from "@/components/app/projects/project-week-goal";
 import { deriveWeeklyGoal } from "@/lib/projects/weekly-goal";
 import { listProjectTasks } from "@/lib/tasks/tasks";
@@ -201,7 +203,12 @@ export default async function ProjectStadiumPage({
   const stadiumWeekGoal = deriveWeeklyGoal(courseTasks, { todayIso: courseToday.todayIso, scope: "project" });
   // KAS PASIKEITĖ PROJEKTE: the team's chain as counts + the project's own
   // facts, over the stages and tasks this page already read.
-  const projectTrace = await loadProjectTrace(id, "manager", courseStages, courseTasks);
+  // The project forecast (SEP-1: a forecast, never a fact), read on demand for
+  // this manager from the project's recorded facts — lib/forecast/forecast-read.ts.
+  const [projectTrace, forecastRead] = await Promise.all([
+    loadProjectTrace(id, "manager", courseStages, courseTasks),
+    readProjectForecast(id, courseToday.todayIso),
+  ]);
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="project-stadium">
@@ -335,6 +342,7 @@ export default async function ProjectStadiumPage({
       {/* ── THE PROJECT COURSE (Future Experience C): the same route the
             assigned workers see — one shared goal for the whole team. ── */}
       <ProjectCourseTrack course={stadiumCourse} locale={locale} />
+      <ProjectForecastPanel read={forecastRead} locale={locale} />
       <ProjectWeekGoal goal={stadiumWeekGoal} locale={locale} />
       {/* Where the course or the week has nothing to draw: the REAL first
           step (the stages panel, the task form), never a decorative screen. */}

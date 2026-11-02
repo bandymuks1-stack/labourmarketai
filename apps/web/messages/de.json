@@ -19810,6 +19810,73 @@
     },
     "helpNeeded": "Hilfe nötig — {stage}:"
   },
+  "projectForecast": {
+    "title": "Prognose",
+    "notFact": "Eine Prognose aus der erfassten Arbeit dieses Projekts, Stand {date} — keine Tatsache und kein Versprechen. Sie wird bei jedem Öffnen dieser Seite neu berechnet.",
+    "unavailable": "Die Prognose konnte gerade nicht gelesen werden.",
+    "insufficient": "Noch zu wenig erfasste Arbeit für eine Prognose dieses Projekts.",
+    "notApplicable": "Nichts zu prognostizieren: Das Projekt hat keine offene Arbeit.",
+    "unknown": "Unbekannt",
+    "beyondHorizon": "Beim jetzigen Tempo mehr als drei Jahre entfernt",
+    "completionLabel": "Voraussichtliches Ende",
+    "deadlineLabel": "Termin",
+    "leftLabel": "Verbleibende Arbeit",
+    "leftTasks": "{left} von {total} Aufgaben",
+    "leftStages": "{left} von {total} Phasen",
+    "peopleLabel": "Benötigte Personen",
+    "peopleValue": "{needed} (jetzt {active})",
+    "qualityLabel": "Qualitätsrisiko",
+    "confidenceLabel": "Verlässlichkeit",
+    "actionsTitle": "Was es ändern würde",
+    "assumptionsTitle": "Annahmen",
+    "risk": {
+      "on_track": "Im Plan",
+      "tight": "Knapp",
+      "likely_miss": "Wird wahrscheinlich verfehlt",
+      "overdue": "Überfällig",
+      "unknown": "Unbekannt"
+    },
+    "quality": {
+      "none": "Keine offen",
+      "low": "Gering",
+      "elevated": "Erhöht",
+      "high": "Hoch",
+      "unknown": "Unbekannt"
+    },
+    "confidence": {
+      "insufficient": "zu wenige Belege",
+      "low": "gering",
+      "medium": "mittel",
+      "high": "hoch"
+    },
+    "action": {
+      "add_workers": "Personen ins Team holen",
+      "find_partner_capacity": "Partnerkapazität finden",
+      "unblock_stages": "Blockierte Phasen freigeben",
+      "unblock_tasks": "Blockierte Aufgaben freigeben",
+      "close_serious_defects": "Schwere Mängel beheben",
+      "complete_readiness": "Fehlende Einsatzbereitschaft des Teams vervollständigen",
+      "record_hours": "Die an diesem Projekt gearbeiteten Stunden erfassen",
+      "set_planned_end": "Ein geplantes Enddatum setzen",
+      "break_down_scope": "Die Arbeit in Aufgaben aufteilen",
+      "review_budget": "Das Budget prüfen",
+      "replan_deadline": "Den Termin neu planen"
+    },
+    "assumption": {
+      "trailing_window_days": "Das Tempo wird aus den letzten 28 Tagen gelesen.",
+      "calendar_day_rate": "Stunden werden auf Kalendertage verteilt; kein Arbeitskalender wird angenommen.",
+      "equal_unit_weight": "Jede Aufgabe zählt gleich.",
+      "unit_is_stage": "Das Projekt hat keine Aufgaben, daher werden Phasen gezählt.",
+      "team_stays_as_is": "Das Team bleibt, wie es jetzt ist.",
+      "absences_as_approved": "Nur genehmigte Abwesenheiten werden berücksichtigt.",
+      "throughput_without_hours": "Es sind keine Stunden erfasst, daher wird das Ende nur aus erledigter Arbeit gelesen.",
+      "cost_continues_at_observed_rate": "Die Kosten laufen im bisher beobachteten Tempo weiter.",
+      "single_hours_ledger": "Eine Stundenerfassung wird verwendet; die andere wird daneben gezeigt, nie addiert.",
+      "hours_partly_unconfirmed": "Ein Teil der Stunden ist noch nicht bestätigt.",
+      "hours_read_truncated": "Nicht alle Stunden konnten gelesen werden; die Zahlen können zu niedrig sein.",
+      "free_internal_people_unknown": "Es ist nicht bekannt, wer in der Organisation sonst frei ist."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "Ziel dieser Woche",
     "titleMine": "Ihre Aufgaben diese Woche",
