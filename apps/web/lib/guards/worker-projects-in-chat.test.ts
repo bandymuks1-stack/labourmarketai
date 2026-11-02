@@ -22,7 +22,7 @@ describe("a worker's \"my projects\" are their assignments", () => {
     // The failure-keeping variant of the page's read (listWorkerProjects is
     // listWorkerProjectsResult with the failure flattened to []): a failed
     // assignments read is "error", never "no projects" (#1314).
-    expect(src).toContain('import { listWorkerProjectsResult, loadOwnProjectAsks } from "@/lib/projects/worker-project-access";');
+    expect(src).toContain('import { listWorkerProjectsResult, loadOwnProjectAsksResult } from "@/lib/projects/worker-project-access";');
     expect(src).toContain('if (read.status !== "ok") return { kind: "error" };');
     expect(src).not.toMatch(/\.from\(|\.rpc\(/);
     expect(src).not.toMatch(/^export (interface|type|const) /m);

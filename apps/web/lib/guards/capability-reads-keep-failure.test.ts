@@ -28,4 +28,22 @@ describe("capability reads keep their failure", () => {
     expect(src).toContain("listWorkerProjectsResult()");
     expect(src).toContain('if (read.status !== "ok") return { kind: "error" };');
   });
+
+  it("a project's checklist that did not answer is unknown, never 'nothing is open'", () => {
+    // Codex P2 on #2941: a failed readiness query used to return [] and the
+    // phone said "Nothing is open for you on this project".
+    const access = read("lib/projects/worker-project-access.ts");
+    expect(access).toContain("if (error || !data) return null;");
+    expect(access).toContain("checklistRead: checklist !== null");
+    const src = read("lib/conversation/worker-projects.ts");
+    expect(src).toContain("loadOwnProjectAsksResult(activeIds)");
+    expect(src).toMatch(/asksRead: r\.assignmentStatus === "active" \? checklist : \("not_read" as const\)/);
+    const screen = read("../mobile/app/(shell)/project.tsx");
+    expect(screen).toContain('asksState(project) === "unavailable"');
+    const shapes = read("../mobile/src/capability-shapes.ts");
+    expect(shapes).toContain('const read = p.asksRead ?? "unavailable";');
+    // A capped read (asksTotalAtLeast) is not proof of an empty checklist.
+    expect(shapes).toContain('if (read === "ok" && p.asksTotalAtLeast === true) return "incomplete";');
+    expect(screen).toContain('asksState(project) === "incomplete"');
+  });
 });
