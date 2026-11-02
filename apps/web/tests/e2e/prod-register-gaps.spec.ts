@@ -51,7 +51,9 @@ test("G-1 (6.18). the waitlist keeps a real submit: the same address the second 
   const billingOn = (await page.getByTestId("pricing-cta-business").count()) > 0;
   test.skip(billingOn, "billing is on: the plan card offers the account, not the waitlist");
 
-  const email = `qa.synthetic.waitlist+${RUN}@example.com`;
+  // Unique per workflow ATTEMPT: a re-run keeps GITHUB_RUN_ID, and an address
+  // an earlier attempt stored would answer "duplicate" on the first submit.
+  const email = `qa.synthetic.waitlist+${RUN}-${process.env.GITHUB_RUN_ATTEMPT ?? "1"}@example.com`;
   const submit = async (): Promise<string> => {
     await card.getByRole("button").first().click();
     const dialog = page.getByRole("dialog");
