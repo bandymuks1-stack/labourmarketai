@@ -348,7 +348,7 @@ The 19 journeys (rows in brackets):
 | 7.28 | Payee and terms | FAIL | — | live terms name seller UAB the partner organization but no renewal/cancellation/refund/14-day withdrawal clauses, and say legal info is 'being prepared' while the paid pilot is live; anon pricing says nothing can be boug… | no | owner/legal clauses (RED); meta-text removal in progress |
 | 7.29 | VAT Stripe Tax | NOT_VERIFIED | — | RED draft #2685; sandbox scenarios PASS Stripe-side | unproven |  |
 | 7.30 | Invoices + work-acceptance acts from the Work Journal | NOT_IMPLEMENTED | 2026-11-01 | vision §10, §19 item 5 (invoice, advance, credit note, acceptance act, accountant export) | no | owner: invoicing rules per country, then build |
-| 7.31 | Free + two paid tiers for workers AND for companies | NOT_IMPLEMENTED | 2026-11-01 | owner product goal (2026-11-01); documented today: worker free only (+1 deferred), company free + EUR 99 | no | owner: final tiers, limits and prices (separate approval); no pricing change before that |
+| 7.31 | Free + two paid tiers for workers AND for companies | NOT_IMPLEMENTED | 2026-11-01 | owner product goal (2026-11-01); documented today: worker free only (+1 deferred), company free + one paid tier (amount in the private record) | no | owner: final tiers, limits and prices (separate approval); no pricing change before that |
 
 ## Languages & markets
 

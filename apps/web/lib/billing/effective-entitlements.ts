@@ -124,8 +124,20 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
   // refused every need while billing is live. Roles still pick the audience
   // for the personal workspace. This changes the FALLBACK plan only - never
   // access: the employer gate / membership proof is decided before this read.
+  //
+  // The same holds for a PLATFORM ADMIN acting inside an organization
+  // (production defect measured 2026-11-02): the admin shortcut resolved the
+  // member to `admin_internal` BEFORE the organization's plan was read, and
+  // that internal plan carries no organization feature — a manager of a PAID
+  // organization who also holds the platform `admin` role was refused every
+  // new need (`over_open_need_limit`, limit 0) while the colleague who paid was
+  // not. Platform admin rights are RBAC-gated on their own surfaces
+  // (`requireSuperadmin`), never through an organization's entitlement, so an
+  // organization subject resolves the ORGANIZATION's plan whoever acts in it.
+  const actsForOrganization = subject?.type === "organization";
   const audience: PlanAudience =
-    subject?.type === "organization" && heldAudience === "worker" ? "company" : heldAudience;
+    actsForOrganization && (heldAudience === "worker" || heldAudience === "admin") ? "company" : heldAudience;
+  const adminShortcut = isAdmin && !actsForOrganization;
 
   // Real subscription + manual override (degrade if the billing tables are
   // not applied yet → null, i.e. free/permissive).
@@ -227,7 +239,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
 
   const ctx = resolveEntitlements({
     billingActive,
-    isAdmin,
+    isAdmin: adminShortcut,
     audience,
     subscriptionPlanKey,
     subscriptionStatus,
