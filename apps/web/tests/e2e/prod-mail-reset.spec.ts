@@ -55,7 +55,16 @@ async function phone(browser: Browser): Promise<{ page: Page; close: () => Promi
 async function signIn(page: Page, secret: string): Promise<number> {
   await page.goto("/lt/auth/login");
   await page.locator('input[name="email"]').fill(ADDRESS);
-  await page.locator('input[name="password"]').fill(secret);
+  // A failed fill repeats the typed value in Playwright's call log, and walk
+  // errors land in public artefacts: replace it with an error that keeps
+  // neither the message nor the cause.
+  let filled = true;
+  try {
+    await page.locator('input[name="password"]').fill(secret);
+  } catch {
+    filled = false;
+  }
+  if (!filled) throw new Error("the sign-in password field could not be filled (details withheld: they repeat the password)");
   const answer = page.waitForResponse((r) => r.url().includes("/auth/v1/token") && r.request().method() === "POST", {
     timeout: 30_000,
   });
