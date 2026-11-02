@@ -48,6 +48,9 @@ begin
    where lower(invited_email) = c_email and external_reference = c_ref;
   get diagnostics v_inv = row_count;
 
+  -- pilot_events.profile_id is NO ACTION: the walk's own analytics events go first.
+  delete from public.pilot_events where profile_id = v_uid;
+
   delete from auth.users where id = v_uid;
 
   if exists (select 1 from auth.users where id = v_uid)
@@ -55,6 +58,7 @@ begin
      or exists (select 1 from public.workers where profile_id = v_uid)
      or exists (select 1 from public.profile_roles where profile_id = v_uid)
      or exists (select 1 from public.invitation_acceptances where profile_id = v_uid)
+     or exists (select 1 from public.pilot_events where profile_id = v_uid)
      or exists (select 1 from public.invitations where external_reference = c_ref) then
     raise exception 'G3 ABORT: rows of the synthetic account survived';
   end if;
