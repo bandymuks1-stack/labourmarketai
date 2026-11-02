@@ -183,6 +183,7 @@ hand-over complete; they start nothing without an assignment here.
 | PR | Goal | Executor | CODE_COMPLETE | MERGED | DEPLOYED | LIVE_VERIFIED |
 |---|---|---|---|---|---|---|
 | #2917 | brigade offered and matched as a unit | lane A | ✓ | ✓ | ✓ | ✓ walk 41350506578 (19/19) |
+| #2933 | an organization's plan applies to a platform admin acting in it (RED, owner-approved) | nonstop-pilot-need-limit | ✓ | ✓ `233b2e7c8` | ✓ | ✓ 2026-11-02 — MCP create + Chrome as the affected member (details private) |
 | #2913 | six production-applied migrations restored byte-exact (RED, approved) | coordinator | ✓ | ✓ | ✓ (no production change) | ✓ parity gate 41342643253 |
 | #2916 | mobile: correct a journal entry | mobile | ✓ | ✓ | n/a (app build) | Android vs production ✓; ✓ from `main` @bdb27bb88: Android 41451882387, iOS 41451829006 (attempt 2 of 2; attempt 1 lost the simulator screen after sign-in, not a product defect) — correction draft → confirm passed on both |
 | #2928 | mobile: messages | mobile | ✓ | ✓ | n/a (app build) | ✓ list, conversation opened, reply draft previewed (not sent) — Android 41451882387, iOS 41451829006 from `main` |
@@ -198,13 +199,43 @@ hand-over complete; they start nothing without an assignment here.
 | #2903 → #2921 | D-4 reset by real mail → D-5 invited path by real mail | coordinator | ✓ | ✓ `3543c13bc` / `c2580a328` | ✓ (test code) | ✓ mail-reset 41428606490 (2/2), invited-worker 41430482903 (7/7) |
 | #2918 / #2923 / #2924 | C-3, X-2, consent wording | ChatGPT security | ✓ (CI green, Codex clean) | — | — | owner gate |
 
-### 3.3 Owner-gated (RED, draft, `needs-human-gate`) — 39 open (2026-11-02)
+### 3.3 Open-PR audit (owner order 2026-11-02 "visų atvirų PR patikrų ir blokavimų auditas")
 
-Conflict upkeep by the session that opened each (§3.1), otherwise by the coordinator. None may be
-applied or merged without an owner approval naming it.
-#2923 #2918 #2903 #2886 #2816 #2812 #2811 #2809 #2806 #2795 #2752 #2747 #2746 #2739 #2738
-#2713 #2707 #2704 #2701 #2693 #2685 #2682 #2647 #2474 #2471 #2463 #2454 #2441 #2440 #2420
-#2418 #2410 #2362 #2235 #2227 #2209 #2203 #2165 #1816.
+77 PRs open at the audit (79 found; #2935, #1421 closed as superseded, evidence kept on the PRs).
+A failing `Vercel` status is stale (Vercel was removed) and blocks nothing. RED / `needs-human-gate`
+PRs are never merged or applied without an owner approval naming them.
+
+**Technical — fixed in the current flow by an existing executor**
+
+| PR | Blocker | Executor | Action | Owner OK |
+|---|---|---|---|---|
+| #2959 | `quality`: 4 migration guards (new migration file vs baselines / ordering) | `local_b55e3e39` | guard baselines + timestamp order; stays RED draft | yes (apply) |
+| #2941 | CI running after 3 Codex P2 fixes | `local_00be3967` | auto-merge once Codex is clean | no |
+| #2961, #2962 | CI running | mobile / J-12 executors | auto-merge on | no |
+| #2844 | was behind main (all checks green 10-27) | coordinator | branch updated, auto-merge on | no |
+| #2154, #2455 | behind main | coordinator | branch updated, auto-merge | no |
+| #2738, #2739, #2410 | conflicts; their migrations are already on main via #2913 | `local_13cb59b3` | rebase without the migration, land the app code; GREEN only if nothing RED remains | no if GREEN |
+| #2454 | `signup-isolated` fails | `local_3951ad81` | fix the walk; stays RED (edits a prod-qa workflow) | yes |
+| #2682 | conflicts (pilot pass name / term / amount display) | coordinator | rebase; billing = RED class | yes |
+| #1617 + #1619 | CodeQL `Analyze` fails because init and analyze must move together | — | merge as a pair after rebase (low priority) | no |
+| #1620, #1622–#1625, #2356 | Dependabot bumps behind main, not on main | — | regroup / rebase in one dependency batch after P0 | no |
+
+**Owner decisions (RED / waiver / strategy)** — by product value: #2693 (read grant so vacancy retention
+can run), #2747 (free workers discoverable by default), #2474 (free plan 3 profiles + VIP), billing chain
+#2441 → #2647 → #2685 (+ #2701 copy) → #2704, #2209 (country filter), #2746 → #2713 (listing lifecycle,
+goods purchases), #2471 (external profile links consent v3), #2707 (MCP scopes + gate waiver), #2362 (165
+dates), DB batch #2420 / #2418 / #2440 / #1045, J-12 #2959, RED-1 #2946, #2937 (worker role in chat/MCP),
+C-3 #2918 → X-2 #2923, #2924 / #2642 / #2403 (product-gate waivers), #2886 (owner hold), #2463 (ESCO cold
+locales), #2235, #2227, #2203, #2165, #1816, #2816, #2812, #2811, #2809, #2806, #2795, #2752 (legal),
+#2842 (paid terms draft, legal).
+
+### 3.4 Stale / superseded — owner decides keep or close (nobody closes them on the coordinator's say-so)
+
+Recommended CLOSE (evidence stays on the PR): #2438 (superseded by the program registers), #740 (voice
+deferred), #2419 (privacy-refusal part landed in #2433; only 429/timeout remains), #1225 (landing moved
+on), #897 + #896 (stacked financial-layer drafts), #2915 (second register-like snapshot; the 288 statuses
+live in FUNCTION_REGISTER). Rescope: #2165 (referral pipeline already on main), #1577, #1835.
+Leave parked: #2198 (voice), #2377, #2370 (owner visual), #1211, #1166.
 
 ### 3.3a Owner-approved, QUEUED — not started (do not begin before the start conditions)
 
@@ -220,12 +251,6 @@ the ban on automatic replies to company mail stays; core publishing and candidat
 stay free; no revenue projections from unconfirmed placement commissions; first pilot =
 50 real offers, staged, browser-verified (desktop + mobile), with measured views,
 sign-ups, applications and returning users. No new agent, radar or parallel project.
-
-### 3.4 Stale non-draft PRs (`STALE?`, >7 days no push)
-
-#2642 (owner waiver needed), #2455, #2449, #2447 (draft, owner hold), #2438, #2419,
-#2403 (waiver), #2377, #2370, #2356 (dependabot). Owner decides keep/close; nobody
-closes them on the coordinator's say-so.
 
 ---
 
