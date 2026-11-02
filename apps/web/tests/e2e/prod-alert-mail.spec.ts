@@ -224,10 +224,21 @@ test("A-3. 390 px: the work card says Sweden; the next visit writes the job aler
   assertSyntheticSession();
   const { ctx, page } = await open(browser);
   try {
-    await page.goto("/lt/dashboard/profile");
+    // The work card lives in the profile's folded "details" disclosure
+    // (#cv-details). The person reaches it the way the hub's readiness step
+    // links to it: `#cv-availability`, which DetailsHashOpener opens on
+    // arrival. Run 41469193732 went to the bare page and waited on a toggle
+    // inside the still-closed disclosure. Tapping the bar is the fallback.
+    await page.goto("/lt/dashboard/profile#cv-availability");
     await settle(page);
-    await inMain(page).getByTestId("work-card-editor-toggle").first().click();
-    const editor = inMain(page).getByTestId("work-card-editor").first();
+    const card = inMain(page).getByTestId("profile-work-card-editor");
+    if (!(await card.isVisible().catch(() => false))) {
+      await inMain(page).locator("details#cv-details > summary").click();
+    }
+    await expect(card, "the work card is reachable on a phone").toBeVisible({ timeout: 30_000 });
+    const toggle = card.getByTestId("work-card-editor-toggle");
+    if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+    const editor = card.getByTestId("work-card-editor");
     await expect(editor).toBeVisible({ timeout: 30_000 });
     await editor.locator('input[name="preferred_countries"]').fill(COUNTRY);
     await expectNoSidewaysScroll(page, "profile, work card (390)");
@@ -238,8 +249,8 @@ test("A-3. 390 px: the work card says Sweden; the next visit writes the job aler
     shared.since = await nextUid();
     const t0 = Date.now();
     await editor.getByTestId("work-card-save").click();
-    await expect(inMain(page).getByTestId("work-card-saved").or(inMain(page).getByTestId("work-card-error"))).toBeVisible({ timeout: 30_000 });
-    expect(await inMain(page).getByTestId("work-card-error").isVisible(), "the work card was refused").toBe(false);
+    await expect(editor.getByTestId("work-card-saved").or(editor.getByTestId("work-card-error"))).toBeVisible({ timeout: 30_000 });
+    expect(await editor.getByTestId("work-card-error").isVisible(), "the work card was refused").toBe(false);
 
     await page.goto("/lt/dashboard");
     await settle(page);
