@@ -26,6 +26,7 @@ drop function if exists public.request_education_cohort_join_v1(uuid, text, text
 drop function if exists public.list_open_education_cohorts_v1();
 drop function if exists public.set_education_cohort_join_requests_v1(uuid, boolean);
 drop function if exists public.archive_education_cohort_v1(uuid);
+drop function if exists public.education_cohort_decider_basis_v1(uuid);
 
 alter table public.education_cohort_members drop constraint if exists education_cohort_members_status_check;
 alter table public.education_cohort_members

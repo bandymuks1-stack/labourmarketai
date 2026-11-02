@@ -1,7 +1,7 @@
 -- @human-gate-approved — RED draft J-12 (owner decision 2026-11-02); NOT applied. Apply only after explicit owner approval, via Supabase MCP apply_migration.
 -- 20261102160000_education_cohort_join_requests_v1
 --
--- ██ RED CLASS — human gate (six new SECURITY DEFINER commands + GRANT, a widened
+-- ██ RED CLASS — human gate (seven new SECURITY DEFINER functions + GRANT, a widened
 -- ██ status CHECK on a membership table, and one command creates a `student`
 -- ██ engagement context). Draft; owner-channel apply only, never auto-merged.
 --
@@ -29,9 +29,16 @@
 -- name and the group's own name, programme and dates: what the institution
 -- chose to publish by opening it, nothing about other learners.
 --
--- WHO DECIDES. `manages_organization(cohort's organisation)` — the same
--- authority that assigns members today and that confirms a learner's journal
--- entries under decision 0028. Nobody decides their own request.
+-- WHO DECIDES (owner decision 2026-11-03). Only the institution's OWN owner,
+-- admin or manager: `education_cohort_decider_basis_v1` below. It is narrower
+-- than `manages_organization`, which also admits `external_manager`. An
+-- external manager or agency may decide only under an explicit, limited and
+-- revocable per-group delegation from the institution — a separate, later PR;
+-- until then they get no access by default. Nobody decides their own request.
+-- Administering a group never confirms practice, hours, competences or a
+-- qualification: accept writes the membership, the student relationship and
+-- an audit row, nothing else. Every decision's actor and authority basis is
+-- in `audit_logs` (admin-read).
 --
 -- THE RELATIONSHIP. Assigning a member requires an accepted student relationship
 -- (membership never creates a relationship the learner did not accept). Here the
@@ -76,7 +83,32 @@ alter table public.education_cohort_members
 comment on column public.education_cohort_members.request_label is
   'The name the learner typed when asking to join — the only thing about the learner the institution reads.';
 
--- ── 2. Institution opens / closes a group for requests ───────────────────────
+-- ── 2. Who may administer a group: the institution's own people only ───────
+-- Returns the authority basis ('membership:owner|admin|manager' or
+-- 'engagement:owner|manager') or null. `external_manager` — by engagement or
+-- by membership — never qualifies (owner decision 2026-11-03). Internal helper:
+-- callable only from the definer commands below, not by any client role.
+create or replace function public.education_cohort_decider_basis_v1(p_org uuid)
+returns text
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select coalesce(
+    (select 'membership:' || m.role from public.company_memberships m
+      where m.profile_id = auth.uid() and m.organization_id = p_org
+        and m.status = 'active' and m.role in ('owner', 'admin', 'manager')
+      order by array_position(array['owner', 'admin', 'manager'], m.role) limit 1),
+    (select 'engagement:' || ec.relationship_slug from public.engagement_contexts ec
+      where ec.profile_id = auth.uid() and ec.organization_id = p_org
+        and ec.status = 'active' and ec.relationship_slug in ('owner', 'manager')
+      order by array_position(array['owner', 'manager'], ec.relationship_slug) limit 1))
+   where p_org is not null and auth.uid() is not null;
+$$;
+revoke all on function public.education_cohort_decider_basis_v1(uuid) from public, anon, authenticated;
+
+-- ── 2b. Institution opens / closes a group for requests ───────────────────────
 
 create or replace function public.set_education_cohort_join_requests_v1(
   p_cohort_id uuid,
@@ -88,16 +120,21 @@ security definer
 set search_path = public
 as $$
 declare
-  v_uid uuid := auth.uid();
-  v_org uuid;
+  v_uid   uuid := auth.uid();
+  v_org   uuid;
+  v_basis text;
 begin
   if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
   select organization_id into v_org from public.education_cohorts where id = p_cohort_id and archived_at is null;
   if v_org is null then raise exception 'cohort_not_found' using errcode = '42501'; end if;
-  if not public.manages_organization(v_org) then raise exception 'not_manager' using errcode = '42501'; end if;
+  v_basis := public.education_cohort_decider_basis_v1(v_org);
+  if v_basis is null then raise exception 'not_manager' using errcode = '42501'; end if;
   update public.education_cohorts
      set join_requests_open = coalesce(p_open, false), updated_at = now()
    where id = p_cohort_id;
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (v_uid, 'education_cohort_join_requests_set_v1', 'education_cohorts', p_cohort_id,
+    jsonb_build_object('open', coalesce(p_open, false), 'authority_basis', v_basis));
 end;
 $$;
 
@@ -112,13 +149,15 @@ security definer
 set search_path = public
 as $$
 declare
-  v_uid uuid := auth.uid();
-  v_org uuid;
+  v_uid   uuid := auth.uid();
+  v_org   uuid;
+  v_basis text;
 begin
   if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
   select organization_id into v_org from public.education_cohorts where id = p_cohort_id and archived_at is null;
   if v_org is null then raise exception 'cohort_not_found' using errcode = '42501'; end if;
-  if not public.manages_organization(v_org) then raise exception 'not_manager' using errcode = '42501'; end if;
+  v_basis := public.education_cohort_decider_basis_v1(v_org);
+  if v_basis is null then raise exception 'not_manager' using errcode = '42501'; end if;
   update public.education_cohort_members
      set status = 'declined', decided_at = now()
    where cohort_id = p_cohort_id and status = 'requested';
@@ -126,7 +165,8 @@ begin
      set archived_at = now(), join_requests_open = false, updated_at = now()
    where id = p_cohort_id;
   insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
-  values (v_uid, 'education_cohort_archived_v1', 'education_cohorts', p_cohort_id, '{}'::jsonb);
+  values (v_uid, 'education_cohort_archived_v1', 'education_cohorts', p_cohort_id,
+    jsonb_build_object('authority_basis', v_basis));
 end;
 $$;
 
@@ -254,13 +294,15 @@ as $$
 declare
   v_uid      uuid := auth.uid();
   v_org      uuid;
+  v_basis    text;
   v_existing uuid;
 begin
   if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
   if p_decision not in ('accept', 'decline') then raise exception 'invalid_decision' using errcode = '22023'; end if;
   select organization_id into v_org from public.education_cohorts where id = p_cohort_id and archived_at is null;
   if v_org is null then raise exception 'cohort_not_found' using errcode = '42501'; end if;
-  if not public.manages_organization(v_org) then raise exception 'not_manager' using errcode = '42501'; end if;
+  v_basis := public.education_cohort_decider_basis_v1(v_org);
+  if v_basis is null then raise exception 'not_manager' using errcode = '42501'; end if;
   -- Nobody decides their own request (the decision-0028 rule, applied here).
   if p_profile_id = v_uid then raise exception 'self_decision_not_allowed' using errcode = '42501'; end if;
   perform 1 from public.education_cohort_members
@@ -274,7 +316,7 @@ begin
      where cohort_id = p_cohort_id and profile_id = p_profile_id;
     insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
     values (v_uid, 'education_cohort_join_declined_v1', 'education_cohorts', p_cohort_id,
-      jsonb_build_object('profile_id', p_profile_id));
+      jsonb_build_object('profile_id', p_profile_id, 'authority_basis', v_basis));
     return 'declined';
   end if;
 
@@ -296,7 +338,7 @@ begin
    where cohort_id = p_cohort_id and profile_id = p_profile_id;
   insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
   values (v_uid, 'education_cohort_join_accepted_v1', 'education_cohorts', p_cohort_id,
-    jsonb_build_object('profile_id', p_profile_id));
+    jsonb_build_object('profile_id', p_profile_id, 'authority_basis', v_basis));
   return 'accepted';
 end;
 $$;
@@ -322,4 +364,5 @@ grant execute on function public.decide_education_cohort_join_v1(uuid, uuid, tex
 -- drop function if exists public.list_open_education_cohorts_v1();
 -- drop function if exists public.set_education_cohort_join_requests_v1(uuid, boolean);
 -- drop function if exists public.archive_education_cohort_v1(uuid);
+-- drop function if exists public.education_cohort_decider_basis_v1(uuid);
 -- restore the two-state CHECK; drop the four request columns and join_requests_open.

@@ -33,6 +33,9 @@ MGR=a0000000-0000-0000-0000-00000000000a
 LEARNER=b0000000-0000-0000-0000-00000000000b
 OTHER=c0000000-0000-0000-0000-00000000000c
 OUTSIDER=d0000000-0000-0000-0000-00000000000d
+EXTENG=e0000000-0000-0000-0000-00000000000e
+EXTMEM=e1000000-0000-0000-0000-00000000000e
+MEMADMIN=e2000000-0000-0000-0000-00000000000e
 ORG=f0000000-0000-0000-0000-0000000000f1
 PROG=a1000000-0000-0000-0000-0000000000a1
 COH=c1000000-0000-0000-0000-0000000000c1
@@ -63,10 +66,12 @@ q() { as "$1" "$2" "$3" | tail -1; }
 DB=j12proof; fresh $DB
 PSQL="psql -h $HOST -p $PORT -U postgres -d $DB -v ON_ERROR_STOP=1 -q"
 $PSQL >/dev/null <<SQL
-insert into profiles values ('$MGR'), ('$LEARNER'), ('$OTHER'), ('$OUTSIDER');
+insert into profiles values ('$MGR'), ('$LEARNER'), ('$OTHER'), ('$OUTSIDER'), ('$EXTENG'), ('$EXTMEM'), ('$MEMADMIN');
 insert into organizations values ('$ORG', 'QA Institution', null, null);
 insert into organization_roles values ('$ORG', 'training_provider');
 insert into engagement_contexts (profile_id, organization_id, relationship_slug, hash_self) values ('$MGR', '$ORG', 'manager', 'x');
+insert into engagement_contexts (profile_id, organization_id, relationship_slug, hash_self) values ('$EXTENG', '$ORG', 'external_manager', 'x');
+insert into company_memberships (profile_id, organization_id, role) values ('$EXTMEM', '$ORG', 'external_manager'), ('$MEMADMIN', '$ORG', 'admin');
 insert into education_programs (id, organization_id, name) values ('$PROG', '$ORG', 'Tiling programme');
 insert into education_cohorts (id, program_id, organization_id, name) values ('$COH', '$PROG', '$ORG', 'Group A');
 SQL
@@ -99,7 +104,24 @@ q $MGR authenticated "select request_education_cohort_join_v1('$COH','The manage
 check "nobody decides their own request"        "self_decision_not_allowed" "$(q $MGR authenticated "select decide_education_cohort_join_v1('$COH','$MGR','accept');")"
 check "no request, nothing to decide"           "no_pending_request" "$(q $MGR authenticated "select decide_education_cohort_join_v1('$COH','$OTHER','decline');")"
 check "bad decision word refused"               "invalid_decision" "$(q $MGR authenticated "select decide_education_cohort_join_v1('$COH','$LEARNER','maybe');")"
+echo "== external managers get no access by default (owner decision 2026-11-03)"
+check "sanity: manages_organization admits the external manager (engagement)" "t" "$(q $EXTENG authenticated "select manages_organization('$ORG');")"
+check "sanity: manages_organization admits the external manager (membership)" "t" "$(q $EXTMEM authenticated "select manages_organization('$ORG');")"
+for X in $EXTENG $EXTMEM; do
+  check "external manager $X cannot accept"     "not_manager" "$(q $X authenticated "select decide_education_cohort_join_v1('$COH','$LEARNER','accept');")"
+  check "external manager $X cannot decline"    "not_manager" "$(q $X authenticated "select decide_education_cohort_join_v1('$COH','$LEARNER','decline');")"
+  check "external manager $X cannot archive"    "not_manager" "$(q $X authenticated "select archive_education_cohort_v1('$COH');")"
+  check "external manager $X cannot open/close" "not_manager" "$(q $X authenticated "select set_education_cohort_join_requests_v1('$COH', false);")"
+done
+check "the request is still pending after those refusals" "requested" "$(q '' postgres "select status from education_cohort_members where profile_id='$LEARNER';")"
+check "clients cannot call the authority helper" "permission denied for function education_cohort_decider_basis_v1" "$(q $MGR authenticated "select education_cohort_decider_basis_v1('$ORG');")"
+
+SNAP="select string_agg(table_name || '=' || (xpath('/row/c/text()', query_to_xml(format('select count(*) as c from public.%I', table_name), false, true, '')))[1]::text, ',' order by table_name) from information_schema.tables where table_schema = 'public' and table_type = 'BASE TABLE' and table_name not in ('engagement_contexts', 'audit_logs');"
+BEFORE="$(q '' postgres "$SNAP")"
 check "manager accepts"                         "accepted" "$(q $MGR authenticated "select decide_education_cohort_join_v1('$COH','$LEARNER','accept');")"
+check "accept wrote no confirmation, journal, hours or recognition row (every other table unchanged)" "$BEFORE" "$(q '' postgres "$SNAP")"
+check "accept added one student engagement and one audit row" "1|1" "$(q '' postgres "select (select count(*) from engagement_contexts where profile_id='$LEARNER'), (select count(*) from audit_logs where action='education_cohort_join_accepted_v1');")"
+check "audit row carries actor and authority basis" "t|engagement:manager" "$(q '' postgres "select actor_id = '$MGR', payload->>'authority_basis' from audit_logs where action='education_cohort_join_accepted_v1';")"
 check "membership active, decided"              "active|t" "$(q '' postgres "select status, decided_at is not null from education_cohort_members where profile_id='$LEARNER';")"
 check "learner's own row carries no decider id" "t" "$(q $LEARNER authenticated "select added_by is null from education_cohort_members;")"
 check "decider recorded in the audit log"        "1" "$(q '' postgres "select count(*) from audit_logs where actor_id='$MGR' and action='education_cohort_join_accepted_v1';")"
@@ -115,7 +137,8 @@ check "other learner asks"                      "requested" "$(q $OTHER authenti
 check "and withdraws"                           "" "$(q $OTHER authenticated "select withdraw_education_cohort_join_v1('$COH');")"
 check "withdrawing twice refused"               "no_pending_request" "$(q $OTHER authenticated "select withdraw_education_cohort_join_v1('$COH');")"
 check "asks again after withdrawing"            "requested" "$(q $OTHER authenticated "select request_education_cohort_join_v1('$COH','Ona');")"
-check "manager declines"                        "declined" "$(q $MGR authenticated "select decide_education_cohort_join_v1('$COH','$OTHER','decline');")"
+check "an internal admin (membership) declines" "declined" "$(q $MEMADMIN authenticated "select decide_education_cohort_join_v1('$COH','$OTHER','decline');")"
+check "decline audit basis is the membership role" "t|membership:admin" "$(q '' postgres "select actor_id = '$MEMADMIN', payload->>'authority_basis' from audit_logs where action='education_cohort_join_declined_v1' limit 1;")"
 check "decline creates no relationship"         "0" "$(q '' postgres "select count(*) from engagement_contexts where profile_id='$OTHER';")"
 check "declined row carries no decider id"      "t" "$(q $OTHER authenticated "select added_by is null from education_cohort_members;")"
 check "re-asking right after a decline refused" "request_cooldown" "$(q $OTHER authenticated "select request_education_cohort_join_v1('$COH','Ona');")"
@@ -140,6 +163,7 @@ q $MGR authenticated "select set_education_cohort_join_requests_v1('$COH', true)
 check "outsider asks before the archive"        "requested" "$(q $OUTSIDER authenticated "select request_education_cohort_join_v1('$COH','Petras');")"
 check "a learner cannot archive"                "not_manager" "$(q $LEARNER authenticated "select archive_education_cohort_v1('$COH');")"
 check "manager archives the group"              "" "$(q $MGR authenticated "select archive_education_cohort_v1('$COH');")"
+check "archive audit carries the basis"         "engagement:manager" "$(q '' postgres "select payload->>'authority_basis' from audit_logs where action='education_cohort_archived_v1';")"
 check "archive closed it and declined the pending request" "t|f|declined" "$(q '' postgres "select c.archived_at is not null, c.join_requests_open, m.status from education_cohorts c join education_cohort_members m on m.cohort_id=c.id and m.profile_id='$OUTSIDER' where c.id='$COH';")"
 check "member history kept"                     "active" "$(q '' postgres "select status from education_cohort_members where profile_id='$LEARNER';")"
 check "archived group takes no request"         "cohort_not_found" "$(q $OTHER authenticated "select request_education_cohort_join_v1('$COH','Ona');")"
@@ -156,7 +180,7 @@ PSQL="psql -h $HOST -p $PORT -U postgres -d $DB -v ON_ERROR_STOP=1 -q"
 $PSQL -f "$MIG" >/dev/null
 check "clean rollback applies"                  "ok" "$($PSQL -f "$DOWN" >/dev/null 2>&1 && echo ok)"
 check "two-state CHECK restored"                "CHECK ((status = ANY (ARRAY['active'::text, 'left'::text])))" "$(q '' postgres "select pg_get_constraintdef(oid) from pg_constraint where conname='education_cohort_members_status_check';")"
-check "all six functions dropped"              "0" "$(q '' postgres "select count(*) from pg_proc where proname in ('set_education_cohort_join_requests_v1','archive_education_cohort_v1','list_open_education_cohorts_v1','request_education_cohort_join_v1','withdraw_education_cohort_join_v1','decide_education_cohort_join_v1');")"
+check "all seven functions dropped"              "0" "$(q '' postgres "select count(*) from pg_proc where proname in ('set_education_cohort_join_requests_v1','archive_education_cohort_v1','education_cohort_decider_basis_v1','list_open_education_cohorts_v1','request_education_cohort_join_v1','withdraw_education_cohort_join_v1','decide_education_cohort_join_v1');")"
 check "migration re-applies after rollback"     "ok" "$($PSQL -f "$MIG" >/dev/null 2>&1 && echo ok)"
 
 echo "== $PASS passed, $FAIL failed"

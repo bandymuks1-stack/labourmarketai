@@ -38,10 +38,24 @@ describe("one membership store (decision 0016)", () => {
 });
 
 describe("authority", () => {
-  it("only a manager of the cohort's organisation opens a group or decides a request", () => {
+  it("only the institution's own owner/admin/manager administers a group — never external_manager (owner 2026-11-03)", () => {
     for (const name of ["set_education_cohort_join_requests_v1", "decide_education_cohort_join_v1", "archive_education_cohort_v1"]) {
-      expect(fn(name)).toContain("public.manages_organization(v_org)");
+      expect(fn(name)).toContain("v_basis := public.education_cohort_decider_basis_v1(v_org);");
+      expect(fn(name)).not.toContain("manages_organization");
+      expect(fn(name)).toMatch(/'authority_basis', v_basis/);
     }
+    const basis = fn("education_cohort_decider_basis_v1");
+    expect(basis).toContain("m.role in ('owner', 'admin', 'manager')");
+    expect(basis).toContain("ec.relationship_slug in ('owner', 'manager')");
+    expect(basis).not.toContain("external_manager");
+    expect(body).toContain("revoke all on function public.education_cohort_decider_basis_v1(uuid) from public, anon, authenticated;");
+    expect(body).not.toMatch(/grant execute on function public\.education_cohort_decider_basis_v1/);
+  });
+
+  it("accepting writes only the membership, the student relationship and an audit row — no confirmation, hours or recognition", () => {
+    const decide = fn("decide_education_cohort_join_v1");
+    const targets = [...decide.matchAll(/(?:insert into|update)\s+public\.([a-z_]+)/g)].map((m) => m[1]);
+    expect(new Set(targets)).toEqual(new Set(["education_cohort_members", "engagement_contexts", "audit_logs"]));
   });
 
   it("nobody decides their own request", () => {
