@@ -23,6 +23,7 @@ import { test, expect, type Browser, type Page } from "./prod-walk";
  * synthetic groups; the archived rows stay as audit data.
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
+// Matched as a prefix: the production name is "QA-SYNTHETIC Alfa (testinis subjektas)".
 const ALFA = "QA-SYNTHETIC Alfa";
 const PROGRAM = "QA-SYNTHETIC praktikos programa";
 const COHORT = `QA-SYNTHETIC prašymų grupė ${RUN}`;

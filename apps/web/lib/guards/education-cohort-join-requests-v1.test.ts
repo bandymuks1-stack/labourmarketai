@@ -52,6 +52,13 @@ describe("authority", () => {
     expect(body).not.toMatch(/grant execute on function public\.education_cohort_decider_basis_v1/);
   });
 
+  it("request-state rows are readable only by the learner, internal deciders and admin; active/left rows unchanged", () => {
+    expect(body).toContain("drop policy if exists education_cohort_members_select on public.education_cohort_members;");
+    expect(body).toMatch(/status in \('active', 'left'\)\s+and public\.manages_organization\(public\.education_cohort_organization_v1\(cohort_id\)\)/);
+    expect(body).toMatch(/status not in \('active', 'left'\)\s+and public\.is_education_cohort_internal_decider_v1\(/);
+    expect(down).toMatch(/profile_id = auth\.uid\(\)\s+or public\.manages_organization\(public\.education_cohort_organization_v1\(cohort_id\)\)\s+or public\.is_admin\(\)/);
+  });
+
   it("accepting writes only the membership, the student relationship and an audit row — no confirmation, hours or recognition", () => {
     const decide = fn("decide_education_cohort_join_v1");
     const targets = [...decide.matchAll(/(?:insert into|update)\s+public\.([a-z_]+)/g)].map((m) => m[1]);

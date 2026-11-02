@@ -1,7 +1,8 @@
 -- @human-gate-approved — RED draft J-12 (owner decision 2026-11-02); NOT applied. Apply only after explicit owner approval, via Supabase MCP apply_migration.
 -- 20261102160000_education_cohort_join_requests_v1
 --
--- ██ RED CLASS — human gate (seven new SECURITY DEFINER functions + GRANT, a widened
+-- ██ RED CLASS — human gate (eight new SECURITY DEFINER functions + GRANT, a TIGHTENED
+-- ██ select policy on the membership table, a widened
 -- ██ status CHECK on a membership table, and one command creates a `student`
 -- ██ engagement context). Draft; owner-channel apply only, never auto-merged.
 --
@@ -107,6 +108,39 @@ as $$
    where p_org is not null and auth.uid() is not null;
 $$;
 revoke all on function public.education_cohort_decider_basis_v1(uuid) from public, anon, authenticated;
+
+-- Policy-side twin of the basis: a boolean the members_select policy can call
+-- as the querying role (it reveals only whether the CALLER may decide).
+create or replace function public.is_education_cohort_internal_decider_v1(p_org uuid)
+returns boolean
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select public.education_cohort_decider_basis_v1(p_org) is not null;
+$$;
+revoke all on function public.is_education_cohort_internal_decider_v1(uuid) from public, anon;
+grant execute on function public.is_education_cohort_internal_decider_v1(uuid) to authenticated;
+
+-- ── 2a. Who may READ a request row (TIGHTENING, owner decision 2026-11-03) ──
+-- Until now every row was readable by the learner, by `manages_organization`
+-- of the cohort's organisation (which admits external_manager) and by admin.
+-- Active / left rows keep exactly that. A request-state row (requested /
+-- declined / withdrawn, carrying the learner-typed label and note) is readable
+-- only by the learner, the institution's own owner/admin/manager, and admin —
+-- never by an external manager by default. Rollback restores the 20260903150000
+-- policy text exactly.
+drop policy if exists education_cohort_members_select on public.education_cohort_members;
+create policy education_cohort_members_select on public.education_cohort_members for select
+  using (
+    profile_id = auth.uid()
+    or (status in ('active', 'left')
+        and public.manages_organization(public.education_cohort_organization_v1(cohort_id)))
+    or (status not in ('active', 'left')
+        and public.is_education_cohort_internal_decider_v1(public.education_cohort_organization_v1(cohort_id)))
+    or public.is_admin()
+  );
 
 -- ── 2b. Institution opens / closes a group for requests ───────────────────────
 
@@ -364,5 +398,7 @@ grant execute on function public.decide_education_cohort_join_v1(uuid, uuid, tex
 -- drop function if exists public.list_open_education_cohorts_v1();
 -- drop function if exists public.set_education_cohort_join_requests_v1(uuid, boolean);
 -- drop function if exists public.archive_education_cohort_v1(uuid);
+-- restore the 20260903150000 education_cohort_members_select policy;
+-- drop function if exists public.is_education_cohort_internal_decider_v1(uuid);
 -- drop function if exists public.education_cohort_decider_basis_v1(uuid);
 -- restore the two-state CHECK; drop the four request columns and join_requests_open.

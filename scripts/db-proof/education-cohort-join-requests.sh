@@ -114,6 +114,14 @@ for X in $EXTENG $EXTMEM; do
   check "external manager $X cannot open/close" "not_manager" "$(q $X authenticated "select set_education_cohort_join_requests_v1('$COH', false);")"
 done
 check "the request is still pending after those refusals" "requested" "$(q '' postgres "select status from education_cohort_members where profile_id='$LEARNER';")"
+echo "== who reads request rows (tightened select policy)"
+check "external manager (engagement) reads 0 request rows" "0" "$(q $EXTENG authenticated "select count(*) from education_cohort_members where status not in ('active','left');")"
+check "external manager (membership) reads 0 request rows" "0" "$(q $EXTMEM authenticated "select count(*) from education_cohort_members where status not in ('active','left');")"
+check "external manager (engagement) reads no label or note" "0" "$(q $EXTENG authenticated "select count(*) from education_cohort_members where request_label is not null or request_note is not null;")"
+check "external manager (membership) reads no label or note" "0" "$(q $EXTMEM authenticated "select count(*) from education_cohort_members where request_label is not null or request_note is not null;")"
+check "internal manager (engagement) reads the request + note" "requested|Second year" "$(q $MGR authenticated "select status, request_note from education_cohort_members where profile_id='$LEARNER';")"
+check "internal admin (membership) reads the request" "1" "$(q $MEMADMIN authenticated "select count(*) from education_cohort_members where status = 'requested' and profile_id='$LEARNER';")"
+check "learner reads only their own row" "1|t" "$(q $LEARNER authenticated "select count(*), bool_and(profile_id = '$LEARNER') from education_cohort_members;")"
 check "clients cannot call the authority helper" "permission denied for function education_cohort_decider_basis_v1" "$(q $MGR authenticated "select education_cohort_decider_basis_v1('$ORG');")"
 
 SNAP="select string_agg(table_name || '=' || (xpath('/row/c/text()', query_to_xml(format('select count(*) as c from public.%I', table_name), false, true, '')))[1]::text, ',' order by table_name) from information_schema.tables where table_schema = 'public' and table_type = 'BASE TABLE' and table_name not in ('engagement_contexts', 'audit_logs');"
@@ -130,6 +138,9 @@ check "member now reads the cohort (RLS)"       "1" "$(q $LEARNER authenticated 
 check "member now reads the programme (RLS)"    "1" "$(q $LEARNER authenticated "select count(*) from education_programs;")"
 check "deciding twice refused"                  "no_pending_request" "$(q $MGR authenticated "select decide_education_cohort_join_v1('$COH','$LEARNER','accept');")"
 check "asking again as a member is a no-op"     "already_member" "$(q $LEARNER authenticated "select request_education_cohort_join_v1('$COH','Jonas J.');")"
+check "active-member visibility unchanged: external manager (engagement) reads the active row" "active" "$(q $EXTENG authenticated "select status from education_cohort_members where profile_id='$LEARNER';")"
+check "active-member visibility unchanged: external manager (membership) reads the active row" "active" "$(q $EXTMEM authenticated "select status from education_cohort_members where profile_id='$LEARNER';")"
+check "active-member visibility unchanged: outsider reads nothing" "0" "$(q $OUTSIDER authenticated "select count(*) from education_cohort_members;")"
 check "a member's own group is not in the finder" "0" "$(q $LEARNER authenticated "select count(*) from list_open_education_cohorts_v1();")"
 
 echo "== withdraw / decline / close"
@@ -179,8 +190,9 @@ DB=j12proofclean; fresh $DB
 PSQL="psql -h $HOST -p $PORT -U postgres -d $DB -v ON_ERROR_STOP=1 -q"
 $PSQL -f "$MIG" >/dev/null
 check "clean rollback applies"                  "ok" "$($PSQL -f "$DOWN" >/dev/null 2>&1 && echo ok)"
+check "original select policy restored exactly" "((profile_id = auth.uid()) OR manages_organization(education_cohort_organization_v1(cohort_id)) OR is_admin())" "$(q '' postgres "select pg_get_expr(polqual, polrelid) from pg_policy where polname='education_cohort_members_select';")"
 check "two-state CHECK restored"                "CHECK ((status = ANY (ARRAY['active'::text, 'left'::text])))" "$(q '' postgres "select pg_get_constraintdef(oid) from pg_constraint where conname='education_cohort_members_status_check';")"
-check "all seven functions dropped"              "0" "$(q '' postgres "select count(*) from pg_proc where proname in ('set_education_cohort_join_requests_v1','archive_education_cohort_v1','education_cohort_decider_basis_v1','list_open_education_cohorts_v1','request_education_cohort_join_v1','withdraw_education_cohort_join_v1','decide_education_cohort_join_v1');")"
+check "all eight functions dropped"              "0" "$(q '' postgres "select count(*) from pg_proc where proname in ('set_education_cohort_join_requests_v1','archive_education_cohort_v1','education_cohort_decider_basis_v1','is_education_cohort_internal_decider_v1','list_open_education_cohorts_v1','request_education_cohort_join_v1','withdraw_education_cohort_join_v1','decide_education_cohort_join_v1');")"
 check "migration re-applies after rollback"     "ok" "$($PSQL -f "$MIG" >/dev/null 2>&1 && echo ok)"
 
 echo "== $PASS passed, $FAIL failed"
