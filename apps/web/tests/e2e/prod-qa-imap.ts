@@ -1,5 +1,7 @@
 import { connect, type TLSSocket } from "node:tls";
 
+import { mimeText } from "../../lib/testing/mime-text";
+
 /**
  * READ-ONLY reader for the ONE synthetic QA mailbox (owner decision D-4,
  * 2026-11-01). Used only by production walks that must prove a mail really
@@ -96,9 +98,13 @@ class Session {
 
 const quote = (v: string) => `"${v.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 
-/** Undo quoted-printable soft breaks and escapes so links read whole. */
-function decodeQuotedPrintable(text: string): string {
-  return text.replace(/=\r?\n/g, "").replace(/=([0-9A-F]{2})/gi, (_, h: string) => String.fromCharCode(parseInt(h, 16)));
+/** The message literal of a `UID FETCH … (BODY.PEEK[])` answer: `{n}\r\n`
+ *  then exactly n bytes (one latin1 character per byte). */
+function fetchedMessage(response: string): string {
+  const m = /\{(\d+)\}\r\n/.exec(response);
+  if (!m) return "";
+  const start = m.index + m[0].length;
+  return response.slice(start, start + Number(m[1]));
 }
 
 /** The next UID the mailbox will give — read before triggering a mail, so
@@ -140,7 +146,9 @@ export async function waitForMailLink(
         .filter((u) => u >= sinceUid)
         .sort((a, b) => b - a);
       for (const uid of uids) {
-        const body = decodeQuotedPrintable(await s.run(`UID FETCH ${uid} (BODY.PEEK[TEXT])`));
+        // The WHOLE message (headers too), each text part decoded by its own
+        // Content-Transfer-Encoding — never one encoding assumed for all.
+        const body = mimeText(fetchedMessage(await s.run(`UID FETCH ${uid} (BODY.PEEK[])`)));
         const link = (body.match(/https?:\/\/[^\s"'<>]+/g) ?? []).map((u) => u.replace(/&amp;/g, "&")).find(pick);
         if (link) return { uid, link, seconds: Math.round((Date.now() - started) / 1000) };
       }
