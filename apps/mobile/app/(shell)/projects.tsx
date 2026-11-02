@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
-import { asksTotal, type WorkerProjectsData } from "../../src/capability-shapes";
+import { asksTotal, asksTotalLabel, type WorkerProjectsData } from "../../src/capability-shapes";
 import { useLocale } from "../../src/i18n/locale-context";
 import { traceTestId, useRequestTrace } from "../../src/request-trace";
 import { CapabilityGate } from "../../src/screens/capability-gate";
@@ -69,7 +69,7 @@ export default function Screen() {
                     <Text style={styles.title}>{p.title}</Text>
                     {asksTotal(p) > 0 ? (
                       <Text style={styles.meta}>
-                        {t("projects.asksCount")}: {asksTotal(p)}
+                        {t("projects.asksCount")}: {asksTotalLabel(p)}
                       </Text>
                     ) : null}
                   </Pressable>

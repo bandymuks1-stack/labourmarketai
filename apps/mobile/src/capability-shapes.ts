@@ -498,6 +498,13 @@ export type WorkerProject = {
   /** Every open ask; `asks` names only the first few. Absent from a server
    *  older than the field: then only `asks.length` is known. */
   readonly asksTotal?: number;
+  /** Whether the asks are a real answer: "ok" = read (empty = nothing
+   *  open); "unavailable" = the read failed; "not_read" = not asked (an
+   *  ended assignment). Absent from an older server: then an empty list is
+   *  NOT known to be empty. */
+  readonly asksRead?: "ok" | "unavailable" | "not_read";
+  /** `asksTotal` is a lower bound. */
+  readonly asksTotalAtLeast?: boolean;
   readonly instruction: {
     readonly conversationId: string;
     readonly authorName: string | null;
@@ -509,6 +516,17 @@ export type WorkerProject = {
  *  the asks it named. */
 export function asksTotal(p: WorkerProject): number {
   return Math.max(p.asksTotal ?? 0, p.asks.length);
+}
+
+/** The total as shown: "N+" when the server could only count a lower bound. */
+export function asksTotalLabel(p: WorkerProject): string {
+  return `${asksTotal(p)}${p.asksTotalAtLeast === true ? "+" : ""}`;
+}
+
+/** What may be said about the asks: only a read checklist may say "none". */
+export function asksState(p: WorkerProject): "ok" | "unavailable" | "not_read" {
+  if (p.asks.length > 0) return "ok";
+  return p.asksRead ?? "unavailable";
 }
 
 export type WorkerProjectsData =

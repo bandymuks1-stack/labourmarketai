@@ -3,7 +3,13 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { asksTotal, type WorkerProjectAsk, type WorkerProjectsData } from "../../src/capability-shapes";
+import {
+  asksState,
+  asksTotal,
+  asksTotalLabel,
+  type WorkerProjectAsk,
+  type WorkerProjectsData,
+} from "../../src/capability-shapes";
 import { useLocale } from "../../src/i18n/locale-context";
 import type { MessageKey } from "../../src/i18n/messages";
 import { CapabilityGate } from "../../src/screens/capability-gate";
@@ -68,7 +74,13 @@ export default function Screen() {
                 </Text>
                 <Divider />
                 <Text style={styles.heading}>{t("projects.asksTitle")}</Text>
-                {project.asks.length === 0 ? (
+                {asksState(project) === "unavailable" ? (
+                  // A checklist that did not answer is unknown, never "nothing
+                  // is open".
+                  <Body muted>{t("projects.asksUnavailable")}</Body>
+                ) : asksState(project) === "not_read" ? (
+                  <Body muted>{t("projects.asksNotRead")}</Body>
+                ) : project.asks.length === 0 ? (
                   <Body muted>{t("projects.asksNone")}</Body>
                 ) : (
                   project.asks.map((ask) => (
@@ -78,11 +90,11 @@ export default function Screen() {
                     </View>
                   ))
                 )}
-                {asksTotal(project) > project.asks.length ? (
+                {asksTotal(project) > project.asks.length || project.asksTotalAtLeast === true ? (
                   // The read names only the first asks; never let them pass
                   // for everything still open.
                   <Body muted>
-                    {t("projects.asksShownOf")}: {project.asks.length} / {asksTotal(project)}
+                    {t("projects.asksShownOf")}: {project.asks.length} / {asksTotalLabel(project)}
                   </Body>
                 ) : null}
                 {instruction !== null ? (

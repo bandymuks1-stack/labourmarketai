@@ -286,6 +286,16 @@ export async function listOwnReadinessItems(
   projectIds: readonly string[],
   options?: { readonly statuses: readonly string[] },
 ): Promise<OwnReadinessItem[] | OwnReadinessLedgerItem[]> {
+  return (await queryOwnReadinessItems(workerId, projectIds, options?.statuses)) ?? [];
+}
+
+/** The checklist query itself. `null` = the read did not answer (an error),
+ *  which a caller that SHOWS asks must not render as "nothing is open". */
+async function queryOwnReadinessItems(
+  workerId: string,
+  projectIds: readonly string[],
+  statuses?: readonly string[],
+): Promise<OwnReadinessLedgerItem[] | null> {
   if (!workerId || projectIds.length === 0) return [];
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -293,10 +303,10 @@ export async function listOwnReadinessItems(
     .select("project_id, item_key, label, status, updated_at")
     .eq("worker_id", workerId)
     .in("project_id", projectIds.slice(0, 10))
-    .in("status", [...(options?.statuses ?? OPEN_READINESS_STATUSES)])
+    .in("status", [...(statuses ?? OPEN_READINESS_STATUSES)])
     .order("updated_at", { ascending: false })
     .limit(OWN_READINESS_ITEMS_LIMIT);
-  if (error || !data) return [];
+  if (error || !data) return null;
   return data.map((r) => ({
     projectId: r.project_id as string,
     itemKey: r.item_key as string,
@@ -328,17 +338,34 @@ export interface OwnProjectAsks {
 }
 
 export async function loadOwnProjectAsks(projectIds: readonly string[]): Promise<Map<string, OwnProjectAsks>> {
+  return (await loadOwnProjectAsksResult(projectIds)).byProject;
+}
+
+/**
+ * The same read, saying whether the checklist ANSWERED. `checklistRead:
+ * false` = the checklist query failed: the asks are unknown, never "nothing
+ * is open". `totalsAtLeast` = the query hit OWN_READINESS_ITEMS_LIMIT, so a
+ * project's `asksTotal` is a lower bound.
+ */
+export interface OwnProjectAsksResult {
+  readonly checklistRead: boolean;
+  readonly totalsAtLeast: boolean;
+  readonly byProject: Map<string, OwnProjectAsks>;
+}
+
+export async function loadOwnProjectAsksResult(projectIds: readonly string[]): Promise<OwnProjectAsksResult> {
   const out = new Map<string, OwnProjectAsks>();
   const ids = [...new Set(projectIds)].slice(0, 10);
-  if (ids.length === 0) return out;
+  if (ids.length === 0) return { checklistRead: true, totalsAtLeast: false, byProject: out };
   const workerId = await getOwnWorkerId();
-  if (!workerId) return out;
-  const [items, docs, read, ownProfileId] = await Promise.all([
-    listOwnReadinessItems(workerId, ids),
+  if (!workerId) return { checklistRead: false, totalsAtLeast: false, byProject: out };
+  const [checklist, docs, read, ownProfileId] = await Promise.all([
+    queryOwnReadinessItems(workerId, ids) as Promise<OwnReadinessItem[] | null>,
     listMyDocuments(),
     listWorkerInstructions(),
     getOwnProfileId(),
   ]);
+  const items = checklist ?? [];
   /**
    * REAL WORK IS READ BESIDE THE PAPER (owner correction 2026-09-07).
    *
@@ -395,5 +422,9 @@ export async function loadOwnProjectAsks(projectIds: readonly string[]): Promise
     const ins = instructions.get(id) ?? null;
     if (a.length > 0 || ins) out.set(id, { asks: a, asksTotal: totals.get(id) ?? a.length, instruction: ins });
   }
-  return out;
+  return {
+    checklistRead: checklist !== null,
+    totalsAtLeast: items.length >= OWN_READINESS_ITEMS_LIMIT,
+    byProject: out,
+  };
 }
