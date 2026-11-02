@@ -2,8 +2,9 @@
  * Where a notification leads on the PHONE — pure, from the web path the
  * server attached to the event (`notificationEventHref`).
  *
- * A path whose screen exists in this app opens that screen; every other path
- * opens on the website, as the person, where that route lives. Nothing is
+ * A path whose screen exists in this app AND carries the action the
+ * notification is about opens that screen; every other path opens on the
+ * website, as the person, where that route lives. Nothing is
  * guessed: an id is passed on only when the web path carried one.
  */
 export type NotificationDestination =
@@ -13,7 +14,6 @@ export type NotificationDestination =
         | "/(shell)/conversation"
         | "/(shell)/messages"
         | "/(shell)/journal"
-        | "/(shell)/profile"
         | "/(shell)/jobs";
       readonly params?: Record<string, string>;
     }
@@ -29,7 +29,9 @@ export function notificationDestination(href: string | undefined): NotificationD
   if (thread) return { kind: "native", pathname: "/(shell)/conversation", params: { id: thread[1] } };
   if (path === "/dashboard/communication") return { kind: "native", pathname: "/(shell)/messages" };
   if (path === "/dashboard/journal") return { kind: "native", pathname: "/(shell)/journal" };
-  if (path === "/dashboard/profile") return { kind: "native", pathname: "/(shell)/profile" };
+  // NOT the native profile: what a profile notification is about — a roster
+  // link offer to accept or refuse, a profile to complete — is decided on the
+  // web profile; the phone's profile only reads. It opens on the website.
   const job = new RegExp(`^/jobs/${ID}$`).exec(path);
   if (job) return { kind: "native", pathname: "/(shell)/jobs", params: { id: job[1] } };
   return { kind: "web", path: href };

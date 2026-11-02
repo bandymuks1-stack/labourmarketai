@@ -31,14 +31,27 @@ describe("mobile notification destination", () => {
     });
   });
 
-  it("the journal and profile digests open those screens", () => {
+  it("the journal digest and a review decision open the journal", () => {
     expect(notificationDestination(notificationEventHref("weekly_digest", { focus: "journal" }))).toEqual({
       kind: "native",
       pathname: "/(shell)/journal",
     });
-    expect(notificationDestination(notificationEventHref("weekly_digest", { focus: "profile_completion" }))).toEqual({
+    expect(notificationDestination(notificationEventHref("journal_entry"))).toEqual({
       kind: "native",
-      pathname: "/(shell)/profile",
+      pathname: "/(shell)/journal",
+    });
+  });
+
+  it("profile notifications stay on the website, where their decisions live", () => {
+    // A roster-link offer (accept / refuse) and profile completion are
+    // decided on the web profile; the phone's profile only reads.
+    expect(notificationDestination(notificationEventHref("organization_person"))).toEqual({
+      kind: "web",
+      path: "/dashboard/profile",
+    });
+    expect(notificationDestination(notificationEventHref("weekly_digest", { focus: "profile_completion" }))).toEqual({
+      kind: "web",
+      path: "/dashboard/profile",
     });
   });
 
