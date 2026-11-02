@@ -77,6 +77,21 @@ function recipientLocale(envelope: ExternalWorkerReferralV1): string {
   return (activeLocales as readonly string[]).includes(l) ? l : "en";
 }
 
+/**
+ * One mail per address across partner rows (migration 20261028070000): the
+ * same address lock + refusals as the reprocess reissue. A partner that sends
+ * the same person again under a new lead id gets a stored row but no second
+ * mail ('not_sent'). Before that migration is applied the function does not
+ * exist and intake behaves as it always did.
+ */
+async function mayMailAddress(admin: SupabaseClient, invitationId: string): Promise<boolean> {
+  const r = await asAny(admin).rpc("reserve_external_referral_send_v1", {
+    p_invitation_id: invitationId,
+  });
+  if (r.error) return r.error.code === "42883" || r.error.code === "PGRST202";
+  return r.data === "ok";
+}
+
 export async function receiveExternalReferral(input: {
   readonly source: ExternalReferralSource;
   readonly envelope: ExternalWorkerReferralV1;
@@ -136,13 +151,13 @@ export async function receiveExternalReferral(input: {
   // path and ONLY when it is configured — never a fake "sent".
   let delivery: "sent" | "delivery_failed" | "not_sent" = "not_sent";
   const email = envelope.worker.contact.email;
-  if (email && isTransactionalEmailConfigured()) {
+  if (email && isTransactionalEmailConfigured() && (await mayMailAddress(admin, invitationId))) {
     const tEmail = await getTranslations({ locale, namespace: "invitations.email" });
     const sent = await guardedSendTransactionalEmail({
       to: email,
       subject: buildInvitationSubject(tEmail, "join_platform"),
       text: buildInvitationBody(tEmail, { link: inviteUrl, personalMessage: null }),
-    }, { kind: "invitation" });
+    }, { kind: "invitation", requireLedger: true });
     delivery = sent.status === "sent" ? "sent" : "delivery_failed";
     await asAny(admin).rpc("mark_external_referral_delivery_v1", {
       p_invitation_id: invitationId,

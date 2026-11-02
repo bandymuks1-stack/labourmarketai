@@ -616,6 +616,17 @@ import { join } from "node:path";
  * the real card over every combination of the varying facts (same markup
  * exactly when same facts) and by reading the card's own table keys from
  * its source and pinning the declared key sets to them.
+ *
+ * LT informal "tu" register (owner order 2026-10-28) — the Lithuanian UI is
+ * unified to the informal singular address (tu/tavo/tau; gali, pasirink,
+ * prisijunk …) instead of the formal plural (jūs/jūsų; galite, pasirinkite,
+ * prisijunkite …). Legal texts (`legal.*`) were explicitly excluded. Every key
+ * and every ICU placeholder / plural skeleton is unchanged; only LT wording
+ * moved. The regeneration moved EXACTLY FIVE namespace hashes — `lt.landing`,
+ * `lt.hero`, `lt.livingMarketReview`, `lt.workEntryReview`,
+ * `lt.landingJourney` — and ZERO file hashes; `en.*` and `ru.*` are
+ * byte-identical, which is the proof that no component, layout or other
+ * locale changed.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.

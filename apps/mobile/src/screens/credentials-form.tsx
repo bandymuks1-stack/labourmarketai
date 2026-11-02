@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link } from "expo-router";
+import { Link, Redirect } from "expo-router";
 
 import { useAuth, type AuthFailure } from "../auth-context";
 import { CONFIG } from "../config";
@@ -37,7 +37,7 @@ function failureKey(failure: AuthFailure): MessageKey {
 }
 
 export function CredentialsForm({ mode }: { mode: "sign-in" | "register" }) {
-  const { signIn, register, busy } = useAuth();
+  const { state, signIn, register, busy } = useAuth();
   const { t, locale } = useLocale();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,11 +49,15 @@ export function CredentialsForm({ mode }: { mode: "sign-in" | "register" }) {
       mode === "sign-in"
         ? await signIn(email, password)
         : await register(email, password);
-    // Success navigates by itself: the auth state changes, and the gate at
-    // `app/index.tsx` is what decides where a signed-in person goes. No screen
-    // pushes a route on the strength of its own local success.
+    // Success navigates by itself: the auth state changes, the form hands the
+    // person back to the gate at `app/index.tsx` (below), and the gate decides
+    // where they go. No screen pushes a route on its own local success.
     if (result !== null) setFailure(result);
   };
+
+  // The gate redirected here and is no longer mounted, so it never sees the
+  // auth state change: without this a successful sign-in stays on the form.
+  if (state.status === "signed_in") return <Redirect href="/" />;
 
   const isSignIn = mode === "sign-in";
 

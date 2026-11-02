@@ -379,7 +379,19 @@ async function runSearch(
 export const getPublicVacancyPreview = cache(async function getPublicVacancyPreview(
   id: string,
 ): Promise<PublicVacancyPreview | null | "not_provisioned"> {
-  const supabase = await createClient();
+  return readPublicVacancyPreviewWith(await createClient(), id);
+});
+
+/**
+ * The same single-preview read over a SUPPLIED client — the capability door
+ * (`jobs.get`) hands in the bearer caller's own RLS-scoped client instead of
+ * the cookie one. Same RPC, same anonymous projection, same `toPreview`
+ * defence; not request-cached because the client is part of the call.
+ */
+export async function readPublicVacancyPreviewWith(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<PublicVacancyPreview | null | "not_provisioned"> {
   const { data, error } = await asAny(supabase).rpc("get_public_vacancy_preview_v1", {
     p_id: id,
   });
@@ -394,7 +406,7 @@ export const getPublicVacancyPreview = cache(async function getPublicVacancyPrev
   const rows = (data ?? []) as PreviewRow[];
   const row = rows[0];
   return row ? toPreview(row) : null;
-});
+}
 
 /**
  * Live governed supply counts. Replaces the pinned landing constant: a number

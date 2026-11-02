@@ -1,79 +1,31 @@
--- @human-gate-approved — owner integrated-architecture order 2026-10-24 (Stage 7 forecasting engine): additive forecast storage, mode settings and the significant-change signal; applied only via Supabase MCP apply_migration after review of this exact SQL.
+-- ============================================================================
+-- MIGRATION ALREADY APPLIED IN PRODUCTION — NEVER MANUALLY RE-APPLY.
 --
--- ── HUMAN GATE ─────────────────────────────────────────────────────────────
--- SAFETY CLASS: RED — SECURITY DEFINER functions, CREATE TRIGGER on existing
--- fact tables, GRANT/REVOKE. Draft PR + `needs-human-gate`. Apply ONLY via
--- Supabase MCP `apply_migration`, never `supabase db push`.
+-- Production ledger version : 20261025045152
+-- Production ledger name    : project_forecasts_v1
+-- Restored to repo          : 2026-11-01, for migration-history parity only. The live
+--                             migration-parity gate (quality) found this ledger row with
+--                             no repository file; the owner approved restoring the six
+--                             such rows byte-exact (option 2, 2026-11-01).
+-- Source of truth           : supabase_migrations.schema_migrations.statements of the row
+--                             above, read 2026-11-01. Later-edited branch copies were NOT
+--                             used as a source.
+-- Parity proof              : everything after the marker line below is BYTE-EXACT to
+--                             production's stored statements (33488 bytes).
+--                             md5 = 78669002d230f1733119123de3b9ebe1
+--                             Verify: drop every line up to and including the marker line,
+--                             then md5sum the remainder (no trailing newline).
+-- ROLLBACK                  : supabase/rollbacks/20261025045152_project_forecasts_v1.down.sql — RECONSTRUCTED after the
+--                             production apply; the ledger stored no rollback. Local
+--                             development resets and repo governance only.
 --
--- 20261024130000 — project forecasts v1 (Stage 7 forecasting engine).
---
--- WHAT. A FORECAST is a derived reading of a project's facts (SEP-1: FACT ≠
--- DERIVED ≠ FORECAST). The numbers are computed in the app by ONE
--- deterministic engine (apps/web/lib/forecast/forecast-engine.ts); the
--- database only (1) says which projects are due, (2) hands the scheduler the
--- fact rows, (3) keeps the versions that were said, so they can be compared
--- and measured against what happened, and (4) notes significant changes as
--- they are written.
---
---   organization_forecast_settings  one row per organization that is NOT on
---                                   the default (weekly, enabled). Recompute
---                                   cadence only — never a fact, never a
---                                   price, plan or entitlement.
---   project_forecasts               append-only forecast versions per project
---                                   (version, computed_at, mode, engine
---                                   version, inputs fingerprint, the forecast
---                                   with its sources / assumptions /
---                                   confidence, the comparison with the
---                                   previous version, a numbers-only facts
---                                   summary for the later error measurement).
---   project_forecast_state          one row per project: when it was last
---                                   computed, so an unchanged forecast does
---                                   NOT add a version (bounded storage).
---   project_forecast_signals        insert-only notes "a significant fact of
---                                   project P changed (kind K)", raised by
---                                   AFTER-row triggers inside the writes
---                                   themselves, consumed by the scheduler.
---
--- WHY NO EXISTING STORE FITS. Facts already live in their own tables and stay
--- there; this stores what was SAID about them. The CAL-10 rule "a learned
--- duration must never acquire a table" is untouched: no learned duration, no
--- per-stage estimate, nothing a planning field auto-fills from. A stored
--- forecast version is labelled a forecast in its own table and is never read
--- back as a fact.
---
--- PRODUCTION STABILITY (P0).
---   · The signal trigger does ONE plain INSERT into a table with no foreign
---     key, no unique index and a static CHECK — it cannot fail a user write,
---     and it opens no subtransaction (no EXCEPTION block). UPDATEs that do not
---     touch a forecast-relevant column raise nothing. Absences fan out to at
---     most 20 of the worker's projects.
---   · Insert-only: concurrent writers never wait on each other's signal row.
---   · All forecast work runs in the scheduler (the VPS cron route), bounded
---     per run; nothing is computed inside a user request.
---
--- PRIVACY. No names, no entry text, no e-mail. The facts door returns opaque
--- md5 keys, statuses, dates and numeric metric rows only, and is EXECUTE-able
--- by service_role alone. Mode changes are audited in public.audit_logs (the
--- existing audit table); these tables hold no person identifier.
---
--- ACCESS.
---   · project_forecasts / project_forecast_state: SELECT for whoever can
---     manage the project (canonical can_manage_project); no client writes.
---   · organization_forecast_settings: SELECT for the organization's managers
---     and admins; writes only through forecast_set_mode_v1 (admin only —
---     the cadence follows the plan, so an organization cannot raise its own).
---   · project_forecast_signals: no client access at all.
---
--- ADDITIVE; NO DATA CHANGE to any existing row; no policy on any existing
--- table changes.
---
--- ROLLBACK: supabase/rollbacks/20261024130000_project_forecasts_v1.down.sql
---   drops the triggers, the functions and the four tables (forecast history
---   only; no fact lives here).
-
-begin;
-
--- ── 1. settings ────────────────────────────────────────────────────────────
+-- @human-gate-approved
+-- HUMAN GATE SCOPE: restoration of HISTORICAL, ALREADY-PRODUCTION-APPLIED SQL only
+-- (owner decision 2026-11-01, option 2; RED draft PR, owner approves the merge).
+-- migration-safety findings expected for this file: grant-or-revoke, security-definer functions, create-trigger, drop/create policy, delete inside a function.
+-- This annotation grants NO right to apply, re-apply or change anything in production.
+-- ============================================================================
+-- >>> PRODUCTION STATEMENTS BELOW (byte-exact; do not edit) <<<
 create table if not exists public.organization_forecast_settings (
   organization_id uuid primary key references public.organizations(id) on delete cascade,
   mode            text not null default 'weekly'
@@ -93,7 +45,6 @@ create policy organization_forecast_settings_select on public.organization_forec
   for select to authenticated
   using (public.manages_organization(organization_id) or public.is_admin());
 
--- ── 2. forecast versions ───────────────────────────────────────────────────
 create table if not exists public.project_forecasts (
   id              uuid primary key default gen_random_uuid(),
   project_id      uuid not null references public.projects(id) on delete cascade,
@@ -124,7 +75,6 @@ create policy project_forecasts_select on public.project_forecasts
   for select to authenticated
   using (public.can_manage_project(project_id));
 
--- ── 3. per-project scheduler state ─────────────────────────────────────────
 create table if not exists public.project_forecast_state (
   project_id       uuid primary key references public.projects(id) on delete cascade,
   last_computed_at timestamptz not null,
@@ -140,7 +90,6 @@ create policy project_forecast_state_select on public.project_forecast_state
   for select to authenticated
   using (public.can_manage_project(project_id));
 
--- ── 4. significant-change signals (insert-only, no FK, no unique) ──────────
 create table if not exists public.project_forecast_signals (
   id         bigint generated always as identity primary key,
   project_id uuid not null,
@@ -154,7 +103,6 @@ comment on table public.project_forecast_signals is
 alter table public.project_forecast_signals enable row level security;
 revoke all on table public.project_forecast_signals from public, anon, authenticated, service_role;
 
--- ── 5. the signal trigger ──────────────────────────────────────────────────
 create or replace function public.forecast_note_signal_trg()
 returns trigger
 language plpgsql
@@ -246,7 +194,6 @@ begin
     if tg_op <> 'INSERT' then v_projects := v_projects || old.project_id; end if;
 
   elsif tg_table_name = 'worker_absences' then
-    -- Only an APPROVED absence is planning-relevant (requested ≠ approved).
     if not ((tg_op <> 'DELETE' and new.status = 'approved')
             or (tg_op <> 'INSERT' and old.status = 'approved')) then
       return null;
@@ -338,7 +285,6 @@ end
 $$;
 revoke all on function public.forecast_note_signal_trg() from public, anon, authenticated;
 
--- One AFTER ROW trigger per fact table. Argument = the default signal kind.
 drop trigger if exists forecast_signal on public.journal_entries;
 create trigger forecast_signal after insert or update or delete on public.journal_entries
   for each row execute function public.forecast_note_signal_trg('hours');
@@ -385,10 +331,6 @@ drop trigger if exists forecast_signal on public.finance_records;
 create trigger forecast_signal after insert or update or delete on public.finance_records
   for each row execute function public.forecast_note_signal_trg('budget');
 
--- ── 6. which projects are due (coarse prefilter; the app decides) ──────────
--- The app's recomputeDecision (lib/forecast/forecast-modes.ts) is the
--- authority on "due"; this returns the CANDIDATES under the same cadence,
--- signalled live projects first, then the longest-unrefreshed. Bounded.
 create or replace function public.forecast_due_candidates_v1(p_limit integer default 25)
 returns table (
   project_id       uuid,
@@ -425,9 +367,6 @@ as $$
       left join public.project_forecast_state fs on fs.project_id = p.id
       left join sig on sig.project_id = p.id
      where (p.status in ('live', 'paused')
-            -- A project completed since its last forecast: ONE final run
-            -- (its status change raised a signal), so the history ends with
-            -- the actual and the error can be measured.
             or (p.status = 'completed' and fs.last_version is not null and sig.max_id is not null))
        and coalesce(p.record_state, 'active') <> 'duplicate'
        and coalesce(st.enabled, true)
@@ -458,7 +397,6 @@ $$;
 revoke all on function public.forecast_due_candidates_v1(integer) from public, anon, authenticated;
 grant execute on function public.forecast_due_candidates_v1(integer) to service_role;
 
--- ── 7. the facts door (rows only; every rule stays in the app) ─────────────
 create or replace function public.forecast_project_facts_v1(p_project_id uuid, p_today date)
 returns jsonb
 language plpgsql
@@ -504,9 +442,6 @@ begin
     into v_stages
     from (select * from public.project_stages where project_id = p_project_id order by stage_order, id limit c_stages + 1) s;
 
-  -- Every LIVE entry attributed to this project, in the opaque hours-only
-  -- shape of project_team_journal_hour_rows_v1: time/date metrics and the
-  -- review rows the confirmation rule reads. Never the entry text.
   select coalesce(jsonb_agg(jsonb_build_object(
            'entry_key', md5('je:' || je.id::text),
            'correction_of_key', case when je.correction_of is null then null else md5('je:' || je.correction_of::text) end,
@@ -572,8 +507,6 @@ begin
        limit c_alloc + 1
     ) a;
 
-  -- The team now: individually assigned people + members of brigades that
-  -- hold an open assignment on the project (team_member_at_v1).
   select coalesce(array_agg(distinct x.profile_id), '{}'::uuid[])
     into v_people
     from (
@@ -667,7 +600,6 @@ $$;
 revoke all on function public.forecast_project_facts_v1(uuid, date) from public, anon, authenticated;
 grant execute on function public.forecast_project_facts_v1(uuid, date) to service_role;
 
--- ── 8. record a computed forecast (append a version only when it changed) ──
 create or replace function public.forecast_record_v1(
   p_project_id         uuid,
   p_mode               text,
@@ -729,7 +661,6 @@ $$;
 revoke all on function public.forecast_record_v1(uuid, text, text, timestamptz, date, text, text, jsonb, jsonb, jsonb, boolean, bigint) from public, anon, authenticated;
 grant execute on function public.forecast_record_v1(uuid, text, text, timestamptz, date, text, text, jsonb, jsonb, jsonb, boolean, bigint) to service_role;
 
--- ── 9. set an organization's cadence (admin only, audited) ─────────────────
 create or replace function public.forecast_set_mode_v1(
   p_organization_id uuid,
   p_mode            text,
@@ -782,15 +713,3 @@ end
 $$;
 revoke all on function public.forecast_set_mode_v1(uuid, text, boolean, text) from public, anon;
 grant execute on function public.forecast_set_mode_v1(uuid, text, boolean, text) to authenticated;
-
-commit;
-
--- ROLLBACK (see supabase/rollbacks/20261024130000_project_forecasts_v1.down.sql):
---   drop trigger if exists forecast_signal on <each of the 15 tables>;
---   drop function if exists public.forecast_set_mode_v1(uuid, text, boolean, text);
---   drop function if exists public.forecast_record_v1(...);
---   drop function if exists public.forecast_project_facts_v1(uuid, date);
---   drop function if exists public.forecast_due_candidates_v1(integer);
---   drop function if exists public.forecast_note_signal_trg();
---   drop table if exists public.project_forecast_signals, public.project_forecast_state,
---     public.project_forecasts, public.organization_forecast_settings;

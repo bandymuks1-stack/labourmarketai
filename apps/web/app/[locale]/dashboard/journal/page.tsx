@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import { orgDisplayName } from "@/lib/company/org-display";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -27,8 +28,15 @@ import {
   WORKSPACE_PERSONAL_DOT,
 } from "@/components/app/conversation/chat/workspace-chip";
 import { workspaceAccentIndex } from "@/lib/company/organization-switch";
-import { resolveEngagementContext } from "@/lib/journal/engagement-context-selection";
-import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label";
+import {
+  activeOrganizationOf,
+  orderContextsForChoice,
+  resolveEngagementContext,
+} from "@/lib/journal/engagement-context-selection";
+import {
+  composeDistinctEngagementLabels,
+  unnamedOrganizationKind,
+} from "@/lib/journal/engagement-label";
 import { detectUnrecordedHours } from "@/lib/journal/unrecorded-hours";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { JournalEntryEditLauncher } from "@/components/app/journal-entry-edit-launcher";
@@ -253,7 +261,6 @@ export default async function JournalPage({
   const t = await getTranslations("journal");
   const tSpaces = await getTranslations("spaces");
   const tRel = await getTranslations("relationshipTypes");
-  const tRole = await getTranslations("auth.signup.role");
   const tUnit = await getTranslations("productivityUnits");
   const tProf = await getTranslations("professions");
   const tIntel = await getTranslations("journal.intelligence");
@@ -339,56 +346,78 @@ export default async function JournalPage({
   // The hierarchy now decides (see lib/journal/engagement-context-selection):
   //   A source-determined · B exactly one org context · C several → ASK ·
   //   D none → personal is correct.
-  // Ordering still puts the active workspace first so the list reads sensibly,
-  // but the DEFAULT is the resolution, and on ambiguity there is none.
+  // Ordering is the ONE choice order (active workspace's organization first,
+  // other organizations next, personal last — owner P0 2026-10-29), but the
+  // DEFAULT is the resolution, and on ambiguity there is none. The active
+  // workspace is also a resolution SIGNAL now (rule W): exactly one applicable
+  // context at the organization the person acts for is preselected.
   const activeWorkspaceOrgId = workspaceForDefault.activeWorkspaceId;
-  const actingOrgName =
+  const activeOrganizationId = activeOrganizationOf(workspaceForDefault);
+  const actingWorkspace =
     workspaceForDefault.workspaces.find(
       (w) => w.id === activeWorkspaceOrgId && w.kind === "organization",
-    )?.name || null;
-  const ecOrdered = [...(ecRows ?? [])].sort(
-    (a, b) =>
-      Number(
-        ((b as { organization_id?: string | null }).organization_id ?? null) ===
-          activeWorkspaceOrgId,
-      ) -
-      Number(
-        ((a as { organization_id?: string | null }).organization_id ?? null) ===
-          activeWorkspaceOrgId,
-      ),
+    ) ?? null;
+  const actingOrgName = actingWorkspace?.name || null;
+  const ecOrdered = orderContextsForChoice(
+    ecRows ?? [],
+    activeOrganizationId,
+    (e) => (e as { organization_id?: string | null }).organization_id ?? null,
   );
 
-  const contextResolution = resolveEngagementContext({
-    candidates: (ecRows ?? []).map((e) => {
-      const r = e as {
-        id: string;
-        relationship_slug: string;
-        organization_id?: string | null;
-        status?: string | null;
-        started_at?: string | null;
-        ended_at?: string | null;
-        is_primary?: boolean | null;
-      };
-      return {
-        id: r.id,
-        relationshipSlug: r.relationship_slug,
-        organizationId: r.organization_id ?? null,
-        // The query already filters to status='active'; carry it explicitly so
-        // the pure model needs no knowledge of how it was fetched.
-        status: r.status ?? "active",
-        startedAt: r.started_at ?? null,
-        endedAt: r.ended_at ?? null,
-        isPrimary: r.is_primary === true,
-      };
-    }),
+  const contextCandidates = (ecRows ?? []).map((e) => {
+    const r = e as {
+      id: string;
+      relationship_slug: string;
+      organization_id?: string | null;
+      status?: string | null;
+      started_at?: string | null;
+      ended_at?: string | null;
+      is_primary?: boolean | null;
+    };
+    return {
+      id: r.id,
+      relationshipSlug: r.relationship_slug,
+      organizationId: r.organization_id ?? null,
+      // The query already filters to status='active'; carry it explicitly so
+      // the pure model needs no knowledge of how it was fetched.
+      status: r.status ?? "active",
+      startedAt: r.started_at ?? null,
+      endedAt: r.ended_at ?? null,
+      isPrimary: r.is_primary === true,
+    };
   });
+  // Bounded by the day the work happened (Codex P2 on #2884): the selected
+  // calendar day when there is one. The composer re-resolves on its own date
+  // with the same candidates, so a changed date never keeps a context whose
+  // bounds exclude it.
+  const contextResolution = resolveEngagementContext({
+    candidates: contextCandidates,
+    workDay: selectedDate,
+    activeOrganizationId,
+  });
+  // Acting for an organization with NO recorded work relationship there (a
+  // membership is access, not a work relationship): said plainly in the
+  // composer instead of that organization silently missing from the choice.
+  // Nothing is created — the person picks among their real contexts.
+  // The sentence is prepared whenever the person acts for an organization;
+  // the composer shows it only while the resolution for ITS work date says
+  // there is no applicable relationship there.
+  const activeWorkspaceNotice = actingWorkspace
+    ? t("activeWorkspaceNoRelationship", {
+        org:
+          actingOrgName ??
+          t(
+            `unnamedOrganization.${unnamedOrganizationKind(actingWorkspace?.organizationType)}`,
+          ),
+      })
+    : null;
 
   // ONE LABEL COMPOSER (issue #1689, defect J): the same facts the chat's
   // work-log selector hands to `composeDistinctEngagementLabels`, so a context
   // is named identically here and there. Rules live in
   // `lib/journal/engagement-label.ts`: an organization context reads "Org ·
-  // Relationship" (the org TYPE label when it has no display/legal name —
-  // never a bare "—"; existing role labels, no new i18n key); a personal one
+  // Relationship" ("Agency without a name" when it has no display/legal name —
+  // never a bare type that reads like a real name, owner P0 2026-10-29); a personal one
   // reads "Asmeninis įrašas [· title]" — the person's own title is what tells
   // two org-less contexts apart (production holds exactly that case: one
   // untitled personal context carrying entries, one titled "Darbų vadovas");
@@ -400,14 +429,11 @@ export default async function JournalPage({
       legal_name: string | null;
       organization_type: string | null;
     } | null;
-    const typeLabel =
-      org?.organization_type === "company"
-        ? tRole("company")
-        : org?.organization_type === "agency"
-          ? tRole("agency")
-          : null;
+    const typeLabel = org
+      ? t(`unnamedOrganization.${unnamedOrganizationKind(org.organization_type)}`)
+      : null;
     return {
-      orgName: org?.display_name ?? org?.legal_name ?? null,
+      orgName: orgDisplayName(org?.display_name, org?.legal_name),
       orgTypeLabel: typeLabel,
       title: e.title ?? null,
       relationshipLabel: tRel(e.relationship_slug),
@@ -1398,6 +1424,9 @@ export default async function JournalPage({
               key={editingId ?? "new"}
               engagements={composerEngagements}
               contextResolution={contextResolution}
+              activeWorkspaceNotice={activeWorkspaceNotice}
+              contextCandidates={contextCandidates}
+              activeOrganizationId={activeOrganizationId}
               directions={directions}
               workerSkills={workerSkills}
               editingEntry={editingEntry}
@@ -1411,6 +1440,9 @@ export default async function JournalPage({
               defaultWorkDate={selectedDate}
               engagements={composerEngagements}
               contextResolution={contextResolution}
+              activeWorkspaceNotice={activeWorkspaceNotice}
+              contextCandidates={contextCandidates}
+              activeOrganizationId={activeOrganizationId}
               directions={directions}
               workerSkills={workerSkills}
               templates={journalTemplates}

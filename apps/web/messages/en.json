@@ -2858,7 +2858,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Find a provider for a service"
     }
   },
   "jobPostings": {
@@ -6842,7 +6843,9 @@
       "listings": "Listings",
       "listingsNote": "Premises, equipment, vehicles — offer or look",
       "needs": "Needs & offers",
-      "needsNote": "Publish what you need or what you can offer"
+      "needsNote": "Publish what you need or what you can offer",
+      "buyer": "My requests",
+      "buyerNote": "Save your customer details and keep your requests in one place"
     },
     "loopReadFailed": "Your requests could not be loaded — the list may be incomplete. Refresh the page."
   },
@@ -8544,6 +8547,9 @@
     "skillHoursOwn": "{hours} h, your own record",
     "skillHoursConfirmed": "{hours} h, {confirmed} h of it confirmed by a manager",
     "skillHoursHint": "hours from work-journal entries linked to this skill alone",
+    "skillInvolvedHours": "involved in {hours} h of work not attributed to this skill alone — its own part is not known",
+    "skillInvolvedHoursAlso": "plus involved in {hours} h not attributed to it",
+    "skillInvolvedHoursHint": "Time of journal entries this skill took part in that the records cannot give to it alone — the entry also used other skills, or its time was split between kinds of work without saying where. Never split between skills and never added to your total.",
     "selfStatedTitle": "Self-stated, no records yet",
     "variantsFolded": "{count} spellings",
     "skillShare": "{share}% of recorded work",
@@ -8555,6 +8561,9 @@
     "organizationRecordedHoursWithPeriods": "Organization records: {total} h in total — {hours} h on {days, plural, one {# day} other {# days}} and {periodHours} h stated as period totals ({from} – {to}) in timesheets or imported documents ({approved} h approved). Kept apart from the journal figure and attributed to no skill.",
     "professionalExperienceTotal": "Professional experience in total: {total} h — {journal} h in the work journal and {organization} h in organisation history. Every piece of work counted once; sources shown separately.",
     "professionalExperienceNotCounted": "A further {hours} h is shown but not added, because the same work is already counted.",
+    "durationPending": "{organization} recorded {records, plural, one {# work record} other {# work records}} ({span}) whose duration is not stated yet — shown without hours; not counted in any total.",
+    "durationPendingUnnamed": "an organization",
+    "durationPendingUndated": "dates not recorded",
     "premium": {
       "eyebrowFallback": "Living CV",
       "facts": {
@@ -8573,7 +8582,8 @@
         "both": "{confirmed} h with a manager's record · {recorded} h recorded",
         "recorded": "{hours} h recorded",
         "shown": "Shown by your records",
-        "declared": "You say so; nothing shows it yet"
+        "declared": "You say so; nothing shows it yet",
+        "involved": "Involved in {hours} h, not attributed to it alone"
       },
       "source": {
         "own": "Your record",
@@ -9914,7 +9924,11 @@
       },
       "basis": "{matched} of {total} required skills match ({confirmed} manager-confirmed)",
       "recognizedNote": "requirements recognized from the demand text — not confirmed yet",
-      "missingPrefix": "missing:"
+      "missingPrefix": "missing:",
+      "formalTitle": "Formal requirements",
+      "formalLicence": "Driving licence {categories}: a formal requirement. Recorded work does not replace it.",
+      "formalLicenceHeld": "Driving licence {categories}: you stated you hold it (not verified).",
+      "formalQualification": "A professional qualification or licence may be legally required for this work. Recorded work does not replace it."
     },
     "recommendations": {
       "basisCompact": "{matched} of {total} skills, {confirmed} confirmed",
@@ -18376,7 +18390,7 @@
       "not_a_member": "You are not a member.",
       "not_found": "Record not available.",
       "not_authorized": "You are not authorized for this.",
-      "no_such_user": "No user with this email.",
+      "no_such_user": "No confirmed account with this email yet.",
       "cannot_invite_self": "You cannot invite yourself.",
       "invalid_role": "Invalid role.",
       "last_owner": "The last owner cannot step down — activate another owner first.",
@@ -18406,7 +18420,7 @@
       "grantInvitations": "Allow to manage invitations",
       "withdrawInvitations": "Withdraw invitation management",
       "unavailable": "The member directory could not be read right now. This is not a claim that the organization has no members.",
-      "noAccountHint": "A membership role can only be given to someone who already has an account. Invite a person without an account with an invitation link — once they sign up and join the organisation, you can give them a role here.",
+      "noAccountHint": "A membership role can only be given to someone with a confirmed account. If the person has no account yet, or has not confirmed their email, send them an invitation link — or ask them to confirm their email — and give the role here once they have joined.",
       "noAccountCta": "Create an invitation link"
     },
     "start": {
@@ -18795,6 +18809,14 @@
       "eyebrow": "Business history",
       "title": "{name}: one continuous history",
       "subtitle": "Every figure below counts the organisation's own recorded work, once. Periods show what was stated about earlier legal entities and what that statement rests on.",
+      "titleHeld": "{name}: work records it holds, by period",
+      "subtitleHeld": "Work done under an earlier legal entity belongs to that entity and the people who did it. {name} holds these records as documented continuity; they are not shown as {name}'s own work.",
+      "headerOwn": "{name}'s own period",
+      "headerEarlier": "Earlier legal entity: {name}",
+      "headerUnstated": "Period “{label}” — legal entity not stated",
+      "headerNotPlaced": "Records no stated period places",
+      "continuityNotSuccession": "Continuity documented; legal succession not asserted.",
+      "totalsHeld": "All records {name} holds, across every period, each counted once — not all of it is {name}'s own work.",
       "figures": "{records} records · {hours} h · {people} people · {places} places",
       "totals": {
         "records": "Records",
@@ -19790,6 +19812,73 @@
       "cancelled": "Cancelled"
     },
     "helpNeeded": "Help needed — {stage}:"
+  },
+  "projectForecast": {
+    "title": "Forecast",
+    "notFact": "A forecast read from this project's recorded work as of {date} — not a fact and not a promise. It is recalculated each time this page opens.",
+    "unavailable": "The forecast could not be read right now.",
+    "insufficient": "Not enough recorded work yet to forecast this project.",
+    "notApplicable": "Nothing to forecast: the project has no open work.",
+    "unknown": "Unknown",
+    "beyondHorizon": "More than three years away at the current pace",
+    "completionLabel": "Expected finish",
+    "deadlineLabel": "Deadline",
+    "leftLabel": "Work left",
+    "leftTasks": "{left} of {total} tasks",
+    "leftStages": "{left} of {total} stages",
+    "peopleLabel": "People needed",
+    "peopleValue": "{needed} (now {active})",
+    "qualityLabel": "Quality risk",
+    "confidenceLabel": "Confidence",
+    "actionsTitle": "What would change it",
+    "assumptionsTitle": "Assumptions",
+    "risk": {
+      "on_track": "On track",
+      "tight": "Tight",
+      "likely_miss": "Likely to be missed",
+      "overdue": "Overdue",
+      "unknown": "Unknown"
+    },
+    "quality": {
+      "none": "None open",
+      "low": "Low",
+      "elevated": "Elevated",
+      "high": "High",
+      "unknown": "Unknown"
+    },
+    "confidence": {
+      "insufficient": "too little evidence",
+      "low": "low",
+      "medium": "medium",
+      "high": "high"
+    },
+    "action": {
+      "add_workers": "Add people to the team",
+      "find_partner_capacity": "Find partner capacity",
+      "unblock_stages": "Unblock the blocked stages",
+      "unblock_tasks": "Unblock the blocked tasks",
+      "close_serious_defects": "Close the serious defects",
+      "complete_readiness": "Complete the team's missing readiness items",
+      "record_hours": "Record the hours worked on this project",
+      "set_planned_end": "Set a planned end date",
+      "break_down_scope": "Break the work down into tasks",
+      "review_budget": "Review the budget",
+      "replan_deadline": "Re-plan the deadline"
+    },
+    "assumption": {
+      "trailing_window_days": "The pace is read from the last 28 days.",
+      "calendar_day_rate": "Hours are spread over calendar days; no work calendar is assumed.",
+      "equal_unit_weight": "Every task counts the same.",
+      "unit_is_stage": "The project has no tasks, so stages are counted instead.",
+      "team_stays_as_is": "The team stays as it is now.",
+      "absences_as_approved": "Only approved absences are taken into account.",
+      "throughput_without_hours": "No hours are recorded, so the finish is read from finished work alone.",
+      "cost_continues_at_observed_rate": "Cost continues at the rate seen so far.",
+      "single_hours_ledger": "One hours record is used; the other is shown beside it, never added.",
+      "hours_partly_unconfirmed": "Some of the hours are not yet confirmed.",
+      "hours_read_truncated": "Not every hour could be read; the figures may be low.",
+      "free_internal_people_unknown": "It is not known who else in the organization is free."
+    }
   },
   "projectWeekGoal": {
     "titleProject": "This week's goal",

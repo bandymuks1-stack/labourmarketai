@@ -98,7 +98,7 @@ ${
     ? "_None — every phrase produced at least a weak suggestion._"
     : "| Phrase | Count |\n|---|---|\n" +
       report.unknownByFrequency
-        .map((u) => `| ${u.phrase.replace(/\|/g, "\\|")} | ${u.count} |`)
+        .map((u) => `| ${escapeTableCell(u.phrase)} | ${u.count} |`)
         .join("\n")
 }
 
@@ -110,7 +110,7 @@ ${
     : "| Phrase | Suggested slug(s) |\n|---|---|\n" +
       report.outcomes
         .filter((o) => o.bucket === "weak")
-        .map((o) => `| ${o.phrase.replace(/\|/g, "\\|")} | ${o.slugs.join(", ")} |`)
+        .map((o) => `| ${escapeTableCell(o.phrase)} | ${o.slugs.join(", ")} |`)
         .join("\n")
 }
 
@@ -135,3 +135,9 @@ ${
 }
 
 process.exit(main());
+
+/** A Markdown table cell: backslashes first, then pipes (escaping only the
+ *  pipe would let a trailing backslash swallow the escape). */
+function escapeTableCell(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
+}

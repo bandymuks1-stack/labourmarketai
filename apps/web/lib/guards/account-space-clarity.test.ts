@@ -42,7 +42,7 @@ describe("buyer surface exposes no internal DB/RPC/schema text", () => {
 });
 
 describe("buyer copy does not look like an organization setup", () => {
-  const ORG = ["Jūsų organizacija", "Įmonės duomenys", "Registracijos kodas"];
+  const ORG = ["Jūsų organizacija", "Tavo organizacija", "Įmonės duomenys", "Registracijos kodas"];
   for (const [name, json] of [["lt", lt], ["en", en]] as const) {
     const buyer = JSON.stringify(json.roleDashboards.buyer);
     for (const phrase of ORG) {
@@ -70,7 +70,7 @@ describe("no abstract 'kas esu operacijoje' identity framing anywhere", () => {
 describe("buyer setup replacement copy is human, saved-to-account language", () => {
   it("LT formSubtitle / newRequestSubtitle are account-friendly", () => {
     const setup = lt.roleDashboards.buyer.setup;
-    expect(setup.formSubtitle).toMatch(/saugomi jūsų paskyroje/);
+    expect(setup.formSubtitle).toMatch(/saugomi tavo paskyroje/);
   });
   it("EN equivalents are account-friendly", () => {
     expect(en.roleDashboards.buyer.setup.formSubtitle).toMatch(/saved to your account/);

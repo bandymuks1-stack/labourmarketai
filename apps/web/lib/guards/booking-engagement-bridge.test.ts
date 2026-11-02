@@ -220,7 +220,7 @@ describe("least privilege on every new function", () => {
   it("PUBLIC and anon are revoked; authenticated gets exactly EXECUTE", () => {
     const m = migration();
     for (const fn of FNS) {
-      const esc = fn.replace(/[()]/g, "\\$&").replace(/, /g, ",\\s*");
+      const esc = escapeRegExp(fn).replace(/, /g, ",\\s*");
       expect(m, `${fn} public revoke`).toMatch(
         new RegExp(`revoke all on function public\\.${esc} from public`),
       );
@@ -316,3 +316,8 @@ describe("app wiring — honest until applied, roster surfaces untouched", () =>
     }
   });
 });
+
+/** Every RegExp metacharacter escaped (a partial escape is a different pattern). */
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+}
