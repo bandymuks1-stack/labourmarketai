@@ -27,11 +27,13 @@ a security/permission row says only that an item is open.
 | `OPTIONAL_TEST` | an extra test scenario that does not block launch |
 | `DUPLICATE` | the same function as another row (named in the evidence); kept for history, never counted in the totals |
 
-## Totals (288 planned functions, 2026-11-01)
+## Totals (288 planned functions, 2026-11-02)
 
 | LIVE_VERIFIED | PASS_CI_ONLY | FAIL | BLOCKED | NOT_VERIFIED | NOT_IMPLEMENTED | OPTIONAL_TEST |
 |---|---|---|---|---|---|---|
-| 190 | 8 | 9 | 40 | 18 | 22 | 1 |
+| 190 | 8 | 8 | 40 | 19 | 22 | 1 |
+
+2026-11-02: 2.20 FAIL → NOT_VERIFIED by owner decision 0028 (EVID-2 resolved; re-proof walk pending).
 
 Full planned scope 2026-11-01: 277 rows − 2 DUPLICATE (7.10 = 4.22, 4.17 = 2.35; kept, not counted) + 13 functions found in the vision, architecture and decision documents with no row before (2.36, 2.37, 3.34–3.36, 4.30, 5.20, 5.21, 6.22–6.24, 7.30, 7.31) = **288**. Seven rows were reconciled with product-truth (3.8, 4.6, 11.2, 11.7, 7.5 → NOT_VERIFIED; 2.20, 2.24 → FAIL); their earlier proof stays in the row. Production-verified share of the full scope: **190 / 288 = 66.0 %** (186 after the 2026-11-02 recount; +3.8, 4.6, 6.18, 9.18 from production walks 41350506578 and 41357630136). Targets (conditional, not guaranteed): core product complete and public mid-December 2026; full historical scope February 2027 (preliminary).
 
@@ -82,7 +84,7 @@ Denominator = 287 functions (288 planned minus the one `OPTIONAL_TEST` scenario,
 |---|---|---|
 | **Technical implementation** | every row except `NOT_IMPLEMENTED` (a `BLOCKED` row is built but waits for an owner step) | **265 / 287 = 92.3 %** |
 | **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **190 / 287 = 66.2 %** (71.7 % of the built 265) |
-| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **13 / 19 = 68.4 %** complete · 2 partial · 1 broken · 2 blocked · 1 unverified |
+| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **13 / 19 = 68.4 %** complete · 2 partial · 0 broken · 2 blocked · 2 unverified |
 
 Per area (technical / production-verified) — as of the 277-row register, before the 2026-11-01 full-scope update; recomputed at the next weekly progress report:
 
@@ -107,7 +109,7 @@ The 19 journeys (rows in brackets):
 | # | Journey | State | Why |
 |---|---|---|---|
 | J-1 | Worker joins → onboarding → first journal entry → Living CV (1.1, 1.4, 2.19, 2.4) | complete | fresh-activation 2026-11-01 |
-| J-2 | Journal entry → manager confirms / returns → confirmed on Living CV (2.20, 2.21, 2.31) | **broken** | 2.20 FAIL since 2026-11-01 (reconciled with product-truth, EVID-2) |
+| J-2 | Journal entry → manager confirms / returns → confirmed on Living CV (2.20, 2.21, 2.31) | unverified | EVID-2 resolved by owner decision 0028 (2026-11-02): self-declaration is not a block; 2.20 re-proof walk pending (#2942) |
 | J-3 | Worker finds a need → raises a hand → company contacts → thread (4.3, 4.16, 5.4) | complete | company-chain 2026-11-01 |
 | J-4 | Public job search → job page → save / hand-off to the source (4.4, 4.29) | complete | jobs-search 2026-10-28 |
 | J-5 | Company joins → organization → first need → candidates → shortlist → contact (1.6, 4.1, 4.11, 4.12, 4.16) | complete | fresh-activation, company-talent-history 2026-11-01 |
@@ -117,7 +119,7 @@ The 19 journeys (rows in brackets):
 | J-9 | Agency declares supply → client bridge → offer (4.15, 4.28) | complete | agency-chain 2026-10-26, search-support-privacy 2026-11-01 |
 | J-10 | Brigade offered and matched as a unit (3.7, 4.6, 4.7) | complete | brigade-formation 41350506578 2026-11-01 (19/19); product-truth link LIVE (#2917) |
 | J-11 | Goods / service listed → found → requested → accepted → messages (6.1–6.3) | complete | marketplace 2026-11-01 |
-| J-12 | Institution → cohort → learner → practice → competency → qualification (11.1–11.7, 11.10) | partial | product-truth: learners-join and qualification links BROKEN |
+| J-12 | Institution → cohort → learner → practice → competency → qualification (11.1–11.7, 11.10) | partial | product-truth: learners-join and qualification links BROKEN; owner decision 0028 (2026-11-02) sets the confirmation rule: learner declares, an authorised institution person confirms work, hours, competency and identity, no qualification without an assessment procedure |
 | J-13 | Buyer workspace → request → provider (6.4, 6.1) | partial | 6.4 carries an open item (details private) |
 | J-14 | Organization buys a plan without help (7.1, 7.5, 7.15, 7.28) | blocked | 7.15 hidden by design, 7.28 FAIL (owner/legal) |
 | J-15 | Alert / e-mail about a new matching job without signing in (4.9, 5.7, 5.9) | unverified | `PASS_CI_ONLY` |
@@ -169,7 +171,7 @@ The 19 journeys (rows in brackets):
 | 2.17 | ESCO taxonomy | NOT_VERIFIED | — | quota / RED #2463 | unproven |  |
 | 2.18 | Documents / credential validity | LIVE_VERIFIED | 2026-10-25 | documents-approvals 40152566232 10-25 (walk passed) | yes |  |
 | 2.19 | Work Journal | LIVE_VERIFIED | 2026-11-01 | prod walk fresh-activation 41279196446 2026-11-01 on 38bfb9d93: a fresh worker's first journal entry is saved and reaches the Living CV; prod walk journal-confirm 41281666555 2026-11-01 on 38bfb9d93 (3/3); #2893 night/split shifts + retried confirm (CI); #2895 own-entry correction over MCP/mobile LIVE over MCP — prod walk mcp-agents 41307643008 2026-11-01 on c3df7431d (10/10, A-9: entry recorded and corrected over MCP, one live version, spent token and replaced version refused). Reclassified 2026-11-01: the core journal is proven; the AI part is row 10.9; earlier: #2884 live 91a1a39c: work-context choice fix, verified on a production draft; earlier: ai-off-honesty run 40191899327 10-25 | yes | AI suggestions stay BLOCKED in 10.9 (owner AI keys); the honest off-state is proven |
-| 2.20 | Manager review / confirm | FAIL | 2026-11-01 | 2026-11-01 reconciled with product-truth: open integrity item (EVID-2); details in the private record; the earlier production proof below stays valid for what it covered; earlier: prod walk journal-confirm 41281666555 2026-11-01 on 38bfb9d93 (3/3); earlier: journal-confirm run 39788692498 (green) 10-22 | yes |  |
+| 2.20 | Manager review / confirm | NOT_VERIFIED | 2026-11-02 | 2026-11-02 owner decision 0028 resolves EVID-2 (self-declaration is lawful and labelled; only self-as-independent-confirmer is refused, enforced since 20261003150500); re-proof by the journal-confirm production walk (#2942) pending; 2026-11-01 reconciled with product-truth: open integrity item (EVID-2); details in the private record; the earlier production proof below stays valid for what it covered; earlier: prod walk journal-confirm 41281666555 2026-11-01 on 38bfb9d93 (3/3); earlier: journal-confirm run 39788692498 (green) 10-22 | yes |  |
 | 2.21 | Work verification 8 states | LIVE_VERIFIED | 2026-11-01 | prod walk work-verification 41280396705 2026-11-01 on 38bfb9d93 (6/6); #2895 correction door over MCP: prod walk mcp-agents 41307643008 2026-11-01 on c3df7431d (10/10, A-9: entry recorded and corrected over MCP, one live version, spent token and replaced version refused); earlier: prod walk work-verification run 40300016332 (2026-10-26): V-1..V-6 6/6 — sent to manager, review queue with authority only, changes requested, correction pending (counted once, correction card names the decision it answe… | yes |  |
 | 2.22 | Photos / task evidence | LIVE_VERIFIED | 2026-11-01 | prod walk worker-records-exports 41312948857 2026-11-01 on 7f8bfaa2a (8/8) P-1; earlier: worker-records-exports run 40186822215 10-25 (8/8 green): P-1 a journal entry with a photo saved and shown on fresh load | yes |  |
 | 2.23 | Hours metrics/allocations/timesheets | LIVE_VERIFIED | 2026-10-23 | project-execution E-11 run 39968362991 10-23 | yes |  |
