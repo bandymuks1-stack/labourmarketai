@@ -22,8 +22,14 @@ import { assertSyntheticAddress, imapConfigured, nextUid, waitForMailLink } from
  * The passwords are random per run, held only in memory and never printed.
  * Nothing else about the account changes — except that this passwordless
  * synthetic account keeps the last random password, which nobody knows.
+ *
+ * The address is the QA mailbox's own `qa.invited@` (the mailbox host refuses
+ * plus addresses; owner D-4 result 2026-11-02): the synthetic invited worker.
+ * Run this walk BEFORE spec=invited-worker, whose clean-up erases that account.
+ * That account has no role yet, so after the reset the site may land it on
+ * onboarding instead of the dashboard.
  */
-const ADDRESS = process.env.PROD_QA_MAIL_ADDRESS ?? "qa.worker+goal3@labourmarket.ai";
+const ADDRESS = process.env.PROD_QA_MAIL_ADDRESS ?? "qa.invited@labourmarket.ai";
 const ENABLED = process.env.PROD_QA_WALK === "1" && imapConfigured() && Boolean(process.env.PROD_QA_SUPABASE_URL);
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with the QA mailbox secrets (owner D-4)");
 // Two mails, each up to 3 min, plus the 65 s cool-down between them.
@@ -98,7 +104,7 @@ async function resetTo(page: Page, secret: string): Promise<number> {
     await page.locator('input[name="password"]').fill(secret);
     await page.locator('input[name="confirm_password"]').fill(secret);
     await page.locator('form button[type="submit"]').first().click();
-    await page.waitForURL(/\/lt\/(auth\/login|dashboard)/, { timeout: 60_000 });
+    await page.waitForURL(/\/lt\/(auth\/login|dashboard|onboarding)/, { timeout: 60_000 });
   } catch {
     saved = false;
   }

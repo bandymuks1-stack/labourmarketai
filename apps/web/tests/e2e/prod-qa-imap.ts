@@ -16,15 +16,20 @@ import { PROD_QA_IDENTITIES } from "../../lib/testing/prod-qa-guard";
  * - Only mail addressed to an allowlisted synthetic address is ever read
  *   (`assertSyntheticAddress`); a real person's address is refused before any
  *   connection is made.
+ * - The mailbox host refuses plus addresses (owner D-4 result 2026-11-02), so
+ *   the mailbox's own address `qa.invited@labourmarket.ai` is allowlisted by
+ *   exact equality beside the qa.<name>+<tag> pattern.
  */
 
 const SYNTHETIC = /^qa\.[a-z0-9]+\+[a-z0-9]+@labourmarket\.ai$/;
+export const QA_MAILBOX_ADDRESS = "qa.invited@labourmarket.ai";
 
 /** The shape check AND membership of the canonical, hard-coded synthetic
  *  allowlist (`PROD_QA_IDENTITIES`) — a plausible `qa.*+*` alias that is not
  *  on that list is refused (independent security review 2026-11-02). */
 export function assertSyntheticAddress(address: string): void {
-  if (!SYNTHETIC.test(address) || !PROD_QA_IDENTITIES.includes(address))
+  const shapeOk = address === QA_MAILBOX_ADDRESS || SYNTHETIC.test(address);
+  if (!shapeOk || !PROD_QA_IDENTITIES.includes(address))
     throw new Error("refused: the QA mailbox reader reads only mail to an allowlisted synthetic QA identity");
 }
 
