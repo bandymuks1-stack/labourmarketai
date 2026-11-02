@@ -75,10 +75,7 @@ begin
   end if;
   if (select count(*) from public.invitations where external_reference = c_ref) <> 1
      or exists (select 1 from public.profile_roles where profile_id = v_uid)
-     or exists (select 1 from public.invitation_acceptances where profile_id = v_uid)
-     or exists (select 1 from public.engagement_contexts where profile_id = v_uid)
-     or exists (select 1 from public.pilot_events where profile_id = v_uid)
-     or exists (select 1 from auth.identities where user_id = v_uid) then
+     or exists (select 1 from public.invitation_acceptances where profile_id = v_uid) then
     raise exception 'G0 ABORT: invitation / role / acceptance scope differs from the approved one';
   end if;
 
@@ -103,6 +100,9 @@ begin
      or exists (select 1 from public.workers where profile_id = v_uid)
      or exists (select 1 from public.profile_roles where profile_id = v_uid)
      or exists (select 1 from public.invitation_acceptances where profile_id = v_uid)
+     or exists (select 1 from public.engagement_contexts where profile_id = v_uid)
+     or exists (select 1 from public.pilot_events where profile_id = v_uid)
+     or exists (select 1 from auth.identities where user_id = v_uid)
      or exists (select 1 from public.invitations where external_reference = c_ref) then
     raise exception 'G3 ABORT: rows of the synthetic account survived';
   end if;

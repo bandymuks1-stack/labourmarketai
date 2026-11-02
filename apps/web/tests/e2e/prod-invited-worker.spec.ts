@@ -95,6 +95,35 @@ function claims(): { sub: string; email?: string } {
 }
 const subOf = (): string => claims().sub;
 
+/**
+ * The mailed one-time link signs the browser in with a NEW session that no
+ * storage-state file records, so the workflow's session clean-up cannot see
+ * it. Revoke it here (`scope=local`: only that session), after checking it is
+ * the synthetic person's, issued by production, and not the minted session the
+ * later steps use.
+ */
+async function revokeMailedLinkSession(ctx: BrowserContext): Promise<void> {
+  const raw = (await ctx.cookies())
+    .filter((c) => /^sb-.*-auth-token(\.\d+)?$/.test(c.name))
+    .sort((a, b) => a.name.localeCompare(b.name, "en", { numeric: true }))
+    .map((c) => c.value)
+    .join("");
+  if (!raw) return;
+  const b64 = raw.startsWith("base64-") ? raw.slice(7) : raw;
+  const token = (JSON.parse(Buffer.from(b64.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8")) as { access_token?: string })
+    .access_token;
+  if (!token) return;
+  type Claims = { email?: string; session_id?: string; iss?: string };
+  const decode = (t: string) => JSON.parse(Buffer.from(t.split(".")[1] ?? "", "base64url").toString("utf8")) as Claims;
+  const mailed = decode(token);
+  const minted = decode(bearerOf(SLOT));
+  if (mailed.email !== ADDRESS || mailed.iss !== minted.iss) throw new Error("the browser session is not the synthetic person's");
+  if (!mailed.session_id || mailed.session_id === minted.session_id) return;
+  const res = await qaApi("/auth/v1/logout?scope=local", token, { method: "POST" });
+  console.info(`[invited] mailed-link session revoked: ${res.status}`);
+  expect([204, 401, 403], "the mailed-link session is revoked").toContain(res.status);
+}
+
 /** Every clean-up path acts only on the synthetic person's own session. */
 function assertSyntheticSession(): void {
   assertSyntheticAddress(ADDRESS);
@@ -241,7 +270,11 @@ test("I-2. 390 px: the mailed one-time link proves the address, and the invitati
     expect(after.unverified).toBe(false);
     expect(joinPlatform, "the owner's synthetic referral is now the person's").toHaveLength(1);
   } finally {
-    await ctx.close();
+    try {
+      await revokeMailedLinkSession(ctx);
+    } finally {
+      await ctx.close();
+    }
   }
 });
 
