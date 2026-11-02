@@ -129,7 +129,7 @@ independent work or launch of other features (owner order 2026-10-28).
 
 ---
 
-## 3. Work register — snapshot 2026-11-02 ~08:50Z
+## 3. Work register — snapshot 2026-11-02 ~13:10Z
 
 Owner order 2026-11-02 ("vieningas koordinavimas"): `local_8d793dee` stays the ONE coordinator; every
 active session and window works from THIS file. No second coordination register, no new overall audit.
@@ -150,12 +150,14 @@ active session and window works from THIS file. No second coordination register,
 
 | Session | Owns (single executor) | Open PRs | Depends on | State |
 |---|---|---|---|---|
-| `local_8d793dee` coordinator | PR integration, CI, Codex, deploy, production verification, both registers; D-4/D-5 mailbox walks | #2903 (RED), #2921, #2914, #2915 | owner: D-4 secrets, RED OK for #2903 | IN_PROGRESS |
+| `local_8d793dee` coordinator | PR integration, CI, Codex, deploy, production verification, both registers; dispatches every production-qa walk; owner-decision journeys J-12, J-14, J-17 | #2914, #2915, #2935 | — | IN_PROGRESS |
+| `local_816618a9` j15-alert-mail | **J-15** alert / e-mail without signing in (4.9, 5.7, 5.9): production walk through the real QA mailbox, reusing the #2883 isolated proof | — | coordinator dispatches the walk after merge | IN_PROGRESS |
+| `local_b55e3e39` j2-evid2-red | **J-2** journal → manager confirms: the EVID-2 integrity item (2.20) prepared as a RED draft | — | owner: EVID-2 | IN_PROGRESS |
+| `local_1a4a2a4f` j13-buyer-provider | **J-13** buyer → provider: non-customer becomes a customer in production (6.4) + RED-1 request → offer/contract draft | — | owner: RED-1 | IN_PROGRESS |
 | `local_13cb59b3` lane A | the 7 reconciled rows + production proof of partial rows; brigade as a unit (DEM-6) | #2927 (stacked on #2914), #2930 | #2914 | IN_PROGRESS |
-| `local_00be3967` mobile | web parity (journal correction, messages, notifications, projects); store-submission preparation | #2929 | owner: store accounts | IN_PROGRESS |
+| `local_00be3967` mobile | web parity (journal correction, messages, notifications, projects); Android and iOS runs kept apart, device runs from `main` only (iOS correction re-run on `main` assigned 2026-11-02); store-submission preparation | #2929 | owner: store accounts (J-17); RED #2937 for project detail | IN_PROGRESS |
 | `local_3951ad81` ChatGPT security | C-3 token audience, X-2 curated toolset, consent wording, data minimisation | #2918 (RED), #2923 (RED), #2924 | owner: D-10, X-2, waiver for #2924 | WAITING (owner) |
-| `nonstop-pilot-need-limit` (P0, assigned by coordinator) | paid pilot organization refused `over_open_need_limit`: a member holding the platform admin role resolved to `admin_internal` instead of the organization's plan | #2933 (RED draft) | owner: RED approval | CODE_COMPLETE pending CI |
-| `worker-capability-chat-mcp` (P0, assigned by coordinator, same executor) | chat/MCP refused worker actions (roster invitation accept included) to a person who has their own worker profile but no `worker` role row; the web lets them act | #2937 (RED draft) | owner: RED approval | CODE_COMPLETE pending CI + Codex |
+| `local_50daa866` nonstop-pilot-limit | #2933 LIVE_VERIFIED; worker role from the own worker profile in chat/MCP dispatch | #2937 (RED) | owner: RED approval | WAITING (owner) |
 | `local_14a855e7` growth export | daily aggregate registrations / Living CV export | #2886 (RED) | — | BLOCKED by owner order (no merge, deploy or apply); idle |
 | `local_aa901800` "projekto perėmimas" | ESCO cold locales | #2463 (RED) | owner approval | WAITING (owner) — conflict upkeep only, no new work |
 | `local_056d9f7f` (Agentai OS coordinator) | other repository; its labourmarketai work (#2886) is assigned through this file | — | — | n/a here |
@@ -163,13 +165,26 @@ active session and window works from THIS file. No second coordination register,
 Older sessions (`…16CYcDu`, `…AygGqFo3`, cloud `…hnVKqGvExp`, `local_07992559`, `local_430c3337`) are idle and
 hand-over complete; they start nothing without an assignment here.
 
+### 3.1a The six open user journeys (owner order 2026-11-02 "19/19") — one executor each
+
+13 / 19 complete. NOT_VERIFIED is never counted as FAIL without evidence.
+
+| Journey | State | Works in production | Missing / blocker | Kind of work | Executor | Shortest path to LIVE_VERIFIED |
+|---|---|---|---|---|---|---|
+| J-2 journal → manager confirms | broken (2.20 FAIL) | record → send → manager confirms / returns → Living CV (journal-confirm 41281666555, 3/3) | open integrity item EVID-2 (details in the private record) | RED migration + owner decision | `local_b55e3e39` | RED draft → owner EVID-2 → apply → journal-confirm walk (steps in the private record) |
+| J-12 institution → qualification | partial (11.2, 11.7 NOT_VERIFIED; 11.10 NOT_IMPLEMENTED) | institution, learner link, compass, practice, outcomes, reporting (11.1, 11.3–11.6) | learners cannot join a cohort themselves (ARCH-3); practice not recognised against a formal requirement (SKL-9); RPL equivalence not built (ARCH-2, D-15) | owner decisions, then RED schema | coordinator (owner decisions) | owner ARCH-3 + D-15 scope for RPL → Education executor |
+| J-13 buyer → provider | partial | buyer workspace record + draft request (buyer-workspace 40377604733); service request loop (marketplace 41284728549) | non-customer → customer path never walked in production; accepted request does not become an offer/contract (RED-1) | test + small UX + RED draft | `local_1a4a2a4f` | extended buyer-workspace walk; RED-1 owner decision |
+| J-14 organization buys a plan | blocked | plan catalogue (7.1); paid pilot (7.5 pilot only) | live terms lack renewal / withdrawal / refund clauses (7.28 FAIL); EUR 99 hidden, Stripe Tax RED #2685; two owner acts (MKT-7) | owner + legal | coordinator (owner decisions) | legal terms → #2685 → MKT-7 → billing walk |
+| J-15 alert / e-mail without signing in | unverified (PASS_CI_ONLY) | isolated walk 40833394554 (#2883): alert mail, notification mail, digest | never walked in production; was waiting for the QA mailbox, which is now proven (D-4 / D-5) | test (production walk) | `local_816618a9` | alert-mail walk via the QA mailbox |
+| J-17 install from a store | blocked | Android and iOS apps run against production (8.17, 8.18) | no store listing: Google Play / Apple / EAS accounts (8.15) | owner accounts | `local_00be3967` after owner | owner store accounts → closed-test listing → install walk |
+
 ### 3.2 In flight and last 24 h (status stages kept apart)
 
 | PR | Goal | Executor | CODE_COMPLETE | MERGED | DEPLOYED | LIVE_VERIFIED |
 |---|---|---|---|---|---|---|
 | #2917 | brigade offered and matched as a unit | lane A | ✓ | ✓ | ✓ | ✓ walk 41350506578 (19/19) |
 | #2913 | six production-applied migrations restored byte-exact (RED, approved) | coordinator | ✓ | ✓ | ✓ (no production change) | ✓ parity gate 41342643253 |
-| #2916 | mobile: correct a journal entry | mobile | ✓ | ✓ | n/a (app build) | Android vs production ✓; iOS NOT_VERIFIED (sign-in refused; auth logs show no rate limit — the cause is the credentials the app sent, under investigation by the mobile lane) |
+| #2916 | mobile: correct a journal entry | mobile | ✓ | ✓ | n/a (app build) | Android vs production ✓; iOS: the whole correction flow passed against production in run 41408063016 (from a feature branch; the earlier refusal was the test driver mistyping the address, not a rate limit) — the run on main is still pending |
 | #2928 | mobile: messages | mobile | ✓ | ✓ | n/a (app build) | NOT_VERIFIED |
 | #2919 | failed notification/project reads never answer empty | coordinator | ✓ | ✓ | ✓ | NOT_VERIFIED |
 | #2920 | project forecast beside the course, computed on read | lane A | ✓ | ✓ | ✓ | NOT_VERIFIED |
@@ -179,7 +194,7 @@ hand-over complete; they start nothing without an assignment here.
 | #2915 | completion map | coordinator | ✓ | — | — | — |
 | #2927 / #2930 | register evidence 3.8, 4.6, 6.18, 9.18; G-3 fix | lane A | ✓ | — | — | evidence runs named in the PR |
 | #2929 | mobile in-app notifications | mobile | CI running | — | — | — |
-| #2903 → #2921 | D-4 reset by real mail → D-5 invited path by real mail | coordinator | ✓ (Codex clean) | — | — | BLOCKED on D-4 secrets |
+| #2903 → #2921 | D-4 reset by real mail → D-5 invited path by real mail | coordinator | ✓ | ✓ `3543c13bc` / `c2580a328` | ✓ (test code) | ✓ mail-reset 41428606490 (2/2), invited-worker 41430482903 (7/7) |
 | #2918 / #2923 / #2924 | C-3, X-2, consent wording | ChatGPT security | ✓ (CI green, Codex clean) | — | — | owner gate |
 
 ### 3.3 Owner-gated (RED, draft, `needs-human-gate`) — 39 open (2026-11-02)
@@ -294,7 +309,7 @@ Only items that genuinely need the owner. Resolved or reclassified items are rem
 - `GOV-1` read-only DB secret for CI gates; product-truth owner decisions ORG-2, EVID-2, MKT-7, COM-6, COM-8.
 - **Resolved 2026-11-01:** the live migration-parity gate is active and PASSES on `main` (run 41342643253). The six missing repository files were restored by #2913, with no production change. The separate Codex security review of #2913 did not run; the code review passed.
 - **Backups (13.5):** add the scoped `SUPABASE_ACCESS_TOKEN` secret, so that `db-backup.yml` runs its restore proof (#2906).
-- **D-4 / D-5:** the QA mailbox is the mailbox's own address (the host refuses plus addresses); owner adds the three `production-qa` secrets. The old synthetic invitation was REVOKED 2026-11-02 (owner-approved, exactly one row); deleting the old synthetic account waits for the owner after the read-only scope check (private record). Then RED #2903 → #2921 → `provision-invited` → walks.
+- **D-4 / D-5: DONE 2026-11-02.** #2903 and #2921 merged; `production-qa` restricted to `main`. mail-reset 41428606490 PASS 2/2 (1.3 / J-16), invited-worker 41430482903 PASS 7/7 (J-6 complete); the synthetic account was erased by the platform erasure runner. Open: owner approval to delete the one remaining pseudonymised synthetic invitation (scope checked: exactly 1 row, nothing references it).
 - **Shared VPS (13.1):** remediation #2911 + agentai#1226 live since 2026-11-01; 72 h verdict due 2026-11-04 (details private).
 
 Removed as resolved: #2855 and #2858 (APPLIED, LIVE_VERIFIED 2026-10-28, ledgers 20261028081810 /

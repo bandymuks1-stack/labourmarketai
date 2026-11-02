@@ -275,6 +275,84 @@ const en = {
     "This conversation is not one of yours, or it no longer exists.",
   "messages.noPermission":
     "You may not write in this conversation.",
+  "today.openNotifications":
+    "Notifications",
+  "notifications.title":
+    "Notifications",
+  "notifications.intro":
+    "What happened in your work, newest first. Opening one marks it read. Notifications are not pushed to your phone — they show here when you open this screen.",
+  "notifications.none":
+    "You have no notifications.",
+  "notifications.unread":
+    "New",
+  "notifications.markAll":
+    "Mark all as read",
+  "notifications.markFailedTitle":
+    "We could not mark this as read",
+  "notifications.type.unknown":
+    "A notification",
+  "notifications.type.event_absence_approved":
+    "Your absence was approved",
+  "notifications.type.event_absence_rejected":
+    "Your absence was rejected",
+  "notifications.type.event_absence_requested":
+    "An absence was filed for you",
+  "notifications.type.event_booking_accepted":
+    "Your booking proposal was accepted",
+  "notifications.type.event_booking_declined":
+    "Your booking proposal was declined",
+  "notifications.type.event_booking_proposed":
+    "You received a booking proposal",
+  "notifications.type.event_booking_withdrawn":
+    "The booking proposal was withdrawn",
+  "notifications.type.event_demand_interest_expressed":
+    "A worker expressed interest in your demand",
+  "notifications.type.event_demand_interest_reviewed":
+    "A company marked your interest as reviewed",
+  "notifications.type.event_document_ack_assigned":
+    "You were asked to confirm you have read a document.",
+  "notifications.type.event_document_ack_completed":
+    "A document you sent for confirmation was confirmed.",
+  "notifications.type.event_document_expiring":
+    "A document's validity is ending soon.",
+  "notifications.type.event_engagement_created":
+    "A new engagement was created",
+  "notifications.type.event_engagement_ended":
+    "The engagement was ended",
+  "notifications.type.event_history_link_offered":
+    "An organization offered to connect your recorded work history to your account",
+  "notifications.type.event_invitation_accepted":
+    "Somebody accepted your invitation",
+  "notifications.type.event_job_alert":
+    "A new job fits what you are looking for",
+  "notifications.type.event_journal_review_decided":
+    "Your journal entry was reviewed",
+  "notifications.type.event_journal_review_decided_approved":
+    "Your journal entry was confirmed",
+  "notifications.type.event_journal_review_decided_changes_requested":
+    "Changes were requested on your journal entry",
+  "notifications.type.event_journal_review_decided_rejected":
+    "Your journal entry was rejected",
+  "notifications.type.event_message_received":
+    "You have a new message",
+  "notifications.type.event_saved_search_match":
+    "A search you saved has new results",
+  "notifications.type.event_weekly_digest":
+    "Your weekly work and opportunities summary is ready",
+  "notifications.type.event_weekly_digest_journal":
+    "Your week’s work journal summary is ready",
+  "notifications.type.event_weekly_digest_profile_completion":
+    "To see jobs that fit you, confirm what work you do",
+  "notifications.type.event_work_task_assigned":
+    "A task was assigned to you",
+  "notifications.type.event_workflow_decided":
+    "Your approval request has been decided",
+  "notifications.type.event_workflow_delegated":
+    "An approval round was handed over to you",
+  "notifications.type.event_workflow_escalated":
+    "An approval round passed its deadline",
+  "notifications.type.event_workflow_step_pending":
+    "An approval request is waiting for your decision",
   "messages.threadNotShown":
     "The conversation is not on screen yet. Wait for it to load, read it, then review your reply.",
   "messages.newBeforeReview":
@@ -663,6 +741,84 @@ const lt: Catalogue = {
     "Šis pokalbis nėra tavo arba jo nebėra.",
   "messages.noPermission":
     "Šiame pokalbyje rašyti negali.",
+  "today.openNotifications":
+    "Pranešimai",
+  "notifications.title":
+    "Pranešimai",
+  "notifications.intro":
+    "Kas nutiko tavo darbe – naujausi viršuje. Atidarius pranešimas pažymimas kaip perskaitytas. Pranešimai į telefoną nesiunčiami – jie matomi čia, atidarius šį ekraną.",
+  "notifications.none":
+    "Pranešimų neturi.",
+  "notifications.unread":
+    "Nauja",
+  "notifications.markAll":
+    "Pažymėti visus kaip perskaitytus",
+  "notifications.markFailedTitle":
+    "Nepavyko pažymėti kaip perskaityto",
+  "notifications.type.unknown":
+    "Pranešimas",
+  "notifications.type.event_absence_approved":
+    "Tavo neatvykimas patvirtintas",
+  "notifications.type.event_absence_rejected":
+    "Tavo neatvykimas atmestas",
+  "notifications.type.event_absence_requested":
+    "Tau užregistruotas neatvykimas",
+  "notifications.type.event_booking_accepted":
+    "Tavo rezervacijos pasiūlymas priimtas",
+  "notifications.type.event_booking_declined":
+    "Tavo rezervacijos pasiūlymas atmestas",
+  "notifications.type.event_booking_proposed":
+    "Gavai rezervacijos pasiūlymą",
+  "notifications.type.event_booking_withdrawn":
+    "Rezervacijos pasiūlymas atšauktas",
+  "notifications.type.event_demand_interest_expressed":
+    "Darbuotojas pareiškė susidomėjimą tavo poreikiu",
+  "notifications.type.event_demand_interest_reviewed":
+    "Įmonė pažymėjo tavo susidomėjimą kaip peržiūrėtą",
+  "notifications.type.event_document_ack_assigned":
+    "Tavęs paprašyta patvirtinti, kad perskaitei dokumentą.",
+  "notifications.type.event_document_ack_completed":
+    "Dokumentas, kurį siuntei patvirtinti, buvo patvirtintas.",
+  "notifications.type.event_document_expiring":
+    "Netrukus baigsis dokumento galiojimas.",
+  "notifications.type.event_engagement_created":
+    "Sukurtas naujas bendradarbiavimas",
+  "notifications.type.event_engagement_ended":
+    "Darbo santykis baigtas",
+  "notifications.type.event_history_link_offered":
+    "Organizacija pasiūlė susieti tavo užfiksuotą darbo istoriją su tavo paskyra",
+  "notifications.type.event_invitation_accepted":
+    "Kažkas priėmė tavo kvietimą",
+  "notifications.type.event_job_alert":
+    "Atsirado naujas darbas pagal tavo paieškos kriterijus",
+  "notifications.type.event_journal_review_decided":
+    "Tavo darbo žurnalo įrašas peržiūrėtas",
+  "notifications.type.event_journal_review_decided_approved":
+    "Tavo darbo žurnalo įrašas patvirtintas",
+  "notifications.type.event_journal_review_decided_changes_requested":
+    "Paprašyta pakeisti tavo darbo žurnalo įrašą",
+  "notifications.type.event_journal_review_decided_rejected":
+    "Tavo darbo žurnalo įrašas atmestas",
+  "notifications.type.event_message_received":
+    "Gavai naują žinutę",
+  "notifications.type.event_saved_search_match":
+    "Tavo išsaugotoje paieškoje yra naujų rezultatų",
+  "notifications.type.event_weekly_digest":
+    "Paruošta tavo savaitės darbo ir galimybių apžvalga",
+  "notifications.type.event_weekly_digest_journal":
+    "Paruošta tavo savaitės darbo žurnalo apžvalga",
+  "notifications.type.event_weekly_digest_profile_completion":
+    "Norint pamatyti tau tinkamus darbus, patvirtink, kokį darbą dirbi",
+  "notifications.type.event_work_task_assigned":
+    "Tau priskirta užduotis",
+  "notifications.type.event_workflow_decided":
+    "Dėl tavo tvirtinimo prašymo priimtas sprendimas",
+  "notifications.type.event_workflow_delegated":
+    "Tau perduotas tvirtinimo etapas",
+  "notifications.type.event_workflow_escalated":
+    "Tvirtinimo etapas viršijo terminą",
+  "notifications.type.event_workflow_step_pending":
+    "Tvirtinimo prašymas laukia tavo sprendimo",
   "messages.threadNotShown":
     "Pokalbis dar neparodytas. Palauk, kol jis įsikels, perskaityk jį ir tada peržiūrėk savo atsakymą.",
   "messages.newBeforeReview":
@@ -1047,6 +1203,84 @@ const ru: Catalogue = {
     "Этот разговор не ваш или больше не существует.",
   "messages.noPermission":
     "Вы не можете писать в этом разговоре.",
+  "today.openNotifications":
+    "Уведомления",
+  "notifications.title":
+    "Уведомления",
+  "notifications.intro":
+    "Что произошло в вашей работе, новые сверху. При открытии уведомление отмечается прочитанным. Уведомления не приходят на телефон — они видны здесь, когда вы открываете этот экран.",
+  "notifications.none":
+    "У вас нет уведомлений.",
+  "notifications.unread":
+    "Новое",
+  "notifications.markAll":
+    "Отметить все прочитанными",
+  "notifications.markFailedTitle":
+    "Не удалось отметить как прочитанное",
+  "notifications.type.unknown":
+    "Уведомление",
+  "notifications.type.event_absence_approved":
+    "Ваше отсутствие одобрено",
+  "notifications.type.event_absence_rejected":
+    "Ваше отсутствие отклонено",
+  "notifications.type.event_absence_requested":
+    "Для вас зарегистрировано отсутствие",
+  "notifications.type.event_booking_accepted":
+    "Ваше предложение бронирования принято",
+  "notifications.type.event_booking_declined":
+    "Ваше предложение бронирования отклонено",
+  "notifications.type.event_booking_proposed":
+    "Вы получили предложение бронирования",
+  "notifications.type.event_booking_withdrawn":
+    "Предложение о бронировании отозвано",
+  "notifications.type.event_demand_interest_expressed":
+    "Работник проявил интерес к вашей заявке",
+  "notifications.type.event_demand_interest_reviewed":
+    "Компания отметила ваш интерес как рассмотренный",
+  "notifications.type.event_document_ack_assigned":
+    "Вас попросили подтвердить, что вы прочитали документ.",
+  "notifications.type.event_document_ack_completed":
+    "Документ, отправленный вами на подтверждение, был подтверждён.",
+  "notifications.type.event_document_expiring":
+    "Срок действия документа скоро закончится.",
+  "notifications.type.event_engagement_created":
+    "Создано новое сотрудничество",
+  "notifications.type.event_engagement_ended":
+    "Рабочие отношения завершены",
+  "notifications.type.event_history_link_offered":
+    "Организация предложила связать зафиксированную историю вашей работы с вашим аккаунтом",
+  "notifications.type.event_invitation_accepted":
+    "Кто-то принял ваше приглашение",
+  "notifications.type.event_job_alert":
+    "Появилась новая работа, подходящая под ваш запрос",
+  "notifications.type.event_journal_review_decided":
+    "Запись в вашем журнале проверена",
+  "notifications.type.event_journal_review_decided_approved":
+    "Запись в вашем журнале подтверждена",
+  "notifications.type.event_journal_review_decided_changes_requested":
+    "По записи в вашем журнале запрошены изменения",
+  "notifications.type.event_journal_review_decided_rejected":
+    "Запись в вашем журнале отклонена",
+  "notifications.type.event_message_received":
+    "У вас новое сообщение",
+  "notifications.type.event_saved_search_match":
+    "В сохранённом поиске есть новые результаты",
+  "notifications.type.event_weekly_digest":
+    "Ваш еженедельный обзор работы и возможностей готов",
+  "notifications.type.event_weekly_digest_journal":
+    "Готов обзор вашего рабочего журнала за неделю",
+  "notifications.type.event_weekly_digest_profile_completion":
+    "Чтобы показать подходящие вакансии, подтвердите, какую работу вы выполняете",
+  "notifications.type.event_work_task_assigned":
+    "Вам назначена задача",
+  "notifications.type.event_workflow_decided":
+    "По вашему запросу на согласование принято решение",
+  "notifications.type.event_workflow_delegated":
+    "Вам передан этап согласования",
+  "notifications.type.event_workflow_escalated":
+    "Этап согласования превысил срок",
+  "notifications.type.event_workflow_step_pending":
+    "Запрос на согласование ждёт вашего решения",
   "messages.threadNotShown":
     "Разговор ещё не показан. Дождитесь загрузки, прочитайте его, затем проверьте свой ответ.",
   "messages.newBeforeReview":
@@ -1431,6 +1665,84 @@ const nl: Catalogue = {
     "Dit gesprek is niet van jou of bestaat niet meer.",
   "messages.noPermission":
     "Je mag niet in dit gesprek schrijven.",
+  "today.openNotifications":
+    "Meldingen",
+  "notifications.title":
+    "Meldingen",
+  "notifications.intro":
+    "Wat er in je werk is gebeurd, nieuwste eerst. Openen markeert een melding als gelezen. Meldingen worden niet naar je telefoon gepusht — ze staan hier wanneer je dit scherm opent.",
+  "notifications.none":
+    "Je hebt geen meldingen.",
+  "notifications.unread":
+    "Nieuw",
+  "notifications.markAll":
+    "Alles als gelezen markeren",
+  "notifications.markFailedTitle":
+    "We konden dit niet als gelezen markeren",
+  "notifications.type.unknown":
+    "Een melding",
+  "notifications.type.event_absence_approved":
+    "Je afwezigheid is goedgekeurd",
+  "notifications.type.event_absence_rejected":
+    "Je afwezigheid is afgewezen",
+  "notifications.type.event_absence_requested":
+    "Er is een afwezigheid voor je geregistreerd",
+  "notifications.type.event_booking_accepted":
+    "Je boekingsvoorstel is geaccepteerd",
+  "notifications.type.event_booking_declined":
+    "Je boekingsvoorstel is afgewezen",
+  "notifications.type.event_booking_proposed":
+    "Je hebt een boekingsvoorstel ontvangen",
+  "notifications.type.event_booking_withdrawn":
+    "Het boekingsvoorstel is ingetrokken",
+  "notifications.type.event_demand_interest_expressed":
+    "Een werknemer heeft interesse getoond in je aanvraag",
+  "notifications.type.event_demand_interest_reviewed":
+    "Een bedrijf heeft je interesse als bekeken gemarkeerd",
+  "notifications.type.event_document_ack_assigned":
+    "Je bent gevraagd te bevestigen dat je een document hebt gelezen.",
+  "notifications.type.event_document_ack_completed":
+    "Een document dat je ter bevestiging stuurde, is bevestigd.",
+  "notifications.type.event_document_expiring":
+    "De geldigheid van een document loopt binnenkort af.",
+  "notifications.type.event_engagement_created":
+    "Er is een nieuwe samenwerking aangemaakt",
+  "notifications.type.event_engagement_ended":
+    "De samenwerking is beëindigd",
+  "notifications.type.event_history_link_offered":
+    "Een organisatie biedt aan je geregistreerde werkgeschiedenis aan je account te koppelen",
+  "notifications.type.event_invitation_accepted":
+    "Iemand heeft je uitnodiging aangenomen",
+  "notifications.type.event_job_alert":
+    "Er is een nieuwe baan die bij je zoekopdracht past",
+  "notifications.type.event_journal_review_decided":
+    "Je journaalitem is beoordeeld",
+  "notifications.type.event_journal_review_decided_approved":
+    "Je journaalitem is bevestigd",
+  "notifications.type.event_journal_review_decided_changes_requested":
+    "Er zijn wijzigingen gevraagd voor je journaalitem",
+  "notifications.type.event_journal_review_decided_rejected":
+    "Je journaalitem is afgewezen",
+  "notifications.type.event_message_received":
+    "Je hebt een nieuw bericht",
+  "notifications.type.event_saved_search_match":
+    "Een opgeslagen zoekopdracht heeft nieuwe resultaten",
+  "notifications.type.event_weekly_digest":
+    "Je wekelijkse samenvatting van werk en kansen staat klaar",
+  "notifications.type.event_weekly_digest_journal":
+    "Het weekoverzicht van je werkjournaal is klaar",
+  "notifications.type.event_weekly_digest_profile_completion":
+    "Om je passende banen te tonen, bevestig welk werk je doet",
+  "notifications.type.event_work_task_assigned":
+    "Er is een taak aan je toegewezen",
+  "notifications.type.event_workflow_decided":
+    "Over je goedkeuringsverzoek is beslist",
+  "notifications.type.event_workflow_delegated":
+    "Een goedkeuringsronde is aan jou overgedragen",
+  "notifications.type.event_workflow_escalated":
+    "Een goedkeuringsronde heeft haar termijn overschreden",
+  "notifications.type.event_workflow_step_pending":
+    "Een goedkeuringsverzoek wacht op je beslissing",
   "messages.threadNotShown":
     "Het gesprek staat nog niet op het scherm. Wacht tot het geladen is, lees het en bekijk dan je antwoord.",
   "messages.newBeforeReview":
@@ -1818,6 +2130,84 @@ const de: Catalogue = {
     "Diese Unterhaltung gehört nicht Ihnen oder existiert nicht mehr.",
   "messages.noPermission":
     "Sie dürfen in dieser Unterhaltung nicht schreiben.",
+  "today.openNotifications":
+    "Benachrichtigungen",
+  "notifications.title":
+    "Benachrichtigungen",
+  "notifications.intro":
+    "Was in Ihrer Arbeit passiert ist, neueste zuerst. Beim Öffnen wird eine Benachrichtigung als gelesen markiert. Benachrichtigungen werden nicht auf Ihr Telefon gepusht – sie erscheinen hier, wenn Sie diese Seite öffnen.",
+  "notifications.none":
+    "Sie haben keine Benachrichtigungen.",
+  "notifications.unread":
+    "Neu",
+  "notifications.markAll":
+    "Alle als gelesen markieren",
+  "notifications.markFailedTitle":
+    "Konnte nicht als gelesen markiert werden",
+  "notifications.type.unknown":
+    "Eine Benachrichtigung",
+  "notifications.type.event_absence_approved":
+    "Ihre Abwesenheit wurde genehmigt",
+  "notifications.type.event_absence_rejected":
+    "Ihre Abwesenheit wurde abgelehnt",
+  "notifications.type.event_absence_requested":
+    "Für Sie wurde eine Abwesenheit eingetragen",
+  "notifications.type.event_booking_accepted":
+    "Ihr Buchungsvorschlag wurde angenommen",
+  "notifications.type.event_booking_declined":
+    "Ihr Buchungsvorschlag wurde abgelehnt",
+  "notifications.type.event_booking_proposed":
+    "Sie haben einen Buchungsvorschlag erhalten",
+  "notifications.type.event_booking_withdrawn":
+    "Der Buchungsvorschlag wurde zurückgezogen",
+  "notifications.type.event_demand_interest_expressed":
+    "Eine Arbeitskraft hat Interesse an Ihrem Bedarf bekundet",
+  "notifications.type.event_demand_interest_reviewed":
+    "Ein Unternehmen hat Ihr Interesse als geprüft markiert",
+  "notifications.type.event_document_ack_assigned":
+    "Sie wurden gebeten zu bestätigen, dass Sie ein Dokument gelesen haben.",
+  "notifications.type.event_document_ack_completed":
+    "Ein von Ihnen zur Bestätigung gesendetes Dokument wurde bestätigt.",
+  "notifications.type.event_document_expiring":
+    "Die Gültigkeit eines Dokuments endet bald.",
+  "notifications.type.event_engagement_created":
+    "Ein neues Engagement wurde erstellt",
+  "notifications.type.event_engagement_ended":
+    "Das Arbeitsverhältnis wurde beendet",
+  "notifications.type.event_history_link_offered":
+    "Eine Organisation bietet an, Ihre erfasste Arbeitshistorie mit Ihrem Konto zu verbinden",
+  "notifications.type.event_invitation_accepted":
+    "Jemand hat Ihre Einladung angenommen",
+  "notifications.type.event_job_alert":
+    "Eine neue Stelle passt zu Ihrer Suche",
+  "notifications.type.event_journal_review_decided":
+    "Ihr Journaleintrag wurde geprüft",
+  "notifications.type.event_journal_review_decided_approved":
+    "Ihr Journaleintrag wurde bestätigt",
+  "notifications.type.event_journal_review_decided_changes_requested":
+    "Für Ihren Journaleintrag wurden Änderungen angefordert",
+  "notifications.type.event_journal_review_decided_rejected":
+    "Ihr Journaleintrag wurde abgelehnt",
+  "notifications.type.event_message_received":
+    "Sie haben eine neue Nachricht",
+  "notifications.type.event_saved_search_match":
+    "Eine gespeicherte Suche hat neue Ergebnisse",
+  "notifications.type.event_weekly_digest":
+    "Ihre wöchentliche Übersicht zu Arbeit und Chancen ist bereit",
+  "notifications.type.event_weekly_digest_journal":
+    "Die Wochenübersicht Ihres Arbeitsjournals ist fertig",
+  "notifications.type.event_weekly_digest_profile_completion":
+    "Damit wir Ihnen passende Jobs zeigen können, bestätigen Sie, welche Arbeit Sie machen",
+  "notifications.type.event_work_task_assigned":
+    "Ihnen wurde eine Aufgabe zugewiesen",
+  "notifications.type.event_workflow_decided":
+    "Über Ihre Freigabeanfrage wurde entschieden",
+  "notifications.type.event_workflow_delegated":
+    "Eine Freigaberunde wurde an Sie übergeben",
+  "notifications.type.event_workflow_escalated":
+    "Eine Freigaberunde hat ihre Frist überschritten",
+  "notifications.type.event_workflow_step_pending":
+    "Eine Freigabeanfrage wartet auf Ihre Entscheidung",
   "messages.threadNotShown":
     "Das Gespräch wird noch nicht angezeigt. Warten Sie, bis es geladen ist, lesen Sie es und prüfen Sie dann Ihre Antwort.",
   "messages.newBeforeReview":
@@ -2192,6 +2582,84 @@ const pl: Catalogue = {
     "Ta rozmowa nie jest Twoja albo już nie istnieje.",
   "messages.noPermission":
     "Nie możesz pisać w tej rozmowie.",
+  "today.openNotifications":
+    "Powiadomienia",
+  "notifications.title":
+    "Powiadomienia",
+  "notifications.intro":
+    "Co wydarzyło się w Twojej pracy, najnowsze na górze. Otwarcie oznacza powiadomienie jako przeczytane. Powiadomienia nie są wysyłane na telefon — widać je tutaj po otwarciu tego ekranu.",
+  "notifications.none":
+    "Nie masz powiadomień.",
+  "notifications.unread":
+    "Nowe",
+  "notifications.markAll":
+    "Oznacz wszystkie jako przeczytane",
+  "notifications.markFailedTitle":
+    "Nie udało się oznaczyć jako przeczytane",
+  "notifications.type.unknown":
+    "Powiadomienie",
+  "notifications.type.event_absence_approved":
+    "Twoja nieobecność została zatwierdzona",
+  "notifications.type.event_absence_rejected":
+    "Twoja nieobecność została odrzucona",
+  "notifications.type.event_absence_requested":
+    "Zgłoszono dla Ciebie nieobecność",
+  "notifications.type.event_booking_accepted":
+    "Twoja propozycja rezerwacji została przyjęta",
+  "notifications.type.event_booking_declined":
+    "Twoja propozycja rezerwacji została odrzucona",
+  "notifications.type.event_booking_proposed":
+    "Otrzymałeś propozycję rezerwacji",
+  "notifications.type.event_booking_withdrawn":
+    "Propozycja rezerwacji została wycofana",
+  "notifications.type.event_demand_interest_expressed":
+    "Pracownik wyraził zainteresowanie Twoim zapotrzebowaniem",
+  "notifications.type.event_demand_interest_reviewed":
+    "Firma oznaczyła Twoje zainteresowanie jako rozpatrzone",
+  "notifications.type.event_document_ack_assigned":
+    "Poproszono Cię o potwierdzenie, że zapoznano się z dokumentem.",
+  "notifications.type.event_document_ack_completed":
+    "Dokument wysłany przez Ciebie do potwierdzenia został potwierdzony.",
+  "notifications.type.event_document_expiring":
+    "Ważność dokumentu wkrótce się kończy.",
+  "notifications.type.event_engagement_created":
+    "Utworzono nową współpracę",
+  "notifications.type.event_engagement_ended":
+    "Współpraca została zakończona",
+  "notifications.type.event_history_link_offered":
+    "Organizacja zaproponowała powiązanie zarejestrowanej historii Twojej pracy z Twoim kontem",
+  "notifications.type.event_invitation_accepted":
+    "Ktoś przyjął Twoje zaproszenie",
+  "notifications.type.event_job_alert":
+    "Pojawiła się nowa oferta pasująca do Twoich kryteriów",
+  "notifications.type.event_journal_review_decided":
+    "Twój wpis w dzienniku został sprawdzony",
+  "notifications.type.event_journal_review_decided_approved":
+    "Twój wpis w dzienniku został potwierdzony",
+  "notifications.type.event_journal_review_decided_changes_requested":
+    "Poproszono o zmiany w Twoim wpisie w dzienniku",
+  "notifications.type.event_journal_review_decided_rejected":
+    "Twój wpis w dzienniku został odrzucony",
+  "notifications.type.event_message_received":
+    "Masz nową wiadomość",
+  "notifications.type.event_saved_search_match":
+    "Zapisane wyszukiwanie ma nowe wyniki",
+  "notifications.type.event_weekly_digest":
+    "Twoje tygodniowe podsumowanie pracy i możliwości jest gotowe",
+  "notifications.type.event_weekly_digest_journal":
+    "Podsumowanie Twojego dziennika pracy z tego tygodnia jest gotowe",
+  "notifications.type.event_weekly_digest_profile_completion":
+    "Aby pokazać pasujące oferty, potwierdź, jaką pracę wykonujesz",
+  "notifications.type.event_work_task_assigned":
+    "Przypisano ci zadanie",
+  "notifications.type.event_workflow_decided":
+    "Podjęto decyzję w sprawie Twojego wniosku o zatwierdzenie",
+  "notifications.type.event_workflow_delegated":
+    "Przekazano Ci etap zatwierdzania",
+  "notifications.type.event_workflow_escalated":
+    "Etap zatwierdzania przekroczył termin",
+  "notifications.type.event_workflow_step_pending":
+    "Wniosek o zatwierdzenie czeka na Twoją decyzję",
   "messages.threadNotShown":
     "Rozmowa nie jest jeszcze widoczna. Poczekaj, aż się wczyta, przeczytaj ją, a potem sprawdź swoją odpowiedź.",
   "messages.newBeforeReview":
