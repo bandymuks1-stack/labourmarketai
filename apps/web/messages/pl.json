@@ -19810,6 +19810,73 @@
     },
     "helpNeeded": "Potrzebna pomoc — {stage}:"
   },
+  "projectForecast": {
+    "title": "Prognoza",
+    "notFact": "Prognoza na podstawie zapisanej pracy tego projektu na dzień {date} — nie fakt i nie obietnica. Jest przeliczana przy każdym otwarciu tej strony.",
+    "unavailable": "Nie udało się teraz odczytać prognozy.",
+    "insufficient": "Na razie za mało zapisanej pracy, by prognozować ten projekt.",
+    "notApplicable": "Nie ma czego prognozować: projekt nie ma otwartej pracy.",
+    "unknown": "Nieznane",
+    "beyondHorizon": "Przy obecnym tempie — za ponad trzy lata",
+    "completionLabel": "Przewidywane zakończenie",
+    "deadlineLabel": "Termin",
+    "leftLabel": "Pozostała praca",
+    "leftTasks": "{left} z {total} zadań",
+    "leftStages": "{left} z {total} etapów",
+    "peopleLabel": "Potrzebne osoby",
+    "peopleValue": "{needed} (teraz {active})",
+    "qualityLabel": "Ryzyko jakości",
+    "confidenceLabel": "Wiarygodność",
+    "actionsTitle": "Co by to zmieniło",
+    "assumptionsTitle": "Założenia",
+    "risk": {
+      "on_track": "Zgodnie z planem",
+      "tight": "Na styk",
+      "likely_miss": "Prawdopodobnie nie zdążymy",
+      "overdue": "Po terminie",
+      "unknown": "Nieznane"
+    },
+    "quality": {
+      "none": "Brak otwartych",
+      "low": "Niskie",
+      "elevated": "Podwyższone",
+      "high": "Wysokie",
+      "unknown": "Nieznane"
+    },
+    "confidence": {
+      "insufficient": "za mało danych",
+      "low": "niska",
+      "medium": "średnia",
+      "high": "wysoka"
+    },
+    "action": {
+      "add_workers": "Dodać osoby do zespołu",
+      "find_partner_capacity": "Znaleźć moce partnera",
+      "unblock_stages": "Odblokować zablokowane etapy",
+      "unblock_tasks": "Odblokować zablokowane zadania",
+      "close_serious_defects": "Usunąć poważne usterki",
+      "complete_readiness": "Uzupełnić brakujące punkty gotowości zespołu",
+      "record_hours": "Zapisywać godziny przepracowane w tym projekcie",
+      "set_planned_end": "Ustawić planowaną datę zakończenia",
+      "break_down_scope": "Podzielić pracę na zadania",
+      "review_budget": "Przejrzeć budżet",
+      "replan_deadline": "Zaplanować termin na nowo"
+    },
+    "assumption": {
+      "trailing_window_days": "Tempo jest liczone z ostatnich 28 dni.",
+      "calendar_day_rate": "Godziny są rozłożone na dni kalendarzowe; nie zakłada się kalendarza pracy.",
+      "equal_unit_weight": "Każde zadanie liczy się tak samo.",
+      "unit_is_stage": "Projekt nie ma zadań, więc liczone są etapy.",
+      "team_stays_as_is": "Zespół pozostaje taki, jaki jest teraz.",
+      "absences_as_approved": "Uwzględniane są tylko zatwierdzone nieobecności.",
+      "throughput_without_hours": "Nie zapisano godzin, więc zakończenie liczy się tylko z wykonanej pracy.",
+      "cost_continues_at_observed_rate": "Koszty rosną w dotychczasowym tempie.",
+      "single_hours_ledger": "Używana jest jedna ewidencja godzin; druga jest pokazana obok i nigdy nie jest dodawana.",
+      "hours_partly_unconfirmed": "Część godzin nie jest jeszcze potwierdzona.",
+      "hours_read_truncated": "Nie wszystkie godziny udało się odczytać; liczby mogą być zaniżone.",
+      "free_internal_people_unknown": "Nie wiadomo, kto jeszcze w organizacji jest wolny."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "Cel tego tygodnia",
     "titleMine": "Twoje zadania w tym tygodniu",

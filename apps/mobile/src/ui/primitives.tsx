@@ -48,16 +48,19 @@ export function Button({
   label,
   onPress,
   busy = false,
+  disabled: off = false,
   variant = "primary",
   testID,
 }: {
   label: string;
   onPress: () => void;
   busy?: boolean;
+  /** Not pressable, without the busy spinner (another action is running). */
+  disabled?: boolean;
   variant?: "primary" | "quiet";
   testID?: string;
 }) {
-  const disabled = busy;
+  const disabled = busy || off;
   return (
     <Pressable
       accessibilityRole="button"

@@ -103,6 +103,9 @@ on:
           - invited-worker
           # Owner decision 2026-10-26: the buyer workspace (6.4) with the one owner-created buyer. Dispatch only.
           - buyer-workspace
+          # 2026-11-01 register reconciliation: waitlist real submit (6.18), public JSON APIs (9.18),
+          # journal templates (2.36). Synthetic data only. Dispatch only, never in the rotation.
+          - register-gaps
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -420,6 +423,7 @@ jobs:
             fresh-activation) SPEC=tests/e2e/prod-fresh-activation.spec.ts ;;
             invited-worker) SPEC=tests/e2e/prod-invited-worker.spec.ts ;;
             buyer-workspace) SPEC=tests/e2e/prod-buyer-workspace.spec.ts ;;
+            register-gaps) SPEC=tests/e2e/prod-register-gaps.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
