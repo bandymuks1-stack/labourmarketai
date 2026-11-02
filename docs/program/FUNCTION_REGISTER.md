@@ -440,15 +440,15 @@ The 19 journeys (rows in brackets):
 | ID | Function | Status | Last checked | Evidence (PR / commit / run) | In production | Remaining issue |
 |---|---|---|---|---|---|---|
 | 11.1 | Institution + learner link | LIVE_VERIFIED | 2026-10-21 | learning-practice 39601905282 10-21 | yes |  |
-| 11.2 | Programmes / cohorts | NOT_VERIFIED | 2026-11-01 | 2026-11-01 reconciled with product-truth: product-truth: learners cannot join a cohort themselves (EDU-2, owner decision ARCH-3); the earlier production proof below stays valid for what it covered; earlier: learning-practice run 40154033299 (green) 10-25 | yes |  |
+| 11.2 | Programmes / cohorts | NOT_VERIFIED | 2026-11-01 | 2026-11-02: learner self-request to join a cohort (owner decision 2026-11-02, decision 0028 J-12) built in RED draft #2959 (migration 20261102160000, scratch-PG proof 43/43), NOT applied; stays NOT_VERIFIED until the owner applies it and a production walk passes. 2026-11-01 reconciled with product-truth: product-truth: learners cannot join a cohort themselves (EDU-2, owner decision ARCH-3); the earlier production proof below stays valid for what it covered; earlier: learning-practice run 40154033299 (green) 10-25 | yes |  |
 | 11.3 | Learning compass | LIVE_VERIFIED | 2026-10-25 | learning-practice run 40154033299 (green) 10-25 | yes |  |
 | 11.4 | Practice capacity | LIVE_VERIFIED | 2026-10-25 | learning-practice run 40154033299 (green) 10-25 | yes |  |
 | 11.5 | Learner outcomes | LIVE_VERIFIED | 2026-10-25 | learning-practice run 40154033299 (green) 10-25 | yes |  |
 | 11.6 | Institution reporting + export | LIVE_VERIFIED | 2026-10-25 | learning-practice run 40154033299 (green) 10-25 | yes |  |
-| 11.7 | Practice->competency recognition | NOT_VERIFIED | 2026-11-01 | 2026-11-01 reconciled with product-truth: product-truth: demonstrated capability is not recognised against a formal requirement (SKL-9); the earlier production proof below stays valid for what it covered; earlier: recognition-chain 39602983862 10-21 | yes |  |
+| 11.7 | Practice->competency recognition | NOT_VERIFIED | 2026-11-01 | 2026-11-02: D-15 design recorded in decision 0028 (recognition = separate assessor act on existing evidence, never automatic); no status change. 2026-11-01 reconciled with product-truth: product-truth: demonstrated capability is not recognised against a formal requirement (SKL-9); the earlier production proof below stays valid for what it covered; earlier: recognition-chain 39602983862 10-21 | yes |  |
 | 11.8 | Training & certification register | FAIL | 2026-10-28 | company-governance 40687308231 (2026-10-28 12:28Z) green incl. T-5 — #2857 workspace scoping LIVE_VERIFIED; course register, assign, complete, see completed, retire all pass | yes | engaged non-member workers cannot be assigned training (owner product decision, RED #2816) |
 | 11.9 | Human-in-loop learning review | BLOCKED | — | owner parked nav door | unproven |  |
-| 11.10 | RPL equivalence structure | NOT_IMPLEMENTED | — | registry NOT_BUILT: RPL equivalence structure (ARCH-2) | no | owner, RED schema |
+| 11.10 | RPL equivalence structure | NOT_IMPLEMENTED | — | 2026-11-02: design recorded in decision 0028 §D-15 (procedure; structure stays deferred under ARCH-2 until the first assessor and requirement set are named). registry NOT_BUILT: RPL equivalence structure (ARCH-2) | no | owner, RED schema |
 
 ## Market intelligence
 
