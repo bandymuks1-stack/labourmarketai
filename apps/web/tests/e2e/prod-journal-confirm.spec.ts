@@ -154,16 +154,31 @@ test("2. the employer finds it in the review queue and approves it", async ({ br
   await expect(item).toContainText(RUN);
   await main.getByTestId(`journal-approve-entry-${entryId}`).click();
   // A decided entry leaves the queue (the page refreshes after the stored
-  // decision); poll with reloads until it is gone.
-  await expect
+  // decision); poll with reloads until it is gone. Each reload is bounded and
+  // a reload that does not finish reads as "not loaded", never as "still
+  // listed": run 41467005959 stored the decision at once, but the host froze
+  // the server ~41 s (ops_runtime_samples eld_max 40950 ms, swap exhausted),
+  // so the first unbounded reload alone outlived the whole 45 s window.
+  let lastReading = "no reload finished";
+  const leftQueue = expect
     .poll(
       async () => {
-        await page.goto("/lt/dashboard/inbox");
-        return main.getByTestId(`inbox-entry-${entryId}`).count();
+        try {
+          await page.goto("/lt/dashboard/inbox", { timeout: 20_000 });
+        } catch {
+          lastReading = "a reload did not finish within 20 s (server stall, not a stale queue)";
+          return -1;
+        }
+        const listed = await main.getByTestId(`inbox-entry-${entryId}`).count();
+        lastReading = listed ? "the decided entry is still listed" : "gone";
+        return listed;
       },
-      { timeout: 45_000, intervals: [3_000] },
+      { timeout: 90_000, intervals: [3_000] },
     )
     .toBe(0);
+  await leftQueue.catch((e: unknown) => {
+    throw new Error(`the approved entry did not leave the inbox; last reading: ${lastReading}\n${String(e)}`);
+  });
   await close();
 });
 
