@@ -188,6 +188,30 @@ jobs:
                   const short = id ? String(id).split("/").pop() : "";
                   const aimed = ["journal-compose-review", "journal-compose-back", "journal-compose-site", "tab-today"];
                   if (aimed.includes(short) && n?.attributes?.bounds) ids.add(short + " bounds=" + n.attributes.bounds);
+                  // A refused sign-in: did the FORM hold the secrets? Booleans
+                  // only — never a value, never a length. Tells a driver that
+                  // dropped keystrokes (field differs) from an app that sent
+                  // something other than its field (field matches, server 400).
+                  if (short === "email" || short === "password") {
+                    const a = n?.attributes ?? {};
+                    const shown = String(a.text ?? a.value ?? "");
+                    if (short === "email") {
+                      const want = process.env.MOBILE_QA_EMAIL ?? "";
+                      ids.add("sign-in check: email field equals the secret: " + (shown === want ? "yes" : "no"));
+                    } else {
+                      const secret = process.env.MOBILE_QA_PASSWORD ?? "";
+                      const want = [...secret].length;
+                      const got = [...shown].length;
+                      const masked = got > 0 && /^[•●*]+$/.test(shown);
+                      // iOS smart dashes turn "--" into one em dash: a field
+                      // exactly that many characters SHORTER names that cause.
+                      const pairs = (secret.match(/--/g) ?? []).length;
+                      ids.add("sign-in check: password field masked: " + (masked ? "yes" : "no") +
+                        "; character count vs secret: " + (got === want ? "equal" : got < want ? "SHORTER" : "LONGER") +
+                        "; secret has a double hyphen: " + (pairs > 0 ? "yes" : "no") +
+                        "; shortfall equals the double hyphens: " + (pairs > 0 && want - got === pairs ? "yes" : "no"));
+                    }
+                  }
                   (n?.children ?? []).forEach(walk);
                 };
                 try {
