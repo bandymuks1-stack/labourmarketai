@@ -63,7 +63,7 @@ export default function Screen() {
         if (!marked.ok) setMarkFailure(marked.failure);
         else read.reload();
       }
-      const to = notificationDestination(item.href);
+      const to = notificationDestination(item.href, item.type);
       if (to.kind === "native") {
         router.push(to.params ? { pathname: to.pathname, params: to.params } : to.pathname);
       } else if (to.kind === "web") {

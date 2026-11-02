@@ -22,9 +22,18 @@ export type NotificationDestination =
 
 const ID = "([0-9a-fA-F-]{36})";
 
-export function notificationDestination(href: string | undefined): NotificationDestination {
+export function notificationDestination(
+  href: string | undefined,
+  /** The row's rendered type (`event_…`); decides where one href serves two kinds. */
+  type?: string,
+): NotificationDestination {
   if (!href || !href.startsWith("/")) return { kind: "none" };
   const path = href.split(/[?#]/)[0];
+  // A review DECISION (approved / changes requested / rejected) carries the
+  // reviewer's decision and note, which only the web journal shows (its
+  // decision timeline and review panel); the phone's journal lists entries
+  // without them. The journal digest, same href, opens natively.
+  if (type?.startsWith("event_journal_review_decided")) return { kind: "web", path: href };
   const thread = new RegExp(`^/dashboard/communication/${ID}$`).exec(path);
   if (thread) return { kind: "native", pathname: "/(shell)/conversation", params: { id: thread[1] } };
   if (path === "/dashboard/communication") return { kind: "native", pathname: "/(shell)/messages" };
