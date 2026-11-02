@@ -129,6 +129,40 @@ describe("project.forecast.get", () => {
   });
 });
 
+describe("project.forecast.get — honest cadence and list", () => {
+  it("a failed cadence read says unavailable, never the default", async () => {
+    const { caller } = makeCaller({
+      tables: {
+        project_forecasts: { data: [row(1)], error: null },
+        organization_forecast_settings: { data: null, error: { code: "57014" } },
+      },
+    });
+    const one = (await cap("project.forecast.get").run(caller, { projectId: PRJ })) as unknown as { data: { cadence: unknown } };
+    expect(one.data.cadence).toEqual({ unavailable: true });
+    const list = (await cap("project.forecast.get").run(caller, {})) as unknown as { data: { cadenceByOrganization: Record<string, unknown> } };
+    expect(list.data.cadenceByOrganization[ORG]).toEqual({ unavailable: true });
+  });
+
+  it("no settings row is the default cadence", async () => {
+    const { caller } = makeCaller({ tables: { project_forecasts: { data: [row(1)], error: null } } });
+    const one = (await cap("project.forecast.get").run(caller, { projectId: PRJ })) as unknown as { data: { cadence: unknown } };
+    expect(one.data.cadence).toEqual({ mode: "weekly", enabled: true });
+  });
+
+  it("the latest per project; a full scan window is said to be incomplete", async () => {
+    const other = "0b000000-0000-4000-8000-000000000002";
+    const few = makeCaller({ tables: { project_forecasts: { data: [row(3), row(2), row(1, { project_id: other })], error: null } } });
+    const d = ((await cap("project.forecast.get").run(few.caller, {})) as unknown as { data: { complete: boolean; projects: { projectId: string; version: number }[] } }).data;
+    expect(d.complete).toBe(true);
+    expect(d.projects.map((p) => [p.projectId, p.version])).toEqual([[PRJ, 3], [other, 1]]);
+
+    const busy = makeCaller({ tables: { project_forecasts: { data: Array.from({ length: 300 }, (_, i) => row(300 - i)), error: null } } });
+    const b = ((await cap("project.forecast.get").run(busy.caller, {})) as unknown as { data: { complete: boolean; incompleteNote?: string } }).data;
+    expect(b.complete).toBe(false);
+    expect(b.incompleteNote).toMatch(/projectId/);
+  });
+});
+
 describe("forecast.mode.set — administrators only, draft → confirm, audited by the database", () => {
   it("a non-administrator is refused at the draft, nothing written", async () => {
     const { caller, rpcCalls, writes } = makeCaller({ admin: false });

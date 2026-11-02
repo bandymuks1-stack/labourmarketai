@@ -83,14 +83,18 @@ function headline(row: ForecastRow) {
   };
 }
 
-async function modesFor(db: Db, organizationIds: readonly string[]): Promise<Record<string, { mode: string; enabled: boolean }>> {
-  const out: Record<string, { mode: string; enabled: boolean }> = {};
-  for (const id of organizationIds) out[id] = { mode: DEFAULT_FORECAST_MODE, enabled: true };
+/** An organization's recompute cadence. No settings row = the default; a
+ *  FAILED read says so — never a real-looking default (failed read ≠ empty). */
+type Cadence = { mode: string; enabled: boolean } | { unavailable: true };
+
+async function modesFor(db: Db, organizationIds: readonly string[]): Promise<Record<string, Cadence>> {
+  const out: Record<string, Cadence> = {};
   if (organizationIds.length === 0) return out;
   const { data, error } = await db
     .from("organization_forecast_settings")
     .select("organization_id, mode, enabled")
     .in("organization_id", organizationIds as string[]);
+  for (const id of organizationIds) out[id] = error ? { unavailable: true } : { mode: DEFAULT_FORECAST_MODE, enabled: true };
   if (error) return out;
   for (const r of (data ?? []) as { organization_id: string; mode: string; enabled: boolean }[]) {
     out[r.organization_id] = { mode: r.mode, enabled: r.enabled };
@@ -99,6 +103,9 @@ async function modesFor(db: Db, organizationIds: readonly string[]): Promise<Rec
 }
 
 // ── project.forecast.get ───────────────────────────────────────────────────
+
+const LIST_SCAN_ROWS = 300;
+const LIST_MAX_PROJECTS = 25;
 
 const forecastGetInput = z.object({ projectId: z.string().uuid().optional() }).strict();
 
@@ -160,24 +167,38 @@ const forecastGet: CapabilityDescriptor = {
       };
     }
 
+    // The newest rows across projects, scanned to the latest per project. One
+    // busy project can fill the window and push others out, so a full window
+    // (or more projects than are listed) is said to be INCOMPLETE — never
+    // presented as every managed project.
     const { data, error } = await db
       .from("project_forecasts")
       .select(FORECAST_SELECT)
       .order("computed_at", { ascending: false })
-      .limit(300);
+      .limit(LIST_SCAN_ROWS);
     if (error) return unavailable(error.code);
+    const scanned = (data ?? []) as ForecastRow[];
     const latestByProject = new Map<string, ForecastRow>();
-    for (const r of (data ?? []) as ForecastRow[]) {
+    for (const r of scanned) {
       const seen = latestByProject.get(r.project_id);
       if (!seen || r.version > seen.version) latestByProject.set(r.project_id, r);
     }
-    const rows = [...latestByProject.values()].slice(0, 25);
+    const all = [...latestByProject.values()];
+    const rows = all.slice(0, LIST_MAX_PROJECTS);
+    const complete = scanned.length < LIST_SCAN_ROWS && all.length <= LIST_MAX_PROJECTS;
     const orgs = [...new Set(rows.map((r) => r.organization_id).filter((x): x is string => !!x))];
     return {
       ok: true,
       data: {
         kind: "forecast",
         note: NOT_A_FACT,
+        complete,
+        ...(complete
+          ? {}
+          : {
+              incompleteNote:
+                "This list may leave out some managed projects (only the most recent forecasts were read). Ask with projectId for any project not listed.",
+            }),
         projects: rows.map(headline),
         cadenceByOrganization: await modesFor(db, orgs),
       },
