@@ -360,6 +360,10 @@ jobs:
           fi
           if [ "${{ needs.debounce.outputs.spec }}" = "buyer-workspace" ]; then
             mint_existing "qa.buyer+act1@labourmarket.ai" buyer
+            # J-13: the owner-created fresh worker is the NON-customer who becomes one. Its absence
+            # (revoked / not created) only skips the J-13 steps; the 6.4 steps above still run.
+            mint_existing "qa.freshworker+act1@labourmarket.ai" freshworker \
+              || echo "::warning::qa.freshworker+act1 not mintable — the J-13 steps of buyer-workspace will skip"
           fi
           if [ "${{ needs.debounce.outputs.spec }}" = "invited-worker" ]; then
             mint_existing "qa.invited@labourmarket.ai" invited
