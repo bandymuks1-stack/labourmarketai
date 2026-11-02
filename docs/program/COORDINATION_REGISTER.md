@@ -168,7 +168,7 @@ hand-over complete; they start nothing without an assignment here.
 |---|---|---|---|---|---|---|
 | #2917 | brigade offered and matched as a unit | lane A | ✓ | ✓ | ✓ | ✓ walk 41350506578 (19/19) |
 | #2913 | six production-applied migrations restored byte-exact (RED, approved) | coordinator | ✓ | ✓ | ✓ (no production change) | ✓ parity gate 41342643253 |
-| #2916 | mobile: correct a journal entry | mobile | ✓ | ✓ | n/a (app build) | Android vs production ✓; iOS NOT_VERIFIED (sign-in refused; auth logs show no rate limit — the cause is the credentials the app sent, under investigation by the mobile lane) |
+| #2916 | mobile: correct a journal entry | mobile | ✓ | ✓ | n/a (app build) | Android vs production ✓; iOS: the whole correction flow passed against production in run 41408063016 (from a feature branch; the earlier refusal was the test driver mistyping the address, not a rate limit) — the run on main is still pending |
 | #2928 | mobile: messages | mobile | ✓ | ✓ | n/a (app build) | NOT_VERIFIED |
 | #2919 | failed notification/project reads never answer empty | coordinator | ✓ | ✓ | ✓ | NOT_VERIFIED |
 | #2920 | project forecast beside the course, computed on read | lane A | ✓ | ✓ | ✓ | NOT_VERIFIED |
