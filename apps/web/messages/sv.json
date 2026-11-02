@@ -7910,7 +7910,8 @@
       "withdrawn": "Förfrågan har dragits tillbaka.",
       "closed": "Den här gruppen tar inte emot nya förfrågningar.",
       "invalid": "Kontrollera namnet och meddelandet.",
-      "error": "Något gick fel. Försök igen."
+      "error": "Något gick fel. Försök igen.",
+      "cooldown": "Din förfrågan avslogs nyligen. Du kan fråga den här gruppen igen 30 dagar efter beslutet."
     }
   }
 }

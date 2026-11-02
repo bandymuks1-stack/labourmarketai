@@ -1,7 +1,7 @@
 -- @human-gate-approved — RED draft J-12 (owner decision 2026-11-02); NOT applied. Apply only after explicit owner approval, via Supabase MCP apply_migration.
 -- 20261102160000_education_cohort_join_requests_v1
 --
--- ██ RED CLASS — human gate (new SECURITY DEFINER commands + GRANT, a widened
+-- ██ RED CLASS — human gate (six new SECURITY DEFINER commands + GRANT, a widened
 -- ██ status CHECK on a membership table, and one command creates a `student`
 -- ██ engagement context). Draft; owner-channel apply only, never auto-merged.
 --
@@ -16,7 +16,8 @@
 --     requested → active   (accepted by the institution)
 --     requested → declined (declined by the institution)
 --     requested → withdrawn (withdrawn by the learner)
---   declined | withdrawn | left → requested (asked again, while still open)
+--   withdrawn | left → requested (asked again, while still open)
+--   declined → requested only 30 days after the decline (no re-asking loop)
 -- Every existing reader already filters `status = 'active'` (the two RLS
 -- membership helpers, the learning compass, the institution report), so a
 -- request grants nothing: a requester reads no programme and no cohort through
@@ -42,8 +43,14 @@
 --
 -- WHAT THE INSTITUTION SEES. Only the name the learner typed on the request
 -- and an optional note — the learner's profile, journal and skills stay under
--- the least-privilege ruling (2026-08-27). No new reference to profiles is
--- added (`added_by` records the decider), so the erasure registry is unchanged.
+-- the least-privilege ruling (2026-08-27). The name is typed by the learner and
+-- NOT verified; the institution UI says so. No new reference to profiles is
+-- added, so the erasure registry is unchanged.
+--
+-- WHAT THE LEARNER SEES. Their own row is readable to them (existing RLS), so
+-- the decider is NOT written into it: a request-path row keeps `added_by` null
+-- (the learner added themselves by asking). Who decided is recorded in
+-- `audit_logs` (admin-read only), never returned to the learner.
 --
 -- Reversible: supabase/rollbacks/20261102160000_education_cohort_join_requests_v1.down.sql
 -- (guarded — refuses while any non-active/left row exists).
@@ -91,6 +98,35 @@ begin
   update public.education_cohorts
      set join_requests_open = coalesce(p_open, false), updated_at = now()
    where id = p_cohort_id;
+end;
+$$;
+
+-- An institution archives a group it no longer runs (the cohort table has had
+-- `archived_at` since 20260903120000, but no command set it). Archiving closes
+-- the group for requests and declines any request still pending, so no learner
+-- is left waiting on a group nobody reads; members' rows are kept as history.
+create or replace function public.archive_education_cohort_v1(p_cohort_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_org uuid;
+begin
+  if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
+  select organization_id into v_org from public.education_cohorts where id = p_cohort_id and archived_at is null;
+  if v_org is null then raise exception 'cohort_not_found' using errcode = '42501'; end if;
+  if not public.manages_organization(v_org) then raise exception 'not_manager' using errcode = '42501'; end if;
+  update public.education_cohort_members
+     set status = 'declined', decided_at = now()
+   where cohort_id = p_cohort_id and status = 'requested';
+  update public.education_cohorts
+     set archived_at = now(), join_requests_open = false, updated_at = now()
+   where id = p_cohort_id;
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (v_uid, 'education_cohort_archived_v1', 'education_cohorts', p_cohort_id, '{}'::jsonb);
 end;
 $$;
 
@@ -145,6 +181,7 @@ declare
   v_uid    uuid := auth.uid();
   v_open   boolean;
   v_status text;
+  v_decided timestamptz;
   v_label  text := btrim(coalesce(p_label, ''));
   v_note   text := nullif(btrim(coalesce(p_note, '')), '');
 begin
@@ -155,13 +192,19 @@ begin
   select c.join_requests_open into v_open
     from public.education_cohorts c
     join public.education_programs p on p.id = c.program_id and p.archived_at is null
+    join public.organizations o on o.id = c.organization_id and o.archived_at is null
    where c.id = p_cohort_id and c.archived_at is null;
   if v_open is null then raise exception 'cohort_not_found' using errcode = '42501'; end if;
 
-  select status into v_status from public.education_cohort_members
+  select status, decided_at into v_status, v_decided from public.education_cohort_members
    where cohort_id = p_cohort_id and profile_id = v_uid;
   if v_status = 'active' then return 'already_member'; end if;
   if not v_open then raise exception 'join_requests_closed' using errcode = '42501'; end if;
+  -- A declined learner may ask again only 30 days after the decline, so a
+  -- decline is not answered by an endless re-asking loop.
+  if v_status = 'declined' and v_decided > now() - interval '30 days' then
+    raise exception 'request_cooldown' using errcode = '42501';
+  end if;
 
   insert into public.education_cohort_members
     (cohort_id, profile_id, status, added_by, added_at, requested_at, request_label, request_note, decided_at, left_at)
@@ -169,6 +212,7 @@ begin
     (p_cohort_id, v_uid, 'requested', null, now(), now(), v_label, v_note, null, null)
   on conflict (cohort_id, profile_id) do update
     set status        = 'requested',
+        added_by      = null,
         requested_at  = now(),
         request_label = excluded.request_label,
         request_note  = excluded.request_note,
@@ -226,8 +270,11 @@ begin
 
   if p_decision = 'decline' then
     update public.education_cohort_members
-       set status = 'declined', added_by = v_uid, decided_at = now()
+       set status = 'declined', decided_at = now()
      where cohort_id = p_cohort_id and profile_id = p_profile_id;
+    insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+    values (v_uid, 'education_cohort_join_declined_v1', 'education_cohorts', p_cohort_id,
+      jsonb_build_object('profile_id', p_profile_id));
     return 'declined';
   end if;
 
@@ -245,18 +292,23 @@ begin
   end if;
 
   update public.education_cohort_members
-     set status = 'active', added_by = v_uid, added_at = now(), decided_at = now(), left_at = null
+     set status = 'active', added_by = null, added_at = now(), decided_at = now(), left_at = null
    where cohort_id = p_cohort_id and profile_id = p_profile_id;
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (v_uid, 'education_cohort_join_accepted_v1', 'education_cohorts', p_cohort_id,
+    jsonb_build_object('profile_id', p_profile_id));
   return 'accepted';
 end;
 $$;
 
 revoke execute on function public.set_education_cohort_join_requests_v1(uuid, boolean) from public, anon;
+revoke execute on function public.archive_education_cohort_v1(uuid) from public, anon;
 revoke execute on function public.list_open_education_cohorts_v1() from public, anon;
 revoke execute on function public.request_education_cohort_join_v1(uuid, text, text) from public, anon;
 revoke execute on function public.withdraw_education_cohort_join_v1(uuid) from public, anon;
 revoke execute on function public.decide_education_cohort_join_v1(uuid, uuid, text) from public, anon;
 grant execute on function public.set_education_cohort_join_requests_v1(uuid, boolean) to authenticated;
+grant execute on function public.archive_education_cohort_v1(uuid) to authenticated;
 grant execute on function public.list_open_education_cohorts_v1() to authenticated;
 grant execute on function public.request_education_cohort_join_v1(uuid, text, text) to authenticated;
 grant execute on function public.withdraw_education_cohort_join_v1(uuid) to authenticated;
@@ -269,4 +321,5 @@ grant execute on function public.decide_education_cohort_join_v1(uuid, uuid, tex
 -- drop function if exists public.request_education_cohort_join_v1(uuid, text, text);
 -- drop function if exists public.list_open_education_cohorts_v1();
 -- drop function if exists public.set_education_cohort_join_requests_v1(uuid, boolean);
+-- drop function if exists public.archive_education_cohort_v1(uuid);
 -- restore the two-state CHECK; drop the four request columns and join_requests_open.

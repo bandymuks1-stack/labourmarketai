@@ -2054,7 +2054,9 @@
           "closeRequests": "Nebepriimti naujų prašymų",
           "requestsOpenHint": "Besimokantieji gali rasti šią grupę ir paprašyti prisijungti.",
           "accept": "Priimti",
-          "decline": "atmesti"
+          "decline": "atmesti",
+          "acceptConfirm": "Taip, priimti ir įtraukti į grupę",
+          "cancelDecision": "Atšaukti"
         },
         "unavailable": "Šiuo metu programų įkelti nepavyko. Perkrauk puslapį; tai, ką sukūrei, neprarasta.",
         "inviteLearners": "Pakviesti besimokančiuosius",
@@ -2093,7 +2095,8 @@
           "evidenceRecorded": "Įrašyta",
           "evidenceConfirmed": "pažymėta"
         },
-        "requestFrom": "Prašo prisijungti: {name}"
+        "requestFrom": "Prašo prisijungti: {name}",
+        "requestUnverified": "Vardą įvedė pats besimokantysis — nepatikrinta."
       },
       "learners": {
         "title": "Besimokantieji",
@@ -20085,7 +20088,8 @@
       "withdrawn": "Prašymas atšauktas.",
       "closed": "Ši grupė nebepriima naujų prašymų.",
       "invalid": "Patikrink vardą ir žinutę.",
-      "error": "Kažkas nepavyko. Bandyk dar kartą."
+      "error": "Kažkas nepavyko. Bandyk dar kartą.",
+      "cooldown": "Neseniai gavai atsisakymą. Šios grupės vėl paprašyti galėsi praėjus 30 dienų nuo sprendimo."
     }
   }
 }

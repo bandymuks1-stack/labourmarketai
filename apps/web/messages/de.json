@@ -2054,7 +2054,9 @@
           "closeRequests": "Keine neuen Anfragen mehr annehmen",
           "requestsOpenHint": "Lernende können diese Gruppe finden und um Aufnahme bitten.",
           "accept": "Annehmen",
-          "decline": "ablehnen"
+          "decline": "ablehnen",
+          "acceptConfirm": "Ja, annehmen und zur Gruppe hinzufügen",
+          "cancelDecision": "Abbrechen"
         },
         "unavailable": "Die Studiengänge konnten gerade nicht geladen werden. Laden Sie die Seite neu; nichts von dem, was Sie angelegt haben, ist verloren.",
         "inviteLearners": "Lernende einladen",
@@ -2093,7 +2095,8 @@
           "evidenceRecorded": "Erfasst",
           "evidenceConfirmed": "bestätigt"
         },
-        "requestFrom": "Bittet um Aufnahme: {name}"
+        "requestFrom": "Bittet um Aufnahme: {name}",
+        "requestUnverified": "Vom Lernenden selbst eingegebener Name — nicht überprüft."
       },
       "learners": {
         "title": "Lernende",
@@ -20085,7 +20088,8 @@
       "withdrawn": "Anfrage zurückgezogen.",
       "closed": "Diese Gruppe nimmt keine neuen Anfragen mehr an.",
       "invalid": "Prüfe Name und Nachricht.",
-      "error": "Etwas ist schiefgelaufen. Versuche es erneut."
+      "error": "Etwas ist schiefgelaufen. Versuche es erneut.",
+      "cooldown": "Deine Anfrage wurde kürzlich abgelehnt. Du kannst diese Gruppe 30 Tage nach der Entscheidung erneut anfragen."
     }
   }
 }

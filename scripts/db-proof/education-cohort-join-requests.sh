@@ -100,7 +100,9 @@ check "nobody decides their own request"        "self_decision_not_allowed" "$(q
 check "no request, nothing to decide"           "no_pending_request" "$(q $MGR authenticated "select decide_education_cohort_join_v1('$COH','$OTHER','decline');")"
 check "bad decision word refused"               "invalid_decision" "$(q $MGR authenticated "select decide_education_cohort_join_v1('$COH','$LEARNER','maybe');")"
 check "manager accepts"                         "accepted" "$(q $MGR authenticated "select decide_education_cohort_join_v1('$COH','$LEARNER','accept');")"
-check "membership active, decider recorded"     "active|t|t" "$(q '' postgres "select status, added_by = '$MGR', decided_at is not null from education_cohort_members where profile_id='$LEARNER';")"
+check "membership active, decided"              "active|t" "$(q '' postgres "select status, decided_at is not null from education_cohort_members where profile_id='$LEARNER';")"
+check "learner's own row carries no decider id" "t" "$(q $LEARNER authenticated "select added_by is null from education_cohort_members;")"
+check "decider recorded in the audit log"        "1" "$(q '' postgres "select count(*) from audit_logs where actor_id='$MGR' and action='education_cohort_join_accepted_v1';")"
 check "student relationship created once"       "1|student|active" "$(q '' postgres "select count(*) over (), relationship_slug, status from engagement_contexts where profile_id='$LEARNER';")"
 check "member now reads the cohort (RLS)"       "1" "$(q $LEARNER authenticated "select count(*) from education_cohorts;")"
 check "member now reads the programme (RLS)"    "1" "$(q $LEARNER authenticated "select count(*) from education_programs;")"
@@ -115,10 +117,34 @@ check "withdrawing twice refused"               "no_pending_request" "$(q $OTHER
 check "asks again after withdrawing"            "requested" "$(q $OTHER authenticated "select request_education_cohort_join_v1('$COH','Ona');")"
 check "manager declines"                        "declined" "$(q $MGR authenticated "select decide_education_cohort_join_v1('$COH','$OTHER','decline');")"
 check "decline creates no relationship"         "0" "$(q '' postgres "select count(*) from engagement_contexts where profile_id='$OTHER';")"
+check "declined row carries no decider id"      "t" "$(q $OTHER authenticated "select added_by is null from education_cohort_members;")"
+check "re-asking right after a decline refused" "request_cooldown" "$(q $OTHER authenticated "select request_education_cohort_join_v1('$COH','Ona');")"
+check "refused re-ask left the decline in place" "declined" "$(q '' postgres "select status from education_cohort_members where profile_id='$OTHER';")"
+q '' postgres "update education_cohort_members set decided_at = now() - interval '29 days' where profile_id='$OTHER';" >/dev/null
+check "still refused at 29 days"                "request_cooldown" "$(q $OTHER authenticated "select request_education_cohort_join_v1('$COH','Ona');")"
+q '' postgres "update education_cohort_members set decided_at = now() - interval '31 days' where profile_id='$OTHER';" >/dev/null
+check "may ask again after 30 days"             "requested" "$(q $OTHER authenticated "select request_education_cohort_join_v1('$COH','Ona');")"
+check "manager declines again"                  "declined" "$(q $MGR authenticated "select decide_education_cohort_join_v1('$COH','$OTHER','decline');")"
+q '' postgres "update organizations set archived_at = now() where id='$ORG';" >/dev/null
+check "archived institution takes no request"   "cohort_not_found" "$(q $OUTSIDER authenticated "select request_education_cohort_join_v1('$COH','Petras');")"
+check "archived institution is not findable"    "0" "$(q $OUTSIDER authenticated "select count(*) from list_open_education_cohorts_v1();")"
+check "no row written for the refused request"  "0" "$(q '' postgres "select count(*) from education_cohort_members where profile_id='$OUTSIDER';")"
+q '' postgres "update organizations set archived_at = null where id='$ORG';" >/dev/null
 q $MGR authenticated "select set_education_cohort_join_requests_v1('$COH', false);" >/dev/null
 check "declined learner still sees the outcome" "declined|f" "$(q $OTHER authenticated "select my_status, join_requests_open from list_open_education_cohorts_v1();")"
 check "closed group takes no new request"       "join_requests_closed" "$(q $OTHER authenticated "select request_education_cohort_join_v1('$COH','Ona');")"
 check "outsider finds nothing once closed"      "0" "$(q $OUTSIDER authenticated "select count(*) from list_open_education_cohorts_v1();")"
+
+echo "== archive"
+q $MGR authenticated "select set_education_cohort_join_requests_v1('$COH', true);" >/dev/null
+check "outsider asks before the archive"        "requested" "$(q $OUTSIDER authenticated "select request_education_cohort_join_v1('$COH','Petras');")"
+check "a learner cannot archive"                "not_manager" "$(q $LEARNER authenticated "select archive_education_cohort_v1('$COH');")"
+check "manager archives the group"              "" "$(q $MGR authenticated "select archive_education_cohort_v1('$COH');")"
+check "archive closed it and declined the pending request" "t|f|declined" "$(q '' postgres "select c.archived_at is not null, c.join_requests_open, m.status from education_cohorts c join education_cohort_members m on m.cohort_id=c.id and m.profile_id='$OUTSIDER' where c.id='$COH';")"
+check "member history kept"                     "active" "$(q '' postgres "select status from education_cohort_members where profile_id='$LEARNER';")"
+check "archived group takes no request"         "cohort_not_found" "$(q $OTHER authenticated "select request_education_cohort_join_v1('$COH','Ona');")"
+check "archiving twice refused"                 "cohort_not_found" "$(q $MGR authenticated "select archive_education_cohort_v1('$COH');")"
+check "anon cannot archive"                     "permission denied for function archive_education_cohort_v1" "$(q '' anon "select archive_education_cohort_v1('$COH');")"
 
 echo "== rollback"
 check "rollback refused while request rows exist" "rollback refused: cohort join-request rows exist. Decide or export them first." \
@@ -130,7 +156,7 @@ PSQL="psql -h $HOST -p $PORT -U postgres -d $DB -v ON_ERROR_STOP=1 -q"
 $PSQL -f "$MIG" >/dev/null
 check "clean rollback applies"                  "ok" "$($PSQL -f "$DOWN" >/dev/null 2>&1 && echo ok)"
 check "two-state CHECK restored"                "CHECK ((status = ANY (ARRAY['active'::text, 'left'::text])))" "$(q '' postgres "select pg_get_constraintdef(oid) from pg_constraint where conname='education_cohort_members_status_check';")"
-check "all five functions dropped"              "0" "$(q '' postgres "select count(*) from pg_proc where proname in ('set_education_cohort_join_requests_v1','list_open_education_cohorts_v1','request_education_cohort_join_v1','withdraw_education_cohort_join_v1','decide_education_cohort_join_v1');")"
+check "all six functions dropped"              "0" "$(q '' postgres "select count(*) from pg_proc where proname in ('set_education_cohort_join_requests_v1','archive_education_cohort_v1','list_open_education_cohorts_v1','request_education_cohort_join_v1','withdraw_education_cohort_join_v1','decide_education_cohort_join_v1');")"
 check "migration re-applies after rollback"     "ok" "$($PSQL -f "$MIG" >/dev/null 2>&1 && echo ok)"
 
 echo "== $PASS passed, $FAIL failed"

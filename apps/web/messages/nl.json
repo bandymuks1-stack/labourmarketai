@@ -2054,7 +2054,9 @@
           "closeRequests": "Geen nieuwe verzoeken meer aannemen",
           "requestsOpenHint": "Lerenden kunnen deze groep vinden en vragen om deel te nemen.",
           "accept": "Accepteren",
-          "decline": "afwijzen"
+          "decline": "afwijzen",
+          "acceptConfirm": "Ja, accepteren en aan de groep toevoegen",
+          "cancelDecision": "Annuleren"
         },
         "unavailable": "De opleidingen konden nu niet worden geladen. Vernieuw de pagina; wat je hebt aangemaakt is niet verloren.",
         "inviteLearners": "Lerenden uitnodigen",
@@ -2093,7 +2095,8 @@
           "evidenceRecorded": "Vastgelegd",
           "evidenceConfirmed": "bevestigd"
         },
-        "requestFrom": "Vraagt om deel te nemen: {name}"
+        "requestFrom": "Vraagt om deel te nemen: {name}",
+        "requestUnverified": "Naam ingevuld door de lerende — niet geverifieerd."
       },
       "learners": {
         "title": "Lerenden",
@@ -20085,7 +20088,8 @@
       "withdrawn": "Verzoek ingetrokken.",
       "closed": "Deze groep neemt geen nieuwe verzoeken meer aan.",
       "invalid": "Controleer de naam en het bericht.",
-      "error": "Er ging iets mis. Probeer het opnieuw."
+      "error": "Er ging iets mis. Probeer het opnieuw.",
+      "cooldown": "Je verzoek is onlangs afgewezen. Je kunt deze groep 30 dagen na het besluit opnieuw vragen."
     }
   }
 }

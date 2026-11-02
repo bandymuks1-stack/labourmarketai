@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import {
   createCohortAction,
@@ -37,6 +37,8 @@ export type ProgramFormLabels = {
   readonly closeRequests: string;
   readonly requestsOpenHint: string;
   readonly accept: string;
+  readonly acceptConfirm: string;
+  readonly cancel: string;
   readonly decline: string;
   readonly saving: string;
   readonly saved: string;
@@ -326,30 +328,57 @@ export function DecideJoinRequest({
   readonly labels: ProgramFormLabels;
 }) {
   const [state, action, pending] = useActionState(decideCohortJoinAction, IDLE);
+  // Accepting creates a student relationship, so it takes a second, explicit
+  // click; declining stays one click.
+  const [confirming, setConfirming] = useState(false);
   return (
     <form action={action} className="flex flex-wrap items-center gap-2" data-testid={`cohort-join-decide-${cohortId}-${profileId}`}>
       <input type="hidden" name="cohortId" value={cohortId} readOnly />
       <input type="hidden" name="profileId" value={profileId} readOnly />
-      <button
-        type="submit"
-        name="decision"
-        value="accept"
-        disabled={pending}
-        className={btnCls}
-        data-testid={`cohort-join-accept-${cohortId}-${profileId}`}
-      >
-        {labels.accept}
-      </button>
-      <button
-        type="submit"
-        name="decision"
-        value="decline"
-        disabled={pending}
-        className="text-xs text-text-muted hover:text-text-secondary hover:underline disabled:opacity-60"
-        data-testid={`cohort-join-decline-${cohortId}-${profileId}`}
-      >
-        {labels.decline}
-      </button>
+      {confirming ? (
+        <>
+          <button
+            type="submit"
+            name="decision"
+            value="accept"
+            disabled={pending}
+            className={btnCls}
+            data-testid={`cohort-join-accept-confirm-${cohortId}-${profileId}`}
+          >
+            {labels.acceptConfirm}
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => setConfirming(false)}
+            className="text-xs text-text-muted hover:text-text-secondary hover:underline disabled:opacity-60"
+          >
+            {labels.cancel}
+          </button>
+        </>
+      ) : (
+        <>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => setConfirming(true)}
+            className={btnCls}
+            data-testid={`cohort-join-accept-${cohortId}-${profileId}`}
+          >
+            {labels.accept}
+          </button>
+          <button
+            type="submit"
+            name="decision"
+            value="decline"
+            disabled={pending}
+            className="text-xs text-text-muted hover:text-text-secondary hover:underline disabled:opacity-60"
+            data-testid={`cohort-join-decline-${cohortId}-${profileId}`}
+          >
+            {labels.decline}
+          </button>
+        </>
+      )}
       <StateLine state={state} labels={labels} />
     </form>
   );

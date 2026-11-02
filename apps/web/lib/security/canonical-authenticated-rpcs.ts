@@ -40,6 +40,7 @@ export const CANONICAL_APP_RPCS = [
   "agency_pool_docs_readiness",
   "agency_worker_engagement_links",
   "apply_learning_auto_confirmation",
+  "archive_education_cohort_v1",
   "assign_agency_worker_role",
   "assign_company_worker_role",
   "assign_worker_to_project",

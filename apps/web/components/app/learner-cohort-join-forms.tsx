@@ -21,6 +21,7 @@ export type CohortJoinLabels = {
   readonly alreadyMember: string;
   readonly withdrawn: string;
   readonly closed: string;
+  readonly cooldown: string;
   readonly invalid: string;
   readonly error: string;
 };
@@ -42,9 +43,11 @@ function StateLine({ state, labels }: { state: CohortJoinActionState; labels: Co
           ? labels.withdrawn
           : state.status === "closed"
             ? labels.closed
-            : state.status === "invalid"
-              ? labels.invalid
-              : labels.error;
+            : state.status === "cooldown"
+              ? labels.cooldown
+              : state.status === "invalid"
+                ? labels.invalid
+                : labels.error;
   return ok ? (
     <p className="text-xs text-text-secondary" role="status" data-testid="cohort-join-state">
       {text}

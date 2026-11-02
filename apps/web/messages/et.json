@@ -7910,7 +7910,8 @@
       "withdrawn": "Taotlus võeti tagasi.",
       "closed": "See rühm ei võta enam uusi taotlusi vastu.",
       "invalid": "Kontrolli nime ja sõnumit.",
-      "error": "Midagi läks valesti. Proovi uuesti."
+      "error": "Midagi läks valesti. Proovi uuesti.",
+      "cooldown": "Sinu taotlus lükati hiljuti tagasi. Seda rühma saad uuesti paluda 30 päeva pärast otsust."
     }
   }
 }

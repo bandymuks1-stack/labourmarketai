@@ -42,6 +42,7 @@ export async function LearnerCohortJoinSection({
     alreadyMember: t("form.alreadyMember"),
     withdrawn: t("form.withdrawn"),
     closed: t("form.closed"),
+    cooldown: t("form.cooldown"),
     invalid: t("form.invalid"),
     error: t("form.error"),
   };

@@ -7910,7 +7910,8 @@
       "withdrawn": "Forespørselen er trukket tilbake.",
       "closed": "Denne gruppen tar ikke imot nye forespørsler.",
       "invalid": "Sjekk navnet og meldingen.",
-      "error": "Noe gikk galt. Prøv igjen."
+      "error": "Noe gikk galt. Prøv igjen.",
+      "cooldown": "Forespørselen din ble nylig avslått. Du kan spørre denne gruppen igjen 30 dager etter avgjørelsen."
     }
   }
 }

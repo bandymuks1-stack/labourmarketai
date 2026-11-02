@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
  * J-12 learner join requests (owner decision 2026-11-02; ARCH-3 resolved for
  * EDU-2). STATIC guard over the migration, its rollback and the app wiring.
  * The behavioural proof is scripts/db-proof/education-cohort-join-requests.sh
- * (scratch PostgreSQL 16, probes as `authenticated` / `anon`; 43 assertions at
+ * (scratch PostgreSQL 16, probes as `authenticated` / `anon`; 54+ assertions at
  * the time of writing; NOT part of CI — it needs a database).
  */
 
@@ -39,7 +39,7 @@ describe("one membership store (decision 0016)", () => {
 
 describe("authority", () => {
   it("only a manager of the cohort's organisation opens a group or decides a request", () => {
-    for (const name of ["set_education_cohort_join_requests_v1", "decide_education_cohort_join_v1"]) {
+    for (const name of ["set_education_cohort_join_requests_v1", "decide_education_cohort_join_v1", "archive_education_cohort_v1"]) {
       expect(fn(name)).toContain("public.manages_organization(v_org)");
     }
   });
@@ -53,6 +53,19 @@ describe("authority", () => {
     expect(req).toContain("join_requests_closed");
     expect(req).toMatch(/values\s*\(p_cohort_id, v_uid, 'requested'/);
     expect(fn("withdraw_education_cohort_join_v1")).toMatch(/profile_id = v_uid and status = 'requested'/);
+  });
+
+  it("a request to an archived institution is refused, and a decline is not answered by re-asking at once", () => {
+    const req = fn("request_education_cohort_join_v1");
+    expect(req).toContain("join public.organizations o on o.id = c.organization_id and o.archived_at is null");
+    expect(req).toMatch(/v_status = 'declined' and v_decided > now\(\) - interval '30 days' then\s+raise exception 'request_cooldown'/);
+  });
+
+  it("the decider is never written into the learner-readable row; the audit log records it", () => {
+    const decide = fn("decide_education_cohort_join_v1");
+    expect(decide).not.toMatch(/added_by = v_uid/);
+    expect(decide).toContain("insert into public.audit_logs");
+    expect(fn("request_education_cohort_join_v1")).toMatch(/added_by\s+= null/);
   });
 
   it("accepting creates the student relationship exactly as an accepted invitation does", () => {
@@ -71,6 +84,7 @@ describe("authority", () => {
   it("every command is authenticated-only", () => {
     for (const sig of [
       "set_education_cohort_join_requests_v1(uuid, boolean)",
+      "archive_education_cohort_v1(uuid)",
       "list_open_education_cohorts_v1()",
       "request_education_cohort_join_v1(uuid, text, text)",
       "withdraw_education_cohort_join_v1(uuid)",

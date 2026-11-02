@@ -20,6 +20,7 @@ create table public.professions (slug text primary key, is_active boolean not nu
 create table public.education_types (slug text primary key, is_active boolean not null default true);
 create table public.organization_roles (organization_id uuid, role_slug text);
 create table public.public_vacancies (id uuid primary key default gen_random_uuid(), profession_slug text, expires_at timestamptz, is_active boolean);
+create table public.audit_logs (id uuid primary key default gen_random_uuid(), actor_id uuid, action text, entity text, entity_id uuid, payload jsonb, occurred_at timestamptz not null default now());
 create table public.relationship_types (slug text primary key);
 insert into public.relationship_types values ('student'), ('manager'), ('employee');
 create table public.engagement_contexts (

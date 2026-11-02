@@ -7910,7 +7910,8 @@
       "withdrawn": "Lūgums atsaukts.",
       "closed": "Šī grupa vairs nepieņem jaunus lūgumus.",
       "invalid": "Pārbaudi vārdu un ziņu.",
-      "error": "Kaut kas nogāja greizi. Mēģini vēlreiz."
+      "error": "Kaut kas nogāja greizi. Mēģini vēlreiz.",
+      "cooldown": "Tavs pieprasījums nesen tika noraidīts. Šai grupai vari jautāt vēlreiz 30 dienas pēc lēmuma."
     }
   }
 }

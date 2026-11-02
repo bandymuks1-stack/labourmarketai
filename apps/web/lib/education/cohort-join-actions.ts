@@ -16,6 +16,7 @@ export type CohortJoinActionState =
   | { status: "already_member" }
   | { status: "withdrawn" }
   | { status: "closed" }
+  | { status: "cooldown" }
   | { status: "invalid" }
   | { status: "error" };
 
@@ -24,6 +25,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 function mapJoinError(message: string | undefined): CohortJoinActionState {
   const m = (message ?? "").toLowerCase();
   if (m.includes("join_requests_closed")) return { status: "closed" };
+  if (m.includes("request_cooldown")) return { status: "cooldown" };
   if (m.includes("invalid_request") || m.includes("cohort_not_found") || m.includes("no_pending_request"))
     return { status: "invalid" };
   return { status: "error" };

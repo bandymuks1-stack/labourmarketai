@@ -56,6 +56,8 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
     closeRequests: t("form.closeRequests"),
     requestsOpenHint: t("form.requestsOpenHint"),
     accept: t("form.accept"),
+    acceptConfirm: t("form.acceptConfirm"),
+    cancel: t("form.cancelDecision"),
     decline: t("form.decline"),
     saving: t("form.saving"),
     saved: t("form.saved"),
@@ -194,6 +196,9 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                                     >
                                       <span className="flex flex-col">
                                         <span className="text-text-primary">{t("requestFrom", { name: r.label })}</span>
+                                        <span className="text-meta text-text-muted" data-testid={`cohort-join-request-unverified-${c.id}-${r.profileId}`}>
+                                          {t("requestUnverified")}
+                                        </span>
                                         {r.note ? <span className="text-text-secondary">{r.note}</span> : null}
                                       </span>
                                       <DecideJoinRequest cohortId={c.id} profileId={r.profileId} labels={labels} />

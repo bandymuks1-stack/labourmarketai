@@ -2054,7 +2054,9 @@
           "closeRequests": "Stop taking new requests",
           "requestsOpenHint": "Learners can find this group and ask to join.",
           "accept": "Accept",
-          "decline": "decline"
+          "decline": "decline",
+          "acceptConfirm": "Yes, accept and add to the group",
+          "cancelDecision": "Cancel"
         },
         "unavailable": "Programmes could not be loaded right now. Reload the page; nothing you created is lost.",
         "inviteLearners": "Invite learners",
@@ -2093,7 +2095,8 @@
           "evidenceRecorded": "Recorded",
           "evidenceConfirmed": "signed off"
         },
-        "requestFrom": "Asks to join: {name}"
+        "requestFrom": "Asks to join: {name}",
+        "requestUnverified": "Name typed by the learner — not verified."
       },
       "learners": {
         "title": "Learners",
@@ -20085,7 +20088,8 @@
       "withdrawn": "Request withdrawn.",
       "closed": "This group no longer takes new requests.",
       "invalid": "Check the name and message.",
-      "error": "Something went wrong. Try again."
+      "error": "Something went wrong. Try again.",
+      "cooldown": "You were declined recently. You can ask this group again 30 days after the decision."
     }
   }
 }

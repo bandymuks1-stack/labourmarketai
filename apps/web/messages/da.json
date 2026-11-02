@@ -7910,7 +7910,8 @@
       "withdrawn": "Anmodningen er trukket tilbage.",
       "closed": "Denne gruppe modtager ikke flere anmodninger.",
       "invalid": "Tjek navn og besked.",
-      "error": "Noget gik galt. Prøv igen."
+      "error": "Noget gik galt. Prøv igen.",
+      "cooldown": "Din anmodning blev for nylig afvist. Du kan spørge denne gruppe igen 30 dage efter afgørelsen."
     }
   }
 }

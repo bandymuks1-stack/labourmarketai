@@ -10,17 +10,17 @@ import { test, expect, type Browser, type Page } from "./prod-walk";
  * own; the institution's authorised person accepts; the learner is then a
  * member, and until then a request grants nothing.
  *
- * Needs migration 20261102160000 (PR #2959) applied — before that the
- * institution offers no "open for requests" switch and this walk fails at J-1.
+ * Needs migration 20261102160000 (PR #2959) applied. J-1 checks that first,
+ * through the API, BEFORE it creates anything — a run before the apply fails
+ * there and leaves no synthetic group behind.
  *
  * Runs only in `.github/workflows/prod-qa-walk.yml` (spec=cohort-join-request)
  * with the synthetic cast:
  *   owner    — manages QA-SYNTHETIC Alfa (a training provider, see learning-practice)
  *   worker2  — "QA-SYNTHETIC Worker", the learner
- * Each run makes its own group (the run id is in its name). afterAll closes the
- * group for requests and ends the learner's membership in it, so no open
- * synthetic group stays findable; the closed group itself stays as audit data,
- * as the learning-practice walk's groups do.
+ * Each run makes its own group (the run id is in its name). afterAll ends the
+ * learner's membership in it and archives the group, so runs do not pile up
+ * synthetic groups; the archived rows stay as audit data.
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const ALFA = "QA-SYNTHETIC Alfa";
@@ -65,13 +65,9 @@ let learnerId = "";
 
 test.afterAll(async () => {
   if (!ENABLED || !cohortId) return;
-  // Leave no open synthetic group behind, and no synthetic member in it.
+  // No synthetic member stays in the group, and the group itself is archived
+  // (archiving also closes it for requests and declines anything pending).
   const owner = bearerOf("owner");
-  const closed = await qaApi("/rest/v1/rpc/set_education_cohort_join_requests_v1", owner, {
-    method: "POST",
-    body: { p_cohort_id: cohortId, p_open: false },
-  });
-  console.info(`[join] clean-up: group closed ${closed.status}`);
   if (learnerId) {
     const left = await qaApi("/rest/v1/rpc/set_education_cohort_member_v1", owner, {
       method: "POST",
@@ -79,9 +75,17 @@ test.afterAll(async () => {
     });
     console.info(`[join] clean-up: membership ended ${left.status}`);
   }
+  const archived = await qaApi("/rest/v1/rpc/archive_education_cohort_v1", owner, {
+    method: "POST",
+    body: { p_cohort_id: cohortId },
+  });
+  console.info(`[join] clean-up: group archived ${archived.status}`);
 });
 
 test("J-1. the institution makes a group and opens it for learners' requests", async ({ browser }) => {
+  // Before creating anything: the join-request commands exist (migration applied).
+  const probe = await qaApi("/rest/v1/rpc/list_open_education_cohorts_v1", bearerOf("owner"), { method: "POST", body: {} });
+  expect(probe.ok, "migration 20261102160000 is applied (list_open_education_cohorts_v1 answers)").toBe(true);
   const { page, close } = await as(browser, "owner");
   await education(page);
   const program = page.locator('[data-testid^="program-"]', { hasText: PROGRAM }).first();
@@ -142,7 +146,10 @@ test("J-3. the institution's authorised person sees the request by the typed nam
   const request = page.getByTestId(`cohort-join-request-${cohortId}-${learnerId}`);
   await expect(request).toBeVisible({ timeout: 30_000 });
   await expect(request).toContainText(TYPED);
+  await expect(page.getByTestId(`cohort-join-request-unverified-${cohortId}-${learnerId}`)).toContainText("nepatikrinta");
+  // Accept takes a second, explicit click.
   await page.getByTestId(`cohort-join-accept-${cohortId}-${learnerId}`).click();
+  await page.getByTestId(`cohort-join-accept-confirm-${cohortId}-${learnerId}`).click();
   await expect
     .poll(
       async () => {

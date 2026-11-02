@@ -2054,7 +2054,9 @@
           "closeRequests": "Nie przyjmuj nowych próśb",
           "requestsOpenHint": "Uczący się mogą znaleźć tę grupę i poprosić o dołączenie.",
           "accept": "Przyjmij",
-          "decline": "odrzuć"
+          "decline": "odrzuć",
+          "acceptConfirm": "Tak, przyjmij i dodaj do grupy",
+          "cancelDecision": "Anuluj"
         },
         "unavailable": "Nie udało się teraz wczytać programów. Odśwież stronę — nic z tego, co utworzyłeś, nie zostało utracone.",
         "inviteLearners": "Zaproś uczestników",
@@ -2093,7 +2095,8 @@
           "evidenceRecorded": "Zapisano",
           "evidenceConfirmed": "potwierdzono"
         },
-        "requestFrom": "Prosi o dołączenie: {name}"
+        "requestFrom": "Prosi o dołączenie: {name}",
+        "requestUnverified": "Imię wpisane przez uczącego się — niezweryfikowane."
       },
       "learners": {
         "title": "Uczestnicy",
@@ -20085,7 +20088,8 @@
       "withdrawn": "Prośba wycofana.",
       "closed": "Ta grupa nie przyjmuje już nowych próśb.",
       "invalid": "Sprawdź imię i wiadomość.",
-      "error": "Coś poszło nie tak. Spróbuj ponownie."
+      "error": "Coś poszło nie tak. Spróbuj ponownie.",
+      "cooldown": "Twoja prośba została niedawno odrzucona. Możesz poprosić tę grupę ponownie 30 dni po decyzji."
     }
   }
 }
