@@ -241,15 +241,58 @@ carries a closing comment). Unique, not-yet-built requirements are carried here 
 | #740 voice_journal_jobs migration | voice is deferred (no transcription host; COM-6, V-2) | when voice reopens: one owner-scoped job table, disclosure acknowledged before recording, transcript ≤ 60k, audio retention ≤ 30 days, one job → at most one journal entry, worker/admin read only, RPC-only writes, right-to-erase RPC — design on branch `feat/voice-journal-jobs-migration-v1` (origin #740) |
 | #2915 completion map 2026-11-01 | the 288 statuses live only in FUNCTION_REGISTER (one register) | planning columns not in the register: effort per function, critical path, about 185–295 agent days, conditional targets (core mid-December 2026, full scope February 2027, preliminary) — on branch `docs/cc/completion-map-288` (origin #2915) |
 
-**Kept open for the owner** (the check found unique code or a real ambiguity):
-- **#2419** AI monitoring — classifying quota (429) and timeout failures, and the technical failure rate,
-  is still absent from main (only the privacy-refusal part landed in #2433). Options: rebase to cover
-  only 429/timeout (GREEN), or close.
-- **#896 + #897** financial safety layer and business health engine — the principles CSP-001…005 /
-  FSR-001…005, the commercial gate (11 conditions) and the 39 health metrics exist nowhere on main, and
-  `apps/web/lib/product-gate/axioms.ts:128` still cites #896 as the source of a rule. Their base #895
-  is closed, so they cannot merge as they are. Owner decision: carry these requirements into the
-  canonical architecture (then close) or keep them parked.
+**Kept open for the owner** — independent read-only reviews 2026-11-03 (not by the PRs' authors):
+
+- **#2937** (worker role from the caller's own worker profile in chat/MCP; RED, 5 files, no migration, CI green) —
+  review verdict **APPROVE-SAFE**: the role comes only from `workers.profile_id = auth.uid()` (server-resolved, also
+  under an OAuth bearer); every newly reachable worker action re-checks ownership in its own RPC; only `worker` is
+  added, no company/agency/admin gate and no confirmation-token change. Residual risk low. Non-blocking follow-ups:
+  a behavioural test for a failed worker read and for an agency-only caller with an own worker row; the
+  opportunities page (`requireRoleOrRedirect("worker")`) should reuse the same rule.
+- **#2959** (J-12 learner join request; RED, unapplied) — verdict **APPROVE-WITH-CONDITIONS**: proof 43/43 re-run +
+  11 attack probes correct; definer functions, auth.uid() bound, authenticated-only grants, no RLS change; only
+  `manages_organization` may decide, never one's own request. Conditions being fixed by `local_b55e3e39` before the
+  owner decides: unverified typed name labelled + confirm on accept; re-request cooldown after a decline; `added_by`
+  hidden from the learner; archived organization refused; walk checks the switch first and archives its group.
+  Owner must confirm that `external_manager` (possibly an agency) counts as an authorised decider. Shared follow-up:
+  `engagement_contexts` duplicate race (same as invitations).
+- **#2419** (AI monitoring) — CONFLICTING and failing typecheck; its egress premise is superseded by #2433. Unique,
+  not on main: classify quota / timeout / provider-unavailable from `route_reason`, split price-missing from
+  budget-blocked, `ai-failing` = technical failures ÷ attempted runs (privacy refusals and the disabled runtime
+  excluded), `ai_outcome_*_7d` metric rows. Agentai OS has no LabourMarket AI-health monitor (no duplicate).
+  Recommended: close #2419 and carry exactly that into one small GREEN PR off main (≈1–2 h, 4 files, no migration),
+  reusing the provider-chain failure vocabulary — owner go-ahead.
+- **#896 + #897** — main's gates G-7/G-8 decide WHEN selling is allowed, never WHETHER it pays for itself; that second
+  question exists only in these PRs. **One requirements list (origin #896/#897, 2026-07-28):**
+
+| ID | Requirement | On main |
+|---|---|---|
+| CSP-001 | no deliberate long-term loss; a subsidy names its funding source | absent |
+| CSP-002 | economic model before anything paid goes public | partly (activation gates, no model recorded) |
+| CSP-003 | free tier ≈ 60–70 % of base value, funded by the paid model | absent |
+| CSP-004 | natural free → paid progression, no artificial blocking (review only) | absent |
+| CSP-005 | LMC is an internal economy, not a discount | partly (LMC flags off; 1 LMC = €1 invariant) |
+| FSR-001 | unit cost known before launch | partly (AI cost metering only) |
+| FSR-002 | no "unlimited" without a technical abuse bound | partly (AI run cap; paid plan has no numeric bound on open positions) |
+| FSR-003 | growth must not scale losses | partly (AI cap only) |
+| FSR-004 | no subsidy funded by future investment | absent |
+| FSR-005 | before paid activation: payer, what is paid for, unit cost, margin | partly (payer only) |
+| Gate ×11 | commercial gate conditions (assessment, unit cost, margin, payer, unlimited bound, scaling losses, negative margin, future-funded subsidy, LMC as discount) | absent |
+| Fields | economic-model fields per sellable item; feature-economics fields (owner, payer, cost/revenue driver, margin model, decision) | absent |
+| BHE-39 | 39 health metrics: revenue (MRR excludes top-ups), unit economics, margin, cost (12; only AI measured), LMC (6), adoption (6), composite | raw data only |
+| Plan / LMC health | per-plan margin and risk; LMC liability + backing ratio | absent |
+| Warnings ×8 | LOSS_RISK, NEGATIVE_MARGIN, LOW_MARGIN < 30 %, UNLIMITED_RISK, HIGH_AI_COST > 25 %, EXPENSIVE_FEATURE, LMC_LIABILITY_GROWING, SUBSIDY_RISK | absent |
+| Score | 8 weighted parts = 100; refuses to score below 5 measurable parts; unmeasured ≠ 0 | absent |
+
+  Already enforced, never rebuild: G-7/G-8 + live-key block, LMC kill switches, no money in code / null never
+  unlimited, AI cost metering, per-organization AI run cap. Overlapping open PRs (none duplicates): #2441, #2647,
+  #2474 (VIP = subsidy), #2682 (pilot amount for revenue), #2704 / #2685 / #2701 (net-of-VAT basis).
+  Recommended carrying path: one decision file with CSP/FSR verbatim + the list above, a pointer under MKT-7, an
+  owner row for the economic model of the live Organization plan / trial / pilot pass / VIP grant; re-point the
+  citations of unmerged PRs in `apps/web/lib/product-gate/axioms.ts` (:119, :122, :128, :137, :140) and
+  `docs/PRODUCT_CONSTITUTION.md:239-241`; then close #896/#897. Their code is not rebased (it imports the closed
+  #895's catalogue); a faithful gate would turn RED on the live paid plan until an owner assessment or dated
+  exception exists.
 
 Still recommended for an owner keep/close decision: rescope #2165 (referral pipeline already on main),
 #1577, #1835. Leave parked: #2198 (voice), #2377, #2370 (owner visual), #1211, #1166.
