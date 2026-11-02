@@ -9,7 +9,15 @@
 - [`../mobile/STORE_RELEASE_READINESS_2026-09-13.md`](../mobile/STORE_RELEASE_READINESS_2026-09-13.md) and [`../mobile/MOBILE_STATUS_2026-10-14.md`](../mobile/MOBILE_STATUS_2026-10-14.md).
 - [`../integrations/CHATGPT_MCP_CLIENT_V1.md`](../integrations/CHATGPT_MCP_CLIENT_V1.md) and [`../integrations/LLM_INTEGRATION_COVERAGE_V1.md`](../integrations/LLM_INTEGRATION_COVERAGE_V1.md).
 
-The older store-asset packs (`mobile-store-assets-*-v1.md`, `mobile-store-readiness-v2.md`) were written for a PWA/TWA wrapper. They describe screens the **native** app does not have: opportunities, bookings, messaging, CV export. **Do not submit their listing text.** §2 and §3 replace it.
+The older store-asset packs (`mobile-store-assets-*-v1.md`, `mobile-store-readiness-v2.md`) were written for a PWA/TWA wrapper. They describe screens the **native** app does not have, such as bookings and CV export. **Do not submit their listing text.** §2 and §3 replace it.
+
+**Scope update 2026-11-02.** The native app has grown since 10-14:
+- work-journal correction (#2916);
+- messages (#2928);
+- in-app notifications (#2929);
+- the person's projects (#2941).
+
+These sit next to the jobs, opportunities, post-a-need and availability screens already on `main`. §1, §2 and §3 below are updated to that scope. **Nothing has been submitted or published. No store account, EAS project or signing key was created.** Those stay owner actions (§6).
 
 ---
 
@@ -23,12 +31,20 @@ Expo / React Native app `apps/mobile`, id `ai.labourmarket.app`, version 0.1.0. 
 | Today | This week's own work figures and the latest journal entries. |
 | Work journal | Their own entries, newest first. |
 | Log work | Date, site, notes → draft → confirm (two steps; nothing is saved until confirmed). |
+| Correct an entry | Change a confirmed entry: draft → before/after preview → confirm. The earlier version is kept as superseded, never overwritten. |
+| Messages | Their own in-app conversations. Open a thread and reply. A reply is drafted, previewed and only then sent (draft → confirm). |
+| Notifications | Their own in-app notifications, read when the screen is opened. Mark one or all as read. Some open the matching web page. **No push.** |
+| My projects | The projects they are assigned to: active or ended, what is still needed from them, and the latest instruction (answered in Messages). The full project page (stages, documents, team) is on the website. |
+| Jobs | Search the public vacancy board (the same anonymous view as the website). A job's full page opens on the website. |
+| Opportunities | Open opportunities. Tell the other side they are interested (draft → confirm). |
+| Post a need | For the organization they act for: describe a need → draft → confirm. |
+| Who is free | The workspace's availability (committed is not unavailable), the same read as the web planning page. |
 | Profile | Name, roles, skills inferred from their own journal (Living CV read). |
 | Settings | Language (6), workspace switch, privacy / deletion / terms / support links, sign out. |
 
 **Not in the native app:**
-- messages, calendar, projects, AI chat, marketplace;
-- push, camera, offline queue;
+- calendar, AI chat, marketplace;
+- push notifications, camera, offline queue;
 - Google / Apple sign-in.
 
 These are on the website (`labourmarket.ai`), which the app links to where relevant. The listing must not promise them. Apple guideline 2.3 and Play's misleading-claims policy both reject that.
@@ -67,11 +83,16 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
 > • See your week at a glance: days worked and your latest entries.
 > • Your work journal: every entry you have confirmed, newest first.
 > • Your profile shows the skills your own entries point to — a living CV built from real work, not only from what you declare.
+> • Made a mistake? Correct an entry. You see the before and after and confirm the change; the earlier version is kept.
+> • Messages: read your conversations and reply. You see your reply before it is sent.
+> • Notifications: what happened for you, in the app. Mark them read once you have seen them.
+> • My projects: where you are assigned, what is still needed from you, and the latest instruction.
+> • Search jobs, see opportunities and tell an employer you are interested.
 > • Switch between the workspaces you belong to, in six languages (English, Lithuanian, Russian, Dutch, German, Polish).
 >
 > Your data is closed by default: other people see nothing unless you allow it. You can download your data and request account deletion at any time.
 >
-> More of the platform — projects, messages, calendar and the marketplace — is available at labourmarket.ai.
+> More of the platform — full project pages, the calendar and the marketplace — is available at labourmarket.ai.
 
 **Full description (LT):**
 
@@ -81,11 +102,16 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
 > • Matyk savo savaitę iš karto: dirbtas dienas ir naujausius įrašus.
 > • Tavo darbo žurnalas: visi patvirtinti įrašai, naujausi viršuje.
 > • Profilis rodo įgūdžius, į kuriuos rodo tavo pačių įrašai — gyvas CV iš tikro darbo, ne vien iš deklaracijų.
+> • Suklydai? Pataisyk įrašą. Matai, kas buvo ir kas bus, ir patvirtini pakeitimą; ankstesnė versija išlieka.
+> • Žinutės: skaityk savo pokalbius ir atsakyk. Atsakymą matai prieš jį išsiunčiant.
+> • Pranešimai: kas tau nutiko, tiesiai programėlėje. Pažymėk perskaitytais, kai juos pamatai.
+> • Mano projektai: kur esi priskirtas, ko dar reikia iš tavęs ir naujausias nurodymas.
+> • Ieškok darbo, matyk galimybes ir pranešk darbdaviui, kad tau įdomu.
 > • Perjunk darbo erdves, kurioms priklausai; šešios kalbos.
 >
 > Tavo duomenys uždari pagal nutylėjimą: kiti nemato nieko, kol pats neleidi. Savo duomenis gali atsisiųsti ir paprašyti ištrinti paskyrą bet kada.
 >
-> Daugiau platformos galimybių — projektai, žinutės, kalendorius ir prekyvietė — svetainėje labourmarket.ai.
+> Daugiau platformos galimybių — visi projektų puslapiai, kalendorius ir prekyvietė — svetainėje labourmarket.ai.
 
 **URLs:**
 - Privacy policy: `https://labourmarket.ai/en/legal/privacy`
@@ -103,13 +129,14 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
 | Personal info → Name | Collected, optional, App functionality | profile |
 | Personal info → User IDs | Collected, required, App functionality | account id |
 | App activity → Other user-generated content | Collected, required for the journal, App functionality | journal notes, site name, date |
+| Messages → Other in-app messages | Collected (the replies a person sends), App functionality. Delivered only to the conversation's participants | `message.send_confirm` (#2928) |
 | Location | **Not collected** by the app (a typed site name is user content, not device location) | no location permission (CI refuses one) |
 | Photos, files, contacts, audio, health, financial | Not collected | no such permission or module |
 | Crash logs / diagnostics | Not collected | no crash SDK |
 
-**Note:** the platform itself (website) sends message and vacancy text to Google's Gemini API for translation and chat-intent suggestion. This is disclosed in the privacy policy (PR #2372). The **native app** sends journal text only to LabourMarket.ai. If the owner later enables an AI feature reachable from the app, this form must be updated first.
+**Note:** the platform itself (website) sends message and vacancy text to Google's Gemini API for translation and chat-intent suggestion. This is disclosed in the privacy policy (PR #2372). The **native app** sends its own text only to LabourMarket.ai: journal entries, corrections, message replies, a need, an interest. A message sent from the app is the same platform message the website may then translate for its reader, as already disclosed. If the owner later enables an AI feature reachable from the app, this form must be updated first.
 
-**Content rating (IARC):** no violence, sexual content, gambling, drugs or user-to-user chat in the app. User-generated content is private journal text only.
+**Content rating (IARC):** no violence, sexual content, gambling or drugs. **Users can now communicate:** since #2928 the app reads and replies to the platform's in-app messages, so the questionnaire's "users can interact / exchange messages" answer is **yes**. Messages go only between people already in a conversation on the platform; there is no open chat and no search for strangers.
 
 **Review / test account:** required (the app is login-gated). §6 item 4.
 
@@ -123,7 +150,8 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
 - **Keywords:** `work log,timesheet,work journal,cv,skills,construction,labour,jobs,profile,hours`
 - **Description:** same text as Play §2 (EN).
 - **Support URL:** `https://labourmarket.ai/en/legal/legal-notice`. **Privacy URL:** `/en/legal/privacy`.
-- **App Privacy (nutrition label):** Data Linked to You: Contact Info (Email), Identifiers (User ID), User Content (Other), Name. **Data Used to Track You: none.** This must match `ios.privacyManifests` in `app.json`; the guard pins that.
+- **App Privacy (nutrition label):** Data Linked to You: Contact Info (Email), Identifiers (User ID), User Content (Other; and Emails or Text Messages, which are the in-app replies a person sends, #2928), Name.
+  - **Code gap to close before submitting:** on `main`, `ios.privacyManifests` in `app.json` declares Email, Name, User ID and Other User Content only. It lacks `NSPrivacyCollectedDataTypeEmailsOrTextMessages`. Add it in code (with its guard) first; the label and the manifest must match. **Data Used to Track You: none.** This must match `ios.privacyManifests` in `app.json`; the guard pins that.
 - **Export compliance:** declared in the binary (`ITSAppUsesNonExemptEncryption = false`).
 - **Sign in with Apple:** not required (guideline 4.8 applies only when a third-party login is offered; the app offers e-mail + password only).
 - **Account deletion (5.1.1(v)):**
@@ -131,7 +159,7 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
   - Settings → "Privacy, your data and deleting your account" opens the in-account request.
   - Deletion is a reviewed request, answered within one month. Apple accepts request-based deletion when the process is explained.
   - **Review note to paste:** "Account deletion: Settings → 'Privacy, your data and deleting your account' (opens the web account page, sign in with the same credentials) or Settings → 'How account deletion works' (public page, no sign-in). Deletion is processed by a person within one month; the request is recorded immediately."
-- **Minimum functionality (4.2):** the app is a focused work-journal client, not a web wrapper. Screens are native, and data comes through the MCP API. State this in the review notes.
+- **Minimum functionality (4.2):** the app is a focused work client (journal and corrections, messages, notifications, projects, jobs), not a web wrapper. Screens are native, and data comes through the MCP API. State this in the review notes.
 
 ---
 
