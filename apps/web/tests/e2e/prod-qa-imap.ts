@@ -1,6 +1,7 @@
 import { connect, type TLSSocket } from "node:tls";
 
 import { mimeText } from "../../lib/testing/mime-text";
+import { PROD_QA_IDENTITIES } from "../../lib/testing/prod-qa-guard";
 
 /**
  * READ-ONLY reader for the ONE synthetic QA mailbox (owner decision D-4,
@@ -23,9 +24,13 @@ import { mimeText } from "../../lib/testing/mime-text";
 const SYNTHETIC = /^qa\.[a-z0-9]+\+[a-z0-9]+@labourmarket\.ai$/;
 export const QA_MAILBOX_ADDRESS = "qa.invited@labourmarket.ai";
 
+/** The shape check AND membership of the canonical, hard-coded synthetic
+ *  allowlist (`PROD_QA_IDENTITIES`) — a plausible `qa.*+*` alias that is not
+ *  on that list is refused (independent security review 2026-11-02). */
 export function assertSyntheticAddress(address: string): void {
-  if (address !== QA_MAILBOX_ADDRESS && !SYNTHETIC.test(address))
-    throw new Error("refused: the QA mailbox reader reads only qa.invited@ or qa.<name>+<tag>@labourmarket.ai mail");
+  const shapeOk = address === QA_MAILBOX_ADDRESS || SYNTHETIC.test(address);
+  if (!shapeOk || !PROD_QA_IDENTITIES.includes(address))
+    throw new Error("refused: the QA mailbox reader reads only mail to an allowlisted synthetic QA identity");
 }
 
 export function imapConfigured(): boolean {
@@ -57,16 +62,29 @@ class Session {
     // Node's own messages name the host and the certificate's names, and test
     // errors land in public artefacts: only the error code is kept.
     try {
+      // Bounded: a host that never completes the handshake fails in 30 s.
       await new Promise<void>((ok, fail) => {
-        sock.once("secureConnect", () => ok());
-        sock.once("error", fail);
+        const timer = setTimeout(() => fail(Object.assign(new Error("timeout"), { code: "ETIMEDOUT" })), 30_000);
+        sock.once("secureConnect", () => {
+          clearTimeout(timer);
+          ok();
+        });
+        sock.once("error", (e) => {
+          clearTimeout(timer);
+          fail(e);
+        });
       });
     } catch (err) {
       sock.destroy();
       throw new Error(`IMAP: connection failed (${(err as NodeJS.ErrnoException).code ?? "error"})`);
     }
     const s = new Session(sock);
-    await s.until((text) => /^\* OK/m.test(text));
+    try {
+      await s.until((text) => /^\* OK/m.test(text));
+    } catch (err) {
+      sock.destroy();
+      throw err;
+    }
     return s;
   }
 

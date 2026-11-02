@@ -43,13 +43,14 @@ const TRUSTED_HOSTS = [process.env.E2E_BASE_URL, process.env.PROD_QA_SUPABASE_UR
   .filter((v): v is string => Boolean(v))
   .map((v) => new URL(v).host);
 const RESET_LINK = (u: string) => {
-  let host = "";
+  let url: URL;
   try {
-    host = new URL(u).host;
+    url = new URL(u);
   } catch {
     return false;
   }
-  return TRUSTED_HOSTS.includes(host) && /verify|callback|recovery|reset-password|token/.test(u);
+  // HTTPS only: a plain-http link is never followed, whatever its host.
+  return url.protocol === "https:" && TRUSTED_HOSTS.includes(url.host) && /verify|callback|recovery|reset-password|token/.test(u);
 };
 const password = () => `Qa-${randomBytes(18).toString("base64url")}!9`;
 
