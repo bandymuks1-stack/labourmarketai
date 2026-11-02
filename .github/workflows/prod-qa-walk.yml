@@ -45,6 +45,9 @@ on:
           - marketplace
           - agency-chain
           - learning-practice
+          # J-12 learner join request (PR #2959). Dispatch only, never in the rotation: it can pass only once
+          # migration 20261102160000 is applied in production.
+          - cohort-join-request
           - sectors-languages
           - chat-confirm-once
           - living-cv-growth
@@ -402,6 +405,7 @@ jobs:
             marketplace) SPEC=tests/e2e/prod-marketplace.spec.ts ;;
             agency-chain) SPEC=tests/e2e/prod-agency-chain.spec.ts ;;
             learning-practice) SPEC=tests/e2e/prod-learning-practice.spec.ts ;;
+            cohort-join-request) SPEC=tests/e2e/prod-cohort-join-request.spec.ts ;;
             sectors-languages) SPEC=tests/e2e/prod-sectors-languages.spec.ts ;;
             chat-confirm-once) SPEC=tests/e2e/prod-chat-confirm-once.spec.ts ;;
             living-cv-growth) SPEC=tests/e2e/prod-living-cv-growth.spec.ts ;;
