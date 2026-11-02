@@ -55,19 +55,20 @@ begin
     raise exception 'G1 ABORT: % synthetic accounts match (expected exactly 1)', v_n;
   end if;
 
-  -- G0: the exact dependency set, from the catalog (no table is assumed).
+  -- G0: the exact dependency set, from the catalog (no table is assumed). The referenced
+  -- relation is compared as a regclass (OID), never as search-path-dependent text.
   select id into v_wid from public.workers where profile_id = v_uid;
   for r in
-    select c.conrelid::regclass::text as tbl, a.attname as col, c.confrelid::regclass::text as ref
+    select c.conrelid::regclass::text as tbl, a.attname as col, c.confrelid as ref
       from pg_constraint c
       join pg_attribute a on a.attrelid = c.conrelid and a.attnum = c.conkey[1]
      where c.contype = 'f' and array_length(c.conkey, 1) = 1
        and c.confrelid in ('auth.users'::regclass, 'public.profiles'::regclass, 'public.workers'::regclass)
      order by 1, 2
   loop
-    if r.ref = 'public.workers' and v_wid is null then continue; end if;
+    if r.ref = 'public.workers'::regclass and v_wid is null then continue; end if;
     execute format('select count(*) from %s where %I = $1', r.tbl, r.col)
-       into v_cnt using case when r.ref = 'public.workers' then v_wid else v_uid end;
+       into v_cnt using case when r.ref = 'public.workers'::regclass then v_wid else v_uid end;
     if v_cnt > 0 then v_scope := v_scope || format('%s.%s=%s;', r.tbl, r.col, v_cnt); end if;
   end loop;
   if v_scope <> 'auth.identities.user_id=1;engagement_contexts.profile_id=1;pilot_events.profile_id=2;profiles.id=1;workers.profile_id=1;' then
