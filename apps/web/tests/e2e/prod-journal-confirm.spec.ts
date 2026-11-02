@@ -1,6 +1,8 @@
+import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { bearerOf, qaApi } from "./prod-qa-api";
 import { test, expect, type Browser, type Page } from "./prod-walk";
 
 import { answerNoProjectIfAsked, chooseWorkContextIfAsked } from "./worklog-context";
@@ -71,6 +73,48 @@ test("1. the worker records the day's work in the journal", async ({ browser }) 
   await expect(card).toBeVisible({ timeout: 30_000 });
   entryId = (await card.getAttribute("data-testid"))!.replace("journal-entry-card-", "");
   await close();
+});
+
+/** A refusal: a non-2xx answer, or one of the review doors' own refusal statuses. */
+async function refused(res: Response): Promise<string> {
+  const body = (await res.text()).trim();
+  if (!res.ok) return `http ${res.status}`;
+  const status = body.replace(/^"|"$/g, "");
+  expect(status, "a self-confirmation door answered as if it confirmed").toMatch(
+    /^(not_authorized|self_review_not_allowed|review_authority_not_established|no_reviewer_engagement)$/,
+  );
+  return status;
+}
+
+test("1b. the worker cannot confirm their own entry through any door (EVID-2)", async () => {
+  // The subject must never be the party that accepts their own work. All three
+  // doors end at the BEFORE INSERT guard on journal_entry_confirmations
+  // (migration 20261003150500); this walks each one with the worker's OWN
+  // token. Step 2 then proves nothing was written: the entry is still pending
+  // in the employer's queue.
+  expect(entryId).not.toBe("");
+  const token = bearerOf("worker");
+  await refused(
+    await qaApi("/rest/v1/rpc/review_journal_entry", token, {
+      method: "POST",
+      body: { p_entry_id: entryId, p_decision: "approved", p_note: null },
+    }),
+  );
+  await refused(
+    await qaApi("/rest/v1/rpc/confirm_entry_and_verify_skills", token, {
+      method: "POST",
+      body: { p_entry_id: entryId, p_skill_ids: [randomUUID()], p_note: null },
+    }),
+  );
+  const direct = await qaApi("/rest/v1/journal_entry_confirmations", token, {
+    method: "POST",
+    body: {
+      entry_id: entryId,
+      confirmer_id: JSON.parse(Buffer.from(token.split(".")[1] ?? "", "base64url").toString("utf8")).sub,
+      confirmation_scope: { action: "confirm", decision: "approved" },
+    },
+  });
+  expect(direct.ok, "a direct self-insert into journal_entry_confirmations was accepted").toBe(false);
 });
 
 test("2. the employer finds it in the review queue and approves it", async ({ browser }) => {
