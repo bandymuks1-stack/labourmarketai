@@ -2096,7 +2096,7 @@
           "evidenceConfirmed": "signed off"
         },
         "requestFrom": "Asks to join: {name}",
-        "requestUnverified": "Name typed by the learner — not verified."
+        "requestUnverified": "Name typed by the learner — not checked by anyone."
       },
       "learners": {
         "title": "Learners",
