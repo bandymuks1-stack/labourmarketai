@@ -561,7 +561,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 |---|---|---|---|---|---|---|
 | EVID-0 | **Work Journal** (4 transports, 1 core) | `journal_entries` + 7 satellites | **PROD_HUMAN** | R + PC | — | the product's strongest chain |
 | EVID-1 | **Organization historical evidence import** | `organization_people`, `evidence_import_*`, `organization_evidence_*` | **PARTIAL** | production data path | 0 | owner-approved 2026-09-08; recursion fix APPLIED (ledger `20260908080950`); read + write proven under real auth, rolled back, zero residue; **no human import yet** |
-| EVID-2 | Manager review / receive loop | `journal_entry_confirmations`, `review_journal_entry` | PROD_HUMAN | — | 0 | **OWNER?** self-confirmation: block in the RPC, or keep the weaker classification? |
+| EVID-2 | Manager review / receive loop | `journal_entry_confirmations`, `review_journal_entry` | PROD_HUMAN | — | 0 | RESOLVED 2026-11-02 (decision 0028): self-declaration allowed and labelled as such; only self-as-independent-confirmer is refused |
 | EVID-3 | Work verification state (8 states) | `lib/journal/work-verification-state` | IMPL | — | 1 | never walked by a human |
 | EVID-4 | Photos / task evidence | `journal_entry_photos`, `journal_entry_tasks` | PROD_DATA (8 photos) | — | 2 | — |
 | EVID-5 | Hours: journal metrics · allocations · timesheets | 3 stores + 1 dead | PARTIAL | — | 1 | reconciled inside ONE SQL function; no TS reader unions them |
@@ -666,9 +666,10 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 
 Each is independent; none blocks a code train.
 
-1. **Self-confirmation, authorization side** (EVID-2) — block in
-   `review_journal_entry`, or rely on the weaker classification now shipping?
-   A sole trader legitimately has nobody above them. RED.
+1. ~~**Self-confirmation, authorization side** (EVID-2)~~ — **RESOLVED by the owner
+   2026-11-02, decision 0028**: a person's own confirmation is a lawful personal
+   declaration and stays labelled as such; only presenting oneself as the
+   independent confirmer is refused.
 2. **Nine unapplied migrations** — apply the four with live UI behind them
    (agency clients, journal templates, external profiles, opportunity-seen), or
    retire them?

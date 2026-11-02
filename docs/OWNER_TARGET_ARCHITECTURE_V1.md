@@ -633,7 +633,7 @@ decisions, each with its exact owner question, are in
 |---|---|
 | **PER-11** | Apply a split `external_profiles_v1` carrying only the one table its live UI needs, or retire the section |
 | **ORG-2** | Migrate the seven gates to `organization_roles`, or keep the industry lock deliberately |
-| **EVID-2** | Block self-confirmation in `review_journal_entry`, or rely on the weaker classification |
+| ~~**EVID-2**~~ | ✅ **RESOLVED — owner, 2026-11-02 ([decision 0028](DECISIONS/0028-self-declared-and-independently-confirmed-work.md)).** A person may create, correct and confirm their own journal as a lawful personal declaration, with or without a registered employer; what is forbidden is presenting oneself as the independent confirmer. Self-declared and independently confirmed experience stay apart on the Living CV, the same hours are never counted twice, a later-joining employer can confirm earlier declared work with history kept. Institutions (J-12): an authorised teacher / practice supervisor confirms the learner's declared work bound to work, hours, competency and confirmer; no formal qualification without an assessment procedure. One person — one journal — one hours ledger |
 | **EVID-6** | The v1 select policy resolves `moderation_status` to the RECORD's status and hands the experience author a reply moderation has not published. Correcting it is a schema change (RED) |
 | **MKT-7** | Two independent owner acts arm real charging |
 | **GOV-1** | Add a READ-ONLY `SUPABASE_DB_URL` GitHub Actions secret. Two live security gates stay inactive without it |
