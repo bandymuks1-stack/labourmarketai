@@ -2858,7 +2858,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Einen Anbieter für eine Dienstleistung finden"
     }
   },
   "jobPostings": {
@@ -6842,7 +6843,9 @@
       "listings": "Inserate",
       "listingsNote": "Räume, Geräte, Fahrzeuge – anbieten oder suchen",
       "needs": "Bedarf & Angebot",
-      "needsNote": "Veröffentlichen Sie, was Sie brauchen oder anbieten können"
+      "needsNote": "Veröffentlichen Sie, was Sie brauchen oder anbieten können",
+      "buyer": "Meine Anfragen",
+      "buyerNote": "Kundendaten speichern und Anfragen an einem Ort behalten"
     },
     "loopReadFailed": "Ihre Anfragen konnten nicht geladen werden — die Liste ist möglicherweise unvollständig. Laden Sie die Seite neu."
   },

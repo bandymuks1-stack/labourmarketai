@@ -2858,7 +2858,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Find a provider for a service"
     }
   },
   "jobPostings": {
@@ -6842,7 +6843,9 @@
       "listings": "Listings",
       "listingsNote": "Premises, equipment, vehicles — offer or look",
       "needs": "Needs & offers",
-      "needsNote": "Publish what you need or what you can offer"
+      "needsNote": "Publish what you need or what you can offer",
+      "buyer": "My requests",
+      "buyerNote": "Save your customer details and keep your requests in one place"
     },
     "loopReadFailed": "Your requests could not be loaded — the list may be incomplete. Refresh the page."
   },
