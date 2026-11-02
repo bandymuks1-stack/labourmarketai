@@ -510,3 +510,13 @@ audit.
   no chat table itself; where a conversation message was authored by the erased
   person, the executor severs the author inside the database under the reviewed
   registry, and the message stays for the counterparty. Responses are counts only.
+
+- **2026-11-01 — `lib/forecast/forecast-read.ts`** (owner order 2026-10-24 Stage 7, register
+  3.34: the forecast engine on the project course screen). On the manager project page
+  it first asks the viewer's OWN session `can_manage_project(project)`; only on `true`
+  does it call, with the service-role client, the ONE service-role-granted
+  `forecast_project_facts_v1` (applied migration 20261025045152) for that project.
+  That function returns opaque md5 keys, statuses, dates and numeric rows only — no
+  entry text, review note or name. The pure engine computes the forecast in memory;
+  nothing is written (no forecast row, no signal consumed), no chat table is read,
+  nothing is sent outbound.

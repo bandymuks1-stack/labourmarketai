@@ -19810,6 +19810,73 @@
     },
     "helpNeeded": "Help needed — {stage}:"
   },
+  "projectForecast": {
+    "title": "Forecast",
+    "notFact": "A forecast read from this project's recorded work as of {date} — not a fact and not a promise. It is recalculated each time this page opens.",
+    "unavailable": "The forecast could not be read right now.",
+    "insufficient": "Not enough recorded work yet to forecast this project.",
+    "notApplicable": "Nothing to forecast: the project has no open work.",
+    "unknown": "Unknown",
+    "beyondHorizon": "More than three years away at the current pace",
+    "completionLabel": "Expected finish",
+    "deadlineLabel": "Deadline",
+    "leftLabel": "Work left",
+    "leftTasks": "{left} of {total} tasks",
+    "leftStages": "{left} of {total} stages",
+    "peopleLabel": "People needed",
+    "peopleValue": "{needed} (now {active})",
+    "qualityLabel": "Quality risk",
+    "confidenceLabel": "Confidence",
+    "actionsTitle": "What would change it",
+    "assumptionsTitle": "Assumptions",
+    "risk": {
+      "on_track": "On track",
+      "tight": "Tight",
+      "likely_miss": "Likely to be missed",
+      "overdue": "Overdue",
+      "unknown": "Unknown"
+    },
+    "quality": {
+      "none": "None open",
+      "low": "Low",
+      "elevated": "Elevated",
+      "high": "High",
+      "unknown": "Unknown"
+    },
+    "confidence": {
+      "insufficient": "too little evidence",
+      "low": "low",
+      "medium": "medium",
+      "high": "high"
+    },
+    "action": {
+      "add_workers": "Add people to the team",
+      "find_partner_capacity": "Find partner capacity",
+      "unblock_stages": "Unblock the blocked stages",
+      "unblock_tasks": "Unblock the blocked tasks",
+      "close_serious_defects": "Close the serious defects",
+      "complete_readiness": "Complete the team's missing readiness items",
+      "record_hours": "Record the hours worked on this project",
+      "set_planned_end": "Set a planned end date",
+      "break_down_scope": "Break the work down into tasks",
+      "review_budget": "Review the budget",
+      "replan_deadline": "Re-plan the deadline"
+    },
+    "assumption": {
+      "trailing_window_days": "The pace is read from the last 28 days.",
+      "calendar_day_rate": "Hours are spread over calendar days; no work calendar is assumed.",
+      "equal_unit_weight": "Every task counts the same.",
+      "unit_is_stage": "The project has no tasks, so stages are counted instead.",
+      "team_stays_as_is": "The team stays as it is now.",
+      "absences_as_approved": "Only approved absences are taken into account.",
+      "throughput_without_hours": "No hours are recorded, so the finish is read from finished work alone.",
+      "cost_continues_at_observed_rate": "Cost continues at the rate seen so far.",
+      "single_hours_ledger": "One hours record is used; the other is shown beside it, never added.",
+      "hours_partly_unconfirmed": "Some of the hours are not yet confirmed.",
+      "hours_read_truncated": "Not every hour could be read; the figures may be low.",
+      "free_internal_people_unknown": "It is not known who else in the organization is free."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "This week's goal",
     "titleMine": "Your tasks this week",

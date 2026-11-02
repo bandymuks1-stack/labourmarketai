@@ -107,10 +107,11 @@ const profileGet: CapabilityDescriptor = {
   kind: "read",
   title: "My LabourMarket profile",
   description:
-    "The caller's own profile record: name, locale, country, onboarding " +
-    "state, whether a worker profile exists, and the roles the account " +
-    "actually holds. Facts as recorded — no derived scores, and a read that " +
-    "failed is reported as unavailable rather than as an absence.",
+    "The caller's own profile record: account id, name, email address, " +
+    "locale, country, onboarding state, active role, whether a worker " +
+    "profile exists (and its id), and the roles the account actually " +
+    "holds. Facts as recorded — no derived scores, and a read that failed " +
+    "is reported as unavailable rather than as an absence.",
   exposed: true,
   annotations: {
     readOnlyHint: true,

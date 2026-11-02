@@ -184,9 +184,12 @@ describe("deep-link claim — exactly the screens the app has", () => {
       [
         "/",
         "/availability",
+        "/conversation",
+        "/correct-entry",
         "/jobs",
         "/journal",
         "/log-work",
+        "/messages",
         "/need",
         "/opportunities",
         "/profile",
