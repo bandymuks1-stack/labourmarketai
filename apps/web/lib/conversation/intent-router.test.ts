@@ -1516,3 +1516,26 @@ describe("rename-organization — a rename sentence reaches the rename door", ()
     expect(classifyIntent("Kas vyksta mano įmonėje?").intent).toBe("company-overview");
   });
 });
+
+describe("a question about the needs we already have reviews them; a new need still opens the form", () => {
+  it.each([
+    "Kiek darbuotojų poreikių šiuo metu turime atvirų?",
+    "kokie mūsų poreikiai dabar?",
+    "parodyk mūsų atvirus poreikius",
+    "how many open needs do we have?",
+    "сколько у нас открытых заявок?",
+    "wie viele offene Anfragen haben wir?",
+    "hoeveel openstaande aanvragen hebben we?",
+    "ile mamy otwartych zapotrzebowań?",
+  ])("%s → candidates", (text) => {
+    expect(classifyIntent(text).intent).toBe("candidates");
+  });
+  it.each([
+    "reikia darbuotojų",
+    "reikia 3 mūrininkų kitai savaitei",
+    "darbuotojų poreikis: 5 suvirintojai Norvegijoje",
+    "we need welders next month",
+  ])("%s → need-workers", (text) => {
+    expect(classifyIntent(text).intent).toBe("need-workers");
+  });
+});

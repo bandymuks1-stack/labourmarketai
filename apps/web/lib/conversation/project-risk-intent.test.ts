@@ -49,7 +49,11 @@ describe("which project is at risk, by sentence", () => {
     expect(LOADER).toContain("loadProjectDetailForResult(p.projectId)");
     expect(LOADER).toContain('p.status !== "completed"');
     expect(LOADER).toContain('pr.status === "live" && pr.assignmentTotal === 0');
-    expect(LOADER).toContain("pulse.tasksOverdue + pulse.workersWithMissingDocs");
+    // documents are shown, never summed into the risk order (decision 0021
+    // extension, 2026-10-24)
+    expect(LOADER).toContain("(pulse ? pulse.tasksOverdue : 0)");
+    expect(LOADER).not.toContain("pulse.tasksOverdue + pulse.workersWithMissingDocs");
+    expect(LOADER).toContain("workersWithMissingDocs: pulse?.workersWithMissingDocs ?? 0");
     expect(LOADER).not.toMatch(/\.rpc\(|\.from\(/);
     // no fabricated figure can travel: the contract has no percentage, score or colour
     expect(CONTRACT).not.toMatch(/readonly \w*(percent|score|colou?r)\w*:/i);

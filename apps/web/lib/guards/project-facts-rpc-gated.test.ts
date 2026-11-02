@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * R-3 (2026-09-19 completion audit): project facts — title, city, country,
@@ -162,7 +163,7 @@ describe("R-3 application — the write goes ONLY through the RPC and degrades h
   });
 
   it("copy exists in every active locale for the form and both new notices", () => {
-    for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+    for (const loc of activeLocales) {
       const json = JSON.parse(read(`messages/${loc}.json`));
       const manage = json.projectOps.manage;
       for (const k of ["title", "city", "country", "countryNone", "startDate", "endDate", "save", "hint", "completedReadOnly"]) {

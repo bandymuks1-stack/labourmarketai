@@ -71,7 +71,7 @@ describe("ŠIANDIEN reads as one clear page on a phone (IA 2026-09-13 §5)", () 
     const screen = read("components/app/today/today-screen.tsx");
     const header = screen.indexOf('data-testid="today-header"');
     const waiting = screen.indexOf("<HomeWaiting");
-    const others = ["<EmployerVisibilityAsk", "<HomeRunning", "<HomeBecause", "<HomeOutside"].map((m) =>
+    const others = ["<HomeEmployerVisibility", "<HomeRunning", "<HomeBecause", "<HomeOutside"].map((m) =>
       screen.indexOf(m),
     );
     expect(waiting).toBeGreaterThan(header);
@@ -86,8 +86,10 @@ describe("ŠIANDIEN reads as one clear page on a phone (IA 2026-09-13 §5)", () 
     }
   });
 
-  it("the worker bar keeps the primitive's tap height", () => {
-    expect(read("components/app/bottom-nav.tsx")).toMatch(/h-16 flex-col/);
+  it("the phone navigation keeps a generous tap height", () => {
+    // The bottom bar (h-16 tabs) was retired with the one header (2026-10-25);
+    // its phone destinations are now sheet tiles at least 80px tall.
+    expect(read("components/app/conversation/chat/conversation-header.tsx")).toMatch(/relative flex min-h-20 flex-col/);
   });
 });
 

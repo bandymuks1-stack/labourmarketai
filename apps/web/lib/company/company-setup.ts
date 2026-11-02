@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -263,9 +264,7 @@ export async function readCompanyByIdForAccess(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", row: null };
-  const { data, error } = await readCompaniesPrivate(supabase, SELECT_COLUMNS, (q) =>
-    q.eq("id", companyId).maybeSingle(),
-  );
+  const { data, error } = await readCompanyPrivateRowOnce(companyId);
   if (error) {
     if (
       error.code === UNDEFINED_COLUMN_CODE ||
@@ -278,14 +277,11 @@ export async function readCompanyByIdForAccess(
   if (!data) return { kind: "ok", row: null };
   const row = mapCompanyRow(data);
   if (row.profileId === user.id) return { kind: "ok", row };
-  const { data: membership, error: mErr } = await asAny(supabase)
-    .from("company_memberships")
-    .select("id, organizations!inner(legacy_company_id)")
-    .eq("profile_id", user.id)
-    .eq("status", "active")
-    .in("role", [...rolesForAccess(access)])
-    .eq("organizations.legacy_company_id", companyId)
-    .limit(1);
+  const { data: membership, error: mErr } = await readGovernanceMembershipOnce(
+    companyId,
+    user.id,
+    access,
+  );
   if (mErr) {
     // A membership read failure must not turn into "you own this": fail
     // closed to the same shape as "not yours".
@@ -293,6 +289,44 @@ export async function readCompanyByIdForAccess(
   }
   return { kind: "ok", row: (membership ?? []).length > 0 ? row : null };
 }
+
+/**
+ * REQUEST-SCOPED reads behind `readCompanyByIdForAccess` (perf 2026-10-22).
+ * One `/dashboard/company` render asked for the SAME company row four times —
+ * the organization doors, the page, the chat starter context and the bridge
+ * spine count each resolve the active company by id: four identical
+ * `read_companies_private_v1` round trips in one request. React `cache()` is
+ * request-scoped deduplication, not data caching: every navigation reads
+ * again, and a server action (no render) runs the read itself, so a write is
+ * never answered by a stale row. The row is mapped afresh per caller
+ * (`mapCompanyRow`). The membership read keeps its access split: "open" and
+ * "govern" are different questions and never answer for one another.
+ */
+const readCompanyPrivateRowOnce = cache(async (companyId: string) => {
+  const supabase = await createClient();
+  return readCompaniesPrivate(supabase, SELECT_COLUMNS, (q) =>
+    q.eq("id", companyId).maybeSingle(),
+  );
+});
+
+const readGovernanceMembershipOnce = cache(
+  async (
+    companyId: string,
+    profileId: string,
+    access: CompanyReadAccess,
+  ): Promise<{ data: unknown[] | null; error: unknown }> => {
+    const supabase = await createClient();
+    const { data, error } = await asAny(supabase)
+      .from("company_memberships")
+      .select("id, organizations!inner(legacy_company_id)")
+      .eq("profile_id", profileId)
+      .eq("status", "active")
+      .in("role", [...rolesForAccess(access)])
+      .eq("organizations.legacy_company_id", companyId)
+      .limit(1);
+    return { data: (data as unknown[] | null) ?? null, error };
+  },
+);
 
 /** The company, only where the caller GOVERNS it (creator or active
  *  owner/admin member) — the read every WRITE surface keys on. Keeps its

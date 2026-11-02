@@ -44,6 +44,8 @@ import {
   describeAcceptanceEnv,
 } from "../lib/testing/acceptance-mode";
 
+const LOCAL_CONFIRMATION_TOKEN_SECRET = "local-stack-only-confirmation-secret-not-for-production";
+
 const REPO_ROOT = join(__dirname, "..", "..", "..");
 
 function main(): void {
@@ -102,6 +104,12 @@ function main(): void {
     NEXT_PUBLIC_SUPABASE_URL: local.url,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: local.anonKey,
     SUPABASE_SERVICE_ROLE_KEY: local.serviceKey,
+    // Confirmation tokens are signed ONLY with the dedicated secret (#2444):
+    // the service-role key is never reused as HMAC material, so this local
+    // harness must supply one. An exported value wins; the fallback is a
+    // local-only literal that signs nothing outside this loopback stack.
+    CONVERSATION_TOKEN_SECRET:
+      process.env.CONVERSATION_TOKEN_SECRET ?? LOCAL_CONFIRMATION_TOKEN_SECRET,
   };
 
   console.info(`[acceptance] ${describeAcceptanceEnv(childEnv)}`);

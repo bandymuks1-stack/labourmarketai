@@ -40,11 +40,11 @@ export function PeriodNav({
     key: string,
   ) => (
     <>
-      <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
+      <span className="truncate font-mono text-meta uppercase tracking-label text-text-secondary">
         {label}
       </span>
       <span
-        className="font-display text-xl font-bold tabular-nums text-text-primary"
+        className="whitespace-nowrap font-display text-xl font-bold tabular-nums text-text-primary"
         data-testid={`wi-period-hours-${key}`}
       >
         {t("hours", { hours: fmtHours(p.hours, locale) })}
@@ -60,7 +60,7 @@ export function PeriodNav({
     </>
   );
   const tileClass = (active: boolean) =>
-    `flex min-h-11 flex-col gap-0.5 rounded-md border px-3 py-2.5 transition-colors ${
+    `flex min-h-11 min-w-0 flex-col gap-0.5 rounded-md border px-3 py-2.5 transition-colors ${
       active
         ? "border-brand-blue bg-brand-blue/10"
         : "border-border-subtle bg-surface-1/50 hover:border-brand-blue/60"
@@ -68,9 +68,15 @@ export function PeriodNav({
   return (
     <nav
       aria-label={t("periodLabel")}
-      className="grid grid-cols-3 gap-2 sm:grid-cols-5"
+      className="flex flex-col gap-2"
       data-testid="wi-period-nav"
     >
+      {/* The windows read the JOURNAL only — an organization's span (months,
+          no days) is never placed into a journal window (#2169, 2026-10-15). */}
+      <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-text-muted" data-testid="wi-period-nav-scope">
+        {t("experience.periodsLabel")}
+      </span>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
       {WORK_PERIOD_KEYS.map((key: WorkPeriodKey) => {
         const p = wi.periods.find((x) => x.key === key)!;
         const active = wi.scope === key;
@@ -123,6 +129,7 @@ export function PeriodNav({
           </div>
         )
       ) : null}
+      </div>
     </nav>
   );
 }

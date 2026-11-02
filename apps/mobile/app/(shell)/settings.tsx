@@ -12,6 +12,7 @@ import { useAuth } from "../../src/auth-context";
 import { capability } from "../../src/domain";
 import { CapabilityFailureNotice } from "../../src/screens/capability-failure";
 import { useCapability } from "../../src/use-capability";
+import { useWorkspaceEpoch } from "../../src/workspace-epoch";
 import { useLocale } from "../../src/i18n/locale-context";
 import { LANGUAGE_NAMES } from "../../src/i18n/messages";
 import { Body, Button, Divider, NotAvailable, Title } from "../../src/ui/primitives";
@@ -76,6 +77,7 @@ export default function Settings() {
   const { signOut, busy, state, accessToken } = useAuth();
 
   const workspaces = useCapability<ContextListData>("context.list");
+  const { bump: workspaceSwitched } = useWorkspaceEpoch();
   const [switching, setSwitching] = useState<string | null>(null);
   const [switchError, setSwitchError] = useState<string | null>(null);
   // Bound once: narrowing a property access does not survive into the map
@@ -103,10 +105,14 @@ export default function Settings() {
         // switched NOTHING, so the list is re-read rather than a local guess
         // being painted over the truth.
         setSwitchError(t("workspace.switchFailed"));
+        workspaces.reload();
+        return;
       }
-      workspaces.reload();
+      // Every mounted station (this list included) reads again for the
+      // workspace the person now acts for.
+      workspaceSwitched();
     },
-    [accessToken, locale, t, workspaces],
+    [accessToken, locale, t, workspaces, workspaceSwitched],
   );
 
   // `CONFIG` is null only on the misconfiguration screen at `_layout`, which

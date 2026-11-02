@@ -58,7 +58,7 @@ export function PlayerCardModes({
     <div
       role="tablist"
       aria-label={label}
-      className={cn("-mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5",)}
+      className="flex flex-wrap gap-x-1 pb-0.5"
       data-testid="player-card-modes"
     >
       {PLAYER_CARD_MODES.map((key) => (

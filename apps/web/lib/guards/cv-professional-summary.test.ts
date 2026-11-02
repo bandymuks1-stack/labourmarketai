@@ -10,6 +10,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 const webRoot = resolve(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(resolve(webRoot, rel), "utf-8");
@@ -41,7 +42,7 @@ describe("CV professional summary — sourced from the worker's own profile_text
 });
 
 describe("summary title localized for active locales (en/lt/ru)", () => {
-  for (const locale of ["en", "lt", "ru"] as const) {
+  for (const locale of activeLocales) {
     it(`${locale}: cvExport.summaryTitle exists`, () => {
       const j = JSON.parse(read(`messages/${locale}.json`));
       expect(typeof j.cvExport.summaryTitle).toBe("string");

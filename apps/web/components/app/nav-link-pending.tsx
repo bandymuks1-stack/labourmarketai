@@ -1,6 +1,7 @@
 "use client";
 
 import { useLinkStatus } from "next/link";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 /**
@@ -16,11 +17,14 @@ import { cn } from "@/lib/utils";
  */
 export function NavLinkPending({ className }: { className?: string }) {
   const { pending } = useLinkStatus();
+  // The status is announced to screen readers in the reader's language —
+  // a phone user on /lt heard "Loading" in English on every tab tap.
+  const t = useTranslations("common");
   if (!pending) return null;
   return (
     <span
       role="status"
-      aria-label="Loading"
+      aria-label={t("loading")}
       data-testid="nav-link-pending"
       className={cn(
         "inline-block h-3 w-3 animate-spin motion-reduce:animate-none rounded-full border-2 border-current border-r-transparent align-middle",

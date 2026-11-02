@@ -131,13 +131,13 @@ import {
   type EntryWorkTime,
   type WorkTimeMetricRow,
 } from "@/lib/journal/work-time";
-import {
-  deriveEvidenceTier,
-  EVIDENCE_TIER_RANK,
-  type EvidenceTier,
-} from "@/lib/evidence/evidence-tier";
+import { EVIDENCE_TIER_RANK, type EvidenceTier } from "@/lib/evidence/evidence-tier";
 import type { EntrySkillProvenance } from "@/lib/journal/entry-skill-source";
 import type { HistoryContext } from "@/lib/organization-evidence/professional-history-context";
+import {
+  standingEvidenceTier,
+  type CrossPartyConfirmationState,
+} from "@/lib/evidence/skill-confirmation-standing";
 import { fragmentSkillsByIndex } from "@/lib/journal/fragment-skill-evidence";
 import {
   deriveWorkTimeChecks,
@@ -166,6 +166,10 @@ export type WorkIntelligenceEntry = {
   /** Uploaded photos on this entry, when the caller read them (0 = none
    *  read OR none uploaded — the caller decides whether photos were read). */
   readonly photoCount?: number;
+  /** The project the entry was written against (`journal_entries.project_id`),
+   *  when the caller read it. Lets the all-time journal lines split by
+   *  project; never changes an hour. */
+  readonly projectId?: string | null;
 };
 
 /** A declared skill row (worker_skills) as the core reader hands it over. */
@@ -174,6 +178,10 @@ export type WorkIntelligenceSkillRow = {
   readonly slug: string;
   readonly verified: boolean | null;
   readonly source: string | null;
+  /** The standing read's verdict on a recorded confirmation (absent when
+   *  none was flagged) — an UNKNOWN one is journal-level evidence, never
+   *  erased to self-declared (standingEvidenceTier). */
+  readonly confirmation?: CrossPartyConfirmationState;
 };
 
 /** One live organization hour record (`work_hour_allocations`, not
@@ -200,6 +208,23 @@ export type WorkIntelligenceOrganizationRecord = {
   readonly context?: HistoryContext;
 };
 
+/** One record the organization holds about the person whose DURATION IS NOT
+ *  STATED (`hours` null at the source). The work happened and was recorded;
+ *  its length is unknown. UNKNOWN is never zero (SEP-7): carried beside the
+ *  other ledgers so the Living CV can show the day or span with "duration to
+ *  be confirmed" — never an hour in any period, total, skill or activity. */
+export type WorkIntelligenceOrganizationPendingRecord = {
+  readonly id: string;
+  readonly organizationId: string;
+  /** ISO day of a day record, or null. */
+  readonly workDate: string | null;
+  /** ISO span of a period record, or null. */
+  readonly periodStart: string | null;
+  readonly periodEnd: string | null;
+  readonly source: string;
+  readonly context?: HistoryContext;
+};
+
 /** One PERIOD record the organization holds about the person: a total over
  *  a span with NO source days ("800 h, 2025-06-01 → 2025-11-30", from an
  *  imported document). Carried BESIDE the day records (IA §2), never summed
@@ -218,6 +243,10 @@ export type WorkIntelligenceOrganizationPeriodRecord = {
    *  A span that is not the source's is shown at month precision with this
    *  label, and never split (owner rule 2026-09-23). */
   readonly provenance: "source" | "human_choice" | "derived";
+  /** The figure's stated basis (`derived.hoursBasis`: actual / estimated,
+   *  with its method), when a source or a correction stated one. Absent =
+   *  not stated — read as an organization-reported figure, never as actual. */
+  readonly hoursBasis?: { readonly value: string; readonly method: string | null; readonly note: string | null } | null;
   /** The same context the day records carry (imported evidence only). */
   readonly context?: HistoryContext;
 };
@@ -278,6 +307,9 @@ export type WorkIntelligenceInput = {
    *  read. Ignored when `organizationRecords` is null — a half-read ledger
    *  would pose as a smaller one. */
   readonly organizationPeriodRecords?: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** The organization's records with NO stated duration. Passed through,
+   *  summed into nothing; ignored when `organizationRecords` is null. */
+  readonly organizationPendingRecords?: readonly WorkIntelligenceOrganizationPendingRecord[] | null;
 };
 
 /** Inclusive UTC calendar-day windows ending today (W12 doctrine: dates are
@@ -394,6 +426,27 @@ export type ContextWorkTime = {
   readonly entries: number;
 };
 
+/**
+ * ALL-TIME journal work per (engagement context, project) — the lines the
+ * one professional-experience reading (`professional-experience.ts`) joins to
+ * organizations and projects. Unlike `contexts`, which describes the FOCUS
+ * period, these cover every entry the model was built from, so the all-time
+ * figure never changes with the period tab. Every entry counted once.
+ */
+export type JournalAllTimeLine = {
+  readonly engagementContextId: string | null;
+  readonly projectId: string | null;
+  readonly hours: number;
+  readonly confirmedHours: number;
+  readonly entries: number;
+  /** Hours per work day (`YYYY-MM-DD`, ascending) — only days that carry
+   *  hours. Lets a reading tell which of the line's hours fall inside a span
+   *  an organization stated, without inventing a distribution. */
+  readonly hoursByDay: readonly { readonly day: string; readonly hours: number; readonly confirmedHours: number }[];
+  readonly firstWorkedDay: string | null;
+  readonly lastWorkedDay: string | null;
+};
+
 export type MonthWorkTime = {
   /** `YYYY-MM` */
   readonly month: string;
@@ -471,6 +524,10 @@ export type WorkIntelligence = {
   readonly coverage: WorkIntelligenceCoverage;
   /** The section's five tabs, plus one `range` row when `focusRange` is set. */
   readonly periods: readonly WorkPeriodTotals[];
+  /** Entries whose written hours never became recorded time, with the
+   *  earliest such work day (lib/journal/unrecorded-hours.ts). Set by the
+   *  read layer; absent when the model was derived without entry text. */
+  readonly unrecordedHours?: { readonly entries: number; readonly earliestDay: string } | null;
   /** The organization's own hour records per period (owner §19) — read
    *  beside the journal, shown beside it, added to nothing. `null` when the
    *  ledger could not be read; every period at zero when it holds nothing. */
@@ -479,6 +536,11 @@ export type WorkIntelligence = {
    *  their own beside `organizationRecords`, in no period's `hours`, on no
    *  day. `null` exactly when `organizationRecords` is null (UNKNOWN). */
   readonly organizationPeriodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** The organization's records with NO stated duration (SEP-7: unknown,
+   *  never zero) — shown as "duration to be confirmed", in no sum. `null`
+   *  exactly when `organizationRecords` is null (UNKNOWN). Optional so
+   *  hand-built models in callers stay valid; absent = none. */
+  readonly organizationPendingRecords?: readonly WorkIntelligenceOrganizationPendingRecord[] | null;
   /** The organization's DAY records that carry a professional-history context
    *  (imported evidence), as read - handed through untouched so the Living CV can
    *  name the work behind the hours. A pass-through, never a sum: no figure in
@@ -495,6 +557,13 @@ export type WorkIntelligence = {
   readonly skills: readonly SkillWorkTime[];
   readonly activities: readonly ActivityWorkTime[];
   readonly contexts: readonly ContextWorkTime[];
+  /** ALL-TIME journal work per (context, project) — the focus tab does not
+   *  scope it (see `JournalAllTimeLine`). Hours desc. */
+  readonly journalAllTime: readonly JournalAllTimeLine[];
+  /** Every entry id the model was built from (live entries, counted once) —
+   *  so a reading beside the model can tell an organization record that
+   *  describes one of THESE entries from one that describes other work. */
+  readonly entryIds: readonly string[];
   /** Oldest → newest, only months that carry at least one entry. */
   readonly months: readonly MonthWorkTime[];
   readonly outputs: readonly OutputTotal[];
@@ -764,7 +833,7 @@ export function deriveWorkIntelligence(
   for (const s of [...input.skills].sort((a, b) => a.skillId.localeCompare(b.skillId))) {
     const slug = (s.slug ?? "").trim();
     if (!slug || !s.skillId) continue;
-    const tier = deriveEvidenceTier({ verified: s.verified, source: s.source });
+    const tier = standingEvidenceTier({ verified: s.verified, source: s.source, confirmation: s.confirmation });
     const canonical = canonicalIdBySlug.get(slug) ?? s.skillId;
     canonicalIdBySlug.set(slug, canonical);
     canonicalIdByAlias.set(s.skillId, canonical);
@@ -1073,6 +1142,67 @@ export function deriveWorkIntelligence(
         String(x.engagementContextId ?? "").localeCompare(String(y.engagementContextId ?? "")),
     );
 
+  // ── all-time journal lines per (context, project) — NOT focus-scoped ──
+  // The same once-per-entry rule as the `all` period row: an entry's hours
+  // land on exactly one line, keyed by where it was written. The professional
+  // experience reading joins these to organizations and projects.
+  const allTimeAcc = new Map<
+    string,
+    {
+      ctx: string | null;
+      project: string | null;
+      hours: number;
+      confirmed: number;
+      entries: number;
+      days: Map<string, { hours: number; confirmed: number }>;
+    }
+  >();
+  for (const d of derived) {
+    const ctx = d.entry.engagementContextId ?? null;
+    const project = d.entry.projectId ?? null;
+    const key = `${ctx ?? ""}|${project ?? ""}`;
+    let a = allTimeAcc.get(key);
+    if (!a) {
+      a = { ctx, project, hours: 0, confirmed: 0, entries: 0, days: new Map() };
+      allTimeAcc.set(key, a);
+    }
+    a.entries += 1;
+    a.hours += d.time.totalHours;
+    const approved = d.entry.reviewResult === "approved";
+    if (approved) a.confirmed += d.time.totalHours;
+    if (d.time.totalHours > 0) {
+      const day = a.days.get(d.time.day) ?? { hours: 0, confirmed: 0 };
+      day.hours += d.time.totalHours;
+      if (approved) day.confirmed += d.time.totalHours;
+      a.days.set(d.time.day, day);
+    }
+  }
+  const journalAllTime: JournalAllTimeLine[] = [...allTimeAcc.values()]
+    .map((a) => {
+      const hoursByDay = [...a.days.entries()]
+        .sort(([x], [y]) => x.localeCompare(y))
+        .map(([day, v]) => ({ day, hours: round2(v.hours), confirmedHours: round2(v.confirmed) }));
+      return {
+        engagementContextId: a.ctx,
+        projectId: a.project,
+        hours: round2(a.hours),
+        confirmedHours: round2(a.confirmed),
+        entries: a.entries,
+        hoursByDay,
+        firstWorkedDay: hoursByDay[0]?.day ?? null,
+        lastWorkedDay: hoursByDay[hoursByDay.length - 1]?.day ?? null,
+      };
+    })
+    .sort(
+      (x, y) =>
+        y.hours - x.hours ||
+        y.entries - x.entries ||
+        `${x.engagementContextId ?? ""}|${x.projectId ?? ""}`.localeCompare(
+          `${y.engagementContextId ?? ""}|${y.projectId ?? ""}`,
+        ),
+    );
+  const entryIds = derived.map((d) => d.entry.entryId).sort();
+
   // ── months (always all-time — the evolution axis) ─────────────────────
   const monthAcc = new Map<string, { hours: number; confirmed: number; entries: number }>();
   for (const d of derived) {
@@ -1236,6 +1366,7 @@ export function deriveWorkIntelligence(
     periods,
     organizationRecords,
     organizationPeriodRecords,
+    organizationPendingRecords: orgRows === null ? null : [...(input.organizationPendingRecords ?? [])],
     organizationContextRecords:
       orgRows === null
         ? null
@@ -1247,6 +1378,8 @@ export function deriveWorkIntelligence(
     skills,
     activities,
     contexts,
+    journalAllTime,
+    entryIds,
     months,
     outputs,
     evidence,

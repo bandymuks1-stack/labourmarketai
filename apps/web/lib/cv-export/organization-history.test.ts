@@ -182,3 +182,47 @@ describe("buildCvOrganizationHistory", () => {
     expect(e.reconstructed).toBe(false);
   });
 });
+
+describe("name history (decision 0025): the source label is carried as data and bands the group", () => {
+  it("records under different dataset labels of the same supplier form separate entries, each carrying its label", async () => {
+    const mod = await import("./organization-history");
+    const { buildHistoryContext } = await import("@/lib/organization-evidence/professional-history-context");
+    const base = {
+      activityDate: "2024-03-05",
+      periodStart: null,
+      periodEnd: null,
+      importedAt: null,
+      contextLabel: null,
+      activityKind: "work",
+      workObjectId: null,
+      workObjectName: null,
+      projectId: null,
+      projectName: null,
+      parties: [],
+      relationshipKind: "employee",
+      supplierRole: "employer",
+      supplierOrganizationId: "org1",
+      sourceKind: "xlsx",
+      rowOrigin: "parsed_file",
+      reportedState: "ORGANIZATION_REPORTED",
+      attestation: null,
+      independentlyVerified: false,
+      contested: false,
+    };
+    const rec = (id: string, sourceLabel: string | null, hours: number): WorkIntelligenceOrganizationRecord => ({
+      id,
+      workDate: "2024-03-05",
+      hours,
+      source: "import",
+      status: "recorded",
+      organizationId: "org1",
+      journalEntryId: null,
+      context: buildHistoryContext({ ...base, sourceLabel }),
+    });
+    const entries = mod.buildCvOrganizationHistory([rec("a", "Vivat Rex PL", 8), rec("b", "Vivat Rex PL", 4), rec("c", null, 6)], []);
+    expect(entries.map((e) => [e.sourceLabel, e.dayHours, e.dayRecords])).toEqual([
+      ["Vivat Rex PL", 12, 2],
+      [null, 6, 1],
+    ]);
+  });
+});

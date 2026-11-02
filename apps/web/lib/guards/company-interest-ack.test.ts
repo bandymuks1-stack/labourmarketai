@@ -7,6 +7,7 @@ import {
   isCompanyAckStatus,
   WORKER_WRITABLE_INTEREST_STATUSES,
 } from "@/lib/opportunities/interest-snapshot";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * COMPANY INTEREST ACKNOWLEDGEMENT GUARDS (PR7).
@@ -146,7 +147,7 @@ describe("no external sending; honest internal-only copy", () => {
   });
 
   it("worker-side status labels are honest acknowledgements, not applications", () => {
-    for (const locale of ["en", "lt", "ru"] as const) {
+    for (const locale of activeLocales) {
       const j = JSON.parse(read(`messages/${locale}.json`)) as {
         opportunities?: { interest?: Record<string, string> };
       };

@@ -38,6 +38,7 @@ import {
   runVacancyIngestionSession,
 } from "../lib/vacancy-runner/vacancy-ingestion";
 import { operatorRunExitCode } from "../lib/vacancy-runner/operator-run-exit";
+import { countStoredRows } from "../lib/vacancy-runner/operator-run-count";
 import { getVacancyProvider } from "../lib/vacancy-sources/vacancy-provider-registry";
 import type { VacancyImportChannel } from "../lib/vacancy-sources/vacancy-contract";
 
@@ -92,21 +93,6 @@ function parseArgs(argv: readonly string[]): Args {
     } else throw new Error(`unknown argument: ${a}`);
   }
   return args;
-}
-
-async function countStored(
-  client: { from: (t: string) => any },
-  providerKey: string,
-): Promise<number | "not_provisioned"> {
-  const { count, error } = await client
-    .from("public_vacancies")
-    .select("*", { count: "exact", head: true })
-    .eq("provider_key", providerKey);
-  if (error) {
-    if (error.code === "42P01") return "not_provisioned";
-    throw new Error(`count_failed:${error.code ?? "unknown"}`);
-  }
-  return count ?? 0;
 }
 
 async function readCursorRow(
@@ -171,7 +157,7 @@ async function main(): Promise<void> {
   const nowIso = new Date().toISOString();
 
   const before = {
-    storedRows: await countStored(client, provider.key),
+    storedRows: await countStoredRows(client, provider.key),
     cursor: await readCursorRow(client, provider.key, channel),
   };
 
@@ -182,7 +168,7 @@ async function main(): Promise<void> {
   });
 
   const after = {
-    storedRows: await countStored(client, provider.key),
+    storedRows: await countStoredRows(client, provider.key),
     cursor: await readCursorRow(client, provider.key, channel),
   };
 

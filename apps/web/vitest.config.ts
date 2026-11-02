@@ -2,6 +2,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
+import { vitestTmpOwnership } from "./lib/test/vitest-tmp-ownership";
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -21,6 +22,11 @@ const localGuardWorkers = Math.max(2, Math.floor(cores / 4));
 
 // Unit tests only (pure logic like lib/auth-errors). E2E stays in Playwright.
 export default defineConfig({
+  // Vitest keeps each run's module cache in %TEMP%\<id>\ and removes it only on
+  // a clean close; agent timeouts kill runs first (~141k leftovers on the owner
+  // PC). Each run marks its directory with its pid and removes only directories
+  // whose owner process is gone — see lib/test/vitest-tmp-ownership.ts.
+  plugins: [vitestTmpOwnership()],
   // Transform component JSX with the automatic runtime (react/jsx-runtime) so a
   // guard test can render a real client component to static markup for a DOM
   // order proof. vitest 4 transforms with oxc, which otherwise inherits

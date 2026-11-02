@@ -2,12 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buildPageMetadata } from "@/lib/seo/metadata";
-import {
-  LegalDisclaimer,
-  LegalSectionList,
-  PendingLegalNotice,
-  type LegalSection,
-} from "@/components/marketing/legal-notes";
+import { LegalSectionList, type LegalSection } from "@/components/marketing/legal-notes";
 import { PermissionMatrixSection } from "@/components/marketing/permission-matrix-table";
 
 /**
@@ -52,12 +47,9 @@ export default async function LegalPage({
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-16 sm:px-12" data-testid="legal-data-access">
-      <h1 className="font-display text-4xl font-bold tracking-tightest text-text-primary">
+      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary break-words hyphens-auto sm:text-4xl">
         {t("dataAccess.title")}
       </h1>
-      <div className="mt-6">
-        <PendingLegalNotice />
-      </div>
       <p className="mt-6 text-sm leading-relaxed text-text-secondary">{t("dataAccess.intro")}</p>
       <LegalSectionList sections={sections} />
       {/* WAGON 7 — source-backed role × surface permission matrix. Rows render
@@ -65,7 +57,6 @@ export default async function LegalPage({
       <PermissionMatrixSection />
       <div className="mt-8 flex flex-col gap-3">
         <p className="text-sm leading-relaxed text-text-secondary">{t("requestContact")}</p>
-        <LegalDisclaimer />
       </div>
       <nav aria-label={t("related")} className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
         <Link

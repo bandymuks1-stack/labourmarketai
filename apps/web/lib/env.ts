@@ -45,13 +45,34 @@ const schema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   SUPABASE_DB_PASSWORD: z.string().min(1).optional(),
   /**
-   * Dedicated HMAC key for conversation confirmation tokens (audit L-02).
-   * Optional: when unset, lib/conversation/dispatch.ts falls back to the
-   * service-role key and, failing that, REFUSES to sign — it no longer falls
-   * back to a hardcoded literal. Set this to stop reusing the service-role key
-   * for a second purpose.
+   * Dedicated HMAC key for conversation + capability confirmation tokens
+   * (audit L-02). REQUIRED IN PRODUCTION: at least 32 characters of random
+   * material (`openssl rand -hex 32`); production refuses to sign without it
+   * and never falls back to the service-role key. Outside production the
+   * service-role key is still accepted so local dev works on a fresh checkout.
+   * Optional here so builds pass without secrets — the check is lazy, at sign
+   * time (lib/security/confirmation-key-material.ts).
    */
-  CONVERSATION_TOKEN_SECRET: z.string().min(16).optional(),
+  // A blank hPanel/dashboard field means "not set" — without this an empty
+  // string failed min(16) and took the WHOLE app down at boot (env is read
+  // by nearly every module), not just the confirm steps.
+  CONVERSATION_TOKEN_SECRET: z.preprocess(blankAsAbsent, z.string().min(16).optional()),
+  /**
+   * The public https origin a self-hosted deployment advertises to OAuth and
+   * MCP clients when its hostname is not one of ours (lib/mcp/public-origin.ts).
+   * Unset on Vercel and on production: the request host decides there.
+   */
+  PUBLIC_ORIGIN: z.preprocess(
+    blankAsAbsent,
+    z
+      .string()
+      .url()
+      .refine(
+        (v) => v.startsWith("https://") && new URL(v).origin === v.replace(/\/$/, ""),
+        "PUBLIC_ORIGIN must be an https origin with no path, query or fragment",
+      )
+      .optional(),
+  ),
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS: z
     .enum(["true", "false"])
     .default("true"),
@@ -77,6 +98,20 @@ const schema = z.object({
   // confirmed in code (PRICING_READINESS_STATE) AND every live key is present.
   // Any other value keeps the historical hard block. See config-core.ts.
   STRIPE_LIVE_ACTIVATION: z.string().optional(),
+  // PILOT (owner 2026-10-21, payments launch) — DENY BY DEFAULT: a comma-
+  // separated list of organization ids. Billing (checkout, the order button and
+  // plan enforcement) is on ONLY for those organizations; every other workspace
+  // and every public page behaves exactly as with billing off. Unset, blank or a
+  // malformed list admits nobody. Exactly ALL_ORGANIZATIONS = the public launch.
+  // See config-core.ts.
+  BILLING_PILOT_ORGANIZATION_IDS: z.string().optional(),
+  // TRIAL SWITCH (owner 2026-10-21): "false" = a NEW organization subscription
+  // is paid from the first day (no automatic 14-day trial). It changes only
+  // checkouts started from now on — an existing subscription keeps its terms.
+  BILLING_TRIAL_ENABLED: z.enum(["true", "false"]).default("true"),
+  // The organization pilot pass (pilot-pass-core): 1 € once → the paid
+  // Organization plan for the pilot period. Off unless the owner switches it on.
+  BILLING_PILOT_PASS_ENABLED: z.enum(["true", "false"]).default("false"),
   // TEST price ids (price_…) per paid plan — owner sets these in Stripe test.
   STRIPE_PRICE_WORKER_PLUS: z.string().optional(),
   STRIPE_PRICE_COMPANY_PILOT: z.string().optional(),
@@ -87,7 +122,7 @@ const schema = z.object({
   // NEVER committed, NEVER in the client). Safety logic: lib/ai/runtime/config-core.ts.
   AI_PROVIDER_MODE: z.enum(["disabled", "mock", "live"]).default("disabled"),
   AI_PROVIDER: z
-    .enum(["local", "anthropic", "openai", "gemini", "xai"])
+    .enum(["local", "anthropic", "openai", "gemini", "xai", "cloudflare", "mistral", "groq"])
     .default("anthropic"),
   AI_API_KEY: z.string().optional(),
   AI_MODEL: z.string().optional(),
@@ -95,6 +130,10 @@ const schema = z.object({
   AI_MAX_RETRIES: z.string().optional(),
   AI_MAX_OUTPUT_TOKENS: z.string().optional(),
   AI_DAILY_RUN_BUDGET: z.string().optional(),
+  // ZERO PAID API BUDGET (owner 2026-10-27): metered AI providers (Gemini,
+  // Anthropic, OpenAI, xAI, DeepL Pro) never run — not even as a fallback —
+  // unless this is exactly "true". Free tiers and local models are unaffected.
+  AI_PAID_PROVIDERS_ALLOWED: z.enum(["true", "false"]).default("false"),
   // ── AI Router v1 — per-provider adapters (ALL OFF by default) ──────────────
   // Each non-anthropic adapter is DOUBLE gated: its enable flag must be
   // "true" AND its key must be present, else the adapter returns the typed
@@ -117,6 +156,15 @@ const schema = z.object({
   AI_CLOUDFLARE_ENABLED: z.enum(["true", "false"]).default("false"),
   CLOUDFLARE_ACCOUNT_ID: z.string().optional(),
   CLOUDFLARE_API_TOKEN: z.string().optional(),
+  // ── Free API tiers (2026-10-25; ALL OFF by default) ─────────────────────────
+  // OpenAI-compatible bindings in lib/ai/runtime/providers/free-tier.ts. Each is
+  // DOUBLE gated (flag + key) and is a `free_tier` external provider for the
+  // data-egress gate: PUBLIC payloads only. Cloudflare's general LLMs reuse
+  // AI_CLOUDFLARE_ENABLED + CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN above.
+  AI_MISTRAL_ENABLED: z.enum(["true", "false"]).default("false"),
+  MISTRAL_API_KEY: z.string().optional(),
+  AI_GROQ_ENABLED: z.enum(["true", "false"]).default("false"),
+  GROQ_API_KEY: z.string().optional(),
   // ── Local OpenAI-compatible runtime (free_local; OFF by default) ───────────
   // The ONE provider that needs no key: it authenticates by network location.
   // Its proof of configuration is instead a VALIDATED base URL plus an explicit
@@ -180,6 +228,7 @@ const parsed = schema.safeParse({
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   SUPABASE_DB_PASSWORD: process.env.SUPABASE_DB_PASSWORD,
   CONVERSATION_TOKEN_SECRET: process.env.CONVERSATION_TOKEN_SECRET,
+  PUBLIC_ORIGIN: process.env.PUBLIC_ORIGIN,
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS:
     process.env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS,
   PAYMENTS_ENABLED: process.env.PAYMENTS_ENABLED,
@@ -190,6 +239,9 @@ const parsed = schema.safeParse({
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   STRIPE_LIVE_ACTIVATION: process.env.STRIPE_LIVE_ACTIVATION,
+  BILLING_PILOT_ORGANIZATION_IDS: process.env.BILLING_PILOT_ORGANIZATION_IDS,
+  BILLING_TRIAL_ENABLED: process.env.BILLING_TRIAL_ENABLED,
+  BILLING_PILOT_PASS_ENABLED: process.env.BILLING_PILOT_PASS_ENABLED,
   STRIPE_PRICE_WORKER_PLUS: process.env.STRIPE_PRICE_WORKER_PLUS,
   STRIPE_PRICE_COMPANY_PILOT: process.env.STRIPE_PRICE_COMPANY_PILOT,
   STRIPE_PRICE_AGENCY_PILOT: process.env.STRIPE_PRICE_AGENCY_PILOT,
@@ -201,6 +253,7 @@ const parsed = schema.safeParse({
   AI_MAX_RETRIES: process.env.AI_MAX_RETRIES,
   AI_MAX_OUTPUT_TOKENS: process.env.AI_MAX_OUTPUT_TOKENS,
   AI_DAILY_RUN_BUDGET: process.env.AI_DAILY_RUN_BUDGET,
+  AI_PAID_PROVIDERS_ALLOWED: process.env.AI_PAID_PROVIDERS_ALLOWED,
   AI_OPENAI_ENABLED: process.env.AI_OPENAI_ENABLED,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   AI_GEMINI_ENABLED: process.env.AI_GEMINI_ENABLED,
@@ -216,6 +269,10 @@ const parsed = schema.safeParse({
   AI_CLOUDFLARE_ENABLED: process.env.AI_CLOUDFLARE_ENABLED,
   CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
   CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN,
+  AI_MISTRAL_ENABLED: process.env.AI_MISTRAL_ENABLED,
+  MISTRAL_API_KEY: process.env.MISTRAL_API_KEY,
+  AI_GROQ_ENABLED: process.env.AI_GROQ_ENABLED,
+  GROQ_API_KEY: process.env.GROQ_API_KEY,
   AI_LOCAL_ENABLED: process.env.AI_LOCAL_ENABLED,
   AI_LOCAL_BASE_URL: process.env.AI_LOCAL_BASE_URL,
   AI_LOCAL_MODEL: process.env.AI_LOCAL_MODEL,

@@ -70,8 +70,10 @@ afterEach(() => {
 });
 
 describe("secondary walk order and fallback", () => {
-  it("the shipped order is self-hosted first, then DeepL, then Cloudflare", () => {
-    expect(SECONDARY_TRANSLATION_PROVIDERS.map((s) => s.id)).toEqual(["libretranslate", "deepl", "cloudflare"]);
+  it("the shipped order is self-hosted first, then the free allocation, then the paid specialist", () => {
+    // 2026-10-25 (owner: free suitable options first; DeepL is the specialist,
+    // used only when allowed and when nothing free could serve).
+    expect(SECONDARY_TRANSLATION_PROVIDERS.map((s) => s.id)).toEqual(["libretranslate", "cloudflare", "deepl"]);
   });
 
   it("a 429 on the first engine advances to the next; the second one answers", async () => {

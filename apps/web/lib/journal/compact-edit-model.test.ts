@@ -582,3 +582,35 @@ describe("a row that is only its own phrase names no kind of work (#1689, produc
     ]);
   });
 });
+
+describe("only a skill the person adds or re-ticks may supersede a dispute (#2885)", () => {
+  it("an untouched re-save carries the persisted skill as selected but NOT re-selected", () => {
+    const fields = buildCompactSaveFields(
+      input({
+        rows: [
+          row({ key: "p", label: "Flooring", skillSlug: "flooring", origin: "persisted", timeValue: "3" }),
+        ],
+      }),
+    );
+    const [f] = JSON.parse(fields.fragments_json) as Array<{ selected?: boolean; reselected?: boolean }>;
+    expect(f.selected).toBe(true);
+    expect(f.reselected).toBe(false);
+  });
+
+  it("a skill added (or re-ticked) in this session is re-selected", () => {
+    const fields = buildCompactSaveFields(
+      input({ rows: [row({ key: "n", label: "Flooring", skillSlug: "flooring", origin: "added" })] }),
+    );
+    const [f] = JSON.parse(fields.fragments_json) as Array<{ reselected?: boolean }>;
+    expect(f.reselected).toBe(true);
+  });
+
+  it("the supersede writes the superseding decision only for re-selected slugs", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const src = readFileSync(join(__dirname, "actions.ts"), "utf8");
+    expect(src).toMatch(/f\.selected === true && f\.reselected === true/);
+    expect(src).toMatch(/for \(const slug of reselectedSlugs\)/);
+    expect(src).not.toMatch(/for \(const slug of selectedSlugs\)/);
+  });
+});

@@ -1,4 +1,6 @@
 import "server-only";
+import { dayStartInstantIso } from "@/lib/time/local-day";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { createClient } from "@/lib/supabase/server";
@@ -32,14 +34,21 @@ export interface StadiumWorkerPosition {
 export interface ProjectStadium {
   readonly ops: ProjectOperations;
   readonly positions: ReadonlyMap<string, string | null>;
-  /** Journal entries written TODAY by assigned workers (RLS-readable). */
-  readonly entriesToday: number;
+  /** Journal entries written TODAY by assigned workers (RLS-readable), or
+   *  null when the count could not be read (SEP-7: UNKNOWN ≠ 0). */
+  readonly entriesToday: number | null;
 }
 
-function dayStartIso(): string {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString();
+/**
+ * Start of the VIEWER's calendar day as a UTC instant (audit 2026-10-16,
+ * C-3). The previous `setHours(0,0,0,0)` was the server's midnight — UTC on
+ * Vercel — so for a manager in Vilnius an entry written at 01:30 local
+ * counted for "yesterday" until 03:00. The viewer's zone comes from the
+ * same `lm_tz` cookie the journal and planning surfaces use (#2159).
+ */
+async function viewerDayStartIso(): Promise<string> {
+  const today = await viewerWorkToday();
+  return dayStartInstantIso(today.todayIso, today.timeZone);
 }
 
 export async function getProjectStadium(
@@ -53,9 +62,10 @@ export async function getProjectStadium(
   const positions = new Map<string, string | null>(
     workerIds.map((id) => [id, null]),
   );
-  let entriesToday = 0;
+  let entriesToday: number | null = workerIds.length > 0 ? null : 0;
 
   if (workerIds.length > 0) {
+    const dayStart = await viewerDayStartIso();
     try {
       const [profRes, todayRes] = await Promise.all([
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,7 +80,7 @@ export async function getProjectStadium(
             .from("journal_entries")
             .select("*", { count: "exact", head: true })
             .in("worker_id", workerIds),
-        ).gte("created_at", dayStartIso()),
+        ).gte("created_at", dayStart),
       ]);
       for (const row of (profRes.data ?? []) as {
         worker_id: string;
@@ -78,9 +88,9 @@ export async function getProjectStadium(
       }[]) {
         positions.set(row.worker_id, row.professions?.slug ?? null);
       }
-      if (typeof todayRes.count === "number") entriesToday = todayRes.count;
+      if (!todayRes.error && typeof todayRes.count === "number") entriesToday = todayRes.count;
     } catch {
-      // keep nulls/0 — honest degradation
+      // positions stay null, entriesToday stays null — honest degradation
     }
   }
 

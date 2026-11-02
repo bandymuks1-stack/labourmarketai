@@ -298,6 +298,10 @@ export interface DetailMetric {
   readonly valueNumeric: number | null;
   readonly valueText: string | null;
   readonly unitSlug: string | null;
+  /** Row ordering, when the detail RPC returns it (the canonical work-time
+   *  rule's "latest quantity row wins" needs it). */
+  readonly createdAt?: string | null;
+  readonly id?: string | null;
 }
 export interface DetailPhoto {
   readonly id: string;
@@ -346,6 +350,8 @@ export function parseEntryDetail(json: unknown): EntryDetail | null {
               valueNumeric: typeof m.value_numeric === "number" ? m.value_numeric : null,
               valueText: str(m.value_text),
               unitSlug: str(m.unit_slug),
+              createdAt: str(m.created_at),
+              id: str(m.id),
             },
           ]
         : [],

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { withoutErasureRegistrySeed } from "./erasure-registry-seed";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * HANDOVER PASSPORT SHELL guards (product-tree branch 19, train §8.8).
@@ -84,7 +86,7 @@ describe("passport migration — one new append-only table + one new gated RPC o
     );
     expect(others.length).toBeGreaterThan(100);
     for (const f of others) {
-      const src = read(`supabase/migrations/${f}`);
+      const src = withoutErasureRegistrySeed(read(`supabase/migrations/${f}`));
       expect(src, `${f} must not define ${NEW_FUNCTION}`).not.toContain(NEW_FUNCTION);
       expect(src, `${f} must not define ${NEW_TABLE}`).not.toContain(NEW_TABLE);
     }
@@ -251,7 +253,7 @@ describe("app surface — passport shell reuses the EXISTING operations spine", 
 });
 
 describe("i18n — handoverPassport namespace present in en/lt/ru", () => {
-  for (const locale of ["en", "lt", "ru"]) {
+  for (const locale of activeLocales) {
     it(`${locale} carries the full handoverPassport catalogue`, () => {
       const messages = JSON.parse(readWeb(`messages/${locale}.json`));
       const ns = messages.handoverPassport;

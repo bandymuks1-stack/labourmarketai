@@ -12,6 +12,7 @@ import {
   readHistoryLookups,
 } from "./history-context-read";
 import type { HistoryContext, HistoryContextInput } from "./professional-history-context";
+import { readAllPages } from "./evidence-pagination";
 import {
   deriveEvidenceStanding,
   anyStandingDispute,
@@ -56,8 +57,8 @@ import {
  */
 
 const MISSING_OBJECT_CODES = new Set(["42P01", "42883", "PGRST202", "PGRST205"]);
-/** The same ceiling `work_hour_allocations` reads under. */
-const READ_LIMIT = 5000;
+/** The ceiling the paged read stops at (pages of 1000 — the server's own cap). */
+const READ_LIMIT = 20000;
 const MAX_LINKED_PEOPLE = 50;
 
 export interface WorkerEvidenceRecordRow {
@@ -83,6 +84,45 @@ export interface WorkerEvidencePeriodRow {
   readonly periodEnd: string;
   readonly hours: number;
   readonly provenance: PeriodProvenance;
+  /** `derived.hoursBasis` as stated (by the source or a correction); null =
+   *  not stated. Read by the one hours ledger (hours-ledger.ts). */
+  readonly hoursBasis: HoursBasisStatement | null;
+  readonly context: HistoryContext;
+}
+
+/** A stated basis of a period figure: `actual` (summed from timesheets) or
+ *  `estimated` (a rate, a reconstruction), with the method that produced it. */
+export type HoursBasisStatement = {
+  readonly value: string;
+  readonly method: string | null;
+  readonly note: string | null;
+};
+
+/** The ONE reading of `derived.hoursBasis` — a derived entry
+ *  `{ value, method, confidence, note }` as a correction writes it. Anything
+ *  else (absent, malformed, an unknown value) is NOT a stated basis. */
+export function hoursBasisFrom(derived: Record<string, unknown> | null | undefined): HoursBasisStatement | null {
+  const e = derived?.hoursBasis as { value?: unknown; method?: unknown; note?: unknown } | undefined;
+  if (!e || typeof e !== "object") return null;
+  if (e.value !== "actual" && e.value !== "estimated") return null;
+  return {
+    value: e.value,
+    method: typeof e.method === "string" ? e.method : null,
+    note: typeof e.note === "string" ? e.note : null,
+  };
+}
+
+/** A committed record whose DURATION IS NOT STATED (`hours` null): the work
+ *  happened and was recorded, its length is unknown. UNKNOWN is never zero
+ *  (SEP-7): it is history to show ("duration to be confirmed"), never an hour
+ *  in any sum. `workDate` for a day record; the span for a period record;
+ *  both null when the record carries no usable date. */
+export interface WorkerEvidencePendingRow {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly workDate: string | null;
+  readonly periodStart: string | null;
+  readonly periodEnd: string | null;
   readonly context: HistoryContext;
 }
 
@@ -93,6 +133,9 @@ export type WorkerEvidenceRead =
       readonly rows: readonly WorkerEvidenceRecordRow[];
       /** Period rows — beside the day ledger, added to nothing. */
       readonly periodRows: readonly WorkerEvidencePeriodRow[];
+      /** Records with no stated duration — shown, summed nowhere. Absent on
+       *  readers that predate it (treated as none). */
+      readonly pendingRows?: readonly WorkerEvidencePendingRow[];
     }
   | { readonly kind: "needs-migration" }
   | { readonly kind: "error" };
@@ -172,27 +215,53 @@ export async function readEvidenceRecordsForPeople(
   // Dated AND period records in ONE bounded read: a period row has no
   // activity_date, so the old "activity_date is not null" filter was
   // exactly what made imported history invisible on the person's timeline.
-  const res = await db(supabase)
-    .from("organization_evidence_records")
-    .select(
-      "id, organization_id, organization_person_id, activity_date, period_start, period_end, hours, evidence_state, derived, activity_kind, context_label, work_object_id, project_id, supplied_by_organization_id, supplier_role, source_kind, row_origin, imported_at, organization_people(relationship_kind, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
-    )
-    .in("organization_person_id", personIds)
-    .order("activity_date", { ascending: false, nullsFirst: false })
-    .limit(READ_LIMIT);
-  if (res.error) {
-    if (MISSING_OBJECT_CODES.has(res.error.code ?? "")) return { kind: "needs-migration" };
-    console.error("[evidence] worker records read failed:", res.error.code);
+  // PAGED to the end: the server answers at most 1000 rows per request, so
+  // the former `.limit(5000)` silently became 1000 — and every hour past it
+  // vanished from the ONE experience total (decision 0025). `id` breaks ties
+  // so no row is skipped or repeated across pages.
+  let failure: { code?: string } | null = null;
+  const paged = await readAllPages<Record<string, unknown>>(
+    (from, to) =>
+      db(supabase)
+        .from("organization_evidence_records")
+        .select(
+          "id, organization_id, organization_person_id, activity_date, period_start, period_end, hours, evidence_state, derived, activity_kind, context_label, work_object_id, project_id, supplied_by_organization_id, supplier_role, source_kind, row_origin, imported_at, source_sheet:source_fact->>source_sheet, organization_people(relationship_kind, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
+        )
+        .in("organization_person_id", personIds)
+        .order("activity_date", { ascending: false, nullsFirst: false })
+        .order("id", { ascending: true })
+        .range(from, to)
+        .then((r: { data: Record<string, unknown>[] | null; error: { code?: string } | null }) => {
+          if (r.error) failure = r.error;
+          return r;
+        }),
+    { ceiling: READ_LIMIT },
+  );
+  if (!paged) {
+    const code = (failure as { code?: string } | null)?.code ?? "";
+    if (MISSING_OBJECT_CODES.has(code)) return { kind: "needs-migration" };
+    console.error("[evidence] worker records read failed:", code);
     return { kind: "error" };
   }
+  // A read stopped at its ceiling is NOT the person's history: totals over
+  // part of it would be presented as complete. Unknown, never a smaller number.
+  if (paged.truncated) {
+    console.error("[evidence] worker records read reached its ceiling:", READ_LIMIT);
+    return { kind: "error" };
+  }
+  const res = { data: paged.rows };
 
   type Raw = Omit<HistoryContextInput, "workObjectName" | "projectName" | "organizationNames">;
   const rows: (Omit<WorkerEvidenceRecordRow, "context"> & { raw: Raw })[] = [];
   const periodRows: (Omit<WorkerEvidencePeriodRow, "context"> & { raw: Raw })[] = [];
+  const pendingRows: (Omit<WorkerEvidencePendingRow, "context"> & { raw: Raw })[] = [];
   const seen = new Set<string>();
   for (const r of (res.data ?? []) as Record<string, unknown>[]) {
     const hours = r.hours === null || r.hours === undefined ? null : Number(r.hours);
-    if (hours === null || !Number.isFinite(hours) || hours <= 0) continue;
+    // A STATED figure that is not a positive number carries no hour. An
+    // ABSENT figure (null) is different: the duration is unknown, the work is
+    // not — it travels on as a pending row below (SEP-7, never dropped).
+    if (hours !== null && (!Number.isFinite(hours) || hours <= 0)) continue;
     const events = ((r.organization_evidence_events as Record<string, unknown>[] | null) ?? []).map(
       (e): RecordLifecycleEvent => ({
         eventType: e.event_type as RecordLifecycleEvent["eventType"],
@@ -244,6 +313,9 @@ export async function readEvidenceRecordsForPeople(
       supplierOrganizationId: (r.supplied_by_organization_id as string | null) ?? null,
       sourceKind: (r.source_kind as string | null) ?? null,
       rowOrigin: (r.row_origin as string | null) ?? null,
+      // The entity-at-the-time label the source gave the row (its sheet name) —
+      // what places the record in a stated business period on read.
+      sourceLabel: (r.source_sheet as string | null) ?? null,
       reportedState: (r.evidence_state as string | null) ?? null,
       attestation: standing.attestation
         ? { role: standing.attestation.role, self: standing.attestation.self }
@@ -251,6 +323,19 @@ export async function readEvidenceRecordsForPeople(
       independentlyVerified: standing.independentlyVerified,
       contested: anyStandingDispute(events),
     };
+    if (hours === null) {
+      const day = (r.activity_date as string | null) ?? null;
+      const span = periodStart && periodEnd && ISO_DAY.test(periodStart) && ISO_DAY.test(periodEnd);
+      pendingRows.push({
+        id: r.id as string,
+        organizationId: r.organization_id as string,
+        workDate: day && ISO_DAY.test(day) ? day : null,
+        periodStart: span ? periodStart : null,
+        periodEnd: span ? periodEnd : null,
+        raw,
+      });
+      continue;
+    }
     if (periodStart && periodEnd && ISO_DAY.test(periodStart) && ISO_DAY.test(periodEnd)) {
       // A period aggregate: one figure over a span. Never a day.
       periodRows.push({
@@ -261,6 +346,7 @@ export async function readEvidenceRecordsForPeople(
         hours,
         // From the already-selected `derived.timeSemantics` — the ONE rule.
         provenance: periodProvenance({ activityDate: null, periodStart, factFields: [], derived }),
+        hoursBasis: hoursBasisFrom(derived),
         raw,
       });
       continue;
@@ -287,16 +373,20 @@ export async function readEvidenceRecordsForPeople(
   // caller's RLS. A failed or invisible lookup leaves the name absent; it
   // never fails the history read and never changes a row, an hour or a count.
   const lookups =
-    rows.length + periodRows.length === 0
+    rows.length + periodRows.length + pendingRows.length === 0
       ? EMPTY_HISTORY_LOOKUPS
       : await readHistoryLookups(
           supabase,
-          lookupIdsOf([...rows, ...periodRows].map((x) => x.raw)),
+          lookupIdsOf([...rows, ...periodRows, ...pendingRows].map((x) => x.raw)),
         );
   return {
     kind: "ok",
     rows: rows.map(({ raw, ...row }) => ({ ...row, context: contextWithLookups(raw, lookups) })),
     periodRows: periodRows.map(({ raw, ...row }) => ({
+      ...row,
+      context: contextWithLookups(raw, lookups),
+    })),
+    pendingRows: pendingRows.map(({ raw, ...row }) => ({
       ...row,
       context: contextWithLookups(raw, lookups),
     })),

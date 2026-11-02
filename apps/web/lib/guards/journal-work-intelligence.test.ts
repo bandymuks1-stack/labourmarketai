@@ -698,7 +698,9 @@ describe("12 · the second hour ledger is bridged, not merged (owner §19, re-au
   it("the organization's records reach the model through the ONE reader and the ONE allocation read — RLS-scoped, no admin client", () => {
     expect(allocations).toMatch(/export async function readAllocationsForWorker\(/);
     // worker-scoped, live rows only, bounded — no employer context, no org filter
-    expect(allocations).toMatch(/\.eq\("worker_id", workerId\)\s*\.is\("superseded_by", null\)\s*\.order\("work_date", \{ ascending: false \}\)\s*\.limit\(ALLOCATION_READ_LIMIT\)/);
+    expect(allocations).toMatch(/\.eq\("worker_id", workerId\)\s*\.is\("superseded_by", null\)\s*\.order\("work_date", \{ ascending: false \}\)\s*\.order\("id", \{ ascending: false \}\),\s*\{ pageSize: 1000, maxPages: WORKER_LEDGER_MAX_PAGES \}/);
+    // paged to the end; a ledger past the ceiling is UNKNOWN, never a lower total
+    expect(allocations).toMatch(/if \(res\.truncated\) \{[\s\S]*?return \{ kind: "error" \};/);
     expect(allocations).not.toMatch(/service_role|createAdminClient|createServiceClient/);
     expect(reader).toContain('import { readAllocationsForWorker } from "@/lib/work-hours/allocations";');
     expect(reader).toMatch(/export async function readOrganizationRecords\(/);
@@ -1184,8 +1186,12 @@ describe("14 · ONE time scope (issue #1689, lane B): bounded reads say so, diar
     for (const [name, src] of Object.entries({ planning, timesheets })) {
       expect(src, `${name} re-implements the chain`).not.toMatch(/rows\.map\(\(r\) => r\.correction_of\)\.filter\(/);
     }
-    // the bounded workload read is deterministic: ordered before limited
-    expect(timesheets).toMatch(/\.order\("created_at", \{ ascending: false \}\)\s*\.order\("id", \{ ascending: false \}\)\s*\.limit\(WORKLOAD_READ_LIMIT\)/);
+    // the workload read is deterministic AND complete (2026-10-20): ordered,
+    // paged to the end with its metrics embedded, UNAVAILABLE past the ceiling
+    expect(timesheets).toMatch(/\.order\("created_at", \{ ascending: false \}\)\s*\.order\("id", \{ ascending: false \}\),\s*\{ pageSize: 1000, maxPages: WORKLOAD_MAX_PAGES \}/);
+    expect(timesheets).toMatch(/journal_entry_metrics\(id, metric_slug, value_text, value_numeric, unit_slug, source, created_at\)/);
+    expect(timesheets).toMatch(/if \(entriesRes\.error \|\| entriesRes\.truncated\) return \{ status: "unavailable" \};/);
+    expect(timesheets).not.toMatch(/WORKLOAD_METRIC_READ_LIMIT/);
   });
 
   it("the intake's saved-record day check adds the SAME organization ledger the section's checks add, through the one helper", () => {

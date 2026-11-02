@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ContactDisclosureRequests } from "@/components/app/contact-disclosure-requests";
@@ -7,6 +8,7 @@ import { PartnerSupplyRepresentation } from "@/components/app/partner-supply-rep
 import { Card } from "@/components/ui/Card";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { PrivacyDeletionRequest } from "@/components/app/privacy-deletion-request";
+import { PrivacyDeletionConfirm } from "@/components/app/privacy-deletion-confirm";
 import { listMyPrivacyRequests } from "@/lib/privacy/actions";
 import { listMyContactDisclosureRequests } from "@/lib/privacy/contact-disclosure-actions";
 import {
@@ -29,6 +31,11 @@ import {
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/privacy", "privacySelfService.title");
+
 
 /** Never show a worker a raw database code. Turns `chat_message` /
  *  `contact_email` into "Chat message" / "Contact email" as a safe fallback
@@ -94,6 +101,13 @@ export default async function PrivacyPage({
   const partnerLegal = PARTNER_SUPPLY_REPRESENTATION_V1.texts[consentLocale];
 
   const previewFields = discoverabilityPreviewFields(preview, tc);
+
+  // An open account-deletion request turns the form into its confirmation step.
+  const openDeletion = myRequests.find(
+    (r) =>
+      r.type === "account_deletion" &&
+      ["submitted", "in_review", "needs_followup", "approved"].includes(r.status),
+  );
 
   // SEP-7: a history that could not be read is NOT an empty history. Both
   // sections below say "could not be read" instead of "nothing yet".
@@ -468,7 +482,7 @@ export default async function PrivacyPage({
         </p>
       </section>
 
-      <section className="card-border p-5" data-testid="privacy-deletion">
+      <section id="privacy-deletion" className="card-border scroll-mt-24 p-5" data-testid="privacy-deletion">
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("deletion.title")}
         </p>
@@ -476,18 +490,37 @@ export default async function PrivacyPage({
           {t("deletion.body")}
         </p>
         <div className="mt-3">
-          <PrivacyDeletionRequest
-            labels={{
-              confirmLabel: t("deletion.confirmLabel"),
-              noteLabel: t("deletion.noteLabel"),
-              submit: t("deletion.submit"),
-              submitted: t("deletion.submitted"),
-              submittedBody: t("deletion.submittedBody"),
-              unavailable: t("deletion.unavailable"),
-              tooManyOpen: t("deletion.tooManyOpen"),
-              error: t("deletion.error"),
-            }}
-          />
+          {openDeletion?.status === "needs_followup" ? (
+            <p className="text-sm text-text-secondary" data-testid="privacy-deletion-in-review">
+              {t("deletion.inReview")}
+            </p>
+          ) : openDeletion ? (
+            <PrivacyDeletionConfirm
+              locale={locale}
+              labels={{
+                body: t("deletion.confirmStepBody"),
+                confirm: t("deletion.confirmStep"),
+                reauthBody: t("deletion.reauthBody"),
+                reauth: t("deletion.reauth"),
+                confirmed: t("deletion.confirmedTitle"),
+                confirmedBody: t("deletion.confirmedBody"),
+                error: t("deletion.error"),
+              }}
+            />
+          ) : (
+            <PrivacyDeletionRequest
+              labels={{
+                confirmLabel: t("deletion.confirmLabel"),
+                noteLabel: t("deletion.noteLabel"),
+                submit: t("deletion.submit"),
+                submitted: t("deletion.submitted"),
+                submittedBody: t("deletion.submittedBody"),
+                unavailable: t("deletion.unavailable"),
+                tooManyOpen: t("deletion.tooManyOpen"),
+                error: t("deletion.error"),
+              }}
+            />
+          )}
         </div>
       </section>
 
@@ -525,12 +558,7 @@ export default async function PrivacyPage({
         </section>
       )}
 
-      <Link
-        href="/dashboard/account"
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue"
-      >
-        ← {t("backToAccount")}
-      </Link>
+      <PageBack href="/dashboard/account">{t("backToAccount")}</PageBack>
     </div>
   );
 }

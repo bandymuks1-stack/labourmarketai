@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
+
 import { activeLocales, defaultLocale, type ActiveLocale } from "@/lib/i18n/config";
+import { reportClientError } from "@/lib/telemetry/report-client-error";
 
 /**
  * Root global error boundary (RC6, F6). Catches errors thrown ABOVE the
@@ -72,6 +75,8 @@ export default function GlobalError({
   reset: () => void;
 }) {
   console.error("[global-error-boundary]", error);
+  // One sanitised crash report; never throws (2026-10-18 incident).
+  useEffect(() => reportClientError("global", error), [error]);
   // Read at render time so the common case — a purely client-side crash, where
   // this shell never touches the server — is correct on first paint. On the
   // SSR path the server has no pathname, so the markup is the unchanged LT/EN

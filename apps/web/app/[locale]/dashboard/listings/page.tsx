@@ -9,7 +9,16 @@ import {
   discoverMarketplaceListings,
 } from "@/lib/marketplace/listings";
 import { MarketplaceListingsSection } from "@/components/app/marketplace-listings-section";
+import {
+  getActiveOrganizationContext,
+  governedActiveOrganizationId,
+} from "@/lib/company/active-organization";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/listings");
+
 
 export const dynamic = "force-dynamic";
 
@@ -42,12 +51,23 @@ export default async function ListingsPage({
   if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/listings`);
 
   const t = await getTranslations("marketplaceListings");
-  const [mine, discovery] = await Promise.all([
+  const [mine, discovery, orgCtx] = await Promise.all([
     listMyMarketplaceListings(),
     discoverMarketplaceListings(),
+    getActiveOrganizationContext(),
   ]);
+  // A company sells, rents out or looks for things as ITSELF: when the active
+  // workspace (the chip) is an organization the person governs, the form
+  // offers it as the publisher. The RPC re-checks `manages_organization`.
+  const governedId = governedActiveOrganizationId(orgCtx);
+  const publisher =
+    governedId && orgCtx.activeOrganization
+      ? { id: governedId, name: orgCtx.activeOrganization.name }
+      : null;
   const needsMigration =
     mine.kind === "needs-migration" || discovery.kind === "needs-migration";
+  // A failed read is named as such — never rendered as an empty board.
+  const readUnavailable = mine.kind === "unavailable" || discovery.kind === "unavailable";
   const extended =
     mine.kind === "ok" && discovery.kind === "ok" && mine.extended && discovery.extended;
   const myRows = mine.kind === "ok" ? mine.rows : [];
@@ -65,8 +85,10 @@ export default async function ListingsPage({
         myRows={myRows}
         discoveryRows={discoveryRows}
         needsMigration={needsMigration}
+        readUnavailable={readUnavailable}
         extended={extended}
         unavailable={unavailable}
+        publisher={publisher}
         locale={locale}
       />
 

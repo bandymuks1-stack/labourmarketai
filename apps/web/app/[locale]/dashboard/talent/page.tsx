@@ -1,10 +1,16 @@
 import { redirect } from "next/navigation";
+import { PageTitle } from "@/components/app/premium/page-title";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { JobDemandCard, type JobDemandCardEntity } from "@/components/visual/job-demand-card";
 import { WorkerCard, type WorkerCardEntity } from "@/components/visual/worker-card";
 import { createClient } from "@/lib/supabase/server";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/talent", "auth.dashboard.tabs.discover");
+
 
 /**
  * Talent surface preview — Sprint P0 of the Visual Information
@@ -126,9 +132,9 @@ export default async function TalentPage({
   return (
     <div className="flex flex-col gap-6" data-testid="talent-preview-page">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+        <PageTitle>
           {t("tabs.discover")} · {tp("previewSuffix")}
-        </h1>
+        </PageTitle>
         <p className="text-sm text-text-secondary">{tp("intro")}</p>
         <div
           className="card-border inline-flex w-fit items-center gap-2 px-3 py-1 text-xs"

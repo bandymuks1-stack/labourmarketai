@@ -1,4 +1,5 @@
 import "server-only";
+import { readKeysetPagesDesc } from "@/lib/admin/keyset-pages";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -271,24 +272,25 @@ export async function getTimeToFirstValueByActor(
   const names = [
     ...new Set([...TTFV_START_EVENTS, ...TTFV_ACTOR_EVENTS, ...TTFV_ACTION_EVENTS, ...TTFV_RESULT_EVENTS]),
   ];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const fromAny = (supabase as any).from.bind(supabase) as (name: string) => {
-    select: (cols: string) => {
-      in: (col: string, vals: readonly string[]) => {
-        not: (col: string, op: string, value: null) => {
-          order: (col: string, opts: { ascending: boolean }) => {
-            limit: (n: number) => Promise<{ data: TtfvRow[] | null; error: { message?: string } | null }>;
-          };
-        };
-      };
-    };
-  };
-  const { data, error } = await fromAny("pilot_events")
-    .select("event_name, profile_id, created_at, metadata")
-    .in("event_name", names)
-    .not("profile_id", "is", null)
-    .order("created_at", { ascending: false })
-    .limit(WINDOW_ROWS);
+  // PAGED (pages of 1000, the server's own cap): a single .limit() above
+  // 1000 silently returned 1000 rows — a busy window was read short and the
+  // truncation check (rows >= cap) never fired. KEYSET pages (created_at, id)
+  // under an upper bound fixed before the first page: inserts, erasures and
+  // late commits between requests cannot shift a row across pages.
+  const snapshotAt = new Date().toISOString();
+  const paged = await readKeysetPagesDesc<TtfvRow & { id: string }>(
+    () =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase as any)
+        .from("pilot_events")
+        .select("id, event_name, profile_id, created_at, metadata")
+        .in("event_name", names)
+        .not("profile_id", "is", null)
+        .lte("created_at", snapshotAt),
+    { maxRows: WINDOW_ROWS },
+  );
+  const error = paged.error as { message?: string } | null;
+  const data = error ? null : paged.rows;
   if (error) return { available: false, byActor: [], usersWithStart: 0, excludedPreview: 0 };
   return summariseTtfv((data ?? []) as TtfvRow[]);
 }

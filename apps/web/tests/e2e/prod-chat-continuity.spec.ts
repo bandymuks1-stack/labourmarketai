@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type Page } from "@playwright/test";
+import { test, expect, type Browser, type Page } from "./prod-walk";
 
 /**
  * PRODUCTION CHAT CONTINUITY — owner programme 2026-10-12 §4: a person must
@@ -48,7 +48,14 @@ async function useWorkspace(page: Page, orgName: string): Promise<void> {
   if ((await chip.innerText()).includes(orgName)) return;
   await chip.getByRole("button").first().click();
   await page.getByTestId("workspace-chip-menu").locator('[data-testid^="workspace-option-"]', { hasText: orgName }).first().click();
-  await expect(chip).toContainText(orgName, { timeout: 30_000 });
+  try {
+    await expect(chip).toContainText(orgName, { timeout: 30_000 });
+  } catch (cause) {
+    // Name which of the two failures it was: the server refused the switch
+    // (the menu shows the refusal) or it accepted and the page kept the old one.
+    const refused = await page.getByTestId("workspace-switch-failed").isVisible().catch(() => false);
+    throw new Error(`workspace switch to "${orgName}" did not land: ${refused ? "server refused it" : "no refusal shown, page kept the previous workspace"}`, { cause });
+  }
   await page.goto("/lt/dashboard");
   await expect(page.getByTestId("composer-input")).toBeVisible({ timeout: 30_000 });
 }

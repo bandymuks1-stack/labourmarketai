@@ -69,7 +69,10 @@ describe("the employer brief counts the company's unread, not the person's whole
   it("uses the organization-scoped unread read", () => {
     const brief = readFileSync(join(WEB, "lib", "conversation", "opening-brief.ts"), "utf8");
     const employer = brief.slice(brief.indexOf("export async function loadEmployerOpeningBrief"));
-    expect(employer).toMatch(/getUnreadConversationIdsForOrganization\(ctx\.companyId\)/);
+    // The ORGANIZATION id: every filter in organization-scope.ts is organization_id
+    // (2026-10-20: the companies.id passed before matched nothing — the count was always 0).
+    expect(employer).toMatch(/getUnreadConversationIdsForOrganization\(ctx\.organizationId\)/);
+    expect(employer).not.toMatch(/getUnreadConversationIdsForOrganization\(ctx\.companyId\)/);
     expect(employer).not.toMatch(/getUnreadConversationCount\(\)/);
   });
 });

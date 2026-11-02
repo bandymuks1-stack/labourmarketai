@@ -72,13 +72,16 @@ describe("W3 rows 19/14 — return to workspace + the advanced-door ratchet", ()
     expect(src).not.toContain(`"/dashboard/advanced"`);
   });
 
-  it("the canonical return primitive exists: the layout nav's home entry", () => {
-    // bottom-nav is the mobile return; dashboard-chrome is the desktop one.
-    // Both live in the LAYOUT chain, not on any single route.
-    const bottomNav = readFileSync(
-      join(ROOT, "components", "app", "bottom-nav.tsx"),
+  it("the canonical return primitive exists: the one header's home entry", () => {
+    // The one header (rendered by every chrome mode, so it lives in the LAYOUT
+    // chain, not on any single route) carries the back-home link and the logo
+    // home link at every width. The phone bottom bar that used to be the
+    // mobile return retired 2026-10-25.
+    const header = readFileSync(
+      join(ROOT, "components", "app", "conversation", "chat", "conversation-header.tsx"),
       "utf8",
     );
-    expect(bottomNav).toMatch(/"\/dashboard"/);
+    expect(header).toMatch(/href="\/dashboard"\s+aria-label=\{nav\.chat\}\s+data-testid="back-to-chat"/);
+    expect(header).toMatch(/href="\/dashboard"\s+data-testid="shell-logo-home"/);
   });
 });

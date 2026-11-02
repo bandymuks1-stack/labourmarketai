@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { computeNewCounts } from "@/lib/marketplace/service-requests-shared";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * "New updates since last seen" tracking (Option C′).
@@ -156,7 +157,7 @@ describe("server helpers are rollout-safe + visit marks seen", () => {
 // the pure logic, RPC boundary and visit-marks-seen wiring stay pinned above.
 
 describe("new-badge copy present across active locales", () => {
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: marketplace.newBadge present + non-empty`, () => {
       const m = (JSON.parse(read(`messages/${loc}.json`)) as { marketplace?: Record<string, unknown> }).marketplace ?? {};
       expect(typeof m.newBadge, `${loc}.newBadge`).toBe("string");

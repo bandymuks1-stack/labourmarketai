@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Market Map owner signal depth v1 guard.
@@ -18,7 +19,7 @@ const CAPTURE = read("components/app/market-map-capture.tsx");
 const HELPER = read("lib/market-map/capture.ts");
 const ACTIONS = read("lib/market-map/capture-actions.ts");
 const SIGNALS = read("lib/market-map/signals.ts");
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 const cap = (loc: string) => JSON.parse(read(`messages/${loc}.json`)).marketMap.capture;
 
 function stripComments(src: string): string {

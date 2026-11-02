@@ -117,13 +117,19 @@ export function localizedUrl(locale: ActiveLocale, path: string = ""): string {
   return `${MARKETING_ORIGIN}/${locale}${normalizePath(path)}`;
 }
 
-/** hreflang alternates map for a path across all active locales + x-default. */
+/** hreflang alternates map for a path across all active locales + x-default.
+ *
+ *  `x-default` is ENGLISH (audit 2026-10-16, U-2): it is the page a search
+ *  engine serves to a searcher whose language matches none of the routed
+ *  locales. It was the Lithuanian default, on every public page and on all
+ *  ~39k job URLs — so a Swedish, Finnish or French searcher was sent to a
+ *  Lithuanian page. The product's own default locale is unchanged. */
 export function hreflangAlternates(path: string = ""): Record<string, string> {
   const languages: Record<string, string> = {};
   for (const locale of activeLocales) {
     languages[locale] = localizedUrl(locale, path);
   }
-  languages["x-default"] = localizedUrl(defaultLocale, path);
+  languages["x-default"] = localizedUrl("en", path);
   return languages;
 }
 

@@ -66,14 +66,14 @@ human-confirmed write path (platform doctrine §7).
 |---|---|---|
 | `worker_profile` | `extract_cv` | free-text bio/CV → structured profile draft |
 | `work_journal` | `normalize_work_scope` | journal free-text → structured work scope |
-| `skill_evidence` | `normalize_external_profile` | evidence text → normalized capability claims |
+| ~~`skill_evidence`~~ | ~~`normalize_external_profile`~~ | RETIRED 2026-10-25 (row 10.11) — see docs/ai/INTERNAL_LLM_AGENTS_V1.md §4.1 |
 | `company_need` | `structure_future_work` | company's future work → structured need |
-| `country_readiness` | `derive_workforce_requirements` | what working in a country requires |
-| `document_assistant` | `derive_workforce_requirements` | documents needed = requirement derivation |
+| `country_readiness` | `derive_workforce_requirements` | v2 2026-10-25: a cited plain-language reading of the sourced country matrix |
+| ~~`document_assistant`~~ | ~~`derive_workforce_requirements`~~ | RETIRED 2026-10-25 (row 10.11) — documents-gap answers it |
 | `matching_explanation` | `explain_match` | canonical fit → explanation |
-| `booking_risk` | `explain_match` | risk narrative = explanation over canonical signals |
-| `admin_risk` | `explain_match` | same explanation-class task, admin audience |
-| `support_onboarding` | `draft_follow_up` | guidance / next-step message drafts |
+| ~~`booking_risk`~~ | ~~`explain_match`~~ | RETIRED 2026-10-25 (row 10.11) — booking-conflict RPC + roster-conflicts |
+| ~~`admin_risk`~~ | ~~`explain_match`~~ | RETIRED 2026-10-25 (row 10.11) — admin readiness overview |
+| ~~`support_onboarding`~~ | ~~`draft_follow_up`~~ | RETIRED 2026-10-25 (row 10.11) — canonical next-action resolver |
 | `translation_copy` | `translate_message` | translation |
 
 `detect_capacity_gap` and `detect_skill_gap` have **no agent** on purpose:

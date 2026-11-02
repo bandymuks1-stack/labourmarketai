@@ -11,6 +11,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 const webRoot = resolve(__dirname, "..", "..");
 function msg(locale: string): {
@@ -55,7 +56,7 @@ describe("public trust positioning — approved general-platform framing", () =>
 });
 
 describe("public copy avoids forbidden positioning", () => {
-  it.each(["en", "lt", "ru"])("%s hero + footer carry no forbidden framing", (l) => {
+  it.each([...activeLocales])("%s hero + footer carry no forbidden framing", (l) => {
     const m = msg(l);
     const text = [
       m.hero.chip, m.hero.headline, m.hero.headlineAccent, m.hero.subcopy,
@@ -68,7 +69,7 @@ describe("public copy avoids forbidden positioning", () => {
 });
 
 describe("footer attribution + rights", () => {
-  it.each(["en", "lt", "ru"])("%s footer has Rexora attribution and reserved rights", (l) => {
+  it.each([...activeLocales])("%s footer has Rexora attribution and reserved rights", (l) => {
     const f = msg(l).footer;
     expect(f.rexora, `${l} footer.rexora`).toMatch(/Rexora/);
     expect(typeof f.rights === "string" && f.rights.length > 0, `${l} footer.rights`).toBe(true);

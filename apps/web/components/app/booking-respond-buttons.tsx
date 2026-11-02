@@ -57,6 +57,10 @@ export function BookingRespondButtons({
         acknowledgedClashes?: number;
       }
     | { kind: "conflict" }
+    /** The person acknowledged the clash and the database still could not
+     *  record the overlapping accept. Terminal for accepting: the
+     *  acknowledgement button is NOT shown again, so it cannot loop. */
+    | { kind: "overlap-not-recordable" }
     | { kind: "unavailable" }
     | { kind: "error" }
   >({ kind: "idle" });
@@ -101,12 +105,77 @@ export function BookingRespondButtons({
         // a separate, explicit action rendered below, never an auto-retry.
         setState({ kind: "conflict" });
         router.refresh();
+      } else if (res.kind === "overlap-not-recordable") {
+        // The acknowledgement was given and still could not be recorded
+        // (production 2026-10-25). NOT the conflict state again — that
+        // re-offered the same button, which then did visibly nothing. What is
+        // left is to decline, or to leave the offer open for the company to
+        // change its dates; the booking itself is still `proposed`.
+        setDeclineOpen(false);
+        setState({ kind: "overlap-not-recordable" });
       } else if (res.kind === "needs-migration") {
         setState({ kind: "unavailable" });
       } else {
         setState({ kind: "error" });
       }
     });
+  }
+
+  /** The ONE decline step — the reason select, the note, the confirm — shared
+   *  by the ordinary row and the overlap answer, so there is no second
+   *  decline wording or path. */
+  function declineForm() {
+    return (
+      <div
+        className="flex w-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
+        data-testid="booking-decline-form"
+      >
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
+          {t("reason.optionalTitle")}
+          <select
+            value={reasonKind}
+            onChange={(e) => setReasonKind(e.target.value)}
+            data-testid="booking-decline-reason"
+            className="min-h-11 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+          >
+            <option value="">{t("reason.none")}</option>
+            {DECLINE_REASON_KINDS.map((kind) => (
+              <option key={kind} value={kind}>
+                {t(`reason.decline.${kind}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
+          {t("reason.noteLabel")}
+          <input
+            type="text"
+            maxLength={REASON_NOTE_MAX}
+            value={reasonNote}
+            onChange={(e) => setReasonNote(e.target.value)}
+            className="min-h-11 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+          />
+        </label>
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => respond("declined")}
+            data-testid="booking-decline-confirm"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+          >
+            {t("reason.confirmDecline")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setDeclineOpen(false)}
+            className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
+          >
+            {t("reason.cancel")}
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (state.kind === "done") {
@@ -135,6 +204,37 @@ export function BookingRespondButtons({
             {t("reason.notStored")}
           </span>
         ) : null}
+      </div>
+    );
+  }
+
+  if (state.kind === "overlap-not-recordable") {
+    // The person said "I know it overlaps" and the database still could not
+    // record it. One calm sentence says so and names what is left. There is
+    // deliberately NO accept and NO accept-anyway control here: repeating
+    // either can only fail the same way, which is what made the button loop.
+    return (
+      <div className="flex flex-col gap-1.5" data-testid="booking-overlap-not-recordable-decision">
+        <span
+          className="text-meta text-state-warning"
+          role="status"
+          data-testid="booking-overlap-not-recordable"
+        >
+          {t("clash.notRecordable")}
+        </span>
+        {declineOpen ? (
+          declineForm()
+        ) : (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => setDeclineOpen(true)}
+            data-testid="booking-overlap-decline-open"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+          >
+            {labels.decline}
+          </button>
+        )}
       </div>
     );
   }
@@ -235,57 +335,7 @@ export function BookingRespondButtons({
           </div>
         </div>
       ) : null}
-      {declineOpen ? (
-        <div
-          className="flex w-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
-          data-testid="booking-decline-form"
-        >
-          <label className="flex flex-col gap-1 text-meta text-text-muted">
-            {t("reason.optionalTitle")}
-            <select
-              value={reasonKind}
-              onChange={(e) => setReasonKind(e.target.value)}
-              data-testid="booking-decline-reason"
-              className="min-h-11 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
-            >
-              <option value="">{t("reason.none")}</option>
-              {DECLINE_REASON_KINDS.map((kind) => (
-                <option key={kind} value={kind}>
-                  {t(`reason.decline.${kind}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1 text-meta text-text-muted">
-            {t("reason.noteLabel")}
-            <input
-              type="text"
-              maxLength={REASON_NOTE_MAX}
-              value={reasonNote}
-              onChange={(e) => setReasonNote(e.target.value)}
-              className="min-h-11 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
-            />
-          </label>
-          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => respond("declined")}
-              data-testid="booking-decline-confirm"
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
-            >
-              {t("reason.confirmDecline")}
-            </button>
-            <button
-              type="button"
-              onClick={() => setDeclineOpen(false)}
-              className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
-            >
-              {t("reason.cancel")}
-            </button>
-          </div>
-        </div>
-      ) : null}
+      {declineOpen ? declineForm() : null}
       {state.kind === "unavailable" ? (
         <span className="text-meta text-text-muted">{labels.unavailable}</span>
       ) : state.kind === "error" ? (

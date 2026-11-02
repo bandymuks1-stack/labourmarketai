@@ -5,21 +5,25 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   Plus,
-  Pencil,
-  Trash2,
-  Play,
-  Pause,
-  Archive,
-  RotateCcw,
   MessageSquare,
   ArrowRight,
 } from "lucide-react";
 
+import { StatusChip } from "@/components/app/status-chip";
+import {
+  MarketEntryActions,
+  MarketEntryChip,
+  MarketEntryVisibility,
+} from "@/components/app/market-entry-lifecycle";
+import { listingAdapter } from "@/lib/market-lifecycle/adapters";
+import type { EntryAction } from "@/lib/market-lifecycle/contract";
 import { Link } from "@/lib/i18n/navigation";
+import { getCountryMeta } from "@/lib/location/country-model";
 import {
   createMarketplaceListingAction,
   updateMarketplaceListingAction,
   setMarketplaceListingStatusAction,
+  applyMarketplaceListingAction,
   deleteMarketplaceListingAction,
   enquireAboutListingAction,
 } from "@/lib/marketplace/listings";
@@ -57,11 +61,14 @@ import { assessPublish } from "@/lib/marketplace/publish-policy";
  * messaging).
  */
 
-const STATUS_RING: Record<ListingStatus, string> = {
-  draft: "border-ink-500 bg-ink-800/40 text-text-muted",
-  active: "border-state-success/40 bg-state-success/5 text-state-success",
-  paused: "border-ink-500 bg-ink-800/40 text-text-secondary",
-  closed: "border-state-warning/40 bg-state-warning/5 text-state-warning",
+/** Test ids the walk specs already use, one per contract action. */
+const LISTING_TEST_ID: Record<EntryAction, (id: string) => string> = {
+  publish: (id) => `listing-activate-${id}`,
+  resume: (id) => `listing-activate-${id}`,
+  pause: (id) => `listing-pause-${id}`,
+  complete: (id) => `listing-close-${id}`,
+  withdraw: (id) => `listing-withdraw-${id}`,
+  edit: (id) => `listing-edit-${id}`,
 };
 
 type Draft = {
@@ -80,6 +87,8 @@ type Draft = {
   quantity: string;
   unit: string;
   expiresOn: string;
+  /** Publish as the governed active organization (create only; see `publisher`). */
+  asOrganization: boolean;
 };
 
 const EMPTY_DRAFT: Draft = {
@@ -100,6 +109,7 @@ const EMPTY_DRAFT: Draft = {
   quantity: "",
   unit: "",
   expiresOn: "",
+  asOrganization: true,
 };
 
 function toNumber(v: string): number | null {
@@ -128,22 +138,31 @@ export function MarketplaceListingsSection({
   myRows,
   discoveryRows,
   needsMigration,
+  readUnavailable = false,
   extended,
   unavailable = [],
+  publisher = null,
   locale,
 }: {
   myRows: MarketplaceListingRow[];
   discoveryRows: MarketplaceDiscoveryRow[];
   needsMigration: boolean;
+  /** The platform's own listings read failed (audit 2026-10-16, M-2). */
+  readUnavailable?: boolean;
   /** The universal-marketplace migration is applied. */
   extended: boolean;
   /** Federated sources that could not be read (never rendered as empty). */
   unavailable?: readonly ("vacancies" | "workforce" | "demand")[];
+  /** The organization the person governs in the active workspace — offered as
+   *  the publisher of a NEW listing (owner or manager only; the RPC re-checks). */
+  publisher?: { id: string; name: string } | null;
   locale: string;
 }) {
   const t = useTranslations("marketplaceListings");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  // The ONE lifecycle contract's view of a listing (lib/market-lifecycle).
+  const adapter = listingAdapter({ pauseSupported: extended, closedOutcomeStored: false });
   const [mode, setMode] = useState<
     { kind: "idle" } | { kind: "create" } | { kind: "edit"; id: string }
   >({ kind: "idle" });
@@ -165,7 +184,6 @@ export function MarketplaceListingsSection({
   const focusCls = (id: string) => (focusId === id ? " ring-2 ring-brand-blue" : "");
   // Two-step delete (G-12b): the trash icon only ARMS the row; the permanent
   // delete needs the explicit second press.
-  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const inputCls =
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
@@ -204,6 +222,7 @@ export function MarketplaceListingsSection({
       quantity: row.quantity != null ? String(row.quantity) : "",
       unit: row.unit ?? "",
       expiresOn: row.expiresAt ? row.expiresAt.slice(0, 10) : "",
+      asOrganization: row.organizationId !== null,
     });
     setMode({ kind: "edit", id: row.id });
   }
@@ -268,6 +287,10 @@ export function MarketplaceListingsSection({
           extended && draft.expiresOn
             ? new Date(`${draft.expiresOn}T23:59:59`).toISOString()
             : null,
+        // The publisher is chosen once, at creation; an edit never moves a
+        // listing between a person and an organization.
+        organizationId:
+          mode.kind === "create" && publisher && draft.asOrganization ? publisher.id : null,
       };
       const res =
         mode.kind === "edit"
@@ -276,6 +299,27 @@ export function MarketplaceListingsSection({
       if (res.kind === "ok") {
         close();
         router.refresh();
+      } else {
+        setError(errorFor(res));
+      }
+    });
+  }
+
+  /** A lifecycle contract action from the row (`MarketEntryActions`). */
+  function runAction(row: MarketplaceListingRow, action: EntryAction) {
+    if (action === "edit") {
+      openEdit(row);
+      return;
+    }
+    startTransition(async () => {
+      const res = await applyMarketplaceListingAction(row.id, action, row.status);
+      if (res.kind === "ok") {
+        setAckFor(null);
+        setLegalAck(false);
+        router.refresh();
+      } else if (res.kind === "legal-check-required") {
+        setError(null);
+        setAckFor(row.id);
       } else {
         setError(errorFor(res));
       }
@@ -299,7 +343,6 @@ export function MarketplaceListingsSection({
   }
 
   function remove(id: string) {
-    setConfirmingId(null);
     startTransition(async () => {
       const res = await deleteMarketplaceListingAction(id);
       if (res.kind === "ok") router.refresh();
@@ -307,13 +350,16 @@ export function MarketplaceListingsSection({
     });
   }
 
-  if (needsMigration) {
+  if (needsMigration || readUnavailable) {
     return (
       <section className="card-border p-4">
         <h2 className="font-display text-lg font-semibold text-text-primary">{t("title")}</h2>
         <p className="mt-2 text-sm text-text-secondary">{t("intro")}</p>
-        <p className="mt-3 rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted">
-          {t("notAvailable")}
+        <p
+          className="mt-3 rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted"
+          data-testid={readUnavailable ? "listings-read-unavailable" : undefined}
+        >
+          {readUnavailable ? t("readUnavailable") : t("notAvailable")}
         </p>
       </section>
     );
@@ -666,6 +712,20 @@ export function MarketplaceListingsSection({
             {draft.domain === "service_need" && (
               <p className="text-xs text-text-muted">{t("serviceNeedHint")}</p>
             )}
+            {mode.kind === "create" && publisher && (
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-text-secondary">{t("formPublisherLabel")}</span>
+                <select
+                  className={inputCls}
+                  value={draft.asOrganization ? "organization" : "self"}
+                  data-testid="listing-form-publisher"
+                  onChange={(e) => setDraft({ ...draft, asOrganization: e.target.value === "organization" })}
+                >
+                  <option value="organization">{publisher.name}</option>
+                  <option value="self">{t("publisherSelf")}</option>
+                </select>
+              </label>
+            )}
             <label className="flex flex-col gap-1 text-sm">
               <span className="text-text-secondary">{t("formTitleLabel")}</span>
               <input
@@ -698,7 +758,16 @@ export function MarketplaceListingsSection({
                   data-testid="listing-form-country"
                   maxLength={2}
                   placeholder={t("formCountryPlaceholder")}
-                  onChange={(e) => setDraft({ ...draft, locationCountry: e.target.value.toUpperCase() })}
+                  onChange={(e) => {
+                    const code = e.target.value.toUpperCase();
+                    // The price currency follows the country while the person
+                    // has not chosen one themselves (audit 2026-10-16, M-4):
+                    // a Norwegian seller no longer publishes an EUR price by
+                    // inertia. A deliberate choice is never overwritten.
+                    const inherited = draft.currency === "" || draft.currency === EMPTY_DRAFT.currency;
+                    const next = inherited ? (getCountryMeta(code)?.currency ?? EMPTY_DRAFT.currency) : draft.currency;
+                    setDraft({ ...draft, locationCountry: code, currency: next });
+                  }}
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm">
@@ -834,12 +903,24 @@ export function MarketplaceListingsSection({
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium text-text-primary">{row.title}</span>
-                      <span className={`rounded-full border px-2 py-0.5 text-meta ${STATUS_RING[row.status]}`}>
-                        {t(`status.${row.status}`)}
-                      </span>
+                      <MarketEntryChip
+                        facts={adapter.facts(row)}
+                        visibility={{ expired: isExpired(row.expiresAt) }}
+                        testId={`listing-status-${row.id}`}
+                      />
                       {isExpired(row.expiresAt) && (
-                        <span className="rounded-full border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 text-meta text-state-warning">
+                        <StatusChip variant="attention" className="px-2 py-0.5 text-meta">
                           {t("expired")}
+                        </StatusChip>
+                      )}
+                      {row.organizationId && (
+                        <span
+                          data-testid="my-listing-publisher"
+                          className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                        >
+                          {row.organizationId === publisher?.id
+                            ? t("publishedAs", { name: publisher.name })
+                            : t("publishedAsOrganization")}
                         </span>
                       )}
                     </div>
@@ -855,104 +936,30 @@ export function MarketplaceListingsSection({
                       {row.quantity != null ? ` · ${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : ""}
                       {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt) })}` : ""}
                     </p>
+                    {/* Whether OTHERS can find it right now, in words — the
+                        ONE lifecycle contract's line, the same on every row. */}
+                    <div className="mt-1">
+                      <MarketEntryVisibility
+                        facts={adapter.facts(row)}
+                        visibility={{ expired: isExpired(row.expiresAt) }}
+                        testId={`listing-visibility-${row.id}`}
+                      />
+                    </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
-                    {row.status !== "active" ? (
-                      <button
-                        type="button"
-                        title={t("activate")}
-                        aria-label={t("activate")}
-                        onClick={() => changeStatus(row.id, "active")}
-                        data-testid={`listing-activate-${row.id}`}
-                        disabled={pending}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-success hover:border-state-success sm:h-8 sm:w-8"
-                      >
-                        <Play aria-hidden className="h-4 w-4" />
-                      </button>
-                    ) : (
-                      <>
-                        {extended && (
-                          <button
-                            type="button"
-                            title={t("pause")}
-                            aria-label={t("pause")}
-                            onClick={() => changeStatus(row.id, "paused")}
-                            disabled={pending}
-                            className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue sm:h-8 sm:w-8"
-                          >
-                            <Pause aria-hidden className="h-4 w-4" />
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          title={t("close")}
-                          aria-label={t("close")}
-                          onClick={() => changeStatus(row.id, "closed")}
-                          disabled={pending}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-warning hover:border-state-warning sm:h-8 sm:w-8"
-                        >
-                          <Archive aria-hidden className="h-4 w-4" />
-                        </button>
-                      </>
-                    )}
-                    {row.status === "closed" && (
-                      <button
-                        type="button"
-                        title={t("reopen")}
-                        aria-label={t("reopen")}
-                        onClick={() => changeStatus(row.id, "draft")}
-                        disabled={pending}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue sm:h-8 sm:w-8"
-                      >
-                        <RotateCcw aria-hidden className="h-4 w-4" />
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      title={t("edit")}
-                      aria-label={t("edit")}
-                      onClick={() => openEdit(row)}
-                      disabled={pending}
-                      className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue sm:h-8 sm:w-8"
-                    >
-                      <Pencil aria-hidden className="h-4 w-4" />
-                    </button>
-                    {confirmingId === row.id ? (
-                      <span
-                        role="alertdialog"
-                        aria-label={t("removeConfirm")}
-                        className="inline-flex items-center gap-2 text-xs text-text-secondary"
-                      >
-                        {t("removeConfirm")}
-                        <button
-                          type="button"
-                          onClick={() => remove(row.id)}
-                          disabled={pending}
-                          data-testid={`listing-remove-confirm-${row.id}`}
-                          className="inline-flex min-h-11 items-center rounded border border-state-danger px-2 py-1 text-state-danger sm:min-h-8"
-                        >
-                          {t("remove")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmingId(null)}
-                          className="inline-flex min-h-11 items-center rounded border border-ink-500 px-2 py-1 sm:min-h-8"
-                        >
-                          {t("cancel")}
-                        </button>
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        title={t("remove")}
-                        aria-label={t("remove")}
-                        onClick={() => setConfirmingId(row.id)}
-                        disabled={pending}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-danger hover:border-state-danger sm:h-8 sm:w-8"
-                      >
-                        <Trash2 aria-hidden className="h-4 w-4" />
-                      </button>
-                    )}
+                  {/* The contract's actions, in words; hiding (pause /
+                      complete / remove from market) is one reversible click,
+                      apart from permanent deletion, which confirms first. */}
+                  {/* min-w-0, not shrink-0: an armed delete confirmation must
+                      wrap inside the row, never push past the card. */}
+                  <div className="min-w-0">
+                    <MarketEntryActions
+                      support={adapter.support}
+                      facts={adapter.facts(row)}
+                      onAction={(action) => runAction(row, action)}
+                      pending={pending}
+                      testIdFor={(action) => LISTING_TEST_ID[action](row.id)}
+                      erase={{ onConfirm: () => remove(row.id), testId: `listing-remove-${row.id}` }}
+                    />
                   </div>
                 </div>
                 {ackFor === row.id && (

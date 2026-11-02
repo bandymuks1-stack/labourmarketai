@@ -6,6 +6,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider } from "../src/auth-context";
 import { ActorContextProvider } from "../src/context-provider";
 import { ProfileProvider } from "../src/profile-provider";
+import { WorkspaceEpochProvider } from "../src/workspace-epoch";
 import { LocaleProvider } from "../src/i18n/locale-context";
 import { CONFIG_PROBLEMS } from "../src/config";
 import { CrashScreen } from "../src/screens/crash";
@@ -50,6 +51,7 @@ export default function RootLayout() {
           <MisconfiguredScreen problems={CONFIG_PROBLEMS} />
         ) : (
           <AuthProvider>
+            <WorkspaceEpochProvider>
             {/* ProfileProvider owns the ONE `profile.get` per session; the
                 actor context derives held roles from it, and Today / Profile
                 read the same answer instead of fetching their own. */}
@@ -58,11 +60,12 @@ export default function RootLayout() {
               <Stack
                 screenOptions={{
                   headerShown: false,
-                  contentStyle: { backgroundColor: "#0B0E14" },
+                  contentStyle: { backgroundColor: "#070706" },
                 }}
               />
               </ActorContextProvider>
             </ProfileProvider>
+            </WorkspaceEpochProvider>
           </AuthProvider>
         )}
       </LocaleProvider>

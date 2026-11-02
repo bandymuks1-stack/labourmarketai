@@ -111,10 +111,24 @@ function row(page: Page, label: string): Locator {
   return page.locator("li").filter({ hasText: label }).last();
 }
 
-async function acceptRow(page: Page, label: string) {
+/**
+ * Accept is TWO human steps since the C1 disclosure (#1136, 2026-08-13): the
+ * row's Accept opens an inline consent form ("By accepting you agree to the
+ * dates shown…"), and its own confirm commits. Clicking only the first one
+ * leaves the booking `proposed` — which this spec used to read as a missing
+ * `booking-responded`.
+ */
+async function openAccept(page: Page, label: string): Promise<Locator> {
   const r = row(page, label);
   await expect(r).toBeVisible({ timeout: 60_000 });
-  await r.getByRole("button", { name: /^(Accept|Priimti)$/ }).click();
+  await r.getByTestId("booking-accept-open").click();
+  const confirm = r.getByTestId("booking-accept-confirm");
+  await expect(confirm).toBeVisible({ timeout: 30_000 });
+  return confirm;
+}
+
+async function acceptRow(page: Page, label: string) {
+  await (await openAccept(page, label)).click();
 }
 
 test.describe("W12 slice 1 — atomic double-booking, browser proof", () => {
@@ -169,8 +183,8 @@ test.describe("W12 slice 1 — atomic double-booking, browser proof", () => {
     await login(page);
     await openBookings(page);
 
-    const btn = row(page, A_OVERLAP).getByRole("button", { name: /^Accept$/ });
-    await expect(btn).toBeVisible({ timeout: 60_000 });
+    // The committing control is the disclosure's confirm (see openAccept).
+    const btn = await openAccept(page, A_OVERLAP);
 
     // Two rapid activations of the SAME control.
     await btn.click();

@@ -42,6 +42,7 @@ import {
 import { AI_EGRESS_GRANTS, MAX_GRANTABLE_FOR_FREE_TIER } from "@/lib/ai/runtime/data-egress";
 import type { AiAgentKey } from "@/lib/ai/registry/types";
 import { vacancyTranslationInputSchema } from "@/lib/ai/registry/agents/vacancy-translation";
+import { countryReadinessInputSchema } from "@/lib/ai/registry/agents/country-readiness";
 
 /**
  * Every agent key the product invokes today, with the sensitivity class this
@@ -53,6 +54,7 @@ import { vacancyTranslationInputSchema } from "@/lib/ai/registry/agents/vacancy-
  *   matching_explanation  lib/staffing/match-preview-actions.ts
  *   company_need          lib/staffing/company-need-actions.ts
  *   market_explanation    lib/market/market-explanation-actions.ts
+ *   country_readiness     lib/country-readiness/readiness-reading-actions.ts
  */
 const WIRED_AGENT_SENSITIVITY = {
   worker_profile: "PERSONAL",
@@ -60,6 +62,13 @@ const WIRED_AGENT_SENSITIVITY = {
   matching_explanation: "PERSONAL",
   // An employer's own future work — scope, headcount, timeframe. No person.
   company_need: "LOW_RISK_PROJECT_DATA",
+  // Wired 2026-10-25 (owner decision, registry row 10.11): the plain-language
+  // reading of the sourced country matrix
+  // (lib/country-readiness/readiness-reading-actions.ts). The payload is
+  // matrix rows only — no person — but it KEEPS the LOW_RISK class its task
+  // always had: moving it to PUBLIC would let it leave for an ungranted
+  // external provider, which is an egress widening and an owner act.
+  country_readiness: "LOW_RISK_PROJECT_DATA",
   // Aggregate counts of published job ads — the ONE PUBLIC surface.
   market_explanation: "PUBLIC",
   // ONE typed chat sentence the deterministic router could not read —
@@ -296,8 +305,43 @@ describe("the classes the gate names have not moved", () => {
     expect(AGENT_TASK_TYPES.country_readiness).toBe(
       "derive_workforce_requirements",
     );
-    expect(AGENT_TASK_TYPES.document_assistant).toBe(
-      "derive_workforce_requirements",
-    );
+    // document_assistant also mapped here until it was RETIRED on 2026-10-25
+    // (owner decision, registry row 10.11): its whole output is
+    // lib/conversation/documents-gap.ts. It must not come back unmapped-but-
+    // registered or mapped-but-unregistered.
+    expect(Object.keys(AGENT_TASK_TYPES)).not.toContain("document_assistant");
+  });
+
+  it("the country reading admits matrix rows only — no person, no free text", () => {
+    // The input schema is strict, so these are refused before any provider.
+    const base = {
+      country: "NL",
+      scope: "worker_posted",
+      sourceRecords: [
+        {
+          ref: "a1_certificate",
+          level: "required",
+          risk: "high",
+          grade: "official",
+          source: "Your Europe",
+          statement: "An A1 document.",
+        },
+      ],
+    };
+    expect(countryReadinessInputSchema.safeParse(base).success).toBe(true);
+    for (const widened of [
+      { ...base, workerDocumentStatus: ["passport: ready"] },
+      { ...base, role: "electrician from Vilnius" },
+      { ...base, profileId: "p-1" },
+      { ...base, sourceRecords: [{ ...base.sourceRecords[0], workerName: "X" }] },
+    ]) {
+      expect(countryReadinessInputSchema.safeParse(widened).success).toBe(false);
+    }
+    // And no grant names its task: an external provider may receive PUBLIC
+    // only, so today this run is refused externally and served locally or not
+    // at all.
+    expect(
+      AI_EGRESS_GRANTS.some((g) => (g.tasks ?? []).includes("derive_workforce_requirements")),
+    ).toBe(false);
   });
 });

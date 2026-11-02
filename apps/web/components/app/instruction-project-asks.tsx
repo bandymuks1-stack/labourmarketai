@@ -55,6 +55,10 @@ export interface InstructionProjectAsksLabels {
 /** Copy resolved by the page (server side) — the component holds no strings. */
 export interface InstructionLedgerLabels {
   readonly ratio: (have: number, total: number) => string;
+  /** Said instead of "0 of 0" when no row has a known state to count. */
+  readonly ratioNone: string;
+  /** The rows whose state is not known, said apart from the ratio. */
+  readonly ratioUnknown: (count: number) => string;
   readonly state: Record<RequirementLedgerRow["state"], string>;
   readonly why: (row: RequirementLedgerRow, country: string | null) => string;
   readonly stateFrom: (row: RequirementLedgerRow) => string;
@@ -111,7 +115,7 @@ function resolutionHref(r: RequirementResolution): string | null {
     case "set_availability":
     case "ask":
       return r.href;
-    case "issuing_authority":
+    case "information_source":
       return r.url;
     default:
       return null;
@@ -134,8 +138,15 @@ export function RequirementLedgerRows({ ledger, labels }: { ledger: RequirementL
         data-testid="instruction-ledger-ratio"
         data-have={ledger.ratio.have}
         data-total={ledger.ratio.total}
+        data-unknown={ledger.ratio.unknown}
       >
-        {labels.ratio(ledger.ratio.have, ledger.ratio.total)}
+        {/* "Yra 0 iš 0" said nothing true: with no known state to count the
+            line says so instead (walk-spec 2026-10-25). Unknown rows are named
+            apart, never folded into the total. */}
+        {ledger.ratio.total === 0
+          ? labels.ratioNone
+          : labels.ratio(ledger.ratio.have, ledger.ratio.total)}
+        {ledger.ratio.unknown > 0 ? ` · ${labels.ratioUnknown(ledger.ratio.unknown)}` : null}
       </p>
       <ul className="flex flex-col gap-2">
         {ledger.rows.map((row) => {
@@ -174,7 +185,7 @@ export function RequirementLedgerRows({ ledger, labels }: { ledger: RequirementL
                         data-testid="instruction-ledger-resolution"
                         data-resolution={r.kind}
                       >
-                        {href && r.kind === "issuing_authority" ? (
+                        {href && r.kind === "information_source" ? (
                           <a href={href} target="_blank" rel="noreferrer noopener" className={ACTION_LINK}>
                             {text}
                           </a>

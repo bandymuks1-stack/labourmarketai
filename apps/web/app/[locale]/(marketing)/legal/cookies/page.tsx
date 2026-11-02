@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buildPageMetadata } from "@/lib/seo/metadata";
-import { LegalDisclaimer, PendingLegalNotice } from "@/components/marketing/legal-notes";
 
 /**
  * Cookie policy page (CR train WAGON 2, audit area 3).
@@ -14,7 +13,6 @@ import { LegalDisclaimer, PendingLegalNotice } from "@/components/marketing/lega
  *   - the admin-only display preference cookie (lm_hide_admin_ui),
  *   - theme choice lives in localStorage, NOT a cookie,
  *   - NO analytics / advertising / third-party tracking cookies exist.
- * The binding legal wording stays owner/lawyer-gated → pending notice shown.
  */
 export async function generateMetadata({
   params,
@@ -43,12 +41,9 @@ export default async function LegalPage({
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-16 sm:px-12" data-testid="legal-cookies">
-      <h1 className="font-display text-4xl font-bold tracking-tightest text-text-primary">
+      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary break-words hyphens-auto sm:text-4xl">
         {t("cookies.title")}
       </h1>
-      <div className="mt-6">
-        <PendingLegalNotice />
-      </div>
       <p className="mt-6 text-sm leading-relaxed text-text-secondary">{t("cookies.intro")}</p>
       <ul className="mt-8 flex flex-col gap-3">
         {items.map((item) => (
@@ -67,7 +62,6 @@ export default async function LegalPage({
       </div>
       <div className="mt-8 flex flex-col gap-3">
         <p className="text-sm leading-relaxed text-text-secondary">{t("requestContact")}</p>
-        <LegalDisclaimer />
       </div>
       <nav aria-label={t("related")} className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
         <Link

@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+import lt from "../../messages/lt.json";
+
 /**
  * Auth flow e2e (slice 6). Each spec checks `SUPABASE_TEST_URL` up front
  * and skips if it isn't configured — keeps `pnpm e2e` green until the
@@ -38,6 +40,14 @@ const requiresTestEnv = (): void => {
  */
 const E2E_PASSWORD = "E2ePass!23x";
 
+/**
+ * The signup heading is read from the LT catalogue, not hard-coded: the worker
+ * copy moved from formal "Sukurkite" to informal "Sukurk" (owner 2026-10-14,
+ * #2369) and a literal here went stale with no product change. Exact match, so
+ * a missing key (the raw key rendered) still fails.
+ */
+const SIGNUP_HEADLINE_LT = lt.auth.signup.headline;
+
 test.describe("Signup → password → onboarding", () => {
   test("signup with email+password lands the NEW user in onboarding", async ({
     page,
@@ -46,7 +56,7 @@ test.describe("Signup → password → onboarding", () => {
     const email = `e2e.signup.${Date.now()}@local.test`;
     await page.goto("/lt/auth/signup");
     await expect(
-      page.getByRole("heading", { name: /Sukurkite paskyrą/i }),
+      page.getByRole("heading", { name: SIGNUP_HEADLINE_LT, exact: true }),
     ).toBeVisible();
     await page.locator('input[type="email"]').fill(email);
     // Structural selectors: the password label's accessible name carries the

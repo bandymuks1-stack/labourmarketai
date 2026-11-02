@@ -4,6 +4,7 @@ import {
   ALL_WORK_TYPE_SLUGS,
   buildWorkCategoryOptions,
 } from "@/lib/taxonomy/work-categories";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Locks the P0 work taxonomy as a broad, multi-sector list so the intake/need
@@ -79,9 +80,24 @@ describe("P0 work-category taxonomy is broad, not construction-only", () => {
     expect(de[0].options[0].label).not.toBe(lt[0].options[0].label);
   });
 
-  it("an inactive locale still falls back to Lithuanian (unchanged)", () => {
-    const lt = buildWorkCategoryOptions("lt");
-    expect(buildWorkCategoryOptions("sv")[0].sector).toBe(lt[0].sector);
+  it("a locale without a label column reads English, never Lithuanian", () => {
+    // Owner order 2026-10-23: LT is one market's language, not a default for
+    // other readers. A later-activated locale must not be served Lithuanian.
+    const en = buildWorkCategoryOptions("en");
+    expect(buildWorkCategoryOptions("sv")[0].sector).toBe(en[0].sector);
+    expect(buildWorkCategoryOptions("uk")[0].options[0].label).toBe(en[0].options[0].label);
+  });
+
+  it("every ACTIVE locale has its own label column (no active locale falls back)", () => {
+    for (const loc of activeLocales) {
+      for (const c of WORK_CATEGORIES) {
+        const row = c as unknown as Record<string, unknown>;
+        expect(typeof row[loc], `${c.key} has no ${loc} label`).toBe("string");
+        for (const t of c.types) {
+          expect(typeof (t as unknown as Record<string, unknown>)[loc], `${t.slug} has no ${loc} label`).toBe("string");
+        }
+      }
+    }
   });
 
   it("keeps the core construction slugs (backward compatible)", () => {

@@ -14,6 +14,11 @@ import {
   getSpineCounts,
 } from "@/lib/notifications/spine";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/activity", "activityCentre.title");
+
 
 /**
  * Unified activity centre (control room PR C) — ONE cross-module surface
@@ -251,6 +256,8 @@ export default async function ActivityCentrePage({
                     <Link
                       href={e.href as "/dashboard"}
                       data-testid={`activity-stored-event-${e.id}`}
+                      data-event-type={e.type}
+                      data-read={e.read_at === null ? "false" : "true"}
                       className={`flex items-center rounded-md border border-ink-500 px-4 py-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
                         e.read_at === null ? "bg-ink-800/40" : "bg-ink-800/10"
                       }`}
@@ -260,6 +267,8 @@ export default async function ActivityCentrePage({
                   ) : (
                     <div
                       data-testid={`activity-stored-event-${e.id}`}
+                      data-event-type={e.type}
+                      data-read={e.read_at === null ? "false" : "true"}
                       className={`flex items-center rounded-md border border-ink-500 px-4 py-3 ${
                         e.read_at === null ? "bg-ink-800/40" : "bg-ink-800/10"
                       }`}

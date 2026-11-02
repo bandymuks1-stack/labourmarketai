@@ -14,7 +14,7 @@ import { persistPublicCompanyNeed } from "./company-need-public-intake";
 import { aiActionRateLimited } from "../security/ai-action-throttle";
 import { sendCompanyNeedOwnerAlert } from "../notifications/telegram-owner-alerts";
 import { isConstructionWorkType } from "../taxonomy/work-categories";
-import type { AiLocale } from "../ai/runtime/types";
+import { aiLocaleFor, type AiLocale } from "../ai/runtime/types";
 
 export interface CompanyNeedFormState {
   readonly ok: boolean;
@@ -42,9 +42,8 @@ export interface CompanyNeedFormState {
   readonly message?: string;
 }
 
-function toAiLocale(value: string): AiLocale {
-  return value === "lt" || value === "ru" ? value : "en";
-}
+/** Every routed UI locale is an AI locale; anything else is answered in EN. */
+const toAiLocale = (value: string): AiLocale => aiLocaleFor(value);
 
 function str(value: FormDataEntryValue | null): string | undefined {
   const s = String(value ?? "").trim();
@@ -183,7 +182,16 @@ export async function submitCompanyNeedAction(
     return { ok: true, persisted, isConstruction, draftStatus: "disabled" };
   }
 
-  const result = await draftVacancyFromNeed(raw, locale);
+  // The draft is optional enrichment; the need is already stored above. Any
+  // throw from the AI layer (network, timeout, quota, env) degrades to the
+  // honest "no draft" state — it must never turn a stored need into an error
+  // screen (owner P0-E 2026-10-30, 0 EUR AI budget: providers WILL fail).
+  let result: Awaited<ReturnType<typeof draftVacancyFromNeed>>;
+  try {
+    result = await draftVacancyFromNeed(raw, locale);
+  } catch {
+    return { ok: true, persisted, isConstruction, draftStatus: "disabled" };
+  }
 
   if (!result.ok) {
     // The AI-draft parse failed, but if the row was persisted the submission

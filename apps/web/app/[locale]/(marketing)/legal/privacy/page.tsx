@@ -2,24 +2,14 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buildPageMetadata } from "@/lib/seo/metadata";
-import {
-  LegalDisclaimer,
-  LegalSectionList,
-  PendingLegalItems,
-  PendingLegalNotice,
-  type LegalSection,
-} from "@/components/marketing/legal-notes";
+import { LegalSectionList, type LegalSection } from "@/components/marketing/legal-notes";
 
 /**
- * Privacy / GDPR explanation page (CR train WAGON 2, audit area 2).
- *
- * Upgraded from the honest "being prepared" stub to a structured plain-language
- * explanation: what data is used, why, who can see it, consent, rights (the
- * REAL manual request process), and retention. Every fact is derived from the
- * shipped product (consents audit trail, closed-by-default access rules, no
- * trackers). The BINDING legal wording remains owner/lawyer-gated (train
- * stop-rule 5): the page renders the visible pending-legal notice plus an
- * explicit list of what still awaits final wording — no fake legal finality.
+ * Privacy Policy (CR train WAGON 2, audit area 2): what data is used, why,
+ * social sign-in (Google / Facebook / LinkedIn), who can see it, the service
+ * providers that process it, consent, rights and retention. Every fact is
+ * derived from the shipped product. This is also the privacy policy URL the
+ * OAuth provider consoles (Meta, Google, LinkedIn) point to.
  */
 export async function generateMetadata({
   params,
@@ -45,22 +35,16 @@ export default async function LegalPage({
   setRequestLocale(locale);
   const t = await getTranslations("legal");
   const sections = t.raw("privacy.sections") as LegalSection[];
-  const pendingItems = t.raw("privacy.pendingItems") as string[];
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-16 sm:px-12" data-testid="legal-privacy">
-      <h1 className="font-display text-4xl font-bold tracking-tightest text-text-primary">
+      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary break-words hyphens-auto sm:text-4xl">
         {t("privacy.title")}
       </h1>
-      <div className="mt-6">
-        <PendingLegalNotice />
-      </div>
       <p className="mt-6 text-sm leading-relaxed text-text-secondary">{t("privacy.intro")}</p>
       <LegalSectionList sections={sections} />
-      <PendingLegalItems title={t("privacy.pendingTitle")} items={pendingItems} />
       <div className="mt-8 flex flex-col gap-3">
         <p className="text-sm leading-relaxed text-text-secondary">{t("requestContact")}</p>
-        <LegalDisclaimer />
       </div>
       <nav aria-label={t("related")} className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
         <Link
@@ -68,6 +52,12 @@ export default async function LegalPage({
           className="text-sm text-text-secondary hover:text-text-primary"
         >
           {t("dataAccess.title")} →
+        </Link>
+        <Link
+          href="/legal/data-deletion"
+          className="text-sm text-text-secondary hover:text-text-primary"
+        >
+          {t("dataDeletion.title")} →
         </Link>
         <Link
           href="/legal/data-protection"

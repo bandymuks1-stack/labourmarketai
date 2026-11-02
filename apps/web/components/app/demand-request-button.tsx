@@ -31,6 +31,7 @@ import {
   deriveCompensationHonestyFlags,
   requiresTalentPoolDisclosure,
   sanitizeStructuredDemandV2,
+  teamCompositionFor,
 } from "@/lib/demand/structured-demand-v2";
 import {
   buildWorkCategoryOptions,
@@ -87,8 +88,13 @@ export function DemandRequestButton({
   stepTitles,
   repeatRequestId = null,
   usage = null,
+  organizationId = null,
 }: {
   intent: "hire_workers" | "partner";
+  /** The organization this page was rendered for. Sent with the submit so a
+   *  workspace switched meanwhile (another tab) REFUSES instead of posting
+   *  the need into a company the person did not see. */
+  organizationId?: string | null;
   /** Pre-submit open-needs usage for the acting workspace: the ONE gate's
    *  verdict reshaped (lib/billing/open-needs-usage.ts). Null / not visible
    *  while billing is not enforced: nothing is shown. */
@@ -101,6 +107,7 @@ export function DemandRequestButton({
   repeatRequestId?: string | null;
 }) {
   const t = useTranslations("auth.dashboard.wow.demand");
+  const tStale = useTranslations("conversation.forms.ui");
   const router = useRouter();
   // Structured field labels reuse the existing 3-locale catalogues (no new
   // 11-locale keys): companyNeed for the field labels + accommodation options,
@@ -126,6 +133,9 @@ export function DemandRequestButton({
   const [workType, setWorkType] = useState("");
   const [country, setCountry] = useState("");
   const [teamSize, setTeamSize] = useState("");
+  // Teams of a stated size read from the description ("3 brigados po 4") —
+  // kept beside the total only while the count still equals teams × size.
+  const [teamComposition, setTeamComposition] = useState<{ teams: number; perTeam: number } | null>(null);
   const [accommodation, setAccommodation] = useState("");
   const accommodationOptions: { value: string; label: string }[] = [
     { value: "provided_free", label: tc("accFree") },
@@ -170,7 +180,7 @@ export function DemandRequestButton({
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);
-  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual">(
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual" | "workspaceChanged">(
     "idle",
   );
   // Advanced structured clusters (structured_v2, PR 2) — optional; empty
@@ -306,6 +316,16 @@ export function DemandRequestButton({
   // server uses, so the preview never disagrees with what will be stored.
   const advWire = buildStructuredV2Input(adv);
   const advV2 = sanitizeStructuredDemandV2(advWire);
+  /** The structured cluster to send, with the team composition added while
+   *  it still explains the number of workers (the server re-checks). */
+  function withTeam(wire: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+    const team = teamCompositionFor(
+      teamSize.trim() ? Number(teamSize) : null,
+      teamComposition?.teams,
+      teamComposition?.perTeam,
+    );
+    return team ? { ...(wire ?? {}), team } : wire;
+  }
   const honestyFlags = deriveCompensationHonestyFlags(advV2);
   const talentPoolDisclosure = requiresTalentPoolDisclosure(advV2);
 
@@ -335,6 +355,9 @@ export function DemandRequestButton({
       if (s.workType && !workType) setWorkType(s.workType);
       if (s.country && !country) setCountry(s.country);
       if (s.teamSize != null && !teamSize.trim()) setTeamSize(String(s.teamSize));
+      setTeamComposition(
+        s.teamCount != null && s.perTeamSize != null ? { teams: s.teamCount, perTeam: s.perTeamSize } : null,
+      );
       if (s.startPeriod) setUrgency(s.startPeriod);
       if (s.accommodation && !accommodation) setAccommodation(s.accommodation);
       setAutoSuggested(s.reasons.length > 0);
@@ -368,11 +391,13 @@ export function DemandRequestButton({
         transport: transport || undefined,
         requiredTools: requiredTools.length > 0 ? requiredTools : undefined,
         estimate: estimateEngaged ? estimate : undefined,
-        structuredV2: advWire,
-      });
+        structuredV2: withTeam(advWire),
+      }, { expectedOrganizationId: organizationId });
       setState(
         res.ok
           ? "done"
+          : res.code === "workspace_changed"
+            ? "workspaceChanged"
           : res.code === "needs_migration"
             ? "needsMigration"
             : res.code === "over_open_need_limit"
@@ -508,15 +533,27 @@ export function DemandRequestButton({
           ✓ {t(`${key}.done`)}
         </p>
         <p className="text-xs text-text-secondary">{t("form.submittedHeading")}</p>
-        {/* The exact next step — the scouting room where matches + interest for
-            this need appear (audit PR4: success used to be a dead-end panel). */}
-        <Link
-          href={"/dashboard/company/scouting" as "/dashboard"}
-          className="w-fit text-sm font-medium text-brand-blue hover:underline"
-          data-testid="demand-done-scouting-link"
-        >
-          {t("form.doneScoutingLink")} →
-        </Link>
+        {/* The exact next step. A NEED: the scouting room where matches +
+            interest for it appear (audit PR4: success used to be a dead-end
+            panel). An OFFER has no matches to scout — its next step is the
+            organisation's own offers list, where the saved offer now stands. */}
+        {intent === "hire_workers" ? (
+          <Link
+            href={"/dashboard/company/scouting" as "/dashboard"}
+            className="w-fit text-sm font-medium text-brand-blue hover:underline"
+            data-testid="demand-done-scouting-link"
+          >
+            {t("form.doneScoutingLink")} →
+          </Link>
+        ) : (
+          <Link
+            href={"/dashboard/company/needs#agency-offers" as "/dashboard"}
+            className="w-fit text-sm font-medium text-brand-blue hover:underline"
+            data-testid="demand-done-offers-link"
+          >
+            {t("form.doneOffersLink")} →
+          </Link>
+        )}
         {summaryList}
         {estimateSummary}
       </div>
@@ -1011,6 +1048,11 @@ export function DemandRequestButton({
       {(state === "limitUpgrade" || state === "limitIndividual") && (
         <p className="text-xs text-state-warning" role="alert" data-testid="demand-open-need-limit" data-next={state === "limitIndividual" ? "individual_plan" : "upgrade"}>
           {state === "limitIndividual" ? t("errorOpenNeedLimitIndividual") : t("errorOpenNeedLimitUpgrade")}
+        </p>
+      )}
+      {state === "workspaceChanged" && (
+        <p className="text-xs text-state-warning" role="alert" data-testid="demand-workspace-changed">
+          {tStale("errorStale")}
         </p>
       )}
       {state === "needsMigration" && (

@@ -8,6 +8,11 @@ import {
 } from "@/components/intelligence/manual-import-sandbox-form";
 import { runSandboxValidationAction } from "./actions";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/import-sandbox");
+
 
 /**
  * MANUAL IMPORT SANDBOX workspace (Manual Import Sandbox v1) — the

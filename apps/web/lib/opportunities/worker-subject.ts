@@ -16,11 +16,11 @@ import {
 import type { DomainCaller } from "@/lib/domain/caller";
 import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import {
-  sourceToEvidence,
   type EvidenceTier,
   type MatchSubject,
   type WorkerLanguageFact,
 } from "@/lib/market/match-v1";
+import { standingSourceTier } from "@/lib/evidence/skill-confirmation-standing";
 
 /**
  * The signed-in worker's OWN match subject (Worker Express Interest slice).
@@ -212,7 +212,9 @@ function assembleOwnWorkerContext({
   for (const s of skillRows) {
     const slug = s.skills?.slug;
     if (!slug) continue;
-    const tier: EvidenceTier = s.verified ? "manager_confirmed" : sourceToEvidence(s.source);
+    // `verified` is already the STANDING confirmation (worker-core.ts); an
+    // UNKNOWN one keeps its source, which must not lift it to the top tier.
+    const tier: EvidenceTier = standingSourceTier(s);
     const prev = ownSkillTiers.get(slug);
     if (!prev || tierRank[tier] > tierRank[prev]) ownSkillTiers.set(slug, tier);
   }

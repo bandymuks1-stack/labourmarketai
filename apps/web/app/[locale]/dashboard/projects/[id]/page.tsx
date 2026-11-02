@@ -14,11 +14,14 @@ import {
   Users,
 } from "lucide-react";
 
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { getProjectStadium } from "@/lib/projects/stadium";
 import { ProjectCourseTrack } from "@/components/app/projects/project-course-track";
 import { deriveProjectCourse } from "@/lib/projects/project-course";
+import { ProjectForecastPanel } from "@/components/app/projects/project-forecast-panel";
+import { readProjectForecast } from "@/lib/forecast/forecast-read";
 import { ProjectWeekGoal } from "@/components/app/projects/project-week-goal";
 import { deriveWeeklyGoal } from "@/lib/projects/weekly-goal";
 import { listProjectTasks } from "@/lib/tasks/tasks";
@@ -45,6 +48,11 @@ import { ProjectLinkedDocuments } from "@/components/app/linked-documents";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/projects/[id]");
+
 
 export const dynamic = "force-dynamic";
 
@@ -80,11 +88,9 @@ export default async function ProjectStadiumPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
   const role = (profile?.active_role as Role) ?? "worker";
 
   // RC2 role-aware routing (F11): one canonical project route that branches
@@ -197,7 +203,12 @@ export default async function ProjectStadiumPage({
   const stadiumWeekGoal = deriveWeeklyGoal(courseTasks, { todayIso: courseToday.todayIso, scope: "project" });
   // KAS PASIKEITĖ PROJEKTE: the team's chain as counts + the project's own
   // facts, over the stages and tasks this page already read.
-  const projectTrace = await loadProjectTrace(id, "manager", courseStages, courseTasks);
+  // The project forecast (SEP-1: a forecast, never a fact), read on demand for
+  // this manager from the project's recorded facts — lib/forecast/forecast-read.ts.
+  const [projectTrace, forecastRead] = await Promise.all([
+    loadProjectTrace(id, "manager", courseStages, courseTasks),
+    readProjectForecast(id, courseToday.todayIso),
+  ]);
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="project-stadium">
@@ -331,6 +342,7 @@ export default async function ProjectStadiumPage({
       {/* ── THE PROJECT COURSE (Future Experience C): the same route the
             assigned workers see — one shared goal for the whole team. ── */}
       <ProjectCourseTrack course={stadiumCourse} locale={locale} />
+      <ProjectForecastPanel read={forecastRead} locale={locale} />
       <ProjectWeekGoal goal={stadiumWeekGoal} locale={locale} />
       {/* Where the course or the week has nothing to draw: the REAL first
           step (the stages panel, the task form), never a decorative screen. */}
@@ -375,7 +387,7 @@ export default async function ProjectStadiumPage({
                     aria-hidden
                     className={cn(
                       "flex h-16 w-14 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-lg font-bold text-text-primary",
-                      w.confirmedSkills > 0
+                      (w.confirmedSkills ?? 0) > 0
                         ? "border-trust-accent/50"
                         : "border-ink-500",
                     )}
@@ -399,13 +411,13 @@ export default async function ProjectStadiumPage({
                   <span
                     className={cn(
                       "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-meta",
-                      w.confirmedSkills > 0
+                      (w.confirmedSkills ?? 0) > 0
                         ? "border-state-success/30 bg-state-success/10 text-state-success"
                         : "border-ink-600 bg-ink-800/40 text-text-secondary",
                     )}
                   >
                     <ShieldCheck className="h-3 w-3" aria-hidden />
-                    {w.confirmedSkills}
+                    {w.confirmedSkills ?? "—"}
                   </span>
                   {w.openReviewItems > 0 ? (
                     <span className="inline-flex items-center gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-1 font-mono text-meta text-state-warning">
@@ -542,11 +554,19 @@ export default async function ProjectStadiumPage({
         <NotebookPen
           className={cn(
             "h-6 w-6 shrink-0",
-            entriesToday > 0 ? "text-state-live" : "text-text-muted",
+            entriesToday !== null && entriesToday > 0 ? "text-state-live" : "text-text-muted",
           )}
           aria-hidden
         />
-        {entriesToday > 0 ? (
+        {entriesToday === null ? (
+          // The count could not be read: say nothing numeric (SEP-7).
+          <span
+            className="min-w-0 flex-1 font-mono text-sm text-text-muted"
+            data-testid="stadium-today-unknown"
+          >
+            —
+          </span>
+        ) : entriesToday > 0 ? (
           <>
             <CountUp
               text={String(entriesToday)}

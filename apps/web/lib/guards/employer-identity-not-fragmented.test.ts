@@ -40,7 +40,12 @@ describe("employer capability is read from HELD roles, not the active one", () =
     // same set AuthState.roles carries. If that gate ever moved to
     // active_role, this chip would start promising a redirect.
     const gate = read("lib", "auth", "require-role.ts");
-    expect(gate).toMatch(/from\("profile_roles"\)/);
+    // The gate reads through the request-cached `readActiveRoleRows` (perf
+    // 2026-10-23), whose body is the `profile_roles` / `is_active` select.
+    expect(gate).toMatch(/readActiveRoleRows\(/);
+    expect(read("lib", "auth", "profile-roles.ts")).toMatch(
+      /const readActiveRoleRowsOnce = cache\([\s\S]{0,300}from\("profile_roles"\)[\s\S]{0,120}\.eq\("is_active", true\)/,
+    );
     expect(gate).toMatch(/heldRoles\.has\(expectedRole\)/);
     // Comments stripped: the file's own doc-block SAYS "active_role" while
     // explaining that it deliberately does not read it, so asserting on raw

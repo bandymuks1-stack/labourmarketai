@@ -22,6 +22,7 @@ const read = (...p: string[]) => readFileSync(join(web, ...p), "utf8");
 const chat = read("components", "app", "conversation", "chat", "conversation-chat.tsx");
 const core = read("lib", "assistant", "transcript.ts");
 const route = read("app", "api", "assistant", "transcript", "route.ts");
+const sameOriginHelper = read("lib", "http", "same-origin-request.ts");
 const client = read("lib", "assistant", "transcript-client.ts");
 
 describe("chat transcript writes survive the page and stay ordered", () => {
@@ -44,7 +45,14 @@ describe("chat transcript writes survive the page and stay ordered", () => {
   });
   it("the route reuses the one writer and refuses cross-site writes", () => {
     expect(route).toMatch(/import \{ appendAssistantTurn \} from "@\/lib\/assistant\/transcript"/);
-    expect(route).toMatch(/function sameOrigin/);
+    // 2026-10-17: the same-origin judgement lives in lib/http/same-origin-request.ts and compares the
+    // browser's Origin with the request's PUBLIC host (requestPublicOrigin), never with req.url -
+    // behind the VPS proxy req.url is the bind host 0.0.0.0:3000 and every browser write was 403.
+    expect(route).toMatch(/import \{ isSameOriginRequest \} from "@\/lib\/http\/same-origin-request"/);
+    expect(route).toMatch(/if \(!isSameOriginRequest\(req\)\) return NextResponse\.json\(\{ saved: false \}, \{ status: 403 \}\)/);
+    expect(route).not.toMatch(/new URL\(req\.url\)/);
+    expect(sameOriginHelper).toMatch(/requestPublicOrigin\(req\)/);
+    expect(sameOriginHelper).not.toMatch(/new URL\(req\.url\)\.host/);
     expect(route).toMatch(/keepalive/);
   });
   it("a design preview never writes", () => {

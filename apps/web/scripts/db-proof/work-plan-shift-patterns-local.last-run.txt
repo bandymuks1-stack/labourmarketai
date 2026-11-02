@@ -1,0 +1,23 @@
+work-plan-shift-patterns-local — 2026-10-23T15:50:25.557Z
+PostgreSQL 16, local throwaway cluster (synthetic ids only)
+PASS  migration applies on the applied work_plan_entries shape
+PASS  T1 CHECK agrees with parseShiftPattern on 25 shapes
+PASS  T2 isShiftDay parity on 720 pattern-days
+PASS  T3a manager stores a rota through v2
+PASS  T3b malformed pattern refused
+PASS  T3c pattern with no working day refused
+PASS  T3d non-manager refused (authority unchanged)
+PASS  T3e NULL pattern stores a one-off window
+PASS  T3f direct insert stays revoked
+PASS  T4 CHECK refuses a malformed pattern on a direct write
+PASS  T5a validator accepts the 4 run collisions reserveCapacity produced
+PASS  T5b overlap spanning a rest day refused
+PASS  T5c overlap stopping inside a run refused
+PASS  T5d whole-window overlap of a rota refused
+PASS  T5e a run clipped by the window edge is accepted
+PASS  T5f a one-off plan keeps the previous predicate
+PASS  T6a rollback refuses while a patterned row exists
+PASS  T6b rollback removes the column and the three new functions
+PASS  T6c rollback restores the validator byte-for-byte
+PASS  T6d migration re-applies after rollback
+20/20 passed

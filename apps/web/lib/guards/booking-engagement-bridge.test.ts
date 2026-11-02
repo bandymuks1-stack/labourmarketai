@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * BOOKING-ENGAGEMENT BRIDGE GUARDS (booking-engagement bridge v1).
@@ -219,7 +220,7 @@ describe("least privilege on every new function", () => {
   it("PUBLIC and anon are revoked; authenticated gets exactly EXECUTE", () => {
     const m = migration();
     for (const fn of FNS) {
-      const esc = fn.replace(/[()]/g, "\\$&").replace(/, /g, ",\\s*");
+      const esc = escapeRegExp(fn).replace(/, /g, ",\\s*");
       expect(m, `${fn} public revoke`).toMatch(
         new RegExp(`revoke all on function public\\.${esc} from public`),
       );
@@ -306,7 +307,7 @@ describe("app wiring — honest until applied, roster surfaces untouched", () =>
   });
 
   it("both picker group labels exist in every active locale", () => {
-    for (const locale of ["lt", "en", "de", "nl", "ru"] as const) {
+    for (const locale of activeLocales) {
       const j = JSON.parse(read(`messages/${locale}.json`)) as {
         projects?: { assign?: Record<string, string> };
       };
@@ -315,3 +316,8 @@ describe("app wiring — honest until applied, roster surfaces untouched", () =>
     }
   });
 });
+
+/** Every RegExp metacharacter escaped (a partial escape is a different pattern). */
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+}

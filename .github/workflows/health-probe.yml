@@ -1,17 +1,32 @@
 name: health-probe
 
 # FINAL COMPLETION Train L (2026-09-02): an INTERNAL uptime probe that needs no
-# external account. Every 15 minutes GitHub calls the production health route
-# (auth + database probes; 200 only when both answer). A failed scheduled run
-# e-mails the repository owner — GitHub's default notification for scheduled
-# workflow failures — so an outage is noticed without a third-party monitor.
-# Secret-free: the route is public and returns booleans + latencies only.
-# The external monitor (register L2) remains recommended for a second vantage
-# point; this closes the "nobody is watching" gap on its own.
+# external account. A failed scheduled run e-mails the repository owner —
+# GitHub's default notification for scheduled workflow failures — so an outage
+# is noticed without a third-party monitor. Secret-free: every URL is public.
+#
+# P0 stall monitor (2026-10-23): the same probe now also measures STALLS, from
+# outside, through Cloudflare, the way a person meets the site. Two incidents on
+# 2026-10-23 (a document that never finished for 4 min; Cloudflare 522s with a
+# 19.7 s first byte = the origin did not accept the TCP connection) were found
+# only because a QA walk happened to be running. This gives their frequency and
+# timing without a walk:
+#   - every 5 minutes (GitHub runs scheduled jobs late and sometimes skips them;
+#     the summary line carries the real UTC time of each measurement);
+#   - ONE request each to /api/health, /lt (public) and /lt/auth/login: three
+#     anonymous GETs per run, so the probe is never a load source;
+#   - one compact line per run in the job summary (status, connect, first byte,
+#     total, Cloudflare colo + cache status — no body, no cookie, no identity);
+#   - the run FAILS (= owner alert) when any first byte takes > 10 s, a body does
+#     not finish within 30 s (curl's exit code is kept: fast 200 headers with a
+#     body held open is exactly the stall class seen), a 200 is empty, any answer
+#     is 5xx, or a request gets no answer at all (000). A failing health check is
+#     re-asked twice, 20 s apart, so the summary says whether it recovered — the
+#     run still fails: a stall that heals by itself is still a stall a person met.
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 concurrency:
@@ -26,16 +41,58 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: GET /api/health (3 attempts, 20 s apart — a single cold-start 503 is not an outage)
+      - name: Measure /api/health, /lt, /lt/auth/login through Cloudflare (one GET each)
         shell: bash
         run: |
           set -u
-          for attempt in 1 2 3; do
-            code=$(curl -sS -o body.json -w '%{http_code}' --max-time 25 "https://labourmarket.ai/api/health" || echo "000")
-            echo "attempt $attempt → HTTP $code"
-            cat body.json 2>/dev/null | head -c 600; echo
-            if [ "$code" = "200" ]; then exit 0; fi
-            sleep 20
+          set +e   # a failed request is a measurement, not a reason to stop measuring
+          BASE="https://labourmarket.ai"
+          LIMIT_TTFB=10
+          fail=0
+          line="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          probe() {
+            # prints: <http_code> <connect_s> <ttfb_s> <total_s> <bytes> <curl_rc> <colo> <cache>
+            # curl's exit code is KEPT: a page whose 200 headers arrive fast but whose body never
+            # finishes (the 2026-10-23 held-open document) ends in a timeout (rc 28) with a 200 and a
+            # low first byte — only rc and the byte count show that stall.
+            local url="$1" out rc code tc tt tot size colo cache
+            out=$(curl -sS -o /dev/null -D hdr.txt --max-time 30 \
+              -H 'User-Agent: labourmarket-stall-monitor/1 (+github-actions)' \
+              -w '%{http_code} %{time_connect} %{time_starttransfer} %{time_total} %{size_download}' "$url" 2>/dev/null)
+            rc=$?
+            [ -n "$out" ] || out="000 0 0 30 0"
+            read -r code tc tt tot size <<<"$out"
+            colo=$(grep -i '^cf-ray:' hdr.txt 2>/dev/null | tr -d '\r' | sed -E 's/.*-([A-Z]{3}).*/\1/' | head -1)
+            cache=$(grep -i '^cf-cache-status:' hdr.txt 2>/dev/null | tr -d '\r' | awk '{print $2}' | head -1)
+            rm -f hdr.txt
+            echo "$code $tc $tt $tot ${size:-0} $rc ${colo:--} ${cache:--}"
+          }
+          # FAIL when: no answer / 5xx; first byte > limit; curl did not complete the transfer
+          # (rc != 0, e.g. 28 = body still open at 30 s); a 200 with an empty body.
+          judge() {
+            local code="$1" tt="$2" size="$3" rc="$4"
+            if [ "$code" = "000" ] || [ "$code" -ge 500 ] 2>/dev/null; then echo FAIL_STATUS; return; fi
+            if awk -v t="$tt" -v l="$LIMIT_TTFB" 'BEGIN{exit !(t>l)}'; then echo FAIL_STALL; return; fi
+            if [ "$rc" != 0 ]; then echo "FAIL_INCOMPLETE(curl=$rc)"; return; fi
+            if [ "$code" = 200 ] && [ "$size" = 0 ]; then echo FAIL_EMPTY; return; fi
+            echo ok
+          }
+          for path in /api/health /lt /lt/auth/login; do
+            read -r code tc tt tot size rc colo cache <<<"$(probe "$BASE$path")"
+            verdict=$(judge "$code" "$tt" "$size" "$rc")
+            [ "$verdict" = ok ] || fail=1
+            line="$line | $path $code connect=${tc}s ttfb=${tt}s total=${tot}s bytes=$size colo=$colo cache=$cache $verdict"
+            if [ "$path" = "/api/health" ] && [ "$verdict" != "ok" ]; then
+              for retry in 1 2; do
+                sleep 20
+                read -r rcode _ rtt rtot rsize rrc _ _ <<<"$(probe "$BASE$path")"
+                line="$line (retry$retry $rcode ttfb=${rtt}s total=${rtot}s $(judge "$rcode" "$rtt" "$rsize" "$rrc"))"
+              done
+            fi
           done
-          echo "::error::production /api/health did not answer 200 in 3 attempts (last HTTP $code)"
-          exit 1
+          echo "$line"
+          echo "$line" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$fail" = 1 ]; then
+            echo "::error::production stall or 5xx seen from outside (first byte > ${LIMIT_TTFB} s, body not completed in 30 s, empty 200, 5xx or no answer): $line"
+            exit 1
+          fi

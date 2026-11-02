@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -117,6 +118,27 @@ export async function getEmployerWorkerAvailability(
    *  decides which workers the caller may see at all. */
   caller?: { readonly supabase: SupabaseClient; readonly userId: string },
 ): Promise<EmployerAvailabilityResult> {
+  // The cookie session's read is shared within ONE render; an explicit caller
+  // (bearer / agent transport, its own client) always reads for itself.
+  return caller ? readEmployerWorkerAvailability(caller) : readSessionEmployerAvailabilityOnce();
+}
+
+/**
+ * REQUEST-SCOPED (perf 2026-10-22): one `/dashboard/company` render read the
+ * session's availability three times — the opening brief's "absent today",
+ * the planning-conflicts count and the who-is-free answer — each the same
+ * roster, absence and own-identity round trips. React `cache()` deduplicates
+ * within ONE render only: every navigation reads again, and a server action
+ * (no render) reads itself, so a leave decision is never answered from an
+ * earlier read. Callers treat the result as read-only.
+ */
+const readSessionEmployerAvailabilityOnce = cache(
+  async (): Promise<EmployerAvailabilityResult> => readEmployerWorkerAvailability(undefined),
+);
+
+async function readEmployerWorkerAvailability(
+  caller: { readonly supabase: SupabaseClient; readonly userId: string } | undefined,
+): Promise<EmployerAvailabilityResult> {
   const supabase = caller?.supabase ?? (await createClient());
   let userId = caller?.userId ?? null;
   if (!userId) {
@@ -126,22 +148,6 @@ export async function getEmployerWorkerAvailability(
     userId = user?.id ?? null;
   }
   if (!userId) return { status: "not-authed" };
-
-  const workersRes = await (supabase as AnyClient)
-    .from("company_workers")
-    .select("worker_id, workers(id, display_name)")
-    .eq("status", "active")
-    .limit(MANAGED_WORKER_LIMIT);
-  if (workersRes.error) return { status: "error" };
-
-  type WorkerRow = {
-    worker_id: string;
-    workers: { id: string; display_name: string | null } | null;
-  };
-  const managed = (workersRes.data ?? []) as WorkerRow[];
-  const nameByWorker = new Map<string, string | null>(
-    managed.map((r) => [r.worker_id, r.workers?.display_name ?? null]),
-  );
 
   // MINIMISED SELECT — `note` and `absence_type` are never requested. See the
   // module header: this is the enforcement point, not the component.
@@ -162,7 +168,31 @@ export async function getEmployerWorkerAvailability(
       .order("start_date", { ascending: true })
       .limit(ABSENCE_READ_LIMIT);
 
-  let absRes = await readAbsences("worker_absence_scheduling");
+  // ONE STAGE (perf 2026-10-23): the roster, the leave rows and the caller's
+  // own worker ids depend on nothing but the caller, so they are read together
+  // (they used to be three stages on the People page and the company home).
+  // Each answer is handled exactly as before, in the same order.
+  const [workersRes, firstAbsRes, ownRes] = await Promise.all([
+    (supabase as AnyClient)
+      .from("company_workers")
+      .select("worker_id, workers(id, display_name)")
+      .eq("status", "active")
+      .limit(MANAGED_WORKER_LIMIT),
+    readAbsences("worker_absence_scheduling"),
+    (supabase as AnyClient).from("workers").select("id").eq("profile_id", userId).limit(5),
+  ]);
+  if (workersRes.error) return { status: "error" };
+
+  type WorkerRow = {
+    worker_id: string;
+    workers: { id: string; display_name: string | null } | null;
+  };
+  const managed = (workersRes.data ?? []) as WorkerRow[];
+  const nameByWorker = new Map<string, string | null>(
+    managed.map((r) => [r.worker_id, r.workers?.display_name ?? null]),
+  );
+
+  let absRes = firstAbsRes;
   if (absRes.error) {
     const code = (absRes.error as { code?: string }).code;
     // The hardened relation is absent on a stack where the owner-gated
@@ -196,11 +226,7 @@ export async function getEmployerWorkerAvailability(
   // 20261011160000 it admits people who joined by invitation (an engagement,
   // no `company_workers` row). Filtering by the roster list hid exactly their
   // approved leave from the employer's plan.
-  const ownRes = await (supabase as AnyClient)
-    .from("workers")
-    .select("id")
-    .eq("profile_id", userId)
-    .limit(5);
+  // (`ownRes` was read in the first stage above.)
   const ownWorkerIds = new Set<string>(
     ((ownRes.data ?? []) as { id: string }[]).map((r) => r.id),
   );

@@ -31,6 +31,8 @@ export type AiProviderAdapterId =
   | "deepl"
   | "libretranslate"
   | "cloudflare"
+  | "mistral"
+  | "groq"
   | "meta_llama"
   | "xai"
   | "sora";
@@ -128,14 +130,35 @@ export const PROVIDER_ADAPTER_REGISTRY: readonly AiProviderAdapterDescriptor[] =
   },
   {
     id: "cloudflare",
-    displayName: "Cloudflare Workers AI (m2m100)",
+    displayName: "Cloudflare Workers AI (m2m100 + free-allocation LLMs)",
     status: "wired_env_gated",
-    capabilities: ["translate_message"],
+    capabilities: [...LLM_TASKS, "explain_market_demand"],
     notes:
-      "Real ai/run wire in providers/cloudflare.ts (free-allocation model only), reached " +
-      "ONLY via the translate_message secondary walk. Inert unless AI_CLOUDFLARE_ENABLED=true + " +
-      "CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN; external free tier, so the egress gate " +
-      "refuses private message text until the owner reclassifies it.",
+      "Two wires, one vendor switch: the m2m100 ai/run wire in providers/cloudflare.ts " +
+      "(translate_message secondary walk) and the OpenAI-compatible /ai/v1 chain binding " +
+      "in providers/free-tier.ts (Gemma 4 / Mistral Small / gpt-oss, priced per Neuron, " +
+      "10,000 Neurons/day free). Inert unless AI_CLOUDFLARE_ENABLED=true + CLOUDFLARE_ACCOUNT_ID + " +
+      "CLOUDFLARE_API_TOKEN; external free tier, so the egress gate sends PUBLIC payloads only.",
+  },
+  {
+    id: "mistral",
+    displayName: "Mistral AI (free Experiment plan)",
+    status: "wired_env_gated",
+    capabilities: [...LLM_TASKS, "explain_market_demand"],
+    notes:
+      "OpenAI-compatible chain binding in providers/free-tier.ts (api.mistral.ai). Inert unless " +
+      "AI_MISTRAL_ENABLED=true + MISTRAL_API_KEY; free tier that trains by default, so the " +
+      "egress gate sends PUBLIC payloads only.",
+  },
+  {
+    id: "groq",
+    displayName: "Groq (free plan)",
+    status: "wired_env_gated",
+    capabilities: [...LLM_TASKS, "explain_market_demand"],
+    notes:
+      "OpenAI-compatible chain binding in providers/free-tier.ts (api.groq.com/openai/v1). Inert " +
+      "unless AI_GROQ_ENABLED=true + GROQ_API_KEY; free tier, US storage, so the egress gate " +
+      "sends PUBLIC payloads only.",
   },
   {
     id: "meta_llama",

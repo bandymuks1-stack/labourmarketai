@@ -179,7 +179,7 @@ export async function computeProductMetrics(client: SupabaseClient, now: number 
   const since = new Date(now - 7 * DAY).toISOString();
   const ai = await client
     .from("ai_runs")
-    .select("latency_ms, schema_validation, fallback_applied, blocked_reason, actual_cost_usd, estimated_cost_usd")
+    .select("provider, latency_ms, schema_validation, fallback_applied, blocked_reason, actual_cost_usd, estimated_cost_usd")
     .gte("created_at", since)
     .limit(20_000);
   if (ai.error) unknown.push({ source: "ai_runs", reason: ai.error.code ?? "read_failed" });
@@ -194,6 +194,12 @@ export async function computeProductMetrics(client: SupabaseClient, now: number 
   tech("ai_runs_failed_validation_7d", runs.filter((a) => a.schema_validation === "failed" || a.schema_validation === "invalid").length, "ai_runs.schema_validation", "output failed its schema");
   tech("ai_runs_fallback_7d", runs.filter((a) => a.fallback_applied === true).length, "ai_runs.fallback_applied", "fell back to another model or a deterministic answer");
   tech("ai_runs_blocked_7d", runs.filter((a) => !!a.blocked_reason).length, "ai_runs.blocked_reason", "refused before the call");
+  // provider = 'disabled': a person reached an AI surface and the runtime had
+  // no provider to answer (AI_PROVIDER_MODE off, unknown provider or no key —
+  // `providerKindFor` in lib/ai/runtime/config-core.ts). Such a run carries no
+  // blocked_reason, no failed schema and no fallback, so before this count the
+  // monitor read a fully switched-off AI runtime as healthy.
+  tech("ai_runs_runtime_disabled_7d", runs.filter((a) => a.provider === "disabled").length, "ai_runs.provider", "no AI provider was configured to answer (runtime disabled)");
   tech("ai_cost_usd_7d", Math.round(100 * runs.reduce((s, a) => s + Number(a.actual_cost_usd ?? a.estimated_cost_usd ?? 0), 0)) / 100, "ai_runs.actual_cost_usd (else estimated)", "sum");
 
   const cur = await client.from("vacancy_import_cursors").select("provider_key, last_success_at");

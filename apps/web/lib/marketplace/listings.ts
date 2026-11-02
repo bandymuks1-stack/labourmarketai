@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { toActiveLocale } from "@/lib/i18n/config";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { hideQaMarked, isQaViewer } from "@/lib/marketplace/qa-marked";
@@ -35,6 +36,8 @@ import {
 } from "@/lib/marketplace/market-model";
 import { assessPublish } from "@/lib/marketplace/publish-policy";
 import { readFederatedMarketRows } from "@/lib/marketplace/federation";
+import { actionForStatus, listingAdapter } from "@/lib/market-lifecycle/adapters";
+import { transition, type EntryAction } from "@/lib/market-lifecycle/contract";
 import {
   filterByDirection,
   indexRowActor,
@@ -164,7 +167,9 @@ export async function listMyMarketplaceListings(): Promise<MarketplaceListingLis
   }
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
-    return { kind: "ok", rows: [], extended };
+    // A 42501 / 57014 / RLS refusal used to render as "no listings" — an
+    // UNKNOWN shown as ZERO (audit 2026-10-16, M-2).
+    return { kind: "unavailable" };
   }
   return {
     kind: "ok",
@@ -328,7 +333,7 @@ async function discoverIndexRows(filters?: {
       extended: true,
     };
   }
-  if (!isAbsent(error)) return { kind: "ok", rows: [], extended: true };
+  if (!isAbsent(error)) return { kind: "unavailable" };
 
   // Legacy fallback (index view not applied yet): work resources only.
   if (domainFilter && domainFilter !== "work_resource") {
@@ -349,7 +354,7 @@ async function discoverIndexRows(filters?: {
   const legacy = await lq;
   if (legacy.error) {
     if (isAbsent(legacy.error)) return { kind: "needs-migration" };
-    return { kind: "ok", rows: [], extended: false };
+    return { kind: "unavailable" };
   }
   const rows: MarketplaceDiscoveryRow[] = (legacy.data ?? []).map(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -592,15 +597,29 @@ export async function setMarketplaceListingStatusAction(
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-authed" };
 
+  // THE ONE LIFECYCLE CONTRACT (lib/market-lifecycle): the requested status
+  // must be what one of the contract's actions produces from the row's
+  // current state — for the UI, the MCP tool and any other door alike.
+  const { data: row, error: readError } = await asAny(supabase)
+    .from("marketplace_listings")
+    .select("status, category, listing_kind, title, description, owner_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (readError) {
+    if (isAbsent(readError)) return { kind: "needs-migration" };
+    return { kind: "error", message: "status_failed" };
+  }
+  if (!row || row.owner_id !== user.id) return { kind: "invalid", field: "id" };
+  if (row.status === status) return { kind: "ok", id };
+  const adapter = listingAdapter({ pauseSupported: true, closedOutcomeStored: false });
+  if (!actionForStatus(adapter, adapter.facts({ status: String(row.status) }), status)) {
+    return { kind: "invalid", field: "status" };
+  }
+
   if (status === "active") {
     // Publishing is where the policy bites (the RPC and the DB trigger apply
     // the registry half; the text-aware half is here).
-    const { data: row } = await asAny(supabase)
-      .from("marketplace_listings")
-      .select("category, listing_kind, title, description, owner_id")
-      .eq("id", id)
-      .maybeSingle();
-    if (row && row.owner_id === user.id) {
+    {
       const verdict = assessPublish({
         subject: row.category,
         listingKind: row.listing_kind,
@@ -639,6 +658,23 @@ export async function setMarketplaceListingStatusAction(
   return { kind: "ok", id };
 }
 
+/**
+ * A contract action on an own listing (publish, pause, resume, complete,
+ * withdraw) — resolved to the status the contract targets, then written by
+ * the one status door above, which re-checks the same contract.
+ */
+export async function applyMarketplaceListingAction(
+  id: string,
+  action: EntryAction,
+  currentStatus: string,
+  legalCheckAcknowledged = false,
+): Promise<MarketplaceListingMutateResult> {
+  const adapter = listingAdapter({ pauseSupported: true, closedOutcomeStored: false });
+  const target = action === "edit" ? null : transition(adapter.support, adapter.facts({ status: currentStatus }), action);
+  if (!target) return { kind: "invalid", field: "action" };
+  return setMarketplaceListingStatusAction(id, adapter.statusFor(target.state), legalCheckAcknowledged);
+}
+
 export async function deleteMarketplaceListingAction(
   id: string,
 ): Promise<MarketplaceListingMutateResult> {
@@ -671,7 +707,9 @@ export async function deleteMarketplaceListingAction(
  */
 export async function enquireAboutListingAction(formData: FormData): Promise<void> {
   const listingId = String(formData.get("listingId") ?? "");
-  const locale = String(formData.get("locale") ?? "lt");
+  // Clamped to the active set: a form-supplied "/evil.com" must never
+  // become the protocol-relative redirect "//evil.com/…".
+  const locale = toActiveLocale(String(formData.get("locale") ?? ""));
   const cannotOpen = `/${locale}/dashboard/communication?notice=cannot_open`;
   if (!listingId) redirect(cannotOpen);
 

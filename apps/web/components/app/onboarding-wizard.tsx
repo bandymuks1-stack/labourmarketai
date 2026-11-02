@@ -1,12 +1,12 @@
 "use client";
 
-import { type ReactNode, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { type ReactNode, useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { completeOnboarding, type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 import { RoleIcon } from "@/components/app/role-icon";
-import { trackFunnel } from "@/lib/telemetry/task";
+import { trackFunnel, trackFunnelFailure } from "@/lib/telemetry/task";
 import { getFirstTouchAttribution } from "@/lib/telemetry/attribution";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { DarkListbox } from "@/components/ui/DarkListbox";
@@ -35,6 +35,41 @@ import {
   nextPathForIntents,
   type FirstRunIntent,
 } from "@/lib/onboarding/first-run-intent";
+
+/** This tab's onboarding draft (step, intents, country) — sessionStorage only,
+ *  never the name or any free text. Every access is guarded: storage may be
+ *  unavailable (private mode, blocked site data) and the wizard must work. */
+const ONBOARDING_DRAFT_KEY = "lm.onboarding.draft.v1";
+type OnboardingDraft = { step: 1 | 2; intents: string[]; country: string };
+function readOnboardingDraft(): OnboardingDraft | null {
+  try {
+    const raw = window.sessionStorage.getItem(ONBOARDING_DRAFT_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw) as Partial<OnboardingDraft>;
+    if (!Array.isArray(d.intents) || (d.step !== 1 && d.step !== 2)) return null;
+    return {
+      step: d.step,
+      intents: d.intents.filter((i): i is string => typeof i === "string").slice(0, 12),
+      country: typeof d.country === "string" ? d.country.slice(0, 8) : "",
+    };
+  } catch {
+    return null;
+  }
+}
+function writeOnboardingDraft(d: OnboardingDraft): void {
+  try {
+    window.sessionStorage.setItem(ONBOARDING_DRAFT_KEY, JSON.stringify(d));
+  } catch {
+    /* storage unavailable: the wizard simply does not remember */
+  }
+}
+function clearOnboardingDraft(): void {
+  try {
+    window.sessionStorage.removeItem(ONBOARDING_DRAFT_KEY);
+  } catch {
+    /* nothing to clear */
+  }
+}
 
 /** Role cards — the START is intentionally simple (owner directive,
  *  company-role-simplicity-v1): a person either WORKS THEMSELVES or
@@ -266,6 +301,16 @@ export function OnboardingWizard({
   const [educationTypeSlug, setEducationTypeSlug] = useState<string>("other");
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // A field that failed validation is named AT the field (aria-invalid +
+  // aria-describedby + the message right under it) and focused — the error
+  // line above the submit button sat ~700 px below the country field on a
+  // phone, with the field itself unmarked (UX review 2026-10-24, 1.4).
+  const [fieldError, setFieldError] = useState<"name" | "country" | null>(null);
+  const fieldIds = useId();
+  const nameInputId = `${fieldIds}-name`;
+  const nameErrorId = `${fieldIds}-name-error`;
+  const countryButtonId = `${fieldIds}-country`;
+  const countryErrorId = `${fieldIds}-country-error`;
 
   // Activation funnel (P0-A): the wizard mounting = onboarding started.
   const startedRef = useRef(false);
@@ -274,6 +319,41 @@ export function OnboardingWizard({
     startedRef.current = true;
     trackFunnel(FUNNEL_EVENTS.onboardingStarted);
   }, []);
+
+  // KEEP THE PLACE (activation audit 2026-10-26): step, intents and country
+  // lived only in React state, so a reload, a language switch or Back sent a
+  // person who had reached step 2 to step 1 again — production showed the
+  // people who never finished restarting the wizard ~3x as often as those
+  // who did. The draft rides in sessionStorage (this tab only, no server, no
+  // personal text — the name stays out), is restored once after hydration
+  // and cleared when onboarding completes. Storage can be unavailable
+  // (private mode): every access is guarded and the wizard works without it.
+  const draftRestoredRef = useRef(false);
+  useEffect(() => {
+    if (draftRestoredRef.current) return;
+    draftRestoredRef.current = true;
+    const draft = readOnboardingDraft();
+    if (!draft) return;
+    const restored = draft.intents.filter((i) => (FIRST_RUN_INTENTS as readonly string[]).includes(i)) as FirstRunIntent[];
+    if (restored.length > 0) setIntents(new Set(restored));
+    if (draft.country && countryOptions.some((o) => o.value === draft.country)) setCountry(draft.country);
+    if (draft.step === 2 && restored.length > 0) setStep(2);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- restore exactly once, after hydration
+  }, []);
+  useEffect(() => {
+    if (!draftRestoredRef.current) return;
+    writeOnboardingDraft({ step, intents: [...intents], country });
+  }, [step, intents, country]);
+  // Step 2 opens at its own top, not at step 1's scroll offset (its heading
+  // and first field were off-screen on a phone).
+  const firstStepRenderRef = useRef(true);
+  useEffect(() => {
+    if (firstStepRenderRef.current) {
+      firstStepRenderRef.current = false;
+      return;
+    }
+    if (step === 2) window.scrollTo({ top: 0 });
+  }, [step]);
 
   function toggleIntent(i: FirstRunIntent) {
     setIntents((prev) => {
@@ -295,14 +375,32 @@ export function OnboardingWizard({
   }
 
   function submit() {
-    if (roles.size === 0) return;
+    // Production 2026-10-26: 14 of 19 stuck sign-ups opened the profile step
+    // and none submitted it; a failed check here was invisible. Each refusal
+    // now names itself (bounded code, no PII) so the drop-off has a cause.
+    const refuse = (code: string) =>
+      trackFunnelFailure(FUNNEL_EVENTS.onboardingStepProfileCompleted, code, { step: "profile" });
+    if (roles.size === 0) {
+      // Was a silent return: the button did nothing. Say why and go back.
+      refuse("no_role");
+      setError(t("error_role_required"));
+      setStep(1);
+      return;
+    }
     setError(null);
+    setFieldError(null);
     if (!displayName.trim()) {
-      setError(t("error_name_required"));
+      refuse("name_missing");
+      setFieldError("name");
+      document.getElementById(nameInputId)?.focus();
       return;
     }
     if (!country) {
-      setError(t("error_country_required"));
+      refuse("country_missing");
+      setFieldError("country");
+      const toggle = document.getElementById(countryButtonId);
+      toggle?.scrollIntoView({ block: "center" });
+      toggle?.focus({ preventScroll: true });
       return;
     }
     // NO profession check. A person may not be working right now, may hold
@@ -312,6 +410,7 @@ export function OnboardingWizard({
     // (`bestEvidencedProfession`, guard no-mandatory-profession). An empty
     // field means "not stated here", never "has no profession".
     if (asksForCurrentEducation(intentList) && institutionName.trim().length < 2) {
+      refuse("institution_missing");
       setError(t("step2.errorInstitution"));
       return;
     }
@@ -407,7 +506,10 @@ export function OnboardingWizard({
             console.error("[onboarding] invitation auto-accept failed:", e);
           }
         }
+        // An invitation found WITHOUT its token is accepted by
+        // completeOnboarding on the server, after it settles the role.
         await completeOnboarding(form);
+        clearOnboardingDraft();
         // Reached only if the runtime resolves the action instead of
         // throwing NEXT_REDIRECT — exactly one of these two success
         // paths runs, so the event never double-fires.
@@ -429,6 +531,7 @@ export function OnboardingWizard({
         // await — is the reliable success signal. trackFunnel is
         // fire-and-forget, safe before the rethrow.
         if (e instanceof Error && /NEXT_REDIRECT/.test(e.message)) {
+          clearOnboardingDraft();
           trackFunnel(FUNNEL_EVENTS.onboardingCompleted, {
             ...getFirstTouchAttribution(),
             role_context: primaryRole,
@@ -601,6 +704,11 @@ export function OnboardingWizard({
         >
           {t("rolePicker.continue")}
         </Button>
+        {error && (
+          <p className="text-xs text-state-danger" role="alert">
+            {error}
+          </p>
+        )}
       </div>
     );
   }
@@ -623,12 +731,25 @@ export function OnboardingWizard({
       <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
         {t("display_name_label")}
         <input
+          id={nameInputId}
           name="display_name"
           value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
+          onChange={(e) => {
+            setDisplayName(e.target.value);
+            if (fieldError === "name") setFieldError(null);
+          }}
           required
-          className={inputCls}
+          autoComplete="name"
+          aria-invalid={fieldError === "name" ? true : undefined}
+          aria-describedby={fieldError === "name" ? nameErrorId : undefined}
+          className={fieldError === "name" ? inputCls.replace("border-ink-500", "border-state-danger") : inputCls}
+          data-testid="onboarding-display-name"
         />
+        {fieldError === "name" ? (
+          <span id={nameErrorId} role="alert" className="text-xs text-state-danger" data-testid="onboarding-name-error">
+            {t("error_name_required")}
+          </span>
+        ) : null}
       </label>
 
       {/* SEARCHABLE (owner direction 2026-09-27). The list is every ISO
@@ -654,7 +775,10 @@ export function OnboardingWizard({
         <DarkListbox
           name="country"
           value={country}
-          onChange={setCountry}
+          onChange={(next) => {
+            setCountry(next);
+            if (fieldError === "country") setFieldError(null);
+          }}
           options={countryOptions}
           placeholder={t("country_placeholder")}
           ariaLabel={t("country_label")}
@@ -663,7 +787,15 @@ export function OnboardingWizard({
           searchPlaceholder={t("country_search_placeholder")}
           searchEmptyLabel={t("country_search_empty")}
           testId="onboarding-country"
+          buttonId={countryButtonId}
+          invalid={fieldError === "country"}
+          describedBy={fieldError === "country" ? countryErrorId : undefined}
         />
+        {fieldError === "country" ? (
+          <span id={countryErrorId} role="alert" className="text-xs text-state-danger" data-testid="onboarding-country-error">
+            {t("error_country_required")}
+          </span>
+        ) : null}
       </div>
 
       {/* WHAT WORK THIS PERSON DOES — asked here because this is the moment

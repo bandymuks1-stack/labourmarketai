@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 import {
   booleanToTriState,
@@ -50,7 +50,8 @@ const read = (rel: string) => readFileSync(join(webRoot, rel), "utf8");
 // ── (a) vocabularies match the draft SQL exactly ────────────────────────────
 
 // Pinned literals from PR #720's CHECK constraints (worker_languages).
-const SQL_720_LANGS = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
+// 'uk' added by 20261019170000_worker_language_uk_v1 (strict CHECK superset).
+const SQL_720_LANGS = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru", "uk"];
 const SQL_720_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2", "native"];
 // Pinned literals from PR #721's CHECK constraints (workers columns v2).
 const SQL_721_PAY_BASES = ["gross", "net"];
@@ -85,7 +86,11 @@ describe("(a) vocabularies match the draft SQL (PR #720 / PR #721)", () => {
   );
   it("PR #720 SQL (when present in repo) carries the same closed sets", () => {
     if (!existsSync(mig720)) return; // draft not merged — pinned literals rule
-    const sql = readFileSync(mig720, "utf8");
+    // The lang CHECK is #720's plus the 'uk' widening (20261019170000): together
+    // they carry the whole closed set.
+    const sql =
+      readFileSync(mig720, "utf8") +
+      readFileSync(join(dirname(mig720), "20261019170000_worker_language_uk_v1.sql"), "utf8");
     for (const lang of SQL_720_LANGS) expect(sql).toContain(`'${lang}'`);
     for (const level of SQL_720_LEVELS) expect(sql).toContain(`'${level}'`);
     expect(sql).toContain("save_worker_language_v1");

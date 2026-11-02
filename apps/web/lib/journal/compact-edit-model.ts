@@ -293,6 +293,10 @@ export function buildCompactSaveFields(
         // so its parser-derived slugs keep their pre-existing metric-only
         // behaviour (no silent self-declaration from a time confirm).
         selected: r.skillSlug !== null,
+        // Added (or re-ticked, which re-adds the row) in THIS session — the
+        // only rows whose skill may supersede an earlier dispute of it. A
+        // preloaded persisted row never does, however it was edited.
+        reselected: r.skillSlug !== null && r.origin === "added",
         // PROVENANCE (issue #1689): a persisted fragment the worker did not
         // touch keeps the source it was saved with (`ai_extracted` stays a
         // machine reading); a row the worker edited or added is their input.

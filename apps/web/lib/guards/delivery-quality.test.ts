@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Wagon 11 — Delivery & Quality guard. Defects + corrections; project-scoped,
@@ -74,7 +75,7 @@ describe("delivery-quality code degrades honestly", () => {
 });
 
 describe("quality strings exist in every active-parity locale", () => {
-  for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+  for (const loc of activeLocales) {
     it(`${loc} has quality with all defect statuses`, () => {
       const msgs = JSON.parse(read(`messages/${loc}.json`));
       expect(msgs.quality?.title, loc).toBeTruthy();

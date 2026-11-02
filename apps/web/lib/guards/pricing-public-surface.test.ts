@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Public pricing surface guard (launch repair Scope C).
@@ -64,7 +65,7 @@ describe("the test checkout is reachable only behind the superadmin gate", () =>
 });
 
 describe("concierge offer copy exists and stays honest", () => {
-  for (const locale of ["en", "lt", "ru"] as const) {
+  for (const locale of activeLocales) {
     it(`${locale} conciergeOffer namespace is complete`, () => {
       const catalog = JSON.parse(read(`messages/${locale}.json`)) as {
         conciergeOffer?: {

@@ -3,6 +3,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { readVerifiedSessionEmail } from "@/lib/auth/verified-email-gate";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 
 /**
  * Canonical-journey P3 — claim bridge: public /company-need intake → the
@@ -134,6 +135,9 @@ export type ClaimIntakeResult =
         | "email_unverified"
         | "not_yours"
         | "not_claimable"
+        /** The account already has an open company draft: claiming would
+         *  overwrite it (one draft per profile + kind). Nothing changed. */
+        | "draft_exists"
         | "needs_migration"
         | "error";
     };
@@ -205,14 +209,42 @@ export async function claimPublicIntake(intakeId: string): Promise<ClaimIntakeRe
       join([intake.urgency, intake.engagement_type], "; ").slice(0, 500) || undefined,
   };
 
+  // NEVER OVER AN OPEN DRAFT (audit 2026-10-20): the draft save keeps ONE
+  // draft per profile + kind, so claiming a second intake — or one while the
+  // wizard draft was open — replaced that draft's content, and the earlier
+  // intake was already marked converted, so it could never be claimed again.
+  // The person finishes or discards their draft first; nothing is lost.
+  const {
+    data: { user: sessionUser },
+  } = await supabase.auth.getUser();
+  if (!sessionUser) return { ok: false, reason: "not_authenticated" };
+  const { data: openDraft, error: openDraftErr } = await asAny(supabase)
+    .from("customer_requests")
+    .select("id")
+    .eq("profile_id", sessionUser.id)
+    .eq("kind", "company_request")
+    .eq("status", "draft")
+    .limit(1);
+  if (openDraftErr) return { ok: false, reason: "error" };
+  if (Array.isArray(openDraft) && openDraft.length > 0) return { ok: false, reason: "draft_exists" };
+
   // Owner-scoped draft upsert — the SAME canonical path the dashboard draft
-  // form uses (customer_requests, status='draft', kind='company_request').
-  const { error: draftErr } = await asAny(supabase).rpc("save_demand_draft", {
+  // form uses (customer_requests, status='draft', kind='company_request'),
+  // stamped with the company the person is acting for (v2), like the form.
+  const employer = await requireEmployerCompany();
+  const draftArgs = {
     p_kind: "company_request",
     p_title: payload.title ?? intake.company_name ?? null,
     p_payload: payload,
     p_original_language: "lt",
+  };
+  let { error: draftErr } = await asAny(supabase).rpc("save_demand_draft_v2", {
+    ...draftArgs,
+    p_organization_id: employer.ok ? employer.organizationId : null,
   });
+  if (draftErr && ["42883", "PGRST202"].includes((draftErr as { code?: string }).code ?? "")) {
+    ({ error: draftErr } = await asAny(supabase).rpc("save_demand_draft", draftArgs));
+  }
   if (draftErr) {
     if ((draftErr as { code?: string }).code === "42883") {
       return { ok: false, reason: "needs_migration" };

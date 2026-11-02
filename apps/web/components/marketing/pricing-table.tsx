@@ -1,9 +1,9 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/lib/i18n/navigation";
+import { TrackedCta } from "@/components/app/tracked-cta";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 import { getPlans, PLAN_SLUGS } from "@/lib/marketing/plans";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
-import { getBillingConfig } from "@/lib/billing/config";
+import { getBillingConfigFor } from "@/lib/billing/config";
 import { isStripeActive } from "@/lib/billing/config-core";
 
 /**
@@ -26,14 +26,18 @@ export async function PricingTable() {
   const locale = await getLocale();
   const rows = await getPlans(); // null if Supabase unreachable in preview
   const confirmed = PRICING_READINESS_STATE === "owner_confirmed";
-  const billingOn = isStripeActive(getBillingConfig());
+  const billingOn = isStripeActive(getBillingConfigFor(null));
   const cardClass = "flex flex-col card-border p-6";
 
   return (
     <section className="mx-auto grid max-w-container gap-6 px-6 pb-16 sm:px-12 lg:grid-cols-3">
       {PLAN_SLUGS.map((slug) => {
         const row = rows?.find((r) => r.slug === slug);
-        const dbName = locale === "lt" ? row?.name_lt : row?.name_en;
+        // The plans table carries a name in LT and EN only. Every other locale
+        // reads its own catalog name — a German reader was shown the English
+        // DB name although `pricing.plans.<slug>.name` exists in German.
+        const dbName =
+          locale === "lt" ? row?.name_lt : locale === "en" ? row?.name_en : undefined;
         const name = dbName ?? t(`plans.${slug}.name`);
         const features = t.raw(`plans.${slug}.features`) as string[];
         const price = confirmed && typeof row?.price_eur_monthly === "number" ? row.price_eur_monthly : null;
@@ -90,13 +94,14 @@ export async function PricingTable() {
 
             <div className="mt-6">
               {billingOn && confirmed ? (
-                <Link
+                <TrackedCta
                   href="/dashboard/account"
+                  ctaId={`pricing_plan_${slug}`}
                   className="text-sm font-semibold text-brand-blue hover:underline"
                   data-testid={`pricing-cta-${slug}`}
                 >
                   {price === 0 ? t("ctaStartFree") : t("ctaSubscribe")}
-                </Link>
+                </TrackedCta>
               ) : (
                 <WaitlistModal
                   trigger={t("planCta")}
@@ -121,13 +126,15 @@ export async function PricingTable() {
         </p>
         <p className="mt-3 flex-1 text-sm text-text-secondary">{t("individual.body")}</p>
         <div className="mt-6">
-          <Link
+          <TrackedCta
             href="/company-need"
+            ctaId="pricing_individual_need"
+            audience="companies"
             className="text-sm font-semibold text-brand-blue hover:underline"
             data-testid="pricing-cta-individual"
           >
             {t("individual.cta")}
-          </Link>
+          </TrackedCta>
         </div>
       </div>
     </section>

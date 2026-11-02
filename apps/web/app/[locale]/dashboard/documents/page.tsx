@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import type { CredentialValidityState } from "@/lib/documents/credential-validity";
 
 import { Link } from "@/lib/i18n/navigation";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { readMyPreferredCountries } from "@/lib/documents/my-countries";
 import {
@@ -10,6 +11,7 @@ import {
 } from "@/lib/config/documents";
 import {
   computeCountryReadiness,
+  documentReadinessScope,
   type DerivedDocumentStatus,
 } from "@/lib/documents/readiness";
 import { unmatchableRequirementRows } from "@/lib/country-readiness/requirement-rows";
@@ -47,6 +49,11 @@ import {
 } from "@/lib/readiness/worker-readiness";
 import type { Role } from "@/lib/auth/actions";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/documents", "documents.title");
+
 
 /**
  * "Mano dokumentai" — the document & work-proof centre (control room PR H,
@@ -215,15 +222,11 @@ export default async function WorkerDocumentsPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  let activeRole: Role | null = null;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("active_role")
-      .eq("id", user.id)
-      .single();
-    activeRole = (profile?.active_role as Role | null) ?? null;
-  }
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const activeRole: Role | null = user
+    ? (((await getSessionProfile()).profile?.active_role as Role | null) ?? null)
+    : null;
 
   const sp = await searchParams;
 
@@ -324,9 +327,15 @@ export default async function WorkerDocumentsPage({
   // constant so the disabled branch issues exactly the queries it issued
   // before (today the constant is `true`, so that arm is unreachable; guarding
   // it keeps this change semantics-preserving if it is ever flipped).
-  const [centre, docsConsent] = await Promise.all([
+  //
+  // The person's preferred countries (below) depend only on the session too,
+  // so they start in the same batch instead of as a further serial stage.
+  const [centre, docsConsent, myCountries] = await Promise.all([
     getWorkerDocumentCentre(),
     DOCUMENTS_READINESS_ENABLED ? getDocsConsent() : Promise.resolve(null),
+    DOCUMENTS_READINESS_ENABLED && user
+      ? readMyPreferredCountries(user.id)
+      : Promise.resolve([] as string[]),
   ]);
 
   if (!DOCUMENTS_READINESS_ENABLED) {
@@ -360,7 +369,7 @@ export default async function WorkerDocumentsPage({
   // (workers.preferred_countries, owner-scoped by RLS) lead the chip row. It
   // only orders the chips and selects nothing: a preference is not a right
   // to work, and the checklist still appears only after the person picks.
-  const myCountries = user ? await readMyPreferredCountries(user.id) : [];
+  // (Read in the batch above.)
   const orderedCountries = [
     ...DOCUMENT_COUNTRIES.filter((c) => myCountries.includes(c)),
     ...DOCUMENT_COUNTRIES.filter((c) => !myCountries.includes(c)),
@@ -574,6 +583,9 @@ export default async function WorkerDocumentsPage({
                   <li
                     key={d.id}
                     className="card-border glow-hover rise-in flex flex-wrap items-center justify-between gap-2 p-3"
+                    data-testid="doc-centre-item"
+                    data-type={d.documentTypeSlug}
+                    data-country={d.country ?? ""}
                     data-status={d.derivedStatus}
                   >
                     <div className="flex min-w-0 flex-col gap-0.5">
@@ -814,6 +826,17 @@ export default async function WorkerDocumentsPage({
                     <p className="text-meta text-text-muted">
                       {t("scopeNote")}
                     </p>
+                    {/* Base country not stated: whether this work would be a
+                        POSTING is unknown, so the posting papers are not
+                        listed as missing — and the page says why. */}
+                    {!inv.readiness.homeCountry ? (
+                      <p
+                        className="text-meta text-text-muted"
+                        data-testid="documents-posting-needs-base"
+                      >
+                        {t("country.postingNeedsBase")}
+                      </p>
+                    ) : null}
 
                     {/* REQUIREMENTS THAT APPLY AND CANNOT BE CHECKED FROM
                         DOCUMENTS. `matrixRequirementRows` keys on a document
@@ -826,9 +849,11 @@ export default async function WorkerDocumentsPage({
                         folded into the status above — this list changes no
                         count and no overall verdict. */}
                     {(() => {
+                      // The SAME scope the checklist above was built in:
+                      // posting-only rules only across a known border.
                       const unmatchable = unmatchableRequirementRows(
                         country,
-                        "worker_posted",
+                        documentReadinessScope(country, inv.readiness.homeCountry),
                       );
                       if (unmatchable.length === 0) return null;
                       return (
@@ -939,9 +964,9 @@ export default async function WorkerDocumentsPage({
       <DocsConsentToggle current={docsConsent} />
 
       {/* WAGON 9 (area 17) — Lithuanian-master jurisdiction/document
-          guidance. LT locale renders the full draft registry; other locales
-          see only the "being prepared from the Lithuanian master" notice
-          (owner correction 2026-07-05). */}
+          guidance. LT locale renders the full registry; other locales see
+          only the "available in Lithuanian only" notice (owner correction
+          2026-07-05). */}
       <LtDocumentGuidance locale={locale} />
     </div>
   );

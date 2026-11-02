@@ -29,17 +29,21 @@ function read(rel: string): string {
 }
 
 describe("Guard: AccountMenu component is wired into the dashboard header", () => {
-  const layout = read("app/[locale]/dashboard/layout.tsx");
+  // THE ONE header (rendered by every dashboard chrome mode since 2026-10-25)
+  // is where the account menu lives; the layout no longer authors a header.
+  const header = read("components/app/conversation/chat/conversation-header.tsx");
   const menu = read("components/app/account-menu.tsx");
 
-  it("dashboard layout imports AccountMenu", () => {
-    expect(layout).toMatch(
+  it("the dashboard header imports AccountMenu, and every chrome mode renders that header", () => {
+    expect(header).toMatch(
       /import\s*\{\s*AccountMenu\s*\}\s*from\s*["']@\/components\/app\/account-menu["']/,
     );
+    const chrome = read("components/app/dashboard-chrome.tsx");
+    expect(chrome.match(/<ConversationHeader\b/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
   });
 
-  it("dashboard layout renders <AccountMenu /> in the header", () => {
-    const codeOnly = layout
+  it("the dashboard header renders <AccountMenu />", () => {
+    const codeOnly = header
       .replace(/\/\*[\s\S]*?\*\//g, "")
       .replace(/\/\/[^\n]*\n/g, "");
     expect(codeOnly).toMatch(/<AccountMenu\s*\/>/);

@@ -180,7 +180,11 @@ export function WorkspaceChip() {
     // header's flex row measures, and its default `min-width: auto` floors it
     // at the button's content width — so the button could never actually use
     // the `truncate` it carries.
-    <div className="relative min-w-0" data-testid="workspace-chip">
+    // `flex` (2026-10-25): a BLOCK wrapper sizes the button by its own
+    // `max-w-40`, not by the width the header row hands this wrapper, so a
+    // shrunken wrapper let the button spill 37px over the nav beside it
+    // (measured at 390px). As a flex item the button shrinks with it.
+    <div className="relative flex min-w-0" data-testid="workspace-chip">
       <button
         ref={triggerRef}
         type="button"

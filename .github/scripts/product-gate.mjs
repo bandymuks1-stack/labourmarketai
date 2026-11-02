@@ -28,7 +28,7 @@
 // No network, no env secrets, no writes outside PRODUCT_ARCHITECTURE_DIFF.md.
 
 import { execFileSync } from "node:child_process";
-import { evaluateFindings, waiverContextFromEnv } from "./owner-waivers.mjs";
+import { evaluateFindings, waiverContextFromEnv, waiverValidUntil } from "./owner-waivers.mjs";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
 const REPO_ROOT = process.cwd();
@@ -867,7 +867,11 @@ if (waivedAll) {
   console.log(`  scope       ${w.scope}`);
   console.log(`  pull reqs   ${w.pullRequests.join(", ")}  (this run: ${waiverCtx.pullRequest})`);
   console.log(`  files       ${w.files.join(", ")}`);
-  console.log(`  expires     ${w.expiresAt}  (today: ${waiverCtx.today})`);
+  console.log(
+    `  valid until ${waiverValidUntil(w, waiverCtx.today)}  (${
+      w.ownerSetExpiresAt ? "owner-set term" : `12-month rolling term from ${w.approvedAt}`
+    }; today: ${waiverCtx.today})`,
+  );
   console.log(`  removed by  ${w.resolvedBy} — the waiver MUST be deleted then`);
   console.log(`  reason      ${w.reason}`);
   console.log("");
