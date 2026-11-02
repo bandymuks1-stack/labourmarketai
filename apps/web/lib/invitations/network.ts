@@ -202,16 +202,23 @@ export type IncomingInvitationRow = {
 
 export type IncomingInvitationsRead =
   | { status: "ok"; items: IncomingInvitationRow[] }
+  /** The caller's address is not VERIFIED (database `email_unverified`): what is
+   *  addressed to an email is only shown to that mailbox's proven owner. Distinct
+   *  from "none" and from "error" so the UI can offer the progressive proof. */
+  | { status: "email_unverified" }
   | { status: "needs-migration" }
   | { status: "error" };
 
-/** Pending invitations addressed to the caller's own verified email. */
+/** Pending invitations addressed to the caller's own VERIFIED email. */
 export async function listInvitationsForMe(): Promise<IncomingInvitationsRead> {
   const supabase = await createClient();
   const { data, error } = await asAny(supabase).rpc("list_invitations_for_me_v1");
   if (error) {
     if (error.code === "42883") return { status: "needs-migration" };
     return { status: "error" };
+  }
+  if ((data as { email_unverified?: unknown } | null)?.email_unverified === true) {
+    return { status: "email_unverified" };
   }
   type Item = {
     id: string;

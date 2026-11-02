@@ -34,6 +34,7 @@ export interface WorkerInvitationsLabels {
   readonly outcomeLinked: string;
   readonly outcomeAlreadyLinked: string;
   readonly outcomeNoInvitation: string;
+  readonly outcomeEmailUnverified: string;
   readonly outcomeNoWorker: string;
   readonly outcomeError: string;
   readonly outcomeNeedsMigration: string;
@@ -63,6 +64,8 @@ function InvitationRow({
           return { text: labels.outcomeNoInvitation, ok: false };
         case "no_worker_profile":
           return { text: labels.outcomeNoWorker, ok: false };
+        case "email_unverified":
+          return { text: labels.outcomeEmailUnverified, ok: false };
       }
     }
     if (state.code === "needs_migration")

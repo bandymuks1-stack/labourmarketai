@@ -10,6 +10,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import {
+  inviteTokenFromNextPath,
+  invitationImpliesWorkerContext,
+} from "@/lib/invitations/model";
+import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
 import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
 import { DOOR_WORDS_KEY, readLandingHandoff } from "@/lib/onboarding/landing-handoff";
 
@@ -47,6 +52,23 @@ export default async function OnboardingPage({
         .map((key) => tDoors(key))
         .join(" · ") || null
     : null;
+
+  // FRICTIONLESS ADDRESSED INVITE (owner decision 2026-10-06): when the
+  // invitation the person arrived through canonically implies a worker, the
+  // first-run role picker asks nothing the invitation already answered. Narrow
+  // by construction (invitationImpliesWorkerContext): every ambiguous kind
+  // still shows the picker.
+  const inviteToken = inviteTokenFromNextPath(safeNext);
+  let impliedWorker = false;
+  if (inviteToken) {
+    const preview = await readPublicInvitationPreview(inviteToken);
+    impliedWorker =
+      preview.kind === "ok" &&
+      invitationImpliesWorkerContext({
+        invitationType: preview.preview.invitationType,
+        externalSourceSlug: preview.preview.externalSourceSlug,
+      });
+  }
 
   const supabase = await createClient();
   // ONE `profiles` read per request. This used to be its own SELECT; it is now
@@ -146,7 +168,9 @@ export default async function OnboardingPage({
           returnTo={safeNext}
           educationTypeOptions={educationTypeOptions}
           saidSentence={handoff.sentence || null}
-          defaultIntents={handoff.intents}
+          defaultIntents={impliedWorker ? ["work"] : handoff.intents}
+          skipRoleStep={impliedWorker}
+          invitationToken={inviteToken}
           defaultProfessionSlug={handoff.professionSlug}
           doorIntents={handoff.door}
           doorWords={doorWords}

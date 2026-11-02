@@ -3948,7 +3948,9 @@
       "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien. Zie je de e-mail niet? Kijk in je spammap — hier kun je een nieuwe link aanvragen.",
       "resend_label": "Link opnieuw sturen",
       "resend_sent": "Opnieuw verstuurd. Controleer je inbox en spammap.",
-      "resend_wait": "Je kunt over {seconds} s een nieuwe link aanvragen."
+      "resend_wait": "Je kunt over {seconds} s een nieuwe link aanvragen.",
+      "invited_email_note": "Dit is het adres waarnaar je uitnodiging is gestuurd.",
+      "show_password": "Wachtwoord tonen"
     },
     "login": {
       "headline": "Inloggen",
@@ -7379,6 +7381,7 @@
     "outcomeLinked": "Gekoppeld. Je bent nu verbonden.",
     "outcomeAlreadyLinked": "Je bent al gekoppeld.",
     "outcomeNoInvitation": "Uitnodiging niet gevonden.",
+    "outcomeEmailUnverified": "Bevestig eerst je e-mail (pagina Netwerk) en accepteer daarna de uitnodiging.",
     "outcomeNoWorker": "Je werknemersprofiel is nog niet gereed.",
     "outcomeError": "Accepteren is niet gelukt. Probeer het opnieuw.",
     "outcomeNeedsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw."
@@ -11689,7 +11692,22 @@
         "declined": "Uitnodiging afgewezen.",
         "no_worker_profile": "Maak eerst uw werkprofiel aan en accepteer daarna de uitnodiging.",
         "not_found": "Uitnodiging niet gevonden.",
-        "error": "Er ging iets mis. Probeer het opnieuw."
+        "error": "Er ging iets mis. Probeer het opnieuw.",
+        "email_unverified": "Bevestig eerst je e-mail en accepteer daarna de uitnodiging."
+      },
+      "verify": {
+        "title": "Bevestig je e-mail om uitnodigingen te zien die ernaar zijn gestuurd",
+        "body": "Uitnodigingen die aan een e-mailadres zijn gericht, worden alleen getoond aan wie dat postvak kan openen. Al het andere in je account werkt zoals het werkte; dit is alleen nodig om deze uitnodigingen te zien of te accepteren.",
+        "send": "Stuur me een eenmalige link",
+        "sending": "Bezig met verzenden…",
+        "sent": "We hebben een eenmalige link naar {email} gestuurd. Open hem op dit apparaat om af te ronden.",
+        "sentNoAddress": "We hebben een eenmalige link naar je e-mailadres gestuurd. Open hem op dit apparaat om af te ronden.",
+        "rateLimited": "Er is zojuist een link verstuurd. Wacht een minuut voordat je een nieuwe aanvraagt.",
+        "alreadyVerified": "Dit e-mailadres is al bevestigd. Ververs de pagina.",
+        "failed": "Die link heeft je e-mail niet bevestigd (mogelijk is hij oud of elders geopend). Je kunt een nieuwe aanvragen.",
+        "error": "We konden de link niet versturen. Probeer het later opnieuw.",
+        "intakeTitle": "Bevestig je e-mail om een eerdere inzending voort te zetten",
+        "intakeBody": "Als je via ons openbare formulier met dit adres een bedrijfsbehoefte hebt ingediend, bevestig dan het adres; dan tonen we die hier zodat je niets opnieuw hoeft te typen. Al het andere werkt zoals het werkte."
       }
     },
     "search": {
@@ -11885,6 +11903,7 @@
         "revoked": "Deze uitnodiging is ingetrokken.",
         "declined": "Uitnodiging afgewezen.",
         "no_worker_profile": "Maak eerst uw werkprofiel aan en accepteer daarna de uitnodiging.",
+        "email_mismatch": "Deze uitnodiging is gericht aan een ander e-mailadres.",
         "not_found": "Uitnodiging niet gevonden.",
         "error": "Er ging iets mis. Probeer het opnieuw.",
         "exhausted": "Alle plaatsen zijn bezet.",
@@ -11907,7 +11926,13 @@
       "agencyClient": "Een uitzendbureau nodigt je bedrijf uit om als klant samen te werken.",
       "agencyClientNext": "Na het accepteren verschijnt het verbindingsverzoek op de pagina Partners van je organisatie — bevestig het daar met je bedrijf. Tot dan wordt er niets gedeeld.",
       "addressedToOther": "Deze uitnodiging is gericht aan {email}. Je bent ingelogd met een ander adres, dus de verbinding kan niet vanuit dit account worden bevestigd — log in met het uitgenodigde adres en open deze link opnieuw.",
-      "switchAccount": "Uitloggen en van account wisselen"
+      "switchAccount": "Uitloggen en van account wisselen",
+      "emailMismatch": {
+        "title": "Deze uitnodiging is voor een ander e-mailadres",
+        "body": "Deze uitnodiging is verstuurd naar {email}. Je bent ingelogd met een ander adres, dus ze kan vanuit dit account niet worden getoond of beantwoord. Log in met het uitgenodigde adres en open deze link opnieuw.",
+        "bodyNoHint": "Deze uitnodiging is verstuurd naar een ander e-mailadres dan dat waarmee je bent ingelogd, dus ze kan vanuit dit account niet worden getoond of beantwoord. Log in met het uitgenodigde adres en open deze link opnieuw.",
+        "untouched": "Er is niets geaccepteerd of gewijzigd. De uitnodiging wacht nog steeds op de persoon aan wie ze is gestuurd."
+      }
     },
     "teamEnquiriesTitle": "Mijn aanvragen aan ploegen",
     "admin": {

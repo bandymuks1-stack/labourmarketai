@@ -1535,6 +1535,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-03: PER-12 subject-safe export projection (new SECURITY DEFINER read fn) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003120000_privacy_export_import_lines_subject_v1.sql",
       "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
+      // 2026-10-04: verified-email boundary (WORKER_REGISTRATION_FRICTION_REMOVAL, #2152). The marker is a risk acknowledgement, not approval.
+      "20261003151000_email_verified_boundary_v1.sql",
+      // 2026-10-04: staff-invitation e-mail binding (token doors refuse an addressed invitation to another e-mail; SECURITY DEFINER bodies) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261003151100_staff_invitation_email_binding_v1.sql",
+      // 2026-10-05: the v1 invitation accept/decline doors lose API EXECUTE (privilege change) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261003151500_invitation_v1_doors_not_api_callable_v1.sql",
+      // 2026-10-06: service-role-only read of the invited address for the frictionless signup page - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261006100500_invitation_signup_context_v1.sql",
 ]);
   });
 

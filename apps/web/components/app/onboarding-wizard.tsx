@@ -15,6 +15,7 @@ import {
   filterCountryOptions,
 } from "@/lib/location/country-options";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
+import { acceptInvitationAfterSignup } from "@/lib/invitations/signup-accept-action";
 import {
   SELF_DECLARED_PROFESSION_MAX_LENGTH,
   normalizeSelfDeclaredProfession,
@@ -78,6 +79,8 @@ export function OnboardingWizard({
   educationTypeOptions,
   saidSentence = null,
   defaultIntents = [],
+  skipRoleStep = false,
+  invitationToken = null,
   defaultProfessionSlug = null,
   doorIntents = [],
   doorWords = null,
@@ -92,6 +95,16 @@ export function OnboardingWizard({
   /** Cards to pre-tick from that sentence (lib/onboarding/landing-handoff):
    *  a DEFAULT the person sees and can untick, not a fact declared for them. */
   defaultIntents?: readonly FirstRunIntent[];
+  /** The invitation the person arrived through already determines the worker
+   *  context (invitationImpliesWorkerContext): start at the profile step. The
+   *  role stays editable only through the normal "change context" paths. */
+  skipRoleStep?: boolean;
+  /** The invitation the person arrived through (token from `next`). When they
+   *  came by a path that did not already accept it (social sign-in returns
+   *  through the OAuth callback), the canonical acceptance continues when they
+   *  finish the profile - the e-mail binding still decides; nothing here grants
+   *  a consent. Already accepted at signup -> `already_accepted`, harmless. */
+  invitationToken?: string | null;
   /** Registry profession the sentence named (exactly one), else null. */
   defaultProfessionSlug?: string | null;
   /** The landing DOOR the person came through, when `returnTo` is exactly
@@ -127,7 +140,7 @@ export function OnboardingWizard({
   // offered the 17 ACTIVE_MARKETS only, so a person in Vietnam, Ireland,
   // Saudi Arabia or the Philippines could not name their own country.
   const countryOptions = useMemo(() => countryOptionsForLocale(locale), [locale]);
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2>(skipRoleStep && defaultIntents.length > 0 ? 2 : 1);
   // Pre-ticked from the landing sentence when one travelled here; the person
   // still sees the tick, can remove it, and must press Continue.
   const [intents, setIntents] = useState<Set<FirstRunIntent>>(
@@ -354,6 +367,13 @@ export function OnboardingWizard({
     });
     start(async () => {
       try {
+        if (invitationToken) {
+          try {
+            await acceptInvitationAfterSignup({ token: invitationToken, locale });
+          } catch (e) {
+            console.error("[onboarding] invitation auto-accept failed:", e);
+          }
+        }
         await completeOnboarding(form);
         // Reached only if the runtime resolves the action instead of
         // throwing NEXT_REDIRECT — exactly one of these two success
@@ -837,14 +857,16 @@ export function OnboardingWizard({
         >
           {pending ? t("saving") : t("step2.continue")}
         </Button>
-        <button
-          type="button"
-          onClick={() => setStep(1)}
-          disabled={pending}
-          className="text-xs text-text-muted hover:text-text-secondary disabled:opacity-60"
-        >
-          {t("back")}
-        </button>
+        {!skipRoleStep && (
+          <button
+            type="button"
+            onClick={() => setStep(1)}
+            disabled={pending}
+            className="text-xs text-text-muted hover:text-text-secondary disabled:opacity-60"
+          >
+            {t("back")}
+          </button>
+        )}
       </div>
     </form>
   );

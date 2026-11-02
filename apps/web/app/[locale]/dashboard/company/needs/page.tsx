@@ -12,7 +12,8 @@ import {
 import { actsAsAgency, resolveNeedsAudience } from "@/lib/company/agency-capability";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
-import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
+import { listClaimablePublicIntakesState } from "@/lib/company/claim-public-intake";
+import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
 import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interest";
 import { readDemandReadbackLabels } from "@/lib/company/company-section-labels";
 import { readOpenNeedsUsage } from "@/lib/billing/open-needs-usage-read";
@@ -107,14 +108,19 @@ export default async function CompanyNeedsPage({
   // with the `partner` intent (agency_offer) for exactly that reason.
   const t = isStaffingAgency ? tNeedsAgency : tNeeds;
 
-  const [demandReadback, claimableIntakes, rPendingInterest, readbackLabels, openNeedsUsage] =
+  const [demandReadback, claimableState, rPendingInterest, readbackLabels, openNeedsUsage] =
     await Promise.all([
       listOwnCustomerRequests(EMPLOYER_DEMAND_KINDS),
-      listClaimablePublicIntakes(),
+      listClaimablePublicIntakesState(),
       listPendingInterestCountsForCompany(),
       readDemandReadbackLabels(),
       readOpenNeedsUsage(),
     ]);
+
+  // An unverified address reads NOTHING from the intake queue (the service role is
+  // never reached); the page offers the progressive proof instead — and says
+  // nothing about whether an intake exists for that address.
+  const claimableIntakes = claimableState.status === "ok" ? claimableState.intakes : [];
 
   // WHO IS WAITING — one localized line per demand that has hands raised.
   // Resolved here because the plural form is a locale rule.
@@ -257,6 +263,11 @@ export default async function CompanyNeedsPage({
 
       {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC
           /company-need submissions continue here as a real draft demand. */}
+      {claimableState.status === "email_unverified" ? (
+        <div id="company-claims-verify" className="scroll-mt-20">
+          <VerifyEmailPrompt locale={locale} next="/dashboard/company/needs" variant="intake" />
+        </div>
+      ) : null}
       {claimableIntakes.length > 0 ? (
         <div id="company-claims" className="scroll-mt-20">
           <ClaimPublicIntakeCard

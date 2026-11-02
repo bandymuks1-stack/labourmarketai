@@ -108,12 +108,16 @@ describe("the recipient is the demand owner, resolved by the write path", () => 
   it("every caller hands over facts from an authoritative return, never the browser", () => {
     const inv = read("lib", "invitations", "actions.ts");
     const calls = inv.split("emitDemandInterestNotification({").slice(1);
-    expect(calls.length).toBe(2);
+    // ONE emit site since the convergence audit (F5): the shared
+    // afterInvitationAccepted helper, which BOTH the token door and the by-id
+    // door call with the RPC's own return and the session user's id.
+    expect(calls.length).toBe(1);
     for (const c of calls) {
       const head = c.slice(0, 400);
       expect(head).toContain("ownerProfileId: (data?.inviter_profile_id ?? null)");
-      expect(head).toContain("actorProfileId: user.id");
+      expect(head).toContain("actorProfileId: userId");
     }
+    expect(inv.match(/await afterInvitationAccepted\(\{\s*userId: user\.id,/g)?.length).toBe(2);
     // Nobody else emits it.
     const emittersOnly = ["lib/opportunities/interest.ts", "lib/invitations/actions.ts"];
     expect(emittersOnly.length).toBe(2);

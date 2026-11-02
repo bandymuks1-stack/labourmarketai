@@ -3948,7 +3948,9 @@
       "check_email_body": "Wysłaliśmy link potwierdzający na adres {email}. Otwórz go, aby dokończyć tworzenie konta. Jeśli go nie widzisz, sprawdź folder spam — możesz też poprosić tutaj o nowy link.",
       "resend_label": "Wyślij link ponownie",
       "resend_sent": "Wysłano ponownie. Sprawdź skrzynkę odbiorczą i folder spam.",
-      "resend_wait": "O nowy link możesz poprosić za {seconds} s."
+      "resend_wait": "O nowy link możesz poprosić za {seconds} s.",
+      "invited_email_note": "To adres, na który wysłano zaproszenie.",
+      "show_password": "Pokaż hasło"
     },
     "login": {
       "headline": "Zaloguj się",
@@ -7379,6 +7381,7 @@
     "outcomeLinked": "Połączono. Jesteś teraz połączony.",
     "outcomeAlreadyLinked": "Jesteś już połączony.",
     "outcomeNoInvitation": "Nie znaleziono zaproszenia.",
+    "outcomeEmailUnverified": "Najpierw potwierdź e-mail (strona Sieć), a potem przyjmij zaproszenie.",
     "outcomeNoWorker": "Twój profil pracownika nie jest jeszcze gotowy.",
     "outcomeError": "Nie udało się zaakceptować. Spróbuj ponownie.",
     "outcomeNeedsMigration": "Nie udało się wykonać czynności. Spróbuj ponownie."
@@ -11689,7 +11692,22 @@
         "declined": "Zaproszenie odrzucone.",
         "no_worker_profile": "Najpierw utwórz profil pracownika, a następnie zaakceptuj zaproszenie.",
         "not_found": "Nie znaleziono zaproszenia.",
-        "error": "Coś poszło nie tak. Spróbuj ponownie."
+        "error": "Coś poszło nie tak. Spróbuj ponownie.",
+        "email_unverified": "Najpierw potwierdź e-mail, a potem przyjmij zaproszenie."
+      },
+      "verify": {
+        "title": "Potwierdź e-mail, aby zobaczyć zaproszenia wysłane na ten adres",
+        "body": "Zaproszenia zaadresowane na adres e-mail są pokazywane tylko osobie, która może otworzyć tę skrzynkę. Wszystko inne na koncie działa jak dotąd; potwierdzenie jest potrzebne tylko do zobaczenia lub przyjęcia tych zaproszeń.",
+        "send": "Wyślij mi jednorazowy link",
+        "sending": "Wysyłanie…",
+        "sent": "Wysłaliśmy jednorazowy link na {email}. Otwórz go na tym urządzeniu, aby dokończyć.",
+        "sentNoAddress": "Wysłaliśmy jednorazowy link na Twój adres e-mail. Otwórz go na tym urządzeniu, aby dokończyć.",
+        "rateLimited": "Link został wysłany chwilę temu. Poczekaj minutę, zanim poprosisz o kolejny.",
+        "alreadyVerified": "Ten adres e-mail jest już potwierdzony. Odśwież stronę.",
+        "failed": "Ten link nie potwierdził Twojego e-mail (może być stary lub otwarty gdzie indziej). Możesz poprosić o nowy.",
+        "error": "Nie udało się wysłać linku. Spróbuj ponownie później.",
+        "intakeTitle": "Potwierdź e-mail, aby kontynuować wcześniejsze zgłoszenie",
+        "intakeBody": "Jeśli przez nasz publiczny formularz zgłosiłeś potrzebę firmy z tego adresu, potwierdź adres, a pokażemy ją tutaj, abyś nie musiał wpisywać wszystkiego ponownie. Wszystko inne działa jak dotąd."
       }
     },
     "search": {
@@ -11885,6 +11903,7 @@
         "revoked": "To zaproszenie zostało cofnięte.",
         "declined": "Zaproszenie odrzucone.",
         "no_worker_profile": "Najpierw utwórz profil pracownika, a następnie zaakceptuj zaproszenie.",
+        "email_mismatch": "To zaproszenie jest zaadresowane do innego adresu e-mail.",
         "not_found": "Nie znaleziono zaproszenia.",
         "error": "Coś poszło nie tak. Spróbuj ponownie.",
         "exhausted": "Wszystkie miejsca są zajęte.",
@@ -11907,7 +11926,13 @@
       "agencyClient": "Agencja pracy zaprasza Twoją firmę do współpracy jako klienta.",
       "agencyClientNext": "Po zaakceptowaniu prośba o połączenie pojawi się na stronie Partnerzy Twojej organizacji — potwierdź ją tam w imieniu swojej firmy. Do tego czasu nic nie jest udostępniane.",
       "addressedToOther": "To zaproszenie zostało zaadresowane do {email}. Jesteś zalogowany(a) innym adresem, więc z tego konta nie można potwierdzić połączenia — zaloguj się zaproszonym adresem i otwórz ten link ponownie.",
-      "switchAccount": "Wyloguj się i zmień konto"
+      "switchAccount": "Wyloguj się i zmień konto",
+      "emailMismatch": {
+        "title": "To zaproszenie jest przeznaczone dla innego adresu e-mail",
+        "body": "To zaproszenie zostało wysłane na adres {email}. Jesteś zalogowany(a) innym adresem, więc z tego konta nie można go wyświetlić ani na nie odpowiedzieć. Zaloguj się zaproszonym adresem i otwórz ten link ponownie.",
+        "bodyNoHint": "To zaproszenie zostało wysłane na inny adres e-mail niż ten, którym jesteś zalogowany(a), więc z tego konta nie można go wyświetlić ani na nie odpowiedzieć. Zaloguj się zaproszonym adresem i otwórz ten link ponownie.",
+        "untouched": "Nic nie zostało przyjęte ani zmienione. Zaproszenie nadal czeka na osobę, do której je wysłano."
+      }
     },
     "teamEnquiriesTitle": "Moje zapytania do zespołów",
     "admin": {

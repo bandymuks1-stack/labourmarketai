@@ -59,6 +59,8 @@ type Preview = {
   invitation_type?: string;
   status?: string;
   invited_email?: string | null;
+  /** Only on outcome `email_mismatch`: first character + domain, nothing else. */
+  invited_email_hint?: string | null;
   invited_name?: string | null;
   proposed_role?: string | null;
   personal_message?: string | null;
@@ -105,6 +107,7 @@ const NOTICES = new Set([
   "revoked",
   "declined",
   "no_worker_profile",
+  "email_mismatch",
   "not_found",
   "error",
   "referral_accepted",
@@ -270,6 +273,52 @@ export default async function InvitePage({
   }
 
   const preview = (data ?? { outcome: "not_found" }) as Preview;
+  // ADDRESSED TO SOMEONE ELSE (20261003151100). The invitation carries an
+  // invited e-mail and the signed-in session is not it: the database refuses
+  // to show or answer it. The truthful thing to say is exactly that — with
+  // the masked addressee when one is known — and to offer the way forward:
+  // sign in with the invited address. Nothing was accepted, declined or
+  // consumed; the real invitee's link is untouched.
+  if (preview.outcome === "email_mismatch") {
+    return shell(
+      <>
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+          {t("eyebrow")}
+        </p>
+        <h1 className="font-display text-2xl font-bold text-text-primary">
+          {t("emailMismatch.title")}
+        </h1>
+        <div
+          role="status"
+          className="flex flex-col gap-3 rounded-md border border-state-warning/50 bg-state-warning/10 p-4 text-sm text-text-secondary"
+          data-testid="invite-email-mismatch"
+        >
+          <p>
+            {preview.invited_email_hint
+              ? t("emailMismatch.body", { email: preview.invited_email_hint })
+              : t("emailMismatch.bodyNoHint")}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href={`/${locale}/auth/logout`}
+              className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 py-2 text-sm text-text-secondary hover:border-brand-blue hover:text-text-primary"
+              data-testid="invite-switch-account"
+            >
+              {t("switchAccount")}
+            </a>
+            <Link
+              href="/dashboard"
+              className="inline-flex min-h-11 items-center rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
+              data-testid="invite-mismatch-dashboard"
+            >
+              {t("toDashboard")}
+            </Link>
+          </div>
+          <p className="text-meta text-text-muted">{t("emailMismatch.untouched")}</p>
+        </div>
+      </>,
+    );
+  }
   if (preview.outcome !== "ok") {
     return shell(
       <>
