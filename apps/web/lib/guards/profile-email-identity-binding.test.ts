@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -251,9 +251,10 @@ describe("6. no application path writes profiles.email", () => {
     const roots = ["app", "components", "lib"].map((d) => join(WEB, d));
     const offenders: string[] = [];
     const walk = (dir: string): void => {
-      for (const e of readdirSync(dir)) {
+      for (const dirent of readdirSync(dir, { withFileTypes: true })) {
+        const e = dirent.name;
         const p = join(dir, e);
-        if (statSync(p).isDirectory()) {
+        if (dirent.isDirectory()) {
           if (e !== "node_modules") walk(p);
         } else if (/\.tsx?$/.test(e) && !/\.test\.tsx?$/.test(e)) {
           const src = readFileSync(p, "utf8");

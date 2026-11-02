@@ -18,6 +18,11 @@ import {
 import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
 import { writeEntrySkillLinks } from "@/lib/journal/entry-skill-link-write";
 import {
+  appendEntryMarker,
+  recordEntrySkillDecision,
+  retractEntrySkillEvidence,
+} from "@/lib/journal/entry-skill-retraction";
+import {
   FRAGMENT_SKILL_METRIC_SLUG,
   formatFragmentSkillValue,
   mapRecognitionToPersistedFragments,
@@ -405,39 +410,6 @@ async function addSkillAndLink(
   return { ok: true, added: !alreadyOwned };
 }
 
-/** Append-only entry marker (idempotent by value). */
-async function appendEntryMarker(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sb: any,
-  entryId: string,
-  metricSlug: string,
-  valueText: string,
-  valueNumeric?: number,
-): Promise<boolean> {
-  const { data: existing } = await sb
-    .from("journal_entry_metrics")
-    .select("id, value_text")
-    .eq("entry_id", entryId)
-    .eq("metric_slug", metricSlug);
-  const normalized = normalizeClaimLabel(valueText);
-  const already = ((existing ?? []) as { value_text: string | null }[]).some(
-    (r) => normalizeClaimLabel(r.value_text ?? "") === normalized,
-  );
-  if (already) return true;
-  const ins = await sb.from("journal_entry_metrics").insert([
-    {
-      entry_id: entryId,
-      metric_slug: metricSlug,
-      source: "worker_input",
-      value_text: valueText,
-      ...(typeof valueNumeric === "number"
-        ? { value_numeric: valueNumeric }
-        : {}),
-    },
-  ]);
-  return !ins.error;
-}
-
 // ─────────────────────────────────────────────────────────────────────────
 // Confirm actions.
 // ─────────────────────────────────────────────────────────────────────────
@@ -577,15 +549,35 @@ export async function rejectJournalSkillCandidate(
         (c.kind === "ambiguous" &&
           (c.choices ?? []).some((ch) => ch.slug === slug)),
     );
-  if (!member) return { ok: false, code: "candidate_not_found" };
-
-  const ok = await appendEntryMarker(
-    ctx.sb,
-    ctx.entryId,
-    ENTRY_MARKER_SLUGS.skillRejected,
-    slug,
+  // IDEMPOTENT: a slug the person already rejected on this entry is no
+  // longer a member, but the withdrawal that followed the marker may not
+  // have landed. A retry finishes it (the marker is the source of truth).
+  const alreadyRejected = ctx.recognition.rejected.some(
+    (r) => r.slug === slug && r.reason === "user_rejected",
   );
+  if (!member && !alreadyRejected) return { ok: false, code: "candidate_not_found" };
+  if (alreadyRejected) {
+    const finished = await retractEntrySkillEvidence(ctx.sb, {
+      entryId: ctx.entryId,
+      workerId: ctx.workerId,
+      slugs: [slug],
+    });
+    return finished.ok ? { ok: true } : { ok: false, code: "write_failed" };
+  }
+
+  // ENTRY_MARKER_SLUGS.skillRejected, as the person's latest decision.
+  const ok = await recordEntrySkillDecision(ctx.sb, ctx.entryId, slug, "rejected");
   if (!ok) return { ok: false, code: "write_failed" };
+  // A rejected RECOGNISED skill was already linked to this entry as
+  // evidence by the pipeline: the dispute withdraws that link and lets the
+  // evidence tier fall back (the marker above keeps the decision and its
+  // basis). A candidate was never linked, so for it this is a no-op.
+  const retracted = await retractEntrySkillEvidence(ctx.sb, {
+    entryId: ctx.entryId,
+    workerId: ctx.workerId,
+    slugs: [slug],
+  });
+  if (!retracted.ok) return { ok: false, code: "write_failed" };
   // The learning ledger observes the correction (never changes the entry).
   await recordSkillFeedbackSignal(ctx.sb, {
     workerId: ctx.workerId,

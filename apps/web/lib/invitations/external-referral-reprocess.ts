@@ -10,7 +10,10 @@
  *     (the database function `reissue_external_referral_v1` re-checks each);
  *   - never a synthetic address, never a person who already has an account
  *     (a "join the platform" mail to a member is wrong);
- *   - one mail per address: duplicates collapse onto the newest referral;
+ *   - one mail per address: duplicates collapse onto the newest referral,
+ *     and an address that ALREADY received a partner invitation mail is
+ *     never mailed again from an older duplicate row (2026-10-27 batch: the
+ *     sent row leaves the candidate list, so the older duplicate surfaced);
  *   - a DRY RUN by default — counts only, nothing rotated, nothing sent;
  *   - a control test first (`onlyInvitationId`), then at most `MAX_PER_RUN`
  *     per run; a bulk run is the owner's separate approval, not this code's;
@@ -45,6 +48,8 @@ export type ExclusionReason =
   | "no_address"
   | "synthetic_address"
   | "has_account"
+  | "already_mailed_address"
+  | "reserved_address"
   | "duplicate_address";
 
 export type Selection = {
@@ -55,7 +60,16 @@ export type Selection = {
 /** Which rows may receive a fresh link, and why every other one may not. */
 export function selectReprocessCandidates(
   rows: readonly ReferralRow[],
-  input: { readonly now: Date; readonly existingAccountEmails: ReadonlySet<string> },
+  input: {
+    readonly now: Date;
+    readonly existingAccountEmails: ReadonlySet<string>;
+    /** Addresses that already received a partner invitation mail (any row). */
+    readonly alreadyMailedEmails?: ReadonlySet<string>;
+    /** Addresses with a send reservation on any row (outcome unknown until
+     *  resolved): left out BEFORE the control row or the batch is chosen, so a
+     *  stuck reservation never occupies a slot. */
+    readonly reservedEmails?: ReadonlySet<string>;
+  },
 ): Selection {
   const excluded: Partial<Record<ExclusionReason, number>> = {};
   const skip = (r: ExclusionReason) => {
@@ -72,6 +86,8 @@ export function selectReprocessCandidates(
     else if (!address) skip("no_address");
     else if (SYNTHETIC_ADDRESS.test(address)) skip("synthetic_address");
     else if (input.existingAccountEmails.has(address)) skip("has_account");
+    else if (input.alreadyMailedEmails?.has(address)) skip("already_mailed_address");
+    else if (input.reservedEmails?.has(address)) skip("reserved_address");
     else {
       const seen = newestByAddress.get(address);
       if (!seen) newestByAddress.set(address, row);
@@ -95,7 +111,7 @@ export type ReprocessDeps = {
   readonly buildLink: (locale: string, token: string) => string;
   /** Sends ONE invitation mail in `locale`; true only on a provider ack. */
   readonly send: (to: string, locale: string, link: string) => Promise<boolean>;
-  /** `mark_external_referral_delivery_v1`. */
+  /** `mark_external_referral_delivery_v1` — throws when the outcome was not stored. */
   readonly mark: (invitationId: string, outcome: "sent" | "delivery_failed") => Promise<void>;
   readonly resolveLocale: (locale: string | null) => string;
 };
@@ -161,9 +177,18 @@ export async function reprocessExternalReferrals(
     } catch {
       ok = false;
     }
-    await deps.mark(row.id, ok ? "sent" : "delivery_failed");
     if (ok) sent += 1;
     else failed += 1;
+    // A mark that does not land leaves the row reserved in the database
+    // (`delivery_reserved_at`, migration 20261028070000), so no later run can
+    // mail that address again; stop here instead of sending more while the
+    // stored state is uncertain.
+    try {
+      await deps.mark(row.id, ok ? "sent" : "delivery_failed");
+    } catch {
+      refused.mark_failed = (refused.mark_failed ?? 0) + 1;
+      break;
+    }
   }
   return { outcome: "done", ...base, attempted: batch.length, sent, failed, refused };
 }

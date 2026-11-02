@@ -506,6 +506,8 @@ export function OnboardingWizard({
             console.error("[onboarding] invitation auto-accept failed:", e);
           }
         }
+        // An invitation found WITHOUT its token is accepted by
+        // completeOnboarding on the server, after it settles the role.
         await completeOnboarding(form);
         clearOnboardingDraft();
         // Reached only if the runtime resolves the action instead of

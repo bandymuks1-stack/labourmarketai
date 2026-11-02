@@ -2858,7 +2858,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Einen Anbieter für eine Dienstleistung finden"
     }
   },
   "jobPostings": {
@@ -4126,7 +4127,7 @@
         "service_provider": "Dienstleister",
         "admin": "Administrator"
       },
-      "subcopy": "Ein Profil für Ihre echten Fähigkeiten, Ihre Verfügbarkeit und Ihre Berufserfahrung — damit Menschen und Unternehmen sehen, wo Sie zu echtem Arbeitsbedarf passen. Registrieren Sie sich mit einem sozialen Konto oder mit E-Mail-Adresse und Passwort; im nächsten Schritt sagen Sie, weshalb Sie hier sind.",
+      "subcopy": "Ein Profil für Ihre Berufserfahrung und Chancen — im nächsten Schritt sagen Sie, wofür Sie hier sind.",
       "google_label": "Mit Google fortfahren",
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
@@ -6842,7 +6843,9 @@
       "listings": "Inserate",
       "listingsNote": "Räume, Geräte, Fahrzeuge – anbieten oder suchen",
       "needs": "Bedarf & Angebot",
-      "needsNote": "Veröffentlichen Sie, was Sie brauchen oder anbieten können"
+      "needsNote": "Veröffentlichen Sie, was Sie brauchen oder anbieten können",
+      "buyer": "Meine Anfragen",
+      "buyerNote": "Kundendaten speichern und Anfragen an einem Ort behalten"
     },
     "loopReadFailed": "Ihre Anfragen konnten nicht geladen werden — die Liste ist möglicherweise unvollständig. Laden Sie die Seite neu."
   },
@@ -8544,6 +8547,9 @@
     "skillHoursOwn": "{hours} Std., Ihr eigener Eintrag",
     "skillHoursConfirmed": "{hours} Std., davon {confirmed} Std. vom Vorgesetzten bestätigt",
     "skillHoursHint": "Stunden aus Arbeitsjournal-Einträgen, die nur mit dieser Fähigkeit verknüpft sind",
+    "skillInvolvedHours": "beteiligt an {hours} Std. Arbeit, die nicht allein dieser Fähigkeit zugeordnet ist — ihr eigener Anteil ist unbekannt",
+    "skillInvolvedHoursAlso": "dazu beteiligt an {hours} Std., nicht allein ihr zugeordnet",
+    "skillInvolvedHoursHint": "Zeit von Journaleinträgen, an denen diese Fähigkeit beteiligt war, die die Nachweise ihr aber nicht allein zuordnen können — der Eintrag nutzte auch andere Fähigkeiten, oder die Zeit wurde ohne Angabe auf Tätigkeiten verteilt. Nie aufgeteilt und nie zu Ihrer Gesamtsumme addiert.",
     "selfStatedTitle": "Selbst angegeben, noch keine Einträge",
     "variantsFolded": "{count} Schreibweisen",
     "skillShare": "{share} % der erfassten Arbeit",
@@ -8555,6 +8561,9 @@
     "organizationRecordedHoursWithPeriods": "Aufzeichnungen von Organisationen: insgesamt {total} Std. — {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} und {periodHours} Std. als Zeitraumsumme ({from} – {to}) in Stundenzetteln oder importierten Dokumenten ({approved} Std. bestätigt). Getrennt von der Journalzahl geführt und keiner Fähigkeit zugeordnet.",
     "professionalExperienceTotal": "Berufserfahrung insgesamt: {total} Std. — {journal} Std. im Arbeitsjournal und {organization} Std. in der Organisationshistorie. Jede Arbeit einmal gezählt; Quellen getrennt ausgewiesen.",
     "professionalExperienceNotCounted": "Weitere {hours} Std. werden angezeigt, aber nicht addiert, weil dieselbe Arbeit bereits gezählt ist.",
+    "durationPending": "{organization} hat {records, plural, one {# Arbeitsnachweis} other {# Arbeitsnachweise}} ({span}) erfasst, deren Dauer noch nicht angegeben ist — ohne Stunden gezeigt; in keiner Summe gezählt.",
+    "durationPendingUnnamed": "eine Organisation",
+    "durationPendingUndated": "Daten nicht erfasst",
     "premium": {
       "eyebrowFallback": "Lebendiger Lebenslauf",
       "facts": {
@@ -8573,7 +8582,8 @@
         "both": "{confirmed} Std. mit Eintrag der Leitung · {recorded} Std. erfasst",
         "recorded": "{hours} Std. erfasst",
         "shown": "Durch Ihre Einträge belegt",
-        "declared": "Von Ihnen angegeben; noch nicht belegt"
+        "declared": "Von Ihnen angegeben; noch nicht belegt",
+        "involved": "Beteiligt an {hours} Std., nicht allein ihr zugeordnet"
       },
       "source": {
         "own": "Ihr Eintrag",
@@ -9914,7 +9924,11 @@
       },
       "basis": "{matched} von {total} erforderlichen Fähigkeiten passen ({confirmed} vom Manager bestätigt)",
       "recognizedNote": "Anforderungen aus dem Anfragetext erkannt — noch nicht bestätigt",
-      "missingPrefix": "fehlend:"
+      "missingPrefix": "fehlend:",
+      "formalTitle": "Formale Anforderungen",
+      "formalLicence": "Führerschein {categories}: eine formale Anforderung. Erfasste Arbeit ersetzt ihn nicht.",
+      "formalLicenceHeld": "Führerschein {categories}: du hast angegeben, ihn zu besitzen (nicht geprüft).",
+      "formalQualification": "Für diese Arbeit kann eine berufliche Qualifikation oder Lizenz gesetzlich vorgeschrieben sein. Erfasste Arbeit ersetzt sie nicht."
     },
     "recommendations": {
       "basisCompact": "{matched} von {total} Fähigkeiten, {confirmed} bestätigt",
@@ -18376,7 +18390,7 @@
       "not_a_member": "Sie sind kein Mitglied.",
       "not_found": "Eintrag nicht verfügbar.",
       "not_authorized": "Dazu sind Sie nicht berechtigt.",
-      "no_such_user": "Kein Nutzer mit dieser E-Mail-Adresse.",
+      "no_such_user": "Noch kein bestätigtes Konto mit dieser E-Mail-Adresse.",
       "cannot_invite_self": "Sie können sich nicht selbst einladen.",
       "invalid_role": "Ungültige Rolle.",
       "last_owner": "Der letzte Inhaber kann nicht zurücktreten — aktivieren Sie zuerst einen weiteren Inhaber.",
@@ -18406,7 +18420,7 @@
       "grantInvitations": "Einladungen verwalten erlauben",
       "withdrawInvitations": "Einladungsverwaltung entziehen",
       "unavailable": "Die Mitgliederliste konnte gerade nicht gelesen werden. Das heißt nicht, dass die Organisation keine Mitglieder hat.",
-      "noAccountHint": "Eine Mitgliedsrolle kann nur jemandem gegeben werden, der bereits ein Konto hat. Laden Sie eine Person ohne Konto mit einem Einladungslink ein — sobald sie sich registriert und der Organisation beitritt, können Sie ihr hier eine Rolle geben.",
+      "noAccountHint": "Eine Mitgliedsrolle kann nur jemandem mit einem bestätigten Konto gegeben werden. Hat die Person noch kein Konto oder ihre E-Mail-Adresse noch nicht bestätigt, schicken Sie ihr einen Einladungslink oder bitten Sie sie, die E-Mail-Adresse zu bestätigen — sobald sie beigetreten ist, können Sie ihr hier die Rolle geben.",
       "noAccountCta": "Einladungslink erstellen"
     },
     "start": {
@@ -18795,6 +18809,14 @@
       "eyebrow": "Unternehmensgeschichte",
       "title": "{name}: eine durchgehende Geschichte",
       "subtitle": "Jede Zahl unten zählt die erfasste Arbeit der Organisation genau einmal. Zeiträume zeigen, was über frühere Rechtsträger erklärt wurde und worauf diese Erklärung beruht.",
+      "titleHeld": "{name}: gehaltene Arbeitsnachweise nach Zeiträumen",
+      "subtitleHeld": "Arbeit unter einer früheren juristischen Person gehört dieser und den Menschen, die sie geleistet haben. {name} hält diese Nachweise als dokumentierte Kontinuität; sie werden nicht als eigene Arbeit von {name} gezeigt.",
+      "headerOwn": "Eigener Zeitraum von {name}",
+      "headerEarlier": "Frühere juristische Person: {name}",
+      "headerUnstated": "Zeitraum „{label}“ — juristische Person nicht angegeben",
+      "headerNotPlaced": "Nachweise ohne angegebenen Zeitraum",
+      "continuityNotSuccession": "Kontinuität dokumentiert; Rechtsnachfolge nicht behauptet.",
+      "totalsHeld": "Alle Nachweise, die {name} hält, über alle Zeiträume, jeder einmal gezählt — nicht alles davon ist eigene Arbeit von {name}.",
       "figures": "{records} Einträge · {hours} Std. · {people} Personen · {places} Orte",
       "totals": {
         "records": "Einträge",
@@ -19790,6 +19812,73 @@
       "cancelled": "Abgebrochen"
     },
     "helpNeeded": "Hilfe nötig — {stage}:"
+  },
+  "projectForecast": {
+    "title": "Prognose",
+    "notFact": "Eine Prognose aus der erfassten Arbeit dieses Projekts, Stand {date} — keine Tatsache und kein Versprechen. Sie wird bei jedem Öffnen dieser Seite neu berechnet.",
+    "unavailable": "Die Prognose konnte gerade nicht gelesen werden.",
+    "insufficient": "Noch zu wenig erfasste Arbeit für eine Prognose dieses Projekts.",
+    "notApplicable": "Nichts zu prognostizieren: Das Projekt hat keine offene Arbeit.",
+    "unknown": "Unbekannt",
+    "beyondHorizon": "Beim jetzigen Tempo mehr als drei Jahre entfernt",
+    "completionLabel": "Voraussichtliches Ende",
+    "deadlineLabel": "Termin",
+    "leftLabel": "Verbleibende Arbeit",
+    "leftTasks": "{left} von {total} Aufgaben",
+    "leftStages": "{left} von {total} Phasen",
+    "peopleLabel": "Benötigte Personen",
+    "peopleValue": "{needed} (jetzt {active})",
+    "qualityLabel": "Qualitätsrisiko",
+    "confidenceLabel": "Verlässlichkeit",
+    "actionsTitle": "Was es ändern würde",
+    "assumptionsTitle": "Annahmen",
+    "risk": {
+      "on_track": "Im Plan",
+      "tight": "Knapp",
+      "likely_miss": "Wird wahrscheinlich verfehlt",
+      "overdue": "Überfällig",
+      "unknown": "Unbekannt"
+    },
+    "quality": {
+      "none": "Keine offen",
+      "low": "Gering",
+      "elevated": "Erhöht",
+      "high": "Hoch",
+      "unknown": "Unbekannt"
+    },
+    "confidence": {
+      "insufficient": "zu wenige Belege",
+      "low": "gering",
+      "medium": "mittel",
+      "high": "hoch"
+    },
+    "action": {
+      "add_workers": "Personen ins Team holen",
+      "find_partner_capacity": "Partnerkapazität finden",
+      "unblock_stages": "Blockierte Phasen freigeben",
+      "unblock_tasks": "Blockierte Aufgaben freigeben",
+      "close_serious_defects": "Schwere Mängel beheben",
+      "complete_readiness": "Fehlende Einsatzbereitschaft des Teams vervollständigen",
+      "record_hours": "Die an diesem Projekt gearbeiteten Stunden erfassen",
+      "set_planned_end": "Ein geplantes Enddatum setzen",
+      "break_down_scope": "Die Arbeit in Aufgaben aufteilen",
+      "review_budget": "Das Budget prüfen",
+      "replan_deadline": "Den Termin neu planen"
+    },
+    "assumption": {
+      "trailing_window_days": "Das Tempo wird aus den letzten 28 Tagen gelesen.",
+      "calendar_day_rate": "Stunden werden auf Kalendertage verteilt; kein Arbeitskalender wird angenommen.",
+      "equal_unit_weight": "Jede Aufgabe zählt gleich.",
+      "unit_is_stage": "Das Projekt hat keine Aufgaben, daher werden Phasen gezählt.",
+      "team_stays_as_is": "Das Team bleibt, wie es jetzt ist.",
+      "absences_as_approved": "Nur genehmigte Abwesenheiten werden berücksichtigt.",
+      "throughput_without_hours": "Es sind keine Stunden erfasst, daher wird das Ende nur aus erledigter Arbeit gelesen.",
+      "cost_continues_at_observed_rate": "Die Kosten laufen im bisher beobachteten Tempo weiter.",
+      "single_hours_ledger": "Eine Stundenerfassung wird verwendet; die andere wird daneben gezeigt, nie addiert.",
+      "hours_partly_unconfirmed": "Ein Teil der Stunden ist noch nicht bestätigt.",
+      "hours_read_truncated": "Nicht alle Stunden konnten gelesen werden; die Zahlen können zu niedrig sein.",
+      "free_internal_people_unknown": "Es ist nicht bekannt, wer in der Organisation sonst frei ist."
+    }
   },
   "projectWeekGoal": {
     "titleProject": "Ziel dieser Woche",

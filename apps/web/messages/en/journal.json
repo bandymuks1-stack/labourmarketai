@@ -258,6 +258,12 @@
   "engagement": "Context",
   "engagementChoose": "Choose the engagement…",
   "engagementAmbiguous": "This work could belong to more than one engagement. Choose which one before saving.",
+  "unnamedOrganization": {
+    "company": "Company without a name",
+    "agency": "Agency without a name",
+    "other": "Organization without a name"
+  },
+  "activeWorkspaceNoRelationship": "You are acting for {org}, but no work relationship with {org} is recorded, so it is not offered here. Choose the context this work really belongs to.",
   "project": "Project",
   "projectChoose": "Choose the project…",
   "projectNone": "Not project work",
