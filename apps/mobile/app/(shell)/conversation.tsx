@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams } from "expo-router";
+import { useHeaderHeight } from "expo-router/react-navigation";
 
 import type { ConversationGetData } from "../../src/capability-shapes";
 import { useLocale } from "../../src/i18n/locale-context";
@@ -34,6 +35,11 @@ export default function Screen() {
   // change, or the screen jumps under the person's finger while the reply
   // box grows with their typing.
   const scroll = useRef<ScrollView>(null);
+  // The keyboard is measured against the WINDOW, this screen sits below the
+  // header: without the header's height as the offset, iOS lifts the content
+  // short by exactly that much, and the reply box's last control — Review —
+  // stays under the keyboard (iOS run 41408063016: both taps hit the keys).
+  const headerHeight = useHeaderHeight();
   const toEnd = useRef(false);
   const scrollToEnd = useCallback(() => {
     toEnd.current = true;
@@ -44,6 +50,7 @@ export default function Screen() {
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? headerHeight : 0}
       >
         <ScrollView
           ref={scroll}
