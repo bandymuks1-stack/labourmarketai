@@ -154,7 +154,7 @@ active session and window works from THIS file. No second coordination register,
 | `local_13cb59b3` lane A | the 7 reconciled rows + production proof of partial rows; brigade as a unit (DEM-6) | #2927 (stacked on #2914), #2930 | #2914 | IN_PROGRESS |
 | `local_00be3967` mobile | web parity (journal correction, messages, notifications, projects); store-submission preparation | #2929 | owner: store accounts | IN_PROGRESS |
 | `local_3951ad81` ChatGPT security | C-3 token audience, X-2 curated toolset, consent wording, data minimisation | #2918 (RED), #2923 (RED), #2924 | owner: D-10, X-2, waiver for #2924 | WAITING (owner) |
-| `nonstop-pilot-need-limit` (P0, assigned by coordinator) | paid pilot organization refused `over_open_need_limit`: a member holding the platform admin role resolved to `admin_internal` instead of the organization's plan | #2933 (RED draft) | owner: RED approval | CODE_COMPLETE pending CI |
+| `nonstop-pilot-need-limit` (P0, assigned by coordinator) | paid pilot organization refused `over_open_need_limit`: a member holding the platform admin role resolved to `admin_internal` instead of the organization's plan | #2933 (RED draft) | owner: RED approval | DONE — #2933 MERGED `233b2e7c8`, DEPLOYED 2026-11-02, LIVE_VERIFIED 2026-11-02 (owner-approved need created through MCP by the affected member without `over_open_need_limit`; checked in Chrome as that member; nobody contacted) |
 | `local_14a855e7` growth export | daily aggregate registrations / Living CV export | #2886 (RED) | — | BLOCKED by owner order (no merge, deploy or apply); idle |
 | `local_aa901800` "projekto perėmimas" | ESCO cold locales | #2463 (RED) | owner approval | WAITING (owner) — conflict upkeep only, no new work |
 | `local_056d9f7f` (Agentai OS coordinator) | other repository; its labourmarketai work (#2886) is assigned through this file | — | — | n/a here |
@@ -167,6 +167,7 @@ hand-over complete; they start nothing without an assignment here.
 | PR | Goal | Executor | CODE_COMPLETE | MERGED | DEPLOYED | LIVE_VERIFIED |
 |---|---|---|---|---|---|---|
 | #2917 | brigade offered and matched as a unit | lane A | ✓ | ✓ | ✓ | ✓ walk 41350506578 (19/19) |
+| #2933 | an organization's plan applies to a platform admin acting in it (RED, owner-approved) | nonstop-pilot-need-limit | ✓ | ✓ `233b2e7c8` | ✓ | ✓ 2026-11-02 — MCP create + Chrome as the affected member (details private) |
 | #2913 | six production-applied migrations restored byte-exact (RED, approved) | coordinator | ✓ | ✓ | ✓ (no production change) | ✓ parity gate 41342643253 |
 | #2916 | mobile: correct a journal entry | mobile | ✓ | ✓ | n/a (app build) | Android vs production ✓; iOS NOT_VERIFIED (sign-in refused; auth logs show no rate limit — the cause is the credentials the app sent, under investigation by the mobile lane) |
 | #2928 | mobile: messages | mobile | ✓ | ✓ | n/a (app build) | NOT_VERIFIED |
