@@ -227,7 +227,10 @@ test("B-5 (6.4). a non-customer discovers buying and becomes a customer through 
   } else {
     const notice = page.getByTestId("access-refusal-notice");
     await expect(notice, "the refusal names the missing space instead of a silent bounce").toBeVisible({ timeout: 30_000 });
-    await expect(notice).toHaveAttribute("data-reason", "needs_customer_role");
+    // The redirect carries the token (`require-role.ts`); the notice exposes
+    // the parsed role (`lib/auth/access-notice.ts`), never the raw token.
+    expect(new URL(page.url()).searchParams.get("notice")).toBe("needs_customer_role");
+    await expect(notice).toHaveAttribute("data-reason", "customer");
     // Discovery: the service loop (the home chat's door for a needed service)
     // offers the buyer lane — the setup hub's own form.
     await page.goto("/lt/dashboard/service-requests");
