@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   JOB_ALERT_READ_TIME_TTL_MS,
@@ -28,5 +28,20 @@ describe("read-time job-alert throttle", () => {
     claimJobAlertEvaluation("p-b", t);
     forgetJobAlertEvaluation("p-a");
     expect(claimJobAlertEvaluation("p-b", t + 1)).toBe(false);
+  });
+
+  // The save (server action layer) and the claim (layout render layer) get
+  // separate copies of this module in a Next build: they must share one map.
+  it("two copies of the module share one throttle", async () => {
+    const t = 4_000_000_000_000;
+    vi.resetModules();
+    const render = await import("./job-alert-throttle");
+    vi.resetModules();
+    const action = await import("./job-alert-throttle");
+    expect(render).not.toBe(action);
+    expect(render.claimJobAlertEvaluation("p-layers", t)).toBe(true);
+    expect(action.claimJobAlertEvaluation("p-layers", t + 1)).toBe(false);
+    action.forgetJobAlertEvaluation("p-layers");
+    expect(render.claimJobAlertEvaluation("p-layers", t + 60_000)).toBe(true);
   });
 });
