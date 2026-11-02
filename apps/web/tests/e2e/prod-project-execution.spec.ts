@@ -153,6 +153,18 @@ test("E-1 (3.2). Alfa has its two walk projects — created through the project 
   await ctx.close();
 });
 
+// A run that stopped before E-14 and whose afterAll cleanup also failed
+// (project-execution 41359872373 during a deploy, then 41360971243) leaves
+// Vytas assigned to A and B with a kept clash and a walk stage on A. The next
+// run then re-assigns an already-assigned, already-overridden worker and
+// measures that, not the chain. Every run starts from the clean state E-14
+// leaves behind.
+test("E-1b. leftovers of an earlier unfinished run are cleared first", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner");
+  await cleanUp(page);
+  await ctx.close();
+});
+
 test("E-2 (3.13). both projects get the same dates on their operations board", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
