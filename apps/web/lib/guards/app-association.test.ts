@@ -191,6 +191,7 @@ describe("deep-link claim — exactly the screens the app has", () => {
         "/log-work",
         "/messages",
         "/need",
+        "/notifications",
         "/opportunities",
         "/profile",
         "/register",

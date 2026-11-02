@@ -51,10 +51,16 @@ bound to the thread's last message) → `message.send_confirm`. In-app only.
 Starting a NEW conversation with a person is not on the phone yet (the web
 starts it from a project or a profile).
 
+**Notifications are wired** (2026-11-01): Today → Notifications
+(`notification.list`, the web bell's durable rows) — opening one marks it read
+(`notification.mark_read`) and goes to the screen it is about (in the app when
+the app has it, else the website); "Mark all as read" is the bell's
+`notification.mark_all_read`. **Push stays OFF** (owner decision: no vendor).
+
 **Deep links claim exactly the screens this app has** (`/`, `/sign-in`,
 `/register`, `/today`, `/journal`, `/log-work`, `/correct-entry`, `/profile`,
 `/settings`, `/opportunities`, `/availability`, `/jobs`, `/need`, `/messages`,
-`/conversation`) —
+`/conversation`, `/notifications`) —
 `NATIVE_APP_PATHS` in `apps/web/lib/mobile/app-association.ts` drives both
 the Apple document and `app.json`'s Android intent filter, pinned to the route
 files by `apps/web/lib/guards/app-association.test.ts`. A web link such as

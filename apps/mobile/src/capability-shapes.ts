@@ -456,3 +456,21 @@ export type MessageSendConfirmData = {
     readonly bodyMatches: boolean;
   } | null;
 };
+
+/**
+ * `notification.list` — the caller's in-app notifications, newest first,
+ * with read state. `type` is the server's RENDERED type key (`event_<type>`,
+ * or a focused variant such as `event_weekly_digest_journal`), so the label
+ * says what the row truthfully is; `href` is the web surface the event is
+ * about. Push is OFF (owner decision, no vendor): this list is read, never
+ * delivered.
+ */
+export type NotificationItem = {
+  readonly id: string;
+  readonly type: string;
+  readonly created_at: string;
+  readonly read_at: string | null;
+  readonly href?: string;
+};
+
+export type NotificationListData = { readonly items: readonly NotificationItem[] };
