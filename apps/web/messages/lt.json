@@ -2858,7 +2858,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Rask paslaugos teikėją"
     }
   },
   "jobPostings": {
@@ -6842,7 +6843,9 @@
       "listings": "Skelbimai",
       "listingsNote": "Patalpos, įranga, transportas — siūlyk ar ieškok",
       "needs": "Poreikiai ir pasiūla",
-      "needsNote": "Paskelbk, ko reikia ar ką gali pasiūlyti"
+      "needsNote": "Paskelbk, ko reikia ar ką gali pasiūlyti",
+      "buyer": "Mano užklausos",
+      "buyerNote": "Išsaugok užsakovo duomenis ir laikyk užklausas vienoje vietoje"
     },
     "loopReadFailed": "Nepavyko įkelti tavo užklausų — sąrašas gali būti nepilnas. Atnaujink puslapį."
   },

@@ -2858,7 +2858,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Znajdź wykonawcę usługi"
     }
   },
   "jobPostings": {
@@ -6842,7 +6843,9 @@
       "listings": "Ogłoszenia",
       "listingsNote": "Lokale, sprzęt, pojazdy – oferuj lub szukaj",
       "needs": "Potrzeby i oferty",
-      "needsNote": "Opublikuj, czego potrzebujesz lub co możesz zaoferować"
+      "needsNote": "Opublikuj, czego potrzebujesz lub co możesz zaoferować",
+      "buyer": "Moje zapytania",
+      "buyerNote": "Zapisz dane klienta i trzymaj zapytania w jednym miejscu"
     },
     "loopReadFailed": "Nie udało się wczytać Twoich zapytań — lista może być niepełna. Odśwież stronę."
   },
