@@ -18,6 +18,7 @@
  *  - Aggregates only. No id, e-mail, name or free text leaves this module.
  */
 
+import { AI_RUN_OUTCOMES, summarizeAiRuns, type AiRunOutcome } from "@/lib/ops/ai-run-outcome";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type Population = "REAL" | "TEST" | "INTERNAL";
@@ -157,6 +158,24 @@ function percentile(values: number[], p: number): number | null {
   return s[Math.min(s.length - 1, Math.floor((p / 100) * s.length))]!;
 }
 
+const AI_OUTCOME_RULES: Record<AiRunOutcome, string> = {
+  served: "the answer passed its schema",
+  privacy_refused: "INTENTIONAL: blocked_reason egress_refused — personal data may not leave to an ungranted provider (#2433)",
+  confirmation_required: "INTENTIONAL: blocked_reason needs_human_confirmation",
+  budget_blocked: "INTENTIONAL: cost ceiling, daily or organization run budget",
+  vendorless: "provider 'disabled' — alerted by ai-runtime-disabled, not counted as attempted",
+  price_missing: "blocked_reason cost_unpriced — the routed model has no owner-reviewed price",
+  configuration: "vendor call failed: provider not set up",
+  unavailable: "vendor call failed: 5xx / network",
+  timeout: "vendor call failed: timeout / latency ceiling",
+  rate_limit: "vendor call failed: quota or rate limit (e.g. HTTP 429)",
+  provider_error: "vendor call failed: the provider's own error",
+  invalid_output: "the answer failed its schema",
+  truncated: "vendor call failed: cut at the output-token ceiling",
+  unsupported_capability: "vendor call failed: no usable provider for the task",
+  unclassified: "a block reason or skipped run of an unknown shape",
+};
+
 const DAY = 86_400_000;
 
 export async function computeProductMetrics(client: SupabaseClient, now: number = Date.now()): Promise<MetricsSnapshot> {
@@ -179,7 +198,7 @@ export async function computeProductMetrics(client: SupabaseClient, now: number 
   const since = new Date(now - 7 * DAY).toISOString();
   const ai = await client
     .from("ai_runs")
-    .select("provider, latency_ms, schema_validation, fallback_applied, blocked_reason, actual_cost_usd, estimated_cost_usd")
+    .select("provider, latency_ms, schema_validation, fallback_applied, blocked_reason, route_reason, actual_cost_usd, estimated_cost_usd")
     .gte("created_at", since)
     .limit(20_000);
   if (ai.error) unknown.push({ source: "ai_runs", reason: ai.error.code ?? "read_failed" });
@@ -200,6 +219,21 @@ export async function computeProductMetrics(client: SupabaseClient, now: number 
   // blocked_reason, no failed schema and no fallback, so before this count the
   // monitor read a fully switched-off AI runtime as healthy.
   tech("ai_runs_runtime_disabled_7d", runs.filter((a) => a.provider === "disabled").length, "ai_runs.provider", "no AI provider was configured to answer (runtime disabled)");
+  // One count per outcome (lib/ops/ai-run-outcome.ts): intentional refusals
+  // (egress, human confirmation, budget) are never a fault, and quota /
+  // timeout / 5xx — recorded only in route_reason — are finally counted.
+  const outcomes = summarizeAiRuns(runs);
+  for (const o of AI_RUN_OUTCOMES) {
+    tech(`ai_outcome_${o}_7d`, outcomes.byOutcome[o], "ai_runs (classifyAiRun)", AI_OUTCOME_RULES[o]);
+  }
+  tech("ai_runs_attempted_7d", outcomes.attempted, "ai_runs (classifyAiRun)", "runs that should have reached a provider: all minus intentional refusals and provider 'disabled'");
+  tech("ai_technical_failures_7d", outcomes.technicalFailures, "ai_runs (classifyAiRun)", "missing price + configuration + unavailable + timeout + rate limit + provider error + invalid / truncated output + unsupported + unclassified");
+  tech(
+    "ai_technical_failure_rate_pct_7d",
+    outcomes.technicalFailureRate === null ? null : Math.round(1000 * outcomes.technicalFailureRate) / 10,
+    "ai_runs (classifyAiRun)",
+    "technical failures / attempted runs, % (none attempted = unknown, never 0 %)",
+  );
   tech("ai_cost_usd_7d", Math.round(100 * runs.reduce((s, a) => s + Number(a.actual_cost_usd ?? a.estimated_cost_usd ?? 0), 0)) / 100, "ai_runs.actual_cost_usd (else estimated)", "sum");
 
   const cur = await client.from("vacancy_import_cursors").select("provider_key, last_success_at");

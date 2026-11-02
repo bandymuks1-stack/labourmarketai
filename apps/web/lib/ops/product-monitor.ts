@@ -53,7 +53,7 @@ export const SIGNALS: readonly SignalDefinition[] = [
   { id: "review-queue-stale", severity: "P3", condition: "journal entries waiting > 14 days for confirmation ≥ 1", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "living-cv-not-refreshing", severity: "P2", condition: "journal entries in 7 days ≥ 3 AND no worker_skills row refreshed in 7 days", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "search-slow", severity: "P2", condition: "public free-text job search median of 3 > 3000 ms (or unreachable)", interval: MONITOR_INTERVAL, responder: RESPONDER },
-  { id: "ai-failing", severity: "P2", condition: "AI runs in 7 days ≥ 10 AND (failed validation + blocked) / runs > 30 %", interval: MONITOR_INTERVAL, responder: RESPONDER },
+  { id: "ai-failing", severity: "P2", condition: "attempted AI runs in 7 days ≥ 10 AND technical failures / attempted > 30 % (intentional refusals and provider 'disabled' excluded — lib/ops/ai-run-outcome.ts)", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "ai-runtime-disabled", severity: "P2", condition: "AI runs in 7 days answered by no provider (ai_runs.provider = 'disabled') ≥ 1: people reached an AI surface while the AI runtime was switched off or had no key", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "vacancy-sync-lagging", severity: "P2", condition: "oldest successful vacancy import > 30 h", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "data-integrity", severity: "P1", condition: "any of: accepted invitation without acceptor, brigade offer on a missing need, confirmation on a deleted entry, an accepted staff or partner invitation whose acceptor has no relationship with that organization", interval: MONITOR_INTERVAL, responder: RESPONDER },
@@ -114,9 +114,17 @@ export function evaluateSignals(s: MetricsSnapshot, p: MonitorProbes): SignalRes
   }
   set("search-slow", p.searchMedianMs === null ? "BREACH" : p.searchMedianMs > 3000 ? "BREACH" : "OK", p.searchMedianMs === null ? "search unreachable" : `median ${Math.round(p.searchMedianMs)} ms`);
   {
-    const runs = metricTotal(metric(s, "ai_runs_7d"));
-    const bad = (metricTotal(metric(s, "ai_runs_failed_validation_7d")) ?? 0) + (metricTotal(metric(s, "ai_runs_blocked_7d")) ?? 0);
-    set("ai-failing", runs === null ? "UNKNOWN" : runs >= 10 && bad / runs > 0.3 ? "BREACH" : "OK", `${val(runs)} runs, ${bad} failed/blocked (7 d)`);
+    // Technical failures over ATTEMPTED runs (lib/ops/ai-run-outcome.ts): an
+    // intentional refusal (egress #2433, human confirmation, budget) is never
+    // a fault, and provider 'disabled' is ai-runtime-disabled's signal.
+    const attempted = metricTotal(metric(s, "ai_runs_attempted_7d"));
+    const bad = metricTotal(metric(s, "ai_technical_failures_7d"));
+    const refused = metricTotal(metric(s, "ai_outcome_privacy_refused_7d"));
+    set(
+      "ai-failing",
+      attempted === null || bad === null ? "UNKNOWN" : attempted >= 10 && bad / attempted > 0.3 ? "BREACH" : "OK",
+      `${val(attempted)} attempted, ${val(bad)} technical failures, ${val(refused)} privacy refusals (intentional) (7 d)`,
+    );
   }
   {
     const runs = metricTotal(metric(s, "ai_runs_7d"));
