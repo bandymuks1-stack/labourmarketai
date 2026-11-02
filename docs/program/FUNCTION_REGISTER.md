@@ -31,9 +31,9 @@ a security/permission row says only that an item is open.
 
 | LIVE_VERIFIED | PASS_CI_ONLY | FAIL | BLOCKED | NOT_VERIFIED | NOT_IMPLEMENTED | OPTIONAL_TEST |
 |---|---|---|---|---|---|---|
-| 186 | 9 | 9 | 40 | 21 | 22 | 1 |
+| 190 | 8 | 9 | 40 | 18 | 22 | 1 |
 
-Full planned scope 2026-11-01: 277 rows − 2 DUPLICATE (7.10 = 4.22, 4.17 = 2.35; kept, not counted) + 13 functions found in the vision, architecture and decision documents with no row before (2.36, 2.37, 3.34–3.36, 4.30, 5.20, 5.21, 6.22–6.24, 7.30, 7.31) = **288**. Seven rows were reconciled with product-truth (3.8, 4.6, 11.2, 11.7, 7.5 → NOT_VERIFIED; 2.20, 2.24 → FAIL); their earlier proof stays in the row. Production-verified share of the full scope: **186 / 288 = 64.6 %**. Targets (conditional, not guaranteed): core product complete and public mid-December 2026; full historical scope February 2027 (preliminary).
+Full planned scope 2026-11-01: 277 rows − 2 DUPLICATE (7.10 = 4.22, 4.17 = 2.35; kept, not counted) + 13 functions found in the vision, architecture and decision documents with no row before (2.36, 2.37, 3.34–3.36, 4.30, 5.20, 5.21, 6.22–6.24, 7.30, 7.31) = **288**. Seven rows were reconciled with product-truth (3.8, 4.6, 11.2, 11.7, 7.5 → NOT_VERIFIED; 2.20, 2.24 → FAIL); their earlier proof stays in the row. Production-verified share of the full scope: **190 / 288 = 66.0 %** (186 after the 2026-11-02 recount; +3.8, 4.6, 6.18, 9.18 from production walks 41350506578 and 41357630136). Targets (conditional, not guaranteed): core product complete and public mid-December 2026; full historical scope February 2027 (preliminary).
 
 Seeded 2026-10-28 from the 275-row QA matrix of 2026-10-23…28 plus the 2026-10-28 production results; a `PASS` row
 whose evidence names a production run or production use became `LIVE_VERIFIED`, any other `PASS` became `PASS_CI_ONLY`.
@@ -81,8 +81,8 @@ Denominator = 287 functions (288 planned minus the one `OPTIONAL_TEST` scenario,
 | Measure | Method | Result |
 |---|---|---|
 | **Technical implementation** | every row except `NOT_IMPLEMENTED` (a `BLOCKED` row is built but waits for an owner step) | **265 / 287 = 92.3 %** |
-| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **186 / 287 = 64.8 %** (70.2 % of the built 265) |
-| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **11 / 19 = 57.9 %** complete · 4 partial · 1 broken · 2 blocked · 1 unverified |
+| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **190 / 287 = 66.2 %** (71.7 % of the built 265) |
+| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **12 / 19 = 63.2 %** complete · 3 partial · 1 broken · 2 blocked · 1 unverified |
 
 Per area (technical / production-verified) — as of the 277-row register, before the 2026-11-01 full-scope update; recomputed at the next weekly progress report:
 
@@ -115,7 +115,7 @@ The 19 journeys (rows in brackets):
 | J-7 | Project → assign worker → hours on site → board → report (3.2, 3.6, 3.3, 2.23, 3.13) | complete | project-execution 41295981934 2026-11-01 |
 | J-8 | Need → dates proposed → worker accepts → engagement (5.13) | complete | orders-bookings 2026-10-26 |
 | J-9 | Agency declares supply → client bridge → offer (4.15, 4.28) | complete | agency-chain 2026-10-26, search-support-privacy 2026-11-01 |
-| J-10 | Brigade offered and matched as a unit (3.7, 4.6, 4.7) | partial | product-truth: unit matching link BROKEN |
+| J-10 | Brigade offered and matched as a unit (3.7, 4.6, 4.7) | complete | brigade-formation 41350506578 2026-11-01 (19/19); product-truth link LIVE (#2917) |
 | J-11 | Goods / service listed → found → requested → accepted → messages (6.1–6.3) | complete | marketplace 2026-11-01 |
 | J-12 | Institution → cohort → learner → practice → competency → qualification (11.1–11.7, 11.10) | partial | product-truth: learners-join and qualification links BROKEN |
 | J-13 | Buyer workspace → request → provider (6.4, 6.1) | partial | 6.4 carries an open item (details private) |
@@ -199,7 +199,7 @@ The 19 journeys (rows in brackets):
 | 3.5 | Tasks | LIVE_VERIFIED | 2026-11-01 | prod walk project-execution 41283540387 2026-11-01 on 38bfb9d93 E-4 PASS; earlier: project-execution run 40081437313 10-24: E-4 the walk starts and completes ITS OWN task (card matched by its own title inside main, after #2724) | yes |  |
 | 3.6 | Worker->project assignment | LIVE_VERIFIED | 2026-11-01 | prod walk project-execution 41295981934 2026-11-01 on 3b7eafbe4 green end to end (after #2897: the walk now waits for the assign answer; the assignment was stored all along); earlier: run 41283540387 on 38bfb9d93 E-5 FAIL (walk timing), project-execution E-5 run 39968362991 10-23 | yes |  |
 | 3.7 | Brigades | LIVE_VERIFIED | 2026-10-22 | brigade-formation 39795574869 10-22 | yes |  |
-| 3.8 | Team->project assignment | NOT_VERIFIED | 2026-11-01 | 2026-11-01 reconciled with product-truth: product-truth: brigade matched as a unit — the journey link is broken (DEM-6/WRK-6); the earlier production proof below stays valid for what it covered; earlier: brigade-formation run 39795574869 (green) 10-22 | yes |  |
+| 3.8 | Team->project assignment | LIVE_VERIFIED | 2026-11-01 | prod walk brigade-formation 41350506578 2026-11-01 on 7c46946c3 (19/19, B2B-1..10: brigade offered and matched as one unit, handed into one team assignment, work recorded on it); product-truth journey link LIVE since #2917; details in the private record; earlier: brigade-formation run 39795574869 (green) 10-22 | yes |  |
 | 3.9 | Readiness | LIVE_VERIFIED | 2026-10-23 | project-execution E-7 run 39968362991 10-23 | yes |  |
 | 3.10 | Defects / corrections | LIVE_VERIFIED | 2026-10-23 | project-execution E-8 run 39968362991 10-23 | yes |  |
 | 3.11 | Handover passport | LIVE_VERIFIED | 2026-10-23 | project-execution E-9 run 39968362991 10-23 | yes |  |
@@ -225,8 +225,8 @@ The 19 journeys (rows in brackets):
 | 3.31 | Reporting / export | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-21; earlier: profile-cv-history run 40182648408 10-25 (21/21 green): P-21 company report opens, export downloads | yes |  |
 | 3.32 | Assets / tools | LIVE_VERIFIED | 2026-11-01 | prod walk org-roster 41318490491 2026-11-01 on 681e6678f (7/7) R-6; earlier: org-roster R-6 assets issue/return run 39969976834 10-23 | yes | D-2 fixed |
 | 3.33 | Hours page | LIVE_VERIFIED | 2026-11-01 | prod walk company-chain 41283188592 2026-11-01 on 38bfb9d93 (13/13) H-1/H-2 company + agency; earlier: company-chain 39569833029 10-21; owner #2673 | yes |  |
-| 3.34 | Project forecast engine + recompute modes | NOT_VERIFIED | 2026-11-01 | built (#2733, lib/forecast: engine, facts, history, scheduler, modes) but not wired to any screen; owner order 2026-10-24 | unproven | wire to the project course + register in capability-register |
-| 3.35 | Commitment overlap -> warning -> alternatives -> override -> audit | NOT_VERIFIED | 2026-11-01 | architecture §5 J-TIME-FREEDOM; MCP calendar_conflicts_get exists; UI flow and override audit unproven | unproven | flow + production walk |
+| 3.34 | Project forecast engine + recompute modes | NOT_VERIFIED | 2026-11-01 | 2026-11-01: engine wired to the manager project page, computed on read (#2920, capability WRK-11); prod walks register-gaps 41366955536 G-4 (state insufficient_data) and project-execution 41408054477 E-12b 2026-11-02 (17/17; project A forecast state ok): the manager reads a computed forecast in production, labelled a forecast, not a fact; storage, recompute scheduler and cadence modes NOT wired (draft #2738); earlier: built (#2733, lib/forecast: engine, facts, history, scheduler, modes) but not wired to any screen; owner order 2026-10-24 | unproven | wire storage + recompute modes (#2738), then walk a project with enough recorded work |
+| 3.35 | Commitment overlap -> warning -> alternatives -> override -> audit | NOT_VERIFIED | 2026-11-01 | architecture §5 J-TIME-FREEDOM; MCP calendar_conflicts_get exists; UI flow and override audit unproven; the recorded override of an acknowledged clash needs RED #2795 (clash-marker migration, owner) | unproven | flow + production walk |
 | 3.36 | Company Living CV | NOT_VERIFIED | 2026-11-01 | owner order 2026-10-24; nearest: company history 3.27 | unproven | owner to confirm the product shape |
 
 ## Demand, jobs & matching
@@ -238,7 +238,7 @@ The 19 journeys (rows in brackets):
 | 4.3 | Worker opportunity board + interest | LIVE_VERIFIED | 2026-11-01 | prod walk company-chain 41283188592 2026-11-01 on 38bfb9d93 (13/13) C-1; earlier: company-chain C-1 run 40315387466 (success; replaces 39960149411, which concluded failure — register D-7) | yes |  |
 | 4.4 | Public /jobs board | LIVE_VERIFIED | 2026-10-28 | jobs-search 40645813917 J-1..J-6 6/6 (board, filter, page bounds, job page, signed-in save → saved view → remove); earlier: public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-4 public job board renders a vacancy count | yes |  |
 | 4.5 | Matching engine both directions | LIVE_VERIFIED | 2026-11-01 | prod walk company-talent-history 41279265278 2026-11-01 on 38bfb9d93 (17/17) K-2: real fit band + skill basis on the board (#2889); prod walk search-support-privacy 41283989921 2026-11-01 on 38bfb9d93 (20 green, 2 planned skips) M-1; earlier: #2887 RED applied (ledger 20261029180012) + app e506e98b, verified in production; isolated job-fit 46/46 + compat 2/2; earlier: search-support-privacy run 40215640433 10-25 | yes | older needs await an owner-approved backfill |
-| 4.6 | Team matching + team offer | NOT_VERIFIED | 2026-11-01 | 2026-11-01 reconciled with product-truth: product-truth: brigade matched as a unit — the journey link is broken (DEM-6/WRK-6); the earlier production proof below stays valid for what it covered; earlier: brigade-formation run 39795574869 (green) 10-22 | yes | pricing note fixed #2687 |
+| 4.6 | Team matching + team offer | LIVE_VERIFIED | 2026-11-01 | prod walk brigade-formation 41350506578 2026-11-01 on 7c46946c3 (19/19, B2B-1..10: brigade offered and matched as one unit, handed into one team assignment, work recorded on it); product-truth journey link LIVE since #2917; details in the private record; earlier: brigade-formation run 39795574869 (green) 10-22 | yes | pricing note fixed #2687 |
 | 4.7 | B2B negotiation | LIVE_VERIFIED | 2026-10-22 | brigade-formation run 39795574869 (green) 10-22 | yes |  |
 | 4.8 | Anonymous public need intake | PASS_CI_ONLY | 2026-10-30 | isolated public-need walk (signup-isolated 40833394554, #2883): anonymous intake stores one row; earlier: form renders | unproven | not walked in production |
 | 4.9 | Saved searches + alerts | PASS_CI_ONLY | 2026-10-30 | isolated saved-search walk (40833394554, #2883): search stored, match notification + alert mail delivered; earlier: worker-records-exports run 40186822215 S-1/S-2: saved searches save + reopen PASS; alert delivery not proven | unproven | not walked in production |
@@ -306,7 +306,7 @@ The 19 journeys (rows in brackets):
 | 6.14 | Logistics | NOT_IMPLEMENTED | — | registry NOT_BUILT: logistics/shipment/freight | no | depends on 6.13 |
 | 6.16 | Commercial handoff to the partner organization | LIVE_VERIFIED | 2026-10-24 | prod DB: commercial_handoffs 7 delivered, last 2026-10-24 08:58 UTC | yes |  |
 | 6.17 | CRM pipeline | LIVE_VERIFIED | 2026-10-25 | owner admin session 2026-10-25 12:30 LT, read-only Chromium (Claude in Chrome): /admin/pipeline renders all demand sources by stage (read-only by design) | yes |  |
-| 6.18 | Waitlist | NOT_VERIFIED | — | modal + validation live; no real submit | unproven |  |
+| 6.18 | Waitlist | LIVE_VERIFIED | 2026-11-01 | prod walk register-gaps 41357630136 2026-11-01 (3/3) G-1: real anonymous submit from the plan card stored, the same synthetic address again answers already-on-the-list (the stored row); earlier: modal + validation live; no real submit | yes |  |
 | 6.19 | Team enquiries | LIVE_VERIFIED | 2026-11-01 | prod walk company-talent-history 41279265278 2026-11-01 on 38bfb9d93 (17/17) T-1..T-5; earlier: public-org-locales run 40205429467 10-25 S-8 PASS (team enquiry inbox renders for the owner) | yes |  |
 | 6.20 | Value channels | LIVE_VERIFIED | 2026-10-26 | public-org-locales run 40371836163 2026-10-26: S-9 chat names the value channel for an offer (#2831 fixed the walk's page-offset read; product answered correctly in 40363282539 too) | yes |  |
 | 6.21 | /business/[slug] | BLOCKED | — | RED RPC owner | unproven |  |
@@ -319,7 +319,7 @@ The 19 journeys (rows in brackets):
 | ID | Function | Status | Last checked | Evidence (PR / commit / run) | In production | Remaining issue |
 |---|---|---|---|---|---|---|
 | 7.1 | Plan catalogue + /pricing | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-2 /pricing plan cards honest for the billing state | yes |  |
-| 7.2 | Free organization limit 1 open need | PASS_CI_ONLY | 2026-10-23 | brigade walk 10-12; pilot lifted limit 10-23 | unproven |  |
+| 7.2 | Free organization limit 1 open need | PASS_CI_ONLY | 2026-10-23 | brigade walk 10-12; pilot lifted limit 10-23; 2026-11-01: not walkable on the QA cast (its organization holds the pilot) — needs a free synthetic organization | unproven |  |
 | 7.3 | Entitlement resolver | LIVE_VERIFIED | 2026-10-23 | pilot payment changed effective entitlements live 10-23 | yes |  |
 | 7.4 | Stripe TEST checkout/portal/webhook | OPTIONAL_TEST | 2026-10-28 | billing-test-mode never executed: the pilot organization is not armed in Stripe TEST; production stays LIVE (owner 10-28) | — | extra TEST scenario; does not block launch and is not a payment defect |
 | 7.5 | Live charging | NOT_VERIFIED | 2026-11-01 | 2026-11-01 reconciled with product-truth: pilot payment only; self-serve paid plan is not live (owner decision MKT-7); the earlier production proof below stays valid for what it covered; earlier: real Stripe LIVE payment, webhook fired, pilot plan activated (owner-confirmed) | yes |  |
@@ -394,7 +394,7 @@ The 19 journeys (rows in brackets):
 | 9.15 | Search stacks | LIVE_VERIFIED | 2026-11-01 | prod walk search-support-privacy 41283989921 2026-11-01 on 38bfb9d93 (20 green, 2 planned skips) S-3; earlier: search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): S-3 synthetic organization findable in the network directory (directory part) | yes |  |
 | 9.16 | External referral API | BLOCKED | — | partner tokens; anon 401 PASS | unproven |  |
 | 9.17 | Internal supply feed | PASS_CI_ONLY | 2026-10-23 | 401 anon; edge logs show authorized Agentai pulls 10-23 (readback 05:50, supply feed 06:02/08:32/11:01) | unproven | readback 1x/24 h vs 4/day intended |
-| 9.18 | Public JSON APIs | PASS_CI_ONLY | — | /api/health public 200 ok; others authenticated by design | unproven |  |
+| 9.18 | Public JSON APIs | LIVE_VERIFIED | 2026-11-01 | prod walk register-gaps 41357630136 2026-11-01 G-2 (green; details in the private record); earlier: /api/health public 200 ok; others authenticated by design | yes |  |
 | 9.19 | Admin import sandbox | BLOCKED | 2026-10-25 | owner admin session 2026-10-25 12:30 LT, read-only Chromium (Claude in Chrome): renders 'disabled — set INTELLIGENCE_SANDBOX_ENABLED=1' (honest off state) | unproven | owner: enable flag if wanted |
 | 9.20 | Admin intelligence inspector | BLOCKED | 2026-10-25 | owner admin session 2026-10-25 12:30 LT, read-only Chromium (Claude in Chrome): renders 'disabled — set INTELLIGENCE_INSPECTOR_ENABLED=1' + source activation readiness | unproven | owner: enable flag if wanted |
 | 9.22 | Env schema validation | LIVE_VERIFIED | — | zod env validation at load; deploy 39952179926 health=healthy, build 431385cf; rollback on unhealthy | yes | open security/permission item — details kept out of the public repository (owner rule) |
@@ -475,7 +475,7 @@ The 19 journeys (rows in brackets):
 | 13.10 | Quality gates | LIVE_VERIFIED | 2026-10-25 | Quality Gates on main run 40175733431 success 2026-10-25 | yes |  |
 | 13.11 | E2E in CI | LIVE_VERIFIED | — | e2e-smoke 39950760373 on live build 431385cf: 32/32 | yes |  |
 | 13.12 | Executable product constitution | LIVE_VERIFIED | — | quality 39950760135 product-truth green (111 caps, 28 nodes, 6 journeys) | yes |  |
-| 13.13 | Feature-availability catalogue | NOT_VERIFIED | — | catalog guards green; effect only in signed-in dashboards, no prod walk | unproven |  |
+| 13.13 | Feature-availability catalogue | NOT_VERIFIED | 2026-11-01 | 2026-11-01 code read: the catalogue's UI consumers (feature-availability-grid, role-catalogue-card) are rendered by no page, so it has no dashboard effect to walk (built, not connected); catalog guards green; effect only in signed-in dashboards, no prod walk | unproven |  |
 | 13.14 | Owner waivers / product gate | LIVE_VERIFIED | — | product gate + self-test pass; waivers 35/35; live anon secdef gate PASS 589/9 | yes | live parity gate skipped: CI role lacks USAGE on supabase_migrations (owner GOV-1) |
 | 13.15 | Old-browser compatibility | LIVE_VERIFIED | — | shim live | yes |  |
 | 13.16 | Browser crash reports | NOT_VERIFIED | — | only a registry citation; no primary evidence recoverable | unproven |  |
