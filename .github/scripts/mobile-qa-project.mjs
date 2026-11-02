@@ -59,12 +59,18 @@ async function call(capability, args = {}) {
   }
   return payload ?? {};
 }
-/** draft/prepare → confirm, the person's two steps. */
-async function twoStep(prepare, confirm, input, wrapped) {
-  const d = await call(prepare, wrapped ? { input } : input);
+/**
+ * draft/prepare → confirm, the person's two steps. The shapes differ per
+ * door: a capability pair takes its fields flat on both legs ("flat"); a
+ * chat-action pair takes them flat on prepare and as `{input}` on confirm
+ * ("action"), except one whose input is a union, `{input}` on both legs
+ * ("wrapped").
+ */
+async function twoStep(prepare, confirm, input, shape) {
+  const d = await call(prepare, shape === "wrapped" ? { input } : input);
   const confirmationToken = d.confirmationToken;
   if (!confirmationToken) throw new Error(`${prepare}: no confirmation token`);
-  return call(confirm, wrapped ? { input, confirmationToken } : { ...input, confirmationToken });
+  return call(confirm, shape === "flat" ? { ...input, confirmationToken } : { input, confirmationToken });
 }
 const assignedProject = (wp) =>
   (wp.projects ?? []).find((p) => p.title === TITLE && (p.assignmentStatus ?? "active") === "active");
@@ -90,13 +96,13 @@ try {
 
   const roster = await call("roster.list");
   if (!(roster.people ?? []).some((p) => p.workerProfileId === profileId)) {
-    await twoStep("company.invite-worker_prepare", "company.invite-worker_confirm", { email, note: `${TITLE} — review identity` }, true);
+    await twoStep("company.invite-worker_prepare", "company.invite-worker_confirm", { email, note: `${TITLE} — review identity` }, "action");
     steps.push("invited");
     await call("context.switch", { workspace: "personal" });
     const inv = await call("invitations.list");
     const item = (inv.items ?? []).find((i) => i.ref?.source === "company_roster" && String(i.organizationName ?? "").startsWith("QA-SYNTHETIC Alfa"));
     if (!item) throw new Error("invitations.list: the roster invitation did not arrive");
-    await twoStep("worker.respond-invitation_prepare", "worker.respond-invitation_confirm", { ...item.ref, decision: "accepted" }, true);
+    await twoStep("worker.respond-invitation_prepare", "worker.respond-invitation_confirm", { ...item.ref, decision: "accepted" }, "wrapped");
     steps.push("accepted");
     await call("context.switch", { workspace: alfa.id });
   }
@@ -104,7 +110,7 @@ try {
   const projects = await call("projects.list");
   let project = (projects.projects ?? []).find((p) => p.title === TITLE && p.status !== "completed");
   if (!project) {
-    const created = await twoStep("project.create_draft", "project.create_confirm", { title: TITLE, city: "Kaunas" }, false);
+    const created = await twoStep("project.create_draft", "project.create_confirm", { title: TITLE, city: "Kaunas" }, "flat");
     const id = created.projectId ?? created.readBack?.id;
     project = id ? { id } : null;
     if (!project) {
@@ -114,7 +120,7 @@ try {
     if (!project) throw new Error("project.create_confirm: created project not found");
     steps.push("project created");
   }
-  await twoStep("assignment.create_draft", "assignment.create_confirm", { projectId: project.id, workerProfileId: profileId }, false);
+  await twoStep("assignment.create_draft", "assignment.create_confirm", { projectId: project.id, workerProfileId: profileId }, "flat");
   steps.push("assigned");
 
   const check = await call("worker.projects.list");
