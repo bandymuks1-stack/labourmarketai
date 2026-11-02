@@ -82,7 +82,7 @@ Denominator = 287 functions (288 planned minus the one `OPTIONAL_TEST` scenario,
 |---|---|---|
 | **Technical implementation** | every row except `NOT_IMPLEMENTED` (a `BLOCKED` row is built but waits for an owner step) | **265 / 287 = 92.3 %** |
 | **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **190 / 287 = 66.2 %** (71.7 % of the built 265) |
-| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **12 / 19 = 63.2 %** complete · 3 partial · 1 broken · 2 blocked · 1 unverified |
+| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **13 / 19 = 68.4 %** complete · 2 partial · 1 broken · 2 blocked · 1 unverified |
 
 Per area (technical / production-verified) — as of the 277-row register, before the 2026-11-01 full-scope update; recomputed at the next weekly progress report:
 
@@ -111,7 +111,7 @@ The 19 journeys (rows in brackets):
 | J-3 | Worker finds a need → raises a hand → company contacts → thread (4.3, 4.16, 5.4) | complete | company-chain 2026-11-01 |
 | J-4 | Public job search → job page → save / hand-off to the source (4.4, 4.29) | complete | jobs-search 2026-10-28 |
 | J-5 | Company joins → organization → first need → candidates → shortlist → contact (1.6, 4.1, 4.11, 4.12, 4.16) | complete | fresh-activation, company-talent-history 2026-11-01 |
-| J-6 | Company invites a person → the person accepts → member (1.9, 1.4) | partial | invited path not walked in production (identity not provisioned) |
+| J-6 | Company invites a person → the person accepts → member (1.9, 1.4) | complete | invited-worker 41430482903 2026-11-02 (7/7: invitation hidden until the mailed proof, accepted on the network page, member as worker, journal → Living CV) |
 | J-7 | Project → assign worker → hours on site → board → report (3.2, 3.6, 3.3, 2.23, 3.13) | complete | project-execution 41295981934 2026-11-01 |
 | J-8 | Need → dates proposed → worker accepts → engagement (5.13) | complete | orders-bookings 2026-10-26 |
 | J-9 | Agency declares supply → client bridge → offer (4.15, 4.28) | complete | agency-chain 2026-10-26, search-support-privacy 2026-11-01 |
@@ -121,7 +121,7 @@ The 19 journeys (rows in brackets):
 | J-13 | Buyer workspace → request → provider (6.4, 6.1) | partial | 6.4 carries an open item (details private) |
 | J-14 | Organization buys a plan without help (7.1, 7.5, 7.15, 7.28) | blocked | 7.15 hidden by design, 7.28 FAIL (owner/legal) |
 | J-15 | Alert / e-mail about a new matching job without signing in (4.9, 5.7, 5.9) | unverified | `PASS_CI_ONLY` |
-| J-16 | Forgotten password → reset mail → new password (1.3) | complete | production use 2026-11-01 (1.3) |
+| J-16 | Forgotten password → reset mail → new password (1.3) | complete | mail-reset 41428606490 2026-11-02 (2/2, the real reset mail in the QA mailbox) |
 | J-17 | Install the native app from a store (8.15, 8.17, 8.18) | blocked | no store listing (owner accounts) |
 | J-18 | Own data export / erasure request (9.4, 9.5, 9.6) | complete | search-support-privacy 2026-11-01, erasure 2026-10-19 |
 | J-19 | Growth: potential capabilities + learning compass (2.29, 11.3) | complete | living-cv-growth 2026-11-01, learning-practice 2026-10-25 |
@@ -132,13 +132,13 @@ The 19 journeys (rows in brackets):
 |---|---|---|---|---|---|---|
 | 1.1 | E-mail+password sign-up / sign-in | LIVE_VERIFIED | 2026-10-28 | isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-1..S-3 form sign-up worker/company/agency, S-4 existing address → sign-in, S-5 sign-out/sign-in; role-routes 39849107061; #2854 deployed f5c0e88f (sign-up skeleton LIVE; closed-invite / existing-address  | yes | self-serve sign-up through the form proven in CI only (no synthetic production accounts, owner rule) |
 | 1.2 | Google OAuth | LIVE_VERIFIED | 2026-10-18 | owner Google sign-in 10-18/19; buttons x6 live | yes |  |
-| 1.3 | Password reset | LIVE_VERIFIED | 2026-11-01 | production use 2026-11-01 (details in the private record); earlier: isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-6 reset mail → link → new password works, old refused (HTTP 400); profile-cv-history P-1 run 40166272659 10-25: reset form renders; mail delivery still unproven (SMTP) | yes | no repeatable production walk yet (D-4 mailbox walk #2903 pending the owner) |
+| 1.3 | Password reset | LIVE_VERIFIED | 2026-11-02 | prod walk mail-reset 41428606490 2026-11-02 2/2 (reset mail read from the real QA mailbox ~12 s → link → new password signs in; second reset: old password refused, new works); earlier: isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-6 reset mail → link → new password works, old refused (HTTP 400); profile-cv-history P-1 run 40166272659 10-25: reset form renders; mail delivery still unproven (SMTP) | yes | no repeatable production walk yet (D-4 mailbox walk #2903 pending the owner) |
 | 1.4 | Onboarding + setup hub | LIVE_VERIFIED | 2026-11-01 | prod walk fresh-activation 41279196446 2026-11-01 on 38bfb9d93: fresh worker + fresh company onboarding (owner-created accounts); earlier: fresh-activation walks (owner-created accounts) PASS; invited-worker path: onboarding finds the invitation without the link (#2845, live 2e4ae2b4b), server settles the role and accepts after it (#2846, live 51a35183, mig… | yes |  |
 | 1.5 | Multi-role identity | LIVE_VERIFIED | 2026-11-01 | prod walk role-routes 41280157502 2026-11-01 on 38bfb9d93 (5/5 roles); earlier: role-routes run 39783147517 (green) 10-22; 5 roles | yes |  |
 | 1.6 | Organization creation + identity | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): S-[volume withheld] identity page shows Alfa's own record | yes |  |
 | 1.7 | Organization verification | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): S-2 verification status shown, honest | yes |  |
 | 1.8 | Multi-capability organization | BLOCKED | — | owner decision ORG-2 | unproven |  |
-| 1.9 | Memberships, invitations, roles | LIVE_VERIFIED | 2026-10-28 | isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-9 invitation link → sign-up through it → stored accepted by that person; brigade-formation 39795574869 10-22 | yes | invited-worker production walk 41280970767 (2026-11-01) did not run: the synthetic invited identity is not provisioned (owner step, parked) — invited path proven in isolated CI only |
+| 1.9 | Memberships, invitations, roles | LIVE_VERIFIED | 2026-11-02 | prod walk invited-worker 41430482903 2026-11-02 7/7 (the invited person registers without the link, proves the address by the mailed link, accepts on the network page, becomes a worker member; second accept and an unknown invitation refused); earlier: isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-9 invitation link → sign-up through it → stored accepted by that person; brigade-formation 39795574869 10-22 | yes | expired-invitation and project-linked invitation not walked in production |
 | 1.10 | Workspace context + switching | LIVE_VERIFIED | 2026-11-01 | prod walk org-roster 41318490491 2026-11-01 on 681e6678f (7/7) R-7 — details in the private record; earlier: org-roster R-7 run 39969976834 10-23 | yes |  |
 | 1.11 | Cross-org isolation | LIVE_VERIFIED | 2026-11-01 | prod walk worker-identity-split 41318189146 2026-11-01 on 681e6678f (5/5) — details in the private record; earlier: #2876 applied (ledger 20261028161106), verified in production 2026-10-28; earlier: worker-identity-split 39602569732 — isolation details in the private record (owner rule) | yes |  |
 | 1.12 | Invitation / referral network | LIVE_VERIFIED | 2026-10-28 | #2855 (ledger 20261028081810) + #2858 (20261028091725) applied, verified, deployed a4cbc9b9; send ledger shows no duplicate recipient; earlier: 2026-10-27 production: partner referrals arrive through the referral door (pending join_platform with consent, latest 2026-10-27), are e-mailed (41 sent) an | yes |  |

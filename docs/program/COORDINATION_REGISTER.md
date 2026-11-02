@@ -178,7 +178,7 @@ hand-over complete; they start nothing without an assignment here.
 | #2915 | completion map | coordinator | ✓ | — | — | — |
 | #2927 / #2930 | register evidence 3.8, 4.6, 6.18, 9.18; G-3 fix | lane A | ✓ | — | — | evidence runs named in the PR |
 | #2929 | mobile in-app notifications | mobile | CI running | — | — | — |
-| #2903 → #2921 | D-4 reset by real mail → D-5 invited path by real mail | coordinator | ✓ (Codex clean) | — | — | BLOCKED on D-4 secrets |
+| #2903 → #2921 | D-4 reset by real mail → D-5 invited path by real mail | coordinator | ✓ | ✓ `3543c13bc` / `c2580a328` | ✓ (test code) | ✓ mail-reset 41428606490 (2/2), invited-worker 41430482903 (7/7) |
 | #2918 / #2923 / #2924 | C-3, X-2, consent wording | ChatGPT security | ✓ (CI green, Codex clean) | — | — | owner gate |
 
 ### 3.3 Owner-gated (RED, draft, `needs-human-gate`) — 39 open (2026-11-02)
@@ -293,7 +293,7 @@ Only items that genuinely need the owner. Resolved or reclassified items are rem
 - `GOV-1` read-only DB secret for CI gates; product-truth owner decisions ORG-2, EVID-2, MKT-7, COM-6, COM-8.
 - **Resolved 2026-11-01:** the live migration-parity gate is active and PASSES on `main` (run 41342643253). The six missing repository files were restored by #2913, with no production change. The separate Codex security review of #2913 did not run; the code review passed.
 - **Backups (13.5):** add the scoped `SUPABASE_ACCESS_TOKEN` secret, so that `db-backup.yml` runs its restore proof (#2906).
-- **D-4 / D-5:** the QA mailbox is the mailbox's own address (the host refuses plus addresses); owner adds the three `production-qa` secrets. The old synthetic invitation was REVOKED 2026-11-02 (owner-approved, exactly one row); deleting the old synthetic account waits for the owner after the read-only scope check (private record). Then RED #2903 → #2921 → `provision-invited` → walks.
+- **D-4 / D-5: DONE 2026-11-02.** #2903 and #2921 merged; `production-qa` restricted to `main`. mail-reset 41428606490 PASS 2/2 (1.3 / J-16), invited-worker 41430482903 PASS 7/7 (J-6 complete); the synthetic account was erased by the platform erasure runner. Open: owner approval to delete the one remaining pseudonymised synthetic invitation (scope checked: exactly 1 row, nothing references it).
 - **Shared VPS (13.1):** remediation #2911 + agentai#1226 live since 2026-11-01; 72 h verdict due 2026-11-04 (details private).
 
 Removed as resolved: #2855 and #2858 (APPLIED, LIVE_VERIFIED 2026-10-28, ledgers 20261028081810 /
