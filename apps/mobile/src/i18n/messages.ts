@@ -181,6 +181,226 @@ const en = {
   "journal.compose.reviewOnWeb":
     "What is waiting for review is confirmed on the website.",
   "profile.skillsEmpty": "No skills recorded yet.",
+  "journal.correct.action":
+    "Correct this entry",
+  "journal.correct.title":
+    "Correct an entry",
+  "journal.correct.intro":
+    "Change what is wrong — the words, the day or the site. The previous version stays in your history; your totals count the corrected one.",
+  "journal.correct.nothingChanged":
+    "Nothing was changed yet. Edit the words, the day or the site first.",
+  "journal.correct.previewTitle":
+    "Check the correction before it is saved",
+  "journal.correct.before":
+    "Now",
+  "journal.correct.after":
+    "After the correction",
+  "journal.correct.hours":
+    "Hours",
+  "journal.correct.output":
+    "Output",
+  "journal.correct.wasConfirmed":
+    "A manager confirmed this entry. That confirmation stays on the earlier version; the corrected version is saved as not yet confirmed.",
+  "journal.correct.save":
+    "Save the correction",
+  "journal.correct.savedTitle":
+    "Correction saved",
+  "journal.correct.savedBody":
+    "Your journal and your totals now show the corrected version.",
+  "journal.correct.savedConfirmedBody":
+    "The corrected version is saved and waits for a manager's confirmation; the earlier confirmed version stays in your history.",
+  "journal.correct.draftFailedTitle":
+    "We could not prepare this correction",
+  "journal.correct.saveFailedTitle":
+    "We could not save this correction",
+  "journal.correct.unsureSaved":
+    "The correction was sent but no answer came back, so we cannot tell whether it was saved. Trying again is safe: a correction that already landed is refused, never saved twice.",
+  "journal.correct.staleDraft":
+    "This was not saved: your journal changed after the correction was prepared. Review it again.",
+  "journal.correct.superseded":
+    "This entry was already corrected or removed. Open the journal again and correct the current version.",
+  "journal.correct.notFound":
+    "This entry is not among your latest journal entries. It may have been corrected already.",
+  "journal.correct.conflict":
+    "The new words state one duration for the whole entry, but the entry also records an output, and both need the same field. State the time per activity, or correct this entry on the website.",
+  "journal.correct.missingTitle":
+    "This entry cannot be corrected here",
+  "today.openMessages":
+    "Messages",
+  "messages.title":
+    "Messages",
+  "messages.conversation":
+    "Conversation",
+  "messages.intro":
+    "Your conversations inside LabourMarket.ai. Messages stay in the app — nothing is sent by email or SMS. New messages show when you open this screen.",
+  "messages.none":
+    "You have no conversations yet.",
+  "messages.untitled":
+    "Conversation",
+  "messages.threadEmpty":
+    "No messages in this conversation yet.",
+  "messages.fromMe":
+    "You",
+  "messages.fromThem":
+    "Them",
+  "messages.replyLabel":
+    "Your reply",
+  "messages.review":
+    "Review before sending",
+  "messages.emptyBody":
+    "Write a message first.",
+  "messages.previewTitle":
+    "Check this before it is sent",
+  "messages.previewNothingSent":
+    "Nothing has been sent yet. This is exactly the text the other person will see.",
+  "messages.send":
+    "Send",
+  "messages.sentTitle":
+    "Sent",
+  "messages.sentBody":
+    "Your message is in the conversation.",
+  "messages.sentUnverified":
+    "The server accepted your message, but reading it back did not match. Open the conversation again to check it.",
+  "messages.writeAnother":
+    "Write another message",
+  "messages.draftFailedTitle":
+    "We could not prepare this message",
+  "messages.sendFailedTitle":
+    "We could not send this message",
+  "messages.unsureSent":
+    "The message was sent but no answer came back, so we cannot tell whether it arrived. Open the conversation again before sending it a second time.",
+  "messages.staleDraft":
+    "Not sent: a new message arrived in this conversation after you prepared yours. Read it, then review your reply again.",
+  "messages.notFound":
+    "This conversation is not one of yours, or it no longer exists.",
+  "messages.noPermission":
+    "You may not write in this conversation.",
+  "today.openNotifications":
+    "Notifications",
+  "notifications.title":
+    "Notifications",
+  "notifications.intro":
+    "What happened in your work, newest first. Opening one marks it read. Notifications are not pushed to your phone — they show here when you open this screen.",
+  "notifications.none":
+    "You have no notifications.",
+  "notifications.unread":
+    "New",
+  "notifications.markAll":
+    "Mark all as read",
+  "notifications.markFailedTitle":
+    "We could not mark this as read",
+  "notifications.type.unknown":
+    "A notification",
+  "notifications.type.event_absence_approved":
+    "Your absence was approved",
+  "notifications.type.event_absence_rejected":
+    "Your absence was rejected",
+  "notifications.type.event_absence_requested":
+    "An absence was filed for you",
+  "notifications.type.event_booking_accepted":
+    "Your booking proposal was accepted",
+  "notifications.type.event_booking_declined":
+    "Your booking proposal was declined",
+  "notifications.type.event_booking_proposed":
+    "You received a booking proposal",
+  "notifications.type.event_booking_withdrawn":
+    "The booking proposal was withdrawn",
+  "notifications.type.event_demand_interest_expressed":
+    "A worker expressed interest in your demand",
+  "notifications.type.event_demand_interest_reviewed":
+    "A company marked your interest as reviewed",
+  "notifications.type.event_document_ack_assigned":
+    "You were asked to confirm you have read a document.",
+  "notifications.type.event_document_ack_completed":
+    "A document you sent for confirmation was confirmed.",
+  "notifications.type.event_document_expiring":
+    "A document's validity is ending soon.",
+  "notifications.type.event_engagement_created":
+    "A new engagement was created",
+  "notifications.type.event_engagement_ended":
+    "The engagement was ended",
+  "notifications.type.event_history_link_offered":
+    "An organization offered to connect your recorded work history to your account",
+  "notifications.type.event_invitation_accepted":
+    "Somebody accepted your invitation",
+  "notifications.type.event_job_alert":
+    "A new job fits what you are looking for",
+  "notifications.type.event_journal_review_decided":
+    "Your journal entry was reviewed",
+  "notifications.type.event_journal_review_decided_approved":
+    "Your journal entry was confirmed",
+  "notifications.type.event_journal_review_decided_changes_requested":
+    "Changes were requested on your journal entry",
+  "notifications.type.event_journal_review_decided_rejected":
+    "Your journal entry was rejected",
+  "notifications.type.event_message_received":
+    "You have a new message",
+  "notifications.type.event_saved_search_match":
+    "A search you saved has new results",
+  "notifications.type.event_weekly_digest":
+    "Your weekly work and opportunities summary is ready",
+  "notifications.type.event_weekly_digest_journal":
+    "Your week’s work journal summary is ready",
+  "notifications.type.event_weekly_digest_profile_completion":
+    "To see jobs that fit you, confirm what work you do",
+  "notifications.type.event_work_task_assigned":
+    "A task was assigned to you",
+  "notifications.type.event_workflow_decided":
+    "Your approval request has been decided",
+  "notifications.type.event_workflow_delegated":
+    "An approval round was handed over to you",
+  "notifications.type.event_workflow_escalated":
+    "An approval round passed its deadline",
+  "notifications.type.event_workflow_step_pending":
+    "An approval request is waiting for your decision",
+  "today.openProjects":
+    "My projects",
+  "projects.title":
+    "My projects",
+  "projects.detailTitle":
+    "Project",
+  "projects.none":
+    "You are not assigned to any project.",
+  "projects.active":
+    "Active",
+  "projects.ended":
+    "Ended",
+  "projects.asksCount":
+    "Still needed from you",
+  "projects.moreOnWeb":
+    "Only your first projects are shown here. The website lists all of them.",
+  "projects.notFound":
+    "This project is not one of yours, or it is not among the projects shown here.",
+  "projects.asksTitle":
+    "Still needed from you",
+  "projects.asksShownOf":
+    "Shown here / still open in all — the full list is on the website",
+  "projects.asksUnavailable":
+    "What is still needed from you could not be read just now. Try again, or open the project on the website.",
+  "projects.asksNotRead":
+    "This assignment has ended. What was asked of you on it is on the project's web page.",
+  "projects.asksIncomplete":
+    "More is open across your projects than the app can list, so this project's part may not be shown. Its web page has the full list.",
+  "projects.asksNone":
+    "Nothing is open for you on this project.",
+  "projects.ask.needed":
+    "Needed",
+  "projects.ask.missing":
+    "Missing",
+  "projects.ask.rejected":
+    "Rejected — needs a new one",
+  "projects.ask.expired":
+    "Expired",
+  "projects.instructionTitle":
+    "Latest instruction",
+  "projects.answerInstruction":
+    "Answer in Messages",
+  "projects.webDetail":
+    "The full project page — stages, documents and the team — is on the website.",
+  "messages.threadNotShown":
+    "The conversation is not on screen yet. Wait for it to load, read it, then review your reply.",
+  "messages.newBeforeReview":
+    "A new message arrived in this conversation. It is now shown above — read it, then review your reply again.",
   "profile.noWorkerProfile": "This account has no worker profile yet.",
   "profile.figuresTitle": "Skills, with your recorded hours",
   "profile.groupManagerConfirmed": "Confirmed by a manager",
@@ -471,6 +691,226 @@ const lt: Catalogue = {
   "journal.compose.reviewOnWeb":
     "Tai, kas laukia peržiūros, patvirtinama svetainėje.",
   "profile.skillsEmpty": "Įgūdžių dar neužfiksuota.",
+  "journal.correct.action":
+    "Taisyti šį įrašą",
+  "journal.correct.title":
+    "Taisyti įrašą",
+  "journal.correct.intro":
+    "Pakeisk tai, kas neteisinga – žodžius, dieną ar vietą. Ankstesnė versija lieka tavo istorijoje; sumos skaičiuoja pataisytą.",
+  "journal.correct.nothingChanged":
+    "Kol kas niekas nepakeista. Pirmiausia pataisyk žodžius, dieną ar vietą.",
+  "journal.correct.previewTitle":
+    "Patikrink pataisymą prieš įrašant",
+  "journal.correct.before":
+    "Dabar",
+  "journal.correct.after":
+    "Po pataisymo",
+  "journal.correct.hours":
+    "Valandos",
+  "journal.correct.output":
+    "Atlikta",
+  "journal.correct.wasConfirmed":
+    "Šį įrašą patvirtino vadovas. Patvirtinimas lieka ankstesnei versijai; pataisyta versija įrašoma kaip dar nepatvirtinta.",
+  "journal.correct.save":
+    "Įrašyti pataisymą",
+  "journal.correct.savedTitle":
+    "Pataisymas įrašytas",
+  "journal.correct.savedBody":
+    "Tavo dienoraštis ir sumos dabar rodo pataisytą versiją.",
+  "journal.correct.savedConfirmedBody":
+    "Pataisyta versija įrašyta ir laukia vadovo patvirtinimo; ankstesnė patvirtinta versija lieka tavo istorijoje.",
+  "journal.correct.draftFailedTitle":
+    "Nepavyko paruošti pataisymo",
+  "journal.correct.saveFailedTitle":
+    "Nepavyko įrašyti pataisymo",
+  "journal.correct.unsureSaved":
+    "Pataisymas išsiųstas, bet atsakymas negrįžo, todėl nežinome, ar jis įrašytas. Bandyti dar kartą saugu: jau įrašytas pataisymas atmetamas, dvigubai neįrašomas.",
+  "journal.correct.staleDraft":
+    "Neįrašyta: po pataisymo paruošimo tavo dienoraštis pasikeitė. Peržiūrėk dar kartą.",
+  "journal.correct.superseded":
+    "Šis įrašas jau pataisytas arba pašalintas. Atidaryk dienoraštį iš naujo ir taisyk dabartinę versiją.",
+  "journal.correct.notFound":
+    "Šio įrašo nėra tarp naujausių tavo dienoraščio įrašų. Galbūt jis jau pataisytas.",
+  "journal.correct.conflict":
+    "Nauji žodžiai nurodo vieną trukmę visam įrašui, bet įraše dar yra atliktas kiekis, o abiem reikia to paties lauko. Nurodyk laiką kiekvienai veiklai arba pataisyk įrašą svetainėje.",
+  "journal.correct.missingTitle":
+    "Šio įrašo čia pataisyti negalima",
+  "today.openMessages":
+    "Žinutės",
+  "messages.title":
+    "Žinutės",
+  "messages.conversation":
+    "Pokalbis",
+  "messages.intro":
+    "Tavo pokalbiai LabourMarket.ai viduje. Žinutės lieka programėlėje – nieko nesiunčiame el. paštu ar SMS. Naujos žinutės matomos atidarius šį ekraną.",
+  "messages.none":
+    "Kol kas neturi pokalbių.",
+  "messages.untitled":
+    "Pokalbis",
+  "messages.threadEmpty":
+    "Šiame pokalbyje dar nėra žinučių.",
+  "messages.fromMe":
+    "Tu",
+  "messages.fromThem":
+    "Pašnekovas",
+  "messages.replyLabel":
+    "Tavo atsakymas",
+  "messages.review":
+    "Peržiūrėti prieš siunčiant",
+  "messages.emptyBody":
+    "Pirmiausia parašyk žinutę.",
+  "messages.previewTitle":
+    "Patikrink prieš siunčiant",
+  "messages.previewNothingSent":
+    "Kol kas niekas neišsiųsta. Būtent šį tekstą matys kitas žmogus.",
+  "messages.send":
+    "Siųsti",
+  "messages.sentTitle":
+    "Išsiųsta",
+  "messages.sentBody":
+    "Tavo žinutė yra pokalbyje.",
+  "messages.sentUnverified":
+    "Serveris žinutę priėmė, bet nuskaityta ji nesutapo. Atidaryk pokalbį iš naujo ir patikrink.",
+  "messages.writeAnother":
+    "Rašyti kitą žinutę",
+  "messages.draftFailedTitle":
+    "Nepavyko paruošti žinutės",
+  "messages.sendFailedTitle":
+    "Nepavyko išsiųsti žinutės",
+  "messages.unsureSent":
+    "Žinutė išsiųsta, bet atsakymas negrįžo, todėl nežinome, ar ji pasiekė. Prieš siųsdamas antrą kartą, atidaryk pokalbį iš naujo.",
+  "messages.staleDraft":
+    "Neišsiųsta: tau ruošiant atsakymą, pokalbyje atsirado nauja žinutė. Perskaityk ją ir peržiūrėk atsakymą dar kartą.",
+  "messages.notFound":
+    "Šis pokalbis nėra tavo arba jo nebėra.",
+  "messages.noPermission":
+    "Šiame pokalbyje rašyti negali.",
+  "today.openNotifications":
+    "Pranešimai",
+  "notifications.title":
+    "Pranešimai",
+  "notifications.intro":
+    "Kas nutiko tavo darbe – naujausi viršuje. Atidarius pranešimas pažymimas kaip perskaitytas. Pranešimai į telefoną nesiunčiami – jie matomi čia, atidarius šį ekraną.",
+  "notifications.none":
+    "Pranešimų neturi.",
+  "notifications.unread":
+    "Nauja",
+  "notifications.markAll":
+    "Pažymėti visus kaip perskaitytus",
+  "notifications.markFailedTitle":
+    "Nepavyko pažymėti kaip perskaityto",
+  "notifications.type.unknown":
+    "Pranešimas",
+  "notifications.type.event_absence_approved":
+    "Tavo neatvykimas patvirtintas",
+  "notifications.type.event_absence_rejected":
+    "Tavo neatvykimas atmestas",
+  "notifications.type.event_absence_requested":
+    "Tau užregistruotas neatvykimas",
+  "notifications.type.event_booking_accepted":
+    "Tavo rezervacijos pasiūlymas priimtas",
+  "notifications.type.event_booking_declined":
+    "Tavo rezervacijos pasiūlymas atmestas",
+  "notifications.type.event_booking_proposed":
+    "Gavai rezervacijos pasiūlymą",
+  "notifications.type.event_booking_withdrawn":
+    "Rezervacijos pasiūlymas atšauktas",
+  "notifications.type.event_demand_interest_expressed":
+    "Darbuotojas pareiškė susidomėjimą tavo poreikiu",
+  "notifications.type.event_demand_interest_reviewed":
+    "Įmonė pažymėjo tavo susidomėjimą kaip peržiūrėtą",
+  "notifications.type.event_document_ack_assigned":
+    "Tavęs paprašyta patvirtinti, kad perskaitei dokumentą.",
+  "notifications.type.event_document_ack_completed":
+    "Dokumentas, kurį siuntei patvirtinti, buvo patvirtintas.",
+  "notifications.type.event_document_expiring":
+    "Netrukus baigsis dokumento galiojimas.",
+  "notifications.type.event_engagement_created":
+    "Sukurtas naujas bendradarbiavimas",
+  "notifications.type.event_engagement_ended":
+    "Darbo santykis baigtas",
+  "notifications.type.event_history_link_offered":
+    "Organizacija pasiūlė susieti tavo užfiksuotą darbo istoriją su tavo paskyra",
+  "notifications.type.event_invitation_accepted":
+    "Kažkas priėmė tavo kvietimą",
+  "notifications.type.event_job_alert":
+    "Atsirado naujas darbas pagal tavo paieškos kriterijus",
+  "notifications.type.event_journal_review_decided":
+    "Tavo darbo žurnalo įrašas peržiūrėtas",
+  "notifications.type.event_journal_review_decided_approved":
+    "Tavo darbo žurnalo įrašas patvirtintas",
+  "notifications.type.event_journal_review_decided_changes_requested":
+    "Paprašyta pakeisti tavo darbo žurnalo įrašą",
+  "notifications.type.event_journal_review_decided_rejected":
+    "Tavo darbo žurnalo įrašas atmestas",
+  "notifications.type.event_message_received":
+    "Gavai naują žinutę",
+  "notifications.type.event_saved_search_match":
+    "Tavo išsaugotoje paieškoje yra naujų rezultatų",
+  "notifications.type.event_weekly_digest":
+    "Paruošta tavo savaitės darbo ir galimybių apžvalga",
+  "notifications.type.event_weekly_digest_journal":
+    "Paruošta tavo savaitės darbo žurnalo apžvalga",
+  "notifications.type.event_weekly_digest_profile_completion":
+    "Norint pamatyti tau tinkamus darbus, patvirtink, kokį darbą dirbi",
+  "notifications.type.event_work_task_assigned":
+    "Tau priskirta užduotis",
+  "notifications.type.event_workflow_decided":
+    "Dėl tavo tvirtinimo prašymo priimtas sprendimas",
+  "notifications.type.event_workflow_delegated":
+    "Tau perduotas tvirtinimo etapas",
+  "notifications.type.event_workflow_escalated":
+    "Tvirtinimo etapas viršijo terminą",
+  "notifications.type.event_workflow_step_pending":
+    "Tvirtinimo prašymas laukia tavo sprendimo",
+  "today.openProjects":
+    "Mano projektai",
+  "projects.title":
+    "Mano projektai",
+  "projects.detailTitle":
+    "Projektas",
+  "projects.none":
+    "Tau nepriskirtas joks projektas.",
+  "projects.active":
+    "Aktyvus",
+  "projects.ended":
+    "Baigtas",
+  "projects.asksCount":
+    "Dar reikia iš tavęs",
+  "projects.moreOnWeb":
+    "Čia rodomi tik pirmieji tavo projektai. Svetainėje matysi visus.",
+  "projects.notFound":
+    "Šis projektas nėra tavo arba jo nėra tarp čia rodomų projektų.",
+  "projects.asksTitle":
+    "Dar reikia iš tavęs",
+  "projects.asksShownOf":
+    "Rodoma čia / iš viso dar atvira – visas sąrašas svetainėje",
+  "projects.asksUnavailable":
+    "Šiuo metu nepavyko nuskaityti, ko dar reikia iš tavęs. Bandyk dar kartą arba atidaryk projektą svetainėje.",
+  "projects.asksNotRead":
+    "Šis priskyrimas baigtas. Kas jame buvo prašyta iš tavęs, matysi projekto puslapyje svetainėje.",
+  "projects.asksIncomplete":
+    "Tavo projektuose atvira daugiau, nei programėlė gali išvardyti, todėl šio projekto dalis gali būti neparodyta. Visas sąrašas – projekto puslapyje svetainėje.",
+  "projects.asksNone":
+    "Šiame projekte tau nieko neliko atlikti.",
+  "projects.ask.needed":
+    "Reikia",
+  "projects.ask.missing":
+    "Trūksta",
+  "projects.ask.rejected":
+    "Atmesta – reikia naujo",
+  "projects.ask.expired":
+    "Nebegalioja",
+  "projects.instructionTitle":
+    "Naujausias nurodymas",
+  "projects.answerInstruction":
+    "Atsakyti žinutėse",
+  "projects.webDetail":
+    "Visas projekto puslapis – etapai, dokumentai ir komanda – yra svetainėje.",
+  "messages.threadNotShown":
+    "Pokalbis dar neparodytas. Palauk, kol jis įsikels, perskaityk jį ir tada peržiūrėk savo atsakymą.",
+  "messages.newBeforeReview":
+    "Šiame pokalbyje atėjo nauja žinutė. Ji jau rodoma aukščiau – perskaityk ją ir dar kartą peržiūrėk savo atsakymą.",
   "profile.noWorkerProfile": "Ši paskyra dar neturi darbuotojo profilio.",
   "profile.figuresTitle": "Įgūdžiai su tavo užrašytomis valandomis",
   "profile.groupManagerConfirmed": "Vadovo patvirtinta",
@@ -757,6 +1197,226 @@ const ru: Catalogue = {
   "journal.compose.reviewOnWeb":
     "То, что ждёт проверки, подтверждается на сайте.",
   "profile.skillsEmpty": "Навыки пока не записаны.",
+  "journal.correct.action":
+    "Исправить эту запись",
+  "journal.correct.title":
+    "Исправить запись",
+  "journal.correct.intro":
+    "Измените то, что неверно, — текст, день или место. Прежняя версия остаётся в истории; итоги считают исправленную.",
+  "journal.correct.nothingChanged":
+    "Пока ничего не изменено. Сначала исправьте текст, день или место.",
+  "journal.correct.previewTitle":
+    "Проверьте исправление перед сохранением",
+  "journal.correct.before":
+    "Сейчас",
+  "journal.correct.after":
+    "После исправления",
+  "journal.correct.hours":
+    "Часы",
+  "journal.correct.output":
+    "Выполнено",
+  "journal.correct.wasConfirmed":
+    "Эту запись подтвердил руководитель. Подтверждение остаётся у прежней версии; исправленная сохраняется как ещё не подтверждённая.",
+  "journal.correct.save":
+    "Сохранить исправление",
+  "journal.correct.savedTitle":
+    "Исправление сохранено",
+  "journal.correct.savedBody":
+    "Журнал и итоги теперь показывают исправленную версию.",
+  "journal.correct.savedConfirmedBody":
+    "Исправленная версия сохранена и ждёт подтверждения руководителя; прежняя подтверждённая версия остаётся в истории.",
+  "journal.correct.draftFailedTitle":
+    "Не удалось подготовить исправление",
+  "journal.correct.saveFailedTitle":
+    "Не удалось сохранить исправление",
+  "journal.correct.unsureSaved":
+    "Исправление отправлено, но ответ не пришёл, поэтому неизвестно, сохранено ли оно. Повторить безопасно: уже сохранённое исправление будет отклонено, а не сохранено дважды.",
+  "journal.correct.staleDraft":
+    "Не сохранено: журнал изменился после подготовки исправления. Проверьте ещё раз.",
+  "journal.correct.superseded":
+    "Эта запись уже исправлена или удалена. Откройте журнал снова и исправьте текущую версию.",
+  "journal.correct.notFound":
+    "Этой записи нет среди ваших последних записей журнала. Возможно, она уже исправлена.",
+  "journal.correct.conflict":
+    "Новый текст указывает одну длительность на всю запись, но в записи есть и объём работы, а обоим нужно одно и то же поле. Укажите время по каждому виду работ или исправьте запись на сайте.",
+  "journal.correct.missingTitle":
+    "Эту запись здесь исправить нельзя",
+  "today.openMessages":
+    "Сообщения",
+  "messages.title":
+    "Сообщения",
+  "messages.conversation":
+    "Разговор",
+  "messages.intro":
+    "Ваши разговоры внутри LabourMarket.ai. Сообщения остаются в приложении — ничего не отправляется по e-mail или SMS. Новые сообщения видны при открытии этого экрана.",
+  "messages.none":
+    "У вас пока нет разговоров.",
+  "messages.untitled":
+    "Разговор",
+  "messages.threadEmpty":
+    "В этом разговоре пока нет сообщений.",
+  "messages.fromMe":
+    "Вы",
+  "messages.fromThem":
+    "Собеседник",
+  "messages.replyLabel":
+    "Ваш ответ",
+  "messages.review":
+    "Проверить перед отправкой",
+  "messages.emptyBody":
+    "Сначала напишите сообщение.",
+  "messages.previewTitle":
+    "Проверьте перед отправкой",
+  "messages.previewNothingSent":
+    "Пока ничего не отправлено. Именно этот текст увидит собеседник.",
+  "messages.send":
+    "Отправить",
+  "messages.sentTitle":
+    "Отправлено",
+  "messages.sentBody":
+    "Ваше сообщение в разговоре.",
+  "messages.sentUnverified":
+    "Сервер принял сообщение, но при обратном чтении текст не совпал. Откройте разговор снова и проверьте.",
+  "messages.writeAnother":
+    "Написать ещё",
+  "messages.draftFailedTitle":
+    "Не удалось подготовить сообщение",
+  "messages.sendFailedTitle":
+    "Не удалось отправить сообщение",
+  "messages.unsureSent":
+    "Сообщение отправлено, но ответ не пришёл, поэтому неизвестно, дошло ли оно. Перед повторной отправкой откройте разговор снова.",
+  "messages.staleDraft":
+    "Не отправлено: пока вы готовили ответ, в разговоре появилось новое сообщение. Прочитайте его и проверьте ответ ещё раз.",
+  "messages.notFound":
+    "Этот разговор не ваш или больше не существует.",
+  "messages.noPermission":
+    "Вы не можете писать в этом разговоре.",
+  "today.openNotifications":
+    "Уведомления",
+  "notifications.title":
+    "Уведомления",
+  "notifications.intro":
+    "Что произошло в вашей работе, новые сверху. При открытии уведомление отмечается прочитанным. Уведомления не приходят на телефон — они видны здесь, когда вы открываете этот экран.",
+  "notifications.none":
+    "У вас нет уведомлений.",
+  "notifications.unread":
+    "Новое",
+  "notifications.markAll":
+    "Отметить все прочитанными",
+  "notifications.markFailedTitle":
+    "Не удалось отметить как прочитанное",
+  "notifications.type.unknown":
+    "Уведомление",
+  "notifications.type.event_absence_approved":
+    "Ваше отсутствие одобрено",
+  "notifications.type.event_absence_rejected":
+    "Ваше отсутствие отклонено",
+  "notifications.type.event_absence_requested":
+    "Для вас зарегистрировано отсутствие",
+  "notifications.type.event_booking_accepted":
+    "Ваше предложение бронирования принято",
+  "notifications.type.event_booking_declined":
+    "Ваше предложение бронирования отклонено",
+  "notifications.type.event_booking_proposed":
+    "Вы получили предложение бронирования",
+  "notifications.type.event_booking_withdrawn":
+    "Предложение о бронировании отозвано",
+  "notifications.type.event_demand_interest_expressed":
+    "Работник проявил интерес к вашей заявке",
+  "notifications.type.event_demand_interest_reviewed":
+    "Компания отметила ваш интерес как рассмотренный",
+  "notifications.type.event_document_ack_assigned":
+    "Вас попросили подтвердить, что вы прочитали документ.",
+  "notifications.type.event_document_ack_completed":
+    "Документ, отправленный вами на подтверждение, был подтверждён.",
+  "notifications.type.event_document_expiring":
+    "Срок действия документа скоро закончится.",
+  "notifications.type.event_engagement_created":
+    "Создано новое сотрудничество",
+  "notifications.type.event_engagement_ended":
+    "Рабочие отношения завершены",
+  "notifications.type.event_history_link_offered":
+    "Организация предложила связать зафиксированную историю вашей работы с вашим аккаунтом",
+  "notifications.type.event_invitation_accepted":
+    "Кто-то принял ваше приглашение",
+  "notifications.type.event_job_alert":
+    "Появилась новая работа, подходящая под ваш запрос",
+  "notifications.type.event_journal_review_decided":
+    "Запись в вашем журнале проверена",
+  "notifications.type.event_journal_review_decided_approved":
+    "Запись в вашем журнале подтверждена",
+  "notifications.type.event_journal_review_decided_changes_requested":
+    "По записи в вашем журнале запрошены изменения",
+  "notifications.type.event_journal_review_decided_rejected":
+    "Запись в вашем журнале отклонена",
+  "notifications.type.event_message_received":
+    "У вас новое сообщение",
+  "notifications.type.event_saved_search_match":
+    "В сохранённом поиске есть новые результаты",
+  "notifications.type.event_weekly_digest":
+    "Ваш еженедельный обзор работы и возможностей готов",
+  "notifications.type.event_weekly_digest_journal":
+    "Готов обзор вашего рабочего журнала за неделю",
+  "notifications.type.event_weekly_digest_profile_completion":
+    "Чтобы показать подходящие вакансии, подтвердите, какую работу вы выполняете",
+  "notifications.type.event_work_task_assigned":
+    "Вам назначена задача",
+  "notifications.type.event_workflow_decided":
+    "По вашему запросу на согласование принято решение",
+  "notifications.type.event_workflow_delegated":
+    "Вам передан этап согласования",
+  "notifications.type.event_workflow_escalated":
+    "Этап согласования превысил срок",
+  "notifications.type.event_workflow_step_pending":
+    "Запрос на согласование ждёт вашего решения",
+  "today.openProjects":
+    "Мои проекты",
+  "projects.title":
+    "Мои проекты",
+  "projects.detailTitle":
+    "Проект",
+  "projects.none":
+    "У вас нет назначенных проектов.",
+  "projects.active":
+    "Активный",
+  "projects.ended":
+    "Завершён",
+  "projects.asksCount":
+    "Ещё нужно от вас",
+  "projects.moreOnWeb":
+    "Здесь показаны только первые ваши проекты. На сайте видны все.",
+  "projects.notFound":
+    "Этот проект не ваш или его нет среди показанных здесь.",
+  "projects.asksTitle":
+    "Ещё нужно от вас",
+  "projects.asksShownOf":
+    "Показано здесь / всего открыто — полный список на сайте",
+  "projects.asksUnavailable":
+    "Сейчас не удалось прочитать, что ещё нужно от вас. Попробуйте ещё раз или откройте проект на сайте.",
+  "projects.asksNotRead":
+    "Это назначение завершено. Что по нему требовалось от вас, видно на странице проекта на сайте.",
+  "projects.asksIncomplete":
+    "В ваших проектах открыто больше, чем приложение может показать, поэтому часть этого проекта может быть не видна. Полный список — на странице проекта на сайте.",
+  "projects.asksNone":
+    "По этому проекту от вас ничего не требуется.",
+  "projects.ask.needed":
+    "Нужно",
+  "projects.ask.missing":
+    "Отсутствует",
+  "projects.ask.rejected":
+    "Отклонено — нужен новый",
+  "projects.ask.expired":
+    "Истёк срок",
+  "projects.instructionTitle":
+    "Последнее указание",
+  "projects.answerInstruction":
+    "Ответить в сообщениях",
+  "projects.webDetail":
+    "Полная страница проекта — этапы, документы и команда — на сайте.",
+  "messages.threadNotShown":
+    "Разговор ещё не показан. Дождитесь загрузки, прочитайте его, затем проверьте свой ответ.",
+  "messages.newBeforeReview":
+    "В этом разговоре пришло новое сообщение. Оно уже показано выше — прочитайте его и проверьте свой ответ ещё раз.",
   "profile.noWorkerProfile": "У этого аккаунта пока нет профиля работника.",
   "profile.figuresTitle": "Навыки с вашими записанными часами",
   "profile.groupManagerConfirmed": "Подтверждено руководителем",
@@ -1043,6 +1703,226 @@ const nl: Catalogue = {
   "journal.compose.reviewOnWeb":
     "Wat op beoordeling wacht, bevestig je op de website.",
   "profile.skillsEmpty": "Nog geen vaardigheden vastgelegd.",
+  "journal.correct.action":
+    "Deze invoer corrigeren",
+  "journal.correct.title":
+    "Invoer corrigeren",
+  "journal.correct.intro":
+    "Wijzig wat niet klopt: de tekst, de dag of de locatie. De vorige versie blijft in je geschiedenis; je totalen tellen de gecorrigeerde.",
+  "journal.correct.nothingChanged":
+    "Er is nog niets gewijzigd. Pas eerst de tekst, de dag of de locatie aan.",
+  "journal.correct.previewTitle":
+    "Controleer de correctie voordat die wordt opgeslagen",
+  "journal.correct.before":
+    "Nu",
+  "journal.correct.after":
+    "Na de correctie",
+  "journal.correct.hours":
+    "Uren",
+  "journal.correct.output":
+    "Productie",
+  "journal.correct.wasConfirmed":
+    "Een leidinggevende heeft deze invoer bevestigd. Die bevestiging blijft bij de vorige versie; de gecorrigeerde versie wordt opgeslagen als nog niet bevestigd.",
+  "journal.correct.save":
+    "Correctie opslaan",
+  "journal.correct.savedTitle":
+    "Correctie opgeslagen",
+  "journal.correct.savedBody":
+    "Je logboek en je totalen tonen nu de gecorrigeerde versie.",
+  "journal.correct.savedConfirmedBody":
+    "De gecorrigeerde versie is opgeslagen en wacht op bevestiging door een leidinggevende; de eerder bevestigde versie blijft in je geschiedenis.",
+  "journal.correct.draftFailedTitle":
+    "We konden deze correctie niet voorbereiden",
+  "journal.correct.saveFailedTitle":
+    "We konden deze correctie niet opslaan",
+  "journal.correct.unsureSaved":
+    "De correctie is verstuurd maar er kwam geen antwoord, dus we weten niet of ze is opgeslagen. Opnieuw proberen is veilig: een correctie die al is opgeslagen wordt geweigerd, nooit dubbel opgeslagen.",
+  "journal.correct.staleDraft":
+    "Niet opgeslagen: je logboek is gewijzigd nadat de correctie was voorbereid. Bekijk het opnieuw.",
+  "journal.correct.superseded":
+    "Deze invoer is al gecorrigeerd of verwijderd. Open het logboek opnieuw en corrigeer de huidige versie.",
+  "journal.correct.notFound":
+    "Deze invoer staat niet bij je laatste logboekinvoer. Misschien is ze al gecorrigeerd.",
+  "journal.correct.conflict":
+    "De nieuwe tekst noemt één duur voor de hele invoer, maar de invoer bevat ook een productie, en beide hebben hetzelfde veld nodig. Geef de tijd per activiteit op, of corrigeer deze invoer op de website.",
+  "journal.correct.missingTitle":
+    "Deze invoer kan hier niet worden gecorrigeerd",
+  "today.openMessages":
+    "Berichten",
+  "messages.title":
+    "Berichten",
+  "messages.conversation":
+    "Gesprek",
+  "messages.intro":
+    "Je gesprekken binnen LabourMarket.ai. Berichten blijven in de app — er wordt niets per e-mail of sms verstuurd. Nieuwe berichten zie je als je dit scherm opent.",
+  "messages.none":
+    "Je hebt nog geen gesprekken.",
+  "messages.untitled":
+    "Gesprek",
+  "messages.threadEmpty":
+    "Nog geen berichten in dit gesprek.",
+  "messages.fromMe":
+    "Jij",
+  "messages.fromThem":
+    "De ander",
+  "messages.replyLabel":
+    "Je antwoord",
+  "messages.review":
+    "Bekijken voor verzenden",
+  "messages.emptyBody":
+    "Schrijf eerst een bericht.",
+  "messages.previewTitle":
+    "Controleer dit voordat het wordt verstuurd",
+  "messages.previewNothingSent":
+    "Er is nog niets verstuurd. Dit is precies de tekst die de ander ziet.",
+  "messages.send":
+    "Versturen",
+  "messages.sentTitle":
+    "Verstuurd",
+  "messages.sentBody":
+    "Je bericht staat in het gesprek.",
+  "messages.sentUnverified":
+    "De server heeft je bericht aangenomen, maar bij het teruglezen kwam het niet overeen. Open het gesprek opnieuw om het te controleren.",
+  "messages.writeAnother":
+    "Nog een bericht schrijven",
+  "messages.draftFailedTitle":
+    "We konden dit bericht niet voorbereiden",
+  "messages.sendFailedTitle":
+    "We konden dit bericht niet versturen",
+  "messages.unsureSent":
+    "Het bericht is verstuurd maar er kwam geen antwoord, dus we weten niet of het is aangekomen. Open het gesprek opnieuw voordat je het nog eens verstuurt.",
+  "messages.staleDraft":
+    "Niet verstuurd: er kwam een nieuw bericht in dit gesprek nadat je het jouwe had voorbereid. Lees het en bekijk je antwoord opnieuw.",
+  "messages.notFound":
+    "Dit gesprek is niet van jou of bestaat niet meer.",
+  "messages.noPermission":
+    "Je mag niet in dit gesprek schrijven.",
+  "today.openNotifications":
+    "Meldingen",
+  "notifications.title":
+    "Meldingen",
+  "notifications.intro":
+    "Wat er in je werk is gebeurd, nieuwste eerst. Openen markeert een melding als gelezen. Meldingen worden niet naar je telefoon gepusht — ze staan hier wanneer je dit scherm opent.",
+  "notifications.none":
+    "Je hebt geen meldingen.",
+  "notifications.unread":
+    "Nieuw",
+  "notifications.markAll":
+    "Alles als gelezen markeren",
+  "notifications.markFailedTitle":
+    "We konden dit niet als gelezen markeren",
+  "notifications.type.unknown":
+    "Een melding",
+  "notifications.type.event_absence_approved":
+    "Je afwezigheid is goedgekeurd",
+  "notifications.type.event_absence_rejected":
+    "Je afwezigheid is afgewezen",
+  "notifications.type.event_absence_requested":
+    "Er is een afwezigheid voor je geregistreerd",
+  "notifications.type.event_booking_accepted":
+    "Je boekingsvoorstel is geaccepteerd",
+  "notifications.type.event_booking_declined":
+    "Je boekingsvoorstel is afgewezen",
+  "notifications.type.event_booking_proposed":
+    "Je hebt een boekingsvoorstel ontvangen",
+  "notifications.type.event_booking_withdrawn":
+    "Het boekingsvoorstel is ingetrokken",
+  "notifications.type.event_demand_interest_expressed":
+    "Een werknemer heeft interesse getoond in je aanvraag",
+  "notifications.type.event_demand_interest_reviewed":
+    "Een bedrijf heeft je interesse als bekeken gemarkeerd",
+  "notifications.type.event_document_ack_assigned":
+    "Je bent gevraagd te bevestigen dat je een document hebt gelezen.",
+  "notifications.type.event_document_ack_completed":
+    "Een document dat je ter bevestiging stuurde, is bevestigd.",
+  "notifications.type.event_document_expiring":
+    "De geldigheid van een document loopt binnenkort af.",
+  "notifications.type.event_engagement_created":
+    "Er is een nieuwe samenwerking aangemaakt",
+  "notifications.type.event_engagement_ended":
+    "De samenwerking is beëindigd",
+  "notifications.type.event_history_link_offered":
+    "Een organisatie biedt aan je geregistreerde werkgeschiedenis aan je account te koppelen",
+  "notifications.type.event_invitation_accepted":
+    "Iemand heeft je uitnodiging aangenomen",
+  "notifications.type.event_job_alert":
+    "Er is een nieuwe baan die bij je zoekopdracht past",
+  "notifications.type.event_journal_review_decided":
+    "Je journaalitem is beoordeeld",
+  "notifications.type.event_journal_review_decided_approved":
+    "Je journaalitem is bevestigd",
+  "notifications.type.event_journal_review_decided_changes_requested":
+    "Er zijn wijzigingen gevraagd voor je journaalitem",
+  "notifications.type.event_journal_review_decided_rejected":
+    "Je journaalitem is afgewezen",
+  "notifications.type.event_message_received":
+    "Je hebt een nieuw bericht",
+  "notifications.type.event_saved_search_match":
+    "Een opgeslagen zoekopdracht heeft nieuwe resultaten",
+  "notifications.type.event_weekly_digest":
+    "Je wekelijkse samenvatting van werk en kansen staat klaar",
+  "notifications.type.event_weekly_digest_journal":
+    "Het weekoverzicht van je werkjournaal is klaar",
+  "notifications.type.event_weekly_digest_profile_completion":
+    "Om je passende banen te tonen, bevestig welk werk je doet",
+  "notifications.type.event_work_task_assigned":
+    "Er is een taak aan je toegewezen",
+  "notifications.type.event_workflow_decided":
+    "Over je goedkeuringsverzoek is beslist",
+  "notifications.type.event_workflow_delegated":
+    "Een goedkeuringsronde is aan jou overgedragen",
+  "notifications.type.event_workflow_escalated":
+    "Een goedkeuringsronde heeft haar termijn overschreden",
+  "notifications.type.event_workflow_step_pending":
+    "Een goedkeuringsverzoek wacht op je beslissing",
+  "today.openProjects":
+    "Mijn projecten",
+  "projects.title":
+    "Mijn projecten",
+  "projects.detailTitle":
+    "Project",
+  "projects.none":
+    "Je bent aan geen enkel project toegewezen.",
+  "projects.active":
+    "Actief",
+  "projects.ended":
+    "Beëindigd",
+  "projects.asksCount":
+    "Nog nodig van jou",
+  "projects.moreOnWeb":
+    "Hier staan alleen je eerste projecten. De website toont ze allemaal.",
+  "projects.notFound":
+    "Dit project is niet van jou, of het staat niet bij de projecten die hier worden getoond.",
+  "projects.asksTitle":
+    "Nog nodig van jou",
+  "projects.asksShownOf":
+    "Hier getoond / in totaal nog open — de volledige lijst staat op de website",
+  "projects.asksUnavailable":
+    "Wat er nog van je nodig is, kon nu niet worden gelezen. Probeer het opnieuw of open het project op de website.",
+  "projects.asksNotRead":
+    "Deze toewijzing is beëindigd. Wat er daarbij van je werd gevraagd, staat op de projectpagina op de website.",
+  "projects.asksIncomplete":
+    "Er staat in je projecten meer open dan de app kan tonen, dus het deel van dit project wordt mogelijk niet getoond. De projectpagina op de website heeft de volledige lijst.",
+  "projects.asksNone":
+    "Voor jou staat er op dit project niets open.",
+  "projects.ask.needed":
+    "Nodig",
+  "projects.ask.missing":
+    "Ontbreekt",
+  "projects.ask.rejected":
+    "Afgewezen — er is een nieuwe nodig",
+  "projects.ask.expired":
+    "Verlopen",
+  "projects.instructionTitle":
+    "Laatste instructie",
+  "projects.answerInstruction":
+    "Antwoorden in Berichten",
+  "projects.webDetail":
+    "De volledige projectpagina — fasen, documenten en het team — staat op de website.",
+  "messages.threadNotShown":
+    "Het gesprek staat nog niet op het scherm. Wacht tot het geladen is, lees het en bekijk dan je antwoord.",
+  "messages.newBeforeReview":
+    "Er is een nieuw bericht in dit gesprek binnengekomen. Het staat nu hierboven — lees het en bekijk je antwoord opnieuw.",
   "profile.noWorkerProfile": "Dit account heeft nog geen werkersprofiel.",
   "profile.figuresTitle": "Vaardigheden, met je vastgelegde uren",
   "profile.groupManagerConfirmed": "Bevestigd door een leidinggevende",
@@ -1332,6 +2212,226 @@ const de: Catalogue = {
   "journal.compose.reviewOnWeb":
     "Was auf Prüfung wartet, wird auf der Website bestätigt.",
   "profile.skillsEmpty": "Noch keine Fähigkeiten erfasst.",
+  "journal.correct.action":
+    "Diesen Eintrag korrigieren",
+  "journal.correct.title":
+    "Eintrag korrigieren",
+  "journal.correct.intro":
+    "Ändern Sie, was nicht stimmt – den Text, den Tag oder den Ort. Die vorige Fassung bleibt in Ihrem Verlauf; Ihre Summen zählen die korrigierte.",
+  "journal.correct.nothingChanged":
+    "Noch nichts geändert. Bearbeiten Sie zuerst den Text, den Tag oder den Ort.",
+  "journal.correct.previewTitle":
+    "Korrektur vor dem Speichern prüfen",
+  "journal.correct.before":
+    "Jetzt",
+  "journal.correct.after":
+    "Nach der Korrektur",
+  "journal.correct.hours":
+    "Stunden",
+  "journal.correct.output":
+    "Leistung",
+  "journal.correct.wasConfirmed":
+    "Eine Führungskraft hat diesen Eintrag bestätigt. Die Bestätigung bleibt bei der vorigen Fassung; die korrigierte Fassung wird als noch nicht bestätigt gespeichert.",
+  "journal.correct.save":
+    "Korrektur speichern",
+  "journal.correct.savedTitle":
+    "Korrektur gespeichert",
+  "journal.correct.savedBody":
+    "Ihr Arbeitsjournal und Ihre Summen zeigen jetzt die korrigierte Fassung.",
+  "journal.correct.savedConfirmedBody":
+    "Die korrigierte Fassung ist gespeichert und wartet auf die Bestätigung einer Führungskraft; die zuvor bestätigte Fassung bleibt in Ihrem Verlauf.",
+  "journal.correct.draftFailedTitle":
+    "Diese Korrektur konnte nicht vorbereitet werden",
+  "journal.correct.saveFailedTitle":
+    "Diese Korrektur konnte nicht gespeichert werden",
+  "journal.correct.unsureSaved":
+    "Die Korrektur wurde gesendet, aber es kam keine Antwort, daher wissen wir nicht, ob sie gespeichert wurde. Ein erneuter Versuch ist sicher: Eine bereits gespeicherte Korrektur wird abgelehnt, nie doppelt gespeichert.",
+  "journal.correct.staleDraft":
+    "Nicht gespeichert: Ihr Journal hat sich geändert, nachdem die Korrektur vorbereitet wurde. Bitte erneut prüfen.",
+  "journal.correct.superseded":
+    "Dieser Eintrag wurde bereits korrigiert oder entfernt. Öffnen Sie das Journal erneut und korrigieren Sie die aktuelle Fassung.",
+  "journal.correct.notFound":
+    "Dieser Eintrag ist nicht unter Ihren neuesten Journaleinträgen. Vielleicht wurde er bereits korrigiert.",
+  "journal.correct.conflict":
+    "Der neue Text nennt eine Dauer für den ganzen Eintrag, der Eintrag enthält aber auch eine Leistungsmenge, und beide brauchen dasselbe Feld. Geben Sie die Zeit je Tätigkeit an oder korrigieren Sie den Eintrag auf der Website.",
+  "journal.correct.missingTitle":
+    "Dieser Eintrag kann hier nicht korrigiert werden",
+  "today.openMessages":
+    "Nachrichten",
+  "messages.title":
+    "Nachrichten",
+  "messages.conversation":
+    "Unterhaltung",
+  "messages.intro":
+    "Ihre Unterhaltungen in LabourMarket.ai. Nachrichten bleiben in der App – nichts wird per E-Mail oder SMS versendet. Neue Nachrichten erscheinen, wenn Sie diese Seite öffnen.",
+  "messages.none":
+    "Sie haben noch keine Unterhaltungen.",
+  "messages.untitled":
+    "Unterhaltung",
+  "messages.threadEmpty":
+    "In dieser Unterhaltung gibt es noch keine Nachrichten.",
+  "messages.fromMe":
+    "Sie",
+  "messages.fromThem":
+    "Gegenüber",
+  "messages.replyLabel":
+    "Ihre Antwort",
+  "messages.review":
+    "Vor dem Senden prüfen",
+  "messages.emptyBody":
+    "Schreiben Sie zuerst eine Nachricht.",
+  "messages.previewTitle":
+    "Vor dem Senden prüfen",
+  "messages.previewNothingSent":
+    "Noch wurde nichts gesendet. Genau diesen Text sieht die andere Person.",
+  "messages.send":
+    "Senden",
+  "messages.sentTitle":
+    "Gesendet",
+  "messages.sentBody":
+    "Ihre Nachricht ist in der Unterhaltung.",
+  "messages.sentUnverified":
+    "Der Server hat Ihre Nachricht angenommen, aber beim Zurücklesen stimmte sie nicht überein. Öffnen Sie die Unterhaltung erneut, um sie zu prüfen.",
+  "messages.writeAnother":
+    "Weitere Nachricht schreiben",
+  "messages.draftFailedTitle":
+    "Diese Nachricht konnte nicht vorbereitet werden",
+  "messages.sendFailedTitle":
+    "Diese Nachricht konnte nicht gesendet werden",
+  "messages.unsureSent":
+    "Die Nachricht wurde gesendet, aber es kam keine Antwort, daher wissen wir nicht, ob sie angekommen ist. Öffnen Sie die Unterhaltung erneut, bevor Sie sie noch einmal senden.",
+  "messages.staleDraft":
+    "Nicht gesendet: Nachdem Sie Ihre Antwort vorbereitet haben, kam eine neue Nachricht in diese Unterhaltung. Lesen Sie sie und prüfen Sie Ihre Antwort erneut.",
+  "messages.notFound":
+    "Diese Unterhaltung gehört nicht Ihnen oder existiert nicht mehr.",
+  "messages.noPermission":
+    "Sie dürfen in dieser Unterhaltung nicht schreiben.",
+  "today.openNotifications":
+    "Benachrichtigungen",
+  "notifications.title":
+    "Benachrichtigungen",
+  "notifications.intro":
+    "Was in Ihrer Arbeit passiert ist, neueste zuerst. Beim Öffnen wird eine Benachrichtigung als gelesen markiert. Benachrichtigungen werden nicht auf Ihr Telefon gepusht – sie erscheinen hier, wenn Sie diese Seite öffnen.",
+  "notifications.none":
+    "Sie haben keine Benachrichtigungen.",
+  "notifications.unread":
+    "Neu",
+  "notifications.markAll":
+    "Alle als gelesen markieren",
+  "notifications.markFailedTitle":
+    "Konnte nicht als gelesen markiert werden",
+  "notifications.type.unknown":
+    "Eine Benachrichtigung",
+  "notifications.type.event_absence_approved":
+    "Ihre Abwesenheit wurde genehmigt",
+  "notifications.type.event_absence_rejected":
+    "Ihre Abwesenheit wurde abgelehnt",
+  "notifications.type.event_absence_requested":
+    "Für Sie wurde eine Abwesenheit eingetragen",
+  "notifications.type.event_booking_accepted":
+    "Ihr Buchungsvorschlag wurde angenommen",
+  "notifications.type.event_booking_declined":
+    "Ihr Buchungsvorschlag wurde abgelehnt",
+  "notifications.type.event_booking_proposed":
+    "Sie haben einen Buchungsvorschlag erhalten",
+  "notifications.type.event_booking_withdrawn":
+    "Der Buchungsvorschlag wurde zurückgezogen",
+  "notifications.type.event_demand_interest_expressed":
+    "Eine Arbeitskraft hat Interesse an Ihrem Bedarf bekundet",
+  "notifications.type.event_demand_interest_reviewed":
+    "Ein Unternehmen hat Ihr Interesse als geprüft markiert",
+  "notifications.type.event_document_ack_assigned":
+    "Sie wurden gebeten zu bestätigen, dass Sie ein Dokument gelesen haben.",
+  "notifications.type.event_document_ack_completed":
+    "Ein von Ihnen zur Bestätigung gesendetes Dokument wurde bestätigt.",
+  "notifications.type.event_document_expiring":
+    "Die Gültigkeit eines Dokuments endet bald.",
+  "notifications.type.event_engagement_created":
+    "Ein neues Engagement wurde erstellt",
+  "notifications.type.event_engagement_ended":
+    "Das Arbeitsverhältnis wurde beendet",
+  "notifications.type.event_history_link_offered":
+    "Eine Organisation bietet an, Ihre erfasste Arbeitshistorie mit Ihrem Konto zu verbinden",
+  "notifications.type.event_invitation_accepted":
+    "Jemand hat Ihre Einladung angenommen",
+  "notifications.type.event_job_alert":
+    "Eine neue Stelle passt zu Ihrer Suche",
+  "notifications.type.event_journal_review_decided":
+    "Ihr Journaleintrag wurde geprüft",
+  "notifications.type.event_journal_review_decided_approved":
+    "Ihr Journaleintrag wurde bestätigt",
+  "notifications.type.event_journal_review_decided_changes_requested":
+    "Für Ihren Journaleintrag wurden Änderungen angefordert",
+  "notifications.type.event_journal_review_decided_rejected":
+    "Ihr Journaleintrag wurde abgelehnt",
+  "notifications.type.event_message_received":
+    "Sie haben eine neue Nachricht",
+  "notifications.type.event_saved_search_match":
+    "Eine gespeicherte Suche hat neue Ergebnisse",
+  "notifications.type.event_weekly_digest":
+    "Ihre wöchentliche Übersicht zu Arbeit und Chancen ist bereit",
+  "notifications.type.event_weekly_digest_journal":
+    "Die Wochenübersicht Ihres Arbeitsjournals ist fertig",
+  "notifications.type.event_weekly_digest_profile_completion":
+    "Damit wir Ihnen passende Jobs zeigen können, bestätigen Sie, welche Arbeit Sie machen",
+  "notifications.type.event_work_task_assigned":
+    "Ihnen wurde eine Aufgabe zugewiesen",
+  "notifications.type.event_workflow_decided":
+    "Über Ihre Freigabeanfrage wurde entschieden",
+  "notifications.type.event_workflow_delegated":
+    "Eine Freigaberunde wurde an Sie übergeben",
+  "notifications.type.event_workflow_escalated":
+    "Eine Freigaberunde hat ihre Frist überschritten",
+  "notifications.type.event_workflow_step_pending":
+    "Eine Freigabeanfrage wartet auf Ihre Entscheidung",
+  "today.openProjects":
+    "Meine Projekte",
+  "projects.title":
+    "Meine Projekte",
+  "projects.detailTitle":
+    "Projekt",
+  "projects.none":
+    "Sie sind keinem Projekt zugewiesen.",
+  "projects.active":
+    "Aktiv",
+  "projects.ended":
+    "Beendet",
+  "projects.asksCount":
+    "Noch von Ihnen benötigt",
+  "projects.moreOnWeb":
+    "Hier werden nur Ihre ersten Projekte angezeigt. Die Website zeigt alle.",
+  "projects.notFound":
+    "Dieses Projekt gehört nicht zu Ihren oder ist nicht unter den hier gezeigten Projekten.",
+  "projects.asksTitle":
+    "Noch von Ihnen benötigt",
+  "projects.asksShownOf":
+    "Hier angezeigt / insgesamt noch offen – die vollständige Liste finden Sie auf der Website",
+  "projects.asksUnavailable":
+    "Was noch von Ihnen benötigt wird, konnte gerade nicht gelesen werden. Versuchen Sie es erneut oder öffnen Sie das Projekt auf der Website.",
+  "projects.asksNotRead":
+    "Dieser Einsatz ist beendet. Was dabei von Ihnen verlangt wurde, steht auf der Projektseite der Website.",
+  "projects.asksIncomplete":
+    "In Ihren Projekten ist mehr offen, als die App anzeigen kann; der Teil dieses Projekts wird daher möglicherweise nicht gezeigt. Die vollständige Liste steht auf der Projektseite der Website.",
+  "projects.asksNone":
+    "Für Sie ist in diesem Projekt nichts offen.",
+  "projects.ask.needed":
+    "Benötigt",
+  "projects.ask.missing":
+    "Fehlt",
+  "projects.ask.rejected":
+    "Abgelehnt – ein neues wird benötigt",
+  "projects.ask.expired":
+    "Abgelaufen",
+  "projects.instructionTitle":
+    "Letzte Anweisung",
+  "projects.answerInstruction":
+    "In Nachrichten antworten",
+  "projects.webDetail":
+    "Die vollständige Projektseite – Phasen, Dokumente und Team – finden Sie auf der Website.",
+  "messages.threadNotShown":
+    "Das Gespräch wird noch nicht angezeigt. Warten Sie, bis es geladen ist, lesen Sie es und prüfen Sie dann Ihre Antwort.",
+  "messages.newBeforeReview":
+    "In diesem Gespräch ist eine neue Nachricht eingegangen. Sie wird jetzt oben angezeigt – lesen Sie sie und prüfen Sie Ihre Antwort erneut.",
   "profile.noWorkerProfile": "Dieses Konto hat noch kein Arbeiterprofil.",
   "profile.figuresTitle": "Fähigkeiten mit Ihren erfassten Stunden",
   "profile.groupManagerConfirmed": "Von einer Führungskraft bestätigt",
@@ -1608,6 +2708,226 @@ const pl: Catalogue = {
   "journal.compose.reviewOnWeb":
     "To, co czeka na sprawdzenie, potwierdza się na stronie internetowej.",
   "profile.skillsEmpty": "Nie zapisano jeszcze żadnych umiejętności.",
+  "journal.correct.action":
+    "Popraw ten wpis",
+  "journal.correct.title":
+    "Popraw wpis",
+  "journal.correct.intro":
+    "Zmień to, co jest błędne — treść, dzień lub miejsce. Poprzednia wersja zostaje w historii; sumy liczą poprawioną.",
+  "journal.correct.nothingChanged":
+    "Nic jeszcze nie zmieniono. Najpierw popraw treść, dzień lub miejsce.",
+  "journal.correct.previewTitle":
+    "Sprawdź poprawkę przed zapisaniem",
+  "journal.correct.before":
+    "Teraz",
+  "journal.correct.after":
+    "Po poprawce",
+  "journal.correct.hours":
+    "Godziny",
+  "journal.correct.output":
+    "Wykonano",
+  "journal.correct.wasConfirmed":
+    "Ten wpis potwierdził kierownik. Potwierdzenie zostaje przy poprzedniej wersji; poprawiona wersja zostaje zapisana jako jeszcze niepotwierdzona.",
+  "journal.correct.save":
+    "Zapisz poprawkę",
+  "journal.correct.savedTitle":
+    "Poprawka zapisana",
+  "journal.correct.savedBody":
+    "Dziennik i sumy pokazują teraz poprawioną wersję.",
+  "journal.correct.savedConfirmedBody":
+    "Poprawiona wersja jest zapisana i czeka na potwierdzenie kierownika; poprzednia potwierdzona wersja zostaje w historii.",
+  "journal.correct.draftFailedTitle":
+    "Nie udało się przygotować poprawki",
+  "journal.correct.saveFailedTitle":
+    "Nie udało się zapisać poprawki",
+  "journal.correct.unsureSaved":
+    "Poprawka została wysłana, ale nie wróciła odpowiedź, więc nie wiemy, czy została zapisana. Ponowna próba jest bezpieczna: poprawka, która już została zapisana, zostanie odrzucona, a nie zapisana dwa razy.",
+  "journal.correct.staleDraft":
+    "Nie zapisano: dziennik zmienił się po przygotowaniu poprawki. Sprawdź ją ponownie.",
+  "journal.correct.superseded":
+    "Ten wpis został już poprawiony lub usunięty. Otwórz dziennik ponownie i popraw bieżącą wersję.",
+  "journal.correct.notFound":
+    "Tego wpisu nie ma wśród Twoich najnowszych wpisów w dzienniku. Możliwe, że został już poprawiony.",
+  "journal.correct.conflict":
+    "Nowa treść podaje jeden czas dla całego wpisu, ale wpis zawiera też ilość wykonanej pracy, a oba wymagają tego samego pola. Podaj czas dla każdej czynności albo popraw wpis na stronie.",
+  "journal.correct.missingTitle":
+    "Tego wpisu nie można tu poprawić",
+  "today.openMessages":
+    "Wiadomości",
+  "messages.title":
+    "Wiadomości",
+  "messages.conversation":
+    "Rozmowa",
+  "messages.intro":
+    "Twoje rozmowy w LabourMarket.ai. Wiadomości zostają w aplikacji — nic nie jest wysyłane e-mailem ani SMS-em. Nowe wiadomości widać po otwarciu tego ekranu.",
+  "messages.none":
+    "Nie masz jeszcze żadnych rozmów.",
+  "messages.untitled":
+    "Rozmowa",
+  "messages.threadEmpty":
+    "W tej rozmowie nie ma jeszcze wiadomości.",
+  "messages.fromMe":
+    "Ty",
+  "messages.fromThem":
+    "Rozmówca",
+  "messages.replyLabel":
+    "Twoja odpowiedź",
+  "messages.review":
+    "Sprawdź przed wysłaniem",
+  "messages.emptyBody":
+    "Najpierw napisz wiadomość.",
+  "messages.previewTitle":
+    "Sprawdź przed wysłaniem",
+  "messages.previewNothingSent":
+    "Nic jeszcze nie wysłano. Dokładnie ten tekst zobaczy druga osoba.",
+  "messages.send":
+    "Wyślij",
+  "messages.sentTitle":
+    "Wysłano",
+  "messages.sentBody":
+    "Twoja wiadomość jest w rozmowie.",
+  "messages.sentUnverified":
+    "Serwer przyjął wiadomość, ale po odczytaniu nie zgadzała się. Otwórz rozmowę ponownie, aby ją sprawdzić.",
+  "messages.writeAnother":
+    "Napisz kolejną wiadomość",
+  "messages.draftFailedTitle":
+    "Nie udało się przygotować wiadomości",
+  "messages.sendFailedTitle":
+    "Nie udało się wysłać wiadomości",
+  "messages.unsureSent":
+    "Wiadomość została wysłana, ale nie wróciła odpowiedź, więc nie wiemy, czy dotarła. Zanim wyślesz ją ponownie, otwórz rozmowę jeszcze raz.",
+  "messages.staleDraft":
+    "Nie wysłano: po przygotowaniu Twojej odpowiedzi w rozmowie pojawiła się nowa wiadomość. Przeczytaj ją i sprawdź odpowiedź ponownie.",
+  "messages.notFound":
+    "Ta rozmowa nie jest Twoja albo już nie istnieje.",
+  "messages.noPermission":
+    "Nie możesz pisać w tej rozmowie.",
+  "today.openNotifications":
+    "Powiadomienia",
+  "notifications.title":
+    "Powiadomienia",
+  "notifications.intro":
+    "Co wydarzyło się w Twojej pracy, najnowsze na górze. Otwarcie oznacza powiadomienie jako przeczytane. Powiadomienia nie są wysyłane na telefon — widać je tutaj po otwarciu tego ekranu.",
+  "notifications.none":
+    "Nie masz powiadomień.",
+  "notifications.unread":
+    "Nowe",
+  "notifications.markAll":
+    "Oznacz wszystkie jako przeczytane",
+  "notifications.markFailedTitle":
+    "Nie udało się oznaczyć jako przeczytane",
+  "notifications.type.unknown":
+    "Powiadomienie",
+  "notifications.type.event_absence_approved":
+    "Twoja nieobecność została zatwierdzona",
+  "notifications.type.event_absence_rejected":
+    "Twoja nieobecność została odrzucona",
+  "notifications.type.event_absence_requested":
+    "Zgłoszono dla Ciebie nieobecność",
+  "notifications.type.event_booking_accepted":
+    "Twoja propozycja rezerwacji została przyjęta",
+  "notifications.type.event_booking_declined":
+    "Twoja propozycja rezerwacji została odrzucona",
+  "notifications.type.event_booking_proposed":
+    "Otrzymałeś propozycję rezerwacji",
+  "notifications.type.event_booking_withdrawn":
+    "Propozycja rezerwacji została wycofana",
+  "notifications.type.event_demand_interest_expressed":
+    "Pracownik wyraził zainteresowanie Twoim zapotrzebowaniem",
+  "notifications.type.event_demand_interest_reviewed":
+    "Firma oznaczyła Twoje zainteresowanie jako rozpatrzone",
+  "notifications.type.event_document_ack_assigned":
+    "Poproszono Cię o potwierdzenie, że zapoznano się z dokumentem.",
+  "notifications.type.event_document_ack_completed":
+    "Dokument wysłany przez Ciebie do potwierdzenia został potwierdzony.",
+  "notifications.type.event_document_expiring":
+    "Ważność dokumentu wkrótce się kończy.",
+  "notifications.type.event_engagement_created":
+    "Utworzono nową współpracę",
+  "notifications.type.event_engagement_ended":
+    "Współpraca została zakończona",
+  "notifications.type.event_history_link_offered":
+    "Organizacja zaproponowała powiązanie zarejestrowanej historii Twojej pracy z Twoim kontem",
+  "notifications.type.event_invitation_accepted":
+    "Ktoś przyjął Twoje zaproszenie",
+  "notifications.type.event_job_alert":
+    "Pojawiła się nowa oferta pasująca do Twoich kryteriów",
+  "notifications.type.event_journal_review_decided":
+    "Twój wpis w dzienniku został sprawdzony",
+  "notifications.type.event_journal_review_decided_approved":
+    "Twój wpis w dzienniku został potwierdzony",
+  "notifications.type.event_journal_review_decided_changes_requested":
+    "Poproszono o zmiany w Twoim wpisie w dzienniku",
+  "notifications.type.event_journal_review_decided_rejected":
+    "Twój wpis w dzienniku został odrzucony",
+  "notifications.type.event_message_received":
+    "Masz nową wiadomość",
+  "notifications.type.event_saved_search_match":
+    "Zapisane wyszukiwanie ma nowe wyniki",
+  "notifications.type.event_weekly_digest":
+    "Twoje tygodniowe podsumowanie pracy i możliwości jest gotowe",
+  "notifications.type.event_weekly_digest_journal":
+    "Podsumowanie Twojego dziennika pracy z tego tygodnia jest gotowe",
+  "notifications.type.event_weekly_digest_profile_completion":
+    "Aby pokazać pasujące oferty, potwierdź, jaką pracę wykonujesz",
+  "notifications.type.event_work_task_assigned":
+    "Przypisano ci zadanie",
+  "notifications.type.event_workflow_decided":
+    "Podjęto decyzję w sprawie Twojego wniosku o zatwierdzenie",
+  "notifications.type.event_workflow_delegated":
+    "Przekazano Ci etap zatwierdzania",
+  "notifications.type.event_workflow_escalated":
+    "Etap zatwierdzania przekroczył termin",
+  "notifications.type.event_workflow_step_pending":
+    "Wniosek o zatwierdzenie czeka na Twoją decyzję",
+  "today.openProjects":
+    "Moje projekty",
+  "projects.title":
+    "Moje projekty",
+  "projects.detailTitle":
+    "Projekt",
+  "projects.none":
+    "Nie masz przypisanego żadnego projektu.",
+  "projects.active":
+    "Aktywny",
+  "projects.ended":
+    "Zakończony",
+  "projects.asksCount":
+    "Jeszcze potrzebne od Ciebie",
+  "projects.moreOnWeb":
+    "Tutaj widać tylko Twoje pierwsze projekty. Na stronie widać wszystkie.",
+  "projects.notFound":
+    "Ten projekt nie jest Twój albo nie ma go wśród pokazanych tutaj.",
+  "projects.asksTitle":
+    "Jeszcze potrzebne od Ciebie",
+  "projects.asksShownOf":
+    "Pokazane tutaj / łącznie otwarte — pełna lista jest na stronie internetowej",
+  "projects.asksUnavailable":
+    "Nie udało się teraz odczytać, co jeszcze jest potrzebne od Ciebie. Spróbuj ponownie albo otwórz projekt na stronie internetowej.",
+  "projects.asksNotRead":
+    "To przypisanie się zakończyło. Co było w nim od Ciebie wymagane, zobaczysz na stronie projektu.",
+  "projects.asksIncomplete":
+    "W Twoich projektach otwartych jest więcej, niż aplikacja może pokazać, więc część tego projektu może nie być widoczna. Pełna lista jest na stronie projektu.",
+  "projects.asksNone":
+    "W tym projekcie nic nie czeka na Ciebie.",
+  "projects.ask.needed":
+    "Potrzebne",
+  "projects.ask.missing":
+    "Brakuje",
+  "projects.ask.rejected":
+    "Odrzucone — potrzebny nowy",
+  "projects.ask.expired":
+    "Wygasło",
+  "projects.instructionTitle":
+    "Najnowsze polecenie",
+  "projects.answerInstruction":
+    "Odpowiedz w wiadomościach",
+  "projects.webDetail":
+    "Pełna strona projektu — etapy, dokumenty i zespół — jest na stronie internetowej.",
+  "messages.threadNotShown":
+    "Rozmowa nie jest jeszcze widoczna. Poczekaj, aż się wczyta, przeczytaj ją, a potem sprawdź swoją odpowiedź.",
+  "messages.newBeforeReview":
+    "W tej rozmowie pojawiła się nowa wiadomość. Jest teraz widoczna powyżej — przeczytaj ją i sprawdź swoją odpowiedź jeszcze raz.",
   "profile.noWorkerProfile": "To konto nie ma jeszcze profilu pracownika.",
   "profile.figuresTitle": "Umiejętności wraz z Twoimi zapisanymi godzinami",
   "profile.groupManagerConfirmed": "Potwierdzone przez kierownika",

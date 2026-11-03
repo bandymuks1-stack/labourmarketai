@@ -7714,6 +7714,73 @@
     },
     "helpNeeded": "Trenger hjelp — {stage}:"
   },
+  "projectForecast": {
+    "title": "Prognose",
+    "notFact": "En prognose ut fra prosjektets registrerte arbeid per {date} — ikke et faktum og ikke et løfte. Den regnes ut på nytt hver gang siden åpnes.",
+    "unavailable": "Prognosen kunne ikke leses akkurat nå.",
+    "insufficient": "Foreløpig for lite registrert arbeid til å lage en prognose for prosjektet.",
+    "notApplicable": "Ingenting å forutsi: prosjektet har ikke noe åpent arbeid.",
+    "unknown": "Ukjent",
+    "beyondHorizon": "Mer enn tre år unna i nåværende tempo",
+    "completionLabel": "Forventet ferdig",
+    "deadlineLabel": "Frist",
+    "leftLabel": "Gjenstående arbeid",
+    "leftTasks": "{left} av {total} oppgaver",
+    "leftStages": "{left} av {total} faser",
+    "peopleLabel": "Personer som trengs",
+    "peopleValue": "{needed} (nå {active})",
+    "qualityLabel": "Kvalitetsrisiko",
+    "confidenceLabel": "Pålitelighet",
+    "actionsTitle": "Hva som ville endret den",
+    "assumptionsTitle": "Forutsetninger",
+    "risk": {
+      "on_track": "I rute",
+      "tight": "Stramt",
+      "likely_miss": "Nås trolig ikke",
+      "overdue": "Forsinket",
+      "unknown": "Ukjent"
+    },
+    "quality": {
+      "none": "Ingen åpne",
+      "low": "Lav",
+      "elevated": "Forhøyet",
+      "high": "Høy",
+      "unknown": "Ukjent"
+    },
+    "confidence": {
+      "insufficient": "for lite dokumentasjon",
+      "low": "lav",
+      "medium": "middels",
+      "high": "høy"
+    },
+    "action": {
+      "add_workers": "Legg til personer i teamet",
+      "find_partner_capacity": "Finn partnerkapasitet",
+      "unblock_stages": "Fjern blokkeringen av de blokkerte fasene",
+      "unblock_tasks": "Fjern blokkeringen av de blokkerte oppgavene",
+      "close_serious_defects": "Lukk de alvorlige avvikene",
+      "complete_readiness": "Fullfør teamets manglende klarhetspunkter",
+      "record_hours": "Registrer timene som er jobbet på prosjektet",
+      "set_planned_end": "Sett en planlagt sluttdato",
+      "break_down_scope": "Del arbeidet opp i oppgaver",
+      "review_budget": "Gå gjennom budsjettet",
+      "replan_deadline": "Planlegg fristen på nytt"
+    },
+    "assumption": {
+      "trailing_window_days": "Tempoet leses fra de siste 28 dagene.",
+      "calendar_day_rate": "Timer fordeles på kalenderdager; ingen arbeidskalender antas.",
+      "equal_unit_weight": "Hver oppgave teller likt.",
+      "unit_is_stage": "Prosjektet har ingen oppgaver, så faser telles i stedet.",
+      "team_stays_as_is": "Teamet forblir som det er nå.",
+      "absences_as_approved": "Bare godkjent fravær tas med.",
+      "throughput_without_hours": "Ingen timer er registrert, så ferdigdatoen leses bare fra fullført arbeid.",
+      "cost_continues_at_observed_rate": "Kostnadene fortsetter i tempoet sett så langt.",
+      "single_hours_ledger": "Én timeregistrering brukes; den andre vises ved siden av og legges aldri til.",
+      "hours_partly_unconfirmed": "Noen av timene er ennå ikke bekreftet.",
+      "hours_read_truncated": "Ikke alle timer kunne leses; tallene kan være for lave.",
+      "free_internal_people_unknown": "Det er ikke kjent hvem andre i organisasjonen som er ledige."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "Ukens mål",
     "titleMine": "Dine oppgaver denne uken",
@@ -7819,5 +7886,32 @@
     "error": "That didn't work. Nothing was changed.",
     "notAllowed": "The organization's owner or a manager can do this.",
     "notSameWork": "These records no longer match — refresh the page."
+  },
+  "learnerCohortJoin": {
+    "title": "Læringsgruppe",
+    "declaredNote": "Du kan alltid registrere praksisen din og arbeidet du har gjort, også før en institusjon har tatt deg opp. Til institusjonens autoriserte person bekrefter det, vises det som erklært av deg, ikke som bekreftet.",
+    "journalLink": "Åpne journalen",
+    "find": "{count, plural, one {# åpen gruppe} other {# åpne grupper}}",
+    "empty": "Ingen institusjon tar imot forespørsler om å bli med akkurat nå.",
+    "unavailable": "Læringsgruppene kunne ikke lastes nå. Prøv igjen senere.",
+    "status": {
+      "requested": "Forespørsel sendt, venter på institusjonens beslutning.",
+      "declined": "Institusjonen godtok ikke denne forespørselen."
+    },
+    "form": {
+      "nameLabel": "Navnet ditt slik institusjonen kjenner deg",
+      "nameHint": "Institusjonen ser bare dette navnet og meldingen din, ikke profilen eller journalen din.",
+      "noteLabel": "Melding til institusjonen (valgfritt)",
+      "send": "Be om å bli med",
+      "withdraw": "trekk tilbake forespørselen",
+      "saving": "Sender…",
+      "requested": "Forespørsel sendt.",
+      "alreadyMember": "Du er allerede medlem av denne gruppen.",
+      "withdrawn": "Forespørselen er trukket tilbake.",
+      "closed": "Denne gruppen tar ikke imot nye forespørsler.",
+      "invalid": "Sjekk navnet og meldingen.",
+      "error": "Noe gikk galt. Prøv igjen.",
+      "cooldown": "Forespørselen din ble nylig avslått. Du kan spørre denne gruppen igjen 30 dager etter avgjørelsen."
+    }
   }
 }

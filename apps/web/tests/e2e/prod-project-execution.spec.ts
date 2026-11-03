@@ -153,6 +153,18 @@ test("E-1 (3.2). Alfa has its two walk projects — created through the project 
   await ctx.close();
 });
 
+// A run that stopped before E-14 and whose afterAll cleanup also failed
+// (project-execution 41359872373 during a deploy, then 41360971243) leaves
+// Vytas assigned to A and B with a kept clash and a walk stage on A. The next
+// run then re-assigns an already-assigned, already-overridden worker and
+// measures that, not the chain. Every run starts from the clean state E-14
+// leaves behind.
+test("E-1b. leftovers of an earlier unfinished run are cleared first", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner");
+  await cleanUp(page);
+  await ctx.close();
+});
+
 test("E-2 (3.13). both projects get the same dates on their operations board", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
@@ -472,6 +484,33 @@ test("E-12 (5.11 / 3.14). the assigned worker sees project A on their own projec
     "the dated assignment is on the worker's agenda",
   ).toBeVisible({ timeout: 30_000 });
   await ctx.close();
+});
+
+test("E-12b (3.34). the owner reads project A's forecast beside the course; the assigned worker does not", async ({ browser }) => {
+  {
+    const { ctx, page } = await as(browser, "owner");
+    await useWorkspace(page, ALFA);
+    const res = await page.goto(`/lt/dashboard/projects/${projectA}`);
+    expect(res?.status() ?? 0, "project page answered").toBeLessThan(500);
+    await rendered(page, "owner project page");
+    const panel = inMain(page).getByTestId("project-forecast");
+    await expect(panel, "the forecast panel renders for the project's manager").toBeVisible({ timeout: 30_000 });
+    const state = await panel.getAttribute("data-state");
+    console.log(`[forecast] project A forecast state: ${state}`);
+    // "unavailable" means the facts door or the authority read failed in
+    // production — that is the failure this step exists to catch.
+    expect(["ok", "insufficient_data", "not_applicable"], `forecast read in production (got ${state})`).toContain(state);
+    await expect(panel.getByTestId("project-forecast-note"), "labelled a forecast, not a fact").toBeVisible();
+    await ctx.close();
+  }
+  {
+    const { ctx, page } = await as(browser, "worker");
+    await page.goto(`/lt/dashboard/projects/${projectA}`);
+    await rendered(page, "worker project page");
+    await expect(page.locator("body")).toContainText(PROJECT_A, { timeout: 30_000 });
+    await expect(page.getByTestId("project-forecast"), "the forecast is the manager's, not the worker's").toHaveCount(0);
+    await ctx.close();
+  }
 });
 
 test("E-13 (3.13). the operations report downloads for the owner and for nobody else", async ({ browser }) => {

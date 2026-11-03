@@ -34,6 +34,23 @@ name: jobs-need-journey
 - tapOn:
     id: "email"
 - inputText: ${MOBILE_QA_EMAIL}
+# The iOS driver has typed a DIFFERENT address here (run 41403100804: the
+# server refused it while the password arrived whole; the review address has
+# a "+", on the email keyboard's symbol layer). The field is read back and
+# typed once more when it differs; this step's COMPLETED / SKIPPED in the log
+# is the record of whether that happened.
+- copyTextFrom:
+    id: "email"
+- evalScript: ${output.emailTyped = maestro.copiedText === MOBILE_QA_EMAIL}
+- runFlow:
+    label: "EMAIL_RETYPED (the first typing differed)"
+    when:
+      true: ${output.emailTyped !== true}
+    commands:
+      - tapOn:
+          id: "email"
+      - eraseText: 80
+      - inputText: ${MOBILE_QA_EMAIL}
 - tapOn:
     id: "password"
 - inputText: ${MOBILE_QA_PASSWORD}
@@ -165,11 +182,14 @@ name: jobs-need-journey
         id: "capability-retry"
     commands:
       - waitForAnimationToEnd
+# Centred: the last Today station can stop right at the bottom edge, where
+# the iOS tab bar takes the tap.
 - scrollUntilVisible:
     element:
       id: "today-open-need"
     direction: DOWN
     timeout: 30000
+    centerElement: true
 - waitForAnimationToEnd
 - tapOn:
     id: "today-open-need"

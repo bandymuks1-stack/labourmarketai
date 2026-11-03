@@ -40,6 +40,8 @@ const cohort = (members: Array<{ id: string; status: "active" | "left" }>) => ({
   startsOn: null,
   endsOn: null,
   members: members.map((m) => ({ profileId: m.id, status: m.status, label: `label-${m.id}` })),
+  joinRequestsOpen: null,
+  requests: [],
 });
 
 const program = (over: Partial<ProgramRow> = {}): ProgramRow => ({

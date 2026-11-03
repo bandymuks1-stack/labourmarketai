@@ -262,6 +262,19 @@ function MarketplaceConnections({
           label: t("connections.diary"),
           note: t("connections.diaryNote"),
         },
+    // A person ordering services can keep a customer record and their own
+    // requests: the buyer lane of the Activity Setup Hub (it edits the record
+    // once it exists). A company orders through its needs, above.
+    ...(isCompany
+      ? []
+      : [
+          {
+            key: "buyer",
+            href: "/dashboard/start/buyer",
+            label: t("connections.buyer"),
+            note: t("connections.buyerNote"),
+          },
+        ]),
   ];
   return (
     <section
@@ -274,7 +287,7 @@ function MarketplaceConnections({
       <p className="text-xs text-text-secondary">{t("connections.intro")}</p>
       {/* Shared ActionCard pattern (audit PR8) — one visual grammar for
           navigation cards across the app. */}
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {links.map((l) => (
           <ActionCard
             key={l.key}

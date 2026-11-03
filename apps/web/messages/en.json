@@ -2049,7 +2049,14 @@
           "saved": "Saved.",
           "forbidden": "Only a manager of this institution can do this.",
           "invalid": "Please check the values.",
-          "error": "Something went wrong. Please try again."
+          "error": "Something went wrong. Please try again.",
+          "openRequests": "Let learners ask to join",
+          "closeRequests": "Stop taking new requests",
+          "requestsOpenHint": "Learners can find this group and ask to join.",
+          "accept": "Accept",
+          "decline": "decline",
+          "acceptConfirm": "Yes, accept and add to the group",
+          "cancelDecision": "Cancel"
         },
         "unavailable": "Programmes could not be loaded right now. Reload the page; nothing you created is lost.",
         "inviteLearners": "Invite learners",
@@ -2087,7 +2094,9 @@
           "evidenceUnavailable": "The learner's practice entries could not be read right now. Nothing is recorded.",
           "evidenceRecorded": "Recorded",
           "evidenceConfirmed": "signed off"
-        }
+        },
+        "requestFrom": "Asks to join: {name}",
+        "requestUnverified": "Name typed by the learner — not checked by anyone."
       },
       "learners": {
         "title": "Learners",
@@ -2858,7 +2867,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Find a provider for a service"
     }
   },
   "jobPostings": {
@@ -6842,7 +6852,9 @@
       "listings": "Listings",
       "listingsNote": "Premises, equipment, vehicles — offer or look",
       "needs": "Needs & offers",
-      "needsNote": "Publish what you need or what you can offer"
+      "needsNote": "Publish what you need or what you can offer",
+      "buyer": "My requests",
+      "buyerNote": "Save your customer details and keep your requests in one place"
     },
     "loopReadFailed": "Your requests could not be loaded — the list may be incomplete. Refresh the page."
   },
@@ -19810,6 +19822,73 @@
     },
     "helpNeeded": "Help needed — {stage}:"
   },
+  "projectForecast": {
+    "title": "Forecast",
+    "notFact": "A forecast read from this project's recorded work as of {date} — not a fact and not a promise. It is recalculated each time this page opens.",
+    "unavailable": "The forecast could not be read right now.",
+    "insufficient": "Not enough recorded work yet to forecast this project.",
+    "notApplicable": "Nothing to forecast: the project has no open work.",
+    "unknown": "Unknown",
+    "beyondHorizon": "More than three years away at the current pace",
+    "completionLabel": "Expected finish",
+    "deadlineLabel": "Deadline",
+    "leftLabel": "Work left",
+    "leftTasks": "{left} of {total} tasks",
+    "leftStages": "{left} of {total} stages",
+    "peopleLabel": "People needed",
+    "peopleValue": "{needed} (now {active})",
+    "qualityLabel": "Quality risk",
+    "confidenceLabel": "Confidence",
+    "actionsTitle": "What would change it",
+    "assumptionsTitle": "Assumptions",
+    "risk": {
+      "on_track": "On track",
+      "tight": "Tight",
+      "likely_miss": "Likely to be missed",
+      "overdue": "Overdue",
+      "unknown": "Unknown"
+    },
+    "quality": {
+      "none": "None open",
+      "low": "Low",
+      "elevated": "Elevated",
+      "high": "High",
+      "unknown": "Unknown"
+    },
+    "confidence": {
+      "insufficient": "too little evidence",
+      "low": "low",
+      "medium": "medium",
+      "high": "high"
+    },
+    "action": {
+      "add_workers": "Add people to the team",
+      "find_partner_capacity": "Find partner capacity",
+      "unblock_stages": "Unblock the blocked stages",
+      "unblock_tasks": "Unblock the blocked tasks",
+      "close_serious_defects": "Close the serious defects",
+      "complete_readiness": "Complete the team's missing readiness items",
+      "record_hours": "Record the hours worked on this project",
+      "set_planned_end": "Set a planned end date",
+      "break_down_scope": "Break the work down into tasks",
+      "review_budget": "Review the budget",
+      "replan_deadline": "Re-plan the deadline"
+    },
+    "assumption": {
+      "trailing_window_days": "The pace is read from the last 28 days.",
+      "calendar_day_rate": "Hours are spread over calendar days; no work calendar is assumed.",
+      "equal_unit_weight": "Every task counts the same.",
+      "unit_is_stage": "The project has no tasks, so stages are counted instead.",
+      "team_stays_as_is": "The team stays as it is now.",
+      "absences_as_approved": "Only approved absences are taken into account.",
+      "throughput_without_hours": "No hours are recorded, so the finish is read from finished work alone.",
+      "cost_continues_at_observed_rate": "Cost continues at the rate seen so far.",
+      "single_hours_ledger": "One hours record is used; the other is shown beside it, never added.",
+      "hours_partly_unconfirmed": "Some of the hours are not yet confirmed.",
+      "hours_read_truncated": "Not every hour could be read; the figures may be low.",
+      "free_internal_people_unknown": "It is not known who else in the organization is free."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "This week's goal",
     "titleMine": "Your tasks this week",
@@ -19984,6 +20063,33 @@
       "business_details": "Company or business registration and invoicing details.",
       "insurance": "Liability or other insurance, if this work needs it.",
       "client_requirements": "Any specific requirements of the client or the site."
+    }
+  },
+  "learnerCohortJoin": {
+    "title": "Learning group",
+    "declaredNote": "You can record your practice and the work you did at any time, even before an institution accepts you. Until the institution's authorised person confirms it, it shows as declared by you, not as confirmed.",
+    "journalLink": "Open the journal",
+    "find": "{count, plural, one {# open group} other {# open groups}}",
+    "empty": "No institution is taking join requests right now.",
+    "unavailable": "Learning groups could not be loaded right now. Try again later.",
+    "status": {
+      "requested": "Request sent, waiting for the institution's decision.",
+      "declined": "The institution did not accept this request."
+    },
+    "form": {
+      "nameLabel": "Your name as the institution knows you",
+      "nameHint": "The institution sees only this name and your message, not your profile or journal.",
+      "noteLabel": "Message to the institution (optional)",
+      "send": "Ask to join",
+      "withdraw": "withdraw request",
+      "saving": "Sending…",
+      "requested": "Request sent.",
+      "alreadyMember": "You are already a member of this group.",
+      "withdrawn": "Request withdrawn.",
+      "closed": "This group no longer takes new requests.",
+      "invalid": "Check the name and message.",
+      "error": "Something went wrong. Try again.",
+      "cooldown": "You were declined recently. You can ask this group again 30 days after the decision."
     }
   }
 }

@@ -185,6 +185,8 @@ const DOMAIN_DESTRUCTIVE: readonly string[] = [
   "marketplace_listing.delete_confirm",
   "proposal.delete_confirm",
   "contract.delete_confirm",
+  // Overwrites the organization's stored recompute cadence (audited).
+  "forecast.mode.set_confirm",
 ];
 
 describe("the registry itself", () => {
@@ -461,6 +463,10 @@ describe("the registry itself", () => {
       // read the website's /jobs page performs, anonymous projection only.
       "jobs.search",
       "jobs.get",
+      // Stage 7 forecasts (2026-10-24): forecast read + cadence draft → confirm.
+      "project.forecast.get",
+      "forecast.mode.set_draft",
+      "forecast.mode.set_confirm",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
@@ -728,6 +734,10 @@ describe("the registry itself", () => {
       // read the website's /jobs page performs, anonymous projection only.
       "jobs.search",
       "jobs.get",
+      // Stage 7 forecasts (2026-10-24): forecast read + cadence draft → confirm.
+      "project.forecast.get",
+      "forecast.mode.set_draft",
+      "forecast.mode.set_confirm",
     ]);
   });
 
@@ -825,6 +835,17 @@ describe("the registry itself", () => {
   });
 });
 
+/** The `profile` object profile.get returns — pinned by the first test below. */
+const PROFILE_REPLY_FIELDS = {
+  id: 1,
+  fullName: 1,
+  email: 1,
+  locale: 1,
+  country: 1,
+  onboarded: 1,
+  activeRole: 1,
+} as const;
+
 describe("profile.get", () => {
   it("returns recorded facts and the worker's three-valued existence", async () => {
     const r = await runCapability(
@@ -855,6 +876,27 @@ describe("profile.get", () => {
         heldRoles: { status: "known", roles: ["worker", "company"] },
       },
     });
+    // Ties the reply to the minimisation guard below.
+    const profile = (r as { ok: true; data: { profile: Record<string, unknown> } }).data.profile;
+    expect(Object.keys(profile).sort()).toEqual(Object.keys(PROFILE_REPLY_FIELDS).sort());
+  });
+
+  it("data minimisation: the description names every personal field the reply carries", () => {
+    // An assistant (and the person reading its tool list) must be able to
+    // tell from the description alone that this read returns their e-mail
+    // address. A field added to the reply without being named here fails.
+    const description = listCapabilities().find((c) => c.id === "profile.get")!.description;
+    const named: Record<string, RegExp> = {
+      id: /account id/,
+      fullName: /\bname\b/,
+      email: /email address/,
+      locale: /locale/,
+      country: /country/,
+      onboarded: /onboarding state/,
+      activeRole: /active role/,
+    };
+    expect(Object.keys(named).sort()).toEqual(Object.keys(PROFILE_REPLY_FIELDS).sort());
+    for (const [field, rx] of Object.entries(named)) expect(description, field).toMatch(rx);
   });
 
   it("a failed ROLES read is 'unavailable', never 'holds no roles'", async () => {

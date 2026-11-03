@@ -2049,7 +2049,14 @@
           "saved": "Gespeichert.",
           "forbidden": "Das kann nur eine Leitung dieser Einrichtung.",
           "invalid": "Bitte prüfen Sie die Werte.",
-          "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+          "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+          "openRequests": "Lernende um Aufnahme bitten lassen",
+          "closeRequests": "Keine neuen Anfragen mehr annehmen",
+          "requestsOpenHint": "Lernende können diese Gruppe finden und um Aufnahme bitten.",
+          "accept": "Annehmen",
+          "decline": "ablehnen",
+          "acceptConfirm": "Ja, annehmen und zur Gruppe hinzufügen",
+          "cancelDecision": "Abbrechen"
         },
         "unavailable": "Die Studiengänge konnten gerade nicht geladen werden. Laden Sie die Seite neu; nichts von dem, was Sie angelegt haben, ist verloren.",
         "inviteLearners": "Lernende einladen",
@@ -2087,7 +2094,9 @@
           "evidenceUnavailable": "Die Praxiseinträge konnten gerade nicht gelesen werden. Es wurde nichts erfasst.",
           "evidenceRecorded": "Erfasst",
           "evidenceConfirmed": "bestätigt"
-        }
+        },
+        "requestFrom": "Bittet um Aufnahme: {name}",
+        "requestUnverified": "Vom Lernenden selbst eingegebener Name — nicht überprüft."
       },
       "learners": {
         "title": "Lernende",
@@ -2858,7 +2867,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Einen Anbieter für eine Dienstleistung finden"
     }
   },
   "jobPostings": {
@@ -6842,7 +6852,9 @@
       "listings": "Inserate",
       "listingsNote": "Räume, Geräte, Fahrzeuge – anbieten oder suchen",
       "needs": "Bedarf & Angebot",
-      "needsNote": "Veröffentlichen Sie, was Sie brauchen oder anbieten können"
+      "needsNote": "Veröffentlichen Sie, was Sie brauchen oder anbieten können",
+      "buyer": "Meine Anfragen",
+      "buyerNote": "Kundendaten speichern und Anfragen an einem Ort behalten"
     },
     "loopReadFailed": "Ihre Anfragen konnten nicht geladen werden — die Liste ist möglicherweise unvollständig. Laden Sie die Seite neu."
   },
@@ -19810,6 +19822,73 @@
     },
     "helpNeeded": "Hilfe nötig — {stage}:"
   },
+  "projectForecast": {
+    "title": "Prognose",
+    "notFact": "Eine Prognose aus der erfassten Arbeit dieses Projekts, Stand {date} — keine Tatsache und kein Versprechen. Sie wird bei jedem Öffnen dieser Seite neu berechnet.",
+    "unavailable": "Die Prognose konnte gerade nicht gelesen werden.",
+    "insufficient": "Noch zu wenig erfasste Arbeit für eine Prognose dieses Projekts.",
+    "notApplicable": "Nichts zu prognostizieren: Das Projekt hat keine offene Arbeit.",
+    "unknown": "Unbekannt",
+    "beyondHorizon": "Beim jetzigen Tempo mehr als drei Jahre entfernt",
+    "completionLabel": "Voraussichtliches Ende",
+    "deadlineLabel": "Termin",
+    "leftLabel": "Verbleibende Arbeit",
+    "leftTasks": "{left} von {total} Aufgaben",
+    "leftStages": "{left} von {total} Phasen",
+    "peopleLabel": "Benötigte Personen",
+    "peopleValue": "{needed} (jetzt {active})",
+    "qualityLabel": "Qualitätsrisiko",
+    "confidenceLabel": "Verlässlichkeit",
+    "actionsTitle": "Was es ändern würde",
+    "assumptionsTitle": "Annahmen",
+    "risk": {
+      "on_track": "Im Plan",
+      "tight": "Knapp",
+      "likely_miss": "Wird wahrscheinlich verfehlt",
+      "overdue": "Überfällig",
+      "unknown": "Unbekannt"
+    },
+    "quality": {
+      "none": "Keine offen",
+      "low": "Gering",
+      "elevated": "Erhöht",
+      "high": "Hoch",
+      "unknown": "Unbekannt"
+    },
+    "confidence": {
+      "insufficient": "zu wenige Belege",
+      "low": "gering",
+      "medium": "mittel",
+      "high": "hoch"
+    },
+    "action": {
+      "add_workers": "Personen ins Team holen",
+      "find_partner_capacity": "Partnerkapazität finden",
+      "unblock_stages": "Blockierte Phasen freigeben",
+      "unblock_tasks": "Blockierte Aufgaben freigeben",
+      "close_serious_defects": "Schwere Mängel beheben",
+      "complete_readiness": "Fehlende Einsatzbereitschaft des Teams vervollständigen",
+      "record_hours": "Die an diesem Projekt gearbeiteten Stunden erfassen",
+      "set_planned_end": "Ein geplantes Enddatum setzen",
+      "break_down_scope": "Die Arbeit in Aufgaben aufteilen",
+      "review_budget": "Das Budget prüfen",
+      "replan_deadline": "Den Termin neu planen"
+    },
+    "assumption": {
+      "trailing_window_days": "Das Tempo wird aus den letzten 28 Tagen gelesen.",
+      "calendar_day_rate": "Stunden werden auf Kalendertage verteilt; kein Arbeitskalender wird angenommen.",
+      "equal_unit_weight": "Jede Aufgabe zählt gleich.",
+      "unit_is_stage": "Das Projekt hat keine Aufgaben, daher werden Phasen gezählt.",
+      "team_stays_as_is": "Das Team bleibt, wie es jetzt ist.",
+      "absences_as_approved": "Nur genehmigte Abwesenheiten werden berücksichtigt.",
+      "throughput_without_hours": "Es sind keine Stunden erfasst, daher wird das Ende nur aus erledigter Arbeit gelesen.",
+      "cost_continues_at_observed_rate": "Die Kosten laufen im bisher beobachteten Tempo weiter.",
+      "single_hours_ledger": "Eine Stundenerfassung wird verwendet; die andere wird daneben gezeigt, nie addiert.",
+      "hours_partly_unconfirmed": "Ein Teil der Stunden ist noch nicht bestätigt.",
+      "hours_read_truncated": "Nicht alle Stunden konnten gelesen werden; die Zahlen können zu niedrig sein.",
+      "free_internal_people_unknown": "Es ist nicht bekannt, wer in der Organisation sonst frei ist."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "Ziel dieser Woche",
     "titleMine": "Ihre Aufgaben diese Woche",
@@ -19984,6 +20063,33 @@
       "business_details": "Angaben zur Unternehmens- oder Gewerberegistrierung und zur Rechnungsstellung.",
       "insurance": "Eine Haftpflicht- oder andere Versicherung, falls diese Arbeit sie braucht.",
       "client_requirements": "Besondere Anforderungen des Auftraggebers oder der Baustelle, falls vorhanden."
+    }
+  },
+  "learnerCohortJoin": {
+    "title": "Lerngruppe",
+    "declaredNote": "Du kannst deine Praxis und deine Arbeit jederzeit eintragen, auch bevor eine Einrichtung dich aufnimmt. Bis die befugte Person der Einrichtung sie bestätigt, gilt sie als von dir angegeben, nicht als bestätigt.",
+    "journalLink": "Journal öffnen",
+    "find": "{count, plural, one {# offene Gruppe} other {# offene Gruppen}}",
+    "empty": "Derzeit nimmt keine Einrichtung Aufnahmeanfragen an.",
+    "unavailable": "Die Lerngruppen konnten gerade nicht geladen werden. Versuche es später erneut.",
+    "status": {
+      "requested": "Anfrage gesendet, wartet auf die Entscheidung der Einrichtung.",
+      "declined": "Die Einrichtung hat diese Anfrage nicht angenommen."
+    },
+    "form": {
+      "nameLabel": "Dein Name, wie die Einrichtung dich kennt",
+      "nameHint": "Die Einrichtung sieht nur diesen Namen und deine Nachricht, nicht dein Profil oder Journal.",
+      "noteLabel": "Nachricht an die Einrichtung (optional)",
+      "send": "Um Aufnahme bitten",
+      "withdraw": "Anfrage zurückziehen",
+      "saving": "Wird gesendet…",
+      "requested": "Anfrage gesendet.",
+      "alreadyMember": "Du bist bereits Mitglied dieser Gruppe.",
+      "withdrawn": "Anfrage zurückgezogen.",
+      "closed": "Diese Gruppe nimmt keine neuen Anfragen mehr an.",
+      "invalid": "Prüfe Name und Nachricht.",
+      "error": "Etwas ist schiefgelaufen. Versuche es erneut.",
+      "cooldown": "Deine Anfrage wurde kürzlich abgelehnt. Du kannst diese Gruppe 30 Tage nach der Entscheidung erneut anfragen."
     }
   }
 }

@@ -81,6 +81,10 @@ export default function ShellLayout() {
         name="log-work"
         options={{ href: null, title: t("journal.compose.title") }}
       />
+      <Tabs.Screen
+        name="correct-entry"
+        options={{ href: null, title: t("journal.correct.title") }}
+      />
       {/* Two more STATIONS reached from Today, for the same reason: */}
       <Tabs.Screen
         name="opportunities"
@@ -92,6 +96,26 @@ export default function ShellLayout() {
       />
       <Tabs.Screen name="jobs" options={{ href: null, title: t("jobs.title") }} />
       <Tabs.Screen name="need" options={{ href: null, title: t("need.title") }} />
+      <Tabs.Screen
+        name="messages"
+        options={{ href: null, title: t("messages.title") }}
+      />
+      <Tabs.Screen
+        name="projects"
+        options={{ href: null, title: t("projects.title") }}
+      />
+      <Tabs.Screen
+        name="project"
+        options={{ href: null, title: t("projects.detailTitle") }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{ href: null, title: t("notifications.title") }}
+      />
+      <Tabs.Screen
+        name="conversation"
+        options={{ href: null, title: t("messages.conversation") }}
+      />
     </Tabs>
   );
 }

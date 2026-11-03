@@ -5,11 +5,13 @@ import { createHash } from "node:crypto";
 
 import { createClient } from "@/lib/supabase/server";
 import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
+import { readWorkerCoreRow } from "@/lib/data/worker-core";
 import { env } from "@/lib/env";
 import { type Role } from "@/lib/auth/actions";
 import { getConversationAction } from "@/lib/conversation/action-registry";
 import {
   authorizeDispatch,
+  heldDispatchRoles,
   isStaleWorkspaceContext,
   requiresConfirmation,
   workspaceBoundFingerprint,
@@ -141,6 +143,12 @@ function tokenSecret(): string {
  * before its executor could resolve their real role. The executor still
  * resolves the company through `requireEmployerCompany` and gates per
  * capability; RLS and the RPCs remain the backstop.
+ *
+ * THE OWN WORKER PROFILE IS THE WORKER GATE TOO (2026-11-02): a person whose
+ * own `workers` row exists holds `worker` for this dispatch, read through THE
+ * canonical workers-row core the web reads (`readWorkerCoreRow`, RLS
+ * `owns_worker`). Read only when the catalogue lacks `worker`; a failed read
+ * adds nothing (it never grants).
  */
 async function heldRolesOf(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -154,9 +162,17 @@ async function heldRolesOf(
       .eq("profile_id", userId)
       .eq("is_active", true),
   );
-  const set = new Set<Role>(rows.map((r) => r.role as Role));
-  if (workspaceOpensCompanySpace(workspace)) set.add("company");
-  return set.size > 0 ? set : new Set<Role>(["worker"]);
+  const profileRoles = rows.map((r) => r.role as string);
+  let ownsWorkerProfile = false;
+  if (profileRoles.length > 0 && !profileRoles.includes("worker")) {
+    const worker = await readWorkerCoreRow({ supabase, userId });
+    ownsWorkerProfile = worker.ok && worker.value !== null;
+  }
+  return heldDispatchRoles({
+    profileRoles,
+    opensCompanySpace: workspaceOpensCompanySpace(workspace),
+    ownsWorkerProfile,
+  });
 }
 
 /** The education tables are not in the generated types yet (lib/education/programs.ts uses the same cast). */

@@ -159,6 +159,7 @@ The service-role client (`lib/supabase/admin.ts`, `createAdminClient()`,
 | `lib/billing/effective-entitlements.ts` | **runtime** | **No** — READ-ONLY `billing_subscriptions` for an ORGANIZATION billing subject only (payments production calm v1, 2026-09-22) | ✅ legitimate; the table's only SELECT policy is `owner_id = auth.uid() or is_admin()`, so through the user client an organization's plan was visible ONLY to the profile that paid — a co-manager with `manage-billing` in the same workspace resolved as free. The read is scoped by the SERVER-resolved subject (`resolveBillingSubject` → `resolveEmployerCompanyContext`, the caller's own active `company_memberships` row through the RLS-scoped session — the same subject the checkout route binds a session to), filtered by adapter mode, projects plan_key / status / provider_subscription_id / updated_at only (no payer identity, no customer id), writes nothing (P7 guard), falls back to the user client when no service key is configured; personal subjects keep the user-scoped read. No RLS change; no chat table; nothing outbound |
 | `lib/admin/company-need-intakes.ts` | **runtime** | **No** — reads/updates `company_need_public_intakes` only (Public Intake Owner Queue v1, `isSuperadmin`-gated) | ✅ legitimate; the table has no anon/authenticated RLS policy by design (PR #678: write-only via anon RPC, read-only via service role); status update only, writes nothing outbound |
 | `lib/sales/lead-intake.ts` | **runtime** | **No** — READ-ONLY `waitlist` SELECT (§8.14 intake panel, `isSuperadmin`-gated) | ✅ legitimate; `waitlist` has no authenticated read policy by design (0005: anon INSERT only, reads service-role only); writes nothing |
+| `lib/forecast/forecast-store.ts` | **runtime** (VPS cron `forecast-recompute` only) | **No** — calls ONLY the three service-role-granted SECURITY DEFINER doors of the forecast migration (`forecast_due_candidates_v1`, `forecast_project_facts_v1`, `forecast_record_v1`); no table read or written directly | ✅ legitimate; the scheduler has no user session. The facts door returns opaque keys, statuses, dates and numeric metric rows only (no names, no entry text); writes go only to the forecast tables (derived readings, SEP-1). No chat table, nothing outbound |
 | `lib/env.ts` | env plumbing (`requireSupabaseServiceEnv`) | No | ✅ |
 | `scripts/admin-promote.ts` | CLI (interactive) | No (`profiles`) | ✅ operator tool |
 | `scripts/admin-grant-superadmin.ts` | CLI (dry-run + double flag) | No (`profiles`/`profile_roles`) | ✅ operator tool |
@@ -519,3 +520,13 @@ audit.
   no chat table itself; where a conversation message was authored by the erased
   person, the executor severs the author inside the database under the reviewed
   registry, and the message stays for the counterparty. Responses are counts only.
+
+- **2026-11-01 — `lib/forecast/forecast-read.ts`** (owner order 2026-10-24 Stage 7, register
+  3.34: the forecast engine on the project course screen). On the manager project page
+  it first asks the viewer's OWN session `can_manage_project(project)`; only on `true`
+  does it call, with the service-role client, the ONE service-role-granted
+  `forecast_project_facts_v1` (applied migration 20261025045152) for that project.
+  That function returns opaque md5 keys, statuses, dates and numeric rows only — no
+  entry text, review note or name. The pure engine computes the forecast in memory;
+  nothing is written (no forecast row, no signal consumed), no chat table is read,
+  nothing is sent outbound.

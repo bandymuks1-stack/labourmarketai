@@ -11,6 +11,7 @@ import {
   PRODUCTION_ORIGIN,
   PROD_QA_FRESH_IDENTITIES,
   PROD_QA_IDENTITIES,
+  PROD_QA_INVITED_EMAIL,
   PROD_QA_WORKER_EMAIL,
   ProdQaGuardError,
   assertProdQaTarget,
@@ -71,7 +72,7 @@ describe("exactly the synthetic cast is allowlisted", () => {
         "qa.buyer+act1@labourmarket.ai",
         "qa.freshcompany+act1@labourmarket.ai",
         "qa.freshworker+act1@labourmarket.ai",
-        "qa.invited+act1@labourmarket.ai",
+        "qa.invited@labourmarket.ai",
         "qa.manager+multiw@labourmarket.ai",
         "qa.owner+multiw@labourmarket.ai",
         "qa.worker+goal3@labourmarket.ai",
@@ -80,7 +81,9 @@ describe("exactly the synthetic cast is allowlisted", () => {
     );
     expect(PROD_QA_IDENTITIES[0]).toBe(PROD_QA_WORKER_EMAIL);
     for (const email of PROD_QA_IDENTITIES) {
-      expect(email).toMatch(/^qa\.[a-z]+\+[a-z0-9]+@labourmarket\.ai$/);
+      // Plus-tagged, except the one invited worker, which is the QA mailbox's own
+      // address (the mailbox host refuses plus addresses; owner D-4 2026-11-02).
+      expect(email).toMatch(email === PROD_QA_INVITED_EMAIL ? /^qa\.invited@labourmarket\.ai$/ : /^qa\.[a-z]+\+[a-z0-9]+@labourmarket\.ai$/);
     }
   });
 
@@ -89,7 +92,7 @@ describe("exactly the synthetic cast is allowlisted", () => {
       "qa.buyer+act1@labourmarket.ai",
       "qa.freshcompany+act1@labourmarket.ai",
       "qa.freshworker+act1@labourmarket.ai",
-      "qa.invited+act1@labourmarket.ai",
+      "qa.invited@labourmarket.ai",
     ]);
     // The mint looks the account up and refuses before any magic link exists.
     const mint = read(MINT);

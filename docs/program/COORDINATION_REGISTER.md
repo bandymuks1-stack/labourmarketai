@@ -101,7 +101,7 @@ independent work or launch of other features (owner order 2026-10-28).
 | coordination (this file) | **session `local_8d793dee` "LabourMarket.ai projekto koordinavimas" — the ONE main coordinator** | 2026-10-28 06:37Z (owner order: single control centre) | keeps §2–§5 current, integrates PRs into `main`, owns deploy follow-up. Earlier holders `…16CYcDu` / `…AygGqFo3` / cloud `…hnVKqGvExp` handed over (§2b) and become executors only on this coordinator's assignment |
 | migration (prod DB) | — free — | | last: `referral_send_address_guard_v1` (#2855) applied 2026-10-28 08:18Z, ledger `20261028081810`, by `local_8d793dee` on owner approval of #2855 at `35e749fc3`. Pending RED (needs its own approval): #2858 |
 | live sends (e-mail to real people) | reprocess: manual only, under `flock`; **do not run `resolve_reservations` until #2858 is applied** | 2026-10-28 09:00Z | partner intake mails live (each through the address lock since `ae60b244`). Ledger `invitation` since 10-26: 51 mails / 51 recipients, 0 duplicates; 15 rows `pending/not_sent` |
-| deploy | — serial via `deploy-vps.yml` — | | production = `ae60b244` (#2855) 08:58Z, healthy. Walks: use a sequential queue that waits ≥6 min after each deploy (brake e) |
+| deploy | — serial via `deploy-vps.yml` — | | production = `0e5f4b3e0` (#2925), deployed 2026-11-02 06:26Z, healthy. Walks: sequential queue, ≥6 min after each deploy (brake e) |
 
 
 ### 2a. Handover `…16CYcDu` → `…AygGqFo3` (owner order, 2026-10-28 ~06:30Z)
@@ -129,59 +129,175 @@ independent work or launch of other features (owner order 2026-10-28).
 
 ---
 
-## 3. Work register — snapshot 2026-10-28 ~06:45Z
+## 3. Work register — snapshot 2026-11-02 ~13:10Z
 
-Sources: GitHub PRs/Actions, production migration ledger, session list and
-transcripts readable from the coordinator session. Status per §1.4.
+Owner order 2026-11-02 ("vieningas koordinavimas"): `local_8d793dee` stays the ONE coordinator; every
+active session and window works from THIS file. No second coordination register, no new overall audit.
+
+### 3.0 Rules for every executor (binding)
+1. **One task = one executor.** The row in §3.1 names it. Nobody else starts the same work; a duplicate
+   is merged into the row's owner or stopped only after its results are handed over (PR, branch, note).
+2. **Before starting any work:** `git fetch origin`, read this §3 on `main`, read
+   [`FUNCTION_REGISTER.md`](FUNCTION_REGISTER.md), run `gh pr list --state open` and check the area is not
+   already claimed (§1.1). Work outside your row → ask the coordinator first.
+3. **Status words stay separate** (owner, binding): `CODE_COMPLETE` (code + CI green) ≠ `MERGED` (on
+   `main`) ≠ `DEPLOYED` (a `Deploy to VPS` run contains it) ≠ `LIVE_VERIFIED` (walked in production).
+4. Every significant state change goes to the coordinator, who publishes ONE consolidated report
+   (live / being fixed / blocked / waiting for the owner) and keeps this file current.
+5. Priority: P0 = the real core product working and critical defects; extra features run in parallel.
 
 ### 3.1 Active executors
 
-| Session | Where | Doing | State |
-|---|---|---|---|
-| `session_016CYcDuhGGEA75ruJ3zXD99` "projekto perėmimas" | owner's computer | was: platform functional + UX audit, regression queue (stopped at handover §2a) | HANDED OVER — executor on assignment only |
-| `session_011vBC1iAygGqFo3aoB76NrV` "darbų perimimas" | owner's computer | was: #2843 sends (done), D-1 proof, #2839/#2840 review | HANDED OVER — idle |
-| `session_011vBC1hnVKqGvExp129bfjT` coordinator | cloud | was: this register, D-1/D-3 evidence, QA-evidence recovery (#2851, folded in here) | HANDED OVER |
-| `local_8d793dee` "projekto koordinavimas" | owner's computer | **main coordinator** (§2b): PR integration, deploy, P1 fixes, executor assignment | IN_PROGRESS |
-| `session_011vBC1hntPRyoM4yRJKKcG2` | owner's computer | other repository (Agentai OS) — not this repo | n/a here |
-
-~45 older sessions are idle; most end with an owner question (merge, secret, billing).
-Those questions are collected in §5, not re-asked per session.
-
-### 3.2 Recent work (last 48 h)
-
-| PR | Goal | Owner of work | State | Prod |
+| Session | Owns (single executor) | Open PRs | Depends on | State |
 |---|---|---|---|---|
-| #2841 | safe reprocess of unsent partner referrals (RED, approved) | `…AygGqFo3` | DONE | migration + code live |
-| #2845 | invited person arriving without link is still the addressee | `…16CYcDu` | DONE | live |
-| #2846 | invitations-for-me carries partner source (RED, approved for this one) | `…16CYcDu` | DONE | live, `51a3518` |
-| #2847 | synthetic invited-worker provision/revoke/purge mechanism | `…16CYcDu` | DONE (code) | workflow `prod-qa-invited-provision` never run → invited-worker E2E **NOT_VERIFIED** (owner: parked, do not ask again) |
-| #2848 | public header brand not cut on phones | `…16CYcDu` | DONE | LIVE_VERIFIED 320/360/375 |
-| #2843 | never re-mail an address from an older duplicate referral (RED, approved 10-28) | `…AygGqFo3` | DONE | merged `7e64b332`, deployed `c3f440fc`; ledger `20261028044705`; sends finished (D-3) |
-| #2849 | public site opens light; one-sentence sign-up intro (11 locales); theme follows in-app navigation | `…16CYcDu` | merged `5c8e61b3` | NOT DEPLOYED: production `c3f440fc` at 06:31Z → visual check after deploy |
-| #2844 | synthetic data instead of personal e-mails in tests/docs | unknown | WAITING (owner: legal wording) | CI green; touches `docs/legal/*` — owner decides |
-| #2840 | zero paid AI budget — metered providers off unless owner opens | coordinator `local_8d793dee` | MERGED `99b7db82` 2026-10-28 07:12Z | updated with `main`, CI green on the fresh base; no production behaviour change (paid providers already off) — DEPLOYED with the next deploy after `83af6a82` |
-| #2839 | DB restore procedure doc | coordinator `local_8d793dee` | MERGED `c8e08bf5` 06:54Z, DEPLOYED | docs only |
-| #2853 | coordination register: single main coordinator, #2851 folded in | coordinator | MERGED `83af6a82`, DEPLOYED 07:16Z | #2851 CLOSED as duplicate |
-| #2854 | invite/signup UX (audit P1-1, P1-2, P2-3, P2-4) | coordinator | MERGED `f5c0e88f`, DEPLOYED | signup skeleton LIVE_VERIFIED (SSR); closed-invite + existing-address branches NOT_VERIFIED live (need a closed token) |
-| #2855 | D-3 address-level send guard: advisory lock, reservation, intake reserve, v3 candidates, recovery, fail-closed ledger, `flock` | coordinator | **APPLIED** 08:18Z (ledger `20261028081810`) · **VERIFIED** · **MERGED** `ae60b244` 08:40Z · **DEPLOYED** 08:58Z | evidence below (D-3) |
-| #2857 | training register shows only the active workspace's courses (governance T-5) | coordinator | MERGED, deploy pending | proof = company-governance re-run (queued) |
-| #2858 | recovery counts only THIS reservation's ledger row (Codex P2 on #2855) | coordinator | **RED draft, NOT applied** | latent: 0 reservations; needs owner approval naming #2858 |
-| #2859 | missing job → board link; invite resend reaches the invited address (audit P2-2, P2-7) | coordinator | auto-merge on CI | — |
-| #2842 | paid-terms legal draft | unknown | WAITING (legal/owner) | — |
-| #2828 | premium action cards visual proposal | unknown | WAITING (owner visual) | — |
+| `local_8d793dee` coordinator | PR integration, CI, Codex, deploy, production verification, both registers; dispatches every production-qa walk; owner-decision journeys J-12, J-14, J-17 | #2914, #2915, #2935 | — | IN_PROGRESS |
+| `local_816618a9` j15-alert-mail | **J-15** alert / e-mail without signing in (4.9, 5.7, 5.9): production walk through the real QA mailbox, reusing the #2883 isolated proof | — | coordinator dispatches the walk after merge | IN_PROGRESS |
+| `local_b55e3e39` j2-evid2-red | **J-2** journal → manager confirms: the EVID-2 integrity item (2.20) prepared as a RED draft | — | owner: EVID-2 | IN_PROGRESS |
+| `local_1a4a2a4f` j13-buyer-provider | **J-13** buyer → provider: non-customer becomes a customer in production (6.4) + RED-1 request → offer/contract draft | — | owner: RED-1 | IN_PROGRESS |
+| `local_13cb59b3` lane A | the 7 reconciled rows + production proof of partial rows; brigade as a unit (DEM-6) | #2927 (stacked on #2914), #2930 | #2914 | IN_PROGRESS |
+| `local_00be3967` mobile | web parity (journal correction, messages, notifications, projects); Android and iOS runs kept apart, device runs from `main` only (iOS correction re-run on `main` assigned 2026-11-02); store-submission preparation | #2929 | owner: store accounts (J-17); RED #2937 for project detail | IN_PROGRESS |
+| `local_3951ad81` ChatGPT security | C-3 token audience, X-2 curated toolset, consent wording, data minimisation | #2918 (RED), #2923 (RED), #2924 | owner: D-10, X-2, waiver for #2924 | WAITING (owner) |
+| `local_50daa866` nonstop-pilot-limit | #2933 LIVE_VERIFIED; worker role from the own worker profile in chat/MCP dispatch | #2937 (RED) | owner: RED approval | WAITING (owner) |
+| `local_14a855e7` growth export | daily aggregate registrations / Living CV export | #2886 (RED) | — | BLOCKED by owner order (no merge, deploy or apply); idle |
+| `local_aa901800` "projekto perėmimas" | ESCO cold locales | #2463 (RED) | owner approval | WAITING (owner) — conflict upkeep only, no new work |
+| `local_056d9f7f` (Agentai OS coordinator) | other repository; its labourmarketai work (#2886) is assigned through this file. **INFRA P0 handed over 2026-11-02 18:40Z:** host OOM evidence (12:06 and 15:01 UTC kills in `agentai-scheduler`, no memory limit) — required: a hard memory limit + the cause of the growing scheduled job fixed (owner: a bigger server alone is not enough) | — | Agentai OS reply: job, PR, deploy time | WAITING (Agentai OS) |
 
-### 3.3 Owner-gated (RED, draft, `needs-human-gate`) — 33 open
+Older sessions (`…16CYcDu`, `…AygGqFo3`, cloud `…hnVKqGvExp`, `local_07992559`, `local_430c3337`) are idle and
+hand-over complete; they start nothing without an assignment here.
 
-Kept mergeable by `…16CYcDu` (conflict upkeep only). None may be applied or merged
-without an owner approval naming it.
-#2816 #2812 #2811 #2809 #2806 #2795 #2752 #2747 #2746 #2739 #2738 #2713 #2707 #2704
-#2701 #2693 #2685 #2682 #2647 #2474 #2471 #2463 #2454 #2441 #2440 #2420 #2418 #2410
-#2362 #2235 #2227 #2209 #2203.
+### 3.1a The six open user journeys (owner order 2026-11-02 "19/19") — one executor each
 
-### 3.3a Owner-approved, QUEUED — not started (do not begin before the start conditions)
+15 / 19 complete (J-2 and J-13 proven 2026-11-02). NOT_VERIFIED is never counted as FAIL without evidence.
 
-| Item | Approved | Priority | State | Start conditions |
+| Journey | State | Works in production | Missing / blocker | Kind of work | Executor | Shortest path to LIVE_VERIFIED |
+|---|---|---|---|---|---|---|
+| J-2 journal → manager confirms | **complete** — journal-confirm 41478434884 (4/4); was unverified | record → send → manager confirms / returns → Living CV (journal-confirm 41281666555, 3/3) | EVID-2 RESOLVED by owner decision 0028 (2026-11-02): self-declaration is lawful and never a block; the lane checks the data model against each 0028 rule and proposes only the minimal change for a rule not met | test (#2942) + only-if-needed minimal change | `local_b55e3e39` | rule check → journal-confirm walk proving self-declaration, separation and independent confirmation |
+| J-12 institution → qualification | partial (11.2, 11.7 NOT_VERIFIED; 11.10 NOT_IMPLEMENTED) | institution, learner link, compass, practice, outcomes, reporting (11.1, 11.3–11.6) | **ARCH-3 decided by the owner 2026-11-02:** a learner may ASK to join a cohort; the institution's authorised person accepts membership and confirms practice and work done; the learner may keep their own history without confirmation, labelled self-declared (decision 0028). **D-15 decided:** recording work experience stays existing functionality; formal recognition of prior learning (RPL) is a separate later stage, an assessor's procedure, never an automatic qualification. Practice against a formal requirement (SKL-9) stays open **Built 2026-11-02:** RED draft #2959 (learner join request + institution accept, migration 20261102160000, NOT applied; scratch-PG proof 43/43; walk spec `cohort-join-request` included, dispatch only). GREEN #2960 records J-12 and the D-15 RPL design in decision 0028 | owner approval + apply of #2959 (RED); RPL: owner names the first assessor and requirement set | `local_b55e3e39` (assigned 2026-11-02) | apply #2959 → dispatch `prod-qa-walk.yml -f spec=cohort-join-request` (pass = 5/5) |
+| J-13 buyer → provider | **complete** — buyer-workspace 41480104268 (9/9); RED-1 #2946 is the next extension; was partial | buyer workspace record + draft request (buyer-workspace 40377604733); service request loop (marketplace 41284728549) | non-customer → customer path never walked in production; accepted request does not become an offer/contract (RED-1) | test + small UX + RED draft | `local_1a4a2a4f` | extended buyer-workspace walk; RED-1 owner decision |
+| J-14 organization buys a plan | blocked | plan catalogue (7.1); paid pilot (7.5 pilot only) | **7.28 missing in the live terms (2026-11-02 read):** price VAT basis, billing period, automatic renewal, how to cancel and when, refund rules, B2C 14-day withdrawal + waiver for an immediately started service (checkout checkbox + e-mailed confirmation do not exist yet), complaint handling, consumer authority (VVTAT), liability limitation, notice of term/price changes, chargebacks. Present: seller identity, governing law. Draft #2842 covers most but not liability or change notice, and has placeholders. **Stripe Tax #2685**: RED draft (migration-safety on a GRANT), switch `BILLING_STRIPE_TAX_ENABLED` off; needs owner Stripe-dashboard acts (live VAT registration, seller tax id, tax behaviour on the price, webhook events), migration apply, switch last; companion #2701 (drop the unproven VAT promise). **MKT-7** = gate G-7 pricing readiness (done 2026-09-05) + gate G-8 live-activation env (recorded as set); charging is limited by the pilot organisation list. No new payments are activated without a separate owner approval | owner + legal | coordinator (owner decisions) | terms text (legal) → #2701 + #2685 → billing walk |
+| J-15 alert / e-mail without signing in | partial — **instant job alerts + alert e-mail LIVE_VERIFIED** (4.9, 5.7: alert-mail 41488266687, 9/9); **weekly digest e-mail (5.9) is a separate mandatory check, PASS_CI_ONLY** | alerts, alert e-mail, saved search, in-app digest; the Monday 07:00 UTC digest run itself ran 2026-11-02 (13 in-app digests) | digest e-mail never sent because nobody in production has turned on digest e-mail (consent-first, default off) — not a defect; an e-mail proof needs a consenting synthetic account that logged work and did not visit before the Monday run | test (two-part walk: setup this week, check Mon 2026-11-09 after 07:05 UTC) + owner approval for the QA account | `local_816618a9` | digest-setup walk → Monday run → digest-check walk |
+| J-17 install from a store | blocked | Android and iOS apps run against production (8.17, 8.18) | owner accounts: Google Play (US$25 one-time; a personal account needs a 12-tester / 14-day closed test, an organisation account needs a free D-U-N-S number), Apple Developer (US$99/year; organisation needs D-U-N-S + legal entity), Expo EAS (free plan is enough to build and submit once; no Mac needed). Minimum first year US$124. Repo already has bundle ids, EAS profiles, privacy labels, listing texts (pack 2026-10-14, being refreshed for messages / notifications / projects); missing: `eas init`, submit profile, signing keys, review account, real screenshots, owner approval of icon and listing. Nothing is published without permission | owner accounts; mobile QA continues (#2940 auto-merge, #2941 Codex P2 fix) | `local_00be3967` | owner store accounts → closed-test listing → install walk |
+
+### 3.2 In flight and last 24 h (status stages kept apart)
+
+| PR | Goal | Executor | CODE_COMPLETE | MERGED | DEPLOYED | LIVE_VERIFIED |
+|---|---|---|---|---|---|---|
+| #2917 | brigade offered and matched as a unit | lane A | ✓ | ✓ | ✓ | ✓ walk 41350506578 (19/19) |
+| #2933 | an organization's plan applies to a platform admin acting in it (RED, owner-approved) | nonstop-pilot-need-limit | ✓ | ✓ `233b2e7c8` | ✓ | ✓ 2026-11-02 — MCP create + Chrome as the affected member (details private) |
+| #2913 | six production-applied migrations restored byte-exact (RED, approved) | coordinator | ✓ | ✓ | ✓ (no production change) | ✓ parity gate 41342643253 |
+| #2916 | mobile: correct a journal entry | mobile | ✓ | ✓ | n/a (app build) | Android vs production ✓; ✓ from `main` @bdb27bb88: Android 41451882387, iOS 41451829006 (attempt 2 of 2; attempt 1 lost the simulator screen after sign-in, not a product defect) — correction draft → confirm passed on both |
+| #2928 | mobile: messages | mobile | ✓ | ✓ | n/a (app build) | ✓ list, conversation opened, reply draft previewed (not sent) — Android 41451882387, iOS 41451829006 from `main` |
+| #2919 | failed notification/project reads never answer empty | coordinator | ✓ | ✓ | ✓ | NOT_VERIFIED |
+| #2920 | project forecast beside the course, computed on read | lane A | ✓ | ✓ | ✓ | NOT_VERIFIED |
+| #2922 | MCP profile.get description; ChatGPT sign-in note | ChatGPT security | ✓ | ✓ | ✓ | NOT_VERIFIED |
+| #2925 / #2926 | register-gaps walk; circuit-breaker fix | lane A | ✓ | ✓ | ✓ | walk runs feed #2927 |
+| #2914 | full scope 288, parity refresh | coordinator | ✓ (Codex re-review) | — | — | — |
+| #2915 | completion map | coordinator | ✓ | — | — | — |
+| #2927 / #2930 | register evidence 3.8, 4.6, 6.18, 9.18; G-3 fix | lane A | ✓ | — | — | evidence runs named in the PR |
+| #2929 | mobile in-app notifications | mobile | ✓ | ✓ `bdb27bb88` | n/a (app build) | list ✓ on both platforms (same runs); mark-all-read not exercised (nothing unread) |
+| #2940 / #2941 | mobile: driver address read-back; projects list + detail | mobile | Codex requested | — | — | project detail BLOCKED until RED #2937 |
+| #2903 → #2921 | D-4 reset by real mail → D-5 invited path by real mail | coordinator | ✓ | ✓ `3543c13bc` / `c2580a328` | ✓ (test code) | ✓ mail-reset 41428606490 (2/2), invited-worker 41430482903 (7/7) |
+| #2918 / #2923 / #2924 | C-3, X-2, consent wording | ChatGPT security | ✓ (CI green, Codex clean) | — | — | owner gate |
+
+### 3.3 Open-PR audit (owner order 2026-11-02 "visų atvirų PR patikrų ir blokavimų auditas")
+
+77 PRs open at the audit (79 found; #2935, #1421 closed as superseded, evidence kept on the PRs).
+A failing `Vercel` status is stale (Vercel was removed) and blocks nothing. RED / `needs-human-gate`
+PRs are never merged or applied without an owner approval naming them.
+
+**Technical — fixed in the current flow by an existing executor**
+
+| PR | Blocker | Executor | Action | Owner OK |
 |---|---|---|---|---|
+| #2959 | `quality`: 4 migration guards (new migration file vs baselines / ordering) | `local_b55e3e39` | guard baselines + timestamp order; stays RED draft | yes (apply) |
+| #2941 | CI running after 3 Codex P2 fixes | `local_00be3967` | auto-merge once Codex is clean | no |
+| #2961, #2962 | CI running | mobile / J-12 executors | auto-merge on | no |
+| #2844 | was behind main (all checks green 10-27) | coordinator | branch updated, auto-merge on | no |
+| #2154, #2455 | behind main | coordinator | branch updated, auto-merge | no |
+| #2738, #2739, #2410 | conflicts; their migrations are already on main via #2913 | `local_13cb59b3` | rebase without the migration, land the app code; GREEN only if nothing RED remains | no if GREEN |
+| #2454 | `signup-isolated` fails | `local_3951ad81` | fix the walk; stays RED (edits a prod-qa workflow) | yes |
+| #2682 | conflicts (pilot pass name / term / amount display) | coordinator | rebase; billing = RED class | yes |
+| #1617 + #1619 | CodeQL `Analyze` fails because init and analyze must move together | — | merge as a pair after rebase (low priority) | no |
+| #1620, #1622–#1625, #2356 | Dependabot bumps behind main, not on main | — | regroup / rebase in one dependency batch after P0 | no |
+
+**Owner decisions (RED / waiver / strategy)** — by product value: #2693 (read grant so vacancy retention
+can run), #2747 (free workers discoverable by default), #2474 (free plan 3 profiles + VIP), billing chain
+#2441 → #2647 → #2685 (+ #2701 copy) → #2704, #2209 (country filter), #2746 → #2713 (listing lifecycle,
+goods purchases), #2471 (external profile links consent v3), #2707 (MCP scopes + gate waiver), #2362 (165
+dates), DB batch #2420 / #2418 / #2440 / #1045, J-12 #2959, RED-1 #2946, #2937 (worker role in chat/MCP),
+C-3 #2918 → X-2 #2923, #2924 / #2642 / #2403 (product-gate waivers), #2886 (owner hold), #2463 (ESCO cold
+locales), #2235, #2227, #2203, #2165, #1816, #2816, #2812, #2811, #2809, #2806, #2795, #2752 (legal),
+#2842 (paid terms draft, legal).
+
+### 3.4 Stale / superseded — owner decides keep or close (nobody closes them on the coordinator's say-so)
+
+**Closed 2026-11-02 under the owner's conditional approval** (branches, migrations and history kept; each PR
+carries a closing comment). Unique, not-yet-built requirements are carried here with their origin PR:
+
+| Closed PR | Why | Carried requirement (origin) |
+|---|---|---|
+| #1225 landing FOCUS | already on main: #1231 (FOCUS = restored previous landing) and #1232 (FOCUS default) | none |
+| #2438 master audit 2026-10-16 | its owner decisions N-1…N-13 are resolved or tracked elsewhere (#2439, #2442, #2433, #2432 merged; #2444 superseded by #2451; #2440, #2441 open in §3.3) | **reference only, never merged:** growth strategy F-1 (shareable, consent-based confirmed work record), F-2 (company side as weekly operations + crew-lead invite loop), F-3 (finish the money path first), cold-start per participant group, ten country plans, KPI definitions, 30/60/90 roadmap, PRODUCT_MASTER_SPEC (SUPPORTING) — on branch `docs/cc/master-audit-2026-10-16` (origin #2438); reuse when growth work starts (§3.3a) |
+| #740 voice_journal_jobs migration | voice is deferred (no transcription host; COM-6, V-2) | when voice reopens: one owner-scoped job table, disclosure acknowledged before recording, transcript ≤ 60k, audio retention ≤ 30 days, one job → at most one journal entry, worker/admin read only, RPC-only writes, right-to-erase RPC — design on branch `feat/voice-journal-jobs-migration-v1` (origin #740) |
+| #2915 completion map 2026-11-01 | the 288 statuses live only in FUNCTION_REGISTER (one register) | planning columns not in the register: effort per function, critical path, about 185–295 agent days, conditional targets (core mid-December 2026, full scope February 2027, preliminary) — on branch `docs/cc/completion-map-288` (origin #2915) |
+
+**Kept open for the owner** — independent read-only reviews 2026-11-03 (not by the PRs' authors):
+
+- **#2937** (worker role from the caller's own worker profile in chat/MCP; RED, 5 files, no migration, CI green) —
+  review verdict **APPROVE-SAFE**: the role comes only from `workers.profile_id = auth.uid()` (server-resolved, also
+  under an OAuth bearer); every newly reachable worker action re-checks ownership in its own RPC; only `worker` is
+  added, no company/agency/admin gate and no confirmation-token change. Residual risk low. Non-blocking follow-ups:
+  a behavioural test for a failed worker read and for an agency-only caller with an own worker row; the
+  opportunities page (`requireRoleOrRedirect("worker")`) should reuse the same rule.
+- **#2959** (J-12 learner join request; RED, unapplied) — verdict **APPROVE-WITH-CONDITIONS**: proof 43/43 re-run +
+  11 attack probes correct; definer functions, auth.uid() bound, authenticated-only grants, no RLS change; only
+  `manages_organization` may decide, never one's own request. Conditions being fixed by `local_b55e3e39` before the
+  owner decides: unverified typed name labelled + confirm on accept; re-request cooldown after a decline; `added_by`
+  hidden from the learner; archived organization refused; walk checks the switch first and archives its group.
+  Owner must confirm that `external_manager` (possibly an agency) counts as an authorised decider. Shared follow-up:
+  `engagement_contexts` duplicate race (same as invitations).
+- **#2419** (AI monitoring) — CONFLICTING and failing typecheck; its egress premise is superseded by #2433. Unique,
+  not on main: classify quota / timeout / provider-unavailable from `route_reason`, split price-missing from
+  budget-blocked, `ai-failing` = technical failures ÷ attempted runs (privacy refusals and the disabled runtime
+  excluded), `ai_outcome_*_7d` metric rows. Agentai OS has no LabourMarket AI-health monitor (no duplicate).
+  Recommended: close #2419 and carry exactly that into one small GREEN PR off main (≈1–2 h, 4 files, no migration),
+  reusing the provider-chain failure vocabulary — owner go-ahead.
+- **#896 + #897** — main's gates G-7/G-8 decide WHEN selling is allowed, never WHETHER it pays for itself; that second
+  question exists only in these PRs. **One requirements list (origin #896/#897, 2026-07-28):**
+
+| ID | Requirement | On main |
+|---|---|---|
+| CSP-001 | no deliberate long-term loss; a subsidy names its funding source | absent |
+| CSP-002 | economic model before anything paid goes public | partly (activation gates, no model recorded) |
+| CSP-003 | free tier ≈ 60–70 % of base value, funded by the paid model | absent |
+| CSP-004 | natural free → paid progression, no artificial blocking (review only) | absent |
+| CSP-005 | LMC is an internal economy, not a discount | partly (LMC flags off; 1 LMC = €1 invariant) |
+| FSR-001 | unit cost known before launch | partly (AI cost metering only) |
+| FSR-002 | no "unlimited" without a technical abuse bound | partly (AI run cap; paid plan has no numeric bound on open positions) |
+| FSR-003 | growth must not scale losses | partly (AI cap only) |
+| FSR-004 | no subsidy funded by future investment | absent |
+| FSR-005 | before paid activation: payer, what is paid for, unit cost, margin | partly (payer only) |
+| Gate ×11 | commercial gate conditions (assessment, unit cost, margin, payer, unlimited bound, scaling losses, negative margin, future-funded subsidy, LMC as discount) | absent |
+| Fields | economic-model fields per sellable item; feature-economics fields (owner, payer, cost/revenue driver, margin model, decision) | absent |
+| BHE-39 | 39 health metrics: revenue (MRR excludes top-ups), unit economics, margin, cost (12; only AI measured), LMC (6), adoption (6), composite | raw data only |
+| Plan / LMC health | per-plan margin and risk; LMC liability + backing ratio | absent |
+| Warnings ×8 | LOSS_RISK, NEGATIVE_MARGIN, LOW_MARGIN < 30 %, UNLIMITED_RISK, HIGH_AI_COST > 25 %, EXPENSIVE_FEATURE, LMC_LIABILITY_GROWING, SUBSIDY_RISK | absent |
+| Score | 8 weighted parts = 100; refuses to score below 5 measurable parts; unmeasured ≠ 0 | absent |
+
+  Already enforced, never rebuild: G-7/G-8 + live-key block, LMC kill switches, no money in code / null never
+  unlimited, AI cost metering, per-organization AI run cap. Overlapping open PRs (none duplicates): #2441, #2647,
+  #2474 (VIP = subsidy), #2682 (pilot amount for revenue), #2704 / #2685 / #2701 (net-of-VAT basis).
+  Recommended carrying path: one decision file with CSP/FSR verbatim + the list above, a pointer under MKT-7, an
+  owner row for the economic model of the live Organization plan / trial / pilot pass / VIP grant; re-point the
+  citations of unmerged PRs in `apps/web/lib/product-gate/axioms.ts` (:119, :122, :128, :137, :140) and
+  `docs/PRODUCT_CONSTITUTION.md:239-241`; then close #896/#897. Their code is not rebased (it imports the closed
+  #895's catalogue); a faithful gate would turn RED on the live paid plan until an owner assessment or dated
+  exception exists.
+
+Still recommended for an owner keep/close decision: rescope #2165 (referral pipeline already on main),
+#1577, #1835. Leave parked: #2198 (voice), #2377, #2370 (owner visual), #1211, #1166.
+
+---|---|---|---|---|
 | Job-offer intake → public listing → candidate sign-up → Living CV → application → employer review (growth mechanism of the existing platform, not a new product; LabourMarket.ai + Agentai OS data processing + Nonstop Group commercial links) | owner, 2026-11-01 | P1, after current P0 | QUEUED, NOT STARTED — owner: coordinator `local_8d793dee` | (1) current P0 work finished; (2) core user journeys verified in production; (3) no open P0 blocker; (4) this register checked; (5) proven no duplication of existing intake / vacancy store / opportunities / interest / Living CV components |
 
 Binding notes for that item: reuse the existing ingestion and vacancy store; keep source,
@@ -192,12 +308,6 @@ the ban on automatic replies to company mail stays; core publishing and candidat
 stay free; no revenue projections from unconfirmed placement commissions; first pilot =
 50 real offers, staged, browser-verified (desktop + mobile), with measured views,
 sign-ups, applications and returning users. No new agent, radar or parallel project.
-
-### 3.4 Stale non-draft PRs (`STALE?`, >7 days no push)
-
-#2642 (owner waiver needed), #2455, #2449, #2447 (draft, owner hold), #2438, #2419,
-#2403 (waiver), #2377, #2370, #2356 (dependabot). Owner decides keep/close; nobody
-closes them on the coordinator's say-so.
 
 ---
 
@@ -214,6 +324,7 @@ closes them on the coordinator's say-so.
 | D-7 | Two counts of the function matrix: local 275-row matrix (`_agent-workspaces/labourmarketai/matrix/functionality-matrix-2026-10-23.md`, not in git) PASS 194 / FAIL 8 / BLOCKED 39 / NOT_VERIFIED 18 / NOT_IMPLEMENTED 16; public `docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md` 71/274 LIVE_PROVEN (stale since #2640, 10-21). Matrix rows 4.3/4.16 cite run 39960149411, which concluded failure. | two truths | regenerate the public summary from the matrix (counts and run ids only); re-cite 4.3/4.16 to 40315387466 |
 | D-8 | `jobs-search` 40640097643 (05:48Z) J-6 "save job" failed. **Re-run 40645813917 (06:47Z, `b0747e50`): 6/6 PASS incl. J-6** (save, find in saved view, remove). | intermittent, not reproduced — cause NOT_VERIFIED | LIVE_VERIFIED 06:47Z; if J-6 fails again, trace button → `saveVacancyAction` → `savePublicVacancy` |
 | D-9 | Inactive locales da/et/lv/no/sv: 5 817 of 15 191 keys, 22–44 % `[EN]` placeholders. Active six (lt/en/ru/nl/de/pl) complete, 0 placeholders, no untranslated prose (catalog audit 2026-10-28). | blocks only those five markets (they redirect to /en) | coordinator: translation pipeline without paid APIs (owner order 2026-10-28), with placeholder/ICU/length QC — not started |
+| D-11 | Possible overlaps in the OAuth/MCP area: #2806 (tokens only at the connector door) vs #2918 (C-3 audience binding); #2707 (scopes behind a flag) vs #2923 (curated assistant toolset); #2812 (user-controlled grants) vs #2924 (consent wording). | two competing implementations | owner of the comparison: `local_3951ad81`; it proposes supersede / keep per pair; nothing is closed before its content is handed over |
 | D-10 | **Inbound reachability from GitHub runners, 2026-10-28 only** (none in the 80 walk runs before): ≈06:23–06:36Z (deploy SSH connect timeout; walk health no answer), ≈06:59Z (T-3 `ERR_TIMED_OUT`), 07:57Z (walk health no answer). Every event seen from GitHub-hosted runners; the coordinator's browser samples (3 s, incl. across a deploy at 07:16Z) never failed; Supabase edge logs show the VPS app calling the DB at its normal rate throughout. | P1 INFRA (GitHub→VPS path; users not shown affected) | owner: VPS logs (nginx/sshd/firewall, fail2ban) or provider network for those minutes; read-only SSH for the coordinator was requested |
 
 ---
@@ -279,9 +390,9 @@ Only items that genuinely need the owner. Resolved or reclassified items are rem
 - D-6 product question: training for engaged (non-member) workers (RED #2816).
 - #2844 legal wording; #2842 paid terms (legal).
 - `GOV-1` read-only DB secret for CI gates; product-truth owner decisions ORG-2, EVID-2, MKT-7, COM-6, COM-8.
-- **Open security blocker (2026-11-01):** one CI live gate is not active; owner action pending. Details and the exact step are in the private record.
+- **Resolved 2026-11-01:** the live migration-parity gate is active and PASSES on `main` (run 41342643253). The six missing repository files were restored by #2913, with no production change. The separate Codex security review of #2913 did not run; the code review passed.
 - **Backups (13.5):** add the scoped `SUPABASE_ACCESS_TOKEN` secret, so that `db-backup.yml` runs its restore proof (#2906).
-- **D-4 / D-5:** QA mailbox secrets plus merging RED #2903; dispatch `prod-qa-invited-provision` → `provision-invited`.
+- **D-4 / D-5: DONE 2026-11-02.** #2903 and #2921 merged; `production-qa` restricted to `main`. mail-reset 41428606490 PASS 2/2 (1.3 / J-16), invited-worker 41430482903 PASS 7/7 (J-6 complete); the synthetic account was erased by the platform erasure runner. Open: owner approval to delete the one remaining pseudonymised synthetic invitation (scope checked: exactly 1 row, nothing references it).
 - **Shared VPS (13.1):** remediation #2911 + agentai#1226 live since 2026-11-01; 72 h verdict due 2026-11-04 (details private).
 
 Removed as resolved: #2855 and #2858 (APPLIED, LIVE_VERIFIED 2026-10-28, ledgers 20261028081810 /
