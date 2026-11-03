@@ -5,6 +5,7 @@ import { CORE_NAV_IDS, getCoreNavItems } from "@/lib/config/navigation";
 import { actingRoleForWorkspace } from "@/lib/company/organization-switch";
 import {
   CUSTOMER_HEADER_DOORS,
+  customerHeaderDoors,
   ORGANIZATION_WORK_AREAS,
   organizationHeaderAreas,
 } from "@/lib/navigation/work-areas";
@@ -76,13 +77,26 @@ describe("the header follows the acting role, the primary row stays the core loo
     }
   });
 
-  it("a customer (active role, no organization workspace) finds their requests first in More", () => {
-    expect(header).toMatch(
-      /auth\?\.activeRole === "customer" && activeWorkspace\?\.kind !== "organization" \? CUSTOMER_HEADER_DOORS : \[\]/,
-    );
+  it("a customer finds their requests first in More — by the HELD role, like the page's gate", () => {
+    expect(header).toMatch(/const customerDoors = customerHeaderDoors\(auth\?\.roles \?\? \[\], activeWorkspace\);/);
     expect(CUSTOMER_HEADER_DOORS.map((d) => d.href)).toEqual(["/dashboard/buyer"]);
     expect(existsSync(join(__dirname, "../../app/[locale]/dashboard/buyer/page.tsx"))).toBe(true);
     const coreHrefs = new Set(getCoreNavItems().map((i) => i.href));
     for (const d of CUSTOMER_HEADER_DOORS) expect(coreHrefs.has(d.href)).toBe(false);
+  });
+
+  it("REGRESSION (walk 41676554374): a customer whose ACTIVE role is worker still gets the door", () => {
+    const personal = { kind: "personal" } as const;
+    // holds customer + worker, active = worker (the normal post-onboarding state)
+    expect(customerHeaderDoors(["worker", "customer"], personal)).toEqual(CUSTOMER_HEADER_DOORS);
+    expect(customerHeaderDoors(["customer"], null)).toEqual(CUSTOMER_HEADER_DOORS);
+    // no customer role → no door
+    expect(customerHeaderDoors(["worker"], personal)).toEqual([]);
+    expect(customerHeaderDoors([], personal)).toEqual([]);
+    // an organization workspace → no door, even for a customer
+    expect(customerHeaderDoors(["worker", "customer", "company"], { kind: "organization" })).toEqual([]);
+    // the page's own gate asks for the same held role
+    const buyer = readFileSync(join(__dirname, "../../app/[locale]/dashboard/buyer/page.tsx"), "utf8");
+    expect(buyer).toMatch(/requireRoleOrRedirect\(locale, "customer"\)/);
   });
 });
