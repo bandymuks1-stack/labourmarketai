@@ -195,6 +195,12 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261102160000_",
       // 2026-11-03 (RED draft, NOT applied): J-12 follow-up — set_education_cohort_member_v1 refuses request rows.
       "20261103090000_",
+      // 2026-11-03 (RED, owner-approved, APPLIED ledger 20261103170942): work-plan scope predicate made internal only (client EXECUTE revoked).
+      "20261103120000_",
+      // 2026-11-03 (RED, owner-approved, APPLIED ledger 20261103171024): agency docs readiness reads the live agency roster.
+      "20261103130000_",
+      // 2026-11-03 (RED, owner-approved, APPLIED ledger 20261103171134): agency client records follow owns_company.
+      "20261103140000_",
       // 2026-11-03 (RED draft, NOT applied): pg_trgm + the job search trigram index (owner decision: index, never a result cap).
       "20261103171000_",
       "20261103171100_",
