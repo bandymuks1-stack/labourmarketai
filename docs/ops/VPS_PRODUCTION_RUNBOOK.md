@@ -91,7 +91,7 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 | Commercial handoffs | `/api/cron/commercial-handoffs` (06:00 UTC) | **running** (measured 2026-10-23: the 06:00 UTC sweep read the queue; consented hand-offs are delivered by the immediate path) | VPS cron.d |
 | Job alerts | `/api/cron/job-alerts` (06:17 UTC) | the GitHub `job-alerts-cadence.yml` no-op was **removed** (it never had `CRON_SECRET`; nginx 404s `/api/cron/*` from the internet) | VPS cron.d (line present in the bundle) |
 | Billing recovery | `/api/cron/billing-recovery` | `billing-recovery-cadence.yml` kept **dispatch-only** (schedule removed; its static gate stays reviewable). Since 2026-10-23 it makes **no HTTP call**: nginx 404s `/api/cron/*` from the internet, so a runner call could never succeed; an open gate fails loudly and points at `lm-cron.sh billing-recovery` on the VPS. `apps/web/vercel.json` keeps its `crons` block unchanged: three guards read it as the schedule declaration and the Vercel project is disabled, so the block is inert documentation | VPS cron.d line added only with the Stripe GO |
-| **DB backup** | `db-backup.yml` 03:30 UTC: `pg_dump` on the runner (`public` + `auth`) through a **temporary CLI login role** minted with the owner's scoped `SUPABASE_ACCESS_TOKEN` (or the optional `SUPABASE_BACKUP_DB_URL` read role) → **restore drill** into a throw-away postgres:17 → `age`-encrypt to the VPS public key → ship via the forced-command receiver (`backup`) → `/root/lm-prod/backups/` (700/600), 14-day rotation | **never produced a backup** (drills 10-17 failed on permissions; since 10-18 no credential secret) — owner step in §9.1 | GitHub-side dump; VPS stores ciphertext only; no DB password typed anywhere |
+| **DB backup** | `db-backup.yml` 03:30 UTC: `pg_dump` on the runner (`public` + `auth` + `storage` metadata + `supabase_migrations` ledger) through the owner-approved read role `SUPABASE_BACKUP_DB_URL` (or a temporary CLI login role via `SUPABASE_ACCESS_TOKEN`) → **restore drill** with exact schema-object and per-table row proof → Storage **files** + pg_cron job definitions downloaded via the Storage API and size-checked → both `age`-encrypted to the VPS public key → shipped via the forced-command receiver (`backup`) → `/root/lm-prod/backups/` (700/600), 14-day rotation | **producing backups since 2026-11-03** (drill 41636950462, full 41637888590); completeness proof + files bundle 2026-11-03 (§9.1.0) | GitHub-side dump; VPS stores ciphertext only; no DB password typed anywhere |
 | NAV (Norway) ingestion | `nav-supply-cadence.yml` 02/08/14/20 UTC (GitHub, service role) | GREEN after migration | keep (GitHub) |
 | Sweden ingestion | `sweden-supply-cadence.yml` 01/09/17 UTC | GREEN | keep |
 | Freshness check | `ingestion-freshness.yml` 04/10/16/22 UTC | GREEN | keep |
@@ -160,9 +160,12 @@ prints or sets a value.
 
 ### 9.1 Database backup (`db-backup.yml`)
 
-**State:** never produced a backup. The 10-17 drills failed on permissions
-(`permission denied for schema auth`, then `… for table profiles`), and every
-night since 10-18 the job stops at *Require secrets*.
+**State (2026-11-03):** producing backups. The owner created the read role
+behind `SUPABASE_BACKUP_DB_URL`; drill 41636950462 and full run 41637888590
+were green (the first stored dump is on the VPS). Before that: the 10-17 drills
+failed on permissions (`permission denied for schema auth`, then `… for table
+profiles`), and from 10-18 the job stopped at *Require secrets*. What a backup
+holds, and the proof, are in §9.1.0.
 
 Ready (verified in the repo and run logs): `ops/vps/backup.age.pub`; the deploy
 trio secrets; the forced-command receiver with its `backup` action (present in
@@ -213,10 +216,10 @@ with it (PostgreSQL 17 `CREATE ROLE` docs). Then the Session-pooler URI of
 `lm_backup.<project-ref>` goes into `gh secret set SUPABASE_BACKUP_DB_URL`
 (hidden prompt). When that secret exists it wins over the token.
 
-**Accounts (auth.users) — the former gap:** the job now dumps `public` and
-`auth` together; if `auth` cannot be read it falls back to `public` only and
-says so (warning + summary line `scope=public`). The restore drill checks that
-`auth.users` restored when the scope says it is there.
+**Accounts (auth.users) — the former gap:** the job dumps `public`, `auth`,
+`storage` and `supabase_migrations` together (§9.1.0); if that cannot be read it
+falls back to `public` only and says so (warning + summary line `scope=public`).
+The restore drill proves every dumped schema came back (§9.1.0).
 
 **Second line of defence:** on a paid Supabase plan, Dashboard → Database →
 **Backups** lists the platform's own daily backups (Pro keeps 7 days). Check
@@ -230,35 +233,122 @@ GitHub job is then the only backup.
 installed copy is current). Keep the offline copy of `backup.age.key` — without
 it no backup can be decrypted.
 
+### 9.1.0 What a backup holds — and what it does not (completeness, 2026-11-03)
+
+Measured on production 2026-11-03 (counts only): base tables `public` 249,
+`auth` 27, `storage` 8, `supabase_migrations` 1, `cron` 2, `realtime` 3 (one
+partitioned), `vault` 1. The read role behind `SUPABASE_BACKUP_DB_URL`
+(BYPASSRLS + `pg_read_all_data`) can read every one of them.
+
+**"284 reachable vs 253 restored", explained.** 284 = 249 + 27 + 8 base tables
+in `public`, `auth`, `storage`. The drill's former "public tables=253" counted
+`information_schema.tables`, which lists VIEWS too: 249 base tables + 4 views
+(`worker_absence_scheduling`, `lmc_lot_balances`, `lmc_account_balances`,
+`market_index_v1`) = 253. Nothing extra was created and no table was lost; the
+drill now prints base tables and views separately and proves them exactly. (The
+same drill DID lose objects — see *Restore errors* below.)
+
+| Schema | In the backup | Why |
+|---|---|---|
+| `public` | pg_dump | product data |
+| `auth` | pg_dump | accounts, identities, sessions |
+| `storage` | pg_dump (metadata) + **files bundle** | buckets and object rows; the FILES themselves are in no database dump (nor in Supabase's own DB backups) |
+| `supabase_migrations` | pg_dump | the applied-migration ledger: what a restored database already contains |
+| `cron` | job definitions in the files bundle (`cron-jobs.csv`) | its tables belong to the pg_cron extension; a schema dump would carry data for tables a restore cannot create. The target's pg_cron recreates them; jobs are re-scheduled from the CSV |
+| `vault` | **not backed up, on purpose** | Supabase-managed secrets encrypted with this project's own key: ciphertext is useless elsewhere and must not travel; the owner re-enters secrets |
+| `realtime` | **not backed up, on purpose** | Supabase runtime (subscriptions, short-lived broadcast partitions), recreated by the platform; no product data |
+
+**What the nightly drill proves** (job summary, counts only): per schema, the
+exact number of tables, views, indexes, constraints, policies, triggers and
+functions equals the source; every table's row count lands inside its source
+window [before dump, after dump] — the key tables (`profiles`, `workers`,
+`organizations`, `journal_entries`, `journal_entry_confirmations`, `auth.users`,
+`storage.objects`, `supabase_migrations.schema_migrations`) fail the job when
+outside it, any other table only warns (busy tables such as `auth.sessions`
+can move both ways between the two reads), and a table that restored EMPTY or
+not at all fails; every journal entry keeps its worker. The Storage step proves
+every listed object downloaded with exactly its recorded size (count + total
+bytes) and that the cron export has as many jobs as `cron.job`.
+
+**Restore errors, expected and not.** Against a plain postgres:17 the former
+drill logged 195 error lines: `role "authenticated" does not exist` (RLS
+policies), `data type uuid has no default operator class for access method
+"gist"` (the one exclusion constraint, which needs `btree_gist`), and `schema
+"public" already exists`. Only the last is harmless; the others meant policies
+and a constraint were MISSING from the restored copy while the row proof still
+passed. The drill now creates the Supabase roles and extensions first (what a
+Supabase target already has), so the only expected error is `schema "public"
+already exists`. Any other error line is printed (first ten, statement text
+only) as a warning, and the exact object proof turns any missing object into a
+failure.
+
+**Receiver.** The files bundle needs the receiver from main (it accepts
+`lm-files-<stamp>.tar.age` and rotates it after 14 days). Like every
+`/root/lm-prod/bin` script it is installed BY HAND. Until it is, the job stores
+the database dump and then fails loudly on the files bundle, naming this step.
+
 ### 9.1.1 Restoring a backup (verify first; production only with owner approval)
 
 The nightly job proves every dump restores (the drill), but a real recovery
 is a separate, owner-approved act. Order: **verify in isolation → owner
 decision → (only then) production**. Never restore over production to "test".
 
-1. **Pick the file** on the VPS: `ls -l /root/lm-prod/backups/`
-   (`lm-db-<UTC stamp>.dump.age`, 600; 14 days kept). Note its sha256.
+1. **Pick the pair** on the VPS: `ls -l /root/lm-prod/backups/` —
+   `lm-db-<UTC stamp>.dump.age` (the database) and `lm-files-<same stamp>.tar.age`
+   (Storage files + cron jobs), 600, 14 days kept. Compare their sha256 with the
+   run's summary.
 2. **Decrypt on the VPS into a 700 scratch directory** (the private key never
    leaves the VPS):
-   `umask 077; mkdir -p /root/lm-restore && age -d -i /root/lm-prod/backup.age.key -o /root/lm-restore/lm.dump /root/lm-prod/backups/<file>`
+   `umask 077; mkdir -p /root/lm-restore/files && age -d -i /root/lm-prod/backup.age.key -o /root/lm-restore/lm.dump /root/lm-prod/backups/lm-db-<stamp>.dump.age`
+   and `age -d -i /root/lm-prod/backup.age.key /root/lm-prod/backups/lm-files-<stamp>.tar.age | tar -C /root/lm-restore/files -xf -`
+   → `files/storage/<bucket>/<object name>`, `files/storage-manifest.jsonl`
+   (bucket, name, size, sha256 per object), `files/cron-jobs.csv`.
 3. **Restore into a throw-away database first** — a local `postgres:17`
    container on the VPS, never the production project:
-   `docker run -d --name lm-restore-check -e POSTGRES_PASSWORD=<local-only> -p 127.0.0.1:55433:5432 postgres:17`
+   `docker run -d --name lm-restore-check -e POSTGRES_PASSWORD=<local-only> -p 127.0.0.1:55433:5432 postgres:17`.
+   **Prepare the target the way Supabase has it** (otherwise every policy and the
+   exclusion constraint go missing):
+   ```sql
+   create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
+   create schema extensions;
+   create extension btree_gist with schema extensions;
+   create extension pgcrypto with schema extensions;
+   create extension "uuid-ossp" with schema extensions;
+   ```
    then `pg_restore -h 127.0.0.1 -p 55433 -U postgres -d postgres --no-owner --no-privileges /root/lm-restore/lm.dump`.
-   The dump is custom format (`-Fc`), schemas `public` + `auth` (or `public`
-   only when the job's summary said `scope=public`). Errors about Supabase
-   roles/extensions (`authenticated`, `anon`, `supabase_*`, `pg_graphql`…) are
-   expected outside Supabase; table-data errors are not.
-4. **Check what came back** (counts only, nothing printed from rows):
-   number of `public` tables, `select count(*) from auth.users`, and the newest
-   `created_at` of a busy table — that is the point in time the backup holds.
+   pg_restore orders the work itself (schemas → types and functions → tables →
+   data → indexes and constraints → triggers → policies); one invocation restores
+   all four schemas (`public`, `auth`, `storage`, `supabase_migrations` — or
+   `public` only when the run's summary said `scope=public`). Expected error:
+   `schema "public" already exists`, nothing else. Any other error is a missing
+   object — stop and look before going further.
+4. **Check what came back** (counts only, nothing printed from rows) against the
+   run's summary: per-schema object counts; `select count(*)` of the key tables;
+   `select count(*) from storage.objects` (= lines of `storage-manifest.jsonl`);
+   `select max(version) from supabase_migrations.schema_migrations` (the newest
+   applied migration); the newest `created_at` of a busy table — the point in
+   time the backup holds. Files:
+   `cd /root/lm-restore/files && jq -r '"\(.sha256)  storage/\(.b)/\(.n)"' storage-manifest.jsonl | sha256sum -c --quiet`
+   (no output = every file intact).
 5. **Owner decision.** Prefer the narrowest recovery: copy back only the
-   affected rows/tables. A whole-database restore into the production project
-   replaces newer data and needs the owner's explicit approval, a maintenance
-   window and a fresh dump of the current state taken first. Supabase's own
-   Pro backups (Dashboard → Database → Backups, 7 days) are the alternative for
-   a whole-project point-in-time restore.
-6. **Clean up** the plaintext: `shred -u /root/lm-restore/lm.dump; docker rm -fv lm-restore-check` —
+   affected rows, tables or files. A whole-database restore into a Supabase
+   project replaces newer data and needs the owner's explicit approval, a
+   maintenance window and a fresh dump of the current state taken first.
+   Supabase's own Pro backups (Dashboard → Database → Backups, 7 days) are the
+   alternative for a whole-project point-in-time restore of the DATABASE; they
+   hold no Storage files either. Into a NEW Supabase project, in this order:
+   1. the roles and extensions of step 3 already exist there — do not create them;
+   2. `pg_restore --no-owner --no-privileges` as the project's `postgres` role for
+      `public`, `storage` and `supabase_migrations` (`-n` each); `auth` is created
+      by the platform, so restore it with `--data-only -n auth` afterwards;
+   3. **Storage files** go back through the Storage API with the service-role
+      key, one upload per manifest line, same bucket and name
+      (`POST /storage/v1/object/<bucket>/<name>` with `x-upsert: true`); the
+      bucket rows came back with the `storage` schema;
+   4. **cron jobs**: for each line of `cron-jobs.csv`,
+      `select cron.schedule(<jobname>, <schedule>, <command>)`;
+   5. **vault secrets** are not in the backup: the owner re-enters them.
+6. **Clean up** the plaintext: `shred -u /root/lm-restore/lm.dump; find /root/lm-restore/files -type f -exec shred -u {} +; rm -rf /root/lm-restore; docker rm -fv lm-restore-check` —
    `-v` also removes the container's anonymous data volume (`/var/lib/postgresql/data`), which
    otherwise keeps a second plaintext copy of the restored database on the VPS. Confirm with
    `docker volume ls -qf dangling=true` (no volume from the drill may remain).
