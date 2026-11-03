@@ -1,6 +1,8 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+
+import { CANONICAL_APP_RPCS } from "@/lib/security/canonical-authenticated-rpcs";
 
 /**
  * Guard: work_plan_worker_in_scope_v1 is an INTERNAL predicate.
@@ -32,6 +34,19 @@ describe("Guard: work-plan scope predicate is internal only", () => {
   it("grants nothing and leaves the body alone", () => {
     expect(up).not.toMatch(/\bgrant\b/i);
     expect(up).not.toMatch(/create or replace function/i);
+  });
+
+  it("no later migration grants it back to a client role", () => {
+    const dir = resolve(repo, "supabase/migrations");
+    const later = readdirSync(dir).filter((f) => f.endsWith(".sql") && f > `${NAME}.sql`);
+    const regrant = new RegExp(`grant\\s+(execute|all)[^;]*on\\s+function\\s+${SIG}[^;]*to[^;]*\\b(authenticated|anon|public)\\b`, "i");
+    for (const f of later) {
+      expect(exec(`supabase/migrations/${f}`), f).not.toMatch(regrant);
+    }
+  });
+
+  it("the app never calls it directly", () => {
+    expect(CANONICAL_APP_RPCS).not.toContain("work_plan_worker_in_scope_v1");
   });
 
   it("rollback restores the authenticated grant", () => {

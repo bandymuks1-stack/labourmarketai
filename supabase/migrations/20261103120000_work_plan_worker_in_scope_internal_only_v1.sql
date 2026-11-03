@@ -9,7 +9,7 @@
 -- of ANY organization — a cross-tenant membership bit.
 --
 -- It is an internal predicate. Its only callers are the SECURITY DEFINER
--- commands create_work_plan_entry_v1 / create_work_plan_entry_v2 (owned by
+-- planning commands create_work_plan_entry_v1 and its v2 successor (owned by
 -- postgres, so they run it with the owner's rights, unaffected by this
 -- revoke). No RLS policy, no SECURITY INVOKER function and no application
 -- code calls it (checked in production 2026-11-03).
