@@ -286,9 +286,9 @@ test("S-1. the provider offers a service and makes it discoverable", async ({ br
   serviceId = (await row.getAttribute("data-testid"))!.replace("service-offering-row-", "");
   const status = inMain(page).getByTestId(`service-offering-status-${serviceId}`);
   // The discoverability line renders for draft and paused rows too: wait for
-  // the row itself to say ACTIVE before the next actor looks for it. A click
-  // during the post-save re-render can be lost (prod-marketplace run
-  // 41721656743: no PATCH reached the server), so re-click until it holds.
+  // the row itself to say ACTIVE before the next actor looks for it; the
+  // publish can queue behind the save's refresh (prod-marketplace run
+  // 41721656743), so keep the page open and re-click if it never lands.
   await expect(async () => {
     if (!/aktyv|active/i.test(await status.innerText())) {
       await inMain(page).getByTestId(`service-offering-toggle-${serviceId}`).click();

@@ -74,9 +74,11 @@ test("M-2. the provider offers a service and makes it discoverable", async ({ br
   serviceId = (await row.getAttribute("data-testid"))!.replace("service-offering-row-", "");
   // Prove the publication, not the hint: the discoverability line renders in
   // EVERY state (draft too), so its visibility proved nothing. Run 41721656743
-  // clicked publish while the list re-rendered after save; the action never
-  // reached the server (no PATCH in edge logs), the row stayed a draft, and
-  // M-5 failed far from the cause. Re-click until the row is findable.
+  // clicked publish while the save's router.refresh was still in flight; Next
+  // queues a server action behind a pending refresh, the already-true check
+  // passed at once and the context closed before the action was sent (no
+  // PATCH in edge logs). The row stayed a draft and M-5 failed far from the
+  // cause. Keep the page open until the row is findable; re-click if not.
   const status = page.getByTestId(`service-offering-status-${serviceId}`);
   const findable = page.getByTestId(`service-offering-discoverability-${serviceId}`);
   await expect(async () => {

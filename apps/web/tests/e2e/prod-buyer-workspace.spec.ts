@@ -228,8 +228,8 @@ test("B-4 (6.1). the provider offers a service and makes it discoverable", async
   const status = page.getByTestId(`service-offering-status-${serviceId}`);
   // The visibility line renders for a draft too; wait until it says others
   // can find it, so the context never closes while the publish is in flight.
-  // A click during the post-save re-render can be lost (prod-marketplace run
-  // 41721656743: no PATCH reached the server), so re-click until it holds.
+  // The publish can queue behind the save's refresh (prod-marketplace run
+  // 41721656743), so re-click if it never lands.
   await expect(async () => {
     if (!/aktyv|active/i.test(await status.innerText())) {
       await page.getByTestId(`service-offering-toggle-${serviceId}`).click();
