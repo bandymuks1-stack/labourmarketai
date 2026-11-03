@@ -1760,6 +1760,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-03: work-plan scope predicate made internal only (client EXECUTE revoked). RED draft, the marker is the
       // human-gate acknowledgement, NOT applied until the owner approves.
       "20261103120000_work_plan_worker_in_scope_internal_only_v1.sql",
+      // 2026-11-03: agency docs readiness reads the live agency roster. RED draft, the marker is the
+      // human-gate acknowledgement, NOT applied until the owner approves.
+      "20261103130000_agency_pool_docs_readiness_live_roster_v1.sql",
 ]);
   });
 
