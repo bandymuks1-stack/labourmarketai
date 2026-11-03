@@ -24,6 +24,11 @@ import {
 
 export const ENTRY_MARKER_SLUGS = {
   skillRejected: "skill_rejected",
+  /** The person's explicit re-link of a skill they had rejected on THIS
+   *  entry: entry-scoped, append-only, value_text = slug, value_numeric =
+   *  decision time (ms). Only the person's own choice writes it — recognition
+   *  never supersedes a rejection. Latest decision per (entry, slug) wins. */
+  skillReaffirmed: "skill_reaffirmed",
   claimRejected: "skill_claim_rejected",
   claim: "skill_claim",
   unresolvedFragment: "unresolved_fragment",
@@ -75,6 +80,36 @@ export type EntryRecognitionMarkers = {
   latestPipelineVersion: number;
 };
 
+export type EntrySkillDecision = "rejected" | "reaffirmed";
+
+/**
+ * The person's LATEST decision per slug on one entry, from its
+ * `skill_rejected` / `skill_reaffirmed` rows. Order = `value_numeric` (the
+ * decision time in ms; rows written before it existed read as 0, i.e. the
+ * oldest). On a tie the rejection wins — the cautious reading.
+ */
+export function latestSkillDecisions(
+  rows: readonly EntryMarkerRow[],
+): Map<string, EntrySkillDecision> {
+  const best = new Map<string, { at: number; decision: EntrySkillDecision }>();
+  for (const r of rows) {
+    const decision: EntrySkillDecision | null =
+      r.metric_slug === ENTRY_MARKER_SLUGS.skillRejected
+        ? "rejected"
+        : r.metric_slug === ENTRY_MARKER_SLUGS.skillReaffirmed
+          ? "reaffirmed"
+          : null;
+    const slug = r.value_text?.trim();
+    if (!decision || !slug) continue;
+    const at = typeof r.value_numeric === "number" ? r.value_numeric : 0;
+    const prev = best.get(slug);
+    if (!prev || at > prev.at || (at === prev.at && decision === "rejected")) {
+      best.set(slug, { at, decision });
+    }
+  }
+  return new Map([...best].map(([slug, v]) => [slug, v.decision]));
+}
+
 /** Read every recognition marker of one entry from its metric rows. */
 export function readEntryRecognitionMarkers(
   rows: readonly EntryMarkerRow[],
@@ -96,9 +131,6 @@ export function readEntryRecognitionMarkers(
         if (parsed) out.existingFragmentSkillSet.add(formatFragmentSkillValue(parsed));
         break;
       }
-      case ENTRY_MARKER_SLUGS.skillRejected:
-        if (r.value_text) out.rejectedSlugs.add(r.value_text.trim());
-        break;
       case ENTRY_MARKER_SLUGS.claimRejected:
         if (r.value_text) out.rejectedClaims.add(normalizeClaimLabel(r.value_text));
         break;
@@ -134,6 +166,10 @@ export function readEntryRecognitionMarkers(
         }
         break;
     }
+  }
+  // A rejection stands until the person's own later re-link supersedes it.
+  for (const [slug, decision] of latestSkillDecisions(rows)) {
+    if (decision === "rejected") out.rejectedSlugs.add(slug);
   }
   return out;
 }

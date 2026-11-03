@@ -234,6 +234,71 @@ describe("CIE integration — the workspace resolves defaults, the user re-picks
     }
   });
 
+  it("UI, chat and MCP resolve the context with the SAME active-workspace signal (rule W, owner P0 2026-10-29)", () => {
+    // One resolver, one signal. If one surface stopped passing the active
+    // organization, identical work would be preselected on the web and asked
+    // about over MCP (or the reverse) — the divergence this rule exists to end.
+    const callers = {
+      journalPage: read("app/[locale]/dashboard/journal/page.tsx"),
+      worklog: read("lib/conversation/worklog-engagements.ts"),
+      capability: read("lib/capabilities/registry.ts"),
+    };
+    for (const [name, src] of Object.entries(callers)) {
+      const call = src.slice(src.indexOf("resolveEngagementContext({"));
+      const args = call.slice(0, call.indexOf("});"));
+      expect(args, name).toMatch(/activeOrganizationId/);
+      // The organization comes from the ONE workspace resolution, through the
+      // helper that can never hand the personal sentinel over as an org id.
+      expect(src, name).toMatch(/activeOrganizationOf\(/);
+      // The ONE choice order (active first, personal last).
+      expect(src, name).toMatch(/orderContextsForChoice\(/);
+      // Membership without a work relationship is SAID, not omitted (the web
+      // page delegates the per-date decision to the composer it renders).
+      expect(
+        name === "journalPage" ? read("components/app/journal-entry-composer.tsx") : src,
+        name,
+      ).toMatch(/activeWorkspaceWithoutContext/);
+      expect(src, name).toMatch(/activeWorkspaceNoRelationship/);
+    }
+    // Applicability is bounded by the WORK DAY on every surface (Codex P2 on
+    // #2884): the page resolves on the selected day and hands the composer the
+    // candidates so it re-resolves on its own date; the chat loader takes the
+    // draft's day and returns the candidates so the flow re-resolves when the
+    // date changes; the MCP draft resolves on the draft's workDate.
+    const sliceArgs = (src: string) => {
+      const call = src.slice(src.indexOf("resolveEngagementContext({"));
+      return call.slice(0, call.indexOf("});"));
+    };
+    expect(sliceArgs(callers.journalPage)).toMatch(/workDay: selectedDate/);
+    expect(sliceArgs(callers.worklog)).toMatch(/workDay: day/);
+    expect(sliceArgs(callers.capability)).toMatch(/workDay: workDate/);
+    const composerSrc = read("components/app/journal-entry-composer.tsx");
+    expect(composerSrc).toMatch(/contextCandidates=\{contextCandidates\}|contextCandidates,/);
+    expect(composerSrc).toMatch(/workDay: workDate/);
+    expect(callers.journalPage).toMatch(/contextCandidates=\{contextCandidates\}/);
+    const flowSrc = read("components/app/conversation/worker-worklog-flow.tsx");
+    expect(flowSrc).toMatch(/listWorkLogEngagements\(draft\.date\)/);
+    expect(flowSrc).toMatch(/workDay: workDate/);
+    // The document-import form re-resolves on the day the person chooses.
+    const docForm = read("components/app/document-journal-draft-form.tsx");
+    expect(docForm).toMatch(/resolveEngagementContext\(\{/);
+    expect(docForm).toMatch(/workDay: workDate/);
+    expect(read("components/app/document-journal-draft-review.tsx")).toMatch(
+      /contextCandidates=\{eng\.candidates\}/,
+    );
+
+    // The MCP path takes the workspace from the transport-neutral core.
+    expect(callers.capability).toMatch(/resolveActiveWorkspaceForCaller\(caller, null\)/);
+    // The web surfaces from the same resolution the header chip shows.
+    expect(callers.journalPage).toMatch(/getWorkspaceContext\(\)/);
+    expect(callers.worklog).toMatch(/getWorkspaceContext\(\)/);
+    // And the sentence reaches the person on both web surfaces.
+    expect(read("components/app/journal-entry-composer.tsx")).toMatch(/activeWorkspaceNotice/);
+    expect(read("components/app/conversation/worker-worklog-flow.tsx")).toMatch(
+      /setActiveWorkspaceNotice\(res\.activeWorkspaceNotice/,
+    );
+  });
+
   it("the brief's suggestions render through EXISTING chip mechanisms only", () => {
     const chat = read("components/app/conversation/chat/conversation-chat.tsx");
     expect(chat).toMatch(/id: "logwork"/);

@@ -74,6 +74,20 @@ jobs:
       - name: Unit tests (vitest)
         run: pnpm -F web test
 
+      # Every Playwright spec must load (2026-11-01: a duplicate declaration in a
+      # production walk passed typecheck - tests/e2e is outside the app tsconfig -
+      # and the walk then ran 0 tests). Listing parses every file; it starts no
+      # server and no browser. A file that does not load fails the gate.
+      - name: E2E specs load (every Playwright file parses)
+        working-directory: apps/web
+        run: |
+          if ! pnpm exec playwright test --list > "$RUNNER_TEMP/e2e-list.txt" 2>&1; then
+            grep -E -A8 "Error" "$RUNNER_TEMP/e2e-list.txt" | head -80
+            echo "::error::a Playwright spec does not load (see above)"
+            exit 1
+          fi
+          tail -1 "$RUNNER_TEMP/e2e-list.txt"
+
       - name: Placeholder governance check
         run: pnpm placeholders:check
 

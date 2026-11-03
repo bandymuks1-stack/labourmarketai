@@ -162,6 +162,10 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
    */
   const CONSUMERS = [
     LIFECYCLE_READER,
+    // 20261025045152 project_forecasts_v1 (restored byte-exact by #2913, production-applied 2026-10-25):
+    // reads public.work_tasks for forecast facts and attaches its forecast_signal trigger to it.
+    // Creates/alters/writes/policies nothing on work_tasks and defines no task RPC.
+    "20261025045152_project_forecasts_v1",
     "20260817232000_management_decisions_v1",
     // 20261003150600 — team_assignments (WRK-6): holds an FK to public.work_tasks and reads it to
     // check a task belongs to the project a team is assigned to. Creates/alters/writes nothing on it.
@@ -227,10 +231,12 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
         if (CONSUMERS.some((c) => f.startsWith(c))) {
           // A consumer may reference the table, and NOTHING more.
           expect(src, `${dir}/${f} must not create/alter/drop work_tasks`).not.toMatch(
-            /(create|alter|drop)\s+table\s+(if (not )?exists\s+)?public\.work_tasks\b/i,
+            /(create|alter|drop)\s+table\s+(if (not )?exists\s+)?(only\s+)?(public\.)?work_tasks\b/i,
           );
+          // Qualified OR unqualified: a function with `search_path = public` resolves a bare
+          // `work_tasks` to the same table, so both spellings are writes.
           expect(src, `${dir}/${f} must not write work_tasks`).not.toMatch(
-            /(insert\s+into|update|delete\s+from)\s+public\.work_tasks\b/i,
+            /(insert\s+into|update|delete\s+from|truncate(\s+table)?)\s+(only\s+)?(public\.)?work_tasks\b/i,
           );
           expect(src, `${dir}/${f} must not policy work_tasks`).not.toMatch(
             /(create|drop)\s+policy[\s\S]{0,80}on public\.work_tasks\b/i,

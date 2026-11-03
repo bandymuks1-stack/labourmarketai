@@ -509,14 +509,18 @@ test.describe("signed in as the synthetic owner of Alfa", () => {
     await openInAlfa(page, "/lt/dashboard");
     await expect(page.getByTestId("composer-input")).toBeVisible({ timeout: 30_000 });
     const text = "Pagaminome 500 medinių palečių ir norime jas parduoti.";
-    const before = (await page.locator("body").innerText()).length;
+    // The product's own channel readback (conversation.chat.valueIntent.*).
+    const channel = /Tavo teigimu:|skelbimų lentoje|Atidaryti skelbimus|paslaugos pasiūlymą|Šito per platformą pasiūlyti negalima/g;
+    const hits = async () => ((await page.locator("body").innerText()).match(channel) ?? []).length;
+    // Count, not offset: starting a conversation folds the home intro, so the
+    // page text SHRINKS and an offset into it cut the answer to its last word
+    // (run 40363282539 logged "skelbimus" — the tail of "Atidaryti skelbimus").
+    const before = await hits();
     await page.getByTestId("composer-input").fill(text);
     await page.getByTestId("composer-send").click();
-    // The product's own channel readback (conversation.chat.valueIntent.*).
-    const channel = /Tavo teigimu:|skelbimų lentoje|Atidaryti skelbimus|paslaugos pasiūlymą|Šito per platformą pasiūlyti negalima/;
-    const tail = async () => (await page.locator("body").innerText()).slice(Math.max(0, before - 50));
+    const tail = async () => (await page.locator("body").innerText()).slice(-1200);
     const answered = await expect
-      .poll(async () => channel.test(await tail()), { timeout: 45_000, intervals: [1_000] })
+      .poll(async () => (await hits()) > before, { timeout: 45_000, intervals: [1_000] })
       .toBe(true)
       .then(() => true)
       .catch(() => false);
@@ -552,6 +556,25 @@ test.describe("signed in as the synthetic owner of Alfa", () => {
       await v.ctx.close();
     }
     expect(failures, failures.join("\n")).toEqual([]);
+  });
+
+  test("S-12 (8.16). a signed-in person reports a language problem from the account menu", async ({ browser }) => {
+    const { ctx, page } = await owner(browser);
+    await openInAlfa(page, "/lt/dashboard/journal");
+    await page.getByTestId("account-menu-trigger").first().click();
+    await page.getByTestId("language-feedback-open").click();
+    const comment = page.getByTestId("language-feedback-comment");
+    await expect(comment, "the report form opens with its comment box").toBeVisible({ timeout: 30_000 });
+    // Marked synthetic, so the admin inbox reads it as a walk's trace.
+    await comment.fill(`QA-SYNTHETIC ${RUN}: production walk language report (ignore).`);
+    await page.getByRole("button", { name: "Išsiųsti" }).click();
+    const ok = page.getByTestId("language-feedback-success");
+    const err = page.getByTestId("language-feedback-error");
+    await expect(ok.or(err)).toBeVisible({ timeout: 30_000 });
+    const failed = (await err.isVisible()) ? await err.innerText() : "";
+    console.info(`[lang-feedback] ${RUN} submitted=${failed === ""}${failed ? ` error="${failed.slice(0, 80)}"` : ""}`);
+    expect(failed, "the language report was refused").toBe("");
+    await ctx.close();
   });
 
   // ── 8.13 / 8.16: the language switch persists for the user ──────────────

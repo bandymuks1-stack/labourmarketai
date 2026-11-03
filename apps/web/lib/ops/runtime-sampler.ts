@@ -12,7 +12,7 @@
  *       memory PSI, falling MemAvailable;
  *   (b) the Node process is blocked or throttled — long event-loop delay and
  *       ELU ~1 with process CPU burning (blocked), or cgroup nr_throttled /
- *       throttled_usec climbing (the `--cpus=0.5` quota), cgroup memory near
+ *       throttled_usec climbing (the `--cpus` quota set in ops/vps/lm-prod-run.sh), cgroup memory near
  *       memory.max, memory.events high/max/oom;
  *   (c) the network path (nginx / docker-proxy / firewall) — ticks on time,
  *       low event-loop delay, idle ELU and a fast self-connect to the listener

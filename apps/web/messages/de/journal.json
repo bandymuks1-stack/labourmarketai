@@ -258,6 +258,12 @@
   "engagement": "Kontext",
   "engagementChoose": "Beschäftigung wählen…",
   "engagementAmbiguous": "Diese Arbeit könnte zu mehr als einer Beschäftigung gehören. Wählen Sie vor dem Speichern aus, zu welcher.",
+  "unnamedOrganization": {
+    "company": "Unternehmen ohne Namen",
+    "agency": "Agentur ohne Namen",
+    "other": "Organisation ohne Namen"
+  },
+  "activeWorkspaceNoRelationship": "Sie handeln für {org}, aber es ist keine Arbeitsbeziehung mit {org} erfasst, daher wird sie hier nicht angeboten. Wählen Sie den Kontext, zu dem diese Arbeit wirklich gehört.",
   "project": "Projekt",
   "projectChoose": "Projekt wählen…",
   "projectNone": "Keine Projektarbeit",

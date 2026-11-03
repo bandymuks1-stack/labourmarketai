@@ -2049,7 +2049,14 @@
           "saved": "Gespeichert.",
           "forbidden": "Das kann nur eine Leitung dieser Einrichtung.",
           "invalid": "Bitte prüfen Sie die Werte.",
-          "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+          "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+          "openRequests": "Lernende um Aufnahme bitten lassen",
+          "closeRequests": "Keine neuen Anfragen mehr annehmen",
+          "requestsOpenHint": "Lernende können diese Gruppe finden und um Aufnahme bitten.",
+          "accept": "Annehmen",
+          "decline": "ablehnen",
+          "acceptConfirm": "Ja, annehmen und zur Gruppe hinzufügen",
+          "cancelDecision": "Abbrechen"
         },
         "unavailable": "Die Studiengänge konnten gerade nicht geladen werden. Laden Sie die Seite neu; nichts von dem, was Sie angelegt haben, ist verloren.",
         "inviteLearners": "Lernende einladen",
@@ -2087,7 +2094,10 @@
           "evidenceUnavailable": "Die Praxiseinträge konnten gerade nicht gelesen werden. Es wurde nichts erfasst.",
           "evidenceRecorded": "Erfasst",
           "evidenceConfirmed": "bestätigt"
-        }
+        },
+        "requestFrom": "Bittet um Aufnahme: {name}",
+        "requestUnverified": "Vom Lernenden selbst eingegebener Name — nicht überprüft.",
+        "membersNotForRole": "Gruppenmitglieder sind für deine Rolle nicht verfügbar. Nur Inhaber, Admin oder Leitung der Einrichtung selbst sehen und ändern die Mitgliedschaft."
       },
       "learners": {
         "title": "Lernende",
@@ -2858,7 +2868,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Einen Anbieter für eine Dienstleistung finden"
     }
   },
   "jobPostings": {
@@ -4126,7 +4137,7 @@
         "service_provider": "Dienstleister",
         "admin": "Administrator"
       },
-      "subcopy": "Ein Profil für Ihre echten Fähigkeiten, Ihre Verfügbarkeit und Ihre Berufserfahrung — damit Menschen und Unternehmen sehen, wo Sie zu echtem Arbeitsbedarf passen. Registrieren Sie sich mit einem sozialen Konto oder mit E-Mail-Adresse und Passwort; im nächsten Schritt sagen Sie, weshalb Sie hier sind.",
+      "subcopy": "Ein Profil für Ihre Berufserfahrung und Chancen — im nächsten Schritt sagen Sie, wofür Sie hier sind.",
       "google_label": "Mit Google fortfahren",
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
@@ -5731,7 +5742,8 @@
             "Unternehmensinformationen, die von Unternehmensbenutzern eingegeben werden: Unternehmensangaben, Bedarfe, Projekte und Buchungen.",
             "Nachrichten, die Sie auf der Plattform senden und empfangen.",
             "Einwilligungsaufzeichnungen: Wenn Sie eine Einwilligung erteilen oder widerrufen, werden die Aktion und ihr Zeitpunkt gespeichert.",
-            "Technische Daten, die für den Betrieb des Dienstes nötig sind, etwa Anmelde-Cookies (siehe Cookie-Richtlinie)."
+            "Technische Daten, die für den Betrieb des Dienstes nötig sind, etwa Anmelde-Cookies (siehe Cookie-Richtlinie).",
+            "Nur mit Ihrer Einwilligung: Nutzungsmessung auf unseren eigenen Servern (erreichte Seiten und Schritte, tägliche Aktivität) und die Kampagne, die Sie gebracht hat, gespeichert bei Ihrem Konto. Siehe Cookie-Richtlinie."
           ]
         },
         {
@@ -5823,10 +5835,36 @@
         {
           "name": "Administrator-Anzeigeeinstellung (lm_hide_admin_ui)",
           "purpose": "Wird nur bei Administratorkonten verwendet. Merkt sich, ob Administrator-Steuerelemente ausgeblendet sind, und ändert nichts an Berechtigungen."
+        },
+        {
+          "name": "Anmeldeversuch-Marker (lm.oauth.trace)",
+          "purpose": "Tab-Speicher, wird beim Schließen des Tabs entfernt. Ein zufälliger Code, der einen Anmeldeversuch mit seinem Ergebnis verknüpft, damit eine fehlgeschlagene Anmeldung untersucht werden kann. Für die von Ihnen begonnene Anmeldung erforderlich; er enthält keine Kontodaten."
         }
       ],
-      "localStorageNote": "Im eigenen Speicher Ihres Browsers (keine Cookies) liegen einige Einträge: Ihre Wahl des hellen oder dunklen Designs; welche Seite oder Kampagne Sie zuerst hierher geführt hat, einmalig gespeichert, damit eine spätere Registrierung ihr zugeordnet werden kann; eine zufällige Sitzungskennung je Tab, die beim Schließen des Tabs verschwindet; und kleine Annehmlichkeiten wie ausgeblendete Hinweise, zuletzt angesehene Einträge und Ihre Spracheingabesprache. Nichts davon wird an Dritte weitergegeben oder für Werbung genutzt, und Sie können es jederzeit über Ihren Browser löschen.",
-      "noTracking": "Es gibt heute keine Analyse-, Werbe- oder Drittanbieter-Tracking-Cookies auf der Plattform. Sollte sich das jemals ändern, wird zuerst diese Seite aktualisiert."
+      "localStorageNote": "Im eigenen Speicher Ihres Browsers (keine Cookies) liegen außerdem einige Einträge, die Sie selbst gewählt haben: Ihre Wahl des hellen oder dunklen Designs, Ihre Entscheidung zur Nutzungsmessung und kleine Annehmlichkeiten wie ausgeblendete Hinweise, zuletzt angesehene Einträge und Ihre Spracheingabesprache. Sie bleiben auf Ihrem Gerät, und Sie können sie jederzeit über Ihren Browser löschen.",
+      "noTracking": "Auf der Plattform gibt es keine Werbe- oder Drittanbieter-Tracking-Cookies, und nichts wird zu Werbezwecken an Dritte weitergegeben.",
+      "settingsLink": "Cookie-Einstellungen",
+      "analyticsTitle": "Nutzungsmessung — nur mit Ihrer Einwilligung",
+      "analyticsIntro": "Mit Ihrer Einwilligung messen wir, wie das Produkt genutzt wird: welche Seiten und Schritte erreicht werden, die Schritte der Registrierung, die tägliche Aktivität und welche Kampagne einen Besucher gebracht hat. Die Ereignisse werden auf unseren eigenen Servern gespeichert und, wenn Sie angemeldet sind, Ihrem Konto zugeordnet. Ohne Ihre Einwilligung wird keiner der folgenden Einträge geschrieben und kein Messereignis aus Ihrem Browser gesendet.",
+      "analyticsItems": [
+        {
+          "name": "Kampagne des ersten Besuchs (lm.attr.first)",
+          "purpose": "Browserspeicher. Die Kampagnen-Tags (utm_*), die verweisende Website und die Einstiegsseite Ihres ersten Besuchs. Bei der Registrierung werden sie in Ihren eigenen Kontodatensatz übernommen, damit die Kampagne, die Sie gebracht hat, gezählt werden kann."
+        },
+        {
+          "name": "Sitzungskennung (lm.pilot.session)",
+          "purpose": "Tab-Speicher, wird beim Schließen des Tabs entfernt. Eine zufällige Kennung, die mit jedem Messereignis gesendet wird, damit die Schritte in einem Tab zusammen gezählt werden können."
+        },
+        {
+          "name": "Aktivitätsmarker (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
+          "purpose": "Browserspeicher. Der letzte Tag, an dem Sie aktiv waren, und ein Marker, dass eine Registrierung läuft."
+        },
+        {
+          "name": "Einmal-Zählmarker (lm.funnel.*)",
+          "purpose": "Tab-Speicher. Verhindert, dass dasselbe Messereignis doppelt gezählt wird."
+        }
+      ],
+      "analyticsBasis": "Eine Ablehnung oder ein Widerruf entfernt diese Einträge sofort von diesem Gerät; wenn Sie angemeldet sind, wird auch die bei Ihrem Konto gespeicherte Kampagne gelöscht. Die Messung selbst beruht auf unserem berechtigten Interesse an der Verbesserung des Produkts (Art. 6 Abs. 1 lit. f DSGVO), und Sie können ihr wie in der Datenschutzerklärung beschrieben widersprechen."
     },
     "requestContact": "Um eine Frage zu stellen oder einen Antrag zu Ihren Daten zu stellen, kontaktieren Sie uns — ein Mensch wird ihn prüfen.",
     "related": "Verwandte Seiten",
@@ -6853,7 +6891,9 @@
       "listings": "Inserate",
       "listingsNote": "Räume, Geräte, Fahrzeuge – anbieten oder suchen",
       "needs": "Bedarf & Angebot",
-      "needsNote": "Veröffentlichen Sie, was Sie brauchen oder anbieten können"
+      "needsNote": "Veröffentlichen Sie, was Sie brauchen oder anbieten können",
+      "buyer": "Meine Anfragen",
+      "buyerNote": "Kundendaten speichern und Anfragen an einem Ort behalten"
     },
     "loopReadFailed": "Ihre Anfragen konnten nicht geladen werden — die Liste ist möglicherweise unvollständig. Laden Sie die Seite neu."
   },
@@ -7636,7 +7676,7 @@
     "campaigns": {
       "title": "Kampagne → Stelle → Konto",
       "empty": "In diesem Zeitfenster gibt es noch keine Ereignisse mit Kampagnenkennung.",
-      "help": "First-Touch utm_campaign × utm_content im selben Zeitfenster und mit derselben Populationsfilterung. Das sind Ereigniszahlen, keine eindeutigen Besucher — eine spätere Spalte ist keine Teilmenge einer früheren, daher ist ein Verhältnis zwischen zwei Spalten keine Conversion. Höchstens 25 Zeilen nach Aufrufen; nicht gekennzeichneter (organischer) Verkehr wird nicht gelistet. Die Interesse-Spalte wird serverseitig gesendet, wo keine Kampagne verfügbar ist, und bleibt daher konstruktionsbedingt 0 — das ist eine fehlende Messung, keine gemessene Null.",
+      "help": "First-Touch utm_campaign × utm_content im selben Zeitfenster und mit derselben Populationsfilterung. Das sind Ereigniszahlen, keine eindeutigen Besucher — eine spätere Spalte ist keine Teilmenge einer früheren, daher ist ein Verhältnis zwischen zwei Spalten keine Conversion. Höchstens 25 Zeilen nach Aufrufen; nicht gekennzeichneter (organischer) Verkehr wird nicht gelistet. Die Interesse-Spalte wird serverseitig gesendet, wo keine Kampagne verfügbar ist, und bleibt daher konstruktionsbedingt 0 — das ist eine fehlende Messung, keine gemessene Null. Die vier Spalten nach der Registrierung zählen Ereignisse, nicht Personen (Journaleinträge sind jeder gespeicherte Eintrag, nicht der erste), und nur für Konten, deren eigener Datensatz die Kampagne trägt: Registrierungen mit erlaubter Analyse, Google-Registrierungen erst ab 2026-11-03. Besucher, die die Analyse abgelehnt haben, sind in dieser Tabelle gar nicht enthalten.",
       "col": {
         "campaign": "Kampagne / Variante",
         "landing": "Aufrufe",
@@ -7646,7 +7686,11 @@
         "signupCompleted": "Konto erstellt",
         "returnedToJob": "Zurück zur Stelle",
         "compared": "Verglichen",
-        "interest": "Interesse"
+        "interest": "Interesse",
+        "profileSaved": "Profil gespeichert",
+        "profileMatchable": "Profil abgleichbar",
+        "journalEntrySaved": "Journaleinträge",
+        "jobSearch": "Jobsuche"
       }
     },
     "funnel": {
@@ -8555,6 +8599,9 @@
     "skillHoursOwn": "{hours} Std., Ihr eigener Eintrag",
     "skillHoursConfirmed": "{hours} Std., davon {confirmed} Std. vom Vorgesetzten bestätigt",
     "skillHoursHint": "Stunden aus Arbeitsjournal-Einträgen, die nur mit dieser Fähigkeit verknüpft sind",
+    "skillInvolvedHours": "beteiligt an {hours} Std. Arbeit, die nicht allein dieser Fähigkeit zugeordnet ist — ihr eigener Anteil ist unbekannt",
+    "skillInvolvedHoursAlso": "dazu beteiligt an {hours} Std., nicht allein ihr zugeordnet",
+    "skillInvolvedHoursHint": "Zeit von Journaleinträgen, an denen diese Fähigkeit beteiligt war, die die Nachweise ihr aber nicht allein zuordnen können — der Eintrag nutzte auch andere Fähigkeiten, oder die Zeit wurde ohne Angabe auf Tätigkeiten verteilt. Nie aufgeteilt und nie zu Ihrer Gesamtsumme addiert.",
     "selfStatedTitle": "Selbst angegeben, noch keine Einträge",
     "variantsFolded": "{count} Schreibweisen",
     "skillShare": "{share} % der erfassten Arbeit",
@@ -8566,6 +8613,9 @@
     "organizationRecordedHoursWithPeriods": "Aufzeichnungen von Organisationen: insgesamt {total} Std. — {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} und {periodHours} Std. als Zeitraumsumme ({from} – {to}) in Stundenzetteln oder importierten Dokumenten ({approved} Std. bestätigt). Getrennt von der Journalzahl geführt und keiner Fähigkeit zugeordnet.",
     "professionalExperienceTotal": "Berufserfahrung insgesamt: {total} Std. — {journal} Std. im Arbeitsjournal und {organization} Std. in der Organisationshistorie. Jede Arbeit einmal gezählt; Quellen getrennt ausgewiesen.",
     "professionalExperienceNotCounted": "Weitere {hours} Std. werden angezeigt, aber nicht addiert, weil dieselbe Arbeit bereits gezählt ist.",
+    "durationPending": "{organization} hat {records, plural, one {# Arbeitsnachweis} other {# Arbeitsnachweise}} ({span}) erfasst, deren Dauer noch nicht angegeben ist — ohne Stunden gezeigt; in keiner Summe gezählt.",
+    "durationPendingUnnamed": "eine Organisation",
+    "durationPendingUndated": "Daten nicht erfasst",
     "premium": {
       "eyebrowFallback": "Lebendiger Lebenslauf",
       "facts": {
@@ -8584,7 +8634,8 @@
         "both": "{confirmed} Std. mit Eintrag der Leitung · {recorded} Std. erfasst",
         "recorded": "{hours} Std. erfasst",
         "shown": "Durch Ihre Einträge belegt",
-        "declared": "Von Ihnen angegeben; noch nicht belegt"
+        "declared": "Von Ihnen angegeben; noch nicht belegt",
+        "involved": "Beteiligt an {hours} Std., nicht allein ihr zugeordnet"
       },
       "source": {
         "own": "Ihr Eintrag",
@@ -9925,7 +9976,11 @@
       },
       "basis": "{matched} von {total} erforderlichen Fähigkeiten passen ({confirmed} vom Manager bestätigt)",
       "recognizedNote": "Anforderungen aus dem Anfragetext erkannt — noch nicht bestätigt",
-      "missingPrefix": "fehlend:"
+      "missingPrefix": "fehlend:",
+      "formalTitle": "Formale Anforderungen",
+      "formalLicence": "Führerschein {categories}: eine formale Anforderung. Erfasste Arbeit ersetzt ihn nicht.",
+      "formalLicenceHeld": "Führerschein {categories}: du hast angegeben, ihn zu besitzen (nicht geprüft).",
+      "formalQualification": "Für diese Arbeit kann eine berufliche Qualifikation oder Lizenz gesetzlich vorgeschrieben sein. Erfasste Arbeit ersetzt sie nicht."
     },
     "recommendations": {
       "basisCompact": "{matched} von {total} Fähigkeiten, {confirmed} bestätigt",
@@ -14404,6 +14459,7 @@
       "eduCohortCreated": "Gruppe angelegt. Sie können Lernende zuweisen.",
       "eduAssignNoCohort": "Noch keine Gruppen — legen Sie zuerst eine Gruppe an.",
       "eduAssignNoLearners": "Noch keine angenommenen Lernenden. Laden Sie einen Lernenden ein — zuweisen können Sie ihn nach der Annahme.",
+      "eduMembersNotForRole": "Gruppenmitgliedschaft ist für deine Rolle nicht verfügbar. Nur Inhaber, Admin oder Leitung der Einrichtung selbst können Lernende zuordnen.",
       "eduAssignDone": "Lernender der Gruppe zugewiesen.",
       "eduNotInstitution": "Diese Organisation ist noch nicht als Bildungseinrichtung markiert. Markieren Sie das im Unternehmensbereich.",
       "eduUnavailable": "Programme können gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
@@ -18387,7 +18443,7 @@
       "not_a_member": "Sie sind kein Mitglied.",
       "not_found": "Eintrag nicht verfügbar.",
       "not_authorized": "Dazu sind Sie nicht berechtigt.",
-      "no_such_user": "Kein Nutzer mit dieser E-Mail-Adresse.",
+      "no_such_user": "Noch kein bestätigtes Konto mit dieser E-Mail-Adresse.",
       "cannot_invite_self": "Sie können sich nicht selbst einladen.",
       "invalid_role": "Ungültige Rolle.",
       "last_owner": "Der letzte Inhaber kann nicht zurücktreten — aktivieren Sie zuerst einen weiteren Inhaber.",
@@ -18417,7 +18473,7 @@
       "grantInvitations": "Einladungen verwalten erlauben",
       "withdrawInvitations": "Einladungsverwaltung entziehen",
       "unavailable": "Die Mitgliederliste konnte gerade nicht gelesen werden. Das heißt nicht, dass die Organisation keine Mitglieder hat.",
-      "noAccountHint": "Eine Mitgliedsrolle kann nur jemandem gegeben werden, der bereits ein Konto hat. Laden Sie eine Person ohne Konto mit einem Einladungslink ein — sobald sie sich registriert und der Organisation beitritt, können Sie ihr hier eine Rolle geben.",
+      "noAccountHint": "Eine Mitgliedsrolle kann nur jemandem mit einem bestätigten Konto gegeben werden. Hat die Person noch kein Konto oder ihre E-Mail-Adresse noch nicht bestätigt, schicken Sie ihr einen Einladungslink oder bitten Sie sie, die E-Mail-Adresse zu bestätigen — sobald sie beigetreten ist, können Sie ihr hier die Rolle geben.",
       "noAccountCta": "Einladungslink erstellen"
     },
     "start": {
@@ -18806,6 +18862,14 @@
       "eyebrow": "Unternehmensgeschichte",
       "title": "{name}: eine durchgehende Geschichte",
       "subtitle": "Jede Zahl unten zählt die erfasste Arbeit der Organisation genau einmal. Zeiträume zeigen, was über frühere Rechtsträger erklärt wurde und worauf diese Erklärung beruht.",
+      "titleHeld": "{name}: gehaltene Arbeitsnachweise nach Zeiträumen",
+      "subtitleHeld": "Arbeit unter einer früheren juristischen Person gehört dieser und den Menschen, die sie geleistet haben. {name} hält diese Nachweise als dokumentierte Kontinuität; sie werden nicht als eigene Arbeit von {name} gezeigt.",
+      "headerOwn": "Eigener Zeitraum von {name}",
+      "headerEarlier": "Frühere juristische Person: {name}",
+      "headerUnstated": "Zeitraum „{label}“ — juristische Person nicht angegeben",
+      "headerNotPlaced": "Nachweise ohne angegebenen Zeitraum",
+      "continuityNotSuccession": "Kontinuität dokumentiert; Rechtsnachfolge nicht behauptet.",
+      "totalsHeld": "Alle Nachweise, die {name} hält, über alle Zeiträume, jeder einmal gezählt — nicht alles davon ist eigene Arbeit von {name}.",
       "figures": "{records} Einträge · {hours} Std. · {people} Personen · {places} Orte",
       "totals": {
         "records": "Einträge",
@@ -19802,6 +19866,73 @@
     },
     "helpNeeded": "Hilfe nötig — {stage}:"
   },
+  "projectForecast": {
+    "title": "Prognose",
+    "notFact": "Eine Prognose aus der erfassten Arbeit dieses Projekts, Stand {date} — keine Tatsache und kein Versprechen. Sie wird bei jedem Öffnen dieser Seite neu berechnet.",
+    "unavailable": "Die Prognose konnte gerade nicht gelesen werden.",
+    "insufficient": "Noch zu wenig erfasste Arbeit für eine Prognose dieses Projekts.",
+    "notApplicable": "Nichts zu prognostizieren: Das Projekt hat keine offene Arbeit.",
+    "unknown": "Unbekannt",
+    "beyondHorizon": "Beim jetzigen Tempo mehr als drei Jahre entfernt",
+    "completionLabel": "Voraussichtliches Ende",
+    "deadlineLabel": "Termin",
+    "leftLabel": "Verbleibende Arbeit",
+    "leftTasks": "{left} von {total} Aufgaben",
+    "leftStages": "{left} von {total} Phasen",
+    "peopleLabel": "Benötigte Personen",
+    "peopleValue": "{needed} (jetzt {active})",
+    "qualityLabel": "Qualitätsrisiko",
+    "confidenceLabel": "Verlässlichkeit",
+    "actionsTitle": "Was es ändern würde",
+    "assumptionsTitle": "Annahmen",
+    "risk": {
+      "on_track": "Im Plan",
+      "tight": "Knapp",
+      "likely_miss": "Wird wahrscheinlich verfehlt",
+      "overdue": "Überfällig",
+      "unknown": "Unbekannt"
+    },
+    "quality": {
+      "none": "Keine offen",
+      "low": "Gering",
+      "elevated": "Erhöht",
+      "high": "Hoch",
+      "unknown": "Unbekannt"
+    },
+    "confidence": {
+      "insufficient": "zu wenige Belege",
+      "low": "gering",
+      "medium": "mittel",
+      "high": "hoch"
+    },
+    "action": {
+      "add_workers": "Personen ins Team holen",
+      "find_partner_capacity": "Partnerkapazität finden",
+      "unblock_stages": "Blockierte Phasen freigeben",
+      "unblock_tasks": "Blockierte Aufgaben freigeben",
+      "close_serious_defects": "Schwere Mängel beheben",
+      "complete_readiness": "Fehlende Einsatzbereitschaft des Teams vervollständigen",
+      "record_hours": "Die an diesem Projekt gearbeiteten Stunden erfassen",
+      "set_planned_end": "Ein geplantes Enddatum setzen",
+      "break_down_scope": "Die Arbeit in Aufgaben aufteilen",
+      "review_budget": "Das Budget prüfen",
+      "replan_deadline": "Den Termin neu planen"
+    },
+    "assumption": {
+      "trailing_window_days": "Das Tempo wird aus den letzten 28 Tagen gelesen.",
+      "calendar_day_rate": "Stunden werden auf Kalendertage verteilt; kein Arbeitskalender wird angenommen.",
+      "equal_unit_weight": "Jede Aufgabe zählt gleich.",
+      "unit_is_stage": "Das Projekt hat keine Aufgaben, daher werden Phasen gezählt.",
+      "team_stays_as_is": "Das Team bleibt, wie es jetzt ist.",
+      "absences_as_approved": "Nur genehmigte Abwesenheiten werden berücksichtigt.",
+      "throughput_without_hours": "Es sind keine Stunden erfasst, daher wird das Ende nur aus erledigter Arbeit gelesen.",
+      "cost_continues_at_observed_rate": "Die Kosten laufen im bisher beobachteten Tempo weiter.",
+      "single_hours_ledger": "Eine Stundenerfassung wird verwendet; die andere wird daneben gezeigt, nie addiert.",
+      "hours_partly_unconfirmed": "Ein Teil der Stunden ist noch nicht bestätigt.",
+      "hours_read_truncated": "Nicht alle Stunden konnten gelesen werden; die Zahlen können zu niedrig sein.",
+      "free_internal_people_unknown": "Es ist nicht bekannt, wer in der Organisation sonst frei ist."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "Ziel dieser Woche",
     "titleMine": "Ihre Aufgaben diese Woche",
@@ -19976,6 +20107,50 @@
       "business_details": "Angaben zur Unternehmens- oder Gewerberegistrierung und zur Rechnungsstellung.",
       "insurance": "Eine Haftpflicht- oder andere Versicherung, falls diese Arbeit sie braucht.",
       "client_requirements": "Besondere Anforderungen des Auftraggebers oder der Baustelle, falls vorhanden."
+    }
+  },
+  "learnerCohortJoin": {
+    "title": "Lerngruppe",
+    "declaredNote": "Du kannst deine Praxis und deine Arbeit jederzeit eintragen, auch bevor eine Einrichtung dich aufnimmt. Bis die befugte Person der Einrichtung sie bestätigt, gilt sie als von dir angegeben, nicht als bestätigt.",
+    "journalLink": "Journal öffnen",
+    "find": "{count, plural, one {# offene Gruppe} other {# offene Gruppen}}",
+    "empty": "Derzeit nimmt keine Einrichtung Aufnahmeanfragen an.",
+    "unavailable": "Die Lerngruppen konnten gerade nicht geladen werden. Versuche es später erneut.",
+    "status": {
+      "requested": "Anfrage gesendet, wartet auf die Entscheidung der Einrichtung.",
+      "declined": "Die Einrichtung hat diese Anfrage nicht angenommen."
+    },
+    "form": {
+      "nameLabel": "Dein Name, wie die Einrichtung dich kennt",
+      "nameHint": "Die Einrichtung sieht nur diesen Namen und deine Nachricht, nicht dein Profil oder Journal.",
+      "noteLabel": "Nachricht an die Einrichtung (optional)",
+      "send": "Um Aufnahme bitten",
+      "withdraw": "Anfrage zurückziehen",
+      "saving": "Wird gesendet…",
+      "requested": "Anfrage gesendet.",
+      "alreadyMember": "Du bist bereits Mitglied dieser Gruppe.",
+      "withdrawn": "Anfrage zurückgezogen.",
+      "closed": "Diese Gruppe nimmt keine neuen Anfragen mehr an.",
+      "invalid": "Prüfe Name und Nachricht.",
+      "error": "Etwas ist schiefgelaufen. Versuche es erneut.",
+      "cooldown": "Deine Anfrage wurde kürzlich abgelehnt. Du kannst diese Gruppe 30 Tage nach der Entscheidung erneut anfragen."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "Mit Ihrer Einwilligung messen wir in Ihrem Browser, welche Seiten und Schritte Menschen helfen und welche Kampagne Sie hierher geführt hat; ohne sie wird dafür nichts auf Ihrem Gerät gespeichert. Grundlegende Zählungen von Aktionen auf unseren eigenen Servern erfolgen in jedem Fall (siehe Cookie-Richtlinie). Das Produkt funktioniert gleich, wie auch immer Sie wählen.",
+      "accept": "Messung erlauben",
+      "refuse": "Ablehnen",
+      "more": "Cookie-Richtlinie",
+      "label": "Auswahl zur Nutzungsmessung"
+    },
+    "control": {
+      "title": "Nutzungsmessung und Kampagnenzuordnung",
+      "granted": "Sie haben zugestimmt. Sie können jederzeit widerrufen; die Einträge werden dann von diesem Gerät entfernt.",
+      "refused": "Sie haben abgelehnt. Auf diesem Gerät wird für die Messung nichts gespeichert.",
+      "undecided": "Sie haben noch nicht gewählt, daher wird für die Messung nichts gespeichert.",
+      "allow": "Erlauben",
+      "refuse": "Ablehnen"
     }
   }
 }

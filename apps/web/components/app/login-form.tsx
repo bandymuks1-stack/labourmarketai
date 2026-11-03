@@ -245,7 +245,7 @@ export function LoginForm({
          /lt/auth/login?email=…&password=…
        Reproduced in a real browser on 2026-08-07. POST keeps the values in a
        request body that nothing here reads. */
-    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-6" noValidate>
+    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-5 sm:gap-6" noValidate>
       <header>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("headline")}
@@ -311,37 +311,29 @@ export function LoginForm({
         </div>
       )}
 
-      {/* The Google button on LOGIN also creates an account for a new Google
-          identity, so the same pre-collection notice must appear here — the
-          OAuth path may not bypass it. Email/password login below creates no
-          account and needs no notice. */}
-      <AuthLegalNotice variant="googleLogin" />
+      {/* One social group (UX friction batch 2026-10-28): the notice and the
+          provider buttons sit tight together (gap-3) instead of each taking
+          the form's gap-6, so the e-mail form and its one primary action
+          move up on a phone. The notice still precedes every account-creating
+          button in document order. */}
+      <div className="flex flex-col gap-3" data-testid="auth-social-group">
+        {/* The Google button on LOGIN also creates an account for a new Google
+            identity, so the same pre-collection notice must appear here — the
+            OAuth path may not bypass it. Email/password login below creates no
+            account and needs no notice. */}
+        <AuthLegalNotice variant="googleLogin" />
 
-      {/* `context="signup"` because this button is ACCOUNT-CREATING for a new
-          Google identity (see the notice above) — the press mirrors the signup
-          form exactly: first-touch attribution + `registration_started` +
-          the pending-signup marker. A returning login is never mis-counted:
-          only the /onboarding surface (which a returning user never mounts)
-          emits `signup_completed` from that marker.
-          `registrationStep="login_page"` (2026-09-22) names THIS page on the
-          event, so the admin funnel can keep the raw count and stop counting
-          a returning user's login-page press as a registration conversion. */}
-      <GoogleButton
-        label={t("google_label")}
-        redirectingLabel={t("google_redirecting")}
-        errorLabel={t("error_generic")}
-        disabled={disabled}
-        nextPath={nextPath}
-        context="signup"
-        registrationStep="login_page"
-      />
-
-      {/* LinkedIn/Facebook render ONLY when the auth server reports the
-          provider enabled — same account-creating same-tab flow as Google,
-          so `context="signup"` for the same attribution reasons. */}
-      {linkedinEnabled && (
-        <LinkedInButton
-          label={tSocial("continueWithLinkedIn")}
+        {/* `context="signup"` because this button is ACCOUNT-CREATING for a new
+            Google identity (see the notice above) — the press mirrors the signup
+            form exactly: first-touch attribution + `registration_started` +
+            the pending-signup marker. A returning login is never mis-counted:
+            only the /onboarding surface (which a returning user never mounts)
+            emits `signup_completed` from that marker.
+            `registrationStep="login_page"` (2026-09-22) names THIS page on the
+            event, so the admin funnel can keep the raw count and stop counting
+            a returning user's login-page press as a registration conversion. */}
+        <GoogleButton
+          label={t("google_label")}
           redirectingLabel={t("google_redirecting")}
           errorLabel={t("error_generic")}
           disabled={disabled}
@@ -349,18 +341,33 @@ export function LoginForm({
           context="signup"
           registrationStep="login_page"
         />
-      )}
-      {facebookEnabled && (
-        <FacebookButton
-          label={tSocial("continueWithFacebook")}
-          redirectingLabel={t("google_redirecting")}
-          errorLabel={t("error_generic")}
-          disabled={disabled}
-          nextPath={nextPath}
-          context="signup"
-          registrationStep="login_page"
-        />
-      )}
+
+        {/* LinkedIn/Facebook render ONLY when the auth server reports the
+            provider enabled — same account-creating same-tab flow as Google,
+            so `context="signup"` for the same attribution reasons. */}
+        {linkedinEnabled && (
+          <LinkedInButton
+            label={tSocial("continueWithLinkedIn")}
+            redirectingLabel={t("google_redirecting")}
+            errorLabel={t("error_generic")}
+            disabled={disabled}
+            nextPath={nextPath}
+            context="signup"
+            registrationStep="login_page"
+          />
+        )}
+        {facebookEnabled && (
+          <FacebookButton
+            label={tSocial("continueWithFacebook")}
+            redirectingLabel={t("google_redirecting")}
+            errorLabel={t("error_generic")}
+            disabled={disabled}
+            nextPath={nextPath}
+            context="signup"
+            registrationStep="login_page"
+          />
+        )}
+      </div>
 
       <div className="flex items-center gap-3" aria-hidden>
         <span className="h-px flex-1 bg-ink-500" />
@@ -457,8 +464,10 @@ export function LoginForm({
         </p>
       )}
 
-      <div className="flex items-center justify-between">
-        <Button type="submit" loading={disabled}>
+      {/* One primary action: full width on a phone (the sign-in/sign-up
+          link drops beneath it instead of squeezing it), inline from sm up. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Button type="submit" className="w-full sm:w-auto" loading={disabled}>
           {disabled ? t("signing") : t("submit_label")}
         </Button>
         <span className="text-xs text-text-muted">

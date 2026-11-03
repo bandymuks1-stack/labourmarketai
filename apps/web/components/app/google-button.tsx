@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { useLocale } from "next-intl";
+import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import {
   generateOauthTraceId,
@@ -44,22 +45,26 @@ function GoogleLogo() {
   );
 }
 
-/** LinkedIn "in" bug, white on transparent — sits on the brand-blue button
- *  surface below. Inline so no external asset pipeline is needed. */
+/** LinkedIn "in" bug in LinkedIn blue (#0A66C2) — sits on the same neutral
+ *  white surface as the Google button. Inline so no external asset pipeline
+ *  is needed. */
 function LinkedInLogo() {
   return (
-    <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF">
+    <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="#0A66C2">
       <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45Z" />
     </svg>
   );
 }
 
-/** Facebook "f" mark, white on transparent — sits on the brand-blue button
- *  surface below. Inline so no external asset pipeline is needed. */
+/** Facebook mark: the white "f" inside the Facebook-blue (#0866FF) disc —
+ *  sits on the same neutral white surface as the Google button. Inline so no
+ *  external asset pipeline is needed. */
 function FacebookLogo() {
   return (
-    <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF">
-      <path d="M13.5 21.9v-8.4h2.82l.42-3.27H13.5V8.14c0-.95.26-1.59 1.62-1.59h1.74V3.63c-.3-.04-1.33-.13-2.53-.13-2.5 0-4.22 1.53-4.22 4.34v2.42H7.28v3.27h2.83v8.37c.62.09 1.25.13 1.89.13.51 0 1.01-.03 1.5-.13Z" />
+    <svg aria-hidden width="18" height="18" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" fill="#0866FF" />
+      <path
+        fill="#FFFFFF" d="M13.5 21.9v-8.4h2.82l.42-3.27H13.5V8.14c0-.95.26-1.59 1.62-1.59h1.74V3.63c-.3-.04-1.33-.13-2.53-.13-2.5 0-4.22 1.53-4.22 4.34v2.42H7.28v3.27h2.83v8.37c.62.09 1.25.13 1.89.13.51 0 1.01-.03 1.5-.13Z" />
     </svg>
   );
 }
@@ -98,6 +103,16 @@ type OAuthProviderConfig = {
 
 type OAuthButtonProps = {
   label: string;
+  /** The provider's bare name, shown INSTEAD of `label` below `sm`, where two
+   *  provider buttons share one row (mobile sign-up fold, owner P0-1
+   *  2026-11-03). The accessible name stays the full `label` (it contains the
+   *  visible word, WCAG 2.5.3). An EMPTY string = the provider logo alone
+   *  below `sm` (a 48 px square beside the Google row, P0-1b 360×740); the
+   *  accessible name is still the full label. Omitted = the full label at
+   *  every width. */
+  compactLabel?: string;
+  /** Classes for the button's own wrapper (its width inside a shared row). */
+  wrapperClassName?: string;
   redirectingLabel: string;
   errorLabel: string;
   disabled?: boolean;
@@ -152,6 +167,8 @@ type OAuthButtonProps = {
 function OAuthProviderButton({
   provider,
   label,
+  compactLabel,
+  wrapperClassName,
   redirectingLabel,
   errorLabel,
   disabled,
@@ -240,17 +257,33 @@ function OAuthProviderButton({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={cn("flex flex-col gap-2", wrapperClassName)}>
       <button
         type="button"
         onClick={onClick}
         disabled={disabled || loading}
         aria-busy={loading || undefined}
         data-testid={provider.testId}
-        className={provider.buttonClassName}
+        aria-label={compactLabel !== undefined && !loading ? label : undefined}
+        className={cn(provider.buttonClassName, compactLabel === "" && "max-sm:px-0")}
       >
         {provider.logo}
-        {loading ? redirectingLabel : label}
+        {compactLabel !== undefined ? (
+          <>
+            {compactLabel ? (
+              <span className="sm:hidden">{loading ? redirectingLabel : compactLabel}</span>
+            ) : null}
+            {/* Logo-only below sm: the words stay for assistive tech (sr-only
+                is out of the flex flow, so no gap is added to the square). */}
+            <span className={compactLabel ? "hidden sm:inline" : "sr-only sm:not-sr-only"}>
+              {loading ? redirectingLabel : label}
+            </span>
+          </>
+        ) : loading ? (
+          redirectingLabel
+        ) : (
+          label
+        )}
       </button>
       {failed && (
         <p className="text-xs text-state-danger" role="alert">
@@ -260,6 +293,13 @@ function OAuthProviderButton({
     </div>
   );
 }
+
+/** The ONE surface every social sign-in button shares: Google's white card
+ *  (its brand guidelines want the multicolour "G" on white), reused for
+ *  LinkedIn and Facebook so the three read as one quiet group beneath the
+ *  form's single primary action. Brand-fixed and theme-independent. */
+const NEUTRAL_SOCIAL_BUTTON_CLASS =
+  "flex min-h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-white px-4 py-2.5 text-sm font-medium text-[#1f1f1f] transition-opacity hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60";
 
 /** Google's own provider config — the ONE live provider today. */
 const GOOGLE_PROVIDER: OAuthProviderConfig = {
@@ -271,8 +311,7 @@ const GOOGLE_PROVIDER: OAuthProviderConfig = {
   // inverts to near-white under `[data-theme="light"]` and makes the
   // label invisible (white-on-white). `#1f1f1f` is Google's own button
   // text colour and is theme-independent, matching the fixed `bg-white`.
-  buttonClassName:
-    "flex min-h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-white px-4 py-2.5 text-sm font-medium text-[#1f1f1f] transition-opacity hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60",
+  buttonClassName: NEUTRAL_SOCIAL_BUTTON_CLASS,
   markPending: () => markSignupPending("google"),
   logStartFailure: (e) =>
     console.error("[auth] signInWithOAuth(google) failed:", {
@@ -307,11 +346,11 @@ const LINKEDIN_PROVIDER: OAuthProviderConfig = {
   id: "linkedin_oidc",
   logo: <LinkedInLogo />,
   testId: "linkedin-signin",
-  // LinkedIn brand button: the fixed #0A66C2 surface with white label —
-  // brand-fixed like the Google white card, hence config, not a caller prop,
-  // and theme-independent by design.
-  buttonClassName:
-    "flex min-h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-[#0A66C2] px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:bg-[#0A66C2]/90 disabled:cursor-not-allowed disabled:opacity-60",
+  // ONE social grammar (UX friction batch 2026-10-28): the same neutral
+  // white card as Google, the brand colour lives in the mark only. Three
+  // differently coloured full-width buttons used to out-shout the form's one
+  // primary action on a phone.
+  buttonClassName: NEUTRAL_SOCIAL_BUTTON_CLASS,
   markPending: () => markSignupPending("linkedin_oidc"),
   logStartFailure: (e) =>
     console.error("[auth] signInWithOAuth(linkedin_oidc) failed:", {
@@ -334,12 +373,9 @@ const FACEBOOK_PROVIDER: OAuthProviderConfig = {
   id: "facebook",
   logo: <FacebookLogo />,
   testId: "facebook-signin",
-  // Facebook brand button: Facebook's current brand blue #0866FF with a
-  // white label — brand-fixed and theme-independent, same rationale as above.
-  // The older #1877F2 measured 4.23:1 against white, below WCAG AA 4.5:1
-  // (axe, production login, 2026-10-22); #0866FF is 4.82:1, hover #1465D6 5.44:1.
-  buttonClassName:
-    "flex min-h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-[#0866FF] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1465D6] disabled:cursor-not-allowed disabled:opacity-60",
+  // Same neutral card as Google and LinkedIn; the label is the dark #1f1f1f
+  // on white (well above WCAG AA), the brand blue lives in the mark only.
+  buttonClassName: NEUTRAL_SOCIAL_BUTTON_CLASS,
   markPending: () => markSignupPending("facebook"),
   logStartFailure: (e) =>
     console.error("[auth] signInWithOAuth(facebook) failed:", {

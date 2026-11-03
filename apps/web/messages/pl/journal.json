@@ -258,6 +258,12 @@
   "engagement": "Kontekst",
   "engagementChoose": "Wybierz zaangażowanie…",
   "engagementAmbiguous": "Ta praca może należeć do więcej niż jednego zaangażowania. Wybierz, do którego, przed zapisaniem.",
+  "unnamedOrganization": {
+    "company": "Firma bez nazwy",
+    "agency": "Agencja bez nazwy",
+    "other": "Organizacja bez nazwy"
+  },
+  "activeWorkspaceNoRelationship": "Działasz w imieniu {org}, ale nie zarejestrowano relacji pracy z {org}, więc nie ma jej tutaj. Wybierz kontekst, do którego ta praca naprawdę należy.",
   "project": "Projekt",
   "projectChoose": "Wybierz projekt…",
   "projectNone": "To nie praca projektowa",

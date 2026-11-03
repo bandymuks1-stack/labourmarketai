@@ -158,6 +158,28 @@ test("O-0. the worker's own worker id (own row, own token)", async () => {
   workerId = rows[0].id;
 });
 
+/**
+ * The first day, at least `from` days out, on which the worker has NO accepted
+ * booking. Every run's accepted booking stays history (O-8), and an
+ * open-ended booking occupies its start day, so fixed offsets clashed when the
+ * walk ran twice in a day (run 40216243755 met the overlap constraint on the
+ * second run of 10-25). Read with the worker's own token (own rows only).
+ */
+async function firstFreeDay(from: number): Promise<string> {
+  const res = await qaApi(
+    `/rest/v1/booking_requests?select=start_date,expected_end_date&status=eq.accepted&worker_id=eq.${encodeURIComponent(workerId)}`,
+    bearerOf("worker"),
+  );
+  expect(res.status, "the worker's own accepted bookings answered").toBe(200);
+  const taken = (await res.json()) as { start_date: string; expected_end_date: string | null }[];
+  const busy = (day: string) => taken.some((b) => day >= b.start_date && day <= (b.expected_end_date ?? b.start_date));
+  for (let d = from; d < from + 365; d += 1) {
+    const day = dayFromToday(d);
+    if (!busy(day)) return day;
+  }
+  throw new Error("no free day in a year of accepted bookings");
+}
+
 async function submitNeed(page: Page): Promise<"done" | "limit"> {
   await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
   await page.getByTestId("demand-role").fill(NEED_ROLE);
@@ -248,10 +270,16 @@ test("O-3 (5.13). Gama proposes dates to the hand-raiser from its candidate list
   const open = candidate.getByTestId("propose-booking-open");
   await expect(open, "the candidate card offers a booking proposal").toBeVisible({ timeout: 30_000 });
   await open.click();
-  const outcome = await propose(candidate, dayFromToday(21));
+  const outcome = await propose(candidate, await firstFreeDay(21));
   expect(outcome, "the proposal was sent").toBe("sent");
   await ctx.close();
 });
+
+/** The booking's row in the page's main region. While a reloaded page is
+ *  still streaming, React briefly holds a second, hidden copy of the list
+ *  outside <main>; a page-wide locator then matches both. A copy that never
+ *  goes away is a hydration failure, which mobile-surfaces M-5 measures. */
+const bookingById = (page: Page, id: string) => page.getByRole("main").getByTestId(`booking-${id}`);
 
 test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
@@ -267,15 +295,16 @@ test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates",
   await row.getByTestId("booking-withdraw-form").getByTestId("booking-withdraw-confirm").click();
   await expect(row.getByTestId("booking-withdrawn")).toBeVisible({ timeout: 30_000 });
   await page.reload();
-  const withdrawn = page.getByTestId(`booking-${bookingId}`);
+  const withdrawn = bookingById(page, bookingId);
   await expect(withdrawn).toHaveAttribute("data-status", "withdrawn", { timeout: 30_000 });
 
   // The company's own withdrawal may be undone with new dates (repeat actions).
   await withdrawn.getByTestId("propose-again-open").click();
-  const outcome = await propose(withdrawn, dayFromToday(28));
+  // A free day for the proposal the worker will accept in O-5.
+  const outcome = await propose(withdrawn, await firstFreeDay(28));
   expect(outcome, "the second proposal was sent").toBe("sent");
   await page.reload();
-  await expect(page.getByTestId(`booking-${bookingId}`)).toHaveAttribute("data-status", "proposed", {
+  await expect(bookingById(page, bookingId)).toHaveAttribute("data-status", "proposed", {
     timeout: 30_000,
   });
   await ctx.close();
@@ -284,7 +313,7 @@ test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates",
 test("O-5 (5.13). the worker accepts the proposal on the phone", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker", true);
   await page.goto("/lt/dashboard/bookings");
-  const row = page.getByTestId(`booking-${bookingId}`);
+  const row = bookingById(page, bookingId);
   await expect(row, "the proposal reached the worker").toBeVisible({ timeout: 30_000 });
   await expect(row).toHaveAttribute("data-direction", "incoming");
   await expect(row).toHaveAttribute("data-status", "proposed");
@@ -339,7 +368,7 @@ test("O-6 (5.13). Gama sees the acceptance and opens the conversation with the w
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto("/lt/dashboard/bookings");
-  const row = page.getByTestId(`booking-${bookingId}`);
+  const row = bookingById(page, bookingId);
   await expect(row).toHaveAttribute("data-status", "accepted", { timeout: 30_000 });
   await expect(row.getByTestId("booking-accepted-planning-link")).toBeVisible();
   await row.getByTestId("booking-outgoing-message-cta").click();
@@ -361,7 +390,7 @@ test("O-8 (5.13). Gama closes this run's need (cleanup, the booking stays histor
   await useWorkspace(page, GAMA);
   expect(await closeNeed(page, requestId)).toBe("closed");
   await page.goto("/lt/dashboard/bookings");
-  await expect(page.getByTestId(`booking-${bookingId}`)).toHaveAttribute("data-status", "accepted", {
+  await expect(bookingById(page, bookingId)).toHaveAttribute("data-status", "accepted", {
     timeout: 30_000,
   });
   await ctx.close();

@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/visual/theme-default";
 import { Bricolage_Grotesque, Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { AnalyticsConsentBanner } from "@/components/app/analytics-consent";
 import {
   BASE_CLIENT_MESSAGE_ROOTS,
   pickMessages,
@@ -139,6 +141,7 @@ export default async function LocaleLayout({
     notFound();
   }
   setRequestLocale(locale);
+  const consentT = await getTranslations({ locale, namespace: "consent" });
 
   return (
     <html
@@ -175,7 +178,7 @@ export default async function LocaleLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var s=localStorage.getItem('theme');var t=s==='light'?'light':'dark';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='dark';}})();",
+              THEME_BOOTSTRAP_SCRIPT,
           }}
         />
       </head>
@@ -200,6 +203,19 @@ export default async function LocaleLayout({
             BASE_CLIENT_MESSAGE_ROOTS,
           )}
         >
+          {/* Analytics consent (owner decision 2026-11-03): until a choice
+              exists on this device nothing non-essential is stored or sent.
+              Rendered BEFORE the page, in the flow, so it never covers it.
+              Strings are passed in, so no client message root is added. */}
+          <AnalyticsConsentBanner
+            strings={{
+              label: consentT("banner.label"),
+              text: consentT("banner.text"),
+              accept: consentT("banner.accept"),
+              refuse: consentT("banner.refuse"),
+              more: consentT("banner.more"),
+            }}
+          />
           {children}
         </NextIntlClientProvider>
       </body>

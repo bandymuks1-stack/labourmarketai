@@ -198,6 +198,9 @@ export type IncomingInvitationRow = {
    * the localized `relationshipTypes` catalogue, never as the slug.
    */
   relationshipSlug: string | null;
+  /** The partner a referral came from (`nonstop`…); null for invitations
+   *  from a person or a company, and until the database read returns it. */
+  externalSourceSlug: string | null;
 };
 
 export type IncomingInvitationsRead =
@@ -233,6 +236,7 @@ export async function listInvitationsForMe(): Promise<IncomingInvitationsRead> {
     /** WHAT the invited person is being asked to become. Null on every
      *  invitation created before 20260827200000 — the historical default. */
     relationship_slug: string | null;
+    external_source_slug?: string | null;
   };
   const items = ((data?.items ?? []) as Item[]).map((i) => ({
     id: i.id,
@@ -245,6 +249,7 @@ export async function listInvitationsForMe(): Promise<IncomingInvitationsRead> {
     projectTitle: i.project_title,
     inviterName: i.inviter_name,
     relationshipSlug: i.relationship_slug ?? null,
+    externalSourceSlug: i.external_source_slug ?? null,
   }));
   return { status: "ok", items };
 }

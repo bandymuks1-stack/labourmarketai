@@ -66,6 +66,8 @@ import { Link } from "@/lib/i18n/navigation";
 import { type CvSectionCard } from "@/components/app/cv-completeness-grid";
 import { WorkerEducationSection } from "@/components/app/worker-education-section";
 import { LearningCompassSection } from "@/components/app/learning-compass-section";
+import { LearnerCohortJoinSection } from "@/components/app/learner-cohort-join-section";
+import { readJoinableCohorts, type CohortJoinRead } from "@/lib/education/cohort-join";
 import { readLearningCompass, type LearningCompassRead } from "@/lib/learning/learning-compass";
 import { WorkerAchievementsSection } from "@/components/app/worker-achievements-section";
 import {
@@ -409,6 +411,7 @@ export default async function ProfilePage({
   // count of project-linked journal entries powering the completeness grid.
   let workerEducation: WorkerEducationRead | null = null;
   let learningCompass: LearningCompassRead | null = null;
+  let cohortJoin: CohortJoinRead | null = null;
   let workerAchievements: WorkerAchievementsRead | null = null;
   let projectLinkedEntryCount = 0;
   let certificateDocCount = 0;
@@ -450,6 +453,7 @@ export default async function ProfilePage({
       playerCardRes,
       experienceRelationships,
       standingSkills,
+      cohortJoinRes,
     ] = await Promise.all([
       getOwnAvailabilityPrefs(),
       // Learning Compass (Track C): own records + the board's match results;
@@ -534,6 +538,9 @@ export default async function ProfilePage({
       // (lib/evidence/skill-confirmation-standing.ts) — request-cached, the
       // player card above shares the same read.
       readOwnStandingConfirmedSkillIds(workerId),
+      // J-12: learning groups open for a learner's own join request, and the
+      // learner's requests (migration 20261102160000; absent → renders nothing).
+      readJoinableCohorts().catch((): CohortJoinRead | null => null),
     ]);
 
     availabilityPrefs = prefsRes;
@@ -559,6 +566,7 @@ export default async function ProfilePage({
     externalProfiles = extRes;
     workerEducation = eduRes;
     learningCompass = compassRes;
+    cohortJoin = cohortJoinRes;
     workerAchievements = achRes;
     projectLinkedEntryCount = projCountRes.count ?? 0;
     certificateDocCount = certDocsRes.count ?? 0;
@@ -1183,6 +1191,15 @@ export default async function ProfilePage({
           imported history). Student path only; nothing generated. */}
       {learningCompass?.status === "ok" && learningCompass.student ? (
         <LearningCompassSection compass={learningCompass.compass} />
+      ) : null}
+
+      {/* J-12: ask to join a learning group; the learner's own record stays
+          their declaration until the institution confirms it. */}
+      {cohortJoin ? (
+        <LearnerCohortJoinSection
+          read={cohortJoin}
+          student={learningCompass?.status === "ok" && learningCompass.student}
+        />
       ) : null}
 
       {/* W7-S1: the readiness/summary surfaces that used to stand here —

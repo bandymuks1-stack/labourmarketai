@@ -45,6 +45,9 @@ on:
           - marketplace
           - agency-chain
           - learning-practice
+          # J-12 learner join request (PR #2959). Dispatch only, never in the rotation: it can pass only once
+          # migration 20261102160000 is applied in production.
+          - cohort-join-request
           - sectors-languages
           - chat-confirm-once
           - living-cv-growth
@@ -90,6 +93,37 @@ on:
           - ux-metrics
           # Owner decision 2026-10-26 §5: locale vs server load behind the slow non-LT pages. Dispatch only.
           - lcp-locale-probe
+          # Owner-approved 2026-10-26: two synthetic sessions at once vs one (read-only). Dispatch only.
+          - concurrency-probe
+          # Owner decision 2026-10-26: a brand-new worker and company, from onboarding to the first
+          # useful action. Dispatch only, never in the rotation; the two accounts are created by the
+          # owner (prod-qa-fresh-provision.yml) — this walk only signs in to them.
+          - fresh-activation
+          # The synthetic INVITED worker registers WITHOUT the link (owner
+          # decision 2026-10-28). Dispatch only, never in the rotation; the
+          # account and its referral are created by the owner
+          # (prod-qa-invited-provision.yml).
+          - invited-worker
+          # Owner decision 2026-10-26: the buyer workspace (6.4) with the one owner-created buyer. Dispatch only.
+          - buyer-workspace
+          # Owner decision D-4 (2026-11-01): password reset proven by the mail that really arrives in
+          # the owner's synthetic QA mailbox (read-only). Dispatch only, never in the rotation; skips
+          # itself until the PROD_QA_IMAP_* secrets exist in the production-qa environment.
+          - mail-reset
+          # Journey J-15 (4.9 / 5.7 / 5.9): a job alert for a new matching live ad reaches the QA mailbox
+          # and its link opens the public job page signed out. Dispatch only, never in the rotation; signs
+          # in to the owner-created qa.invited@ account (prod-qa-invited-provision.yml) and erases it at the end.
+          - alert-mail
+          # Register row 5.9 (owner 2026-11-02): the weekly digest E-MAIL, proven by the real Monday 07:00 UTC
+          # sweep, in two dispatches on the owner-created qa.invited@ account. digest-setup (Tue..Sun) stores the
+          # digest e-mail consent and one journal entry and KEEPS the account; digest-check (the Monday after,
+          # after 07:05 UTC, no sign-in that day before it) reads the mail, opens its link and erases the account.
+          # Dispatch only, never in the rotation.
+          - digest-setup
+          - digest-check
+          # 2026-11-01 register reconciliation: waitlist real submit (6.18), public JSON APIs (9.18),
+          # journal templates (2.36). Synthetic data only. Dispatch only, never in the rotation.
+          - register-gaps
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -118,6 +152,10 @@ on:
   # plus the debounced post-merge role-routes walk; the full catalogue is still available on dispatch.
   schedule:
     - cron: "41 3 * * 0"
+    # J-15 / row 5.9 (owner 2026-11-02): the Monday check of the weekly digest e-mail, after the 07:00 UTC
+    # sweep, on CI so it does not depend on an open desktop app. Resolves to digest-check ONLY on
+    # 2026-11-09; on any other date this cron picks nothing (no budget, no walk). Same brakes.
+    - cron: "20 7 9 11 *"
 
 permissions:
   contents: read
@@ -145,13 +183,20 @@ jobs:
         env:
           INPUT_SPEC: ${{ inputs.spec }}
           EVENT: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
         run: |
           set -euo pipefail
           ROTATION=(brigade-formation employee-beta-gate role-routes chat-continuity journal-confirm calendar-planning marketplace agency-chain learning-practice sectors-languages chat-confirm-once living-cv-growth staff-review-notice manager-chat mobile-surfaces recognition-chain mcp-chain mcp-agents project-context worker-identity-split company-chain project-execution org-roster marketplace-goods-services orders-bookings documents-approvals jobs-search notifications-inapp profile-cv-history search-support-privacy public-org-locales)
           case "$EVENT" in
             workflow_dispatch) spec="$INPUT_SPEC" ;;
             push) spec=role-routes ;;
-            schedule) spec="${ROTATION[$(( 10#$(date -u +%U) % ${#ROTATION[@]} ))]}" ;;
+            schedule)
+              if [ "$SCHEDULE" = "20 7 9 11 *" ]; then
+                # The one dated digest-check (row 5.9); any other year/date: nothing.
+                if [ "$(date -u +%F)" = "2026-11-09" ]; then spec=digest-check; else spec=none; fi
+              else
+                spec="${ROTATION[$(( 10#$(date -u +%U) % ${#ROTATION[@]} ))]}"
+              fi ;;
             *) echo "::error::unexpected event $EVENT"; exit 1 ;;
           esac
           echo "spec=$spec" >> "$GITHUB_OUTPUT"
@@ -171,6 +216,8 @@ jobs:
   budget:
     # After the debounce, so a cancelled merge-burst run never counts or spends the budget.
     needs: debounce
+    # `none`: the dated digest-check cron fired on another date — no walk (the walk job needs this one).
+    if: needs.debounce.outputs.spec != 'none'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     permissions:
@@ -312,6 +359,7 @@ jobs:
         run: node .github/scripts/walk-brakes.mjs health
 
       - name: Provision + mint the synthetic cast (allowlist only)
+        id: mint
         shell: bash
         run: |
           set -euo pipefail
@@ -328,6 +376,25 @@ jobs:
           mint "qa.worker+multiw@labourmarket.ai"  worker
           mint "qa.worker+goal3@labourmarket.ai"   worker2
           mint "qa.agency+multiw@labourmarket.ai"  agency
+          # The fresh pair: minted ONLY for the fresh-activation walk and WITHOUT the provision step —
+          # the mint refuses an account the owner has not created, so a walk never creates one.
+          mint_existing() {
+            PROD_QA_IDENTITY="$1" PROD_QA_STORAGE_SLOT="$2" pnpm exec tsx scripts/prod-qa-mint-session.ts
+          }
+          if [ "${{ needs.debounce.outputs.spec }}" = "fresh-activation" ]; then
+            mint_existing "qa.freshworker+act1@labourmarket.ai"  freshworker
+            mint_existing "qa.freshcompany+act1@labourmarket.ai" freshcompany
+          fi
+          if [ "${{ needs.debounce.outputs.spec }}" = "buyer-workspace" ]; then
+            mint_existing "qa.buyer+act1@labourmarket.ai" buyer
+            # J-13: the owner-created fresh worker is the NON-customer who becomes one. Its absence
+            # (revoked / not created) only skips the J-13 steps; the 6.4 steps above still run.
+            mint_existing "qa.freshworker+act1@labourmarket.ai" freshworker \
+              || echo "::warning::qa.freshworker+act1 not mintable — the J-13 steps of buyer-workspace will skip"
+          fi
+          if [ "${{ needs.debounce.outputs.spec }}" = "invited-worker" ] || [ "${{ needs.debounce.outputs.spec }}" = "alert-mail" ] || [ "${{ needs.debounce.outputs.spec }}" = "digest-setup" ] || [ "${{ needs.debounce.outputs.spec }}" = "digest-check" ]; then
+            mint_existing "qa.invited@labourmarket.ai" invited
+          fi
           # employee-beta-gate.spec.ts reads the original single-worker file.
           install -m 600 tests/e2e/.storage-state.prod-qa.worker2.json tests/e2e/.storage-state.prod-qa.json
 
@@ -337,6 +404,13 @@ jobs:
           # The addressed invitee of staff-review-notice: the second synthetic
           # worker minted above (same allowlisted identity, no new account).
           PROD_QA_INVITEE_EMAIL: qa.worker+goal3@labourmarket.ai
+          # mail-reset, invited-worker and alert-mail only: the read-only synthetic QA mailbox (owner D-4;
+          # D-5 proves the invited address with the mailed one-time link; J-15 reads the job-alert and digest mail). Every other spec gets empty values, so no
+          # other walk ever holds the mailbox credentials.
+          PROD_QA_IMAP_HOST: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check') && secrets.PROD_QA_IMAP_HOST || '' }}
+          PROD_QA_IMAP_USER: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check') && secrets.PROD_QA_IMAP_USER || '' }}
+          PROD_QA_IMAP_PASS: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check') && secrets.PROD_QA_IMAP_PASS || '' }}
+          PROD_QA_MAIL_ADDRESS: qa.invited@labourmarket.ai
         run: |
           set -uo pipefail
           cd apps/web
@@ -351,6 +425,7 @@ jobs:
             marketplace) SPEC=tests/e2e/prod-marketplace.spec.ts ;;
             agency-chain) SPEC=tests/e2e/prod-agency-chain.spec.ts ;;
             learning-practice) SPEC=tests/e2e/prod-learning-practice.spec.ts ;;
+            cohort-join-request) SPEC=tests/e2e/prod-cohort-join-request.spec.ts ;;
             sectors-languages) SPEC=tests/e2e/prod-sectors-languages.spec.ts ;;
             chat-confirm-once) SPEC=tests/e2e/prod-chat-confirm-once.spec.ts ;;
             living-cv-growth) SPEC=tests/e2e/prod-living-cv-growth.spec.ts ;;
@@ -387,6 +462,15 @@ jobs:
             lmc-csrf) SPEC=tests/e2e/prod-lmc-csrf.spec.ts ;;
             ux-metrics) SPEC=tests/e2e/prod-ux-metrics.spec.ts ;;
             lcp-locale-probe) SPEC=tests/e2e/prod-lcp-locale-probe.spec.ts ;;
+            concurrency-probe) SPEC=tests/e2e/prod-concurrency-probe.spec.ts ;;
+            fresh-activation) SPEC=tests/e2e/prod-fresh-activation.spec.ts ;;
+            invited-worker) SPEC=tests/e2e/prod-invited-worker.spec.ts ;;
+            buyer-workspace) SPEC=tests/e2e/prod-buyer-workspace.spec.ts ;;
+            mail-reset) SPEC=tests/e2e/prod-mail-reset.spec.ts ;;
+            alert-mail) SPEC=tests/e2e/prod-alert-mail.spec.ts ;;
+            digest-setup) SPEC=tests/e2e/prod-digest-setup.spec.ts ;;
+            digest-check) SPEC=tests/e2e/prod-digest-check.spec.ts ;;
+            register-gaps) SPEC=tests/e2e/prod-register-gaps.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
@@ -417,11 +501,6 @@ jobs:
           fi
           exit "${code}"
 
-      - name: Destroy session files (always)
-        if: always()
-        shell: bash
-        run: rm -f apps/web/tests/e2e/.storage-state.prod-qa*.json
-
       # The repository is PUBLIC, so its artifacts are readable by any signed-in
       # GitHub user. Screenshots of production pages can show real companies'
       # open needs next to the synthetic cast, so they are NOT published — only
@@ -435,10 +514,23 @@ jobs:
       - name: Revoke and delete the synthetic sessions
         if: always()
         shell: bash
+        env:
+          # The mint step ran: session files MUST be here for the revoke. If
+          # none are, the revoke fails instead of reporting a clean 0/0.
+          PROD_QA_REVOKE_EXPECT_FILES: ${{ steps.mint.outcome == 'success' && '1' || '0' }}
         run: |
           cd apps/web
           pnpm exec tsx scripts/prod-qa-revoke-sessions.ts
           ls tests/e2e/.storage-state.prod-qa*.json 2>/dev/null && { echo "::error::a session file survived cleanup"; exit 1; } || echo "no session file left"
+
+      # AFTER the revoke, never before it: the revoke reads each session file to
+      # log that session out at Supabase, then deletes the file. When this step
+      # ran first (until 2026-10-26) the revoke found files=0 and revoked
+      # nothing, so every walk left one live session per minted identity.
+      - name: Destroy session files (always, belt and braces)
+        if: always()
+        shell: bash
+        run: rm -f apps/web/tests/e2e/.storage-state.prod-qa*.json
 
       - name: Upload result (no screenshots, no traces, no sessions)
         if: always()

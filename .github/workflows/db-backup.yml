@@ -173,15 +173,37 @@ jobs:
           # the product tables). If auth cannot be read (e.g. a URL role with public-only rights,
           # first drill 2026-10-17: "permission denied for schema auth"), fall back to public only —
           # loudly, never silently.
+          # Restore proof (2026-11-01): exact row counts of the key tables, read from the
+          # source right before and right after the dump. The restore drill must land
+          # every table inside that window - "the file restored" is not proof that the
+          # data did. Counts only; no row content leaves the database.
+          KEY_TABLES="public.profiles public.workers public.organizations public.journal_entries public.journal_entry_confirmations auth.users"
+          # One table per query, so a table this role cannot read (auth.* for a
+          # public-only URL role) leaves only ITS line out; -q keeps the `SET`
+          # command status out of the output; only "<table>\t<number>" lines
+          # are kept.
+          count_source() {
+            local t n pre=""
+            [ "$MODE" = "pat" ] && pre="set role postgres; "
+            for t in $KEY_TABLES; do
+              n=$(psql "$CONN" -q -v ON_ERROR_STOP=1 -tA -c "${pre}select count(*) from $t" 2>/dev/null | tail -1) || continue
+              case "$n" in ''|*[!0-9]*) continue ;; esac
+              printf '%s\t%s\n' "$t" "$n"
+            done
+          }
           SCOPE="public+auth"
+          connect && { count_source > "$T/counts.before" || : > "$T/counts.before"; }
           if ! { connect && pg_dump "$CONN" "${ROLE_ARGS[@]}" -Fc --no-owner --no-privileges --schema=public --schema=auth -f "$out" 2> "$T/dump.err"; }; then
             echo "::warning::dump of public+auth failed ($(grep -m1 -oE 'ERROR: +[a-z ]+' "$T/dump.err" || echo 'see log')) — retrying public only"
             rm -f "$out"; SCOPE="public"
             connect
             pg_dump "$CONN" "${ROLE_ARGS[@]}" -Fc --no-owner --no-privileges --schema=public -f "$out"
           fi
+          connect && { count_source > "$T/counts.after" || : > "$T/counts.after"; }
           rm -f "$PGPASSFILE" "$T/dump.err"
           echo "SCOPE=$SCOPE" >> "$GITHUB_ENV"
+          echo "KEY_TABLES=$KEY_TABLES" >> "$GITHUB_ENV"
+          echo "source key-table counts read: before=$(wc -l < "$T/counts.before") after=$(wc -l < "$T/counts.after") tables"
           size=$(stat -c %s "$out"); echo "dump scope=$SCOPE bytes=$size" | tee -a "$GITHUB_STEP_SUMMARY"
           [ "$size" -gt 100000 ] || { echo "::error::dump is suspiciously small ($size bytes)"; exit 1; }
           [ "$SCOPE" = "public+auth" ] || echo "::warning::this backup holds the public schema only — accounts (auth.users) are NOT in it (runbook §5)"
@@ -217,6 +239,32 @@ jobs:
             [ "$auth_tables" -ge 1 ] && [ "$(q "select count(*) > 0 from auth.users")" = "t" ] \
               || { echo "::error::restore drill: the auth schema did not restore (auth tables=$auth_tables)"; exit 1; }
           fi
+          [ "$errs" = "0" ] || { echo "::warning::pg_restore reported $errs error line(s); first ones:"; grep -m5 "ERROR" restore.err | cut -c1-200 || true; }
+          # Every key table must restore with a row count inside the source window
+          # [before, after]; a table the source could not count fails the proof
+          # instead of passing silently.
+          B="$RUNNER_TEMP/lmdb/counts.before"; A="$RUNNER_TEMP/lmdb/counts.after"
+          [ -s "$B" ] && [ -s "$A" ] || { echo "::error::restore proof: the source key-table counts could not be read"; exit 1; }
+          bad=0
+          for t in $KEY_TABLES; do
+            case "$t" in auth.*) [ "$SCOPE" = "public+auth" ] || continue ;; esac
+            before=$(awk -F'\t' -v t="$t" '$1==t{print $2}' "$B")
+            after=$(awk -F'\t' -v t="$t" '$1==t{print $2}' "$A")
+            if [ -z "$before" ]; then echo "::error::restore proof: the source count of $t could not be read"; bad=1; continue; fi
+            got=$(q "select count(*) from $t" 2>/dev/null || echo missing)
+            [ -n "$after" ] || after="$before"
+            lo=$(( before < after ? before : after )); hi=$(( before > after ? before : after ))
+            if [ "$got" = "missing" ] || [ -z "$got" ] || [ "$got" -lt "$lo" ] || [ "$got" -gt "$hi" ]; then
+              echo "::error::restore proof: $t restored ${got:-nothing}, source window [$lo, $hi]"; bad=1
+            else
+              echo "restore proof: $t restored $got rows, source window [$lo, $hi]" | tee -a "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+          [ "$bad" = "0" ] || exit 1
+          # Append-only evidence must come back whole: no journal entry without its worker.
+          orphans=$(q "select count(*) from public.journal_entries j where not exists (select 1 from public.workers w where w.id = j.worker_id)")
+          [ "$orphans" = "0" ] || { echo "::error::restore proof: $orphans journal entries restored without their worker"; exit 1; }
+          echo "restore proof: every key table inside its source window; every journal entry has its worker" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Encrypt to the VPS backup key
         run: |
           set -euo pipefail

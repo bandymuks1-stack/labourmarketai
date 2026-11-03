@@ -68,7 +68,7 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   const outcomes: OutcomesForReport = { status: "ok", outcomes: outcomesRead.outcomes };
   const day = new Date().toISOString().slice(0, 10);
-  return new NextResponse(buildInstitutionReportCsv(programsRead.programs, outcomes), {
+  return new NextResponse(buildInstitutionReportCsv(programsRead.programs, outcomes, programsRead.membersVisible), {
     status: 200,
     headers: {
       "Content-Type": "text/csv; charset=utf-8",

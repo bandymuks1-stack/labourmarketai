@@ -5,11 +5,13 @@ import { createHash } from "node:crypto";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { recordEntrySkillDecision } from "@/lib/journal/entry-skill-retraction";
 import { failedPipelineResult } from "@/lib/journal/skill-pipeline";
 import {
   collectUnitSlugs,
   createJournalEntryCore,
   fragmentMetricRows,
+  parseClockTime,
   parseFragments,
   parseRejectedSlugs,
   resolveEntryLanguage,
@@ -137,6 +139,18 @@ export async function supersedeJournalEntry(
     String(formData.get("rejected_slugs_json") ?? ""),
   );
   const quantity = quantityRaw === "" ? null : Number(quantityRaw);
+  // The same time fields the create core reads (journal-write-core): the
+  // entry-level quantity's provenance and the clock span. Before, an edit
+  // turned an `ai_extracted` duration into the worker's input and dropped
+  // the span's clock times (P0-A 2026-10-30).
+  const quantitySource: RpcMetricRow["source"] =
+    String(formData.get("quantity_source") ?? "") === "ai_extracted" ? "ai_extracted" : "worker_input";
+  const workStart = parseClockTime(String(formData.get("work_start") ?? ""));
+  const workEnd = parseClockTime(String(formData.get("work_end") ?? ""));
+  const breakMinutesRaw = String(formData.get("break_minutes") ?? "").trim();
+  const breakMinutes = /^\d{1,4}$/.test(breakMinutesRaw) ? Number(breakMinutesRaw) : null;
+  const workTimeSource: RpcMetricRow["source"] =
+    String(formData.get("work_time_source") ?? "") === "ai_extracted" ? "ai_extracted" : "worker_input";
 
   if (!engagementId) {
     return {
@@ -186,7 +200,7 @@ export async function supersedeJournalEntry(
   // owner-gated migration follow-up; this closes every app path today.
   const { data: oldEntry } = await supabase
     .from("journal_entries")
-    .select("id, superseded_by, deleted_at")
+    .select("id, superseded_by, deleted_at, original_text, original_language")
     .eq("id", oldEntryId)
     .maybeSingle();
   if (!oldEntry) {
@@ -234,6 +248,18 @@ export async function supersedeJournalEntry(
   }
 
   const originalText = notes;
+  // The language of the WORDS, not of the screen: when the words are the
+  // stored ones (a date / site / hours correction), they keep the language
+  // they were recorded in. The request locale labelled them before, so a
+  // Russian entry corrected from an English screen read as English
+  // everywhere (export, recognition) — P0-A 2026-10-30. New words still
+  // take the request locale (the composer has no other signal).
+  const storedText = (oldEntry as { original_text?: string | null }).original_text ?? null;
+  const storedLanguage = (oldEntry as { original_language?: string | null }).original_language ?? null;
+  const originalLanguage =
+    storedText !== null && storedLanguage && storedText.trim() === originalText
+      ? storedLanguage
+      : locale.slice(0, 2);
   const hashSelf = createHash("sha256")
     .update(
       [
@@ -273,7 +299,13 @@ export async function supersedeJournalEntry(
       institutionName,
       topic,
       fragments,
+      quantitySource,
     }),
+    ...(workStart ? [{ metric_slug: "work_start", value_text: workStart, source: workTimeSource }] : []),
+    ...(workEnd ? [{ metric_slug: "work_end", value_text: workEnd, source: workTimeSource }] : []),
+    ...(breakMinutes !== null
+      ? [{ metric_slug: "break_minutes", value_numeric: breakMinutes, unit_slug: "minutes", source: workTimeSource }]
+      : []),
     ...moduleRows.rows,
   ];
 
@@ -306,7 +338,7 @@ export async function supersedeJournalEntry(
     p_entry_type_slug: hasStructured ? "hybrid" : "freeform",
     p_profession_id: professionId,
     p_original_text: originalText,
-    p_original_language: locale.slice(0, 2),
+    p_original_language: originalLanguage,
     p_hash_self: hashSelf,
     p_visibility_scope: "closed",
     p_metrics: metrics,
@@ -363,6 +395,27 @@ export async function supersedeJournalEntry(
     };
   }
 
+  // A slug the person EXPLICITLY added or re-ticked in this edit (never a
+  // preloaded row an untouched re-save carries) supersedes an
+  // earlier dispute of it in the entry's chain: recorded as their later
+  // decision BEFORE the pipeline applies chain-wide decisions (otherwise the
+  // predecessor's rejection would withdraw the link they just chose). A
+  // no-op where nothing was disputed (entry-skill-retraction.ts).
+  const reselectedSlugs = [
+    ...new Set(
+      fragments
+        .filter((f) => f.selected === true && f.reselected === true)
+        .map((f) => f.activitySlug ?? null)
+        .filter((s): s is string => typeof s === "string" && selectedSlugs.includes(s)),
+    ),
+  ];
+  for (const slug of reselectedSlugs) {
+    const recorded = await recordEntrySkillDecision(supabase, newEntryId, slug, "reaffirmed");
+    if (!recorded) {
+      console.error("[journal] re-selection decision not recorded", { entry: newEntryId });
+    }
+  }
+
   // P0 Track B: run the canonical pipeline for the NEW entry id with the new
   // text — pipeline idempotency (ignore-duplicate upserts + metric dedupe)
   // makes an edit/re-save safe to reprocess.
@@ -394,6 +447,8 @@ function buildMetricsForSave(args: {
   institutionName: string;
   topic: string;
   fragments: ParsedFragmentInput[];
+  /** Provenance of the entry-level quantity (default: the worker's input). */
+  quantitySource?: RpcMetricRow["source"];
 }): RpcMetricRow[] {
   const {
     workDirection,
@@ -430,7 +485,7 @@ function buildMetricsForSave(args: {
             metric_slug: "quantity",
             value_numeric: quantity,
             unit_slug: unitSlug,
-            source: "worker_input" as const,
+            source: args.quantitySource ?? ("worker_input" as const),
           },
         ]
       : []),

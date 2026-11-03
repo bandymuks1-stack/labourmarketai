@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, type Dirent } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -9,7 +9,9 @@ import {
 } from "@/lib/testing/e2e-storage-target";
 import {
   PRODUCTION_ORIGIN,
+  PROD_QA_FRESH_IDENTITIES,
   PROD_QA_IDENTITIES,
+  PROD_QA_INVITED_EMAIL,
   PROD_QA_WORKER_EMAIL,
   ProdQaGuardError,
   assertProdQaTarget,
@@ -59,12 +61,18 @@ const FORBIDDEN_PROVISIONING_SQL: readonly RegExp[] = [
 ];
 
 describe("exactly the synthetic cast is allowlisted", () => {
-  it("the allowlist is exactly these five, each unmistakably synthetic", () => {
+  it("the allowlist is exactly these nine, each unmistakably synthetic", () => {
     // Widening is a reviewed code change (owner decision 2026-09-28 added the
-    // three +multiw identities beside the worker). Pinned exactly.
+    // three +multiw identities beside the worker; owner decision 2026-10-26
+    // added the two fresh-activation identities; owner decision 2026-10-28 the
+    // one invited worker). Pinned exactly.
     expect([...PROD_QA_IDENTITIES].sort()).toEqual(
       [
         "qa.agency+multiw@labourmarket.ai",
+        "qa.buyer+act1@labourmarket.ai",
+        "qa.freshcompany+act1@labourmarket.ai",
+        "qa.freshworker+act1@labourmarket.ai",
+        "qa.invited@labourmarket.ai",
         "qa.manager+multiw@labourmarket.ai",
         "qa.owner+multiw@labourmarket.ai",
         "qa.worker+goal3@labourmarket.ai",
@@ -73,8 +81,38 @@ describe("exactly the synthetic cast is allowlisted", () => {
     );
     expect(PROD_QA_IDENTITIES[0]).toBe(PROD_QA_WORKER_EMAIL);
     for (const email of PROD_QA_IDENTITIES) {
-      expect(email).toMatch(/^qa\.[a-z]+\+[a-z0-9]+@labourmarket\.ai$/);
+      // Plus-tagged, except the one invited worker, which is the QA mailbox's own
+      // address (the mailbox host refuses plus addresses; owner D-4 2026-11-02).
+      expect(email).toMatch(email === PROD_QA_INVITED_EMAIL ? /^qa\.invited@labourmarket\.ai$/ : /^qa\.[a-z]+\+[a-z0-9]+@labourmarket\.ai$/);
     }
+  });
+
+  it("a walk can never create a fresh identity — only the owner can", () => {
+    expect([...PROD_QA_FRESH_IDENTITIES].sort()).toEqual([
+      "qa.buyer+act1@labourmarket.ai",
+      "qa.freshcompany+act1@labourmarket.ai",
+      "qa.freshworker+act1@labourmarket.ai",
+      "qa.invited@labourmarket.ai",
+    ]);
+    // The mint looks the account up and refuses before any magic link exists.
+    const mint = read(MINT);
+    const check = mint.indexOf("PROD_QA_FRESH_IDENTITIES.includes(target.email)");
+    expect(check).toBeGreaterThan(-1);
+    expect(check).toBeLessThan(mint.indexOf("generateLink("));
+    expect(mint.slice(check, mint.indexOf("generateLink("))).toMatch(/findAuthUserByEmail\(admin, target\.email\)[\s\S]*fail\(/);
+    // The walk mints the fresh pair WITHOUT the provision step.
+    const walk = readFileSync(join(WEB, "..", "..", ".github", "workflows", "prod-qa-walk.yml"), "utf8");
+    const fresh = walk.slice(walk.indexOf("mint_existing()"), walk.indexOf("- name: Walk"));
+    expect(fresh).toMatch(/mint_existing "qa\.freshworker\+act1@labourmarket\.ai"/);
+    expect(fresh).toMatch(/mint_existing "qa\.freshcompany\+act1@labourmarket\.ai"/);
+    const body = fresh.slice(0, fresh.indexOf("}"));
+    expect(body).not.toMatch(/prod-qa-provision/);
+    // A fresh account starts like a real one: no role in its metadata; the
+    // buyer carries only the customer role (never admin).
+    expect(read(PROVISION)).toMatch(/: fresh\s*\? \{\}/);
+    expect(read(PROVISION)).toMatch(/PROD_QA_BUYER_EMAIL\s*\? \{ role: "customer" \}/);
+    expect(read(PROVISION)).not.toMatch(/role: "admin"/);
+    expect(walk).toMatch(/mint_existing "qa\.buyer\+act1@labourmarket\.ai"\s+buyer/);
   });
 
   it("accepts the allowlisted identity against production", () => {
@@ -306,6 +344,10 @@ describe("the production path is a SCRIPT, never a reachable surface", () => {
       "lib/guards/prod-qa-identity.test.ts",
       // Another guard TEST (never shipped): pins the walk-token rules (#2537).
       "lib/guards/prod-qa-token-hygiene.test.ts",
+      // Another guard TEST (never shipped): pins the mobile review identity's
+      // one-run password script to the allowlisted owner (#2871). Reads the
+      // guard as text, imports nothing from it.
+      "lib/guards/mobile-qa-credential.test.ts",
     ]);
     const offenders: string[] = [];
     for (const dir of ["app", "components", "lib"]) {
@@ -384,21 +426,18 @@ describe("the gate refuses to run rather than pass for the wrong reason", () => 
 
 function grepTree(dir: string, rx: RegExp): string[] {
   const out: string[] = [];
-  let entries: string[];
+  // Dirents, not a stat per path: the type comes with the listing, so there is
+  // no check-then-use window on a path another process may be rewriting.
+  let entries: Dirent[];
   try {
-    entries = readdirSync(dir);
+    entries = readdirSync(dir, { withFileTypes: true });
   } catch {
     return out;
   }
-  for (const entry of entries) {
+  for (const dirent of entries) {
+    const entry = dirent.name;
     const p = join(dir, entry);
-    let s;
-    try {
-      s = statSync(p);
-    } catch {
-      continue;
-    }
-    if (s.isDirectory()) {
+    if (dirent.isDirectory()) {
       // Build and test ARTEFACTS. Skipped both because they cannot contain a
       // source import and because walking a directory another process is
       // actively writing makes this assertion intermittently unreliable — the

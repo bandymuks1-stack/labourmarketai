@@ -221,6 +221,15 @@ export default async function InvitePage({
           >
             {t(`closed.${p.status}`)}
           </p>
+        ) : null}
+        {closed ? (
+          <Link
+            href="/auth/signup"
+            className="w-fit rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
+            data-testid="invite-closed-selfstart"
+          >
+            {t("selfStart")}
+          </Link>
         ) : (
           <>
             <p className="text-sm text-text-secondary" data-testid="invite-anon-explainer">
@@ -260,11 +269,15 @@ export default async function InvitePage({
             </p>
           </>
         )}
-        <p className="text-meta text-text-muted">
-          {t("expiresNote", {
-            date: formatUtcDate(p.expiresAt ?? undefined, locale) ?? "—",
-          })}
-        </p>
+        {/* A closed invitation never shows a validity date next to the
+            sentence that says it is closed. */}
+        {!closed && (
+          <p className="text-meta text-text-muted">
+            {t("expiresNote", {
+              date: formatUtcDate(p.expiresAt ?? undefined, locale) ?? "—",
+            })}
+          </p>
+        )}
       </>,
     );
   }
@@ -548,12 +561,21 @@ export default async function InvitePage({
           </Link>
         </div>
       ) : closed ? (
-        <p
-          className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-secondary"
-          data-testid="invite-closed"
-        >
-          {t(`closed.${closedKey}`)}
-        </p>
+        <div className="flex flex-col gap-3">
+          <p
+            className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-secondary"
+            data-testid="invite-closed"
+          >
+            {t(`closed.${closedKey}`)}
+          </p>
+          <Link
+            href="/dashboard"
+            className="w-fit rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
+            data-testid="invite-closed-dashboard"
+          >
+            {t("toDashboard")}
+          </Link>
+        </div>
       ) : addressedToOther ? (
         <div
           role="status"
@@ -615,11 +637,13 @@ export default async function InvitePage({
         />
       )}
 
-      <p className="text-meta text-text-muted">
-        {t("expiresNote", {
-          date: formatUtcDate(preview.expires_at, locale) ?? "—",
-        })}
-      </p>
+      {!closed && (
+        <p className="text-meta text-text-muted">
+          {t("expiresNote", {
+            date: formatUtcDate(preview.expires_at, locale) ?? "—",
+          })}
+        </p>
+      )}
     </>,
   );
 }

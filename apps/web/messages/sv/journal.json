@@ -30,6 +30,12 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Välj engagemang…",
   "engagementAmbiguous": "Det här arbetet kan höra till mer än ett engagemang. Välj vilket innan du sparar.",
+  "unnamedOrganization": {
+    "company": "Företag utan namn",
+    "agency": "Byrå utan namn",
+    "other": "Organisation utan namn"
+  },
+  "activeWorkspaceNoRelationship": "Du agerar för {org}, men inget arbetsförhållande med {org} är registrerat, så det erbjuds inte här. Välj det sammanhang som arbetet verkligen hör till.",
   "project": "Projekt",
   "projectChoose": "Välj projekt…",
   "projectNone": "Inte projektarbete",

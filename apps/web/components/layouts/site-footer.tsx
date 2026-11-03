@@ -111,6 +111,9 @@ export async function SiteFooter() {
             <Link href="/legal/cookies" className="text-sm text-text-secondary hover:text-text-primary">
               {legal("cookies.title")}
             </Link>
+            <Link href="/legal/cookies#analytics-consent" className="text-sm text-text-secondary hover:text-text-primary">
+              {legal("cookies.settingsLink")}
+            </Link>
             <Link href="/legal/marketplace-rules" className="text-sm text-text-secondary hover:text-text-primary">
               {legal("marketplaceRules.title")}
             </Link>

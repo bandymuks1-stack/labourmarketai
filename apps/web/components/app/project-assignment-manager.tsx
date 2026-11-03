@@ -643,7 +643,9 @@ export function ProjectAssignmentManager({
             {assignState?.ok && !decided && (
               <span className="text-xs text-state-success" role="status" data-testid="assign-worker-done">{labels.assigned}</span>
             )}
-            {resultError(assignState, labels)}
+            {assignState && !assignState.ok ? (
+              <span data-testid="assign-worker-failed">{resultError(assignState, labels)}</span>
+            ) : null}
           </div>
           {decided ? (
             <p className="text-xs text-state-success" role="status" data-testid="assign-reservation-decided">
