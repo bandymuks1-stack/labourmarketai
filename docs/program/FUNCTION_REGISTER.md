@@ -154,12 +154,12 @@ second register. The function rows below keep their own status; this view reads 
 
 | Dimension | Rows | PASS | FAIL | BLOCKED | NOT VERIFIED |
 |---|---|---|---|---|---|
-| Functions (288, per area below) | 288 | 161 | 10 | 60 | 57 |
+| Functions (288, per area below) | 288 | 162 | 9 | 60 | 57 |
 | SEO | 10 | 8 | 1 | 1 | 0 |
 | GEO | 4 | 4 | 0 | 0 | 0 |
 | Search | 5 | 4 | 1 | 0 | 0 |
-| Design (direction A P0) | 5 | 4 | 1 | 0 | 0 |
-| **All** | **312** | **181** | **13** | **61** | **57** |
+| Design (direction A P0) | 5 | 5 | 0 | 0 | 0 |
+| **All** | **312** | **183** | **11** | **61** | **57** |
 
 Functions per area:
 
@@ -170,7 +170,7 @@ Functions per area:
 | Company operations & projects | 36 | 33 | 0 | 0 | 3 |
 | Demand, jobs & matching | 26 | 21 | 0 | 2 | 3 |
 | Chat & communication | 21 | 13 | 1 | 4 | 3 |
-| Marketplace | 22 | 12 | 1 | 7 | 2 |
+| Marketplace | 22 | 13 | 0 | 7 | 2 |
 | Plans, billing & entitlements | 30 | 1 | 2 | 15 | 12 |
 | Languages & markets | 18 | 9 | 0 | 6 | 3 |
 | Admin, privacy & security | 24 | 11 | 1 | 3 | 9 |
@@ -178,14 +178,11 @@ Functions per area:
 | Education & learning | 10 | 7 | 1 | 2 | 0 |
 | Market intelligence | 6 | 4 | 0 | 0 | 2 |
 | Infrastructure & operations | 17 | 2 | 2 | 1 | 12 |
-| **Functions** | **288** | **161** | **10** | **60** | **57** |
+| **Functions** | **288** | **162** | **9** | **60** | **57** |
 
 Where the stricter rule moves a function (all other rows map one to one):
 
-- **FAIL instead of PASS (1):** 6.4 buyer workspace. Prod walk buyer-workspace 41676554374 (2026-11-03, build
-  `3fa5798a2`) failed B-3b, twice in a row (41674630724 also failed): a customer does not find the "Mano užklausos"
-  (my requests) door in "More". #3003 is in the production build `a10b6c47`, so this is a defect in production, not a
-  deploy lag. B-0..B-3 stay green.
+- **6.4 buyer workspace stays PASS:** walks 41674630724 and 41676554374 (16:29 and 16:40 UTC) failed B-3b because they ran before #3003 was deployed (build `a10b6c47d`, 20:27 UTC). The re-run after the deploy, buyer-workspace 41713787541 (20:39 UTC), passed 10/10, B-3b included.
 - **PASS instead of BLOCKED (1):** 13.5 database backup. Restore drill 41664420591 and full run 41665452921
   (2026-11-03) are production job runs (#3005). The function row below is updated.
 - **NOT VERIFIED instead of PASS (34):** `LIVE_VERIFIED` rows whose evidence is production data, an owner action, a CI
@@ -196,7 +193,7 @@ Where the stricter rule moves a function (all other rows map one to one):
 - **NOT_IMPLEMENTED (22):** 21 wait on a named owner decision or an owner-gated RED draft → BLOCKED. 5.20 user-defined
   automations has no owner gate and is not built → FAIL (not built; not a defect of anything that exists).
 
-The 10 function FAILs: 2.24, 5.20 (not built), 6.4, 7.27, 7.28, 9.25, 10.20, 11.8, 13.1, 13.17. Their reasons are in the
+The 9 function FAILs: 2.24, 5.20 (not built), 7.27, 7.28, 9.25, 10.20, 11.8, 13.1, 13.17. Their reasons are in the
 rows.
 
 ### SEO (signed out, 2026-11-03)
@@ -240,7 +237,7 @@ rows.
 | DS-1 | Mobile sign-up at 360 px | PASS | Chrome, 360×780, `/lt/auth/signup` signed out: nothing scrolls sideways (scroll width 360), Google / LinkedIn / Facebook, e-mail and two passwords full width, the submit button 42 px high, terms and the data-controller notice above the form | inputs use 14 px text, so iOS Safari zooms in on focus; `/lt/auth/sign-up` (hyphen) is a 404 |
 | DS-2 | Mobile sign-up at 390 px | PASS | Chrome, 390×844, the same page: no sideways scroll; e-mail `autocomplete=email`, passwords `new-password`, three labels | the same 14 px note |
 | DS-3 | Role navigation | PASS | prod walk role-routes 41329744822 (2026-11-01, 5 roles); prod walk mobile-surfaces 41317177981 (2026-11-01, 390 px, 6/6) | — |
-| DS-4 | Customer door in "More" (#3003) | FAIL | prod walk buyer-workspace 41676554374 (2026-11-03) B-3b: the "Mano užklausos" door is not in "More" or the phone sheet | the same defect as 6.4 |
+| DS-4 | Customer door in "More" (#3003) | PASS | prod walk buyer-workspace 41713787541 (2026-11-03, after the #3003 deploy) B-3b: the customer finds "Mano užklausos" first in "More" and on the phone sheet | — |
 | DS-5 | Job cards on a phone | PASS | Chrome, 390×844, `/lt/jobs` signed out: 20 cards, each 358 px wide, no sideways scroll, no bare-dash title; the source language is named on each card | — |
 
 ### Latest production walk per spec (2026-11-03 20:30 UTC)
@@ -256,7 +253,7 @@ non-cancelled run and the last success. "None in the last 1000 runs" means the w
 | alert-mail | 41488266687 | 2026-11-02 | success | 41488266687 2026-11-02 |
 | billing-test-mode | 40668367143 | 2026-10-28 | failure | none in the last 1000 runs |
 | brigade-formation | 41350506578 | 2026-11-01 | success | 41350506578 2026-11-01 |
-| buyer-workspace | 41676554374 | 2026-11-03 | failure | 41480104268 2026-11-02 |
+| buyer-workspace | 41713787541 | 2026-11-03 | success | 41713787541 2026-11-03 |
 | calendar-planning | 41656893141 | 2026-11-03 | success | 41656893141 2026-11-03 |
 | chat-confirm-once | 41543973553 | 2026-11-02 | success | 41543973553 2026-11-02 |
 | chat-continuity | 41322286924 | 2026-11-01 | success | 41322286924 2026-11-01 |
@@ -308,27 +305,25 @@ non-cancelled run and the last success. "None in the last 1000 runs" means the w
 | worker-identity-split | 41318189146 | 2026-11-01 | success | 41318189146 2026-11-01 |
 | worker-records-exports | 41312948857 | 2026-11-01 | success | 41312948857 2026-11-01 |
 
-The six latest failures:
+The five latest failures:
 
-- **buyer-workspace:** a product failure, B-3b (6.4 / DS-4 above).
 - **employee-beta-gate:** a test defect. G5 read the market anchors before Leaflet drew them. It is fixed on `main`: the spec now waits for an anchor or the empty state, and names this run. Its re-run is pending.
 - **digest-setup:** the harness. The walk itself ran; the closing session-revoke step reported 5 of 6 sessions revoked. #2975 is open: a session the walk signed out itself counts as revoked.
 - **schedule:** the walk brake. It was dispatched 0.4 min after a deploy, inside the 5 min quiet period, and is not re-run yet.
 - **billing-test-mode:** the optional 7.4 scenario. The pilot organization is not armed in Stripe TEST.
 - **push:** in progress at the time of writing.
 
-From the coordinator's queue of six, agency-chain (41656190771) and documents-approvals (41662082035) passed. buyer-workspace failed, as above. orders-bookings, marketplace and project-execution had no run on 2026-11-03 at the time of writing; their latest successes are in the table. They are re-counted when their runs finish.
+From the coordinator's queue of six, agency-chain (41656190771) and documents-approvals (41662082035) passed. buyer-workspace passed on its re-run after the deploy (41713787541). orders-bookings, marketplace and project-execution had no run on 2026-11-03 at the time of writing; their latest successes are in the table. They are re-counted when their runs finish.
 
 ### Real user blockers (2026-11-03)
 
 These are what a real person meets now. Owner-gated scope and not-yet-built functions are listed apart.
 
 1. **The first search for a new word on `/jobs` fails** (SR-1). The visitor waits 4–11 s and gets no jobs. Fix: RED draft #3024, not applied.
-2. **A customer cannot find their requests door in "More"** (6.4 / DS-4, #3003, in production `a10b6c47`). The rest of the buyer workspace works.
-3. **Organizations cannot buy a plan without help** (J-14). 7.28 payee and terms are FAIL (owner/legal), and 7.15 is hidden by design.
-4. **AI help and some e-mail are off in production** (13.17 env parity). This waits on the owner and legal.
-5. **The native apps are not in the stores** (J-17, BLOCKED on the owner's store accounts).
-6. **Workers who are engaged but not members cannot be assigned training** (11.8, owner decision, RED #2816).
+2. **Organizations cannot buy a plan without help** (J-14). 7.28 payee and terms are FAIL (owner/legal), and 7.15 is hidden by design.
+3. **AI help and some e-mail are off in production** (13.17 env parity). This waits on the owner and legal.
+4. **The native apps are not in the stores** (J-17, BLOCKED on the owner's store accounts).
+5. **Workers who are engaged but not members cannot be assigned training** (11.8, owner decision, RED #2816).
 
 Not user-facing, but open:
 
@@ -504,7 +499,7 @@ Not user-facing, but open:
 | 6.1 | Service offerings + request loop | LIVE_VERIFIED | 2026-11-01 | prod walk marketplace 41284728549 2026-11-01 on 38bfb9d93 (6/6) M-2, M-5, M-6; earlier: marketplace-goods-services run 40164310896 10-25: service made discoverable, requested by another org, accepted with a note, requester sees acceptance, both sides message | yes |  |
 | 6.2 | Listings goods/rental/wanted | LIVE_VERIFIED | 2026-11-01 | prod walk marketplace 41284728549 2026-11-01 on 38bfb9d93 (6/6) M-1, M-3, M-4; earlier: marketplace-goods-services run 40164310896 10-25 (14/14): private sale listing, company rental published as the company, private 'looking for' listing, discovery, cross-org Q&A thread; cleanup closed all synthetic listin… | yes |  |
 | 6.3 | One discovery index | LIVE_VERIFIED | 2026-11-01 | prod walk marketplace 41284728549 2026-11-01 on 38bfb9d93 (6/6) M-3/M-5; earlier: marketplace-goods-services run 40164310896 10-25: listings and services found in the one market discovery | yes |  |
-| 6.4 | Buyer workspace | LIVE_VERIFIED | 2026-11-02 | prod walk buyer-workspace 41480104268 2026-11-02 on 4453e9d3a (9/9): B-0..B-3 workspace, B-4 provider service, B-5 a non-customer discovers buying and becomes a customer through the shipped UI, B-6 finds the provider and requests it, B-7 390 px, B-8 no console error or 401/403; clean-up withdrew the request and paused the service; earlier: buyer-workspace run 40377604733 2026-10-26 (owner-created synthetic buyer): B-0 onboarding via shipped wizard, B-[volume withheld] record saves + reads back, B-2 DRAFT request listed once, B-3 390 px no sideways scroll; … | yes | open security/permission item — details kept out of the public repository (owner rule); REGRESSION 2026-11-03: prod walk buyer-workspace 41676554374 B-3b — the customer door (#3003) is not in "More" on build a10b6c47 |
+| 6.4 | Buyer workspace | LIVE_VERIFIED | 2026-11-03 | prod walk buyer-workspace 41713787541 2026-11-03 on a10b6c47d (10/10, B-3b the customer door from #3003 included); earlier: prod walk buyer-workspace 41480104268 2026-11-02 on 4453e9d3a (9/9): B-0..B-3 workspace, B-4 provider service, B-5 a non-customer discovers buying and becomes a customer through the shipped UI, B-6 finds the provider and requests it, B-7 390 px, B-8 no console error or 401/403; clean-up withdrew the request and paused the service; earlier: buyer-workspace run 40377604733 2026-10-26 (owner-created synthetic buyer): B-0 onboarding via shipped wizard, B-[volume withheld] record saves + reads back, B-2 DRAFT request listed once, B-3 390 px no sideways scroll; … | yes | open security/permission item — details kept out of the public repository (owner rule) |
 | 6.6 | Proposals/contracts | LIVE_VERIFIED | 2026-10-25 | documents-approvals 40152566232 10-25 (walk passed) | yes |  |
 | 6.7 | Procurement | LIVE_VERIFIED | 2026-11-01 | prod walk orders-bookings 41321294873 2026-11-01 on 4a5b45828 P-1; earlier: orders-bookings run 40361384432 2026-10-26 PASS (re-proven) | yes |  |
 | 6.8 | Business trips | LIVE_VERIFIED | 2026-11-01 | prod walk orders-bookings 41321294873 2026-11-01 on 4a5b45828 T-1; earlier: orders-bookings run 40361384432 2026-10-26 PASS (re-proven) | yes | fixed by #2706 (rpc .catch crash) |
