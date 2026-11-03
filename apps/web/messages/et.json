@@ -2025,6 +2025,17 @@
       "done": "Liidetud. Read ja nende kirjed säilivad; projektide loend näitab nüüd säilitatud projekti.",
       "failed": "Ei liidetud. Läbi minemata ridade puhul ei muudetud midagi — laadige uuesti ja proovige veel."
     },
+    "deck": {
+      "label": "Mida saad teha",
+      "new": "Uus projekt",
+      "newHint": "Loo see ja alusta",
+      "assign": "Määra töötaja",
+      "assignHint": "Projekti juurde",
+      "teams": "Määra meeskond",
+      "teamsHint": "Meeskond projekti või ülesande jaoks",
+      "chat": "Vestlused",
+      "toolsLabel": "Muud tööriistad"
+    },
     "assign": {
       "reservation": {
         "unknownWhy": {
