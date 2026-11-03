@@ -449,6 +449,46 @@ export async function readPublicVacancySupplyCounts(
 }
 
 /**
+ * PUBLIC LOCATION — country + municipality for signed-out visitors (owner
+ * decision 2026-11-03). Answers only for live ads from sources whose licence
+ * and own public ad make the location public; every other id is simply
+ * absent from the map. A missing function (not yet applied, or rolled back)
+ * reads as "no location", never as an error — the card renders as today.
+ */
+export interface PublicVacancyLocation {
+  /** ISO 3166-1 alpha-2, upper case. */
+  readonly country: string;
+  /** The source's municipality, or null when unknown or not place-shaped. */
+  readonly city: string | null;
+}
+
+/** The function reads at most one board page of ids per call. */
+export const PUBLIC_VACANCY_LOCATION_BATCH = 50;
+
+export async function readPublicVacancyLocations(
+  ids: readonly string[],
+  suppliedClient?: SupabaseClient,
+): Promise<ReadonlyMap<string, PublicVacancyLocation>> {
+  const out = new Map<string, PublicVacancyLocation>();
+  const unique = [...new Set(ids)].slice(0, PUBLIC_VACANCY_LOCATION_BATCH);
+  if (unique.length === 0) return out;
+
+  const supabase = suppliedClient ?? (await createClient());
+  const { data, error } = await asAny(supabase).rpc("public_vacancy_locations_v1", {
+    p_ids: unique,
+  });
+  if (error) {
+    if (isNotProvisioned(error.code)) return out;
+    throw error;
+  }
+  for (const row of (data ?? []) as { id: string; country: string | null; city: string | null }[]) {
+    if (!row.country) continue;
+    out.set(row.id, { country: row.country, city: row.city ?? null });
+  }
+  return out;
+}
+
+/**
  * SITEMAP PROJECTION — the crawler-discovery path.
  *
  * Deliberately separate from the two preview readers above, and narrower than

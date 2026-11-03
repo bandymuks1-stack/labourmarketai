@@ -150,6 +150,23 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
       "Discloses the exact count and publication-date distribution of the live corpus by allowing full enumeration of public job URLs. Those URLs are intended to be public and indexed, so this is the requirement rather than a side effect. `last_modified` is `published_at` and never an ingestion timestamp, so the sitemap cannot make a false freshness claim.",
   },
   {
+    name: "public_vacancy_locations_v1",
+    identityArgs: "p_ids uuid[]",
+    mutates: false,
+    publicCaller:
+      "The public job board card and the /jobs/[id] page (owner decision 2026-11-03: signed-out visitors see country and city when known and lawfully public). Called with the ids the visitor already received from the sibling preview functions.",
+    authorization:
+      "The projection IS the authorization: RETURNS TABLE exposes only `id`, `country` (ISO alpha-2) and `city` (the source's municipality). Rows answer only when live (`is_active` AND not expired) and from an explicit provider allow-list (arbetsformedlingen, nav) whose licence permits republication and whose own public ad shows the location. No title, employer, region, address, coordinates, attribution, description or application URL is selected.",
+    inputValidation:
+      "`p_ids` is uuid[]-typed (malformed input is rejected before the body runs); NULL or empty answers nothing; only the first 50 elements are read. A city is returned only when it is 2-60 characters with no digit, '@' or URL, else NULL.",
+    abuseControls:
+      "No DB-level rate limit. Read-only and idempotent. Never searches by location, so it cannot be used to find which ads sit in a given place; it answers only for ids, at most one board page per call, and only for rows a visitor could open one by one.",
+    definerJustification:
+      "`public_vacancies` has no anon SELECT grant and no anon RLS policy. DEFINER is what narrows anon access to the three location columns instead of opening the table.",
+    residualRisk:
+      "Country + municipality next to an occupation can narrow an ad to a small employer in a small municipality. The employer is still withheld; the same facts are on the source's own public ad. No person is described by a job ad's location.",
+  },
+  {
     name: "get_public_business_profile_v1",
     identityArgs: "p_slug text",
     mutates: false,
