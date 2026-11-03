@@ -18,4 +18,4 @@
  * takes effect where the box was already too short.
  */
 export const AUTH_INPUT_CLASS =
-  "w-full min-h-[2.75rem] rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
+  "w-full min-h-[2.75rem] rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue aria-[invalid=true]:border-state-danger";

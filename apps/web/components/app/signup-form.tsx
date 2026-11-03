@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 
@@ -104,6 +104,26 @@ export function SignupForm({
     "idle" | "signing" | "error" | "check_email"
   >("idle");
   const [error, setError] = useState<string | null>(null);
+  // Which field a CLIENT-side validation error belongs to: that input is
+  // marked invalid, points at the message and takes focus, so a phone user
+  // lands on the field to fix instead of hunting for it (P0-1 2026-11-03).
+  const [errorField, setErrorField] = useState<"email" | "password" | "confirm" | null>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const confirmRef = useRef<HTMLInputElement>(null);
+  // The message renders directly under its field; server errors keep the
+  // alert above the action.
+  const fieldMessage = (field: "email" | "password" | "confirm") =>
+    error && errorField === field ? (
+      <span id="signup-error" role="alert" className="text-xs text-state-danger">
+        {error}
+      </span>
+    ) : null;
+  function fieldError(field: "email" | "password" | "confirm", message: string) {
+    setError(message);
+    setErrorField(field);
+    ({ email: emailRef, password: passwordRef, confirm: confirmRef })[field].current?.focus();
+  }
   // When a returning user lands on /signup by mistake, Supabase returns
   // `user_already_exists`. We surface a one-click "Login instead" CTA
   // next to the error so they aren't stuck reading body text.
@@ -180,28 +200,29 @@ export function SignupForm({
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setErrorField(null);
     if (!invitation && !isValidEmail(email)) {
-      setError(t("error_email"));
+      fieldError("email", t("error_email"));
       return;
     }
     if (password.length < MIN_PASSWORD) {
-      setError(t("error_password_short", { min: MIN_PASSWORD }));
+      fieldError("password", t("error_password_short", { min: MIN_PASSWORD }));
       return;
     }
     if (!/[A-Z]/.test(password)) {
-      setError(t("error_password_uppercase"));
+      fieldError("password", t("error_password_uppercase"));
       return;
     }
     if (!/[0-9]/.test(password)) {
-      setError(t("error_password_number"));
+      fieldError("password", t("error_password_number"));
       return;
     }
     if (!/[^A-Za-z0-9]/.test(password)) {
-      setError(t("error_password_special"));
+      fieldError("password", t("error_password_special"));
       return;
     }
     if (!invitation && password !== confirm) {
-      setError(t("error_password_mismatch"));
+      fieldError("confirm", t("error_password_mismatch"));
       return;
     }
     setStatus("signing");
@@ -372,12 +393,12 @@ export function SignupForm({
   return (
     /* `method="post"` — pre-hydration fallback only. See login-form.tsx: without
        it an early submit GETs the password into the URL. */
-    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-5 sm:gap-6" noValidate>
+    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-4 sm:gap-6" noValidate>
       <header>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
           {t("headline")}
         </h1>
-        <p className="mt-3 text-sm leading-relaxed text-text-secondary">
+        <p className="mt-2 text-sm leading-relaxed text-text-secondary sm:mt-3">
           {t("subcopy")}
         </p>
       </header>
@@ -391,7 +412,7 @@ export function SignupForm({
           the form's gap-6, so the e-mail form and its one primary action
           move up on a phone. The notice still precedes every account-creating
           button in document order. */}
-      <div className="flex flex-col gap-3" data-testid="auth-social-group">
+      <div className="flex flex-col gap-2 sm:gap-3" data-testid="auth-social-group">
         {/* GDPR Art. 13 first-layer notice, rendered ONCE and before the first
             account-creating control (the Google path collects account data
             too); the e-mail form below is read past it in document order. A
@@ -412,27 +433,41 @@ export function SignupForm({
         {/* LinkedIn/Facebook render ONLY when the auth server reports the
             provider enabled — the same account-creating same-tab flow, behind
             the same GDPR notice above. */}
-        {linkedinEnabled && (
-          <LinkedInButton
-            label={tSocial("continueWithLinkedIn")}
-            redirectingLabel={t("google_redirecting")}
-            errorLabel={t("error_generic")}
-            disabled={disabled}
-            nextPath={nextPath}
-            context="signup"
-            registrationStep="signup_page"
-          />
-        )}
-        {facebookEnabled && (
-          <FacebookButton
-            label={tSocial("continueWithFacebook")}
-            redirectingLabel={t("google_redirecting")}
-            errorLabel={t("error_generic")}
-            disabled={disabled}
-            nextPath={nextPath}
-            context="signup"
-            registrationStep="signup_page"
-          />
+        {/* Two secondary providers share ONE row on a phone (bare provider
+            names, full accessible names) so the e-mail form's action reaches
+            the first screen at 390 px; from sm up each keeps its own row. */}
+        {(linkedinEnabled || facebookEnabled) && (
+          <div
+            className={cn(
+              "flex flex-col gap-2 sm:gap-3",
+              linkedinEnabled && facebookEnabled && "grid grid-cols-2 sm:flex",
+            )}
+          >
+            {linkedinEnabled && (
+              <LinkedInButton
+                label={tSocial("continueWithLinkedIn")}
+                compactLabel={facebookEnabled ? "LinkedIn" : undefined}
+                redirectingLabel={t("google_redirecting")}
+                errorLabel={t("error_generic")}
+                disabled={disabled}
+                nextPath={nextPath}
+                context="signup"
+                registrationStep="signup_page"
+              />
+            )}
+            {facebookEnabled && (
+              <FacebookButton
+                label={tSocial("continueWithFacebook")}
+                compactLabel={linkedinEnabled ? "Facebook" : undefined}
+                redirectingLabel={t("google_redirecting")}
+                errorLabel={t("error_generic")}
+                disabled={disabled}
+                nextPath={nextPath}
+                context="signup"
+                registrationStep="signup_page"
+              />
+            )}
+          </div>
         )}
       </div>
 
@@ -455,10 +490,15 @@ export function SignupForm({
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t("email_placeholder")}
           readOnly={Boolean(invitation)}
-          aria-describedby={invitation ? "invited-email-note" : undefined}
+          ref={emailRef}
+          aria-invalid={errorField === "email" || undefined}
+          aria-describedby={
+            errorField === "email" ? "signup-error" : invitation ? "invited-email-note" : undefined
+          }
           data-testid={invitation ? "signup-invited-email" : undefined}
           className={AUTH_INPUT_CLASS}
         />
+        {fieldMessage("email")}
         {invitation && (
           <span id="invited-email-note" className="text-text-muted">
             {t("invited_email_note")}
@@ -480,8 +520,10 @@ export function SignupForm({
           minLength={MIN_PASSWORD}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          ref={passwordRef}
           className={AUTH_INPUT_CLASS}
-          aria-describedby="password-help"
+          aria-invalid={errorField === "password" || undefined}
+          aria-describedby={errorField === "password" ? "password-help signup-error" : "password-help"}
         />
         <span
           id="password-help"
@@ -493,6 +535,7 @@ export function SignupForm({
           {passwordOk && <span aria-hidden>✓</span>}
           {t("password_help")}
         </span>
+        {fieldMessage("password")}
       </label>
 
       {invitation ? (
@@ -515,12 +558,16 @@ export function SignupForm({
             required
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
+            ref={confirmRef}
+            aria-invalid={errorField === "confirm" || undefined}
+            aria-describedby={errorField === "confirm" ? "signup-error" : undefined}
             className={AUTH_INPUT_CLASS}
           />
+          {fieldMessage("confirm")}
         </label>
       )}
 
-      {error && (
+      {error && !errorField && (
         // The already-registered case is the most common reason an owner
         // bounces back here ("I registered yesterday — why am I not in?").
         // Surface a one-tap "Login instead" CTA right next to the error

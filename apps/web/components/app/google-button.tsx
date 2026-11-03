@@ -102,6 +102,11 @@ type OAuthProviderConfig = {
 
 type OAuthButtonProps = {
   label: string;
+  /** The provider's bare name, shown INSTEAD of `label` below `sm`, where two
+   *  provider buttons share one row (mobile sign-up fold, owner P0-1
+   *  2026-11-03). The accessible name stays the full `label` (it contains the
+   *  visible word, WCAG 2.5.3). Omitted = the full label at every width. */
+  compactLabel?: string;
   redirectingLabel: string;
   errorLabel: string;
   disabled?: boolean;
@@ -156,6 +161,7 @@ type OAuthButtonProps = {
 function OAuthProviderButton({
   provider,
   label,
+  compactLabel,
   redirectingLabel,
   errorLabel,
   disabled,
@@ -251,10 +257,20 @@ function OAuthProviderButton({
         disabled={disabled || loading}
         aria-busy={loading || undefined}
         data-testid={provider.testId}
+        aria-label={compactLabel && !loading ? label : undefined}
         className={provider.buttonClassName}
       >
         {provider.logo}
-        {loading ? redirectingLabel : label}
+        {loading ? (
+          redirectingLabel
+        ) : compactLabel ? (
+          <>
+            <span className="sm:hidden">{compactLabel}</span>
+            <span className="hidden sm:inline">{label}</span>
+          </>
+        ) : (
+          label
+        )}
       </button>
       {failed && (
         <p className="text-xs text-state-danger" role="alert">
