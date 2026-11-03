@@ -2025,6 +2025,17 @@
       "done": "Lagt sammen. Rækkerne og deres poster bevares; projektlisten viser nu det beholdte projekt.",
       "failed": "Ikke lagt sammen. Intet blev ændret for rækker, der ikke gik igennem — genindlæs og prøv igen."
     },
+    "deck": {
+      "label": "Det kan du gøre",
+      "new": "Nyt projekt",
+      "newHint": "Opret det og kom i gang",
+      "assign": "Tildel en medarbejder",
+      "assignHint": "Til et projekt",
+      "teams": "Tildel et hold",
+      "teamsHint": "Et hold til et projekt eller en opgave",
+      "chat": "Samtaler",
+      "toolsLabel": "Andre værktøjer"
+    },
     "assign": {
       "reservation": {
         "unknownWhy": {

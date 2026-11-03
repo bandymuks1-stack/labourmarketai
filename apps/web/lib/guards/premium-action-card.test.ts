@@ -26,8 +26,10 @@ describe("the card: depth without weight", () => {
     expect(CARD).not.toMatch(/from "(three|framer-motion|react-spring|@react-three\/[^"]*)"/);
   });
 
-  it("the lean is hover-only on hover-capable pointers, and reduced motion removes it", () => {
-    expect(CSS).toMatch(/@media \(hover: hover\) \{\s*\.lm-card3d:hover \{\s*transform: perspective\(900px\) rotateX\(3deg\) translateY\(-3px\);/);
+  it("no tilt (owner 2026-11-03): a 1 px lift on hover-capable pointers only, reduced motion removes it", () => {
+    expect(CSS).toMatch(/@media \(hover: hover\) \{\s*\.lm-card3d:hover \{\s*transform: translateY\(-1px\);/);
+    const block = CSS.slice(CSS.indexOf(".lm-card3d {"), CSS.indexOf("/* ── A DISABLED BRAND CONTROL"));
+    expect(block).not.toMatch(/rotate[XYZ]?\(|perspective\(/);
     const reduced = CSS.slice(CSS.indexOf("@media (prefers-reduced-motion: reduce) {"), CSS.indexOf(".lm-card3d {"));
     expect(reduced).toMatch(/\.lm-card3d,\s*\.lm-card3d:hover,\s*\.lm-card3d:active \{\s*transition: none !important;\s*transform: none !important;/);
   });

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
  * PREMIUM ACTION CARD (owner design direction 2026-10-26) — the one reusable
  * card for the places where a person CHOOSES what to do: an action, a work
  * area, a profession, a category. Black and gold, calm, a little physical:
- * depth comes from light and shadow and a slight lean on hover (`.lm-card3d`
+ * depth comes from light and shadow and a 1 px lift on hover, no tilt (`.lm-card3d`
  * in globals.css — transform + box-shadow only, no 3D library), one simple
  * line icon and a short name that reads in three seconds.
  *

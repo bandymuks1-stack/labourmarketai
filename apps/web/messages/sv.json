@@ -2025,6 +2025,17 @@
       "done": "Sammanslaget. Raderna och deras poster finns kvar; projektlistan visar nu det behållna projektet.",
       "failed": "Inte sammanslaget. Inget ändrades för rader som inte gick igenom — ladda om och försök igen."
     },
+    "deck": {
+      "label": "Det här kan du göra",
+      "new": "Nytt projekt",
+      "newHint": "Skapa det och kom igång",
+      "assign": "Tilldela en arbetare",
+      "assignHint": "Till ett projekt",
+      "teams": "Tilldela ett team",
+      "teamsHint": "Ett team för ett projekt eller en uppgift",
+      "chat": "Samtal",
+      "toolsLabel": "Andra verktyg"
+    },
     "assign": {
       "reservation": {
         "unknownWhy": {

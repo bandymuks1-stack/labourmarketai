@@ -2025,6 +2025,17 @@
       "done": "Apvienots. Rindas un to ieraksti saglabāti; projektu sarakstā tagad redzams saglabātais projekts.",
       "failed": "Nav apvienots. Neapstrādātajām rindām nekas nav mainīts — pārlādējiet un mēģiniet vēlreiz."
     },
+    "deck": {
+      "label": "Ko tu vari darīt",
+      "new": "Jauns projekts",
+      "newHint": "Izveido to un sāc",
+      "assign": "Piešķirt darbinieku",
+      "assignHint": "Projektam",
+      "teams": "Piešķirt komandu",
+      "teamsHint": "Komanda projektam vai uzdevumam",
+      "chat": "Sarunas",
+      "toolsLabel": "Citi rīki"
+    },
     "assign": {
       "reservation": {
         "unknownWhy": {

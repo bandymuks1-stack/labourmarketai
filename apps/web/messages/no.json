@@ -2025,6 +2025,17 @@
       "done": "Slått sammen. Radene og postene beholdes; prosjektlisten viser nå det beholdte prosjektet.",
       "failed": "Ikke slått sammen. Ingenting ble endret for rader som ikke gikk gjennom — last inn på nytt og prøv igjen."
     },
+    "deck": {
+      "label": "Dette kan du gjøre",
+      "new": "Nytt prosjekt",
+      "newHint": "Opprett det og kom i gang",
+      "assign": "Tildel en arbeider",
+      "assignHint": "Til et prosjekt",
+      "teams": "Tildel et lag",
+      "teamsHint": "Et lag til et prosjekt eller en oppgave",
+      "chat": "Samtaler",
+      "toolsLabel": "Andre verktøy"
+    },
     "assign": {
       "reservation": {
         "unknownWhy": {

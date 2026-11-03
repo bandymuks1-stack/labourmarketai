@@ -704,7 +704,8 @@ a {
  * Owner design direction + reviews 2026-10-26: a calm PHYSICAL object, not a
  * glow. A clear surface (a soft light falling from the top onto graphite), a
  * soft edge (a bright top bevel, a darker bottom bevel), depth (layered,
- * soft shadows: contact + near + far) — no halo. A 3deg lean and a 3 px lift
+ * soft shadows: contact + near + far) — no halo. NO lean (owner decision
+ * 2026-11-03, direction A: "pašalinti tilt efektą"): a 1 px lift
  * on hover-capable pointers only; a press settles it. Only `transform` and
  * `box-shadow` move — compositor work, no 3D library, no WebGL, no filters.
  * Reduced motion is in the canonical block above. Light theme: white
@@ -720,7 +721,7 @@ a {
     0 1px 1px rgb(0 0 0 / 0.5),
     0 6px 12px -6px rgb(0 0 0 / 0.55),
     0 16px 28px -18px rgb(0 0 0 / 0.75);
-  transform: perspective(900px) rotateX(0deg) translateY(0);
+  transform: translateY(0);
   transition:
     transform var(--motion-fast) var(--motion-ease-out),
     box-shadow var(--motion-fast) var(--motion-ease-out),
@@ -737,7 +738,7 @@ a {
 }
 @media (hover: hover) {
   .lm-card3d:hover {
-    transform: perspective(900px) rotateX(3deg) translateY(-3px);
+    transform: translateY(-1px);
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.09),
       inset 0 -1px 0 rgb(0 0 0 / 0.45),
@@ -755,7 +756,7 @@ a {
   }
 }
 .lm-card3d:active {
-  transform: perspective(900px) translateY(0) scale(0.98);
+  transform: translateY(0) scale(0.98);
   transition-duration: var(--motion-instant);
 }
 /* The screen's ONE primary: the same object, a little more lit and raised —
