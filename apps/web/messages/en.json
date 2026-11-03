@@ -5835,6 +5835,10 @@
         {
           "name": "Administrator display preference (lm_hide_admin_ui)",
           "purpose": "Used only on administrator accounts. Remembers whether administrator controls are hidden and changes nothing about permissions."
+        },
+        {
+          "name": "Sign-in attempt marker (lm.oauth.trace)",
+          "purpose": "Tab storage, removed when the tab closes. A random code that links one sign-in attempt to its result, so a failed sign-in can be diagnosed. Essential for the sign-in you started; it carries no account data."
         }
       ],
       "localStorageNote": "Your browser's own storage (not cookies) also holds a few items you asked for: your light or dark theme choice, your choice about usage measurement, and small conveniences such as dismissed notices, recently viewed items and your speech-input language. They stay on your device and you can clear them at any time through your browser.",
@@ -5860,7 +5864,7 @@
           "purpose": "Tab storage. Stops the same measurement event being counted twice."
         }
       ],
-      "analyticsBasis": "Refusing or withdrawing removes these items from this device at once; campaign data already copied into your account stays there until you ask us to delete it. The measurement itself is based on our legitimate interest in improving the product (GDPR Art. 6(1)(f)), and you can object to it as described in the Privacy Policy."
+      "analyticsBasis": "Refusing or withdrawing removes these items from this device at once; if you are signed in, the campaign kept with your account is cleared too. The measurement itself is based on our legitimate interest in improving the product (GDPR Art. 6(1)(f)), and you can object to it as described in the Privacy Policy."
     },
     "requestContact": "To ask a question or make a request about your data, get in touch with us — a person will review it.",
     "related": "Related pages",
@@ -20123,10 +20127,11 @@
   },
   "consent": {
     "banner": {
-      "text": "With your consent we measure, on our own servers, which pages and steps help people and which campaign brought you here. Nothing for this is stored on your device unless you agree. The product works the same either way.",
+      "text": "With your consent we measure in your browser which pages and steps help people and which campaign brought you here; without it nothing for this is stored on your device. Basic counts of actions on our own servers are kept either way (see the Cookie Policy). The product works the same whatever you choose.",
       "accept": "Allow measurement",
       "refuse": "Refuse",
-      "more": "Cookie Policy"
+      "more": "Cookie Policy",
+      "label": "Usage measurement choice"
     },
     "control": {
       "title": "Usage measurement and campaign attribution",

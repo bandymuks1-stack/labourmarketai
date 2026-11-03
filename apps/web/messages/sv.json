@@ -7917,10 +7917,11 @@
   },
   "consent": {
     "banner": {
-      "text": "Med ditt samtycke mäter vi på våra egna servrar vilka sidor och steg som hjälper människor och vilken kampanj som förde dig hit. Utan ditt samtycke sparas inget för detta på din enhet. Produkten fungerar likadant oavsett.",
+      "text": "Med ditt samtycke mäter vi i din webbläsare vilka sidor och steg som hjälper människor och vilken kampanj som förde dig hit; utan det sparas inget för detta på din enhet. Grundläggande räkning av handlingar på våra egna servrar sker oavsett (se cookiepolicyn). Produkten fungerar likadant vad du än väljer.",
       "accept": "Tillåt mätning",
       "refuse": "Avböj",
-      "more": "Cookiepolicy"
+      "more": "Cookiepolicy",
+      "label": "Val om användningsmätning"
     },
     "control": {
       "title": "Användningsmätning och kampanjattribution",

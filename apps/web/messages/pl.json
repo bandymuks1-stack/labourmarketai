@@ -5835,6 +5835,10 @@
         {
           "name": "Preferencja wyświetlania dla administratora (lm_hide_admin_ui)",
           "purpose": "Używany wyłącznie na kontach administratorów. Zapamiętuje, czy elementy administracyjne są ukryte, i nie zmienia niczego w uprawnieniach."
+        },
+        {
+          "name": "Znacznik próby logowania (lm.oauth.trace)",
+          "purpose": "Pamięć karty, usuwana po jej zamknięciu. Losowy kod łączący jedną próbę logowania z jej wynikiem, aby można było zbadać nieudane logowanie. Niezbędny dla rozpoczętego przez Ciebie logowania; nie zawiera danych konta."
         }
       ],
       "localStorageNote": "Pamięć przeglądarki (nie pliki cookie) przechowuje też kilka elementów, o które sam poprosiłeś: wybór jasnego lub ciemnego motywu, Twoją decyzję w sprawie pomiaru korzystania oraz drobne udogodnienia, np. ukryte powiadomienia, ostatnio oglądane pozycje i język wprowadzania głosowego. Pozostają one na Twoim urządzeniu i w każdej chwili możesz je wyczyścić w przeglądarce.",
@@ -5860,7 +5864,7 @@
           "purpose": "Pamięć karty. Zapobiega dwukrotnemu policzeniu tego samego zdarzenia pomiarowego."
         }
       ],
-      "analyticsBasis": "Odmowa lub wycofanie zgody od razu usuwa te elementy z tego urządzenia; dane kampanii już skopiowane do Twojego konta pozostają tam, dopóki nie poprosisz o ich usunięcie. Sam pomiar opiera się na naszym prawnie uzasadnionym interesie w ulepszaniu produktu (art. 6 ust. 1 lit. f RODO) i możesz się mu sprzeciwić w sposób opisany w Polityce prywatności."
+      "analyticsBasis": "Odmowa lub wycofanie zgody od razu usuwa te elementy z tego urządzenia; jeśli jesteś zalogowany, usuwana jest też kampania przechowywana z Twoim kontem. Sam pomiar opiera się na naszym prawnie uzasadnionym interesie w ulepszaniu produktu (art. 6 ust. 1 lit. f RODO) i możesz się mu sprzeciwić w sposób opisany w Polityce prywatności."
     },
     "requestContact": "Aby zadać pytanie lub zgłosić żądanie dotyczące swoich danych, skontaktuj się z nami — sprawę rozpatrzy człowiek.",
     "related": "Powiązane strony",
@@ -20123,10 +20127,11 @@
   },
   "consent": {
     "banner": {
-      "text": "Za Twoją zgodą mierzymy na własnych serwerach, które strony i kroki pomagają ludziom i która kampania Cię tu przyprowadziła. Bez Twojej zgody nic w tym celu nie jest zapisywane na Twoim urządzeniu. Produkt działa tak samo w obu przypadkach.",
+      "text": "Za Twoją zgodą mierzymy w Twojej przeglądarce, które strony i kroki pomagają ludziom i która kampania Cię tu przyprowadziła; bez zgody nic w tym celu nie jest zapisywane na Twoim urządzeniu. Podstawowe liczniki działań na naszych własnych serwerach prowadzimy w każdym przypadku (zobacz Politykę cookies). Produkt działa tak samo, cokolwiek wybierzesz.",
       "accept": "Zezwól na pomiar",
       "refuse": "Odmów",
-      "more": "Polityka cookies"
+      "more": "Polityka cookies",
+      "label": "Wybór dotyczący pomiaru korzystania"
     },
     "control": {
       "title": "Pomiar korzystania i przypisanie kampanii",

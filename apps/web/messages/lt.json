@@ -5835,6 +5835,10 @@
         {
           "name": "Administratoriaus rodymo nuostata (lm_hide_admin_ui)",
           "purpose": "Naudojama tik administratorių paskyrose. Įsimena, ar paslėpti administratoriaus valdikliai, ir nekeičia jokių teisių."
+        },
+        {
+          "name": "Prisijungimo bandymo žymė (lm.oauth.trace)",
+          "purpose": "Kortelės saugykla, pašalinama uždarius kortelę. Atsitiktinis kodas, susiejantis vieną prisijungimo bandymą su jo rezultatu, kad būtų galima ištirti nepavykusį prisijungimą. Būtina jūsų pradėtam prisijungimui; joje nėra paskyros duomenų."
         }
       ],
       "localStorageNote": "Naršyklės saugykloje (ne slapukuose) taip pat laikomi keli jūsų prašyti dalykai: šviesios ar tamsios temos pasirinkimas, jūsų sprendimas dėl naudojimo matavimo ir smulkūs patogumai, pvz., paslėpti pranešimai, neseniai peržiūrėti įrašai ir kalbos įvesties kalba. Jie lieka jūsų įrenginyje, ir juos bet kada galite išvalyti savo naršyklėje.",
@@ -5860,7 +5864,7 @@
           "purpose": "Kortelės saugykla. Neleidžia to paties matavimo įvykio suskaičiuoti du kartus."
         }
       ],
-      "analyticsBasis": "Atsisakius ar atšaukus sutikimą, šie įrašai iš karto pašalinami iš šio įrenginio; į jūsų paskyrą jau nukopijuoti kampanijos duomenys lieka, kol paprašysite juos ištrinti. Pats matavimas grindžiamas mūsų teisėtu interesu tobulinti produktą (BDAR 6 str. 1 d. f p.), ir galite jam prieštarauti, kaip aprašyta Privatumo politikoje."
+      "analyticsBasis": "Atsisakius ar atšaukus sutikimą, šie įrašai iš karto pašalinami iš šio įrenginio; jei esate prisijungę, ištrinama ir su jūsų paskyra saugoma kampanija. Pats matavimas grindžiamas mūsų teisėtu interesu tobulinti produktą (BDAR 6 str. 1 d. f p.), ir galite jam prieštarauti, kaip aprašyta Privatumo politikoje."
     },
     "requestContact": "Norėdami užduoti klausimą ar pateikti prašymą dėl savo duomenų, susisiekite su mumis — jį peržiūrės žmogus.",
     "related": "Susiję puslapiai",
@@ -20123,10 +20127,11 @@
   },
   "consent": {
     "banner": {
-      "text": "Jums sutikus, savo serveriuose matuojame, kurie puslapiai ir žingsniai padeda žmonėms ir kuri kampanija jus čia atvedė. Be jūsų sutikimo tam jūsų įrenginyje niekas neįrašoma. Produktas veikia taip pat bet kuriuo atveju.",
+      "text": "Jums sutikus, jūsų naršyklėje matuojame, kurie puslapiai ir žingsniai padeda žmonėms ir kuri kampanija jus čia atvedė; be sutikimo tam jūsų įrenginyje niekas neįrašoma. Bendri veiksmų skaičiai mūsų pačių serveriuose kaupiami bet kuriuo atveju (žr. Slapukų politiką). Produktas veikia taip pat, ką bepasirinktumėte.",
       "accept": "Leisti matavimą",
       "refuse": "Atsisakyti",
-      "more": "Slapukų politika"
+      "more": "Slapukų politika",
+      "label": "Naudojimo matavimo pasirinkimas"
     },
     "control": {
       "title": "Naudojimo matavimas ir kampanijos priskyrimas",

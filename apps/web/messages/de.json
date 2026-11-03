@@ -5835,6 +5835,10 @@
         {
           "name": "Administrator-Anzeigeeinstellung (lm_hide_admin_ui)",
           "purpose": "Wird nur bei Administratorkonten verwendet. Merkt sich, ob Administrator-Steuerelemente ausgeblendet sind, und ändert nichts an Berechtigungen."
+        },
+        {
+          "name": "Anmeldeversuch-Marker (lm.oauth.trace)",
+          "purpose": "Tab-Speicher, wird beim Schließen des Tabs entfernt. Ein zufälliger Code, der einen Anmeldeversuch mit seinem Ergebnis verknüpft, damit eine fehlgeschlagene Anmeldung untersucht werden kann. Für die von Ihnen begonnene Anmeldung erforderlich; er enthält keine Kontodaten."
         }
       ],
       "localStorageNote": "Im eigenen Speicher Ihres Browsers (keine Cookies) liegen außerdem einige Einträge, die Sie selbst gewählt haben: Ihre Wahl des hellen oder dunklen Designs, Ihre Entscheidung zur Nutzungsmessung und kleine Annehmlichkeiten wie ausgeblendete Hinweise, zuletzt angesehene Einträge und Ihre Spracheingabesprache. Sie bleiben auf Ihrem Gerät, und Sie können sie jederzeit über Ihren Browser löschen.",
@@ -5860,7 +5864,7 @@
           "purpose": "Tab-Speicher. Verhindert, dass dasselbe Messereignis doppelt gezählt wird."
         }
       ],
-      "analyticsBasis": "Eine Ablehnung oder ein Widerruf entfernt diese Einträge sofort von diesem Gerät; bereits in Ihr Konto übernommene Kampagnendaten bleiben dort, bis Sie uns um Löschung bitten. Die Messung selbst beruht auf unserem berechtigten Interesse an der Verbesserung des Produkts (Art. 6 Abs. 1 lit. f DSGVO), und Sie können ihr wie in der Datenschutzerklärung beschrieben widersprechen."
+      "analyticsBasis": "Eine Ablehnung oder ein Widerruf entfernt diese Einträge sofort von diesem Gerät; wenn Sie angemeldet sind, wird auch die bei Ihrem Konto gespeicherte Kampagne gelöscht. Die Messung selbst beruht auf unserem berechtigten Interesse an der Verbesserung des Produkts (Art. 6 Abs. 1 lit. f DSGVO), und Sie können ihr wie in der Datenschutzerklärung beschrieben widersprechen."
     },
     "requestContact": "Um eine Frage zu stellen oder einen Antrag zu Ihren Daten zu stellen, kontaktieren Sie uns — ein Mensch wird ihn prüfen.",
     "related": "Verwandte Seiten",
@@ -20123,10 +20127,11 @@
   },
   "consent": {
     "banner": {
-      "text": "Mit Ihrer Einwilligung messen wir auf unseren eigenen Servern, welche Seiten und Schritte Menschen helfen und welche Kampagne Sie hierher geführt hat. Ohne Ihre Zustimmung wird dafür nichts auf Ihrem Gerät gespeichert. Das Produkt funktioniert in beiden Fällen gleich.",
+      "text": "Mit Ihrer Einwilligung messen wir in Ihrem Browser, welche Seiten und Schritte Menschen helfen und welche Kampagne Sie hierher geführt hat; ohne sie wird dafür nichts auf Ihrem Gerät gespeichert. Grundlegende Zählungen von Aktionen auf unseren eigenen Servern erfolgen in jedem Fall (siehe Cookie-Richtlinie). Das Produkt funktioniert gleich, wie auch immer Sie wählen.",
       "accept": "Messung erlauben",
       "refuse": "Ablehnen",
-      "more": "Cookie-Richtlinie"
+      "more": "Cookie-Richtlinie",
+      "label": "Auswahl zur Nutzungsmessung"
     },
     "control": {
       "title": "Nutzungsmessung und Kampagnenzuordnung",

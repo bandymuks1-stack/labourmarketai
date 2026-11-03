@@ -9,6 +9,7 @@ import {
   setAnalyticsConsent,
   type AnalyticsConsentChoice,
 } from "@/lib/consent/analytics-consent";
+import { refuseAnalytics } from "@/lib/consent/account-campaign";
 
 /**
  * The analytics consent choice (owner decision 2026-11-03). Two surfaces, one
@@ -24,6 +25,8 @@ import {
  */
 
 export type AnalyticsConsentBannerStrings = {
+  /** The banner region's own accessible name. */
+  readonly label: string;
   readonly text: string;
   readonly accept: string;
   readonly refuse: string;
@@ -61,9 +64,9 @@ export function AnalyticsConsentBanner({ strings }: { strings: AnalyticsConsentB
   return (
     <section
       role="region"
-      aria-label={strings.more}
+      aria-label={strings.label}
       data-testid="analytics-consent-banner"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border-subtle bg-surface-1 px-4 py-4 shadow-lg sm:px-6"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border-subtle bg-surface-1 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lg sm:px-6"
     >
       <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-relaxed text-text-secondary">
@@ -77,7 +80,7 @@ export function AnalyticsConsentBanner({ strings }: { strings: AnalyticsConsentB
             variant="secondary"
             size="sm"
             data-testid="analytics-consent-refuse"
-            onClick={() => setAnalyticsConsent("refused")}
+            onClick={refuseAnalytics}
           >
             {strings.refuse}
           </Button>
@@ -115,7 +118,7 @@ export function AnalyticsConsentControl({ strings }: { strings: AnalyticsConsent
           size="sm"
           data-testid="analytics-consent-control-refuse"
           aria-pressed={choice === "refused"}
-          onClick={() => setAnalyticsConsent("refused")}
+          onClick={refuseAnalytics}
         >
           {strings.refuse}
         </Button>

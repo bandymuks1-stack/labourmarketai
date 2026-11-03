@@ -209,6 +209,7 @@ export default async function LocaleLayout({
               Strings are passed in, so no client message root is added. */}
           <AnalyticsConsentBanner
             strings={{
+              label: consentT("banner.label"),
               text: consentT("banner.text"),
               accept: consentT("banner.accept"),
               refuse: consentT("banner.refuse"),

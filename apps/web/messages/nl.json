@@ -5835,6 +5835,10 @@
         {
           "name": "Weergavevoorkeur voor beheerders (lm_hide_admin_ui)",
           "purpose": "Wordt alleen gebruikt op beheerdersaccounts. Onthoudt of beheerdersbedieningen verborgen zijn en verandert niets aan rechten."
+        },
+        {
+          "name": "Inlogpoging-markering (lm.oauth.trace)",
+          "purpose": "Tabbladopslag, verwijderd als het tabblad sluit. Een willekeurige code die één inlogpoging aan het resultaat koppelt, zodat een mislukte inlog kan worden onderzocht. Nodig voor de inlog die u startte; bevat geen accountgegevens."
         }
       ],
       "localStorageNote": "De eigen opslag van uw browser (geen cookies) bevat daarnaast een paar items waar u zelf om vroeg: uw keuze voor een licht of donker thema, uw keuze over gebruiksmeting en kleine gemakken zoals weggeklikte meldingen, recent bekeken items en de taal van spraakinvoer. Ze blijven op uw apparaat en u kunt ze op elk moment via uw browser wissen.",
@@ -5860,7 +5864,7 @@
           "purpose": "Tabbladopslag. Voorkomt dat dezelfde meetgebeurtenis twee keer wordt geteld."
         }
       ],
-      "analyticsBasis": "Weigeren of intrekken verwijdert deze items direct van dit apparaat; campagnegegevens die al naar uw account zijn gekopieerd blijven daar tot u ons vraagt ze te verwijderen. De meting zelf is gebaseerd op ons gerechtvaardigd belang bij het verbeteren van het product (art. 6, lid 1, onder f, AVG), en u kunt er bezwaar tegen maken zoals beschreven in het privacybeleid."
+      "analyticsBasis": "Weigeren of intrekken verwijdert deze items direct van dit apparaat; als u bent ingelogd, wordt ook de campagne bij uw account gewist. De meting zelf is gebaseerd op ons gerechtvaardigd belang bij het verbeteren van het product (art. 6, lid 1, onder f, AVG), en u kunt er bezwaar tegen maken zoals beschreven in het privacybeleid."
     },
     "requestContact": "Neem contact met ons op om een vraag te stellen of een verzoek over je gegevens in te dienen — een persoon zal het beoordelen.",
     "related": "Gerelateerde pagina's",
@@ -20123,10 +20127,11 @@
   },
   "consent": {
     "banner": {
-      "text": "Met uw toestemming meten we op onze eigen servers welke pagina's en stappen mensen helpen en welke campagne u hierheen bracht. Zonder uw toestemming wordt hiervoor niets op uw apparaat opgeslagen. Het product werkt in beide gevallen hetzelfde.",
+      "text": "Met uw toestemming meten we in uw browser welke pagina's en stappen mensen helpen en welke campagne u hierheen bracht; zonder toestemming wordt hiervoor niets op uw apparaat opgeslagen. Basistellingen van acties op onze eigen servers gebeuren hoe dan ook (zie het cookiebeleid). Het product werkt hetzelfde, wat u ook kiest.",
       "accept": "Meting toestaan",
       "refuse": "Weigeren",
-      "more": "Cookiebeleid"
+      "more": "Cookiebeleid",
+      "label": "Keuze over gebruiksmeting"
     },
     "control": {
       "title": "Gebruiksmeting en campagnetoewijzing",

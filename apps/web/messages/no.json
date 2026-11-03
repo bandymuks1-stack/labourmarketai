@@ -7917,10 +7917,11 @@
   },
   "consent": {
     "banner": {
-      "text": "Med ditt samtykke måler vi på våre egne servere hvilke sider og trinn som hjelper folk, og hvilken kampanje som brakte deg hit. Uten ditt samtykke lagres ingenting for dette på enheten din. Produktet fungerer likt uansett.",
+      "text": "Med ditt samtykke måler vi i nettleseren din hvilke sider og trinn som hjelper folk, og hvilken kampanje som brakte deg hit; uten det lagres ingenting for dette på enheten din. Grunnleggende tellinger av handlinger på våre egne servere skjer uansett (se informasjonen om informasjonskapsler). Produktet fungerer likt uansett hva du velger.",
       "accept": "Tillat måling",
       "refuse": "Avslå",
-      "more": "Informasjonskapsler"
+      "more": "Informasjonskapsler",
+      "label": "Valg om bruksmåling"
     },
     "control": {
       "title": "Bruksmåling og kampanjetilskriving",
