@@ -31,9 +31,9 @@ a security/permission row says only that an item is open.
 
 | LIVE_VERIFIED | PASS_CI_ONLY | FAIL | BLOCKED | NOT_VERIFIED | NOT_IMPLEMENTED | OPTIONAL_TEST |
 |---|---|---|---|---|---|---|
-| 194 | 6 | 10 | 39 | 16 | 22 | 1 |
+| 196 | 6 | 8 | 39 | 16 | 22 | 1 |
 
-2026-11-03: 6.1 and 6.3 LIVE_VERIFIED → FAIL by prod walk marketplace 41721656743 (M-5, build a10b6c47d); documents-approvals 41716118134, agency-chain 41717112150, orders-bookings 41718546706 and project-execution 41722638759 re-proved their rows on the same build. 2026-11-03: 13.5 BLOCKED → LIVE_VERIFIED by db-backup restore drill 41664420591 + full run 41665452921 (#3005). 2026-11-03: 11.7 NOT_VERIFIED → LIVE_VERIFIED by recognition-chain 41617507405; J-12 redefined by the owner as the baseline learning-group journey (11.1–11.7), RPL 11.10 a separate advanced stage. 2026-11-03: 11.2 NOT_VERIFIED → LIVE_VERIFIED by cohort-join-request 41611766407 (6/6). 2026-11-02: 2.20 FAIL → NOT_VERIFIED by owner decision 0028, then → LIVE_VERIFIED by journal-confirm 41478434884. 4.9 and 5.7 PASS_CI_ONLY → LIVE_VERIFIED by alert-mail 41488266687.
+2026-11-03 evening: documents-approvals 41716118134, agency-chain 41717112150, orders-bookings 41718546706 (build a10b6c47d), project-execution 41722638759 and marketplace 41729310761 (build 7f0f06583) re-proved their rows; no status changed. 2026-11-03: 13.5 BLOCKED → LIVE_VERIFIED by db-backup restore drill 41664420591 + full run 41665452921 (#3005). 2026-11-03: 11.7 NOT_VERIFIED → LIVE_VERIFIED by recognition-chain 41617507405; J-12 redefined by the owner as the baseline learning-group journey (11.1–11.7), RPL 11.10 a separate advanced stage. 2026-11-03: 11.2 NOT_VERIFIED → LIVE_VERIFIED by cohort-join-request 41611766407 (6/6). 2026-11-02: 2.20 FAIL → NOT_VERIFIED by owner decision 0028, then → LIVE_VERIFIED by journal-confirm 41478434884. 4.9 and 5.7 PASS_CI_ONLY → LIVE_VERIFIED by alert-mail 41488266687.
 
 Full planned scope 2026-11-01: 277 rows − 2 DUPLICATE (7.10 = 4.22, 4.17 = 2.35; kept, not counted) + 13 functions found in the vision, architecture and decision documents with no row before (2.36, 2.37, 3.34–3.36, 4.30, 5.20, 5.21, 6.22–6.24, 7.30, 7.31) = **288**. Seven rows were reconciled with product-truth (3.8, 4.6, 11.2, 11.7, 7.5 → NOT_VERIFIED; 2.20, 2.24 → FAIL); their earlier proof stays in the row. Production-verified share of the full scope: **190 / 288 = 66.0 %** (186 after the 2026-11-02 recount; +3.8, 4.6, 6.18, 9.18 from production walks 41350506578 and 41357630136). Targets (conditional, not guaranteed): core product complete and public mid-December 2026; full historical scope February 2027 (preliminary).
 
@@ -83,8 +83,8 @@ Denominator = 287 functions (288 planned minus the one `OPTIONAL_TEST` scenario,
 | Measure | Method | Result |
 |---|---|---|
 | **Technical implementation** | every row except `NOT_IMPLEMENTED` (a `BLOCKED` row is built but waits for an owner step) | **265 / 287 = 92.3 %** |
-| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **194 / 287 = 67.6 %** (73.2 % of the built 265) |
-| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **14 / 19 = 73.7 %** complete · 2 partial · 1 broken · 2 blocked · 0 unverified (J-12 counts the baseline learning-group journey 11.1–11.7; advanced RPL 11.10 is tracked separately, owner D-15) |
+| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **196 / 287 = 68.3 %** (74.0 % of the built 265) |
+| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **16 / 19 = 84.2 %** complete · 1 partial · 0 broken · 2 blocked · 0 unverified (J-12 counts the baseline learning-group journey 11.1–11.7; advanced RPL 11.10 is tracked separately, owner D-15) |
 
 Per area (technical / production-verified) — as of the 277-row register, before the 2026-11-01 full-scope update; recomputed at the next weekly progress report:
 
@@ -118,9 +118,9 @@ The 19 journeys (rows in brackets):
 | J-8 | Need → dates proposed → worker accepts → engagement (5.13) | complete | orders-bookings 41718546706 2026-11-03 |
 | J-9 | Agency declares supply → client bridge → offer (4.15, 4.28) | complete | agency-chain 41717112150 2026-11-03, search-support-privacy 2026-11-01 |
 | J-10 | Brigade offered and matched as a unit (3.7, 4.6, 4.7) | complete | brigade-formation 41350506578 2026-11-01 (19/19); product-truth link LIVE (#2917) |
-| J-11 | Goods / service listed → found → requested → accepted → messages (6.1–6.3) | broken | marketplace 41721656743 2026-11-03 failed M-5: the buyer does not find the public service in the market (6.1, 6.3 FAIL); the listing half M-1..M-4 passed |
+| J-11 | Goods / service listed → found → requested → accepted → messages (6.1–6.3) | complete | marketplace 41729310761 2026-11-03 |
 | J-12 | Institution → cohort → learner → practice → competency (11.1–11.7) — BASELINE learning-group journey | complete | 11.1, 11.3–11.6 learning-practice 2026-10-21/25; 11.2 learner join request cohort-join-request 41611766407 (6/6, 2026-11-03); 11.7 practice → authorised sign-off → competency → learner view recognition-chain 41617507405 (2026-11-03). Formal recognition of prior learning / qualification (11.10 RPL) is NOT part of this journey: owner decision D-15 (2026-11-02, confirmed 2026-11-03) makes it a separate, later ADVANCED stage — tracked as row 11.10, never an automatic qualification |
-| J-13 | Buyer workspace → request → provider (6.4, 6.1) | partial | buyer-workspace 41713787541 2026-11-03 passed (10/10, B-3b), but 6.1 is FAIL from marketplace M-5; earlier: buyer-workspace 41480104268 2026-11-02 (9/9, non-customer → customer → provider request); next extension (request → offer/contract) is owner decision RED-1, draft #2946 |
+| J-13 | Buyer workspace → request → provider (6.4, 6.1) | complete | buyer-workspace 41713787541 2026-11-03 (10/10, B-3b); earlier: buyer-workspace 41480104268 2026-11-02 (9/9, non-customer → customer → provider request); next extension (request → offer/contract) is owner decision RED-1, draft #2946 |
 | J-14 | Organization buys a plan without help (7.1, 7.5, 7.15, 7.28) | blocked | 7.15 hidden by design, 7.28 FAIL (owner/legal) |
 | J-15 | Alert / e-mail about a new matching job without signing in (4.9, 5.7, 5.9) | partial | alert-mail 41488266687 2026-11-02 (9/9): matching-job alert e-mail arrives and opens signed out (4.9, 5.7 LIVE_VERIFIED); the weekly digest e-mail (5.9) is not yet observed in production |
 | J-16 | Forgotten password → reset mail → new password (1.3) | complete | mail-reset 41428606490 2026-11-02 (2/2, the real reset mail in the QA mailbox) |
@@ -154,12 +154,12 @@ second register. The function rows below keep their own status; this view reads 
 
 | Dimension | Rows | PASS | FAIL | BLOCKED | NOT VERIFIED |
 |---|---|---|---|---|---|
-| Functions (288, per area below) | 288 | 160 | 11 | 60 | 57 |
+| Functions (288, per area below) | 288 | 162 | 9 | 60 | 57 |
 | SEO | 10 | 8 | 1 | 1 | 0 |
 | GEO | 4 | 4 | 0 | 0 | 0 |
 | Search | 5 | 4 | 1 | 0 | 0 |
 | Design (direction A P0) | 5 | 5 | 0 | 0 | 0 |
-| **All** | **312** | **181** | **13** | **61** | **57** |
+| **All** | **312** | **183** | **11** | **61** | **57** |
 
 Functions per area:
 
@@ -170,7 +170,7 @@ Functions per area:
 | Company operations & projects | 36 | 33 | 0 | 0 | 3 |
 | Demand, jobs & matching | 26 | 21 | 0 | 2 | 3 |
 | Chat & communication | 21 | 13 | 1 | 4 | 3 |
-| Marketplace | 22 | 11 | 2 | 7 | 2 |
+| Marketplace | 22 | 13 | 0 | 7 | 2 |
 | Plans, billing & entitlements | 30 | 1 | 2 | 15 | 12 |
 | Languages & markets | 18 | 9 | 0 | 6 | 3 |
 | Admin, privacy & security | 24 | 11 | 1 | 3 | 9 |
@@ -178,12 +178,12 @@ Functions per area:
 | Education & learning | 10 | 7 | 1 | 2 | 0 |
 | Market intelligence | 6 | 4 | 0 | 0 | 2 |
 | Infrastructure & operations | 17 | 2 | 2 | 1 | 12 |
-| **Functions** | **288** | **160** | **11** | **60** | **57** |
+| **Functions** | **288** | **162** | **9** | **60** | **57** |
 
 Where the stricter rule moves a function (all other rows map one to one):
 
-- **6.1 and 6.3 are FAIL (rows updated):** prod walk marketplace 41721656743 (2026-11-03 21:31 UTC, build `a10b6c47d`) failed M-5: a buyer who is a person does not find the public service row on `/lt/dashboard/listings`. M-1..M-4 (goods listed, service offered, shelf found, message received) passed. The cause is under analysis; the rows return to PASS only on a green re-run.
 - **#3004 agency fixes are NOT VERIFIED:** the docs-readiness live roster and the client-record authority fixes are applied and catalog-checked. documents-approvals has no agency step, and agency-chain does not open agency documents readiness or client records, so neither walk proves them. They have no function row of their own.
+- **Marketplace 6.1–6.3 stay PASS:** walk 41721656743 (21:31 UTC, build `7f0f06583`) failed M-5 on a test race: the publish action was still queued when the walk closed the page. The walk-only fix #3028 re-ran green as 41729310761 (22:20 UTC, build `7f0f06583`).
 
 - **6.4 buyer workspace stays PASS:** walks 41674630724 and 41676554374 (16:29 and 16:40 UTC) failed B-3b because they ran before #3003 was deployed (build `a10b6c47d`, 20:27 UTC). The re-run after the deploy, buyer-workspace 41713787541 (20:39 UTC), passed 10/10, B-3b included.
 - **PASS instead of BLOCKED (1):** 13.5 database backup. Restore drill 41664420591 and full run 41665452921
@@ -196,7 +196,7 @@ Where the stricter rule moves a function (all other rows map one to one):
 - **NOT_IMPLEMENTED (22):** 21 wait on a named owner decision or an owner-gated RED draft → BLOCKED. 5.20 user-defined
   automations has no owner gate and is not built → FAIL (not built; not a defect of anything that exists).
 
-The 11 function FAILs: 2.24, 5.20 (not built), 6.1, 6.3, 7.27, 7.28, 9.25, 10.20, 11.8, 13.1, 13.17. Their reasons are in the
+The 9 function FAILs: 2.24, 5.20 (not built), 7.27, 7.28, 9.25, 10.20, 11.8, 13.1, 13.17. Their reasons are in the
 rows.
 
 ### SEO (signed out, 2026-11-03)
@@ -243,7 +243,7 @@ rows.
 | DS-4 | Customer door in "More" (#3003) | PASS | prod walk buyer-workspace 41713787541 (2026-11-03, after the #3003 deploy) B-3b: the customer finds "Mano užklausos" first in "More" and on the phone sheet | — |
 | DS-5 | Job cards on a phone | PASS | Chrome, 390×844, `/lt/jobs` signed out: 20 cards, each 358 px wide, no sideways scroll, no bare-dash title; the source language is named on each card | — |
 
-### Latest production walk per spec (2026-11-03 21:45 UTC)
+### Latest production walk per spec (2026-11-03 22:20 UTC)
 
 From `gh run list --workflow prod-qa-walk.yml --limit 1000` (display title `prod-qa-walk <spec>`). The latest
 non-cancelled run and the last success. "None in the last 1000 runs" means the window, which reaches back to 2026-10-17.
@@ -278,7 +278,7 @@ non-cancelled run and the last success. "None in the last 1000 runs" means the w
 | lmc-csrf | 40210854856 | 2026-10-25 | success | 40210854856 2026-10-25 |
 | mail-reset | 41428606490 | 2026-11-02 | success | 41428606490 2026-11-02 |
 | manager-chat | 41658636784 | 2026-11-03 | success | 41658636784 2026-11-03 |
-| marketplace | 41721656743 | 2026-11-03 | failure | 41284728549 2026-11-01 |
+| marketplace | 41729310761 | 2026-11-03 | success | 41729310761 2026-11-03 |
 | marketplace-goods-services | 41664268898 | 2026-11-03 | success | 41664268898 2026-11-03 |
 | mcp-agents | 41307643008 | 2026-11-01 | success | 41307643008 2026-11-01 |
 | mcp-chain | 41589289076 | 2026-11-03 | success | 41589289076 2026-11-03 |
@@ -308,9 +308,7 @@ non-cancelled run and the last success. "None in the last 1000 runs" means the w
 | worker-identity-split | 41318189146 | 2026-11-01 | success | 41318189146 2026-11-01 |
 | worker-records-exports | 41312948857 | 2026-11-01 | success | 41312948857 2026-11-01 |
 
-The six latest failures:
-
-- **marketplace:** a product failure, M-5 (6.1 / 6.3 above).
+The five latest failures:
 
 - **employee-beta-gate:** a test defect. G5 read the market anchors before Leaflet drew them. It is fixed on `main`: the spec now waits for an anchor or the empty state, and names this run. Its re-run is pending.
 - **digest-setup:** the harness. The walk itself ran; the closing session-revoke step reported 5 of 6 sessions revoked. #2975 is open: a session the walk signed out itself counts as revoked.
@@ -318,18 +316,17 @@ The six latest failures:
 - **billing-test-mode:** the optional 7.4 scenario. The pilot organization is not armed in Stripe TEST.
 - **push:** in progress at the time of writing.
 
-The coordinator's queue on build `a10b6c47d` (deployed 20:27 UTC): buyer-workspace 41713787541, documents-approvals 41716118134 (its first try was a deploy-brake refusal, not the product), agency-chain 41717112150, orders-bookings 41718546706 and project-execution 41722638759 passed; marketplace 41721656743 failed M-5.
+The coordinator's queue, all green. On build `a10b6c47d` (deployed 20:27 UTC): buyer-workspace 41713787541, documents-approvals 41716118134 (its first try was a deploy-brake refusal, not the product), agency-chain 41717112150, orders-bookings 41718546706. On build `7f0f06583` (deployed 21:19 UTC, contains `a10b6c47d`): project-execution 41722638759 and marketplace 41729310761. The marketplace run 41721656743 before it failed M-5 on a test race, fixed walk-only in #3028.
 
 ### Real user blockers (2026-11-03)
 
 These are what a real person meets now. Owner-gated scope and not-yet-built functions are listed apart.
 
 1. **The first search for a new word on `/jobs` fails** (SR-1). The visitor waits 4–11 s and gets no jobs. Fix: RED draft #3024, not applied.
-2. **A person looking for a service does not find it in the market** (6.1 / 6.3, marketplace M-5). Goods listings are found; the service row is not shown on `/lt/dashboard/listings`. Cause under analysis; a blocker until re-proven.
-3. **Organizations cannot buy a plan without help** (J-14). 7.28 payee and terms are FAIL (owner/legal), and 7.15 is hidden by design.
-4. **AI help and some e-mail are off in production** (13.17 env parity). This waits on the owner and legal.
-5. **The native apps are not in the stores** (J-17, BLOCKED on the owner's store accounts).
-6. **Workers who are engaged but not members cannot be assigned training** (11.8, owner decision, RED #2816).
+2. **Organizations cannot buy a plan without help** (J-14). 7.28 payee and terms are FAIL (owner/legal), and 7.15 is hidden by design.
+3. **AI help and some e-mail are off in production** (13.17 env parity). This waits on the owner and legal.
+4. **The native apps are not in the stores** (J-17, BLOCKED on the owner's store accounts).
+5. **Workers who are engaged but not members cannot be assigned training** (11.8, owner decision, RED #2816).
 
 Not user-facing, but open:
 
@@ -383,7 +380,7 @@ Not user-facing, but open:
 | 2.20 | Manager review / confirm | LIVE_VERIFIED | 2026-11-02 | prod walk journal-confirm 41478434884 2026-11-02 on 4453e9d3a (4/4): the worker's own declaration is recorded and counted, the worker cannot record themselves as the independent confirmer, a different authorised manager approves and the entry leaves the queue, the Living CV gains exactly one confirmed entry with hours unchanged (decision 0028); DB: one live entry, one employer approval, no self row; earlier run 41467005959 failed on a host memory stall (approval stored), test bounded in #2948; owner decision 0028 resolves EVID-2 (self-declaration is lawful and labelled; only self-as-independent-confirmer is refused, enforced since 20261003150500); 2026-11-01 reconciled with product-truth: open integrity item (EVID-2); details in the private record; the earlier production proof below stays valid for what it covered; earlier: prod walk journal-confirm 41281666555 2026-11-01 on 38bfb9d93 (3/3); earlier: journal-confirm run 39788692498 (green) 10-22 | yes |  |
 | 2.21 | Work verification 8 states | LIVE_VERIFIED | 2026-11-01 | prod walk work-verification 41280396705 2026-11-01 on 38bfb9d93 (6/6); #2895 correction door over MCP: prod walk mcp-agents 41307643008 2026-11-01 on c3df7431d (10/10, A-9: entry recorded and corrected over MCP, one live version, spent token and replaced version refused); earlier: prod walk work-verification run 40300016332 (2026-10-26): V-1..V-6 6/6 — sent to manager, review queue with authority only, changes requested, correction pending (counted once, correction card names the decision it answe… | yes |  |
 | 2.22 | Photos / task evidence | LIVE_VERIFIED | 2026-11-01 | prod walk worker-records-exports 41312948857 2026-11-01 on 7f8bfaa2a (8/8) P-1; earlier: worker-records-exports run 40186822215 10-25 (8/8 green): P-1 a journal entry with a photo saved and shown on fresh load | yes |  |
-| 2.23 | Hours metrics/allocations/timesheets | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on a10b6c47d (passed); earlier: project-execution E-11 run 39968362991 10-23 | yes |  |
+| 2.23 | Hours metrics/allocations/timesheets | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: project-execution E-11 run 39968362991 10-23 | yes |  |
 | 2.24 | Experience records + disputes | FAIL | 2026-11-01 | 2026-11-01 reconciled with product-truth: open RED moderation item (EVID-6); details in the private record; the earlier production proof below stays valid for what it covered; earlier: prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-15; earlier: profile-cv-history run 40182648408 10-25 (21/21 green): P-15 experience records open with right of reply | yes |  |
 | 2.25 | Work in numbers | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-17; earlier: profile-cv-history run 40182648408 10-25 (21/21 green): P-17 work in numbers from own recorded work | yes |  |
 | 2.26 | One continuous professional history | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-18; #2894 duration-pending records shown without hours, totals unchanged (CI); earlier: profile-cv-history run 40182648408 10-25 (21/21 green): P-18 one continuous history: one total, every hour once | yes |  |
@@ -404,22 +401,22 @@ Not user-facing, but open:
 | ID | Function | Status | Last checked | Evidence (PR / commit / run) | In production | Remaining issue |
 |---|---|---|---|---|---|---|
 | 3.1 | Company home | LIVE_VERIFIED | 2026-10-23 | owner session 10-23 the partner organization 1.6 s; role-routes 39783147517 | yes | large-org timing not measured |
-| 3.2 | Projects | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on a10b6c47d (passed); earlier: prod walk project-execution 41283540387 2026-11-01 on 38bfb9d93 E-1 PASS; earlier: project-execution E-1 39798187544 10-22 | yes |  |
-| 3.3 | Objects / sites | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on a10b6c47d (passed); earlier: project-execution E-11 run 39968362991 10-23 | yes |  |
-| 3.4 | Stages | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on a10b6c47d (passed); earlier: prod walk project-execution 41283540387 2026-11-01 on 38bfb9d93 E-3 PASS; earlier: project-execution run 40085615921 (green) 10-24 | yes |  |
-| 3.5 | Tasks | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on a10b6c47d (passed); earlier: prod walk project-execution 41283540387 2026-11-01 on 38bfb9d93 E-4 PASS; earlier: project-execution run 40081437313 10-24: E-4 the walk starts and completes ITS OWN task (card matched by its own title inside main, after #2724) | yes |  |
-| 3.6 | Worker->project assignment | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on a10b6c47d (passed); earlier: prod walk project-execution 41295981934 2026-11-01 on 3b7eafbe4 green end to end (after #2897: the walk now waits for the assign answer; the assignment was stored all along); earlier: run 41283540387 on 38bfb9d93 E-5 FAIL (walk timing), project-execution E-5 run 39968362991 10-23 | yes |  |
+| 3.2 | Projects | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: prod walk project-execution 41283540387 2026-11-01 on 38bfb9d93 E-1 PASS; earlier: project-execution E-1 39798187544 10-22 | yes |  |
+| 3.3 | Objects / sites | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: project-execution E-11 run 39968362991 10-23 | yes |  |
+| 3.4 | Stages | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: prod walk project-execution 41283540387 2026-11-01 on 38bfb9d93 E-3 PASS; earlier: project-execution run 40085615921 (green) 10-24 | yes |  |
+| 3.5 | Tasks | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: prod walk project-execution 41283540387 2026-11-01 on 38bfb9d93 E-4 PASS; earlier: project-execution run 40081437313 10-24: E-4 the walk starts and completes ITS OWN task (card matched by its own title inside main, after #2724) | yes |  |
+| 3.6 | Worker->project assignment | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: prod walk project-execution 41295981934 2026-11-01 on 3b7eafbe4 green end to end (after #2897: the walk now waits for the assign answer; the assignment was stored all along); earlier: run 41283540387 on 38bfb9d93 E-5 FAIL (walk timing), project-execution E-5 run 39968362991 10-23 | yes |  |
 | 3.7 | Brigades | LIVE_VERIFIED | 2026-10-22 | brigade-formation 39795574869 10-22 | yes |  |
 | 3.8 | Team->project assignment | LIVE_VERIFIED | 2026-11-01 | prod walk brigade-formation 41350506578 2026-11-01 on 7c46946c3 (19/19, B2B-1..10: brigade offered and matched as one unit, handed into one team assignment, work recorded on it); product-truth journey link LIVE since #2917; details in the private record; earlier: brigade-formation run 39795574869 (green) 10-22 | yes |  |
-| 3.9 | Readiness | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on a10b6c47d (passed); earlier: project-execution E-7 run 39968362991 10-23 | yes |  |
-| 3.10 | Defects / corrections | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on a10b6c47d (passed); earlier: project-execution E-8 run 39968362991 10-23 | yes |  |
-| 3.11 | Handover passport | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on a10b6c47d (passed); earlier: project-execution E-9 run 39968362991 10-23 | yes |  |
-| 3.12 | Project economics | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on a10b6c47d (passed); earlier: project-execution E-10 run 39968362991 10-23 | yes |  |
-| 3.13 | Operations board + export | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on a10b6c47d (passed); earlier: prod walk project-execution 41283540387 2026-11-01 on 38bfb9d93 E-2 PASS (dates); earlier: project-execution E-2 run 39968362991 10-23: owner downloads the operations report | yes | outsider-refusal step E-13 still to re-run (spec fixed #2702) |
+| 3.9 | Readiness | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: project-execution E-7 run 39968362991 10-23 | yes |  |
+| 3.10 | Defects / corrections | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: project-execution E-8 run 39968362991 10-23 | yes |  |
+| 3.11 | Handover passport | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: project-execution E-9 run 39968362991 10-23 | yes |  |
+| 3.12 | Project economics | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: project-execution E-10 run 39968362991 10-23 | yes |  |
+| 3.13 | Operations board + export | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: prod walk project-execution 41283540387 2026-11-01 on 38bfb9d93 E-2 PASS (dates); earlier: project-execution E-2 run 39968362991 10-23: owner downloads the operations report | yes | outsider-refusal step E-13 still to re-run (spec fixed #2702) |
 | 3.14 | Employer planning / calendar | LIVE_VERIFIED | 2026-10-21 | calendar-planning 39571666417 10-21 | yes |  |
 | 3.15 | Absences / leave | LIVE_VERIFIED | 2026-10-23 | calendar-planning run 40007491242 (green) 10-23 | yes |  |
 | 3.16 | Capacity / gap timeline | LIVE_VERIFIED | 2026-10-23 | owner session 10-23: workforce planning shows active team 2, capacity [volume withheld]-days, honest partial count | yes |  |
-| 3.17 | Capacity reservation | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on a10b6c47d (passed); earlier: project-execution E-6 run 39968362991 10-23 | yes |  |
+| 3.17 | Capacity reservation | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: project-execution E-6 run 39968362991 10-23 | yes |  |
 | 3.18 | Utilisation | LIVE_VERIFIED | 2026-10-26 | prod walk utilisation-planned-actual run 40295307338 (2026-10-26): U-0..U-3 8/8 — owner commits worker to dated project, committed days move on fresh load; EN + phone; employee and other org refused | yes |  |
 | 3.19 | Planned vs actual | LIVE_VERIFIED | 2026-10-26 | prod walk run 40295307338 (2026-10-26): P-1..P-4 — three stages planned 5 days, started+finished; fresh load shows planned vs actual gap; EN + phone; other org + employee refused | yes |  |
 | 3.20 | Shifts / rotas | LIVE_VERIFIED | 2026-10-28 | rota-repeat 40659497014; earlier: prod-qa-walk rota-repeat 40018016745 10-23 (5/5): weekly Mon/Wed/Fri + 2-on/1-off saved via Repeat UI, clash WARNS but saves (planned_collides), persists after reload, bands correct on worker calendar, cancel clears; DB:… | yes |  |
@@ -502,9 +499,9 @@ Not user-facing, but open:
 
 | ID | Function | Status | Last checked | Evidence (PR / commit / run) | In production | Remaining issue |
 |---|---|---|---|---|---|---|
-| 6.1 | Service offerings + request loop | FAIL | 2026-11-03 | prod walk marketplace 41721656743 2026-11-03 on a10b6c47d FAILED M-5: the buyer (a person) does not find the public service row on /lt/dashboard/listings; M-1..M-4 passed; cause under analysis; earlier: prod walk marketplace 41284728549 2026-11-01 on 38bfb9d93 (6/6) M-2, M-5, M-6; earlier: marketplace-goods-services run 40164310896 10-25: service made discoverable, requested by another org, accepted with a note, requester sees acceptance, both sides message | yes | REGRESSION 2026-11-03: marketplace M-5, the service row is not found on the market page; cause under analysis, re-proof needed |
-| 6.2 | Listings goods/rental/wanted | LIVE_VERIFIED | 2026-11-01 | prod walk marketplace 41284728549 2026-11-01 on 38bfb9d93 (6/6) M-1, M-3, M-4; earlier: marketplace-goods-services run 40164310896 10-25 (14/14): private sale listing, company rental published as the company, private 'looking for' listing, discovery, cross-org Q&A thread; cleanup closed all synthetic listin… | yes |  |
-| 6.3 | One discovery index | FAIL | 2026-11-03 | prod walk marketplace 41721656743 2026-11-03 on a10b6c47d FAILED M-5: the buyer (a person) does not find the public service row on /lt/dashboard/listings; M-1..M-4 passed; cause under analysis; earlier: prod walk marketplace 41284728549 2026-11-01 on 38bfb9d93 (6/6) M-3/M-5; earlier: marketplace-goods-services run 40164310896 10-25: listings and services found in the one market discovery | yes | REGRESSION 2026-11-03: marketplace M-5, the service row is not found on the market page; cause under analysis, re-proof needed |
+| 6.1 | Service offerings + request loop | LIVE_VERIFIED | 2026-11-03 | prod walk marketplace 41729310761 2026-11-03 on 7f0f06583 (passed after the walk-only fix #3028; the earlier run 41721656743 on the same build failed M-5 on a test race: the publish action was still queued when the walk closed the page); earlier: prod walk marketplace 41284728549 2026-11-01 on 38bfb9d93 (6/6) M-2, M-5, M-6; earlier: marketplace-goods-services run 40164310896 10-25: service made discoverable, requested by another org, accepted with a note, requester sees acceptance, both sides message | yes |  |
+| 6.2 | Listings goods/rental/wanted | LIVE_VERIFIED | 2026-11-03 | prod walk marketplace 41729310761 2026-11-03 on 7f0f06583 (passed after the walk-only fix #3028; the earlier run 41721656743 on the same build failed M-5 on a test race: the publish action was still queued when the walk closed the page); earlier: prod walk marketplace 41284728549 2026-11-01 on 38bfb9d93 (6/6) M-1, M-3, M-4; earlier: marketplace-goods-services run 40164310896 10-25 (14/14): private sale listing, company rental published as the company, private 'looking for' listing, discovery, cross-org Q&A thread; cleanup closed all synthetic listin… | yes |  |
+| 6.3 | One discovery index | LIVE_VERIFIED | 2026-11-03 | prod walk marketplace 41729310761 2026-11-03 on 7f0f06583 (passed after the walk-only fix #3028; the earlier run 41721656743 on the same build failed M-5 on a test race: the publish action was still queued when the walk closed the page); earlier: prod walk marketplace 41284728549 2026-11-01 on 38bfb9d93 (6/6) M-3/M-5; earlier: marketplace-goods-services run 40164310896 10-25: listings and services found in the one market discovery | yes |  |
 | 6.4 | Buyer workspace | LIVE_VERIFIED | 2026-11-03 | prod walk buyer-workspace 41713787541 2026-11-03 on a10b6c47d (10/10, B-3b the customer door from #3003 included); earlier: prod walk buyer-workspace 41480104268 2026-11-02 on 4453e9d3a (9/9): B-0..B-3 workspace, B-4 provider service, B-5 a non-customer discovers buying and becomes a customer through the shipped UI, B-6 finds the provider and requests it, B-7 390 px, B-8 no console error or 401/403; clean-up withdrew the request and paused the service; earlier: buyer-workspace run 40377604733 2026-10-26 (owner-created synthetic buyer): B-0 onboarding via shipped wizard, B-[volume withheld] record saves + reads back, B-2 DRAFT request listed once, B-3 390 px no sideways scroll; … | yes | open security/permission item — details kept out of the public repository (owner rule) |
 | 6.6 | Proposals/contracts | LIVE_VERIFIED | 2026-11-03 | prod walk documents-approvals 41716118134 2026-11-03 on a10b6c47d (passed); earlier: documents-approvals 40152566232 10-25 (walk passed) | yes |  |
 | 6.7 | Procurement | LIVE_VERIFIED | 2026-11-03 | prod walk orders-bookings 41718546706 2026-11-03 on a10b6c47d (passed); earlier: prod walk orders-bookings 41321294873 2026-11-01 on 4a5b45828 P-1; earlier: orders-bookings run 40361384432 2026-10-26 PASS (re-proven) | yes |  |
