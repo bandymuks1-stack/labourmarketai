@@ -57,6 +57,10 @@
 
 begin;
 
+-- Applied 2026-11-03 with this line (ledger 20261103193911): without it pg_get_indexdef prints
+-- gin_trgm_ops unqualified when the session search_path includes extensions, and the guard raises.
+set local search_path = public;
+
 -- Refuse to record a half-built or differently shaped index: `if not exists`
 -- alone would silently accept an INVALID leftover from a failed concurrent
 -- build, or a same-named index with another expression.
