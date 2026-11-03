@@ -195,6 +195,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261102160000_",
       // 2026-11-03 (RED draft, NOT applied): J-12 follow-up — set_education_cohort_member_v1 refuses request rows.
       "20261103090000_",
+      // 2026-11-03 (RED draft, NOT applied): system audit — row-independent policy calls as InitPlans on 22 hot-table policies.
+      "20261103180000_",
       // #2913 restored six production-applied migrations byte-exact (owner option 2, 2026-11-01): historical restorations dated after the package, not pending work of it.
       "20261007155339_",
       "20261015193211_",
