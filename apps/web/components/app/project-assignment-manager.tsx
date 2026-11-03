@@ -148,8 +148,11 @@ type ProjectWithAssignments = ManagedProject & {
   assignments: ProjectAssignment[];
 };
 
+// Form submits sit BELOW the page's one primary action (the action deck's
+// "New project"), so they are outlined gold, not a gold fill (owner design
+// pass 2026-10-26: one primary per screen).
 const primary =
-  "inline-flex w-fit items-center gap-2 rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-transform hover:-translate-y-0.5";
+  "inline-flex min-h-11 w-fit items-center gap-2 rounded-md border border-brand-blue/60 px-4 py-2 text-sm font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60";
 const field =
   "rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary";
 
