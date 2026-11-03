@@ -53,6 +53,9 @@ ORG=f0000000-0000-0000-0000-0000000000f1
 ORG2=f0000000-0000-0000-0000-0000000000f2
 PROG=a1000000-0000-0000-0000-0000000000a1
 COH=c1000000-0000-0000-0000-0000000000c1
+COH2=c2000000-0000-0000-0000-0000000000c2
+COH3=c3000000-0000-0000-0000-0000000000c3
+SENTINEL=00000000-0000-0000-0000-00000000dead
 NEG="$EXTENG $EXTMEM $OTHERMGR $WRONGMEM $WRONGEMP"
 
 PASS=0; FAIL=0
@@ -62,6 +65,17 @@ $ADMIN -c "create database $DB" >/dev/null
 PSQL="psql -h $HOST -p $PORT -U postgres -d $DB -v ON_ERROR_STOP=1 -q"
 $PSQL -f "$HERE/education-cohort-join-requests.prelude.sql" >/dev/null
 for m in "${MIGS[@]}"; do $PSQL -f "$m" >/dev/null || { echo "failed: $m"; exit 1; }; done
+# Stand-in for the applied erasure registry (20261019140000): the columns the
+# executor reads, and the education_cohort_members.profile_id row verbatim.
+$PSQL >/dev/null <<'SQL'
+create table public.privacy_erasure_registry_v3 (
+  schema_name text not null default 'public', table_name text not null, column_name text not null,
+  parent text, treatment text not null, scrub_columns text[], note text not null,
+  updated_at timestamptz not null default now(), primary key (schema_name, table_name, column_name));
+insert into public.privacy_erasure_registry_v3 (schema_name, table_name, column_name, parent, treatment, scrub_columns, note) values
+  ('public', 'education_cohort_members', 'profile_id', 'profiles', 'sever_sentinel', null, 'FK cascades on the live schema; v3 severs the row to the sentinel BEFORE the account delete so the cascade finds nothing (explicit decision, not an accident)');
+insert into public.profiles values ('00000000-0000-0000-0000-00000000dead');
+SQL
 
 as() {
   psql -h $HOST -p $PORT -U postgres -d "$DB" -tA -q 2>&1 <<SQL | grep -v '^SET$' | sed -E 's/^psql:.*:[0-9]+: //; s/^ERROR: +//' | head -1
@@ -81,9 +95,9 @@ refused() { # name actual — any refusal (not_manager / permission denied / req
     *) PASS=$((PASS+1)); echo "  ok   $1 ($2)";;
   esac
 }
-OBJ="select md5(pg_get_functiondef('public.set_education_cohort_member_v1(uuid,uuid,text)'::regprocedure))
-  || md5(pg_get_functiondef('public.decide_education_cohort_join_v1(uuid,uuid,text)'::regprocedure))
-  || md5(pg_get_expr(polqual, polrelid)) from pg_policy where polname = 'education_cohort_members_select';"
+OBJ="select md5(pg_get_functiondef('public.set_education_cohort_member_v1(uuid,uuid,text)'::regprocedure));"
+DECFN="select md5(pg_get_functiondef('public.decide_education_cohort_join_v1(uuid,uuid,text)'::regprocedure));"
+POL="select pg_get_expr(polqual, polrelid) from pg_policy where polname = 'education_cohort_members_select';"
 BEFORE_OBJ="$(q '' postgres "$OBJ")"
 
 $PSQL >/dev/null <<SQL
@@ -98,7 +112,8 @@ insert into engagement_contexts (profile_id, organization_id, relationship_slug,
 insert into company_memberships (profile_id, organization_id, role) values
   ('$OWNER', '$ORG', 'owner'), ('$ADMINM', '$ORG', 'admin'), ('$EXTMEM', '$ORG', 'external_manager'), ('$WRONGMEM', '$ORG', 'member');
 insert into education_programs (id, organization_id, name) values ('$PROG', '$ORG', 'Tiling programme');
-insert into education_cohorts (id, program_id, organization_id, name, join_requests_open) values ('$COH', '$PROG', '$ORG', 'Group A', true);
+insert into education_cohorts (id, program_id, organization_id, name, join_requests_open) values
+  ('$COH', '$PROG', '$ORG', 'Group A', true), ('$COH2', '$PROG', '$ORG', 'Group B', false), ('$COH3', '$PROG', '$ORG', 'Group C', false);
 insert into education_cohort_members (cohort_id, profile_id, status, requested_at, request_label, request_note) values
   ('$COH', '$REQ', 'requested', now(), 'Typed Req', 'note req'),
   ('$COH', '$DEC', 'declined',  now(), 'Typed Dec', 'note dec'),
@@ -153,6 +168,11 @@ check "member state after the internal writes" "active|t" "$(q '' postgres "sele
 check "unlinked learner still refused" "not_a_linked_learner" "$(q $MGR authenticated "select set_education_cohort_member_v1('$COH','$OWNER','active');")"
 check "invalid status still refused" "invalid_status" "$(q $MGR authenticated "select set_education_cohort_member_v1('$COH','$PLAIN','requested');")"
 check "internal manager can still close the group" "" "$(q $MGR authenticated "select set_education_cohort_join_requests_v1('$COH', false);")"
+check "internal owner (membership) opens group B" "" "$(q $OWNER authenticated "select set_education_cohort_join_requests_v1('$COH2', true);")"
+check "internal admin (membership) closes group B" "" "$(q $ADMINM authenticated "select set_education_cohort_join_requests_v1('$COH2', false);")"
+check "internal owner (membership) archives group B" "" "$(q $OWNER authenticated "select archive_education_cohort_v1('$COH2');")"
+check "internal admin (membership) archives group C" "" "$(q $ADMINM authenticated "select archive_education_cohort_v1('$COH3');")"
+check "open/close + archive audit bases for owner and admin" "membership:admin,membership:owner|membership:admin,membership:owner" "$(q '' postgres "select (select string_agg(distinct payload->>'authority_basis', ',') from audit_logs where action='education_cohort_join_requests_set_v1' and entity_id='$COH2'), (select string_agg(payload->>'authority_basis', ',' order by payload->>'authority_basis') from audit_logs where action='education_cohort_archived_v1');")"
 check "the learner reads their own active row" "active" "$(q $REQ authenticated "select status from education_cohort_members;")"
 check "the learner reads no other learner's row" "1" "$(q $REQ authenticated "select count(*) from education_cohort_members;")"
 
@@ -165,6 +185,21 @@ check "set_member writes an audit row with actor and basis" "3|membership:owner,
 check "accept audit row: actor + basis, no learner text" "t|membership:admin|f" "$(q '' postgres "select actor_id='$ADMINM', payload->>'authority_basis', payload::text like '%Typed%' from audit_logs where action='education_cohort_join_accepted_v1';")"
 check "no audit row was removed" "t" "$(q '' postgres "select count(*) >= $AUDIT0 + 5 from audit_logs;")"
 
+echo "== erasure rewrites the erased person's typed text, keeps the row (condition 4)"
+check "registry row now scrubs request_label and request_note" "{request_label,request_note}|sever_sentinel" "$(q '' postgres "select scrub_columns, treatment from privacy_erasure_registry_v3 where table_name='education_cohort_members' and column_name='profile_id';")"
+# the executor's severing statement, built exactly as erase_user_account_v3 (c) builds it
+$PSQL >/dev/null <<SQL
+do \$\$ declare r record; c text; v_sets text := ''; begin
+  select * into r from public.privacy_erasure_registry_v3 where table_name='education_cohort_members' and column_name='profile_id';
+  for c in select unnest(coalesce(r.scrub_columns, '{}'::text[])) loop v_sets := v_sets || format(', %I = null', c); end loop;
+  execute format('update %s set %I = \$2%s where %I = \$1', 'public.education_cohort_members', r.column_name, v_sets, r.column_name)
+    using '$REQ'::uuid, '$SENTINEL'::uuid;
+end \$\$;
+SQL
+check "erased person's row kept, severed to the sentinel" "1|active" "$(q '' postgres "select count(*), max(status) from education_cohort_members where profile_id='$SENTINEL';")"
+check "... with the typed name and note rewritten" "t|t" "$(q '' postgres "select request_label is null, request_note is null from education_cohort_members where profile_id='$SENTINEL';")"
+check "... and no other row touched" "2" "$(q '' postgres "select count(*) from education_cohort_members where request_label is not null and status in ('declined','withdrawn');")"
+
 echo "== no alternative path (condition 3)"
 check "client-executable definer functions touching the membership table are exactly the known set" \
   "archive_education_cohort_v1,decide_education_cohort_join_v1,is_active_cohort_member_v1,is_active_program_member_v1,list_open_education_cohorts_v1,request_education_cohort_join_v1,set_education_cohort_member_v1,withdraw_education_cohort_join_v1" \
@@ -176,8 +211,17 @@ check "anon holds no SELECT on the membership table" "f" "$(q '' postgres "selec
 check "the membership table has exactly one policy (select)" "education_cohort_members_select:r" "$(q '' postgres "select string_agg(polname || ':' || polcmd::text, ',') from pg_policy where polrelid = 'public.education_cohort_members'::regclass;")"
 
 echo "== rollback"
+AFTER_POL="$(q '' postgres "$POL")"
+AFTER_DEC="$(q '' postgres "$DECFN")"
+TEXT_BEFORE_DOWN="$(q '' postgres "select count(*) from education_cohort_members where request_label is not null;")"
 check "rollback applies" "ok" "$($PSQL -f "$DOWN" >/dev/null 2>&1 && echo ok)"
-check "all three objects restored exactly (md5)" "$BEFORE_OBJ" "$(q '' postgres "$OBJ")"
+check "member command restored exactly (md5)" "$BEFORE_OBJ" "$(q '' postgres "$OBJ")"
+check "the non-destructive decide is KEPT by the rollback" "$AFTER_DEC" "$(q '' postgres "$DECFN")"
+check "... so an accept after the rollback still keeps the learner's text" "accepted|Typed Wd" "$(q '' postgres "update education_cohort_members set status='requested' where profile_id='$WD';" >/dev/null; q $MGR authenticated "select decide_education_cohort_join_v1('$COH','$WD','accept');")|$(q '' postgres "select request_label from education_cohort_members where profile_id='$WD';")"
+check "the tightened select policy is KEPT by the rollback" "$AFTER_POL" "$(q '' postgres "$POL")"
+check "an external manager still reads no row after the rollback" "0" "$(q $EXTMEM authenticated "select count(*) from education_cohort_members;")"
+check "the erasure scrub is KEPT by the rollback" "{request_label,request_note}" "$(q '' postgres "select scrub_columns from privacy_erasure_registry_v3 where table_name='education_cohort_members' and column_name='profile_id';")"
+check "the rollback nulled no request text" "$TEXT_BEFORE_DOWN" "$(q '' postgres "select count(*) from education_cohort_members where request_label is not null;")"
 check "rows and audit history untouched by the rollback" "t" "$(q '' postgres "select count(*) >= $AUDIT0 + 5 from audit_logs;")"
 check "migration re-applies after rollback" "ok" "$($PSQL -f "$MIG" >/dev/null 2>&1 && echo ok)"
 

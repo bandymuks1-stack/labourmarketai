@@ -31,7 +31,6 @@ const slicePolicy = (s: string) => {
   return s.slice(start, s.indexOf(");", start) + 2);
 };
 const applied0903 = read("supabase/migrations/20260903120000_education_programs_cohorts_v1.sql");
-const applied1102 = read("supabase/migrations/20261102160000_education_cohort_join_requests_v1.sql");
 
 describe("membership command", () => {
   const member = sliceFn(body, "set_education_cohort_member_v1");
@@ -72,6 +71,15 @@ describe("who reads a membership row", () => {
   });
 });
 
+describe("erasure", () => {
+  it("the severing registry row scrubs the erased person's typed request name and note; no row is deleted", () => {
+    expect(body).toMatch(
+      /update public\.privacy_erasure_registry_v3\s+set scrub_columns = array\['request_label', 'request_note'\][\s\S]*table_name = 'education_cohort_members' and column_name = 'profile_id'/,
+    );
+    expect(body).not.toMatch(/delete from public\.education_cohort_members/i);
+  });
+});
+
 describe("grants and rollback", () => {
   it("keeps both commands authenticated-only", () => {
     for (const sig of ["set_education_cohort_member_v1(uuid, uuid, text)", "decide_education_cohort_join_v1(uuid, uuid, text)"]) {
@@ -81,10 +89,12 @@ describe("grants and rollback", () => {
     expect(body).not.toMatch(/to anon/i);
   });
 
-  it("the rollback restores all three objects' applied text exactly, in one transaction", () => {
+  it("the rollback restores the member command exactly and KEEPS the non-destructive decide, the tightened policy and the erasure scrub", () => {
     expect(sliceFn(down, "set_education_cohort_member_v1")).toBe(sliceFn(applied0903, "set_education_cohort_member_v1"));
-    expect(sliceFn(down, "decide_education_cohort_join_v1")).toBe(sliceFn(applied1102, "decide_education_cohort_join_v1"));
-    expect(slicePolicy(down)).toBe(slicePolicy(applied1102));
+    expect(down).not.toContain("function public.decide_education_cohort_join_v1(");
+    expect(down).not.toMatch(/^\s*(create|drop) policy/m);
+    expect(down).not.toMatch(/^\s*update public\.privacy_erasure_registry_v3/m);
+    expect(down).not.toMatch(/request_label\s*=\s*null|request_note\s*=\s*null/);
     expect(down).toMatch(/^begin;/m);
     expect(down.trimEnd().endsWith("commit;")).toBe(true);
     expect(sql.startsWith("-- @human-gate-approved")).toBe(true);

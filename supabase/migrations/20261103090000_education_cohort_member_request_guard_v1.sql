@@ -32,13 +32,22 @@
 -- No column, row or audit entry is removed; set_education_cohort_member_v1
 -- now also writes an audit row (actor + authority basis).
 --
+-- ERASURE (condition 4). Erasure v3 re-points education_cohort_members.profile_id
+-- to the sentinel (sever_sentinel, 20261019140000) and keeps the row for the
+-- institution — but nothing rewrote request_label / request_note, so a name
+-- the person typed would survive their erasure. The value-rule table cannot
+-- find it (it matches e-mail / phone / id mentions, and a typed name is none of
+-- them); the registry row's scrub_columns is the existing mechanism for exactly
+-- this — the executor nulls those columns IN the same severing statement. No
+-- row is deleted; only the erased person's own typed text goes.
+--
 -- Unchanged on purpose (listed in the PR inventory): create / update of
 -- programmes and cohorts, and the programme / cohort select policies, keep
 -- manages_organization — they hold no learner data and no membership; narrowing
 -- them is a separate decision.
 --
 -- Reversible: supabase/rollbacks/20261103090000_education_cohort_member_request_guard_v1.down.sql
--- (restores all three objects' current text exactly).
+-- (restores the member command exactly; keeps every protective change).
 
 -- ── 1. Membership command: internal deciders only; request rows refused ─────
 
@@ -175,7 +184,16 @@ create policy education_cohort_members_select on public.education_cohort_members
     or public.is_admin()
   );
 
+-- ── 4. Erasure rewrites the erased person's typed request text ───────────────
+
+update public.privacy_erasure_registry_v3
+   set scrub_columns = array['request_label', 'request_note'],
+       note = note || ' — J-12 (2026-11-03): the person''s own typed request name and note are scrubbed in the severing statement; the row stays',
+       updated_at = now()
+ where schema_name = 'public' and table_name = 'education_cohort_members' and column_name = 'profile_id';
+
 -- ROLLBACK
 -- (see supabase/rollbacks/20261103090000_education_cohort_member_request_guard_v1.down.sql)
--- restore set_education_cohort_member_v1 (20260903120000), decide_education_cohort_join_v1
--- and education_cohort_members_select (20261102160000) exactly.
+-- restores set_education_cohort_member_v1 (20260903120000) exactly; KEEPS the
+-- non-destructive decide, the tightened select policy and the erasure scrub
+-- (each only protects; see the down file).
