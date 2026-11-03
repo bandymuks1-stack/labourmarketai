@@ -182,6 +182,34 @@ function watch(page: Page, who: string): void {
   });
 }
 
+// ── #3003 (owner P0-2, 2026-11-03): the customer's own door. Read-only. When
+// the ACTIVE role is customer outside an organization workspace, the header's
+// "More" and the phone sheet open with "Mano užklausos" (/dashboard/buyer),
+// and no destination appears twice. It asserts strictly: an account whose
+// active role is not customer fails here, which names that state.
+test("B-3b (#3003). the customer finds \"Mano užklausos\" first in More and on the phone sheet", async ({ browser }) => {
+  for (const phone of [false, true]) {
+    const { page, close } = await as(browser, phone);
+    await page.goto("/lt/dashboard/buyer");
+    await settle(page);
+    if (phone) {
+      await page.getByTestId("header-nav-sheet-trigger").click();
+    } else {
+      await page.getByTestId("header-nav-more").click();
+    }
+    const list = page.getByTestId(phone ? "header-nav-sheet" : "header-nav-more-menu");
+    await expect(list).toBeVisible({ timeout: 30_000 });
+    const door = list.getByTestId(phone ? "header-nav-sheet-area:buyer" : "header-nav-more-area:buyer");
+    const hrefs = await list
+      .locator(phone ? '[data-testid^="header-nav-sheet-"]' : '[data-testid^="header-nav-more-"]')
+      .evaluateAll((els) => els.map((e) => e.getAttribute("href")));
+    console.info(`[nav] buyer ${phone ? "sheet" : "More"}: ${hrefs.join(" ")}`);
+    await expect(door).toHaveAttribute("href", "/lt/dashboard/buyer");
+    expect(new Set(hrefs).size, `duplicate destinations: ${hrefs.join(" ")}`).toBe(hrefs.length);
+    await close();
+  }
+});
+
 test("B-4 (6.1). the provider offers a service and makes it discoverable", async ({ browser }) => {
   test.skip(!J13, "J-13 needs the provider and the non-buyer sessions (slots worker, freshworker)");
   const { page, close } = await as(browser, false, "worker");

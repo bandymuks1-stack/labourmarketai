@@ -20,7 +20,10 @@ import {
   listSavedPublicVacancyIds,
   resolveOwnWorkerId,
 } from "@/lib/opportunities/saved-opportunities";
-import { listPublicVacancyPreviewsByIds } from "@/lib/vacancy-store/vacancy-read";
+import {
+  listMemberVacancyFactsByIds,
+  listPublicVacancyPreviewsByIds,
+} from "@/lib/vacancy-store/vacancy-read";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { buildJobsListJsonLd } from "@/lib/seo/public-job-json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
@@ -281,6 +284,17 @@ const SAVED_EMPTY: L = {
   pl: "Nie masz jeszcze zapisanej żadnej oferty pracy. Otwórz ofertę i użyj „Zapisz”.",
 };
 
+/** The anonymous card's honest line where the member facts would be (owner
+ *  P0-3, 2026-11-03): they exist, they open after sign-in (directive 2026-08-24). */
+const LOCKED_FACTS: L = {
+  en: "Employer and location: after sign-in",
+  lt: "Darbdavys ir vieta: prisijungus",
+  ru: "Работодатель и место: после входа",
+  nl: "Werkgever en locatie: na inloggen",
+  de: "Arbeitgeber und Ort: nach der Anmeldung",
+  pl: "Pracodawca i miejsce: po zalogowaniu",
+};
+
 const SAVED_BADGE: L = {
   en: "Saved",
   lt: "Išsaugota",
@@ -425,6 +439,34 @@ export default async function JobsPage({
     const s = qs.toString();
     return s ? `/jobs?${s}` : "/jobs";
   };
+
+  // MEMBER FACTS (owner P0-3, 2026-11-03): a signed-in person's card shows who
+  // publishes the ad and where the work is. Read under their OWN client for
+  // exactly the rows this page shows; an anonymous visitor costs no extra read.
+  const shownIds = [
+    ...savedPreviews.map((v) => v.id),
+    ...(result.status === "ok" ? result.vacancies.map((v) => v.id) : []),
+  ];
+  const memberFacts =
+    supabase && user && shownIds.length > 0
+      ? await listMemberVacancyFactsByIds(supabase, shownIds)
+      : null;
+  const regionName = (() => {
+    try {
+      return new Intl.DisplayNames([active], { type: "region" });
+    } catch {
+      return null;
+    }
+  })();
+  const cardFacts = (id: string) => {
+    if (!memberFacts) return undefined;
+    const f = memberFacts.get(id);
+    if (!f) return null;
+    const country = f.country ? (regionName?.of(f.country.toUpperCase()) ?? f.country) : null;
+    const place = [f.city ?? f.region, country].filter(Boolean).join(", ") || null;
+    return { employer: f.employerName, place };
+  };
+  const lockedFactsLabel = user ? undefined : LOCKED_FACTS[active];
 
   // A PAGE PAST THE END IS NOT AN EMPTY BOARD (2026-10-08 walk). The count
   // rides on the page's own rows, so `?page=9999` read "0 vacancies found"
@@ -572,6 +614,8 @@ export default async function JobsPage({
                     }
                     genericTitle={GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
+                    memberFacts={cardFacts(v.id)}
+                    lockedFactsLabel={lockedFactsLabel}
                     savedLabel={SAVED_BADGE[active]}
                   />
                 </li>
@@ -635,6 +679,8 @@ export default async function JobsPage({
                     }
                     genericTitle={GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
+                    memberFacts={cardFacts(v.id)}
+                    lockedFactsLabel={lockedFactsLabel}
                     savedLabel={
                       mySaved.vacancyIds.has(v.id)
                         ? SAVED_BADGE[active]

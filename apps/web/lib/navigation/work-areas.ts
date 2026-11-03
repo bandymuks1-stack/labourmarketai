@@ -18,6 +18,7 @@
  * presentation, never a permission.
  */
 
+import type { NavItem } from "@/lib/config/navigation";
 import { TODAY_STATIONS, type TodayStationId } from "@/lib/today/today-route";
 
 export type WorkAreaIconKey =
@@ -71,7 +72,10 @@ export const PERSONAL_WORK_AREAS: readonly WorkArea[] = TODAY_STATIONS.map((s) =
 export const ORGANIZATION_WORK_AREAS: readonly WorkArea[] = [
   { id: "need", href: "/dashboard/company/needs", iconKey: "userSearch", labelKey: "companyModel.need" },
   { id: "offer", href: "/dashboard/services", iconKey: "package", labelKey: "companyModel.offer" },
-  { id: "market", href: "/dashboard/listings", iconKey: "store", labelKey: "companyModel.market" },
+  // "Rinka" is the service/request loop — the SAME route as the organization
+  // door of that name (route drift fix 2026-11-03). Physical-resource listings
+  // stay reachable from that page and from the command finder.
+  { id: "market", href: "/dashboard/service-requests", iconKey: "store", labelKey: "companyModel.market" },
   { id: "people", href: "/dashboard/company/people", iconKey: "users", labelKey: "companyModel.people" },
   { id: "projects", href: "/dashboard/projects", iconKey: "folder", labelKey: "companyModel.projects" },
   { id: "messages", href: "/dashboard/communication", iconKey: "messages", labelKey: "companyModel.messages" },
@@ -82,6 +86,48 @@ export const ORGANIZATION_WORK_AREAS: readonly WorkArea[] = [
   { id: "work", href: "/dashboard/hours", iconKey: "activity", labelKey: "companyModel.work" },
   { id: "results", href: "/dashboard/reports", iconKey: "barChart", labelKey: "companyModel.results" },
   { id: "history", href: "/dashboard/company/history", iconKey: "history", labelKey: "companyModel.history" },
+];
+
+/**
+ * THE ORGANIZATION'S DOORS IN THE ONE HEADER (owner P0-2, direction A,
+ * 2026-11-03: navigation by role). For a person whose acting role in the
+ * ACTIVE workspace is company or agency (`actingRoleForWorkspace` — the ONE
+ * resolver; owner/manager AND the held role), the header's "More" and the
+ * phone sheet open with these doors, the role's own core first. The primary
+ * row stays the A-03 core loop for everyone (chat → journal → calendar →
+ * messages): this re-prioritizes "More", it adds no primary item.
+ *
+ * The two areas that ARE a core destination (messages, calendar) are left out
+ * so no destination appears twice. Every door re-checks its own rights: for
+ * an owner or manager of the active organization the company gate opens by
+ * membership (`requireRoleOrRedirect` → `workspaceOpensCompanySpace`), which
+ * is why an agency owner can open them too.
+ */
+const HEADER_AREA_LEADS: Record<"company" | "agency", readonly string[]> = {
+  company: ["people", "projects", "work"],
+  agency: ["people", "clients", "projects"],
+};
+const AREAS_IN_THE_CORE_LOOP = new Set(["messages", "calendar"]);
+
+export function organizationHeaderAreas(role: "company" | "agency"): readonly NavItem[] {
+  const leads = HEADER_AREA_LEADS[role];
+  const rank = (id: string) => (leads.includes(id) ? leads.indexOf(id) : leads.length);
+  return ORGANIZATION_WORK_AREAS.filter((a) => !AREAS_IN_THE_CORE_LOOP.has(a.id))
+    .map((a, n) => ({ a, n }))
+    .sort((x, y) => rank(x.a.id) - rank(y.a.id) || x.n - y.n)
+    .map(({ a }) => ({ id: `area:${a.id}` as const, href: a.href, tabLabelKey: a.labelKey, iconKey: a.iconKey }));
+}
+
+/**
+ * THE CUSTOMER'S OWN DOOR in the one header (owner P0-2, coordinator ruling
+ * 2026-11-03): a person whose ACTIVE role is customer, outside an
+ * organization workspace, finds "Mano užklausos" (/dashboard/buyer — the
+ * customer role's home) first in "More" and the phone sheet. Same rule as the
+ * organization doors: the primary row stays the A-03 core loop, this adds no
+ * primary item, and the page re-checks the customer role itself.
+ */
+export const CUSTOMER_HEADER_DOORS: readonly NavItem[] = [
+  { id: "area:buyer", href: "/dashboard/buyer", tabLabelKey: "roleDashboards.buyer.title", iconKey: "package" },
 ];
 
 export type WorkAreaContext = "personal" | "organization";

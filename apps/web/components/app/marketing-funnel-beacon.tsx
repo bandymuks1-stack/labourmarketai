@@ -8,6 +8,7 @@ import {
   captureFirstTouchAttribution,
   getFirstTouchAttribution,
 } from "@/lib/telemetry/attribution";
+import { whenAnalyticsConsentGranted } from "@/lib/consent/analytics-consent";
 
 /**
  * Public acquisition-funnel beacon (Pre-Advertising Launch Readiness v1).
@@ -43,30 +44,34 @@ export function MarketingFunnelBeacon() {
   const pathname = usePathname();
 
   useEffect(() => {
-    // First-touch attribution is idempotent and survives across the whole
-    // session; capture it on every marketing mount so a direct ad landing
-    // on any public page is attributed.
-    captureFirstTouchAttribution();
+    // Nothing is stored or sent before an explicit analytics yes; a yes given
+    // later on this page still counts this landing (the URL is unchanged).
+    return whenAnalyticsConsentGranted(() => {
+      // First-touch attribution is idempotent and survives across the whole
+      // session; capture it on every marketing mount so a direct ad landing
+      // on any public page is attributed.
+      captureFirstTouchAttribution();
 
-    // `landing_viewed` fires once per tab-session — navigating between
-    // marketing pages must not spam the funnel.
-    let alreadyFired = false;
-    try {
-      alreadyFired = window.sessionStorage.getItem(FIRED_KEY) === "1";
-    } catch {
-      /* sessionStorage unavailable — fall back to firing once per mount */
-    }
-    if (alreadyFired) return;
-    try {
-      window.sessionStorage.setItem(FIRED_KEY, "1");
-    } catch {
-      /* ignore */
-    }
+      // `landing_viewed` fires once per tab-session — navigating between
+      // marketing pages must not spam the funnel.
+      let alreadyFired = false;
+      try {
+        alreadyFired = window.sessionStorage.getItem(FIRED_KEY) === "1";
+      } catch {
+        /* sessionStorage unavailable — fall back to firing once per mount */
+      }
+      if (alreadyFired) return;
+      try {
+        window.sessionStorage.setItem(FIRED_KEY, "1");
+      } catch {
+        /* ignore */
+      }
 
-    trackFunnel(FUNNEL_EVENTS.landingViewed, {
-      audience: audienceFromPath(pathname),
-      landing_path: pathname.slice(0, 120),
-      ...getFirstTouchAttribution(),
+      trackFunnel(FUNNEL_EVENTS.landingViewed, {
+        audience: audienceFromPath(pathname),
+        landing_path: pathname.slice(0, 120),
+        ...getFirstTouchAttribution(),
+      });
     });
     // Intentionally run once on first marketing mount only.
     // eslint-disable-next-line react-hooks/exhaustive-deps

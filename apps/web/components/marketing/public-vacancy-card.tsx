@@ -3,6 +3,7 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 import { formatUtcDate } from "@/lib/time/display";
 import { PlaceTimeStamp } from "@/components/app/work-world/primitives";
+import { vacancyPayLabel } from "@/lib/vacancy-store/vacancy-pay-label";
 
 /**
  * One anonymous vacancy row.
@@ -83,15 +84,28 @@ const POSITIONS: L = {
 };
 
 /**
- * The anonymous fact chips (employment form · working time · positions), in
- * the reader's language from the fixed maps above. ONE builder for the card
+ * The anonymous fact chips (pay · employment form · working time · positions),
+ * in the reader's language from the fixed maps above. ONE builder for the card
  * and `/jobs/[id]`, so the detail page never shows less than its own card.
+ * Pay is part of the anonymous projection, shown first when the publisher
+ * supplied it (owner P0-3, 2026-11-03).
  */
 export function vacancyFactChips(
-  vacancy: Pick<PublicVacancyPreview, "employmentForm" | "workingTime" | "positions">,
+  vacancy: Pick<
+    PublicVacancyPreview,
+    | "employmentForm"
+    | "workingTime"
+    | "positions"
+    | "compensationCurrency"
+    | "compensationMin"
+    | "compensationMax"
+  >,
   locale: ActiveLocale,
 ): string[] {
   const chips: string[] = [];
+
+  const pay = vacancyPayLabel(vacancy, locale);
+  if (pay) chips.push(pay);
 
   const form = vacancy.employmentForm
     ? EMPLOYMENT_FORM[vacancy.employmentForm]?.[locale]
@@ -116,8 +130,21 @@ export function PublicVacancyCard({
   headingFallback,
   genericTitle,
   sourceLanguageLabel,
+  memberFacts,
+  lockedFactsLabel,
 }: {
   readonly vacancy: PublicVacancyPreview;
+  /**
+   * MEMBER-ONLY facts (owner P0-3, 2026-11-03): the employer and the place,
+   * read by the caller under the signed-in person's OWN client from the
+   * member read path. Never passed for an anonymous viewer; the anonymous
+   * projection cannot carry them (owner directive 2026-08-24).
+   */
+  readonly memberFacts?: { readonly employer: string | null; readonly place: string | null } | null;
+  /** Already-localized "employer and place after sign-in" line, passed by the
+   *  board for an anonymous viewer INSTEAD of `memberFacts`, so the card says
+   *  what exists instead of leaving the gap unexplained. Omitted = no line. */
+  readonly lockedFactsLabel?: string;
   readonly locale: ActiveLocale;
   /** Localized profession name for the anonymous heading (owner directive
    *  2026-08-24): the raw title is member-only because it embeds employer and
@@ -153,6 +180,9 @@ export function PublicVacancyCard({
   readonly sourceLanguageLabel?: string;
 }) {
   const chips = vacancyFactChips(vacancy, locale);
+  const memberLine = memberFacts
+    ? [memberFacts.employer, memberFacts.place].filter((x): x is string => Boolean(x)).join(" · ")
+    : "";
 
   const published = formatUtcDate(vacancy.publishedAt, locale);
   // Only a plausible language subtag is emitted: a malformed value in the data
@@ -231,6 +261,16 @@ export function PublicVacancyCard({
           </p>
         )
       )}
+
+      {memberLine ? (
+        <p className="mt-1 text-sm text-text-secondary" data-testid="public-vacancy-member-facts">
+          {memberLine}
+        </p>
+      ) : !memberFacts && lockedFactsLabel ? (
+        <p className="mt-1 text-sm text-text-muted" data-testid="public-vacancy-locked-facts">
+          {lockedFactsLabel}
+        </p>
+      ) : null}
 
       {chips.length > 0 && (
         <ul className="mt-2 flex flex-wrap gap-1.5">
