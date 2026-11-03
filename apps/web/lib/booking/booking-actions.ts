@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import {
   countOwnerResponsesSince,
+  isOverlapExclusionViolation,
   normalizeBookingReason,
   DECLINE_REASON_KINDS,
   WITHDRAW_REASON_KINDS,
@@ -93,13 +94,43 @@ export type BookingActionResult =
     }
   | { kind: "needs-migration" }
   | { kind: "conflict" }
+  /**
+   * The worker ACKNOWLEDGED the clash and the database still refused to
+   * record the accept (production 2026-10-25, walk orders-bookings O-5).
+   *
+   * v4 skips its own clash check when acknowledged, but the table's exclusion
+   * constraint `booking_requests_no_overlapping_accepted` still forbids two
+   * overlapping `accepted` rows for one worker, so the UPDATE fails with
+   * 23P01 and the booking stays `proposed`. Reporting that as `conflict`
+   * re-showed the very question the person had just answered and made the
+   * "accept anyway" button loop. This is its own answer: the overlap cannot
+   * be recorded YET — the person may decline, or leave the offer open for
+   * the company to change its dates. Never a success, never a plain conflict.
+   */
+  | { kind: "overlap-not-recordable" }
   /** The worker already ACCEPTED this proposal: its terms are an agreement
    *  and are not rewritten by proposing again. */
   | { kind: "already-accepted" }
+  /** The propose RPC refused (20261021095200): the worker is not one this
+   *  company may contact, the need is closed, or the worker DECLINED this
+   *  proposal (not re-opened without the worker's new consent). */
+  | { kind: "refused"; reason: ProposeRefusal }
   | { kind: "not-authed" }
   | { kind: "not-entitled" }
   | { kind: "rate-limited" }
   | { kind: "error"; message: string };
+
+export type ProposeRefusal = "worker-not-reachable" | "need-closed" | "already-answered";
+
+/** The propose RPC's stable refusal words → the action's closed vocabulary.
+ *  null = not one of them (the generic classifier decides). */
+function proposeRefusal(error: { message?: string }): ProposeRefusal | null {
+  const m = error.message ?? "";
+  if (/\bworker_not_reachable\b/.test(m)) return "worker-not-reachable";
+  if (/\bdemand_closed\b/.test(m)) return "need-closed";
+  if (/\bbooking_not_reopenable\b/.test(m)) return "already-answered";
+  return null;
+}
 
 function classify(error: { code?: string; message?: string }): BookingActionResult {
   if (error.code && ABSENT.has(error.code)) return { kind: "needs-migration" };
@@ -271,6 +302,14 @@ export async function proposeBookingAction(
   if ((existing as { status?: string } | null)?.status === "accepted") {
     return { kind: "already-accepted" };
   }
+  // The worker's "no" stands (20261021095200, owner decision 2026-10-21): a
+  // DECLINED proposal is not re-opened without the worker's new consent. The
+  // RPC refuses the same; this is the clean signal before any write. A
+  // proposal the company withdrew itself may be made again.
+  const existingStatus = (existing as { status?: string } | null)?.status;
+  if (existingStatus === "declined") {
+    return { kind: "refused", reason: "already-answered" };
+  }
 
   // WHAT the worker is offered is the need's own role. The scouting proposal
   // sends only dates + a note, so the booking used to reach the worker as a
@@ -299,6 +338,9 @@ export async function proposeBookingAction(
     if (error.code === "P0004" || /limit reached|too many open/i.test(error.message ?? "")) {
       return { kind: "rate-limited" };
     }
+    if (/booking already accepted/i.test(error.message ?? "")) return { kind: "already-accepted" };
+    const refusal = proposeRefusal(error);
+    if (refusal) return { kind: "refused", reason: refusal };
     return classify(error);
   }
   revalidatePath(`/${input.locale}/dashboard/bookings`);
@@ -420,6 +462,10 @@ export async function respondBookingAction(input: {
       // acknowledged, and reporting that as a plain conflict would hide the
       // real reason. Say the capability is missing.
       if (isAbsentFunction(v4.error)) return { kind: "needs-migration" };
+      // The acknowledgement was given, and the table constraint still refused
+      // the overlapping accept: say exactly that, never the plain conflict the
+      // person has already answered (that is what made the button loop).
+      if (isOverlapExclusionViolation(v4.error)) return { kind: "overlap-not-recordable" };
       return classify(v4.error);
     }
 
@@ -636,7 +682,9 @@ export interface BookingRow {
 export type BookingsListResult =
   | { kind: "ok"; incoming: BookingRow[]; outgoing: BookingRow[] }
   | { kind: "needs-migration" }
-  | { kind: "not-authed" };
+  | { kind: "not-authed" }
+  /** The read itself failed — the bookings are UNKNOWN, never "none". */
+  | { kind: "read-failed" };
 
 // Column lists for the tolerant read: the extended list ALSO asks for the
 // owner-gated lifecycle-v2 deadline column; while it is not applied the
@@ -699,7 +747,13 @@ async function readMyBookings(): Promise<BookingsListResult> {
   const { data, error } = res!;
   if (error) {
     if (error.code && ABSENT.has(error.code)) return { kind: "needs-migration" };
-    return { kind: "ok", incoming: [], outgoing: [] };
+    // UNKNOWN is not ZERO: a failed read used to come back as an empty "ok"
+    // list, so the worker saw "no proposals yet" while a proposal sat
+    // unreadable — a delivery failure disguised as an empty inbox (row 5.13
+    // follow-up, 2026-10-25). Every consumer already treats a non-ok kind as
+    // unknown; the bookings page says so and offers a retry.
+    console.error("[bookings] list read failed", { code: error.code ?? null });
+    return { kind: "read-failed" };
   }
 
   const incoming: BookingRow[] = [];
@@ -804,6 +858,17 @@ export async function getPendingIncomingBookingCount(): Promise<number> {
  * booking_requests_seen migration is not applied — both degrade to 0 "new".
  */
 export async function getBookingRequestsSeenAt(): Promise<string | null> {
+  return readBookingRequestsSeenAtOnce();
+}
+
+/** Read ONCE per server render (perf 2026-10-22): the bell's booking-response
+ *  badge and the opening brief's "workers answered" line both asked for the
+ *  same seen timestamp in one company render. Request-scoped like
+ *  `readMyBookingsOnce` above: every navigation re-reads, and a server action
+ *  (no render — e.g. `markBookingRequestsSeen`) never sees a cached value. */
+const readBookingRequestsSeenAtOnce = cache(readBookingRequestsSeenAt);
+
+async function readBookingRequestsSeenAt(): Promise<string | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -833,14 +898,15 @@ export async function getBookingResponsesNewCount(opts?: {
    *  Absent → the badge semantics stay exactly as before (0 until seen). */
   fallbackDays?: number;
 }): Promise<number> {
-  const seen = await getBookingRequestsSeenAt();
+  // The bookings list is request-cached and the spine's pending count reads
+  // it anyway, so it starts beside the seen read instead of after it.
+  const [seen, result] = await Promise.all([getBookingRequestsSeenAt(), listMyBookings()]);
   const fallback =
     opts?.fallbackDays && opts.fallbackDays > 0
       ? new Date(Date.now() - opts.fallbackDays * 86400000).toISOString()
       : null;
   const seenAt = seen ?? fallback;
   if (!seenAt) return 0;
-  const result = await listMyBookings();
   if (result.kind !== "ok") return 0;
   return countOwnerResponsesSince(result.outgoing, seenAt);
 }

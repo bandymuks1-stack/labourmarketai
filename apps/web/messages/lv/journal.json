@@ -30,6 +30,12 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Izvēlieties iesaisti…",
   "engagementAmbiguous": "Šis darbs var piederēt vairāk nekā vienai iesaistei. Pirms saglabāšanas izvēlieties, kurai.",
+  "unnamedOrganization": {
+    "company": "Uzņēmums bez nosaukuma",
+    "agency": "Aģentūra bez nosaukuma",
+    "other": "Organizācija bez nosaukuma"
+  },
+  "activeWorkspaceNoRelationship": "Jūs darbojaties {org} vārdā, bet darba attiecības ar {org} nav reģistrētas, tāpēc tās šeit netiek piedāvātas. Izvēlieties kontekstu, kuram šis darbs patiešām pieder.",
   "project": "Projekts",
   "projectChoose": "Izvēlieties projektu…",
   "projectNone": "Nav projekta darbs",
@@ -140,14 +146,15 @@
     "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later.",
     "uploading": "[EN] Uploading photo…",
     "remove": "[EN] Remove photo",
-    "previewAlt": "[EN] Selected photo"
+    "previewAlt": "[EN] Selected photo",
+    "takePhoto": "Nofotografēt"
   },
   "voice": {
     "entryCta": "Ierakstīt ar balsi",
     "pageTitle": "Balss ievade",
     "pageIntro": "Pastāstiet par savu darba dienu — jūs pārskatīsiet un izlabosiet tekstu, pirms kaut kas tiks saglabāts.",
     "backToJournal": "Atpakaļ uz dienasgrāmatu",
-    "unavailable": "Balss transkripcija vēl nav konfigurēta. Platformas īpašnieks vēl nav pievienojis transkripcijas serveri — ierakstīšana līdz tam ir atspējota. Ierakstu vienmēr varat uzrakstīt kā tekstu.",
+    "unavailable": "Balss transkripcija vēl nav pieejama — ierakstīšana pagaidām ir atspējota. Ierakstu vienmēr varat uzrakstīt kā tekstu.",
     "disclosureTitle": "Pirms ierakstīšanas",
     "disclosureProcessing": "Jūsu ieraksts tiek nosūtīts uz LabourMarket.ai kontrolētu apstrādes serveri, lai to pārvērstu tekstā. Trešo pušu balss pakalpojumi netiek izmantoti.",
     "disclosureWhy": "Tas tiek izmantots tikai zemāk redzamā teksta izveidei — nekam citam.",

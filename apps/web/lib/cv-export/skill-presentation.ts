@@ -54,6 +54,10 @@ export type SkillPracticeFacts = {
   readonly firstWorkedDay?: string | null;
   readonly lastWorkedDay: string | null;
   readonly trend?: "up" | "down" | "flat" | "new" | "none";
+  /** The engagement contexts the linked entries belong to — what lets the
+   *  career journey draw a skill line through the stop it was worked at
+   *  (never through a stop it merely overlaps in time). */
+  readonly contextIds?: readonly string[];
 };
 
 export type SkillPracticeBySlug = Readonly<Record<string, SkillPracticeFacts>>;
@@ -79,6 +83,7 @@ export function skillPracticeFromIntelligence(
       firstWorkedDay: (s as { firstWorkedDay?: string | null }).firstWorkedDay ?? null,
       lastWorkedDay: s.lastWorkedDay,
       trend: s.trend,
+      contextIds: s.contextIds,
     };
   }
   return out;
@@ -329,4 +334,55 @@ export function topPresentedSkills(
     }
   }
   return out;
+}
+
+/**
+ * THE TWO KINDS OF SKILL TIME, AS A CHIP STATES THEM (owner P0-B 2026-10-30).
+ *
+ * `attributedHours` is time the skill itself can claim (the only linked skill
+ * on the entry, or the fragment its link sits on). `sharedHours` is the
+ * model's UNATTRIBUTED REMAINDER of entries the skill took part in — time the
+ * evidence cannot give to this skill alone: the entry also used other skills,
+ * or its own timed parts split the time between kinds of work without saying
+ * where (work-intelligence.ts, basis `shared` / `multi_activity`). It is
+ * INVOLVEMENT, not whole-session time and not the skill's own hours: stated
+ * as "involved, not attributed to this skill", never split, never added.
+ *
+ * Before this reading the Living CV showed attributed hours only, so a skill
+ * whose every entry also used other skills showed no time at all — even
+ * though the person's records hold the work (the common case: one day of
+ * work, two or three skills recognised).
+ *
+ * `null` facts = the journal could not be read → `unknown` (SEP-7, never 0).
+ */
+export type SkillTimeReading =
+  | { readonly kind: "unknown" }
+  | { readonly kind: "none" }
+  | {
+      readonly kind: "attributed";
+      readonly attributedHours: number;
+      readonly confirmedHours: number;
+      /** Involved-but-unattributed time on top (0 when none) — stated
+       *  separately, never added. */
+      readonly involvedHours: number;
+    }
+  | { readonly kind: "involvement_only"; readonly involvedHours: number };
+
+export function skillTimeReading(
+  facts: SkillPracticeFacts | null | undefined,
+  journalReadable: boolean,
+): SkillTimeReading {
+  if (!journalReadable) return { kind: "unknown" };
+  if (!facts) return { kind: "none" };
+  const involved = facts.sharedHours > 0 ? facts.sharedHours : 0;
+  if (facts.attributedHours > 0) {
+    return {
+      kind: "attributed",
+      attributedHours: facts.attributedHours,
+      confirmedHours: facts.confirmedHours,
+      involvedHours: involved,
+    };
+  }
+  if (involved > 0) return { kind: "involvement_only", involvedHours: involved };
+  return { kind: "none" };
 }

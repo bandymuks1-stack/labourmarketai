@@ -353,11 +353,22 @@ export async function deleteDemandDraft(type: DraftType): Promise<void> {
     }
   }
 
-  const { error } = await cr(supabase)
-    .update({ status: "closed" })
+  // `discarded` (lifecycle contract): a draft that leaves the form was never
+  // in the market — including the draft a submit just superseded — so it can
+  // never be reopened into it. Without the column (migration unapplied) the
+  // close happens exactly as before.
+  let { error } = await cr(supabase)
+    .update({ status: "closed", closed_outcome: "discarded" })
     .eq("profile_id", user.id)
     .eq("kind", type)
     .eq("status", "draft");
+  if (error && (error.code === "42703" || error.code === "PGRST204")) {
+    ({ error } = await cr(supabase)
+      .update({ status: "closed" })
+      .eq("profile_id", user.id)
+      .eq("kind", type)
+      .eq("status", "draft"));
+  }
 
   if (error) {
     console.error("[demand-draft] delete failed:", error.message);

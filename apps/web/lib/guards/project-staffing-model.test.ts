@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * PROJECT STAFFING MODEL guards (formerly "sports operating model", Commercial
@@ -39,7 +40,7 @@ const opsBoard = read("components/app/project-operations-board.tsx");
 const projectsLib = read("lib/projects/projects.ts");
 const actionsLib = read("lib/projects/actions.ts");
 
-const LOCALES = ["en", "lt", "ru"] as const;
+const LOCALES = activeLocales;
 
 /** Ranking-claim tokens per language (also matched inside longer words). */
 const RANKING_TOKEN = /rank|reiting|рейтинг/i;
@@ -99,11 +100,23 @@ describe("1 · /about explains the work-evidence model and the projects board li
 });
 
 describe("2 · the staffing view renders ONLY real assignment rows", () => {
-  it("rows come from listProjectAssignments (project_worker_assignments, active, RLS)", () => {
-    expect(projectsPage).toMatch(/listProjectAssignments\(p\.id\)/);
+  it("rows come from listProjectAssignments* (project_worker_assignments, active, RLS)", () => {
+    // 2026-10-18 perf: one batched read for every active project (was one per project).
+    expect(projectsPage).toMatch(/listProjectAssignmentsForProjects\(\s*activeProjects\.map\(\(p\) => p\.id\)/);
+    expect(projectsLib).toMatch(/\.in\("project_id", ids\)/);
     expect(projectsLib).toMatch(/\.from\("project_worker_assignments"\)/);
     expect(projectsLib).toMatch(/\.eq\("status", "active"\)/);
     expect(manager).toMatch(/p\.assignments\.map\(/);
+  });
+
+  it("the gallery photo counts are one batched read, not a request pair per project", () => {
+    // 2026-10-19 perf: 12 projects cost 24 gallery reads (the entry count was never shown).
+    expect(projectsPage).toMatch(/getProjectPhotoCounts\(galleryProjects\.map\(\(p\) => p\.id\)\)/);
+    expect(projectsPage).not.toContain("getProjectGallerySummary");
+    // A truncated batch (PostgREST max_rows) is never accepted as the count.
+    const gallery = read("lib/journal/project-gallery.ts");
+    expect(gallery).toContain('{ count: "exact" }');
+    expect(gallery).toContain("data.length === count");
   });
 
   it("no sample/demo/fixture data pin anywhere on the roster path", () => {

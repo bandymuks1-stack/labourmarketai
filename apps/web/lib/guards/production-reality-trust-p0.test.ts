@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Production reality / trust guards (production-reality-trust-p0).
@@ -20,7 +21,7 @@ import { join } from "node:path";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 
 describe("issue 2 — stale journal skill chips stay collapsed (no unrelated chips shown)", () => {
   const src = read("components/app/journal-entry-skill-links.tsx");

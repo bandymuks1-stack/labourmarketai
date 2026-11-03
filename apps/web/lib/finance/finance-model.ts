@@ -430,3 +430,59 @@ export function financeStatusLabelKey(status: FinanceRecordStatus): string {
 export function financeTypeLabelKey(type: FinanceRecordType): string {
   return `finance.type.${type}`;
 }
+
+/* ------------------------------------------------------------------ */
+/* Workspace scope (decision 0024: one organization's context never    */
+/* shows in another)                                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The workspace a finance read answers for. `companyId` is the ACTIVE
+ * workspace's company (server-resolved), or null when the person is in a
+ * personal / non-employer workspace.
+ */
+export type FinanceWorkspaceScope = {
+  readonly userId: string;
+  readonly companyId: string | null;
+};
+
+const FINANCE_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * PostgREST `or` filter for the records of ONE workspace: the active
+ * company's records, plus the caller's own records that carry no company.
+ * RLS still decides what is readable at all; this only stops a person who
+ * governs two organizations from seeing (and exporting) both in one place.
+ * Returns null for a malformed id — the caller then reads nothing.
+ */
+export function financeWorkspaceOrFilter(scope: FinanceWorkspaceScope): string | null {
+  if (!FINANCE_UUID_RE.test(scope.userId)) return null;
+  const personal = `and(company_id.is.null,created_by.eq.${scope.userId})`;
+  if (scope.companyId === null) return personal;
+  if (!FINANCE_UUID_RE.test(scope.companyId)) return null;
+  return `company_id.eq.${scope.companyId},${personal}`;
+}
+
+/** The same rule for one record (pure; the in-memory mirror of the filter). */
+export function recordInFinanceWorkspace(
+  record: { readonly companyId: string | null; readonly createdBy: string },
+  scope: FinanceWorkspaceScope,
+): boolean {
+  if (record.companyId === null) return record.createdBy === scope.userId;
+  return scope.companyId !== null && record.companyId === scope.companyId;
+}
+
+/**
+ * Whether the caller may link a finance record to the workspace company —
+ * the app-side mirror of `finance_company_authority_v1` (a creator whose
+ * governance was not ended, or an ACTIVE owner/admin membership; managers
+ * deliberately excluded). The form offers the company link only when the
+ * database would accept it, so a manager is never handed a pre-ticked box
+ * that can only end in "not allowed".
+ */
+export function canLinkFinanceToCompany(ctx: {
+  readonly role: string;
+  readonly isCreator?: boolean;
+}): boolean {
+  return ctx.role === "owner" || ctx.role === "admin" || ctx.isCreator === true;
+}

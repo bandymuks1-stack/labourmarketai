@@ -3,11 +3,13 @@
 import "server-only";
 
 import { runAiAgent } from "@/lib/ai/run-agent-server";
+import { aiLocaleFor } from "@/lib/ai/runtime/types";
 import { CONVERSATION_INTENT_SENTENCE_MAX } from "@/lib/ai/registry/agents/conversation-intent";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 import { intentCatalogue } from "@/lib/conversation/intent-catalogue";
+import { validatePlan } from "@/lib/conversation/intent-plan";
 import { INTENT_REGISTRY, type RoutedIntent } from "@/lib/conversation/intent-registry";
 import {
   unsupportedReasonForAiOutcome,
@@ -53,7 +55,6 @@ import {
  */
 
 const RATE_LIMIT = { limit: 30, windowMs: 10 * 60 * 1000 } as const;
-const AI_LOCALES = new Set(["en", "lt", "ru"]);
 
 function isRoutedIntent(v: unknown): v is RoutedIntent {
   return (
@@ -96,7 +97,7 @@ export async function proposeUnderstandingAction(input: {
   });
   if (limited.limited) return { kind: "unsupported", reason: "rate_limited", source: "model" };
 
-  const locale = AI_LOCALES.has(input.locale) ? (input.locale as "en" | "lt" | "ru") : "en";
+  const locale = aiLocaleFor(input.locale);
   const identity = input.identity === "company" ? "company" : "person";
 
   try {
@@ -122,7 +123,7 @@ export async function proposeUnderstandingAction(input: {
     }
     const envelope = outcome.value as {
       confidence?: "low" | "medium" | "high";
-      data?: { kind?: unknown; intent?: unknown; reference?: unknown };
+      data?: { kind?: unknown; intent?: unknown; reference?: unknown; steps?: unknown };
     };
     const kind = envelope.data?.kind;
     const reference = cleanReference(envelope.data?.reference);
@@ -141,6 +142,12 @@ export async function proposeUnderstandingAction(input: {
         if (envelope.confidence !== "high" && envelope.confidence !== "medium") {
           return { kind: "unsupported", reason: "not_understood", source: "model" };
         }
+        // ONE SENTENCE, AN ORDERED PLAN (owner 2026-10-14 §4). Same call,
+        // same grant; accepted only inside lib/conversation/intent-plan.ts's
+        // rule (reads, at most one write as the last step). Anything else is
+        // the single intent, exactly as before.
+        const plan = validatePlan(envelope.data?.steps, sentence);
+        if (plan && plan[0].intent === proposed) return { kind: "plan", steps: plan, source: "model" };
         return { kind: "intent", intent: proposed, score: 0, source: "model" };
       }
       case "reference":

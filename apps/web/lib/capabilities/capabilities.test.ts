@@ -32,9 +32,21 @@ const coreWrite = vi.fn(async () => ({
     cvUpdated: true,
   },
 }));
+// The entry a refused confirm's draft already became (P0-A retry replay);
+// none by default, so every refusal test below stays a refusal.
+const confirmedDraftLookup = vi.fn(async (..._a: unknown[]): Promise<string | null> => null);
 vi.mock("@/lib/journal/journal-write-core", () => ({
   createJournalEntryCore: (...args: unknown[]) => coreWrite(...(args as [])),
   projectsToChooseFrom: async () => null,
+  findConfirmedDraftEntry: (...args: unknown[]) => confirmedDraftLookup(...args),
+  runSkillPipeline: async () => ({
+    status: "completed",
+    added: 0,
+    strengthened: 1,
+    reviewNeeded: 0,
+    claimsSaved: 0,
+    cvUpdated: false,
+  }),
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -76,6 +88,17 @@ const demandFingerprint = vi.fn(async () => "demand:none");
 vi.mock("@/lib/demand/demand-request", () => ({
   submitDemandRequestCore: (...a: unknown[]) => demandSubmit(...(a as [])),
   demandStateFingerprint: (...a: unknown[]) => demandFingerprint(...(a as [])),
+}));
+
+// Whether a recorded skill confirmation still STANDS is read from the journal
+// (lib/evidence/skill-confirmation-standing-read.ts); the table stub cannot
+// model that read, so each test states the answer it needs.
+const standingRead = vi.hoisted(() => ({
+  value: null as { ids: ReadonlySet<string>; subjectProfileId: string | null } | null,
+}));
+vi.mock("@/lib/evidence/skill-confirmation-standing-read", () => ({
+  readStandingConfirmedSkillIds: async () => standingRead.value,
+  readOwnStandingConfirmedSkillIds: async () => standingRead.value,
 }));
 
 import {
@@ -162,6 +185,8 @@ const DOMAIN_DESTRUCTIVE: readonly string[] = [
   "marketplace_listing.delete_confirm",
   "proposal.delete_confirm",
   "contract.delete_confirm",
+  // Overwrites the organization's stored recompute cadence (audited).
+  "forecast.mode.set_confirm",
 ];
 
 describe("the registry itself", () => {
@@ -175,6 +200,8 @@ describe("the registry itself", () => {
       "journal.work_intelligence.get",
       "journal.create_draft",
       "journal.confirm",
+      "journal.correct_draft",
+      "journal.correct_confirm",
       "interest.express_draft",
       "interest.express_confirm",
       "work_card.save_draft",
@@ -432,6 +459,14 @@ describe("the registry itself", () => {
       "timesheets.overview.get",
       "finance.records.list",
       "cv.verified.get",
+      // The public vacancy board for a bearer client (2026-10-16): the same
+      // read the website's /jobs page performs, anonymous projection only.
+      "jobs.search",
+      "jobs.get",
+      // Stage 7 forecasts (2026-10-24): forecast read + cadence draft → confirm.
+      "project.forecast.get",
+      "forecast.mode.set_draft",
+      "forecast.mode.set_confirm",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
@@ -442,6 +477,8 @@ describe("the registry itself", () => {
       "journal.work_intelligence.get",
       "journal.create_draft",
       "journal.confirm",
+      "journal.correct_draft",
+      "journal.correct_confirm",
       "interest.express_draft",
       "interest.express_confirm",
       "work_card.save_draft",
@@ -693,6 +730,14 @@ describe("the registry itself", () => {
       "timesheets.overview.get",
       "finance.records.list",
       "cv.verified.get",
+      // The public vacancy board for a bearer client (2026-10-16): the same
+      // read the website's /jobs page performs, anonymous projection only.
+      "jobs.search",
+      "jobs.get",
+      // Stage 7 forecasts (2026-10-24): forecast read + cadence draft → confirm.
+      "project.forecast.get",
+      "forecast.mode.set_draft",
+      "forecast.mode.set_confirm",
     ]);
   });
 
@@ -790,6 +835,17 @@ describe("the registry itself", () => {
   });
 });
 
+/** The `profile` object profile.get returns — pinned by the first test below. */
+const PROFILE_REPLY_FIELDS = {
+  id: 1,
+  fullName: 1,
+  email: 1,
+  locale: 1,
+  country: 1,
+  onboarded: 1,
+  activeRole: 1,
+} as const;
+
 describe("profile.get", () => {
   it("returns recorded facts and the worker's three-valued existence", async () => {
     const r = await runCapability(
@@ -820,6 +876,27 @@ describe("profile.get", () => {
         heldRoles: { status: "known", roles: ["worker", "company"] },
       },
     });
+    // Ties the reply to the minimisation guard below.
+    const profile = (r as { ok: true; data: { profile: Record<string, unknown> } }).data.profile;
+    expect(Object.keys(profile).sort()).toEqual(Object.keys(PROFILE_REPLY_FIELDS).sort());
+  });
+
+  it("data minimisation: the description names every personal field the reply carries", () => {
+    // An assistant (and the person reading its tool list) must be able to
+    // tell from the description alone that this read returns their e-mail
+    // address. A field added to the reply without being named here fails.
+    const description = listCapabilities().find((c) => c.id === "profile.get")!.description;
+    const named: Record<string, RegExp> = {
+      id: /account id/,
+      fullName: /\bname\b/,
+      email: /email address/,
+      locale: /locale/,
+      country: /country/,
+      onboarded: /onboarding state/,
+      activeRole: /active role/,
+    };
+    expect(Object.keys(named).sort()).toEqual(Object.keys(PROFILE_REPLY_FIELDS).sort());
+    for (const [field, rx] of Object.entries(named)) expect(description, field).toMatch(rx);
   });
 
   it("a failed ROLES read is 'unavailable', never 'holds no roles'", async () => {
@@ -888,6 +965,7 @@ describe("profile.get", () => {
 
 describe("living_cv.skills.get", () => {
   it("returns the caller's worker_skills rows joined to catalogue slugs", async () => {
+    standingRead.value = { ids: new Set(["s-1"]), subjectProfileId: "profile-1" };
     const r = await runCapability(
       "living_cv.skills.get",
       caller({
@@ -911,6 +989,8 @@ describe("living_cv.skills.get", () => {
       ok: true,
       data: {
         workerId: "worker-1",
+        // no journal scripted here → the practice read is UNKNOWN, never zero
+        practiceStatus: "unavailable",
         skills: [
           {
             skillId: "s-1",
@@ -918,10 +998,35 @@ describe("living_cv.skills.get", () => {
             verified: true,
             source: "work_journal",
             verifiedAt: "2026-08-01T00:00:00Z",
+            practice: null,
           },
         ],
       },
     });
+  });
+
+  it("a recorded confirmation whose work no longer stands is NOT verified (the act is kept)", async () => {
+    standingRead.value = { ids: new Set(), subjectProfileId: "profile-1" };
+    const r = await runCapability(
+      "living_cv.skills.get",
+      caller({
+        workers: { data: { id: "worker-1" }, error: null },
+        worker_skills: {
+          data: [
+            {
+              skill_id: "s-1",
+              verified: true,
+              source: "work_journal",
+              verified_at: "2026-08-01T00:00:00Z",
+              skills: { slug: "tiling" },
+            },
+          ],
+          error: null,
+        },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({ ok: true, data: { skills: [{ skillId: "s-1", verified: false }] } });
   });
 
   it("no worker row is an honest no_worker, not an empty success", async () => {
@@ -1361,7 +1466,7 @@ describe("journal draft → confirm", () => {
         projectId: null,
         // The named context — the human sees WHERE the entry lands before
         // confirming.
-        engagementLabel: "Dev Statyba",
+        engagementLabel: "Dev Statyba · employee",
       });
       expect(typeof r.data?.confirmationToken).toBe("string");
     }
@@ -1378,7 +1483,7 @@ describe("journal draft → confirm", () => {
     if (r.ok) {
       const preview = r.data?.preview as Record<string, unknown>;
       expect(preview.engagementContextId).toBe(DRAFT.engagementContextId);
-      expect(preview.engagementLabel).toBe("Dev Statyba");
+      expect(preview.engagementLabel).toBe("Dev Statyba · employee");
       expect(typeof r.data?.confirmationToken).toBe("string");
     }
   });
@@ -1430,8 +1535,8 @@ describe("journal draft → confirm", () => {
       expect(r.data?.status).toBe("engagement_choice_required");
       expect(r.data?.confirmationToken).toBeUndefined();
       expect(r.data?.options).toEqual([
-        { id: EC_ROW.id, label: "Dev Statyba" },
-        { id: second.id, label: "Nonstop Group" },
+        { id: EC_ROW.id, label: "Dev Statyba · employee" },
+        { id: second.id, label: "Nonstop Group · employee" },
       ]);
     }
   });
@@ -1449,7 +1554,7 @@ describe("journal draft → confirm", () => {
       expect(r.data?.status).toBe("engagement_choice_required");
       expect(r.data?.confirmationToken).toBeUndefined();
       expect(r.data?.preview).toBeUndefined();
-      expect(r.data?.options).toEqual([{ id: EC_ROW.id, label: "Dev Statyba" }]);
+      expect(r.data?.options).toEqual([{ id: EC_ROW.id, label: "Dev Statyba · employee" }]);
       expect(String(r.data?.note)).toMatch(/not one of this account's active work contexts/);
     }
   });
@@ -1466,7 +1571,7 @@ describe("journal draft → confirm", () => {
     if (r.ok) {
       expect(r.data?.status).toBe("engagement_choice_required");
       expect(r.data?.confirmationToken).toBeUndefined();
-      expect(r.data?.options).toEqual([{ id: EC_ROW.id, label: "Dev Statyba" }]);
+      expect(r.data?.options).toEqual([{ id: EC_ROW.id, label: "Dev Statyba · employee" }]);
     }
   });
 
@@ -1485,10 +1590,10 @@ describe("journal draft → confirm", () => {
     expect(r).toMatchObject({ ok: false, code: "no_engagement_context" });
   });
 
-  it("duplicate option labels are qualified by relationship — two contexts at the same org stay tellable apart", async () => {
+  it("two contexts at the same org stay tellable apart — the ONE composer names the relationship", async () => {
     // The education case from the web selector (worklog-engagements.ts):
-    // employed at the org that also hosts the placement. Both bases render
-    // as the org name, so each gets its relationship as a qualifier.
+    // employed at the org that also hosts the placement. The shared composer
+    // reads "Org · Relationship", so the two are distinct by construction.
     const placement = {
       ...EC_ROW,
       id: "00000000-0000-4000-8000-0000000000ed",
@@ -1507,12 +1612,117 @@ describe("journal draft → confirm", () => {
     expect(r.ok).toBe(true);
     if (r.ok) {
       expect(r.data?.status).toBe("engagement_choice_required");
-      // The translation mock has() => false, so the qualifier is the raw
+      // The translation mock has() => false, so the relationship is the raw
       // slug here; in the app it is the localized relationshipTypes word.
       expect(r.data?.options).toEqual([
-        { id: EC_ROW.id, label: "Dev Statyba — employee" },
-        { id: placement.id, label: "Dev Statyba — student" },
+        { id: EC_ROW.id, label: "Dev Statyba · employee" },
+        { id: placement.id, label: "Dev Statyba · student" },
       ]);
+    }
+  });
+
+  // ── ACTIVE WORKSPACE (owner P0 2026-10-29) — the MCP draft resolves with the
+  // SAME signal the web composer and the chat work-log pass: the pointer from
+  // the one transport-neutral workspace core.
+  const ORG_A = "00000000-0000-4000-8000-00000000aa01";
+  const ORG_B = "00000000-0000-4000-8000-00000000bb01";
+  const ORG_ACTING = "00000000-0000-4000-8000-00000000cc01";
+  const ctxAt = (id: string, org: string | null, name: string | null, extra: Record<string, unknown> = {}) => ({
+    ...EC_ROW,
+    id,
+    is_primary: false,
+    organization_id: org,
+    organizations: org
+      ? { display_name: name, legal_name: null, organization_type: "company" }
+      : null,
+    ...extra,
+  });
+  const CTX_A = ctxAt("00000000-0000-4000-8000-0000000000a1", ORG_A, "Alfa");
+  const CTX_B = ctxAt("00000000-0000-4000-8000-0000000000b1", ORG_B, "Beta");
+  const CTX_PERSONAL = ctxAt("00000000-0000-4000-8000-0000000000p1", null, null, { is_primary: true });
+  /** A world where the caller ACTS FOR `pointer` — a governance membership
+   *  lists it (access), and the durable pointer names it. */
+  const actingWorld = (contexts: unknown[], pointer: string, memberOrgName = "Acting Org"): TableScript => ({
+    ...journalState("h0"),
+    engagement_contexts: { data: contexts, error: null },
+    organizations: { data: [], error: null },
+    company_memberships: {
+      data: [
+        {
+          organization_id: pointer,
+          role: "member",
+          organizations: { display_name: memberOrgName, legal_name: null, organization_type: "company" },
+        },
+      ],
+      error: null,
+    },
+    profiles: { data: { active_organization_id: pointer }, error: null },
+  });
+
+  it("rule W: acting for an organization with exactly one context there preselects it — no choice, still NAMED", async () => {
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller(actingWorld([CTX_PERSONAL, CTX_A, CTX_B], ORG_B)),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      const preview = r.data?.preview as Record<string, unknown>;
+      expect(preview.engagementContextId).toBe(CTX_B.id);
+      expect(preview.engagementLabel).toBe("Beta · employee");
+      expect(typeof r.data?.confirmationToken).toBe("string");
+      expect(r.data?.activeWorkspaceNotice).toBeUndefined();
+    }
+  });
+
+  it("CONTROL: the same contexts with NO active organization still ask (rule C) — the signal, not the data, decided", async () => {
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({ ...journalState("h0"), engagement_contexts: { data: [CTX_PERSONAL, CTX_A, CTX_B], error: null } }),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data?.status).toBe("engagement_choice_required");
+  });
+
+  it("membership WITHOUT a work relationship: the choice says so plainly, orders active-first/personal-last, creates nothing", async () => {
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller(actingWorld([CTX_PERSONAL, CTX_A, CTX_B], ORG_ACTING)),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("engagement_choice_required");
+      expect(r.data?.confirmationToken).toBeUndefined();
+      // The mock renders keys; in the app this is the localized sentence
+      // "You are acting for {org}, but no work relationship … is recorded".
+      expect(r.data?.activeWorkspaceNotice).toBe("activeWorkspaceNoRelationship");
+      const ids = (r.data?.options as { id: string }[]).map((o) => o.id);
+      // The acting org is NOT invented as an option; personal reads last.
+      expect(ids).toEqual([CTX_A.id, CTX_B.id, CTX_PERSONAL.id]);
+    }
+  });
+
+  it("an organization WITHOUT a name says so in the option label — never its bare type or relationship", async () => {
+    const unnamedAgency = ctxAt("00000000-0000-4000-8000-0000000000u1", ORG_B, null, {
+      relationship_slug: "owner",
+      organizations: { display_name: null, legal_name: null, organization_type: "agency" },
+    });
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({ ...journalState("h0"), engagement_contexts: { data: [CTX_PERSONAL, CTX_A, unnamedAgency], error: null } }),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      const labels = (r.data?.options as { id: string; label: string }[]).map((o) => o.label);
+      expect(labels).toContain("unnamedOrganization.agency · owner");
+      expect(labels).not.toContain("owner");
     }
   });
 
@@ -1635,6 +1845,70 @@ describe("journal draft → confirm", () => {
     expect(replayed).toMatchObject({ ok: false, code: "confirmation_rejected" });
     expect(replayed.ok === false && /stale_state/.test(replayed.message ?? "")).toBe(true);
     expect(coreWrite).not.toHaveBeenCalled();
+  });
+
+  // P0-A 2026-10-30: the first confirm WROTE, its response was lost (mobile
+  // network drop, client timeout) and the client retried the same token. It
+  // used to answer "not saved — draft again", inviting a second copy.
+  it("RETRY AFTER A LOST RESPONSE: the spent token answers with the entry the first call recorded — and writes nothing", async () => {
+    coreWrite.mockClear();
+    confirmedDraftLookup.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    confirmedDraftLookup.mockResolvedValueOnce("e-first");
+
+    const retried = await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(retried).toMatchObject({
+      ok: true,
+      data: { entryId: "e-first", alreadyRecorded: true, skills: { status: "completed" } },
+    });
+    expect(coreWrite).not.toHaveBeenCalled();
+    // The lookup is bound to THIS draft: worker, context, words, day, project
+    // and only entries recorded after the token was issued.
+    const [, q] = confirmedDraftLookup.mock.calls[0] as unknown as [unknown, Record<string, unknown>];
+    // …with the confirm's OWN FormData mapping: every signed field it writes.
+    expect(q).toMatchObject({ workerId: "worker-1" });
+    expect(q.fields).toEqual({
+      locale: "lt",
+      engagement_context_id: DRAFT.engagementContextId,
+      notes: DRAFT.notes,
+      work_date: DRAFT.workDate,
+      site_name: DRAFT.siteName,
+      project_id: "",
+      ...intakeWorkTimeFields(DRAFT.notes, DRAFT.workDate),
+    });
+    expect(typeof q.issuedAtMs).toBe("number");
+  });
+
+  it("a stale token whose draft was NOT recorded stays refused (draft again)", async () => {
+    coreWrite.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const r = await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(r).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(coreWrite).not.toHaveBeenCalled();
+  });
+
+  it("a forged or tampered token never even asks whether the entry exists", async () => {
+    confirmedDraftLookup.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      notes: "Different notes than were previewed",
+      confirmationToken: token,
+    });
+    await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      confirmationToken: "not-a-real.token",
+    });
+    expect(confirmedDraftLookup).not.toHaveBeenCalled();
   });
 });
 

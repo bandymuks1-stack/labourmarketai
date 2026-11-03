@@ -10,7 +10,7 @@
  *  - the research module is editorial-only (never imported by a route/render).
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { WAVE2C_ANSWERS } from "@/content/answer-engine/wave2c-answers";
 import { WAVE2D_ANSWERS } from "@/content/answer-engine/wave2d-answers";
@@ -177,10 +177,10 @@ describe("answer engine — public question research (privacy + separation)", ()
     const roots = ["app", "components"].map((d) => resolve(webRoot, d));
     const hits: string[] = [];
     const walk = (dir: string) => {
-      for (const name of readdirSync(dir)) {
+      for (const dirent of readdirSync(dir, { withFileTypes: true })) {
+        const name = dirent.name;
         const p = join(dir, name);
-        const st = statSync(p);
-        if (st.isDirectory()) walk(p);
+        if (dirent.isDirectory()) walk(p);
         else if (/\.(tsx?|jsx?)$/.test(name)) {
           const src = readFileSync(p, "utf-8");
           if (src.includes("research/public-question-signals")) hits.push(p);
@@ -254,10 +254,10 @@ describe("answer engine — Wave 2D discovery signal contract", () => {
     const roots = ["app", "components"].map((d) => resolve(webRoot, d));
     const hits: string[] = [];
     const walk = (dir: string) => {
-      for (const name of readdirSync(dir)) {
+      for (const dirent of readdirSync(dir, { withFileTypes: true })) {
+        const name = dirent.name;
         const p = join(dir, name);
-        const st = statSync(p);
-        if (st.isDirectory()) walk(p);
+        if (dirent.isDirectory()) walk(p);
         else if (/\.(tsx?|jsx?)$/.test(name)) {
           if (readFileSync(p, "utf-8").includes("research/wave2d-question-signals")) hits.push(p);
         }

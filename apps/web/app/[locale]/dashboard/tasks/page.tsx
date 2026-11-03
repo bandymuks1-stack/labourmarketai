@@ -88,6 +88,11 @@ import { listOrganizationMembers } from "@/lib/company/memberships";
 import { createUtcFormatter } from "@/lib/time/display";
 import { taskAnchorId } from "@/lib/projects/stage-gantt";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/tasks", "tasks.title");
+
 
 /**
  * Work tasks (control room PR D, capability gap map §3) — the role-aware
@@ -206,6 +211,8 @@ export default async function TasksPage({
     rtask?: string;
     /** Deep link from the project timeline / planning: highlight this task. */
     task?: string;
+    /** Deep link from a project's first step: open the create form. */
+    create?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -1300,13 +1307,6 @@ export default async function TasksPage({
   }
 
   const myTasks = [...myResult.tasks, ...teamOnlyTasks];
-  const openTasks = myTasks.filter((task) => isOpen(task.status));
-  const closedTasks = myTasks.filter((task) => !isOpen(task.status));
-  // A deep link (?task=) that targets a FINISHED task reveals the closed
-  // group, otherwise the link would land on a page that does not show it.
-  const closedVisible =
-    showClosed ||
-    (highlightTaskId !== null && closedTasks.some((task) => task.id === highlightTaskId));
 
   /* PROJECT → STAGE → TASK → SUBTASK view of the project-filtered list.
      WBS numbers are DERIVED (lib/projects/wbs.ts), never stored, and only
@@ -1326,6 +1326,36 @@ export default async function TasksPage({
     structure && projectFilter
       ? deriveWbs(projectStageList, projectTaskList)
       : null;
+
+  // ONE CARD PER TASK. The project section above already renders these rows;
+  // the my-tasks list and the board must not draw the same card again (two
+  // sets of Start/Complete actions, a duplicated #task-<id> anchor and label
+  // ids — measured by the production project walk, 2026-10-22). The set is
+  // what the project section ACTUALLY shows (stage filter included), so a
+  // task outside it stays in my list. `myTasks` stays whole: the dependency
+  // picker reads it.
+  const shownInProject = new Set<string>(
+    !projectFilter || !projectResult || projectResult.status !== "ok"
+      ? []
+      : structure && wbs && projectResult.tasks.length > 0
+        ? [
+            ...wbs.stages
+              .filter((g) => stageFilter === null || stageFilter === g.stageId)
+              .flatMap((g) => flattenWbs(g.roots).map((n) => n.task.id)),
+            ...(stageFilter === null || stageFilter === "none"
+              ? flattenWbs(wbs.unstaged).map((n) => n.task.id)
+              : []),
+          ]
+        : projectResult.tasks.map((task) => task.id),
+  );
+  const listedMyTasks = myTasks.filter((task) => !shownInProject.has(task.id));
+  const openTasks = listedMyTasks.filter((task) => isOpen(task.status));
+  const closedTasks = listedMyTasks.filter((task) => !isOpen(task.status));
+  // A deep link (?task=) that targets a FINISHED task reveals the closed
+  // group, otherwise the link would land on a page that does not show it.
+  const closedVisible =
+    showClosed ||
+    (highlightTaskId !== null && closedTasks.some((task) => task.id === highlightTaskId));
 
   const evidenceRollup: Readonly<Record<string, StageEvidenceRollup>> =
     evidence.status === "ok"
@@ -1559,7 +1589,9 @@ export default async function TasksPage({
           disclosure so the OPEN TASKS lead the page — the ~10-field form no
           longer pushes the task list below the fold. Same form, same action. */}
       <details
-        className="group rounded-md border border-ink-500 bg-ink-800/30"
+        id="tasks-create"
+        open={sp.create === "1" ? true : undefined}
+        className="group scroll-mt-24 rounded-md border border-ink-500 bg-ink-800/30"
         data-testid="tasks-create"
       >
         <summary className="flex cursor-pointer list-none items-center gap-2 p-4 font-display text-lg font-semibold tracking-tight text-text-primary [&::-webkit-details-marker]:hidden">
@@ -1756,7 +1788,7 @@ export default async function TasksPage({
           data-testid="tasks-board"
         >
           {BOARD_COLUMNS.map((status) => {
-            const column = myTasks.filter((task) => task.status === status);
+            const column = listedMyTasks.filter((task) => task.status === status);
             return (
               <section
                 key={status}
@@ -1781,7 +1813,7 @@ export default async function TasksPage({
       ) : (
         /* My tasks — open groups by status; done/cancelled behind a link. */
         <section className="flex flex-col gap-4" data-testid="tasks-my">
-          {openTasks.length === 0 ? (
+          {!myTasks.some((task) => isOpen(task.status)) ? (
             <p
               className="rounded-md border border-dashed border-ink-500 p-5 text-sm text-text-secondary"
               data-testid="tasks-my-empty"

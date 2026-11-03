@@ -7,7 +7,7 @@
     "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",
     "created": "[EN] Created",
     "scoutLink": "[EN] Matched workers & interest for this need",
-    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
+    "manageHelp": "[EN] Complete an inquiry, remove it from the market or publish it again right here in the list; a draft can be continued or discarded. Confirming its recognized skills is done from its scouting view. Editing submitted text is not available yet.",
     "syntheticTitle": {
       "hiringWorkers": "Søker medarbeidere",
       "agencyPartnership": "Partnerskapstilbud"
@@ -293,7 +293,7 @@
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
         "profile": "Profil",
-        "journal": "Min CV",
+        "journal": "Arbeidsjournal",
         "search": "[EN] Search",
         "advanced": "Avansert styring",
         "playerCard": "Min profesjonelle profil",
@@ -416,6 +416,7 @@
       "country_search_placeholder": "Søk etter et land",
       "country_search_empty": "Fant ingen land. Prøv et annet navn.",
       "error_country_required": "Vennligst velg et land.",
+      "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Hva er yrket ditt eller arbeidserfaringen din?",
       "profession_placeholder": "Skriv et yrke eller arbeidsområde",
       "profession_add": "Legg til",
@@ -552,7 +553,7 @@
         "admin": "Administrator"
       },
       "signing": "[EN] Creating...",
-      "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with a social account or with email and password; you'll pick your role next.",
+      "subcopy": "Én profil for din arbeidserfaring og dine muligheter — i neste steg sier du hva du kommer for.",
       "submit_label": "[EN] Sign up",
       "resend_label": "Send lenken på nytt",
       "resend_sent": "Sendt på nytt. Sjekk innboksen og søppelpostmappen.",
@@ -570,7 +571,18 @@
     "localeSwitch": "[EN] Language",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
-    "skipToContent": "[EN] Skip to content"
+    "skipToContent": "[EN] Skip to content",
+    "loading": "Laster inn…",
+    "dashboardSections": "Oversiktens seksjoner",
+    "nav": {
+      "more": "Mer",
+      "menu": "Meny",
+      "areas": "Arbeidsområder",
+      "close": "Lukk",
+      "youAreHere": "Du er her",
+      "previous": "Forrige område",
+      "next": "Neste område"
+    }
   },
   "companies": {
     "cta": {
@@ -923,7 +935,9 @@
       "screenshot": "[EN] Company demand flow",
       "subcopy": "[EN] Post what you need on each project and see which available workers and agencies fit it.",
       "title": "[EN] Live demand,",
-      "titleAccent": "[EN] in context."
+      "titleAccent": "[EN] in context.",
+      "calculatorBody": "Før du etterspør arbeid, anslå det: arbeidstimer, materialer, utstyr og reiser — med dine egne tall.",
+      "calculatorLink": "Beregn kostnaden for et prosjekt"
     },
     "workers": {
       "benefits": [
@@ -1022,7 +1036,7 @@
       },
       {
         "q": "Hvordan håndteres betaling?",
-        "a": "Kortbetaling via Stripe med mva. håndtert av Stripe Tax; fakturaer, oppsigelse og endringer finnes i organisasjonskontoen din."
+        "a": "Kortbetaling via Stripe. Fakturaer, betalingshistorikk og oppsigelse finnes i organisasjonskontoen din."
       },
       {
         "q": "Finnes det en grense for aktive stillinger?",
@@ -1713,7 +1727,7 @@
       "help": "[EN] Pick a destination country to see which documents it asks for.",
       "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
-      "next": "[EN] Next step: take care of — {doc}.",
+      "next": "[EN] If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
       "ok": "[EN] All curated requirements for {country} are covered."
     },
     "types": {
@@ -2028,6 +2042,15 @@
       "pending": "Slår sammen…",
       "done": "Slått sammen. Radene og postene beholdes; prosjektlisten viser nå det beholdte prosjektet.",
       "failed": "Ikke slått sammen. Ingenting ble endret for rader som ikke gikk gjennom — last inn på nytt og prøv igjen."
+    },
+    "assign": {
+      "reservation": {
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
+        }
+      }
     }
   },
   "projectOps": {
@@ -2825,6 +2848,7 @@
     }
   },
   "bookings": {
+    "readFailed": "[EN] Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "endsOn": "[EN] Until {date}",
     "noRole": "[EN] Work engagement",
     "displayState": {
@@ -2857,7 +2881,11 @@
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "[EN] This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
-      "alreadyAccepted": "Arbeidstakeren har allerede akseptert dette forslaget — avtalte vilkår overskrives ikke her. Avtal endringer i samtalen."
+      "alreadyAccepted": "Arbeidstakeren har allerede akseptert dette forslaget — avtalte vilkår overskrives ikke her. Avtal endringer i samtalen.",
+      "refusedNotReachable": "Denne personen kan ikke få et bookingforslag herfra — profilen er ikke synlig for arbeidsgivere, og det finnes ingen arbeidsrelasjon med deg.",
+      "refusedNeedClosed": "Dette behovet er lukket — åpne det igjen før du foreslår en booking.",
+      "refusedAnswered": "Arbeidstakeren avslo dette forslaget, så det åpnes ikke på nytt uten ny samtykke fra arbeidstakeren. Fortsett i samtalen eller finn en annen arbeidstaker.",
+      "unconfirmed": "[EN] No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -2906,7 +2934,8 @@
     "clash": {
       "acceptAnyway": "Jeg vet at det overlapper — godta likevel",
       "stillStands": "Å godta fjerner ikke overlappet. Begge bookingene beholder datoene sine, konflikten forblir synlig i kalenderen, og valget ditt registreres.",
-      "acknowledged": "Godtatt med kjent overlapp. {count} eksisterende booking(er) overlapper fortsatt — ingenting ble avlyst eller skjult, og valget ditt er registrert."
+      "acknowledged": "Godtatt med kjent overlapp. {count} eksisterende booking(er) overlapper fortsatt — ingenting ble avlyst eller skjult, og valget ditt er registrert.",
+      "notRecordable": "Disse datoene overlapper en booking du allerede har godtatt, og overlappet kan ikke registreres ennå, så du kan avslå dette tilbudet eller la det stå åpent slik at bedriften kan endre datoene."
     },
     "proposedBy": "Foreslått av {name}",
     "termsChanged": "Bedriften endret vilkårene. Du hadde godtatt: {previous}. Bestem deg på nytt for de nye datoene."
@@ -2919,6 +2948,7 @@
     "loopReadFailed": "Forespørslene dine kunne ikke lastes — listen kan være ufullstendig. Last inn siden på nytt."
   },
   "people": {
+    "anonymousName": "Kandidat {token}",
     "eyebrow": "Personprofil",
     "restrictedTitle": "Profil ikke tilgjengelig",
     "restrictedBody": "Du kan ikke se denne personens profil: det finnes ingen aktiv arbeidsrelasjon, eller personen har ikke samtykket til å være synlig.",
@@ -3030,9 +3060,9 @@
       "coveredShort": "[EN] {count} covered"
     },
     "notes": {
-      "assignmentsPending": "[EN] Assignment data is prepared and joins this view after owner activation.",
-      "languagesPending": "[EN] Language coverage is prepared and joins this view after owner activation.",
-      "brigadesPending": "[EN] Brigade coverage is prepared and joins this view after owner activation.",
+      "assignmentsPending": "[EN] Assignment data is not shown in this view yet.",
+      "languagesPending": "[EN] Language coverage is not shown in this view yet.",
+      "brigadesPending": "[EN] Brigade coverage is not shown in this view yet.",
       "demandError": "[EN] Work needs could not be read right now.",
       "projectError": "[EN] Projects could not be read right now.",
       "capacityError": "[EN] Part of the capacity data could not be read right now."
@@ -3066,7 +3096,7 @@
     },
     "stateNote": {
       "insufficientData": "Det finnes ennå ikke nok ekte data for dette signalet — et ærlig hull vises i stedet for et oppdiktet tall.",
-      "needsMigration": "Datalageret bak dette signalet er forberedt og kobles på etter eierens aktivering. Inntil da estimeres ingenting.",
+      "needsMigration": "Dette signalet er ennå ikke slått på. Inntil da estimeres ingenting.",
       "stale": "Bevisene bak dette signalet er eldre enn ferskhetsvinduet — betrakt dem som utdaterte."
     },
     "valueClass": {
@@ -3118,7 +3148,7 @@
         "agencyAggregate": "Aggregat på tvers av kunder"
       },
       "state": {
-        "needsMigration": "Dette signalet er forberedt og venter på eierens aktivering."
+        "needsMigration": "Dette signalet er ennå ikke slått på."
       },
       "salary": {
         "noBenchmark": "Det finnes ennå ingen lønnsreferanse for ditt yrke og land.",
@@ -3153,7 +3183,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Eier-aktivert datalager (ennå ikke slått på)",
+      "gatedMigration": "Datalager ennå ikke slått på",
       "marketRateAverages": "Admin-kuraterte markedssats-gjennomsnitt",
       "journalEvidence": "Dine egne arbeidsjournal-bevis",
       "fillTimeMeasurementsMissing": "Ansettelsestidsmålinger (ennå ikke samlet inn)",
@@ -3211,14 +3241,14 @@
       },
       "terms": {
         "internal": "Intern utledning fra kanoniske plattformtabeller; kohortpolitikken beskytter enkeltpersoner.",
-        "adminCurated": "Eier-angitte gjennomsnitt med en kildenotis i stedet for en utvalgsstørrelse.",
-        "statGovLt": "Offisiell statistikk; kildeangivelse kreves; aktivering venter på eierens bekreftelse.",
-        "eurostat": "Offisiell EU-statistikk; kildeangivelse kreves; aktivering venter på eierens bekreftelse.",
+        "adminCurated": "Kuraterte gjennomsnitt med en kildenotis i stedet for en utvalgsstørrelse.",
+        "statGovLt": "Offisiell statistikk; kildeangivelse kreves. Ennå ikke i bruk.",
+        "eurostat": "Aktiv kilde. Offisiell EU-statistikk; kildeangivelse kreves.",
         "arbetsformedlingen": "Aktiv kilde. Bruksvilkår bekreftet: en gratis offentlig datakilde (CC0). Kilden vises ved hver annonse, og hver annonse lenker tilbake til den opprinnelige utlysningen.",
         "nav": "Aktiv kilde. NAVs API-vilkår er akseptert og tilgang er gitt. De løpende pliktene følges: en trukket annonse fjernes umiddelbart, en oppdatert annonse oppdateres raskt, og søknadslenken går til den opprinnelige annonsen.",
-        "cvbankas": "Kun et forslag — brukstillatelse ubekreftet; blandes aldri med interne tall.",
-        "eures": "Foreslått kilde. Bruksvilkår ennå ikke vurdert — aktivering krever eierens bekreftelse. Ingenting hentes i dag.",
-        "uztLt": "Foreslått kilde. Bruksvilkår ennå ikke vurdert — aktivering krever eierens bekreftelse. Ingenting hentes i dag."
+        "cvbankas": "Foreslått kilde — ikke i bruk; blandes aldri med interne tall.",
+        "eures": "Foreslått kilde. Ikke i bruk — ingenting hentes i dag.",
+        "uztLt": "Foreslått kilde. Ikke i bruk — ingenting hentes i dag."
       },
       "status": {
         "active": "Aktiv (intern)",
@@ -3230,7 +3260,7 @@
     "methodology": {
       "title": "Metodikk",
       "deterministic": "Alle verdier er deterministiske og beregnet fra registreringer med kilder — ingenting estimeres av KI, og ingen tall blir noensinne oppdiktet.",
-      "externalOff": "Eksterne kilder er av: hver eksterne referanse er et forslag som venter på eierens juridiske bekreftelse. Interne og eksterne tall blandes aldri.",
+      "externalOff": "Eksterne kilder er av. Interne og eksterne tall blandes aldri.",
       "cohort": "Små kohorter grupperes eller skjules for å beskytte enkeltpersoner."
     },
     "contextual": {
@@ -3345,7 +3375,7 @@
       },
       "unavailable": {
         "requirementTitle": "Hva som kreves",
-        "sourcesTitle": "Kilder som venter på eierens godkjenning"
+        "sourcesTitle": "Kilder som ennå ikke er i bruk"
       },
       "reason": {
         "salaryNoBenchmark": "Det er ingen lønnstall her fordi det ennå ikke finnes en kuratert markedssats for ditt yrke og land, og ingen ekstern lønnskilde er godkjent for bruk.",
@@ -3358,14 +3388,14 @@
         "salaryInputsMissing": "Det er ingen lønnstall her fordi det finnes en kuratert markedssats, men din egen forventede lønn mangler, så det er ingenting å sammenligne med."
       },
       "requirement": {
-        "ownerEnableStore": "Plattformeieren må slå på observasjonslageret og godkjenne minst én datakilde.",
-        "salaryBenchmark": "En administrator må legge inn en kuratert markedssats for ditt yrke og land, eller plattformeieren må godkjenne en ekstern lønnskilde.",
+        "ownerEnableStore": "Observasjonslageret må slås på, og minst én datakilde må godkjennes.",
+        "salaryBenchmark": "Det må legges inn en kuratert markedssats for ditt yrke og land, eller en ekstern lønnskilde må godkjennes.",
         "demandOwnRows": "Legg til arbeidsforespørsler — kortet fylles med organisasjonens egne data så snart oppføringer finnes.",
         "salaryBasis": "Lønnsbasis (brutto eller netto) må være registrert for både din forventede lønn og den kuraterte markedssatsen før en ærlig sammenligning kan vises.",
         "salaryInputs": "Legg inn din forventede lønn i arbeidstakerprofilen din — sammenligningen vises så snart den finnes."
       },
       "after": {
-        "activation": "Etter at eieren har godkjent og aktivert en datakilde, fylles dette kortet med dokumenterte, daterte tall — hvert med pålitelighet, ferskhet, kilde og trinnvis opprinnelse."
+        "activation": "Når en datakilde er slått på, fylles dette kortet med dokumenterte, daterte tall — hvert med pålitelighet, ferskhet, kilde og trinnvis opprinnelse."
       }
     },
     "drawer": {
@@ -3701,8 +3731,8 @@
           "description": "Et listepunkt for en prosjektmedarbeider merkes med en reell status — kreves, mottatt, sjekket."
         },
         "seedReadinessChecklist": {
-          "label": "Start dokumentlisten",
-          "description": "Standardlisten for beredskap / dokumenter startes for alle på prosjektet."
+          "label": "Legg til forslag til avtale",
+          "description": "Foreslåtte punkter å avtale før avtalen legges til for alle på prosjektet. Det er ikke en obligatorisk liste og ikke en vurdering av beredskap."
         },
         "requestReadiness": {
           "label": "Be om det som mangler",
@@ -4184,6 +4214,7 @@
       "eduCohortCreated": "Gruppe opprettet. Du kan tildele elever.",
       "eduAssignNoCohort": "Ingen grupper ennå — opprett først en gruppe.",
       "eduAssignNoLearners": "Ingen aksepterte elever ennå. Inviter en elev — du kan tildele når invitasjonen er akseptert.",
+      "eduMembersNotForRole": "Gruppemedlemskap er ikke tilgjengelig for din rolle. Bare institusjonens egen eier, administrator eller leder kan tildele elever.",
       "eduAssignDone": "Elev tildelt gruppen.",
       "eduNotInstitution": "Denne organisasjonen er ennå ikke merket som utdanningsinstitusjon. Merk det i bedriftsdelen.",
       "eduUnavailable": "Programmene kan ikke leses akkurat nå. Det betyr ikke at det ikke finnes noen.",
@@ -4280,8 +4311,8 @@
       "missingDeclaredSkills": "oppgitte ferdigheter",
       "missingEvidence": "arbeidsbevis",
       "blockedSuffix": "(avvist / utløpt)",
-      "readinessSeedChip": "Start dokumentlisten ({count} pers.)",
-      "readinessSeeded": "Liste startet: {count} pers. × {items} punkter — alle «kreves».",
+      "readinessSeedChip": "Legg til forslag til avtale ({count} pers.)",
+      "readinessSeeded": "Forslag lagt til: {count} pers. × {items} punkter — alle «avtales før avtalen».",
       "readinessGotChip": "Mottatt: {label} ({name})",
       "readinessGotDone": "Merket som mottatt: {label} ({name}).",
       "readinessCheckedChip": "Kontrollert: {label} ({name})",
@@ -4322,7 +4353,7 @@
       "moveAskProject": "Hvor skal {name} flyttes? Velg:",
       "moveWhatIfTitle": "Hvis {name} flyttes fra “{from}” til “{to}”:",
       "moveFromLine": "• “{from}”: personer {before} → {after}; {tasks} av hans åpne arbeidspakker blir der; beredskapsliste der: {checked}/{total}.",
-      "moveToLine": "• “{to}”: personer {before} → {after}; beredskapslisten der starter på 0/{total}.",
+      "moveToLine": "• “{to}”: personer {before} → {after}; hva som skal avtales der, er ikke valgt ennå (opptil {total} punkter foreslått).",
       "moveCountryLine": "• Landet endres: {from} → {to} — andre dokumentkrav.",
       "moveNoDatesLine": "• “{to}” har ingen datoer — fravær kan ikke sjekkes.",
       "moveAvailabilityUnknownLine": "• Fravær ukjent.",
@@ -4372,7 +4403,10 @@
       "chipOfferOurs": "Tilby vårt lag eller vår bedrift",
       "teamOfferAgreed": "Avtalt i prinsippet — ennå ikke en signert kontrakt. Avtal vilkårene i samtalen, og tildel deretter laget et prosjekt.",
       "teamOfferDeclined": "Avslått. Bedriften som tilbød, ser svaret ditt.",
-      "teamOfferThreadFailed": "Denne samtalen kan ikke åpnes."
+      "teamOfferThreadFailed": "Denne samtalen kan ikke åpnes.",
+      "whatChangedIntro": "{count, plural, one {Her er kjeden fra ditt siste arbeid: hva du gjorde, hva som endret seg, hva det åpnet.} other {Her er # kjeder fra ditt siste arbeid: hva du gjorde, hva som endret seg, hva det åpnet.}}",
+      "whatChangedNone": "Ingenting nytt kom ut av arbeidet ditt de siste 14 dagene. Når du registrerer arbeid og det blir bekreftet, viser jeg hva det endret.",
+      "whatChangedUnavailable": "Jeg kunne ikke sjekke hva som endret seg akkurat nå. Registreringene dine er trygge – prøv igjen om litt eller åpne journalen."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -4769,6 +4803,37 @@
       },
       "topTitle": "Mest etterspurte yrker akkurat nå",
       "topNote": "Rangert etter aktive stillingsannonser på plattformen."
+    },
+    "hero": {
+      "headline": "Et levende system av arbeids- og forretningsmuligheter.",
+      "sub": "Vis på ett sted hva du kan, hva du tilbyr eller hva du ser etter. Finn arbeidstakere, jobber, entreprenører, tjenester og varer — og erfaringen og mulighetene dine forblir alltid tilgjengelige."
+    },
+    "ways": {
+      "title": "Hva du kan gjøre her",
+      "show": {
+        "title": "Vis hva du kan",
+        "body": "Arbeid, ferdigheter og erfaring på ett sted. Hver oppføring legger til din faglige historie.",
+        "cta": "Lag profil"
+      },
+      "offer": {
+        "title": "Tilby det du har",
+        "body": "Tjenester, varer, team eller ledige folk — publiser tilbudet ditt slik at de som trenger det, finner deg.",
+        "cta": "Tilby"
+      },
+      "find": {
+        "title": "Finn det du ser etter",
+        "body": "Skriv med egne ord hva du trenger — en arbeidstaker, en jobb, en entreprenør, en tjeneste eller varer.",
+        "cta": "Søk"
+      },
+      "discoverLead": "Oppdag",
+      "discover": {
+        "workers": "Arbeidstakere",
+        "jobs": "Jobber",
+        "contractors": "Entreprenører",
+        "services": "Tjenester",
+        "goods": "Varer"
+      },
+      "lasting": "Erfaringen og mulighetene dine forblir tilgjengelige — når du bytter jobb, prosjekt eller land."
     }
   },
   "workspace": {
@@ -6746,7 +6811,6 @@
       "openNeed": "Åpne behovet",
       "gapsRow": "{count, plural, =1 {1 person på {project} mangler dokumenter} other {# personer på {project} mangler dokumenter}}",
       "gapsCta": "Sjekk dokumenter",
-      "needsCta": "Beskriv et behov",
       "noOneFrom": "Ingen er ledig fra {date}",
       "unclear": "{count, plural, =1 {1 person har arbeid uten datoer — ledig tid kan være mindre} other {# personer har arbeid uten datoer — ledig tid kan være mindre}}",
       "fit": {
@@ -6916,7 +6980,9 @@
       "managesInvitations": "Håndterer invitasjoner",
       "grantInvitations": "Tillat å håndtere invitasjoner",
       "withdrawInvitations": "Trekk tilbake håndtering av invitasjoner",
-      "unavailable": "Medlemslisten kunne ikke leses akkurat nå. Det betyr ikke at organisasjonen ikke har medlemmer."
+      "unavailable": "Medlemslisten kunne ikke leses akkurat nå. Det betyr ikke at organisasjonen ikke har medlemmer.",
+      "noAccountHint": "En medlemsrolle kan bare gis til noen som allerede har en konto. Inviter en person uten konto med en invitasjonslenke — når personen registrerer seg og blir med i organisasjonen, kan du gi en rolle her.",
+      "noAccountCta": "Lag en invitasjonslenke"
     },
     "start": {
       "membersMoved": "Medlemmer og invitasjoner for {workspace} administreres i organisasjonens Innstillinger.",
@@ -7039,6 +7105,7 @@
     "titleCompany": "Hva som skjer med arbeidet du driver",
     "example": "Eksempel — ikke en ekte person eller ekte data",
     "hint": "Velg et trinn. Hvert trinn åpner det virkelige stedet i arbeidsområdet ditt.",
+    "hintWorkers": "Velg et trinn. Hvert trinn åpner det virkelige stedet i arbeidsområdet ditt.",
     "open": "Åpne i arbeidsområdet ditt",
     "list": "Trinn i arbeidets livssyklus",
     "workers": {
@@ -7534,5 +7601,353 @@
       "unplaced_single_unmatched": "poster med ukjent sted"
     },
     "link": "Datakvalitet"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Venter på deg",
+      "clear": "Ingenting venter på deg.",
+      "unknown": "Det som venter på deg, kunne ikke leses."
+    },
+    "running": {
+      "title": "Pågår nå",
+      "projectsUnknown": "Prosjektene du er tildelt, kunne ikke leses.",
+      "today": "I dag",
+      "week": "Siste 7 dager",
+      "hours": "{hours} t",
+      "entries": "{n, plural, one {# registrering} other {# registreringer}}",
+      "noEntriesToday": "Ingenting registrert i dag ennå",
+      "confirmed": "Av dette bekreftet av en leder eller kunde: {hours} t",
+      "confirmedNone": "Ingen bekreftede timer ennå",
+      "barLabel": "Registrerte og bekreftede timer, siste 7 dager",
+      "record": {
+        "line": "Din rekord: {best} t bekreftet på en måned ({month}). Denne måneden så langt: {current} t.",
+        "reached": "Denne måneden nådde du din egen rekord: {hours} bekreftede t.",
+        "onlyYou": "Bare du ser dette – det sammenlignes bare med dine egne måneder.",
+        "barLabel": "Denne måneden mot din beste"
+      }
+    },
+    "because": {
+      "title": "Siste hendelser",
+      "unknown": "Det som endret seg, kunne ikke leses.",
+      "also": "Skjedde også",
+      "all": "All aktivitet"
+    },
+    "outside": {
+      "title": "Dine muligheter",
+      "barLabel": "Muligheter etter match"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Et arbeidsforhold startet",
+        "relationshipEnded": "Et arbeidsforhold ble avsluttet",
+        "bookingAgreed": "Bookingen ble avtalt",
+        "bookingRefused": "Bookingen ble avslått",
+        "bookingWithdrawn": "Bookingen ble trukket tilbake",
+        "absenceApproved": "Fraværet ble godkjent",
+        "absenceRefused": "Fraværet ble avslått",
+        "decisionRecorded": "Beslutningen ble registrert",
+        "acknowledgementRecorded": "Kvitteringen ble registrert",
+        "invitationAnswered": "Invitasjonen ble besvart"
+      },
+      "state": {
+        "engagementActive": "Ansettelse: aktiv",
+        "engagementClosed": "Ansettelse: avsluttet",
+        "bookingConfirmed": "Booking: bekreftet",
+        "bookingClosed": "Booking: lukket",
+        "absenceDecided": "Fravær: avgjort",
+        "workflowClosed": "Godkjenning: avsluttet",
+        "documentAcknowledged": "Dokument: kvittert",
+        "relationshipFormed": "Relasjon: etablert"
+      }
+    },
+    "retry": "Last inn på nytt",
+    "retrying": "Laster…",
+    "availability": {
+      "partial": "En del av dataene dine er midlertidig utilgjengelige ({count} av 4 områder).",
+      "totalTitle": "Vi kunne ikke lese dataene dine akkurat nå",
+      "totalBody": "Registreringene dine er trygge – dette er midlertidig. Prøv igjen om litt."
+    }
+  },
+  "homeTrace": {
+    "title": "Hva som endret seg",
+    "unknown": "Vi kunne ikke lese hva som endret seg etter handlingene dine.",
+    "all": "All aktivitet",
+    "empty": "Ingen nye følger de siste 14 dagene. Når du registrerer arbeid og det blir bekreftet, ser du her hva det endret.",
+    "openJournal": "Åpne arbeidsjournalen",
+    "entryUntitled": "Arbeidsregistrering",
+    "roleUnknown": "annen part",
+    "journalUnknown": "Arbeidsjournalen kunne ikke leses.",
+    "eventsUnknown": "Varslene kunne ikke leses.",
+    "truncated": "Basert på dine nyeste 30 registreringer.",
+    "step": {
+      "recordedHours": "{hours} t registrert",
+      "recordedDays": "{days} d registrert",
+      "recordedUntimed": "Registrert uten varighet",
+      "awaiting": "Venter på bekreftelse",
+      "selfApproved": "Godkjent av deg selv – ikke en bekreftelse fra en annen part",
+      "approvedBy": "Bekreftet av: {role}",
+      "approvedAutomatic": "Bekreftet automatisk etter en regel",
+      "rejected": "Avvist",
+      "changesRequested": "Endring ønsket",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bekreftet registrering} other {# bekreftede registreringer}}} other {Living CV oppdatert: {skills}}}",
+      "cvUnlinked": "Living CV: bekreftet arbeid, ennå ikke knyttet til en ferdighet",
+      "cvUnknown": "Living CV: kunne ikke leses",
+      "matching": "Matchingen ser bekreftet arbeid: {skills}",
+      "matchingRepeated": "Matchingen ser gjentatt bekreftet arbeid: {skills}"
+    },
+    "legend": {
+      "fact": "Fakta",
+      "pending": "Venter på en annen part",
+      "derived": "Utledet fra fakta"
+    }
+  },
+  "careerJourney": {
+    "title": "Din karrierevei",
+    "summary": "Prosjekter er stopp, ferdigheter er linjer. En linje stopper bare der journalen din viser at ferdigheten ble brukt.",
+    "now": "Nå",
+    "gap": "Ingen registreringer",
+    "horizon": "Horisont",
+    "derived": "utledet, ikke et løfte",
+    "linksUnknown": "Vi kunne ikke lese hvor ferdighetene dine ble brukt – linjene vises uten stopp.",
+    "level": {
+      "confirmed": "bekreftet",
+      "recorded": "registrert",
+      "declared": "oppgitt"
+    },
+    "focusHint": "Trykk på en linje for å følge én ferdighet gjennom hele veien.",
+    "showAll": "Vis alle",
+    "horizonDetail": "{shared} av {total} i arbeidet ditt · {confirmed} bekreftet"
+  },
+  "projectCourse": {
+    "title": "Prosjektløp",
+    "count": "{done} av {total} faser ferdige",
+    "unknown": "Prosjektets faser kunne ikke leses.",
+    "here": "Her er vi",
+    "state": {
+      "done": "Ferdig",
+      "now": "Pågår",
+      "risk": "Etter planen",
+      "blocked": "Blokkert",
+      "planned": "Planlagt",
+      "cancelled": "Avlyst"
+    },
+    "helpNeeded": "Trenger hjelp — {stage}:"
+  },
+  "projectForecast": {
+    "title": "Prognose",
+    "notFact": "En prognose ut fra prosjektets registrerte arbeid per {date} — ikke et faktum og ikke et løfte. Den regnes ut på nytt hver gang siden åpnes.",
+    "unavailable": "Prognosen kunne ikke leses akkurat nå.",
+    "insufficient": "Foreløpig for lite registrert arbeid til å lage en prognose for prosjektet.",
+    "notApplicable": "Ingenting å forutsi: prosjektet har ikke noe åpent arbeid.",
+    "unknown": "Ukjent",
+    "beyondHorizon": "Mer enn tre år unna i nåværende tempo",
+    "completionLabel": "Forventet ferdig",
+    "deadlineLabel": "Frist",
+    "leftLabel": "Gjenstående arbeid",
+    "leftTasks": "{left} av {total} oppgaver",
+    "leftStages": "{left} av {total} faser",
+    "peopleLabel": "Personer som trengs",
+    "peopleValue": "{needed} (nå {active})",
+    "qualityLabel": "Kvalitetsrisiko",
+    "confidenceLabel": "Pålitelighet",
+    "actionsTitle": "Hva som ville endret den",
+    "assumptionsTitle": "Forutsetninger",
+    "risk": {
+      "on_track": "I rute",
+      "tight": "Stramt",
+      "likely_miss": "Nås trolig ikke",
+      "overdue": "Forsinket",
+      "unknown": "Ukjent"
+    },
+    "quality": {
+      "none": "Ingen åpne",
+      "low": "Lav",
+      "elevated": "Forhøyet",
+      "high": "Høy",
+      "unknown": "Ukjent"
+    },
+    "confidence": {
+      "insufficient": "for lite dokumentasjon",
+      "low": "lav",
+      "medium": "middels",
+      "high": "høy"
+    },
+    "action": {
+      "add_workers": "Legg til personer i teamet",
+      "find_partner_capacity": "Finn partnerkapasitet",
+      "unblock_stages": "Fjern blokkeringen av de blokkerte fasene",
+      "unblock_tasks": "Fjern blokkeringen av de blokkerte oppgavene",
+      "close_serious_defects": "Lukk de alvorlige avvikene",
+      "complete_readiness": "Fullfør teamets manglende klarhetspunkter",
+      "record_hours": "Registrer timene som er jobbet på prosjektet",
+      "set_planned_end": "Sett en planlagt sluttdato",
+      "break_down_scope": "Del arbeidet opp i oppgaver",
+      "review_budget": "Gå gjennom budsjettet",
+      "replan_deadline": "Planlegg fristen på nytt"
+    },
+    "assumption": {
+      "trailing_window_days": "Tempoet leses fra de siste 28 dagene.",
+      "calendar_day_rate": "Timer fordeles på kalenderdager; ingen arbeidskalender antas.",
+      "equal_unit_weight": "Hver oppgave teller likt.",
+      "unit_is_stage": "Prosjektet har ingen oppgaver, så faser telles i stedet.",
+      "team_stays_as_is": "Teamet forblir som det er nå.",
+      "absences_as_approved": "Bare godkjent fravær tas med.",
+      "throughput_without_hours": "Ingen timer er registrert, så ferdigdatoen leses bare fra fullført arbeid.",
+      "cost_continues_at_observed_rate": "Kostnadene fortsetter i tempoet sett så langt.",
+      "single_hours_ledger": "Én timeregistrering brukes; den andre vises ved siden av og legges aldri til.",
+      "hours_partly_unconfirmed": "Noen av timene er ennå ikke bekreftet.",
+      "hours_read_truncated": "Ikke alle timer kunne leses; tallene kan være for lave.",
+      "free_internal_people_unknown": "Det er ikke kjent hvem andre i organisasjonen som er ledige."
+    }
+  },
+  "projectWeekGoal": {
+    "titleProject": "Ukens mål",
+    "titleMine": "Dine oppgaver denne uken",
+    "count": "{done} av {total} ferdige",
+    "unknown": "Ukens oppgaver kunne ikke leses.",
+    "mineNote": "Bare oppgavene du kan se: dine og teamets.",
+    "status": {
+      "todo": "Å gjøre",
+      "in_progress": "Pågår",
+      "blocked": "Blokkert",
+      "done": "Ferdig",
+      "cancelled": "Avlyst",
+      "overdue": "Forsinket"
+    }
+  },
+  "projectTrace": {
+    "title": "Hva som er endret i prosjektet",
+    "window": "Siste 14 dager",
+    "unknown": "Kunne ikke lese hva som er endret i prosjektet.",
+    "emptyManager": "Ingenting nytt i prosjektet på 14 dager: ingen nye arbeidsregistreringer, fullførte etapper eller lukkede oppgaver.",
+    "emptyMember": "Ingen nye registreringer fra deg i dette prosjektet på 14 dager. Registrer arbeid i journalen – her ser du hva det endret.",
+    "teamLabel": "Lagets arbeidskjede",
+    "team": {
+      "recorded": "Registrert: {count}",
+      "awaiting": "Venter på gjennomgang: {count}",
+      "returned": "Sendt tilbake for retting: {count}",
+      "confirmed": "Bekreftet av en annen part: {count}",
+      "confirmedUnknown": "Antall bekreftelser kunne ikke fastslås",
+      "livingCv": "Bekreftet arbeid teller i de ansattes Living CV"
+    },
+    "review": "Gå gjennom de ventende ({count})",
+    "stageDone": "Etappen «{name}» fullført",
+    "tasksDone": "Lukkede oppgaver: {count}",
+    "journalUnknown": "Kunne ikke lese prosjektets arbeidsregistreringer.",
+    "stagesUnknown": "Kunne ikke lese prosjektets etapper.",
+    "tasksUnknown": "Kunne ikke lese prosjektets oppgaver.",
+    "truncated": "Viser de nyeste registreringene."
+  },
+  "projectFirstStep": {
+    "title": "Første steg",
+    "both": "Prosjektet har ennå ingen etapper og ingen oppgaver denne uken. Legg til etapper – laget ser én felles rute og hvor dere er.",
+    "stages": "Prosjektet har ennå ingen etapper. Legg dem til – laget ser én felles rute og hvor dere er.",
+    "tasks": "Ingen oppgaver har frist denne uken. Opprett en oppgave – den blir ukens mål.",
+    "addStages": "Legg til etapper",
+    "addTask": "Opprett en oppgave"
+  },
+  "workerPublicSummary": {
+    "title": "Profesjonell presentasjon for arbeidsgivere",
+    "audience": "Bare bedrifter og byråer du har et arbeidsforhold til, ser denne teksten (du jobber for dem, er i teamet deres eller har akseptert tilbudet deres). Den vises ikke i åpent søk. Din personlige beskrivelse over er bare synlig for deg.",
+    "headline": "Overskrift (opptil 120 tegn)",
+    "headlinePlaceholder": "f.eks. Flislegger, 8 år, jobber i LT og NO",
+    "bio": "Kort beskrivelse (opptil 1000 tegn)",
+    "bioPlaceholder": "Hva du er best på, hvilket arbeid du har gjort, hva du ser etter.",
+    "save": "Lagre",
+    "saved": "Lagret",
+    "tooLong": "Teksten er for lang.",
+    "error": "Kunne ikke lagre. Prøv igjen."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: hva du har, og hva som mangler",
+    "anyCountry": "hvilket som helst land"
+  },
+  "workObjects": {
+    "addButton": "Legg til objekt"
+  },
+  "adminLaunchReadiness": {
+    "mail": {
+      "title": "Offisiell postkasse (info@labourmarket.ai)",
+      "ready": "Sender",
+      "notReady": "Sender ikke",
+      "present": "satt",
+      "missing": "MANGLER",
+      "portOk": "støttet (465, TLS)",
+      "portUnsupported": "IKKE STØTTET – kun 465",
+      "note": "Én e-postkanal: GDPR-varsler sendes når alle LM_SMTP_*-verdier er satt; invitasjons- og varslings-e-post først når sendingen er slått på separat. Bare om en verdi finnes vises, aldri selve verdien. Sett en manglende verdi på VPS-en med lm-env-set.sh.",
+      "invites": "Invitasjons- og varslings-e-post",
+      "invitesOn": "på",
+      "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp og én testsending"
+    }
+  },
+  "historyDuplicates": {
+    "title": "Possible duplicate records",
+    "hint": "Review and decide",
+    "intro": "These are records of the same person on the same day at the same site. They may be genuinely separate work (two shifts or tasks) or the same work recorded twice. Nothing is changed automatically: if a record is a duplicate, mark it — it stops counting but stays visible and can be reinstated.",
+    "summary": "Awaiting your decision: {groups}",
+    "none": "No possible duplicate records found.",
+    "unavailable": "The review could not be shown right now.",
+    "truncated": "There are many records — the review may be incomplete.",
+    "sameHours": "Same hours",
+    "differentHours": "Different hours",
+    "sameText": "Same description",
+    "recordN": "Record {n}",
+    "hours": "{hours} h",
+    "noHours": "No hours stated",
+    "counted": "Counted",
+    "marked": "Marked as a duplicate",
+    "source": "Source: {file} · imported {date}",
+    "noSource": "not stated",
+    "mark": "Duplicate — keep record {n}",
+    "reinstate": "Reinstate",
+    "unnamedPerson": "Unnamed person",
+    "unnamedObject": "Unnamed site",
+    "error": "That didn't work. Nothing was changed.",
+    "notAllowed": "The organization's owner or a manager can do this.",
+    "notSameWork": "These records no longer match — refresh the page."
+  },
+  "learnerCohortJoin": {
+    "title": "Læringsgruppe",
+    "declaredNote": "Du kan alltid registrere praksisen din og arbeidet du har gjort, også før en institusjon har tatt deg opp. Til institusjonens autoriserte person bekrefter det, vises det som erklært av deg, ikke som bekreftet.",
+    "journalLink": "Åpne journalen",
+    "find": "{count, plural, one {# åpen gruppe} other {# åpne grupper}}",
+    "empty": "Ingen institusjon tar imot forespørsler om å bli med akkurat nå.",
+    "unavailable": "Læringsgruppene kunne ikke lastes nå. Prøv igjen senere.",
+    "status": {
+      "requested": "Forespørsel sendt, venter på institusjonens beslutning.",
+      "declined": "Institusjonen godtok ikke denne forespørselen."
+    },
+    "form": {
+      "nameLabel": "Navnet ditt slik institusjonen kjenner deg",
+      "nameHint": "Institusjonen ser bare dette navnet og meldingen din, ikke profilen eller journalen din.",
+      "noteLabel": "Melding til institusjonen (valgfritt)",
+      "send": "Be om å bli med",
+      "withdraw": "trekk tilbake forespørselen",
+      "saving": "Sender…",
+      "requested": "Forespørsel sendt.",
+      "alreadyMember": "Du er allerede medlem av denne gruppen.",
+      "withdrawn": "Forespørselen er trukket tilbake.",
+      "closed": "Denne gruppen tar ikke imot nye forespørsler.",
+      "invalid": "Sjekk navnet og meldingen.",
+      "error": "Noe gikk galt. Prøv igjen.",
+      "cooldown": "Forespørselen din ble nylig avslått. Du kan spørre denne gruppen igjen 30 dager etter avgjørelsen."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "Med ditt samtykke måler vi i nettleseren din hvilke sider og trinn som hjelper folk, og hvilken kampanje som brakte deg hit; uten det lagres ingenting for dette på enheten din. Grunnleggende tellinger av handlinger på våre egne servere skjer uansett (se informasjonen om informasjonskapsler). Produktet fungerer likt uansett hva du velger.",
+      "accept": "Tillat måling",
+      "refuse": "Avslå",
+      "more": "Informasjonskapsler",
+      "label": "Valg om bruksmåling"
+    },
+    "control": {
+      "title": "Bruksmåling og kampanjetilskriving",
+      "granted": "Du har gitt tillatelse. Du kan trekke den tilbake når som helst; elementene fjernes da fra denne enheten.",
+      "refused": "Du har avslått. Ingenting for måling lagres på denne enheten.",
+      "undecided": "Du har ikke valgt ennå, så ingenting for måling lagres.",
+      "allow": "Tillat",
+      "refuse": "Avslå"
+    }
   }
 }

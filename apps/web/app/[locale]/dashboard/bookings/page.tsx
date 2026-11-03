@@ -8,6 +8,7 @@ import { BookingWithdrawButton } from "@/components/app/booking-withdraw-button"
 import { BookingManageControls } from "@/components/app/booking-manage-controls";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import { MarkBookingsSeen } from "@/components/app/mark-bookings-seen";
+import { HomeRetry } from "@/components/app/home/home-retry";
 import { Link } from "@/lib/i18n/navigation";
 import {
   canProposeAgain,
@@ -19,6 +20,12 @@ import {
 } from "@/lib/booking/booking-state";
 import { ActionCard } from "@/components/app/action-card";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/bookings", "bookings.title");
+
 
 /**
  * Bookings (Stage 6) — the worker's incoming proposals (accept/decline) and the
@@ -62,6 +69,8 @@ export default async function BookingsPage({
   // its field/submit labels are reused verbatim from `scouting.booking` (one
   // flow, one wording) instead of duplicating seven keys per locale.
   const tProposeForm = await getTranslations("scouting.booking");
+  // The "read again" wording is the home regions' own (one retry, one wording).
+  const tRetry = await getTranslations("homeRegions");
   const result = await listMyBookings();
   // One consistent "now" for the whole render — the derived display states
   // (awaiting / stale) are computed against it, read-only.
@@ -79,6 +88,9 @@ export default async function BookingsPage({
         <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
+      {/* Mutual, neutral pre-agreement recommendation — advice to both
+          parties, never a gate (decision 0021 extension, 2026-10-24). */}
+      <CollaborationChecksNote context={{ dealKind: "work_engagement" }} testId="bookings-collaboration-checks" />
 
       {/* Planning hub connections (§8.3): a booking is one part of the plan —
           surface the real, existing surfaces it links to (Marketplace orders,
@@ -97,6 +109,22 @@ export default async function BookingsPage({
         >
           {t("unavailable")}
         </p>
+      ) : result.kind === "read-failed" ? (
+        // UNKNOWN is not ZERO: a failed read is named and can be retried —
+        // never rendered as "no proposals yet" (row 5.13 follow-up).
+        <div
+          className="flex flex-col gap-2 rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+          role="status"
+        >
+          <p className="text-sm text-text-secondary" data-testid="bookings-read-failed">
+            {t("readFailed")}
+          </p>
+          <HomeRetry
+            label={tRetry("retry")}
+            pendingLabel={tRetry("retrying")}
+            testid="bookings-read-failed-retry"
+          />
+        </div>
       ) : (
         <>
           <Section
@@ -186,14 +214,15 @@ export default async function BookingsPage({
                   />
                   <PlanningLink label={t("actions.planning")} />
                 </div>
-              ) : canProposeAgain(row.status) ? (
-                // Terminal declined/withdrawn (repeat actions, PR 6b): the
-                // company may RE-OPEN the same proposal with new dates — the
-                // existing propose flow pre-scoped to the same request +
-                // worker (the applied RPC upserts on that key). The worker
-                // decides again; nothing is booked until they accept.
+              ) : canProposeAgain(row.status) || row.status === "declined" ? (
+                // Withdrawn by the company itself (repeat actions, PR 6b): it
+                // may propose again with new dates — the existing propose flow
+                // pre-scoped to the same request + worker, under the same
+                // reach and open-need checks. Declined by the worker: the
+                // worker's answer stands (20261021095200); the next step is
+                // another worker.
                 <div className="flex flex-wrap items-center gap-2">
-                  {row.requestId && row.workerId ? (
+                  {canProposeAgain(row.status) && row.requestId && row.workerId ? (
                     <ProposeBookingButton
                       locale={locale}
                       requestId={row.requestId}
@@ -394,6 +423,7 @@ function Section({
                 className="card-border flex flex-col gap-3 overflow-hidden p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
                 data-testid={`booking-${row.id}`}
                 data-status={row.status}
+                data-direction={direction}
                 data-display-state={display}
               >
                 <div className="flex min-w-0 flex-col gap-0.5">

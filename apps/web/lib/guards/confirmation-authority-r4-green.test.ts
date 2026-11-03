@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * R-4, GREEN half (2026-09-19 completion window).
@@ -76,7 +77,7 @@ describe("R-4 GREEN — the refusal names its real reason", () => {
   it("copy exists in every active locale: panel labels, membership role names and the refusal", () => {
     expect(labels).toMatch(/authorityTitle: tOrg\("authority\.title"\)/);
     expect(labels).toMatch(/external_manager: tOrg\("roles\.external_manager"\)/);
-    for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+    for (const loc of activeLocales) {
       const main = JSON.parse(read(`messages/${loc}.json`)).orgMembers;
       for (const k of ["title", "intro", "grant", "granted"]) {
         expect(typeof main.authority[k], `${loc}.authority.${k}`).toBe("string");

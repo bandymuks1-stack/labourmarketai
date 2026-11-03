@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Request-loop clarity slice — surface the fields the request loop ALREADY
@@ -50,7 +51,7 @@ describe("the new clarity labels are threaded + present in active locales", () =
     }
   });
 
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: marketplace defines requesterMessage / providerNote / responded`, () => {
       const m = (JSON.parse(read(`messages/${loc}.json`)) as { marketplace?: Record<string, unknown> }).marketplace ?? {};
       for (const k of ["requesterMessage", "providerNote", "responded"]) {

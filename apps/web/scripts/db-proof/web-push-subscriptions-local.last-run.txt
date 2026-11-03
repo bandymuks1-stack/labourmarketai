@@ -1,0 +1,20 @@
+web-push-subscriptions-local — 2026-10-23T16:25:04.109Z
+PostgreSQL 16, local throwaway cluster (synthetic ids only)
+PASS  migration applies on the applied notification_preferences shape
+PASS  T1a push opt-in row accepted
+PASS  T1b unknown channel still refused
+PASS  T2a register stores the caller's subscription
+PASS  T2b direct insert revoked
+PASS  T3 the browser endpoint moves to whoever subscribed last
+PASS  T4a another account deletes 0 rows
+PASS  T4b anon reads nothing
+PASS  T5a non-https endpoint refused
+PASS  T5b malformed key refused
+PASS  T6a service_role reads subscriptions
+PASS  T7 erasure registry row present (allow_cascade)
+PASS  T8a rollback refuses while rows exist
+PASS  T6b service_role deletes a gone subscription
+PASS  T8b rollback removes the table and registry row
+PASS  T8c rollback restores the two-channel CHECK
+PASS  T8d migration re-applies after rollback
+17/17 passed

@@ -125,7 +125,12 @@ const FINANCIAL_EVENT_TYPES = new Set([
 ]);
 
 function isManualRow(s: LocalSubscriptionRecord): boolean {
-  return s.providerSubscriptionId === null || s.providerSubscriptionId.startsWith("manual_");
+  return (
+    s.providerSubscriptionId === null ||
+    s.providerSubscriptionId.startsWith("manual_") ||
+    // A pilot pass is a one-time payment, not a provider subscription.
+    s.providerSubscriptionId.startsWith("pilotpass_")
+  );
 }
 
 function scopeOf(s: LocalSubscriptionRecord): string {

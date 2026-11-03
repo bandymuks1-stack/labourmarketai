@@ -292,7 +292,7 @@ describe("UI language status stays honest and discoverable", () => {
 
     // md and up: the canonical shell header.
     expect(header).toContain("<LocaleSwitcher");
-    expect(header).toContain('mobile ? "hidden" : "hidden md:flex"');
+    expect(header).toContain('className={mobile ? "hidden" : "hidden md:flex"}');
 
     // below md: the avatar menu, which the header renders at every width.
     // `inline` since window 11 (§25): every OTHER header dropdown escapes

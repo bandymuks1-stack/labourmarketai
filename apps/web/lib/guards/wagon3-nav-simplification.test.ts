@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Wagon 3 — Dashboard and Navigation Simplification (UX Recovery Train).
@@ -21,7 +22,7 @@ import { join } from "node:path";
 const APP = process.cwd();
 const read = (rel: string): string => readFileSync(join(APP, rel), "utf-8");
 
-const ACTIVE_LOCALES = ["lt", "en", "de", "nl", "ru"] as const;
+const ACTIVE_LOCALES = activeLocales;
 
 // Architecture terms a worker must never see in the primary nav. Deliberately
 // scoped to NAV LABELS only — content surfaces (admin, intelligence

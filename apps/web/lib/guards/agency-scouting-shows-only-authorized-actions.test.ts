@@ -17,8 +17,11 @@ const PAGE = readFileSync(
 
 describe("an agency on a client's shared need sees only what it may do", () => {
   it("derives the actor's relation from the caller's own needs", () => {
+    // Hand-raisers on a need that names no trade (owner decision 2026-10-22)
+    // are owner controls too, so the not-structured result answers the same
+    // question the same way.
     expect(PAGE).toMatch(
-      /const actsForClient =\s+result\?\.kind === "ok" && !demands\.some\(\(d\) => d\.id === result\.demand\.id\);/,
+      /const actsForClient =\s+\(result\?\.kind === "ok" \|\| result\?\.kind === "not-structured"\) &&\s+!demands\.some\(\(d\) => d\.id === result\.demand\.id\);/,
     );
   });
 

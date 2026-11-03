@@ -28,6 +28,13 @@ import { activeLocales, defaultLocale, type ActiveLocale } from "@/lib/i18n/conf
 /** Brand name as it must appear in public SEO signals. */
 export const BRAND_NAME = "LabourMarket.ai";
 
+/** A page title with the brand exactly once: " · LabourMarket.ai" is appended
+ *  only when the title does not already name the brand ("What is
+ *  LabourMarket.ai · LabourMarket.ai", SEO audit 2026-11-03). */
+export function brandedTitle(title: string): string {
+  return title.includes(BRAND_NAME) ? title : `${title} · ${BRAND_NAME}`;
+}
+
 /**
  * One-sentence organisation description (owner-approved manifest text).
  * The SINGLE source for app/manifest.ts `description` and the Organization
@@ -117,13 +124,19 @@ export function localizedUrl(locale: ActiveLocale, path: string = ""): string {
   return `${MARKETING_ORIGIN}/${locale}${normalizePath(path)}`;
 }
 
-/** hreflang alternates map for a path across all active locales + x-default. */
+/** hreflang alternates map for a path across all active locales + x-default.
+ *
+ *  `x-default` is ENGLISH (audit 2026-10-16, U-2): it is the page a search
+ *  engine serves to a searcher whose language matches none of the routed
+ *  locales. It was the Lithuanian default, on every public page and on all
+ *  ~39k job URLs — so a Swedish, Finnish or French searcher was sent to a
+ *  Lithuanian page. The product's own default locale is unchanged. */
 export function hreflangAlternates(path: string = ""): Record<string, string> {
   const languages: Record<string, string> = {};
   for (const locale of activeLocales) {
     languages[locale] = localizedUrl(locale, path);
   }
-  languages["x-default"] = localizedUrl(defaultLocale, path);
+  languages["x-default"] = localizedUrl("en", path);
   return languages;
 }
 
@@ -155,32 +168,32 @@ export const PAGE_SEO: Readonly<
     en: {
       title: "For Workers — Build your profile and CV",
       description:
-        "Workers across sectors — from logistics and manufacturing to hospitality, care, construction and more: create a profile and CV on LabourMarket.ai, show your skills and availability, and be visible for work opportunities and employer needs across Europe.",
+        "Workers in any sector: create a profile and CV on LabourMarket.ai, show your skills and availability, and be visible to employers across Europe.",
     },
     lt: {
       title: "Darbuotojams — susikurk profilį ir CV",
       description:
-        "Įvairių sektorių darbuotojai — nuo logistikos ir gamybos iki apgyvendinimo, priežiūros, statybos ir kt.: susikurk profilį ir CV LabourMarket.ai, parodyk įgūdžius ir prieinamumą ir būk matomas darbo galimybėms bei darbdavių poreikiams Europoje.",
+        "Bet kurio sektoriaus darbuotojams: susikurk profilį ir CV LabourMarket.ai, parodyk įgūdžius ir prieinamumą ir būk matomas darbdaviams Europoje.",
     },
     ru: {
       title: "Работникам — создайте профиль и CV",
       description:
-        "Работники разных секторов — от логистики и производства до гостеприимства, ухода, строительства и других: создайте профиль и CV на LabourMarket.ai, покажите навыки и доступность и будьте видимы для рабочих возможностей и потребностей работодателей в Европе.",
+        "Работникам любых секторов: создайте профиль и CV на LabourMarket.ai, покажите навыки и доступность и будьте видны работодателям в Европе.",
     },
     nl: {
       title: "Voor werknemers — Bouw je profiel en cv",
       description:
-        "Werknemers uit allerlei sectoren — van logistiek en productie tot horeca, zorg, bouw en meer: maak een profiel en cv op LabourMarket.ai, laat je vaardigheden en beschikbaarheid zien en wees zichtbaar voor werkkansen en personeelsbehoeften van werkgevers in heel Europa.",
+        "Werknemers in elke sector: maak een profiel en cv op LabourMarket.ai, laat je vaardigheden en beschikbaarheid zien en wees zichtbaar voor werkgevers.",
     },
     de: {
       title: "Für Arbeitskräfte — Erstellen Sie Ihr Profil und Ihren Lebenslauf",
       description:
-        "Arbeitskräfte aus vielen Branchen — von Logistik und Produktion bis Gastgewerbe, Pflege, Bau und mehr: Erstellen Sie ein Profil und einen Lebenslauf auf LabourMarket.ai, zeigen Sie Ihre Fähigkeiten und Verfügbarkeit und werden Sie sichtbar für Arbeitsmöglichkeiten und Arbeitgeberbedarfe in ganz Europa.",
+        "Arbeitskräfte jeder Branche: Profil und Lebenslauf auf LabourMarket.ai erstellen, Fähigkeiten und Verfügbarkeit zeigen, für Arbeitgeber sichtbar sein.",
     },
     pl: {
       title: "Dla pracowników — zbuduj swój profil i CV",
       description:
-        "Pracownicy z różnych branż — od logistyki i produkcji po hotelarstwo, opiekę, budownictwo i więcej: załóż profil i CV na LabourMarket.ai, pokaż swoje umiejętności i dostępność i bądź widoczny dla ofert pracy oraz zapotrzebowania pracodawców w całej Europie.",
+        "Pracownicy z każdej branży: załóż profil i CV na LabourMarket.ai, pokaż umiejętności i dostępność i bądź widoczny dla pracodawców w Europie.",
     },
   },
   companies: {
@@ -415,32 +428,32 @@ export const PAGE_SEO: Readonly<
     en: {
       title: "Work Opportunities — Find work across sectors",
       description:
-        "Looking for work in Europe? LabourMarket.ai helps workers across sectors — construction, logistics, manufacturing, hospitality, care and more — build a profile and CV and reach real employer needs.",
+        "Looking for work in Europe? LabourMarket.ai helps workers in every sector build a profile and CV and reach real employer needs.",
     },
     lt: {
       title: "Darbo galimybės — rask darbą įvairiuose sektoriuose",
       description:
-        "Ieškai darbo Europoje? LabourMarket.ai padeda įvairių sektorių darbuotojams — statyba, logistika, gamyba, apgyvendinimas, priežiūra ir kt. — susikurti profilį ir CV ir pasiekti realius darbdavių poreikius.",
+        "Ieškai darbo Europoje? LabourMarket.ai padeda bet kurio sektoriaus darbuotojams susikurti profilį ir CV ir pasiekti realius darbdavių poreikius.",
     },
     ru: {
       title: "Возможности работы — найдите работу в разных секторах",
       description:
-        "Ищете работу в Европе? LabourMarket.ai помогает работникам разных секторов — строительство, логистика, производство, гостеприимство, уход и др. — создать профиль и CV и выйти на реальные потребности работодателей.",
+        "Ищете работу в Европе? LabourMarket.ai помогает работникам любых секторов создать профиль и CV и выйти на реальные потребности работодателей.",
     },
     nl: {
       title: "Werkkansen — Vind werk in verschillende sectoren",
       description:
-        "Op zoek naar werk in Europa? LabourMarket.ai helpt werknemers in allerlei sectoren — bouw, logistiek, productie, horeca, zorg en meer — een profiel en cv op te bouwen en echte personeelsbehoeften van werkgevers te bereiken.",
+        "Op zoek naar werk in Europa? LabourMarket.ai helpt werknemers in elke sector een profiel en cv op te bouwen en echte vraag van werkgevers te bereiken.",
     },
     de: {
       title: "Arbeitsmöglichkeiten — Arbeit in verschiedenen Branchen finden",
       description:
-        "Sie suchen Arbeit in Europa? LabourMarket.ai hilft Arbeitskräften in vielen Branchen — Bau, Logistik, Produktion, Gastgewerbe, Pflege und mehr — ein Profil und einen Lebenslauf zu erstellen und echte Arbeitgeberbedarfe zu erreichen.",
+        "Sie suchen Arbeit in Europa? LabourMarket.ai hilft Arbeitskräften jeder Branche, Profil und Lebenslauf zu erstellen und echten Arbeitgeberbedarf zu erreichen.",
     },
     pl: {
       title: "Możliwości pracy — znajdź pracę w różnych branżach",
       description:
-        "Szukasz pracy w Europie? LabourMarket.ai pomaga pracownikom z wielu branż — budownictwo, logistyka, produkcja, hotelarstwo, opieka i więcej — zbudować profil i CV oraz dotrzeć do realnego zapotrzebowania pracodawców.",
+        "Szukasz pracy w Europie? LabourMarket.ai pomaga pracownikom z każdej branży zbudować profil i CV oraz dotrzeć do realnego zapotrzebowania pracodawców.",
     },
   },
   skills: {
@@ -482,128 +495,128 @@ export const PAGE_SEO: Readonly<
     en: {
       title: "Open jobs",
       description:
-        "Browse live vacancies imported from official public employment sources. Job title, category, employment form and working time are open to everyone; sign in free to see the employer, the location and how to apply.",
+        "Live vacancies from official public job sources. Title, category, contract and hours are open to all; sign in free to see employer, location and how to apply.",
     },
     lt: {
       title: "Laisvos darbo vietos",
       description:
-        "Naršyk gyvas darbo vietas iš oficialių viešų užimtumo šaltinių. Pareigos, kategorija, sutarties tipas ir darbo laikas matomi visiems; prisijunk nemokamai, kad matytum darbdavį, vietovę ir kaip kandidatuoti.",
+        "Gyvos darbo vietos iš oficialių viešų užimtumo šaltinių. Pareigos, kategorija ir darbo laikas matomi visiems; prisijunk nemokamai — matysi darbdavį ir vietovę.",
     },
     ru: {
       title: "Открытые вакансии",
       description:
-        "Смотрите актуальные вакансии из официальных публичных источников занятости. Название, категория, тип занятости и рабочее время открыты всем; зарегистрируйтесь бесплатно, чтобы увидеть работодателя, местоположение и способ подачи заявки.",
+        "Актуальные вакансии из официальных публичных источников. Должность, категория и график открыты всем; войдите бесплатно, чтобы увидеть работодателя и место.",
     },
     nl: {
       title: "Openstaande vacatures",
       description:
-        "Bekijk actuele vacatures uit officiële openbare arbeidsbronnen. Functietitel, categorie, contractvorm en werktijd zijn voor iedereen zichtbaar; maak gratis een account om de werkgever, de locatie en de sollicitatiewijze te zien.",
+        "Actuele vacatures uit officiële openbare bronnen. Functie, categorie, contract en werktijd zijn openbaar; log gratis in voor werkgever, locatie en solliciteren.",
     },
     de: {
       title: "Offene Stellen",
       description:
-        "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Bezeichnung, Kategorie, Vertragsform und Arbeitszeit sind für alle sichtbar; kostenlos anmelden, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+        "Aktuelle Stellen aus offiziellen öffentlichen Quellen. Titel, Kategorie, Vertrag und Arbeitszeit für alle sichtbar; kostenlos anmelden für Arbeitgeber und Ort.",
     },
     pl: {
       title: "Otwarte oferty pracy",
       description:
-        "Przeglądaj aktualne oferty pracy z oficjalnych publicznych źródeł zatrudnienia. Nazwa stanowiska, kategoria, forma zatrudnienia i wymiar czasu pracy są widoczne dla wszystkich; załóż darmowe konto, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
+        "Aktualne oferty z oficjalnych publicznych źródeł. Stanowisko, kategoria, umowa i czas pracy są jawne; zaloguj się za darmo, by zobaczyć pracodawcę i miejsce.",
     },
   },
   professions: {
     en: {
       title: "Professions & Sectors — Who LabourMarket.ai is for",
       description:
-        "From construction workers, welders and drivers to warehouse, production, cleaning, hospitality, care and admin roles — LabourMarket.ai covers professions and sectors across Europe, plus teams, agencies and employers.",
+        "From warehouse, production, cleaning, hospitality and care to construction, welding and driving: the professions and sectors LabourMarket.ai covers.",
     },
     lt: {
       title: "Profesijos ir sektoriai — kam skirta LabourMarket.ai",
       description:
-        "Nuo statybininkų, suvirintojų ir vairuotojų iki sandėlio, gamybos, valymo, apgyvendinimo, priežiūros ir administracijos — LabourMarket.ai apima profesijas ir sektorius Europoje, taip pat brigadas, agentūras ir darbdavius.",
+        "Nuo sandėlio, gamybos, valymo, apgyvendinimo ir priežiūros iki statybos, suvirinimo ir vairavimo: profesijos ir sektoriai LabourMarket.ai.",
     },
     ru: {
       title: "Профессии и секторы — для кого LabourMarket.ai",
       description:
-        "От строителей, сварщиков и водителей до склада, производства, уборки, гостеприимства, ухода и администрации — LabourMarket.ai охватывает профессии и секторы Европы, а также бригады, агентства и работодателей.",
+        "От склада, производства, уборки, гостеприимства и ухода до стройки, сварки и вождения: профессии и секторы, которые охватывает LabourMarket.ai.",
     },
     nl: {
       title: "Beroepen en sectoren — Voor wie LabourMarket.ai is",
       description:
-        "Van bouwvakkers, lassers en chauffeurs tot magazijn-, productie-, schoonmaak-, horeca-, zorg- en administratieve functies — LabourMarket.ai dekt beroepen en sectoren in heel Europa, plus ploegen, uitzendbureaus en werkgevers.",
+        "Van magazijn, productie, schoonmaak, horeca en zorg tot bouw, lassen en transport: de beroepen en sectoren die LabourMarket.ai dekt.",
     },
     de: {
       title: "Berufe und Branchen — Für wen LabourMarket.ai gedacht ist",
       description:
-        "Von Bauarbeitern, Schweißern und Fahrern bis zu Lager-, Produktions-, Reinigungs-, Gastgewerbe-, Pflege- und Verwaltungsrollen — LabourMarket.ai deckt Berufe und Branchen in ganz Europa ab, dazu Kolonnen, Personalagenturen und Arbeitgeber.",
+        "Von Lager, Produktion, Reinigung, Gastgewerbe und Pflege bis Bau, Schweißen und Fahren: die Berufe und Branchen von LabourMarket.ai.",
     },
     pl: {
       title: "Zawody i branże — dla kogo jest LabourMarket.ai",
       description:
-        "Od pracowników budowlanych, spawaczy i kierowców po magazyn, produkcję, sprzątanie, hotelarstwo, opiekę i administrację — LabourMarket.ai obejmuje zawody i branże w całej Europie, a także zespoły, agencje i pracodawców.",
+        "Od magazynu, produkcji, sprzątania, hotelarstwa i opieki po budownictwo, spawanie i transport: zawody i branże, które obejmuje LabourMarket.ai.",
     },
   },
   projectCostCalculator: {
     en: {
       title: "Project Calculator — Estimate work and project costs",
       description:
-        "Free work and project cost calculator: enter your own workers, hours, rates, materials and extras and get a transparent preliminary estimate. Cross-sector — logistics, cleaning, manufacturing, hospitality, care, construction and more. No account needed; your numbers are not stored.",
+        "Free work and project cost calculator: enter your own workers, hours, rates and materials for a transparent preliminary estimate. No account; nothing stored.",
     },
     lt: {
       title: "Darbų ir projekto skaičiuoklė — apskaičiuok darbų kainą",
       description:
-        "Nemokama darbų ir projekto kainos skaičiuoklė: įvesk savo darbuotojus, valandas, įkainius, medžiagas ir papildomas išlaidas — gauk skaidrią preliminarią sąmatą. Įvairiems sektoriams — logistikai, valymui, gamybai, svetingumui, priežiūrai, statybai ir kt. Nereikia paskyros; tavo skaičiai nesaugomi.",
+        "Nemokama darbų ir projekto kainos skaičiuoklė: įvesk darbuotojus, valandas, įkainius ir medžiagas — gauk skaidrią preliminarią sąmatą. Be paskyros.",
     },
     ru: {
       title: "Калькулятор проекта — оцените стоимость работ",
       description:
-        "Бесплатный калькулятор стоимости работ и проектов: введите своих работников, часы, ставки, материалы и дополнительные расходы — получите прозрачную предварительную смету. Для разных секторов — логистика, уборка, производство, гостеприимство, уход, строительство и др. Без аккаунта; ваши цифры не сохраняются.",
+        "Бесплатный калькулятор стоимости работ: введите работников, часы, ставки и материалы — получите прозрачную предварительную смету. Без аккаунта.",
     },
     nl: {
       title: "Projectcalculator — Bereken werk- en projectkosten",
       description:
-        "Gratis calculator voor werk- en projectkosten: voer je eigen werknemers, uren, tarieven, materialen en extra's in en krijg een transparante voorlopige raming. Voor allerlei sectoren — logistiek, schoonmaak, productie, horeca, zorg, bouw en meer. Geen account nodig; je cijfers worden niet opgeslagen.",
+        "Gratis calculator voor werk- en projectkosten: voer werknemers, uren, tarieven en materialen in voor een transparante raming. Geen account nodig.",
     },
     de: {
       title: "Projektrechner — Arbeits- und Projektkosten kalkulieren",
       description:
-        "Kostenloser Arbeits- und Projektkostenrechner: Geben Sie Ihre eigenen Arbeitskräfte, Stunden, Sätze, Material- und Zusatzkosten ein und erhalten Sie eine transparente vorläufige Schätzung. Branchenübergreifend — Logistik, Reinigung, Produktion, Gastgewerbe, Pflege, Bau und mehr. Ohne Konto; Ihre Zahlen werden nicht gespeichert.",
+        "Kostenloser Projektkostenrechner: Arbeitskräfte, Stunden, Sätze und Material eingeben und eine transparente vorläufige Schätzung erhalten. Ohne Konto.",
     },
     pl: {
       title: "Kalkulator projektu — oszacuj koszty prac i projektu",
       description:
-        "Darmowy kalkulator kosztów prac i projektu: wpisz własnych pracowników, godziny, stawki, materiały i dodatki i otrzymaj przejrzysty wstępny kosztorys. Dla wielu branż — logistyka, sprzątanie, produkcja, hotelarstwo, opieka, budownictwo i więcej. Konto nie jest potrzebne; Twoje liczby nie są zapisywane.",
+        "Darmowy kalkulator kosztów prac: wpisz pracowników, godziny, stawki i materiały, by dostać przejrzysty wstępny kosztorys. Bez zakładania konta.",
     },
   },
   createCv: {
     en: {
       title: "Free CV Builder — Create a professional CV online",
       description:
-        "Create a professional CV free on LabourMarket.ai: import an existing PDF or DOCX or start from scratch, review every extracted fact, choose a clean template and download as PDF. Optionally build your worker profile, structure your skills with the European ESCO taxonomy and see real job ads from official public sources.",
+        "Create a professional CV free: import a PDF or DOCX or start from scratch, check every extracted fact, pick a clean template and download it as a PDF.",
     },
     lt: {
       title: "Nemokamas CV kūrimas — susikurk profesionalų CV internetu",
       description:
-        "Susikurk profesionalų CV nemokamai LabourMarket.ai: importuok esamą PDF ar DOCX arba pradėk nuo nulio, peržiūrėk kiekvieną faktą, pasirink tvarkingą šabloną ir atsisiųsk PDF. Papildomai gali susikurti darbuotojo profilį, struktūruoti įgūdžius pagal Europos ESCO klasifikatorių ir matyti tikrus darbo skelbimus iš oficialių viešų šaltinių.",
+        "Susikurk profesionalų CV nemokamai: importuok PDF ar DOCX arba pradėk nuo nulio, patikrink kiekvieną faktą, pasirink šabloną ir atsisiųsk PDF.",
     },
     ru: {
       title: "Бесплатный конструктор CV — создайте профессиональное резюме онлайн",
       description:
-        "Создайте профессиональное CV бесплатно на LabourMarket.ai: импортируйте существующий PDF или DOCX либо начните с нуля, проверьте каждый факт, выберите аккуратный шаблон и скачайте PDF. По желанию — создайте профиль работника, структурируйте навыки по европейской классификации ESCO и смотрите реальные вакансии из официальных публичных источников.",
+        "Создайте профессиональное CV бесплатно: импортируйте PDF или DOCX либо начните с нуля, проверьте каждый факт, выберите шаблон и скачайте PDF.",
     },
     nl: {
       title: "Gratis cv-maker — Maak online een professioneel cv",
       description:
-        "Maak gratis een professioneel cv op LabourMarket.ai: importeer een bestaand PDF- of DOCX-bestand of begin vanaf nul, controleer elk feit, kies een strakke template en download als PDF. Optioneel bouw je je werknemersprofiel op, structureer je je vaardigheden met de Europese ESCO-taxonomie en zie je echte vacatures uit officiële publieke bronnen.",
+        "Maak gratis een professioneel cv: importeer een PDF of DOCX of begin vanaf nul, controleer elk feit, kies een template en download als PDF.",
     },
     de: {
       title: "Kostenloser Lebenslauf-Generator — Professionellen Lebenslauf online erstellen",
       description:
-        "Erstellen Sie kostenlos einen professionellen Lebenslauf auf LabourMarket.ai: Importieren Sie ein vorhandenes PDF oder DOCX oder beginnen Sie bei null, prüfen Sie jeden Fakt, wählen Sie eine klare Vorlage und laden Sie als PDF herunter. Optional bauen Sie Ihr Arbeitskraft-Profil auf, strukturieren Ihre Fähigkeiten mit der europäischen ESCO-Taxonomie und sehen echte Stellenanzeigen aus offiziellen öffentlichen Quellen.",
+        "Kostenlos einen professionellen Lebenslauf erstellen: PDF oder DOCX importieren oder neu beginnen, jeden Fakt prüfen, Vorlage wählen, als PDF laden.",
     },
     pl: {
       title: "Darmowy kreator CV — stwórz profesjonalne CV online",
       description:
-        "Stwórz profesjonalne CV za darmo na LabourMarket.ai: zaimportuj istniejący plik PDF lub DOCX albo zacznij od zera, sprawdź każdy fakt, wybierz czysty szablon i pobierz jako PDF. Opcjonalnie zbuduj swój profil pracownika, uporządkuj umiejętności według europejskiej taksonomii ESCO i zobacz prawdziwe oferty pracy z oficjalnych publicznych źródeł.",
+        "Stwórz profesjonalne CV za darmo: zaimportuj PDF lub DOCX albo zacznij od zera, sprawdź każdy fakt, wybierz szablon i pobierz PDF.",
     },
   },
 };
@@ -631,7 +644,7 @@ export function buildPageMetadata({
 }: PageMetaInput): Metadata {
   const active = resolveActiveLocale(locale);
   const brand = BRAND_SEO[active];
-  const resolvedTitle = title ? `${title} · ${BRAND_NAME}` : brand.title;
+  const resolvedTitle = title ? brandedTitle(title) : brand.title;
   const resolvedDescription = description ?? brand.description;
   const url = localizedUrl(active, path);
   // Brand share card (social-acquisition readiness v1): every public page

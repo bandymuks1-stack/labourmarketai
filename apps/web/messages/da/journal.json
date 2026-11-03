@@ -30,6 +30,12 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Vælg tilknytning…",
   "engagementAmbiguous": "Dette arbejde kan høre til mere end én tilknytning. Vælg hvilken, før du gemmer.",
+  "unnamedOrganization": {
+    "company": "Virksomhed uden navn",
+    "agency": "Bureau uden navn",
+    "other": "Organisation uden navn"
+  },
+  "activeWorkspaceNoRelationship": "Du handler på vegne af {org}, men der er ikke registreret noget arbejdsforhold med {org}, så det tilbydes ikke her. Vælg den kontekst, arbejdet reelt hører til.",
   "project": "Projekt",
   "projectChoose": "Vælg projekt…",
   "projectNone": "Ikke projektarbejde",
@@ -140,14 +146,15 @@
     "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later.",
     "uploading": "Uploader foto…",
     "remove": "Fjern foto",
-    "previewAlt": "Valgt foto"
+    "previewAlt": "Valgt foto",
+    "takePhoto": "Tag et billede"
   },
   "voice": {
     "entryCta": "Optag med stemme",
     "pageTitle": "Stemmeindtastning",
     "pageIntro": "Fortæl om din arbejdsdag — du gennemgår og retter teksten, før noget gemmes.",
     "backToJournal": "Tilbage til dagbogen",
-    "unavailable": "Stemmetranskription er ikke konfigureret endnu. Transkriptionsserveren er endnu ikke tilsluttet af platformens ejer — optagelse er deaktiveret indtil da. Du kan altid skrive dit indlæg som tekst.",
+    "unavailable": "Stemmetranskription er ikke tilgængelig endnu — optagelse er slået fra indtil videre. Du kan altid skrive dit indlæg som tekst.",
     "disclosureTitle": "Før du optager",
     "disclosureProcessing": "Din optagelse sendes til en behandlingsserver kontrolleret af LabourMarket.ai for at blive omdannet til tekst. Der bruges ingen tredjeparts taletjeneste.",
     "disclosureWhy": "Den bruges kun til at lave teksten nedenfor — intet andet.",

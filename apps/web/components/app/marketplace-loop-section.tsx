@@ -543,6 +543,7 @@ export function MarketplaceLoopSection({
                     type="button"
                     disabled={pending}
                     onClick={() => run(() => withdrawRequest(r.id))}
+                    data-testid="marketplace-outgoing-withdraw"
                     className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-muted disabled:opacity-50"
                   >
                     <Undo2 className="h-3 w-3" /> {labels.withdraw}

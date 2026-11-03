@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import { orgDisplayName } from "@/lib/company/org-display";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -27,8 +28,15 @@ import {
   WORKSPACE_PERSONAL_DOT,
 } from "@/components/app/conversation/chat/workspace-chip";
 import { workspaceAccentIndex } from "@/lib/company/organization-switch";
-import { resolveEngagementContext } from "@/lib/journal/engagement-context-selection";
-import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label";
+import {
+  activeOrganizationOf,
+  orderContextsForChoice,
+  resolveEngagementContext,
+} from "@/lib/journal/engagement-context-selection";
+import {
+  composeDistinctEngagementLabels,
+  unnamedOrganizationKind,
+} from "@/lib/journal/engagement-label";
 import { detectUnrecordedHours } from "@/lib/journal/unrecorded-hours";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { JournalEntryEditLauncher } from "@/components/app/journal-entry-edit-launcher";
@@ -59,8 +67,12 @@ import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-histo
 import {
   deriveReviewResult,
   deriveReviewTimeline,
+  isSelfConfirmedOnly,
 } from "@/lib/journal/review-status";
-import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
+import {
+  CorrectionProvenanceLine,
+  EvidenceDecisionTimeline,
+} from "@/components/app/evidence-decision-timeline";
 import { EntryReviewPanel } from "@/components/app/entry-review-panel";
 import { readEntryReviewStates } from "@/lib/journal/counterparty-review";
 import {
@@ -70,6 +82,8 @@ import {
 import { EmptyState } from "@/components/app/empty-state";
 import { JournalJobContext } from "@/components/app/journal-job-context";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionProfile } from "@/lib/auth/session-profile";
+import { getWorkerCoreRow } from "@/lib/data/worker-core";
 import { processJournalEntrySkills } from "@/lib/journal/skill-pipeline";
 import { JOURNAL_PIPELINE_VERSION } from "@/lib/journal/journal-recognition";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
@@ -138,6 +152,15 @@ import {
   resolveScale,
 } from "@/lib/journal/journal-calendar";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { experienceFiguresOf } from "@/lib/journal/experience-figures";
+import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
+import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/journal", "journal.navTitle");
+
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -238,7 +261,6 @@ export default async function JournalPage({
   const t = await getTranslations("journal");
   const tSpaces = await getTranslations("spaces");
   const tRel = await getTranslations("relationshipTypes");
-  const tRole = await getTranslations("auth.signup.role");
   const tUnit = await getTranslations("productivityUnits");
   const tProf = await getTranslations("professions");
   const tIntel = await getTranslations("journal.intelligence");
@@ -274,14 +296,19 @@ export default async function JournalPage({
   // particular is called with the literal "person" and is consumed further
   // down purely to ORDER `ecRows`; ordering after the batch is identical to
   // ordering after a serial await.
+  //
+  // The worker row and the own profile row are THE request-cached session
+  // reads (perf 2026-10-23) — the shell, the player card and the bell read the
+  // same two rows in this render, so the page no longer re-queries them. A
+  // failed read is null in both, exactly as the page's own reads answered.
   const [
-    { data: worker },
-    { data: ownProfile },
+    workerRow,
+    { profile: ownProfile },
     { data: ecRows },
     workspaceForDefault,
   ] = await Promise.all([
-    supabase.from("workers").select("id").eq("profile_id", user.id).maybeSingle(),
-    supabase.from("profiles").select("full_name, email").eq("id", user.id).maybeSingle(),
+    getWorkerCoreRow(),
+    getSessionProfile(),
     supabase
       .from("engagement_contexts")
       .select(
@@ -293,6 +320,7 @@ export default async function JournalPage({
       .order("is_primary", { ascending: false }),
     getWorkspaceContext(),
   ]);
+  const worker = workerRow ? { id: workerRow.id } : null;
   const submitterName =
     ownProfile?.full_name ??
     (ownProfile?.email ? ownProfile.email.split("@")[0] : null);
@@ -318,56 +346,78 @@ export default async function JournalPage({
   // The hierarchy now decides (see lib/journal/engagement-context-selection):
   //   A source-determined · B exactly one org context · C several → ASK ·
   //   D none → personal is correct.
-  // Ordering still puts the active workspace first so the list reads sensibly,
-  // but the DEFAULT is the resolution, and on ambiguity there is none.
+  // Ordering is the ONE choice order (active workspace's organization first,
+  // other organizations next, personal last — owner P0 2026-10-29), but the
+  // DEFAULT is the resolution, and on ambiguity there is none. The active
+  // workspace is also a resolution SIGNAL now (rule W): exactly one applicable
+  // context at the organization the person acts for is preselected.
   const activeWorkspaceOrgId = workspaceForDefault.activeWorkspaceId;
-  const actingOrgName =
+  const activeOrganizationId = activeOrganizationOf(workspaceForDefault);
+  const actingWorkspace =
     workspaceForDefault.workspaces.find(
       (w) => w.id === activeWorkspaceOrgId && w.kind === "organization",
-    )?.name || null;
-  const ecOrdered = [...(ecRows ?? [])].sort(
-    (a, b) =>
-      Number(
-        ((b as { organization_id?: string | null }).organization_id ?? null) ===
-          activeWorkspaceOrgId,
-      ) -
-      Number(
-        ((a as { organization_id?: string | null }).organization_id ?? null) ===
-          activeWorkspaceOrgId,
-      ),
+    ) ?? null;
+  const actingOrgName = actingWorkspace?.name || null;
+  const ecOrdered = orderContextsForChoice(
+    ecRows ?? [],
+    activeOrganizationId,
+    (e) => (e as { organization_id?: string | null }).organization_id ?? null,
   );
 
-  const contextResolution = resolveEngagementContext({
-    candidates: (ecRows ?? []).map((e) => {
-      const r = e as {
-        id: string;
-        relationship_slug: string;
-        organization_id?: string | null;
-        status?: string | null;
-        started_at?: string | null;
-        ended_at?: string | null;
-        is_primary?: boolean | null;
-      };
-      return {
-        id: r.id,
-        relationshipSlug: r.relationship_slug,
-        organizationId: r.organization_id ?? null,
-        // The query already filters to status='active'; carry it explicitly so
-        // the pure model needs no knowledge of how it was fetched.
-        status: r.status ?? "active",
-        startedAt: r.started_at ?? null,
-        endedAt: r.ended_at ?? null,
-        isPrimary: r.is_primary === true,
-      };
-    }),
+  const contextCandidates = (ecRows ?? []).map((e) => {
+    const r = e as {
+      id: string;
+      relationship_slug: string;
+      organization_id?: string | null;
+      status?: string | null;
+      started_at?: string | null;
+      ended_at?: string | null;
+      is_primary?: boolean | null;
+    };
+    return {
+      id: r.id,
+      relationshipSlug: r.relationship_slug,
+      organizationId: r.organization_id ?? null,
+      // The query already filters to status='active'; carry it explicitly so
+      // the pure model needs no knowledge of how it was fetched.
+      status: r.status ?? "active",
+      startedAt: r.started_at ?? null,
+      endedAt: r.ended_at ?? null,
+      isPrimary: r.is_primary === true,
+    };
   });
+  // Bounded by the day the work happened (Codex P2 on #2884): the selected
+  // calendar day when there is one. The composer re-resolves on its own date
+  // with the same candidates, so a changed date never keeps a context whose
+  // bounds exclude it.
+  const contextResolution = resolveEngagementContext({
+    candidates: contextCandidates,
+    workDay: selectedDate,
+    activeOrganizationId,
+  });
+  // Acting for an organization with NO recorded work relationship there (a
+  // membership is access, not a work relationship): said plainly in the
+  // composer instead of that organization silently missing from the choice.
+  // Nothing is created — the person picks among their real contexts.
+  // The sentence is prepared whenever the person acts for an organization;
+  // the composer shows it only while the resolution for ITS work date says
+  // there is no applicable relationship there.
+  const activeWorkspaceNotice = actingWorkspace
+    ? t("activeWorkspaceNoRelationship", {
+        org:
+          actingOrgName ??
+          t(
+            `unnamedOrganization.${unnamedOrganizationKind(actingWorkspace?.organizationType)}`,
+          ),
+      })
+    : null;
 
   // ONE LABEL COMPOSER (issue #1689, defect J): the same facts the chat's
   // work-log selector hands to `composeDistinctEngagementLabels`, so a context
   // is named identically here and there. Rules live in
   // `lib/journal/engagement-label.ts`: an organization context reads "Org ·
-  // Relationship" (the org TYPE label when it has no display/legal name —
-  // never a bare "—"; existing role labels, no new i18n key); a personal one
+  // Relationship" ("Agency without a name" when it has no display/legal name —
+  // never a bare type that reads like a real name, owner P0 2026-10-29); a personal one
   // reads "Asmeninis įrašas [· title]" — the person's own title is what tells
   // two org-less contexts apart (production holds exactly that case: one
   // untitled personal context carrying entries, one titled "Darbų vadovas");
@@ -379,14 +429,11 @@ export default async function JournalPage({
       legal_name: string | null;
       organization_type: string | null;
     } | null;
-    const typeLabel =
-      org?.organization_type === "company"
-        ? tRole("company")
-        : org?.organization_type === "agency"
-          ? tRole("agency")
-          : null;
+    const typeLabel = org
+      ? t(`unnamedOrganization.${unnamedOrganizationKind(org.organization_type)}`)
+      : null;
     return {
-      orgName: org?.display_name ?? org?.legal_name ?? null,
+      orgName: orgDisplayName(org?.display_name, org?.legal_name),
       orgTypeLabel: typeLabel,
       title: e.title ?? null,
       relationshipLabel: tRel(e.relationship_slug),
@@ -510,21 +557,15 @@ export default async function JournalPage({
     let hasRosterLink = false;
     let rosterOrgName: string | null = null;
     if (worker) {
-      const [cw, aw] = await Promise.all([
-        supabase
-          .from("company_workers")
-          .select("companies(display_name, legal_name)")
-          .eq("worker_id", worker.id)
-          .eq("status", "active")
-          .limit(1),
-        supabase
-          .from("agency_workers")
-          .select("agencies(legal_name)")
-          .eq("worker_id", worker.id)
-          .eq("status", "active")
-          .limit(1),
-      ]);
-      hasRosterLink = (cw.data?.length ?? 0) > 0 || (aw.data?.length ?? 0) > 0;
+      // Legacy `agency_workers` is not API-exposed (no SELECT grant, Model A
+      // retired) — see lib/guards/agency-workers-not-api-exposed.test.ts.
+      const cw = await supabase
+        .from("company_workers")
+        .select("companies(display_name, legal_name)")
+        .eq("worker_id", worker.id)
+        .eq("status", "active")
+        .limit(1);
+      hasRosterLink = (cw.data?.length ?? 0) > 0;
       const cwOrg = (
         cw.data?.[0] as
           | {
@@ -535,13 +576,7 @@ export default async function JournalPage({
             }
           | undefined
       )?.companies;
-      const awOrg = (
-        aw.data?.[0] as
-          | { agencies?: { legal_name: string | null } | null }
-          | undefined
-      )?.agencies;
-      rosterOrgName =
-        cwOrg?.display_name ?? cwOrg?.legal_name ?? awOrg?.legal_name ?? null;
+      rosterOrgName = cwOrg?.display_name ?? cwOrg?.legal_name ?? null;
     }
     const contextState =
       pending.length > 0 ? "pending" : hasRosterLink ? "roster" : "none";
@@ -633,7 +668,7 @@ export default async function JournalPage({
       readOwnOccupationPath(supabase, worker.id),
       supabase
         .from("worker_skills")
-        .select("skill_id, verified, source, skills(slug)")
+        .select("skill_id, verified, verified_by, verified_at, source, skills(slug)")
         .eq("worker_id", worker.id),
       readWorkerEntrySkillLinks(supabase, worker.id),
       // G4 bridge: THE canonical journal-list core (v3 select + legacy
@@ -723,7 +758,13 @@ export default async function JournalPage({
   const idToSlug = new Map<string, string>();
   const declaredSlugSet = new Set(availableSkillsForLinks.map((s) => s.slug));
   const verifiedSkillIds = new Set<string>();
-  for (const r of skillIdRows ?? []) {
+  // A recorded confirmation counts only while it STANDS
+  // (lib/evidence/skill-confirmation-standing.ts).
+  const standingSkillRows = withStandingConfirmation(
+    skillIdRows ?? [],
+    anyRecordedConfirmation(skillIdRows ?? []) ? await readOwnStandingConfirmedSkillIds(worker.id) : null,
+  );
+  for (const r of standingSkillRows) {
     const slug = (r.skills as { slug: string | null } | null)?.slug ?? null;
     if (r.skill_id && slug) idToSlug.set(r.skill_id as string, slug);
     if (r.skill_id && (r as { verified?: boolean }).verified) {
@@ -753,6 +794,13 @@ export default async function JournalPage({
   const entries: JournalEntryRow[] | null = entriesRead.ok
     ? entriesRead.entries
     : null;
+  // What each listed correction ANSWERED (walk work-verification 2026-10-25):
+  // the decided original is not a card (counted once), so its decision and
+  // note reach the worker only through its correction's card. Provenance
+  // from the same read — no second query, no second count.
+  const correctionProvenance = entriesRead.ok
+    ? entriesRead.correctionProvenance
+    : {};
 
   // ── Client review state (EVID-2 slice 2) ─────────────────────────────────
   // Per entry: submitted? accepted / correction requested / disputed? and which
@@ -795,18 +843,20 @@ export default async function JournalPage({
         return latest < JOURNAL_PIPELINE_VERSION;
       })
       .slice(0, 5);
-    for (const e of stale) {
-      try {
-        await processJournalEntrySkills({
+    // In PARALLEL, not one after another (2026-10-18 perf: a person with five
+    // unhealable entries paid five sequential pipeline runs on every visit).
+    // Entries are independent and the pipeline is idempotent per entry.
+    await Promise.allSettled(
+      stale.map((e) =>
+        processJournalEntrySkills({
           entryId: e.id,
           text: e.original_text ?? "",
           locale,
           revalidate: false,
-        });
-      } catch {
-        // Heal is best-effort — a failure never blocks the page.
-      }
-    }
+        }),
+      ),
+    );
+    // Heal is best-effort — a rejection never blocks the page (allSettled).
   }
 
   // EDIT preload (v5): when the worker arrived via ?editing=<id>, reconstruct
@@ -829,6 +879,7 @@ export default async function JournalPage({
   const editingEntry = editingRow
     ? buildEditingEntry({
         id: editingRow.id,
+        createdAt: editingRow.created_at ?? null,
         originalText: editingRow.original_text,
         metrics: editingRow.journal_entry_metrics,
         engagementContextId: editingRow.engagement_context_id ?? null,
@@ -1067,6 +1118,9 @@ export default async function JournalPage({
           context: e.engagement_context_id
             ? (contextFacts.get(e.engagement_context_id) ?? null)
             : null,
+          // The signed-in person IS the subject: their own approval is
+          // `self_confirmed`, never "manager confirmed" (review-status.ts).
+          selfConfirmedOnly: isSelfConfirmedOnly(e.journal_entry_confirmations, user.id),
         });
         const org = e.engagement_context_id
           ? engagementChips.get(e.engagement_context_id)?.label
@@ -1196,9 +1250,11 @@ export default async function JournalPage({
   // reads as before: the avatar never depended on the card, and the labels and
   // the thermometer are both gated on the SAME `manoCard` non-null check — so
   // they resolve together, and neither is fetched when there is no card.
-  const [manoCard, manoAvatar] = await Promise.all([
+  const [manoCard, manoAvatar, manoRelationships] = await Promise.all([
     getWorkerPlayerCard(),
     getOwnAvatar(),
+    // For the decision-0025 total on the card's fact strip (same rule as the profile).
+    readOwnExperienceRelationships(supabase, user.id).catch(() => null),
   ]);
   const [manoCardLabels, manoThermometer] = manoCard
     ? await Promise.all([
@@ -1210,6 +1266,7 @@ export default async function JournalPage({
           // The identity stage's fact strip: the SAME model's all-time row.
           allTime: workIntelligence?.periods.find((p) => p.key === "all") ?? null,
           allTimeTruncated: workIntelligence?.coverage.truncated ?? false,
+          ...experienceFiguresOf(workIntelligence, manoRelationships),
         }),
         getOwnThermometer().then(toThermometerView),
       ])
@@ -1367,6 +1424,9 @@ export default async function JournalPage({
               key={editingId ?? "new"}
               engagements={composerEngagements}
               contextResolution={contextResolution}
+              activeWorkspaceNotice={activeWorkspaceNotice}
+              contextCandidates={contextCandidates}
+              activeOrganizationId={activeOrganizationId}
               directions={directions}
               workerSkills={workerSkills}
               editingEntry={editingEntry}
@@ -1380,6 +1440,9 @@ export default async function JournalPage({
               defaultWorkDate={selectedDate}
               engagements={composerEngagements}
               contextResolution={contextResolution}
+              activeWorkspaceNotice={activeWorkspaceNotice}
+              contextCandidates={contextCandidates}
+              activeOrganizationId={activeOrganizationId}
               directions={directions}
               workerSkills={workerSkills}
               templates={journalTemplates}
@@ -1701,7 +1764,10 @@ export default async function JournalPage({
             // flow, not on the generic greeting. "Create your first entry"
             // that drops the worker on the home screen is the exact
             // interaction the tester read as being thrown out of the journal.
-            cta={{ label: t("listEmptyCta"), href: "/dashboard?intent=log-work" }}
+            // SECONDARY (activation audit fix #7): the ONE primary on an empty
+            // journal is the recorder ABOVE this list; this door LEAVES the
+            // page, so it is bordered, never a second gradient button.
+            cta={{ label: t("listEmptyCta"), href: "/dashboard?intent=log-work", variant: "secondary" }}
           />
         ) : (
           <div className="flex flex-col gap-4">
@@ -1828,6 +1894,15 @@ export default async function JournalPage({
                         context: e.engagement_context_id
                           ? (contextFacts.get(e.engagement_context_id) ?? null)
                           : null,
+                        // A SELF-approval (the signed-in subject approved their
+                        // own entry) reads `self_confirmed` — never "Vadovo
+                        // patvirtinta". The reader selects `confirmer_id`
+                        // (JOURNAL_ENTRY_CONFIRMATIONS_EMBED), so this is
+                        // answerable here.
+                        selfConfirmedOnly: isSelfConfirmedOnly(
+                          e.journal_entry_confirmations,
+                          user.id,
+                        ),
                       });
                       const explainVerification = !explainedStates.has(verification.state);
                       explainedStates.add(verification.state);
@@ -1869,14 +1944,27 @@ export default async function JournalPage({
                       // be able to answer it. Before, only the client-review
                       // phase offered the correction control, so this request
                       // was a dead end (walk 2026-10-09).
+                      // A REJECTION is answerable the same way (walk-spec
+                      // 2026-10-25): it was a dead end — no edit, no delete,
+                      // no correction. The correction is a NEW entry
+                      // (`correction_of`); the rejected one stays as history
+                      // with its decision (journal_entry_supersede_v2 keeps a
+                      // decided original untouched). The original is then no
+                      // card of its own (counted once); its decision and note
+                      // are read on the correction's card
+                      // (`correctionProvenance` → CorrectionProvenanceLine and
+                      // the timeline's "corrected-from" step).
+                      const latestEmployerDecision = timeline.at(-1)?.result;
                       const employerAskedChanges =
-                        timeline.at(-1)?.result === "changes_requested" &&
+                        (latestEmployerDecision === "changes_requested" ||
+                          latestEmployerDecision === "rejected") &&
                         !correctedOriginalIds.has(e.id) &&
                         reviewPhase !== "correction_requested" &&
                         reviewPhase !== "disputed";
                       const rowEditingEntry = canDelete
                         ? buildEditingEntry({
                             id: e.id,
+                            createdAt: e.created_at ?? null,
                             originalText: e.original_text,
                             metrics: e.journal_entry_metrics,
                             engagementContextId: e.engagement_context_id ?? null,
@@ -1945,6 +2033,15 @@ export default async function JournalPage({
                             verification.state,
                           )}
                           standingSolid={spineNodeSolid(verification.state)}
+                          provenanceSlot={
+                            correctionProvenance[e.id] ? (
+                              <CorrectionProvenanceLine
+                                key="corrected-from"
+                                entryId={e.id}
+                                steps={correctionProvenance[e.id]}
+                              />
+                            ) : undefined
+                          }
                           needsAttention={
                             employerAskedChanges ||
                             (!!reviewState && reviewPhase !== "none")
@@ -1968,6 +2065,7 @@ export default async function JournalPage({
                                 key="employer-correct-launcher"
                                 entry={buildEditingEntry({
                                   id: e.id,
+                                  createdAt: e.created_at ?? null,
                                   originalText: e.original_text,
                                   metrics: e.journal_entry_metrics,
                                   engagementContextId: e.engagement_context_id ?? null,
@@ -2015,6 +2113,7 @@ export default async function JournalPage({
                               <EvidenceDecisionTimeline
                                 createdAt={e.created_at}
                                 events={timeline}
+                                correctedFrom={correctionProvenance[e.id]}
                                 awaiting={
                                   verification.state !== "verifier_available" &&
                                   verification.state !== "verifier_not_identified"
@@ -2036,6 +2135,7 @@ export default async function JournalPage({
                                         key="correct-launcher"
                                         entry={buildEditingEntry({
                                           id: e.id,
+                                          createdAt: e.created_at ?? null,
                                           originalText: e.original_text,
                                           metrics: e.journal_entry_metrics,
                                           engagementContextId:

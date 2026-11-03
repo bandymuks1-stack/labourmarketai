@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * A COVERAGE CLAIM MAY NOT NAME A REGION THAT STOPPED BEING TRUE.
@@ -29,7 +30,7 @@ import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
  */
 
 const WEB = join(__dirname, "..", "..");
-const LOCALES = ["en", "lt", "ru", "nl", "de"] as const;
+const LOCALES = activeLocales;
 
 const catalog = (loc: string): Record<string, unknown> =>
   JSON.parse(readFileSync(join(WEB, "messages", `${loc}.json`), "utf8")) as Record<

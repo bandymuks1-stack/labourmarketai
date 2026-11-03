@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Train B — the marketplace request loop stays surfaced through an honest,
@@ -42,7 +43,7 @@ describe("the notification spine carries the request-loop count (canonical signa
 });
 
 describe("dashboard badge i18n exists across active locales", () => {
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc} defines dashboardIncomingTitle + dashboardIncomingNote`, () => {
       const m = (JSON.parse(read(`messages/${loc}.json`)) as { marketplace?: Record<string, unknown> }).marketplace ?? {};
       for (const k of ["dashboardIncomingTitle", "dashboardIncomingNote"]) {

@@ -215,6 +215,10 @@ update public.engagement_contexts
 -- Company owner "owner" engagement — manages_organization() (0013) requires
 -- an active manager/owner/external_manager engagement row; owning the
 -- organizations row alone does NOT grant inbox access.
+-- Only when the `ensure_org_owner_engagement` trigger (0035) has not already
+-- written one: inserted unconditionally it gave the owner TWO active owner
+-- engagements and every engagement surface listed them twice (local UX review
+-- 2026-10-24, row 3.23) — a state production's trigger guard never produces.
 insert into public.engagement_contexts
   (id, profile_id, organization_id, relationship_slug, status, is_primary,
    hash_self)
@@ -226,6 +230,12 @@ select
     'sha256'), 'hex')
 from public.organizations o
 where o.legacy_company_id = 'cccccccc-0000-0000-0000-000000000001'
+  and not exists (
+    select 1 from public.engagement_contexts ec
+     where ec.profile_id = 'aaaaaaaa-0000-0000-0000-000000000002'
+       and ec.organization_id = o.id
+       and ec.relationship_slug = 'owner'
+  )
 on conflict (id) do nothing;
 
 -- Worker direction for the composer's profession select (tiler is the

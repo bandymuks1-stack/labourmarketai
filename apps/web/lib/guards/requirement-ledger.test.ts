@@ -62,7 +62,11 @@ describe("no second readiness model — the ledger derives from the existing der
   it("the existing checklist read is EXTENDED (optional statuses), its default stays the open rows only, and its anchors for the privacy guard are intact", () => {
     expect(ACCESS).toContain('const OPEN_READINESS_STATUSES = ["needed", "missing", "rejected", "expired"] as const;');
     expect(ACCESS).toContain('export const LEDGER_READINESS_STATUSES = ["needed", "missing", "received", "checked", "rejected", "expired"] as const;');
-    expect(ACCESS).toContain(".in(\"status\", [...(options?.statuses ?? OPEN_READINESS_STATUSES)])");
+    // The query moved into queryOwnReadinessItems (#2941: a failed read is
+    // null there, so the asks can say "unknown"); the public read still
+    // takes the optional statuses and still answers [] on failure.
+    expect(ACCESS).toContain("return (await queryOwnReadinessItems(workerId, projectIds, options?.statuses)) ?? [];");
+    expect(ACCESS).toContain(".in(\"status\", [...(statuses ?? OPEN_READINESS_STATUSES)])");
     expect(ACCESS).toMatch(/\.eq\("worker_id", workerId\)/);
     expect(ACCESS).not.toContain('"not_required"');
   });
@@ -147,6 +151,8 @@ describe("one visual consumer — the instructions page, ordinary words, honest 
   it("no architecture vocabulary and no banned words reach the person; the copy lands in every active locale with the same keys", () => {
     const REQUIRED_KEYS = [
       "ratio",
+      "ratioNone",
+      "ratioUnknown",
       "availability",
       "state.valid",
       "state.expiring",
@@ -174,7 +180,7 @@ describe("one visual consumer — the instructions page, ordinary words, honest 
       "managerStatus.rejected",
       "managerStatus.expired",
       "resolution.addDocument",
-      "resolution.issuingAuthority",
+      "resolution.informationSource",
       "resolution.trainingProgram",
       "resolution.serviceOffering",
       "resolution.serviceOfferingRate",
@@ -198,6 +204,20 @@ describe("one visual consumer — the instructions page, ordinary words, honest 
       expect(get(ledger, "ratio")).toMatch(/\{have\}[\s\S]*\{total\}/);
       expect(get(ledger, "rejected")).toContain("{count}");
       expect(get(ledger, "why.country_requirement")).toContain("{country}");
+      expect(get(ledger, "ratioUnknown")).toContain("{count}");
+      expect(get(ledger, "resolution.informationSource")).toContain("{title}");
+      // An EU information page is where to READ about a rule, never its
+      // issuer (walk-spec 2026-10-25: "Išduoda: Your Europe").
+      expect(get(ledger, "resolution.issuingAuthority"), locale).toBeUndefined();
+      expect(get(ledger, "resolution.informationSource") as string).not.toMatch(
+        /Išduoda|Issued by|Выдаёт|Afgegeven door|Ausgestellt von|Wydane przez/i,
+      );
     }
+  });
+
+  it("'0 of 0' is never rendered and unknown rows are said apart (walk-spec 2026-10-25)", () => {
+    expect(COMPONENT).toMatch(/ledger\.ratio\.total === 0\s*\?\s*labels\.ratioNone/);
+    expect(COMPONENT).toMatch(/ledger\.ratio\.unknown > 0 \? ` · \$\{labels\.ratioUnknown\(ledger\.ratio\.unknown\)\}`/);
+    expect(COMPONENT).toContain('r.kind === "information_source"');
   });
 });

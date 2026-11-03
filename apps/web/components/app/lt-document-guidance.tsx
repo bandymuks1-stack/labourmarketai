@@ -1,47 +1,34 @@
 import { getTranslations } from "next-intl/server";
 import { ScrollText } from "lucide-react";
 
-import { isSuperadmin } from "@/lib/auth/superadmin";
-
-import {
-  guidanceByCountry,
-  guidanceStatusCounts,
-  LT_MASTER_GUIDANCE,
-  type GuidanceStatus,
-} from "@/lib/documents/lt-master-guidance";
+import { guidanceByCountry } from "@/lib/documents/lt-master-guidance";
 
 /**
  * Lithuanian-master document guidance surface (CR train WAGON 9, area 17).
  *
- * OWNER RULE (2026-07-05): the guidance content exists in Lithuanian ONLY
- * until the owner approves the LT master. Rendering is therefore
- * locale-split at this component:
- *   - lt  → the full draft registry, grouped by work country, with an
- *           always-visible "informacinio pobūdžio" disclaimer, a review
- *           status badge and the needs-legal-review flag on every item;
- *   - any other locale → ONLY the short "being prepared from the Lithuanian
- *           master version" notice — never a translated body.
+ * OWNER RULE (2026-07-05): the guidance content exists in Lithuanian ONLY.
+ * Rendering is therefore locale-split at this component:
+ *   - lt  → the guidance registry, grouped by work country, with the intro
+ *           ("informacinio pobūdžio") and one line pointing to official
+ *           sources;
+ *   - any other locale → ONLY the short "available in Lithuanian only"
+ *           notice — never a translated body.
  *
- * The review-status summary is honest operator visibility (counts of items
- * per pipeline state) — it never claims approval that has not happened.
+ * Owner P0 (2026-10-23): the page presents the guidance as information and
+ * says nothing about how it was drafted. Pipeline status, owner / lawyer
+ * review state and "draft" labels are internal registry data
+ * (lib/documents/lt-master-guidance.ts keeps `status` and
+ * `needsLegalReview`) and are rendered to nobody.
  * Help-request CTAs are OUT of scope here (WAGON 10): the closing line is
  * information-only and promises nothing interactive.
  */
-
-const STATUS_TONE: Record<GuidanceStatus, string> = {
-  LT_DRAFT_READY: "border-state-warning/40 bg-state-warning/5 text-state-warning",
-  OWNER_EDITING: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
-  OWNER_APPROVED_LT: "border-state-success/40 bg-state-success/5 text-state-success",
-  TRANSLATION_READY: "border-brand-cyan/40 bg-brand-cyan/5 text-brand-cyan",
-  TRANSLATED: "border-state-success/40 bg-state-success/5 text-state-success",
-};
 
 export async function LtDocumentGuidance({ locale }: { locale: string }) {
   const t = await getTranslations("documents.guidance");
 
   if (locale !== "lt") {
-    // Non-LT locales: short pending notice ONLY — no guidance bodies exist
-    // in any other language yet (owner correction 2026-07-05).
+    // Non-LT locales: short notice ONLY — no guidance bodies exist in any
+    // other language (owner correction 2026-07-05).
     return (
       <section
         className="flex flex-col gap-2"
@@ -62,20 +49,7 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
     );
   }
 
-  // Pipeline-state telemetry (per-item review status + the counts summary)
-  // is OPERATOR visibility, not worker/company information — it renders only
-  // for admins. The needs-legal-review flag stays visible to everyone: that
-  // one is an honesty marker about the content itself (§18), not telemetry.
-  // Looked up only on the LT branch — the other ten locales early-return a
-  // pending notice above and must not pay the extra profile reads.
-  const operatorView = await isSuperadmin();
-
-  const counts = guidanceStatusCounts();
   const grouped = guidanceByCountry();
-  const total = LT_MASTER_GUIDANCE.length;
-  const awaitingReview = LT_MASTER_GUIDANCE.filter(
-    (i) => i.needsLegalReview,
-  ).length;
 
   return (
     <section
@@ -91,41 +65,15 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
         <p className="text-xs leading-relaxed text-text-secondary">
           {t("intro")}
         </p>
-      </div>
-
-      {/* Always-visible honesty block: informational, not legal advice,
-          every item below is a DRAFT awaiting owner/lawyer review. */}
-      <p
-        className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
-        data-testid="documents-guidance-disclaimer"
-      >
-        {t("draftDisclaimer")}
-      </p>
-
-      {/* Honest review-state summary (operator/owner visibility — counts,
-          never a fake approval). ADMIN-ONLY: pipeline states are internal
-          telemetry a worker cannot act on. */}
-      {operatorView ? (
-        <div
-          className="flex flex-wrap items-center gap-2"
-          data-testid="documents-guidance-status-summary"
+        {/* One factual line: requirements are checked at the official
+            source. Nothing about drafting or review state. */}
+        <p
+          className="text-xs leading-relaxed text-text-secondary"
+          data-testid="documents-guidance-disclaimer"
         >
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {t("statusSummary", { total, awaiting: awaitingReview })}
-          </span>
-          {(Object.keys(counts) as GuidanceStatus[])
-            .filter((s) => counts[s] > 0)
-            .map((s) => (
-              <span
-                key={s}
-                className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[s]}`}
-                data-testid={`guidance-status-count-${s}`}
-              >
-                {t(`status.${s}` as never)}: {counts[s]}
-              </span>
-            ))}
-        </div>
-      ) : null}
+          {t("officialSources")}
+        </p>
+      </div>
 
       {/* Density pass (worker-workspace UX audit v2): the full registry made
           the documents page end in a very long always-open list. Each country
@@ -147,28 +95,9 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
                 className="card-border flex flex-col gap-2 p-4"
                 data-testid={`guidance-item-${item.id}`}
               >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-sm font-semibold text-text-primary">
-                    {item.titleLt}
-                  </span>
-                  <span className="flex flex-wrap gap-1.5">
-                    {operatorView ? (
-                      <span
-                        className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[item.status]}`}
-                      >
-                        {t(`status.${item.status}` as never)}
-                      </span>
-                    ) : null}
-                    {item.needsLegalReview ? (
-                      <span
-                        className="rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning"
-                        data-testid={`guidance-needs-review-${item.id}`}
-                      >
-                        {t("needsLegalReview")}
-                      </span>
-                    ) : null}
-                  </span>
-                </div>
+                <span className="text-sm font-semibold text-text-primary">
+                  {item.titleLt}
+                </span>
                 <p className="text-xs leading-relaxed text-text-secondary">
                   {item.bodyLt}
                 </p>

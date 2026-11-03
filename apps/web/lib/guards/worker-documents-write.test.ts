@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * W4 Slice 2 — the worker_documents WRITE path.
@@ -70,7 +71,7 @@ describe("worker documents write path (W4 Slice 2)", () => {
   });
 
   it("every editor label ships in all five locales", () => {
-    for (const loc of ["lt", "en", "de", "nl", "ru"]) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(read(`messages/${loc}.json`));
       const e = m.documents?.editor;
       expect(e, `${loc} documents.editor`).toBeTruthy();

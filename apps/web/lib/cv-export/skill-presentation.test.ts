@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   presentSkills,
   skillMagnitude,
+  skillTimeReading,
   topPresentedSkills,
   type SkillPracticeFacts,
 } from "./skill-presentation";
@@ -151,5 +152,34 @@ describe("skill presentation — magnitude is visible and ordered (owner defect 
     });
     expect(p.visible).toBe(1);
     expect(p.groups[0]!.tier).toBe("confirmed");
+  });
+});
+
+describe("skill time reading — attributed hours and unattributed involvement stay apart (P0-B)", () => {
+  // NEGATIVE CONTROL: before this reading the CV chip rendered only
+  // `attributedHours > 0`; a skill backed solely by sessions it shared with
+  // other skills (attributed 0, shared 8) rendered no time at all.
+  it("a skill whose time is all unattributed shows its involvement, not 0 and not own hours", () => {
+    expect(skillTimeReading(facts({ sharedHours: 8, entries: 1 }), true)).toEqual({
+      kind: "involvement_only",
+      involvedHours: 8,
+    });
+  });
+
+  it("attributed hours carry the confirmed part and the unattributed involvement separately — never summed", () => {
+    const r = skillTimeReading(facts({ attributedHours: 3, confirmedHours: 1, sharedHours: 8 }), true);
+    expect(r).toEqual({ kind: "attributed", attributedHours: 3, confirmedHours: 1, involvedHours: 8 });
+    if (r.kind === "attributed") expect(r.attributedHours).not.toBe(11);
+  });
+
+  it("four skills on one 8 h entry each read 8 h of involvement; the person's total is untouched", () => {
+    const readings = ["a", "b", "c", "d"].map(() => skillTimeReading(facts({ sharedHours: 8, entries: 1 }), true));
+    for (const r of readings) expect(r).toEqual({ kind: "involvement_only", involvedHours: 8 });
+  });
+
+  it("no facts = none; an unreadable journal = unknown, never zero (SEP-7)", () => {
+    expect(skillTimeReading(undefined, true)).toEqual({ kind: "none" });
+    expect(skillTimeReading(facts({ entries: 2 }), true)).toEqual({ kind: "none" });
+    expect(skillTimeReading(facts({ attributedHours: 5 }), false)).toEqual({ kind: "unknown" });
   });
 });

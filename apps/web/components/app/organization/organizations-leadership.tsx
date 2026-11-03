@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { formatUtcDate } from "@/lib/time/display";
 import { readMyLedOrganizations } from "@/lib/organization-evidence/my-organizations-read";
+import { formerNamesOf } from "@/lib/journal/professional-experience";
 
 /**
  * ORGANIZATIONS AND LEADERSHIP — the person's own profile and Living CV.
@@ -23,6 +24,9 @@ export async function OrganizationsLeadership({
 }) {
   const read = await readMyLedOrganizations();
   const t = await getTranslations("organizationsLeadership");
+  // The legal-entity relation words are the business history's own — one
+  // vocabulary for the same statement on every surface (decision 0025).
+  const tRelation = await getTranslations("companyWorkHistory.business.relation");
   if (read.kind === "unavailable") {
     return (
       <p className="text-meta text-text-muted" data-testid="organizations-leadership-unavailable">
@@ -48,28 +52,50 @@ export async function OrganizationsLeadership({
         <p className="max-w-[60ch] text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
       <ol className="flex flex-col">
-        {read.organizations.map((o) => (
+        {read.organizations.map((o) => {
+          // ONE organization identity with a name history: a period whose
+          // legal relation says "same legal entity" / "renamed" is a FORMER
+          // NAME of this organization, said beside its current name.
+          const formerNames = formerNamesOf(
+            o.periods.map((p) => ({
+              id: p.id,
+              label: p.periodLabel,
+              from: p.periodStart,
+              to: p.periodEnd,
+              basis: p.basis,
+              legalEntityRelation: p.legalEntityRelation,
+              legalEntityLabel: p.legalEntityLabel,
+              sourceLabels: p.sourceLabels,
+            })),
+          );
+          return (
           <li
             key={o.organizationId}
             className="flex flex-col gap-2 border-t border-text-primary/10 py-4 first:border-t-0"
             data-testid="organizations-leadership-row"
             data-relationship={o.relationship}
+            data-former-names={formerNames.join(" | ")}
           >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <p className="font-display text-lg font-semibold text-text-primary">
                 {o.name || <span className="italic text-text-muted">{t("unnamed")}</span>}
+                {formerNames.length > 0 ? (
+                  <span className="ml-2 text-meta font-normal text-text-muted" data-testid="organizations-leadership-formerly">
+                    ({t("formerly", { names: formerNames.join(", ") })})
+                  </span>
+                ) : null}
               </p>
               <span className="text-meta text-text-muted">{t(`role.${o.relationship}`)}</span>
             </div>
             {o.periods.map((p) => (
-              <p key={p.id} className="text-sm text-text-secondary" data-testid="organizations-leadership-period">
+              <p key={p.id} className="text-sm text-text-secondary" data-testid="organizations-leadership-period" data-relation={p.legalEntityRelation}>
                 {t("period", {
                   label: p.periodLabel,
                   from: date(p.periodStart),
                   to: date(p.periodEnd),
                 })}{" "}
                 <span className="text-text-muted">
-                  · {t(`basis.${p.basis}`)} · {t(`relation.${p.legalEntityRelation === "not_asserted" ? "not_asserted" : "stated"}`)}
+                  · {t(`basis.${p.basis}`)} · {tRelation(p.legalEntityRelation as never)}
                 </span>
               </p>
             ))}
@@ -81,7 +107,8 @@ export async function OrganizationsLeadership({
               {t("openHistory")} →
             </Link>
           </li>
-        ))}
+          );
+        })}
       </ol>
       <p className="text-meta text-text-muted">{t("note")}</p>
     </section>

@@ -135,6 +135,7 @@ import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { NEED_DOOR_HREF } from "@/lib/company/need-door";
 import type { BaseIdentity } from "@/lib/config/roles";
 import { useRouter } from "@/lib/i18n/navigation";
 import {
@@ -147,7 +148,9 @@ import {
 import {
   dispatchIntent,
   type IntentHandlers,
+  type RoutedIntent,
 } from "@/lib/conversation/intent-registry";
+import type { PlanStep } from "@/lib/conversation/intent-plan";
 import { workspaceDisplayLabels, type WorkspaceInfo } from "@/lib/company/organization-switch";
 import { extractWorkLog, journalDraftReadiness } from "@/lib/conversation/worklog-extract";
 import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
@@ -179,6 +182,8 @@ import {
 import { ChatMessageReply } from "@/components/app/conversation/chat-message-reply";
 import { ChatPhotoStrip } from "@/components/app/conversation/chat-photo-strip";
 import { readRecentPhotosForChat } from "@/lib/conversation/evidence-photos";
+import { readWhatChangedForChat } from "@/lib/conversation/what-changed";
+import { ChatTraceStrip } from "@/components/app/conversation/chat-trace-strip";
 import { DiscoverabilityConsent } from "@/components/app/discoverability-consent";
 import { loadEmployerVisibilityForChat } from "@/lib/conversation/employer-visibility-chat";
 import { EMPLOYER_VISIBILITY_HREF } from "@/lib/privacy/employer-visibility";
@@ -186,10 +191,8 @@ import { WorkerInvitationAction } from "@/components/app/conversation/worker-inv
 import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
 import { loadCriteriaSummaryForChat, loadWorkCardPrefillForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
-import {
-  appendAssistantTurn,
-  loadAssistantThread,
-} from "@/lib/assistant/transcript";
+import { loadAssistantThread } from "@/lib/assistant/transcript";
+import { postTranscriptTurn } from "@/lib/assistant/transcript-client";
 import { WorldStateProvider } from "@/components/app/world-state/world-state-provider";
 import { ContextPanel } from "@/components/app/world-state/context-panel";
 import { useResultParam } from "@/components/app/workspace/use-result-param";
@@ -272,6 +275,25 @@ function PersonalWorkspaceIntroStream({
   const { intro, labels } = use(payload);
   if (intro.kind === "hidden" || !labels) return null;
   return <PersonalWorkspaceIntro intro={intro} labels={labels} onAction={onAction} />;
+}
+
+/** The S2 block's place while its slow readiness read streams (home CLS P0,
+ *  2026-10-26). It used to be `fallback={null}`: the block (a compact card,
+ *  ~250–300 px) then appeared out of nothing above the greeting and pushed
+ *  the greeting and the centred composer down. The page hands a payload ONLY
+ *  when the block can render at all (`personalIntroMayShow`, decided from
+ *  facts it already holds), so this reservation is drawn only where a block
+ *  is genuinely coming — never a placeholder for something that cannot. */
+function PersonalWorkspaceIntroPending() {
+  return (
+    <div
+      aria-hidden
+      data-testid="personal-workspace-intro-pending"
+      className="min-h-64 rounded-card border border-ink-600/70 bg-ink-800/40 p-4"
+    >
+      <SkeletonText lines={4} />
+    </div>
+  );
 }
 
 /**
@@ -698,6 +720,7 @@ export type ChatLabels = {
   eduCohortCreated: string;
   eduAssignNoCohort: string;
   eduAssignNoLearners: string;
+  eduMembersNotForRole: string;
   eduAssignDone: string;
   eduNotInstitution: string;
   eduUnavailable: string;
@@ -877,6 +900,7 @@ export function ConversationChat({
   mobile = false,
   personalIntroPayload = null,
   openingContext = null,
+  openingContextWide = false,
   accessNotice = null,
   countryLabels,
   agencyWorkspace = false,
@@ -925,6 +949,9 @@ export function ConversationChat({
    *  home stays ONE conversation for every identity. When present it wins
    *  over the S2 payload — the page hands only one of the two. */
   openingContext?: ReactNode;
+  /** The opening context is a full working home that uses the desktop width
+   *  (the worker's four regions) rather than a chat-width block. */
+  openingContextWide?: boolean;
   /** One line explaining why this home is the screen the person got, when a
    *  role gate sent them here. Server-resolved and already localized, so the
    *  internal `needs_<role>_role` token never crosses into the client bundle.
@@ -1209,6 +1236,14 @@ export function ConversationChat({
     enabled: false,
     chain: Promise.resolve(),
   });
+  // MULTI-STEP PLAN (owner 2026-10-14 §4): the steps still to run, in order,
+  // with the handlers of the sentence that produced them. Each next step runs
+  // only when the person taps it — a human in the loop for every step.
+  const planRef = useRef<{
+    steps: readonly PlanStep[];
+    total: number;
+    run: (intent: RoutedIntent) => void;
+  } | null>(null);
   // The router compiles its patterns on first use; build them in idle slices
   // once the conversation is on screen so the first sentence finds them ready.
   useEffect(() => prewarmIntentRouter(), []);
@@ -1216,10 +1251,14 @@ export function ConversationChat({
     if (script) return; // design preview: never touches real persistence
     let cancelled = false;
     const loading = loadAssistantThread();
-    transcriptRef.current.chain = loading.then(
+    // The load only supplies a conversation-id HINT now; appends no longer
+    // wait for it (the server resolves the thread itself — see persistTurn).
+    loading.then(
       (res) => {
         if (!res.available) return;
-        transcriptRef.current.conversationId = res.conversationId;
+        if (transcriptRef.current.conversationId === null) {
+          transcriptRef.current.conversationId = res.conversationId;
+        }
         transcriptRef.current.enabled = true;
       },
       () => undefined,
@@ -1235,6 +1274,7 @@ export function ConversationChat({
           setItems((prev) => [
             {
               id: nid(),
+              history: true,
               embed: (
                 <HistoryBlock
                   messages={restored}
@@ -1267,16 +1307,17 @@ export function ConversationChat({
     (role: "user" | "assistant", text: string) => {
       if (script || !text.trim()) return;
       const tr = transcriptRef.current;
+      // P0 2026-10-14: the append used to be a server action, and Next.js runs
+      // a page's server actions one at a time — it queued behind every other
+      // action the chat fires, so a message sent just before the person
+      // closed or left the page was never written. A keepalive fetch to the
+      // transcript route runs beside that queue and is finished by the
+      // browser even after unload. The chain still orders the appends, so a
+      // question is always written before its answer.
       tr.chain = tr.chain
         .then(async () => {
-          if (!tr.enabled) return;
-          const res = await appendAssistantTurn({
-            conversationId: tr.conversationId,
-            role,
-            text,
-            language: locale,
-          });
-          if (res.available) tr.conversationId = res.conversationId;
+          const saved = await postTranscriptTurn({ conversationId: tr.conversationId, role, text, language: locale });
+          if (saved) tr.conversationId = saved;
         })
         .catch(() => {
           /* degraded — nothing claimed */
@@ -1296,6 +1337,12 @@ export function ConversationChat({
    *  thing — prod walk 2026-09-04: "Kas turėtų jame dirbti?" and its chips
    *  sat under the open project sheet and could not be tapped. */
   const [chipsPostedAt, setChipsPostedAt] = useState<number | null>(null);
+  /** The moment the OPENING BRIEF posted its chips. Kept apart from
+   *  `chipsPostedAt`: the brief is not an answer about what the sheet shows,
+   *  so it may close a sheet that opened on its own (a pending invitation) but
+   *  never a result or selection the person asked for — sharing the stamp
+   *  collapsed every `?result=` deep link on a phone (QA 2026-10-16). */
+  const [briefChipsPostedAt, setBriefChipsPostedAt] = useState<number | null>(null);
 
   /**
    * THE ACTIVE CONVERSATION GOAL (owner P0 §1/§5, 2026-09-06).
@@ -1443,6 +1490,15 @@ export function ConversationChat({
         const actionId = spec.actionId;
         const isEmployer =
           actionId.startsWith("company.") || actionId.startsWith("agency.");
+        // The chat's demand intake rendered (activation audit 2026-10-26 §2):
+        // the same `demand_form_viewed` the Needs door's intake sends, with
+        // the chat as its surface — whichever chip or sentence opened it.
+        if (actionId === "company.create-demand") {
+          trackFunnel(FUNNEL_EVENTS.demandFormViewed, {
+            surface: "chat",
+            role_context: "company",
+          });
+        }
         const render = (values?: Record<string, string | boolean>) => pushEmbed(
           <InlineActionForm
             spec={spec}
@@ -1809,7 +1865,7 @@ export function ConversationChat({
         // The brief asks with chips like any assistant() turn, so the phone
         // sheet (auto-opened for a pending invitation) yields to it the same
         // way instead of staying over the home.
-        if (brief.chips.length > 0) setChipsPostedAt(Date.now());
+        if (brief.chips.length > 0) setBriefChipsPostedAt(Date.now());
       })
       .catch(() => {
         /* the greeting stands on its own — never a fabricated brief */
@@ -3445,6 +3501,35 @@ export function ConversationChat({
         setTyping(false);
         // A failed read says it could not check — never that nothing is stored.
         assistant(t("photosUnavailable"), chips);
+      });
+  }, [assistant, pushEmbed, locale, labels.navJournal, t]);
+  /**
+   * "KAS PASIKEITĖ?" (Future Experience A, owner 2026-10-14) — the ONE
+   * consequence trace read back in the thread: what the person did → what
+   * changed → what it opened, worded by the same function the home uses.
+   * Honest states: `none` = the reads answered and nothing changed in the
+   * window; `unknown` / a thrown read = could not check (never "nothing").
+   */
+  const startWhatChanged = useCallback(() => {
+    setTyping(true);
+    const chips = [{ id: "link:/dashboard/journal#journal-entries", label: labels.navJournal }];
+    readWhatChangedForChat({ locale })
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "unknown") {
+          assistant(t("whatChangedUnavailable"), chips);
+          return;
+        }
+        if (res.kind === "none") {
+          assistant(res.partial ? `${t("whatChangedNone")} ${res.partial}` : t("whatChangedNone"), chips);
+          return;
+        }
+        assistant(t("whatChangedIntro", { count: res.items.length }), chips);
+        pushEmbed(<ChatTraceStrip items={res.items} partial={res.partial} />);
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(t("whatChangedUnavailable"), chips);
       });
   }, [assistant, pushEmbed, locale, labels.navJournal, t]);
   /**
@@ -5230,6 +5315,14 @@ export function ConversationChat({
               assistant(labels.eduAssignNoCohort, [{ id: "edu:cohort", label: labels.chipCreateCohort }]);
               return;
             }
+            // J-12: only the institution's own owner/admin/manager changes
+            // membership — say so instead of "no learners yet".
+            if (!res.membersVisible) {
+              assistant(labels.eduMembersNotForRole, [
+                { id: "link:/dashboard/company/education#institution-programs-title", label: labels.chipProgrammes },
+              ]);
+              return;
+            }
             if (res.assignable.length === 0) {
               assistant(labels.eduAssignNoLearners, [
                 { id: "f:company.invite-learner", label: labels.chipInviteStudent },
@@ -5425,6 +5518,17 @@ export function ConversationChat({
     (chip: ChoiceChip) => {
       if (runPinChip(chip.id)) return;
       noteUsage(chip.id, chip.label);
+      // A "describe a need" door was tapped — the starter chip, the follow-up
+      // after a saved need, or the employer bridge's link to the Needs door.
+      // Same event and the same bounded surface as every other need door
+      // (`lib/company/need-door.ts`); the form's own view is counted in
+      // `openForm`.
+      if (chip.id.split("?")[0] === "f:company.create-demand" || chip.id === `link:${NEED_DOOR_HREF}`) {
+        trackFunnel(FUNNEL_EVENTS.companyDemandActionClicked, {
+          surface: "chat",
+          role_context: "company",
+        });
+      }
       // PERSONAL ACTS ARE NOT COMPANY ACTS (owner 2026-10-01). The CV, the
       // personal profile and the person's own work log belong to the PERSON;
       // in a company workspace the chip says so and offers the personal space
@@ -5443,6 +5547,25 @@ export function ConversationChat({
       // pinnable ref, so noteUsage above records nothing for it).
       if (chip.id.startsWith("attach-file:")) {
         attachChoiceRef.current(chip);
+        return;
+      }
+      // The next step of a plan the person's own sentence asked for. Runs the
+      // SAME handler that sentence would have run; a write step only opens
+      // its confirm card.
+      if (chip.id.startsWith("plan-step:")) {
+        const plan = planRef.current;
+        const next = plan?.steps[0];
+        if (!plan || !next || `plan-step:${next.intent}` !== chip.id) return;
+        user(chip.label);
+        const rest = plan.steps.slice(1);
+        planRef.current = rest.length > 0 ? { ...plan, steps: rest } : null;
+        plan.run(next.intent);
+        if (rest.length > 0) {
+          const n = plan.total - rest.length + 1;
+          assistant(t("planNextOffer"), [
+            { id: `plan-step:${rest[0].intent}`, label: rest[0].label ?? t("planStep", { n, count: plan.total }) },
+          ]);
+        }
         return;
       }
       switch (chip.id) {
@@ -6080,7 +6203,13 @@ export function ConversationChat({
       else if (v.workType) parts.push(workTypeLabels[v.workType] ?? v.workType);
       if (v.subject === "goods" && v.quantity) parts.push(v.quantity.raw);
       if (v.headcount !== null) {
-        parts.push(t("valueIntent.people", { count: v.headcount }));
+        // Teams of a stated size read back as both: "12 žmonių (3 brigados po 4)".
+        const people = t("valueIntent.people", { count: v.headcount });
+        parts.push(
+          v.teamCount != null && v.perTeamSize != null
+            ? `${people} (${t("valueIntent.teams", { teams: v.teamCount, perTeam: v.perTeamSize })})`
+            : people,
+        );
       }
       if (v.window) {
         if (v.window.kind === "days_count") {
@@ -6143,6 +6272,13 @@ export function ConversationChat({
       if (v.workType) out.workType = v.workType;
       if (v.country) out.country = v.country;
       if (v.headcount !== null) out.teamSize = String(v.headcount);
+      // Teams of a stated size ride the form state unrendered, like the work
+      // type: the executor stores them in `structured_v2.team` only while the
+      // number of workers still equals teams × size.
+      if (v.teamCount != null && v.perTeamSize != null) {
+        out.teamCount = String(v.teamCount);
+        out.perTeamSize = String(v.perTeamSize);
+      }
       if (v.window) {
         if (v.window.kind === "from_date" && v.window.startIso) {
           out.startDate = v.window.startIso;
@@ -6184,11 +6320,13 @@ export function ConversationChat({
         : null;
       const questions = v.missing
         .filter(
-          (m): m is "location" | "window" | "quantity" | "headcount" =>
+          (m): m is "location" | "window" | "quantity" | "headcount" | "team_size" =>
             m === "location" ||
             m === "window" ||
             m === "quantity" ||
-            m === "headcount",
+            m === "headcount" ||
+            // Teams named without a size or as a range: ask about the teams.
+            m === "team_size",
         )
         .map((m) => t(`valueIntent.ask.${m}` as Parameters<typeof t>[0]));
 
@@ -6219,9 +6357,14 @@ export function ConversationChat({
           assistant(
             [
               understood,
-              verdict.listingKind === "rental"
-                ? t("valueIntent.goodsListableRental")
-                : t("valueIntent.goodsListable"),
+              // review of #2434: a goods subject (produce, handmade, household,
+              // other) is not a "work-related resource" — say Goods.
+              typeof verdict.listingCategory === "string" &&
+              verdict.listingCategory.startsWith("goods_")
+                ? t("valueIntent.goodsListableGoods")
+                : verdict.listingKind === "rental"
+                  ? t("valueIntent.goodsListableRental")
+                  : t("valueIntent.goodsListable"),
               ...questions,
             ]
               .filter((l): l is string => Boolean(l))
@@ -6236,8 +6379,10 @@ export function ConversationChat({
           return;
         }
         if (verdict?.kind === "LEGAL_CHECK_REQUIRED") {
-          // Food/produce: name plainly WHAT would have to be checked, then
-          // the channel truth — no approved produce channel, nothing saved.
+          // Food/produce: name plainly WHAT has to be checked, then the
+          // channel truth — the goods board accepts a draft and asks for the
+          // legal acknowledgement on publish (audit 2026-10-16, M-1). Nothing
+          // is saved here; the chip opens the board.
           assistant(
             [
               understood,
@@ -6246,20 +6391,17 @@ export function ConversationChat({
             ]
               .filter((l): l is string => Boolean(l))
               .join("\n"),
+            [
+              {
+                id: "link:/dashboard/listings",
+                label: t("valueIntent.chipListings"),
+              },
+            ],
           );
           return;
         }
-        if (
-          verdict?.kind === "CHANNEL_RESTRICTED" &&
-          verdict.reasonKey === "category_not_supported"
-        ) {
-          assistant(
-            [understood, t("valueIntent.goodsCategoryUnsupported")]
-              .filter((l): l is string => Boolean(l))
-              .join("\n"),
-          );
-          return;
-        }
+        // (The former category_not_supported branch is gone: since M-1 the
+        // marketplace channel never emits it for a lawful goods statement.)
         // NEEDS_MORE_INFORMATION → the unclear branch below asks for it.
       }
 
@@ -7631,6 +7773,7 @@ export function ConversationChat({
         invitations: () => startInvitations(),
         // The stored work photos, shown back (issue #1689, defect G).
         evidencePhotos: () => startEvidencePhotos(),
+        whatChanged: () => startWhatChanged(),
         // "Kas mato mano profilį?" — state first, then the existing consent.
         employerVisibility: () => startEmployerVisibility(),
         // ACCEPT BY SENTENCE (launch completion 2026-09-20): the one waiting
@@ -7764,6 +7907,25 @@ export function ConversationChat({
                 trackResolution(res.intent, "llm");
                 dispatchIntent(res.intent, handlers, withTyping, fallback);
                 return;
+              case "plan": {
+                // ONE SENTENCE, SEVERAL STEPS, IN ORDER (owner 2026-10-14 §4).
+                // The first step runs now; each next one is offered and runs
+                // when tapped. Every step is an existing handler; a write is
+                // only ever the last step and only opens its confirm card.
+                trackResolution(res.steps[0].intent, "llm");
+                const total = res.steps.length;
+                const rest = res.steps.slice(1);
+                planRef.current = {
+                  steps: rest,
+                  total,
+                  run: (step) => dispatchIntent(step, handlers, withTyping, fallback),
+                };
+                assistant(t("planIntro", { count: total }), [
+                  { id: `plan-step:${rest[0].intent}`, label: rest[0].label ?? t("planStep", { n: 2, count: total }) },
+                ]);
+                dispatchIntent(res.steps[0].intent, handlers, withTyping, fallback);
+                return;
+              }
               case "reference":
                 // Resolve against the caller's own world — never an operation.
                 trackResolution("unknown", "llm");
@@ -7806,7 +7968,7 @@ export function ConversationChat({
           askToClarify(t("answerFailed"));
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startWhatChanged, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
   );
 
   /**
@@ -8132,6 +8294,7 @@ export function ConversationChat({
             <ConversationThread
               items={items}
               typing={typing}
+              introWide={Boolean(openingContext) && openingContextWide && !script}
               /* "Mano erdvė" (S2). It sits INSIDE the opening composition, so
                  the workspace still opens as a conversation: the block, the
                  greeting and the composer are one centred first screen, and
@@ -8142,11 +8305,13 @@ export function ConversationChat({
                 openingContext && !script ? (
                   openingContext
                 ) : personalIntroPayload && !script ? (
-                  /* Invisible boundary (#1011): the intro's slow readiness
-                     reads stream in AFTER the shell — the opening composition
-                     renders immediately and the block appears when known,
-                     exactly like the layout's SpineStream. */
-                  <Suspense fallback={null}>
+                  /* Own boundary (#1011): the intro's slow readiness reads
+                     stream in AFTER the shell — the opening composition
+                     renders immediately, exactly like the layout's
+                     SpineStream. The pending state RESERVES the block's
+                     space (home CLS P0): a payload only exists when the
+                     block can render, so nothing is reserved in vain. */
+                  <Suspense fallback={<PersonalWorkspaceIntroPending />}>
                     <PersonalWorkspaceIntroStream
                       payload={personalIntroPayload}
                       onAction={handlePanelChip}
@@ -8222,6 +8387,7 @@ export function ConversationChat({
             wide={panelWide}
             full={resultFull}
             chipsPostedAt={chipsPostedAt}
+            briefChipsPostedAt={briefChipsPostedAt}
             onCloseResult={closeResult}
             // Two different verbs, two different callbacks: the station door
             // navigates and says where; "full screen" expands in place.

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageTitle } from "@/components/app/premium/page-title";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -31,6 +32,11 @@ import {
 } from "@/lib/market-map/owner-readiness";
 import { getOwnAvatar } from "@/lib/profile/avatar";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/market-map", "marketMap.pageTitle");
+
 
 /**
  * THE ONE MAP (owner target: one map, not several).
@@ -184,12 +190,7 @@ export default async function MarketMapPage({
         event={FUNNEL_EVENTS.preferredLocationViewed}
         metadata={{ surface: "market_map" }}
       />
-      <h1
-        className="font-display text-2xl font-bold tracking-tightest text-text-primary"
-        data-testid="market-map-page-header"
-      >
-        {tMap("pageTitle")}
-      </h1>
+      <PageTitle data-testid="market-map-page-header">{tMap("pageTitle")}</PageTitle>
 
       {/* ONE map: layers, location + radius, the map, its places. */}
       <WorldDiscovery

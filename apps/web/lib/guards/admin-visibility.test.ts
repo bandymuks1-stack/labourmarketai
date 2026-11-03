@@ -44,9 +44,9 @@ function walk(dir: string, filter: (p: string) => boolean): string[] {
  *  surrounding code gates on an admin signal (verified by the test
  *  itself — the file must still contain the gating signal). */
 const ADMIN_GATED_FILES = new Set<string>([
-  // RoleSwitcher renders the /dashboard/admin admin-mode badge ONLY
-  // when `isAdmin` from the auth context is true.
-  join(APP_ROOT, "components", "app", "role-switcher.tsx"),
+  // (The role switcher's admin-mode badge used to be listed here; the
+  // switcher was retired with the one header on 2026-10-25. The header's
+  // admin destination comes from `ADMIN_NAV_ITEM`, appended only for admins.)
   // Visual OS preview page renders the /dashboard/admin/project-truth
   // shortcut ONLY when `isAdmin` (dual signal via deriveIsAdmin) is
   // true; non-admins never see the admin link.
@@ -112,8 +112,8 @@ describe("admin visibility — non-admin UI never renders /dashboard/admin links
       if (!/\/dashboard\/admin\b/.test(src)) continue;
       if (ADMIN_GATED_FILES.has(f)) {
         // Verify the allowlisted file STILL contains the gating signal.
-        // If a future edit strips the `isAdmin` check from
-        // role-switcher.tsx, this test catches that too.
+        // If a future edit strips the `isAdmin` check from an
+        // allowlisted file, this test catches that too.
         if (!/\bisAdmin\b/.test(src)) {
           violations.push(
             `Allowlisted file ${f.replace(APP_ROOT, ".")} no longer contains an \`isAdmin\` gate — re-verify the admin-mode badge is still gated.`,

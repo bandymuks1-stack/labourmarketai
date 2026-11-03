@@ -3,11 +3,23 @@
  * No network: the live branch is reached only to prove it self-gates on a
  * missing key BEFORE importing the SDK.
  */
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, onTestFinished } from "vitest";
 import { resolveAiRuntimeConfig, type AiRuntimeConfigInput } from "./config-core";
 import { dispatchAiCompletion, selectCompletionProvider } from "./run-core";
 import type { AiCompletionRequest } from "./types";
 import { resolveTaskRoute } from "./task-routing";
+
+// ZERO PAID API BUDGET (paid-budget.ts) is closed by default. These tests study
+// how METERED providers behave behind the egress gate and the chain, so they
+// run with the owner switch open; paid-budget.test.ts covers the closed state.
+const PAID_BEFORE = process.env.AI_PAID_PROVIDERS_ALLOWED;
+beforeEach(() => {
+  process.env.AI_PAID_PROVIDERS_ALLOWED = "true";
+});
+afterEach(() => {
+  if (PAID_BEFORE === undefined) delete process.env.AI_PAID_PROVIDERS_ALLOWED;
+  else process.env.AI_PAID_PROVIDERS_ALLOWED = PAID_BEFORE;
+});
 
 const base: AiRuntimeConfigInput = {
   mode: undefined, provider: undefined, apiKey: undefined, model: undefined,
@@ -140,6 +152,10 @@ describe("RED-2 (owner approval 2026-09-17): the SHIPPED grant table opens trans
   });
 
   it("gemini: passes the gate and reaches the adapter (which self-gates on env — no network)", async () => {
+    process.env.AI_GEMINI_PAID_TIER_CONFIRMED = "1";
+    onTestFinished(() => {
+      delete process.env.AI_GEMINI_PAID_TIER_CONFIRMED;
+    });
     const cfg = resolveAiRuntimeConfig({ ...base, mode: "live", provider: "gemini", apiKey: "presence-only" });
     const r = await dispatchAiCompletion(translation(), cfg);
     expect(r.status).toBe("disabled");

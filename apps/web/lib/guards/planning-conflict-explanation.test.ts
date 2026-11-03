@@ -9,6 +9,7 @@ import {
   visibleConflictPartners,
   type PlanningItem,
 } from "@/lib/planning/planning-model";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Guard for W12 item C — a conflict explains itself.
@@ -174,7 +175,7 @@ describe("the planning page wires the explanation", () => {
 describe("copy exists in every ACTIVE locale", () => {
   // `planning` is an active-locale namespace: the 6 inactive catalogues do not
   // carry it at all, so parity is asserted against the active set only.
-  for (const loc of ["en", "lt", "ru", "nl", "de"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: planning.conflict.withVisible is present and interpolates both slots`, () => {
       const m = JSON.parse(read(`messages/${loc}.json`)) as {
         planning: { conflict: Record<string, string> };

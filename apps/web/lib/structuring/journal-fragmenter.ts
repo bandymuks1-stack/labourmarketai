@@ -75,6 +75,18 @@ const TRAILING_TIME_QTY_RE = new RegExp(
 const TRAILING_SEPARATORS_RE = /[\s,;:–—-]+$/u;
 const LEADING_SEPARATORS_RE = /^[\s,;:–—-]+/u;
 
+/** A number+unit time/quantity expression ANYWHERE in a segment (same unit
+ *  vocabulary as the trailing stripper, un-anchored). A comma-delimited
+ *  segment carrying one is a real, measured work item — so the comma after it
+ *  ends that item (see `segmentHasWorkAnchor`). Runs on FOLDED text. */
+const CONTAINS_TIME_QTY_RE = new RegExp(
+  `\\d+(?:[.,]\\d+)?\\s*(?:${[
+    ...DURATION_UNIT_PATTERNS,
+    ...QUANTITY_UNIT_PATTERNS,
+  ].join("|")})`,
+  "iu",
+);
+
 /** Clause conjunctions that MAY split two work items (folded forms). */
 const CONJUNCTION_RE =
   /\s+(?:ir|bei|taip\s+pat|and|also|en|und|и|а\s+также)\s+/giu;
@@ -260,6 +272,57 @@ function splitOnConjunctions(part: string): string[] {
   return [part];
 }
 
+/** A comma-delimited segment stands on its own as a work item when it carries
+ *  a verb-like token OR a number+unit time/quantity expression — the same two
+ *  signals the rest of the pipeline keys real work on. Receives GUARDED text
+ *  (decimal separators are the \x01/\x02 marks); restores them before folding
+ *  so "1,5 val" reads as a timed item, not as two bare numbers. */
+function segmentHasWorkAnchor(guardedSegment: string): boolean {
+  const folded = foldText(
+    guardedSegment
+      .replace(new RegExp(DECIMAL_COMMA, "g"), ",")
+      .replace(new RegExp(DECIMAL_DOT, "g"), "."),
+  );
+  if (!folded) return false;
+  if (CONTAINS_TIME_QTY_RE.test(folded)) return true;
+  return tokenize(folded).some(isVerbLikeToken);
+}
+
+/**
+ * Split ONE hard part on COMMAS — but ONLY where the comma sits between two
+ * real work items: the text accumulated since the last boundary AND the
+ * segment after the comma each carry a verb or a time/quantity expression
+ * (`segmentHasWorkAnchor`). A comma with a bare noun phrase on either side is
+ * NOT a boundary, so a descriptive clause — the kind a Lithuanian worker
+ * writes to summarise analysis work ("privatumo, sutikimų, pasitikėjimo …
+ * analizė, dokumentacijos spragų identifikavimas") — stays ONE fragment
+ * instead of shattering into noun scraps that each surface as their own
+ * `unresolved_fragment`; and a bare note trailing a real item ("dažiau sienas
+ * 4 val, papildomos pastabos") joins that item rather than becoming a scrap.
+ * Timed/quantified lists ("30 min pertrauka, 2 val dažiau") and verb-clause
+ * lists ("kroviau paletes, valiau langus") still split exactly as before.
+ * Operates on GUARDED text so decimal commas (\x01) are never split on.
+ * Data-driven: extend the signals, never add a sentence-specific branch.
+ */
+function splitOnWorkItemCommas(guardedPart: string): string[] {
+  if (!guardedPart.includes(",")) return [guardedPart];
+  const segments = guardedPart.split(",");
+  const out: string[] = [];
+  let buffer = segments[0];
+  for (let i = 1; i < segments.length; i++) {
+    const next = segments[i];
+    if (segmentHasWorkAnchor(buffer) && segmentHasWorkAnchor(next)) {
+      out.push(buffer);
+      buffer = next;
+    } else {
+      // A bare noun phrase on one side — the comma joins, it does not bound.
+      buffer = `${buffer},${next}`;
+    }
+  }
+  out.push(buffer);
+  return out;
+}
+
 /** Strip trailing time/quantity expressions + separators (folded input). */
 function stripTimeAndQuantity(folded: string): string {
   let out = folded;
@@ -299,36 +362,44 @@ export function fragmentJournalText(text: string): JournalFragment[] {
     comma: DECIMAL_COMMA,
   }).replace(ITEMISING_COLON_G, (m) => `;${m.slice(1)}`);
 
+  const restoreDecimals = (p: string): string =>
+    p
+      .replace(new RegExp(DECIMAL_COMMA, "g"), ",")
+      .replace(new RegExp(DECIMAL_DOT, "g"), ".");
+
+  // Hard boundaries are sentence punctuation, the itemising-colon-derived ';'
+  // and newlines — NOT the comma. The comma was an unconditional boundary,
+  // which shattered comma-separated descriptive prose into bare noun scraps
+  // (each an unresolved_fragment). It is now split only where it ends a real
+  // work item (`splitOnWorkItemCommas`). Both splits run on the GUARDED text
+  // so decimal commas are never boundaries; decimals are restored per piece.
   const hardParts = guarded
-    .split(/[.!?;,\n]+/)
-    .map((p) =>
-      p
-        .replace(new RegExp(DECIMAL_COMMA, "g"), ",")
-        .replace(new RegExp(DECIMAL_DOT, "g"), "."),
-    )
-    .map((p) => p.replace(LEADING_SEPARATORS_RE, "").trim())
-    .filter((p) => p.length > 0);
+    .split(/[.!?;\n]+/)
+    .filter((p) => p.trim().length > 0);
 
   const out: JournalFragment[] = [];
   const seenIds = new Set<string>();
-  for (const part of hardParts) {
-    for (const piece of splitOnConjunctions(part)) {
-      const textPiece = piece
-        .replace(LEADING_SEPARATORS_RE, "")
-        .replace(TRAILING_SEPARATORS_RE, "")
-        .trim();
-      if (!textPiece) continue;
-      const normalized = stripTimeAndQuantity(foldText(textPiece));
-      if (!normalized) continue;
-      const id = fnv1aHex(normalized);
-      if (seenIds.has(id)) continue; // exact duplicate fragment — one card
-      seenIds.add(id);
-      out.push({
-        id,
-        text: textPiece,
-        normalized,
-        meaningful: isMeaningful(normalized),
-      });
+  for (const guardedPart of hardParts) {
+    for (const guardedItem of splitOnWorkItemCommas(guardedPart)) {
+      const part = restoreDecimals(guardedItem);
+      for (const piece of splitOnConjunctions(part)) {
+        const textPiece = piece
+          .replace(LEADING_SEPARATORS_RE, "")
+          .replace(TRAILING_SEPARATORS_RE, "")
+          .trim();
+        if (!textPiece) continue;
+        const normalized = stripTimeAndQuantity(foldText(textPiece));
+        if (!normalized) continue;
+        const id = fnv1aHex(normalized);
+        if (seenIds.has(id)) continue; // exact duplicate fragment — one card
+        seenIds.add(id);
+        out.push({
+          id,
+          text: textPiece,
+          normalized,
+          meaningful: isMeaningful(normalized),
+        });
+      }
     }
   }
   return out;

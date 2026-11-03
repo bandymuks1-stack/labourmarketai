@@ -25,10 +25,21 @@ import { defineConfig, devices } from "@playwright/test";
  */
 const LOCAL_STACK = !!process.env.E2E_LOCAL_STACK;
 
+/**
+ * PRODUCTION WALKS ARE SERIAL TOO (owner decision 2026-10-26: tests must not
+ * worsen real people's experience). `prod-qa-walk.yml` sets PROD_QA_WALK=1
+ * and drives the LIVE site; with the default workers the runner swept two
+ * actor/locale groups at once, and the ux-metrics walk measured 7-39 s LCP on
+ * the later locales while a controlled sequential walk measured ~2-2.5 s for
+ * every locale (run 40328663291). One worker: our own load stays one person's,
+ * and a measurement is not distorted by the walk itself.
+ */
+const PROD_WALK = process.env.PROD_QA_WALK === "1";
+
 export default defineConfig({
   testDir: "./tests/e2e",
-  fullyParallel: !LOCAL_STACK,
-  workers: LOCAL_STACK ? 1 : undefined,
+  fullyParallel: !LOCAL_STACK && !PROD_WALK,
+  workers: LOCAL_STACK || PROD_WALK ? 1 : undefined,
   /**
    * LOCAL-STACK RUNS GET A LONGER PER-TEST BUDGET.
    *

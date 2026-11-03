@@ -37,6 +37,7 @@ export function JournalEntryRow({
   standing = "UNKNOWN",
   standingSolid = false,
   chainSlot,
+  provenanceSlot,
   needsAttention = false,
 }: {
   entryId: string;
@@ -53,6 +54,12 @@ export function JournalEntryRow({
    *  your history), built by the page from the same verification state that
    *  drives `standing`. Shown between the entry and its status zone. */
   chainSlot?: React.ReactNode;
+  /** This entry is a CORRECTION that answered a decision (returned / rejected
+   *  / reviewed original): one short provenance line in view, above the
+   *  entry's own words (`CorrectionProvenanceLine`). The original is never a
+   *  second card and adds nothing to any count; the full note sits in the
+   *  timeline behind "more". Absent → nothing extra. */
+  provenanceSlot?: React.ReactNode;
   /** Edit-in-place control (journal compact UX v1): the page passes the
    *  drawer-based edit launcher here so editing opens in a compact drawer
    *  over the list — no navigation, scroll/day position preserved. Absent →
@@ -185,6 +192,9 @@ export function JournalEntryRow({
     <WorkSpineNode state={standing} solid={standingSolid}>
     <div className="card-border flex flex-col gap-3 p-4" data-testid={`journal-entry-card-${entryId}`}>
       {/* Sections: entry text + "Sistema suprato" come from `children`. */}
+      {/* A correction says what it answered first, as a quiet kicker above
+          its own words — provenance, never a second card or state. */}
+      {provenanceSlot}
       {children}
       {/* MAIN action in view — edit, or the correction an employer asked for. */}
       <div className="flex flex-wrap items-center gap-2">

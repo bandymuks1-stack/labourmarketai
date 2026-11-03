@@ -93,3 +93,22 @@ export function organizationAllTime(wi: WorkIntelligence | null): OrganizationAl
     to,
   };
 }
+
+/**
+ * The organization-recorded hours of all time that NO journal figure already
+ * holds — the line the Work Intelligence "all time" tile names beside the
+ * journal hours (#2169, 2026-10-15: the tile read "25.58 h" while the person's
+ * 800 h imported period counted only in a box further down).
+ *
+ * Day records that describe a live journal entry (`linkedHours`) are the SAME
+ * work the journal tile already counts, so they are left out; everything else
+ * the all-time rule counts (other day records + non-overlapping periods) is
+ * the remainder. Shown beside the journal figure, never added into it.
+ * `null` = the ledger could not be read (UNKNOWN, never zero).
+ */
+export function organizationHoursBeyondJournal(wi: WorkIntelligence | null): number | null {
+  const allTime = organizationAllTime(wi);
+  if (!allTime) return null;
+  const linked = wi?.organizationRecords?.find((p) => p.key === "all")?.linkedHours ?? 0;
+  return Math.max(0, round2(allTime.totalHours - linked));
+}

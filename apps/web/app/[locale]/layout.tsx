@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/visual/theme-default";
 import { Bricolage_Grotesque, Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { AnalyticsConsentBanner } from "@/components/app/analytics-consent";
 import {
   BASE_CLIENT_MESSAGE_ROOTS,
   pickMessages,
@@ -14,6 +16,8 @@ import { organizationJsonLd, webSiteJsonLd } from "@/lib/answer-engine/answer-se
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { BRAND_NAME, BRAND_SEO, resolveActiveLocale } from "@/lib/seo/metadata";
+import { REGEXP_LOOKBEHIND_SHIM } from "@/lib/compat/regexp-lookbehind-shim";
+import { CLIENT_ERROR_EARLY_SCRIPT } from "@/lib/telemetry/client-error-early-script";
 import "../globals.css";
 
 // TASK 07 typography lock (owner, 2026-06-11): Bricolage Grotesque carries
@@ -137,6 +141,7 @@ export default async function LocaleLayout({
     notFound();
   }
   setRequestLocale(locale);
+  const consentT = await getTranslations({ locale, namespace: "consent" });
 
   return (
     <html
@@ -145,6 +150,15 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* FIRST in <head>, before any application module is evaluated:
+            browsers without regex lookbehind (Safari / iOS < 16.4, old
+            in-app web views) otherwise die on load with "Application error"
+            (2026-10-18 incident). A no-op on every current browser. */}
+        <script dangerouslySetInnerHTML={{ __html: REGEXP_LOOKBEHIND_SHIM }} />
+        {/* Second: the crash reporter for failures no error boundary can
+            see (module evaluation, unhandled rejections, a missing chunk).
+            Sanitised, at most three per page, logged — never stored. */}
+        <script dangerouslySetInnerHTML={{ __html: CLIENT_ERROR_EARLY_SCRIPT }} />
         {/* Organization + WebSite structured data on EVERY locale page
             (2026-09-19): the landing is outside the marketing route group
             and is a frozen composition, so the publisher nodes live here
@@ -164,7 +178,7 @@ export default async function LocaleLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var s=localStorage.getItem('theme');var t=s==='light'?'light':'dark';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='dark';}})();",
+              THEME_BOOTSTRAP_SCRIPT,
           }}
         />
       </head>
@@ -189,6 +203,19 @@ export default async function LocaleLayout({
             BASE_CLIENT_MESSAGE_ROOTS,
           )}
         >
+          {/* Analytics consent (owner decision 2026-11-03): until a choice
+              exists on this device nothing non-essential is stored or sent.
+              Rendered BEFORE the page, in the flow, so it never covers it.
+              Strings are passed in, so no client message root is added. */}
+          <AnalyticsConsentBanner
+            strings={{
+              label: consentT("banner.label"),
+              text: consentT("banner.text"),
+              accept: consentT("banner.accept"),
+              refuse: consentT("banner.refuse"),
+              more: consentT("banner.more"),
+            }}
+          />
           {children}
         </NextIntlClientProvider>
       </body>

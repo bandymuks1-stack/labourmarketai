@@ -13,6 +13,7 @@
  */
 import type { MatchResultV1, MatchStatus } from "@/lib/market/match-v1";
 import type { NeedStructureSuggestion } from "@/lib/structuring/structure-need";
+import type { NeedHeadcount } from "@/lib/structuring/need-headcount";
 
 /** The four real entry intents. One unified question, four answers. */
 export type RecognitionIntent =
@@ -137,6 +138,10 @@ export interface RecognizedCard {
   readonly readiness: ReadinessState;
   /** 1–3 next actions, each opening an EXISTING route. Never more than 3. */
   readonly nextActions: readonly NextAction[];
+  /** How many workers the text states (total, teams × size, or one singular
+   *  occupation) — or the clarification to ask when teams are not sized.
+   *  Absent when the text states no count, and for a person seeking work. */
+  readonly headcount?: NeedHeadcount;
 }
 
 /** Match readiness band for the top-N explanation (not a rating). */

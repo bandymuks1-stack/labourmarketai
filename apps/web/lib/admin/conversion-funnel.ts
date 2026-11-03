@@ -1,4 +1,5 @@
 import "server-only";
+import { readKeysetPagesDesc } from "@/lib/admin/keyset-pages";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
@@ -283,6 +284,14 @@ export type CampaignReadout = {
   returnedToJob: number;
   compared: number;
   interest: number;
+  /** Worker steps AFTER sign-up (owner decision 2026-11-03). Occurrences,
+   *  not people: "journal entries" is every saved entry, never "first entry",
+   *  which needs a per-person read (blocked RED #2886). Attributed only for
+   *  accounts whose own record carries the campaign (consented sign-ups). */
+  profileSaved: number;
+  profileMatchable: number;
+  journalEntrySaved: number;
+  jobSearch: number;
 };
 
 /** Column → the already-emitted event it counts. Declared as data so the
@@ -296,6 +305,10 @@ const CAMPAIGN_COLUMN_EVENTS = {
   returnedToJob: FUNNEL_EVENTS.jobReturnedAfterAuth,
   compared: FUNNEL_EVENTS.jobCompared,
   interest: FUNNEL_EVENTS.vacancyInterestExpressed,
+  profileSaved: FUNNEL_EVENTS.profileSaved,
+  profileMatchable: FUNNEL_EVENTS.profileMatchable,
+  journalEntrySaved: FUNNEL_EVENTS.journalEntrySaved,
+  jobSearch: FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed,
 } as const satisfies Record<
   Exclude<keyof CampaignReadout, "campaign" | "content">,
   string
@@ -412,44 +425,31 @@ export async function getAcquisitionFunnel(
   // Every rendered stage plus the campaign read-out's own columns (see
   // FUNNEL_READ_EVENTS) — one read, one window, one population.
   const names = FUNNEL_READ_EVENTS;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const fromAny = (supabase as any).from.bind(supabase) as (
-    name: string,
-  ) => {
-    select: (cols: string) => {
-      in: (
-        col: string,
-        vals: readonly string[],
-      ) => {
-        gte: (
-          col: string,
-          value: string,
-        ) => {
-          order: (
-            col: string,
-            opts: { ascending: boolean },
-          ) => {
-            limit: (n: number) => Promise<{
-              data: FunnelRow[] | null;
-              error: { message?: string } | null;
-            }>;
-          };
-        };
-      };
-    };
-  };
 
   // `created_at` is SELECTED as well as filtered: a window cannot be applied
   // to a column the read does not carry, and the ordering below is what makes
   // the cap keep the most recent rows instead of an arbitrary slice.
   // `profile_id` (W14 item 5) is what makes internal activity classifiable at
   // all — without it the funnel cannot tell the owner from a prospect.
-  const { data, error } = await fromAny("pilot_events")
-    .select("event_name, metadata, created_at, profile_id")
-    .in("event_name", names)
-    .gte("created_at", funnelWindowStart(now))
-    .order("created_at", { ascending: false })
-    .limit(FUNNEL_MAX_ROWS);
+  // PAGED (pages of 1000, the server's own cap): a single .limit() above
+  // 1000 silently returned 1000 rows — a busy window was read short and the
+  // truncation check (rows >= cap) never fired. KEYSET pages (created_at, id)
+  // under an upper bound fixed before the first page: inserts, erasures and
+  // late commits between requests cannot shift a row across pages.
+  const snapshotAt = now.toISOString();
+  const paged = await readKeysetPagesDesc<FunnelRow & { id: string; created_at: string }>(
+    () =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase as any)
+        .from("pilot_events")
+        .select("id, event_name, metadata, created_at, profile_id")
+        .in("event_name", names)
+        .gte("created_at", funnelWindowStart(now))
+        .lte("created_at", snapshotAt),
+    { maxRows: FUNNEL_MAX_ROWS },
+  );
+  const error = paged.error as { message?: string } | null;
+  const data = error ? null : paged.rows;
 
   if (error) {
     return {
@@ -570,6 +570,10 @@ export function summariseFunnel(
             returnedToJob: 0,
             compared: 0,
             interest: 0,
+            profileSaved: 0,
+            profileMatchable: 0,
+            journalEntrySaved: 0,
+            jobSearch: 0,
           };
           campaignRows.set(key, row);
         }

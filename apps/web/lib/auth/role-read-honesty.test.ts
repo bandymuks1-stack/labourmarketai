@@ -213,7 +213,14 @@ describe("the authenticated shell reads roles the same honest way", () => {
   );
 
   it("routes its profile_roles read through the shared reader", () => {
-    expect(layout).toMatch(/readActiveProfileRoles\(/);
+    // Perf 2026-10-23: the shell reads through the request-cached
+    // `readActiveRoleRows`, which is `readActiveProfileRoles` underneath —
+    // the same retry-then-throw semantics, shared with the page gate.
+    expect(layout).toMatch(/readActiveRoleRows\(/);
+    const reader = readFileSync(join(__dirname, "profile-roles.ts"), "utf8");
+    expect(reader).toMatch(
+      /const readActiveRoleRowsOnce = cache\([\s\S]{0,200}readActiveProfileRoles<RoleRow>\(/,
+    );
   });
 
   it("never destructures the roles read down to `data` alone", () => {
@@ -275,8 +282,12 @@ describe("no downstream reader turns an unreadable role table into a grant", () 
     expect(dispatch).not.toMatch(
       /catch[\s\S]{0,60}return new Set<Role>\(\["worker"\]\)/,
     );
-    // The answered-empty default (a brand-new account can still act) stays.
-    expect(dispatch).toMatch(/set\.size > 0 \? set : new Set<Role>\(\["worker"\]\)/);
+    // The answered-empty default (a brand-new account can still act) stays —
+    // decided by the pure core the dispatcher builds its held roles with.
+    const core = src("lib/conversation/dispatch-core.ts");
+    expect(core).not.toMatch(/catch[\s\S]{0,60}return new Set<Role>\(\["worker"\]\)/);
+    expect(core).toMatch(/set\.size > 0 \? set : new Set<Role>\(\["worker"\]\)/);
+    expect(dispatch).toMatch(/return heldDispatchRoles\(\{/);
     expect(dispatch).toMatch(/readActiveProfileRoles\(/);
   });
 

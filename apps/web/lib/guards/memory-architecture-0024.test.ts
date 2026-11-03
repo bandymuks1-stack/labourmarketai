@@ -20,7 +20,8 @@ describe("decision 0024: memory and context", () => {
     expect(sql).toMatch(/organization_id uuid references public\.organizations\(id\)/);
     const t = read("apps/web/lib/assistant/transcript.ts");
     expect(t).toMatch(/scoped\.eq\("organization_id", workspaceId\) : scoped\.is\("organization_id", null\)/);
-    expect(t).toMatch(/insert\(\{ owner_id: user\.id, organization_id: await threadWorkspaceId\(\) \}\)/);
+    // Created (and looked up) only under the SERVER-resolved workspace.
+    expect(t).toMatch(/const workspaceId = await threadWorkspaceId\(\);[\s\S]*insert\(\{ owner_id: user\.id, organization_id: workspaceId \}\)/);
     // the workspace is resolved server-side, never taken from the client
     expect(t).toContain("getWorkspaceContext()");
   });

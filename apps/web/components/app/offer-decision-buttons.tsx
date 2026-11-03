@@ -58,7 +58,7 @@ export function OfferDecisionButtons({
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="min-h-11 sm:min-h-0 inline-flex items-center gap-1.5 rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-60"
             data-testid={`offer-accept-${offerId}`}
           >
             <Check className="h-3.5 w-3.5" aria-hidden /> {labels.accept}
@@ -70,7 +70,7 @@ export function OfferDecisionButtons({
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:border-text-muted disabled:opacity-60"
+            className="min-h-11 sm:min-h-0 inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:border-text-muted disabled:opacity-60"
             data-testid={`offer-decline-${offerId}`}
           >
             <X className="h-3.5 w-3.5" aria-hidden /> {labels.decline}

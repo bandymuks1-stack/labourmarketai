@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { professionsNamedInText } from "@/lib/onboarding/landing-handoff";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * FAST PATH TO MATCHABILITY (owner command 2026-09-17 §7).
@@ -79,7 +80,7 @@ describe("the text-first flow offers the direction, records it first, and never 
   it("says when nothing became a catalogued skill and no direction exists — with the next step", () => {
     expect(flow).toContain('data-testid="profile-text-flow-needs-direction"');
     expect(flow).toContain('href="#profile-edit"');
-    for (const locale of ["lt", "en", "ru", "de", "nl"]) {
+    for (const locale of activeLocales) {
       const m = JSON.parse(read("messages", `${locale}.json`)) as {
         skills: { textFirst: Record<string, string> };
       };

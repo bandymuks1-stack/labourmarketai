@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import type { JournalEntry } from "../capability-shapes";
 import { useLocale } from "../i18n/locale-context";
-import { Body } from "../ui/primitives";
+import { Body, Button } from "../ui/primitives";
 import { theme } from "../ui/theme";
 
 /**
@@ -16,7 +16,15 @@ import { theme } from "../ui/theme";
  * they exist, as a count, because a confirmation is a recorded event and zero
  * of them is not a badge worth inventing.
  */
-export function JournalEntryList({ entries }: { entries: readonly JournalEntry[] }) {
+export function JournalEntryList({
+  entries,
+  onCorrect,
+}: {
+  entries: readonly JournalEntry[];
+  /** Offered only where correcting belongs (the journal itself), never on
+   *  a summary such as Today's recent work. */
+  onCorrect?: (entry: JournalEntry) => void;
+}) {
   const { t } = useLocale();
   if (entries.length === 0) {
     // A LOADED, genuinely empty answer — the one case where "nothing recorded
@@ -25,23 +33,38 @@ export function JournalEntryList({ entries }: { entries: readonly JournalEntry[]
   }
   return (
     <View style={styles.list}>
-      {entries.map((entry) => (
-        <View key={entry.entryId} style={styles.entry} accessible>
-          <Text style={styles.meta}>
-            {workDateOf(entry)}
-            {entry.confirmations > 0 ? `   ✓ ${entry.confirmations}` : ""}
-          </Text>
-          <Text style={styles.text}>{entry.text}</Text>
+      {entries.map((entry, index) => (
+        <View key={entry.entryId} style={styles.entry}>
+          <View accessible>
+            <Text style={styles.meta}>
+              {workDateOf(entry)}
+              {entry.confirmations > 0 ? `   ✓ ${entry.confirmations}` : ""}
+            </Text>
+            <Text style={styles.text}>{entry.text}</Text>
+          </View>
+          {onCorrect ? (
+            <Button
+              variant="quiet"
+              testID={`journal-entry-correct-${index}`}
+              label={t("journal.correct.action")}
+              onPress={() => onCorrect(entry)}
+            />
+          ) : null}
         </View>
       ))}
     </View>
   );
 }
 
-function workDateOf(entry: JournalEntry): string {
+export function workDateOf(entry: JournalEntry): string {
   const recorded = entry.metrics.find((m) => m.slug === "work_date");
   if (recorded?.valueText) return recorded.valueText;
   return entry.createdAt.slice(0, 10);
+}
+
+/** The entry's recorded site, when it carries one. */
+export function siteNameOf(entry: JournalEntry): string | null {
+  return entry.metrics.find((m) => m.slug === "site_name")?.valueText ?? null;
 }
 
 const styles = StyleSheet.create({

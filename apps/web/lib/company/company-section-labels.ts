@@ -212,6 +212,8 @@ export async function readAgencyBridgeLabels() {
     noShared: tAB("noShared"),
     workerLabel: tAB("workerLabel"),
     workerPlaceholder: tAB("workerPlaceholder"),
+    noteLabel: tAB("noteLabel"),
+    inviteLinkLabel: tAB("inviteLinkLabel"),
     offerButton: tAB("offerButton"),
     noRoster: tAB("noRoster"),
     goToRoster: tAB("goToRoster"),

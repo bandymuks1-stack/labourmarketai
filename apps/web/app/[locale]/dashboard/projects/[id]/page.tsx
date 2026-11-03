@@ -14,9 +14,22 @@ import {
   Users,
 } from "lucide-react";
 
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { getProjectStadium } from "@/lib/projects/stadium";
+import { ProjectCourseTrack } from "@/components/app/projects/project-course-track";
+import { deriveProjectCourse } from "@/lib/projects/project-course";
+import { ProjectForecastPanel } from "@/components/app/projects/project-forecast-panel";
+import { readProjectForecast } from "@/lib/forecast/forecast-read";
+import { ProjectWeekGoal } from "@/components/app/projects/project-week-goal";
+import { deriveWeeklyGoal } from "@/lib/projects/weekly-goal";
+import { listProjectTasks } from "@/lib/tasks/tasks";
+import { listProjectStages } from "@/lib/projects/stages";
+import { ProjectFirstStep } from "@/components/app/projects/project-first-step";
+import { ProjectTraceRegion } from "@/components/app/projects/project-trace";
+import { loadProjectTrace } from "@/lib/projects/project-trace-server";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 import { getWorkerProjectView } from "@/lib/projects/worker-project-access";
 import { WorkerProjectPanel } from "@/components/app/worker-project-panel";
 import {
@@ -37,6 +50,11 @@ import { cn } from "@/lib/utils";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { PersonPortrait } from "@/components/app/identity/person-portrait";
 import { playerInitials } from "@/lib/identity/player-identity";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/projects/[id]");
+
 
 export const dynamic = "force-dynamic";
 
@@ -72,11 +90,9 @@ export default async function ProjectStadiumPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
   const role = (profile?.active_role as Role) ?? "worker";
 
   // RC2 role-aware routing (F11): one canonical project route that branches
@@ -172,6 +188,25 @@ export default async function ProjectStadiumPage({
     ? (((await supabase.from("projects").select("title").eq("id", mergedInto).maybeSingle()).data?.title as string | null) ?? null)
     : null;
   const mergedFragments = fragmentsOf.get(id)?.length ?? 0;
+
+  // The project course: the stages the manager's session reads (stage RLS),
+  // through the same model the assigned workers' view uses.
+  const [courseStages, courseToday, courseTasks] = await Promise.all([
+    listProjectStages(id).catch(() => null),
+    viewerWorkToday(),
+    listProjectTasks(id).catch(() => null),
+  ]);
+  const stadiumCourse = deriveProjectCourse(courseStages, courseToday.todayIso);
+  // This week's goal over every task the manager's session reads.
+  const stadiumWeekGoal = deriveWeeklyGoal(courseTasks, { todayIso: courseToday.todayIso, scope: "project" });
+  // KAS PASIKEITĖ PROJEKTE: the team's chain as counts + the project's own
+  // facts, over the stages and tasks this page already read.
+  // The project forecast (SEP-1: a forecast, never a fact), read on demand for
+  // this manager from the project's recorded facts — lib/forecast/forecast-read.ts.
+  const [projectTrace, forecastRead] = await Promise.all([
+    loadProjectTrace(id, "manager", courseStages, courseTasks),
+    readProjectForecast(id, courseToday.todayIso),
+  ]);
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="project-stadium">
@@ -302,6 +337,20 @@ export default async function ProjectStadiumPage({
         ) : null}
       </header>
 
+      {/* ── THE PROJECT COURSE (Future Experience C): the same route the
+            assigned workers see — one shared goal for the whole team. ── */}
+      <ProjectCourseTrack course={stadiumCourse} locale={locale} />
+      <ProjectForecastPanel read={forecastRead} locale={locale} />
+      <ProjectWeekGoal goal={stadiumWeekGoal} locale={locale} />
+      {/* Where the course or the week has nothing to draw: the REAL first
+          step (the stages panel, the task form), never a decorative screen. */}
+      <ProjectFirstStep
+        projectId={id}
+        stagesMissing={stadiumCourse.kind === "none"}
+        tasksMissing={stadiumWeekGoal.kind === "none"}
+      />
+      <ProjectTraceRegion trace={projectTrace} locale={locale} reviewHref="/dashboard/inbox/quick" />
+
       {/* ── THE FIELD comes first: the people around the work are what a
             manager opens this page for. Location, communication and the
             pulses follow — same sections, same facts. ── */}
@@ -340,7 +389,7 @@ export default async function ProjectStadiumPage({
                     aria-hidden
                     className={cn(
                       "flex shrink-0 rounded-[0.9rem] border p-0.5",
-                      w.confirmedSkills > 0
+                      (w.confirmedSkills ?? 0) > 0
                         ? "border-trust-accent/50"
                         : "border-transparent",
                     )}
@@ -364,13 +413,13 @@ export default async function ProjectStadiumPage({
                   <span
                     className={cn(
                       "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-meta",
-                      w.confirmedSkills > 0
+                      (w.confirmedSkills ?? 0) > 0
                         ? "border-state-success/30 bg-state-success/10 text-state-success"
                         : "border-ink-600 bg-ink-800/40 text-text-secondary",
                     )}
                   >
                     <ShieldCheck className="h-3 w-3" aria-hidden />
-                    {w.confirmedSkills}
+                    {w.confirmedSkills ?? "—"}
                   </span>
                   {w.openReviewItems > 0 ? (
                     <span className="inline-flex items-center gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-1 font-mono text-meta text-state-warning">
@@ -507,11 +556,19 @@ export default async function ProjectStadiumPage({
         <NotebookPen
           className={cn(
             "h-6 w-6 shrink-0",
-            entriesToday > 0 ? "text-state-live" : "text-text-muted",
+            entriesToday !== null && entriesToday > 0 ? "text-state-live" : "text-text-muted",
           )}
           aria-hidden
         />
-        {entriesToday > 0 ? (
+        {entriesToday === null ? (
+          // The count could not be read: say nothing numeric (SEP-7).
+          <span
+            className="min-w-0 flex-1 font-mono text-sm text-text-muted"
+            data-testid="stadium-today-unknown"
+          >
+            —
+          </span>
+        ) : entriesToday > 0 ? (
           <>
             <CountUp
               text={String(entriesToday)}

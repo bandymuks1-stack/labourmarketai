@@ -48,6 +48,7 @@
  * CALLER'S OWN WORLD FIRST, and to ask when that does not settle it.
  */
 import { classifyIntent, type ConversationIntent } from "@/lib/conversation/intent-router";
+import type { PlanStep } from "@/lib/conversation/intent-plan";
 
 /**
  * Below this, a reference-shaped utterance is not treated as a command.
@@ -279,6 +280,18 @@ export type Understanding =
       readonly kind: "unsupported";
       readonly reason: UnsupportedReason;
       readonly source: UnderstandingSource;
+    }
+  | {
+      /**
+       * ONE message, an ORDERED PLAN of 2–3 existing intents (owner
+       * 2026-10-14 §4). Validated by lib/conversation/intent-plan.ts: reads,
+       * at most one write as the last step, never a navigating step. The
+       * surface runs the first step and offers the rest in order; each label
+       * is the person's own words (or null).
+       */
+      readonly kind: "plan";
+      readonly steps: readonly PlanStep[];
+      readonly source: "model";
     }
   /** The deterministic layer found nothing. The model has NOT been asked yet. */
   | { readonly kind: "none" };

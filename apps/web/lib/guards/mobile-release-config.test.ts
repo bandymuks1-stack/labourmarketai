@@ -70,7 +70,8 @@ describe("mobile store-release config — the generated native project is only a
     // is the very false declaration this pin exists to prevent. Each type is
     // named, because each answers for something the client demonstrably
     // handles: the account it signs in with, the name and user id on the
-    // profile it reads, and the journal content it writes.
+    // profile it reads, the journal content it writes, and the in-app
+    // message replies it sends (message.send_confirm, #2928).
     const declared = new Set(
       collected.map((t: Record<string, unknown>) => t.NSPrivacyCollectedDataType as string),
     );
@@ -79,6 +80,7 @@ describe("mobile store-release config — the generated native project is only a
       "NSPrivacyCollectedDataTypeName",
       "NSPrivacyCollectedDataTypeUserID",
       "NSPrivacyCollectedDataTypeOtherUserContent",
+      "NSPrivacyCollectedDataTypeEmailsOrTextMessages",
     ]) {
       expect(
         declared.has(required),
@@ -295,5 +297,16 @@ describe("mobile store-release config — submission questions answered in app.j
     expect(wf).toMatch(/-lt 36/);
     expect(wf).toContain(":app:bundleRelease");
     expect(wf).toContain("ANDROID_RELEASE_AAB_BUILT");
+  });
+});
+
+describe("iOS CI proves a DEVICE archive, not only a simulator build", () => {
+  it("archives for generic iOS unsigned and reads the store answers from the archived Info.plist", () => {
+    const wf = readFileSync(resolve(REPO, ".github/workflows/ios.yml"), "utf8");
+    expect(wf).toContain('-destination "generic/platform=iOS"');
+    expect(wf).toContain("CODE_SIGNING_ALLOWED=NO");
+    expect(wf).toContain("Print :ITSAppUsesNonExemptEncryption");
+    expect(wf).toContain("Print :UIDeviceFamily");
+    expect(wf).toContain("IOS_DEVICE_ARCHIVE_BUILT");
   });
 });

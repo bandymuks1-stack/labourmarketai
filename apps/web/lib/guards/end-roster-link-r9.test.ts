@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * R-9 (2026-09-19 completion audit): a roster relationship can be ENDED —
@@ -108,7 +109,9 @@ describe("R-9 application — both sides reach the ONE write, honestly gated", (
 
   it("the worker's own links are read RLS-only, bounded, in the profile's existing parallel stage", () => {
     expect(links).toMatch(/\.from\("company_workers"\)[^;]*workers!inner\(profile_id\)[^;]*\.eq\("workers\.profile_id", userId\)[^;]*\.eq\("status", "active"\)[^;]*\.limit\(TEAM_LINKS_LIMIT\)/);
-    expect(links).toMatch(/\.from\("agency_workers"\)[^;]*\.limit\(TEAM_LINKS_LIMIT\)/);
+    // Legacy agency_workers is not API-exposed (no SELECT grant) — never read;
+    // see agency-workers-not-api-exposed.test.ts.
+    expect(links).not.toMatch(/\.from\("agency_workers"\)/);
     expect(links).not.toMatch(/\.rpc\(|\.insert\(|\.update\(|\.delete\(/);
     expect(profile).toMatch(/myOrgEvidence,\s*myTeamLinks,\s*\] = await Promise\.all\(/);
     expect(profile).toMatch(/listMyTeamLinks\(supabase, user\.id\),/);
@@ -120,7 +123,7 @@ describe("R-9 application — both sides reach the ONE write, honestly gated", (
   });
 
   it("copy exists in every active locale and says leaving/removing is not deletion", () => {
-    for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(read(`messages/${loc}.json`)).rosterLinkEnd;
       for (const k of ["title", "hint", "openSelf", "openOwner", "confirmSelf", "confirmOwner", "reasonLabel", "submit", "cancel", "doneSelf", "doneOwner", "needsMigration", "notFound", "failed", "readFailed", "since", "unnamedOrganization"]) {
         expect(typeof m[k], `${loc}.${k}`).toBe("string");

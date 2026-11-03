@@ -6,6 +6,7 @@ import {
 } from "@/lib/journal/entry-skill-source";
 import type { EntrySkillLinkRow } from "@/lib/journal/journal-entry-skills";
 import { readAllPages } from "@/lib/journal/journal-list-core";
+import { readDisputedEntrySkills, withoutDisputedLinks } from "@/lib/journal/entry-skill-disputes";
 
 /**
  * Read side of the journal entry ↔ skill link table (PR-C).
@@ -79,10 +80,59 @@ export async function readWorkerEntrySkillLinks(
   if (res.error) {
     return { ok: false, rows: [], provenanceByEntry: new Map(), truncated: false };
   }
+  // A disputed link is never shown as the entry's evidence, even while its
+  // row still exists (entry-skill-disputes.ts).
+  const disputed = await readDisputedEntrySkills(supabase, workerId);
   return {
     ok: true,
-    rows: res.rows.map((r) => ({ journal_entry_id: r.journal_entry_id, skill_id: r.skill_id })),
+    rows: withoutDisputedLinks(
+      res.rows.map((r) => ({ journal_entry_id: r.journal_entry_id, skill_id: r.skill_id })),
+      disputed,
+    ),
     provenanceByEntry,
     truncated: res.truncated,
   };
+}
+
+/** Most entries one slug-link read may ask about — a bounded window, never a
+ *  whole history (callers pass their own recent page). */
+export const ENTRY_SKILL_SLUGS_MAX_ENTRIES = 100;
+
+/**
+ * The linked skill SLUGS of a few known entries — for a consumer that holds a
+ * recent page of the person's entries (the consequence trace) and must not
+ * page the whole link table to name what those entries show.
+ *
+ * Same table, same RLS (the caller's own client); bounded by the entry ids
+ * given. `null` = the read failed (UNKNOWN) — never an empty map that would
+ * read as "linked to no skill". An entry with no link is simply absent.
+ */
+export async function readEntrySkillSlugs(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  entryIds: readonly string[],
+): Promise<Map<string, string[]> | null> {
+  const ids = [...new Set(entryIds)].slice(0, ENTRY_SKILL_SLUGS_MAX_ENTRIES);
+  const out = new Map<string, string[]>();
+  if (ids.length === 0) return out;
+  try {
+    const res = await supabase
+      .from("journal_entry_skills")
+      .select("journal_entry_id, skills(slug)")
+      .in("journal_entry_id", ids);
+    if (res.error) return null;
+    for (const row of (res.data ?? []) as {
+      journal_entry_id: string;
+      skills: { slug: string | null } | null;
+    }[]) {
+      const slug = row.skills?.slug;
+      if (!slug) continue;
+      const list = out.get(row.journal_entry_id) ?? [];
+      if (!list.includes(slug)) list.push(slug);
+      out.set(row.journal_entry_id, list);
+    }
+    return out;
+  } catch {
+    return null;
+  }
 }

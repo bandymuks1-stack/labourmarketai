@@ -23,11 +23,13 @@ import type {
 import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { loadPersonalWorkspaceIntro } from "@/lib/workspace/personal-workspace-intro-server";
+import { personalIntroMayShow } from "@/lib/workspace/personal-workspace-intro";
 import { resolvePersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
 import { baseIdentityForRole } from "@/lib/config/roles";
 import { readHeldRoles } from "@/lib/auth/held-roles";
 import {
   actingRoleForWorkspace,
+  PERSONAL_WORKSPACE_ID,
   STALE_CONTEXT_NOTICE,
   workspaceDisplayLabels,
   workspaceRelationshipLabel,
@@ -58,6 +60,7 @@ import {
 } from "@/lib/auth/dashboard-role-decision";
 import { TodayScreen } from "@/components/app/today/today-screen";
 import { CompanyModelScreen } from "@/components/app/organization/company-model-screen";
+import { PilotPassInvite } from "@/components/app/pilot-pass-invite";
 import { conversationOpeningContext } from "@/lib/today/today-route";
 import { AccessRefusalNotice } from "@/components/app/access-refusal-notice";
 import {
@@ -65,6 +68,11 @@ import {
   accessNoticeOffersSetup,
   parseAccessNotice,
 } from "@/lib/auth/access-notice";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard");
+
 
 /**
  * Dashboard root — the ONE authenticated home: the conversation, for EVERY
@@ -203,9 +211,27 @@ export default async function DashboardHomePage({
   // For the worker in their personal space the block is hidden with its
   // reason named: ŠIANDIEN's header is where their space is introduced (IA
   // §4: the intro card is REPLACED, not shown twice).
-  const personalIntroPayload: Promise<PersonalIntroPayload> = workerToday
+  //
+  // WHETHER IT CAN RENDER AT ALL is decided HERE, before the slow read, from
+  // facts this request already holds (home CLS P0, 2026-10-26): the same
+  // session, the same workspace resolution and the same identity rule the
+  // loader uses. Where it cannot, no payload is handed over — no slow read,
+  // and the chat reserves nothing. Where it can, the chat reserves the
+  // block's space while it streams, so it no longer appears out of nothing
+  // above the greeting and pushes the screen down. Only the CONTENT
+  // resolves late — the surface still reaches the shell at once (#1011).
+  const introMayShow = personalIntroMayShow({
+    signedIn: Boolean(session.user),
+    workspaceKind:
+      rootWorkspace.activeWorkspaceId === PERSONAL_WORKSPACE_ID ? "personal" : "organization",
+    identity,
+    replacedByToday: workerToday,
+  });
+  const personalIntroPayload: Promise<PersonalIntroPayload> | null = workerToday
     ? Promise.resolve({ intro: { kind: "hidden", reason: "replaced-by-today" }, labels: null })
-    : loadPersonalIntroPayload();
+    : introMayShow
+      ? loadPersonalIntroPayload()
+      : null;
   // STARTERS ARE SUGGESTIONS, NOT A ROLE MENU (owner contract 2026-09-04
   // §5–§6, ARCHITECTURE §5.5). The company greeting used to branch on ONE
   // flag (education | agency | employer) and show that role's three chips —
@@ -221,6 +247,11 @@ export default async function DashboardHomePage({
   // account with real skills, history or journal entries is no longer told
   // its first step is to upload a CV. Read in the SAME parallel batch as the
   // rest — three bounded head-counts, each degrading to "unknown".
+  //
+  // The pins read (MY SPACE, below) needs only the active workspace, so it
+  // starts here with the starter batch instead of after it (perf 2026-10-23).
+  const pinsPromise = listMyPins(activeOrgWorkspace?.id ?? null);
+  pinsPromise.catch(() => {}); // awaited (and so thrown) in the batch below
   const [{ offers, labels: bookingLabels }, learnerLink, starterContext, personFacts] =
     await Promise.all([
       loadBookingOffers(activeRole),
@@ -247,7 +278,7 @@ export default async function DashboardHomePage({
   // other — one batch, not consecutive awaits (measured: the same reads,
   // issued together).
   const [pinsRead, tChat, tWorkLog, tCountryNames, tRelationships] = await Promise.all([
-    listMyPins(activeOrgWorkspace?.id ?? null),
+    pinsPromise,
     getTranslations("conversation.chat"),
     getTranslations("conversation.worklog"),
     getTranslations("labourMarket"),
@@ -377,8 +408,16 @@ export default async function DashboardHomePage({
   // were stripped from the URL on first consumption, so a remount never
   // re-sends them.
   // The company workspace opens on the company model (existing doors).
-  const companyOpeningContext =
+  const companyModel =
     activeOrgWorkspace && identity === "company" ? <CompanyModelScreen /> : null;
+  // The pilot pass pointer leads it — the employer home is where an owner
+  // looks first, and it renders nothing unless the pass is theirs to start.
+  const companyOpeningContext = companyModel ? (
+    <>
+      <PilotPassInvite className="mb-4" />
+      {companyModel}
+    </>
+  ) : null;
   const conversationKey = `${rootWorkspace.activeWorkspaceId}:${identity}`;
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
@@ -413,6 +452,7 @@ export default async function DashboardHomePage({
         // chat's own opening composition (the worker's "now" above the
         // greeting and the composer). One home, one conversation.
         openingContext={workerToday ? <TodayScreen locale={locale as ActiveLocale} /> : companyOpeningContext}
+        openingContextWide={Boolean(workerToday)}
         countryLabels={countryLabels}
         educationWorkspace={educationWorkspace}
         agencyWorkspace={agencyWorkspace}

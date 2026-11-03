@@ -28,6 +28,7 @@ import type {
   FunnelMetadata,
 } from "@/lib/telemetry/funnel-events";
 import { isNonProductionHostname } from "@/lib/telemetry/production-host";
+import { hasAnalyticsConsent } from "@/lib/consent/analytics-consent";
 
 const SESSION_KEY = "lm.pilot.session";
 const startTimes = new Map<string, number>();
@@ -99,6 +100,9 @@ function fire(
   // Skip when there's no window — the helper is used by client
   // components but defensively guards SSR too.
   if (typeof window === "undefined") return;
+  // No analytics without an explicit yes (lib/consent/analytics-consent.ts):
+  // nothing is sent and no session id is minted on the device.
+  if (!hasAnalyticsConsent()) return;
   const payload = {
     sessionId: getPilotSessionId(),
     route: currentRoute(),
@@ -225,6 +229,19 @@ export function trackFunnel(
   fire(eventName, "info", { metadata: enriched });
 }
 
+/** A funnel step that FAILED: result "error" with a bounded failure code
+ *  (a closed client code such as "unsupported" / "too-large" — never a raw
+ *  message, filename or user input). Same metadata allowlist as trackFunnel. */
+export function trackFunnelFailure(
+  eventName: FunnelEventName,
+  errorCode: string,
+  metadata?: FunnelMetadata,
+): void {
+  const enriched: Record<string, unknown> = { ...(metadata ?? {}) };
+  if (isNonProductionHost()) enriched.preview_host = true;
+  fire(eventName, "error", { errorCode: errorCode.slice(0, 64), metadata: enriched });
+}
+
 // ── Signup-completion pending flag (Worker Launch Readiness v1) ──────────────
 // A brand-new signup and a returning login both land on an authenticated
 // surface, so `login_succeeded` alone cannot tell them apart. The signup
@@ -248,6 +265,7 @@ export type SignupSurface = (typeof SIGNUP_SURFACES)[number];
  *  surface can emit `signup_completed`. Bounded surface label only. */
 export function markSignupPending(surface: SignupSurface): void {
   if (typeof window === "undefined") return;
+  if (!hasAnalyticsConsent()) return;
   try {
     window.localStorage.setItem(SIGNUP_PENDING_KEY, surface);
   } catch {

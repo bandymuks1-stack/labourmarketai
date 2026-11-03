@@ -73,26 +73,33 @@ export async function applyNeedStructureAction(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabase as any;
 
-  // Merge the whitelisted accommodation into payload without touching the rest.
-  const { data: existing } = await sb
-    .from("customer_requests")
-    .select("payload")
-    .eq("id", requestId)
-    .maybeSingle();
-  const payload = {
-    ...((existing?.payload as Record<string, unknown> | null) ?? {}),
-    accommodation,
-  };
+  // ONLY THE FIELDS THE REVIEWER SUPPLIED. The update used to write all four
+  // columns every time, so a field left empty — or a legacy value outside the
+  // closed sets that the form could only pre-fill as text — was overwritten
+  // with null: filling in just the country erased the demand's stated role
+  // and start. A column with no validated value is now left exactly as the
+  // employer recorded it.
+  const patch: Record<string, unknown> = {};
+  if (workType) patch.role_or_work_type = workType;
+  if (country) patch.country = country;
+  if (teamSize != null) patch.team_size = teamSize;
+  if (startPeriod) patch.start_period = startPeriod;
+  if (accommodation) {
+    // Merge the whitelisted accommodation into payload without touching the rest.
+    const { data: existing } = await sb
+      .from("customer_requests")
+      .select("payload")
+      .eq("id", requestId)
+      .maybeSingle();
+    patch.payload = {
+      ...((existing?.payload as Record<string, unknown> | null) ?? {}),
+      accommodation,
+    };
+  }
 
   const { data: updated, error } = await sb
     .from("customer_requests")
-    .update({
-      role_or_work_type: workType,
-      country,
-      team_size: teamSize,
-      start_period: startPeriod,
-      payload,
-    })
+    .update(patch)
     .eq("id", requestId)
     .eq("status", "submitted")
     .select("id");

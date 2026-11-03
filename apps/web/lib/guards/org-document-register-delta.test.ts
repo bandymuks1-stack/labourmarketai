@@ -17,6 +17,7 @@ import {
   retentionState,
   sanitizeRegisterSearch,
 } from "@/lib/documents/document-file-model";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * ORG DOCUMENT REGISTER DELTA v1 guards — the TS↔SQL contract of the
@@ -547,7 +548,7 @@ describe("9. bounds and i18n", () => {
   });
 
   it("primary locales carry no [EN] marker on the new keys", () => {
-    for (const loc of ["en", "lt", "ru", "nl", "de"] as const) {
+    for (const loc of activeLocales) {
       const json = JSON.parse(read("messages", `${loc}.json`)) as {
         orgDocuments: { retention: { noDeletionNote: string } };
       };

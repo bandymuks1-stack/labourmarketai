@@ -221,7 +221,11 @@ describe("synthetic fixtures stay out of normal surfaces", () => {
       /excludeFixtures:\s*!isSyntheticFixtureLabel\(employer\.organizationName\)/,
     );
     const pool = read("lib/market/match-subject.ts");
-    expect(pool).toMatch(/excludeSyntheticFixtures\(candidates, \(c\) => \[c\.displayName, c\.headline\]\)/);
+    // 2026-10-18 (identity split, 20261018160000): a discovered worker arrives without a name, so
+    // the fixture decision is a flag — from the name for a related row, from the projection's
+    // SQL-computed `is_synthetic_fixture` for a discovered one.
+    expect(pool).toMatch(/candidates\.filter\(\(c\) => !c\.syntheticFixture\)/);
+    expect(pool).toMatch(/w\.is_synthetic_fixture === true \|\|\s*isSyntheticFixtureLabel\(/);
     expect(pool).toMatch(/poolSize: shown\.length/);
   });
   it("the renamed fixture workers carry a documented marker", () => {

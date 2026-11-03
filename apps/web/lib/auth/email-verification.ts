@@ -4,9 +4,11 @@
  * PURE (no Next.js / Supabase imports) so every branch is unit-testable
  * (lib/auth/email-verification.test.ts).
  *
- * THE MODEL. Registration is frictionless: with Supabase "Confirm email" OFF a
- * new person gets a live session at once. That session proves NOTHING about
- * mailbox ownership, so a SEPARATE state decides it — the database's
+ * THE MODEL. Registration is meant to be frictionless: with Supabase "Confirm
+ * email" OFF a new person gets a live session at once. PRODUCTION TODAY
+ * (verified 2026-10-21): "Confirm email" is still ON (since 2026-09-02); the
+ * flip is prepared, not executed (docs/runbooks/frictionless-invite-cutover-v1.md).
+ * Either way a session proves NOTHING about mailbox ownership, so a SEPARATE state decides it — the database's
  * `email_verifications_v1` (migration 20261003151000), read through
  * `my_email_verification_v1()`. Three states, never conflated:
  *

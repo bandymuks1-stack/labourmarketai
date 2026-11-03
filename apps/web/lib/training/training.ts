@@ -3,12 +3,16 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
+  NO_TRAINING_AUTHORITY,
   TRAINING_READ_LIMIT,
+  deriveTrainingAuthority,
   isTrainingMigrationMissingCode,
   isValidTrainingAssignmentStatus,
   type CertificationRow,
   type TrainingAssignmentRow,
+  type TrainingAuthority,
   type TrainingProgramRow,
 } from "@/lib/training/training-model";
 
@@ -130,6 +134,62 @@ export async function getTrainingOverview(): Promise<TrainingOverviewResult> {
     mine: rows.filter((r) => r.assigneeProfileId === user.id),
     viewerProfileId: user.id,
   };
+}
+
+/** Distinct organizations the authority read asks about — bounded. */
+const AUTHORITY_ORG_LIMIT = 20;
+
+/**
+ * The caller's training AUTHORITY: which forms the register may offer.
+ *
+ * Asks the database the exact predicates the write commands enforce (see
+ * `TrainingAuthority` in training-model.ts) instead of re-deriving them from
+ * role strings or from whether the organization already has data. The add-a-
+ * course target is the same `requireEmployerCompany()` resolution
+ * `createTrainingProgramAction` uses. Any failed read fails CLOSED.
+ *
+ * @param organizationIds the organizations of the courses and managed
+ *   assignments the register shows.
+ */
+export async function getTrainingAuthority(
+  organizationIds: readonly string[],
+): Promise<TrainingAuthority> {
+  const supabase = await createClient();
+  const employer = await requireEmployerCompany();
+  const employerOrganizationId = employer.ok ? employer.organizationId : null;
+
+  const orgs = [
+    ...new Set([
+      ...(employerOrganizationId ? [employerOrganizationId] : []),
+      ...organizationIds.filter((id) => id.length > 0),
+    ]),
+  ].slice(0, AUTHORITY_ORG_LIMIT);
+  if (orgs.length === 0) return NO_TRAINING_AUTHORITY;
+
+  const yes = async (
+    name: string,
+    args?: Record<string, unknown>,
+  ): Promise<boolean> => {
+    const { data, error } = await asAny(supabase).rpc(name, args);
+    return !error && data === true;
+  };
+
+  const [platformAdmin, ownerAdminPairs, demandPairs] = await Promise.all([
+    yes("is_admin"),
+    Promise.all(
+      orgs.map(async (org) => [org, await yes("org_owner_admin_v1", { p_organization_id: org })] as const),
+    ),
+    Promise.all(
+      orgs.map(async (org) => [org, await yes("has_org_demand_access", { org })] as const),
+    ),
+  ]);
+
+  return deriveTrainingAuthority({
+    employerOrganizationId,
+    platformAdmin,
+    ownerAdmin: new Map(ownerAdminPairs),
+    demandAccess: new Map(demandPairs),
+  });
 }
 
 export type CertificationRegisterResult =

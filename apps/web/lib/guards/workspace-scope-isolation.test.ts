@@ -65,8 +65,12 @@ describe("Guard: personal journal is profile-scoped, not company-scoped", () => 
   it("the worker is resolved from the signed-in user's profile", () => {
     // worker = the user's own row (workers.profile_id = user.id). This is the
     // root of the personal scope — entries hang off this worker, never a company.
-    expect(journal).toMatch(/from\(\s*["']workers["']\s*\)/);
-    expect(journal).toMatch(/\.eq\(\s*["']profile_id["']\s*,\s*user\.id\s*\)/);
+    // Perf 2026-10-23: THE request-cached session worker row
+    // (`getWorkerCoreRow`: workers.profile_id = the signed-in user).
+    expect(journal).toMatch(/getWorkerCoreRow\(\)/);
+    const core = read("lib/data/worker-core.ts");
+    expect(core).toMatch(/from\("workers"\)[\s\S]{0,120}\.eq\("profile_id", caller\.userId\)/);
+    expect(core).toMatch(/readWorkerCoreRow\(\{ supabase, userId: user\.id \}\)/);
   });
   it("journal entries are keyed to that worker (worker_id), not a company", () => {
     // G4: the entries read lives in THE journal-list core; the page hands it

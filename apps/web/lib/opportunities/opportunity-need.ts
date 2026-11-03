@@ -11,6 +11,7 @@ import {
   type StructuredDemandV2,
 } from "@/lib/demand/structured-demand-v2";
 import { deriveNeedSkills, type NeedSkillSource } from "@/lib/market/need-skills";
+import { readProjectedNeedSkills } from "@/lib/market/need-skills-payload";
 import type { MatchNeed } from "@/lib/market/match-v1";
 
 import { readStructuredDemandPublic } from "./structured-public";
@@ -105,11 +106,24 @@ export function needFromDemandRow(row: unknown): {
   source: NeedSkillSource | null;
 } {
   const r = (row ?? {}) as Record<string, unknown>;
-  const base = needFromRoleText(
+  const titleOnly = needFromRoleText(
     (r.role_text as string | null) ?? null,
     (r.country as string | null) ?? null,
     (r.location_label as string | null) ?? null,
   );
+  // Owner decision 2026-10-29 (migration 20261029190000): the need's OWN
+  // requirement set — the company's confirmed slugs, else the set derived at
+  // intake from title + description + skills text + notes — projected by the
+  // gated reader as catalogue slugs only. When the row carries none (an older
+  // need, or the reader not yet widened) the title-only reading stays exactly
+  // as it was. The profession detected from the title rides along either way.
+  const projected = readProjectedNeedSkills(row);
+  const base = projected
+    ? {
+        need: { ...titleOnly.need, skillIds: projected.slugs, needSource: projected.source },
+        source: projected.source,
+      }
+    : titleOnly;
   const structuredV2 = structuredV2FromDemandRow(row);
   // `structuredV2: null` is passed explicitly rather than omitted: the engine
   // reads `need.structuredV2 ?? null` and treats both identically, and being

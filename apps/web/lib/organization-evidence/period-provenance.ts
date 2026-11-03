@@ -219,6 +219,32 @@ export function formatMonthSpan(span: MonthSpan, locale: string): string {
   );
 }
 
+/**
+ * A month span in full month names, for a headline figure ("2025 m.
+ * birželis–lapkritis", "June–November 2025"). `month: "short"` is NOT usable
+ * there: for `lt` Intl renders it numerically ("2025-06"), which read as a
+ * raw date (owner 2026-10-15). Same year → the months once and the year once,
+ * through the caller's localised pattern; across years → Intl's own range.
+ */
+export function formatMonthSpanLong(
+  span: MonthSpan,
+  locale: string,
+  sameYearPattern: (parts: { readonly year: string; readonly from: string; readonly to: string }) => string,
+): string {
+  const at = (ym: string) => new Date(`${ym}-01T00:00:00Z`);
+  const a = at(span.first);
+  const b = at(span.last);
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return isoMonthSpan(span);
+  const month = new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" });
+  if (span.first === span.last) {
+    return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(a);
+  }
+  if (span.first.slice(0, 4) === span.last.slice(0, 4)) {
+    return sameYearPattern({ year: span.first.slice(0, 4), from: month.format(a), to: month.format(b) });
+  }
+  return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).formatRange(a, b);
+}
+
 /** A month span in the ISO form surfaces that print ISO days use. */
 export function isoMonthSpan(span: MonthSpan): string {
   return span.first === span.last ? span.first : `${span.first} – ${span.last}`;

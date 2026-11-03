@@ -184,16 +184,17 @@ export function ManagerInstructionComposer({
           type="submit"
           disabled={pending}
           className="inline-flex w-fit items-center gap-2 rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-transform hover:-translate-y-0.5"
+          data-testid="instruction-send"
         >
           {pending ? labels.sending : labels.send}
         </button>
         {state?.ok && (
-          <span className="text-xs text-state-success" role="status">
+          <span className="text-xs text-state-success" role="status" data-testid="instruction-sent">
             {labels.sent}
           </span>
         )}
         {state && !state.ok && (
-          <span className="text-xs text-state-danger" role="status">
+          <span className="text-xs text-state-danger" role="status" data-testid="instruction-send-failed" data-code={state.code}>
             {state.code === "not_authorized"
               ? labels.notAuthorized
               : state.code === "needs_migration"

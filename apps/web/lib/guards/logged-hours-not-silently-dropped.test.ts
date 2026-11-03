@@ -67,8 +67,15 @@ describe("the save path refuses to drop reviewed-pending durations", () => {
     const at = body.indexOf('stage === "compose" && !editingEntry');
     expect(at).toBeGreaterThan(-1);
     const block = body.slice(at, at + 420);
-    // the ONE recognizer, the existing review step, and an early return
-    expect(block).toContain("statedDurationCount(extractJournalSuggestions(text))");
+    // the ONE recognizer (read through reviewTimeSuggestion, so a stated span
+    // counts and a break does not — P0-A 2026-10-30), the existing review
+    // step, and an early return
+    expect(block).toContain("statedDurationCount(reviewedSuggestions(text))");
+    const helperAt = COMPOSER.indexOf("function reviewedSuggestions(raw: string)");
+    expect(helperAt).toBeGreaterThan(-1);
+    const helper = COMPOSER.slice(helperAt, helperAt + 300);
+    expect(helper).toContain("extractJournalSuggestions(raw)");
+    expect(helper).toContain("reviewTimeSuggestion(raw,");
     expect(block).toContain("analyse(text);");
     expect(block).toContain("return;");
     // …and it sits before the request is built

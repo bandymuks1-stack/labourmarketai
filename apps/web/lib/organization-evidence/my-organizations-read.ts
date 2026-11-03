@@ -30,7 +30,16 @@ export type LedOrganization = {
   readonly relationship: "owner" | "manager";
   readonly periods: readonly Pick<
     HistoryPeriodStatement,
-    "id" | "periodLabel" | "legalEntityLabel" | "legalEntityRelation" | "basis" | "periodStart" | "periodEnd"
+    | "id"
+    | "periodLabel"
+    | "legalEntityLabel"
+    | "legalEntityRelation"
+    | "basis"
+    | "periodStart"
+    | "periodEnd"
+    | "sourceLabels"
+    | "periodStartPrecision"
+    | "periodEndPrecision"
   >[];
 };
 
@@ -56,7 +65,7 @@ export async function readMyLedOrganizations(): Promise<MyOrganizationsRead> {
   const res = await untypedClient(supabase)
     .from("organization_history_periods")
     .select(
-      "id, organization_id, period_label, legal_entity_label, legal_entity_relation, basis, period_start, period_end, continuity, source_labels, basis_reference, statement, supersedes_id, created_at",
+      "id, organization_id, period_label, legal_entity_label, legal_entity_relation, basis, period_start, period_end, continuity, source_labels, basis_reference, statement, supersedes_id, created_at, period_start_precision, period_end_precision",
     )
     .in(
       "organization_id",
@@ -80,6 +89,8 @@ export async function readMyLedOrganizations(): Promise<MyOrganizationsRead> {
     statement: string | null;
     supersedes_id: string | null;
     created_at: string;
+    period_start_precision: HistoryPeriodStatement["periodStartPrecision"];
+    period_end_precision: HistoryPeriodStatement["periodEndPrecision"];
   };
   const rows = (res.data ?? []) as Row[];
   return {
@@ -102,6 +113,8 @@ export async function readMyLedOrganizations(): Promise<MyOrganizationsRead> {
             statement: r.statement,
             createdAt: r.created_at,
             supersedesId: r.supersedes_id,
+            periodStartPrecision: r.period_start_precision ?? null,
+            periodEndPrecision: r.period_end_precision ?? null,
           })),
       );
       return {
@@ -116,6 +129,9 @@ export async function readMyLedOrganizations(): Promise<MyOrganizationsRead> {
           basis: p.basis,
           periodStart: p.periodStart,
           periodEnd: p.periodEnd,
+          sourceLabels: p.sourceLabels,
+          periodStartPrecision: p.periodStartPrecision ?? null,
+          periodEndPrecision: p.periodEndPrecision ?? null,
         })),
       };
     }),

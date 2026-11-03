@@ -8,7 +8,7 @@ import type { ChatMessage } from "./types";
  *  (e.g. the real CV flow / inline form / booking action rendered in-stream). */
 export type ThreadItem =
   | { id: string; message: ChatMessage }
-  | { id: string; embed: ReactNode };
+  | { id: string; embed: ReactNode; history?: true };
 
 /**
  * Turn-pair rhythm.
@@ -44,6 +44,7 @@ export function ConversationThread({
   emptyState,
   composer,
   intro,
+  introWide = false,
 }: {
   items: ThreadItem[];
   typing: boolean;
@@ -54,6 +55,11 @@ export function ConversationThread({
    *  greeting: the first real turn replaces it with the conversation, so it
    *  never becomes a permanent header and needs no dismissed-state to store. */
   intro?: ReactNode;
+  /** The intro is a full working home (the worker's four regions), not a
+   *  chat-width block: it renders in its own wider container above the
+   *  conversation column, so a desktop screen uses its width (owner D1
+   *  review 2026-10-14). The conversation column itself keeps its width. */
+  introWide?: boolean;
   /** The chat composer, handed in by the shell. While the conversation is
    *  still OPENING (greeting + brief only) it renders HERE, centred right
    *  under the greeting (owner audit §4.1 — "composer centre pirmo atidarymo
@@ -63,13 +69,17 @@ export function ConversationThread({
 }) {
   const endRef = useRef<HTMLDivElement>(null);
 
-  /** Nothing has happened yet — the screen holds only the assistant's
-   *  opening (greeting, and possibly the real state brief). One user turn,
-   *  one embedded flow or restored history ends the opening state. */
+  /** Nothing has happened yet IN THIS VISIT — the screen holds only the
+   *  assistant's opening (greeting, and possibly the real state brief). One
+   *  user turn or one embedded flow ends the opening state. The COLLAPSED
+   *  earlier-conversation block does not: a returning worker who once wrote
+   *  in the chat must still open on their home (ŠIANDIEN), not lose it for
+   *  good (prod walk 2026-10-15: every returning worker saw no home). */
+  const fresh = items.filter((it) => !("history" in it && it.history));
   const isOpening =
     !typing &&
-    items.length <= 3 &&
-    items.every((it) => "message" in it && it.message.role === "assistant");
+    fresh.length <= 3 &&
+    fresh.every((it) => "message" in it && it.message.role === "assistant");
 
   /** The opening composition reads TOP-DOWN when the composer is not inside
    *  it (an opening context such as ŠIANDIEN hands the composer to the
@@ -80,6 +90,16 @@ export function ConversationThread({
    *  when the brief lands — hid ŠIANDIEN's header and its one next action.
    *  Openings that carry their composer inline keep scrolling to it. */
   const holdOpeningTop = isOpening && !composer;
+
+  /** A WIDE intro (ŠIANDIEN — a full working home) sits above the opening
+   *  column. The column is centred ONLY when no such home is above it: under
+   *  the home the greeting simply follows it, top-down. Centred there, every
+   *  late arrival re-centred it — the opening brief landing under the
+   *  greeting, the collapsed history block above it, a region of the home
+   *  growing — and each moved the greeting by half its height (home CLS P0,
+   *  2026-10-26). Without a wide intro the centred first screen is exactly
+   *  as it was (owner audit §4.1, composer in the centre). */
+  const wideIntroAbove = Boolean(intro && introWide);
 
   useEffect(() => {
     if (holdOpeningTop) return;
@@ -118,12 +138,21 @@ export function ConversationThread({
           greeting) stays scrollable from its first line on a short phone.
           `justify-content: center` in a scroll container would have made the
           overflowing top unreachable. */}
+      {isOpening && intro && introWide ? (
+        <div className="mx-auto w-full max-w-6xl flex-none px-4 pt-6 lg:px-8" data-testid="conversation-intro-wide">
+          {intro}
+        </div>
+      ) : null}
       <div
+        // Named for the layout-shift probe (ux-metrics `cls_top`): without an
+        // id of its own, a shift of this column was attributed to the whole
+        // `conversation-thread` scroller.
+        data-testid="conversation-column"
         className={`mx-auto flex w-full max-w-3xl flex-none flex-col px-4 py-6 ${
-          isOpening ? "my-auto" : ""
+          !wideIntroAbove && isOpening ? "my-auto" : ""
         }`}
       >
-        {isOpening && intro ? <div className="mb-5">{intro}</div> : null}
+        {isOpening && intro && !introWide ? <div className="mb-5">{intro}</div> : null}
         {items.length === 0 && emptyState}
         {/* `ua-msg-in` animates ONLY transform + opacity, and a CSS animation
             runs on mount — so a newly appended turn rises into place while the

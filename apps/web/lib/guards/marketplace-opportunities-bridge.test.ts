@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Marketplace ↔ opportunities bridge guard (quality-train PR D).
@@ -66,7 +67,7 @@ describe("the two halves stay cross-linked page-to-page", () => {
 });
 
 describe("bridge copy exists in every served locale — labels stay distinct", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: marketplace.hubOpportunities + note are non-empty`, () => {
       const msgs = JSON.parse(read(`messages/${loc}.json`)) as {
         marketplace: Record<string, string>;
@@ -99,7 +100,7 @@ describe("the owner-gated bridges stay documented, not improvised", () => {
   it("no automatic accepted-request → booking claim anywhere in marketplace copy", () => {
     // The schema has no such bridge (booking_requests anchors on demand) —
     // the UI must not promise one until the owner decides the model.
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const msgs = JSON.parse(read(`messages/${loc}.json`)) as {
         marketplace: Record<string, unknown>;
       };

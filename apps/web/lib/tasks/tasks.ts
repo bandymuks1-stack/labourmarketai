@@ -111,8 +111,23 @@ const UNDEFINED_COLUMN = "42703";
 
 /** Bounded, deterministically ordered base query: nearest due date first
  *  (nulls last), then newest created. Never more than the read limit. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function orderedTaskQuery(supabase: SupabaseClient, columns: string): any {
+function orderedTaskQuery(
+  supabase: SupabaseClient,
+  columns: string,
+  batch?: { readonly rowCap: number },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any {
+  if (batch) {
+    // A MANY-project read (the company home's project scan): the same order,
+    // an exact count so the caller can prove the batch is complete, and the
+    // API's row cap instead of the one-project limit.
+    return asAny(supabase)
+      .from("work_tasks")
+      .select(columns, { count: "exact" })
+      .order("due_at", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .limit(batch.rowCap);
+  }
   return asAny(supabase)
     .from("work_tasks")
     .select(columns)
@@ -127,17 +142,19 @@ async function runTaskQuery(
   supabase: SupabaseClient,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   refine: (q: any) => any,
+  batch?: { readonly rowCap: number },
 ): Promise<{
   error: { code?: string; message: string } | null;
   data: unknown;
   structure: boolean;
+  count?: number | null;
 }> {
-  const v3 = await refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V3));
+  const v3 = await refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V3, batch));
   if (!v3.error) return { ...v3, structure: true };
   if (v3.error.code !== UNDEFINED_COLUMN) return { ...v3, structure: false };
-  const v2 = await refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V2));
+  const v2 = await refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V2, batch));
   if (v2.error && v2.error.code === UNDEFINED_COLUMN) {
-    const v1 = await refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V1));
+    const v1 = await refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V1, batch));
     return { ...v1, structure: false };
   }
   return { ...v2, structure: false };
@@ -313,6 +330,65 @@ export async function listProjectTasks(
 
   const res = await runTaskQuery(supabase, (q) => q.eq("project_id", projectId));
   return mapResult(res);
+}
+
+/** The API's row cap for one batched read (`max_rows`). */
+const TASK_BATCH_ROW_CAP = 1000;
+
+/**
+ * `listProjectTasks` for MANY projects in one read (the company home's
+ * project scan — perf 2026-10-22: one task read per scanned project). Each
+ * project's answer is exactly what `listProjectTasks` returns for it:
+ *   - the same columns (with the same v3 → v2 → v1 fallback), RLS and order,
+ *     and at most WORK_TASK_READ_LIMIT tasks per project — the per-project
+ *     order is the global order restricted to that project;
+ *   - a failed read is every project's failed read (mapped by the same
+ *     `mapResult`: needs-migration stays needs-migration);
+ *   - the batch is used only when it is provably COMPLETE (rows read = exact
+ *     count, under the row cap); otherwise each project is read on its own.
+ */
+export async function listProjectTasksForProjects(
+  projectIds: readonly string[],
+): Promise<Map<string, MyTasksResult>> {
+  const out = new Map<string, MyTasksResult>();
+  const valid = [...new Set(projectIds)].filter((id) => UUID_RX.test(id));
+  for (const id of projectIds) {
+    if (!UUID_RX.test(id)) out.set(id, { status: "ok", tasks: [], error: null });
+  }
+  if (valid.length === 0) return out;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    for (const id of valid) out.set(id, { status: "not-authed" });
+    return out;
+  }
+
+  const res = await runTaskQuery(supabase, (q) => q.in("project_id", valid), {
+    rowCap: TASK_BATCH_ROW_CAP,
+  });
+  if (res.error) {
+    const mapped = mapResult(res);
+    for (const id of valid) out.set(id, mapped);
+    return out;
+  }
+  const rows = Array.isArray(res.data) ? (res.data as Row[]) : null;
+  if (rows && typeof res.count === "number" && rows.length === res.count) {
+    const byProject = new Map<string, Row[]>(valid.map((id) => [id, []]));
+    for (const r of rows) {
+      const list = r.project_id ? byProject.get(r.project_id) : undefined;
+      if (list && list.length < WORK_TASK_READ_LIMIT) list.push(r);
+    }
+    for (const id of valid) {
+      out.set(id, mapResult({ error: null, data: byProject.get(id) ?? [], structure: res.structure }));
+    }
+    return out;
+  }
+  // Incomplete batch: each project its own bounded read, as before.
+  const single = await Promise.all(valid.map((id) => listProjectTasks(id)));
+  valid.forEach((id, i) => out.set(id, single[i]));
+  return out;
 }
 
 /**

@@ -140,11 +140,40 @@ export async function appendAssistantTurn(input: {
   if (!user) return { available: false };
   const db = supabase as unknown as LooseDb;
 
-  let conversationId = input.conversationId;
+  // THE THREAD IS RESOLVED HERE, SERVER-SIDE (P0 2026-10-14). A client
+  // conversation id is only a hint: it is used when it is still this
+  // person's visible thread in the CURRENT workspace, otherwise the one
+  // (person, workspace) thread is looked up, and only when none exists is it
+  // created. Before, a null id from a client that had not finished loading
+  // created a second thread, and a stale id could write into another
+  // workspace's thread.
+  const workspaceId = await threadWorkspaceId();
+  const inWorkspace = (q: LooseFilter) =>
+    workspaceId ? q.eq("organization_id", workspaceId) : q.is("organization_id", null);
+  let conversationId: string | null = null;
+  if (input.conversationId) {
+    const hinted = await inWorkspace(
+      db.from("assistant_conversations").select("id").eq("id", input.conversationId).eq("owner_id", user.id),
+    )
+      .is("hidden_at", null)
+      .maybeSingle();
+    if (!hinted.error && hinted.data?.id) conversationId = hinted.data.id as string;
+  }
+  if (!conversationId) {
+    const existing = await inWorkspace(
+      db.from("assistant_conversations").select("id").eq("owner_id", user.id),
+    )
+      .is("hidden_at", null)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (existing.error) return { available: false };
+    conversationId = (existing.data?.id as string | undefined) ?? null;
+  }
   if (!conversationId) {
     const created = await db
       .from("assistant_conversations")
-      .insert({ owner_id: user.id, organization_id: await threadWorkspaceId() })
+      .insert({ owner_id: user.id, organization_id: workspaceId })
       .select("id")
       .single();
     if (created.error || !created.data?.id) {

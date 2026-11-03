@@ -69,7 +69,9 @@ export default async function SignupPage({
     }
   }
   return (
-    <Suspense fallback={null}>
+    // The form reads the URL on the client, so it renders after hydration; a
+    // slow phone sees the form's outline meanwhile, never an empty page.
+    <Suspense fallback={<SignupFormSkeleton />}>
       <SignupForm
         linkedinEnabled={providers.linkedin_oidc}
         facebookEnabled={providers.facebook}
@@ -80,5 +82,16 @@ export default async function SignupPage({
         }
       />
     </Suspense>
+  );
+}
+
+function SignupFormSkeleton() {
+  return (
+    <div className="flex flex-col gap-4" aria-busy="true" data-testid="signup-form-skeleton">
+      <div className="h-8 w-2/3 animate-pulse rounded-md bg-ink-700/40" />
+      <div className="h-11 w-full animate-pulse rounded-md bg-ink-700/30" />
+      <div className="h-11 w-full animate-pulse rounded-md bg-ink-700/30" />
+      <div className="h-11 w-full animate-pulse rounded-md bg-ink-700/50" />
+    </div>
   );
 }

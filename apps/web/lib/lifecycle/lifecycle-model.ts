@@ -177,6 +177,42 @@ export type LifecycleMemberRow = {
   readonly openOffboardingRunId: string | null;
 };
 
+/**
+ * ONE PERSON, ONE ROW PER RELATIONSHIP in "people and stages".
+ *
+ * The same person can hold two ACTIVE engagement rows of the same
+ * relationship in one organization — the owner engagement the
+ * `ensure_org_owner_engagement` trigger creates plus a second one written
+ * by an older path (the local dev fixture did exactly this). The section then
+ * listed the owner twice (local UX review 2026-10-24, row 3.23). A
+ * duplicate row with no lifecycle work of its own says nothing the first one
+ * does not, so it is folded into the first; a row that carries an OPEN
+ * onboarding/offboarding run or a non-default stage is real lifecycle state
+ * and is always kept. Ended rows are history and are never folded. Pure;
+ * input order is kept.
+ */
+export function collapseDuplicateLifecycleRows(
+  rows: readonly LifecycleMemberRow[],
+): LifecycleMemberRow[] {
+  const carriesOwnState = (m: LifecycleMemberRow): boolean =>
+    m.openOnboardingRunId !== null ||
+    m.openOffboardingRunId !== null ||
+    m.stage !== "active";
+  const firstPlain = new Map<string, number>();
+  const out: LifecycleMemberRow[] = [];
+  for (const m of rows) {
+    if (m.engagementStatus === "ended" || m.stage === "ended" || carriesOwnState(m)) {
+      out.push(m);
+      continue;
+    }
+    const key = `${m.profileId}\u0000${m.relationshipSlug}`;
+    if (firstPlain.has(key)) continue;
+    firstPlain.set(key, out.length);
+    out.push(m);
+  }
+  return out;
+}
+
 export type LifecycleTemplateRow = {
   readonly id: string;
   readonly name: string;

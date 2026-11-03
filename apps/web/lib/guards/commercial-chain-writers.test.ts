@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -106,11 +106,11 @@ describe("§14 — matching stays DERIVED, not quietly persisted", () => {
       const stack = [dir];
       while (stack.length > 0) {
         const cur = stack.pop()!;
-        for (const name of readdirSync(cur)) {
+        for (const dirent of readdirSync(cur, { withFileTypes: true })) {
+          const name = dirent.name;
           if (name === "node_modules" || name === ".next") continue;
           const p = join(cur, name);
-          const st = statSync(p);
-          if (st.isDirectory()) {
+          if (dirent.isDirectory()) {
             stack.push(p);
             continue;
           }

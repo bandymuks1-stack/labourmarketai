@@ -125,6 +125,33 @@ export interface EmployerCandidateRow {
 }
 
 /**
+ * A person who raised a hand on a need that names NO trade (owner decision
+ * 2026-10-22), projected from `UnassessedHandRaiser`. Deliberately NOT an
+ * `EmployerCandidateRow`: there is no match status, no coverage, no confirmed
+ * count, no eligibility and no gaps, because nothing was compared. The literal
+ * `matchAssessed: false` makes every renderer say so.
+ */
+export interface EmployerHandRaiserRow {
+  readonly matchAssessed: false;
+  readonly workerId: string;
+  /** The deterministic anonymized token (no name, ever). */
+  readonly label: string;
+  /** The profession the worker stated themselves — their own fact, not a
+   *  match against the need. */
+  readonly professionSlug: string | null;
+  /** Profile-safe country from the visibility policy. */
+  readonly country: string | null;
+  /** Owner rule 6 + actionability — the SAME gate as a scouted candidate. */
+  readonly canContact: boolean;
+  readonly shortlistStatus: "saved" | "interested" | "not_fit" | "reviewed" | null;
+  /** The company's OWN internal note (never worker data). */
+  readonly shortlistNote: string | null;
+  /** The ONE derived pipeline stage (P4). */
+  readonly pipelineStage: CandidatePipelineStage;
+  readonly bookingStatus: string | null;
+}
+
+/**
  * The panel's candidate view for ONE demand.
  *
  * Every non-ok kind is a DIFFERENT sentence on the surface. Collapsing
@@ -146,7 +173,15 @@ export type EmployerCandidatesResult =
        *  entitled to know the platform did not look at everyone. */
       readonly retrievalCapped: boolean;
     }
-  | { readonly kind: "not-structured"; readonly demand: EmployerDemandRow }
+  | {
+      readonly kind: "not-structured";
+      readonly demand: EmployerDemandRow;
+      /** Hand-raisers shown now, trade match NOT assessed (owner decision
+       *  2026-10-22). Empty → the plain "nothing to match against" state. */
+      readonly handRaisers: readonly EmployerHandRaiserRow[];
+      /** How many visible hand-raisers there are (before the panel cap). */
+      readonly handRaisersTotal: number;
+    }
   | { readonly kind: "not-found" }
   | { readonly kind: "needs-migration" }
   | { readonly kind: "no-company-context"; readonly reason: EmployerContextReason }

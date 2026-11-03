@@ -6,6 +6,7 @@ import {
   deriveOriginKey,
 } from "@/lib/communication/conversation-display";
 import { evaluateCommunicationRequest } from "@/lib/communication/communication-eligibility";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Message context + contact permissions honesty guard
@@ -133,7 +134,7 @@ describe("no fake read/delivered/seen receipts in the thread UI", () => {
 });
 
 describe("honest origin copy exists in all active locales", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: communication.origin.you + .other are present and non-empty`, () => {
       const origin = (JSON.parse(read(`messages/${loc}.json`)) as Record<string, Record<string, Record<string, string>>>)
         .communication?.origin;

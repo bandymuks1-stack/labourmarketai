@@ -1151,6 +1151,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Zeig das Foto",
     pl: "Pokaż wgrane zdjęcie",
   },
+  "what-changed": {
+    lt: "Kas pasikeitė nuo vakar?",
+    en: "What changed since yesterday?",
+    ru: "Что изменилось со вчера?",
+    nl: "Wat is er veranderd sinds gisteren?",
+    de: "Was hat sich seit gestern geändert?",
+    pl: "Co się zmieniło od wczoraj?",
+  },
   "add-task": {
     lt: "Pridėk užduotį projektui: sumontuoti pastolius",
     en: "Add a task to the project: erect the scaffold",
@@ -1506,5 +1514,28 @@ describe("rename-organization — a rename sentence reaches the rename door", ()
     expect(classifyIntent("Perjunk į įmonę Nonstop").intent).toBe("switch-context");
     expect(classifyIntent("change my workspace").intent).toBe("switch-context");
     expect(classifyIntent("Kas vyksta mano įmonėje?").intent).toBe("company-overview");
+  });
+});
+
+describe("a question about the needs we already have reviews them; a new need still opens the form", () => {
+  it.each([
+    "Kiek darbuotojų poreikių šiuo metu turime atvirų?",
+    "kokie mūsų poreikiai dabar?",
+    "parodyk mūsų atvirus poreikius",
+    "how many open needs do we have?",
+    "сколько у нас открытых заявок?",
+    "wie viele offene Anfragen haben wir?",
+    "hoeveel openstaande aanvragen hebben we?",
+    "ile mamy otwartych zapotrzebowań?",
+  ])("%s → candidates", (text) => {
+    expect(classifyIntent(text).intent).toBe("candidates");
+  });
+  it.each([
+    "reikia darbuotojų",
+    "reikia 3 mūrininkų kitai savaitei",
+    "darbuotojų poreikis: 5 suvirintojai Norvegijoje",
+    "we need welders next month",
+  ])("%s → need-workers", (text) => {
+    expect(classifyIntent(text).intent).toBe("need-workers");
   });
 });

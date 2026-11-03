@@ -601,7 +601,9 @@ second document reads as the canonical architecture.
 | `docs/audits/**` | Point-in-time findings | Evidence |
 | `docs/product/*-contract-v1.md` | Feature-level contracts under §1 | Detail |
 | `docs/integrations/AI_AGENT_PARTICIPANTS_V1.md` | Coverage and phased plan for §1.13 (AI agents as participants); adds no graph node — agents are a subject KIND on the existing ACTOR model | AGENT-1..4, data minimization §4a, phases P0–P7 |
+| `docs/plans/not-implemented-architecture-2026-10-23.md` | Implementation plans for capabilities not built yet (goods purchases + delivery, the cross-border-deals memo, LMC / paid tiers, agents runtime, AI agent providers, voice door, RPL structure, store release); adds no graph node and settles no §10 decision | The exact owner question each plan waits on |
 | `docs/design/historical-timesheet-import-v3.md` + `docs/design/historical-timesheet-fixture-v3.md` | A PROPOSED feature design under §1.6 (historical timesheet import, owner rules 2026-09-23); adds no graph node; its migrations are owner-gated. Its v2 commercial expansion (invoices, payments, payroll) is SUPERSEDED by owner decision A | Historical import slices PR-2 to PR-7 |
+| `docs/design/ux-system-2026-11/UX_UI_SYSTEM_PROPOSAL_2026-11-03.md` | A PROPOSED UX/UI system (tools, three visual directions, staged plan) under the existing design chain (`docs/DESIGN_SYSTEM.md`); adds no graph node and no second design system; implementation waits for the owner's direction choice | UX/UI stages S0–S7 |
 
 ### SUPERSEDED AS ARCHITECTURE — historical evidence only
 
@@ -624,13 +626,18 @@ second architecture.
 
 Six carried forward, plus four surfaced by this reconciliation.
 
+*Pointer (SUPPORTING, §9):* the implementation plans that wait on these
+decisions, each with its exact owner question, are in
+[`docs/plans/not-implemented-architecture-2026-10-23.md`](plans/not-implemented-architecture-2026-10-23.md).
+
 | Id | Decision |
 |---|---|
 | **PER-11** | Apply a split `external_profiles_v1` carrying only the one table its live UI needs, or retire the section |
 | **ORG-2** | Migrate the seven gates to `organization_roles`, or keep the industry lock deliberately |
-| **EVID-2** | Block self-confirmation in `review_journal_entry`, or rely on the weaker classification |
+| ~~**EVID-2**~~ | ✅ **RESOLVED — owner, 2026-11-02 ([decision 0028](DECISIONS/0028-self-declared-and-independently-confirmed-work.md)).** A person may create, correct and confirm their own journal as a lawful personal declaration, with or without a registered employer; what is forbidden is presenting oneself as the independent confirmer. Self-declared and independently confirmed experience stay apart on the Living CV, the same hours are never counted twice, a later-joining employer can confirm earlier declared work with history kept. Institutions (J-12): an authorised teacher / practice supervisor confirms the learner's declared work bound to work, hours, competency and confirmer; no formal qualification without an assessment procedure. One person — one journal — one hours ledger |
 | **EVID-6** | The v1 select policy resolves `moderation_status` to the RECORD's status and hands the experience author a reply moderation has not published. Correcting it is a schema change (RED) |
-| **MKT-7** | Two independent owner acts arm real charging |
+| **MKT-7** | Two independent owner acts arm real charging — *Pointer:* arming decides **when** money may be taken (G-7 price table, G-8 live keys and approval). **Whether** what is sold pays for itself is recorded in ONE place, [decision 0029](DECISIONS/0029-commercial-sustainability-and-business-health.md): the commercial sustainability principles CSP-001…005, the financial safety rules FSR-001…005, the economic-model fields, the commercial-gate conditions and the business-health metrics, warnings and score (carried from PRs #896, #897 and #895, now closed). All are held by review until a gate is built; nothing there sets a price or arms a payment. |
+| **FIN-1** *(new, 2026-11-03)* | **The economic model of what is sold today** ([decision 0029](DECISIONS/0029-commercial-sustainability-and-business-health.md) §8). For each of these, the owner records the owner, unit cost, expected margin and what funds any subsidy: (a) the live Organization plan; (b) the 14-day trial, the 1 € / 30-day pilot pass and the VIP grant of #2474; (c) the **FSR-002 bound for unlimited open positions**, i.e. whether the existing rate limits and intake throttles count as the technical abuse bound or a fair-use ceiling is needed; (d) the free-tier funding statement; (e) whether the one-time pilot-pass payment is an accepted exception to "Stripe sells only subscriptions and LMC top-ups". Not decided by any agent; pricing and payment state unchanged |
 | **GOV-1** | Add a READ-ONLY `SUPABASE_DB_URL` GitHub Actions secret. Two live security gates stay inactive without it |
 | ~~**ARCH-1**~~ | ✅ **RESOLVED — APPROVED by the owner, 2026-09-14.** INSTITUTIONS, SUPPLY, MATCHING and RECOGNITION/RPL are first-class nodes. All 28 are now in `product-graph.ts` and guarded. The decision was explicitly *architectural/semantic, not authorization to create four duplicate modules, routes, databases or UI sections* — see §1.9 for what that means in practice. |
 | ~~**ARCH-2**~~ | ✅ **PRINCIPLE APPROVED, IMPLEMENTATION DEFERRED — owner, 2026-09-14.** The rule is binding now and recorded in **§1.10**. The structure is NOT to be built yet: it lands only when the Institution/RPL end-to-end chain reaches its dependency point, and then through the normal owner schema gate (RED). **No longer a sequencing ambiguity** — RPL is scheduled, not blocked |

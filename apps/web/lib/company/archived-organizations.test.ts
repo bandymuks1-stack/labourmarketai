@@ -159,7 +159,9 @@ function makeClient(resolve: (call: Call) => Answer) {
 interface WorldOptions {
   /** The archive column does not exist (pre-migration database). */
   columnAbsent?: boolean;
-  /** The bounded archive read (`id in (...)`) fails for real. */
+  /** The archive read fails for real: the bounded `id in (...)` read, and the
+   *  membership reads that carry the archive column in their organization
+   *  embed (perf 2026-10-23 — the archive state rides those reads now). */
   archiveReadFails?: boolean;
   /** Rows as they stand BEFORE the migration (nothing archived). */
   orgs?: Record<string, OrgRow>;
@@ -167,16 +169,36 @@ interface WorldOptions {
 
 function world(opts: WorldOptions = {}) {
   const orgs = opts.orgs ?? ORGS;
-  const embed = (id: string) => {
+  const embed = (id: string, withArchive: boolean) => {
     const o = orgs[id];
     return o
-      ? { display_name: o.display_name, legal_name: o.legal_name, organization_type: o.organization_type }
+      ? {
+          display_name: o.display_name,
+          legal_name: o.legal_name,
+          organization_type: o.organization_type,
+          ...(withArchive ? { archived_at: o.archived_at } : {}),
+        }
       : null;
   };
+  /** A membership read whose organization embed asks for the archive column. */
+  const embedFailure = (select: string): Answer | null => {
+    if (!/organizations\([^)]*archived_at/.test(select)) return null;
+    if (opts.columnAbsent) return { error: { code: "42703" } };
+    if (opts.archiveReadFails) return { error: { code: "XX000", message: "boom" } };
+    return null;
+  };
+  // The bound company embedded through the legacy-binding foreign key — the
+  // same rows the `companies` table answers below.
+  const COMPANY_EMBED = /,?\s*companies!organizations_legacy_company_id_fkey\(([^)]*)\)/;
   const project = (o: OrgRow, select: string) => {
     const out: Record<string, unknown> = {};
-    for (const col of select.split(",").map((s) => s.trim())) {
+    const company = COMPANY_EMBED.exec(select);
+    for (const col of select.replace(COMPANY_EMBED, "").split(",").map((s) => s.trim())) {
       out[col] = (o as unknown as Record<string, unknown>)[col];
+    }
+    if (company) {
+      out.companies =
+        o.legacy_company_id === NONSTOP_COMPANY ? { id: NONSTOP_COMPANY, profile_id: RAMUNAS } : null;
     }
     return out;
   };
@@ -208,6 +230,9 @@ function world(opts: WorldOptions = {}) {
       return { data: [] };
     }
     if (call.table === "company_memberships") {
+      const select = String(arg(call, "select") ?? "");
+      const failed = embedFailure(select);
+      if (failed) return failed;
       const profile = eqValue(call, "profile_id");
       const org = eqValue(call, "organization_id");
       const roleIn = arg(call, "in", 1) as string[] | undefined;
@@ -221,11 +246,14 @@ function world(opts: WorldOptions = {}) {
         data: rows.map((m) => ({
           organization_id: m.organization_id,
           role: m.role,
-          organizations: embed(m.organization_id),
+          organizations: embed(m.organization_id, select.includes("archived_at")),
         })),
       };
     }
     if (call.table === "engagement_contexts") {
+      const select = String(arg(call, "select") ?? "");
+      const failed = embedFailure(select);
+      if (failed) return failed;
       const profile = eqValue(call, "profile_id");
       const slugIn = arg(call, "in", 1) as string[] | undefined;
       const rows = ENGAGEMENTS.filter(
@@ -235,7 +263,7 @@ function world(opts: WorldOptions = {}) {
         data: rows.map((e) => ({
           organization_id: e.organization_id,
           relationship_slug: e.relationship_slug,
-          organizations: embed(e.organization_id),
+          organizations: embed(e.organization_id, select.includes("archived_at")),
         })),
       };
     }

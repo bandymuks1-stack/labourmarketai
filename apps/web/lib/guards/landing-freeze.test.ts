@@ -18,9 +18,10 @@ import {
  * (lt/en/ru) are byte-identical to the committed baseline. It catches both
  * direct edits and indirect drift through shared components or message keys.
  *
- * If this test fails, the change touched the landing. Revert it. Do NOT
- * regenerate the baseline unless the change is part of the explicit,
- * owner-approved landing plan (see scripts/generate-landing-freeze-baseline.ts).
+ * If this test fails, the change touched the landing. If that was accidental,
+ * revert it. If it is a justified functional or UX fix (owner 2026-10-25: the
+ * freeze must not block those), regenerate the baseline in the same PR and
+ * name the reason — see scripts/generate-landing-freeze-baseline.ts.
  */
 
 const webRoot = join(__dirname, "..", "..");

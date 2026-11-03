@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseClientEnv } from "@/lib/env";
 import { clientKeyFromHeaders, rateLimit } from "@/lib/security/rate-limit";
+import { isSameOriginRequest } from "@/lib/http/same-origin-request";
 import type { Database } from "@/lib/supabase/types";
 
 // Companies / agencies waitlist (PV §10 honesty): M1 only ships worker
@@ -25,6 +26,15 @@ const PG_UNIQUE_VIOLATION = "23505";
 const RATE_LIMIT = { limit: 5, windowMs: 10 * 60 * 1000 } as const;
 
 export async function POST(req: Request) {
+  // A cross-site page could otherwise POST distinct addresses into the
+  // waitlist from every visitor's browser (walk-spec finding 2026-10-25). The
+  // ONE shared same-origin check — the one `/api/assistant/transcript` uses —
+  // refuses a foreign Origin, a cross-site Sec-Fetch-Site, a missing Origin
+  // without same-origin fetch metadata, and a look-alike host. The only
+  // caller is this site's own waitlist modal (a same-origin `fetch`).
+  if (!isSameOriginRequest(req)) {
+    return NextResponse.json({ ok: false, message: "Forbidden" }, { status: 403 });
+  }
   const decision = rateLimit({
     name: "waitlist",
     key: clientKeyFromHeaders(req.headers),
