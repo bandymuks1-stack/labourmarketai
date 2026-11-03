@@ -216,10 +216,22 @@ name: signed-in-journey
           commands:
             - tapOn:
                 id: "journal-compose-option-0"
+            # Picking a context sends the draft again: the form shows while it
+            # runs, then the preview puts "save" where "review" was. Wait for
+            # the preview here, or the review tap below lands on save and
+            # stores the entry behind the flow's back (runs 41543478450,
+            # 41543455043).
+            - extendedWaitUntil:
+                visible:
+                  id: "journal-compose-save"
+                timeout: 20000
+                optional: true
       - runFlow:
           when:
             visible:
               id: "journal-compose-review"
+            notVisible:
+              id: "journal-compose-save"
           commands:
             - waitForAnimationToEnd
             - tapOn:
@@ -243,10 +255,22 @@ name: signed-in-journey
           commands:
             - tapOn:
                 id: "journal-compose-option-0"
+            # Picking a context sends the draft again: the form shows while it
+            # runs, then the preview puts "save" where "review" was. Wait for
+            # the preview here, or the review tap below lands on save and
+            # stores the entry behind the flow's back (runs 41543478450,
+            # 41543455043).
+            - extendedWaitUntil:
+                visible:
+                  id: "journal-compose-save"
+                timeout: 20000
+                optional: true
       - runFlow:
           when:
             visible:
               id: "journal-compose-review"
+            notVisible:
+              id: "journal-compose-save"
           commands:
             - waitForAnimationToEnd
             - tapOn:
@@ -270,10 +294,22 @@ name: signed-in-journey
           commands:
             - tapOn:
                 id: "journal-compose-option-0"
+            # Picking a context sends the draft again: the form shows while it
+            # runs, then the preview puts "save" where "review" was. Wait for
+            # the preview here, or the review tap below lands on save and
+            # stores the entry behind the flow's back (runs 41543478450,
+            # 41543455043).
+            - extendedWaitUntil:
+                visible:
+                  id: "journal-compose-save"
+                timeout: 20000
+                optional: true
       - runFlow:
           when:
             visible:
               id: "journal-compose-review"
+            notVisible:
+              id: "journal-compose-save"
           commands:
             - waitForAnimationToEnd
             - tapOn:
