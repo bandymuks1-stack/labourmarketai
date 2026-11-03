@@ -380,10 +380,9 @@ const MORE_LEADS = {
   company: ["area:people", "area:projects", "area:work"],
   agency: ["area:people", "area:clients", "area:projects"],
 } as const;
-const testIdsIn = (scope: Locator, prefix: string) =>
-  scope
-    .locator(`[data-testid^="${prefix}"]`)
-    .evaluateAll((els, p) => els.map((e) => (e.getAttribute("data-testid") ?? "").slice(String(p).length)), prefix);
+/** The ids under one literal testid prefix, in render order, with the prefix cut. */
+const idsAfter = (items: Locator, prefix: string) =>
+  items.evaluateAll((els, p) => els.map((e) => (e.getAttribute("data-testid") ?? "").slice(String(p).length)), prefix);
 
 for (const { slot, org, label, kinds } of [
   { slot: "owner", org: ALFA, label: "Alfa (company)", kinds: ["company"] as const },
@@ -397,11 +396,11 @@ for (const { slot, org, label, kinds } of [
     await page.goto("/lt/dashboard/projects");
     const core = page.getByTestId("header-core-nav");
     await expect(core).toBeVisible({ timeout: 30_000 });
-    expect(await testIdsIn(core, "header-core-nav-")).toEqual(CORE_IDS);
+    expect(await idsAfter(core.locator('[data-testid^="header-core-nav-"]'), "header-core-nav-")).toEqual(CORE_IDS);
     await page.getByTestId("header-nav-more").click();
     const more = page.getByTestId("header-nav-more-menu");
     await expect(more).toBeVisible();
-    const leads = (await testIdsIn(more, "header-nav-more-")).slice(0, 3);
+    const leads = (await idsAfter(more.locator('[data-testid^="header-nav-more-"]'), "header-nav-more-")).slice(0, 3);
     const kind = kinds.find((k) => JSON.stringify(MORE_LEADS[k]) === JSON.stringify(leads));
     console.log(`[nav] ${slot}: More opens with ${leads.join(", ")} (${kind ?? "no match"})`);
     expect(kind, `More leads ${leads.join(", ")}`).toBeTruthy();
@@ -416,7 +415,7 @@ test("N-2 (P0-2). on the phone, Alfa's area sheet lists the core loop, then its 
   await page.getByTestId("header-nav-sheet-trigger").click();
   const sheet = page.getByTestId("header-nav-sheet");
   await expect(sheet).toBeVisible({ timeout: 30_000 });
-  const ids = await testIdsIn(sheet, "header-nav-sheet-");
+  const ids = await idsAfter(sheet.locator('[data-testid^="header-nav-sheet-"]'), "header-nav-sheet-");
   expect(ids.slice(0, 4)).toEqual(CORE_IDS);
   expect(ids.slice(4, 7)).toEqual([...MORE_LEADS.company]);
   await ctx.close();
