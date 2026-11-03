@@ -93,8 +93,8 @@ describe("public_vacancy_locations_v1 SQL boundary", () => {
 
   it("is definer with a pinned search_path and PUBLIC revoked before the grant", () => {
     expect(sql).toMatch(/security definer set search_path = public/);
-    const revoke = sql.indexOf("revoke execute on function public.public_vacancy_locations_v1(uuid[]) from public;");
-    const grant = sql.indexOf("grant execute on function public.public_vacancy_locations_v1(uuid[]) to anon, authenticated;");
+    const revoke = sql.indexOf("revoke execute on function public.public_vacancy_locations_v1(p_ids uuid[]) from public;");
+    const grant = sql.indexOf("grant execute on function public.public_vacancy_locations_v1(p_ids uuid[]) to anon, authenticated;");
     expect(revoke).toBeGreaterThan(-1);
     expect(grant).toBeGreaterThan(revoke);
   });
@@ -104,6 +104,6 @@ describe("public_vacancy_locations_v1 SQL boundary", () => {
       join(process.cwd(), "../../supabase/rollbacks/20261103130000_public_vacancy_locations_v1.down.sql"),
       "utf-8",
     );
-    expect(down).toMatch(/drop function if exists public\.public_vacancy_locations_v1\(uuid\[\]\);/);
+    expect(down).toMatch(/drop function if exists public\.public_vacancy_locations_v1\(p_ids uuid\[\]\);/);
   });
 });

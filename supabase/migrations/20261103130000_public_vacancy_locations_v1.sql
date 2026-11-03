@@ -77,12 +77,12 @@ create or replace function public.public_vacancy_locations_v1(
     and v.country ~ '^[A-Za-z]{2}$';
 $$;
 
-comment on function public.public_vacancy_locations_v1(uuid[]) is
+comment on function public.public_vacancy_locations_v1(p_ids uuid[]) is
   'Country + municipality of live, allow-listed public vacancies for anonymous callers (owner 2026-11-03). No title, employer, region, address, coordinates or attribution. Max 50 ids.';
 
 -- REVOKE FROM PUBLIC FIRST — a bare grant leaves the default PUBLIC EXECUTE in
 -- place, the idiom behind the 2026-07-22 P0. Then the same two roles as the
 -- sibling public functions: anon (the board, the job page, crawlers) and
 -- authenticated (a signed-in member reads the same public card).
-revoke execute on function public.public_vacancy_locations_v1(uuid[]) from public;
-grant execute on function public.public_vacancy_locations_v1(uuid[]) to anon, authenticated;
+revoke execute on function public.public_vacancy_locations_v1(p_ids uuid[]) from public;
+grant execute on function public.public_vacancy_locations_v1(p_ids uuid[]) to anon, authenticated;

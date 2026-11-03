@@ -7,4 +7,4 @@
 -- get_public_vacancy_preview_v1, list_public_vacancy_sitemap_v1 and
 -- count_public_vacancies_v1 were never touched). The app reader treats the
 -- missing function as "not provisioned" and shows no location.
-drop function if exists public.public_vacancy_locations_v1(uuid[]);
+drop function if exists public.public_vacancy_locations_v1(p_ids uuid[]);
