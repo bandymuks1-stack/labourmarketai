@@ -27,13 +27,13 @@ a security/permission row says only that an item is open.
 | `OPTIONAL_TEST` | an extra test scenario that does not block launch |
 | `DUPLICATE` | the same function as another row (named in the evidence); kept for history, never counted in the totals |
 
-## Totals (288 planned functions, 2026-11-02)
+## Totals (288 planned functions, 2026-11-03)
 
 | LIVE_VERIFIED | PASS_CI_ONLY | FAIL | BLOCKED | NOT_VERIFIED | NOT_IMPLEMENTED | OPTIONAL_TEST |
 |---|---|---|---|---|---|---|
-| 195 | 6 | 8 | 40 | 16 | 22 | 1 |
+| 196 | 6 | 8 | 39 | 16 | 22 | 1 |
 
-2026-11-03: 11.7 NOT_VERIFIED → LIVE_VERIFIED by recognition-chain 41617507405; J-12 redefined by the owner as the baseline learning-group journey (11.1–11.7), RPL 11.10 a separate advanced stage. 2026-11-03: 11.2 NOT_VERIFIED → LIVE_VERIFIED by cohort-join-request 41611766407 (6/6). 2026-11-02: 2.20 FAIL → NOT_VERIFIED by owner decision 0028, then → LIVE_VERIFIED by journal-confirm 41478434884. 4.9 and 5.7 PASS_CI_ONLY → LIVE_VERIFIED by alert-mail 41488266687.
+2026-11-03: 13.5 BLOCKED → LIVE_VERIFIED by db-backup restore drill 41664420591 + full run 41665452921 (#3005). 2026-11-03: 11.7 NOT_VERIFIED → LIVE_VERIFIED by recognition-chain 41617507405; J-12 redefined by the owner as the baseline learning-group journey (11.1–11.7), RPL 11.10 a separate advanced stage. 2026-11-03: 11.2 NOT_VERIFIED → LIVE_VERIFIED by cohort-join-request 41611766407 (6/6). 2026-11-02: 2.20 FAIL → NOT_VERIFIED by owner decision 0028, then → LIVE_VERIFIED by journal-confirm 41478434884. 4.9 and 5.7 PASS_CI_ONLY → LIVE_VERIFIED by alert-mail 41488266687.
 
 Full planned scope 2026-11-01: 277 rows − 2 DUPLICATE (7.10 = 4.22, 4.17 = 2.35; kept, not counted) + 13 functions found in the vision, architecture and decision documents with no row before (2.36, 2.37, 3.34–3.36, 4.30, 5.20, 5.21, 6.22–6.24, 7.30, 7.31) = **288**. Seven rows were reconciled with product-truth (3.8, 4.6, 11.2, 11.7, 7.5 → NOT_VERIFIED; 2.20, 2.24 → FAIL); their earlier proof stays in the row. Production-verified share of the full scope: **190 / 288 = 66.0 %** (186 after the 2026-11-02 recount; +3.8, 4.6, 6.18, 9.18 from production walks 41350506578 and 41357630136). Targets (conditional, not guaranteed): core product complete and public mid-December 2026; full historical scope February 2027 (preliminary).
 
@@ -83,7 +83,7 @@ Denominator = 287 functions (288 planned minus the one `OPTIONAL_TEST` scenario,
 | Measure | Method | Result |
 |---|---|---|
 | **Technical implementation** | every row except `NOT_IMPLEMENTED` (a `BLOCKED` row is built but waits for an owner step) | **265 / 287 = 92.3 %** |
-| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **195 / 287 = 67.9 %** (73.6 % of the built 265) |
+| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **196 / 287 = 68.3 %** (74.0 % of the built 265) |
 | **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **16 / 19 = 84.2 %** complete · 1 partial · 0 broken · 2 blocked · 0 unverified (J-12 counts the baseline learning-group journey 11.1–11.7; advanced RPL 11.10 is tracked separately, owner D-15) |
 
 Per area (technical / production-verified) — as of the 277-row register, before the 2026-11-01 full-scope update; recomputed at the next weekly progress report:
@@ -127,6 +127,209 @@ The 19 journeys (rows in brackets):
 | J-17 | Install the native app from a store (8.15, 8.17, 8.18) | blocked | no store listing (owner accounts) |
 | J-18 | Own data export / erasure request (9.4, 9.5, 9.6) | complete | search-support-privacy 2026-11-01, erasure 2026-10-19 |
 | J-19 | Growth: potential capabilities + learning compass (2.29, 11.3) | complete | living-cv-growth 2026-11-01, learning-practice 2026-10-25 |
+
+## Combined audit view — functions, SEO, GEO, search and design (2026-11-03)
+
+Owner order 2026-11-03: one combined PASS / FAIL / BLOCKED / NOT VERIFIED register, tied to real production tests in Chrome;
+new functions never stop the stabilization of the existing core user journeys. This view is part of this file, not a
+second register. The function rows below keep their own status; this view reads them under a stricter rule.
+
+**Rules of this view (binding for it):**
+
+1. Every row has exactly one of **PASS / FAIL / BLOCKED / NOT VERIFIED**.
+2. **PASS** needs production evidence: a `prod-qa-walk` run id (spec + date) or a Chrome production check (date, URL,
+   viewport). For an infrastructure row, a production job run id against the production system counts (a walk cannot
+   prove a backup). A CI run, an isolated local run, a code read or a bare "live" note is **NOT VERIFIED**.
+3. A function's PASS falls to **FAIL** when the latest walk of its spec failed on a product assertion; a test defect
+   already fixed on `main` leaves the row as it was and names the re-run.
+4. Mapping from the function rows: `LIVE_VERIFIED` → PASS when the evidence names a production walk run or a Chrome
+   production check, otherwise NOT VERIFIED; `PASS_CI_ONLY`, `NOT_VERIFIED`, `OPTIONAL_TEST` → NOT VERIFIED; `FAIL` → FAIL;
+   `BLOCKED` → BLOCKED; `NOT_IMPLEMENTED` → BLOCKED when it waits on a named owner decision or an owner-gated RED draft,
+   otherwise FAIL (not built). `DUPLICATE` rows are not counted.
+5. SEO, GEO, search and design checks are run **signed out** (requests without cookies) on `https://labourmarket.ai`, build
+   `a10b6c47`, 2026-11-03 20:00–20:30 UTC, in the desktop app's built-in Chromium browser. Phone checks name their
+   viewport.
+
+### Totals 2026-11-03
+
+| Dimension | Rows | PASS | FAIL | BLOCKED | NOT VERIFIED |
+|---|---|---|---|---|---|
+| Functions (288, per area below) | 288 | 162 | 9 | 60 | 57 |
+| SEO | 10 | 8 | 1 | 1 | 0 |
+| GEO | 4 | 4 | 0 | 0 | 0 |
+| Search | 5 | 4 | 1 | 0 | 0 |
+| Design (direction A P0) | 5 | 5 | 0 | 0 | 0 |
+| **All** | **312** | **183** | **11** | **61** | **57** |
+
+Functions per area:
+
+| Area | Rows | PASS | FAIL | BLOCKED | NOT VERIFIED |
+|---|---|---|---|---|---|
+| Identity, sign-up & organizations | 15 | 11 | 0 | 1 | 3 |
+| Worker profile, Work Journal & Living CV | 37 | 29 | 1 | 5 | 2 |
+| Company operations & projects | 36 | 33 | 0 | 0 | 3 |
+| Demand, jobs & matching | 26 | 21 | 0 | 2 | 3 |
+| Chat & communication | 21 | 13 | 1 | 4 | 3 |
+| Marketplace | 22 | 13 | 0 | 7 | 2 |
+| Plans, billing & entitlements | 30 | 1 | 2 | 15 | 12 |
+| Languages & markets | 18 | 9 | 0 | 6 | 3 |
+| Admin, privacy & security | 24 | 11 | 1 | 3 | 9 |
+| MCP & AI agents | 26 | 8 | 1 | 14 | 3 |
+| Education & learning | 10 | 7 | 1 | 2 | 0 |
+| Market intelligence | 6 | 4 | 0 | 0 | 2 |
+| Infrastructure & operations | 17 | 2 | 2 | 1 | 12 |
+| **Functions** | **288** | **162** | **9** | **60** | **57** |
+
+Where the stricter rule moves a function (all other rows map one to one):
+
+- **6.4 buyer workspace stays PASS:** walks 41674630724 and 41676554374 (16:29 and 16:40 UTC) failed B-3b because they ran before #3003 was deployed (build `a10b6c47d`, 20:27 UTC). The re-run after the deploy, buyer-workspace 41713787541 (20:39 UTC), passed 10/10, B-3b included.
+- **PASS instead of BLOCKED (1):** 13.5 database backup. Restore drill 41664420591 and full run 41665452921
+  (2026-11-03) are production job runs (#3005). The function row below is updated.
+- **NOT VERIFIED instead of PASS (34):** `LIVE_VERIFIED` rows whose evidence is production data, an owner action, a CI
+  run, an isolated run or a bare "live" note, but no production walk run and no Chrome production check: 1.2, 1.12,
+  1.13, 4.29, 5.14, 6.11, 6.16, 7.3, 7.16, 7.17, 8.1, 8.17, 8.18, 9.4, 9.6, 9.8, 9.10, 9.22, 9.23, 9.24, 10.18, 10.19,
+  10.23, 12.2, 12.5, 13.2, 13.6, 13.7, 13.8, 13.10, 13.11, 13.12, 13.14, 13.15. Their production facts stay true in the
+  rows; they only lack the evidence type this view asks for.
+- **NOT_IMPLEMENTED (22):** 21 wait on a named owner decision or an owner-gated RED draft → BLOCKED. 5.20 user-defined
+  automations has no owner gate and is not built → FAIL (not built; not a defect of anything that exists).
+
+The 9 function FAILs: 2.24, 5.20 (not built), 7.27, 7.28, 9.25, 10.20, 11.8, 13.1, 13.17. Their reasons are in the
+rows.
+
+### SEO (signed out, 2026-11-03)
+
+| ID | Check | Status | Evidence (Chrome, signed out) | Remaining issue |
+|---|---|---|---|---|
+| SEO-1 | robots.txt | PASS | `/robots.txt` 200: `Allow: /`; private paths disallowed (`/api/`, `/*/dashboard`, `/*/onboarding`, `/*/auth`, `/*/cv`, `/*/invite`, `/*/oauth`, `/*/design`); three sitemaps declared | Cloudflare puts its managed content-signal block in front (see GEO-2) |
+| SEO-2 | sitemap.xml | PASS | `/sitemap.xml` 200: 264 URLs = 44 public paths × 6 locales (lt, en, ru, nl, de, pl), 1,770 `xhtml:link` hreflang alternates | — |
+| SEO-3 | Questions and jobs sitemaps | PASS | `/questions-sitemap.xml` 200, 270 URLs; `/jobs-sitemap.xml` 200, an index of 55 shards; shard 0's first job page answers 200 | keyset paging of the jobs sitemap is RED draft #2996, not applied |
+| SEO-4 | Canonical | PASS | 11 pages checked (`/lt`, `/en`, `/lt/jobs`, `/lt/professions`, `/lt/labour-market`, `/lt/labour-market/lt`, `/lt/questions`, a question page, `/lt/for-companies`, `/lt/pricing`, a job page): each names itself; `/lt/jobs?profession=…` names `/lt/jobs` | — |
+| SEO-5 | hreflang | PASS | the same 11 pages: lt, en, ru, nl, de, pl + x-default | — |
+| SEO-6 | JSON-LD | PASS | every page Organization + WebSite and parses; `/lt/jobs` CollectionPage; questions BreadcrumbList (+ Article on a question page); job page WebPage | a job page carries no JobPosting on purpose: employer and place are withheld from signed-out visitors (2026-08-24 rule) |
+| SEO-7 | Title, description, Open Graph, one h1 | PASS | the 11 pages: a title, a description (85–204 characters), og:image, exactly one h1, `index, follow`; `/lt/auth/signup` is `noindex, nofollow` | the country page description is short (85 characters) |
+| SEO-8 | Job board page 2+ | FAIL | `/lt/jobs?page=2` names `https://labourmarket.ai/lt/jobs` as its canonical, so pages 2+ are folded into page 1 and their jobs reach search engines only through the sitemap | fix in draft #2984 |
+| SEO-9 | Country market pages | PASS | `/lt/labour-market/{lt,lv,ee,pl,de,nl}` in the sitemap; `/lt/labour-market/lt` and `/lt/labour-market/de` answer 200, self-canonical, indexable | — |
+| SEO-10 | Country and city on signed-out job pages | BLOCKED | the board shows "employer and place: after sign-in" | owner decision 2026-11-03 approved the scope; the database function is RED draft #2993, not applied — waits for the owner's separate apply approval |
+
+### GEO (generative engines, signed out, 2026-11-03)
+
+| ID | Check | Status | Evidence (Chrome, signed out) | Remaining issue |
+|---|---|---|---|---|
+| GEO-1 | llms.txt | PASS | `/llms.txt` 200: the product described in plain words | `/llms-full.txt` 404 (optional) |
+| GEO-2 | Answer-engine crawlers may read the site | PASS | `/robots.txt`: `User-agent: *` allowed, `Content-Signal: search=yes, ai-train=no, use=reference`; search and answer agents not named are allowed | training crawlers are disallowed by the Cloudflare managed block, among them GPTBot, ClaudeBot, CCBot, Google-Extended. Google-Extended also keeps pages out of Gemini grounding. That is an owner choice to confirm, not a defect |
+| GEO-3 | Question-and-answer pages | PASS | 270 question pages in their sitemap; a question page has Article + BreadcrumbList JSON-LD, canonical, hreflang | — |
+| GEO-4 | Public market facts are quotable | PASS | `/lt/labour-market` and six country pages indexable, self-canonical, with descriptions | — |
+
+### Search (signed out, 2026-11-03)
+
+| ID | Check | Status | Evidence | Remaining issue |
+|---|---|---|---|---|
+| SR-1 | `/jobs` free text, cold first query | FAIL | Chrome, desktop: `/lt/jobs?q=sjukskoterska` (a word not searched before) took 6.5 s and showed no job and the "unavailable" state; the same query warm answered without the error | real visitors' first query of a new word times out (4–11 s against the 3 s budget); fix is RED draft #3024, not applied |
+| SR-2 | `/jobs` free text, repeated query | PASS | Chrome: `/lt/jobs?q=suvirintojas` 0.6 s then 0.3 s, `/lt/jobs?q=elektrikas` 0.8 s, 20 cards each | — |
+| SR-3 | Profession filter | PASS | Chrome: 50 professions in the filter; `/lt/jobs?profession=teacher` 1.6 s, 20 cards; `handyman` 2 cards; professions with no live job show the honest empty state | the first filtered read after a while took 4.0 s (`site_engineer`) |
+| SR-4 | Jobs search walk | PASS | prod walk jobs-search 41663385778 (2026-11-03) | — |
+| SR-5 | Job page from search, signed out | PASS | Chrome: a job page from the jobs sitemap answers 200, self-canonical, hreflang, one h1 | — |
+
+### Design — direction A P0 (2026-11-03)
+
+| ID | Check | Status | Evidence | Remaining issue |
+|---|---|---|---|---|
+| DS-1 | Mobile sign-up at 360 px | PASS | Chrome, 360×780, `/lt/auth/signup` signed out: nothing scrolls sideways (scroll width 360), Google / LinkedIn / Facebook, e-mail and two passwords full width, the submit button 42 px high, terms and the data-controller notice above the form | inputs use 14 px text, so iOS Safari zooms in on focus; `/lt/auth/sign-up` (hyphen) is a 404 |
+| DS-2 | Mobile sign-up at 390 px | PASS | Chrome, 390×844, the same page: no sideways scroll; e-mail `autocomplete=email`, passwords `new-password`, three labels | the same 14 px note |
+| DS-3 | Role navigation | PASS | prod walk role-routes 41329744822 (2026-11-01, 5 roles); prod walk mobile-surfaces 41317177981 (2026-11-01, 390 px, 6/6) | — |
+| DS-4 | Customer door in "More" (#3003) | PASS | prod walk buyer-workspace 41713787541 (2026-11-03, after the #3003 deploy) B-3b: the customer finds "Mano užklausos" first in "More" and on the phone sheet | — |
+| DS-5 | Job cards on a phone | PASS | Chrome, 390×844, `/lt/jobs` signed out: 20 cards, each 358 px wide, no sideways scroll, no bare-dash title; the source language is named on each card | — |
+
+### Latest production walk per spec (2026-11-03 20:30 UTC)
+
+From `gh run list --workflow prod-qa-walk.yml --limit 1000` (display title `prod-qa-walk <spec>`). The latest
+non-cancelled run and the last success. "None in the last 1000 runs" means the window, which reaches back to 2026-10-17.
+
+| Spec | Latest run | Date | Conclusion | Last success |
+|---|---|---|---|---|
+| admin-console | 40688059945 | 2026-10-28 | success | 40688059945 2026-10-28 |
+| agency-chain | 41656190771 | 2026-11-03 | success | 41656190771 2026-11-03 |
+| ai-off-honesty | 40301607964 | 2026-10-26 | success | 40301607964 2026-10-26 |
+| alert-mail | 41488266687 | 2026-11-02 | success | 41488266687 2026-11-02 |
+| billing-test-mode | 40668367143 | 2026-10-28 | failure | none in the last 1000 runs |
+| brigade-formation | 41350506578 | 2026-11-01 | success | 41350506578 2026-11-01 |
+| buyer-workspace | 41713787541 | 2026-11-03 | success | 41713787541 2026-11-03 |
+| calendar-planning | 41656893141 | 2026-11-03 | success | 41656893141 2026-11-03 |
+| chat-confirm-once | 41543973553 | 2026-11-02 | success | 41543973553 2026-11-02 |
+| chat-continuity | 41322286924 | 2026-11-01 | success | 41322286924 2026-11-01 |
+| cohort-join-request | 41611766407 | 2026-11-03 | success | 41611766407 2026-11-03 |
+| company-chain | 41672031864 | 2026-11-03 | success | 41672031864 2026-11-03 |
+| company-governance | 40687308231 | 2026-10-28 | success | 40687308231 2026-10-28 |
+| company-talent-history | 41279265278 | 2026-11-01 | success | 41279265278 2026-11-01 |
+| concurrency-probe | 40342223134 | 2026-10-26 | success | 40342223134 2026-10-26 |
+| digest-setup | 41584540254 | 2026-11-03 | failure | none in the last 1000 runs |
+| documents-approvals | 41662082035 | 2026-11-03 | success | 41662082035 2026-11-03 |
+| employee-beta-gate | 41671159180 | 2026-11-03 | failure | 40045368369 2026-10-24 |
+| fresh-activation | 41279196446 | 2026-11-01 | success | 41279196446 2026-11-01 |
+| invited-worker | 41430482903 | 2026-11-02 | success | 41430482903 2026-11-02 |
+| jobs-search | 41663385778 | 2026-11-03 | success | 41663385778 2026-11-03 |
+| journal-confirm | 41478434884 | 2026-11-02 | success | 41478434884 2026-11-02 |
+| lcp-locale-probe | 40328663291 | 2026-10-26 | success | 40328663291 2026-10-26 |
+| learning-practice | 41668191663 | 2026-11-03 | success | 41668191663 2026-11-03 |
+| living-cv-growth | 41281984217 | 2026-11-01 | success | 41281984217 2026-11-01 |
+| lmc-csrf | 40210854856 | 2026-10-25 | success | 40210854856 2026-10-25 |
+| mail-reset | 41428606490 | 2026-11-02 | success | 41428606490 2026-11-02 |
+| manager-chat | 41658636784 | 2026-11-03 | success | 41658636784 2026-11-03 |
+| marketplace | 41284728549 | 2026-11-01 | success | 41284728549 2026-11-01 |
+| marketplace-goods-services | 41664268898 | 2026-11-03 | success | 41664268898 2026-11-03 |
+| mcp-agents | 41307643008 | 2026-11-01 | success | 41307643008 2026-11-01 |
+| mcp-chain | 41589289076 | 2026-11-03 | success | 41589289076 2026-11-03 |
+| mcp-oauth-client | 41356233405 | 2026-11-01 | success | 41356233405 2026-11-01 |
+| mobile-surfaces | 41317177981 | 2026-11-01 | success | 41317177981 2026-11-01 |
+| notifications-inapp | 41312513056 | 2026-11-01 | success | 41312513056 2026-11-01 |
+| orders-bookings | 41321294873 | 2026-11-01 | success | 41321294873 2026-11-01 |
+| org-roster | 41318490491 | 2026-11-01 | success | 41318490491 2026-11-01 |
+| profile-cv-history | 41282258795 | 2026-11-01 | success | 41282258795 2026-11-01 |
+| project-context | 41661103338 | 2026-11-03 | success | 41661103338 2026-11-03 |
+| project-execution | 41408054477 | 2026-11-02 | success | 41408054477 2026-11-02 |
+| public-market-direction | 40186517027 | 2026-10-25 | success | 40186517027 2026-10-25 |
+| public-org-locales | 40371836163 | 2026-10-26 | success | 40371836163 2026-10-26 |
+| push | 41712000880 | 2026-11-03 | pending | 41548831709 2026-11-02 |
+| recognition-chain | 41617507405 | 2026-11-03 | success | 41617507405 2026-11-03 |
+| register-gaps | 41366955536 | 2026-11-02 | success | 41366955536 2026-11-02 |
+| requirements-countries | 40209522348 | 2026-10-25 | success | 40209522348 2026-10-25 |
+| role-routes | 41329744822 | 2026-11-01 | success | 41329744822 2026-11-01 |
+| rota-repeat | 40659497014 | 2026-10-28 | success | 40659497014 2026-10-28 |
+| schedule | 41299117311 | 2026-11-01 | failure | none in the last 1000 runs |
+| search-support-privacy | 41283989921 | 2026-11-01 | success | 41283989921 2026-11-01 |
+| sectors-languages | 40300823818 | 2026-10-26 | success | 40300823818 2026-10-26 |
+| staff-review-notice | 41659492978 | 2026-11-03 | success | 41659492978 2026-11-03 |
+| utilisation-planned-actual | 40295307338 | 2026-10-26 | success | 40295307338 2026-10-26 |
+| ux-metrics | 40339788562 | 2026-10-26 | success | 40339788562 2026-10-26 |
+| work-verification | 41287293886 | 2026-11-01 | success | 41287293886 2026-11-01 |
+| worker-identity-split | 41318189146 | 2026-11-01 | success | 41318189146 2026-11-01 |
+| worker-records-exports | 41312948857 | 2026-11-01 | success | 41312948857 2026-11-01 |
+
+The five latest failures:
+
+- **employee-beta-gate:** a test defect. G5 read the market anchors before Leaflet drew them. It is fixed on `main`: the spec now waits for an anchor or the empty state, and names this run. Its re-run is pending.
+- **digest-setup:** the harness. The walk itself ran; the closing session-revoke step reported 5 of 6 sessions revoked. #2975 is open: a session the walk signed out itself counts as revoked.
+- **schedule:** the walk brake. It was dispatched 0.4 min after a deploy, inside the 5 min quiet period, and is not re-run yet.
+- **billing-test-mode:** the optional 7.4 scenario. The pilot organization is not armed in Stripe TEST.
+- **push:** in progress at the time of writing.
+
+From the coordinator's queue of six, agency-chain (41656190771) and documents-approvals (41662082035) passed. buyer-workspace passed on its re-run after the deploy (41713787541). orders-bookings, marketplace and project-execution had no run on 2026-11-03 at the time of writing; their latest successes are in the table. They are re-counted when their runs finish.
+
+### Real user blockers (2026-11-03)
+
+These are what a real person meets now. Owner-gated scope and not-yet-built functions are listed apart.
+
+1. **The first search for a new word on `/jobs` fails** (SR-1). The visitor waits 4–11 s and gets no jobs. Fix: RED draft #3024, not applied.
+2. **Organizations cannot buy a plan without help** (J-14). 7.28 payee and terms are FAIL (owner/legal), and 7.15 is hidden by design.
+3. **AI help and some e-mail are off in production** (13.17 env parity). This waits on the owner and legal.
+4. **The native apps are not in the stores** (J-17, BLOCKED on the owner's store accounts).
+5. **Workers who are engaged but not members cannot be assigned training** (11.8, owner decision, RED #2816).
+
+Not user-facing, but open:
+
+- SEO-8: job board pages 2+ fold into page 1 (draft #2984).
+- 13.1: the production walk network path (72 h verdict 2026-11-04).
+- 2.24, 9.25, 10.20: their reasons are in the rows; the security items stay out of the public repository.
 
 ## Identity, sign-up & organizations
 
@@ -296,7 +499,7 @@ The 19 journeys (rows in brackets):
 | 6.1 | Service offerings + request loop | LIVE_VERIFIED | 2026-11-01 | prod walk marketplace 41284728549 2026-11-01 on 38bfb9d93 (6/6) M-2, M-5, M-6; earlier: marketplace-goods-services run 40164310896 10-25: service made discoverable, requested by another org, accepted with a note, requester sees acceptance, both sides message | yes |  |
 | 6.2 | Listings goods/rental/wanted | LIVE_VERIFIED | 2026-11-01 | prod walk marketplace 41284728549 2026-11-01 on 38bfb9d93 (6/6) M-1, M-3, M-4; earlier: marketplace-goods-services run 40164310896 10-25 (14/14): private sale listing, company rental published as the company, private 'looking for' listing, discovery, cross-org Q&A thread; cleanup closed all synthetic listin… | yes |  |
 | 6.3 | One discovery index | LIVE_VERIFIED | 2026-11-01 | prod walk marketplace 41284728549 2026-11-01 on 38bfb9d93 (6/6) M-3/M-5; earlier: marketplace-goods-services run 40164310896 10-25: listings and services found in the one market discovery | yes |  |
-| 6.4 | Buyer workspace | LIVE_VERIFIED | 2026-11-02 | prod walk buyer-workspace 41480104268 2026-11-02 on 4453e9d3a (9/9): B-0..B-3 workspace, B-4 provider service, B-5 a non-customer discovers buying and becomes a customer through the shipped UI, B-6 finds the provider and requests it, B-7 390 px, B-8 no console error or 401/403; clean-up withdrew the request and paused the service; earlier: buyer-workspace run 40377604733 2026-10-26 (owner-created synthetic buyer): B-0 onboarding via shipped wizard, B-[volume withheld] record saves + reads back, B-2 DRAFT request listed once, B-3 390 px no sideways scroll; … | yes | open security/permission item — details kept out of the public repository (owner rule) |
+| 6.4 | Buyer workspace | LIVE_VERIFIED | 2026-11-03 | prod walk buyer-workspace 41713787541 2026-11-03 on a10b6c47d (10/10, B-3b the customer door from #3003 included); earlier: prod walk buyer-workspace 41480104268 2026-11-02 on 4453e9d3a (9/9): B-0..B-3 workspace, B-4 provider service, B-5 a non-customer discovers buying and becomes a customer through the shipped UI, B-6 finds the provider and requests it, B-7 390 px, B-8 no console error or 401/403; clean-up withdrew the request and paused the service; earlier: buyer-workspace run 40377604733 2026-10-26 (owner-created synthetic buyer): B-0 onboarding via shipped wizard, B-[volume withheld] record saves + reads back, B-2 DRAFT request listed once, B-3 390 px no sideways scroll; … | yes | open security/permission item — details kept out of the public repository (owner rule) |
 | 6.6 | Proposals/contracts | LIVE_VERIFIED | 2026-10-25 | documents-approvals 40152566232 10-25 (walk passed) | yes |  |
 | 6.7 | Procurement | LIVE_VERIFIED | 2026-11-01 | prod walk orders-bookings 41321294873 2026-11-01 on 4a5b45828 P-1; earlier: orders-bookings run 40361384432 2026-10-26 PASS (re-proven) | yes |  |
 | 6.8 | Business trips | LIVE_VERIFIED | 2026-11-01 | prod walk orders-bookings 41321294873 2026-11-01 on 4a5b45828 T-1; earlier: orders-bookings run 40361384432 2026-10-26 PASS (re-proven) | yes | fixed by #2706 (rpc .catch crash) |
@@ -469,7 +672,7 @@ The 19 journeys (rows in brackets):
 | 13.2 | Health probe + monitor | LIVE_VERIFIED | — | live | yes |  |
 | 13.3 | Prod QA walk harness | LIVE_VERIFIED | 2026-10-22 | role-routes run 39783147517 (green) 10-22 | yes |  |
 | 13.4 | Supabase capacity | PASS_CI_ONLY | 2026-10-25 | Supabase org plan=pro (get_organization 2026-10-25) | unproven |  |
-| 13.5 | Database backup | BLOCKED | 2026-11-01 | 2026-11-01: open security/permission item, owner step pending; details in the private record; earlier: 2026-10-27 read-only: db-backup.yml stops at 'Require secrets' nightly since 10-18 (10-17 drills: permission denied); repo has VPS_DEPLOY_* but neither SUPABASE_ACCESS_TOKEN nor SUPABASE_BACKUP_DB_URL; 0 successful runs … | no | open security/permission item — details kept out of the public repository (owner rule) |
+| 13.5 | Database backup | LIVE_VERIFIED | 2026-11-03 | #3005: restore drill 41664420591 and full run 41665452921 2026-11-03 — scope public, auth, storage, supabase_migrations + Storage files + scheduled-job definitions; schema objects restored exactly, every table inside its source window, every Storage file by count and bytes; both encrypted files reach the VPS and decrypt; restore procedure in VPS_PRODUCTION_RUNBOOK §9.1.1; earlier: 2026-10-27 read-only: db-backup.yml stops at 'Require secrets' nightly since 10-18 (10-17 drills: permission denied); repo has VPS_DEPLOY_* but neither SUPABASE_ACCESS_TOKEN nor SUPABASE_BACKUP_DB_URL; 0 successful runs … | yes | first scheduled full-scope nightly 2026-11-04 03:30 UTC to be checked |
 | 13.6 | VPS cron bundle | LIVE_VERIFIED | 2026-10-23 | prod data 10-23: all 4 VPS cron entries ran (handoffs 06:00, job-alerts, weekly digest Mon, erasure every 10 min); pg_cron booking expiry ran | yes | 1 erasure notice queued (no SMTP) |
 | 13.7 | Migration safety + parity | LIVE_VERIFIED | 2026-10-23 | parity tool vs prod ledger 10-23 | yes |  |
 | 13.8 | Migration ledger parity | LIVE_VERIFIED | 2026-10-23 | prod ledger 10-23: 396 match; all drift documented except ESCO fn applied with file only in open #2410 | yes | record/merge #2410 |
