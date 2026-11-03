@@ -317,8 +317,9 @@ jobs:
           cmp -s "$D/objects.before" "$D/objects.after" \
             || echo "::warning::the source schema changed while the dump ran; comparing with the state before it"
           awk -F'\t' -v sc=",$SCOPE," 'index(sc, "," $1 ",")' "$D/objects.before" > "$D/objects.expected"
+          [ -s "$D/objects.expected" ] && [ -s "$D/objects.restored" ] || { echo "::error::restore proof: the schema-object counts could not be read"; exit 1; }
           if cmp -s "$D/objects.expected" "$D/objects.restored"; then
-            echo "restore proof: schema objects equal the source ($(awk -F'\t' '{printf "%s%s.%s=%s", NR>1?" ":"", $1, $2, $3}' "$D/objects.restored"))" | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "restore proof: schema objects equal the source ($(awk -F'\t' '{printf "%s%s.%s=%s", (NR > 1 ? " " : ""), $1, $2, $3}' "$D/objects.restored"))" | tee -a "$GITHUB_STEP_SUMMARY"
           else
             echo "::error::restore proof: schema objects differ from the source (schema/kind, source, restored):"
             join -t "$(printf '\t')" -a1 -a2 -e 0 -o 0,1.2,2.2 \
