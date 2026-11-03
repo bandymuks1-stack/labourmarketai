@@ -72,7 +72,10 @@ export const PERSONAL_WORK_AREAS: readonly WorkArea[] = TODAY_STATIONS.map((s) =
 export const ORGANIZATION_WORK_AREAS: readonly WorkArea[] = [
   { id: "need", href: "/dashboard/company/needs", iconKey: "userSearch", labelKey: "companyModel.need" },
   { id: "offer", href: "/dashboard/services", iconKey: "package", labelKey: "companyModel.offer" },
-  { id: "market", href: "/dashboard/listings", iconKey: "store", labelKey: "companyModel.market" },
+  // "Rinka" is the service/request loop — the SAME route as the organization
+  // door of that name (route drift fix 2026-11-03). Physical-resource listings
+  // stay reachable from that page and from the command finder.
+  { id: "market", href: "/dashboard/service-requests", iconKey: "store", labelKey: "companyModel.market" },
   { id: "people", href: "/dashboard/company/people", iconKey: "users", labelKey: "companyModel.people" },
   { id: "projects", href: "/dashboard/projects", iconKey: "folder", labelKey: "companyModel.projects" },
   { id: "messages", href: "/dashboard/communication", iconKey: "messages", labelKey: "companyModel.messages" },
