@@ -31,9 +31,9 @@ a security/permission row says only that an item is open.
 
 | LIVE_VERIFIED | PASS_CI_ONLY | FAIL | BLOCKED | NOT_VERIFIED | NOT_IMPLEMENTED | OPTIONAL_TEST |
 |---|---|---|---|---|---|---|
-| 193 | 6 | 8 | 40 | 18 | 22 | 1 |
+| 194 | 6 | 8 | 40 | 17 | 22 | 1 |
 
-2026-11-02: 2.20 FAIL → NOT_VERIFIED by owner decision 0028, then → LIVE_VERIFIED by journal-confirm 41478434884. 4.9 and 5.7 PASS_CI_ONLY → LIVE_VERIFIED by alert-mail 41488266687.
+2026-11-03: 11.2 NOT_VERIFIED → LIVE_VERIFIED by cohort-join-request 41611766407 (6/6). 2026-11-02: 2.20 FAIL → NOT_VERIFIED by owner decision 0028, then → LIVE_VERIFIED by journal-confirm 41478434884. 4.9 and 5.7 PASS_CI_ONLY → LIVE_VERIFIED by alert-mail 41488266687.
 
 Full planned scope 2026-11-01: 277 rows − 2 DUPLICATE (7.10 = 4.22, 4.17 = 2.35; kept, not counted) + 13 functions found in the vision, architecture and decision documents with no row before (2.36, 2.37, 3.34–3.36, 4.30, 5.20, 5.21, 6.22–6.24, 7.30, 7.31) = **288**. Seven rows were reconciled with product-truth (3.8, 4.6, 11.2, 11.7, 7.5 → NOT_VERIFIED; 2.20, 2.24 → FAIL); their earlier proof stays in the row. Production-verified share of the full scope: **190 / 288 = 66.0 %** (186 after the 2026-11-02 recount; +3.8, 4.6, 6.18, 9.18 from production walks 41350506578 and 41357630136). Targets (conditional, not guaranteed): core product complete and public mid-December 2026; full historical scope February 2027 (preliminary).
 
@@ -83,7 +83,7 @@ Denominator = 287 functions (288 planned minus the one `OPTIONAL_TEST` scenario,
 | Measure | Method | Result |
 |---|---|---|
 | **Technical implementation** | every row except `NOT_IMPLEMENTED` (a `BLOCKED` row is built but waits for an owner step) | **265 / 287 = 92.3 %** |
-| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **190 / 287 = 66.2 %** (71.7 % of the built 265) |
+| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **194 / 287 = 67.6 %** (73.2 % of the built 265) |
 | **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **15 / 19 = 78.9 %** complete · 2 partial · 0 broken · 2 blocked · 0 unverified |
 
 Per area (technical / production-verified) — as of the 277-row register, before the 2026-11-01 full-scope update; recomputed at the next weekly progress report:
@@ -119,7 +119,7 @@ The 19 journeys (rows in brackets):
 | J-9 | Agency declares supply → client bridge → offer (4.15, 4.28) | complete | agency-chain 2026-10-26, search-support-privacy 2026-11-01 |
 | J-10 | Brigade offered and matched as a unit (3.7, 4.6, 4.7) | complete | brigade-formation 41350506578 2026-11-01 (19/19); product-truth link LIVE (#2917) |
 | J-11 | Goods / service listed → found → requested → accepted → messages (6.1–6.3) | complete | marketplace 2026-11-01 |
-| J-12 | Institution → cohort → learner → practice → competency → qualification (11.1–11.7, 11.10) | partial | product-truth: learners-join and qualification links BROKEN; owner decision 0028 (2026-11-02) sets the confirmation rule: learner declares, an authorised institution person confirms work, hours, competency and identity, no qualification without an assessment procedure |
+| J-12 | Institution → cohort → learner → practice → competency → qualification (11.1–11.7, 11.10) | partial | learner join request LIVE_VERIFIED (cohort-join-request 41611766407, 6/6, 2026-11-03; 11.2); still open: practice → competency recognition (11.7 NOT_VERIFIED) and RPL (11.10, a separate later stage by owner decision D-15); was: learners-join link BROKEN; owner decision 0028 (2026-11-02) sets the confirmation rule: learner declares, an authorised institution person confirms work, hours, competency and identity, no qualification without an assessment procedure |
 | J-13 | Buyer workspace → request → provider (6.4, 6.1) | complete | buyer-workspace 41480104268 2026-11-02 (9/9, non-customer → customer → provider request); next extension (request → offer/contract) is owner decision RED-1, draft #2946 |
 | J-14 | Organization buys a plan without help (7.1, 7.5, 7.15, 7.28) | blocked | 7.15 hidden by design, 7.28 FAIL (owner/legal) |
 | J-15 | Alert / e-mail about a new matching job without signing in (4.9, 5.7, 5.9) | partial | alert-mail 41488266687 2026-11-02 (9/9): matching-job alert e-mail arrives and opens signed out (4.9, 5.7 LIVE_VERIFIED); the weekly digest e-mail (5.9) is not yet observed in production |
@@ -440,7 +440,7 @@ The 19 journeys (rows in brackets):
 | ID | Function | Status | Last checked | Evidence (PR / commit / run) | In production | Remaining issue |
 |---|---|---|---|---|---|---|
 | 11.1 | Institution + learner link | LIVE_VERIFIED | 2026-10-21 | learning-practice 39601905282 10-21 | yes |  |
-| 11.2 | Programmes / cohorts | NOT_VERIFIED | 2026-11-01 | 2026-11-02: learner self-request to join a cohort (owner decision 2026-11-02, decision 0028 J-12) built in RED draft #2959 (migration 20261102160000, scratch-PG proof 43/43), NOT applied; stays NOT_VERIFIED until the owner applies it and a production walk passes. 2026-11-01 reconciled with product-truth: product-truth: learners cannot join a cohort themselves (EDU-2, owner decision ARCH-3); the earlier production proof below stays valid for what it covered; earlier: learning-practice run 40154033299 (green) 10-25 | yes |  |
+| 11.2 | Programmes / cohorts | LIVE_VERIFIED | 2026-11-03 | prod walk cohort-join-request 41611766407 2026-11-03 (6/6): an institution opens a group; a learner asks to join (own record stays declared); the request grants nothing and cannot be self-accepted; callers without authority (anon, worker, agency) are refused and read no request text; the institution's own authorised person accepts in two steps; the learner is a member (compass) — after #2959, #2977 (applied 2026-11-02 / 2026-11-03), #2979, #2983; earlier: 2026-11-02: learner self-request to join a cohort (owner decision 2026-11-02, decision 0028 J-12) built in RED draft #2959 (migration 20261102160000, scratch-PG proof 43/43), NOT applied; stays NOT_VERIFIED until the owner applies it and a production walk passes. 2026-11-01 reconciled with product-truth: product-truth: learners cannot join a cohort themselves (EDU-2, owner decision ARCH-3); the earlier production proof below stays valid for what it covered; earlier: learning-practice run 40154033299 (green) 10-25 | yes |  |
 | 11.3 | Learning compass | LIVE_VERIFIED | 2026-10-25 | learning-practice run 40154033299 (green) 10-25 | yes |  |
 | 11.4 | Practice capacity | LIVE_VERIFIED | 2026-10-25 | learning-practice run 40154033299 (green) 10-25 | yes |  |
 | 11.5 | Learner outcomes | LIVE_VERIFIED | 2026-10-25 | learning-practice run 40154033299 (green) 10-25 | yes |  |
