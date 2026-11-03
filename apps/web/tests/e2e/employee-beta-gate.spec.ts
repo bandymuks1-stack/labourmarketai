@@ -238,6 +238,11 @@ test.describe("desktop 1440x900", () => {
     await page.screenshot({ path: join(SHOTS, "g5-market-1440.png") });
 
     const anchors = page.locator("[data-anchor-id]");
+    // Leaflet draws the anchors in a client effect AFTER the map container is
+    // visible; count() does not wait, so a slow paint read 0 and took the
+    // empty branch on a non-empty market (run 41671159180). Decide the branch
+    // on what actually rendered: an anchor or the honest empty state.
+    await expect(anchors.first().or(page.getByTestId("market-empty"))).toBeAttached({ timeout: 30_000 });
     const n = await anchors.count();
     if (n === 0) {
       // An empty production market is a legitimate state, not a gate failure —
@@ -277,6 +282,8 @@ test.describe("desktop 1440x900", () => {
     await expect(page.getByTestId("market-map")).toBeVisible();
 
     const anchors = page.locator("[data-anchor-id]");
+    // Same race as G5: wait for an anchor or the honest empty before deciding.
+    await expect(anchors.first().or(page.getByTestId("market-empty"))).toBeAttached({ timeout: 30_000 });
     test.skip((await anchors.count()) === 0, "no market anchors in production to drill into");
 
     await anchors.first().click();
