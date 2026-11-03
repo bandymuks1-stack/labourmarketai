@@ -2,6 +2,7 @@ import { appendFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type Page } from "./prod-walk";
+import { proveActionTiles } from "./action-tile-proof";
 
 /**
  * PRODUCTION UNIVERSAL MARKETPLACE — owner programme 2026-10-12 §3D: a person
@@ -308,4 +309,21 @@ test.afterAll(async ({ browser }) => {
     }
   }
   if (failed.length > 0) reportCleanupProblem(failed);
+});
+
+// ── T (#2828): the service-requests related-door grid is the ONE action tile.
+// Read-only: real links, no gold primary, no destination twice, 1280 and 390.
+test("T-1 (#2828). the service-requests related-door grid renders as action tiles", async ({ browser }) => {
+  await proveActionTiles(
+    async (mobile) => {
+      const ctx = await browser.newContext({
+        storageState: state("worker"),
+        locale: "lt-LT",
+        ...(mobile ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : { viewport: { width: 1280, height: 900 } }),
+      });
+      return { page: await ctx.newPage(), close: () => ctx.close() };
+    },
+    "/lt/dashboard/service-requests",
+    { scopeTestId: "marketplace-connections", primaries: 0 },
+  );
 });
