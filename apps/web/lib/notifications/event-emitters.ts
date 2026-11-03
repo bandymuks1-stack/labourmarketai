@@ -1941,6 +1941,7 @@ import {
   type JobAlertPairReader,
 } from "@/lib/opportunities/job-alert-candidates";
 import type { StoredPublicVacancyV1 } from "@/lib/vacancy-store/vacancy-read";
+import { claimJobAlertEvaluation } from "./job-alert-throttle";
 
 export interface JobAlertRunCounts {
   written: number;
@@ -1989,10 +1990,6 @@ async function announceJobs(
   return counts;
 }
 
-/** Best-effort throttle for the read-time path: one evaluation per person per
- *  window per warm instance. The dedupe key, not this map, is the authority. */
-const JOB_ALERT_READ_TIME_TTL_MS = 30 * 60 * 1000;
-const jobAlertLastRun = new Map<string, number>();
 
 /**
  * Read-time entrance — fired from the worker's own dashboard render, detached
@@ -2008,9 +2005,8 @@ export function maybeEmitJobAlertsInBackground(): void {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
-      const last = jobAlertLastRun.get(user.id) ?? 0;
-      if (Date.now() - last < JOB_ALERT_READ_TIME_TTL_MS) return;
-      jobAlertLastRun.set(user.id, Date.now());
+      // Best-effort throttle (job-alert-throttle.ts); a work-card save resets it.
+      if (!claimJobAlertEvaluation(user.id)) return;
 
       const ctx = await buildOwnWorkerContext(supabase, user.id);
       if (!ctx) return;

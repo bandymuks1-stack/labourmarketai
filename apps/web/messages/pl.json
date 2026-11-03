@@ -2049,7 +2049,14 @@
           "saved": "Zapisano.",
           "forbidden": "Może to zrobić tylko kierownik tej instytucji.",
           "invalid": "Sprawdź wprowadzone wartości.",
-          "error": "Coś poszło nie tak. Spróbuj ponownie."
+          "error": "Coś poszło nie tak. Spróbuj ponownie.",
+          "openRequests": "Pozwól uczącym się prosić o dołączenie",
+          "closeRequests": "Nie przyjmuj nowych próśb",
+          "requestsOpenHint": "Uczący się mogą znaleźć tę grupę i poprosić o dołączenie.",
+          "accept": "Przyjmij",
+          "decline": "odrzuć",
+          "acceptConfirm": "Tak, przyjmij i dodaj do grupy",
+          "cancelDecision": "Anuluj"
         },
         "unavailable": "Nie udało się teraz wczytać programów. Odśwież stronę — nic z tego, co utworzyłeś, nie zostało utracone.",
         "inviteLearners": "Zaproś uczestników",
@@ -2087,7 +2094,9 @@
           "evidenceUnavailable": "Nie udało się teraz odczytać wpisów praktyki. Nic nie zapisano.",
           "evidenceRecorded": "Zapisano",
           "evidenceConfirmed": "potwierdzono"
-        }
+        },
+        "requestFrom": "Prosi o dołączenie: {name}",
+        "requestUnverified": "Imię wpisane przez uczącego się — niezweryfikowane."
       },
       "learners": {
         "title": "Uczestnicy",
@@ -2858,7 +2867,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Znajdź wykonawcę usługi"
     }
   },
   "jobPostings": {
@@ -6842,7 +6852,9 @@
       "listings": "Ogłoszenia",
       "listingsNote": "Lokale, sprzęt, pojazdy – oferuj lub szukaj",
       "needs": "Potrzeby i oferty",
-      "needsNote": "Opublikuj, czego potrzebujesz lub co możesz zaoferować"
+      "needsNote": "Opublikuj, czego potrzebujesz lub co możesz zaoferować",
+      "buyer": "Moje zapytania",
+      "buyerNote": "Zapisz dane klienta i trzymaj zapytania w jednym miejscu"
     },
     "loopReadFailed": "Nie udało się wczytać Twoich zapytań — lista może być niepełna. Odśwież stronę."
   },
@@ -19810,6 +19822,73 @@
     },
     "helpNeeded": "Potrzebna pomoc — {stage}:"
   },
+  "projectForecast": {
+    "title": "Prognoza",
+    "notFact": "Prognoza na podstawie zapisanej pracy tego projektu na dzień {date} — nie fakt i nie obietnica. Jest przeliczana przy każdym otwarciu tej strony.",
+    "unavailable": "Nie udało się teraz odczytać prognozy.",
+    "insufficient": "Na razie za mało zapisanej pracy, by prognozować ten projekt.",
+    "notApplicable": "Nie ma czego prognozować: projekt nie ma otwartej pracy.",
+    "unknown": "Nieznane",
+    "beyondHorizon": "Przy obecnym tempie — za ponad trzy lata",
+    "completionLabel": "Przewidywane zakończenie",
+    "deadlineLabel": "Termin",
+    "leftLabel": "Pozostała praca",
+    "leftTasks": "{left} z {total} zadań",
+    "leftStages": "{left} z {total} etapów",
+    "peopleLabel": "Potrzebne osoby",
+    "peopleValue": "{needed} (teraz {active})",
+    "qualityLabel": "Ryzyko jakości",
+    "confidenceLabel": "Wiarygodność",
+    "actionsTitle": "Co by to zmieniło",
+    "assumptionsTitle": "Założenia",
+    "risk": {
+      "on_track": "Zgodnie z planem",
+      "tight": "Na styk",
+      "likely_miss": "Prawdopodobnie nie zdążymy",
+      "overdue": "Po terminie",
+      "unknown": "Nieznane"
+    },
+    "quality": {
+      "none": "Brak otwartych",
+      "low": "Niskie",
+      "elevated": "Podwyższone",
+      "high": "Wysokie",
+      "unknown": "Nieznane"
+    },
+    "confidence": {
+      "insufficient": "za mało danych",
+      "low": "niska",
+      "medium": "średnia",
+      "high": "wysoka"
+    },
+    "action": {
+      "add_workers": "Dodać osoby do zespołu",
+      "find_partner_capacity": "Znaleźć moce partnera",
+      "unblock_stages": "Odblokować zablokowane etapy",
+      "unblock_tasks": "Odblokować zablokowane zadania",
+      "close_serious_defects": "Usunąć poważne usterki",
+      "complete_readiness": "Uzupełnić brakujące punkty gotowości zespołu",
+      "record_hours": "Zapisywać godziny przepracowane w tym projekcie",
+      "set_planned_end": "Ustawić planowaną datę zakończenia",
+      "break_down_scope": "Podzielić pracę na zadania",
+      "review_budget": "Przejrzeć budżet",
+      "replan_deadline": "Zaplanować termin na nowo"
+    },
+    "assumption": {
+      "trailing_window_days": "Tempo jest liczone z ostatnich 28 dni.",
+      "calendar_day_rate": "Godziny są rozłożone na dni kalendarzowe; nie zakłada się kalendarza pracy.",
+      "equal_unit_weight": "Każde zadanie liczy się tak samo.",
+      "unit_is_stage": "Projekt nie ma zadań, więc liczone są etapy.",
+      "team_stays_as_is": "Zespół pozostaje taki, jaki jest teraz.",
+      "absences_as_approved": "Uwzględniane są tylko zatwierdzone nieobecności.",
+      "throughput_without_hours": "Nie zapisano godzin, więc zakończenie liczy się tylko z wykonanej pracy.",
+      "cost_continues_at_observed_rate": "Koszty rosną w dotychczasowym tempie.",
+      "single_hours_ledger": "Używana jest jedna ewidencja godzin; druga jest pokazana obok i nigdy nie jest dodawana.",
+      "hours_partly_unconfirmed": "Część godzin nie jest jeszcze potwierdzona.",
+      "hours_read_truncated": "Nie wszystkie godziny udało się odczytać; liczby mogą być zaniżone.",
+      "free_internal_people_unknown": "Nie wiadomo, kto jeszcze w organizacji jest wolny."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "Cel tego tygodnia",
     "titleMine": "Twoje zadania w tym tygodniu",
@@ -19984,6 +20063,33 @@
       "business_details": "Dane rejestracyjne firmy lub działalności oraz dane do faktur.",
       "insurance": "Ubezpieczenie OC lub inne, jeśli ta praca go wymaga.",
       "client_requirements": "Szczególne wymagania zleceniodawcy lub obiektu, jeśli są."
+    }
+  },
+  "learnerCohortJoin": {
+    "title": "Grupa szkoleniowa",
+    "declaredNote": "Swoją praktykę i wykonaną pracę możesz zapisywać zawsze, także zanim placówka cię przyjmie. Dopóki upoważniona osoba placówki ich nie potwierdzi, są pokazywane jako zadeklarowane przez ciebie, nie jako potwierdzone.",
+    "journalLink": "Otwórz dziennik",
+    "find": "{count, plural, one {# otwarta grupa} few {# otwarte grupy} many {# otwartych grup} other {# otwartej grupy}}",
+    "empty": "Żadna placówka nie przyjmuje teraz próśb o dołączenie.",
+    "unavailable": "Nie udało się teraz wczytać grup szkoleniowych. Spróbuj później.",
+    "status": {
+      "requested": "Prośba wysłana, czeka na decyzję placówki.",
+      "declined": "Placówka nie przyjęła tej prośby."
+    },
+    "form": {
+      "nameLabel": "Twoje imię i nazwisko, pod którym zna cię placówka",
+      "nameHint": "Placówka widzi tylko to imię i twoją wiadomość, nie twój profil ani dziennik.",
+      "noteLabel": "Wiadomość do placówki (opcjonalnie)",
+      "send": "Poproś o dołączenie",
+      "withdraw": "wycofaj prośbę",
+      "saving": "Wysyłanie…",
+      "requested": "Prośba wysłana.",
+      "alreadyMember": "Jesteś już członkiem tej grupy.",
+      "withdrawn": "Prośba wycofana.",
+      "closed": "Ta grupa nie przyjmuje już nowych próśb.",
+      "invalid": "Sprawdź imię i wiadomość.",
+      "error": "Coś poszło nie tak. Spróbuj ponownie.",
+      "cooldown": "Twoja prośba została niedawno odrzucona. Możesz poprosić tę grupę ponownie 30 dni po decyzji."
     }
   }
 }

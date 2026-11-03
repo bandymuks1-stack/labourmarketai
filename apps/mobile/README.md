@@ -39,8 +39,39 @@ cannot list contexts yet — never an invented single context).~~
 arrive on `profile.get` and `holdingsFromHeldRoles` (client-core) maps them;
 `unknown` only while the profile loads, `unavailable` on a failed read.
 
+**Correcting an entry is wired** (2026-11-01): each entry in the Work journal
+offers "Correct", which opens `/(shell)/correct-entry` — `journal.correct_draft`
+(before/after preview, hours by the server's rule) → `journal.correct_confirm`,
+the web journal's own supersede. The earlier version stays in the history.
+
+**Messages are wired** (2026-11-01): Today → Messages (`conversation.list`) →
+one conversation (`conversation.get`) with a reply box —
+`message.send_draft` (nothing sent; permission check, exact text, a token
+bound to the thread's last message) → `message.send_confirm`. In-app only.
+Starting a NEW conversation with a person is not on the phone yet (the web
+starts it from a project or a profile).
+
+**Notifications are wired** (2026-11-01): Today → Notifications
+(`notification.list`, the web bell's durable rows) — opening one marks it read
+(`notification.mark_read`) and goes to the screen it is about (in the app when
+the app has it, else the website); "Mark all as read" is the bell's
+`notification.mark_all_read`. **Push stays OFF** (owner decision: no vendor).
+
+**My projects are wired** (2026-11-01): Today → My projects
+(`worker.projects.list`, the worker project page's own read, active first,
+capped for display — the screen says when there are more) → one project:
+place, assignment state, what it still needs from the person (checklist rows
+verbatim) and the manager's latest instruction, which opens its thread in
+Messages.
+
+Still NOT on the phone, by decision or not built: Google sign-in, onboarding,
+starting a new conversation, push, calendar, camera evidence, offline queue,
+voice. See `docs/mobile/STORE_RELEASE_READINESS_2026-09-13.md` §1a.
+
 **Deep links claim exactly the screens this app has** (`/`, `/sign-in`,
-`/register`, `/today`, `/journal`, `/log-work`, `/profile`, `/settings`) —
+`/register`, `/today`, `/journal`, `/log-work`, `/correct-entry`, `/profile`,
+`/settings`, `/opportunities`, `/availability`, `/jobs`, `/need`, `/messages`,
+`/conversation`, `/notifications`, `/projects`, `/project`) —
 `NATIVE_APP_PATHS` in `apps/web/lib/mobile/app-association.ts` drives both
 the Apple document and `app.json`'s Android intent filter, pinned to the route
 files by `apps/web/lib/guards/app-association.test.ts`. A web link such as
@@ -52,9 +83,10 @@ requests (`/<locale>/dashboard/privacy`, including account deletion; App Store
 origin the build talks to. Not re-implemented on the phone
 (`mobile-account-controls.test.ts`).
 
-What the app does NOT have, and does not pretend to: Google sign-in,
+~~What the app does NOT have, and does not pretend to: Google sign-in,
 onboarding, jobs, interest, messaging, notifications, calendar, camera
-evidence. See `docs/mobile/STORE_RELEASE_READINESS_2026-09-13.md` §1a.
+evidence.~~ **Superseded 2026-11-01**: jobs, interest, messaging,
+notifications and projects are wired (above).
 
 What is NOT PROVEN, which is a different thing from not built: **on-device
 runtime** of any of it against production. `ios.yml` proves the auth-failure

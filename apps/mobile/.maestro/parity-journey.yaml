@@ -1,0 +1,323 @@
+# PARITY JOURNEY — the web-parity screens (owner directive 2026-11-01), on a
+# device, signed in.
+#
+# Runs ONLY from the dispatch jobs that run signed-in-journey.yaml and
+# jobs-need-journey.yaml (production-qa environment, the owner's ONE synthetic
+# review identity), AFTER them: the session they left in the keychain is
+# reused, so this flow relaunches WITHOUT clearing state and lands on Today.
+# No screenshot and no debug output (the repository is public).
+#
+# What a green run proves:
+#   1. Work Journal correction: the newest entry of the synthetic identity
+#      (the one signed-in-journey.yaml just wrote) is opened from the journal,
+#      its site is changed, the correction is DRAFTED (journal.correct_draft,
+#      before/after preview) and CONFIRMED (journal.correct_confirm, the web's
+#      own supersede); the saved state renders.
+#   2. Messages: Today opens Messages; conversation.list renders a LOADED
+#      read (messages-loaded; a failed read renders capability-retry and the
+#      step fails). When the identity has a conversation, it is opened
+#      (conversation.get) and a reply is DRAFTED (message.send_draft) and
+#      previewed; it is SENT (message.send_confirm) only with MESSAGE_SEND=1.
+#   3. Notifications: Today opens Notifications; notification.list renders a
+#      LOADED read; when any is unread, notification.mark_all_read runs and the
+#      re-read shows the newest one read.
+#   4. Projects: Today opens My projects; worker.projects.list renders a
+#      LOADED read; when the identity is assigned to a project, its detail
+#      (what it still needs from the person, the latest instruction) renders.
+#   last. sign-out returns to the sign-in form.
+# Every step navigates by testID, never by a label that changes with the
+# device language. Every scroll CENTRES its target: one that stops at the
+# bottom edge sits under the iOS tab bar, which takes the tap. Keyboards are
+# put away as in signed-in-journey.yaml: Android by hideKeyboard; iOS by
+# Return on a one-line box or a tap on the screen title — never a drag.
+appId: ai.labourmarket.app
+name: parity-journey
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "tab-today"
+    timeout: 60000
+
+# --- 1. Correct the newest journal entry ---
+- tapOn:
+    id: "tab-journal"
+- extendedWaitUntil:
+    visible:
+      id: "journal-entry-correct-0"
+    timeout: 60000
+- waitForAnimationToEnd
+- tapOn:
+    id: "journal-entry-correct-0"
+- extendedWaitUntil:
+    visible:
+      id: "journal-correct-site"
+    timeout: 60000
+- tapOn:
+    id: "journal-correct-site"
+# Whatever the cursor position, anything left of it goes and a new site is
+# typed: the site then differs from the stored one, which is all a
+# correction needs.
+- eraseText: 60
+- inputText: "CI site corrected"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - pressKey: Enter
+- scrollUntilVisible:
+    element:
+      id: "journal-correct-back"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "journal-correct-review"
+# A tap that landed while the layout moved under a closing keyboard is
+# retried once, as the compose flow does.
+- runFlow:
+    when:
+      notVisible:
+        id: "journal-correct-save"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "journal-correct-save"
+          timeout: 20000
+          optional: true
+      - runFlow:
+          when:
+            visible:
+              id: "journal-correct-review"
+          commands:
+            - waitForAnimationToEnd
+            - tapOn:
+                id: "journal-correct-review"
+- extendedWaitUntil:
+    visible:
+      id: "journal-correct-preview"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "journal-correct-save"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "journal-correct-save"
+- extendedWaitUntil:
+    visible:
+      id: "journal-correct-saved"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "journal-correct-back"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "journal-correct-back"
+- extendedWaitUntil:
+    visible:
+      id: "journal-log-work"
+    timeout: 30000
+
+# --- 2. Messages: the conversation list is read; a reply is drafted ---
+# The reply is SENT only with MESSAGE_SEND=1: a sent message reaches whoever
+# is on the other side, and the review identity's conversations are not
+# proven to be with synthetic people only. By default the draft round trip
+# (message.send_draft: permission check + preview + token, nothing sent)
+# runs and the draft is dropped.
+- tapOn:
+    id: "tab-today"
+- scrollUntilVisible:
+    element:
+      id: "today-open-messages"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-messages"
+- extendedWaitUntil:
+    visible:
+      id: "messages-loaded"
+    timeout: 60000
+- runFlow:
+    when:
+      visible:
+        id: "messages-open-0"
+    commands:
+      - tapOn:
+          id: "messages-open-0"
+      - extendedWaitUntil:
+          visible:
+            id: "conversation-loaded"
+          timeout: 60000
+      # The thread opens at its newest message, the reply box below it.
+      - scrollUntilVisible:
+          element:
+            id: "message-review"
+          direction: DOWN
+          timeout: 60000
+          centerElement: true
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "message-body"
+      - inputText: "QA-SYNTHETIC parity journey reply"
+      - runFlow:
+          when:
+            platform: Android
+          commands:
+            - hideKeyboard
+      - runFlow:
+          when:
+            platform: iOS
+          commands:
+            - tapOn:
+                id: "message-body-label"
+            - waitForAnimationToEnd
+      - scrollUntilVisible:
+          element:
+            id: "message-review"
+          direction: DOWN
+          timeout: 20000
+          centerElement: true
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "message-review"
+      # A tap that landed while the layout moved under a closing keyboard is
+      # retried once, as the correction above does.
+      - runFlow:
+          when:
+            notVisible:
+              id: "message-preview"
+          commands:
+            - extendedWaitUntil:
+                visible:
+                  id: "message-preview"
+                timeout: 20000
+                optional: true
+            - runFlow:
+                when:
+                  visible:
+                    id: "message-review"
+                commands:
+                  - waitForAnimationToEnd
+                  - tapOn:
+                      id: "message-review"
+      - extendedWaitUntil:
+          visible:
+            id: "message-preview"
+          timeout: 60000
+      - runFlow:
+          when:
+            true: ${MESSAGE_SEND == '1'}
+          commands:
+            - scrollUntilVisible:
+                element:
+                  id: "message-send"
+                direction: DOWN
+                timeout: 20000
+                centerElement: true
+            - waitForAnimationToEnd
+            - tapOn:
+                id: "message-send"
+            - extendedWaitUntil:
+                visible:
+                  id: "message-sent"
+                timeout: 60000
+
+# --- 3. Notifications: the list is read; unread ones are marked read ---
+# Opening a row would hand some of them to the browser, so the journey uses
+# the bell's "mark all as read" (the synthetic identity's own read state).
+- tapOn:
+    id: "tab-today"
+- scrollUntilVisible:
+    element:
+      id: "today-open-notifications"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-notifications"
+- extendedWaitUntil:
+    visible:
+      id: "notifications-loaded"
+    timeout: 60000
+- runFlow:
+    when:
+      visible:
+        id: "notifications-mark-all"
+    commands:
+      - tapOn:
+          id: "notifications-mark-all"
+      - extendedWaitUntil:
+          visible:
+            id: "notification-0-read"
+          timeout: 60000
+
+# --- 4. Projects: the worker's projects are read; the first one opens ---
+- tapOn:
+    id: "tab-today"
+- scrollUntilVisible:
+    element:
+      id: "today-open-projects"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-projects"
+- extendedWaitUntil:
+    visible:
+      id: "projects-loaded"
+    timeout: 60000
+# With PROJECT_EXPECTED=1 the run prepared a synthetic project the identity
+# is assigned to (mobile-qa-project.mjs): its row MUST be there, so a lost
+# assignment fails the step instead of skipping the detail below.
+- runFlow:
+    when:
+      true: ${PROJECT_EXPECTED == '1'}
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "projects-open-0"
+          timeout: 30000
+- runFlow:
+    when:
+      visible:
+        id: "projects-open-0"
+    commands:
+      - tapOn:
+          id: "projects-open-0"
+      - extendedWaitUntil:
+          visible:
+            id: "project-loaded"
+          timeout: 60000
+
+# --- last. Sign out, back to the form ---
+- tapOn:
+    id: "tab-settings"
+- scrollUntilVisible:
+    element:
+      id: "sign-out"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sign-out"
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000

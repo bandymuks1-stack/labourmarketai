@@ -536,6 +536,15 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/communication/communication-core.ts",
       "lib/company/claim-public-intake.ts",
       "lib/email/send-ledger-store.ts",
+      // 2026-11-01: the project forecast on read. Calls ONLY the service-role-
+      // granted forecast_project_facts_v1 (opaque keys, statuses, dates, numbers;
+      // no text, no names), and only AFTER the viewer's own session passed the
+      // database's can_manage_project for that project. Reads no chat table,
+      // writes nothing.
+      "lib/forecast/forecast-read.ts",
+      // 2026-10-24: the forecast scheduler (cron forecast-recompute). ONLY the
+      // three service-role forecast doors; no chat table; nothing outbound.
+      "lib/forecast/forecast-store.ts",
       "lib/invitations/external-referral-receive.ts",
       "lib/invitations/external-referral-reprocess-run.ts",
       "lib/invitations/public-preview.ts",

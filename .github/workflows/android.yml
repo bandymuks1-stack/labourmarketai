@@ -405,6 +405,19 @@ jobs:
           SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node .github/scripts/mobile-qa-credential.mjs issue
 
+      # A project the review identity is legitimately assigned to, so the
+      # journey can open a project's detail (mobile-qa-project.mjs: the
+      # product's own invite → accept → create → assign chain, in the
+      # identity's own synthetic company). A failure does not stop the other
+      # proofs; the journey then says the detail was NOT exercised.
+      - name: Prepare the synthetic project for the review identity
+        id: qa_project
+        continue-on-error: true
+        env:
+          ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
+          ORIGIN: ${{ inputs.origin || 'https://labourmarket.ai' }}
+        run: node .github/scripts/mobile-qa-project.mjs
+
       - name: Install Maestro CLI
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
@@ -423,6 +436,7 @@ jobs:
         env:
           MAESTRO_CLI_NO_ANALYTICS: "1"
           MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
+          PROJECT_EXPECTED: ${{ steps.qa_project.outcome == 'success' && '1' || '0' }}
         with:
           api-level: 34
           arch: x86_64

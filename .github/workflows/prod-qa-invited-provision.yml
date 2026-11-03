@@ -2,11 +2,11 @@ name: prod-qa-invited-provision
 run-name: prod-qa-invited-provision ${{ inputs.action }}
 
 # OWNER-DISPATCH ONLY (owner decision 2026-10-28). The synthetic INVITED worker
-# `qa.invited+act1@labourmarket.ai` for the "registers without the link" walk
+# `qa.invited@labourmarket.ai` for the "registers without the link" walk
 # (prod-qa-walk.yml spec=invited-worker):
 #
 #   provision-invited  one synthetic partner referral addressed to that address
-#                      (reference QA-SYNTHETIC-invited-act1, through the partner
+#                      (reference QA-SYNTHETIC-invited-mbx1, through the partner
 #                      door's own database function — nobody is contacted), then
 #                      the account: confirmed, passwordless, qa_synthetic, NO role.
 #   revoke-invited     bans the account (sessions die). The account and its rows

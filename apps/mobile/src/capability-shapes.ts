@@ -352,3 +352,191 @@ export type DemandCreateConfirmData = {
   readonly actingFor: string;
   readonly structuredDestination: string;
 };
+
+/**
+ * `journal.correct_draft` / `journal.correct_confirm` — correcting one of the
+ * caller's OWN live entries (the web journal's edit, the same atomic
+ * supersede). The draft writes nothing and returns the entry BEFORE and
+ * AFTER — hours by the canonical work-time rule on both sides, so a person
+ * sees what their total will do before saving — and a one-time token bound
+ * to the exact change and the journal's head.
+ */
+export type JournalCorrectionChange = {
+  readonly entryId: string;
+  readonly notes?: string;
+  readonly workDate?: string;
+  /** A new site; `null` removes it; absent keeps the stored one. */
+  readonly siteName?: string | null;
+};
+
+export type JournalCorrectionSide = {
+  readonly notes: string;
+  readonly workDate: string | null;
+  readonly siteName: string | null;
+  readonly hours: number;
+  readonly output: { readonly value: number; readonly unitSlug: string } | null;
+};
+
+export type JournalCorrectDraftData = {
+  readonly preview: {
+    readonly entryId: string;
+    readonly before: JournalCorrectionSide;
+    readonly after: JournalCorrectionSide;
+    /** A confirmed entry keeps its confirmation; the correction becomes a
+     *  new, unconfirmed version that replaces it in every total. */
+    readonly wasConfirmed: boolean;
+  };
+  readonly confirmationToken: string;
+  readonly note: string;
+};
+
+export type JournalCorrectConfirmData = {
+  readonly entryId: string;
+  readonly correctedEntryId: string;
+  readonly wasConfirmed: boolean;
+  readonly skills: JournalConfirmData["skills"];
+};
+
+/**
+ * `conversation.list` / `conversation.get` — the caller's own in-app
+ * conversations (those they participate in, under their RLS), and the latest
+ * messages of one, oldest first. `withName` is the other party's name only
+ * when the product may show it.
+ */
+export type ConversationListData = {
+  readonly conversations: readonly {
+    readonly conversationId: string;
+    readonly subject: string | null;
+    readonly kind: string;
+    readonly withName: string | null;
+    readonly lastActivityAt: string;
+  }[];
+};
+
+export type ConversationMessage = {
+  readonly id: string;
+  readonly fromMe: boolean;
+  readonly body: string;
+  readonly language: string | null;
+  readonly at: string;
+};
+
+export type ConversationGetData = {
+  readonly conversation: {
+    readonly id: string;
+    readonly subject: string | null;
+    readonly kind: string;
+  };
+  readonly messages: readonly ConversationMessage[];
+};
+
+/**
+ * `message.send_draft` / `message.send_confirm` — one in-app message, never
+ * email or SMS. The draft sends NOTHING: it checks the contact permission and
+ * mints a token bound to the exact text and the conversation's current last
+ * message (a message arriving in between voids it).
+ */
+export type MessageSendDraftData = {
+  readonly preview: {
+    readonly conversation: "existing" | "new";
+    readonly permission: string;
+    readonly subject: string | null;
+    readonly body: string;
+  };
+  readonly confirmationToken: string;
+  readonly note: string;
+};
+
+export type MessageSendConfirmData = {
+  readonly status: "sent";
+  readonly conversationId: string;
+  readonly readBack: {
+    readonly id: string;
+    readonly sentAt: string;
+    readonly bodyMatches: boolean;
+  } | null;
+};
+
+/**
+ * `notification.list` — the caller's in-app notifications, newest first,
+ * with read state. `type` is the server's RENDERED type key (`event_<type>`,
+ * or a focused variant such as `event_weekly_digest_journal`), so the label
+ * says what the row truthfully is; `href` is the web surface the event is
+ * about. Push is OFF (owner decision, no vendor): this list is read, never
+ * delivered.
+ */
+export type NotificationItem = {
+  readonly id: string;
+  readonly type: string;
+  readonly created_at: string;
+  readonly read_at: string | null;
+  readonly href?: string;
+};
+
+export type NotificationListData = { readonly items: readonly NotificationItem[] };
+
+/**
+ * `worker.projects.list` — the projects the caller is assigned to, the same
+ * read the worker's project page uses (RLS-scoped to their own assignments):
+ * active first, at most a handful, each with what the project still needs
+ * from THIS person (the manager's open checklist rows, labels verbatim) and
+ * the manager's latest instruction. `kind: "empty"` is a LOADED answer of
+ * no assignments; a failed read arrives as a failure, never as empty.
+ */
+export type WorkerProjectAsk = {
+  readonly itemKey: string;
+  readonly label: string;
+  readonly status: "needed" | "missing" | "rejected" | "expired";
+};
+
+export type WorkerProject = {
+  readonly projectId: string;
+  readonly title: string;
+  readonly place: string | null;
+  readonly assignmentStatus: "active" | "ended";
+  readonly asks: readonly WorkerProjectAsk[];
+  /** Every open ask; `asks` names only the first few. Absent from a server
+   *  older than the field: then only `asks.length` is known. */
+  readonly asksTotal?: number;
+  /** Whether the asks are a real answer: "ok" = read (empty = nothing
+   *  open); "unavailable" = the read failed; "not_read" = not asked (an
+   *  ended assignment). Absent from an older server: then an empty list is
+   *  NOT known to be empty. */
+  readonly asksRead?: "ok" | "unavailable" | "not_read";
+  /** `asksTotal` is a lower bound. */
+  readonly asksTotalAtLeast?: boolean;
+  readonly instruction: {
+    readonly conversationId: string;
+    readonly authorName: string | null;
+    readonly text: string;
+  } | null;
+};
+
+/** All asks still open on a project: the server's total, never fewer than
+ *  the asks it named. */
+export function asksTotal(p: WorkerProject): number {
+  return Math.max(p.asksTotal ?? 0, p.asks.length);
+}
+
+/** The total as shown: "N+" when the server could only count a lower bound. */
+export function asksTotalLabel(p: WorkerProject): string {
+  return `${asksTotal(p)}${p.asksTotalAtLeast === true ? "+" : ""}`;
+}
+
+/** What may be said about the asks: only a COMPLETE read checklist may say
+ *  "none". "incomplete" = the read answered but hit its row cap
+ *  (`asksTotalAtLeast`), so a project with no row in it may still have some. */
+export function asksState(p: WorkerProject): "ok" | "unavailable" | "not_read" | "incomplete" {
+  if (p.asks.length > 0) return "ok";
+  const read = p.asksRead ?? "unavailable";
+  if (read === "ok" && p.asksTotalAtLeast === true) return "incomplete";
+  return read;
+}
+
+export type WorkerProjectsData =
+  | {
+      readonly kind: "ok";
+      readonly projects: readonly WorkerProject[];
+      readonly activeCount: number;
+    }
+  | { readonly kind: "empty" };

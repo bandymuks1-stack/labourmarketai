@@ -2049,7 +2049,14 @@
           "saved": "Išsaugota.",
           "forbidden": "Tai gali daryti tik šios įstaigos vadovas.",
           "invalid": "Patikrink reikšmes.",
-          "error": "Kažkas nepavyko. Bandyk dar kartą."
+          "error": "Kažkas nepavyko. Bandyk dar kartą.",
+          "openRequests": "Leisti besimokantiesiems prašyti prisijungti",
+          "closeRequests": "Nebepriimti naujų prašymų",
+          "requestsOpenHint": "Besimokantieji gali rasti šią grupę ir paprašyti prisijungti.",
+          "accept": "Priimti",
+          "decline": "atmesti",
+          "acceptConfirm": "Taip, priimti ir įtraukti į grupę",
+          "cancelDecision": "Atšaukti"
         },
         "unavailable": "Šiuo metu programų įkelti nepavyko. Perkrauk puslapį; tai, ką sukūrei, neprarasta.",
         "inviteLearners": "Pakviesti besimokančiuosius",
@@ -2087,7 +2094,9 @@
           "evidenceUnavailable": "Besimokančiojo praktikos įrašų šiuo metu nepavyko nuskaityti. Nieko neįrašyta.",
           "evidenceRecorded": "Įrašyta",
           "evidenceConfirmed": "pažymėta"
-        }
+        },
+        "requestFrom": "Prašo prisijungti: {name}",
+        "requestUnverified": "Vardą įvedė pats besimokantysis — nepatikrinta."
       },
       "learners": {
         "title": "Besimokantieji",
@@ -2858,7 +2867,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Rask paslaugos teikėją"
     }
   },
   "jobPostings": {
@@ -6842,7 +6852,9 @@
       "listings": "Skelbimai",
       "listingsNote": "Patalpos, įranga, transportas — siūlyk ar ieškok",
       "needs": "Poreikiai ir pasiūla",
-      "needsNote": "Paskelbk, ko reikia ar ką gali pasiūlyti"
+      "needsNote": "Paskelbk, ko reikia ar ką gali pasiūlyti",
+      "buyer": "Mano užklausos",
+      "buyerNote": "Išsaugok užsakovo duomenis ir laikyk užklausas vienoje vietoje"
     },
     "loopReadFailed": "Nepavyko įkelti tavo užklausų — sąrašas gali būti nepilnas. Atnaujink puslapį."
   },
@@ -19810,6 +19822,73 @@
     },
     "helpNeeded": "Reikia pagalbos — {stage}:"
   },
+  "projectForecast": {
+    "title": "Prognozė",
+    "notFact": "Prognozė iš šio projekto užfiksuoto darbo {date} dienai — ne faktas ir ne pažadas. Ji perskaičiuojama kaskart atidarius šį puslapį.",
+    "unavailable": "Prognozės šiuo metu nepavyko perskaityti.",
+    "insufficient": "Užfiksuoto darbo kol kas per mažai, kad būtų galima prognozuoti šį projektą.",
+    "notApplicable": "Nėra ką prognozuoti: projekte neliko atviro darbo.",
+    "unknown": "Nežinoma",
+    "beyondHorizon": "Dabartiniu tempu — daugiau nei po trejų metų",
+    "completionLabel": "Numatoma pabaiga",
+    "deadlineLabel": "Terminas",
+    "leftLabel": "Liko darbo",
+    "leftTasks": "{left} iš {total} užduočių",
+    "leftStages": "{left} iš {total} etapų",
+    "peopleLabel": "Reikia žmonių",
+    "peopleValue": "{needed} (dabar {active})",
+    "qualityLabel": "Kokybės rizika",
+    "confidenceLabel": "Patikimumas",
+    "actionsTitle": "Kas tai pakeistų",
+    "assumptionsTitle": "Prielaidos",
+    "risk": {
+      "on_track": "Spėjama laiku",
+      "tight": "Įtemptai",
+      "likely_miss": "Greičiausiai nebus spėta",
+      "overdue": "Vėluoja",
+      "unknown": "Nežinoma"
+    },
+    "quality": {
+      "none": "Atvirų nėra",
+      "low": "Maža",
+      "elevated": "Padidėjusi",
+      "high": "Didelė",
+      "unknown": "Nežinoma"
+    },
+    "confidence": {
+      "insufficient": "per mažai duomenų",
+      "low": "mažas",
+      "medium": "vidutinis",
+      "high": "didelis"
+    },
+    "action": {
+      "add_workers": "Papildyk komandą žmonėmis",
+      "find_partner_capacity": "Rask partnerio pajėgumų",
+      "unblock_stages": "Atblokuok sustojusius etapus",
+      "unblock_tasks": "Atblokuok sustojusias užduotis",
+      "close_serious_defects": "Uždaryk rimtus defektus",
+      "complete_readiness": "Užbaik trūkstamus komandos pasirengimo punktus",
+      "record_hours": "Fiksuok šiame projekte dirbtas valandas",
+      "set_planned_end": "Nustatyk planuojamą pabaigos datą",
+      "break_down_scope": "Išskaidyk darbą į užduotis",
+      "review_budget": "Peržiūrėk biudžetą",
+      "replan_deadline": "Perplanuok terminą"
+    },
+    "assumption": {
+      "trailing_window_days": "Tempas skaičiuojamas iš paskutinių 28 dienų.",
+      "calendar_day_rate": "Valandos paskirstomos kalendorinėmis dienomis; darbo kalendorius nenumatomas.",
+      "equal_unit_weight": "Kiekviena užduotis skaičiuojama vienodai.",
+      "unit_is_stage": "Projekte nėra užduočių, todėl skaičiuojami etapai.",
+      "team_stays_as_is": "Komanda lieka tokia, kokia yra dabar.",
+      "absences_as_approved": "Įskaitomi tik patvirtinti nebuvimai.",
+      "throughput_without_hours": "Valandų neužfiksuota, todėl pabaiga skaičiuojama tik iš atlikto darbo.",
+      "cost_continues_at_observed_rate": "Kaina toliau auga iki šiol matytu tempu.",
+      "single_hours_ledger": "Naudojama viena valandų apskaita; kita rodoma šalia ir niekada nepridedama.",
+      "hours_partly_unconfirmed": "Dalis valandų dar nepatvirtinta.",
+      "hours_read_truncated": "Ne visas valandas pavyko perskaityti; skaičiai gali būti per maži.",
+      "free_internal_people_unknown": "Nežinoma, kas dar organizacijoje laisvas."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "Šios savaitės tikslas",
     "titleMine": "Tavo šios savaitės užduotys",
@@ -19984,6 +20063,33 @@
       "business_details": "Įmonės ar veiklos registracijos ir sąskaitų išrašymo duomenys.",
       "insurance": "Civilinės atsakomybės ar kitas draudimas, jei jo reikia šiam darbui.",
       "client_requirements": "Konkretūs užsakovo ar objekto reikalavimai, jei tokių yra."
+    }
+  },
+  "learnerCohortJoin": {
+    "title": "Mokymo grupė",
+    "declaredNote": "Savo praktiką ir atliktus darbus gali pildyti visada, net jei įstaiga tavęs dar nepriėmė. Kol įstaigos įgaliotas asmuo jų nepatvirtino, jie rodomi kaip tavo paties deklaruoti, ne kaip patvirtinti.",
+    "journalLink": "Pildyti žurnalą",
+    "find": "{count, plural, one {Atvira # grupė} few {Atviros # grupės} other {Atvirų grupių: #}}",
+    "empty": "Šiuo metu nė viena mokymo įstaiga nepriima prašymų prisijungti.",
+    "unavailable": "Mokymo grupių dabar nepavyko įkelti. Pabandyk vėliau.",
+    "status": {
+      "requested": "Prašymas išsiųstas, laukia įstaigos sprendimo.",
+      "declined": "Įstaiga šio prašymo nepriėmė."
+    },
+    "form": {
+      "nameLabel": "Tavo vardas, kaip tave pažįsta įstaiga",
+      "nameHint": "Įstaiga matys tik šį vardą ir žinutę, ne tavo profilį ar žurnalą.",
+      "noteLabel": "Žinutė įstaigai (neprivaloma)",
+      "send": "Prašyti prisijungti",
+      "withdraw": "atšaukti prašymą",
+      "saving": "Siunčiama…",
+      "requested": "Prašymas išsiųstas.",
+      "alreadyMember": "Tu jau esi šios grupės narys.",
+      "withdrawn": "Prašymas atšauktas.",
+      "closed": "Ši grupė nebepriima naujų prašymų.",
+      "invalid": "Patikrink vardą ir žinutę.",
+      "error": "Kažkas nepavyko. Bandyk dar kartą.",
+      "cooldown": "Neseniai gavai atsisakymą. Šios grupės vėl paprašyti galėsi praėjus 30 dienų nuo sprendimo."
     }
   }
 }

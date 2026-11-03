@@ -28,7 +28,7 @@ history is what the migration runner acts on.
 
 ## 1. The four production ledger rows
 
-All four were applied by `bandymuks1@gmail.com` via Supabase MCP
+All four were applied by `[owner contact, kept outside the repository]` via Supabase MCP
 `apply_migration` (which mints its own `version` from the wall clock), not via
 `supabase db push`. That is why no version corresponds to a repo filename.
 
