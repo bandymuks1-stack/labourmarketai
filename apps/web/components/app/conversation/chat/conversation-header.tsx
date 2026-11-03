@@ -9,6 +9,8 @@ import {
   getHeaderOverflowNavItems,
   type NavItem,
 } from "@/lib/config/navigation";
+import { organizationHeaderAreas } from "@/lib/navigation/work-areas";
+import { actingRoleForWorkspace } from "@/lib/company/organization-switch";
 import { activeNavItem, headerPlaceLabelKey } from "@/lib/navigation/header-place";
 import { NAV_ICONS } from "@/components/app/nav-icons";
 import { NavLinkPending } from "@/components/app/nav-link-pending";
@@ -88,7 +90,16 @@ export function ConversationHeader({
   // console joins "More" only for an admin who has not hidden admin chrome.
   const isAdmin = Boolean(auth?.isAdmin && !auth?.adminUiHidden);
   const primary = getCoreNavItems();
-  const overflow = getHeaderOverflowNavItems({ isAdmin });
+  // P0-2 (2026-11-03): the ACTIVE workspace's acting role decides what "More"
+  // opens with — the organization's own doors for the person who runs it
+  // (company / agency), nothing extra otherwise. The primary row above is the
+  // A-03 core loop for everyone.
+  const activeWorkspace =
+    auth?.workspaces?.find((w) => w.id === auth.activeWorkspaceId) ?? auth?.workspaces?.[0] ?? null;
+  const actingRole = actingRoleForWorkspace(activeWorkspace, auth?.roles ?? []);
+  const organizationAreas =
+    actingRole === "company" || actingRole === "agency" ? organizationHeaderAreas(actingRole) : [];
+  const overflow = [...organizationAreas, ...getHeaderOverflowNavItems({ isAdmin })];
   const allItems = [...primary, ...overflow];
   const active = activeNavItem(pathname, allItems);
   const activeOverflow = active && overflow.some((i) => i.id === active.id) ? active : null;

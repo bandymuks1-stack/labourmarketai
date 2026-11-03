@@ -205,7 +205,8 @@ export default async function LocaleLayout({
         >
           {/* Analytics consent (owner decision 2026-11-03): until a choice
               exists on this device nothing non-essential is stored or sent.
-              Rendered BEFORE the page, in the flow, so it never covers it.
+              Rendered BEFORE the page, in the flow, so it never covers it;
+              on /auth/* the auth layout renders it below the form instead.
               Strings are passed in, so no client message root is added. */}
           <AnalyticsConsentBanner
             strings={{

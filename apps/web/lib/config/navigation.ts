@@ -19,6 +19,7 @@ import {
   type FeatureConfig,
   type FeatureKey,
 } from "./feature-availability";
+import type { WorkAreaIconKey } from "@/lib/navigation/work-areas";
 
 /** Icon ids — concrete icon imports live in `components/app/nav-icons.ts`
  *  (read by the one header), so this config stays framework-agnostic. */
@@ -32,7 +33,10 @@ export type NavIconKey =
   | "calendar"
   | "network"
   | "user"
-  | "shield";
+  | "shield"
+  // An organization work area listed under the header's "More" keeps the
+  // icon its area switcher shows (`lib/navigation/work-areas.ts`).
+  | WorkAreaIconKey;
 
 type TabMeta = {
   /** i18n key for the SHORT tab label (e.g. "Apžvalga" vs the feature's
@@ -90,7 +94,8 @@ export type NavItem = {
   /** The feature key the tab is sourced from, or "admin" for the
    *  permission-gated admin item (not a catalogue feature). Useful for
    *  tests + telemetry + React keys. */
-  id: FeatureKey | "admin";
+  /** …or `area:<id>` for an organization work area (`work-areas.ts`). */
+  id: FeatureKey | "admin" | `area:${string}`;
   /** Locale-prefixed app route. */
   href: string;
   tabLabelKey: string;

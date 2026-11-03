@@ -7928,10 +7928,10 @@
   },
   "consent": {
     "banner": {
-      "text": "Ar jūsu piekrišanu mēs jūsu pārlūkā mērām, kuras lapas un soļi palīdz cilvēkiem un kura kampaņa jūs šeit atveda; bez tās šim nolūkam jūsu ierīcē nekas netiek saglabāts. Pamata darbību uzskaite mūsu pašu serveros notiek jebkurā gadījumā (skatiet sīkdatņu politiku). Produkts darbojas vienādi neatkarīgi no jūsu izvēles.",
+      "text": "Lapu lietojumu un kampaņu, kas jūs atveda, mērām tikai ar jūsu atļauju.",
       "accept": "Atļaut mērīšanu",
       "refuse": "Atteikties",
-      "more": "Sīkdatņu politika",
+      "more": "Vairāk",
       "label": "Lietošanas mērīšanas izvēle"
     },
     "control": {

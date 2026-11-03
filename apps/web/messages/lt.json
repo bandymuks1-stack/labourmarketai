@@ -5743,7 +5743,7 @@
             "Žinutės, kurias siunčiate ir gaunate platformoje.",
             "Sutikimų įrašai: kai duodate ar atšaukiate sutikimą, išsaugomas veiksmas ir jo laikas.",
             "Techniniai duomenys, reikalingi paslaugai veikti, pavyzdžiui, prisijungimo slapukai (žr. Slapukų politiką).",
-            "Tik su jūsų sutikimu: naudojimo matavimas mūsų pačių serveriuose (pasiekti puslapiai ir žingsniai, kasdienis aktyvumas) ir jus atvedusi kampanija, saugoma kartu su jūsų paskyra. Žr. Slapukų politiką."
+            "Tik su tavo sutikimu: naudojimo matavimas mūsų pačių serveriuose (pasiekti puslapiai ir žingsniai, kasdienis aktyvumas) ir tave atvedusi kampanija, saugoma kartu su tavo paskyra. Žr. Slapukų politiką."
           ]
         },
         {
@@ -5822,15 +5822,15 @@
     },
     "cookies": {
       "title": "Slapukų politika",
-      "intro": "Šiame puslapyje išvardyta, ką platforma šiandien iš tikrųjų saugo jūsų naršyklėje. Sąmoningai — labai nedaug.",
+      "intro": "Šiame puslapyje išvardyta, ką platforma šiandien iš tikrųjų saugo tavo naršyklėje. Sąmoningai — labai nedaug.",
       "items": [
         {
           "name": "Prisijungimo slapukai",
-          "purpose": "Nustatomi prisijungus, kad liktumėte prisijungę naršydami tarp puslapių. Būtini — be jų paslauga negali išlaikyti jūsų prisijungimo."
+          "purpose": "Nustatomi prisijungus, kad naršant tarp puslapių prisijungimas išliktų. Būtini — be jų paslauga negali išlaikyti tavo prisijungimo."
         },
         {
           "name": "Kalbos slapukas (NEXT_LOCALE)",
-          "purpose": "Gali būti nustatytas, kad įsimintų jūsų kalbos pasirinkimą ir puslapiai atsidarytų jūsų kalba."
+          "purpose": "Gali būti nustatytas, kad įsimintų tavo kalbos pasirinkimą ir puslapiai atsidarytų tavo kalba."
         },
         {
           "name": "Administratoriaus rodymo nuostata (lm_hide_admin_ui)",
@@ -5838,18 +5838,18 @@
         },
         {
           "name": "Prisijungimo bandymo žymė (lm.oauth.trace)",
-          "purpose": "Kortelės saugykla, pašalinama uždarius kortelę. Atsitiktinis kodas, susiejantis vieną prisijungimo bandymą su jo rezultatu, kad būtų galima ištirti nepavykusį prisijungimą. Būtina jūsų pradėtam prisijungimui; joje nėra paskyros duomenų."
+          "purpose": "Kortelės saugykla, pašalinama uždarius kortelę. Atsitiktinis kodas, susiejantis vieną prisijungimo bandymą su jo rezultatu, kad būtų galima ištirti nepavykusį prisijungimą. Būtina tavo pradėtam prisijungimui; joje nėra paskyros duomenų."
         }
       ],
-      "localStorageNote": "Naršyklės saugykloje (ne slapukuose) taip pat laikomi keli jūsų prašyti dalykai: šviesios ar tamsios temos pasirinkimas, jūsų sprendimas dėl naudojimo matavimo ir smulkūs patogumai, pvz., paslėpti pranešimai, neseniai peržiūrėti įrašai ir kalbos įvesties kalba. Jie lieka jūsų įrenginyje, ir juos bet kada galite išvalyti savo naršyklėje.",
+      "localStorageNote": "Naršyklės saugykloje (ne slapukuose) taip pat laikomi keli tavo prašyti dalykai: šviesios ar tamsios temos pasirinkimas, tavo sprendimas dėl naudojimo matavimo ir smulkūs patogumai, pvz., paslėpti pranešimai, neseniai peržiūrėti įrašai ir kalbos įvesties kalba. Jie lieka tavo įrenginyje, ir juos bet kada gali išvalyti savo naršyklėje.",
       "noTracking": "Platformoje nėra reklamos ar trečiųjų šalių sekimo slapukų, ir niekas neperduodama trečiosioms šalims reklamai.",
       "settingsLink": "Slapukų nustatymai",
-      "analyticsTitle": "Naudojimo matavimas — tik su jūsų sutikimu",
-      "analyticsIntro": "Jums sutikus, matuojame, kaip naudojamasi produktu: kuriuos puslapius ir žingsnius žmonės pasiekia, registracijos žingsnius, kasdienį aktyvumą ir kuri kampanija atvedė lankytoją. Įvykiai saugomi mūsų pačių serveriuose ir, jei esate prisijungę, susiejami su jūsų paskyra. Be jūsų sutikimo nė vienas toliau išvardytas įrašas nesukuriamas ir iš jūsų naršyklės nesiunčiamas joks matavimo įvykis.",
+      "analyticsTitle": "Naudojimo matavimas — tik su tavo sutikimu",
+      "analyticsIntro": "Tau sutikus, matuojame, kaip naudojamasi produktu: kuriuos puslapius ir žingsnius žmonės pasiekia, registracijos žingsnius, kasdienį aktyvumą ir kuri kampanija atvedė lankytoją. Įvykiai saugomi mūsų pačių serveriuose ir, jei prisijungei, susiejami su tavo paskyra. Be tavo sutikimo nė vienas toliau išvardytas įrašas nesukuriamas ir iš tavo naršyklės nesiunčiamas joks matavimo įvykis.",
       "analyticsItems": [
         {
           "name": "Pirmojo apsilankymo kampanija (lm.attr.first)",
-          "purpose": "Naršyklės saugykla. Pirmojo apsilankymo kampanijos žymos (utm_*), nukreipusi svetainė ir nusileidimo puslapis. Registruojantis jos nukopijuojamos į jūsų paskyros įrašą, kad būtų galima suskaičiuoti, kuri kampanija jus atvedė."
+          "purpose": "Naršyklės saugykla. Pirmojo apsilankymo kampanijos žymos (utm_*), nukreipusi svetainė ir nusileidimo puslapis. Registruojantis jos nukopijuojamos į tavo paskyros įrašą, kad būtų galima suskaičiuoti, kuri kampanija tave atvedė."
         },
         {
           "name": "Sesijos identifikatorius (lm.pilot.session)",
@@ -5857,14 +5857,14 @@
         },
         {
           "name": "Aktyvumo žymės (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
-          "purpose": "Naršyklės saugykla. Paskutinė diena, kai buvote aktyvūs, ir žymė, kad vyksta registracija."
+          "purpose": "Naršyklės saugykla. Paskutinė diena, kai naudojaisi platforma, ir žymė, kad vyksta registracija."
         },
         {
           "name": "Vienkartinio skaičiavimo žymės (lm.funnel.*)",
           "purpose": "Kortelės saugykla. Neleidžia to paties matavimo įvykio suskaičiuoti du kartus."
         }
       ],
-      "analyticsBasis": "Atsisakius ar atšaukus sutikimą, šie įrašai iš karto pašalinami iš šio įrenginio; jei esate prisijungę, ištrinama ir su jūsų paskyra saugoma kampanija. Pats matavimas grindžiamas mūsų teisėtu interesu tobulinti produktą (BDAR 6 str. 1 d. f p.), ir galite jam prieštarauti, kaip aprašyta Privatumo politikoje."
+      "analyticsBasis": "Atsisakius ar atšaukus sutikimą, šie įrašai iš karto pašalinami iš šio įrenginio; jei prisijungei, ištrinama ir su tavo paskyra saugoma kampanija. Pats matavimas grindžiamas mūsų teisėtu interesu tobulinti produktą (BDAR 6 str. 1 d. f p.), ir gali jam prieštarauti, kaip aprašyta Privatumo politikoje."
     },
     "requestContact": "Norėdami užduoti klausimą ar pateikti prašymą dėl savo duomenų, susisiekite su mumis — jį peržiūrės žmogus.",
     "related": "Susiję puslapiai",
@@ -20138,17 +20138,17 @@
   },
   "consent": {
     "banner": {
-      "text": "Jums sutikus, jūsų naršyklėje matuojame, kurie puslapiai ir žingsniai padeda žmonėms ir kuri kampanija jus čia atvedė; be sutikimo tam jūsų įrenginyje niekas neįrašoma. Bendri veiksmų skaičiai mūsų pačių serveriuose kaupiami bet kuriuo atveju (žr. Slapukų politiką). Produktas veikia taip pat, ką bepasirinktumėte.",
+      "text": "Puslapių naudojimą ir kampaniją, iš kurios atėjai, matuojame tik tau leidus.",
       "accept": "Leisti matavimą",
       "refuse": "Atsisakyti",
-      "more": "Slapukų politika",
+      "more": "Daugiau",
       "label": "Naudojimo matavimo pasirinkimas"
     },
     "control": {
       "title": "Naudojimo matavimas ir kampanijos priskyrimas",
-      "granted": "Jūs leidote. Galite bet kada atšaukti — tada įrašai pašalinami iš šio įrenginio.",
-      "refused": "Jūs atsisakėte. Šiame įrenginyje matavimui niekas nesaugoma.",
-      "undecided": "Dar nepasirinkote, todėl matavimui niekas nesaugoma.",
+      "granted": "Leidai. Gali bet kada atšaukti — tada įrašai pašalinami iš šio įrenginio.",
+      "refused": "Atsisakei. Šiame įrenginyje matavimui niekas nesaugoma.",
+      "undecided": "Dar nepasirinkai, todėl matavimui niekas nesaugoma.",
       "allow": "Leisti",
       "refuse": "Atsisakyti"
     }
