@@ -241,6 +241,26 @@ carries a closing comment). Unique, not-yet-built requirements are carried here 
 | #740 voice_journal_jobs migration | voice is deferred (no transcription host; COM-6, V-2) | when voice reopens: one owner-scoped job table, disclosure acknowledged before recording, transcript ≤ 60k, audio retention ≤ 30 days, one job → at most one journal entry, worker/admin read only, RPC-only writes, right-to-erase RPC — design on branch `feat/voice-journal-jobs-migration-v1` (origin #740) |
 | #2915 completion map 2026-11-01 | the 288 statuses live only in FUNCTION_REGISTER (one register) | planning columns not in the register: effort per function, critical path, about 185–295 agent days, conditional targets (core mid-December 2026, full scope February 2027, preliminary) — on branch `docs/cc/completion-map-288` (origin #2915) |
 
+**Owner decisions 2026-11-03 (later the same day)**
+
+| Area | Decision | Conditions | Executor | Next |
+|---|---|---|---|---|
+| Design | Direction **A "Ramus darbo stalas"** is the platform direction; B = optional dark theme; from C only subtle mobile elements | keep the logo and brand identity; P0 mobile sign-up, role-based primary navigation, job cards with place / employer / pay when known; P1 unify cards, typography, forms, journal, Living CV, HR, projects; P2 dark theme and effects; current-vs-proposed comparison before any system change; small PRs, each checked in Chrome and on mobile; no second UI system; Radix only per component; evaluate axe-core | `local_f7fa8877` (UX/UI, proposal #2982) | P0 PRs |
+| Campaign analytics | Consent management approved IF non-essential cookies are used | first check whether attribution can be kept lawfully without non-essential storage; if consent is needed: a clear accept / refuse choice, no non-essential storage before consent; fix UTM through Google sign-in and conversion measurement; #2886 stays blocked | `local_13cb59b3` | legal/technical check → PR(s) |
+| SEO | #2981 sitemap fix | after deploy: sitemap coverage, which URLs should be indexable (53,095 is not a target), Search Console submission (owner's account) | `local_1a4a2a4f` | post-deploy check |
+| Paid plans | Continue pricing and legal-terms preparation | no real price change without a separate approval | `local_50daa866` (terms draft from #2842), `local_1a4a2a4f` (plans proposal, private) | drafts |
+| J-12 | Applied: #2959 (2026-11-02 23:52:56Z) and the security fix #2977 (2026-11-03 07:59:24Z); #2979 (members not available, never 0) and #2983 (accept is really two-step) | LIVE_VERIFIED only after the full production PASS | coordinator | walk after #2983 deploy |
+
+**Owner decisions 2026-11-03** (recorded verbatim in the PRs; executors in §3.1):
+
+| PR | Decision | Conditions | Executor | Next |
+|---|---|---|---|---|
+| #2937 | APPROVED | keep worker / organization / assistant rights separate; the assistant never gets more than the user; after deploy verify real chat and mobile project scenarios in production | coordinator (merge), mobile `local_00be3967` (project detail re-run) | merge after CI on current main → deploy → prod walks |
+| #2959 | APPROVED WITH CONDITIONS | learners may request; an external manager / agency may decide ONLY with an explicit, limited, revocable per-group delegation from the institution — not in this PR, so external roles get no access by default (separate verified PR); administering a group never confirms practice, hours, competences or a qualification; actor, origin and authority basis traceable; one journal, one hours ledger; self-declared history stays possible and separate; before the production migration: backup state, rollback and RLS/grants checked; Chrome J-12 walk after deploy | `local_b55e3e39` (narrow deciders), coordinator (pre-apply checks, apply, walk) | narrowed PR → checks → apply → walk |
+| #896, #897 | CARRY OVER AND CLOSE | all unique financial, accounting, payment, audit and security requirements into ONE canonical financial-architecture decision file with links to the historical PRs; close only after the carry-over is checked complete; no payment activation, no pricing change | `local_13cb59b3` | decision-file PR → completeness check → close both |
+| #2419 | REPLACE WITH A SMALL NEW PR | compare with Agentai OS; keep unique requirements; close the old PR with a link; minimal, non-duplicating; no automatic deploy, no new external access, no cost | `local_1a4a2a4f` | new PR (no auto-merge) → close #2419 |
+| J-15 digest | unchanged | the scheduled setup (11-03) and check (11-09) stay as planned | `local_816618a9` | — |
+
 **Kept open for the owner** — independent read-only reviews 2026-11-03 (not by the PRs' authors):
 
 - **#2937** (worker role from the caller's own worker profile in chat/MCP; RED, 5 files, no migration, CI green) —
