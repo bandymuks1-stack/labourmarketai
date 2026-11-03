@@ -331,10 +331,14 @@ async function readTaskCounts(): Promise<OrgReportsView["tasks"]> {
   }
 }
 
-async function readOrgDocumentCounts(): Promise<OrgReportsView["documents"]> {
+export async function readOrgDocumentCounts(): Promise<OrgReportsView["documents"]> {
   try {
     const centre = await getOrgDocumentCentre();
     if (centre.kind !== "ok") return { state: "unavailable" };
+    // Zero counted workers is not a fact we can assert: the aggregate still
+    // reads the retired agency pool, so a live roster always counts 0. Same
+    // honest note as the document centre's own zero case.
+    if (centre.summary.workers === 0) return { state: "unavailable" };
     return {
       state: "ok",
       workers: centre.summary.workers,
