@@ -7,6 +7,7 @@ import { Link, usePathname } from "@/lib/i18n/navigation";
 import {
   getCoreNavItems,
   getHeaderOverflowNavItems,
+  getOrganizationHeaderNav,
   type NavItem,
 } from "@/lib/config/navigation";
 import { activeNavItem, headerPlaceLabelKey } from "@/lib/navigation/header-place";
@@ -87,8 +88,14 @@ export function ConversationHeader({
   // Admin is a permission dimension, not a catalogue feature: the admin
   // console joins "More" only for an admin who has not hidden admin chrome.
   const isAdmin = Boolean(auth?.isAdmin && !auth?.adminUiHidden);
-  const primary = getCoreNavItems();
-  const overflow = getHeaderOverflowNavItems({ isAdmin });
+  // P0-2 (2026-11-03): the core follows the ACTIVE workspace — a person who
+  // runs a company or agency gets that organization's own core; the personal
+  // space keeps the one core loop. Same lists on every route of the workspace.
+  const activeWorkspace =
+    auth?.workspaces?.find((w) => w.id === auth.activeWorkspaceId) ?? auth?.workspaces?.[0] ?? null;
+  const organizationNav = getOrganizationHeaderNav({ isAdmin, workspace: activeWorkspace });
+  const primary = organizationNav?.primary ?? getCoreNavItems();
+  const overflow = organizationNav?.overflow ?? getHeaderOverflowNavItems({ isAdmin });
   const allItems = [...primary, ...overflow];
   const active = activeNavItem(pathname, allItems);
   const activeOverflow = active && overflow.some((i) => i.id === active.id) ? active : null;
