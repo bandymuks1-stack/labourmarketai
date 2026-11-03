@@ -5742,7 +5742,8 @@
             "Company information entered by company users: company details, needs, projects and bookings.",
             "Messages you send and receive on the platform.",
             "Consent records: when you give or revoke a consent, the action and its time are stored.",
-            "Technical data needed to run the service, such as sign-in cookies (see the Cookie Policy)."
+            "Technical data needed to run the service, such as sign-in cookies (see the Cookie Policy).",
+            "Only with your consent: usage measurement on our own servers (pages and steps reached, daily activity) and the campaign that brought you, kept with your account. See the Cookie Policy."
           ]
         },
         {
@@ -5836,8 +5837,30 @@
           "purpose": "Used only on administrator accounts. Remembers whether administrator controls are hidden and changes nothing about permissions."
         }
       ],
-      "localStorageNote": "Your browser's own storage (not cookies) holds a few items: your light or dark theme choice; which page or campaign first brought you here, stored once so a later sign-up can be attributed to it; a random per-tab session identifier that disappears when the tab closes; and small conveniences such as dismissed notices, recently viewed items and your speech-input language. None of this is shared with any third party or used for advertising, and you can clear it at any time through your browser.",
-      "noTracking": "There are no analytics, advertising or third-party tracking cookies on the platform today. If this ever changes, this page will be updated first."
+      "localStorageNote": "Your browser's own storage (not cookies) also holds a few items you asked for: your light or dark theme choice, your choice about usage measurement, and small conveniences such as dismissed notices, recently viewed items and your speech-input language. They stay on your device and you can clear them at any time through your browser.",
+      "noTracking": "There are no advertising or third-party tracking cookies on the platform, and nothing is shared with a third party for advertising.",
+      "settingsLink": "Cookie settings",
+      "analyticsTitle": "Usage measurement — only with your consent",
+      "analyticsIntro": "With your consent we measure how the product is used: which pages and steps people reach, sign-up steps, daily activity and which campaign brought a visitor. Events are stored on our own servers, linked to your account if you are signed in. Without your consent none of the items below is written and no measurement event is sent from your browser.",
+      "analyticsItems": [
+        {
+          "name": "First-visit campaign (lm.attr.first)",
+          "purpose": "Browser storage. The campaign tags (utm_*), the referring site and the landing page of your first visit. At sign-up they are copied into your own account record, so the campaign that brought you can be counted."
+        },
+        {
+          "name": "Session identifier (lm.pilot.session)",
+          "purpose": "Tab storage, removed when the tab closes. A random identifier sent with each measurement event, so the steps in one tab can be counted together."
+        },
+        {
+          "name": "Activity markers (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
+          "purpose": "Browser storage. The last day you were active, and a marker that a sign-up is in progress."
+        },
+        {
+          "name": "Count-once markers (lm.funnel.*)",
+          "purpose": "Tab storage. Stops the same measurement event being counted twice."
+        }
+      ],
+      "analyticsBasis": "Refusing or withdrawing removes these items from this device at once; campaign data already copied into your account stays there until you ask us to delete it. The measurement itself is based on our legitimate interest in improving the product (GDPR Art. 6(1)(f)), and you can object to it as described in the Privacy Policy."
     },
     "requestContact": "To ask a question or make a request about your data, get in touch with us — a person will review it.",
     "related": "Related pages",
@@ -7638,7 +7661,7 @@
     "campaigns": {
       "title": "Campaign → job → account",
       "empty": "No campaign-tagged events in this window yet.",
-      "help": "First-touch utm_campaign × utm_content over the same window, same population filter. These are event occurrences, not unique visitors — a later column is not a subset of an earlier one, so no ratio between two columns is a conversion rate. Top 25 by landings; untagged (organic) traffic is not listed. The interest column is emitted server-side, where no campaign is available, so it stays 0 by construction — that is a missing measurement, not a measured zero.",
+      "help": "First-touch utm_campaign × utm_content over the same window, same population filter. These are event occurrences, not unique visitors — a later column is not a subset of an earlier one, so no ratio between two columns is a conversion rate. Top 25 by landings; untagged (organic) traffic is not listed. The interest column is emitted server-side, where no campaign is available, so it stays 0 by construction — that is a missing measurement, not a measured zero. The four columns after sign-up count occurrences, not people (journal entries are every saved entry, not a first entry), and only for accounts whose own record carries the campaign: sign-ups that allowed analytics, and Google sign-ups only from 2026-11-03. Visitors who refused analytics are not in this table at all.",
       "col": {
         "campaign": "Campaign / variant",
         "landing": "Landings",
@@ -7648,7 +7671,11 @@
         "signupCompleted": "Account created",
         "returnedToJob": "Returned to job",
         "compared": "Compared",
-        "interest": "Interest"
+        "interest": "Interest",
+        "profileSaved": "Profile saved",
+        "profileMatchable": "Profile matchable",
+        "journalEntrySaved": "Journal entries",
+        "jobSearch": "Job search"
       }
     },
     "funnel": {
@@ -20092,6 +20119,22 @@
       "invalid": "Check the name and message.",
       "error": "Something went wrong. Try again.",
       "cooldown": "You were declined recently. You can ask this group again 30 days after the decision."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "With your consent we measure, on our own servers, which pages and steps help people and which campaign brought you here. Nothing for this is stored on your device unless you agree. The product works the same either way.",
+      "accept": "Allow measurement",
+      "refuse": "Refuse",
+      "more": "Cookie Policy"
+    },
+    "control": {
+      "title": "Usage measurement and campaign attribution",
+      "granted": "You allowed it. You can withdraw at any time; the items are then removed from this device.",
+      "refused": "You refused it. Nothing for measurement is stored on this device.",
+      "undecided": "You have not chosen yet, so nothing for measurement is stored.",
+      "allow": "Allow",
+      "refuse": "Refuse"
     }
   }
 }

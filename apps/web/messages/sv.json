@@ -7914,5 +7914,21 @@
       "error": "Något gick fel. Försök igen.",
       "cooldown": "Din förfrågan avslogs nyligen. Du kan fråga den här gruppen igen 30 dagar efter beslutet."
     }
+  },
+  "consent": {
+    "banner": {
+      "text": "Med ditt samtycke mäter vi på våra egna servrar vilka sidor och steg som hjälper människor och vilken kampanj som förde dig hit. Utan ditt samtycke sparas inget för detta på din enhet. Produkten fungerar likadant oavsett.",
+      "accept": "Tillåt mätning",
+      "refuse": "Avböj",
+      "more": "Cookiepolicy"
+    },
+    "control": {
+      "title": "Användningsmätning och kampanjattribution",
+      "granted": "Du har gett tillåtelse. Du kan när som helst återkalla den; posterna tas då bort från den här enheten.",
+      "refused": "Du har avböjt. Inget för mätning sparas på den här enheten.",
+      "undecided": "Du har inte valt ännu, så inget för mätning sparas.",
+      "allow": "Tillåt",
+      "refuse": "Avböj"
+    }
   }
 }

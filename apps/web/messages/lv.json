@@ -7914,5 +7914,21 @@
       "error": "Kaut kas nogāja greizi. Mēģini vēlreiz.",
       "cooldown": "Tavs pieprasījums nesen tika noraidīts. Šai grupai vari jautāt vēlreiz 30 dienas pēc lēmuma."
     }
+  },
+  "consent": {
+    "banner": {
+      "text": "Ar jūsu piekrišanu mēs savos serveros mērām, kuras lapas un soļi palīdz cilvēkiem un kura kampaņa jūs šeit atveda. Bez jūsu piekrišanas šim nolūkam jūsu ierīcē nekas netiek saglabāts. Produkts darbojas vienādi abos gadījumos.",
+      "accept": "Atļaut mērīšanu",
+      "refuse": "Atteikties",
+      "more": "Sīkdatņu politika"
+    },
+    "control": {
+      "title": "Lietošanas mērīšana un kampaņas piesaiste",
+      "granted": "Jūs atļāvāt. Jūs varat jebkurā laikā atsaukt piekrišanu; tad ieraksti tiek noņemti no šīs ierīces.",
+      "refused": "Jūs atteicāties. Šajā ierīcē mērīšanai nekas netiek glabāts.",
+      "undecided": "Jūs vēl neesat izvēlējušies, tāpēc mērīšanai nekas netiek glabāts.",
+      "allow": "Atļaut",
+      "refuse": "Atteikties"
+    }
   }
 }

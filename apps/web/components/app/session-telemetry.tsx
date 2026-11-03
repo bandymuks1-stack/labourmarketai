@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { consumeSignupPending, trackFunnel } from "@/lib/telemetry/task";
 import { getFirstTouchAttribution } from "@/lib/telemetry/attribution";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { hasAnalyticsConsent } from "@/lib/consent/analytics-consent";
 
 /**
  * Session-level activation beacon (P0-A). Mounted once in the dashboard
@@ -39,6 +40,8 @@ export function SessionTelemetry({
     if (ran.current) return;
     ran.current = true;
     if (typeof window === "undefined") return;
+    // No analytics item (markers or events) without an explicit yes.
+    if (!hasAnalyticsConsent()) return;
 
     // login_succeeded — once per tab session.
     try {

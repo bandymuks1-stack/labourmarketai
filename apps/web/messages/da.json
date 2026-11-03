@@ -7914,5 +7914,21 @@
       "error": "Noget gik galt. Prøv igen.",
       "cooldown": "Din anmodning blev for nylig afvist. Du kan spørge denne gruppe igen 30 dage efter afgørelsen."
     }
+  },
+  "consent": {
+    "banner": {
+      "text": "Med dit samtykke måler vi på vores egne servere, hvilke sider og trin der hjælper folk, og hvilken kampagne der bragte dig hertil. Uden dit samtykke gemmes intet til dette på din enhed. Produktet virker på samme måde uanset dit valg.",
+      "accept": "Tillad måling",
+      "refuse": "Afvis",
+      "more": "Cookiepolitik"
+    },
+    "control": {
+      "title": "Brugsmåling og kampagnetilskrivning",
+      "granted": "Du har givet tilladelse. Du kan til enhver tid trække den tilbage; elementerne fjernes så fra denne enhed.",
+      "refused": "Du har afvist. Intet til måling gemmes på denne enhed.",
+      "undecided": "Du har ikke valgt endnu, så intet til måling gemmes.",
+      "allow": "Tillad",
+      "refuse": "Afvis"
+    }
   }
 }

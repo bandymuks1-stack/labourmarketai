@@ -7914,5 +7914,21 @@
       "error": "Midagi läks valesti. Proovi uuesti.",
       "cooldown": "Sinu taotlus lükati hiljuti tagasi. Seda rühma saad uuesti paluda 30 päeva pärast otsust."
     }
+  },
+  "consent": {
+    "banner": {
+      "text": "Sinu nõusolekul mõõdame oma serverites, millised lehed ja sammud inimesi aitavad ja milline kampaania sind siia tõi. Ilma sinu nõusolekuta ei salvestata selleks sinu seadmesse midagi. Toode töötab igal juhul ühtemoodi.",
+      "accept": "Luba mõõtmine",
+      "refuse": "Keeldu",
+      "more": "Küpsiste põhimõtted"
+    },
+    "control": {
+      "title": "Kasutuse mõõtmine ja kampaania omistamine",
+      "granted": "Sa lubasid. Võid nõusoleku igal ajal tagasi võtta; siis eemaldatakse kirjed sellest seadmest.",
+      "refused": "Sa keeldusid. Sellesse seadmesse ei salvestata mõõtmiseks midagi.",
+      "undecided": "Sa pole veel valinud, seega mõõtmiseks ei salvestata midagi.",
+      "allow": "Luba",
+      "refuse": "Keeldu"
+    }
   }
 }

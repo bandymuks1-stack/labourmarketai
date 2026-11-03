@@ -5742,7 +5742,8 @@
             "Unternehmensinformationen, die von Unternehmensbenutzern eingegeben werden: Unternehmensangaben, Bedarfe, Projekte und Buchungen.",
             "Nachrichten, die Sie auf der Plattform senden und empfangen.",
             "Einwilligungsaufzeichnungen: Wenn Sie eine Einwilligung erteilen oder widerrufen, werden die Aktion und ihr Zeitpunkt gespeichert.",
-            "Technische Daten, die für den Betrieb des Dienstes nötig sind, etwa Anmelde-Cookies (siehe Cookie-Richtlinie)."
+            "Technische Daten, die für den Betrieb des Dienstes nötig sind, etwa Anmelde-Cookies (siehe Cookie-Richtlinie).",
+            "Nur mit Ihrer Einwilligung: Nutzungsmessung auf unseren eigenen Servern (erreichte Seiten und Schritte, tägliche Aktivität) und die Kampagne, die Sie gebracht hat, gespeichert bei Ihrem Konto. Siehe Cookie-Richtlinie."
           ]
         },
         {
@@ -5836,8 +5837,30 @@
           "purpose": "Wird nur bei Administratorkonten verwendet. Merkt sich, ob Administrator-Steuerelemente ausgeblendet sind, und ändert nichts an Berechtigungen."
         }
       ],
-      "localStorageNote": "Im eigenen Speicher Ihres Browsers (keine Cookies) liegen einige Einträge: Ihre Wahl des hellen oder dunklen Designs; welche Seite oder Kampagne Sie zuerst hierher geführt hat, einmalig gespeichert, damit eine spätere Registrierung ihr zugeordnet werden kann; eine zufällige Sitzungskennung je Tab, die beim Schließen des Tabs verschwindet; und kleine Annehmlichkeiten wie ausgeblendete Hinweise, zuletzt angesehene Einträge und Ihre Spracheingabesprache. Nichts davon wird an Dritte weitergegeben oder für Werbung genutzt, und Sie können es jederzeit über Ihren Browser löschen.",
-      "noTracking": "Es gibt heute keine Analyse-, Werbe- oder Drittanbieter-Tracking-Cookies auf der Plattform. Sollte sich das jemals ändern, wird zuerst diese Seite aktualisiert."
+      "localStorageNote": "Im eigenen Speicher Ihres Browsers (keine Cookies) liegen außerdem einige Einträge, die Sie selbst gewählt haben: Ihre Wahl des hellen oder dunklen Designs, Ihre Entscheidung zur Nutzungsmessung und kleine Annehmlichkeiten wie ausgeblendete Hinweise, zuletzt angesehene Einträge und Ihre Spracheingabesprache. Sie bleiben auf Ihrem Gerät, und Sie können sie jederzeit über Ihren Browser löschen.",
+      "noTracking": "Auf der Plattform gibt es keine Werbe- oder Drittanbieter-Tracking-Cookies, und nichts wird zu Werbezwecken an Dritte weitergegeben.",
+      "settingsLink": "Cookie-Einstellungen",
+      "analyticsTitle": "Nutzungsmessung — nur mit Ihrer Einwilligung",
+      "analyticsIntro": "Mit Ihrer Einwilligung messen wir, wie das Produkt genutzt wird: welche Seiten und Schritte erreicht werden, die Schritte der Registrierung, die tägliche Aktivität und welche Kampagne einen Besucher gebracht hat. Die Ereignisse werden auf unseren eigenen Servern gespeichert und, wenn Sie angemeldet sind, Ihrem Konto zugeordnet. Ohne Ihre Einwilligung wird keiner der folgenden Einträge geschrieben und kein Messereignis aus Ihrem Browser gesendet.",
+      "analyticsItems": [
+        {
+          "name": "Kampagne des ersten Besuchs (lm.attr.first)",
+          "purpose": "Browserspeicher. Die Kampagnen-Tags (utm_*), die verweisende Website und die Einstiegsseite Ihres ersten Besuchs. Bei der Registrierung werden sie in Ihren eigenen Kontodatensatz übernommen, damit die Kampagne, die Sie gebracht hat, gezählt werden kann."
+        },
+        {
+          "name": "Sitzungskennung (lm.pilot.session)",
+          "purpose": "Tab-Speicher, wird beim Schließen des Tabs entfernt. Eine zufällige Kennung, die mit jedem Messereignis gesendet wird, damit die Schritte in einem Tab zusammen gezählt werden können."
+        },
+        {
+          "name": "Aktivitätsmarker (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
+          "purpose": "Browserspeicher. Der letzte Tag, an dem Sie aktiv waren, und ein Marker, dass eine Registrierung läuft."
+        },
+        {
+          "name": "Einmal-Zählmarker (lm.funnel.*)",
+          "purpose": "Tab-Speicher. Verhindert, dass dasselbe Messereignis doppelt gezählt wird."
+        }
+      ],
+      "analyticsBasis": "Eine Ablehnung oder ein Widerruf entfernt diese Einträge sofort von diesem Gerät; bereits in Ihr Konto übernommene Kampagnendaten bleiben dort, bis Sie uns um Löschung bitten. Die Messung selbst beruht auf unserem berechtigten Interesse an der Verbesserung des Produkts (Art. 6 Abs. 1 lit. f DSGVO), und Sie können ihr wie in der Datenschutzerklärung beschrieben widersprechen."
     },
     "requestContact": "Um eine Frage zu stellen oder einen Antrag zu Ihren Daten zu stellen, kontaktieren Sie uns — ein Mensch wird ihn prüfen.",
     "related": "Verwandte Seiten",
@@ -7638,7 +7661,7 @@
     "campaigns": {
       "title": "Kampagne → Stelle → Konto",
       "empty": "In diesem Zeitfenster gibt es noch keine Ereignisse mit Kampagnenkennung.",
-      "help": "First-Touch utm_campaign × utm_content im selben Zeitfenster und mit derselben Populationsfilterung. Das sind Ereigniszahlen, keine eindeutigen Besucher — eine spätere Spalte ist keine Teilmenge einer früheren, daher ist ein Verhältnis zwischen zwei Spalten keine Conversion. Höchstens 25 Zeilen nach Aufrufen; nicht gekennzeichneter (organischer) Verkehr wird nicht gelistet. Die Interesse-Spalte wird serverseitig gesendet, wo keine Kampagne verfügbar ist, und bleibt daher konstruktionsbedingt 0 — das ist eine fehlende Messung, keine gemessene Null.",
+      "help": "First-Touch utm_campaign × utm_content im selben Zeitfenster und mit derselben Populationsfilterung. Das sind Ereigniszahlen, keine eindeutigen Besucher — eine spätere Spalte ist keine Teilmenge einer früheren, daher ist ein Verhältnis zwischen zwei Spalten keine Conversion. Höchstens 25 Zeilen nach Aufrufen; nicht gekennzeichneter (organischer) Verkehr wird nicht gelistet. Die Interesse-Spalte wird serverseitig gesendet, wo keine Kampagne verfügbar ist, und bleibt daher konstruktionsbedingt 0 — das ist eine fehlende Messung, keine gemessene Null. Die vier Spalten nach der Registrierung zählen Ereignisse, nicht Personen (Journaleinträge sind jeder gespeicherte Eintrag, nicht der erste), und nur für Konten, deren eigener Datensatz die Kampagne trägt: Registrierungen mit erlaubter Analyse, Google-Registrierungen erst ab 2026-11-03. Besucher, die die Analyse abgelehnt haben, sind in dieser Tabelle gar nicht enthalten.",
       "col": {
         "campaign": "Kampagne / Variante",
         "landing": "Aufrufe",
@@ -7648,7 +7671,11 @@
         "signupCompleted": "Konto erstellt",
         "returnedToJob": "Zurück zur Stelle",
         "compared": "Verglichen",
-        "interest": "Interesse"
+        "interest": "Interesse",
+        "profileSaved": "Profil gespeichert",
+        "profileMatchable": "Profil abgleichbar",
+        "journalEntrySaved": "Journaleinträge",
+        "jobSearch": "Jobsuche"
       }
     },
     "funnel": {
@@ -20092,6 +20119,22 @@
       "invalid": "Prüfe Name und Nachricht.",
       "error": "Etwas ist schiefgelaufen. Versuche es erneut.",
       "cooldown": "Deine Anfrage wurde kürzlich abgelehnt. Du kannst diese Gruppe 30 Tage nach der Entscheidung erneut anfragen."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "Mit Ihrer Einwilligung messen wir auf unseren eigenen Servern, welche Seiten und Schritte Menschen helfen und welche Kampagne Sie hierher geführt hat. Ohne Ihre Zustimmung wird dafür nichts auf Ihrem Gerät gespeichert. Das Produkt funktioniert in beiden Fällen gleich.",
+      "accept": "Messung erlauben",
+      "refuse": "Ablehnen",
+      "more": "Cookie-Richtlinie"
+    },
+    "control": {
+      "title": "Nutzungsmessung und Kampagnenzuordnung",
+      "granted": "Sie haben zugestimmt. Sie können jederzeit widerrufen; die Einträge werden dann von diesem Gerät entfernt.",
+      "refused": "Sie haben abgelehnt. Auf diesem Gerät wird für die Messung nichts gespeichert.",
+      "undecided": "Sie haben noch nicht gewählt, daher wird für die Messung nichts gespeichert.",
+      "allow": "Erlauben",
+      "refuse": "Ablehnen"
     }
   }
 }
