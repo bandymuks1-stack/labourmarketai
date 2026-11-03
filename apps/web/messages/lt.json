@@ -2096,7 +2096,8 @@
           "evidenceConfirmed": "pažymėta"
         },
         "requestFrom": "Prašo prisijungti: {name}",
-        "requestUnverified": "Vardą įvedė pats besimokantysis — nepatikrinta."
+        "requestUnverified": "Vardą įvedė pats besimokantysis — nepatikrinta.",
+        "membersNotForRole": "Grupės narių tavo rolė nemato. Narystę mato ir keičia tik pačios įstaigos savininkas, administratorius ar vadovas."
       },
       "learners": {
         "title": "Besimokantieji",
@@ -14416,6 +14417,7 @@
       "eduCohortCreated": "Grupė sukurta. Gali priskirti studentus.",
       "eduAssignNoCohort": "Grupių dar nėra — pirmiausia sukurk grupę.",
       "eduAssignNoLearners": "Priimtų studentų dar nėra. Pakviesk studentą — priskirti galėsi, kai jis priims pakvietimą.",
+      "eduMembersNotForRole": "Grupės narystė tavo rolei nepasiekiama. Besimokančiuosius priskirti gali tik pačios įstaigos savininkas, administratorius ar vadovas.",
       "eduAssignDone": "Studentas priskirtas grupei.",
       "eduNotInstitution": "Ši organizacija dar nepažymėta kaip mokymo įstaiga. Pažymėk tai įmonės skiltyje.",
       "eduUnavailable": "Šiuo metu programų perskaityti nepavyksta. Tai nereiškia, kad jų nėra.",

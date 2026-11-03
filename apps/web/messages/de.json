@@ -2096,7 +2096,8 @@
           "evidenceConfirmed": "bestätigt"
         },
         "requestFrom": "Bittet um Aufnahme: {name}",
-        "requestUnverified": "Vom Lernenden selbst eingegebener Name — nicht überprüft."
+        "requestUnverified": "Vom Lernenden selbst eingegebener Name — nicht überprüft.",
+        "membersNotForRole": "Gruppenmitglieder sind für deine Rolle nicht verfügbar. Nur Inhaber, Admin oder Leitung der Einrichtung selbst sehen und ändern die Mitgliedschaft."
       },
       "learners": {
         "title": "Lernende",
@@ -14416,6 +14417,7 @@
       "eduCohortCreated": "Gruppe angelegt. Sie können Lernende zuweisen.",
       "eduAssignNoCohort": "Noch keine Gruppen — legen Sie zuerst eine Gruppe an.",
       "eduAssignNoLearners": "Noch keine angenommenen Lernenden. Laden Sie einen Lernenden ein — zuweisen können Sie ihn nach der Annahme.",
+      "eduMembersNotForRole": "Gruppenmitgliedschaft ist für deine Rolle nicht verfügbar. Nur Inhaber, Admin oder Leitung der Einrichtung selbst können Lernende zuordnen.",
       "eduAssignDone": "Lernender der Gruppe zugewiesen.",
       "eduNotInstitution": "Diese Organisation ist noch nicht als Bildungseinrichtung markiert. Markieren Sie das im Unternehmensbereich.",
       "eduUnavailable": "Programme können gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
