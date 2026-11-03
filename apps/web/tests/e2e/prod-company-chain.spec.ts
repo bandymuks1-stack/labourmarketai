@@ -370,6 +370,57 @@ for (const { slot, org, label } of [
   });
 }
 
+// ── N (P0-2, owner direction A 2026-11-03; #2995): navigation by role. The
+// primary row stays the A-03 core loop for every workspace; for the person
+// who runs the organization, the header's "More" and the phone sheet open with
+// that organization's own doors. Read-only: it opens two menus and writes
+// nothing, so it costs this walk no data.
+const CORE_IDS = ["overview", "journal_text_first", "planning", "communication"];
+const MORE_LEADS = {
+  company: ["area:people", "area:projects", "area:work"],
+  agency: ["area:people", "area:clients", "area:projects"],
+} as const;
+/** The ids under one literal testid prefix, in render order, with the prefix cut. */
+const idsAfter = (items: Locator, prefix: string) =>
+  items.evaluateAll((els, p) => els.map((e) => (e.getAttribute("data-testid") ?? "").slice(String(p).length)), prefix);
+
+for (const { slot, org, label, kinds } of [
+  { slot: "owner", org: ALFA, label: "Alfa (company)", kinds: ["company"] as const },
+  // The agency org resolves through actingRoleForWorkspace: agency when the
+  // agency role is held, company when only the company role is.
+  { slot: "agency", org: AGENCY, label: "the agency", kinds: ["agency", "company"] as const },
+]) {
+  test(`N-1 (P0-2). ${label}: the core loop stays; the organization's doors lead "More"`, async ({ browser }) => {
+    const { ctx, page } = await as(browser, slot);
+    await useWorkspace(page, org);
+    await page.goto("/lt/dashboard/projects");
+    const core = page.getByTestId("header-core-nav");
+    await expect(core).toBeVisible({ timeout: 30_000 });
+    expect(await idsAfter(core.locator('[data-testid^="header-core-nav-"]'), "header-core-nav-")).toEqual(CORE_IDS);
+    await page.getByTestId("header-nav-more").click();
+    const more = page.getByTestId("header-nav-more-menu");
+    await expect(more).toBeVisible();
+    const leads = (await idsAfter(more.locator('[data-testid^="header-nav-more-"]'), "header-nav-more-")).slice(0, 3);
+    const kind = kinds.find((k) => JSON.stringify(MORE_LEADS[k]) === JSON.stringify(leads));
+    console.log(`[nav] ${slot}: More opens with ${leads.join(", ")} (${kind ?? "no match"})`);
+    expect(kind, `More leads ${leads.join(", ")}`).toBeTruthy();
+    await ctx.close();
+  });
+}
+
+test("N-2 (P0-2). on the phone, Alfa's area sheet lists the core loop, then its doors", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner", true);
+  await useWorkspace(page, ALFA);
+  await page.goto("/lt/dashboard/projects");
+  await page.getByTestId("header-nav-sheet-trigger").click();
+  const sheet = page.getByTestId("header-nav-sheet");
+  await expect(sheet).toBeVisible({ timeout: 30_000 });
+  const ids = await idsAfter(sheet.locator('[data-testid^="header-nav-sheet-"]'), "header-nav-sheet-");
+  expect(ids.slice(0, 4)).toEqual(CORE_IDS);
+  expect(ids.slice(4, 7)).toEqual([...MORE_LEADS.company]);
+  await ctx.close();
+});
+
 // ── U (#2680, owner decision 2026-10-22): a need that names NO trade still
 // shows the people who raised a hand on it, labelled "trade match not
 // assessed", with no score. Before #2680 scouting returned not-structured
