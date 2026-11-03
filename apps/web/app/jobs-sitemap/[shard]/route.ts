@@ -30,11 +30,18 @@
  * <lastmod> is the publisher's `published_at` and never an ingestion timestamp
  * — see the migration header for the production measurement behind that.
  */
-import { listPublicVacancySitemapEntries } from "@/lib/vacancy-store/public-vacancy-preview";
+import {
+  SITEMAP_CACHE_CONTROL,
+  readCachedSitemapShard,
+  type CachedSitemapShard,
+} from "@/lib/vacancy-store/public-vacancy-sitemap-cache";
 import { localizedUrl, hreflangAlternates } from "@/lib/seo/metadata";
 import { defaultLocale } from "@/lib/i18n/config";
 
-export const revalidate = 3600;
+// Cached in lib/vacancy-store/public-vacancy-sitemap-cache.ts (one hour per
+// shard, misses serialized). The route itself renders per request from that
+// cache and is never prerendered at build time, so a build never queries the DB.
+export const dynamic = "force-dynamic";
 
 const XHTML = "http://www.w3.org/1999/xhtml";
 
@@ -56,7 +63,7 @@ function xml(body: string): Response {
   return new Response(body, {
     headers: {
       "Content-Type": "application/xml",
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": SITEMAP_CACHE_CONTROL,
     },
   });
 }
@@ -73,7 +80,18 @@ export async function GET(
   if (!match) return emptySitemap();
   const shard = Number.parseInt(match[1], 10);
 
-  const page = await listPublicVacancySitemapEntries({ shard });
+  let page: CachedSitemapShard;
+  try {
+    page = await readCachedSitemapShard(shard);
+  } catch {
+    // A statement timeout (or any database failure) is TEMPORARY. A crawler
+    // must read it as "come back", never as a broken sitemap (500) nor as
+    // "no jobs" (an empty shard invites de-indexing). Never cached.
+    return new Response(null, {
+      status: 503,
+      headers: { "Retry-After": "600", "Cache-Control": "no-store" },
+    });
+  }
   if (page.status === "not_provisioned" || page.entries.length === 0) {
     return emptySitemap();
   }

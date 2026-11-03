@@ -303,6 +303,49 @@ export async function listPublicVacancyPreviewsByIds(
   return { status: "ok", previews: rows.map(toPreviewRow) };
 }
 
+/** What a MEMBER's board card adds to the anonymous projection: who
+ *  publishes the ad and where the work is (owner P0-3, 2026-11-03). */
+export interface MemberVacancyFactsV1 {
+  readonly employerName: string | null;
+  readonly city: string | null;
+  readonly region: string | null;
+  /** ISO 3166-1 alpha-2 as stored. */
+  readonly country: string | null;
+}
+
+/**
+ * The member-only facts for the ads ONE board page already shows, read under
+ * the signed-in person's OWN client: `public_vacancies` grants SELECT to
+ * `authenticated` only, so an anonymous client gets nothing here by
+ * construction (owner directive 2026-08-24 stands). The ids come from the
+ * board's own anonymous read, so this never widens what the page lists, and
+ * a failed read degrades to the anonymous card instead of failing the page.
+ */
+export async function listMemberVacancyFactsByIds(
+  client: VacancyDbClient,
+  ids: readonly string[],
+): Promise<ReadonlyMap<string, MemberVacancyFactsV1>> {
+  const wanted = [...new Set(ids)].slice(0, PREVIEW_BY_ID_MAX);
+  if (wanted.length === 0) return new Map();
+  const { data, error } = await client
+    .from(VACANCY_TABLE)
+    .select("id,employer_name,city,region,country")
+    .in("id", wanted);
+  if (error) return new Map();
+  const str = (v: unknown): string | null =>
+    typeof v === "string" && v.trim().length > 0 ? v.trim() : null;
+  const out = new Map<string, MemberVacancyFactsV1>();
+  for (const row of (data ?? []) as readonly Record<string, unknown>[]) {
+    out.set(String(row.id ?? ""), {
+      employerName: str(row.employer_name),
+      city: str(row.city),
+      region: str(row.region),
+      country: str(row.country),
+    });
+  }
+  return out;
+}
+
 /** Hard cap: the save RPC allows 200 bookmarks across both sources, so this
  *  can never be asked for more than the whole list. */
 const PREVIEW_BY_ID_MAX = 200;

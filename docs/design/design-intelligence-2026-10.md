@@ -89,6 +89,35 @@ Visual QA
 
 Open items to verify before adoption (not checked in this pass): gzip sizes of xyflow and dagre in this app, the Next 15 ViewTransition support level, framer-motion 13 changelog, FullCalendar premium plugin list and pricing, source licenses of the diagram and WCAG skills, and release dates of all packages.
 
+## 7. Design-technology register: Phase 1 UX/UI system (2026-11-03)
+
+This section is the register entry for the UX/UI system proposal
+(`docs/design/ux-system-2026-11/UX_UI_SYSTEM_PROPOSAL_2026-11-03.md`). Facts were verified 2026-11-03 on the listed
+official source, the GitHub API (`pushed_at`, `/security-advisories`) or the npm registry. "n/v" means not verified.
+**Nothing below is installed.** The install status of the new candidates is "proposed, not installed" until the owner approves
+the stage that needs them.
+
+| Tool / source | Source URL | Licence | Version, activity, advisories (2026-11-03) | Compatibility verdict | Install status |
+|---|---|---|---|---|---|
+| Apple Human Interface Guidelines | https://developer.apple.com/design/human-interface-guidelines | Apple docs (proprietary text) | Live documentation | ADAPT PRINCIPLE: hierarchy, clarity, target sizes, materials only on the chrome layer | reference (not installable) |
+| Apple Design Resources (UI kits) | https://developer.apple.com/design/resources ; licence PDF https://developer.apple.com/support/downloads/terms/apple-design-resources/Apple-Design-Resources-License-20230621-English.pdf | Proprietary | iOS/macOS 27 kits | **REJECT**: the licence restricts mock-ups to software for Apple platforms and bars website content, so it is unusable for a web or Android product | not installed (rejected) |
+| Liquid Glass (principle) | https://developer.apple.com/design/human-interface-guidelines/materials ; https://caniuse.com/css-backdrop-filter ; https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-transparency | n/a | HIG: "use sparingly", never in the content layer; `backdrop-filter` ~97 % global support; `prefers-reduced-transparency` limited and experimental | ADAPT PRINCIPLE, limited to phone chrome (tab bar, sheets), with an opaque default | reference |
+| Apple-HIG agent skills (raintree-technology/apple-hig-skills MIT, ebuntario/apple-hig MIT, danielimad/SKILLS no licence) | https://github.com/raintree-technology/apple-hig-skills | MIT / MIT / none | 149 / 5 / 0 stars; unvetted; some redistribute Apple text | **REJECT** (unvetted, licence or provenance doubts); use the local skills | not installed (rejected) |
+| shadcn/ui | https://ui.shadcn.com ; https://github.com/shadcn-ui/ui | MIT | CLI 4.23.0 (2026-10-27), pushed 2026-11-02, 0 advisories | REFERENCE CODE ONLY: copy-in model; new components target Tailwind v4 + React 19, and the repo is on Tailwind 3.4 | not installed (reference) |
+| Radix Primitives (`radix-ui`) | https://github.com/radix-ui/primitives ; https://www.radix-ui.com/primitives | MIT | 1.8.1; last commits 2026-10-14; 0 advisories; React ^19 peer | **ADOPT per primitive** (Dialog, Popover, DropdownMenu, Tabs, Tooltip, Combobox-like Select), styled by our tokens; Tailwind-independent | **proposed, not installed** |
+| Base UI (`@base-ui/react`) | https://github.com/mui/base-ui | MIT | 1.9.0 (2026-10-09), pushed 2026-11-03, 0 advisories | ALTERNATIVE to Radix (more active, younger API). Pick one, never both. | proposed alternative, not installed |
+| React Aria Components | https://github.com/adobe/react-spectrum | Apache-2.0 | 1.22.x (2026-10-09), 0 advisories | REFERENCE ONLY: strongest a11y, heavier API; a second option if Radix fails a keyboard proof | not installed (reference) |
+| Material Design 3 / `@material/web` | https://m3.material.io ; https://github.com/material-components/material-web | Apache-2.0 | 2.5.0 (2026-07-15); README says it is in maintenance mode | **REJECT** as a dependency (Web Components, maintenance mode); reading reference only | not installed (rejected) |
+| IBM Carbon (`@carbon/react`) | https://github.com/carbon-design-system/carbon | Apache-2.0 | 1.119.0 (2026-10-21), 0 advisories | **REJECT** (its own styling system = a second design system); data-table patterns as reference | not installed (rejected) |
+| Fluent 2 (`@fluentui/react-components`) | https://fluent2.microsoft.design ; https://github.com/microsoft/fluentui | MIT (fonts and icons separate) | 9.75.1, pushed 2026-11-02 | **REJECT** (Griffel CSS-in-JS conflicts with Tailwind tokens) | not installed (rejected) |
+| Ant Design | https://github.com/ant-design/ant-design | MIT | 6.6.8 (2026-10-26); 2018 unannounced easter-egg incident (issue #13098) | **REJECT** (heavy, opinionated, second system; supply-chain history) | not installed (rejected) |
+| Figma Starter (free) | https://www.figma.com/pricing | Proprietary, free tier | 3 files, no Dev Mode, remote MCP limited to 20 tool calls a month | OPTIONAL owner sketchpad only; the design source of truth stays in the repo (tokens + HTML mockups) | not installed (optional) |
+| Storybook | https://github.com/storybookjs/storybook | MIT | 10.6.5 (2026-10-27); **4 advisories incl. a Critical dev-server code injection, GHSA-f2ph-cmg5-wxc8, fixed in 10.6.2** | DEFER: if it is ever adopted, pin ≥ 10.6.2 and never expose its dev server; the render harness plus Playwright covers the need now | not installed (deferred) |
+| Playwright `toHaveScreenshot` | https://playwright.dev/docs/test-snapshots | Apache-2.0 | latest 1.64.1 (2026-10-14); the repo has 1.62.1 | **ADOPT**: baselines in the CI image; 390/1280 × light/dark × reduced motion | already installed (feature unused) |
+| `@axe-core/playwright` | https://github.com/dequelabs/axe-core-npm | MPL-2.0 | 4.14.0 (2026-10-15) | **ADOPT (dev only)**; MPL file-level copyleft is fine unmodified | **proposed, not installed** |
+| Style Dictionary | https://github.com/style-dictionary/style-dictionary | Apache-2.0 | 5.7.1 (2026-10-24) | DEFER: only if web↔Expo token drift is proven; one token source can be shared through `packages/client-core` first | not installed (deferred) |
+| Local agent skills (design-taste-frontend, high-end-visual-design, make-interfaces-feel-better, baseline-ui, fixing-accessibility, fixing-motion-performance, a11y-audit, web-design-guidelines) | session skill list | per skill | already available | ADOPT as review checklists; no new skill installed | in use |
+
 ## Sources
 - npm registry `latest` manifests: @xyflow/react, motion, framer-motion, d3-force, elkjs, @dagrejs/dagre, cytoscape, vis-network, sigma, @fullcalendar/react, @schedule-x/react, react-big-calendar, @axe-core/playwright, backstopjs (fetched 2026-10-02)
 - https://github.com/xyflow/xyflow ; https://reactflow.dev/learn/troubleshooting/remove-attribution ; https://reactflow.dev/learn/advanced-use/accessibility

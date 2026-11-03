@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { FIRST_VISIT_CAMPAIGN, refuseOnFirstVisit, storedAnalytics } from "./first-visit-consent";
+
 /**
  * SELF-SERVE SIGN-UP, end to end, on a THROWAWAY LOCAL Supabase stack
  * (.github/workflows/signup-isolated.yml). The one journey no production walk
@@ -48,9 +50,23 @@ async function userId(address: string): Promise<string> {
   return u.id;
 }
 
-/** The public sign-up form → the onboarding wizard (Confirm email is OFF locally). */
-async function signUp(page: Page, address: string, password: string = PASSWORD): Promise<void> {
-  await page.goto(`${BASE}/en/auth/signup`);
+/**
+ * The public sign-up form → the onboarding wizard (Confirm email is OFF locally).
+ * `refuseConsent`: arrive like a stranger from a campaign link and answer the
+ * real first-visit consent banner with "refuse" before filling the form.
+ */
+async function signUp(
+  page: Page,
+  address: string,
+  password: string = PASSWORD,
+  opts: { refuseConsent?: boolean } = {},
+): Promise<void> {
+  if (opts.refuseConsent) {
+    await page.goto(`${BASE}/en/auth/signup?${FIRST_VISIT_CAMPAIGN}`);
+    await refuseOnFirstVisit(page);
+  } else {
+    await page.goto(`${BASE}/en/auth/signup`);
+  }
   await page.locator('input[type="email"]').fill(address);
   await page.locator('input[name="password"]').fill(password);
   await page.locator('input[name="confirm_password"]').fill(password);
@@ -70,11 +86,14 @@ async function onboard(page: Page, intent: string, displayName: string): Promise
   await page.getByTestId("onboarding-submit").click();
 }
 
-test("S-1. a worker signs up through the form, onboards, and lands as a worker", async ({ page }) => {
+test("S-1. a worker refuses analytics on the first visit, signs up through the form, onboards, and lands as a worker", async ({ page }) => {
   const address = email("worker");
-  await signUp(page, address);
+  await signUp(page, address, PASSWORD, { refuseConsent: true });
   await onboard(page, "work", "Synthetic Signup Worker");
   await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+  const stored = await storedAnalytics(page);
+  expect(JSON.parse(stored.consent ?? "{}").choice, "the refusal survives sign-up and onboarding").toBe("refused");
+  expect(stored.analytics, "nothing analytics-related was stored on the way in").toEqual([]);
   const id = await userId(address);
   const [profile] = await db<Array<{ onboarded: boolean | null; active_role: string | null; country: string | null }>>(
     `profiles?id=eq.${id}&select=onboarded,active_role,country`,

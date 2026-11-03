@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { useLocale } from "next-intl";
+import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import {
   generateOauthTraceId,
@@ -102,6 +103,16 @@ type OAuthProviderConfig = {
 
 type OAuthButtonProps = {
   label: string;
+  /** The provider's bare name, shown INSTEAD of `label` below `sm`, where two
+   *  provider buttons share one row (mobile sign-up fold, owner P0-1
+   *  2026-11-03). The accessible name stays the full `label` (it contains the
+   *  visible word, WCAG 2.5.3). An EMPTY string = the provider logo alone
+   *  below `sm` (a 48 px square beside the Google row, P0-1b 360×740); the
+   *  accessible name is still the full label. Omitted = the full label at
+   *  every width. */
+  compactLabel?: string;
+  /** Classes for the button's own wrapper (its width inside a shared row). */
+  wrapperClassName?: string;
   redirectingLabel: string;
   errorLabel: string;
   disabled?: boolean;
@@ -156,6 +167,8 @@ type OAuthButtonProps = {
 function OAuthProviderButton({
   provider,
   label,
+  compactLabel,
+  wrapperClassName,
   redirectingLabel,
   errorLabel,
   disabled,
@@ -244,17 +257,33 @@ function OAuthProviderButton({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={cn("flex flex-col gap-2", wrapperClassName)}>
       <button
         type="button"
         onClick={onClick}
         disabled={disabled || loading}
         aria-busy={loading || undefined}
         data-testid={provider.testId}
-        className={provider.buttonClassName}
+        aria-label={compactLabel !== undefined && !loading ? label : undefined}
+        className={cn(provider.buttonClassName, compactLabel === "" && "max-sm:px-0")}
       >
         {provider.logo}
-        {loading ? redirectingLabel : label}
+        {compactLabel !== undefined ? (
+          <>
+            {compactLabel ? (
+              <span className="sm:hidden">{loading ? redirectingLabel : compactLabel}</span>
+            ) : null}
+            {/* Logo-only below sm: the words stay for assistive tech (sr-only
+                is out of the flex flow, so no gap is added to the square). */}
+            <span className={compactLabel ? "hidden sm:inline" : "sr-only sm:not-sr-only"}>
+              {loading ? redirectingLabel : label}
+            </span>
+          </>
+        ) : loading ? (
+          redirectingLabel
+        ) : (
+          label
+        )}
       </button>
       {failed && (
         <p className="text-xs text-state-danger" role="alert">
