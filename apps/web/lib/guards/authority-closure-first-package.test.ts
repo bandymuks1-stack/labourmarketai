@@ -201,6 +201,10 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261103130000_",
       // 2026-11-03 (RED, owner-approved, APPLIED ledger 20261103171134): agency client records follow owns_company.
       "20261103140000_",
+      // 2026-11-03 (RED, owner-approved, APPLIED ledger 20261103193811 / 20261103193911): pg_trgm + the job search trigram index; the index was rolled back the same day (ledger 20261103194208).
+      "20261103171000_",
+      "20261103171100_",
+      "20261103171300_",
       // #2913 restored six production-applied migrations byte-exact (owner option 2, 2026-11-01): historical restorations dated after the package, not pending work of it.
       "20261007155339_",
       "20261015193211_",
