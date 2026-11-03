@@ -20127,10 +20127,10 @@
   },
   "consent": {
     "banner": {
-      "text": "Za Twoją zgodą mierzymy w Twojej przeglądarce, które strony i kroki pomagają ludziom i która kampania Cię tu przyprowadziła; bez zgody nic w tym celu nie jest zapisywane na Twoim urządzeniu. Podstawowe liczniki działań na naszych własnych serwerach prowadzimy w każdym przypadku (zobacz Politykę cookies). Produkt działa tak samo, cokolwiek wybierzesz.",
+      "text": "Korzystanie ze stron i źródło kampanii mierzymy tylko za Twoją zgodą.",
       "accept": "Zezwól na pomiar",
       "refuse": "Odmów",
-      "more": "Polityka cookies",
+      "more": "Więcej",
       "label": "Wybór dotyczący pomiaru korzystania"
     },
     "control": {
