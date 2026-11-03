@@ -1134,7 +1134,7 @@ export default async function JobDetailPage({
           </div>
         </section>
       ) : (
-        <section className="mt-8 rounded-lg border border-dashed p-5">
+        <section className="mt-8 rounded-lg border border-dashed p-5" data-testid="public-job-locked">
           <h2 className="text-base font-medium">{LOCKED_TITLE[active]}</h2>
           <p className="mt-1 text-sm text-text-muted">{LOCKED_BODY[active]}</p>
           <div className="mt-4 flex flex-wrap gap-2">
