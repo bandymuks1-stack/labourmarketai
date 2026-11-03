@@ -18,6 +18,7 @@
  * presentation, never a permission.
  */
 
+import type { NavItem } from "@/lib/config/navigation";
 import { TODAY_STATIONS, type TodayStationId } from "@/lib/today/today-route";
 
 export type WorkAreaIconKey =
@@ -83,6 +84,36 @@ export const ORGANIZATION_WORK_AREAS: readonly WorkArea[] = [
   { id: "results", href: "/dashboard/reports", iconKey: "barChart", labelKey: "companyModel.results" },
   { id: "history", href: "/dashboard/company/history", iconKey: "history", labelKey: "companyModel.history" },
 ];
+
+/**
+ * THE ORGANIZATION'S DOORS IN THE ONE HEADER (owner P0-2, direction A,
+ * 2026-11-03: navigation by role). For a person whose acting role in the
+ * ACTIVE workspace is company or agency (`actingRoleForWorkspace` — the ONE
+ * resolver; owner/manager AND the held role), the header's "More" and the
+ * phone sheet open with these doors, the role's own core first. The primary
+ * row stays the A-03 core loop for everyone (chat → journal → calendar →
+ * messages): this re-prioritizes "More", it adds no primary item.
+ *
+ * The two areas that ARE a core destination (messages, calendar) are left out
+ * so no destination appears twice. Every door re-checks its own rights: for
+ * an owner or manager of the active organization the company gate opens by
+ * membership (`requireRoleOrRedirect` → `workspaceOpensCompanySpace`), which
+ * is why an agency owner can open them too.
+ */
+const HEADER_AREA_LEADS: Record<"company" | "agency", readonly string[]> = {
+  company: ["people", "projects", "work"],
+  agency: ["people", "clients", "projects"],
+};
+const AREAS_IN_THE_CORE_LOOP = new Set(["messages", "calendar"]);
+
+export function organizationHeaderAreas(role: "company" | "agency"): readonly NavItem[] {
+  const leads = HEADER_AREA_LEADS[role];
+  const rank = (id: string) => (leads.includes(id) ? leads.indexOf(id) : leads.length);
+  return ORGANIZATION_WORK_AREAS.filter((a) => !AREAS_IN_THE_CORE_LOOP.has(a.id))
+    .map((a, n) => ({ a, n }))
+    .sort((x, y) => rank(x.a.id) - rank(y.a.id) || x.n - y.n)
+    .map(({ a }) => ({ id: `area:${a.id}` as const, href: a.href, tabLabelKey: a.labelKey, iconKey: a.iconKey }));
+}
 
 export type WorkAreaContext = "personal" | "organization";
 
