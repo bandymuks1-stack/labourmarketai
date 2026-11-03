@@ -4,9 +4,13 @@ import { createClient as createSupabaseClient, type SupabaseClient } from "@supa
 import { unstable_cache } from "next/cache";
 import { requireSupabaseClientEnv } from "@/lib/env";
 import {
+  PUBLIC_VACANCY_SITEMAP_SHARD_SIZE,
+  listPublicVacancySitemapAfter,
   listPublicVacancySitemapEntries,
   readPublicVacancySupplyCounts,
+  type PublicVacancySitemapCursor,
   type PublicVacancySitemapEntry,
+  type PublicVacancySitemapPage,
 } from "@/lib/vacancy-store/public-vacancy-preview";
 
 /**
@@ -30,7 +34,9 @@ import {
  *   3. cache MISSES run ONE AT A TIME, so 54 parallel misses become 54 short
  *      sequential queries instead of 54 deep scans competing for the same CPU;
  *   4. one retry on a statement timeout (57014), as the board search does.
- * The deep-OFFSET cost itself needs a keyset function (RED, separate PR).
+ *   5. KEYSET paging once `list_public_vacancy_sitemap_after_v1` is applied:
+ *      the cursor walk records where each shard starts, and a shard is one
+ *      ~19 ms seek. While the function is absent, OFFSET (v1) as before.
  */
 
 const QUERY_CANCELED = "57014";
@@ -70,17 +76,73 @@ export type CachedSitemapShard =
   | { readonly status: "ok"; readonly entries: readonly PublicVacancySitemapEntry[] }
   | { readonly status: "not_provisioned" };
 
+/** Upper bound on the cursor walk (500 shards = 500k ads), a bound, not a goal. */
+const MAX_SHARDS = 500;
+
+export type SitemapCursors =
+  /** Keyset function applied: `starts[n]` is where shard n begins (null = first). */
+  | { readonly mode: "keyset"; readonly starts: readonly (PublicVacancySitemapCursor | null)[] }
+  /** Keyset function absent (not applied / rolled back): page by OFFSET (v1). */
+  | { readonly mode: "offset" };
+
+type AfterReader = (after: PublicVacancySitemapCursor | null) => Promise<PublicVacancySitemapPage>;
+
+/**
+ * Walk the sitemap once by keyset and record where each shard starts. Every
+ * step is a short index seek (~19 ms in production), so ~54 steps stay far
+ * inside any timeout. Exported for the unit test; the routes use the cached
+ * wrapper below.
+ */
+export async function walkSitemapCursors(read: AfterReader): Promise<SitemapCursors> {
+  const starts: (PublicVacancySitemapCursor | null)[] = [];
+  let next: PublicVacancySitemapCursor | null = null;
+  for (let i = 0; i < MAX_SHARDS; i++) {
+    const page = await withTimeoutRetry(() => read(next));
+    if (page.status === "not_provisioned") return { mode: "offset" };
+    if (page.entries.length === 0) break;
+    starts.push(next);
+    if (page.entries.length < PUBLIC_VACANCY_SITEMAP_SHARD_SIZE) break;
+    const last = page.entries[page.entries.length - 1];
+    // published_at is NOT NULL on the table; a missing date means the
+    // projection changed under us — page by OFFSET rather than guess.
+    if (!last.lastModified) return { mode: "offset" };
+    next = { publishedAt: last.lastModified, id: last.id };
+  }
+  return { mode: "keyset", starts };
+}
+
+export const readCachedSitemapCursors = unstable_cache(
+  (): Promise<SitemapCursors> =>
+    serialized(() => walkSitemapCursors((after) => listPublicVacancySitemapAfter(after, anonClient()))),
+  ["jobs-sitemap-cursors-v1"],
+  { revalidate: TTL_SECONDS, tags: ["jobs-sitemap"] },
+);
+
 export const readCachedSitemapShard = unstable_cache(
-  (shard: number): Promise<CachedSitemapShard> =>
-    serialized(() =>
+  async (shard: number): Promise<CachedSitemapShard> => {
+    // Read OUTSIDE `serialized`: the cursor walk queues itself, and a nested
+    // queue entry would wait on its own parent.
+    const cursors = await readCachedSitemapCursors();
+    return serialized(() =>
       withTimeoutRetry(async () => {
-        const page = await listPublicVacancySitemapEntries({ shard }, anonClient());
+        let page: PublicVacancySitemapPage;
+        if (cursors.mode === "keyset") {
+          if (shard >= cursors.starts.length) return { status: "ok" as const, entries: [] };
+          page = await listPublicVacancySitemapAfter(cursors.starts[shard], anonClient());
+          // Rolled back between the walk and this read: fall back to OFFSET.
+          if (page.status === "not_provisioned") {
+            page = await listPublicVacancySitemapEntries({ shard }, anonClient());
+          }
+        } else {
+          page = await listPublicVacancySitemapEntries({ shard }, anonClient());
+        }
         return page.status === "ok"
           ? { status: "ok" as const, entries: page.entries }
           : { status: "not_provisioned" as const };
       }),
-    ),
-  ["jobs-sitemap-shard-v1"],
+    );
+  },
+  ["jobs-sitemap-shard-v2"],
   { revalidate: TTL_SECONDS, tags: ["jobs-sitemap"] },
 );
 
@@ -95,6 +157,16 @@ export const readCachedActiveVacancyCount = unstable_cache(
   ["jobs-sitemap-count-v1"],
   { revalidate: TTL_SECONDS, tags: ["jobs-sitemap"] },
 );
+
+/** How many shards the index lists: the walked keyset shards when the keyset
+ *  function is applied, else ceil(live count / shard size) as before.
+ *  null = the feature is off (an empty, valid index). */
+export async function readCachedSitemapShardCount(): Promise<number | null> {
+  const cursors = await readCachedSitemapCursors();
+  if (cursors.mode === "keyset") return cursors.starts.length;
+  const active = await readCachedActiveVacancyCount();
+  return active === null ? null : Math.ceil(active / PUBLIC_VACANCY_SITEMAP_SHARD_SIZE);
+}
 
 /** Shared and edge caches may keep a sitemap an hour and serve it stale for a
  *  day while refreshing — a crawler never waits on the database. */

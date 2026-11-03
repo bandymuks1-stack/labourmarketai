@@ -25,10 +25,9 @@
  * Engine's /questions-sitemap.xml already uses.
  */
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
-import { PUBLIC_VACANCY_SITEMAP_SHARD_SIZE } from "@/lib/vacancy-store/public-vacancy-preview";
 import {
   SITEMAP_CACHE_CONTROL,
-  readCachedActiveVacancyCount,
+  readCachedSitemapShardCount,
 } from "@/lib/vacancy-store/public-vacancy-sitemap-cache";
 
 // Count cached for an hour in public-vacancy-sitemap-cache.ts; never
@@ -44,9 +43,9 @@ function esc(s: string): string {
 }
 
 export async function GET(): Promise<Response> {
-  let activeVacancies: number | null;
+  let shards: number | null;
   try {
-    activeVacancies = await readCachedActiveVacancyCount();
+    shards = await readCachedSitemapShardCount();
   } catch {
     // The count is a real query that can exceed the anon statement timeout on
     // a cold buffer pool (P0-1b, 2026-09-03). A crawler must never read that
@@ -62,10 +61,7 @@ export async function GET(): Promise<Response> {
   // `not_provisioned` (feature off) and "zero live ads" both mean there is
   // nothing to advertise. A crawler must still receive a VALID, EMPTY index —
   // never a 404 or a 500, which would be read as a broken sitemap.
-  const shardCount =
-    activeVacancies !== null && activeVacancies > 0
-      ? Math.ceil(activeVacancies / PUBLIC_VACANCY_SITEMAP_SHARD_SIZE)
-      : 0;
+  const shardCount = shards !== null && shards > 0 ? shards : 0;
 
   const sitemaps = Array.from({ length: shardCount }, (_, i) => {
     const loc = `${MARKETING_ORIGIN}/jobs-sitemap/${i}.xml`;
