@@ -9,22 +9,41 @@ const PAY_FROM: L = { en: "from", lt: "nuo", ru: "от", nl: "vanaf", de: "ab", 
 const PAY_UP_TO: L = { en: "up to", lt: "iki", ru: "до", nl: "tot", de: "bis", pl: "do" };
 
 /**
- * The pay the publisher supplied, in the reader's number format, or `null`.
- * Never invented: no currency (or a malformed one) or no amount = no chip.
+ * THE ONE pay wording (audit 2026-11-03: job cards and job alerts used to
+ * format the same stated pay two ways — an alert printed "up to 3200" as
+ * "3200 EUR", an exact amount the publisher never stated).
+ *
+ * `locale` given: the reader's number format and words ("nuo 2 500 EUR").
+ * `locale` null: the language-neutral form for text stored before anyone
+ * reads it (a job alert's metadata) — no grouping, "≥" / "≤" for one bound.
+ * Never invented: no currency (or a malformed one) or no amount = null.
  */
+export function payLabel(
+  currencyRaw: string | null | undefined,
+  minRaw: number | null | undefined,
+  maxRaw: number | null | undefined,
+  locale: ActiveLocale | null,
+): string | null {
+  const currency = currencyRaw?.trim().toUpperCase() ?? "";
+  if (!/^[A-Z]{3}$/.test(currency)) return null;
+  const valid = (n: number | null | undefined) =>
+    typeof n === "number" && Number.isFinite(n) && n > 0 ? n : null;
+  const min = valid(minRaw);
+  const max = valid(maxRaw);
+  if (min === null && max === null) return null;
+  const fmt = locale
+    ? (v: number) => new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(v)
+    : (v: number) => String(Math.round(v));
+  if (min !== null && max !== null && max > min) return `${fmt(min)}–${fmt(max)} ${currency}`;
+  if (min !== null && max !== null) return `${fmt(min)} ${currency}`;
+  if (min !== null) return `${locale ? PAY_FROM[locale] : "≥"} ${fmt(min)} ${currency}`;
+  return `${locale ? PAY_UP_TO[locale] : "≤"} ${fmt(max as number)} ${currency}`;
+}
+
+/** The pay the publisher supplied on a job card, in the reader's format. */
 export function vacancyPayLabel(
   vacancy: Pick<PublicVacancyPreview, "compensationCurrency" | "compensationMin" | "compensationMax">,
   locale: ActiveLocale,
 ): string | null {
-  const currency = vacancy.compensationCurrency?.trim().toUpperCase() ?? "";
-  if (!/^[A-Z]{3}$/.test(currency)) return null;
-  const valid = (n: number | null) => (n !== null && Number.isFinite(n) && n > 0 ? n : null);
-  const min = valid(vacancy.compensationMin);
-  const max = valid(vacancy.compensationMax);
-  if (min === null && max === null) return null;
-  const n = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
-  if (min !== null && max !== null && max > min) return `${n.format(min)}–${n.format(max)} ${currency}`;
-  if (min !== null && max !== null) return `${n.format(min)} ${currency}`;
-  if (min !== null) return `${PAY_FROM[locale]} ${n.format(min)} ${currency}`;
-  return `${PAY_UP_TO[locale]} ${n.format(max as number)} ${currency}`;
+  return payLabel(vacancy.compensationCurrency, vacancy.compensationMin, vacancy.compensationMax, locale);
 }
