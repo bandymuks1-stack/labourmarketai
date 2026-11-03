@@ -155,6 +155,32 @@ test("J-2b. a request grants nothing, and the learner cannot accept it themselve
   expect(self.ok, "the learner accepted their own request").toBe(false);
 });
 
+test("J-2c. callers without authority over the group are refused and read no request text", async () => {
+  // Synthetic identities available to this walk: `worker` (a plain worker —
+  // wrong role) and `agency` (manages ANOTHER organisation). The cast has no
+  // external_manager on QA-SYNTHETIC Alfa; that case is proven in the DB proofs.
+  // Not signed in = anon (no bearer).
+  const callers: Array<[string, string | null]> = [["anon", null]];
+  for (const slot of ["worker", "agency"]) if (existsSync(state(slot))) callers.push([slot, bearerOf(slot)]);
+  for (const [who, token] of callers) {
+    const rows = await qaApi(`/rest/v1/education_cohort_members?cohort_id=eq.${cohortId}&select=status,request_label,request_note`, token);
+    const body = rows.ok ? ((await rows.json()) as unknown[]) : [];
+    expect(body, `${who} reads no membership or request text`).toEqual([]);
+    const attempts: Array<[string, Record<string, unknown>]> = [
+      ["decide_education_cohort_join_v1", { p_cohort_id: cohortId, p_profile_id: learnerId, p_decision: "accept" }],
+      ["set_education_cohort_member_v1", { p_cohort_id: cohortId, p_profile_id: learnerId, p_status: "active" }],
+      ["set_education_cohort_join_requests_v1", { p_cohort_id: cohortId, p_open: false }],
+      ["archive_education_cohort_v1", { p_cohort_id: cohortId }],
+    ];
+    for (const [fn, args] of attempts) {
+      const r = await qaApi(`/rest/v1/rpc/${fn}`, token, { method: "POST", body: args });
+      expect(r.ok, `${who} was allowed ${fn}`).toBe(false);
+    }
+  }
+  const still = await qaApi(`/rest/v1/education_cohort_members?cohort_id=eq.${cohortId}&select=status`, bearerOf("worker2"));
+  expect(await still.json(), "the request is still pending after the refused attempts").toEqual([{ status: "requested" }]);
+});
+
 test("J-3. the institution's authorised person sees the request by the typed name and accepts it", async ({ browser }) => {
   const { page, close } = await as(browser, "owner");
   await education(page);
