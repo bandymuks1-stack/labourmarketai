@@ -7935,10 +7935,10 @@
   },
   "consent": {
     "banner": {
-      "text": "Med ditt samtycke mäter vi i din webbläsare vilka sidor och steg som hjälper människor och vilken kampanj som förde dig hit; utan det sparas inget för detta på din enhet. Grundläggande räkning av handlingar på våra egna servrar sker oavsett (se cookiepolicyn). Produkten fungerar likadant vad du än väljer.",
+      "text": "Vi mäter sidanvändning och vilken kampanj som förde dig hit bara om du tillåter det.",
       "accept": "Tillåt mätning",
       "refuse": "Avböj",
-      "more": "Cookiepolicy",
+      "more": "Mer",
       "label": "Val om användningsmätning"
     },
     "control": {

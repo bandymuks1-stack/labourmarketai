@@ -20128,10 +20128,10 @@
   },
   "consent": {
     "banner": {
-      "text": "With your consent we measure in your browser which pages and steps help people and which campaign brought you here; without it nothing for this is stored on your device. Basic counts of actions on our own servers are kept either way (see the Cookie Policy). The product works the same whatever you choose.",
+      "text": "We measure page use and which campaign brought you here only if you allow it.",
       "accept": "Allow measurement",
       "refuse": "Refuse",
-      "more": "Cookie Policy",
+      "more": "More",
       "label": "Usage measurement choice"
     },
     "control": {

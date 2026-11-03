@@ -7935,10 +7935,10 @@
   },
   "consent": {
     "banner": {
-      "text": "Med dit samtykke måler vi i din browser, hvilke sider og trin der hjælper folk, og hvilken kampagne der bragte dig hertil; uden det gemmes intet til dette på din enhed. Grundlæggende optællinger af handlinger på vores egne servere sker under alle omstændigheder (se cookiepolitikken). Produktet virker på samme måde, uanset hvad du vælger.",
+      "text": "Vi måler sidebrug, og hvilken kampagne der bragte dig hertil, kun hvis du tillader det.",
       "accept": "Tillad måling",
       "refuse": "Afvis",
-      "more": "Cookiepolitik",
+      "more": "Mere",
       "label": "Valg om brugsmåling"
     },
     "control": {

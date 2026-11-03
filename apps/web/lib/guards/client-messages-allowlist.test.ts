@@ -11,6 +11,7 @@ import {
   pickMessages,
 } from "@/lib/i18n/client-messages";
 import { DASHBOARD_MODULES } from "@/lib/dashboard/dashboard-module-registry";
+import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
 import { activeLocales } from "@/lib/i18n/config";
 
 /**
@@ -221,6 +222,13 @@ describe("every client-reachable namespace root is allowlisted (v1 union)", () =
         ALLOW.has(root),
         `registry root "${root}" must be allowlisted`,
       ).toBe(true);
+    }
+  });
+
+  it("dynamic roots: organization work areas the header can name", () => {
+    for (const area of ORGANIZATION_WORK_AREAS) {
+      const root = area.labelKey.split(".")[0];
+      expect(ALLOW.has(root), `work-area root "${root}" must be allowlisted`).toBe(true);
     }
   });
 

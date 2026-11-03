@@ -5743,7 +5743,7 @@
             "Berichten die je op het platform verstuurt en ontvangt.",
             "Toestemmingsrecords: wanneer je een toestemming geeft of intrekt, worden de actie en het tijdstip opgeslagen.",
             "Technische gegevens die nodig zijn om de dienst te laten draaien, zoals inlogcookies (zie het cookiebeleid).",
-            "Alleen met uw toestemming: gebruiksmeting op onze eigen servers (bereikte pagina's en stappen, dagelijkse activiteit) en de campagne die u bracht, bewaard bij uw account. Zie het cookiebeleid."
+            "Alleen met je toestemming: gebruiksmeting op onze eigen servers (bereikte pagina's en stappen, dagelijkse activiteit) en de campagne die je bracht, bewaard bij je account. Zie het cookiebeleid."
           ]
         },
         {
@@ -5838,18 +5838,18 @@
         },
         {
           "name": "Inlogpoging-markering (lm.oauth.trace)",
-          "purpose": "Tabbladopslag, verwijderd als het tabblad sluit. Een willekeurige code die één inlogpoging aan het resultaat koppelt, zodat een mislukte inlog kan worden onderzocht. Nodig voor de inlog die u startte; bevat geen accountgegevens."
+          "purpose": "Tabbladopslag, verwijderd als het tabblad sluit. Een willekeurige code die één inlogpoging aan het resultaat koppelt, zodat een mislukte inlog kan worden onderzocht. Nodig voor de inlog die je startte; bevat geen accountgegevens."
         }
       ],
-      "localStorageNote": "De eigen opslag van uw browser (geen cookies) bevat daarnaast een paar items waar u zelf om vroeg: uw keuze voor een licht of donker thema, uw keuze over gebruiksmeting en kleine gemakken zoals weggeklikte meldingen, recent bekeken items en de taal van spraakinvoer. Ze blijven op uw apparaat en u kunt ze op elk moment via uw browser wissen.",
+      "localStorageNote": "De eigen opslag van je browser (geen cookies) bevat daarnaast een paar items waar je zelf om vroeg: je keuze voor een licht of donker thema, je keuze over gebruiksmeting en kleine gemakken zoals weggeklikte meldingen, recent bekeken items en de taal van spraakinvoer. Ze blijven op je apparaat en je kunt ze op elk moment via je browser wissen.",
       "noTracking": "Er zijn op het platform geen advertentie- of trackingcookies van derden, en niets wordt voor advertenties met derden gedeeld.",
       "settingsLink": "Cookie-instellingen",
-      "analyticsTitle": "Gebruiksmeting — alleen met uw toestemming",
-      "analyticsIntro": "Met uw toestemming meten we hoe het product wordt gebruikt: welke pagina's en stappen mensen bereiken, de stappen van de registratie, dagelijkse activiteit en welke campagne een bezoeker bracht. Gebeurtenissen worden op onze eigen servers bewaard en, als u bent ingelogd, aan uw account gekoppeld. Zonder uw toestemming wordt geen van de onderstaande items geschreven en wordt er geen meetgebeurtenis vanuit uw browser verzonden.",
+      "analyticsTitle": "Gebruiksmeting — alleen met je toestemming",
+      "analyticsIntro": "Met je toestemming meten we hoe het product wordt gebruikt: welke pagina's en stappen mensen bereiken, de stappen van de registratie, dagelijkse activiteit en welke campagne een bezoeker bracht. Gebeurtenissen worden op onze eigen servers bewaard en, als je bent ingelogd, aan je account gekoppeld. Zonder je toestemming wordt geen van de onderstaande items geschreven en wordt er geen meetgebeurtenis vanuit je browser verzonden.",
       "analyticsItems": [
         {
           "name": "Campagne van het eerste bezoek (lm.attr.first)",
-          "purpose": "Browseropslag. De campagnetags (utm_*), de verwijzende site en de landingspagina van uw eerste bezoek. Bij registratie worden ze naar uw eigen accountgegevens gekopieerd, zodat de campagne die u bracht kan worden geteld."
+          "purpose": "Browseropslag. De campagnetags (utm_*), de verwijzende site en de landingspagina van je eerste bezoek. Bij registratie worden ze naar je eigen accountgegevens gekopieerd, zodat de campagne die je bracht kan worden geteld."
         },
         {
           "name": "Sessie-ID (lm.pilot.session)",
@@ -5857,14 +5857,14 @@
         },
         {
           "name": "Activiteitsmarkeringen (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
-          "purpose": "Browseropslag. De laatste dag dat u actief was, en een markering dat een registratie bezig is."
+          "purpose": "Browseropslag. De laatste dag dat je actief was, en een markering dat een registratie bezig is."
         },
         {
           "name": "Eenmaal-tellen-markeringen (lm.funnel.*)",
           "purpose": "Tabbladopslag. Voorkomt dat dezelfde meetgebeurtenis twee keer wordt geteld."
         }
       ],
-      "analyticsBasis": "Weigeren of intrekken verwijdert deze items direct van dit apparaat; als u bent ingelogd, wordt ook de campagne bij uw account gewist. De meting zelf is gebaseerd op ons gerechtvaardigd belang bij het verbeteren van het product (art. 6, lid 1, onder f, AVG), en u kunt er bezwaar tegen maken zoals beschreven in het privacybeleid."
+      "analyticsBasis": "Weigeren of intrekken verwijdert deze items direct van dit apparaat; als je bent ingelogd, wordt ook de campagne bij je account gewist. De meting zelf is gebaseerd op ons gerechtvaardigd belang bij het verbeteren van het product (art. 6, lid 1, onder f, AVG), en je kunt er bezwaar tegen maken zoals beschreven in het privacybeleid."
     },
     "requestContact": "Neem contact met ons op om een vraag te stellen of een verzoek over je gegevens in te dienen — een persoon zal het beoordelen.",
     "related": "Gerelateerde pagina's",
@@ -20128,17 +20128,17 @@
   },
   "consent": {
     "banner": {
-      "text": "Met uw toestemming meten we in uw browser welke pagina's en stappen mensen helpen en welke campagne u hierheen bracht; zonder toestemming wordt hiervoor niets op uw apparaat opgeslagen. Basistellingen van acties op onze eigen servers gebeuren hoe dan ook (zie het cookiebeleid). Het product werkt hetzelfde, wat u ook kiest.",
+      "text": "We meten paginagebruik en via welke campagne je kwam alleen als je dat toestaat.",
       "accept": "Meting toestaan",
       "refuse": "Weigeren",
-      "more": "Cookiebeleid",
+      "more": "Meer",
       "label": "Keuze over gebruiksmeting"
     },
     "control": {
       "title": "Gebruiksmeting en campagnetoewijzing",
-      "granted": "U heeft toestemming gegeven. U kunt die altijd intrekken; de items worden dan van dit apparaat verwijderd.",
-      "refused": "U heeft geweigerd. Op dit apparaat wordt niets voor meting opgeslagen.",
-      "undecided": "U heeft nog niet gekozen, dus er wordt niets voor meting opgeslagen.",
+      "granted": "Je hebt toestemming gegeven. Je kunt die altijd intrekken; de items worden dan van dit apparaat verwijderd.",
+      "refused": "Je hebt geweigerd. Op dit apparaat wordt niets voor meting opgeslagen.",
+      "undecided": "Je hebt nog niet gekozen, dus er wordt niets voor meting opgeslagen.",
       "allow": "Toestaan",
       "refuse": "Weigeren"
     }

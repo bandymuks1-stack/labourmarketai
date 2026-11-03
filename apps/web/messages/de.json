@@ -20128,10 +20128,10 @@
   },
   "consent": {
     "banner": {
-      "text": "Mit Ihrer Einwilligung messen wir in Ihrem Browser, welche Seiten und Schritte Menschen helfen und welche Kampagne Sie hierher geführt hat; ohne sie wird dafür nichts auf Ihrem Gerät gespeichert. Grundlegende Zählungen von Aktionen auf unseren eigenen Servern erfolgen in jedem Fall (siehe Cookie-Richtlinie). Das Produkt funktioniert gleich, wie auch immer Sie wählen.",
+      "text": "Seitennutzung und die Kampagne, über die Sie kamen, messen wir nur mit Ihrer Erlaubnis.",
       "accept": "Messung erlauben",
       "refuse": "Ablehnen",
-      "more": "Cookie-Richtlinie",
+      "more": "Mehr",
       "label": "Auswahl zur Nutzungsmessung"
     },
     "control": {

@@ -241,6 +241,8 @@ carries a closing comment). Unique, not-yet-built requirements are carried here 
 | #740 voice_journal_jobs migration | voice is deferred (no transcription host; COM-6, V-2) | when voice reopens: one owner-scoped job table, disclosure acknowledged before recording, transcript ≤ 60k, audio retention ≤ 30 days, one job → at most one journal entry, worker/admin read only, RPC-only writes, right-to-erase RPC — design on branch `feat/voice-journal-jobs-migration-v1` (origin #740) |
 | #2915 completion map 2026-11-01 | the 288 statuses live only in FUNCTION_REGISTER (one register) | planning columns not in the register: effort per function, critical path, about 185–295 agent days, conditional targets (core mid-December 2026, full scope February 2027, preliminary) — on branch `docs/cc/completion-map-288` (origin #2915) |
 
+**Database backup — OPERATIONAL 2026-11-03** (owner approval the same day: one read-only backup role through the existing authorised access; no new API key). Read-only backup role created (read all incl. RLS-protected data, no write/admin), its connection string stored in the existing `SUPABASE_BACKUP_DB_URL` slot without ever being shown. `db-backup.yml`: drill run 41636950462 and full run 41637888590 both SUCCESS — dump, restore into a throw-away PostgreSQL with every key table matching the source exactly, encryption, copy on the VPS; an encrypted copy also kept off the VPS (checksums identical). Nightly 03:30 UTC from now on. Details and the credential inventory are in the private record.
+
 **Owner decisions 2026-11-03 (public launch)**
 
 | Item | Decision | Executor | Done when |

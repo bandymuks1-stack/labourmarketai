@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { AnalyticsConsentBanner } from "@/components/app/analytics-consent";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { LmLogo } from "@/components/ui/lm-logo";
@@ -32,6 +33,7 @@ export default async function AuthLayout({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const consentT = await getTranslations({ locale, namespace: "consent" });
 
   return (
     <NextIntlClientProvider
@@ -57,6 +59,19 @@ export default async function AuthLayout({
         </header>
         <main className="relative z-10 mx-auto flex max-w-md flex-col px-6 pb-20">
           {children}
+          {/* Analytics consent on sign-up / sign-in sits BELOW the form so
+              the account action stays first on a phone; the root layout's
+              top banner skips /auth/* (components/app/analytics-consent.tsx). */}
+          <AnalyticsConsentBanner
+            placement="after-form"
+            strings={{
+              label: consentT("banner.label"),
+              text: consentT("banner.text"),
+              accept: consentT("banner.accept"),
+              refuse: consentT("banner.refuse"),
+              more: consentT("banner.more"),
+            }}
+          />
         </main>
       </div>
     </NextIntlClientProvider>

@@ -7935,10 +7935,10 @@
   },
   "consent": {
     "banner": {
-      "text": "Sinu nõusolekul mõõdame sinu brauseris, millised lehed ja sammud inimesi aitavad ja milline kampaania sind siia tõi; ilma selleta ei salvestata selleks sinu seadmesse midagi. Põhilisi tegevuste loendusi meie enda serverites peetakse igal juhul (vaata küpsiste põhimõtteid). Toode töötab ühtemoodi, mida iganes sa valid.",
+      "text": "Lehtede kasutust ja kampaaniat, mis sind siia tõi, mõõdame ainult sinu loal.",
       "accept": "Luba mõõtmine",
       "refuse": "Keeldu",
-      "more": "Küpsiste põhimõtted",
+      "more": "Rohkem",
       "label": "Kasutuse mõõtmise valik"
     },
     "control": {
