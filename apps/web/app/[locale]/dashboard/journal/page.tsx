@@ -65,6 +65,7 @@ import { readModuleFieldValues } from "@/lib/journal/journal-module-fields";
 import { readOwnOccupationPath } from "@/lib/journal/journal-occupation-path";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import {
+  deriveIndependentReviewResult,
   deriveReviewResult,
   deriveReviewTimeline,
   isSelfConfirmedOnly,
@@ -892,9 +893,12 @@ export default async function JournalPage({
   // Evidence Status Strip (v1) for the list status zone — a compact legend
   // showing which honest states the worker's entries are actually in. Derived
   // purely from the existing review result; "confirmed" lights up ONLY when a
-  // real approved confirmation exists, never automatically.
+  // real approved confirmation exists, never automatically. The signed-in
+  // person IS the subject, so their own approval of their own entry never
+  // counts here (decision 0028 J-2.2): the strip's "confirmed" chip and the
+  // CV bridge's "confirmed" count mean another person confirmed it.
   const evidenceStatuses = (entries ?? []).map((e) =>
-    deriveReviewResult(e.journal_entry_confirmations),
+    deriveIndependentReviewResult(e.journal_entry_confirmations, user.id),
   );
 
   // Diary day-grouping (CV/records feed cleanup): the feed reads as a dated
@@ -1020,22 +1024,13 @@ export default async function JournalPage({
       totalMinutes: g.totalMinutes,
       /**
        * The SAME derivation the rest of the page uses for "confirmed"
-       * (`deriveReviewResult` === "approved") — never a second rule.
-       *
-       * WHAT THIS COUNT CANNOT SAY, and why the calendar's words are careful:
-       * `deriveReviewResult` also returns "approved" when the SUBJECT
-       * approved their own entry (a worker who manages their organization),
-       * and this page's reader selects `confirmation_scope, created_at,
-       * confirmer_role` — not `confirmer_id` — so `isSelfConfirmation` cannot
-       * be evaluated here (review-status.ts documents exactly this). The
-       * marker therefore says a JOURNAL RECORD is confirmed and never that a
-       * MANAGER confirmed it: claiming independence the data cannot support
-       * would dress self-declared evidence as external confirmation (SEP-3).
-       * Widening the reader's select is a change to a shared canonical reader
-       * and belongs in its own slice, not in a UX pass.
+       * (`deriveIndependentReviewResult` === "approved") — never a second
+       * rule. The signed-in person is the subject, so a self-approval
+       * (decision 0028 J-2.2) never counts as a confirmed day.
        */
       confirmedCount: g.entries.filter(
-        (e) => deriveReviewResult(e.journal_entry_confirmations) === "approved",
+        (e) =>
+          deriveIndependentReviewResult(e.journal_entry_confirmations, user.id) === "approved",
       ).length,
       reportedMinutes: reportedByDay.get(g.isoKey) ?? 0,
     })).concat(
