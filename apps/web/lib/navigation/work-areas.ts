@@ -120,15 +120,31 @@ export function organizationHeaderAreas(role: "company" | "agency"): readonly Na
 
 /**
  * THE CUSTOMER'S OWN DOOR in the one header (owner P0-2, coordinator ruling
- * 2026-11-03): a person whose ACTIVE role is customer, outside an
- * organization workspace, finds "Mano užklausos" (/dashboard/buyer — the
- * customer role's home) first in "More" and the phone sheet. Same rule as the
+ * 2026-11-03): a person who HOLDS the customer role, outside an organization
+ * workspace, finds "Mano užklausos" (/dashboard/buyer — the customer role's
+ * home) first in "More" and the phone sheet. Same rule as the
  * organization doors: the primary row stays the A-03 core loop, this adds no
  * primary item, and the page re-checks the customer role itself.
  */
 export const CUSTOMER_HEADER_DOORS: readonly NavItem[] = [
   { id: "area:buyer", href: "/dashboard/buyer", tabLabelKey: "roleDashboards.buyer.title", iconKey: "package" },
 ];
+
+/**
+ * WHO GETS THE CUSTOMER DOOR — the SAME rule as the /dashboard/buyer gate
+ * (`requireRoleOrRedirect(locale, "customer")`, a HELD-role check). Production
+ * walk buyer-workspace 41676554374: a customer whose active role was `worker`
+ * (the normal state after onboarding resets active_role to the chosen
+ * primary) got no door, because the first version asked for the ACTIVE role.
+ */
+export function customerHeaderDoors(
+  heldRoles: readonly string[],
+  activeWorkspace: { readonly kind: "personal" | "organization" } | null | undefined,
+): readonly NavItem[] {
+  if (!heldRoles.includes("customer")) return [];
+  if (activeWorkspace?.kind === "organization") return [];
+  return CUSTOMER_HEADER_DOORS;
+}
 
 export type WorkAreaContext = "personal" | "organization";
 
