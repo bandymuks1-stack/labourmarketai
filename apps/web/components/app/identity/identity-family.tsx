@@ -71,9 +71,12 @@ export const IDENTITY_SIZE = { chip: 28, row: 40, card: 64 } as const;
 export type IdentitySize = keyof typeof IDENTITY_SIZE | number;
 const px = (size: IdentitySize) => (typeof size === "number" ? size : IDENTITY_SIZE[size]);
 
-/** From card size up there is room for the engraved figure behind the
- *  initials; below it the plate carries the initials alone (calm, legible). */
-export const FIGURE_MIN_PX = IDENTITY_SIZE.card;
+/** Only a STAGE-size portrait (≥ 120 px, or a fluid stage frame) has room for
+ *  the engraved figure behind the initials. Every mark below it — chip, row,
+ *  card, the 64–96 px medium avatars — carries the initials alone: calm and
+ *  legible (owner decision 2026-11-03 on #2370: "patikslinti vidutinio dydžio
+ *  avatarus"). The anonymous person keeps the hatched figure at every size. */
+export const FIGURE_MIN_PX = 120;
 
 /** First letters of an organization/project name (legal forms and quote
  *  marks skipped: UAB „Statybų grupė" → "SG"). Neutral "•" when nothing is left. */
@@ -215,7 +218,9 @@ export function TeamStack({
   const s = px(size);
   const shown = members.slice(0, max);
   const over = members.length - shown.length;
-  const overlap = Math.round(s * 0.3);
+  // 18 % overlap (was 30 %): each member's initials stay readable beside the
+  // next mark, with the 2 px ground ring separating them (owner 2026-11-03).
+  const overlap = Math.round(s * 0.18);
   return (
     <span className={cn("inline-flex items-center", className)} data-identity="team-stack">
       {shown.map((m, i) => (
