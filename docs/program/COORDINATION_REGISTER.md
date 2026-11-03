@@ -243,6 +243,28 @@ carries a closing comment). Unique, not-yet-built requirements are carried here 
 
 **Database backup — OPERATIONAL 2026-11-03** (owner approval the same day: one read-only backup role through the existing authorised access; no new API key). Read-only backup role created (read all incl. RLS-protected data, no write/admin), its connection string stored in the existing `SUPABASE_BACKUP_DB_URL` slot without ever being shown. `db-backup.yml`: drill run 41636950462 and full run 41637888590 both SUCCESS — dump, restore into a throw-away PostgreSQL with every key table matching the source exactly, encryption, copy on the VPS; an encrypted copy also kept off the VPS (checksums identical). Nightly 03:30 UTC from now on. Details and the credential inventory are in the private record.
 
+**Database backup completeness — PASS 2026-11-03** (owner P0 the same day: explain the 284 tables that can be read versus the 253 restored; check every schema a restore needs, the permissions, and the restore procedure). PR #3005. Findings:
+- **284 versus 253:** 284 is the base tables in the public, accounts and file-storage schemas. The former drill's 253 counted views too: 249 product tables plus 4 views.
+- **The real gap:** the drill's 195 restore errors hid missing access policies and one constraint. The drill now creates the platform roles and extensions first, and only the one harmless error remains.
+
+Backup scope now:
+- the product data;
+- accounts;
+- file-storage metadata;
+- the migration ledger;
+- the stored FILES and the scheduled-job definitions, as a second encrypted bundle beside the dump (14-day rotation).
+
+Left out on purpose, with reasons in the runbook (§9.1.0): the platform's secrets store and its realtime runtime.
+
+Proof:
+- **Drill from main,** run 41664420591: every schema object type matches the source exactly; every table's row count is inside its source window; every file came back byte for byte; every scheduled job was exported.
+- **Full run,** run 41665452921: both encrypted files reached the VPS and decrypt correctly. A copy is also kept off the VPS, with identical checksums.
+- **Receiver:** the VPS receiver from main was installed once, with the owner's approval; the old copy is kept.
+
+The restore procedure is documented end to end in the runbook (§9.1.1).
+
+**Open:** the first SCHEDULED full-scope nightly, 2026-11-04 03:30 UTC. Check it after it runs and add its run id here.
+
 **Owner decisions 2026-11-03 (public launch)**
 
 | Item | Decision | Executor | Done when |
