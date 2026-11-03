@@ -1,11 +1,21 @@
 #!/usr/bin/env bash
 # ============================================================================
-# J-12 follow-up (migration 20261103090000): RUNTIME proof that the member
-# command never flips a request row and never leaves request text on a member
-# row. Scratch PostgreSQL 16 only. Reuses the J-12 prelude (production
-# manages_organization, which admits external_manager), applies the two applied
-# education migrations, the applied J-12 migration and this one VERBATIM, and
-# probes as `authenticated` with a JWT subject.
+# J-12 access closure (migration 20261103090000): RUNTIME proof on a scratch
+# PostgreSQL 16, owner conditions 2026-11-03 (1–6).
+#
+# Reuses the J-12 prelude, whose manages_organization is the PRODUCTION
+# predicate (admits external_manager). Applies the two applied education
+# migrations, the applied J-12 migration (20261102160000) and this one
+# VERBATIM, and probes as `authenticated` / `anon` with a JWT subject.
+#   - reproduces both gaps BEFORE the fix;
+#   - negative: external manager by engagement and by membership, a manager of
+#     ANOTHER institution, a wrong-role member and employee, anon — for every
+#     membership-changing command and for reading request text;
+#   - positive: the institution's own owner / admin / manager, and the learner;
+#   - nothing destroyed: request text and audit rows survive;
+#   - no alternative path: every client-executable definer function that
+#     touches the membership table is in the known set;
+#   - rollback restores all three objects exactly (md5).
 #
 # Usage: as scripts/db-proof/education-cohort-join-requests.sh (port 54396).
 # Throwaway only. Never point this at production or a shared local stack.
@@ -24,16 +34,26 @@ MIGS=(
 MIG="$REPO/supabase/migrations/20261103090000_education_cohort_member_request_guard_v1.sql"
 DOWN="$REPO/supabase/rollbacks/20261103090000_education_cohort_member_request_guard_v1.down.sql"
 
-MGR=a0000000-0000-0000-0000-00000000000a
+# institution's own people (positive)
+MGR=a0000000-0000-0000-0000-00000000000a      # engagement manager
+OWNER=a1000000-0000-0000-0000-00000000000a    # membership owner
+ADMINM=a2000000-0000-0000-0000-00000000000a   # membership admin
+# no authority over this institution (negative)
+EXTENG=e0000000-0000-0000-0000-00000000000e   # engagement external_manager
+EXTMEM=e1000000-0000-0000-0000-00000000000e   # membership external_manager
+OTHERMGR=e2000000-0000-0000-0000-00000000000e # manager of ANOTHER institution
+WRONGMEM=e3000000-0000-0000-0000-00000000000e # membership role 'member'
+WRONGEMP=e4000000-0000-0000-0000-00000000000e # engagement 'employee'
+# learners (all already linked as students)
 REQ=b0000000-0000-0000-0000-00000000000b
 DEC=c0000000-0000-0000-0000-00000000000c
 WD=d0000000-0000-0000-0000-00000000000d
 PLAIN=d1000000-0000-0000-0000-00000000000d
-EXTENG=e0000000-0000-0000-0000-00000000000e
-EXTMEM=e1000000-0000-0000-0000-00000000000e
 ORG=f0000000-0000-0000-0000-0000000000f1
+ORG2=f0000000-0000-0000-0000-0000000000f2
 PROG=a1000000-0000-0000-0000-0000000000a1
 COH=c1000000-0000-0000-0000-0000000000c1
+NEG="$EXTENG $EXTMEM $OTHERMGR $WRONGMEM $WRONGEMP"
 
 PASS=0; FAIL=0
 DB=j12guard
@@ -55,18 +75,28 @@ check() {
   if [ "$3" = "$2" ]; then PASS=$((PASS+1)); echo "  ok   $1";
   else FAIL=$((FAIL+1)); echo "  FAIL $1 — expected [$2] got [$3]"; fi
 }
-FN="select md5(pg_get_functiondef('public.set_education_cohort_member_v1(uuid,uuid,text)'::regprocedure));"
-ORIGINAL="$(q '' postgres "$FN")"
+refused() { # name actual — any refusal (not_manager / permission denied / request_row_use_decide …), never success
+  case "$2" in
+    ""|requested|accepted|declined) FAIL=$((FAIL+1)); echo "  FAIL $1 — was ALLOWED [$2]";;
+    *) PASS=$((PASS+1)); echo "  ok   $1 ($2)";;
+  esac
+}
+OBJ="select md5(pg_get_functiondef('public.set_education_cohort_member_v1(uuid,uuid,text)'::regprocedure))
+  || md5(pg_get_functiondef('public.decide_education_cohort_join_v1(uuid,uuid,text)'::regprocedure))
+  || md5(pg_get_expr(polqual, polrelid)) from pg_policy where polname = 'education_cohort_members_select';"
+BEFORE_OBJ="$(q '' postgres "$OBJ")"
 
 $PSQL >/dev/null <<SQL
-insert into profiles values ('$MGR'), ('$REQ'), ('$DEC'), ('$WD'), ('$PLAIN'), ('$EXTENG'), ('$EXTMEM');
-insert into organizations values ('$ORG', 'QA Institution', null, null);
+insert into profiles values ('$MGR'), ('$OWNER'), ('$ADMINM'), ('$EXTENG'), ('$EXTMEM'), ('$OTHERMGR'), ('$WRONGMEM'), ('$WRONGEMP'),
+  ('$REQ'), ('$DEC'), ('$WD'), ('$PLAIN');
+insert into organizations values ('$ORG', 'QA Institution', null, null), ('$ORG2', 'Other Institution', null, null);
+insert into relationship_types values ('member') on conflict do nothing;
 insert into engagement_contexts (profile_id, organization_id, relationship_slug, hash_self) values
-  ('$MGR', '$ORG', 'manager', 'x'), ('$EXTENG', '$ORG', 'external_manager', 'x');
-insert into company_memberships (profile_id, organization_id, role) values ('$EXTMEM', '$ORG', 'external_manager');
--- every learner is ALREADY a linked student (the case the gap needs)
-insert into engagement_contexts (profile_id, organization_id, relationship_slug, hash_self) values
+  ('$MGR', '$ORG', 'manager', 'x'), ('$EXTENG', '$ORG', 'external_manager', 'x'),
+  ('$OTHERMGR', '$ORG2', 'manager', 'x'), ('$WRONGEMP', '$ORG', 'employee', 'x'),
   ('$REQ', '$ORG', 'student', 'x'), ('$DEC', '$ORG', 'student', 'x'), ('$WD', '$ORG', 'student', 'x'), ('$PLAIN', '$ORG', 'student', 'x');
+insert into company_memberships (profile_id, organization_id, role) values
+  ('$OWNER', '$ORG', 'owner'), ('$ADMINM', '$ORG', 'admin'), ('$EXTMEM', '$ORG', 'external_manager'), ('$WRONGMEM', '$ORG', 'member');
 insert into education_programs (id, organization_id, name) values ('$PROG', '$ORG', 'Tiling programme');
 insert into education_cohorts (id, program_id, organization_id, name, join_requests_open) values ('$COH', '$PROG', '$ORG', 'Group A', true);
 insert into education_cohort_members (cohort_id, profile_id, status, requested_at, request_label, request_note) values
@@ -75,45 +105,80 @@ insert into education_cohort_members (cohort_id, profile_id, status, requested_a
   ('$COH', '$WD',  'withdrawn', now(), 'Typed Wd',  'note wd');
 SQL
 
-echo "== BEFORE the fix (the gap, reproduced)"
-check "external manager flips a requested row to active (gap)" "" "$(q $EXTENG authenticated "select set_education_cohort_member_v1('$COH','$REQ','active');")"
-check "... and the typed label stays on the active row (gap)" "active|Typed Req" "$(q '' postgres "select status, request_label from education_cohort_members where profile_id='$REQ';")"
+echo "== BEFORE the fix — both gaps reproduced"
+check "gap 1: an external manager flips a requested row to active" "" "$(q $EXTENG authenticated "select set_education_cohort_member_v1('$COH','$REQ','active');")"
+check "gap 2: ... and reads the learner-typed text on the now-active row" "active|Typed Req|note req" "$(q $EXTMEM authenticated "select status, request_label, request_note from education_cohort_members where profile_id='$REQ';")"
 $PSQL -c "update education_cohort_members set status='requested' where profile_id='$REQ';" >/dev/null
 
 $PSQL -f "$MIG" >/dev/null || { echo "migration failed to apply"; exit 1; }
+AUDIT0="$(q '' postgres "select count(*) from audit_logs;")"
 
-echo "== request rows are never flipped"
-for X in $EXTENG $EXTMEM $MGR; do
+echo "== negative: no authority over the institution (condition 5)"
+for X in $NEG; do
+  refused "$X: set_member on a linked learner"     "$(q $X authenticated "select set_education_cohort_member_v1('$COH','$PLAIN','active');")"
+  refused "$X: set_member on a request row"        "$(q $X authenticated "select set_education_cohort_member_v1('$COH','$REQ','active');")"
+  refused "$X: accept"                             "$(q $X authenticated "select decide_education_cohort_join_v1('$COH','$REQ','accept');")"
+  refused "$X: decline"                            "$(q $X authenticated "select decide_education_cohort_join_v1('$COH','$REQ','decline');")"
+  refused "$X: open/close"                         "$(q $X authenticated "select set_education_cohort_join_requests_v1('$COH', false);")"
+  refused "$X: archive"                            "$(q $X authenticated "select archive_education_cohort_v1('$COH');")"
+  check   "$X: reads no membership row"            "0" "$(q $X authenticated "select count(*) from education_cohort_members;")"
+  check   "$X: reads no learner-typed text"        "0" "$(q $X authenticated "select count(*) from education_cohort_members where request_label is not null or request_note is not null;")"
+done
+refused "anon: set_member"  "$(q '' anon "select set_education_cohort_member_v1('$COH','$PLAIN','active');")"
+refused "anon: accept"      "$(q '' anon "select decide_education_cohort_join_v1('$COH','$REQ','accept');")"
+refused "anon: open/close"  "$(q '' anon "select set_education_cohort_join_requests_v1('$COH', false);")"
+refused "anon: archive"     "$(q '' anon "select archive_education_cohort_v1('$COH');")"
+refused "anon: read rows"   "$(q '' anon "select count(*) from education_cohort_members;")"
+refused "a learner cannot accept their own request" "$(q $REQ authenticated "select decide_education_cohort_join_v1('$COH','$REQ','accept');")"
+refused "a learner cannot set their own membership" "$(q $REQ authenticated "select set_education_cohort_member_v1('$COH','$REQ','active');")"
+check "every row unchanged after all refusals" "declined|requested|withdrawn" "$(q '' postgres "select string_agg(status, '|' order by status) from education_cohort_members;")"
+check "no refusal wrote an audit row" "$AUDIT0" "$(q '' postgres "select count(*) from audit_logs;")"
+
+echo "== request rows go only through decide / withdraw / archive (condition 1)"
+for X in $MGR $OWNER $ADMINM; do
   for P in $REQ $DEC $WD; do
-    for S in active left; do
-      check "$X cannot set $P to $S" "request_row_use_decide" "$(q $X authenticated "select set_education_cohort_member_v1('$COH','$P','$S');")"
-    done
+    check "internal $X cannot set_member $P" "request_row_use_decide" "$(q $X authenticated "select set_education_cohort_member_v1('$COH','$P','left');")"
   done
 done
-check "request rows unchanged after all refusals" "declined|requested|withdrawn" "$(q '' postgres "select string_agg(status, '|' order by status) from education_cohort_members;")"
-check "the J-12 decide path still accepts (internal manager)" "accepted" "$(q $MGR authenticated "select decide_education_cohort_join_v1('$COH','$REQ','accept');")"
-check "external manager still cannot decide" "not_manager" "$(q $EXTENG authenticated "select decide_education_cohort_join_v1('$COH','$WD','accept');")"
 
-echo "== the member path for linked learners is unchanged"
-check "internal manager adds a linked learner" "" "$(q $MGR authenticated "select set_education_cohort_member_v1('$COH','$PLAIN','active');")"
-check "... active, decider recorded" "active|t" "$(q '' postgres "select status, added_by = '$MGR' from education_cohort_members where profile_id='$PLAIN';")"
-check "internal manager ends it" "" "$(q $MGR authenticated "select set_education_cohort_member_v1('$COH','$PLAIN','left');")"
-check "... left, left_at set" "left|t" "$(q '' postgres "select status, left_at is not null from education_cohort_members where profile_id='$PLAIN';")"
-check "and re-activates it" "active|t" "$(q $MGR authenticated "select set_education_cohort_member_v1('$COH','$PLAIN','active');" >/dev/null; q '' postgres "select status, left_at is null from education_cohort_members where profile_id='$PLAIN';")"
-check "unlinked learner still refused" "not_a_linked_learner" "$(q $MGR authenticated "select set_education_cohort_member_v1('$COH','$MGR','active');")"
+echo "== positive: the institution's own people and the learner (condition 6)"
+check "learner reads own request row with own text" "requested|Typed Req|note req" "$(q $REQ authenticated "select status, request_label, request_note from education_cohort_members;")"
+check "internal manager (engagement) reads the request text" "Typed Req|note req" "$(q $MGR authenticated "select request_label, request_note from education_cohort_members where profile_id='$REQ';")"
+check "internal owner (membership) reads all three request rows" "3" "$(q $OWNER authenticated "select count(*) from education_cohort_members;")"
+check "internal admin (membership) accepts" "accepted" "$(q $ADMINM authenticated "select decide_education_cohort_join_v1('$COH','$REQ','accept');")"
+check "internal owner adds a linked learner" "" "$(q $OWNER authenticated "select set_education_cohort_member_v1('$COH','$PLAIN','active');")"
+check "internal manager ends that membership" "" "$(q $MGR authenticated "select set_education_cohort_member_v1('$COH','$PLAIN','left');")"
+check "... and re-activates it" "" "$(q $MGR authenticated "select set_education_cohort_member_v1('$COH','$PLAIN','active');")"
+check "member state after the internal writes" "active|t" "$(q '' postgres "select status, left_at is null from education_cohort_members where profile_id='$PLAIN';")"
+check "unlinked learner still refused" "not_a_linked_learner" "$(q $MGR authenticated "select set_education_cohort_member_v1('$COH','$OWNER','active');")"
 check "invalid status still refused" "invalid_status" "$(q $MGR authenticated "select set_education_cohort_member_v1('$COH','$PLAIN','requested');")"
+check "internal manager can still close the group" "" "$(q $MGR authenticated "select set_education_cohort_join_requests_v1('$COH', false);")"
+check "the learner reads their own active row" "active" "$(q $REQ authenticated "select status from education_cohort_members;")"
+check "the learner reads no other learner's row" "1" "$(q $REQ authenticated "select count(*) from education_cohort_members;")"
 
-echo "== no request text on active / left rows"
-$PSQL -c "update education_cohort_members set request_label='Legacy Typed', request_note='legacy note' where profile_id='$PLAIN';" >/dev/null
-check "ending a member clears legacy request text" "left||" "$(q $MGR authenticated "select set_education_cohort_member_v1('$COH','$PLAIN','left');" >/dev/null; q '' postgres "select status, request_label, request_note from education_cohort_members where profile_id='$PLAIN';")"
-check "the accepted request row carries no request text" "active||" "$(q '' postgres "select status, request_label, request_note from education_cohort_members where profile_id='$REQ';")"
-check "ending the accepted member keeps it clean" "left||" "$(q $MGR authenticated "select set_education_cohort_member_v1('$COH','$REQ','left');" >/dev/null; q '' postgres "select status, request_label, request_note from education_cohort_members where profile_id='$REQ';")"
-check "no active/left row anywhere holds request text" "0" "$(q '' postgres "select count(*) from education_cohort_members where status in ('active','left') and (request_label is not null or request_note is not null);")"
+echo "== nothing destroyed, everything traceable (condition 4)"
+check "accept KEPT the learner's own request text" "active|Typed Req|note req" "$(q '' postgres "select status, request_label, request_note from education_cohort_members where profile_id='$REQ';")"
+check "... readable to the learner" "Typed Req|note req" "$(q $REQ authenticated "select request_label, request_note from education_cohort_members;")"
+check "... never to an external manager" "0" "$(q $EXTMEM authenticated "select count(*) from education_cohort_members where profile_id='$REQ';")"
+check "declined / withdrawn rows keep their text" "2" "$(q '' postgres "select count(*) from education_cohort_members where status in ('declined','withdrawn') and request_label is not null and request_note is not null;")"
+check "set_member writes an audit row with actor and basis" "3|membership:owner,engagement:manager,engagement:manager" "$(q '' postgres "select count(*), string_agg(payload->>'authority_basis', ',' order by occurred_at, (payload->>'authority_basis') desc) from audit_logs where action='education_cohort_member_set_v1';")"
+check "accept audit row: actor + basis, no learner text" "t|membership:admin|f" "$(q '' postgres "select actor_id='$ADMINM', payload->>'authority_basis', payload::text like '%Typed%' from audit_logs where action='education_cohort_join_accepted_v1';")"
+check "no audit row was removed" "t" "$(q '' postgres "select count(*) >= $AUDIT0 + 5 from audit_logs;")"
+
+echo "== no alternative path (condition 3)"
+check "client-executable definer functions touching the membership table are exactly the known set" \
+  "archive_education_cohort_v1,decide_education_cohort_join_v1,is_active_cohort_member_v1,is_active_program_member_v1,list_open_education_cohorts_v1,request_education_cohort_join_v1,set_education_cohort_member_v1,withdraw_education_cohort_join_v1" \
+  "$(q '' postgres "select string_agg(proname, ',' order by proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname='public' and p.prosecdef and p.prosrc ilike '%education_cohort_members%' and has_function_privilege('authenticated', p.oid, 'execute');")"
+check "every membership WRITER among them uses the decider basis or is the learner's own row" "0" \
+  "$(q '' postgres "select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.prosecdef and p.prosrc ~* '(insert into|update)\s+public\.education_cohort_members' and has_function_privilege('authenticated', p.oid, 'execute') and p.prosrc not like '%education_cohort_decider_basis_v1%' and p.prosrc not like '%profile_id = v_uid%' and p.prosrc not like '%v_uid, ''requested''%';")"
+check "authenticated holds no INSERT/UPDATE/DELETE on the membership table" "f|f|f" "$(q '' postgres "select has_table_privilege('authenticated','public.education_cohort_members','insert'), has_table_privilege('authenticated','public.education_cohort_members','update'), has_table_privilege('authenticated','public.education_cohort_members','delete');")"
+check "anon holds no SELECT on the membership table" "f" "$(q '' postgres "select has_table_privilege('anon','public.education_cohort_members','select');")"
+check "the membership table has exactly one policy (select)" "education_cohort_members_select:r" "$(q '' postgres "select string_agg(polname || ':' || polcmd::text, ',') from pg_policy where polrelid = 'public.education_cohort_members'::regclass;")"
 
 echo "== rollback"
 check "rollback applies" "ok" "$($PSQL -f "$DOWN" >/dev/null 2>&1 && echo ok)"
-check "function text restored exactly (md5 of pg_get_functiondef)" "$ORIGINAL" "$(q '' postgres "$FN")"
-check "grants restored: authenticated may execute, anon may not" "t|f" "$(q '' postgres "select has_function_privilege('authenticated','public.set_education_cohort_member_v1(uuid,uuid,text)','execute'), has_function_privilege('anon','public.set_education_cohort_member_v1(uuid,uuid,text)','execute');")"
+check "all three objects restored exactly (md5)" "$BEFORE_OBJ" "$(q '' postgres "$OBJ")"
+check "rows and audit history untouched by the rollback" "t" "$(q '' postgres "select count(*) >= $AUDIT0 + 5 from audit_logs;")"
 check "migration re-applies after rollback" "ok" "$($PSQL -f "$MIG" >/dev/null 2>&1 && echo ok)"
 
 echo "== $PASS passed, $FAIL failed"
