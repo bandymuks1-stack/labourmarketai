@@ -3,7 +3,12 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CORE_NAV_IDS, getCoreNavItems } from "@/lib/config/navigation";
 import { actingRoleForWorkspace } from "@/lib/company/organization-switch";
-import { ORGANIZATION_WORK_AREAS, organizationHeaderAreas } from "@/lib/navigation/work-areas";
+import {
+  CUSTOMER_HEADER_DOORS,
+  ORGANIZATION_WORK_AREAS,
+  organizationHeaderAreas,
+} from "@/lib/navigation/work-areas";
+import { existsSync } from "node:fs";
 
 /**
  * NAVIGATION BY ROLE WITHOUT A SECOND CORE (owner P0-2, direction A,
@@ -29,7 +34,7 @@ describe("the header follows the acting role, the primary row stays the core loo
   it("the acting role comes from the ONE resolver, with the held roles", () => {
     expect(header).toMatch(/actingRoleForWorkspace\(activeWorkspace, auth\?\.roles \?\? \[\]\)/);
     expect(header).toMatch(
-      /const overflow = \[\.\.\.organizationAreas, \.\.\.getHeaderOverflowNavItems\(\{ isAdmin \}\)\]/,
+      /const overflow = \[\.\.\.organizationAreas, \.\.\.customerDoors, \.\.\.getHeaderOverflowNavItems\(\{ isAdmin \}\)\]/,
     );
   });
 
@@ -69,5 +74,15 @@ describe("the header follows the acting role, the primary row stays the core loo
         if (!coreHrefs.has(a.href)) expect(hrefs, a.id).toContain(a.href);
       }
     }
+  });
+
+  it("a customer (active role, no organization workspace) finds their requests first in More", () => {
+    expect(header).toMatch(
+      /auth\?\.activeRole === "customer" && activeWorkspace\?\.kind !== "organization" \? CUSTOMER_HEADER_DOORS : \[\]/,
+    );
+    expect(CUSTOMER_HEADER_DOORS.map((d) => d.href)).toEqual(["/dashboard/buyer"]);
+    expect(existsSync(join(__dirname, "../../app/[locale]/dashboard/buyer/page.tsx"))).toBe(true);
+    const coreHrefs = new Set(getCoreNavItems().map((i) => i.href));
+    for (const d of CUSTOMER_HEADER_DOORS) expect(coreHrefs.has(d.href)).toBe(false);
   });
 });
