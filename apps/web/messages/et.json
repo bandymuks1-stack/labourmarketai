@@ -4196,6 +4196,7 @@
       "eduCohortCreated": "Rühm loodud. Saad õppijaid määrata.",
       "eduAssignNoCohort": "Rühmi veel pole — loo kõigepealt rühm.",
       "eduAssignNoLearners": "Vastuvõetud õppijaid veel pole. Kutsu õppija — määrata saad pärast kutse vastuvõtmist.",
+      "eduMembersNotForRole": "Rühma liikmesus pole sinu rollile saadaval. Õppijaid saab määrata ainult asutuse enda omanik, administraator või juht.",
       "eduAssignDone": "Õppija määratud rühma.",
       "eduNotInstitution": "See organisatsioon pole veel märgitud õppeasutuseks. Märgi see ettevõtte jaotises.",
       "eduUnavailable": "Programme ei saa praegu lugeda. See ei tähenda, et neid pole.",

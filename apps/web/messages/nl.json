@@ -2096,7 +2096,8 @@
           "evidenceConfirmed": "bevestigd"
         },
         "requestFrom": "Vraagt om deel te nemen: {name}",
-        "requestUnverified": "Naam ingevuld door de lerende — niet geverifieerd."
+        "requestUnverified": "Naam ingevuld door de lerende — niet geverifieerd.",
+        "membersNotForRole": "Groepsleden zijn niet beschikbaar voor jouw rol. Alleen de eigen eigenaar, beheerder of manager van de instelling ziet en wijzigt het lidmaatschap."
       },
       "learners": {
         "title": "Lerenden",
@@ -14416,6 +14417,7 @@
       "eduCohortCreated": "Groep aangemaakt. Je kunt leerlingen toewijzen.",
       "eduAssignNoCohort": "Nog geen groepen — maak eerst een groep aan.",
       "eduAssignNoLearners": "Nog geen geaccepteerde leerlingen. Nodig een leerling uit — toewijzen kan zodra hij of zij accepteert.",
+      "eduMembersNotForRole": "Groepslidmaatschap is niet beschikbaar voor jouw rol. Alleen de eigen eigenaar, beheerder of manager van de instelling kan lerenden toewijzen.",
       "eduAssignDone": "Leerling toegewezen aan de groep.",
       "eduNotInstitution": "Deze organisatie is nog niet gemarkeerd als opleidingsinstelling. Markeer dit in het bedrijfsgedeelte.",
       "eduUnavailable": "Opleidingen kunnen nu niet worden gelezen. Dat betekent niet dat er geen zijn.",

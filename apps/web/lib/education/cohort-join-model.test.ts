@@ -80,4 +80,12 @@ describe("institution roster vs requests", () => {
     );
     expect(members.map((m) => m.label)).toEqual(["Invited Name", "Typed Name", "p-unknow"]);
   });
+
+  it("names a REQUEST only by what the learner typed on it, even when an older invitation exists", () => {
+    const { requests } = splitCohortMembers(
+      [{ profile_id: "p-invited", status: "requested", request_label: "Typed On Request" }],
+      labels,
+    );
+    expect(requests.map((r) => r.label)).toEqual(["Typed On Request"]);
+  });
 });

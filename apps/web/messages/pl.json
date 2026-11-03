@@ -2096,7 +2096,8 @@
           "evidenceConfirmed": "potwierdzono"
         },
         "requestFrom": "Prosi o dołączenie: {name}",
-        "requestUnverified": "Imię wpisane przez uczącego się — niezweryfikowane."
+        "requestUnverified": "Imię wpisane przez uczącego się — niezweryfikowane.",
+        "membersNotForRole": "Członkowie grupy nie są dostępni dla twojej roli. Członkostwo widzi i zmienia tylko właściciel, administrator lub kierownik samej placówki."
       },
       "learners": {
         "title": "Uczestnicy",
@@ -14416,6 +14417,7 @@
       "eduCohortCreated": "Grupa utworzona. Możesz przypisywać uczniów.",
       "eduAssignNoCohort": "Nie ma jeszcze grup — najpierw utwórz grupę.",
       "eduAssignNoLearners": "Nie ma jeszcze przyjętych uczniów. Zaproś ucznia — przypisać go będzie można po przyjęciu zaproszenia.",
+      "eduMembersNotForRole": "Członkostwo w grupie nie jest dostępne dla twojej roli. Uczących się może przypisać tylko właściciel, administrator lub kierownik samej placówki.",
       "eduAssignDone": "Uczeń przypisany do grupy.",
       "eduNotInstitution": "Ta organizacja nie jest jeszcze oznaczona jako placówka edukacyjna. Oznacz to w sekcji firmy.",
       "eduUnavailable": "Nie można teraz odczytać programów. To nie znaczy, że ich nie ma.",
