@@ -120,7 +120,10 @@ test("J-2. the learner finds the group and asks to join, keeping their own recor
   await page.getByTestId(`cohort-join-name-${cohortId}`).fill(TYPED);
   await page.getByTestId(`cohort-join-note-${cohortId}`).fill(`QA-SYNTHETIC ${RUN}`);
   await page.getByTestId(`cohort-join-send-${cohortId}`).click();
-  await expect(group.getByTestId("cohort-join-state")).toBeVisible({ timeout: 30_000 });
+  // On success the action revalidates the page: the group re-renders as
+  // "requested" (status + withdraw) and the form, with its one-shot state line,
+  // is gone — so wait for the status, not for the transient line.
+  await expect(group.getByTestId(`learner-cohort-status-${cohortId}`)).toHaveAttribute("data-status", "requested", { timeout: 30_000 });
   await page.reload();
   await expect(page.getByTestId(`learner-cohort-status-${cohortId}`).filter({ visible: true })).toHaveAttribute("data-status", "requested", {
     timeout: 30_000,
