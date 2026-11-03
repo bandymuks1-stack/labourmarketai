@@ -70,11 +70,22 @@ test.afterAll(async () => {
   // (archiving also closes it for requests and declines anything pending).
   const owner = bearerOf("owner");
   if (learnerId) {
-    const left = await qaApi("/rest/v1/rpc/set_education_cohort_member_v1", owner, {
-      method: "POST",
-      body: { p_cohort_id: cohortId, p_profile_id: learnerId, p_status: "left" },
-    });
-    console.info(`[join] clean-up: membership ended ${left.status}`);
+    // Only an ACTIVE membership is ended through set_education_cohort_member_v1.
+    // A request still pending is withdrawn by the learner (a request row is
+    // never flipped by the member command); archive below declines anything left.
+    const learner = bearerOf("worker2");
+    const own = await qaApi(`/rest/v1/education_cohort_members?cohort_id=eq.${cohortId}&select=status`, learner);
+    const status = own.ok ? ((await own.json()) as Array<{ status: string }>)[0]?.status : undefined;
+    if (status === "requested") {
+      const wd = await qaApi("/rest/v1/rpc/withdraw_education_cohort_join_v1", learner, { method: "POST", body: { p_cohort_id: cohortId } });
+      console.info(`[join] clean-up: request withdrawn ${wd.status}`);
+    } else if (status === "active") {
+      const left = await qaApi("/rest/v1/rpc/set_education_cohort_member_v1", owner, {
+        method: "POST",
+        body: { p_cohort_id: cohortId, p_profile_id: learnerId, p_status: "left" },
+      });
+      console.info(`[join] clean-up: membership ended ${left.status}`);
+    }
   }
   const archived = await qaApi("/rest/v1/rpc/archive_education_cohort_v1", owner, {
     method: "POST",
@@ -120,7 +131,10 @@ test("J-2. the learner finds the group and asks to join, keeping their own recor
   await page.getByTestId(`cohort-join-name-${cohortId}`).fill(TYPED);
   await page.getByTestId(`cohort-join-note-${cohortId}`).fill(`QA-SYNTHETIC ${RUN}`);
   await page.getByTestId(`cohort-join-send-${cohortId}`).click();
-  await expect(group.getByTestId("cohort-join-state")).toBeVisible({ timeout: 30_000 });
+  // On success the action revalidates the page: the group re-renders as
+  // "requested" (status + withdraw) and the form, with its one-shot state line,
+  // is gone — so wait for the status, not for the transient line.
+  await expect(group.getByTestId(`learner-cohort-status-${cohortId}`)).toHaveAttribute("data-status", "requested", { timeout: 30_000 });
   await page.reload();
   await expect(page.getByTestId(`learner-cohort-status-${cohortId}`).filter({ visible: true })).toHaveAttribute("data-status", "requested", {
     timeout: 30_000,
@@ -139,6 +153,32 @@ test("J-2b. a request grants nothing, and the learner cannot accept it themselve
     body: { p_cohort_id: cohortId, p_profile_id: learnerId, p_decision: "accept" },
   });
   expect(self.ok, "the learner accepted their own request").toBe(false);
+});
+
+test("J-2c. callers without authority over the group are refused and read no request text", async () => {
+  // Synthetic identities available to this walk: `worker` (a plain worker —
+  // wrong role) and `agency` (manages ANOTHER organisation). The cast has no
+  // external_manager on QA-SYNTHETIC Alfa; that case is proven in the DB proofs.
+  // Not signed in = anon (no bearer).
+  const callers: Array<[string, string | null]> = [["anon", null]];
+  for (const slot of ["worker", "agency"]) if (existsSync(state(slot))) callers.push([slot, bearerOf(slot)]);
+  for (const [who, token] of callers) {
+    const rows = await qaApi(`/rest/v1/education_cohort_members?cohort_id=eq.${cohortId}&select=status,request_label,request_note`, token);
+    const body = rows.ok ? ((await rows.json()) as unknown[]) : [];
+    expect(body, `${who} reads no membership or request text`).toEqual([]);
+    const attempts: Array<[string, Record<string, unknown>]> = [
+      ["decide_education_cohort_join_v1", { p_cohort_id: cohortId, p_profile_id: learnerId, p_decision: "accept" }],
+      ["set_education_cohort_member_v1", { p_cohort_id: cohortId, p_profile_id: learnerId, p_status: "active" }],
+      ["set_education_cohort_join_requests_v1", { p_cohort_id: cohortId, p_open: false }],
+      ["archive_education_cohort_v1", { p_cohort_id: cohortId }],
+    ];
+    for (const [fn, args] of attempts) {
+      const r = await qaApi(`/rest/v1/rpc/${fn}`, token, { method: "POST", body: args });
+      expect(r.ok, `${who} was allowed ${fn}`).toBe(false);
+    }
+  }
+  const still = await qaApi(`/rest/v1/education_cohort_members?cohort_id=eq.${cohortId}&select=status`, bearerOf("worker2"));
+  expect(await still.json(), "the request is still pending after the refused attempts").toEqual([{ status: "requested" }]);
 });
 
 test("J-3. the institution's authorised person sees the request by the typed name and accepts it", async ({ browser }) => {
@@ -160,11 +200,13 @@ test("J-3. the institution's authorised person sees the request by the typed nam
       { timeout: 60_000, intervals: [3_000] },
     )
     .toBe(0);
-  // Accept clears the learner-typed name from the member row, so the chip names
-  // the learner by the institution's own invitation (an earlier
-  // learning-practice run) or, without one, by the id prefix.
-  await expect(cohortRow(page)).toContainText(new RegExp(`QA-SYNTHETIC (Worker|mokinys)|${learnerId.slice(0, 8)}`), { timeout: 30_000 });
-  await expect(cohortRow(page)).not.toContainText(TYPED);
+  // The member chip names the learner by the institution's own invitation (an
+  // earlier learning-practice run), else by the name typed on this request
+  // (kept once the access-closure migration stops clearing it), else by the id
+  // prefix (the 20261102160000 accept cleared it).
+  await expect(cohortRow(page)).toContainText(new RegExp(`QA-SYNTHETIC (Worker|mokinys|besimokantis)|${learnerId.slice(0, 8)}`), {
+    timeout: 30_000,
+  });
   await close();
 });
 

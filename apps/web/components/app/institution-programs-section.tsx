@@ -100,7 +100,7 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
               const hasEmptyCohort = read.programs.some((p) =>
                 p.cohorts.some((c) => c.members.every((m) => m.status !== "active")),
               );
-              return waiting > 0 && hasEmptyCohort ? (
+              return read.membersVisible && waiting > 0 && hasEmptyCohort ? (
                 <p className="text-xs leading-relaxed text-state-warning" data-testid="institution-learners-not-in-cohort">
                   {t("unassignedLearners", { count: waiting })}
                 </p>
@@ -156,7 +156,7 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                                 <span className="text-text-primary">{c.name}</span>
                                 <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                                  {t("members", { count: c.members.filter((m) => m.status === "active").length })}
+                                  {read.membersVisible ? t("members", { count: c.members.filter((m) => m.status === "active").length }) : null}
                                   {/* The cohort's time span as a mono stamp
                                       (work-world grammar) — the dates the
                                       institution recorded, nothing derived. */}
@@ -171,6 +171,13 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                                   ) : null}
                                 </span>
                               </div>
+                              {!read.membersVisible ? (
+                                // J-12: an external manager reads the group, not its
+                                // membership — unknown, never "0 members".
+                                <p className="text-xs text-text-muted" data-testid={`cohort-members-not-for-role-${c.id}`}>
+                                  {t("membersNotForRole")}
+                                </p>
+                              ) : null}
                               {c.members.filter((m) => m.status === "active").length > 0 ? (
                                 <ul className="flex flex-wrap gap-1.5">
                                   {c.members
@@ -206,20 +213,22 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                                   ))}
                                 </ul>
                               ) : null}
-                              {c.joinRequestsOpen !== null ? (
+                              {read.membersVisible && c.joinRequestsOpen !== null ? (
                                 <JoinRequestsToggle cohortId={c.id} open={c.joinRequestsOpen} labels={labels} />
                               ) : null}
-                              <AssignLearnerForm
-                                cohortId={c.id}
-                                learners={read.assignable.filter((l) => !c.members.some((m) => m.profileId === l.profileId && m.status === "active"))}
-                                labels={labels}
-                              />
+                              {read.membersVisible ? (
+                                <AssignLearnerForm
+                                  cohortId={c.id}
+                                  learners={read.assignable.filter((l) => !c.members.some((m) => m.profileId === l.profileId && m.status === "active"))}
+                                  labels={labels}
+                                />
+                              ) : null}
                             </li>
                           ))}
                         </ul>
                       ) : null}
                       <CreateCohortForm programId={p.id} labels={labels} />
-                      {memberIds.size === 0 && read.assignable.length === 0 ? (
+                      {read.membersVisible && memberIds.size === 0 && read.assignable.length === 0 ? (
                         <p className="text-meta text-text-muted">
                           {t("noLearnersYet")}{" "}
                           <Link

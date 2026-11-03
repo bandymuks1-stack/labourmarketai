@@ -61,8 +61,11 @@ export interface CohortRow {
  * migration a requested row could not exist, and treating an unknown state as
  * `active` would have counted a request as a member.
  *
- * The label is what the institution typed on its own invitation, else the name
- * the learner typed on their request — never anything read from the profile.
+ * A MEMBER is named by what the institution typed on its own invitation, else
+ * the name the learner typed on their request. A REQUEST is named only by what
+ * the learner typed on it — the card says exactly that ("typed by the learner,
+ * not checked"), so an older invitation name must never stand in for it. Never
+ * anything read from the profile.
  */
 export function splitCohortMembers(
   rows: ReadonlyArray<Record<string, unknown>>,
@@ -74,12 +77,12 @@ export function splitCohortMembers(
     const profileId = String(m.profile_id);
     const status = String(m.status);
     const typed = typeof m.request_label === "string" && m.request_label.trim() ? m.request_label.trim() : null;
-    const label = labelByProfile.get(profileId) ?? typed ?? profileId.slice(0, 8);
-    if (status === "active" || status === "left") members.push({ profileId, status, label });
+    if (status === "active" || status === "left")
+      members.push({ profileId, status, label: labelByProfile.get(profileId) ?? typed ?? profileId.slice(0, 8) });
     else if (status === "requested")
       requests.push({
         profileId,
-        label,
+        label: typed ?? profileId.slice(0, 8),
         note: typeof m.request_note === "string" && m.request_note.trim() ? m.request_note.trim() : null,
         requestedAt: typeof m.requested_at === "string" ? m.requested_at : null,
       });
@@ -145,6 +148,15 @@ export type InstitutionProgramsRead =
       readonly status: "ok";
       readonly programs: readonly ProgramRow[];
       readonly assignable: readonly AssignableLearner[];
+      /**
+       * Whether the caller may see and change cohort MEMBERSHIP: the
+       * institution's own owner / admin / manager (J-12 decider basis,
+       * `is_education_cohort_internal_decider_v1`). An external manager reads
+       * programmes and cohorts but no membership row, so for them every
+       * cohort's `members` / `requests` are empty because they are NOT KNOWN —
+       * never "0 members" (SEP-7, UNKNOWN != ZERO). Callers must check this.
+       */
+      readonly membersVisible: boolean;
     }
   | { readonly status: "unavailable" };
 
@@ -198,7 +210,7 @@ export async function readInstitutionPrograms(organizationId: string): Promise<I
   const programRows = (programsRes.data ?? []) as Array<Record<string, unknown>>;
   const programIds = programRows.map((p) => String(p.id));
 
-  const [cohortsRes, invRes, ctxRes, demandRes] = await Promise.all([
+  const [cohortsRes, invRes, ctxRes, demandRes, deciderRes] = await Promise.all([
     programIds.length === 0
       ? Promise.resolve({ data: [], error: null })
       : readCohorts(supabase, programIds),
@@ -222,7 +234,10 @@ export async function readInstitutionPrograms(organizationId: string): Promise<I
       .eq("status", "active")
       .limit(500),
     asAny(supabase).rpc("count_public_vacancies_by_profession_v1", { p_limit: PUBLIC_DEMAND_LIMIT }),
+    asAny(supabase).rpc("is_education_cohort_internal_decider_v1", { p_org: organizationId }),
   ]);
+  // A failed or missing answer is "not visible", never "visible with zero".
+  const membersVisible = !deciderRes.error && deciderRes.data === true;
   // A failed eligibility read is `unavailable`, not an empty dropdown: an
   // empty list here reads as "this institution has no learners", which is a
   // different and false statement (SEP-7, UNKNOWN != ZERO).
@@ -246,10 +261,9 @@ export async function readInstitutionPrograms(organizationId: string): Promise<I
 
   const cohortsByProgram = new Map<string, CohortRow[]>();
   for (const c of (cohortsRes.data ?? []) as Array<Record<string, unknown>>) {
-    const { members, requests } = splitCohortMembers(
-      (c.education_cohort_members ?? []) as Array<Record<string, unknown>>,
-      labelByProfile,
-    );
+    const { members, requests } = membersVisible
+      ? splitCohortMembers((c.education_cohort_members ?? []) as Array<Record<string, unknown>>, labelByProfile)
+      : { members: [], requests: [] };
     const row: CohortRow = {
       id: String(c.id),
       name: String(c.name),
@@ -281,5 +295,5 @@ export async function readInstitutionPrograms(organizationId: string): Promise<I
   );
   const assignable = eligibleLearners(labelByProfile, activeStudentProfileIds);
 
-  return { status: "ok", programs, assignable };
+  return { status: "ok", programs, assignable, membersVisible };
 }

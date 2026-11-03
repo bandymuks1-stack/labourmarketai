@@ -230,6 +230,7 @@ const CHAT_KEYS = [
   "eduCohortCreated",
   "eduAssignNoCohort",
   "eduAssignNoLearners",
+  "eduMembersNotForRole",
   "eduAssignDone",
   "eduNotInstitution",
   "eduUnavailable",

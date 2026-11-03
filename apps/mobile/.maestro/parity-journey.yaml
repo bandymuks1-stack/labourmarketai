@@ -254,7 +254,10 @@ name: parity-journey
     visible:
       id: "notifications-loaded"
     timeout: 60000
+# Labelled so the claim line can say whether it RAN: with nothing unread the
+# button is absent and mark-all is not exercised (runs 41588120930, 41588140836).
 - runFlow:
+    label: "MARK_ALL_READ (unread notifications marked read)"
     when:
       visible:
         id: "notifications-mark-all"
