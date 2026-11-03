@@ -540,6 +540,16 @@ export default async function ProjectsPage({
           <p className="text-meta leading-relaxed text-text-muted" data-testid="company-ops-projects-linking">
             {tOps("projectsLinkingNote")}
           </p>
+          {/* Kept on the owner's order 2026-11-03 ("nepašalinant veikiančios
+              projektų kortelės create context funkcijos"): the card's own
+              create-context link stays beside the page's primary tile. */}
+          <Link
+            href="/dashboard/company/projects/new"
+            className="w-fit rounded-md border border-brand-blue/40 px-3 py-1 text-xs font-medium text-brand-blue hover:bg-brand-blue/10"
+            data-testid="company-ops-projects-create"
+          >
+            {tOps("createProject.entryCta")}
+          </Link>
         </div>
       ) : null}
 

@@ -114,9 +114,13 @@ describe("the Work page: two tiers, navigation stays navigation", () => {
     expect(PAGE).toMatch(/<p className="hidden text-sm leading-relaxed text-text-secondary sm:block">\s*\{t\("intro"\)\}/);
   });
 
-  it("the gradient button and the duplicate create link are gone; repeated form submits are outlined", () => {
+  it("the gradient button is gone; repeated form submits are outlined", () => {
     expect(PAGE).not.toMatch(/primaryHref="\/dashboard\/company\/projects\/new"/);
-    expect(PAGE).not.toMatch(/data-testid="company-ops-projects-create"/);
+    // The project card's own create-context link STAYS (owner order 2026-11-03:
+    // "nepašalinant veikiančios projektų kortelės create context funkcijos"),
+    // outlined, never a second gold primary — pinned by
+    // lib/company/project-context-expansion.test.ts.
+    expect(PAGE).toMatch(/data-testid="company-ops-projects-create"/);
     for (const f of ["components/app/project-team-assignments.tsx", "components/app/project-assignment-manager.tsx"]) {
       const primary = read(f).match(/const primary =\s*"([^"]+)"/)?.[1] ?? "";
       expect(primary, f).not.toMatch(/bg-gradient-cta/);
