@@ -51,13 +51,7 @@ describe("the header's priority set stays the focused core (no extra top-level e
   const header = read("components/app/conversation/chat/conversation-header.tsx");
 
   it("renders the catalogue-driven core first — admin is never part of it", () => {
-    // RE-ANCHORED 2026-11-03 (owner P0-2, direction A: "primary navigation by
-    // role"): a person who RUNS a company or agency gets that organization's
-    // own core from the same catalogue module; everyone else still gets
-    // exactly the core loop. Admin stays out of both (see below).
-    expect(header).toMatch(
-      /const primary = organizationNav\?\.primary \?\? getCoreNavItems\(\)/,
-    );
+    expect(header).toMatch(/const primary = getCoreNavItems\(\)/);
     expect(header).not.toMatch(/ADMIN_NAV_ITEM/);
   });
 });

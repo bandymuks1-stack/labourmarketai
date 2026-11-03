@@ -19,12 +19,7 @@ import {
   type FeatureConfig,
   type FeatureKey,
 } from "./feature-availability";
-import { actsAsAgency } from "@/lib/company/agency-capability";
-import {
-  ORGANIZATION_WORK_AREAS,
-  type WorkArea,
-  type WorkAreaIconKey,
-} from "@/lib/navigation/work-areas";
+import type { WorkAreaIconKey } from "@/lib/navigation/work-areas";
 
 /** Icon ids — concrete icon imports live in `components/app/nav-icons.ts`
  *  (read by the one header), so this config stays framework-agnostic. */
@@ -39,8 +34,8 @@ export type NavIconKey =
   | "network"
   | "user"
   | "shield"
-  // The organization work areas' icons (`lib/navigation/work-areas.ts`), so an
-  // area promoted into the header keeps the icon its area switcher shows.
+  // An organization work area listed under the header's "More" keeps the
+  // icon its area switcher shows (`lib/navigation/work-areas.ts`).
   | WorkAreaIconKey;
 
 type TabMeta = {
@@ -99,6 +94,7 @@ export type NavItem = {
   /** The feature key the tab is sourced from, or "admin" for the
    *  permission-gated admin item (not a catalogue feature). Useful for
    *  tests + telemetry + React keys. */
+  /** …or `area:<id>` for an organization work area (`work-areas.ts`). */
   id: FeatureKey | "admin" | `area:${string}`;
   /** Locale-prefixed app route. */
   href: string;
@@ -192,104 +188,6 @@ export function getHeaderOverflowNavItems({
   const coreIds = new Set<string>(CORE_NAV_IDS);
   const extras = getAdvancedNavItems().filter((i) => !coreIds.has(i.id));
   return isAdmin ? [...extras, ADMIN_NAV_ITEM] : extras;
-}
-
-/**
- * THE ACTIVE WORKSPACE, as the header needs it (owner P0-2, direction A,
- * 2026-11-03: "primary navigation by role"). A presentation input only —
- * every destination still checks its own rights under RLS.
- */
-export type HeaderWorkspace = {
-  readonly kind: "personal" | "organization";
-  readonly organizationType?: "company" | "agency" | "team" | "other";
-  readonly companyType?: string | null;
-  readonly relationship?: "owner" | "manager" | "employee" | "other";
-} | null;
-
-/**
- * The organization areas that join the core loop for a person who RUNS the
- * organization (owner or manager), by kind. Ids are `ORGANIZATION_WORK_AREAS`
- * ids — the ONE list of the organization's doors; nothing here spells a route.
- * A company is run through its people, projects and hours; an agency through
- * its people (the reserve), its clients and its projects.
- */
-const ORGANIZATION_CORE_AREAS: Record<"company" | "agency", readonly string[]> = {
-  company: ["people", "projects", "work"],
-  agency: ["people", "clients", "projects"],
-};
-
-/** Organization areas that ARE a catalogue destination already (same route):
- *  the catalogue item is used, so no destination appears twice. */
-const AREA_SAME_AS_FEATURE: Readonly<Record<string, FeatureKey>> = {
-  messages: "communication",
-  calendar: "planning",
-};
-
-function areaNavItem(area: WorkArea): NavItem {
-  return {
-    id: `area:${area.id}`,
-    href: area.href,
-    tabLabelKey: area.labelKey,
-    iconKey: area.iconKey,
-  };
-}
-
-/** Which organization kind leads the header, or null for the personal loop. */
-export function organizationNavKind(workspace: HeaderWorkspace): "company" | "agency" | null {
-  if (!workspace || workspace.kind !== "organization") return null;
-  if (workspace.relationship !== "owner" && workspace.relationship !== "manager") return null;
-  // ORG-2: agency is a capability, answered by the ONE rule (`actsAsAgency`);
-  // the workspace payload carries the company type, not the declared roles,
-  // so the type arm is what this display choice can see.
-  if (workspace.organizationType === "agency" || actsAsAgency(workspace.companyType, [])) {
-    return "agency";
-  }
-  if (workspace.organizationType === "company") return "company";
-  return null;
-}
-
-/**
- * THE HEADER'S ITEMS FOR AN ORGANIZATION WORKSPACE — primary by priority, the
- * rest under "More" — or `null`, and the header keeps the one core loop
- * (`getCoreNavItems` + `getHeaderOverflowNavItems`): the personal space and an
- * employee inside an organization. A person who runs a company or agency gets
- * that organization's own core instead:
- * home · its core areas · messages. Calendar and journal move to "More" with
- * every other organization door, so EVERY destination stays reachable
- * (nothing is removed, only re-prioritized), and the list is stable for that
- * workspace on every route (the orientation rule behind CORE_NAV_IDS).
- */
-export function getOrganizationHeaderNav({
-  isAdmin,
-  workspace,
-}: {
-  isAdmin: boolean;
-  workspace: HeaderWorkspace;
-}): { readonly primary: readonly NavItem[]; readonly overflow: readonly NavItem[] } | null {
-  const kind = organizationNavKind(workspace);
-  if (!kind) return null;
-  const feature = new Map(VISIBLE_PRIMARY_NAV_ITEMS.map((i) => [i.id, i] as const));
-  const pick = (id: FeatureKey) => {
-    const item = feature.get(id);
-    return item ? [item] : [];
-  };
-  const coreAreaIds = ORGANIZATION_CORE_AREAS[kind];
-  const coreAreas = coreAreaIds.flatMap((id) => {
-    const area = ORGANIZATION_WORK_AREAS.find((a) => a.id === id);
-    return area ? [areaNavItem(area)] : [];
-  });
-  const primary = [...pick("overview"), ...coreAreas, ...pick("communication")];
-  const primaryIds = new Set(primary.map((i) => i.id));
-  const otherAreas = ORGANIZATION_WORK_AREAS.filter(
-    (a) => !coreAreaIds.includes(a.id) && !(a.id in AREA_SAME_AS_FEATURE),
-  ).map(areaNavItem);
-  const overflow = [
-    ...pick("planning"),
-    ...pick("journal_text_first"),
-    ...otherAreas,
-    ...getHeaderOverflowNavItems({ isAdmin }).filter((i) => !primaryIds.has(i.id)),
-  ].filter((i, n, all) => all.findIndex((j) => j.id === i.id) === n);
-  return { primary, overflow };
 }
 
 /**
