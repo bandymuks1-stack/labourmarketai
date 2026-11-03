@@ -1757,6 +1757,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-03: J-12 follow-up — the member command refuses request rows. RED draft,
       // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
       "20261103090000_education_cohort_member_request_guard_v1.sql",
+      // 2026-11-03: pg_trgm for the job search trigram index (create-extension). RED draft,
+      // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261103171000_pg_trgm_extension_v1.sql",
 ]);
   });
 
