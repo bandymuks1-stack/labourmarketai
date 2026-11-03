@@ -70,11 +70,22 @@ test.afterAll(async () => {
   // (archiving also closes it for requests and declines anything pending).
   const owner = bearerOf("owner");
   if (learnerId) {
-    const left = await qaApi("/rest/v1/rpc/set_education_cohort_member_v1", owner, {
-      method: "POST",
-      body: { p_cohort_id: cohortId, p_profile_id: learnerId, p_status: "left" },
-    });
-    console.info(`[join] clean-up: membership ended ${left.status}`);
+    // Only an ACTIVE membership is ended through set_education_cohort_member_v1.
+    // A request still pending is withdrawn by the learner (a request row is
+    // never flipped by the member command); archive below declines anything left.
+    const learner = bearerOf("worker2");
+    const own = await qaApi(`/rest/v1/education_cohort_members?cohort_id=eq.${cohortId}&select=status`, learner);
+    const status = own.ok ? ((await own.json()) as Array<{ status: string }>)[0]?.status : undefined;
+    if (status === "requested") {
+      const wd = await qaApi("/rest/v1/rpc/withdraw_education_cohort_join_v1", learner, { method: "POST", body: { p_cohort_id: cohortId } });
+      console.info(`[join] clean-up: request withdrawn ${wd.status}`);
+    } else if (status === "active") {
+      const left = await qaApi("/rest/v1/rpc/set_education_cohort_member_v1", owner, {
+        method: "POST",
+        body: { p_cohort_id: cohortId, p_profile_id: learnerId, p_status: "left" },
+      });
+      console.info(`[join] clean-up: membership ended ${left.status}`);
+    }
   }
   const archived = await qaApi("/rest/v1/rpc/archive_education_cohort_v1", owner, {
     method: "POST",

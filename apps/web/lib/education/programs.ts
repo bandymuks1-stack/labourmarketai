@@ -61,8 +61,11 @@ export interface CohortRow {
  * migration a requested row could not exist, and treating an unknown state as
  * `active` would have counted a request as a member.
  *
- * The label is what the institution typed on its own invitation, else the name
- * the learner typed on their request — never anything read from the profile.
+ * A MEMBER is named by what the institution typed on its own invitation, else
+ * the name the learner typed on their request. A REQUEST is named only by what
+ * the learner typed on it — the card says exactly that ("typed by the learner,
+ * not checked"), so an older invitation name must never stand in for it. Never
+ * anything read from the profile.
  */
 export function splitCohortMembers(
   rows: ReadonlyArray<Record<string, unknown>>,
@@ -74,12 +77,12 @@ export function splitCohortMembers(
     const profileId = String(m.profile_id);
     const status = String(m.status);
     const typed = typeof m.request_label === "string" && m.request_label.trim() ? m.request_label.trim() : null;
-    const label = labelByProfile.get(profileId) ?? typed ?? profileId.slice(0, 8);
-    if (status === "active" || status === "left") members.push({ profileId, status, label });
+    if (status === "active" || status === "left")
+      members.push({ profileId, status, label: labelByProfile.get(profileId) ?? typed ?? profileId.slice(0, 8) });
     else if (status === "requested")
       requests.push({
         profileId,
-        label,
+        label: typed ?? profileId.slice(0, 8),
         note: typeof m.request_note === "string" && m.request_note.trim() ? m.request_note.trim() : null,
         requestedAt: typeof m.requested_at === "string" ? m.requested_at : null,
       });
