@@ -1757,6 +1757,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-03: J-12 follow-up — the member command refuses request rows. RED draft,
       // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
       "20261103090000_education_cohort_member_request_guard_v1.sql",
+      // 2026-11-03: system audit — row-independent policy calls wrapped as InitPlans (22
+      // hot-table policies, expressions otherwise verbatim). RED draft, NOT applied.
+      "20261103180000_rls_initplan_hot_tables_v1.sql",
 ]);
   });
 
