@@ -678,6 +678,15 @@ export const SCOPED_OWNER_WAIVERS = [
       // (found by the ai-off-honesty production walk). Markup only; the
       // axiom, codes, surfaces, files, expiry and subset rule are unchanged.
       2771,
+      // OWNER APPROVAL 2026-11-03, verbatim (given to the coordinator in its own
+      // session): "I approve adding ONLY PR 2991 and PR 2984 to the existing
+      // public-acquisition-route-jobs waiver pullRequests list." — "Jokių kitų
+      // išimties pakeitimų nedaryti." #2991: job cards show pay when supplied,
+      // members see employer + place, signed-out cards stay anonymous (the
+      // 08-24 rule). #2984: job-list page ≥ 2 canonicals to itself. Only the two
+      // numbers are added; axiom, codes, surfaces, files, expiry and subset rule
+      // are unchanged.
+      2984, 2991,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.

@@ -7914,5 +7914,22 @@
       "error": "Noe gikk galt. Prøv igjen.",
       "cooldown": "Forespørselen din ble nylig avslått. Du kan spørre denne gruppen igjen 30 dager etter avgjørelsen."
     }
+  },
+  "consent": {
+    "banner": {
+      "text": "Med ditt samtykke måler vi i nettleseren din hvilke sider og trinn som hjelper folk, og hvilken kampanje som brakte deg hit; uten det lagres ingenting for dette på enheten din. Grunnleggende tellinger av handlinger på våre egne servere skjer uansett (se informasjonen om informasjonskapsler). Produktet fungerer likt uansett hva du velger.",
+      "accept": "Tillat måling",
+      "refuse": "Avslå",
+      "more": "Informasjonskapsler",
+      "label": "Valg om bruksmåling"
+    },
+    "control": {
+      "title": "Bruksmåling og kampanjetilskriving",
+      "granted": "Du har gitt tillatelse. Du kan trekke den tilbake når som helst; elementene fjernes da fra denne enheten.",
+      "refused": "Du har avslått. Ingenting for måling lagres på denne enheten.",
+      "undecided": "Du har ikke valgt ennå, så ingenting for måling lagres.",
+      "allow": "Tillat",
+      "refuse": "Avslå"
+    }
   }
 }

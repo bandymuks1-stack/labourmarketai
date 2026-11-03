@@ -241,6 +241,18 @@ carries a closing comment). Unique, not-yet-built requirements are carried here 
 | #740 voice_journal_jobs migration | voice is deferred (no transcription host; COM-6, V-2) | when voice reopens: one owner-scoped job table, disclosure acknowledged before recording, transcript ≤ 60k, audio retention ≤ 30 days, one job → at most one journal entry, worker/admin read only, RPC-only writes, right-to-erase RPC — design on branch `feat/voice-journal-jobs-migration-v1` (origin #740) |
 | #2915 completion map 2026-11-01 | the 288 statuses live only in FUNCTION_REGISTER (one register) | planning columns not in the register: effort per function, critical path, about 185–295 agent days, conditional targets (core mid-December 2026, full scope February 2027, preliminary) — on branch `docs/cc/completion-map-288` (origin #2915) |
 
+**Owner decisions 2026-11-03 (public launch)**
+
+| Item | Decision | Executor | Done when |
+|---|---|---|---|
+| Country + city on public job ads for signed-out visitors | APPROVED in principle, when known and lawfully public; title and employer stay withheld | `local_1a4a2a4f` | RED draft (migration, access check, privacy assessment, rollback) → separate owner approval → apply → walk |
+| Waiver `public-acquisition-route-jobs` | "I approve adding ONLY PR 2991 and PR 2984 to the existing public-acquisition-route-jobs waiver pullRequests list." — nothing else changes | `local_f7fa8877` (#2991), `local_1a4a2a4f` (#2984) | both merged with only those two numbers added in both pins |
+| GoogleOther + Applebot-Extended | prepare allowing them, with a Cloudflare rate limit; assess robots.txt, content use, SEO/GEO; general security restrictions stay | `local_1a4a2a4f` (plan), owner (Cloudflare) | plan delivered; owner applies |
+| #2828, #2370 | judge against direction A: #2828 drop tilt + 5 locales; #2370 resolve conflicts; visual comparison before merge | `local_f7fa8877` | comparison shown → owner visual approval |
+| #2989 | sign-up button visible at 360×740 as well; real sign-up check in Chrome | `local_f7fa8877` | measured + Chrome check after deploy |
+| #2988 | all four privacy-review fixes; refusal removes the campaign from the account and from new events; merge only after an independent re-check + CI PASS | `local_13cb59b3`, coordinator re-check | re-check pass → merge → production check |
+| J-12 | baseline learning-group journey COMPLETE (11.7 recognition-chain 41617507405); 11.10 RPL stays the later D-15 stage | — | done (#2990) |
+
 **Owner decisions 2026-11-03 (later the same day)**
 
 | Area | Decision | Conditions | Executor | Next |

@@ -5742,7 +5742,8 @@
             "Informacje o firmie wprowadzane przez użytkowników firmowych: dane firmy, zapotrzebowania na pracowników, projekty i rezerwacje.",
             "Wiadomości, które wysyłasz i otrzymujesz na platformie.",
             "Zapisy zgód: gdy udzielasz lub wycofujesz zgodę, zapisywane są czynność i jej czas.",
-            "Dane techniczne potrzebne do działania usługi, takie jak pliki cookie logowania (zobacz Politykę plików cookie)."
+            "Dane techniczne potrzebne do działania usługi, takie jak pliki cookie logowania (zobacz Politykę plików cookie).",
+            "Tylko za Twoją zgodą: pomiar korzystania na naszych własnych serwerach (osiągnięte strony i kroki, codzienna aktywność) oraz kampania, która Cię przyprowadziła, przechowywana z Twoim kontem. Zobacz Politykę cookies."
           ]
         },
         {
@@ -5834,10 +5835,36 @@
         {
           "name": "Preferencja wyświetlania dla administratora (lm_hide_admin_ui)",
           "purpose": "Używany wyłącznie na kontach administratorów. Zapamiętuje, czy elementy administracyjne są ukryte, i nie zmienia niczego w uprawnieniach."
+        },
+        {
+          "name": "Znacznik próby logowania (lm.oauth.trace)",
+          "purpose": "Pamięć karty, usuwana po jej zamknięciu. Losowy kod łączący jedną próbę logowania z jej wynikiem, aby można było zbadać nieudane logowanie. Niezbędny dla rozpoczętego przez Ciebie logowania; nie zawiera danych konta."
         }
       ],
-      "localStorageNote": "W pamięci przeglądarki (nie w plikach cookie) przechowywanych jest kilka elementów: Twój wybór jasnego lub ciemnego motywu; która strona lub kampania po raz pierwszy Cię tu sprowadziła — zapisane jednorazowo, aby późniejszą rejestrację można było do niej przypisać; losowy identyfikator sesji dla każdej karty, znikający po jej zamknięciu; oraz drobne udogodnienia, takie jak zamknięte powiadomienia, ostatnio oglądane elementy i język wprowadzania mową. Nic z tego nie jest udostępniane stronom trzecim ani wykorzystywane do reklam, a wszystko możesz w każdej chwili wyczyścić w przeglądarce.",
-      "noTracking": "Na platformie nie ma dziś żadnych plików cookie analitycznych, reklamowych ani śledzących innych firm. Jeśli kiedykolwiek się to zmieni, ta strona zostanie zaktualizowana jako pierwsza."
+      "localStorageNote": "Pamięć przeglądarki (nie pliki cookie) przechowuje też kilka elementów, o które sam poprosiłeś: wybór jasnego lub ciemnego motywu, Twoją decyzję w sprawie pomiaru korzystania oraz drobne udogodnienia, np. ukryte powiadomienia, ostatnio oglądane pozycje i język wprowadzania głosowego. Pozostają one na Twoim urządzeniu i w każdej chwili możesz je wyczyścić w przeglądarce.",
+      "noTracking": "Na platformie nie ma reklamowych ani śledzących plików cookie stron trzecich i nic nie jest przekazywane stronom trzecim w celach reklamowych.",
+      "settingsLink": "Ustawienia cookies",
+      "analyticsTitle": "Pomiar korzystania — tylko za Twoją zgodą",
+      "analyticsIntro": "Za Twoją zgodą mierzymy, jak korzysta się z produktu: które strony i kroki są osiągane, kroki rejestracji, codzienną aktywność oraz która kampania przyprowadziła odwiedzającego. Zdarzenia są przechowywane na naszych własnych serwerach i, jeśli jesteś zalogowany, powiązane z Twoim kontem. Bez Twojej zgody żaden z poniższych elementów nie jest zapisywany i żadne zdarzenie pomiarowe nie jest wysyłane z Twojej przeglądarki.",
+      "analyticsItems": [
+        {
+          "name": "Kampania pierwszej wizyty (lm.attr.first)",
+          "purpose": "Pamięć przeglądarki. Tagi kampanii (utm_*), strona odsyłająca i strona wejścia przy pierwszej wizycie. Przy rejestracji są kopiowane do rekordu Twojego konta, aby można było policzyć kampanię, która Cię przyprowadziła."
+        },
+        {
+          "name": "Identyfikator sesji (lm.pilot.session)",
+          "purpose": "Pamięć karty, usuwana po jej zamknięciu. Losowy identyfikator wysyłany z każdym zdarzeniem pomiarowym, aby kroki w jednej karcie liczyć razem."
+        },
+        {
+          "name": "Znaczniki aktywności (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
+          "purpose": "Pamięć przeglądarki. Ostatni dzień Twojej aktywności i znacznik, że trwa rejestracja."
+        },
+        {
+          "name": "Znaczniki jednorazowego liczenia (lm.funnel.*)",
+          "purpose": "Pamięć karty. Zapobiega dwukrotnemu policzeniu tego samego zdarzenia pomiarowego."
+        }
+      ],
+      "analyticsBasis": "Odmowa lub wycofanie zgody od razu usuwa te elementy z tego urządzenia; jeśli jesteś zalogowany, usuwana jest też kampania przechowywana z Twoim kontem. Sam pomiar opiera się na naszym prawnie uzasadnionym interesie w ulepszaniu produktu (art. 6 ust. 1 lit. f RODO) i możesz się mu sprzeciwić w sposób opisany w Polityce prywatności."
     },
     "requestContact": "Aby zadać pytanie lub zgłosić żądanie dotyczące swoich danych, skontaktuj się z nami — sprawę rozpatrzy człowiek.",
     "related": "Powiązane strony",
@@ -7638,7 +7665,7 @@
     "campaigns": {
       "title": "Kampania → oferta → konto",
       "empty": "W tym oknie nie ma jeszcze zdarzeń oznaczonych kampanią.",
-      "help": "Pierwszy kontakt utm_campaign × utm_content w tym samym oknie, z tym samym filtrem populacji. To wystąpienia zdarzeń, nie unikalni odwiedzający — późniejsza kolumna nie jest podzbiorem wcześniejszej, więc żaden stosunek dwóch kolumn nie jest współczynnikiem konwersji. 25 najczęstszych według wejść; ruch nieoznaczony (organiczny) nie jest wymieniony. Kolumna zainteresowania jest emitowana po stronie serwera, gdzie kampania nie jest dostępna, więc z założenia pozostaje 0 — to brak pomiaru, nie zmierzone zero.",
+      "help": "Pierwszy kontakt utm_campaign × utm_content w tym samym oknie, z tym samym filtrem populacji. To wystąpienia zdarzeń, nie unikalni odwiedzający — późniejsza kolumna nie jest podzbiorem wcześniejszej, więc żaden stosunek dwóch kolumn nie jest współczynnikiem konwersji. 25 najczęstszych według wejść; ruch nieoznaczony (organiczny) nie jest wymieniony. Kolumna zainteresowania jest emitowana po stronie serwera, gdzie kampania nie jest dostępna, więc z założenia pozostaje 0 — to brak pomiaru, nie zmierzone zero. Cztery kolumny po rejestracji liczą zdarzenia, nie osoby (wpisy w dzienniku to każdy zapisany wpis, nie pierwszy), i tylko dla kont, których własny rekord zawiera kampanię: rejestracje z dozwoloną analityką, a rejestracje przez Google dopiero od 2026-11-03. Odwiedzający, którzy odmówili analityki, w ogóle nie trafiają do tej tabeli.",
       "col": {
         "campaign": "Kampania / wariant",
         "landing": "Wejścia",
@@ -7648,7 +7675,11 @@
         "signupCompleted": "Utworzono konto",
         "returnedToJob": "Powrót do oferty",
         "compared": "Porównano",
-        "interest": "Zainteresowanie"
+        "interest": "Zainteresowanie",
+        "profileSaved": "Profil zapisany",
+        "profileMatchable": "Profil gotowy do dopasowania",
+        "journalEntrySaved": "Wpisy w dzienniku",
+        "jobSearch": "Szukanie pracy"
       }
     },
     "funnel": {
@@ -20092,6 +20123,23 @@
       "invalid": "Sprawdź imię i wiadomość.",
       "error": "Coś poszło nie tak. Spróbuj ponownie.",
       "cooldown": "Twoja prośba została niedawno odrzucona. Możesz poprosić tę grupę ponownie 30 dni po decyzji."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "Za Twoją zgodą mierzymy w Twojej przeglądarce, które strony i kroki pomagają ludziom i która kampania Cię tu przyprowadziła; bez zgody nic w tym celu nie jest zapisywane na Twoim urządzeniu. Podstawowe liczniki działań na naszych własnych serwerach prowadzimy w każdym przypadku (zobacz Politykę cookies). Produkt działa tak samo, cokolwiek wybierzesz.",
+      "accept": "Zezwól na pomiar",
+      "refuse": "Odmów",
+      "more": "Polityka cookies",
+      "label": "Wybór dotyczący pomiaru korzystania"
+    },
+    "control": {
+      "title": "Pomiar korzystania i przypisanie kampanii",
+      "granted": "Wyraziłeś zgodę. Możesz ją w każdej chwili wycofać — wtedy wpisy zostaną usunięte z tego urządzenia.",
+      "refused": "Odmówiłeś. Na tym urządzeniu nic nie jest zapisywane na potrzeby pomiaru.",
+      "undecided": "Nie dokonałeś jeszcze wyboru, więc nic nie jest zapisywane na potrzeby pomiaru.",
+      "allow": "Zezwól",
+      "refuse": "Odmów"
     }
   }
 }

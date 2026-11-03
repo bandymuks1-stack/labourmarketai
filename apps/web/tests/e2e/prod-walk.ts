@@ -1,6 +1,7 @@
 import { test as base, type BrowserContextOptions } from "@playwright/test";
 
 import { WALK_TIME_ZONE, seedViewerTimeZone } from "./viewer-time-zone";
+import { seedWalkAnalyticsConsent } from "./analytics-consent-seed";
 
 /**
  * THE PRODUCTION WALK'S `test` — every browser context it opens is a returning
@@ -32,6 +33,10 @@ import { WALK_TIME_ZONE, seedViewerTimeZone } from "./viewer-time-zone";
  * step passes its minted session file). Hence the wrapper; it also re-asserts
  * the zone, so a context's zone and its cookie can never disagree.
  *
+ * The same two doors also seed the analytics consent choice (refused unless
+ * the walk sets its own), so the consent banner never covers a bottom CTA a
+ * walk must press — see `analytics-consent-seed.ts`.
+ *
  * Overriding the worker-scoped `browser` fixture gives these tests their own
  * workers, so no test that imports the plain `@playwright/test` ever sees the
  * wrapped browser. Nothing a walk asserts changes: the page a person sees after
@@ -43,6 +48,7 @@ export const test = base.extend({
   timezoneId: WALK_TIME_ZONE,
   context: async ({ context }, use) => {
     await seedViewerTimeZone(context);
+    await seedWalkAnalyticsConsent(context);
     await use(context);
   },
   browser: [
@@ -51,6 +57,7 @@ export const test = base.extend({
       browser.newContext = async (options?: BrowserContextOptions) => {
         const ctx = await newContext.call(browser, { ...options, timezoneId: WALK_TIME_ZONE });
         await seedViewerTimeZone(ctx);
+        await seedWalkAnalyticsConsent(ctx);
         return ctx;
       };
       try {

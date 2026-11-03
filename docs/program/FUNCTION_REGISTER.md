@@ -31,9 +31,9 @@ a security/permission row says only that an item is open.
 
 | LIVE_VERIFIED | PASS_CI_ONLY | FAIL | BLOCKED | NOT_VERIFIED | NOT_IMPLEMENTED | OPTIONAL_TEST |
 |---|---|---|---|---|---|---|
-| 194 | 6 | 8 | 40 | 17 | 22 | 1 |
+| 195 | 6 | 8 | 40 | 16 | 22 | 1 |
 
-2026-11-03: 11.2 NOT_VERIFIED → LIVE_VERIFIED by cohort-join-request 41611766407 (6/6). 2026-11-02: 2.20 FAIL → NOT_VERIFIED by owner decision 0028, then → LIVE_VERIFIED by journal-confirm 41478434884. 4.9 and 5.7 PASS_CI_ONLY → LIVE_VERIFIED by alert-mail 41488266687.
+2026-11-03: 11.7 NOT_VERIFIED → LIVE_VERIFIED by recognition-chain 41617507405; J-12 redefined by the owner as the baseline learning-group journey (11.1–11.7), RPL 11.10 a separate advanced stage. 2026-11-03: 11.2 NOT_VERIFIED → LIVE_VERIFIED by cohort-join-request 41611766407 (6/6). 2026-11-02: 2.20 FAIL → NOT_VERIFIED by owner decision 0028, then → LIVE_VERIFIED by journal-confirm 41478434884. 4.9 and 5.7 PASS_CI_ONLY → LIVE_VERIFIED by alert-mail 41488266687.
 
 Full planned scope 2026-11-01: 277 rows − 2 DUPLICATE (7.10 = 4.22, 4.17 = 2.35; kept, not counted) + 13 functions found in the vision, architecture and decision documents with no row before (2.36, 2.37, 3.34–3.36, 4.30, 5.20, 5.21, 6.22–6.24, 7.30, 7.31) = **288**. Seven rows were reconciled with product-truth (3.8, 4.6, 11.2, 11.7, 7.5 → NOT_VERIFIED; 2.20, 2.24 → FAIL); their earlier proof stays in the row. Production-verified share of the full scope: **190 / 288 = 66.0 %** (186 after the 2026-11-02 recount; +3.8, 4.6, 6.18, 9.18 from production walks 41350506578 and 41357630136). Targets (conditional, not guaranteed): core product complete and public mid-December 2026; full historical scope February 2027 (preliminary).
 
@@ -83,8 +83,8 @@ Denominator = 287 functions (288 planned minus the one `OPTIONAL_TEST` scenario,
 | Measure | Method | Result |
 |---|---|---|
 | **Technical implementation** | every row except `NOT_IMPLEMENTED` (a `BLOCKED` row is built but waits for an owner step) | **265 / 287 = 92.3 %** |
-| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **194 / 287 = 67.6 %** (73.2 % of the built 265) |
-| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **15 / 19 = 78.9 %** complete · 2 partial · 0 broken · 2 blocked · 0 unverified |
+| **Production verification** | `LIVE_VERIFIED` only (`PASS_CI_ONLY`, `NOT_VERIFIED`, `BLOCKED`, `FAIL` never count) | **195 / 287 = 67.9 %** (73.6 % of the built 265) |
+| **Real user-journey completion** | 19 end-to-end journeys a real person needs (below); a journey counts only when **every** step is `LIVE_VERIFIED`, none is `FAIL`, and no admin help is needed | **16 / 19 = 84.2 %** complete · 1 partial · 0 broken · 2 blocked · 0 unverified (J-12 counts the baseline learning-group journey 11.1–11.7; advanced RPL 11.10 is tracked separately, owner D-15) |
 
 Per area (technical / production-verified) — as of the 277-row register, before the 2026-11-01 full-scope update; recomputed at the next weekly progress report:
 
@@ -119,7 +119,7 @@ The 19 journeys (rows in brackets):
 | J-9 | Agency declares supply → client bridge → offer (4.15, 4.28) | complete | agency-chain 2026-10-26, search-support-privacy 2026-11-01 |
 | J-10 | Brigade offered and matched as a unit (3.7, 4.6, 4.7) | complete | brigade-formation 41350506578 2026-11-01 (19/19); product-truth link LIVE (#2917) |
 | J-11 | Goods / service listed → found → requested → accepted → messages (6.1–6.3) | complete | marketplace 2026-11-01 |
-| J-12 | Institution → cohort → learner → practice → competency → qualification (11.1–11.7, 11.10) | partial | learner join request LIVE_VERIFIED (cohort-join-request 41611766407, 6/6, 2026-11-03; 11.2); still open: practice → competency recognition (11.7 NOT_VERIFIED) and RPL (11.10, a separate later stage by owner decision D-15); was: learners-join link BROKEN; owner decision 0028 (2026-11-02) sets the confirmation rule: learner declares, an authorised institution person confirms work, hours, competency and identity, no qualification without an assessment procedure |
+| J-12 | Institution → cohort → learner → practice → competency (11.1–11.7) — BASELINE learning-group journey | complete | 11.1, 11.3–11.6 learning-practice 2026-10-21/25; 11.2 learner join request cohort-join-request 41611766407 (6/6, 2026-11-03); 11.7 practice → authorised sign-off → competency → learner view recognition-chain 41617507405 (2026-11-03). Formal recognition of prior learning / qualification (11.10 RPL) is NOT part of this journey: owner decision D-15 (2026-11-02, confirmed 2026-11-03) makes it a separate, later ADVANCED stage — tracked as row 11.10, never an automatic qualification |
 | J-13 | Buyer workspace → request → provider (6.4, 6.1) | complete | buyer-workspace 41480104268 2026-11-02 (9/9, non-customer → customer → provider request); next extension (request → offer/contract) is owner decision RED-1, draft #2946 |
 | J-14 | Organization buys a plan without help (7.1, 7.5, 7.15, 7.28) | blocked | 7.15 hidden by design, 7.28 FAIL (owner/legal) |
 | J-15 | Alert / e-mail about a new matching job without signing in (4.9, 5.7, 5.9) | partial | alert-mail 41488266687 2026-11-02 (9/9): matching-job alert e-mail arrives and opens signed out (4.9, 5.7 LIVE_VERIFIED); the weekly digest e-mail (5.9) is not yet observed in production |
@@ -445,7 +445,7 @@ The 19 journeys (rows in brackets):
 | 11.4 | Practice capacity | LIVE_VERIFIED | 2026-10-25 | learning-practice run 40154033299 (green) 10-25 | yes |  |
 | 11.5 | Learner outcomes | LIVE_VERIFIED | 2026-10-25 | learning-practice run 40154033299 (green) 10-25 | yes |  |
 | 11.6 | Institution reporting + export | LIVE_VERIFIED | 2026-10-25 | learning-practice run 40154033299 (green) 10-25 | yes |  |
-| 11.7 | Practice->competency recognition | NOT_VERIFIED | 2026-11-01 | 2026-11-02: D-15 design recorded in decision 0028 (recognition = separate assessor act on existing evidence, never automatic); no status change. 2026-11-01 reconciled with product-truth: product-truth: demonstrated capability is not recognised against a formal requirement (SKL-9); the earlier production proof below stays valid for what it covered; earlier: recognition-chain 39602983862 10-21 | yes |  |
+| 11.7 | Practice->competency recognition | LIVE_VERIFIED | 2026-11-03 | prod walk recognition-chain 41617507405 2026-11-03 (7 passed, R-3 skipped: learner already connected): the learner records a practice day in the training relationship; the institution's authorised person signs it off in its review queue; the institution picks THAT signed-off practice and records the competency recognition (assessor ≠ the learner's employer, conflict rule); the learner sees the recognition among their own. Earlier: 2026-11-02: D-15 design recorded in decision 0028 (recognition = separate assessor act on existing evidence, never automatic); no status change. 2026-11-01 reconciled with product-truth: product-truth: demonstrated capability is not recognised against a formal requirement (SKL-9); the earlier production proof below stays valid for what it covered; earlier: recognition-chain 39602983862 10-21 | yes |  |
 | 11.8 | Training & certification register | FAIL | 2026-10-28 | company-governance 40687308231 (2026-10-28 12:28Z) green incl. T-5 — #2857 workspace scoping LIVE_VERIFIED; course register, assign, complete, see completed, retire all pass | yes | engaged non-member workers cannot be assigned training (owner product decision, RED #2816) |
 | 11.9 | Human-in-loop learning review | BLOCKED | — | owner parked nav door | unproven |  |
 | 11.10 | RPL equivalence structure | NOT_IMPLEMENTED | — | 2026-11-02: design recorded in decision 0028 §D-15 (procedure; structure stays deferred under ARCH-2 until the first assessor and requirement set are named). registry NOT_BUILT: RPL equivalence structure (ARCH-2) | no | owner, RED schema |
