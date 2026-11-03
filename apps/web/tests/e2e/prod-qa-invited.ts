@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
@@ -20,6 +20,13 @@ export const ADDRESS = "qa.invited@labourmarket.ai";
 export const SLOT = "invited";
 export const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 export const STATE = resolve(__dirname, `.storage-state.prod-qa.${SLOT}.json`);
+
+/** Written once the walk's own in-app sign-out landed: the revoke step then
+ *  counts Supabase's 403/404 for this slot's session as already ended
+ *  (scripts/prod-qa-revoke-sessions.ts), and deletes this marker. */
+export function markSignedOut(): void {
+  writeFileSync(resolve(__dirname, `.storage-state.prod-qa.${SLOT}.signed-out.json`), "{}\n", { mode: 0o600 });
+}
 export const PHONE = { width: 390, height: 844 };
 export const APP_HOST = new URL(process.env.E2E_BASE_URL ?? "https://labourmarket.ai").host;
 
