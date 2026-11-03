@@ -16,6 +16,7 @@ import {
   BRAND_NAME,
   BRAND_ORGANIZATION_DESCRIPTION,
   BRAND_SEO,
+  brandedTitle,
   OG_IMAGE_SIZE,
   localizedUrl,
   resolveActiveLocale,
@@ -69,7 +70,7 @@ export function buildQuestionMetadata(answer: LocalizedAnswer): Metadata {
   const indexable = isIndexable(answer.canonicalQuestionId, answer.locale);
   const canonical = url(answer.locale, questionPath(answer.localizedSlug));
   return {
-    title: `${answer.title} · ${BRAND_NAME}`,
+    title: brandedTitle(answer.title),
     description: answer.description,
     alternates: { canonical, languages: questionHreflang(answer.canonicalQuestionId) },
     robots: indexable ? { index: true, follow: true } : { index: false, follow: false },
@@ -103,7 +104,7 @@ export function buildStaticQuestionsMetadata(
   langs["x-default"] = url(defaultLocale, path);
   const canonical = url(locale, path);
   return {
-    title: `${title} · ${BRAND_NAME}`,
+    title: brandedTitle(title),
     description,
     alternates: { canonical, languages: langs },
     robots: { index: true, follow: true },
