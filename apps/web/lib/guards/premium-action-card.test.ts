@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { activeLocales } from "@/lib/i18n/config";
@@ -131,5 +131,35 @@ describe("the Work page: two tiers, navigation stays navigation", () => {
         expect(m.projects.deck[k], `${locale} projects.deck.${k}`).toBeTruthy();
       }
     }
+  });
+});
+
+/**
+ * ONE ACTION-CHOICE PRIMITIVE (owner decision 2026-11-03: "Tai nėra leidimas
+ * kurti papildomų dubliuojančių kortelių sistemų"). The audit-PR8 ActionCard
+ * folded into this tile; no component anywhere may export another action
+ * card, action tile or action deck.
+ */
+describe("premium-action-card is the ONE action-choice primitive", () => {
+  const ROOT = join(__dirname, "..", "..");
+  const walk = (dir: string, out: string[] = []): string[] => {
+    for (const name of readdirSync(dir)) {
+      if (name === "node_modules" || name.startsWith(".")) continue;
+      const p = join(dir, name);
+      if (statSync(p).isDirectory()) walk(p, out);
+      else if (name.endsWith(".tsx") && !name.endsWith(".test.tsx")) out.push(p);
+    }
+    return out;
+  };
+  it("no other component exports an ActionCard, ActionTile or ActionDeck", () => {
+    const offenders: string[] = [];
+    for (const dir of ["components", "app"]) {
+      for (const file of walk(join(ROOT, dir))) {
+        const rel = file.slice(ROOT.length + 1).split(sep).join("/");
+        if (rel === "components/ui/premium-action-card.tsx") continue;
+        if (/export (function|const) \w*Action(Card|Tile|Deck)\b/.test(readFileSync(file, "utf8"))) offenders.push(rel);
+      }
+    }
+    expect(offenders).toEqual([]);
   });
 });
