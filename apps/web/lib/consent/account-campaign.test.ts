@@ -63,7 +63,9 @@ describe("campaignClearPatch", () => {
     expect(campaignClearPatch(null)).toBeNull();
   });
   it("after the patch the server reads no campaign at all", () => {
-    expect(firstTouchFromUserMetadata({ utm_campaign: "x", ...ALL_NULL })).toEqual({});
+    const patched: Record<string, unknown> = { utm_campaign: "x", locale: "lt" };
+    Object.assign(patched, ALL_NULL);
+    expect(firstTouchFromUserMetadata(patched)).toEqual({});
   });
 });
 
