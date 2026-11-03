@@ -4196,6 +4196,7 @@
       "eduCohortCreated": "Grupp skapad. Du kan tilldela elever.",
       "eduAssignNoCohort": "Inga grupper ännu — skapa först en grupp.",
       "eduAssignNoLearners": "Inga accepterade elever ännu. Bjud in en elev — du kan tilldela när inbjudan har accepterats.",
+      "eduMembersNotForRole": "Gruppmedlemskap är inte tillgängligt för din roll. Bara institutionens egen ägare, administratör eller chef kan tilldela elever.",
       "eduAssignDone": "Elev tilldelad gruppen.",
       "eduNotInstitution": "Den här organisationen är ännu inte markerad som utbildningsinstitution. Markera det i företagsavsnittet.",
       "eduUnavailable": "Programmen kan inte läsas just nu. Det betyder inte att det inte finns några.",

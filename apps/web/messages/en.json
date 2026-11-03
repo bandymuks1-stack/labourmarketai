@@ -2096,7 +2096,8 @@
           "evidenceConfirmed": "signed off"
         },
         "requestFrom": "Asks to join: {name}",
-        "requestUnverified": "Name typed by the learner — not checked by anyone."
+        "requestUnverified": "Name typed by the learner — not checked by anyone.",
+        "membersNotForRole": "Group members are not available to your role. Only the institution's own owner, admin or manager sees and changes membership."
       },
       "learners": {
         "title": "Learners",
@@ -14416,6 +14417,7 @@
       "eduCohortCreated": "Cohort created. You can assign learners.",
       "eduAssignNoCohort": "No cohorts yet — create a cohort first.",
       "eduAssignNoLearners": "No accepted learners yet. Invite a learner — you can assign them once they accept.",
+      "eduMembersNotForRole": "Group membership is not available to your role. Only the institution's own owner, admin or manager can assign learners.",
       "eduAssignDone": "Learner assigned to the cohort.",
       "eduNotInstitution": "This organization is not marked as a training institution yet. Mark it in the company section.",
       "eduUnavailable": "Programmes cannot be read right now. That does not mean there are none.",

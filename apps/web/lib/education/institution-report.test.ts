@@ -140,6 +140,13 @@ describe("institution report — an unknown demand never exports as zero (SEP-7)
     expect(demandCountFor("carpenter", null)).toBeNull();
   });
 
+  it("writes `unknown`, not 0, for active learners when the caller may not see membership (J-12)", () => {
+    const csv = buildInstitutionReportCsv([program({ demandCount: 3 })], OK_OUTCOMES, false);
+    const cells = blocks(csv).programs[1].split(",");
+    expect(cells[4]).toBe(UNKNOWN_CELL);
+    expect(cells[5]).toBe("3");
+  });
+
   it("writes a real zero when the count actually measured zero", () => {
     const csv = buildInstitutionReportCsv([program({ demandCount: 0 })], OK_OUTCOMES);
     const row = blocks(csv).programs[1];

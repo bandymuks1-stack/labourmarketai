@@ -4196,6 +4196,7 @@
       "eduCohortCreated": "Hold oprettet. Du kan tildele elever.",
       "eduAssignNoCohort": "Ingen hold endnu — opret først et hold.",
       "eduAssignNoLearners": "Ingen accepterede elever endnu. Inviter en elev — du kan tildele, når invitationen er accepteret.",
+      "eduMembersNotForRole": "Gruppemedlemskab er ikke tilgængeligt for din rolle. Kun institutionens egen ejer, administrator eller leder kan tildele elever.",
       "eduAssignDone": "Elev tildelt holdet.",
       "eduNotInstitution": "Denne organisation er endnu ikke markeret som uddannelsesinstitution. Marker det i virksomhedsafsnittet.",
       "eduUnavailable": "Programmer kan ikke læses lige nu. Det betyder ikke, at der ingen er.",
