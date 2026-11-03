@@ -9,7 +9,7 @@ import {
   getHeaderOverflowNavItems,
   type NavItem,
 } from "@/lib/config/navigation";
-import { organizationHeaderAreas } from "@/lib/navigation/work-areas";
+import { CUSTOMER_HEADER_DOORS, organizationHeaderAreas } from "@/lib/navigation/work-areas";
 import { actingRoleForWorkspace } from "@/lib/company/organization-switch";
 import { activeNavItem, headerPlaceLabelKey } from "@/lib/navigation/header-place";
 import { NAV_ICONS } from "@/components/app/nav-icons";
@@ -99,7 +99,11 @@ export function ConversationHeader({
   const actingRole = actingRoleForWorkspace(activeWorkspace, auth?.roles ?? []);
   const organizationAreas =
     actingRole === "company" || actingRole === "agency" ? organizationHeaderAreas(actingRole) : [];
-  const overflow = [...organizationAreas, ...getHeaderOverflowNavItems({ isAdmin })];
+  // The customer's own door leads "More" when the ACTIVE role is customer and
+  // no organization is the active workspace (client-side; no new read).
+  const customerDoors =
+    auth?.activeRole === "customer" && activeWorkspace?.kind !== "organization" ? CUSTOMER_HEADER_DOORS : [];
+  const overflow = [...organizationAreas, ...customerDoors, ...getHeaderOverflowNavItems({ isAdmin })];
   const allItems = [...primary, ...overflow];
   const active = activeNavItem(pathname, allItems);
   const activeOverflow = active && overflow.some((i) => i.id === active.id) ? active : null;
