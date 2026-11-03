@@ -96,14 +96,16 @@ describe("P0-1b — /jobs-sitemap.xml never answers 500 on a transient count fai
   const route = read("app/jobs-sitemap.xml/route.ts");
 
   it("wraps the count in try/catch and answers 503 + Retry-After, uncached", () => {
-    expect(route).toMatch(/try \{\s*counts = await readPublicVacancySupplyCounts\(\);\s*\} catch/);
+    // Since the 2026-11-03 sitemap P0 the count is the cached, cookie-less read
+    // (lib/vacancy-store/public-vacancy-sitemap-cache.ts); still try/catch → 503.
+    expect(route).toMatch(/try \{\s*activeVacancies = await readCachedActiveVacancyCount\(\);\s*\} catch/);
     expect(route).toMatch(/status: 503/);
     expect(route).toMatch(/"Retry-After": "600"/);
     expect(route).toMatch(/"Cache-Control": "no-store"/);
   });
 
   it("still emits a VALID EMPTY index when the feature is off or there are zero live ads (unchanged)", () => {
-    expect(route).toMatch(/counts\.status === "ok" && counts\.activeVacancies > 0/);
+    expect(route).toMatch(/activeVacancies !== null && activeVacancies > 0/);
     expect(route).toMatch(/<sitemapindex xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
   });
 });
