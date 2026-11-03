@@ -115,6 +115,18 @@ export function organizationHeaderAreas(role: "company" | "agency"): readonly Na
     .map(({ a }) => ({ id: `area:${a.id}` as const, href: a.href, tabLabelKey: a.labelKey, iconKey: a.iconKey }));
 }
 
+/**
+ * THE CUSTOMER'S OWN DOOR in the one header (owner P0-2, coordinator ruling
+ * 2026-11-03): a person whose ACTIVE role is customer, outside an
+ * organization workspace, finds "Mano užklausos" (/dashboard/buyer — the
+ * customer role's home) first in "More" and the phone sheet. Same rule as the
+ * organization doors: the primary row stays the A-03 core loop, this adds no
+ * primary item, and the page re-checks the customer role itself.
+ */
+export const CUSTOMER_HEADER_DOORS: readonly NavItem[] = [
+  { id: "area:buyer", href: "/dashboard/buyer", tabLabelKey: "roleDashboards.buyer.title", iconKey: "package" },
+];
+
 export type WorkAreaContext = "personal" | "organization";
 
 /** The areas of a workspace — the one lookup every home surface uses. */
