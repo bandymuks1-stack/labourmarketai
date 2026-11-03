@@ -1,15 +1,17 @@
 import React from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 import type { JournalListData } from "../../src/capability-shapes";
 import { useLocale } from "../../src/i18n/locale-context";
+import { traceTestId, useRequestTrace } from "../../src/request-trace";
 import { CapabilityGate } from "../../src/screens/capability-gate";
 import { JournalEntryList } from "../../src/screens/journal-entries";
 import { Button, Title } from "../../src/ui/primitives";
 import { theme } from "../../src/ui/theme";
 import { useCapability } from "../../src/use-capability";
+import { useReloadOnReturn } from "../../src/use-reload-on-return";
 
 const PAGE = { limit: 20 } as const;
 
@@ -26,11 +28,23 @@ export default function Screen() {
   const { t } = useLocale();
   const router = useRouter();
   const journal = useCapability<JournalListData>("journal.list", PAGE);
+  // Back from logging or correcting: the corrected version replaces the old.
+  useReloadOnReturn(journal.reload);
+  // State words only, for the CI journeys (src/request-trace.ts).
+  const trace = useRequestTrace();
+  const readState =
+    journal.state.status === "failed"
+      ? `failed-${journal.state.failure.kind}`
+      : journal.state.status;
 
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Title>{t("nav.journal")}</Title>
+        <View testID={`journal-read-${readState}`}>
+          <View testID={traceTestId(trace, "journal.list")}>
+            <Title>{t("nav.journal")}</Title>
+          </View>
+        </View>
         <Button
           testID="journal-log-work"
           label={t("journal.logWork")}
@@ -43,7 +57,17 @@ export default function Screen() {
             code === "no_worker_profile" ? t("profile.noWorkerProfile") : null
           }
         >
-          {(data) => <JournalEntryList entries={data.entries} />}
+          {(data) => (
+            <JournalEntryList
+              entries={data.entries}
+              onCorrect={(entry) =>
+                router.push({
+                  pathname: "/(shell)/correct-entry",
+                  params: { entryId: entry.entryId },
+                })
+              }
+            />
+          )}
         </CapabilityGate>
         {/* The station the web journal links to: what these entries add up
             to lives on the profile (hours · share · entries per skill). */}

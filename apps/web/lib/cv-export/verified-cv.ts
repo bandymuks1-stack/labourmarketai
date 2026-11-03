@@ -41,6 +41,7 @@ import {
   type WorkIntelligence,
 } from "@/lib/journal/work-intelligence";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import { readDisputedEntrySkills, withoutDisputedLinks } from "@/lib/journal/entry-skill-disputes";
 import {
   deriveProfessionalExperience,
   type ProfessionalExperience,
@@ -661,10 +662,16 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   const countedEntryIds = new Set(
     cvLiveEntries(((entriesRes.data ?? []) as unknown) as CvEntryRow[]).map((e) => e.id),
   );
+  // …and never a link the person DISPUTED on its entry, even while the row
+  // itself still exists (lib/journal/entry-skill-disputes.ts).
+  const disputed = linkRes.error ? null : await readDisputedEntrySkills(supabase, workerId);
   const durableSupported = linkRes.error
     ? new Set<string>()
     : supportedSkillIds(
-        ((linkRes.data ?? []) as EntrySkillLinkRow[]).filter((l) => countedEntryIds.has(l.journal_entry_id)),
+        withoutDisputedLinks(
+          ((linkRes.data ?? []) as EntrySkillLinkRow[]).filter((l) => countedEntryIds.has(l.journal_entry_id)),
+          disputed,
+        ),
       );
 
   // `verified` below is the STANDING confirmation, not the stored flag

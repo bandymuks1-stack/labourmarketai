@@ -553,7 +553,7 @@
         "admin": "Administratör"
       },
       "signing": "[EN] Creating...",
-      "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with a social account or with email and password; you'll pick your role next.",
+      "subcopy": "En profil för din arbetslivserfarenhet och dina möjligheter — i nästa steg berättar du vad du söker.",
       "submit_label": "[EN] Sign up",
       "resend_label": "Skicka länken igen",
       "resend_sent": "Skickat igen. Kontrollera inkorgen och skräppostmappen.",
@@ -4196,6 +4196,7 @@
       "eduCohortCreated": "Grupp skapad. Du kan tilldela elever.",
       "eduAssignNoCohort": "Inga grupper ännu — skapa först en grupp.",
       "eduAssignNoLearners": "Inga accepterade elever ännu. Bjud in en elev — du kan tilldela när inbjudan har accepterats.",
+      "eduMembersNotForRole": "Gruppmedlemskap är inte tillgängligt för din roll. Bara institutionens egen ägare, administratör eller chef kan tilldela elever.",
       "eduAssignDone": "Elev tilldelad gruppen.",
       "eduNotInstitution": "Den här organisationen är ännu inte markerad som utbildningsinstitution. Markera det i företagsavsnittet.",
       "eduUnavailable": "Programmen kan inte läsas just nu. Det betyder inte att det inte finns några.",
@@ -7714,6 +7715,73 @@
     },
     "helpNeeded": "Hjälp behövs — {stage}:"
   },
+  "projectForecast": {
+    "title": "Prognos",
+    "notFact": "En prognos utifrån projektets registrerade arbete per {date} — inte ett faktum och inte ett löfte. Den räknas om varje gång sidan öppnas.",
+    "unavailable": "Prognosen kunde inte läsas just nu.",
+    "insufficient": "Ännu för lite registrerat arbete för att göra en prognos för projektet.",
+    "notApplicable": "Inget att förutse: projektet har inget öppet arbete.",
+    "unknown": "Okänt",
+    "beyondHorizon": "Mer än tre år bort i nuvarande takt",
+    "completionLabel": "Förväntat slut",
+    "deadlineLabel": "Tidsfrist",
+    "leftLabel": "Återstående arbete",
+    "leftTasks": "{left} av {total} uppgifter",
+    "leftStages": "{left} av {total} etapper",
+    "peopleLabel": "Personer som behövs",
+    "peopleValue": "{needed} (nu {active})",
+    "qualityLabel": "Kvalitetsrisk",
+    "confidenceLabel": "Tillförlitlighet",
+    "actionsTitle": "Vad som skulle ändra den",
+    "assumptionsTitle": "Antaganden",
+    "risk": {
+      "on_track": "Enligt plan",
+      "tight": "Knappt",
+      "likely_miss": "Nås troligen inte",
+      "overdue": "Försenat",
+      "unknown": "Okänt"
+    },
+    "quality": {
+      "none": "Inga öppna",
+      "low": "Låg",
+      "elevated": "Förhöjd",
+      "high": "Hög",
+      "unknown": "Okänt"
+    },
+    "confidence": {
+      "insufficient": "för lite underlag",
+      "low": "låg",
+      "medium": "medel",
+      "high": "hög"
+    },
+    "action": {
+      "add_workers": "Lägg till personer i teamet",
+      "find_partner_capacity": "Hitta partnerkapacitet",
+      "unblock_stages": "Lås upp de blockerade etapperna",
+      "unblock_tasks": "Lås upp de blockerade uppgifterna",
+      "close_serious_defects": "Åtgärda de allvarliga bristerna",
+      "complete_readiness": "Slutför teamets saknade beredskapspunkter",
+      "record_hours": "Registrera timmarna som arbetats i projektet",
+      "set_planned_end": "Ange ett planerat slutdatum",
+      "break_down_scope": "Dela upp arbetet i uppgifter",
+      "review_budget": "Se över budgeten",
+      "replan_deadline": "Planera om tidsfristen"
+    },
+    "assumption": {
+      "trailing_window_days": "Takten läses från de senaste 28 dagarna.",
+      "calendar_day_rate": "Timmar fördelas på kalenderdagar; ingen arbetskalender antas.",
+      "equal_unit_weight": "Varje uppgift räknas lika.",
+      "unit_is_stage": "Projektet har inga uppgifter, så etapper räknas i stället.",
+      "team_stays_as_is": "Teamet förblir som det är nu.",
+      "absences_as_approved": "Endast godkänd frånvaro räknas med.",
+      "throughput_without_hours": "Inga timmar är registrerade, så slutet läses enbart från avslutat arbete.",
+      "cost_continues_at_observed_rate": "Kostnaderna fortsätter i den takt som setts hittills.",
+      "single_hours_ledger": "En timredovisning används; den andra visas bredvid och läggs aldrig till.",
+      "hours_partly_unconfirmed": "En del av timmarna är ännu inte bekräftade.",
+      "hours_read_truncated": "Alla timmar kunde inte läsas; siffrorna kan vara för låga.",
+      "free_internal_people_unknown": "Det är okänt vem mer i organisationen som är ledig."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "Veckans mål",
     "titleMine": "Dina uppgifter den här veckan",
@@ -7819,5 +7887,32 @@
     "error": "That didn't work. Nothing was changed.",
     "notAllowed": "The organization's owner or a manager can do this.",
     "notSameWork": "These records no longer match — refresh the page."
+  },
+  "learnerCohortJoin": {
+    "title": "Lärgrupp",
+    "declaredNote": "Du kan alltid registrera din praktik och ditt arbete, även innan en utbildningsanordnare har antagit dig. Tills anordnarens behöriga person bekräftar det visas det som angivet av dig, inte som bekräftat.",
+    "journalLink": "Öppna journalen",
+    "find": "{count, plural, one {# öppen grupp} other {# öppna grupper}}",
+    "empty": "Ingen utbildningsanordnare tar emot förfrågningar om att gå med just nu.",
+    "unavailable": "Lärgrupperna kunde inte laddas just nu. Försök igen senare.",
+    "status": {
+      "requested": "Förfrågan skickad, väntar på anordnarens beslut.",
+      "declined": "Anordnaren godkände inte den här förfrågan."
+    },
+    "form": {
+      "nameLabel": "Ditt namn som anordnaren känner dig",
+      "nameHint": "Anordnaren ser bara det här namnet och ditt meddelande, inte din profil eller journal.",
+      "noteLabel": "Meddelande till anordnaren (valfritt)",
+      "send": "Be om att gå med",
+      "withdraw": "dra tillbaka förfrågan",
+      "saving": "Skickar…",
+      "requested": "Förfrågan skickad.",
+      "alreadyMember": "Du är redan medlem i den här gruppen.",
+      "withdrawn": "Förfrågan har dragits tillbaka.",
+      "closed": "Den här gruppen tar inte emot nya förfrågningar.",
+      "invalid": "Kontrollera namnet och meddelandet.",
+      "error": "Något gick fel. Försök igen.",
+      "cooldown": "Din förfrågan avslogs nyligen. Du kan fråga den här gruppen igen 30 dagar efter beslutet."
+    }
   }
 }

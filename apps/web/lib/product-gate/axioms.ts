@@ -116,28 +116,28 @@ export const AXIOMS: readonly Axiom[] = [
     id: "A-10",
     rule:
       "No new commercial surface without the commercial system: price, LMC rule, Stripe object and entitlement live in exactly one catalogue.",
-    source: "docs/product/lmc-canonical-commercial-catalogue-v1.md (the merged canonical record, PR #894)",
+    source: "docs/DECISIONS/0029-commercial-sustainability-and-business-health.md §6 (one catalogue: apps/web/lib/commercial/plan-catalogue.ts; provenance lmc-canonical-commercial-catalogue-v1, PR #894; carried from closed PR #895)",
     enforcement: "review",
     gateCheck:
-      "HUMAN GATE until the commercial system ships. The machine half (commercial-single-source + commercial-gate) arrives with docs/product/commercial-system-v1.md in PR #895/#896; claiming machine enforcement before then would be a dormant check. The rule itself is unchanged and binding.",
+      "HUMAN GATE until a commercial gate is built on main's catalogue (decision 0029 §9). Claiming machine enforcement before then would be a dormant check. The rule itself is unchanged and binding.",
   },
   {
     id: "A-11",
     rule:
       "No feature is launched without a known economic model (payer, unit cost, margin) — financial safety is a merge gate, not a review note.",
-    source: "PR #896 — commercial sustainability v1 (CSP-002, FSR-001, FSR-005), not yet merged",
+    source: "docs/DECISIONS/0029-commercial-sustainability-and-business-health.md §1–§4 (CSP-002, FSR-001, FSR-005; carried from PR #896)",
     enforcement: "review",
     gateCheck:
-      "HUMAN GATE until PR #896 merges and brings the Commercial Gate with it. The rule is binding now; claiming machine enforcement before its gate exists would be a dormant check.",
+      "HUMAN GATE until the commercial gate of decision 0029 §9 is built. The rule is binding now; claiming machine enforcement before its gate exists would be a dormant check.",
   },
   {
     id: "A-12",
     rule:
       "A metric or state that is not measured is reported as unmeasured — never as a zero, never as a reassuring default.",
-    source: "PR #897 — Business Health Engine v1, not yet merged",
+    source: "docs/DECISIONS/0029-commercial-sustainability-and-business-health.md §5 (business health; carried from PR #897)",
     enforcement: "review",
     gateCheck:
-      "HUMAN GATE until PR #897 merges and brings the business-health guard with it. The honesty rule itself is binding now.",
+      "HUMAN GATE until the business-health definitions of decision 0029 §5 exist as code with their guard. The honesty rule itself is binding now.",
   },
   {
     id: "A-13",

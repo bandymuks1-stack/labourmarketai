@@ -15,6 +15,7 @@ import { SkillFigureList } from "../../src/screens/work-figures";
 import { Body, Button, Divider, Title } from "../../src/ui/primitives";
 import { theme } from "../../src/ui/theme";
 import { useCapability } from "../../src/use-capability";
+import { useReloadOnReturn } from "../../src/use-reload-on-return";
 import { useProfile } from "../../src/profile-provider";
 
 /** All time — the Living CV's own scope for a skill's hours. */
@@ -47,6 +48,10 @@ export default function Screen() {
     "journal.work_intelligence.get",
     ALL_TIME,
   );
+  // Tabs stay mounted: a journal entry logged or corrected elsewhere must
+  // show here on return, not the figures read before it (Codex on #2916).
+  useReloadOnReturn(skills.reload);
+  useReloadOnReturn(figures.reload);
 
   // Loaded figures, or null while loading / after a failure. The list is
   // told which, and never invents a figure for either.

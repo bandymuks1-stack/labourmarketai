@@ -720,6 +720,7 @@ export type ChatLabels = {
   eduCohortCreated: string;
   eduAssignNoCohort: string;
   eduAssignNoLearners: string;
+  eduMembersNotForRole: string;
   eduAssignDone: string;
   eduNotInstitution: string;
   eduUnavailable: string;
@@ -5312,6 +5313,14 @@ export function ConversationChat({
             );
             if (cohorts.length === 0) {
               assistant(labels.eduAssignNoCohort, [{ id: "edu:cohort", label: labels.chipCreateCohort }]);
+              return;
+            }
+            // J-12: only the institution's own owner/admin/manager changes
+            // membership — say so instead of "no learners yet".
+            if (!res.membersVisible) {
+              assistant(labels.eduMembersNotForRole, [
+                { id: "link:/dashboard/company/education#institution-programs-title", label: labels.chipProgrammes },
+              ]);
               return;
             }
             if (res.assignable.length === 0) {

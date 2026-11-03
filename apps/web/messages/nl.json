@@ -2049,7 +2049,14 @@
           "saved": "Opgeslagen.",
           "forbidden": "Alleen een beheerder van deze instelling kan dit doen.",
           "invalid": "Controleer de waarden.",
-          "error": "Er ging iets mis. Probeer het opnieuw."
+          "error": "Er ging iets mis. Probeer het opnieuw.",
+          "openRequests": "Laat lerenden vragen om deel te nemen",
+          "closeRequests": "Geen nieuwe verzoeken meer aannemen",
+          "requestsOpenHint": "Lerenden kunnen deze groep vinden en vragen om deel te nemen.",
+          "accept": "Accepteren",
+          "decline": "afwijzen",
+          "acceptConfirm": "Ja, accepteren en aan de groep toevoegen",
+          "cancelDecision": "Annuleren"
         },
         "unavailable": "De opleidingen konden nu niet worden geladen. Vernieuw de pagina; wat je hebt aangemaakt is niet verloren.",
         "inviteLearners": "Lerenden uitnodigen",
@@ -2087,7 +2094,10 @@
           "evidenceUnavailable": "De praktijkvermeldingen konden nu niet worden gelezen. Er is niets vastgelegd.",
           "evidenceRecorded": "Vastgelegd",
           "evidenceConfirmed": "bevestigd"
-        }
+        },
+        "requestFrom": "Vraagt om deel te nemen: {name}",
+        "requestUnverified": "Naam ingevuld door de lerende — niet geverifieerd.",
+        "membersNotForRole": "Groepsleden zijn niet beschikbaar voor jouw rol. Alleen de eigen eigenaar, beheerder of manager van de instelling ziet en wijzigt het lidmaatschap."
       },
       "learners": {
         "title": "Lerenden",
@@ -2858,7 +2868,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Vind een aanbieder voor een dienst"
     }
   },
   "jobPostings": {
@@ -4126,7 +4137,7 @@
         "service_provider": "Dienstverlener",
         "admin": "Beheerder"
       },
-      "subcopy": "Eén profiel voor je echte vaardigheden, beschikbaarheid en werkervaring — zodat mensen en bedrijven zien waar jij past bij echt werk. Registreer je met een sociaal account, of met je e-mailadres en wachtwoord; in de volgende stap zeg je waarvoor je komt.",
+      "subcopy": "Eén profiel voor je werkervaring en kansen — in de volgende stap geef je aan waarvoor je komt.",
       "google_label": "Doorgaan met Google",
       "google_redirecting": "Doorsturen...",
       "divider": "of",
@@ -6842,7 +6853,9 @@
       "listings": "Advertenties",
       "listingsNote": "Ruimtes, uitrusting, voertuigen – aanbieden of zoeken",
       "needs": "Vraag & aanbod",
-      "needsNote": "Publiceer wat je nodig hebt of kunt bieden"
+      "needsNote": "Publiceer wat je nodig hebt of kunt bieden",
+      "buyer": "Mijn aanvragen",
+      "buyerNote": "Bewaar je klantgegevens en houd je aanvragen op één plek"
     },
     "loopReadFailed": "Je aanvragen konden niet worden geladen — de lijst is mogelijk onvolledig. Vernieuw de pagina."
   },
@@ -8544,6 +8557,9 @@
     "skillHoursOwn": "{hours} u, je eigen registratie",
     "skillHoursConfirmed": "{hours} u, waarvan {confirmed} u bevestigd door een manager",
     "skillHoursHint": "uren uit werkjournaalregistraties die alleen aan deze vaardigheid gekoppeld zijn",
+    "skillInvolvedHours": "betrokken bij {hours} u werk dat niet alleen aan deze vaardigheid is toegeschreven — het eigen deel is onbekend",
+    "skillInvolvedHoursAlso": "plus betrokken bij {hours} u, niet alleen aan haar toegeschreven",
+    "skillInvolvedHoursHint": "Tijd van journaalitems waarin deze vaardigheid meedeed, maar die de registraties niet alleen aan haar kunnen geven — het item gebruikte ook andere vaardigheden, of de tijd is over soorten werk verdeeld zonder te zeggen waar. Nooit verdeeld en nooit bij je totaal opgeteld.",
     "selfStatedTitle": "Zelf opgegeven, nog geen registraties",
     "variantsFolded": "{count} spellingen",
     "skillShare": "{share}% van het geregistreerde werk",
@@ -8555,6 +8571,9 @@
     "organizationRecordedHoursWithPeriods": "Registraties van organisaties: {total} u in totaal — {hours} u op {days, plural, one {# dag} other {# dagen}} en {periodHours} u vermeld als periodetotaal ({from} – {to}) in urenstaten of geïmporteerde documenten ({approved} u goedgekeurd). Apart gehouden van het journaalcijfer en aan geen vaardigheid toegekend.",
     "professionalExperienceTotal": "Beroepservaring in totaal: {total} u — {journal} u in het werkjournaal en {organization} u in de organisatiehistorie. Elk stuk werk één keer geteld; bronnen apart getoond.",
     "professionalExperienceNotCounted": "Nog {hours} u wordt getoond maar niet opgeteld, omdat hetzelfde werk al is geteld.",
+    "durationPending": "{organization} legde {records, plural, one {# werkregistratie} other {# werkregistraties}} vast ({span}) waarvan de duur nog niet is vermeld — getoond zonder uren; in geen totaal geteld.",
+    "durationPendingUnnamed": "een organisatie",
+    "durationPendingUndated": "data niet vastgelegd",
     "premium": {
       "eyebrowFallback": "Levend cv",
       "facts": {
@@ -8573,7 +8592,8 @@
         "both": "{confirmed} u met registratie van een leidinggevende · {recorded} u vastgelegd",
         "recorded": "{hours} u vastgelegd",
         "shown": "Blijkt uit je registraties",
-        "declared": "Door jou opgegeven; nog niet aangetoond"
+        "declared": "Door jou opgegeven; nog niet aangetoond",
+        "involved": "Betrokken bij {hours} u, niet alleen aan haar toegeschreven"
       },
       "source": {
         "own": "Jouw registratie",
@@ -9914,7 +9934,11 @@
       },
       "basis": "{matched} van {total} vereiste vaardigheden komen overeen ({confirmed} door manager bevestigd)",
       "recognizedNote": "eisen herkend uit de aanvraagtekst — nog niet bevestigd",
-      "missingPrefix": "ontbreekt:"
+      "missingPrefix": "ontbreekt:",
+      "formalTitle": "Formele eisen",
+      "formalLicence": "Rijbewijs {categories}: een formele eis. Vastgelegd werk vervangt het niet.",
+      "formalLicenceHeld": "Rijbewijs {categories}: je hebt aangegeven dat je het hebt (niet gecontroleerd).",
+      "formalQualification": "Voor dit werk kan een beroepskwalificatie of vergunning wettelijk verplicht zijn. Vastgelegd werk vervangt die niet."
     },
     "recommendations": {
       "basisCompact": "{matched} van {total} vaardigheden, {confirmed} bevestigd",
@@ -14393,6 +14417,7 @@
       "eduCohortCreated": "Groep aangemaakt. Je kunt leerlingen toewijzen.",
       "eduAssignNoCohort": "Nog geen groepen — maak eerst een groep aan.",
       "eduAssignNoLearners": "Nog geen geaccepteerde leerlingen. Nodig een leerling uit — toewijzen kan zodra hij of zij accepteert.",
+      "eduMembersNotForRole": "Groepslidmaatschap is niet beschikbaar voor jouw rol. Alleen de eigen eigenaar, beheerder of manager van de instelling kan lerenden toewijzen.",
       "eduAssignDone": "Leerling toegewezen aan de groep.",
       "eduNotInstitution": "Deze organisatie is nog niet gemarkeerd als opleidingsinstelling. Markeer dit in het bedrijfsgedeelte.",
       "eduUnavailable": "Opleidingen kunnen nu niet worden gelezen. Dat betekent niet dat er geen zijn.",
@@ -18376,7 +18401,7 @@
       "not_a_member": "Je bent geen lid.",
       "not_found": "Record niet beschikbaar.",
       "not_authorized": "Je bent hiervoor niet gemachtigd.",
-      "no_such_user": "Geen gebruiker met dit e-mailadres.",
+      "no_such_user": "Nog geen bevestigd account met dit e-mailadres.",
       "cannot_invite_self": "Je kunt jezelf niet uitnodigen.",
       "invalid_role": "Ongeldige rol.",
       "last_owner": "De laatste eigenaar kan niet terugtreden — activeer eerst een andere eigenaar.",
@@ -18406,7 +18431,7 @@
       "grantInvitations": "Uitnodigingen laten beheren",
       "withdrawInvitations": "Uitnodigingsbeheer intrekken",
       "unavailable": "De ledenlijst kon nu niet worden gelezen. Dat betekent niet dat de organisatie geen leden heeft.",
-      "noAccountHint": "Een lidmaatschapsrol kan alleen worden gegeven aan iemand die al een account heeft. Nodig iemand zonder account uit met een uitnodigingslink — zodra die persoon zich registreert en bij de organisatie aansluit, kun je hier een rol geven.",
+      "noAccountHint": "Een lidmaatschapsrol kan alleen worden gegeven aan iemand met een bevestigd account. Heeft de persoon nog geen account of is het e-mailadres nog niet bevestigd, stuur dan een uitnodigingslink of vraag om het e-mailadres te bevestigen — zodra de persoon is aangesloten, kun je hier de rol geven.",
       "noAccountCta": "Uitnodigingslink maken"
     },
     "start": {
@@ -18795,6 +18820,14 @@
       "eyebrow": "Bedrijfsgeschiedenis",
       "title": "{name}: één doorlopende geschiedenis",
       "subtitle": "Elk cijfer hieronder telt het vastgelegde werk van de organisatie precies één keer. Periodes tonen wat er over eerdere rechtspersonen is verklaard en waarop die verklaring rust.",
+      "titleHeld": "{name}: werkregistraties in bezit, per periode",
+      "subtitleHeld": "Werk onder een eerdere rechtspersoon hoort bij die rechtspersoon en de mensen die het deden. {name} bewaart deze registraties als gedocumenteerde continuïteit; ze worden niet getoond als eigen werk van {name}.",
+      "headerOwn": "Eigen periode van {name}",
+      "headerEarlier": "Eerdere rechtspersoon: {name}",
+      "headerUnstated": "Periode ‘{label}’ — rechtspersoon niet vermeld",
+      "headerNotPlaced": "Registraties die geen vermelde periode plaatst",
+      "continuityNotSuccession": "Continuïteit gedocumenteerd; rechtsopvolging niet gesteld.",
+      "totalsHeld": "Alle registraties die {name} bewaart, over alle perioden, elk één keer geteld — niet alles is eigen werk van {name}.",
       "figures": "{records} registraties · {hours} u · {people} personen · {places} plaatsen",
       "totals": {
         "records": "Registraties",
@@ -19791,6 +19824,73 @@
     },
     "helpNeeded": "Hulp nodig — {stage}:"
   },
+  "projectForecast": {
+    "title": "Prognose",
+    "notFact": "Een prognose op basis van het vastgelegde werk van dit project per {date} — geen feit en geen belofte. Ze wordt opnieuw berekend telkens als deze pagina opent.",
+    "unavailable": "De prognose kon nu niet worden gelezen.",
+    "insufficient": "Nog te weinig vastgelegd werk om dit project te voorspellen.",
+    "notApplicable": "Niets te voorspellen: het project heeft geen open werk.",
+    "unknown": "Onbekend",
+    "beyondHorizon": "Bij het huidige tempo meer dan drie jaar weg",
+    "completionLabel": "Verwacht einde",
+    "deadlineLabel": "Einddatum",
+    "leftLabel": "Resterend werk",
+    "leftTasks": "{left} van {total} taken",
+    "leftStages": "{left} van {total} fasen",
+    "peopleLabel": "Benodigde mensen",
+    "peopleValue": "{needed} (nu {active})",
+    "qualityLabel": "Kwaliteitsrisico",
+    "confidenceLabel": "Betrouwbaarheid",
+    "actionsTitle": "Wat het zou veranderen",
+    "assumptionsTitle": "Aannames",
+    "risk": {
+      "on_track": "Op schema",
+      "tight": "Krap",
+      "likely_miss": "Wordt waarschijnlijk niet gehaald",
+      "overdue": "Te laat",
+      "unknown": "Onbekend"
+    },
+    "quality": {
+      "none": "Geen open",
+      "low": "Laag",
+      "elevated": "Verhoogd",
+      "high": "Hoog",
+      "unknown": "Onbekend"
+    },
+    "confidence": {
+      "insufficient": "te weinig bewijs",
+      "low": "laag",
+      "medium": "gemiddeld",
+      "high": "hoog"
+    },
+    "action": {
+      "add_workers": "Mensen aan het team toevoegen",
+      "find_partner_capacity": "Partnercapaciteit vinden",
+      "unblock_stages": "Geblokkeerde fasen deblokkeren",
+      "unblock_tasks": "Geblokkeerde taken deblokkeren",
+      "close_serious_defects": "Ernstige gebreken oplossen",
+      "complete_readiness": "Ontbrekende gereedheidspunten van het team aanvullen",
+      "record_hours": "De op dit project gewerkte uren vastleggen",
+      "set_planned_end": "Een geplande einddatum instellen",
+      "break_down_scope": "Het werk opdelen in taken",
+      "review_budget": "Het budget nakijken",
+      "replan_deadline": "De deadline opnieuw plannen"
+    },
+    "assumption": {
+      "trailing_window_days": "Het tempo wordt gelezen uit de laatste 28 dagen.",
+      "calendar_day_rate": "Uren worden over kalenderdagen verdeeld; er wordt geen werkkalender aangenomen.",
+      "equal_unit_weight": "Elke taak telt even zwaar.",
+      "unit_is_stage": "Het project heeft geen taken, dus worden fasen geteld.",
+      "team_stays_as_is": "Het team blijft zoals het nu is.",
+      "absences_as_approved": "Alleen goedgekeurde afwezigheden worden meegeteld.",
+      "throughput_without_hours": "Er zijn geen uren vastgelegd, dus het einde wordt alleen uit afgerond werk gelezen.",
+      "cost_continues_at_observed_rate": "De kosten lopen door in het tot nu toe geziene tempo.",
+      "single_hours_ledger": "Eén urenregistratie wordt gebruikt; de andere staat ernaast en wordt nooit opgeteld.",
+      "hours_partly_unconfirmed": "Een deel van de uren is nog niet bevestigd.",
+      "hours_read_truncated": "Niet alle uren konden worden gelezen; de cijfers kunnen te laag zijn.",
+      "free_internal_people_unknown": "Het is niet bekend wie er verder in de organisatie vrij is."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "Doel van deze week",
     "titleMine": "Je taken deze week",
@@ -19965,6 +20065,33 @@
       "business_details": "Gegevens over de inschrijving van het bedrijf en voor facturatie.",
       "insurance": "Een aansprakelijkheids- of andere verzekering, als dit werk die nodig heeft.",
       "client_requirements": "Specifieke eisen van de opdrachtgever of de locatie, als die er zijn."
+    }
+  },
+  "learnerCohortJoin": {
+    "title": "Leergroep",
+    "declaredNote": "Je kunt je praktijk en je werk altijd vastleggen, ook voordat een instelling je heeft aangenomen. Tot de bevoegde persoon van de instelling het bevestigt, staat het als door jou opgegeven, niet als bevestigd.",
+    "journalLink": "Journaal openen",
+    "find": "{count, plural, one {# open groep} other {# open groepen}}",
+    "empty": "Er is nu geen instelling die verzoeken om deel te nemen aanneemt.",
+    "unavailable": "De leergroepen konden nu niet worden geladen. Probeer het later opnieuw.",
+    "status": {
+      "requested": "Verzoek verstuurd, wacht op de beslissing van de instelling.",
+      "declined": "De instelling heeft dit verzoek niet geaccepteerd."
+    },
+    "form": {
+      "nameLabel": "Je naam zoals de instelling je kent",
+      "nameHint": "De instelling ziet alleen deze naam en je bericht, niet je profiel of journaal.",
+      "noteLabel": "Bericht aan de instelling (optioneel)",
+      "send": "Vragen om deel te nemen",
+      "withdraw": "verzoek intrekken",
+      "saving": "Bezig met versturen…",
+      "requested": "Verzoek verstuurd.",
+      "alreadyMember": "Je bent al lid van deze groep.",
+      "withdrawn": "Verzoek ingetrokken.",
+      "closed": "Deze groep neemt geen nieuwe verzoeken meer aan.",
+      "invalid": "Controleer de naam en het bericht.",
+      "error": "Er ging iets mis. Probeer het opnieuw.",
+      "cooldown": "Je verzoek is onlangs afgewezen. Je kunt deze groep 30 dagen na het besluit opnieuw vragen."
     }
   }
 }

@@ -364,6 +364,17 @@ export default async function BuyerDashboardPage({
         </section>
       )}
 
+      {/* The way from the buyer workspace to the providers (J-13): the ONE
+          service-request loop, where active offerings are discovered and
+          requested. Navigation only — no second intake. */}
+      <Link
+        href={"/dashboard/service-requests" as "/dashboard"}
+        className="inline-flex min-h-11 items-center self-start rounded-md border border-brand-blue px-3 text-sm text-brand-blue hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+        data-testid="buyer-dashboard-find-provider"
+      >
+        {t("findProviderLink")} →
+      </Link>
+
       <BuyerRequestsSection
         listResult={requestsResult}
         attachmentsResult={attachmentsResult}

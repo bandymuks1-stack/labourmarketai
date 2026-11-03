@@ -2049,7 +2049,14 @@
           "saved": "Zapisano.",
           "forbidden": "Może to zrobić tylko kierownik tej instytucji.",
           "invalid": "Sprawdź wprowadzone wartości.",
-          "error": "Coś poszło nie tak. Spróbuj ponownie."
+          "error": "Coś poszło nie tak. Spróbuj ponownie.",
+          "openRequests": "Pozwól uczącym się prosić o dołączenie",
+          "closeRequests": "Nie przyjmuj nowych próśb",
+          "requestsOpenHint": "Uczący się mogą znaleźć tę grupę i poprosić o dołączenie.",
+          "accept": "Przyjmij",
+          "decline": "odrzuć",
+          "acceptConfirm": "Tak, przyjmij i dodaj do grupy",
+          "cancelDecision": "Anuluj"
         },
         "unavailable": "Nie udało się teraz wczytać programów. Odśwież stronę — nic z tego, co utworzyłeś, nie zostało utracone.",
         "inviteLearners": "Zaproś uczestników",
@@ -2087,7 +2094,10 @@
           "evidenceUnavailable": "Nie udało się teraz odczytać wpisów praktyki. Nic nie zapisano.",
           "evidenceRecorded": "Zapisano",
           "evidenceConfirmed": "potwierdzono"
-        }
+        },
+        "requestFrom": "Prosi o dołączenie: {name}",
+        "requestUnverified": "Imię wpisane przez uczącego się — niezweryfikowane.",
+        "membersNotForRole": "Członkowie grupy nie są dostępni dla twojej roli. Członkostwo widzi i zmienia tylko właściciel, administrator lub kierownik samej placówki."
       },
       "learners": {
         "title": "Uczestnicy",
@@ -2858,7 +2868,8 @@
             }
           }
         }
-      }
+      },
+      "findProviderLink": "Znajdź wykonawcę usługi"
     }
   },
   "jobPostings": {
@@ -4126,7 +4137,7 @@
         "service_provider": "Usługodawca",
         "admin": "Administrator"
       },
-      "subcopy": "Jeden profil dla Twoich prawdziwych umiejętności, dostępności i doświadczenia — aby ludzie i firmy widzieli, gdzie pasujesz do prawdziwych potrzeb. Zarejestruj się przez konto społecznościowe lub e-mailem i hasłem; w następnym kroku wskażesz, po co tu jesteś.",
+      "subcopy": "Jeden profil dla Twojego doświadczenia zawodowego i możliwości — w następnym kroku wskażesz, po co przychodzisz.",
       "google_label": "Kontynuuj przez Google",
       "google_redirecting": "Przekierowanie...",
       "divider": "lub",
@@ -6842,7 +6853,9 @@
       "listings": "Ogłoszenia",
       "listingsNote": "Lokale, sprzęt, pojazdy – oferuj lub szukaj",
       "needs": "Potrzeby i oferty",
-      "needsNote": "Opublikuj, czego potrzebujesz lub co możesz zaoferować"
+      "needsNote": "Opublikuj, czego potrzebujesz lub co możesz zaoferować",
+      "buyer": "Moje zapytania",
+      "buyerNote": "Zapisz dane klienta i trzymaj zapytania w jednym miejscu"
     },
     "loopReadFailed": "Nie udało się wczytać Twoich zapytań — lista może być niepełna. Odśwież stronę."
   },
@@ -8544,6 +8557,9 @@
     "skillHoursOwn": "{hours} h, Twój własny zapis",
     "skillHoursConfirmed": "{hours} h, w tym {confirmed} h potwierdzonych przez kierownika",
     "skillHoursHint": "godziny z wpisów w dzienniku pracy powiązanych wyłącznie z tą umiejętnością",
+    "skillInvolvedHours": "udział w {hours} h pracy nieprzypisanej wyłącznie tej umiejętności — jej własna część nie jest znana",
+    "skillInvolvedHoursAlso": "oraz udział w {hours} h nieprzypisanych wyłącznie jej",
+    "skillInvolvedHoursHint": "Czas wpisów w dzienniku, w których ta umiejętność brała udział, ale zapisy nie mogą przypisać go wyłącznie jej — wpis wykorzystywał też inne umiejętności lub czas podzielono między rodzaje pracy bez wskazania gdzie. Nigdy nie dzielony i nigdy nie doliczany do Twojej sumy.",
     "selfStatedTitle": "Zadeklarowane samodzielnie, brak jeszcze zapisów",
     "variantsFolded": "{count} wariantów zapisu",
     "skillShare": "{share}% zarejestrowanej pracy",
@@ -8555,6 +8571,9 @@
     "organizationRecordedHoursWithPeriods": "Zapisy organizacji: łącznie {total} godz. — {hours} godz. w {days, plural, one {# dniu} few {# dniach} many {# dniach} other {# dnia}} oraz {periodHours} godz. podane jako suma za okres ({from} – {to}) w ewidencjach czasu pracy lub zaimportowanych dokumentach ({approved} godz. zatwierdzonych). Liczone oddzielnie od dziennika i nieprzypisane do żadnej umiejętności.",
     "professionalExperienceTotal": "Doświadczenie zawodowe łącznie: {total} godz. — {journal} godz. w dzienniku pracy i {organization} godz. w historii organizacji. Każda praca liczona raz; źródła pokazane osobno.",
     "professionalExperienceNotCounted": "Kolejne {hours} godz. jest pokazane, ale nie dodane, ponieważ ta sama praca jest już policzona.",
+    "durationPending": "{organization} zapisała {records, plural, one {# zapis pracy} few {# zapisy pracy} many {# zapisów pracy} other {# zapisu pracy}} ({span}), których czas trwania nie został jeszcze podany — pokazane bez godzin; nie wliczono do żadnej sumy.",
+    "durationPendingUnnamed": "organizacja",
+    "durationPendingUndated": "daty nie zapisane",
     "premium": {
       "eyebrowFallback": "Żywe CV",
       "facts": {
@@ -8573,7 +8592,8 @@
         "both": "{confirmed} godz. z wpisem kierownika · {recorded} godz. zapisane",
         "recorded": "{hours} godz. zapisane",
         "shown": "Widać w Twoich zapisach",
-        "declared": "Podane przez Ciebie; jeszcze nie pokazane"
+        "declared": "Podane przez Ciebie; jeszcze nie pokazane",
+        "involved": "Udział w {hours} h, nieprzypisanych wyłącznie jej"
       },
       "source": {
         "own": "Twój zapis",
@@ -9914,7 +9934,11 @@
       },
       "basis": "{matched} z {total} wymaganych umiejętności pasuje ({confirmed} potwierdzonych przez kierownika)",
       "recognizedNote": "wymagania rozpoznane z treści zapytania — jeszcze niepotwierdzone",
-      "missingPrefix": "brakuje:"
+      "missingPrefix": "brakuje:",
+      "formalTitle": "Wymagania formalne",
+      "formalLicence": "Prawo jazdy {categories}: wymaganie formalne. Zapisana praca go nie zastępuje.",
+      "formalLicenceHeld": "Prawo jazdy {categories}: podałeś, że je masz (niezweryfikowane).",
+      "formalQualification": "Do tej pracy prawnie mogą być wymagane kwalifikacje zawodowe lub licencja. Zapisana praca ich nie zastępuje."
     },
     "recommendations": {
       "basisCompact": "{matched} z {total} umiejętności, {confirmed} potwierdzonych",
@@ -14393,6 +14417,7 @@
       "eduCohortCreated": "Grupa utworzona. Możesz przypisywać uczniów.",
       "eduAssignNoCohort": "Nie ma jeszcze grup — najpierw utwórz grupę.",
       "eduAssignNoLearners": "Nie ma jeszcze przyjętych uczniów. Zaproś ucznia — przypisać go będzie można po przyjęciu zaproszenia.",
+      "eduMembersNotForRole": "Członkostwo w grupie nie jest dostępne dla twojej roli. Uczących się może przypisać tylko właściciel, administrator lub kierownik samej placówki.",
       "eduAssignDone": "Uczeń przypisany do grupy.",
       "eduNotInstitution": "Ta organizacja nie jest jeszcze oznaczona jako placówka edukacyjna. Oznacz to w sekcji firmy.",
       "eduUnavailable": "Nie można teraz odczytać programów. To nie znaczy, że ich nie ma.",
@@ -18376,7 +18401,7 @@
       "not_a_member": "Nie jesteś członkiem.",
       "not_found": "Wpis niedostępny.",
       "not_authorized": "Nie masz uprawnień do tej czynności.",
-      "no_such_user": "Brak użytkownika z tym adresem e-mail.",
+      "no_such_user": "Nie ma jeszcze potwierdzonego konta z tym adresem e-mail.",
       "cannot_invite_self": "Nie możesz zaprosić samego siebie.",
       "invalid_role": "Nieprawidłowa rola.",
       "last_owner": "Ostatni właściciel nie może ustąpić — najpierw aktywuj innego właściciela.",
@@ -18406,7 +18431,7 @@
       "grantInvitations": "Zezwól na zarządzanie zaproszeniami",
       "withdrawInvitations": "Cofnij zarządzanie zaproszeniami",
       "unavailable": "Nie udało się teraz odczytać listy członków. To nie znaczy, że organizacja nie ma członków.",
-      "noAccountHint": "Rolę członka można nadać tylko osobie, która ma już konto. Osobę bez konta zaproś linkiem z zaproszeniem — gdy się zarejestruje i dołączy do organizacji, nadasz jej tu rolę.",
+      "noAccountHint": "Rolę członka można nadać tylko osobie z potwierdzonym kontem. Jeśli osoba nie ma jeszcze konta albo nie potwierdziła adresu e-mail, wyślij jej link z zaproszeniem lub poproś o potwierdzenie adresu — gdy dołączy, nadasz jej rolę tutaj.",
       "noAccountCta": "Utwórz link z zaproszeniem"
     },
     "start": {
@@ -18795,6 +18820,14 @@
       "eyebrow": "Historia firmy",
       "title": "{name}: jedna ciągła historia",
       "subtitle": "Każda liczba poniżej liczy zarejestrowaną pracę organizacji dokładnie raz. Okresy pokazują, co zadeklarowano o wcześniejszych podmiotach prawnych i na czym ta deklaracja się opiera.",
+      "titleHeld": "{name}: posiadane zapisy pracy według okresów",
+      "subtitleHeld": "Praca wykonana w ramach wcześniejszego podmiotu prawnego należy do tego podmiotu i ludzi, którzy ją wykonali. {name} przechowuje te zapisy jako udokumentowaną ciągłość; nie są pokazywane jako własna praca {name}.",
+      "headerOwn": "Własny okres {name}",
+      "headerEarlier": "Wcześniejszy podmiot prawny: {name}",
+      "headerUnstated": "Okres „{label}” — podmiot prawny nie został podany",
+      "headerNotPlaced": "Zapisy nieprzypisane do żadnego podanego okresu",
+      "continuityNotSuccession": "Ciągłość udokumentowana; następstwo prawne nie zostało stwierdzone.",
+      "totalsHeld": "Wszystkie zapisy, które przechowuje {name}, ze wszystkich okresów, każdy liczony raz — nie wszystko to własna praca {name}.",
       "figures": "{records} wpisów · {hours} godz. · {people} osób · {places} miejsc",
       "totals": {
         "records": "Wpisy",
@@ -19791,6 +19824,73 @@
     },
     "helpNeeded": "Potrzebna pomoc — {stage}:"
   },
+  "projectForecast": {
+    "title": "Prognoza",
+    "notFact": "Prognoza na podstawie zapisanej pracy tego projektu na dzień {date} — nie fakt i nie obietnica. Jest przeliczana przy każdym otwarciu tej strony.",
+    "unavailable": "Nie udało się teraz odczytać prognozy.",
+    "insufficient": "Na razie za mało zapisanej pracy, by prognozować ten projekt.",
+    "notApplicable": "Nie ma czego prognozować: projekt nie ma otwartej pracy.",
+    "unknown": "Nieznane",
+    "beyondHorizon": "Przy obecnym tempie — za ponad trzy lata",
+    "completionLabel": "Przewidywane zakończenie",
+    "deadlineLabel": "Termin",
+    "leftLabel": "Pozostała praca",
+    "leftTasks": "{left} z {total} zadań",
+    "leftStages": "{left} z {total} etapów",
+    "peopleLabel": "Potrzebne osoby",
+    "peopleValue": "{needed} (teraz {active})",
+    "qualityLabel": "Ryzyko jakości",
+    "confidenceLabel": "Wiarygodność",
+    "actionsTitle": "Co by to zmieniło",
+    "assumptionsTitle": "Założenia",
+    "risk": {
+      "on_track": "Zgodnie z planem",
+      "tight": "Na styk",
+      "likely_miss": "Prawdopodobnie nie zdążymy",
+      "overdue": "Po terminie",
+      "unknown": "Nieznane"
+    },
+    "quality": {
+      "none": "Brak otwartych",
+      "low": "Niskie",
+      "elevated": "Podwyższone",
+      "high": "Wysokie",
+      "unknown": "Nieznane"
+    },
+    "confidence": {
+      "insufficient": "za mało danych",
+      "low": "niska",
+      "medium": "średnia",
+      "high": "wysoka"
+    },
+    "action": {
+      "add_workers": "Dodać osoby do zespołu",
+      "find_partner_capacity": "Znaleźć moce partnera",
+      "unblock_stages": "Odblokować zablokowane etapy",
+      "unblock_tasks": "Odblokować zablokowane zadania",
+      "close_serious_defects": "Usunąć poważne usterki",
+      "complete_readiness": "Uzupełnić brakujące punkty gotowości zespołu",
+      "record_hours": "Zapisywać godziny przepracowane w tym projekcie",
+      "set_planned_end": "Ustawić planowaną datę zakończenia",
+      "break_down_scope": "Podzielić pracę na zadania",
+      "review_budget": "Przejrzeć budżet",
+      "replan_deadline": "Zaplanować termin na nowo"
+    },
+    "assumption": {
+      "trailing_window_days": "Tempo jest liczone z ostatnich 28 dni.",
+      "calendar_day_rate": "Godziny są rozłożone na dni kalendarzowe; nie zakłada się kalendarza pracy.",
+      "equal_unit_weight": "Każde zadanie liczy się tak samo.",
+      "unit_is_stage": "Projekt nie ma zadań, więc liczone są etapy.",
+      "team_stays_as_is": "Zespół pozostaje taki, jaki jest teraz.",
+      "absences_as_approved": "Uwzględniane są tylko zatwierdzone nieobecności.",
+      "throughput_without_hours": "Nie zapisano godzin, więc zakończenie liczy się tylko z wykonanej pracy.",
+      "cost_continues_at_observed_rate": "Koszty rosną w dotychczasowym tempie.",
+      "single_hours_ledger": "Używana jest jedna ewidencja godzin; druga jest pokazana obok i nigdy nie jest dodawana.",
+      "hours_partly_unconfirmed": "Część godzin nie jest jeszcze potwierdzona.",
+      "hours_read_truncated": "Nie wszystkie godziny udało się odczytać; liczby mogą być zaniżone.",
+      "free_internal_people_unknown": "Nie wiadomo, kto jeszcze w organizacji jest wolny."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "Cel tego tygodnia",
     "titleMine": "Twoje zadania w tym tygodniu",
@@ -19965,6 +20065,33 @@
       "business_details": "Dane rejestracyjne firmy lub działalności oraz dane do faktur.",
       "insurance": "Ubezpieczenie OC lub inne, jeśli ta praca go wymaga.",
       "client_requirements": "Szczególne wymagania zleceniodawcy lub obiektu, jeśli są."
+    }
+  },
+  "learnerCohortJoin": {
+    "title": "Grupa szkoleniowa",
+    "declaredNote": "Swoją praktykę i wykonaną pracę możesz zapisywać zawsze, także zanim placówka cię przyjmie. Dopóki upoważniona osoba placówki ich nie potwierdzi, są pokazywane jako zadeklarowane przez ciebie, nie jako potwierdzone.",
+    "journalLink": "Otwórz dziennik",
+    "find": "{count, plural, one {# otwarta grupa} few {# otwarte grupy} many {# otwartych grup} other {# otwartej grupy}}",
+    "empty": "Żadna placówka nie przyjmuje teraz próśb o dołączenie.",
+    "unavailable": "Nie udało się teraz wczytać grup szkoleniowych. Spróbuj później.",
+    "status": {
+      "requested": "Prośba wysłana, czeka na decyzję placówki.",
+      "declined": "Placówka nie przyjęła tej prośby."
+    },
+    "form": {
+      "nameLabel": "Twoje imię i nazwisko, pod którym zna cię placówka",
+      "nameHint": "Placówka widzi tylko to imię i twoją wiadomość, nie twój profil ani dziennik.",
+      "noteLabel": "Wiadomość do placówki (opcjonalnie)",
+      "send": "Poproś o dołączenie",
+      "withdraw": "wycofaj prośbę",
+      "saving": "Wysyłanie…",
+      "requested": "Prośba wysłana.",
+      "alreadyMember": "Jesteś już członkiem tej grupy.",
+      "withdrawn": "Prośba wycofana.",
+      "closed": "Ta grupa nie przyjmuje już nowych próśb.",
+      "invalid": "Sprawdź imię i wiadomość.",
+      "error": "Coś poszło nie tak. Spróbuj ponownie.",
+      "cooldown": "Twoja prośba została niedawno odrzucona. Możesz poprosić tę grupę ponownie 30 dni po decyzji."
     }
   }
 }

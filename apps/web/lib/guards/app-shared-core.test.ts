@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -26,9 +26,10 @@ const LIB = join(process.cwd(), "lib");
 function tsFiles(dir: string): string[] {
   const out: string[] = [];
   const walk = (d: string) => {
-    for (const name of readdirSync(d)) {
+    for (const dirent of readdirSync(d, { withFileTypes: true })) {
+      const name = dirent.name;
       const p = join(d, name);
-      if (statSync(p).isDirectory()) walk(p);
+      if (dirent.isDirectory()) walk(p);
       else if (name.endsWith(".ts") && !name.endsWith(".test.ts")) out.push(p);
     }
   };
@@ -140,9 +141,10 @@ describe("the single transport blocker is real and is where the map says", () =>
     const apiDir = join(process.cwd(), "app", "api");
     const offenders: string[] = [];
     const walk = (d: string) => {
-      for (const name of readdirSync(d)) {
+      for (const dirent of readdirSync(d, { withFileTypes: true })) {
+        const name = dirent.name;
         const p = join(d, name);
-        if (statSync(p).isDirectory()) walk(p);
+        if (dirent.isDirectory()) walk(p);
         else if (name === "route.ts") {
           const src = readFileSync(p, "utf8");
           if (/req\.headers\.get\(\s*["']authorization/i.test(src)) {

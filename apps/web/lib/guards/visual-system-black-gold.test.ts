@@ -21,6 +21,11 @@ import { activeLocales } from "@/lib/i18n/config";
  *     not the default — four light values really were failing when light was
  *     the unmeasured one.
  *
+ * 2026-10-28 (owner): the PUBLIC site opens LIGHT; the signed-in workspace
+ * keeps the dark default; a saved choice always wins. The bootstrap checks
+ * below are re-anchored to that rule (lib/visual/theme-default.ts) — the same
+ * three failure modes are still guarded, per page instead of product-wide.
+ *
  * Added by this file:
  *   • the ink ladder is the owner's tonal depth, not "some dark";
  *   • the brand accent is GOLD in both palettes;
@@ -79,30 +84,28 @@ describe("black + gold is the product default", () => {
     expect(relLum(page), "light page background must be light").toBeGreaterThan(0.5);
   });
 
-  it("the pre-paint bootstrap resolves a definite theme, defaulting to dark", () => {
+  it("the pre-paint bootstrap resolves a definite theme per page (public light, workspace dark)", () => {
+    const rule = read("lib/visual/theme-default.ts");
+    // ONE rule: the bootstrap string is BUILT from the workspace pattern, so the
+    // inline script and <ThemeReapply/> can never disagree.
+    expect(rule).toMatch(/WORKSPACE_PATH_SOURCE = "\^\/\[a-z\]\{2\}\/\(dashboard\|onboarding\|cv\)\(\/\|\$\)"/);
+    expect(rule).toMatch(/JSON\.stringify\(WORKSPACE_PATH_SOURCE\)/);
+    // Resolve-then-stamp, and a storage failure still lands on the page default.
+    expect(rule).toMatch(/document\.documentElement\.dataset\.theme=t/);
+    expect(rule).toMatch(/catch\(e\)\{document\.documentElement\.dataset\.theme=d;\}/);
     for (const file of ["app/[locale]/layout.tsx", "app/[locale]/not-found.tsx"]) {
       const src = read(file);
-      expect(src, `${file}: reads the shared key`).toMatch(/localStorage\.getItem\('theme'\)/);
-      // Resolve-then-stamp: never "stamp only if stored", which left the
-      // attribute absent and every reader guessing.
-      expect(src, `${file}: resolves light-or-dark`).toMatch(
-        /s\s*===\s*'light'\s*\?\s*'light'\s*:\s*'dark'/,
-      );
-      expect(src, `${file}: stamps before paint`).toMatch(
-        /document\.documentElement\.dataset\.theme=t/,
-      );
-      // The catch path must also land on the product default, not on light.
-      expect(src, `${file}: storage failure still lands on dark`).toMatch(
-        /catch\(e\)\{document\.documentElement\.dataset\.theme='dark'/,
-      );
+      expect(src, `${file}: uses the one bootstrap`).toMatch(/__html:\s*THEME_BOOTSTRAP_SCRIPT/);
+      expect(src, `${file}: no hand-written bootstrap left`).not.toMatch(/localStorage\.getItem\('theme'\)/);
     }
   });
 
-  it("a stored LIGHT preference is never overwritten", () => {
-    // The one regression worse than the original bug: a dark-first default
-    // that stomps on a deliberate choice. (Inverted twin of the old check.)
+  it("a stored preference (light OR dark) is never overwritten", () => {
+    // The one regression worse than the original bug: a default that stomps
+    // on a deliberate choice.
     const reapply = read("components/app/theme-reapply.tsx");
-    expect(reapply).toMatch(/localStorage\.getItem\("theme"\) === "light"/);
+    expect(reapply).toMatch(/resolveTheme\(localStorage\.getItem\("theme"\), window\.location\.pathname\)/);
+    expect(read("lib/visual/theme-default.ts")).toMatch(/if \(saved === "light" \|\| saved === "dark"\) return saved;/);
     // The watcher must still only act when the attribute was STRIPPED.
     expect(reapply).toMatch(/hasAttribute\("data-theme"\)/);
   });

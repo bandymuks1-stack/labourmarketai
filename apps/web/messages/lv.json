@@ -553,7 +553,7 @@
         "admin": "Administrators"
       },
       "signing": "[EN] Creating...",
-      "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with a social account or with email and password; you'll pick your role next.",
+      "subcopy": "Viens profils tavai darba pieredzei un iespējām — nākamajā solī norādīsi, kāpēc atnāci.",
       "submit_label": "[EN] Sign up",
       "resend_label": "Sūtīt saiti vēlreiz",
       "resend_sent": "Nosūtīts vēlreiz. Pārbaudiet iesūtni un mēstuļu mapi.",
@@ -4196,6 +4196,7 @@
       "eduCohortCreated": "Grupa izveidota. Varat piešķirt audzēkņus.",
       "eduAssignNoCohort": "Grupu vēl nav — vispirms izveidojiet grupu.",
       "eduAssignNoLearners": "Pieņemtu audzēkņu vēl nav. Uzaiciniet audzēkni — piešķirt varēsiet, kad viņš pieņems uzaicinājumu.",
+      "eduMembersNotForRole": "Grupas dalība tavai lomai nav pieejama. Izglītojamos var piešķirt tikai pašas iestādes īpašnieks, administrators vai vadītājs.",
       "eduAssignDone": "Audzēknis piešķirts grupai.",
       "eduNotInstitution": "Šī organizācija vēl nav atzīmēta kā mācību iestāde. Atzīmējiet to uzņēmuma sadaļā.",
       "eduUnavailable": "Programmas pašlaik nevar nolasīt. Tas nenozīmē, ka to nav.",
@@ -7714,6 +7715,73 @@
     },
     "helpNeeded": "Vajadzīga palīdzība — {stage}:"
   },
+  "projectForecast": {
+    "title": "Prognoze",
+    "notFact": "Prognoze no šī projekta reģistrētā darba uz {date} — nav fakts un nav solījums. To pārrēķina katru reizi, kad šī lapa tiek atvērta.",
+    "unavailable": "Prognozi pašlaik neizdevās nolasīt.",
+    "insufficient": "Reģistrētā darba vēl ir par maz, lai prognozētu šo projektu.",
+    "notApplicable": "Nav ko prognozēt: projektā nav atvērta darba.",
+    "unknown": "Nav zināms",
+    "beyondHorizon": "Pašreizējā tempā — vairāk nekā pēc trim gadiem",
+    "completionLabel": "Paredzamās beigas",
+    "deadlineLabel": "Termiņš",
+    "leftLabel": "Atlikušais darbs",
+    "leftTasks": "{left} no {total} uzdevumiem",
+    "leftStages": "{left} no {total} posmiem",
+    "peopleLabel": "Vajadzīgie cilvēki",
+    "peopleValue": "{needed} (tagad {active})",
+    "qualityLabel": "Kvalitātes risks",
+    "confidenceLabel": "Ticamība",
+    "actionsTitle": "Kas to mainītu",
+    "assumptionsTitle": "Pieņēmumi",
+    "risk": {
+      "on_track": "Laikā",
+      "tight": "Saspringti",
+      "likely_miss": "Visticamāk netiks paspēts",
+      "overdue": "Nokavēts",
+      "unknown": "Nav zināms"
+    },
+    "quality": {
+      "none": "Atvērtu nav",
+      "low": "Zems",
+      "elevated": "Paaugstināts",
+      "high": "Augsts",
+      "unknown": "Nav zināms"
+    },
+    "confidence": {
+      "insufficient": "par maz pierādījumu",
+      "low": "zema",
+      "medium": "vidēja",
+      "high": "augsta"
+    },
+    "action": {
+      "add_workers": "Pievienot komandai cilvēkus",
+      "find_partner_capacity": "Atrast partnera jaudu",
+      "unblock_stages": "Atbloķēt bloķētos posmus",
+      "unblock_tasks": "Atbloķēt bloķētos uzdevumus",
+      "close_serious_defects": "Novērst nopietnos defektus",
+      "complete_readiness": "Pabeigt komandas trūkstošos gatavības punktus",
+      "record_hours": "Reģistrēt šajā projektā nostrādātās stundas",
+      "set_planned_end": "Iestatīt plānoto beigu datumu",
+      "break_down_scope": "Sadalīt darbu uzdevumos",
+      "review_budget": "Pārskatīt budžetu",
+      "replan_deadline": "Pārplānot termiņu"
+    },
+    "assumption": {
+      "trailing_window_days": "Temps tiek nolasīts no pēdējām 28 dienām.",
+      "calendar_day_rate": "Stundas tiek sadalītas pa kalendāra dienām; darba kalendārs netiek pieņemts.",
+      "equal_unit_weight": "Katrs uzdevums skaitās vienādi.",
+      "unit_is_stage": "Projektā nav uzdevumu, tāpēc tiek skaitīti posmi.",
+      "team_stays_as_is": "Komanda paliek tāda, kāda tā ir tagad.",
+      "absences_as_approved": "Tiek ņemtas vērā tikai apstiprinātās prombūtnes.",
+      "throughput_without_hours": "Stundas nav reģistrētas, tāpēc beigas tiek nolasītas tikai no paveiktā darba.",
+      "cost_continues_at_observed_rate": "Izmaksas turpinās līdzšinējā tempā.",
+      "single_hours_ledger": "Tiek izmantota viena stundu uzskaite; otra tiek rādīta blakus un nekad netiek pieskaitīta.",
+      "hours_partly_unconfirmed": "Daļa stundu vēl nav apstiprināta.",
+      "hours_read_truncated": "Ne visas stundas izdevās nolasīt; skaitļi var būt par maziem.",
+      "free_internal_people_unknown": "Nav zināms, kurš vēl organizācijā ir brīvs."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "Šīs nedēļas mērķis",
     "titleMine": "Jūsu šīs nedēļas uzdevumi",
@@ -7819,5 +7887,32 @@
     "error": "That didn't work. Nothing was changed.",
     "notAllowed": "The organization's owner or a manager can do this.",
     "notSameWork": "These records no longer match — refresh the page."
+  },
+  "learnerCohortJoin": {
+    "title": "Mācību grupa",
+    "declaredNote": "Savu praksi un paveikto darbu vari ierakstīt jebkurā laikā, arī pirms iestāde tevi ir uzņēmusi. Kamēr iestādes pilnvarotā persona to nav apstiprinājusi, tas tiek rādīts kā tevis paša deklarēts, nevis apstiprināts.",
+    "journalLink": "Atvērt žurnālu",
+    "find": "{count, plural, zero {# atvērtu grupu} one {# atvērta grupa} other {# atvērtas grupas}}",
+    "empty": "Pašlaik neviena iestāde nepieņem lūgumus pievienoties.",
+    "unavailable": "Mācību grupas pašlaik neizdevās ielādēt. Mēģini vēlāk.",
+    "status": {
+      "requested": "Lūgums nosūtīts, gaida iestādes lēmumu.",
+      "declined": "Iestāde šo lūgumu nepieņēma."
+    },
+    "form": {
+      "nameLabel": "Tavs vārds, kā tevi pazīst iestāde",
+      "nameHint": "Iestāde redz tikai šo vārdu un tavu ziņu, nevis tavu profilu vai žurnālu.",
+      "noteLabel": "Ziņa iestādei (nav obligāta)",
+      "send": "Lūgt pievienoties",
+      "withdraw": "atsaukt lūgumu",
+      "saving": "Sūta…",
+      "requested": "Lūgums nosūtīts.",
+      "alreadyMember": "Tu jau esi šīs grupas dalībnieks.",
+      "withdrawn": "Lūgums atsaukts.",
+      "closed": "Šī grupa vairs nepieņem jaunus lūgumus.",
+      "invalid": "Pārbaudi vārdu un ziņu.",
+      "error": "Kaut kas nogāja greizi. Mēģini vēlreiz.",
+      "cooldown": "Tavs pieprasījums nesen tika noraidīts. Šai grupai vari jautāt vēlreiz 30 dienas pēc lēmuma."
+    }
   }
 }

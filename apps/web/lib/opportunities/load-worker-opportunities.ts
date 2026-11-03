@@ -15,6 +15,7 @@ import {
   type WorkerOpportunityProfile,
 } from "./opportunity-fit";
 import { needFromDemandRow } from "./opportunity-need";
+import { formalRequirementsFor, type FormalRequirement } from "./formal-requirements";
 import { buildOwnWorkerContext } from "./worker-subject";
 import { listMyInterestSignals } from "./interest";
 import { listMyHandoffsByVacancy, type MyHandoffRow } from "./vacancy-interest";
@@ -111,6 +112,10 @@ export interface OpportunityCard {
    *  conditions not provided"). Parsed through the tolerant public reader;
    *  never the raw payload, never free text. */
   readonly structured: StructuredDemandPublic | null;
+  /** FORMAL requirements of this need (licence categories, a commonly
+   *  regulated profession), kept apart from skill fit: recorded work never
+   *  satisfies one (owner decision 2026-10-29, SEP-6). Absent = none stated. */
+  readonly formalRequirements?: readonly FormalRequirement[];
 }
 
 /** The few fields the saved group renders. Deliberately NOT the whole ad:
@@ -459,6 +464,11 @@ async function loadBoard(
             // applied — the tolerant reader turns an absent/invalid field into
             // an honest null (same degradation pattern as transport/tools).
             structured: readStructuredDemandPublic(row),
+            formalRequirements: formalRequirementsFor({
+              structuredV2: matchNeed.structuredV2,
+              professionSlug: matchNeed.professionSlug,
+              statedLicenceCategories: ctx.subject.drivingLicenceCategories,
+            }),
           };
         })
         // Best matches first — the SHARED §19 need-context comparator.

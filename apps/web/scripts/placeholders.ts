@@ -7,7 +7,7 @@
  *
  * Run with cwd = apps/web (pnpm -C apps/web ...).
  */
-import { appendFileSync, existsSync } from "node:fs";
+import { closeSync, constants, openSync, writeSync } from "node:fs";
 import { join } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { placeholders, type Placeholder } from "../content/placeholders";
@@ -114,17 +114,26 @@ async function cmdPromote(id: string | undefined): Promise<void> {
     }
   }
 
-  if (!existsSync(CHANGELOG)) {
+  // Open for append WITHOUT create: a missing CHANGELOG fails here, in the
+  // same call that writes, so there is no exists-then-append window.
+  let fd: number;
+  try {
+    fd = openSync(CHANGELOG, constants.O_WRONLY | constants.O_APPEND);
+  } catch {
     console.error(`CHANGELOG not found at ${CHANGELOG}`);
     process.exit(1);
     return;
   }
   const stamp = new Date().toISOString();
-  appendFileSync(
-    CHANGELOG,
-    `- ${stamp} — promote \`${entry.id}\`: edit content/placeholders.ts ` +
-      `(set value to real data, status='replaced'). Source: ${entry.replacementSource}\n`,
-  );
+  try {
+    writeSync(
+      fd,
+      `- ${stamp} — promote \`${entry.id}\`: edit content/placeholders.ts ` +
+        `(set value to real data, status='replaced'). Source: ${entry.replacementSource}\n`,
+    );
+  } finally {
+    closeSync(fd);
+  }
   console.log(
     `\nRecorded in docs/CHANGELOG.md. Now edit content/placeholders.ts: ` +
       `set the real value and status='replaced' for "${entry.id}".`,

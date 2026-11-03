@@ -182,7 +182,16 @@ export async function submitCompanyNeedAction(
     return { ok: true, persisted, isConstruction, draftStatus: "disabled" };
   }
 
-  const result = await draftVacancyFromNeed(raw, locale);
+  // The draft is optional enrichment; the need is already stored above. Any
+  // throw from the AI layer (network, timeout, quota, env) degrades to the
+  // honest "no draft" state — it must never turn a stored need into an error
+  // screen (owner P0-E 2026-10-30, 0 EUR AI budget: providers WILL fail).
+  let result: Awaited<ReturnType<typeof draftVacancyFromNeed>>;
+  try {
+    result = await draftVacancyFromNeed(raw, locale);
+  } catch {
+    return { ok: true, persisted, isConstruction, draftStatus: "disabled" };
+  }
 
   if (!result.ok) {
     // The AI-draft parse failed, but if the row was persisted the submission

@@ -130,6 +130,10 @@ const schema = z.object({
   AI_MAX_RETRIES: z.string().optional(),
   AI_MAX_OUTPUT_TOKENS: z.string().optional(),
   AI_DAILY_RUN_BUDGET: z.string().optional(),
+  // ZERO PAID API BUDGET (owner 2026-10-27): metered AI providers (Gemini,
+  // Anthropic, OpenAI, xAI, DeepL Pro) never run — not even as a fallback —
+  // unless this is exactly "true". Free tiers and local models are unaffected.
+  AI_PAID_PROVIDERS_ALLOWED: z.enum(["true", "false"]).default("false"),
   // ── AI Router v1 — per-provider adapters (ALL OFF by default) ──────────────
   // Each non-anthropic adapter is DOUBLE gated: its enable flag must be
   // "true" AND its key must be present, else the adapter returns the typed
@@ -249,6 +253,7 @@ const parsed = schema.safeParse({
   AI_MAX_RETRIES: process.env.AI_MAX_RETRIES,
   AI_MAX_OUTPUT_TOKENS: process.env.AI_MAX_OUTPUT_TOKENS,
   AI_DAILY_RUN_BUDGET: process.env.AI_DAILY_RUN_BUDGET,
+  AI_PAID_PROVIDERS_ALLOWED: process.env.AI_PAID_PROVIDERS_ALLOWED,
   AI_OPENAI_ENABLED: process.env.AI_OPENAI_ENABLED,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   AI_GEMINI_ENABLED: process.env.AI_GEMINI_ENABLED,

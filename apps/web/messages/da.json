@@ -553,7 +553,7 @@
         "admin": "Administrator"
       },
       "signing": "[EN] Creating...",
-      "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with a social account or with email and password; you'll pick your role next.",
+      "subcopy": "Én profil til din arbejdserfaring og dine muligheder — i næste trin fortæller du, hvad du kommer for.",
       "submit_label": "[EN] Sign up",
       "resend_label": "Send linket igen",
       "resend_sent": "Sendt igen. Tjek din indbakke og spammappe.",
@@ -4196,6 +4196,7 @@
       "eduCohortCreated": "Hold oprettet. Du kan tildele elever.",
       "eduAssignNoCohort": "Ingen hold endnu — opret først et hold.",
       "eduAssignNoLearners": "Ingen accepterede elever endnu. Inviter en elev — du kan tildele, når invitationen er accepteret.",
+      "eduMembersNotForRole": "Gruppemedlemskab er ikke tilgængeligt for din rolle. Kun institutionens egen ejer, administrator eller leder kan tildele elever.",
       "eduAssignDone": "Elev tildelt holdet.",
       "eduNotInstitution": "Denne organisation er endnu ikke markeret som uddannelsesinstitution. Marker det i virksomhedsafsnittet.",
       "eduUnavailable": "Programmer kan ikke læses lige nu. Det betyder ikke, at der ingen er.",
@@ -7714,6 +7715,73 @@
     },
     "helpNeeded": "Hjælp søges — {stage}:"
   },
+  "projectForecast": {
+    "title": "Prognose",
+    "notFact": "En prognose ud fra projektets registrerede arbejde pr. {date} — ikke et faktum og ikke et løfte. Den genberegnes, hver gang siden åbnes.",
+    "unavailable": "Prognosen kunne ikke læses lige nu.",
+    "insufficient": "Endnu for lidt registreret arbejde til at lave en prognose for projektet.",
+    "notApplicable": "Intet at forudsige: projektet har intet åbent arbejde.",
+    "unknown": "Ukendt",
+    "beyondHorizon": "Mere end tre år væk i det nuværende tempo",
+    "completionLabel": "Forventet afslutning",
+    "deadlineLabel": "Frist",
+    "leftLabel": "Resterende arbejde",
+    "leftTasks": "{left} af {total} opgaver",
+    "leftStages": "{left} af {total} faser",
+    "peopleLabel": "Personer der skal bruges",
+    "peopleValue": "{needed} (nu {active})",
+    "qualityLabel": "Kvalitetsrisiko",
+    "confidenceLabel": "Pålidelighed",
+    "actionsTitle": "Hvad der ville ændre den",
+    "assumptionsTitle": "Antagelser",
+    "risk": {
+      "on_track": "Efter planen",
+      "tight": "Stramt",
+      "likely_miss": "Nås sandsynligvis ikke",
+      "overdue": "Forsinket",
+      "unknown": "Ukendt"
+    },
+    "quality": {
+      "none": "Ingen åbne",
+      "low": "Lav",
+      "elevated": "Forhøjet",
+      "high": "Høj",
+      "unknown": "Ukendt"
+    },
+    "confidence": {
+      "insufficient": "for lidt dokumentation",
+      "low": "lav",
+      "medium": "middel",
+      "high": "høj"
+    },
+    "action": {
+      "add_workers": "Tilføj personer til holdet",
+      "find_partner_capacity": "Find partnerkapacitet",
+      "unblock_stages": "Fjern blokeringen af de blokerede faser",
+      "unblock_tasks": "Fjern blokeringen af de blokerede opgaver",
+      "close_serious_defects": "Luk de alvorlige mangler",
+      "complete_readiness": "Gør holdets manglende parathedspunkter færdige",
+      "record_hours": "Registrér de timer, der er arbejdet på projektet",
+      "set_planned_end": "Sæt en planlagt slutdato",
+      "break_down_scope": "Del arbejdet op i opgaver",
+      "review_budget": "Gennemgå budgettet",
+      "replan_deadline": "Planlæg fristen igen"
+    },
+    "assumption": {
+      "trailing_window_days": "Tempoet læses ud fra de seneste 28 dage.",
+      "calendar_day_rate": "Timer fordeles på kalenderdage; der antages ingen arbejdskalender.",
+      "equal_unit_weight": "Hver opgave tæller lige meget.",
+      "unit_is_stage": "Projektet har ingen opgaver, så faser tælles i stedet.",
+      "team_stays_as_is": "Holdet forbliver, som det er nu.",
+      "absences_as_approved": "Kun godkendt fravær medregnes.",
+      "throughput_without_hours": "Der er ingen timer registreret, så afslutningen læses kun ud fra færdigt arbejde.",
+      "cost_continues_at_observed_rate": "Omkostningerne fortsætter i det hidtil sete tempo.",
+      "single_hours_ledger": "Én timeregistrering bruges; den anden vises ved siden af og lægges aldrig til.",
+      "hours_partly_unconfirmed": "En del af timerne er endnu ikke bekræftet.",
+      "hours_read_truncated": "Ikke alle timer kunne læses; tallene kan være for lave.",
+      "free_internal_people_unknown": "Det vides ikke, hvem ellers i organisationen der er ledig."
+    }
+  },
   "projectWeekGoal": {
     "titleProject": "Ugens mål",
     "titleMine": "Dine opgaver denne uge",
@@ -7819,5 +7887,32 @@
     "error": "That didn't work. Nothing was changed.",
     "notAllowed": "The organization's owner or a manager can do this.",
     "notSameWork": "These records no longer match — refresh the page."
+  },
+  "learnerCohortJoin": {
+    "title": "Læringsgruppe",
+    "declaredNote": "Du kan altid registrere din praktik og dit arbejde, også før en institution har optaget dig. Indtil institutionens bemyndigede person bekræfter det, vises det som erklæret af dig, ikke som bekræftet.",
+    "journalLink": "Åbn journalen",
+    "find": "{count, plural, one {# åben gruppe} other {# åbne grupper}}",
+    "empty": "Ingen institution modtager anmodninger om at deltage lige nu.",
+    "unavailable": "Læringsgrupperne kunne ikke indlæses lige nu. Prøv igen senere.",
+    "status": {
+      "requested": "Anmodning sendt, venter på institutionens beslutning.",
+      "declined": "Institutionen godkendte ikke denne anmodning."
+    },
+    "form": {
+      "nameLabel": "Dit navn, som institutionen kender dig",
+      "nameHint": "Institutionen ser kun dette navn og din besked, ikke din profil eller journal.",
+      "noteLabel": "Besked til institutionen (valgfri)",
+      "send": "Bed om at deltage",
+      "withdraw": "træk anmodningen tilbage",
+      "saving": "Sender…",
+      "requested": "Anmodning sendt.",
+      "alreadyMember": "Du er allerede medlem af denne gruppe.",
+      "withdrawn": "Anmodningen er trukket tilbage.",
+      "closed": "Denne gruppe modtager ikke flere anmodninger.",
+      "invalid": "Tjek navn og besked.",
+      "error": "Noget gik galt. Prøv igen.",
+      "cooldown": "Din anmodning blev for nylig afvist. Du kan spørge denne gruppe igen 30 dage efter afgørelsen."
+    }
   }
 }

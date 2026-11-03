@@ -3,7 +3,7 @@
 import "server-only";
 
 import { firstRecordableAsk } from "@/lib/projects/worker-project-asks";
-import { listWorkerProjects, loadOwnProjectAsks } from "@/lib/projects/worker-project-access";
+import { listWorkerProjectsResult, loadOwnProjectAsksResult } from "@/lib/projects/worker-project-access";
 
 import {
   WORKER_PROJECTS_CHAT_LIMIT,
@@ -27,20 +27,31 @@ import {
  */
 export async function loadWorkerProjectsForChat(): Promise<WorkerProjectsChatResult> {
   try {
-    const rows = await listWorkerProjects();
+    // The failure-keeping read: an assignments read that failed is "error",
+    // never "you have no projects" (#1314) — the chat, the
+    // `worker.projects.list` capability and the native app all say so.
+    const read = await listWorkerProjectsResult();
+    if (read.status !== "ok") return { kind: "error" };
+    const rows = read.rows;
     if (rows.length === 0) return { kind: "empty" };
     const shown = rows
       .slice()
       .sort((a, b) => (a.assignmentStatus === b.assignmentStatus ? 0 : a.assignmentStatus === "active" ? -1 : 1))
       .slice(0, WORKER_PROJECTS_CHAT_LIMIT);
     const activeIds = shown.filter((r) => r.assignmentStatus === "active").map((r) => r.projectId);
-    const own = await loadOwnProjectAsks(activeIds).catch(() => new Map());
+    const ownRead = await loadOwnProjectAsksResult(activeIds).catch(() => null);
+    const own = ownRead?.byProject ?? new Map();
+    const checklist: "ok" | "unavailable" = ownRead?.checklistRead ? "ok" : "unavailable";
     const projects = shown.map((r) => ({
       projectId: r.projectId,
       title: r.title?.trim() || "—",
       place: [r.city, r.country].filter(Boolean).join(", ") || null,
       assignmentStatus: r.assignmentStatus,
       asks: own.get(r.projectId)?.asks ?? [],
+      asksTotal: own.get(r.projectId)?.asksTotal ?? 0,
+      // An ended assignment's checklist is not read at all: unknown, not empty.
+      asksRead: r.assignmentStatus === "active" ? checklist : ("not_read" as const),
+      asksTotalAtLeast: ownRead?.totalsAtLeast ?? false,
       instruction: own.get(r.projectId)?.instruction ?? null,
     }));
     const firstProject = projects.find((p) => firstRecordableAsk([p.asks]) !== null) ?? null;

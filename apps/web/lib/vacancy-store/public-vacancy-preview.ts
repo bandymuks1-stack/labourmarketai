@@ -379,7 +379,19 @@ async function runSearch(
 export const getPublicVacancyPreview = cache(async function getPublicVacancyPreview(
   id: string,
 ): Promise<PublicVacancyPreview | null | "not_provisioned"> {
-  const supabase = await createClient();
+  return readPublicVacancyPreviewWith(await createClient(), id);
+});
+
+/**
+ * The same single-preview read over a SUPPLIED client — the capability door
+ * (`jobs.get`) hands in the bearer caller's own RLS-scoped client instead of
+ * the cookie one. Same RPC, same anonymous projection, same `toPreview`
+ * defence; not request-cached because the client is part of the call.
+ */
+export async function readPublicVacancyPreviewWith(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<PublicVacancyPreview | null | "not_provisioned"> {
   const { data, error } = await asAny(supabase).rpc("get_public_vacancy_preview_v1", {
     p_id: id,
   });
@@ -394,7 +406,7 @@ export const getPublicVacancyPreview = cache(async function getPublicVacancyPrev
   const rows = (data ?? []) as PreviewRow[];
   const row = rows[0];
   return row ? toPreview(row) : null;
-});
+}
 
 /**
  * Live governed supply counts. Replaces the pinned landing constant: a number
@@ -457,8 +469,15 @@ export interface PublicVacancySitemapPage {
   readonly entries: readonly PublicVacancySitemapEntry[];
 }
 
-/** Rows per sitemap shard. Well under the sitemaps.org 50,000-per-file ceiling. */
-export const PUBLIC_VACANCY_SITEMAP_SHARD_SIZE = 5000;
+/**
+ * Rows per sitemap shard — PostgREST's own `max_rows` (supabase/config.toml:
+ * 1000). The server answers at most that many rows per RPC call and says
+ * nothing about the rest, so a larger shard is silently cut: at 5000 every
+ * shard returned 1000 rows and the index (ceil(count / 5000) shards) left
+ * four in five live job pages out of the sitemap (production, 2026-11-03:
+ * 11,000 of 53,095). One shard = one call = one full page.
+ */
+export const PUBLIC_VACANCY_SITEMAP_SHARD_SIZE = 1000;
 
 export async function listPublicVacancySitemapEntries(input: {
   shard: number;

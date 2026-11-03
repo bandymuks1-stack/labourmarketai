@@ -215,9 +215,23 @@ jobs:
           MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
           MAESTRO_CLI_NO_ANALYTICS: "1"
         run: |
-          maestro test apps/mobile/.maestro/auth-failure-journey.yaml \
-            --debug-output ios-artifacts/maestro-debug
-          echo "IOS_RUNTIME_JOURNEY_PROVEN: auth screen rendered, sign-in attempted, failure state surfaced, app interactive after failure"
+          # ONE retry, for the harness only (mirrors the Android offline
+          # journey): main run 38631166349 (2026-10-14) hung on the first
+          # "Tap on id: email" and exited 1 after the auth screen had already
+          # rendered and been screenshotted; the same commit passed on its PR
+          # (run 38623974297). That is the XCTest driver, not the app. The
+          # retry re-runs the WHOLE flow (launch with clearState) and keeps
+          # its own debug output, so a real regression still fails twice.
+          journey() {
+            maestro test apps/mobile/.maestro/auth-failure-journey.yaml \
+              --debug-output "ios-artifacts/maestro-debug$1"
+          }
+          if journey "" || { echo "::warning::iOS journey attempt 1 failed - retrying once"; sleep 15; journey "-retry"; }; then
+            echo "IOS_RUNTIME_JOURNEY_PROVEN: auth screen rendered, sign-in attempted, failure state surfaced, app interactive after failure"
+          else
+            echo "::error::iOS runtime journey failed twice"
+            exit 1
+          fi
 
       - name: Evidence on failure — simulator log
         if: failure()

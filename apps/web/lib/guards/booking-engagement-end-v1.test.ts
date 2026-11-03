@@ -1495,6 +1495,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260928181000_booking_reopen_lifecycle_edges_v1.sql",
       // owner-approved RED 2026-09-28: agency drafts client need / share-scoped read / placement lifecycle.
       "20260928190000_agency_delegated_demand_and_placement_v1.sql",
+      // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
+      "20260928190100_agency_drafted_needs_output_column_v1.sql",
       // walk 2026-09-28: a re-accepted booking restores the engagement it minted.
       "20260928200000_booking_reaccept_restores_engagement_v1.sql",
       // walk 2026-09-28: an agency placement booking carries the need's role.
@@ -1606,6 +1608,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261007140000_work_plan_scope_roster_engagement_v1.sql",
       // 2026-10-07 (E6, owner decision): a team/brigade offered against one demand (new table + SECURITY DEFINER doors + GRANT) - marker is the human-gate acknowledgement; owner-approved 2026-10-08 (separate hand-off RPC).
       "20261007150000_team_demand_offer_v1.sql",
+      // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
+      "20261007155339_20261006100100_conversation_participants_service_role_insert_grant_v1.sql",
       // 2026-10-07: private evidence-media bucket + storage.objects policies (RED storage policy) - marker is the human-gate acknowledgement; owner-approved in chat 2026-10-08 (PR #2189).
       "20261007180000_evidence_media_bucket_v1.sql",
       // 2026-10-08 (#2195, owner-approved RED, narrower audience: subject + CURRENT engagement only): company-side recognitions read (SECURITY DEFINER + GRANT) - marker is the human-gate acknowledgement.
@@ -1643,6 +1647,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261014090100_historical_consolidation_package_v1.sql",
       // 2026-10-14 (RED, needs-human-gate, NOT applied): brigade disband v1.
       "20261014190000_team_disband_v1.sql",
+      // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
+      "20261015193211_20261015120000_esco_label_search_v1.sql",
       // 2026-10-18: the worker identity split (RED RLS policy + SECURITY DEFINER + GRANT). The
       // annotation acknowledges the RED class so CI can run; the PR stays a draft with
       // needs-human-gate and is applied only on the owner's explicit approval.
@@ -1721,6 +1727,36 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-23: owner approved #2719 in chat (apply before deploy, then merge). Runtime
       // stall sampler evidence table — numbers only, service_role only, 14-day retention.
       "20261023190000_ops_runtime_samples_v1.sql",
+      // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
+      "20261025045152_project_forecasts_v1.sql",
+      // 2026-10-27: owner approved #2841 in chat (apply + merge). Two service_role-only
+      // SECURITY DEFINER functions that rotate one unsent partner referral token; ledger
+      // 20261027193124.
+      "20261027120000_reissue_external_referral_v1.sql",
+      // 2026-10-28: owner approved #2843 in chat (apply + merge). Read-only service_role
+      // candidate list that flags already-mailed addresses; ledger 20261028044705.
+      "20261027210000_external_referral_reprocess_candidates_v2.sql",
+      // 2026-10-28: owner approved #2846 in chat (apply + merge). The caller-scoped
+      // invitations read carries the partner source; ledger 20261028034356.
+      "20261027231000_list_invitations_for_me_source_slug_v1.sql",
+      // 2026-10-28: owner approved #2855 in chat (apply + merge, at 35e749fc3).
+      // Address lock + send reservation for partner referral sends; ledger 20261028081810.
+      "20261028070000_referral_send_address_guard_v1.sql",
+      // 2026-10-28: owner approved #2858 in chat (apply + merge, at d0159eb).
+      // Recovery counts only this reservation's ledger row; ledger 20261028091725.
+      "20261028090000_resolve_reservation_exact_window_v1.sql",
+      // 2026-10-28: owner approved #2876 in chat (conditional apply, at a3a10eb7d).
+      // Synthetic QA needs out of the three cross-org demand readers.
+      "20261028123000_synthetic_demand_cross_org_readers_v1.sql",
+      // 2026-10-29: owner approved #2887 in chat (production apply, at dbd1363ef).
+      // The worker reader projects the need's required skills as catalogue slugs.
+      "20261029190000_worker_board_need_skill_slugs_v1.sql",
+      // 2026-11-02: J-12 learner join requests (#2959) — RED draft, the marker is the
+      // human-gate acknowledgement, NOT applied until the owner approves.
+      "20261102160000_education_cohort_join_requests_v1.sql",
+      // 2026-11-03: J-12 follow-up — the member command refuses request rows. RED draft,
+      // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261103090000_education_cohort_member_request_guard_v1.sql",
 ]);
   });
 
