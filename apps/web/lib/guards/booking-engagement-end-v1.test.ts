@@ -1771,6 +1771,10 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261103171000_pg_trgm_extension_v1.sql",
       // 2026-11-03: production rollback record of the trigram index (drop index). RED, APPLIED ledger 20261103194208.
       "20261103171300_public_vacancies_occupation_trgm_idx_rollback_v1.sql",
+      // 2026-11-03: search function force_custom_plan (ALTER FUNCTION, SECURITY DEFINER) and the trigram index retry. RED draft,
+      // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261103200000_search_public_vacancy_previews_force_custom_plan_v1.sql",
+      "20261103200100_public_vacancies_occupation_trgm_idx_v2.sql",
 ]);
   });
 
