@@ -44,6 +44,19 @@ import { seedWalkAnalyticsConsent } from "./analytics-consent-seed";
  */
 export * from "@playwright/test";
 
+/**
+ * THE ONE EXCEPTION to the consent seed: a context opened with
+ * `firstVisit(...)` options is a browser that has never been here, so the walk
+ * meets the real first-visit consent banner and must answer it itself (the
+ * fresh-activation walk refuses it on the sign-up page). The time zone is
+ * still seeded; only the consent choice is left unanswered.
+ */
+export const FIRST_VISIT = "lmFirstVisit" as const;
+export type FirstVisitContextOptions = BrowserContextOptions & { readonly [FIRST_VISIT]?: true };
+export function firstVisit(options: BrowserContextOptions = {}): FirstVisitContextOptions {
+  return { ...options, [FIRST_VISIT]: true };
+}
+
 export const test = base.extend({
   timezoneId: WALK_TIME_ZONE,
   context: async ({ context }, use) => {
@@ -54,10 +67,11 @@ export const test = base.extend({
   browser: [
     async ({ browser }, use) => {
       const newContext = browser.newContext;
-      browser.newContext = async (options?: BrowserContextOptions) => {
-        const ctx = await newContext.call(browser, { ...options, timezoneId: WALK_TIME_ZONE });
+      browser.newContext = async (options?: FirstVisitContextOptions) => {
+        const { [FIRST_VISIT]: unseeded, ...rest } = options ?? {};
+        const ctx = await newContext.call(browser, { ...rest, timezoneId: WALK_TIME_ZONE });
         await seedViewerTimeZone(ctx);
-        await seedWalkAnalyticsConsent(ctx);
+        if (!unseeded) await seedWalkAnalyticsConsent(ctx);
         return ctx;
       };
       try {
