@@ -358,6 +358,7 @@ function PlanningConnections({
       {/* The ONE action-choice tile (owner 2026-11-03: no second card system). */}
       <PremiumActionDeck
         ariaLabel={t("connections.title")}
+        layout="list"
         items={links.map((l) => ({
           key: l.key,
           href: l.href,

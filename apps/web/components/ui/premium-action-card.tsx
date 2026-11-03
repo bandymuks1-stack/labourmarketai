@@ -157,12 +157,17 @@ export function PremiumActionDeck({
   ariaLabel,
   items,
   size = "feature",
+  layout = "deck",
   testId,
   className,
 }: {
   readonly ariaLabel: string;
   readonly items: readonly DeckItem[];
   readonly size?: "feature" | "compact";
+  /** `deck`: the screen's own actions, two columns on a phone. `list`: a
+   *  grid of related doors whose hints must stay readable — one column on a
+   *  phone, two from sm, three from lg (bookings / service-requests). */
+  readonly layout?: "deck" | "list";
   readonly testId?: string;
   readonly className?: string;
 }) {
@@ -171,7 +176,11 @@ export function PremiumActionDeck({
       <ul
         className={cn(
           "grid",
-          size === "compact" ? "auto-rows-fr grid-cols-3 gap-2 sm:gap-3" : "auto-rows-fr grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3",
+          layout === "list"
+            ? "grid-cols-1 gap-2 sm:auto-rows-fr sm:grid-cols-2 sm:gap-3 lg:grid-cols-3"
+            : size === "compact"
+              ? "auto-rows-fr grid-cols-3 gap-2 sm:gap-3"
+              : "auto-rows-fr grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3",
         )}
       >
         {items.map(({ key, ...card }) => (
