@@ -20,13 +20,11 @@
 -- permissive/restrictive settings are untouched (ALTER POLICY changes only the
 -- expressions given).
 --
--- NOT IN THIS FILE (measured, kept for a designed step): the real per-row cost
--- is `can_view_worker()` / `caller_has_worker_relation_v1()` (~1.6 ms per row;
--- `worker_skills` select ≈ 400 ms for 249 rows) and nested RLS through
--- `workers` (booking_requests 0.9 ms without RLS vs ≈ 220 ms with it). Those
--- are visibility functions; changing them is an authority change and needs its
--- own design + proof. The 183 remaining `auth_rls_initplan` policies on smaller
--- tables follow in later batches of the same mechanical shape.
+-- NOT IN THIS FILE: row-DEPENDENT functions are untouched (changing what they
+-- compute is an authority change with its own design and proof). Measurements
+-- and the follow-up design live in the private audit record. The remaining
+-- `auth_rls_initplan` policies on smaller tables follow in later batches of
+-- the same mechanical shape.
 --
 -- Rollback: supabase/rollbacks/20261103180000_rls_initplan_hot_tables_v1.down.sql
 -- restores every expression exactly as production holds it today.
