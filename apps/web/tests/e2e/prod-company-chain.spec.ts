@@ -386,9 +386,12 @@ const idsAfter = (items: Locator, prefix: string) =>
 
 for (const { slot, org, label, kinds } of [
   { slot: "owner", org: ALFA, label: "Alfa (company)", kinds: ["company"] as const },
-  // The agency org resolves through actingRoleForWorkspace: agency when the
-  // agency role is held, company when only the company role is.
-  { slot: "agency", org: AGENCY, label: "the agency", kinds: ["agency", "company"] as const },
+  // The header follows the ACTING ROLE (actingRoleForWorkspace, the one
+  // resolver): the synthetic agency owner holds only `company` (onboarding's
+  // agency intent grants `company`), so its "More" leads with the company set.
+  // Whether agency-ness should come from the organization instead is the open
+  // owner decision ORG-2 (coordinator ruling 2026-11-03: assert the company set).
+  { slot: "agency", org: AGENCY, label: "the agency", kinds: ["company"] as const },
 ]) {
   test(`N-1 (P0-2). ${label}: the core loop stays; the organization's doors lead "More"`, async ({ browser }) => {
     const { ctx, page } = await as(browser, slot);
@@ -404,9 +407,29 @@ for (const { slot, org, label, kinds } of [
     const kind = kinds.find((k) => JSON.stringify(MORE_LEADS[k]) === JSON.stringify(leads));
     console.log(`[nav] ${slot}: More opens with ${leads.join(", ")} (${kind ?? "no match"})`);
     expect(kind, `More leads ${leads.join(", ")}`).toBeTruthy();
+    // #3002: one door, one route — the calendar is the ONE calendar, "Rinka" is
+    // the service/request loop, and no destination appears twice.
+    await expect(core.getByTestId("header-core-nav-planning")).toHaveAttribute("href", "/lt/dashboard/planning");
+    await expect(more.getByTestId("header-nav-more-area:market")).toHaveAttribute("href", "/lt/dashboard/service-requests");
+    const hrefs = [
+      ...(await core.locator('[data-testid^="header-core-nav-"]').evaluateAll((els) => els.map((e) => e.getAttribute("href")))),
+      ...(await more.locator('[data-testid^="header-nav-more-"]').evaluateAll((els) => els.map((e) => e.getAttribute("href")))),
+    ];
+    expect(new Set(hrefs).size, `duplicate destinations: ${hrefs.join(" ")}`).toBe(hrefs.length);
+    // #3003: an organization workspace carries no customer door.
+    await expect(more.getByTestId("header-nav-more-area:buyer")).toHaveCount(0);
     await ctx.close();
   });
 }
+
+test("N-3 (#3002). Alfa's door strip: Kalendorius opens the one calendar, Rinka the service requests", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  await page.goto("/lt/dashboard/company");
+  await expect(page.getByTestId("organization-door-calendar").first()).toHaveAttribute("href", "/lt/dashboard/planning", { timeout: 30_000 });
+  await expect(page.getByTestId("organization-door-market").first()).toHaveAttribute("href", "/lt/dashboard/service-requests");
+  await ctx.close();
+});
 
 test("N-2 (P0-2). on the phone, Alfa's area sheet lists the core loop, then its doors", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner", true);
@@ -418,6 +441,10 @@ test("N-2 (P0-2). on the phone, Alfa's area sheet lists the core loop, then its 
   const ids = await idsAfter(sheet.locator('[data-testid^="header-nav-sheet-"]'), "header-nav-sheet-");
   expect(ids.slice(0, 4)).toEqual(CORE_IDS);
   expect(ids.slice(4, 7)).toEqual([...MORE_LEADS.company]);
+  const hrefs = await sheet
+    .locator('[data-testid^="header-nav-sheet-"]')
+    .evaluateAll((els) => els.map((e) => e.getAttribute("href")));
+  expect(new Set(hrefs).size, `duplicate destinations: ${hrefs.join(" ")}`).toBe(hrefs.length);
   await ctx.close();
 });
 
