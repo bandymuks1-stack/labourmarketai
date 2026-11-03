@@ -203,9 +203,9 @@ export default async function LocaleLayout({
             BASE_CLIENT_MESSAGE_ROOTS,
           )}
         >
-          {children}
           {/* Analytics consent (owner decision 2026-11-03): until a choice
               exists on this device nothing non-essential is stored or sent.
+              Rendered BEFORE the page, in the flow, so it never covers it.
               Strings are passed in, so no client message root is added. */}
           <AnalyticsConsentBanner
             strings={{
@@ -216,6 +216,7 @@ export default async function LocaleLayout({
               more: consentT("banner.more"),
             }}
           />
+          {children}
         </NextIntlClientProvider>
       </body>
     </html>

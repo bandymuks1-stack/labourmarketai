@@ -18,6 +18,11 @@ import { refuseAnalytics } from "@/lib/consent/account-campaign";
  *   - the CONTROL on the Cookie Policy page (linked from the footer), where
  *     the choice is changed or withdrawn at any time.
  *
+ * The banner sits in the normal page flow at the very top, never fixed over
+ * the page: it pushes content down instead of covering a field or a CTA on
+ * a phone (tests/e2e/auth-field-touch-floor.spec.ts), and needs no z-index
+ * or safe-area handling.
+ *
  * Both choices are offered side by side with the SAME button style: nothing
  * is pre-selected, refusing takes exactly one press, like accepting, and
  * making no choice means no. Strings come from the server component that
@@ -66,7 +71,7 @@ export function AnalyticsConsentBanner({ strings }: { strings: AnalyticsConsentB
       role="region"
       aria-label={strings.label}
       data-testid="analytics-consent-banner"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border-subtle bg-surface-1 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lg sm:px-6"
+      className="border-b border-border-subtle bg-surface-1 px-4 py-3 sm:px-6"
     >
       <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-relaxed text-text-secondary">
