@@ -65,7 +65,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter=!mobile
 
+      # tsc needs about 2.7 GB on this codebase; Node's default heap on the runner
+      # is about 2 GB, so without this the step dies now and then with
+      # "JavaScript heap out of memory" (runs 41585471700, 41790091398).
       - name: Typecheck
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
         run: pnpm -F web typecheck
 
       - name: Lint

@@ -50,6 +50,13 @@ describe("presentCriteria — real presence, never defaults", () => {
 });
 
 describe("missingImportantCriteria — matching-relevant gaps only, stable order", () => {
+  it("an UNREADABLE skills count is neither present nor missing (SEP-7)", () => {
+    const s = snap({ skillsCount: null, documentsCount: null });
+    expect(presentCriteria(s).skills).toBe(false);
+    expect(presentCriteria(s).documents).toBe(false);
+    expect(missingImportantCriteria(s)).not.toContain("skills");
+  });
+
   it("empty profile reports the five matching-critical gaps in ask order", () => {
     expect(missingImportantCriteria(snap())).toEqual([
       "skills",

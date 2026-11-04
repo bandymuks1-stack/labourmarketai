@@ -38,7 +38,13 @@ export async function PermissionMatrixSection() {
       </h2>
       <p className="mt-3 text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
 
-      <div className="mt-6 overflow-x-auto rounded-md border border-border-subtle">
+      {/* Focusable with a name: a keyboard user scrolls the wide table on a phone. */}
+      <div
+        role="region"
+        aria-label={t("title")}
+        tabIndex={0}
+        className="mt-6 overflow-x-auto rounded-md border border-border-subtle"
+      >
         <table className="w-full min-w-[720px] border-collapse text-left text-sm">
           <caption className="sr-only">{t("title")}</caption>
           <thead>
