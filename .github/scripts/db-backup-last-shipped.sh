@@ -11,8 +11,10 @@
 set -euo pipefail
 
 repo="${GH_REPO:-$GITHUB_REPOSITORY}"
-runs=$(gh api "repos/$repo/actions/workflows/db-backup.yml/runs?status=success&per_page=40" \
-  --jq '.workflow_runs[] | "\(.id) \(.updated_at)"')
+# Most runs are skips (every merge starts one), so only runs long enough to have
+# backed up are read: a skip takes seconds, a backup takes minutes.
+runs=$(gh api "repos/$repo/actions/workflows/db-backup.yml/runs?status=success&per_page=100" \
+  --jq '.workflow_runs[] | select(((.updated_at | fromdate) - (.run_started_at | fromdate)) > 120) | "\(.id) \(.updated_at)"')
 
 while read -r id finished; do
   [ -n "$id" ] || continue
