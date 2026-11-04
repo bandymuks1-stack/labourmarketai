@@ -51,7 +51,7 @@ export const BRAND_SEO: Readonly<Record<ActiveLocale, BrandCopy>> = {
     title:
       "LabourMarket.ai — International platform for work and services",
     description:
-      "LabourMarket.ai: international platform for work, specialists and services. In any sector, find jobs, workers, clients, services and project partners.",
+      "LabourMarket.ai: platform for work, specialists and services, locally and internationally. Any sector: jobs, workers, clients, services and project partners.",
   },
   lt: {
     title:
