@@ -23,14 +23,34 @@ describe("vacancyDescriptionText — HTML feeds read as text", () => {
     expect(vacancyDescriptionText("&amp;lt;b&amp;gt;")).toBe("&lt;b&gt;");
   });
 
-  it("an escaped tag becomes literal text, and script/style blocks vanish with their content", () => {
-    expect(vacancyDescriptionText("<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>")).toBe("<script>alert(1)</script>");
+  it("an escaped tag stays readable text that cannot open a tag; blocks vanish with their content", () => {
+    expect(vacancyDescriptionText("<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>")).toBe("< script>alert(1)< /script>");
     expect(vacancyDescriptionText("<p>Hei</p><script>alert(1)</script><style>p{}</style><!-- x -->")).toBe("Hei");
     expect(vacancyDescriptionText('<p onclick="x()">Hei <a href="javascript:x()">her</a></p>')).toBe("Hei her");
-    // Nested / unclosed openers do not survive a single pass.
-    const nested = vacancyDescriptionText("<p>A</p><scr<script>x</script>ipt>alert(1)</p><!-<!-- c -->- d<!-- open");
-    expect(nested).not.toMatch(/<script|<!--/i);
-    expect(nested.startsWith("A")).toBe(true);
+  });
+
+  it("the output never holds a tag start, whatever the payload (nested, split, unclosed, encoded)", () => {
+    const payloads = [
+      "<scr<script>ipt>alert(1)</scr</script>ipt>",
+      "<scr<script></script>ipt>alert(1)</script>",
+      "<p>A</p><scr<script>x</script>ipt>alert(1)</p><!-<!-- c -->- d<!-- open",
+      "<<script>script>alert(1)<</script>/script>",
+      "<script>never closed",
+      "<script",
+      "<p>x</p><!-",
+      "<p>x</p><img src=x onerror=alert(1)>",
+      "<p>x</p><svg/onload=alert(1)>",
+      "<p>x</p><iframe src=javascript:alert(1)></iframe>",
+      "<p>x</p>&lt;img src=x onerror=alert(1)&gt;",
+      "<p>x</p>&#60;script&#62;alert(1)&#60;/script&#62;",
+      "<p>x</p>&#x3c;script&#x3e;",
+      "<p>x</p><\nscript>",
+      "plain <unknown-tag attr=1> text",
+    ];
+    for (const payload of payloads) {
+      expect(vacancyDescriptionText(payload), payload).not.toMatch(/<[a-z!/?]/i);
+    }
+    expect(vacancyDescriptionText("<p>A</p><script>never closed").trim()).toBe("A");
   });
 
   it("leaves plain text as typed: its own breaks, and angle brackets that are not tags", () => {
