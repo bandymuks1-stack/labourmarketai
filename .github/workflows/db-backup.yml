@@ -401,7 +401,6 @@ jobs:
           SQL
           # pg_restore continues past errors by default; the proof below decides.
           pg_restore -h 127.0.0.1 -p 55432 -U postgres -d drill_restore "lm-db-$STAMP.dump" 2> restore.err || true
-          $P -d drill_restore -c "grant truncate on public.profiles to anon" >/dev/null
           q() { psql -h 127.0.0.1 -p 55432 -U postgres -X -d drill_restore -tAc "$1"; }
           dq() { printf '%s\n' "$1" | $P -d drill_restore -v schemas="$SCOPE" -tA -F "$(printf '\t')"; }
           # Error lines that concern roles or grants are counted, never printed.
