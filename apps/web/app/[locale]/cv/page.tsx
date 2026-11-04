@@ -41,6 +41,7 @@ import {
   type PremiumCvFact,
 } from "@/components/app/cv/premium-living-cv";
 import { ownEngagementHeading } from "@/lib/cv-export/own-engagement-heading";
+import { statedDateLabel } from "@/lib/cv/period-dates";
 import {
   buildEuFormatCv,
   resolveEuFormatDocument,
@@ -449,8 +450,9 @@ export default async function VerifiedCvPage({
       const roleLabel = tRel.has(e.relationship)
         ? tRel(e.relationship)
         : e.relationship;
-      const start = formatUtcDate(e.startedAt, locale);
-      const end = formatUtcDate(e.endedAt, locale);
+      // A job with no organization carries only what the person stated.
+      const start = e.orgName ? formatUtcDate(e.startedAt, locale) : statedDateLabel(e.startedAt, "start", locale);
+      const end = e.orgName ? formatUtcDate(e.endedAt, locale) : statedDateLabel(e.endedAt, "end", locale);
       const range =
         start && end
           ? `${start} – ${end}`
@@ -733,8 +735,12 @@ export default async function VerifiedCvPage({
         title: e.title,
         relationshipLabel: tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship,
       });
-      const from = monthYear(e.startedAt);
-      const to = e.endedAt ? monthYear(e.endedAt) : tPremium("present");
+      const from = e.orgName ? monthYear(e.startedAt) : statedDateLabel(e.startedAt, "start", locale, "month");
+      const to = !e.endedAt
+        ? tPremium("present")
+        : e.orgName
+          ? monthYear(e.endedAt)
+          : statedDateLabel(e.endedAt, "end", locale, "month");
       const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
       return {
         key: `own:${e.id ?? i}`,
@@ -984,6 +990,7 @@ export default async function VerifiedCvPage({
               // keeps the same label instead of printing it like a document.
               declaredCertificate: t("declaredCertHint"),
               date: (iso) => formatUtcDate(iso, locale),
+              statedDate: (iso, edge) => statedDateLabel(iso, edge, locale),
               present: t("present"),
               // Organization-provided history: the SAME composition the
               // on-screen CV uses, so the two documents never disagree.

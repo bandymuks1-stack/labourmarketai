@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Wrench } from "lucide-react";
+import { statedDateLabel } from "@/lib/cv/period-dates";
 import { cn } from "@/lib/utils";
 import type { ProfileSkillClaimRow } from "@/lib/profile/profile-skill-claims";
 import type { SkillPresentation } from "@/lib/cv-export/skill-presentation";
@@ -414,8 +415,12 @@ export function CapabilityProfileSection({
           </h3>
           <ul className="flex flex-col gap-3">
             {engagements.map((c) => {
-              const start = fmt(c.startedAt);
-              const end = c.endedAt ? fmt(c.endedAt) : tEng("present");
+              const start = c.selfDeclared ? statedDateLabel(c.startedAt, "start", locale, "month") : fmt(c.startedAt);
+              const end = !c.endedAt
+                ? tEng("present")
+                : c.selfDeclared
+                  ? statedDateLabel(c.endedAt, "end", locale, "month")
+                  : fmt(c.endedAt);
               return (
                 <li key={c.id} className="card-border p-4" data-testid="capability-experience-row">
                   <div className="flex items-start justify-between gap-3">
