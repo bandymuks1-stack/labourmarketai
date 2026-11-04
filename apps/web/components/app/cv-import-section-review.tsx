@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import {
   hasAnyProposal,
   type CvDatePart,
+  type CvProposalConfidence,
   type CvSectionProposals,
 } from "@/lib/cv/structured-parse";
 import {
@@ -222,6 +223,7 @@ export function CvImportSectionReview({
             itemKey={`wh-${i}`}
             label={w.title}
             sub={periodLabel(w)}
+            confidence={w.confidence}
             aiOrigin={i >= merged.aiStart.workHistory}
             onConfirm={() =>
               confirmCvWorkHistoryAction({
@@ -249,6 +251,7 @@ export function CvImportSectionReview({
                 .filter(Boolean)
                 .join(" · ") || null
             }
+            confidence={e.confidence}
             aiOrigin={i >= merged.aiStart.education}
             onConfirm={() =>
               confirmCvEducationAction({
@@ -277,6 +280,7 @@ export function CvImportSectionReview({
                 l.lang
               }
               sub={null}
+              confidence={l.confidence}
               aiOrigin={i >= merged.aiStart.languages}
               confirmDisabled={chosen === ""}
               onConfirm={(allowReplace) =>
@@ -318,6 +322,7 @@ export function CvImportSectionReview({
             itemKey={`cert-${i}`}
             label={c.title}
             sub={c.year ? String(c.year) : null}
+            confidence={c.confidence}
             aiOrigin={i >= merged.aiStart.certificates}
             onConfirm={() =>
               confirmCvCertificateAction({ title: c.title, year: c.year })
@@ -334,6 +339,7 @@ export function CvImportSectionReview({
             itemKey={`ach-${i}`}
             label={a.title}
             sub={null}
+            confidence={a.confidence}
             aiOrigin={false}
             onConfirm={() => confirmCvAchievementAction({ title: a.title })}
           />
@@ -349,6 +355,7 @@ export function CvImportSectionReview({
               .filter((v): v is number => v !== null)
               .join("–")} ${t("perMonth")}`}
             sub={null}
+            confidence={merged.salary.confidence}
             aiOrigin={proposals.salary === null}
             onConfirm={(allowReplace) =>
               confirmCvSalaryAction({
@@ -369,6 +376,7 @@ export function CvImportSectionReview({
             itemKey={`avail-${h.key}`}
             label={t(`availabilityKeys.${h.key}`)}
             sub={null}
+            confidence={h.confidence}
             aiOrigin={false}
             onConfirm={(allowReplace) =>
               confirmCvAvailabilityAction({ key: h.key, allowReplace })
@@ -416,6 +424,7 @@ function ItemRow({
   itemKey,
   label,
   sub,
+  confidence,
   aiOrigin,
   confirmDisabled,
   onConfirm,
@@ -425,6 +434,8 @@ function ItemRow({
   itemKey: string;
   label: string;
   sub?: string | null;
+  /** How sure the parser is of its READING of the CV, never of the fact. */
+  confidence: CvProposalConfidence;
   aiOrigin: boolean;
   confirmDisabled?: boolean;
   onConfirm: (allowReplace: boolean) => Promise<CvImportConfirmResult>;
@@ -440,10 +451,17 @@ function ItemRow({
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex min-w-0 flex-col">
-            <span className="truncate text-sm text-text-primary">{label}</span>
+            <span className="break-words text-sm text-text-primary">{label}</span>
             {sub ? (
               <span className="text-xs text-text-secondary">{sub}</span>
             ) : null}
+            <span
+              className={`text-xs ${confidence === "low" ? "text-state-warning" : "text-text-muted"}`}
+              data-testid={`cv-import-confidence-${itemKey}`}
+              data-confidence={confidence}
+            >
+              {t(`confidence.${confidence}`)}
+            </span>
             {aiOrigin && (
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("aiHint")}
