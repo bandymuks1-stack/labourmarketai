@@ -158,8 +158,8 @@ second register. The function rows below keep their own status; this view reads 
 | SEO (2026-11-04) | 10 | 7 | 2 | 1 | 0 |
 | GEO (2026-11-04) | 6 | 5 | 1 | 0 | 0 |
 | Internal search (2026-11-04) | 9 | 5 | 2 | 0 | 2 |
-| UX/UI (2026-11-04; DS-1–DS-5 from 2026-11-03) | 15 | 11 | 4 | 0 | 0 |
-| **All** | **328** | **190** | **18** | **61** | **59** |
+| UX/UI (2026-11-04; DS-1–DS-5 from 2026-11-03) | 15 | 12 | 3 | 0 | 0 |
+| **All** | **328** | **191** | **17** | **61** | **59** |
 
 Functions per area:
 
@@ -265,11 +265,11 @@ Pages: `/lt`, `/lt/jobs`, `/lt/for-companies`, `/lt/for-workers`, `/lt/pricing`,
 | UX-3 | CLS, phone 390 px | FAIL | Playwright: **0.13 on 9 of 10 pages** (0 on `/lt/auth/signup`). Good is ≤ 0.1 | **Cause:** the analytics consent banner (`components/app/analytics-consent.tsx`, `placement="top"`) renders only after hydration, because the choice is read from the device. It is inserted above the header, and its 59 px pushed the header and the whole page down (desktop, 671 ms after start). It hits every first visit, crawlers included. The banner is in the page flow on purpose (owner decision 2026-11-03: never cover a field), so the fix is an owner choice. Either render it from the server when there is no choice cookie (the choice mirrored into a cookie), or reserve its space. This is consent UX, so no GREEN change was made | Owner: choose how the banner renders |
 | UX-4 | CLS, desktop | PASS | Playwright: 0.043 on 9 of 10 pages, 0 on sign-up | same cause as UX-3, below the limit here | None |
 | UX-5 | INP (one real interaction) | PASS | Playwright: worst 96 ms on phone (`/lt/for-companies`), 56 ms on desktop. Good is ≤ 200 ms | lab proxy: one click per page | None |
-| UX-6 | Accessibility (axe, WCAG 2.x A/AA) | FAIL | Playwright + axe at 390 px, signed out. First run 2026-11-04 (10 pages): 20 failing nodes in 3 rules. Sweep of all 44 public paths, build `2afdfd8a`: 55 nodes (the footer label already fixed; `color-contrast` ×8 and `link-in-text-block` ×1 on each of the 6 country pages; `scrollable-region-focusable` ×1 on `/lt/legal/data-access`). **Re-run on build `4c58f60a`: 43 of 44 paths clean, 1 node** | #3030 and #3038 are proven live. The last node is fixed in GREEN #3039 | GREEN #3039 (auto-merge). Audit session: re-run axe after its deploy |
+| UX-6 | Accessibility (axe, WCAG 2.x A/AA) | PASS | Playwright + axe at 390 px, signed out. Build `2afdfd8a`: 55 failing nodes on 44 public paths. **Build `07fd9fa7`, after #3030, #3038, #3039: 44 of 44 paths clean, 0 nodes** | signed-in pages have never been scanned (A11Y-2); only lt at 390 px was swept | Coordinator: add axe to a walk (A11Y-2) |
 | UX-7 | No sideways scroll | PASS | Playwright: scroll width = viewport on all 20 loads | — | None |
 | UX-8 | Runtime errors | PASS | Playwright: 0 `pageerror` and 0 console errors on all 20 loads | — | None |
 | UX-9 | Not-found state | FAIL | Chrome: `/en/this-page-does-not-exist`, `/lt/jobs/00000000-0000-0000-0000-000000000000` and `/lt/auth/sign-up` answer 404 + `noindex` (correct). But the HTML is Next's `<html id="__next_error__">` shell: no `lang`, no h1, the home page's title. The branded page appears only through JavaScript | the not-found render falls into the error shell on the server. `/lt/auth/sign-up` (hyphen) could redirect to `/lt/auth/signup` | GREEN executor: render not-found on the server; redirect the hyphen address |
-| UX-10 | One logo everywhere (browser tab) | FAIL | Owner defect 2026-11-04: the old ascending-bars logo shows in the browser tab. `app/favicon.ico` was last changed 2026-06-28 and all three sizes were the bars; Next emits it as `rel=icon sizes=16x16`. Looked at, and already the LM mark: `app/icon.svg`, `public/app-icon.svg`, `public/brand/lm-mark.svg`, `public/icon-*.png`, `public/icon-maskable-*.png`, `app/apple-icon.png`, the four `apps/mobile/assets` images. OG and Twitter images are a text wordmark; the 404 page and transactional e-mail carry no logo image; `placeholders/logo-mark.svg` is not used by any surface | Fix in the favicon PR: generator + pixel guard. Stays FAIL until production's `/favicon.ico` is proven on the exact build in a fresh browser profile |
+| UX-10 | One logo everywhere (browser tab) | FAIL | Owner defect 2026-11-04: the old ascending-bars logo shows in the browser tab. `app/favicon.ico` was last changed 2026-06-28 and all three sizes were the bars; Next emits it as `rel=icon sizes=16x16`. Looked at, and already the LM mark: `app/icon.svg`, `public/app-icon.svg`, `public/brand/lm-mark.svg`, `public/icon-*.png`, `public/icon-maskable-*.png`, `app/apple-icon.png`, the four `apps/mobile/assets` images. OG and Twitter images are a text wordmark; the 404 page and transactional e-mail carry no logo image; `placeholders/logo-mark.svg` is not used by any surface; no PDF library exists, CV and report printing is the browser printing the page. Sign-up and sign-in use the one `LmLogo`. **For the owner:** the source vectors (`docs/brand/source`) are orange `#FFA100`; the product shows the same geometry in gold under the visual direction approved 2026-09-09 (#1683). The wide main logo with the wordmark is not used as a file anywhere. Outside this repository and not checked: the Google OAuth consent logo and any Stripe invoice branding | Fix in the favicon PR: generator + pixel guard. Stays FAIL until production's `/favicon.ico` is proven on the exact build in a fresh browser profile |
 | DS-1 | Mobile sign-up at 360 px | PASS | Chrome, 360×780, 2026-11-03: no sideways scroll, full-width fields, 42 px submit, terms above the form | inputs use 14 px text, so iOS Safari zooms on focus | GREEN executor: 16 px inputs |
 | DS-2 | Mobile sign-up at 390 px | PASS | Chrome, 390×844, 2026-11-03: no sideways scroll; `autocomplete` email / new-password; three labels | the same 14 px note | GREEN executor: 16 px inputs |
 | DS-3 | Role navigation | PASS | prod walk role-routes 41329744822 (2026-11-01, 5 roles); prod walk mobile-surfaces 41317177981 (2026-11-01, 390 px, 6/6) | — | Coordinator: re-walk on risk |
@@ -514,17 +514,19 @@ Owner order 2026-11-04: continue the audit beyond the six core tests, in this on
 
 | Dimension | Rows | PASS | FAIL | BLOCKED | NOT VERIFIED |
 |---|---|---|---|---|---|
+| Real-user scenarios | 16 | 8 | 4 | 2 | 2 |
+| UX at phone size | 5 | 3 | 2 | 0 | 0 |
 | Roles and life stages | 38 | 22 | 4 | 7 | 5 |
 | Search | 5 | 1 | 1 | 0 | 3 |
-| CV, Journal, projects, HR, organization | 16 | 8 | 3 | 2 | 3 |
-| Indexing and AEO | 6 | 2 | 1 | 0 | 3 |
-| Mobile, languages, accessibility | 8 | 3 | 2 | 1 | 2 |
+| CV, Journal, projects, HR, organization | 16 | 8 | 2 | 2 | 4 |
+| Indexing and AEO | 11 | 3 | 3 | 1 | 4 |
+| Mobile, languages, accessibility | 10 | 5 | 1 | 2 | 2 |
 | Payments | 4 | 1 | 1 | 1 | 1 |
 | Notifications | 4 | 2 | 0 | 1 | 1 |
 | AI | 3 | 2 | 0 | 1 | 0 |
 | Security | 3 | 2 | 1 | 0 | 0 |
 | Delivery | 2 | 0 | 2 | 0 | 0 |
-| **This section** | **89** | **43** | **15** | **13** | **18** |
+| **This section** | **117** | **57** | **21** | **17** | **22** |
 
 Roles:
 
@@ -598,11 +600,11 @@ The SEO, GEO, internal search and UX/UI tables and the 288 function rows are cou
 
 | ID | Area | Status | Evidence | Executor / next action |
 |---|---|---|---|---|
-| CV-1 | CV import reads the file correctly | FAIL | UF-3: language levels and training centres misread. Fix #3035 merged; not yet proven on production | Coordinator: re-run profile-cv-history P-6 after the deploy, on a synthetic CV |
+| CV-1 | CV import reads the file correctly | FAIL | UF-3: language levels and training centres misread. Fixes #3035, #3042, #3044 live on `07fd9fa7`; not yet proven on production | Coordinator: re-run profile-cv-history P-6 after the deploy, on a synthetic CV |
 | CV-2 | Living CV shows evidence states | PASS | prod walk living-cv-growth 41281984217 (2026-11-01) | Coordinator: re-walk on risk |
 | JRN-1 | Work Journal: record, correct, confirm | PASS | prod walk journal-confirm 41478434884 (2026-11-02), self-confirmation refused in step 1b | Coordinator: re-walk on risk |
 | JRN-2 | Work Journal: a failed read is not "start your records" | NOT VERIFIED | #3013 merged 2026-11-04; a failure cannot be forced on production | Coordinator: accept the unit guard, or a read-only local render |
-| JRN-3 | Unknown never shown as 0 | FAIL | five surfaces, until #3017 (merged 2026-11-04) is proven live | Audit session: confirm the merge and the deploy (`/api/health`) |
+| JRN-3 | Unknown never shown as 0 | NOT VERIFIED | #3017 live on `07fd9fa7`; a failed read cannot be forced on production, so only its guards prove it | Coordinator: accept the guards, or a read-only local render |
 | JRN-4 | Voice Work Journal | BLOCKED | 2.30, 5.15: no transcription host | Owner: hosting decision (deferred 2026-10-08) |
 | PRJ-1 | Projects: stages, tasks, assignment, board | PASS | prod walk project-execution 41789372775 (2026-11-04, `d69327239`) | Coordinator: re-walk on risk |
 | PRJ-2 | Project forecast | NOT VERIFIED | 3.34: forecast cron not installed on the VPS; needs a project with enough recorded work | Coordinator: install the cron (#2738), then walk |
@@ -622,10 +624,10 @@ SEO and GEO checks are in their tables above; these rows add what those do not c
 | ID | Check | Status | Evidence | Executor / next action |
 |---|---|---|---|---|
 | IDX-1 | Crawlers can reach everything meant to be indexed | PASS | SEO-1, SEO-2, SEO-3: 264 + 54,222 + 270 URLs in sitemaps; all 264 and 55 shards fetched | Coordinator: re-check on a sitemap change |
-| IDX-2 | What search engines have actually indexed | NOT VERIFIED | no Search Console or Bing data is available to this audit, and the code has no site-verification tag. Two test queries in one third-party web search returned no page of the site; `site:` was not honoured there, so this proves nothing either way | Owner: Search Console and Bing Webmaster read access. Then the audit reads indexed counts |
+| IDX-2 | What search engines have actually indexed, and real traffic | BLOCKED | no Search Console or Bing Webmaster data is available, and the code has no site-verification tag. Public signs only: IDX-4, IDX-5, IDX-8 | **Owner: connect a Google Search Console domain property for `labourmarket.ai` and Bing Webmaster Tools, and give the audit read access.** Then read indexed counts, queries and clicks |
 | IDX-3 | New pages are announced (IndexNow) | NOT VERIFIED | `lib/answer-engine/indexnow.ts` stays dormant without `INDEXNOW_KEY`; whether production has the key was not checked | Owner: provide the key if wanted |
 | AEO-1 | Question pages are machine-readable answers | PASS | GEO-3: 270 pages; 30 sampled, Article + BreadcrumbList | Coordinator: re-check on risk |
-| AEO-2 | An answer engine names and describes the product | NOT VERIFIED | the same test queries did not surface the product; no answer-engine test was run | Coordinator: repeat a fixed question set monthly, once GEO-6 is settled |
+| AEO-2 | An answer engine names and describes the product | NOT VERIFIED | a third-party web search did not surface the product. `/robots.txt`: OAI-SearchBot, PerplexityBot and Claude-SearchBot are not named, so allowed; GPTBot, ClaudeBot, Google-Extended and Applebot-Extended are named in the Cloudflare block. No answer engine was queried | Coordinator: repeat a fixed question set monthly, once GEO-6 is settled. Owner: confirm the Google-Extended choice |
 | AEO-3 | One answer to "what is LabourMarket.ai" | FAIL | GEO-6: three different definitions | Owner: choose one sentence. GREEN executor reuses it |
 
 ### UX/UI, mobile, languages, accessibility
@@ -638,7 +640,7 @@ SEO and GEO checks are in their tables above; these rows add what those do not c
 | LNG-1 | Public text is translated | PASS | Playwright, 2026-11-04, 44 paths × lt, ru, nl, de, pl against en: the only identical text is 2 proper names per country page (EURES, Cedefop), 12 blocks per locale | Coordinator: re-check on a copy change |
 | LNG-2 | Signed-in text is translated | NOT VERIFIED | 8.1: 6 locales × 25 routes on 2026-10-23; prod walk sectors-languages 40300823818 (2026-10-26) | Coordinator: re-run sectors-languages, the run is old |
 | LNG-3 | The five further markets | BLOCKED | 8.5: about 9,400 missing keys per locale | Owner: activation decision |
-| A11Y-1 | Public pages, axe WCAG A/AA | FAIL | Playwright 390 px, 2026-11-04, build `4c58f60a`: 43 of 44 paths clean; 1 node on `/lt/legal/data-access`. #3030 and #3038 proven live (55 nodes → 1) | GREEN #3039 (auto-merge). Audit session: re-run after its deploy |
+| A11Y-1 | Public pages, axe WCAG A/AA | PASS | Playwright 390 px, 2026-11-04, build `07fd9fa7`: **44 of 44 public paths clean, 0 failing nodes** (55 nodes on `2afdfd8a` before #3030, #3038, #3039) | Coordinator: re-run on a design change. One locale (lt) and phone size only |
 | A11Y-2 | Signed-in pages, axe | NOT VERIFIED | axe has never run on a signed-in page | Coordinator: add axe to the mobile-surfaces walk (test-only, GREEN) |
 
 ### Payments, notifications, AI, security, delivery
@@ -661,6 +663,55 @@ SEO and GEO checks are in their tables above; these rows add what those do not c
 | SEC-3 | Open security items | FAIL | 2.24, 9.25, 10.20 stay open; details in the private record | Coordinator: private record |
 | DEL-1 | A deploy run's commit is the commit it shipped | FAIL | twice on 2026-11-04 a run listed under one commit shipped the previous green one: 41783082125 listed `d69327239`, shipped `8126e693`; 41794146544 listed `4c58f60a8`, shipped `2afdfd8a`. Only `/api/health` is true | Coordinator: read the build from `/api/health` before every walk. GREEN executor: put the shipped commit in the run title |
 | DEL-2 | Typecheck stays up on `main` | FAIL | out of memory in runs 41795459454 and 41790091398; a red run holds back its deploy | GREEN #3041 (auto-merge) |
+
+### Real-user scenarios, end to end (2026-11-04)
+
+Owner's unified command: judge each scenario by what a real person can actually do today. No real path means FAIL or BLOCKED, with the exact gap. These rows point at the rows above instead of repeating them. Signed-out checks ran in Chromium at 390 px on build `07fd9fa7`. Signed-in steps rest on the named production walks; no walk was dispatched for this audit. Production counts are aggregates and may include synthetic accounts.
+
+| ID | Scenario: what a real user does | Status | Executor | PR / build | Proof | Remaining problem | Next concrete action |
+|---|---|---|---|---|---|---|---|
+| SC-1 | Learner or trainee joins a programme, records practice, gets it recognized | PASS | Coordinator | walk builds of 2026-11-03 | prod walks learning-practice 41668191663, cohort-join-request 41611766407, recognition-chain 41617507405 | no proof the history carries from learner to job seeker (L-4); institution is free text (UF-5) | Add the L-4 step to recognition-chain at the next planned run |
+| SC-2 | Worker records work, an employer confirms it, the Living CV grows | PASS | Coordinator | walk builds of 2026-11-01..02 | prod walks journal-confirm 41478434884, living-cv-growth 41281984217 | CV import fixes (#3035, #3042, #3044) not proven on production (CV-1) | Run profile-cv-history once those are live; it is the walk this risk calls for |
+| SC-3 | Person looking for work finds it fast, in their own words | FAIL | GREEN executor; coordinator for RED | SR-1 RED not applied; #3033, #3034 open | Chromium 390 px: `/lt/jobs?q=slaugytoj` first try 9.4 s, repeat 0.3–1.0 s. `slaugytojas` (nurse, Lithuanian) "0 found", while the Swedish word `undersköterska` gives 20 cards a page: search reads the ad's source language only. Profession filter works (SR-3) | a native word for a foreign-language ad finds nothing and says none exist; cold-query timeout; raw HTML in ads; translate button fails | Add care and common words to the profession word map (`public-vacancy-profession-match.ts`); assign #3033, #3034; new RED search draft |
+| SC-4 | Self-employed specialist offers a service and customers find them | BLOCKED | Owner, then GREEN executor | 6.21 needs an owner-approved RED RPC | The path to publish exists: home door "Pasiūlyti" → sign-up → `/dashboard/services` (4 fields); prod walk marketplace 41790404575 M-2, M-5. Chromium: `/lt/services`, `/lt/marketplace` 404, `/lt/business/x` 404 | **a customer who is not signed in cannot find them; no public service page and none in the sitemap.** Onboarding has no self-employed door (role `freelancer` is hidden); no invoices (7.30); only 4 active offers in production | Owner: approve public service pages (6.21). GREEN: public service list and page, then a sitemap |
+| SC-5 | Employer posts a need and gets people | PASS | Coordinator | build of 2026-11-03 | prod walk company-chain 41672031864 C-0b..C-4. Production: 100 of 248 worker profiles discoverable | direct worker search is unproven (SCH-2); a person must raise a hand first in the walked path | Add the SR-8 step to company-chain |
+| SC-6 | Customer asks for a service and follows the request | PASS | Coordinator | `d69327239` | prod walks buyer-workspace 41785749357, marketplace 41790404575, orders-bookings 41787683432 | sign-up comes before seeing any offer; 4 active offers, 0 active listings in production, so a real customer mostly finds nothing | Same public list as SC-4; real supply is a growth task, not a code task |
+| SC-7 | Contractor takes a subcontractor's team for a need | PASS | Coordinator | build of 2026-11-01 | prod walk brigade-formation 41350506578 B2B-1..B2B-4 | invoices and work-acceptance acts absent (7.30) | Owner: invoicing rules per country (7.30) |
+| SC-8 | Subcontractor's people work and log hours inside the contractor's project | NOT VERIFIED | Coordinator | — | no walk follows hours from a subcontractor's team into another company's project | whether the chain works end to end is unknown | Add a step to brigade-formation; do not call it working until then |
+| SC-9 | Recruitment agency: roster, client, shared need, offer, decision | PASS | Coordinator | `d69327239` | prod walk agency-chain 41787046374 | A-2 unproven | Add the two A-2 steps to agency-chain |
+| SC-10 | Project, team and HR management in one company | PASS | Coordinator | `d69327239` and earlier | prod walks project-execution 41789372775, documents-approvals 41786102850, org-roster 41318490491, company-governance 40687308231, rota-repeat 40659497014 | forecast (PRJ-2), overlap flow (PRJ-3), training for non-members (HR-4) | Install the forecast cron; owner decision on #2816 |
+| SC-11 | Vocational school runs a programme and signs off practice | PASS | Coordinator | build of 2026-11-03 | ED-1, ED-2, ED-3 | public institution profile (8.9) blocked | Owner: allow a public profile for the walk |
+| SC-12 | A person's qualification is formally recognized | BLOCKED | Owner | RED schema 11.10; 11.9 | credentials are declared by the person (2.18); recognition is an institution's sign-off (recognition-chain). No equivalence structure, no check against a qualification register | a formal qualification cannot be verified here; the product must keep saying declared | Owner: RPL structure (11.10) |
+| SC-13 | Anyone searches all services, signed out | FAIL | Owner, then GREEN executor | none | Chromium: no public service or market route (404 on 5 tried), none in the 264-URL sitemap; `/dashboard/services` redirects to sign-in; services are not a primary nav tab | the whole service side is invisible to visitors and search engines | Same public list as SC-4 |
+| SC-14 | Family looks for home help or care | FAIL | Owner | none | Production subjects are `service_general`, `service_trade`, `service_creative`, `service_other`: no care subject. A service category is free text. No verification, safeguarding or trust rule for carers was found in the code. Jobs side: profession "Priežiūros darbuotojas" works, but `slaugytojas` finds 0 | **no real path.** A caregiver can type a free-text offer; a family must sign up and read an unfiltered list | Owner: decide whether care is in scope and its safeguarding rules. Do not launch care search without them |
+| SC-15 | Older person or pensioner finds help | FAIL | Owner | none | "senjor", "pensinink", "pensioner" appear in no text of the lt and en message files. Sign-up needs e-mail, a password with 4 character rules and 2 onboarding steps. No phone or assisted route found | **no door and no wording for this person**; depends on SC-14 | Owner: decide scope; then one plain-language page and an assisted route |
+| SC-16 | Pensioner wants to keep working | NOT VERIFIED | Coordinator | — | nothing stops the worker path (W-1), and no age filter was found; nobody has tested it with this person in mind. Inputs are 14 px | comfort for older eyes untested | A moderated test with one older person, not a walk |
+
+### UX in Chromium at phone size (2026-11-04)
+
+Ordering and booking: E-4, C-1, C-2. Accessibility: A11Y-1, A11Y-2. Finding work: SC-3. Finding a worker: SC-5, SCH-2.
+
+| ID | Check | Status | Executor | PR / build | Proof | Remaining problem | Next concrete action |
+|---|---|---|---|---|---|---|---|
+| UXC-1 | Simple sign-up | PASS | Coordinator | `07fd9fa7` | Chromium 390 px: 3 fields + 3 social buttons, each 44 px high, one h1; prod walk fresh-activation 41279196446 | first field at 358 px under the consent banner; 14 px inputs zoom on iOS; UF-4: the person still finds it long | GREEN: 16 px inputs |
+| UXC-2 | Quick service offer | PASS | Coordinator | `d69327239` | home door to sign-up with the service page as the next step; prod walk marketplace 41790404575 M-2 | category is free text, so offers cannot be filtered | Owner: subject list for services |
+| UXC-3 | Comfortable on a phone | FAIL | Owner; GREEN executor | `07fd9fa7` | Chromium 390 px, controls under 24 px high: `/lt` 22 of 55, `/lt/jobs` 18 of 49, `/lt/for-workers` 18 of 34, sign-up 3 of 15; text under 14 px: `/lt` 16 of 40. Axe target-size reports none, because inline links are exempt, so this is comfort and not a WCAG failure. CLS: MOB-3 | small links are hard for older or gloved hands | GREEN: raise footer and nav link hit areas after a visual check; owner: banner choice |
+| UXC-4 | One navigation for all roles | PASS | Coordinator | build of 2026-11-01 | prod walk role-routes 41329744822 (5 roles); DS-4 | services and listings reached only through the market | Owner: decide whether services get a nav door |
+| UXC-5 | Messages a person understands | FAIL | Owner; GREEN executor | #3034 open | UF-1 failing translate button, UF-6 unclear calendar records, UF-7 several names for one job board | same board under several names per locale | GREEN: one name after owner choice; merge #3034 |
+
+### Index, language and AI-search state from public sources (2026-11-04)
+
+Owner rule: a technical SEO PASS does not prove pages are indexed or get traffic.
+
+| ID | Check | Status | Executor | PR / build | Proof | Remaining problem | Next concrete action |
+|---|---|---|---|---|---|---|---|
+| IDX-4 | Public job pages appear in Google | PASS | Coordinator | `07fd9fa7` | Google `site:labourmarket.ai/lt/jobs/`: 10 of 10 first-page results are the site's job pages. Google `site:labourmarket.ai`: home in 5 languages, pricing, jobs, about. No total is shown | share of 54,222 URLs indexed is unknown | IDX-2 |
+| IDX-5 | Public pages appear in Bing | NOT VERIFIED | Coordinator | `07fd9fa7` | Bing `site:labourmarket.ai` answered "no results", yet the plain query `labourmarket.ai` listed 9 site pages, so `site:` is unreliable here. `labourmarket.ai jobs welder` shows `/en/jobs`; no job page seen in Bing | job pages in Bing unproven | IDX-2 |
+| IDX-6 | Public service pages exist and can be indexed | FAIL | Owner, then GREEN executor | none | SC-13: 0 public service pages, 0 in sitemaps | nothing for a search engine to index | SC-4 |
+| IDX-7 | Old host does not break an indexed link | FAIL | Owner (Cloudflare) | none | Chromium: `https://app.labourmarket.ai/lt/pricing` answers 402 "Deployment Paused" (Vercel). Bing lists that URL. `/llms.txt` says "www. and app. are permanent redirects"; `www.` is (301), `app.` is not | a search result and a statement to AI crawlers are both wrong | Owner: point `app.` at the same Cloudflare 301 as `www.` |
+| IDX-8 | Found without the brand name | NOT VERIFIED | Coordinator | — | Bing, 2 unbranded queries (`darbo skelbimai suvirintojas`, `pagalba namuose senjorams paslaugos`): 0 of 10 results from the site each. Two queries prove little | real traffic unknown | IDX-2 gives real queries and clicks |
+| LNG-4 | Required European languages | BLOCKED | Owner | 8.5 | Chromium: lt, en, ru, nl, de, pl answer 200. `/lv`, `/et`, `/fi`, `/sv`, `/no`, `/uk` redirect to English silently. `/es`, `/fr` answer 404 | Sweden and Norway supply the ads, yet their languages are not offered | Owner: which languages next; about 9,400 keys per locale |
+| LNG-5 | Translated and original language kept apart | PASS | Coordinator | `07fd9fa7` | Chromium, job page on `/lt`: page `lang=lt`, the Swedish title carries `lang="sv"`, cards name the source language | one Swedish ad has 7 hreflang URLs with the same text | Coordinator: review the alternates when JobPosting or country data changes |
 
 ### NOT VERIFIED function rows: executor and next action
 
@@ -1065,7 +1116,7 @@ SEO and GEO checks are in their tables above; these rows add what those do not c
 | 13.2 | Health probe + monitor | LIVE_VERIFIED | — | live | yes |  |
 | 13.3 | Prod QA walk harness | LIVE_VERIFIED | 2026-10-22 | role-routes run 39783147517 (green) 10-22 | yes |  |
 | 13.4 | Supabase capacity | PASS_CI_ONLY | 2026-10-25 | Supabase org plan=pro (get_organization 2026-10-25) | unproven |  |
-| 13.5 | Database backup | LIVE_VERIFIED | 2026-11-03 | #3005: restore drill 41664420591 and full run 41665452921 2026-11-03 — scope public, auth, storage, supabase_migrations + Storage files + scheduled-job definitions; schema objects restored exactly, every table inside its source window, every Storage file by count and bytes; both encrypted files reach the VPS and decrypt; restore procedure in VPS_PRODUCTION_RUNBOOK §9.1.1; earlier: 2026-10-27 read-only: db-backup.yml stops at 'Require secrets' nightly since 10-18 (10-17 drills: permission denied); repo has VPS_DEPLOY_* but neither SUPABASE_ACCESS_TOKEN nor SUPABASE_BACKUP_DB_URL; 0 successful runs … | yes | first scheduled full-scope nightly 2026-11-04 03:30 UTC to be checked |
+| 13.5 | Database backup | LIVE_VERIFIED | 2026-11-03 | #3005: restore drill 41664420591 and full run 41665452921 2026-11-03 — scope public, auth, storage, supabase_migrations + Storage files + scheduled-job definitions; schema objects restored exactly, every table inside its source window, every Storage file by count and bytes; both encrypted files reach the VPS and decrypt; restore procedure in VPS_PRODUCTION_RUNBOOK §9.1.1; earlier: 2026-10-27 read-only: db-backup.yml stops at 'Require secrets' nightly since 10-18 (10-17 drills: permission denied); repo has VPS_DEPLOY_* but neither SUPABASE_ACCESS_TOKEN nor SUPABASE_BACKUP_DB_URL; 0 successful runs … | yes | Scheduled daily run + failure alert (2026-11-04): NOT VERIFIED until a real scheduled run is checked. first scheduled full-scope nightly 2026-11-04 03:30 UTC to be checked |
 | 13.6 | VPS cron bundle | LIVE_VERIFIED | 2026-10-23 | prod data 10-23: all 4 VPS cron entries ran (handoffs 06:00, job-alerts, weekly digest Mon, erasure every 10 min); pg_cron booking expiry ran | yes | 1 erasure notice queued (no SMTP) |
 | 13.7 | Migration safety + parity | LIVE_VERIFIED | 2026-10-23 | parity tool vs prod ledger 10-23 | yes |  |
 | 13.8 | Migration ledger parity | LIVE_VERIFIED | 2026-10-23 | prod ledger 10-23: 396 match; all drift documented except ESCO fn applied with file only in open #2410 | yes | record/merge #2410 |
