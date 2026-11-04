@@ -12894,15 +12894,35 @@
   "cvImport": {
     "reviewTitle": "Ką radome tavo CV",
     "reviewHint": "Sistema tik siūlo. Kiekvieną įrašą išsaugok arba atmesk — sprendi tu.",
+    "edit": "Taisyti",
+    "editDone": "Baigti taisyti",
+    "fieldTitle": "Pavadinimas",
+    "fieldText": "Tekstas",
+    "fieldInstitution": "Mokymo įstaiga",
+    "fieldProgram": "Programa",
+    "fieldKind": "Rūšis",
+    "fieldStart": "Pradžia",
+    "fieldEnd": "Pabaiga",
+    "fieldYear": "Metai",
+    "dateHint": "pvz. 2019 arba 2019-03",
+    "unplacedHint": "Šių eilučių nepriskyrėme. Pasirink, kur priklauso, arba atmesk.",
+    "placeAs": "Kur priskirti?",
+    "confidence": {
+      "high": "Aiškiai parašyta CV",
+      "medium": "Patikrink, ar perskaityta teisingai",
+      "low": "Spėjimas: būtinai patikrink"
+    },
     "empty": "Iš šio teksto dalių nuskaityti nepavyko — gali jas įrašyti ranka.",
     "groups": {
       "workHistory": "Darbo patirtis",
       "education": "Išsilavinimas",
+      "training": "Mokymai ir kursai",
       "languages": "Kalbos",
       "certificates": "Sertifikatai",
       "achievements": "Pasiekimai",
       "salary": "Atlyginimo lūkestis",
-      "availability": "Prieinamumas"
+      "availability": "Prieinamumas",
+      "unplaced": "Neatpažinta"
     },
     "confirm": "Išsaugoti",
     "saving": "Įrašoma…",
@@ -16165,6 +16185,7 @@
       "allowanceRemaining": "Liko {count} iš {limit} vertimų",
       "allowanceExhausted": "Išnaudojai visus {limit} tau skirtus vertimus. Skelbimą ir toliau galima skaityti originalo kalba.",
       "unavailable": "Šio skelbimo dabar išversti nepavyko. Žemiau rodomi paties skelbėjo žodžiai.",
+      "notSwitchedOn": "Automatinio skelbimų vertimo dar nėra. Žemiau – paties skelbėjo žodžiai.",
       "signedOut": "Prisijunk, kad galėtum išversti šį skelbimą."
     }
   },

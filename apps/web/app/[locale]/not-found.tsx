@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/visual/theme-default";
 import { Link } from "@/lib/i18n/navigation";
+import { LmLogo } from "@/components/ui/lm-logo";
 import { ThemeReapply } from "@/components/app/theme-reapply";
 
 /**
@@ -31,6 +32,7 @@ export default async function NotFound() {
         }}
       />
       <ThemeReapply />
+      <LmLogo className="h-12 w-auto" />
       <p className="font-mono text-xs uppercase tracking-label text-text-muted">
         {t("code")}
       </p>

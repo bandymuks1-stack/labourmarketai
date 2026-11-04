@@ -226,16 +226,20 @@ test("B-4 (6.1). the provider offers a service and makes it discoverable", async
   await expect(row).toBeVisible({ timeout: 30_000 });
   serviceId = (await row.getAttribute("data-testid"))!.replace("service-offering-row-", "");
   const status = page.getByTestId(`service-offering-status-${serviceId}`);
-  if (!/aktyv|active/i.test(await status.innerText())) {
-    await page.getByTestId(`service-offering-toggle-${serviceId}`).click();
-  }
   // The visibility line renders for a draft too; wait until it says others
   // can find it, so the context never closes while the publish is in flight.
-  await expect(page.getByTestId(`service-offering-discoverability-${serviceId}`)).toHaveAttribute(
-    "data-visibility",
-    "visible",
-    { timeout: 30_000 },
-  );
+  // The publish can queue behind the save's refresh (prod-marketplace run
+  // 41721656743), so re-click if it never lands.
+  await expect(async () => {
+    if (!/aktyv|active/i.test(await status.innerText())) {
+      await page.getByTestId(`service-offering-toggle-${serviceId}`).click();
+    }
+    await expect(page.getByTestId(`service-offering-discoverability-${serviceId}`)).toHaveAttribute(
+      "data-visibility",
+      "visible",
+      { timeout: 10_000 },
+    );
+  }).toPass({ timeout: 45_000 });
   await close();
 });
 

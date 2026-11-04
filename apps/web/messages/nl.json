@@ -12894,15 +12894,35 @@
   "cvImport": {
     "reviewTitle": "Gedetecteerde cv-onderdelen",
     "reviewHint": "Het systeem stelt alleen voor. Sla elk item op of verwijder het — jij beslist.",
+    "edit": "Corrigeren",
+    "editDone": "Klaar",
+    "fieldTitle": "Titel",
+    "fieldText": "Tekst",
+    "fieldInstitution": "School of aanbieder",
+    "fieldProgram": "Opleiding",
+    "fieldKind": "Soort",
+    "fieldStart": "Begin",
+    "fieldEnd": "Einde",
+    "fieldYear": "Jaar",
+    "dateHint": "bijv. 2019 of 2019-03",
+    "unplacedHint": "Deze regels konden we niet plaatsen. Kies waar ze horen of verwijder ze.",
+    "placeAs": "Waar hoort dit?",
+    "confidence": {
+      "high": "Duidelijk vermeld in het cv",
+      "medium": "Controleer of dit goed is gelezen",
+      "low": "Een gok: controleer dit"
+    },
     "empty": "Geen gestructureerde items gevonden in de tekst.",
     "groups": {
       "workHistory": "Werkervaring",
       "education": "Opleiding",
+      "training": "Trainingen en cursussen",
       "languages": "Talen",
       "certificates": "Certificaten",
       "achievements": "Prestaties",
       "salary": "Salarisverwachting",
-      "availability": "Beschikbaarheid"
+      "availability": "Beschikbaarheid",
+      "unplaced": "Niet herkend"
     },
     "confirm": "Opslaan",
     "saving": "Opslaan…",
@@ -16165,6 +16185,7 @@
       "allowanceRemaining": "Nog {count} van {limit} vertalingen over",
       "allowanceExhausted": "Je hebt al je {limit} inbegrepen vertalingen gebruikt. De vacature blijft volledig leesbaar in de oorspronkelijke taal.",
       "unavailable": "Deze vacature kon nu niet worden vertaald. Hieronder staan de eigen woorden van de adverteerder.",
+      "notSwitchedOn": "Automatisch vertalen van vacatures staat nog niet aan. Hieronder staan de eigen woorden van de adverteerder.",
       "signedOut": "Meld je aan om deze vacature te vertalen."
     }
   },

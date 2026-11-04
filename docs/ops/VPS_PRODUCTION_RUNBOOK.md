@@ -91,7 +91,7 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 | Commercial handoffs | `/api/cron/commercial-handoffs` (06:00 UTC) | **running** (measured 2026-10-23: the 06:00 UTC sweep read the queue; consented hand-offs are delivered by the immediate path) | VPS cron.d |
 | Job alerts | `/api/cron/job-alerts` (06:17 UTC) | the GitHub `job-alerts-cadence.yml` no-op was **removed** (it never had `CRON_SECRET`; nginx 404s `/api/cron/*` from the internet) | VPS cron.d (line present in the bundle) |
 | Billing recovery | `/api/cron/billing-recovery` | `billing-recovery-cadence.yml` kept **dispatch-only** (schedule removed; its static gate stays reviewable). Since 2026-10-23 it makes **no HTTP call**: nginx 404s `/api/cron/*` from the internet, so a runner call could never succeed; an open gate fails loudly and points at `lm-cron.sh billing-recovery` on the VPS. `apps/web/vercel.json` keeps its `crons` block unchanged: three guards read it as the schedule declaration and the Vercel project is disabled, so the block is inert documentation | VPS cron.d line added only with the Stripe GO |
-| **DB backup** | `db-backup.yml` 03:30 UTC: `pg_dump` on the runner (`public` + `auth` + `storage` metadata + `supabase_migrations` ledger) through the owner-approved read role `SUPABASE_BACKUP_DB_URL` (or a temporary CLI login role via `SUPABASE_ACCESS_TOKEN`) → **restore drill** with exact schema-object and per-table row proof → Storage **files** + pg_cron job definitions downloaded via the Storage API and size-checked → both `age`-encrypted to the VPS public key → shipped via the forced-command receiver (`backup`) → `/root/lm-prod/backups/` (700/600), 14-day rotation | **producing backups since 2026-11-03** (drill 41636950462, full 41637888590); completeness proof + files bundle 2026-11-03 (§9.1.0) | GitHub-side dump; VPS stores ciphertext only; no DB password typed anywhere |
+| **DB backup** | `db-backup.yml`, every 4 h with a skip guard (one backup a day): `pg_dump` on the runner (`public` + `auth` + `storage` metadata + `supabase_migrations` ledger) through the owner-approved read role `SUPABASE_BACKUP_DB_URL` (or a temporary CLI login role via `SUPABASE_ACCESS_TOKEN`) → **restore drill** with exact schema-object and per-table row proof → Storage **files** + pg_cron job definitions downloaded via the Storage API and size-checked → both `age`-encrypted to the VPS public key → shipped via the forced-command receiver (`backup`) → `/root/lm-prod/backups/` (700/600), 14-day rotation | **producing backups since 2026-11-03** (drill 41636950462, full 41637888590); completeness proof + files bundle 2026-11-03 (§9.1.0) | GitHub-side dump; VPS stores ciphertext only; no DB password typed anywhere |
 | NAV (Norway) ingestion | `nav-supply-cadence.yml` 02/08/14/20 UTC (GitHub, service role) | GREEN after migration | keep (GitHub) |
 | Sweden ingestion | `sweden-supply-cadence.yml` 01/09/17 UTC | GREEN | keep |
 | Freshness check | `ingestion-freshness.yml` 04/10/16/22 UTC | GREEN | keep |
@@ -233,6 +233,44 @@ GitHub job is then the only backup.
 installed copy is current). Keep the offline copy of `backup.age.key` — without
 it no backup can be decrypted.
 
+### 9.1.0a Daily run, alerts and limits (2026-11-04)
+
+**Daily run.** `db-backup.yml` has six schedule slots, and also starts when Quality Gates finishes on `main` (the `db-backup` freshness job too); a guard job skips the run when a backup reached the VPS in the last 18 h. A person's dispatch always runs. "Reached the VPS" means the *Ship to the VPS* step succeeded (`.github/scripts/db-backup-last-shipped.sh`): a skipped run and a `restore_drill_only` run are green and ship nothing.
+
+**Alerts.** A failed run opens or updates one `db-backup-failed` issue, with only the run link in it, and the next backup that ships closes it. A run from a branch is a test and neither opens nor closes the issue. The `db-backup` job in `ingestion-freshness.yml` fails when no backup reached the VPS in 26 h, updates the same issue and dispatches a backup.
+
+**What each run proves:** the dump restores into a throw-away `postgres:17` with exact schema-object counts, grants equal per schema and kind (count and hash; only counts are printed), and every table inside its source window; every Storage file by count and size; both files encrypted with `age`; the receiver re-checks the sha256 of what it received and the `age` header before storing, and answers `BACKUP_OK`.
+
+**What it does not prove:**
+- that a stored file decrypts: the drill runs on the plaintext before encryption, and the receiver never holds the key at that step. Decryption is a manual check, last done 2026-11-03 over root SSH on the VPS with the VPS's key. The owner's offline copy of the key has not been shown to decrypt;
+- a restore into a real Supabase project;
+- that the scope is complete on every run: if `auth` and the other schemas cannot be read, the job falls back to `public` only and stays green, with a warning;
+- anything after the 14-day rotation.
+- role memberships and role attributes: `pg_dump` does not hold them, so the drill creates every source role as a plain role. The grants are exact; what each role can inherit is not in the backup;
+- that grants apply on a real Supabase target: the drill restores as a superuser and keeps owners, which the project's `postgres` role cannot do there (§9.1.1 step 5).
+
+**The one expected restore error.** `restore-errors=1 (harmless=1)` is `CREATE SCHEMA public;` failing because the target database already has that schema. Run 41815407585 confirms it from both sides: `restore.err` has one error line, the server log has one `ERROR`, and it is this statement. Nothing else fails with it, and the schema-object proof is exact. Any other error counts as `other`, which only warns; the object and row proofs are what fail the job.
+
+**Last proof (2026-11-04).** Manual run 41815407585: full backup, restore drill and shipping passed. Not yet exercised: a scheduled start, the 26 h freshness job, the failure issue. A manual run makes the guard skip scheduled slots for the next 18 h, so a skipped scheduled run proves the slot fired, and only the first slot after that proves a scheduled backup.
+
+**Independence.** The automatic copies are in one place, on the production VPS, next to the app and its key. There is no automatic second destination, which is an owner decision. Other copies: encrypted files copied by hand on 2026-11-03 to the owner's PC, which do not update, and Supabase's managed Pro backups, whose list could not be read with the tools available (they hold no Storage files).
+
+**The scheduler is not reliable for this repository.** Measured 2026-10-28 to 11-04: `*/5` ran 31 times out of 2,017 slots, hourly workflows about 28 of 168, and six-hourly ones started 3 to 6 h late, with gaps up to 12.7 h. The 26 h check runs on the same scheduler, so if GitHub's schedule stops, the backup and its alarm stop together. A trigger outside GitHub is proposed separately and is not installed.
+
+### 9.1.0b Backup watchdog on the VPS (owner approval 2026-11-04)
+
+Independent of GitHub's scheduler. It raises an alarm; it does not start a backup.
+
+- **Install:** `ops/vps/install-backup-watchdog.sh <approved address>` as root, pinned to one commit, no secrets, sends no mail. Then `ops/vps/test-backup-watchdog-mail.sh <address>`, which sends exactly two test mails with invented files; PASS only when someone sees them arrive, as `mail=sent` proves only that the server accepted them. Neither script has been run as of 2026-11-04.
+- **Files:** `ops/vps/lm-backup-watchdog.sh` and `ops/vps/labourmarket-backup-watchdog.cron`, copied to `/root/lm-prod/bin/`; the cron file installed as `/etc/cron.d/labourmarket-backup-watchdog`, hourly at minute 7. It has its own cron file because `lm-cron-install.sh` calls every product route when it runs.
+- **What counts as a good backup:** the newest pair (database + Storage files, same stamp) in `backups/verified.log`, a line the receiver writes after its own sha256 and `age` checks, checked again on disk for size, sha256 and `age` header. A file's date proves nothing here. The dump is read in full hourly, at low priority.
+- **Alert:** older than 26 h, or failing a check, is one incident: one mail when it starts, none while it lasts, one when it clears. State is in `backup-watchdog.state`; if a mail fails, the next hour tries again.
+- **Mail:** the existing `LM_SMTP_*` mailbox by `curl`. The address is `ALERT_TO=` in `/root/lm-prod/backup-watchdog.conf` (root, 600), and it must be one the owner approved. Without it, nothing is sent and the log says `mail=failed:4`.
+- **Check it:** `tail /root/lm-prod/backup-watchdog.log`, one line an hour; `grep labourmarket-backup /var/log/syslog` or `journalctl -u cron` for cron itself.
+- **Test without real backups:** `sh ops/vps/lm-backup-watchdog.test.sh` uses its own temporary directory and sends nothing.
+- **Remove:** `rm /etc/cron.d/labourmarket-backup-watchdog`. The receiver's record line is harmless if left.
+- **Limit:** nothing watches the watchdog. If the VPS or its cron is down, no mail comes; the GitHub freshness job is the other side of that.
+
 ### 9.1.0 What a backup holds — and what it does not (completeness, 2026-11-03)
 
 Measured on production 2026-11-03 (counts only): base tables `public` 249,
@@ -260,7 +298,9 @@ same drill DID lose objects — see *Restore errors* below.)
 
 **What the nightly drill proves** (job summary, counts only): per schema, the
 exact number of tables, views, indexes, constraints, policies, triggers and
-functions equals the source; every table's row count lands inside its source
+functions equals the source; the grants match per schema and kind, by count and by
+hash of (object, grantee, privilege, grant option), and a difference fails the job
+(proven by an injected extra grant, run 41819279617); every table's row count lands inside its source
 window [before dump, after dump] — the key tables (`profiles`, `workers`,
 `organizations`, `journal_entries`, `journal_entry_confirmations`, `auth.users`,
 `storage.objects`, `supabase_migrations.schema_migrations`) fail the job when
@@ -338,7 +378,11 @@ decision → (only then) production**. Never restore over production to "test".
    alternative for a whole-project point-in-time restore of the DATABASE; they
    hold no Storage files either. Into a NEW Supabase project, in this order:
    1. the roles and extensions of step 3 already exist there — do not create them;
-   2. `pg_restore --no-owner --no-privileges` as the project's `postgres` role for
+   2. `pg_restore --no-owner` as the project's `postgres` role, so the grants come back
+      (the dump holds them since 2026-11-04; older dumps do not). **Not yet tested on a
+      real Supabase project:** a grant made by another role can fail there. Compare the
+      result with the run's `grants equal the source` line and fix any difference before
+      the database serves anyone. For
       `public`, `storage` and `supabase_migrations` (`-n` each); `auth` is created
       by the platform, so restore it with `--data-only -n auth` afterwards;
    3. **Storage files** go back through the Storage API with the service-role

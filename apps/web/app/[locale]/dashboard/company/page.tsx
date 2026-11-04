@@ -208,7 +208,8 @@ export default async function CompanyDashboardPage({
     // Never summed with the employer count above: its own number and label.
     {
       key: "clientReview",
-      count: clientToDecide ?? 0,
+      // null = the count could not be read (SEP-7) — kept, never 0.
+      count: clientToDecide,
       href: `/${locale}/dashboard/inbox/counterparty`,
     },
     // Recorded work nobody can confirm yet (review switched off). Unknown (a

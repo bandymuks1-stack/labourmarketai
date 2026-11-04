@@ -789,8 +789,8 @@ export default async function JournalPage({
   // Entries with their metrics + confirmation status — read through THE
   // canonical journal-list core (G4): v3 lifecycle select (deleted_at,
   // superseded_by hidden), legacy projection fallback while migration 0018
-  // is unapplied, newest first. A failed read renders as an empty list,
-  // exactly as the inline query degraded before the extraction.
+  // is unapplied, newest first. A failed read is `null` and renders as
+  // "could not be read" — never as an empty journal (SEP-7: UNKNOWN ≠ ZERO).
   type JournalEntryRow = JournalEntryListRow;
   const entries: JournalEntryRow[] | null = entriesRead.ok
     ? entriesRead.entries
@@ -1691,12 +1691,14 @@ export default async function JournalPage({
           className="text-meta leading-relaxed text-text-muted"
           data-testid="journal-cv-bridge"
         >
-          {totalEntryCount > 0
-            ? t("cvBridge", {
-                confirmed: confirmedEntryCount,
-                total: totalEntryCount,
-              })
-            : t("cvBridgeEmpty")}{" "}
+          {entries === null
+            ? t("cvBridgeUnavailable")
+            : totalEntryCount > 0
+              ? t("cvBridge", {
+                  confirmed: confirmedEntryCount,
+                  total: totalEntryCount,
+                })
+              : t("cvBridgeEmpty")}{" "}
           <Link
             href="/cv"
             className="font-medium text-brand-blue hover:underline"
@@ -1706,28 +1708,42 @@ export default async function JournalPage({
           </Link>
         </p>
         {/* Proof-engine loop strip — ONE dense row, real counts only:
-            įrašai → įgūdžių įrodymai → CV → pasiūlymai. */}
-        <p
-          className="text-meta leading-relaxed text-text-muted"
-          data-testid="journal-proof-loop"
-        >
-          {t("proofLoop.stripPeriod", {
-            entries: entriesThisMonth,
-            period: t("intelligence.period.month"),
-            evidenced: evidencedSkillIds.size,
-            confirmed: verifiedSkillIds.size,
-          })}{" "}
-          <Link
-            href="/cv"
-            className="font-medium text-brand-blue hover:underline"
-            data-testid="journal-proof-loop-cv-link"
+            įrašai → įgūdžių įrodymai → CV → pasiūlymai. A failed
+            list read shows no counts at all (SEP-7). */}
+        {entries !== null && (
+          <p
+            className="text-meta leading-relaxed text-text-muted"
+            data-testid="journal-proof-loop"
           >
-            {t("proofLoop.cvLink")} →
-          </Link>
-        </p>
+            {t("proofLoop.stripPeriod", {
+              entries: entriesThisMonth,
+              period: t("intelligence.period.month"),
+              evidenced: evidencedSkillIds.size,
+              confirmed: verifiedSkillIds.size,
+            })}{" "}
+            <Link
+              href="/cv"
+              className="font-medium text-brand-blue hover:underline"
+              data-testid="journal-proof-loop-cv-link"
+            >
+              {t("proofLoop.cvLink")} →
+            </Link>
+          </p>
+        )}
           </div>
         </details>
-        {diaryScope !== "recent" && visibleDayGroups.length === 0 ? (
+        {entries === null ? (
+          /* The list read FAILED. Not an empty journal and not an empty day:
+             no first-entry door, no "nothing on this day" (SEP-7). */
+          <div
+            role="status"
+            className="flex flex-col gap-1 rounded-md border border-border-subtle bg-surface-1/40 px-4 py-4"
+            data-testid="journal-list-unavailable"
+          >
+            <p className="text-sm font-medium text-text-primary">{t("listUnavailableTitle")}</p>
+            <p className="text-sm leading-relaxed text-text-secondary">{t("listUnavailable")}</p>
+          </div>
+        ) : diaryScope !== "recent" && visibleDayGroups.length === 0 ? (
           /* A day — or a period — the person navigated to that holds no
              records. A real answer over a known window (SEP-7: a recorded
              zero, not an unknown), with the one action that changes it and
