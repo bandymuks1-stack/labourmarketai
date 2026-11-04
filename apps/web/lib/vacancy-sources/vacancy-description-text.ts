@@ -11,9 +11,11 @@
  * translation input, in ONE pass over the string (no repeated replacing):
  *   - only a CLOSED list of formatting tags is recognised; block tags and
  *     `<br>` become line breaks, `<li>` becomes a bullet line, the rest drop;
- *   - `<script>` / `<style>` / `<head>` / `<noscript>` blocks and comments are
- *     removed with their content, to the end of the text when never closed;
- *   - entities are decoded ONCE, after the tags are gone;
+ *   - `<script>`, `<style>`, `<iframe>` and the like, and comments, are removed
+ *     with their content, to the end of the text when never closed;
+ *   - entities are decoded ONCE, after the tags are gone; control characters
+ *     and the old Windows code points some feeds carry (`&#150;` for a dash) do
+ *     not reach the reader;
  *   - LAST, every `<` that could open a tag gets a space after it, so the
  *     result holds NO tag start at all, whatever it was built from: a payload
  *     split around a removed block, an escaped `&lt;script&gt;`, or a tag we
@@ -31,11 +33,14 @@ const BLOCK_TAGS = new Set([
 ]);
 const INLINE_TAGS = new Set([
   "span", "strong", "b", "i", "em", "u", "s", "small", "sup", "sub", "font",
-  "a", "abbr", "code", "mark", "del", "ins", "label", "img", "th", "td",
-  "caption", "nobr", "wbr", "o:p",
+  "a", "abbr", "code", "mark", "del", "ins", "label", "img", "caption", "nobr", "wbr", "o:p",
 ]);
+/** Table cells: a space, or "Sted" and "Telefon" would read as one word. */
+const CELL_TAGS = new Set(["td", "th"]);
 /** Removed WITH their content: what they hold was never words for a reader. */
-const CONTENT_FREE_TAGS = new Set(["script", "style", "head", "noscript"]);
+const CONTENT_FREE_TAGS = new Set([
+  "script", "style", "head", "noscript", "iframe", "object", "embed", "svg", "video", "audio",
+]);
 
 /** A complete tag at the sticky position: closing slash + name. */
 const TAG_AT = /<(\/?)([a-z][a-z0-9:]*)\b[^<>]*>/iy;
@@ -51,19 +56,34 @@ const NAMED: Readonly<Record<string, string>> = {
   copy: "©", reg: "®", trade: "™", shy: "",
 };
 
+/** Windows-1252 punctuation that some feeds write as a C1 code point. */
+const WINDOWS_PUNCTUATION: Readonly<Record<number, string>> = {
+  0x91: "‘", 0x92: "’", 0x93: "“", 0x94: "”", 0x95: "•", 0x96: "–", 0x97: "—", 0x85: "…",
+};
+/** Control and format characters a reader can never mean, line breaks and tabs kept. */
+const UNREADABLE = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\u200b\ufeff\ufff0-\uffff]/g;
+
 function decodeEntities(text: string): string {
   return text.replace(/&(#x[0-9a-f]{1,6}|#[0-9]{1,7}|[a-z][a-z0-9]{1,8});/gi, (whole, body: string) => {
     if (body[0] === "#") {
       const code = body[1] === "x" || body[1] === "X" ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10);
       if (!Number.isFinite(code) || code <= 0 || code > 0x10ffff || (code >= 0xd800 && code <= 0xdfff)) return whole;
-      return code === 0xa0 ? " " : String.fromCodePoint(code);
+      if (code === 0xa0) return " ";
+      return WINDOWS_PUNCTUATION[code] ?? String.fromCodePoint(code);
     }
     return NAMED[body] ?? whole;
   });
 }
 
 function isKnownTag(name: string): boolean {
-  return BLOCK_TAGS.has(name) || INLINE_TAGS.has(name) || name === "br" || name === "li" || CONTENT_FREE_TAGS.has(name);
+  return (
+    BLOCK_TAGS.has(name) ||
+    INLINE_TAGS.has(name) ||
+    CELL_TAGS.has(name) ||
+    name === "br" ||
+    name === "li" ||
+    CONTENT_FREE_TAGS.has(name)
+  );
 }
 
 /** The tag at `at`, when `text` holds a complete one there. */
@@ -73,18 +93,26 @@ function tagAt(text: string, at: number): { closing: boolean; name: string; end:
   return m ? { closing: m[1] === "/", name: m[2].toLowerCase(), end: at + m[0].length } : null;
 }
 
-/** Whether this text is an HTML source: its own line breaks are then layout. */
-function looksLikeHtml(text: string): boolean {
+/** What the text holds: any tag we know, and any tag that lays out lines. In a
+ *  text with only inline tags (a stray `<o:p>` in a plain Swedish ad) the line
+ *  breaks are still the publisher's paragraphs; only layout tags replace them. */
+function htmlKind(text: string): { readonly html: boolean; readonly layout: boolean } {
+  let html = false;
   for (let at = text.indexOf("<"); at !== -1; at = text.indexOf("<", at + 1)) {
-    if (text.startsWith("<!--", at)) return true;
+    if (text.startsWith("<!--", at)) {
+      html = true;
+      continue;
+    }
     const tag = tagAt(text, at);
-    if (tag && isKnownTag(tag.name)) return true;
+    if (!tag || !isKnownTag(tag.name)) continue;
+    html = true;
+    if (BLOCK_TAGS.has(tag.name) || tag.name === "br" || tag.name === "li") return { html, layout: true };
   }
-  return false;
+  return { html, layout: false };
 }
 
-function htmlToLines(html: string): string {
-  const source = html.replace(/\s*\n\s*/g, " ");
+function htmlToLines(html: string, layout: boolean): string {
+  const source = layout ? html.replace(/\s*\n\s*/g, " ") : html;
   const lower = source.toLowerCase();
   const out: string[] = [];
   let at = 0;
@@ -101,6 +129,8 @@ function htmlToLines(html: string): string {
       continue;
     }
     const tag = tagAt(source, lt);
+    // A tag cut off by the end of the text (imports clamp long ads): not words.
+    if (!tag && layout && /^<\/?[a-z][^<>]*$/i.test(source.slice(lt))) break;
     if (!tag || !isKnownTag(tag.name)) {
       // Not a tag we know: the character stays, and the last step of
       // vacancyDescriptionText makes sure it cannot open one.
@@ -121,6 +151,7 @@ function htmlToLines(html: string): string {
     if (tag.name === "br") out.push("\n");
     else if (tag.name === "li") out.push(tag.closing ? "" : "\n• ");
     else if (BLOCK_TAGS.has(tag.name)) out.push("\n\n");
+    else if (CELL_TAGS.has(tag.name)) out.push(" ");
     at = tag.end;
   }
   return out.join("");
@@ -130,7 +161,9 @@ function htmlToLines(html: string): string {
 export function vacancyDescriptionText(raw: string): string {
   if (!raw) return "";
   const text = raw.replace(/\r\n?/g, "\n");
-  return decodeEntities(looksLikeHtml(text) ? htmlToLines(text) : text)
+  const kind = htmlKind(text);
+  return decodeEntities(kind.html ? htmlToLines(text, kind.layout) : text)
+    .replace(UNREADABLE, "")
     .replace(/[ \t ]+/g, " ")
     .split("\n")
     .map((line) => line.trim())

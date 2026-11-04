@@ -55,6 +55,45 @@ describe("vacancyDescriptionText — HTML feeds read as text", () => {
     expect(vacancyDescriptionText("<p>A</p><script>never closed").trim()).toBe("A");
   });
 
+  it("reads malformed HTML: unclosed, uppercase, stray, attributes, nothing readable lost", () => {
+    expect(vacancyDescriptionText("<p>Første<li>Andre<li>Tredje")).toBe("Første\n• Andre\n• Tredje");
+    expect(vacancyDescriptionText("<P ALIGN=center>Hei</P><BR/>der")).toBe("Hei\n\nder");
+    expect(vacancyDescriptionText("</div></p>Tekst<p></p><p>  </p>")).toBe("Tekst");
+    expect(vacancyDescriptionText('<a href="x>y">Søk</a>')).not.toMatch(/<[a-z/]/i);
+    for (const broken of ["<p>Tekst<br", "<p>Tekst</p", "<p>Tekst<", "<<p>>Tekst", "<p <b>Tekst"]) {
+      const out = vacancyDescriptionText(broken);
+      expect(out, broken).toContain("Tekst");
+      expect(out, broken).not.toMatch(/<[a-z!/?]/i);
+    }
+  });
+
+  it("what the feeds really carry (counted in production 2026-11-04)", () => {
+    // Swedish ads embed these; they are not words for a reader.
+    expect(vacancyDescriptionText('Vi söker<iframe src="https://example.invalid/v"></iframe> svetsare')).toBe("Vi söker svetsare");
+    expect(vacancyDescriptionText('<p>Hej</p><img src="x.png" alt="logo">')).toBe("Hej");
+    // An address in angle brackets stays readable and cannot open a tag.
+    expect(vacancyDescriptionText("Mejla <filip@example.invalid> eller <http://example.invalid>")).toBe(
+      "Mejla < filip@example.invalid> eller < http://example.invalid>",
+    );
+    // Norwegian ads write punctuation, addresses and emoji as numeric entities.
+    expect(vacancyDescriptionText("<p>post&#64;example.invalid &#x1F4CD; Oslo</p>")).toBe("post@example.invalid 📍 Oslo");
+    expect(vacancyDescriptionText("<p>Rolle &#150; lønn &#39;god&#39; &#34;sikker&#34;</p>")).toBe("Rolle – lønn 'god' \"sikker\"");
+    // An ad cut off mid-tag by the import limit ends with its words.
+    expect(vacancyDescriptionText('<p>Kontakt oss</p><p>Ring <a href="tel:')).toBe("Kontakt oss\n\nRing");
+    expect(vacancyDescriptionText("<ul><li>Rør</li><l")).toBe("• Rør");
+    // Invisible characters do not reach the reader.
+    expect(vacancyDescriptionText("<p>&#xFEFF;Start&#xFFF8; slutt</p>")).toBe("Start slutt");
+    expect(vacancyDescriptionText("\u200b\nÄr du vår nästa expert?")).toBe("Är du vår nästa expert?");
+    // A table reads cell by cell (Norwegian contact tables).
+    expect(vacancyDescriptionText("<table><tr><td>Sted</td><td>Telefon</td></tr><tr><td>Oslo</td><td>Spør</td></tr></table>")).toBe(
+      "Sted Telefon\n\nOslo Spør",
+    );
+    // A stray Word tag in a plain Swedish ad keeps its paragraphs.
+    expect(vacancyDescriptionText("Är du säljaren?<o:p></o:p>\n\nPå Volt arbetar vi.\n· Kollektivavtal")).toBe(
+      "Är du säljaren?\n\nPå Volt arbetar vi.\n· Kollektivavtal",
+    );
+  });
+
   it("leaves plain text as typed: its own breaks, and angle brackets that are not tags", () => {
     const plain = "Arbetsuppgifter:\n- svetsning\n- montage\n\nLön < 30 000 kr, krav <10 år>";
     expect(vacancyDescriptionText(plain)).toBe(plain);
