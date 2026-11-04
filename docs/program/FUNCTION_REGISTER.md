@@ -244,7 +244,7 @@ Database timings come from production `pg_stat_statements`, read-only. They are 
 
 | ID | Check | Status | Evidence | Defect / blocker |
 |---|---|---|---|---|
-| SR-1 | `/jobs` free text, cold first query | FAIL | measured by J-13: see its report and RED draft #3024. `pg_stat_statements`: `search_public_vacancy_previews_v1` 35,752 calls, mean 560 ms, max 2,999 ms (the 3 s anon timeout) | fix is RED draft #3024, not applied. #3020's trigram index was rolled back (RC-A6, #3025) |
+| SR-1 | `/jobs` free text, cold first query | FAIL | measured by J-13: see its report and RED draft #3024. `pg_stat_statements`: `search_public_vacancy_previews_v1` 35,752 calls, mean 560 ms, max 2,999 ms (the 3 s anon timeout) | fix is RED draft #3024, not applied. #3020's trigram index was rolled back (RC-A6, #3025). 2026-11-04: after the owner-approved manual VACUUM, pages read per search fell from 30.5k to 4.3k and signed-out Chrome searches took 0.43–0.92 s with no unavailable state; the status stays FAIL until the decay measurement after the 08:11 import and a cold check after idle |
 | SR-2 | `/jobs` free text, correctness and warm timing | PASS | Chrome, signed out, full HTML: `suvirintojas` 736 ms, `snickare` 451 ms, `el` 446 ms; **20 cards each, and 20 of 20 titles contain the term**. `developer` 0 cards with the honest "0 rasta… nerasta" state. No "unavailable" state | — |
 | SR-3 | Profession filter | PASS | Chrome: `?profession=teacher` 306 ms, 20 cards; `handyman` 2 cards; `electrician` page 1 / page 2: 20 / 20 cards, 0 overlap | — |
 | SR-4 | Search paging | FAIL | Chrome: unfiltered board p1/p2 0 overlap; `?q=el` p1/p2 0 overlap. **But a term that maps to a profession drops the page:** `/lt/jobs?q=elektrikas&page=2` redirects to `/lt/jobs?profession=electrician` and shows page 1 again (20 of 20 the same) | the board's own links never build this URL (after the redirect they carry `profession`), so only shared or hand-made links meet it. Fix: carry `page` into the redirect in `jobs/page.tsx`. It is blocked by the same owner waiver as SEO-8 |
@@ -275,7 +275,9 @@ Pages: `/lt`, `/lt/jobs`, `/lt/for-companies`, `/lt/for-workers`, `/lt/pricing`,
 | DS-4 | Customer door in "More" (#3003) | PASS | prod walk buyer-workspace 41713787541 (2026-11-03) B-3b | — |
 | DS-5 | Job cards on a phone | PASS | Chrome, 390×844, 2026-11-03: 20 cards, 358 px wide, no sideways scroll, source language named | — |
 
-### Latest production walk per spec (2026-11-03 22:20 UTC)
+### Latest production walk per spec (2026-11-04 07:15 UTC)
+
+The six walks of 2026-11-04 (buyer-workspace, documents-approvals, agency-chain, orders-bookings, project-execution, marketplace) all ran on one build, `d69327239` (deploy run 41784453076, finished 06:21:51Z; `/api/health` build `d6932723`), with no deploy between them.
 
 From `gh run list --workflow prod-qa-walk.yml --limit 1000` (display title `prod-qa-walk <spec>`). The latest
 non-cancelled run and the last success. "None in the last 1000 runs" means the window, which reaches back to 2026-10-17.
@@ -283,12 +285,12 @@ non-cancelled run and the last success. "None in the last 1000 runs" means the w
 | Spec | Latest run | Date | Conclusion | Last success |
 |---|---|---|---|---|
 | admin-console | 40688059945 | 2026-10-28 | success | 40688059945 2026-10-28 |
-| agency-chain | 41717112150 | 2026-11-03 | success | 41717112150 2026-11-03 |
+| agency-chain | 41787046374 | 2026-11-04 | success | 41787046374 2026-11-04 |
 | ai-off-honesty | 40301607964 | 2026-10-26 | success | 40301607964 2026-10-26 |
 | alert-mail | 41488266687 | 2026-11-02 | success | 41488266687 2026-11-02 |
 | billing-test-mode | 40668367143 | 2026-10-28 | failure | none in the last 1000 runs |
 | brigade-formation | 41350506578 | 2026-11-01 | success | 41350506578 2026-11-01 |
-| buyer-workspace | 41713787541 | 2026-11-03 | success | 41713787541 2026-11-03 |
+| buyer-workspace | 41785749357 | 2026-11-04 | success | 41785749357 2026-11-04 |
 | calendar-planning | 41656893141 | 2026-11-03 | success | 41656893141 2026-11-03 |
 | chat-confirm-once | 41543973553 | 2026-11-02 | success | 41543973553 2026-11-02 |
 | chat-continuity | 41322286924 | 2026-11-01 | success | 41322286924 2026-11-01 |
@@ -298,7 +300,7 @@ non-cancelled run and the last success. "None in the last 1000 runs" means the w
 | company-talent-history | 41279265278 | 2026-11-01 | success | 41279265278 2026-11-01 |
 | concurrency-probe | 40342223134 | 2026-10-26 | success | 40342223134 2026-10-26 |
 | digest-setup | 41584540254 | 2026-11-03 | failure | none in the last 1000 runs |
-| documents-approvals | 41716118134 | 2026-11-03 | success | 41716118134 2026-11-03 |
+| documents-approvals | 41786102850 | 2026-11-04 | success | 41786102850 2026-11-04 |
 | employee-beta-gate | 41671159180 | 2026-11-03 | failure | 40045368369 2026-10-24 |
 | fresh-activation | 41279196446 | 2026-11-01 | success | 41279196446 2026-11-01 |
 | invited-worker | 41430482903 | 2026-11-02 | success | 41430482903 2026-11-02 |
@@ -310,18 +312,18 @@ non-cancelled run and the last success. "None in the last 1000 runs" means the w
 | lmc-csrf | 40210854856 | 2026-10-25 | success | 40210854856 2026-10-25 |
 | mail-reset | 41428606490 | 2026-11-02 | success | 41428606490 2026-11-02 |
 | manager-chat | 41658636784 | 2026-11-03 | success | 41658636784 2026-11-03 |
-| marketplace | 41729310761 | 2026-11-03 | success | 41729310761 2026-11-03 |
+| marketplace | 41790404575 | 2026-11-04 | success | 41790404575 2026-11-04 |
 | marketplace-goods-services | 41664268898 | 2026-11-03 | success | 41664268898 2026-11-03 |
 | mcp-agents | 41307643008 | 2026-11-01 | success | 41307643008 2026-11-01 |
 | mcp-chain | 41589289076 | 2026-11-03 | success | 41589289076 2026-11-03 |
 | mcp-oauth-client | 41356233405 | 2026-11-01 | success | 41356233405 2026-11-01 |
 | mobile-surfaces | 41317177981 | 2026-11-01 | success | 41317177981 2026-11-01 |
 | notifications-inapp | 41312513056 | 2026-11-01 | success | 41312513056 2026-11-01 |
-| orders-bookings | 41718546706 | 2026-11-03 | success | 41718546706 2026-11-03 |
+| orders-bookings | 41787683432 | 2026-11-04 | success | 41787683432 2026-11-04 |
 | org-roster | 41318490491 | 2026-11-01 | success | 41318490491 2026-11-01 |
 | profile-cv-history | 41282258795 | 2026-11-01 | success | 41282258795 2026-11-01 |
 | project-context | 41661103338 | 2026-11-03 | success | 41661103338 2026-11-03 |
-| project-execution | 41722638759 | 2026-11-03 | success | 41722638759 2026-11-03 |
+| project-execution | 41789372775 | 2026-11-04 | success | 41789372775 2026-11-04 |
 | public-market-direction | 40186517027 | 2026-10-25 | success | 40186517027 2026-10-25 |
 | public-org-locales | 40371836163 | 2026-10-26 | success | 40371836163 2026-10-26 |
 | push | 41712000880 | 2026-11-03 | pending | 41548831709 2026-11-02 |
@@ -365,6 +367,26 @@ Not user-facing, but open:
 - SEO-8: job board pages 2+ fold into page 1 (draft #2984).
 - 13.1: the production walk network path (72 h verdict 2026-11-04).
 - 2.24, 9.25, 10.20: their reasons are in the rows; the security items stay out of the public repository.
+
+### First real user's feedback (2026-11-04)
+
+Source: the first real user's own observations, with screenshots, relayed by the owner on 2026-11-04. They are
+observations, not confirmed defects, until the evidence column says otherwise. No personal data is kept here.
+Checked in Chrome on production signed out, by read-only production queries, and by local renders with stub
+data (synthetic fixtures, no real account). Signed-in production proof needs a QA-SYNTHETIC walk. Nothing below
+is resolved until its fix is merged, deployed and proven; all PRs are held (merge hold 2026-11-04, auto-merge off).
+
+Classes: `REAL_DEFECT`, `UX_OR_NAV`, `UNCLEAR_EXPLANATION`, `NEW_FEATURE_SUGGESTION`, `UNPROVEN`.
+
+| ID | Observation | Class | Evidence | Linked rows | State |
+|---|---|---|---|---|---|
+| UF-1 | Translating a job ad into English fails | `UNCLEAR_EXPLANATION` | Machine translation is off by design (8.3, 7.14 BLOCKED). Production: 121,465 of 121,465 active ads have `translation_status = unavailable`, 0 stored translations. For a member, every foreign-language ad offers "Translate into …"; every click answers "could not be translated right now" (local render reproduces it). Signed out: no button and no description; the ad's own title is shown as published (`/en/jobs/48478a31-…` shows "Tømrer") | 8.3, 7.14, 4.4 | OPEN. #3034 replaces the button with "Automatic translation of job ads is not switched on yet" while no provider may take the task (button returns by itself). Translation itself stays owner-gated |
+| UF-2 | Imported job descriptions show HTML tags | `REAL_DEFECT` | Production, active ads: NAV 8,835 of 8,835 store the description as HTML (`<section>`, `<p>`, `<strong>`, `<li>`), 5,049 with entities; Arbetsförmedlingen 8 with tags, 215 with entities. The job page renders the stored string as text, so the tags are **escaped (no XSS)** but shown. Local render of a NAV-shaped ad: before = the raw `<section id="arb-aapningstekst"> <p>…` string, after = paragraphs and bullets | 4.4 | OPEN. #3033: plain-text reading (closed tag list, script/style dropped, entities decoded once, never HTML) on the job page and as the translation input; the stored original stays verbatim |
+| UF-3 | CV import extracts only part of the data | `REAL_DEFECT` | Free parser on a synthetic CV: "Anglų B2, rusų gimtoji" gave Russian **B2** (level read from the whole line); "… rengimo centras" (training centre) filed as **work history**; the multi-line PDF layout (title / company / dates on separate lines) loses the title and the dates and uses the company as the title. The review shows no extraction summary and never shows the parser's per-item confidence; an item can only be confirmed or discarded (the language level is the one editable field) | 2.3, 2.5, 2.7, 2.9, 10.8 | PARTLY OPEN. #3035 fixes the language level and the training-centre case. Open: multi-line layout; an extraction summary ("found …, not recognised: …"); editing a field before saving |
+| UF-4 | Sign-up takes too long | `UX_OR_NAV` | From a job ad (`/lt/auth/signup?next=/lt/jobs/…`): 3 social buttons or 3 fields (e-mail, password, repeat password), a password rule of 8+ characters with an uppercase letter, a digit and a special character, then onboarding step 1 (intent / role) and step 2 (name, country, profession; an institution for a learner). Searching jobs needs no account; employer, place and how to apply need one. Not needed to reach the ad's details: the repeated password (a show-password toggle exists), the role step when the person came from a job ad, and profession / country before the first look | 1.1, 1.4 | PROPOSAL (one journey): ad → account (e-mail + password or one social button) → straight back to the ad with the worker intent implied; name, country and profession asked later in context. Auth-core and onboarding touch: owner review first |
+| UF-5 | Education institutions should be searchable | `NEW_FEATURE_SUGGESTION` | The institution is free text in three places (onboarding learner step, profile education 2.7, journal learning entry); no search exists. Institutions are already organizations with an education capability (ARCH-1: INSTITUTIONS node realised by existing capabilities) | 2.7, 11.1 | PROPOSAL: one combobox (the onboarding country combobox pattern) over public education organizations, always keeping "use what I typed"; the name stays stored as typed, an optional organization link is a later additive migration |
+| UF-6 | Calendar MONTH / YEAR: what they mean | `UNCLEAR_EXPLANATION` | `/dashboard/planning`: the view chips (Darbotvarkė, Diena, Savaitė, Mėnuo, Metai) switch the view; local render: the year view shows 12 month tiles, each "N įrašų" ("N records"), opening that month; the month view is a 42-cell grid with a legend (journal filled / worked, not filled / confirmed). The year tile does not say what a record is. **No production walk opens the month or year view** (calendar-planning covers the agenda) | 3.14, 5.11 | OPEN: name what is counted on the year tile; add month/year steps to the calendar-planning walk. Correctness of the counts is `UNPROVEN` in production |
+| UF-7 | "Jobs" vs "Job offers" is confusing | `UNCLEAR_EXPLANATION` | One public job-ad board, several names per locale. LT: nav "Darbo skelbimai", board heading "Laisvos darbo vietos", landing tile "Darbai", dashboard "Darbo galimybės". EN: "Jobs", "Open jobs", "Jobs & vacancies", "Work opportunities", and "Offers" (commercial proposals) next to them. Same pattern in ru, nl, de, pl. "Opportunities" is deliberately wider than job ads (A-13), but nothing says so | 4.4, 8.1 | PROPOSAL: one glossary decision per locale (nav label = board heading for job ads; "opportunities" explained as work, services and projects; "Offers" named as commercial offers). Copy across 6 locales and the board's SEO heading: owner copy decision |
 
 ## FAIL and BLOCKED triage (2026-11-04)
 
@@ -481,7 +503,7 @@ The run ids of the 2026-11-04 re-runs on build `3a9bcdef9` are added here as the
 | 1.1 | E-mail+password sign-up / sign-in | LIVE_VERIFIED | 2026-10-28 | isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-1..S-3 form sign-up worker/company/agency, S-4 existing address → sign-in, S-5 sign-out/sign-in; role-routes 39849107061; #2854 deployed f5c0e88f (sign-up skeleton LIVE; closed-invite / existing-address  | yes | self-serve sign-up through the form proven in CI only (no synthetic production accounts, owner rule) |
 | 1.2 | Google OAuth | LIVE_VERIFIED | 2026-10-18 | owner Google sign-in 10-18/19; buttons x6 live | yes |  |
 | 1.3 | Password reset | LIVE_VERIFIED | 2026-11-02 | prod walk mail-reset 41428606490 2026-11-02 2/2 (reset mail read from the real QA mailbox ~12 s → link → new password signs in; second reset: old password refused, new works); earlier: isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-6 reset mail → link → new password works, old refused (HTTP 400); profile-cv-history P-1 run 40166272659 10-25: reset form renders; mail delivery still unproven (SMTP) | yes | no repeatable production walk yet (D-4 mailbox walk #2903 pending the owner) |
-| 1.4 | Onboarding + setup hub | LIVE_VERIFIED | 2026-11-01 | prod walk fresh-activation 41279196446 2026-11-01 on 38bfb9d93: fresh worker + fresh company onboarding (owner-created accounts); earlier: fresh-activation walks (owner-created accounts) PASS; invited-worker path: onboarding finds the invitation without the link (#2845, live 2e4ae2b4b), server settles the role and accepts after it (#2846, live 51a35183, mig… | yes |  |
+| 1.4 | Onboarding + setup hub | LIVE_VERIFIED | 2026-11-01 | prod walk fresh-activation 41279196446 2026-11-01 on 38bfb9d93: fresh worker + fresh company onboarding (owner-created accounts); earlier: fresh-activation walks (owner-created accounts) PASS; invited-worker path: onboarding finds the invitation without the link (#2845, live 2e4ae2b4b), server settles the role and accepts after it (#2846, live 51a35183, mig… | yes | open: UF-4 (first real user 2026-11-04) |
 | 1.5 | Multi-role identity | LIVE_VERIFIED | 2026-11-01 | prod walk role-routes 41280157502 2026-11-01 on 38bfb9d93 (5/5 roles); earlier: role-routes run 39783147517 (green) 10-22; 5 roles | yes |  |
 | 1.6 | Organization creation + identity | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): S-[volume withheld] identity page shows Alfa's own record | yes |  |
 | 1.7 | Organization verification | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): S-2 verification status shown, honest | yes |  |
@@ -500,11 +522,11 @@ The run ids of the 2026-11-04 re-runs on build `3a9bcdef9` are added here as the
 |---|---|---|---|---|---|---|
 | 2.1 | Professional profile + narrative | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-3; earlier: profile-cv-history run 40182648408 10-25 (21/21 green) | yes |  |
 | 2.2 | Work card availability/pay/locations | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-4; earlier: profile-cv-history run 40182648408 10-25 (21/21 green) | yes |  |
-| 2.3 | CV import confirm each fact | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-6; earlier: ai-off-honesty run 40191899327 10-25 (12/13 green): B-2 a CV file read deterministically into a proposal; nothing saved before confirm | yes |  |
+| 2.3 | CV import confirm each fact | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-6; earlier: ai-off-honesty run 40191899327 10-25 (12/13 green): B-2 a CV file read deterministically into a proposal; nothing saved before confirm | yes | open: UF-3 (first real user 2026-11-04) |
 | 2.4 | Living CV / player card / EU export | LIVE_VERIFIED | 2026-11-01 | prod walk fresh-activation 41279196446 2026-11-01 on 38bfb9d93: first journal entry reaches the Living CV; prod walk living-cv-growth 41281984217 2026-11-01 on 38bfb9d93 (3/3, lt/en/ru); #2894 skill time + no-duration records (isolated tests); earlier: fresh-activation run 40546035425 2026-10-27 on 429b106bc (after #2837+#2838): worker journal entry -> Living CV exact vs own DB: entries=5 hours=35 m2=30, CV recorded=35 confirmed=0 (unconfirmed separated); 390 px no sid… | yes |  |
 | 2.5 | Employment history | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-7; earlier: profile-cv-history run 40182648408 10-25 (21/21 green) | yes |  |
 | 2.6 | Practice / volunteering | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-8; earlier: profile-cv-history run 40182648408 10-25 (21/21 green) | yes |  |
-| 2.7 | Education records | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-9; earlier: profile-cv-history run 40182648408 10-25 (21/21 green) | yes |  |
+| 2.7 | Education records | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-9; earlier: profile-cv-history run 40182648408 10-25 (21/21 green) | yes | open: UF-5 suggestion (first real user 2026-11-04) |
 | 2.8 | Achievements / declared certificates | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-10; earlier: profile-cv-history run 40182648408 10-25 (21/21 green) | yes |  |
 | 2.9 | Languages | LIVE_VERIFIED | 2026-11-01 | prod walk profile-cv-history 41282258795 2026-11-01 on 38bfb9d93 (21/21) P-5; earlier: profile-cv-history run 40182648408 10-25 (21/21 green) | yes |  |
 | 2.10 | External profile links | BLOCKED | — | RED #2471 | unproven |  |
@@ -553,7 +575,7 @@ The run ids of the 2026-11-04 re-runs on build `3a9bcdef9` are added here as the
 | 3.11 | Handover passport | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: project-execution E-9 run 39968362991 10-23 | yes |  |
 | 3.12 | Project economics | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: project-execution E-10 run 39968362991 10-23 | yes |  |
 | 3.13 | Operations board + export | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: prod walk project-execution 41283540387 2026-11-01 on 38bfb9d93 E-2 PASS (dates); earlier: project-execution E-2 run 39968362991 10-23: owner downloads the operations report | yes | outsider-refusal step E-13 still to re-run (spec fixed #2702) |
-| 3.14 | Employer planning / calendar | LIVE_VERIFIED | 2026-10-21 | calendar-planning 39571666417 10-21 | yes |  |
+| 3.14 | Employer planning / calendar | LIVE_VERIFIED | 2026-10-21 | calendar-planning 39571666417 10-21 | yes | open: UF-6 (first real user 2026-11-04) |
 | 3.15 | Absences / leave | LIVE_VERIFIED | 2026-10-23 | calendar-planning run 40007491242 (green) 10-23 | yes |  |
 | 3.16 | Capacity / gap timeline | LIVE_VERIFIED | 2026-10-23 | owner session 10-23: workforce planning shows active team 2, capacity [volume withheld]-days, honest partial count | yes |  |
 | 3.17 | Capacity reservation | LIVE_VERIFIED | 2026-11-03 | prod walk project-execution 41722638759 2026-11-03 on 7f0f06583 (passed); earlier: project-execution E-6 run 39968362991 10-23 | yes |  |
@@ -584,7 +606,7 @@ The run ids of the 2026-11-04 re-runs on build `3a9bcdef9` are added here as the
 | 4.1 | Canonical demand intake | LIVE_VERIFIED | 2026-11-01 | prod walk fresh-activation 41279196446 2026-11-01 on 38bfb9d93: fresh company describes a need, visible where it lands; prod walk company-chain 41283188592 2026-11-01 on 38bfb9d93 (13/13) C-0b; earlier: fresh-activation run 40546035425 2026-10-27 on 429b106bc (after #2837+#2838): brand-new company saves its first need (no plan limit) in 4 clicks; visible on company home 1280+390 px; scouting room for the need opens with… | yes |  |
 | 4.2 | Demand != supply direction | LIVE_VERIFIED | 2026-10-25 | public-market-direction run 40186517027 (green) 10-25: demand vs supply direction on public market, LT/EN/RU at 390+1280 px; anon refused from scouting + journal export | yes |  |
 | 4.3 | Worker opportunity board + interest | LIVE_VERIFIED | 2026-11-01 | prod walk company-chain 41283188592 2026-11-01 on 38bfb9d93 (13/13) C-1; earlier: company-chain C-1 run 40315387466 (success; replaces 39960149411, which concluded failure — register D-7) | yes |  |
-| 4.4 | Public /jobs board | LIVE_VERIFIED | 2026-10-28 | jobs-search 40645813917 J-1..J-6 6/6 (board, filter, page bounds, job page, signed-in save → saved view → remove); earlier: public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-4 public job board renders a vacancy count | yes |  |
+| 4.4 | Public /jobs board | LIVE_VERIFIED | 2026-10-28 | jobs-search 40645813917 J-1..J-6 6/6 (board, filter, page bounds, job page, signed-in save → saved view → remove); earlier: public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-4 public job board renders a vacancy count | yes | open: UF-1, UF-2, UF-7 (first real user 2026-11-04) |
 | 4.5 | Matching engine both directions | LIVE_VERIFIED | 2026-11-01 | prod walk company-talent-history 41279265278 2026-11-01 on 38bfb9d93 (17/17) K-2: real fit band + skill basis on the board (#2889); prod walk search-support-privacy 41283989921 2026-11-01 on 38bfb9d93 (20 green, 2 planned skips) M-1; earlier: #2887 RED applied (ledger 20261029180012) + app e506e98b, verified in production; isolated job-fit 46/46 + compat 2/2; earlier: search-support-privacy run 40215640433 10-25 | yes | older needs await an owner-approved backfill |
 | 4.6 | Team matching + team offer | LIVE_VERIFIED | 2026-11-01 | prod walk brigade-formation 41350506578 2026-11-01 on 7c46946c3 (19/19, B2B-1..10: brigade offered and matched as one unit, handed into one team assignment, work recorded on it); product-truth journey link LIVE since #2917; details in the private record; earlier: brigade-formation run 39795574869 (green) 10-22 | yes | pricing note fixed #2687 |
 | 4.7 | B2B negotiation | LIVE_VERIFIED | 2026-10-22 | brigade-formation run 39795574869 (green) 10-22 | yes |  |
@@ -623,7 +645,7 @@ The run ids of the 2026-11-04 re-runs on build `3a9bcdef9` are added here as the
 | 5.8 | Push | BLOCKED | — | #2712 merged; migration 20261023190255 applied (0 subscriptions, RLS on, no anon grant); channel OFF unless WEB_PUSH_ENABLED=true (code-verified) | unproven | owner: VAPID keys + real delivery test |
 | 5.9 | Weekly digest | PASS_CI_ONLY | 2026-11-02 | 2026-11-02 07:00 UTC the Monday sweep ran in production and wrote in-app digests; no digest e-mail went out because no recipient had switched digest e-mail on (consent-first, default off) — the e-mail hop is unexercised, not broken (measurements in the private record); proof pending: digest-setup (Tue..Sun) + digest-check (Monday after 07:05 UTC) on the synthetic QA mailbox account; 2026-11-02 production: e-mail consent for the digest stored and this week's in-app digest row present (alert-mail 41488266687 A-6); the digest E-MAIL (Monday 07:00 UTC sweep, only for workers who did not visit that week) has not been observed in production — the send ledger shows no digest mail in 30 days; earlier: isolated digest walk (40833394554, #2883): one digest per week, mail delivered; earlier: search-support-privacy run 40215640433 S-4: the weekly digest's in-app channel control exists; a digest itself not seen (email needs SMTP) | unproven | by design a worker who visited that week gets the digest in-app only |
 | 5.10 | Attention / activity centre | LIVE_VERIFIED | 2026-11-01 | prod walk notifications-inapp 41312513056 2026-11-01 on 7f8bfaa2a (8/8), incl. N-6 mark-all-read on the phone; earlier: notifications-inapp run 40204616787 10-25 (8/8 green): N-5 activity centre lists the same stored event as read; N-3/N-4 bell row opens the thread and stays read after reload; N-6 phone 'mark all read'; N-7 no role detour | yes |  |
-| 5.11 | Worker calendar | LIVE_VERIFIED | 2026-10-23 | calendar-planning run 40007491242 (green) 10-23 | yes |  |
+| 5.11 | Worker calendar | LIVE_VERIFIED | 2026-10-23 | calendar-planning run 40007491242 (green) 10-23 | yes | open: UF-6 (first real user 2026-11-04) |
 | 5.12 | Availability | LIVE_VERIFIED | — | owner session write+revert | yes |  |
 | 5.13 | Booking request->accept->engagement | LIVE_VERIFIED | 2026-11-03 | prod walk orders-bookings 41718546706 2026-11-03 on a10b6c47d (passed); earlier: prod walk orders-bookings 41321294873 2026-11-01 on 4a5b45828 (16/17; B-1 skipped: no synthetic customer identity, 6.4 has its own proof): need, hand raised, dates proposed, withdrawn + re-proposed, worker accepts on the phone, company opens the conversation, booking in the worker plan; earlier run 41311931938 stopped at O-4 on a test locator (fixed #2905/#2907, no product change); earlier: orders-bookings run 40361384432 2026-10-26: O-0..O-8 all green - need posted, hand raised, dates proposed, withdrawn + re-proposed, worker ACCEPTS on the phone, company sees it and opens the conversation, booking in the … | yes | the acknowledged-overlap path stays RED #2795 (constraint not relaxed); plain accept works |
 | 5.14 | Command finder + voice | LIVE_VERIFIED | — | owner #2673/#2679 (finder only) | yes |  |
