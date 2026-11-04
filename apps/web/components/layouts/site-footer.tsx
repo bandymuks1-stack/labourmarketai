@@ -56,11 +56,15 @@ export async function SiteFooter() {
   return (
     <footer className="relative z-10 mt-24 border-t border-ink-600/60">
       <div className="mx-auto max-w-container px-6 sm:px-12">
-        <div className="py-8 opacity-70">
+        <div className="py-8">
+          {/* Only the map is dimmed: an opacity on the wrapper took the label
+              below WCAG AA contrast (axe color-contrast, 2026-11-04). */}
           <p className="mb-3 font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("activity")}
           </p>
-          <ActivityMap />
+          <div className="opacity-70">
+            <ActivityMap />
+          </div>
         </div>
 
         <div className="grid gap-10 border-t border-ink-600/60 py-12 sm:grid-cols-2 lg:grid-cols-4">
