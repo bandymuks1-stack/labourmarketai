@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { getPublicVacancyById } from "@/lib/vacancy-store/vacancy-read";
+
 import { vacancyDescriptionText } from "./vacancy-description-text";
 
 describe("vacancyDescriptionText — HTML feeds read as text", () => {
@@ -60,15 +62,46 @@ describe("vacancyDescriptionText — HTML feeds read as text", () => {
   });
 });
 
-describe("the job page shows the description through it, as text", () => {
-  const page = readFileSync(join(__dirname, "..", "..", "app", "[locale]", "(marketing)", "jobs", "[id]", "page.tsx"), "utf8");
-  it("renders vacancyDescriptionText(member.descriptionRaw), never the raw string", () => {
-    expect(page).toMatch(/\{descriptionText\}/);
-    expect(page).toMatch(/vacancyDescriptionText\(member\.descriptionRaw\)/);
-    expect(page).not.toMatch(/\{member\.descriptionRaw\}/);
+describe("the member's read gives the page readable text; the store is untouched", () => {
+  const stored = {
+    id: "00000000-0000-4000-8000-0000000000aa",
+    content_hash: "stored-hash",
+    title_raw: "Tømrer",
+    description_raw: "<p>Er du en <strong>dyktig</strong> tømrer?</p><script>alert(1)</script>",
+  };
+  const clientReturning = (row: Record<string, unknown>) => {
+    const writes: string[] = [];
+    const chain: Record<string, unknown> = {
+      select: () => chain,
+      eq: () => chain,
+      or: () => chain,
+      maybeSingle: async () => ({ data: row, error: null }),
+      update: () => writes.push("update"),
+      upsert: () => writes.push("upsert"),
+      insert: () => writes.push("insert"),
+    };
+    return { client: { from: () => chain } as never, writes };
+  };
+
+  it("getPublicVacancyById returns the text, keeps the stored hash, writes nothing", async () => {
+    const { client, writes } = clientReturning(stored);
+    const found = await getPublicVacancyById(client, stored.id);
+    if (found.status !== "ok") throw new Error(found.status);
+    expect(found.vacancy.descriptionRaw).toBe("Er du en dyktig tømrer?");
+    expect(found.vacancy.contentHash).toBe("stored-hash");
+    expect(writes).toEqual([]);
+    expect(stored.description_raw).toContain("<p>");
   });
-  it("never renders a description as HTML", () => {
+
+  it("the page renders that value as a text child, never as HTML", () => {
+    const page = readFileSync(join(__dirname, "..", "..", "app", "[locale]", "(marketing)", "jobs", "[id]", "page.tsx"), "utf8");
+    expect(page).toContain("{member.descriptionRaw}");
     const html = page.match(/dangerouslySetInnerHTML=\{\{[\s\S]*?\}\}/g) ?? [];
-    for (const block of html) expect(block).not.toMatch(/description(Raw|Text)/);
+    for (const block of html) expect(block).not.toMatch(/descriptionRaw/);
+  });
+
+  it("matching does not read the description, so this changes no reading of a job", () => {
+    const need = readFileSync(join(__dirname, "vacancy-need.ts"), "utf8");
+    expect(need).not.toContain("descriptionRaw");
   });
 });

@@ -6,7 +6,6 @@ import { runAiAgent } from "@/lib/ai/run-agent-server";
 import { aiLocaleFor } from "@/lib/ai/runtime/types";
 import { aiTaskServableNow } from "@/lib/ai/egress-precheck-server";
 import { rateLimit } from "@/lib/security/rate-limit";
-import { vacancyDescriptionText } from "@/lib/vacancy-sources/vacancy-description-text";
 
 import type { StoredPublicVacancyV1, VacancyLocaleTranslationV1 } from "./vacancy-read";
 import { redactContactData, restoreRedactions } from "./vacancy-redaction";
@@ -338,9 +337,7 @@ export async function translateVacancyOnDemand(
   // provider saw — so a phone number's digits cannot make the digit check
   // pass or fail by accident.
   const title = redactContactData(v.titleRaw);
-  // An HTML feed's tags are layout, not words to translate: the provider
-  // gets the same plain text the reader sees.
-  const description = redactContactData(vacancyDescriptionText(v.descriptionRaw).slice(0, 12_000));
+  const description = redactContactData(v.descriptionRaw.slice(0, 12_000));
   const result = await translateOne(
     { id: "v0", title: title.text, ...(description.text ? { description: description.text } : {}) },
     sourceLocale,

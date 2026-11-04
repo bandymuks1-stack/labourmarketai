@@ -39,6 +39,7 @@ import type {
   VacancyProviderKey,
   VacancyWorkingTime,
 } from "@/lib/vacancy-sources/vacancy-contract";
+import { vacancyDescriptionText } from "@/lib/vacancy-sources/vacancy-description-text";
 
 type VacancyDbClient = Pick<SupabaseClient, "from">;
 
