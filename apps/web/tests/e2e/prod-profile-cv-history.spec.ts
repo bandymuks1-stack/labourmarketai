@@ -349,30 +349,33 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
     "QA Synthetic profesine mokykla, statybos programa 2015-2019",
     "Anglu kalba B2",
   ];
-  await page.goto("/lt/dashboard");
-  await say(page, "Įkelk mano CV");
-  // "my CV" + a file verb is a FILE intent (#1684, `handleFileIntent` →
-  // `fileSelfCv`): the chat names the door as ONE `cv` chip and the import
-  // opens only when the person takes it (run 40049229470 waited 60 s for a
-  // flow that is never opened by the sentence alone). The newest chip answers
-  // this request; a starter row may carry an older one. Visible nodes only:
-  // the dashboard streams through a hidden `<div id="S:n">` copy at the end
-  // of <body>, so a bare `.last()` can land on the hidden starter row.
-  await inMain(page).getByTestId("chat-chip-cv").filter({ visible: true }).last().click({ timeout: 60_000 });
-  await expect(inMain(page).getByTestId("conversation-cv-flow").last()).toBeVisible({ timeout: 60_000 });
-  const input = page.locator('[data-testid="cv-import-upload"] input[type="file"]').last();
-  await input.waitFor({ state: "attached", timeout: 30_000 });
-  await input.setInputFiles({
-    name: "qa-synthetic-cv.docx",
-    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    buffer: Buffer.from(makeDocx(lines.join("\n"))),
-  });
-  const review = inMain(page).getByTestId("cv-import-section-review").last();
-  const empty = inMain(page).getByTestId("conversation-cv-empty").last();
-  const error = inMain(page).getByTestId("cv-import-error").last();
-  await expect(review.or(empty).or(error)).toBeVisible({ timeout: 60_000 });
-  if (await error.isVisible()) throw new Error(`CV not read: ${(await error.innerText()).slice(0, 120)}`);
-  await expect(review, "the generated CV yields a proposal").toBeVisible();
+  const importCv = async () => {
+    await page.goto("/lt/dashboard");
+    await say(page, "Įkelk mano CV");
+    // "my CV" + a file verb is a FILE intent (#1684, `handleFileIntent` →
+    // `fileSelfCv`): the chat names the door as ONE `cv` chip and the import
+    // opens only when the person takes it (run 40049229470 waited 60 s for a
+    // flow that is never opened by the sentence alone). The newest chip answers
+    // this request; a starter row may carry an older one. Visible nodes only:
+    // the dashboard streams through a hidden `<div id="S:n">` copy at the end
+    // of <body>, so a bare `.last()` can land on the hidden starter row.
+    await inMain(page).getByTestId("chat-chip-cv").filter({ visible: true }).last().click({ timeout: 60_000 });
+    await expect(inMain(page).getByTestId("conversation-cv-flow").last()).toBeVisible({ timeout: 60_000 });
+    const input = page.locator('[data-testid="cv-import-upload"] input[type="file"]').last();
+    await input.waitFor({ state: "attached", timeout: 30_000 });
+    await input.setInputFiles({
+      name: "qa-synthetic-cv.docx",
+      mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      buffer: Buffer.from(makeDocx(lines.join("\n"))),
+    });
+    const review = inMain(page).getByTestId("cv-import-section-review").last();
+    const empty = inMain(page).getByTestId("conversation-cv-empty").last();
+    const error = inMain(page).getByTestId("cv-import-error").last();
+    await expect(review.or(empty).or(error)).toBeVisible({ timeout: 60_000 });
+    if (await error.isVisible()) throw new Error(`CV not read: ${(await error.innerText()).slice(0, 120)}`);
+    await expect(review, "the generated CV yields a proposal").toBeVisible();
+  };
+  await importCv();
   const job = inMain(page).getByTestId("cv-import-item-wh-0").last();
   await expect(job).toContainText(company, { timeout: 30_000 });
   const items = await page.locator('[data-testid^="cv-import-item-"]').count();
@@ -380,6 +383,26 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
   // Negative control: a proposal is not a save.
   const cv = await livingCv(page);
   await expect(cv.getByText(company)).toHaveCount(0);
+
+  // UF-3: the person corrects the proposal before saving; what they typed is what
+  // is stored and what the Living CV reads, as their own statement. The row is
+  // removed in `afterAll` with the others, even after a red step.
+  const corrected = `${TAG} pataisyta CV eilute`;
+  await importCv();
+  await expect(job).toContainText(company, { timeout: 30_000 });
+  await inMain(page).getByTestId("cv-import-edit-wh-0").last().click();
+  await inMain(page).getByTestId("cv-import-field-wh-0-title").last().fill(corrected);
+  await inMain(page).getByTestId("cv-import-field-wh-0-start").last().fill("2019-03");
+  await expect(job, "the row follows the correction").toContainText(corrected);
+  addedHistory.push(corrected);
+  await inMain(page).getByTestId("cv-import-confirm-wh-0").last().click();
+  await expect(inMain(page).getByTestId("cv-import-saved-wh-0").last()).toBeVisible({ timeout: 30_000 });
+  const after = await livingCv(page);
+  const saved = after
+    .locator('[data-testid="premium-cv-experience-row"][data-level="declared"]', { hasText: corrected })
+    .or(after.getByTestId("cv-history-node").filter({ hasText: corrected }));
+  await expect(saved.first(), "the corrected row is on the Living CV, as stated by the person").toBeVisible({ timeout: 60_000 });
+  await expect(after.getByText(company), "the parser's reading was not saved").toHaveCount(0);
   await ctx.close();
 });
 
