@@ -1754,6 +1754,23 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-02: J-12 learner join requests (#2959) — RED draft, the marker is the
       // human-gate acknowledgement, NOT applied until the owner approves.
       "20261102160000_education_cohort_join_requests_v1.sql",
+      // 2026-11-03: J-12 follow-up — the member command refuses request rows. RED draft,
+      // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261103090000_education_cohort_member_request_guard_v1.sql",
+      // 2026-11-03: work-plan scope predicate made internal only (client EXECUTE revoked). RED, owner-approved, the marker is the
+      // human-gate acknowledgement; APPLIED ledger 20261103170942.
+      "20261103120000_work_plan_worker_in_scope_internal_only_v1.sql",
+      // 2026-11-03: agency docs readiness reads the live agency roster. RED, owner-approved, the marker is the
+      // human-gate acknowledgement; APPLIED ledger 20261103171024.
+      "20261103130000_agency_pool_docs_readiness_live_roster_v1.sql",
+      // 2026-11-03: agency client records follow owns_company. RED, owner-approved, the marker is the
+      // human-gate acknowledgement; APPLIED ledger 20261103171134.
+      "20261103140000_agency_clients_company_authority_v1.sql",
+      // 2026-11-03: pg_trgm for the job search trigram index (create-extension). RED draft,
+      // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261103171000_pg_trgm_extension_v1.sql",
+      // 2026-11-03: production rollback record of the trigram index (drop index). RED, APPLIED ledger 20261103194208.
+      "20261103171300_public_vacancies_occupation_trgm_idx_rollback_v1.sql",
 ]);
   });
 

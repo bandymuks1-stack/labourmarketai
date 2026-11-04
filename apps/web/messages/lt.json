@@ -2096,7 +2096,8 @@
           "evidenceConfirmed": "pažymėta"
         },
         "requestFrom": "Prašo prisijungti: {name}",
-        "requestUnverified": "Vardą įvedė pats besimokantysis — nepatikrinta."
+        "requestUnverified": "Vardą įvedė pats besimokantysis — nepatikrinta.",
+        "membersNotForRole": "Grupės narių tavo rolė nemato. Narystę mato ir keičia tik pačios įstaigos savininkas, administratorius ar vadovas."
       },
       "learners": {
         "title": "Besimokantieji",
@@ -5741,7 +5742,8 @@
             "Įmonių naudotojų įvesta įmonės informacija: įmonės duomenys, poreikiai, projektai ir rezervacijos.",
             "Žinutės, kurias siunčiate ir gaunate platformoje.",
             "Sutikimų įrašai: kai duodate ar atšaukiate sutikimą, išsaugomas veiksmas ir jo laikas.",
-            "Techniniai duomenys, reikalingi paslaugai veikti, pavyzdžiui, prisijungimo slapukai (žr. Slapukų politiką)."
+            "Techniniai duomenys, reikalingi paslaugai veikti, pavyzdžiui, prisijungimo slapukai (žr. Slapukų politiką).",
+            "Tik su tavo sutikimu: naudojimo matavimas mūsų pačių serveriuose (pasiekti puslapiai ir žingsniai, kasdienis aktyvumas) ir tave atvedusi kampanija, saugoma kartu su tavo paskyra. Žr. Slapukų politiką."
           ]
         },
         {
@@ -5820,23 +5822,49 @@
     },
     "cookies": {
       "title": "Slapukų politika",
-      "intro": "Šiame puslapyje išvardyta, ką platforma šiandien iš tikrųjų saugo jūsų naršyklėje. Sąmoningai — labai nedaug.",
+      "intro": "Šiame puslapyje išvardyta, ką platforma šiandien iš tikrųjų saugo tavo naršyklėje. Sąmoningai — labai nedaug.",
       "items": [
         {
           "name": "Prisijungimo slapukai",
-          "purpose": "Nustatomi prisijungus, kad liktumėte prisijungę naršydami tarp puslapių. Būtini — be jų paslauga negali išlaikyti jūsų prisijungimo."
+          "purpose": "Nustatomi prisijungus, kad naršant tarp puslapių prisijungimas išliktų. Būtini — be jų paslauga negali išlaikyti tavo prisijungimo."
         },
         {
           "name": "Kalbos slapukas (NEXT_LOCALE)",
-          "purpose": "Gali būti nustatytas, kad įsimintų jūsų kalbos pasirinkimą ir puslapiai atsidarytų jūsų kalba."
+          "purpose": "Gali būti nustatytas, kad įsimintų tavo kalbos pasirinkimą ir puslapiai atsidarytų tavo kalba."
         },
         {
           "name": "Administratoriaus rodymo nuostata (lm_hide_admin_ui)",
           "purpose": "Naudojama tik administratorių paskyrose. Įsimena, ar paslėpti administratoriaus valdikliai, ir nekeičia jokių teisių."
+        },
+        {
+          "name": "Prisijungimo bandymo žymė (lm.oauth.trace)",
+          "purpose": "Kortelės saugykla, pašalinama uždarius kortelę. Atsitiktinis kodas, susiejantis vieną prisijungimo bandymą su jo rezultatu, kad būtų galima ištirti nepavykusį prisijungimą. Būtina tavo pradėtam prisijungimui; joje nėra paskyros duomenų."
         }
       ],
-      "localStorageNote": "Naršyklės saugykloje (ne slapukuose) laikomi keli dalykai: jūsų šviesios ar tamsios temos pasirinkimas; kuris puslapis ar kampanija jus čia atvedė pirmą kartą — įrašoma vieną kartą, kad vėlesnę registraciją būtų galima jai priskirti; atsitiktinis kiekvienos kortelės sesijos identifikatorius, išnykstantis uždarius kortelę; ir smulkūs patogumai, pvz., paslėpti pranešimai, neseniai peržiūrėti įrašai ir kalbos įvesties kalba. Niekas iš to neperduodama trečiosioms šalims ir nenaudojama reklamai; viską bet kada galite išvalyti savo naršyklėje.",
-      "noTracking": "Platformoje šiandien nėra analitikos, reklamos ar trečiųjų šalių sekimo slapukų. Jei tai kada nors keistųsi, pirmiausia bus atnaujintas šis puslapis."
+      "localStorageNote": "Naršyklės saugykloje (ne slapukuose) taip pat laikomi keli tavo prašyti dalykai: šviesios ar tamsios temos pasirinkimas, tavo sprendimas dėl naudojimo matavimo ir smulkūs patogumai, pvz., paslėpti pranešimai, neseniai peržiūrėti įrašai ir kalbos įvesties kalba. Jie lieka tavo įrenginyje, ir juos bet kada gali išvalyti savo naršyklėje.",
+      "noTracking": "Platformoje nėra reklamos ar trečiųjų šalių sekimo slapukų, ir niekas neperduodama trečiosioms šalims reklamai.",
+      "settingsLink": "Slapukų nustatymai",
+      "analyticsTitle": "Naudojimo matavimas — tik su tavo sutikimu",
+      "analyticsIntro": "Tau sutikus, matuojame, kaip naudojamasi produktu: kuriuos puslapius ir žingsnius žmonės pasiekia, registracijos žingsnius, kasdienį aktyvumą ir kuri kampanija atvedė lankytoją. Įvykiai saugomi mūsų pačių serveriuose ir, jei prisijungei, susiejami su tavo paskyra. Be tavo sutikimo nė vienas toliau išvardytas įrašas nesukuriamas ir iš tavo naršyklės nesiunčiamas joks matavimo įvykis.",
+      "analyticsItems": [
+        {
+          "name": "Pirmojo apsilankymo kampanija (lm.attr.first)",
+          "purpose": "Naršyklės saugykla. Pirmojo apsilankymo kampanijos žymos (utm_*), nukreipusi svetainė ir nusileidimo puslapis. Registruojantis jos nukopijuojamos į tavo paskyros įrašą, kad būtų galima suskaičiuoti, kuri kampanija tave atvedė."
+        },
+        {
+          "name": "Sesijos identifikatorius (lm.pilot.session)",
+          "purpose": "Kortelės saugykla, pašalinama uždarius kortelę. Atsitiktinis identifikatorius, siunčiamas su kiekvienu matavimo įvykiu, kad vienos kortelės žingsnius būtų galima skaičiuoti kartu."
+        },
+        {
+          "name": "Aktyvumo žymės (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
+          "purpose": "Naršyklės saugykla. Paskutinė diena, kai naudojaisi platforma, ir žymė, kad vyksta registracija."
+        },
+        {
+          "name": "Vienkartinio skaičiavimo žymės (lm.funnel.*)",
+          "purpose": "Kortelės saugykla. Neleidžia to paties matavimo įvykio suskaičiuoti du kartus."
+        }
+      ],
+      "analyticsBasis": "Atsisakius ar atšaukus sutikimą, šie įrašai iš karto pašalinami iš šio įrenginio; jei prisijungei, ištrinama ir su tavo paskyra saugoma kampanija. Pats matavimas grindžiamas mūsų teisėtu interesu tobulinti produktą (BDAR 6 str. 1 d. f p.), ir gali jam prieštarauti, kaip aprašyta Privatumo politikoje."
     },
     "requestContact": "Norėdami užduoti klausimą ar pateikti prašymą dėl savo duomenų, susisiekite su mumis — jį peržiūrės žmogus.",
     "related": "Susiję puslapiai",
@@ -6376,6 +6404,17 @@
       "pending": "Jungiama…",
       "done": "Sujungta. Eilutės ir jų įrašai išsaugoti; projektų sąraše dabar rodomas išlaikomas projektas.",
       "failed": "Nesujungta. Nepavykusioms eilutėms niekas nepakeista — atnaujink ir bandyk dar kartą."
+    },
+    "deck": {
+      "label": "Ką gali padaryti",
+      "new": "Naujas projektas",
+      "newHint": "Sukurk ir pradėk dirbti",
+      "assign": "Priskirti darbuotoją",
+      "assignHint": "Prie projekto",
+      "teams": "Paskirti komandą",
+      "teamsHint": "Brigada projektui ar užduočiai",
+      "chat": "Pokalbiai",
+      "toolsLabel": "Kiti įrankiai"
     }
   },
   "projectOps": {
@@ -7637,7 +7676,7 @@
     "campaigns": {
       "title": "Kampanija → skelbimas → paskyra",
       "empty": "Šiame lange dar nėra įvykių su kampanijos žyma.",
-      "help": "Pirmojo prisilietimo utm_campaign × utm_content tame pačiame lange ir su ta pačia auditorijos atranka. Tai įvykių skaičiai, ne unikalūs lankytojai — tolesnis stulpelis nėra ankstesniojo poaibis, todėl santykis tarp dviejų stulpelių nėra konversija. Rodoma iki 25 eilučių pagal apsilankymus; nepažymėtas (organinis) srautas nerodomas. Susidomėjimo stulpelis siunčiamas serverio pusėje, kur kampanijos duomenų nėra, todėl jis lieka 0 dėl sandaros — tai neišmatuota, o ne išmatuotas nulis.",
+      "help": "Pirmojo prisilietimo utm_campaign × utm_content tame pačiame lange ir su ta pačia auditorijos atranka. Tai įvykių skaičiai, ne unikalūs lankytojai — tolesnis stulpelis nėra ankstesniojo poaibis, todėl santykis tarp dviejų stulpelių nėra konversija. Rodoma iki 25 eilučių pagal apsilankymus; nepažymėtas (organinis) srautas nerodomas. Susidomėjimo stulpelis siunčiamas serverio pusėje, kur kampanijos duomenų nėra, todėl jis lieka 0 dėl sandaros — tai neišmatuota, o ne išmatuotas nulis. Keturi stulpeliai po registracijos skaičiuoja įvykius, ne žmones (žurnalo įrašai — kiekvienas išsaugotas įrašas, ne pirmasis), ir tik paskyras, kurių įraše yra kampanija: registracijas, kuriose leista analitika, o „Google“ registracijas — tik nuo 2026-11-03. Analitikos atsisakę lankytojai šioje lentelėje visai nepatenka.",
       "col": {
         "campaign": "Kampanija / variantas",
         "landing": "Apsilankymai",
@@ -7647,7 +7686,11 @@
         "signupCompleted": "Sukurta paskyrų",
         "returnedToJob": "Grįžo prie skelbimo",
         "compared": "Palyginta",
-        "interest": "Pareikšta susidomėjimo"
+        "interest": "Pareikšta susidomėjimo",
+        "profileSaved": "Profilis išsaugotas",
+        "profileMatchable": "Profilis tinkamas atrankai",
+        "journalEntrySaved": "Žurnalo įrašai",
+        "jobSearch": "Darbo paieška"
       }
     },
     "funnel": {
@@ -14416,6 +14459,7 @@
       "eduCohortCreated": "Grupė sukurta. Gali priskirti studentus.",
       "eduAssignNoCohort": "Grupių dar nėra — pirmiausia sukurk grupę.",
       "eduAssignNoLearners": "Priimtų studentų dar nėra. Pakviesk studentą — priskirti galėsi, kai jis priims pakvietimą.",
+      "eduMembersNotForRole": "Grupės narystė tavo rolei nepasiekiama. Besimokančiuosius priskirti gali tik pačios įstaigos savininkas, administratorius ar vadovas.",
       "eduAssignDone": "Studentas priskirtas grupei.",
       "eduNotInstitution": "Ši organizacija dar nepažymėta kaip mokymo įstaiga. Pažymėk tai įmonės skiltyje.",
       "eduUnavailable": "Šiuo metu programų perskaityti nepavyksta. Tai nereiškia, kad jų nėra.",
@@ -20090,6 +20134,23 @@
       "invalid": "Patikrink vardą ir žinutę.",
       "error": "Kažkas nepavyko. Bandyk dar kartą.",
       "cooldown": "Neseniai gavai atsisakymą. Šios grupės vėl paprašyti galėsi praėjus 30 dienų nuo sprendimo."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "Puslapių naudojimą ir kampaniją, iš kurios atėjai, matuojame tik tau leidus.",
+      "accept": "Leisti matavimą",
+      "refuse": "Atsisakyti",
+      "more": "Daugiau",
+      "label": "Naudojimo matavimo pasirinkimas"
+    },
+    "control": {
+      "title": "Naudojimo matavimas ir kampanijos priskyrimas",
+      "granted": "Leidai. Gali bet kada atšaukti — tada įrašai pašalinami iš šio įrenginio.",
+      "refused": "Atsisakei. Šiame įrenginyje matavimui niekas nesaugoma.",
+      "undecided": "Dar nepasirinkai, todėl matavimui niekas nesaugoma.",
+      "allow": "Leisti",
+      "refuse": "Atsisakyti"
     }
   }
 }

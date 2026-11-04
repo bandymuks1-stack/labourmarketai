@@ -1,6 +1,7 @@
 import "server-only";
 
 import { sendSmtp, smtpConfigFromEnv, type SmtpConfig } from "@/lib/email/smtp";
+import { isSyntheticQaPlusAddress } from "@/lib/email/synthetic-address";
 
 /**
  * Provider-neutral transactional email adapter (core-network area B).
@@ -34,6 +35,9 @@ export type TransactionalSendResult =
    *  "logged" outcome as a delivered email. */
   | { status: "logged" }
   | { status: "not_configured" }
+  /** A synthetic QA plus-address on our own domain (lib/email/synthetic-address.ts):
+   *  nothing was sent, by design — neither "sent" nor a retryable failure. */
+  | { status: "suppressed_synthetic_address" }
   | { status: "failed"; reason: string };
 
 const SEND_TIMEOUT_MS = 10_000;
@@ -98,6 +102,8 @@ export function isTransactionalEmailPathActive(): boolean {
 export async function sendTransactionalEmail(
   message: TransactionalEmail,
 ): Promise<TransactionalSendResult> {
+  // Never deliver to a synthetic QA plus-address: it would only bounce (550).
+  if (isSyntheticQaPlusAddress(message.to)) return { status: "suppressed_synthetic_address" };
   const cfg = config();
   if (!cfg) {
     // Log provider (dev/test only): accept without sending. No console use

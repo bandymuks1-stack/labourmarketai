@@ -2025,6 +2025,17 @@
       "done": "Apvienots. Rindas un to ieraksti saglabāti; projektu sarakstā tagad redzams saglabātais projekts.",
       "failed": "Nav apvienots. Neapstrādātajām rindām nekas nav mainīts — pārlādējiet un mēģiniet vēlreiz."
     },
+    "deck": {
+      "label": "Ko tu vari darīt",
+      "new": "Jauns projekts",
+      "newHint": "Izveido to un sāc",
+      "assign": "Piešķirt darbinieku",
+      "assignHint": "Projektam",
+      "teams": "Piešķirt komandu",
+      "teamsHint": "Komanda projektam vai uzdevumam",
+      "chat": "Sarunas",
+      "toolsLabel": "Citi rīki"
+    },
     "assign": {
       "reservation": {
         "unknownWhy": {
@@ -4196,6 +4207,7 @@
       "eduCohortCreated": "Grupa izveidota. Varat piešķirt audzēkņus.",
       "eduAssignNoCohort": "Grupu vēl nav — vispirms izveidojiet grupu.",
       "eduAssignNoLearners": "Pieņemtu audzēkņu vēl nav. Uzaiciniet audzēkni — piešķirt varēsiet, kad viņš pieņems uzaicinājumu.",
+      "eduMembersNotForRole": "Grupas dalība tavai lomai nav pieejama. Izglītojamos var piešķirt tikai pašas iestādes īpašnieks, administrators vai vadītājs.",
       "eduAssignDone": "Audzēknis piešķirts grupai.",
       "eduNotInstitution": "Šī organizācija vēl nav atzīmēta kā mācību iestāde. Atzīmējiet to uzņēmuma sadaļā.",
       "eduUnavailable": "Programmas pašlaik nevar nolasīt. Tas nenozīmē, ka to nav.",
@@ -7912,6 +7924,23 @@
       "invalid": "Pārbaudi vārdu un ziņu.",
       "error": "Kaut kas nogāja greizi. Mēģini vēlreiz.",
       "cooldown": "Tavs pieprasījums nesen tika noraidīts. Šai grupai vari jautāt vēlreiz 30 dienas pēc lēmuma."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "Lapu lietojumu un kampaņu, kas jūs atveda, mērām tikai ar jūsu atļauju.",
+      "accept": "Atļaut mērīšanu",
+      "refuse": "Atteikties",
+      "more": "Vairāk",
+      "label": "Lietošanas mērīšanas izvēle"
+    },
+    "control": {
+      "title": "Lietošanas mērīšana un kampaņas piesaiste",
+      "granted": "Jūs atļāvāt. Jūs varat jebkurā laikā atsaukt piekrišanu; tad ieraksti tiek noņemti no šīs ierīces.",
+      "refused": "Jūs atteicāties. Šajā ierīcē mērīšanai nekas netiek glabāts.",
+      "undecided": "Jūs vēl neesat izvēlējušies, tāpēc mērīšanai nekas netiek glabāts.",
+      "allow": "Atļaut",
+      "refuse": "Atteikties"
     }
   }
 }

@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 import { consumeSignupPending, trackFunnel } from "@/lib/telemetry/task";
 import { getFirstTouchAttribution } from "@/lib/telemetry/attribution";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { hasAnalyticsConsent, readAnalyticsConsent } from "@/lib/consent/analytics-consent";
+import { clearAccountCampaign } from "@/lib/consent/account-campaign";
 
 /**
  * Session-level activation beacon (P0-A). Mounted once in the dashboard
@@ -39,6 +41,12 @@ export function SessionTelemetry({
     if (ran.current) return;
     ran.current = true;
     if (typeof window === "undefined") return;
+    // A refusal made on this device (perhaps before signing in) also covers
+    // the account: its stored campaign is cleared, so the server stops
+    // stamping it (lib/consent/account-campaign.ts). No-op without one.
+    if (readAnalyticsConsent()?.choice === "refused") void clearAccountCampaign();
+    // No analytics item (markers or events) without an explicit yes.
+    if (!hasAnalyticsConsent()) return;
 
     // login_succeeded — once per tab session.
     try {

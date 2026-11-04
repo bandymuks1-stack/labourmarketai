@@ -2025,6 +2025,17 @@
       "done": "Liidetud. Read ja nende kirjed säilivad; projektide loend näitab nüüd säilitatud projekti.",
       "failed": "Ei liidetud. Läbi minemata ridade puhul ei muudetud midagi — laadige uuesti ja proovige veel."
     },
+    "deck": {
+      "label": "Mida saad teha",
+      "new": "Uus projekt",
+      "newHint": "Loo see ja alusta",
+      "assign": "Määra töötaja",
+      "assignHint": "Projekti juurde",
+      "teams": "Määra meeskond",
+      "teamsHint": "Meeskond projekti või ülesande jaoks",
+      "chat": "Vestlused",
+      "toolsLabel": "Muud tööriistad"
+    },
     "assign": {
       "reservation": {
         "unknownWhy": {
@@ -4196,6 +4207,7 @@
       "eduCohortCreated": "Rühm loodud. Saad õppijaid määrata.",
       "eduAssignNoCohort": "Rühmi veel pole — loo kõigepealt rühm.",
       "eduAssignNoLearners": "Vastuvõetud õppijaid veel pole. Kutsu õppija — määrata saad pärast kutse vastuvõtmist.",
+      "eduMembersNotForRole": "Rühma liikmesus pole sinu rollile saadaval. Õppijaid saab määrata ainult asutuse enda omanik, administraator või juht.",
       "eduAssignDone": "Õppija määratud rühma.",
       "eduNotInstitution": "See organisatsioon pole veel märgitud õppeasutuseks. Märgi see ettevõtte jaotises.",
       "eduUnavailable": "Programme ei saa praegu lugeda. See ei tähenda, et neid pole.",
@@ -7912,6 +7924,23 @@
       "invalid": "Kontrolli nime ja sõnumit.",
       "error": "Midagi läks valesti. Proovi uuesti.",
       "cooldown": "Sinu taotlus lükati hiljuti tagasi. Seda rühma saad uuesti paluda 30 päeva pärast otsust."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "Lehtede kasutust ja kampaaniat, mis sind siia tõi, mõõdame ainult sinu loal.",
+      "accept": "Luba mõõtmine",
+      "refuse": "Keeldu",
+      "more": "Rohkem",
+      "label": "Kasutuse mõõtmise valik"
+    },
+    "control": {
+      "title": "Kasutuse mõõtmine ja kampaania omistamine",
+      "granted": "Sa lubasid. Võid nõusoleku igal ajal tagasi võtta; siis eemaldatakse kirjed sellest seadmest.",
+      "refused": "Sa keeldusid. Sellesse seadmesse ei salvestata mõõtmiseks midagi.",
+      "undecided": "Sa pole veel valinud, seega mõõtmiseks ei salvestata midagi.",
+      "allow": "Luba",
+      "refuse": "Keeldu"
     }
   }
 }

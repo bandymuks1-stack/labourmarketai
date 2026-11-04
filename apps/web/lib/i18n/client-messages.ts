@@ -104,6 +104,10 @@ export const CLIENT_MESSAGE_ROOTS = [
   "marketplace",
   "marketplaceListings",
   "messaging",
+  // Organization work-area labels (16 short strings): the one header names an
+  // organization's core areas for the person who runs it (owner P0-2,
+  // 2026-11-03; `getOrganizationHeaderNav`).
+  "companyModel",
   "needStructuring",
   "network",
   // The organization capability question ("What does your organization do?").

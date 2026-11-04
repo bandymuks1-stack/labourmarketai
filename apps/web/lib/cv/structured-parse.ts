@@ -147,7 +147,7 @@ const COMPANY_MARKER_RE =
   /\b(UAB|MB|AB|VšĮ|IĮ|GmbH|B\.?V\.?|Sp\.\s*z\s*o\.?o\.?|Ltd\.?|SIA|OÜ|OOO|ООО|LLC|Inc\.?)\b/;
 
 const EDUCATION_RE =
-  /universit|kolegij|college|hochschule|gimnazij|mokykl|school|schule|школ|университет|колледж|bakalaur|bachelor|magistr|master|мастер|магистр|doktor|doctor|доктор|profesin|vocational|berufsschule|akademij|academy|академ|institut|kursai|course|курс|opleiding|studij/i;
+  /universit|kolegij|college|hochschule|gimnazij|mokykl|school|schule|школ|университет|колледж|bakalaur|bachelor|magistr|master|мастер|магистр|doktor|doctor|доктор|profesin|vocational|berufsschule|akademij|academy|академ|institut|kursai|course|курс|opleiding|studij|rengimo cent|mokymo cent|training cent|technikum|liceum|лицей|техникум|училищ|szkoł/i;
 
 const CERTIFICATE_RE =
   /sertifikat|certificate|certificaat|zertifikat|сертификат|pažymėjim|licencij|licentie|licen[cs]e|lizenz|лиценз|atestat|attest|удостоверен/i;
@@ -163,7 +163,7 @@ const EDUCATION_TYPE_RULES: ReadonlyArray<[RegExp, string]> = [
   [/bakalaur|bachelor|бакалавр/i, "university_bachelor"],
   [/universit|университет/i, "university_bachelor"],
   [/kolegij|college|hogeschool|колледж/i, "college"],
-  [/profesin|vocational|berufs|профессиональн/i, "vocational"],
+  [/profesin|vocational|berufs|профессиональн|rengimo cent|technikum|техникум|училищ/i, "vocational"],
   [/gimnazij|vidurin|secondary|gymnasium|гимназ|средн/i, "secondary"],
   [/pradin|primary|grundschule|начальн/i, "primary"],
   [/kursai|course|kurs|курс|training|mokym/i, "course_certificate"],
@@ -323,6 +323,15 @@ function languageLevelFor(line: string): {
   return { level: null, confidence: "medium" };
 }
 
+/** The part of a list line that belongs to the language `re` matches: the
+ *  comma/semicolon/slash/pipe segment that names it, when the line names more
+ *  than one language. Otherwise the whole line. */
+function languageSegment(line: string, re: RegExp): string {
+  const named = LANGUAGE_RULES.filter(([r]) => r.test(line)).length;
+  if (named < 2) return line;
+  return line.split(/[,;/|]/).find((seg) => re.test(seg)) ?? line;
+}
+
 // ── Main parser ──────────────────────────────────────────────────────────────
 
 export function parseCvSections(text: string): CvSectionProposals {
@@ -362,7 +371,10 @@ export function parseCvSections(text: string): CvSectionProposals {
       // Only treat as a language FACT when the line looks like a language
       // statement (has a level marker) or is short (a list line), otherwise
       // ordinary sentences mentioning a country/language would false-positive.
-      const { level, confidence } = languageLevelFor(line);
+      // The level is read from THIS language's own part of the line: in
+      // "Anglų B2, rusų gimtoji" Russian is native, not B2. A line naming one
+      // language keeps the whole line ("Anglų kalba – B2").
+      const { level, confidence } = languageLevelFor(languageSegment(line, re));
       if (level === null && line.length > 80) continue;
       seenLang.add(code);
       if (out.languages.length < MAX_PER_SECTION) {

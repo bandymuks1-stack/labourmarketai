@@ -9,7 +9,8 @@ export const EDUCATION_CHAT_LIST_LIMIT = 6;
 export interface EducationChatCohort {
   readonly id: string;
   readonly name: string;
-  readonly memberCount: number;
+  /** null = the caller may not see membership (not an internal decider) — unknown, never 0. */
+  readonly memberCount: number | null;
 }
 
 export interface EducationChatProgramme {
@@ -33,4 +34,6 @@ export type EducationWorkspaceChatResult =
       readonly organizationId: string;
       readonly programmes: readonly EducationChatProgramme[];
       readonly assignable: readonly EducationChatLearner[];
+      /** false: membership is not available to this caller's role (J-12); assignable is then empty. */
+      readonly membersVisible: boolean;
     };

@@ -2025,6 +2025,17 @@
       "done": "Slått sammen. Radene og postene beholdes; prosjektlisten viser nå det beholdte prosjektet.",
       "failed": "Ikke slått sammen. Ingenting ble endret for rader som ikke gikk gjennom — last inn på nytt og prøv igjen."
     },
+    "deck": {
+      "label": "Dette kan du gjøre",
+      "new": "Nytt prosjekt",
+      "newHint": "Opprett det og kom i gang",
+      "assign": "Tildel en arbeider",
+      "assignHint": "Til et prosjekt",
+      "teams": "Tildel et lag",
+      "teamsHint": "Et lag til et prosjekt eller en oppgave",
+      "chat": "Samtaler",
+      "toolsLabel": "Andre verktøy"
+    },
     "assign": {
       "reservation": {
         "unknownWhy": {
@@ -4196,6 +4207,7 @@
       "eduCohortCreated": "Gruppe opprettet. Du kan tildele elever.",
       "eduAssignNoCohort": "Ingen grupper ennå — opprett først en gruppe.",
       "eduAssignNoLearners": "Ingen aksepterte elever ennå. Inviter en elev — du kan tildele når invitasjonen er akseptert.",
+      "eduMembersNotForRole": "Gruppemedlemskap er ikke tilgjengelig for din rolle. Bare institusjonens egen eier, administrator eller leder kan tildele elever.",
       "eduAssignDone": "Elev tildelt gruppen.",
       "eduNotInstitution": "Denne organisasjonen er ennå ikke merket som utdanningsinstitusjon. Merk det i bedriftsdelen.",
       "eduUnavailable": "Programmene kan ikke leses akkurat nå. Det betyr ikke at det ikke finnes noen.",
@@ -7912,6 +7924,23 @@
       "invalid": "Sjekk navnet og meldingen.",
       "error": "Noe gikk galt. Prøv igjen.",
       "cooldown": "Forespørselen din ble nylig avslått. Du kan spørre denne gruppen igjen 30 dager etter avgjørelsen."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "Vi måler sidebruk, og hvilken kampanje som brakte deg hit, bare hvis du tillater det.",
+      "accept": "Tillat måling",
+      "refuse": "Avslå",
+      "more": "Mer",
+      "label": "Valg om bruksmåling"
+    },
+    "control": {
+      "title": "Bruksmåling og kampanjetilskriving",
+      "granted": "Du har gitt tillatelse. Du kan trekke den tilbake når som helst; elementene fjernes da fra denne enheten.",
+      "refused": "Du har avslått. Ingenting for måling lagres på denne enheten.",
+      "undecided": "Du har ikke valgt ennå, så ingenting for måling lagres.",
+      "allow": "Tillat",
+      "refuse": "Avslå"
     }
   }
 }
