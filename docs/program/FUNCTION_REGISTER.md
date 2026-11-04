@@ -334,6 +334,114 @@ Not user-facing, but open:
 - 13.1: the production walk network path (72 h verdict 2026-11-04).
 - 2.24, 9.25, 10.20: their reasons are in the rows; the security items stay out of the public repository.
 
+## FAIL and BLOCKED triage (2026-11-04)
+
+Owner order 2026-11-04, step 3. Every row that the combined audit view counts as FAIL (11) or BLOCKED (61) gets exactly one class. This sorts the rows; it changes no status. A row becomes PASS only on a production proof.
+
+Classes:
+
+- `USER_BLOCKER_WEB`: a real worker, employer, customer or agency cannot finish a core action on the web today without help or without an error.
+- `OWNER_GATED`: waits on an owner, legal, billing, AI or e-mail decision or credential. Paid plans, AI help and e-mail stay off until security, legal and functional tests pass. Items already approved are not asked again.
+- `INFRA`: hosting, operations or security; details stay in the private record.
+- `OPTIONAL_OR_UNPLANNED`: not needed for a core scenario.
+- `TEST_ONLY`: the test harness cannot prove it; the product is not shown to fail.
+
+| Class | FAIL | BLOCKED | Total |
+|---|---|---|---|
+| `USER_BLOCKER_WEB` | 1 | 0 | 1 |
+| `OWNER_GATED` | 4 | 44 | 48 |
+| `INFRA` | 4 | 2 | 6 |
+| `OPTIONAL_OR_UNPLANNED` | 2 | 13 | 15 |
+| `TEST_ONLY` | 0 | 2 | 2 |
+| **All** | **11** | **61** | **72** |
+
+### USER_BLOCKER_WEB, ranked by how many people it reaches
+
+1. **SR-1: the first `/jobs` search for a word that is not a profession name times out.** It reaches every visitor who types free text: signed out, workers and agencies. Profession words already redirect to the working profession filter.
+   - GREEN, now: when the free-text read times out, show the honest message together with the profession filter and the nearest profession matches (the existing profession resolver), instead of a page with no jobs.
+   - RED, in a new draft: the search index fix. #3020 was rolled back and #3024 was closed: after about 5 calls the cached generic plan took 16–26 s for 1–2 character terms. The new draft must carry the plan-cache proof that #3025 requires (at least 10 calls per term on one connection, under both auto and force_generic_plan).
+
+No other FAIL or BLOCKED row stops a core web action today. The earlier list of real user blockers was: plan purchase, AI and e-mail, native apps, and training for non-members. Under this order those are `OWNER_GATED`, because each waits on an owner, legal or credential step that the order keeps off on purpose.
+
+### Every row
+
+| ID | Function / check | Status | Class | Reason | Evidence |
+|---|---|---|---|---|---|
+| SR-1 | `/jobs` free text, cold first query | FAIL | `USER_BLOCKER_WEB` | a word that is not a profession name times out: the visitor gets "the job board did not answer in time" and no jobs | Chrome production check 2026-11-04, build `3a9bcdef`, desktop, signed out: `/lt/jobs?q=byggarbetare` 3.6 s to first byte and the timeout message; `lagerarbetare` 4.8 s. Profession words (`betonuotojas`, `plyteliu`) redirect to the profession filter and answer in 0.4–1.0 s |
+| 1.8 | Multi-capability organization | BLOCKED | `OWNER_GATED` | owner decision ORG-2 (one organization with several capabilities) | register row; no production test until the decision |
+| 2.10 | External profile links | BLOCKED | `OWNER_GATED` | per-company grant for external links, RED #2471 | RED draft #2471, not applied |
+| 2.27 | Org historical evidence import | BLOCKED | `OWNER_GATED` | owner decision ARCH-5 (organization history import) | register row |
+| 2.28 | Historical consolidation | BLOCKED | `OWNER_GATED` | 165 historical dates wait for the owner OK on RED #2362 | RED draft #2362 |
+| 2.30 | Voice Work Journal | BLOCKED | `OWNER_GATED` | voice journal needs a speech-to-text host; the typed journal works | typed journal: prod walk fresh-activation 41279196446 (J-1) |
+| 2.37 | Subject refuses an imported record | BLOCKED | `OWNER_GATED` | owner decision ARCH-5; exists only as the blocker of 2.27 | register row |
+| 4.18 | Employer data disclosure grant | BLOCKED | `OWNER_GATED` | employer disclosure grant, RED #2471 | RED draft #2471 |
+| 4.22 | 3 free profile views + VIP | BLOCKED | `OWNER_GATED` | 3 free profile views + VIP: billing figures, RED #2474 | RED draft #2474 |
+| 5.5 | Message translation | BLOCKED | `OWNER_GATED` | message translation is AI; the original text is shown and labelled | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
+| 5.8 | Push | BLOCKED | `OWNER_GATED` | push needs the owner VAPID keys and a real delivery test; the channel is off by flag | migration 20261023190255 applied, 0 subscriptions (row evidence) |
+| 6.21 | /business/[slug] | BLOCKED | `OWNER_GATED` | public business page needs an owner-approved RED RPC | register row |
+| 7.6 | Billing recovery cron | BLOCKED | `OWNER_GATED` | billing recovery cron: paid plans stay off; needs the owner VPS cron line + flag | #2696 |
+| 7.8 | LMC credit ledger | BLOCKED | `OWNER_GATED` | LMC credit ledger: owner design, LMC owner-locked | register row |
+| 7.9 | LMC top-ups, VIP, ai_plus, tiers | BLOCKED | `OWNER_GATED` | LMC top-ups, VIP, ai_plus, tiers: owner prices | registry NOT_BUILT |
+| 7.11 | Deferred plans | BLOCKED | `OWNER_GATED` | deferred plans: owner prices | registry NOT_BUILT |
+| 7.12 | AI cost metering | BLOCKED | `OWNER_GATED` | AI cost metering waits on the AI runtime (10.6) | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
+| 7.14 | Vacancy translation entitlement | BLOCKED | `OWNER_GATED` | vacancy translation entitlement needs AI | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
+| 7.15 | EUR 99 subscription checkout | BLOCKED | `OWNER_GATED` | EUR 99 checkout hidden by design during the pilot; VAT path RED #2685 | RED draft #2685 |
+| 7.19 | Refunds and disputes | BLOCKED | `OWNER_GATED` | refunds and disputes: owner refund policy, then a TEST-mode walk | 0 events in production (row evidence) |
+| 7.20 | Invoices inside LM | BLOCKED | `OWNER_GATED` | in-app invoices: paid plans stay off; RED #2682 adds the plan name and amount | Stripe portal invoice exists (row evidence) |
+| 7.23 | LMC top-up | BLOCKED | `OWNER_GATED` | LMC top-up: owner packages, VAT, refund | registry NOT_BUILT |
+| 7.24 | LMC granted once per payment | BLOCKED | `OWNER_GATED` | LMC grant per payment: depends on 7.23 | registry NOT_BUILT |
+| 7.26 | LMC spend + reversal | BLOCKED | `OWNER_GATED` | LMC spend + reversal: depends on 7.23 | registry NOT_BUILT |
+| 7.27 | Free VIP for approved employers | FAIL | `OWNER_GATED` | free VIP for approved employers: RED #2474 | RED draft #2474 |
+| 7.28 | Payee and terms | FAIL | `OWNER_GATED` | payee and terms: renewal, cancellation, refund and withdrawal clauses wait on owner/legal; paid plans stay off until then | production terms page (row evidence) |
+| 7.31 | Free + two paid tiers for workers AND for companies | BLOCKED | `OWNER_GATED` | free + two paid tiers: owner final tiers and prices (separate approval) | owner product goal 2026-11-01 |
+| 8.3 | Machine translation | BLOCKED | `OWNER_GATED` | machine translation is AI; originals shown and labelled | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
+| 8.5 | Nine priority launch markets | BLOCKED | `OWNER_GATED` | five more markets need about 9,400 strings each translated and reviewed; the six active locales are complete | catalog audit 2026-10-28 |
+| 8.13 | Native app | BLOCKED | `OWNER_GATED` | native apps run against production; the store accounts are the owner's | rows 8.17 / 8.18 (Android, iOS on production) |
+| 8.14 | App links | BLOCKED | `OWNER_GATED` | app links need the store accounts | register row |
+| 8.15 | Mobile store release | BLOCKED | `OWNER_GATED` | store release needs the owner store accounts + ARCH-6 | register row |
+| 9.16 | External referral API | BLOCKED | `OWNER_GATED` | external referral API needs partner tokens; signed-out callers get 401 as they should | row evidence: anonymous 401 |
+| 10.4 | MCP scopes | BLOCKED | `OWNER_GATED` | MCP OAuth scopes: security RED, design draft #2923, owner decision X-2 | RED draft #2923 |
+| 10.5 | ChatGPT/Claude listings | BLOCKED | `OWNER_GATED` | ChatGPT / Claude directory listings: owner portals | register row |
+| 10.6 | AI runtime | BLOCKED | `OWNER_GATED` | AI runtime off | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
+| 10.7 | Conversation intent LLM | BLOCKED | `OWNER_GATED` | conversation intent LLM: depends on 10.6 | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
+| 10.8 | CV AI structuring | BLOCKED | `OWNER_GATED` | CV AI structuring: depends on 10.6; free CV extraction works without AI | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
+| 10.9 | Journal AI suggestions | BLOCKED | `OWNER_GATED` | journal AI suggestions: depends on 10.6 | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
+| 10.10 | Explanation AI | BLOCKED | `OWNER_GATED` | explanation AI: depends on 10.6 | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
+| 10.21 | Eurostat import | BLOCKED | `OWNER_GATED` | Eurostat import has no scheduler; owner to allow the scheduled import | data dated 2026-07-15 (row evidence) |
+| 10.22 | the partner organization integration | BLOCKED | `OWNER_GATED` | partner organization integration: owner | register row |
+| 10.24 | Self-hosted STT/translate | BLOCKED | `OWNER_GATED` | self-hosted speech/translation: owner deploy | register row |
+| 10.25 | Cloudflare AI adapter | BLOCKED | `OWNER_GATED` | Cloudflare AI adapter: owner key | register row |
+| 10.26 | OpenAI apps challenge | BLOCKED | `OWNER_GATED` | OpenAI apps challenge: owner token | register row |
+| 11.8 | Training & certification register | FAIL | `OWNER_GATED` | training for engaged non-member workers: owner product decision, RED #2816; members can be assigned | prod walk company-governance 40687308231 (T-5 green for members) |
+| 11.9 | Human-in-loop learning review | BLOCKED | `OWNER_GATED` | human-in-loop learning review: owner parked the nav door | register row |
+| 13.17 | Env parity after hosting move | FAIL | `OWNER_GATED` | AI and some e-mail are off after the hosting move; they stay off until security, legal and functional tests pass (owner + legal) | read-only check 2026-10-27 (row evidence) |
+| SEO-10 | Country and city on signed-out job pages | BLOCKED | `OWNER_GATED` | scope approved by the owner 2026-11-03; the database function waits for the separate apply approval of RED #2993 (no new approval needed for the scope) | RED draft #2993, not applied |
+| 2.24 | Experience records + disputes | FAIL | `INFRA` | open moderation/security item EVID-6; the record and dispute flow keeps its earlier production proof | details in the private record |
+| 5.16 | Owner Telegram alerts | BLOCKED | `INFRA` | owner-only operations alerts; needs the owner bot token | register row; not a user feature |
+| 9.25 | CodeQL / dependency alerts | FAIL | `INFRA` | CodeQL / dependency alerts triaged | details in the private record |
+| 10.20 | Vacancy retention | FAIL | `INFRA` | vacancy retention purge fails closed on a permission item | dry run 39936626534; details in the private record |
+| 13.1 | VPS hosting + auto-deploy | FAIL | `INFRA` | runner-to-VPS network path; 72 h verdict due 2026-11-04 | #2911; details in the private record |
+| 13.9 | Supabase GitHub integration | BLOCKED | `INFRA` | Supabase GitHub integration: owner setting | register row |
+| 5.20 | User-defined automations | FAIL | `OPTIONAL_OR_UNPLANNED` | user-defined automations: a vision item, not built, no core journey needs it | vision §12/§19 |
+| 5.21 | SMS / WhatsApp channels | BLOCKED | `OPTIONAL_OR_UNPLANNED` | SMS / WhatsApp: a later channel that needs a paid provider | vision §11 |
+| 6.12 | Cross-border deals | BLOCKED | `OPTIONAL_OR_UNPLANNED` | cross-border deals module: not built; 6.6 contracts + 6.11 readiness may suffice (owner to say) | registry NOT_BUILT |
+| 6.13 | Orders goods purchase | BLOCKED | `OPTIONAL_OR_UNPLANNED` | goods purchase orders: not built; only organization plans take payments | registry NOT_BUILT |
+| 6.14 | Logistics | BLOCKED | `OPTIONAL_OR_UNPLANNED` | logistics: not built, depends on 6.13 | registry NOT_BUILT |
+| 6.22 | Housing / accommodation | BLOCKED | `OPTIONAL_OR_UNPLANNED` | housing: a vision item, owner scope first | vision §8 |
+| 6.23 | Service order rating, cancellation and dispute | BLOCKED | `OPTIONAL_OR_UNPLANNED` | service-order rating and dispute: not built; request, accept and withdraw work | prod walk marketplace 41729310761 (2026-11-03, 7f0f06583) |
+| 6.24 | Swipe-style B2C discovery feed | BLOCKED | `OPTIONAL_OR_UNPLANNED` | swipe discovery feed: lower-confidence pattern, owner to confirm | decision 0013 |
+| 7.30 | Invoices + work-acceptance acts from the Work Journal | BLOCKED | `OPTIONAL_OR_UNPLANNED` | invoices and acceptance acts from the journal: owner invoicing rules per country, then build | vision §10 |
+| 9.19 | Admin import sandbox | BLOCKED | `OPTIONAL_OR_UNPLANNED` | admin import sandbox: an optional admin flag, off and labelled | owner admin session 2026-10-25 (Chrome) |
+| 9.20 | Admin intelligence inspector | BLOCKED | `OPTIONAL_OR_UNPLANNED` | admin intelligence inspector: an optional admin flag, off and labelled | owner admin session 2026-10-25 (Chrome) |
+| 10.15 | Agents OS runtime | BLOCKED | `OPTIONAL_OR_UNPLANNED` | internal agents runtime: architecture only, owner AGENT-1..4 | registry NOT_BUILT |
+| 10.16 | AI agents as participants | BLOCKED | `OPTIONAL_OR_UNPLANNED` | AI agents as market participants: owner AGENT-1..4 | registry NOT_BUILT |
+| 11.10 | RPL equivalence structure | BLOCKED | `OPTIONAL_OR_UNPLANNED` | RPL equivalence structure: deferred under ARCH-2 until an assessor and requirement set are named | decision 0028 §D-15 |
+| SEO-8 | Job board page 2+ canonical | FAIL | `OPTIONAL_OR_UNPLANNED` | pages 2+ fold into page 1 for crawlers; no user action breaks, and the jobs still reach search engines through the sitemap | Chrome production check 2026-11-03; fix ready in draft #2984, held by the product gate on `/jobs` |
+| 7.7 | Manual pilot grant (admin) | BLOCKED | `TEST_ONLY` | the walk has no admin session; the grant itself was used for the pilot (paid 2026-10-23) | register row |
+| 8.9 | Public org profile | BLOCKED | `TEST_ONLY` | no organization has published a public profile, so the walk skips S-10; the product is not shown to fail | prod walk public-org-locales 40205429467 (S-10 skipped) |
+
+The run ids of the 2026-11-04 re-runs on build `3a9bcdef9` are added here as the coordinator reports them.
+
 ## Identity, sign-up & organizations
 
 | ID | Function | Status | Last checked | Evidence (PR / commit / run) | In production | Remaining issue |
