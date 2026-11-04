@@ -235,3 +235,23 @@ describe("brand pages use the one logo component", () => {
     });
   }
 });
+
+/**
+ * A SHARE CARD WITHOUT A HASH IN ITS URL MUST NOT BE IMMUTABLE. `og:image` on most
+ * pages is the bare `/opengraph-image`, so next/og's year-long `immutable` default
+ * pinned the old card in browsers and shared caches after the mark was added.
+ */
+describe("the share card can change", () => {
+  const card = readFileSync(resolve(WEB_ROOT, "app/[locale]/opengraph-image.tsx"), "utf8");
+  it("sets its own short cache instead of next/og's immutable default", () => {
+    expect(card).toContain('headers: { "cache-control": SHARE_CARD_CACHE_CONTROL }');
+    const value = /SHARE_CARD_CACHE_CONTROL = "([^"]+)"/.exec(card)?.[1] ?? "";
+    expect(value).not.toMatch(/immutable/);
+    expect(Number(/max-age=(\d+)/.exec(value)?.[1])).toBeLessThanOrEqual(3600);
+    expect(Number(/s-maxage=(\d+)/.exec(value)?.[1])).toBeLessThanOrEqual(86400);
+  });
+  it("the Twitter card is the same route, so it gets the same header", () => {
+    expect(readFileSync(resolve(WEB_ROOT, "app/[locale]/twitter-image.tsx"), "utf8")).toContain('from "./opengraph-image"');
+  });
+});
+
