@@ -17,6 +17,12 @@
 # GITHUB_TOKEN (actions: write to dispatch, issues: write) and the existing
 # service-role secret used read-only on one table.
 #
+# The `db-backup` job holds the production database backup to the same 26 h limit.
+# It reads the Actions API only and, when stale, opens or updates the one
+# `db-backup-failed` issue (db-backup.yml closes it on the next backup that ships),
+# dispatches db-backup.yml, and turns this run red so GitHub's failure e-mail fires.
+# The vacancy kill switches do not apply to it.
+#
 # Kill switch: honours VACANCY_SCHEDULE_ENABLED and each provider's own
 # VACANCY_SOURCE_*_ENABLED variable exactly like the cadence workflows.
 name: ingestion-freshness
@@ -115,3 +121,50 @@ jobs:
           # shellcheck disable=SC2086
           gh workflow run "$WORKFLOW" $DISPATCH_ARGS
           echo "Dispatched $WORKFLOW ($DISPATCH_ARGS) for $SOURCE."
+
+  db-backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Freshness of the database backup
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -u
+          STALE_AFTER_S=$(( 26 * 3600 ))
+          REDISPATCH_AFTER_S=$(( 2 * 3600 ))
+          LABEL="db-backup-failed"
+          WORKFLOW="db-backup.yml"
+          if ! last=$(bash .github/scripts/db-backup-last-shipped.sh); then
+            echo "::warning title=db backup unreadable::could not read the backup runs; no judgement made"
+            echo "| db-backup | unreadable | - | UNKNOWN |" >> "$GITHUB_STEP_SUMMARY"; exit 0
+          fi
+          if [ -n "$last" ]; then
+            age=$(( $(date +%s) - $(date -d "$last" +%s) ))
+            if [ "$age" -le "$STALE_AFTER_S" ]; then
+              echo "| db-backup | $last | $(( age / 3600 )) h | FRESH |" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+          fi
+          echo "| db-backup | ${last:-none recent} | - | STALE |" >> "$GITHUB_STEP_SUMMARY"
+          echo "::error title=db backup not fresh::last backup on the VPS: ${last:-none recent}; limit 26 h"
+          open_issue=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty' || true)
+          if [ -n "$open_issue" ]; then
+            gh issue comment "$open_issue" --body "No backup on the VPS within 26 h: $RUN_URL" || true
+          else
+            gh label create "$LABEL" --color B60205 --description "DB backup failed or stale (auto-managed)" 2>/dev/null || true
+            gh issue create --label "$LABEL" --title "DB backup failed" --body "No backup on the VPS within 26 h: $RUN_URL" || true
+          fi
+          busy=$(gh run list --workflow "$WORKFLOW" --json status --jq '[.[]|select(.status=="queued" or .status=="in_progress")]|length' || echo 0)
+          recent=$(gh run list --workflow "$WORKFLOW" --event workflow_dispatch --limit 1 --json createdAt --jq '.[0].createdAt // empty' || true)
+          if [ "${busy:-0}" -gt 0 ]; then
+            echo "$WORKFLOW already queued or running; not dispatching."
+          elif [ -n "$recent" ] && [ $(( $(date +%s) - $(date -d "$recent" +%s) )) -lt "$REDISPATCH_AFTER_S" ]; then
+            echo "A dispatch ran at $recent (< 2 h ago); not dispatching again."
+          else
+            gh workflow run "$WORKFLOW" && echo "Dispatched $WORKFLOW."
+          fi
+          exit 1

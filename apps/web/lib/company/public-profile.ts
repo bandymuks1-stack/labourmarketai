@@ -13,7 +13,6 @@ import {
   type BusinessPublishResult,
   type PublicBusinessListing,
   type PublicBusinessProfileView,
-  type PublicBusinessService,
 } from "@/lib/company/public-profile-model";
 
 /**
@@ -60,23 +59,10 @@ export async function getPublicBusinessProfile(
   const p: any = profileRows[0];
   const orgId: string = p.id;
 
-  const [{ data: svc }, { data: lst }] = await Promise.all([
-    asAny(supabase).rpc("get_public_business_services_v1", { p_org_id: orgId }),
-    asAny(supabase).rpc("get_public_business_listings_v1", { p_org_id: orgId }),
-  ]);
+  const { data: lst } = await asAny(supabase).rpc("get_public_business_listings_v1", {
+    p_org_id: orgId,
+  });
 
-  const services: PublicBusinessService[] = Array.isArray(svc)
-    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      svc.map((s: any) => ({
-        id: s.id,
-        title: s.title,
-        description: s.description ?? null,
-        categorySlug: s.category_slug ?? null,
-        locationCountry: s.location_country ?? null,
-        remote: s.remote === true,
-        rateText: s.rate_text ?? null,
-      }))
-    : [];
   const listings: PublicBusinessListing[] = Array.isArray(lst)
     ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
       lst.map((m: any) => ({
@@ -102,7 +88,6 @@ export async function getPublicBusinessProfile(
       contactEmail: p.contact_email ?? null,
       contactPhone: p.contact_phone ?? null,
     },
-    services,
     listings,
   };
 }

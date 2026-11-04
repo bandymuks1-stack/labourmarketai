@@ -76,7 +76,12 @@ name: DB backup (Supabase → VPS, encrypted)
 
 on:
   schedule:
-    - cron: "30 3 * * *"   # 03:30 UTC nightly (after the 03:00 legacy cron, before EU office hours)
+    # Every 4 h, and the guard job below skips the run when a backup reached the VPS
+    # in the last 18 h. GitHub's schedule has started the single 03:30 slot hours late
+    # and can drop a slot, so one slot a day is not a reliable daily backup. 18 h rather
+    # than "this UTC day": a late run one day plus an early run the next stays under the
+    # 26 h freshness limit (ingestion-freshness.yml).
+    - cron: "30 3,7,11,15,19,23 * * *"
   workflow_dispatch:
     inputs:
       restore_drill_only:
@@ -92,7 +97,40 @@ permissions:
   contents: read
 
 jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decide whether this run backs up
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -u
+          SKIP_WITHIN_S=$(( 18 * 3600 ))
+          # A person's dispatch always runs. An unreadable answer also runs: an extra
+          # backup costs little, a missed one is what this workflow exists to prevent.
+          decision=true
+          if [ "$EVENT" = "schedule" ]; then
+            if last=$(bash .github/scripts/db-backup-last-shipped.sh) && [ -n "$last" ]; then
+              age=$(( $(date +%s) - $(date -d "$last" +%s) ))
+              echo "last backup on the VPS: $last ($(( age / 3600 )) h ago)"
+              [ "$age" -lt "$SKIP_WITHIN_S" ] && decision=false
+            fi
+          fi
+          echo "run=$decision" >> "$GITHUB_OUTPUT"
+          echo "backup this run: $decision" | tee -a "$GITHUB_STEP_SUMMARY"
+
   backup:
+    needs: guard
+    if: needs.guard.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     services:
@@ -451,3 +489,44 @@ jobs:
           shred -u lm-db-*.dump lm-db-*.dump.age lm-files-*.tar lm-files-*.tar.age 2>/dev/null || true
           find "$RUNNER_TEMP/lmdb" -type f -exec shred -u {} + 2>/dev/null || true
           rm -rf "$RUNNER_TEMP/lmdb" ~/.ssh/deploy_key
+
+  # One open issue while backups fail, closed by the next backup that ships. The
+  # repository is public: the text carries the run link and nothing else. A failed
+  # scheduled run also sends GitHub's own failure e-mail.
+  notify:
+    needs: [guard, backup]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Open, update or close the backup issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          GUARD: ${{ needs.guard.result }}
+          BACKUP: ${{ needs.backup.result }}
+          DRILL_ONLY: ${{ inputs.restore_drill_only }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -u
+          LABEL="db-backup-failed"
+          open_issue=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty')
+          case "$GUARD/$BACKUP" in
+            failure/*|cancelled/*|*/failure|*/cancelled)
+              if [ -n "$open_issue" ]; then
+                gh issue comment "$open_issue" --body "Failed again: $RUN_URL"
+              else
+                gh label create "$LABEL" --color B60205 --description "DB backup failed or stale (auto-managed)" 2>/dev/null || true
+                gh issue create --label "$LABEL" --title "DB backup failed" --body "Failed run: $RUN_URL"
+              fi
+              ;;
+            */success)
+              if [ "$DRILL_ONLY" != "true" ] && [ -n "$open_issue" ]; then
+                gh issue comment "$open_issue" --body "Recovered, backup shipped: $RUN_URL"
+                gh issue close "$open_issue"
+              fi
+              ;;
+          esac

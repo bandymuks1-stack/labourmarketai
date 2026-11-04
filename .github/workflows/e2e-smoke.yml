@@ -166,6 +166,9 @@ jobs:
 
       # Env-independent in this repo (see quality.yml). No secrets, no DB.
       - name: Build
+        env:
+          # Same heap as deploy-vps.yml: the default of about 2 GB fails now and then.
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build
 
       - name: Start server
