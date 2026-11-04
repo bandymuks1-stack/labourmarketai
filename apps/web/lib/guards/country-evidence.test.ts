@@ -13,6 +13,8 @@ import { resolve } from "node:path";
 import {
   SUPPORTED_COUNTRIES,
   PRIORITY_MARKETS,
+  MARKETS_WITH_PUBLIC_JOB_ADS,
+  isSupportedCountry,
   COUNTRY_SIGNALS,
   findCountryProvenanceProblems,
 } from "../labour-market/country-evidence";
@@ -78,4 +80,14 @@ describe("no English leakage on LT/RU country content", () => {
       }
     });
   }
+});
+
+describe("markets whose job ads are on the board are not called coming soon", () => {
+  it("Sweden and Norway link to the board, and only markets without an evidence page do", () => {
+    expect(MARKETS_WITH_PUBLIC_JOB_ADS).toEqual(["SE", "NO"]);
+    for (const code of MARKETS_WITH_PUBLIC_JOB_ADS) {
+      expect(PRIORITY_MARKETS).toContain(code);
+      expect(isSupportedCountry(code)).toBe(false);
+    }
+  });
 });
