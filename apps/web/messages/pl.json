@@ -12894,6 +12894,17 @@
   "cvImport": {
     "reviewTitle": "Co znaleźliśmy w Twoim CV",
     "reviewHint": "System tylko sugeruje. Zapisz lub odrzuć każdy wpis — Ty decydujesz.",
+    "edit": "Popraw",
+    "editDone": "Gotowe",
+    "fieldTitle": "Nazwa",
+    "fieldText": "Tekst",
+    "fieldInstitution": "Szkoła lub organizator",
+    "fieldProgram": "Program",
+    "fieldKind": "Rodzaj",
+    "fieldStart": "Początek",
+    "fieldEnd": "Koniec",
+    "fieldYear": "Rok",
+    "dateHint": "np. 2019 lub 2019-03",
     "unplacedHint": "Tych wierszy nie udało się przypisać. Wybierz sekcję lub odrzuć.",
     "placeAs": "Gdzie to należy?",
     "confidence": {

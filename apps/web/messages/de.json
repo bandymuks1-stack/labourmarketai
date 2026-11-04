@@ -12894,6 +12894,17 @@
   "cvImport": {
     "reviewTitle": "Erkannte Lebenslauf-Abschnitte",
     "reviewHint": "Das System schlägt nur vor. Speichern oder verwerfen Sie jeden Eintrag — Sie entscheiden.",
+    "edit": "Korrigieren",
+    "editDone": "Fertig",
+    "fieldTitle": "Bezeichnung",
+    "fieldText": "Inhalt",
+    "fieldInstitution": "Schule oder Anbieter",
+    "fieldProgram": "Programm",
+    "fieldKind": "Art",
+    "fieldStart": "Beginn",
+    "fieldEnd": "Ende",
+    "fieldYear": "Jahr",
+    "dateHint": "z. B. 2019 oder 2019-03",
     "unplacedHint": "Diese Zeilen konnten wir nicht zuordnen. Wählen Sie den Abschnitt oder verwerfen Sie sie.",
     "placeAs": "Wohin gehört das?",
     "confidence": {

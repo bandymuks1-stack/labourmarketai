@@ -310,6 +310,11 @@ function parseDateToken(token: string): CvDatePart | null {
   return { year, month, day };
 }
 
+/** One typed date at its stated precision; null when it is not a real date. */
+export function parseCvDate(text: string): CvDatePart | null {
+  return new RegExp(`^${DATE_TOKEN}$`).test(text.trim()) ? parseDateToken(text.trim()) : null;
+}
+
 function parseYearRange(line: string): {
   start: CvDatePart;
   end: CvDatePart | null;
