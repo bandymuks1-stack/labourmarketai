@@ -203,3 +203,40 @@ test("J-6. a signed-in worker saves a job privately, finds it in the saved view,
   await expect(page.locator(`main a[href="/lt/jobs/${jobId}"]`)).toHaveCount(0);
   await ctx.close();
 });
+
+// ── UF-1, UF-2 (first real user's feedback, 2026-11-04): a NAV ad as a member.
+// Read-only. The description is members-only, so this is the only production
+// proof of how it reads. Norwegian words reach Norwegian ads; the card's own
+// language line confirms it before the ad is opened.
+test("J-7 (UF-1, UF-2). a member reads a Norwegian ad as text, and the translation note replaces the button", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker");
+  let href: string | null = null;
+  for (const word of ["t%C3%B8mrer", "sykepleier", "elektriker"]) {
+    await page.goto(`/lt/jobs?q=${word}`);
+    await boardAnswered(page);
+    const norwegian = cards(page).filter({ hasText: /norveg/i }).first();
+    if (await norwegian.count()) {
+      href = await norwegian.getAttribute("href");
+      break;
+    }
+  }
+  expect(href, "no Norwegian ad on the board for any search word").not.toBeNull();
+  await page.goto(href!);
+  const language = page.getByTestId("vacancy-language");
+  await expect(language, "a foreign ad names its language").toBeVisible({ timeout: 60_000 });
+  await expect(language).toContainText(/norveg/i);
+
+  // No literal markup anywhere in what a person reads (UF-2).
+  const text = await page.locator("main").innerText();
+  expect(text.length, "the member view has a description").toBeGreaterThan(200);
+  expect(text).not.toMatch(/<\/?(p|br|ul|ol|li|strong|em|div|section|h[1-6]|table|tr|td)\b/i);
+  expect(text).not.toMatch(/&(nbsp|amp|lt|gt|quot|#\d+);/);
+
+  // Translation is off: the note, never a button that can only fail (UF-1).
+  await expect(page.getByTestId("vacancy-translate-off")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId("vacancy-translate-off")).toContainText(/vertimo dar n/i);
+  await expect(page.getByTestId("vacancy-translate-button")).toHaveCount(0);
+  console.info(`[uf] ad ${href}: ${text.length} chars, no markup, off note shown`);
+  await ctx.close();
+});
+

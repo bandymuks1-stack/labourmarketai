@@ -12894,15 +12894,35 @@
   "cvImport": {
     "reviewTitle": "What we found in your CV",
     "reviewHint": "The system only suggests. Save or discard each entry — you decide.",
+    "edit": "Correct",
+    "editDone": "Done",
+    "fieldTitle": "Title",
+    "fieldText": "Text",
+    "fieldInstitution": "School or provider",
+    "fieldProgram": "Programme",
+    "fieldKind": "Kind",
+    "fieldStart": "Start",
+    "fieldEnd": "End",
+    "fieldYear": "Year",
+    "dateHint": "e.g. 2019 or 2019-03",
+    "unplacedHint": "We could not place these lines. Choose where each belongs, or discard it.",
+    "placeAs": "Where does it belong?",
+    "confidence": {
+      "high": "Stated clearly in the CV",
+      "medium": "Check that this was read correctly",
+      "low": "A guess: please check it"
+    },
     "empty": "We couldn't read any sections from this text — you can add them by hand.",
     "groups": {
       "workHistory": "Work history",
       "education": "Education",
+      "training": "Training and courses",
       "languages": "Languages",
       "certificates": "Certificates",
       "achievements": "Achievements",
       "salary": "Salary expectation",
-      "availability": "Availability"
+      "availability": "Availability",
+      "unplaced": "Not recognised"
     },
     "confirm": "Save",
     "saving": "Saving…",
@@ -16165,6 +16185,7 @@
       "allowanceRemaining": "{count} of {limit} translations left",
       "allowanceExhausted": "You have used all {limit} of your included translations. The advertisement stays fully readable in its original language.",
       "unavailable": "This advertisement could not be translated right now. The publisher's own words are shown below.",
+      "notSwitchedOn": "There is no automatic translation of job ads yet. The publisher's own words are shown below.",
       "signedOut": "Sign in to translate this advertisement."
     }
   },

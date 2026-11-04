@@ -77,7 +77,8 @@ export interface CompassCohort {
 export interface CompassInput {
   readonly professionSlug: string | null;
   readonly skills: readonly CompassSkill[];
-  readonly journalEntryCount: number;
+  /** null = the count could not be read (SEP-7): no "log your first entry". */
+  readonly journalEntryCount: number | null;
   readonly education: readonly CompassEducation[];
   readonly opportunities: readonly CompassOpportunity[];
   readonly availabilityKnown: boolean;
@@ -160,7 +161,7 @@ export interface LearningCompass {
     readonly skillsConfirmed: number;
     readonly skillsJournalSupported: number;
     readonly skillsSelfDeclared: number;
-    readonly journalEntries: number;
+    readonly journalEntries: number | null;
     readonly educationEntries: number;
   };
   readonly fitsNow: readonly CompassOpportunity[];

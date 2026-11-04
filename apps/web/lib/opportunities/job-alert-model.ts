@@ -25,6 +25,7 @@
  * criterion is missing so the UI can ask for it. Salary is optional: without
  * it nothing is excluded on pay.
  */
+import { payLabel } from "@/lib/vacancy-store/vacancy-pay-label";
 import type { StoredPublicVacancyV1 } from "@/lib/vacancy-store/vacancy-read";
 import { deterministicEntityId } from "@/lib/notifications/deterministic-entity-id";
 
@@ -195,21 +196,16 @@ export interface JobAlertFacts {
   readonly salary: string | null;
 }
 
-/** "2500-3200 EUR" / "up to 3200 EUR" — ONLY a EUR figure the publisher
- *  stated; anything else is null (unknown is never rendered as a number). */
+/** "2500–3200 EUR" / "≤ 3200 EUR" — ONLY a EUR figure the publisher stated
+ *  (the alert compares pay in EUR); anything else is null (unknown is never
+ *  rendered as a number). The wording is the job card's own (`payLabel`), in
+ *  its language-neutral form: the alert text is stored before it is read. */
 export function formatOfferedPay(
   v: Pick<StoredPublicVacancyV1, "compensation">,
 ): string | null {
   const comp = v.compensation;
   if (comp.currency !== "EUR") return null;
-  const min = typeof comp.min === "number" ? Math.round(comp.min) : null;
-  const max = typeof comp.max === "number" ? Math.round(comp.max) : null;
-  if (min !== null && max !== null) {
-    return min === max ? `${max} EUR` : `${min}-${max} EUR`;
-  }
-  if (max !== null) return `${max} EUR`;
-  if (min !== null) return `${min} EUR`;
-  return null;
+  return payLabel(comp.currency, comp.min, comp.max, null);
 }
 
 export function jobAlertFacts(

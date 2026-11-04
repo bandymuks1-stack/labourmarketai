@@ -12894,15 +12894,35 @@
   "cvImport": {
     "reviewTitle": "Co znaleźliśmy w Twoim CV",
     "reviewHint": "System tylko sugeruje. Zapisz lub odrzuć każdy wpis — Ty decydujesz.",
+    "edit": "Popraw",
+    "editDone": "Gotowe",
+    "fieldTitle": "Nazwa",
+    "fieldText": "Tekst",
+    "fieldInstitution": "Szkoła lub organizator",
+    "fieldProgram": "Program",
+    "fieldKind": "Rodzaj",
+    "fieldStart": "Początek",
+    "fieldEnd": "Koniec",
+    "fieldYear": "Rok",
+    "dateHint": "np. 2019 lub 2019-03",
+    "unplacedHint": "Tych wierszy nie udało się przypisać. Wybierz sekcję lub odrzuć.",
+    "placeAs": "Gdzie to należy?",
+    "confidence": {
+      "high": "Wyraźnie podane w CV",
+      "medium": "Sprawdź, czy odczytano to poprawnie",
+      "low": "Przypuszczenie: koniecznie sprawdź"
+    },
     "empty": "Nie udało się odczytać żadnych sekcji z tego tekstu — możesz dodać je ręcznie.",
     "groups": {
       "workHistory": "Historia zatrudnienia",
       "education": "Wykształcenie",
+      "training": "Szkolenia i kursy",
       "languages": "Języki",
       "certificates": "Certyfikaty",
       "achievements": "Osiągnięcia",
       "salary": "Oczekiwania płacowe",
-      "availability": "Dostępność"
+      "availability": "Dostępność",
+      "unplaced": "Nierozpoznane"
     },
     "confirm": "Zapisz",
     "saving": "Zapisywanie…",
@@ -16165,6 +16185,7 @@
       "allowanceRemaining": "Pozostało {count} z {limit} tłumaczeń",
       "allowanceExhausted": "Wykorzystano wszystkie {limit} tłumaczeń zawartych w planie. Ogłoszenie nadal można czytać w języku oryginału.",
       "unavailable": "Nie udało się teraz przetłumaczyć tego ogłoszenia. Poniżej słowa samego ogłoszeniodawcy.",
+      "notSwitchedOn": "Automatyczne tłumaczenie ogłoszeń nie jest jeszcze włączone. Poniżej słowa samego ogłoszeniodawcy.",
       "signedOut": "Zaloguj się, aby przetłumaczyć to ogłoszenie."
     }
   },

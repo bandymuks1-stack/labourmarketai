@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { hasAnyProposal, parseCvSections } from "./structured-parse";
+import { hasAnyProposal, parseCvSections, TRAINING_TYPE_SLUG } from "./structured-parse";
 
 /**
  * Structured CV parsing heuristics (Full CV System v1) — fixture-driven.
@@ -74,6 +74,160 @@ describe("parseCvSections", () => {
     const noLevel = parseCvSections("Kalbos: anglų");
     expect(noLevel.languages).toHaveLength(1);
     expect(noLevel.languages[0].level).toBeNull();
+  });
+
+  it("reads each language's level from its own part of the line (first real user's feedback 2026-11-04)", () => {
+    const p = parseCvSections("KALBOS\nAnglų B2, rusų gimtoji; lenkų A1");
+    expect(p.languages.find((l) => l.lang === "en")?.level).toBe("B2");
+    expect(p.languages.find((l) => l.lang === "ru")?.level).toBe("native");
+    // A language with no level of its own gets none — never a neighbour's.
+    const bare = parseCvSections("Anglų C1, rusų");
+    expect(bare.languages.find((l) => l.lang === "en")?.level).toBe("C1");
+    expect(bare.languages.find((l) => l.lang === "ru")?.level).toBeNull();
+    // One language per line keeps the whole line.
+    expect(parseCvSections("Anglų kalba – B2").languages[0].level).toBe("B2");
+  });
+
+  it("a vocational training centre is education, not work history", () => {
+    const p = parseCvSections("2012–2016 Vilniaus statybininkų rengimo centras, apdailininkas");
+    expect(p.workHistory).toHaveLength(0);
+    expect(p.education).toHaveLength(1);
+    expect(p.education[0].startYear).toBe(2012);
+    expect(p.education[0].educationTypeSlug).toBe("vocational");
+  });
+
+  describe("stacked PDF layouts (title / employer / dates on separate lines)", () => {
+    const period = { start: { year: 2019, month: 3, day: null }, end: { year: 2023, month: 12, day: null } };
+
+    it("title / employer / month-name dates", () => {
+      const p = parseCvSections(
+        "Darbo patirtis\nPlytelių klojėjas\nUAB Fixture Statyba\n2019 m. kovas – 2023 m. gruodis\n• Vonios kambarių apdaila\nPagalbinis darbininkas\nUAB Fixture Remontas\n2016-09 – 2019-02",
+      );
+      expect(p.workHistory).toHaveLength(2);
+      expect(p.workHistory[0]).toMatchObject({
+        title: "Plytelių klojėjas, UAB Fixture Statyba",
+        ...period,
+        isCurrent: false,
+        confidence: "medium",
+        sourceLine: "Plytelių klojėjas / UAB Fixture Statyba / 2019 m. kovas – 2023 m. gruodis",
+      });
+      expect(p.workHistory[1].title).toBe("Pagalbinis darbininkas, UAB Fixture Remontas");
+      expect(p.workHistory[1].startYear).toBe(2016);
+      // A duty bullet is not an entry.
+      expect(JSON.stringify(p.workHistory)).not.toContain("Vonios");
+    });
+
+    it("the same entry in every order reads the same", () => {
+      for (const cv of [
+        "Work experience\nTiler\nFixture Build Ltd\nMarch 2019 – Dec 2023",
+        "Work experience\nTiler\nMar 2019 – December 2023\nFixture Build Ltd",
+        "Work experience\nMarch 2019 - December 2023\nTiler\nFixture Build Ltd",
+        "Work experience\n03/2019 – 12/2023\nTiler, Fixture Build Ltd",
+      ]) {
+        const p = parseCvSections(cv);
+        expect(p.workHistory, cv).toHaveLength(1);
+        expect(p.workHistory[0], cv).toMatchObject({ title: "Tiler, Fixture Build Ltd", ...period });
+      }
+    });
+
+    it("an entry still running stays open: no invented end", () => {
+      const p = parseCvSections("Опыт работы\nСварщик\nООО Фикстура\nмарт 2020 – настоящее время");
+      expect(p.workHistory[0]).toMatchObject({ startYear: 2020, endYear: null, isCurrent: true });
+    });
+
+    it("entries that open with the period keep their own lines", () => {
+      const p = parseCvSections(
+        "Darbo patirtis\n2019-03 – 2023-12\nPlytelių klojėjas\nUAB Alfa\n2016-09 – 2019-02\nDarbininkas\nUAB Beta",
+      );
+      expect(p.workHistory.map((w) => w.title)).toEqual(["Plytelių klojėjas, UAB Alfa", "Darbininkas, UAB Beta"]);
+    });
+
+    it("education: school first, program and year kept, under its heading", () => {
+      const p = parseCvSections(
+        "Išsilavinimas\nApdailininkas\nVilniaus statybininkų rengimo centras\n2012 – 2016\nFixture 11-oji\n2011\nFixture kolegija\nApdaila, 2016",
+      );
+      expect(p.workHistory).toHaveLength(0);
+      expect(p.education[0]).toMatchObject({
+        institution: "Vilniaus statybininkų rengimo centras",
+        program: "Apdailininkas",
+        startYear: 2012,
+        endYear: 2016,
+      });
+      expect(p.education[1]).toMatchObject({ institution: "Fixture 11-oji", endYear: 2011 });
+      expect(p.education[2]).toMatchObject({ institution: "Fixture kolegija", program: "Apdaila", endYear: 2016 });
+    });
+
+    it("a name above the first job, with no heading, is not part of that job", () => {
+      const p = parseCvSections("Vardenis Pavardenis\nPlytelių klojėjas\n2019 – 2023");
+      expect(p.workHistory).toHaveLength(1);
+      expect(p.workHistory[0].title).toBe("Plytelių klojėjas");
+    });
+
+    it("never groups languages or certificates, nor reads a word as a month away from a year", () => {
+      const p = parseCvSections("Kalbos\nAnglų B2\nRusų gimtoji\n2019 – 2023");
+      expect(p.languages).toHaveLength(2);
+      expect(p.workHistory).toHaveLength(0);
+      const name = parseCvSections("Darbo patirtis\nKovas Marketing 2019 UAB Alfa");
+      expect(name.workHistory[0].start).toBeNull();
+    });
+
+    it("an employer whose name holds a school word stays work under its heading", () => {
+      const p = parseCvSections("Darbo patirtis\nUAB Mokyklų renovacija, dažytojas 2018–2020");
+      expect(p.education).toHaveLength(0);
+      expect(p.workHistory).toHaveLength(1);
+    });
+  });
+
+  describe("work, training and education stay apart", () => {
+    it("a line under a training heading is training, even with no school word", () => {
+      const p = parseCvSections(
+        "Darbo patirtis\nUAB Alfa, mūrininkas 2019–2022\nMokymai\nDarbas aukštyje, 2021\nPirmoji pagalba\n2022\nIšsilavinimas\nVilniaus kolegija, statyba 2015–2018",
+      );
+      expect(p.workHistory.map((w) => w.title)).toEqual(["UAB Alfa, mūrininkas"]);
+      const training = p.education.filter((e) => e.educationTypeSlug === TRAINING_TYPE_SLUG);
+      expect(training.map((e) => [e.institution, e.endYear])).toEqual([
+        ["Darbas aukštyje", 2021],
+        ["Pirmoji pagalba", 2022],
+      ]);
+      const school = p.education.filter((e) => e.educationTypeSlug !== TRAINING_TYPE_SLUG);
+      expect(school.map((e) => e.institution)).toEqual(["Vilniaus kolegija"]);
+      expect(school[0].educationTypeSlug).toBe("college");
+    });
+
+    it("the heading is recognised in every active language", () => {
+      for (const heading of ["Mokymai", "Courses", "Курсы", "Cursussen", "Weiterbildung", "Szkolenia"]) {
+        const p = parseCvSections(`${heading}\nFixture kvalifikacija`);
+        expect(p.education[0]?.educationTypeSlug, heading).toBe(TRAINING_TYPE_SLUG);
+        expect(p.unplaced, heading).toEqual([]);
+      }
+    });
+  });
+
+  describe("lines that became no proposal are kept for the person", () => {
+    it("keeps duty bullets and free lines, without their bullet mark", () => {
+      const p = parseCvSections(
+        "Darbo patirtis\nPlytelių klojėjas\nUAB Alfa\n2019 – 2023\n• Vonios kambarių apdaila\nTikslus ir atsakingas darbuotojas.",
+      );
+      expect(p.unplaced).toEqual(["Vonios kambarių apdaila", "Tikslus ir atsakingas darbuotojas."]);
+    });
+
+    it("never a contact line, a heading, a bare date, or a line already proposed", () => {
+      const p = parseCvSections(
+        "Vardas@example.invalid\n+370 600 00000\nhttps://example.invalid/cv\nKalbos\nAnglų B2\n2019 – 2023\nDarbo patirtis\nUAB Alfa, mūrininkas 2019–2022",
+      );
+      expect(p.unplaced).toEqual([]);
+    });
+
+    it("the same line twice is offered once, and the list is bounded", () => {
+      expect(parseCvSections("Tikslus darbas\nTikslus darbas").unplaced).toEqual(["Tikslus darbas"]);
+      const many = Array.from({ length: 80 }, (_, i) => `Eilutė numeris ${"x".repeat(i + 1)}`).join("\n");
+      expect(parseCvSections(many).unplaced).toHaveLength(40);
+    });
+
+    it("a CV with only such lines still reaches the review", () => {
+      expect(hasAnyProposal(parseCvSections("Tikslus darbas"))).toBe(true);
+      expect(hasAnyProposal(parseCvSections(""))).toBe(false);
+    });
   });
 
   it("detects certificates as their own group (not work history)", () => {

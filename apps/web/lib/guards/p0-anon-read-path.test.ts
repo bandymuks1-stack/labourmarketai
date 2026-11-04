@@ -92,6 +92,24 @@ describe("P0-1 GREEN migration 3 — autovacuum keeps the covering index index-o
   });
 });
 
+describe("autovacuum v2 — absolute thresholds that do not drift as the table grows", () => {
+  const AV2 = "supabase/migrations/20261104060000_public_vacancies_autovacuum_v2.sql";
+  const sql = read(AV2, repo);
+
+  it("vacuums after 200 dead tuples or 200 inserts — storage parameters only", () => {
+    // Measured 2026-11-04: 2 % of 192k rows waited 44 h, 36,064 heap fetches on
+    // the free-text count (29,282 pages); after VACUUM ~2k pages, same results.
+    // 1,500 / 1,000 did not fire after a NAV-sized import on scratch; 200 / 200 did.
+    expect(sql).toMatch(/alter table public\.public_vacancies set \(\s*autovacuum_vacuum_scale_factor = 0,\s*autovacuum_vacuum_threshold = 200,\s*autovacuum_vacuum_insert_scale_factor = 0,\s*autovacuum_vacuum_insert_threshold = 200\s*\);/);
+    const executable = sql.replace(/--[^\n]*/g, "");
+    expect(executable).not.toMatch(/security\s+definer|(^|\s)(grant|revoke)\s+|create\s+policy|\bdrop\b|\bupdate\b|\bdelete\b|create\s+index/i);
+    expect(sql).toMatch(/^-- ROLLBACK$/m);
+    const down = read(AV2.replace("migrations", "rollbacks").replace(/\.sql$/, ".down.sql"), repo);
+    expect(down).toMatch(/autovacuum_vacuum_scale_factor = 0\.02,\s*autovacuum_vacuum_threshold = 500/);
+    expect(down).toMatch(/reset \(\s*autovacuum_vacuum_insert_scale_factor,\s*autovacuum_vacuum_insert_threshold\s*\)/);
+  });
+});
+
 describe("P0-1b — /jobs-sitemap.xml never answers 500 on a transient count failure", () => {
   const route = read("app/jobs-sitemap.xml/route.ts");
 

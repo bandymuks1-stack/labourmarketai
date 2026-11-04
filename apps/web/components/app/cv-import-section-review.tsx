@@ -6,9 +6,22 @@ import { useTranslations } from "next-intl";
 
 import {
   hasAnyProposal,
+  TRAINING_TYPE_SLUG,
   type CvDatePart,
+  type CvEducationProposal,
+  type CvProposalConfidence,
   type CvSectionProposals,
 } from "@/lib/cv/structured-parse";
+import {
+  achievementInput,
+  certificateInput,
+  cvDateText,
+  editedText,
+  educationInput,
+  learningKind,
+  workHistoryInput,
+  type CvFieldEdits,
+} from "@/lib/cv/cv-proposal-edit";
 import {
   confirmCvAchievementAction,
   confirmCvAvailabilityAction,
@@ -51,6 +64,37 @@ type ItemStatus =
   | { state: "conflict"; existing: string }
   | { state: "needs_migration" }
   | { state: "error"; message: "error" | "invalid" };
+
+/** Where a line the parser could not place may go: through the SAME confirm
+ *  actions as a proposal, so the person's choice is saved the same way. */
+const UNPLACED_TARGETS = ["workHistory", "education", "certificates", "achievements"] as const;
+type UnplacedTarget = (typeof UNPLACED_TARGETS)[number];
+
+function saveUnplaced(target: UnplacedTarget, line: string): Promise<CvImportConfirmResult> {
+  switch (target) {
+    case "workHistory":
+      return confirmCvWorkHistoryAction({
+        title: line,
+        startYear: null,
+        endYear: null,
+        start: null,
+        end: null,
+        isCurrent: false,
+      });
+    case "education":
+      return confirmCvEducationAction({
+        institution: line,
+        program: null,
+        educationTypeSlug: "other",
+        startYear: null,
+        endYear: null,
+      });
+    case "certificates":
+      return confirmCvCertificateAction({ title: line, year: null });
+    case "achievements":
+      return confirmCvAchievementAction({ title: line });
+  }
+}
 
 function mergeProposals(
   det: CvSectionProposals,
@@ -98,6 +142,7 @@ function mergeProposals(
     achievements: det.achievements,
     salary: det.salary ?? ai.salary,
     availability: det.availability,
+    unplaced: det.unplaced,
   };
   return {
     ...merged,
@@ -129,6 +174,11 @@ export function CvImportSectionReview({
 
   const [status, setStatus] = useState<Record<string, ItemStatus>>({});
   const [levelByKey, setLevelByKey] = useState<Record<string, string>>({});
+  const [placeByKey, setPlaceByKey] = useState<Record<string, UnplacedTarget | "">>({});
+  const [editsByKey, setEditsByKey] = useState<Record<string, CvFieldEdits>>({});
+  const editsOf = (key: string): CvFieldEdits => editsByKey[key] ?? {};
+  const setEdit = (key: string, field: string, value: string) =>
+    setEditsByKey((prev) => ({ ...prev, [key]: { ...prev[key], [field]: value } }));
 
   const statusOf = (key: string): ItemStatus =>
     status[key] ?? { state: "pending" };
@@ -169,7 +219,9 @@ export function CvImportSectionReview({
     }
   }
 
-  const rowCtx: RowContext = { statusOf, setItem, run };
+  const rowCtx: RowContext = { statusOf, setItem, run, editsOf, setEdit };
+  /** The typed values could not be saved: the row says so, nothing is sent. */
+  const notSaved = async (): Promise<CvImportConfirmResult> => ({ ok: false, code: "invalid" });
 
   const yearsLabel = (
     start: number | null,
@@ -220,48 +272,75 @@ export function CvImportSectionReview({
             key={`wh-${i}`}
             ctx={rowCtx}
             itemKey={`wh-${i}`}
-            label={w.title}
-            sub={periodLabel(w)}
-            aiOrigin={i >= merged.aiStart.workHistory}
-            onConfirm={() =>
-              confirmCvWorkHistoryAction({
-                title: w.title,
-                startYear: w.startYear,
-                endYear: w.endYear,
-                start: w.start ?? null,
-                end: w.end ?? null,
-                isCurrent: w.isCurrent,
-              })
+            label={editsOf(`wh-${i}`).title ?? w.title}
+            sub={
+              editsOf(`wh-${i}`).start !== undefined || editsOf(`wh-${i}`).end !== undefined
+                ? `${editsOf(`wh-${i}`).start ?? cvDateText(w.start)}–${editsOf(`wh-${i}`).end ?? cvDateText(w.end)}`
+                : periodLabel(w)
             }
+            confidence={w.confidence}
+            fields={[
+              { name: "title", label: t("fieldTitle"), value: w.title },
+              { name: "start", label: t("fieldStart"), value: cvDateText(w.start ?? (w.startYear ? { year: w.startYear, month: null, day: null } : null)), hint: t("dateHint") },
+              { name: "end", label: t("fieldEnd"), value: cvDateText(w.end ?? (w.endYear ? { year: w.endYear, month: null, day: null } : null)), hint: t("dateHint") },
+            ]}
+            aiOrigin={i >= merged.aiStart.workHistory}
+            onConfirm={() => {
+              const input = workHistoryInput(w, editsOf(`wh-${i}`));
+              return input ? confirmCvWorkHistoryAction(input) : notSaved();
+            }}
           />
         ))}
       </ReviewGroup>
 
-      <ReviewGroup nameKey="education" count={merged.education.length}>
-        {merged.education.map((e, i) => (
+      {([
+        ["education", (e: CvEducationProposal) => e.educationTypeSlug !== TRAINING_TYPE_SLUG],
+        ["training", (e: CvEducationProposal) => e.educationTypeSlug === TRAINING_TYPE_SLUG],
+      ] as const).map(([nameKey, belongs]) => (
+      <ReviewGroup key={nameKey} nameKey={nameKey} count={merged.education.filter(belongs).length}>
+        {merged.education.map((e, i) => !belongs(e) ? null : (
           <ItemRow
             key={`edu-${i}`}
             ctx={rowCtx}
             itemKey={`edu-${i}`}
-            label={e.institution}
+            label={editsOf(`edu-${i}`).institution ?? e.institution}
             sub={
-              [e.program, yearsLabel(e.startYear, e.endYear, false)]
+              [
+                editsOf(`edu-${i}`).program ?? e.program,
+                yearsLabel(
+                  Number(editsOf(`edu-${i}`).startYear ?? e.startYear) || null,
+                  Number(editsOf(`edu-${i}`).endYear ?? e.endYear) || null,
+                  false,
+                ),
+              ]
                 .filter(Boolean)
                 .join(" · ") || null
             }
+            confidence={e.confidence}
+            fields={[
+              { name: "institution", label: t("fieldInstitution"), value: e.institution },
+              { name: "program", label: t("fieldProgram"), value: e.program ?? "" },
+              {
+                name: "kind",
+                label: t("fieldKind"),
+                value: learningKind(e.educationTypeSlug),
+                options: [
+                  { value: "education", label: t("groups.education") },
+                  { value: "training", label: t("groups.training") },
+                ],
+              },
+              { name: "startYear", label: t("fieldStart"), value: e.startYear ? String(e.startYear) : "" },
+              { name: "endYear", label: t("fieldEnd"), value: e.endYear ? String(e.endYear) : "" },
+            ]}
             aiOrigin={i >= merged.aiStart.education}
-            onConfirm={() =>
-              confirmCvEducationAction({
-                institution: e.institution,
-                program: e.program,
-                educationTypeSlug: e.educationTypeSlug,
-                startYear: e.startYear,
-                endYear: e.endYear,
-              })
-            }
+            onConfirm={() => {
+              const input = educationInput(e, editsOf(`edu-${i}`));
+              return input ? confirmCvEducationAction(input) : notSaved();
+            }}
           />
         ))}
       </ReviewGroup>
+      ))}
 
       <ReviewGroup nameKey="languages" count={merged.languages.length}>
         {merged.languages.map((l, i) => {
@@ -277,6 +356,7 @@ export function CvImportSectionReview({
                 l.lang
               }
               sub={null}
+              confidence={l.confidence}
               aiOrigin={i >= merged.aiStart.languages}
               confirmDisabled={chosen === ""}
               onConfirm={(allowReplace) =>
@@ -316,12 +396,18 @@ export function CvImportSectionReview({
             key={`cert-${i}`}
             ctx={rowCtx}
             itemKey={`cert-${i}`}
-            label={c.title}
-            sub={c.year ? String(c.year) : null}
+            label={editsOf(`cert-${i}`).title ?? c.title}
+            sub={editsOf(`cert-${i}`).year ?? (c.year ? String(c.year) : null)}
+            confidence={c.confidence}
+            fields={[
+              { name: "title", label: t("fieldTitle"), value: c.title },
+              { name: "year", label: t("fieldYear"), value: c.year ? String(c.year) : "" },
+            ]}
             aiOrigin={i >= merged.aiStart.certificates}
-            onConfirm={() =>
-              confirmCvCertificateAction({ title: c.title, year: c.year })
-            }
+            onConfirm={() => {
+              const input = certificateInput(c, editsOf(`cert-${i}`));
+              return input ? confirmCvCertificateAction(input) : notSaved();
+            }}
           />
         ))}
       </ReviewGroup>
@@ -332,10 +418,15 @@ export function CvImportSectionReview({
             key={`ach-${i}`}
             ctx={rowCtx}
             itemKey={`ach-${i}`}
-            label={a.title}
+            label={editsOf(`ach-${i}`).title ?? a.title}
             sub={null}
+            confidence={a.confidence}
+            fields={[{ name: "title", label: t("fieldTitle"), value: a.title }]}
             aiOrigin={false}
-            onConfirm={() => confirmCvAchievementAction({ title: a.title })}
+            onConfirm={() => {
+              const input = achievementInput(a, editsOf(`ach-${i}`));
+              return input ? confirmCvAchievementAction(input) : notSaved();
+            }}
           />
         ))}
       </ReviewGroup>
@@ -349,6 +440,7 @@ export function CvImportSectionReview({
               .filter((v): v is number => v !== null)
               .join("–")} ${t("perMonth")}`}
             sub={null}
+            confidence={merged.salary.confidence}
             aiOrigin={proposals.salary === null}
             onConfirm={(allowReplace) =>
               confirmCvSalaryAction({
@@ -369,12 +461,61 @@ export function CvImportSectionReview({
             itemKey={`avail-${h.key}`}
             label={t(`availabilityKeys.${h.key}`)}
             sub={null}
+            confidence={h.confidence}
             aiOrigin={false}
             onConfirm={(allowReplace) =>
               confirmCvAvailabilityAction({ key: h.key, allowReplace })
             }
           />
         ))}
+      </ReviewGroup>
+
+      <ReviewGroup
+        nameKey="unplaced"
+        count={merged.unplaced.length}
+        hint={t("unplacedHint")}
+      >
+        {merged.unplaced.map((line, i) => {
+          const key = `unplaced-${i}`;
+          const target = placeByKey[key] ?? "";
+          return (
+            <ItemRow
+              key={key}
+              ctx={rowCtx}
+              itemKey={key}
+              label={editsOf(key).text ?? line}
+              sub={null}
+              confidence={null}
+              aiOrigin={false}
+              confirmDisabled={target === ""}
+              fields={[{ name: "text", label: t("fieldText"), value: line }]}
+              onConfirm={() => {
+                const text = editedText(line, editsOf(key));
+                return text ? saveUnplaced(target as UnplacedTarget, text) : notSaved();
+              }}
+            >
+              <select
+                value={target}
+                onChange={(e) =>
+                  setPlaceByKey((prev) => ({
+                    ...prev,
+                    [key]: e.target.value as UnplacedTarget | "",
+                  }))
+                }
+                aria-label={t("placeAs")}
+                className="rounded-md border border-ink-500 bg-ink-700 px-2 py-1 text-xs text-text-primary outline-none focus:border-brand-blue"
+                data-testid={`cv-import-place-${key}`}
+              >
+                <option value="">{t("placeAs")}</option>
+                {UNPLACED_TARGETS.map((g) => (
+                  <option key={g} value={g}>
+                    {t(`groups.${g}`)}
+                  </option>
+                ))}
+              </select>
+            </ItemRow>
+          );
+        })}
       </ReviewGroup>
     </section>
   );
@@ -388,15 +529,28 @@ interface RowContext {
     call: (allowReplace: boolean) => Promise<CvImportConfirmResult>,
     allowReplace?: boolean,
   ) => Promise<void>;
+  editsOf: (key: string) => CvFieldEdits;
+  setEdit: (key: string, field: string, value: string) => void;
+}
+
+/** One correctable field of a proposal. `value` is what the parser read. */
+interface EditField {
+  name: string;
+  label: string;
+  value: string;
+  hint?: string;
+  options?: readonly { value: string; label: string }[];
 }
 
 function ReviewGroup({
   nameKey,
   count,
+  hint,
   children,
 }: {
   nameKey: string;
   count: number;
+  hint?: string;
   children: React.ReactNode;
 }) {
   const t = useTranslations("cvImport");
@@ -406,6 +560,7 @@ function ReviewGroup({
       <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
         {t(`groups.${nameKey}`)} · {count}
       </p>
+      {hint ? <p className="text-xs leading-relaxed text-text-secondary">{hint}</p> : null}
       <ul className="flex flex-col gap-1.5">{children}</ul>
     </div>
   );
@@ -416,8 +571,10 @@ function ItemRow({
   itemKey,
   label,
   sub,
+  confidence: readingConfidence,
   aiOrigin,
   confirmDisabled,
+  fields,
   onConfirm,
   children,
 }: {
@@ -425,14 +582,23 @@ function ItemRow({
   itemKey: string;
   label: string;
   sub?: string | null;
+  /** How sure the parser is of its READING of the CV, never of the fact. Null
+   *  for a line it did not read into anything. */
+  confidence: CvProposalConfidence | null;
   aiOrigin: boolean;
   confirmDisabled?: boolean;
+  fields?: readonly EditField[];
   onConfirm: (allowReplace: boolean) => Promise<CvImportConfirmResult>;
   children?: React.ReactNode;
 }) {
   const t = useTranslations("cvImport");
-  const { statusOf, setItem, run } = ctx;
+  const { statusOf, setItem, run, editsOf, setEdit } = ctx;
+  const [editing, setEditing] = useState(false);
   const s = statusOf(itemKey);
+  const open = s.state === "pending" || s.state === "error";
+  const edits = editsOf(itemKey);
+  // What the person corrected is theirs: the parser's doubt no longer applies.
+  const confidence = Object.keys(edits).length > 0 ? null : readingConfidence;
   return (
       <li
         className="flex flex-col gap-1.5 rounded-md border border-ink-600 px-3 py-2"
@@ -440,9 +606,18 @@ function ItemRow({
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex min-w-0 flex-col">
-            <span className="truncate text-sm text-text-primary">{label}</span>
+            <span className="break-words text-sm text-text-primary">{label}</span>
             {sub ? (
               <span className="text-xs text-text-secondary">{sub}</span>
+            ) : null}
+            {confidence ? (
+              <span
+                className={`text-xs ${confidence === "low" ? "text-state-warning" : "text-text-muted"}`}
+                data-testid={`cv-import-confidence-${itemKey}`}
+                data-confidence={confidence}
+              >
+                {t(`confidence.${confidence}`)}
+              </span>
             ) : null}
             {aiOrigin && (
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">
@@ -450,7 +625,7 @@ function ItemRow({
               </span>
             )}
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {children}
             {s.state === "pending" || s.state === "error" ? (
               <>
@@ -463,6 +638,17 @@ function ItemRow({
                 >
                   {t("confirm")}
                 </button>
+                {fields ? (
+                  <button
+                    type="button"
+                    aria-expanded={editing}
+                    onClick={() => setEditing((v) => !v)}
+                    className="rounded-md border border-ink-600 px-2.5 py-1 text-xs text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary"
+                    data-testid={`cv-import-edit-${itemKey}`}
+                  >
+                    {editing ? t("editDone") : t("edit")}
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => setItem(itemKey, { state: "discarded" })}
@@ -490,6 +676,37 @@ function ItemRow({
             )}
           </div>
         </div>
+        {editing && open && fields ? (
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid={`cv-import-fields-${itemKey}`}>
+            {fields.map((f) => (
+              <label key={f.name} className="flex flex-col gap-1 text-xs text-text-secondary">
+                {f.label}
+                {f.options ? (
+                  <select
+                    value={edits[f.name] ?? f.value}
+                    onChange={(e) => setEdit(itemKey, f.name, e.target.value)}
+                    className="rounded-md border border-ink-500 bg-ink-700 px-2 py-1.5 text-sm text-text-primary outline-none focus:border-brand-blue"
+                    data-testid={`cv-import-field-${itemKey}-${f.name}`}
+                  >
+                    {f.options.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    value={edits[f.name] ?? f.value}
+                    placeholder={f.hint}
+                    onChange={(e) => setEdit(itemKey, f.name, e.target.value)}
+                    className="rounded-md border border-ink-500 bg-ink-700 px-2 py-1.5 text-sm text-text-primary outline-none focus:border-brand-blue"
+                    data-testid={`cv-import-field-${itemKey}-${f.name}`}
+                  />
+                )}
+              </label>
+            ))}
+          </div>
+        ) : null}
         {s.state === "conflict" && (
           <div
             className="flex flex-wrap items-center gap-2 rounded-md border border-state-warning/40 bg-state-warning/5 px-2 py-1.5"
