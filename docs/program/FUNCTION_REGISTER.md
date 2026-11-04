@@ -216,64 +216,64 @@ Database timings come from production `pg_stat_statements`, read-only. They are 
 
 ### SEO (signed out, 2026-11-04)
 
-| ID | Check | Status | Evidence | Defect / blocker |
-|---|---|---|---|---|
-| SEO-1 | robots.txt | PASS | Chrome: `/robots.txt` 200, `Allow: /`, 39 `Disallow` lines (private paths), 3 `Sitemap` lines, `Content-Signal: search=yes,ai-train=no,use=reference` | — |
-| SEO-2 | sitemap.xml: every URL | PASS | Chrome: 264 URLs (44 paths × lt, en, ru, nl, de, pl), 1,770 `xhtml:link` alternates. **All 264 were fetched:** 264 × 200, 264 self-canonical, 0 `noindex`, 7 hreflang each (6 + x-default), `<html lang>` matches the path 264/264, exactly one h1 264/264. Median 327 ms, max 1,176 ms | — |
-| SEO-3 | Jobs and questions sitemaps | PASS | Chrome: `/jobs-sitemap.xml` 200 with 55 shards. **All 55 shards fetched:** 55 × 200, **54,222 job URLs**, 7 alternates and a `lastmod` on every URL. 18 job URLs sampled (first, middle and last of shards 0, 10, 20, 30, 40, 54): 18 × 200, self-canonical, indexable. `/questions-sitemap.xml` 270 URLs; 30 sampled (every 9th): 30 × 200, self-canonical | keyset paging of the jobs sitemap is RED draft #2996, not applied |
-| SEO-4 | Canonical | PASS | 312 pages (SEO-2, SEO-3 samples): each names itself. `/lt/jobs?q=…` names `/lt/jobs` | page 2+: SEO-8 |
-| SEO-5 | hreflang | PASS | 312 pages: 7 alternates each, x-default present | — |
-| SEO-6 | Structured data validity | PASS | 312 pages: **0 JSON-LD parse errors**. Organization + WebSite on every page; CollectionPage on `/jobs`; Article + BreadcrumbList on question pages; WebPage on job pages | no JobPosting by design (employer and place are members-only, 2026-08-24 rule) |
-| SEO-7 | Title and description length | FAIL | Chrome, the 264 sitemap pages: **31 titles over 70 characters** (the home page in all 6 locales, 77–92; e.g. `/de/create-cv` 96, `/de/worker-intake` 93). **67 descriptions over 170 characters** (max 248). **12 under 70**: `/{locale}/labour-market/lv` and `/ee` | search results cut them. Copy fix across 6 locales; the home title is under the landing freeze, so its baseline is refreshed in the same PR |
-| SEO-8 | Job board page 2+ | FAIL | Chrome: `/lt/jobs?page=2` and `/en/jobs?page=3` name `/lt/jobs` and `/en/jobs` as canonical. Their 20 cards differ from page 1 (0 of 20 overlap) | fix in draft #2984. **Blocker:** the product gate. `app/[locale]/(marketing)/jobs/page.tsx` is under owner waiver `public-acquisition-route-jobs`, so the gate reports the waiver's existing findings as `pr-not-covered` on any PR touching the file. The waiver's PR list needs #2984 added, in `.github/scripts/owner-waivers.mjs` and in `scoped-owner-waiver.test.ts`. That takes an owner sentence |
-| SEO-9 | Country market pages | PASS | Chrome: `/{locale}/labour-market/{lt,lv,ee,pl,de,nl}`: 36 sitemap URLs, all 200, self-canonical, indexable | lv and ee descriptions are short (SEO-7) |
-| SEO-10 | Country and city on signed-out job pages | BLOCKED | Chrome: cards read "Darbdavys ir vieta: prisijungus" | the database function is RED draft #2993, not applied. It waits for the owner's apply approval |
+| ID | Check | Status | Evidence | Defect / blocker | Executor / next action |
+|---|---|---|---|---|---|
+| SEO-1 | robots.txt | PASS | Chrome: `/robots.txt` 200, `Allow: /`, 39 `Disallow` lines (private paths), 3 `Sitemap` lines, `Content-Signal: search=yes,ai-train=no,use=reference` | — | Coordinator: re-check on risk |
+| SEO-2 | sitemap.xml: every URL | PASS | Chrome: 264 URLs (44 paths × lt, en, ru, nl, de, pl), 1,770 `xhtml:link` alternates. **All 264 were fetched:** 264 × 200, 264 self-canonical, 0 `noindex`, 7 hreflang each (6 + x-default), `<html lang>` matches the path 264/264, exactly one h1 264/264. Median 327 ms, max 1,176 ms | — | Coordinator: re-check on a sitemap change |
+| SEO-3 | Jobs and questions sitemaps | PASS | Chrome: `/jobs-sitemap.xml` 200 with 55 shards. **All 55 shards fetched:** 55 × 200, **54,222 job URLs**, 7 alternates and a `lastmod` on every URL. 18 job URLs sampled (first, middle and last of shards 0, 10, 20, 30, 40, 54): 18 × 200, self-canonical, indexable. `/questions-sitemap.xml` 270 URLs; 30 sampled (every 9th): 30 × 200, self-canonical | keyset paging of the jobs sitemap is RED draft #2996, not applied | Owner: apply approval for #2996 |
+| SEO-4 | Canonical | PASS | 312 pages (SEO-2, SEO-3 samples): each names itself. `/lt/jobs?q=…` names `/lt/jobs` | page 2+: SEO-8 | Coordinator: re-check on risk |
+| SEO-5 | hreflang | PASS | 312 pages: 7 alternates each, x-default present | — | Coordinator: re-check on risk |
+| SEO-6 | Structured data validity | PASS | 312 pages: **0 JSON-LD parse errors**. Organization + WebSite on every page; CollectionPage on `/jobs`; Article + BreadcrumbList on question pages; WebPage on job pages | no JobPosting by design (employer and place are members-only, 2026-08-24 rule) | Coordinator: re-check on risk |
+| SEO-7 | Title and description length | FAIL | Chrome, the 264 sitemap pages: **31 titles over 70 characters** (the home page in all 6 locales, 77–92; e.g. `/de/create-cv` 96, `/de/worker-intake` 93). **67 descriptions over 170 characters** (max 248). **12 under 70**: `/{locale}/labour-market/lv` and `/ee` | search results cut them. Copy fix across 6 locales; the home title is under the landing freeze, so its baseline is refreshed in the same PR | GREEN executor: shorten titles and descriptions, 6 locales |
+| SEO-8 | Job board page 2+ | FAIL | Chrome: `/lt/jobs?page=2` and `/en/jobs?page=3` name `/lt/jobs` and `/en/jobs` as canonical. Their 20 cards differ from page 1 (0 of 20 overlap) | fix in draft #2984. **Blocker:** the product gate. `app/[locale]/(marketing)/jobs/page.tsx` is under owner waiver `public-acquisition-route-jobs`, so the gate reports the waiver's existing findings as `pr-not-covered` on any PR touching the file. The waiver's PR list needs #2984 added, in `.github/scripts/owner-waivers.mjs` and in `scoped-owner-waiver.test.ts`. That takes an owner sentence | Owner: one sentence for the waiver. Then #2984 merges |
+| SEO-9 | Country market pages | PASS | Chrome: `/{locale}/labour-market/{lt,lv,ee,pl,de,nl}`: 36 sitemap URLs, all 200, self-canonical, indexable | lv and ee descriptions are short (SEO-7) | Coordinator: re-check on risk |
+| SEO-10 | Country and city on signed-out job pages | BLOCKED | Chrome: cards read "Darbdavys ir vieta: prisijungus" | the database function is RED draft #2993, not applied. It waits for the owner's apply approval | Owner: apply approval for #2993 |
 
 ### GEO (generative engines, signed out, 2026-11-04)
 
-| ID | Check | Status | Evidence | Defect / blocker |
-|---|---|---|---|---|
-| GEO-1 | llms.txt | PASS | Chrome: `/llms.txt` 200, 3,141 characters, sections "How to read this site", "Public pages", "Facts to keep straight", "Connect an AI assistant", "Security", 11 links | `/llms-full.txt` 404 (optional) |
-| GEO-2 | Answer-engine crawlers may read the site | PASS | `/robots.txt`: `User-agent: *` allowed, `use=reference`. Search and answer agents are not named, so they are allowed | Cloudflare's managed block disallows the training crawlers (GPTBot, ClaudeBot, CCBot, Google-Extended, GoogleOther, Applebot-Extended). Owner choice (D-10), not a defect |
-| GEO-3 | Question-and-answer pages | PASS | 270 question pages; 30 sampled, all with Article + BreadcrumbList, self-canonical | — |
-| GEO-4 | Public market facts are quotable | PASS | SEO-9 | — |
-| GEO-5 | Key pages answer "what is it" in text | PASS | Chrome, main text: `/en/about` opens with "What is LabourMarket.ai / LabourMarket.ai is…" (829 words, 10 h2). `/en` 655 words, 13 h2; `/en/pricing` 899 words, states that prices are confirmed and online activation is not open; `/en/for-companies` 426 words | hub pages are thin: `/en/questions` 58 words, `/en/labour-market` 63 words, both without h2. No `FAQPage` markup on any page |
-| GEO-6 | Entity consistency | FAIL | Chrome, 11 key pages in 4 locales: Organization `name`, `url` and `logo` are identical everywhere, and `og:site_name` is `LabourMarket.ai` everywhere. **Three different definitions of the product:** llms.txt "a work and professional-life platform"; `/en/about` "a labour-market operating platform"; `/en` "a living system of work and business opportunities" | an answer engine quoting the site gets three answers. The Organization has no `@id` and 0 `sameAs`, and WebSite has no `SearchAction`. Fix: one definition sentence reused by all three, plus `@id`. This is copy (owner wording), so it is not changed here |
+| ID | Check | Status | Evidence | Defect / blocker | Executor / next action |
+|---|---|---|---|---|---|
+| GEO-1 | llms.txt | PASS | Chrome: `/llms.txt` 200, 3,141 characters, sections "How to read this site", "Public pages", "Facts to keep straight", "Connect an AI assistant", "Security", 11 links | `/llms-full.txt` 404 (optional) | None |
+| GEO-2 | Answer-engine crawlers may read the site | PASS | `/robots.txt`: `User-agent: *` allowed, `use=reference`. Search and answer agents are not named, so they are allowed | Cloudflare's managed block disallows the training crawlers (GPTBot, ClaudeBot, CCBot, Google-Extended, GoogleOther, Applebot-Extended). Owner choice (D-10), not a defect | Owner: confirm the crawler choice (D-10) |
+| GEO-3 | Question-and-answer pages | PASS | 270 question pages; 30 sampled, all with Article + BreadcrumbList, self-canonical | — | Coordinator: re-check on risk |
+| GEO-4 | Public market facts are quotable | PASS | SEO-9 | — | Coordinator: re-check on risk |
+| GEO-5 | Key pages answer "what is it" in text | PASS | Chrome, main text: `/en/about` opens with "What is LabourMarket.ai / LabourMarket.ai is…" (829 words, 10 h2). `/en` 655 words, 13 h2; `/en/pricing` 899 words, states that prices are confirmed and online activation is not open; `/en/for-companies` 426 words | hub pages are thin: `/en/questions` 58 words, `/en/labour-market` 63 words, both without h2. No `FAQPage` markup on any page | GREEN executor: add text to the two thin hubs |
+| GEO-6 | Entity consistency | FAIL | Chrome, 11 key pages in 4 locales: Organization `name`, `url` and `logo` are identical everywhere, and `og:site_name` is `LabourMarket.ai` everywhere. **Three different definitions of the product:** llms.txt "a work and professional-life platform"; `/en/about` "a labour-market operating platform"; `/en` "a living system of work and business opportunities" | an answer engine quoting the site gets three answers. The Organization has no `@id` and 0 `sameAs`, and WebSite has no `SearchAction`. Fix: one definition sentence reused by all three, plus `@id`. This is copy (owner wording), so it is not changed here | Owner: choose one sentence. GREEN executor: reuse it, add `@id` |
 
 ### Internal search (2026-11-04)
 
-| ID | Check | Status | Evidence | Defect / blocker |
-|---|---|---|---|---|
-| SR-1 | `/jobs` free text, cold first query | FAIL | measured by J-13: see its report and RED draft #3024. `pg_stat_statements`: `search_public_vacancy_previews_v1` 35,752 calls, mean 560 ms, max 2,999 ms (the 3 s anon timeout) | fix is RED draft #3024, not applied. #3020's trigram index was rolled back (RC-A6, #3025). 2026-11-04: after the owner-approved manual VACUUM, pages read per search fell from 30.5k to 4.3k and signed-out Chrome searches took 0.43–0.92 s with no unavailable state; the status stays FAIL until the decay measurement after the 08:11 import and a cold check after idle |
-| SR-2 | `/jobs` free text, correctness and warm timing | PASS | Chrome, signed out, full HTML: `suvirintojas` 736 ms, `snickare` 451 ms, `el` 446 ms; **20 cards each, and 20 of 20 titles contain the term**. `developer` 0 cards with the honest "0 rasta… nerasta" state. No "unavailable" state | — |
-| SR-3 | Profession filter | PASS | Chrome: `?profession=teacher` 306 ms, 20 cards; `handyman` 2 cards; `electrician` page 1 / page 2: 20 / 20 cards, 0 overlap | — |
-| SR-4 | Search paging | FAIL | Chrome: unfiltered board p1/p2 0 overlap; `?q=el` p1/p2 0 overlap. **But a term that maps to a profession drops the page:** `/lt/jobs?q=elektrikas&page=2` redirects to `/lt/jobs?profession=electrician` and shows page 1 again (20 of 20 the same) | the board's own links never build this URL (after the redirect they carry `profession`), so only shared or hand-made links meet it. Fix: carry `page` into the redirect in `jobs/page.tsx`. It is blocked by the same owner waiver as SEO-8 |
-| SR-5 | Jobs search walk | PASS | prod walk jobs-search 41663385778 (2026-11-03) | — |
-| SR-6 | Job page from search, signed out | PASS | SEO-3: 18 job pages from the sitemap, 200, self-canonical, indexable | — |
-| SR-7 | Marketplace find | PASS | prod walk marketplace 41729310761 (2026-11-03): M-3 the buyer finds the shelf among goods; M-5 the buyer reaches the service from the market. `pg_stat_statements`: `marketplace_listings` reads 501 calls, mean 1.3 ms, max 79 ms; `org_capabilities_for_visible_listings_v1` 141 calls, mean 9.2 ms, max 314 ms | — |
-| SR-8 | People / candidates search | NOT VERIFIED | no production walk searches people: company-chain C-2/U-3 opens the hand-raisers of a need, which is not a search. `pg_stat_statements`: `list_discoverable_worker_ids_v1` 572 calls, mean 41.9 ms, **max 2,536 ms**; `list_discoverable_worker_profiles_v1` 463 calls, mean 45.4 ms, max 1,021 ms | needs a walk step: the company searches by profession and place and finds the synthetic discoverable worker, and an undiscoverable one stays absent |
-| SR-9 | Organizations directory search | NOT VERIFIED | no walk. `search_organizations_directory_v1` 16 calls in total, mean 11.0 ms, max 55 ms | needs a walk step |
+| ID | Check | Status | Evidence | Defect / blocker | Executor / next action |
+|---|---|---|---|---|---|
+| SR-1 | `/jobs` free text, cold first query | FAIL | measured by J-13: see its report and RED draft #3024. `pg_stat_statements`: `search_public_vacancy_previews_v1` 35,752 calls, mean 560 ms, max 2,999 ms (the 3 s anon timeout) | fix is RED draft #3024, not applied. #3020's trigram index was rolled back (RC-A6, #3025). 2026-11-04: after the owner-approved manual VACUUM, pages read per search fell from 30.5k to 4.3k and signed-out Chrome searches took 0.43–0.92 s with no unavailable state; the status stays FAIL until the decay measurement after the 08:11 import and a cold check after idle | GREEN executor: honest timeout state. Coordinator: new RED draft |
+| SR-2 | `/jobs` free text, correctness and warm timing | PASS | Chrome, signed out, full HTML: `suvirintojas` 736 ms, `snickare` 451 ms, `el` 446 ms; **20 cards each, and 20 of 20 titles contain the term**. `developer` 0 cards with the honest "0 rasta… nerasta" state. No "unavailable" state | — | Coordinator: re-walk on risk |
+| SR-3 | Profession filter | PASS | Chrome: `?profession=teacher` 306 ms, 20 cards; `handyman` 2 cards; `electrician` page 1 / page 2: 20 / 20 cards, 0 overlap | — | Coordinator: re-walk on risk |
+| SR-4 | Search paging | FAIL | Chrome: unfiltered board p1/p2 0 overlap; `?q=el` p1/p2 0 overlap. **But a term that maps to a profession drops the page:** `/lt/jobs?q=elektrikas&page=2` redirects to `/lt/jobs?profession=electrician` and shows page 1 again (20 of 20 the same) | the board's own links never build this URL (after the redirect they carry `profession`), so only shared or hand-made links meet it. Fix: carry `page` into the redirect in `jobs/page.tsx`. It is blocked by the same owner waiver as SEO-8 | GREEN executor, once the waiver covers `jobs/page.tsx` |
+| SR-5 | Jobs search walk | PASS | prod walk jobs-search 41663385778 (2026-11-03) | — | Coordinator: re-walk on risk |
+| SR-6 | Job page from search, signed out | PASS | SEO-3: 18 job pages from the sitemap, 200, self-canonical, indexable | — | Coordinator: re-check on risk |
+| SR-7 | Marketplace find | PASS | prod walk marketplace 41729310761 (2026-11-03): M-3 the buyer finds the shelf among goods; M-5 the buyer reaches the service from the market. `pg_stat_statements`: `marketplace_listings` reads 501 calls, mean 1.3 ms, max 79 ms; `org_capabilities_for_visible_listings_v1` 141 calls, mean 9.2 ms, max 314 ms | — | Coordinator: re-walk on risk |
+| SR-8 | People / candidates search | NOT VERIFIED | no production walk searches people: company-chain C-2/U-3 opens the hand-raisers of a need, which is not a search. `pg_stat_statements`: `list_discoverable_worker_ids_v1` 572 calls, mean 41.9 ms, **max 2,536 ms**; `list_discoverable_worker_profiles_v1` 463 calls, mean 45.4 ms, max 1,021 ms | needs a walk step: the company searches by profession and place and finds the synthetic discoverable worker, and an undiscoverable one stays absent | Coordinator: add the walk step |
+| SR-9 | Organizations directory search | NOT VERIFIED | no walk. `search_organizations_directory_v1` 16 calls in total, mean 11.0 ms, max 55 ms | needs a walk step | Coordinator: add the walk step |
 
 ### UX/UI (signed out, 2026-11-04)
 
 Pages: `/lt`, `/lt/jobs`, `/lt/for-companies`, `/lt/for-workers`, `/lt/pricing`, `/lt/questions`, `/lt/auth/signup`, `/lt/labour-market/lt`, `/en`, `/lt/jobs?q=suvirintojas`.
 
-| ID | Check | Status | Evidence | Defect / blocker |
-|---|---|---|---|---|
-| UX-1 | LCP, phone 390 px | PASS | Playwright: worst `/lt` **2,384 ms** (the h1); others 500–1,388 ms. Good is ≤ 2,500 ms | `/lt` is close to the limit under 4× CPU |
-| UX-2 | LCP, desktop | PASS | Playwright: worst `/lt` 632 ms, others 208–536 ms | — |
-| UX-3 | CLS, phone 390 px | FAIL | Playwright: **0.13 on 9 of 10 pages** (0 on `/lt/auth/signup`). Good is ≤ 0.1 | **Cause:** the analytics consent banner (`components/app/analytics-consent.tsx`, `placement="top"`) renders only after hydration, because the choice is read from the device. It is inserted above the header, and its 59 px pushed the header and the whole page down (desktop, 671 ms after start). It hits every first visit, crawlers included. The banner is in the page flow on purpose (owner decision 2026-11-03: never cover a field), so the fix is an owner choice. Either render it from the server when there is no choice cookie (the choice mirrored into a cookie), or reserve its space. This is consent UX, so no GREEN change was made |
-| UX-4 | CLS, desktop | PASS | Playwright: 0.043 on 9 of 10 pages, 0 on sign-up | same cause as UX-3, below the limit here |
-| UX-5 | INP (one real interaction) | PASS | Playwright: worst 96 ms on phone (`/lt/for-companies`), 56 ms on desktop. Good is ≤ 200 ms | lab proxy: one click per page |
-| UX-6 | Accessibility (axe, WCAG 2.x A/AA) | FAIL | Playwright + axe, 10 phone pages and desktop `/lt`: **20 failing nodes in 3 rules.** `color-contrast` ×1 on 9 pages plus desktop `/lt`: the footer label "Rinkos apžvalga", 12 px under an `opacity-70` wrapper. `color-contrast` ×9 on `/lt/labour-market/lt`: the requirement chips `border-brand-blue/40 bg-brand-blue/10`. `link-in-text-block` ×1 on `/lt/labour-market/lt`: a source link told apart by colour only. `/lt/auth/signup`: 0 | the footer label is fixed in GREEN #3030 (auto-merge); re-run axe after deploy. The country-page chips and link are still open |
-| UX-7 | No sideways scroll | PASS | Playwright: scroll width = viewport on all 20 loads | — |
-| UX-8 | Runtime errors | PASS | Playwright: 0 `pageerror` and 0 console errors on all 20 loads | — |
-| UX-9 | Not-found state | FAIL | Chrome: `/en/this-page-does-not-exist`, `/lt/jobs/00000000-0000-0000-0000-000000000000` and `/lt/auth/sign-up` answer 404 + `noindex` (correct). But the HTML is Next's `<html id="__next_error__">` shell: no `lang`, no h1, the home page's title. The branded page appears only through JavaScript | the not-found render falls into the error shell on the server. `/lt/auth/sign-up` (hyphen) could redirect to `/lt/auth/signup` |
-| DS-1 | Mobile sign-up at 360 px | PASS | Chrome, 360×780, 2026-11-03: no sideways scroll, full-width fields, 42 px submit, terms above the form | inputs use 14 px text, so iOS Safari zooms on focus |
-| DS-2 | Mobile sign-up at 390 px | PASS | Chrome, 390×844, 2026-11-03: no sideways scroll; `autocomplete` email / new-password; three labels | the same 14 px note |
-| DS-3 | Role navigation | PASS | prod walk role-routes 41329744822 (2026-11-01, 5 roles); prod walk mobile-surfaces 41317177981 (2026-11-01, 390 px, 6/6) | — |
-| DS-4 | Customer door in "More" (#3003) | PASS | prod walk buyer-workspace 41713787541 (2026-11-03) B-3b | — |
-| DS-5 | Job cards on a phone | PASS | Chrome, 390×844, 2026-11-03: 20 cards, 358 px wide, no sideways scroll, source language named | — |
+| ID | Check | Status | Evidence | Defect / blocker | Executor / next action |
+|---|---|---|---|---|---|
+| UX-1 | LCP, phone 390 px | PASS | Playwright: worst `/lt` **2,384 ms** (the h1); others 500–1,388 ms. Good is ≤ 2,500 ms | `/lt` is close to the limit under 4× CPU | Coordinator: re-measure on a home page change |
+| UX-2 | LCP, desktop | PASS | Playwright: worst `/lt` 632 ms, others 208–536 ms | — | None |
+| UX-3 | CLS, phone 390 px | FAIL | Playwright: **0.13 on 9 of 10 pages** (0 on `/lt/auth/signup`). Good is ≤ 0.1 | **Cause:** the analytics consent banner (`components/app/analytics-consent.tsx`, `placement="top"`) renders only after hydration, because the choice is read from the device. It is inserted above the header, and its 59 px pushed the header and the whole page down (desktop, 671 ms after start). It hits every first visit, crawlers included. The banner is in the page flow on purpose (owner decision 2026-11-03: never cover a field), so the fix is an owner choice. Either render it from the server when there is no choice cookie (the choice mirrored into a cookie), or reserve its space. This is consent UX, so no GREEN change was made | Owner: choose how the banner renders |
+| UX-4 | CLS, desktop | PASS | Playwright: 0.043 on 9 of 10 pages, 0 on sign-up | same cause as UX-3, below the limit here | None |
+| UX-5 | INP (one real interaction) | PASS | Playwright: worst 96 ms on phone (`/lt/for-companies`), 56 ms on desktop. Good is ≤ 200 ms | lab proxy: one click per page | None |
+| UX-6 | Accessibility (axe, WCAG 2.x A/AA) | FAIL | Playwright + axe at 390 px, signed out. First run 2026-11-04 (10 pages): 20 failing nodes in 3 rules. Sweep of all 44 public paths, build `2afdfd8a`: 55 nodes (the footer label already fixed; `color-contrast` ×8 and `link-in-text-block` ×1 on each of the 6 country pages; `scrollable-region-focusable` ×1 on `/lt/legal/data-access`). **Re-run on build `4c58f60a`: 43 of 44 paths clean, 1 node** | #3030 and #3038 are proven live. The last node is fixed in GREEN #3039 | GREEN #3039 (auto-merge). Audit session: re-run axe after its deploy |
+| UX-7 | No sideways scroll | PASS | Playwright: scroll width = viewport on all 20 loads | — | None |
+| UX-8 | Runtime errors | PASS | Playwright: 0 `pageerror` and 0 console errors on all 20 loads | — | None |
+| UX-9 | Not-found state | FAIL | Chrome: `/en/this-page-does-not-exist`, `/lt/jobs/00000000-0000-0000-0000-000000000000` and `/lt/auth/sign-up` answer 404 + `noindex` (correct). But the HTML is Next's `<html id="__next_error__">` shell: no `lang`, no h1, the home page's title. The branded page appears only through JavaScript | the not-found render falls into the error shell on the server. `/lt/auth/sign-up` (hyphen) could redirect to `/lt/auth/signup` | GREEN executor: render not-found on the server; redirect the hyphen address |
+| DS-1 | Mobile sign-up at 360 px | PASS | Chrome, 360×780, 2026-11-03: no sideways scroll, full-width fields, 42 px submit, terms above the form | inputs use 14 px text, so iOS Safari zooms on focus | GREEN executor: 16 px inputs |
+| DS-2 | Mobile sign-up at 390 px | PASS | Chrome, 390×844, 2026-11-03: no sideways scroll; `autocomplete` email / new-password; three labels | the same 14 px note | GREEN executor: 16 px inputs |
+| DS-3 | Role navigation | PASS | prod walk role-routes 41329744822 (2026-11-01, 5 roles); prod walk mobile-surfaces 41317177981 (2026-11-01, 390 px, 6/6) | — | Coordinator: re-walk on risk |
+| DS-4 | Customer door in "More" (#3003) | PASS | prod walk buyer-workspace 41713787541 (2026-11-03) B-3b | — | Coordinator: re-walk on risk |
+| DS-5 | Job cards on a phone | PASS | Chrome, 390×844, 2026-11-03: 20 cards, 358 px wide, no sideways scroll, source language named | — | Coordinator: re-check on risk |
 
 ### Latest production walk per spec (2026-11-04 07:15 UTC)
 
@@ -419,82 +419,309 @@ No other FAIL or BLOCKED row stops a core web action today. The earlier list of 
 
 ### Every row
 
-| ID | Function / check | Status | Class | Reason | Evidence |
-|---|---|---|---|---|---|
-| SR-1 | `/jobs` free text, cold first query | FAIL | `USER_BLOCKER_WEB` | a word that is not a profession name times out: the visitor gets "the job board did not answer in time" and no jobs | Chrome production check 2026-11-04, build `3a9bcdef`, desktop, signed out: `/lt/jobs?q=byggarbetare` 3.6 s to first byte and the timeout message; `lagerarbetare` 4.8 s. Profession words (`betonuotojas`, `plyteliu`) redirect to the profession filter and answer in 0.4–1.0 s |
-| 1.8 | Multi-capability organization | BLOCKED | `OWNER_GATED` | owner decision ORG-2 (one organization with several capabilities) | register row; no production test until the decision |
-| 2.10 | External profile links | BLOCKED | `OWNER_GATED` | per-company grant for external links, RED #2471 | RED draft #2471, not applied |
-| 2.27 | Org historical evidence import | BLOCKED | `OWNER_GATED` | owner decision ARCH-5 (organization history import) | register row |
-| 2.28 | Historical consolidation | BLOCKED | `OWNER_GATED` | 165 historical dates wait for the owner OK on RED #2362 | RED draft #2362 |
-| 2.30 | Voice Work Journal | BLOCKED | `OWNER_GATED` | voice journal needs a speech-to-text host; the typed journal works | typed journal: prod walk fresh-activation 41279196446 (J-1) |
-| 2.37 | Subject refuses an imported record | BLOCKED | `OWNER_GATED` | owner decision ARCH-5; exists only as the blocker of 2.27 | register row |
-| 4.18 | Employer data disclosure grant | BLOCKED | `OWNER_GATED` | employer disclosure grant, RED #2471 | RED draft #2471 |
-| 4.22 | 3 free profile views + VIP | BLOCKED | `OWNER_GATED` | 3 free profile views + VIP: billing figures, RED #2474 | RED draft #2474 |
-| 5.5 | Message translation | BLOCKED | `OWNER_GATED` | message translation is AI; the original text is shown and labelled | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
-| 5.8 | Push | BLOCKED | `OWNER_GATED` | push needs the owner VAPID keys and a real delivery test; the channel is off by flag | migration 20261023190255 applied, 0 subscriptions (row evidence) |
-| 6.21 | /business/[slug] | BLOCKED | `OWNER_GATED` | public business page needs an owner-approved RED RPC | register row |
-| 7.6 | Billing recovery cron | BLOCKED | `OWNER_GATED` | billing recovery cron: paid plans stay off; needs the owner VPS cron line + flag | #2696 |
-| 7.8 | LMC credit ledger | BLOCKED | `OWNER_GATED` | LMC credit ledger: owner design, LMC owner-locked | register row |
-| 7.9 | LMC top-ups, VIP, ai_plus, tiers | BLOCKED | `OWNER_GATED` | LMC top-ups, VIP, ai_plus, tiers: owner prices | registry NOT_BUILT |
-| 7.11 | Deferred plans | BLOCKED | `OWNER_GATED` | deferred plans: owner prices | registry NOT_BUILT |
-| 7.12 | AI cost metering | BLOCKED | `OWNER_GATED` | AI cost metering waits on the AI runtime (10.6) | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
-| 7.14 | Vacancy translation entitlement | BLOCKED | `OWNER_GATED` | vacancy translation entitlement needs AI | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
-| 7.15 | EUR 99 subscription checkout | BLOCKED | `OWNER_GATED` | EUR 99 checkout hidden by design during the pilot; VAT path RED #2685 | RED draft #2685 |
-| 7.19 | Refunds and disputes | BLOCKED | `OWNER_GATED` | refunds and disputes: owner refund policy, then a TEST-mode walk | 0 events in production (row evidence) |
-| 7.20 | Invoices inside LM | BLOCKED | `OWNER_GATED` | in-app invoices: paid plans stay off; RED #2682 adds the plan name and amount | Stripe portal invoice exists (row evidence) |
-| 7.23 | LMC top-up | BLOCKED | `OWNER_GATED` | LMC top-up: owner packages, VAT, refund | registry NOT_BUILT |
-| 7.24 | LMC granted once per payment | BLOCKED | `OWNER_GATED` | LMC grant per payment: depends on 7.23 | registry NOT_BUILT |
-| 7.26 | LMC spend + reversal | BLOCKED | `OWNER_GATED` | LMC spend + reversal: depends on 7.23 | registry NOT_BUILT |
-| 7.27 | Free VIP for approved employers | FAIL | `OWNER_GATED` | free VIP for approved employers: RED #2474 | RED draft #2474 |
-| 7.28 | Payee and terms | FAIL | `OWNER_GATED` | payee and terms: renewal, cancellation, refund and withdrawal clauses wait on owner/legal; paid plans stay off until then | production terms page (row evidence) |
-| 7.31 | Free + two paid tiers for workers AND for companies | BLOCKED | `OWNER_GATED` | free + two paid tiers: owner final tiers and prices (separate approval) | owner product goal 2026-11-01 |
-| 8.3 | Machine translation | BLOCKED | `OWNER_GATED` | machine translation is AI; originals shown and labelled | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
-| 8.5 | Nine priority launch markets | BLOCKED | `OWNER_GATED` | five more markets need about 9,400 strings each translated and reviewed; the six active locales are complete | catalog audit 2026-10-28 |
-| 8.13 | Native app | BLOCKED | `OWNER_GATED` | native apps run against production; the store accounts are the owner's | rows 8.17 / 8.18 (Android, iOS on production) |
-| 8.14 | App links | BLOCKED | `OWNER_GATED` | app links need the store accounts | register row |
-| 8.15 | Mobile store release | BLOCKED | `OWNER_GATED` | store release needs the owner store accounts + ARCH-6 | register row |
-| 9.16 | External referral API | BLOCKED | `OWNER_GATED` | external referral API needs partner tokens; signed-out callers get 401 as they should | row evidence: anonymous 401 |
-| 10.4 | MCP scopes | BLOCKED | `OWNER_GATED` | MCP OAuth scopes: security RED, design draft #2923, owner decision X-2 | RED draft #2923 |
-| 10.5 | ChatGPT/Claude listings | BLOCKED | `OWNER_GATED` | ChatGPT / Claude directory listings: owner portals | register row |
-| 10.6 | AI runtime | BLOCKED | `OWNER_GATED` | AI runtime off | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
-| 10.7 | Conversation intent LLM | BLOCKED | `OWNER_GATED` | conversation intent LLM: depends on 10.6 | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
-| 10.8 | CV AI structuring | BLOCKED | `OWNER_GATED` | CV AI structuring: depends on 10.6; free CV extraction works without AI | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
-| 10.9 | Journal AI suggestions | BLOCKED | `OWNER_GATED` | journal AI suggestions: depends on 10.6 | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
-| 10.10 | Explanation AI | BLOCKED | `OWNER_GATED` | explanation AI: depends on 10.6 | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) |
-| 10.21 | Eurostat import | BLOCKED | `OWNER_GATED` | Eurostat import has no scheduler; owner to allow the scheduled import | data dated 2026-07-15 (row evidence) |
-| 10.22 | the partner organization integration | BLOCKED | `OWNER_GATED` | partner organization integration: owner | register row |
-| 10.24 | Self-hosted STT/translate | BLOCKED | `OWNER_GATED` | self-hosted speech/translation: owner deploy | register row |
-| 10.25 | Cloudflare AI adapter | BLOCKED | `OWNER_GATED` | Cloudflare AI adapter: owner key | register row |
-| 10.26 | OpenAI apps challenge | BLOCKED | `OWNER_GATED` | OpenAI apps challenge: owner token | register row |
-| 11.8 | Training & certification register | FAIL | `OWNER_GATED` | training for engaged non-member workers: owner product decision, RED #2816; members can be assigned | prod walk company-governance 40687308231 (T-5 green for members) |
-| 11.9 | Human-in-loop learning review | BLOCKED | `OWNER_GATED` | human-in-loop learning review: owner parked the nav door | register row |
-| 13.17 | Env parity after hosting move | FAIL | `OWNER_GATED` | AI and some e-mail are off after the hosting move; they stay off until security, legal and functional tests pass (owner + legal) | read-only check 2026-10-27 (row evidence) |
-| SEO-10 | Country and city on signed-out job pages | BLOCKED | `OWNER_GATED` | scope approved by the owner 2026-11-03; the database function waits for the separate apply approval of RED #2993 (no new approval needed for the scope) | RED draft #2993, not applied |
-| 2.24 | Experience records + disputes | FAIL | `INFRA` | open moderation/security item EVID-6; the record and dispute flow keeps its earlier production proof | details in the private record |
-| 5.16 | Owner Telegram alerts | BLOCKED | `INFRA` | owner-only operations alerts; needs the owner bot token | register row; not a user feature |
-| 9.25 | CodeQL / dependency alerts | FAIL | `INFRA` | CodeQL / dependency alerts triaged | details in the private record |
-| 10.20 | Vacancy retention | FAIL | `INFRA` | vacancy retention purge fails closed on a permission item | dry run 39936626534; details in the private record |
-| 13.1 | VPS hosting + auto-deploy | FAIL | `INFRA` | runner-to-VPS network path; 72 h verdict due 2026-11-04 | #2911; details in the private record |
-| 13.9 | Supabase GitHub integration | BLOCKED | `INFRA` | Supabase GitHub integration: owner setting | register row |
-| 5.20 | User-defined automations | FAIL | `OPTIONAL_OR_UNPLANNED` | user-defined automations: a vision item, not built, no core journey needs it | vision §12/§19 |
-| 5.21 | SMS / WhatsApp channels | BLOCKED | `OPTIONAL_OR_UNPLANNED` | SMS / WhatsApp: a later channel that needs a paid provider | vision §11 |
-| 6.12 | Cross-border deals | BLOCKED | `OPTIONAL_OR_UNPLANNED` | cross-border deals module: not built; 6.6 contracts + 6.11 readiness may suffice (owner to say) | registry NOT_BUILT |
-| 6.13 | Orders goods purchase | BLOCKED | `OPTIONAL_OR_UNPLANNED` | goods purchase orders: not built; only organization plans take payments | registry NOT_BUILT |
-| 6.14 | Logistics | BLOCKED | `OPTIONAL_OR_UNPLANNED` | logistics: not built, depends on 6.13 | registry NOT_BUILT |
-| 6.22 | Housing / accommodation | BLOCKED | `OPTIONAL_OR_UNPLANNED` | housing: a vision item, owner scope first | vision §8 |
-| 6.23 | Service order rating, cancellation and dispute | BLOCKED | `OPTIONAL_OR_UNPLANNED` | service-order rating and dispute: not built; request, accept and withdraw work | prod walk marketplace 41729310761 (2026-11-03, 7f0f06583) |
-| 6.24 | Swipe-style B2C discovery feed | BLOCKED | `OPTIONAL_OR_UNPLANNED` | swipe discovery feed: lower-confidence pattern, owner to confirm | decision 0013 |
-| 7.30 | Invoices + work-acceptance acts from the Work Journal | BLOCKED | `OPTIONAL_OR_UNPLANNED` | invoices and acceptance acts from the journal: owner invoicing rules per country, then build | vision §10 |
-| 9.19 | Admin import sandbox | BLOCKED | `OPTIONAL_OR_UNPLANNED` | admin import sandbox: an optional admin flag, off and labelled | owner admin session 2026-10-25 (Chrome) |
-| 9.20 | Admin intelligence inspector | BLOCKED | `OPTIONAL_OR_UNPLANNED` | admin intelligence inspector: an optional admin flag, off and labelled | owner admin session 2026-10-25 (Chrome) |
-| 10.15 | Agents OS runtime | BLOCKED | `OPTIONAL_OR_UNPLANNED` | internal agents runtime: architecture only, owner AGENT-1..4 | registry NOT_BUILT |
-| 10.16 | AI agents as participants | BLOCKED | `OPTIONAL_OR_UNPLANNED` | AI agents as market participants: owner AGENT-1..4 | registry NOT_BUILT |
-| 11.10 | RPL equivalence structure | BLOCKED | `OPTIONAL_OR_UNPLANNED` | RPL equivalence structure: deferred under ARCH-2 until an assessor and requirement set are named | decision 0028 §D-15 |
-| SEO-8 | Job board page 2+ canonical | FAIL | `OPTIONAL_OR_UNPLANNED` | pages 2+ fold into page 1 for crawlers; no user action breaks, and the jobs still reach search engines through the sitemap | Chrome production check 2026-11-03; fix ready in draft #2984, held by the product gate on `/jobs` |
-| 7.7 | Manual pilot grant (admin) | BLOCKED | `TEST_ONLY` | the walk has no admin session; the grant itself was used for the pilot (paid 2026-10-23) | register row |
-| 8.9 | Public org profile | BLOCKED | `TEST_ONLY` | no organization has published a public profile, so the walk skips S-10; the product is not shown to fail | prod walk public-org-locales 40205429467 (S-10 skipped) |
+| ID | Function / check | Status | Class | Reason | Evidence | Executor / next action |
+|---|---|---|---|---|---|---|
+| SR-1 | `/jobs` free text, cold first query | FAIL | `USER_BLOCKER_WEB` | a word that is not a profession name times out: the visitor gets "the job board did not answer in time" and no jobs | Chrome production check 2026-11-04, build `3a9bcdef`, desktop, signed out: `/lt/jobs?q=byggarbetare` 3.6 s to first byte and the timeout message; `lagerarbetare` 4.8 s. Profession words (`betonuotojas`, `plyteliu`) redirect to the profession filter and answer in 0.4–1.0 s | GREEN executor: honest timeout state. Coordinator: new RED draft with the plan-cache proof |
+| 1.8 | Multi-capability organization | BLOCKED | `OWNER_GATED` | owner decision ORG-2 (one organization with several capabilities) | register row; no production test until the decision | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 2.10 | External profile links | BLOCKED | `OWNER_GATED` | per-company grant for external links, RED #2471 | RED draft #2471, not applied | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 2.27 | Org historical evidence import | BLOCKED | `OWNER_GATED` | owner decision ARCH-5 (organization history import) | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 2.28 | Historical consolidation | BLOCKED | `OWNER_GATED` | 165 historical dates wait for the owner OK on RED #2362 | RED draft #2362 | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 2.30 | Voice Work Journal | BLOCKED | `OWNER_GATED` | voice journal needs a speech-to-text host; the typed journal works | typed journal: prod walk fresh-activation 41279196446 (J-1) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 2.37 | Subject refuses an imported record | BLOCKED | `OWNER_GATED` | owner decision ARCH-5; exists only as the blocker of 2.27 | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 4.18 | Employer data disclosure grant | BLOCKED | `OWNER_GATED` | employer disclosure grant, RED #2471 | RED draft #2471 | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 4.22 | 3 free profile views + VIP | BLOCKED | `OWNER_GATED` | 3 free profile views + VIP: billing figures, RED #2474 | RED draft #2474 | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 5.5 | Message translation | BLOCKED | `OWNER_GATED` | message translation is AI; the original text is shown and labelled | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 5.8 | Push | BLOCKED | `OWNER_GATED` | push needs the owner VAPID keys and a real delivery test; the channel is off by flag | migration 20261023190255 applied, 0 subscriptions (row evidence) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 6.21 | /business/[slug] | BLOCKED | `OWNER_GATED` | public business page needs an owner-approved RED RPC | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.6 | Billing recovery cron | BLOCKED | `OWNER_GATED` | billing recovery cron: paid plans stay off; needs the owner VPS cron line + flag | #2696 | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.8 | LMC credit ledger | BLOCKED | `OWNER_GATED` | LMC credit ledger: owner design, LMC owner-locked | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.9 | LMC top-ups, VIP, ai_plus, tiers | BLOCKED | `OWNER_GATED` | LMC top-ups, VIP, ai_plus, tiers: owner prices | registry NOT_BUILT | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.11 | Deferred plans | BLOCKED | `OWNER_GATED` | deferred plans: owner prices | registry NOT_BUILT | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.12 | AI cost metering | BLOCKED | `OWNER_GATED` | AI cost metering waits on the AI runtime (10.6) | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.14 | Vacancy translation entitlement | BLOCKED | `OWNER_GATED` | vacancy translation entitlement needs AI | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.15 | EUR 99 subscription checkout | BLOCKED | `OWNER_GATED` | EUR 99 checkout hidden by design during the pilot; VAT path RED #2685 | RED draft #2685 | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.19 | Refunds and disputes | BLOCKED | `OWNER_GATED` | refunds and disputes: owner refund policy, then a TEST-mode walk | 0 events in production (row evidence) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.20 | Invoices inside LM | BLOCKED | `OWNER_GATED` | in-app invoices: paid plans stay off; RED #2682 adds the plan name and amount | Stripe portal invoice exists (row evidence) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.23 | LMC top-up | BLOCKED | `OWNER_GATED` | LMC top-up: owner packages, VAT, refund | registry NOT_BUILT | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.24 | LMC granted once per payment | BLOCKED | `OWNER_GATED` | LMC grant per payment: depends on 7.23 | registry NOT_BUILT | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.26 | LMC spend + reversal | BLOCKED | `OWNER_GATED` | LMC spend + reversal: depends on 7.23 | registry NOT_BUILT | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.27 | Free VIP for approved employers | FAIL | `OWNER_GATED` | free VIP for approved employers: RED #2474 | RED draft #2474 | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.28 | Payee and terms | FAIL | `OWNER_GATED` | payee and terms: renewal, cancellation, refund and withdrawal clauses wait on owner/legal; paid plans stay off until then | production terms page (row evidence) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 7.31 | Free + two paid tiers for workers AND for companies | BLOCKED | `OWNER_GATED` | free + two paid tiers: owner final tiers and prices (separate approval) | owner product goal 2026-11-01 | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 8.3 | Machine translation | BLOCKED | `OWNER_GATED` | machine translation is AI; originals shown and labelled | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 8.5 | Nine priority launch markets | BLOCKED | `OWNER_GATED` | five more markets need about 9,400 strings each translated and reviewed; the six active locales are complete | catalog audit 2026-10-28 | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 8.13 | Native app | BLOCKED | `OWNER_GATED` | native apps run against production; the store accounts are the owner's | rows 8.17 / 8.18 (Android, iOS on production) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 8.14 | App links | BLOCKED | `OWNER_GATED` | app links need the store accounts | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 8.15 | Mobile store release | BLOCKED | `OWNER_GATED` | store release needs the owner store accounts + ARCH-6 | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 9.16 | External referral API | BLOCKED | `OWNER_GATED` | external referral API needs partner tokens; signed-out callers get 401 as they should | row evidence: anonymous 401 | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 10.4 | MCP scopes | BLOCKED | `OWNER_GATED` | MCP OAuth scopes: security RED, design draft #2923, owner decision X-2 | RED draft #2923 | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 10.5 | ChatGPT/Claude listings | BLOCKED | `OWNER_GATED` | ChatGPT / Claude directory listings: owner portals | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 10.6 | AI runtime | BLOCKED | `OWNER_GATED` | AI runtime off | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 10.7 | Conversation intent LLM | BLOCKED | `OWNER_GATED` | conversation intent LLM: depends on 10.6 | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 10.8 | CV AI structuring | BLOCKED | `OWNER_GATED` | CV AI structuring: depends on 10.6; free CV extraction works without AI | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 10.9 | Journal AI suggestions | BLOCKED | `OWNER_GATED` | journal AI suggestions: depends on 10.6 | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 10.10 | Explanation AI | BLOCKED | `OWNER_GATED` | explanation AI: depends on 10.6 | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 10.21 | Eurostat import | BLOCKED | `OWNER_GATED` | Eurostat import has no scheduler; owner to allow the scheduled import | data dated 2026-07-15 (row evidence) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 10.22 | the partner organization integration | BLOCKED | `OWNER_GATED` | partner organization integration: owner | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 10.24 | Self-hosted STT/translate | BLOCKED | `OWNER_GATED` | self-hosted speech/translation: owner deploy | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 10.25 | Cloudflare AI adapter | BLOCKED | `OWNER_GATED` | Cloudflare AI adapter: owner key | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 10.26 | OpenAI apps challenge | BLOCKED | `OWNER_GATED` | OpenAI apps challenge: owner token | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 11.8 | Training & certification register | FAIL | `OWNER_GATED` | training for engaged non-member workers: owner product decision, RED #2816; members can be assigned | prod walk company-governance 40687308231 (T-5 green for members) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 11.9 | Human-in-loop learning review | BLOCKED | `OWNER_GATED` | human-in-loop learning review: owner parked the nav door | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 13.17 | Env parity after hosting move | FAIL | `OWNER_GATED` | AI and some e-mail are off after the hosting move; they stay off until security, legal and functional tests pass (owner + legal) | read-only check 2026-10-27 (row evidence) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| SEO-10 | Country and city on signed-out job pages | BLOCKED | `OWNER_GATED` | scope approved by the owner 2026-11-03; the database function waits for the separate apply approval of RED #2993 (no new approval needed for the scope) | RED draft #2993, not applied | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 2.24 | Experience records + disputes | FAIL | `INFRA` | open moderation/security item EVID-6; the record and dispute flow keeps its earlier production proof | details in the private record | Coordinator: private record |
+| 5.16 | Owner Telegram alerts | BLOCKED | `INFRA` | owner-only operations alerts; needs the owner bot token | register row; not a user feature | Coordinator: private record |
+| 9.25 | CodeQL / dependency alerts | FAIL | `INFRA` | CodeQL / dependency alerts triaged | details in the private record | Coordinator: private record |
+| 10.20 | Vacancy retention | FAIL | `INFRA` | vacancy retention purge fails closed on a permission item | dry run 39936626534; details in the private record | Coordinator: private record |
+| 13.1 | VPS hosting + auto-deploy | FAIL | `INFRA` | runner-to-VPS network path; 72 h verdict due 2026-11-04 | #2911; details in the private record | Coordinator: private record |
+| 13.9 | Supabase GitHub integration | BLOCKED | `INFRA` | Supabase GitHub integration: owner setting | register row | Coordinator: private record |
+| 5.20 | User-defined automations | FAIL | `OPTIONAL_OR_UNPLANNED` | user-defined automations: a vision item, not built, no core journey needs it | vision §12/§19 | None now. Owner schedules it if wanted |
+| 5.21 | SMS / WhatsApp channels | BLOCKED | `OPTIONAL_OR_UNPLANNED` | SMS / WhatsApp: a later channel that needs a paid provider | vision §11 | None now. Owner schedules it if wanted |
+| 6.12 | Cross-border deals | BLOCKED | `OPTIONAL_OR_UNPLANNED` | cross-border deals module: not built; 6.6 contracts + 6.11 readiness may suffice (owner to say) | registry NOT_BUILT | None now. Owner schedules it if wanted |
+| 6.13 | Orders goods purchase | BLOCKED | `OPTIONAL_OR_UNPLANNED` | goods purchase orders: not built; only organization plans take payments | registry NOT_BUILT | None now. Owner schedules it if wanted |
+| 6.14 | Logistics | BLOCKED | `OPTIONAL_OR_UNPLANNED` | logistics: not built, depends on 6.13 | registry NOT_BUILT | None now. Owner schedules it if wanted |
+| 6.22 | Housing / accommodation | BLOCKED | `OPTIONAL_OR_UNPLANNED` | housing: a vision item, owner scope first | vision §8 | None now. Owner schedules it if wanted |
+| 6.23 | Service order rating, cancellation and dispute | BLOCKED | `OPTIONAL_OR_UNPLANNED` | service-order rating and dispute: not built; request, accept and withdraw work | prod walk marketplace 41729310761 (2026-11-03, 7f0f06583) | None now. Owner schedules it if wanted |
+| 6.24 | Swipe-style B2C discovery feed | BLOCKED | `OPTIONAL_OR_UNPLANNED` | swipe discovery feed: lower-confidence pattern, owner to confirm | decision 0013 | None now. Owner schedules it if wanted |
+| 7.30 | Invoices + work-acceptance acts from the Work Journal | BLOCKED | `OPTIONAL_OR_UNPLANNED` | invoices and acceptance acts from the journal: owner invoicing rules per country, then build | vision §10 | None now. Owner schedules it if wanted |
+| 9.19 | Admin import sandbox | BLOCKED | `OPTIONAL_OR_UNPLANNED` | admin import sandbox: an optional admin flag, off and labelled | owner admin session 2026-10-25 (Chrome) | None now. Owner schedules it if wanted |
+| 9.20 | Admin intelligence inspector | BLOCKED | `OPTIONAL_OR_UNPLANNED` | admin intelligence inspector: an optional admin flag, off and labelled | owner admin session 2026-10-25 (Chrome) | None now. Owner schedules it if wanted |
+| 10.15 | Agents OS runtime | BLOCKED | `OPTIONAL_OR_UNPLANNED` | internal agents runtime: architecture only, owner AGENT-1..4 | registry NOT_BUILT | None now. Owner schedules it if wanted |
+| 10.16 | AI agents as participants | BLOCKED | `OPTIONAL_OR_UNPLANNED` | AI agents as market participants: owner AGENT-1..4 | registry NOT_BUILT | None now. Owner schedules it if wanted |
+| 11.10 | RPL equivalence structure | BLOCKED | `OPTIONAL_OR_UNPLANNED` | RPL equivalence structure: deferred under ARCH-2 until an assessor and requirement set are named | decision 0028 §D-15 | None now. Owner schedules it if wanted |
+| SEO-8 | Job board page 2+ canonical | FAIL | `OPTIONAL_OR_UNPLANNED` | pages 2+ fold into page 1 for crawlers; no user action breaks, and the jobs still reach search engines through the sitemap | Chrome production check 2026-11-03; fix ready in draft #2984, held by the product gate on `/jobs` | None now. Owner schedules it if wanted |
+| 7.7 | Manual pilot grant (admin) | BLOCKED | `TEST_ONLY` | the walk has no admin session; the grant itself was used for the pilot (paid 2026-10-23) | register row | Coordinator: fix the walk harness, re-run |
+| 8.9 | Public org profile | BLOCKED | `TEST_ONLY` | no organization has published a public profile, so the walk skips S-10; the product is not shown to fail | prod walk public-org-locales 40205429467 (S-10 skipped) | Coordinator: fix the walk harness, re-run |
 
 The run ids of the 2026-11-04 re-runs on build `3a9bcdef9` are added here as the coordinator reports them.
+
+## Whole-project audit by role and dimension (2026-11-04)
+
+Owner order 2026-11-04: continue the audit beyond the six core tests, in this one register. Every row has a status, its evidence, the responsible executor and the next action.
+
+**How to read it:**
+
+- The rules of the combined audit view apply: PASS needs a named production walk run, a Chrome production check or a production job run. A pass in CI alone is NOT VERIFIED.
+- These rows are **views over the function rows**, plus new checks. They overlap, so they are not added to the function total.
+- A walk row names the latest run. Only the six 2026-11-04 walks are tied to one build (`d69327239`); the older runs prove the function on the build of their date.
+- Measured on 2026-11-04 on builds `2afdfd8a` and `4c58f60a` (`/api/health`). Signed out unless a walk is named. Method: "How the 2026-11-04 rows were measured" above, plus a sweep of all 44 public paths at 390 px.
+- Function rows that are PASS have one rule: the executor is the coordinator, and the next action is a re-walk only when a change puts that function at risk. All other function rows carry their executor and next action in "Every row" under the triage section (FAIL, BLOCKED) and in "NOT VERIFIED function rows" below.
+- Security details stay in the private record.
+
+### Summary per dimension
+
+| Dimension | Rows | PASS | FAIL | BLOCKED | NOT VERIFIED |
+|---|---|---|---|---|---|
+| Roles and life stages | 38 | 22 | 4 | 7 | 5 |
+| Search | 5 | 1 | 1 | 0 | 3 |
+| CV, Journal, projects, HR, organization | 16 | 8 | 3 | 2 | 3 |
+| Indexing and AEO | 6 | 2 | 1 | 0 | 3 |
+| Mobile, languages, accessibility | 8 | 3 | 2 | 1 | 2 |
+| Payments | 4 | 1 | 1 | 1 | 1 |
+| Notifications | 4 | 2 | 0 | 1 | 1 |
+| AI | 3 | 2 | 0 | 1 | 0 |
+| Security | 3 | 2 | 1 | 0 | 0 |
+| Delivery | 2 | 0 | 2 | 0 | 0 |
+| **This section** | **89** | **43** | **15** | **13** | **18** |
+
+Roles:
+
+| Role | Rows | PASS | FAIL | BLOCKED | NOT VERIFIED |
+|---|---|---|---|---|---|
+| Worker | 7 | 5 | 0 | 2 | 0 |
+| Learner | 5 | 3 | 0 | 1 | 1 |
+| Job seeker | 7 | 3 | 3 | 1 | 0 |
+| Employer | 6 | 4 | 1 | 0 | 1 |
+| Customer | 4 | 2 | 0 | 2 | 0 |
+| Agency | 2 | 1 | 0 | 0 | 1 |
+| Education organization | 4 | 3 | 0 | 0 | 1 |
+| Admin | 3 | 1 | 0 | 1 | 1 |
+
+The SEO, GEO, internal search and UX/UI tables and the 288 function rows are counted under "Totals" in the combined audit view.
+
+### Roles and life stages
+
+| ID | Role / life stage | Status | Evidence | Executor / next action |
+|---|---|---|---|---|
+| W-1 | Worker: new person, sign-up to first journal entry | PASS | prod walk fresh-activation 41279196446 (2026-11-01) | Coordinator: re-walk on risk. Sign-up length is UF-4 |
+| W-2 | Worker: invited person, mailed link, accepts, first entry, deletes the account | PASS | prod walk invited-worker 41430482903 (2026-11-02) I-0..I-6 | Coordinator: re-walk on risk |
+| W-3 | Worker: records work, employer confirms | PASS | prod walk journal-confirm 41478434884 (2026-11-02) | Coordinator: re-walk on risk |
+| W-4 | Worker: Living CV grows from real work | PASS | prod walks living-cv-growth 41281984217, profile-cv-history 41282258795 (2026-11-01) | Coordinator: re-walk on risk |
+| W-5 | Worker: takes records out (CSV, hours, gallery) | PASS | prod walk worker-records-exports 41312948857 (2026-11-01) | Coordinator: re-walk on risk |
+| W-6 | Worker: disputes or refuses a record | BLOCKED | 2.37 waits on owner decision ARCH-5; 2.24 open item EVID-6 (private record) | Owner: ARCH-5. Then a GREEN executor builds and the coordinator walks |
+| W-7 | Worker: native phone app | BLOCKED | 8.17 and 8.18 ran against production on 2026-11-02 (runs 41451882387, 41451829006); 8.15 not in the stores | Owner: store accounts (Google Play, Apple, EAS) |
+| L-1 | Learner: joins by the institution's link | PASS | prod walk learning-practice 41668191663 (2026-11-03) L-2..L-5 | Coordinator: re-walk on risk |
+| L-2 | Learner: finds a group and asks to join | PASS | prod walk cohort-join-request 41611766407 (2026-11-03) | Coordinator: re-walk on risk |
+| L-3 | Learner: practice day is signed off and recognized | PASS | prod walk recognition-chain 41617507405 (2026-11-03) | Coordinator: re-walk on risk |
+| L-4 | Learner moves to work: the same history continues into job search | NOT VERIFIED | no walk follows one person from learner to job seeker | Coordinator: add a walk step on the recognition-chain person |
+| L-5 | Learner: earlier learning recognized as equivalent (RPL) | BLOCKED | 11.10, RED schema | Owner: decide the RPL structure |
+| JS-1 | Job seeker: finds jobs by a known word, signed out | PASS | SR-2, SR-3 (Chrome 2026-11-04); prod walk jobs-search 41663385778 (2026-11-03) | Coordinator: re-walk on risk |
+| JS-2 | Job seeker: first search for a new word | FAIL | SR-1: the visitor gets no jobs when the read times out | GREEN executor: honest timeout state with profession matches. Coordinator: new RED draft with the #3025 plan-cache proof |
+| JS-3 | Job seeker: reads the imported ad | FAIL | UF-2: NAV ads show raw HTML tags (8,835 active ads) | Coordinator: assign #3033 (quality and CodeQL red), then Chrome check |
+| JS-4 | Job seeker: translates a foreign ad | FAIL | UF-1: every member's click answers "could not be translated"; 0 stored translations | Coordinator: assign #3034. Owner: AI keys for real translation (8.3) |
+| JS-5 | Job seeker: saved search and mailed alert | PASS | prod walk alert-mail 41488266687 (2026-11-02) | Coordinator: re-walk on risk |
+| JS-6 | Job seeker: raises a hand and is contacted | PASS | prod walk company-chain 41672031864 (2026-11-03) C-1..C-4 | Coordinator: re-walk on risk |
+| JS-7 | Job seeker: sees country and city before sign-in | BLOCKED | SEO-10, RED draft #2993 | Owner: apply approval. Coordinator applies |
+| E-1 | Employer: sets up the organization, first need | PASS | prod walk fresh-activation 41279196446 (2026-11-01) | Coordinator: re-walk on risk |
+| E-2 | Employer: sees candidates and contacts them | PASS | prod walk company-chain 41672031864 (2026-11-03) C-2, C-3 | Coordinator: re-walk on risk |
+| E-3 | Employer: shortlist with internal notes | PASS | prod walk company-talent-history 41279265278 (2026-11-01) K-3, K-4 | Coordinator: re-walk on risk |
+| E-4 | Employer: proposes dates, worker accepts | PASS | prod walk orders-bookings 41787683432 (2026-11-04, `d69327239`) | Coordinator: re-walk on risk |
+| E-5 | Employer: decides to hire and closes the need | NOT VERIFIED | 4.30: decision and history UI not finished | GREEN executor: build the UI. Coordinator: walk |
+| E-6 | Employer: buys a plan alone | FAIL | 7.28 payee and terms; 7.15 hidden by design during the pilot | Owner + legal: clauses and approval. Paid plans stay off until then |
+| C-1 | Customer: record and a request in the own workspace | PASS | prod walk buyer-workspace 41785749357 (2026-11-04, `d69327239`) | Coordinator: re-walk on risk |
+| C-2 | Customer: finds goods and services, asks the seller | PASS | prod walk marketplace 41790404575 (2026-11-04, `d69327239`) | Coordinator: re-walk on risk |
+| C-3 | Customer: buys goods with payment | BLOCKED | 6.13 not built; RED #2713 | Owner: scope decision |
+| C-4 | Customer: accepted request becomes a proposal | BLOCKED | RED draft #2946 | Owner: apply approval |
+| A-1 | Agency: roster, client, shared need, offer, decision | PASS | prod walk agency-chain 41787046374 (2026-11-04, `d69327239`) | Coordinator: re-walk on risk |
+| A-2 | Agency: documents readiness and client records (#3004) | NOT VERIFIED | applied and catalog-checked; no walk opens these two surfaces | Coordinator: add two steps to agency-chain |
+| ED-1 | Education organization: programme, cohort, learner | PASS | prod walk learning-practice 41668191663 (2026-11-03) L-1..L-5 | Coordinator: re-walk on risk |
+| ED-2 | Education organization: answers join requests | PASS | prod walk cohort-join-request 41611766407 (2026-11-03) J-3 | Coordinator: re-walk on risk |
+| ED-3 | Education organization: signs off and recognizes practice | PASS | prod walk recognition-chain 41617507405 (2026-11-03) R-5, R-6 | Coordinator: re-walk on risk |
+| ED-4 | Education organization: institution found by search | NOT VERIFIED | UF-5: the institution is free text in three places; no search exists | Owner: accept or decline the proposal in UF-5 |
+| AD-1 | Admin: every operator page opens | PASS | prod walk admin-console 40688059945 (2026-10-28) | Coordinator: re-walk, the run is a week old |
+| AD-2 | Admin: privacy requests and erasure | NOT VERIFIED | 9.4, 9.6: production data receipt 2026-10-19, no walk or Chrome check | Coordinator: state the evidence type the view accepts for a job run |
+| AD-3 | Admin: import sandbox and intelligence inspector | BLOCKED | 9.19, 9.20 are off by flag | Owner: enable only if wanted |
+
+### Search
+
+| ID | Search | Status | Evidence | Executor / next action |
+|---|---|---|---|---|
+| SCH-1 | Jobs | FAIL | SR-1 cold query FAIL, SR-4 paging FAIL; SR-2, SR-3, SR-5, SR-6 PASS | See SR-1 and SR-4 |
+| SCH-2 | Workers / candidates | NOT VERIFIED | SR-8: no walk searches people; `list_discoverable_worker_ids_v1` max 2,536 ms | Coordinator: add the walk step named in SR-8 |
+| SCH-3 | Services and goods | PASS | SR-7: prod walk marketplace 41790404575 (2026-11-04); M-3, M-5 | Coordinator: re-walk on risk |
+| SCH-4 | Orders | NOT VERIFIED | a customer's and a provider's order lists are walked (buyer-workspace B-2, orders-bookings), but searching inside them is not | Coordinator: say whether search is expected here; if so, add a step |
+| SCH-5 | Organizations | NOT VERIFIED | SR-9: 16 calls in total, no walk | Coordinator: add the walk step named in SR-9 |
+
+### CV, Work Journal, projects, HR and organization management
+
+| ID | Area | Status | Evidence | Executor / next action |
+|---|---|---|---|---|
+| CV-1 | CV import reads the file correctly | FAIL | UF-3: language levels and training centres misread. Fix #3035 merged; not yet proven on production | Coordinator: re-run profile-cv-history P-6 after the deploy, on a synthetic CV |
+| CV-2 | Living CV shows evidence states | PASS | prod walk living-cv-growth 41281984217 (2026-11-01) | Coordinator: re-walk on risk |
+| JRN-1 | Work Journal: record, correct, confirm | PASS | prod walk journal-confirm 41478434884 (2026-11-02), self-confirmation refused in step 1b | Coordinator: re-walk on risk |
+| JRN-2 | Work Journal: a failed read is not "start your records" | NOT VERIFIED | #3013 merged 2026-11-04; a failure cannot be forced on production | Coordinator: accept the unit guard, or a read-only local render |
+| JRN-3 | Unknown never shown as 0 | FAIL | five surfaces, until #3017 (merged 2026-11-04) is proven live | Audit session: confirm the merge and the deploy (`/api/health`) |
+| JRN-4 | Voice Work Journal | BLOCKED | 2.30, 5.15: no transcription host | Owner: hosting decision (deferred 2026-10-08) |
+| PRJ-1 | Projects: stages, tasks, assignment, board | PASS | prod walk project-execution 41789372775 (2026-11-04, `d69327239`) | Coordinator: re-walk on risk |
+| PRJ-2 | Project forecast | NOT VERIFIED | 3.34: forecast cron not installed on the VPS; needs a project with enough recorded work | Coordinator: install the cron (#2738), then walk |
+| PRJ-3 | Overlap warning, alternatives, override | NOT VERIFIED | 3.35: UI flow unproven; RED #2795 | Owner: RED approval. Coordinator: walk |
+| HR-1 | Roster, people import, on/offboarding, instructions, assets | PASS | prod walk org-roster 41318490491 (2026-11-01) R-1..R-6 | Coordinator: re-walk on risk |
+| HR-2 | Approvals and document register | PASS | prod walk documents-approvals 41786102850 (2026-11-04, `d69327239`) | Coordinator: re-walk on risk |
+| HR-3 | Planning, shifts | PASS | prod walks calendar-planning 41656893141 (2026-11-03), rota-repeat 40659497014 (2026-10-28) | Coordinator: re-walk on risk |
+| HR-4 | Training assigned to engaged non-members | FAIL | 11.8, owner product decision, RED #2816 | Owner: decide. Coordinator applies |
+| ORG-1 | Decisions and management approvals | PASS | prod walk company-governance 40687308231 (2026-10-28) D-1..D-5 | Coordinator: re-walk on risk |
+| ORG-2 | One organization with several capabilities | BLOCKED | 1.8, owner decision ORG-2 | Owner: decide |
+| ORG-3 | Isolation between organizations | PASS | prod walks org-roster 41318490491 R-7, search-support-privacy 41283989921 P-5 | Coordinator: re-walk on risk |
+
+### Indexing, SEO, GEO, AEO
+
+SEO and GEO checks are in their tables above; these rows add what those do not cover.
+
+| ID | Check | Status | Evidence | Executor / next action |
+|---|---|---|---|---|
+| IDX-1 | Crawlers can reach everything meant to be indexed | PASS | SEO-1, SEO-2, SEO-3: 264 + 54,222 + 270 URLs in sitemaps; all 264 and 55 shards fetched | Coordinator: re-check on a sitemap change |
+| IDX-2 | What search engines have actually indexed | NOT VERIFIED | no Search Console or Bing data is available to this audit, and the code has no site-verification tag. Two test queries in one third-party web search returned no page of the site; `site:` was not honoured there, so this proves nothing either way | Owner: Search Console and Bing Webmaster read access. Then the audit reads indexed counts |
+| IDX-3 | New pages are announced (IndexNow) | NOT VERIFIED | `lib/answer-engine/indexnow.ts` stays dormant without `INDEXNOW_KEY`; whether production has the key was not checked | Owner: provide the key if wanted |
+| AEO-1 | Question pages are machine-readable answers | PASS | GEO-3: 270 pages; 30 sampled, Article + BreadcrumbList | Coordinator: re-check on risk |
+| AEO-2 | An answer engine names and describes the product | NOT VERIFIED | the same test queries did not surface the product; no answer-engine test was run | Coordinator: repeat a fixed question set monthly, once GEO-6 is settled |
+| AEO-3 | One answer to "what is LabourMarket.ai" | FAIL | GEO-6: three different definitions | Owner: choose one sentence. GREEN executor reuses it |
+
+### UX/UI, mobile, languages, accessibility
+
+| ID | Check | Status | Evidence | Executor / next action |
+|---|---|---|---|---|
+| MOB-1 | Public pages on a phone | PASS | Playwright 390 px, 2026-11-04, all 44 public paths in lt: 0 sideways scroll, 0 page errors | Coordinator: re-check on a layout change |
+| MOB-2 | Signed-in pages on a phone | PASS | prod walk mobile-surfaces 41317177981 (2026-11-01, 6/6) | Coordinator: re-walk on risk |
+| MOB-3 | First-visit layout shift on a phone | FAIL | UX-3: CLS 0.13 from the consent banner | Owner: choose how the banner renders |
+| LNG-1 | Public text is translated | PASS | Playwright, 2026-11-04, 44 paths × lt, ru, nl, de, pl against en: the only identical text is 2 proper names per country page (EURES, Cedefop), 12 blocks per locale | Coordinator: re-check on a copy change |
+| LNG-2 | Signed-in text is translated | NOT VERIFIED | 8.1: 6 locales × 25 routes on 2026-10-23; prod walk sectors-languages 40300823818 (2026-10-26) | Coordinator: re-run sectors-languages, the run is old |
+| LNG-3 | The five further markets | BLOCKED | 8.5: about 9,400 missing keys per locale | Owner: activation decision |
+| A11Y-1 | Public pages, axe WCAG A/AA | FAIL | Playwright 390 px, 2026-11-04, build `4c58f60a`: 43 of 44 paths clean; 1 node on `/lt/legal/data-access`. #3030 and #3038 proven live (55 nodes → 1) | GREEN #3039 (auto-merge). Audit session: re-run after its deploy |
+| A11Y-2 | Signed-in pages, axe | NOT VERIFIED | axe has never run on a signed-in page | Coordinator: add axe to the mobile-surfaces walk (test-only, GREEN) |
+
+### Payments, notifications, AI, security, delivery
+
+| ID | Check | Status | Evidence | Executor / next action |
+|---|---|---|---|---|
+| PAY-1 | Real pilot payment changes rights | NOT VERIFIED | 7.3, 7.5: pilot payment 2026-10-23, production data, no walk; failure and expiry unproven (7.18) | Coordinator: arm the pilot in Stripe TEST (7.4) so failure and expiry can be walked |
+| PAY-2 | Plan purchase without help | FAIL | E-6, 7.28 | Owner + legal |
+| PAY-3 | Pricing page is honest | PASS | Chrome 2026-11-04, `/en/pricing` signed out: prices confirmed, online activation not open, waitlist | Coordinator: re-check on a billing change |
+| PAY-4 | VAT, invoices | BLOCKED | 7.29, 7.30; RED #2685, #2704 | Owner + legal |
+| NTF-1 | In-app notifications | PASS | prod walk notifications-inapp 41312513056 (2026-11-01) | Coordinator: re-walk on risk |
+| NTF-2 | E-mail: alerts and password reset | PASS | prod walks alert-mail 41488266687, mail-reset 41428606490 (2026-11-02) | Coordinator: re-walk on risk |
+| NTF-3 | Push | BLOCKED | 5.8: 0 subscriptions; the channel is off by flag | Owner: VAPID keys and a real delivery test |
+| NTF-4 | Weekly digest | NOT VERIFIED | 5.9: the Monday sweep wrote in-app digests on 2026-11-02; digest-setup 41584540254 failed on the harness | Coordinator: merge #2975, re-run digest-setup |
+| AI-1 | With AI off, the product is honest | PASS | prod walk ai-off-honesty 40301607964 (2026-10-26) | Coordinator: re-walk, the run is old |
+| AI-2 | AI functions themselves | BLOCKED | 10.6–10.10, 5.5, 8.3: no provider keys, kept off on purpose | Owner + legal: activation after security, legal and functional tests |
+| AI-3 | Assistants over MCP and OAuth | PASS | prod walks mcp-chain 41589289076 (2026-11-03), mcp-oauth-client 41356233405, mcp-agents 41307643008 (2026-11-01) | Coordinator: re-walk on risk. Scopes: 10.4, owner X-2 |
+| SEC-1 | Private pages refuse a signed-out visitor | PASS | Playwright 2026-11-04: 5 private routes answer 307 to the sign-in page | Coordinator: re-check on a routing change |
+| SEC-2 | Public response headers | PASS | Playwright 2026-11-04: transport, framing, sniffing, referrer and permissions headers present | Coordinator: remaining item in 9.24 |
+| SEC-3 | Open security items | FAIL | 2.24, 9.25, 10.20 stay open; details in the private record | Coordinator: private record |
+| DEL-1 | A deploy run's commit is the commit it shipped | FAIL | twice on 2026-11-04 a run listed under one commit shipped the previous green one: 41783082125 listed `d69327239`, shipped `8126e693`; 41794146544 listed `4c58f60a8`, shipped `2afdfd8a`. Only `/api/health` is true | Coordinator: read the build from `/api/health` before every walk. GREEN executor: put the shipped commit in the run title |
+| DEL-2 | Typecheck stays up on `main` | FAIL | out of memory in runs 41795459454 and 41790091398; a red run holds back its deploy | GREEN #3041 (auto-merge) |
+
+### NOT VERIFIED function rows: executor and next action
+
+| ID | Function | Evidence type today | Executor / next action |
+|---|---|---|---|
+| 1.2 | Google OAuth | production facts, no walk or Chrome check | Coordinator: a Chrome check of the Google door on a QA identity |
+| 1.12 | Invitation / referral network | production facts, no walk or Chrome check | Coordinator: walk the referral link end to end |
+| 1.13 | Transactional e-mail | production facts, no walk or Chrome check | Owner + legal: mail stays limited (13.17). Coordinator: walk after |
+| 2.17 | ESCO taxonomy | not proven end to end | Owner: RED #2463 and quota |
+| 2.36 | Profession-specific journal templates | not proven end to end | Coordinator: add a walk step for a profession template |
+| 3.34 | Project forecast engine + recompute modes | not proven end to end | Coordinator: install the cron (#2738), then walk a project with enough recorded work |
+| 3.35 | Commitment overlap -> warning -> alternatives -> override -> audit | not proven end to end | Owner: RED #2795. Coordinator: walk the flow |
+| 3.36 | Company Living CV | not proven end to end | Owner: confirm the product shape |
+| 4.8 | Anonymous public need intake | CI or isolated run | Coordinator: walk the anonymous intake in production |
+| 4.29 | Interest->vacancy hand-off | production facts, no walk or Chrome check | Coordinator: name a production job run or Chrome check for it; the production data stays true |
+| 4.30 | Candidate pipeline -> hire decision -> close need (+ agency commissions, agency-to-agency) | not proven end to end | GREEN executor: decision and history UI. Coordinator: walk |
+| 5.9 | Weekly digest | CI or isolated run | Coordinator: merge #2975, re-run digest-setup |
+| 5.14 | Command finder + voice | production facts, no walk or Chrome check | Coordinator: add a finder step to a walk |
+| 5.15 | Voice as equal door | not proven end to end | Owner: voice host (deferred 2026-10-08) |
+| 6.11 | Cross-border readiness | production facts, no walk or Chrome check | Coordinator: Chrome check of the public part |
+| 6.16 | Commercial handoff to the partner organization | production facts, no walk or Chrome check | Coordinator: name a production job run or Chrome check for it; the production data stays true |
+| 7.2 | Free organization limit 1 open need | CI or isolated run | Coordinator: a QA organization off the pilot, then walk the limit |
+| 7.3 | Entitlement resolver | production facts, no walk or Chrome check | Coordinator: name a production job run or Chrome check for it; the production data stays true |
+| 7.4 | Stripe TEST checkout/portal/webhook | optional scenario | Coordinator: arm the pilot in Stripe TEST (optional scenario) |
+| 7.5 | Live charging | not proven end to end | Owner: self-serve stays off by decision |
+| 7.13 | Plan-gated booking_requests | not proven end to end | Coordinator: a QA organization at its booking limit, then walk |
+| 7.16 | Webhook signature verification | production facts, no walk or Chrome check | Coordinator: name a production job run or Chrome check for it; the production data stays true |
+| 7.17 | No double charge / processing | production facts, no walk or Chrome check | Coordinator: close the 2 stale open checkout operations; name the run |
+| 7.18 | Payment changes rights | not proven end to end | Coordinator: walk failure and expiry in Stripe TEST (7.4) |
+| 7.21 | Billing portal for every billing manager | not proven end to end | Coordinator: a second billing manager in the walk |
+| 7.22 | Paid-feature rights and limits | not proven end to end | Owner: #2474 and the limits. Coordinator: walk |
+| 7.25 | LMC balance and history | not proven end to end | Coordinator: private record |
+| 7.29 | VAT Stripe Tax | not proven end to end | Owner + legal: RED #2685 |
+| 8.1 | UI localization | production facts, no walk or Chrome check | Coordinator: re-run sectors-languages |
+| 8.17 | Android app (native) | production facts, no walk or Chrome check | Owner: Google Play account (8.15) |
+| 8.18 | iOS app (native) | production facts, no walk or Chrome check | Owner: Apple account (8.15) |
+| 9.4 | Privacy request intake | production facts, no walk or Chrome check | Coordinator: name a production job run or Chrome check for it; the production data stays true |
+| 9.6 | GDPR erasure executor | production facts, no walk or Chrome check | Coordinator: name a production job run or Chrome check for it; the production data stays true |
+| 9.8 | RLS on every table | production facts, no walk or Chrome check | Coordinator: a read-only catalog run, stated in the private record |
+| 9.9 | Audit trail | CI or isolated run | Coordinator: private record |
+| 9.10 | Rate limiting | production facts, no walk or Chrome check | Coordinator: private record |
+| 9.17 | Internal supply feed | CI or isolated run | Coordinator: settle the intended readback cadence, then a job run |
+| 9.22 | Env schema validation | production facts, no walk or Chrome check | Coordinator: private record |
+| 9.23 | Security-definer governance | production facts, no walk or Chrome check | Coordinator: RED R-2, private record |
+| 9.24 | Security incident handling | production facts, no walk or Chrome check | Coordinator: private record |
+| 10.18 | Vacancy source SE | production facts, no walk or Chrome check | Coordinator: name a production job run or Chrome check for it; the production data stays true |
+| 10.19 | Vacancy source NAV | production facts, no walk or Chrome check | Coordinator: name a production job run or Chrome check for it; the production data stays true |
+| 10.23 | Agentai supply feed | production facts, no walk or Chrome check | Coordinator: name a production job run or Chrome check for it; the production data stays true |
+| 12.2 | Labour-market intelligence | production facts, no walk or Chrome check | Coordinator: Chrome check; copy D-2 stays open |
+| 12.5 | Public market facts | production facts, no walk or Chrome check | Coordinator: Chrome check against the database figure |
+| 13.2 | Health probe + monitor | production facts, no walk or Chrome check | Coordinator: name the monitor's production run |
+| 13.4 | Supabase capacity | CI or isolated run | Coordinator: read the plan and capacity, name the date |
+| 13.6 | VPS cron bundle | production facts, no walk or Chrome check | Coordinator: name a production job run or Chrome check for it; the production data stays true |
+| 13.7 | Migration safety + parity | production facts, no walk or Chrome check | Coordinator: name a production parity run |
+| 13.8 | Migration ledger parity | production facts, no walk or Chrome check | Coordinator: name a production parity run |
+| 13.10 | Quality gates | production facts, no walk or Chrome check | None: CI by nature; DEL-2 tracks its stability |
+| 13.11 | E2E in CI | production facts, no walk or Chrome check | None: CI by nature |
+| 13.12 | Executable product constitution | production facts, no walk or Chrome check | None: CI by nature |
+| 13.13 | Feature-availability catalogue | not proven end to end | Coordinator: Chrome check of the catalogue's surfaces |
+| 13.14 | Owner waivers / product gate | production facts, no walk or Chrome check | Coordinator: restore the live parity read for CI |
+| 13.15 | Old-browser compatibility | production facts, no walk or Chrome check | Coordinator: a Chrome check on an old-browser profile |
+| 13.16 | Browser crash reports | not proven end to end | Coordinator: find primary evidence or mark not built |
 
 ## Identity, sign-up & organizations
 
