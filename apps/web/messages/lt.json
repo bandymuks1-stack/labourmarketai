@@ -16165,7 +16165,7 @@
       "allowanceRemaining": "Liko {count} iš {limit} vertimų",
       "allowanceExhausted": "Išnaudojai visus {limit} tau skirtus vertimus. Skelbimą ir toliau galima skaityti originalo kalba.",
       "unavailable": "Šio skelbimo dabar išversti nepavyko. Žemiau rodomi paties skelbėjo žodžiai.",
-      "notSwitchedOn": "Automatinis skelbimų vertimas dar neįjungtas. Žemiau – paties skelbėjo žodžiai.",
+      "notSwitchedOn": "Automatinio skelbimų vertimo dar nėra. Žemiau – paties skelbėjo žodžiai.",
       "signedOut": "Prisijunk, kad galėtum išversti šį skelbimą."
     }
   },
