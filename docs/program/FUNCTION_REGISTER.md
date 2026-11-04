@@ -244,7 +244,7 @@ Database timings come from production `pg_stat_statements`, read-only. They are 
 
 | ID | Check | Status | Evidence | Defect / blocker |
 |---|---|---|---|---|
-| SR-1 | `/jobs` free text, cold first query | FAIL | measured by J-13: see its report and RED draft #3024. `pg_stat_statements`: `search_public_vacancy_previews_v1` 35,752 calls, mean 560 ms, max 2,999 ms (the 3 s anon timeout) | fix is RED draft #3024, not applied. #3020's trigram index was rolled back (RC-A6, #3025) |
+| SR-1 | `/jobs` free text, cold first query | FAIL | measured by J-13: see its report and RED draft #3024. `pg_stat_statements`: `search_public_vacancy_previews_v1` 35,752 calls, mean 560 ms, max 2,999 ms (the 3 s anon timeout) | fix is RED draft #3024, not applied. #3020's trigram index was rolled back (RC-A6, #3025). 2026-11-04: after the owner-approved manual VACUUM, pages read per search fell from 30.5k to 4.3k and signed-out Chrome searches took 0.43–0.92 s with no unavailable state; the status stays FAIL until the decay measurement after the 08:11 import and a cold check after idle |
 | SR-2 | `/jobs` free text, correctness and warm timing | PASS | Chrome, signed out, full HTML: `suvirintojas` 736 ms, `snickare` 451 ms, `el` 446 ms; **20 cards each, and 20 of 20 titles contain the term**. `developer` 0 cards with the honest "0 rasta… nerasta" state. No "unavailable" state | — |
 | SR-3 | Profession filter | PASS | Chrome: `?profession=teacher` 306 ms, 20 cards; `handyman` 2 cards; `electrician` page 1 / page 2: 20 / 20 cards, 0 overlap | — |
 | SR-4 | Search paging | FAIL | Chrome: unfiltered board p1/p2 0 overlap; `?q=el` p1/p2 0 overlap. **But a term that maps to a profession drops the page:** `/lt/jobs?q=elektrikas&page=2` redirects to `/lt/jobs?profession=electrician` and shows page 1 again (20 of 20 the same) | the board's own links never build this URL (after the redirect they carry `profession`), so only shared or hand-made links meet it. Fix: carry `page` into the redirect in `jobs/page.tsx`. It is blocked by the same owner waiver as SEO-8 |
@@ -275,7 +275,9 @@ Pages: `/lt`, `/lt/jobs`, `/lt/for-companies`, `/lt/for-workers`, `/lt/pricing`,
 | DS-4 | Customer door in "More" (#3003) | PASS | prod walk buyer-workspace 41713787541 (2026-11-03) B-3b | — |
 | DS-5 | Job cards on a phone | PASS | Chrome, 390×844, 2026-11-03: 20 cards, 358 px wide, no sideways scroll, source language named | — |
 
-### Latest production walk per spec (2026-11-03 22:20 UTC)
+### Latest production walk per spec (2026-11-04 07:15 UTC)
+
+The six walks of 2026-11-04 (buyer-workspace, documents-approvals, agency-chain, orders-bookings, project-execution, marketplace) all ran on one build, `d69327239` (deploy run 41784453076, finished 06:21:51Z; `/api/health` build `d6932723`), with no deploy between them.
 
 From `gh run list --workflow prod-qa-walk.yml --limit 1000` (display title `prod-qa-walk <spec>`). The latest
 non-cancelled run and the last success. "None in the last 1000 runs" means the window, which reaches back to 2026-10-17.
@@ -283,12 +285,12 @@ non-cancelled run and the last success. "None in the last 1000 runs" means the w
 | Spec | Latest run | Date | Conclusion | Last success |
 |---|---|---|---|---|
 | admin-console | 40688059945 | 2026-10-28 | success | 40688059945 2026-10-28 |
-| agency-chain | 41717112150 | 2026-11-03 | success | 41717112150 2026-11-03 |
+| agency-chain | 41787046374 | 2026-11-04 | success | 41787046374 2026-11-04 |
 | ai-off-honesty | 40301607964 | 2026-10-26 | success | 40301607964 2026-10-26 |
 | alert-mail | 41488266687 | 2026-11-02 | success | 41488266687 2026-11-02 |
 | billing-test-mode | 40668367143 | 2026-10-28 | failure | none in the last 1000 runs |
 | brigade-formation | 41350506578 | 2026-11-01 | success | 41350506578 2026-11-01 |
-| buyer-workspace | 41713787541 | 2026-11-03 | success | 41713787541 2026-11-03 |
+| buyer-workspace | 41785749357 | 2026-11-04 | success | 41785749357 2026-11-04 |
 | calendar-planning | 41656893141 | 2026-11-03 | success | 41656893141 2026-11-03 |
 | chat-confirm-once | 41543973553 | 2026-11-02 | success | 41543973553 2026-11-02 |
 | chat-continuity | 41322286924 | 2026-11-01 | success | 41322286924 2026-11-01 |
@@ -298,7 +300,7 @@ non-cancelled run and the last success. "None in the last 1000 runs" means the w
 | company-talent-history | 41279265278 | 2026-11-01 | success | 41279265278 2026-11-01 |
 | concurrency-probe | 40342223134 | 2026-10-26 | success | 40342223134 2026-10-26 |
 | digest-setup | 41584540254 | 2026-11-03 | failure | none in the last 1000 runs |
-| documents-approvals | 41716118134 | 2026-11-03 | success | 41716118134 2026-11-03 |
+| documents-approvals | 41786102850 | 2026-11-04 | success | 41786102850 2026-11-04 |
 | employee-beta-gate | 41671159180 | 2026-11-03 | failure | 40045368369 2026-10-24 |
 | fresh-activation | 41279196446 | 2026-11-01 | success | 41279196446 2026-11-01 |
 | invited-worker | 41430482903 | 2026-11-02 | success | 41430482903 2026-11-02 |
@@ -310,18 +312,18 @@ non-cancelled run and the last success. "None in the last 1000 runs" means the w
 | lmc-csrf | 40210854856 | 2026-10-25 | success | 40210854856 2026-10-25 |
 | mail-reset | 41428606490 | 2026-11-02 | success | 41428606490 2026-11-02 |
 | manager-chat | 41658636784 | 2026-11-03 | success | 41658636784 2026-11-03 |
-| marketplace | 41729310761 | 2026-11-03 | success | 41729310761 2026-11-03 |
+| marketplace | 41790404575 | 2026-11-04 | success | 41790404575 2026-11-04 |
 | marketplace-goods-services | 41664268898 | 2026-11-03 | success | 41664268898 2026-11-03 |
 | mcp-agents | 41307643008 | 2026-11-01 | success | 41307643008 2026-11-01 |
 | mcp-chain | 41589289076 | 2026-11-03 | success | 41589289076 2026-11-03 |
 | mcp-oauth-client | 41356233405 | 2026-11-01 | success | 41356233405 2026-11-01 |
 | mobile-surfaces | 41317177981 | 2026-11-01 | success | 41317177981 2026-11-01 |
 | notifications-inapp | 41312513056 | 2026-11-01 | success | 41312513056 2026-11-01 |
-| orders-bookings | 41718546706 | 2026-11-03 | success | 41718546706 2026-11-03 |
+| orders-bookings | 41787683432 | 2026-11-04 | success | 41787683432 2026-11-04 |
 | org-roster | 41318490491 | 2026-11-01 | success | 41318490491 2026-11-01 |
 | profile-cv-history | 41282258795 | 2026-11-01 | success | 41282258795 2026-11-01 |
 | project-context | 41661103338 | 2026-11-03 | success | 41661103338 2026-11-03 |
-| project-execution | 41722638759 | 2026-11-03 | success | 41722638759 2026-11-03 |
+| project-execution | 41789372775 | 2026-11-04 | success | 41789372775 2026-11-04 |
 | public-market-direction | 40186517027 | 2026-10-25 | success | 40186517027 2026-10-25 |
 | public-org-locales | 40371836163 | 2026-10-26 | success | 40371836163 2026-10-26 |
 | push | 41712000880 | 2026-11-03 | pending | 41548831709 2026-11-02 |
