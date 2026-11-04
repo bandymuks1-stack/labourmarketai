@@ -12894,6 +12894,11 @@
   "cvImport": {
     "reviewTitle": "Ką radome tavo CV",
     "reviewHint": "Sistema tik siūlo. Kiekvieną įrašą išsaugok arba atmesk — sprendi tu.",
+    "confidence": {
+      "high": "Aiškiai parašyta CV",
+      "medium": "Patikrink, ar perskaityta teisingai",
+      "low": "Spėjimas: būtinai patikrink"
+    },
     "empty": "Iš šio teksto dalių nuskaityti nepavyko — gali jas įrašyti ranka.",
     "groups": {
       "workHistory": "Darbo patirtis",

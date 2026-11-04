@@ -217,7 +217,43 @@ const AVAILABILITY_RULES: ReadonlyArray<[RegExp, CvAvailabilityHintKey]> = [
 /** Bare section-header lines ("Sertifikatai", "Education", …) are structure,
  *  not content — they must never become proposals themselves. */
 const SECTION_HEADER_RE =
-  /^(sertifikatai|sertifikatas|pažymėjimai|certificates?|zertifikate|certificaten|сертификаты|išsilavinimas|education|ausbildung|opleiding|образование|kalbos|languages|sprachen|talen|языки|pasiekimai|achievements|erfolge|prestaties|достижения|apdovanojimai|awards|darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы)\s*:?$/i;
+  /^(sertifikatai|sertifikatas|pažymėjimai|certificates?|zertifikate|certificaten|сертификаты|certyfikaty|išsilavinimas|education|ausbildung|opleiding|образование|wykształcenie|kalbos|languages|sprachen|talen|языки|języki|pasiekimai|achievements|erfolge|prestaties|достижения|osiągnięcia|apdovanojimai|awards|darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы|doświadczenie( zawodowe)?)\s*:?$/i;
+const WORK_HEADER_RE =
+  /^(darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы|doświadczenie( zawodowe)?)\s*:?$/i;
+const EDUCATION_HEADER_RE =
+  /^(išsilavinimas|education|ausbildung|opleiding|образование|wykształcenie)\s*:?$/i;
+
+/** Month names, whole words only and only beside a year: "Kovalenko 2019" is
+ *  not March. */
+const MONTH_WORDS: ReadonlyArray<readonly [number, string]> = [
+  [1, "sausis|sausio|saus|january|jan|januar|januari|styczeń|stycznia|sty|январь|января|янв"],
+  [2, "vasaris|vasario|vas|february|feb|februar|februari|luty|lutego|lut|февраль|февраля|фев"],
+  [3, "kovas|kovo|kov|march|mar|märz|maart|mrt|marzec|marca|март|марта|мар"],
+  [4, "balandis|balandžio|bal|april|apr|kwiecień|kwietnia|kwi|апрель|апреля|апр"],
+  [5, "gegužė|gegužės|geg|may|mai|mei|maj|maja|май|мая"],
+  [6, "birželis|birželio|bir|june|jun|juni|czerwiec|czerwca|cze|июнь|июня|июн"],
+  [7, "liepa|liepos|lie|july|jul|juli|lipiec|lipca|lip|июль|июля|июл"],
+  [8, "rugpjūtis|rugpjūčio|rgp|august|aug|augustus|sierpień|sierpnia|sie|август|августа|авг"],
+  [9, "rugsėjis|rugsėjo|rgs|september|sep|sept|wrzesień|września|wrz|сентябрь|сентября|сен"],
+  [10, "spalis|spalio|spl|october|oct|okt|oktober|październik|października|paź|октябрь|октября|окт"],
+  [11, "lapkritis|lapkričio|lap|november|nov|listopad|listopada|lis|ноябрь|ноября|ноя"],
+  [12, "gruodis|gruodžio|grd|december|dec|dez|dezember|grudzień|grudnia|gru|декабрь|декабря|дек"],
+];
+const MONTH_NUMBER = new Map<string, number>(
+  MONTH_WORDS.flatMap(([n, words]) => words.split("|").map((w) => [w, n] as const)),
+);
+const MONTH_ALT = [...MONTH_NUMBER.keys()].sort((a, b) => b.length - a.length).join("|");
+const YEAR_MARK = "(?:\\s?(?:m|г|r)\\.?(?![\\p{L}]))?";
+const MONTH_MARK = "(?:\\.|\\s?mėn\\.?)?";
+const YEAR_THEN_MONTH_RE = new RegExp(
+  `(?<![\\p{L}\\d])((?:19|20)\\d{2})${YEAR_MARK}\\s+(${MONTH_ALT})(?![\\p{L}])${MONTH_MARK}`,
+  "giu",
+);
+const MONTH_THEN_YEAR_RE = new RegExp(
+  `(?<![\\p{L}])(${MONTH_ALT})(?![\\p{L}])${MONTH_MARK}\\s+((?:19|20)\\d{2})(?!\\d)${YEAR_MARK}`,
+  "giu",
+);
+const BULLET_RE = /^[•·▪●◦*–—-]\s/;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -332,6 +368,97 @@ function languageSegment(line: string, re: RegExp): string {
   return line.split(/[,;/|]/).find((seg) => re.test(seg)) ?? line;
 }
 
+/** "2019 m. kovas" / "March 2019" as the numeric form the range grammar reads. */
+function numericMonthDates(line: string): string {
+  const num = (w: string) => String(MONTH_NUMBER.get(w.toLowerCase()) ?? 0).padStart(2, "0");
+  return line
+    .replace(YEAR_THEN_MONTH_RE, (_, y: string, m: string) => `${y}-${num(m)}`)
+    .replace(MONTH_THEN_YEAR_RE, (_, m: string, y: string) => `${num(m)}/${y}`);
+}
+
+type CvSection = "work" | "education" | "other" | null;
+
+interface CvLine {
+  /** Text the classifier reads; a stacked entry is its lines joined. */
+  text: string;
+  /** What the person's CV says, for the review ("title / employer / dates"). */
+  source: string;
+  section: CvSection;
+  /** Joined from several lines: a reading of the layout, never high confidence. */
+  stacked: boolean;
+  isHeader: boolean;
+}
+
+/** A line that states an entry's period and nothing of its own: "03/2019 –
+ *  12/2023", or under an education heading a lone year or "Program, 2016". */
+function isPeriodLine(l: CvLine): boolean {
+  if (l.isHeader) return false;
+  if (l.section === "education" && !EDUCATION_RE.test(l.text) && /(?:^|\s)(?:19|20)\d{2}$/.test(l.text)) return true;
+  return parseYearRange(l.text) !== null && stripDates(l.text).replace(/[^\p{L}]/gu, "").length === 0;
+}
+
+/** Could this line be the title or the employer of an entry? Not a duty bullet,
+ *  a sentence, a contact line, or a line with its own period. */
+function isEntryLine(l: CvLine): boolean {
+  return (
+    !l.isHeader &&
+    !isPeriodLine(l) &&
+    !BULLET_RE.test(l.text) &&
+    l.text.length <= 90 &&
+    !/[.!?]$/.test(l.text) &&
+    !/@|https?:|\+?\d[\d\s()-]{6,}/.test(l.text) &&
+    parseYearRange(l.text) === null
+  );
+}
+
+/**
+ * PDF CVs usually stack an entry: title / employer / period, in any order, and
+ * the classifier below reads ONE line at a time. This joins each period line
+ * with the entry lines that belong to it, into the one-line form the classifier
+ * already understands, so there is one parser and one set of rules.
+ *
+ * Lines before a period belong to it; a CV that opens each entry with the
+ * period has them after it. One line after is also taken when it names an
+ * employer (title / period / employer). Outside a known section only ONE line
+ * is taken: a name or a headline above the first job is not part of that job.
+ * Languages, certificates and the like are never grouped.
+ */
+function joinStackedEntries(input: readonly CvLine[]): CvLine[] {
+  const used = new Set<number>();
+  const joined = new Map<number, CvLine>();
+  input.forEach((line, i) => {
+    if (line.section === "other" || !isPeriodLine(line)) return;
+    const reach = line.section === null ? 1 : 2;
+    const before: number[] = [];
+    for (let k = i - 1; k >= 0 && before.length < reach; k--) {
+      if (used.has(k) || !isEntryLine(input[k]) || input[k].section !== line.section) break;
+      before.unshift(k);
+    }
+    const after: number[] = [];
+    for (let k = i + 1; k < input.length && before.length + after.length < reach; k++) {
+      if (!isEntryLine(input[k]) || input[k].section !== line.section) break;
+      if (before.length > 0 && !COMPANY_MARKER_RE.test(input[k].text)) break;
+      after.push(k);
+    }
+    const parts = [...before, ...after];
+    if (parts.length === 0) return;
+    // The school first: "Institution, program" is how education lines split.
+    if (line.section === "education") {
+      parts.sort((a, b) => Number(EDUCATION_RE.test(input[b].text)) - Number(EDUCATION_RE.test(input[a].text)));
+    }
+    for (const k of parts) used.add(k);
+    used.add(i);
+    joined.set(i, {
+      text: `${parts.map((k) => input[k].text).join(", ")}${/^\p{L}/u.test(line.text) ? ", " : " "}${line.text}`,
+      source: [...before, i, ...after].map((k) => input[k].source).join(" / "),
+      section: line.section,
+      stacked: true,
+      isHeader: false,
+    });
+  });
+  return input.flatMap((line, i) => joined.get(i) ?? (used.has(i) ? [] : [line]));
+}
+
 // ── Main parser ──────────────────────────────────────────────────────────────
 
 export function parseCvSections(text: string): CvSectionProposals {
@@ -347,19 +474,34 @@ export function parseCvSections(text: string): CvSectionProposals {
   const raw = (text ?? "").trim();
   if (raw.length === 0) return out;
 
-  const lines = raw
-    .split(/\n+/)
-    .map((l) => clampLine(l.trim()))
-    .filter((l) => l.length >= 3)
-    .slice(0, 400);
+  let section: CvSection = null;
+  const lines = joinStackedEntries(
+    raw
+      .split(/\n+/)
+      .map((l) => clampLine(l.trim()))
+      .filter((l) => l.length >= 3)
+      .slice(0, 400)
+      .map((l): CvLine => {
+        const isHeader = SECTION_HEADER_RE.test(l);
+        if (isHeader) {
+          section = WORK_HEADER_RE.test(l) ? "work" : EDUCATION_HEADER_RE.test(l) ? "education" : "other";
+        }
+        return { text: numericMonthDates(l), source: l, section, stacked: false, isHeader };
+      }),
+  );
 
   const seenLang = new Set<string>();
   const seenAvailability = new Set<CvAvailabilityHintKey>();
   const seenTitles = new Set<string>();
 
-  for (const line of lines) {
-    if (SECTION_HEADER_RE.test(line)) continue;
-    const isEducation = EDUCATION_RE.test(line);
+  for (const { text: line, source: sourceLine, section: inSection, stacked, isHeader } of lines) {
+    if (isHeader) continue;
+    // The heading the line sits under decides when the words alone cannot:
+    // "UAB Mokyklų renovacija" under work experience is an employer.
+    const isEducation =
+      inSection === "education"
+        ? EDUCATION_RE.test(line) || stacked || parseYearRange(line) !== null
+        : EDUCATION_RE.test(line) && !(inSection === "work" && COMPANY_MARKER_RE.test(line));
     const isCertificate = CERTIFICATE_RE.test(line);
     const isAchievement = ACHIEVEMENT_RE.test(line);
     const range = parseYearRange(line);
@@ -378,7 +520,7 @@ export function parseCvSections(text: string): CvSectionProposals {
       if (level === null && line.length > 80) continue;
       seenLang.add(code);
       if (out.languages.length < MAX_PER_SECTION) {
-        out.languages.push({ lang: code, level, confidence, sourceLine: line });
+        out.languages.push({ lang: code, level, confidence, sourceLine });
       }
     }
 
@@ -386,7 +528,7 @@ export function parseCvSections(text: string): CvSectionProposals {
     for (const [re, key] of AVAILABILITY_RULES) {
       if (!re.test(line) || seenAvailability.has(key)) continue;
       seenAvailability.add(key);
-      out.availability.push({ key, confidence: "medium", sourceLine: line });
+      out.availability.push({ key, confidence: "medium", sourceLine });
     }
 
     // Salary expectation — first plausible MONTHLY figure only. Hourly wages
@@ -406,7 +548,7 @@ export function parseCvSections(text: string): CvSectionProposals {
           minEur: min,
           maxEur: max,
           confidence: rangeM ? "high" : "medium",
-          sourceLine: line,
+          sourceLine,
         };
       }
     }
@@ -419,7 +561,7 @@ export function parseCvSections(text: string): CvSectionProposals {
           title,
           year: firstYear(line),
           confidence: "medium",
-          sourceLine: line,
+          sourceLine,
         });
       }
       continue; // a certificate line is not also a job/education line
@@ -429,7 +571,7 @@ export function parseCvSections(text: string): CvSectionProposals {
       const title = stripDates(line).slice(0, 160);
       if (title.length >= 3 && !seenTitles.has(`a:${title.toLowerCase()}`)) {
         seenTitles.add(`a:${title.toLowerCase()}`);
-        out.achievements.push({ title, confidence: "low", sourceLine: line });
+        out.achievements.push({ title, confidence: "low", sourceLine });
       }
       continue;
     }
@@ -451,7 +593,7 @@ export function parseCvSections(text: string): CvSectionProposals {
             startYear: range?.start.year ?? null,
             endYear: range?.end?.year ?? firstYear(line),
             confidence: range ? "medium" : "low",
-            sourceLine: line,
+            sourceLine,
           });
         }
       }
@@ -474,8 +616,8 @@ export function parseCvSections(text: string): CvSectionProposals {
             start: range?.start ?? null,
             end: range?.end ?? null,
             isCurrent: range?.isCurrent ?? false,
-            confidence: range && hasCompany ? "high" : range ? "medium" : "low",
-            sourceLine: line,
+            confidence: range && hasCompany && !stacked ? "high" : range ? "medium" : "low",
+            sourceLine,
           });
         }
       }

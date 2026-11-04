@@ -155,8 +155,10 @@ export async function readLearningCompass(): Promise<LearningCompassRead> {
         .select("id", { count: "exact", head: true })
         .eq("worker_id", ctx.workerId),
     )
-      .then((r: { count: number | null; error: unknown }) => (r.error ? 0 : (r.count ?? 0)))
-      .catch(() => 0),
+      // A failed count is UNKNOWN, never 0 (SEP-7) — 0 would advise "log your
+      // first entry" to a person with a full journal.
+      .then((r: { count: number | null; error: unknown }) => (r.error ? null : (r.count ?? 0)))
+      .catch(() => null),
   ]);
 
   const education: CompassEducation[] =

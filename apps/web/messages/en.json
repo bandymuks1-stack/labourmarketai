@@ -12894,6 +12894,11 @@
   "cvImport": {
     "reviewTitle": "What we found in your CV",
     "reviewHint": "The system only suggests. Save or discard each entry — you decide.",
+    "confidence": {
+      "high": "Stated clearly in the CV",
+      "medium": "Check that this was read correctly",
+      "low": "A guess: please check it"
+    },
     "empty": "We couldn't read any sections from this text — you can add them by hand.",
     "groups": {
       "workHistory": "Work history",

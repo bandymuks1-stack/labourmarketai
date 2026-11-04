@@ -12894,6 +12894,11 @@
   "cvImport": {
     "reviewTitle": "Gedetecteerde cv-onderdelen",
     "reviewHint": "Het systeem stelt alleen voor. Sla elk item op of verwijder het — jij beslist.",
+    "confidence": {
+      "high": "Duidelijk vermeld in het cv",
+      "medium": "Controleer of dit goed is gelezen",
+      "low": "Een gok: controleer dit"
+    },
     "empty": "Geen gestructureerde items gevonden in de tekst.",
     "groups": {
       "workHistory": "Werkervaring",
