@@ -176,3 +176,41 @@ describe("every brand raster is the owner's mark, read from its pixels", () => {
     expect(meanDiff(await rgba(bars, 32), await rgba(SOURCE_TILE, 32))).toBeGreaterThan(MAX_MEAN_CHANNEL_DIFF);
   });
 });
+
+/**
+ * THE MARK IS NEVER REDRAWN (owner 2026-11-04: "Naujo logotipo neperpiešti,
+ * nekeisti jo proporcijų, spalvų ar kompozicijos"). Every shipped vector carries
+ * the owner's geometry byte for byte, and the raster's scale is uniform.
+ *
+ * The COLOUR is pinned as it stands, not as the source file has it: the source
+ * is orange (#FFA100); the product shows gold under the visual direction approved
+ * 2026-09-09 (#1683). The register row UX-10 names that for the owner.
+ */
+describe("the shipped mark is the owner's geometry", () => {
+  const SOURCE = resolve(WEB_ROOT, "../../docs/brand/source/LM_Color Single.svg");
+  const shapes = (text: string) => ({
+    polygons: [...text.matchAll(/<polygon[^>]*points="([^"]+)"/g)].map((m) => m[1]!.trim()).sort(),
+    circle: /cx="614\.05"\s+cy="497\.95"\s+r="39\.16"/.test(text),
+  });
+
+  for (const file of ["public/brand/lm-mark.svg", "app/icon.svg", "public/app-icon.svg", "components/ui/lm-logo.tsx"]) {
+    it(`${file}: every polygon and the dot, verbatim`, () => {
+      const source = shapes(readFileSync(SOURCE, "utf8"));
+      expect(source.polygons).toHaveLength(3);
+      const shipped = shapes(readFileSync(resolve(WEB_ROOT, file), "utf8"));
+      expect(shipped.polygons).toEqual(source.polygons);
+      expect(shipped.circle).toBe(true);
+    });
+  }
+
+  it("the tile places it with one uniform scale, so its proportions hold", () => {
+    const tile = readFileSync(SOURCE_TILE, "utf8");
+    expect(tile).toMatch(/<g transform="translate\([-\d.]+ [-\d.]+\) scale\([\d.]+\)" fill="#D4AF37">/);
+    expect(tile).toContain('fill="#070706"');
+  });
+
+  it("the gold is the approved one, in the full-size mark too", () => {
+    const mark = readFileSync(resolve(WEB_ROOT, "public/brand/lm-mark.svg"), "utf8");
+    for (const stop of ["#8C6A16", "#D4AF37", "#F2D675"]) expect(mark).toContain(stop);
+  });
+});
