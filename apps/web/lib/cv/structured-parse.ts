@@ -218,10 +218,15 @@ const AVAILABILITY_RULES: ReadonlyArray<[RegExp, CvAvailabilityHintKey]> = [
   ],
 ];
 
+/** The education_types slug of a course or training, as opposed to a school. */
+export const TRAINING_TYPE_SLUG = "course_certificate";
+
 /** Bare section-header lines ("Sertifikatai", "Education", …) are structure,
  *  not content — they must never become proposals themselves. */
 const SECTION_HEADER_RE =
-  /^(sertifikatai|sertifikatas|pažymėjimai|certificates?|zertifikate|certificaten|сертификаты|certyfikaty|išsilavinimas|education|ausbildung|opleiding|образование|wykształcenie|kalbos|languages|sprachen|talen|языки|języki|pasiekimai|achievements|erfolge|prestaties|достижения|osiągnięcia|apdovanojimai|awards|darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы|doświadczenie( zawodowe)?)\s*:?$/i;
+  /^(sertifikatai|sertifikatas|pažymėjimai|certificates?|zertifikate|certificaten|сертификаты|certyfikaty|išsilavinimas|education|ausbildung|opleiding|образование|wykształcenie|kalbos|languages|sprachen|talen|языки|języki|pasiekimai|achievements|erfolge|prestaties|достижения|osiągnięcia|apdovanojimai|awards|darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы|doświadczenie( zawodowe)?|mokymai|kursai|kvalifikacijos kėlimas|training|trainings|courses|weiterbildung|fortbildung|kurse|cursussen|trainingen|курсы|обучение|szkolenia|kursy)\s*:?$/i;
+const TRAINING_HEADER_RE =
+  /^(mokymai|kursai|kvalifikacijos kėlimas|training|trainings|courses|weiterbildung|fortbildung|kurse|cursussen|trainingen|курсы|обучение|szkolenia|kursy)\s*:?$/i;
 const WORK_HEADER_RE =
   /^(darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы|doświadczenie( zawodowe)?)\s*:?$/i;
 const EDUCATION_HEADER_RE =
@@ -382,7 +387,9 @@ function numericMonthDates(line: string): string {
     .replace(MONTH_THEN_YEAR_RE, (_, m: string, y: string) => `${num(m)}/${y}`);
 }
 
-type CvSection = "work" | "education" | "other" | null;
+/** "training" reads like "education" and saves through the same records; it
+ *  only fixes the type, so a course never reads as a school. */
+type CvSection = "work" | "education" | "training" | "other" | null;
 
 interface CvLine {
   /** Text the classifier reads; a stacked entry is its lines joined. */
@@ -395,11 +402,17 @@ interface CvLine {
   isHeader: boolean;
 }
 
+function isLearningSection(section: CvSection): boolean {
+  return section === "education" || section === "training";
+}
+
 /** A line that states an entry's period and nothing of its own: "03/2019 –
  *  12/2023", or under an education heading a lone year or "Program, 2016". */
 function isPeriodLine(l: CvLine): boolean {
   if (l.isHeader) return false;
-  if (l.section === "education" && !EDUCATION_RE.test(l.text) && /(?:^|\s)(?:19|20)\d{2}$/.test(l.text)) return true;
+  if (isLearningSection(l.section) && /^(?:19|20)\d{2}$/.test(l.text)) return true;
+  // "Program, 2016" under a school. Under a training heading it is a whole entry.
+  if (l.section === "education" && !EDUCATION_RE.test(l.text) && /\s(?:19|20)\d{2}$/.test(l.text)) return true;
   return parseYearRange(l.text) !== null && stripDates(l.text).replace(/[^\p{L}]/gu, "").length === 0;
 }
 
@@ -425,7 +438,8 @@ function isEntryLine(l: CvLine): boolean {
  *
  * Lines before a period belong to it; a CV that opens each entry with the
  * period has them after it. One line after is also taken when it names an
- * employer (title / period / employer). Outside a known section only ONE line
+ * employer (title / period / employer). Outside a known section, and under a
+ * training heading (a course has a name, not an employer), only ONE line
  * is taken: a name or a headline above the first job is not part of that job.
  * Languages, certificates and the like are never grouped.
  */
@@ -434,14 +448,16 @@ function joinStackedEntries(input: readonly CvLine[]): CvLine[] {
   const joined = new Map<number, CvLine>();
   input.forEach((line, i) => {
     if (line.section === "other" || !isPeriodLine(line)) return;
-    const reach = line.section === null ? 1 : 2;
+    const reach = line.section === null || line.section === "training" ? 1 : 2;
     const before: number[] = [];
     for (let k = i - 1; k >= 0 && before.length < reach; k--) {
       if (used.has(k) || !isEntryLine(input[k]) || input[k].section !== line.section) break;
       before.unshift(k);
     }
+    // A line with words of its own only completes the line before it.
+    const hasWords = /\p{L}/u.test(line.text);
     const after: number[] = [];
-    for (let k = i + 1; k < input.length && before.length + after.length < reach; k++) {
+    for (let k = i + 1; !hasWords && k < input.length && before.length + after.length < reach; k++) {
       if (!isEntryLine(input[k]) || input[k].section !== line.section) break;
       if (before.length > 0 && !COMPANY_MARKER_RE.test(input[k].text)) break;
       after.push(k);
@@ -449,7 +465,7 @@ function joinStackedEntries(input: readonly CvLine[]): CvLine[] {
     const parts = [...before, ...after];
     if (parts.length === 0) return;
     // The school first: "Institution, program" is how education lines split.
-    if (line.section === "education") {
+    if (isLearningSection(line.section)) {
       parts.sort((a, b) => Number(EDUCATION_RE.test(input[b].text)) - Number(EDUCATION_RE.test(input[a].text)));
     }
     for (const k of parts) used.add(k);
@@ -491,7 +507,13 @@ export function parseCvSections(text: string): CvSectionProposals {
       .map((l): CvLine => {
         const isHeader = SECTION_HEADER_RE.test(l);
         if (isHeader) {
-          section = WORK_HEADER_RE.test(l) ? "work" : EDUCATION_HEADER_RE.test(l) ? "education" : "other";
+          section = WORK_HEADER_RE.test(l)
+            ? "work"
+            : EDUCATION_HEADER_RE.test(l)
+              ? "education"
+              : TRAINING_HEADER_RE.test(l)
+                ? "training"
+                : "other";
         }
         return { text: numericMonthDates(l), source: l, section, stacked: false, isHeader };
       }),
@@ -506,7 +528,9 @@ export function parseCvSections(text: string): CvSectionProposals {
     // The heading the line sits under decides when the words alone cannot:
     // "UAB Mokyklų renovacija" under work experience is an employer.
     const isEducation =
-      inSection === "education"
+      inSection === "training"
+        ? line.replace(/[^\p{L}]/gu, "").length >= 3
+        : inSection === "education"
         ? EDUCATION_RE.test(line) || stacked || parseYearRange(line) !== null
         : EDUCATION_RE.test(line) && !(inSection === "work" && COMPANY_MARKER_RE.test(line));
     const isCertificate = CERTIFICATE_RE.test(line);
@@ -596,7 +620,7 @@ export function parseCvSections(text: string): CvSectionProposals {
           out.education.push({
             institution,
             program,
-            educationTypeSlug: educationTypeSlugFor(line),
+            educationTypeSlug: inSection === "training" ? TRAINING_TYPE_SLUG : educationTypeSlugFor(line),
             startYear: range?.start.year ?? null,
             endYear: range?.end?.year ?? firstYear(line),
             confidence: range ? "medium" : "low",

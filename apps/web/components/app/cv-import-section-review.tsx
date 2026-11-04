@@ -6,7 +6,9 @@ import { useTranslations } from "next-intl";
 
 import {
   hasAnyProposal,
+  TRAINING_TYPE_SLUG,
   type CvDatePart,
+  type CvEducationProposal,
   type CvProposalConfidence,
   type CvSectionProposals,
 } from "@/lib/cv/structured-parse";
@@ -272,8 +274,12 @@ export function CvImportSectionReview({
         ))}
       </ReviewGroup>
 
-      <ReviewGroup nameKey="education" count={merged.education.length}>
-        {merged.education.map((e, i) => (
+      {([
+        ["education", (e: CvEducationProposal) => e.educationTypeSlug !== TRAINING_TYPE_SLUG],
+        ["training", (e: CvEducationProposal) => e.educationTypeSlug === TRAINING_TYPE_SLUG],
+      ] as const).map(([nameKey, belongs]) => (
+      <ReviewGroup key={nameKey} nameKey={nameKey} count={merged.education.filter(belongs).length}>
+        {merged.education.map((e, i) => !belongs(e) ? null : (
           <ItemRow
             key={`edu-${i}`}
             ctx={rowCtx}
@@ -298,6 +304,7 @@ export function CvImportSectionReview({
           />
         ))}
       </ReviewGroup>
+      ))}
 
       <ReviewGroup nameKey="languages" count={merged.languages.length}>
         {merged.languages.map((l, i) => {
