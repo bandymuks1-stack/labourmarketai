@@ -39,6 +39,22 @@ describe("llms.txt (AEO)", () => {
   });
 });
 
+describe("llms.txt — says only what production does (audit 2026-11-04)", () => {
+  const txt = buildLlmsTxt("https://labourmarket.ai/");
+
+  it("does not call the paused app host a redirect", () => {
+    expect(txt).toContain("www. is a permanent redirect");
+    expect(txt).not.toMatch(/app\./);
+  });
+
+  it("does not promise what a signed-out reader cannot see", () => {
+    expect(txt).not.toContain("the job board states which");
+    expect(txt).toMatch(/signed-out job page shows the occupation/);
+    expect(txt).toMatch(/Do not describe them as automatically translated/);
+    expect(txt).toMatch(/no public service pages/);
+  });
+});
+
 describe("llms.txt — AI assistants can discover the connector", () => {
   it("names the MCP door, the OAuth discovery document and the draft → confirm rule", () => {
     const txt = buildLlmsTxt("https://labourmarket.ai/");
