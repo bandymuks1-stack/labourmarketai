@@ -244,7 +244,7 @@ Database timings come from production `pg_stat_statements`, read-only. They are 
 
 | ID | Check | Status | Evidence | Defect / blocker | Executor / next action |
 |---|---|---|---|---|---|
-| SR-1 | `/jobs` free text, cold first query | FAIL | measured by J-13: see its report and RED draft #3024. `pg_stat_statements`: `search_public_vacancy_previews_v1` 35,752 calls, mean 560 ms, max 2,999 ms (the 3 s anon timeout) | fix is RED draft #3024, not applied. #3020's trigram index was rolled back (RC-A6, #3025). 2026-11-04: after the owner-approved manual VACUUM, pages read per search fell from 30.5k to 4.3k and signed-out Chrome searches took 0.43–0.92 s with no unavailable state; the status stays FAIL until the decay measurement after the 08:11 import and a cold check after idle | GREEN executor: honest timeout state. Coordinator: new RED draft |
+| SR-1 | `/jobs` free text, cold first query | FAIL | measured by J-13: see its report and RED draft #3024. `pg_stat_statements`: `search_public_vacancy_previews_v1` 35,752 calls, mean 560 ms, max 2,999 ms (the 3 s anon timeout) | fix is RED draft #3024, not applied. #3020's trigram index was rolled back (RC-A6, #3025). 2026-11-04: after the owner-approved manual VACUUM, pages read per search fell from 30.5k to 4.3k and signed-out Chrome searches took 0.43–0.92 s with no unavailable state; the status stays FAIL until the decay measurement after the 08:11 import and a cold check after idle. 2026-11-04 #3069 live (one scan over a new expiry-ordered index; ledger 20261104192157, 20261104192220; merged 8fb1043c1). First production result, build `8fb1043c`, 16 min after deploy, signed out: `byggarbetare` first search 970 ms (0 results), repeat 330 ms; `b` 382 ms; `ok` 763 ms; `qqxzv` 318 ms; no cancels. Positive, not a pass: first searches on terms with results and after two real imports are still to be measured, and SR-10 stands | GREEN executor: honest timeout state. Coordinator: new RED draft |
 | SR-2 | `/jobs` free text, correctness and warm timing | PASS | Chrome, signed out, full HTML: `suvirintojas` 736 ms, `snickare` 451 ms, `el` 446 ms; **20 cards each, and 20 of 20 titles contain the term**. `developer` 0 cards with the honest "0 rasta… nerasta" state. No "unavailable" state | — | Coordinator: re-walk on risk |
 | SR-3 | Profession filter | PASS | Chrome: `?profession=teacher` 306 ms, 20 cards; `handyman` 2 cards; `electrician` page 1 / page 2: 20 / 20 cards, 0 overlap | — | Coordinator: re-walk on risk |
 | SR-4 | Search paging | FAIL | Chrome: unfiltered board p1/p2 0 overlap; `?q=el` p1/p2 0 overlap. **But a term that maps to a profession drops the page:** `/lt/jobs?q=elektrikas&page=2` redirects to `/lt/jobs?profession=electrician` and shows page 1 again (20 of 20 the same) | the board's own links never build this URL (after the redirect they carry `profession`), so only shared or hand-made links meet it. Fix: carry `page` into the redirect in `jobs/page.tsx`. It is blocked by the same owner waiver as SEO-8 | GREEN executor, once the waiver covers `jobs/page.tsx` |
@@ -253,6 +253,7 @@ Database timings come from production `pg_stat_statements`, read-only. They are 
 | SR-7 | Marketplace find | PASS | prod walk marketplace 41729310761 (2026-11-03): M-3 the buyer finds the shelf among goods; M-5 the buyer reaches the service from the market. `pg_stat_statements`: `marketplace_listings` reads 501 calls, mean 1.3 ms, max 79 ms; `org_capabilities_for_visible_listings_v1` 141 calls, mean 9.2 ms, max 314 ms | — | Coordinator: re-walk on risk |
 | SR-8 | People / candidates search | NOT VERIFIED | no production walk searches people: company-chain C-2/U-3 opens the hand-raisers of a need, which is not a search. `pg_stat_statements`: `list_discoverable_worker_ids_v1` 572 calls, mean 41.9 ms, **max 2,536 ms**; `list_discoverable_worker_profiles_v1` 463 calls, mean 45.4 ms, max 1,021 ms | needs a walk step: the company searches by profession and place and finds the synthetic discoverable worker, and an undiscoverable one stays absent | Coordinator: add the walk step |
 | SR-9 | Organizations directory search | NOT VERIFIED | no walk. `search_organizations_directory_v1` 16 calls in total, mean 11.0 ms, max 55 ms | needs a walk step | Coordinator: add the walk step |
+| SR-10 | `/jobs` free text finds the ads that exist | FAIL | P0 accuracy defect, registered 2026-11-04 by owner order. The search reads the occupation label only: `byggarbetare` returns 0 while 12 live ads carry it in the title; `ok` is 1,288 by occupation and 1,527 by title. Existing behaviour, not caused by #3069 | owner requirement: search at least the job title, the profession and its synonyms, related specialities and suitable structured requirements, in several languages, ranked by relevance, with country and profession filters kept. Measure the cost first; no fix that brings back long first-search waits; test on scratch first. Conflict to settle: the 2026-08-24 directive keeps the hidden title out of anonymous matching | J-13: cost comparison, then a minimal safe fix for owner approval |
 
 ### UX/UI (signed out, 2026-11-04)
 
@@ -357,7 +358,7 @@ The coordinator's queue, all green. On build `a10b6c47d` (deployed 20:27 UTC): b
 
 These are what a real person meets now. Owner-gated scope and not-yet-built functions are listed apart.
 
-1. **The first search for a new word on `/jobs` fails** (SR-1). The visitor waits 4–11 s and gets no jobs. Fix: RED draft #3024, not applied.
+1. **The first search for a new word on `/jobs` fails** (SR-1). The visitor waits 4–11 s and gets no jobs. #3069 is live since 2026-11-04 (first reading 970 ms); still FAIL with SR-10, the search misses ads that exist.
 2. **Organizations cannot buy a plan without help** (J-14). 7.28 payee and terms are FAIL (owner/legal), and 7.15 is hidden by design.
 3. **AI help and some e-mail are off in production** (13.17 env parity). This waits on the owner and legal.
 4. **The native apps are not in the stores** (J-17, BLOCKED on the owner's store accounts).
@@ -403,16 +404,16 @@ Classes:
 
 | Class | FAIL | BLOCKED | Total |
 |---|---|---|---|
-| `USER_BLOCKER_WEB` | 1 | 0 | 1 |
+| `USER_BLOCKER_WEB` | 2 | 0 | 2 |
 | `OWNER_GATED` | 4 | 44 | 48 |
 | `INFRA` | 4 | 2 | 6 |
 | `OPTIONAL_OR_UNPLANNED` | 2 | 13 | 15 |
 | `TEST_ONLY` | 0 | 2 | 2 |
-| **All** | **11** | **61** | **72** |
+| **All** | **12** | **61** | **73** |
 
 ### USER_BLOCKER_WEB, ranked by how many people it reaches
 
-1. **SR-1: the first `/jobs` search for a word that is not a profession name times out.** It reaches every visitor who types free text: signed out, workers and agencies. Profession words already redirect to the working profession filter.
+1. **SR-1: the first `/jobs` search for a word that is not a profession name times out.** It reaches every visitor who types free text: signed out, workers and agencies. Profession words already redirect to the working profession filter. #3069 is live since 2026-11-04 and the first production reading is 970 ms; SR-1 stays FAIL, see SR-1 and SR-10.
    - GREEN, now: when the free-text read times out, show the honest message together with the profession filter and the nearest profession matches (the existing profession resolver), instead of a page with no jobs.
    - RED, in a new draft: the search index fix. #3020 was rolled back and #3024 was closed: after about 5 calls the cached generic plan took 16–26 s for 1–2 character terms. The new draft must carry the plan-cache proof that #3025 requires (at least 10 calls per term on one connection, under both auto and force_generic_plan).
 
@@ -422,7 +423,8 @@ No other FAIL or BLOCKED row stops a core web action today. The earlier list of 
 
 | ID | Function / check | Status | Class | Reason | Evidence | Executor / next action |
 |---|---|---|---|---|---|---|
-| SR-1 | `/jobs` free text, cold first query | FAIL | `USER_BLOCKER_WEB` | a word that is not a profession name times out: the visitor gets "the job board did not answer in time" and no jobs | Chrome production check 2026-11-04, build `3a9bcdef`, desktop, signed out: `/lt/jobs?q=byggarbetare` 3.6 s to first byte and the timeout message; `lagerarbetare` 4.8 s. Profession words (`betonuotojas`, `plyteliu`) redirect to the profession filter and answer in 0.4–1.0 s | GREEN executor: honest timeout state. Coordinator: new RED draft with the plan-cache proof |
+| SR-1 | `/jobs` free text, cold first query | FAIL | `USER_BLOCKER_WEB` | a word that is not a profession name times out: the visitor gets "the job board did not answer in time" and no jobs | Chrome production check 2026-11-04, build `3a9bcdef`, desktop, signed out: `/lt/jobs?q=byggarbetare` 3.6 s to first byte and the timeout message; `lagerarbetare` 4.8 s. Profession words (`betonuotojas`, `plyteliu`) redirect to the profession filter and answer in 0.4–1.0 s | GREEN executor: honest timeout state. #3069 live 2026-11-04: first production search 970 ms, see the SR-1 row above; stays FAIL until SR-10 is fixed and the import readings are in |
+| SR-10 | `/jobs` free text finds the ads that exist | FAIL | `USER_BLOCKER_WEB` | a visitor gets 0 or too few results for ads that exist, because only the occupation label is searched | `byggarbetare` 0 results with 12 live ads carrying it in the title (production, 2026-11-04) | J-13: cost comparison, then a fix for owner approval |
 | 1.8 | Multi-capability organization | BLOCKED | `OWNER_GATED` | owner decision ORG-2 (one organization with several capabilities) | register row; no production test until the decision | Owner: the decision in the Reason column. Then the coordinator applies or walks |
 | 2.10 | External profile links | BLOCKED | `OWNER_GATED` | per-company grant for external links, RED #2471 | RED draft #2471, not applied | Owner: the decision in the Reason column. Then the coordinator applies or walks |
 | 2.27 | Org historical evidence import | BLOCKED | `OWNER_GATED` | owner decision ARCH-5 (organization history import) | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
@@ -571,7 +573,7 @@ The SEO, GEO, internal search and UX/UI tables and the 288 function rows are cou
 | L-4 | Learner moves to work: the same history continues into job search | NOT VERIFIED | no walk follows one person from learner to job seeker | Coordinator: add a walk step on the recognition-chain person |
 | L-5 | Learner: earlier learning recognized as equivalent (RPL) | BLOCKED | 11.10, RED schema | Owner: decide the RPL structure |
 | JS-1 | Job seeker: finds jobs by a known word, signed out | PASS | SR-2, SR-3 (Chrome 2026-11-04); prod walk jobs-search 41663385778 (2026-11-03) | Coordinator: re-walk on risk |
-| JS-2 | Job seeker: first search for a new word | FAIL | SR-1: the visitor gets no jobs when the read times out | GREEN executor: honest timeout state with profession matches. Coordinator: new RED draft with the #3025 plan-cache proof |
+| JS-2 | Job seeker: first search for a new word | FAIL | SR-1: the visitor gets no jobs when the read times out | GREEN executor: honest timeout state with profession matches. #3069 live; see SR-1 and SR-10 |
 | JS-3 | Job seeker: reads the imported ad | FAIL | UF-2: NAV ads show raw HTML tags (8,835 active ads) | Coordinator: assign #3033 (quality and CodeQL red), then Chrome check |
 | JS-4 | Job seeker: translates a foreign ad | FAIL | UF-1: every member's click answers "could not be translated"; 0 stored translations | Coordinator: assign #3034. Owner: AI keys for real translation (8.3) |
 | JS-5 | Job seeker: saved search and mailed alert | PASS | prod walk alert-mail 41488266687 (2026-11-02) | Coordinator: re-walk on risk |
@@ -601,7 +603,7 @@ The SEO, GEO, internal search and UX/UI tables and the 288 function rows are cou
 
 | ID | Search | Status | Evidence | Executor / next action |
 |---|---|---|---|---|
-| SCH-1 | Jobs | FAIL | SR-1 cold query FAIL, SR-4 paging FAIL; SR-2, SR-3, SR-5, SR-6 PASS | See SR-1 and SR-4 |
+| SCH-1 | Jobs | FAIL | SR-1 cold query FAIL, SR-4 paging FAIL, SR-10 accuracy FAIL; SR-2, SR-3, SR-5, SR-6 PASS | See SR-1, SR-4 and SR-10 |
 | SCH-2 | Workers / candidates | NOT VERIFIED | SR-8: no walk searches people; `list_discoverable_worker_ids_v1` max 2,536 ms | Coordinator: add the walk step named in SR-8 |
 | SCH-3 | Services and goods | PASS | SR-7: prod walk marketplace 41790404575 (2026-11-04); M-3, M-5 | Coordinator: re-walk on risk |
 | SCH-4 | Orders | NOT VERIFIED | a customer's and a provider's order lists are walked (buyer-workspace B-2, orders-bookings), but searching inside them is not | Coordinator: say whether search is expected here; if so, add a step |
