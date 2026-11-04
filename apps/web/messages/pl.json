@@ -12894,6 +12894,8 @@
   "cvImport": {
     "reviewTitle": "Co znaleźliśmy w Twoim CV",
     "reviewHint": "System tylko sugeruje. Zapisz lub odrzuć każdy wpis — Ty decydujesz.",
+    "unplacedHint": "Tych wierszy nie udało się przypisać. Wybierz sekcję lub odrzuć.",
+    "placeAs": "Gdzie to należy?",
     "confidence": {
       "high": "Wyraźnie podane w CV",
       "medium": "Sprawdź, czy odczytano to poprawnie",
@@ -12903,11 +12905,13 @@
     "groups": {
       "workHistory": "Historia zatrudnienia",
       "education": "Wykształcenie",
+      "training": "Szkolenia i kursy",
       "languages": "Języki",
       "certificates": "Certyfikaty",
       "achievements": "Osiągnięcia",
       "salary": "Oczekiwania płacowe",
-      "availability": "Dostępność"
+      "availability": "Dostępność",
+      "unplaced": "Nierozpoznane"
     },
     "confirm": "Zapisz",
     "saving": "Zapisywanie…",

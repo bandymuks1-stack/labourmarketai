@@ -12894,6 +12894,8 @@
   "cvImport": {
     "reviewTitle": "Ką radome tavo CV",
     "reviewHint": "Sistema tik siūlo. Kiekvieną įrašą išsaugok arba atmesk — sprendi tu.",
+    "unplacedHint": "Šių eilučių nepriskyrėme. Pasirink, kur priklauso, arba atmesk.",
+    "placeAs": "Kur priskirti?",
     "confidence": {
       "high": "Aiškiai parašyta CV",
       "medium": "Patikrink, ar perskaityta teisingai",
@@ -12903,11 +12905,13 @@
     "groups": {
       "workHistory": "Darbo patirtis",
       "education": "Išsilavinimas",
+      "training": "Mokymai ir kursai",
       "languages": "Kalbos",
       "certificates": "Sertifikatai",
       "achievements": "Pasiekimai",
       "salary": "Atlyginimo lūkestis",
-      "availability": "Prieinamumas"
+      "availability": "Prieinamumas",
+      "unplaced": "Neatpažinta"
     },
     "confirm": "Išsaugoti",
     "saving": "Įrašoma…",

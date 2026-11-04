@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { hasAnyProposal, parseCvSections } from "./structured-parse";
+import { hasAnyProposal, parseCvSections, TRAINING_TYPE_SLUG } from "./structured-parse";
 
 /**
  * Structured CV parsing heuristics (Full CV System v1) — fixture-driven.
@@ -175,6 +175,58 @@ describe("parseCvSections", () => {
       const p = parseCvSections("Darbo patirtis\nUAB Mokyklų renovacija, dažytojas 2018–2020");
       expect(p.education).toHaveLength(0);
       expect(p.workHistory).toHaveLength(1);
+    });
+  });
+
+  describe("work, training and education stay apart", () => {
+    it("a line under a training heading is training, even with no school word", () => {
+      const p = parseCvSections(
+        "Darbo patirtis\nUAB Alfa, mūrininkas 2019–2022\nMokymai\nDarbas aukštyje, 2021\nPirmoji pagalba\n2022\nIšsilavinimas\nVilniaus kolegija, statyba 2015–2018",
+      );
+      expect(p.workHistory.map((w) => w.title)).toEqual(["UAB Alfa, mūrininkas"]);
+      const training = p.education.filter((e) => e.educationTypeSlug === TRAINING_TYPE_SLUG);
+      expect(training.map((e) => [e.institution, e.endYear])).toEqual([
+        ["Darbas aukštyje", 2021],
+        ["Pirmoji pagalba", 2022],
+      ]);
+      const school = p.education.filter((e) => e.educationTypeSlug !== TRAINING_TYPE_SLUG);
+      expect(school.map((e) => e.institution)).toEqual(["Vilniaus kolegija"]);
+      expect(school[0].educationTypeSlug).toBe("college");
+    });
+
+    it("the heading is recognised in every active language", () => {
+      for (const heading of ["Mokymai", "Courses", "Курсы", "Cursussen", "Weiterbildung", "Szkolenia"]) {
+        const p = parseCvSections(`${heading}\nFixture kvalifikacija`);
+        expect(p.education[0]?.educationTypeSlug, heading).toBe(TRAINING_TYPE_SLUG);
+        expect(p.unplaced, heading).toEqual([]);
+      }
+    });
+  });
+
+  describe("lines that became no proposal are kept for the person", () => {
+    it("keeps duty bullets and free lines, without their bullet mark", () => {
+      const p = parseCvSections(
+        "Darbo patirtis\nPlytelių klojėjas\nUAB Alfa\n2019 – 2023\n• Vonios kambarių apdaila\nTikslus ir atsakingas darbuotojas.",
+      );
+      expect(p.unplaced).toEqual(["Vonios kambarių apdaila", "Tikslus ir atsakingas darbuotojas."]);
+    });
+
+    it("never a contact line, a heading, a bare date, or a line already proposed", () => {
+      const p = parseCvSections(
+        "Vardas@example.invalid\n+370 600 00000\nhttps://example.invalid/cv\nKalbos\nAnglų B2\n2019 – 2023\nDarbo patirtis\nUAB Alfa, mūrininkas 2019–2022",
+      );
+      expect(p.unplaced).toEqual([]);
+    });
+
+    it("the same line twice is offered once, and the list is bounded", () => {
+      expect(parseCvSections("Tikslus darbas\nTikslus darbas").unplaced).toEqual(["Tikslus darbas"]);
+      const many = Array.from({ length: 80 }, (_, i) => `Eilutė numeris ${"x".repeat(i + 1)}`).join("\n");
+      expect(parseCvSections(many).unplaced).toHaveLength(40);
+    });
+
+    it("a CV with only such lines still reaches the review", () => {
+      expect(hasAnyProposal(parseCvSections("Tikslus darbas"))).toBe(true);
+      expect(hasAnyProposal(parseCvSections(""))).toBe(false);
     });
   });
 

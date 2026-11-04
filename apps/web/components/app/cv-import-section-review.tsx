@@ -6,7 +6,9 @@ import { useTranslations } from "next-intl";
 
 import {
   hasAnyProposal,
+  TRAINING_TYPE_SLUG,
   type CvDatePart,
+  type CvEducationProposal,
   type CvProposalConfidence,
   type CvSectionProposals,
 } from "@/lib/cv/structured-parse";
@@ -52,6 +54,37 @@ type ItemStatus =
   | { state: "conflict"; existing: string }
   | { state: "needs_migration" }
   | { state: "error"; message: "error" | "invalid" };
+
+/** Where a line the parser could not place may go: through the SAME confirm
+ *  actions as a proposal, so the person's choice is saved the same way. */
+const UNPLACED_TARGETS = ["workHistory", "education", "certificates", "achievements"] as const;
+type UnplacedTarget = (typeof UNPLACED_TARGETS)[number];
+
+function saveUnplaced(target: UnplacedTarget, line: string): Promise<CvImportConfirmResult> {
+  switch (target) {
+    case "workHistory":
+      return confirmCvWorkHistoryAction({
+        title: line,
+        startYear: null,
+        endYear: null,
+        start: null,
+        end: null,
+        isCurrent: false,
+      });
+    case "education":
+      return confirmCvEducationAction({
+        institution: line,
+        program: null,
+        educationTypeSlug: "other",
+        startYear: null,
+        endYear: null,
+      });
+    case "certificates":
+      return confirmCvCertificateAction({ title: line, year: null });
+    case "achievements":
+      return confirmCvAchievementAction({ title: line });
+  }
+}
 
 function mergeProposals(
   det: CvSectionProposals,
@@ -99,6 +132,7 @@ function mergeProposals(
     achievements: det.achievements,
     salary: det.salary ?? ai.salary,
     availability: det.availability,
+    unplaced: det.unplaced,
   };
   return {
     ...merged,
@@ -130,6 +164,7 @@ export function CvImportSectionReview({
 
   const [status, setStatus] = useState<Record<string, ItemStatus>>({});
   const [levelByKey, setLevelByKey] = useState<Record<string, string>>({});
+  const [placeByKey, setPlaceByKey] = useState<Record<string, UnplacedTarget | "">>({});
 
   const statusOf = (key: string): ItemStatus =>
     status[key] ?? { state: "pending" };
@@ -239,8 +274,12 @@ export function CvImportSectionReview({
         ))}
       </ReviewGroup>
 
-      <ReviewGroup nameKey="education" count={merged.education.length}>
-        {merged.education.map((e, i) => (
+      {([
+        ["education", (e: CvEducationProposal) => e.educationTypeSlug !== TRAINING_TYPE_SLUG],
+        ["training", (e: CvEducationProposal) => e.educationTypeSlug === TRAINING_TYPE_SLUG],
+      ] as const).map(([nameKey, belongs]) => (
+      <ReviewGroup key={nameKey} nameKey={nameKey} count={merged.education.filter(belongs).length}>
+        {merged.education.map((e, i) => !belongs(e) ? null : (
           <ItemRow
             key={`edu-${i}`}
             ctx={rowCtx}
@@ -265,6 +304,7 @@ export function CvImportSectionReview({
           />
         ))}
       </ReviewGroup>
+      ))}
 
       <ReviewGroup nameKey="languages" count={merged.languages.length}>
         {merged.languages.map((l, i) => {
@@ -384,6 +424,50 @@ export function CvImportSectionReview({
           />
         ))}
       </ReviewGroup>
+
+      <ReviewGroup
+        nameKey="unplaced"
+        count={merged.unplaced.length}
+        hint={t("unplacedHint")}
+      >
+        {merged.unplaced.map((line, i) => {
+          const key = `unplaced-${i}`;
+          const target = placeByKey[key] ?? "";
+          return (
+            <ItemRow
+              key={key}
+              ctx={rowCtx}
+              itemKey={key}
+              label={line}
+              sub={null}
+              confidence={null}
+              aiOrigin={false}
+              confirmDisabled={target === ""}
+              onConfirm={() => saveUnplaced(target as UnplacedTarget, line)}
+            >
+              <select
+                value={target}
+                onChange={(e) =>
+                  setPlaceByKey((prev) => ({
+                    ...prev,
+                    [key]: e.target.value as UnplacedTarget | "",
+                  }))
+                }
+                aria-label={t("placeAs")}
+                className="rounded-md border border-ink-500 bg-ink-700 px-2 py-1 text-xs text-text-primary outline-none focus:border-brand-blue"
+                data-testid={`cv-import-place-${key}`}
+              >
+                <option value="">{t("placeAs")}</option>
+                {UNPLACED_TARGETS.map((g) => (
+                  <option key={g} value={g}>
+                    {t(`groups.${g}`)}
+                  </option>
+                ))}
+              </select>
+            </ItemRow>
+          );
+        })}
+      </ReviewGroup>
     </section>
   );
 }
@@ -401,10 +485,12 @@ interface RowContext {
 function ReviewGroup({
   nameKey,
   count,
+  hint,
   children,
 }: {
   nameKey: string;
   count: number;
+  hint?: string;
   children: React.ReactNode;
 }) {
   const t = useTranslations("cvImport");
@@ -414,6 +500,7 @@ function ReviewGroup({
       <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
         {t(`groups.${nameKey}`)} · {count}
       </p>
+      {hint ? <p className="text-xs leading-relaxed text-text-secondary">{hint}</p> : null}
       <ul className="flex flex-col gap-1.5">{children}</ul>
     </div>
   );
@@ -434,8 +521,9 @@ function ItemRow({
   itemKey: string;
   label: string;
   sub?: string | null;
-  /** How sure the parser is of its READING of the CV, never of the fact. */
-  confidence: CvProposalConfidence;
+  /** How sure the parser is of its READING of the CV, never of the fact. Null
+   *  for a line it did not read into anything. */
+  confidence: CvProposalConfidence | null;
   aiOrigin: boolean;
   confirmDisabled?: boolean;
   onConfirm: (allowReplace: boolean) => Promise<CvImportConfirmResult>;
@@ -455,13 +543,15 @@ function ItemRow({
             {sub ? (
               <span className="text-xs text-text-secondary">{sub}</span>
             ) : null}
-            <span
-              className={`text-xs ${confidence === "low" ? "text-state-warning" : "text-text-muted"}`}
-              data-testid={`cv-import-confidence-${itemKey}`}
-              data-confidence={confidence}
-            >
-              {t(`confidence.${confidence}`)}
-            </span>
+            {confidence ? (
+              <span
+                className={`text-xs ${confidence === "low" ? "text-state-warning" : "text-text-muted"}`}
+                data-testid={`cv-import-confidence-${itemKey}`}
+                data-confidence={confidence}
+              >
+                {t(`confidence.${confidence}`)}
+              </span>
+            ) : null}
             {aiOrigin && (
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("aiHint")}

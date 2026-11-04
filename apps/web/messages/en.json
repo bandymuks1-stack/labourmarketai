@@ -12894,6 +12894,8 @@
   "cvImport": {
     "reviewTitle": "What we found in your CV",
     "reviewHint": "The system only suggests. Save or discard each entry — you decide.",
+    "unplacedHint": "We could not place these lines. Choose where each belongs, or discard it.",
+    "placeAs": "Where does it belong?",
     "confidence": {
       "high": "Stated clearly in the CV",
       "medium": "Check that this was read correctly",
@@ -12903,11 +12905,13 @@
     "groups": {
       "workHistory": "Work history",
       "education": "Education",
+      "training": "Training and courses",
       "languages": "Languages",
       "certificates": "Certificates",
       "achievements": "Achievements",
       "salary": "Salary expectation",
-      "availability": "Availability"
+      "availability": "Availability",
+      "unplaced": "Not recognised"
     },
     "confirm": "Save",
     "saving": "Saving…",

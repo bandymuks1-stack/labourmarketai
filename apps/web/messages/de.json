@@ -12894,6 +12894,8 @@
   "cvImport": {
     "reviewTitle": "Erkannte Lebenslauf-Abschnitte",
     "reviewHint": "Das System schlägt nur vor. Speichern oder verwerfen Sie jeden Eintrag — Sie entscheiden.",
+    "unplacedHint": "Diese Zeilen konnten wir nicht zuordnen. Wählen Sie den Abschnitt oder verwerfen Sie sie.",
+    "placeAs": "Wohin gehört das?",
     "confidence": {
       "high": "Im Lebenslauf klar angegeben",
       "medium": "Prüfen Sie, ob dies richtig gelesen wurde",
@@ -12903,11 +12905,13 @@
     "groups": {
       "workHistory": "Berufserfahrung",
       "education": "Ausbildung",
+      "training": "Weiterbildung und Kurse",
       "languages": "Sprachen",
       "certificates": "Zertifikate",
       "achievements": "Erfolge",
       "salary": "Gehaltsvorstellung",
-      "availability": "Verfügbarkeit"
+      "availability": "Verfügbarkeit",
+      "unplaced": "Nicht erkannt"
     },
     "confirm": "Speichern",
     "saving": "Wird gespeichert…",
