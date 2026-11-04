@@ -257,6 +257,19 @@ it no backup can be decrypted.
 
 **The scheduler is not reliable for this repository.** Measured 2026-10-28 to 11-04: `*/5` ran 31 times out of 2,017 slots, hourly workflows about 28 of 168, and six-hourly ones started 3 to 6 h late, with gaps up to 12.7 h. The 26 h check runs on the same scheduler, so if GitHub's schedule stops, the backup and its alarm stop together. A trigger outside GitHub is proposed separately and is not installed.
 
+### 9.1.0b Backup watchdog on the VPS (owner approval 2026-11-04)
+
+Independent of GitHub's scheduler. It raises an alarm; it does not start a backup.
+
+- **Files:** `ops/vps/lm-backup-watchdog.sh` and `ops/vps/labourmarket-backup-watchdog.cron`, copied to `/root/lm-prod/bin/`; the cron file installed as `/etc/cron.d/labourmarket-backup-watchdog`, hourly at minute 7. It has its own cron file because `lm-cron-install.sh` calls every product route when it runs.
+- **What counts as a good backup:** the newest pair (database + Storage files, same stamp) in `backups/verified.log`, a line the receiver writes after its own sha256 and `age` checks, checked again on disk for size, sha256 and `age` header. A file's date proves nothing here. The dump is read in full hourly, at low priority.
+- **Alert:** older than 26 h, or failing a check, is one incident: one mail when it starts, none while it lasts, one when it clears. State is in `backup-watchdog.state`; if a mail fails, the next hour tries again.
+- **Mail:** the existing `LM_SMTP_*` mailbox by `curl`. The address is `ALERT_TO=` in `/root/lm-prod/backup-watchdog.conf` (root, 600), and it must be one the owner approved. Without it, nothing is sent and the log says `mail=failed:4`.
+- **Check it:** `tail /root/lm-prod/backup-watchdog.log`, one line an hour; `grep labourmarket-backup /var/log/syslog` or `journalctl -u cron` for cron itself.
+- **Test without real backups:** `sh ops/vps/lm-backup-watchdog.test.sh` uses its own temporary directory and sends nothing.
+- **Remove:** `rm /etc/cron.d/labourmarket-backup-watchdog`. The receiver's record line is harmless if left.
+- **Limit:** nothing watches the watchdog. If the VPS or its cron is down, no mail comes; the GitHub freshness job is the other side of that.
+
 ### 9.1.0 What a backup holds — and what it does not (completeness, 2026-11-03)
 
 Measured on production 2026-11-03 (counts only): base tables `public` 249,
