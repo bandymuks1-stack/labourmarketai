@@ -2,6 +2,7 @@ import { appendFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type Page } from "./prod-walk";
+import { proveActionTiles } from "./action-tile-proof";
 
 /**
  * PRODUCTION UNIVERSAL MARKETPLACE — owner programme 2026-10-12 §3D: a person
@@ -71,11 +72,21 @@ test("M-2. the provider offers a service and makes it discoverable", async ({ br
   const row = page.locator('[data-testid^="service-offering-row-"]', { hasText: SERVICE }).first();
   await expect(row).toBeVisible({ timeout: 30_000 });
   serviceId = (await row.getAttribute("data-testid"))!.replace("service-offering-row-", "");
+  // Prove the publication, not the hint: the discoverability line renders in
+  // EVERY state (draft too), so its visibility proved nothing. Run 41721656743
+  // clicked publish while the save's router.refresh was still in flight; Next
+  // queues a server action behind a pending refresh, the already-true check
+  // passed at once and the context closed before the action was sent (no
+  // PATCH in edge logs). The row stayed a draft and M-5 failed far from the
+  // cause. Keep the page open until the row is findable; re-click if not.
   const status = page.getByTestId(`service-offering-status-${serviceId}`);
-  if (!/aktyv|active/i.test(await status.innerText())) {
-    await page.getByTestId(`service-offering-toggle-${serviceId}`).click();
-  }
-  await expect(page.getByTestId(`service-offering-discoverability-${serviceId}`)).toBeVisible({ timeout: 30_000 });
+  const findable = page.getByTestId(`service-offering-discoverability-${serviceId}`);
+  await expect(async () => {
+    if (!/aktyv|active/i.test(await status.innerText())) {
+      await page.getByTestId(`service-offering-toggle-${serviceId}`).click();
+    }
+    await expect(findable).toHaveAttribute("data-visibility", "visible", { timeout: 10_000 });
+  }).toPass({ timeout: 45_000 });
   await close();
 });
 
@@ -308,4 +319,21 @@ test.afterAll(async ({ browser }) => {
     }
   }
   if (failed.length > 0) reportCleanupProblem(failed);
+});
+
+// ── T (#2828): the service-requests related-door grid is the ONE action tile.
+// Read-only: real links, no gold primary, no destination twice, 1280 and 390.
+test("T-1 (#2828). the service-requests related-door grid renders as action tiles", async ({ browser }) => {
+  await proveActionTiles(
+    async (mobile) => {
+      const ctx = await browser.newContext({
+        storageState: state("worker"),
+        locale: "lt-LT",
+        ...(mobile ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : { viewport: { width: 1280, height: 900 } }),
+      });
+      return { page: await ctx.newPage(), close: () => ctx.close() };
+    },
+    "/lt/dashboard/service-requests",
+    { scopeTestId: "marketplace-connections", primaries: 0 },
+  );
 });

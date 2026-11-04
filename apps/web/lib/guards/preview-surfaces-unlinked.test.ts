@@ -30,6 +30,8 @@ const NAV_SURFACES = [
   "lib/config/feature-availability.ts",
   "app/[locale]/dashboard/page.tsx",
   "app/[locale]/dashboard/admin/page.tsx",
+  // The public /for-companies lifecycle steps (a company visitor clicks them).
+  "components/marketing/work-lifecycle-section.tsx",
 ];
 
 // `/dashboard/learning` (route-truth-map): the human-in-loop learning review

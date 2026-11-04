@@ -76,6 +76,26 @@ describe("parseCvSections", () => {
     expect(noLevel.languages[0].level).toBeNull();
   });
 
+  it("reads each language's level from its own part of the line (first real user's feedback 2026-11-04)", () => {
+    const p = parseCvSections("KALBOS\nAnglų B2, rusų gimtoji; lenkų A1");
+    expect(p.languages.find((l) => l.lang === "en")?.level).toBe("B2");
+    expect(p.languages.find((l) => l.lang === "ru")?.level).toBe("native");
+    // A language with no level of its own gets none — never a neighbour's.
+    const bare = parseCvSections("Anglų C1, rusų");
+    expect(bare.languages.find((l) => l.lang === "en")?.level).toBe("C1");
+    expect(bare.languages.find((l) => l.lang === "ru")?.level).toBeNull();
+    // One language per line keeps the whole line.
+    expect(parseCvSections("Anglų kalba – B2").languages[0].level).toBe("B2");
+  });
+
+  it("a vocational training centre is education, not work history", () => {
+    const p = parseCvSections("2012–2016 Vilniaus statybininkų rengimo centras, apdailininkas");
+    expect(p.workHistory).toHaveLength(0);
+    expect(p.education).toHaveLength(1);
+    expect(p.education[0].startYear).toBe(2012);
+    expect(p.education[0].educationTypeSlug).toBe("vocational");
+  });
+
   it("detects certificates as their own group (not work history)", () => {
     const p = parseCvSections(LT_CV);
     expect(p.certificates).toHaveLength(1);
