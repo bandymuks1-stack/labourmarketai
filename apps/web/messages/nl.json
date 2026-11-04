@@ -12894,6 +12894,17 @@
   "cvImport": {
     "reviewTitle": "Gedetecteerde cv-onderdelen",
     "reviewHint": "Het systeem stelt alleen voor. Sla elk item op of verwijder het — jij beslist.",
+    "edit": "Corrigeren",
+    "editDone": "Klaar",
+    "fieldTitle": "Titel",
+    "fieldText": "Tekst",
+    "fieldInstitution": "School of aanbieder",
+    "fieldProgram": "Opleiding",
+    "fieldKind": "Soort",
+    "fieldStart": "Begin",
+    "fieldEnd": "Einde",
+    "fieldYear": "Jaar",
+    "dateHint": "bijv. 2019 of 2019-03",
     "unplacedHint": "Deze regels konden we niet plaatsen. Kies waar ze horen of verwijder ze.",
     "placeAs": "Waar hoort dit?",
     "confidence": {

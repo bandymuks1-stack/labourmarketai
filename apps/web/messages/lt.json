@@ -12894,6 +12894,17 @@
   "cvImport": {
     "reviewTitle": "Ką radome tavo CV",
     "reviewHint": "Sistema tik siūlo. Kiekvieną įrašą išsaugok arba atmesk — sprendi tu.",
+    "edit": "Taisyti",
+    "editDone": "Baigti taisyti",
+    "fieldTitle": "Pavadinimas",
+    "fieldText": "Tekstas",
+    "fieldInstitution": "Mokymo įstaiga",
+    "fieldProgram": "Programa",
+    "fieldKind": "Rūšis",
+    "fieldStart": "Pradžia",
+    "fieldEnd": "Pabaiga",
+    "fieldYear": "Metai",
+    "dateHint": "pvz. 2019 arba 2019-03",
     "unplacedHint": "Šių eilučių nepriskyrėme. Pasirink, kur priklauso, arba atmesk.",
     "placeAs": "Kur priskirti?",
     "confidence": {
