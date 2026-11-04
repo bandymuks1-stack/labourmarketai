@@ -180,13 +180,13 @@ jobs:
            where c.relkind in ('r','p','v','m','f','S')
              and not exists (select 1 from ext where classid = 'pg_class'::regclass and objid = c.oid)
           union all
-          select c.relnamespace, 'columns', c.relname || '.' || t.attname, a.grantee, a.privilege_type, a.is_grantable
+          select c.relnamespace, 'columns', c.relname::text || '.' || t.attname::text, a.grantee, a.privilege_type, a.is_grantable
             from pg_attribute t join pg_class c on c.oid = t.attrelid
             cross join lateral aclexplode(t.attacl) a
            where t.attacl is not null and t.attnum > 0 and not t.attisdropped
              and not exists (select 1 from ext where classid = 'pg_class'::regclass and objid = c.oid)
           union all
-          select p.pronamespace, 'functions', p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')', a.grantee, a.privilege_type, a.is_grantable
+          select p.pronamespace, 'functions', p.proname::text || '(' || pg_get_function_identity_arguments(p.oid) || ')', a.grantee, a.privilege_type, a.is_grantable
             from pg_proc p
             cross join lateral aclexplode(coalesce(p.proacl, acldefault('f'::"char", p.proowner))) a
            where not exists (select 1 from ext where classid = 'pg_proc'::regclass and objid = p.oid)
@@ -201,13 +201,13 @@ jobs:
             from pg_namespace n
             cross join lateral aclexplode(coalesce(n.nspacl, acldefault('n'::"char", n.nspowner))) a
           union all
-          select d.defaclnamespace, 'default_privileges', pg_get_userbyid(d.defaclrole) || '/' || d.defaclobjtype, a.grantee, a.privilege_type, a.is_grantable
+          select d.defaclnamespace, 'default_privileges', pg_get_userbyid(d.defaclrole) || '/' || d.defaclobjtype::text, a.grantee, a.privilege_type, a.is_grantable
             from pg_default_acl d
             cross join lateral aclexplode(d.defaclacl) a
            where d.defaclnamespace <> 0
         ),
         named as (
-          select e.ns, e.k, e.obj || '|' || coalesce(r.rolname::text, 'PUBLIC') || '|' || e.privilege_type || '|' || e.is_grantable as line
+          select e.ns, e.k, e.obj || '|' || coalesce(r.rolname::text, 'PUBLIC') || '|' || e.privilege_type || '|' || e.is_grantable::text as line
             from entries e left join pg_roles r on r.oid = e.grantee
         )
         select n.nspname, x.k, count(*), md5(string_agg(x.line, E'\n' order by x.line collate "C"))
