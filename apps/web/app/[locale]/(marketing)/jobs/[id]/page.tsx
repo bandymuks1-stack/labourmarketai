@@ -38,6 +38,7 @@ import {
   readPublicJobForMember,
   type PublicJobReading,
 } from "@/lib/opportunities/public-job-reading";
+import { vacancyDescriptionText } from "@/lib/vacancy-sources/vacancy-description-text";
 import type { StoredPublicVacancyV1 } from "@/lib/vacancy-store/vacancy-read";
 
 /**
@@ -586,6 +587,9 @@ export default async function JobDetailPage({
         // throws on codes other than "no table" / "bad uuid".
         .catch(() => null)
     : null;
+  // The publisher's description as readable text (an HTML feed's tags read
+  // as paragraphs); the stored original stays verbatim.
+  const descriptionText = member ? vacancyDescriptionText(member.descriptionRaw) : "";
 
   // The member's reading of THIS job: engine verdict, requirement tiers, the
   // existing interest state and same-profession alternatives. `null` for an
@@ -922,19 +926,20 @@ export default async function JobDetailPage({
             </section>
           ) : null}
 
-          {member.descriptionRaw.trim().length > 0 && (
+          {descriptionText.length > 0 && (
             <section className="mt-8">
               <h2 className="text-base font-medium">
                 {DESCRIPTION_HEADING[active]}
               </h2>
-              {/* The publisher's own words, rendered as TEXT. `whitespace-pre-line`
-                  keeps their paragraph breaks without interpreting anything in
-                  the string as markup — this is third-party content. */}
+              {/* The publisher's own words, rendered as TEXT. A feed that
+                  sends HTML (NAV) is read into plain paragraphs first
+                  (vacancyDescriptionText); `whitespace-pre-line` keeps the
+                  breaks and nothing in the string is ever markup. */}
               <p
                 lang={sourceLang}
                 className="mt-2 whitespace-pre-line text-sm leading-relaxed text-text-muted"
               >
-                {member.descriptionRaw}
+                {descriptionText}
               </p>
             </section>
           )}

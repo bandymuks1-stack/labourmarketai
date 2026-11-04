@@ -43,10 +43,13 @@ describe("the publisher's words never leave the page", () => {
   it("the original description renders independently of any rendering", () => {
     const src = read(JOB_PAGE);
     // The original body is its own section, not a fallback inside the
-    // translated one — a rendering ADDS, it never replaces.
-    expect(src).toContain("{member.descriptionRaw}");
+    // translated one — a rendering ADDS, it never replaces. It is the stored
+    // original read as text (an HTML feed's tags become paragraphs,
+    // vacancy-description-text.ts), never a translation.
+    expect(src).toContain("const descriptionText = member ? vacancyDescriptionText(member.descriptionRaw)");
+    expect(src).toContain("{descriptionText}");
     const control = src.indexOf("<VacancyTranslateControl");
-    const original = src.indexOf("{member.descriptionRaw}");
+    const original = src.indexOf("{descriptionText}");
     expect(original).toBeGreaterThan(control);
   });
 
