@@ -27,6 +27,7 @@ const INLINE_TAGS = "span|strong|b|i|em|u|s|small|sup|sub|font|a|abbr|code|mark|
 
 const DROP_BLOCK_RE = /<(script|style|head|noscript)\b[^>]*>[\s\S]*?<\/\1\s*>/gi;
 const COMMENT_RE = /<!--[\s\S]*?-->/g;
+const UNCLOSED_RE = /<!--|<\/?(?:script|style|head|noscript)\b[^>]*>?/gi;
 const BR_RE = /<br\b[^>]*\/?>/gi;
 const LI_OPEN_RE = /<li\b[^>]*>/gi;
 const LI_CLOSE_RE = /<\/li\s*>/gi;
@@ -61,10 +62,20 @@ export function vacancyDescriptionText(raw: string): string {
   if (!raw) return "";
   let text = raw.replace(/\r\n?/g, "\n");
   if (ANY_KNOWN_TAG_RE.test(text) || text.includes("<!--")) {
+    // Removed until nothing changes, then any unclosed remnant: one pass over
+    // "<scr<script></script>ipt>" would leave a fresh "<script>". The output
+    // is text either way; this keeps it free of those openers too.
+    let prev: string;
+    do {
+      prev = text;
+      text = text.replace(COMMENT_RE, "").replace(DROP_BLOCK_RE, "");
+    } while (text !== prev);
+    do {
+      prev = text;
+      text = text.replace(UNCLOSED_RE, "");
+    } while (text !== prev);
     // HTML source: its own line breaks are layout, not content.
     text = text
-      .replace(COMMENT_RE, "")
-      .replace(DROP_BLOCK_RE, "")
       .replace(/\s*\n\s*/g, " ")
       .replace(BR_RE, "\n")
       .replace(LI_OPEN_RE, "\n• ")

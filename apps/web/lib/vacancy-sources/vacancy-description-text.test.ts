@@ -27,6 +27,10 @@ describe("vacancyDescriptionText — HTML feeds read as text", () => {
     expect(vacancyDescriptionText("<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>")).toBe("<script>alert(1)</script>");
     expect(vacancyDescriptionText("<p>Hei</p><script>alert(1)</script><style>p{}</style><!-- x -->")).toBe("Hei");
     expect(vacancyDescriptionText('<p onclick="x()">Hei <a href="javascript:x()">her</a></p>')).toBe("Hei her");
+    // Nested / unclosed openers do not survive a single pass.
+    const nested = vacancyDescriptionText("<p>A</p><scr<script>x</script>ipt>alert(1)</p><!-<!-- c -->- d<!-- open");
+    expect(nested).not.toMatch(/<script|<!--/i);
+    expect(nested.startsWith("A")).toBe(true);
   });
 
   it("leaves plain text as typed: its own breaks, and angle brackets that are not tags", () => {
