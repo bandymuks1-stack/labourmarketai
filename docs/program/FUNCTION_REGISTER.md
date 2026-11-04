@@ -494,7 +494,18 @@ No other FAIL or BLOCKED row stops a core web action today. The earlier list of 
 | 7.7 | Manual pilot grant (admin) | BLOCKED | `TEST_ONLY` | the walk has no admin session; the grant itself was used for the pilot (paid 2026-10-23) | register row | Coordinator: fix the walk harness, re-run |
 | 8.9 | Public org profile | BLOCKED | `TEST_ONLY` | no organization has published a public profile, so the walk skips S-10; the product is not shown to fail | prod walk public-org-locales 40205429467 (S-10 skipped) | Coordinator: fix the walk harness, re-run |
 
-The run ids of the 2026-11-04 re-runs on build `3a9bcdef9` are added here as the coordinator reports them.
+The six re-runs of 2026-11-04 ran on build `d69327239`; their run ids are in "Latest production walk per spec".
+
+### Open checks from the B2 / B6 code read (2026-11-04)
+
+These came out of reading the code. Security details stay in the private record. No status changes here: a row moves only on a production proof.
+
+| Item | Found | State | Next action |
+|---|---|---|---|
+| `/business/` website link (6.21) | The setter stores free text, so the link needed a check where it is rendered | fix in #3046 (GREEN); nothing published is affected | after merge and deploy: a production walk with a synthetic published profile |
+| Personal offerings on `/business/` (6.21) | `service_offerings` has no organization column, so its read returns the owner's personal offerings | section removed in #3046; the read function is unchanged | RED draft: add `organization_id` to `service_offerings`, or narrow the read |
+| Recurring order during the pilot pass (7.15) | Only the UI withheld the order; the route had no check | RED draft #3047, `needs-human-gate`; not merged, nothing enabled | owner approval of #3047 |
+| Partner lead store (10.22) | Integration probe 41796163605 (2026-11-04 08:00 UTC): `UNREACHABLE`; 00:54 UTC was READY. The partner's site answered; its database check failed or took over 4 s | one failure; no later run at the time of writing | read the next scheduled run. If it fails again: the owner checks the partner's database |
 
 ## Whole-project audit by role and dimension (2026-11-04)
 
