@@ -20,7 +20,9 @@ describe("the CV review shows the parser's confidence", () => {
       expect(src, v).toContain(`confidence={${v}.confidence}`);
     }
     // Required on the row, so a new proposal kind cannot leave it out.
-    expect(src).toContain("confidence: CvProposalConfidence;");
+    expect(src).toContain("confidence: CvProposalConfidence | null;");
+    // Null only for the line the parser read into nothing.
+    expect(src.match(/confidence=\{null\}/g)).toHaveLength(1);
   });
 
   it("the row says it in words", () => {
@@ -39,6 +41,41 @@ describe("the CV review shows the parser's confidence", () => {
       expect(Object.values(c).join(" ")).not.toMatch(
         /verified|confirmed|patvirtint|patikrinta|подтвержд|проверено|geverifieerd|bevestigd|verifiziert|bestätigt|zweryfikowan|potwierdzon/i,
       );
+    });
+  }
+});
+
+/**
+ * NOTHING THE PERSON WROTE SILENTLY DISAPPEARS (owner 2026-11-04, UF-3). A line
+ * the parser read into nothing is shown; the person places it through the SAME
+ * confirm actions, or discards it. Nothing saves without their click.
+ */
+describe("the CV review offers the lines it could not place", () => {
+  it("each line is placed by choice, through the existing confirm actions", () => {
+    const src = read(REVIEW);
+    expect(src).toContain('nameKey="unplaced"');
+    expect(src).toContain('confirmDisabled={target === ""}');
+    const save = src.slice(src.indexOf("function saveUnplaced"), src.indexOf("function mergeProposals"));
+    for (const action of [
+      "confirmCvWorkHistoryAction",
+      "confirmCvEducationAction",
+      "confirmCvCertificateAction",
+      "confirmCvAchievementAction",
+    ]) {
+      expect(save, action).toContain(action);
+    }
+    // A placed line claims no period: none was read.
+    expect(save).toContain("startYear: null");
+  });
+
+  for (const l of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    it(`${l}: the copy exists`, () => {
+      const m = JSON.parse(read(`messages/${l}.json`)) as {
+        cvImport: { groups: Record<string, string>; unplacedHint: string; placeAs: string };
+      };
+      expect(m.cvImport.groups.unplaced).toBeTruthy();
+      expect(m.cvImport.unplacedHint).toBeTruthy();
+      expect(m.cvImport.placeAs).toBeTruthy();
     });
   }
 });

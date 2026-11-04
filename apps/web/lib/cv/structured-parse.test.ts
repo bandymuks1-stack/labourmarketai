@@ -178,6 +178,33 @@ describe("parseCvSections", () => {
     });
   });
 
+  describe("lines that became no proposal are kept for the person", () => {
+    it("keeps duty bullets and free lines, without their bullet mark", () => {
+      const p = parseCvSections(
+        "Darbo patirtis\nPlytelių klojėjas\nUAB Alfa\n2019 – 2023\n• Vonios kambarių apdaila\nTikslus ir atsakingas darbuotojas.",
+      );
+      expect(p.unplaced).toEqual(["Vonios kambarių apdaila", "Tikslus ir atsakingas darbuotojas."]);
+    });
+
+    it("never a contact line, a heading, a bare date, or a line already proposed", () => {
+      const p = parseCvSections(
+        "Vardas@example.invalid\n+370 600 00000\nhttps://example.invalid/cv\nKalbos\nAnglų B2\n2019 – 2023\nDarbo patirtis\nUAB Alfa, mūrininkas 2019–2022",
+      );
+      expect(p.unplaced).toEqual([]);
+    });
+
+    it("the same line twice is offered once, and the list is bounded", () => {
+      expect(parseCvSections("Tikslus darbas\nTikslus darbas").unplaced).toEqual(["Tikslus darbas"]);
+      const many = Array.from({ length: 80 }, (_, i) => `Eilutė numeris ${"x".repeat(i + 1)}`).join("\n");
+      expect(parseCvSections(many).unplaced).toHaveLength(40);
+    });
+
+    it("a CV with only such lines still reaches the review", () => {
+      expect(hasAnyProposal(parseCvSections("Tikslus darbas"))).toBe(true);
+      expect(hasAnyProposal(parseCvSections(""))).toBe(false);
+    });
+  });
+
   it("detects certificates as their own group (not work history)", () => {
     const p = parseCvSections(LT_CV);
     expect(p.certificates).toHaveLength(1);

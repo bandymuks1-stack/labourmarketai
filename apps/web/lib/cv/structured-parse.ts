@@ -106,6 +106,10 @@ export interface CvSectionProposals {
    *  the FIRST plausible monthly figure (honest: never averaged/merged). */
   salary: CvSalaryProposal | null;
   availability: CvAvailabilityHint[];
+  /** The CV's own lines that became no proposal at all, for the person to place
+   *  or discard, so nothing they wrote silently disappears. Never a contact
+   *  line, a heading or a bare date. */
+  unplaced: string[];
 }
 
 const MAX_PER_SECTION = 20;
@@ -254,6 +258,8 @@ const MONTH_THEN_YEAR_RE = new RegExp(
   "giu",
 );
 const BULLET_RE = /^[•·▪●◦*–—-]\s/;
+const CONTACT_RE = /@|https?:|\+?\d[\d\s()-]{6,}/;
+const MAX_UNPLACED = 40;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -406,7 +412,7 @@ function isEntryLine(l: CvLine): boolean {
     !BULLET_RE.test(l.text) &&
     l.text.length <= 90 &&
     !/[.!?]$/.test(l.text) &&
-    !/@|https?:|\+?\d[\d\s()-]{6,}/.test(l.text) &&
+    !CONTACT_RE.test(l.text) &&
     parseYearRange(l.text) === null
   );
 }
@@ -470,6 +476,7 @@ export function parseCvSections(text: string): CvSectionProposals {
     achievements: [],
     salary: null,
     availability: [],
+    unplaced: [],
   };
   const raw = (text ?? "").trim();
   if (raw.length === 0) return out;
@@ -624,6 +631,26 @@ export function parseCvSections(text: string): CvSectionProposals {
     }
   }
 
+  // Read AFTER the classifier, from what it used: no second set of rules.
+  const placed = new Set<string>(
+    [
+      ...out.workHistory,
+      ...out.education,
+      ...out.languages,
+      ...out.certificates,
+      ...out.achievements,
+      ...out.availability,
+      ...(out.salary ? [out.salary] : []),
+    ].map((p) => p.sourceLine),
+  );
+  const unplaced = new Set<string>();
+  for (const { source, isHeader } of lines) {
+    const line = source.replace(BULLET_RE, "").trim();
+    if (isHeader || placed.has(source) || CONTACT_RE.test(line)) continue;
+    if (line.replace(/[^\p{L}]/gu, "").length >= 3) unplaced.add(line.slice(0, 200));
+  }
+  out.unplaced = [...unplaced].slice(0, MAX_UNPLACED);
+
   return out;
 }
 
@@ -637,6 +664,7 @@ export function hasAnyProposal(p: CvSectionProposals): boolean {
     p.certificates.length > 0 ||
     p.achievements.length > 0 ||
     p.salary !== null ||
-    p.availability.length > 0
+    p.availability.length > 0 ||
+    p.unplaced.length > 0
   );
 }
