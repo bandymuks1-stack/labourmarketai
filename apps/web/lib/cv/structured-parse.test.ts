@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { hasAnyProposal, parseCvSections } from "./structured-parse";
+import { hasAnyProposal, parseCvSections, TRAINING_TYPE_SLUG } from "./structured-parse";
 
 /**
  * Structured CV parsing heuristics (Full CV System v1) — fixture-driven.
@@ -175,6 +175,31 @@ describe("parseCvSections", () => {
       const p = parseCvSections("Darbo patirtis\nUAB Mokyklų renovacija, dažytojas 2018–2020");
       expect(p.education).toHaveLength(0);
       expect(p.workHistory).toHaveLength(1);
+    });
+  });
+
+  describe("work, training and education stay apart", () => {
+    it("a line under a training heading is training, even with no school word", () => {
+      const p = parseCvSections(
+        "Darbo patirtis\nUAB Alfa, mūrininkas 2019–2022\nMokymai\nDarbas aukštyje, 2021\nPirmoji pagalba\n2022\nIšsilavinimas\nVilniaus kolegija, statyba 2015–2018",
+      );
+      expect(p.workHistory.map((w) => w.title)).toEqual(["UAB Alfa, mūrininkas"]);
+      const training = p.education.filter((e) => e.educationTypeSlug === TRAINING_TYPE_SLUG);
+      expect(training.map((e) => [e.institution, e.endYear])).toEqual([
+        ["Darbas aukštyje", 2021],
+        ["Pirmoji pagalba", 2022],
+      ]);
+      const school = p.education.filter((e) => e.educationTypeSlug !== TRAINING_TYPE_SLUG);
+      expect(school.map((e) => e.institution)).toEqual(["Vilniaus kolegija"]);
+      expect(school[0].educationTypeSlug).toBe("college");
+    });
+
+    it("the heading is recognised in every active language", () => {
+      for (const heading of ["Mokymai", "Courses", "Курсы", "Cursussen", "Weiterbildung", "Szkolenia"]) {
+        const p = parseCvSections(`${heading}\nFixture kvalifikacija`);
+        expect(p.education[0]?.educationTypeSlug, heading).toBe(TRAINING_TYPE_SLUG);
+        expect(p.unplaced, heading).toEqual([]);
+      }
     });
   });
 
