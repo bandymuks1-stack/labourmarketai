@@ -206,6 +206,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261103171100_",
       "20261103171300_",
       "20261104160000_",
+      "20261105100000_",
+      "20261105100100_",
       "20261104160100_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
       "20261104060000_",
