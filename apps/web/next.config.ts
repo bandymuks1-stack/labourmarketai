@@ -5,6 +5,7 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 import { activeLocales } from "./lib/i18n/config";
+import { HTML_LIMITED_BOTS } from "./lib/seo/html-limited-bots";
 
 const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 
@@ -181,6 +182,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Never advertise the framework version to attackers scanning for CVEs.
   poweredByHeader: false,
+  // Crawlers that run no script must find canonical and robots in <head>.
+  htmlLimitedBots: HTML_LIMITED_BOTS,
   // Self-hosting (P0 restore, 2026-10-16): `standalone` emits
   // `.next/standalone/apps/web/server.js` plus a traced minimal node_modules,
   // so the app can run with plain `node server.js` on any Node host (Hostinger
