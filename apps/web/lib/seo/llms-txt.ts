@@ -49,7 +49,7 @@ export function buildLlmsTxt(
   return [
     "# LabourMarket.ai",
     "",
-    "> LabourMarket.ai is a work and professional-life platform. A person keeps a Work Journal whose entries become evidence, skills and a living CV; companies, staffing agencies and education institutions describe real workforce needs and connect to matching people. It is operated chat-first, on the web and on mobile, and is built for the European labour market.",
+    "> LabourMarket.ai is an international platform for work, specialists and services, where people and companies find jobs, workers, clients, services and project partners. A person keeps a Work Journal whose entries become evidence, skills and a living CV. It is operated chat-first, on the web and on mobile.",
     "",
     "## How to read this site",
     "",

@@ -36,12 +36,12 @@ export function brandedTitle(title: string): string {
 }
 
 /**
- * One-sentence organisation description (owner-approved manifest text).
+ * One-sentence organisation description (owner's wording, 2026-11-04, GEO-6).
  * The SINGLE source for app/manifest.ts `description` and the Organization
  * JSON-LD `description` — never duplicate the literal.
  */
 export const BRAND_ORGANIZATION_DESCRIPTION =
-  "One work world for workers, employers, agencies and institutions: real work, evidence, skills, demand, matching and workforce operations.";
+  "International platform for work, specialists and services, where people and companies find jobs, workers, clients, services and project partners.";
 
 type BrandCopy = { title: string; description: string };
 
@@ -49,39 +49,39 @@ type BrandCopy = { title: string; description: string };
 export const BRAND_SEO: Readonly<Record<ActiveLocale, BrandCopy>> = {
   en: {
     title:
-      "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+      "LabourMarket.ai — International platform for work and services",
     description:
-      "LabourMarket.ai is a general labour-market platform where people and companies see needs, readiness, skills, work opportunities and market signals — locally and internationally, across sectors.",
+      "LabourMarket.ai: international platform for work, specialists and services. In any sector, find jobs, workers, clients, services and project partners.",
   },
   lt: {
     title:
-      "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+      "LabourMarket.ai — tarptautinė darbo ir paslaugų platforma",
     description:
-      "LabourMarket.ai — bendra darbo rinkos platforma, kurioje žmonės ir įmonės mato poreikius, pasirengimą, įgūdžius, darbo galimybes ir rinkos signalus — vietoje ir tarptautiniu mastu, įvairiuose sektoriuose.",
+      "LabourMarket.ai – tarptautinė darbo, specialistų ir paslaugų platforma. Bet kuriame sektoriuje rask darbą, darbuotojus, užsakovus, paslaugas ir projektų partnerius.",
   },
   ru: {
     title:
-      "LabourMarket.ai — работники, работодатели, навыки и возможности работы в Европе",
+      "LabourMarket.ai — международная платформа работы и услуг",
     description:
-      "LabourMarket.ai — общая платформа рынка труда, где люди и компании видят потребности, готовность, навыки, рабочие возможности и рыночные сигналы — локально и на международном уровне, в разных секторах.",
+      "LabourMarket.ai — международная платформа работы, специалистов и услуг. В любом секторе найдите работу, работников, заказчиков, услуги и партнёров по проектам.",
   },
   nl: {
     title:
-      "LabourMarket.ai — Werknemers, werkgevers, vaardigheden en werkkansen in Europa",
+      "LabourMarket.ai — Internationaal platform voor werk en diensten",
     description:
-      "LabourMarket.ai is een algemeen arbeidsmarktplatform waar mensen en bedrijven behoeften, gereedheid, vaardigheden, werkkansen en marktsignalen zien — lokaal en internationaal, in verschillende sectoren.",
+      "LabourMarket.ai: internationaal platform voor werk, specialisten en diensten. Vind in elke sector werk, werknemers, opdrachtgevers, diensten en projectpartners.",
   },
   de: {
     title:
-      "LabourMarket.ai — Arbeitskräfte, Arbeitgeber, Fähigkeiten und Arbeitsmöglichkeiten in Europa",
+      "LabourMarket.ai — Plattform für Arbeit und Dienstleistungen in Europa",
     description:
-      "LabourMarket.ai ist eine allgemeine Arbeitsmarktplattform, auf der Menschen und Unternehmen Bedarfe, Bereitschaft, Fähigkeiten, Arbeitsmöglichkeiten und Marktsignale sehen — lokal und international, über viele Branchen hinweg.",
+      "LabourMarket.ai: internationale Plattform für Arbeit, Fachkräfte und Dienstleistungen. In jeder Branche Arbeit, Personal, Auftraggeber und Projektpartner finden.",
   },
   pl: {
     title:
-      "LabourMarket.ai — pracownicy, pracodawcy, umiejętności i możliwości pracy w Europie",
+      "LabourMarket.ai — międzynarodowa platforma pracy i usług",
     description:
-      "LabourMarket.ai to ogólna platforma rynku pracy, na której ludzie i firmy widzą zapotrzebowanie, gotowość, umiejętności, możliwości pracy i sygnały rynkowe — lokalnie i międzynarodowo, w wielu branżach.",
+      "LabourMarket.ai: międzynarodowa platforma pracy, specjalistów i usług. W każdej branży znajdź pracę, pracowników, zleceniodawców, usługi i partnerów do projektów.",
   },
 };
 
