@@ -18,13 +18,12 @@ describe("brandedTitle", () => {
   });
 });
 
-const SHORTENED = ["workers", "createCv", "projectCostCalculator", "professions", "jobs", "workOpportunities"] as const;
-
-describe("shortened curated descriptions stay within 160 characters", () => {
-  for (const key of SHORTENED) {
+describe("curated page copy fits a search result (SEO-7)", () => {
+  for (const [key, byLocale] of Object.entries(PAGE_SEO)) {
     it(key, () => {
-      for (const [locale, copy] of Object.entries(PAGE_SEO[key])) {
-        expect(copy.description.length, `${key}.${locale}`).toBeLessThanOrEqual(160);
+      for (const [locale, copy] of Object.entries(byLocale)) {
+        expect(copy.description.length, `${key}.${locale} description`).toBeLessThanOrEqual(160);
+        expect(brandedTitle(copy.title).length, `${key}.${locale} title`).toBeLessThanOrEqual(70);
       }
     });
   }

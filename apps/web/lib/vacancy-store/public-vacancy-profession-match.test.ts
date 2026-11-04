@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 import { matchProfessionAcrossLocales, matchProfessionByLabel } from "./public-vacancy-profession-match";
 
@@ -63,5 +66,27 @@ describe("the same word in another active language", () => {
     const X = [{ slug: "baker", label: "Welder" }];
     expect(matchProfessionAcrossLocales("welder", LT, [EN, X])).toBeNull();
     expect(matchProfessionAcrossLocales("lagerarbetare", LT, [EN, RU])).toBeNull();
+  });
+});
+
+describe("the real catalogue: a word people type for a profession stays the filter", () => {
+  const ACTIVE = ["en", "lt", "ru", "nl", "de", "pl"] as const;
+  const catalogue = (l: string) =>
+    Object.entries(
+      JSON.parse(readFileSync(join(__dirname, "..", "..", "messages", l, "professions.json"), "utf8")) as Record<string, string>,
+    ).map(([slug, label]) => ({ slug, label }));
+
+  it("elektriker goes to the electrician filter on every active board, not to free text", () => {
+    for (const board of ACTIVE) {
+      const others = ACTIVE.filter((l) => l !== board).map(catalogue);
+      expect(matchProfessionAcrossLocales("elektriker", catalogue(board), others), board).toBe("electrician");
+    }
+  });
+
+  it("words the catalogue does not name stay free text", () => {
+    const others = ACTIVE.filter((l) => l !== "lt").map(catalogue);
+    for (const term of ["kock", "el", "ab", "ter", "snickare", "undersköterska", "zzqx"]) {
+      expect(matchProfessionAcrossLocales(term, catalogue("lt"), others), term).toBeNull();
+    }
   });
 });

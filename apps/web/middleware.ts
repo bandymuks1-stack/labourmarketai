@@ -8,7 +8,10 @@ import {
   stripLocaleSegment,
 } from "@/lib/auth/role-gated-routes";
 import { unsupportedLanguageRedirectPath } from "@/lib/i18n/unsupported-language";
-import { entryLocaleForUnmatchedLanguage } from "@/lib/i18n/entry-locale";
+import {
+  entryLocaleForUnmatchedLanguage,
+  languageFreeRootTarget,
+} from "@/lib/i18n/entry-locale";
 import { env } from "@/lib/env";
 import {
   ONBOARDING_RETURN_HEADER,
@@ -126,6 +129,26 @@ function maybeRedirectUnmatchedLanguageEntry(
   const url = request.nextUrl.clone();
   url.pathname = `/${target}${pathname === "/" ? "" : pathname}`;
   return NextResponse.redirect(url, 307);
+}
+
+/** `/` with no language and no earlier choice → a permanent redirect, so Google
+ *  keeps `/lt` instead of folding it into the root (lib/i18n/entry-locale.ts).
+ *  `no-store` and `Vary` keep the 301 from any cache a person could read. */
+function maybeRedirectLanguageFreeRoot(
+  request: NextRequest,
+): NextResponse | undefined {
+  const target = languageFreeRootTarget(
+    request.nextUrl.pathname,
+    request.headers.get("accept-language"),
+    request.cookies.get("NEXT_LOCALE")?.value ?? null,
+  );
+  if (!target) return undefined;
+  const url = request.nextUrl.clone();
+  url.pathname = target;
+  const response = NextResponse.redirect(url, 301);
+  response.headers.set("Cache-Control", "no-store");
+  response.headers.set("Vary", "Accept-Language, Cookie");
+  return response;
 }
 
 /** Locale-stripped pathname, e.g. "/lt/dashboard" → "/dashboard". */
@@ -319,6 +342,10 @@ export async function middleware(request: NextRequest) {
   //     is an explicit choice, and intl handles it unchanged.
   const unmatchedEntry = maybeRedirectUnmatchedLanguageEntry(request);
   if (unmatchedEntry) return unmatchedEntry;
+
+  // 0e. The bare root with no language at all: a crawler. Permanent, not 307.
+  const languageFreeRoot = maybeRedirectLanguageFreeRoot(request);
+  if (languageFreeRoot) return languageFreeRoot;
 
   // 1. Locale routing — may redirect (`/` → `/lt`) or rewrite. When intl
   //    issues its own redirect (e.g. `/` → `/lt`, `/dashboard` → `/lt/dashboard`)
