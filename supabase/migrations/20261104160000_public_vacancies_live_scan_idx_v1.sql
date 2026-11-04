@@ -11,7 +11,7 @@
 -- `expires_at` is included because the planner only allows an index-only scan when the
 -- plain column is available.
 --
--- @plan-cache-proof: scripts/db-proof/plan-cache-probe.sql, auto + force_generic_plan, scratch PG16, 12 terms of 1, 2, 3 characters and whole words, numbers in the PR description
+-- @plan-cache-proof: scripts/db-proof/plan-cache-probe.sql, auto + force_generic_plan, scratch PG16, 9 terms of 1, 2, 3 characters and whole words, numbers in the PR description
 --
 -- PRODUCTION APPLY PROCEDURE (owner approval first; never `supabase db push`).
 -- apply_migration wraps its SQL in a transaction and CREATE INDEX CONCURRENTLY
