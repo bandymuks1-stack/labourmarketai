@@ -5723,6 +5723,7 @@
     },
     "privacy": {
       "title": "Polityka prywatności",
+      "metaDescription": "Ta strona wyjaśnia prostym językiem, jakich danych osobowych używa Labour Market AI, w jakim celu i jakie masz prawa. Opisuje platformę taką, jaka działa dzisiaj.",
       "intro": "Ta strona wyjaśnia prostym językiem, jakich danych osobowych używa Labour Market AI, w jakim celu i jakie masz prawa. Opisuje platformę taką, jaka działa dzisiaj.",
       "sections": [
         {
@@ -10446,6 +10447,7 @@
   },
   "matchPreview": {
     "title": "Podgląd dopasowania",
+    "metaDescription": "Wpisz dane pracownika i potrzebę firmy i zobacz, jak do siebie pasują. Narzędzie wyjaśnia dopasowanie, ale niczego nie rezerwuje ani nie zapisuje.",
     "subtitle": "Wprowadź dane pracownika i zapotrzebowanie firmy, aby zobaczyć dopasowanie. To narzędzie podglądowe — oblicza dopasowanie i je wyjaśnia, ale niczego nie rezerwuje ani nie zapisuje.",
     "previewOnly": "Tylko podgląd — nic nie zarezerwowano ani nie zapisano jako wniosek o rezerwację.",
     "workerSection": "Pracownik",
@@ -10783,7 +10785,7 @@
   },
   "about": {
     "metaTitle": "Czym jest LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai to operacyjna platforma rynku pracy: prawdziwa praca staje się dla osoby historią zawodową, dowodami i żywym CV, a dla organizacji — historią wykonanej pracy i jej możliwości.",
+    "metaDescription": "LabourMarket.ai to międzynarodowa platforma pracy, specjalistów i usług. Prawdziwa praca staje się historią zawodową, dowodami i żywym CV.",
     "navLabel": "O LabourMarket.ai",
     "eyebrow": "O platformie",
     "title": "Czym jest LabourMarket.ai",
