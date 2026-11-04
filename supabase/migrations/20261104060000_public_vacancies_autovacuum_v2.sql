@@ -12,11 +12,11 @@
 --   * last_autovacuum 2026-11-02 09:25 (44 h), relallvisible 17,434 of 24,411.
 --   * free-text count: Index Only Scan public_vacancies_active_board_cover_idx
 --     (3,282 pages) with Heap Fetches 36,064 -> shared hit=29,282.
---   * time follows pages touched, not the plan: the same plan answered in
---     0.10-0.15 s once its pages were resident and in 2.4-8.8 s (worst 24 s while
---     the instance was memory-starved) when they were not. A 2,690-page count
---     took 2.66 s in that same state. CPU was not the limit (1M-row
---     generate_series: 285 ms).
+--   * the plan is not the cause: the same plan answered in 0.10-0.15 s and in
+--     2.4-8.8 s (worst 24 s). Pages are only part of it: the same 9,222 pages
+--     took 128 ms and then 4,653 ms about 30 s apart. This migration stops an
+--     import's slowdown from lasting; it does not by itself bound the first call
+--     under 3 s (4,327 vacuumed pages: 2,767 ms).
 -- Measured on a production-width synthetic copy (PG16, 23.8k heap pages):
 --   * after two days of importer churn: Seq Scan, 25,401 pages per count
 --   * after VACUUM:                     Index Only Scan, 2,028-2,095 pages
@@ -30,8 +30,8 @@
 -- This restores the 2026-09-03 intent ("a vacuum follows each import") with
 -- absolute thresholds that do not drift as the table grows: a vacuum after 200
 -- dead tuples or 200 inserts. Autovacuum visits a table at most once per naptime
--- (1 min) and skips index vacuuming when few pages hold dead items, so a vacuum
--- between imports reads little more than the pages the import changed.
+-- (1 min). Estimated cost: 7-28 s per run, about 3.5 imports a day reach the
+-- thresholds, 0.5-5 min/day (workflow logs and scratch).
 -- Storage parameters only — no data, no privileges, no function, no index, no
 -- result change. The analyze settings of v1 are kept. Reversible: see the ROLLBACK block and
 -- supabase/rollbacks/<same name>.down.sql.
