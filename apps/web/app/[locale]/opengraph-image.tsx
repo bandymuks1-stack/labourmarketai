@@ -29,6 +29,15 @@ import {
  * loaded here without bundling font binaries; the fallback is deliberate).
  */
 
+/**
+ * NOT next/og's default, `immutable, max-age=31536000`. That is right only for a
+ * URL carrying a content hash, and `buildPageMetadata` publishes this route with
+ * none, so a changed card stayed pinned for up to a year (found 2026-11-04 when
+ * the approved mark was added: browsers kept showing the old card). An hour in a
+ * browser, a day in a shared cache: a brand card can wait that long.
+ */
+const SHARE_CARD_CACHE_CONTROL = "public, no-transform, max-age=3600, s-maxage=86400";
+
 export const alt = BRAND_NAME;
 export const size = OG_IMAGE_SIZE;
 export const contentType = "image/png";
@@ -145,6 +154,6 @@ export default async function OpenGraphImage({
         </div>
       </div>
     ),
-    { ...size },
+    { ...size, headers: { "cache-control": SHARE_CARD_CACHE_CONTROL } },
   );
 }
