@@ -141,9 +141,11 @@ export async function LearningCompassSection({
                   {t("journalSupported", { count: evidence.skillsJournalSupported })}
                 </li>
               ) : null}
-              <li className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 text-text-secondary">
-                {t("journalEntries", { count: evidence.journalEntries })}
-              </li>
+              {evidence.journalEntries !== null ? (
+                <li className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 text-text-secondary">
+                  {t("journalEntries", { count: evidence.journalEntries })}
+                </li>
+              ) : null}
               <li className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 text-text-secondary">
                 {t("educationEntries", { count: evidence.educationEntries })}
               </li>
