@@ -205,6 +205,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261103171000_",
       "20261103171100_",
       "20261103171300_",
+      "20261104120000_",
+      "20261104120100_",
       // #2913 restored six production-applied migrations byte-exact (owner option 2, 2026-11-01): historical restorations dated after the package, not pending work of it.
       "20261007155339_",
       "20261015193211_",
