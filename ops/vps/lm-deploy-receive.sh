@@ -74,6 +74,8 @@ case "$ACTION" in
     head -c 8 "$BK/$NAME.part" | grep -q 'age-encr' || { rm -f "$BK/$NAME.part"; echo "BACKUP_FAIL not an age file"; exit 1; }
     mv "$BK/$NAME.part" "$BK/$NAME"; chmod 600 "$BK/$NAME"
     find "$BK" \( -name 'lm-db-*.dump.age' -o -name 'lm-files-*.tar.age' \) -mtime +14 -print -delete | sed 's/^/rotated /'
+    # What was verified above, for the backup watchdog (lm-backup-watchdog.sh): time, name, bytes, sha256.
+    printf '%s %s %s %s\n' "$(date -u +%s)" "$NAME" "$(stat -c %s "$BK/$NAME")" "$SUM" >> "$BK/verified.log" || echo "verified record not written"
     echo "stored bytes=$(stat -c %s "$BK/$NAME") kept=$(ls -1 "$BK" | grep -c 'dump.age$') kept_files=$(ls -1 "$BK" | grep -c '^lm-files-.*tar.age$') free_mb=$(df -m "$BK" | awk 'NR==2{print $4}')"
     echo "BACKUP_OK $NAME";;
   *) echo "refused: unknown command"; exit 1;;

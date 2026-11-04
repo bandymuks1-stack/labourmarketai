@@ -167,6 +167,9 @@ jobs:
       # This is the cheap half, and it is also the agent bootstrap command:
       # `node .github/scripts/product-truth.mjs` prints what the product is,
       # what it must never be narrowed into, and which journeys are broken.
+      - name: Backup watchdog (synthetic test, no real backups, no mail)
+        run: sh ops/vps/lm-backup-watchdog.test.sh
+
       - name: Product truth (capability register halves agree)
         run: node .github/scripts/product-truth.mjs --check
 

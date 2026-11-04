@@ -1,0 +1,5 @@
+# /etc/cron.d/labourmarket-backup-watchdog (owner approval 2026-11-04). Its own file on purpose: lm-cron-install.sh
+# calls every product route once when it installs, which must not happen for this.
+# Install: install -m 644 -o root -g root /root/lm-prod/bin/labourmarket-backup-watchdog.cron /etc/cron.d/labourmarket-backup-watchdog
+SHELL=/bin/sh
+7 * * * * root nice -n 19 sh /root/lm-prod/bin/lm-backup-watchdog.sh >> /root/lm-prod/backup-watchdog.log 2>&1
