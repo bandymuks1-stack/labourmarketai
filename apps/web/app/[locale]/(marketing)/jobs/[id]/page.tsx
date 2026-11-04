@@ -28,7 +28,6 @@ import { FitBandChip } from "@/components/app/opportunities/fit-band-chip";
 import { MatchTierExplanation } from "@/components/app/match-tier-explanation";
 import { VacancyInterestButton } from "@/components/app/vacancy-interest-button";
 import { VacancyTranslateControl } from "@/components/app/vacancy-translate-control";
-import { aiTaskServableNow } from "@/lib/ai/egress-precheck-server";
 // The pure helper comes from the NON-client module: this page is a server
 // component, and importing it from the `"use client"` control made it a client
 // reference. This route renders dynamically so it never hit the prerender error
@@ -587,13 +586,6 @@ export default async function JobDetailPage({
         // throws on codes other than "no table" / "bad uuid".
         .catch(() => null)
     : null;
-  // Whether a translation CAN run now: with no provider allowed to take the
-  // task, the button could only ever answer "could not be translated", so the
-  // page says up front that translation is not switched on (first real
-  // user's feedback 2026-11-04). The button returns by itself once it can run.
-  const translationOn = member
-    ? await aiTaskServableNow("translate_vacancy").catch(() => false)
-    : false;
 
   // The member's reading of THIS job: engine verdict, requirement tiers, the
   // existing interest state and same-profession alternatives. `null` for an
@@ -906,33 +898,27 @@ export default async function JobDetailPage({
                   language: displayLanguageName(sourceLang, active),
                 })}
               </p>
-              {translationOn ? (
-                <VacancyTranslateControl
-                  vacancyId={id}
-                  descriptionHeading={DESCRIPTION_HEADING[active]}
-                  labels={{
-                    translate: t("vacancySources.language.translate", {
-                      language: displayLanguageName(active, active),
-                    }),
-                    translating: t("vacancySources.language.translating"),
-                    machineNote: t("vacancySources.language.machineNote"),
-                    // TEMPLATES, not functions: this is a client component,
-                    // and a function prop threw the page to the error screen
-                    // (P0 2026-09-29). The control fills {count}/{limit}.
-                    remaining: t("vacancySources.language.allowanceRemaining", {
-                      count: "{count}",
-                      limit: "{limit}",
-                    }),
-                    exhausted: t("vacancySources.language.allowanceExhausted", { limit: "{limit}" }),
-                    unavailable: t("vacancySources.language.unavailable"),
-                    signedOut: t("vacancySources.language.signedOut"),
-                  }}
-                />
-              ) : (
-                <p className="mt-2 text-meta text-text-muted" data-testid="vacancy-translate-off">
-                  {t("vacancySources.language.notSwitchedOn")}
-                </p>
-              )}
+              <VacancyTranslateControl
+                vacancyId={id}
+                descriptionHeading={DESCRIPTION_HEADING[active]}
+                labels={{
+                  translate: t("vacancySources.language.translate", {
+                    language: displayLanguageName(active, active),
+                  }),
+                  translating: t("vacancySources.language.translating"),
+                  machineNote: t("vacancySources.language.machineNote"),
+                  // TEMPLATES, not functions: this is a client component,
+                  // and a function prop threw the page to the error screen
+                  // (P0 2026-09-29). The control fills {count}/{limit}.
+                  remaining: t("vacancySources.language.allowanceRemaining", {
+                    count: "{count}",
+                    limit: "{limit}",
+                  }),
+                  exhausted: t("vacancySources.language.allowanceExhausted", { limit: "{limit}" }),
+                  unavailable: t("vacancySources.language.unavailable"),
+                  signedOut: t("vacancySources.language.signedOut"),
+                }}
+              />
             </section>
           ) : null}
 
