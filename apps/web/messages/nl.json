@@ -16165,6 +16165,7 @@
       "allowanceRemaining": "Nog {count} van {limit} vertalingen over",
       "allowanceExhausted": "Je hebt al je {limit} inbegrepen vertalingen gebruikt. De vacature blijft volledig leesbaar in de oorspronkelijke taal.",
       "unavailable": "Deze vacature kon nu niet worden vertaald. Hieronder staan de eigen woorden van de adverteerder.",
+      "notSwitchedOn": "Automatisch vertalen van vacatures staat nog niet aan. Hieronder staan de eigen woorden van de adverteerder.",
       "signedOut": "Meld je aan om deze vacature te vertalen."
     }
   },

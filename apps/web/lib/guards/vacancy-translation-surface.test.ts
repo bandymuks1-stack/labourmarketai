@@ -117,3 +117,32 @@ describe("the copy exists, in every served locale, as real sentences", () => {
     }
   });
 });
+
+/**
+ * NO BUTTON THAT CAN ONLY FAIL (first real user's feedback 2026-11-04). With
+ * no provider allowed to take `translate_vacancy`, every click answered
+ * "could not be translated right now". The page asks the same egress
+ * pre-check the action uses and, when it is off, says so in words instead.
+ */
+describe("translation that cannot run is named, not offered", () => {
+  it("the control renders only when the task is servable now", () => {
+    const src = read(JOB_PAGE);
+    expect(src).toContain('await aiTaskServableNow("translate_vacancy")');
+    const gate = src.indexOf("{translationOn ? (");
+    const control = src.indexOf("<VacancyTranslateControl");
+    const off = src.indexOf('data-testid="vacancy-translate-off"');
+    expect(gate).toBeGreaterThan(-1);
+    expect(control).toBeGreaterThan(gate);
+    expect(off).toBeGreaterThan(control);
+    expect(src).toContain('t("vacancySources.language.notSwitchedOn")');
+  });
+
+  it("the off note exists in every active locale", () => {
+    for (const l of ["lt", "en", "ru", "nl", "de", "pl"]) {
+      const m = JSON.parse(read(`messages/${l}.json`)) as {
+        vacancySources: { language: Record<string, string> };
+      };
+      expect(m.vacancySources.language.notSwitchedOn, l).toBeTruthy();
+    }
+  });
+});

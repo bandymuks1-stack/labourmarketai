@@ -16165,6 +16165,7 @@
       "allowanceRemaining": "Noch {count} von {limit} Übersetzungen übrig",
       "allowanceExhausted": "Sie haben alle {limit} enthaltenen Übersetzungen verbraucht. Die Anzeige bleibt in der Originalsprache vollständig lesbar.",
       "unavailable": "Diese Anzeige konnte gerade nicht übersetzt werden. Unten stehen die eigenen Worte des Inserenten.",
+      "notSwitchedOn": "Die automatische Übersetzung von Anzeigen ist noch nicht eingeschaltet. Unten stehen die eigenen Worte des Inserenten.",
       "signedOut": "Melden Sie sich an, um diese Anzeige zu übersetzen."
     }
   },
