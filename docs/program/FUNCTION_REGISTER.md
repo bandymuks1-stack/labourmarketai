@@ -146,20 +146,20 @@ second register. The function rows below keep their own status; this view reads 
    production check, otherwise NOT VERIFIED; `PASS_CI_ONLY`, `NOT_VERIFIED`, `OPTIONAL_TEST` → NOT VERIFIED; `FAIL` → FAIL;
    `BLOCKED` → BLOCKED; `NOT_IMPLEMENTED` → BLOCKED when it waits on a named owner decision or an owner-gated RED draft,
    otherwise FAIL (not built). `DUPLICATE` rows are not counted.
-5. SEO, GEO, search and design checks are run **signed out** (requests without cookies) on `https://labourmarket.ai`, build
+5. SEO, GEO, search and design checks are run **signed out** (the 2026-11-04 rows: method under "How the 2026-11-04 rows were measured") (requests without cookies) on `https://labourmarket.ai`, build
    `a10b6c47`, 2026-11-03 20:00–20:30 UTC, in the desktop app's built-in Chromium browser. Phone checks name their
    viewport.
 
-### Totals 2026-11-03
+### Totals (functions 2026-11-03; SEO, GEO, search and UX/UI 2026-11-04)
 
 | Dimension | Rows | PASS | FAIL | BLOCKED | NOT VERIFIED |
 |---|---|---|---|---|---|
 | Functions (288, per area below) | 288 | 162 | 9 | 60 | 57 |
-| SEO | 10 | 8 | 1 | 1 | 0 |
-| GEO | 4 | 4 | 0 | 0 | 0 |
-| Search | 5 | 4 | 1 | 0 | 0 |
-| Design (direction A P0) | 5 | 5 | 0 | 0 | 0 |
-| **All** | **312** | **183** | **11** | **61** | **57** |
+| SEO (2026-11-04) | 10 | 7 | 2 | 1 | 0 |
+| GEO (2026-11-04) | 6 | 5 | 1 | 0 | 0 |
+| Internal search (2026-11-04) | 9 | 5 | 2 | 0 | 2 |
+| UX/UI (2026-11-04; DS-1–DS-5 from 2026-11-03) | 14 | 11 | 3 | 0 | 0 |
+| **All** | **327** | **190** | **17** | **61** | **59** |
 
 Functions per area:
 
@@ -199,49 +199,81 @@ Where the stricter rule moves a function (all other rows map one to one):
 The 9 function FAILs: 2.24, 5.20 (not built), 7.27, 7.28, 9.25, 10.20, 11.8, 13.1, 13.17. Their reasons are in the
 rows.
 
-### SEO (signed out, 2026-11-03)
+### How the 2026-11-04 rows were measured
 
-| ID | Check | Status | Evidence (Chrome, signed out) | Remaining issue |
+Signed out, on `https://labourmarket.ai`, 2026-11-04 between 05:30 and 07:00 UTC. Two production checks:
+
+- **Chrome:** the desktop app's built-in Chromium browser made same-origin `fetch` requests with `credentials: "omit"` and parsed each response with `DOMParser`. That covers status, canonical, hreflang, robots meta, JSON-LD, h1, title, description and `lang`.
+- **Playwright Chromium, signed out** (`playwright-core` 1.60, headless, no cookies), for the Web Vitals and accessibility checks:
+  - phone: 390×844, DPR 3, touch, 4× CPU throttle, +150 ms latency;
+  - desktop: 1366×900, no throttle;
+  - one cold load per page and one real click (h1, then a neutral spot) for INP;
+  - axe-core 4.10.2, rule sets `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`.
+
+The Web Vitals are lab numbers from one load each, not field data.
+
+Database timings come from production `pg_stat_statements`, read-only. They are cumulative since the statistics reset of 2026-05-19, so a mean blends old and new code. No production data was written.
+
+### SEO (signed out, 2026-11-04)
+
+| ID | Check | Status | Evidence | Defect / blocker |
 |---|---|---|---|---|
-| SEO-1 | robots.txt | PASS | `/robots.txt` 200: `Allow: /`; private paths disallowed (`/api/`, `/*/dashboard`, `/*/onboarding`, `/*/auth`, `/*/cv`, `/*/invite`, `/*/oauth`, `/*/design`); three sitemaps declared | Cloudflare puts its managed content-signal block in front (see GEO-2) |
-| SEO-2 | sitemap.xml | PASS | `/sitemap.xml` 200: 264 URLs = 44 public paths × 6 locales (lt, en, ru, nl, de, pl), 1,770 `xhtml:link` hreflang alternates | — |
-| SEO-3 | Questions and jobs sitemaps | PASS | `/questions-sitemap.xml` 200, 270 URLs; `/jobs-sitemap.xml` 200, an index of 55 shards; shard 0's first job page answers 200 | keyset paging of the jobs sitemap is RED draft #2996, not applied |
-| SEO-4 | Canonical | PASS | 11 pages checked (`/lt`, `/en`, `/lt/jobs`, `/lt/professions`, `/lt/labour-market`, `/lt/labour-market/lt`, `/lt/questions`, a question page, `/lt/for-companies`, `/lt/pricing`, a job page): each names itself; `/lt/jobs?profession=…` names `/lt/jobs` | — |
-| SEO-5 | hreflang | PASS | the same 11 pages: lt, en, ru, nl, de, pl + x-default | — |
-| SEO-6 | JSON-LD | PASS | every page Organization + WebSite and parses; `/lt/jobs` CollectionPage; questions BreadcrumbList (+ Article on a question page); job page WebPage | a job page carries no JobPosting on purpose: employer and place are withheld from signed-out visitors (2026-08-24 rule) |
-| SEO-7 | Title, description, Open Graph, one h1 | PASS | the 11 pages: a title, a description (85–204 characters), og:image, exactly one h1, `index, follow`; `/lt/auth/signup` is `noindex, nofollow` | the country page description is short (85 characters) |
-| SEO-8 | Job board page 2+ | FAIL | `/lt/jobs?page=2` names `https://labourmarket.ai/lt/jobs` as its canonical, so pages 2+ are folded into page 1 and their jobs reach search engines only through the sitemap | fix in draft #2984 |
-| SEO-9 | Country market pages | PASS | `/lt/labour-market/{lt,lv,ee,pl,de,nl}` in the sitemap; `/lt/labour-market/lt` and `/lt/labour-market/de` answer 200, self-canonical, indexable | — |
-| SEO-10 | Country and city on signed-out job pages | BLOCKED | the board shows "employer and place: after sign-in" | owner decision 2026-11-03 approved the scope; the database function is RED draft #2993, not applied — waits for the owner's separate apply approval |
+| SEO-1 | robots.txt | PASS | Chrome: `/robots.txt` 200, `Allow: /`, 39 `Disallow` lines (private paths), 3 `Sitemap` lines, `Content-Signal: search=yes,ai-train=no,use=reference` | — |
+| SEO-2 | sitemap.xml: every URL | PASS | Chrome: 264 URLs (44 paths × lt, en, ru, nl, de, pl), 1,770 `xhtml:link` alternates. **All 264 were fetched:** 264 × 200, 264 self-canonical, 0 `noindex`, 7 hreflang each (6 + x-default), `<html lang>` matches the path 264/264, exactly one h1 264/264. Median 327 ms, max 1,176 ms | — |
+| SEO-3 | Jobs and questions sitemaps | PASS | Chrome: `/jobs-sitemap.xml` 200 with 55 shards. **All 55 shards fetched:** 55 × 200, **54,222 job URLs**, 7 alternates and a `lastmod` on every URL. 18 job URLs sampled (first, middle and last of shards 0, 10, 20, 30, 40, 54): 18 × 200, self-canonical, indexable. `/questions-sitemap.xml` 270 URLs; 30 sampled (every 9th): 30 × 200, self-canonical | keyset paging of the jobs sitemap is RED draft #2996, not applied |
+| SEO-4 | Canonical | PASS | 312 pages (SEO-2, SEO-3 samples): each names itself. `/lt/jobs?q=…` names `/lt/jobs` | page 2+: SEO-8 |
+| SEO-5 | hreflang | PASS | 312 pages: 7 alternates each, x-default present | — |
+| SEO-6 | Structured data validity | PASS | 312 pages: **0 JSON-LD parse errors**. Organization + WebSite on every page; CollectionPage on `/jobs`; Article + BreadcrumbList on question pages; WebPage on job pages | no JobPosting by design (employer and place are members-only, 2026-08-24 rule) |
+| SEO-7 | Title and description length | FAIL | Chrome, the 264 sitemap pages: **31 titles over 70 characters** (the home page in all 6 locales, 77–92; e.g. `/de/create-cv` 96, `/de/worker-intake` 93). **67 descriptions over 170 characters** (max 248). **12 under 70**: `/{locale}/labour-market/lv` and `/ee` | search results cut them. Copy fix across 6 locales; the home title is under the landing freeze, so its baseline is refreshed in the same PR |
+| SEO-8 | Job board page 2+ | FAIL | Chrome: `/lt/jobs?page=2` and `/en/jobs?page=3` name `/lt/jobs` and `/en/jobs` as canonical. Their 20 cards differ from page 1 (0 of 20 overlap) | fix in draft #2984. **Blocker:** the product gate. `app/[locale]/(marketing)/jobs/page.tsx` is under owner waiver `public-acquisition-route-jobs`, so the gate reports the waiver's existing findings as `pr-not-covered` on any PR touching the file. The waiver's PR list needs #2984 added, in `.github/scripts/owner-waivers.mjs` and in `scoped-owner-waiver.test.ts`. That takes an owner sentence |
+| SEO-9 | Country market pages | PASS | Chrome: `/{locale}/labour-market/{lt,lv,ee,pl,de,nl}`: 36 sitemap URLs, all 200, self-canonical, indexable | lv and ee descriptions are short (SEO-7) |
+| SEO-10 | Country and city on signed-out job pages | BLOCKED | Chrome: cards read "Darbdavys ir vieta: prisijungus" | the database function is RED draft #2993, not applied. It waits for the owner's apply approval |
 
-### GEO (generative engines, signed out, 2026-11-03)
+### GEO (generative engines, signed out, 2026-11-04)
 
-| ID | Check | Status | Evidence (Chrome, signed out) | Remaining issue |
+| ID | Check | Status | Evidence | Defect / blocker |
 |---|---|---|---|---|
-| GEO-1 | llms.txt | PASS | `/llms.txt` 200: the product described in plain words | `/llms-full.txt` 404 (optional) |
-| GEO-2 | Answer-engine crawlers may read the site | PASS | `/robots.txt`: `User-agent: *` allowed, `Content-Signal: search=yes, ai-train=no, use=reference`; search and answer agents not named are allowed | training crawlers are disallowed by the Cloudflare managed block, among them GPTBot, ClaudeBot, CCBot, Google-Extended. Google-Extended also keeps pages out of Gemini grounding. That is an owner choice to confirm, not a defect |
-| GEO-3 | Question-and-answer pages | PASS | 270 question pages in their sitemap; a question page has Article + BreadcrumbList JSON-LD, canonical, hreflang | — |
-| GEO-4 | Public market facts are quotable | PASS | `/lt/labour-market` and six country pages indexable, self-canonical, with descriptions | — |
+| GEO-1 | llms.txt | PASS | Chrome: `/llms.txt` 200, 3,141 characters, sections "How to read this site", "Public pages", "Facts to keep straight", "Connect an AI assistant", "Security", 11 links | `/llms-full.txt` 404 (optional) |
+| GEO-2 | Answer-engine crawlers may read the site | PASS | `/robots.txt`: `User-agent: *` allowed, `use=reference`. Search and answer agents are not named, so they are allowed | Cloudflare's managed block disallows the training crawlers (GPTBot, ClaudeBot, CCBot, Google-Extended, GoogleOther, Applebot-Extended). Owner choice (D-10), not a defect |
+| GEO-3 | Question-and-answer pages | PASS | 270 question pages; 30 sampled, all with Article + BreadcrumbList, self-canonical | — |
+| GEO-4 | Public market facts are quotable | PASS | SEO-9 | — |
+| GEO-5 | Key pages answer "what is it" in text | PASS | Chrome, main text: `/en/about` opens with "What is LabourMarket.ai / LabourMarket.ai is…" (829 words, 10 h2). `/en` 655 words, 13 h2; `/en/pricing` 899 words, states that prices are confirmed and online activation is not open; `/en/for-companies` 426 words | hub pages are thin: `/en/questions` 58 words, `/en/labour-market` 63 words, both without h2. No `FAQPage` markup on any page |
+| GEO-6 | Entity consistency | FAIL | Chrome, 11 key pages in 4 locales: Organization `name`, `url` and `logo` are identical everywhere, and `og:site_name` is `LabourMarket.ai` everywhere. **Three different definitions of the product:** llms.txt "a work and professional-life platform"; `/en/about` "a labour-market operating platform"; `/en` "a living system of work and business opportunities" | an answer engine quoting the site gets three answers. The Organization has no `@id` and 0 `sameAs`, and WebSite has no `SearchAction`. Fix: one definition sentence reused by all three, plus `@id`. This is copy (owner wording), so it is not changed here |
 
-### Search (signed out, 2026-11-03)
+### Internal search (2026-11-04)
 
-| ID | Check | Status | Evidence | Remaining issue |
+| ID | Check | Status | Evidence | Defect / blocker |
 |---|---|---|---|---|
-| SR-1 | `/jobs` free text, cold first query | FAIL | Chrome, desktop: `/lt/jobs?q=sjukskoterska` (a word not searched before) took 6.5 s and showed no job and the "unavailable" state; the same query warm answered without the error | real visitors' first query of a new word times out (4–11 s against the 3 s budget); fix is RED draft #3024, not applied |
-| SR-2 | `/jobs` free text, repeated query | PASS | Chrome: `/lt/jobs?q=suvirintojas` 0.6 s then 0.3 s, `/lt/jobs?q=elektrikas` 0.8 s, 20 cards each | — |
-| SR-3 | Profession filter | PASS | Chrome: 50 professions in the filter; `/lt/jobs?profession=teacher` 1.6 s, 20 cards; `handyman` 2 cards; professions with no live job show the honest empty state | the first filtered read after a while took 4.0 s (`site_engineer`) |
-| SR-4 | Jobs search walk | PASS | prod walk jobs-search 41663385778 (2026-11-03) | — |
-| SR-5 | Job page from search, signed out | PASS | Chrome: a job page from the jobs sitemap answers 200, self-canonical, hreflang, one h1 | — |
+| SR-1 | `/jobs` free text, cold first query | FAIL | measured by J-13: see its report and RED draft #3024. `pg_stat_statements`: `search_public_vacancy_previews_v1` 35,752 calls, mean 560 ms, max 2,999 ms (the 3 s anon timeout) | fix is RED draft #3024, not applied. #3020's trigram index was rolled back (RC-A6, #3025) |
+| SR-2 | `/jobs` free text, correctness and warm timing | PASS | Chrome, signed out, full HTML: `suvirintojas` 736 ms, `snickare` 451 ms, `el` 446 ms; **20 cards each, and 20 of 20 titles contain the term**. `developer` 0 cards with the honest "0 rasta… nerasta" state. No "unavailable" state | — |
+| SR-3 | Profession filter | PASS | Chrome: `?profession=teacher` 306 ms, 20 cards; `handyman` 2 cards; `electrician` page 1 / page 2: 20 / 20 cards, 0 overlap | — |
+| SR-4 | Search paging | FAIL | Chrome: unfiltered board p1/p2 0 overlap; `?q=el` p1/p2 0 overlap. **But a term that maps to a profession drops the page:** `/lt/jobs?q=elektrikas&page=2` redirects to `/lt/jobs?profession=electrician` and shows page 1 again (20 of 20 the same) | the board's own links never build this URL (after the redirect they carry `profession`), so only shared or hand-made links meet it. Fix: carry `page` into the redirect in `jobs/page.tsx`. It is blocked by the same owner waiver as SEO-8 |
+| SR-5 | Jobs search walk | PASS | prod walk jobs-search 41663385778 (2026-11-03) | — |
+| SR-6 | Job page from search, signed out | PASS | SEO-3: 18 job pages from the sitemap, 200, self-canonical, indexable | — |
+| SR-7 | Marketplace find | PASS | prod walk marketplace 41729310761 (2026-11-03): M-3 the buyer finds the shelf among goods; M-5 the buyer reaches the service from the market. `pg_stat_statements`: `marketplace_listings` reads 501 calls, mean 1.3 ms, max 79 ms; `org_capabilities_for_visible_listings_v1` 141 calls, mean 9.2 ms, max 314 ms | — |
+| SR-8 | People / candidates search | NOT VERIFIED | no production walk searches people: company-chain C-2/U-3 opens the hand-raisers of a need, which is not a search. `pg_stat_statements`: `list_discoverable_worker_ids_v1` 572 calls, mean 41.9 ms, **max 2,536 ms**; `list_discoverable_worker_profiles_v1` 463 calls, mean 45.4 ms, max 1,021 ms | needs a walk step: the company searches by profession and place and finds the synthetic discoverable worker, and an undiscoverable one stays absent |
+| SR-9 | Organizations directory search | NOT VERIFIED | no walk. `search_organizations_directory_v1` 16 calls in total, mean 11.0 ms, max 55 ms | needs a walk step |
 
-### Design — direction A P0 (2026-11-03)
+### UX/UI (signed out, 2026-11-04)
 
-| ID | Check | Status | Evidence | Remaining issue |
+Pages: `/lt`, `/lt/jobs`, `/lt/for-companies`, `/lt/for-workers`, `/lt/pricing`, `/lt/questions`, `/lt/auth/signup`, `/lt/labour-market/lt`, `/en`, `/lt/jobs?q=suvirintojas`.
+
+| ID | Check | Status | Evidence | Defect / blocker |
 |---|---|---|---|---|
-| DS-1 | Mobile sign-up at 360 px | PASS | Chrome, 360×780, `/lt/auth/signup` signed out: nothing scrolls sideways (scroll width 360), Google / LinkedIn / Facebook, e-mail and two passwords full width, the submit button 42 px high, terms and the data-controller notice above the form | inputs use 14 px text, so iOS Safari zooms in on focus; `/lt/auth/sign-up` (hyphen) is a 404 |
-| DS-2 | Mobile sign-up at 390 px | PASS | Chrome, 390×844, the same page: no sideways scroll; e-mail `autocomplete=email`, passwords `new-password`, three labels | the same 14 px note |
+| UX-1 | LCP, phone 390 px | PASS | Playwright: worst `/lt` **2,384 ms** (the h1); others 500–1,388 ms. Good is ≤ 2,500 ms | `/lt` is close to the limit under 4× CPU |
+| UX-2 | LCP, desktop | PASS | Playwright: worst `/lt` 632 ms, others 208–536 ms | — |
+| UX-3 | CLS, phone 390 px | FAIL | Playwright: **0.13 on 9 of 10 pages** (0 on `/lt/auth/signup`). Good is ≤ 0.1 | **Cause:** the analytics consent banner (`components/app/analytics-consent.tsx`, `placement="top"`) renders only after hydration, because the choice is read from the device. It is inserted above the header, and its 59 px pushed the header and the whole page down (desktop, 671 ms after start). It hits every first visit, crawlers included. The banner is in the page flow on purpose (owner decision 2026-11-03: never cover a field), so the fix is an owner choice. Either render it from the server when there is no choice cookie (the choice mirrored into a cookie), or reserve its space. This is consent UX, so no GREEN change was made |
+| UX-4 | CLS, desktop | PASS | Playwright: 0.043 on 9 of 10 pages, 0 on sign-up | same cause as UX-3, below the limit here |
+| UX-5 | INP (one real interaction) | PASS | Playwright: worst 96 ms on phone (`/lt/for-companies`), 56 ms on desktop. Good is ≤ 200 ms | lab proxy: one click per page |
+| UX-6 | Accessibility (axe, WCAG 2.x A/AA) | FAIL | Playwright + axe, 10 phone pages and desktop `/lt`: **20 failing nodes in 3 rules.** `color-contrast` ×1 on 9 pages plus desktop `/lt`: the footer label "Rinkos apžvalga", 12 px under an `opacity-70` wrapper. `color-contrast` ×9 on `/lt/labour-market/lt`: the requirement chips `border-brand-blue/40 bg-brand-blue/10`. `link-in-text-block` ×1 on `/lt/labour-market/lt`: a source link told apart by colour only. `/lt/auth/signup`: 0 | the footer label is fixed in GREEN #3030 (auto-merge); re-run axe after deploy. The country-page chips and link are still open |
+| UX-7 | No sideways scroll | PASS | Playwright: scroll width = viewport on all 20 loads | — |
+| UX-8 | Runtime errors | PASS | Playwright: 0 `pageerror` and 0 console errors on all 20 loads | — |
+| UX-9 | Not-found state | FAIL | Chrome: `/en/this-page-does-not-exist`, `/lt/jobs/00000000-0000-0000-0000-000000000000` and `/lt/auth/sign-up` answer 404 + `noindex` (correct). But the HTML is Next's `<html id="__next_error__">` shell: no `lang`, no h1, the home page's title. The branded page appears only through JavaScript | the not-found render falls into the error shell on the server. `/lt/auth/sign-up` (hyphen) could redirect to `/lt/auth/signup` |
+| DS-1 | Mobile sign-up at 360 px | PASS | Chrome, 360×780, 2026-11-03: no sideways scroll, full-width fields, 42 px submit, terms above the form | inputs use 14 px text, so iOS Safari zooms on focus |
+| DS-2 | Mobile sign-up at 390 px | PASS | Chrome, 390×844, 2026-11-03: no sideways scroll; `autocomplete` email / new-password; three labels | the same 14 px note |
 | DS-3 | Role navigation | PASS | prod walk role-routes 41329744822 (2026-11-01, 5 roles); prod walk mobile-surfaces 41317177981 (2026-11-01, 390 px, 6/6) | — |
-| DS-4 | Customer door in "More" (#3003) | PASS | prod walk buyer-workspace 41713787541 (2026-11-03, after the #3003 deploy) B-3b: the customer finds "Mano užklausos" first in "More" and on the phone sheet | — |
-| DS-5 | Job cards on a phone | PASS | Chrome, 390×844, `/lt/jobs` signed out: 20 cards, each 358 px wide, no sideways scroll, no bare-dash title; the source language is named on each card | — |
+| DS-4 | Customer door in "More" (#3003) | PASS | prod walk buyer-workspace 41713787541 (2026-11-03) B-3b | — |
+| DS-5 | Job cards on a phone | PASS | Chrome, 390×844, 2026-11-03: 20 cards, 358 px wide, no sideways scroll, source language named | — |
 
 ### Latest production walk per spec (2026-11-03 22:20 UTC)
 
