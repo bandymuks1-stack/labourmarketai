@@ -14,7 +14,8 @@ import {
  * link shared to LinkedIn / Facebook / X / WhatsApp rendered as a bare text
  * snippet. This route gives every public page one honest, per-locale brand
  * card, drawn entirely with next/og (no external asset, no font fetch, no
- * screenshot pipeline).
+ * screenshot pipeline). It carries the approved LM mark (owner 2026-11-04: the
+ * approved logo at every active brand point).
  *
  * Honesty contract (doctrine §18): the card carries ONLY the brand name and
  * the SAME per-locale positioning line the SEO title already states — no
@@ -64,16 +65,28 @@ export default async function OpenGraphImage({
           color: "rgb(255, 255, 255)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-          <div
-            style={{
-              width: "14px",
-              height: "14px",
-              borderRadius: "999px",
-              backgroundImage:
-                "linear-gradient(135deg, rgb(138, 106, 18), rgb(212, 175, 55), rgb(255, 217, 102))",
-            }}
-          />
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+          {/* The approved LM mark, the same geometry and gold as
+              public/brand/lm-mark.svg (pinned in pwa-install-assets.test.ts):
+              the owner's vector, never redrawn. Inline because next/og cannot
+              load a file without a fetch, and this card makes none. */}
+          <svg width="74" height="70" viewBox="0 0 700.27 660.2" role="img" aria-label={BRAND_NAME}>
+            <defs>
+              <linearGradient id="lm-metal" x1="89" y1="537" x2="653" y2="123" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#8C6A16" />
+                <stop offset="0.28" stop-color="#D4AF37" />
+                <stop offset="0.5" stop-color="#F2D675" />
+                <stop offset="0.72" stop-color="#D4AF37" />
+                <stop offset="1" stop-color="#8C6A16" />
+              </linearGradient>
+            </defs>
+            <g fill="url(#lm-metal)">
+              <polygon points="158.18,123.09 89.02,123.09 89.02,533.46 336.3,533.46 336.3,464.3 158.18,464.3 " />
+              <polygon points="208.23,173.43 367.53,385.6 367.55,385.57 367.69,385.77 478.08,238.75 478.08,533.46 547.24,533.46 547.24,146.63 547.46,146.34 547.24,135.44 547.24,123.09 546.99,123.09 478.43,123.09 478.08,123.09 478.08,123.56 367.63,270.66 256.84,123.09 208.23,123.09 " />
+              <polygon points="326.49,414.25 208.23,256.78 208.23,414.25 " />
+              <circle cx="614.05" cy="497.95" r="39.16" />
+            </g>
+          </svg>
           <div
             style={{
               fontSize: "26px",

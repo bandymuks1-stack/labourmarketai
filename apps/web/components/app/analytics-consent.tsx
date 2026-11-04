@@ -95,8 +95,8 @@ export function AnalyticsConsentBanner({
       data-placement={placement}
       className={
         placement === "top"
-          ? "border-b border-border-subtle bg-surface-1 px-4 py-2.5 sm:px-6"
-          : "mt-6 rounded-md border border-border-subtle bg-surface-1 px-4 py-2.5"
+          ? "border-b border-border-subtle bg-surface-1 px-4 py-2.5 sm:px-6 print:hidden"
+          : "mt-6 rounded-md border border-border-subtle bg-surface-1 px-4 py-2.5 print:hidden"
       }
     >
       <div className="mx-auto flex max-w-4xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">

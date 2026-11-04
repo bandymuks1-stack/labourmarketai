@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 
+import { LmLogo } from "@/components/ui/lm-logo";
 import { reportClientError } from "@/lib/telemetry/report-client-error";
 
 /**
@@ -75,6 +76,7 @@ export default function LocaleError({
 
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 p-6 text-center">
+      <LmLogo className="h-12 w-auto" />
       <p
         className="max-w-sm text-sm leading-relaxed text-text-secondary"
         role="alert"
