@@ -99,7 +99,7 @@ without the brakes. Until that changes, this rule depends on the person or sessi
 
 **Evidence, 2026-11-04 (correlation only, cause not proven):** the coordinator measured a walk
 burst of 8,119 edge requests per 5 min against 991, origin time going from 156 ms to
-1.2–9.6 s, and 16 statement timeouts from 22:38 to 22:42 UTC. Walk run 41925521910 ran from
+1.2–9.6 s, and 9 statement timeouts from 22:38 to 22:42 UTC. Walk run 41925521910 ran from
 22:30:28 to 22:43:45. Brake (e) cleared at 22:28:31 and 22:30:03, while Quality Gates for the same
 commit was active (22:23:20–22:33:47). Deploy run 41926365186 then started at 22:33:51 and
 shipped from 22:38:33 to 22:40:41, inside the walk.
