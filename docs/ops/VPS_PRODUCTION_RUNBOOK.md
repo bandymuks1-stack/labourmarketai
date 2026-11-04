@@ -91,7 +91,7 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 | Commercial handoffs | `/api/cron/commercial-handoffs` (06:00 UTC) | **running** (measured 2026-10-23: the 06:00 UTC sweep read the queue; consented hand-offs are delivered by the immediate path) | VPS cron.d |
 | Job alerts | `/api/cron/job-alerts` (06:17 UTC) | the GitHub `job-alerts-cadence.yml` no-op was **removed** (it never had `CRON_SECRET`; nginx 404s `/api/cron/*` from the internet) | VPS cron.d (line present in the bundle) |
 | Billing recovery | `/api/cron/billing-recovery` | `billing-recovery-cadence.yml` kept **dispatch-only** (schedule removed; its static gate stays reviewable). Since 2026-10-23 it makes **no HTTP call**: nginx 404s `/api/cron/*` from the internet, so a runner call could never succeed; an open gate fails loudly and points at `lm-cron.sh billing-recovery` on the VPS. `apps/web/vercel.json` keeps its `crons` block unchanged: three guards read it as the schedule declaration and the Vercel project is disabled, so the block is inert documentation | VPS cron.d line added only with the Stripe GO |
-| **DB backup** | `db-backup.yml` 03:30 UTC: `pg_dump` on the runner (`public` + `auth` + `storage` metadata + `supabase_migrations` ledger) through the owner-approved read role `SUPABASE_BACKUP_DB_URL` (or a temporary CLI login role via `SUPABASE_ACCESS_TOKEN`) → **restore drill** with exact schema-object and per-table row proof → Storage **files** + pg_cron job definitions downloaded via the Storage API and size-checked → both `age`-encrypted to the VPS public key → shipped via the forced-command receiver (`backup`) → `/root/lm-prod/backups/` (700/600), 14-day rotation | **producing backups since 2026-11-03** (drill 41636950462, full 41637888590); completeness proof + files bundle 2026-11-03 (§9.1.0) | GitHub-side dump; VPS stores ciphertext only; no DB password typed anywhere |
+| **DB backup** | `db-backup.yml`, every 4 h with a skip guard (one backup a day): `pg_dump` on the runner (`public` + `auth` + `storage` metadata + `supabase_migrations` ledger) through the owner-approved read role `SUPABASE_BACKUP_DB_URL` (or a temporary CLI login role via `SUPABASE_ACCESS_TOKEN`) → **restore drill** with exact schema-object and per-table row proof → Storage **files** + pg_cron job definitions downloaded via the Storage API and size-checked → both `age`-encrypted to the VPS public key → shipped via the forced-command receiver (`backup`) → `/root/lm-prod/backups/` (700/600), 14-day rotation | **producing backups since 2026-11-03** (drill 41636950462, full 41637888590); completeness proof + files bundle 2026-11-03 (§9.1.0) | GitHub-side dump; VPS stores ciphertext only; no DB password typed anywhere |
 | NAV (Norway) ingestion | `nav-supply-cadence.yml` 02/08/14/20 UTC (GitHub, service role) | GREEN after migration | keep (GitHub) |
 | Sweden ingestion | `sweden-supply-cadence.yml` 01/09/17 UTC | GREEN | keep |
 | Freshness check | `ingestion-freshness.yml` 04/10/16/22 UTC | GREEN | keep |
@@ -232,6 +232,22 @@ GitHub job is then the only backup.
 (equals `git show origin/main:ops/vps/lm-deploy-receive.sh | sha256sum` when the
 installed copy is current). Keep the offline copy of `backup.age.key` — without
 it no backup can be decrypted.
+
+### 9.1.0a Daily run, alerts and limits (2026-11-04)
+
+**Daily run.** `db-backup.yml` has six schedule slots; a guard job skips the run when a backup reached the VPS in the last 18 h. A person's dispatch always runs. "Reached the VPS" means the *Ship to the VPS* step succeeded (`.github/scripts/db-backup-last-shipped.sh`): a skipped run and a `restore_drill_only` run are green and ship nothing.
+
+**Alerts.** A failed run opens or updates one `db-backup-failed` issue, with only the run link in it, and the next backup that ships closes it. The `db-backup` job in `ingestion-freshness.yml` fails when no backup reached the VPS in 26 h, updates the same issue and dispatches a backup.
+
+**What each run proves:** the dump restores into a throw-away `postgres:17` with exact schema-object counts and every table inside its source window; every Storage file by count and size; both files encrypted with `age`; the receiver re-checks the sha256 of what it received and the `age` header before storing, and answers `BACKUP_OK`.
+
+**What it does not prove:**
+- that a stored file decrypts: the drill runs on the plaintext before encryption, and the receiver never holds the key at that step. Decryption is a manual check (done once, 2026-11-03, #3005);
+- a restore into a real Supabase project;
+- that the scope is complete on every run: if `auth` and the other schemas cannot be read, the job falls back to `public` only and stays green, with a warning;
+- anything after the 14-day rotation.
+
+**Independence.** The backups are in one place, on the production VPS, next to the app and its key (plus the owner's offline copy of the key). Losing that server loses them. An off-site copy costs money or needs a new credential, so it is an owner decision.
 
 ### 9.1.0 What a backup holds — and what it does not (completeness, 2026-11-03)
 

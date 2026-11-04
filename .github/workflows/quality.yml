@@ -224,4 +224,7 @@ jobs:
           pnpm check:migration-parity
 
       - name: Build (env-independent)
+        env:
+          # Same heap as deploy-vps.yml: the default of about 2 GB fails now and then.
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build

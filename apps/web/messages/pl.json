@@ -12894,6 +12894,11 @@
   "cvImport": {
     "reviewTitle": "Co znaleźliśmy w Twoim CV",
     "reviewHint": "System tylko sugeruje. Zapisz lub odrzuć każdy wpis — Ty decydujesz.",
+    "confidence": {
+      "high": "Wyraźnie podane w CV",
+      "medium": "Sprawdź, czy odczytano to poprawnie",
+      "low": "Przypuszczenie: koniecznie sprawdź"
+    },
     "empty": "Nie udało się odczytać żadnych sekcji z tego tekstu — możesz dodać je ręcznie.",
     "groups": {
       "workHistory": "Historia zatrudnienia",
