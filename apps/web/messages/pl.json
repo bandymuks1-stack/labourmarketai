@@ -16174,6 +16174,7 @@
       "allowanceRemaining": "Pozostało {count} z {limit} tłumaczeń",
       "allowanceExhausted": "Wykorzystano wszystkie {limit} tłumaczeń zawartych w planie. Ogłoszenie nadal można czytać w języku oryginału.",
       "unavailable": "Nie udało się teraz przetłumaczyć tego ogłoszenia. Poniżej słowa samego ogłoszeniodawcy.",
+      "notSwitchedOn": "Automatyczne tłumaczenie ogłoszeń nie jest jeszcze włączone. Poniżej słowa samego ogłoszeniodawcy.",
       "signedOut": "Zaloguj się, aby przetłumaczyć to ogłoszenie."
     }
   },

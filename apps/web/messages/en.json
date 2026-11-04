@@ -16174,6 +16174,7 @@
       "allowanceRemaining": "{count} of {limit} translations left",
       "allowanceExhausted": "You have used all {limit} of your included translations. The advertisement stays fully readable in its original language.",
       "unavailable": "This advertisement could not be translated right now. The publisher's own words are shown below.",
+      "notSwitchedOn": "There is no automatic translation of job ads yet. The publisher's own words are shown below.",
       "signedOut": "Sign in to translate this advertisement."
     }
   },
