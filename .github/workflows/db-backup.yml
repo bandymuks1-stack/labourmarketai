@@ -574,10 +574,11 @@ jobs:
 
   # One open issue while backups fail, closed by the next backup that ships. The
   # repository is public: the text carries the run link and nothing else. A failed
-  # scheduled run also sends GitHub's own failure e-mail.
+  # scheduled run also sends GitHub's own failure e-mail. A test from a branch is not
+  # the production backup: it neither opens nor closes the issue.
   notify:
     needs: [guard, backup]
-    if: always()
+    if: always() && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
