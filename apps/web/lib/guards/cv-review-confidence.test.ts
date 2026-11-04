@@ -79,3 +79,35 @@ describe("the CV review offers the lines it could not place", () => {
     });
   }
 });
+
+/**
+ * THE PERSON CORRECTS BEFORE IT IS SAVED (owner 2026-11-04, UF-3). Every row that
+ * holds free words can be corrected, and what is saved is the corrected value,
+ * through the same confirm action. Nothing is saved by typing.
+ */
+describe("the CV review lets the person correct a proposal before saving", () => {
+  it("each confirm goes through the correction rules, not the raw proposal", () => {
+    const src = read(REVIEW);
+    for (const rule of ["workHistoryInput(w,", "educationInput(e,", "certificateInput(c,", "achievementInput(a,", "editedText(line,"]) {
+      expect(src, rule).toContain(rule);
+    }
+    expect(src).not.toMatch(/confirmCvWorkHistoryAction\(\{\s*title: w\.title/);
+    expect(src).not.toMatch(/confirmCvEducationAction\(\{\s*institution: e\.institution/);
+  });
+
+  it("typing only changes the draft; saving is still the one click", () => {
+    const src = read(REVIEW);
+    const panel = src.slice(src.indexOf("cv-import-fields-"), src.indexOf('s.state === "conflict"'));
+    expect(panel).toContain("setEdit(itemKey, f.name, e.target.value)");
+    expect(panel).not.toMatch(/\brun\(|confirmCv/);
+  });
+
+  for (const l of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    it(`${l}: the correction copy exists`, () => {
+      const m = JSON.parse(read(`messages/${l}.json`)) as { cvImport: Record<string, unknown> };
+      for (const k of ["edit", "editDone", "fieldTitle", "fieldText", "fieldInstitution", "fieldProgram", "fieldKind", "fieldStart", "fieldEnd", "fieldYear", "dateHint"]) {
+        expect(m.cvImport[k], k).toBeTruthy();
+      }
+    });
+  }
+});

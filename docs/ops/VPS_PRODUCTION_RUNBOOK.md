@@ -246,6 +246,11 @@ it no backup can be decrypted.
 - a restore into a real Supabase project;
 - that the scope is complete on every run: if `auth` and the other schemas cannot be read, the job falls back to `public` only and stays green, with a warning;
 - anything after the 14-day rotation.
+- grants: `pg_dump` and `pg_restore` both run with `--no-privileges`, so no `GRANT` or `REVOKE` is in the dump, and the object proof does not compare them. A database restored into a new project has the target's default privileges, not production's. Compare and re-apply privileges before it serves anyone.
+
+**The one expected restore error.** `restore-errors=1 (harmless=1)` is `CREATE SCHEMA public;` failing because the target database already has that schema. Run 41815407585 confirms it from both sides: `restore.err` has one error line, the server log has one `ERROR`, and it is this statement. Nothing else fails with it, and the schema-object proof is exact. Any other error counts as `other`, which only warns; the object and row proofs are what fail the job.
+
+**Last proof (2026-11-04).** Manual run 41815407585: full backup, restore drill and shipping passed. Not yet exercised: a scheduled start, the 26 h freshness job, the failure issue. A manual run makes the guard skip scheduled slots for the next 18 h, so a skipped scheduled run proves the slot fired, and only the first slot after that proves a scheduled backup.
 
 **Independence.** The backups are in one place, on the production VPS, next to the app and its key (plus the owner's offline copy of the key). Losing that server loses them. An off-site copy costs money or needs a new credential, so it is an owner decision.
 
