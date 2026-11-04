@@ -193,7 +193,7 @@ describe("the shipped mark is the owner's geometry", () => {
     circle: /cx="614\.05"\s+cy="497\.95"\s+r="39\.16"/.test(text),
   });
 
-  for (const file of ["public/brand/lm-mark.svg", "app/icon.svg", "public/app-icon.svg", "components/ui/lm-logo.tsx"]) {
+  for (const file of ["public/brand/lm-mark.svg", "app/icon.svg", "public/app-icon.svg", "components/ui/lm-logo.tsx", "app/[locale]/opengraph-image.tsx"]) {
     it(`${file}: every polygon and the dot, verbatim`, () => {
       const source = shapes(readFileSync(SOURCE, "utf8"));
       expect(source.polygons).toHaveLength(3);
@@ -213,4 +213,25 @@ describe("the shipped mark is the owner's geometry", () => {
     const mark = readFileSync(resolve(WEB_ROOT, "public/brand/lm-mark.svg"), "utf8");
     for (const stop of ["#8C6A16", "#D4AF37", "#F2D675"]) expect(mark).toContain(stop);
   });
+});
+
+/**
+ * THE APPROVED LOGO AT THE PLACES A PERSON LANDS WHEN SOMETHING GOES WRONG (owner
+ * 2026-11-04: "registracijos, prisijungimo, klaidų ir viešuosius puslapius").
+ * Through the ONE component, so none of them can carry a second drawing.
+ */
+describe("brand pages use the one logo component", () => {
+  for (const file of [
+    "app/[locale]/not-found.tsx",
+    "app/not-found.tsx",
+    "app/[locale]/error.tsx",
+    "app/global-error.tsx",
+    "app/[locale]/auth/layout.tsx",
+    "components/layouts/site-nav.tsx",
+    "components/app/conversation/chat/conversation-header.tsx",
+  ]) {
+    it(`${file} renders LmLogo`, () => {
+      expect(readFileSync(resolve(WEB_ROOT, file), "utf8")).toContain("<LmLogo");
+    });
+  }
 });
