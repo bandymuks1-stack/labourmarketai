@@ -248,9 +248,15 @@ export async function getPublicVacancyById(
   }
   if (!data) return { status: "not_found" };
 
+  // THE READING COPY of the publisher's words: an HTML feed's tags become plain
+  // paragraphs for the two uses of this read, the member's job page and the
+  // translation input (first real user's feedback 2026-11-04). The STORED value
+  // stays verbatim: nothing here writes, `contentHash` is the stored one, and
+  // categorization and matching do not read the description through this path.
+  const vacancy = fromPublicVacancyRow(data as Record<string, unknown>);
   return {
     status: "ok",
-    vacancy: fromPublicVacancyRow(data as Record<string, unknown>),
+    vacancy: { ...vacancy, descriptionRaw: vacancyDescriptionText(vacancy.descriptionRaw) },
   };
 }
 
