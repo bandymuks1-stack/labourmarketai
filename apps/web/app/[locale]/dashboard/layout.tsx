@@ -10,6 +10,8 @@ import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { LanguageFeedbackWidget } from "@/components/app/language-feedback-widget";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { SpineStream } from "@/components/app/spine-stream";
+import { OwnAvatarStream } from "@/components/app/identity/own-avatar-stream";
+import { IdentityFamilyProvider } from "@/components/app/identity/identity-family-context";
 import { DashboardChrome } from "@/components/app/dashboard-chrome";
 import type { ConversationNavLabels } from "@/components/app/conversation/chat/conversation-header";
 import { AuthProvider } from "@/lib/auth/context";
@@ -330,23 +332,34 @@ export default async function DashboardLayout({
         <Suspense key={workspace.activeWorkspaceId} fallback={null}>
           <SpineStream activeRole={activeRole} />
         </Suspense>
+        {/* The person's OWN photo for the shell's account control — streamed
+            after first paint like the spine; plate + initials until it arrives
+            or when there is none. */}
+        <Suspense fallback={null}>
+          <OwnAvatarStream />
+        </Suspense>
         <SessionTelemetry />
         {/* A page from the build before a deploy reloads once instead of
             failing its next action ("Failed to find Server Action"). */}
         <StaleBuildRecovery />
         <AmbientGlow />
-        <DashboardChrome
-          nav={nav}
-          headerTitle={tChat("headerTitle")}
-          rexora={rexora}
-        >
-          {/* Same reason: after a switch the shell and the chip commit as soon
-              as the layout's own reads finish; the page streams in under the
-              section skeleton. Same workspace = same key = navigation as before. */}
-          <Suspense key={workspace.activeWorkspaceId} fallback={<DashboardSectionLoading />}>
-            {children}
-          </Suspense>
-        </DashboardChrome>
+        {/* D2: the identity family's no-photo plate is the SIGNED-IN product's
+            look only; the frozen public landing keeps the legacy portrait
+            (owner 2026-10-14). The provider adds no DOM. */}
+        <IdentityFamilyProvider>
+          <DashboardChrome
+            nav={nav}
+            headerTitle={tChat("headerTitle")}
+            rexora={rexora}
+          >
+            {/* Same reason: after a switch the shell and the chip commit as soon
+                as the layout's own reads finish; the page streams in under the
+                section skeleton. Same workspace = same key = navigation as before. */}
+            <Suspense key={workspace.activeWorkspaceId} fallback={<DashboardSectionLoading />}>
+              {children}
+            </Suspense>
+          </DashboardChrome>
+        </IdentityFamilyProvider>
         {/* v1 tester language-feedback widget — authenticated sessions only. */}
         <LanguageFeedbackWidget />
       </AuthProvider>

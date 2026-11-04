@@ -172,7 +172,7 @@ export function PlayerCardResult({
           className="flex flex-col gap-3 rounded-card border border-ink-600 p-4"
           data-testid="player-card-work-editor"
         >
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <span className="text-xs font-medium text-text-muted">
             {view.workEditorLabels.nextEyebrow}
           </span>
           <WorkCardEditor

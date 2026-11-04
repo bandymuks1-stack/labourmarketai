@@ -157,9 +157,11 @@ export interface PlayerCardLabels {
   readiness: {
     label: string;
     hint: string;
-    levelReady: string;
-    levelBuilding: string;
-    levelStart: string;
+    /** "Profile steps: {met} of {total} done" — template, filled by the card. */
+    ringAria: string;
+    /** The state of one step, in words (a11y: never colour or a glyph alone). */
+    stepDone: string;
+    stepOpen: string;
     /** "{met}/{total} signals met" with values interpolated by the caller-free
      *  component — stored as a template the component fills. */
     signalsTemplate: string;
@@ -247,7 +249,7 @@ function StatBody({ value, label, hint }: { value: string; label: string; hint: 
         text={value}
         className="font-mono text-2xl font-bold tracking-tightest text-text-primary"
       />
-      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+      <span className="text-xs font-medium text-text-muted">
         {label}
       </span>
       <span className="text-meta leading-relaxed text-text-secondary">{hint}</span>
@@ -285,12 +287,6 @@ export function WorkerPlayerCard({
   const confirmed = card.workCardConfirmed;
   // Honest readiness signals (real met/total), drives the status ring + line.
   const readiness = deriveWorkerReadiness(card);
-  const levelLabel =
-    readiness.level === "ready"
-      ? labels.readiness.levelReady
-      : readiness.level === "building"
-        ? labels.readiness.levelBuilding
-        : labels.readiness.levelStart;
   const missing = missingReadinessPillars(readiness);
   // Identity tile (avatar + name + initials) sourced through the ONE minimum
   // Player Card contract, so the fallback rules are identical to every other
@@ -349,29 +345,41 @@ export function WorkerPlayerCard({
           data-testid="player-card-readiness"
           data-readiness-level={readiness.level}
         >
-          <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+          <span className="inline-flex items-center gap-2 text-xs font-medium text-text-muted">
             {labels.readiness.label}
             <span className="text-text-secondary">
               {readiness.met}/{readiness.total} {labels.readiness.signalsTemplate}
             </span>
           </span>
-          {missing.length > 0 ? (
-            <span className="flex flex-wrap items-center gap-1.5 text-meta leading-relaxed text-text-secondary">
-              <span className="text-text-muted">{labels.readiness.nextLabel}</span>
-              {missing.map((k) => (
-                <span
-                  key={k}
-                  className="inline-flex items-center rounded-sm border border-ink-500 px-1.5 py-0.5 text-meta text-text-secondary"
-                >
-                  {labels.readiness.pillars[k]}
+          {/* The checklist behind the count (D2, from #2125): every step is
+              NAMED and its state is said in words — a solid frame for done, a
+              dashed one for to do — so "6/6" is never an unexplained number. */}
+          <ul className="flex flex-wrap gap-1.5" data-testid="player-card-readiness-steps">
+            {readiness.pillars.map((p) => (
+              <li
+                key={p.key}
+                data-met={p.met ? "true" : "false"}
+                className={cn(
+                  "inline-flex min-h-7 items-center gap-1.5 rounded-sm border px-2 py-0.5 text-meta",
+                  p.met
+                    ? "border-ink-500 bg-ink-800 text-text-primary"
+                    : "border-dashed border-ink-500 text-text-secondary",
+                )}
+              >
+                <span aria-hidden>{p.met ? "✓" : "○"}</span>
+                {labels.readiness.pillars[p.key]}
+                <span className="sr-only">
+                  {" "}
+                  {p.met ? labels.readiness.stepDone : labels.readiness.stepOpen}
                 </span>
-              ))}
-            </span>
-          ) : (
+              </li>
+            ))}
+          </ul>
+          {missing.length === 0 ? (
             <span className="text-meta leading-relaxed text-text-secondary">
               {labels.readiness.hint}
             </span>
-          )}
+          ) : null}
         </div>
     </>
   );
@@ -381,7 +389,7 @@ export function WorkerPlayerCard({
         <div className="flex flex-wrap items-center gap-2">
           {labels.availabilityLabel ? (
             <span
-              className="inline-flex min-h-7 items-center gap-2 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
+              className="inline-flex min-h-7 items-center gap-2 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-xs font-medium text-text-secondary"
               data-testid="player-card-availability"
             >
               {card.availabilityStatus === "available" ? (
@@ -399,7 +407,7 @@ export function WorkerPlayerCard({
             </span>
           ) : null}
           <span
-            className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
+            className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-xs font-medium text-text-secondary"
             data-testid="player-card-workcard"
           >
             <Shield className="h-3.5 w-3.5" aria-hidden />
@@ -415,7 +423,7 @@ export function WorkerPlayerCard({
             "verified" glow, no certification badge — confirmation stays an
             internal signal and is never advertised on this self-view card. ── */}
         <div id="player-card-skills" className="flex scroll-mt-20 flex-col gap-2" data-testid="player-card-skill-signals">
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <span className="text-xs font-medium text-text-muted">
             {labels.verifiedTitle}
           </span>
           {verifiedUnavailable ? (
@@ -520,7 +528,7 @@ export function WorkerPlayerCard({
               history renders nothing (it is a fact, not a gap to pad). */}
         {unplacedHistory.length > 0 ? (
           <div className="flex flex-col gap-1.5" data-testid="player-card-work-history">
-            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            <span className="text-xs font-medium text-text-muted">
               {labels.workHistoryLabel}
             </span>
             <ul className="flex flex-col gap-1">
@@ -533,7 +541,7 @@ export function WorkerPlayerCard({
                     {h.organizationName ?? h.title}
                   </span>
                   {h.startedAt ? (
-                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    <span className="text-xs font-medium text-text-muted">
                       {h.startedAt}
                       {h.current ? ` — ${labels.workHistoryCurrent}` : h.endedAt ? ` — ${h.endedAt}` : ""}
                     </span>
@@ -568,7 +576,7 @@ export function WorkerPlayerCard({
               className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
               data-testid="player-card-documents"
             >
-              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+              <span className="text-xs font-medium text-text-muted">
                 {labels.documentsLabel}
               </span>
               <span className="text-sm text-text-primary">{labels.documentsValue}</span>
@@ -578,7 +586,7 @@ export function WorkerPlayerCard({
             className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
             data-testid="player-card-reputation"
           >
-            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            <span className="text-xs font-medium text-text-muted">
               {labels.reputationLabel}
             </span>
             <span className="text-sm text-text-primary">
@@ -600,7 +608,7 @@ export function WorkerPlayerCard({
             className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
             data-testid="player-card-thermometer"
           >
-            <span className="inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted">
               <Thermometer className="h-3.5 w-3.5" aria-hidden />
               {labels.thermoLabel}
             </span>
@@ -649,7 +657,7 @@ export function WorkerPlayerCard({
           ) : (
             <Sparkle className="h-4 w-4 shrink-0 text-text-muted" aria-hidden />
           )}
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <span className="text-xs font-medium text-text-muted">
             {labels.latestEvidenceLabel}
           </span>
           <span className="text-text-primary">
@@ -665,7 +673,7 @@ export function WorkerPlayerCard({
   const secMobility =
     mobilityCountries.length > 0 || labels.relocateLabel ? (
       <div className="flex flex-col gap-1.5" data-testid="player-card-mobility">
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+        <span className="text-xs font-medium text-text-muted">
           {labels.mobilityLabel}
         </span>
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-primary">
@@ -756,7 +764,7 @@ export function WorkerPlayerCard({
             avatarTestids={{ photo: "player-card-avatar-photo", monogram: "player-card-avatar-monogram" }}
             edge={<ProvenanceEdge provenanceClass={card.provenance.class} />}
             eyebrow={
-              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+              <span className="text-xs font-medium text-text-muted">
                 {labels.title}
               </span>
             }
@@ -783,7 +791,10 @@ export function WorkerPlayerCard({
                 met={readiness.met}
                 total={readiness.total}
                 level={readiness.level}
-                levelLabel={levelLabel}
+                caption={labels.readiness.label}
+                ariaLabel={labels.readiness.ringAria
+                  .replace("{met}", String(readiness.met))
+                  .replace("{total}", String(readiness.total))}
                 size="md"
               />
             }
@@ -794,7 +805,7 @@ export function WorkerPlayerCard({
             {/* P6 — the SAME fact as the edge, in words (a11y: state is never
                 colour alone). The words WRAP — never truncate (prod walk c893557b). */}
             <p className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
-              <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
+              <span className="shrink-0 text-xs font-medium text-text-muted">
                 {labels.provenance.label}
               </span>
               <ProvenanceLine

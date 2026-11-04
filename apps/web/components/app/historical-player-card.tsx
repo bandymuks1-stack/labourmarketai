@@ -444,7 +444,7 @@ export function HistoricalPlayerCard({
               <h3 className="truncate font-display text-title-lg font-semibold tracking-tightest text-text-primary">
                 {name}
               </h3>
-              <span className="inline-flex items-center gap-1 rounded-full border border-brand-orange/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
+              <span className="inline-flex items-center gap-1 rounded-full border border-brand-orange/40 px-2 py-0.5 text-xs font-medium text-text-muted">
                 <SemanticIcon
                   concept="historical"
                   label={labels.historical}
@@ -513,7 +513,7 @@ export function HistoricalPlayerCard({
                 <dt className="sr-only">{aggregateText}</dt>
                 <dd className="flex items-baseline gap-1.5 font-display text-title font-bold tabular-nums text-state-amber">
                   Σ {formatHours(person.aggregateHours)}
-                  <span className="font-mono text-meta font-normal uppercase tracking-label text-state-amber">
+                  <span className="text-xs font-normal text-state-amber">
                     h ·{" "}
                     {person.remoteRows > 0
                       ? labels.aggregateRemote
@@ -535,7 +535,7 @@ export function HistoricalPlayerCard({
                 formatDate={formatDate}
               />
               <span
-                className="flex justify-between font-mono text-meta uppercase tracking-label text-text-muted"
+                className="flex justify-between text-xs font-medium text-text-muted"
                 aria-hidden
               >
                 <span>{labels.rhythm}</span>
@@ -573,7 +573,7 @@ export function HistoricalPlayerCard({
 
         {/* the footprint — places as square marks with their days */}
         <div className="flex flex-col gap-1.5">
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <span className="text-xs font-medium text-text-muted">
             {labels.contexts}
           </span>
           <ul
@@ -644,7 +644,7 @@ export function HistoricalPlayerCard({
           aria-label={labels.currentToken}
           title={labels.currentNotInferred}
         >
-          <li className="inline-flex items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
+          <li className="inline-flex items-center gap-1 text-xs font-medium text-text-muted">
             <SemanticIcon
               concept="current"
               label={labels.currentToken}
@@ -739,7 +739,7 @@ export function HistoricalPlayerCard({
                 className="flex flex-col gap-1"
                 data-testid="historical-player-evidence"
               >
-                <h4 className="font-mono text-meta uppercase tracking-label text-text-muted">
+                <h4 className="text-xs font-medium text-text-muted">
                   {labels.evidence}
                 </h4>
                 <ul className="flex flex-col gap-1">
@@ -762,7 +762,7 @@ export function HistoricalPlayerCard({
                 className="flex flex-col gap-1"
                 data-testid="historical-player-interpretations"
               >
-                <h4 className="font-mono text-meta uppercase tracking-label text-text-muted">
+                <h4 className="text-xs font-medium text-text-muted">
                   {labels.interpretations}
                 </h4>
                 <ul className="flex flex-col gap-0.5 text-meta text-text-secondary">
@@ -777,7 +777,7 @@ export function HistoricalPlayerCard({
             )}
             {(person.unallocatedRows > 0 || person.noPlaceRows > 0) && (
               <section className="flex flex-col gap-1">
-                <h4 className="font-mono text-meta uppercase tracking-label text-text-muted">
+                <h4 className="text-xs font-medium text-text-muted">
                   {labels.unknowns}
                 </h4>
                 <ul className="flex flex-col gap-0.5 text-meta text-text-secondary">
@@ -824,7 +824,7 @@ function Figure({
           className="h-4 w-4 self-center text-text-muted"
         />
         {value}
-        <span className="font-mono text-meta font-normal uppercase tracking-label text-text-muted">
+        <span className="text-xs font-normal text-text-muted">
           {unit}
         </span>
       </dd>

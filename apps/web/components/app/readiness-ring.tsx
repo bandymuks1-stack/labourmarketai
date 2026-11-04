@@ -3,46 +3,47 @@
 import { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useMounted } from "@/lib/use-mounted";
-import { cn } from "@/lib/utils";
 import type { ReadinessLevel } from "@/lib/player-card/readiness";
 
 /**
  * ReadinessRing — the Player Card's status ring. It reuses the EXACT premium
  * scouting visual language of the landing OVRRing (same SVG gauge, same
  * tier color tokens, same scroll-in arc), but it is an HONEST readiness gauge:
- * the arc fills by `met / total` REAL signals and the centre shows the met
- * count, never a fabricated 0–99 rating.
+ * the arc fills by `met / total` REAL profile steps and the centre shows the
+ * met count, never a fabricated 0–99 rating. The caller names what is counted
+ * (caption + aria label) and lists the steps beside it (D2: no unexplained N/N).
  */
 
 const SIZES = { sm: 56, md: 80, lg: 120 } as const;
 
-/** Readiness level → premium brand tokens. Deliberately NOT gold: gold is the
- *  reserved trust-accent (real confirmation) per DESIGN_SOUL §1, and readiness
- *  is a signal count, not a confirmation. The gauge SHAPE matches the landing
- *  OVR ring; the palette stays honest. */
+/** Readiness level → arc token. Structure over colour (owner restraint
+ *  2026-10-09/10): the FRACTION is the signal, so every level draws the same
+ *  calm informational arc. Never gold (gold is the view's one action, never a
+ *  state) and never green (green is a second party's confirmation; these are
+ *  the person's own profile steps). An empty profile has no arc at all. */
 const LEVEL_STROKE: Record<ReadinessLevel, string> = {
   ready: "stroke-brand-cyan",
-  building: "stroke-brand-blue",
+  building: "stroke-brand-cyan",
   start: "stroke-ink-500",
-};
-const LEVEL_TEXT: Record<ReadinessLevel, string> = {
-  ready: "text-brand-cyan",
-  building: "text-brand-blue",
-  start: "text-text-muted",
 };
 
 export function ReadinessRing({
   met,
   total,
   level,
-  levelLabel,
+  caption,
+  ariaLabel,
   size = "md",
 }: {
   met: number;
   total: number;
   level: ReadinessLevel;
-  /** Localized level word (e.g. "Pasiruošęs"), resolved by the caller. */
-  levelLabel: string;
+  /** What the count counts, in words ("Profile steps"). A bare "6/6" with a
+   *  judgement word ("Ready") beside it was an unexplained score; the caption
+   *  names the thing counted and the caller lists the steps beside it. */
+  caption: string;
+  /** Full accessible name: "Profile steps: 6 of 6 done". */
+  ariaLabel: string;
   size?: keyof typeof SIZES;
 }) {
   const ref = useRef<SVGSVGElement>(null);
@@ -67,7 +68,7 @@ export function ReadinessRing({
         height={px}
         viewBox={`0 0 ${px} ${px}`}
         role="img"
-        aria-label={`Readiness: ${met} of ${total} signals met`}
+        aria-label={ariaLabel}
       >
         <circle
           cx={cx}
@@ -96,19 +97,14 @@ export function ReadinessRing({
           y={cx}
           textAnchor="middle"
           dominantBaseline="central"
-          className="fill-text-primary font-mono font-bold"
+          className="fill-text-primary font-mono font-semibold tabular-nums"
           style={{ fontSize: Math.round(px * 0.3) }}
         >
           {met}/{total}
         </text>
       </svg>
-      <span
-        className={cn(
-          "font-mono text-meta font-semibold uppercase tracking-label",
-          LEVEL_TEXT[level],
-        )}
-      >
-        {levelLabel}
+      <span className="max-w-[7rem] text-center text-xs font-medium leading-tight text-text-secondary">
+        {caption}
       </span>
     </div>
   );
