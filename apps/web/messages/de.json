@@ -12894,6 +12894,11 @@
   "cvImport": {
     "reviewTitle": "Erkannte Lebenslauf-Abschnitte",
     "reviewHint": "Das System schlägt nur vor. Speichern oder verwerfen Sie jeden Eintrag — Sie entscheiden.",
+    "confidence": {
+      "high": "Im Lebenslauf klar angegeben",
+      "medium": "Prüfen Sie, ob dies richtig gelesen wurde",
+      "low": "Eine Vermutung: bitte prüfen"
+    },
     "empty": "Keine strukturierten Einträge im Text erkannt.",
     "groups": {
       "workHistory": "Berufserfahrung",
