@@ -17,9 +17,13 @@
  * owner gate (see docs/mobile/STORE_RELEASE_READINESS_2026-09-13.md §4.1) and
  * this script neither performs nor implies it.
  *
+ * `app/favicon.ico` is written here too (owner defect 2026-11-04): it sat outside
+ * this script, kept the old ascending bars for four months after the mark
+ * changed, and Chrome chose it for the browser tab.
+ *
  * Run: pnpm -F web icons:generate
  */
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -50,6 +54,33 @@ const MASKABLE_SAFE_ZONE = 0.8;
 
 /** The ink plate behind a maskable icon: --c-ink-900, the page background. */
 const PLATE = { r: 0x07, g: 0x07, b: 0x06, alpha: 1 } as const;
+
+/**
+ * The favicon's source is `app/icon.svg`: the same geometry in the flat form on
+ * the rounded tile, drawn for 16px, where a metallic ramp resolves into mud.
+ */
+const FAVICON_SOURCE = resolve(WEB_ROOT, "app/icon.svg");
+const FAVICON_SIZES = [16, 32, 48] as const;
+
+/** An ICO is a directory of images; each entry here is a whole PNG. */
+function icoFromPngs(images: readonly { size: number; png: Buffer }[]): Buffer {
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(1, 2); // type: icon
+  header.writeUInt16LE(images.length, 4);
+  let offset = header.length + 16 * images.length;
+  const entries = images.map(({ size, png }) => {
+    const entry = Buffer.alloc(16);
+    entry.writeUInt8(size, 0);
+    entry.writeUInt8(size, 1);
+    entry.writeUInt16LE(1, 4); // colour planes
+    entry.writeUInt16LE(32, 6); // bits per pixel
+    entry.writeUInt32LE(png.length, 8);
+    entry.writeUInt32LE(offset, 12);
+    offset += png.length;
+    return entry;
+  });
+  return Buffer.concat([header, ...entries, ...images.map((i) => i.png)]);
+}
 
 /** High density so the vector resolves cleanly before it is downsampled. */
 const DENSITY = 600;
@@ -97,7 +128,22 @@ async function main(): Promise<void> {
     written.push("../app/apple-icon.png");
   }
 
-  console.log(`generate-icons: wrote ${written.length} files from public/app-icon.svg`);
+  {
+    const source = readFileSync(FAVICON_SOURCE);
+    const images = await Promise.all(
+      FAVICON_SIZES.map(async (size) => ({
+        size,
+        png: await sharp(source, { density: DENSITY })
+          .resize(size, size, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+          .png({ compressionLevel: 9 })
+          .toBuffer(),
+      })),
+    );
+    writeFileSync(resolve(WEB_ROOT, "app/favicon.ico"), icoFromPngs(images));
+    written.push("../app/favicon.ico");
+  }
+
+  console.log(`generate-icons: wrote ${written.length} files from the owner's vector`);
   for (const f of written) console.log(`  public/${f}`);
 }
 

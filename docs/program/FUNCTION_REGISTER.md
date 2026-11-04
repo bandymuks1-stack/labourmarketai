@@ -158,8 +158,8 @@ second register. The function rows below keep their own status; this view reads 
 | SEO (2026-11-04) | 10 | 7 | 2 | 1 | 0 |
 | GEO (2026-11-04) | 6 | 5 | 1 | 0 | 0 |
 | Internal search (2026-11-04) | 9 | 5 | 2 | 0 | 2 |
-| UX/UI (2026-11-04; DS-1–DS-5 from 2026-11-03) | 14 | 11 | 3 | 0 | 0 |
-| **All** | **327** | **190** | **17** | **61** | **59** |
+| UX/UI (2026-11-04; DS-1–DS-5 from 2026-11-03) | 15 | 11 | 4 | 0 | 0 |
+| **All** | **328** | **190** | **18** | **61** | **59** |
 
 Functions per area:
 
@@ -269,6 +269,7 @@ Pages: `/lt`, `/lt/jobs`, `/lt/for-companies`, `/lt/for-workers`, `/lt/pricing`,
 | UX-7 | No sideways scroll | PASS | Playwright: scroll width = viewport on all 20 loads | — | None |
 | UX-8 | Runtime errors | PASS | Playwright: 0 `pageerror` and 0 console errors on all 20 loads | — | None |
 | UX-9 | Not-found state | FAIL | Chrome: `/en/this-page-does-not-exist`, `/lt/jobs/00000000-0000-0000-0000-000000000000` and `/lt/auth/sign-up` answer 404 + `noindex` (correct). But the HTML is Next's `<html id="__next_error__">` shell: no `lang`, no h1, the home page's title. The branded page appears only through JavaScript | the not-found render falls into the error shell on the server. `/lt/auth/sign-up` (hyphen) could redirect to `/lt/auth/signup` | GREEN executor: render not-found on the server; redirect the hyphen address |
+| UX-10 | One logo everywhere (browser tab) | FAIL | Owner defect 2026-11-04: the old ascending-bars logo shows in the browser tab. `app/favicon.ico` was last changed 2026-06-28 and all three sizes were the bars; Next emits it as `rel=icon sizes=16x16`. Looked at, and already the LM mark: `app/icon.svg`, `public/app-icon.svg`, `public/brand/lm-mark.svg`, `public/icon-*.png`, `public/icon-maskable-*.png`, `app/apple-icon.png`, the four `apps/mobile/assets` images. OG and Twitter images are a text wordmark; the 404 page and transactional e-mail carry no logo image; `placeholders/logo-mark.svg` is not used by any surface | Fix in the favicon PR: generator + pixel guard. Stays FAIL until production's `/favicon.ico` is proven on the exact build in a fresh browser profile |
 | DS-1 | Mobile sign-up at 360 px | PASS | Chrome, 360×780, 2026-11-03: no sideways scroll, full-width fields, 42 px submit, terms above the form | inputs use 14 px text, so iOS Safari zooms on focus | GREEN executor: 16 px inputs |
 | DS-2 | Mobile sign-up at 390 px | PASS | Chrome, 390×844, 2026-11-03: no sideways scroll; `autocomplete` email / new-password; three labels | the same 14 px note | GREEN executor: 16 px inputs |
 | DS-3 | Role navigation | PASS | prod walk role-routes 41329744822 (2026-11-01, 5 roles); prod walk mobile-surfaces 41317177981 (2026-11-01, 390 px, 6/6) | — | Coordinator: re-walk on risk |
