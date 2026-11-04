@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { entryLocaleForUnmatchedLanguage } from "./entry-locale";
+import { entryLocaleForUnmatchedLanguage, languageFreeRootTarget } from "./entry-locale";
 
 /**
  * Audit 2026-10-16 (U-1 / U-2): international entry.
@@ -49,6 +49,32 @@ describe("x-default hreflang points at English (U-2)", () => {
     expect(src).toContain("entryLocaleForUnmatchedLanguage(");
     expect(src.indexOf("entryLocaleForUnmatchedLanguage(")).toBeLessThan(
       src.indexOf("const intlResponse = intl("),
+    );
+  });
+});
+
+describe("languageFreeRootTarget", () => {
+  it("sends a crawler's bare root to the default locale", () => {
+    expect(languageFreeRootTarget("/", null, null)).toBe("/lt");
+    expect(languageFreeRootTarget("/", "  ", null)).toBe("/lt");
+  });
+
+  it("leaves a person's language and choice to the negotiation", () => {
+    expect(languageFreeRootTarget("/", "de-DE,de;q=0.9", null)).toBeNull();
+    expect(languageFreeRootTarget("/", null, "ru")).toBeNull();
+  });
+
+  it("touches only the bare root", () => {
+    expect(languageFreeRootTarget("/jobs", null, null)).toBeNull();
+    expect(languageFreeRootTarget("/lt", null, null)).toBeNull();
+    expect(languageFreeRootTarget("/en/auth/signup", null, null)).toBeNull();
+  });
+
+  it("the middleware answers it with a 301 before next-intl's 307", () => {
+    const src = readFileSync(join(__dirname, "..", "..", "middleware.ts"), "utf8");
+    expect(src).toMatch(/NextResponse\.redirect\(url, 301\)/);
+    expect(src.indexOf("maybeRedirectLanguageFreeRoot(request);")).toBeLessThan(
+      src.indexOf("intl(withGateHeaders(request))"),
     );
   });
 });
