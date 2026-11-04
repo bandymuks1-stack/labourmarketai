@@ -40,6 +40,7 @@ import {
   type PremiumCvExperience,
   type PremiumCvFact,
 } from "@/components/app/cv/premium-living-cv";
+import { ownEngagementHeading } from "@/lib/cv-export/own-engagement-heading";
 import {
   buildEuFormatCv,
   resolveEuFormatDocument,
@@ -727,15 +728,18 @@ export default async function VerifiedCvPage({
     ...earlierEntityStops.map(stopEntry),
     ...uncoveredRoles.map(roleEntry),
     ...cv.workHistory.map((e, i): PremiumCvExperience & { sortKey: string } => {
-      const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
+      const heading = ownEngagementHeading({
+        orgName: e.orgName,
+        title: e.title,
+        relationshipLabel: tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship,
+      });
       const from = monthYear(e.startedAt);
       const to = e.endedAt ? monthYear(e.endedAt) : tPremium("present");
       const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
       return {
         key: `own:${e.id ?? i}`,
         period: from ? `${from} – ${to}` : e.endedAt ? to : null,
-        title: e.orgName ? (e.title ?? org) : org,
-        subtitle: e.orgName && e.title ? e.orgName : null,
+        ...heading,
         detail: rec
           ? rec.confirmedHours > 0
             ? tPremium("evidence.both", { confirmed: fmtNum.format(roundHours(rec.confirmedHours)), recorded: fmtNum.format(roundHours(rec.hours)) })
@@ -819,15 +823,18 @@ export default async function VerifiedCvPage({
         };
       }),
       ...cv.workHistory.map((e, i) => {
-        const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
+        const heading = ownEngagementHeading({
+          orgName: e.orgName,
+          title: e.title,
+          relationshipLabel: tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship,
+        });
         const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
         const key = `own:${e.id ?? i}`;
         const years = [yearOf(e.startedAt), e.endedAt ? yearOf(e.endedAt) : tJourney("now")].filter(Boolean).join("–");
         journeyMeta[key] = [years, rec ? premiumHours(rec.hours) : null].filter(Boolean).join(" · ");
         return {
           key,
-          title: e.orgName ? (e.title ?? org) : org,
-          subtitle: e.orgName && e.title ? e.orgName : null,
+          ...heading,
           from: e.startedAt,
           to: e.endedAt,
           current: !e.endedAt,
