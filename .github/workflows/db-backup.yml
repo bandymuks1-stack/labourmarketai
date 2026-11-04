@@ -84,6 +84,15 @@ on:
     # than "this UTC day": a late run one day plus an early run the next stays under the
     # 26 h freshness limit (ingestion-freshness.yml).
     - cron: "30 3,7,11,15,19,23 * * *"
+  # GitHub's scheduler starves this repository (measured 2026-11-04: frequent workflows
+  # lost 83-98% of their slots), so a finished Quality Gates run on main also starts this.
+  # It is an addition to the schedule, under the same guard. Nothing from the triggering
+  # run is checked out or used. A backup and a deploy can overlap: they share nothing but
+  # the VPS, in different directories (runs 41815407585 and 41824425911 overlapped one).
+  workflow_run:
+    workflows: ["Quality Gates"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       restore_drill_only:
@@ -114,13 +123,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           EVENT: ${{ github.event_name }}
+          WR_EVENT: ${{ github.event.workflow_run.event }}
+          WR_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          WR_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
         run: |
           set -u
           SKIP_WITHIN_S=$(( 18 * 3600 ))
           # A person's dispatch always runs. An unreadable answer also runs: an extra
           # backup costs little, a missed one is what this workflow exists to prevent.
           decision=true
-          if [ "$EVENT" = "schedule" ]; then
+          if [ "$EVENT" = "workflow_run" ] && { [ "$WR_EVENT" != "push" ] || [ "$WR_BRANCH" != "main" ] || [ "$WR_REPO" != "$GITHUB_REPOSITORY" ]; }; then
+            # The branch filter above also matches a pull request from a fork's `main`.
+            echo "started by a run that is not a push to this repository's main"
+            decision=false
+          elif [ "$EVENT" = "schedule" ] || [ "$EVENT" = "workflow_run" ]; then
             if last=$(bash .github/scripts/db-backup-last-shipped.sh) && [ -n "$last" ]; then
               age=$(( $(date +%s) - $(date -d "$last" +%s) ))
               echo "last backup on the VPS: $last ($(( age / 3600 )) h ago)"

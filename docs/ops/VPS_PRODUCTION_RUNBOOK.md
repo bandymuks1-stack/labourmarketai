@@ -235,7 +235,7 @@ it no backup can be decrypted.
 
 ### 9.1.0a Daily run, alerts and limits (2026-11-04)
 
-**Daily run.** `db-backup.yml` has six schedule slots; a guard job skips the run when a backup reached the VPS in the last 18 h. A person's dispatch always runs. "Reached the VPS" means the *Ship to the VPS* step succeeded (`.github/scripts/db-backup-last-shipped.sh`): a skipped run and a `restore_drill_only` run are green and ship nothing.
+**Daily run.** `db-backup.yml` has six schedule slots, and also starts when Quality Gates finishes on `main` (the `db-backup` freshness job too); a guard job skips the run when a backup reached the VPS in the last 18 h. A person's dispatch always runs. "Reached the VPS" means the *Ship to the VPS* step succeeded (`.github/scripts/db-backup-last-shipped.sh`): a skipped run and a `restore_drill_only` run are green and ship nothing.
 
 **Alerts.** A failed run opens or updates one `db-backup-failed` issue, with only the run link in it, and the next backup that ships closes it. A run from a branch is a test and neither opens nor closes the issue. The `db-backup` job in `ingestion-freshness.yml` fails when no backup reached the VPS in 26 h, updates the same issue and dispatches a backup.
 
@@ -261,6 +261,7 @@ it no backup can be decrypted.
 
 Independent of GitHub's scheduler. It raises an alarm; it does not start a backup.
 
+- **Install:** `ops/vps/install-backup-watchdog.sh <approved address>` as root, pinned to one commit, no secrets, sends no mail. Then `ops/vps/test-backup-watchdog-mail.sh <address>`, which sends exactly two test mails with invented files; PASS only when someone sees them arrive, as `mail=sent` proves only that the server accepted them. Neither script has been run as of 2026-11-04.
 - **Files:** `ops/vps/lm-backup-watchdog.sh` and `ops/vps/labourmarket-backup-watchdog.cron`, copied to `/root/lm-prod/bin/`; the cron file installed as `/etc/cron.d/labourmarket-backup-watchdog`, hourly at minute 7. It has its own cron file because `lm-cron-install.sh` calls every product route when it runs.
 - **What counts as a good backup:** the newest pair (database + Storage files, same stamp) in `backups/verified.log`, a line the receiver writes after its own sha256 and `age` checks, checked again on disk for size, sha256 and `age` header. A file's date proves nothing here. The dump is read in full hourly, at low priority.
 - **Alert:** older than 26 h, or failing a check, is one incident: one mail when it starts, none while it lasts, one when it clears. State is in `backup-watchdog.state`; if a mail fails, the next hour tries again.
