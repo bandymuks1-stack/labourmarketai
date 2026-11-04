@@ -137,6 +137,19 @@ describe("translation that cannot run is named, not offered", () => {
     expect(src).toContain('t("vacancySources.language.notSwitchedOn")');
   });
 
+  it("the note switches NO AI on: the page only asks, and an unanswered question is off", () => {
+    const src = read(JOB_PAGE);
+    // The owner's condition on #3034: "Tai nėra leidimas automatiškai įjungti AI vertimą."
+    expect(src).toContain('await aiTaskServableNow("translate_vacancy").catch(() => false)');
+    // A signed-out visitor is never asked about, and the page runs no provider.
+    expect(src).toMatch(/const translationOn = member\s*\? await aiTaskServableNow/);
+    expect(src).not.toMatch(/runAiAgent|translateVacancyAction/);
+    // The note and the button are the two arms of ONE condition.
+    const gate = src.slice(src.indexOf("{translationOn ? ("));
+    expect(gate.indexOf("<VacancyTranslateControl")).toBeLessThan(gate.indexOf(") : ("));
+    expect(gate.indexOf('data-testid="vacancy-translate-off"')).toBeGreaterThan(gate.indexOf(") : ("));
+  });
+
   it("the off note exists in every active locale", () => {
     for (const l of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const m = JSON.parse(read(`messages/${l}.json`)) as {
