@@ -147,7 +147,7 @@ end;
 $function$;
 
 comment on function public.search_public_vacancy_previews_v1(text, text, integer, integer) is
-  'Anonymous board projection. plpgsql with one branch per filter combination so each branch is planned with a usable index. Free text matches lower(occupation_raw) collate "C" like lower(needle), and one index-only scan of public_vacancies_active_occupation_scan_idx answers the exact total and the page. total_count: singleton when unfiltered (<= 10 min stale), exact live count otherwise.';
+  'Anonymous board projection. plpgsql with one branch per filter combination so each branch is planned with a usable index. Free text matches lower(occupation_raw) collate "C" like lower(needle), and one index-only scan of public_vacancies_active_live_scan_idx, over rows not yet expired, answers the exact total and the page. total_count: singleton when unfiltered (<= 10 min stale), exact live count otherwise.';
 
 -- ROLLBACK
 -- see supabase/rollbacks/20261104160100_search_public_vacancy_previews_live_scan_v5.down.sql
