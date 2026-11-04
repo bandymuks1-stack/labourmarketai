@@ -49,9 +49,11 @@ name: DB backup (Supabase → VPS, encrypted)
 #      the schema uses (`btree_gist`, `pgcrypto`, `uuid-ossp` in `extensions`)
 #      created first, as in a real Supabase target. PROOF, not "the file restored":
 #      per schema, the exact count of tables, views, indexes, constraints,
-#      policies, triggers and functions equals the source; every table's row
-#      count lands inside its source window [before dump, after dump] (key tables
-#      fail the job, others warn); every journal entry keeps its worker.
+#      policies, triggers and functions equals the source; so do the grants, per
+#      schema and kind, by count and hash (every role of the source is created first
+#      and object owners are kept, so the ACLs can come back as they were); every
+#      table's row count lands inside its source window [before dump, after dump] (key
+#      tables fail the job, others warn); every journal entry keeps its worker.
 #   3. STORAGE FILES (pg_dump never holds them, nor do Supabase's own DB backups):
 #      every object listed in `storage.objects` is downloaded through the Storage
 #      API with the service-role key (never a public URL), checked object by
@@ -163,6 +165,55 @@ jobs:
         ) o join pg_namespace n on n.oid = o.ns
         where n.nspname = any(string_to_array(:'schemas', ','))
         group by 1, 2 order by 1, 2;
+      # The grants, per schema and kind: how many (grantee, privilege, grant option)
+      # entries, and a hash of them with their objects. Default ACLs count as what they
+      # mean, so NULL equals an explicit default. The grantor is left out: it does not
+      # change who may do what. Only the count is ever printed (public repository). The
+      # search_path is fixed because function arguments print by it, and Supabase's differs.
+      PROOF_GRANTS_SQL: |
+        set search_path = pg_catalog;
+        with ext as (select classid, objid from pg_depend where deptype = 'e'),
+        entries as (
+          select c.relnamespace ns, case when c.relkind = 'S' then 'sequences' else 'relations' end k, c.relname::text obj, a.grantee, a.privilege_type, a.is_grantable
+            from pg_class c
+            cross join lateral aclexplode(coalesce(c.relacl, acldefault((case when c.relkind = 'S' then 's' else 'r' end)::"char", c.relowner))) a
+           where c.relkind in ('r','p','v','m','f','S')
+             and not exists (select 1 from ext where classid = 'pg_class'::regclass and objid = c.oid)
+          union all
+          select c.relnamespace, 'columns', c.relname::text || '.' || t.attname::text, a.grantee, a.privilege_type, a.is_grantable
+            from pg_attribute t join pg_class c on c.oid = t.attrelid
+            cross join lateral aclexplode(t.attacl) a
+           where t.attacl is not null and t.attnum > 0 and not t.attisdropped
+             and not exists (select 1 from ext where classid = 'pg_class'::regclass and objid = c.oid)
+          union all
+          select p.pronamespace, 'functions', p.proname::text || '(' || pg_get_function_identity_arguments(p.oid) || ')', a.grantee, a.privilege_type, a.is_grantable
+            from pg_proc p
+            cross join lateral aclexplode(coalesce(p.proacl, acldefault('f'::"char", p.proowner))) a
+           where not exists (select 1 from ext where classid = 'pg_proc'::regclass and objid = p.oid)
+          union all
+          select y.typnamespace, 'types', y.typname::text, a.grantee, a.privilege_type, a.is_grantable
+            from pg_type y
+            cross join lateral aclexplode(y.typacl) a
+           where y.typacl is not null
+             and not exists (select 1 from ext where classid = 'pg_type'::regclass and objid = y.oid)
+          union all
+          select n.oid, 'schema', n.nspname::text, a.grantee, a.privilege_type, a.is_grantable
+            from pg_namespace n
+            cross join lateral aclexplode(coalesce(n.nspacl, acldefault('n'::"char", n.nspowner))) a
+          union all
+          select d.defaclnamespace, 'default_privileges', pg_get_userbyid(d.defaclrole) || '/' || d.defaclobjtype::text, a.grantee, a.privilege_type, a.is_grantable
+            from pg_default_acl d
+            cross join lateral aclexplode(d.defaclacl) a
+           where d.defaclnamespace <> 0
+        ),
+        named as (
+          select e.ns, e.k, e.obj || '|' || coalesce(r.rolname::text, 'PUBLIC') || '|' || e.privilege_type || '|' || e.is_grantable::text as line
+            from entries e left join pg_roles r on r.oid = e.grantee
+        )
+        select n.nspname, x.k, count(*), md5(string_agg(x.line, E'\n' order by x.line collate "C"))
+          from named x join pg_namespace n on n.oid = x.ns
+         where n.nspname = any(string_to_array(:'schemas', ','))
+         group by 1, 2 order by 1, 2;
       # Exact row count of every table in the dumped schemas, in ONE statement
       # (query_to_xml runs each count; works inside a read-only transaction).
       PROOF_ROWS_SQL: |
@@ -283,15 +334,19 @@ jobs:
           SCOPE="$FULL_SCHEMAS"
           connect && src "$PROOF_ROWS_SQL" "$FULL_SCHEMAS" > "$T/rows.before"
           connect && src "$PROOF_OBJECTS_SQL" "$FULL_SCHEMAS" > "$T/objects.before"
+          connect && src "$PROOF_GRANTS_SQL" "$FULL_SCHEMAS" > "$T/grants.before"
+          # Role names, for the drill only: grants and owners need them. Never printed.
+          connect && src "select rolname from pg_roles where rolname !~ '^pg_' order by 1;" "" > "$T/roles.source"
           schema_args=(); for s in ${FULL_SCHEMAS//,/ }; do schema_args+=("--schema=$s"); done
-          if ! { connect && pg_dump "$CONN" "${ROLE_ARGS[@]}" -Fc --no-owner --no-privileges "${schema_args[@]}" -f "$out" 2> "$T/dump.err"; }; then
+          if ! { connect && pg_dump "$CONN" "${ROLE_ARGS[@]}" -Fc --no-owner "${schema_args[@]}" -f "$out" 2> "$T/dump.err"; }; then
             echo "::warning::dump of $FULL_SCHEMAS failed ($(grep -m1 -oE 'ERROR: +[a-z ]+' "$T/dump.err" || echo 'see log')) — retrying public only"
             rm -f "$out"; SCOPE="public"
             connect
-            pg_dump "$CONN" "${ROLE_ARGS[@]}" -Fc --no-owner --no-privileges --schema=public -f "$out"
+            pg_dump "$CONN" "${ROLE_ARGS[@]}" -Fc --no-owner --schema=public -f "$out"
           fi
           connect && src "$PROOF_ROWS_SQL" "$FULL_SCHEMAS" > "$T/rows.after"
           connect && src "$PROOF_OBJECTS_SQL" "$FULL_SCHEMAS" > "$T/objects.after"
+          connect && src "$PROOF_GRANTS_SQL" "$FULL_SCHEMAS" > "$T/grants.after"
           # The Storage object list (bucket, name, recorded size) and the pg_cron job
           # definitions, for the files bundle. 600 files on the runner; never printed.
           connect && src "select json_build_object('b', bucket_id, 'n', name, 's', (metadata->>'size')::bigint) from storage.objects order by bucket_id, name;" "" > "$T/objects.jsonl"
@@ -321,6 +376,10 @@ jobs:
         run: |
           set -euo pipefail
           P="psql -h 127.0.0.1 -p 55432 -U postgres -X -q -v ON_ERROR_STOP=1"
+          # GitHub prints a service container's log at the end of the job, failed statements
+          # included. A failed GRANT must not reach a public log.
+          $P -c "alter system set log_min_messages = 'fatal'" -c "alter system set log_min_error_statement = 'panic'" -c "select pg_reload_conf()" >/dev/null
+          sleep 1
           $P -c "create database drill_restore" >/dev/null
           # A Supabase target already has these; a plain postgres:17 does not. Created
           # first so the drill measures the DUMP, not the missing platform: without
@@ -333,10 +392,19 @@ jobs:
           create extension pgcrypto with schema extensions;
           create extension "uuid-ossp" with schema extensions;
           SQL
+          # Every other role of the source, so grants and owners can come back. Owners are
+          # kept here: a grant is made by, and measured against, the object's owner.
+          $P -d drill_restore -v roles="$(paste -sd, "$RUNNER_TEMP/lmdb/roles.source")" >/dev/null <<'SQL'
+          select format('create role %I nologin', r) from unnest(string_to_array(:'roles', ',')) r
+           where not exists (select 1 from pg_roles where rolname = r)
+          \gexec
+          SQL
           # pg_restore continues past errors by default; the proof below decides.
-          pg_restore -h 127.0.0.1 -p 55432 -U postgres -d drill_restore --no-owner --no-privileges "lm-db-$STAMP.dump" 2> restore.err || true
+          pg_restore -h 127.0.0.1 -p 55432 -U postgres -d drill_restore "lm-db-$STAMP.dump" 2> restore.err || true
           q() { psql -h 127.0.0.1 -p 55432 -U postgres -X -d drill_restore -tAc "$1"; }
           dq() { printf '%s\n' "$1" | $P -d drill_restore -v schemas="$SCOPE" -tA -F "$(printf '\t')"; }
+          # Error lines that concern roles or grants are counted, never printed.
+          printable_errors() { grep "ERROR" restore.err | grep -v 'schema "public" already exists' | grep -v -i -E 'role |privilege|permission|grant|revoke|owner' || true; }
           # Error lines, by class (counts only). "schema public already exists" is
           # pg_restore meeting the database's own public schema: harmless.
           errs=$(grep -c "ERROR" restore.err || true)
@@ -346,8 +414,8 @@ jobs:
           views=$(q "select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='v'")
           rows=$(q "select coalesce(sum(n_live_tup),0) from pg_stat_user_tables where schemaname='public'")
           echo "restore drill: scope=$SCOPE public base tables=$tables views=$views rows≈$rows restore-errors=$errs (harmless=$harmless other=$other)" | tee -a "$GITHUB_STEP_SUMMARY"
-          [ "$tables" -ge 50 ] && [ "$rows" -ge 1 ] || { echo "::error::restore drill failed (tables=$tables rows=$rows)"; grep -m20 ERROR restore.err | cut -c1-200; exit 1; }
-          [ "$other" = "0" ] || { echo "::warning::pg_restore reported $other unexpected error line(s); first ones:"; grep "ERROR" restore.err | grep -v 'schema "public" already exists' | head -10 | cut -c1-200 || true; }
+          [ "$tables" -ge 50 ] && [ "$rows" -ge 1 ] || { echo "::error::restore drill failed (tables=$tables rows=$rows)"; printable_errors | head -20 | cut -c1-200; exit 1; }
+          [ "$other" = "0" ] || { echo "::warning::pg_restore reported $other unexpected error line(s); first ones that may be printed:"; printable_errors | head -10 | cut -c1-200; }
           D="$RUNNER_TEMP/lmdb"
           bad=0
           # 1. Schema objects: per schema and kind, the restore equals the source exactly.
@@ -365,7 +433,21 @@ jobs:
               <(awk -F'\t' '{print $1"/"$2"\t"$3}' "$D/objects.restored" | sort) | awk -F'\t' '$2 != $3'
             bad=1
           fi
-          # 2. Rows: every table inside its source window [before, after].
+          # 2. Grants: per schema and kind, the restore equals the source, by count and
+          # hash, as it stood before or after the dump. Only counts are printed.
+          dq "$PROOF_GRANTS_SQL" > "$D/grants.restored"
+          for w in before after; do awk -F'\t' -v sc=",$SCOPE," 'index(sc, "," $1 ",")' "$D/grants.$w" > "$D/grants.expected.$w"; done
+          [ -s "$D/grants.expected.before" ] && [ -s "$D/grants.restored" ] || { echo "::error::restore proof: the grants could not be read"; exit 1; }
+          if cmp -s "$D/grants.expected.before" "$D/grants.restored" || cmp -s "$D/grants.expected.after" "$D/grants.restored"; then
+            echo "restore proof: grants equal the source ($(awk -F'\t' '{printf "%s%s.%s=%s", (NR > 1 ? " " : ""), $1, $2, $3}' "$D/grants.restored"))" | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::error::restore proof: grants differ from the source (schema/kind, source count, restored count; equal counts mean different content):"
+            join -t "$(printf '\t')" -a1 -a2 -e 0 -o 0,1.2,2.2,1.3,2.3 \
+              <(awk -F'\t' '{print $1"/"$2"\t"$3"\t"$4}' "$D/grants.expected.before" | sort) \
+              <(awk -F'\t' '{print $1"/"$2"\t"$3"\t"$4}' "$D/grants.restored" | sort) | awk -F'\t' '$4 != $5 {print $1"\t"$2"\t"$3}'
+            bad=1
+          fi
+          # 3. Rows: every table inside its source window [before, after].
           dq "$PROOF_ROWS_SQL" > "$D/rows.restored"
           [ -s "$D/rows.before" ] && [ -s "$D/rows.after" ] || { echo "::error::restore proof: the source row counts could not be read"; exit 1; }
           awk -F'\t' -v sc=",$SCOPE," -v keys=" $KEY_TABLES " '
@@ -400,10 +482,10 @@ jobs:
           echo "restore proof: $n tables compared; outside their window: $keybad key, $out other ($zero restored empty); missing: $missing" | tee -a "$GITHUB_STEP_SUMMARY"
           [ "$keybad" = "0" ] && [ "$zero" = "0" ] && [ "$missing" = "0" ] || bad=1
           [ "$bad" = "0" ] || exit 1
-          # 3. Append-only evidence must come back whole: no journal entry without its worker.
+          # 4. Append-only evidence must come back whole: no journal entry without its worker.
           orphans=$(q "select count(*) from public.journal_entries j where not exists (select 1 from public.workers w where w.id = j.worker_id)")
           [ "$orphans" = "0" ] || { echo "::error::restore proof: $orphans journal entries restored without their worker"; exit 1; }
-          echo "restore proof: schema objects exact; every key table inside its source window; every journal entry has its worker" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "restore proof: schema objects and grants exact; every key table inside its source window; every journal entry has its worker" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Storage files + cron job definitions (plaintext stays on this runner only)
         env:
           SRK: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -492,10 +574,11 @@ jobs:
 
   # One open issue while backups fail, closed by the next backup that ships. The
   # repository is public: the text carries the run link and nothing else. A failed
-  # scheduled run also sends GitHub's own failure e-mail.
+  # scheduled run also sends GitHub's own failure e-mail. A test from a branch is not
+  # the production backup: it neither opens nor closes the issue.
   notify:
     needs: [guard, backup]
-    if: always()
+    if: always() && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

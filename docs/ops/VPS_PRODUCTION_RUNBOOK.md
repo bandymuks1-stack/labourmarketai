@@ -237,22 +237,25 @@ it no backup can be decrypted.
 
 **Daily run.** `db-backup.yml` has six schedule slots; a guard job skips the run when a backup reached the VPS in the last 18 h. A person's dispatch always runs. "Reached the VPS" means the *Ship to the VPS* step succeeded (`.github/scripts/db-backup-last-shipped.sh`): a skipped run and a `restore_drill_only` run are green and ship nothing.
 
-**Alerts.** A failed run opens or updates one `db-backup-failed` issue, with only the run link in it, and the next backup that ships closes it. The `db-backup` job in `ingestion-freshness.yml` fails when no backup reached the VPS in 26 h, updates the same issue and dispatches a backup.
+**Alerts.** A failed run opens or updates one `db-backup-failed` issue, with only the run link in it, and the next backup that ships closes it. A run from a branch is a test and neither opens nor closes the issue. The `db-backup` job in `ingestion-freshness.yml` fails when no backup reached the VPS in 26 h, updates the same issue and dispatches a backup.
 
-**What each run proves:** the dump restores into a throw-away `postgres:17` with exact schema-object counts and every table inside its source window; every Storage file by count and size; both files encrypted with `age`; the receiver re-checks the sha256 of what it received and the `age` header before storing, and answers `BACKUP_OK`.
+**What each run proves:** the dump restores into a throw-away `postgres:17` with exact schema-object counts, grants equal per schema and kind (count and hash; only counts are printed), and every table inside its source window; every Storage file by count and size; both files encrypted with `age`; the receiver re-checks the sha256 of what it received and the `age` header before storing, and answers `BACKUP_OK`.
 
 **What it does not prove:**
-- that a stored file decrypts: the drill runs on the plaintext before encryption, and the receiver never holds the key at that step. Decryption is a manual check (done once, 2026-11-03, #3005);
+- that a stored file decrypts: the drill runs on the plaintext before encryption, and the receiver never holds the key at that step. Decryption is a manual check, last done 2026-11-03 over root SSH on the VPS with the VPS's key. The owner's offline copy of the key has not been shown to decrypt;
 - a restore into a real Supabase project;
 - that the scope is complete on every run: if `auth` and the other schemas cannot be read, the job falls back to `public` only and stays green, with a warning;
 - anything after the 14-day rotation.
-- grants: `pg_dump` and `pg_restore` both run with `--no-privileges`, so no `GRANT` or `REVOKE` is in the dump, and the object proof does not compare them. A database restored into a new project has the target's default privileges, not production's. Compare and re-apply privileges before it serves anyone.
+- role memberships and role attributes: `pg_dump` does not hold them, so the drill creates every source role as a plain role. The grants are exact; what each role can inherit is not in the backup;
+- that grants apply on a real Supabase target: the drill restores as a superuser and keeps owners, which the project's `postgres` role cannot do there (§9.1.1 step 5).
 
 **The one expected restore error.** `restore-errors=1 (harmless=1)` is `CREATE SCHEMA public;` failing because the target database already has that schema. Run 41815407585 confirms it from both sides: `restore.err` has one error line, the server log has one `ERROR`, and it is this statement. Nothing else fails with it, and the schema-object proof is exact. Any other error counts as `other`, which only warns; the object and row proofs are what fail the job.
 
 **Last proof (2026-11-04).** Manual run 41815407585: full backup, restore drill and shipping passed. Not yet exercised: a scheduled start, the 26 h freshness job, the failure issue. A manual run makes the guard skip scheduled slots for the next 18 h, so a skipped scheduled run proves the slot fired, and only the first slot after that proves a scheduled backup.
 
-**Independence.** The backups are in one place, on the production VPS, next to the app and its key (plus the owner's offline copy of the key). Losing that server loses them. An off-site copy costs money or needs a new credential, so it is an owner decision.
+**Independence.** The automatic copies are in one place, on the production VPS, next to the app and its key. There is no automatic second destination, which is an owner decision. Other copies: encrypted files copied by hand on 2026-11-03 to the owner's PC, which do not update, and Supabase's managed Pro backups, whose list could not be read with the tools available (they hold no Storage files).
+
+**The scheduler is not reliable for this repository.** Measured 2026-10-28 to 11-04: `*/5` ran 31 times out of 2,017 slots, hourly workflows about 28 of 168, and six-hourly ones started 3 to 6 h late, with gaps up to 12.7 h. The 26 h check runs on the same scheduler, so if GitHub's schedule stops, the backup and its alarm stop together. A trigger outside GitHub is proposed separately and is not installed.
 
 ### 9.1.0 What a backup holds — and what it does not (completeness, 2026-11-03)
 
@@ -281,7 +284,9 @@ same drill DID lose objects — see *Restore errors* below.)
 
 **What the nightly drill proves** (job summary, counts only): per schema, the
 exact number of tables, views, indexes, constraints, policies, triggers and
-functions equals the source; every table's row count lands inside its source
+functions equals the source; the grants match per schema and kind, by count and by
+hash of (object, grantee, privilege, grant option), and a difference fails the job
+(proven by an injected extra grant, run 41819279617); every table's row count lands inside its source
 window [before dump, after dump] — the key tables (`profiles`, `workers`,
 `organizations`, `journal_entries`, `journal_entry_confirmations`, `auth.users`,
 `storage.objects`, `supabase_migrations.schema_migrations`) fail the job when
@@ -359,7 +364,11 @@ decision → (only then) production**. Never restore over production to "test".
    alternative for a whole-project point-in-time restore of the DATABASE; they
    hold no Storage files either. Into a NEW Supabase project, in this order:
    1. the roles and extensions of step 3 already exist there — do not create them;
-   2. `pg_restore --no-owner --no-privileges` as the project's `postgres` role for
+   2. `pg_restore --no-owner` as the project's `postgres` role, so the grants come back
+      (the dump holds them since 2026-11-04; older dumps do not). **Not yet tested on a
+      real Supabase project:** a grant made by another role can fail there. Compare the
+      result with the run's `grants equal the source` line and fix any difference before
+      the database serves anyone. For
       `public`, `storage` and `supabase_migrations` (`-n` each); `auth` is created
       by the platform, so restore it with `--data-only -n auth` afterwards;
    3. **Storage files** go back through the Storage API with the service-role
