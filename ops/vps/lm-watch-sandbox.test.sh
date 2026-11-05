@@ -1,7 +1,7 @@
 #!/bin/bash
 # Real test of variant B on a throw-away CI machine: real users, real systemd units, the real receiver, invented
 # secrets and invented backups. It refuses to run anywhere else, so it can never touch the VPS.
-#   sudo -E bash ops/vps/lm-watch-sandbox.test.sh      (GitHub Actions only)
+#   sudo env GITHUB_ACTIONS="$GITHUB_ACTIONS" bash ops/vps/lm-watch-sandbox.test.sh      (GitHub Actions only)
 set -u
 HERE=$(cd "$(dirname "$0")" && pwd)
 [ "${GITHUB_ACTIONS:-}" = "true" ] || { echo "REFUSED: runs only on a throw-away CI machine"; exit 2; }
