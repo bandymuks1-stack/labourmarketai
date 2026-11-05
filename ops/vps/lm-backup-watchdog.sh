@@ -72,6 +72,8 @@ check_folder() {
   [ ! -L "$BK" ] || { echo symlink; return 0; }
   [ -d "$BK" ] || return 0
   case "$(stat -c %a "$BK")" in 700|750) ;; *) echo mode_too_wide; return 0;; esac
+  [ -r "$BK" ] && [ -x "$BK" ] || { echo unreadable; return 0; }
+  [ ! -e "$REC" ] || [ -r "$REC" ] || { echo unreadable; return 0; }
   [ "$(ls -ld "$BK" | cut -c11)" != "+" ] || { echo acl_present; return 0; }
   owner=$(stat -c %U "$BK"); group=$(stat -c %G "$BK")
   for p in "$BK"/* "$BK"/.[!.]*; do
@@ -141,7 +143,7 @@ reason_text() {
     incomplete_pair) echo "Paskutine kopija liko pusiaukeleje: yra tik vienas poros failas.";;
     unrecorded_file) echo "Diske yra kopijos failas be patvirtinimo iraso.";;
     failed_transfer) echo "Diske liko nebaigtas kopijos perdavimas.";;
-    unreadable) echo "Sargas negali perskaityti patvirtintos kopijos failo.";;
+    unreadable) echo "Sargas negali perskaityti kopiju aplanko arba failo.";;
     symlink) echo "Kopiju aplanke yra simboline nuoroda.";;
     unexpected_entry) echo "Kopiju aplanke yra netiketas irasas.";;
     mode_too_wide|wrong_group|wrong_owner|acl_present) echo "Kopiju failu teises platesnes nei numatyta ($1).";;

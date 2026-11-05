@@ -261,7 +261,7 @@ it no backup can be decrypted.
 
 **Nothing here is on the VPS.** The owner held the root install on 2026-11-05 and approved preparing this variant for review only. Installing it needs a separate owner approval.
 
-**A merge changes nothing live.** The deploy ships only the app's standalone tarball into `releases/`. The receiver, these scripts and the units reach the VPS only by a root install, and `install-backup-watchdog.sh` stops until a separate reviewed PR fills in its pins. If the receiver file were ever copied by hand before the group exists, its group-read lines do nothing: folder `700`, files `600`, as today. After a merge, `sha256sum` of the live receiver differs from `main` until the install; that is expected.
+**What a merge does, as far as the repo shows.** It doesn't change the receiver, file permissions, users or schedulers: the deploy tarball holds only the app and goes only into `releases/`, the deploy key can run only `deploy`, `status`, `rollback` and `backup`, nothing in the repo updates `ops/vps` on the host, and `install-backup-watchdog.sh` stops until a separate reviewed PR fills in its pins. **But a merge does ship a new release of unchanged app code and restarts the app,** because `ops/` and `.github/` aren't docs, so the docs-only rule doesn't skip it. The VPS's actual state hasn't been read for this. If the receiver file were ever copied by hand before the group exists, its group-read lines do nothing: folder `700`, files `600`, as today. After a merge, `sha256sum` of the live receiver differs from `main` until the install; that is expected.
 
 **Design**
 
@@ -277,6 +277,12 @@ it no backup can be decrypted.
 | Mail | Alerts-only credential in its `env` (600), never the main mailbox's | Same |
 
 The kernel's file permissions are the limit, and the sandbox is a second layer. So a gap in the sandbox doesn't expose the decryption key, `env`, Docker's container configs or `/etc/shadow`: `lmwatch` has no right to read them anyway.
+
+**Limit: file permissions can't stop a world-readable file.** Another app's careless `.env` would be readable. The units hide `/opt`, `/srv`, `/mnt`, `/media` and home folders, but the rest of the host stays visible. **So the condition "no other production secrets" can't be confirmed until the owner's check below has been read.** Any secret-looking file it lists needs fixing, or hiding in the units.
+
+**Network:** the units can't reach `localhost`, where the app's internal routes are, or link-local addresses such as cloud metadata. The local DNS stub (`127.0.0.53`) stays allowed. If this host resolves DNS another way, the allow needs changing.
+
+**Logs go to the journal, never a file in the service user's folder.** systemd opens `append:` files as root, before dropping to the user, and follows links, so a service user could have written into any file as root. This was shown in a test before the fix (run 42006499668).
 
 **Proposed receiver change** (`ops/vps/lm-deploy-receive.sh`, between the `group read` markers, plus two call sites):
 
@@ -311,7 +317,7 @@ One incident means one alert when it starts, none while it lasts, and one when i
 
 **Resources**
 
-- **Watchdog:** hourly it reads one pair of backups to hash them, with `Nice=19`, idle I/O, 50% of one CPU and 128 MB at most. One log line an hour, with no rotation needed for years.
+- **Watchdog:** hourly it reads one pair of backups to hash them, with `Nice=19`, idle I/O, 50% of one CPU and 128 MB at most. One journal line an hour.
 - **SEO watch:** about 20 public requests a day, up to 30 s each.
 - **New on the host:** 2 users, 2 groups, 4 unit files, 2 folders. No port, no sudo rule, no package.
 - **Cost:** 0, unless the alerts-only mail credential needs a paid mailbox; that assessment is in the private record.
@@ -320,7 +326,8 @@ One incident means one alert when it starts, none while it lasts, and one when i
 
 - `ops/vps/lm-backup-watchdog.test.sh`, `ops/vps/lm-seo-watch.test.sh`: synthetic, in `quality`.
 - `ops/vps/lm-watch-sandbox.test.sh`, workflow `vps-watch-tests.yml`: real users, real systemd units and the real receiver on GitHub's throw-away machine, with invented secrets and backups. It refuses to run anywhere else.
-- It proves: `lmwatch` and `lmseo` can't read planted secrets in Docker-like paths, `/opt`, `/srv`, `/var/spool`, `/etc`; `lmwatch` reads the backup pair and can't write or delete; no capabilities; the timer alerts with no new file; every alert above; rollback.
+- It proves: `lmwatch` and `lmseo` can't read planted root-only secrets in Docker paths, `/opt`, `/srv`, `/var/spool`, `/etc`, or world-readable ones in `/opt` and `/srv`; `lmwatch` reads the backup pair and can't write or delete; no capabilities; a link as a log can't write as root; local routes and metadata are blocked while DNS, TLS and an SMTPS connection work; the timer alerts with no new file; every alert above; rollback; the installer's real steps with test pins.
+- It doesn't send real mail or log in to a mail server.
 - **It doesn't prove the production host.** That machine's systemd version, layout and other apps are different.
 
 **Before any install (owner, read-only on the VPS)**
@@ -345,9 +352,19 @@ ls -ld /var/lib/docker; docker info --format '{{.DockerRootDir}}'
 ls -d /*
 ```
 
+Names of secret-looking files an unprivileged user could read, names only and no contents. Keep the output private:
+
+```bash
+runuser -u nobody -- find / -xdev \( -path /proc -o -path /sys \) -prune -o -type f \( -name '.env*' -o -name '*.key' -o -name '*.pem' -o -name 'id_rsa*' -o -name '*credential*' -o -name '*secret*' \) -readable -print 2>/dev/null
+```
+
+```bash
+resolvectl status 2>/dev/null | head -3; ls -l /etc/resolv.conf
+```
+
 **Install, after separate approval:** a reviewed PR sets the pins in `install-backup-watchdog.sh`, then it runs as root, then `runuser -u lmwatch -- sh test-backup-watchdog-mail.sh <address>`. PASS only when someone has seen both test mails arrive.
 
-**Check it, once installed:** `systemctl list-timers 'lm-*'`, `tail /var/lib/lm-watch/backup-watchdog.log`, `systemctl --failed`.
+**Check it, once installed:** `systemctl list-timers 'lm-*'`, `journalctl -u lm-backup-watchdog -n 5`, `systemctl --failed`.
 
 **Rollback**
 
@@ -385,6 +402,8 @@ Without the group, the receiver goes back to `700` and `600` by itself; its old 
 - The receiver is on the backup path, so a mistake there could affect backups. It's tested, and a group-read failure isn't fatal, but it is still a change to that file.
 - SEO watch presents itself as Googlebot from a non-Google address, and Cloudflare could challenge it. That would look like a false alarm.
 - If `lmwatch` is ever added to another group by hand, the check catches only `docker`, `sudo` and `adm`, plus the paths it tests.
+- World-readable secrets outside the hidden folders stay readable until the owner's pre-install check has been read and acted on.
+- `IPAddressDeny` needs the kernel's cgroup support. If this host lacks it, the rule may not apply; the test proves it only on GitHub's machine.
 
 ### 9.1.0 What a backup holds — and what it does not (completeness, 2026-11-03)
 

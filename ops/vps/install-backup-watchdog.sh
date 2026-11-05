@@ -7,8 +7,8 @@
 # It stops until the pins below are filled in by a separate reviewed PR (merging this file changes nothing live;
 # nothing on the VPS updates itself from this repository).
 #
-# Takes no secret. The owner puts the alerts-only credential (LM_SMTP_* lines, never the main mailbox's) in
-# /var/lib/lm-watch/env and /var/lib/lm-seo/env, owner the service user, mode 600, before this runs.
+# Takes no secret. Before this runs, the owner creates /var/lib/lm-watch and /var/lib/lm-seo (root, 700) and puts the
+# alerts-only credential (LM_SMTP_* lines, never the main mailbox's) in env in each. This hands them to their service users.
 # Sends no mail. The mail test is separate: test-backup-watchdog-mail.sh.
 # Removal: VPS_PRODUCTION_RUNBOOK section 9.1.0b.
 set -eu
@@ -67,7 +67,11 @@ getent group lmseo >/dev/null || groupadd -r lmseo
 id lmseo >/dev/null 2>&1 || useradd -r -g lmseo -G "" -d /nonexistent -M -s /usr/sbin/nologin lmseo
 [ "$(id -nG lmwatch)" = "lmwatch" ] && [ "$(id -nG lmseo)" = "lmseo" ] || stop "a service user is in another group"
 
-echo "3. scripts and units"
+echo "3. scripts and units, after the synthetic test as the new user"
+install -d -m 755 -o root -g root "$T.test"
+cp "$T/lm-backup-watchdog.sh" "$T/lm-backup-watchdog.test.sh" "$T.test/"; chmod 755 "$T.test"/*
+runuser -u lmwatch -- sh "$T.test/lm-backup-watchdog.test.sh" > "$T/test.out" 2>&1 || { tail -5 "$T/test.out"; rm -rf "$T.test"; stop "the synthetic test failed; nothing installed"; }
+tail -1 "$T/test.out"; rm -rf "$T.test"
 install -d -m 755 -o root -g root "$OPT"
 for f in lm-backup-watchdog.sh lm-backup-watchdog.test.sh lm-seo-watch.sh; do install -m 755 -o root -g root "$T/$f" "$OPT/$f"; done
 for f in lm-backup-watchdog.service lm-backup-watchdog.timer lm-seo-watch.service lm-seo-watch.timer; do install -m 644 -o root -g root "$T/$f" "/etc/systemd/system/$f"; done
@@ -102,7 +106,8 @@ printf 'ALERT_TO=%s\n' "$TO" > /var/lib/lm-watch/backup-watchdog.conf; chown lmw
 printf 'ALERT_TO=%s\n' "$TO" > /var/lib/lm-seo/backup-watchdog.conf; chown lmseo:lmseo /var/lib/lm-seo/backup-watchdog.conf; chmod 600 /var/lib/lm-seo/backup-watchdog.conf
 systemctl daemon-reload
 systemctl start lm-backup-watchdog.service
-tail -n 1 /var/lib/lm-watch/backup-watchdog.log | grep -q ' status=ok ' || stop "the check did not report ok; timers not started"
+journalctl --sync 2>/dev/null || true
+journalctl -u lm-backup-watchdog.service -n 5 -o cat --no-pager | grep ' status=' | tail -n 1 | grep -q ' status=ok ' || stop "the check did not report ok; timers not started"
 
 echo "8. timers"
 systemctl enable --now lm-backup-watchdog.timer lm-seo-watch.timer

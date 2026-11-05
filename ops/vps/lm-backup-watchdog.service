@@ -12,9 +12,16 @@ StateDirectory=lm-watch
 StateDirectoryMode=0700
 ExecStart=/bin/sh /opt/lm-watch/lm-backup-watchdog.sh --root /var/lib/lm-watch
 SuccessExitStatus=1
-StandardOutput=append:/var/lib/lm-watch/backup-watchdog.log
-StandardError=append:/var/lib/lm-watch/backup-watchdog.log
+# The journal, never a file in the service user's own folder: systemd opens those as root and follows links.
+StandardOutput=journal
+StandardError=journal
 BindReadOnlyPaths=/root/lm-prod/backups:/var/lib/lm-watch/backups
+BindReadOnlyPaths=/opt/lm-watch
+# Other apps may keep world-readable files here. The rest of the host: see the pre-install check in the runbook.
+TemporaryFileSystem=/opt:ro /srv:ro /mnt:ro /media:ro
+# The app's internal routes on this host and cloud metadata are off limits; the local DNS stub stays reachable.
+IPAddressDeny=localhost link-local
+IPAddressAllow=127.0.0.53
 CapabilityBoundingSet=
 AmbientCapabilities=
 NoNewPrivileges=yes
