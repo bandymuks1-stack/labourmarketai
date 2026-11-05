@@ -81,6 +81,29 @@ and verifies after the run for its commit succeeds. Do not merge while another
 session's owner-gated production step (migration apply, live send) is mid-flight in
 §2 unless the PRs are independent.
 
+### 1.7a Walk lane — one production walk at a time
+**At most one production walk at a time, and never during a deploy or an import.**
+This holds for every session and every workflow that walks production.
+
+Before dispatching a walk, check that nothing else is walking production, that no
+`deploy-vps.yml` run is active, that no Quality Gates run on `main` is active, and that no import
+is running. A successful Quality Gates run on `main` starts a deploy within seconds, so an
+active one is a deploy on its way.
+
+**The brakes do not enforce all of this yet.** `prod-qa-walk.yml` brake (e) looks only at
+active `deploy-vps.yml` runs and any that ended under 5 min ago, and only at two moments before
+the walk starts. It can't see Quality Gates on the way to a deploy or a deploy that starts
+during the walk, and `deploy-vps.yml` doesn't check for walks. No brake looks at imports.
+`ios-signed-in.yml` can walk production outside the `prod-qa-walk` concurrency group and
+without the brakes. Until that changes, this rule depends on the person or session dispatching.
+
+**Evidence, 2026-11-04 (correlation only, cause not proven):** the coordinator measured a walk
+burst of 8,119 edge requests per 5 min against 991, origin time going from 156 ms to
+1.2–9.6 s, and 9 statement timeouts from 22:38 to 22:42 UTC. Walk run 41925521910 ran from
+22:30:28 to 22:43:45. Brake (e) cleared at 22:28:31 and 22:30:03, while Quality Gates for the same
+commit was active (22:23:20–22:33:47). Deploy run 41926365186 then started at 22:33:51 and
+shipped from 22:38:33 to 22:40:41, inside the walk.
+
 ### 1.8 Hand-off
 A session that stops writes, in its PR body (or §3 row): current head SHA, what is
 proven, what is left, exact next step, and anything waiting on the owner. A
