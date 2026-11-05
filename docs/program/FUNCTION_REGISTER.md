@@ -1313,10 +1313,10 @@ Not filled yet: `Map: stages`. `Map: blockers` holds open PRs linked to function
 | 3.13 | Projekto operacijų lenta | Matai visus projekto darbus vienoje lentoje ir parsisiunti. | įmonė, vadovas | /dashboard/projects/[id]/operations | projektai | eisena | nenustatyta |  | kodas |
 | 3.14 | Darbų planavimas ir kalendorius | Planuoji žmonių darbus kalendoriuje. | įmonė, vadovas | /dashboard/company/planning | verslo-valdymas,projektai | eisena | nenustatyta |  | kodas |
 | 3.15 | Nebuvimai ir atostogos | Užsirašai ir patvirtini atostogas bei nebuvimus. | darbuotojas, vadovas, įmonė | /dashboard/absences | verslo-valdymas | eisena | nenustatyta |  | kodas |
-| 3.16 | Žmonių trūkumo laiko juosta | Matai, kada trūks žmonių. | įmonė, vadovas |  | verslo-valdymas,projektai | ne | nenustatyta |  | registras |
+| 3.16 | Žmonių trūkumo laiko juosta | Matai, kada trūks žmonių. | įmonė, vadovas |  | verslo-valdymas,projektai | savininkas | nenustatyta |  | registras |
 | 3.17 | Žmonių rezervavimas | Rezervuoji žmogaus laiką ateičiai. | įmonė, vadovas | /dashboard/company/planning | verslo-valdymas,projektai | eisena | nenustatyta |  | kodas |
 | 3.18 | Užimtumas | Matai, kiek kiekvienas žmogus užimtas. | įmonė, vadovas | /dashboard/company/planning | verslo-valdymas | eisena | nenustatyta |  | kodas |
-| 3.19 | Planas ir faktas | Palygini suplanuotą darbą su atliktu. | įmonė, vadovas |  | verslo-valdymas,projektai | api | nenustatyta |  | registras |
+| 3.19 | Planas ir faktas | Palygini suplanuotą darbą su atliktu. | įmonė, vadovas |  | verslo-valdymas,projektai | eisena | nenustatyta |  | registras |
 | 3.20 | Pamainos ir grafikai | Sudarai pamainų grafiką. | įmonė, vadovas | /dashboard/company/planning | verslo-valdymas | eisena | nenustatyta |  | kodas |
 | 3.21 | Darbuotojų sąrašas | Matai visus savo įmonės žmones. | įmonė, vadovas | /dashboard/company/people | verslo-valdymas | eisena | nenustatyta |  | kodas |
 | 3.22 | Žmonių įkėlimas | Įkeli žmonių sąrašą iš failo. | įmonė, vadovas | /dashboard/company/people | verslo-valdymas | eisena | nenustatyta |  | kodas |
@@ -1372,9 +1372,9 @@ Not filled yet: `Map: stages`. `Map: blockers` holds open PRs linked to function
 | 5.9 | Savaitės apžvalga | Kas savaitę gauni trumpą apžvalgą el. paštu. | darbuotojas, ieškantis darbo, įmonė |  |  | eisena | nenustatyta | Koordinatorius | registras |
 | 5.10 | Veiklos centras | Vienoje vietoje matai, kam reikia tavo dėmesio. | darbuotojas, įmonė, vadovas | /dashboard/activity | verslo-valdymas | eisena | nenustatyta |  | kodas |
 | 5.11 | Darbuotojo kalendorius | Matai savo darbus kalendoriuje. | darbuotojas, savarankiškas specialistas | /dashboard/planning | savarankiskos-paslaugos,projektai | eisena | nenustatyta |  | kodas |
-| 5.12 | Prieinamumas | Nurodai, kada gali dirbti. | darbuotojas, savarankiškas specialistas, ieškantis darbo |  | isidarbinimas,savarankiskos-paslaugos | ne | nenustatyta |  | registras |
+| 5.12 | Prieinamumas | Nurodai, kada gali dirbti. | darbuotojas, savarankiškas specialistas, ieškantis darbo |  | isidarbinimas,savarankiskos-paslaugos | savininkas | nenustatyta |  | registras |
 | 5.13 | Užsakymas, sutikimas, darbas | Gauni užsakymą, jį priimi ir pradedi darbą. | darbuotojas, savarankiškas specialistas, įmonė | /dashboard/bookings | savarankiskos-paslaugos,samdymas | eisena | nenustatyta |  | kodas |
-| 5.14 | Greitoji paieška ir balsas | Greitai randi puslapį ar veiksmą, galima balsu. | darbuotojas, įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 5.14 | Greitoji paieška ir balsas | Greitai randi puslapį ar veiksmą, galima balsu. | darbuotojas, įmonė |  |  | savininkas | nenustatyta | Koordinatorius | registras |
 | 5.15 | Balsas kaip lygiavertis būdas | Viską gali padaryti ir balsu. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas | registras |
 | 5.16 | Įspėjimai savininkui | Savininkas gauna žinią per Telegram. | administratorius |  |  | ne | nenustatyta | Koordinatorius | registras |
 | 5.17 | Pagalbos pokalbiai | Parašai pagalbos komandai. | darbuotojas, įmonė |  |  | eisena | nenustatyta |  | registras |
@@ -1406,7 +1406,7 @@ Not filled yet: `Map: stages`. `Map: blockers` holds open PRs linked to function
 | 6.24 | Paslaugų srautas telefone | Naršai paslaugas braukdamas pirštu. | klientas |  | savarankiskos-paslaugos | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
 | 7.1 | Planai ir kainų puslapis | Matai, kokie yra planai. | įmonė, darbuotojas, agentūra | /pricing |  | eisena | nenustatyta |  | kodas |
 | 7.2 | Nemokamas planas: vienas atviras poreikis | Nemokamai gali turėti vieną atvirą poreikį. | įmonė |  | samdymas | ne | nemokama | Koordinatorius | registras |
-| 7.3 | Planų teisių nustatymas | Žinoma, ką leidžia tavo planas. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 7.3 | Planų teisių nustatymas | Žinoma, ką leidžia tavo planas. | sistema |  |  | savininkas | nenustatyta | Koordinatorius | registras |
 | 7.4 | Bandomasis mokėjimas | Išbandomas mokėjimas be tikrų pinigų. | administratorius |  |  |  | nenustatyta | Koordinatorius | registras |
 | 7.5 | Mokėjimas už planą | Įmonė už planą sumoka kortele. | įmonė |  |  | ne | mokama | Savininkas | registras |
 | 7.6 | Mokėjimų įrašų atkūrimas | Pataisomi nepavykę mokėjimų įrašai. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
@@ -1455,7 +1455,7 @@ Not filled yet: `Map: stages`. `Map: blockers` holds open PRs linked to function
 | 8.18 | Programėlė iPhone | Programėlė iPhone telefonui. | darbuotojas, įmonė |  |  | api | nenustatyta | Savininkas | registras |
 | 9.1 | Administratoriaus skydas | Administratorius valdo platformą. | administratorius | /dashboard/admin |  | eisena | nenustatyta |  | kodas |
 | 9.2 | Bandymai, rodikliai, lyga | Administratorius seka bandymus ir rodiklius. | administratorius | /dashboard/admin/pilots |  | savininkas | nenustatyta |  | kodas |
-| 9.3 | Naudotojo peržiūra | Administratorius pažiūri vieno naudotojo būseną. | administratorius | /dashboard/admin/users/[id] |  | ne | nenustatyta |  | kodas |
+| 9.3 | Naudotojo peržiūra | Administratorius pažiūri vieno naudotojo būseną. | administratorius | /dashboard/admin/users/[id] |  | savininkas | nenustatyta |  | kodas |
 | 9.4 | Privatumo prašymai | Gali paprašyti savo duomenų ar jų ištrynimo. | darbuotojas, ieškantis darbo, įmonė | /dashboard/privacy |  | ne | nenustatyta | Koordinatorius | kodas |
 | 9.5 | Duomenų atsisiuntimas | Parsisiunti visus apie save laikomus duomenis. | darbuotojas, ieškantis darbo, įmonė | /dashboard/privacy |  | eisena | nenustatyta |  | kodas |
 | 9.6 | Duomenų ištrynimas | Tavo duomenys ištrinami, kai to paprašai. | darbuotojas, ieškantis darbo, įmonė | /dashboard/privacy |  | ne | nenustatyta | Koordinatorius | kodas |
@@ -1513,10 +1513,10 @@ Not filled yet: `Map: stages`. `Map: blockers` holds open PRs linked to function
 | 11.8 | Mokymų ir pažymėjimų sąrašas | Laikai mokymus ir pažymėjimus vienoje vietoje. | besimokantis, darbuotojas, mokymo įstaiga | /dashboard/learning | mokymasis,tobulejimas | eisena | nenustatyta | Savininkas, paskui koordinatorius | kodas |
 | 11.9 | Mokymosi peržiūra žmogaus akimis | Žmogus peržiūri mokymosi rekomendacijas. | besimokantis, mokymo įstaiga |  | mokymasis | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
 | 11.10 | Ankstesnio mokymosi pripažinimas | Pripažįstamas anksčiau įgytas mokymasis. | besimokantis, darbuotojas |  | mokymasis,karjeros-keitimas | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
-| 12.1 | Rinkos žemėlapis | Matai, kur yra darbo ir žmonių. | darbuotojas, ieškantis darbo, įmonė | /dashboard/market-map | isidarbinimas,karjeros-keitimas,verslo-valdymas | ne | nenustatyta |  | kodas |
+| 12.1 | Rinkos žemėlapis | Matai, kur yra darbo ir žmonių. | darbuotojas, ieškantis darbo, įmonė | /dashboard/market-map | isidarbinimas,karjeros-keitimas,verslo-valdymas | savininkas | nenustatyta |  | kodas |
 | 12.2 | Darbo rinkos žinios | Skaitai apie darbo rinką. | darbuotojas, ieškantis darbo, įmonė | /dashboard/intelligence | karjeros-keitimas,isidarbinimas | ne | nenustatyta | Koordinatorius | kodas |
 | 12.3 | Žinių skydas | Žinias matai vienoje vietoje. | darbuotojas, įmonė, vadovas | /dashboard/intelligence | karjeros-keitimas,verslo-valdymas | eisena | nenustatyta |  | kodas |
-| 12.4 | Poreikio atpažinimas | Atpažįstamas rinkos poreikis. | administratorius, įmonė | /dashboard/market/recognize | verslo-valdymas | ne | nenustatyta |  | kodas |
+| 12.4 | Poreikio atpažinimas | Atpažįstamas rinkos poreikis. | administratorius, įmonė | /dashboard/market/recognize | verslo-valdymas | savininkas | nenustatyta |  | kodas |
 | 12.5 | Viešieji rinkos faktai | Matai viešus rinkos faktus. | ieškantis darbo, darbuotojas, įmonė | /labour-market | isidarbinimas,karjeros-keitimas | ne | nenustatyta | Koordinatorius | kodas |
 | 12.6 | Administratoriaus rinkos puslapis | Administratorius mato rinkos vaizdą. | administratorius | /dashboard/admin/market |  | savininkas | nenustatyta |  | kodas |
 | 13.1 | Svetainės talpinimas ir atnaujinimas | Svetainė pasiekiama ir atnaujinama be pertraukų. | sistema |  |  | eisena | nenustatyta | Koordinatorius | registras |
@@ -2002,3 +2002,152 @@ Not filled yet: `Map: stages`. `Map: blockers` holds open PRs linked to function
 | OI-70 | Projekto sąskaitų eiga (#2203) | 3.12, 7.30 | savininkas, paskui koordinatorius |
 | OI-73 | Biuro profesijų katalogas (#1577) | 2.12 | savininkas, paskui koordinatorius |
 | OI-101 | Balso atpažinimo paleidimas (#2198) | 2.30, 5.15 | savininkas, paskui koordinatorius |
+
+## Chrome check queue
+
+Priority queue for the 123 functions with no browser proof named in their evidence (owner order 2026-11-05). Ordered by real user impact: core journeys, then money and privacy, then the rest. Status still comes only from the function rows. Scenarios are referenced by J-n and SC-n, not rewritten here.
+
+| Group | Meaning | Functions |
+|---|---|---|
+| A | Core journeys, can run now | 11 |
+| B | Money and privacy, can run now | 5 |
+| C | Rest, can run now | 1 |
+| D | Waits: blocked or not built, core and money first | 66 |
+| E | Already proven in a browser | 8 |
+| F | A browser can't prove it | 32 |
+
+**So the real gap is smaller and different from 123:** 8 already had browser proof that the keyword count missed, 32 can't be proven in a browser, 66 can't be tested until they're unblocked or built, and **17 can be checked now.**
+
+How it's tested:
+
+- **existing walk / walk, new step:** Playwright Chromium against production with the synthetic cast, dispatched by the coordinator through `prod-qa-walk.yml`. This is not a person in Chrome.
+- **Chrome signed out:** a real browser with no account; no walk budget, no writes.
+- **QA account in a real browser isn't offered.** Agents don't enter production passwords. Anything signed in goes through a walk, or the owner does it in their own Chrome.
+
+**What fits:** 12 walks cover groups A to C. Earlier runs of 10 of those specs took 18 s to about 6 min; `requirements-countries` and `public-market-direction` have no run among the last 400. With setup and the 3 min gap, allow up to about 12 min each, so about 2.5 h of walk time in total. That's a quarter of the 48-a-day budget and fits in one day under the lane rule (one walk at a time, never during a deploy or import, §1.7a). Spread them at no more than 2 an hour in a quiet period: Quality Gates is active on `main` about 20% of the time, and a merge can start a deploy. Seven of them need a new step first, so they follow small test PRs. Estimate only; per-walk load wasn't measured.
+
+| Order | Function | Name | Group | How | Walk | Journey | Note |
+|---|---|---|---|---|---|---|---|
+| 1 | 1.13 | Sistemos laiškai | A | existing walk, record it | mail-reset | J-16 | Run 41428606490 read the real QA mailbox; no new run |
+| 2 | 1.11 | Įmonių duomenų atskyrimas | A | existing walk | company-governance | SC-10 | Browser side of isolation; the API walk stays too |
+| 3 | 4.20 | Asmens apsauga paieškoje | A | walk, new step | company-talent-history | SC-5 | Company sees a masked person |
+| 4 | 1.12 | Kvietimai ir rekomendavimas | A | walk, new step | invited-worker | J-6 | Synthetic invitation only |
+| 5 | 2.36 | Žurnalo šablonai pagal profesiją | A | walk, new step | journal-confirm | SC-2 | Profession template in the journal |
+| 6 | 4.8 | Anoniminis poreikio pateikimas | A | walk, new step | register-gaps | SC-6 | Writes one row; the walk must remove it |
+| 7 | 4.29 | Susidomėjimas virsta laisva vieta | A | walk, new step | jobs-search | J-4 | Screen only; no hand-off to the real partner |
+| 8 | 6.11 | Pasirengimas darbui užsienyje | A | existing walk, plus Chrome signed out | requirements-countries |  | Public part |
+| 9 | 8.1 | Svetainės kalbos | A | existing walk, plus Chrome signed out | public-org-locales |  | All active languages |
+| 10 | 12.2 | Darbo rinkos žinios | A | existing walk, plus Chrome signed out | public-market-direction |  |  |
+| 11 | 12.5 | Viešieji rinkos faktai | A | existing walk, plus Chrome signed out | public-market-direction |  |  |
+| 12 | 9.4 | Privatumo prašymai | B | existing walk | search-support-privacy | J-18 |  |
+| 13 | 7.2 | Nemokamas planas: vienas atviras poreikis | B | walk, new step | fresh-activation | J-5 | Needs an organization without the pilot; the QA cast's holds it |
+| 14 | 9.9 | Veiksmų žurnalas | B | walk, new step | admin-console |  | Screen only; detail in the private record |
+| 15 | 7.28 | Pardavėjas ir sąlygos | B | Chrome signed out |  | J-14 | Read the live terms; stays FAIL until legal text exists |
+| 16 | 9.24 | Saugumo incidentų tvarkymas | B | Chrome signed out |  |  | Response headers on public pages |
+| 17 | 13.16 | Naršyklės klaidų pranešimai | C | read the code first |  |  | Only a citation so far; may not exist |
+| 18 | 4.30 | Kandidatas, sprendimas, poreikio uždarymas | D | walk once unblocked |  | SC-5 | Waits; see its row |
+| 19 | 3.35 | Persidengiančių įsipareigojimų įspėjimas | D | walk once unblocked |  | SC-10 | Waits; see its row |
+| 20 | 3.36 | Įmonės gyvasis CV | D | walk once unblocked |  |  | Waits; see its row |
+| 21 | 2.10 | Nuorodos į kitus profilius | D | walk once unblocked |  |  | Waits; see its row |
+| 22 | 4.18 | Duomenų atskleidimas darbdaviui | D | walk once unblocked |  |  | Waits; see its row |
+| 23 | 2.27 | Įmonės istorinių įrašų įkėlimas | D | walk once unblocked |  |  | Waits; see its row |
+| 24 | 2.28 | Senų įrašų sujungimas | D | walk once unblocked |  |  | Waits; see its row |
+| 25 | 2.37 | Įrašo atsisakymas | D | new walk once it exists |  |  | Not built |
+| 26 | 6.21 | Viešas verslo puslapis | D | walk once unblocked |  | SC-4 | Waits; see its row |
+| 27 | 4.22 | Trys nemokami profilių peržiūrėjimai | D | new walk once it exists |  |  | Not built |
+| 28 | 2.17 | Europos profesijų klasifikatorius | D | walk once unblocked |  |  | Waits; see its row |
+| 29 | 5.15 | Balsas kaip lygiavertis būdas | D | walk once unblocked |  |  | Waits; see its row |
+| 30 | 2.30 | Žurnalas balsu | D | walk once unblocked |  |  | Waits; see its row |
+| 31 | 7.5 | Mokėjimas už planą | D | walk once unblocked |  | J-14 | Waits; see its row |
+| 32 | 7.6 | Mokėjimų įrašų atkūrimas | D | walk once unblocked |  |  | Waits; see its row |
+| 33 | 7.7 | Rankinis bandomojo plano suteikimas | D | walk once unblocked |  |  | Waits; see its row |
+| 34 | 7.8 | Kreditų sąskaita | D | walk once unblocked |  |  | Waits; see its row |
+| 35 | 7.9 | Kreditų papildymas ir planų pakopos | D | new walk once it exists |  |  | Not built |
+| 36 | 7.11 | Atidėti planai | D | new walk once it exists |  |  | Not built |
+| 37 | 7.12 | Dirbtinio intelekto kaštų skaičiavimas | D | walk once unblocked |  |  | Waits; see its row |
+| 38 | 7.15 | Metinė prenumerata | D | walk once unblocked |  | J-14 | Waits; see its row |
+| 39 | 7.18 | Mokėjimas keičia teises | D | walk once unblocked |  |  | Waits; see its row |
+| 40 | 7.19 | Grąžinimai ir ginčai | D | walk once unblocked |  |  | Waits; see its row |
+| 41 | 7.20 | Sąskaitos platformoje | D | new walk once it exists |  |  | Not built |
+| 42 | 7.21 | Atsiskaitymo portalas | D | walk once unblocked |  |  | Waits; see its row |
+| 43 | 7.22 | Mokamų funkcijų teisės ir ribos | D | walk once unblocked |  |  | Waits; see its row |
+| 44 | 7.23 | Kreditų pirkimas | D | new walk once it exists |  |  | Not built |
+| 45 | 7.24 | Kreditai po vieno mokėjimo | D | new walk once it exists |  |  | Not built |
+| 46 | 7.26 | Kreditų išleidimas ir grąžinimas | D | new walk once it exists |  |  | Not built |
+| 47 | 7.27 | Nemokamas VIP patvirtintoms įmonėms | D | walk once unblocked |  |  | Waits; see its row |
+| 48 | 7.29 | PVM skaičiavimas | D | walk once unblocked |  |  | Waits; see its row |
+| 49 | 7.30 | Sąskaitos ir priėmimo aktai iš žurnalo | D | new walk once it exists |  |  | Not built |
+| 50 | 7.31 | Planai darbuotojams ir įmonėms | D | new walk once it exists |  |  | Not built |
+| 51 | 1.8 | Viena organizacija, keli veiklos tipai | D | walk once unblocked |  |  | Waits; see its row |
+| 52 | 5.8 | Pranešimai telefone | D | walk once unblocked |  |  | Waits; see its row |
+| 53 | 5.16 | Įspėjimai savininkui | D | walk once unblocked |  |  | Waits; see its row |
+| 54 | 5.20 | Savos automatizacijos | D | new walk once it exists |  |  | Not built |
+| 55 | 5.21 | SMS ir WhatsApp kanalai | D | new walk once it exists |  |  | Not built |
+| 56 | 6.12 | Tarptautiniai sandoriai | D | new walk once it exists |  |  | Not built |
+| 57 | 6.13 | Prekių užsakymai | D | new walk once it exists |  |  | Not built |
+| 58 | 6.14 | Logistika | D | new walk once it exists |  |  | Not built |
+| 59 | 6.22 | Būstas | D | new walk once it exists |  |  | Not built |
+| 60 | 6.23 | Paslaugos įvertinimas ir ginčai | D | new walk once it exists |  |  | Not built |
+| 61 | 6.24 | Paslaugų srautas telefone | D | new walk once it exists |  |  | Not built |
+| 62 | 8.5 | Devynios pirmosios rinkos | D | walk once unblocked |  |  | Waits; see its row |
+| 63 | 8.13 | Programėlė telefonui | D | walk once unblocked |  | J-17 | Waits; see its row |
+| 64 | 8.14 | Nuorodos į programėlę | D | walk once unblocked |  | J-17 | Waits; see its row |
+| 65 | 8.15 | Programėlių parduotuvės | D | walk once unblocked |  | J-17 | Waits; see its row |
+| 66 | 9.16 | Rekomendavimo sąsaja | D | walk once unblocked |  |  | Waits; see its row |
+| 67 | 10.4 | Dirbtinio intelekto leidimų sritys | D | new walk once it exists |  |  | Not built |
+| 68 | 10.5 | Sąrašai dirbtinio intelekto parduotuvėse | D | walk once unblocked |  |  | Waits; see its row |
+| 69 | 10.7 | Pokalbio ketinimų atpažinimas | D | walk once unblocked |  |  | Waits; see its row |
+| 70 | 10.8 | CV sutvarkymas dirbtiniu intelektu | D | walk once unblocked |  |  | Waits; see its row |
+| 71 | 10.9 | Žurnalo siūlymai | D | walk once unblocked |  |  | Waits; see its row |
+| 72 | 10.10 | Paaiškinimai | D | walk once unblocked |  |  | Waits; see its row |
+| 73 | 10.15 | Pagalbininkų vykdymas | D | new walk once it exists |  |  | Not built |
+| 74 | 10.16 | Pagalbininkai kaip dalyviai | D | new walk once it exists |  |  | Not built |
+| 75 | 10.21 | Statistikos importas | D | walk once unblocked |  |  | Waits; see its row |
+| 76 | 10.22 | Partnerio organizacijos sąsaja | D | walk once unblocked |  |  | Waits; see its row |
+| 77 | 10.24 | Savo serverio vertimas | D | walk once unblocked |  |  | Waits; see its row |
+| 78 | 10.25 | Debesų dirbtinis intelektas | D | walk once unblocked |  |  | Waits; see its row |
+| 79 | 10.26 | Programų konkursas | D | walk once unblocked |  |  | Waits; see its row |
+| 80 | 11.9 | Mokymosi peržiūra žmogaus akimis | D | walk once unblocked |  |  | Waits; see its row |
+| 81 | 11.10 | Ankstesnio mokymosi pripažinimas | D | new walk once it exists |  |  | Not built |
+| 82 | 13.9 | Ryšys su kodo saugykla | D | walk once unblocked |  |  | Waits; see its row |
+| 83 | 13.17 | Aplinkos suderinimas po perkėlimo | D | walk once unblocked |  |  | Waits; see its row |
+| 84 | 3.16 | Žmonių trūkumo laiko juosta | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 85 | 3.19 | Planas ir faktas | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 86 | 5.12 | Prieinamumas | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 87 | 5.14 | Greitoji paieška ir balsas | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 88 | 9.3 | Naudotojo peržiūra | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 89 | 12.1 | Rinkos žemėlapis | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 90 | 12.4 | Poreikio atpažinimas | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 91 | 7.3 | Planų teisių nustatymas | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 92 | 6.16 | Perdavimas partnerio organizacijai | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 93 | 7.16 | Mokėjimo pranešimo patikra | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 94 | 7.17 | Dvigubo apmokestinimo apsauga | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 95 | 8.17 | Programėlė Android telefonui | F | no browser can prove it |  |  | native app, proven on a device |
+| 96 | 8.18 | Programėlė iPhone | F | no browser can prove it |  |  | native app, proven on a device |
+| 97 | 9.6 | Duomenų ištrynimas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 98 | 9.7 | Darbuotojo duomenų skyrimas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 99 | 9.8 | Duomenų prieigos taisyklės | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 100 | 9.10 | Užklausų ribojimas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 101 | 9.17 | Vidinis pasiūlos srautas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 102 | 9.22 | Aplinkos nustatymų patikra | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 103 | 9.23 | Duomenų bazės funkcijų kontrolė | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 104 | 9.25 | Saugumo perspėjimai | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 105 | 10.2 | Dirbtinio intelekto scenarijai | F | no browser can prove it |  |  | MCP, no screen |
+| 106 | 10.3 | Prisijungimas dirbtinio intelekto programoms | F | no browser can prove it |  |  | MCP, no screen |
+| 107 | 10.17 | Išorinių veiksmų kvitai | F | no browser can prove it |  |  | MCP, no screen |
+| 108 | 10.18 | Skelbimai iš Švedijos | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 109 | 10.19 | Skelbimai iš Norvegijos | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 110 | 10.20 | Senų skelbimų šalinimas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 111 | 10.23 | Agentūros pasiūlos srautas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 112 | 13.2 | Veikimo stebėjimas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 113 | 13.4 | Duomenų bazės talpa | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 114 | 13.5 | Atsarginės kopijos | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 115 | 13.6 | Reguliarūs foniniai darbai | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 116 | 13.7 | Duomenų bazės pakeitimų patikra | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 117 | 13.8 | Pakeitimų žurnalo suderinimas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 118 | 13.10 | Kokybės vartai | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 119 | 13.11 | Automatinė naudotojo kelio patikra | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 120 | 13.12 | Produkto taisyklių patikra | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 121 | 13.13 | Funkcijų prieinamumo sąrašas | F | no browser can prove it |  |  | no page shows it |
+| 122 | 13.14 | Išimčių valdymas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 123 | 13.15 | Senų naršyklių palaikymas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
