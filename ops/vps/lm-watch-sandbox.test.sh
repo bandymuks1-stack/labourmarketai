@@ -17,8 +17,9 @@ echo "invented env secret" > $D/env; echo "invented key" > $D/backup.age.key
 PL=/var/lib/planted-docker/containers/x; mkdir -p $PL /opt/planted /srv/planted /var/spool/planted
 for f in $PL/config.v2.json /opt/planted/secret /srv/planted/secret /var/spool/planted/secret /etc/planted-secret; do echo "invented secret" > "$f"; chmod 600 "$f"; done
 # World-readable, as another app's careless .env might be: file permissions can't stop these, only the view can.
+install -d -m 755 /backup
 chmod 755 /opt/planted /srv/planted /var/spool/planted
-for f in /opt/planted/.env /srv/planted/.env /var/spool/planted/.env; do echo "invented secret" > "$f"; chmod 644 "$f"; done
+for f in /opt/planted/.env /srv/planted/.env /var/spool/planted/.env /backup/planted.env; do echo "invented secret" > "$f"; chmod 644 "$f"; done
 # The real Docker path too: this is where a container's environment normally sits in clear text.
 RD=/var/lib/docker/containers/lm-test; mkdir -p $RD; echo "invented secret" > $RD/config.v2.json; chmod 600 $RD/config.v2.json
 umask 022
@@ -120,20 +121,39 @@ echo "caps=$(grep -E '^CapEff' /proc/self/status | awk '{print $2}')"
 ls /proc | grep -cE '^[0-9]+$' | sed 's/^/procs=/'
 curl -s --max-time 4 -o /dev/null http://127.0.0.1:18765/ && echo "localhost=reached" || echo "localhost=blocked"
 curl -s --max-time 4 -o /dev/null http://169.254.169.254/ && echo "metadata=reached" || echo "metadata=blocked"
+for t in $(cat /opt/lm-watch/probe.targets); do curl -s --max-time 4 -o /dev/null "http://$t/" && echo "net:$t=reached" || echo "net:$t=blocked"; done
 getent hosts github.com >/dev/null && echo "dns=works" || echo "dns=failed"
 curl -s --max-time 15 -o /dev/null https://api.github.com/zen && echo "tls=works" || echo "tls=failed"
 curl -s --max-time 15 --ssl-reqd smtps://smtp.gmail.com:465 >/dev/null 2>&1; rc=$?
 case "$rc" in 6|7|28) echo "smtps=unreachable:$rc";; *) echo "smtps=reachable";; esac
 PROBE
 chmod 755 $OPT/probe.sh
-PATHS="$D/env $D/backup.age.key $PL/config.v2.json /opt/planted/secret /srv/planted/secret /var/spool/planted/secret /opt/planted/.env /srv/planted/.env /etc/planted-secret /etc/shadow $RD/config.v2.json"
+PATHS="$D/env $D/backup.age.key $PL/config.v2.json /opt/planted/secret /srv/planted/secret /var/spool/planted/secret /opt/planted/.env /srv/planted/.env /backup/planted.env /etc/planted-secret /etc/shadow $RD/config.v2.json"
 python3 -m http.server --bind 127.0.0.1 18765 >/dev/null 2>&1 &
 HTTP=$!
-sleep 1
+# Private addresses on this machine, and a real container on a real Docker bridge: the way round a port published
+# only on 127.0.0.1, and round nginx and Cloudflare.
+ip link add lmtest0 type dummy; ip link set lmtest0 up; sysctl -qw net.ipv6.conf.lmtest0.disable_ipv6=0
+LISTENERS=""
+for a in 10.99.0.1 172.20.99.1 192.168.99.1; do
+  ip addr add "$a/32" dev lmtest0
+  python3 -m http.server --bind "$a" 18766 >/dev/null 2>&1 &
+  LISTENERS="$LISTENERS $!"
+done
+ip -6 addr add fd00:99::1/128 dev lmtest0 nodad
+python3 -m http.server --bind fd00:99::1 18766 >/dev/null 2>&1 &
+LISTENERS="$LISTENERS $!"
+docker run -d --name lm-test-app --expose 3000 busybox:1.36 httpd -f -p 3000 >/dev/null
+APP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' lm-test-app)
+TARGETS="10.99.0.1:18766 172.20.99.1:18766 192.168.99.1:18766 [fd00:99::1]:18766 $APP:3000"
+echo "$TARGETS" > $OPT/probe.targets; chmod 644 $OPT/probe.targets
+sleep 2
 ok "the local test server answers from outside the unit" "$(curl -s --max-time 4 -o /dev/null -w '%{http_code}' http://127.0.0.1:18765/)" 200
+for t in $TARGETS; do ok "$t answers from outside the unit" "$(curl -s --max-time 4 -o /dev/null http://$t/ && echo reached)" reached; done
 net() { # output file
   ok "local app routes are blocked" "$(grep -c '^localhost=blocked' "$1")" 1
   ok "cloud metadata is blocked" "$(grep -c '^metadata=blocked' "$1")" 1
+  for t in $TARGETS; do ok "private address $t is blocked" "$(grep -cF "net:$t=blocked" "$1")" 1; done
   ok "DNS still works" "$(grep -c '^dns=works' "$1")" 1
   ok "TLS to the internet still works" "$(grep -c '^tls=works' "$1")" 1
   ok "an SMTPS server is still reachable" "$(grep -c '^smtps=reachable' "$1")" 1
@@ -286,6 +306,7 @@ PATH=$X/bin:$PATH command sh $X/install.sh a@example.test > $X/out2 2>&1
 ok "a second run is harmless" "$?" 0
 systemctl disable --now lm-backup-watchdog.timer lm-seo-watch.timer 2>/dev/null
 
-rm -rf $RD
+kill $LISTENERS 2>/dev/null; docker rm -f lm-test-app >/dev/null 2>&1; ip link del lmtest0
+rm -rf $RD /backup
 echo "$N checks, $FAILS failed"
 [ "$FAILS" = 0 ]
