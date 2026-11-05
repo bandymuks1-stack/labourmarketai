@@ -1189,7 +1189,7 @@ How to read it:
 - **Kaina** is `nenustatyta` unless the register or plan code states it.
 - **Completion rule for the map:** veikianti and Naršyklė is `eisena` or `savininkas`, over all counted rows in that need, with a missing value counted as not done. Always show both numbers. The three measures above stay as they are.
 
-Not filled yet: `Map: blockers` and `Map: stages`. Open work is in [`COORDINATION_REGISTER.md`](COORDINATION_REGISTER.md) §7.
+Not filled yet: `Map: stages`. `Map: blockers` holds open PRs linked to function rows; forgotten items aren't linked yet. Open work is in [`COORDINATION_REGISTER.md`](COORDINATION_REGISTER.md) §7.
 
 ### Map: groups
 
@@ -1938,3 +1938,34 @@ Not filled yet: `Map: blockers` and `Map: stages`. Open work is in [`COORDINATIO
 | J-18 | Tavo duomenų eksportas ir ištrynimas | 3 | 9.6 |
 | J-19 | Augimas: galimi įgūdžiai ir mokymosi kryptis | 1 | 2.29 |
 | J-19 | Augimas: galimi įgūdžiai ir mokymosi kryptis | 2 | 11.3 |
+
+### Map: blockers
+
+| Blocker | Lietuviškai | Affects | Who |
+|---|---|---|---|
+| OI-4 | Bandomojo plano rodymas (#2682) | 7.4, 7.20 | savininkas, paskui koordinatorius |
+| OI-5 | Išsaugotų darbų sąrašas rodomas teisingai (#2642) | 4.4 | savininkas, paskui koordinatorius |
+| OI-8 | Mokėjimo apsauga bandomuoju laikotarpiu (#3047) | 7.4, 7.15 | savininkas, paskui koordinatorius |
+| OI-13 | Senų skelbimų šalinimo apsauga (#2693) | 10.20 | savininkas, paskui koordinatorius |
+| OI-14 | Pagalbininkų prisijungimo testas (#2454) | 10.3 | savininkas, paskui koordinatorius |
+| OI-27 | Įmonė skiria mokymus darbuotojams (#2816) | 11.8 | savininkas, paskui koordinatorius |
+| OI-28 | Užimtumo konflikto fiksavimas (#2795) | 3.35, 5.13 | savininkas, paskui koordinatorius |
+| OI-29 | Darbuotojų matomumas pagal nutylėjimą (#2747) | 2.35, 4.17 | savininkas, paskui koordinatorius |
+| OI-30 | Skelbimo uždarymo būsena (#2746) | 6.2 | savininkas, paskui koordinatorius |
+| OI-31 | Skelbimų filtras pagal šalį (#2209) | 4.4 | savininkas, paskui koordinatorius |
+| OI-48 | Leidimų aprašymai paprastais žodžiais (#2924) | 10.3, 10.4 | savininkas, paskui koordinatorius |
+| OI-49 | Pagalbininkų prieigos apimtis (#2923) | 10.4 | savininkas, paskui koordinatorius |
+| OI-50 | Kasdienė augimo ataskaita (#2886) | 9.14 | savininkas, paskui koordinatorius |
+| OI-52 | Naudotojo valdomi leidimai (#2812) | 10.3, 10.4 | savininkas, paskui koordinatorius |
+| OI-54 | Prekių pirkimo užklausos (#2713) | 6.13 | savininkas, paskui koordinatorius |
+| OI-55 | Pagalbininkų leidimų sritys (#2707) | 10.4 | savininkas, paskui koordinatorius |
+| OI-56 | Įmonės sąskaitos mokėjimų skiltyje (#2704) | 7.20 | savininkas, paskui koordinatorius |
+| OI-57 | PVM pažadas ir tekstas (#2701) | 7.29 | savininkas ir teisininkas |
+| OI-58 | PVM ir sąskaitų tvarkymas (#2685) | 7.15, 7.29 | savininkas, paskui koordinatorius |
+| OI-60 | Trys nemokami profilių peržiūrėjimai (#2474) | 4.22, 7.10, 7.22, 7.27 | savininkas, paskui koordinatorius |
+| OI-61 | Nuorodos į profilius tik su leidimu (#2471) | 2.10, 4.18 | savininkas, paskui koordinatorius |
+| OI-62 | Profesijų klasifikatoriaus sutvarkymas (#2463) | 2.17 | savininkas, paskui koordinatorius |
+| OI-67 | Istorinių datų ištaisymas (#2362) | 2.28 | savininkas, paskui koordinatorius |
+| OI-70 | Projekto sąskaitų eiga (#2203) | 3.12, 7.30 | savininkas, paskui koordinatorius |
+| OI-73 | Biuro profesijų katalogas (#1577) | 2.12 | savininkas, paskui koordinatorius |
+| OI-101 | Balso atpažinimo paleidimas (#2198) | 2.30, 5.15 | savininkas, paskui koordinatorius |
