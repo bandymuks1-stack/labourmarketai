@@ -15,7 +15,7 @@ expect() { # name, actual, wanted
   N=$((N + 1))
   if [ "$2" = "$3" ]; then echo "ok $N $1"; else echo "FAIL $N $1: got '$2', wanted '$3' ($(cat "$T/out"))"; FAILS=$((FAILS + 1)); fi
 }
-reset() { rm -rf "$R"/backup-watchdog.state "$R"/backup-watchdog.lastrun "$R"/backup-watchdog.alive "$B"/* "$B"/.[!.]*; chmod 700 "$B"; : > "$M"; NOW=2000000000; }
+reset() { rm -rf "$R"/backup-watchdog.state "$R"/backup-watchdog.lastrun "$R"/backup-watchdog.alive "$B"/* "$B"/.[!.]*; chmod u=rwx,go=,g-s "$B"; : > "$M"; NOW=2000000000; }
 # A pair with its records, recorded $2 hours before NOW.
 pair() {
   for f in "lm-db-$1.dump.age" "lm-files-$1.tar.age"; do
@@ -87,8 +87,8 @@ expect "just stored: healthy" "$(run)" 0
 NOW=$((NOW + 25 * HOUR)); expect "25 h, no new file: healthy" "$(run)" 0
 NOW=$((NOW + 2 * HOUR)); expect "27 h, no new file: problem" "$(run)" 1
 expect "27 h, no new file: stale" "$(grep -c 'status=stale' "$T/out")" 1
-expect "27 h, no new file: one alert" "$(mails)" 1
-NOW=$((NOW + HOUR)); run >/dev/null; expect "next hour: still one alert" "$(mails)" 1
+expect "27 h, no new file: one alert" "$(grep -c 'Backup problem' "$M")" 1
+NOW=$((NOW + HOUR)); run >/dev/null; expect "next hour: still one alert" "$(grep -c 'Backup problem' "$M")" 1
 
 # --- A backup that failed half-way.
 reset; pair M 3; printf 'age-encryption.org/v1 x
