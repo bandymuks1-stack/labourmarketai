@@ -170,6 +170,9 @@ jobs:
       - name: Backup watchdog (synthetic test, no real backups, no mail)
         run: sh ops/vps/lm-backup-watchdog.test.sh
 
+      - name: SEO watch (synthetic test, no network, no mail)
+        run: sh ops/vps/lm-seo-watch.test.sh
+
       - name: Product truth (capability register halves agree)
         run: node .github/scripts/product-truth.mjs --check
 
