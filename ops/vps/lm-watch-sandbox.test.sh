@@ -17,6 +17,7 @@ echo "invented env secret" > $D/env; echo "invented key" > $D/backup.age.key
 PL=/var/lib/planted-docker/containers/x; mkdir -p $PL /opt/planted /srv/planted /var/spool/planted
 for f in $PL/config.v2.json /opt/planted/secret /srv/planted/secret /var/spool/planted/secret /etc/planted-secret; do echo "invented secret" > "$f"; chmod 600 "$f"; done
 # World-readable, as another app's careless .env might be: file permissions can't stop these, only the view can.
+chmod 755 /opt/planted /srv/planted /var/spool/planted
 for f in /opt/planted/.env /srv/planted/.env /var/spool/planted/.env; do echo "invented secret" > "$f"; chmod 644 "$f"; done
 # The real Docker path too: this is where a container's environment normally sits in clear text.
 RD=/var/lib/docker/containers/lm-test; mkdir -p $RD; echo "invented secret" > $RD/config.v2.json; chmod 600 $RD/config.v2.json
