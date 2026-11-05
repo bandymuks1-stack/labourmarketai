@@ -7,9 +7,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import {
+  ACHIEVEMENT_COLUMNS,
   ACHIEVEMENTS_MAX_ROWS,
+  achievementEntryFromRow,
   classifyAchievementsError,
+  findSameAchievement,
   validateAchievementInput,
+  type WorkerAchievementEntry,
 } from "./worker-achievements-model";
 
 /**
@@ -24,7 +28,7 @@ import {
  */
 
 export type WorkerAchievementActionResult =
-  | { ok: true; id?: string }
+  | { ok: true; id?: string; entry?: WorkerAchievementEntry }
   | {
       ok: false;
       code: "needs_migration" | "unauthenticated" | "invalid" | "limit" | "error";
@@ -64,12 +68,16 @@ export async function saveWorkerAchievementAction(
   const id = String(formData.get("id") ?? "").trim();
 
   if (id === "") {
-    const { count, error: countError } = await asAny(supabase)
+    const { data: ownRows, error: ownError } = await asAny(supabase)
       .from("worker_achievements")
-      .select("id", { count: "exact", head: true })
+      .select(ACHIEVEMENT_COLUMNS)
       .eq("profile_id", user.id);
-    if (countError) return mapError(countError.code);
-    if ((count ?? 0) >= ACHIEVEMENTS_MAX_ROWS) return { ok: false, code: "limit" };
+    if (ownError) return mapError(ownError.code);
+    const own = ((ownRows ?? []) as Parameters<typeof achievementEntryFromRow>[0][]).map(achievementEntryFromRow);
+    // Already stated: the save answers with that row, it does not store it twice.
+    const already = findSameAchievement(own, input);
+    if (already) return { ok: true, id: already.id, entry: already };
+    if (own.length >= ACHIEVEMENTS_MAX_ROWS) return { ok: false, code: "limit" };
 
     const { data, error } = await asAny(supabase)
       .from("worker_achievements")
@@ -80,7 +88,7 @@ export async function saveWorkerAchievementAction(
         achieved_at: input.achievedAt,
         achievement_type_slug: input.achievementTypeSlug,
       })
-      .select("id")
+      .select(ACHIEVEMENT_COLUMNS)
       .single();
     if (error) {
       const mapped = mapError(error.code);
@@ -90,10 +98,11 @@ export async function saveWorkerAchievementAction(
       return mapped;
     }
     revalidatePath("/", "layout");
-    return { ok: true, id: (data as { id: string } | null)?.id };
+    const entry = achievementEntryFromRow(data as Parameters<typeof achievementEntryFromRow>[0]);
+    return { ok: true, id: entry.id, entry };
   }
 
-  const { error } = await asAny(supabase)
+  const { data: updated, error } = await asAny(supabase)
     .from("worker_achievements")
     .update({
       title: input.title,
@@ -102,7 +111,9 @@ export async function saveWorkerAchievementAction(
       achievement_type_slug: input.achievementTypeSlug,
     })
     .eq("id", id)
-    .eq("profile_id", user.id);
+    .eq("profile_id", user.id)
+    .select(ACHIEVEMENT_COLUMNS)
+    .maybeSingle();
   if (error) {
     const mapped = mapError(error.code);
     if (mapped.ok === false && mapped.code === "error") {
@@ -111,7 +122,11 @@ export async function saveWorkerAchievementAction(
     return mapped;
   }
   revalidatePath("/", "layout");
-  return { ok: true, id };
+  return {
+    ok: true,
+    id,
+    entry: updated ? achievementEntryFromRow(updated as Parameters<typeof achievementEntryFromRow>[0]) : undefined,
+  };
 }
 
 export async function removeWorkerAchievementAction(

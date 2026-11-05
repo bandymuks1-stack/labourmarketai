@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { useSavedRows } from "@/lib/hooks/use-saved-rows";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { DarkListbox } from "@/components/ui/DarkListbox";
@@ -54,12 +54,13 @@ export function WorkerAchievementsSection({
 }) {
   const t = useTranslations("cvSections.achievements");
   const tType = useTranslations("cvSections.achievementTypes");
-  const router = useRouter();
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const { rows, showSaved, hideRemoved } = useSavedRows(initial);
 
   function errorLabel(res: WorkerAchievementActionResult): string {
     if (res.ok) return "";
@@ -90,9 +91,12 @@ export function WorkerAchievementsSection({
         setError(errorLabel(res));
         return;
       }
+      // The server's confirmed row, on screen while the page catches up. The save
+      // already re-renders the page (`revalidatePath`); a `router.refresh()` here
+      // rendered all of it a second time.
+      if (res.entry) showSaved(res.entry);
       setForm(EMPTY_FORM);
       setOpen(false);
-      router.refresh();
     } catch (e) {
       console.error("[worker-achievements] save failed:", e);
       setError(t("error"));
@@ -103,6 +107,7 @@ export function WorkerAchievementsSection({
 
   async function remove(id: string) {
     setError(null);
+    setRemovingId(id);
     try {
       const fd = new FormData();
       fd.set("id", id);
@@ -111,10 +116,12 @@ export function WorkerAchievementsSection({
         setError(errorLabel(res));
         return;
       }
-      router.refresh();
+      hideRemoved(id);
     } catch (e) {
       console.error("[worker-achievements] remove failed:", e);
       setError(t("error"));
+    } finally {
+      setRemovingId(null);
     }
   }
 
@@ -146,9 +153,9 @@ export function WorkerAchievementsSection({
         </p>
       ) : (
         <>
-          {initial.length > 0 ? (
+          {rows.length > 0 ? (
             <ul className="flex flex-col gap-2" data-testid="worker-achievements-list">
-              {initial.map((entry) => (
+              {rows.map((entry) => (
                 <li
                   key={entry.id}
                   className="flex items-start justify-between gap-3 rounded-md border border-ink-600 px-3 py-2"
@@ -191,6 +198,7 @@ export function WorkerAchievementsSection({
                     <button
                       type="button"
                       onClick={() => remove(entry.id)}
+                      disabled={removingId === entry.id}
                       className="inline-flex min-h-11 items-center rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:border-state-danger hover:text-state-danger"
                       data-testid={`worker-achievements-remove-${entry.id}`}
                     >
