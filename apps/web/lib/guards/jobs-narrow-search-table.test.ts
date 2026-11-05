@@ -51,6 +51,7 @@ describe("narrow search table", () => {
     expect(fold).toContain("'[^[:alnum:]+#]+'");
     expect(fold).toContain("'ß', 'ss'");
     expect(fold).toContain("NFD");
+    expect(fold).toContain("'øæłđ', 'oald'");
     expect(fold).toMatch(/immutable/);
   });
 

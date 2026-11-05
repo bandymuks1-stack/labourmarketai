@@ -38,6 +38,15 @@ export function matchProfessionByLabel(
   if (q.length < 3) return null;
 
   const folded = options.map((o) => ({ slug: o.slug, l: foldForMatch(o.label) }));
+  const hit = matchFolded(q, folded);
+  if (hit) return hit;
+  // "Kuechenhilfe" is how a keyboard without ü writes "Küchenhilfe". Tried second, so a label
+  // that really holds ue or ae ("Steuerberater") is still matched as itself.
+  const typed = q.replace(/([aou])e/g, "$1");
+  return typed !== q && typed.length >= 3 ? matchFolded(typed, folded) : null;
+}
+
+function matchFolded(q: string, folded: readonly { slug: string; l: string }[]): string | null {
 
   const exact = folded.filter((o) => o.l === q);
   if (exact.length === 1) return exact[0]!.slug;

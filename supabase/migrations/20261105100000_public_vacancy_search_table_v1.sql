@@ -34,7 +34,8 @@ set local lock_timeout = '5s';
 -- One fold for what is stored and for what is searched. Lower case in the database's own
 -- collation, because lower() under "C" leaves Ä and Š as they are. ß is ss and a letter loses its
 -- marks, as the page's catalogue match already treats them (foldForMatch), so lärare and larare,
--- Schweißer and Schweisser are one word. Every run of anything but a letter, a digit, + or #
+-- Schweißer and Schweisser are one word; ø æ ł đ have no marks to lose, so they are named, and
+-- sjåfør and sjafor are one word. Every run of anything but a letter, a digit, + or #
 -- becomes one space, so words can be told apart and a search term cannot carry a LIKE wildcard.
 -- + and # stay so that C++ and C# stay themselves.
 create or replace function public.public_vacancy_search_fold(p_text text)
@@ -44,7 +45,7 @@ immutable
 parallel safe
 set search_path to ''
 as $function$
-  select ' ' || pg_catalog.btrim(pg_catalog.regexp_replace(pg_catalog.regexp_replace(pg_catalog.normalize(pg_catalog.replace(pg_catalog.lower(coalesce(p_text, '')), 'ß', 'ss'), 'NFD'), '[\u0300-\u036f]', '', 'g'), '[^[:alnum:]+#]+', ' ', 'g')) || ' '
+  select ' ' || pg_catalog.btrim(pg_catalog.regexp_replace(pg_catalog.regexp_replace(pg_catalog.normalize(pg_catalog.translate(pg_catalog.replace(pg_catalog.lower(coalesce(p_text, '')), 'ß', 'ss'), 'øæłđ', 'oald'), 'NFD'), '[\u0300-\u036f]', '', 'g'), '[^[:alnum:]+#]+', ' ', 'g')) || ' '
 $function$;
 
 revoke all on function public.public_vacancy_search_fold(text) from public, anon, authenticated, service_role;

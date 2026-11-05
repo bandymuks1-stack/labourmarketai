@@ -17,7 +17,7 @@ set client_encoding = 'UTF8';
 begin transaction isolation level repeatable read read only;
 do $$
 declare
-  v_terms text[] := array['a', 'e', 'ö', 'el', 'ok', 'it', 'vd', 'ter', 'ing', 'kock', 'lager', 'lärare', 'snickare', 'undersköterska', 'byggarbetare', 'kock helg', 'zzqx', 'ELEKTRIKER', '  kock  ', '%', '_', '-', 'it-tekniker', 'c++', 'larare', 'underskoterska', 'schweisser', 'schweißer'];
+  v_terms text[] := array['a', 'e', 'ö', 'el', 'ok', 'it', 'vd', 'ter', 'ing', 'kock', 'lager', 'lärare', 'snickare', 'undersköterska', 'byggarbetare', 'kock helg', 'zzqx', 'ELEKTRIKER', '  kock  ', '%', '_', '-', 'it-tekniker', 'c++', 'larare', 'underskoterska', 'schweisser', 'schweißer', 'sjåfør', 'sjafor'];
   v_term text;
   v_folded text;
   v_like text;
@@ -33,7 +33,7 @@ declare
   v_diffs int := 0;
 begin
   foreach v_term in array v_terms loop
-    v_folded := btrim(regexp_replace(regexp_replace(normalize(replace(lower(btrim(v_term)), 'ß', 'ss'), NFD), '[\u0300-\u036f]', '', 'g'), '[^[:alnum:]+#]+', ' ', 'g'));
+    v_folded := btrim(regexp_replace(regexp_replace(normalize(translate(replace(lower(btrim(v_term)), 'ß', 'ss'), 'øæłđ', 'oald'), NFD), '[\u0300-\u036f]', '', 'g'), '[^[:alnum:]+#]+', ' ', 'g'));
     v_like := case when length(v_folded) <= 3 then '% ' || v_folded || '%' else '%' || v_folded || '%' end;
     v_today := '%' || lower(replace(replace(btrim(v_term), '%', '\%'), '_', '\_')) || '%';
     select count(*) filter (where v_folded <> '' and x.t like v_like),
@@ -42,7 +42,7 @@ begin
            count(*) filter (where x.o like v_today and v_folded <> '' and not (x.t like v_like) and x.t like '% ' || v_folded || '%')
       into v_oracle, v_found_today, v_lost, v_lost_word
     from (
-      select ' ' || btrim(regexp_replace(regexp_replace(normalize(replace(lower(coalesce(v.title_raw, '') || ' ' || coalesce(v.occupation_raw, '')), 'ß', 'ss'), NFD), '[\u0300-\u036f]', '', 'g'), '[^[:alnum:]+#]+', ' ', 'g')) || ' ' as t,
+      select ' ' || btrim(regexp_replace(regexp_replace(normalize(translate(replace(lower(coalesce(v.title_raw, '') || ' ' || coalesce(v.occupation_raw, '')), 'ß', 'ss'), 'øæłđ', 'oald'), NFD), '[\u0300-\u036f]', '', 'g'), '[^[:alnum:]+#]+', ' ', 'g')) || ' ' as t,
              lower(v.occupation_raw) collate "C" as o
       from public.public_vacancies v
       where v.is_active and (v.expires_at is null or v.expires_at > now())
