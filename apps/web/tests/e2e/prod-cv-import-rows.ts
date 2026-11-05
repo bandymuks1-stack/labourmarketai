@@ -5,9 +5,9 @@ import { bearerOf, qaApi } from "./prod-qa-api";
  * token: its own rows only, under its own row-level security.
  *
  * Not through the profile page. Its remove button is the same delete plus a
- * `revalidatePath("/", "layout")`, and one such call took about 26 s per row on
+ * `revalidatePath("/", "layout")`, and a removal took about 26 s per row on
  * production (run 42098444964): 12 rows did not fit 300 s and 4 stayed. Here a
- * sweep is at most 2 reads + 1 delete + 1 read per table, whatever the row count.
+ * sweep is 1 read + 1 delete + 1 read per table, whatever the row count.
  *
  * Only this walk writes the prefix `QA-SYNTHETIC R`. Other walks write
  * `QA-SYNTHETIC <run id>` or a word.
