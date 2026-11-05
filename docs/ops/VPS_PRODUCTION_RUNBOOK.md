@@ -257,19 +257,134 @@ it no backup can be decrypted.
 
 **The scheduler is not reliable for this repository.** Measured 2026-10-28 to 11-04: `*/5` ran 31 times out of 2,017 slots, hourly workflows about 28 of 168, and six-hourly ones started 3 to 6 h late, with gaps up to 12.7 h. The 26 h check runs on the same scheduler, so if GitHub's schedule stops, the backup and its alarm stop together. A trigger outside GitHub is proposed separately and is not installed.
 
-### 9.1.0b Backup watchdog on the VPS (owner approval 2026-11-04)
+### 9.1.0b Backup watchdog and SEO watch: variant B (PROPOSED, NOT INSTALLED)
 
-Independent of GitHub's scheduler. It raises an alarm; it does not start a backup.
+**Nothing here is on the VPS.** The owner held the root install on 2026-11-05 and approved preparing this variant for review only. Installing it needs a separate owner approval.
 
-- **Install:** `ops/vps/install-backup-watchdog.sh <approved address>` as root, pinned to one commit, no secrets, sends no mail. Then `ops/vps/test-backup-watchdog-mail.sh <address>`, which sends exactly two test mails with invented files; PASS only when someone sees them arrive, as `mail=sent` proves only that the server accepted them. Neither script has been run as of 2026-11-04.
-- **Files:** `ops/vps/lm-backup-watchdog.sh` and `ops/vps/labourmarket-backup-watchdog.cron`, copied to `/root/lm-prod/bin/`; the cron file installed as `/etc/cron.d/labourmarket-backup-watchdog`, hourly at minute 7. It has its own cron file because `lm-cron-install.sh` calls every product route when it runs.
-- **What counts as a good backup:** the newest pair (database + Storage files, same stamp) in `backups/verified.log`, a line the receiver writes after its own sha256 and `age` checks, checked again on disk for size, sha256 and `age` header. A file's date proves nothing here. The dump is read in full hourly, at low priority.
-- **Alert:** older than 26 h, or failing a check, is one incident: one mail when it starts, none while it lasts, one when it clears. State is in `backup-watchdog.state`; if a mail fails, the next hour tries again.
-- **Mail:** the existing `LM_SMTP_*` mailbox by `curl`. The address is `ALERT_TO=` in `/root/lm-prod/backup-watchdog.conf` (root, 600), and it must be one the owner approved. Without it, nothing is sent and the log says `mail=failed:4`.
-- **Check it:** `tail /root/lm-prod/backup-watchdog.log`, one line an hour; `grep labourmarket-backup /var/log/syslog` or `journalctl -u cron` for cron itself.
-- **Test without real backups:** `sh ops/vps/lm-backup-watchdog.test.sh` uses its own temporary directory and sends nothing.
-- **Remove:** `rm /etc/cron.d/labourmarket-backup-watchdog`. The receiver's record line is harmless if left.
-- **Limit:** nothing watches the watchdog. If the VPS or its cron is down, no mail comes; the GitHub freshness job is the other side of that.
+**A merge changes nothing live.** The deploy ships only the app's standalone tarball into `releases/`. The receiver, these scripts and the units reach the VPS only by a root install, and `install-backup-watchdog.sh` stops until a separate reviewed PR fills in its pins. If the receiver file were ever copied by hand before the group exists, its group-read lines do nothing: folder `700`, files `600`, as today. After a merge, `sha256sum` of the live receiver differs from `main` until the install; that is expected.
+
+**Design**
+
+| | Backup watchdog | SEO watch |
+|---|---|---|
+| User | `lmwatch`, no login, one group | `lmseo`, no login, one group, not in `lmwatch` |
+| Why separate | Reads encrypted backups | Parses internet content, so it holds nothing worth taking |
+| Scheduler | `lm-backup-watchdog.timer`, hourly at minute 7, `Persistent` | `lm-seo-watch.timer`, daily 05:37 UTC, `Persistent` |
+| Linux capabilities | None | None |
+| Database access | None | None of its own; it reads public pages as anyone does |
+| Folder | `/var/lib/lm-watch` (700) | `/var/lib/lm-seo` (700) |
+| Sees backups | Read-only bind at `/var/lib/lm-watch/backups` | No |
+| Mail | Alerts-only credential in its `env` (600), never the main mailbox's | Same |
+
+The kernel's file permissions are the limit, and the sandbox is a second layer. So a gap in the sandbox doesn't expose the decryption key, `env`, Docker's container configs or `/etc/shadow`: `lmwatch` has no right to read them anyway.
+
+**Proposed receiver change** (`ops/vps/lm-deploy-receive.sh`, between the `group read` markers, plus two call sites):
+
+- Only when group `lmwatch` exists, the folder becomes `750 root:lmwatch` with setgid cleared, each stored backup and `verified.log` become `640 root:lmwatch`. `.part` files stay `600`. The key and `env` aren't in that folder and aren't touched.
+- Plain files only: a link is refused, `chgrp -h`, never `-R`. If the folder itself is a link, the backup stops with `BACKUP_FAIL`. If `verified.log` is a link, nothing is written through it.
+- A failure to set group read doesn't fail the backup. The watchdog then can't read the file and alerts, which is the safe direction.
+
+**What it detects**
+
+| Situation | Status | When |
+|---|---|---|
+| **No new backup: the job never started, or nothing arrived** | `stale` | Past 26 h, from the clock alone |
+| No record at all | `no_record` | Next run |
+| Backup failed half-way: one file of a pair | `incomplete_pair` | After 1 h |
+| Transfer left behind | `failed_transfer` | After 1 h |
+| Stored file with no record | `unrecorded_file` | After 1 h |
+| File gone, changed size, changed bytes, not `age` | `missing_file`, `size_mismatch`, `sha256_mismatch`, `not_age` | Next run |
+| A file it should read but can't | `unreadable` | Next run |
+| A link or anything but a plain file in the folder | `symlink`, `unexpected_entry` | Next run |
+| Modes wider than intended, setgid, wrong group or owner, an ACL | `mode_too_wide`, `wrong_group`, `wrong_owner`, `acl_present` | Next run |
+| Running as root, or able to read a secret, or in `docker`, `sudo`, `adm` | `runs_as_root`, `access_too_wide` | Next run |
+| Its own runs stopped for over 6 h | One "was not running" mail when it runs again | Next run |
+
+One incident means one alert when it starts, none while it lasts, and one when it clears.
+
+**When mail itself fails, and what stays unsolved**
+
+- A failed alert isn't marked as sent, so the next hour tries again. The run exits 2, the unit shows as failed, and the log says `mail=failed:<code>`. **Nothing else tells a person.** There's no second route from the VPS, because that would need a new service or token, which this approval doesn't include.
+- **Silence is noticeable only by a person:** a weekly "still alive" mail. If it stops coming, something is wrong. Nobody is told that it stopped.
+- **From outside:** the GitHub freshness job checks the backup's age and opens the `db-backup-failed` issue, independently of the VPS. Its stale path hasn't been proven in production yet.
+- **Still unsolved:** the VPS down and the freshness job broken at once; a compromised watchdog staying silent; an alert mailbox nobody reads. Accepted by the server isn't the same as arrived, so delivery needs a person to see the test mails.
+
+**Resources**
+
+- **Watchdog:** hourly it reads one pair of backups to hash them, with `Nice=19`, idle I/O, 50% of one CPU and 128 MB at most. One log line an hour, with no rotation needed for years.
+- **SEO watch:** about 20 public requests a day, up to 30 s each.
+- **New on the host:** 2 users, 2 groups, 4 unit files, 2 folders. No port, no sudo rule, no package.
+- **Cost:** 0, unless the alerts-only mail credential needs a paid mailbox; that assessment is in the private record.
+
+**Tests**
+
+- `ops/vps/lm-backup-watchdog.test.sh`, `ops/vps/lm-seo-watch.test.sh`: synthetic, in `quality`.
+- `ops/vps/lm-watch-sandbox.test.sh`, workflow `vps-watch-tests.yml`: real users, real systemd units and the real receiver on GitHub's throw-away machine, with invented secrets and backups. It refuses to run anywhere else.
+- It proves: `lmwatch` and `lmseo` can't read planted secrets in Docker-like paths, `/opt`, `/srv`, `/var/spool`, `/etc`; `lmwatch` reads the backup pair and can't write or delete; no capabilities; the timer alerts with no new file; every alert above; rollback.
+- **It doesn't prove the production host.** That machine's systemd version, layout and other apps are different.
+
+**Before any install (owner, read-only on the VPS)**
+
+```bash
+ps -p 1 -o comm=
+```
+
+```bash
+systemctl --version | head -1
+```
+
+```bash
+stat -c '%a %U %G' /root /root/lm-prod /root/lm-prod/backups
+```
+
+```bash
+ls -ld /var/lib/docker; docker info --format '{{.DockerRootDir}}'
+```
+
+```bash
+ls -d /*
+```
+
+**Install, after separate approval:** a reviewed PR sets the pins in `install-backup-watchdog.sh`, then it runs as root, then `runuser -u lmwatch -- sh test-backup-watchdog-mail.sh <address>`. PASS only when someone has seen both test mails arrive.
+
+**Check it, once installed:** `systemctl list-timers 'lm-*'`, `tail /var/lib/lm-watch/backup-watchdog.log`, `systemctl --failed`.
+
+**Rollback**
+
+```bash
+systemctl disable --now lm-seo-watch.timer lm-backup-watchdog.timer
+```
+
+```bash
+rm /etc/systemd/system/lm-seo-watch.* /etc/systemd/system/lm-backup-watchdog.*
+```
+
+```bash
+systemctl daemon-reload
+```
+
+```bash
+find /root/lm-prod/backups -maxdepth 1 -type f \( -name 'lm-db-*.dump.age' -o -name 'lm-files-*.tar.age' -o -name verified.log \) -exec chgrp -h root {} + -exec chmod 600 {} +
+```
+
+```bash
+chgrp -h root /root/lm-prod/backups; chmod 700 /root/lm-prod/backups
+```
+
+```bash
+userdel lmwatch; userdel lmseo; groupdel lmwatch; groupdel lmseo
+```
+
+Without the group, the receiver goes back to `700` and `600` by itself; its old copy is `lm-deploy-receive.sh.bak-variant-b`. Removing `/var/lib/lm-watch`, `/var/lib/lm-seo` and `/opt/lm-watch` is optional, and the backups' contents aren't touched at any point.
+
+**Remaining risks**
+
+- `lmwatch` reads encrypted backups. Useful to an attacker only with the key, which stays out of reach, but it could copy them out over the network.
+- The alerts-only credential can send mail as that address. Limit it to sending, or to its own mailbox.
+- Group read widens who can read the backup files, by one account. That's the change the owner is asked to approve.
+- The receiver is on the backup path, so a mistake there could affect backups. It's tested, and a group-read failure isn't fatal, but it is still a change to that file.
+- SEO watch presents itself as Googlebot from a non-Google address, and Cloudflare could challenge it. That would look like a false alarm.
+- If `lmwatch` is ever added to another group by hand, the check catches only `docker`, `sudo` and `adm`, plus the paths it tests.
 
 ### 9.1.0 What a backup holds — and what it does not (completeness, 2026-11-03)
 

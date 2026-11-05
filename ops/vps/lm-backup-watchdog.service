@@ -1,0 +1,42 @@
+# Backup watchdog: unprivileged user, no Linux capabilities, no database access. Reads only the encrypted
+# backups (through group lmwatch) and its own folder. Exit 1 means a problem it has already reported.
+[Unit]
+Description=LabourMarket backup watchdog
+
+[Service]
+Type=oneshot
+User=lmwatch
+Group=lmwatch
+UMask=0077
+StateDirectory=lm-watch
+StateDirectoryMode=0700
+ExecStart=/bin/sh /opt/lm-watch/lm-backup-watchdog.sh --root /var/lib/lm-watch
+SuccessExitStatus=1
+StandardOutput=append:/var/lib/lm-watch/backup-watchdog.log
+StandardError=append:/var/lib/lm-watch/backup-watchdog.log
+BindReadOnlyPaths=/root/lm-prod/backups:/var/lib/lm-watch/backups
+CapabilityBoundingSet=
+AmbientCapabilities=
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=tmpfs
+ProtectProc=invisible
+ProcSubset=pid
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallFilter=@system-service
+Nice=19
+IOSchedulingClass=idle
+CPUQuota=50%
+MemoryMax=128M
+TimeoutStartSec=15min

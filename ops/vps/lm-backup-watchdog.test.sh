@@ -2,19 +2,20 @@
 # Synthetic test of lm-backup-watchdog.sh: its own temporary directory, invented files, mail to a file.
 # It never reads or touches real backups and sends no mail. Run from anywhere: sh lm-backup-watchdog.test.sh
 set -u
+umask 077
 HERE=$(cd "$(dirname "$0")" && pwd)
 W="$HERE/lm-backup-watchdog.sh"
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT INT TERM
 R="$T/root"; B="$R/backups"; M="$T/mail"; mkdir -p "$B"; : > "$M"
 NOW=2000000000; HOUR=3600; FAILS=0; N=0
 
-run() { sh "$W" --root "$R" --now "$NOW" --mail-file "$M" >"$T/out" 2>&1; echo $?; }
+run() { sh "$W" --root "$R" --now "$NOW" --mail-file "$M" --skip-access-check >"$T/out" 2>&1; echo $?; }
 mails() { grep -c '^Subject:' "$M"; }
 expect() { # name, actual, wanted
   N=$((N + 1))
   if [ "$2" = "$3" ]; then echo "ok $N $1"; else echo "FAIL $N $1: got '$2', wanted '$3' ($(cat "$T/out"))"; FAILS=$((FAILS + 1)); fi
 }
-reset() { rm -f "$R"/backup-watchdog.state "$B"/*; : > "$M"; }
+reset() { rm -rf "$R"/backup-watchdog.state "$R"/backup-watchdog.lastrun "$R"/backup-watchdog.alive "$B"/* "$B"/.[!.]*; chmod 700 "$B"; : > "$M"; NOW=2000000000; }
 # A pair with its records, recorded $2 hours before NOW.
 pair() {
   for f in "lm-db-$1.dump.age" "lm-files-$1.tar.age"; do
@@ -69,16 +70,97 @@ reset; pair K 1; f="$B/lm-db-K.dump.age"; printf 'not an age file at all\n' > "$
 expect "recorded file that is not age: reason" "$(run; grep -c 'status=not_age' "$T/out")" "$(printf '1\n1')"
 
 reset
-sh "$W" --root "$R" --now "$NOW" --mail-file "$T/no/such/dir/mail" >"$T/out" 2>&1; rc=$?
+sh "$W" --root "$R" --now "$NOW" --mail-file "$T/no/such/dir/mail" --skip-access-check >"$T/out" 2>&1; rc=$?
 expect "mail fails: exit 2" "$rc" 2
 expect "mail fails: incident not marked as sent" "$(cat "$R/backup-watchdog.state" 2>/dev/null)" ""
 expect "mail back: the alert goes out" "$(run; mails)" "$(printf '1\n1')"
 
 reset
-sh "$W" --root "$R" --now "$NOW" >"$T/out" 2>&1; rc=$?
+sh "$W" --root "$R" --now "$NOW" --skip-access-check >"$T/out" 2>&1; rc=$?
 expect "no approved address: exit 2, nothing sent" "$rc" 2
 expect "no approved address: reason logged" "$(grep -c 'mail=failed:4' "$T/out")" 1
 expect "the status line carries no address" "$(grep -c '@' "$T/out")" 0
+
+# --- A backup that never starts: nothing arrives, only the clock moves.
+reset; pair L 0
+expect "just stored: healthy" "$(run)" 0
+NOW=$((NOW + 25 * HOUR)); expect "25 h, no new file: healthy" "$(run)" 0
+NOW=$((NOW + 2 * HOUR)); expect "27 h, no new file: problem" "$(run)" 1
+expect "27 h, no new file: stale" "$(grep -c 'status=stale' "$T/out")" 1
+expect "27 h, no new file: one alert" "$(mails)" 1
+NOW=$((NOW + HOUR)); run >/dev/null; expect "next hour: still one alert" "$(mails)" 1
+
+# --- A backup that failed half-way.
+reset; pair M 3; printf 'age-encryption.org/v1 x
+' > "$B/lm-db-N.dump.age"
+printf '%s lm-db-N.dump.age %s %s
+' "$((NOW - 2 * HOUR))" "$(stat -c %s "$B/lm-db-N.dump.age")" "$(sha256sum "$B/lm-db-N.dump.age" | cut -d' ' -f1)" >> "$B/verified.log"
+expect "one half of a pair, old: problem" "$(run)" 1
+expect "one half of a pair, old: reason" "$(grep -c 'status=incomplete_pair' "$T/out")" 1
+
+reset; pair O 3; printf 'age-encryption.org/v1 x
+' > "$B/lm-db-P.dump.age"
+printf '%s lm-db-P.dump.age %s %s
+' "$((NOW - 60))" "$(stat -c %s "$B/lm-db-P.dump.age")" "$(sha256sum "$B/lm-db-P.dump.age" | cut -d' ' -f1)" >> "$B/verified.log"
+expect "one half arriving right now: healthy" "$(run)" 0
+
+reset; pair Q 3; printf 'age-encryption.org/v1 x
+' > "$B/lm-db-R.dump.age"; touch -d "@$((NOW - 2 * HOUR))" "$B/lm-db-R.dump.age"
+expect "stored file with no record: problem" "$(run)" 1
+expect "stored file with no record: reason" "$(grep -c 'status=unrecorded_file' "$T/out")" 1
+
+reset; pair S 1; : > "$B/lm-db-T.dump.age.part"; touch -d "@$((NOW - 2 * HOUR))" "$B/lm-db-T.dump.age.part"
+expect "transfer left behind: reason" "$(run; grep -c 'status=failed_transfer' "$T/out")" "$(printf '1
+1')"
+reset; pair U 1; : > "$B/lm-db-V.dump.age.part"; touch -d "@$((NOW - 60))" "$B/lm-db-V.dump.age.part"
+expect "transfer in progress: healthy" "$(run)" 0
+
+# --- Wider access than intended, and links.
+reset; pair W1 1; chmod 644 "$B/lm-db-W1.dump.age"
+expect "file too wide: reason" "$(run; grep -c 'status=mode_too_wide' "$T/out")" "$(printf '1
+1')"
+reset; pair W2 1; chmod 660 "$B/lm-db-W2.dump.age"
+expect "group can write: reason" "$(run; grep -c 'status=mode_too_wide' "$T/out")" "$(printf '1
+1')"
+reset; pair W3 1; chmod 755 "$B"
+expect "folder too wide: reason" "$(run; grep -c 'status=mode_too_wide' "$T/out")" "$(printf '1
+1')"
+reset; pair W4 1; chmod 2750 "$B"
+expect "setgid folder: reason" "$(run; grep -c 'status=mode_too_wide' "$T/out")" "$(printf '1
+1')"
+reset; pair W5 1; ln -s "$T/mail" "$B/planted"
+expect "planted link: reason" "$(run; grep -c 'status=symlink' "$T/out")" "$(printf '1
+1')"
+reset; pair W6 1; f="$B/lm-files-W6.tar.age"; mv "$f" "$T/real"; ln -s "$T/real" "$f"
+expect "recorded file swapped for a link: reason" "$(run; grep -c 'status=symlink' "$T/out")" "$(printf '1
+1')"
+reset; pair W7 1; mkdir "$B/planted"
+expect "planted folder: reason" "$(run; grep -c 'status=unexpected_entry' "$T/out")" "$(printf '1
+1')"
+rmdir "$B/planted"
+reset; pair W8 1; chmod 640 "$B/lm-db-W8.dump.age" "$B/lm-files-W8.tar.age" "$B/verified.log"; chmod 750 "$B"
+expect "the intended group read: healthy" "$(run)" 0
+
+# --- Silence can be noticed.
+reset; pair X 0; run >/dev/null
+NOW=$((NOW + 8 * HOUR)); run >/dev/null
+expect "8 h gap in its own runs: told once" "$(grep -c 'was not running' "$M")" 1
+NOW=$((NOW + HOUR)); run >/dev/null
+expect "the next hour: not told again" "$(grep -c 'was not running' "$M")" 1
+
+reset; pair Y 0; run >/dev/null
+i=0; while [ $i -lt 7 ]; do : > "$B/verified.log"; rm -f "$B"/lm-*; NOW=$((NOW + 5 * HOUR)); pair "Y$i" 0; run >/dev/null; i=$((i + 1)); done
+expect "under a week: no sign of life yet" "$(grep -c 'watchdog alive' "$M")" 0
+i=0; while [ $i -lt 28 ]; do : > "$B/verified.log"; rm -f "$B"/lm-*; NOW=$((NOW + 5 * HOUR)); pair "Z$i" 0; run >/dev/null; i=$((i + 1)); done
+expect "after a week: one sign of life" "$(grep -c 'watchdog alive' "$M")" 1
+
+# --- Being able to read a secret is a problem. The real check, with this machine's real account.
+reset; pair AA 1
+sh "$W" --root "$R" --now "$NOW" --mail-file "$M" >"$T/out" 2>&1; rc=$?
+case " $(id -nG 2>/dev/null) " in
+  *" docker "*|*" sudo "*|*" adm "*) expect "an account in an admin group is refused" "$(grep -c 'status=access_too_wide' "$T/out")" 1;;
+  *) expect "a plain account passes the access check" "$rc" 0;;
+esac
 
 echo "$N checks, $FAILS failed"
 [ "$FAILS" = "0" ]

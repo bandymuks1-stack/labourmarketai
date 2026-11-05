@@ -1,107 +1,114 @@
 #!/bin/sh
-# Installs the backup watchdog on the VPS (owner approval 2026-11-04). Run once as root:
+# Installs variant B on the VPS: users lmwatch and lmseo, the watchdog and SEO watch as systemd timers, group read
+# on the encrypted backups, and the receiver's group-read lines. Run once as root, only after the owner's separate
+# approval of the install:
 #   sh install-backup-watchdog.sh <owner-approved alert address>
 #
-# Takes no secret. Downloads one pinned commit and checks every file's sha256 before using it. Sends no
-# mail: the real check runs before the address is set. Changes only: the receiver (one record line, the
-# old copy kept), three new files in bin/, backups/verified.log, one cron file, one config file.
-# The mail test is separate: test-backup-watchdog-mail.sh.
-# --root and --cron-dir exist only to try this somewhere other than the VPS.
+# It stops until the pins below are filled in by a separate reviewed PR (merging this file changes nothing live;
+# nothing on the VPS updates itself from this repository).
+#
+# Takes no secret. The owner puts the alerts-only credential (LM_SMTP_* lines, never the main mailbox's) in
+# /var/lib/lm-watch/env and /var/lib/lm-seo/env, owner the service user, mode 600, before this runs.
+# Sends no mail. The mail test is separate: test-backup-watchdog-mail.sh.
+# Removal: VPS_PRODUCTION_RUNBOOK section 9.1.0b.
 set -eu
 umask 077
-PIN=8ebb43e93408e0ac1a0ef898bc017c52833f2b5a
-RAW="https://raw.githubusercontent.com/bandymuks1-stack/labourmarketai/$PIN/ops/vps"
-RECEIVER_BEFORE=bf3f7031427c0642fdb433d7ef7c24f77aa26d1b54974bb7c89c25b0b435447d
-RECEIVER_AFTER=2efbb369baa7df62d9a5f1143efe34fa943b6b3a928f9c0f1949088cc37a600f
-WATCHDOG=eddae5d0aa5781139378c4983627a29dae50d71cf7ef68762a99ef4f527158b2
-WATCHDOG_TEST=8791d602f809c25c7b6be9454892ecd8049e8d03567a6ccbe82b6356bf1a8c82
-CRON=66b86ad1e4728a652530eb62fff4412aa43c51781933b1aa7524910e47a83850
-# The newest pair stored before the receiver kept a record: full run 41824425911, from that run's log.
-SEED_STAMP=20261104T115318Z
-SEED_DB_BYTES=336902952
-SEED_DB_SHA=3efd828668f9f477b2b52cecafd2aef04beec1832bdf49394c0154b28298c331
-SEED_FILES_BYTES=29693192
-SEED_FILES_SHA=4b0f12c9c9733cae05a44533ab3ee1c729ae99e437e9060d0266be6d4f4d42cb
+PIN=UNSET
+RECEIVER_BEFORE=UNSET
+RECEIVER_AFTER=UNSET
+WATCHDOG=UNSET
+WATCHDOG_TEST=UNSET
+SEO=UNSET
+WATCHDOG_UNIT=UNSET
+WATCHDOG_TIMER=UNSET
+SEO_UNIT=UNSET
+SEO_TIMER=UNSET
+# The newest stored pair, from its run's log, when the receiver has kept no record yet.
+SEED_RUN=UNSET
+SEED_STAMP=UNSET
+SEED_DB_BYTES=UNSET
+SEED_DB_SHA=UNSET
+SEED_FILES_BYTES=UNSET
+SEED_FILES_SHA=UNSET
 
-ROOT=/root/lm-prod; CRON_DIR=/etc/cron.d; TO=""
-while [ $# -gt 0 ]; do
-  case "$1" in
-    --root) ROOT="$2"; shift 2;;
-    --cron-dir) CRON_DIR="$2"; shift 2;;
-    *) TO="$1"; shift;;
-  esac
-done
-BIN="$ROOT/bin"; BK="$ROOT/backups"; REC="$BK/verified.log"; CONF="$ROOT/backup-watchdog.conf"
 stop() { echo "STOP: $1"; exit 1; }
-sha() { sha256sum "$1" | cut -d' ' -f1; }
-
+TO="${1:-}"
+[ "$PIN" != "UNSET" ] || stop "not pinned: installing needs the owner's separate approval and a reviewed PR that sets the pins"
+[ "$(id -u)" = "0" ] || stop "run as root"
 case "$TO" in ?*@?*.?*) ;; *) stop "usage: sh install-backup-watchdog.sh <owner-approved alert address>";; esac
 case "$TO" in *[!A-Za-z0-9.@_+-]*) stop "the address has characters it should not have";; esac
-[ -f "$BIN/lm-deploy-receive.sh" ] || stop "$BIN/lm-deploy-receive.sh is missing"
+systemctl --version >/dev/null 2>&1 || stop "this host has no systemd"
+
+D=/root/lm-prod; BIN="$D/bin"; BK="$D/backups"; REC="$BK/verified.log"; OPT=/opt/lm-watch
+RAW="https://raw.githubusercontent.com/bandymuks1-stack/labourmarketai/$PIN/ops/vps"
+sha() { sha256sum "$1" | cut -d' ' -f1; }
+[ ! -L "$BK" ] && [ -d "$BK" ] || stop "$BK is not a plain folder"
+for d in /var/lib/lm-watch /var/lib/lm-seo; do [ -s "$d/env" ] || stop "$d/env is missing: the owner puts the alerts-only credential there first"; done
 if ls "$BK"/*.part >/dev/null 2>&1; then stop "a backup is arriving right now; try again in a few minutes"; fi
 now_receiver=$(sha "$BIN/lm-deploy-receive.sh")
-if [ "$now_receiver" != "$RECEIVER_AFTER" ] && [ "$now_receiver" != "$RECEIVER_BEFORE" ]; then
-  stop "the installed receiver is neither the expected old version nor the new one: $now_receiver"
-fi
+[ "$now_receiver" = "$RECEIVER_AFTER" ] || [ "$now_receiver" = "$RECEIVER_BEFORE" ] || stop "the installed receiver is neither the expected old version nor the new one"
 
 echo "1. download pinned commit $PIN"
-T=$(mktemp -d "$ROOT/.wdinstall.XXXXXX"); trap 'rm -rf "$T"' EXIT INT TERM
-get() { curl -fsS --max-time 60 -o "$T/$1" "$RAW/$1"; [ "$(sha "$T/$1")" = "$2" ] || stop "$1 does not match its pinned sha256"; echo "   $1 $2"; }
+T=$(mktemp -d); trap 'rm -rf "$T"' EXIT INT TERM
+get() { curl -fsS --max-time 60 -o "$T/$1" "$RAW/$1"; [ "$(sha "$T/$1")" = "$2" ] || stop "$1 does not match its pinned sha256"; echo "   $1 ok"; }
 get lm-deploy-receive.sh "$RECEIVER_AFTER"
 get lm-backup-watchdog.sh "$WATCHDOG"
 get lm-backup-watchdog.test.sh "$WATCHDOG_TEST"
-get labourmarket-backup-watchdog.cron "$CRON"
+get lm-seo-watch.sh "$SEO"
+get lm-backup-watchdog.service "$WATCHDOG_UNIT"
+get lm-backup-watchdog.timer "$WATCHDOG_TIMER"
+get lm-seo-watch.service "$SEO_UNIT"
+get lm-seo-watch.timer "$SEO_TIMER"
 
-echo "2. synthetic test (temporary directory, no real backups, no mail)"
-sh "$T/lm-backup-watchdog.test.sh" > "$T/test.out" 2>&1 || { tail -5 "$T/test.out"; stop "the synthetic test failed; nothing installed"; }
-tail -1 "$T/test.out"
+echo "2. users with no login and no other group"
+getent group lmwatch >/dev/null || groupadd -r lmwatch
+id lmwatch >/dev/null 2>&1 || useradd -r -g lmwatch -G "" -d /nonexistent -M -s /usr/sbin/nologin lmwatch
+getent group lmseo >/dev/null || groupadd -r lmseo
+id lmseo >/dev/null 2>&1 || useradd -r -g lmseo -G "" -d /nonexistent -M -s /usr/sbin/nologin lmseo
+[ "$(id -nG lmwatch)" = "lmwatch" ] && [ "$(id -nG lmseo)" = "lmseo" ] || stop "a service user is in another group"
 
-echo "3. install the files"
-cp "$T/lm-backup-watchdog.sh" "$BIN/lm-backup-watchdog.sh.new"; chmod 700 "$BIN/lm-backup-watchdog.sh.new"; mv "$BIN/lm-backup-watchdog.sh.new" "$BIN/lm-backup-watchdog.sh"
-cp "$T/lm-backup-watchdog.test.sh" "$BIN/lm-backup-watchdog.test.sh"; chmod 700 "$BIN/lm-backup-watchdog.test.sh"
-cp "$T/labourmarket-backup-watchdog.cron" "$BIN/labourmarket-backup-watchdog.cron"; chmod 600 "$BIN/labourmarket-backup-watchdog.cron"
+echo "3. scripts and units"
+install -d -m 755 -o root -g root "$OPT"
+for f in lm-backup-watchdog.sh lm-backup-watchdog.test.sh lm-seo-watch.sh; do install -m 755 -o root -g root "$T/$f" "$OPT/$f"; done
+for f in lm-backup-watchdog.service lm-backup-watchdog.timer lm-seo-watch.service lm-seo-watch.timer; do install -m 644 -o root -g root "$T/$f" "/etc/systemd/system/$f"; done
+install -d -m 700 -o lmwatch -g lmwatch /var/lib/lm-watch /var/lib/lm-watch/backups
+install -d -m 700 -o lmseo -g lmseo /var/lib/lm-seo
+chown lmwatch:lmwatch /var/lib/lm-watch/env; chmod 600 /var/lib/lm-watch/env
+chown lmseo:lmseo /var/lib/lm-seo/env; chmod 600 /var/lib/lm-seo/env
+
+echo "4. receiver, old copy kept"
 if [ "$now_receiver" = "$RECEIVER_BEFORE" ]; then
   mode=$(stat -c %a "$BIN/lm-deploy-receive.sh")
-  [ -e "$BIN/lm-deploy-receive.sh.bak-20261104" ] || cp -p "$BIN/lm-deploy-receive.sh" "$BIN/lm-deploy-receive.sh.bak-20261104"
+  [ -e "$BIN/lm-deploy-receive.sh.bak-variant-b" ] || cp -p "$BIN/lm-deploy-receive.sh" "$BIN/lm-deploy-receive.sh.bak-variant-b"
   cp "$T/lm-deploy-receive.sh" "$BIN/lm-deploy-receive.sh.new"; chmod "$mode" "$BIN/lm-deploy-receive.sh.new"; mv "$BIN/lm-deploy-receive.sh.new" "$BIN/lm-deploy-receive.sh"
-  echo "   receiver replaced, mode $mode, old copy lm-deploy-receive.sh.bak-20261104"
-else
-  echo "   receiver already current"
 fi
 
-echo "4. record for the newest existing pair"
-if [ -s "$REC" ]; then
-  echo "   $REC already has records; not seeding"
-else
+echo "5. record for the newest pair, if none"
+if [ ! -s "$REC" ]; then
   db="lm-db-$SEED_STAMP.dump.age"; files="lm-files-$SEED_STAMP.tar.age"
-  [ "$(sha "$BK/$db")" = "$SEED_DB_SHA" ] || stop "$db does not match the sha256 in the run's log; not recorded"
-  [ "$(sha "$BK/$files")" = "$SEED_FILES_SHA" ] || stop "$files does not match the sha256 in the run's log; not recorded"
+  [ "$(sha "$BK/$db")" = "$SEED_DB_SHA" ] && [ "$(sha "$BK/$files")" = "$SEED_FILES_SHA" ] || stop "the pair does not match its run's sha256"
   {
-    printf '%s %s %s %s seeded-run-41824425911\n' "$(stat -c %Y "$BK/$db")" "$db" "$SEED_DB_BYTES" "$SEED_DB_SHA"
-    printf '%s %s %s %s seeded-run-41824425911\n' "$(stat -c %Y "$BK/$files")" "$files" "$SEED_FILES_BYTES" "$SEED_FILES_SHA"
+    printf '%s %s %s %s seeded-run-%s\n' "$(stat -c %Y "$BK/$db")" "$db" "$SEED_DB_BYTES" "$SEED_DB_SHA" "$SEED_RUN"
+    printf '%s %s %s %s seeded-run-%s\n' "$(stat -c %Y "$BK/$files")" "$files" "$SEED_FILES_BYTES" "$SEED_FILES_SHA" "$SEED_RUN"
   } >> "$REC"
-  chmod 600 "$REC"
-  echo "   recorded $SEED_STAMP from the sha256 values of run 41824425911"
 fi
 
-echo "5. one real check (no address set yet, so it cannot send mail)"
-[ ! -e "$CONF" ] || echo "   note: $CONF already exists; a real problem found now would send one alert"
-sh "$BIN/lm-backup-watchdog.sh" --root "$ROOT" || stop "the check did not report ok; cron and address not installed"
+echo "6. group read: the folder, the backup files and the record only; never a link, no recursion"
+chgrp -h lmwatch "$BK"; chmod u=rwx,g=rx,o=,g-s "$BK"
+find "$BK" -maxdepth 1 -type f \( -name 'lm-db-*.dump.age' -o -name 'lm-files-*.tar.age' -o -name verified.log \) -exec chgrp -h lmwatch {} + -exec chmod 640 {} +
 
-echo "6. cron"
-cp "$BIN/labourmarket-backup-watchdog.cron" "$CRON_DIR/labourmarket-backup-watchdog"; chmod 644 "$CRON_DIR/labourmarket-backup-watchdog"
-[ "$(id -u)" != "0" ] || chown root:root "$CRON_DIR/labourmarket-backup-watchdog"
-grep -v '^#' "$CRON_DIR/labourmarket-backup-watchdog"
+echo "7. address, then the real check through its unit: it must say ok before any timer starts"
+printf 'ALERT_TO=%s\n' "$TO" > /var/lib/lm-watch/backup-watchdog.conf; chown lmwatch:lmwatch /var/lib/lm-watch/backup-watchdog.conf; chmod 600 /var/lib/lm-watch/backup-watchdog.conf
+printf 'ALERT_TO=%s\n' "$TO" > /var/lib/lm-seo/backup-watchdog.conf; chown lmseo:lmseo /var/lib/lm-seo/backup-watchdog.conf; chmod 600 /var/lib/lm-seo/backup-watchdog.conf
+systemctl daemon-reload
+systemctl start lm-backup-watchdog.service
+tail -n 1 /var/lib/lm-watch/backup-watchdog.log | grep -q ' status=ok ' || stop "the check did not report ok; timers not started"
 
-echo "7. address"
-printf 'ALERT_TO=%s\n' "$TO" > "$CONF"; chmod 600 "$CONF"
-echo "   $CONF set, mode $(stat -c %a "$CONF")"
+echo "8. timers"
+systemctl enable --now lm-backup-watchdog.timer lm-seo-watch.timer
+systemctl list-timers 'lm-*' --no-pager
 
 cat <<EOF
 
-DONE. No mail was sent.
-Next: sh test-backup-watchdog-mail.sh <address> sends the two test mails; someone must see them arrive.
-Check after minute 7: tail -3 $ROOT/backup-watchdog.log; journalctl -u cron --since '2 hours ago' | grep lm-backup-watchdog
-Remove: rm $CRON_DIR/labourmarket-backup-watchdog $CONF $ROOT/backup-watchdog.state $BIN/lm-backup-watchdog.sh $BIN/lm-backup-watchdog.test.sh $BIN/labourmarket-backup-watchdog.cron
-Old receiver, if needed: cp -p $BIN/lm-deploy-receive.sh.bak-20261104 $BIN/lm-deploy-receive.sh
+DONE. Next: runuser -u lmwatch -- sh test-backup-watchdog-mail.sh <address> sends the two test mails; someone must see them arrive.
 EOF

@@ -1,4 +1,0 @@
-# /etc/cron.d/labourmarket-seo-watch (owner order 2026-11-04, register IDX-16). About 20 public requests a day.
-# Install: install -m 644 -o root -g root /root/lm-prod/bin/labourmarket-seo-watch.cron /etc/cron.d/labourmarket-seo-watch
-SHELL=/bin/sh
-37 5 * * * root nice -n 19 sh /root/lm-prod/bin/lm-seo-watch.sh >> /root/lm-prod/seo-watch.log 2>&1
