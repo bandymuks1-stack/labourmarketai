@@ -22,7 +22,7 @@ begin
     where not exists (select 1 from public.public_vacancies v where v.id = s.id and v.is_active);
   select count(*) into v_changed from public.public_vacancy_search s
     join public.public_vacancies v on v.id = s.id
-    where v.occupation_raw is distinct from s.occupation_raw
+    where s.search_text is distinct from public.public_vacancy_search_fold(coalesce(v.title_raw, '') || ' ' || coalesce(v.occupation_raw, ''))
        or v.expires_at is distinct from s.expires_at
        or v.published_at is distinct from s.published_at;
   raise notice 'RECONCILE source=% copy=% missing=% extra=% changed=%', v_source, v_copy, v_missing, v_extra, v_changed;

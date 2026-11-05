@@ -19,12 +19,13 @@ export interface ProfessionLabel {
   readonly label: string;
 }
 
-/** Lowercase, diacritics removed ("Kepejas" and "kepejas" are the same word). */
+/** Lowercase, diacritics removed ("Kepejas" and "kepejas" are the same word), ß as ss ("Schweißer" and "Schweisser"). */
 export function foldForMatch(s: string): string {
   return s
     .normalize("NFD")
     .replace(/\p{M}/gu, "")
     .toLowerCase()
+    .replace(/ß/g, "ss")
     .replace(/\s+/g, " ")
     .trim();
 }

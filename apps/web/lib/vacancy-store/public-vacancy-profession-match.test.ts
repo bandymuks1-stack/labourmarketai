@@ -83,6 +83,15 @@ describe("the real catalogue: a word people type for a profession stays the filt
     }
   });
 
+  it("schweisser is the same word as the catalogue's Schweißer, on every active board", () => {
+    for (const board of ACTIVE) {
+      const others = ACTIVE.filter((l) => l !== board).map(catalogue);
+      for (const term of ["schweißer", "schweisser", "Schweisser", "SCHWEISSER"]) {
+        expect(matchProfessionAcrossLocales(term, catalogue(board), others), `${board} ${term}`).toBe("welder");
+      }
+    }
+  });
+
   it("words the catalogue does not name stay free text", () => {
     const others = ACTIVE.filter((l) => l !== "lt").map(catalogue);
     for (const term of ["kock", "el", "ab", "ter", "snickare", "undersköterska", "zzqx"]) {

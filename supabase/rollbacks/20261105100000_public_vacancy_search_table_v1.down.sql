@@ -5,3 +5,4 @@ drop trigger if exists public_vacancy_search_sync_del on public.public_vacancies
 drop trigger if exists public_vacancy_search_sync_upd on public.public_vacancies;
 drop function if exists public.public_vacancy_search_sync();
 drop table if exists public.public_vacancy_search;
+drop function if exists public.public_vacancy_search_fold(text);
