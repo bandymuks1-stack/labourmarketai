@@ -711,7 +711,7 @@ Owner's order: the main criterion is that a person really reaches the goal. Thes
 | ID | Goal reached | Steps to the result | Clear what to press next | Shows it is running | No duplicates | Clear errors | Input not lost | Works without an agent's help | Phone |
 |---|---|---|---|---|---|---|---|---|---|
 | SC-1 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
-| SC-2 | PASS | NOT VERIFIED | NOT VERIFIED | **FAIL until #3089 is proven**: a saved row showed nothing for 6 to 30 s under load (P-9) | **FAIL**: `confirmCvEducationAction` still stores a repeat CV import twice. Profile form fixed by #3089, not proven | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-2 | PASS | NOT VERIFIED | NOT VERIFIED | Profile saves: PASS in the walk 41994411748, row in under 1 s (no person yet) | **FAIL**: `confirmCvEducationAction` still stores a repeat CV import twice. Profile forms fixed by #3089 and proven in that walk | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
 | SC-3 | **FAIL** | 1 query, measured | NOT VERIFIED | NOT VERIFIED: first try 9.4 s | not applicable | **FAIL**: `slaugytojas` says "0 found" when matching ads exist | NOT VERIFIED | **FAIL**: the word a person uses finds nothing | 390 px Chromium: same FAIL |
 | SC-4 | BLOCKED | Offer: home door, sign-up, 4 fields. Finding it signed out: no path | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | **FAIL** for the customer: no public page | 390 px Chromium: 404 |
 | SC-5 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
