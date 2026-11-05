@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
-  buildModel,
+  buildModel as buildUntypedModel,
   deriveState,
   expandIds,
   generate,
@@ -17,6 +17,14 @@ import {
  * The function map (owner order 2026-11-05) is an OUTPUT of FUNCTION_REGISTER.md, not
  * a second source of truth: same register, same page, every status from the rows.
  */
+type MapFunction = { id: string; status: string; state: string | null; browser: string; browserLt: string };
+type MapNeed = { slug: string; done: number; total: number; pct: number };
+type MapModel = ReturnType<typeof buildUntypedModel> & {
+  groups: { functions: MapFunction[] }[];
+  needs: MapNeed[];
+};
+const buildModel = (md: string, coordination?: string) => buildUntypedModel(md, coordination) as unknown as MapModel;
+
 const REGISTER = readFileSync(join(process.cwd(), "..", "..", "docs", "program", "FUNCTION_REGISTER.md"), "utf8");
 
 describe("the map is reproducible from the register", () => {
@@ -147,7 +155,7 @@ describe("the catalogue agreed with J-15", () => {
       "| 1.5 | E lt | | | | samdymas | eisena | | |",
       "| 1.6 | F lt | | | | samdymas | savininkas | | |",
     ].join("\n");
-    const need = buildModel(md).needs.find((n: { slug: string }) => n.slug === "samdymas");
+    const need = buildModel(md).needs.find((n) => n.slug === "samdymas") as MapNeed;
     expect([need.done, need.total]).toEqual([2, 5]);
     expect(need.pct).toBe(40);
   });
