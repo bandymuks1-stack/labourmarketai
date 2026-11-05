@@ -184,7 +184,7 @@ ok "no capabilities" "$(grep -c '^caps=0000000000000000' $Q/probe.out)" 1
 clean lm-seo-watch.service
 
 echo "== the real watchdog in its real unit"
-logs() { journalctl --sync 2>/dev/null; journalctl -u "$1" -o cat --no-pager | grep ' status=' ; }
+logs() { journalctl --sync 2>/dev/null; journalctl -u "$1" -o cat --no-pager | grep 'Z status=' ; }
 last() { logs lm-backup-watchdog.service | tail -n 1; }
 now=$(date -u +%s); M=$S/mail; rm -f $S/backup-watchdog.state $S/backup-watchdog.lastrun $S/backup-watchdog.alive
 run() { # extra arguments
@@ -299,7 +299,6 @@ STUB
 chmod 755 $X/bin/curl
 PATH=$X/bin:$PATH command sh $X/install.sh a@example.test > $X/out 2>&1; rc=$?
 cat $X/out | tail -n 25
-systemctl status lm-backup-watchdog.service --no-pager -n 15 2>&1 | tail -n 22
 ok "the installer finishes" "$rc" 0
 ok "lmwatch: no login, one group" "$(id -nG lmwatch) $(getent passwd lmwatch | cut -d: -f7)" "lmwatch /usr/sbin/nologin"
 ok "lmseo: no login, one group" "$(id -nG lmseo) $(getent passwd lmseo | cut -d: -f7)" "lmseo /usr/sbin/nologin"

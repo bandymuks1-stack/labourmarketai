@@ -148,7 +148,7 @@ echo "8. the real check through its unit: it must say ok or no_record before any
 since=$(date '+%F %T')
 systemctl start lm-backup-watchdog.service || true
 journalctl --sync 2>/dev/null || true
-line=$(journalctl -u lm-backup-watchdog.service --since "$since" -o cat --no-pager | grep ' status=' | tail -n 1 || true)
+line=$(journalctl -u lm-backup-watchdog.service --since "$since" -o cat --no-pager | grep 'Z status=' | tail -n 1 || true)
 case "$line" in
   *" status=ok "*) echo "   status=ok";;
   *" status=no_record "*)
