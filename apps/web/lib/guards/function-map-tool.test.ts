@@ -4,11 +4,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildModel,
+  deriveState,
   expandIds,
   generate,
   parseFunctions,
   parseJourneys,
   parseMapTable,
+  parseOpenItems,
 } from "../../../../.github/scripts/function-map.mjs";
 
 /**
@@ -73,7 +75,7 @@ describe("the map is reproducible from the register", () => {
 describe("what a partial catalogue shows", () => {
   it("today's map says what is derived instead of pretending", () => {
     const empty = buildModel("## A\n\n| ID | Function | Status | Last checked | Evidence | In production | Issue |\n|---|\n| 1.1 | Sign-up | FAIL | 2026-11-01 | run | no | broken |\n");
-    expect(empty.partial).toEqual({ links: true, data: true, blockers: true, stages: true, groups: true });
+    expect(empty.partial).toEqual({ links: true, data: true, blockers: true, stages: true, groups: true, catalogue: true });
     expect(empty.stages[0].ids).toEqual(["1.1"]);
   });
 
@@ -109,6 +111,68 @@ describe("what a partial catalogue shows", () => {
       "| 1.1 | 9.9 | depends | |",
     ].join("\n");
     expect(buildModel(md).unknownIds).toEqual(["9.9"]);
+  });
+});
+
+describe("the catalogue agreed with J-15", () => {
+  const HEAD = "| ID | Function | Status | Last checked | Evidence | In production | Issue |\n|---|";
+  const CAT = "### Map: functions\n| ID | Pavadinimas | Ką leidžia | Kam | Kur rasti | Poreikiai | Naršyklė | Kaina | Vykdytojas |\n|---|---|---|---|---|---|---|---|---|";
+
+  it("state is derived from the row's status, never stored", () => {
+    expect(deriveState("LIVE_VERIFIED")).toBe("veikianti");
+    expect(deriveState("PASS_CI_ONLY")).toBe("testuojama");
+    expect(deriveState("NOT_VERIFIED")).toBe("testuojama");
+    expect(deriveState("BLOCKED")).toBe("užblokuota");
+    expect(deriveState("FAIL")).toBe("užblokuota");
+    expect(deriveState("NOT_IMPLEMENTED")).toBe("planuojama");
+    expect(deriveState("NOT_IMPLEMENTED", true)).toBe("kuriama");
+    expect(deriveState("DUPLICATE")).toBeNull();
+    expect(deriveState("OPTIONAL_TEST")).toBeNull();
+  });
+
+  it("a need counts works AND seen in a browser; a missing value is not done", () => {
+    const md = [
+      "## A", HEAD,
+      "| 1.1 | A | LIVE_VERIFIED | 2026-11-01 | r | yes | |",
+      "| 1.2 | B | LIVE_VERIFIED | 2026-11-01 | r | yes | |",
+      "| 1.3 | C | LIVE_VERIFIED | 2026-11-01 | r | yes | |",
+      "| 1.4 | D | FAIL | 2026-11-01 | r | no | |",
+      "| 1.5 | E | DUPLICATE | 2026-11-01 | r | no | |",
+      "| 1.6 | F | LIVE_VERIFIED | 2026-11-01 | r | yes | |",
+      CAT,
+      "| 1.1 | A lt | | | | samdymas | eisena | | |",
+      "| 1.2 | B lt | | | | samdymas, projektai | api | | |",
+      "| 1.3 | C lt | | | | samdymas | | | |",
+      "| 1.4 | D lt | | | | samdymas | eisena | | |",
+      "| 1.5 | E lt | | | | samdymas | eisena | | |",
+      "| 1.6 | F lt | | | | samdymas | savininkas | | |",
+    ].join("\n");
+    const need = buildModel(md).needs.find((n: { slug: string }) => n.slug === "samdymas");
+    expect([need.done, need.total]).toEqual([2, 5]);
+    expect(need.pct).toBe(40);
+  });
+
+  it("an empty browser value reads NOT VERIFIED, and `eisena` is not called a person", () => {
+    const md = ["## A", HEAD, "| 1.1 | A | LIVE_VERIFIED | 2026-11-01 | r | yes | |", "| 1.2 | B | LIVE_VERIFIED | 2026-11-01 | r | yes | |", CAT, "| 1.1 | A | | | | | eisena | | |"].join("\n");
+    const [a, b] = buildModel(md).groups[0].functions;
+    expect(a.browserLt).toMatch(/Playwright Chromium, ne žmogus/);
+    expect(b.browser).toBe("");
+    expect(b.browserLt).toMatch(/NOT VERIFIED/);
+  });
+
+  it("`kuriama` needs a pull request named on an open item about the row", () => {
+    const md = ["## A", HEAD, "| 1.1 | A | NOT_IMPLEMENTED | 2026-11-01 | r | no | |"].join("\n");
+    expect(buildModel(md).groups[0].functions[0].state).toBe("planuojama");
+    const coord = "### Open items\n| ID | Item | Rows |\n|---|---|---|\n| OI-1 | built in #3001 | 1.1 |";
+    expect(parseOpenItems(coord)[0].ID).toBe("OI-1");
+    expect(buildModel(md, coord).groups[0].functions[0].state).toBe("kuriama");
+  });
+
+  it("a catalogue id or need the register does not know is reported", () => {
+    const md = ["## A", HEAD, "| 1.1 | A | FAIL | 2026-11-01 | r | no | |", CAT, "| 7.7 | X | | | | | | | |", "| 1.1 | A | | | | nera-tokio | | | |"].join("\n");
+    const model = buildModel(md);
+    expect(model.unknownIds).toEqual(["7.7"]);
+    expect(model.unknownNeeds).toEqual(["nera-tokio"]);
   });
 });
 

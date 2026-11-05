@@ -20,6 +20,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const REGISTER_PATH = join(ROOT, "docs", "program", "FUNCTION_REGISTER.md");
+export const COORDINATION_PATH = join(ROOT, "docs", "program", "COORDINATION_REGISTER.md");
 
 export const STATUSES = [
   "LIVE_VERIFIED",
@@ -82,6 +83,40 @@ const JOURNEY_LT = {
   "J-18": "Savo duomenų eksportas ir ištrynimas",
   "J-19": "Augimas: galimi gebėjimai ir mokymosi kryptis",
 };
+
+/** The catalogue's human needs, in the owner's order (`Map: functions`, Poreikiai). */
+const NEEDS_LT = {
+  mokymasis: "Mokymasis",
+  "pirmas-darbas": "Pirmas darbas",
+  isidarbinimas: "Įsidarbinimas",
+  "savarankiskos-paslaugos": "Savarankiškos paslaugos",
+  samdymas: "Samdymas",
+  projektai: "Projektai",
+  "verslo-valdymas": "Verslo valdymas",
+  tobulejimas: "Tobulėjimas",
+  "karjeros-keitimas": "Karjeros keitimas",
+  senjorai: "Senjorai",
+};
+
+const BROWSER_LT = {
+  eisena: "Automatinė eisena gamyboje (Playwright Chromium, ne žmogus Chrome naršyklėje)",
+  savininkas: "Savininkas ar tikras naudotojas naršyklėje",
+  api: "Įrodyta gamyboje be naršyklės",
+  ne: "Naršyklėje netikrinta",
+  "": "NOT VERIFIED: neįvertinta",
+};
+
+/**
+ * The function's state, DERIVED and never stored (agreed with J-15, 2026-11-05).
+ * `kuriama` needs a pull request named on a blocker or open item about the row.
+ */
+export function deriveState(status, hasNamedPr = false) {
+  if (status === "LIVE_VERIFIED") return "veikianti";
+  if (status === "PASS_CI_ONLY" || status === "NOT_VERIFIED") return "testuojama";
+  if (status === "BLOCKED" || status === "FAIL") return "užblokuota";
+  if (status === "NOT_IMPLEMENTED") return hasNamedPr ? "kuriama" : "planuojama";
+  return null;
+}
 
 const JOURNEY_STATE_LT = { complete: "Pasiekiama", partial: "Iš dalies", blocked: "Užblokuota", broken: "Nutrūksta" };
 
@@ -213,6 +248,27 @@ export function parseMapTable(md, title) {
   return rows;
 }
 
+/** `### Open items` of COORDINATION_REGISTER.md; a public file, optional here. */
+export function parseOpenItems(md) {
+  const lines = md.split("\n");
+  const start = lines.findIndex((l) => l.trim() === "### Open items");
+  if (start < 0) return [];
+  let header = null;
+  const rows = [];
+  for (const line of lines.slice(start + 1)) {
+    if (line.startsWith("#")) break;
+    if (!line.startsWith("|")) continue;
+    const c = cellsOf(line);
+    if (/^-+$/.test(c[0])) continue;
+    if (!header) {
+      header = c;
+      continue;
+    }
+    rows.push(Object.fromEntries(header.map((h, i) => [h, plain(c[i] ?? "")])));
+  }
+  return rows;
+}
+
 const inDenominator = (f) => f.status !== "DUPLICATE" && f.status !== "OPTIONAL_TEST";
 
 function countsOf(functions) {
@@ -226,8 +282,9 @@ function countsOf(functions) {
 }
 
 /** Everything the page shows, from the register text alone. Deterministic. */
-export function buildModel(rawMd) {
+export function buildModel(rawMd, rawCoordination = "") {
   const md = rawMd.replace(/\r\n/g, "\n");
+  const coordination = rawCoordination.replace(/\r\n/g, "\n");
   const groupsLt = new Map(parseMapTable(md, "groups").map((r) => [Number(r.Group), r]));
   const groups = parseFunctions(md).map((g) => ({
     number: g.number,
@@ -237,8 +294,50 @@ export function buildModel(rawMd) {
     functions: g.functions,
     counts: countsOf(g.functions),
   }));
+  const openItems = parseOpenItems(coordination);
+  const prNamedFor = new Set();
+  for (const b of parseMapTable(md, "blockers")) {
+    if (/#\d{2,5}/.test(Object.values(b).join(" "))) expandIds(b.Affects ?? "").forEach((id) => prNamedFor.add(id));
+  }
+  for (const item of openItems) {
+    if (/#\d{2,5}/.test(Object.values(item).join(" "))) expandIds(item.Rows ?? "").forEach((id) => prNamedFor.add(id));
+  }
+  const catalogue = new Map(parseMapTable(md, "functions").map((r) => [r.ID, r]));
+  for (const g of groups) {
+    g.functions = g.functions.map((f) => {
+      const c = catalogue.get(f.id);
+      return {
+        ...f,
+        state: deriveState(f.status, prNamedFor.has(f.id)),
+        lt: c?.Pavadinimas || "",
+        does: c?.["Ką leidžia"] || "",
+        forWhom: c?.Kam || "",
+        where: c?.["Kur rasti"] || "",
+        needs: (c?.Poreikiai ?? "").split(/,\s*/).filter(Boolean),
+        browser: c?.["Naršyklė"] ?? "",
+        browserLt: BROWSER_LT[c?.["Naršyklė"] ?? ""] ?? c?.["Naršyklė"] ?? "",
+        price: c?.Kaina || "",
+        executor: c?.Vykdytojas || "",
+      };
+    });
+  }
   const all = groups.flatMap((g) => g.functions);
   const known = new Set(all.map((f) => f.id));
+  // The fourth measure: works AND a browser saw it, over every counted row of the
+  // need. A missing catalogue value counts as not done.
+  const needs = Object.entries(NEEDS_LT).map(([slug, lt]) => {
+    const rows = all.filter((f) => inDenominator(f) && f.needs.includes(slug));
+    const done = rows.filter((f) => f.state === "veikianti" && (f.browser === "eisena" || f.browser === "savininkas"));
+    return {
+      slug,
+      lt,
+      done: done.length,
+      total: rows.length,
+      pct: rows.length ? Math.round((done.length / rows.length) * 1000) / 10 : 0,
+      ids: rows.map((f) => f.id),
+    };
+  });
+  const unknownNeeds = [...new Set(all.flatMap((f) => f.needs))].filter((n) => !(n in NEEDS_LT));
   const statusOf = new Map(all.map((f) => [f.id, f.status]));
 
   const mapJourneys = parseMapTable(md, "journeys");
@@ -322,6 +421,7 @@ export function buildModel(rawMd) {
       ...journeys.flatMap((j) => j.steps.map((s) => s.id)),
       ...mapLinks.flatMap((l) => [l.From, l.To]),
       ...mapStages.flatMap((s) => expandIds(s.Functions)),
+      ...catalogue.keys(),
     ]),
   ].filter((id) => /^\d+\.\d+$/.test(id) && !known.has(id));
 
@@ -337,7 +437,12 @@ export function buildModel(rawMd) {
       blockers: mapBlockers.length === 0,
       stages: mapStages.length === 0,
       groups: groupsLt.size === 0,
+      catalogue: catalogue.size === 0,
     },
+    catalogued: all.filter((f) => catalogue.has(f.id)).length,
+    needs,
+    unknownNeeds,
+    openItems,
     counts,
     journeyTotals: {
       total: journeys.length,
@@ -393,6 +498,30 @@ function graph() {
   return '<svg class="graph" viewBox="0 0 ' + W + " " + H + '" role="group" aria-label="Funkcijų grupės ir ryšiai tarp jų">' + lines + nodes + "</svg>";
 }
 
+function needsSection() {
+  if (M.partial.catalogue) return partial("Žmogaus poreikiai atsiras, kai registre bus užpildyta lentelė „Map: functions“. Kol kas rodomos techninės grupės.");
+  const cards = M.needs.map((n) => '<button class="card" data-need="' + esc(n.slug) + '"><strong>' + esc(n.lt) + "</strong><b class=\"big\">" + n.done + " / " + n.total + "</b><small>" + n.pct + " %: veikia ir matyta naršyklėje</small></button>").join("");
+  return (M.catalogued < M.counts.total ? partial("Katalogas užpildytas " + M.catalogued + " funkcijų. Neužpildytos skaičiuojamos kaip nepadarytos.") : "") +
+    '<p class="rule">Taisyklė: funkcija veikia gamyboje ir ją matė automatinė eisena (Playwright Chromium) ar žmogus naršyklėje, padalinta iš visų to poreikio funkcijų.</p><div class="cards">' + cards + "</div>";
+}
+
+function needDetail(slug) {
+  const n = M.needs.find((x) => x.slug === slug);
+  if (!n) return;
+  const box = $("#detail");
+  box.innerHTML = '<div class="dh"><h3>' + esc(n.lt) + " · " + n.done + " / " + n.total + '</h3><button id="close" aria-label="Uždaryti">✕</button></div><ul>' +
+    n.ids.map((id) => { const f = fn.get(id); return "<li>" + dot(f.status) + "<span>" + esc(f.lt || f.name) + (f.does ? "<br><small>" + esc(f.does) + "</small>" : "") + "</span><small>" + esc(f.state || "") + (f.browserLt ? " · " + esc(f.browserLt) : "") + "</small></li>"; }).join("") + "</ul>";
+  box.hidden = false;
+  $("#close").onclick = () => { box.hidden = true; };
+  box.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
+function openItemsSection() {
+  if (!M.openItems.length) return "";
+  const keys = Object.keys(M.openItems[0]);
+  return '<section><h2>Atviri darbai</h2><div class="tw"><table><thead><tr>' + keys.map((k) => "<th>" + esc(k) + "</th>").join("") + "</tr></thead><tbody>" + M.openItems.map((r) => "<tr>" + keys.map((k) => "<td>" + esc(r[k]) + "</td>").join("") + "</tr>").join("") + "</tbody></table></div></section>";
+}
+
 function groupCards() {
   return '<div class="cards">' + M.groups.map((g) =>
     '<button class="card" data-group="' + g.number + '"><span class="num">' + g.number + "</span><strong>" + esc(g.lt) + "</strong>" + bar(g.counts) +
@@ -418,6 +547,7 @@ function stagesList() {
 
 function owner() {
   return "<section><h2>Kiek padaryta</h2>" + measures() + "</section>" +
+    "<section><h2>Pagal žmogaus poreikį</h2>" + needsSection() + "</section>" +
     "<section><h2>Funkcijų grupės</h2>" + legend() + '<p class="rule">Paspausk grupę, kad matytum jos funkcijas. Funkcijų pavadinimai registre kol kas angliški.</p>' + groupCards() + "</section>" +
     "<section><h2>Kaip grupės susijusios</h2>" + (M.partial.links ? partial("Ryšiai kol kas išvesti tik iš žmogaus kelionių eilės. Tikros priklausomybės dar neįrašytos į registrą.") : "") + graph() + "</section>" +
     "<section><h2>Žmogaus kelionės: nuo registracijos iki rezultato</h2><ul class=\"journeys\">" + M.journeys.map((j) => journeyChain(j, false)).join("") + "</ul></section>" +
@@ -427,8 +557,8 @@ function owner() {
 
 function technical() {
   const filter = '<div class="filters"><input id="q" type="search" placeholder="Ieškoti: ID, pavadinimas, įrodymas" aria-label="Ieškoti funkcijų"><select id="st" aria-label="Filtruoti pagal būseną"><option value="">Visos būsenos</option>' + Object.keys(M.statusLt).map((s) => '<option value="' + s + '">' + s + "</option>").join("") + "</select><span id=\"cnt\" role=\"status\"></span></div>";
-  const groups = M.groups.map((g) => '<details class="tg" data-group="' + g.number + '"><summary><b>' + g.number + " " + esc(g.name) + "</b>" + bar(g.counts) + "<small>" + g.counts.builtPct + " % sukurta · " + g.counts.verifiedPct + ' % patikrinta</small></summary><div class="tw"><table><thead><tr><th>ID</th><th>Funkcija</th><th>Būsena</th><th>Tikrinta</th><th>Įrodymas</th><th>Liko</th></tr></thead><tbody>' +
-    g.functions.map((f) => '<tr data-s="' + esc(f.status) + '" data-t="' + esc((f.id + " " + f.name + " " + f.evidence + " " + f.issue).toLowerCase()) + '"><td>' + esc(f.id) + "</td><td>" + esc(f.name) + "</td><td>" + dot(f.status) + esc(f.status) + "</td><td>" + esc(f.checked) + '</td><td class="ev">' + esc(f.evidence) + '</td><td class="ev">' + esc(f.issue) + "</td></tr>").join("") + "</tbody></table></div></details>").join("");
+  const groups = M.groups.map((g) => '<details class="tg" data-group="' + g.number + '"><summary><b>' + g.number + " " + esc(g.name) + "</b>" + bar(g.counts) + "<small>" + g.counts.builtPct + " % sukurta · " + g.counts.verifiedPct + ' % patikrinta</small></summary><div class="tw"><table><thead><tr><th>ID</th><th>Funkcija</th><th>Būsena</th><th>Būklė</th><th>Naršyklė</th><th>Tikrinta</th><th>Įrodymas</th><th>Liko</th></tr></thead><tbody>' +
+    g.functions.map((f) => '<tr data-s="' + esc(f.status) + '" data-t="' + esc((f.id + " " + f.name + " " + f.evidence + " " + f.issue).toLowerCase()) + '"><td>' + esc(f.id) + "</td><td>" + esc(f.name) + "</td><td>" + dot(f.status) + esc(f.status) + "</td><td>" + esc(f.state || "") + "</td><td>" + esc(f.browser || "NOT VERIFIED") + "</td><td>" + esc(f.checked) + '</td><td class="ev">' + esc(f.evidence) + '</td><td class="ev">' + esc(f.issue) + "</td></tr>").join("") + "</tbody></table></div></details>").join("");
   const links = M.links.map((l) => "<tr><td>" + esc(l.from) + "</td><td>" + esc(l.to) + "</td><td>" + esc(l.kind) + "</td><td>" + esc(l.data || l.journey) + "</td></tr>").join("");
   const sc = M.scenarios.map((s) => "<tr><td>" + esc(s.id) + "</td><td>" + esc(s.name) + "</td><td>" + esc(s.status) + '</td><td class="ev">' + esc(s.proof) + '</td><td class="ev">' + esc(s.problem) + "</td></tr>").join("");
   return "<section><h2>Būsena ir taisyklė</h2>" + measures() + '<p class="rule">Vardiklis: ' + M.counts.total + " funkcijos, be DUPLICATE ir OPTIONAL_TEST. Sukurta: viskas, išskyrus NOT_IMPLEMENTED. Patikrinta: tik LIVE_VERIFIED. Kelionė: tik tada, kai registre jos būsena complete.</p>" + legend() + "</section>" +
@@ -437,7 +567,7 @@ function technical() {
     "<section><h2>Kelionės</h2><ul class=\"journeys\">" + M.journeys.map((j) => journeyChain(j, true)).join("") + "</ul></section>" +
     "<section><h2>Scenarijai</h2><div class=\"tw\"><table><thead><tr><th>ID</th><th>Scenarijus</th><th>Būsena</th><th>Įrodymas</th><th>Problema</th></tr></thead><tbody>" + sc + "</tbody></table></div></section>" +
     "<section><h2>Kritiniai trukdžiai</h2>" + blockersList(true) + "</section>" +
-    "<section><h2>Etapai</h2>" + stagesList() + "</section>";
+    "<section><h2>Etapai</h2>" + stagesList() + "</section>" + openItemsSection();
 }
 
 function detail(number) {
@@ -445,7 +575,7 @@ function detail(number) {
   if (!g) return;
   const box = $("#detail");
   box.innerHTML = '<div class="dh"><h3>' + g.number + " " + esc(g.lt) + '</h3><button id="close" aria-label="Uždaryti">✕</button></div>' + bar(g.counts) +
-    "<ul>" + g.functions.map((f) => "<li>" + dot(f.status) + "<span>" + esc(f.name) + "</span><small>" + esc(M.statusLt[f.status] || f.status) + "</small></li>").join("") + "</ul>";
+    "<ul>" + g.functions.map((f) => "<li>" + dot(f.status) + "<span>" + esc(f.lt || f.name) + "</span><small>" + esc(M.statusLt[f.status] || f.status) + "</small></li>").join("") + "</ul>";
   box.hidden = false;
   document.querySelectorAll(".graph line").forEach((l) => l.classList.toggle("on", l.dataset.a == number || l.dataset.b == number));
   $("#close").onclick = () => { box.hidden = true; };
@@ -460,6 +590,7 @@ function show(view) {
     el.addEventListener("click", () => detail(Number(el.dataset.group)));
     el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); detail(Number(el.dataset.group)); } });
   });
+  document.querySelectorAll("[data-need]").forEach((el) => el.addEventListener("click", () => needDetail(el.dataset.need)));
   const q = $("#q"), st = $("#st");
   if (q) {
     const run = () => {
@@ -494,7 +625,7 @@ section{padding:18px 0;border-top:1px solid var(--line)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;list-style:none;padding:0;margin:0 0 12px;font-size:13px;color:var(--tx2)}.legend li{display:flex;align-items:center;gap:6px}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none;background:var(--none)}.s-LIVE_VERIFIED{background:var(--ok)}.s-PASS_CI_ONLY{background:var(--ci)}.s-NOT_VERIFIED{background:var(--nv)}.s-BLOCKED{background:var(--wait)}.s-FAIL{background:var(--bad)}.s-NOT_IMPLEMENTED{background:var(--none)}.s-OPTIONAL_TEST,.s-DUPLICATE,.s-UNKNOWN{background:transparent;border:1px solid var(--tx3)}
 .bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--card2);gap:1px;width:100%}.bar i{display:block}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}.card{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--tx);font:inherit;cursor:pointer;display:flex;flex-direction:column;gap:6px}.card:hover,.card:focus-visible{border-color:var(--gold)}.card .num{color:var(--tx3);font-size:13px}.card small{color:var(--tx3);font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}.card{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--tx);font:inherit;cursor:pointer;display:flex;flex-direction:column;gap:6px}.card:hover,.card:focus-visible{border-color:var(--gold)}.card .num{color:var(--tx3);font-size:13px}.card .big{font-size:24px;font-variant-numeric:tabular-nums}.card small{color:var(--tx3);font-size:13px}
 #detail{position:sticky;bottom:0;background:var(--card2);border:1px solid var(--gold);border-radius:10px 10px 0 0;padding:12px 14px;max-height:55vh;overflow:auto;margin:0 auto;max-width:1048px}#detail ul{list-style:none;padding:0;margin:8px 0 0}#detail li{display:grid;grid-template-columns:14px 1fr auto;gap:8px;align-items:center;padding:4px 0;font-size:14px}#detail small{color:var(--tx3);font-size:12px}.dh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}.dh button{min-width:44px;min-height:44px;background:none;border:0;color:var(--tx);font-size:18px;cursor:pointer}
 .graph{width:100%;height:auto;display:block;max-width:760px;margin:0 auto}.graph line{stroke:var(--line)}.graph line.on{stroke:var(--gold)}.node{cursor:pointer}.node circle{fill:var(--card);stroke:var(--tx3)}.node:hover circle,.node:focus-visible circle{stroke:var(--gold)}.node text{text-anchor:middle;fill:var(--tx)}.nn{font-size:14px;font-weight:600}.np{font-size:11px;fill:var(--tx3)!important}
 .journeys,.blockers{list-style:none;padding:0;margin:0;display:grid;gap:8px}.journey,.blockers li{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}.journey>div:first-child{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.journey em{font-style:normal;font-size:13px;color:var(--ok);flex:none}.j-partial em{color:var(--wait)}.j-blocked em,.j-broken em{color:var(--bad)}.journey small,.blockers small{color:var(--tx3);font-size:13px;overflow-wrap:anywhere}.blockers span{color:var(--tx2);font-size:14px}
@@ -526,8 +657,8 @@ export function renderHtml(model) {
 `;
 }
 
-export function generate(md) {
-  return renderHtml(buildModel(md));
+export function generate(md, coordination = "") {
+  return renderHtml(buildModel(md, coordination));
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
@@ -536,8 +667,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     console.error("usage: node .github/scripts/function-map.mjs --out <file.html>");
     process.exit(2);
   }
-  const model = buildModel(readFileSync(REGISTER_PATH, "utf8"));
+  const model = buildModel(readFileSync(REGISTER_PATH, "utf8"), readFileSync(COORDINATION_PATH, "utf8"));
   if (model.unknownIds.length) console.warn(`function-map: ids not in the register: ${model.unknownIds.join(", ")}`);
+  if (model.unknownNeeds.length) console.warn(`function-map: unknown needs: ${model.unknownNeeds.join(", ")}`);
   writeFileSync(process.argv[i + 1], renderHtml(model));
   console.log(
     `function-map: ${process.argv[i + 1]} — ${model.counts.total} functions, ${model.counts.verified} verified, ${model.journeyTotals.complete}/${model.journeyTotals.total} journeys`,
