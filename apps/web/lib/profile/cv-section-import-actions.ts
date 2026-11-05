@@ -12,10 +12,16 @@ import {
   classifyLanguagesError,
 } from "@/lib/worker/worker-languages-model";
 import {
+  EDUCATION_COLUMNS,
+  educationEntryFromRow,
+  findSameEducation,
   validateEducationInput,
   classifyEducationError,
 } from "@/lib/worker/worker-education-model";
 import {
+  ACHIEVEMENT_COLUMNS,
+  achievementEntryFromRow,
+  findSameAchievement,
   validateAchievementInput,
   classifyAchievementsError,
 } from "@/lib/worker/worker-achievements-model";
@@ -238,6 +244,19 @@ export async function confirmCvEducationAction(input: {
   });
   if (!validated) return { ok: false, code: "invalid" };
 
+  // The same CV imported again answers with the row it already stored: the table
+  // has no unique key, so this is the only thing between it and a second row.
+  const { data: own, error: ownError } = await asAny(ctx.supabase)
+    .from("worker_education")
+    .select(EDUCATION_COLUMNS)
+    .eq("profile_id", ctx.userId);
+  if (ownError) {
+    const mapped = classifyEducationError(ownError.code);
+    return { ok: false, code: mapped };
+  }
+  const entries = ((own ?? []) as Parameters<typeof educationEntryFromRow>[0][]).map(educationEntryFromRow);
+  if (findSameEducation(entries, validated)) return { ok: true };
+
   const { error } = await asAny(ctx.supabase).from("worker_education").insert({
     profile_id: ctx.userId,
     institution_name: validated.institutionName,
@@ -334,6 +353,18 @@ async function insertAchievement(
     achievementTypeSlug: kindSlug,
   });
   if (!validated) return { ok: false, code: "invalid" };
+
+  // The same CV imported again: see the education rule above.
+  const { data: own, error: ownError } = await asAny(ctx.supabase)
+    .from("worker_achievements")
+    .select(ACHIEVEMENT_COLUMNS)
+    .eq("profile_id", ctx.userId);
+  if (ownError) {
+    const mapped = classifyAchievementsError(ownError.code);
+    return { ok: false, code: mapped };
+  }
+  const entries = ((own ?? []) as Parameters<typeof achievementEntryFromRow>[0][]).map(achievementEntryFromRow);
+  if (findSameAchievement(entries, validated)) return { ok: true };
 
   const { error } = await asAny(ctx.supabase).from("worker_achievements").insert({
     profile_id: ctx.userId,
