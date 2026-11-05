@@ -90,6 +90,18 @@ with() { # service, command
 }
 clean() { rm -rf "/etc/systemd/system/$1.d"; systemctl daemon-reload; }
 
+echo "== a service user can't reach root through its log"
+# systemd must not open anything in these folders as root: both users own their folder and could plant a link.
+umask 077; echo "original" > /etc/planted-target; umask 022; chmod 600 /etc/planted-target
+for pair in "lm-seo-watch.service lmseo $Q/seo-watch.log" "lm-backup-watchdog.service lmwatch $S/backup-watchdog.log"; do
+  set -- $pair
+  rm -f "$3"; runuser -u "$2" -- ln -s /etc/planted-target "$3"
+  with "$1" "/bin/sh -c 'echo planted-through-the-link'" >/dev/null
+  ok "$2: a link as its log doesn't write as root" "$(cat /etc/planted-target)" "original"
+  ok "$2: the link target keeps owner and mode" "$(mode /etc/planted-target)" "600 root root"
+  echo original > /etc/planted-target; rm -f "$3"; clean "$1"
+done
+
 cat > $OPT/probe.sh <<'PROBE'
 #!/bin/sh
 # One line per path: name=read or name=refused. Writes too.
