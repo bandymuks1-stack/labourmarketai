@@ -124,6 +124,9 @@ on:
           # 2026-11-01 register reconciliation: waitlist real submit (6.18), public JSON APIs (9.18),
           # journal templates (2.36). Synthetic data only. Dispatch only, never in the rotation.
           - register-gaps
+          # #3102 (owner 2026-11-05): a CV imported once, again and from two tabs at once leaves one row. Synthetic
+          # worker, real Chrome. Dispatch only, never in the rotation.
+          - cv-import-duplicates
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -471,6 +474,7 @@ jobs:
             digest-setup) SPEC=tests/e2e/prod-digest-setup.spec.ts ;;
             digest-check) SPEC=tests/e2e/prod-digest-check.spec.ts ;;
             register-gaps) SPEC=tests/e2e/prod-register-gaps.spec.ts ;;
+            cv-import-duplicates) SPEC=tests/e2e/prod-cv-import-duplicates.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
