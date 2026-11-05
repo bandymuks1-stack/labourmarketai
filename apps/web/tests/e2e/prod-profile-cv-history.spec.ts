@@ -954,6 +954,52 @@ test("P-24 (2.5). experience: failed save, save, reload, repeat and remove, with
   await ctx.close();
 });
 
+test("P-25 (UF-3). a job with no organization reads as the person stated it on the Living CV", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  const title = `${TAG} tik metai`;
+  const main = await profileAt(page, "capabilities");
+  await main.getByTestId("add-experience-open").click();
+  const form = main.getByTestId("add-experience-form");
+  await form.getByTestId("add-experience-title").fill(title);
+  await form.getByTestId("add-experience-start-year").fill("2019");
+  await form.getByTestId("add-experience-current").check();
+  addedHistory.push(title);
+  await form.getByTestId("add-experience-save").click();
+  await expect(main.getByTestId("capability-experience-row").filter({ hasText: title }).first()).toBeVisible({ timeout: 60_000 });
+
+  const cv = await livingCv(page);
+  // The title leads the row (#3084), not the word for the relationship.
+  const row = cv.getByTestId("premium-cv-experience-row").filter({ hasText: title });
+  await expect(row, "the Living CV names the job by its title").toHaveCount(1, { timeout: 30_000 });
+  // Only the year was stated (#3086): no month, no day, on screen or in print.
+  await expect(row, "a stated year has no invented month").toContainText("2019");
+  await expect(row).not.toContainText("2019-01");
+  const printed = cv.getByTestId("cv-history-node").filter({ hasText: title });
+  await expect(printed, "the printed list reads the same").toHaveCount(1);
+  await expect(printed).not.toContainText("2019-01");
+  await ctx.close();
+});
+
+test("P-26 (2.1). the summary save answers on screen, every time, with real times", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  // One run saw the save stored and no "saved" for 30 s (41994411748, cleanup). This
+  // reports what a person sees on each try. A try with no answer fails the walk.
+  let main = await profileAt(page, "profile-public-summary");
+  const original = await main.getByTestId("profile-public-headline").inputValue();
+  summaryOriginal ??= { headline: original, bio: await main.getByTestId("profile-public-bio").inputValue() };
+  for (const attempt of [1, 2, 3]) {
+    main = await profileAt(page, "profile-public-summary");
+    await main.getByTestId("profile-public-headline").fill(`${TAG} bandymas ${attempt}`);
+    const saved = main.getByTestId("profile-public-summary-saved");
+    const error = main.getByTestId("profile-public-summary-error");
+    const started = Date.now();
+    await main.getByTestId("profile-public-summary-save").click();
+    await expect(saved.or(error), `try ${attempt}: the save answers on screen`).toBeVisible({ timeout: 60_000 });
+    console.info(`[save-proof] summary try ${attempt}: ${(await saved.isVisible()) ? "saved" : "error"} after ${Date.now() - started} ms`);
+  }
+  await ctx.close();
+});
+
 // ── cleanup ──────────────────────────────────────────────────────────────────
 // `afterAll`, not a last test: a serial walk stops at its first red step, and
 // a run that failed half-way must still put back what it changed. Each item is
