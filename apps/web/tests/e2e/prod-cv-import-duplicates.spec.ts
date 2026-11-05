@@ -248,8 +248,7 @@ async function sweep(browser: Browser, when: string): Promise<string[]> {
         await fresh.first().waitFor({ state: "visible", timeout: 10_000 }).catch(() => undefined);
         stayed = await fresh.count();
       } catch (e) {
-        console.info(`[cleanup ${when}] ${kind}: stopped (${(e as Error).message.split("
-")[0].slice(0, 160)})`);
+        console.info(`[cleanup ${when}] ${kind}: stopped (${(e as Error).message.split("\n")[0].slice(0, 160)})`);
       }
       console.info(`[cleanup ${when}] ${kind}: removed=${removed} from_earlier_runs=${earlier} left=${stayed < 0 ? "unknown" : stayed}`);
       if (stayed !== 0) left.push(kind);
