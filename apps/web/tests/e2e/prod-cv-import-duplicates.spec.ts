@@ -21,15 +21,20 @@ import { makeDocx } from "../../lib/cv/__fixtures__/cv-fixtures";
  * fix (a unique key) is a separate owner decision, so don't weaken the assertion.
  *
  * WRITES. Only `qa.worker+goal3`, the synthetic worker. Every row carries
- * `QA-SYNTHETIC R<run id>`, and `afterAll` removes every row with that tag, even
- * after a red step, and fails the run if one stays. The CV file is generated in
- * memory and names nobody.
+ * `QA-SYNTHETIC R<run id>`. `afterAll` can't run in a killed or cancelled job, so
+ * every row with that prefix, from any run, is removed both before the test and
+ * after it, and a row still there after it fails the run. The CV file is generated
+ * in memory and names nobody.
  *
  * Logs carry the tag, counts and timings only; the walk log is a public artefact.
  * Runs only in `.github/workflows/prod-qa-walk.yml` with minted QA sessions.
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const TAG = `QA-SYNTHETIC R${RUN}`;
+// Only this walk writes this prefix; other walks' rows read `QA-SYNTHETIC <run id>`.
+const ANY_RUN = /QA-SYNTHETIC R/;
+// Each hook is capped so that the slowest case still fits the 30-minute walk job.
+const SWEEP_TIMEOUT = 300_000;
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1" && existsSync(state("worker2"));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
@@ -217,38 +222,54 @@ test("#3102: confirming a CV's education and certificate leaves one row each", a
   await ctx.close();
 });
 
-// Every row with this run's tag, wherever the walk stopped. A row left behind fails
-// the run: it would be a false row on the synthetic worker's profile.
-test.afterAll(async ({ browser }) => {
-  test.setTimeout(600_000);
+/** Removes this walk's rows from any run. Returns the kinds it could not prove clean. */
+async function sweep(browser: Browser, when: string): Promise<string[]> {
   const { ctx, page } = await as(browser);
   const left: string[] = [];
   try {
     for (const kind of ["education", "certificate"] as const) {
       let removed = 0;
+      let earlier = 0;
       let stayed = -1;
       try {
         for (let i = 0; i < 40; i++) {
-          const rows = (await section(page, kind)).getByTestId(ROWS[kind].row).filter({ hasText: TAG });
+          const rows = (await section(page, kind)).getByTestId(ROWS[kind].row).filter({ hasText: ANY_RUN });
           await rows.first().waitFor({ state: "visible", timeout: 10_000 }).catch(() => undefined);
           const before = await rows.count();
           if (before === 0) break;
+          const fromEarlierRun = !(await rows.first().innerText()).includes(TAG);
           await rows.first().locator(ROWS[kind].remove).first().click();
           await expect.poll(() => rows.count(), { timeout: 30_000 }).toBeLessThan(before);
           removed++;
+          if (fromEarlierRun) earlier++;
         }
         // From a fresh load, not the page that was just changed.
-        const fresh = (await section(page, kind)).getByTestId(ROWS[kind].row).filter({ hasText: TAG });
+        const fresh = (await section(page, kind)).getByTestId(ROWS[kind].row).filter({ hasText: ANY_RUN });
         await fresh.first().waitFor({ state: "visible", timeout: 10_000 }).catch(() => undefined);
         stayed = await fresh.count();
       } catch (e) {
-        console.info(`[cleanup] ${kind}: stopped (${(e as Error).message.split("\n")[0].slice(0, 160)})`);
+        console.info(`[cleanup ${when}] ${kind}: stopped (${(e as Error).message.split("
+")[0].slice(0, 160)})`);
       }
-      console.info(`[cleanup] ${kind}: removed=${removed} left=${stayed < 0 ? "unknown" : stayed}`);
+      console.info(`[cleanup ${when}] ${kind}: removed=${removed} from_earlier_runs=${earlier} left=${stayed < 0 ? "unknown" : stayed}`);
       if (stayed !== 0) left.push(kind);
     }
   } finally {
     await ctx.close();
   }
-  expect(left, "rows this run left on the synthetic worker").toEqual([]);
+  return left;
+}
+
+// What a killed or cancelled run left. It can't change this run's counts, because
+// every title carries this run's id, so a row that stays here is judged in `afterAll`.
+test.beforeAll(async ({ browser }) => {
+  test.setTimeout(SWEEP_TIMEOUT);
+  await sweep(browser, "before");
+});
+
+// Wherever the walk stopped. A row left behind fails the run: it would be a false
+// row on the synthetic worker's profile.
+test.afterAll(async ({ browser }) => {
+  test.setTimeout(SWEEP_TIMEOUT);
+  expect(await sweep(browser, "after"), "rows left on the synthetic worker").toEqual([]);
 });
