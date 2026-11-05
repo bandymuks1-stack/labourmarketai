@@ -16,6 +16,8 @@ umask 077
 echo "invented env secret" > $D/env; echo "invented key" > $D/backup.age.key
 PL=/var/lib/planted-docker/containers/x; mkdir -p $PL /opt/planted /srv/planted /var/spool/planted
 for f in $PL/config.v2.json /opt/planted/secret /srv/planted/secret /var/spool/planted/secret /etc/planted-secret; do echo "invented secret" > "$f"; chmod 600 "$f"; done
+# The real Docker path too: this is where a container's environment normally sits in clear text.
+RD=/var/lib/docker/containers/lm-test; mkdir -p $RD; echo "invented secret" > $RD/config.v2.json; chmod 600 $RD/config.v2.json
 umask 022
 install -m 700 "$HERE/lm-deploy-receive.sh" $D/bin/lm-deploy-receive.sh
 
@@ -102,7 +104,7 @@ echo "caps=$(grep -E '^CapEff' /proc/self/status | awk '{print $2}')"
 ls /proc | grep -cE '^[0-9]+$' | sed 's/^/procs=/'
 PROBE
 chmod 755 $OPT/probe.sh
-PATHS="$D/env $D/backup.age.key $PL/config.v2.json /opt/planted/secret /srv/planted/secret /var/spool/planted/secret /etc/planted-secret /etc/shadow /var/lib/docker/containers/none"
+PATHS="$D/env $D/backup.age.key $PL/config.v2.json /opt/planted/secret /srv/planted/secret /var/spool/planted/secret /etc/planted-secret /etc/shadow $RD/config.v2.json"
 echo "== inside the watchdog's unit"
 ok "probe ran" "$(with lm-backup-watchdog.service "/bin/sh -c 'ROOTDIR=$S exec /bin/sh $OPT/probe.sh $PATHS $S/backups/lm-db-$A.dump.age $S/backups/verified.log /proc/1/environ > $S/probe.out 2>&1'")" 0
 cat $S/probe.out
@@ -198,5 +200,6 @@ D2=$(st | sed 's/Z$/9Z/')
 ok "the receiver stores as before" "$(store lm-db-$D2.dump.age)" "BACKUP_OK lm-db-$D2.dump.age"
 ok "and at 600" "$(mode $BK/lm-db-$D2.dump.age)" "600 root root"
 
+rm -rf $RD
 echo "$N checks, $FAILS failed"
 [ "$FAILS" = 0 ]
