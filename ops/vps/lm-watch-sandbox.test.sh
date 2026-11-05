@@ -94,7 +94,7 @@ cat > $OPT/probe.sh <<'PROBE'
 r() { if cat "$1" >/dev/null 2>&1; then echo "$1=read"; else echo "$1=refused"; fi; }
 for p in "$@"; do r "$p"; done
 ls /var/lib/planted-docker >/dev/null 2>&1 && echo "ls-docker=listed" || echo "ls-docker=refused"
-: >> "$ROOTDIR/backups/verified.log" 2>/dev/null && echo "write-record=written" || echo "write-record=refused"
+( : >> "$ROOTDIR/backups/verified.log" ) 2>/dev/null && echo "write-record=written" || echo "write-record=refused"
 touch "$ROOTDIR/backups/planted" 2>/dev/null && echo "new-file=written" || echo "new-file=refused"
 rm "$ROOTDIR/backups/verified.log" 2>/dev/null && echo "delete=done" || echo "delete=refused"
 echo "uid=$(id -u) groups=$(id -nG)"
@@ -132,7 +132,7 @@ now=$(date -u +%s); M=$S/mail; rm -f $S/backup-watchdog.state $S/backup-watchdog
 run() { # extra arguments
   ok "unit ran" "$(with lm-backup-watchdog.service "/bin/sh $OPT/lm-backup-watchdog.sh --root $S --mail-file $M $*")" 0
 }
-subjects() { grep -c '^Subject:' $M 2>/dev/null || true; }
+subjects() { if [ -f $M ]; then grep -c '^Subject: .*Backup problem' $M; else echo 0; fi; }
 run; ok "healthy pair: ok, with the access check on" "$(last | grep -c 'status=ok ')" 1
 ok "no mail" "$(subjects)" 0
 
