@@ -10,6 +10,10 @@
 # One difference: the drill reads the source's role list, which is not in a dump. Here the roles are
 # the ones the dump asks for, found by restoring the schema into a scratch database first.
 #
+# NEVER A LIVE DATABASE. There is no host, URL or password option: the only target is the container this
+# script starts. It stops unless Docker is on this machine, stops on the production host, and checks the
+# container before anything is decrypted: its own, postgres:17, no network, nothing published.
+#
 # The container has no network and nothing is published, so it cannot reach production. Plaintext goes
 # straight from age into the container's memory (tmpfs) and is gone when the container is removed.
 # --on-disk puts it on Docker's disk instead, if memory runs out; the space is then freed, not wiped.
@@ -45,8 +49,13 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 WF="$HERE/../.github/workflows/db-backup.yml"
 PUB="$HERE/vps/backup.age.pub"
 stop() { echo "STOP: $1"; echo "RESULT: FAIL"; exit 1; }
+# Docker must be this machine's: a remote endpoint would put the plaintext on that host.
+local_docker() { case "$1" in npipe://*|unix://*) return 0;; *) return 1;; esac; }
+[ -z "${DOCKER_HOST:-}" ] || local_docker "$DOCKER_HOST" || stop "DOCKER_HOST points away from this machine; this runs only on a local Docker"
+[ ! -e /root/lm-prod ] || stop "this looks like the production host; run it on another machine"
 for t in docker age age-keygen sha256sum; do command -v "$t" >/dev/null || stop "$t is not installed"; done
 [ -f "$WF" ] && [ -f "$PUB" ] || stop "run this from a checkout of the repository"
+local_docker "$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null | tr -d '')"   || stop "the Docker context is not this machine's, or Docker is not running"
 native() { if command -v cygpath >/dev/null; then cygpath -m "$1"; else printf '%s' "$1"; fi; }
 KEY=$(native "$KEY"); DB=$(native "$DB"); FILES=$(native "$FILES")
 [ -f "$KEY" ] || stop "the key file is missing"
@@ -116,6 +125,10 @@ fi
 docker run -d --name "$C" --network none -e POSTGRES_HOST_AUTH_METHOD=trust "${mounts[@]}" \
   postgres:17 -c fsync=off -c full_page_writes=off >/dev/null || stop "the container did not start"
 STARTED=1
+# The target before anything is decrypted: this exact container, no network, nothing published, no other interface.
+[ "$(docker inspect --format '{{.Config.Image}} {{.HostConfig.NetworkMode}} {{len .HostConfig.PortBindings}}' "$C" | tr -d '')" = "postgres:17 none 0" ]   || stop "the target is not the expected throw-away container"
+[ "$(ex sh -c 'ls /sys/class/net' | tr -d '' | grep -vx lo | wc -l | tr -d ' ')" = "0" ] || stop "the container has a network interface"
+pass "the target is this throw-away container: no network, nothing published"
 ex mkdir -p /restore/files
 # The image's first start also runs a temporary server, on its socket only; TCP answers when it is the real one.
 for _ in $(seq 1 60); do ex pg_isready -q -h 127.0.0.1 -U postgres && break; sleep 2; done
