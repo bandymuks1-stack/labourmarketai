@@ -318,6 +318,7 @@ export function buildModel(rawMd, rawCoordination = "") {
         browserLt: BROWSER_LT[c?.["Naršyklė"] ?? ""] ?? c?.["Naršyklė"] ?? "",
         price: c?.Kaina || "",
         executor: c?.Vykdytojas || "",
+        checkedBy: c?.Tikrinta || "",
       };
     });
   }
@@ -500,7 +501,7 @@ function graph() {
 
 function needsSection() {
   if (M.partial.catalogue) return partial("Žmogaus poreikiai atsiras, kai registre bus užpildyta lentelė „Map: functions“. Kol kas rodomos techninės grupės.");
-  const cards = M.needs.map((n) => '<button class="card" data-need="' + esc(n.slug) + '"><strong>' + esc(n.lt) + "</strong><b class=\"big\">" + n.done + " / " + n.total + "</b><small>" + n.pct + " %: veikia ir matyta naršyklėje</small></button>").join("");
+  const cards = M.needs.map((n) => '<button class="card" data-need="' + esc(n.slug) + '"><strong>' + esc(n.lt) + "</strong><b class=\"big\">" + n.done + " / " + n.total + "</b><small>" + (n.total ? n.pct + " %: veikia ir matyta naršyklėje" : "Šiam poreikiui funkcijų dar nepriskirta") + "</small></button>").join("");
   return (M.catalogued < M.counts.total ? partial("Katalogas užpildytas " + M.catalogued + " funkcijų. Neužpildytos skaičiuojamos kaip nepadarytos.") : "") +
     '<p class="rule">Taisyklė: funkcija veikia gamyboje ir ją matė automatinė eisena (Playwright Chromium) ar žmogus naršyklėje, padalinta iš visų to poreikio funkcijų.</p><div class="cards">' + cards + "</div>";
 }
@@ -522,6 +523,27 @@ function openItemsSection() {
   return '<section><h2>Atviri darbai</h2><div class="tw"><table><thead><tr>' + keys.map((k) => "<th>" + esc(k) + "</th>").join("") + "</tr></thead><tbody>" + M.openItems.map((r) => "<tr>" + keys.map((k) => "<td>" + esc(r[k]) + "</td>").join("") + "</tr>").join("") + "</tbody></table></div></section>";
 }
 
+function dataFlows() {
+  const by = new Map();
+  for (const l of M.links) {
+    if (l.kind !== "data") continue;
+    const a = Number(String(l.from).split(".")[0]), b = Number(String(l.to).split(".")[0]);
+    if (a === b) continue;
+    const key = a + ">" + b;
+    if (!by.has(key)) by.set(key, { a, b, data: new Set() });
+    if (l.data) by.get(key).data.add(l.data);
+  }
+  const lt = (n) => (M.groups.find((g) => g.number === n) || {}).lt || n;
+  const rows = [...by.values()].sort((x, y) => x.a - y.a || x.b - y.b);
+  if (!rows.length) return "";
+  return '<h3 class="sub">Kokie duomenys juda tarp grupių</h3><ul class="flows">' + rows.map((r) => "<li><b>" + esc(lt(r.a)) + " → " + esc(lt(r.b)) + "</b><span>" + [...r.data].map(esc).join(", ") + "</span></li>").join("") + "</ul>";
+}
+
+function affectedNames(ids) {
+  const names = ids.map((id) => (fn.get(id) || {}).lt || (fn.get(id) || {}).name || id);
+  return names.slice(0, 3).join(", ") + (names.length > 3 ? " ir dar " + (names.length - 3) : "");
+}
+
 function groupCards() {
   return '<div class="cards">' + M.groups.map((g) =>
     '<button class="card" data-group="' + g.number + '"><span class="num">' + g.number + "</span><strong>" + esc(g.lt) + "</strong>" + bar(g.counts) +
@@ -536,7 +558,7 @@ function journeyChain(j, tech) {
 function blockersList(tech) {
   const rows = M.blockers.map((b) => "<li><b>" + esc(b.id) + " " + esc(b.name) + "</b>" +
     (b.reason ? "<span>" + esc(b.reason) + "</span>" : "") +
-    (b.affects.length ? "<small>Paveikia: " + b.affects.map(esc).join(", ") + "</small>" : "") +
+    (b.affects.length ? "<small>Paveikia: " + esc(tech ? b.affects.join(", ") : affectedNames(b.affects)) + "</small>" : "") +
     (tech && b.next ? "<small>Kas toliau: " + esc(b.next) + "</small>" : "") + "</li>").join("");
   return '<ul class="blockers">' + rows + "</ul>";
 }
@@ -549,7 +571,7 @@ function owner() {
   return "<section><h2>Kiek padaryta</h2>" + measures() + "</section>" +
     "<section><h2>Pagal žmogaus poreikį</h2>" + needsSection() + "</section>" +
     "<section><h2>Funkcijų grupės</h2>" + legend() + '<p class="rule">Paspausk grupę, kad matytum jos funkcijas. Funkcijų pavadinimai registre kol kas angliški.</p>' + groupCards() + "</section>" +
-    "<section><h2>Kaip grupės susijusios</h2>" + (M.partial.links ? partial("Ryšiai kol kas išvesti tik iš žmogaus kelionių eilės. Tikros priklausomybės dar neįrašytos į registrą.") : "") + graph() + "</section>" +
+    "<section><h2>Kaip grupės susijusios</h2>" + (M.partial.links ? partial("Ryšiai kol kas išvesti tik iš žmogaus kelionių eilės. Tikros priklausomybės dar neįrašytos į registrą.") : "") + graph() + dataFlows() + "</section>" +
     "<section><h2>Žmogaus kelionės: nuo registracijos iki rezultato</h2><ul class=\"journeys\">" + M.journeys.map((j) => journeyChain(j, false)).join("") + "</ul></section>" +
     "<section><h2>Kas dabar labiausiai trukdo</h2>" + (M.partial.blockers ? partial("Sąrašas paimtas iš registro FAIL ir BLOCKED peržiūros, todėl aprašymai kol kas angliški, o poveikis žinomas ne visur.") : "") + blockersList(false) + "</section>" +
     "<section><h2>Kiti etapai</h2>" + (M.partial.stages ? partial("Etapai išvesti iš būsenų. Savininko patvirtintos eilės registre dar nėra.") : "") + stagesList() + "</section>";
@@ -557,8 +579,8 @@ function owner() {
 
 function technical() {
   const filter = '<div class="filters"><input id="q" type="search" placeholder="Ieškoti: ID, pavadinimas, įrodymas" aria-label="Ieškoti funkcijų"><select id="st" aria-label="Filtruoti pagal būseną"><option value="">Visos būsenos</option>' + Object.keys(M.statusLt).map((s) => '<option value="' + s + '">' + s + "</option>").join("") + "</select><span id=\"cnt\" role=\"status\"></span></div>";
-  const groups = M.groups.map((g) => '<details class="tg" data-group="' + g.number + '"><summary><b>' + g.number + " " + esc(g.name) + "</b>" + bar(g.counts) + "<small>" + g.counts.builtPct + " % sukurta · " + g.counts.verifiedPct + ' % patikrinta</small></summary><div class="tw"><table><thead><tr><th>ID</th><th>Funkcija</th><th>Būsena</th><th>Būklė</th><th>Naršyklė</th><th>Tikrinta</th><th>Įrodymas</th><th>Liko</th></tr></thead><tbody>' +
-    g.functions.map((f) => '<tr data-s="' + esc(f.status) + '" data-t="' + esc((f.id + " " + f.name + " " + f.evidence + " " + f.issue).toLowerCase()) + '"><td>' + esc(f.id) + "</td><td>" + esc(f.name) + "</td><td>" + dot(f.status) + esc(f.status) + "</td><td>" + esc(f.state || "") + "</td><td>" + esc(f.browser || "NOT VERIFIED") + "</td><td>" + esc(f.checked) + '</td><td class="ev">' + esc(f.evidence) + '</td><td class="ev">' + esc(f.issue) + "</td></tr>").join("") + "</tbody></table></div></details>").join("");
+  const groups = M.groups.map((g) => '<details class="tg" data-group="' + g.number + '"><summary><b>' + g.number + " " + esc(g.name) + "</b>" + bar(g.counts) + "<small>" + g.counts.builtPct + " % sukurta · " + g.counts.verifiedPct + ' % patikrinta</small></summary><div class="tw"><table><thead><tr><th>ID</th><th>Funkcija</th><th>Būsena</th><th>Būklė</th><th>Naršyklė</th><th>Katalogas</th><th>Tikrinta</th><th>Įrodymas</th><th>Liko</th></tr></thead><tbody>' +
+    g.functions.map((f) => '<tr data-s="' + esc(f.status) + '" data-t="' + esc((f.id + " " + f.name + " " + f.evidence + " " + f.issue).toLowerCase()) + '"><td>' + esc(f.id) + "</td><td>" + esc(f.name) + "</td><td>" + dot(f.status) + esc(f.status) + "</td><td>" + esc(f.state || "") + "</td><td>" + esc(f.browser || "NOT VERIFIED") + "</td><td>" + esc(f.checkedBy) + "</td><td>" + esc(f.checked) + '</td><td class="ev">' + esc(f.evidence) + '</td><td class="ev">' + esc(f.issue) + "</td></tr>").join("") + "</tbody></table></div></details>").join("");
   const links = M.links.map((l) => "<tr><td>" + esc(l.from) + "</td><td>" + esc(l.to) + "</td><td>" + esc(l.kind) + "</td><td>" + esc(l.data || l.journey) + "</td></tr>").join("");
   const sc = M.scenarios.map((s) => "<tr><td>" + esc(s.id) + "</td><td>" + esc(s.name) + "</td><td>" + esc(s.status) + '</td><td class="ev">' + esc(s.proof) + '</td><td class="ev">' + esc(s.problem) + "</td></tr>").join("");
   return "<section><h2>Būsena ir taisyklė</h2>" + measures() + '<p class="rule">Vardiklis: ' + M.counts.total + " funkcijos, be DUPLICATE ir OPTIONAL_TEST. Sukurta: viskas, išskyrus NOT_IMPLEMENTED. Patikrinta: tik LIVE_VERIFIED. Kelionė: tik tada, kai registre jos būsena complete.</p>" + legend() + "</section>" +
@@ -575,7 +597,7 @@ function detail(number) {
   if (!g) return;
   const box = $("#detail");
   box.innerHTML = '<div class="dh"><h3>' + g.number + " " + esc(g.lt) + '</h3><button id="close" aria-label="Uždaryti">✕</button></div>' + bar(g.counts) +
-    "<ul>" + g.functions.map((f) => "<li>" + dot(f.status) + "<span>" + esc(f.lt || f.name) + "</span><small>" + esc(M.statusLt[f.status] || f.status) + "</small></li>").join("") + "</ul>";
+    "<ul>" + g.functions.map((f) => "<li>" + dot(f.status) + "<span>" + esc(f.lt || f.name) + (f.does ? "<br><small>" + esc(f.does) + "</small>" : "") + "</span><small>" + esc(M.statusLt[f.status] || f.status) + "</small></li>").join("") + "</ul>";
   box.hidden = false;
   document.querySelectorAll(".graph line").forEach((l) => l.classList.toggle("on", l.dataset.a == number || l.dataset.b == number));
   $("#close").onclick = () => { box.hidden = true; };
@@ -631,6 +653,7 @@ section{padding:18px 0;border-top:1px solid var(--line)}
 .journeys,.blockers{list-style:none;padding:0;margin:0;display:grid;gap:8px}.journey,.blockers li{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}.journey>div:first-child{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.journey em{font-style:normal;font-size:13px;color:var(--ok);flex:none}.j-partial em{color:var(--wait)}.j-blocked em,.j-broken em{color:var(--bad)}.journey small,.blockers small{color:var(--tx3);font-size:13px;overflow-wrap:anywhere}.blockers span{color:var(--tx2);font-size:14px}
 .chain{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:13px;color:var(--tx3)}.step{display:inline-flex;align-items:center;gap:4px}
 .stages{margin:0;padding:0;list-style:none;display:grid;gap:8px}.stages li{display:flex;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}.stages span{color:var(--tx3);flex:none}
+.sub{margin:18px 0 8px;font-size:16px}.flows{list-style:none;margin:0;padding:0;display:grid;gap:6px}.flows li{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px}.flows span{color:var(--tx3);font-size:13px}
 .partial{margin:0 0 10px;padding:8px 10px;border:1px dashed var(--wait);border-radius:8px;font-size:14px;color:var(--tx2)}
 .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}.filters input,.filters select{min-height:44px;font:inherit;font-size:16px;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:0 10px}.filters input{flex:1 1 220px}
 .tg{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--card)}.tg summary{padding:10px 12px;cursor:pointer;display:grid;gap:4px;min-height:44px}.tg small{color:var(--tx3);font-size:13px}
