@@ -835,7 +835,7 @@ async function timed(what: string, wait: () => Promise<unknown>): Promise<void> 
 
 async function proveSection(
   page: Page,
-  c: { name: string; hash: string; prefix: string; field: string; type: string; title: string; added: string[] },
+  c: { name: string; hash: string; prefix: string; field: string; type: string; title: string; remove: string; added: string[] },
 ): Promise<void> {
   const section = async () => (await profileAt(page, c.hash)).getByTestId(c.prefix);
   const rowsIn = (s: Locator) => s.getByTestId(`${c.prefix}-row`).filter({ hasText: c.title });
@@ -875,7 +875,7 @@ async function proveSection(
 
   // Removed at once, and gone after a reload.
   const row = rowsIn(s).first();
-  await row.locator(`[data-testid^="${c.prefix}-remove-"]`).first().click();
+  await row.locator(c.remove).first().click();
   await timed(`${c.name} remove to row gone`, () => expect(rowsIn(s)).toHaveCount(0, { timeout: 60_000 }));
   s = await section();
   await expect(rowsIn(s), `${c.name}: stays removed after a reload`).toHaveCount(0, { timeout: 30_000 });
@@ -891,6 +891,7 @@ test("P-22 (2.7). education: failed save, save, reload, repeat and remove, with 
     field: "institution",
     type: "Profesinis",
     title: `${TAG} kartojama mokykla`,
+    remove: '[data-testid^="worker-education-remove-"]',
     added: addedEducation,
   });
   await ctx.close();
@@ -905,6 +906,7 @@ test("P-23 (2.8). achievements: failed save, save, reload, repeat and remove, wi
     field: "title",
     type: "Pasiekimas",
     title: `${TAG} kartojamas pasiekimas`,
+    remove: '[data-testid^="worker-achievements-remove-"]',
     added: addedAchievements,
   });
   await ctx.close();
