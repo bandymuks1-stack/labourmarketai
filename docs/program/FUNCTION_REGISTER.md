@@ -1176,3 +1176,796 @@ Owner rule: a page is not done because CI passed or a sitemap answered 200. Thes
 | 13.16 | Browser crash reports | NOT_VERIFIED | — | only a registry citation; no primary evidence recoverable | unproven |  |
 | 13.17 | Env parity after hosting move | FAIL | 2026-10-27 | 2026-10-27 read-only: last real AI call gemini 2026-10-15 16:07; since then provider=disabled reason=mode_disabled (AI_PROVIDER_MODE not live) - 25 calls to 10-27; lifetime AI spend actual $0.16 (Oct $0.09/234 calls). In… | no | OWNER+LEGAL: AI off coincides with owner 10-15 Gemini personal-data restriction (needs billed key + AI_GEMINI_PAID_TIER_CONFIRMED=1 / DPA). SMTP: LM_SMTP_PASS + INVITE_EMAIL_PROVIDER=smtp via lm-env-set.sh |
 
+## Function map data
+
+Source for the interactive function map, added 2026-11-05. **Status, evidence and date still come only from the function rows above.** IDs are those row IDs.
+
+How to read it:
+
+- **Draft.** A description says what a function is for, not that it works. State is derived from the row's status: LIVE_VERIFIED = veikianti; PASS_CI_ONLY or NOT_VERIFIED = testuojama; BLOCKED or FAIL = užblokuota; NOT_IMPLEMENTED = planuojama, or kuriama if it has an open PR. OPTIONAL_TEST and DUPLICATE rows aren't counted.
+- **Naršyklė** comes from keywords in the evidence column, not a row-by-row read: `eisena` = a browser walk in production (Playwright Chromium, synthetic users, not a person in Chrome), `savininkas` = the owner or a real user in a browser, `api` = production proof with no browser, `ne` = no browser named. Empty = not counted.
+- **Poreikiai** means the function serves that need at least in part. A general function can serve a need that has no dedicated function, so a count here doesn't show the need is covered. `senjorai` has none.
+- **Tikrinta**: `kodas` = its route was found in the code, not that the behaviour was confirmed there; `registras` = read from the register only. Empty cells mean not known.
+- **Kaina** is `nenustatyta` unless the register or plan code states it.
+- **Completion rule for the map:** veikianti and Naršyklė is `eisena` or `savininkas`, over all counted rows in that need, with a missing value counted as not done. Always show both numbers. The three measures above stay as they are.
+
+Not filled yet: `Map: stages`. `Map: blockers` holds open PRs linked to function rows; forgotten items aren't linked yet. Open work is in [`COORDINATION_REGISTER.md`](COORDINATION_REGISTER.md) §7.
+
+### Map: groups
+
+| Group | Lietuviškai | Trumpai |
+|---|---|---|
+| 1 | Paskyra, registracija ir organizacijos | Kaip prisijungi ir kuriam darbui ar įmonei priklausai |
+| 2 | Darbuotojo profilis, darbo žurnalas ir gyvas CV | Tavo darbo istorija ir įgūdžiai vienoje vietoje |
+| 3 | Įmonės darbai ir projektai | Žmonės, valandos ir projektai |
+| 4 | Poreikiai, darbo skelbimai ir atranka | Kaip žmogus ir darbas randa vienas kitą |
+| 5 | Pokalbiai ir pranešimai | Bendravimas ir priminimai |
+| 6 | Prekyvietė | Paslaugos ir prekės tarp žmonių ir įmonių |
+| 7 | Planai ir mokėjimai | Kas nemokama, kas mokama ir kaip mokama |
+| 8 | Kalbos ir rinkos | Kalbos, šalys ir programėlės |
+| 9 | Administravimas, privatumas ir saugumas | Tavo duomenų apsauga ir administratoriaus darbas |
+| 10 | Pagalbininkai ir dirbtinis intelektas | Pokalbių asistentai ir jų ribos |
+| 11 | Mokymasis | Mokymo įstaigos, grupės ir pripažinimas |
+| 12 | Rinkos žinios | Ką rodo darbo rinkos duomenys |
+| 13 | Infrastruktūra ir veikimas | Kas palaiko sistemą veikiančią |
+
+### Map: functions
+
+| ID | Pavadinimas | Ką leidžia | Kam | Kur rasti | Poreikiai | Naršyklė | Kaina | Vykdytojas | Tikrinta |
+|---|---|---|---|---|---|---|---|---|---|
+| 1.1 | Registracija ir prisijungimas | Susikuri paskyrą ir prisijungi el. paštu bei slaptažodžiu. | darbuotojas, ieškantis darbo, įmonė, agentūra | /auth/signup, /auth/login |  | eisena | nenustatyta |  | kodas |
+| 1.2 | Prisijungimas per Google | Prisijungi viena paspaudimu su savo Google paskyra. | darbuotojas, ieškantis darbo, įmonė, agentūra | /auth/login |  | savininkas | nenustatyta | Koordinatorius | kodas |
+| 1.3 | Slaptažodžio atkūrimas | Pamiršęs slaptažodį gauni laišką ir nusistatai naują. | darbuotojas, ieškantis darbo, įmonė, agentūra | /auth/forgot-password |  | eisena | nenustatyta |  | kodas |
+| 1.4 | Pirmieji žingsniai po registracijos | Po registracijos žingsnis po žingsnio nustatai, ko tau reikia. | darbuotojas, ieškantis darbo, įmonė, agentūra | /onboarding | pirmas-darbas,isidarbinimas,samdymas | eisena | nenustatyta |  | kodas |
+| 1.5 | Keli vaidmenys vienoje paskyroje | Vienoje paskyroje gali būti ir darbuotojas, ir įmonės žmogus. | darbuotojas, įmonė, agentūra | /dashboard/account |  | eisena | nenustatyta |  | kodas |
+| 1.6 | Įmonės paskyros sukūrimas | Sukuri savo įmonės ar organizacijos paskyrą. | įmonė, vadovas, agentūra | /dashboard/start/company | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 1.7 | Įmonės patikra | Įmonė patvirtinama, kad kiti ja galėtų pasitikėti. | įmonė, administratorius | /dashboard/admin/company-verification | samdymas | eisena | nenustatyta |  | kodas |
+| 1.8 | Viena organizacija, keli veiklos tipai | Viena organizacija gali veikti keliose srityse vienu metu. | įmonė |  | verslo-valdymas | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 1.9 | Nariai, kvietimai ir vaidmenys | Pakvieti žmones į įmonę ir nustatai, ką kiekvienas gali daryti. | įmonė, vadovas | /invite/[token] | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 1.10 | Darbo erdvės perjungimas | Perjungi tarp savo asmeninės ir įmonės erdvių. | darbuotojas, įmonė, vadovas, agentūra | /dashboard |  | eisena | nenustatyta |  | kodas |
+| 1.11 | Įmonių duomenų atskyrimas | Apsaugo, kad viena įmonė nematytų kitos įmonės duomenų. | sistema |  |  | api | nenustatyta |  | registras |
+| 1.12 | Kvietimai ir rekomendavimas | Pakvieti pažįstamus prisijungti per savo nuorodą. | darbuotojas, įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 1.13 | Sistemos laiškai | Gauni svarbius laiškus apie savo paskyrą ir veiksmus. | darbuotojas, ieškantis darbo, įmonė |  |  | ne | nenustatyta | Savininkas ir teisininkas | registras |
+| 1.14 | Pranešimas apie peržiūrą | Personalas gauna žinią, kai ką nors reikia peržiūrėti. | administratorius |  |  | eisena | nenustatyta |  | registras |
+| 1.15 | Įmonės praeitis ir jos perėmimas | Perimi savo įmonės ankstesnius darbo įrašus. | įmonė, vadovas | /dashboard/company/history | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 2.1 | Profesinis profilis | Susirašai, kas esi ir ką moki dirbti. | darbuotojas, ieškantis darbo, savarankiškas specialistas | /dashboard/profile | isidarbinimas,tobulejimas,pirmas-darbas | eisena | nenustatyta |  | kodas |
+| 2.2 | Darbo kortelė | Nurodai, kada gali dirbti, kokio atlygio tikiesi ir kur. | darbuotojas, ieškantis darbo, savarankiškas specialistas | /dashboard/profile | isidarbinimas,savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 2.3 | CV įkėlimas ir patvirtinimas | Įkeli CV ir patvirtini kiekvieną joje rastą faktą. | darbuotojas, ieškantis darbo | /cv | isidarbinimas,karjeros-keitimas,pirmas-darbas | eisena | nenustatyta |  | kodas |
+| 2.4 | Gyvasis CV | Turi nuolat atsinaujinantį CV, kurį gali atsisiųsti. | darbuotojas, ieškantis darbo, savarankiškas specialistas | /cv | isidarbinimas,tobulejimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 2.5 | Darbo patirtis | Surašai, kur dirbai ir ką darei. | darbuotojas, ieškantis darbo | /dashboard/profile | isidarbinimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 2.6 | Praktika ir savanorystė | Įrašai praktiką ir savanorystę kaip patirtį. | ieškantis darbo, besimokantis, darbuotojas | /dashboard/profile | pirmas-darbas,mokymasis | eisena | nenustatyta |  | kodas |
+| 2.7 | Išsilavinimas | Pridedi savo mokslus ir kvalifikacijas. | darbuotojas, ieškantis darbo, besimokantis | /dashboard/profile | pirmas-darbas,mokymasis,isidarbinimas | eisena | nenustatyta |  | kodas |
+| 2.8 | Pasiekimai ir pažymėjimai | Pridedi pasiekimus ir savo nurodytus pažymėjimus. | darbuotojas, ieškantis darbo | /dashboard/profile | isidarbinimas,tobulejimas | eisena | nenustatyta |  | kodas |
+| 2.9 | Kalbos | Nurodai, kokias kalbas moki ir kaip gerai. | darbuotojas, ieškantis darbo | /dashboard/profile | isidarbinimas | eisena | nenustatyta |  | kodas |
+| 2.10 | Nuorodos į kitus profilius | Prie profilio pridedi nuorodas į savo darbus kitur. | darbuotojas, savarankiškas specialistas |  | savarankiskos-paslaugos | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 2.11 | Reikalavimų sąrašas | Matai, ko dar trūksta, kad atitiktum darbo reikalavimus. | darbuotojas, ieškantis darbo |  | tobulejimas | eisena | nenustatyta |  | registras |
+| 2.12 | Įgūdžių ir profesijų sąrašas | Pasirenki savo profesijas ir įgūdžius iš bendro sąrašo. | darbuotojas, ieškantis darbo, savarankiškas specialistas | /dashboard/profile | isidarbinimas,tobulejimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 2.13 | Įgūdžių atpažinimas iš darbo žurnalo | Iš tavo darbo įrašų atpažįstama, ką moki. | darbuotojas, ieškantis darbo | /dashboard/journal | tobulejimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 2.14 | Įrodymų lygiai | Matai, kiek tavo įgūdis pagrįstas tikru darbu. | darbuotojas, ieškantis darbo, įmonė | /cv | tobulejimas,isidarbinimas | eisena | nenustatyta |  | kodas |
+| 2.15 | Savo įgūdžių pareiškimas | Įrašai įgūdį savais žodžiais, net jei jo nėra sąraše. | darbuotojas, ieškantis darbo, savarankiškas specialistas | /dashboard/profile | tobulejimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 2.16 | Bendrieji gebėjimai | Matai gebėjimus, kurie tinka daugelyje darbų. | darbuotojas, ieškantis darbo | /cv | karjeros-keitimas,tobulejimas | eisena | nenustatyta |  | kodas |
+| 2.17 | Europos profesijų klasifikatorius | Profesijos ir įgūdžiai susiejami su Europos sąrašu. | sistema |  | isidarbinimas,karjeros-keitimas | ne | nenustatyta | Savininkas | registras |
+| 2.18 | Dokumentai ir jų galiojimas | Laikai dokumentus ir matai, kada baigsis jų galiojimas. | darbuotojas, ieškantis darbo, įmonė | /dashboard/documents | isidarbinimas,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 2.19 | Darbo žurnalas | Kasdien užsirašai, ką padarei darbe. | darbuotojas, savarankiškas specialistas | /dashboard/journal | tobulejimas,projektai,isidarbinimas | eisena | nenustatyta |  | kodas |
+| 2.20 | Vadovo patvirtinimas | Vadovas peržiūri ir patvirtina tavo darbo įrašus. | vadovas, darbuotojas | /dashboard/inbox | isidarbinimas,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 2.21 | Darbo patvirtinimo būsenos | Matai, ar įrašą jau patvirtino, ar dar laukia. | darbuotojas, vadovas | /dashboard/journal | isidarbinimas | eisena | nenustatyta |  | kodas |
+| 2.22 | Nuotraukos ir darbo įrodymai | Prie įrašo pridedi nuotraukas, kad parodytum atliktą darbą. | darbuotojas, savarankiškas specialistas | /dashboard/gallery | savarankiskos-paslaugos,tobulejimas | eisena | nenustatyta |  | kodas |
+| 2.23 | Valandos ir suvestinės | Matai savo valandas ir darbo laiko lapus. | darbuotojas, vadovas, įmonė | /dashboard/hours | projektai,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 2.24 | Patirties įrašai ir ginčai | Gali užginčyti įrašą, kuris tau atrodo neteisingas. | darbuotojas, vadovas |  | isidarbinimas | eisena | nenustatyta | Koordinatorius | registras |
+| 2.25 | Darbas skaičiais | Matai savo darbo apimtis skaičiais. | darbuotojas, savarankiškas specialistas | /dashboard/work-in-numbers | tobulejimas | eisena | nenustatyta |  | kodas |
+| 2.26 | Viena nuosekli profesinė istorija | Visa tavo darbo istorija sudėta į vieną vietą. | darbuotojas, ieškantis darbo | /dashboard/profile | isidarbinimas,karjeros-keitimas,tobulejimas | eisena | nenustatyta |  | kodas |
+| 2.27 | Įmonės istorinių įrašų įkėlimas | Įmonė įkelia ankstesnius savo darbuotojų darbo įrašus. | įmonė, vadovas |  | verslo-valdymas | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 2.28 | Senų įrašų sujungimas | Seni dubliuoti darbo įrašai sujungiami į vieną. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 2.29 | Galimi, dar neįrodyti gebėjimai | Parodomi gebėjimai, kuriuos tikėtina turi. | darbuotojas, ieškantis darbo | /cv | karjeros-keitimas,tobulejimas | eisena | nenustatyta |  | kodas |
+| 2.30 | Žurnalas balsu | Darbo žurnalą pasakai balsu, o ne rašai. | darbuotojas, savarankiškas specialistas | /dashboard/journal/voice | tobulejimas | ne | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 2.31 | Žurnalo įrašų apsauga nuo keitimo | Apsaugo, kad praeities įrašai nebūtų slapčia pakeisti. | darbuotojas, vadovas, sistema |  |  | eisena | nenustatyta |  | registras |
+| 2.32 | Kitos pusės atsiliepimas | Klientas ar partneris patvirtina arba įvertina atliktą darbą. | savarankiškas specialistas, klientas, vadovas | /dashboard/inbox/counterparty | savarankiskos-paslaugos,isidarbinimas | eisena | nenustatyta |  | kodas |
+| 2.33 | Darbų galerija | Rodai savo atliktų darbų nuotraukas. | savarankiškas specialistas, darbuotojas | /dashboard/gallery | savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 2.34 | Žurnalo ir valandų atsisiuntimas | Parsisiunti žurnalą ir valandas faile. | darbuotojas, vadovas | /dashboard/hours | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 2.35 | Sutikimas būti randamam | Pats nusprendi, ar darbdaviai gali tave rasti. | darbuotojas, ieškantis darbo | /dashboard/privacy | isidarbinimas,samdymas | eisena | nenustatyta |  | kodas |
+| 2.36 | Žurnalo šablonai pagal profesiją | Gauni žurnalo formą, pritaikytą tavo profesijai. | darbuotojas, savarankiškas specialistas |  | tobulejimas | ne | nenustatyta | Koordinatorius | registras |
+| 2.37 | Įrašo atsisakymas | Žmogus gali atsisakyti apie jį įkelto įrašo. | darbuotojas |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 3.1 | Įmonės pradžia | Matai savo įmonės dienos vaizdą vienoje vietoje. | įmonė, vadovas | /dashboard/company | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.2 | Projektai | Sukuri projektą ir seki jo eigą. | įmonė, vadovas | /dashboard/projects | projektai,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.3 | Objektai ir vietos | Projektui priskiri objektą ar darbo vietą. | įmonė, vadovas |  | projektai | eisena | nenustatyta |  | registras |
+| 3.4 | Projekto etapai | Projektą suskaidai į etapus. | įmonė, vadovas | /dashboard/projects/[id] | projektai | eisena | nenustatyta |  | kodas |
+| 3.5 | Užduotys | Skiri užduotis ir seki, ar jos atliktos. | įmonė, vadovas, darbuotojas | /dashboard/tasks | projektai,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.6 | Darbuotojo skyrimas projektui | Paskiri žmogų dirbti konkrečiame projekte. | įmonė, vadovas | /dashboard/projects/[id] | projektai,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.7 | Brigados | Sudarai brigadą iš kelių žmonių. | įmonė, vadovas | /dashboard/company/people | projektai,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.8 | Brigados skyrimas projektui | Visą brigadą paskiri į projektą. | įmonė, vadovas |  | projektai | eisena | nenustatyta |  | registras |
+| 3.9 | Projekto pasirengimas | Matai, ar viskas paruošta projektui pradėti. | įmonė, vadovas |  | projektai | eisena | nenustatyta |  | registras |
+| 3.10 | Defektai ir taisymai | Užfiksuoji trūkumus ir pažymi, kada jie ištaisyti. | įmonė, vadovas |  | projektai | eisena | nenustatyta |  | registras |
+| 3.11 | Perdavimo dokumentas | Užbaigus darbą parengi perdavimo dokumentą klientui. | įmonė, vadovas | /dashboard/projects/[id]/operations | projektai | eisena | nenustatyta |  | kodas |
+| 3.12 | Projekto išlaidos ir pajamos | Matai, kiek projektas kainuoja ir kiek uždirba. | įmonė, vadovas |  | projektai,verslo-valdymas | eisena | nenustatyta |  | registras |
+| 3.13 | Projekto operacijų lenta | Matai visus projekto darbus vienoje lentoje ir parsisiunti. | įmonė, vadovas | /dashboard/projects/[id]/operations | projektai | eisena | nenustatyta |  | kodas |
+| 3.14 | Darbų planavimas ir kalendorius | Planuoji žmonių darbus kalendoriuje. | įmonė, vadovas | /dashboard/company/planning | verslo-valdymas,projektai | eisena | nenustatyta |  | kodas |
+| 3.15 | Nebuvimai ir atostogos | Užsirašai ir patvirtini atostogas bei nebuvimus. | darbuotojas, vadovas, įmonė | /dashboard/absences | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.16 | Žmonių trūkumo laiko juosta | Matai, kada trūks žmonių. | įmonė, vadovas |  | verslo-valdymas,projektai | ne | nenustatyta |  | registras |
+| 3.17 | Žmonių rezervavimas | Rezervuoji žmogaus laiką ateičiai. | įmonė, vadovas | /dashboard/company/planning | verslo-valdymas,projektai | eisena | nenustatyta |  | kodas |
+| 3.18 | Užimtumas | Matai, kiek kiekvienas žmogus užimtas. | įmonė, vadovas | /dashboard/company/planning | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.19 | Planas ir faktas | Palygini suplanuotą darbą su atliktu. | įmonė, vadovas |  | verslo-valdymas,projektai | api | nenustatyta |  | registras |
+| 3.20 | Pamainos ir grafikai | Sudarai pamainų grafiką. | įmonė, vadovas | /dashboard/company/planning | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.21 | Darbuotojų sąrašas | Matai visus savo įmonės žmones. | įmonė, vadovas | /dashboard/company/people | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.22 | Žmonių įkėlimas | Įkeli žmonių sąrašą iš failo. | įmonė, vadovas | /dashboard/company/people | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.23 | Priėmimas ir išleidimas iš darbo | Seki naujo darbuotojo įvedimą ir išėjimą. | įmonė, vadovas |  | verslo-valdymas,samdymas | eisena | nenustatyta |  | registras |
+| 3.24 | Patvirtinimai ir procesai | Pateiktus prašymus patvirtini ar atmeti. | įmonė, vadovas |  | verslo-valdymas | eisena | nenustatyta |  | registras |
+| 3.25 | Vadovo sprendimai | Užrašai sprendimus ir jų peržiūras. | vadovas |  | verslo-valdymas | eisena | nenustatyta |  | registras |
+| 3.26 | Nurodymai | Darbuotojams išsiunti nurodymus. | vadovas, įmonė, darbuotojas | /dashboard/instructions | verslo-valdymas,projektai | eisena | nenustatyta |  | kodas |
+| 3.27 | Įmonės istorija ir duomenų kokybė | Matai įmonės istoriją ir kur trūksta duomenų. | įmonė, vadovas | /dashboard/company/history | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.28 | Atsakymai vadovui pokalbyje | Vadovas pokalbyje paklausia apie savo įmonę ir gauna atsakymą. | vadovas, įmonė | pokalbis | verslo-valdymas | eisena | nenustatyta |  | registras |
+| 3.29 | Įmonės dokumentų sąrašas | Saugai įmonės dokumentus vienoje vietoje. | įmonė, vadovas | /dashboard/documents | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.30 | Įmonės nustatymai ir pagalbos prašymas | Keiti įmonės nustatymus ir paprašai pagalbos. | įmonė, vadovas | /dashboard/company/settings | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.31 | Ataskaitos ir atsisiuntimas | Gauni ataskaitas ir jas parsisiunti. | įmonė, vadovas | /dashboard/reports | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.32 | Įrankiai ir turtas | Seki, kas turi kokį įmonės įrankį. | įmonė, vadovas | /dashboard/assets | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.33 | Valandų puslapis | Žiūri ir tvirtini žmonių valandas. | įmonė, vadovas, darbuotojas | /dashboard/hours | verslo-valdymas,projektai | eisena | nenustatyta |  | kodas |
+| 3.34 | Projekto eigos prognozė | Prognozuojama, kada projektas baigsis. | įmonė, vadovas |  | projektai,verslo-valdymas | eisena | nenustatyta | Koordinatorius | registras |
+| 3.35 | Persidengiančių įsipareigojimų įspėjimas | Gauni įspėjimą, kai žmogus paskirtas į du darbus vienu metu. | įmonė, vadovas |  | verslo-valdymas,projektai | ne | nenustatyta | Savininkas ir koordinatorius | registras |
+| 3.36 | Įmonės gyvasis CV | Įmonė turi savo nuolat atsinaujinantį profilį. | įmonė, vadovas |  | verslo-valdymas | ne | nenustatyta | Savininkas | registras |
+| 4.1 | Poreikio įvedimas | Įmonė vienodu būdu užrašo, kokių žmonių jai reikia. | įmonė, vadovas, agentūra | /dashboard/company/needs | samdymas,projektai | eisena | nenustatyta |  | kodas |
+| 4.2 | Poreikis ir pasiūla atskirai | Skiriama, ko įmonė ieško ir ką žmogus siūlo. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 4.3 | Galimybių lenta darbuotojui | Matai tau tinkamas galimybes ir pasakai, kad domina. | darbuotojas, ieškantis darbo | /dashboard/opportunities | isidarbinimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 4.4 | Viešoji darbo skelbimų lenta | Be registracijos ieškai darbo skelbimų. | ieškantis darbo, darbuotojas | /jobs | isidarbinimas,pirmas-darbas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 4.5 | Žmonių ir darbų suderinimas | Siūlomi tinkami darbai žmonėms ir žmonės darbams. | ieškantis darbo, įmonė |  | isidarbinimas,samdymas | eisena | nenustatyta |  | registras |
+| 4.6 | Komandos paieška ir pasiūlymas | Įmonė randa visą komandą ir jai pateikia pasiūlymą. | įmonė, agentūra |  | samdymas,projektai | eisena | nenustatyta |  | registras |
+| 4.7 | Derybos tarp įmonių | Dvi įmonės susiderina sąlygas. | įmonė, agentūra |  | projektai,verslo-valdymas | eisena | nenustatyta |  | registras |
+| 4.8 | Anoniminis poreikio pateikimas | Be registracijos įmonė palieka savo poreikį. | įmonė | /company-need | samdymas | ne | nenustatyta | Koordinatorius | kodas |
+| 4.9 | Išsaugotos paieškos ir pranešimai | Išsaugai paiešką ir gauni žinią apie naujus skelbimus. | ieškantis darbo, darbuotojas | /jobs | isidarbinimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 4.10 | Pasiūlos paieška įmonėms | Įmonė ieško žmonių ir komandų pagal poreikį. | įmonė, vadovas | /dashboard/talent | samdymas | eisena | nenustatyta |  | kodas |
+| 4.11 | Kandidatų paieška | Įmonė ieško tinkamų kandidatų. | įmonė, agentūra | /dashboard/candidates | samdymas | eisena | nenustatyta |  | kodas |
+| 4.12 | Trumpasis sąrašas ir pastabos | Įmonė susideda kandidatus į sąrašą ir rašo pastabas. | įmonė, agentūra | /dashboard/company/scouting | samdymas | eisena | nenustatyta |  | kodas |
+| 4.13 | Automatinis kandidatų parinkimas | Kandidatai parenkami automatiškai ir pateikiamas kvitas. | įmonė, agentūra |  | samdymas | eisena | nenustatyta |  | registras |
+| 4.14 | Kandidatų juodraščiai | Įmonė paruošia kandidato pasiūlymą prieš išsiunčiant. | agentūra, įmonė |  | samdymas | eisena | nenustatyta |  | registras |
+| 4.15 | Agentūros ir kliento ryšys | Agentūra susieja su klientu ir siūlo jam žmones. | agentūra, klientas |  | samdymas | eisena | nenustatyta |  | registras |
+| 4.16 | Susisiekimas su susidomėjusiu žmogumi | Įmonė parašo žmogui, kuris pareiškė susidomėjimą. | įmonė, agentūra |  | samdymas | eisena | nenustatyta |  | registras |
+| 4.17 | Sutikimas būti randamam | Pats nusprendi, ar tave gali rasti. | darbuotojas, ieškantis darbo | /dashboard/privacy | isidarbinimas |  | nenustatyta |  | kodas |
+| 4.18 | Duomenų atskleidimas darbdaviui | Leidi konkrečiam darbdaviui matyti papildomus savo duomenis. | darbuotojas, ieškantis darbo |  | isidarbinimas | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 4.19 | Prašymai atskleisti kontaktus | Įmonė paprašo tavo kontaktų, o tu nusprendi. | darbuotojas, ieškantis darbo, įmonė |  | isidarbinimas,samdymas | eisena | nenustatyta |  | registras |
+| 4.20 | Asmens apsauga paieškoje | Paieškoje žmogaus tapatybė nerodoma be jo leidimo. | sistema |  |  | api | nenustatyta |  | registras |
+| 4.21 | Asmens vardo slėpimas | Žmogaus vardas rodomas tik gavus leidimą. | sistema | /dashboard/people/[workerId] |  | eisena | nenustatyta |  | kodas |
+| 4.22 | Trys nemokami profilių peržiūrėjimai | Įmonė kelis profilius mato nemokamai, daugiau už papildomą planą. | įmonė |  | samdymas | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 4.25 | Derinimo valdymo skydas | Administratorius tikrina derinimo rezultatus. | administratorius | /dashboard/admin/matching |  | savininkas | nenustatyta |  | kodas |
+| 4.26 | Viešas tinkamumo peržiūrėjimas | Be registracijos pamatai, ar tinki darbui. | ieškantis darbo, darbuotojas | /match-preview | isidarbinimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 4.28 | Pasiūlos pareiškimas | Įmonė ar žmogus pasako, ką gali pasiūlyti. | savarankiškas specialistas, įmonė |  | savarankiskos-paslaugos | eisena | nenustatyta |  | registras |
+| 4.29 | Susidomėjimas virsta laisva vieta | Žmogaus susidomėjimas paverčiamas darbo vieta įmonėje. | įmonė, agentūra |  | samdymas | ne | nenustatyta | Koordinatorius | registras |
+| 4.30 | Kandidatas, sprendimas, poreikio uždarymas | Nuo kandidato iki priėmimo sprendimo ir poreikio uždarymo. | įmonė, agentūra, vadovas |  | samdymas | ne | nenustatyta | Vykdytojas ir koordinatorius | registras |
+| 5.1 | Pokalbio pradžia | Pradedi nuo pokalbio ir paprašai, ko reikia. | darbuotojas, ieškantis darbo, įmonė, vadovas | pokalbis | isidarbinimas,verslo-valdymas,savarankiskos-paslaugos | eisena | nenustatyta |  | registras |
+| 5.2 | Pokalbio istorija | Pokalbis išlieka ir gali grįžti prie jo vėliau. | darbuotojas, įmonė | pokalbis |  | eisena | nenustatyta |  | registras |
+| 5.3 | Vienkartiniai patvirtinimai | Svarbų veiksmą patvirtini vieną kartą. | darbuotojas, įmonė, vadovas | pokalbis |  | eisena | nenustatyta |  | registras |
+| 5.4 | Žinutės ir gijos | Susirašinėji su kitais žmonėmis ir įmonėmis. | darbuotojas, įmonė, agentūra | /dashboard/communication |  | eisena | nenustatyta |  | kodas |
+| 5.5 | Žinučių vertimas | Žinutė išverčiama, o originalas lieka matomas. | darbuotojas, įmonė | /dashboard/communication |  | eisena | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 5.6 | Pranešimai programoje | Matai naujus pranešimus programoje. | darbuotojas, ieškantis darbo, įmonė | /dashboard/activity |  | eisena | nenustatyta |  | kodas |
+| 5.7 | Pranešimai el. paštu | Gauni svarbias žinias el. paštu. | darbuotojas, ieškantis darbo, įmonė |  |  | eisena | nenustatyta |  | registras |
+| 5.8 | Pranešimai telefone | Gauni pranešimą į telefoną. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 5.9 | Savaitės apžvalga | Kas savaitę gauni trumpą apžvalgą el. paštu. | darbuotojas, ieškantis darbo, įmonė |  |  | eisena | nenustatyta | Koordinatorius | registras |
+| 5.10 | Veiklos centras | Vienoje vietoje matai, kam reikia tavo dėmesio. | darbuotojas, įmonė, vadovas | /dashboard/activity | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 5.11 | Darbuotojo kalendorius | Matai savo darbus kalendoriuje. | darbuotojas, savarankiškas specialistas | /dashboard/planning | savarankiskos-paslaugos,projektai | eisena | nenustatyta |  | kodas |
+| 5.12 | Prieinamumas | Nurodai, kada gali dirbti. | darbuotojas, savarankiškas specialistas, ieškantis darbo |  | isidarbinimas,savarankiskos-paslaugos | ne | nenustatyta |  | registras |
+| 5.13 | Užsakymas, sutikimas, darbas | Gauni užsakymą, jį priimi ir pradedi darbą. | darbuotojas, savarankiškas specialistas, įmonė | /dashboard/bookings | savarankiskos-paslaugos,samdymas | eisena | nenustatyta |  | kodas |
+| 5.14 | Greitoji paieška ir balsas | Greitai randi puslapį ar veiksmą, galima balsu. | darbuotojas, įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 5.15 | Balsas kaip lygiavertis būdas | Viską gali padaryti ir balsu. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas | registras |
+| 5.16 | Įspėjimai savininkui | Savininkas gauna žinią per Telegram. | administratorius |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 5.17 | Pagalbos pokalbiai | Parašai pagalbos komandai. | darbuotojas, įmonė |  |  | eisena | nenustatyta |  | registras |
+| 5.18 | Paieška skyriuje | Ieškai žmonių, projektų ir dokumentų vienoje vietoje. | darbuotojas, įmonė, vadovas |  |  | eisena | nenustatyta |  | registras |
+| 5.19 | Gautų ataskaitų peržiūra | Matai gautas ataskaitas. | vadovas, įmonė | /dashboard/inbox/report | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 5.20 | Savos automatizacijos | Pats susikuri automatinius veiksmus. | įmonė, vadovas |  | verslo-valdymas | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 5.21 | SMS ir WhatsApp kanalai | Žinutes gauni per SMS ar WhatsApp. | darbuotojas, įmonė |  |  | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 6.1 | Paslaugos ir užklausų ratas | Siūlai paslaugas ir gauni užklausas. | savarankiškas specialistas, klientas | /dashboard/services | savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 6.2 | Skelbimai: prekės, nuoma, ieškau | Skelbi prekes, nuomą ar ko ieškai. | savarankiškas specialistas, klientas, įmonė | /dashboard/listings | savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 6.3 | Bendra paieška | Ieškai paslaugų ir skelbimų vienoje vietoje. | klientas, įmonė | /dashboard/listings | savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 6.4 | Pirkėjo erdvė | Kaip pirkėjas matai savo užklausas ir pasiūlymus. | klientas, įmonė | /dashboard/buyer | savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 6.6 | Pasiūlymai ir sutartys | Paruoši pasiūlymą ir sutartį klientui. | savarankiškas specialistas, įmonė | /dashboard/commercial | savarankiskos-paslaugos,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 6.7 | Pirkimai | Valdai pirkimus savo įmonėje. | įmonė, vadovas | /dashboard/finance | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 6.8 | Komandiruotės | Planuoji ir seki komandiruotes. | įmonė, vadovas, darbuotojas | /dashboard/finance | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 6.9 | Finansų įrašai | Matai įmonės finansų įrašus. | įmonė, vadovas | /dashboard/finance | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 6.10 | Projekto kainos skaičiuoklė | Be registracijos apskaičiuoji projekto kainą. | klientas, įmonė, savarankiškas specialistas | /calculators/project-cost | projektai,savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 6.11 | Pasirengimas darbui užsienyje | Matai, ko reikia dirbti kitoje šalyje. | įmonė, darbuotojas |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 6.12 | Tarptautiniai sandoriai | Įmonės sudaro sandorius tarp šalių. | įmonė |  | verslo-valdymas | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 6.13 | Prekių užsakymai | Perki prekes per platformą. | klientas, įmonė |  | savarankiskos-paslaugos | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 6.14 | Logistika | Susitvarkai prekių pristatymą. | įmonė |  | verslo-valdymas | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 6.16 | Perdavimas partnerio organizacijai | Užklausa perduodama partnerio organizacijai. | įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 6.17 | Pardavimų eiga | Seki potencialių klientų eigą. | administratorius |  |  | savininkas | nenustatyta |  | registras |
+| 6.18 | Laukiančiųjų sąrašas | Užsirašai gauti žinią, kai funkcija atsiras. | darbuotojas, įmonė |  |  | eisena | nenustatyta |  | registras |
+| 6.19 | Komandos užklausos | Gauni komandos užklausas. | įmonė, agentūra | /dashboard/service-requests | samdymas | eisena | nenustatyta |  | kodas |
+| 6.20 | Vertės kanalai | Parodomi keliai, kuriais žmogus gauna naudą iš platformos. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 6.21 | Viešas verslo puslapis | Verslas turi viešą savo puslapį. | įmonė, savarankiškas specialistas, klientas | /business/[slug] | savarankiskos-paslaugos | ne | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 6.22 | Būstas | Susirandi nakvynę darbui. | darbuotojas, įmonė |  |  | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 6.23 | Paslaugos įvertinimas ir ginčai | Įvertini paslaugą, atšauki užsakymą ar paduodi skundą. | klientas, savarankiškas specialistas |  | savarankiskos-paslaugos | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 6.24 | Paslaugų srautas telefone | Naršai paslaugas braukdamas pirštu. | klientas |  | savarankiskos-paslaugos | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 7.1 | Planai ir kainų puslapis | Matai, kokie yra planai. | įmonė, darbuotojas, agentūra | /pricing |  | eisena | nenustatyta |  | kodas |
+| 7.2 | Nemokamas planas: vienas atviras poreikis | Nemokamai gali turėti vieną atvirą poreikį. | įmonė |  | samdymas | ne | nemokama | Koordinatorius | registras |
+| 7.3 | Planų teisių nustatymas | Žinoma, ką leidžia tavo planas. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 7.4 | Bandomasis mokėjimas | Išbandomas mokėjimas be tikrų pinigų. | administratorius |  |  |  | nenustatyta | Koordinatorius | registras |
+| 7.5 | Mokėjimas už planą | Įmonė už planą sumoka kortele. | įmonė |  |  | ne | mokama | Savininkas | registras |
+| 7.6 | Mokėjimų įrašų atkūrimas | Pataisomi nepavykę mokėjimų įrašai. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.7 | Rankinis bandomojo plano suteikimas | Administratorius suteikia bandomąjį planą. | administratorius |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 7.8 | Kreditų sąskaita | Seki kreditų likutį. | įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.9 | Kreditų papildymas ir planų pakopos | Papildai kreditus ir renkiesi planą. | įmonė, agentūra |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.10 | Trys peržiūros ir VIP | Ta pati funkcija kaip 4.22, paliekama istorijai. | įmonė |  |  |  | nenustatyta |  | registras |
+| 7.11 | Atidėti planai | Ateityje bus papildomi planai darbuotojams ir agentūroms. | darbuotojas, agentūra |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.12 | Dirbtinio intelekto kaštų skaičiavimas | Skaičiuojama, kiek kainuoja dirbtinio intelekto pagalba. | administratorius |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.13 | Užsakymų riba pagal planą | Plane nustatyta, kiek užsakymų gali turėti. | įmonė |  |  | eisena | nenustatyta | Koordinatorius | registras |
+| 7.14 | Skelbimų vertimo teisė | Skelbimo vertimas priklauso nuo plano. | įmonė |  |  | eisena | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.15 | Metinė prenumerata | Įmonė užsisako mokamą planą. | įmonė |  |  | ne | mokama | Savininkas, paskui koordinatorius | registras |
+| 7.16 | Mokėjimo pranešimo patikra | Tikrinama, ar mokėjimo žinia tikra. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 7.17 | Dvigubo apmokestinimo apsauga | Tavo kortelė nenurašoma du kartus už tą patį. | įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 7.18 | Mokėjimas keičia teises | Sumokėjus atsiranda teisės, nutrūkus mokėjimui jos dingsta. | įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 7.19 | Grąžinimai ir ginčai | Pinigų grąžinimas ar ginčo sprendimas. | įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.20 | Sąskaitos platformoje | Sąskaitas matai pačioje platformoje. | įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.21 | Atsiskaitymo portalas | Kiekvienas už mokėjimus atsakingas žmogus gali atidaryti portalą. | įmonė, vadovas | /dashboard/account |  | ne | nenustatyta | Koordinatorius | kodas |
+| 7.22 | Mokamų funkcijų teisės ir ribos | Kiekviena mokama funkcija taikoma pagal plano ribas. | įmonė |  |  | ne | nenustatyta | Savininkas ir koordinatorius | registras |
+| 7.23 | Kreditų pirkimas | Vienkartinis kreditų pirkimas. | įmonė |  |  | ne | mokama | Savininkas, paskui koordinatorius | registras |
+| 7.24 | Kreditai po vieno mokėjimo | Už vieną mokėjimą kreditai suteikiami vieną kartą. | įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.25 | Kreditų likutis ir istorija | Matai savo kreditų likutį ir istoriją. | įmonė | pokalbis |  | eisena | nenustatyta | Koordinatorius | registras |
+| 7.26 | Kreditų išleidimas ir grąžinimas | Išleidžiami ir grąžinami kreditai. | įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.27 | Nemokamas VIP patvirtintoms įmonėms | Patvirtinta įmonė gauna VIP nemokamai. | įmonė |  | samdymas | ne | nemokama | Savininkas, paskui koordinatorius | registras |
+| 7.28 | Pardavėjas ir sąlygos | Matai, kas parduoda ir kokiomis sąlygomis. | įmonė | /legal/terms |  | ne | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 7.29 | PVM skaičiavimas | Mokėjimuose skaičiuojamas PVM. | įmonė |  |  | ne | nenustatyta | Savininkas ir teisininkas | registras |
+| 7.30 | Sąskaitos ir priėmimo aktai iš žurnalo | Iš darbo žurnalo parengiama sąskaita ir priėmimo aktas. | savarankiškas specialistas, įmonė |  | savarankiskos-paslaugos,verslo-valdymas | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 7.31 | Planai darbuotojams ir įmonėms | Planai abiem pusėms: nemokamas ir mokami. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 8.1 | Svetainės kalbos | Naudoji platformą savo kalba. | darbuotojas, ieškantis darbo, įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 8.2 | Darbas suprantamas keliomis kalbomis | Darbo aprašai suprantami keliomis kalbomis. | darbuotojas, ieškantis darbo, įmonė |  | isidarbinimas | eisena | nenustatyta |  | registras |
+| 8.3 | Automatinis vertimas | Tekstas išverčiamas į tavo kalbą. | darbuotojas, ieškantis darbo, įmonė |  | isidarbinimas | eisena | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 8.4 | Šalių darbo rinkos puslapiai | Skaitai apie darbo rinką skirtingose šalyse. | ieškantis darbo, darbuotojas | /labour-market | isidarbinimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 8.5 | Devynios pirmosios rinkos | Platforma pritaikoma devynioms šalims. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 8.6 | Šalių reikalavimų lentelė | Matai, ko reikia dirbti konkrečioje šalyje. | ieškantis darbo, darbuotojas | /work-abroad | isidarbinimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 8.7 | Viešas atsakymų puslapis | Randi atsakymus į dažniausius klausimus. | ieškantis darbo, darbuotojas, įmonė | /questions | isidarbinimas,pirmas-darbas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 8.8 | Paieškos sistemų paruošimas | Svetainė tinkamai matoma paieškos sistemose. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 8.9 | Viešas įmonės profilis | Įmonė turi viešą savo profilį. | įmonė, klientas | /business/[slug] | samdymas | eisena | nenustatyta | Koordinatorius | kodas |
+| 8.10 | Pristatymo svetainė | Perskaitai apie platformą prieš registruojantis. | ieškantis darbo, darbuotojas, įmonė, agentūra | /about |  | eisena | nenustatyta |  | kodas |
+| 8.11 | Svetainė telefone | Naudoji platformą telefone. | darbuotojas, ieškantis darbo, įmonė |  |  | eisena | nenustatyta |  | registras |
+| 8.12 | Įdiegimas telefone | Platformą įdedi į telefono pradžios ekraną. | darbuotojas, įmonė |  |  | eisena | nenustatyta |  | registras |
+| 8.13 | Programėlė telefonui | Atskira programėlė telefone. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 8.14 | Nuorodos į programėlę | Nuoroda iš laiško atidaro programėlę. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 8.15 | Programėlių parduotuvės | Programėlė pasiekiama programėlių parduotuvėse. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 8.16 | Pastabos apie vertimą | Praneši, kad vertimas neteisingas. | darbuotojas, ieškantis darbo, įmonė, administratorius | /dashboard/admin/language-feedback |  | eisena | nenustatyta |  | kodas |
+| 8.17 | Programėlė Android telefonui | Programėlė Android telefonui. | darbuotojas, įmonė |  |  | api | nenustatyta | Savininkas | registras |
+| 8.18 | Programėlė iPhone | Programėlė iPhone telefonui. | darbuotojas, įmonė |  |  | api | nenustatyta | Savininkas | registras |
+| 9.1 | Administratoriaus skydas | Administratorius valdo platformą. | administratorius | /dashboard/admin |  | eisena | nenustatyta |  | kodas |
+| 9.2 | Bandymai, rodikliai, lyga | Administratorius seka bandymus ir rodiklius. | administratorius | /dashboard/admin/pilots |  | savininkas | nenustatyta |  | kodas |
+| 9.3 | Naudotojo peržiūra | Administratorius pažiūri vieno naudotojo būseną. | administratorius | /dashboard/admin/users/[id] |  | ne | nenustatyta |  | kodas |
+| 9.4 | Privatumo prašymai | Gali paprašyti savo duomenų ar jų ištrynimo. | darbuotojas, ieškantis darbo, įmonė | /dashboard/privacy |  | ne | nenustatyta | Koordinatorius | kodas |
+| 9.5 | Duomenų atsisiuntimas | Parsisiunti visus apie save laikomus duomenis. | darbuotojas, ieškantis darbo, įmonė | /dashboard/privacy |  | eisena | nenustatyta |  | kodas |
+| 9.6 | Duomenų ištrynimas | Tavo duomenys ištrinami, kai to paprašai. | darbuotojas, ieškantis darbo, įmonė | /dashboard/privacy |  | ne | nenustatyta | Koordinatorius | kodas |
+| 9.7 | Darbuotojo duomenų skyrimas | Atskiriami žmogaus ir jo įmonės duomenys. | sistema |  |  | api | nenustatyta |  | registras |
+| 9.8 | Duomenų prieigos taisyklės | Kiekvienas mato tik savo duomenis. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.9 | Veiksmų žurnalas | Svarbūs veiksmai užrašomi. | sistema, administratorius |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.10 | Užklausų ribojimas | Apsaugo nuo piktnaudžiavimo. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.11 | Užklausų kilmės patikra | Apsaugo nuo suklastotų užklausų. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 9.12 | Teisiniai puslapiai | Perskaitai sąlygas ir privatumo politiką. | darbuotojas, ieškantis darbo, įmonė | /legal/privacy |  | eisena | nenustatyta |  | kodas |
+| 9.13 | Asmens vietos apsauga | Tavo tikslios vietos kiti nemato. | darbuotojas, ieškantis darbo |  |  | eisena | nenustatyta |  | registras |
+| 9.14 | Naudojimo statistika | Administratorius mato, kaip naudojama platforma. | administratorius | /dashboard/admin/telemetry |  | savininkas | nenustatyta |  | kodas |
+| 9.15 | Paieškos būdai | Skirtingos paieškos randa žmones, darbus ir paslaugas. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 9.16 | Rekomendavimo sąsaja | Išorinė sistema siunčia rekomendacijas. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 9.17 | Vidinis pasiūlos srautas | Vidinė sistema gauna pasiūlos duomenis. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.18 | Viešos duomenų sąsajos | Kitos svetainės gali gauti viešus duomenis. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 9.19 | Importo bandymų erdvė | Administratorius išbando importą. | administratorius | /dashboard/admin/import-sandbox |  | savininkas | nenustatyta | Niekas dabar; savininkas, jei norės | kodas |
+| 9.20 | Stebėjimų tikrintuvas | Administratorius tikrina stebėjimus. | administratorius | /dashboard/admin/intelligence-observations |  | savininkas | nenustatyta | Niekas dabar; savininkas, jei norės | kodas |
+| 9.22 | Aplinkos nustatymų patikra | Neleidžia paleisti sistemos su blogais nustatymais. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.23 | Duomenų bazės funkcijų kontrolė | Saugo, kad duomenų funkcijos nebūtų per laisvos. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.24 | Saugumo incidentų tvarkymas | Reaguojama į saugumo incidentus. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.25 | Saugumo perspėjimai | Stebimi saugumo perspėjimai apie kodą. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 10.1 | Atvira sąsaja dirbtinio intelekto programoms | Programa gali veikti tavo vardu su tavo leidimu. | darbuotojas, įmonė | MCP |  | eisena | nenustatyta |  | kodas |
+| 10.2 | Dirbtinio intelekto scenarijai | Paruošti scenarijai dirbtinio intelekto programoms. | darbuotojas, įmonė | MCP |  | api | nenustatyta |  | kodas |
+| 10.3 | Prisijungimas dirbtinio intelekto programoms | Programa saugiai gauna tavo leidimą. | darbuotojas, įmonė | MCP |  | api | nenustatyta |  | kodas |
+| 10.4 | Dirbtinio intelekto leidimų sritys | Nustatai, ką programa gali daryti. | darbuotojas, įmonė | MCP |  | ne | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 10.5 | Sąrašai dirbtinio intelekto parduotuvėse | Platforma rodoma dirbtinio intelekto programų sąrašuose. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.6 | Dirbtinio intelekto pagalba | Platforma naudoja dirbtinį intelektą pagalbai. | darbuotojas, įmonė |  |  | eisena | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.7 | Pokalbio ketinimų atpažinimas | Pokalbyje atpažįstama, ko nori. | darbuotojas, įmonė | pokalbis |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.8 | CV sutvarkymas dirbtiniu intelektu | Iš CV dirbtinis intelektas išrenka faktus. | darbuotojas, ieškantis darbo | /cv | isidarbinimas,karjeros-keitimas | ne | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 10.9 | Žurnalo siūlymai | Žurnalo įrašui siūlomi patobulinimai. | darbuotojas | /dashboard/journal | tobulejimas | ne | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 10.10 | Paaiškinimai | Gauni paaiškinimą, kodėl taip pasiūlyta. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.11 | Pagalbininkai be iškvietimo | Yra pagalbininkai, kurių dar niekas nekviečia. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 10.13 | Pagalbininko puslapis | Pasikalbi su pagalbininku. | darbuotojas, įmonė | /dashboard/assist |  | eisena | nenustatyta |  | kodas |
+| 10.14 | Pagalbininkų valdymas | Administratorius valdo pagalbininkus. | administratorius | /dashboard/admin/agent-os |  | savininkas | nenustatyta |  | kodas |
+| 10.15 | Pagalbininkų vykdymas | Pagalbininkai atlieka darbus patys. | administratorius |  |  | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 10.16 | Pagalbininkai kaip dalyviai | Pagalbininkas yra pokalbio dalyvis. | darbuotojas, įmonė |  |  | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 10.17 | Išorinių veiksmų kvitai | Gauni kvitą apie išorinį veiksmą. | darbuotojas, įmonė | MCP |  | api | nenustatyta |  | kodas |
+| 10.18 | Skelbimai iš Švedijos | Platforma gauna skelbimus iš Švedijos. | ieškantis darbo, darbuotojas | foninis | isidarbinimas | ne | nenustatyta | Koordinatorius | registras |
+| 10.19 | Skelbimai iš Norvegijos | Platforma gauna skelbimus iš Norvegijos. | ieškantis darbo, darbuotojas | foninis | isidarbinimas | ne | nenustatyta | Koordinatorius | registras |
+| 10.20 | Senų skelbimų šalinimas | Pasenę skelbimai pašalinami. | ieškantis darbo, darbuotojas | foninis | isidarbinimas | api | nenustatyta | Koordinatorius | registras |
+| 10.21 | Statistikos importas | Importuojama oficiali statistika. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.22 | Partnerio organizacijos sąsaja | Duomenys keičiasi su partnerio organizacija. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.23 | Agentūros pasiūlos srautas | Agentūros pasiūla patenka į platformą. | agentūra |  | samdymas | ne | nenustatyta | Koordinatorius | registras |
+| 10.24 | Savo serverio vertimas | Vertimas veikia mūsų serveryje. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.25 | Debesų dirbtinis intelektas | Papildomas dirbtinio intelekto tiekėjas. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.26 | Programų konkursas | Dalyvavimas dirbtinio intelekto programų konkurse. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.27 | Žemėlapiai | Matai vietas žemėlapyje. | darbuotojas, ieškantis darbo, įmonė |  | isidarbinimas | eisena | nenustatyta |  | registras |
+| 11.1 | Mokymo įstaiga ir besimokantysis | Mokymo įstaiga susieja su savo besimokančiais. | mokymo įstaiga, besimokantis | /dashboard/company/education | mokymasis | eisena | nenustatyta |  | kodas |
+| 11.2 | Programos ir srautai | Mokymo įstaiga kuria programas ir grupes. | mokymo įstaiga | /dashboard/company/education | mokymasis | eisena | nenustatyta |  | kodas |
+| 11.3 | Mokymosi kompasas | Matai, ką mokytis toliau. | besimokantis, darbuotojas, ieškantis darbo | /dashboard/learning | mokymasis,tobulejimas,karjeros-keitimas,pirmas-darbas | eisena | nenustatyta |  | kodas |
+| 11.4 | Praktikos vietos | Įmonė pasiūlo vietų praktikai. | įmonė, mokymo įstaiga, besimokantis | /dashboard/company/education | mokymasis,pirmas-darbas | eisena | nenustatyta |  | kodas |
+| 11.5 | Besimokančiųjų rezultatai | Matai, kaip sekasi besimokantiems. | mokymo įstaiga, besimokantis | /dashboard/learning | mokymasis | eisena | nenustatyta |  | kodas |
+| 11.6 | Mokymo įstaigos ataskaitos | Mokymo įstaiga gauna ataskaitas. | mokymo įstaiga | /dashboard/reports | mokymasis | eisena | nenustatyta |  | kodas |
+| 11.7 | Praktika virsta gebėjimu | Atlikta praktika parodo įgytą gebėjimą. | besimokantis, mokymo įstaiga | /dashboard/learning | mokymasis,pirmas-darbas,tobulejimas | eisena | nenustatyta |  | kodas |
+| 11.8 | Mokymų ir pažymėjimų sąrašas | Laikai mokymus ir pažymėjimus vienoje vietoje. | besimokantis, darbuotojas, mokymo įstaiga | /dashboard/learning | mokymasis,tobulejimas | eisena | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 11.9 | Mokymosi peržiūra žmogaus akimis | Žmogus peržiūri mokymosi rekomendacijas. | besimokantis, mokymo įstaiga |  | mokymasis | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 11.10 | Ankstesnio mokymosi pripažinimas | Pripažįstamas anksčiau įgytas mokymasis. | besimokantis, darbuotojas |  | mokymasis,karjeros-keitimas | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 12.1 | Rinkos žemėlapis | Matai, kur yra darbo ir žmonių. | darbuotojas, ieškantis darbo, įmonė | /dashboard/market-map | isidarbinimas,karjeros-keitimas,verslo-valdymas | ne | nenustatyta |  | kodas |
+| 12.2 | Darbo rinkos žinios | Skaitai apie darbo rinką. | darbuotojas, ieškantis darbo, įmonė | /dashboard/intelligence | karjeros-keitimas,isidarbinimas | ne | nenustatyta | Koordinatorius | kodas |
+| 12.3 | Žinių skydas | Žinias matai vienoje vietoje. | darbuotojas, įmonė, vadovas | /dashboard/intelligence | karjeros-keitimas,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 12.4 | Poreikio atpažinimas | Atpažįstamas rinkos poreikis. | administratorius, įmonė | /dashboard/market/recognize | verslo-valdymas | ne | nenustatyta |  | kodas |
+| 12.5 | Viešieji rinkos faktai | Matai viešus rinkos faktus. | ieškantis darbo, darbuotojas, įmonė | /labour-market | isidarbinimas,karjeros-keitimas | ne | nenustatyta | Koordinatorius | kodas |
+| 12.6 | Administratoriaus rinkos puslapis | Administratorius mato rinkos vaizdą. | administratorius | /dashboard/admin/market |  | savininkas | nenustatyta |  | kodas |
+| 13.1 | Svetainės talpinimas ir atnaujinimas | Svetainė pasiekiama ir atnaujinama be pertraukų. | sistema |  |  | eisena | nenustatyta | Koordinatorius | registras |
+| 13.2 | Veikimo stebėjimas | Pastebima, kai svetainė neatsako. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.3 | Paruoštas patikrinimo paketas | Automatiškai išbandomi pagrindiniai naudotojo žingsniai. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 13.4 | Duomenų bazės talpa | Pasirūpinama, kad duomenys tilptų. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.5 | Atsarginės kopijos | Tavo duomenys turi atsarginę kopiją. | sistema |  |  | api | nenustatyta |  | registras |
+| 13.6 | Reguliarūs foniniai darbai | Reguliariai atliekami foniniai darbai. | sistema | foninis |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.7 | Duomenų bazės pakeitimų patikra | Prieš keičiant duomenų bazę tikrinama, ar saugu. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.8 | Pakeitimų žurnalo suderinimas | Pakeitimų žurnalas atitinka tikrą būseną. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.9 | Ryšys su kodo saugykla | Duomenų bazė susieta su kodo saugykla. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.10 | Kokybės vartai | Prieš paskelbiant keitimą, jis tikrinamas. | sistema |  |  | api | nenustatyta | Nereikia (automatinė patikra) | registras |
+| 13.11 | Automatinė naudotojo kelio patikra | Automatiškai išbandomi pagrindiniai žingsniai. | sistema |  |  | ne | nenustatyta | Nereikia (automatinė patikra) | registras |
+| 13.12 | Produkto taisyklių patikra | Automatiškai tikrinama, ar laikomasi produkto taisyklių. | sistema |  |  | ne | nenustatyta | Nereikia (automatinė patikra) | registras |
+| 13.13 | Funkcijų prieinamumo sąrašas | Aišku, kurios funkcijos jau paruoštos. | administratorius, sistema |  |  | api | nenustatyta | Koordinatorius | registras |
+| 13.14 | Išimčių valdymas | Savininkas leidžia išimtis kokybės vartams. | administratorius |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.15 | Senų naršyklių palaikymas | Svetainė atsidaro ir senesnėje naršyklėje. | darbuotojas, ieškantis darbo, įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.16 | Naršyklės klaidų pranešimai | Sužinoma, kai tavo naršyklėje įvyko klaida. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.17 | Aplinkos suderinimas po perkėlimo | Po serverio keitimo viskas sulyginama. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+
+### Map: links
+
+| From | To | Kind | Data |
+|---|---|---|---|
+| 1.2 | 1.1 | depends |  |
+| 1.3 | 1.1 | depends |  |
+| 1.4 | 1.1 | depends |  |
+| 1.5 | 1.1 | depends |  |
+| 1.6 | 1.1 | depends |  |
+| 1.7 | 1.6 | depends |  |
+| 1.9 | 1.6 | depends |  |
+| 1.10 | 1.5 | depends |  |
+| 1.15 | 1.6 | depends |  |
+| 1.14 | 1.7 | depends |  |
+| 1.12 | 1.1 | depends |  |
+| 1.13 | 1.1 | depends |  |
+| 2.1 | 1.1 | depends |  |
+| 2.2 | 2.1 | depends |  |
+| 2.3 | 2.1 | depends |  |
+| 2.4 | 2.1 | depends |  |
+| 2.5 | 2.1 | depends |  |
+| 2.6 | 2.1 | depends |  |
+| 2.7 | 2.1 | depends |  |
+| 2.8 | 2.1 | depends |  |
+| 2.9 | 2.1 | depends |  |
+| 2.10 | 2.1 | depends |  |
+| 2.11 | 2.12 | depends |  |
+| 2.12 | 2.1 | depends |  |
+| 2.13 | 2.19 | depends |  |
+| 2.13 | 2.12 | depends |  |
+| 2.14 | 2.13 | depends |  |
+| 2.15 | 2.12 | depends |  |
+| 2.16 | 2.12 | depends |  |
+| 2.18 | 2.1 | depends |  |
+| 2.19 | 1.1 | depends |  |
+| 2.20 | 2.19 | depends |  |
+| 2.20 | 1.9 | depends |  |
+| 2.21 | 2.20 | depends |  |
+| 2.22 | 2.19 | depends |  |
+| 2.23 | 2.19 | depends |  |
+| 2.24 | 2.19 | depends |  |
+| 2.25 | 2.23 | depends |  |
+| 2.26 | 2.19 | depends |  |
+| 2.27 | 1.15 | depends |  |
+| 2.28 | 2.27 | depends |  |
+| 2.29 | 2.13 | depends |  |
+| 2.30 | 2.19 | depends |  |
+| 2.31 | 2.19 | depends |  |
+| 2.32 | 2.19 | depends |  |
+| 2.33 | 2.22 | depends |  |
+| 2.34 | 2.23 | depends |  |
+| 2.35 | 2.1 | depends |  |
+| 2.36 | 2.19 | depends |  |
+| 2.37 | 2.27 | depends |  |
+| 3.1 | 1.6 | depends |  |
+| 3.2 | 3.1 | depends |  |
+| 3.3 | 3.2 | depends |  |
+| 3.4 | 3.2 | depends |  |
+| 3.5 | 3.4 | depends |  |
+| 3.6 | 3.2 | depends |  |
+| 3.6 | 3.21 | depends |  |
+| 3.7 | 3.21 | depends |  |
+| 3.8 | 3.7 | depends |  |
+| 3.8 | 3.2 | depends |  |
+| 3.9 | 3.2 | depends |  |
+| 3.10 | 3.2 | depends |  |
+| 3.11 | 3.2 | depends |  |
+| 3.12 | 3.2 | depends |  |
+| 3.13 | 3.2 | depends |  |
+| 3.14 | 3.6 | depends |  |
+| 3.15 | 3.21 | depends |  |
+| 3.16 | 3.14 | depends |  |
+| 3.17 | 3.14 | depends |  |
+| 3.18 | 3.14 | depends |  |
+| 3.19 | 3.14 | depends |  |
+| 3.19 | 2.23 | depends |  |
+| 3.20 | 3.14 | depends |  |
+| 3.21 | 1.9 | depends |  |
+| 3.22 | 3.21 | depends |  |
+| 3.23 | 3.21 | depends |  |
+| 3.24 | 3.21 | depends |  |
+| 3.25 | 3.1 | depends |  |
+| 3.26 | 3.21 | depends |  |
+| 3.27 | 1.15 | depends |  |
+| 3.28 | 5.1 | depends |  |
+| 3.29 | 2.18 | depends |  |
+| 3.30 | 3.1 | depends |  |
+| 3.31 | 3.1 | depends |  |
+| 3.32 | 3.1 | depends |  |
+| 3.33 | 2.23 | depends |  |
+| 3.34 | 3.2 | depends |  |
+| 3.34 | 2.23 | depends |  |
+| 3.35 | 3.14 | depends |  |
+| 3.35 | 3.17 | depends |  |
+| 3.36 | 3.1 | depends |  |
+| 4.1 | 1.6 | depends |  |
+| 4.3 | 4.5 | depends |  |
+| 4.5 | 2.1 | depends |  |
+| 4.5 | 4.1 | depends |  |
+| 4.6 | 4.1 | depends |  |
+| 4.7 | 4.1 | depends |  |
+| 4.9 | 4.4 | depends |  |
+| 4.10 | 4.28 | depends |  |
+| 4.11 | 4.10 | depends |  |
+| 4.12 | 4.11 | depends |  |
+| 4.13 | 4.11 | depends |  |
+| 4.14 | 4.11 | depends |  |
+| 4.15 | 1.6 | depends |  |
+| 4.16 | 4.3 | depends |  |
+| 4.17 | 2.35 | depends |  |
+| 4.18 | 2.35 | depends |  |
+| 4.19 | 4.17 | depends |  |
+| 4.21 | 4.20 | depends |  |
+| 4.22 | 4.21 | depends |  |
+| 4.26 | 2.1 | depends |  |
+| 4.28 | 2.1 | depends |  |
+| 4.29 | 4.3 | depends |  |
+| 4.29 | 4.1 | depends |  |
+| 4.30 | 4.12 | depends |  |
+| 4.30 | 4.1 | depends |  |
+| 5.2 | 5.1 | depends |  |
+| 5.3 | 5.1 | depends |  |
+| 5.5 | 5.4 | depends |  |
+| 5.6 | 5.4 | depends |  |
+| 5.7 | 1.13 | depends |  |
+| 5.8 | 5.6 | depends |  |
+| 5.9 | 5.7 | depends |  |
+| 5.10 | 5.6 | depends |  |
+| 5.11 | 5.12 | depends |  |
+| 5.13 | 5.11 | depends |  |
+| 5.14 | 5.1 | depends |  |
+| 5.15 | 5.14 | depends |  |
+| 5.19 | 2.20 | depends |  |
+| 5.21 | 5.6 | depends |  |
+| 6.1 | 2.1 | depends |  |
+| 6.3 | 6.1 | depends |  |
+| 6.3 | 6.2 | depends |  |
+| 6.4 | 6.3 | depends |  |
+| 6.6 | 6.1 | depends |  |
+| 6.7 | 3.1 | depends |  |
+| 6.9 | 3.1 | depends |  |
+| 6.12 | 6.11 | depends |  |
+| 6.13 | 6.2 | depends |  |
+| 6.14 | 6.13 | depends |  |
+| 6.19 | 4.6 | depends |  |
+| 6.21 | 1.6 | depends |  |
+| 6.23 | 6.1 | depends |  |
+| 6.24 | 6.3 | depends |  |
+| 7.2 | 7.3 | depends |  |
+| 7.3 | 7.1 | depends |  |
+| 7.5 | 7.3 | depends |  |
+| 7.13 | 7.3 | depends |  |
+| 7.14 | 7.3 | depends |  |
+| 7.15 | 7.5 | depends |  |
+| 7.16 | 7.5 | depends |  |
+| 7.17 | 7.5 | depends |  |
+| 7.18 | 7.5 | depends |  |
+| 7.18 | 7.3 | depends |  |
+| 7.19 | 7.5 | depends |  |
+| 7.20 | 7.5 | depends |  |
+| 7.21 | 7.5 | depends |  |
+| 7.22 | 7.3 | depends |  |
+| 7.23 | 7.5 | depends |  |
+| 7.24 | 7.23 | depends |  |
+| 7.25 | 7.8 | depends |  |
+| 7.26 | 7.8 | depends |  |
+| 7.27 | 7.3 | depends |  |
+| 7.29 | 7.5 | depends |  |
+| 7.31 | 7.1 | depends |  |
+| 7.6 | 7.5 | depends |  |
+| 7.12 | 10.6 | depends |  |
+| 7.30 | 2.19 | depends |  |
+| 8.2 | 8.1 | depends |  |
+| 8.5 | 8.1 | depends |  |
+| 8.9 | 1.6 | depends |  |
+| 8.12 | 8.11 | depends |  |
+| 8.14 | 8.13 | depends |  |
+| 8.15 | 8.13 | depends |  |
+| 8.17 | 8.13 | depends |  |
+| 8.18 | 8.13 | depends |  |
+| 8.16 | 8.3 | depends |  |
+| 8.6 | 8.4 | depends |  |
+| 8.8 | 8.10 | depends |  |
+| 9.6 | 9.4 | depends |  |
+| 9.5 | 9.4 | depends |  |
+| 9.2 | 9.1 | depends |  |
+| 9.3 | 9.1 | depends |  |
+| 9.14 | 9.1 | depends |  |
+| 9.19 | 9.1 | depends |  |
+| 9.20 | 9.1 | depends |  |
+| 9.16 | 1.12 | depends |  |
+| 10.2 | 10.1 | depends |  |
+| 10.3 | 10.1 | depends |  |
+| 10.4 | 10.3 | depends |  |
+| 10.17 | 10.1 | depends |  |
+| 10.8 | 10.6 | depends |  |
+| 10.9 | 10.6 | depends |  |
+| 10.10 | 10.6 | depends |  |
+| 10.7 | 10.6 | depends |  |
+| 10.16 | 10.6 | depends |  |
+| 10.14 | 10.15 | depends |  |
+| 10.11 | 10.15 | depends |  |
+| 10.18 | 4.4 | depends |  |
+| 10.19 | 4.4 | depends |  |
+| 10.20 | 4.4 | depends |  |
+| 10.23 | 9.17 | depends |  |
+| 10.5 | 10.1 | depends |  |
+| 10.26 | 10.5 | depends |  |
+| 11.2 | 11.1 | depends |  |
+| 11.3 | 11.1 | depends |  |
+| 11.4 | 11.1 | depends |  |
+| 11.5 | 11.2 | depends |  |
+| 11.6 | 11.5 | depends |  |
+| 11.7 | 11.4 | depends |  |
+| 11.7 | 2.19 | depends |  |
+| 11.8 | 11.1 | depends |  |
+| 11.9 | 11.7 | depends |  |
+| 11.10 | 11.8 | depends |  |
+| 12.1 | 12.2 | depends |  |
+| 12.3 | 12.2 | depends |  |
+| 12.4 | 12.2 | depends |  |
+| 12.6 | 12.2 | depends |  |
+| 13.3 | 13.1 | depends |  |
+| 13.2 | 13.1 | depends |  |
+| 13.5 | 13.4 | depends |  |
+| 13.6 | 13.1 | depends |  |
+| 13.8 | 13.7 | depends |  |
+| 13.10 | 13.11 | depends |  |
+| 13.12 | 13.10 | depends |  |
+| 13.14 | 13.10 | depends |  |
+| 13.17 | 13.1 | depends |  |
+| 2.19 | 2.20 | data | žurnalo įrašai |
+| 2.20 | 2.21 | data | patvirtinimo būsena |
+| 2.19 | 2.23 | data | darbo valandos |
+| 2.23 | 2.25 | data | valandos |
+| 2.19 | 2.13 | data | darbo įrašų tekstas |
+| 2.13 | 2.4 | data | atpažinti įgūdžiai |
+| 2.3 | 2.4 | data | patvirtinti CV faktai |
+| 2.5 | 2.26 | data | darbo patirtis |
+| 2.19 | 2.26 | data | žurnalo įrašai |
+| 2.27 | 2.26 | data | organizacijos pateikta istorija |
+| 2.26 | 2.4 | data | profesinė istorija |
+| 2.22 | 2.33 | data | nuotraukos |
+| 2.35 | 4.10 | data | sutikimas būti randamam |
+| 2.35 | 4.17 | data | sutikimas būti randamam |
+| 2.1 | 4.5 | data | profilio duomenys |
+| 2.2 | 4.5 | data | prieinamumas ir atlygis |
+| 2.32 | 2.21 | data | kitos pusės patvirtinimas |
+| 2.12 | 11.3 | data | įgūdžiai |
+| 2.11 | 11.3 | data | trūkstami gebėjimai |
+| 2.18 | 3.29 | data | dokumentai |
+| 2.23 | 3.33 | data | valandos |
+| 2.23 | 3.19 | data | faktinės valandos |
+| 2.23 | 3.12 | data | valandos |
+| 2.23 | 3.34 | data | įrašytos valandos |
+| 2.23 | 3.31 | data | valandos ataskaitoms |
+| 4.1 | 4.5 | data | poreikis |
+| 4.5 | 4.3 | data | tinkami darbai |
+| 4.5 | 4.11 | data | tinkami kandidatai |
+| 4.3 | 4.29 | data | susidomėjimas |
+| 4.29 | 4.30 | data | laisva vieta |
+| 4.11 | 4.12 | data | kandidatai |
+| 4.12 | 4.30 | data | trumpasis kandidatų sąrašas |
+| 4.13 | 4.12 | data | parinkti kandidatai |
+| 4.1 | 4.6 | data | poreikis |
+| 4.6 | 6.19 | data | komandos pasiūlymas |
+| 4.28 | 4.10 | data | pasiūla |
+| 4.4 | 4.9 | data | skelbimai |
+| 4.9 | 5.7 | data | pranešimai apie naujus skelbimus |
+| 4.9 | 5.6 | data | pranešimai apie naujus skelbimus |
+| 10.18 | 4.4 | data | skelbimai |
+| 10.19 | 4.4 | data | skelbimai |
+| 10.18 | 12.2 | data | skelbimų duomenys |
+| 4.1 | 12.4 | data | įmonių poreikiai |
+| 4.14 | 4.15 | data | kandidato pasiūlymas |
+| 4.16 | 5.4 | data | žinutė žmogui |
+| 4.19 | 5.4 | data | kontaktų prašymas |
+| 4.30 | 12.2 | data | uždaryti poreikiai |
+| 3.14 | 3.19 | data | planas |
+| 3.6 | 3.14 | data | paskyrimai |
+| 3.15 | 3.14 | data | nebuvimai |
+| 3.5 | 3.13 | data | užduotys |
+| 3.22 | 3.21 | data | žmonių sąrašas |
+| 3.21 | 3.6 | data | žmonės |
+| 3.7 | 3.8 | data | brigada |
+| 3.17 | 3.35 | data | rezervacijos |
+| 3.14 | 3.34 | data | planas |
+| 3.20 | 3.14 | data | pamainos |
+| 3.2 | 3.13 | data | projektai |
+| 3.4 | 3.5 | data | etapai |
+| 3.2 | 3.4 | data | projektas |
+| 3.10 | 3.11 | data | defektai |
+| 3.9 | 3.11 | data | pasirengimas |
+| 3.27 | 3.31 | data | istorija |
+| 3.28 | 5.1 | data | atsakymai |
+| 5.13 | 5.11 | data | priimti užsakymai |
+| 5.12 | 5.11 | data | prieinamumas |
+| 5.12 | 4.5 | data | prieinamumas |
+| 5.4 | 5.6 | data | žinutės |
+| 5.6 | 5.7 | data | pranešimai |
+| 5.6 | 5.9 | data | pranešimai |
+| 5.1 | 2.19 | data | pokalbiu įrašyti darbai |
+| 5.1 | 5.3 | data | veiksmai patvirtinimui |
+| 5.19 | 3.31 | data | ataskaitos |
+| 5.5 | 5.4 | data | vertimai |
+| 8.3 | 5.5 | data | vertimai |
+| 8.3 | 7.14 | data | vertimai |
+| 6.1 | 6.3 | data | paslaugos |
+| 6.2 | 6.3 | data | skelbimai |
+| 6.3 | 6.4 | data | paslaugų paieška |
+| 6.1 | 6.6 | data | užklausa |
+| 6.6 | 6.9 | data | sutartys ir pasiūlymai |
+| 6.9 | 3.12 | data | išlaidos |
+| 6.10 | 6.6 | data | kainos skaičiavimas |
+| 6.1 | 5.13 | data | užklausos |
+| 6.19 | 5.13 | data | komandos užklausos |
+| 6.8 | 6.9 | data | komandiruočių išlaidos |
+| 6.7 | 6.9 | data | pirkimų išlaidos |
+| 7.1 | 7.3 | data | planai |
+| 7.5 | 7.18 | data | mokėjimai |
+| 7.5 | 7.3 | data | mokėjimo būsena |
+| 7.16 | 7.5 | data | patvirtinti mokėjimai |
+| 7.3 | 7.2 | data | plano ribos |
+| 7.3 | 7.13 | data | plano ribos |
+| 7.3 | 7.14 | data | plano teisės |
+| 7.3 | 7.22 | data | plano teisės |
+| 7.23 | 7.8 | data | kreditai |
+| 7.8 | 7.25 | data | kreditų likutis |
+| 7.26 | 7.8 | data | kreditų judėjimas |
+| 7.24 | 7.8 | data | kreditai |
+| 7.15 | 7.31 | data | prenumerata |
+| 1.7 | 7.27 | data | patvirtinta įmonė |
+| 7.5 | 7.17 | data | mokėjimų įrašai |
+| 9.4 | 9.5 | data | duomenų prašymas |
+| 9.4 | 9.6 | data | duomenų prašymas |
+| 9.14 | 9.2 | data | naudojimo statistika |
+| 9.9 | 9.1 | data | veiksmų žurnalas |
+| 9.17 | 4.10 | data | vidinė pasiūla |
+| 9.18 | 8.7 | data | viešos duomenys |
+| 9.13 | 4.21 | data | vietos privatumas |
+| 10.1 | 10.2 | data | programos įrankiai |
+| 10.3 | 10.4 | data | leidimai |
+| 10.4 | 10.17 | data | leidimų sritys |
+| 10.6 | 10.8 | data | dirbtinio intelekto pagalba |
+| 10.6 | 10.9 | data | dirbtinio intelekto pagalba |
+| 10.6 | 10.10 | data | dirbtinio intelekto pagalba |
+| 10.6 | 10.7 | data | dirbtinio intelekto pagalba |
+| 10.8 | 2.3 | data | CV faktai patvirtinimui |
+| 10.9 | 2.19 | data | žurnalo siūlymai |
+| 10.23 | 4.10 | data | agentūros pasiūla |
+| 10.20 | 4.4 | data | aktualūs skelbimai |
+| 11.1 | 11.2 | data | mokymo įstaigos ir besimokantys |
+| 11.2 | 11.5 | data | programos ir srautai |
+| 11.5 | 11.6 | data | rezultatai |
+| 11.4 | 11.7 | data | praktika |
+| 11.7 | 2.13 | data | įgyti gebėjimai |
+| 11.7 | 2.12 | data | įgyti įgūdžiai |
+| 11.8 | 2.8 | data | pažymėjimai |
+| 11.3 | 11.8 | data | mokymosi poreikis |
+| 11.9 | 11.7 | data | žmogaus peržiūra |
+| 11.10 | 11.8 | data | pripažintas mokymasis |
+| 12.5 | 8.4 | data | rinkos faktai |
+| 12.5 | 12.1 | data | rinkos faktai |
+| 12.2 | 12.3 | data | žinios |
+| 8.4 | 8.6 | data | šalių duomenys |
+| 1.9 | 3.21 | data | nariai |
+| 1.15 | 2.27 | data | įmonės istorija |
+| 1.1 | 1.4 | data | paskyra |
+| 1.6 | 1.7 | data | įmonės duomenys |
+| 1.12 | 1.1 | data | kvietimas |
+| 1.9 | 2.20 | data | vaidmenys |
+
+### Map: journeys
+
+| Journey | Lietuviškai | Step | Functions |
+|---|---|---|---|
+| J-1 | Darbuotojas prisijungia, pradeda ir mato gyvą CV | 1 | 1.1 |
+| J-1 | Darbuotojas prisijungia, pradeda ir mato gyvą CV | 2 | 1.4 |
+| J-1 | Darbuotojas prisijungia, pradeda ir mato gyvą CV | 3 | 2.19 |
+| J-1 | Darbuotojas prisijungia, pradeda ir mato gyvą CV | 4 | 2.4 |
+| J-2 | Vadovas patvirtina žurnalo įrašą, ir jis atsiranda CV | 1 | 2.20 |
+| J-2 | Vadovas patvirtina žurnalo įrašą, ir jis atsiranda CV | 2 | 2.21 |
+| J-2 | Vadovas patvirtina žurnalo įrašą, ir jis atsiranda CV | 3 | 2.31 |
+| J-3 | Darbuotojas randa poreikį ir susisiekia su įmone | 1 | 4.3 |
+| J-3 | Darbuotojas randa poreikį ir susisiekia su įmone | 2 | 4.16 |
+| J-3 | Darbuotojas randa poreikį ir susisiekia su įmone | 3 | 5.4 |
+| J-4 | Viešoji darbo paieška | 1 | 4.4 |
+| J-4 | Viešoji darbo paieška | 2 | 4.29 |
+| J-5 | Įmonė prisijungia ir randa kandidatus | 1 | 1.6 |
+| J-5 | Įmonė prisijungia ir randa kandidatus | 2 | 4.1 |
+| J-5 | Įmonė prisijungia ir randa kandidatus | 3 | 4.11 |
+| J-5 | Įmonė prisijungia ir randa kandidatus | 4 | 4.12 |
+| J-5 | Įmonė prisijungia ir randa kandidatus | 5 | 4.16 |
+| J-6 | Įmonė pakviečia žmogų | 1 | 1.9 |
+| J-6 | Įmonė pakviečia žmogų | 2 | 1.4 |
+| J-7 | Projektas, valandos ir ataskaita | 1 | 3.2 |
+| J-7 | Projektas, valandos ir ataskaita | 2 | 3.6 |
+| J-7 | Projektas, valandos ir ataskaita | 3 | 3.3 |
+| J-7 | Projektas, valandos ir ataskaita | 4 | 2.23 |
+| J-7 | Projektas, valandos ir ataskaita | 5 | 3.13 |
+| J-8 | Poreikis, datos ir darbuotojo sutikimas | 1 | 5.13 |
+| J-9 | Agentūra pasiūlo žmones klientui | 1 | 4.15 |
+| J-9 | Agentūra pasiūlo žmones klientui | 2 | 4.28 |
+| J-10 | Brigada siūloma kaip vienas vienetas | 1 | 3.7 |
+| J-10 | Brigada siūloma kaip vienas vienetas | 2 | 4.6 |
+| J-10 | Brigada siūloma kaip vienas vienetas | 3 | 4.7 |
+| J-11 | Prekė ar paslauga: paskelbta, rasta, užsakyta | 1 | 6.1 |
+| J-11 | Prekė ar paslauga: paskelbta, rasta, užsakyta | 2 | 6.2 |
+| J-11 | Prekė ar paslauga: paskelbta, rasta, užsakyta | 3 | 6.3 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 1 | 11.1 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 2 | 11.2 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 3 | 11.3 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 4 | 11.4 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 5 | 11.5 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 6 | 11.6 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 7 | 11.7 |
+| J-13 | Pirkėjas ir paslaugos teikėjas | 1 | 6.4 |
+| J-13 | Pirkėjas ir paslaugos teikėjas | 2 | 6.1 |
+| J-14 | Įmonė perka planą be pagalbos | 1 | 7.1 |
+| J-14 | Įmonė perka planą be pagalbos | 2 | 7.5 |
+| J-14 | Įmonė perka planą be pagalbos | 3 | 7.15 |
+| J-14 | Įmonė perka planą be pagalbos | 4 | 7.28 |
+| J-15 | Pranešimas apie tinkamą darbą be prisijungimo | 1 | 4.9 |
+| J-15 | Pranešimas apie tinkamą darbą be prisijungimo | 2 | 5.7 |
+| J-15 | Pranešimas apie tinkamą darbą be prisijungimo | 3 | 5.9 |
+| J-16 | Pamiršai slaptažodį | 1 | 1.3 |
+| J-17 | Programėlės įdiegimas iš parduotuvės | 1 | 8.15 |
+| J-17 | Programėlės įdiegimas iš parduotuvės | 2 | 8.17 |
+| J-17 | Programėlės įdiegimas iš parduotuvės | 3 | 8.18 |
+| J-18 | Tavo duomenų eksportas ir ištrynimas | 1 | 9.4 |
+| J-18 | Tavo duomenų eksportas ir ištrynimas | 2 | 9.5 |
+| J-18 | Tavo duomenų eksportas ir ištrynimas | 3 | 9.6 |
+| J-19 | Augimas: galimi įgūdžiai ir mokymosi kryptis | 1 | 2.29 |
+| J-19 | Augimas: galimi įgūdžiai ir mokymosi kryptis | 2 | 11.3 |
+
+### Map: blockers
+
+| Blocker | Lietuviškai | Affects | Who |
+|---|---|---|---|
+| OI-4 | Bandomojo plano rodymas (#2682) | 7.4, 7.20 | savininkas, paskui koordinatorius |
+| OI-5 | Išsaugotų darbų sąrašas rodomas teisingai (#2642) | 4.4 | savininkas, paskui koordinatorius |
+| OI-8 | Mokėjimo apsauga bandomuoju laikotarpiu (#3047) | 7.4, 7.15 | savininkas, paskui koordinatorius |
+| OI-13 | Senų skelbimų šalinimo apsauga (#2693) | 10.20 | savininkas, paskui koordinatorius |
+| OI-14 | Pagalbininkų prisijungimo testas (#2454) | 10.3 | savininkas, paskui koordinatorius |
+| OI-27 | Įmonė skiria mokymus darbuotojams (#2816) | 11.8 | savininkas, paskui koordinatorius |
+| OI-28 | Užimtumo konflikto fiksavimas (#2795) | 3.35, 5.13 | savininkas, paskui koordinatorius |
+| OI-29 | Darbuotojų matomumas pagal nutylėjimą (#2747) | 2.35, 4.17 | savininkas, paskui koordinatorius |
+| OI-30 | Skelbimo uždarymo būsena (#2746) | 6.2 | savininkas, paskui koordinatorius |
+| OI-31 | Skelbimų filtras pagal šalį (#2209) | 4.4 | savininkas, paskui koordinatorius |
+| OI-48 | Leidimų aprašymai paprastais žodžiais (#2924) | 10.3, 10.4 | savininkas, paskui koordinatorius |
+| OI-49 | Pagalbininkų prieigos apimtis (#2923) | 10.4 | savininkas, paskui koordinatorius |
+| OI-50 | Kasdienė augimo ataskaita (#2886) | 9.14 | savininkas, paskui koordinatorius |
+| OI-52 | Naudotojo valdomi leidimai (#2812) | 10.3, 10.4 | savininkas, paskui koordinatorius |
+| OI-54 | Prekių pirkimo užklausos (#2713) | 6.13 | savininkas, paskui koordinatorius |
+| OI-55 | Pagalbininkų leidimų sritys (#2707) | 10.4 | savininkas, paskui koordinatorius |
+| OI-56 | Įmonės sąskaitos mokėjimų skiltyje (#2704) | 7.20 | savininkas, paskui koordinatorius |
+| OI-57 | PVM pažadas ir tekstas (#2701) | 7.29 | savininkas ir teisininkas |
+| OI-58 | PVM ir sąskaitų tvarkymas (#2685) | 7.15, 7.29 | savininkas, paskui koordinatorius |
+| OI-60 | Trys nemokami profilių peržiūrėjimai (#2474) | 4.22, 7.10, 7.22, 7.27 | savininkas, paskui koordinatorius |
+| OI-61 | Nuorodos į profilius tik su leidimu (#2471) | 2.10, 4.18 | savininkas, paskui koordinatorius |
+| OI-62 | Profesijų klasifikatoriaus sutvarkymas (#2463) | 2.17 | savininkas, paskui koordinatorius |
+| OI-67 | Istorinių datų ištaisymas (#2362) | 2.28 | savininkas, paskui koordinatorius |
+| OI-70 | Projekto sąskaitų eiga (#2203) | 3.12, 7.30 | savininkas, paskui koordinatorius |
+| OI-73 | Biuro profesijų katalogas (#1577) | 2.12 | savininkas, paskui koordinatorius |
+| OI-101 | Balso atpažinimo paleidimas (#2198) | 2.30, 5.15 | savininkas, paskui koordinatorius |
