@@ -1,28 +1,30 @@
 #!/bin/sh
 # LabourMarket.ai - daily check of what a search engine is served (owner order 2026-11-04, register IDX-16).
-# Daily from /etc/cron.d/labourmarket-seo-watch. Independent of GitHub. Signed out and read-only: about 20
-# public requests a day, no database access of its own and no paid service.
+# Daily from lm-seo-watch.timer, as the unprivileged user lmseo, which has no access to the backups: this script
+# parses content from the internet. Independent of GitHub. Signed out and read-only: about 20 public requests
+# a day, no database access of its own and no paid service.
 #
 # It proves stage 1 only (technically ready). What Google discovered, indexed, showed or sent is read
 # from Search Console; this script says nothing about it.
 #
 # A failed check is one incident: one alert when it starts, one message when it clears.
-# Mail: the same mailbox and address as the backup watchdog (LM_SMTP_* in /root/lm-prod/env, ALERT_TO in
-# /root/lm-prod/backup-watchdog.conf). Without them nothing is sent and the run exits 2.
+# Mail: an alerts-only credential and address like the backup watchdog's, in its own folder (LM_SMTP_* in
+# <root>/env, ALERT_TO in <root>/backup-watchdog.conf). Without them nothing is sent and the run exits 2.
 #
-#   sh lm-seo-watch.sh
-#   sh lm-seo-watch.sh --root <test dir> [--mail-file <file>]   (tests only)
+#   sh lm-seo-watch.sh --root /var/lib/lm-seo
+#   ... [--mail-file <file>] [--skip-access-check]   (tests only)
 #
 # One status line goes to stdout. Exit 0 healthy, 1 problem, 2 mail failed.
 set -eu
 umask 077
-ROOT=/root/lm-prod; MAIL_FILE=""; BASE="https://labourmarket.ai"; NOW=$(date -u +%FT%TZ)
+ROOT=/var/lib/lm-seo; MAIL_FILE=""; ACCESS_CHECK=1; BASE="https://labourmarket.ai"; NOW=$(date -u +%FT%TZ)
 UA="Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
 MIN_JOB_SHARDS=30
 while [ $# -gt 0 ]; do
   case "$1" in
     --root) ROOT="$2"; shift 2;;
     --mail-file) MAIL_FILE="$2"; shift 2;;
+    --skip-access-check) ACCESS_CHECK=0; shift;;
     *) echo "unknown argument"; exit 64;;
   esac
 done
@@ -30,6 +32,15 @@ STATE="$ROOT/seo-watch.state"; CONF="$ROOT/backup-watchdog.conf"
 T=$(mktemp -d "$ROOT/.seo-watch.XXXXXX"); trap 'rm -rf "$T"' EXIT INT TERM
 PROBLEMS=""
 problem() { PROBLEMS="$PROBLEMS $1"; }
+
+# Access this account must not have: it reads the internet, so it must hold nothing worth taking.
+if [ "$ACCESS_CHECK" = 1 ]; then
+  [ "$(id -u)" != "0" ] || problem runs_as_root
+  case " $(id -nG 2>/dev/null) " in *" lmwatch "*|*" docker "*|*" sudo "*|*" adm "*) problem access_too_wide;; esac
+  for p in /root/lm-prod/env /root/lm-prod/backup.age.key /root/lm-prod/backups /var/lib/lm-watch /etc/shadow /var/lib/docker/containers; do
+    [ ! -r "$p" ] || problem access_too_wide
+  done
+fi
 
 # Fetches without following redirects: sets CODE and LOCATION, leaves the body in $T/b.
 fetch() {

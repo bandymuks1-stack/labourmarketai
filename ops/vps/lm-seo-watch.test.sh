@@ -51,7 +51,7 @@ printf '%s' "$code"
 STUB
 chmod +x "$T/bin/curl"
 
-run() { PATH="$T/bin:$PATH" BREAK="${1:-}" sh "$W" --root "$R" --mail-file "$M" >"$T/out" 2>&1; echo $?; }
+run() { PATH="$T/bin:$PATH" BREAK="${1:-}" sh "$W" --root "$R" --mail-file "$M" --skip-access-check >"$T/out" 2>&1; echo $?; }
 mails() { grep -c '^Subject:' "$M"; }
 expect() { # name, actual, wanted
   N=$((N + 1))
