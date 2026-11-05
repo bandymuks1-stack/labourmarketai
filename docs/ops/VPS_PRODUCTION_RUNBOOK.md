@@ -333,6 +333,15 @@ The nightly job proves every dump restores (the drill), but a real recovery
 is a separate, owner-approved act. Order: **verify in isolation → owner
 decision → (only then) production**. Never restore over production to "test".
 
+**To prove a stored pair, use `ops/restore-stored-backup.sh`** on the owner's PC (Git Bash + Docker
+Desktop), with the owner's offline key: same image, target preparation and `pg_restore` call as the
+drill, no network, plaintext in the container's memory, counts only in the output, and it compares
+objects, grants, key tables and Storage files with what the backup's run reported. It does not load
+the VPS and it also proves the offline key.
+`bash ops/restore-stored-backup.sh --run <run id> --key <key file> --db lm-db-<stamp>.dump.age --files lm-files-<stamp>.tar.age`.
+Steps 1–4 below are the manual path on the VPS. Their `--no-owner --no-privileges` restore gives
+readable data but leaves out owners and grants, so its result cannot be compared with the run's grant counts.
+
 1. **Pick the pair** on the VPS: `ls -l /root/lm-prod/backups/` —
    `lm-db-<UTC stamp>.dump.age` (the database) and `lm-files-<same stamp>.tar.age`
    (Storage files + cron jobs), 600, 14 days kept. Compare their sha256 with the
