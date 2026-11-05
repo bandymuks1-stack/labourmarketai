@@ -17,9 +17,10 @@ StandardOutput=journal
 StandardError=journal
 BindReadOnlyPaths=/opt/lm-watch
 # Other apps may keep world-readable files here. The rest of the host: see the pre-install check in the runbook.
-TemporaryFileSystem=/opt:ro /srv:ro /mnt:ro /media:ro
-# The app's internal routes on this host and cloud metadata are off limits; the local DNS stub stays reachable.
-IPAddressDeny=localhost link-local
+TemporaryFileSystem=/opt:ro /srv:ro /mnt:ro /media:ro /backup:ro
+# Off limits: local routes, cloud metadata, and private ranges, where a container answers past the port published on
+# 127.0.0.1 and past nginx. The local DNS stub stays reachable.
+IPAddressDeny=localhost link-local 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 fc00::/7
 IPAddressAllow=127.0.0.53
 CapabilityBoundingSet=
 AmbientCapabilities=
