@@ -700,6 +700,39 @@ Owner's unified command: judge each scenario by what a real person can actually 
 | SC-15 | Older person or pensioner finds help | FAIL | Owner | none | "senjor", "pensinink", "pensioner" appear in no text of the lt and en message files. Sign-up needs e-mail, a password with 4 character rules and 2 onboarding steps. No phone or assisted route found | **no door and no wording for this person**; depends on SC-14 | Owner: decide scope; then one plain-language page and an assisted route |
 | SC-16 | Pensioner wants to keep working | NOT VERIFIED | Coordinator | — | nothing stops the worker path (W-1), and no age filter was found; nobody has tested it with this person in mind. Inputs are 14 px | comfort for older eyes untested | A moderated test with one older person, not a walk |
 
+### Critical scenarios, seven questions (2026-11-05)
+
+Owner's order: the main criterion is that a person really reaches the goal. These rows add seven questions to SC-1..SC-16 and do not replace them. The goal column repeats the status of the SC row above, and that row stays the source.
+
+**How to read it.** A production walk is a script in Playwright Chromium that already knows what to press. It proves the path exists and the result is stored. It cannot prove that a person knows what to press next, or that it works without help, so a walk alone never gives PASS in those columns. `NOT VERIFIED` means nobody has checked; it is not a pass. No value here comes from a real person in real Chrome yet. `not applicable` means there is no path to judge.
+
+**Result today:** goal reached in 8 of 16 scenarios, 4 FAIL, 2 BLOCKED, 2 NOT VERIFIED. **Not one scenario has all seven questions answered, so none is a full PASS here.**
+
+| ID | Goal reached | Steps to the result | Clear what to press next | Shows it is running | No duplicates | Clear errors | Input not lost | Works without an agent's help | Phone |
+|---|---|---|---|---|---|---|---|---|---|
+| SC-1 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-2 | PASS | NOT VERIFIED | NOT VERIFIED | **FAIL until #3089 is proven**: a saved row showed nothing for 6 to 30 s under load (P-9) | **FAIL**: `confirmCvEducationAction` still stores a repeat CV import twice. Profile form fixed by #3089, not proven | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-3 | **FAIL** | 1 query, measured | NOT VERIFIED | NOT VERIFIED: first try 9.4 s | not applicable | **FAIL**: `slaugytojas` says "0 found" when matching ads exist | NOT VERIFIED | **FAIL**: the word a person uses finds nothing | 390 px Chromium: same FAIL |
+| SC-4 | BLOCKED | Offer: home door, sign-up, 4 fields. Finding it signed out: no path | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | **FAIL** for the customer: no public page | 390 px Chromium: 404 |
+| SC-5 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-6 | PASS | Sign-up comes before seeing any offer | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-7 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-8 | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-9 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-10 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-11 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-12 | BLOCKED | No path | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | **FAIL**: no path | not applicable |
+| SC-13 | **FAIL** | No path | **FAIL**: no door | not applicable | not applicable | **FAIL**: 404 on 5 routes tried | not applicable | **FAIL**: no path | 390 px Chromium: 404 |
+| SC-14 | **FAIL** | No path | **FAIL**: no door | not applicable | not applicable | NOT VERIFIED | not applicable | **FAIL**: no path | NOT VERIFIED |
+| SC-15 | **FAIL** | E-mail, password with 4 rules, 2 onboarding steps, then no door | **FAIL**: no door or wording | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | **FAIL**: no assisted route | NOT VERIFIED |
+| SC-16 | NOT VERIFIED | Same as W-1, not counted | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | Inputs are 14 px; older eyes untested |
+
+**What can close these, by risk:**
+
+1. **A moderated test with one real person in real Chrome, desktop and phone:** SC-2, SC-3, SC-5, SC-6. It is the only thing that answers "clear what to press" and "works without help". Coordinator or owner: a production browser is not available to the UX/UI session.
+2. **Walk steps, one at a time under the lane rule:** SC-8 (brigade-formation), L-4 (recognition-chain), A11Y-2 (mobile-surfaces). They close real gaps. No step is added or dispatched by this table.
+3. **Owner scope first:** SC-4, SC-13, SC-14, SC-15. A walk cannot help until a door exists.
+
 ### UX in Chromium at phone size (2026-11-04)
 
 Ordering and booking: E-4, C-1, C-2. Accessibility: A11Y-1, A11Y-2. Finding work: SC-3. Finding a worker: SC-5, SCH-2.
