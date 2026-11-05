@@ -159,7 +159,7 @@ export function parseFunctions(md) {
     }
     if (/^\|\s*ID\s*\|\s*Function\s*\|\s*Status\s*\|/.test(line)) {
       inTable = true;
-      group = { name: heading, functions: [] };
+      group = { name: heading, functions: /** @type {any[]} */ ([]) };
       groups.push(group);
       continue;
     }

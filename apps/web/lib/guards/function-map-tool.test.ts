@@ -19,7 +19,7 @@ import {
  */
 type MapFunction = { id: string; status: string; state: string | null; browser: string; browserLt: string };
 type MapNeed = { slug: string; done: number; total: number; pct: number };
-type MapModel = ReturnType<typeof buildUntypedModel> & {
+type MapModel = Omit<ReturnType<typeof buildUntypedModel>, "groups" | "needs"> & {
   groups: { functions: MapFunction[] }[];
   needs: MapNeed[];
 };
