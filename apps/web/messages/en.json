@@ -5723,6 +5723,7 @@
     },
     "privacy": {
       "title": "Privacy Policy",
+      "metaDescription": "This page explains in plain language what personal data LabourMarket.ai uses, why it uses it, and what rights you have. It describes the platform as it works today.",
       "intro": "This page explains in plain language what personal data Labour Market AI uses, why it uses it, and what rights you have. It describes the platform as it works today.",
       "sections": [
         {
@@ -10446,6 +10447,7 @@
   },
   "matchPreview": {
     "title": "Match preview",
+    "metaDescription": "Enter a worker's facts and a company need to see how they fit. This is a preview tool — it computes fit and explains it, but does not book or save anything.",
     "subtitle": "Enter a worker's facts and a company need to see how they fit. This is a preview tool — it computes fit and explains it, but does not book or save anything.",
     "previewOnly": "Preview only — not booked and not saved as a booking request.",
     "workerSection": "Worker",
@@ -10783,7 +10785,7 @@
   },
   "about": {
     "metaTitle": "What is LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai is a labour-market operating platform: real work becomes professional history, evidence and a living CV for a person, and a work history and capability record for an organisation.",
+    "metaDescription": "LabourMarket.ai is an international platform for work, specialists and services. Real work becomes professional history, evidence and a living CV.",
     "navLabel": "About LabourMarket.ai",
     "eyebrow": "About the platform",
     "title": "What is LabourMarket.ai",
@@ -15423,8 +15425,8 @@
       "noStars": "No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
     },
     "hero": {
-      "headline": "A living system of work and business opportunities.",
-      "sub": "In one place, show what you can do, what you offer or what you are looking for. Discover workers, jobs, contractors, services and goods — and your experience and opportunities stay within reach, always."
+      "headline": "Work, workers, services and business opportunities – all in one place.",
+      "sub": "Look for work, specialists, workers, clients or project partners, locally and worldwide. Build your professional profile, present your experience, offer services and discover new opportunities."
     },
     "entry": {
       "label": "Write what you need — in your own words",

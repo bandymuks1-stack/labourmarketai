@@ -5723,6 +5723,7 @@
     },
     "privacy": {
       "title": "Privacybeleid",
+      "metaDescription": "In gewone taal: welke persoonsgegevens LabourMarket.ai gebruikt, waarom, en welke rechten je hebt. Het platform zoals het vandaag werkt.",
       "intro": "Deze pagina legt in gewone taal uit welke persoonsgegevens Labour Market AI gebruikt, waarom, en welke rechten je hebt. De pagina beschrijft het platform zoals het vandaag werkt.",
       "sections": [
         {
@@ -10446,6 +10447,7 @@
   },
   "matchPreview": {
     "title": "Matchvoorbeeld",
+    "metaDescription": "Voer de gegevens van een werknemer en een personeelsbehoefte in en zie hoe ze passen. Deze tool legt de fit uit, maar boekt of bewaart niets.",
     "subtitle": "Voer de gegevens van een werknemer en een personeelsbehoefte in om te zien hoe ze bij elkaar passen. Dit is een voorbeeldtool — hij berekent de fit en legt die uit, maar boekt of bewaart niets.",
     "previewOnly": "Alleen een voorbeeld — niet geboekt en niet opgeslagen als boekingsaanvraag.",
     "workerSection": "Werknemer",
@@ -10783,7 +10785,7 @@
   },
   "about": {
     "metaTitle": "Wat is LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai is een besturingsplatform voor de arbeidsmarkt: echt werk wordt professionele geschiedenis, bewijs en een levend cv voor een persoon, en een werkgeschiedenis en capaciteitsoverzicht voor een organisatie.",
+    "metaDescription": "LabourMarket.ai is een internationaal platform voor werk, specialisten en diensten. Echt werk wordt professionele geschiedenis, bewijs en een levend cv.",
     "navLabel": "Over LabourMarket.ai",
     "eyebrow": "Over het platform",
     "title": "Wat is LabourMarket.ai",
@@ -15423,8 +15425,8 @@
       "noStars": "Nergens sterren: een mens wordt nooit tot een score gereduceerd. Elke match wordt uitgelegd tegen een concrete behoefte — met zichtbare cijfers."
     },
     "hero": {
-      "headline": "Een levend systeem van werk- en zakelijke kansen.",
-      "sub": "Laat op één plek zien wat je kunt, wat je aanbiedt of wat je zoekt. Ontdek werknemers, banen, aannemers, diensten en goederen — en je ervaring en kansen blijven altijd bereikbaar."
+      "headline": "Werk, werknemers, diensten en zakelijke kansen – op één plek.",
+      "sub": "Zoek werk, specialisten, werknemers, klanten of projectpartners, dichtbij en wereldwijd. Maak je professionele profiel, laat je ervaring zien, bied diensten aan en ontdek nieuwe kansen."
     },
     "entry": {
       "label": "Schrijf wat u nodig heeft — in uw eigen woorden",

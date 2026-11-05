@@ -7,7 +7,7 @@ describe("llms.txt (AEO)", () => {
 
   it("is Markdown with the H1, a blockquote summary and the canonical origin", () => {
     expect(txt.startsWith("# LabourMarket.ai\n")).toBe(true);
-    expect(txt).toMatch(/^> LabourMarket\.ai is a work and professional-life platform/m);
+    expect(txt).toMatch(/^> LabourMarket\.ai is an international platform for work, specialists and services/m);
     expect(txt).toContain("Canonical origin: https://labourmarket.ai ");
     // trailing slash on the origin is normalised, never doubled
     expect(txt).not.toContain("https://labourmarket.ai//");

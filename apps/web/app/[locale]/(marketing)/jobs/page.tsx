@@ -399,13 +399,29 @@ export default async function JobsPage({
   // never touches the auth server.
   const signedIn = await hasSessionCookie();
   const supabase = signedIn ? await createClient() : null;
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
-  const workerId =
-    supabase && user ? await resolveOwnWorkerId(supabase, user.id) : null;
-  const mySaved =
-    supabase && workerId
-      ? await listSavedPublicVacancyIds(supabase, workerId)
-      : { vacancyIds: new Set<string>(), available: false };
+  const runBoardSearch = () =>
+    searchPublicVacancyPreviews({
+      query,
+      professionSlug: profession,
+      page,
+    });
+  // The board's read needs nothing from the session, so a signed-in person does
+  // not wait for their bookmarks before it starts (2026-11-04: on a first search
+  // the two together took 1.1 s in sequence before the search's own 1.1 s). The
+  // saved view reads no board unless its bookmarks turn out to be unavailable.
+  const [member, earlyBoardSearch] = await Promise.all([
+    (async () => {
+      const u = supabase ? (await supabase.auth.getUser()).data.user : null;
+      const id = supabase && u ? await resolveOwnWorkerId(supabase, u.id) : null;
+      const saved =
+        supabase && id
+          ? await listSavedPublicVacancyIds(supabase, id)
+          : { vacancyIds: new Set<string>(), available: false };
+      return { user: u, mySaved: saved };
+    })(),
+    wantsSaved ? null : runBoardSearch(),
+  ]);
+  const { user, mySaved } = member;
 
   // Saved view: the worker's own ids, resolved to previews through the member
   // read path under their OWN client. Expired/withdrawn bookmarks drop out
@@ -423,11 +439,7 @@ export default async function JobsPage({
 
   const result = showSaved
     ? { status: "ok" as const, vacancies: [], totalCount: 0, hasMore: false }
-    : await searchPublicVacancyPreviews({
-        query,
-        professionSlug: profession,
-        page,
-      });
+    : (earlyBoardSearch ?? (await runBoardSearch()));
 
   const pageHref = (p: number) => {
     const qs = new URLSearchParams();

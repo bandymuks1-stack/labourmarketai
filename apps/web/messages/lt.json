@@ -5723,6 +5723,7 @@
     },
     "privacy": {
       "title": "Privatumo politika",
+      "metaDescription": "Paprastais žodžiais: kokius asmens duomenis naudoja LabourMarket.ai, kodėl ir kokias teises turite. Platforma aprašyta tokia, kokia veikia šiandien.",
       "intro": "Šis puslapis paprastais žodžiais paaiškina, kokius asmens duomenis naudoja Labour Market AI, kodėl juos naudoja ir kokias teises turite. Jis aprašo platformą tokią, kokia ji veikia šiandien.",
       "sections": [
         {
@@ -10446,6 +10447,7 @@
   },
   "matchPreview": {
     "title": "Atitikimo peržiūra",
+    "metaDescription": "Įvesk darbuotojo duomenis ir įmonės poreikį ir pamatyk, kaip jie dera. Peržiūros įrankis apskaičiuoja atitikimą ir jį paaiškina, bet nieko neišsaugo.",
     "subtitle": "Įvesk darbuotojo duomenis ir įmonės poreikį, kad pamatytum, kaip jie dera. Tai peržiūros įrankis — jis apskaičiuoja atitikimą ir jį paaiškina, bet nieko nerezervuoja ir neišsaugo.",
     "previewOnly": "Tik peržiūra — nerezervuota ir neišsaugota kaip rezervacijos užklausa.",
     "workerSection": "Darbuotojas",
@@ -10783,7 +10785,7 @@
   },
   "about": {
     "metaTitle": "Kas yra LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai — darbo rinkos operacinė platforma: tikras darbas tampa profesine istorija, įrodymais ir gyvu CV žmogui, o įmonei — realiai atlikto darbo istorija ir gebėjimais.",
+    "metaDescription": "LabourMarket.ai – tarptautinė darbo, specialistų ir paslaugų platforma. Tikras darbas tampa profesine istorija, įrodymais ir gyvu CV.",
     "navLabel": "Apie LabourMarket.ai",
     "eyebrow": "Apie platformą",
     "title": "Kas yra LabourMarket.ai",
@@ -15423,8 +15425,8 @@
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
     },
     "hero": {
-      "headline": "Tai gyva darbo ir verslo galimybių sistema.",
-      "sub": "Vienoje vietoje parodyk, ką moki, ką siūlai arba ko ieškai. Atrask darbuotojus, darbus, rangovus, paslaugas ir prekes, o tavo patirtis bei galimybės išlieka pasiekiamos nuolat."
+      "headline": "Darbas, darbuotojai, paslaugos ir verslo galimybės – vienoje vietoje.",
+      "sub": "Ieškokite darbo, specialistų, darbuotojų, klientų ar projektų partnerių Lietuvoje ir visame pasaulyje. Kurkite savo profesinį profilį, pristatykite patirtį, siūlykite paslaugas ir atraskite naujas galimybes."
     },
     "entry": {
       "label": "Parašyk, ko reikia — savais žodžiais",

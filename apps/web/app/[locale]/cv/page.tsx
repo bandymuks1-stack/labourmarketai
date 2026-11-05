@@ -40,6 +40,8 @@ import {
   type PremiumCvExperience,
   type PremiumCvFact,
 } from "@/components/app/cv/premium-living-cv";
+import { ownEngagementHeading } from "@/lib/cv-export/own-engagement-heading";
+import { statedDateLabel } from "@/lib/cv/period-dates";
 import {
   buildEuFormatCv,
   resolveEuFormatDocument,
@@ -448,8 +450,9 @@ export default async function VerifiedCvPage({
       const roleLabel = tRel.has(e.relationship)
         ? tRel(e.relationship)
         : e.relationship;
-      const start = formatUtcDate(e.startedAt, locale);
-      const end = formatUtcDate(e.endedAt, locale);
+      // A job with no organization carries only what the person stated.
+      const start = e.orgName ? formatUtcDate(e.startedAt, locale) : statedDateLabel(e.startedAt, "start", locale);
+      const end = e.orgName ? formatUtcDate(e.endedAt, locale) : statedDateLabel(e.endedAt, "end", locale);
       const range =
         start && end
           ? `${start} – ${end}`
@@ -727,15 +730,22 @@ export default async function VerifiedCvPage({
     ...earlierEntityStops.map(stopEntry),
     ...uncoveredRoles.map(roleEntry),
     ...cv.workHistory.map((e, i): PremiumCvExperience & { sortKey: string } => {
-      const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
-      const from = monthYear(e.startedAt);
-      const to = e.endedAt ? monthYear(e.endedAt) : tPremium("present");
+      const heading = ownEngagementHeading({
+        orgName: e.orgName,
+        title: e.title,
+        relationshipLabel: tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship,
+      });
+      const from = e.orgName ? monthYear(e.startedAt) : statedDateLabel(e.startedAt, "start", locale, "month");
+      const to = !e.endedAt
+        ? tPremium("present")
+        : e.orgName
+          ? monthYear(e.endedAt)
+          : statedDateLabel(e.endedAt, "end", locale, "month");
       const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
       return {
         key: `own:${e.id ?? i}`,
         period: from ? `${from} – ${to}` : e.endedAt ? to : null,
-        title: e.orgName ? (e.title ?? org) : org,
-        subtitle: e.orgName && e.title ? e.orgName : null,
+        ...heading,
         detail: rec
           ? rec.confirmedHours > 0
             ? tPremium("evidence.both", { confirmed: fmtNum.format(roundHours(rec.confirmedHours)), recorded: fmtNum.format(roundHours(rec.hours)) })
@@ -819,15 +829,18 @@ export default async function VerifiedCvPage({
         };
       }),
       ...cv.workHistory.map((e, i) => {
-        const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
+        const heading = ownEngagementHeading({
+          orgName: e.orgName,
+          title: e.title,
+          relationshipLabel: tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship,
+        });
         const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
         const key = `own:${e.id ?? i}`;
         const years = [yearOf(e.startedAt), e.endedAt ? yearOf(e.endedAt) : tJourney("now")].filter(Boolean).join("–");
         journeyMeta[key] = [years, rec ? premiumHours(rec.hours) : null].filter(Boolean).join(" · ");
         return {
           key,
-          title: e.orgName ? (e.title ?? org) : org,
-          subtitle: e.orgName && e.title ? e.orgName : null,
+          ...heading,
           from: e.startedAt,
           to: e.endedAt,
           current: !e.endedAt,
@@ -977,6 +990,7 @@ export default async function VerifiedCvPage({
               // keeps the same label instead of printing it like a document.
               declaredCertificate: t("declaredCertHint"),
               date: (iso) => formatUtcDate(iso, locale),
+              statedDate: (iso, edge) => statedDateLabel(iso, edge, locale),
               present: t("present"),
               // Organization-provided history: the SAME composition the
               // on-screen CV uses, so the two documents never disagree.

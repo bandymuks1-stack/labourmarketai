@@ -38,7 +38,9 @@ const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slo
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["worker", "worker2", "owner"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 test.describe.configure({ mode: "serial", timeout: 240_000, retries: 0 });
-test.use({ actionTimeout: 30_000 });
+// The Chrome build the runner carries, not Playwright's Chromium (owner 2026-11-05).
+// Still headless and scripted: it is Chrome, not a person.
+test.use({ actionTimeout: 30_000, channel: "chrome" });
 
 const EXPERIENCE = `${TAG} darbo patirtis`;
 const PRACTICE = `${TAG} savanorystė`;
@@ -809,6 +811,146 @@ test("P-21 (3.31). the company report opens and its export downloads as a file",
     expect(name, "the export is a CSV file").toMatch(/\.csv$/i);
     await download.delete();
   }
+  await ctx.close();
+});
+
+// ── P-9 (owner 2026-11-05): save, error, repeat, reload, remove, with real times ─
+//
+// The owner's question is what a person meets, so every wait here is reported in ms
+// and a slow one fails nothing: the times are the result. An aborted request stands
+// in for a failed save, because production offers no way to make one fail. It is
+// this browser's request that is aborted; nothing reaches the server.
+
+const failNextSave = async (page: Page): Promise<() => Promise<void>> => {
+  const url = "**/lt/dashboard/profile**";
+  await page.route(url, (route) => (route.request().method() === "POST" ? route.abort() : route.continue()));
+  return () => page.unroute(url);
+};
+
+async function timed(what: string, wait: () => Promise<unknown>): Promise<void> {
+  const started = Date.now();
+  await wait();
+  console.info(`[save-proof] ${what}: ${Date.now() - started} ms`);
+}
+
+async function proveSection(
+  page: Page,
+  c: { name: string; hash: string; prefix: string; field: string; type: string; title: string; remove: string; added: string[] },
+): Promise<void> {
+  const section = async () => (await profileAt(page, c.hash)).getByTestId(c.prefix);
+  const rowsIn = (s: Locator) => s.getByTestId(`${c.prefix}-row`).filter({ hasText: c.title });
+  const fill = async (s: Locator) => {
+    await s.getByTestId(`${c.prefix}-add-open`).click();
+    const form = s.getByTestId(`${c.prefix}-form`);
+    await form.getByTestId(`${c.prefix}-${c.field}`).fill(c.title);
+    await pick(page, form, `${c.prefix}-type`, c.type);
+    return form;
+  };
+
+  // A failed save: an error, no row, and what was typed is still there.
+  let s = await section();
+  const form = await fill(s);
+  const restore = await failNextSave(page);
+  await form.getByTestId(`${c.prefix}-save`).click();
+  await expect(s.getByRole("alert").first(), `${c.name}: the failed save says so`).toBeVisible({ timeout: 30_000 });
+  await expect(rowsIn(s), `${c.name}: a failed save shows no row`).toHaveCount(0);
+  await expect(form.getByTestId(`${c.prefix}-${c.field}`), `${c.name}: the typed text is not lost`).toHaveValue(c.title);
+  await restore();
+
+  // The same form, sent again: saved, and on screen without a reload.
+  c.added.push(c.title);
+  await form.getByTestId(`${c.prefix}-save`).click();
+  await timed(`${c.name} save to row visible`, () => expect(rowsIn(s).first()).toBeVisible({ timeout: 60_000 }));
+
+  // Survives a reload, once.
+  s = await section();
+  await expect(rowsIn(s), `${c.name}: survives a reload, once`).toHaveCount(1, { timeout: 30_000 });
+
+  // The same statement again: still one row.
+  const again = await fill(s);
+  await again.getByTestId(`${c.prefix}-save`).click();
+  await expect(s.getByTestId(`${c.prefix}-add-open`), `${c.name}: the repeat save answered`).toBeVisible({ timeout: 30_000 });
+  s = await section();
+  await expect(rowsIn(s), `${c.name}: a repeat save is not a second row`).toHaveCount(1, { timeout: 30_000 });
+
+  // Removed at once, and gone after a reload.
+  const row = rowsIn(s).first();
+  await row.locator(c.remove).first().click();
+  await timed(`${c.name} remove to row gone`, () => expect(rowsIn(s)).toHaveCount(0, { timeout: 60_000 }));
+  s = await section();
+  await expect(rowsIn(s), `${c.name}: stays removed after a reload`).toHaveCount(0, { timeout: 30_000 });
+}
+
+test("P-22 (2.7). education: failed save, save, reload, repeat and remove, with real times", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  console.info(`[save-proof] browser ${browser.browserType().name()} ${browser.version()}`);
+  await proveSection(page, {
+    name: "education",
+    hash: "cv-education",
+    prefix: "worker-education",
+    field: "institution",
+    type: "Profesinis",
+    title: `${TAG} kartojama mokykla`,
+    remove: '[data-testid^="worker-education-remove-"]',
+    added: addedEducation,
+  });
+  await ctx.close();
+});
+
+test("P-23 (2.8). achievements: failed save, save, reload, repeat and remove, with real times", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  await proveSection(page, {
+    name: "achievements",
+    hash: "cv-achievements",
+    prefix: "worker-achievements",
+    field: "title",
+    type: "Pasiekimas",
+    title: `${TAG} kartojamas pasiekimas`,
+    remove: '[data-testid^="worker-achievements-remove-"]',
+    added: addedAchievements,
+  });
+  await ctx.close();
+});
+
+test("P-24 (2.5). experience: failed save, save, reload, repeat and remove, with real times", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  const title = `${TAG} kartojama patirtis`;
+  const rowsIn = (m: Locator) => m.getByTestId("capability-experience-row").filter({ hasText: title });
+  const fill = async (m: Locator) => {
+    await m.getByTestId("add-experience-open").click();
+    const form = m.getByTestId("add-experience-form");
+    await form.getByTestId("add-experience-title").fill(title);
+    await form.getByTestId("add-experience-start-year").fill("2019");
+    await form.getByTestId("add-experience-current").check();
+    return form;
+  };
+
+  let main = await profileAt(page, "capabilities");
+  const form = await fill(main);
+  const restore = await failNextSave(page);
+  await form.getByTestId("add-experience-save").click();
+  await expect(form.getByTestId("add-experience-error"), "the failed save says so").toBeVisible({ timeout: 30_000 });
+  await expect(rowsIn(main), "a failed save shows no row").toHaveCount(0);
+  await expect(form.getByTestId("add-experience-title"), "the typed text is not lost").toHaveValue(title);
+  await restore();
+
+  addedHistory.push(title);
+  await form.getByTestId("add-experience-save").click();
+  await timed("experience save to row visible", () => expect(rowsIn(main).first()).toBeVisible({ timeout: 60_000 }));
+
+  main = await profileAt(page, "capabilities");
+  await expect(rowsIn(main), "survives a reload, once").toHaveCount(1, { timeout: 30_000 });
+
+  const again = await fill(main);
+  await again.getByTestId("add-experience-save").click();
+  await expect(again.getByTestId("add-experience-title"), "the repeat save answered").toHaveValue("", { timeout: 30_000 });
+  main = await profileAt(page, "capabilities");
+  await expect(rowsIn(main), "a repeat save is not a second row").toHaveCount(1, { timeout: 30_000 });
+
+  await rowsIn(main).first().locator('[data-testid^="capability-experience-remove-"]').click();
+  await timed("experience remove to row gone", () => expect(rowsIn(main)).toHaveCount(0, { timeout: 60_000 }));
+  main = await profileAt(page, "capabilities");
+  await expect(rowsIn(main), "stays removed after a reload").toHaveCount(0, { timeout: 30_000 });
   await ctx.close();
 });
 

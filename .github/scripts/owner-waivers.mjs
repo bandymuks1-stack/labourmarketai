@@ -687,6 +687,13 @@ export const SCOPED_OWNER_WAIVERS = [
       // numbers are added; axiom, codes, surfaces, files, expiry and subset rule
       // are unchanged.
       2984, 2991,
+      // OWNER APPROVAL 2026-11-04, verbatim (given to the coordinator in its own
+      // session): "I approve adding ONLY PR 3087 to the existing
+      // public-acquisition-route-jobs waiver pullRequests list." #3087: the signed-in
+      // board search starts alongside the session reads; the page shows the same
+      // content. Only the number is added; axiom, codes, surfaces, files, expiry and
+      // subset rule are unchanged.
+      3087,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.

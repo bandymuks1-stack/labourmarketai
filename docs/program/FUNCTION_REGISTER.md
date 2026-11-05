@@ -224,7 +224,7 @@ Database timings come from production `pg_stat_statements`, read-only. They are 
 | SEO-4 | Canonical | PASS | 312 pages (SEO-2, SEO-3 samples): each names itself. `/lt/jobs?q=…` names `/lt/jobs` | page 2+: SEO-8 | Coordinator: re-check on risk |
 | SEO-5 | hreflang | PASS | 312 pages: 7 alternates each, x-default present | — | Coordinator: re-check on risk |
 | SEO-6 | Structured data validity | PASS | 312 pages: **0 JSON-LD parse errors**. Organization + WebSite on every page; CollectionPage on `/jobs`; Article + BreadcrumbList on question pages; WebPage on job pages | no JobPosting by design (employer and place are members-only, 2026-08-24 rule) | Coordinator: re-check on risk |
-| SEO-7 | Title and description length | FAIL | Chrome, the 264 sitemap pages: **31 titles over 70 characters** (the home page in all 6 locales, 77–92; e.g. `/de/create-cv` 96, `/de/worker-intake` 93). **67 descriptions over 170 characters** (max 248). **12 under 70**: `/{locale}/labour-market/lv` and `/ee` | search results cut them. Copy fix across 6 locales; the home title is under the landing freeze, so its baseline is refreshed in the same PR | GREEN executor: shorten titles and descriptions, 6 locales |
+| SEO-7 | Title and description length | FAIL | Chromium, build `c9a58473`: home in 6 locales has titles of 56 to 69 characters and descriptions of 157 to 164 (#3078). `/about` 133 to 148, `/match-preview` 151 to 156, German privacy 158 (#3081, `ff33a25b`). Still long: `/en/legal/privacy` 165, `/pl/legal/privacy` 162, and the rest of `/legal/*` is not re-measured. **12 under 70**: `/{locale}/labour-market/lv` and `/ee` | the whole set of 264 pages has not been re-measured since #3074. Natural wording in nl, de, pl and ru has had no native review | GREEN executor: re-measure all 264 and fix what is left, with no new commercial promises |
 | SEO-8 | Job board page 2+ | FAIL | Chrome: `/lt/jobs?page=2` and `/en/jobs?page=3` name `/lt/jobs` and `/en/jobs` as canonical. Their 20 cards differ from page 1 (0 of 20 overlap). Deep pages cost more: page 500 took 487 ms, page 1,500 916 ms, page 2,500 2,041 ms | fix in draft #2984. The gate is no longer the blocker: #2997 added the owner-approved waiver to main. A cap at page 100 is ready, so crawlers are not invited to deep OFFSET scans. **Not pushed:** the permission system refused the push to that branch | Coordinator: authorize the push to #2984, or push it. Then it merges |
 | SEO-9 | Country market pages | PASS | Chrome: `/{locale}/labour-market/{lt,lv,ee,pl,de,nl}`: 36 sitemap URLs, all 200, self-canonical, indexable | lv and ee descriptions are short (SEO-7) | Coordinator: re-check on risk |
 | SEO-10 | Country and city on signed-out job pages | BLOCKED | Chrome: cards read "Darbdavys ir vieta: prisijungus" | the database function is RED draft #2993, not applied. It waits for the owner's apply approval | Owner: apply approval for #2993 |
@@ -238,13 +238,13 @@ Database timings come from production `pg_stat_statements`, read-only. They are 
 | GEO-3 | Question-and-answer pages | PASS | 270 question pages; 30 sampled, all with Article + BreadcrumbList, self-canonical | — | Coordinator: re-check on risk |
 | GEO-4 | Public market facts are quotable | PASS | SEO-9 | — | Coordinator: re-check on risk |
 | GEO-5 | Key pages answer "what is it" in text | PASS | Chrome, main text: `/en/about` opens with "What is LabourMarket.ai / LabourMarket.ai is…" (829 words, 10 h2). `/en` 655 words, 13 h2; `/en/pricing` 899 words, states that prices are confirmed and online activation is not open; `/en/for-companies` 426 words | hub pages are thin: `/en/questions` 58 words, `/en/labour-market` 63 words, both without h2. No `FAQPage` markup on any page | GREEN executor: add text to the two thin hubs |
-| GEO-6 | Entity consistency | FAIL | Chrome, 11 key pages in 4 locales: Organization `name`, `url` and `logo` are identical everywhere, and `og:site_name` is `LabourMarket.ai` everywhere. **Three different definitions of the product:** llms.txt "a work and professional-life platform"; `/en/about` "a labour-market operating platform"; `/en` "a living system of work and business opportunities" | an answer engine quoting the site gets three answers. The Organization has no `@id` and 0 `sameAs`, and WebSite has no `SearchAction`. Fix: one definition sentence reused by all three, plus `@id`. This is copy (owner wording), so it is not changed here | Owner: choose one sentence. GREEN executor: reuse it, add `@id` |
+| GEO-6 | Entity consistency | FAIL | Chromium, build `c9a58473`, 6 locales: home description, Organization description and llms.txt now use the owner's definition (#3078). The English home description also says "locally and internationally", as `landing-not-abroad-only.test.ts` requires. Organization `name`, `url` and `logo` are the same everywhere | the Organization still has no `@id` and 0 `sameAs`, and its description is English on every locale. The hero headline and `/about` body still use older wording; the hero is under the landing freeze | GREEN executor: add `@id`, localize the description, then align the hero and `/about` |
 
 ### Internal search (2026-11-04)
 
 | ID | Check | Status | Evidence | Defect / blocker | Executor / next action |
 |---|---|---|---|---|---|
-| SR-1 | `/jobs` free text, cold first query | FAIL | measured by J-13: see its report and RED draft #3024. `pg_stat_statements`: `search_public_vacancy_previews_v1` 35,752 calls, mean 560 ms, max 2,999 ms (the 3 s anon timeout) | fix is RED draft #3024, not applied. #3020's trigram index was rolled back (RC-A6, #3025). 2026-11-04: after the owner-approved manual VACUUM, pages read per search fell from 30.5k to 4.3k and signed-out Chrome searches took 0.43–0.92 s with no unavailable state; the status stays FAIL until the decay measurement after the 08:11 import and a cold check after idle | GREEN executor: honest timeout state. Coordinator: new RED draft |
+| SR-1 | `/jobs` free text, cold first query | FAIL | measured by J-13: see its report and RED draft #3024. `pg_stat_statements`: `search_public_vacancy_previews_v1` 35,752 calls, mean 560 ms, max 2,999 ms (the 3 s anon timeout) | fix is RED draft #3024, not applied. #3020's trigram index was rolled back (RC-A6, #3025). 2026-11-04: after the owner-approved manual VACUUM, pages read per search fell from 30.5k to 4.3k and signed-out Chrome searches took 0.43–0.92 s with no unavailable state; the status stays FAIL until the decay measurement after the 08:11 import and a cold check after idle. 2026-11-04 #3069 live (one scan over a new expiry-ordered index; ledger 20261104192157, 20261104192220; merged 8fb1043c1). First production result, build `8fb1043c`, 16 min after deploy, signed out: `byggarbetare` first search 970 ms (0 results), repeat 330 ms; `b` 382 ms; `ok` 763 ms; `qqxzv` 318 ms; no cancels. Positive, not a pass: first searches on terms with results and after two real imports are still to be measured, and SR-10 stands | GREEN executor: honest timeout state. Coordinator: new RED draft |
 | SR-2 | `/jobs` free text, correctness and warm timing | PASS | Chrome, signed out, full HTML: `suvirintojas` 736 ms, `snickare` 451 ms, `el` 446 ms; **20 cards each, and 20 of 20 titles contain the term**. `developer` 0 cards with the honest "0 rasta… nerasta" state. No "unavailable" state | — | Coordinator: re-walk on risk |
 | SR-3 | Profession filter | PASS | Chrome: `?profession=teacher` 306 ms, 20 cards; `handyman` 2 cards; `electrician` page 1 / page 2: 20 / 20 cards, 0 overlap | — | Coordinator: re-walk on risk |
 | SR-4 | Search paging | FAIL | Chrome: unfiltered board p1/p2 0 overlap; `?q=el` p1/p2 0 overlap. **But a term that maps to a profession drops the page:** `/lt/jobs?q=elektrikas&page=2` redirects to `/lt/jobs?profession=electrician` and shows page 1 again (20 of 20 the same) | the board's own links never build this URL (after the redirect they carry `profession`), so only shared or hand-made links meet it. Fix: carry `page` into the redirect in `jobs/page.tsx`. It is blocked by the same owner waiver as SEO-8 | GREEN executor, once the waiver covers `jobs/page.tsx` |
@@ -253,6 +253,7 @@ Database timings come from production `pg_stat_statements`, read-only. They are 
 | SR-7 | Marketplace find | PASS | prod walk marketplace 41729310761 (2026-11-03): M-3 the buyer finds the shelf among goods; M-5 the buyer reaches the service from the market. `pg_stat_statements`: `marketplace_listings` reads 501 calls, mean 1.3 ms, max 79 ms; `org_capabilities_for_visible_listings_v1` 141 calls, mean 9.2 ms, max 314 ms | — | Coordinator: re-walk on risk |
 | SR-8 | People / candidates search | NOT VERIFIED | no production walk searches people: company-chain C-2/U-3 opens the hand-raisers of a need, which is not a search. `pg_stat_statements`: `list_discoverable_worker_ids_v1` 572 calls, mean 41.9 ms, **max 2,536 ms**; `list_discoverable_worker_profiles_v1` 463 calls, mean 45.4 ms, max 1,021 ms | needs a walk step: the company searches by profession and place and finds the synthetic discoverable worker, and an undiscoverable one stays absent | Coordinator: add the walk step |
 | SR-9 | Organizations directory search | NOT VERIFIED | no walk. `search_organizations_directory_v1` 16 calls in total, mean 11.0 ms, max 55 ms | needs a walk step | Coordinator: add the walk step |
+| SR-10 | `/jobs` free text finds the ads that exist | FAIL | P0 accuracy defect, registered 2026-11-04 by owner order. The search reads the occupation label only: `byggarbetare` returns 0 while 12 live ads carry it in the title; `ok` is 1,288 by occupation and 1,527 by title. Existing behaviour, not caused by #3069 | owner requirement: search at least the job title, the profession and its synonyms, related specialities and suitable structured requirements, in several languages, ranked by relevance, with country and profession filters kept. Measure the cost first; no fix that brings back long first-search waits; test on scratch first. Conflict to settle: the 2026-08-24 directive keeps the hidden title out of anonymous matching | J-13: cost comparison, then a minimal safe fix for owner approval |
 
 ### UX/UI (signed out, 2026-11-04)
 
@@ -357,7 +358,7 @@ The coordinator's queue, all green. On build `a10b6c47d` (deployed 20:27 UTC): b
 
 These are what a real person meets now. Owner-gated scope and not-yet-built functions are listed apart.
 
-1. **The first search for a new word on `/jobs` fails** (SR-1). The visitor waits 4–11 s and gets no jobs. Fix: RED draft #3024, not applied.
+1. **The first search for a new word on `/jobs` fails** (SR-1). The visitor waits 4–11 s and gets no jobs. #3069 is live since 2026-11-04 (first reading 970 ms); still FAIL with SR-10, the search misses ads that exist.
 2. **Organizations cannot buy a plan without help** (J-14). 7.28 payee and terms are FAIL (owner/legal), and 7.15 is hidden by design.
 3. **AI help and some e-mail are off in production** (13.17 env parity). This waits on the owner and legal.
 4. **The native apps are not in the stores** (J-17, BLOCKED on the owner's store accounts).
@@ -383,7 +384,7 @@ Classes: `REAL_DEFECT`, `UX_OR_NAV`, `UNCLEAR_EXPLANATION`, `NEW_FEATURE_SUGGEST
 |---|---|---|---|---|---|
 | UF-1 | Translating a job ad into English fails | `UNCLEAR_EXPLANATION` | Machine translation is off by design (8.3, 7.14 BLOCKED). Production: 121,465 of 121,465 active ads have `translation_status = unavailable`, 0 stored translations. For a member, every foreign-language ad offers "Translate into …"; every click answers "could not be translated right now" (local render reproduces it). Signed out: no button and no description; the ad's own title is shown as published (`/en/jobs/48478a31-…` shows "Tømrer") | 8.3, 7.14, 4.4 | **PASS on production for lt, en, ru**, build cfa33d65, real Chrome, signed in, on real Norwegian and Swedish ads (coordinator, 2026-11-04): the note shows in all three, 0 translate buttons. **de, nl, pl not checked on production.** Fix #3034; machine translation itself stays owner-gated (8.3, 7.14) |
 | UF-2 | Imported job descriptions show HTML tags | `REAL_DEFECT` | Production, active ads: NAV 8,835 of 8,835 store the description as HTML (`<section>`, `<p>`, `<strong>`, `<li>`), 5,049 with entities; Arbetsförmedlingen 8 with tags, 215 with entities. The job page renders the stored string as text, so the tags are **escaped (no XSS)** but shown. Local render of a NAV-shaped ad: before = the raw `<section id="arb-aapningstekst"> <p>…` string, after = paragraphs and bullets | 4.4 | **PASS on production**, build af97d1b5, real Chrome, signed-in profile (coordinator, 2026-11-04). Norwegian ad e6b812d2: 0 visible tags, 0 raw entities, 16 bullets; its stored description still holds its HTML (read-only SQL). Swedish ad 923d7c2c: 0 visible tags, 0 raw entities; its stored text still holds entities. Fix #3033: plain-text reading in the member's read, the stored original verbatim. Repeatable walk step J-7: #3060, not run yet |
-| UF-3 | CV import extracts only part of the data | `REAL_DEFECT` | Free parser on a synthetic CV: "Anglų B2, rusų gimtoji" gave Russian **B2** (level read from the whole line); "… rengimo centras" (training centre) filed as **work history**; the multi-line PDF layout (title / company / dates on separate lines) loses the title and the dates and uses the company as the title. The review shows no extraction summary and never shows the parser's per-item confidence; an item can only be confirmed or discarded (the language level is the one editable field) | 2.3, 2.5, 2.7, 2.9, 10.8 | PARTLY OPEN. #3035 fixes the language level and the training-centre case. Open: multi-line layout; an extraction summary ("found …, not recognised: …"); editing a field before saving |
+| UF-3 | CV import extracts only part of the data | `REAL_DEFECT` | Free parser on a synthetic CV: "Anglų B2, rusų gimtoji" gave Russian **B2** (level read from the whole line); "… rengimo centras" (training centre) filed as **work history**; the multi-line PDF layout (title / company / dates on separate lines) loses the title and the dates and uses the company as the title. The review shows no extraction summary and never shows the parser's per-item confidence; an item can only be confirmed or discarded (the language level is the one editable field) | 2.3, 2.5, 2.7, 2.9, 10.8 | OPEN until proven on production. Merged, seen locally on synthetic data: language level per language and training-centre case (#3035), multi-line layout (#3042), confidence line (#3044), unrecognised lines shown (#3045), training and education apart (#3054), editing a field before saving (#3055). What reaches the Living CV: an imported job read only "Darbuotojas", its title lost (#3084); a stated year printed as a full invented date ("2018-01-01", dates PR). Repeatable walk step P-6: #3060, not run yet |
 | UF-4 | Sign-up takes too long | `UX_OR_NAV` | From a job ad (`/lt/auth/signup?next=/lt/jobs/…`): 3 social buttons or 3 fields (e-mail, password, repeat password), a password rule of 8+ characters with an uppercase letter, a digit and a special character, then onboarding step 1 (intent / role) and step 2 (name, country, profession; an institution for a learner). Searching jobs needs no account; employer, place and how to apply need one. Not needed to reach the ad's details: the repeated password (a show-password toggle exists), the role step when the person came from a job ad, and profession / country before the first look | 1.1, 1.4 | PROPOSAL (one journey): ad → account (e-mail + password or one social button) → straight back to the ad with the worker intent implied; name, country and profession asked later in context. Auth-core and onboarding touch: owner review first |
 | UF-5 | Education institutions should be searchable | `NEW_FEATURE_SUGGESTION` | The institution is free text in three places (onboarding learner step, profile education 2.7, journal learning entry); no search exists. Institutions are already organizations with an education capability (ARCH-1: INSTITUTIONS node realised by existing capabilities) | 2.7, 11.1 | PROPOSAL: one combobox (the onboarding country combobox pattern) over public education organizations, always keeping "use what I typed"; the name stays stored as typed, an optional organization link is a later additive migration |
 | UF-6 | Calendar MONTH / YEAR: what they mean | `UNCLEAR_EXPLANATION` | `/dashboard/planning`: the view chips (Darbotvarkė, Diena, Savaitė, Mėnuo, Metai) switch the view; local render: the year view shows 12 month tiles, each "N įrašų" ("N records"), opening that month; the month view is a 42-cell grid with a legend (journal filled / worked, not filled / confirmed). The year tile does not say what a record is. **No production walk opens the month or year view** (calendar-planning covers the agenda) | 3.14, 5.11 | OPEN: name what is counted on the year tile; add month/year steps to the calendar-planning walk. Correctness of the counts is `UNPROVEN` in production |
@@ -403,16 +404,16 @@ Classes:
 
 | Class | FAIL | BLOCKED | Total |
 |---|---|---|---|
-| `USER_BLOCKER_WEB` | 1 | 0 | 1 |
+| `USER_BLOCKER_WEB` | 2 | 0 | 2 |
 | `OWNER_GATED` | 4 | 44 | 48 |
 | `INFRA` | 4 | 2 | 6 |
 | `OPTIONAL_OR_UNPLANNED` | 2 | 13 | 15 |
 | `TEST_ONLY` | 0 | 2 | 2 |
-| **All** | **11** | **61** | **72** |
+| **All** | **12** | **61** | **73** |
 
 ### USER_BLOCKER_WEB, ranked by how many people it reaches
 
-1. **SR-1: the first `/jobs` search for a word that is not a profession name times out.** It reaches every visitor who types free text: signed out, workers and agencies. Profession words already redirect to the working profession filter.
+1. **SR-1: the first `/jobs` search for a word that is not a profession name times out.** It reaches every visitor who types free text: signed out, workers and agencies. Profession words already redirect to the working profession filter. #3069 is live since 2026-11-04 and the first production reading is 970 ms; SR-1 stays FAIL, see SR-1 and SR-10.
    - GREEN, now: when the free-text read times out, show the honest message together with the profession filter and the nearest profession matches (the existing profession resolver), instead of a page with no jobs.
    - RED, in a new draft: the search index fix. #3020 was rolled back and #3024 was closed: after about 5 calls the cached generic plan took 16–26 s for 1–2 character terms. The new draft must carry the plan-cache proof that #3025 requires (at least 10 calls per term on one connection, under both auto and force_generic_plan).
 
@@ -422,7 +423,8 @@ No other FAIL or BLOCKED row stops a core web action today. The earlier list of 
 
 | ID | Function / check | Status | Class | Reason | Evidence | Executor / next action |
 |---|---|---|---|---|---|---|
-| SR-1 | `/jobs` free text, cold first query | FAIL | `USER_BLOCKER_WEB` | a word that is not a profession name times out: the visitor gets "the job board did not answer in time" and no jobs | Chrome production check 2026-11-04, build `3a9bcdef`, desktop, signed out: `/lt/jobs?q=byggarbetare` 3.6 s to first byte and the timeout message; `lagerarbetare` 4.8 s. Profession words (`betonuotojas`, `plyteliu`) redirect to the profession filter and answer in 0.4–1.0 s | GREEN executor: honest timeout state. Coordinator: new RED draft with the plan-cache proof |
+| SR-1 | `/jobs` free text, cold first query | FAIL | `USER_BLOCKER_WEB` | a word that is not a profession name times out: the visitor gets "the job board did not answer in time" and no jobs | Chrome production check 2026-11-04, build `3a9bcdef`, desktop, signed out: `/lt/jobs?q=byggarbetare` 3.6 s to first byte and the timeout message; `lagerarbetare` 4.8 s. Profession words (`betonuotojas`, `plyteliu`) redirect to the profession filter and answer in 0.4–1.0 s | GREEN executor: honest timeout state. #3069 live 2026-11-04: first production search 970 ms, see the SR-1 row above; stays FAIL until SR-10 is fixed and the import readings are in |
+| SR-10 | `/jobs` free text finds the ads that exist | FAIL | `USER_BLOCKER_WEB` | a visitor gets 0 or too few results for ads that exist, because only the occupation label is searched | `byggarbetare` 0 results with 12 live ads carrying it in the title (production, 2026-11-04) | J-13: cost comparison, then a fix for owner approval |
 | 1.8 | Multi-capability organization | BLOCKED | `OWNER_GATED` | owner decision ORG-2 (one organization with several capabilities) | register row; no production test until the decision | Owner: the decision in the Reason column. Then the coordinator applies or walks |
 | 2.10 | External profile links | BLOCKED | `OWNER_GATED` | per-company grant for external links, RED #2471 | RED draft #2471, not applied | Owner: the decision in the Reason column. Then the coordinator applies or walks |
 | 2.27 | Org historical evidence import | BLOCKED | `OWNER_GATED` | owner decision ARCH-5 (organization history import) | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
@@ -530,14 +532,14 @@ Owner order 2026-11-04: continue the audit beyond the six core tests, in this on
 | Roles and life stages | 38 | 22 | 4 | 7 | 5 |
 | Search | 5 | 1 | 1 | 0 | 3 |
 | CV, Journal, projects, HR, organization | 16 | 8 | 2 | 2 | 4 |
-| Indexing and AEO | 21 | 7 | 5 | 2 | 7 |
-| Mobile, languages, accessibility | 10 | 5 | 1 | 2 | 2 |
+| Indexing and AEO | 25 | 9 | 8 | 1 | 7 |
+| Mobile, languages, accessibility | 12 | 5 | 2 | 2 | 3 |
 | Payments | 4 | 1 | 1 | 1 | 1 |
 | Notifications | 4 | 2 | 0 | 1 | 1 |
 | AI | 3 | 2 | 0 | 1 | 0 |
 | Security | 3 | 2 | 1 | 0 | 0 |
 | Delivery | 2 | 0 | 2 | 0 | 0 |
-| **This section** | **127** | **61** | **23** | **18** | **25** |
+| **This section** | **133** | **63** | **27** | **17** | **26** |
 
 Roles:
 
@@ -571,7 +573,7 @@ The SEO, GEO, internal search and UX/UI tables and the 288 function rows are cou
 | L-4 | Learner moves to work: the same history continues into job search | NOT VERIFIED | no walk follows one person from learner to job seeker | Coordinator: add a walk step on the recognition-chain person |
 | L-5 | Learner: earlier learning recognized as equivalent (RPL) | BLOCKED | 11.10, RED schema | Owner: decide the RPL structure |
 | JS-1 | Job seeker: finds jobs by a known word, signed out | PASS | SR-2, SR-3 (Chrome 2026-11-04); prod walk jobs-search 41663385778 (2026-11-03) | Coordinator: re-walk on risk |
-| JS-2 | Job seeker: first search for a new word | FAIL | SR-1: the visitor gets no jobs when the read times out | GREEN executor: honest timeout state with profession matches. Coordinator: new RED draft with the #3025 plan-cache proof |
+| JS-2 | Job seeker: first search for a new word | FAIL | SR-1: the visitor gets no jobs when the read times out | GREEN executor: honest timeout state with profession matches. #3069 live; see SR-1 and SR-10 |
 | JS-3 | Job seeker: reads the imported ad | FAIL | UF-2: NAV ads show raw HTML tags (8,835 active ads) | Coordinator: assign #3033 (quality and CodeQL red), then Chrome check |
 | JS-4 | Job seeker: translates a foreign ad | FAIL | UF-1: every member's click answers "could not be translated"; 0 stored translations | Coordinator: assign #3034. Owner: AI keys for real translation (8.3) |
 | JS-5 | Job seeker: saved search and mailed alert | PASS | prod walk alert-mail 41488266687 (2026-11-02) | Coordinator: re-walk on risk |
@@ -601,7 +603,7 @@ The SEO, GEO, internal search and UX/UI tables and the 288 function rows are cou
 
 | ID | Search | Status | Evidence | Executor / next action |
 |---|---|---|---|---|
-| SCH-1 | Jobs | FAIL | SR-1 cold query FAIL, SR-4 paging FAIL; SR-2, SR-3, SR-5, SR-6 PASS | See SR-1 and SR-4 |
+| SCH-1 | Jobs | FAIL | SR-1 cold query FAIL, SR-4 paging FAIL, SR-10 accuracy FAIL; SR-2, SR-3, SR-5, SR-6 PASS | See SR-1, SR-4 and SR-10 |
 | SCH-2 | Workers / candidates | NOT VERIFIED | SR-8: no walk searches people; `list_discoverable_worker_ids_v1` max 2,536 ms | Coordinator: add the walk step named in SR-8 |
 | SCH-3 | Services and goods | PASS | SR-7: prod walk marketplace 41790404575 (2026-11-04); M-3, M-5 | Coordinator: re-walk on risk |
 | SCH-4 | Orders | NOT VERIFIED | a customer's and a provider's order lists are walked (buyer-workspace B-2, orders-bookings), but searching inside them is not | Coordinator: say whether search is expected here; if so, add a step |
@@ -744,14 +746,20 @@ Owner rule: a page is not done because CI passed or a sitemap answered 200. Thes
 
 | ID | Check | Status | Executor | PR / build | Proof | Remaining problem | Next concrete action |
 |---|---|---|---|---|---|---|---|
-| IDX-9 | JobPosting on job pages | BLOCKED | Owner | none | Emitted today: WebPage + Occupation, `datePublished`. Google's required fields are `title`, `description` (the complete job text), `datePosted`, `hiringOrganization`, `jobLocation`. The rule of 2026-08-24 keeps the employer, the place and the full text for members, so 3 of the 5 cannot be met. Google also requires the data to match what the page shows, so a crawler-only version would be cloaking | job pages cannot enter Google's job results while that rule stands | Owner decides: keep the rule, or show employer, place and full text signed out on some ads. Then: RED read function, `validThrough`, NAV licence duties |
+| IDX-9 | JobPosting on job pages | FAIL | Owner decided 2026-11-05; RED executor next | none | **Owner's decision:** a valid public ad may show signed out: the employer name when confirmed for public view, the place at the precision allowed, the full approved public text, and pay, work type and terms when given and meant to be public. JSON-LD must match what a signed-out person sees. Never: non-public data, personal contacts, internal HR notes, private requirements, confidential documents. An undisclosed employer is never invented or published in JSON-LD; where Google's required fields lack reliable data, the ad gets no JobPosting. Emitted today: WebPage + Occupation, `datePublished` | not built. `get_public_vacancy_preview_v1` returns none of these fields, and the guards `public-anon-vacancy-boundary.test.ts` and `public-job-json-ld.ts` pin the old rule. **Open risk:** imported ad text can name a contact person, an e-mail address or a phone number. How often is not measured, and it must be handled before the text goes public | RED read function (separate approval, no migration under the 2026-11-05 merge approval), contact removal rule, `validThrough`, NAV licence duties, then the page and guards together |
 | IDX-10 | Job pages have their own content | FAIL | Owner | none | 54,479 live ads. Sample of 12: 1 shared description. **34,209 (63%) have no catalogue profession**, so the heading is the publisher's Swedish or Norwegian words on every locale. **0 carry pay**. Each ad has 6 locale URLs, so about 327,000 near-identical URLs | Google may keep most as crawled but not indexed. Not measured yet | Wait for Search Console's Pages report. Then owner: sitemap rule (live, 180 days or younger, catalogue profession) and whether the description may name occupation and contract type. `jobs/[id]/page.tsx` is under a waiver |
 | IDX-11 | Closed ads are not served as live | PASS | Coordinator | `1206918d` | Production: **66,271 ads** have the active flag but have expired. Three sampled pages answer 404 with noindex. The sitemap, search, counts and member read all filter on expiry (function definitions and `getPublicVacancyById`) | sitemap cache can list an ad for up to 1 hour after expiry. RLS policy `public_vacancies_read_active` checks only the flag | Owner decision: a data job that deactivates expired rows, which would also shrink the scans behind SR-1 |
 | IDX-12 | Ad updates reach search engines | FAIL | Coordinator (RED) | #2996 draft | `list_public_vacancy_sitemap_v1` sends `published_at` as `lastmod`, so a changed ad shows no change | Google is not told about edits | Use `updated_at` when that function is next changed under RED review. Not worth its own migration |
 | IDX-13 | Exact duplicate ads | PASS | Coordinator | `1206918d` | Read-only: 0 duplicate `content_hash` groups among live ads | the same job reposted with changed text is not detected | Revisit if Search Console reports duplicates |
-| IDX-14 | Private pages cannot be indexed | NOT VERIFIED | Coordinator | #3071 merged, not yet on `90e47a29` | Signed out as Googlebot: `/dashboard`, `/dashboard/journal`, `/dashboard/services`, `/onboarding`, `/cv` 307 to sign-in; `/auth/*` and `/invite/*` noindex; `/design`, unknown routes 404 noindex. `robots.txt` disallows all of them and `/api/`. 0 private URLs in `sitemap.xml`. Job page and board payloads hold no employer, application link, description, city or coordinates field. Guard `trust-security-txt-noindex.test.ts` | **`/oauth/consent` still says `index, follow` on the running build.** robots.txt disallows it. #3071 fixes it, and the deploy that listed its commit shipped the commit before | Re-read the page once the next deploy lands; then PASS |
-| IDX-15 | Crawlers read metadata in the head | NOT VERIFIED | GREEN executor | none | 11 pages per crawler: Googlebot and Bingbot 11 of 11 in `<head>`. OAI-SearchBot, PerplexityBot, Claude-SearchBot: 9 of 11, because the board streams its metadata into the body and they run no script | AI crawlers miss the board's canonical | GREEN: add them to `htmlLimitedBots`, keeping Next's own list |
-| IDX-16 | Monitoring of search visibility | NOT VERIFIED | Coordinator | none | Design only: once a day on the VPS, not GitHub's scheduler. Search Console and Bing APIs read-only; 200 URL inspections a day by page type and language; a signed-out check of robots, sitemap index and 20 URLs. Numbers stay private. No database reads | nothing runs yet. Search Console's API has no Pages report, so index totals come from the UI and samples | Coordinator: approve the design. Owner: a read-only Google service account on the property and a Bing Webmaster API key, both stored on the VPS only |
+| IDX-14 | Private pages cannot be indexed | PASS | Coordinator | #3071, `e762d6f0` | Signed out as Googlebot: `/dashboard`, `/dashboard/journal`, `/dashboard/services`, `/onboarding`, `/cv` 307 to sign-in; `/auth/*`, `/invite/*` and `/oauth/consent` noindex, nofollow (`/oauth/consent` said `index, follow` before #3071); `/design` and unknown routes 404 noindex. `robots.txt` disallows all of them and `/api/`. 0 private URLs in `sitemap.xml`. Job page and board payloads hold no employer, application link, description, city or coordinates field. Guard `trust-security-txt-noindex.test.ts` | Google still knows 3 blocked URLs by name (IDX-20), correctly blocked | Coordinator: re-check on risk |
+| IDX-15 | Crawlers read metadata in the head | PASS | Coordinator | #3073, `20b866bd` | 11 pages per crawler: Googlebot, Bingbot, OAI-SearchBot, PerplexityBot, Claude-SearchBot **11 of 11 in `<head>`** (AI crawlers were 9 of 11). A normal browser still gets the streamed page: 9 of 11, as designed | — | Coordinator: re-check when Next is upgraded; `HTML_LIMITED_BOTS` keeps a copy of Next's list |
+| IDX-19 | Lithuanian home page is its own canonical | NOT VERIFIED | Coordinator | #3075, `20b866bd` | URL Inspection of `/lt`: not indexed, **Google-selected canonical `/`**, declared `/lt`, last crawl 2026-11-03. Cause: `/` answered 307 to `/lt` for a request with no language. Stage 1 fixed on production: `/` with no language now answers **301 to `/lt`**, `no-store`. People keep the 307: de to `/de`, lt to `/lt`, en to `/en`, sv to `/en`, cookie ru to `/ru`, also over a de browser. Sign-up 200 | stages 2 to 5 unproven. Google has not re-read it | Coordinator: request reindexing of `/lt`. PASS only when Search Console shows `/lt` as canonical |
+| IDX-20 | The other not-indexed URLs, read against production | FAIL | Owner for content; coordinator re-reads | none | **Proven near-duplicates:** `/lt/labour-market/ee` shares 94% of its sentences with `/lv` and 95% with `/lt`; `/nl/labour-market/nl` 95% with `/de`. **Proven thin:** `/lt/labour-market` has 85 words, mostly a link list. Sweden and Norway no longer say "coming soon": their cards link to the job board (#3079, `5b24826b`). **No defect served:** `/nl` (798 own words), `/ru/legal/legal-notice`, `/de/legal/data-access`: 200, self-canonical, own language. `/manifest.webmanifest` is JSON and should not be indexed. Blocked by robots, correctly: `/ru/dashboard/journal`, `/ru/dashboard/profile`, `app.`/de/auth/signup. `/lt/legal/terms`: 189 words, self-canonical, repeats company details of the legal notice; the cause of its status is not proven | country pages need real per-country facts. Filling them with the existing intros would add more duplicate text, so it was not done | Owner: what each country page may say. Coordinator: URL Inspection of `/lt/legal/terms`, re-read `/nl` after 7 days |
+| LNG-6 | Coverage of the 24 EU languages and Norwegian | FAIL | Coordinator | none | Measured from the message files at `c9a58473`, table below. 5 EU languages are routed and complete (nl, de, lt, pl, en), plus Russian. 5 EU languages and Norwegian have a partial catalogue. Finnish has taxonomy only. 13 have nothing. `docs/LANGUAGE_MATRIX.md` holds older numbers from 2026-08-30 | the two markets that supply every ad have no language of their own. French, first-group by owner order, has no file. Native review is recorded for en and lt only | Order in the table. No locale goes live with thin content or without native review |
+| LNG-7 | Translation pipeline without a paid API | NOT VERIFIED | Coordinator | none | Exists: `services/translate/` (self-hosted LibreTranslate: its README lists en, lt, lv, et, ru, pl, de, nl, da, nb, sv, uk, **not fr or fi**), `check-i18n-debt.ts`, the untranslated baseline guard. For ads: `public_vacancies.translations` keeps each rendering beside the untouched original, with source language, source hash, provider and model, and `status` can say `needs_review`. That is the owner's rule for ads already | no job translates catalogue files with placeholder, ICU and length checks (D-9, not started). Whether the LibreTranslate host is deployed is not verified. Its status on production needs a read. Machine output is a draft, never a finished language | Coordinator: build the batch tool. Owner or host: run LibreTranslate. Reviewers: native review per language |
+| IDX-21 | Only pages with real value get indexed | FAIL | Coordinator after the 7-day read | none | 54,479 live ads × 6 locale URLs is about 327,000 URLs, and the text stays in the ad's original language on all 6. 34,209 ads (63%) have no catalogue profession, 20,270 do. Each ad's text is the same across locales. Page types with real content today: 30 or so public paths, 6 country pages, `/questions`. No page per profession, service or city exists | Google may leave most as crawled but not indexed. Search Console has not reported on them yet, so the size of the harm is not measured | **Proposal, not done:** after the Pages read on 2026-11-11, put in the sitemap one URL per ad (`/en/jobs/{id}`), live, 180 days or younger, with a catalogue profession: at most 20,270 URLs. Ads outside the rule stay reachable and useful, just not listed. Giving the other 34,209 a profession comes from the existing word lists and categorizer. Depends on #2996 |
+| AEO-4 | AI-search visibility is tracked honestly | NOT VERIFIED | Coordinator | none | No measurement exists for ChatGPT, Gemini or Perplexity, so this register claims none. Cheap method: a fixed list of about 10 questions per priority market, asked by hand once a month on free tiers, recording: named or not, cited URL, what it said wrong. Bing Webmaster and Search Console remain the numbers for search | results are a small sample and vary between runs, so they show direction and nothing more | Coordinator: first panel after #3078 has been crawled |
+| IDX-16 | Monitoring of search visibility | NOT VERIFIED | Coordinator | #3080, `182a2d73` | `ops/vps/lm-seo-watch.sh` is on main: a daily signed-out check of robots, sitemaps, 7 pages, redirects and private pages, about 20 public GET requests. One alert when a problem starts and one when it clears, through the mailbox the backup watchdog already uses. No paid service, no new outside channel, no database. Synthetic test 28 of 28 in CI. The Search Console and Bing API design is not built | **not installed on the VPS**, so nothing runs yet. It proves stage 1 only | Coordinator: install the script and `labourmarket-seo-watch.cron` as root. Owner: a read-only Google service account and a Bing key if API reads are wanted |
 | IDX-17 | Search Console baseline, 2026-11-04 (stages 2 to 5, whole site) | PASS | Coordinator | read from Search Console by the coordinator | Sitemaps were never submitted before today; all three submitted today. `sitemap.xml` 264 discovered, `questions-sitemap.xml` 270, `jobs-sitemap.xml` index with 55 children and 0 pages counted so far. **Indexed 127, not indexed 31:** page with redirect 18, crawled but not indexed 7, blocked by robots.txt 3, Google chose another canonical 2, duplicate without a chosen canonical 1. **Last 90 days: 5 clicks, 323 impressions, CTR 1.5%, average position 9.6.** Top queries are brand or generic, all with 0 clicks. Core Web Vitals: **not enough field data**, so MOB-3 and UX-3 are lab numbers only | a PASS here means the baseline was read, not that visibility is good. 127 of about 55,000 listed URLs are indexed; job URLs were first submitted today | Re-read the jobs sitemap count and Pages report after 7 days, then 28. Read the URL lists for the 13 pages in the last four reasons |
 | IDX-18 | Crawl load from the job sitemap submission | PASS | Coordinator | `1206918d` | Measured after submission. Job page: 15 fetched as Googlebot, 15 × 200, p50 230 ms, max 468 ms, 17 `get_public_vacancy_preview_v1` calls in that minute, so about one read per page. A sample call took 5.8 ms. Sitemap children: 12 fetches of 6 children, 42 to 262 ms, served from the 1-hour cache; edge logs over 6 hours show 55 of 55 sitemap reads 200. Postgres logs: 3 statement timeouts in the 6 hours, at 14:00 UTC; the search function returned 3 × 500 in the same 6 hours, the SR-1 path, not the sitemap | **a cold deep child is close to the limit:** the query at offset 54,000 took 3.6 s under `EXPLAIN ANALYZE`, against a 3 s anonymous timeout, because 66,271 expired rows are scanned and dropped. A miss would answer 503 with Retry-After, not 500. Full crawl means about 327,000 job URLs | Apply RED #2996 (keyset paging), then the expired-row data job (IDX-11). Watch this row as Google starts crawling |
 
@@ -816,6 +824,53 @@ Owner rule: a page is not done because CI passed or a sitemap answered 200. Thes
 | 13.14 | Owner waivers / product gate | production facts, no walk or Chrome check | Coordinator: restore the live parity read for CI |
 | 13.15 | Old-browser compatibility | production facts, no walk or Chrome check | Coordinator: a Chrome check on an old-browser profile |
 | 13.16 | Browser crash reports | not proven end to end | Coordinator: find primary evidence or mark not built |
+
+### EU language coverage, 24 official languages plus Norwegian (2026-11-05)
+
+Measured from `apps/web/messages` at `c9a58473`. English has 15,360 keys and 1,460 taxonomy keys. **Real** means present, no `[EN]` marker, not identical to English. Identical text can be correct (names, short words), so routed languages under 100% are not defects by that alone. Journey columns group message namespaces by hand: Reg registration, Prof profiles, Serv services, Jobs job search, Ads, Ord orders, Proj projects, Err errors, Ntf notifications, Help. They do not cover e-mail templates, which are outside these files.
+
+All routed languages share one set of rules: self-canonical URL, 7 hreflang (6 languages + x-default), in `sitemap.xml`, indexable. Unrouted `lv`, `et`, `fi`, `sv`, `no` redirect to English (307); `es`, `fr` go to `/en/es`, `/en/fr`, then 404 (LNG-4). Unrouted languages have no URL, canonical, hreflang or sitemap entry. Live ads on 2026-11-04: Sweden 46,022, Norway 8,457, no other country.
+
+| Order | Language | Catalogue keys | Real | `[EN]` | Real % | Taxonomy real | Reg | Prof | Serv | Jobs | Ads | Ord | Proj | Err | Ntf | Help | Routed | Ads in its market |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | German `de` | 15,360 | 15,157 | 0 | 98.7 | 1,403 | 98 | 99 | 99 | 98 | 98 | 100 | 98 | 92 | 97 | 100 | yes | 0 |
+| 1 | French `fr` | no file | 0 | - | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | no | 0 |
+| 1 | Dutch `nl` | 15,360 | 15,101 | 0 | 98.3 | 1,386 | 99 | 98 | 100 | 98 | 97 | 99 | 98 | 90 | 97 | 99 | yes | 0 |
+| 1 | Danish `da` | 5,914 | 4,412 | 1,301 | 28.7 | 208 | 15 | 21 | 2 | 38 | 56 | 50 | 30 | 41 | 3 | 0 | no | 0 |
+| 1 | Swedish `sv` | 5,914 | 3,294 | 2,467 | 21.4 | 201 | 15 | 7 | 0 | 18 | 14 | 38 | 25 | 41 | 3 | 0 | no | **46,022** |
+| 1 | Finnish `fi` | no file | 0 | - | 0 | 683 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | no | 0 |
+| 1 | Polish `pl` | 15,360 | 15,258 | 0 | 99.3 | 1,437 | 99 | 99 | 100 | 99 | 99 | 100 | 99 | 97 | 99 | 100 | yes | 0 |
+| 1 | Lithuanian `lt` | 15,360 | 15,286 | 0 | 99.5 | 1,451 | 99 | 99 | 100 | 99 | 100 | 100 | 100 | 92 | 99 | 100 | yes | 0 |
+| 1 | Norwegian `no`, extra | 5,914 | 3,293 | 2,467 | 21.4 | 199 | 15 | 7 | 0 | 18 | 14 | 38 | 25 | 41 | 3 | 0 | no | **8,457** |
+| 2 | Latvian `lv` | 5,914 | 3,239 | 2,543 | 21.1 | 203 | 15 | 7 | 0 | 18 | 15 | 38 | 25 | 41 | 3 | 0 | no | 0 |
+| 2 | Estonian `et` | 5,914 | 3,213 | 2,560 | 20.9 | 202 | 15 | 7 | 0 | 18 | 15 | 38 | 25 | 41 | 3 | 0 | no | 0 |
+| 2 | Spanish `es` | no file | 0 | - | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | no | 0 |
+| source | English `en` | 15,360 | 15,360 | 0 | 100 | 1,460 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | yes | n/a |
+| 3 | `bg`, `hr`, `cs`, `el`, `hu`, `ga`, `it`, `mt`, `pt`, `ro`, `sk`, `sl` | no file | 0 | - | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | no | 0 |
+
+Order 1 is the owner's. Order 2 follows `PRIORITY_MARKETS` and ADR 0010; German, French and Dutch also serve Austria, Switzerland and Belgium. Russian is outside the 24: routed, 15,304 real keys, a worker language and not a market. `docs/LANGUAGE_MATRIX.md` also asks for Georgian, which is absent.
+
+**Rules for every language:** user-entered ads are never rewritten as originals. Translations are stored apart, carry their origin, and are never shown as the employer's confirmed original. No paid translation API without approval. Native review before a language goes live. No locale is activated with thin content.
+
+### Search plan by country (2026-11-05)
+
+Stage 1 only: nothing here is proven in Google, Bing or AI answers. "Country page" is `/labour-market/{code}`, which exists for 6 markets, with near-duplicate text in at least 3 (IDX-20). Services: 4 private offers, 0 public listings, 0 public organizations, so **no market has public services to index**.
+
+| Market | Language state | Live ads | Country page | First honest step |
+|---|---|---|---|---|
+| Sweden | `sv` 21%, not routed | 46,022 | none, card links to the board | Ads with a profession in the sitemap (IDX-21), JobPosting (IDX-9), then a page from real ad counts by profession and region |
+| Norway | `no` 21%, not routed | 8,457 | none, card links to the board | Same as Sweden, after the NAV licence duties are read |
+| Lithuania | complete | 0 | yes | Rewrite from real local facts. Worker sign-up, CV and employer posting are the honest offer. `/lt` canonical is awaited (IDX-19) |
+| Germany, Netherlands, Poland | complete | 0 | yes | Replace near-duplicate country text with sourced facts. Ad work-abroad pages to SE and NO supply, in the reader's language |
+| Latvia, Estonia | 21%, not routed | 0 | yes, in routed languages | Keep the pages only with their own facts. Language after order 1 |
+| Denmark | `da` 29%, not routed | 0 | none, "coming soon" | Language first; no country page without supply |
+| Finland | taxonomy only | 0 | none, "coming soon" | Catalogue first; no country page without supply |
+| France, Belgium, Spain, Austria, Switzerland | fr, es none; de, nl complete | 0 | none, "coming soon" | No pages until there is supply or a real local offer |
+| Other EU countries | none | 0 | none | Nothing to index now |
+
+**By goal.** Work: the board and ads, under IDX-9, IDX-10, IDX-21. Workers and professions: `/professions` is one page; build per-profession pages only where ads or people exist (20,270 ads carry a profession; counts per profession decide). Subcontractors, teams, partners and local services: 6.21 with opt-in; nothing public until providers choose it. Learning and practice: `/skills` and the existing learning routes only. Registration, CV and posting: `/create-cv`, `/for-workers`, `/for-companies`, `/company-need` exist; measure them in Search Console first. AEO: `/questions` answers per market, with schema only where it matches the page. GEO: AEO-4.
+
+**Owner's rule:** no thousands of near-identical thin pages. Only pages with real value get indexed. A profession, country or city page needs its own data, or it isn't built.
 
 ## Identity, sign-up & organizations
 
@@ -1158,7 +1213,7 @@ Owner rule: a page is not done because CI passed or a sitemap answered 200. Thes
 | 13.2 | Health probe + monitor | LIVE_VERIFIED | — | live | yes |  |
 | 13.3 | Prod QA walk harness | LIVE_VERIFIED | 2026-10-22 | role-routes run 39783147517 (green) 10-22 | yes |  |
 | 13.4 | Supabase capacity | PASS_CI_ONLY | 2026-10-25 | Supabase org plan=pro (get_organization 2026-10-25) | unproven |  |
-| 13.5 | Database backup | LIVE_VERIFIED | 2026-11-04 | Full run 41824425911 on `51942af1d`: first stored dump with grants, grants exact, both files `BACKUP_OK`; it closed the failure issue #3058 by itself. Grants kept and proven (#3061): restore drill 41822877894 on main `51942af1d`: grants equal the source in 17 schema/kind groups, 287 tables compared, 0 outside their window, 0 missing; an injected extra grant failed the drill before shipping (41819279617). Manual full run 41815407585 2026-11-04 on `af97d1b54`: guard, backup and notify succeeded; 287 tables compared, 0 outside their window, 0 missing, schema objects exact; Storage files 66/66; both files `BACKUP_OK` from the VPS. Earlier: #3005: restore drill 41664420591 and full run 41665452921 2026-11-03 — scope public, auth, storage, supabase_migrations + Storage files + scheduled-job definitions; schema objects restored exactly, every table inside its source window, every Storage file by count and bytes; both encrypted files reach the VPS and decrypt; restore procedure in VPS_PRODUCTION_RUNBOOK §9.1.1; earlier: 2026-10-27 read-only: db-backup.yml stops at 'Require secrets' nightly since 10-18 (10-17 drills: permission denied); repo has VPS_DEPLOY_* but neither SUPABASE_ACCESS_TOKEN nor SUPABASE_BACKUP_DB_URL; 0 successful runs … | yes | Per part, 2026-11-04. PASS: start after Quality Gates on main, guard skip (41834401403, #3067); freshness job fresh path (41834401352); full backup + restore drill + shipping + stored grants (41824425911); grants proof and mismatch stop (41822877894, 41819279617); the failure issue closing (#3058). NOT VERIFIED: the scheduled trigger (no slot has fired since #3051; measured over 7 days, frequent workflows lost 83-98% of slots and daily ones started 6-8 h late); the 26 h freshness job's stale path; a backup started by a merge (first run after a merge skipped as it should, 41834401403); the failure issue opening from a run on main; decrypting a stored file (last done 2026-11-03 on the VPS with its key; the check of today's file was refused to the agent session); the owner's offline key decrypting (never shown); a restore into a real Supabase project. VPS watchdog: owner approved 2026-11-04, code merged in #3064, NOT INSTALLED (VPS access refused to the agent session; install script `ops/vps/install-backup-watchdog.sh` not yet run). The owner approved an admin alert address; that it receives mail is not yet shown. Retention from the receiver, 2026-11-04: 4 dumps and 3 file bundles kept, 14-day rotation, 20,809 MB free, 366 MB a pair. No automatic off-site copy; a Backblaze plan is private and not activated (owner decision). Manual: encrypted files of 2026-11-03 on the owner's PC; Supabase managed backups (list not read). |
+| 13.5 | Database backup | LIVE_VERIFIED | 2026-11-05 | First backup started by a merge: run 41981561592 2026-11-05 on `f8dbb2b3b`, 18.6 h after the previous one: restore drill exact (287 tables, 0 outside their window), Storage files 73/73, grants exact, 0 tables missing, both files `BACKUP_OK`, pair `20261105T063721Z`; the next run skipped as it should (41982931958). Earlier: full run 41824425911 on `51942af1d`: first stored dump with grants, grants exact, both files `BACKUP_OK`; it closed the failure issue #3058 by itself. Grants kept and proven (#3061): restore drill 41822877894 on main `51942af1d`: grants equal the source in 17 schema/kind groups, 287 tables compared, 0 outside their window, 0 missing; an injected extra grant failed the drill before shipping (41819279617). Manual full run 41815407585 2026-11-04 on `af97d1b54`: guard, backup and notify succeeded; 287 tables compared, 0 outside their window, 0 missing, schema objects exact; Storage files 66/66; both files `BACKUP_OK` from the VPS. Earlier: #3005: restore drill 41664420591 and full run 41665452921 2026-11-03 — scope public, auth, storage, supabase_migrations + Storage files + scheduled-job definitions; schema objects restored exactly, every table inside its source window, every Storage file by count and bytes; both encrypted files reach the VPS and decrypt; restore procedure in VPS_PRODUCTION_RUNBOOK §9.1.1; earlier: 2026-10-27 read-only: db-backup.yml stops at 'Require secrets' nightly since 10-18 (10-17 drills: permission denied); repo has VPS_DEPLOY_* but neither SUPABASE_ACCESS_TOKEN nor SUPABASE_BACKUP_DB_URL; 0 successful runs … | yes | Per part, 2026-11-05. PASS: start after Quality Gates on main, guard skip (41834401403, #3067); a backup started by a merge (41981561592); freshness job fresh path (41834401352); full backup + restore drill + shipping + stored grants (41824425911); grants proof and mismatch stop (41822877894, 41819279617); the failure issue closing (#3058). NOT VERIFIED: a backup started by the schedule (first slot since #3051 fired 2026-11-04 18:45 UTC, at least 3 h late, and the guard skipped it as it should, 41890262254; the 2026-11-05 00:28 UTC slot skipped too, 12 h after the last backup, 41941621226; measured over 7 days, frequent workflows lost 83-98% of slots and daily ones started 6-8 h late); the 26 h freshness job's stale path; the failure issue opening from a run on main; decrypting a stored file (last done 2026-11-03 on the VPS with its key; the check of today's file was refused to the agent session); the owner's offline key decrypting (never shown); a restore into a real Supabase project. VPS watchdog: owner approved 2026-11-04, code merged in #3064, NOT INSTALLED (VPS access refused to the agent session; install script `ops/vps/install-backup-watchdog.sh` not yet run). The owner approved an admin alert address; that it receives mail is not yet shown. Retention from the receiver, 2026-11-04: 4 dumps and 3 file bundles kept, 14-day rotation, 20,809 MB free, 366 MB a pair. No automatic off-site copy; a Backblaze plan is private and not activated (owner decision). Manual: encrypted files of 2026-11-03 on the owner's PC; Supabase managed backups (list not read). |
 | 13.6 | VPS cron bundle | LIVE_VERIFIED | 2026-10-23 | prod data 10-23: all 4 VPS cron entries ran (handoffs 06:00, job-alerts, weekly digest Mon, erasure every 10 min); pg_cron booking expiry ran | yes | 1 erasure notice queued (no SMTP) |
 | 13.7 | Migration safety + parity | LIVE_VERIFIED | 2026-10-23 | parity tool vs prod ledger 10-23 | yes |  |
 | 13.8 | Migration ledger parity | LIVE_VERIFIED | 2026-10-23 | prod ledger 10-23: 396 match; all drift documented except ESCO fn applied with file only in open #2410 | yes | record/merge #2410 |
@@ -1172,3 +1227,945 @@ Owner rule: a page is not done because CI passed or a sitemap answered 200. Thes
 | 13.16 | Browser crash reports | NOT_VERIFIED | — | only a registry citation; no primary evidence recoverable | unproven |  |
 | 13.17 | Env parity after hosting move | FAIL | 2026-10-27 | 2026-10-27 read-only: last real AI call gemini 2026-10-15 16:07; since then provider=disabled reason=mode_disabled (AI_PROVIDER_MODE not live) - 25 calls to 10-27; lifetime AI spend actual $0.16 (Oct $0.09/234 calls). In… | no | OWNER+LEGAL: AI off coincides with owner 10-15 Gemini personal-data restriction (needs billed key + AI_GEMINI_PAID_TIER_CONFIRMED=1 / DPA). SMTP: LM_SMTP_PASS + INVITE_EMAIL_PROVIDER=smtp via lm-env-set.sh |
 
+## Function map data
+
+Source for the interactive function map, added 2026-11-05. **Status, evidence and date still come only from the function rows above.** IDs are those row IDs.
+
+How to read it:
+
+- **Draft.** A description says what a function is for, not that it works. State is derived from the row's status: LIVE_VERIFIED = veikianti; PASS_CI_ONLY or NOT_VERIFIED = testuojama; BLOCKED or FAIL = užblokuota; NOT_IMPLEMENTED = planuojama, or kuriama if it has an open PR. OPTIONAL_TEST and DUPLICATE rows aren't counted.
+- **Naršyklė** comes from keywords in the evidence column, not a row-by-row read: `eisena` = a browser walk in production (Playwright Chromium, synthetic users, not a person in Chrome), `savininkas` = the owner or a real user in a browser, `api` = production proof with no browser, `ne` = no browser named. Empty = not counted.
+- **Poreikiai** means the function serves that need at least in part. A general function can serve a need that has no dedicated function, so a count here doesn't show the need is covered. `senjorai` has none.
+- **Tikrinta**: `kodas` = its route was found in the code, not that the behaviour was confirmed there; `registras` = read from the register only. Empty cells mean not known.
+- **Kaina** is `nenustatyta` unless the register or plan code states it.
+- **Completion rule for the map:** veikianti and Naršyklė is `eisena` or `savininkas`, over all counted rows in that need, with a missing value counted as not done. Always show both numbers. The three measures above stay as they are.
+
+Not filled yet: `Map: stages`. `Map: blockers` holds open PRs linked to function rows; forgotten items aren't linked yet. Open work is in [`COORDINATION_REGISTER.md`](COORDINATION_REGISTER.md) §7.
+
+### Map: groups
+
+| Group | Lietuviškai | Trumpai |
+|---|---|---|
+| 1 | Paskyra, registracija ir organizacijos | Kaip prisijungi ir kuriam darbui ar įmonei priklausai |
+| 2 | Darbuotojo profilis, darbo žurnalas ir gyvas CV | Tavo darbo istorija ir įgūdžiai vienoje vietoje |
+| 3 | Įmonės darbai ir projektai | Žmonės, valandos ir projektai |
+| 4 | Poreikiai, darbo skelbimai ir atranka | Kaip žmogus ir darbas randa vienas kitą |
+| 5 | Pokalbiai ir pranešimai | Bendravimas ir priminimai |
+| 6 | Prekyvietė | Paslaugos ir prekės tarp žmonių ir įmonių |
+| 7 | Planai ir mokėjimai | Kas nemokama, kas mokama ir kaip mokama |
+| 8 | Kalbos ir rinkos | Kalbos, šalys ir programėlės |
+| 9 | Administravimas, privatumas ir saugumas | Tavo duomenų apsauga ir administratoriaus darbas |
+| 10 | Pagalbininkai ir dirbtinis intelektas | Pokalbių asistentai ir jų ribos |
+| 11 | Mokymasis | Mokymo įstaigos, grupės ir pripažinimas |
+| 12 | Rinkos žinios | Ką rodo darbo rinkos duomenys |
+| 13 | Infrastruktūra ir veikimas | Kas palaiko sistemą veikiančią |
+
+### Map: functions
+
+| ID | Pavadinimas | Ką leidžia | Kam | Kur rasti | Poreikiai | Naršyklė | Kaina | Vykdytojas | Tikrinta |
+|---|---|---|---|---|---|---|---|---|---|
+| 1.1 | Registracija ir prisijungimas | Susikuri paskyrą ir prisijungi el. paštu bei slaptažodžiu. | darbuotojas, ieškantis darbo, įmonė, agentūra | /auth/signup, /auth/login |  | eisena | nenustatyta |  | kodas |
+| 1.2 | Prisijungimas per Google | Prisijungi viena paspaudimu su savo Google paskyra. | darbuotojas, ieškantis darbo, įmonė, agentūra | /auth/login |  | savininkas | nenustatyta | Koordinatorius | kodas |
+| 1.3 | Slaptažodžio atkūrimas | Pamiršęs slaptažodį gauni laišką ir nusistatai naują. | darbuotojas, ieškantis darbo, įmonė, agentūra | /auth/forgot-password |  | eisena | nenustatyta |  | kodas |
+| 1.4 | Pirmieji žingsniai po registracijos | Po registracijos žingsnis po žingsnio nustatai, ko tau reikia. | darbuotojas, ieškantis darbo, įmonė, agentūra | /onboarding | pirmas-darbas,isidarbinimas,samdymas | eisena | nenustatyta |  | kodas |
+| 1.5 | Keli vaidmenys vienoje paskyroje | Vienoje paskyroje gali būti ir darbuotojas, ir įmonės žmogus. | darbuotojas, įmonė, agentūra | /dashboard/account |  | eisena | nenustatyta |  | kodas |
+| 1.6 | Įmonės paskyros sukūrimas | Sukuri savo įmonės ar organizacijos paskyrą. | įmonė, vadovas, agentūra | /dashboard/start/company | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 1.7 | Įmonės patikra | Įmonė patvirtinama, kad kiti ja galėtų pasitikėti. | įmonė, administratorius | /dashboard/admin/company-verification | samdymas | eisena | nenustatyta |  | kodas |
+| 1.8 | Viena organizacija, keli veiklos tipai | Viena organizacija gali veikti keliose srityse vienu metu. | įmonė |  | verslo-valdymas | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 1.9 | Nariai, kvietimai ir vaidmenys | Pakvieti žmones į įmonę ir nustatai, ką kiekvienas gali daryti. | įmonė, vadovas | /invite/[token] | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 1.10 | Darbo erdvės perjungimas | Perjungi tarp savo asmeninės ir įmonės erdvių. | darbuotojas, įmonė, vadovas, agentūra | /dashboard |  | eisena | nenustatyta |  | kodas |
+| 1.11 | Įmonių duomenų atskyrimas | Apsaugo, kad viena įmonė nematytų kitos įmonės duomenų. | sistema |  |  | api | nenustatyta |  | registras |
+| 1.12 | Kvietimai ir rekomendavimas | Pakvieti pažįstamus prisijungti per savo nuorodą. | darbuotojas, įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 1.13 | Sistemos laiškai | Gauni svarbius laiškus apie savo paskyrą ir veiksmus. | darbuotojas, ieškantis darbo, įmonė |  |  | ne | nenustatyta | Savininkas ir teisininkas | registras |
+| 1.14 | Pranešimas apie peržiūrą | Personalas gauna žinią, kai ką nors reikia peržiūrėti. | administratorius |  |  | eisena | nenustatyta |  | registras |
+| 1.15 | Įmonės praeitis ir jos perėmimas | Perimi savo įmonės ankstesnius darbo įrašus. | įmonė, vadovas | /dashboard/company/history | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 2.1 | Profesinis profilis | Susirašai, kas esi ir ką moki dirbti. | darbuotojas, ieškantis darbo, savarankiškas specialistas | /dashboard/profile | isidarbinimas,tobulejimas,pirmas-darbas | eisena | nenustatyta |  | kodas |
+| 2.2 | Darbo kortelė | Nurodai, kada gali dirbti, kokio atlygio tikiesi ir kur. | darbuotojas, ieškantis darbo, savarankiškas specialistas | /dashboard/profile | isidarbinimas,savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 2.3 | CV įkėlimas ir patvirtinimas | Įkeli CV ir patvirtini kiekvieną joje rastą faktą. | darbuotojas, ieškantis darbo | /cv | isidarbinimas,karjeros-keitimas,pirmas-darbas | eisena | nenustatyta |  | kodas |
+| 2.4 | Gyvasis CV | Turi nuolat atsinaujinantį CV, kurį gali atsisiųsti. | darbuotojas, ieškantis darbo, savarankiškas specialistas | /cv | isidarbinimas,tobulejimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 2.5 | Darbo patirtis | Surašai, kur dirbai ir ką darei. | darbuotojas, ieškantis darbo | /dashboard/profile | isidarbinimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 2.6 | Praktika ir savanorystė | Įrašai praktiką ir savanorystę kaip patirtį. | ieškantis darbo, besimokantis, darbuotojas | /dashboard/profile | pirmas-darbas,mokymasis | eisena | nenustatyta |  | kodas |
+| 2.7 | Išsilavinimas | Pridedi savo mokslus ir kvalifikacijas. | darbuotojas, ieškantis darbo, besimokantis | /dashboard/profile | pirmas-darbas,mokymasis,isidarbinimas | eisena | nenustatyta |  | kodas |
+| 2.8 | Pasiekimai ir pažymėjimai | Pridedi pasiekimus ir savo nurodytus pažymėjimus. | darbuotojas, ieškantis darbo | /dashboard/profile | isidarbinimas,tobulejimas | eisena | nenustatyta |  | kodas |
+| 2.9 | Kalbos | Nurodai, kokias kalbas moki ir kaip gerai. | darbuotojas, ieškantis darbo | /dashboard/profile | isidarbinimas | eisena | nenustatyta |  | kodas |
+| 2.10 | Nuorodos į kitus profilius | Prie profilio pridedi nuorodas į savo darbus kitur. | darbuotojas, savarankiškas specialistas |  | savarankiskos-paslaugos | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 2.11 | Reikalavimų sąrašas | Matai, ko dar trūksta, kad atitiktum darbo reikalavimus. | darbuotojas, ieškantis darbo |  | tobulejimas | eisena | nenustatyta |  | registras |
+| 2.12 | Įgūdžių ir profesijų sąrašas | Pasirenki savo profesijas ir įgūdžius iš bendro sąrašo. | darbuotojas, ieškantis darbo, savarankiškas specialistas | /dashboard/profile | isidarbinimas,tobulejimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 2.13 | Įgūdžių atpažinimas iš darbo žurnalo | Iš tavo darbo įrašų atpažįstama, ką moki. | darbuotojas, ieškantis darbo | /dashboard/journal | tobulejimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 2.14 | Įrodymų lygiai | Matai, kiek tavo įgūdis pagrįstas tikru darbu. | darbuotojas, ieškantis darbo, įmonė | /cv | tobulejimas,isidarbinimas | eisena | nenustatyta |  | kodas |
+| 2.15 | Savo įgūdžių pareiškimas | Įrašai įgūdį savais žodžiais, net jei jo nėra sąraše. | darbuotojas, ieškantis darbo, savarankiškas specialistas | /dashboard/profile | tobulejimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 2.16 | Bendrieji gebėjimai | Matai gebėjimus, kurie tinka daugelyje darbų. | darbuotojas, ieškantis darbo | /cv | karjeros-keitimas,tobulejimas | eisena | nenustatyta |  | kodas |
+| 2.17 | Europos profesijų klasifikatorius | Profesijos ir įgūdžiai susiejami su Europos sąrašu. | sistema |  | isidarbinimas,karjeros-keitimas | ne | nenustatyta | Savininkas | registras |
+| 2.18 | Dokumentai ir jų galiojimas | Laikai dokumentus ir matai, kada baigsis jų galiojimas. | darbuotojas, ieškantis darbo, įmonė | /dashboard/documents | isidarbinimas,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 2.19 | Darbo žurnalas | Kasdien užsirašai, ką padarei darbe. | darbuotojas, savarankiškas specialistas | /dashboard/journal | tobulejimas,projektai,isidarbinimas | eisena | nenustatyta |  | kodas |
+| 2.20 | Vadovo patvirtinimas | Vadovas peržiūri ir patvirtina tavo darbo įrašus. | vadovas, darbuotojas | /dashboard/inbox | isidarbinimas,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 2.21 | Darbo patvirtinimo būsenos | Matai, ar įrašą jau patvirtino, ar dar laukia. | darbuotojas, vadovas | /dashboard/journal | isidarbinimas | eisena | nenustatyta |  | kodas |
+| 2.22 | Nuotraukos ir darbo įrodymai | Prie įrašo pridedi nuotraukas, kad parodytum atliktą darbą. | darbuotojas, savarankiškas specialistas | /dashboard/gallery | savarankiskos-paslaugos,tobulejimas | eisena | nenustatyta |  | kodas |
+| 2.23 | Valandos ir suvestinės | Matai savo valandas ir darbo laiko lapus. | darbuotojas, vadovas, įmonė | /dashboard/hours | projektai,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 2.24 | Patirties įrašai ir ginčai | Gali užginčyti įrašą, kuris tau atrodo neteisingas. | darbuotojas, vadovas |  | isidarbinimas | eisena | nenustatyta | Koordinatorius | registras |
+| 2.25 | Darbas skaičiais | Matai savo darbo apimtis skaičiais. | darbuotojas, savarankiškas specialistas | /dashboard/work-in-numbers | tobulejimas | eisena | nenustatyta |  | kodas |
+| 2.26 | Viena nuosekli profesinė istorija | Visa tavo darbo istorija sudėta į vieną vietą. | darbuotojas, ieškantis darbo | /dashboard/profile | isidarbinimas,karjeros-keitimas,tobulejimas | eisena | nenustatyta |  | kodas |
+| 2.27 | Įmonės istorinių įrašų įkėlimas | Įmonė įkelia ankstesnius savo darbuotojų darbo įrašus. | įmonė, vadovas |  | verslo-valdymas | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 2.28 | Senų įrašų sujungimas | Seni dubliuoti darbo įrašai sujungiami į vieną. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 2.29 | Galimi, dar neįrodyti gebėjimai | Parodomi gebėjimai, kuriuos tikėtina turi. | darbuotojas, ieškantis darbo | /cv | karjeros-keitimas,tobulejimas | eisena | nenustatyta |  | kodas |
+| 2.30 | Žurnalas balsu | Darbo žurnalą pasakai balsu, o ne rašai. | darbuotojas, savarankiškas specialistas | /dashboard/journal/voice | tobulejimas | ne | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 2.31 | Žurnalo įrašų apsauga nuo keitimo | Apsaugo, kad praeities įrašai nebūtų slapčia pakeisti. | darbuotojas, vadovas, sistema |  |  | eisena | nenustatyta |  | registras |
+| 2.32 | Kitos pusės atsiliepimas | Klientas ar partneris patvirtina arba įvertina atliktą darbą. | savarankiškas specialistas, klientas, vadovas | /dashboard/inbox/counterparty | savarankiskos-paslaugos,isidarbinimas | eisena | nenustatyta |  | kodas |
+| 2.33 | Darbų galerija | Rodai savo atliktų darbų nuotraukas. | savarankiškas specialistas, darbuotojas | /dashboard/gallery | savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 2.34 | Žurnalo ir valandų atsisiuntimas | Parsisiunti žurnalą ir valandas faile. | darbuotojas, vadovas | /dashboard/hours | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 2.35 | Sutikimas būti randamam | Pats nusprendi, ar darbdaviai gali tave rasti. | darbuotojas, ieškantis darbo | /dashboard/privacy | isidarbinimas,samdymas | eisena | nenustatyta |  | kodas |
+| 2.36 | Žurnalo šablonai pagal profesiją | Gauni žurnalo formą, pritaikytą tavo profesijai. | darbuotojas, savarankiškas specialistas |  | tobulejimas | ne | nenustatyta | Koordinatorius | registras |
+| 2.37 | Įrašo atsisakymas | Žmogus gali atsisakyti apie jį įkelto įrašo. | darbuotojas |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 3.1 | Įmonės pradžia | Matai savo įmonės dienos vaizdą vienoje vietoje. | įmonė, vadovas | /dashboard/company | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.2 | Projektai | Sukuri projektą ir seki jo eigą. | įmonė, vadovas | /dashboard/projects | projektai,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.3 | Objektai ir vietos | Projektui priskiri objektą ar darbo vietą. | įmonė, vadovas |  | projektai | eisena | nenustatyta |  | registras |
+| 3.4 | Projekto etapai | Projektą suskaidai į etapus. | įmonė, vadovas | /dashboard/projects/[id] | projektai | eisena | nenustatyta |  | kodas |
+| 3.5 | Užduotys | Skiri užduotis ir seki, ar jos atliktos. | įmonė, vadovas, darbuotojas | /dashboard/tasks | projektai,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.6 | Darbuotojo skyrimas projektui | Paskiri žmogų dirbti konkrečiame projekte. | įmonė, vadovas | /dashboard/projects/[id] | projektai,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.7 | Brigados | Sudarai brigadą iš kelių žmonių. | įmonė, vadovas | /dashboard/company/people | projektai,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.8 | Brigados skyrimas projektui | Visą brigadą paskiri į projektą. | įmonė, vadovas |  | projektai | eisena | nenustatyta |  | registras |
+| 3.9 | Projekto pasirengimas | Matai, ar viskas paruošta projektui pradėti. | įmonė, vadovas |  | projektai | eisena | nenustatyta |  | registras |
+| 3.10 | Defektai ir taisymai | Užfiksuoji trūkumus ir pažymi, kada jie ištaisyti. | įmonė, vadovas |  | projektai | eisena | nenustatyta |  | registras |
+| 3.11 | Perdavimo dokumentas | Užbaigus darbą parengi perdavimo dokumentą klientui. | įmonė, vadovas | /dashboard/projects/[id]/operations | projektai | eisena | nenustatyta |  | kodas |
+| 3.12 | Projekto išlaidos ir pajamos | Matai, kiek projektas kainuoja ir kiek uždirba. | įmonė, vadovas |  | projektai,verslo-valdymas | eisena | nenustatyta |  | registras |
+| 3.13 | Projekto operacijų lenta | Matai visus projekto darbus vienoje lentoje ir parsisiunti. | įmonė, vadovas | /dashboard/projects/[id]/operations | projektai | eisena | nenustatyta |  | kodas |
+| 3.14 | Darbų planavimas ir kalendorius | Planuoji žmonių darbus kalendoriuje. | įmonė, vadovas | /dashboard/company/planning | verslo-valdymas,projektai | eisena | nenustatyta |  | kodas |
+| 3.15 | Nebuvimai ir atostogos | Užsirašai ir patvirtini atostogas bei nebuvimus. | darbuotojas, vadovas, įmonė | /dashboard/absences | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.16 | Žmonių trūkumo laiko juosta | Matai, kada trūks žmonių. | įmonė, vadovas |  | verslo-valdymas,projektai | savininkas | nenustatyta |  | registras |
+| 3.17 | Žmonių rezervavimas | Rezervuoji žmogaus laiką ateičiai. | įmonė, vadovas | /dashboard/company/planning | verslo-valdymas,projektai | eisena | nenustatyta |  | kodas |
+| 3.18 | Užimtumas | Matai, kiek kiekvienas žmogus užimtas. | įmonė, vadovas | /dashboard/company/planning | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.19 | Planas ir faktas | Palygini suplanuotą darbą su atliktu. | įmonė, vadovas |  | verslo-valdymas,projektai | eisena | nenustatyta |  | registras |
+| 3.20 | Pamainos ir grafikai | Sudarai pamainų grafiką. | įmonė, vadovas | /dashboard/company/planning | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.21 | Darbuotojų sąrašas | Matai visus savo įmonės žmones. | įmonė, vadovas | /dashboard/company/people | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.22 | Žmonių įkėlimas | Įkeli žmonių sąrašą iš failo. | įmonė, vadovas | /dashboard/company/people | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.23 | Priėmimas ir išleidimas iš darbo | Seki naujo darbuotojo įvedimą ir išėjimą. | įmonė, vadovas |  | verslo-valdymas,samdymas | eisena | nenustatyta |  | registras |
+| 3.24 | Patvirtinimai ir procesai | Pateiktus prašymus patvirtini ar atmeti. | įmonė, vadovas |  | verslo-valdymas | eisena | nenustatyta |  | registras |
+| 3.25 | Vadovo sprendimai | Užrašai sprendimus ir jų peržiūras. | vadovas |  | verslo-valdymas | eisena | nenustatyta |  | registras |
+| 3.26 | Nurodymai | Darbuotojams išsiunti nurodymus. | vadovas, įmonė, darbuotojas | /dashboard/instructions | verslo-valdymas,projektai | eisena | nenustatyta |  | kodas |
+| 3.27 | Įmonės istorija ir duomenų kokybė | Matai įmonės istoriją ir kur trūksta duomenų. | įmonė, vadovas | /dashboard/company/history | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.28 | Atsakymai vadovui pokalbyje | Vadovas pokalbyje paklausia apie savo įmonę ir gauna atsakymą. | vadovas, įmonė | pokalbis | verslo-valdymas | eisena | nenustatyta |  | registras |
+| 3.29 | Įmonės dokumentų sąrašas | Saugai įmonės dokumentus vienoje vietoje. | įmonė, vadovas | /dashboard/documents | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.30 | Įmonės nustatymai ir pagalbos prašymas | Keiti įmonės nustatymus ir paprašai pagalbos. | įmonė, vadovas | /dashboard/company/settings | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.31 | Ataskaitos ir atsisiuntimas | Gauni ataskaitas ir jas parsisiunti. | įmonė, vadovas | /dashboard/reports | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.32 | Įrankiai ir turtas | Seki, kas turi kokį įmonės įrankį. | įmonė, vadovas | /dashboard/assets | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 3.33 | Valandų puslapis | Žiūri ir tvirtini žmonių valandas. | įmonė, vadovas, darbuotojas | /dashboard/hours | verslo-valdymas,projektai | eisena | nenustatyta |  | kodas |
+| 3.34 | Projekto eigos prognozė | Prognozuojama, kada projektas baigsis. | įmonė, vadovas |  | projektai,verslo-valdymas | eisena | nenustatyta | Koordinatorius | registras |
+| 3.35 | Persidengiančių įsipareigojimų įspėjimas | Gauni įspėjimą, kai žmogus paskirtas į du darbus vienu metu. | įmonė, vadovas |  | verslo-valdymas,projektai | ne | nenustatyta | Savininkas ir koordinatorius | registras |
+| 3.36 | Įmonės gyvasis CV | Įmonė turi savo nuolat atsinaujinantį profilį. | įmonė, vadovas |  | verslo-valdymas | ne | nenustatyta | Savininkas | registras |
+| 4.1 | Poreikio įvedimas | Įmonė vienodu būdu užrašo, kokių žmonių jai reikia. | įmonė, vadovas, agentūra | /dashboard/company/needs | samdymas,projektai | eisena | nenustatyta |  | kodas |
+| 4.2 | Poreikis ir pasiūla atskirai | Skiriama, ko įmonė ieško ir ką žmogus siūlo. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 4.3 | Galimybių lenta darbuotojui | Matai tau tinkamas galimybes ir pasakai, kad domina. | darbuotojas, ieškantis darbo | /dashboard/opportunities | isidarbinimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 4.4 | Viešoji darbo skelbimų lenta | Be registracijos ieškai darbo skelbimų. | ieškantis darbo, darbuotojas | /jobs | isidarbinimas,pirmas-darbas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 4.5 | Žmonių ir darbų suderinimas | Siūlomi tinkami darbai žmonėms ir žmonės darbams. | ieškantis darbo, įmonė |  | isidarbinimas,samdymas | eisena | nenustatyta |  | registras |
+| 4.6 | Komandos paieška ir pasiūlymas | Įmonė randa visą komandą ir jai pateikia pasiūlymą. | įmonė, agentūra |  | samdymas,projektai | eisena | nenustatyta |  | registras |
+| 4.7 | Derybos tarp įmonių | Dvi įmonės susiderina sąlygas. | įmonė, agentūra |  | projektai,verslo-valdymas | eisena | nenustatyta |  | registras |
+| 4.8 | Anoniminis poreikio pateikimas | Be registracijos įmonė palieka savo poreikį. | įmonė | /company-need | samdymas | ne | nenustatyta | Koordinatorius | kodas |
+| 4.9 | Išsaugotos paieškos ir pranešimai | Išsaugai paiešką ir gauni žinią apie naujus skelbimus. | ieškantis darbo, darbuotojas | /jobs | isidarbinimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 4.10 | Pasiūlos paieška įmonėms | Įmonė ieško žmonių ir komandų pagal poreikį. | įmonė, vadovas | /dashboard/talent | samdymas | eisena | nenustatyta |  | kodas |
+| 4.11 | Kandidatų paieška | Įmonė ieško tinkamų kandidatų. | įmonė, agentūra | /dashboard/candidates | samdymas | eisena | nenustatyta |  | kodas |
+| 4.12 | Trumpasis sąrašas ir pastabos | Įmonė susideda kandidatus į sąrašą ir rašo pastabas. | įmonė, agentūra | /dashboard/company/scouting | samdymas | eisena | nenustatyta |  | kodas |
+| 4.13 | Automatinis kandidatų parinkimas | Kandidatai parenkami automatiškai ir pateikiamas kvitas. | įmonė, agentūra |  | samdymas | eisena | nenustatyta |  | registras |
+| 4.14 | Kandidatų juodraščiai | Įmonė paruošia kandidato pasiūlymą prieš išsiunčiant. | agentūra, įmonė |  | samdymas | eisena | nenustatyta |  | registras |
+| 4.15 | Agentūros ir kliento ryšys | Agentūra susieja su klientu ir siūlo jam žmones. | agentūra, klientas |  | samdymas | eisena | nenustatyta |  | registras |
+| 4.16 | Susisiekimas su susidomėjusiu žmogumi | Įmonė parašo žmogui, kuris pareiškė susidomėjimą. | įmonė, agentūra |  | samdymas | eisena | nenustatyta |  | registras |
+| 4.17 | Sutikimas būti randamam | Pats nusprendi, ar tave gali rasti. | darbuotojas, ieškantis darbo | /dashboard/privacy | isidarbinimas |  | nenustatyta |  | kodas |
+| 4.18 | Duomenų atskleidimas darbdaviui | Leidi konkrečiam darbdaviui matyti papildomus savo duomenis. | darbuotojas, ieškantis darbo |  | isidarbinimas | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 4.19 | Prašymai atskleisti kontaktus | Įmonė paprašo tavo kontaktų, o tu nusprendi. | darbuotojas, ieškantis darbo, įmonė |  | isidarbinimas,samdymas | eisena | nenustatyta |  | registras |
+| 4.20 | Asmens apsauga paieškoje | Paieškoje žmogaus tapatybė nerodoma be jo leidimo. | sistema |  |  | api | nenustatyta |  | registras |
+| 4.21 | Asmens vardo slėpimas | Žmogaus vardas rodomas tik gavus leidimą. | sistema | /dashboard/people/[workerId] |  | eisena | nenustatyta |  | kodas |
+| 4.22 | Trys nemokami profilių peržiūrėjimai | Įmonė kelis profilius mato nemokamai, daugiau už papildomą planą. | įmonė |  | samdymas | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 4.25 | Derinimo valdymo skydas | Administratorius tikrina derinimo rezultatus. | administratorius | /dashboard/admin/matching |  | savininkas | nenustatyta |  | kodas |
+| 4.26 | Viešas tinkamumo peržiūrėjimas | Be registracijos pamatai, ar tinki darbui. | ieškantis darbo, darbuotojas | /match-preview | isidarbinimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 4.28 | Pasiūlos pareiškimas | Įmonė ar žmogus pasako, ką gali pasiūlyti. | savarankiškas specialistas, įmonė |  | savarankiskos-paslaugos | eisena | nenustatyta |  | registras |
+| 4.29 | Susidomėjimas virsta laisva vieta | Žmogaus susidomėjimas paverčiamas darbo vieta įmonėje. | įmonė, agentūra |  | samdymas | ne | nenustatyta | Koordinatorius | registras |
+| 4.30 | Kandidatas, sprendimas, poreikio uždarymas | Nuo kandidato iki priėmimo sprendimo ir poreikio uždarymo. | įmonė, agentūra, vadovas |  | samdymas | ne | nenustatyta | Vykdytojas ir koordinatorius | registras |
+| 5.1 | Pokalbio pradžia | Pradedi nuo pokalbio ir paprašai, ko reikia. | darbuotojas, ieškantis darbo, įmonė, vadovas | pokalbis | isidarbinimas,verslo-valdymas,savarankiskos-paslaugos | eisena | nenustatyta |  | registras |
+| 5.2 | Pokalbio istorija | Pokalbis išlieka ir gali grįžti prie jo vėliau. | darbuotojas, įmonė | pokalbis |  | eisena | nenustatyta |  | registras |
+| 5.3 | Vienkartiniai patvirtinimai | Svarbų veiksmą patvirtini vieną kartą. | darbuotojas, įmonė, vadovas | pokalbis |  | eisena | nenustatyta |  | registras |
+| 5.4 | Žinutės ir gijos | Susirašinėji su kitais žmonėmis ir įmonėmis. | darbuotojas, įmonė, agentūra | /dashboard/communication |  | eisena | nenustatyta |  | kodas |
+| 5.5 | Žinučių vertimas | Žinutė išverčiama, o originalas lieka matomas. | darbuotojas, įmonė | /dashboard/communication |  | eisena | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 5.6 | Pranešimai programoje | Matai naujus pranešimus programoje. | darbuotojas, ieškantis darbo, įmonė | /dashboard/activity |  | eisena | nenustatyta |  | kodas |
+| 5.7 | Pranešimai el. paštu | Gauni svarbias žinias el. paštu. | darbuotojas, ieškantis darbo, įmonė |  |  | eisena | nenustatyta |  | registras |
+| 5.8 | Pranešimai telefone | Gauni pranešimą į telefoną. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 5.9 | Savaitės apžvalga | Kas savaitę gauni trumpą apžvalgą el. paštu. | darbuotojas, ieškantis darbo, įmonė |  |  | eisena | nenustatyta | Koordinatorius | registras |
+| 5.10 | Veiklos centras | Vienoje vietoje matai, kam reikia tavo dėmesio. | darbuotojas, įmonė, vadovas | /dashboard/activity | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 5.11 | Darbuotojo kalendorius | Matai savo darbus kalendoriuje. | darbuotojas, savarankiškas specialistas | /dashboard/planning | savarankiskos-paslaugos,projektai | eisena | nenustatyta |  | kodas |
+| 5.12 | Prieinamumas | Nurodai, kada gali dirbti. | darbuotojas, savarankiškas specialistas, ieškantis darbo |  | isidarbinimas,savarankiskos-paslaugos | savininkas | nenustatyta |  | registras |
+| 5.13 | Užsakymas, sutikimas, darbas | Gauni užsakymą, jį priimi ir pradedi darbą. | darbuotojas, savarankiškas specialistas, įmonė | /dashboard/bookings | savarankiskos-paslaugos,samdymas | eisena | nenustatyta |  | kodas |
+| 5.14 | Greitoji paieška ir balsas | Greitai randi puslapį ar veiksmą, galima balsu. | darbuotojas, įmonė |  |  | savininkas | nenustatyta | Koordinatorius | registras |
+| 5.15 | Balsas kaip lygiavertis būdas | Viską gali padaryti ir balsu. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas | registras |
+| 5.16 | Įspėjimai savininkui | Savininkas gauna žinią per Telegram. | administratorius |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 5.17 | Pagalbos pokalbiai | Parašai pagalbos komandai. | darbuotojas, įmonė |  |  | eisena | nenustatyta |  | registras |
+| 5.18 | Paieška skyriuje | Ieškai žmonių, projektų ir dokumentų vienoje vietoje. | darbuotojas, įmonė, vadovas |  |  | eisena | nenustatyta |  | registras |
+| 5.19 | Gautų ataskaitų peržiūra | Matai gautas ataskaitas. | vadovas, įmonė | /dashboard/inbox/report | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 5.20 | Savos automatizacijos | Pats susikuri automatinius veiksmus. | įmonė, vadovas |  | verslo-valdymas | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 5.21 | SMS ir WhatsApp kanalai | Žinutes gauni per SMS ar WhatsApp. | darbuotojas, įmonė |  |  | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 6.1 | Paslaugos ir užklausų ratas | Siūlai paslaugas ir gauni užklausas. | savarankiškas specialistas, klientas | /dashboard/services | savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 6.2 | Skelbimai: prekės, nuoma, ieškau | Skelbi prekes, nuomą ar ko ieškai. | savarankiškas specialistas, klientas, įmonė | /dashboard/listings | savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 6.3 | Bendra paieška | Ieškai paslaugų ir skelbimų vienoje vietoje. | klientas, įmonė | /dashboard/listings | savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 6.4 | Pirkėjo erdvė | Kaip pirkėjas matai savo užklausas ir pasiūlymus. | klientas, įmonė | /dashboard/buyer | savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 6.6 | Pasiūlymai ir sutartys | Paruoši pasiūlymą ir sutartį klientui. | savarankiškas specialistas, įmonė | /dashboard/commercial | savarankiskos-paslaugos,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 6.7 | Pirkimai | Valdai pirkimus savo įmonėje. | įmonė, vadovas | /dashboard/finance | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 6.8 | Komandiruotės | Planuoji ir seki komandiruotes. | įmonė, vadovas, darbuotojas | /dashboard/finance | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 6.9 | Finansų įrašai | Matai įmonės finansų įrašus. | įmonė, vadovas | /dashboard/finance | verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 6.10 | Projekto kainos skaičiuoklė | Be registracijos apskaičiuoji projekto kainą. | klientas, įmonė, savarankiškas specialistas | /calculators/project-cost | projektai,savarankiskos-paslaugos | eisena | nenustatyta |  | kodas |
+| 6.11 | Pasirengimas darbui užsienyje | Matai, ko reikia dirbti kitoje šalyje. | įmonė, darbuotojas |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 6.12 | Tarptautiniai sandoriai | Įmonės sudaro sandorius tarp šalių. | įmonė |  | verslo-valdymas | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 6.13 | Prekių užsakymai | Perki prekes per platformą. | klientas, įmonė |  | savarankiskos-paslaugos | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 6.14 | Logistika | Susitvarkai prekių pristatymą. | įmonė |  | verslo-valdymas | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 6.16 | Perdavimas partnerio organizacijai | Užklausa perduodama partnerio organizacijai. | įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 6.17 | Pardavimų eiga | Seki potencialių klientų eigą. | administratorius |  |  | savininkas | nenustatyta |  | registras |
+| 6.18 | Laukiančiųjų sąrašas | Užsirašai gauti žinią, kai funkcija atsiras. | darbuotojas, įmonė |  |  | eisena | nenustatyta |  | registras |
+| 6.19 | Komandos užklausos | Gauni komandos užklausas. | įmonė, agentūra | /dashboard/service-requests | samdymas | eisena | nenustatyta |  | kodas |
+| 6.20 | Vertės kanalai | Parodomi keliai, kuriais žmogus gauna naudą iš platformos. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 6.21 | Viešas verslo puslapis | Verslas turi viešą savo puslapį. | įmonė, savarankiškas specialistas, klientas | /business/[slug] | savarankiskos-paslaugos | ne | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 6.22 | Būstas | Susirandi nakvynę darbui. | darbuotojas, įmonė |  |  | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 6.23 | Paslaugos įvertinimas ir ginčai | Įvertini paslaugą, atšauki užsakymą ar paduodi skundą. | klientas, savarankiškas specialistas |  | savarankiskos-paslaugos | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 6.24 | Paslaugų srautas telefone | Naršai paslaugas braukdamas pirštu. | klientas |  | savarankiskos-paslaugos | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 7.1 | Planai ir kainų puslapis | Matai, kokie yra planai. | įmonė, darbuotojas, agentūra | /pricing |  | eisena | nenustatyta |  | kodas |
+| 7.2 | Nemokamas planas: vienas atviras poreikis | Nemokamai gali turėti vieną atvirą poreikį. | įmonė |  | samdymas | ne | nemokama | Koordinatorius | registras |
+| 7.3 | Planų teisių nustatymas | Žinoma, ką leidžia tavo planas. | sistema |  |  | savininkas | nenustatyta | Koordinatorius | registras |
+| 7.4 | Bandomasis mokėjimas | Išbandomas mokėjimas be tikrų pinigų. | administratorius |  |  |  | nenustatyta | Koordinatorius | registras |
+| 7.5 | Mokėjimas už planą | Įmonė už planą sumoka kortele. | įmonė |  |  | ne | mokama | Savininkas | registras |
+| 7.6 | Mokėjimų įrašų atkūrimas | Pataisomi nepavykę mokėjimų įrašai. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.7 | Rankinis bandomojo plano suteikimas | Administratorius suteikia bandomąjį planą. | administratorius |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 7.8 | Kreditų sąskaita | Seki kreditų likutį. | įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.9 | Kreditų papildymas ir planų pakopos | Papildai kreditus ir renkiesi planą. | įmonė, agentūra |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.10 | Trys peržiūros ir VIP | Ta pati funkcija kaip 4.22, paliekama istorijai. | įmonė |  |  |  | nenustatyta |  | registras |
+| 7.11 | Atidėti planai | Ateityje bus papildomi planai darbuotojams ir agentūroms. | darbuotojas, agentūra |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.12 | Dirbtinio intelekto kaštų skaičiavimas | Skaičiuojama, kiek kainuoja dirbtinio intelekto pagalba. | administratorius |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.13 | Užsakymų riba pagal planą | Plane nustatyta, kiek užsakymų gali turėti. | įmonė |  |  | eisena | nenustatyta | Koordinatorius | registras |
+| 7.14 | Skelbimų vertimo teisė | Skelbimo vertimas priklauso nuo plano. | įmonė |  |  | eisena | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.15 | Metinė prenumerata | Įmonė užsisako mokamą planą. | įmonė |  |  | ne | mokama | Savininkas, paskui koordinatorius | registras |
+| 7.16 | Mokėjimo pranešimo patikra | Tikrinama, ar mokėjimo žinia tikra. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 7.17 | Dvigubo apmokestinimo apsauga | Tavo kortelė nenurašoma du kartus už tą patį. | įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 7.18 | Mokėjimas keičia teises | Sumokėjus atsiranda teisės, nutrūkus mokėjimui jos dingsta. | įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 7.19 | Grąžinimai ir ginčai | Pinigų grąžinimas ar ginčo sprendimas. | įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.20 | Sąskaitos platformoje | Sąskaitas matai pačioje platformoje. | įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.21 | Atsiskaitymo portalas | Kiekvienas už mokėjimus atsakingas žmogus gali atidaryti portalą. | įmonė, vadovas | /dashboard/account |  | ne | nenustatyta | Koordinatorius | kodas |
+| 7.22 | Mokamų funkcijų teisės ir ribos | Kiekviena mokama funkcija taikoma pagal plano ribas. | įmonė |  |  | ne | nenustatyta | Savininkas ir koordinatorius | registras |
+| 7.23 | Kreditų pirkimas | Vienkartinis kreditų pirkimas. | įmonė |  |  | ne | mokama | Savininkas, paskui koordinatorius | registras |
+| 7.24 | Kreditai po vieno mokėjimo | Už vieną mokėjimą kreditai suteikiami vieną kartą. | įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.25 | Kreditų likutis ir istorija | Matai savo kreditų likutį ir istoriją. | įmonė | pokalbis |  | eisena | nenustatyta | Koordinatorius | registras |
+| 7.26 | Kreditų išleidimas ir grąžinimas | Išleidžiami ir grąžinami kreditai. | įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 7.27 | Nemokamas VIP patvirtintoms įmonėms | Patvirtinta įmonė gauna VIP nemokamai. | įmonė |  | samdymas | ne | nemokama | Savininkas, paskui koordinatorius | registras |
+| 7.28 | Pardavėjas ir sąlygos | Matai, kas parduoda ir kokiomis sąlygomis. | įmonė | /legal/terms |  | ne | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 7.29 | PVM skaičiavimas | Mokėjimuose skaičiuojamas PVM. | įmonė |  |  | ne | nenustatyta | Savininkas ir teisininkas | registras |
+| 7.30 | Sąskaitos ir priėmimo aktai iš žurnalo | Iš darbo žurnalo parengiama sąskaita ir priėmimo aktas. | savarankiškas specialistas, įmonė |  | savarankiskos-paslaugos,verslo-valdymas | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 7.31 | Planai darbuotojams ir įmonėms | Planai abiem pusėms: nemokamas ir mokami. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 8.1 | Svetainės kalbos | Naudoji platformą savo kalba. | darbuotojas, ieškantis darbo, įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 8.2 | Darbas suprantamas keliomis kalbomis | Darbo aprašai suprantami keliomis kalbomis. | darbuotojas, ieškantis darbo, įmonė |  | isidarbinimas | eisena | nenustatyta |  | registras |
+| 8.3 | Automatinis vertimas | Tekstas išverčiamas į tavo kalbą. | darbuotojas, ieškantis darbo, įmonė |  | isidarbinimas | eisena | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 8.4 | Šalių darbo rinkos puslapiai | Skaitai apie darbo rinką skirtingose šalyse. | ieškantis darbo, darbuotojas | /labour-market | isidarbinimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 8.5 | Devynios pirmosios rinkos | Platforma pritaikoma devynioms šalims. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 8.6 | Šalių reikalavimų lentelė | Matai, ko reikia dirbti konkrečioje šalyje. | ieškantis darbo, darbuotojas | /work-abroad | isidarbinimas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 8.7 | Viešas atsakymų puslapis | Randi atsakymus į dažniausius klausimus. | ieškantis darbo, darbuotojas, įmonė | /questions | isidarbinimas,pirmas-darbas,karjeros-keitimas | eisena | nenustatyta |  | kodas |
+| 8.8 | Paieškos sistemų paruošimas | Svetainė tinkamai matoma paieškos sistemose. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 8.9 | Viešas įmonės profilis | Įmonė turi viešą savo profilį. | įmonė, klientas | /business/[slug] | samdymas | eisena | nenustatyta | Koordinatorius | kodas |
+| 8.10 | Pristatymo svetainė | Perskaitai apie platformą prieš registruojantis. | ieškantis darbo, darbuotojas, įmonė, agentūra | /about |  | eisena | nenustatyta |  | kodas |
+| 8.11 | Svetainė telefone | Naudoji platformą telefone. | darbuotojas, ieškantis darbo, įmonė |  |  | eisena | nenustatyta |  | registras |
+| 8.12 | Įdiegimas telefone | Platformą įdedi į telefono pradžios ekraną. | darbuotojas, įmonė |  |  | eisena | nenustatyta |  | registras |
+| 8.13 | Programėlė telefonui | Atskira programėlė telefone. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 8.14 | Nuorodos į programėlę | Nuoroda iš laiško atidaro programėlę. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 8.15 | Programėlių parduotuvės | Programėlė pasiekiama programėlių parduotuvėse. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 8.16 | Pastabos apie vertimą | Praneši, kad vertimas neteisingas. | darbuotojas, ieškantis darbo, įmonė, administratorius | /dashboard/admin/language-feedback |  | eisena | nenustatyta |  | kodas |
+| 8.17 | Programėlė Android telefonui | Programėlė Android telefonui. | darbuotojas, įmonė |  |  | api | nenustatyta | Savininkas | registras |
+| 8.18 | Programėlė iPhone | Programėlė iPhone telefonui. | darbuotojas, įmonė |  |  | api | nenustatyta | Savininkas | registras |
+| 9.1 | Administratoriaus skydas | Administratorius valdo platformą. | administratorius | /dashboard/admin |  | eisena | nenustatyta |  | kodas |
+| 9.2 | Bandymai, rodikliai, lyga | Administratorius seka bandymus ir rodiklius. | administratorius | /dashboard/admin/pilots |  | savininkas | nenustatyta |  | kodas |
+| 9.3 | Naudotojo peržiūra | Administratorius pažiūri vieno naudotojo būseną. | administratorius | /dashboard/admin/users/[id] |  | savininkas | nenustatyta |  | kodas |
+| 9.4 | Privatumo prašymai | Gali paprašyti savo duomenų ar jų ištrynimo. | darbuotojas, ieškantis darbo, įmonė | /dashboard/privacy |  | ne | nenustatyta | Koordinatorius | kodas |
+| 9.5 | Duomenų atsisiuntimas | Parsisiunti visus apie save laikomus duomenis. | darbuotojas, ieškantis darbo, įmonė | /dashboard/privacy |  | eisena | nenustatyta |  | kodas |
+| 9.6 | Duomenų ištrynimas | Tavo duomenys ištrinami, kai to paprašai. | darbuotojas, ieškantis darbo, įmonė | /dashboard/privacy |  | ne | nenustatyta | Koordinatorius | kodas |
+| 9.7 | Darbuotojo duomenų skyrimas | Atskiriami žmogaus ir jo įmonės duomenys. | sistema |  |  | api | nenustatyta |  | registras |
+| 9.8 | Duomenų prieigos taisyklės | Kiekvienas mato tik savo duomenis. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.9 | Veiksmų žurnalas | Svarbūs veiksmai užrašomi. | sistema, administratorius |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.10 | Užklausų ribojimas | Apsaugo nuo piktnaudžiavimo. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.11 | Užklausų kilmės patikra | Apsaugo nuo suklastotų užklausų. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 9.12 | Teisiniai puslapiai | Perskaitai sąlygas ir privatumo politiką. | darbuotojas, ieškantis darbo, įmonė | /legal/privacy |  | eisena | nenustatyta |  | kodas |
+| 9.13 | Asmens vietos apsauga | Tavo tikslios vietos kiti nemato. | darbuotojas, ieškantis darbo |  |  | eisena | nenustatyta |  | registras |
+| 9.14 | Naudojimo statistika | Administratorius mato, kaip naudojama platforma. | administratorius | /dashboard/admin/telemetry |  | savininkas | nenustatyta |  | kodas |
+| 9.15 | Paieškos būdai | Skirtingos paieškos randa žmones, darbus ir paslaugas. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 9.16 | Rekomendavimo sąsaja | Išorinė sistema siunčia rekomendacijas. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 9.17 | Vidinis pasiūlos srautas | Vidinė sistema gauna pasiūlos duomenis. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.18 | Viešos duomenų sąsajos | Kitos svetainės gali gauti viešus duomenis. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 9.19 | Importo bandymų erdvė | Administratorius išbando importą. | administratorius | /dashboard/admin/import-sandbox |  | savininkas | nenustatyta | Niekas dabar; savininkas, jei norės | kodas |
+| 9.20 | Stebėjimų tikrintuvas | Administratorius tikrina stebėjimus. | administratorius | /dashboard/admin/intelligence-observations |  | savininkas | nenustatyta | Niekas dabar; savininkas, jei norės | kodas |
+| 9.22 | Aplinkos nustatymų patikra | Neleidžia paleisti sistemos su blogais nustatymais. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.23 | Duomenų bazės funkcijų kontrolė | Saugo, kad duomenų funkcijos nebūtų per laisvos. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.24 | Saugumo incidentų tvarkymas | Reaguojama į saugumo incidentus. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 9.25 | Saugumo perspėjimai | Stebimi saugumo perspėjimai apie kodą. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 10.1 | Atvira sąsaja dirbtinio intelekto programoms | Programa gali veikti tavo vardu su tavo leidimu. | darbuotojas, įmonė | MCP |  | eisena | nenustatyta |  | kodas |
+| 10.2 | Dirbtinio intelekto scenarijai | Paruošti scenarijai dirbtinio intelekto programoms. | darbuotojas, įmonė | MCP |  | api | nenustatyta |  | kodas |
+| 10.3 | Prisijungimas dirbtinio intelekto programoms | Programa saugiai gauna tavo leidimą. | darbuotojas, įmonė | MCP |  | api | nenustatyta |  | kodas |
+| 10.4 | Dirbtinio intelekto leidimų sritys | Nustatai, ką programa gali daryti. | darbuotojas, įmonė | MCP |  | ne | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 10.5 | Sąrašai dirbtinio intelekto parduotuvėse | Platforma rodoma dirbtinio intelekto programų sąrašuose. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.6 | Dirbtinio intelekto pagalba | Platforma naudoja dirbtinį intelektą pagalbai. | darbuotojas, įmonė |  |  | eisena | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.7 | Pokalbio ketinimų atpažinimas | Pokalbyje atpažįstama, ko nori. | darbuotojas, įmonė | pokalbis |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.8 | CV sutvarkymas dirbtiniu intelektu | Iš CV dirbtinis intelektas išrenka faktus. | darbuotojas, ieškantis darbo | /cv | isidarbinimas,karjeros-keitimas | ne | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 10.9 | Žurnalo siūlymai | Žurnalo įrašui siūlomi patobulinimai. | darbuotojas | /dashboard/journal | tobulejimas | ne | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 10.10 | Paaiškinimai | Gauni paaiškinimą, kodėl taip pasiūlyta. | darbuotojas, įmonė |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.11 | Pagalbininkai be iškvietimo | Yra pagalbininkai, kurių dar niekas nekviečia. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 10.13 | Pagalbininko puslapis | Pasikalbi su pagalbininku. | darbuotojas, įmonė | /dashboard/assist |  | eisena | nenustatyta |  | kodas |
+| 10.14 | Pagalbininkų valdymas | Administratorius valdo pagalbininkus. | administratorius | /dashboard/admin/agent-os |  | savininkas | nenustatyta |  | kodas |
+| 10.15 | Pagalbininkų vykdymas | Pagalbininkai atlieka darbus patys. | administratorius |  |  | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 10.16 | Pagalbininkai kaip dalyviai | Pagalbininkas yra pokalbio dalyvis. | darbuotojas, įmonė |  |  | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 10.17 | Išorinių veiksmų kvitai | Gauni kvitą apie išorinį veiksmą. | darbuotojas, įmonė | MCP |  | api | nenustatyta |  | kodas |
+| 10.18 | Skelbimai iš Švedijos | Platforma gauna skelbimus iš Švedijos. | ieškantis darbo, darbuotojas | foninis | isidarbinimas | ne | nenustatyta | Koordinatorius | registras |
+| 10.19 | Skelbimai iš Norvegijos | Platforma gauna skelbimus iš Norvegijos. | ieškantis darbo, darbuotojas | foninis | isidarbinimas | ne | nenustatyta | Koordinatorius | registras |
+| 10.20 | Senų skelbimų šalinimas | Pasenę skelbimai pašalinami. | ieškantis darbo, darbuotojas | foninis | isidarbinimas | api | nenustatyta | Koordinatorius | registras |
+| 10.21 | Statistikos importas | Importuojama oficiali statistika. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.22 | Partnerio organizacijos sąsaja | Duomenys keičiasi su partnerio organizacija. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.23 | Agentūros pasiūlos srautas | Agentūros pasiūla patenka į platformą. | agentūra |  | samdymas | ne | nenustatyta | Koordinatorius | registras |
+| 10.24 | Savo serverio vertimas | Vertimas veikia mūsų serveryje. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.25 | Debesų dirbtinis intelektas | Papildomas dirbtinio intelekto tiekėjas. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.26 | Programų konkursas | Dalyvavimas dirbtinio intelekto programų konkurse. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 10.27 | Žemėlapiai | Matai vietas žemėlapyje. | darbuotojas, ieškantis darbo, įmonė |  | isidarbinimas | eisena | nenustatyta |  | registras |
+| 11.1 | Mokymo įstaiga ir besimokantysis | Mokymo įstaiga susieja su savo besimokančiais. | mokymo įstaiga, besimokantis | /dashboard/company/education | mokymasis | eisena | nenustatyta |  | kodas |
+| 11.2 | Programos ir srautai | Mokymo įstaiga kuria programas ir grupes. | mokymo įstaiga | /dashboard/company/education | mokymasis | eisena | nenustatyta |  | kodas |
+| 11.3 | Mokymosi kompasas | Matai, ką mokytis toliau. | besimokantis, darbuotojas, ieškantis darbo | /dashboard/learning | mokymasis,tobulejimas,karjeros-keitimas,pirmas-darbas | eisena | nenustatyta |  | kodas |
+| 11.4 | Praktikos vietos | Įmonė pasiūlo vietų praktikai. | įmonė, mokymo įstaiga, besimokantis | /dashboard/company/education | mokymasis,pirmas-darbas | eisena | nenustatyta |  | kodas |
+| 11.5 | Besimokančiųjų rezultatai | Matai, kaip sekasi besimokantiems. | mokymo įstaiga, besimokantis | /dashboard/learning | mokymasis | eisena | nenustatyta |  | kodas |
+| 11.6 | Mokymo įstaigos ataskaitos | Mokymo įstaiga gauna ataskaitas. | mokymo įstaiga | /dashboard/reports | mokymasis | eisena | nenustatyta |  | kodas |
+| 11.7 | Praktika virsta gebėjimu | Atlikta praktika parodo įgytą gebėjimą. | besimokantis, mokymo įstaiga | /dashboard/learning | mokymasis,pirmas-darbas,tobulejimas | eisena | nenustatyta |  | kodas |
+| 11.8 | Mokymų ir pažymėjimų sąrašas | Laikai mokymus ir pažymėjimus vienoje vietoje. | besimokantis, darbuotojas, mokymo įstaiga | /dashboard/learning | mokymasis,tobulejimas | eisena | nenustatyta | Savininkas, paskui koordinatorius | kodas |
+| 11.9 | Mokymosi peržiūra žmogaus akimis | Žmogus peržiūri mokymosi rekomendacijas. | besimokantis, mokymo įstaiga |  | mokymasis | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+| 11.10 | Ankstesnio mokymosi pripažinimas | Pripažįstamas anksčiau įgytas mokymasis. | besimokantis, darbuotojas |  | mokymasis,karjeros-keitimas | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |
+| 12.1 | Rinkos žemėlapis | Matai, kur yra darbo ir žmonių. | darbuotojas, ieškantis darbo, įmonė | /dashboard/market-map | isidarbinimas,karjeros-keitimas,verslo-valdymas | savininkas | nenustatyta |  | kodas |
+| 12.2 | Darbo rinkos žinios | Skaitai apie darbo rinką. | darbuotojas, ieškantis darbo, įmonė | /dashboard/intelligence | karjeros-keitimas,isidarbinimas | ne | nenustatyta | Koordinatorius | kodas |
+| 12.3 | Žinių skydas | Žinias matai vienoje vietoje. | darbuotojas, įmonė, vadovas | /dashboard/intelligence | karjeros-keitimas,verslo-valdymas | eisena | nenustatyta |  | kodas |
+| 12.4 | Poreikio atpažinimas | Atpažįstamas rinkos poreikis. | administratorius, įmonė | /dashboard/market/recognize | verslo-valdymas | savininkas | nenustatyta |  | kodas |
+| 12.5 | Viešieji rinkos faktai | Matai viešus rinkos faktus. | ieškantis darbo, darbuotojas, įmonė | /labour-market | isidarbinimas,karjeros-keitimas | ne | nenustatyta | Koordinatorius | kodas |
+| 12.6 | Administratoriaus rinkos puslapis | Administratorius mato rinkos vaizdą. | administratorius | /dashboard/admin/market |  | savininkas | nenustatyta |  | kodas |
+| 13.1 | Svetainės talpinimas ir atnaujinimas | Svetainė pasiekiama ir atnaujinama be pertraukų. | sistema |  |  | eisena | nenustatyta | Koordinatorius | registras |
+| 13.2 | Veikimo stebėjimas | Pastebima, kai svetainė neatsako. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.3 | Paruoštas patikrinimo paketas | Automatiškai išbandomi pagrindiniai naudotojo žingsniai. | sistema |  |  | eisena | nenustatyta |  | registras |
+| 13.4 | Duomenų bazės talpa | Pasirūpinama, kad duomenys tilptų. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.5 | Atsarginės kopijos | Tavo duomenys turi atsarginę kopiją. | sistema |  |  | api | nenustatyta |  | registras |
+| 13.6 | Reguliarūs foniniai darbai | Reguliariai atliekami foniniai darbai. | sistema | foninis |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.7 | Duomenų bazės pakeitimų patikra | Prieš keičiant duomenų bazę tikrinama, ar saugu. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.8 | Pakeitimų žurnalo suderinimas | Pakeitimų žurnalas atitinka tikrą būseną. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.9 | Ryšys su kodo saugykla | Duomenų bazė susieta su kodo saugykla. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.10 | Kokybės vartai | Prieš paskelbiant keitimą, jis tikrinamas. | sistema |  |  | api | nenustatyta | Nereikia (automatinė patikra) | registras |
+| 13.11 | Automatinė naudotojo kelio patikra | Automatiškai išbandomi pagrindiniai žingsniai. | sistema |  |  | ne | nenustatyta | Nereikia (automatinė patikra) | registras |
+| 13.12 | Produkto taisyklių patikra | Automatiškai tikrinama, ar laikomasi produkto taisyklių. | sistema |  |  | ne | nenustatyta | Nereikia (automatinė patikra) | registras |
+| 13.13 | Funkcijų prieinamumo sąrašas | Aišku, kurios funkcijos jau paruoštos. | administratorius, sistema |  |  | api | nenustatyta | Koordinatorius | registras |
+| 13.14 | Išimčių valdymas | Savininkas leidžia išimtis kokybės vartams. | administratorius |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.15 | Senų naršyklių palaikymas | Svetainė atsidaro ir senesnėje naršyklėje. | darbuotojas, ieškantis darbo, įmonė |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.16 | Naršyklės klaidų pranešimai | Sužinoma, kai tavo naršyklėje įvyko klaida. | sistema |  |  | ne | nenustatyta | Koordinatorius | registras |
+| 13.17 | Aplinkos suderinimas po perkėlimo | Po serverio keitimo viskas sulyginama. | sistema |  |  | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
+
+### Map: links
+
+| From | To | Kind | Data |
+|---|---|---|---|
+| 1.2 | 1.1 | depends |  |
+| 1.3 | 1.1 | depends |  |
+| 1.4 | 1.1 | depends |  |
+| 1.5 | 1.1 | depends |  |
+| 1.6 | 1.1 | depends |  |
+| 1.7 | 1.6 | depends |  |
+| 1.9 | 1.6 | depends |  |
+| 1.10 | 1.5 | depends |  |
+| 1.15 | 1.6 | depends |  |
+| 1.14 | 1.7 | depends |  |
+| 1.12 | 1.1 | depends |  |
+| 1.13 | 1.1 | depends |  |
+| 2.1 | 1.1 | depends |  |
+| 2.2 | 2.1 | depends |  |
+| 2.3 | 2.1 | depends |  |
+| 2.4 | 2.1 | depends |  |
+| 2.5 | 2.1 | depends |  |
+| 2.6 | 2.1 | depends |  |
+| 2.7 | 2.1 | depends |  |
+| 2.8 | 2.1 | depends |  |
+| 2.9 | 2.1 | depends |  |
+| 2.10 | 2.1 | depends |  |
+| 2.11 | 2.12 | depends |  |
+| 2.12 | 2.1 | depends |  |
+| 2.13 | 2.19 | depends |  |
+| 2.13 | 2.12 | depends |  |
+| 2.14 | 2.13 | depends |  |
+| 2.15 | 2.12 | depends |  |
+| 2.16 | 2.12 | depends |  |
+| 2.18 | 2.1 | depends |  |
+| 2.19 | 1.1 | depends |  |
+| 2.20 | 2.19 | depends |  |
+| 2.20 | 1.9 | depends |  |
+| 2.21 | 2.20 | depends |  |
+| 2.22 | 2.19 | depends |  |
+| 2.23 | 2.19 | depends |  |
+| 2.24 | 2.19 | depends |  |
+| 2.25 | 2.23 | depends |  |
+| 2.26 | 2.19 | depends |  |
+| 2.27 | 1.15 | depends |  |
+| 2.28 | 2.27 | depends |  |
+| 2.29 | 2.13 | depends |  |
+| 2.30 | 2.19 | depends |  |
+| 2.31 | 2.19 | depends |  |
+| 2.32 | 2.19 | depends |  |
+| 2.33 | 2.22 | depends |  |
+| 2.34 | 2.23 | depends |  |
+| 2.35 | 2.1 | depends |  |
+| 2.36 | 2.19 | depends |  |
+| 2.37 | 2.27 | depends |  |
+| 3.1 | 1.6 | depends |  |
+| 3.2 | 3.1 | depends |  |
+| 3.3 | 3.2 | depends |  |
+| 3.4 | 3.2 | depends |  |
+| 3.5 | 3.4 | depends |  |
+| 3.6 | 3.2 | depends |  |
+| 3.6 | 3.21 | depends |  |
+| 3.7 | 3.21 | depends |  |
+| 3.8 | 3.7 | depends |  |
+| 3.8 | 3.2 | depends |  |
+| 3.9 | 3.2 | depends |  |
+| 3.10 | 3.2 | depends |  |
+| 3.11 | 3.2 | depends |  |
+| 3.12 | 3.2 | depends |  |
+| 3.13 | 3.2 | depends |  |
+| 3.14 | 3.6 | depends |  |
+| 3.15 | 3.21 | depends |  |
+| 3.16 | 3.14 | depends |  |
+| 3.17 | 3.14 | depends |  |
+| 3.18 | 3.14 | depends |  |
+| 3.19 | 3.14 | depends |  |
+| 3.19 | 2.23 | depends |  |
+| 3.20 | 3.14 | depends |  |
+| 3.21 | 1.9 | depends |  |
+| 3.22 | 3.21 | depends |  |
+| 3.23 | 3.21 | depends |  |
+| 3.24 | 3.21 | depends |  |
+| 3.25 | 3.1 | depends |  |
+| 3.26 | 3.21 | depends |  |
+| 3.27 | 1.15 | depends |  |
+| 3.28 | 5.1 | depends |  |
+| 3.29 | 2.18 | depends |  |
+| 3.30 | 3.1 | depends |  |
+| 3.31 | 3.1 | depends |  |
+| 3.32 | 3.1 | depends |  |
+| 3.33 | 2.23 | depends |  |
+| 3.34 | 3.2 | depends |  |
+| 3.34 | 2.23 | depends |  |
+| 3.35 | 3.14 | depends |  |
+| 3.35 | 3.17 | depends |  |
+| 3.36 | 3.1 | depends |  |
+| 4.1 | 1.6 | depends |  |
+| 4.3 | 4.5 | depends |  |
+| 4.5 | 2.1 | depends |  |
+| 4.5 | 4.1 | depends |  |
+| 4.6 | 4.1 | depends |  |
+| 4.7 | 4.1 | depends |  |
+| 4.9 | 4.4 | depends |  |
+| 4.10 | 4.28 | depends |  |
+| 4.11 | 4.10 | depends |  |
+| 4.12 | 4.11 | depends |  |
+| 4.13 | 4.11 | depends |  |
+| 4.14 | 4.11 | depends |  |
+| 4.15 | 1.6 | depends |  |
+| 4.16 | 4.3 | depends |  |
+| 4.17 | 2.35 | depends |  |
+| 4.18 | 2.35 | depends |  |
+| 4.19 | 4.17 | depends |  |
+| 4.21 | 4.20 | depends |  |
+| 4.22 | 4.21 | depends |  |
+| 4.26 | 2.1 | depends |  |
+| 4.28 | 2.1 | depends |  |
+| 4.29 | 4.3 | depends |  |
+| 4.29 | 4.1 | depends |  |
+| 4.30 | 4.12 | depends |  |
+| 4.30 | 4.1 | depends |  |
+| 5.2 | 5.1 | depends |  |
+| 5.3 | 5.1 | depends |  |
+| 5.5 | 5.4 | depends |  |
+| 5.6 | 5.4 | depends |  |
+| 5.7 | 1.13 | depends |  |
+| 5.8 | 5.6 | depends |  |
+| 5.9 | 5.7 | depends |  |
+| 5.10 | 5.6 | depends |  |
+| 5.11 | 5.12 | depends |  |
+| 5.13 | 5.11 | depends |  |
+| 5.14 | 5.1 | depends |  |
+| 5.15 | 5.14 | depends |  |
+| 5.19 | 2.20 | depends |  |
+| 5.21 | 5.6 | depends |  |
+| 6.1 | 2.1 | depends |  |
+| 6.3 | 6.1 | depends |  |
+| 6.3 | 6.2 | depends |  |
+| 6.4 | 6.3 | depends |  |
+| 6.6 | 6.1 | depends |  |
+| 6.7 | 3.1 | depends |  |
+| 6.9 | 3.1 | depends |  |
+| 6.12 | 6.11 | depends |  |
+| 6.13 | 6.2 | depends |  |
+| 6.14 | 6.13 | depends |  |
+| 6.19 | 4.6 | depends |  |
+| 6.21 | 1.6 | depends |  |
+| 6.23 | 6.1 | depends |  |
+| 6.24 | 6.3 | depends |  |
+| 7.2 | 7.3 | depends |  |
+| 7.3 | 7.1 | depends |  |
+| 7.5 | 7.3 | depends |  |
+| 7.13 | 7.3 | depends |  |
+| 7.14 | 7.3 | depends |  |
+| 7.15 | 7.5 | depends |  |
+| 7.16 | 7.5 | depends |  |
+| 7.17 | 7.5 | depends |  |
+| 7.18 | 7.5 | depends |  |
+| 7.18 | 7.3 | depends |  |
+| 7.19 | 7.5 | depends |  |
+| 7.20 | 7.5 | depends |  |
+| 7.21 | 7.5 | depends |  |
+| 7.22 | 7.3 | depends |  |
+| 7.23 | 7.5 | depends |  |
+| 7.24 | 7.23 | depends |  |
+| 7.25 | 7.8 | depends |  |
+| 7.26 | 7.8 | depends |  |
+| 7.27 | 7.3 | depends |  |
+| 7.29 | 7.5 | depends |  |
+| 7.31 | 7.1 | depends |  |
+| 7.6 | 7.5 | depends |  |
+| 7.12 | 10.6 | depends |  |
+| 7.30 | 2.19 | depends |  |
+| 8.2 | 8.1 | depends |  |
+| 8.5 | 8.1 | depends |  |
+| 8.9 | 1.6 | depends |  |
+| 8.12 | 8.11 | depends |  |
+| 8.14 | 8.13 | depends |  |
+| 8.15 | 8.13 | depends |  |
+| 8.17 | 8.13 | depends |  |
+| 8.18 | 8.13 | depends |  |
+| 8.16 | 8.3 | depends |  |
+| 8.6 | 8.4 | depends |  |
+| 8.8 | 8.10 | depends |  |
+| 9.6 | 9.4 | depends |  |
+| 9.5 | 9.4 | depends |  |
+| 9.2 | 9.1 | depends |  |
+| 9.3 | 9.1 | depends |  |
+| 9.14 | 9.1 | depends |  |
+| 9.19 | 9.1 | depends |  |
+| 9.20 | 9.1 | depends |  |
+| 9.16 | 1.12 | depends |  |
+| 10.2 | 10.1 | depends |  |
+| 10.3 | 10.1 | depends |  |
+| 10.4 | 10.3 | depends |  |
+| 10.17 | 10.1 | depends |  |
+| 10.8 | 10.6 | depends |  |
+| 10.9 | 10.6 | depends |  |
+| 10.10 | 10.6 | depends |  |
+| 10.7 | 10.6 | depends |  |
+| 10.16 | 10.6 | depends |  |
+| 10.14 | 10.15 | depends |  |
+| 10.11 | 10.15 | depends |  |
+| 10.18 | 4.4 | depends |  |
+| 10.19 | 4.4 | depends |  |
+| 10.20 | 4.4 | depends |  |
+| 10.23 | 9.17 | depends |  |
+| 10.5 | 10.1 | depends |  |
+| 10.26 | 10.5 | depends |  |
+| 11.2 | 11.1 | depends |  |
+| 11.3 | 11.1 | depends |  |
+| 11.4 | 11.1 | depends |  |
+| 11.5 | 11.2 | depends |  |
+| 11.6 | 11.5 | depends |  |
+| 11.7 | 11.4 | depends |  |
+| 11.7 | 2.19 | depends |  |
+| 11.8 | 11.1 | depends |  |
+| 11.9 | 11.7 | depends |  |
+| 11.10 | 11.8 | depends |  |
+| 12.1 | 12.2 | depends |  |
+| 12.3 | 12.2 | depends |  |
+| 12.4 | 12.2 | depends |  |
+| 12.6 | 12.2 | depends |  |
+| 13.3 | 13.1 | depends |  |
+| 13.2 | 13.1 | depends |  |
+| 13.5 | 13.4 | depends |  |
+| 13.6 | 13.1 | depends |  |
+| 13.8 | 13.7 | depends |  |
+| 13.10 | 13.11 | depends |  |
+| 13.12 | 13.10 | depends |  |
+| 13.14 | 13.10 | depends |  |
+| 13.17 | 13.1 | depends |  |
+| 2.19 | 2.20 | data | žurnalo įrašai |
+| 2.20 | 2.21 | data | patvirtinimo būsena |
+| 2.19 | 2.23 | data | darbo valandos |
+| 2.23 | 2.25 | data | valandos |
+| 2.19 | 2.13 | data | darbo įrašų tekstas |
+| 2.13 | 2.4 | data | atpažinti įgūdžiai |
+| 2.3 | 2.4 | data | patvirtinti CV faktai |
+| 2.5 | 2.26 | data | darbo patirtis |
+| 2.19 | 2.26 | data | žurnalo įrašai |
+| 2.27 | 2.26 | data | organizacijos pateikta istorija |
+| 2.26 | 2.4 | data | profesinė istorija |
+| 2.22 | 2.33 | data | nuotraukos |
+| 2.35 | 4.10 | data | sutikimas būti randamam |
+| 2.35 | 4.17 | data | sutikimas būti randamam |
+| 2.1 | 4.5 | data | profilio duomenys |
+| 2.2 | 4.5 | data | prieinamumas ir atlygis |
+| 2.32 | 2.21 | data | kitos pusės patvirtinimas |
+| 2.12 | 11.3 | data | įgūdžiai |
+| 2.11 | 11.3 | data | trūkstami gebėjimai |
+| 2.18 | 3.29 | data | dokumentai |
+| 2.23 | 3.33 | data | valandos |
+| 2.23 | 3.19 | data | faktinės valandos |
+| 2.23 | 3.12 | data | valandos |
+| 2.23 | 3.34 | data | įrašytos valandos |
+| 2.23 | 3.31 | data | valandos ataskaitoms |
+| 4.1 | 4.5 | data | poreikis |
+| 4.5 | 4.3 | data | tinkami darbai |
+| 4.5 | 4.11 | data | tinkami kandidatai |
+| 4.3 | 4.29 | data | susidomėjimas |
+| 4.29 | 4.30 | data | laisva vieta |
+| 4.11 | 4.12 | data | kandidatai |
+| 4.12 | 4.30 | data | trumpasis kandidatų sąrašas |
+| 4.13 | 4.12 | data | parinkti kandidatai |
+| 4.1 | 4.6 | data | poreikis |
+| 4.6 | 6.19 | data | komandos pasiūlymas |
+| 4.28 | 4.10 | data | pasiūla |
+| 4.4 | 4.9 | data | skelbimai |
+| 4.9 | 5.7 | data | pranešimai apie naujus skelbimus |
+| 4.9 | 5.6 | data | pranešimai apie naujus skelbimus |
+| 10.18 | 4.4 | data | skelbimai |
+| 10.19 | 4.4 | data | skelbimai |
+| 10.18 | 12.2 | data | skelbimų duomenys |
+| 4.1 | 12.4 | data | įmonių poreikiai |
+| 4.14 | 4.15 | data | kandidato pasiūlymas |
+| 4.16 | 5.4 | data | žinutė žmogui |
+| 4.19 | 5.4 | data | kontaktų prašymas |
+| 4.30 | 12.2 | data | uždaryti poreikiai |
+| 3.14 | 3.19 | data | planas |
+| 3.6 | 3.14 | data | paskyrimai |
+| 3.15 | 3.14 | data | nebuvimai |
+| 3.5 | 3.13 | data | užduotys |
+| 3.22 | 3.21 | data | žmonių sąrašas |
+| 3.21 | 3.6 | data | žmonės |
+| 3.7 | 3.8 | data | brigada |
+| 3.17 | 3.35 | data | rezervacijos |
+| 3.14 | 3.34 | data | planas |
+| 3.20 | 3.14 | data | pamainos |
+| 3.2 | 3.13 | data | projektai |
+| 3.4 | 3.5 | data | etapai |
+| 3.2 | 3.4 | data | projektas |
+| 3.10 | 3.11 | data | defektai |
+| 3.9 | 3.11 | data | pasirengimas |
+| 3.27 | 3.31 | data | istorija |
+| 3.28 | 5.1 | data | atsakymai |
+| 5.13 | 5.11 | data | priimti užsakymai |
+| 5.12 | 5.11 | data | prieinamumas |
+| 5.12 | 4.5 | data | prieinamumas |
+| 5.4 | 5.6 | data | žinutės |
+| 5.6 | 5.7 | data | pranešimai |
+| 5.6 | 5.9 | data | pranešimai |
+| 5.1 | 2.19 | data | pokalbiu įrašyti darbai |
+| 5.1 | 5.3 | data | veiksmai patvirtinimui |
+| 5.19 | 3.31 | data | ataskaitos |
+| 5.5 | 5.4 | data | vertimai |
+| 8.3 | 5.5 | data | vertimai |
+| 8.3 | 7.14 | data | vertimai |
+| 6.1 | 6.3 | data | paslaugos |
+| 6.2 | 6.3 | data | skelbimai |
+| 6.3 | 6.4 | data | paslaugų paieška |
+| 6.1 | 6.6 | data | užklausa |
+| 6.6 | 6.9 | data | sutartys ir pasiūlymai |
+| 6.9 | 3.12 | data | išlaidos |
+| 6.10 | 6.6 | data | kainos skaičiavimas |
+| 6.1 | 5.13 | data | užklausos |
+| 6.19 | 5.13 | data | komandos užklausos |
+| 6.8 | 6.9 | data | komandiruočių išlaidos |
+| 6.7 | 6.9 | data | pirkimų išlaidos |
+| 7.1 | 7.3 | data | planai |
+| 7.5 | 7.18 | data | mokėjimai |
+| 7.5 | 7.3 | data | mokėjimo būsena |
+| 7.16 | 7.5 | data | patvirtinti mokėjimai |
+| 7.3 | 7.2 | data | plano ribos |
+| 7.3 | 7.13 | data | plano ribos |
+| 7.3 | 7.14 | data | plano teisės |
+| 7.3 | 7.22 | data | plano teisės |
+| 7.23 | 7.8 | data | kreditai |
+| 7.8 | 7.25 | data | kreditų likutis |
+| 7.26 | 7.8 | data | kreditų judėjimas |
+| 7.24 | 7.8 | data | kreditai |
+| 7.15 | 7.31 | data | prenumerata |
+| 1.7 | 7.27 | data | patvirtinta įmonė |
+| 7.5 | 7.17 | data | mokėjimų įrašai |
+| 9.4 | 9.5 | data | duomenų prašymas |
+| 9.4 | 9.6 | data | duomenų prašymas |
+| 9.14 | 9.2 | data | naudojimo statistika |
+| 9.9 | 9.1 | data | veiksmų žurnalas |
+| 9.17 | 4.10 | data | vidinė pasiūla |
+| 9.18 | 8.7 | data | viešos duomenys |
+| 9.13 | 4.21 | data | vietos privatumas |
+| 10.1 | 10.2 | data | programos įrankiai |
+| 10.3 | 10.4 | data | leidimai |
+| 10.4 | 10.17 | data | leidimų sritys |
+| 10.6 | 10.8 | data | dirbtinio intelekto pagalba |
+| 10.6 | 10.9 | data | dirbtinio intelekto pagalba |
+| 10.6 | 10.10 | data | dirbtinio intelekto pagalba |
+| 10.6 | 10.7 | data | dirbtinio intelekto pagalba |
+| 10.8 | 2.3 | data | CV faktai patvirtinimui |
+| 10.9 | 2.19 | data | žurnalo siūlymai |
+| 10.23 | 4.10 | data | agentūros pasiūla |
+| 10.20 | 4.4 | data | aktualūs skelbimai |
+| 11.1 | 11.2 | data | mokymo įstaigos ir besimokantys |
+| 11.2 | 11.5 | data | programos ir srautai |
+| 11.5 | 11.6 | data | rezultatai |
+| 11.4 | 11.7 | data | praktika |
+| 11.7 | 2.13 | data | įgyti gebėjimai |
+| 11.7 | 2.12 | data | įgyti įgūdžiai |
+| 11.8 | 2.8 | data | pažymėjimai |
+| 11.3 | 11.8 | data | mokymosi poreikis |
+| 11.9 | 11.7 | data | žmogaus peržiūra |
+| 11.10 | 11.8 | data | pripažintas mokymasis |
+| 12.5 | 8.4 | data | rinkos faktai |
+| 12.5 | 12.1 | data | rinkos faktai |
+| 12.2 | 12.3 | data | žinios |
+| 8.4 | 8.6 | data | šalių duomenys |
+| 1.9 | 3.21 | data | nariai |
+| 1.15 | 2.27 | data | įmonės istorija |
+| 1.1 | 1.4 | data | paskyra |
+| 1.6 | 1.7 | data | įmonės duomenys |
+| 1.12 | 1.1 | data | kvietimas |
+| 1.9 | 2.20 | data | vaidmenys |
+
+### Map: journeys
+
+| Journey | Lietuviškai | Step | Functions |
+|---|---|---|---|
+| J-1 | Darbuotojas prisijungia, pradeda ir mato gyvą CV | 1 | 1.1 |
+| J-1 | Darbuotojas prisijungia, pradeda ir mato gyvą CV | 2 | 1.4 |
+| J-1 | Darbuotojas prisijungia, pradeda ir mato gyvą CV | 3 | 2.19 |
+| J-1 | Darbuotojas prisijungia, pradeda ir mato gyvą CV | 4 | 2.4 |
+| J-2 | Vadovas patvirtina žurnalo įrašą, ir jis atsiranda CV | 1 | 2.20 |
+| J-2 | Vadovas patvirtina žurnalo įrašą, ir jis atsiranda CV | 2 | 2.21 |
+| J-2 | Vadovas patvirtina žurnalo įrašą, ir jis atsiranda CV | 3 | 2.31 |
+| J-3 | Darbuotojas randa poreikį ir susisiekia su įmone | 1 | 4.3 |
+| J-3 | Darbuotojas randa poreikį ir susisiekia su įmone | 2 | 4.16 |
+| J-3 | Darbuotojas randa poreikį ir susisiekia su įmone | 3 | 5.4 |
+| J-4 | Viešoji darbo paieška | 1 | 4.4 |
+| J-4 | Viešoji darbo paieška | 2 | 4.29 |
+| J-5 | Įmonė prisijungia ir randa kandidatus | 1 | 1.6 |
+| J-5 | Įmonė prisijungia ir randa kandidatus | 2 | 4.1 |
+| J-5 | Įmonė prisijungia ir randa kandidatus | 3 | 4.11 |
+| J-5 | Įmonė prisijungia ir randa kandidatus | 4 | 4.12 |
+| J-5 | Įmonė prisijungia ir randa kandidatus | 5 | 4.16 |
+| J-6 | Įmonė pakviečia žmogų | 1 | 1.9 |
+| J-6 | Įmonė pakviečia žmogų | 2 | 1.4 |
+| J-7 | Projektas, valandos ir ataskaita | 1 | 3.2 |
+| J-7 | Projektas, valandos ir ataskaita | 2 | 3.6 |
+| J-7 | Projektas, valandos ir ataskaita | 3 | 3.3 |
+| J-7 | Projektas, valandos ir ataskaita | 4 | 2.23 |
+| J-7 | Projektas, valandos ir ataskaita | 5 | 3.13 |
+| J-8 | Poreikis, datos ir darbuotojo sutikimas | 1 | 5.13 |
+| J-9 | Agentūra pasiūlo žmones klientui | 1 | 4.15 |
+| J-9 | Agentūra pasiūlo žmones klientui | 2 | 4.28 |
+| J-10 | Brigada siūloma kaip vienas vienetas | 1 | 3.7 |
+| J-10 | Brigada siūloma kaip vienas vienetas | 2 | 4.6 |
+| J-10 | Brigada siūloma kaip vienas vienetas | 3 | 4.7 |
+| J-11 | Prekė ar paslauga: paskelbta, rasta, užsakyta | 1 | 6.1 |
+| J-11 | Prekė ar paslauga: paskelbta, rasta, užsakyta | 2 | 6.2 |
+| J-11 | Prekė ar paslauga: paskelbta, rasta, užsakyta | 3 | 6.3 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 1 | 11.1 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 2 | 11.2 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 3 | 11.3 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 4 | 11.4 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 5 | 11.5 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 6 | 11.6 |
+| J-12 | Mokymo įstaiga, grupė, praktika, kompetencija | 7 | 11.7 |
+| J-13 | Pirkėjas ir paslaugos teikėjas | 1 | 6.4 |
+| J-13 | Pirkėjas ir paslaugos teikėjas | 2 | 6.1 |
+| J-14 | Įmonė perka planą be pagalbos | 1 | 7.1 |
+| J-14 | Įmonė perka planą be pagalbos | 2 | 7.5 |
+| J-14 | Įmonė perka planą be pagalbos | 3 | 7.15 |
+| J-14 | Įmonė perka planą be pagalbos | 4 | 7.28 |
+| J-15 | Pranešimas apie tinkamą darbą be prisijungimo | 1 | 4.9 |
+| J-15 | Pranešimas apie tinkamą darbą be prisijungimo | 2 | 5.7 |
+| J-15 | Pranešimas apie tinkamą darbą be prisijungimo | 3 | 5.9 |
+| J-16 | Pamiršai slaptažodį | 1 | 1.3 |
+| J-17 | Programėlės įdiegimas iš parduotuvės | 1 | 8.15 |
+| J-17 | Programėlės įdiegimas iš parduotuvės | 2 | 8.17 |
+| J-17 | Programėlės įdiegimas iš parduotuvės | 3 | 8.18 |
+| J-18 | Tavo duomenų eksportas ir ištrynimas | 1 | 9.4 |
+| J-18 | Tavo duomenų eksportas ir ištrynimas | 2 | 9.5 |
+| J-18 | Tavo duomenų eksportas ir ištrynimas | 3 | 9.6 |
+| J-19 | Augimas: galimi įgūdžiai ir mokymosi kryptis | 1 | 2.29 |
+| J-19 | Augimas: galimi įgūdžiai ir mokymosi kryptis | 2 | 11.3 |
+
+### Map: blockers
+
+| Blocker | Lietuviškai | Affects | Who |
+|---|---|---|---|
+| OI-4 | Bandomojo plano rodymas (#2682) | 7.4, 7.20 | savininkas, paskui koordinatorius |
+| OI-5 | Išsaugotų darbų sąrašas rodomas teisingai (#2642) | 4.4 | savininkas, paskui koordinatorius |
+| OI-8 | Mokėjimo apsauga bandomuoju laikotarpiu (#3047) | 7.4, 7.15 | savininkas, paskui koordinatorius |
+| OI-13 | Senų skelbimų šalinimo apsauga (#2693) | 10.20 | savininkas, paskui koordinatorius |
+| OI-14 | Pagalbininkų prisijungimo testas (#2454) | 10.3 | savininkas, paskui koordinatorius |
+| OI-27 | Įmonė skiria mokymus darbuotojams (#2816) | 11.8 | savininkas, paskui koordinatorius |
+| OI-28 | Užimtumo konflikto fiksavimas (#2795) | 3.35, 5.13 | savininkas, paskui koordinatorius |
+| OI-29 | Darbuotojų matomumas pagal nutylėjimą (#2747) | 2.35, 4.17 | savininkas, paskui koordinatorius |
+| OI-30 | Skelbimo uždarymo būsena (#2746) | 6.2 | savininkas, paskui koordinatorius |
+| OI-31 | Skelbimų filtras pagal šalį (#2209) | 4.4 | savininkas, paskui koordinatorius |
+| OI-48 | Leidimų aprašymai paprastais žodžiais (#2924) | 10.3, 10.4 | savininkas, paskui koordinatorius |
+| OI-49 | Pagalbininkų prieigos apimtis (#2923) | 10.4 | savininkas, paskui koordinatorius |
+| OI-50 | Kasdienė augimo ataskaita (#2886) | 9.14 | savininkas, paskui koordinatorius |
+| OI-52 | Naudotojo valdomi leidimai (#2812) | 10.3, 10.4 | savininkas, paskui koordinatorius |
+| OI-54 | Prekių pirkimo užklausos (#2713) | 6.13 | savininkas, paskui koordinatorius |
+| OI-55 | Pagalbininkų leidimų sritys (#2707) | 10.4 | savininkas, paskui koordinatorius |
+| OI-56 | Įmonės sąskaitos mokėjimų skiltyje (#2704) | 7.20 | savininkas, paskui koordinatorius |
+| OI-57 | PVM pažadas ir tekstas (#2701) | 7.29 | savininkas ir teisininkas |
+| OI-58 | PVM ir sąskaitų tvarkymas (#2685) | 7.15, 7.29 | savininkas, paskui koordinatorius |
+| OI-60 | Trys nemokami profilių peržiūrėjimai (#2474) | 4.22, 7.10, 7.22, 7.27 | savininkas, paskui koordinatorius |
+| OI-61 | Nuorodos į profilius tik su leidimu (#2471) | 2.10, 4.18 | savininkas, paskui koordinatorius |
+| OI-62 | Profesijų klasifikatoriaus sutvarkymas (#2463) | 2.17 | savininkas, paskui koordinatorius |
+| OI-67 | Istorinių datų ištaisymas (#2362) | 2.28 | savininkas, paskui koordinatorius |
+| OI-70 | Projekto sąskaitų eiga (#2203) | 3.12, 7.30 | savininkas, paskui koordinatorius |
+| OI-73 | Biuro profesijų katalogas (#1577) | 2.12 | savininkas, paskui koordinatorius |
+| OI-101 | Balso atpažinimo paleidimas (#2198) | 2.30, 5.15 | savininkas, paskui koordinatorius |
+
+## Chrome check queue
+
+Priority queue for the 123 functions with no browser proof named in their evidence (owner order 2026-11-05). Ordered by real user impact: core journeys, then money and privacy, then the rest. Status still comes only from the function rows. Scenarios are referenced by J-n and SC-n, not rewritten here.
+
+| Group | Meaning | Functions |
+|---|---|---|
+| A | Core journeys, can run now | 11 |
+| B | Money and privacy, can run now | 5 |
+| C | Rest, can run now | 1 |
+| D | Waits: blocked or not built, core and money first | 66 |
+| E | Already proven in a browser | 8 |
+| F | A browser can't prove it | 32 |
+
+**So the real gap is smaller and different from 123:** 8 already had browser proof that the keyword count missed, 32 can't be proven in a browser, 66 can't be tested until they're unblocked or built, and **17 can be checked now.**
+
+How it's tested:
+
+- **existing walk / walk, new step:** Playwright Chromium against production with the synthetic cast, dispatched by the coordinator through `prod-qa-walk.yml`. This is not a person in Chrome.
+- **Chrome signed out:** a real browser with no account; no walk budget, no writes.
+- **QA account in a real browser isn't offered.** Agents don't enter production passwords. Anything signed in goes through a walk, or the owner does it in their own Chrome.
+
+**What fits:** 12 walks cover groups A to C. Earlier runs of 10 of those specs took 18 s to about 6 min; `requirements-countries` and `public-market-direction` have no run among the last 400. With setup and the 3 min gap, allow up to about 12 min each, so about 2.5 h of walk time in total. That's a quarter of the 48-a-day budget and fits in one day under the lane rule (one walk at a time, never during a deploy or import, §1.7a). Spread them at no more than 2 an hour in a quiet period: Quality Gates is active on `main` about 20% of the time, and a merge can start a deploy. Seven of them need a new step first, so they follow small test PRs. Estimate only; per-walk load wasn't measured.
+
+| Order | Function | Name | Group | How | Walk | Journey | Note |
+|---|---|---|---|---|---|---|---|
+| 1 | 1.13 | Sistemos laiškai | A | existing walk, record it | mail-reset | J-16 | Run 41428606490 read the real QA mailbox; no new run |
+| 2 | 1.11 | Įmonių duomenų atskyrimas | A | existing walk | company-governance | SC-10 | Browser side of isolation; the API walk stays too |
+| 3 | 4.20 | Asmens apsauga paieškoje | A | walk, new step | company-talent-history | SC-5 | Company sees a masked person |
+| 4 | 1.12 | Kvietimai ir rekomendavimas | A | walk, new step | invited-worker | J-6 | Synthetic invitation only |
+| 5 | 2.36 | Žurnalo šablonai pagal profesiją | A | walk, new step | journal-confirm | SC-2 | Profession template in the journal |
+| 6 | 4.8 | Anoniminis poreikio pateikimas | A | walk, new step | register-gaps | SC-6 | Writes one row; the walk must remove it |
+| 7 | 4.29 | Susidomėjimas virsta laisva vieta | A | walk, new step | jobs-search | J-4 | Screen only; no hand-off to the real partner |
+| 8 | 6.11 | Pasirengimas darbui užsienyje | A | existing walk, plus Chrome signed out | requirements-countries |  | Public part |
+| 9 | 8.1 | Svetainės kalbos | A | existing walk, plus Chrome signed out | public-org-locales |  | All active languages |
+| 10 | 12.2 | Darbo rinkos žinios | A | existing walk, plus Chrome signed out | public-market-direction |  |  |
+| 11 | 12.5 | Viešieji rinkos faktai | A | existing walk, plus Chrome signed out | public-market-direction |  |  |
+| 12 | 9.4 | Privatumo prašymai | B | existing walk | search-support-privacy | J-18 |  |
+| 13 | 7.2 | Nemokamas planas: vienas atviras poreikis | B | walk, new step | fresh-activation | J-5 | Needs an organization without the pilot; the QA cast's holds it |
+| 14 | 9.9 | Veiksmų žurnalas | B | walk, new step | admin-console |  | Screen only; detail in the private record |
+| 15 | 7.28 | Pardavėjas ir sąlygos | B | Chrome signed out |  | J-14 | Read the live terms; stays FAIL until legal text exists |
+| 16 | 9.24 | Saugumo incidentų tvarkymas | B | Chrome signed out |  |  | Response headers on public pages |
+| 17 | 13.16 | Naršyklės klaidų pranešimai | C | read the code first |  |  | Only a citation so far; may not exist |
+| 18 | 4.30 | Kandidatas, sprendimas, poreikio uždarymas | D | walk once unblocked |  | SC-5 | Waits; see its row |
+| 19 | 3.35 | Persidengiančių įsipareigojimų įspėjimas | D | walk once unblocked |  | SC-10 | Waits; see its row |
+| 20 | 3.36 | Įmonės gyvasis CV | D | walk once unblocked |  |  | Waits; see its row |
+| 21 | 2.10 | Nuorodos į kitus profilius | D | walk once unblocked |  |  | Waits; see its row |
+| 22 | 4.18 | Duomenų atskleidimas darbdaviui | D | walk once unblocked |  |  | Waits; see its row |
+| 23 | 2.27 | Įmonės istorinių įrašų įkėlimas | D | walk once unblocked |  |  | Waits; see its row |
+| 24 | 2.28 | Senų įrašų sujungimas | D | walk once unblocked |  |  | Waits; see its row |
+| 25 | 2.37 | Įrašo atsisakymas | D | new walk once it exists |  |  | Not built |
+| 26 | 6.21 | Viešas verslo puslapis | D | walk once unblocked |  | SC-4 | Waits; see its row |
+| 27 | 4.22 | Trys nemokami profilių peržiūrėjimai | D | new walk once it exists |  |  | Not built |
+| 28 | 2.17 | Europos profesijų klasifikatorius | D | walk once unblocked |  |  | Waits; see its row |
+| 29 | 5.15 | Balsas kaip lygiavertis būdas | D | walk once unblocked |  |  | Waits; see its row |
+| 30 | 2.30 | Žurnalas balsu | D | walk once unblocked |  |  | Waits; see its row |
+| 31 | 7.5 | Mokėjimas už planą | D | walk once unblocked |  | J-14 | Waits; see its row |
+| 32 | 7.6 | Mokėjimų įrašų atkūrimas | D | walk once unblocked |  |  | Waits; see its row |
+| 33 | 7.7 | Rankinis bandomojo plano suteikimas | D | walk once unblocked |  |  | Waits; see its row |
+| 34 | 7.8 | Kreditų sąskaita | D | walk once unblocked |  |  | Waits; see its row |
+| 35 | 7.9 | Kreditų papildymas ir planų pakopos | D | new walk once it exists |  |  | Not built |
+| 36 | 7.11 | Atidėti planai | D | new walk once it exists |  |  | Not built |
+| 37 | 7.12 | Dirbtinio intelekto kaštų skaičiavimas | D | walk once unblocked |  |  | Waits; see its row |
+| 38 | 7.15 | Metinė prenumerata | D | walk once unblocked |  | J-14 | Waits; see its row |
+| 39 | 7.18 | Mokėjimas keičia teises | D | walk once unblocked |  |  | Waits; see its row |
+| 40 | 7.19 | Grąžinimai ir ginčai | D | walk once unblocked |  |  | Waits; see its row |
+| 41 | 7.20 | Sąskaitos platformoje | D | new walk once it exists |  |  | Not built |
+| 42 | 7.21 | Atsiskaitymo portalas | D | walk once unblocked |  |  | Waits; see its row |
+| 43 | 7.22 | Mokamų funkcijų teisės ir ribos | D | walk once unblocked |  |  | Waits; see its row |
+| 44 | 7.23 | Kreditų pirkimas | D | new walk once it exists |  |  | Not built |
+| 45 | 7.24 | Kreditai po vieno mokėjimo | D | new walk once it exists |  |  | Not built |
+| 46 | 7.26 | Kreditų išleidimas ir grąžinimas | D | new walk once it exists |  |  | Not built |
+| 47 | 7.27 | Nemokamas VIP patvirtintoms įmonėms | D | walk once unblocked |  |  | Waits; see its row |
+| 48 | 7.29 | PVM skaičiavimas | D | walk once unblocked |  |  | Waits; see its row |
+| 49 | 7.30 | Sąskaitos ir priėmimo aktai iš žurnalo | D | new walk once it exists |  |  | Not built |
+| 50 | 7.31 | Planai darbuotojams ir įmonėms | D | new walk once it exists |  |  | Not built |
+| 51 | 1.8 | Viena organizacija, keli veiklos tipai | D | walk once unblocked |  |  | Waits; see its row |
+| 52 | 5.8 | Pranešimai telefone | D | walk once unblocked |  |  | Waits; see its row |
+| 53 | 5.16 | Įspėjimai savininkui | D | walk once unblocked |  |  | Waits; see its row |
+| 54 | 5.20 | Savos automatizacijos | D | new walk once it exists |  |  | Not built |
+| 55 | 5.21 | SMS ir WhatsApp kanalai | D | new walk once it exists |  |  | Not built |
+| 56 | 6.12 | Tarptautiniai sandoriai | D | new walk once it exists |  |  | Not built |
+| 57 | 6.13 | Prekių užsakymai | D | new walk once it exists |  |  | Not built |
+| 58 | 6.14 | Logistika | D | new walk once it exists |  |  | Not built |
+| 59 | 6.22 | Būstas | D | new walk once it exists |  |  | Not built |
+| 60 | 6.23 | Paslaugos įvertinimas ir ginčai | D | new walk once it exists |  |  | Not built |
+| 61 | 6.24 | Paslaugų srautas telefone | D | new walk once it exists |  |  | Not built |
+| 62 | 8.5 | Devynios pirmosios rinkos | D | walk once unblocked |  |  | Waits; see its row |
+| 63 | 8.13 | Programėlė telefonui | D | walk once unblocked |  | J-17 | Waits; see its row |
+| 64 | 8.14 | Nuorodos į programėlę | D | walk once unblocked |  | J-17 | Waits; see its row |
+| 65 | 8.15 | Programėlių parduotuvės | D | walk once unblocked |  | J-17 | Waits; see its row |
+| 66 | 9.16 | Rekomendavimo sąsaja | D | walk once unblocked |  |  | Waits; see its row |
+| 67 | 10.4 | Dirbtinio intelekto leidimų sritys | D | new walk once it exists |  |  | Not built |
+| 68 | 10.5 | Sąrašai dirbtinio intelekto parduotuvėse | D | walk once unblocked |  |  | Waits; see its row |
+| 69 | 10.7 | Pokalbio ketinimų atpažinimas | D | walk once unblocked |  |  | Waits; see its row |
+| 70 | 10.8 | CV sutvarkymas dirbtiniu intelektu | D | walk once unblocked |  |  | Waits; see its row |
+| 71 | 10.9 | Žurnalo siūlymai | D | walk once unblocked |  |  | Waits; see its row |
+| 72 | 10.10 | Paaiškinimai | D | walk once unblocked |  |  | Waits; see its row |
+| 73 | 10.15 | Pagalbininkų vykdymas | D | new walk once it exists |  |  | Not built |
+| 74 | 10.16 | Pagalbininkai kaip dalyviai | D | new walk once it exists |  |  | Not built |
+| 75 | 10.21 | Statistikos importas | D | walk once unblocked |  |  | Waits; see its row |
+| 76 | 10.22 | Partnerio organizacijos sąsaja | D | walk once unblocked |  |  | Waits; see its row |
+| 77 | 10.24 | Savo serverio vertimas | D | walk once unblocked |  |  | Waits; see its row |
+| 78 | 10.25 | Debesų dirbtinis intelektas | D | walk once unblocked |  |  | Waits; see its row |
+| 79 | 10.26 | Programų konkursas | D | walk once unblocked |  |  | Waits; see its row |
+| 80 | 11.9 | Mokymosi peržiūra žmogaus akimis | D | walk once unblocked |  |  | Waits; see its row |
+| 81 | 11.10 | Ankstesnio mokymosi pripažinimas | D | new walk once it exists |  |  | Not built |
+| 82 | 13.9 | Ryšys su kodo saugykla | D | walk once unblocked |  |  | Waits; see its row |
+| 83 | 13.17 | Aplinkos suderinimas po perkėlimo | D | walk once unblocked |  |  | Waits; see its row |
+| 84 | 3.16 | Žmonių trūkumo laiko juosta | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 85 | 3.19 | Planas ir faktas | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 86 | 5.12 | Prieinamumas | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 87 | 5.14 | Greitoji paieška ir balsas | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 88 | 9.3 | Naudotojo peržiūra | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 89 | 12.1 | Rinkos žemėlapis | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 90 | 12.4 | Poreikio atpažinimas | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 91 | 7.3 | Planų teisių nustatymas | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
+| 92 | 6.16 | Perdavimas partnerio organizacijai | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 93 | 7.16 | Mokėjimo pranešimo patikra | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 94 | 7.17 | Dvigubo apmokestinimo apsauga | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 95 | 8.17 | Programėlė Android telefonui | F | no browser can prove it |  |  | native app, proven on a device |
+| 96 | 8.18 | Programėlė iPhone | F | no browser can prove it |  |  | native app, proven on a device |
+| 97 | 9.6 | Duomenų ištrynimas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 98 | 9.7 | Darbuotojo duomenų skyrimas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 99 | 9.8 | Duomenų prieigos taisyklės | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 100 | 9.10 | Užklausų ribojimas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 101 | 9.17 | Vidinis pasiūlos srautas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 102 | 9.22 | Aplinkos nustatymų patikra | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 103 | 9.23 | Duomenų bazės funkcijų kontrolė | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 104 | 9.25 | Saugumo perspėjimai | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 105 | 10.2 | Dirbtinio intelekto scenarijai | F | no browser can prove it |  |  | MCP, no screen |
+| 106 | 10.3 | Prisijungimas dirbtinio intelekto programoms | F | no browser can prove it |  |  | MCP, no screen |
+| 107 | 10.17 | Išorinių veiksmų kvitai | F | no browser can prove it |  |  | MCP, no screen |
+| 108 | 10.18 | Skelbimai iš Švedijos | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 109 | 10.19 | Skelbimai iš Norvegijos | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 110 | 10.20 | Senų skelbimų šalinimas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 111 | 10.23 | Agentūros pasiūlos srautas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 112 | 13.2 | Veikimo stebėjimas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 113 | 13.4 | Duomenų bazės talpa | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 114 | 13.5 | Atsarginės kopijos | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 115 | 13.6 | Reguliarūs foniniai darbai | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 116 | 13.7 | Duomenų bazės pakeitimų patikra | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 117 | 13.8 | Pakeitimų žurnalo suderinimas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 118 | 13.10 | Kokybės vartai | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 119 | 13.11 | Automatinė naudotojo kelio patikra | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 120 | 13.12 | Produkto taisyklių patikra | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 121 | 13.13 | Funkcijų prieinamumo sąrašas | F | no browser can prove it |  |  | no page shows it |
+| 122 | 13.14 | Išimčių valdymas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
+| 123 | 13.15 | Senų naršyklių palaikymas | F | no browser can prove it |  |  | Server or data; keeps its own proof |
