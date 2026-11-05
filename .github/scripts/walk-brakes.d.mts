@@ -23,7 +23,7 @@ export declare function judgeHealthSamples(
 ): { ok: boolean; reasons: string[] };
 
 export declare function judgeDeployBrake(
-  runs: readonly { id: number; status: string; updated_at: string | null }[],
+  runs: readonly { id: number; status: string; updated_at: string | null; deploySkipped?: boolean }[],
   now?: Date,
   t?: typeof THRESHOLDS,
 ): { refuse: boolean; reason: string };

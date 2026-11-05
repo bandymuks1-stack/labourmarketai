@@ -124,6 +124,8 @@ const DEPLOY_ACTIVE = new Set(["in_progress", "queued", "waiting", "requested", 
  */
 export function judgeDeployBrake(runs, now = new Date(), t = THRESHOLDS) {
   const active = runs.filter((r) => DEPLOY_ACTIVE.has(r.status));
+  // A finished run whose deploy job was skipped shipped nothing (docs only, or Quality Gates failed).
+  runs = runs.filter((r) => !r.deploySkipped);
   if (active.length > 0) {
     return {
       refuse: true,
@@ -318,6 +320,16 @@ async function cmdDeploy() {
   const runs = (ghJson(`repos/${REPO}/actions/workflows/deploy-vps.yml/runs?per_page=10`).workflow_runs ?? []).map(
     (r) => ({ id: r.id, status: r.status, updated_at: r.updated_at }),
   );
+  // Only runs that could still hold the quiet period need their jobs read. Unreadable counts as a deploy.
+  for (const r of runs) {
+    if (r.status !== "completed" || Date.now() - Date.parse(r.updated_at) >= THRESHOLDS.deployQuietMinutes * 60_000) continue;
+    try {
+      const jobs = ghJson(`repos/${REPO}/actions/runs/${r.id}/jobs`).jobs ?? [];
+      r.deploySkipped = jobs.find((j) => j.name === "deploy")?.conclusion === "skipped";
+    } catch {
+      r.deploySkipped = false;
+    }
+  }
   const verdict = judgeDeployBrake(runs);
   if (verdict.refuse) refuse(verdict.reason);
   say(`deploy brake: clear (${verdict.reason})`);
