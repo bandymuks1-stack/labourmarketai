@@ -162,5 +162,19 @@ case " $(id -nG 2>/dev/null) " in
   *) expect "a plain account passes the access check" "$rc" 0;;
 esac
 
+# The real folder's shape: old files at 600 from before the record existed, an old database with no partner.
+reset
+for f in archive-a-1.jsonl.gz.age archive-a-1.jsonl.gz.age.sha256 lm-db-OLD.dump.age lm-db-P1.dump.age lm-files-P1.tar.age lm-db-P2.dump.age lm-files-P2.tar.age; do
+  printf 'age-encryption.org/v1 old %s\n' "$f" > "$B/$f"; chmod 600 "$B/$f"; touch -d '2000-01-01' "$B/$f"
+done
+expect "real shape, no record: a problem" "$(run)" 1
+expect "real shape, no record: reported as no_record and nothing else" "$(grep -c 'status=no_record ' "$T/out")" 1
+expect "real shape, no record: one alert" "$(grep -c 'Backup problem' "$M")" 1
+pair NEW 1
+expect "first pair through the new receiver: healthy, old files untouched" "$(run)" 0
+expect "first pair through the new receiver: status ok" "$(grep -c 'status=ok ' "$T/out")" 1
+expect "first pair through the new receiver: no second problem" "$(grep -c 'Backup problem' "$M")" 1
+expect "first pair through the new receiver: one recovery" "$(grep -c 'Backup recovered' "$M")" 1
+
 echo "$N checks, $FAILS failed"
 [ "$FAILS" = "0" ]

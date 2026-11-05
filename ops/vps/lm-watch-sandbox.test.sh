@@ -265,28 +265,36 @@ ok "unpinned, it stops" "$(sh "$HERE/install-backup-watchdog.sh" a@example.test 
 rm -rf $S $Q $OPT
 umask 077; mkdir -p $S $Q; chmod 700 $S $Q; echo "LM_SMTP_HOST=invalid.test" > $S/env; cp $S/env $Q/env; umask 022
 printf '#!/bin/sh\necho old receiver\n' > $D/bin/lm-deploy-receive.sh; chmod 700 $D/bin/lm-deploy-receive.sh
-rm -f $BK/verified.log
-X=/tmp/installer; rm -rf $X; mkdir -p $X/bin
+# The real folder's shape: nothing recorded, old files at 600, an old database with no partner, several pairs.
+find $BK -mindepth 1 -delete; chgrp root $BK; chmod 700 $BK
+umask 077
+OLDF="lm-db-20261101T000000Z.dump.age lm-db-20261102T000000Z.dump.age lm-files-20261102T000000Z.tar.age lm-db-20261103T000000Z.dump.age lm-files-20261103T000000Z.tar.age"
+ARCH="archive-a-20261017T000000Z.jsonl.gz.age archive-a-20261017T000000Z.jsonl.gz.age.sha256 archive-b-20261017T000000Z.jsonl.gz.age archive-b-20261017T000000Z.jsonl.gz.age.sha256"
+for f in $OLDF $ARCH; do printf 'age-encryption.org/v1 invented old\n' > "$BK/$f"; touch -d '2 days ago' "$BK/$f"; done
+umask 022
+X=/tmp/installer; rm -rf $X; mkdir -p $X/bin $X/src; cp "$HERE"/* $X/src/
 sum() { sha256sum "$1" | cut -d' ' -f1; }
-sed -e "s/^PIN=UNSET/PIN=testpin/" \
-    -e "s/^RECEIVER_BEFORE=UNSET/RECEIVER_BEFORE=$(sum $D/bin/lm-deploy-receive.sh)/" \
+pinned() { # the seo unit's pin
+  sed -e "s/^PIN=UNSET/PIN=testpin/" \
+    -e "s/^RECEIVER_BEFORE=UNSET/RECEIVER_BEFORE=$OLDSUM/" \
     -e "s/^RECEIVER_AFTER=UNSET/RECEIVER_AFTER=$(sum "$HERE/lm-deploy-receive.sh")/" \
     -e "s/^WATCHDOG=UNSET/WATCHDOG=$(sum "$HERE/lm-backup-watchdog.sh")/" \
     -e "s/^WATCHDOG_TEST=UNSET/WATCHDOG_TEST=$(sum "$HERE/lm-backup-watchdog.test.sh")/" \
     -e "s/^SEO=UNSET/SEO=$(sum "$HERE/lm-seo-watch.sh")/" \
     -e "s/^WATCHDOG_UNIT=UNSET/WATCHDOG_UNIT=$(sum "$HERE/lm-backup-watchdog.service")/" \
     -e "s/^WATCHDOG_TIMER=UNSET/WATCHDOG_TIMER=$(sum "$HERE/lm-backup-watchdog.timer")/" \
-    -e "s/^SEO_UNIT=UNSET/SEO_UNIT=$(sum "$HERE/lm-seo-watch.service")/" \
+    -e "s/^SEO_UNIT=UNSET/SEO_UNIT=$1/" \
     -e "s/^SEO_TIMER=UNSET/SEO_TIMER=$(sum "$HERE/lm-seo-watch.timer")/" \
-    -e "s/^SEED_RUN=UNSET/SEED_RUN=1/" -e "s/^SEED_STAMP=UNSET/SEED_STAMP=$A/" \
-    -e "s/^SEED_DB_BYTES=UNSET/SEED_DB_BYTES=$(stat -c %s $BK/lm-db-$A.dump.age)/" -e "s/^SEED_DB_SHA=UNSET/SEED_DB_SHA=$(sum $BK/lm-db-$A.dump.age)/" \
-    -e "s/^SEED_FILES_BYTES=UNSET/SEED_FILES_BYTES=$(stat -c %s $BK/lm-files-$A.tar.age)/" -e "s/^SEED_FILES_SHA=UNSET/SEED_FILES_SHA=$(sum $BK/lm-files-$A.tar.age)/" \
-    "$HERE/install-backup-watchdog.sh" > $X/install.sh
-# Serves the pinned files from this checkout instead of the network.
+    "$HERE/install-backup-watchdog.sh"
+}
+OLDSUM=$(sum $D/bin/lm-deploy-receive.sh)
+pinned "$(sum "$HERE/lm-seo-watch.service")" > $X/install.sh
+# Serves the pinned files from a copy of this checkout instead of the network; anything else is the real curl.
 cat > $X/bin/curl <<STUB
 #!/bin/sh
+case "\$*" in *raw.githubusercontent.com*) ;; *) exec /usr/bin/curl "\$@";; esac
 while [ \$# -gt 0 ]; do case "\$1" in -o) out="\$2"; shift 2;; --max-time) shift 2;; -*) shift;; *) url="\$1"; shift;; esac; done
-cp "$HERE/\$(basename "\$url")" "\$out"
+cp "$X/src/\$(basename "\$url")" "\$out"
 STUB
 chmod 755 $X/bin/curl
 PATH=$X/bin:$PATH command sh $X/install.sh a@example.test > $X/out 2>&1; rc=$?
@@ -298,12 +306,50 @@ ok "env handed to its user, 600" "$(mode $S/env)" "600 lmwatch lmwatch"
 ok "receiver replaced" "$(sum $D/bin/lm-deploy-receive.sh)" "$(sum "$HERE/lm-deploy-receive.sh")"
 ok "old receiver kept" "$(grep -c 'old receiver' $D/bin/lm-deploy-receive.sh.bak-variant-b)" 1
 ok "folder 750" "$(mode $BK)" "750 root lmwatch"
-ok "record seeded, 640" "$(mode $BK/verified.log)" "640 root lmwatch"
+ok "the network rule was proven inside the watchdog's unit" "$(grep -c 'lm-backup-watchdog.service: [1-9][0-9]* private addresses refused, DNS and TLS work' $X/out)" 1
+ok "the network rule was proven inside the SEO unit" "$(grep -c 'lm-seo-watch.service: [1-9][0-9]* private addresses refused, DNS and TLS work' $X/out)" 1
+ok "the proving drop-ins are gone" "$(ls /etc/systemd/system/lm-backup-watchdog.service.d /etc/systemd/system/lm-seo-watch.service.d 2>/dev/null | wc -l)" 0
+ok "the proving script is gone" "$(ls $OPT/lm-net-check.sh 2>/dev/null | wc -l)" 0
 ok "the watchdog's timer is on" "$(systemctl is-enabled lm-backup-watchdog.timer)" enabled
 ok "the SEO timer is on" "$(systemctl is-enabled lm-seo-watch.timer)" enabled
-ok "the unit reported ok" "$(logs lm-backup-watchdog.service | tail -n 1 | grep -c 'status=ok ')" 1
+ok "the first run reports no_record" "$(logs lm-backup-watchdog.service | tail -n 1 | grep -c 'status=no_record ')" 1
+# Only the runs below from here on: a persistent timer may fire at any moment otherwise.
+systemctl stop lm-backup-watchdog.timer lm-seo-watch.timer
+
+echo "== the real folder's shape, as installed"
+ok "the installer says that is expected" "$(grep -c 'status=no_record. This is expected, not a fault' $X/out)" 1
+ok "no record invented" "$(ls $BK/verified.log 2>/dev/null | wc -l)" 0
+ok "old backup 640" "$(mode $BK/lm-db-20261102T000000Z.dump.age)" "640 root lmwatch"
+ok "old database with no partner 640" "$(mode $BK/lm-db-20261101T000000Z.dump.age)" "640 root lmwatch"
+ok "archive left at 600" "$(mode $BK/archive-a-20261017T000000Z.jsonl.gz.age)" "600 root root"
+ok "archive checksum left at 600" "$(mode $BK/archive-a-20261017T000000Z.jsonl.gz.age.sha256)" "600 root root"
+now=$(date -u +%s); rm -f $M $S/backup-watchdog.state $S/backup-watchdog.lastrun $S/backup-watchdog.alive
+run; ok "still no_record, and nothing else" "$(last | grep -c 'status=no_record ')" 1
+ok "one alert" "$(subjects)" 1
+N2=$(st)
+ok "first database through the new receiver" "$(store lm-db-$N2.dump.age)" "BACKUP_OK lm-db-$N2.dump.age"
+run; ok "half a pair: still no_record" "$(last | grep -c 'status=no_record ')" 1
+ok "first files through the new receiver" "$(store lm-files-$N2.tar.age)" "BACKUP_OK lm-files-$N2.tar.age"
+ok "archive still there" "$(ls $BK/archive-* | wc -l)" 4
+run; ok "the new pair: ok, old files and archives raise nothing" "$(last | grep -c 'status=ok ')" 1
+ok "one recovery" "$(grep -c 'Backup recovered' $M)" 1
+ok "no second problem" "$(subjects)" 1
+for f in $OLDF; do chgrp root $BK/$f; chmod 600 $BK/$f; done
+run; ok "old files still 600, folder 750, new files 640: ok" "$(last | grep -c 'status=ok ')" 1
+ok "folder is 750 at that point" "$(mode $BK)" "750 root lmwatch"
+ok "still no second problem" "$(subjects)" 1
+run --now $((now + 27 * 3600)); ok "27 h later with no new file: stale" "$(last | grep -c 'status=stale ')" 1
+clean lm-backup-watchdog.service
+
+echo "== the installer again, and with the rule not enforced"
 PATH=$X/bin:$PATH command sh $X/install.sh a@example.test > $X/out2 2>&1
 ok "a second run is harmless" "$?" 0
+sed -i '/^IPAddressDeny=/d' $X/src/lm-seo-watch.service
+pinned "$(sum $X/src/lm-seo-watch.service)" > $X/install-neg.sh
+PATH=$X/bin:$PATH command sh $X/install-neg.sh a@example.test > $X/out3 2>&1; rc=$?
+ok "with the rule missing, the installer stops" "$(test "$rc" != 0 && echo stopped)" stopped
+ok "and says so" "$(grep -c "STOP: lm-seo-watch.service: private addresses are not refused" $X/out3)" 1
+ok "the proving drop-in is gone after a stop" "$(ls /etc/systemd/system/lm-seo-watch.service.d 2>/dev/null | wc -l)" 0
 systemctl disable --now lm-backup-watchdog.timer lm-seo-watch.timer 2>/dev/null
 
 kill $LISTENERS 2>/dev/null; docker rm -f lm-test-app >/dev/null 2>&1; ip link del lmtest0

@@ -135,7 +135,7 @@ fi
 
 reason_text() {
   case "$1" in
-    no_record) echo "Nera nei vienos patvirtintos kopijos irasu.";;
+    no_record) echo "Nera nei vienos patvirtintos kopijos irasu. Iskart po idiegimo tai normalu: irasas atsiras po pirmos kopijos per nauja imtuva.";;
     stale) echo "Paskutine patvirtinta kopija senesne nei 26 valandos.";;
     missing_file) echo "Patvirtintos kopijos failo nera diske.";;
     size_mismatch|sha256_mismatch|not_age) echo "Patvirtintos kopijos failas diske nebesutampa su patvirtintu ($1).";;

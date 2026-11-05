@@ -261,7 +261,11 @@ it no backup can be decrypted.
 
 **Nothing here is on the VPS.** The owner held the root install on 2026-11-05 and approved preparing this variant for review only. Installing it needs a separate owner approval.
 
-**What a merge does, as far as the repo shows.** It doesn't change the receiver, file permissions, users or schedulers: the deploy tarball holds only the app and goes only into `releases/`, the deploy key can run only `deploy`, `status`, `rollback` and `backup`, nothing in the repo updates `ops/vps` on the host, and `install-backup-watchdog.sh` stops until a separate reviewed PR fills in its pins. **But a merge does ship a new release of unchanged app code and restarts the app,** because `ops/` and `.github/` aren't docs, so the docs-only rule doesn't skip it. The VPS's actual state hasn't been read for this. If the receiver file were ever copied by hand before the group exists, its group-read lines do nothing: folder `700`, files `600`, as today. After a merge, `sha256sum` of the live receiver differs from `main` until the install; that is expected.
+**What a merge does, as far as the repo shows.** It doesn't change the receiver, file permissions, users or schedulers: the deploy tarball holds only the app and goes only into `releases/`, the deploy key can run only `deploy`, `status`, `rollback` and `backup`, nothing in the repo updates `ops/vps` on the host, and `install-backup-watchdog.sh` stops until a separate reviewed PR fills in its pins. **But a merge does ship a new release of unchanged app code and restarts the app,** because `ops/` and `.github/` aren't docs, so the docs-only rule doesn't skip it. The VPS's actual state hasn't been read for this. If the receiver file were ever copied by hand before the group exists, its group-read lines do nothing: folder `700`, files `600`, as today.
+
+**The live receiver already differs from `main`.** A read-only check on 2026-11-05 found the live file equal to commit `8922acf08`, while `main` has `8ebb43e93` (#3064), so the live one writes no `verified.log` and none exists in the folder. This gap exists today, with or without this PR. The install therefore brings two receiver changes: #3064's record and the group-read lines.
+
+**The first run after an install reports `no_record`, and that is expected.** Nothing is verified until a whole pair has come through the new receiver. The installer says so, the alert mail says so, and one alert is followed by one recovery mail. The installer doesn't invent a record for the older pairs. A real `no_record` that lasts past the next backup is a real problem.
 
 **Design**
 
@@ -278,9 +282,13 @@ it no backup can be decrypted.
 
 The kernel's file permissions are the limit, and the sandbox is a second layer. So a gap in the sandbox doesn't expose the decryption key, `env`, Docker's container configs or `/etc/shadow`: `lmwatch` has no right to read them anyway.
 
-**Limit: file permissions can't stop a world-readable file.** Another app's careless `.env` would be readable. The units hide `/opt`, `/srv`, `/mnt`, `/media` and home folders, but the rest of the host stays visible. **So the condition "no other production secrets" can't be confirmed until the owner's check below has been read.** Any secret-looking file it lists needs fixing, or hiding in the units.
+**Limit: file permissions can't stop a world-readable file.** Another app's careless `.env` would be readable. The units hide `/opt`, `/srv`, `/mnt`, `/media`, `/backup` and home folders, but the rest of the host stays visible. `/backup` can be listed by anyone on this host, though its current archive isn't readable, so hiding it is defence in depth only.
 
-**Network:** the units can't reach `localhost`, where the app's internal routes are, or link-local addresses such as cloud metadata. The local DNS stub (`127.0.0.53`) stays allowed. If this host resolves DNS another way, the allow needs changing.
+The read-only check on 2026-11-05 found no real secret value readable by `nobody` in the places it searched. It matched file names and common patterns, so **it isn't proof that none exists**. Repeat it if the install comes much later.
+
+**Network:** the units can't reach `localhost`, link-local addresses such as cloud metadata, or the private ranges `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16` and `fc00::/7`. The private ranges matter on this host: the read-only check showed an unprivileged user connecting directly to the app container's bridge address on its internal port, which goes round the port published on `127.0.0.1` and round nginx and Cloudflare. The host's bridge gateway addresses answered too. The local DNS stub (`127.0.0.53`) stays allowed, and the host uses that stub. A test showed this failing before the fix (run 42021975563).
+
+**Limit:** the units can still reach the internet, which includes this host's own public address and anything it exposes there, as anyone can.
 
 **Logs go to the journal, never a file in the service user's folder.** systemd opens `append:` files as root, before dropping to the user, and follows links, so a service user could have written into any file as root. This was shown in a test before the fix (run 42006499668).
 
@@ -317,7 +325,7 @@ One incident means one alert when it starts, none while it lasts, and one when i
 
 **Resources**
 
-- **Watchdog:** hourly it reads one pair of backups to hash them, with `Nice=19`, idle I/O, 50% of one CPU and 128 MB at most. One journal line an hour.
+- **Watchdog:** hourly it reads one pair of backups to hash them, with `Nice=19`, idle I/O, 50% of one CPU and 128 MB at most. One journal line an hour. Measured on the host: the newest database backup hashed in 1.12 s with 0.36 s of CPU at idle I/O, possibly from page cache. On this evidence, hashing less often isn't needed. Still watch it for a day after an install.
 - **SEO watch:** about 20 public requests a day, up to 30 s each.
 - **New on the host:** 2 users, 2 groups, 4 unit files, 2 folders. No port, no sudo rule, no package.
 - **Cost:** 0, unless the alerts-only mail credential needs a paid mailbox; that assessment is in the private record.
@@ -326,11 +334,14 @@ One incident means one alert when it starts, none while it lasts, and one when i
 
 - `ops/vps/lm-backup-watchdog.test.sh`, `ops/vps/lm-seo-watch.test.sh`: synthetic, in `quality`.
 - `ops/vps/lm-watch-sandbox.test.sh`, workflow `vps-watch-tests.yml`: real users, real systemd units and the real receiver on GitHub's throw-away machine, with invented secrets and backups. It refuses to run anywhere else.
-- It proves: `lmwatch` and `lmseo` can't read planted root-only secrets in Docker paths, `/opt`, `/srv`, `/var/spool`, `/etc`, or world-readable ones in `/opt` and `/srv`; `lmwatch` reads the backup pair and can't write or delete; no capabilities; a link as a log can't write as root; local routes and metadata are blocked while DNS, TLS and an SMTPS connection work; the timer alerts with no new file; every alert above; rollback; the installer's real steps with test pins.
+- It proves: `lmwatch` and `lmseo` can't read planted root-only secrets in Docker paths, `/opt`, `/srv`, `/var/spool`, `/etc`, or world-readable ones in `/opt`, `/srv` and `/backup`; `lmwatch` reads the backup pair and can't write or delete; no capabilities; a link as a log can't write as root; local routes, metadata, private addresses on a dummy interface and a real container on a real Docker bridge are blocked while DNS, TLS and an SMTPS connection work; the timer alerts with no new file; every alert above; rollback; the installer's real steps with test pins, and that it stops when the network rule is missing.
+- **The real folder's shape:** old `archive-*.age` and `.sha256` files at `600`, an old database with no partner, several pairs and no `verified.log`. It reports `no_record` and nothing else, then `ok` after one pair through the new receiver, with old files at `640` or still at `600`.
 - It doesn't send real mail or log in to a mail server.
 - **It doesn't prove the production host.** That machine's systemd version, layout and other apps are different.
 
-**Before any install (owner, read-only on the VPS)**
+**Measured on the host, read-only, 2026-11-05:** 1 vCPU; systemd 255; cgroup v2; `CONFIG_CGROUP_BPF=y`; DNS through the resolved stub; ports 465 and 587 reachable with TLS 1.3 verified. Users `lmwatch` and `lmseo`, `/var/lib/lm-*` and `/opt/lm-watch` don't exist yet. Reading these doesn't prove that `IPAddressDeny` is enforced there, so the installer tests it.
+
+**Before any install (owner, read-only on the VPS).** Run once on 2026-11-05, with the output kept private; repeat these if the install comes much later.
 
 ```bash
 ps -p 1 -o comm=
@@ -363,6 +374,8 @@ resolvectl status 2>/dev/null | head -3; ls -l /etc/resolv.conf
 ```
 
 **Install, after separate approval:** a reviewed PR sets the pins in `install-backup-watchdog.sh`, then it runs as root, then `runuser -u lmwatch -- sh test-backup-watchdog-mail.sh <address>`. PASS only when someone has seen both test mails arrive.
+
+Before any timer starts, the installer finds what answers on a private address from outside the units (containers on their internal ports, and the host's private addresses), and proves each is refused from inside both real units, with DNS and TLS still working. If any is reached, or nothing answers so it can't be proven, it stops with the timers off, and rollback below applies. It then runs the real check, which must say `ok` or `no_record`. One alert mail can go to the approved address at that point.
 
 **Check it, once installed:** `systemctl list-timers 'lm-*'`, `journalctl -u lm-backup-watchdog -n 5`, `systemctl --failed`.
 
@@ -403,7 +416,7 @@ Without the group, the receiver goes back to `700` and `600` by itself; its old 
 - SEO watch presents itself as Googlebot from a non-Google address, and Cloudflare could challenge it. That would look like a false alarm.
 - If `lmwatch` is ever added to another group by hand, the check catches only `docker`, `sudo` and `adm`, plus the paths it tests.
 - World-readable secrets outside the hidden folders stay readable until the owner's pre-install check has been read and acted on.
-- `IPAddressDeny` needs the kernel's cgroup support. If this host lacks it, the rule may not apply; the test proves it only on GitHub's machine.
+- `IPAddressDeny` needs the kernel's cgroup support. The host shows cgroup v2 and `CONFIG_CGROUP_BPF=y`, but enforcement there is proven only by the installer's step, which hasn't run. The test proves it only on GitHub's machine.
 
 ### 9.1.0 What a backup holds — and what it does not (completeness, 2026-11-03)
 
