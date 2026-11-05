@@ -44,7 +44,7 @@ immutable
 parallel safe
 set search_path to ''
 as $function$
-  select ' ' || pg_catalog.btrim(pg_catalog.regexp_replace(pg_catalog.regexp_replace(pg_catalog.normalize(pg_catalog.replace(pg_catalog.lower(coalesce(p_text, '')), 'ß', 'ss'), NFD), '[\u0300-\u036f]', '', 'g'), '[^[:alnum:]+#]+', ' ', 'g')) || ' '
+  select ' ' || pg_catalog.btrim(pg_catalog.regexp_replace(pg_catalog.regexp_replace(pg_catalog.normalize(pg_catalog.replace(pg_catalog.lower(coalesce(p_text, '')), 'ß', 'ss'), 'NFD'), '[\u0300-\u036f]', '', 'g'), '[^[:alnum:]+#]+', ' ', 'g')) || ' '
 $function$;
 
 revoke all on function public.public_vacancy_search_fold(text) from public, anon, authenticated, service_role;
