@@ -299,6 +299,7 @@ STUB
 chmod 755 $X/bin/curl
 PATH=$X/bin:$PATH command sh $X/install.sh a@example.test > $X/out 2>&1; rc=$?
 cat $X/out | tail -n 25
+systemctl status lm-backup-watchdog.service --no-pager -n 15 2>&1 | tail -n 22
 ok "the installer finishes" "$rc" 0
 ok "lmwatch: no login, one group" "$(id -nG lmwatch) $(getent passwd lmwatch | cut -d: -f7)" "lmwatch /usr/sbin/nologin"
 ok "lmseo: no login, one group" "$(id -nG lmseo) $(getent passwd lmseo | cut -d: -f7)" "lmseo /usr/sbin/nologin"
