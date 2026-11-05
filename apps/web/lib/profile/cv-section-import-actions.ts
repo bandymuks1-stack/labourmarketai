@@ -59,7 +59,7 @@ import {
  */
 
 export type CvImportConfirmResult =
-  | { ok: true }
+  | { ok: true; id?: string; startedAt?: string | null; endedAt?: string | null }
   | {
       ok: false;
       code:
@@ -131,7 +131,7 @@ export async function confirmCvWorkHistoryAction(input: {
   const startedAt = periodStartIso(startPart);
   const endedAt = input.isCurrent ? null : periodEndIso(endPart);
 
-  const { error } = await asAny(ctx.supabase).rpc(
+  const { data: savedId, error } = await asAny(ctx.supabase).rpc(
     "save_self_declared_work_history_v1",
     {
       p_title: title,
@@ -159,7 +159,12 @@ export async function confirmCvWorkHistoryAction(input: {
     return { ok: false, code: "error" };
   }
   revalidatePath("/", "layout");
-  return { ok: true };
+  return {
+    ok: true,
+    id: typeof savedId === "string" ? savedId : undefined,
+    startedAt,
+    endedAt,
+  };
 }
 
 /**
