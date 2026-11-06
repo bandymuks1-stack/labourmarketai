@@ -1165,3 +1165,18 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .living-hero-rise, .lwh-sweep, .lwh-frag, .lwh-sheen, .lwh-dip { animation: none; }
 }
+
+/*
+ * NO ZOOM ON FOCUS (DS-1, DS-2). iOS Safari zooms the page when a focused field's
+ * text is under 16 px, and most fields here are `text-sm` (14 px). One rule at
+ * phone width, so a field added tomorrow is covered too. Each selector carries a
+ * `:not()` on purpose: a bare `select` is weaker than `.text-sm` and would lose to it.
+ * From `sm` up the design's own size stands.
+ */
+@media (max-width: 639.98px) {
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"], [type="file"], [type="hidden"], [type="button"], [type="submit"], [type="reset"], [type="image"]),
+  textarea:not([hidden]),
+  select:not([hidden]) {
+    font-size: 16px;
+  }
+}
