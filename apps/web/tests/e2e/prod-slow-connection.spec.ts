@@ -128,8 +128,13 @@ test("forms work on a slow phone: what was typed stays, a save shows its state, 
       await settled(page);
       const kept = await composer.inputValue();
       if (kept === "") await composer.fill(sentence);
+      // The composer clears at once; what counts is the message on screen and an answer to it.
+      const answers = inMain(page).getByTestId("assistant-mark");
+      const answersBefore = await answers.count();
       await inMain(page).getByTestId("composer-send").click();
-      await expect(composer).toHaveValue("", { timeout: 120_000 });
+      await expect(inMain(page).getByText(sentence).first()).toBeVisible({ timeout: 120_000 });
+      await expect.poll(() => answers.count(), { timeout: 120_000, intervals: [1_000] }).toBeGreaterThan(answersBefore);
+      await settled(page);
       record(label, kept === sentence && crashes.length === 0 && !(await deadScreen(page)), `field_visible_s=${visibleAfter} kept=${kept === sentence} crash=${crashes.join("/") || "none"}`);
     } catch (e) {
       record(label, false, `stopped (${short(e)})`);
