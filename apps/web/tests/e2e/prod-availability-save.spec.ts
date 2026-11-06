@@ -89,8 +89,16 @@ async function storedCard(): Promise<{ status: string | null; country: string | 
   return { status: row?.availability_status ?? null, country: row?.current_location_country ?? null };
 }
 
+/** On a translated page the scope's words are already the translator's before anything is clicked. */
+async function translationDone(page: Page, scope: Locator, translated: boolean): Promise<void> {
+  if (translated) await expect(scope.locator("font").first()).toBeAttached({ timeout: 30_000 });
+}
+
+/** A crash lands after the answer, in the updates it starts: nothing in flight means they have run. */
+const settled = (page: Page) => page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => undefined);
+
 /** The chat's work card form, opened by the sentence that opens it for a person. */
-async function chatForm(page: Page): Promise<Locator> {
+async function chatForm(page: Page, translated: boolean): Promise<Locator> {
   await page.goto("/lt/dashboard");
   await page.waitForLoadState("load");
   const composer = inMain(page).getByTestId("composer-input");
@@ -100,8 +108,7 @@ async function chatForm(page: Page): Promise<Locator> {
   await inMain(page).getByTestId("composer-send").click();
   const form = inMain(page).getByTestId("inline-action-form-worker.save-work-card").last();
   await expect(form).toBeVisible({ timeout: 60_000 });
-  // Translation starts 1.5 s after load, as a person's page would have it before they click.
-  await page.waitForTimeout(2_500);
+  await translationDone(page, form, translated);
   await form.getByTestId("field-availableFrom").fill("");
   return form;
 }
@@ -120,12 +127,12 @@ async function chatSave(browser: Browser, translated: boolean, c: Case): Promise
   const label = `chat ${translated ? "translated" : "plain"} ${c.name}`;
   const { ctx, page, crashes } = await open(browser, translated);
   try {
-    const form = await chatForm(page);
+    const form = await chatForm(page, translated);
     await form.getByTestId("field-availabilityStatus").selectOption(c.status);
     await form.getByTestId("field-locationCountry").fill(c.country);
     await form.getByTestId("inline-action-continue").click();
     await expect(form.getByTestId("inline-action-review")).toBeVisible({ timeout: 30_000 });
-    await page.waitForTimeout(500);
+    await translationDone(page, form.getByTestId("inline-action-save"), translated);
     const nodes = await page.evaluate(() => (window as unknown as { __translatedNodes?: number }).__translatedNodes ?? 0);
     const save = form.getByTestId("inline-action-save");
     if (c.click === "dbl") await save.dblclick({ timeout: 10_000 });
@@ -133,7 +140,7 @@ async function chatSave(browser: Browser, translated: boolean, c: Case): Promise
     const done = inMain(page).getByTestId("inline-action-done").last();
     const refused = inMain(page).getByTestId("inline-action-error").last();
     const answered = await done.or(refused).first().waitFor({ state: "visible", timeout: SAVE_WAIT }).then(() => true, () => false);
-    await page.waitForTimeout(3_000);
+    await settled(page);
     const dead = await deadScreen(page);
     const refusedShown = answered && (await refused.isVisible().catch(() => false));
     const stored = await storedCard();
@@ -176,11 +183,11 @@ test("the work card saves through a translated page and a plain one, and what wa
       const toggle = main.getByTestId("work-card-editor-toggle");
       if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
       const form = main.getByTestId("work-card-editor");
-      await page.waitForTimeout(2_500);
+      await translationDone(page, form, true);
       await form.locator('select[name="availability_status"]').selectOption("available");
       await form.getByTestId("work-card-save").dblclick();
       await expect(form.getByTestId("work-card-saved").or(form.getByTestId("work-card-error")).first()).toBeVisible({ timeout: SAVE_WAIT });
-      await page.waitForTimeout(3_000);
+      await settled(page);
       const dead = await deadScreen(page);
       const shownSaved = await form.getByTestId("work-card-saved").isVisible().catch(() => false);
       const shownError = await form.getByTestId("work-card-error").isVisible().catch(() => false);
