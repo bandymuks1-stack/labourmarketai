@@ -17,6 +17,7 @@ import { jsonLdScript } from "@/lib/seo/json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { BRAND_NAME, BRAND_SEO, resolveActiveLocale } from "@/lib/seo/metadata";
 import { REGEXP_LOOKBEHIND_SHIM } from "@/lib/compat/regexp-lookbehind-shim";
+import { TRANSLATED_DOM_SHIM } from "@/lib/compat/translated-dom-shim";
 import { CLIENT_ERROR_EARLY_SCRIPT } from "@/lib/telemetry/client-error-early-script";
 import "../globals.css";
 
@@ -159,6 +160,11 @@ export default async function LocaleLayout({
             see (module evaluation, unhandled rejections, a missing chunk).
             Sanitised, at most three per page, logged — never stored. */}
         <script dangerouslySetInnerHTML={{ __html: CLIENT_ERROR_EARLY_SCRIPT }} />
+        {/* Third, before React starts: a page the browser translates has
+            lost the text nodes React holds, and the next update beside one
+            died with "Application error" (2026-11-05 incident). A no-op
+            unless the node a call names has left its parent. */}
+        <script dangerouslySetInnerHTML={{ __html: TRANSLATED_DOM_SHIM }} />
         {/* Organization + WebSite structured data on EVERY locale page
             (2026-09-19): the landing is outside the marketing route group
             and is a frozen composition, so the publisher nodes live here

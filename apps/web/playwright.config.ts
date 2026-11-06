@@ -102,7 +102,8 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      // Production walks run in the Chrome build the runner carries, not Playwright's Chromium.
+      use: { ...devices["Desktop Chrome"], ...(process.env.PROD_QA_WALK === "1" ? { channel: "chrome" } : {}) },
     },
   ],
 });
