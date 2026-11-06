@@ -177,11 +177,16 @@ test("forms work on a slow phone: what was typed stays, a save shows its state, 
       await form.locator('select[name="availability_status"]').selectOption("available");
       await ctx.setOffline(true);
       await form.getByTestId("work-card-save").click();
-      const told = await form.getByTestId("work-card-error").waitFor({ state: "visible", timeout: 30_000 }).then(() => true, () => false);
+      const told = await page.getByTestId("connection-notice").waitFor({ state: "visible", timeout: 30_000 }).then(() => true, () => false);
       const dead = await deadScreen(page);
-      const body = (await page.locator("body").innerText({ timeout: 5_000 }).catch(() => "")).length;
       await ctx.setOffline(false);
-      record(label, told && !dead, `error_shown=${told} dead_screen=${dead} body_chars=${body} crash=${crashes.join("/") || "none"}`);
+      // Back online the notice goes, and the same form still saves.
+      await expect(page.getByTestId("connection-notice")).toHaveCount(0, { timeout: 30_000 });
+      const save = form.getByTestId("work-card-save");
+      await expect(save).toBeEnabled({ timeout: 120_000 });
+      await save.click();
+      const again = await form.getByTestId("work-card-saved").waitFor({ state: "visible", timeout: 120_000 }).then(() => true, () => false);
+      record(label, told && !dead && again, `notice_shown=${told} dead_screen=${dead} saved_after_reconnect=${again} crash=${crashes.join("/") || "none"}`);
     } catch (e) {
       record(label, false, `stopped (${short(e)}) crash=${crashes.join("/") || "none"}`);
     } finally {

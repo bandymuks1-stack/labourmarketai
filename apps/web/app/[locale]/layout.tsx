@@ -18,6 +18,7 @@ import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { BRAND_NAME, BRAND_SEO, resolveActiveLocale } from "@/lib/seo/metadata";
 import { REGEXP_LOOKBEHIND_SHIM } from "@/lib/compat/regexp-lookbehind-shim";
 import { TRANSLATED_DOM_SHIM } from "@/lib/compat/translated-dom-shim";
+import { ConnectionNotice } from "@/components/app/connection-notice";
 import { CLIENT_ERROR_EARLY_SCRIPT } from "@/lib/telemetry/client-error-early-script";
 import "../globals.css";
 
@@ -189,6 +190,7 @@ export default async function LocaleLayout({
         />
       </head>
       <body>
+        <ConnectionNotice locale={locale} />
         {/* Locale-theme continuity (area D): a locale switch re-renders
             <html lang> and React strips the bootstrap's data-theme — this
             watcher restores the saved theme before the next paint. */}
