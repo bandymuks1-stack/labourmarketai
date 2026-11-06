@@ -172,7 +172,7 @@ export default async function LocaleLayout({
             once. Real values only — name, url, logo, language. */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd(locale)) }}
         />
         <script
           type="application/ld+json"
