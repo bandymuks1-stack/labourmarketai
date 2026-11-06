@@ -50,7 +50,7 @@ const KINDS = ["education", "certificate"] as const;
 const ROUNDS = ["lygiagretusa", "lygiagretusb", "lygiagretusc"];
 const DOUBLE = "dvigubas";
 const ONCE = "vienas";
-// A confirm's POST took 20 s on production (run 42098444964); its saved mark can't be asked for sooner.
+// A confirm can be slow under load (run 42098444964); its saved mark can't be asked for sooner.
 const SAVE_WAIT = 60_000;
 
 const school = (name: string) => `${TAG} ${name} profesine mokykla`;
@@ -260,6 +260,7 @@ test("#3102: confirming a CV's education and certificate leaves one row each", a
         .catch(() => console.info(`[double-click] ${kind}: an action still open after ${SAVE_WAIT} ms`));
       const saved = await savedOf(row).waitFor({ state: "visible", timeout: 5_000 }).then(() => true, () => false);
       console.info(`[double-click] ${kind}: actions sent=${actionsA.sent() - sentBefore}, saved mark ${saved}`);
+      expect.soft(actionsA.sent() - sentBefore, `${kind}: a double click sends one save`).toBe(1);
     }
   });
   await attempt("case 3b counts", () => expectOneRowEach(page, "case 3b", [DOUBLE]));

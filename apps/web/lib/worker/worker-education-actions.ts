@@ -106,6 +106,12 @@ export async function saveWorkerEducationAction(
       .select(EDUCATION_COLUMNS)
       .single();
     if (error) {
+      // Another request stored the same row first: answer with that row.
+      if (error.code === "23505") {
+        const { data: now } = await asAny(supabase).from("worker_education").select(EDUCATION_COLUMNS).eq("profile_id", user.id);
+        const stored = findSameEducation(((now ?? []) as Parameters<typeof educationEntryFromRow>[0][]).map(educationEntryFromRow), input);
+        return stored ? { ok: true, id: stored.id, entry: stored } : { ok: true };
+      }
       const mapped = mapError(error.code);
       if (mapped.ok === false && mapped.code === "error") {
         console.error("[worker-education] insert failed:", error.code, error.message);
@@ -134,6 +140,8 @@ export async function saveWorkerEducationAction(
     .select(EDUCATION_COLUMNS)
     .maybeSingle();
   if (error) {
+    // Edited into the same words as another row: nothing changed, and it does not say saved.
+    if (error.code === "23505") return { ok: false, code: "invalid" };
     const mapped = mapError(error.code);
     if (mapped.ok === false && mapped.code === "error") {
       console.error("[worker-education] update failed:", error.code, error.message);
