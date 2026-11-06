@@ -602,7 +602,7 @@ test("M-1 (4.5). the worker sees why Gama's need fits them", async ({ browser })
   await expect(inMain(page).getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const cards = page
     .locator(`li[id="opp-${requestId}"]`)
-    .filter({ has: inMain(page).getByTestId("opportunity-company").filter({ hasText: GAMA }) })
+    .filter({ has: page.getByTestId("opportunity-company").filter({ hasText: GAMA }) })
     .filter({ has: page.locator('[data-testid^="interest-"]') });
   await expect.poll(() => cards.count(), { timeout: 60_000 }).toBeGreaterThan(0);
   const card = cards.first();
