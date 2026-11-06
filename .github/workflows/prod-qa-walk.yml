@@ -132,6 +132,8 @@ on:
           # Real report 2026-11-05: Save on the work card, through a translated page, killed the page. Synthetic worker,
           # real Chrome, translator DOM swap emulated. Dispatch only, never in the rotation.
           - availability-save
+          # Owner 2026-11-06: forms on a slow phone. Synthetic worker, real Chrome. Dispatch only, never in the rotation.
+          - slow-connection
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -482,6 +484,7 @@ jobs:
             cv-import-duplicates) SPEC=tests/e2e/prod-cv-import-duplicates.spec.ts ;;
             cv-import-sweep) SPEC=tests/e2e/prod-cv-import-sweep.spec.ts ;;
             availability-save) SPEC=tests/e2e/prod-availability-save.spec.ts ;;
+            slow-connection) SPEC=tests/e2e/prod-slow-connection.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
