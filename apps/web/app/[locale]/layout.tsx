@@ -4,6 +4,7 @@ import { Bricolage_Grotesque, Inter, Instrument_Serif, JetBrains_Mono } from "ne
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { AnalyticsConsentBanner } from "@/components/app/analytics-consent";
+import { CONSENT_BOOTSTRAP_SCRIPT } from "@/lib/consent/analytics-consent";
 import {
   BASE_CLIENT_MESSAGE_ROOTS,
   pickMessages,
@@ -188,6 +189,9 @@ export default async function LocaleLayout({
               THEME_BOOTSTRAP_SCRIPT,
           }}
         />
+        {/* Before paint, so a person who already chose never sees the banner that
+            the server renders for everyone else (UX-3). */}
+        <script dangerouslySetInnerHTML={{ __html: CONSENT_BOOTSTRAP_SCRIPT }} />
       </head>
       <body>
         <ConnectionNotice locale={locale} />
