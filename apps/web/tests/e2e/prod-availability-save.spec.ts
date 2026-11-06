@@ -68,7 +68,7 @@ async function open(browser: Browser, translated: boolean): Promise<{ ctx: Brows
   if (translated) await ctx.addInitScript(TRANSLATOR);
   const page = await ctx.newPage();
   const crashes: string[] = [];
-  page.on("pageerror", (e) => crashes.push(e.name));
+  page.on("pageerror", (e) => crashes.push(`${e.name}: ${e.message.slice(0, 60)}`));
   return { ctx, page, crashes };
 }
 
