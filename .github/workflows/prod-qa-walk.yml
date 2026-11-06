@@ -135,6 +135,8 @@ on:
           # SR-1 (owner 2026-11-06): first searches signed in and signed out, in scripted headless Chrome, read-only.
           # About 7 min, so it can span an import. Timings go only to the one-day sr1-readings artefact. Dispatch only.
           - sr1-first-search
+          # Owner 2026-11-06: forms on a slow phone. Synthetic worker, real Chrome. Dispatch only, never in the rotation.
+          - slow-connection
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -487,6 +489,7 @@ jobs:
             cv-import-sweep) SPEC=tests/e2e/prod-cv-import-sweep.spec.ts ;;
             availability-save) SPEC=tests/e2e/prod-availability-save.spec.ts ;;
             sr1-first-search) SPEC=tests/e2e/prod-sr1-first-search.spec.ts ;;
+            slow-connection) SPEC=tests/e2e/prod-slow-connection.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
