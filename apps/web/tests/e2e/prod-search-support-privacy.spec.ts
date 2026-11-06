@@ -434,7 +434,7 @@ test("S-2 (5.18). the global dashboard search finds that conversation and opens 
 test("S-3 (9.15). a synthetic organization is findable in the network directory", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker2");
   await page.goto(`/lt/dashboard/network?q=${encodeURIComponent(GAMA)}`);
-  await expect(inMain(page).getByTestId("network-search-results")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole("main").getByTestId("network-search-results")).toBeVisible({ timeout: 60_000 });
   const companies = page.locator('[data-testid^="network-company-"]', { hasText: "Gama" });
   await expect.poll(() => companies.count(), { timeout: 30_000 }).toBeGreaterThan(0);
   await ctx.close();
