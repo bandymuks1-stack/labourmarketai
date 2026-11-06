@@ -91,6 +91,12 @@ export async function saveWorkerAchievementAction(
       .select(ACHIEVEMENT_COLUMNS)
       .single();
     if (error) {
+      // Another request stored the same row first: answer with that row.
+      if (error.code === "23505") {
+        const { data: now } = await asAny(supabase).from("worker_achievements").select(ACHIEVEMENT_COLUMNS).eq("profile_id", user.id);
+        const stored = findSameAchievement(((now ?? []) as Parameters<typeof achievementEntryFromRow>[0][]).map(achievementEntryFromRow), input);
+        return stored ? { ok: true, id: stored.id, entry: stored } : { ok: true };
+      }
       const mapped = mapError(error.code);
       if (mapped.ok === false && mapped.code === "error") {
         console.error("[worker-achievements] insert failed:", error.code, error.message);
@@ -115,6 +121,8 @@ export async function saveWorkerAchievementAction(
     .select(ACHIEVEMENT_COLUMNS)
     .maybeSingle();
   if (error) {
+    // Edited into the same words as another row: nothing changed, and it does not say saved.
+    if (error.code === "23505") return { ok: false, code: "invalid" };
     const mapped = mapError(error.code);
     if (mapped.ok === false && mapped.code === "error") {
       console.error("[worker-achievements] update failed:", error.code, error.message);

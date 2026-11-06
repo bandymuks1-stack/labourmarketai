@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
+import { oneAtATime } from "@/lib/hooks/one-at-a-time";
 import { useSavedRows } from "@/lib/hooks/use-saved-rows";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
@@ -58,6 +59,7 @@ export function WorkerAchievementsSection({
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const [guard] = useState(oneAtATime);
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const { rows, showSaved, hideRemoved } = useSavedRows(initial);
@@ -76,7 +78,8 @@ export function WorkerAchievementsSection({
     }
   }
 
-  async function submit() {
+  const submit = () => guard("save", saveForm);
+  async function saveForm() {
     setPending(true);
     setError(null);
     try {
@@ -105,7 +108,8 @@ export function WorkerAchievementsSection({
     }
   }
 
-  async function remove(id: string) {
+  const remove = (id: string) => guard(`remove-${id}`, () => removeRow(id));
+  async function removeRow(id: string) {
     setError(null);
     setRemovingId(id);
     try {
