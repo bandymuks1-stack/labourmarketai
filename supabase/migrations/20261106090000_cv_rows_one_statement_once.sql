@@ -25,15 +25,20 @@
 -- predicate can go.
 --
 -- description is hashed: up to 2000 characters don't fit a btree entry.
--- Lock: the indexes take a SHARE lock while they build, on tables of a few hundred rows.
+-- Lock: the indexes take a SHARE lock until commit: writes to these two tables wait, reads don't.
+-- The build reads a small table and indexes no existing row. A writer stuck in an open
+-- transaction would make everyone queue behind this migration, so it gives up after 5 s
+-- (55P03), changes nothing, and can simply be run again.
 -- @plan-cache-proof: n/a uniqueness constraints that no RPC or read filters by; the columns stay served by the existing profile_id index
 -- Rollback: supabase/rollbacks/20261106090000_cv_rows_one_statement_once.down.sql
--- PROOF: scripts/db-proof/cv-rows-one-statement-once.sql
+-- PROOF: scripts/db-proof/cv-rows-one-statement-once.sh and cv-rows-one-statement-once-pg17.sh
 
 do $migration$
 declare
   v_cutover text := to_char(now() at time zone 'UTC', 'YYYY-MM-DD HH24:MI:SS.US') || '+00';
 begin
+  perform set_config('lock_timeout', '5s', true);
+
   execute format(
     $sql$
     create unique index worker_education_one_statement_once

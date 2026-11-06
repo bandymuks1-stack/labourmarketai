@@ -1,8 +1,11 @@
 -- Rollback for 20261106090000_cv_rows_one_statement_once.sql: production as it was.
 -- Drops the two indexes and restores the RPC body without the lock. No row is touched:
 -- what was stored while the indexes stood stays, and two new requests at once can again
--- store a row twice.
+-- store a row twice. Dropping an index takes an ACCESS EXCLUSIVE lock, which also stops reads
+-- of the table, so behind a long reader it gives up after 5 s (55P03) and can be run again.
 begin;
+
+set local lock_timeout = '5s';
 
 drop index if exists public.worker_education_one_statement_once;
 drop index if exists public.worker_achievements_one_statement_once;
