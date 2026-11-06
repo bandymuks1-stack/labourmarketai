@@ -182,8 +182,10 @@ test("the work card saves through a translated page and a plain one, and what wa
       await expect(form.getByTestId("work-card-saved").or(form.getByTestId("work-card-error")).first()).toBeVisible({ timeout: SAVE_WAIT });
       await page.waitForTimeout(3_000);
       const dead = await deadScreen(page);
+      const shownSaved = await form.getByTestId("work-card-saved").isVisible().catch(() => false);
+      const shownError = await form.getByTestId("work-card-error").isVisible().catch(() => false);
       const stored = await storedCard();
-      record("profile editor translated double click", !dead && crashes.length === 0 && stored.status === "available", `crash=${crashes.join("/") || "none"} dead_screen=${dead} stored=${stored.status}/${stored.country}`);
+      record("profile editor translated double click", !dead && crashes.length === 0 && shownSaved && !shownError && stored.status === "available", `crash=${crashes.join("/") || "none"} dead_screen=${dead} saved=${shownSaved} error=${shownError} stored=${stored.status}/${stored.country}`);
     } catch (e) {
       record("profile editor translated double click", false, `stopped (${short(e)}) crash=${crashes.join("/") || "none"}`);
     } finally {
