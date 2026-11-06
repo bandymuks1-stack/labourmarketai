@@ -260,6 +260,7 @@ test("#3102: confirming a CV's education and certificate leaves one row each", a
         .catch(() => console.info(`[double-click] ${kind}: an action still open after ${SAVE_WAIT} ms`));
       const saved = await savedOf(row).waitFor({ state: "visible", timeout: 5_000 }).then(() => true, () => false);
       console.info(`[double-click] ${kind}: actions sent=${actionsA.sent() - sentBefore}, saved mark ${saved}`);
+      expect.soft(actionsA.sent() - sentBefore, `${kind}: a double click sends one save`).toBe(1);
     }
   });
   await attempt("case 3b counts", () => expectOneRowEach(page, "case 3b", [DOUBLE]));

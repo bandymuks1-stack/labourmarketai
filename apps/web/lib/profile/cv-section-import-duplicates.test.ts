@@ -1,15 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * A CV imported twice is not two educations (found 2026-11-04, P-9). The tables have
- * no unique key, so these actions are what stops a second row.
+ * A CV imported twice is not two educations (found 2026-11-04, P-9). The action's read
+ * stops a repeat. Two at once both read nothing, so the unique index stops the second
+ * row, and that answer has to read as saved (run 42098444964: 201 twice in every round).
  */
 const inserted: { table: string; row: Record<string, unknown> }[] = [];
 let stored: Record<string, Record<string, unknown>[]> = {};
 let readError: { code: string } | null = null;
+// Stands in for the unique index: what the database says to the second of two inserts.
+let uniqueIndex = false;
+const revalidated: string[] = [];
 
 vi.mock("server-only", () => ({}));
-vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: (path: string) => void revalidated.push(path) }));
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
     auth: { getUser: async () => ({ data: { user: { id: "u1" } } }) },
@@ -18,6 +22,7 @@ vi.mock("@/lib/supabase/server", () => ({
         eq: async () => (readError ? { data: null, error: readError } : { data: stored[table] ?? [], error: null }),
       }),
       insert: async (row: Record<string, unknown>) => {
+        if (uniqueIndex && inserted.some((i) => i.table === table)) return { error: { code: "23505", message: "unique" } };
         inserted.push({ table, row });
         return { error: null };
       },
@@ -47,6 +52,8 @@ beforeEach(() => {
   inserted.length = 0;
   stored = {};
   readError = null;
+  uniqueIndex = false;
+  revalidated.length = 0;
 });
 
 describe("a repeat CV import stores nothing new", () => {
@@ -88,5 +95,39 @@ describe("a repeat CV import stores nothing new", () => {
     const res = await confirmCvEducationAction(school);
     expect(res.ok).toBe(false);
     expect(inserted).toHaveLength(0);
+  });
+});
+
+describe("two confirms at once", () => {
+  it("both read nothing, the index keeps one education row, and both answer saved", async () => {
+    uniqueIndex = true;
+    const answers = await Promise.all([confirmCvEducationAction(school), confirmCvEducationAction(school)]);
+    expect(answers).toEqual([{ ok: true }, { ok: true }]);
+    expect(inserted).toHaveLength(1);
+  });
+
+  it("the same for a certificate", async () => {
+    uniqueIndex = true;
+    const answers = await Promise.all([
+      confirmCvCertificateAction({ title: "Saugos kursai", year: 2022 }),
+      confirmCvCertificateAction({ title: "Saugos kursai", year: 2022 }),
+    ]);
+    expect(answers).toEqual([{ ok: true }, { ok: true }]);
+    expect(inserted).toHaveLength(1);
+  });
+});
+
+describe("what a confirm re-renders", () => {
+  it("the review's confirm answers without the page tree", async () => {
+    await confirmCvEducationAction({ ...school, refreshLater: true });
+    await confirmCvCertificateAction({ title: "Saugos kursai", year: 2022, refreshLater: true });
+    await confirmCvAchievementAction({ title: "Kita", refreshLater: true });
+    expect(inserted).toHaveLength(3);
+    expect(revalidated).toEqual([]);
+  });
+
+  it("any other caller still gets the page it relies on", async () => {
+    await confirmCvAchievementAction({ title: "Kita" });
+    expect(revalidated).toEqual(["/"]);
   });
 });
