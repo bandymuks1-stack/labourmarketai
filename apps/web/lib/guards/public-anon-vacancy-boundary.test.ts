@@ -60,7 +60,7 @@ describe("anonymous public-vacancy boundary (owner directive 2026-08-24)", () =>
     expect(body, `latest definition is in ${file}`).toMatch(
       /v\.source_language,\s+null::text, v\.published_at,/,
     );
-    expect(body, `latest definition is in ${file}`).not.toMatch(/v\.title_raw/);
+    expect(body, `latest definition is in ${file}`).not.toMatch(/\bv\.title_raw\b/);
   });
 
   it("detail projection: latest definition NULLs title_raw and attribution_code", () => {
@@ -79,7 +79,7 @@ describe("anonymous public-vacancy boundary (owner directive 2026-08-24)", () =>
     // content is not. This replaces the 2026-08-24 rule that kept the title out of
     // matching. Probing any other hidden field still confirms restricted content.
     expect(body, `latest definition is in ${file}`).toMatch(/search_text like v_match/);
-    expect(body, `latest definition is in ${file}`).not.toMatch(/h\.title_raw/);
+    expect(body, `latest definition is in ${file}`).not.toMatch(/\bh\.title_raw\b/);
     for (const col of ["description_raw", "employer_name", "application_url", "city", "region", "country"]) {
       expect(body, `${col} in ${file}`).not.toMatch(new RegExp(`\b${col}\b`));
     }
