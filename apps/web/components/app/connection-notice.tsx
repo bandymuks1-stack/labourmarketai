@@ -42,7 +42,7 @@ export function ConnectionNotice({ locale }: { readonly locale: ActiveLocale }) 
     <p
       role="alert"
       data-testid="connection-notice"
-      className="fixed inset-x-0 top-0 z-[100] bg-state-danger px-4 py-3 text-center text-sm font-semibold text-on-danger"
+      className="fixed inset-x-0 top-0 z-[100] bg-state-danger px-4 py-3 text-center text-sm font-semibold text-text-on-danger"
     >
       {COPY[locale]}
     </p>
