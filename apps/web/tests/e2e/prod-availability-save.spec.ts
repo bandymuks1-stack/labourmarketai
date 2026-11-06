@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
+import { sweepCvRows } from "./prod-cv-import-rows";
 import { bearerOf, qaApi } from "./prod-qa-api";
 
 /**
@@ -20,17 +21,20 @@ import { bearerOf, qaApi } from "./prod-qa-api";
  * a new sign-in aren't walked: a minted session can't sign in again, so persistence
  * is a new browser context on the same session, a fresh load and the database.
  *
- * WRITES. Only `qa.worker+goal3`, only its work card. `afterAll` puts the status and
- * the country back through the same RPC; a saved figure can be changed, not cleared.
+ * WRITES. Only `qa.worker+goal3`: its work card, and one education and one certificate
+ * row tagged `QA-SYNTHETIC R<run id>`. `afterAll` puts the status and the country back
+ * through the same RPC, and removes the rows the way the CV walk does.
  * Logs carry case names, counts and error names only.
  */
 const state = resolve(__dirname, ".storage-state.prod-qa.worker2.json");
 const ENABLED = process.env.PROD_QA_WALK === "1" && existsSync(state);
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
-test.describe.configure({ timeout: 900_000, retries: 0 });
+test.describe.configure({ timeout: 1_080_000, retries: 0 });
 test.use({ actionTimeout: 30_000, channel: "chrome" });
 
 const SAVE_WAIT = 60_000;
+const TAG = `QA-SYNTHETIC R${process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`}`;
+const LOCALES = ["en", "ru", "pl", "de", "nl"] as const;
 const short = (e: unknown) => (e as Error).message.split("\n")[0].slice(0, 160);
 
 /** After load, every text node becomes <font><font>text</font></font>, and so does each new one. */
@@ -68,7 +72,7 @@ async function open(browser: Browser, translated: boolean): Promise<{ ctx: Brows
   if (translated) await ctx.addInitScript(TRANSLATOR);
   const page = await ctx.newPage();
   const crashes: string[] = [];
-  page.on("pageerror", (e) => crashes.push(e.name));
+  page.on("pageerror", (e) => crashes.push(`${e.name}: ${e.message.slice(0, 60)}`));
   return { ctx, page, crashes };
 }
 
@@ -169,6 +173,11 @@ test("the work card saves through a translated page and a plain one, and what wa
   await chatSave(browser, true, { name: "label as listed", status: "available", country: "Bangladesh (BD)", expectCountry: "BD" });
   await chatSave(browser, true, { name: "unknown country", status: "available", country: "Xyzland", invalid: true });
 
+  // The country isn't what breaks: other countries, by name and by code.
+  await chatSave(browser, true, { name: "another country by name", status: "available", country: "Vietnam", expectCountry: "VN" });
+  await chatSave(browser, true, { name: "another country by code", status: "available", country: "SE" });
+  await chatSave(browser, true, { name: "back to Bangladesh", status: "available", country: "BD" });
+
   // Empty country keeps the stored one.
   await chatSave(browser, true, { name: "empty country", status: "busy", country: "", expectCountry: "BD" });
 
@@ -200,6 +209,69 @@ test("the work card saves through a translated page and a plain one, and what wa
     }
   }
 
+  // Every other language, translated, through the editor every language has.
+  for (const locale of LOCALES) {
+    const label = `profile editor translated ${locale}`;
+    const { ctx, page, crashes } = await open(browser, true);
+    try {
+      await page.goto(`/${locale}/dashboard/profile#cv-availability`);
+      await page.waitForLoadState("load");
+      const main = inMain(page);
+      await expect(main.getByTestId("profile-work-card-editor")).toBeVisible({ timeout: 60_000 });
+      const toggle = main.getByTestId("work-card-editor-toggle");
+      if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+      const form = main.getByTestId("work-card-editor");
+      await translationDone(page, form, true);
+      await form.locator('select[name="availability_status"]').selectOption("available");
+      await form.getByTestId("work-card-save").dblclick();
+      await expect(form.getByTestId("work-card-saved").or(form.getByTestId("work-card-error")).first()).toBeVisible({ timeout: SAVE_WAIT });
+      await settled(page);
+      const dead = await deadScreen(page);
+      const saved = await form.getByTestId("work-card-saved").isVisible().catch(() => false);
+      record(label, !dead && crashes.length === 0 && saved, `crash=${crashes.join("/") || "none"} dead_screen=${dead} saved=${saved}`);
+    } catch (e) {
+      record(label, false, `stopped (${short(e)}) crash=${crashes.join("/") || "none"}`);
+    } finally {
+      await ctx.close();
+    }
+  }
+
+  // The profile's other forms, translated: add with a double click, then remove.
+  for (const f of [
+    { name: "education", hash: "cv-education", box: "worker-education", open: "worker-education-add-open", form: "worker-education-form", input: "worker-education-institution", type: "worker-education-type", typeName: "Profesinis", save: "worker-education-save", row: "worker-education-row", remove: '[data-testid^="worker-education-remove-"]' },
+    { name: "certificate", hash: "cv-achievements", box: "worker-achievements", open: "worker-achievements-add-open", form: "worker-achievements-form", input: "worker-achievements-title", type: "worker-achievements-type", typeName: "Nurodytas sertifikatas", save: "worker-achievements-save", row: "worker-achievements-row", remove: '[data-testid^="worker-achievements-remove-"]' },
+  ]) {
+    const label = `profile ${f.name} form translated`;
+    const title = `${TAG} vertimas ${f.name}`;
+    const { ctx, page, crashes } = await open(browser, true);
+    try {
+      await page.goto(`/lt/dashboard/profile#${f.hash}`);
+      await page.waitForLoadState("load");
+      const box = inMain(page).getByTestId(f.box);
+      await expect(box).toBeVisible({ timeout: 60_000 });
+      await translationDone(page, box, true);
+      await box.getByTestId(f.open).click();
+      const form = box.getByTestId(f.form);
+      await form.getByTestId(f.input).fill(title);
+      await form.getByTestId(f.type).click();
+      await page.getByRole("option", { name: f.typeName, exact: true }).first().click();
+      await form.getByTestId(f.save).dblclick();
+      const row = box.getByTestId(f.row).filter({ hasText: title });
+      await expect(row.first()).toBeVisible({ timeout: SAVE_WAIT });
+      await settled(page);
+      const rows = await row.count();
+      await row.first().locator(f.remove).first().click();
+      await expect(row).toHaveCount(0, { timeout: SAVE_WAIT });
+      await settled(page);
+      const dead = await deadScreen(page);
+      record(label, !dead && crashes.length === 0 && rows === 1, `crash=${crashes.join("/") || "none"} dead_screen=${dead} rows_shown=${rows}`);
+    } catch (e) {
+      record(label, false, `stopped (${short(e)}) crash=${crashes.join("/") || "none"}`);
+    } finally {
+      await ctx.close();
+    }
+  }
+
   // A new browser context on the same session, a fresh load, and the database.
   {
     const { ctx, page } = await open(browser, false);
@@ -224,6 +296,11 @@ test("the work card saves through a translated page and a plain one, and what wa
 });
 
 test.afterAll(async () => {
+  for (const kind of ["education", "certificate"] as const) {
+    const { removed, left } = await sweepCvRows(kind, TAG);
+    console.info(`[cleanup] ${kind}: removed=${removed} left=${left}`);
+    expect(left, `${kind} rows left`).toBe(0);
+  }
   if (!original) return;
   const res = await qaApi("/rest/v1/rpc/save_worker_card", bearerOf("worker2"), {
     method: "POST",
