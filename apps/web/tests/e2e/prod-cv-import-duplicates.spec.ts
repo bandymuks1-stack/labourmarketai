@@ -50,7 +50,7 @@ const KINDS = ["education", "certificate"] as const;
 const ROUNDS = ["lygiagretusa", "lygiagretusb", "lygiagretusc"];
 const DOUBLE = "dvigubas";
 const ONCE = "vienas";
-// A confirm's POST took 20 s on production (run 42098444964); its saved mark can't be asked for sooner.
+// A confirm can be slow under load (run 42098444964); its saved mark can't be asked for sooner.
 const SAVE_WAIT = 60_000;
 
 const school = (name: string) => `${TAG} ${name} profesine mokykla`;

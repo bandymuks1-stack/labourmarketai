@@ -21,7 +21,7 @@ export function oneAtATime() {
 
 /**
  * One refresh after the last of many saves has settled, and none when nothing was saved.
- * A refresh renders the whole page: one per row is what filled the connection pool.
+ * A refresh renders the whole page: one per row overloaded the database.
  */
 export function refreshWhenSettled(refresh: () => void, waitMs = 1_200) {
   let open = 0;

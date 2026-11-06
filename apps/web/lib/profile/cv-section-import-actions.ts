@@ -64,9 +64,8 @@ import {
  * writes. Doctrine §7.1.
  *
  * `refreshLater`: the caller re-renders the page itself once its last row settled.
- * `revalidatePath` makes the action answer with the whole page tree, and a review of
- * ten rows sent ten of those (about 110 REST calls each) into a pool of ten database
- * connections: PGRST003 and a one-row insert of 20 s in run 42098444964.
+ * `revalidatePath` makes the action answer with the whole page tree, so a review of many
+ * rows asked for many whole-page renders at once and overloaded the database.
  */
 
 export type CvImportConfirmResult =
