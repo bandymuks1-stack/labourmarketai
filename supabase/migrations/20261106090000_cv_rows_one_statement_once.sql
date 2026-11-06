@@ -26,6 +26,7 @@
 --
 -- description is hashed: up to 2000 characters don't fit a btree entry.
 -- Lock: the indexes take a SHARE lock while they build, on tables of a few hundred rows.
+-- @plan-cache-proof: n/a uniqueness constraints that no RPC or read filters by; the columns stay served by the existing profile_id index
 -- Rollback: supabase/rollbacks/20261106090000_cv_rows_one_statement_once.down.sql
 -- PROOF: scripts/db-proof/cv-rows-one-statement-once.sql
 
@@ -146,6 +147,10 @@ begin
   return v_id;
 end;
 $function$;
+
+-- The grants production already has, stated: authenticated only.
+revoke execute on function public.save_self_declared_work_history_v1(text, text, date, date) from public, anon;
+grant execute on function public.save_self_declared_work_history_v1(text, text, date, date) to authenticated;
 
 -- ROLLBACK (the sibling file is the runnable one):
 --   drop index if exists public.worker_education_one_statement_once;

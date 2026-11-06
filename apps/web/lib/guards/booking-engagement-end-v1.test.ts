@@ -1774,6 +1774,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-04: one scan for the free-text job search (SECURITY DEFINER replace). RED draft,
       // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
       "20261104160100_search_public_vacancy_previews_live_scan_v5.sql",
+      // 2026-11-06: one CV statement once (unique indexes + a per-person lock in a SECURITY DEFINER
+      // replace). RED draft, the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261106090000_cv_rows_one_statement_once.sql",
 ]);
   });
 

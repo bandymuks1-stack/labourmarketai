@@ -43,6 +43,10 @@ held() { # The race on purpose: the first holds its write uncommitted while the 
 admin "drop database if exists cv_rows_proof"
 admin "create database cv_rows_proof"
 psql -q -v ON_ERROR_STOP=1 <<SQL
+do \$\$ begin
+  if not exists (select from pg_roles where rolname = 'anon') then create role anon; end if;
+  if not exists (select from pg_roles where rolname = 'authenticated') then create role authenticated; end if;
+end \$\$;
 create schema auth; create schema extensions;
 create extension pgcrypto with schema extensions;
 create function auth.uid() returns uuid language sql stable as \$\$ select '$PERSON'::uuid \$\$;
