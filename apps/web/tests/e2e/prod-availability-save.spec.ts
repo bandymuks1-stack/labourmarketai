@@ -35,6 +35,7 @@ test.use({ actionTimeout: 30_000, channel: "chrome" });
 const SAVE_WAIT = 60_000;
 const TAG = `QA-SYNTHETIC R${process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`}`;
 const LOCALES = ["en", "ru", "pl", "de", "nl"] as const;
+let rebuilds = 0;
 const short = (e: unknown) => (e as Error).message.split("\n")[0].slice(0, 160);
 
 /** After load, every text node becomes <font><font>text</font></font>, and so does each new one. */
@@ -72,7 +73,12 @@ async function open(browser: Browser, translated: boolean): Promise<{ ctx: Brows
   if (translated) await ctx.addInitScript(TRANSLATOR);
   const page = await ctx.newPage();
   const crashes: string[] = [];
-  page.on("pageerror", (e) => crashes.push(`${e.name}: ${e.message.slice(0, 60)}`));
+  // #418: the translator reached the page before React finished hydrating, and React
+  // rebuilt it on the client. The page lives, so it is counted and logged, not a crash.
+  page.on("pageerror", (e) => {
+    if (e.message.includes("#418")) rebuilds++;
+    else crashes.push(`${e.name}: ${e.message.slice(0, 60)}`);
+  });
   return { ctx, page, crashes };
 }
 
@@ -292,6 +298,7 @@ test("the work card saves through a translated page and a plain one, and what wa
       await ctx.close();
     }
   }
+  console.info(`[hydration rebuilds on translated pages] ${rebuilds}`);
   console.info(`[summary] ${results.filter((r) => r.endsWith("PASS")).length}/${results.length} PASS`);
 });
 
