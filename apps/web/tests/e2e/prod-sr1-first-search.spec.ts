@@ -152,7 +152,8 @@ async function reading(browser: Browser, actor: Actor, round: number, term: stri
       board_ms: boardMs,
       search_ms: searchMs,
       ...nav,
-      to_profession_filter: new URL(page.url()).searchParams.has("profession"),
+      // The form always sends `profession=`, so only a value means the word became a filter.
+      to_profession_filter: Boolean(new URL(page.url()).searchParams.get("profession")),
       signed_in: signedIn,
     });
     return signedIn;
