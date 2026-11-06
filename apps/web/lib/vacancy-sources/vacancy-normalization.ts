@@ -115,14 +115,22 @@ export function normalizePositions(value: unknown): number | null {
   return n;
 }
 
+/**
+ * A date Postgres also reads: four-digit year, not year 0. `Date.parse` is far
+ * looser. It reads "Utbildningen startar 270111" as the year 270111, which
+ * serializes as "+270111-..." and fails the whole insert with 22009.
+ */
+const ISO_DATE_START = /^(?!0000)\d{4}-\d{2}-\d{2}/;
+
 /** An ISO-8601 instant the Date constructor accepts, re-emitted in UTC. */
 export function normalizeIsoTimestamp(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const t = value.trim();
-  if (t.length === 0) return null;
+  if (!ISO_DATE_START.test(t)) return null;
   const ms = Date.parse(t);
   if (!Number.isFinite(ms)) return null;
-  return new Date(ms).toISOString();
+  const iso = new Date(ms).toISOString();
+  return ISO_DATE_START.test(iso) ? iso : null;
 }
 
 /** A calendar date (YYYY-MM-DD), or null. Time-of-day is dropped, not kept. */
