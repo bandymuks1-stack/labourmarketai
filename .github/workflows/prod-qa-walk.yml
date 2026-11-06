@@ -132,6 +132,9 @@ on:
           # Real report 2026-11-05: Save on the work card, through a translated page, killed the page. Synthetic worker,
           # real Chrome, translator DOM swap emulated. Dispatch only, never in the rotation.
           - availability-save
+          # SR-1 (owner 2026-11-06): first searches signed in and signed out, in scripted headless Chrome, read-only.
+          # About 7 min, so it can span an import. Timings go only to the one-day sr1-readings artefact. Dispatch only.
+          - sr1-first-search
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -419,6 +422,7 @@ jobs:
           PROD_QA_IMAP_USER: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check') && secrets.PROD_QA_IMAP_USER || '' }}
           PROD_QA_IMAP_PASS: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check') && secrets.PROD_QA_IMAP_PASS || '' }}
           PROD_QA_MAIL_ADDRESS: qa.invited@labourmarket.ai
+          SR1_READINGS_FILE: ${{ github.workspace }}/sr1-readings.jsonl
         run: |
           set -uo pipefail
           cd apps/web
@@ -482,6 +486,7 @@ jobs:
             cv-import-duplicates) SPEC=tests/e2e/prod-cv-import-duplicates.spec.ts ;;
             cv-import-sweep) SPEC=tests/e2e/prod-cv-import-sweep.spec.ts ;;
             availability-save) SPEC=tests/e2e/prod-availability-save.spec.ts ;;
+            sr1-first-search) SPEC=tests/e2e/prod-sr1-first-search.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
@@ -563,3 +568,14 @@ jobs:
           path: |
             prod-qa-result.json
             prod-qa-walk.log
+
+      # The SR-1 timings, apart from the walk's artefact and kept one day: artefacts of this public repo are
+      # readable by any signed-in GitHub user, so whoever records the readings deletes this one after copying them.
+      - name: Upload the SR-1 readings (one day)
+        if: always() && needs.debounce.outputs.spec == 'sr1-first-search'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sr1-readings-${{ github.run_id }}
+          retention-days: 1
+          if-no-files-found: warn
+          path: sr1-readings.jsonl
