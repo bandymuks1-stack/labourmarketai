@@ -238,8 +238,8 @@ test("the work card saves through a translated page and a plain one, and what wa
 
   // The profile's other forms, translated: add with a double click, then remove.
   for (const f of [
-    { name: "education", hash: "cv-education", box: "worker-education", open: "worker-education-add-open", form: "worker-education-form", input: "worker-education-institution", type: "worker-education-type", typeName: "Profesinis", save: "worker-education-save", row: "worker-education-row", remove: "worker-education-remove-" },
-    { name: "certificate", hash: "cv-achievements", box: "worker-achievements", open: "worker-achievements-add-open", form: "worker-achievements-form", input: "worker-achievements-title", type: "worker-achievements-type", typeName: "Nurodytas sertifikatas", save: "worker-achievements-save", row: "worker-achievements-row", remove: "worker-achievements-remove-" },
+    { name: "education", hash: "cv-education", box: "worker-education", open: "worker-education-add-open", form: "worker-education-form", input: "worker-education-institution", type: "worker-education-type", typeName: "Profesinis", save: "worker-education-save", row: "worker-education-row", remove: '[data-testid^="worker-education-remove-"]' },
+    { name: "certificate", hash: "cv-achievements", box: "worker-achievements", open: "worker-achievements-add-open", form: "worker-achievements-form", input: "worker-achievements-title", type: "worker-achievements-type", typeName: "Nurodytas sertifikatas", save: "worker-achievements-save", row: "worker-achievements-row", remove: '[data-testid^="worker-achievements-remove-"]' },
   ]) {
     const label = `profile ${f.name} form translated`;
     const title = `${TAG} vertimas ${f.name}`;
@@ -260,7 +260,7 @@ test("the work card saves through a translated page and a plain one, and what wa
       await expect(row.first()).toBeVisible({ timeout: SAVE_WAIT });
       await settled(page);
       const rows = await row.count();
-      await row.first().locator(`[data-testid^="${f.remove}"]`).first().click();
+      await row.first().locator(f.remove).first().click();
       await expect(row).toHaveCount(0, { timeout: SAVE_WAIT });
       await settled(page);
       const dead = await deadScreen(page);
