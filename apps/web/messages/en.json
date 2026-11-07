@@ -8667,6 +8667,98 @@
       "emptyCapabilities": "No skills on record yet. Skills you add — and the work that shows them — appear here.",
       "emptyExperience": "No work history yet. Your journal and the records of organisations you worked for build this.",
       "untitled": "Work without a name in the source"
+    },
+    "athlete": {
+      "earlyNote": "Early layout of your Living CV. The figures are your real records; the look is not final.",
+      "fullCv": "Open the full CV",
+      "hero": {
+        "portraitAlt": "Photo of {name}",
+        "noRole": "Profession not added yet",
+        "availableFrom": "from {date}",
+        "onlyYou": "Only you see this here."
+      },
+      "stats": {
+        "aria": "Figures and who stands behind them",
+        "unknown": "Could not be read right now",
+        "organizationCount": "{count, plural, one {# organisation} other {# organisations}}",
+        "confirmedBy": "Confirmed by {who}",
+        "confirmedBySomeone": "A confirmation is on record",
+        "confirmedSelfOnly": "You confirmed these yourself; no one else has yet",
+        "someSelfConfirmed": "Some: {qualifier}",
+        "truncated": "Your journal is long, so older entries may sit outside these figures.",
+        "confirmed": {
+          "label": "confirmed hours",
+          "none": "No one has confirmed your work yet"
+        },
+        "total": {
+          "label": "hours of experience",
+          "behind": "Your journal and organisation records, every hour once"
+        },
+        "journal": {
+          "label": "recorded hours",
+          "behind": "Your own Work Journal",
+          "none": "Nothing recorded yet"
+        },
+        "organization": {
+          "label": "hours in organisation records",
+          "behind": "Organisation records"
+        },
+        "projects": {
+          "label": "projects",
+          "behind": "From your records"
+        }
+      },
+      "seasons": {
+        "eyebrow": "Career",
+        "title": "Career by seasons",
+        "empty": "No seasons yet. Write down a day of work and it becomes the first line of your history.",
+        "emptyAction": "Record your work",
+        "undated": "Dates not stated",
+        "hoursNotStated": "Hours not stated",
+        "hoursRecorded": "{hours} recorded",
+        "hoursConfirmed": "{confirmed} confirmed · {recorded} recorded",
+        "orgDayHours": "{hours} across {count, plural, one {# record} other {# records}}",
+        "orgPeriodHours": "{hours} stated as a period total",
+        "note": "A season shows the hours its own records state. The total above counts every hour once.",
+        "confirmedBy": "Confirmed by {who}",
+        "placement": "Placement",
+        "reconstructed": "Rebuilt from an earlier record",
+        "photoAlt": "Photo from the work on {name}",
+        "evidence": {
+          "confirmed": "Confirmed by someone else",
+          "client_accepted": "Accepted by the client",
+          "organization_record": "The organisation's record",
+          "own_record": "Your own record",
+          "stated": "You stated this; nothing shows it yet"
+        }
+      },
+      "skills": {
+        "eyebrow": "Skills",
+        "title": "What you can do and what shows it",
+        "empty": "No skills yet. Add what you can do, and your records will show the rest.",
+        "emptyAction": "Add skills",
+        "potentialFrom": "Your work in {skills} points to it; nothing confirms it yet",
+        "documentUnverified": "You added the document; no one has checked it",
+        "involved": "Involved in {hours}, not attributed to this skill alone",
+        "timeUnknown": "Your journal could not be read right now, so skills show no hours.",
+        "noScore": "There is no overall score of a person here. You see what the records show and who confirmed them.",
+        "state": {
+          "confirmed": "Confirmed by work",
+          "certified": "Certified",
+          "recorded": "In your records",
+          "declared": "You stated it",
+          "potential": "Possible"
+        }
+      },
+      "next": {
+        "eyebrow": "Next move",
+        "title": "Where your work could lead",
+        "confirmed": "Confirmed: {list}",
+        "inRecords": "In your records: {list}",
+        "missing": "Missing: {list}",
+        "none": "No next move to show yet. More recorded work gives this more to go on.",
+        "unknown": "Could not be read right now."
+      }
     }
   },
   "todayScreen": {

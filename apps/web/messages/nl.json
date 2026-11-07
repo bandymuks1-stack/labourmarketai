@@ -8667,6 +8667,98 @@
       "emptyCapabilities": "Nog geen vaardigheden. Hier verschijnen je vaardigheden en het werk dat ze laat zien.",
       "emptyExperience": "Nog geen werkgeschiedenis. Je journaal en de registraties van organisaties waar je werkte bouwen die op.",
       "untitled": "Werk zonder naam in de bron"
+    },
+    "athlete": {
+      "earlyNote": "Vroege opmaak van je Living CV. De cijfers zijn je echte gegevens; het uiterlijk is nog niet definitief.",
+      "fullCv": "Volledig cv openen",
+      "hero": {
+        "portraitAlt": "Foto van {name}",
+        "noRole": "Nog geen beroep toegevoegd",
+        "availableFrom": "vanaf {date}",
+        "onlyYou": "Alleen jij ziet dit hier."
+      },
+      "stats": {
+        "aria": "Cijfers en wie erachter staat",
+        "unknown": "Kon nu niet worden gelezen",
+        "organizationCount": "{count, plural, one {# organisatie} other {# organisaties}}",
+        "confirmedBy": "Bevestigd door {who}",
+        "confirmedBySomeone": "Er staat een bevestiging geregistreerd",
+        "confirmedSelfOnly": "Je hebt dit zelf bevestigd; nog niemand anders",
+        "someSelfConfirmed": "Deels: {qualifier}",
+        "truncated": "Je logboek is lang, dus oudere regels kunnen buiten deze cijfers vallen.",
+        "confirmed": {
+          "label": "bevestigde uren",
+          "none": "Nog niemand heeft je werk bevestigd"
+        },
+        "total": {
+          "label": "uren ervaring",
+          "behind": "Je logboek en gegevens van organisaties, elk uur één keer"
+        },
+        "journal": {
+          "label": "geregistreerde uren",
+          "behind": "Je eigen werklogboek",
+          "none": "Nog niets geregistreerd"
+        },
+        "organization": {
+          "label": "uren in gegevens van organisaties",
+          "behind": "Gegevens van organisaties"
+        },
+        "projects": {
+          "label": "projecten",
+          "behind": "Uit je gegevens"
+        }
+      },
+      "seasons": {
+        "eyebrow": "Loopbaan",
+        "title": "Loopbaan per seizoen",
+        "empty": "Nog geen seizoenen. Noteer een werkdag en die wordt de eerste regel van je geschiedenis.",
+        "emptyAction": "Werk registreren",
+        "undated": "Geen datums vermeld",
+        "hoursNotStated": "Geen uren vermeld",
+        "hoursRecorded": "{hours} geregistreerd",
+        "hoursConfirmed": "{confirmed} bevestigd · {recorded} geregistreerd",
+        "orgDayHours": "{hours} over {count, plural, one {# regel} other {# regels}}",
+        "orgPeriodHours": "{hours} vermeld als totaal over een periode",
+        "note": "Een seizoen toont de uren die zijn eigen gegevens vermelden. Het totaal hierboven telt elk uur één keer.",
+        "confirmedBy": "Bevestigd door {who}",
+        "placement": "Stage",
+        "reconstructed": "Herleid uit een eerdere registratie",
+        "photoAlt": "Foto van het werk aan {name}",
+        "evidence": {
+          "confirmed": "Bevestigd door iemand anders",
+          "client_accepted": "Geaccepteerd door de klant",
+          "organization_record": "Gegevens van de organisatie",
+          "own_record": "Je eigen registratie",
+          "stated": "Dit heb je zelf vermeld; nog niets laat het zien"
+        }
+      },
+      "skills": {
+        "eyebrow": "Vaardigheden",
+        "title": "Wat je kunt en wat dat laat zien",
+        "empty": "Nog geen vaardigheden. Voeg toe wat je kunt; je gegevens laten de rest zien.",
+        "emptyAction": "Vaardigheden toevoegen",
+        "potentialFrom": "Je werk aan {skills} wijst hierop; nog niets bevestigt het",
+        "documentUnverified": "Je hebt het document zelf toegevoegd; niemand heeft het gecontroleerd",
+        "involved": "Betrokken bij {hours}, niet alleen aan deze vaardigheid toegerekend",
+        "timeUnknown": "Je logboek kon nu niet worden gelezen, dus vaardigheden tonen geen uren.",
+        "noScore": "Er is hier geen totaalscore van een persoon. Je ziet wat de gegevens laten zien en wie ze heeft bevestigd.",
+        "state": {
+          "confirmed": "Bevestigd door werk",
+          "certified": "Gecertificeerd",
+          "recorded": "In je gegevens",
+          "declared": "Zelf vermeld",
+          "potential": "Mogelijk"
+        }
+      },
+      "next": {
+        "eyebrow": "Volgende stap",
+        "title": "Waar je werk toe kan leiden",
+        "confirmed": "Bevestigd: {list}",
+        "inRecords": "In je gegevens: {list}",
+        "missing": "Ontbreekt: {list}",
+        "none": "Nog geen volgende stap te tonen. Meer geregistreerd werk geeft hier meer houvast.",
+        "unknown": "Kon nu niet worden gelezen."
+      }
     }
   },
   "todayScreen": {
