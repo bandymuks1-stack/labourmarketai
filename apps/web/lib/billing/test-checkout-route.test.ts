@@ -19,6 +19,7 @@ const supa = vi.hoisted(() => ({
   roles: [{ role: "company" }],
 }));
 const trialSwitch = vi.hoisted(() => ({ on: true }));
+const pilotPass = vi.hoisted(() => ({ on: false }));
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(async () => ({
     auth: { getUser: async () => ({ data: { user: supa.user } }) },
@@ -29,6 +30,7 @@ vi.mock("@/lib/billing/config", () => ({
   getBillingConfig: () => ({ state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" }),
   getBillingConfigFor: () => ({ state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" }),
   billingTrialEnabled: () => trialSwitch.on,
+  billingPilotPassEnabled: () => pilotPass.on,
 }));
 vi.mock("@/lib/billing/prices", () => ({ testPriceIdFor: (k: string) => (k === "company_pilot" ? "price_SERVER" : null) }));
 vi.mock("@/lib/billing/billing-subject", () => ({
@@ -105,6 +107,20 @@ describe("amount authority — the browser never supplies a price", () => {
 });
 
 describe("admission — one active subscription per subject + plan", () => {
+  it("while the pilot pass runs a direct request → 409, NO admission, NO operation, NO provider session", async () => {
+    pilotPass.on = true;
+    try {
+      const res = await post({ planKey: "company_pilot" });
+      expect(res.status).toBe(409);
+      expect((await res.json()).reason).toBe("pilot_pass_active");
+      expect(admit).not.toHaveBeenCalled();
+      expect(open).not.toHaveBeenCalled();
+      expect(createSession).not.toHaveBeenCalled();
+    } finally {
+      pilotPass.on = false;
+    }
+  });
+
   it("subscription_exists → 409, NO operation opened, NO provider session", async () => {
     admit.mockResolvedValue({ admit: false, reason: "subscription_exists", localStatus: "active", provider: "confirmed_live" });
     const res = await post({ planKey: "company_pilot" });
