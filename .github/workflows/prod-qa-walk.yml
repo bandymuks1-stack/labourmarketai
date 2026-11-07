@@ -139,6 +139,8 @@ on:
           - slow-connection
           # Owner 2026-11-07: the Today panel, journal period reports and quick confirmation. Read-only. Dispatch only.
           - organization-daily
+          # Owner P0 2026-11-07: the landing's three request doors. Adds 3 tagged rows and raises the real alert. Dispatch only.
+          - request-doors
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -493,6 +495,7 @@ jobs:
             sr1-first-search) SPEC=tests/e2e/prod-sr1-first-search.spec.ts ;;
             slow-connection) SPEC=tests/e2e/prod-slow-connection.spec.ts ;;
             organization-daily) SPEC=tests/e2e/prod-organization-daily.spec.ts ;;
+            request-doors) SPEC=tests/e2e/prod-request-doors.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
