@@ -15213,6 +15213,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Personalsuche beauftragen",
+        "body": "Nennen Sie den Beruf, die benötigte Personenzahl, das Land und den Arbeitsbeginn."
+      },
+      "b2b": {
+        "title": "B2B-Kooperationsanfrage senden",
+        "body": "Beschreiben Sie Art der Arbeiten, Ort, Umfang und Fristen."
+      },
+      "project": {
+        "title": "Einzelprojekt beauftragen",
+        "body": "Für Privat- und Geschäftskunden: Beschreiben Sie das benötigte Projekt oder die Dienstleistung."
+      },
+      "title": "Anfrage senden",
+      "promise": "Senden Sie Ihre Anfrage ohne Registrierung – wir melden uns innerhalb von 24 Stunden bei Ihnen.",
+      "name": "Name oder Firma",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "country": "Land",
+      "countryChoose": "Land wählen",
+      "city": "Ort",
+      "profession": "Beruf",
+      "workers": "Anzahl der Arbeitskräfte",
+      "start": "Arbeitsbeginn",
+      "details": "Weitere Anforderungen",
+      "work": "Art der Arbeiten",
+      "place": "Einsatzort",
+      "scope": "Umfang",
+      "deadline": "Fristen",
+      "need": "Benötigtes Projekt oder benötigte Dienstleistung",
+      "customer": "Auftraggeber",
+      "customerPrivate": "Privatperson",
+      "customerBusiness": "Unternehmen",
+      "optional": "freiwillig",
+      "send": "Anfrage senden",
+      "sending": "Wird gesendet…",
+      "receivedTitle": "Ihre Anfrage ist bei uns eingegangen",
+      "receivedBody": "Wir melden uns innerhalb von 24 Stunden über die angegebenen Kontaktdaten.",
+      "invalid": "Bitte prüfen Sie die Felder und versuchen Sie es erneut. Ihre Eingaben bleiben im Formular.",
+      "limited": "Gerade gehen zu viele Anfragen ein. Bitte versuchen Sie es später: Ihre Eingaben bleiben im Formular.",
+      "unavailable": "Ihre Anfrage konnte nicht gesendet werden und ist nicht eingegangen. Ihre Eingaben bleiben im Formular, bitte versuchen Sie es erneut.",
+      "notice": "Mit dem Senden bestätigen Sie, dass Sie die <privacy>Datenschutzerklärung</privacy> gelesen haben."
+    },
     "audienceValueEyebrow": "Wert für jede Seite der Arbeit",
     "audienceValueTitle": "Was jede Zielgruppe bekommt",
     "how": {
