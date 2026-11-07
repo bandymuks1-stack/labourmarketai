@@ -1,3 +1,4 @@
+import { isUnknownAddress } from "@/lib/routing/known-first-segments";
 import { NextResponse, NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
@@ -355,6 +356,12 @@ export async function middleware(request: NextRequest) {
   if (intlResponse.headers.get("location")) return intlResponse;
 
   const { locale, rest } = stripLocale(request.nextUrl.pathname);
+
+  // 1a. No route can answer this address: the real 404 page, not Next's error shell
+  //     (UX-9). Redirects in next.config ran before this, so their spellings still work.
+  if (isUnknownAddress(rest)) {
+    return NextResponse.rewrite(new URL(`/${locale}/unknown-address`, request.url), { status: 404 });
+  }
 
   // 1b. The landing has ONE arm (owner decision 2026-09-30: the optional
   //     LIVE arm and its cookie rewrite are removed). The root landing page
