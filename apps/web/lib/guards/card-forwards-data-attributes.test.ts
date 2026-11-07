@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { createElement } from "react";
+import { createElement, type ComponentType } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
@@ -12,7 +12,7 @@ import { Card } from "@/components/ui/Card";
  * production walk noticed.
  */
 const render = (props: Record<string, unknown>) =>
-  renderToStaticMarkup(createElement(Card, { children: "y", ...props }));
+  renderToStaticMarkup(createElement(Card as unknown as ComponentType<Record<string, unknown>>, props, "y"));
 
 describe("Card keeps a caller's data attributes", () => {
   it("renders them on the card's own element", () => {
