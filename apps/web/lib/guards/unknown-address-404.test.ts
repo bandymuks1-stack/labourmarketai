@@ -65,8 +65,8 @@ describe("how it is wired", () => {
     expect(middleware).toMatch(/NextResponse\.rewrite\(target, \{ status: 404 \}\)/);
   });
 
-  it("the router's own fetch is not a 404: that reloads the page in a loop", () => {
-    expect(middleware).toMatch(/request\.headers\.has\("rsc"\)\s*\?\s*NextResponse\.rewrite\(target\)/);
+  it("the router's own fetch is not a 404: that reloads the whole page", () => {
+    expect(middleware).toMatch(/request\.headers\.get\("sec-fetch-dest"\) === "empty"\s*\?\s*NextResponse\.rewrite\(target\)/);
   });
 
   it("the page is the one not-found view, never indexed, and throws nothing", () => {

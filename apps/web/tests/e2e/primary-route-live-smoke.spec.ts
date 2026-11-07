@@ -75,8 +75,8 @@ test.describe("primary route live-render smoke — auth-gated routes", () => {
 
 /**
  * AN ADDRESS NOTHING CAN ANSWER (UX-9): complete HTML with a 404, and it stays put. A
- * 404 on the router's own fetch once made this page reload itself for ever, and every
- * single-request check still passed, so this counts the documents the browser loads.
+ * 404 on the router's own fetch made this page reload itself on a first visit, and
+ * every single-request check still passed, so this counts the documents it loads.
  */
 test("an unknown address is a real 404 page and does not reload itself", async ({ page }) => {
   let documents = 0;

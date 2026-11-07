@@ -360,10 +360,12 @@ export async function middleware(request: NextRequest) {
   // 1a. No route can answer this address: the real 404 page, not Next's error shell
   //     (UX-9). Redirects in next.config ran before this, so their spellings still work.
   if (isUnknownAddress(rest)) {
-    // Only the document answers 404. The router fetches this same address after
-    // hydration, and a 404 to that fetch makes it reload the page, for ever.
+    // Only the document answers 404. A router fetch of this address after hydration
+    // (a first visit refreshes once) must not: a 404 there makes the router reload the
+    // whole page. Next strips `rsc` before middleware, so the browser's own header
+    // tells them apart; a crawler or curl sends none and gets the 404.
     const target = new URL(`/${locale}/unknown-address`, request.url);
-    return request.headers.has("rsc")
+    return request.headers.get("sec-fetch-dest") === "empty"
       ? NextResponse.rewrite(target)
       : NextResponse.rewrite(target, { status: 404 });
   }
