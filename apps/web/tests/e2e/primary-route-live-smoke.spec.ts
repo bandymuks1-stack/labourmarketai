@@ -72,3 +72,26 @@ test.describe("primary route live-render smoke — auth-gated routes", () => {
     });
   }
 });
+
+/**
+ * AN ADDRESS NOTHING CAN ANSWER (UX-9): complete HTML with a 404, and it stays put. A
+ * 404 on the router's own fetch once made this page reload itself for ever, and every
+ * single-request check still passed, so this counts the documents the browser loads.
+ */
+test("an unknown address is a real 404 page and does not reload itself", async ({ page }) => {
+  let documents = 0;
+  page.on("request", (r) => {
+    if (r.isNavigationRequest() && r.frame() === page.mainFrame()) documents++;
+  });
+  const response = await page.goto("/lt/sita-adresa-niekas-neatsako");
+  expect(response?.status()).toBe(404);
+  const html = await response!.text();
+  expect(html).not.toContain("__next_error__");
+  expect(html).toMatch(/<html[^>]*lang="lt"/);
+  expect(html).toMatch(/<h1/);
+  await expect(page.getByTestId("branded-not-found").first()).toBeVisible();
+  await page.waitForTimeout(3000);
+  expect(documents).toBe(1);
+  await expect(page.getByTestId("not-found-home-cta").first()).toBeVisible();
+});
+

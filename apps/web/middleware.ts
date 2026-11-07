@@ -360,7 +360,12 @@ export async function middleware(request: NextRequest) {
   // 1a. No route can answer this address: the real 404 page, not Next's error shell
   //     (UX-9). Redirects in next.config ran before this, so their spellings still work.
   if (isUnknownAddress(rest)) {
-    return NextResponse.rewrite(new URL(`/${locale}/unknown-address`, request.url), { status: 404 });
+    // Only the document answers 404. The router fetches this same address after
+    // hydration, and a 404 to that fetch makes it reload the page, for ever.
+    const target = new URL(`/${locale}/unknown-address`, request.url);
+    return request.headers.has("rsc")
+      ? NextResponse.rewrite(target)
+      : NextResponse.rewrite(target, { status: 404 });
   }
 
   // 1b. The landing has ONE arm (owner decision 2026-09-30: the optional

@@ -62,7 +62,11 @@ describe("how it is wired", () => {
   const page = readFileSync(join(LOCALE_DIR, "unknown-address", "page.tsx"), "utf8");
 
   it("the middleware keeps the 404 status", () => {
-    expect(middleware).toMatch(/unknown-address`, request\.url\), \{ status: 404 \}/);
+    expect(middleware).toMatch(/NextResponse\.rewrite\(target, \{ status: 404 \}\)/);
+  });
+
+  it("the router's own fetch is not a 404: that reloads the page in a loop", () => {
+    expect(middleware).toMatch(/request\.headers\.has\("rsc"\)\s*\?\s*NextResponse\.rewrite\(target\)/);
   });
 
   it("the page is the one not-found view, never indexed, and throws nothing", () => {
