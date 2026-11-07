@@ -1,5 +1,22 @@
 {
   "companyModel": {
+    "today": {
+      "goApprove": "Prüfen und freigeben",
+      "amount": {
+        "hours": "{n} Std.",
+        "days": "{n} T.",
+        "minutes": "{n} Min."
+      },
+      "people": "{n, plural, one {# Person} other {# Personen}}",
+      "entries": "{n, plural, one {# Eintrag} other {# Einträge}}",
+      "unclear": "Stunden unklar: {n}",
+      "noHours": "Ohne Stunden: {n}",
+      "noFigure": "Keine Stunden angegeben",
+      "elsewhere": "Anderswo warten noch {n} auf deine Freigabe.",
+      "notReviewer": "In dieser Organisation gibst du keine Stunden frei: Dafür braucht es eine Beziehung als Führungskraft oder Inhaber.",
+      "decisionsClear": "Gerade warten keine weiteren Entscheidungen.",
+      "doors": "Personen und Projekte"
+    },
     "title": "Unternehmensführung",
     "need": "Was wir brauchen",
     "offer": "Was wir anbieten",

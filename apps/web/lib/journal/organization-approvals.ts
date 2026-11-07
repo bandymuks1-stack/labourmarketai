@@ -18,8 +18,11 @@ export async function readOrganizationApprovalFacts(organizationId: string): Pro
   employees: OrganizationEmployeeReview | null;
   ownUnconfirmed: number | null;
   otherReviewer: boolean | null;
+  /** Does the reader hold a reviewer relationship here? Null: the read failed. Optional,
+   *  so a caller's own fallback without it stays valid. */
+  readerReviews?: boolean | null;
 }> {
-  const unknown = { employees: null, ownUnconfirmed: null, otherReviewer: null };
+  const unknown = { employees: null, ownUnconfirmed: null, otherReviewer: null, readerReviews: null };
   const supabase = await createClient();
   const {
     data: { user },
@@ -53,6 +56,7 @@ export async function readOrganizationApprovalFacts(organizationId: string): Pro
       user.id,
     ),
     otherReviewer,
+    readerReviews: readerManages,
   };
 }
 
