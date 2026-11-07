@@ -205,7 +205,20 @@ test("forms work on a slow phone: what was typed stays, a save shows its state, 
       const headingAfter = seconds(started);
       await settled(page);
       const wide = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
-      record(label, (res?.status() ?? 0) < 400 && crashes.length === 0 && !wide, `status=${res?.status()} heading_s=${headingAfter} loaded_s=${seconds(started)} sideways_scroll=${wide} crash=${crashes.join("/") || "none"}`);
+      // UX-3: nothing below the consent banner may move while the page wakes up.
+      const shift = await page.evaluate(
+        () =>
+          new Promise<number>((done) => {
+            let total = 0;
+            new PerformanceObserver((list) => {
+              for (const e of list.getEntries() as unknown as { value: number; hadRecentInput: boolean }[]) {
+                if (!e.hadRecentInput) total += e.value;
+              }
+            }).observe({ type: "layout-shift", buffered: true });
+            setTimeout(() => done(total), 500);
+          }),
+      );
+      record(label, (res?.status() ?? 0) < 400 && crashes.length === 0 && !wide && shift <= 0.1, `status=${res?.status()} heading_s=${headingAfter} loaded_s=${seconds(started)} layout_shift=${shift.toFixed(3)} sideways_scroll=${wide} crash=${crashes.join("/") || "none"}`);
     } catch (e) {
       record(label, false, `stopped (${short(e)})`);
     } finally {
