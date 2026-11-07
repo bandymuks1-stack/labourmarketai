@@ -15,7 +15,20 @@
     "work": "Arbeit & Stunden",
     "results": "Ergebnisse",
     "history": "Verlauf",
-    "areasTitle": "Unternehmensbereiche"
+    "areasTitle": "Unternehmensbereiche",
+    "approvals": {
+      "title": "Warten auf Freigabe: {n}",
+      "titleUnknown": "Warten auf Freigabe",
+      "what": "Von deinen Beschäftigten erfasste Stunden und Arbeiten. Gib sie direkt hier frei oder lehne sie ab.",
+      "seeAll": "Alle wartenden ({n})",
+      "emptyTitle": "Im Moment warten keine Stunden von Beschäftigten auf Freigabe.",
+      "emptyNext": "Sobald jemand Arbeit erfasst, erscheint sie hier.",
+      "noEmployees": "Diese Organisation hat noch keine Beschäftigten, deren Stunden du freigeben könntest.",
+      "people": "Personen und Team",
+      "reviewOff": "Die Freigabe ist für {off} von {total} Beschäftigten ausgeschaltet. Ihre Stunden erscheinen hier erst, wenn du sie einschaltest.",
+      "enable": "Unter Personen und Team einschalten",
+      "own": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben: Das macht eine andere Führungskraft dieser Organisation."
+    }
   },
   "publicDemand": {
     "title": "Aktuelle Marktnachfrage",

@@ -15,7 +15,20 @@
     "work": "Praca i godziny",
     "results": "Wyniki",
     "history": "Historia",
-    "areasTitle": "Obszary firmy"
+    "areasTitle": "Obszary firmy",
+    "approvals": {
+      "title": "Czeka na zatwierdzenie: {n}",
+      "titleUnknown": "Czeka na zatwierdzenie",
+      "what": "Godziny i prace zapisane przez pracowników. Zatwierdź lub odrzuć je od razu tutaj.",
+      "seeAll": "Wszystkie oczekujące ({n})",
+      "emptyTitle": "Obecnie żadne godziny pracowników nie czekają na zatwierdzenie.",
+      "emptyNext": "Gdy pracownik zapisze pracę, pojawi się tutaj.",
+      "noEmployees": "Ta organizacja nie ma jeszcze pracowników, których godziny mógłbyś zatwierdzić.",
+      "people": "Ludzie i zespół",
+      "reviewOff": "Zatwierdzanie jest wyłączone dla {off} z {total} pracowników. Ich godziny nie pojawią się tutaj, dopóki go nie włączysz.",
+      "enable": "Włącz w sekcji Ludzie i zespół",
+      "own": "Twoje niepotwierdzone wpisy: {n}. Nie możesz zatwierdzić własnej pracy: robi to inny kierownik tej organizacji."
+    }
   },
   "publicDemand": {
     "title": "Aktualny popyt na rynku",

@@ -15,7 +15,20 @@
     "work": "Werk & uren",
     "results": "Resultaten",
     "history": "Geschiedenis",
-    "areasTitle": "Bedrijfsgebieden"
+    "areasTitle": "Bedrijfsgebieden",
+    "approvals": {
+      "title": "Wacht op goedkeuring: {n}",
+      "titleUnknown": "Wacht op goedkeuring",
+      "what": "Uren en werk die je medewerkers hebben vastgelegd. Keur ze hier meteen goed of af.",
+      "seeAll": "Alles wat wacht ({n})",
+      "emptyTitle": "Er wachten nu geen uren van medewerkers op goedkeuring.",
+      "emptyNext": "Zodra een medewerker werk vastlegt, verschijnt het hier.",
+      "noEmployees": "Deze organisatie heeft nog geen medewerkers van wie je uren kunt goedkeuren.",
+      "people": "Mensen en team",
+      "reviewOff": "Goedkeuring staat uit voor {off} van de {total} medewerkers. Hun uren verschijnen hier pas als je het inschakelt.",
+      "enable": "Inschakelen bij Mensen en team",
+      "own": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren: dat doet een andere manager van deze organisatie."
+    }
   },
   "publicDemand": {
     "title": "Actuele marktvraag",

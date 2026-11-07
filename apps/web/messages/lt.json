@@ -15,7 +15,20 @@
     "work": "Darbas ir valandos",
     "results": "Rezultatai",
     "history": "Istorija",
-    "areasTitle": "Įmonės sritys"
+    "areasTitle": "Įmonės sritys",
+    "approvals": {
+      "title": "Laukia patvirtinimo: {n}",
+      "titleUnknown": "Laukia patvirtinimo",
+      "what": "Darbuotojų įrašytos valandos ir darbai. Patvirtink arba atmesk čia pat.",
+      "seeAll": "Visi laukiantys ({n})",
+      "emptyTitle": "Šiuo metu darbuotojų valandos patvirtinimo nelaukia.",
+      "emptyNext": "Kai darbuotojas įrašys darbą, jis atsiras čia.",
+      "noEmployees": "Organizacijoje dar nėra darbuotojų, kurių valandas galėtum patvirtinti.",
+      "people": "Žmonės ir komanda",
+      "reviewOff": "Patvirtinimas neįjungtas: {off} iš {total} darbuotojų. Jų valandos čia neatsiras, kol jo neįjungsi.",
+      "enable": "Įjungti skiltyje „Žmonės ir komanda“",
+      "own": "Tavo paties nepatvirtintų įrašų: {n}. Savo darbo pats patvirtinti negali: tai daro kitas šios organizacijos vadovas."
+    }
   },
   "publicDemand": {
     "title": "Dabartinė rinkos paklausa",
