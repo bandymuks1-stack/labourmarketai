@@ -151,6 +151,14 @@ describe("the action never claims what did not happen", () => {
     }
   });
 
+  it("an advert is stored and told it was received, and no mail goes out", async () => {
+    persist.mockResolvedValue({ ok: true, advertising: true });
+    expect(await send()).toBe("received");
+    expect(persist).toHaveBeenCalledTimes(1);
+    expect(sendSmtp).not.toHaveBeenCalled();
+    expect(info).toHaveBeenCalledWith("[request-door] stored", { door: "b2b", alerted: false });
+  });
+
   it("logs whether anyone was told, and nothing else", async () => {
     await send();
     expect(info).toHaveBeenCalledWith("[request-door] stored", { door: "b2b", alerted: true });

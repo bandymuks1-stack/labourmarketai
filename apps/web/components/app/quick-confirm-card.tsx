@@ -22,6 +22,8 @@ export type QuickConfirmEntryView = {
   createdAt: string;
   /** The day the work happened (`resolveWorkDay`). */
   workDay?: string;
+  /** The stored work time (`reviewerHoursOf`), never a re-parse of the text. */
+  hours?: { value: number; unit: string; certain: boolean } | null;
   originalText: string;
   recognizedNames: string[];
   /** The skills the tap will verify — listed EXPLICITLY on the card (no
@@ -198,6 +200,15 @@ export function QuickConfirmCard({
           {formatUtcDate(entry.workDay ?? entry.createdAt, locale)}
         </p>
       </div>
+
+      {entry.hours ? (
+        <p className="text-sm font-semibold text-text-primary" data-testid={`quick-hours-${entry.id}`}>
+          {t("inbox.hoursLabel")}: {entry.hours.value} {entry.hours.unit}
+          {entry.hours.certain ? null : (
+            <span className="ml-1 text-xs font-normal text-state-warning">({t("inbox.hoursUnclear")})</span>
+          )}
+        </p>
+      ) : null}
 
       {/* WHAT — the entry text + recognized works. */}
       <p className="line-clamp-4 whitespace-pre-wrap break-words text-sm text-text-secondary">

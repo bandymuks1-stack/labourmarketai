@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseClientEnv } from "@/lib/env";
 import { clientKeyFromHeaders, rateLimit } from "@/lib/security/rate-limit";
+import { looksLikeAdvertising } from "./intake-advertising";
 
 /**
  * Anonymous structured company-demand persistence (v1).
@@ -47,7 +48,8 @@ export type PublicIntakeInput = {
 };
 
 export type PublicIntakeResult =
-  | { ok: true }
+  /** `advertising`: stored like any request, but the caller alerts no one. */
+  | { ok: true; advertising: boolean }
   | { ok: false; code: "unavailable" | "invalid" | "error" | "rate_limited" };
 
 /**
@@ -123,7 +125,11 @@ export async function persistPublicCompanyNeed(
       p_source_path: input.sourcePath,
     });
 
-    if (!error) return { ok: true };
+    if (!error) {
+      const advertising = looksLikeAdvertising(input.description, input.companyName, input.sector);
+      if (advertising) console.info("[company-need-intake] stored, reads as advertising, no alert");
+      return { ok: true, advertising };
+    }
 
     if (NOT_APPLIED.has(error.code ?? "")) {
       // Backend not applied yet — the caller degrades to the prepared state.

@@ -476,7 +476,9 @@ describe.each(Object.keys(PAGES) as PagePath[])("one %s request (layout + page)"
 //   /dashboard/company/people   55 / 18 ->  47 / 7
 const BOUNDS: Record<"layout" | PagePath, { calls: number; waves: number }> = {
   layout: { calls: 23, waves: 6 },
-  "/dashboard": { calls: 29, waves: 6 },
+  // +1 (2026-11-07): the organization's active engagements, for why nothing waits to be
+  // approved on the first screen. It shares a wave, so the waves stay at 6.
+  "/dashboard": { calls: 30, waves: 6 },
   "/dashboard/journal": { calls: 25, waves: 5 },
   "/dashboard/communication": { calls: 25, waves: 6 },
   "/dashboard/company": { calls: 50, waves: 7 },

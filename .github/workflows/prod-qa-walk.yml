@@ -137,7 +137,7 @@ on:
           - sr1-first-search
           # Owner 2026-11-06: forms on a slow phone. Synthetic worker, real Chrome. Dispatch only, never in the rotation.
           - slow-connection
-          # Owner 2026-11-07: the Today panel, journal period reports and quick confirmation. Read-only. Dispatch only.
+          # Owner 2026-11-07: the Today panel, journal period reports and quick confirmation, plus one synthetic entry the owner approves from the first screen. Dispatch only.
           - organization-daily
           # Owner P0 2026-11-07: the landing's three request doors. Adds 3 tagged rows and raises the real alert. Dispatch only.
           - request-doors

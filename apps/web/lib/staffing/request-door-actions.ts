@@ -58,6 +58,6 @@ export async function submitRequestDoorAction(formData: FormData): Promise<Reque
 
   // The row is the record; the alert only shortens the wait for it. The result is logged
   // (never the content), because the 24-hour promise rests on someone being told.
-  console.info("[request-door] stored", { door, alerted: await alertTeam(door) });
+  console.info("[request-door] stored", { door, alerted: stored.advertising ? false : await alertTeam(door) });
   return "received";
 }

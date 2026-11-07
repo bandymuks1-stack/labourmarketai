@@ -15,7 +15,22 @@
     "work": "Darbas ir valandos",
     "results": "Rezultatai",
     "history": "Istorija",
-    "areasTitle": "Įmonės sritys"
+    "areasTitle": "Įmonės sritys",
+    "approvals": {
+      "title": "Laukia patvirtinimo: {n}",
+      "titleUnknown": "Laukia patvirtinimo",
+      "what": "Darbuotojų įrašytos valandos ir darbai. Patvirtink arba atmesk čia pat.",
+      "seeAll": "Visi laukiantys ({n})",
+      "emptyTitle": "Šiuo metu darbuotojų valandos patvirtinimo nelaukia.",
+      "emptyNext": "Kai darbuotojas įrašys darbą, jis atsiras čia.",
+      "noEmployees": "Organizacijoje dar nėra darbuotojų, kurių valandas galėtum patvirtinti.",
+      "people": "Žmonės ir komanda",
+      "reviewOff": "Patvirtinimas neįjungtas: {off} iš {total} darbuotojų. Jų valandos čia neatsiras, kol jo neįjungsi.",
+      "enable": "Įjungti skiltyje „Žmonės ir komanda“",
+      "own": "Tavo paties nepatvirtintų įrašų: {n}. Savo darbo pats patvirtinti negali: jį gali patvirtinti kitas šios organizacijos vadovas.",
+      "ownAlone": "Tavo paties nepatvirtintų įrašų: {n}. Savo darbo pats patvirtinti negali, o kito vadovo šioje organizacijoje nėra, todėl jie lieka įrašyti kaip tavo paties darbas.",
+      "ownUnknown": "Tavo paties nepatvirtintų įrašų: {n}. Savo darbo pats patvirtinti negali: jie lieka įrašyti kaip tavo paties darbas, kol juos patvirtina kitas vadovas."
+    }
   },
   "publicDemand": {
     "title": "Dabartinė rinkos paklausa",
@@ -3171,6 +3186,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Panašu į reklamą",
       "eyebrow": "ĮMONIŲ POREIKIAI",
       "title": "Viešų įmonių poreikių eilė",
       "subtitle": "Anoniminiai poreikiai, pateikti per viešą /company-need formą. Peržiūrėk ir rankiniu būdu pažymėk tolesnį žingsnį. Nieko neišsiunčiama automatiškai — visą kontaktą atlieka žmogus.",

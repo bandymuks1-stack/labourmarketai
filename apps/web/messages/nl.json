@@ -15,7 +15,22 @@
     "work": "Werk & uren",
     "results": "Resultaten",
     "history": "Geschiedenis",
-    "areasTitle": "Bedrijfsgebieden"
+    "areasTitle": "Bedrijfsgebieden",
+    "approvals": {
+      "title": "Wacht op goedkeuring: {n}",
+      "titleUnknown": "Wacht op goedkeuring",
+      "what": "Uren en werk die je medewerkers hebben vastgelegd. Keur ze hier meteen goed of af.",
+      "seeAll": "Alles wat wacht ({n})",
+      "emptyTitle": "Er wachten nu geen uren van medewerkers op goedkeuring.",
+      "emptyNext": "Zodra een medewerker werk vastlegt, verschijnt het hier.",
+      "noEmployees": "Deze organisatie heeft nog geen medewerkers van wie je uren kunt goedkeuren.",
+      "people": "Mensen en team",
+      "reviewOff": "Goedkeuring staat uit voor {off} van de {total} medewerkers. Hun uren verschijnen hier pas als je het inschakelt.",
+      "enable": "Inschakelen bij Mensen en team",
+      "own": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren: dat kan een andere manager van deze organisatie.",
+      "ownAlone": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren en deze organisatie heeft geen andere manager, dus ze blijven vastgelegd als je eigen werk.",
+      "ownUnknown": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren: ze blijven vastgelegd als je eigen werk tot een andere manager ze bevestigt."
+    }
   },
   "publicDemand": {
     "title": "Actuele marktvraag",
@@ -3171,6 +3186,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Lijkt op reclame",
       "eyebrow": "PERSONEELSBEHOEFTEN",
       "title": "Openbare wachtrij met personeelsbehoeften",
       "subtitle": "Anonieme behoeften die via het openbare /company-need-formulier zijn ingediend. Beoordeel ze stuk voor stuk en markeer de volgende stap handmatig. Er wordt niets automatisch verstuurd — al het contact verloopt via een mens.",

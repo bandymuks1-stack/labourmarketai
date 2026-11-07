@@ -15,7 +15,9 @@ describe("the review card shows the work day", () => {
   it("the queue resolves each entry's work day with the canonical rule", () => {
     const q = read("lib/journal/review-queue.ts");
     expect(q).toMatch(/workDay: resolveWorkDay\(/);
-    expect(q).toMatch(/\.eq\("metric_slug", "work_date"\)/);
+    // All the entry's metrics are read: its stated day, and the hours the reviewer confirms.
+    expect(q).toMatch(/\.from\("journal_entry_metrics"\)/);
+    expect(q).toMatch(/hours: reviewerHoursOf\(/);
   });
   it("both confirm surfaces print the work day, falling back to the filing day", () => {
     expect(read("components/app/quick-confirm-card.tsx")).toMatch(/formatUtcDate\(entry\.workDay \?\? entry\.createdAt, locale\)/);
