@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { test, expect, firstVisit, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 
@@ -28,13 +28,9 @@ const seconds = (since: number) => Math.round((Date.now() - since) / 1000);
 const TYPED = "qa.synthetic.slow@example.invalid";
 
 async function open(browser: Browser, signedIn: boolean): Promise<{ ctx: BrowserContext; page: Page; crashes: string[] }> {
-  const ctx = await browser.newContext({
-    viewport: PHONE,
-    hasTouch: true,
-    isMobile: true,
-    locale: "en-US",
-    ...(signedIn ? { storageState: state } : {}),
-  });
+  // A stranger has never answered the consent banner: it has to be in what is measured (UX-3).
+  const options = { viewport: PHONE, hasTouch: true, isMobile: true, locale: "en-US" };
+  const ctx = await browser.newContext(signedIn ? { ...options, storageState: state } : firstVisit(options));
   const page = await ctx.newPage();
   const cdp = await ctx.newCDPSession(page);
   await cdp.send("Network.enable");
