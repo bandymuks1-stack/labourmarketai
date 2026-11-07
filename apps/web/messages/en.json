@@ -17493,7 +17493,14 @@
     "approve": "Allow",
     "deny": "Deny",
     "errorMissingId": "The authorization request is missing. Go back to the application and try again.",
-    "errorUnresolved": "The authorization request could not be resolved. It may have expired (requests stay valid for a few minutes) or was already used. Go back to the application and connect again."
+    "errorUnresolved": "The authorization request could not be resolved. It may have expired (requests stay valid for a few minutes) or was already used. Go back to the application and connect again.",
+    "scope_openid": "Confirm that it is you (your account ID)",
+    "scope_email": "See your email address",
+    "scope_profile": "See your name and profile picture",
+    "scope_phone": "See your phone number",
+    "scope_offline_access": "Keep working when you are not using it, until you disconnect it",
+    "scopeOther": "Other permission: {scope}",
+    "revokeWhere": "You can disconnect it at any time in <link>Account → Connected apps</link>."
   },
   "capabilities": {
     "interestChooseDemand": "Choose the demand you are interested in: {options}.",

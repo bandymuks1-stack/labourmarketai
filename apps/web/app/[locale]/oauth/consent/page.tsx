@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { decideOauthConsent } from "@/lib/auth/oauth-consent-actions";
+import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -104,7 +105,7 @@ export default async function OauthConsentPage({
             <dd>
               <ul className="list-inside list-disc text-text-muted">
                 {scopes.map((s) => (
-                  <li key={s}>{s}</li>
+                  <li key={s}>{scopeText(t, s)}</li>
                 ))}
               </ul>
             </dd>
@@ -113,6 +114,15 @@ export default async function OauthConsentPage({
       </dl>
 
       <p className="mt-4 text-xs text-text-muted">{t("authorityNote")}</p>
+      <p className="mt-1 text-xs text-text-muted" data-testid="oauth-consent-revoke-where">
+        {t.rich("revokeWhere", {
+          link: (chunks) => (
+            <Link href="/dashboard/account#connected-apps" className="underline">
+              {chunks}
+            </Link>
+          ),
+        })}
+      </p>
 
       <form action={decideOauthConsent} className="mt-6 flex gap-3">
         <input type="hidden" name="authorization_id" value={authorizationId} />
@@ -135,6 +145,24 @@ export default async function OauthConsentPage({
       </form>
     </ConsentShell>
   );
+}
+
+/**
+ * What a requested scope MEANS, in plain words — never the raw protocol
+ * token alone. The authorization server issues only OIDC scopes (Supabase:
+ * "Custom scopes are not currently supported"); each known one has its own
+ * sentence. An unknown scope is still shown, labelled, so nothing a client
+ * asks for is hidden from the person.
+ */
+const KNOWN_SCOPES = ["openid", "email", "profile", "phone", "offline_access"] as const;
+
+function scopeText(
+  t: Awaited<ReturnType<typeof getTranslations<"oauthConsent">>>,
+  scope: string,
+): string {
+  return (KNOWN_SCOPES as readonly string[]).includes(scope)
+    ? t(`scope_${scope as (typeof KNOWN_SCOPES)[number]}`)
+    : t("scopeOther", { scope });
 }
 
 function ConsentShell({

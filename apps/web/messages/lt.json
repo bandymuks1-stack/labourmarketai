@@ -17493,7 +17493,14 @@
     "approve": "Leisti",
     "deny": "Atmesti",
     "errorMissingId": "Trūksta autorizacijos užklausos. Grįžk į programą ir bandyk dar kartą.",
-    "errorUnresolved": "Nepavyko išspręsti autorizacijos užklausos. Ji galėjo pasibaigti (užklausos galioja kelias minutes) arba jau buvo panaudota. Grįžk į programą ir prisijunk iš naujo."
+    "errorUnresolved": "Nepavyko išspręsti autorizacijos užklausos. Ji galėjo pasibaigti (užklausos galioja kelias minutes) arba jau buvo panaudota. Grįžk į programą ir prisijunk iš naujo.",
+    "scope_openid": "Patvirtinti, kad tai tu (tavo paskyros ID)",
+    "scope_email": "Matyti tavo el. pašto adresą",
+    "scope_profile": "Matyti tavo vardą ir profilio nuotrauką",
+    "scope_phone": "Matyti tavo telefono numerį",
+    "scope_offline_access": "Veikti ir tada, kai jos nenaudoji, kol ją atjungsi",
+    "scopeOther": "Kita teisė: {scope}",
+    "revokeWhere": "Bet kada gali ją atjungti: <link>Paskyra → Prijungtos programos</link>."
   },
   "capabilities": {
     "interestChooseDemand": "Pasirink poreikį, kuris tave domina: {options}.",
