@@ -84,8 +84,10 @@ export function AnalyticsConsentBanner({
 }) {
   const { ready, choice } = useConsentChoice();
   const pathname = usePathname();
-  // Server render and first paint show nothing: the choice lives on the device.
-  if (!ready || choice !== null) return null;
+  // In the server render and the first paint, so its height is there from the start
+  // and nothing below it moves (UX-3). A person who already chose never sees it: the
+  // inline CONSENT_BOOTSTRAP_SCRIPT hides it before paint, and this removes it.
+  if (ready && choice !== null) return null;
   if (placement === "top" && isAuthPath(pathname)) return null;
   return (
     <section

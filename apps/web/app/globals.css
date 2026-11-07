@@ -321,6 +321,11 @@ a {
   }
 }
 
+/* A choice already made: the server-rendered banner never paints (UX-3). */
+html[data-consent-decided] [data-testid="analytics-consent-banner"] {
+  display: none;
+}
+
 @layer components {
   /* A conversation turn entering the stream. */
   .ua-msg-in {
