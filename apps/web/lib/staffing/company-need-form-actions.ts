@@ -143,7 +143,8 @@ export async function submitCompanyNeedAction(
   // Fires ONLY on a persisted intake. The helper never throws and no-ops when
   // the channel is unconfigured; the extra try/catch is defense-in-depth so a
   // Telegram failure can never affect the submission, persistence, or queue.
-  if (persisted) {
+  // An advert is stored like any request, and raises no alert.
+  if (persist.ok && !persist.advertising) {
     try {
       await sendCompanyNeedOwnerAlert({
         companyName: raw.companyName,

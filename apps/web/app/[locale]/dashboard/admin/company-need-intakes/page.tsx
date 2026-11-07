@@ -11,6 +11,7 @@ import {
   CompanyNeedIntakeStatusControl,
   type CompanyNeedIntakeStatusLabels,
 } from "@/components/app/company-need-intake-status";
+import { looksLikeAdvertising } from "@/lib/staffing/intake-advertising";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 
@@ -188,6 +189,15 @@ export default async function AdminCompanyNeedIntakesPage({
                       {r.locale ? ` · ${r.locale.toUpperCase()}` : ""}
                     </span>
                   </div>
+                  {/* Read from the text each time: no status or column holds this yet. */}
+                  {looksLikeAdvertising(r.description, r.companyName, r.sector) ? (
+                    <span
+                      className="rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning"
+                      data-testid={`company-need-intake-advertising-${r.id}`}
+                    >
+                      {t("advertising")}
+                    </span>
+                  ) : null}
                   <span
                     className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[r.status]}`}
                     data-testid={`company-need-intake-status-chip-${r.id}`}

@@ -3171,6 +3171,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Looks like advertising",
       "eyebrow": "COMPANY NEEDS",
       "title": "Public company-need queue",
       "subtitle": "Anonymous needs submitted through the public /company-need form. Review each one and mark the next step by hand. Nothing is sent automatically — a human handles all contact.",

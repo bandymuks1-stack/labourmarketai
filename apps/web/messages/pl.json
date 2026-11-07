@@ -3171,6 +3171,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Wygląda na reklamę",
       "eyebrow": "POTRZEBY FIRM",
       "title": "Kolejka publicznych potrzeb firm",
       "subtitle": "Anonimowe potrzeby zgłoszone przez publiczny formularz /company-need. Przejrzyj każdą i ręcznie oznacz kolejny krok. Nic nie jest wysyłane automatycznie — cały kontakt prowadzi człowiek.",
