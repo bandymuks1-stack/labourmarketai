@@ -112,6 +112,13 @@ test.afterAll(async ({ browser }) => {
   await page.goto("/lt/dashboard/journal");
   const del = inMain(page).getByTestId(`journal-entry-delete-${entryId}`);
   await expect(inMain(page).locator(`[data-testid="journal-entry-card-${entryId}"]`)).toBeVisible({ timeout: 30_000 });
+  // The approval can be stored while the walk stopped short of its receipt. A decided entry
+  // offers no delete: it stays as evidence, marked QA-SYNTHETIC.
+  if ((await del.count()) === 0) {
+    console.info("[cleanup] the synthetic entry is decided, so it stays");
+    await ctx.close();
+    return;
+  }
   if (!(await del.isVisible())) await inMain(page).getByTestId(`journal-entry-more-${entryId}`).locator("summary").first().click();
   await del.click();
   await inMain(page).getByTestId(`journal-entry-delete-${entryId}-yes`).click();

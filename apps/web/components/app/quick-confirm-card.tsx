@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -42,6 +42,7 @@ export type QuickConfirmReceipt = {
   workerName: string;
   originalText: string;
   verifiedSkills: number;
+  decision: "approved" | "rejected";
 };
 
 /**
@@ -56,7 +57,7 @@ export function QuickConfirmCard({
   onConfirmed,
 }: {
   entry: QuickConfirmEntryView;
-  /** Called once when the tap succeeds (see QuickConfirmReceipt). */
+  /** Called when a decision is stored (see QuickConfirmReceipt). */
   onConfirmed?: (receipt: QuickConfirmReceipt) => void;
 }) {
   const t = useTranslations("journal");
@@ -65,34 +66,38 @@ export function QuickConfirmCard({
   /** Which action the manager submitted last — the discriminator for reading
    *  the right `useActionState` result (both persist independently). */
   const [lastAction, setLastAction] = useState<"confirm" | "reject" | null>(null);
-  const [confirmState, confirmAction, confirmPending] = useActionState<
-    QuickConfirmState | null,
-    FormData
-  >(quickConfirmEntry, null);
-  const [rejectState, rejectAction, rejectPending] = useActionState<
-    ReviewActionState | null,
-    FormData
-  >(reviewJournalEntry, null);
-
-  const pending = confirmPending || rejectPending;
-  const confirmed = confirmState?.ok === true;
-  const rejected = rejectState?.ok === true;
-  const verifiedSkills = confirmState?.ok === true ? confirmState.verifiedSkills : 0;
-
-  // Report the success upward exactly once. The action revalidates the route,
-  // so the server re-render drops this entry from the queue and unmounts the
-  // card — the receipt must live in the parent to stay on screen.
-  const reported = useRef(false);
-  useEffect(() => {
-    if (!confirmed || reported.current) return;
-    reported.current = true;
+  // Reported as soon as the action answers, not from an effect after the result renders.
+  // The action revalidates the route, and its result and the refreshed queue commit
+  // together: this card is already gone in that commit, so an effect here never runs and
+  // the person gets no answer (production walk 42414193078: stored, no receipt).
+  const report = (decision: QuickConfirmReceipt["decision"], verifiedSkills: number) =>
     onConfirmed?.({
       id: entry.id,
       workerName: entry.workerName,
       originalText: entry.originalText,
       verifiedSkills,
+      decision,
     });
-  }, [confirmed, verifiedSkills, entry.id, entry.workerName, entry.originalText, onConfirmed]);
+  const [confirmState, confirmAction, confirmPending] = useActionState<
+    QuickConfirmState | null,
+    FormData
+  >(async (previous, formData) => {
+    const result = await quickConfirmEntry(previous, formData);
+    if (result.ok) report("approved", result.verifiedSkills);
+    return result;
+  }, null);
+  const [rejectState, rejectAction, rejectPending] = useActionState<
+    ReviewActionState | null,
+    FormData
+  >(async (previous, formData) => {
+    const result = await reviewJournalEntry(previous, formData);
+    if (result.ok) report("rejected", 0);
+    return result;
+  }, null);
+
+  const pending = confirmPending || rejectPending;
+  const confirmed = confirmState?.ok === true;
+  const rejected = rejectState?.ok === true;
 
   // Report the failure of the action the manager MOST RECENTLY submitted.
   // `useActionState` keeps both results independently and neither is ever
