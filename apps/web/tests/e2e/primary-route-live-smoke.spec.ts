@@ -89,6 +89,7 @@ test("an unknown address is a real 404 page and does not reload itself", async (
   expect(html).not.toContain("__next_error__");
   expect(html).toMatch(/<html[^>]*lang="lt"/);
   expect(html).toMatch(/<h1/);
+  expect(html).toContain("<title>Puslapis nerastas");
   await expect(page.getByTestId("branded-not-found").first()).toBeVisible();
   await page.waitForTimeout(3000);
   expect(documents).toBe(1);
