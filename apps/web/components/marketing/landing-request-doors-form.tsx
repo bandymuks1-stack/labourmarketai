@@ -71,9 +71,13 @@ export function LandingRequestDoorsForm({
   const [result, setResult] = useState<RequestDoorResult | null>(null);
   const [pending, start] = useTransition();
   const openedAt = useRef(0);
+  // The buttons lock while a send runs. This holds if anything still opens another door:
+  // an answer belongs to the form that sent it, never to the one on screen now.
+  const shown = useRef<RequestDoor | null>(null);
 
   function open(next: RequestDoor) {
     openedAt.current = Date.now();
+    shown.current = next;
     setDoor(next);
     setResult(null);
   }
@@ -82,12 +86,15 @@ export function LandingRequestDoorsForm({
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     data.set("started", String(openedAt.current));
+    const sentFrom = door;
     start(async () => {
+      let answer: RequestDoorResult;
       try {
-        setResult(await submitRequestDoorAction(data));
+        answer = await submitRequestDoorAction(data);
       } catch {
-        setResult("unavailable");
+        answer = "unavailable";
       }
+      if (shown.current === sentFrom) setResult(answer);
     });
   }
 
@@ -109,6 +116,7 @@ export function LandingRequestDoorsForm({
                 className="min-h-11 w-full whitespace-normal rounded-xl"
                 aria-expanded={door === d}
                 aria-controls="request-door-form"
+                disabled={pending}
                 data-testid={`request-door-${d}-open`}
                 onClick={() => open(d)}
               >

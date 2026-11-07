@@ -12,11 +12,15 @@ import {
 } from "./request-doors";
 
 const persist = vi.fn();
-const alert = vi.fn();
+const sendSmtp = vi.fn();
+const smtpConfig = vi.fn();
 vi.mock("server-only", () => ({}));
 vi.mock("next-intl/server", () => ({ getLocale: async () => "de" }));
 vi.mock("./company-need-public-intake", () => ({ persistPublicCompanyNeed: (i: unknown) => persist(i) }));
-vi.mock("../notifications/telegram-owner-alerts", () => ({ sendCompanyNeedOwnerAlert: (a: unknown) => alert(a) }));
+vi.mock("../email/smtp", () => ({
+  smtpConfigFromEnv: () => smtpConfig(),
+  sendSmtp: (c: unknown, m: unknown) => sendSmtp(c, m),
+}));
 
 import { submitRequestDoorAction } from "./request-door-actions";
 
@@ -49,6 +53,22 @@ describe("the type is stored and comes back", () => {
     expect(requestDoorFromSourcePath(null)).toBeNull();
     expect(isRequestDoor("b2b")).toBe(true);
     expect(isRequestDoor("x")).toBe(false);
+  });
+});
+
+describe("a repeat for another place is another request", () => {
+  it.each(REQUEST_DOORS)("%s: the description differs when only the place does", (door) => {
+    const here = requestDoorIntake(door, "lt", reader({ ...VALID[door], country: "LT", city: "Vilnius" }));
+    const there = requestDoorIntake(door, "lt", reader({ ...VALID[door], country: "LV", city: "Vilnius" }));
+    const town = requestDoorIntake(door, "lt", reader({ ...VALID[door], country: "LT", city: "Kaunas" }));
+    expect(here?.description).not.toBe(there?.description);
+    expect(here?.description).not.toBe(town?.description);
+  });
+
+  it("the same request at the same place is still a repeat", () => {
+    const a = requestDoorIntake("b2b", "lt", reader(VALID.b2b));
+    const b = requestDoorIntake("b2b", "lt", reader(VALID.b2b));
+    expect(a?.description).toBe(b?.description);
   });
 });
 
@@ -100,12 +120,15 @@ function form(fields: Record<string, string>): FormData {
 }
 
 describe("the action never claims what did not happen", () => {
+  let info: ReturnType<typeof vi.spyOn>;
   beforeEach(() => {
     persist.mockReset();
-    alert.mockReset();
+    sendSmtp.mockReset();
+    smtpConfig.mockReset();
     persist.mockResolvedValue({ ok: true });
-    alert.mockResolvedValue(true);
-    vi.spyOn(console, "info").mockImplementation(() => undefined);
+    smtpConfig.mockReturnValue({ host: "fixture" });
+    sendSmtp.mockResolvedValue({ status: "sent" });
+    info = vi.spyOn(console, "info").mockImplementation(() => undefined);
   });
   const send = (extra: Record<string, string> = {}) => submitRequestDoorAction(form({ door: "b2b", ...VALID.b2b, ...extra }));
 
@@ -113,21 +136,44 @@ describe("the action never claims what did not happen", () => {
     expect(await send()).toBe("received");
     expect(persist).toHaveBeenCalledTimes(1);
     expect(persist.mock.calls[0][0].sourcePath).toBe("/de/request/b2b");
-    expect(alert).toHaveBeenCalledTimes(1);
+    expect(sendSmtp).toHaveBeenCalledTimes(1);
+  });
+
+  it("the alert goes to the one mailbox with the door and the queue link, and nothing of the person's", async () => {
+    await send({ phone: "+37060000000" });
+    const [, mail] = sendSmtp.mock.calls[0];
+    expect(mail.to).toBe("info@labourmarket.ai");
+    const body = `${mail.subject} ${mail.text}`;
+    expect(body).toContain("B2B");
+    expect(body).toContain("/dashboard/admin/company-need-intakes");
+    for (const secret of ["UAB Testas", "a@b.lt", "+37060000000", "Fasadai", "2000 m2", "Vilnius", "kovas"]) {
+      expect(body).not.toContain(secret);
+    }
+  });
+
+  it("logs whether anyone was told, and nothing else", async () => {
+    await send();
+    expect(info).toHaveBeenCalledWith("[request-door] stored", { door: "b2b", alerted: true });
   });
 
   it("not stored is never received, and no one is alerted", async () => {
     for (const [code, answer] of [["rate_limited", "limited"], ["unavailable", "unavailable"], ["error", "unavailable"], ["invalid", "invalid"]]) {
-      alert.mockClear();
+      sendSmtp.mockClear();
       persist.mockResolvedValue({ ok: false, code });
       expect(await send()).toBe(answer);
-      expect(alert).not.toHaveBeenCalled();
+      expect(sendSmtp).not.toHaveBeenCalled();
     }
   });
 
-  it("a failed alert does not lose a stored request", async () => {
-    alert.mockRejectedValue(new Error("down"));
+  it.each([
+    ["the sender throws", () => sendSmtp.mockRejectedValue(new Error("down"))],
+    ["the server refuses", () => sendSmtp.mockResolvedValue({ status: "failed", reason: "x" })],
+    ["no mailbox is set up", () => smtpConfig.mockReturnValue(null)],
+  ])("%s: the stored request stands, and the log says no one was told", async (_n, arrange) => {
+    arrange();
     expect(await send()).toBe("received");
+    expect(persist).toHaveBeenCalledTimes(1);
+    expect(info).toHaveBeenCalledWith("[request-door] stored", { door: "b2b", alerted: false });
   });
 
   it("an unknown door stores nothing", async () => {
@@ -139,7 +185,7 @@ describe("the action never claims what did not happen", () => {
     expect(await send({ website: "http://spam" })).toBe("received");
     expect(await send({ started: String(Date.now()) })).toBe("received");
     expect(persist).not.toHaveBeenCalled();
-    expect(alert).not.toHaveBeenCalled();
+    expect(sendSmtp).not.toHaveBeenCalled();
   });
 
   it("a person who took their time gets through", async () => {
@@ -172,6 +218,12 @@ describe("the page", () => {
     const form = read("components/marketing/landing-request-doors-form.tsx");
     expect(form).toContain("onSubmit={submit}");
     expect(form).not.toMatch(/<form[^>]*\baction=/);
+  });
+
+  it("an answer belongs to the form that sent it: the doors lock, and a late answer is dropped", () => {
+    const form = read("components/marketing/landing-request-doors-form.tsx");
+    expect(form).toContain("disabled={pending}");
+    expect(form).toMatch(/if \(shown\.current === sentFrom\) setResult\(answer\)/);
   });
 
   it("there is no upload: no safe public path exists", () => {

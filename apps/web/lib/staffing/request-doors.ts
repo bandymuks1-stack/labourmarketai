@@ -31,6 +31,15 @@ export function requestDoorFromSourcePath(path: string | null | undefined): Requ
   return REQUEST_DOORS.find((d) => d === door) ?? null;
 }
 
+/** The internal alert, which says only that a request of this type is waiting. */
+export function requestDoorAlert(door: RequestDoor): { readonly subject: string; readonly text: string } {
+  const title = OPERATOR_TITLE[door];
+  return {
+    subject: `Nauja užklausa: ${title}`,
+    text: `${title} laukia atsakymo.\n\nhttps://labourmarket.ai/lt/dashboard/admin/company-need-intakes`,
+  };
+}
+
 export function isRequestDoor(value: unknown): value is RequestDoor {
   return REQUEST_DOORS.some((d) => d === value);
 }
@@ -66,8 +75,11 @@ export function requestDoorIntake(door: RequestDoor, locale: string, read: Read)
     transportNeeded: false,
     sourcePath: requestDoorSourcePath(locale, door),
   };
+  // The place is in the text on purpose. The RPC treats the same name, e-mail and
+  // description within 24 h as a repeat, so the same work at a second site would
+  // otherwise be dropped while the person is told it was received.
   const describe = (lines: readonly (string | false)[]) =>
-    [OPERATOR_TITLE[door], ...lines.filter(Boolean)].join("\n");
+    [OPERATOR_TITLE[door], `Vieta: ${[country, city].filter(Boolean).join(", ")}`, ...lines.filter(Boolean)].join("\n");
 
   if (door === "worker-search") {
     const profession = read("profession");
