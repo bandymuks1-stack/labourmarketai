@@ -27,7 +27,9 @@
       "people": "Mensen en team",
       "reviewOff": "Goedkeuring staat uit voor {off} van de {total} medewerkers. Hun uren verschijnen hier pas als je het inschakelt.",
       "enable": "Inschakelen bij Mensen en team",
-      "own": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren: dat doet een andere manager van deze organisatie."
+      "own": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren: dat kan een andere manager van deze organisatie.",
+      "ownAlone": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren en deze organisatie heeft geen andere manager, dus ze blijven vastgelegd als je eigen werk.",
+      "ownUnknown": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren: ze blijven vastgelegd als je eigen werk tot een andere manager ze bevestigt."
     }
   },
   "publicDemand": {

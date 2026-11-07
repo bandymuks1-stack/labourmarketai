@@ -27,7 +27,9 @@
       "people": "Ludzie i zespół",
       "reviewOff": "Zatwierdzanie jest wyłączone dla {off} z {total} pracowników. Ich godziny nie pojawią się tutaj, dopóki go nie włączysz.",
       "enable": "Włącz w sekcji Ludzie i zespół",
-      "own": "Twoje niepotwierdzone wpisy: {n}. Nie możesz zatwierdzić własnej pracy: robi to inny kierownik tej organizacji."
+      "own": "Twoje niepotwierdzone wpisy: {n}. Nie możesz zatwierdzić własnej pracy: może to zrobić inny kierownik tej organizacji.",
+      "ownAlone": "Twoje niepotwierdzone wpisy: {n}. Nie możesz zatwierdzić własnej pracy, a ta organizacja nie ma innego kierownika, więc pozostają zapisane jako Twoja własna praca.",
+      "ownUnknown": "Twoje niepotwierdzone wpisy: {n}. Nie możesz zatwierdzić własnej pracy: pozostają zapisane jako Twoja własna praca, dopóki nie potwierdzi ich inny kierownik."
     }
   },
   "publicDemand": {

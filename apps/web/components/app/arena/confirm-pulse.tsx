@@ -11,6 +11,7 @@ import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
 import { countCounterpartyToDecide } from "@/lib/journal/counterparty-to-decide-count";
 import { QuickConfirmQueue } from "@/components/app/quick-confirm-queue";
 import { CountUp } from "@/components/app/today/count-up";
+import { Card } from "@/components/ui/Card";
 
 /**
  * ARENA confirm pulse (TASK 07 slice 2) — the S3.5 one-tap confirm queue
@@ -121,8 +122,14 @@ const ON_THE_CARD = 3;
  * says why, including the two reasons that look like a missing feature.
  */
 export async function OrganizationApprovalsCard() {
-  const [context, pending, clientToDecide, t, tPulse, tSkill, tUnit] = await Promise.all([
-    getActiveOrganizationContext(),
+  // All asked together: the facts need only the active organization, which the layout
+  // has already resolved, so they cost this render no wave of their own.
+  const [facts, pending, clientToDecide, t, tPulse, tSkill, tUnit] = await Promise.all([
+    getActiveOrganizationContext().then((context) =>
+      context.activeOrganizationId
+        ? readOrganizationApprovalFacts(context.activeOrganizationId)
+        : { employees: null, ownUnconfirmed: null, otherReviewer: null },
+    ),
     countReviewablePendingEntries(),
     countCounterpartyToDecide(),
     getTranslations("companyModel.approvals"),
@@ -130,27 +137,20 @@ export async function OrganizationApprovalsCard() {
     getTranslations("skillNames"),
     getTranslations("productivityUnits"),
   ]);
-  const organizationId = context.activeOrganizationId;
-  const [facts, queue] = await Promise.all([
-    organizationId
-      ? readOrganizationApprovalFacts(organizationId)
-      : Promise.resolve({ employees: null, ownUnconfirmed: null }),
-    // The rows are read only when the count says some wait.
-    pending
-      ? fetchQuickReviewQueue().catch((): QuickQueueEntry[] | null => null)
-      : Promise.resolve<QuickQueueEntry[] | null>([]),
-  ]);
+  // The rows are read only when the count says some wait.
+  const queue = pending ? await fetchQuickReviewQueue().catch((): QuickQueueEntry[] | null => null) : [];
   const view = organizationApprovalsView({
     // The rows failed: the card cannot offer them, so it does not count them either.
     pending: queue === null ? null : pending,
     employees: facts.employees,
     ownUnconfirmed: facts.ownUnconfirmed,
+    otherReviewer: facts.otherReviewer,
   });
   const entries = (queue ?? []).slice(0, ON_THE_CARD).map((e) => quickConfirmEntryView(e, tSkill, tUnit));
   const lineLink = "w-fit text-sm font-medium text-brand-blue hover:underline";
 
   return (
-    <section className="card-border flex flex-col gap-3 p-5" data-testid="organization-approvals" data-state={view.state}>
+    <Card className="flex flex-col gap-3" data-testid="organization-approvals" data-state={view.state}>
       <h3 className="font-display text-base font-semibold text-text-primary" data-testid="organization-approvals-title">
         {view.state === "unreadable" ? t("titleUnknown") : t("title", { n: pending ?? 0 })}
       </h3>
@@ -201,7 +201,7 @@ export async function OrganizationApprovalsCard() {
       ) : null}
       {view.ownUnconfirmed > 0 ? (
         <p className="text-xs leading-relaxed text-text-muted" data-testid="organization-approvals-own">
-          {t("own", { n: view.ownUnconfirmed })}
+          {t(view.otherReviewer === true ? "own" : view.otherReviewer === false ? "ownAlone" : "ownUnknown", { n: view.ownUnconfirmed })}
         </p>
       ) : null}
       {clientToDecide !== null && clientToDecide > 0 ? (
@@ -209,6 +209,6 @@ export async function OrganizationApprovalsCard() {
           {tPulse("clientTitle", { n: clientToDecide })} →
         </Link>
       ) : null}
-    </section>
+    </Card>
   );
 }

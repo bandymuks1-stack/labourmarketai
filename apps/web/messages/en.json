@@ -27,7 +27,9 @@
       "people": "People and team",
       "reviewOff": "Approval is off for {off} of {total} employees. Their hours won't appear here until you switch it on.",
       "enable": "Switch it on in People and team",
-      "own": "Your own unconfirmed entries: {n}. You can't approve your own work: another manager of this organization does."
+      "own": "Your own unconfirmed entries: {n}. You can't approve your own work: another manager of this organization can.",
+      "ownAlone": "Your own unconfirmed entries: {n}. You can't approve your own work, and this organization has no other manager, so they stay recorded as your own work.",
+      "ownUnknown": "Your own unconfirmed entries: {n}. You can't approve your own work: they stay recorded as your own until another manager confirms them."
     }
   },
   "publicDemand": {

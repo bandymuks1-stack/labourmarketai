@@ -27,7 +27,9 @@
       "people": "Personen und Team",
       "reviewOff": "Die Freigabe ist für {off} von {total} Beschäftigten ausgeschaltet. Ihre Stunden erscheinen hier erst, wenn du sie einschaltest.",
       "enable": "Unter Personen und Team einschalten",
-      "own": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben: Das macht eine andere Führungskraft dieser Organisation."
+      "own": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben: Das kann eine andere Führungskraft dieser Organisation.",
+      "ownAlone": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben, und diese Organisation hat keine andere Führungskraft. Sie bleiben daher als deine eigene Arbeit erfasst.",
+      "ownUnknown": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben: Sie bleiben als deine eigene Arbeit erfasst, bis eine andere Führungskraft sie bestätigt."
     }
   },
   "publicDemand": {

@@ -23,6 +23,8 @@ export type OrganizationApprovalsFacts = {
   readonly employees: OrganizationEmployeeReview | null;
   /** The reader's own entries no one else confirmed. Null: the read failed. */
   readonly ownUnconfirmed: number | null;
+  /** Does someone else here hold a reviewer relationship? Null: the reader can't tell. */
+  readonly otherReviewer: boolean | null;
 };
 
 export type OrganizationApprovalsView = {
@@ -33,14 +35,17 @@ export type OrganizationApprovalsView = {
   readonly reviewOff: OrganizationEmployeeReview | null;
   /** The reader's own unconfirmed entries, which this queue never lists. */
   readonly ownUnconfirmed: number;
+  /** Never assumed: a small owner may be the only one who could confirm anything. */
+  readonly otherReviewer: boolean | null;
 };
 
 export function organizationApprovalsView(facts: OrganizationApprovalsFacts): OrganizationApprovalsView {
-  const { pending, employees, ownUnconfirmed } = facts;
+  const { pending, employees, ownUnconfirmed, otherReviewer } = facts;
   return {
     state: pending === null ? "unreadable" : pending > 0 ? "waiting" : "empty",
     noEmployees: employees?.total === 0,
     reviewOff: employees && employees.reviewOff > 0 ? employees : null,
     ownUnconfirmed: ownUnconfirmed ?? 0,
+    otherReviewer,
   };
 }
