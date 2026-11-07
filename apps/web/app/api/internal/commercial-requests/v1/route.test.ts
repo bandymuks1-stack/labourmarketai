@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const reads: { filter: string | null; limit: number | null } = { filter: null, limit: null };
+const reads: { filter: string | null; limit: number | null; not: unknown[] | null } = {
+  filter: null,
+  limit: null,
+  not: null,
+};
 let result: { data: unknown; error: unknown } = { data: [], error: null };
 let adminThrows = false;
 
@@ -17,6 +21,10 @@ vi.mock("@/lib/supabase/admin", () => ({
       },
       or: (filter: string) => {
         reads.filter = filter;
+        return query;
+      },
+      not: (...args: unknown[]) => {
+        reads.not = args;
         return query;
       },
       then: (done: (r: typeof result) => unknown) => done(result),
@@ -59,6 +67,7 @@ beforeEach(() => {
   vi.stubEnv("COMMERCIAL_REQUESTS_FEED_TOKEN", TOKEN);
   reads.filter = null;
   reads.limit = null;
+  reads.not = null;
   result = { data: [], error: null };
   adminThrows = false;
 });
@@ -190,6 +199,29 @@ describe("paging", () => {
       expect(res.status).toBe(400);
       expect(await res.json()).toEqual({ ok: false, reason });
     }
+    expect(reads.limit).toBeNull();
+  });
+});
+
+describe("the open read", () => {
+  it("leaves out only closed requests, so an unknown status stays visible", async () => {
+    result = { data: [row(ID_1, "2026-11-07T10:00:00+00:00", { status: "contacted" })], error: null };
+    const body = await (await get("?status=open&limit=200")).json();
+    expect(reads.not).toEqual(["status", "in", "(converted,rejected)"]);
+    expect(reads.limit).toBe(201);
+    expect(body.items[0].status).toBe("contacted");
+    expect(body.nextCursor).toBeNull();
+  });
+
+  it("the plain read has no status filter", async () => {
+    await get();
+    expect(reads.not).toBeNull();
+  });
+
+  it("refuses any other status value without reading", async () => {
+    const res = await get("?status=new");
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ ok: false, reason: "bad_status" });
     expect(reads.limit).toBeNull();
   });
 });

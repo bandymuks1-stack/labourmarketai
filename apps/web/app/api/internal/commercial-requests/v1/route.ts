@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { authorizeCommercialRequestsFeed } from "@/lib/api/commercial-requests-feed-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
+  CLOSED_REQUEST_STATUS_FILTER,
   COMMERCIAL_REQUEST_READ_COLUMNS,
   COMMERCIAL_REQUESTS_FEED_SCHEMA,
   type CommercialRequestRow,
@@ -19,6 +20,10 @@ import {
  * its last cursor, and dedupes on `id`. A null `nextCursor` means it has caught up: it
  * keeps its last cursor and pulls with that again later. The cursor moves on creation
  * only, so a later status change is not sent again.
+ *
+ * `?status=open` is the second read: every request not yet closed, with its current
+ * status, so a caller tracking handling can see a change. Same shape and paging; start
+ * it with no cursor each time and follow `nextCursor` to the end.
  *
  * 503 IS NOT AN EMPTY FEED: a failed read must never look like "no requests".
  */
@@ -41,6 +46,9 @@ export async function GET(request: Request): Promise<NextResponse> {
   const cursor = rawCursor === null ? null : decodeFeedCursor(rawCursor);
   if (rawCursor !== null && cursor === null) return refuse(400, "bad_cursor");
 
+  const statusFilter = params.get("status");
+  if (statusFilter !== null && statusFilter !== "open") return refuse(400, "bad_status");
+
   try {
     let query = createAdminClient()
       .from("company_need_public_intakes")
@@ -49,6 +57,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       .order("id", { ascending: true })
       .limit(limit + 1);
     if (cursor) query = query.or(feedCursorFilter(cursor));
+    if (statusFilter === "open") query = query.not("status", "in", CLOSED_REQUEST_STATUS_FILTER);
     const { data, error } = await query;
     if (error || !data) return refuse(503, "unavailable");
 

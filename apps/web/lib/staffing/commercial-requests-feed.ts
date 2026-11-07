@@ -105,6 +105,13 @@ export function parseFeedLimit(raw: string | null): number | null {
   return limit >= 1 && limit <= COMMERCIAL_REQUESTS_MAX_LIMIT ? limit : null;
 }
 
+/** The statuses that need no more handling. `?status=open` is everything else, written
+ *  as an exclusion so a status nobody knows yet is still seen and not lost. */
+export const CLOSED_REQUEST_STATUSES = ["converted", "rejected"] as const;
+
+/** PostgREST's `not in` list for those statuses. */
+export const CLOSED_REQUEST_STATUS_FILTER = `(${CLOSED_REQUEST_STATUSES.join(",")})`;
+
 /** Rows read with one extra past `limit`: that extra row is how the feed knows more
  *  exist, and only then is there a next cursor. */
 export function feedPage(
