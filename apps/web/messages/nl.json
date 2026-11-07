@@ -5694,6 +5694,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Uw overeenkomst voor elke platformdienst wordt gesloten met UAB “Nonstop Group”. Facturen worden opgesteld door en betalingen ontvangen door UAB “Nonstop Group”.",
       "title": "Gebruiksvoorwaarden",
       "sections": [
         {
@@ -5875,6 +5876,7 @@
     },
     "dataProtection": {
       "title": "Gegevensbescherming",
+      "metaDescription": "Deze pagina legt in gewone woorden uit hoe gegevens binnen LabourMarket.ai worden beschermd. Ze beschrijft alleen wat vandaag daadwerkelijk in het platform is ingebouwd.",
       "intro": "Deze pagina legt in gewone woorden uit hoe gegevens binnen Labour Market AI worden beschermd. Ze beschrijft alleen wat vandaag daadwerkelijk in het platform is ingebouwd.",
       "sections": [
         {

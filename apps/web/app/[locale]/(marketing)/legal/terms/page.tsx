@@ -24,7 +24,7 @@ export async function generateMetadata({
     title: t("terms.title"),
     // Own copy (the contracting-party line), not the inherited homepage
     // description that every legal page duplicated (SEO gap, 2026-09-20).
-    description: t("terms.sections.0.items.1" as never),
+    description: t("terms.metaDescription"),
   });
 }
 

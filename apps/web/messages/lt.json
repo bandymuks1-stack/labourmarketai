@@ -5694,6 +5694,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Jūsų sutartis dėl bet kurios platformos paslaugos sudaroma su UAB „Nonstop Group“. Sąskaitas išrašo ir mokėjimus gauna UAB „Nonstop Group“.",
       "title": "Naudojimo sąlygos",
       "sections": [
         {
@@ -5875,6 +5876,7 @@
     },
     "dataProtection": {
       "title": "Duomenų apsauga",
+      "metaDescription": "Šis puslapis paprastais žodžiais paaiškina, kaip saugomi duomenys LabourMarket.ai platformoje. Aprašoma tik tai, kas šiandien iš tikrųjų įdiegta.",
       "intro": "Šis puslapis paprastais žodžiais paaiškina, kaip saugomi duomenys Labour Market AI platformoje. Aprašoma tik tai, kas šiandien iš tikrųjų įdiegta.",
       "sections": [
         {

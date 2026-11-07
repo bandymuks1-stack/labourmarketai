@@ -5694,6 +5694,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Your contract for any platform service is concluded with UAB “Nonstop Group”. Invoices are issued by and payments are received by UAB “Nonstop Group”.",
       "title": "Terms of Service",
       "sections": [
         {
@@ -5875,6 +5876,7 @@
     },
     "dataProtection": {
       "title": "Data protection",
+      "metaDescription": "This page explains in plain words how data inside LabourMarket.ai is protected. It describes only what is actually built into the platform today.",
       "intro": "This page explains in plain words how data inside Labour Market AI is protected. It describes only what is actually built into the platform today.",
       "sections": [
         {
