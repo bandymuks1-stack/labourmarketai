@@ -15246,7 +15246,7 @@
       "customer": "Auftraggeber",
       "customerPrivate": "Privatperson",
       "customerBusiness": "Unternehmen",
-      "optional": "optional",
+      "optional": "freiwillig",
       "send": "Anfrage senden",
       "sending": "Wird gesendet…",
       "receivedTitle": "Ihre Anfrage ist bei uns eingegangen",
