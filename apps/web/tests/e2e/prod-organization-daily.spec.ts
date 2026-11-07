@@ -73,7 +73,9 @@ for (const size of SIZES) {
     const quick = inMain(page).getByTestId("quick-detailed-link");
     const quickShown = await quick.waitFor({ state: "visible", timeout: 60_000 }).then(() => true, () => false);
     const queue = await inMain(page).getByTestId("quick-queue").count();
-    record(`${size.name} quick confirmation`, quickShown, `queue=${queue}`);
+    // A failed read renders its own state beside the queue: it must not count as working.
+    const unavailable = await inMain(page).getByTestId("quick-unavailable").count();
+    record(`${size.name} quick confirmation`, quickShown && queue > 0 && unavailable === 0, `queue=${queue} unavailable=${unavailable}`);
 
     const wide = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
     record(`${size.name} no sideways scroll, no crash`, !wide && crashes.length === 0, `sideways=${wide} crash=${crashes.join("/") || "none"}`);
