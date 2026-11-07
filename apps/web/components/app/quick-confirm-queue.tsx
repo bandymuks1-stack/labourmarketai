@@ -1,7 +1,7 @@
 "use client";
 import { Card } from "@/components/ui/Card";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { EmptyState } from "@/components/app/empty-state";
 import {
@@ -33,6 +33,7 @@ export function QuickConfirmQueue({
   todays,
   exceptions,
   unavailable = false,
+  empty,
 }: {
   entries: QuickConfirmEntryView[];
   /** Today's entries (UTC day) — the batch candidates, computed by the page. */
@@ -41,6 +42,8 @@ export function QuickConfirmQueue({
   /** FAILED ≠ EMPTY (SEP-7): the queue read failed. Rendered as its own named
    *  state inside this boundary, never as the "nothing to review" empty state. */
   unavailable?: boolean;
+  /** What this surface says when nothing waits, in place of the page's empty state. */
+  empty?: ReactNode;
 }) {
   const t = useTranslations("journal");
   const [receipts, setReceipts] = useState<QuickConfirmReceipt[]>([]);
@@ -87,7 +90,7 @@ export function QuickConfirmQueue({
           why={t("inbox.unavailable")}
         />
       ) : visible.length === 0 ? (
-        <EmptyState
+        empty ?? <EmptyState
           testId="quick-empty-state"
           title={t("inbox.emptyTitle")}
           why={t("inbox.empty")}

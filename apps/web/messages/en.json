@@ -15,7 +15,22 @@
     "work": "Work & hours",
     "results": "Results",
     "history": "History",
-    "areasTitle": "Company areas"
+    "areasTitle": "Company areas",
+    "approvals": {
+      "title": "Waiting for approval: {n}",
+      "titleUnknown": "Waiting for approval",
+      "what": "Hours and work your employees recorded. Approve or reject them right here.",
+      "seeAll": "All waiting ({n})",
+      "emptyTitle": "No employee hours are waiting for approval right now.",
+      "emptyNext": "When an employee records work, it appears here.",
+      "noEmployees": "This organization has no employees whose hours you could approve yet.",
+      "people": "People and team",
+      "reviewOff": "Approval is off for {off} of {total} employees. Their hours won't appear here until you switch it on.",
+      "enable": "Switch it on in People and team",
+      "own": "Your own unconfirmed entries: {n}. You can't approve your own work: another manager of this organization can.",
+      "ownAlone": "Your own unconfirmed entries: {n}. You can't approve your own work, and this organization has no other manager, so they stay recorded as your own work.",
+      "ownUnknown": "Your own unconfirmed entries: {n}. You can't approve your own work: they stay recorded as your own until another manager confirms them."
+    }
   },
   "publicDemand": {
     "title": "Current market demand",

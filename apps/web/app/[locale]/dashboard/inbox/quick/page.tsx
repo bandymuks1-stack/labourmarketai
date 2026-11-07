@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import type { QuickConfirmEntryView } from "@/components/app/quick-confirm-card";
 import { QuickConfirmQueue } from "@/components/app/quick-confirm-queue";
+import { quickConfirmEntryView } from "@/lib/journal/quick-confirm-model";
 import { fetchQuickReviewQueue } from "@/lib/journal/review-queue";
 import { fetchBatchExceptions } from "@/lib/journal/batch-review";
 import { createClient } from "@/lib/supabase/server";
@@ -28,6 +29,7 @@ export default async function QuickConfirmPage({
   setRequestLocale(locale);
   const t = await getTranslations("journal");
   const tSkill = await getTranslations("skillNames");
+  const tUnit = await getTranslations("productivityUnits");
 
   const supabase = await createClient();
   const {
@@ -43,16 +45,7 @@ export default async function QuickConfirmPage({
   } catch {
     queue = null;
   }
-  const entries: QuickConfirmEntryView[] = (queue ?? []).map((e) => ({
-    id: e.id,
-    workerName: e.workerName,
-    createdAt: e.createdAt,
-    workDay: e.workDay,
-    originalText: e.originalText,
-    recognizedNames: e.recognizedSlugs.map((slug) => tSkill(slug)),
-    skills: e.skillsToConfirm.map((s) => ({ id: s.id, name: tSkill(s.slug) })),
-    confirmScope: e.confirmScope,
-  }));
+  const entries: QuickConfirmEntryView[] = (queue ?? []).map((e) => quickConfirmEntryView(e, tSkill, tUnit));
 
   // "Confirm all of today" — strictly the entries created today. "Today" is
   // the canonical UTC day (W12), the same day the entry is filed under
