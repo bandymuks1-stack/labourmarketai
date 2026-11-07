@@ -3186,6 +3186,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Sieht nach Werbung aus",
       "eyebrow": "PERSONALBEDARF",
       "title": "Öffentliche Personalbedarfs-Warteschlange",
       "subtitle": "Anonyme Bedarfe, die über das öffentliche /company-need-Formular eingereicht wurden. Prüfen Sie jeden einzelnen und markieren Sie den nächsten Schritt von Hand. Nichts wird automatisch gesendet — ein Mensch übernimmt jeden Kontakt.",

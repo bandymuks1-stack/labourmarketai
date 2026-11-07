@@ -145,7 +145,8 @@ export async function submitCompanyNeedAction(
   // Telegram failure can never affect the submission, persistence, or queue.
   if (persisted) {
     try {
-      await sendCompanyNeedOwnerAlert({
+      // An advert is stored like any request, and raises no alert.
+      if (!persist.advertising) await sendCompanyNeedOwnerAlert({
         companyName: raw.companyName,
         contact: [raw.contactPerson, str(formData.get("contact_email"))]
           .filter(Boolean)
