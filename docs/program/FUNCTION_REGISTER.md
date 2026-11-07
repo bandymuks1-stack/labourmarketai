@@ -157,11 +157,11 @@ second register. The function rows below keep their own status; this view reads 
 | Dimension | Rows | PASS | FAIL | BLOCKED | NOT VERIFIED |
 |---|---|---|---|---|---|
 | Functions (288, per area below) | 288 | 162 | 9 | 60 | 57 |
-| SEO (2026-11-04) | 10 | 7 | 2 | 1 | 0 |
-| GEO (2026-11-04) | 6 | 5 | 1 | 0 | 0 |
+| SEO (2026-11-07) | 10 | 8 | 1 | 1 | 0 |
+| GEO (2026-11-07) | 6 | 5 | 0 | 0 | 1 |
 | Internal search (2026-11-04) | 9 | 5 | 2 | 0 | 2 |
 | UX/UI (2026-11-04; DS-1–DS-5 from 2026-11-03) | 15 | 12 | 3 | 0 | 0 |
-| **All** | **328** | **191** | **17** | **61** | **59** |
+| **All** | **328** | **192** | **15** | **61** | **60** |
 
 Functions per area:
 
@@ -226,9 +226,9 @@ Database timings come from production `pg_stat_statements`, read-only. They are 
 | SEO-4 | Canonical | PASS | 312 pages (SEO-2, SEO-3 samples): each names itself. `/lt/jobs?q=…` names `/lt/jobs` | page 2+: SEO-8 | Coordinator: re-check on risk |
 | SEO-5 | hreflang | PASS | 312 pages: 7 alternates each, x-default present | — | Coordinator: re-check on risk |
 | SEO-6 | Structured data validity | PASS | 312 pages: **0 JSON-LD parse errors**. Organization + WebSite on every page; CollectionPage on `/jobs`; Article + BreadcrumbList on question pages; WebPage on job pages | no JobPosting by design (employer and place are members-only, 2026-08-24 rule) | Coordinator: re-check on risk |
-| SEO-7 | Title and description length | FAIL | Measured as a crawler, all 264 sitemap pages, build `439ba103`, 2026-11-07: **0 titles over 70; 2 descriptions over 170** (`/de/legal/terms` 174, `/de/legal/data-protection` 173); **12 under 70** (`/{locale}/labour-market/lv` and `/ee`). 15 are over 160, including those 2. #3125 fixes the 2 long ones and gives each country page its own text from its first evidence signal | #3125 not merged, so this stays FAIL until re-measured. 13 descriptions of 161–170 stay, under the limit. No native review of the wording | Coordinator: merge #3125 and re-measure |
+| SEO-7 | Title and description length | PASS | Measured as a crawler, all 264 sitemap pages, build `c99d56bc`, 2026-11-07: **0 titles over 70, 0 descriptions over 170, 0 under 70** (before #3125: 0, 2, 12). Each country page's description adds its first evidence signal | 15 descriptions of 161–169 may be cut in a search result. No native review of the wording in ru, nl, de, pl | Coordinator: re-measure on a copy change |
 | SEO-8 | Job board page 2+ | FAIL | Chrome: `/lt/jobs?page=2` and `/en/jobs?page=3` name `/lt/jobs` and `/en/jobs` as canonical. Their 20 cards differ from page 1 (0 of 20 overlap). Deep pages cost more: page 500 took 487 ms, page 1,500 916 ms, page 2,500 2,041 ms | fix in draft #2984. **Exact block:** the permission system refused the commit, the push to `fix/cc/jobs-pagination-canonical` and `gh pr ready 2984` ("Unrequested Commit in a Connected App"). The product gate is not the block: #2997 has the waiver. Left to do: merge main, `JOBS_SELF_CANONICAL_MAX_PAGE = 100` with one test, so crawlers aren't invited to deep OFFSET scans | Owner: approve exactly this push and `gh pr ready 2984`, or add a permission rule |
-| SEO-9 | Country market pages | PASS | Chrome: `/{locale}/labour-market/{lt,lv,ee,pl,de,nl}`: 36 sitemap URLs, all 200, self-canonical, indexable | lv and ee descriptions are short (SEO-7) | Coordinator: re-check on risk |
+| SEO-9 | Country market pages | PASS | Chrome: `/{locale}/labour-market/{lt,lv,ee,pl,de,nl}`: 36 sitemap URLs, all 200, self-canonical, indexable | — | Coordinator: re-check on risk |
 | SEO-10 | Country and city on signed-out job pages | BLOCKED | Chrome: cards read "Darbdavys ir vieta: prisijungus" | the database function is RED draft #2993, not applied. It waits for the owner's apply approval | Owner: apply approval for #2993 |
 
 ### GEO (generative engines, signed out, 2026-11-04)
@@ -240,7 +240,7 @@ Database timings come from production `pg_stat_statements`, read-only. They are 
 | GEO-3 | Question-and-answer pages | PASS | 270 question pages; 30 sampled, all with Article + BreadcrumbList, self-canonical | — | Coordinator: re-check on risk |
 | GEO-4 | Public market facts are quotable | PASS | SEO-9 | — | Coordinator: re-check on risk |
 | GEO-5 | Key pages answer "what is it" in text | PASS | Chrome, main text: `/en/about` opens with "What is LabourMarket.ai / LabourMarket.ai is…" (829 words, 10 h2). `/en` 655 words, 13 h2; `/en/pricing` 899 words, states that prices are confirmed and online activation is not open; `/en/for-companies` 426 words | hub pages are thin: `/en/questions` 58 words, `/en/labour-market` 63 words, both without h2. No `FAQPage` markup on any page | GREEN executor: add text to the two thin hubs |
-| GEO-6 | Entity consistency | FAIL | Hero text is the owner's (#3097). #3122, CI green: Organization gets `@id`, WebSite's publisher points to it, the description is in the page's language, and the `/about` opening uses the owner's definition in 6 locales. Build `c9a58473` before it: home description, Organization and llms.txt already used the definition (#3078) | #3122 not merged and not checked on production. 0 `sameAs`: no profile exists, so none is claimed. This is markup and copy: **it doesn't show that any answer engine describes the product correctly** (AEO-2) | Coordinator: merge #3122 and check `/en`, `/de`, `/about` |
+| GEO-6 | Entity consistency | NOT VERIFIED | Browser, build `c99d56bc`: on `/en`, `/de`, `/lt` and their `/about` pages the Organization has one `@id`, WebSite's publisher points to it, and its description is in the page's language. The old "operating platform" wording is gone from those `/about` pages. Hero text is the owner's (#3097) | 0 `sameAs`: no profile exists, so none is claimed. **Markup and copy only.** By owner's order it isn't PASS: nothing shows that any answer engine now describes the product correctly (AEO-2, AEO-4). `/ru`, `/nl`, `/pl` weren't read | Coordinator: read answer engines per AEO-4 |
 
 ### Internal search (2026-11-04)
 
@@ -534,14 +534,14 @@ Owner order 2026-11-04: continue the audit beyond the six core tests, in this on
 | Roles and life stages | 38 | 22 | 4 | 7 | 5 |
 | Search | 5 | 1 | 1 | 0 | 3 |
 | CV, Journal, projects, HR, organization | 16 | 8 | 2 | 2 | 4 |
-| Indexing and AEO | 25 | 9 | 8 | 1 | 7 |
+| Indexing and AEO | 25 | 9 | 7 | 1 | 8 |
 | Mobile, languages, accessibility | 12 | 5 | 2 | 2 | 3 |
 | Payments | 4 | 1 | 1 | 1 | 1 |
 | Notifications | 4 | 2 | 0 | 1 | 1 |
 | AI | 3 | 2 | 0 | 1 | 0 |
 | Security | 3 | 2 | 1 | 0 | 0 |
 | Delivery | 2 | 0 | 2 | 0 | 0 |
-| **This section** | **133** | **63** | **27** | **17** | **26** |
+| **This section** | **133** | **63** | **26** | **17** | **27** |
 
 Roles:
 
@@ -643,7 +643,7 @@ SEO and GEO checks are in their tables above; these rows add what those do not c
 | IDX-3 | New pages are announced (IndexNow) | NOT VERIFIED | `lib/answer-engine/indexnow.ts` stays dormant without `INDEXNOW_KEY`; whether production has the key was not checked | Owner: provide the key if wanted |
 | AEO-1 | Question pages are machine-readable answers | PASS | GEO-3: 270 pages; 30 sampled, Article + BreadcrumbList | Coordinator: re-check on risk |
 | AEO-2 | An answer engine names and describes the product | NOT VERIFIED | a third-party web search did not surface the product. `/robots.txt`: OAI-SearchBot, PerplexityBot and Claude-SearchBot are not named, so allowed; GPTBot, ClaudeBot, Google-Extended and Applebot-Extended are named in the Cloudflare block. No answer engine was queried | Coordinator: repeat a fixed question set monthly, once GEO-6 is settled. Owner: confirm the Google-Extended choice |
-| AEO-3 | One answer to "what is LabourMarket.ai" | FAIL | GEO-6: three different definitions | Owner: choose one sentence. GREEN executor reuses it |
+| AEO-3 | One answer to "what is LabourMarket.ai" | NOT VERIFIED | The site now gives one definition (GEO-6, build `c99d56bc`). What an answer engine repeats is not measured | Coordinator: AEO-4 |
 
 ### UX/UI, mobile, languages, accessibility
 
