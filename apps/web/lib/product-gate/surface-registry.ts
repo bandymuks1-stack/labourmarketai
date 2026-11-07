@@ -1831,56 +1831,6 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     },
   },
 
-  {
-    // components/app/organization/organization-approvals-card.tsx — work waiting for
-    // approval on the organization's first screen (owner P0 2026-11-07: a director could
-    // not find how to approve hours). A view of the ONE review queue, no second queue.
-    id: "components/app/organization/organization-approvals-card.tsx",
-    kind: "persistent_card",
-    originAxiom: "A-01",
-    purpose:
-      "Tells the person running an organization how many workers' entries wait for approval and lets them approve the oldest right there, on the same cards and writes as the quick queue. When nothing waits it says why: nobody recorded work, approval is off for some employees, or the only recorded work is the reader's own.",
-    whyNotChat:
-      "It is the first thing on the first screen, above any conversation, so a person who never thought to ask still sees what waits. The chat keeps its own confirm-work path; this is the same queue and the same write.",
-    whyNotExistingComponent:
-      "ConfirmPulse only counts and links, says 'entries' where the owner looks for hours, and its calm zero hides why nothing waits. It stays on the project pages, where a count beside the project is its job. QuickConfirmCard and QuickConfirmQueue are reused here unchanged in what they write.",
-    owner: "Owner P0 2026-11-07 — hours approval must be intuitive and quick, per the person's rights",
-    ownsAction: null,
-
-    worldElement: "work_journal",
-    whyNotExistingElement: "Same element: entries of the Work Journal awaiting their employer's decision.",
-    chatIntegration:
-      "The same queue and writes as the chat's company.confirm-work and company.enable-journal-review; the card holds no conversation state of its own.",
-    avatarEffect:
-      "Through the existing write only: an approved entry reads as employer-confirmed on the worker's Living CV. It adds no hours.",
-    mapEffect: "None. Nothing here renders on the market map, and claiming otherwise would be false.",
-    journalRelation:
-      "Reads the gated reviewable set and records decisions through the existing review RPCs. Self-review stays refused; the card only says so.",
-
-    pillar: "work_journal",
-    objectType: "company",
-    registeredInObjectModel: true,
-    hasTimeline: true,
-    hasHistory: true,
-    addableWithoutMapChange: true,
-
-    changesWorldState: false,
-    reflectedOnMap: false,
-    aiControlled: true,
-    usableWithoutLeavingWorkspace: true,
-    needsNoNewPage: true,
-
-    usesEntity: true,
-    needsNewEntityType: false,
-    registrationIsEnough: true,
-    createsNewRole: false,
-    createsNewRelationship: false,
-    aiCanWorkWithIt: true,
-
-    newBehaviorIsEnough: true,
-    newRelationshipIsEnough: true,
-    worldStateCanControlIt: false,
-  },
 ] as const;
 
 /**

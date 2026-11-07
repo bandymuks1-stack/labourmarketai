@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
+import { OrganizationApprovalsCard } from "@/components/app/arena/confirm-pulse";
 import { AreaSwitcher } from "@/components/app/area-switcher";
 import { NeedDoorLink } from "@/components/app/need-door-link";
-import { OrganizationApprovalsCard } from "@/components/app/organization/organization-approvals-card";
 import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
 
 /**
