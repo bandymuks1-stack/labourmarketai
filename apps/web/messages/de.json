@@ -5694,6 +5694,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Ihr Vertrag über jede Plattformleistung kommt mit der UAB „Nonstop Group“ zustande. Sie stellt auch die Rechnungen aus und empfängt die Zahlungen.",
       "title": "Nutzungsbedingungen",
       "sections": [
         {
@@ -5875,6 +5876,7 @@
     },
     "dataProtection": {
       "title": "Datenschutz",
+      "metaDescription": "In einfachen Worten: wie Daten innerhalb von LabourMarket.ai geschützt werden. Beschrieben ist nur, was heute tatsächlich in die Plattform eingebaut ist.",
       "intro": "Diese Seite erklärt in einfachen Worten, wie Daten innerhalb von Labour Market AI geschützt werden. Sie beschreibt nur, was heute tatsächlich in die Plattform eingebaut ist.",
       "sections": [
         {

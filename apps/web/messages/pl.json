@@ -5694,6 +5694,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Twoja umowa na jakąkolwiek usługę platformy jest zawierana z UAB „Nonstop Group”. Faktury wystawia i płatności otrzymuje UAB „Nonstop Group”.",
       "title": "Regulamin",
       "sections": [
         {
@@ -5875,6 +5876,7 @@
     },
     "dataProtection": {
       "title": "Ochrona danych",
+      "metaDescription": "Ta strona wyjaśnia prostymi słowami, jak chronione są dane wewnątrz LabourMarket.ai. Opisuje wyłącznie to, co jest dziś faktycznie wbudowane w platformę.",
       "intro": "Ta strona wyjaśnia prostymi słowami, jak chronione są dane wewnątrz Labour Market AI. Opisuje wyłącznie to, co jest dziś faktycznie wbudowane w platformę.",
       "sections": [
         {
