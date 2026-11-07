@@ -15219,7 +15219,7 @@
         "body": "Nurodykite specialybę, kiek žmonių reikia, šalį ir kada pradėti."
       },
       "b2b": {
-        "title": "Pateikti B2B bendradarbiavimo užklausą",
+        "title": "Pateikti B2B užklausą",
         "body": "Aprašykite darbų pobūdį, vietą, apimtį ir terminus."
       },
       "project": {
@@ -15227,7 +15227,7 @@
         "body": "Privatiems ir verslo užsakovams: aprašykite projekto ar paslaugos poreikį."
       },
       "title": "Pateikite užklausą",
-      "promise": "Pateikite užklausą be registracijos – susisieksime su jumis per 24 valandas.",
+      "promise": "Pateikite užklausą – susisieksime per 24 valandas.",
       "name": "Vardas arba įmonė",
       "email": "El. paštas",
       "phone": "Telefonas",

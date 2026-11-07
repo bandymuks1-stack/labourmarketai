@@ -201,9 +201,9 @@ describe("the page", () => {
   it("the owner's words stand in Lithuanian", () => {
     const d = JSON.parse(read("messages/lt.json")).landing.requestDoors;
     expect(d.workerSearch.title).toBe("Užsakyti darbuotojų paiešką");
-    expect(d.b2b.title).toBe("Pateikti B2B bendradarbiavimo užklausą");
+    expect(d.b2b.title).toBe("Pateikti B2B užklausą");
     expect(d.project.title).toBe("Užsakyti individualaus projekto vykdymą");
-    expect(d.promise).toBe("Pateikite užklausą be registracijos – susisieksime su jumis per 24 valandas.");
+    expect(d.promise).toBe("Pateikite užklausą – susisieksime per 24 valandas.");
   });
 
   it.each(["lt", "en", "ru", "nl", "de", "pl"])("%s has every key, and the notice links the policy", (locale) => {

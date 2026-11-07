@@ -15219,7 +15219,7 @@
         "body": "Podaj zawód, liczbę osób, kraj i termin rozpoczęcia pracy."
       },
       "b2b": {
-        "title": "Wyślij zapytanie o współpracę B2B",
+        "title": "Wyślij zapytanie B2B",
         "body": "Opisz rodzaj prac, miejsce, zakres i terminy."
       },
       "project": {
@@ -15227,7 +15227,7 @@
         "body": "Dla klientów prywatnych i firm: opisz potrzebny projekt lub usługę."
       },
       "title": "Wyślij zapytanie",
-      "promise": "Wyślij zapytanie bez rejestracji – skontaktujemy się z tobą w ciągu 24 godzin.",
+      "promise": "Wyślij zapytanie – skontaktujemy się z tobą w ciągu 24 godzin.",
       "name": "Imię lub firma",
       "email": "E-mail",
       "phone": "Telefon",
