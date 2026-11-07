@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { refusalStatus, resolveApiIdentity } from "@/lib/api/api-identity";
+import { firstPartyRefusalStatus, resolveFirstPartyIdentity } from "@/lib/api/api-identity";
 import { uuidSchema } from "@/lib/skills";
 
 export const runtime = "nodejs";
@@ -24,11 +24,11 @@ export async function GET(
   }
 
   // SHARED AUTHENTICATED API — cookie session OR bearer token, one resolver.
-  const auth = await resolveApiIdentity(req);
+  const auth = await resolveFirstPartyIdentity(req);
   if (!auth.ok) {
     return NextResponse.json(
       { ok: false, message: "Unauthorized" },
-      { status: refusalStatus(auth.reason) },
+      { status: firstPartyRefusalStatus(auth.reason) },
     );
   }
   // RLS decides what this taxonomy read returns, exactly as before; the
