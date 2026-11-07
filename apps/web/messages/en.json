@@ -15219,7 +15219,7 @@
         "body": "Tell us the profession, how many people you need, the country and when to start."
       },
       "b2b": {
-        "title": "Send a B2B cooperation request",
+        "title": "Send a B2B request",
         "body": "Describe the type of work, location, scope and deadlines."
       },
       "project": {
@@ -15227,7 +15227,7 @@
         "body": "For private and business customers: describe the project or service you need."
       },
       "title": "Send a request",
-      "promise": "Send your request without signing up – we will contact you within 24 hours.",
+      "promise": "Send your request – we will contact you within 24 hours.",
       "name": "Name or company",
       "email": "Email",
       "phone": "Phone",

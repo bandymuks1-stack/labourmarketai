@@ -15219,7 +15219,7 @@
         "body": "Geef het beroep, het aantal mensen, het land en de startdatum door."
       },
       "b2b": {
-        "title": "B2B-samenwerking aanvragen",
+        "title": "B2B-aanvraag versturen",
         "body": "Beschrijf het soort werk, de locatie, de omvang en de termijnen."
       },
       "project": {
@@ -15227,7 +15227,7 @@
         "body": "Voor particulieren en bedrijven: beschrijf welk project of welke dienst je nodig hebt."
       },
       "title": "Stuur een aanvraag",
-      "promise": "Stuur je aanvraag zonder registratie – we nemen binnen 24 uur contact met je op.",
+      "promise": "Stuur je aanvraag – we nemen binnen 24 uur contact met je op.",
       "name": "Naam of bedrijf",
       "email": "E-mail",
       "phone": "Telefoon",

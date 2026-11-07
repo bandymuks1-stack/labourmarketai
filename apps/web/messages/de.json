@@ -15219,7 +15219,7 @@
         "body": "Nennen Sie den Beruf, die benötigte Personenzahl, das Land und den Arbeitsbeginn."
       },
       "b2b": {
-        "title": "B2B-Kooperationsanfrage senden",
+        "title": "B2B-Anfrage senden",
         "body": "Beschreiben Sie Art der Arbeiten, Ort, Umfang und Fristen."
       },
       "project": {
@@ -15227,7 +15227,7 @@
         "body": "Für Privat- und Geschäftskunden: Beschreiben Sie das benötigte Projekt oder die Dienstleistung."
       },
       "title": "Anfrage senden",
-      "promise": "Senden Sie Ihre Anfrage ohne Registrierung – wir melden uns innerhalb von 24 Stunden bei Ihnen.",
+      "promise": "Senden Sie Ihre Anfrage – wir melden uns innerhalb von 24 Stunden bei Ihnen.",
       "name": "Name oder Firma",
       "email": "E-Mail",
       "phone": "Telefon",
