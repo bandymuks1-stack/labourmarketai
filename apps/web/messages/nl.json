@@ -15213,6 +15213,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Zoektocht naar werknemers aanvragen",
+        "body": "Geef het beroep, het aantal mensen, het land en de startdatum door."
+      },
+      "b2b": {
+        "title": "B2B-samenwerking aanvragen",
+        "body": "Beschrijf het soort werk, de locatie, de omvang en de termijnen."
+      },
+      "project": {
+        "title": "Individueel project aanvragen",
+        "body": "Voor particulieren en bedrijven: beschrijf welk project of welke dienst je nodig hebt."
+      },
+      "title": "Stuur een aanvraag",
+      "promise": "Stuur je aanvraag zonder registratie – we nemen binnen 24 uur contact met je op.",
+      "name": "Naam of bedrijf",
+      "email": "E-mail",
+      "phone": "Telefoon",
+      "country": "Land",
+      "countryChoose": "Kies een land",
+      "city": "Plaats",
+      "profession": "Beroep",
+      "workers": "Aantal werknemers",
+      "start": "Startdatum",
+      "details": "Aanvullende eisen",
+      "work": "Soort werk",
+      "place": "Locatie",
+      "scope": "Omvang",
+      "deadline": "Termijnen",
+      "need": "Welk project of welke dienst",
+      "customer": "Opdrachtgever",
+      "customerPrivate": "Particulier",
+      "customerBusiness": "Bedrijf",
+      "optional": "optioneel",
+      "send": "Aanvraag versturen",
+      "sending": "Versturen…",
+      "receivedTitle": "We hebben je aanvraag ontvangen",
+      "receivedBody": "We nemen binnen 24 uur contact met je op via de opgegeven gegevens.",
+      "invalid": "Controleer de velden en probeer het opnieuw. Wat je hebt ingevuld staat nog in dit formulier.",
+      "limited": "Er zijn nu te veel aanvragen. Probeer het later opnieuw: wat je hebt ingevuld blijft staan.",
+      "unavailable": "Je aanvraag kon niet worden verstuurd en is niet ontvangen. Wat je hebt ingevuld blijft staan, probeer het opnieuw.",
+      "notice": "Door een aanvraag te versturen bevestig je dat je het <privacy>Privacybeleid</privacy> hebt gelezen."
+    },
     "audienceValueEyebrow": "Waarde voor elke kant van werk",
     "audienceValueTitle": "Wat elke doelgroep krijgt",
     "how": {

@@ -15213,6 +15213,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Užsakyti darbuotojų paiešką",
+        "body": "Nurodykite specialybę, kiek žmonių reikia, šalį ir kada pradėti."
+      },
+      "b2b": {
+        "title": "Pateikti B2B bendradarbiavimo užklausą",
+        "body": "Aprašykite darbų pobūdį, vietą, apimtį ir terminus."
+      },
+      "project": {
+        "title": "Užsakyti individualaus projekto vykdymą",
+        "body": "Privatiems ir verslo užsakovams: aprašykite projekto ar paslaugos poreikį."
+      },
+      "title": "Pateikite užklausą",
+      "promise": "Pateikite užklausą be registracijos – susisieksime su jumis per 24 valandas.",
+      "name": "Vardas arba įmonė",
+      "email": "El. paštas",
+      "phone": "Telefonas",
+      "country": "Šalis",
+      "countryChoose": "Pasirinkite šalį",
+      "city": "Miestas",
+      "profession": "Specialybė",
+      "workers": "Darbuotojų skaičius",
+      "start": "Darbo pradžia",
+      "details": "Papildomi reikalavimai",
+      "work": "Darbų pobūdis",
+      "place": "Vieta",
+      "scope": "Apimtis",
+      "deadline": "Terminai",
+      "need": "Projekto ar paslaugos poreikis",
+      "customer": "Užsakovas",
+      "customerPrivate": "Privatus asmuo",
+      "customerBusiness": "Verslas",
+      "optional": "nebūtina",
+      "send": "Siųsti užklausą",
+      "sending": "Siunčiama…",
+      "receivedTitle": "Užklausą gavome",
+      "receivedBody": "Susisieksime su jumis per 24 valandas nurodytais kontaktais.",
+      "invalid": "Patikrinkite laukus ir bandykite dar kartą. Jūsų įvestis išsaugota šioje formoje.",
+      "limited": "Šiuo metu gauta per daug užklausų. Bandykite vėliau: jūsų įvestis lieka formoje.",
+      "unavailable": "Užklausos išsiųsti nepavyko, ji nebuvo gauta. Jūsų įvestis lieka formoje, bandykite dar kartą.",
+      "notice": "Pateikdami užklausą patvirtinate, kad susipažinote su <privacy>Privatumo politika</privacy>."
+    },
     "audienceValueEyebrow": "Vertė kiekvienai pusei",
     "audienceValueTitle": "Ką gauna kiekviena auditorija",
     "how": {

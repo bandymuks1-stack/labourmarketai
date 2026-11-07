@@ -15213,6 +15213,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Order a worker search",
+        "body": "Tell us the profession, how many people you need, the country and when to start."
+      },
+      "b2b": {
+        "title": "Send a B2B cooperation request",
+        "body": "Describe the type of work, location, scope and deadlines."
+      },
+      "project": {
+        "title": "Order an individual project",
+        "body": "For private and business customers: describe the project or service you need."
+      },
+      "title": "Send a request",
+      "promise": "Send your request without signing up – we will contact you within 24 hours.",
+      "name": "Name or company",
+      "email": "Email",
+      "phone": "Phone",
+      "country": "Country",
+      "countryChoose": "Choose a country",
+      "city": "City",
+      "profession": "Profession",
+      "workers": "Number of workers",
+      "start": "Work start",
+      "details": "Additional requirements",
+      "work": "Type of work",
+      "place": "Location",
+      "scope": "Scope",
+      "deadline": "Deadlines",
+      "need": "Project or service you need",
+      "customer": "Customer",
+      "customerPrivate": "Private person",
+      "customerBusiness": "Business",
+      "optional": "optional",
+      "send": "Send request",
+      "sending": "Sending…",
+      "receivedTitle": "We have your request",
+      "receivedBody": "We will contact you within 24 hours using the details you gave.",
+      "invalid": "Check the fields and try again. What you typed is still in this form.",
+      "limited": "Too many requests right now. Please try later: what you typed stays in the form.",
+      "unavailable": "Your request could not be sent and was not received. What you typed stays in the form, so please try again.",
+      "notice": "By sending a request you confirm that you have read the <privacy>Privacy Policy</privacy>."
+    },
     "audienceValueEyebrow": "Value for every side of work",
     "audienceValueTitle": "What each audience gets",
     "how": {

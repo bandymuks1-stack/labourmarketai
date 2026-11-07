@@ -15213,6 +15213,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Zamów poszukiwanie pracowników",
+        "body": "Podaj zawód, liczbę osób, kraj i termin rozpoczęcia pracy."
+      },
+      "b2b": {
+        "title": "Wyślij zapytanie o współpracę B2B",
+        "body": "Opisz rodzaj prac, miejsce, zakres i terminy."
+      },
+      "project": {
+        "title": "Zamów realizację indywidualnego projektu",
+        "body": "Dla klientów prywatnych i firm: opisz potrzebny projekt lub usługę."
+      },
+      "title": "Wyślij zapytanie",
+      "promise": "Wyślij zapytanie bez rejestracji – skontaktujemy się z tobą w ciągu 24 godzin.",
+      "name": "Imię lub firma",
+      "email": "E-mail",
+      "phone": "Telefon",
+      "country": "Kraj",
+      "countryChoose": "Wybierz kraj",
+      "city": "Miasto",
+      "profession": "Zawód",
+      "workers": "Liczba pracowników",
+      "start": "Rozpoczęcie pracy",
+      "details": "Dodatkowe wymagania",
+      "work": "Rodzaj prac",
+      "place": "Miejsce",
+      "scope": "Zakres",
+      "deadline": "Terminy",
+      "need": "Potrzebny projekt lub usługa",
+      "customer": "Klient",
+      "customerPrivate": "Osoba prywatna",
+      "customerBusiness": "Firma",
+      "optional": "opcjonalnie",
+      "send": "Wyślij zapytanie",
+      "sending": "Wysyłanie…",
+      "receivedTitle": "Otrzymaliśmy twoje zapytanie",
+      "receivedBody": "Skontaktujemy się z tobą w ciągu 24 godzin, korzystając z podanych danych.",
+      "invalid": "Sprawdź pola i spróbuj ponownie. Wpisane dane zostają w formularzu.",
+      "limited": "Teraz jest zbyt wiele zapytań. Spróbuj później: wpisane dane zostają w formularzu.",
+      "unavailable": "Nie udało się wysłać zapytania i nie zostało ono odebrane. Wpisane dane zostają w formularzu, spróbuj ponownie.",
+      "notice": "Wysyłając zapytanie, potwierdzasz, że zapoznałeś się z <privacy>Polityką prywatności</privacy>."
+    },
     "audienceValueEyebrow": "Wartość dla każdej strony pracy",
     "audienceValueTitle": "Co zyskuje każda grupa",
     "how": {

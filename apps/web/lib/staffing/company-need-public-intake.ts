@@ -30,6 +30,7 @@ export type PublicIntakeInput = {
   readonly companyName: string;
   readonly contactName?: string;
   readonly contactEmail?: string;
+  readonly contactPhone?: string;
   readonly country: string;
   readonly cityRegion?: string;
   readonly sector: string;
@@ -106,7 +107,7 @@ export async function persistPublicCompanyNeed(
       p_company_name: input.companyName,
       p_contact_name: input.contactName ?? null,
       p_contact_email: input.contactEmail ?? null,
-      p_contact_phone: null,
+      p_contact_phone: input.contactPhone ?? null,
       p_country: input.country,
       p_city_region: input.cityRegion ?? null,
       p_sector: input.sector,
