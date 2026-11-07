@@ -39,7 +39,7 @@ describe("web app manifest", () => {
   it("references only icons that exist at stable URLs", () => {
     expect(manifest).toMatch(/\/app-icon\.svg/);
     expect(existsSync(join(ROOT, "public/app-icon.svg"))).toBe(true);
-    expect(existsSync(join(ROOT, "app/favicon.ico"))).toBe(true);
+    expect(existsSync(join(ROOT, "public/favicon.ico"))).toBe(true);
   });
 
   it("makes no offline promise (the only SW is push-only: no fetch handler, no cache)", () => {
