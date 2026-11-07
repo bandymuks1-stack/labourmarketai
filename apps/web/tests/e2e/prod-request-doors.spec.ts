@@ -8,7 +8,8 @@ import { test, expect, firstVisit, type Browser, type Page } from "./prod-walk";
  * `QA-SYNTHETIC R<run id>` with an `example.invalid` address, so nobody is contacted
  * and the queue's reader can tell them apart. They also raise the real internal alert,
  * which is the point. The form is read and left unsent at the other sizes and languages.
- * Dispatch only: never in the rotation, because each run adds three rows.
+ * "Received" alone proves nothing, so the coordinator reads the three rows and the alert
+ * log after each run. Dispatch only: never in the rotation, because each run adds three rows.
  */
 const ENABLED = process.env.PROD_QA_WALK === "1";
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml");
@@ -21,6 +22,7 @@ const DOORS = ["worker-search", "b2b", "project"] as const;
 type Door = (typeof DOORS)[number];
 const PROMISE: Record<string, string> = { lt: "24 valand", en: "24 hours" };
 const PHONE = { width: 390, height: 844 };
+const MIN_FILL_MS = 4_000;
 const short = (e: unknown) => (e as Error).message.split("\n")[0].slice(0, 160);
 
 function record(label: string, pass: boolean, detail: string): void {
@@ -81,10 +83,13 @@ test("each door takes a request with no account and says it was received", async
     const label = `sent ${door}`;
     const { ctx, page, crashes } = await open(browser, "/lt", PHONE);
     try {
+      const openedAt = Date.now();
       await page.getByTestId(`request-door-${door}-open`).first().click();
       await expect(page.getByTestId("request-door-form")).toBeVisible({ timeout: 30_000 });
       await expect(page.getByTestId("request-door-panel")).toHaveAttribute("data-door", door);
       await fill(page, door);
+      // A form sent inside the anti-bot interval answers "received" and stores nothing.
+      await expect.poll(() => Date.now() - openedAt, { timeout: 10_000, intervals: [250] }).toBeGreaterThan(MIN_FILL_MS);
       const started = Date.now();
       await page.getByTestId("request-door-send").dblclick();
       const received = page.getByTestId("request-door-received");
