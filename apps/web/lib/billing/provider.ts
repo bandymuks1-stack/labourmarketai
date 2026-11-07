@@ -120,6 +120,15 @@ export type PortalSessionResult =
   | { ok: true; url: string }
   | { ok: false; reason: string };
 
+/**
+ * READ-ONLY (registry 7.20): one provider customer's invoices as raw provider
+ * objects, newest first, for the pure normalizer in org-invoices-core.ts (no
+ * second parser here). `hasMore` = the provider has more than one page.
+ */
+export type ListCustomerInvoicesResult =
+  | { ok: true; invoices: readonly Record<string, unknown>[]; hasMore: boolean }
+  | { ok: false; reason: string };
+
 export interface BillingWebhookEvent {
   readonly id: string;
   readonly type: string;
@@ -144,6 +153,13 @@ export interface BillingProvider {
   createCustomer(input: CreateCustomerInput): Promise<CreateCustomerResult>;
   /** Create a Customer Portal session for the caller's OWN customer. */
   createPortalSession(input: PortalSessionInput): Promise<PortalSessionResult>;
+  /**
+   * READ-ONLY (registry 7.20): the invoices of one provider customer the
+   * SERVER resolved for an organization — never a caller-supplied id. Never
+   * creates, finalizes, pays or voids anything. Optional: the noop provider
+   * answers payments_disabled.
+   */
+  listCustomerInvoices?(providerCustomerId: string): Promise<ListCustomerInvoicesResult>;
   /** Verify signature + parse. Throws on an invalid/forged signature. */
   constructWebhookEvent(
     payload: string,
