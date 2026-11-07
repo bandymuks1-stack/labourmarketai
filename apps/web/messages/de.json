@@ -11409,6 +11409,7 @@
       "empty": "An diesem Tag gibt es keine Einträge."
     },
     "year": {
+      "hint": "Die Zahl zeigt, wie viele Einträge in diesen Monat fallen: Buchungen, Projekte, Aufgaben, Arbeitseinträge, Abwesenheiten und andere. Ein Eintrag über mehrere Monate zählt in jedem davon.",
       "count": "{count, plural, =0 {keine Einträge} one {# Eintrag} other {# Einträge}}"
     },
     "emptyFiltered": "Keine Einträge dieses Typs.",

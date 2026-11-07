@@ -11409,6 +11409,7 @@
       "empty": "Niets op deze dag."
     },
     "year": {
+      "hint": "Het getal is hoeveel items in die maand vallen: reserveringen, projecten, taken, werkregistraties, verlof en andere. Een item over meerdere maanden telt in elk daarvan mee.",
       "count": "{count, plural, =0 {geen items} one {# item} other {# items}}"
     },
     "emptyFiltered": "Geen items van dit type.",
