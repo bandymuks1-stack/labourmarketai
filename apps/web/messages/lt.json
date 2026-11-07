@@ -11409,6 +11409,7 @@
       "empty": "Šią dieną įrašų nėra."
     },
     "year": {
+      "hint": "Skaičius rodo, kiek įrašų patenka į tą mėnesį: rezervacijos, projektai, užduotys, darbo įrašai, atostogos ir kiti. Keliems mėnesiams skirtas įrašas skaičiuojamas kiekviename iš jų.",
       "count": "{count, plural, =0 {nėra įrašų} one {# įrašas} few {# įrašai} other {# įrašų}}"
     },
     "emptyFiltered": "Šio tipo įrašų nėra.",

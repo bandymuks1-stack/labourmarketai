@@ -144,6 +144,23 @@ test("4. the worker's own calendar shows the leave, the plan and the conflict", 
   await close();
 });
 
+test("4b. the month and year views carry the same day, and the year says what it counts", async ({ browser }) => {
+  const { page, close } = await as(browser, "worker");
+  await page.goto(`/lt/dashboard/planning?view=month&date=${DAY}`);
+  await expect(page.getByTestId("planning-month")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId(`planning-month-cell-${DAY}`)).toBeVisible();
+
+  await page.goto(`/lt/dashboard/planning?view=year&date=${DAY}`);
+  await expect(page.getByTestId("planning-year-hint")).toBeVisible({ timeout: 30_000 });
+  const tile = page.getByTestId(`planning-year-${DAY.slice(0, 7)}`);
+  // This month holds the leave and the plan from the steps above.
+  await expect(tile).toBeVisible();
+  await expect(tile).not.toContainText("nėra įrašų");
+  await tile.click();
+  await expect(page.getByTestId(`planning-month-cell-${DAY}`)).toBeVisible({ timeout: 30_000 });
+  await close();
+});
+
 test("5. another organization's owner sees neither the plan nor the leave", async ({ browser }) => {
   test.skip(!existsSync(state("manager")), "no manager session");
   const { page, close } = await as(browser, "manager");

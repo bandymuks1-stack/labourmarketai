@@ -11409,6 +11409,7 @@
       "empty": "Nic tego dnia."
     },
     "year": {
+      "hint": "Liczba pokazuje, ile pozycji przypada na ten miesiąc: rezerwacje, projekty, zadania, wpisy pracy, urlopy i inne. Pozycja obejmująca kilka miesięcy liczy się w każdym z nich.",
       "count": "{count, plural, =0 {brak pozycji} one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}"
     },
     "emptyFiltered": "Brak pozycji tego typu.",
