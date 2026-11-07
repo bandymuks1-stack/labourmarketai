@@ -312,6 +312,7 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
         join(LOCALE_DIR, "cv"),
         join(LOCALE_DIR, "invite"),
         join(LOCALE_DIR, "[...rest]"),
+        join(LOCALE_DIR, "unknown-address"),
         // OAuth consent (owner directive 2026-08-29 §4) — a pure server
         // component: every oauthConsent string renders on the server, the
         // form is native HTML, so no client i18n pick is needed.
@@ -343,6 +344,7 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
       "invite",
       "oauth",
       "onboarding",
+      "unknown-address",
     ]);
   });
 });
