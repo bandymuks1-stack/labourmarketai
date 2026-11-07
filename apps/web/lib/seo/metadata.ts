@@ -37,8 +37,8 @@ export function brandedTitle(title: string): string {
 
 /**
  * One-sentence organisation description (owner's wording, 2026-11-04, GEO-6).
- * The SINGLE source for app/manifest.ts `description` and the Organization
- * JSON-LD `description` — never duplicate the literal.
+ * The SINGLE source for app/manifest.ts `description` — never duplicate the
+ * literal. The Organization JSON-LD uses the localized `BRAND_SEO` text.
  */
 export const BRAND_ORGANIZATION_DESCRIPTION =
   "International platform for work, specialists and services, where people and companies find jobs, workers, clients, services and project partners.";

@@ -14,7 +14,6 @@ import type { Metadata, MetadataRoute } from "next";
 import { MARKETING_ORIGIN, MARKETING_HOST } from "@/lib/domain/canonical";
 import {
   BRAND_NAME,
-  BRAND_ORGANIZATION_DESCRIPTION,
   BRAND_SEO,
   brandedTitle,
   OG_IMAGE_SIZE,
@@ -132,17 +131,22 @@ export interface BreadcrumbItem {
   readonly url: string;
 }
 
+/** One identity for the publisher wherever it is named, so a reader of several
+ *  pages sees one organization. */
+const ORGANIZATION_ID = `${MARKETING_ORIGIN}/#organization`;
+
 /** The publisher, emitted ONCE per page by app/[locale]/layout.tsx. No sameAs:
  *  no social profile URLs exist and none are invented. */
-export function organizationJsonLd() {
+export function organizationJsonLd(locale: string) {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": ORGANIZATION_ID,
     name: BRAND_NAME,
     url: MARKETING_ORIGIN,
     logo: `${MARKETING_ORIGIN}/icon-512.png`,
-    // Same owner-approved sentence as app/manifest.ts — one source.
-    description: BRAND_ORGANIZATION_DESCRIPTION,
+    // The owner's definition in the page's language, as on the home <meta>.
+    description: BRAND_SEO[resolveActiveLocale(locale)].description,
   };
 }
 
@@ -157,7 +161,7 @@ export function webSiteJsonLd(locale: string) {
     // The per-locale brand description the homepage <meta> already carries.
     description: BRAND_SEO[resolveActiveLocale(locale)].description,
     inLanguage: locale,
-    publisher: { "@type": "Organization", name: BRAND_NAME, url: MARKETING_ORIGIN },
+    publisher: { "@type": "Organization", "@id": ORGANIZATION_ID, name: BRAND_NAME, url: MARKETING_ORIGIN },
   };
 }
 
