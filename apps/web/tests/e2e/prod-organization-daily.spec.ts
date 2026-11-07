@@ -66,6 +66,11 @@ for (const size of SIZES) {
     const approvalsState = approvalsShown ? await approvals.getAttribute("data-state") : "none";
     record(`${size.name} approvals card on the first screen`, approvalsShown && approvalsState !== "unreadable", `state=${approvalsState}`);
 
+    await page.goto("/lt/dashboard/hours");
+    const hoursLink = inMain(page).getByTestId("hours-approvals-link");
+    const hoursLinkShown = await hoursLink.waitFor({ state: "visible", timeout: 60_000 }).then(() => true, () => false);
+    record(`${size.name} hours page links to approvals`, hoursLinkShown && (await hoursLink.innerText()).includes("Laukia patvirtinimo"), `shown=${hoursLinkShown}`);
+
     await page.goto("/lt/dashboard/company/planning");
     const today = inMain(page).getByTestId("organization-today-panel");
     const shown = await today.waitFor({ state: "visible", timeout: 60_000 }).then(() => true, () => false);
