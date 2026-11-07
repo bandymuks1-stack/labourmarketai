@@ -15,7 +15,22 @@
     "work": "Praca i godziny",
     "results": "Wyniki",
     "history": "Historia",
-    "areasTitle": "Obszary firmy"
+    "areasTitle": "Obszary firmy",
+    "approvals": {
+      "title": "Czeka na zatwierdzenie: {n}",
+      "titleUnknown": "Czeka na zatwierdzenie",
+      "what": "Godziny i prace zapisane przez pracowników. Zatwierdź lub odrzuć je od razu tutaj.",
+      "seeAll": "Wszystkie oczekujące ({n})",
+      "emptyTitle": "Obecnie żadne godziny pracowników nie czekają na zatwierdzenie.",
+      "emptyNext": "Gdy pracownik zapisze pracę, pojawi się tutaj.",
+      "noEmployees": "Ta organizacja nie ma jeszcze pracowników, których godziny mógłbyś zatwierdzić.",
+      "people": "Ludzie i zespół",
+      "reviewOff": "Zatwierdzanie jest wyłączone dla {off} z {total} pracowników. Ich godziny nie pojawią się tutaj, dopóki go nie włączysz.",
+      "enable": "Włącz w sekcji Ludzie i zespół",
+      "own": "Twoje niepotwierdzone wpisy: {n}. Nie możesz zatwierdzić własnej pracy: może to zrobić inny kierownik tej organizacji.",
+      "ownAlone": "Twoje niepotwierdzone wpisy: {n}. Nie możesz zatwierdzić własnej pracy, a ta organizacja nie ma innego kierownika, więc pozostają zapisane jako Twoja własna praca.",
+      "ownUnknown": "Twoje niepotwierdzone wpisy: {n}. Nie możesz zatwierdzić własnej pracy: pozostają zapisane jako Twoja własna praca, dopóki nie potwierdzi ich inny kierownik."
+    }
   },
   "publicDemand": {
     "title": "Aktualny popyt na rynku",
@@ -3171,6 +3186,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Wygląda na reklamę",
       "eyebrow": "POTRZEBY FIRM",
       "title": "Kolejka publicznych potrzeb firm",
       "subtitle": "Anonimowe potrzeby zgłoszone przez publiczny formularz /company-need. Przejrzyj każdą i ręcznie oznacz kolejny krok. Nic nie jest wysyłane automatycznie — cały kontakt prowadzi człowiek.",
@@ -5694,6 +5710,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Twoja umowa na jakąkolwiek usługę platformy jest zawierana z UAB „Nonstop Group”. Faktury wystawia i płatności otrzymuje UAB „Nonstop Group”.",
       "title": "Regulamin",
       "sections": [
         {
@@ -5723,7 +5740,7 @@
     },
     "privacy": {
       "title": "Polityka prywatności",
-      "metaDescription": "Ta strona wyjaśnia prostym językiem, jakich danych osobowych używa Labour Market AI, w jakim celu i jakie masz prawa. Opisuje platformę taką, jaka działa dzisiaj.",
+      "metaDescription": "Ta strona wyjaśnia prostym językiem, jakich danych osobowych używa LabourMarket.ai, w jakim celu i jakie masz prawa. Opisuje platformę taką, jaka działa dzisiaj.",
       "intro": "Ta strona wyjaśnia prostym językiem, jakich danych osobowych używa Labour Market AI, w jakim celu i jakie masz prawa. Opisuje platformę taką, jaka działa dzisiaj.",
       "sections": [
         {
@@ -5875,6 +5892,7 @@
     },
     "dataProtection": {
       "title": "Ochrona danych",
+      "metaDescription": "Ta strona wyjaśnia prostymi słowami, jak chronione są dane wewnątrz LabourMarket.ai. Opisuje wyłącznie to, co jest dziś faktycznie wbudowane w platformę.",
       "intro": "Ta strona wyjaśnia prostymi słowami, jak chronione są dane wewnątrz Labour Market AI. Opisuje wyłącznie to, co jest dziś faktycznie wbudowane w platformę.",
       "sections": [
         {
@@ -10789,7 +10807,7 @@
     "navLabel": "O LabourMarket.ai",
     "eyebrow": "O platformie",
     "title": "Czym jest LabourMarket.ai",
-    "lede": "LabourMarket.ai to operacyjna platforma rynku pracy. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — od pierwszej rozmowy do następnej szansy.",
+    "lede": "LabourMarket.ai to międzynarodowa platforma pracy, specjalistów i usług. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — od pierwszej rozmowy do następnej szansy.",
     "hero": {
       "lead": "Zawodowa wartość człowieka nie powinna znikać za każdym razem, gdy zmienia pracodawcę. Prawdziwa praca może stać się trwałą historią zawodową: co osoba robiła, gdzie, kiedy, jak długo, w jakiej roli, z jakimi umiejętnościami i jakie dowody oraz potwierdzenia to wspierają.",
       "leadOrg": "Dla organizacji ta sama prawdziwa praca buduje historię tego, co firma faktycznie zrobiła: projekty, zespoły, wykonane prace, godziny, kompetencje i dowody.",
@@ -15211,6 +15229,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Zamów poszukiwanie pracowników",
+        "body": "Podaj zawód, liczbę osób, kraj i termin rozpoczęcia pracy."
+      },
+      "b2b": {
+        "title": "Wyślij zapytanie B2B",
+        "body": "Opisz rodzaj prac, miejsce, zakres i terminy."
+      },
+      "project": {
+        "title": "Zamów realizację indywidualnego projektu",
+        "body": "Dla klientów prywatnych i firm: opisz potrzebny projekt lub usługę."
+      },
+      "title": "Wyślij zapytanie",
+      "promise": "Wyślij zapytanie – skontaktujemy się z tobą w ciągu 24 godzin.",
+      "name": "Imię lub firma",
+      "email": "E-mail",
+      "phone": "Telefon",
+      "country": "Kraj",
+      "countryChoose": "Wybierz kraj",
+      "city": "Miasto",
+      "profession": "Zawód",
+      "workers": "Liczba pracowników",
+      "start": "Rozpoczęcie pracy",
+      "details": "Dodatkowe wymagania",
+      "work": "Rodzaj prac",
+      "place": "Miejsce",
+      "scope": "Zakres",
+      "deadline": "Terminy",
+      "need": "Potrzebny projekt lub usługa",
+      "customer": "Klient",
+      "customerPrivate": "Osoba prywatna",
+      "customerBusiness": "Firma",
+      "optional": "opcjonalnie",
+      "send": "Wyślij zapytanie",
+      "sending": "Wysyłanie…",
+      "receivedTitle": "Otrzymaliśmy twoje zapytanie",
+      "receivedBody": "Skontaktujemy się z tobą w ciągu 24 godzin, korzystając z podanych danych.",
+      "invalid": "Sprawdź pola i spróbuj ponownie. Wpisane dane zostają w formularzu.",
+      "limited": "Teraz jest zbyt wiele zapytań. Spróbuj później: wpisane dane zostają w formularzu.",
+      "unavailable": "Nie udało się wysłać zapytania i nie zostało ono odebrane. Wpisane dane zostają w formularzu, spróbuj ponownie.",
+      "notice": "Wysyłając zapytanie, potwierdzasz, że zapoznałeś się z <privacy>Polityką prywatności</privacy>."
+    },
     "audienceValueEyebrow": "Wartość dla każdej strony pracy",
     "audienceValueTitle": "Co zyskuje każda grupa",
     "how": {
@@ -15425,8 +15486,8 @@
       "noStars": "Nigdzie nie ma ocen w gwiazdkach: człowiek nigdy nie jest sprowadzany do punktacji. Każde dopasowanie jest wyjaśnione wobec konkretnego zapotrzebowania — z widocznymi liczbami."
     },
     "hero": {
-      "headline": "Żywy system możliwości pracy i biznesu.",
-      "sub": "W jednym miejscu pokaż, co umiesz, co oferujesz albo czego szukasz. Odkrywaj pracowników, pracę, wykonawców, usługi i towary — a twoje doświadczenie i możliwości pozostają stale dostępne."
+      "headline": "Praca, pracownicy, usługi i możliwości biznesowe – w jednym miejscu.",
+      "sub": "Szukaj pracy, specjalistów, pracowników, klientów lub partnerów do projektów w swoim kraju i na całym świecie. Stwórz swój profil zawodowy, pokaż doświadczenie, oferuj usługi i odkrywaj nowe możliwości."
     },
     "entry": {
       "label": "Napisz, czego potrzebujesz — własnymi słowami",

@@ -124,6 +124,23 @@ on:
           # 2026-11-01 register reconciliation: waitlist real submit (6.18), public JSON APIs (9.18),
           # journal templates (2.36). Synthetic data only. Dispatch only, never in the rotation.
           - register-gaps
+          # #3102 (owner 2026-11-05): a CV imported once, again and from two tabs at once leaves one row. Synthetic
+          # worker, real Chrome. Dispatch only, never in the rotation.
+          - cv-import-duplicates
+          # Removes only what a stopped cv-import-duplicates walk left on the synthetic worker. Dispatch only.
+          - cv-import-sweep
+          # Real report 2026-11-05: Save on the work card, through a translated page, killed the page. Synthetic worker,
+          # real Chrome, translator DOM swap emulated. Dispatch only, never in the rotation.
+          - availability-save
+          # SR-1 (owner 2026-11-06): first searches signed in and signed out, in scripted headless Chrome, read-only.
+          # About 7 min, so it can span an import. Timings go only to the one-day sr1-readings artefact. Dispatch only.
+          - sr1-first-search
+          # Owner 2026-11-06: forms on a slow phone. Synthetic worker, real Chrome. Dispatch only, never in the rotation.
+          - slow-connection
+          # Owner 2026-11-07: the Today panel, journal period reports and quick confirmation, plus one synthetic entry the owner approves from the first screen. Dispatch only.
+          - organization-daily
+          # Owner P0 2026-11-07: the landing's three request doors. Adds 3 tagged rows and raises the real alert. Dispatch only.
+          - request-doors
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -411,6 +428,7 @@ jobs:
           PROD_QA_IMAP_USER: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check') && secrets.PROD_QA_IMAP_USER || '' }}
           PROD_QA_IMAP_PASS: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check') && secrets.PROD_QA_IMAP_PASS || '' }}
           PROD_QA_MAIL_ADDRESS: qa.invited@labourmarket.ai
+          SR1_READINGS_FILE: ${{ github.workspace }}/sr1-readings.jsonl
         run: |
           set -uo pipefail
           cd apps/web
@@ -471,6 +489,13 @@ jobs:
             digest-setup) SPEC=tests/e2e/prod-digest-setup.spec.ts ;;
             digest-check) SPEC=tests/e2e/prod-digest-check.spec.ts ;;
             register-gaps) SPEC=tests/e2e/prod-register-gaps.spec.ts ;;
+            cv-import-duplicates) SPEC=tests/e2e/prod-cv-import-duplicates.spec.ts ;;
+            cv-import-sweep) SPEC=tests/e2e/prod-cv-import-sweep.spec.ts ;;
+            availability-save) SPEC=tests/e2e/prod-availability-save.spec.ts ;;
+            sr1-first-search) SPEC=tests/e2e/prod-sr1-first-search.spec.ts ;;
+            slow-connection) SPEC=tests/e2e/prod-slow-connection.spec.ts ;;
+            organization-daily) SPEC=tests/e2e/prod-organization-daily.spec.ts ;;
+            request-doors) SPEC=tests/e2e/prod-request-doors.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
@@ -508,6 +533,16 @@ jobs:
       # assertion message names the testid and the expected text, nothing more.
       # `prod-qa-walk.log` is the list reporter's text — exactly what used to be
       # glued to the front of prod-qa-result.json, now in its own file.
+      # The CV walk's rows, whatever stopped the walk: a failed step, a cancel, the test's
+      # own timeout. It needs the session, so it stands before the revoke.
+      - name: Remove the CV walk's synthetic rows
+        if: always() && needs.debounce.outputs.spec == 'cv-import-duplicates' && steps.mint.outcome == 'success'
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          cd apps/web
+          pnpm exec playwright test tests/e2e/prod-cv-import-sweep.spec.ts --project=chromium --trace=off --reporter=list
+
       # Sessions never outlive the walk: every minted session's refresh token is
       # revoked at Supabase and every session file deleted, pass or fail
       # (scripts/prod-qa-revoke-sessions.ts prints counts only).
@@ -542,3 +577,14 @@ jobs:
           path: |
             prod-qa-result.json
             prod-qa-walk.log
+
+      # The SR-1 timings, apart from the walk's artefact and kept one day: artefacts of this public repo are
+      # readable by any signed-in GitHub user, so whoever records the readings deletes this one after copying them.
+      - name: Upload the SR-1 readings (one day)
+        if: always() && needs.debounce.outputs.spec == 'sr1-first-search'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sr1-readings-${{ github.run_id }}
+          retention-days: 1
+          if-no-files-found: warn
+          path: sr1-readings.jsonl

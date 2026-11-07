@@ -28,6 +28,7 @@ import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { buildLivingWorkerHero } from "@/lib/marketing/living-worker-hero";
 import { LivingWorkerHero } from "@/components/marketing/living-worker-hero";
 import { LandingThreeWays } from "@/components/marketing/landing-three-ways";
+import { LandingRequestDoors } from "@/components/marketing/landing-request-doors";
 import { BRAND_NAME } from "@/lib/seo/metadata";
 
 /**
@@ -94,6 +95,7 @@ export async function FocusLanding({
     getTranslations("landing.hero"),
     buildLivingWorkerHero(),
   ]);
+  const tRequest = await getTranslations("landing.requestDoors");
 
   // THE PROMISE — one headline, one sub, one set of primary doors, whichever
   // hero carries it (the living worker hero, or the entry hero without it).
@@ -111,6 +113,10 @@ export async function FocusLanding({
       <div className="mt-6">
         <LandingPrimaryActions locale={locale} surface="landing_hero" />
       </div>
+      {/* The doors sit further down: from the first screen, one plain way to them. */}
+      <a href="#request" className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-text-secondary underline underline-offset-4 hover:text-text-primary" data-testid="landing-request-doors-link">
+        {tRequest("promise")}
+      </a>
     </>
   );
 
@@ -171,6 +177,7 @@ export async function FocusLanding({
                   <LandingThreeWays placement="phone" />
                 </LivingWorkerHero>
                 <LandingThreeWays placement="wide" />
+                <LandingRequestDoors locale={locale} />
                 <section className="mt-8 scroll-mt-24" id="find">
               <PublicEntry
                   supply={
@@ -190,6 +197,7 @@ export async function FocusLanding({
                 <div className="order-1 max-w-3xl lg:col-start-1 lg:row-start-1 lg:self-center">
                   {promise}
                   <LandingThreeWays />
+                  <LandingRequestDoors locale={locale} />
                 </div>
                 <div className="scroll-mt-24" id="find">
                 <PublicEntry

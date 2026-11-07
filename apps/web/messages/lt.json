@@ -15,7 +15,22 @@
     "work": "Darbas ir valandos",
     "results": "Rezultatai",
     "history": "Istorija",
-    "areasTitle": "Įmonės sritys"
+    "areasTitle": "Įmonės sritys",
+    "approvals": {
+      "title": "Laukia patvirtinimo: {n}",
+      "titleUnknown": "Laukia patvirtinimo",
+      "what": "Darbuotojų įrašytos valandos ir darbai. Patvirtink arba atmesk čia pat.",
+      "seeAll": "Visi laukiantys ({n})",
+      "emptyTitle": "Šiuo metu darbuotojų valandos patvirtinimo nelaukia.",
+      "emptyNext": "Kai darbuotojas įrašys darbą, jis atsiras čia.",
+      "noEmployees": "Organizacijoje dar nėra darbuotojų, kurių valandas galėtum patvirtinti.",
+      "people": "Žmonės ir komanda",
+      "reviewOff": "Patvirtinimas neįjungtas: {off} iš {total} darbuotojų. Jų valandos čia neatsiras, kol jo neįjungsi.",
+      "enable": "Įjungti skiltyje „Žmonės ir komanda“",
+      "own": "Tavo paties nepatvirtintų įrašų: {n}. Savo darbo pats patvirtinti negali: jį gali patvirtinti kitas šios organizacijos vadovas.",
+      "ownAlone": "Tavo paties nepatvirtintų įrašų: {n}. Savo darbo pats patvirtinti negali, o kito vadovo šioje organizacijoje nėra, todėl jie lieka įrašyti kaip tavo paties darbas.",
+      "ownUnknown": "Tavo paties nepatvirtintų įrašų: {n}. Savo darbo pats patvirtinti negali: jie lieka įrašyti kaip tavo paties darbas, kol juos patvirtina kitas vadovas."
+    }
   },
   "publicDemand": {
     "title": "Dabartinė rinkos paklausa",
@@ -3171,6 +3186,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Panašu į reklamą",
       "eyebrow": "ĮMONIŲ POREIKIAI",
       "title": "Viešų įmonių poreikių eilė",
       "subtitle": "Anoniminiai poreikiai, pateikti per viešą /company-need formą. Peržiūrėk ir rankiniu būdu pažymėk tolesnį žingsnį. Nieko neišsiunčiama automatiškai — visą kontaktą atlieka žmogus.",
@@ -5694,6 +5710,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Jūsų sutartis dėl bet kurios platformos paslaugos sudaroma su UAB „Nonstop Group“. Sąskaitas išrašo ir mokėjimus gauna UAB „Nonstop Group“.",
       "title": "Naudojimo sąlygos",
       "sections": [
         {
@@ -5723,7 +5740,7 @@
     },
     "privacy": {
       "title": "Privatumo politika",
-      "metaDescription": "Paprastais žodžiais: kokius asmens duomenis naudoja Labour Market AI, kodėl ir kokias teises turite. Platforma aprašyta tokia, kokia veikia šiandien.",
+      "metaDescription": "Paprastais žodžiais: kokius asmens duomenis naudoja LabourMarket.ai, kodėl ir kokias teises turite. Platforma aprašyta tokia, kokia veikia šiandien.",
       "intro": "Šis puslapis paprastais žodžiais paaiškina, kokius asmens duomenis naudoja Labour Market AI, kodėl juos naudoja ir kokias teises turite. Jis aprašo platformą tokią, kokia ji veikia šiandien.",
       "sections": [
         {
@@ -5875,6 +5892,7 @@
     },
     "dataProtection": {
       "title": "Duomenų apsauga",
+      "metaDescription": "Šis puslapis paprastais žodžiais paaiškina, kaip saugomi duomenys LabourMarket.ai platformoje. Aprašoma tik tai, kas šiandien iš tikrųjų įdiegta.",
       "intro": "Šis puslapis paprastais žodžiais paaiškina, kaip saugomi duomenys Labour Market AI platformoje. Aprašoma tik tai, kas šiandien iš tikrųjų įdiegta.",
       "sections": [
         {
@@ -10789,7 +10807,7 @@
     "navLabel": "Apie LabourMarket.ai",
     "eyebrow": "Apie platformą",
     "title": "Kas yra LabourMarket.ai",
-    "lede": "LabourMarket.ai — darbo rinkos operacinė platforma. Ji jungia žmones, darbdavius, agentūras, komandas, projektus, mokymus ir darbo rinkos paslaugas aplink tikrą darbą — nuo pirmo pokalbio iki kitos galimybės.",
+    "lede": "LabourMarket.ai – tarptautinė darbo, specialistų ir paslaugų platforma. Ji jungia žmones, darbdavius, agentūras, komandas, projektus, mokymus ir darbo rinkos paslaugas aplink tikrą darbą — nuo pirmo pokalbio iki kitos galimybės.",
     "hero": {
       "lead": "Žmogaus profesinė vertė neturi dingti kaskart, kai jis keičia darbdavį. Tikras darbas gali tapti ilgalaike profesine istorija: ką žmogus dirbo, kur, kada, kiek laiko, kokiu vaidmeniu, kokiais įgūdžiais ir kokie įrodymai bei patvirtinimai tai remia.",
       "leadOrg": "Organizacijoms tas pats tikras darbas kaupia įmonės realiai atlikto darbo istoriją: projektus, komandas, atliktus darbus, valandas, kompetencijas ir įrodymus.",
@@ -15211,6 +15229,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Užsakyti darbuotojų paiešką",
+        "body": "Nurodykite specialybę, kiek žmonių reikia, šalį ir kada pradėti."
+      },
+      "b2b": {
+        "title": "Pateikti B2B užklausą",
+        "body": "Aprašykite darbų pobūdį, vietą, apimtį ir terminus."
+      },
+      "project": {
+        "title": "Užsakyti individualaus projekto vykdymą",
+        "body": "Privatiems ir verslo užsakovams: aprašykite projekto ar paslaugos poreikį."
+      },
+      "title": "Pateikite užklausą",
+      "promise": "Pateikite užklausą – susisieksime per 24 valandas.",
+      "name": "Vardas arba įmonė",
+      "email": "El. paštas",
+      "phone": "Telefonas",
+      "country": "Šalis",
+      "countryChoose": "Pasirinkite šalį",
+      "city": "Miestas",
+      "profession": "Specialybė",
+      "workers": "Darbuotojų skaičius",
+      "start": "Darbo pradžia",
+      "details": "Papildomi reikalavimai",
+      "work": "Darbų pobūdis",
+      "place": "Vieta",
+      "scope": "Apimtis",
+      "deadline": "Terminai",
+      "need": "Projekto ar paslaugos poreikis",
+      "customer": "Užsakovas",
+      "customerPrivate": "Privatus asmuo",
+      "customerBusiness": "Verslas",
+      "optional": "nebūtina",
+      "send": "Siųsti užklausą",
+      "sending": "Siunčiama…",
+      "receivedTitle": "Užklausą gavome",
+      "receivedBody": "Susisieksime su jumis per 24 valandas nurodytais kontaktais.",
+      "invalid": "Patikrinkite laukus ir bandykite dar kartą. Jūsų įvestis išsaugota šioje formoje.",
+      "limited": "Šiuo metu gauta per daug užklausų. Bandykite vėliau: jūsų įvestis lieka formoje.",
+      "unavailable": "Užklausos išsiųsti nepavyko, ji nebuvo gauta. Jūsų įvestis lieka formoje, bandykite dar kartą.",
+      "notice": "Pateikdami užklausą patvirtinate, kad susipažinote su <privacy>Privatumo politika</privacy>."
+    },
     "audienceValueEyebrow": "Vertė kiekvienai pusei",
     "audienceValueTitle": "Ką gauna kiekviena auditorija",
     "how": {
@@ -15425,8 +15486,8 @@
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
     },
     "hero": {
-      "headline": "Tai gyva darbo ir verslo galimybių sistema.",
-      "sub": "Vienoje vietoje parodyk, ką moki, ką siūlai arba ko ieškai. Atrask darbuotojus, darbus, rangovus, paslaugas ir prekes, o tavo patirtis bei galimybės išlieka pasiekiamos nuolat."
+      "headline": "Darbas, darbuotojai, paslaugos ir verslo galimybės – vienoje vietoje.",
+      "sub": "Ieškokite darbo, specialistų, darbuotojų, klientų ar projektų partnerių Lietuvoje ir visame pasaulyje. Kurkite savo profesinį profilį, pristatykite patirtį, siūlykite paslaugas ir atraskite naujas galimybes."
     },
     "entry": {
       "label": "Parašyk, ko reikia — savais žodžiais",

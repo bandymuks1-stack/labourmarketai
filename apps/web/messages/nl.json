@@ -15,7 +15,22 @@
     "work": "Werk & uren",
     "results": "Resultaten",
     "history": "Geschiedenis",
-    "areasTitle": "Bedrijfsgebieden"
+    "areasTitle": "Bedrijfsgebieden",
+    "approvals": {
+      "title": "Wacht op goedkeuring: {n}",
+      "titleUnknown": "Wacht op goedkeuring",
+      "what": "Uren en werk die je medewerkers hebben vastgelegd. Keur ze hier meteen goed of af.",
+      "seeAll": "Alles wat wacht ({n})",
+      "emptyTitle": "Er wachten nu geen uren van medewerkers op goedkeuring.",
+      "emptyNext": "Zodra een medewerker werk vastlegt, verschijnt het hier.",
+      "noEmployees": "Deze organisatie heeft nog geen medewerkers van wie je uren kunt goedkeuren.",
+      "people": "Mensen en team",
+      "reviewOff": "Goedkeuring staat uit voor {off} van de {total} medewerkers. Hun uren verschijnen hier pas als je het inschakelt.",
+      "enable": "Inschakelen bij Mensen en team",
+      "own": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren: dat kan een andere manager van deze organisatie.",
+      "ownAlone": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren en deze organisatie heeft geen andere manager, dus ze blijven vastgelegd als je eigen werk.",
+      "ownUnknown": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren: ze blijven vastgelegd als je eigen werk tot een andere manager ze bevestigt."
+    }
   },
   "publicDemand": {
     "title": "Actuele marktvraag",
@@ -3171,6 +3186,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Lijkt op reclame",
       "eyebrow": "PERSONEELSBEHOEFTEN",
       "title": "Openbare wachtrij met personeelsbehoeften",
       "subtitle": "Anonieme behoeften die via het openbare /company-need-formulier zijn ingediend. Beoordeel ze stuk voor stuk en markeer de volgende stap handmatig. Er wordt niets automatisch verstuurd — al het contact verloopt via een mens.",
@@ -5694,6 +5710,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Uw overeenkomst voor elke platformdienst wordt gesloten met UAB “Nonstop Group”. Facturen worden opgesteld door en betalingen ontvangen door UAB “Nonstop Group”.",
       "title": "Gebruiksvoorwaarden",
       "sections": [
         {
@@ -5723,7 +5740,7 @@
     },
     "privacy": {
       "title": "Privacybeleid",
-      "metaDescription": "In gewone taal: welke persoonsgegevens Labour Market AI gebruikt, waarom, en welke rechten je hebt. Het platform zoals het vandaag werkt.",
+      "metaDescription": "In gewone taal: welke persoonsgegevens LabourMarket.ai gebruikt, waarom, en welke rechten je hebt. Het platform zoals het vandaag werkt.",
       "intro": "Deze pagina legt in gewone taal uit welke persoonsgegevens Labour Market AI gebruikt, waarom, en welke rechten je hebt. De pagina beschrijft het platform zoals het vandaag werkt.",
       "sections": [
         {
@@ -5875,6 +5892,7 @@
     },
     "dataProtection": {
       "title": "Gegevensbescherming",
+      "metaDescription": "Deze pagina legt in gewone woorden uit hoe gegevens binnen LabourMarket.ai worden beschermd. Ze beschrijft alleen wat vandaag daadwerkelijk in het platform is ingebouwd.",
       "intro": "Deze pagina legt in gewone woorden uit hoe gegevens binnen Labour Market AI worden beschermd. Ze beschrijft alleen wat vandaag daadwerkelijk in het platform is ingebouwd.",
       "sections": [
         {
@@ -10789,7 +10807,7 @@
     "navLabel": "Over LabourMarket.ai",
     "eyebrow": "Over het platform",
     "title": "Wat is LabourMarket.ai",
-    "lede": "LabourMarket.ai is een besturingsplatform voor de arbeidsmarkt. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — van het eerste gesprek tot de volgende kans.",
+    "lede": "LabourMarket.ai is een internationaal platform voor werk, specialisten en diensten. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — van het eerste gesprek tot de volgende kans.",
     "hero": {
       "lead": "De professionele waarde van een persoon mag niet verdwijnen telkens wanneer die van werkgever wisselt. Echt werk kan blijvende professionele geschiedenis worden: wat de persoon deed, waar, wanneer, hoe lang, in welke rol, met welke vaardigheden en welk bewijs en welke bevestiging dat ondersteunt.",
       "leadOrg": "Voor organisaties bouwt datzelfde echte werk het overzicht op van wat het bedrijf werkelijk heeft gedaan: projecten, teams, uitgevoerd werk, uren, competenties en bewijs.",
@@ -15211,6 +15229,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Zoektocht naar werknemers aanvragen",
+        "body": "Geef het beroep, het aantal mensen, het land en de startdatum door."
+      },
+      "b2b": {
+        "title": "B2B-aanvraag versturen",
+        "body": "Beschrijf het soort werk, de locatie, de omvang en de termijnen."
+      },
+      "project": {
+        "title": "Individueel project aanvragen",
+        "body": "Voor particulieren en bedrijven: beschrijf welk project of welke dienst je nodig hebt."
+      },
+      "title": "Stuur een aanvraag",
+      "promise": "Stuur je aanvraag – we nemen binnen 24 uur contact met je op.",
+      "name": "Naam of bedrijf",
+      "email": "E-mail",
+      "phone": "Telefoon",
+      "country": "Land",
+      "countryChoose": "Kies een land",
+      "city": "Plaats",
+      "profession": "Beroep",
+      "workers": "Aantal werknemers",
+      "start": "Startdatum",
+      "details": "Aanvullende eisen",
+      "work": "Soort werk",
+      "place": "Locatie",
+      "scope": "Omvang",
+      "deadline": "Termijnen",
+      "need": "Welk project of welke dienst",
+      "customer": "Opdrachtgever",
+      "customerPrivate": "Particulier",
+      "customerBusiness": "Bedrijf",
+      "optional": "optioneel",
+      "send": "Aanvraag versturen",
+      "sending": "Versturen…",
+      "receivedTitle": "We hebben je aanvraag ontvangen",
+      "receivedBody": "We nemen binnen 24 uur contact met je op via de opgegeven gegevens.",
+      "invalid": "Controleer de velden en probeer het opnieuw. Wat je hebt ingevuld staat nog in dit formulier.",
+      "limited": "Er zijn nu te veel aanvragen. Probeer het later opnieuw: wat je hebt ingevuld blijft staan.",
+      "unavailable": "Je aanvraag kon niet worden verstuurd en is niet ontvangen. Wat je hebt ingevuld blijft staan, probeer het opnieuw.",
+      "notice": "Door een aanvraag te versturen bevestig je dat je het <privacy>Privacybeleid</privacy> hebt gelezen."
+    },
     "audienceValueEyebrow": "Waarde voor elke kant van werk",
     "audienceValueTitle": "Wat elke doelgroep krijgt",
     "how": {
@@ -15425,8 +15486,8 @@
       "noStars": "Nergens sterren: een mens wordt nooit tot een score gereduceerd. Elke match wordt uitgelegd tegen een concrete behoefte — met zichtbare cijfers."
     },
     "hero": {
-      "headline": "Een levend systeem van werk- en zakelijke kansen.",
-      "sub": "Laat op één plek zien wat je kunt, wat je aanbiedt of wat je zoekt. Ontdek werknemers, banen, aannemers, diensten en goederen — en je ervaring en kansen blijven altijd bereikbaar."
+      "headline": "Werk, werknemers, diensten en zakelijke kansen – op één plek.",
+      "sub": "Zoek werk, specialisten, werknemers, klanten of projectpartners, dichtbij en wereldwijd. Maak je professionele profiel, laat je ervaring zien, bied diensten aan en ontdek nieuwe kansen."
     },
     "entry": {
       "label": "Schrijf wat u nodig heeft — in uw eigen woorden",

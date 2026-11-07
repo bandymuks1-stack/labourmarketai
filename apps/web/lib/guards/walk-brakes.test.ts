@@ -81,6 +81,11 @@ describe("deploy brake", () => {
     expect(judgeDeployBrake([done(THRESHOLDS.deployQuietMinutes + 1)], now).refuse).toBe(false);
     expect(judgeDeployBrake([], now).refuse).toBe(false);
   });
+  it("a finished run that shipped nothing holds no quiet period, a running one still refuses", () => {
+    expect(judgeDeployBrake([{ ...done(1), deploySkipped: true }, done(60, 2)], now).refuse).toBe(false);
+    expect(judgeDeployBrake([{ ...done(1), deploySkipped: true }, done(2, 2)], now).refuse).toBe(true);
+    expect(judgeDeployBrake([{ id: 9, status: "in_progress", updated_at: now.toISOString() }], now).refuse).toBe(true);
+  });
   it("judges by the most recent end, whatever the list order", () => {
     expect(judgeDeployBrake([done(60), done(1, 2)], now).refuse).toBe(true);
   });

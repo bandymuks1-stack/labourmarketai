@@ -15,7 +15,22 @@
     "work": "Work & hours",
     "results": "Results",
     "history": "History",
-    "areasTitle": "Company areas"
+    "areasTitle": "Company areas",
+    "approvals": {
+      "title": "Waiting for approval: {n}",
+      "titleUnknown": "Waiting for approval",
+      "what": "Hours and work your employees recorded. Approve or reject them right here.",
+      "seeAll": "All waiting ({n})",
+      "emptyTitle": "No employee hours are waiting for approval right now.",
+      "emptyNext": "When an employee records work, it appears here.",
+      "noEmployees": "This organization has no employees whose hours you could approve yet.",
+      "people": "People and team",
+      "reviewOff": "Approval is off for {off} of {total} employees. Their hours won't appear here until you switch it on.",
+      "enable": "Switch it on in People and team",
+      "own": "Your own unconfirmed entries: {n}. You can't approve your own work: another manager of this organization can.",
+      "ownAlone": "Your own unconfirmed entries: {n}. You can't approve your own work, and this organization has no other manager, so they stay recorded as your own work.",
+      "ownUnknown": "Your own unconfirmed entries: {n}. You can't approve your own work: they stay recorded as your own until another manager confirms them."
+    }
   },
   "publicDemand": {
     "title": "Current market demand",
@@ -3171,6 +3186,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Looks like advertising",
       "eyebrow": "COMPANY NEEDS",
       "title": "Public company-need queue",
       "subtitle": "Anonymous needs submitted through the public /company-need form. Review each one and mark the next step by hand. Nothing is sent automatically — a human handles all contact.",
@@ -5694,6 +5710,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Your contract for any platform service is concluded with UAB “Nonstop Group”. Invoices are issued by and payments are received by UAB “Nonstop Group”.",
       "title": "Terms of Service",
       "sections": [
         {
@@ -5723,7 +5740,7 @@
     },
     "privacy": {
       "title": "Privacy Policy",
-      "metaDescription": "This page explains in plain language what personal data Labour Market AI uses, why it uses it, and what rights you have. It describes the platform as it works today.",
+      "metaDescription": "This page explains in plain language what personal data LabourMarket.ai uses, why it uses it, and what rights you have. It describes the platform as it works today.",
       "intro": "This page explains in plain language what personal data Labour Market AI uses, why it uses it, and what rights you have. It describes the platform as it works today.",
       "sections": [
         {
@@ -5875,6 +5892,7 @@
     },
     "dataProtection": {
       "title": "Data protection",
+      "metaDescription": "This page explains in plain words how data inside LabourMarket.ai is protected. It describes only what is actually built into the platform today.",
       "intro": "This page explains in plain words how data inside Labour Market AI is protected. It describes only what is actually built into the platform today.",
       "sections": [
         {
@@ -10789,7 +10807,7 @@
     "navLabel": "About LabourMarket.ai",
     "eyebrow": "About the platform",
     "title": "What is LabourMarket.ai",
-    "lede": "LabourMarket.ai is a labour-market operating platform. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — from the first conversation to the next opportunity.",
+    "lede": "LabourMarket.ai is an international platform for work, specialists and services. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — from the first conversation to the next opportunity.",
     "hero": {
       "lead": "A person's professional value should not disappear every time they change employer. Real work can become lasting professional history: what the person did, where, when, for how long, in what role, with which skills, and what evidence and confirmation supports it.",
       "leadOrg": "For organisations, the same real work builds the record of what the company has actually done: projects, teams, work performed, hours, competencies and evidence.",
@@ -15211,6 +15229,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Order a worker search",
+        "body": "Tell us the profession, how many people you need, the country and when to start."
+      },
+      "b2b": {
+        "title": "Send a B2B request",
+        "body": "Describe the type of work, location, scope and deadlines."
+      },
+      "project": {
+        "title": "Order an individual project",
+        "body": "For private and business customers: describe the project or service you need."
+      },
+      "title": "Send a request",
+      "promise": "Send your request – we will contact you within 24 hours.",
+      "name": "Name or company",
+      "email": "Email",
+      "phone": "Phone",
+      "country": "Country",
+      "countryChoose": "Choose a country",
+      "city": "City",
+      "profession": "Profession",
+      "workers": "Number of workers",
+      "start": "Work start",
+      "details": "Additional requirements",
+      "work": "Type of work",
+      "place": "Location",
+      "scope": "Scope",
+      "deadline": "Deadlines",
+      "need": "Project or service you need",
+      "customer": "Customer",
+      "customerPrivate": "Private person",
+      "customerBusiness": "Business",
+      "optional": "optional",
+      "send": "Send request",
+      "sending": "Sending…",
+      "receivedTitle": "We have your request",
+      "receivedBody": "We will contact you within 24 hours using the details you gave.",
+      "invalid": "Check the fields and try again. What you typed is still in this form.",
+      "limited": "Too many requests right now. Please try later: what you typed stays in the form.",
+      "unavailable": "Your request could not be sent and was not received. What you typed stays in the form, so please try again.",
+      "notice": "By sending a request you confirm that you have read the <privacy>Privacy Policy</privacy>."
+    },
     "audienceValueEyebrow": "Value for every side of work",
     "audienceValueTitle": "What each audience gets",
     "how": {
@@ -15425,8 +15486,8 @@
       "noStars": "No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
     },
     "hero": {
-      "headline": "A living system of work and business opportunities.",
-      "sub": "In one place, show what you can do, what you offer or what you are looking for. Discover workers, jobs, contractors, services and goods — and your experience and opportunities stay within reach, always."
+      "headline": "Work, workers, services and business opportunities – all in one place.",
+      "sub": "Look for work, specialists, workers, clients or project partners, locally and worldwide. Build your professional profile, present your experience, offer services and discover new opportunities."
     },
     "entry": {
       "label": "Write what you need — in your own words",

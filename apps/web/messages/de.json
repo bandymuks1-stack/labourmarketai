@@ -15,7 +15,22 @@
     "work": "Arbeit & Stunden",
     "results": "Ergebnisse",
     "history": "Verlauf",
-    "areasTitle": "Unternehmensbereiche"
+    "areasTitle": "Unternehmensbereiche",
+    "approvals": {
+      "title": "Warten auf Freigabe: {n}",
+      "titleUnknown": "Warten auf Freigabe",
+      "what": "Von deinen Beschäftigten erfasste Stunden und Arbeiten. Gib sie direkt hier frei oder lehne sie ab.",
+      "seeAll": "Alle wartenden ({n})",
+      "emptyTitle": "Im Moment warten keine Stunden von Beschäftigten auf Freigabe.",
+      "emptyNext": "Sobald jemand Arbeit erfasst, erscheint sie hier.",
+      "noEmployees": "Diese Organisation hat noch keine Beschäftigten, deren Stunden du freigeben könntest.",
+      "people": "Personen und Team",
+      "reviewOff": "Die Freigabe ist für {off} von {total} Beschäftigten ausgeschaltet. Ihre Stunden erscheinen hier erst, wenn du sie einschaltest.",
+      "enable": "Unter Personen und Team einschalten",
+      "own": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben: Das kann eine andere Führungskraft dieser Organisation.",
+      "ownAlone": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben, und diese Organisation hat keine andere Führungskraft. Sie bleiben daher als deine eigene Arbeit erfasst.",
+      "ownUnknown": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben: Sie bleiben als deine eigene Arbeit erfasst, bis eine andere Führungskraft sie bestätigt."
+    }
   },
   "publicDemand": {
     "title": "Aktuelle Marktnachfrage",
@@ -3171,6 +3186,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Sieht nach Werbung aus",
       "eyebrow": "PERSONALBEDARF",
       "title": "Öffentliche Personalbedarfs-Warteschlange",
       "subtitle": "Anonyme Bedarfe, die über das öffentliche /company-need-Formular eingereicht wurden. Prüfen Sie jeden einzelnen und markieren Sie den nächsten Schritt von Hand. Nichts wird automatisch gesendet — ein Mensch übernimmt jeden Kontakt.",
@@ -5694,6 +5710,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Ihr Vertrag über jede Plattformleistung kommt mit der UAB „Nonstop Group“ zustande. Sie stellt auch die Rechnungen aus und empfängt die Zahlungen.",
       "title": "Nutzungsbedingungen",
       "sections": [
         {
@@ -5723,7 +5740,7 @@
     },
     "privacy": {
       "title": "Datenschutzerklärung",
-      "metaDescription": "In einfacher Sprache: welche personenbezogenen Daten Labour Market AI verwendet, warum und welche Rechte Sie haben. Die Plattform, wie sie heute funktioniert.",
+      "metaDescription": "In einfacher Sprache: welche personenbezogenen Daten LabourMarket.ai verwendet, warum und welche Rechte Sie haben. Die Plattform, wie sie heute funktioniert.",
       "intro": "Diese Seite erklärt in einfacher Sprache, welche personenbezogenen Daten Labour Market AI verwendet, warum sie verwendet werden und welche Rechte Sie haben. Sie beschreibt die Plattform, wie sie heute funktioniert.",
       "sections": [
         {
@@ -5875,6 +5892,7 @@
     },
     "dataProtection": {
       "title": "Datenschutz",
+      "metaDescription": "In einfachen Worten: wie Daten innerhalb von LabourMarket.ai geschützt werden. Beschrieben ist nur, was heute tatsächlich in die Plattform eingebaut ist.",
       "intro": "Diese Seite erklärt in einfachen Worten, wie Daten innerhalb von Labour Market AI geschützt werden. Sie beschreibt nur, was heute tatsächlich in die Plattform eingebaut ist.",
       "sections": [
         {
@@ -10789,7 +10807,7 @@
     "navLabel": "Über LabourMarket.ai",
     "eyebrow": "Über die Plattform",
     "title": "Was ist LabourMarket.ai",
-    "lede": "LabourMarket.ai ist eine Betriebsplattform für den Arbeitsmarkt. Sie verbindet Menschen, Arbeitgeber, Agenturen, Teams, Projekte, Weiterbildung und Arbeitsmarktdienste rund um echte Arbeit — vom ersten Gespräch bis zur nächsten Gelegenheit.",
+    "lede": "LabourMarket.ai ist eine internationale Plattform für Arbeit, Fachkräfte und Dienstleistungen. Sie verbindet Menschen, Arbeitgeber, Agenturen, Teams, Projekte, Weiterbildung und Arbeitsmarktdienste rund um echte Arbeit — vom ersten Gespräch bis zur nächsten Gelegenheit.",
     "hero": {
       "lead": "Der berufliche Wert eines Menschen sollte nicht jedes Mal verschwinden, wenn er den Arbeitgeber wechselt. Echte Arbeit kann zu dauerhafter beruflicher Geschichte werden: was die Person getan hat, wo, wann, wie lange, in welcher Rolle, mit welchen Fähigkeiten und welche Nachweise und Bestätigungen das stützen.",
       "leadOrg": "Für Organisationen baut dieselbe echte Arbeit die Historie dessen auf, was das Unternehmen tatsächlich geleistet hat: Projekte, Teams, ausgeführte Arbeiten, Stunden, Kompetenzen und Nachweise.",
@@ -15211,6 +15229,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Personalsuche beauftragen",
+        "body": "Nennen Sie den Beruf, die benötigte Personenzahl, das Land und den Arbeitsbeginn."
+      },
+      "b2b": {
+        "title": "B2B-Anfrage senden",
+        "body": "Beschreiben Sie Art der Arbeiten, Ort, Umfang und Fristen."
+      },
+      "project": {
+        "title": "Einzelprojekt beauftragen",
+        "body": "Für Privat- und Geschäftskunden: Beschreiben Sie das benötigte Projekt oder die Dienstleistung."
+      },
+      "title": "Anfrage senden",
+      "promise": "Senden Sie Ihre Anfrage – wir melden uns innerhalb von 24 Stunden bei Ihnen.",
+      "name": "Name oder Firma",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "country": "Land",
+      "countryChoose": "Land wählen",
+      "city": "Ort",
+      "profession": "Beruf",
+      "workers": "Anzahl der Arbeitskräfte",
+      "start": "Arbeitsbeginn",
+      "details": "Weitere Anforderungen",
+      "work": "Art der Arbeiten",
+      "place": "Einsatzort",
+      "scope": "Umfang",
+      "deadline": "Fristen",
+      "need": "Benötigtes Projekt oder benötigte Dienstleistung",
+      "customer": "Auftraggeber",
+      "customerPrivate": "Privatperson",
+      "customerBusiness": "Unternehmen",
+      "optional": "freiwillig",
+      "send": "Anfrage senden",
+      "sending": "Wird gesendet…",
+      "receivedTitle": "Ihre Anfrage ist bei uns eingegangen",
+      "receivedBody": "Wir melden uns innerhalb von 24 Stunden über die angegebenen Kontaktdaten.",
+      "invalid": "Bitte prüfen Sie die Felder und versuchen Sie es erneut. Ihre Eingaben bleiben im Formular.",
+      "limited": "Gerade gehen zu viele Anfragen ein. Bitte versuchen Sie es später: Ihre Eingaben bleiben im Formular.",
+      "unavailable": "Ihre Anfrage konnte nicht gesendet werden und ist nicht eingegangen. Ihre Eingaben bleiben im Formular, bitte versuchen Sie es erneut.",
+      "notice": "Mit dem Senden bestätigen Sie, dass Sie die <privacy>Datenschutzerklärung</privacy> gelesen haben."
+    },
     "audienceValueEyebrow": "Wert für jede Seite der Arbeit",
     "audienceValueTitle": "Was jede Zielgruppe bekommt",
     "how": {
@@ -15425,8 +15486,8 @@
       "noStars": "Nirgendwo Sterne: ein Mensch wird nie auf eine Zahl reduziert. Jeder Match wird gegen einen konkreten Bedarf erklärt — mit sichtbaren Zahlen."
     },
     "hero": {
-      "headline": "Ein lebendiges System für Arbeits- und Geschäftschancen.",
-      "sub": "Zeigen Sie an einem Ort, was Sie können, was Sie anbieten oder was Sie suchen. Entdecken Sie Arbeitskräfte, Jobs, Auftragnehmer, Dienstleistungen und Waren — und Ihre Erfahrung und Möglichkeiten bleiben jederzeit erreichbar."
+      "headline": "Arbeit, Personal, Dienst­leistungen und Geschäfts­chancen – an einem Ort.",
+      "sub": "Suchen Sie Arbeit, Fachkräfte, Mitarbeitende, Kunden oder Projektpartner – vor Ort und weltweit. Erstellen Sie Ihr berufliches Profil, stellen Sie Ihre Erfahrung vor, bieten Sie Dienstleistungen an und entdecken Sie neue Möglichkeiten."
     },
     "entry": {
       "label": "Schreiben Sie, was Sie brauchen — in Ihren eigenen Worten",

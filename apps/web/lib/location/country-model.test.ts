@@ -182,6 +182,14 @@ describe("country-model — currency formatting", () => {
 });
 
 describe("country-model — resolveCountryCode (global-access rule, 2026-09-22: a country NAME is a country)", () => {
+  it("a name with its code, as lists show it, is that country; a mismatch is none", () => {
+    expect(resolveCountryCode("Bangladesh (BD)")).toBe("BD");
+    expect(resolveCountryCode("bangladesh (bd)")).toBe("BD");
+    expect(resolveCountryCode("Lithuania (BD)")).toBeNull();
+    expect(resolveCountryCode("Nowhere (BD)")).toBeNull();
+    expect(resolveCountryCode("Bangladesh (ZZ)")).toBeNull();
+  });
+
   it("the Vietnam case, every representation → VN", () => {
     for (const typed of ["VN", "vn", " Vn ", "Vietnam", "vietnam", "VIETNAM", "Viet Nam", "viet-nam", "Việt Nam", "Vietnamas", "Wietnam", "Вьетнам", "Vietnã"]) {
       expect(resolveCountryCode(typed), typed).toBe("VN");
