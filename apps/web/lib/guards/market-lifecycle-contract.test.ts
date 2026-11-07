@@ -96,7 +96,10 @@ describe("SERVER: every status door re-checks the contract (UI, MCP, any caller)
 
   it("listings: the status door refuses what no contract action produces", () => {
     const src = read("lib/marketplace/listings.ts");
-    expect(src).toMatch(/if \(!actionForStatus\(adapter, adapter\.facts\(\{ status: String\(row\.status\) \}\), status\)\)/);
+    // The facts include the stored closed outcome, so a discarded draft has
+    // no `resume` here either.
+    expect(src).toMatch(/adapter\.facts\(\{ status: String\(row\.status\), closedOutcome: row\.closed_outcome \?\? null \}\)/);
+    expect(src).toMatch(/if \(!actionForStatus\(adapter, facts, status, outcomeForClose\)\)/);
   });
 
   it("demand: reopen refuses a discarded draft by the contract", () => {
@@ -129,6 +132,37 @@ describe("DATA: hiding is never deletion", () => {
     expect(sql).toMatch(/closed_outcome in \('completed', 'withdrawn', 'discarded'\)/);
     const ddl = sql.replace(/--.*$/gm, "");
     expect(ddl).not.toMatch(/\b(update|delete from|drop table|drop column|grant|revoke|security definer|create policy)\b/i);
+  });
+});
+
+describe("RED half (20261024100000, human-gated): listing outcome + discarded-draft guard", () => {
+  const sql = () =>
+    readFileSync(
+      join(REPO, "supabase", "migrations", "20261024100000_market_lifecycle_listing_outcome_and_discard_guard_v1.sql"),
+      "utf8",
+    );
+
+  it("v3 keeps every v2 check (one publish policy) and refuses to publish a discarded draft", () => {
+    expect(sql()).toMatch(/perform public\.set_marketplace_listing_status_v2\(p_id, p_status\);/);
+    expect(sql()).toMatch(/a discarded draft cannot be published/);
+    expect(sql()).toMatch(/grant\s+execute on function public\.set_marketplace_listing_status_v3\(uuid, text, text\) to authenticated;/);
+    expect(sql()).toMatch(/revoke execute on function public\.set_marketplace_listing_status_v3\(uuid, text, text\) from anon;/);
+  });
+
+  it("the demand trigger adds exactly the discarded refusal and keeps every owner transition", () => {
+    const s = sql();
+    expect(s).toMatch(/old\.closed_outcome = 'discarded'/);
+    expect(s).toMatch(/\(old\.status = 'draft' and new\.status in \('submitted', 'closed'\)\)/);
+    expect(s).toMatch(/\(old\.status = 'closed' and new\.status = 'submitted'\)/);
+    expect(s).toMatch(/set search_path = public/);
+  });
+
+  it("the listing status door tries v3 and falls back to v2 while v3 is absent", () => {
+    const src = read("lib/marketplace/listings.ts");
+    const v3 = src.indexOf('rpc("set_marketplace_listing_status_v3"');
+    const v2 = src.indexOf('rpc("set_marketplace_listing_status_v2"');
+    expect(v3).toBeGreaterThan(0);
+    expect(v2).toBeGreaterThan(v3);
   });
 });
 
