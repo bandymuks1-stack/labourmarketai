@@ -173,6 +173,7 @@ export default async function AdminCompanyNeedIntakesPage({
             {rows.map((r) => (
               <li
                 key={r.id}
+                id={r.id}
                 className="card-border flex flex-col gap-3 p-4"
                 data-testid={`company-need-intake-row-${r.id}`}
                 data-status={r.status}
