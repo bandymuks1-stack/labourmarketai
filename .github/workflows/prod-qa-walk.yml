@@ -137,6 +137,8 @@ on:
           - sr1-first-search
           # Owner 2026-11-06: forms on a slow phone. Synthetic worker, real Chrome. Dispatch only, never in the rotation.
           - slow-connection
+          # Owner 2026-11-07: the Today panel, journal period reports and quick confirmation. Read-only. Dispatch only.
+          - organization-daily
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -490,6 +492,7 @@ jobs:
             availability-save) SPEC=tests/e2e/prod-availability-save.spec.ts ;;
             sr1-first-search) SPEC=tests/e2e/prod-sr1-first-search.spec.ts ;;
             slow-connection) SPEC=tests/e2e/prod-slow-connection.spec.ts ;;
+            organization-daily) SPEC=tests/e2e/prod-organization-daily.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
