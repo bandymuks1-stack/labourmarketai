@@ -59,7 +59,7 @@ describe("isUnknownAddress", () => {
 
 describe("how it is wired", () => {
   const middleware = readFileSync(join(WEB, "middleware.ts"), "utf8");
-  const page = readFileSync(join(LOCALE_DIR, "unknown-address", "page.tsx"), "utf8");
+  const page = readFileSync(join(LOCALE_DIR, "[...rest]", "page.tsx"), "utf8");
 
   it("the middleware keeps the 404 status", () => {
     expect(middleware).toMatch(/NextResponse\.rewrite\(target, \{ status: 404 \}\)/);
@@ -69,13 +69,14 @@ describe("how it is wired", () => {
     expect(middleware).toMatch(/request\.headers\.get\("sec-fetch-dest"\) === "empty"\s*\?\s*NextResponse\.rewrite\(target\)/);
   });
 
-  it("the page is the one not-found view, never indexed, and throws nothing", () => {
+  it("the catch-all renders the one not-found view for that address, never indexed", () => {
     expect(page).toContain('import NotFound from "../not-found"');
     expect(page).toMatch(/robots: \{ index: false/);
-    expect(page.replace(/\/\*[\s\S]*?\*\//g, "")).not.toMatch(/notFound\(\)/);
+    expect(page).toMatch(/rest\[0\] !== UNKNOWN_ADDRESS_SEGMENT\) notFound\(\);/);
   });
 
   it("no sitemap lists it", () => {
     expect(readFileSync(join(WEB, "app", "sitemap.ts"), "utf8")).not.toContain("unknown-address");
+    expect(KNOWN_FIRST_SEGMENTS.has("unknown-address")).toBe(false);
   });
 });

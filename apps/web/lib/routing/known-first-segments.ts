@@ -16,7 +16,6 @@ export const KNOWN_FIRST_SEGMENTS: ReadonlySet<string> = new Set([
   "onboarding",
   "opengraph-image",
   "twitter-image",
-  "unknown-address",
   // app/[locale]/(marketing)
   "about",
   "calculators",
@@ -38,6 +37,9 @@ export const KNOWN_FIRST_SEGMENTS: ReadonlySet<string> = new Set([
   "work-opportunities",
   "worker-intake",
 ]);
+
+/** Where the middleware sends an address no route can answer: handled by the catch-all. */
+export const UNKNOWN_ADDRESS_SEGMENT = "unknown-address";
 
 /** `rest` is the path without its locale: "" or "/" is the landing. */
 export function isUnknownAddress(rest: string): boolean {

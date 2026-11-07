@@ -1,4 +1,4 @@
-import { isUnknownAddress } from "@/lib/routing/known-first-segments";
+import { isUnknownAddress, UNKNOWN_ADDRESS_SEGMENT } from "@/lib/routing/known-first-segments";
 import { NextResponse, NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
@@ -364,7 +364,7 @@ export async function middleware(request: NextRequest) {
     // (a first visit refreshes once) must not: a 404 there makes the router reload the
     // whole page. Next strips `rsc` before middleware, so the browser's own header
     // tells them apart; a crawler or curl sends none and gets the 404.
-    const target = new URL(`/${locale}/unknown-address`, request.url);
+    const target = new URL(`/${locale}/${UNKNOWN_ADDRESS_SEGMENT}`, request.url);
     return request.headers.get("sec-fetch-dest") === "empty"
       ? NextResponse.rewrite(target)
       : NextResponse.rewrite(target, { status: 404 });
