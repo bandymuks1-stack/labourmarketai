@@ -2,7 +2,11 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
-import { matchProfessionAcrossLocales, matchProfessionByLabel } from "./public-vacancy-profession-match";
+import {
+  matchProfessionAcrossLocales,
+  matchProfessionByLabel,
+  professionRedirectHref,
+} from "./public-vacancy-profession-match";
 
 const LT = [
   { slug: "baker", label: "Kepėjas" },
@@ -129,6 +133,18 @@ describe("the real catalogue: a word people type for a profession stays the filt
     const others = ACTIVE.filter((l) => l !== "lt").map(catalogue);
     for (const term of ["kock", "el", "ab", "ter", "snickare", "undersköterska", "zzqx"]) {
       expect(matchProfessionAcrossLocales(term, catalogue("lt"), others), term).toBeNull();
+    }
+  });
+});
+
+describe("professionRedirectHref (SR-4)", () => {
+  it("keeps a page past the first", () => {
+    expect(professionRedirectHref("electrician", "2")).toBe("/jobs?profession=electrician&page=2");
+  });
+
+  it("adds nothing for the first page, no page or a page that is not a number", () => {
+    for (const raw of [undefined, "1", "0", "-3", "abc", ""]) {
+      expect(professionRedirectHref("electrician", raw)).toBe("/jobs?profession=electrician");
     }
   });
 });

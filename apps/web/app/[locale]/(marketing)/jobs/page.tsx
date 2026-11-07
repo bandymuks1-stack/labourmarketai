@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link, redirect } from "@/lib/i18n/navigation";
-import { matchProfessionAcrossLocales } from "@/lib/vacancy-store/public-vacancy-profession-match";
+import {
+  matchProfessionAcrossLocales,
+  professionRedirectHref,
+} from "@/lib/vacancy-store/public-vacancy-profession-match";
 import { activeLocales } from "@/lib/i18n/config";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
@@ -384,7 +387,7 @@ export default async function JobsPage({
         }),
     );
     const mapped = matchProfessionAcrossLocales(query, professionOptions, others);
-    if (mapped) redirect({ href: `/jobs?profession=${mapped}`, locale: active });
+    if (mapped) redirect({ href: professionRedirectHref(mapped, sp.page), locale: active });
   }
   const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
   const wantsSaved = sp.saved === "1";
