@@ -987,7 +987,12 @@ export const SCOPED_OWNER_WAIVERS = [
     // project creation, which never creates a site, so it looped back to the
     // same empty state; it now opens the existing sites form. Only that dead
     // end, like #2101; the three waived answers are unchanged.
-    pullRequests: [1344, 2101, 2159, 2234, 2526],
+    // #3140 — OWNER APPROVAL 2026-11-07, verbatim: "/dashboard/hours: leidžiu pridėti
+    // viršuje aiškiai matomą nuorodą „Laukia patvirtinimo: N“, vedančią į patvirtinimo
+    // eilę, jei N skaičiuojamas pagal realiai šiam naudotojui leidžiamas patvirtinti
+    // ataskaitas. Nekeisti duomenų, teisių ar esamos patvirtinimo verslo logikos."
+    // Only that link; the three waived answers are unchanged.
+    pullRequests: [1344, 2101, 2159, 2234, 2526, 3140],
     // Deliberately empty — the waiver lives IN the branch whose CI must
     // honour it, so pinning the head SHA would change the head SHA.
     approvedHeadShas: [],
