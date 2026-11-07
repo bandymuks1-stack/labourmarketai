@@ -419,6 +419,15 @@ audit.
   `chat-visibility-rls.test.ts` caller inventory. Full design and acceptance
   evidence: `docs/handoffs/FIRST_PARTY_SUPPLY_BRIDGE_V1.md`.
 
+- `app/api/internal/commercial-requests/v1/route.ts` (2026-11-07) — the Agentai OS
+  pull of commercial requests. Behind its own `COMMERCIAL_REQUESTS_FEED_TOKEN`
+  machine secret (401 while unset). Service role is needed because no signed-in
+  user's RLS view holds these rows (RLS on, no policies), and it reads with the
+  `select` grant from `20260713190000`. Names, e-mail, company and description are
+  read only to recognise a test row; the body holds id, door, creation time, status,
+  admin link and that flag (`lib/staffing/commercial-requests-feed.ts`). Touches no
+  chat table and sends nothing.
+
 - `app/api/internal/capability-readback/v1/route.ts` (2026-10-22) — the
   Agentai OS capability readback. Behind the same `SUPPLY_FEED_BEARER_TOKEN`
   machine secret (503 while unset, 401 on a wrong token). Service role is
