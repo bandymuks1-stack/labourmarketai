@@ -33,6 +33,9 @@ export type QuickConfirmEntryView = {
   /** Which rule produced `skills` — `skills_unavailable` is the named read
    *  failure: the card says so instead of claiming "no unconfirmed skills". */
   confirmScope: QuickConfirmScope;
+  /** The organization the entry belongs to, shown when the queue spans several, so no
+   *  card is approved without saying whose hours it is. Absent: one organization. */
+  organization?: string;
 };
 
 /** What a successful tap reports upward — the queue keeps it as a receipt
@@ -196,6 +199,11 @@ export function QuickConfirmCard({
       data-testid={`quick-confirm-card-${entry.id}`}
       data-confirm-scope={entry.confirmScope}
     >
+      {entry.organization ? (
+        <p className="text-meta font-medium text-text-secondary" data-testid={`quick-organization-${entry.id}`}>
+          {entry.organization}
+        </p>
+      ) : null}
       {/* WHO + WHEN — one glance. */}
       <div className="flex items-baseline justify-between gap-3">
         <p className="font-display text-base font-semibold text-text-primary">

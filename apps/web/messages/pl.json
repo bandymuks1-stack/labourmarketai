@@ -1,5 +1,22 @@
 {
   "companyModel": {
+    "today": {
+      "goApprove": "Sprawdź i zatwierdź",
+      "amount": {
+        "hours": "{n} godz.",
+        "days": "{n} dn.",
+        "minutes": "{n} min."
+      },
+      "people": "{n, plural, one {# osoba} few {# osoby} many {# osób} other {# osoby}}",
+      "entries": "{n, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
+      "unclear": "Niejasne godziny: {n}",
+      "noHours": "Bez godzin: {n}",
+      "noFigure": "Nie podano godzin",
+      "elsewhere": "Gdzie indziej na twoje zatwierdzenie czeka jeszcze: {n}.",
+      "notReviewer": "W tej organizacji nie zatwierdzasz godzin: wymaga to relacji kierownika lub właściciela.",
+      "decisionsClear": "Teraz nie czekają żadne inne decyzje.",
+      "doors": "Ludzie i projekty"
+    },
     "title": "Zarządzanie firmą",
     "need": "Czego potrzebujemy",
     "offer": "Co oferujemy",

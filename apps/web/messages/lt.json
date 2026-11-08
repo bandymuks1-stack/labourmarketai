@@ -1,5 +1,22 @@
 {
   "companyModel": {
+    "today": {
+      "goApprove": "Peržiūrėti ir patvirtinti",
+      "amount": {
+        "hours": "{n} val.",
+        "days": "{n} d.",
+        "minutes": "{n} min."
+      },
+      "people": "{n, plural, one {# žmogus} few {# žmonės} many {# žmogaus} other {# žmonių}}",
+      "entries": "{n, plural, one {# įrašas} few {# įrašai} many {# įrašo} other {# įrašų}}",
+      "unclear": "Neaiškios valandos: {n}",
+      "noHours": "Be valandų: {n}",
+      "noFigure": "Valandų nenurodyta",
+      "elsewhere": "Kitur tavo patvirtinimo laukia dar: {n}.",
+      "notReviewer": "Šioje organizacijoje valandų nepatvirtini: tam reikia vadovo ar savininko ryšio su organizacija.",
+      "decisionsClear": "Kitų sprendimų dabar nelaukia.",
+      "doors": "Žmonės ir projektai"
+    },
     "title": "Įmonės valdymas",
     "need": "Ko mums reikia",
     "offer": "Ką siūlome",

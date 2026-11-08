@@ -1,5 +1,22 @@
 {
   "companyModel": {
+    "today": {
+      "goApprove": "Review and approve",
+      "amount": {
+        "hours": "{n} h",
+        "days": "{n} d",
+        "minutes": "{n} min"
+      },
+      "people": "{n, plural, one {# person} other {# people}}",
+      "entries": "{n, plural, one {# entry} other {# entries}}",
+      "unclear": "Hours unclear: {n}",
+      "noHours": "No hours stated: {n}",
+      "noFigure": "No hours stated",
+      "elsewhere": "{n} more waiting for your approval elsewhere.",
+      "notReviewer": "You don't approve hours in this organization: that takes a manager or owner relationship with it.",
+      "decisionsClear": "Nothing else is waiting for a decision right now.",
+      "doors": "People and projects"
+    },
     "title": "Company management",
     "need": "What we need",
     "offer": "What we offer",

@@ -5,6 +5,8 @@ import type { QuickConfirmEntryView } from "@/components/app/quick-confirm-card"
 import { QuickConfirmQueue } from "@/components/app/quick-confirm-queue";
 import { quickConfirmEntryView } from "@/lib/journal/quick-confirm-model";
 import { fetchQuickReviewQueue } from "@/lib/journal/review-queue";
+import { groupByOrganization, reviewScopeOf, rowsInScope } from "@/lib/journal/review-scope";
+import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { fetchBatchExceptions } from "@/lib/journal/batch-review";
 import { createClient } from "@/lib/supabase/server";
 import { utcDayKey, utcTodayKey } from "@/lib/time/display";
@@ -45,7 +47,21 @@ export default async function QuickConfirmPage({
   } catch {
     queue = null;
   }
-  const entries: QuickConfirmEntryView[] = (queue ?? []).map((e) => quickConfirmEntryView(e, tSkill, tUnit));
+  // ONE ORGANIZATION'S CONTEXT (decision 0024). The reviewable set spans every organization
+  // the reader reviews. With an organization active, this page shows its entries only, the
+  // same set its "waiting for approval" counts name, and says how many wait elsewhere.
+  // With none active it shows every entry, grouped by organization and labelled on each
+  // card, never one unlabelled pile.
+  const scope = reviewScopeOf((await getActiveOrganizationContext()).activeOrganizationId);
+  const scoped = rowsInScope(queue ?? [], scope);
+  const groups = scope.kind === "all" ? groupByOrganization(scoped.rows) : [];
+  const labelled = groups.length > 1 || groups.some((g) => g.organizationId === null);
+  const organizationLabel = (name: string | null) => name ?? t("inbox.quick.unnamedOrganization");
+  const ordered = scope.kind === "all" ? groups.flatMap((g) => g.rows) : scoped.rows;
+  const entries: QuickConfirmEntryView[] = ordered.map((e) => ({
+    ...quickConfirmEntryView(e, tSkill, tUnit),
+    ...(labelled ? { organization: organizationLabel(e.organizationName) } : {}),
+  }));
 
   // "Confirm all of today" — strictly the entries created today. "Today" is
   // the canonical UTC day (W12), the same day the entry is filed under
@@ -78,6 +94,18 @@ export default async function QuickConfirmPage({
           {t("inbox.quick.detailedReview")} →
         </Link>
       </header>
+
+      {labelled ? (
+        <p className="text-sm leading-relaxed text-text-secondary" data-testid="quick-by-organization">
+          {t("inbox.quick.byOrganization")}{" "}
+          {groups.map((g) => `${organizationLabel(g.organizationName)}: ${g.rows.length}`).join(" · ")}
+        </p>
+      ) : null}
+      {scoped.elsewhere > 0 ? (
+        <p className="text-sm leading-relaxed text-text-secondary" data-testid="quick-elsewhere">
+          {t("inbox.quick.elsewhere", { n: scoped.elsewhere })}
+        </p>
+      ) : null}
 
       {/* One client boundary that stays mounted across the post-tap
           revalidation, so the manager's receipt survives the queue emptying
