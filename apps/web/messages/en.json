@@ -137,7 +137,26 @@
     "descriptionLabel": "About the company (shown on the public page)",
     "descriptionPlaceholder": "What you do, where you work, what a client or worker can expect…",
     "descriptionHint": "Up to 2000 characters. This is the main text block on your public page.",
-    "errorDescription": "Publication saved, but the description could not be saved. Try again."
+    "errorDescription": "Publication saved, but the description could not be saved. Try again.",
+    "team": {
+      "eyebrow": "Company profile",
+      "aboutEyebrow": "About",
+      "aboutTitle": "Who they are",
+      "offersEyebrow": "Listings",
+      "offersTitle": "What they offer",
+      "seekingEyebrow": "Looking for",
+      "seekingTitle": "What they are looking for",
+      "seekingSub": "The company's own wanted listings. These are not job vacancies.",
+      "contactEyebrow": "Contact",
+      "contactTitle": "Contact the company",
+      "contactNote": "The company published these contacts itself. You reach it directly, not through labourmarket.ai.",
+      "contactNone": "The company has not published a contact, so this page has no way to reach it.",
+      "actionEmail": "Send an e-mail",
+      "actionPhone": "Call",
+      "actionWebsite": "Open the company's website",
+      "heroContact": "How to get in touch",
+      "provenance": "The company filled in this page itself."
+    }
   },
   "marketplaceListings": {
     "pageTitle": "Marketplace",

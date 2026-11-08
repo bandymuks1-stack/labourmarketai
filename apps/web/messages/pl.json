@@ -137,7 +137,26 @@
     "descriptionLabel": "O firmie (pokazywane na publicznej stronie)",
     "descriptionPlaceholder": "Czym się zajmujesz, gdzie działasz, czego może oczekiwać klient lub pracownik…",
     "descriptionHint": "Do 2000 znaków. To główny blok tekstu na Twojej publicznej stronie.",
-    "errorDescription": "Publikacja zapisana, ale nie udało się zapisać opisu. Spróbuj ponownie."
+    "errorDescription": "Publikacja zapisana, ale nie udało się zapisać opisu. Spróbuj ponownie.",
+    "team": {
+      "eyebrow": "Profil firmy",
+      "aboutEyebrow": "O firmie",
+      "aboutTitle": "Kim są",
+      "offersEyebrow": "Ogłoszenia",
+      "offersTitle": "Co oferują",
+      "seekingEyebrow": "Poszukiwane",
+      "seekingTitle": "Czego szukają",
+      "seekingSub": "Ogłoszenia poszukiwania samej firmy. To nie są oferty pracy.",
+      "contactEyebrow": "Kontakt",
+      "contactTitle": "Skontaktuj się z firmą",
+      "contactNote": "Firma sama opublikowała te kontakty. Zwracasz się bezpośrednio do niej, nie przez labourmarket.ai.",
+      "contactNone": "Firma nie opublikowała kontaktu, więc przez tę stronę nie można do niej dotrzeć.",
+      "actionEmail": "Napisz e-mail",
+      "actionPhone": "Zadzwoń",
+      "actionWebsite": "Otwórz stronę firmy",
+      "heroContact": "Jak się skontaktować",
+      "provenance": "Firma sama wypełniła tę stronę."
+    }
   },
   "marketplaceListings": {
     "pageTitle": "Giełda",

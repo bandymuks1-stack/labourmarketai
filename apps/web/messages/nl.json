@@ -137,7 +137,26 @@
     "descriptionLabel": "Over het bedrijf (zichtbaar op de openbare pagina)",
     "descriptionPlaceholder": "Wat u doet, waar u werkt, wat een klant of werker kan verwachten…",
     "descriptionHint": "Maximaal 2000 tekens. Dit is het hoofdtekstblok van uw openbare pagina.",
-    "errorDescription": "Publicatie opgeslagen, maar de beschrijving kon niet worden opgeslagen. Probeer opnieuw."
+    "errorDescription": "Publicatie opgeslagen, maar de beschrijving kon niet worden opgeslagen. Probeer opnieuw.",
+    "team": {
+      "eyebrow": "Bedrijfsprofiel",
+      "aboutEyebrow": "Over het bedrijf",
+      "aboutTitle": "Wie ze zijn",
+      "offersEyebrow": "Advertenties",
+      "offersTitle": "Wat ze aanbieden",
+      "seekingEyebrow": "Gezocht",
+      "seekingTitle": "Waar ze naar zoeken",
+      "seekingSub": "Zoekadvertenties van het bedrijf zelf. Dit zijn geen vacatures.",
+      "contactEyebrow": "Contactgegevens",
+      "contactTitle": "Neem contact op met het bedrijf",
+      "contactNote": "Het bedrijf heeft deze gegevens zelf gepubliceerd. U bereikt het rechtstreeks, niet via labourmarket.ai.",
+      "contactNone": "Het bedrijf heeft geen contactgegevens gepubliceerd, dus via deze pagina is het niet te bereiken.",
+      "actionEmail": "E-mail sturen",
+      "actionPhone": "Bellen",
+      "actionWebsite": "Website van het bedrijf openen",
+      "heroContact": "Hoe u contact opneemt",
+      "provenance": "Het bedrijf heeft deze pagina zelf ingevuld."
+    }
   },
   "marketplaceListings": {
     "pageTitle": "Marktplaats",
