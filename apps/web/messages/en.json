@@ -8741,7 +8741,7 @@
         "documentUnverified": "You added the document; no one has checked it",
         "involved": "Involved in {hours}, not attributed to this skill alone",
         "timeUnknown": "Your journal could not be read right now, so skills show no hours.",
-        "noScore": "There is no overall score of a person here. You see what the records show and who stands behind them.",
+        "noScore": "Nothing here sums a person up in one number. You see what the records show and who stands behind them.",
         "state": {
           "confirmed": "Manager-confirmed work",
           "certified": "Certified",

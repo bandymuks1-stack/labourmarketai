@@ -8741,7 +8741,7 @@
         "documentUnverified": "Dokument dodajesz sam; nikt go nie sprawdził",
         "involved": "Udział w {hours}, nieprzypisany wyłącznie do tej umiejętności",
         "timeUnknown": "Nie udało się teraz odczytać dziennika, więc umiejętności nie mają godzin.",
-        "noScore": "Nie ma tu ogólnej oceny człowieka. Widzisz, co pokazują wpisy i kto za nimi stoi.",
+        "noScore": "Nic tu nie sprowadza człowieka do jednej liczby. Widzisz, co pokazują wpisy i kto za nimi stoi.",
         "state": {
           "confirmed": "Praca potwierdzona przez przełożonego",
           "certified": "Certyfikowane",

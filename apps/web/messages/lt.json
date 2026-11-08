@@ -8741,7 +8741,7 @@
         "documentUnverified": "Dokumentą pridėjai pats; jo niekas netikrino",
         "involved": "Dalyvavo {hours}, bet šios valandos nepriskirtos vien šiam gebėjimui",
         "timeUnknown": "Dabar nepavyko perskaityti žurnalo, todėl prie gebėjimų valandų nėra.",
-        "noScore": "Bendro žmogaus balo čia nėra. Matai, ką rodo įrašai ir kas už jų stovi.",
+        "noScore": "Čia niekas nesutraukia žmogaus į vieną skaičių. Matai, ką rodo įrašai ir kas už jų stovi.",
         "state": {
           "confirmed": "Vadovo patvirtintas darbas",
           "certified": "Sertifikuota",

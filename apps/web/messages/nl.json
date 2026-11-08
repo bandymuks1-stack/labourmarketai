@@ -8741,7 +8741,7 @@
         "documentUnverified": "Je hebt het document zelf toegevoegd; niemand heeft het gecontroleerd",
         "involved": "Betrokken bij {hours}, niet alleen aan deze vaardigheid toegerekend",
         "timeUnknown": "Je logboek kon nu niet worden gelezen, dus vaardigheden tonen geen uren.",
-        "noScore": "Er is hier geen totaalscore van een persoon. Je ziet wat de gegevens laten zien en wie erachter staat.",
+        "noScore": "Niets hier vat een persoon samen in één getal. Je ziet wat de gegevens laten zien en wie erachter staat.",
         "state": {
           "confirmed": "Werk bevestigd door een leidinggevende",
           "certified": "Gecertificeerd",
