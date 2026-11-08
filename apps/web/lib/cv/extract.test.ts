@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { extractCvText, MAX_CV_BYTES } from "./extract";
-import { makeDocx, makePdf } from "./__fixtures__/cv-fixtures";
+import { makeDocx, makePdf, makeUnicodePdf } from "./__fixtures__/cv-fixtures";
 import { parseCvSections } from "./structured-parse";
 
 /**
@@ -226,5 +226,86 @@ describe("UF-3: a one-paragraph-per-line Word CV keeps title, employer and dates
     );
     expect(parsed.workHistory.some((w) => w.title.includes("612"))).toBe(false);
     expect(parsed.unplaced.some((u) => u.includes("612"))).toBe(false);
+  });
+});
+
+/**
+ * UF-3 (PDF) — Lithuanian letters survive a PDF CV, in the person's name, the
+ * employer and the job title, exactly as written (NFC). The test above had to
+ * fall back to ASCII because a standard-14 font cannot carry ą/č/ę/ė/į/š/ų/ū/ž;
+ * these PDFs use the encodings real exporters write for them. Same path as
+ * production: PDF bytes, the real unpdf extraction, the parser.
+ */
+describe("UF-3 (PDF): Lithuanian letters survive name, employer and title", () => {
+  const NAME = "QA-SYNTHETIC Žydrūnė Ąžuolaitė";
+  const COMPANY = "UAB Šiaurės Ąžuolų Statyba";
+  const TITLE = "Vyresnioji įrangos montuotoja";
+  const EDUCATION = "QA Synthetic Ąžuolyno rengimo centras";
+  const CV = [
+    NAME,
+    "Darbo patirtis",
+    TITLE,
+    COMPANY,
+    "2018 – 2024",
+    "Išsilavinimas",
+    `${EDUCATION}, profesinis mokymas 2015–2017`,
+    "Kalbos",
+    "Lietuvių gimtoji, anglų B2",
+  ].join("\n");
+  const LETTERS = "ąčęėįšųūžĄČĘĖĮŠŲŪŽ";
+
+  const read = async (bytes: Uint8Array) => {
+    const res = await extractCvText(toAB(bytes), "qa-synthetic-cv.pdf", "application/pdf");
+    expect(res.kind).toBe("ok");
+    if (res.kind !== "ok") throw new Error(`extraction: ${res.kind}`);
+    return res.text;
+  };
+
+  const expectExact = (text: string) => {
+    // Already composed: no combining mark (U+0300-U+036F) is left anywhere.
+    expect(text).toBe(text.normalize("NFC"));
+    expect(/[̀-ͯ]/.test(text)).toBe(false);
+    const parsed = parseCvSections(text);
+    expect(parsed.workHistory.map((w) => [w.title, w.startYear, w.endYear])).toEqual([
+      [`${TITLE}, ${COMPANY}`, 2018, 2024],
+    ]);
+    expect(parsed.unplaced).toContain(NAME);
+    expect(parsed.education.map((e) => e.institution)).toEqual([EDUCATION]);
+    const level = (code: string) => parsed.languages.find((l) => l.lang === code)?.level;
+    expect(level("lt")).toBe("native");
+    expect(level("en")).toBe("B2");
+  };
+
+  const variants: [string, Parameters<typeof makeUnicodePdf>[1]][] = [
+    ["Identity-H font with a ToUnicode map (Word / Chrome shape)", {}],
+    ["text written decomposed (base letter + combining mark glyphs)", { form: "NFD" }],
+    ["simple font with named glyphs (/Differences, no ToUnicode)", { encoding: "differences" }],
+  ];
+
+  for (const [label, opts] of variants) {
+    it(`${label}: every letter, the name, the employer and the title come back exactly`, async () => {
+      expectExact(await read(makeUnicodePdf(CV, opts)));
+    });
+  }
+
+  it("all nine letters and their capitals come back one for one", async () => {
+    for (const opts of [{}, { form: "NFD" as const }, { encoding: "differences" as const }]) {
+      const text = await read(makeUnicodePdf(`Raidės ${LETTERS}`, opts));
+      expect(text).toBe(`Raidės ${LETTERS}`);
+    }
+  });
+
+  it("a decomposed DOCX or pasted text is composed too", async () => {
+    const res = await extractCvText(
+      toAB(makeDocx(CV.normalize("NFD"))),
+      "cv.docx",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+    expect(res.kind).toBe("ok");
+    if (res.kind !== "ok") return;
+    expectExact(res.text);
+    const pasted = parseCvSections(CV.normalize("NFD"));
+    expect(pasted.workHistory.map((w) => w.title)).toEqual([`${TITLE}, ${COMPANY}`]);
+    expect(pasted.unplaced).toContain(NAME);
   });
 });
