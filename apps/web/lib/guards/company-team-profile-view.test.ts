@@ -143,7 +143,10 @@ describe.each(activeLocales)("%s: rendered copy", (locale) => {
   });
 
   it("empty data puts no digit on the page: no placeholder figure", () => {
-    expect(render(NAME_ONLY).replace(/<[^>]*>/g, "")).not.toMatch(/\d/);
+    // Each text node of the markup: what sits between one tag's end and the next tag.
+    const textNodes = [...render(NAME_ONLY).matchAll(/>([^<]+)</g)].map((m) => m[1]);
+    expect(textNodes.length).toBeGreaterThan(0);
+    for (const node of textNodes) expect(node).not.toMatch(/\d/);
   });
 
   it("a full company shows every region and only real contact links", () => {
