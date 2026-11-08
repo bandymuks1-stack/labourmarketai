@@ -12625,6 +12625,7 @@
     },
     "invitePage": {
       "eyebrow": "UITNODIGING",
+      "pageTitle": "Uitnodiging",
       "notEnabled": "Momenteel niet beschikbaar.",
       "loadError": "De uitnodiging kon nu niet worden geladen. Probeer het opnieuw.",
       "invalidTitle": "Uitnodiging niet gevonden",
