@@ -24,6 +24,11 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "LabourMarket",
     // Single source shared with the Organization JSON-LD (lib/seo/metadata.ts).
     description: BRAND_ORGANIZATION_DESCRIPTION,
+    // The name, short_name and description above are English, so the
+    // manifest's own language is English. This labels those strings only;
+    // the app itself still follows the visitor's locale route.
+    lang: "en",
+    dir: "ltr",
     id: "/",
     start_url: "/",
     scope: "/",
