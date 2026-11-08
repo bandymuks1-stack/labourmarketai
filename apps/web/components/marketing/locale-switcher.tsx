@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
 import { activeLocales } from "@/lib/i18n/config";
+import { alternatePathFor } from "@/lib/i18n/alternate-path";
 import { persistLocalePreferenceAction } from "@/lib/i18n/locale-actions";
 import { cn } from "@/lib/utils";
 
@@ -105,10 +106,17 @@ export function LocaleSwitcher({
   const t = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [suffix, setSuffix] = useState("");
+  const [alternates, setAlternates] = useState<{ hreflang: string | null; href: string }[]>([]);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (open) setSuffix(window.location.search + window.location.hash);
+    if (!open) return;
+    setSuffix(window.location.search + window.location.hash);
+    setAlternates(
+      Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel="alternate"][hreflang]')).map(
+        (el) => ({ hreflang: el.getAttribute("hreflang"), href: el.href }),
+      ),
+    );
   }, [open]);
 
   // Outside-click + Escape are owned by AnchoredOverlay in the portal case
@@ -193,7 +201,7 @@ export function LocaleSwitcher({
             return (
               <Link
                 key={l}
-                href={`${pathname}${suffix}`}
+                href={`${alternatePathFor(l, alternates) ?? pathname}${suffix}`}
                 locale={l}
                 role="menuitem"
                 aria-current={isActive ? "true" : undefined}
