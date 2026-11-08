@@ -8703,6 +8703,98 @@
       "emptyCapabilities": "Brak umiejętności. Tu pojawią się dodane umiejętności i praca, która je pokazuje.",
       "emptyExperience": "Brak historii pracy. Tworzą ją Twój dziennik i zapisy organizacji, w których pracowałeś.",
       "untitled": "Praca bez nazwy w źródle"
+    },
+    "athlete": {
+      "earlyNote": "Wczesny układ Twojego Living CV. Liczby to Twoje prawdziwe wpisy; wygląd nie jest jeszcze ostateczny.",
+      "fullCv": "Otwórz pełne CV",
+      "hero": {
+        "portraitAlt": "Zdjęcie: {name}",
+        "noRole": "Nie dodano jeszcze zawodu",
+        "availableFrom": "od {date}",
+        "onlyYou": "Tutaj widzisz to tylko Ty."
+      },
+      "stats": {
+        "aria": "Liczby i kto za nimi stoi",
+        "unknown": "Nie udało się teraz odczytać",
+        "organizationCount": "{count, plural, one {# organizacja} few {# organizacje} many {# organizacji} other {# organizacji}}",
+        "confirmedBy": "Potwierdzone we wpisie: {who}",
+        "confirmedBySomeone": "Jest wpis przełożonego lub organizacji",
+        "confirmedSelfOnly": "Na razie tylko Twoje własne potwierdzenie; żaden inny przełożony ani organizacja tego nie potwierdzili",
+        "someSelfConfirmed": "Część: {qualifier}",
+        "truncated": "Twój dziennik jest długi, więc starsze wpisy mogą być poza tymi liczbami.",
+        "confirmed": {
+          "label": "godziny we wpisie przełożonego lub organizacji",
+          "none": "Żaden wpis przełożonego ani organizacji nie potwierdza jeszcze Twojej pracy"
+        },
+        "total": {
+          "label": "godziny doświadczenia",
+          "behind": "Twój dziennik i wpisy organizacji, każda godzina raz"
+        },
+        "journal": {
+          "label": "zapisane godziny",
+          "behind": "Twój własny dziennik pracy",
+          "none": "Nic jeszcze nie zapisano"
+        },
+        "organization": {
+          "label": "godziny we wpisach organizacji",
+          "behind": "Wpisy organizacji"
+        },
+        "projects": {
+          "label": "projekty",
+          "behind": "Z Twoich wpisów"
+        }
+      },
+      "seasons": {
+        "eyebrow": "Kariera",
+        "title": "Kariera według sezonów",
+        "empty": "Nie ma jeszcze sezonów. Zapisz jeden dzień pracy, a stanie się pierwszą linią Twojej historii.",
+        "emptyAction": "Zapisz pracę",
+        "undated": "Nie podano dat",
+        "hoursNotStated": "Nie podano godzin",
+        "hoursRecorded": "Zapisano: {hours}",
+        "hoursConfirmed": "We wpisie przełożonego: {confirmed} · zapisano: {recorded}",
+        "orgDayHours": "{hours}, {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
+        "orgPeriodHours": "{hours}, podane jako suma za okres",
+        "note": "Sezon pokazuje godziny podane w jego własnych wpisach. Suma powyżej liczy każdą godzinę raz.",
+        "confirmedBy": "Potwierdzone we wpisie: {who}",
+        "placement": "Praktyka",
+        "reconstructed": "Odtworzono z wcześniejszego wpisu",
+        "photoAlt": "Zdjęcie z pracy: {name}",
+        "evidence": {
+          "confirmed": "Potwierdzone we wpisie przełożonego lub organizacji",
+          "client_accepted": "Przyjął klient",
+          "organization_record": "Wpis organizacji",
+          "own_record": "Twój własny wpis",
+          "stated": "Podajesz to sam; na razie nic tego nie pokazuje"
+        }
+      },
+      "skills": {
+        "eyebrow": "Umiejętności",
+        "title": "Co potrafisz i co to pokazuje",
+        "empty": "Nie ma jeszcze umiejętności. Dodaj, co potrafisz, a resztę pokażą Twoje wpisy.",
+        "emptyAction": "Dodaj umiejętności",
+        "potentialFrom": "Wskazuje na to Twoja praca: {skills}; na razie nie pokazuje tego żaden wpis",
+        "documentUnverified": "Dokument dodajesz sam; nikt go nie sprawdził",
+        "involved": "Udział w {hours}, nieprzypisany wyłącznie do tej umiejętności",
+        "timeUnknown": "Nie udało się teraz odczytać dziennika, więc umiejętności nie mają godzin.",
+        "noScore": "Nic tu nie sprowadza człowieka do jednej liczby. Widzisz, co pokazują wpisy i kto za nimi stoi.",
+        "state": {
+          "confirmed": "Praca potwierdzona przez przełożonego",
+          "certified": "Certyfikowane",
+          "recorded": "W Twoich wpisach",
+          "declared": "Podane przez Ciebie",
+          "potential": "Możliwe"
+        }
+      },
+      "next": {
+        "eyebrow": "Następny krok",
+        "title": "Dokąd może prowadzić Twoja praca",
+        "confirmed": "Potwierdzone przez przełożonego: {list}",
+        "inRecords": "W Twoich wpisach: {list}",
+        "missing": "Brakuje: {list}",
+        "none": "Nie ma jeszcze następnego kroku do pokazania. Więcej zapisanej pracy da więcej podstaw.",
+        "unknown": "Nie udało się teraz odczytać."
+      }
     }
   },
   "todayScreen": {

@@ -8703,6 +8703,98 @@
       "emptyCapabilities": "Gebėjimų dar nėra. Čia atsiras tavo pridėti gebėjimai ir juos rodantis darbas.",
       "emptyExperience": "Darbo istorijos dar nėra. Ją kuria tavo žurnalas ir organizacijų, kuriose dirbai, įrašai.",
       "untitled": "Darbas be pavadinimo šaltinyje"
+    },
+    "athlete": {
+      "earlyNote": "Ankstyvas tavo Living CV išdėstymas. Skaičiai yra tikri tavo įrašai, o išvaizda dar ne galutinė.",
+      "fullCv": "Atidaryti visą CV",
+      "hero": {
+        "portraitAlt": "{name} nuotrauka",
+        "noRole": "Profesija dar nepridėta",
+        "availableFrom": "nuo {date}",
+        "onlyYou": "Čia tai matai tik tu."
+      },
+      "stats": {
+        "aria": "Skaičiai ir kas už jų stovi",
+        "unknown": "Dabar nepavyko perskaityti",
+        "organizationCount": "{count, plural, one {# organizacija} few {# organizacijos} many {# organizacijos} other {# organizacijų}}",
+        "confirmedBy": "Įrašą patvirtino: {who}",
+        "confirmedBySomeone": "Patvirtinimas yra įrašytas",
+        "confirmedSelfOnly": "Kol kas tik tavo paties patvirtinimas; kiti vadovai ar organizacijos dar nepatvirtino",
+        "someSelfConfirmed": "Dalį: {qualifier}",
+        "truncated": "Tavo žurnalas ilgas, todėl senesni įrašai gali būti neįskaičiuoti.",
+        "confirmed": {
+          "label": "valandos vadovo ar organizacijos įraše",
+          "none": "Tavo darbo dar nepatvirtina joks vadovo ar organizacijos įrašas"
+        },
+        "total": {
+          "label": "patirties valandos",
+          "behind": "Tavo žurnalas ir organizacijų įrašai, kiekviena valanda vieną kartą"
+        },
+        "journal": {
+          "label": "įrašytos valandos",
+          "behind": "Tavo paties darbo žurnalas",
+          "none": "Dar nieko neįrašyta"
+        },
+        "organization": {
+          "label": "valandos organizacijų įrašuose",
+          "behind": "Organizacijų įrašai"
+        },
+        "projects": {
+          "label": "projektai",
+          "behind": "Iš tavo įrašų"
+        }
+      },
+      "seasons": {
+        "eyebrow": "Karjera",
+        "title": "Karjera sezonais",
+        "empty": "Sezonų dar nėra. Įrašyk vieną darbo dieną, ir ji taps pirma tavo istorijos eilute.",
+        "emptyAction": "Įrašyti darbą",
+        "undated": "Datos nenurodytos",
+        "hoursNotStated": "Valandos nenurodytos",
+        "hoursRecorded": "Įrašyta: {hours}",
+        "hoursConfirmed": "Vadovo įraše: {confirmed} · įrašyta: {recorded}",
+        "orgDayHours": "{hours}, {count, plural, one {# įrašas} few {# įrašai} many {# įrašo} other {# įrašų}}",
+        "orgPeriodHours": "{hours}, nurodyta kaip viso laikotarpio suma",
+        "note": "Sezonas rodo valandas, kurias nurodo jo paties įrašai. Bendra suma viršuje kiekvieną valandą skaičiuoja vieną kartą.",
+        "confirmedBy": "Įrašą patvirtino: {who}",
+        "placement": "Praktika",
+        "reconstructed": "Atkurta iš ankstesnio įrašo",
+        "photoAlt": "Darbo nuotrauka: {name}",
+        "evidence": {
+          "confirmed": "Patvirtinta vadovo ar organizacijos įraše",
+          "client_accepted": "Priėmė klientas",
+          "organization_record": "Organizacijos įrašas",
+          "own_record": "Tavo paties įrašas",
+          "stated": "Nurodei pats; kol kas to niekas nerodo"
+        }
+      },
+      "skills": {
+        "eyebrow": "Gebėjimai",
+        "title": "Ką moki ir kas tai rodo",
+        "empty": "Gebėjimų dar nėra. Pridėk, ką moki, o likusį vaizdą parodys tavo įrašai.",
+        "emptyAction": "Pridėti gebėjimų",
+        "potentialFrom": "Į tai rodo tavo darbas: {skills}; kol kas to nerodo joks įrašas",
+        "documentUnverified": "Dokumentą pridėjai pats; jo niekas netikrino",
+        "involved": "Dalyvavo {hours}, bet šios valandos nepriskirtos vien šiam gebėjimui",
+        "timeUnknown": "Dabar nepavyko perskaityti žurnalo, todėl prie gebėjimų valandų nėra.",
+        "noScore": "Čia niekas nesutraukia žmogaus į vieną skaičių. Matai, ką rodo įrašai ir kas už jų stovi.",
+        "state": {
+          "confirmed": "Vadovo patvirtintas darbas",
+          "certified": "Sertifikuota",
+          "recorded": "Tavo įrašuose",
+          "declared": "Nurodei pats",
+          "potential": "Galimas"
+        }
+      },
+      "next": {
+        "eyebrow": "Kitas žingsnis",
+        "title": "Kur gali nuvesti tavo darbas",
+        "confirmed": "Vadovo patvirtinta: {list}",
+        "inRecords": "Tavo įrašuose: {list}",
+        "missing": "Trūksta: {list}",
+        "none": "Kito žingsnio kol kas parodyti negalime. Daugiau įrašyto darbo duos daugiau pagrindo.",
+        "unknown": "Dabar nepavyko perskaityti."
+      }
     }
   },
   "todayScreen": {

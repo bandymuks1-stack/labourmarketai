@@ -8703,6 +8703,98 @@
       "emptyCapabilities": "Noch keine Fähigkeiten erfasst. Hier erscheinen Ihre Fähigkeiten und die Arbeit, die sie zeigt.",
       "emptyExperience": "Noch keine Arbeitsgeschichte. Ihr Journal und die Aufzeichnungen Ihrer Arbeitgeber bauen sie auf.",
       "untitled": "Arbeit ohne Namen in der Quelle"
+    },
+    "athlete": {
+      "earlyNote": "Früher Entwurf deines Living CV. Die Zahlen sind deine echten Einträge; das Aussehen ist noch nicht endgültig.",
+      "fullCv": "Vollständigen Lebenslauf öffnen",
+      "hero": {
+        "portraitAlt": "Foto von {name}",
+        "noRole": "Noch kein Beruf hinzugefügt",
+        "availableFrom": "ab {date}",
+        "onlyYou": "Nur du siehst das hier."
+      },
+      "stats": {
+        "aria": "Zahlen und wer dahintersteht",
+        "unknown": "Konnte gerade nicht gelesen werden",
+        "organizationCount": "{count, plural, one {# Organisation} other {# Organisationen}}",
+        "confirmedBy": "Bestätigt im Eintrag von {who}",
+        "confirmedBySomeone": "Ein Eintrag einer Führungskraft oder Organisation liegt vor",
+        "confirmedSelfOnly": "Bisher nur deine eigene Bestätigung; keine andere Führungskraft oder Organisation hat das bestätigt",
+        "someSelfConfirmed": "Teilweise: {qualifier}",
+        "truncated": "Dein Journal ist lang, ältere Einträge können außerhalb dieser Zahlen liegen.",
+        "confirmed": {
+          "label": "Stunden im Eintrag einer Führungskraft oder Organisation",
+          "none": "Noch bestätigt kein Eintrag einer Führungskraft oder Organisation deine Arbeit"
+        },
+        "total": {
+          "label": "Stunden Erfahrung",
+          "behind": "Dein Journal und Einträge von Organisationen, jede Stunde einmal"
+        },
+        "journal": {
+          "label": "erfasste Stunden",
+          "behind": "Dein eigenes Arbeitsjournal",
+          "none": "Noch nichts erfasst"
+        },
+        "organization": {
+          "label": "Stunden in Einträgen von Organisationen",
+          "behind": "Einträge von Organisationen"
+        },
+        "projects": {
+          "label": "Projekte",
+          "behind": "Aus deinen Einträgen"
+        }
+      },
+      "seasons": {
+        "eyebrow": "Laufbahn",
+        "title": "Laufbahn nach Saisons",
+        "empty": "Noch keine Saisons. Halte einen Arbeitstag fest, und er wird die erste Zeile deiner Geschichte.",
+        "emptyAction": "Arbeit erfassen",
+        "undated": "Keine Daten angegeben",
+        "hoursNotStated": "Keine Stunden angegeben",
+        "hoursRecorded": "{hours} erfasst",
+        "hoursConfirmed": "{confirmed} im Eintrag einer Führungskraft · {recorded} erfasst",
+        "orgDayHours": "{hours} in {count, plural, one {# Eintrag} other {# Einträgen}}",
+        "orgPeriodHours": "{hours} als Summe eines Zeitraums angegeben",
+        "note": "Eine Saison zeigt die Stunden, die ihre eigenen Einträge angeben. Die Summe oben zählt jede Stunde einmal.",
+        "confirmedBy": "Bestätigt im Eintrag von {who}",
+        "placement": "Praktikum",
+        "reconstructed": "Aus einem früheren Eintrag rekonstruiert",
+        "photoAlt": "Foto der Arbeit an {name}",
+        "evidence": {
+          "confirmed": "Bestätigt im Eintrag einer Führungskraft oder Organisation",
+          "client_accepted": "Vom Kunden abgenommen",
+          "organization_record": "Eintrag der Organisation",
+          "own_record": "Dein eigener Eintrag",
+          "stated": "Das hast du selbst angegeben; noch zeigt es nichts"
+        }
+      },
+      "skills": {
+        "eyebrow": "Fähigkeiten",
+        "title": "Was du kannst und was das zeigt",
+        "empty": "Noch keine Fähigkeiten. Füge hinzu, was du kannst; den Rest zeigen deine Einträge.",
+        "emptyAction": "Fähigkeiten hinzufügen",
+        "potentialFrom": "Deine Arbeit an {skills} deutet darauf hin; noch zeigt es kein Eintrag",
+        "documentUnverified": "Das Dokument hast du selbst hinzugefügt; niemand hat es geprüft",
+        "involved": "Beteiligt an {hours}, nicht allein dieser Fähigkeit zugerechnet",
+        "timeUnknown": "Dein Journal konnte gerade nicht gelesen werden, darum zeigen Fähigkeiten keine Stunden.",
+        "noScore": "Nichts hier fasst einen Menschen in einer einzigen Zahl zusammen. Du siehst, was die Einträge zeigen und wer dahintersteht.",
+        "state": {
+          "confirmed": "Von einer Führungskraft bestätigte Arbeit",
+          "certified": "Zertifiziert",
+          "recorded": "In deinen Einträgen",
+          "declared": "Selbst angegeben",
+          "potential": "Möglich"
+        }
+      },
+      "next": {
+        "eyebrow": "Nächster Schritt",
+        "title": "Wohin deine Arbeit führen kann",
+        "confirmed": "Von einer Führungskraft bestätigt: {list}",
+        "inRecords": "In deinen Einträgen: {list}",
+        "missing": "Fehlt: {list}",
+        "none": "Noch kein nächster Schritt zu zeigen. Mehr erfasste Arbeit gibt mehr Grundlage.",
+        "unknown": "Konnte gerade nicht gelesen werden."
+      }
     }
   },
   "todayScreen": {
