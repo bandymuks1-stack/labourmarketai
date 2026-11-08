@@ -143,6 +143,8 @@ on:
           - request-doors
           # Owner 2026-11-07: UX-9, UX-10, DS-1, DS-2. Signed out, read-only, adds nothing.
           - public-readiness
+          # #3147: a reviewer of two synthetic organizations sees each one's hours in its own context.
+          - review-scope
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -499,6 +501,7 @@ jobs:
             organization-daily) SPEC=tests/e2e/prod-organization-daily.spec.ts ;;
             request-doors) SPEC=tests/e2e/prod-request-doors.spec.ts ;;
             public-readiness) SPEC=tests/e2e/prod-public-readiness.spec.ts ;;
+            review-scope) SPEC=tests/e2e/prod-review-scope.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
