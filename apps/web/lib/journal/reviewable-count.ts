@@ -3,6 +3,7 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { countInScope, reviewScopeOf } from "@/lib/journal/review-scope";
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 
 /** Postgres / PostgREST codes for "this function is not installed here". */
 const RPC_ABSENT_CODES = new Set(["42883", "PGRST202", "PGRST205"]);
@@ -58,10 +59,10 @@ const readReviewableEntryOrganizations = cache(
     if (ids === null) return null;
     if (ids.length === 0) return new Map();
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("journal_entries")
-      .select("id, engagement_contexts(organization_id)")
-      .in("id", ids);
+    // The live-entry rule: a deleted or superseded row is never counted for anyone.
+    const { data, error } = await liveJournalEntriesOnly(
+      supabase.from("journal_entries").select("id, engagement_contexts(organization_id)").in("id", ids),
+    );
     if (error) return null;
     const byId = new Map<string, string | null>(ids.map((id) => [id, null]));
     for (const row of data ?? []) {

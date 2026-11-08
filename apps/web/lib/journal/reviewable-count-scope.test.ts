@@ -12,6 +12,7 @@ const state = vi.hoisted(() => ({
   rowsError: null as { code?: string } | null,
   active: null as string | null,
   calls: { rpc: 0, rows: 0 },
+  filters: [] as string[],
 }));
 
 vi.mock("react", async (orig) => ({ ...(await orig<typeof import("react")>()), cache: <F,>(fn: F) => fn }));
@@ -26,12 +27,23 @@ vi.mock("@/lib/supabase/server", () => ({
     },
     from: () => ({
       select: () => ({
-        in: async (_column: string, ids: string[]) => {
-          state.calls.rows += 1;
-          return {
-            data: state.rowsError ? null : state.rows.filter((r) => ids.includes(r.id)),
-            error: state.rowsError,
+        in: (_column: string, ids: string[]) => {
+          const filters: string[] = [];
+          const builder = {
+            is(column: string, value: null) {
+              filters.push(`${column}:${value}`);
+              return builder;
+            },
+            then(resolve: (v: unknown) => void) {
+              state.calls.rows += 1;
+              state.filters = filters;
+              resolve({
+                data: state.rowsError ? null : state.rows.filter((r) => ids.includes(r.id)),
+                error: state.rowsError,
+              });
+            },
           };
+          return builder;
         },
       }),
     }),
@@ -63,6 +75,12 @@ describe("a reviewer in two organizations", () => {
   it("counts only Alfa's entries under Alfa", async () => {
     state.active = ALFA;
     expect(await countReviewablePendingEntries()).toBe(3);
+  });
+
+  it("reads the organizations of live entries only", async () => {
+    state.active = ALFA;
+    await countReviewablePendingEntries();
+    expect(state.filters).toEqual(["deleted_at:null", "superseded_by:null"]);
   });
 
   it("counts only Beta's entries under Beta", async () => {
