@@ -6,6 +6,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { readOrganizationApprovalFacts } from "@/lib/journal/organization-approvals";
 import { organizationApprovalsView } from "@/lib/journal/organization-approvals-model";
 import { quickConfirmEntryView } from "@/lib/journal/quick-confirm-model";
+import { reviewScopeOf, rowsInScope } from "@/lib/journal/review-scope";
 import { fetchQuickReviewQueue, type QuickQueueEntry } from "@/lib/journal/review-queue";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
 import { countCounterpartyToDecide } from "@/lib/journal/counterparty-to-decide-count";
@@ -124,7 +125,8 @@ const ON_THE_CARD = 3;
 export async function OrganizationApprovalsCard() {
   // All asked together: the facts need only the active organization, which the layout
   // has already resolved, so they cost this render no wave of their own.
-  const [facts, pending, clientToDecide, t, tPulse, tSkill, tUnit] = await Promise.all([
+  const [context, facts, pending, clientToDecide, t, tPulse, tSkill, tUnit] = await Promise.all([
+    getActiveOrganizationContext(),
     getActiveOrganizationContext().then((context) =>
       context.activeOrganizationId
         ? readOrganizationApprovalFacts(context.activeOrganizationId)
@@ -137,8 +139,14 @@ export async function OrganizationApprovalsCard() {
     getTranslations("skillNames"),
     getTranslations("productivityUnits"),
   ]);
-  // The rows are read only when the count says some wait.
-  const queue = pending ? await fetchQuickReviewQueue().catch((): QuickQueueEntry[] | null => null) : [];
+  // The rows are read only when the count says some wait. The set spans every organization
+  // the reader reviews; the count is this organization's, and so are the rows.
+  const scope = reviewScopeOf(context.activeOrganizationId);
+  const queue = pending
+    ? await fetchQuickReviewQueue()
+        .then((rows) => rowsInScope(rows, scope).rows)
+        .catch((): readonly QuickQueueEntry[] | null => null)
+    : [];
   const view = organizationApprovalsView({
     // The rows failed: the card cannot offer them, so it does not count them either.
     pending: queue === null ? null : pending,

@@ -1,5 +1,22 @@
 {
   "companyModel": {
+    "today": {
+      "goApprove": "Prüfen und freigeben",
+      "amount": {
+        "hours": "{n} Std.",
+        "days": "{n} T.",
+        "minutes": "{n} Min."
+      },
+      "people": "{n, plural, one {# Person} other {# Personen}}",
+      "entries": "{n, plural, one {# Eintrag} other {# Einträge}}",
+      "unclear": "Stunden unklar: {n}",
+      "noHours": "Ohne Stunden: {n}",
+      "noFigure": "Keine Stunden angegeben",
+      "elsewhere": "Anderswo warten noch {n} auf deine Freigabe.",
+      "notReviewer": "In dieser Organisation gibst du keine Stunden frei: Dafür braucht es eine Beziehung als Führungskraft oder Inhaber.",
+      "decisionsClear": "Gerade warten keine weiteren Entscheidungen.",
+      "doors": "Personen und Projekte"
+    },
     "title": "Unternehmensführung",
     "need": "Was wir brauchen",
     "offer": "Was wir anbieten",
@@ -137,7 +154,26 @@
     "descriptionLabel": "Über das Unternehmen (auf der öffentlichen Seite sichtbar)",
     "descriptionPlaceholder": "Was Sie tun, wo Sie arbeiten, was Kunden oder Arbeiter erwarten können…",
     "descriptionHint": "Bis zu 2000 Zeichen. Dies ist der Haupttextblock Ihrer öffentlichen Seite.",
-    "errorDescription": "Veröffentlichung gespeichert, aber die Beschreibung konnte nicht gespeichert werden. Bitte erneut versuchen."
+    "errorDescription": "Veröffentlichung gespeichert, aber die Beschreibung konnte nicht gespeichert werden. Bitte erneut versuchen.",
+    "team": {
+      "eyebrow": "Unternehmensprofil",
+      "aboutEyebrow": "Über das Unternehmen",
+      "aboutTitle": "Wer sie sind",
+      "offersEyebrow": "Anzeigen",
+      "offersTitle": "Was sie anbieten",
+      "seekingEyebrow": "Gesucht",
+      "seekingTitle": "Was sie suchen",
+      "seekingSub": "Suchanzeigen des Unternehmens selbst. Das sind keine Stellenangebote.",
+      "contactEyebrow": "Kontakt",
+      "contactTitle": "Das Unternehmen kontaktieren",
+      "contactNote": "Das Unternehmen hat diese Kontaktdaten selbst veröffentlicht. Sie erreichen es direkt, nicht über labourmarket.ai.",
+      "contactNone": "Das Unternehmen hat keine Kontaktdaten veröffentlicht, daher ist es über diese Seite nicht erreichbar.",
+      "actionEmail": "E-Mail schreiben",
+      "actionPhone": "Anrufen",
+      "actionWebsite": "Website des Unternehmens öffnen",
+      "heroContact": "So erreichen Sie es",
+      "provenance": "Das Unternehmen hat diese Seite selbst ausgefüllt."
+    }
   },
   "marketplaceListings": {
     "pageTitle": "Marktplatz",
@@ -11409,6 +11445,7 @@
       "empty": "An diesem Tag gibt es keine Einträge."
     },
     "year": {
+      "hint": "Die Zahl zeigt, wie viele Einträge in diesen Monat fallen: Buchungen, Projekte, Aufgaben, Arbeitseinträge, Abwesenheiten und andere. Ein Eintrag über mehrere Monate zählt in jedem davon.",
       "count": "{count, plural, =0 {keine Einträge} one {# Eintrag} other {# Einträge}}"
     },
     "emptyFiltered": "Keine Einträge dieses Typs.",

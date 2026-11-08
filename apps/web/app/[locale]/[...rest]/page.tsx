@@ -17,7 +17,8 @@ import NotFound from "../not-found";
  * JavaScript ran (UX-9). So when the middleware already knows no route can answer
  * an address, it rewrites here with status 404 and this renders the same
  * `not-found.tsx` as an ordinary page, without throwing. Anything else that reaches
- * this route (`/lt/jobs/a/b`) still throws: no list can know those in advance.
+ * this route still throws, such as `/lt/auth/nera`: it fits a known first segment and
+ * a known depth, and only the route tree knows it has no page.
  */
 type Params = { readonly params: Promise<{ locale: string; rest: string[] }> };
 

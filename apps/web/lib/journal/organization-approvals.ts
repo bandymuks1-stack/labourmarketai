@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import type { OrganizationEmployeeReview } from "@/lib/journal/organization-approvals-model";
+import { isConfirmedEntry, type ConfirmationRow } from "@/lib/journal/review-status";
 
 const OWN_ENTRIES_LIMIT = 200;
 /** The relationships the review RPC accepts as a reviewer in the entry's organization. */
@@ -17,8 +18,11 @@ export async function readOrganizationApprovalFacts(organizationId: string): Pro
   employees: OrganizationEmployeeReview | null;
   ownUnconfirmed: number | null;
   otherReviewer: boolean | null;
+  /** Does the reader hold a reviewer relationship here? Null: the read failed. Optional,
+   *  so a caller's own fallback without it stays valid. */
+  readerReviews?: boolean | null;
 }> {
-  const unknown = { employees: null, ownUnconfirmed: null, otherReviewer: null };
+  const unknown = { employees: null, ownUnconfirmed: null, otherReviewer: null, readerReviews: null };
   const supabase = await createClient();
   const {
     data: { user },
@@ -52,6 +56,7 @@ export async function readOrganizationApprovalFacts(organizationId: string): Pro
       user.id,
     ),
     otherReviewer,
+    readerReviews: readerManages,
   };
 }
 
@@ -71,13 +76,15 @@ async function countOwnUnconfirmed(
   if (entryError) return null;
   const entryIds = (entries ?? []).map((e) => e.id);
   if (entryIds.length === 0) return 0;
-  // A person's own approval never confirms their work (EVID-2), so only others' rows count.
+  // By the one rule: only someone else's decision confirms, and the latest one stands.
   const { data: confirmations, error: confirmationError } = await supabase
     .from("journal_entry_confirmations")
-    .select("entry_id")
-    .in("entry_id", entryIds)
-    .neq("confirmer_id", userId);
+    .select("entry_id, confirmation_scope, created_at, confirmer_id")
+    .in("entry_id", entryIds);
   if (confirmationError) return null;
-  const confirmed = new Set((confirmations ?? []).map((c) => c.entry_id));
-  return entryIds.filter((id) => !confirmed.has(id)).length;
+  const byEntry = new Map<string, ConfirmationRow[]>();
+  for (const c of (confirmations ?? []) as (ConfirmationRow & { entry_id: string })[]) {
+    byEntry.set(c.entry_id, [...(byEntry.get(c.entry_id) ?? []), c]);
+  }
+  return entryIds.filter((id) => !isConfirmedEntry(byEntry.get(id), userId)).length;
 }

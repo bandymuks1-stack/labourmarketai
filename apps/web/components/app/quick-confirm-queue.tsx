@@ -67,13 +67,19 @@ export function QuickConfirmQueue({
                 compact
                 className="verified-pop flex flex-col gap-0.5 border-state-success/40 bg-state-success/10 text-sm text-state-success"
               >
-              <span>
-                ✓ {t("inbox.quick.receipt", { title: receiptTitle(r.originalText) })}
-                {r.verifiedSkills > 0
-                  ? ` · ${t("inbox.quick.receiptSkills", { count: r.verifiedSkills })}`
-                  : null}
-              </span>
-              <span className="text-meta text-text-muted">{r.workerName}</span>
+              {r.decision === "rejected" ? (
+                <span className="text-text-secondary">{t("inbox.quick.rejectedCard", { name: r.workerName })}</span>
+              ) : (
+                <>
+                  <span>
+                    ✓ {t("inbox.quick.receipt", { title: receiptTitle(r.originalText) })}
+                    {r.verifiedSkills > 0
+                      ? ` · ${t("inbox.quick.receiptSkills", { count: r.verifiedSkills })}`
+                      : null}
+                  </span>
+                  <span className="text-meta text-text-muted">{r.workerName}</span>
+                </>
+              )}
               </Card>
             </li>
           ))}

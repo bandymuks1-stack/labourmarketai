@@ -329,7 +329,7 @@ async function renderServerTree(node: unknown, depth = 0): Promise<void> {
 }
 
 const params = () => Promise.resolve({ locale: "lt" });
-const searchParams = () => Promise.resolve({});
+const searchParams = (path = "") => Promise.resolve(Object.fromEntries(new URLSearchParams(path.split("?")[1] ?? "")));
 
 type PageModule = { default: (p: unknown) => Promise<ReactNode> };
 type LayoutModule = { default: (p: unknown) => Promise<ReactNode> };
@@ -345,6 +345,7 @@ const PAGES = {
   "/dashboard/communication": async () =>
     (await import("@/app/[locale]/dashboard/communication/page")) as PageModule,
   "/dashboard/company": async () => (await import("@/app/[locale]/dashboard/company/page")) as PageModule,
+  "/dashboard/company?view=today": async () => (await import("@/app/[locale]/dashboard/company/page")) as PageModule,
   "/dashboard/company/people": async () =>
     (await import("@/app/[locale]/dashboard/company/people/page")) as PageModule,
 } as const;
@@ -360,7 +361,7 @@ async function renderNestedLayouts(path: PagePath): Promise<void> {
 
 async function renderPageOnly(path: PagePath): Promise<void> {
   const { default: Page } = await PAGES[path]();
-  await renderServerTree(await Page({ params: params(), searchParams: searchParams() }));
+  await renderServerTree(await Page({ params: params(), searchParams: searchParams(path) }));
 }
 
 /** ONE request: the dashboard layout, the nested layouts and the page render
@@ -482,5 +483,9 @@ const BOUNDS: Record<"layout" | PagePath, { calls: number; waves: number }> = {
   "/dashboard/journal": { calls: 25, waves: 5 },
   "/dashboard/communication": { calls: 25, waves: 6 },
   "/dashboard/company": { calls: 50, waves: 7 },
+  // The prototype view (2026-11-07), measured with no reviewable entries in the fixture:
+  // its queue, skills, links, metrics and exception reads run only when something waits.
+  // It skips the default page's reads, so it costs less than the page it lives on.
+  "/dashboard/company?view=today": { calls: 39, waves: 5 },
   "/dashboard/company/people": { calls: 47, waves: 7 },
 };

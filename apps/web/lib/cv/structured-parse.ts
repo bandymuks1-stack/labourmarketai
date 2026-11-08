@@ -263,7 +263,13 @@ const MONTH_THEN_YEAR_RE = new RegExp(
   "giu",
 );
 const BULLET_RE = /^[•·▪●◦*–—-]\s/;
-const CONTACT_RE = /@|https?:|\+?\d[\d\s()-]{6,}/;
+/** A phone number starts on its own: a run of digits glued to a letter is part
+ *  of a name or a code ("UAB QASYNTHETICB42464955148", UF-3), not a contact.
+ *  Read as a phone, such an employer line could not join its job title and
+ *  period, so the job lost both. */
+// No lookbehind: this file runs in the browser, and a browser without lookbehind (Safari
+// before 16.4) would only get the shim's looser fallback (see lib/compat/regexp-lookbehind-shim).
+const CONTACT_RE = /@|https?:|(?:^|[^\p{L}\d])\+?\d[\d\s()-]{6,}/u;
 const MAX_UNPLACED = 40;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

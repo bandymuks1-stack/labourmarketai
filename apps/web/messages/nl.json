@@ -1,5 +1,22 @@
 {
   "companyModel": {
+    "today": {
+      "goApprove": "Bekijken en goedkeuren",
+      "amount": {
+        "hours": "{n} u",
+        "days": "{n} dg",
+        "minutes": "{n} min."
+      },
+      "people": "{n, plural, one {# persoon} other {# personen}}",
+      "entries": "{n, plural, one {# registratie} other {# registraties}}",
+      "unclear": "Uren onduidelijk: {n}",
+      "noHours": "Zonder uren: {n}",
+      "noFigure": "Geen uren vermeld",
+      "elsewhere": "Elders wachten nog {n} op je goedkeuring.",
+      "notReviewer": "Je keurt in deze organisatie geen uren goed: daarvoor is een relatie als manager of eigenaar nodig.",
+      "decisionsClear": "Er wachten nu geen andere beslissingen.",
+      "doors": "Mensen en projecten"
+    },
     "title": "Bedrijfsbeheer",
     "need": "Wat we nodig hebben",
     "offer": "Wat we aanbieden",
@@ -137,7 +154,26 @@
     "descriptionLabel": "Over het bedrijf (zichtbaar op de openbare pagina)",
     "descriptionPlaceholder": "Wat u doet, waar u werkt, wat een klant of werker kan verwachten…",
     "descriptionHint": "Maximaal 2000 tekens. Dit is het hoofdtekstblok van uw openbare pagina.",
-    "errorDescription": "Publicatie opgeslagen, maar de beschrijving kon niet worden opgeslagen. Probeer opnieuw."
+    "errorDescription": "Publicatie opgeslagen, maar de beschrijving kon niet worden opgeslagen. Probeer opnieuw.",
+    "team": {
+      "eyebrow": "Bedrijfsprofiel",
+      "aboutEyebrow": "Over het bedrijf",
+      "aboutTitle": "Wie ze zijn",
+      "offersEyebrow": "Advertenties",
+      "offersTitle": "Wat ze aanbieden",
+      "seekingEyebrow": "Gezocht",
+      "seekingTitle": "Waar ze naar zoeken",
+      "seekingSub": "Zoekadvertenties van het bedrijf zelf. Dit zijn geen vacatures.",
+      "contactEyebrow": "Contactgegevens",
+      "contactTitle": "Neem contact op met het bedrijf",
+      "contactNote": "Het bedrijf heeft deze gegevens zelf gepubliceerd. U bereikt het rechtstreeks, niet via labourmarket.ai.",
+      "contactNone": "Het bedrijf heeft geen contactgegevens gepubliceerd, dus via deze pagina is het niet te bereiken.",
+      "actionEmail": "E-mail sturen",
+      "actionPhone": "Bellen",
+      "actionWebsite": "Website van het bedrijf openen",
+      "heroContact": "Hoe u contact opneemt",
+      "provenance": "Het bedrijf heeft deze pagina zelf ingevuld."
+    }
   },
   "marketplaceListings": {
     "pageTitle": "Marktplaats",
@@ -11409,6 +11445,7 @@
       "empty": "Niets op deze dag."
     },
     "year": {
+      "hint": "Het getal is hoeveel items in die maand vallen: reserveringen, projecten, taken, werkregistraties, verlof en andere. Een item over meerdere maanden telt in elk daarvan mee.",
       "count": "{count, plural, =0 {geen items} one {# item} other {# items}}"
     },
     "emptyFiltered": "Geen items van dit type.",

@@ -408,6 +408,9 @@
     "skills": "Vaardigheden",
     "title": "Items om te bevestigen",
     "quick": {
+      "elsewhere": "In andere organisaties die je beheert wachten er nog {n} op je goedkeuring. Wissel van organisatie om ze te zien en goed te keuren.",
+      "byOrganization": "Per organisatie:",
+      "unnamedOrganization": "Een organisatie waarvan de naam niet gelezen kon worden",
       "openQuick": "Snel bevestigen →",
       "title": "Snel bevestigen",
       "subtitle": "Eén blik, één tik: de kaart toont de werknemer, de datum, de werkzaamheden en de vaardigheden die u bevestigt. Elke bevestiging is uw echte beslissing en wordt pas vastgelegd wanneer u tikt.",

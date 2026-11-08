@@ -1,5 +1,22 @@
 {
   "companyModel": {
+    "today": {
+      "goApprove": "Review and approve",
+      "amount": {
+        "hours": "{n} h",
+        "days": "{n} d",
+        "minutes": "{n} min"
+      },
+      "people": "{n, plural, one {# person} other {# people}}",
+      "entries": "{n, plural, one {# entry} other {# entries}}",
+      "unclear": "Hours unclear: {n}",
+      "noHours": "No hours stated: {n}",
+      "noFigure": "No hours stated",
+      "elsewhere": "{n} more waiting for your approval elsewhere.",
+      "notReviewer": "You don't approve hours in this organization: that takes a manager or owner relationship with it.",
+      "decisionsClear": "Nothing else is waiting for a decision right now.",
+      "doors": "People and projects"
+    },
     "title": "Company management",
     "need": "What we need",
     "offer": "What we offer",
@@ -137,7 +154,26 @@
     "descriptionLabel": "About the company (shown on the public page)",
     "descriptionPlaceholder": "What you do, where you work, what a client or worker can expect…",
     "descriptionHint": "Up to 2000 characters. This is the main text block on your public page.",
-    "errorDescription": "Publication saved, but the description could not be saved. Try again."
+    "errorDescription": "Publication saved, but the description could not be saved. Try again.",
+    "team": {
+      "eyebrow": "Company profile",
+      "aboutEyebrow": "About",
+      "aboutTitle": "Who they are",
+      "offersEyebrow": "Listings",
+      "offersTitle": "What they offer",
+      "seekingEyebrow": "Looking for",
+      "seekingTitle": "What they are looking for",
+      "seekingSub": "The company's own wanted listings. These are not job vacancies.",
+      "contactEyebrow": "Contact",
+      "contactTitle": "Contact the company",
+      "contactNote": "The company published these contacts itself. You reach it directly, not through labourmarket.ai.",
+      "contactNone": "The company has not published a contact, so this page has no way to reach it.",
+      "actionEmail": "Send an e-mail",
+      "actionPhone": "Call",
+      "actionWebsite": "Open the company's website",
+      "heroContact": "How to get in touch",
+      "provenance": "The company filled in this page itself."
+    }
   },
   "marketplaceListings": {
     "pageTitle": "Marketplace",
@@ -11409,6 +11445,7 @@
       "empty": "Nothing on this day."
     },
     "year": {
+      "hint": "The number is how many items fall in that month: bookings, projects, tasks, work entries, leave and others. An item spanning several months counts in each of them.",
       "count": "{count, plural, =0 {no items} one {# item} other {# items}}"
     },
     "emptyFiltered": "No items of this type.",

@@ -3,7 +3,7 @@ import { readCorrectedOriginalIds } from "@/lib/journal/corrected-originals-read
 import { withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
 import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 
-import { EMPLOYER_BASIS_OR_FILTER } from "@/lib/journal/review-status";
+import { countConfirmedEntries, type ConfirmableEntryRow } from "@/lib/journal/review-status";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -383,10 +383,14 @@ async function ownNewestConfirmations(
   }
 }
 
-/** Manager confirmations on the worker's own entries. 0 on any error. */
+/**
+ * Entries of the worker's that someone else confirmed: employer decisions only (decision
+ * 0018), never the person's own (EVID-2). 0 on any error.
+ */
 async function ownConfirmationsCount(
   supabase: SupabaseClient,
   workerId: string,
+  subjectProfileId: string,
 ): Promise<number> {
   try {
     // LIVE ONLY — a confirmation on a retracted or superseded entry is not a
@@ -394,18 +398,12 @@ async function ownConfirmationsCount(
     // adjacent read four lines down had already been filtering `deleted_at`:
     // one file, two answers to the same question.
     const { data: entryRows } = await liveJournalEntriesOnly(
-      asAny(supabase).from("journal_entries").select("id").eq("worker_id", workerId),
-    );
-    const ids = ((entryRows ?? []) as { id: string }[]).map((e) => e.id);
-    if (ids.length === 0) return 0;
-    return await safeCount(
       asAny(supabase)
-        .from("journal_entry_confirmations")
-        .select("id", { count: "exact", head: true })
-        .in("entry_id", ids)
-        // Manager confirmations only (decision 0018).
-        .or(EMPLOYER_BASIS_OR_FILTER),
+        .from("journal_entries")
+        .select("id, correction_of, journal_entry_confirmations(confirmation_scope, created_at, confirmer_id)")
+        .eq("worker_id", workerId),
     );
+    return countConfirmedEntries((entryRows ?? []) as ConfirmableEntryRow[], subjectProfileId);
   } catch {
     return 0;
   }
@@ -566,7 +564,7 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
       ? verifiedSkillBadges(supabase, workerId)
       : Promise.resolve<VerifiedSkillsRead>({ status: "ok", badges: [] }),
     workerId
-      ? ownConfirmationsCount(supabase, workerId)
+      ? ownConfirmationsCount(supabase, workerId, user.id)
       : Promise.resolve(0),
     // Primary profession from the ONE cached profession read (was its own
     // `is_primary = true` select — one of 4 identical ones per navigation).

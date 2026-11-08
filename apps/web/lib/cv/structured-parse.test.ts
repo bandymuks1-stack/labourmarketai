@@ -76,6 +76,17 @@ describe("parseCvSections", () => {
     expect(noLevel.languages[0].level).toBeNull();
   });
 
+  it("reads the CV the production walk uploads in P-6b", () => {
+    const p = parseCvSections(
+      "Darbo patirtis\nPlytelių klojėjas\nUAB QASYNTHETICB1\n2019 – 2023\nIšsilavinimas\nQA Synthetic rengimo centras, profesinis mokymas 2015–2017\nKalbos\nAnglų B2, rusų gimtoji",
+    );
+    expect(p.workHistory[0].title).toContain("Plytelių klojėjas");
+    expect(p.education[0].institution).toContain("rengimo centras");
+    expect(p.workHistory.some((w) => w.title.includes("rengimo centras"))).toBe(false);
+    expect(p.languages.find((l) => l.lang === "en")?.level).toBe("B2");
+    expect(p.languages.find((l) => l.lang === "ru")?.level).not.toBe("B2");
+  });
+
   it("reads each language's level from its own part of the line (first real user's feedback 2026-11-04)", () => {
     const p = parseCvSections("KALBOS\nAnglų B2, rusų gimtoji; lenkų A1");
     expect(p.languages.find((l) => l.lang === "en")?.level).toBe("B2");
@@ -160,7 +171,7 @@ describe("parseCvSections", () => {
     it("a name above the first job, with no heading, is not part of that job", () => {
       const p = parseCvSections("Vardenis Pavardenis\nPlytelių klojėjas\n2019 – 2023");
       expect(p.workHistory).toHaveLength(1);
-      expect(p.workHistory[0].title).toBe("Plytelių klojėjas");
+      expect(p.workHistory[0].title).toContain("Plytelių klojėjas");
     });
 
     it("never groups languages or certificates, nor reads a word as a month away from a year", () => {

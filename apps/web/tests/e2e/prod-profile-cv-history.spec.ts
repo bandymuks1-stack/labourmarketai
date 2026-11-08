@@ -408,6 +408,45 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
   await ctx.close();
 });
 
+test("P-6b (UF-3). a real CV layout is read correctly: title, dates, training and each language's level", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  const company = `UAB QASYNTHETICB${RUN.replace(/[^0-9a-z]/gi, "").toUpperCase()}`;
+  const lines = [
+    "Darbo patirtis",
+    "Plytelių klojėjas",
+    company,
+    "2019 – 2023",
+    "Išsilavinimas",
+    "QA Synthetic rengimo centras, profesinis mokymas 2015–2017",
+    "Kalbos",
+    "Anglų B2, rusų gimtoji",
+  ];
+  await page.goto("/lt/dashboard");
+  await say(page, "Įkelk mano CV");
+  await inMain(page).getByTestId("chat-chip-cv").filter({ visible: true }).last().click({ timeout: 60_000 });
+  const input = page.locator('[data-testid="cv-import-upload"] input[type="file"]').last();
+  await input.waitFor({ state: "attached", timeout: 60_000 });
+  await input.setInputFiles({
+    name: "qa-synthetic-cv-layout.docx",
+    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    buffer: Buffer.from(makeDocx(lines.join("\n"))),
+  });
+  await expect(inMain(page).getByTestId("cv-import-section-review").last()).toBeVisible({ timeout: 60_000 });
+
+  const job = inMain(page).getByTestId("cv-import-item-wh-0").last();
+  await expect(job, "the title is kept, not replaced by the company").toContainText("Plytelių klojėjas", { timeout: 30_000 });
+  await expect(job, "the dates on their own line are kept").toContainText("2019");
+  await expect(inMain(page).getByTestId("cv-import-item-edu-0").last(), "a training centre is education").toContainText("rengimo centras");
+  await expect(page.locator('[data-testid^="cv-import-item-wh-"]').filter({ hasText: "rengimo centras" }), "and never work history").toHaveCount(0);
+  await expect(inMain(page).getByTestId("cv-import-level-en").last(), "English keeps its own level").toHaveValue("B2");
+  await expect(inMain(page).getByTestId("cv-import-level-ru").last(), "Russian is not given English's level").not.toHaveValue("B2");
+
+  // Read, never confirmed: nothing of this reaches the Living CV.
+  const cv = await livingCv(page);
+  await expect(cv.getByText(company)).toHaveCount(0);
+  await ctx.close();
+});
+
 // ── 2.5 – 2.8 — self-declared history rows: add → on the Living CV → removed ─
 
 test("P-7 (2.5). an employment row is added on the profile and shows on the Living CV as the person's own statement", async ({ browser }) => {
