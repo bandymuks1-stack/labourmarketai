@@ -13,7 +13,7 @@ import {
 import { fetchBatchExceptions } from "@/lib/journal/batch-review";
 import { readOrganizationApprovalFacts } from "@/lib/journal/organization-approvals";
 import { fetchQuickReviewQueue, type QuickQueueEntry } from "@/lib/journal/review-queue";
-import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
+import { countReviewableEntriesEverywhere } from "@/lib/journal/reviewable-count";
 import { countWorkersWithUnconfirmableWork } from "@/lib/operations/org-members";
 import { getOrganizationToday, type OrganizationToday } from "@/lib/planning/organization-today";
 import { countRosterConflicts } from "@/lib/planning/roster-conflicts";
@@ -37,7 +37,8 @@ export async function loadOrganizationTodayView(input: {
   const [workToday, today, reviewable, facts, reviewOff, conflicts, invitations, claims] = await Promise.all([
     viewerWorkToday(),
     getOrganizationToday().catch((): OrganizationToday => ({ applied: false, reason: "error" })),
-    countReviewablePendingEntries(),
+    // The whole set: the model scopes it to this organization itself and names the rest.
+    countReviewableEntriesEverywhere(),
     organizationId ? readOrganizationApprovalFacts(organizationId).catch(() => NO_FACTS) : NO_FACTS,
     organizationId ? unknownOnFailure(countWorkersWithUnconfirmableWork(organizationId)) : null,
     unknownOnFailure(countRosterConflicts()),

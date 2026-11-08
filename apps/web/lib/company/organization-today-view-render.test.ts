@@ -66,7 +66,7 @@ const reads = vi.hoisted(() => ({
   translator: (() => "") as unknown,
 }));
 
-vi.mock("@/lib/journal/reviewable-count", () => ({ countReviewablePendingEntries: async () => reads.reviewable }));
+vi.mock("@/lib/journal/reviewable-count", () => ({ countReviewableEntriesEverywhere: async () => reads.reviewable }));
 vi.mock("@/lib/journal/review-queue", () => ({
   fetchQuickReviewQueue: async () => {
     if (reads.queue instanceof Error) throw reads.queue;

@@ -42,6 +42,8 @@ export type QuickQueueEntry = {
    *  every organization the caller reviews; a screen titled with one organization needs
    *  this to tell them apart. Null: the row did not say. */
   organizationId: string | null;
+  /** Its display name, for labelling a queue that spans organizations. Null: unreadable. */
+  organizationName: string | null;
   createdAt: string;
   /** The day the work happened — the SAME rule as the journal and the
    *  calendar (`resolveWorkDay`): the stated `work_date`, else the filing day.
@@ -59,6 +61,19 @@ export type QuickQueueEntry = {
   /** Which rule produced `skillsToConfirm` (named state, never guessed). */
   confirmScope: QuickConfirmScope;
 };
+
+type OrganizationEmbed = {
+  organization_id: string | null;
+  organizations: { display_name: string | null; legal_name: string | null } | null;
+} | null;
+
+function organizationOf(embed: unknown): { id: string | null; name: string | null } {
+  const e = embed as OrganizationEmbed;
+  return {
+    id: e?.organization_id ?? null,
+    name: e?.organizations?.display_name ?? e?.organizations?.legal_name ?? null,
+  };
+}
 
 export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
   const supabase = await createClient();
@@ -88,7 +103,7 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
   const { data: rows, error: rowsError } = await supabase
     .from("journal_entries")
     .select(
-      `id, original_text, created_at, worker_id, workers(${WORKER_NAME_FIELDS}), engagement_contexts(organization_id)`,
+      `id, original_text, created_at, worker_id, workers(${WORKER_NAME_FIELDS}), engagement_contexts(organization_id, organizations(display_name, legal_name))`,
     )
     .in("id", reviewableIds)
     .order("created_at", { ascending: true });
@@ -178,8 +193,8 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
       id: r.id,
       workerId: r.worker_id ?? null,
       workerName,
-      organizationId:
-        (r.engagement_contexts as unknown as { organization_id: string | null } | null)?.organization_id ?? null,
+      organizationId: organizationOf(r.engagement_contexts).id,
+      organizationName: organizationOf(r.engagement_contexts).name,
       createdAt: r.created_at,
       workDay: resolveWorkDay(metricRows.get(r.id) ?? [], r.created_at),
       hours: reviewerHoursOf({ id: r.id, createdAt: r.created_at, metrics: metricRows.get(r.id) ?? [] }),

@@ -408,6 +408,9 @@
     "skills": "Įgūdžiai",
     "title": "Įrašai, laukiantys patvirtinimo",
     "quick": {
+      "elsewhere": "Kitose tavo tvarkomose organizacijose patvirtinimo laukia dar: {n}. Perjunk organizaciją, kad juos matytum ir patvirtintum.",
+      "byOrganization": "Pagal organizaciją:",
+      "unnamedOrganization": "Organizacija, kurios pavadinimo perskaityti nepavyko",
       "openQuick": "Greitas patvirtinimas →",
       "title": "Greitas patvirtinimas",
       "subtitle": "Vienas žvilgsnis, vienas palietimas: kortelėje matosi darbuotojas, data, darbai ir įgūdžiai, kuriuos patvirtinsi. Kiekvienas patvirtinimas — tikras tavo sprendimas, įrašomas tik tau palietus.",
