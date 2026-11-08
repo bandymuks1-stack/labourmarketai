@@ -62,7 +62,7 @@ test("UX-9. a missing record keeps its 404 and title, and a person with JavaScri
   for (const path of ["/lt/jobs/00000000-0000-0000-0000-000000000000", "/lt/auth/nera", "/lt/questions/nera-tokio-klausimo"]) {
     const res = await ctx.request.get(path, { maxRedirects: 0 });
     const r = read(await res.text());
-    record(`missing record ${path}`, res.status() === 404 && r.noindex && !/LabourMarket\.ai$/.test(r.title ?? ""), `status=${res.status()} noindex=${r.noindex} title=${r.title} raw_html: shell=${r.shell} lang=${r.lang} h1=${r.h1}`);
+    record(`missing record ${path}`, res.status() === 404 && r.noindex && /nerastas|not found/i.test(r.title ?? ""), `status=${res.status()} noindex=${r.noindex} title=${r.title} raw_html: shell=${r.shell} lang=${r.lang} h1=${r.h1}`);
 
     const page = await ctx.newPage();
     await page.goto(path);
