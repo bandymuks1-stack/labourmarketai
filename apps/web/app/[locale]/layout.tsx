@@ -98,6 +98,11 @@ export async function generateMetadata({
       title: BRAND_NAME,
       statusBarStyle: "black-translucent",
     },
+    // Next 15 renders `capable: true` as the standard
+    // `mobile-web-app-capable` tag only. iOS Safari before 16.4 reads only
+    // the Apple-prefixed tag for a standalone home-screen launch, so it is
+    // emitted explicitly too. Install chrome only, no offline claim.
+    other: { "apple-mobile-web-app-capable": "yes" },
     robots: { index: true, follow: true },
     openGraph: {
       type: "website",

@@ -7,7 +7,7 @@ import { CompanyTeamProfile, type CompanyTeamTranslate } from "@/components/app/
 import { getPublicBusinessProfile } from "@/lib/company/public-profile";
 import { publicWebsiteHref } from "@/lib/company/public-website";
 import { buildCompanyTeamProfile, isCompanyTeamView } from "@/lib/company/team-profile-model";
-import { BRAND_NAME, buildPageMetadata } from "@/lib/seo/metadata";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +36,8 @@ export async function generateMetadata({
 }: BusinessProfilePageProps): Promise<Metadata> {
   const { locale, slug } = await params;
   const view = await getPublicBusinessProfile(slug);
-  if (!view) return { title: BRAND_NAME, robots: { index: false, follow: false } };
+  // No title of its own: the not-found title applies (UX-9), as on a missing job.
+  if (!view) return { robots: { index: false, follow: false } };
   const { profile } = view;
   const desc = profile.tagline ?? profile.description ?? undefined;
   // Canonical + hreflang + brand share card from the one builder every other

@@ -182,3 +182,121 @@ export function makePdf(text: string): Uint8Array {
   const trailer = `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
   return enc(body + xref + trailer);
 }
+
+/** Assemble numbered PDF objects into a file with a correct xref table. */
+function assemblePdf(objects: string[]): Uint8Array {
+  let body = "%PDF-1.4\n";
+  const offsets: number[] = [];
+  objects.forEach((obj, i) => {
+    offsets.push(enc(body).length);
+    body += `${i + 1} 0 obj\n${obj}\nendobj\n`;
+  });
+  const xrefStart = enc(body).length;
+  let xref = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (const off of offsets) xref += `${String(off).padStart(10, "0")} 00000 n \n`;
+  const trailer = `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+  return enc(body + xref + trailer);
+}
+
+const hex4 = (n: number) => n.toString(16).toUpperCase().padStart(4, "0");
+
+/** UTF-16BE hex of a string, as a ToUnicode CMap writes the destination. */
+const utf16Hex = (s: string) =>
+  [...s]
+    .map((ch) => {
+      const cp = ch.codePointAt(0) ?? 0;
+      if (cp <= 0xffff) return hex4(cp);
+      const v = cp - 0x10000;
+      return hex4(0xd800 + (v >> 10)) + hex4(0xdc00 + (v & 0x3ff));
+    })
+    .join("");
+
+/** Adobe glyph names for the letters the `differences` encoding maps. */
+const GLYPH_NAMES: Record<string, string> = {
+  ą: "aogonek", Ą: "Aogonek", č: "ccaron", Č: "Ccaron", ę: "eogonek", Ę: "Eogonek",
+  ė: "edotaccent", Ė: "Edotaccent", į: "iogonek", Į: "Iogonek", š: "scaron", Š: "Scaron",
+  ų: "uogonek", Ų: "Uogonek", ū: "umacron", Ū: "Umacron", ž: "zcaron", Ž: "Zcaron",
+  "–": "endash", "—": "emdash",
+};
+
+/**
+ * A PDF whose text is NOT limited to the standard-14 Latin-1 set: the shapes
+ * real exporters write for Lithuanian letters, one `text` line per text line.
+ *
+ * - `encoding: "identity"` (default): a Type0 / Identity-H composite font, two
+ *   bytes per glyph, with a `/ToUnicode` CMap saying which character each glyph
+ *   is. That is what Word, Chrome and LibreOffice emit, and the CMap is what
+ *   every text extractor reads. `form: "NFD"` writes the text decomposed (base
+ *   letter and combining mark as separate glyphs, as a macOS-typed or LaTeX PDF
+ *   can).
+ * - `encoding: "differences"`: a simple font whose `/Encoding /Differences`
+ *   names each Lithuanian glyph (`/scaron`, `/eogonek`, ...) with no ToUnicode,
+ *   the older producer path, read through the glyph names.
+ *
+ * The glyph program is not embedded: text extraction never reads outlines, only
+ * the encoding and the ToUnicode map, which are complete here.
+ */
+export function makeUnicodePdf(
+  text: string,
+  opts: { encoding?: "identity" | "differences"; form?: "NFC" | "NFD" } = {},
+): Uint8Array {
+  const lines = text.normalize(opts.form ?? "NFC").split("\n");
+  const objects: string[] = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+  ];
+  const content = (hexLines: string[]) => {
+    const stream = `BT /F1 12 Tf 14 TL 72 720 Td ${hexLines.map((h) => `<${h}> Tj T*`).join(" ")} ET`;
+    return `<< /Length ${enc(stream).length} >>\nstream\n${stream}\nendstream`;
+  };
+
+  if (opts.encoding === "differences") {
+    const codes = new Map<string, number>();
+    const encoded = lines.map((line) =>
+      [...line]
+        .map((ch) => {
+          const cp = ch.codePointAt(0) ?? 0;
+          if (cp >= 0x20 && cp < 0x7f) return cp.toString(16).padStart(2, "0");
+          if (!GLYPH_NAMES[ch]) throw new Error(`makeUnicodePdf: no glyph name for U+${hex4(cp)}`);
+          if (!codes.has(ch)) codes.set(ch, 0x80 + codes.size);
+          return (codes.get(ch) ?? 0).toString(16);
+        })
+        .join(""),
+    );
+    const differences = [...codes.entries()].map(([ch, code]) => `${code} /${GLYPH_NAMES[ch]}`).join(" ");
+    objects.push(
+      "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding << /Type /Encoding " +
+        `/BaseEncoding /WinAnsiEncoding /Differences [${differences}] >> >>`,
+      content(encoded),
+    );
+    return assemblePdf(objects);
+  }
+
+  // Identity-H: one CID per distinct code point, in order of first use.
+  const cids = new Map<string, number>();
+  for (const line of lines) for (const ch of line) if (!cids.has(ch)) cids.set(ch, cids.size + 1);
+  const encoded = lines.map((line) => [...line].map((ch) => hex4(cids.get(ch) ?? 0)).join(""));
+  const bfchar = [...cids.entries()]
+    .map(([ch, cid]) => `<${hex4(cid)}> <${utf16Hex(ch)}>`)
+    .join("\n");
+  const cmap =
+    "/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n" +
+    "/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n" +
+    "/CMapName /QASynthetic-UCS def\n/CMapType 2 def\n" +
+    "1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n" +
+    `${cids.size} beginbfchar\n${bfchar}\nendbfchar\n` +
+    "endcmap\nCMapName currentdict /CMap defineresource pop\nend\nend";
+  objects.push(
+    "<< /Type /Font /Subtype /Type0 /BaseFont /QASyntheticSans /Encoding /Identity-H " +
+      "/DescendantFonts [6 0 R] /ToUnicode 7 0 R >>",
+    content(encoded),
+    "<< /Type /Font /Subtype /CIDFontType2 /BaseFont /QASyntheticSans " +
+      "/CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> " +
+      "/FontDescriptor 8 0 R /DW 600 /CIDToGIDMap /Identity >>",
+    `<< /Length ${enc(cmap).length} >>\nstream\n${cmap}\nendstream`,
+    "<< /Type /FontDescriptor /FontName /QASyntheticSans /Flags 32 /FontBBox [0 -200 1000 900] " +
+      "/ItalicAngle 0 /Ascent 900 /Descent -200 /CapHeight 700 /StemV 80 >>",
+  );
+  return assemblePdf(objects);
+}

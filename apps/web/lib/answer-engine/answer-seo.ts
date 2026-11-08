@@ -16,11 +16,12 @@ import {
   BRAND_NAME,
   BRAND_SEO,
   brandedTitle,
+  hreflangAlternates,
   OG_IMAGE_SIZE,
   localizedUrl,
   resolveActiveLocale,
 } from "@/lib/seo/metadata";
-import { activeLocales, defaultLocale, type ActiveLocale } from "@/lib/i18n/config";
+import { defaultLocale, type ActiveLocale } from "@/lib/i18n/config";
 import {
   getAnswer,
   isIndexable,
@@ -59,9 +60,12 @@ function questionHreflang(id: string): Record<string, string> | undefined {
     const a = getAnswer(id, l);
     if (a) langs[l] = url(l, questionPath(a.localizedSlug));
   }
-  // x-default → LT only when the LT version is actually published.
-  const ltAnswer = published.includes(defaultLocale) ? getAnswer(id, defaultLocale) : null;
-  if (ltAnswer) langs["x-default"] = url(defaultLocale, questionPath(ltAnswer.localizedSlug));
+  // x-default → the English version, as on every other public page (U-2:
+  // a searcher whose language we do not route gets English, not Lithuanian).
+  // Only a published version can be x-default, so an answer without English
+  // keeps the default-locale one; one with neither declares none (never a 404).
+  const xDefault = (["en", defaultLocale] as const).find((l) => langs[l]);
+  if (xDefault) langs["x-default"] = langs[xDefault]!;
   return Object.keys(langs).length > 0 ? langs : undefined;
 }
 
@@ -98,9 +102,8 @@ export function buildStaticQuestionsMetadata(
   title: string,
   description: string,
 ): Metadata {
-  const langs: Record<string, string> = {};
-  for (const l of activeLocales) langs[l] = url(l, path);
-  langs["x-default"] = url(defaultLocale, path);
+  // The ONE public-page hreflang set (all active locales + x-default = English).
+  const langs = hreflangAlternates(path);
   const canonical = url(locale, path);
   return {
     title: brandedTitle(title),

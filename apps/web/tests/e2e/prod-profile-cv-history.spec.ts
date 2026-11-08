@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
-import { makeDocx } from "../../lib/cv/__fixtures__/cv-fixtures";
+import { makeDocx, makeUnicodePdf } from "../../lib/cv/__fixtures__/cv-fixtures";
 
 /**
  * PRODUCTION PROFILE · LIVING CV · HISTORY — owner areas 1 / 3 / 15: the
@@ -440,6 +440,56 @@ test("P-6b (UF-3). a real CV layout is read correctly: title, dates, training an
   await expect(page.locator('[data-testid^="cv-import-item-wh-"]').filter({ hasText: "rengimo centras" }), "and never work history").toHaveCount(0);
   await expect(inMain(page).getByTestId("cv-import-level-en").last(), "English keeps its own level").toHaveValue("B2");
   await expect(inMain(page).getByTestId("cv-import-level-ru").last(), "Russian is not given English's level").not.toHaveValue("B2");
+
+  // Read, never confirmed: nothing of this reaches the Living CV.
+  const cv = await livingCv(page);
+  await expect(cv.getByText(company)).toHaveCount(0);
+  await ctx.close();
+});
+
+test("P-6c (UF-3). a PDF CV keeps Lithuanian letters in the name, the employer and the title", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  // Fixed synthetic strings carrying every Lithuanian letter class: caron
+  // (Š, Ž), ogonek (Ą, į, ų), dot (ė) and macron (ū). The PDF uses a Type0 /
+  // ToUnicode font, the shape Word and Chrome export, built in memory.
+  const name = "QA-SYNTHETIC Žydrūnė Ąžuolaitė";
+  const company = "UAB Šiaurės Ąžuolų Statyba";
+  const title = "Vyresnioji įrangos montuotoja";
+  const lines = [
+    name,
+    "Darbo patirtis",
+    title,
+    company,
+    "2018 – 2024",
+    "Išsilavinimas",
+    "QA Synthetic Ąžuolyno rengimo centras, profesinis mokymas 2015–2017",
+    "Kalbos",
+    "Lietuvių gimtoji, anglų B2",
+  ];
+  await page.goto("/lt/dashboard");
+  await say(page, "Įkelk mano CV");
+  await inMain(page).getByTestId("chat-chip-cv").filter({ visible: true }).last().click({ timeout: 60_000 });
+  const input = page.locator('[data-testid="cv-import-upload"] input[type="file"]').last();
+  await input.waitFor({ state: "attached", timeout: 60_000 });
+  await input.setInputFiles({
+    name: "qa-synthetic-cv-lithuanian.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from(makeUnicodePdf(lines.join("\n"))),
+  });
+  const review = inMain(page).getByTestId("cv-import-section-review").last();
+  const error = inMain(page).getByTestId("cv-import-error").last();
+  await expect(review.or(error)).toBeVisible({ timeout: 60_000 });
+  if (await error.isVisible()) throw new Error(`PDF CV not read: ${(await error.innerText()).slice(0, 120)}`);
+
+  const job = inMain(page).getByTestId("cv-import-item-wh-0").last();
+  await expect(job, "the title keeps į").toContainText(title, { timeout: 30_000 });
+  await expect(job, "the employer keeps Š, ė, Ą, ž and ų").toContainText(company);
+  await expect(job, "the dates are kept").toContainText("2018");
+  await expect(
+    page.locator('[data-testid^="cv-import-item-unplaced-"]').filter({ hasText: name }),
+    "the name line keeps Ž, ū, ė and Ą, offered to place, not dropped",
+  ).toHaveCount(1);
+  await expect(inMain(page).getByTestId("cv-import-level-lt").last(), "Lithuanian is read from \"Lietuvių\"").toHaveValue("native");
 
   // Read, never confirmed: nothing of this reaches the Living CV.
   const cv = await livingCv(page);

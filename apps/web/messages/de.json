@@ -12625,6 +12625,7 @@
     },
     "invitePage": {
       "eyebrow": "EINLADUNG",
+      "pageTitle": "Einladung",
       "notEnabled": "Derzeit nicht verfügbar.",
       "loadError": "Die Einladung konnte gerade nicht geladen werden. Bitte erneut versuchen.",
       "invalidTitle": "Einladung nicht gefunden",
