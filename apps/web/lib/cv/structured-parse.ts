@@ -505,7 +505,9 @@ export function parseCvSections(text: string): CvSectionProposals {
     availability: [],
     unplaced: [],
   };
-  const raw = (text ?? "").trim();
+  // NFC: pasted or extracted text can carry a letter decomposed ("e" + U+0307
+  // for "ė"); the proposals keep it as the one composed letter the person typed.
+  const raw = (text ?? "").normalize("NFC").trim();
   if (raw.length === 0) return out;
 
   let section: CvSection = null;
