@@ -576,22 +576,39 @@ jobs:
       # Belt and braces for `captureGitInfo` in playwright.config.ts: whatever
       # metadata a reporter adds, the published result carries none, and a
       # personal mail address in either file stops the upload instead of
-      # publishing it (privacy, 2026-11-08).
+      # publishing it (privacy, 2026-11-08). FAIL CLOSED: the upload runs only
+      # when this step reached its last line and wrote `published=true`. A
+      # result that is not a readable Playwright report, a check that could
+      # not read a file, a cancel or a crash leaves the output unset, so
+      # nothing is published (the brakes then read "no result file"). Node's
+      # stderr is dropped: a JSON syntax error prints the start of the file
+      # into this public job log.
       - name: Strip reporter metadata from the result (always)
+        id: privacy
         if: always()
         shell: bash
         run: |
-          if [ -f prod-qa-result.json ]; then
-            node -e 'const fs=require("fs"),f=process.argv[1],r=JSON.parse(fs.readFileSync(f,"utf8"));if(r.config){delete r.config.metadata;for(const p of r.config.projects||[])delete p.metadata}fs.writeFileSync(f,JSON.stringify(r,null,2))' prod-qa-result.json
-          fi
-          if grep -Eqs '[A-Za-z0-9._%+-]+@(gmail|googlemail|yahoo|hotmail|outlook|icloud|gmx|proton)\.' prod-qa-result.json prod-qa-walk.log; then
+          withhold() {
             rm -f prod-qa-result.json prod-qa-walk.log
-            echo "::error::a personal mail address was in the walk result; the result is not published"
+            echo "::error::$1; the result is not published"
             exit 1
+          }
+          if [ -f prod-qa-result.json ]; then
+            node -e 'const fs=require("fs"),f=process.argv[1],r=JSON.parse(fs.readFileSync(f,"utf8"));if(!r||typeof r!=="object"||Array.isArray(r)||!r.stats||typeof r.stats!=="object"||!Array.isArray(r.suites))process.exit(3);if(r.config){delete r.config.metadata;for(const p of r.config.projects||[])delete p.metadata}fs.writeFileSync(f,JSON.stringify(r,null,2))' prod-qa-result.json 2>/dev/null \
+              || withhold "the walk result is not a readable Playwright report"
           fi
+          for f in prod-qa-result.json prod-qa-walk.log; do
+            if [ -f "$f" ]; then
+              found=0
+              grep -Eq '[A-Za-z0-9._%+-]+@(gmail|googlemail|yahoo|hotmail|outlook|icloud|gmx|proton)\.' "$f" || found=$?
+              if [ "$found" -eq 0 ]; then withhold "a personal mail address was in the walk result"; fi
+              if [ "$found" -ne 1 ]; then withhold "the privacy check could not read $f"; fi
+            fi
+          done
+          echo "published=true" >> "$GITHUB_OUTPUT"
 
       - name: Upload result (no screenshots, no traces, no sessions)
-        if: always()
+        if: always() && steps.privacy.outputs.published == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: prod-qa-${{ needs.debounce.outputs.spec }}-${{ github.run_id }}
