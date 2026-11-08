@@ -141,3 +141,90 @@ describe("extraction preserves the line structure the section parser needs", () 
     expect(parsed.languages.map((l) => l.lang)).toContain("en");
   });
 });
+
+/**
+ * UF-3 — production walk profile-cv-history step P-6b, run 42464955148.
+ *
+ * A Word CV with one paragraph per line: title / employer / period on their own
+ * lines. Production showed only the employer, with no dates and low confidence.
+ * The blank lines mammoth puts between paragraphs are NOT the cause (the parser
+ * splits on `\n+`). The cause was the employer's name: "UAB QASYNTHETICB<run>"
+ * carries an 11-digit run of digits, which the contact-line rule read as a phone
+ * number, so the employer line could not join the title and the period. With
+ * run id "1" the same CV parsed correctly, which is why it hid locally.
+ *
+ * Same path as production: the DOCX bytes, the real extraction, the parser.
+ */
+describe("UF-3: a one-paragraph-per-line Word CV keeps title, employer and dates", () => {
+  const RUN = "42464955148";
+  const company = `UAB QASYNTHETICB${RUN}`;
+  const lines = [
+    "Darbo patirtis",
+    "Plytelių klojėjas",
+    company,
+    "2019 – 2023",
+    "Išsilavinimas",
+    "QA Synthetic rengimo centras, profesinis mokymas 2015–2017",
+    "Kalbos",
+    "Anglų B2, rusų gimtoji",
+  ];
+
+  it("DOCX: the job keeps its title and dates; training and languages stay right", async () => {
+    const res = await extractCvText(
+      toAB(makeDocx(lines.join("\n"))),
+      "cv.docx",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+    expect(res.kind).toBe("ok");
+    if (res.kind !== "ok") return;
+    const parsed = parseCvSections(res.text);
+
+    expect(parsed.workHistory).toHaveLength(1);
+    const job = parsed.workHistory[0];
+    expect(job.title).toBe(`Plytelių klojėjas, ${company}`);
+    expect(job.startYear).toBe(2019);
+    expect(job.endYear).toBe(2023);
+    expect(job.confidence).not.toBe("low");
+    expect(parsed.unplaced).not.toContain("Plytelių klojėjas");
+
+    expect(parsed.education.map((e) => e.institution)).toEqual(["QA Synthetic rengimo centras"]);
+    expect(parsed.workHistory.some((w) => /rengimo centras/.test(w.title))).toBe(false);
+
+    const level = (code: string) => parsed.languages.find((l) => l.lang === code)?.level;
+    expect(level("en")).toBe("B2");
+    expect(level("ru")).toBe("native");
+  });
+
+  // The test PDF uses a standard-14 font, so Lithuanian letters and the en dash
+  // do not survive it; the same layout is checked in ASCII. It arrives with
+  // single line breaks, and the employer rule is the same one.
+  it("PDF: the same stacked layout keeps title and dates", async () => {
+    const ascii = [
+      "Darbo patirtis",
+      "Plyteliu klojejas",
+      company,
+      "2019 - 2023",
+      "Education",
+      "QA Synthetic rengimo centras, profesinis mokymas 2015-2017",
+      "Languages",
+      "Anglu B2, rusu gimtoji",
+    ];
+    const res = await extractCvText(toAB(makePdf(ascii.join("\n"))), "cv.pdf", "application/pdf");
+    expect(res.kind).toBe("ok");
+    if (res.kind !== "ok") return;
+    const parsed = parseCvSections(res.text);
+
+    expect(parsed.workHistory.map((w) => [w.title, w.startYear, w.endYear])).toEqual([
+      [`Plyteliu klojejas, ${company}`, 2019, 2023],
+    ]);
+    expect(parsed.education.map((e) => e.institution)).toEqual(["QA Synthetic rengimo centras"]);
+  });
+
+  it("a real phone number is still a contact line, never part of a job", () => {
+    const parsed = parseCvSections(
+      ["Darbo patirtis", "Plytelių klojėjas", "+370 612 34567", "2019 – 2023"].join("\n"),
+    );
+    expect(parsed.workHistory.some((w) => w.title.includes("612"))).toBe(false);
+    expect(parsed.unplaced.some((u) => u.includes("612"))).toBe(false);
+  });
+});
