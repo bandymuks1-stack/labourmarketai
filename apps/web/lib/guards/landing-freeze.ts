@@ -20,6 +20,11 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * No fictional people (owner order 2026-11-09): the living worker hero — sample
+ * personas with names, professions and careers under a "Sample" label — is
+ * withdrawn from the landing; the entry hero is the first screen. EXACTLY ONE
+ * hash moved: focus-landing.tsx. No namespace, no other frozen file.
+ *
  * Request door wording (owner order 2026-11-07): the promise and the B2B door's title
  * only. Moved: the `lt`, `en`, `ru` landing namespaces.
  *

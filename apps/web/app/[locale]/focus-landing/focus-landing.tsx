@@ -25,8 +25,6 @@ import {
 } from "@/lib/i18n/client-messages";
 import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
-import { buildLivingWorkerHero } from "@/lib/marketing/living-worker-hero";
-import { LivingWorkerHero } from "@/components/marketing/living-worker-hero";
 import { LandingThreeWays } from "@/components/marketing/landing-three-ways";
 import { LandingRequestDoors } from "@/components/marketing/landing-request-doors";
 import { BRAND_NAME } from "@/lib/seo/metadata";
@@ -87,13 +85,12 @@ export async function FocusLanding({
   const activeLocale = resolveActiveLocale(locale);
   // The ONE canonical market snapshot, through its 300 s `unstable_cache`
   // entry — one market truth, one freshness window (owner command §9/§12).
-  const [market, t, tHero, livingHero] = await Promise.all([
+  const [market, t, tHero] = await Promise.all([
     // The landing renders the supply counts only; it reads `professions`
     // nowhere, so it does not pay for the per-profession reads.
     readLiveMarketLandingSnapshot({ resolveProfessions: false }),
     getTranslations("common"),
     getTranslations("landing.hero"),
-    buildLivingWorkerHero(),
   ]);
   const tRequest = await getTranslations("landing.requestDoors");
 
@@ -159,40 +156,13 @@ export async function FocusLanding({
                 for the entry hero ONLY). Desktop: the promise left, the
                 product story right, the working sentence entry full width
                 beneath. Phone: promise → entry → story, so the working entry
-                stays near the top. The story is the product's own pieces with
-                the landing's sample persona — see <LandingJourney>. */}
-            {/* THE LIVING WORKER HERO (owner 2026-09-29): with its
-                photographs in place, the same sample person stands at the
-                centre of the hero and the promise sits over them; the working
-                sentence entry follows. Without the photographs, the entry
-                hero above stays exactly as it was — never an abstract
-                stand-in. */}
-            {livingHero ? (
-              <>
-                {/* THE MESSAGE IN SECONDS (owner positioning 2026-10-21): the
-                    three ways right under the promise — inside it on a phone
-                    (above the photograph), under the hero on a wide screen. */}
-                <LivingWorkerHero data={livingHero}>
-                  {promise}
-                  <LandingThreeWays placement="phone" />
-                </LivingWorkerHero>
-                <LandingThreeWays placement="wide" />
-                <LandingRequestDoors locale={locale} />
-                <section className="mt-8 scroll-mt-24" id="find">
-              <PublicEntry
-                  supply={
-                    market.activeVacancies !== null && market.distinctEmployers !== null
-                      ? {
-                          vacancies: market.activeVacancies,
-                          employers: market.distinctEmployers,
-                          refreshedAt: market.lastRefreshedAt,
-                        }
-                      : null
-                  }
-                />
-                </section>
-              </>
-            ) : (
+                stays near the top. */}
+            {/* NO FICTIONAL PEOPLE (owner order 2026-11-09): the living worker
+                hero showed sample personas with names, professions and
+                careers under a "Sample" label. Public pages show no invented
+                people or numbers as if real, and carry no sample labels, so the
+                hero is withdrawn and the entry hero below is the landing's
+                first screen. The component stays in the repository unused. */}
               <section className="grid gap-8 lg:items-start">
                 <div className="order-1 max-w-3xl lg:col-start-1 lg:row-start-1 lg:self-center">
                   {promise}
@@ -213,7 +183,6 @@ export async function FocusLanding({
                 />
                 </div>
               </section>
-            )}
 
             {/* ── §17 THE MARKET, IN PLACES ─────────────────────────────
                    Second, directly under the entry, because it answers the
