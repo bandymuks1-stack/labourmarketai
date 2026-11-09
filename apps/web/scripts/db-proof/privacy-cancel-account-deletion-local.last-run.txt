@@ -1,0 +1,103 @@
+privacy-cancel-account-deletion-local — 2026-11-09T09:20:33.245Z
+cluster: <repo>/.tmp/pgcancel-111840 (port 5517, throwaway, synthetic ids only)
+server: PostgreSQL 16.13
+PASS  baseline: guard, due_v1, mark_v1 and erase_user_account_v3 exist from the real migrations
+PASS  20261109120000 applied: 4 new functions + the privacy-row trigger
+PASS  20261109120000 re-applies on the same database (idempotent)
+PASS  grants: cancel executable by authenticated, not by PUBLIC / anon
+PASS  grants: grace constant not executable by PUBLIC / anon / authenticated
+PASS  privacy-row guard is an INVOKER trigger function (current_user = caller)
+
+[e] signed out
+PASS  e1 authenticated role without a JWT subject -> {status:not_signed_in}
+PASS  e2 status without a JWT subject -> {status:none}
+PASS  e3 anon cannot execute the cancel RPC (permission denied)
+PASS  e4 anon cannot execute the status RPC (permission denied)
+
+[a][b] holder cancels, then cancels again
+PASS  a0 no request yet -> cancel {status:not_found}, status {status:none}
+PASS  a1 status before cancel: pending, cancellable, scheduled_erasure_at = confirmed_at + 30 days (["status","request_id","cancellable","confirmed_at","submitted_at","scheduled_erasure_at"])
+PASS  a2 cancel -> {"status":"ok","request_id":"<req>"}
+PASS  a3 row: status closed, closed_outcome withdrawn
+PASS  a4 log entry {status, outcome, at, by:'holder'} appended, no other field (no personal data)
+PASS  a5 the request stays an account-deletion row of the holder (history kept)
+PASS  a6 confirmation row and held + queued notices deleted in the same transaction
+PASS  a7 status after cancel: withdrawn, not cancellable, no schedule
+PASS  a8 the runner no longer sees it (privacy_erasure_due_v1)
+PASS  b1 second cancel -> {status:ok_already, request_id}
+PASS  b2 second cancel wrote nothing (log unchanged)
+PASS  b3 a withdrawn request cannot be re-confirmed
+
+[f] another user
+PASS  f1 another user's cancel -> {status:not_found} (only auth.uid()'s own rows)
+PASS  f2 another user's status -> {status:none}
+PASS  f3 the holder's open request is untouched
+PASS  f4 another user's raw PATCH of the holder's row updates 0 rows (RLS)
+PASS  f5 another user cannot read the holder's row (RLS)
+
+[g] raw owner PATCH of a privacy row
+PASS  g payload: drop privacy_request_type -> refused (42501 privacy_request_rpc_only)
+PASS  g payload: forge a log entry -> refused (42501 privacy_request_rpc_only)
+PASS  g status: in_review -> closed -> refused (42501 privacy_request_rpc_only)
+PASS  g closed_outcome only -> refused (42501 privacy_request_rpc_only)
+PASS  g kind -> refused (42501 privacy_request_rpc_only)
+PASS  g the cancel RPC's marker set by hand on the raw surface does not open the withdraw branch
+PASS  g the row is unchanged after every attempt
+PASS  g regression: the owner still edits / closes an ordinary demand row (lifecycle flows untouched)
+PASS  g regression: the transition guard still refuses an owner closed -> approved on a demand row
+PASS  g regression: the admin review queue still updates a privacy row (status + log)
+PASS  g the RPC path still withdraws (reqH2)
+
+[d] not cancellable
+PASS  d1 operator-closed (no withdrawn outcome) -> {status:not_cancellable, request_id}
+PASS  d2 its status -> done, not cancellable
+
+[h] grace period
+PASS  h1 confirmed just now -> not due
+PASS  h2 confirmed 1 hour ago -> not due
+PASS  h3 confirmed 29 days ago -> not due
+PASS  h4 confirmed 31 days ago -> due
+PASS  h5 the grace is the one named constant (30 days, owner decision 2026-11-09)
+PASS  h6 a due request the runner has not picked yet is still cancellable and then not due
+
+[c1] race: holder cancels first (holds the row), runner marks second
+PASS  c1.0 due before the race
+PASS  c1.1 the runner's mark_v1 WAITED on the row lock (2534 ms)
+PASS  c1.2 the cancel committed: {status:ok}
+PASS  c1.3 then mark_v1 -> {"ok":false,"error":"not_confirmed"} (runner stops: nothing approved)
+PASS  c1.4 request withdrawn, account still exists, nothing due
+PASS  c1.5 no erasure receipt
+
+[c2] race: executor erases first (holds the row), holder cancels second
+PASS  c2.0 after the runner's mark: status in_progress, not cancellable
+PASS  c2.1 the executor erased (receipt written)
+PASS  c2.2 the cancel WAITED on the row lock (2684 ms)
+PASS  c2.3 then cancel -> {status:not_cancellable, request_id} ("not_cancellable")
+PASS  c2.4 the account is gone, the request is closed as executed (not withdrawn)
+PASS  d3 a later cancel with the erased person's stale session -> {status:not_found} (the row is severed to the sentinel; nothing of theirs remains)
+
+[c3] race: runner marks approved first (holds the row), holder cancels second
+PASS  c3.1 the runner marked approved
+PASS  c3.2 the cancel WAITED on the row lock (3020 ms)
+PASS  c3.3 then cancel -> {status:not_cancellable} (d: approved)
+PASS  c3.4 the confirmation and the approval stand (cancel changed nothing)
+
+[x] executor re-check after authorization (the old fingerprint-without-lock gap)
+PASS  x1 confirmation gone after the token -> {erased:false} (existing skip shape), account kept
+PASS  x2 the token was not consumed
+PASS  x3 request closed after the token -> {erased:false}, account kept, no receipt
+PASS  x4 mark_v1 on a closed request -> {ok:false, error:not_open}
+
+[i] rollback, then re-apply
+PASS  i1 rollback applies cleanly
+PASS  i2 guard, due_v1, mark_v1, erase_user_account_v3 are byte-identical to the pre-migration definitions (md5 of pg_get_functiondef)
+PASS  i3 the 4 new functions and the trigger are gone
+PASS  i4 withdrawn rows stay as closed history (no data touched)
+PASS  i5 pre-migration behaviour restored: a request confirmed just now is due again (no grace)
+PASS  i6 forward migration re-applies after the rollback
+PASS  i7 re-applied definitions are identical to the first apply
+PASS  i8 after re-apply: grace in force again and the holder cancels
+PASS  i9 after re-apply: the raw payload PATCH is refused again
+PASS  no deadlock reported by the server during the races
+
+SUMMARY: 76 PASS, 0 FAIL  (finished 2026-11-09T09:22:36.397Z)
