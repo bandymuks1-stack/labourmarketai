@@ -97,6 +97,7 @@ create trigger public_vacancy_search_sync_upd
   execute function public.public_vacancy_search_sync();
 
 -- 2. Country board cover index (the board cover index with country in front).
+-- @plan-cache-proof: n/a a new index for a filter that does not exist before this migration; its plans are proven on a throwaway PG16 cluster (PR evidence) and must be re-read with EXPLAIN right after apply
 create index if not exists public_vacancies_active_country_board_idx
   on public.public_vacancies (country, published_at desc nulls last, id)
   include (expires_at, profession_slug, occupation_raw, employment_form, working_time,
@@ -335,7 +336,7 @@ end;
 $function$;
 
 revoke execute on function public.search_public_vacancy_previews_v1(text, text, integer, integer, text) from public;
-grant execute on function public.search_public_vacancy_previews_v1(text, text, integer, integer, text) to anon, authenticated;
+grant execute on function public.search_public_vacancy_previews_v1(p_query text, p_profession_slug text, p_limit integer, p_offset integer, p_country text) to anon, authenticated;
 
 comment on function public.search_public_vacancy_previews_v1(text, text, integer, integer, text) is
   'Anonymous board projection. plpgsql with one branch per filter combination so each branch is planned with a usable index. Free text matches the public title and the occupation through public_vacancy_search. p_country (ISO alpha-2, optional) restricts every branch to one country; a value that is not a code returns no rows. total_count: singleton (or its per-country entry) when there is no profession and no text (<= 10 min stale), exact live count otherwise.';

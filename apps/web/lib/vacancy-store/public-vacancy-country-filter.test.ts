@@ -95,7 +95,7 @@ describe("the migration and its rollback", () => {
   it("extends the ONE search; no second search function", () => {
     expect(up).toContain("p_country text default null)");
     expect(up).not.toMatch(/create (or replace )?function public\.search_public_vacancy_country/);
-    expect(up).toMatch(/grant execute on function public\.search_public_vacancy_previews_v1\(text, text, integer, integer, text\) to anon, authenticated/);
+    expect(up).toMatch(/grant execute on function public\.search_public_vacancy_previews_v1\(p_query text, p_profession_slug text, p_limit integer, p_offset integer, p_country text\) to anon, authenticated/);
   });
 
   it("the rollback restores the four-argument search and its grants", () => {
