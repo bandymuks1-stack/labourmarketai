@@ -56,7 +56,8 @@ describe("search live scan v5", () => {
       expect(fn).not.toMatch(new RegExp(`\\b${col}\\b`));
     }
     const e = ANON_SECDEF_ALLOWLIST.find((x) => x.name === "search_public_vacancy_previews_v1");
-    expect(e?.identityArgs).toBe("p_query text, p_profession_slug text, p_limit integer, p_offset integer");
+    // The allowlist names the CURRENT signature: a fifth argument, p_country, since 20261109140000.
+    expect(e?.identityArgs).toBe("p_query text, p_profession_slug text, p_limit integer, p_offset integer, p_country text");
   });
 
   it("changes no other branch", () => {

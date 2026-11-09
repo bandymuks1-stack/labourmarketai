@@ -26,8 +26,9 @@ describe("readCountryParam", () => {
 
 /**
  * The board must never look filtered by a country it did not filter by
- * (owner 2026-11-09). Until the RED country filter is applied, the page reads
- * the parameter only to say so, and never hands it to the search.
+ * (owner 2026-11-09). Since the country filter (20261109140000) the page filters
+ * by the parameter only when the country list answered; otherwise it says so.
+ * The rest of that contract is pinned in public-vacancy-country-filter.test.ts.
  */
 describe("/jobs never silently ignores ?country=", () => {
   const page = readFileSync(
@@ -40,8 +41,7 @@ describe("/jobs never silently ignores ?country=", () => {
     expect(page).toContain('data-testid="public-jobs-country-not-filtered"');
   });
 
-  it("does not pass a country to the search or carry it into page links", () => {
-    expect(page).not.toMatch(/countryCode\s*:/);
-    expect(page).not.toMatch(/qs\.set\(\s*"country"/);
+  it("filters by a country only when the country list answered", () => {
+    expect(page).toMatch(/const country = countries\?\.status === "ok" && countryParam\.requested \? countryParam\.code : null;/);
   });
 });

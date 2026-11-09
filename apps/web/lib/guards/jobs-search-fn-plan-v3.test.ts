@@ -42,7 +42,8 @@ describe("search function plan v3", () => {
 
   it("keeps the anon allowlist entry valid and ships a rollback", () => {
     const e = ANON_SECDEF_ALLOWLIST.find((x) => x.name === "search_public_vacancy_previews_v1");
-    expect(e?.identityArgs).toBe("p_query text, p_profession_slug text, p_limit integer, p_offset integer");
+    // The allowlist names the CURRENT signature: a fifth argument, p_country, since 20261109140000.
+    expect(e?.identityArgs).toBe("p_query text, p_profession_slug text, p_limit integer, p_offset integer, p_country text");
     expect(existsSync(down)).toBe(true);
     expect(sqlOnly(readFileSync(down, "utf8"))).toMatch(/language\s+sql/i);
   });

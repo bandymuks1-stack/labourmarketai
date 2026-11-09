@@ -172,7 +172,8 @@ describe("#1572 — no privilege moves", () => {
 });
 
 describe("#1572 — the signature and the anon contract are unchanged", () => {
-  const SIGNATURE = "p_query text, p_profession_slug text, p_limit integer, p_offset integer";
+  // The allowlist names the CURRENT signature: a fifth argument, p_country, since 20261109140000.
+  const SIGNATURE = "p_query text, p_profession_slug text, p_limit integer, p_offset integer, p_country text";
 
   it("the argument list is identical in migration and rollback", () => {
     const args = (sql: string) =>

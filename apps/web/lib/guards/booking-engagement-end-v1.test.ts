@@ -1780,6 +1780,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-09: the holder cancels their own account-deletion request; 30-day grace (owner decision); row lock
       // in the erasure runner and executor. RED draft #3172, the marker is the human-gate acknowledgement, NOT applied.
       "20261109120000_privacy_cancel_account_deletion.sql",
+      // 2026-11-09: country filter on the public board, stacked on #3083. RED draft, NOT applied.
+      "20261109140000_public_jobs_country_filter_v2.sql",
 ]);
   });
 

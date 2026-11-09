@@ -309,6 +309,16 @@ describe("revoke migration 20260722160000", () => {
 });
 
 describe("no new migration may re-open anonymous reachability", () => {
+  /** Signatures a later migration DROPPED and replaced; each entry names that migration. */
+  const SUPERSEDED_ANON_SIGNATURES = [
+    {
+      // 20261109140000 recreates it with a fifth argument, p_country (owner 2026-11-09).
+      signature:
+        "search_public_vacancy_previews_v1(p_query text, p_profession_slug text, p_limit integer, p_offset integer)",
+      droppedBy: "20261109140000_",
+    },
+  ] as const;
+
   it("grants EXECUTE to anon/PUBLIC only for allowlisted signatures", () => {
     const offences: string[] = [];
 
@@ -339,9 +349,13 @@ describe("no new migration may re-open anonymous reachability", () => {
         // sail through the guard. `foo(uuid)` and `foo(uuid, text)` are
         // different grants with different blast radii.
         const signature = normalizeSignature(rawSignature);
-        const allowlisted = [...ANON_SECDEF_ALLOWED_SIGNATURES].some(
-          (sig) => normalizeSignature(sig) === signature,
-        );
+        const allowlisted =
+          [...ANON_SECDEF_ALLOWED_SIGNATURES].some((sig) => normalizeSignature(sig) === signature) ||
+          // A grant in a migration OLDER than the one that dropped that signature is
+          // history, not a reopening: the signature no longer exists after it.
+          SUPERSEDED_ANON_SIGNATURES.some(
+            (s) => normalizeSignature(s.signature) === signature && file < s.droppedBy,
+          );
         if (!allowlisted) {
           offences.push(
             `${file}: grants EXECUTE on public.${rawSignature.replace(/\s+/g, " ").trim()} to "${grantees.trim()}" but that exact signature is not on the anon allowlist`,

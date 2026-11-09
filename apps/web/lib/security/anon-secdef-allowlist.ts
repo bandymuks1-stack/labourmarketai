@@ -66,14 +66,14 @@ export type AnonSecdefContract = {
 export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
   {
     name: "search_public_vacancy_previews_v1",
-    identityArgs: "p_query text, p_profession_slug text, p_limit integer, p_offset integer",
+    identityArgs: "p_query text, p_profession_slug text, p_limit integer, p_offset integer, p_country text",
     mutates: false,
     publicCaller:
       "The public job board (app/[locale]/(marketing)/jobs). Reachable logged-out by design — this is the acquisition surface for 38,142 live imported vacancies.",
     authorization:
-      "No caller identity is consulted, because the projection itself is the authorization: since 20260824120000 the function returns only fields the owner ruled public (category/occupation, employment form, working time, positions, publication date, compensation where genuinely supplied, source language). `title_raw` and `attribution_code` are returned as NULL — the raw title embeds employer and location wording, and the named source identifies the country (owner directive 2026-08-24). The public title may be searched, never returned (owner 2026-11-05). Employer identity, homepage, country, region, city, coordinates, application URL, full description and the compensation note are never selected. Row filter `is_active AND (expires_at is null OR expires_at > now())` so withdrawn and expired ads are invisible.",
+      "No caller identity is consulted, because the projection itself is the authorization: since 20260824120000 the function returns only fields the owner ruled public (category/occupation, employment form, working time, positions, publication date, compensation where genuinely supplied, source language). `title_raw` and `attribution_code` are returned as NULL — the raw title embeds employer and location wording, and the named source identifies the country (owner directive 2026-08-24). The public title may be searched, never returned (owner 2026-11-05). Employer identity, homepage, region, city, coordinates, application URL, full description and the compensation note are never selected. The country is never RETURNED either; since 20261109120000 it can be a FILTER (`p_country`), because the owner ruled the place public at country precision (IDX-9, 2026-11-05) and ordered that `?country=NO` really restrict the board (2026-11-09). Row filter `is_active AND (expires_at is null OR expires_at > now())` so withdrawn and expired ads are invisible.",
     inputValidation:
-      "`p_query` is trimmed and folded by `public_vacancy_search_fold`, which turns every LIKE metacharacter into a space, so a caller cannot turn the search box into a wildcard scan, and a term with nothing searchable finds nothing. Matching reads only `public_vacancy_search`: the folded public title and occupation (owner 2026-11-05). The description, employer and place are deliberately NOT searched, because probing a restricted field is a disclosure by another route. `p_limit` is clamped to 1..50 and `p_offset` floored at 0.",
+      "`p_query` is trimmed and folded by `public_vacancy_search_fold`, which turns every LIKE metacharacter into a space, so a caller cannot turn the search box into a wildcard scan, and a term with nothing searchable finds nothing. Matching reads only `public_vacancy_search`: the folded public title and occupation (owner 2026-11-05). The description, employer and place are deliberately NOT searched, because probing a restricted field is a disclosure by another route. `p_limit` is clamped to 1..50 and `p_offset` floored at 0. `p_country` is trimmed and upper-cased and must be exactly two letters, or the call returns no rows (never every country).",
     abuseControls:
       "No DB-level rate limit. Read-only and idempotent; the abuse ceiling is scraping of a deliberately public projection of already-public employment-service ads. Page size is hard-capped at 50 in SQL, so the endpoint cannot be asked for the whole table in one call.",
     definerJustification:
@@ -114,6 +114,23 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
       "`plans` has no anon/authenticated table privilege since the 2026-07-22 revoke pass (RLS plans_select is true, but the GRANT is absent), so the public page could not render a price. DEFINER exposes the catalogue without widening the table grant.",
     residualRisk:
       "Discloses the published price list, which is the purpose of the page.",
+  },
+  {
+    name: "list_public_vacancy_countries_v1",
+    identityArgs: "",
+    mutates: false,
+    publicCaller:
+      "The public job board's visible country choice (app/[locale]/(marketing)/jobs): which countries have live ads, and how many, so a reader can pick one (owner 2026-11-09).",
+    authorization:
+      "Returns aggregates ONLY: ISO alpha-2 codes with their maintained live-ad totals. No row, no employer, no place below country. The place at country precision is public (IDX-9, 2026-11-05).",
+    inputValidation:
+      "No parameters, so there is no input surface. Only keys matching ^[A-Z]{2}$ with a positive total are returned.",
+    abuseControls:
+      "No DB-level rate limit. Reads one singleton row maintained by the 10-minute cron; constant cost, nothing to enumerate.",
+    definerJustification:
+      "`public_vacancy_supply_counts` is not readable by anon (RLS, no grant); DEFINER exposes the per-country totals without granting the table.",
+    residualRisk:
+      "Discloses how many public ads each country has, which the board itself shows.",
   },
   {
     name: "count_public_vacancies_v1",
