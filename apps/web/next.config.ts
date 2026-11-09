@@ -169,6 +169,9 @@ const ENTRY_SHORTCUT_REDIRECTS = [
   { source: `/${LOCALE}/signup`, destination: "/:locale/auth/signup", permanent: true },
   { source: `/${LOCALE}/login`, destination: "/:locale/auth/login", permanent: true },
   { source: `/${LOCALE}/register`, destination: "/:locale/auth/signup", permanent: true },
+  // The spellings people type (UX-9).
+  { source: `/${LOCALE}/auth/sign-up`, destination: "/:locale/auth/signup", permanent: true },
+  { source: `/${LOCALE}/auth/sign-in`, destination: "/:locale/auth/login", permanent: true },
   // Commonly guessed legal URLs (and what OAuth app consoles ask for). The
   // canonical pages live under /legal/…; these 404'd before.
   { source: `/${LOCALE}/privacy`, destination: "/:locale/legal/privacy", permanent: true },

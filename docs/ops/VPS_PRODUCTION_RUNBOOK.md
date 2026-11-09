@@ -140,6 +140,26 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
    `draft_follow_up`, `translate_*`, `propose_conversation_intent`) stay refused for every free tier
    with a typed privacy refusal that never counts as a run.
 
+7. **Agentai's private path to the commercial requests feed** (owner decision 2026-11-07, B:
+   private Docker network, no new public port). Not applied. In this order:
+   1. Install the new `lm-prod-run.sh` and the vhost from `main`, compare sha256 with git.
+      The script creates `lm-agentai-internal` (`--internal`) on its next run.
+   2. Without waiting for a deploy: `docker network create --internal lm-agentai-internal`
+      (if missing), then `docker network connect --alias labourmarket-app lm-agentai-internal labourmarket-prod`.
+   3. Agentai side: `agentai-scheduler` joins the network as `external: true` in its compose file,
+      and only that service. It calls `http://labourmarket-app:3000/api/internal/commercial-requests/v1`
+      with `Host: labourmarket.ai`, `X-Forwarded-Proto: https` and its bearer token.
+   4. Check: from the scheduler, `/api/health` on `labourmarket-app:3000` answers 200; the feed
+      answers 401 with no token. One deploy later, the alias is on the new container
+      (`docker network inspect lm-agentai-internal`) and the old one is gone.
+   5. Then `nginx -t` and reload with the new vhost: the public path answers 404, like `/api/cron/`.
+   6. Only then the two tokens (owner): `COMMERCIAL_REQUESTS_FEED_TOKEN` here,
+      `AGENTAI_LM_COMMERCIAL_REQUESTS_TOKEN` in Agentai's scheduler env, and a test on both sides.
+   Rollback: `docker network disconnect lm-agentai-internal labourmarket-prod`, the old vhost, and
+   the old `lm-prod-run.sh`. The network itself holds nothing. Because the network is `--internal`,
+   neither side gets a way out to the internet through it, but the scheduler can reach every route
+   of the app on port 3000, as anyone can through nginx today.
+
 ## 8. Defect found by the first production walks (fixed in this PR)
 
 `POST /api/assistant/transcript` refused every browser write with 403 since the move: its

@@ -1,5 +1,22 @@
 {
   "companyModel": {
+    "today": {
+      "goApprove": "Bekijken en goedkeuren",
+      "amount": {
+        "hours": "{n} u",
+        "days": "{n} dg",
+        "minutes": "{n} min."
+      },
+      "people": "{n, plural, one {# persoon} other {# personen}}",
+      "entries": "{n, plural, one {# registratie} other {# registraties}}",
+      "unclear": "Uren onduidelijk: {n}",
+      "noHours": "Zonder uren: {n}",
+      "noFigure": "Geen uren vermeld",
+      "elsewhere": "Elders wachten nog {n} op je goedkeuring.",
+      "notReviewer": "Je keurt in deze organisatie geen uren goed: daarvoor is een relatie als manager of eigenaar nodig.",
+      "decisionsClear": "Er wachten nu geen andere beslissingen.",
+      "doors": "Mensen en projecten"
+    },
     "title": "Bedrijfsbeheer",
     "need": "Wat we nodig hebben",
     "offer": "Wat we aanbieden",
@@ -15,7 +32,22 @@
     "work": "Werk & uren",
     "results": "Resultaten",
     "history": "Geschiedenis",
-    "areasTitle": "Bedrijfsgebieden"
+    "areasTitle": "Bedrijfsgebieden",
+    "approvals": {
+      "title": "Wacht op goedkeuring: {n}",
+      "titleUnknown": "Wacht op goedkeuring",
+      "what": "Uren en werk die je medewerkers hebben vastgelegd. Keur ze hier meteen goed of af.",
+      "seeAll": "Alles wat wacht ({n})",
+      "emptyTitle": "Er wachten nu geen uren van medewerkers op goedkeuring.",
+      "emptyNext": "Zodra een medewerker werk vastlegt, verschijnt het hier.",
+      "noEmployees": "Deze organisatie heeft nog geen medewerkers van wie je uren kunt goedkeuren.",
+      "people": "Mensen en team",
+      "reviewOff": "Goedkeuring staat uit voor {off} van de {total} medewerkers. Hun uren verschijnen hier pas als je het inschakelt.",
+      "enable": "Inschakelen bij Mensen en team",
+      "own": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren: dat kan een andere manager van deze organisatie.",
+      "ownAlone": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren en deze organisatie heeft geen andere manager, dus ze blijven vastgelegd als je eigen werk.",
+      "ownUnknown": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren: ze blijven vastgelegd als je eigen werk tot een andere manager ze bevestigt."
+    }
   },
   "publicDemand": {
     "title": "Actuele marktvraag",
@@ -122,7 +154,26 @@
     "descriptionLabel": "Over het bedrijf (zichtbaar op de openbare pagina)",
     "descriptionPlaceholder": "Wat u doet, waar u werkt, wat een klant of werker kan verwachten…",
     "descriptionHint": "Maximaal 2000 tekens. Dit is het hoofdtekstblok van uw openbare pagina.",
-    "errorDescription": "Publicatie opgeslagen, maar de beschrijving kon niet worden opgeslagen. Probeer opnieuw."
+    "errorDescription": "Publicatie opgeslagen, maar de beschrijving kon niet worden opgeslagen. Probeer opnieuw.",
+    "team": {
+      "eyebrow": "Bedrijfsprofiel",
+      "aboutEyebrow": "Over het bedrijf",
+      "aboutTitle": "Wie ze zijn",
+      "offersEyebrow": "Advertenties",
+      "offersTitle": "Wat ze aanbieden",
+      "seekingEyebrow": "Gezocht",
+      "seekingTitle": "Waar ze naar zoeken",
+      "seekingSub": "Zoekadvertenties van het bedrijf zelf. Dit zijn geen vacatures.",
+      "contactEyebrow": "Contactgegevens",
+      "contactTitle": "Neem contact op met het bedrijf",
+      "contactNote": "Het bedrijf heeft deze gegevens zelf gepubliceerd. U bereikt het rechtstreeks, niet via labourmarket.ai.",
+      "contactNone": "Het bedrijf heeft geen contactgegevens gepubliceerd, dus via deze pagina is het niet te bereiken.",
+      "actionEmail": "E-mail sturen",
+      "actionPhone": "Bellen",
+      "actionWebsite": "Website van het bedrijf openen",
+      "heroContact": "Hoe u contact opneemt",
+      "provenance": "Het bedrijf heeft deze pagina zelf ingevuld."
+    }
   },
   "marketplaceListings": {
     "pageTitle": "Marktplaats",
@@ -3171,6 +3222,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Lijkt op reclame",
       "eyebrow": "PERSONEELSBEHOEFTEN",
       "title": "Openbare wachtrij met personeelsbehoeften",
       "subtitle": "Anonieme behoeften die via het openbare /company-need-formulier zijn ingediend. Beoordeel ze stuk voor stuk en markeer de volgende stap handmatig. Er wordt niets automatisch verstuurd — al het contact verloopt via een mens.",
@@ -5694,6 +5746,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Uw overeenkomst voor elke platformdienst wordt gesloten met UAB “Nonstop Group”. Facturen worden opgesteld door en betalingen ontvangen door UAB “Nonstop Group”.",
       "title": "Gebruiksvoorwaarden",
       "sections": [
         {
@@ -5875,6 +5928,7 @@
     },
     "dataProtection": {
       "title": "Gegevensbescherming",
+      "metaDescription": "Deze pagina legt in gewone woorden uit hoe gegevens binnen LabourMarket.ai worden beschermd. Ze beschrijft alleen wat vandaag daadwerkelijk in het platform is ingebouwd.",
       "intro": "Deze pagina legt in gewone woorden uit hoe gegevens binnen Labour Market AI worden beschermd. Ze beschrijft alleen wat vandaag daadwerkelijk in het platform is ingebouwd.",
       "sections": [
         {
@@ -8649,6 +8703,98 @@
       "emptyCapabilities": "Nog geen vaardigheden. Hier verschijnen je vaardigheden en het werk dat ze laat zien.",
       "emptyExperience": "Nog geen werkgeschiedenis. Je journaal en de registraties van organisaties waar je werkte bouwen die op.",
       "untitled": "Werk zonder naam in de bron"
+    },
+    "athlete": {
+      "earlyNote": "Vroege opmaak van je Living CV. De cijfers zijn je echte gegevens; het uiterlijk is nog niet definitief.",
+      "fullCv": "Volledig cv openen",
+      "hero": {
+        "portraitAlt": "Foto van {name}",
+        "noRole": "Nog geen beroep toegevoegd",
+        "availableFrom": "vanaf {date}",
+        "onlyYou": "Alleen jij ziet dit hier."
+      },
+      "stats": {
+        "aria": "Cijfers en wie erachter staat",
+        "unknown": "Kon nu niet worden gelezen",
+        "organizationCount": "{count, plural, one {# organisatie} other {# organisaties}}",
+        "confirmedBy": "Bevestigd in de registratie van {who}",
+        "confirmedBySomeone": "Er is een registratie van een leidinggevende of organisatie",
+        "confirmedSelfOnly": "Tot nu toe alleen je eigen bevestiging; geen andere leidinggevende of organisatie heeft dit bevestigd",
+        "someSelfConfirmed": "Deels: {qualifier}",
+        "truncated": "Je logboek is lang, dus oudere regels kunnen buiten deze cijfers vallen.",
+        "confirmed": {
+          "label": "uren in de registratie van een leidinggevende of organisatie",
+          "none": "Nog geen registratie van een leidinggevende of organisatie bevestigt je werk"
+        },
+        "total": {
+          "label": "uren ervaring",
+          "behind": "Je logboek en gegevens van organisaties, elk uur één keer"
+        },
+        "journal": {
+          "label": "geregistreerde uren",
+          "behind": "Je eigen werklogboek",
+          "none": "Nog niets geregistreerd"
+        },
+        "organization": {
+          "label": "uren in gegevens van organisaties",
+          "behind": "Gegevens van organisaties"
+        },
+        "projects": {
+          "label": "projecten",
+          "behind": "Uit je gegevens"
+        }
+      },
+      "seasons": {
+        "eyebrow": "Loopbaan",
+        "title": "Loopbaan per seizoen",
+        "empty": "Nog geen seizoenen. Noteer een werkdag en die wordt de eerste regel van je geschiedenis.",
+        "emptyAction": "Werk registreren",
+        "undated": "Geen datums vermeld",
+        "hoursNotStated": "Geen uren vermeld",
+        "hoursRecorded": "{hours} geregistreerd",
+        "hoursConfirmed": "{confirmed} in de registratie van een leidinggevende · {recorded} geregistreerd",
+        "orgDayHours": "{hours} over {count, plural, one {# regel} other {# regels}}",
+        "orgPeriodHours": "{hours} vermeld als totaal over een periode",
+        "note": "Een seizoen toont de uren die zijn eigen gegevens vermelden. Het totaal hierboven telt elk uur één keer.",
+        "confirmedBy": "Bevestigd in de registratie van {who}",
+        "placement": "Stage",
+        "reconstructed": "Herleid uit een eerdere registratie",
+        "photoAlt": "Foto van het werk aan {name}",
+        "evidence": {
+          "confirmed": "Bevestigd in de registratie van een leidinggevende of organisatie",
+          "client_accepted": "Geaccepteerd door de klant",
+          "organization_record": "Gegevens van de organisatie",
+          "own_record": "Je eigen registratie",
+          "stated": "Dit heb je zelf vermeld; nog niets laat het zien"
+        }
+      },
+      "skills": {
+        "eyebrow": "Vaardigheden",
+        "title": "Wat je kunt en wat dat laat zien",
+        "empty": "Nog geen vaardigheden. Voeg toe wat je kunt; je gegevens laten de rest zien.",
+        "emptyAction": "Vaardigheden toevoegen",
+        "potentialFrom": "Je werk aan {skills} wijst hierop; nog geen registratie laat het zien",
+        "documentUnverified": "Je hebt het document zelf toegevoegd; niemand heeft het gecontroleerd",
+        "involved": "Betrokken bij {hours}, niet alleen aan deze vaardigheid toegerekend",
+        "timeUnknown": "Je logboek kon nu niet worden gelezen, dus vaardigheden tonen geen uren.",
+        "noScore": "Niets hier vat een persoon samen in één getal. Je ziet wat de gegevens laten zien en wie erachter staat.",
+        "state": {
+          "confirmed": "Werk bevestigd door een leidinggevende",
+          "certified": "Gecertificeerd",
+          "recorded": "In je gegevens",
+          "declared": "Zelf vermeld",
+          "potential": "Mogelijk"
+        }
+      },
+      "next": {
+        "eyebrow": "Volgende stap",
+        "title": "Waar je werk toe kan leiden",
+        "confirmed": "Bevestigd door een leidinggevende: {list}",
+        "inRecords": "In je gegevens: {list}",
+        "missing": "Ontbreekt: {list}",
+        "none": "Nog geen volgende stap te tonen. Meer geregistreerd werk geeft hier meer houvast.",
+        "unknown": "Kon nu niet worden gelezen."
+      }
     }
   },
   "todayScreen": {
@@ -10789,7 +10935,7 @@
     "navLabel": "Over LabourMarket.ai",
     "eyebrow": "Over het platform",
     "title": "Wat is LabourMarket.ai",
-    "lede": "LabourMarket.ai is een besturingsplatform voor de arbeidsmarkt. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — van het eerste gesprek tot de volgende kans.",
+    "lede": "LabourMarket.ai is een internationaal platform voor werk, specialisten en diensten. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — van het eerste gesprek tot de volgende kans.",
     "hero": {
       "lead": "De professionele waarde van een persoon mag niet verdwijnen telkens wanneer die van werkgever wisselt. Echt werk kan blijvende professionele geschiedenis worden: wat de persoon deed, waar, wanneer, hoe lang, in welke rol, met welke vaardigheden en welk bewijs en welke bevestiging dat ondersteunt.",
       "leadOrg": "Voor organisaties bouwt datzelfde echte werk het overzicht op van wat het bedrijf werkelijk heeft gedaan: projecten, teams, uitgevoerd werk, uren, competenties en bewijs.",
@@ -11391,6 +11537,7 @@
       "empty": "Niets op deze dag."
     },
     "year": {
+      "hint": "Het getal is hoeveel items in die maand vallen: reserveringen, projecten, taken, werkregistraties, verlof en andere. Een item over meerdere maanden telt in elk daarvan mee.",
       "count": "{count, plural, =0 {geen items} one {# item} other {# items}}"
     },
     "emptyFiltered": "Geen items van dit type.",
@@ -12478,6 +12625,7 @@
     },
     "invitePage": {
       "eyebrow": "UITNODIGING",
+      "pageTitle": "Uitnodiging",
       "notEnabled": "Momenteel niet beschikbaar.",
       "loadError": "De uitnodiging kon nu niet worden geladen. Probeer het opnieuw.",
       "invalidTitle": "Uitnodiging niet gevonden",
@@ -15211,6 +15359,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Zoektocht naar werknemers aanvragen",
+        "body": "Geef het beroep, het aantal mensen, het land en de startdatum door."
+      },
+      "b2b": {
+        "title": "B2B-aanvraag versturen",
+        "body": "Beschrijf het soort werk, de locatie, de omvang en de termijnen."
+      },
+      "project": {
+        "title": "Individueel project aanvragen",
+        "body": "Voor particulieren en bedrijven: beschrijf welk project of welke dienst je nodig hebt."
+      },
+      "title": "Stuur een aanvraag",
+      "promise": "Stuur je aanvraag – we nemen binnen 24 uur contact met je op.",
+      "name": "Naam of bedrijf",
+      "email": "E-mail",
+      "phone": "Telefoon",
+      "country": "Land",
+      "countryChoose": "Kies een land",
+      "city": "Plaats",
+      "profession": "Beroep",
+      "workers": "Aantal werknemers",
+      "start": "Startdatum",
+      "details": "Aanvullende eisen",
+      "work": "Soort werk",
+      "place": "Locatie",
+      "scope": "Omvang",
+      "deadline": "Termijnen",
+      "need": "Welk project of welke dienst",
+      "customer": "Opdrachtgever",
+      "customerPrivate": "Particulier",
+      "customerBusiness": "Bedrijf",
+      "optional": "optioneel",
+      "send": "Aanvraag versturen",
+      "sending": "Versturen…",
+      "receivedTitle": "We hebben je aanvraag ontvangen",
+      "receivedBody": "We nemen binnen 24 uur contact met je op via de opgegeven gegevens.",
+      "invalid": "Controleer de velden en probeer het opnieuw. Wat je hebt ingevuld staat nog in dit formulier.",
+      "limited": "Er zijn nu te veel aanvragen. Probeer het later opnieuw: wat je hebt ingevuld blijft staan.",
+      "unavailable": "Je aanvraag kon niet worden verstuurd en is niet ontvangen. Wat je hebt ingevuld blijft staan, probeer het opnieuw.",
+      "notice": "Door een aanvraag te versturen bevestig je dat je het <privacy>Privacybeleid</privacy> hebt gelezen."
+    },
     "audienceValueEyebrow": "Waarde voor elke kant van werk",
     "audienceValueTitle": "Wat elke doelgroep krijgt",
     "how": {

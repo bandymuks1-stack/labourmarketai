@@ -137,6 +137,16 @@ on:
           - sr1-first-search
           # Owner 2026-11-06: forms on a slow phone. Synthetic worker, real Chrome. Dispatch only, never in the rotation.
           - slow-connection
+          # Owner 2026-11-07: the Today panel, journal period reports and quick confirmation, plus one synthetic entry the owner approves from the first screen. Dispatch only.
+          - organization-daily
+          # Owner P0 2026-11-07: the landing's three request doors. Adds 3 tagged rows and raises the real alert. Dispatch only.
+          - request-doors
+          # Owner 2026-11-07: UX-9, UX-10, DS-1, DS-2. Signed out, read-only, adds nothing.
+          - public-readiness
+          # #3147: a reviewer of two synthetic organizations sees each one's hours in its own context.
+          - review-scope
+          # Owner P0 2026-11-09: the job-search regression cases (SR-1…SR-4, SR-10) and three Norwegian ads read as text (#3033). Read-only.
+          - search-regression
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -490,6 +500,11 @@ jobs:
             availability-save) SPEC=tests/e2e/prod-availability-save.spec.ts ;;
             sr1-first-search) SPEC=tests/e2e/prod-sr1-first-search.spec.ts ;;
             slow-connection) SPEC=tests/e2e/prod-slow-connection.spec.ts ;;
+            organization-daily) SPEC=tests/e2e/prod-organization-daily.spec.ts ;;
+            request-doors) SPEC=tests/e2e/prod-request-doors.spec.ts ;;
+            public-readiness) SPEC=tests/e2e/prod-public-readiness.spec.ts ;;
+            review-scope) SPEC=tests/e2e/prod-review-scope.spec.ts ;;
+            search-regression) SPEC=tests/e2e/prod-search-regression.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
@@ -561,8 +576,45 @@ jobs:
         shell: bash
         run: rm -f apps/web/tests/e2e/.storage-state.prod-qa*.json
 
-      - name: Upload result (no screenshots, no traces, no sessions)
+      # Belt and braces for `captureGitInfo` in playwright.config.ts: whatever
+      # metadata a reporter adds, the published result carries none, and a
+      # personal mail address in either file stops the upload instead of
+      # publishing it (privacy, 2026-11-08). FAIL CLOSED: the upload runs only
+      # when this step reached its last line and wrote `published=true`. A
+      # result that is not a readable Playwright report, a check that could
+      # not read a file, a cancel or a crash leaves the output unset, so
+      # nothing is published (the brakes then read "no result file"). Node's
+      # stderr is dropped: a JSON syntax error prints the start of the file
+      # into this public job log.
+      - name: Strip reporter metadata from the result (always)
+        id: privacy
         if: always()
+        shell: bash
+        run: |
+          withhold() {
+            rm -f prod-qa-result.json prod-qa-walk.log 2>/dev/null || true
+            echo "::error::$1; the result is not published"
+            exit 1
+          }
+          for f in prod-qa-result.json prod-qa-walk.log; do
+            if [ -e "$f" ] && [ ! -f "$f" ]; then withhold "$f is not a regular file"; fi
+          done
+          if [ -f prod-qa-result.json ]; then
+            node -e 'const fs=require("fs"),f=process.argv[1],r=JSON.parse(fs.readFileSync(f,"utf8"));if(!r||typeof r!=="object"||Array.isArray(r)||!r.stats||typeof r.stats!=="object"||!Array.isArray(r.suites))process.exit(3);if(r.config){delete r.config.metadata;for(const p of r.config.projects||[])delete p.metadata}fs.writeFileSync(f,JSON.stringify(r,null,2))' prod-qa-result.json 2>/dev/null \
+              || withhold "the walk result is not a readable Playwright report"
+          fi
+          for f in prod-qa-result.json prod-qa-walk.log; do
+            if [ -f "$f" ]; then
+              found=0
+              grep -Eq '[A-Za-z0-9._%+-]+@(gmail|googlemail|yahoo|hotmail|outlook|icloud|gmx|proton)\.' "$f" || found=$?
+              if [ "$found" -eq 0 ]; then withhold "a personal mail address was in the walk result"; fi
+              if [ "$found" -ne 1 ]; then withhold "the privacy check could not read $f"; fi
+            fi
+          done
+          echo "published=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload result (no screenshots, no traces, no sessions)
+        if: always() && steps.privacy.outputs.published == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: prod-qa-${{ needs.debounce.outputs.spec }}-${{ github.run_id }}
@@ -572,10 +624,51 @@ jobs:
             prod-qa-result.json
             prod-qa-walk.log
 
+      # A withheld result still started a walk. The daily budget counts walks
+      # from their `prod-qa-<spec>-<run id>` artefacts (`walk-brakes.mjs count`),
+      # so a withheld result leaves a marker under the same name that holds no
+      # walk data: withholding never frees a walk from the budget. The error
+      # brake reads it as "no result file", as before.
+      - name: Mark a withheld result (counts toward the daily budget)
+        if: always() && steps.privacy.outputs.published != 'true'
+        shell: bash
+        run: echo "the walk result was withheld by the privacy check" > prod-qa-withheld.txt
+
+      - name: Upload the withheld marker
+        if: always() && steps.privacy.outputs.published != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-qa-${{ needs.debounce.outputs.spec }}-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: prod-qa-withheld.txt
+
+      # FAIL CLOSED like the result: the readings are published only when every
+      # line is a reading the spec writes (`walk-brakes.mjs sr1-check`: known
+      # fields, scalar values, no address). A file that fails or cannot be read
+      # is deleted and the step fails; node's stderr is dropped, its stdout says
+      # why with a line number only.
+      - name: Check the SR-1 readings before they are published
+        id: sr1
+        if: always() && needs.debounce.outputs.spec == 'sr1-first-search'
+        shell: bash
+        run: |
+          if [ ! -e sr1-readings.jsonl ]; then
+            echo "no SR-1 readings file"
+            exit 0
+          fi
+          if [ -f sr1-readings.jsonl ] && node .github/scripts/walk-brakes.mjs sr1-check sr1-readings.jsonl 2>/dev/null; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            rm -f sr1-readings.jsonl 2>/dev/null || true
+            echo "::error::the SR-1 readings did not pass the privacy check; they are not published"
+            exit 1
+          fi
+
       # The SR-1 timings, apart from the walk's artefact and kept one day: artefacts of this public repo are
       # readable by any signed-in GitHub user, so whoever records the readings deletes this one after copying them.
       - name: Upload the SR-1 readings (one day)
-        if: always() && needs.debounce.outputs.spec == 'sr1-first-search'
+        if: always() && needs.debounce.outputs.spec == 'sr1-first-search' && steps.sr1.outputs.published == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: sr1-readings-${{ github.run_id }}

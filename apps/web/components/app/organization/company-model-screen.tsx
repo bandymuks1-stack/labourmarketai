@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
+import { OrganizationApprovalsCard } from "@/components/app/arena/confirm-pulse";
 import { AreaSwitcher } from "@/components/app/area-switcher";
 import { NeedDoorLink } from "@/components/app/need-door-link";
 import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
@@ -42,10 +42,9 @@ export async function CompanyModelScreen() {
       <h2 className="font-display text-card-title font-semibold text-text-primary">
         {t("title")}
       </h2>
-      {/* What needs the owner first: the real reviewable-entry queue (honest
-          unknown when unreadable, calm when empty) — the existing pulse the
-          project surfaces already use, not a second counter. */}
-      <ConfirmPulse />
+      {/* What needs the owner first: the real reviewable-entry queue, approved
+          right here (honest unknown when unreadable, says why when empty). */}
+      <OrganizationApprovalsCard />
       <NeedDoorLink
         surface="company_model"
         testId="company-model-primary"

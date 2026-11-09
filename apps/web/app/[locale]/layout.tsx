@@ -4,6 +4,7 @@ import { Bricolage_Grotesque, Inter, Instrument_Serif, JetBrains_Mono } from "ne
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { AnalyticsConsentBanner } from "@/components/app/analytics-consent";
+import { CONSENT_BOOTSTRAP_SCRIPT } from "@/lib/consent/analytics-consent";
 import {
   BASE_CLIENT_MESSAGE_ROOTS,
   pickMessages,
@@ -97,6 +98,11 @@ export async function generateMetadata({
       title: BRAND_NAME,
       statusBarStyle: "black-translucent",
     },
+    // Next 15 renders `capable: true` as the standard
+    // `mobile-web-app-capable` tag only. iOS Safari before 16.4 reads only
+    // the Apple-prefixed tag for a standalone home-screen launch, so it is
+    // emitted explicitly too. Install chrome only, no offline claim.
+    other: { "apple-mobile-web-app-capable": "yes" },
     robots: { index: true, follow: true },
     openGraph: {
       type: "website",
@@ -172,7 +178,7 @@ export default async function LocaleLayout({
             once. Real values only — name, url, logo, language. */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd(locale)) }}
         />
         <script
           type="application/ld+json"
@@ -188,6 +194,9 @@ export default async function LocaleLayout({
               THEME_BOOTSTRAP_SCRIPT,
           }}
         />
+        {/* Before paint, so a person who already chose never sees the banner that
+            the server renders for everyone else (UX-3). */}
+        <script dangerouslySetInnerHTML={{ __html: CONSENT_BOOTSTRAP_SCRIPT }} />
       </head>
       <body>
         <ConnectionNotice locale={locale} />

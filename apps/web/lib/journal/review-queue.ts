@@ -3,6 +3,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { readReviewableJournalEntryIds } from "@/lib/journal/reviewable-count";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
+import { reviewerHoursOf, type ReviewerHours } from "@/lib/journal/reviewer-hours";
 import { resolveWorkDay, type WorkTimeMetricRow } from "@/lib/journal/work-time";
 import {
   WORKER_NAME_FIELDS,
@@ -34,13 +35,23 @@ export type { QuickConfirmScope, QuickQueueSkill };
 
 export type QuickQueueEntry = {
   id: string;
+  /** Groups a person's entries: two people can share a name, and a name can be unreadable. */
+  workerId: string | null;
   workerName: string;
+  /** The entry's organization, read under the caller's RLS. The reviewable set spans
+   *  every organization the caller reviews; a screen titled with one organization needs
+   *  this to tell them apart. Null: the row did not say. */
+  organizationId: string | null;
+  /** Its display name, for labelling a queue that spans organizations. Null: unreadable. */
+  organizationName: string | null;
   createdAt: string;
   /** The day the work happened — the SAME rule as the journal and the
    *  calendar (`resolveWorkDay`): the stated `work_date`, else the filing day.
    *  A reviewer confirms WORK; showing the filing day put the wrong date on
    *  the card (production walk 2026-09-28). */
   workDay: string;
+  /** The stored work time the reviewer is asked to confirm. Null: none stored. */
+  hours: ReviewerHours | null;
   originalText: string;
   /** Deterministic work items recognized from the text — display only. */
   recognizedSlugs: string[];
@@ -50,6 +61,19 @@ export type QuickQueueEntry = {
   /** Which rule produced `skillsToConfirm` (named state, never guessed). */
   confirmScope: QuickConfirmScope;
 };
+
+type OrganizationEmbed = {
+  organization_id: string | null;
+  organizations: { display_name: string | null; legal_name: string | null } | null;
+} | null;
+
+function organizationOf(embed: unknown): { id: string | null; name: string | null } {
+  const e = embed as OrganizationEmbed;
+  return {
+    id: e?.organization_id ?? null,
+    name: e?.organizations?.display_name ?? e?.organizations?.legal_name ?? null,
+  };
+}
 
 export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
   const supabase = await createClient();
@@ -79,7 +103,7 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
   const { data: rows, error: rowsError } = await supabase
     .from("journal_entries")
     .select(
-      `id, original_text, created_at, worker_id, workers(${WORKER_NAME_FIELDS})`,
+      `id, original_text, created_at, worker_id, workers(${WORKER_NAME_FIELDS}), engagement_contexts(organization_id, organizations(display_name, legal_name))`,
     )
     .in("id", reviewableIds)
     .order("created_at", { ascending: true });
@@ -140,18 +164,18 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
     }
   }
 
-  // Stated work days, one bounded read. Unreadable → the filing day, the
-  // same fallback `resolveWorkDay` applies to an entry with no stated day.
-  const workDateRows = new Map<string, WorkTimeMetricRow[]>();
+  // Stated work days and hours, one bounded read. Unreadable → the filing day,
+  // the same fallback `resolveWorkDay` applies to an entry with no stated day,
+  // and no hours line: the reviewer reads the text, no number is made up.
+  const metricRows = new Map<string, WorkTimeMetricRow[]>();
   const wdRes = await supabase
     .from("journal_entry_metrics")
     .select("entry_id, metric_slug, value_text, value_numeric, unit_slug, created_at")
-    .in("entry_id", entryIds)
-    .eq("metric_slug", "work_date");
+    .in("entry_id", entryIds);
   for (const m of (wdRes.data ?? []) as (WorkTimeMetricRow & { entry_id: string })[]) {
-    const list = workDateRows.get(m.entry_id) ?? [];
+    const list = metricRows.get(m.entry_id) ?? [];
     list.push(m);
-    workDateRows.set(m.entry_id, list);
+    metricRows.set(m.entry_id, list);
   }
 
   return entries.map((r) => {
@@ -167,9 +191,13 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
     });
     return {
       id: r.id,
+      workerId: r.worker_id ?? null,
       workerName,
+      organizationId: organizationOf(r.engagement_contexts).id,
+      organizationName: organizationOf(r.engagement_contexts).name,
       createdAt: r.created_at,
-      workDay: resolveWorkDay(workDateRows.get(r.id) ?? [], r.created_at),
+      workDay: resolveWorkDay(metricRows.get(r.id) ?? [], r.created_at),
+      hours: reviewerHoursOf({ id: r.id, createdAt: r.created_at, metrics: metricRows.get(r.id) ?? [] }),
       originalText: r.original_text ?? "",
       recognizedSlugs: depth.works.map((w) => w.slug),
       skillsToConfirm: scoped.skills,
