@@ -285,6 +285,8 @@ export function judgeSr1Readings(text) {
   if (lines.length === 0) return { publish: false, why: "no readings" };
   for (const [i, line] of lines.entries()) {
     const at = `line ${i + 1}`;
+    // The raw line, not only the parsed one: a duplicated key would hide its first value from JSON.parse.
+    if (line.includes("@")) return { publish: false, why: `${at} holds an address` };
     let reading;
     try {
       reading = JSON.parse(line);
