@@ -6,6 +6,7 @@ import {
   cancelOutcomeView,
   deletionSectionMode,
   deletionStatusLabelKey,
+  deletionStatusProvesRpc,
   isMissingRpcError,
   parseCancelResult,
   parseDeletionStatus,
@@ -129,6 +130,15 @@ describe("cancel contract → outcome shown to the person", () => {
   });
 });
 
+describe("30-day copy gate", () => {
+  it("only an answered status RPC switches the copy", () => {
+    expect(deletionStatusProvesRpc({ kind: "unavailable" })).toBe(false);
+    expect(deletionStatusProvesRpc({ kind: "error" })).toBe(false);
+    expect(deletionStatusProvesRpc({ kind: "none" })).toBe(true);
+    expect(deletionStatusProvesRpc(parseDeletionStatus(PENDING, null))).toBe(true);
+  });
+});
+
 describe("deletion section mode", () => {
   const unavailable: DeletionStatusView = { kind: "unavailable" };
   const req = (over: Record<string, unknown>) => parseDeletionStatus({ ...PENDING, ...over }, null);
@@ -173,6 +183,10 @@ describe("every key the model can return exists in every active locale", () => {
       }
       expect(deletion.status.scheduledAt).toContain("{date}");
       expect(deletion.status.scheduledAt).toContain("30");
+      // The 30-day copy shown once the RPC answers.
+      for (const k of ["confirmLabelWaiting", "confirmStepBodyWaiting", "confirmedBodyWaiting"]) {
+        expect(deletion[k], `${locale} ${k}`).toContain("30");
+      }
     });
   }
 });

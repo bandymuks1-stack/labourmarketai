@@ -5712,6 +5712,9 @@
       "confirmedTitle": "Usunięcie potwierdzone",
       "confirmedBody": "System usunie konto w ciągu kilku minut i wyśle potwierdzenie na adres e-mail konta. Jeśli coś będzie wymagało przeglądu, poinformujemy Cię.",
       "inReview": "Automatyczne usunięcie wstrzymano do przeglądu: konto zawiera dane, które mogą wymagać przechowywania na mocy prawa lub dotyczą innych osób. Decyzję i jej uzasadnienie otrzymasz e-mailem w ciągu miesiąca. Do tego czasu Twój profil nie jest widoczny w wyszukiwaniu.",
+      "confirmLabelWaiting": "Rozumiem, że konto i jego dane zostaną usunięte nieodwracalnie 30 dni po potwierdzeniu, chyba że wcześniej anuluję.",
+      "confirmStepBodyWaiting": "Twój wniosek o usunięcie konta został złożony. Potwierdź go — konto zostanie zachowane przez 30 dni i w tym czasie możesz anulować na tej stronie. Potem system usunie konto automatycznie i wyśle potwierdzenie e-mailem.",
+      "confirmedBodyWaiting": "Konto zostanie usunięte za 30 dni. Do tego czasu możesz anulować na tej stronie. Po usunięciu wyślemy potwierdzenie na adres e-mail konta.",
       "status": {
         "pending": "Twój wniosek o usunięcie konta został złożony.",
         "pendingConfirmed": "Usunięcie konta jest potwierdzone i zaplanowane.",

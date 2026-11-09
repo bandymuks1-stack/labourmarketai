@@ -5712,6 +5712,9 @@
       "confirmedTitle": "Deletion confirmed",
       "confirmedBody": "The system will delete the account within the next few minutes and send a confirmation to your account email. If anything needs review, we will tell you.",
       "inReview": "Automatic deletion is paused for review: the account holds data that may have to be kept by law or that concerns other people. You will receive the decision and its reasons by email within one month. Meanwhile your profile is not shown in search.",
+      "confirmLabelWaiting": "I understand that the account and its data are deleted irreversibly 30 days after confirmation, unless I cancel before then.",
+      "confirmStepBodyWaiting": "Your account deletion request is filed. Confirm it — the account is kept for 30 days, and you can cancel on this page during that time. After that the system deletes the account automatically and emails you a confirmation.",
+      "confirmedBodyWaiting": "The account will be deleted in 30 days. Until then you can cancel on this page. Once it is deleted, we will send a confirmation to your account email.",
       "status": {
         "pending": "Your account deletion request is filed.",
         "pendingConfirmed": "Account deletion is confirmed and scheduled.",

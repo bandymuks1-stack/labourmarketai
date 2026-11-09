@@ -157,6 +157,16 @@ export function cancelOutcomeView(result: CancelDeletionResult): CancelOutcomeVi
   }
 }
 
+/**
+ * True only when the status RPC demonstrably ANSWERED (`none` or a request) —
+ * i.e. the migration that introduces the 30-day waiting period is live. Then
+ * (and only then) the page describes the wait. `unavailable` and `error`
+ * prove nothing, so the existing, currently-true copy stays.
+ */
+export function deletionStatusProvesRpc(view: DeletionStatusView): boolean {
+  return view.kind === "none" || view.kind === "request";
+}
+
 /** Keys under `privacySelfService.deletion.status`. */
 export type DeletionStatusLabelKey = "pending" | "pendingConfirmed" | "withdrawn" | "inProgress" | "done";
 

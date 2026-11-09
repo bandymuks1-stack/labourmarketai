@@ -5712,6 +5712,9 @@
       "confirmedTitle": "Verwijdering bevestigd",
       "confirmedBody": "Het systeem verwijdert het account binnen enkele minuten en stuurt een bevestiging naar het e-mailadres van je account. Moet iets worden beoordeeld, dan laten we het je weten.",
       "inReview": "Automatische verwijdering is gepauzeerd voor beoordeling: het account bevat gegevens die mogelijk wettelijk bewaard moeten blijven of die andere mensen betreffen. Je ontvangt het besluit en de redenen binnen een maand per e-mail. Intussen wordt je profiel niet getoond in zoekresultaten.",
+      "confirmLabelWaiting": "Ik begrijp dat het account en de gegevens 30 dagen na bevestiging onherroepelijk worden verwijderd, tenzij ik eerder annuleer.",
+      "confirmStepBodyWaiting": "Je verzoek om je account te verwijderen is ingediend. Bevestig het — het account blijft nog 30 dagen bestaan en in die tijd kun je op deze pagina annuleren. Daarna verwijdert het systeem het account automatisch en stuurt je een bevestiging per e-mail.",
+      "confirmedBodyWaiting": "Het account wordt over 30 dagen verwijderd. Tot die tijd kun je op deze pagina annuleren. Na het verwijderen sturen we een bevestiging naar het e-mailadres van je account.",
       "status": {
         "pending": "Je verzoek om je account te verwijderen is ingediend.",
         "pendingConfirmed": "Het verwijderen van je account is bevestigd en ingepland.",

@@ -15,6 +15,7 @@ import { getMyAccountDeletionStatus } from "@/lib/privacy/deletion-cancel-action
 import {
   deletionSectionMode,
   deletionStatusLabelKey,
+  deletionStatusProvesRpc,
 } from "@/lib/privacy/deletion-cancel-model";
 import { formatUtcDateTime } from "@/lib/time/display";
 import { listMyContactDisclosureRequests } from "@/lib/privacy/contact-disclosure-actions";
@@ -134,6 +135,10 @@ export default async function PrivacyPage({
       minute: "2-digit",
       timeZoneName: "short",
     });
+  // The 30-day waiting period (owner decision 2026-11-09) is described only
+  // when the status RPC exists — that is when the migration introducing the
+  // wait is live. Before it, the existing copy stays true and stays shown.
+  const waitingPeriodLive = deletionStatusProvesRpc(deletionStatus);
   const submittedLabel =
     deletionStatus.kind === "request" ? deletionDate(deletionStatus.submittedAt) : null;
   const scheduledLabel =
@@ -587,20 +592,27 @@ export default async function PrivacyPage({
           ) : deletionMode === "confirm-step" ? (
             <PrivacyDeletionConfirm
               locale={locale}
+              refreshAfterConfirm={waitingPeriodLive}
               labels={{
-                body: t("deletion.confirmStepBody"),
+                body: waitingPeriodLive
+                  ? t("deletion.confirmStepBodyWaiting")
+                  : t("deletion.confirmStepBody"),
                 confirm: t("deletion.confirmStep"),
                 reauthBody: t("deletion.reauthBody"),
                 reauth: t("deletion.reauth"),
                 confirmed: t("deletion.confirmedTitle"),
-                confirmedBody: t("deletion.confirmedBody"),
+                confirmedBody: waitingPeriodLive
+                  ? t("deletion.confirmedBodyWaiting")
+                  : t("deletion.confirmedBody"),
                 error: t("deletion.error"),
               }}
             />
           ) : (
             <PrivacyDeletionRequest
               labels={{
-                confirmLabel: t("deletion.confirmLabel"),
+                confirmLabel: waitingPeriodLive
+                  ? t("deletion.confirmLabelWaiting")
+                  : t("deletion.confirmLabel"),
                 noteLabel: t("deletion.noteLabel"),
                 submit: t("deletion.submit"),
                 submitted: t("deletion.submitted"),
