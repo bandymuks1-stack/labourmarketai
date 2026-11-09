@@ -123,7 +123,8 @@ test("S-9…S-12. pages 2 and 3 are new cards and keep their page (signed out)",
   const typed2 = await board(page, "/lt/jobs?q=elektrikas&page=2");
   record(
     "S-12 elektrikas page 2 (SR-4)",
-    typed2.final.includes("page=2") && overlap(typed1, typed2) === 0,
+    !typed1.unavailable && !typed2.unavailable && typed1.ids.length > 0 && typed2.ids.length > 0 &&
+      typed2.final.includes("page=2") && overlap(typed1, typed2) === 0,
     `${line(typed2)} overlap_with_p1=${overlap(typed1, typed2)}`,
   );
   await ctx.close();
@@ -163,6 +164,7 @@ test("H-1 (#3033). a member reads three Norwegian ads as text: no tags, no live 
     if (candidates.length >= 12) break;
   }
   let checked = 0;
+  let inspected = 0;
   for (const href of candidates) {
     if (checked >= 3) break;
     await page.goto(href);
@@ -171,12 +173,9 @@ test("H-1 (#3033). a member reads three Norwegian ads as text: no tags, no live 
     const body = page.locator("main section p.whitespace-pre-line[lang]:not([data-testid])").first();
     if (!(await body.isVisible({ timeout: 30_000 }).catch(() => false))) continue;
     const text = await body.innerText();
+    const id = href.split("/").pop();
     const bullets = (text.match(/^\s*•/gm) ?? []).length;
     const paragraphs = text.split(/\n\s*\n/).filter((p) => p.trim()).length;
-    // Only ads whose source carried structure (lists or several paragraphs) prove #3033.
-    if (bullets === 0 && paragraphs < 2) continue;
-    checked += 1;
-    const id = href.split("/").pop();
     const live = await body.evaluate((el) => {
       const section = el.closest("section")!;
       return {
@@ -187,14 +186,19 @@ test("H-1 (#3033). a member reads three Norwegian ads as text: no tags, no live 
     });
     const tags = /<\/?[a-z][a-z0-9]*(\s[^>]*)?>/i.test(text);
     const entities = /&(nbsp|amp|lt|gt|quot|#\d+);/.test(text);
-    record(
-      `H-1 ad ${id}`,
-      !tags && !entities && live.children === 0 && live.injected === 0 && live.handlers === 0 && text.length > 200,
+    const facts =
       `len=${text.length} lines=${text.split("\n").length} paragraphs=${paragraphs} bullets=${bullets} tags=${tags} entities=${entities} ` +
-        `elements_in_text=${live.children} injected=${live.injected} on_attrs=${live.handlers} ` +
-        `sha_first80=${sha(text.slice(0, 80))} sha_last80=${sha(text.slice(-80))} sha_all=${sha(text)}`,
-    );
+      `elements_in_text=${live.children} injected=${live.injected} on_attrs=${live.handlers} ` +
+      `sha_first80=${sha(text.slice(0, 80))} sha_last80=${sha(text.slice(-80))} sha_all=${sha(text)}`;
+    // Markup safety holds for EVERY ad opened: a description shown as one line of
+    // literal HTML has no structure, so it must fail here, not be skipped below.
+    inspected += 1;
+    record(`H-1 ad ${id} is text`, !tags && !entities && live.children === 0 && live.injected === 0 && live.handlers === 0, facts);
+    // Structure (lists or several paragraphs) only selects the three that prove #3033 kept it.
+    if (bullets === 0 && paragraphs < 2) continue;
+    checked += 1;
+    record(`H-1 ad ${id} keeps its structure`, text.length > 200, `len=${text.length} paragraphs=${paragraphs} bullets=${bullets}`);
   }
-  record("H-1 three structured Norwegian ads found", checked >= 3, `checked=${checked} candidates=${candidates.length}`);
+  record("H-1 three structured Norwegian ads found", checked >= 3, `checked=${checked} inspected=${inspected} candidates=${candidates.length}`);
   await ctx.close();
 });
