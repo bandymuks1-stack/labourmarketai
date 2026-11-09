@@ -5711,7 +5711,31 @@
       "reauth": "Erneut anmelden",
       "confirmedTitle": "Löschung bestätigt",
       "confirmedBody": "Das System löscht das Konto in den nächsten Minuten und sendet eine Bestätigung an Ihre Konto-E-Mail-Adresse. Muss etwas geprüft werden, informieren wir Sie.",
-      "inReview": "Die automatische Löschung ist zur Prüfung angehalten: Das Konto enthält Daten, die gesetzlich aufbewahrt werden müssen oder andere Personen betreffen könnten. Entscheidung und Gründe erhalten Sie innerhalb eines Monats per E-Mail. Bis dahin wird Ihr Profil in der Suche nicht angezeigt."
+      "inReview": "Die automatische Löschung ist zur Prüfung angehalten: Das Konto enthält Daten, die gesetzlich aufbewahrt werden müssen oder andere Personen betreffen könnten. Entscheidung und Gründe erhalten Sie innerhalb eines Monats per E-Mail. Bis dahin wird Ihr Profil in der Suche nicht angezeigt.",
+      "status": {
+        "pending": "Ihr Antrag auf Kontolöschung ist gestellt.",
+        "pendingConfirmed": "Die Kontolöschung ist bestätigt und geplant.",
+        "withdrawn": "Die Kontolöschung wurde storniert. Ihr Konto bleibt aktiv.",
+        "inProgress": "Die Kontolöschung läuft bereits — sie kann nicht mehr storniert werden.",
+        "done": "Das Konto wurde gelöscht.",
+        "submittedAt": "Gestellt: {date}",
+        "scheduledAt": "Das Konto wird am {date} gelöscht (nach einer Wartezeit von 30 Tagen).",
+        "cancelUntil": "Bis dahin können Sie stornieren.",
+        "loadError": "Der Status der Kontolöschung konnte nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
+      },
+      "cancel": {
+        "button": "Kontolöschung stornieren",
+        "question": "Kontolöschung stornieren? Ihr Konto und Ihre Daten bleiben erhalten.",
+        "confirm": "Ja, stornieren",
+        "keep": "Zurück",
+        "working": "Wird storniert…",
+        "cancelled": "Die Kontolöschung wurde storniert. Ihr Konto bleibt aktiv.",
+        "notCancellable": "Die Kontolöschung hat bereits begonnen und kann nicht mehr storniert werden. Sie erhalten das Ergebnis an die E-Mail-Adresse Ihres Kontos.",
+        "notFound": "Es wurde kein offener Antrag auf Kontolöschung gefunden — es gibt nichts zu stornieren.",
+        "notSignedIn": "Melden Sie sich an, um die Kontolöschung zu stornieren.",
+        "unavailable": "Stornieren ist derzeit nicht verfügbar.",
+        "error": "Die Kontolöschung konnte nicht storniert werden. Versuchen Sie es erneut."
+      }
     },
     "requests": {
       "title": "Ihre gestellten Anträge",

@@ -9,7 +9,14 @@ import { Card } from "@/components/ui/Card";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { PrivacyDeletionRequest } from "@/components/app/privacy-deletion-request";
 import { PrivacyDeletionConfirm } from "@/components/app/privacy-deletion-confirm";
+import { PrivacyDeletionCancel } from "@/components/app/privacy-deletion-cancel";
 import { listMyPrivacyRequests } from "@/lib/privacy/actions";
+import { getMyAccountDeletionStatus } from "@/lib/privacy/deletion-cancel-actions";
+import {
+  deletionSectionMode,
+  deletionStatusLabelKey,
+} from "@/lib/privacy/deletion-cancel-model";
+import { formatUtcDateTime } from "@/lib/time/display";
 import { listMyContactDisclosureRequests } from "@/lib/privacy/contact-disclosure-actions";
 import {
   getMyConsentHistory,
@@ -85,6 +92,7 @@ export default async function PrivacyPage({
     myRequests,
     contactRequestsResult,
     partnerSupplyState,
+    deletionStatus,
   ] = await Promise.all([
     getMyDiscoverabilityState(),
     getMyConsentHistory(),
@@ -92,6 +100,7 @@ export default async function PrivacyPage({
     listMyPrivacyRequests(),
     listMyContactDisclosureRequests(),
     getMyPartnerSupplyState(),
+    getMyAccountDeletionStatus(),
   ]);
 
   // The ONE consent-locale rule (PL → English, never Lithuanian), shared with
@@ -108,6 +117,29 @@ export default async function PrivacyPage({
       r.type === "account_deletion" &&
       ["submitted", "in_review", "needs_followup", "approved"].includes(r.status),
   );
+  // Owner P0 2026-11-09: the request's own status (and a self-service cancel
+  // while it is still cancellable). Until the RED migration that backs it is
+  // applied the read is `unavailable` and the section renders exactly as
+  // before — `deletionSectionMode` keeps the old rule for that case.
+  const deletionMode = deletionSectionMode(deletionStatus, openDeletion?.status ?? null);
+  // The scheduled date is the RPC's `scheduled_erasure_at` (confirmed_at + the
+  // owner's 30-day waiting period, computed in the database) — never derived
+  // here, so there is one source of truth.
+  const deletionDate = (value: string | null) =>
+    formatUtcDateTime(value, locale, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short",
+    });
+  const submittedLabel =
+    deletionStatus.kind === "request" ? deletionDate(deletionStatus.submittedAt) : null;
+  const scheduledLabel =
+    deletionStatus.kind === "request" && deletionStatus.status === "pending"
+      ? deletionDate(deletionStatus.scheduledErasureAt)
+      : null;
 
   // SEP-7: a history that could not be read is NOT an empty history. Both
   // sections below say "could not be read" instead of "nothing yet".
@@ -489,12 +521,70 @@ export default async function PrivacyPage({
         <p className="mt-2 text-sm leading-relaxed text-text-primary">
           {t("deletion.body")}
         </p>
+        {deletionStatus.kind === "error" ? (
+          <p
+            role="status"
+            className="mt-3 text-sm text-text-secondary"
+            data-testid="privacy-deletion-status-error"
+          >
+            {t("deletion.status.loadError")}
+          </p>
+        ) : null}
+        {deletionStatus.kind === "request" ? (
+          <div
+            className="mt-3 flex flex-col gap-2 rounded-md border border-ink-500 p-3"
+            data-testid="privacy-deletion-status"
+            data-status={deletionStatus.status}
+          >
+            <p
+              role="status"
+              className={
+                deletionStatus.status === "withdrawn"
+                  ? "text-sm font-medium text-state-success"
+                  : "text-sm font-medium text-text-primary"
+              }
+            >
+              {t(`deletion.status.${deletionStatusLabelKey(deletionStatus)}`)}
+            </p>
+            {submittedLabel ? (
+              <p className="text-xs text-text-secondary">
+                {t("deletion.status.submittedAt", { date: submittedLabel })}
+              </p>
+            ) : null}
+            {scheduledLabel ? (
+              <p className="text-xs text-text-secondary" data-testid="privacy-deletion-scheduled">
+                {t("deletion.status.scheduledAt", { date: scheduledLabel })}
+                {deletionStatus.cancellable ? ` ${t("deletion.status.cancelUntil")}` : null}
+              </p>
+            ) : null}
+            {deletionStatus.cancellable ? (
+              <PrivacyDeletionCancel
+                locale={locale}
+                labels={{
+                  button: t("deletion.cancel.button"),
+                  question: t("deletion.cancel.question"),
+                  confirm: t("deletion.cancel.confirm"),
+                  keep: t("deletion.cancel.keep"),
+                  working: t("deletion.cancel.working"),
+                  messages: {
+                    cancelled: t("deletion.cancel.cancelled"),
+                    notCancellable: t("deletion.cancel.notCancellable"),
+                    notFound: t("deletion.cancel.notFound"),
+                    notSignedIn: t("deletion.cancel.notSignedIn"),
+                    unavailable: t("deletion.cancel.unavailable"),
+                    error: t("deletion.cancel.error"),
+                  },
+                }}
+              />
+            ) : null}
+          </div>
+        ) : null}
         <div className="mt-3">
-          {openDeletion?.status === "needs_followup" ? (
+          {deletionMode === "status-only" ? null : deletionMode === "in-review" ? (
             <p className="text-sm text-text-secondary" data-testid="privacy-deletion-in-review">
               {t("deletion.inReview")}
             </p>
-          ) : openDeletion ? (
+          ) : deletionMode === "confirm-step" ? (
             <PrivacyDeletionConfirm
               locale={locale}
               labels={{

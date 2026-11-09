@@ -5711,7 +5711,31 @@
       "reauth": "Prisijungti iš naujo",
       "confirmedTitle": "Ištrynimas patvirtintas",
       "confirmedBody": "Sistema paskyrą ištrins per artimiausias kelias minutes ir atsiųs patvirtinimą paskyros el. paštu. Jei kažką reikės peržiūrėti, apie tai pranešime.",
-      "inReview": "Automatinis ištrynimas sustabdytas peržiūrai: paskyroje yra duomenų, kuriuos gali tekti saugoti pagal įstatymą arba kurie susiję su kitais žmonėmis. Sprendimą ir priežastis gausi el. paštu per vieną mėnesį. Tuo metu tavo profilis nerodomas paieškoje."
+      "inReview": "Automatinis ištrynimas sustabdytas peržiūrai: paskyroje yra duomenų, kuriuos gali tekti saugoti pagal įstatymą arba kurie susiję su kitais žmonėmis. Sprendimą ir priežastis gausi el. paštu per vieną mėnesį. Tuo metu tavo profilis nerodomas paieškoje.",
+      "status": {
+        "pending": "Paskyros ištrynimo užklausa pateikta.",
+        "pendingConfirmed": "Paskyros ištrynimas patvirtintas ir suplanuotas.",
+        "withdrawn": "Paskyros ištrynimas atšauktas. Tavo paskyra lieka aktyvi.",
+        "inProgress": "Paskyros ištrynimas jau vyksta — jo atšaukti nebegalima.",
+        "done": "Paskyra ištrinta.",
+        "submittedAt": "Pateikta: {date}",
+        "scheduledAt": "Paskyra bus ištrinta {date} (po 30 dienų laukimo).",
+        "cancelUntil": "Iki tol gali atšaukti.",
+        "loadError": "Nepavyko įkelti paskyros ištrynimo būsenos. Atnaujink puslapį ir pabandyk dar kartą."
+      },
+      "cancel": {
+        "button": "Atšaukti paskyros ištrynimą",
+        "question": "Atšaukti paskyros ištrynimą? Tavo paskyra ir duomenys liks.",
+        "confirm": "Taip, atšaukti",
+        "keep": "Grįžti",
+        "working": "Atšaukiama…",
+        "cancelled": "Paskyros ištrynimas atšauktas. Tavo paskyra lieka aktyvi.",
+        "notCancellable": "Paskyros ištrynimas jau prasidėjo, todėl jo atšaukti nebegalima. Rezultatą gausi paskyros el. paštu.",
+        "notFound": "Aktyvios paskyros ištrynimo užklausos nerasta — atšaukti nėra ko.",
+        "notSignedIn": "Prisijunk, kad galėtum atšaukti paskyros ištrynimą.",
+        "unavailable": "Atšaukimas šiuo metu nepasiekiamas.",
+        "error": "Nepavyko atšaukti paskyros ištrynimo. Pabandyk dar kartą."
+      }
     },
     "requests": {
       "title": "Tavo pateiktos užklausos",
