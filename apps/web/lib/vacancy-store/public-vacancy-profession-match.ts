@@ -121,3 +121,12 @@ export function matchProfessionAcrossLocales(
   if (hits.size > 1) return null;
   return hits.size === 1 ? [...hits][0]! : (TYPED_WORD_SLUG.get(foldForMatch(query)) ?? null);
 }
+
+/**
+ * Where a typed word that names a profession goes. The page stays, so a shared
+ * `?q=elektrikas&page=2` opens page 2 of that profession and not page 1 (SR-4).
+ */
+export function professionRedirectHref(slug: string, rawPage: string | undefined): string {
+  const page = Number.parseInt(rawPage ?? "1", 10) || 1;
+  return page > 1 ? `/jobs?profession=${slug}&page=${page}` : `/jobs?profession=${slug}`;
+}
