@@ -99,7 +99,9 @@ export async function generateMetadata({
   const preview = await getPublicVacancyPreview(id);
 
   if (preview === "not_provisioned" || preview === null) {
-    return { title: "—", robots: { index: false, follow: false } };
+    // No title of its own: the not-found title applies, as on a missing question (UX-9).
+    // A title here made the 404 carry the home page's title.
+    return { robots: { index: false, follow: false } };
   }
 
   // Owner directive 2026-08-24: the raw title is member-only (it embeds

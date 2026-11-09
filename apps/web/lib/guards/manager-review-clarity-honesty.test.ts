@@ -155,8 +155,8 @@ describe("Guard: the manager inbox uses the shared data-gated evidence strip", (
     // The old reader counted every approved ROW: an entry approved twice was 2,
     // one approved and then sent back still counted. The count now goes
     // through the shared per-entry rule and reads the entry id it needs.
-    expect(page).toMatch(/countConfirmedEntriesFromRows\(confRows\)/);
-    expect(page).toMatch(/\.select\("entry_id, confirmation_scope, created_at"\)/);
+    expect(page).toMatch(/countConfirmedEntriesFromRows\(/);
+    expect(page).toMatch(/\.select\("entry_id, confirmation_scope, created_at, confirmer_id/);
     expect(page).not.toMatch(/s\?\.decision === "approved" \|\| s\?\.action === "confirm"/);
     // An unreadable read is unknown, never 0.
     expect(page).toMatch(/\{confirmedCount \?\? "—"\}/);

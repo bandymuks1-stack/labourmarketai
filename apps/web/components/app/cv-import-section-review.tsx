@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { oneAtATime, refreshWhenSettled } from "@/lib/hooks/one-at-a-time";
+
 import {
   hasAnyProposal,
   TRAINING_TYPE_SLUG,
@@ -80,6 +82,7 @@ function saveUnplaced(target: UnplacedTarget, line: string): Promise<CvImportCon
         start: null,
         end: null,
         isCurrent: false,
+        refreshLater: true,
       });
     case "education":
       return confirmCvEducationAction({
@@ -88,11 +91,12 @@ function saveUnplaced(target: UnplacedTarget, line: string): Promise<CvImportCon
         educationTypeSlug: "other",
         startYear: null,
         endYear: null,
+        refreshLater: true,
       });
     case "certificates":
-      return confirmCvCertificateAction({ title: line, year: null });
+      return confirmCvCertificateAction({ title: line, year: null, refreshLater: true });
     case "achievements":
-      return confirmCvAchievementAction({ title: line });
+      return confirmCvAchievementAction({ title: line, refreshLater: true });
   }
 }
 
@@ -166,6 +170,10 @@ export function CvImportSectionReview({
 }) {
   const t = useTranslations("cvImport");
   const router = useRouter();
+  // A second click on a row while its save runs does nothing, before the first await.
+  const [guard] = useState(oneAtATime);
+  // One re-render after the last row, not one per row: `refreshLater` on every confirm below.
+  const [settled] = useState(() => refreshWhenSettled(() => router.refresh()));
 
   const merged = useMemo(
     () => mergeProposals(proposals, aiProposals),
@@ -192,31 +200,37 @@ export function CvImportSectionReview({
     call: (allowReplace: boolean) => Promise<CvImportConfirmResult>,
     allowReplace = false,
   ) {
-    setItem(key, { state: "saving" });
-    try {
-      const res = await call(allowReplace);
-      if (res.ok) {
-        setItem(key, { state: "saved" });
-        router.refresh();
-        return;
+    await guard(key, async () => {
+      setItem(key, { state: "saving" });
+      settled.began();
+      let saved = false;
+      try {
+        const res = await call(allowReplace);
+        if (res.ok) {
+          saved = true;
+          setItem(key, { state: "saved" });
+          return;
+        }
+        switch (res.code) {
+          case "conflict":
+            setItem(key, { state: "conflict", existing: res.existing ?? "—" });
+            return;
+          case "needs_migration":
+            setItem(key, { state: "needs_migration" });
+            return;
+          case "invalid":
+            setItem(key, { state: "error", message: "invalid" });
+            return;
+          default:
+            setItem(key, { state: "error", message: "error" });
+        }
+      } catch (e) {
+        console.error("[cv-import-review] confirm failed:", e);
+        setItem(key, { state: "error", message: "error" });
+      } finally {
+        settled.ended(saved);
       }
-      switch (res.code) {
-        case "conflict":
-          setItem(key, { state: "conflict", existing: res.existing ?? "—" });
-          return;
-        case "needs_migration":
-          setItem(key, { state: "needs_migration" });
-          return;
-        case "invalid":
-          setItem(key, { state: "error", message: "invalid" });
-          return;
-        default:
-          setItem(key, { state: "error", message: "error" });
-      }
-    } catch (e) {
-      console.error("[cv-import-review] confirm failed:", e);
-      setItem(key, { state: "error", message: "error" });
-    }
+    });
   }
 
   const rowCtx: RowContext = { statusOf, setItem, run, editsOf, setEdit };
@@ -287,7 +301,7 @@ export function CvImportSectionReview({
             aiOrigin={i >= merged.aiStart.workHistory}
             onConfirm={() => {
               const input = workHistoryInput(w, editsOf(`wh-${i}`));
-              return input ? confirmCvWorkHistoryAction(input) : notSaved();
+              return input ? confirmCvWorkHistoryAction({ ...input, refreshLater: true }) : notSaved();
             }}
           />
         ))}
@@ -335,7 +349,7 @@ export function CvImportSectionReview({
             aiOrigin={i >= merged.aiStart.education}
             onConfirm={() => {
               const input = educationInput(e, editsOf(`edu-${i}`));
-              return input ? confirmCvEducationAction(input) : notSaved();
+              return input ? confirmCvEducationAction({ ...input, refreshLater: true }) : notSaved();
             }}
           />
         ))}
@@ -364,6 +378,7 @@ export function CvImportSectionReview({
                   lang: l.lang,
                   level: chosen,
                   allowReplace,
+                  refreshLater: true,
                 })
               }
             >
@@ -406,7 +421,7 @@ export function CvImportSectionReview({
             aiOrigin={i >= merged.aiStart.certificates}
             onConfirm={() => {
               const input = certificateInput(c, editsOf(`cert-${i}`));
-              return input ? confirmCvCertificateAction(input) : notSaved();
+              return input ? confirmCvCertificateAction({ ...input, refreshLater: true }) : notSaved();
             }}
           />
         ))}
@@ -425,7 +440,7 @@ export function CvImportSectionReview({
             aiOrigin={false}
             onConfirm={() => {
               const input = achievementInput(a, editsOf(`ach-${i}`));
-              return input ? confirmCvAchievementAction(input) : notSaved();
+              return input ? confirmCvAchievementAction({ ...input, refreshLater: true }) : notSaved();
             }}
           />
         ))}
@@ -447,6 +462,7 @@ export function CvImportSectionReview({
                 minEur: merged.salary!.minEur,
                 maxEur: merged.salary!.maxEur,
                 allowReplace,
+                refreshLater: true,
               })
             }
           />
@@ -464,7 +480,7 @@ export function CvImportSectionReview({
             confidence={h.confidence}
             aiOrigin={false}
             onConfirm={(allowReplace) =>
-              confirmCvAvailabilityAction({ key: h.key, allowReplace })
+              confirmCvAvailabilityAction({ key: h.key, allowReplace, refreshLater: true })
             }
           />
         ))}

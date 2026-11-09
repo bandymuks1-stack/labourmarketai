@@ -102,9 +102,9 @@ async function oldBarsShare(input: Buffer | string): Promise<number> {
 }
 
 describe("every brand raster is the owner's mark, read from its pixels", () => {
-  const FAVICON = resolve(WEB_ROOT, "app/favicon.ico");
+  const FAVICON = resolve(WEB_ROOT, "public/favicon.ico");
 
-  it("app/favicon.ico holds 16, 32 and 48, each the rasterized app/icon.svg", async () => {
+  it("public/favicon.ico holds 16, 32 and 48, each the rasterized app/icon.svg", async () => {
     const images = icoImages(FAVICON);
     expect(images.map((i) => i.size).sort((a, b) => a - b)).toEqual([16, 32, 48]);
     for (const { size, png } of images) {
@@ -115,9 +115,22 @@ describe("every brand raster is the owner's mark, read from its pixels", () => {
     }
   });
 
+  /**
+   * THE OLD ICON STAYED IN THE TAB (UX-10). `app/favicon.ico` makes Next link
+   * `/favicon.ico` with no version in its URL, beside the versioned `/icon.svg?<hash>`,
+   * and a browser that stored the old bars under that URL keeps showing them. In
+   * `public/` the file still answers for anything that asks for it by name, and the
+   * only link left is the versioned one.
+   */
+  it("no unversioned icon link: the favicon is not an app-router file", () => {
+    expect(existsSync(resolve(WEB_ROOT, "app/favicon.ico"))).toBe(false);
+    expect(existsSync(FAVICON)).toBe(true);
+    expect(existsSync(resolve(WEB_ROOT, "app/icon.svg"))).toBe(true);
+  });
+
   it("the favicon comes from the one generator, and the two vectors are one mark", () => {
     const script = readFileSync(resolve(WEB_ROOT, "scripts/generate-icons.mts"), "utf8");
-    expect(script).toContain("app/favicon.ico");
+    expect(script).toContain("public/favicon.ico");
     expect(script).toContain("FAVICON_SIZES = [16, 32, 48]");
     expect(readFileSync(SOURCE_TILE, "utf8")).toBe(readFileSync(SOURCE_MARK, "utf8"));
   });

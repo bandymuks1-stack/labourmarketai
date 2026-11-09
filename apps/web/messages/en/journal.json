@@ -408,6 +408,9 @@
     "skills": "Skills",
     "title": "Entries to confirm",
     "quick": {
+      "elsewhere": "{n} more are waiting for your approval in other organizations you manage. Switch organization to see and approve them.",
+      "byOrganization": "By organization:",
+      "unnamedOrganization": "An organization whose name could not be read",
       "openQuick": "Quick confirm →",
       "title": "Quick confirm",
       "subtitle": "One glance, one tap: the card shows the worker, the date, the works and the exact skills your tap confirms. Every confirmation is your real decision, recorded only when you tap.",

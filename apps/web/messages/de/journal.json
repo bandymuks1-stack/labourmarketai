@@ -408,6 +408,9 @@
     "skills": "Fähigkeiten",
     "title": "Zu bestätigende Einträge",
     "quick": {
+      "elsewhere": "In anderen Organisationen, die du verwaltest, warten noch {n} auf deine Freigabe. Wechsle die Organisation, um sie zu sehen und freizugeben.",
+      "byOrganization": "Nach Organisation:",
+      "unnamedOrganization": "Eine Organisation, deren Name nicht gelesen werden konnte",
       "openQuick": "Schnellbestätigung →",
       "title": "Schnellbestätigung",
       "subtitle": "Ein Blick, ein Tippen: Die Karte zeigt die Arbeitskraft, das Datum, die Arbeiten und die Fähigkeiten, die Sie bestätigen. Jede Bestätigung ist Ihre echte Entscheidung und wird erst durch Ihr Tippen erfasst.",

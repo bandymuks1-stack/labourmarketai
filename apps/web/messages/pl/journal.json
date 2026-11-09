@@ -408,6 +408,9 @@
     "skills": "Umiejętności",
     "title": "Wpisy do potwierdzenia",
     "quick": {
+      "elsewhere": "W innych organizacjach, którymi zarządzasz, na twoje zatwierdzenie czeka jeszcze: {n}. Przełącz organizację, aby je zobaczyć i zatwierdzić.",
+      "byOrganization": "Według organizacji:",
+      "unnamedOrganization": "Organizacja, której nazwy nie udało się odczytać",
       "openQuick": "Szybkie potwierdzanie →",
       "title": "Szybkie potwierdzanie",
       "subtitle": "Jedno spojrzenie, jedno dotknięcie: karta pokazuje pracownika, datę, prace i umiejętności, które potwierdzasz. Każde potwierdzenie to Twoja rzeczywista decyzja, zapisywana dopiero po Twoim dotknięciu.",

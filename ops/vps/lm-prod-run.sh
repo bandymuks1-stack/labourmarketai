@@ -13,6 +13,12 @@
 # old container and give the new one the canonical name. If the new release never becomes healthy,
 # it is removed and the old one keeps serving — nothing changes for anyone.
 # nginx reads the upstream from /etc/nginx/conf.d/domains/labourmarket-upstream.inc (one proxy_pass line).
+#
+# Agentai OS reaches the app privately (owner decision 2026-11-07, B): the Docker network
+# lm-agentai-internal, where the serving container answers as labourmarket-app:3000. It is
+# `--internal`, so nothing on it reaches the internet through it; the app keeps its own
+# default-bridge connection for Supabase. Agentai's scheduler joins it from its own compose
+# file. The alias moves to the new container at the same moment nginx does.
 set -eu
 SHA="${1:?usage: lm-prod-run.sh <release-sha>}"
 case "$SHA" in *[!0-9a-f]*|"") echo "bad sha"; exit 1;; esac
@@ -34,6 +40,9 @@ keep_logs() {
     docker logs --timestamps "$1" 2>&1 | gzip -c > "$D/logs/$1-$(date -u +%Y%m%dT%H%M%SZ)-$2.log.gz" ) || true
   ls -1t "$D/logs"/*.log.gz 2>/dev/null | tail -n +21 | while read -r f; do rm -f "$f"; done
 }
+
+NET=lm-agentai-internal
+docker network inspect "$NET" >/dev/null 2>&1 || docker network create --internal "$NET" >/dev/null
 
 CUR_PORT=$(cat "$D/active-port" 2>/dev/null || echo 3200)
 case "$CUR_PORT" in 3200) NEW_PORT=3201;; 3201) NEW_PORT=3200;; *) CUR_PORT=3200; NEW_PORT=3201;; esac
@@ -83,6 +92,10 @@ if ! nginx -t >/dev/null 2>&1 || ! nginx -s reload; then
   docker rm -f labourmarket-prod-next >/dev/null 2>&1 || true
   echo "nginx switch failed; the current one keeps serving"; exit 1
 fi
+# Agentai's private path follows the switch. During the drain below both containers carry the
+# alias; the old one still answers until it stops. A failure here never stops the public deploy:
+# Agentai then sees the app as unreachable, which it reports, rather than an empty answer.
+docker network connect --alias labourmarket-app "$NET" labourmarket-prod-next 2>/dev/null   || echo "warning: labourmarket-prod-next not on $NET; Agentai's private path is down"
 echo "$NEW_PORT" > "$D/active-port"
 ln -sfn "releases/$SHA" "$D/current"
 

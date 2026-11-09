@@ -209,6 +209,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261105100000_",
       "20261105100100_",
       "20261104160100_",
+      // 2026-11-09 holder-cancelled account deletion (holder cancels own account-deletion request + 30-day grace + row lock; RED draft #3172, needs-human-gate, NOT applied).
+      "20261109120000_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
       "20261104060000_",
       // #2913 restored six production-applied migrations byte-exact (owner option 2, 2026-11-01): historical restorations dated after the package, not pending work of it.

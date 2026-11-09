@@ -1,5 +1,22 @@
 {
   "companyModel": {
+    "today": {
+      "goApprove": "Prüfen und freigeben",
+      "amount": {
+        "hours": "{n} Std.",
+        "days": "{n} T.",
+        "minutes": "{n} Min."
+      },
+      "people": "{n, plural, one {# Person} other {# Personen}}",
+      "entries": "{n, plural, one {# Eintrag} other {# Einträge}}",
+      "unclear": "Stunden unklar: {n}",
+      "noHours": "Ohne Stunden: {n}",
+      "noFigure": "Keine Stunden angegeben",
+      "elsewhere": "Anderswo warten noch {n} auf deine Freigabe.",
+      "notReviewer": "In dieser Organisation gibst du keine Stunden frei: Dafür braucht es eine Beziehung als Führungskraft oder Inhaber.",
+      "decisionsClear": "Gerade warten keine weiteren Entscheidungen.",
+      "doors": "Personen und Projekte"
+    },
     "title": "Unternehmensführung",
     "need": "Was wir brauchen",
     "offer": "Was wir anbieten",
@@ -15,7 +32,22 @@
     "work": "Arbeit & Stunden",
     "results": "Ergebnisse",
     "history": "Verlauf",
-    "areasTitle": "Unternehmensbereiche"
+    "areasTitle": "Unternehmensbereiche",
+    "approvals": {
+      "title": "Warten auf Freigabe: {n}",
+      "titleUnknown": "Warten auf Freigabe",
+      "what": "Von deinen Beschäftigten erfasste Stunden und Arbeiten. Gib sie direkt hier frei oder lehne sie ab.",
+      "seeAll": "Alle wartenden ({n})",
+      "emptyTitle": "Im Moment warten keine Stunden von Beschäftigten auf Freigabe.",
+      "emptyNext": "Sobald jemand Arbeit erfasst, erscheint sie hier.",
+      "noEmployees": "Diese Organisation hat noch keine Beschäftigten, deren Stunden du freigeben könntest.",
+      "people": "Personen und Team",
+      "reviewOff": "Die Freigabe ist für {off} von {total} Beschäftigten ausgeschaltet. Ihre Stunden erscheinen hier erst, wenn du sie einschaltest.",
+      "enable": "Unter Personen und Team einschalten",
+      "own": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben: Das kann eine andere Führungskraft dieser Organisation.",
+      "ownAlone": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben, und diese Organisation hat keine andere Führungskraft. Sie bleiben daher als deine eigene Arbeit erfasst.",
+      "ownUnknown": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben: Sie bleiben als deine eigene Arbeit erfasst, bis eine andere Führungskraft sie bestätigt."
+    }
   },
   "publicDemand": {
     "title": "Aktuelle Marktnachfrage",
@@ -122,7 +154,26 @@
     "descriptionLabel": "Über das Unternehmen (auf der öffentlichen Seite sichtbar)",
     "descriptionPlaceholder": "Was Sie tun, wo Sie arbeiten, was Kunden oder Arbeiter erwarten können…",
     "descriptionHint": "Bis zu 2000 Zeichen. Dies ist der Haupttextblock Ihrer öffentlichen Seite.",
-    "errorDescription": "Veröffentlichung gespeichert, aber die Beschreibung konnte nicht gespeichert werden. Bitte erneut versuchen."
+    "errorDescription": "Veröffentlichung gespeichert, aber die Beschreibung konnte nicht gespeichert werden. Bitte erneut versuchen.",
+    "team": {
+      "eyebrow": "Unternehmensprofil",
+      "aboutEyebrow": "Über das Unternehmen",
+      "aboutTitle": "Wer sie sind",
+      "offersEyebrow": "Anzeigen",
+      "offersTitle": "Was sie anbieten",
+      "seekingEyebrow": "Gesucht",
+      "seekingTitle": "Was sie suchen",
+      "seekingSub": "Suchanzeigen des Unternehmens selbst. Das sind keine Stellenangebote.",
+      "contactEyebrow": "Kontakt",
+      "contactTitle": "Das Unternehmen kontaktieren",
+      "contactNote": "Das Unternehmen hat diese Kontaktdaten selbst veröffentlicht. Sie erreichen es direkt, nicht über labourmarket.ai.",
+      "contactNone": "Das Unternehmen hat keine Kontaktdaten veröffentlicht, daher ist es über diese Seite nicht erreichbar.",
+      "actionEmail": "E-Mail schreiben",
+      "actionPhone": "Anrufen",
+      "actionWebsite": "Website des Unternehmens öffnen",
+      "heroContact": "So erreichen Sie es",
+      "provenance": "Das Unternehmen hat diese Seite selbst ausgefüllt."
+    }
   },
   "marketplaceListings": {
     "pageTitle": "Marktplatz",
@@ -3171,6 +3222,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Sieht nach Werbung aus",
       "eyebrow": "PERSONALBEDARF",
       "title": "Öffentliche Personalbedarfs-Warteschlange",
       "subtitle": "Anonyme Bedarfe, die über das öffentliche /company-need-Formular eingereicht wurden. Prüfen Sie jeden einzelnen und markieren Sie den nächsten Schritt von Hand. Nichts wird automatisch gesendet — ein Mensch übernimmt jeden Kontakt.",
@@ -5659,7 +5711,34 @@
       "reauth": "Erneut anmelden",
       "confirmedTitle": "Löschung bestätigt",
       "confirmedBody": "Das System löscht das Konto in den nächsten Minuten und sendet eine Bestätigung an Ihre Konto-E-Mail-Adresse. Muss etwas geprüft werden, informieren wir Sie.",
-      "inReview": "Die automatische Löschung ist zur Prüfung angehalten: Das Konto enthält Daten, die gesetzlich aufbewahrt werden müssen oder andere Personen betreffen könnten. Entscheidung und Gründe erhalten Sie innerhalb eines Monats per E-Mail. Bis dahin wird Ihr Profil in der Suche nicht angezeigt."
+      "inReview": "Die automatische Löschung ist zur Prüfung angehalten: Das Konto enthält Daten, die gesetzlich aufbewahrt werden müssen oder andere Personen betreffen könnten. Entscheidung und Gründe erhalten Sie innerhalb eines Monats per E-Mail. Bis dahin wird Ihr Profil in der Suche nicht angezeigt.",
+      "confirmLabelWaiting": "Ich verstehe, dass das Konto und seine Daten 30 Tage nach der Bestätigung unwiderruflich gelöscht werden, sofern ich nicht vorher storniere.",
+      "confirmStepBodyWaiting": "Ihr Antrag auf Kontolöschung ist gestellt. Bestätigen Sie ihn — das Konto bleibt 30 Tage erhalten, in dieser Zeit können Sie auf dieser Seite stornieren. Danach löscht das System das Konto automatisch und sendet Ihnen eine Bestätigung per E-Mail.",
+      "confirmedBodyWaiting": "Das Konto wird in 30 Tagen gelöscht. Bis dahin können Sie auf dieser Seite stornieren. Nach der Löschung senden wir eine Bestätigung an Ihre Konto-E-Mail-Adresse.",
+      "status": {
+        "pending": "Ihr Antrag auf Kontolöschung ist gestellt.",
+        "pendingConfirmed": "Die Kontolöschung ist bestätigt und geplant.",
+        "withdrawn": "Die Kontolöschung wurde storniert. Ihr Konto bleibt aktiv.",
+        "inProgress": "Die Kontolöschung läuft bereits — sie kann nicht mehr storniert werden.",
+        "done": "Das Konto wurde gelöscht.",
+        "submittedAt": "Gestellt: {date}",
+        "scheduledAt": "Das Konto wird am {date} gelöscht (nach einer Wartezeit von 30 Tagen).",
+        "cancelUntil": "Bis dahin können Sie stornieren.",
+        "loadError": "Der Status der Kontolöschung konnte nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
+      },
+      "cancel": {
+        "button": "Kontolöschung stornieren",
+        "question": "Kontolöschung stornieren? Ihr Konto und Ihre Daten bleiben erhalten.",
+        "confirm": "Ja, stornieren",
+        "keep": "Zurück",
+        "working": "Wird storniert…",
+        "cancelled": "Die Kontolöschung wurde storniert. Ihr Konto bleibt aktiv.",
+        "notCancellable": "Die Kontolöschung hat bereits begonnen und kann nicht mehr storniert werden. Sie erhalten das Ergebnis an die E-Mail-Adresse Ihres Kontos.",
+        "notFound": "Es wurde kein offener Antrag auf Kontolöschung gefunden — es gibt nichts zu stornieren.",
+        "notSignedIn": "Melden Sie sich an, um die Kontolöschung zu stornieren.",
+        "unavailable": "Stornieren ist derzeit nicht verfügbar.",
+        "error": "Die Kontolöschung konnte nicht storniert werden. Versuchen Sie es erneut."
+      }
     },
     "requests": {
       "title": "Ihre gestellten Anträge",
@@ -5694,6 +5773,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Ihr Vertrag über jede Plattformleistung kommt mit der UAB „Nonstop Group“ zustande. Sie stellt auch die Rechnungen aus und empfängt die Zahlungen.",
       "title": "Nutzungsbedingungen",
       "sections": [
         {
@@ -5800,7 +5880,7 @@
           "heading": "Ihre Rechte",
           "items": [
             "Sie können verlangen, die über Sie gespeicherten Daten einzusehen, sie zu berichtigen, eine Kopie davon zu erhalten, ihre Nutzung einzuschränken oder sie löschen zu lassen.",
-            "Sie können eine Kopie Ihrer eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei selbst aus Ihrem Konto herunterladen. Die Löschung Ihres Kontos können Sie auf der Datenschutz-Seite Ihres Kontos beantragen und nach erneuter Anmeldung bestätigen; das System löscht das Konto dann automatisch und sendet eine Bestätigung an die E-Mail-Adresse des Kontos. Müssen Daten gesetzlich aufbewahrt werden oder betreffen sie andere Personen, wird der Antrag geprüft und Sie erhalten die Entscheidung innerhalb eines Monats. Sie können uns auch kontaktieren — siehe die Seite „Konto- und Datenlöschung“.",
+            "Sie können eine Kopie Ihrer eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei selbst aus Ihrem Konto herunterladen. Die Löschung Ihres Kontos können Sie auf der Datenschutz-Seite Ihres Kontos beantragen und nach erneuter Anmeldung bestätigen; 30 Tage nach der Bestätigung löscht das System das Konto automatisch (bis dahin können Sie den Antrag auf der Datenschutz-Seite stornieren) und sendet eine Bestätigung an die E-Mail-Adresse des Kontos. Nach der endgültigen Löschung können gelöschte Daten noch bis zu 7 Tage in verschlüsselten Datenbank-Backups verbleiben; sie werden dort nicht verwendet und anschließend überschrieben. Müssen Daten gesetzlich aufbewahrt werden oder betreffen sie andere Personen, wird der Antrag geprüft und Sie erhalten die Entscheidung innerhalb eines Monats. Sie können uns auch kontaktieren — siehe die Seite „Konto- und Datenlöschung“.",
             "Wo die Verarbeitung auf einer Einwilligung beruht, können Sie diese Einwilligung jederzeit widerrufen."
           ]
         },
@@ -5875,6 +5955,7 @@
     },
     "dataProtection": {
       "title": "Datenschutz",
+      "metaDescription": "In einfachen Worten: wie Daten innerhalb von LabourMarket.ai geschützt werden. Beschrieben ist nur, was heute tatsächlich in die Plattform eingebaut ist.",
       "intro": "Diese Seite erklärt in einfachen Worten, wie Daten innerhalb von Labour Market AI geschützt werden. Sie beschreibt nur, was heute tatsächlich in die Plattform eingebaut ist.",
       "sections": [
         {
@@ -6117,7 +6198,7 @@
     "dataDeletion": {
       "title": "Konto- und Datenlöschung",
       "description": "So beantragen Sie die Löschung Ihres LabourMarket.ai-Kontos und Ihrer personenbezogenen Daten.",
-      "intro": "Sie können LabourMarket.ai bitten, Ihr Konto und Ihre personenbezogenen Daten zu löschen. Wenn Sie sich anmelden können, können Sie den Antrag selbst stellen: Öffnen Sie die Datenschutz-Seite Ihres Kontos (in der mobilen App: Einstellungen → Datenschutz), wählen Sie die Kontolöschung und bestätigen Sie sie nach erneuter Anmeldung. Das System löscht das Konto dann automatisch und sendet eine Bestätigung an die E-Mail-Adresse des Kontos; müssen Daten gesetzlich aufbewahrt werden oder betreffen sie andere Personen, wird der Antrag geprüft und Sie erhalten die Entscheidung innerhalb eines Monats. Sie können die Löschung auch per E-Mail beantragen, wie unten beschrieben; ein Mensch antwortet innerhalb eines Monats.",
+      "intro": "Sie können LabourMarket.ai bitten, Ihr Konto und Ihre personenbezogenen Daten zu löschen. Wenn Sie sich anmelden können, können Sie den Antrag selbst stellen: Öffnen Sie die Datenschutz-Seite Ihres Kontos (in der mobilen App: Einstellungen → Datenschutz), wählen Sie die Kontolöschung und bestätigen Sie sie nach erneuter Anmeldung. 30 Tage nach der Bestätigung löscht das System das Konto automatisch (bis dahin können Sie den Antrag auf der Datenschutz-Seite stornieren) und sendet eine Bestätigung an die E-Mail-Adresse des Kontos; müssen Daten gesetzlich aufbewahrt werden oder betreffen sie andere Personen, wird der Antrag geprüft und Sie erhalten die Entscheidung innerhalb eines Monats. Nach der endgültigen Löschung können gelöschte Daten noch bis zu 7 Tage in verschlüsselten Datenbank-Backups verbleiben; sie werden dort nicht verwendet und anschließend überschrieben. Sie können die Löschung auch per E-Mail beantragen, wie unten beschrieben; ein Mensch antwortet innerhalb eines Monats.",
       "howTitle": "So beantragen Sie die Löschung",
       "howSteps": [
         "Schreiben Sie an {email} von der E-Mail-Adresse, die mit Ihrem LabourMarket.ai-Konto verknüpft ist.",
@@ -8649,6 +8730,98 @@
       "emptyCapabilities": "Noch keine Fähigkeiten erfasst. Hier erscheinen Ihre Fähigkeiten und die Arbeit, die sie zeigt.",
       "emptyExperience": "Noch keine Arbeitsgeschichte. Ihr Journal und die Aufzeichnungen Ihrer Arbeitgeber bauen sie auf.",
       "untitled": "Arbeit ohne Namen in der Quelle"
+    },
+    "athlete": {
+      "earlyNote": "Früher Entwurf deines Living CV. Die Zahlen sind deine echten Einträge; das Aussehen ist noch nicht endgültig.",
+      "fullCv": "Vollständigen Lebenslauf öffnen",
+      "hero": {
+        "portraitAlt": "Foto von {name}",
+        "noRole": "Noch kein Beruf hinzugefügt",
+        "availableFrom": "ab {date}",
+        "onlyYou": "Nur du siehst das hier."
+      },
+      "stats": {
+        "aria": "Zahlen und wer dahintersteht",
+        "unknown": "Konnte gerade nicht gelesen werden",
+        "organizationCount": "{count, plural, one {# Organisation} other {# Organisationen}}",
+        "confirmedBy": "Bestätigt im Eintrag von {who}",
+        "confirmedBySomeone": "Ein Eintrag einer Führungskraft oder Organisation liegt vor",
+        "confirmedSelfOnly": "Bisher nur deine eigene Bestätigung; keine andere Führungskraft oder Organisation hat das bestätigt",
+        "someSelfConfirmed": "Teilweise: {qualifier}",
+        "truncated": "Dein Journal ist lang, ältere Einträge können außerhalb dieser Zahlen liegen.",
+        "confirmed": {
+          "label": "Stunden im Eintrag einer Führungskraft oder Organisation",
+          "none": "Noch bestätigt kein Eintrag einer Führungskraft oder Organisation deine Arbeit"
+        },
+        "total": {
+          "label": "Stunden Erfahrung",
+          "behind": "Dein Journal und Einträge von Organisationen, jede Stunde einmal"
+        },
+        "journal": {
+          "label": "erfasste Stunden",
+          "behind": "Dein eigenes Arbeitsjournal",
+          "none": "Noch nichts erfasst"
+        },
+        "organization": {
+          "label": "Stunden in Einträgen von Organisationen",
+          "behind": "Einträge von Organisationen"
+        },
+        "projects": {
+          "label": "Projekte",
+          "behind": "Aus deinen Einträgen"
+        }
+      },
+      "seasons": {
+        "eyebrow": "Laufbahn",
+        "title": "Laufbahn nach Saisons",
+        "empty": "Noch keine Saisons. Halte einen Arbeitstag fest, und er wird die erste Zeile deiner Geschichte.",
+        "emptyAction": "Arbeit erfassen",
+        "undated": "Keine Daten angegeben",
+        "hoursNotStated": "Keine Stunden angegeben",
+        "hoursRecorded": "{hours} erfasst",
+        "hoursConfirmed": "{confirmed} im Eintrag einer Führungskraft · {recorded} erfasst",
+        "orgDayHours": "{hours} in {count, plural, one {# Eintrag} other {# Einträgen}}",
+        "orgPeriodHours": "{hours} als Summe eines Zeitraums angegeben",
+        "note": "Eine Saison zeigt die Stunden, die ihre eigenen Einträge angeben. Die Summe oben zählt jede Stunde einmal.",
+        "confirmedBy": "Bestätigt im Eintrag von {who}",
+        "placement": "Praktikum",
+        "reconstructed": "Aus einem früheren Eintrag rekonstruiert",
+        "photoAlt": "Foto der Arbeit an {name}",
+        "evidence": {
+          "confirmed": "Bestätigt im Eintrag einer Führungskraft oder Organisation",
+          "client_accepted": "Vom Kunden abgenommen",
+          "organization_record": "Eintrag der Organisation",
+          "own_record": "Dein eigener Eintrag",
+          "stated": "Das hast du selbst angegeben; noch zeigt es nichts"
+        }
+      },
+      "skills": {
+        "eyebrow": "Fähigkeiten",
+        "title": "Was du kannst und was das zeigt",
+        "empty": "Noch keine Fähigkeiten. Füge hinzu, was du kannst; den Rest zeigen deine Einträge.",
+        "emptyAction": "Fähigkeiten hinzufügen",
+        "potentialFrom": "Deine Arbeit an {skills} deutet darauf hin; noch zeigt es kein Eintrag",
+        "documentUnverified": "Das Dokument hast du selbst hinzugefügt; niemand hat es geprüft",
+        "involved": "Beteiligt an {hours}, nicht allein dieser Fähigkeit zugerechnet",
+        "timeUnknown": "Dein Journal konnte gerade nicht gelesen werden, darum zeigen Fähigkeiten keine Stunden.",
+        "noScore": "Nichts hier fasst einen Menschen in einer einzigen Zahl zusammen. Du siehst, was die Einträge zeigen und wer dahintersteht.",
+        "state": {
+          "confirmed": "Von einer Führungskraft bestätigte Arbeit",
+          "certified": "Zertifiziert",
+          "recorded": "In deinen Einträgen",
+          "declared": "Selbst angegeben",
+          "potential": "Möglich"
+        }
+      },
+      "next": {
+        "eyebrow": "Nächster Schritt",
+        "title": "Wohin deine Arbeit führen kann",
+        "confirmed": "Von einer Führungskraft bestätigt: {list}",
+        "inRecords": "In deinen Einträgen: {list}",
+        "missing": "Fehlt: {list}",
+        "none": "Noch kein nächster Schritt zu zeigen. Mehr erfasste Arbeit gibt mehr Grundlage.",
+        "unknown": "Konnte gerade nicht gelesen werden."
+      }
     }
   },
   "todayScreen": {
@@ -10789,7 +10962,7 @@
     "navLabel": "Über LabourMarket.ai",
     "eyebrow": "Über die Plattform",
     "title": "Was ist LabourMarket.ai",
-    "lede": "LabourMarket.ai ist eine Betriebsplattform für den Arbeitsmarkt. Sie verbindet Menschen, Arbeitgeber, Agenturen, Teams, Projekte, Weiterbildung und Arbeitsmarktdienste rund um echte Arbeit — vom ersten Gespräch bis zur nächsten Gelegenheit.",
+    "lede": "LabourMarket.ai ist eine internationale Plattform für Arbeit, Fachkräfte und Dienstleistungen. Sie verbindet Menschen, Arbeitgeber, Agenturen, Teams, Projekte, Weiterbildung und Arbeitsmarktdienste rund um echte Arbeit — vom ersten Gespräch bis zur nächsten Gelegenheit.",
     "hero": {
       "lead": "Der berufliche Wert eines Menschen sollte nicht jedes Mal verschwinden, wenn er den Arbeitgeber wechselt. Echte Arbeit kann zu dauerhafter beruflicher Geschichte werden: was die Person getan hat, wo, wann, wie lange, in welcher Rolle, mit welchen Fähigkeiten und welche Nachweise und Bestätigungen das stützen.",
       "leadOrg": "Für Organisationen baut dieselbe echte Arbeit die Historie dessen auf, was das Unternehmen tatsächlich geleistet hat: Projekte, Teams, ausgeführte Arbeiten, Stunden, Kompetenzen und Nachweise.",
@@ -11391,6 +11564,7 @@
       "empty": "An diesem Tag gibt es keine Einträge."
     },
     "year": {
+      "hint": "Die Zahl zeigt, wie viele Einträge in diesen Monat fallen: Buchungen, Projekte, Aufgaben, Arbeitseinträge, Abwesenheiten und andere. Ein Eintrag über mehrere Monate zählt in jedem davon.",
       "count": "{count, plural, =0 {keine Einträge} one {# Eintrag} other {# Einträge}}"
     },
     "emptyFiltered": "Keine Einträge dieses Typs.",
@@ -12478,6 +12652,7 @@
     },
     "invitePage": {
       "eyebrow": "EINLADUNG",
+      "pageTitle": "Einladung",
       "notEnabled": "Derzeit nicht verfügbar.",
       "loadError": "Die Einladung konnte gerade nicht geladen werden. Bitte erneut versuchen.",
       "invalidTitle": "Einladung nicht gefunden",
@@ -15211,6 +15386,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Personalsuche beauftragen",
+        "body": "Nennen Sie den Beruf, die benötigte Personenzahl, das Land und den Arbeitsbeginn."
+      },
+      "b2b": {
+        "title": "B2B-Anfrage senden",
+        "body": "Beschreiben Sie Art der Arbeiten, Ort, Umfang und Fristen."
+      },
+      "project": {
+        "title": "Einzelprojekt beauftragen",
+        "body": "Für Privat- und Geschäftskunden: Beschreiben Sie das benötigte Projekt oder die Dienstleistung."
+      },
+      "title": "Anfrage senden",
+      "promise": "Senden Sie Ihre Anfrage – wir melden uns innerhalb von 24 Stunden bei Ihnen.",
+      "name": "Name oder Firma",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "country": "Land",
+      "countryChoose": "Land wählen",
+      "city": "Ort",
+      "profession": "Beruf",
+      "workers": "Anzahl der Arbeitskräfte",
+      "start": "Arbeitsbeginn",
+      "details": "Weitere Anforderungen",
+      "work": "Art der Arbeiten",
+      "place": "Einsatzort",
+      "scope": "Umfang",
+      "deadline": "Fristen",
+      "need": "Benötigtes Projekt oder benötigte Dienstleistung",
+      "customer": "Auftraggeber",
+      "customerPrivate": "Privatperson",
+      "customerBusiness": "Unternehmen",
+      "optional": "freiwillig",
+      "send": "Anfrage senden",
+      "sending": "Wird gesendet…",
+      "receivedTitle": "Ihre Anfrage ist bei uns eingegangen",
+      "receivedBody": "Wir melden uns innerhalb von 24 Stunden über die angegebenen Kontaktdaten.",
+      "invalid": "Bitte prüfen Sie die Felder und versuchen Sie es erneut. Ihre Eingaben bleiben im Formular.",
+      "limited": "Gerade gehen zu viele Anfragen ein. Bitte versuchen Sie es später: Ihre Eingaben bleiben im Formular.",
+      "unavailable": "Ihre Anfrage konnte nicht gesendet werden und ist nicht eingegangen. Ihre Eingaben bleiben im Formular, bitte versuchen Sie es erneut.",
+      "notice": "Mit dem Senden bestätigen Sie, dass Sie die <privacy>Datenschutzerklärung</privacy> gelesen haben."
+    },
     "audienceValueEyebrow": "Wert für jede Seite der Arbeit",
     "audienceValueTitle": "Was jede Zielgruppe bekommt",
     "how": {

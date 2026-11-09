@@ -66,6 +66,36 @@ function matchFolded(q: string, folded: readonly { slug: string; l: string }[]):
 }
 
 /**
+ * WORDS PEOPLE TYPE THAT NO CATALOGUE LABEL NAMES, each for one existing profession.
+ *
+ * On a Swedish and Norwegian supply these answer a false zero in text search. Only a
+ * word that cannot be publisher text belongs here: `chef` means manager in Swedish,
+ * `programmer` sits inside `programmerare` and `lagerist` is Swedish too, so all three
+ * stay free text. Tried last, so a catalogue label always wins.
+ */
+const TYPED_WORDS: Readonly<Record<string, readonly string[]>> = {
+  driver: [
+    "truck driver",
+    "lorry driver",
+    "sunkvežimio vairuotojas",
+    "vilkiko vairuotojas",
+    "lkw fahrer",
+    "lkw-fahrer",
+    "vrachtwagenchauffeur",
+    "дальнобойщик",
+    "водитель грузовика",
+  ],
+  cook: ["küchenchef", "szef kuchni", "шеф-повар"],
+  software_developer: ["entwickler", "softwareentwickler", "ontwikkelaar", "softwareontwikkelaar"],
+  teacher: ["учитель"],
+  warehouse_worker: ["sandėlininkas", "sandėlininkė", "magazynier", "кладовщик"],
+};
+
+const TYPED_WORD_SLUG: ReadonlyMap<string, string> = new Map(
+  Object.entries(TYPED_WORDS).flatMap(([slug, words]) => words.map((w) => [foldForMatch(w), slug] as const)),
+);
+
+/**
  * THE SAME WORD IN ANOTHER ACTIVE LANGUAGE (2026-10-08 anonymous walk).
  *
  * `/lt/jobs?q=welder` and `/en/jobs?q=valytojas` reported a false zero: the
@@ -88,5 +118,15 @@ export function matchProfessionAcrossLocales(
     const slug = matchProfessionByLabel(query, options);
     if (slug) hits.add(slug);
   }
-  return hits.size === 1 ? [...hits][0]! : null;
+  if (hits.size > 1) return null;
+  return hits.size === 1 ? [...hits][0]! : (TYPED_WORD_SLUG.get(foldForMatch(query)) ?? null);
+}
+
+/**
+ * Where a typed word that names a profession goes. The page stays, so a shared
+ * `?q=elektrikas&page=2` opens page 2 of that profession and not page 1 (SR-4).
+ */
+export function professionRedirectHref(slug: string, rawPage: string | undefined): string {
+  const page = Number.parseInt(rawPage ?? "1", 10) || 1;
+  return page > 1 ? `/jobs?profession=${slug}&page=${page}` : `/jobs?profession=${slug}`;
 }

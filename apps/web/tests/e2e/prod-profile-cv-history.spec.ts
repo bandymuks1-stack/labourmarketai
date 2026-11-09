@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
-import { makeDocx } from "../../lib/cv/__fixtures__/cv-fixtures";
+import { makeDocx, makeUnicodePdf } from "../../lib/cv/__fixtures__/cv-fixtures";
 
 /**
  * PRODUCTION PROFILE · LIVING CV · HISTORY — owner areas 1 / 3 / 15: the
@@ -405,6 +405,95 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
     .or(after.getByTestId("cv-history-node").filter({ hasText: corrected }));
   await expect(saved.first(), "the corrected row is on the Living CV, as stated by the person").toBeVisible({ timeout: 60_000 });
   await expect(after.getByText(company), "the parser's reading was not saved").toHaveCount(0);
+  await ctx.close();
+});
+
+test("P-6b (UF-3). a real CV layout is read correctly: title, dates, training and each language's level", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  const company = `UAB QASYNTHETICB${RUN.replace(/[^0-9a-z]/gi, "").toUpperCase()}`;
+  const lines = [
+    "Darbo patirtis",
+    "Plytelių klojėjas",
+    company,
+    "2019 – 2023",
+    "Išsilavinimas",
+    "QA Synthetic rengimo centras, profesinis mokymas 2015–2017",
+    "Kalbos",
+    "Anglų B2, rusų gimtoji",
+  ];
+  await page.goto("/lt/dashboard");
+  await say(page, "Įkelk mano CV");
+  await inMain(page).getByTestId("chat-chip-cv").filter({ visible: true }).last().click({ timeout: 60_000 });
+  const input = page.locator('[data-testid="cv-import-upload"] input[type="file"]').last();
+  await input.waitFor({ state: "attached", timeout: 60_000 });
+  await input.setInputFiles({
+    name: "qa-synthetic-cv-layout.docx",
+    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    buffer: Buffer.from(makeDocx(lines.join("\n"))),
+  });
+  await expect(inMain(page).getByTestId("cv-import-section-review").last()).toBeVisible({ timeout: 60_000 });
+
+  const job = inMain(page).getByTestId("cv-import-item-wh-0").last();
+  await expect(job, "the title is kept, not replaced by the company").toContainText("Plytelių klojėjas", { timeout: 30_000 });
+  await expect(job, "the dates on their own line are kept").toContainText("2019");
+  await expect(inMain(page).getByTestId("cv-import-item-edu-0").last(), "a training centre is education").toContainText("rengimo centras");
+  await expect(page.locator('[data-testid^="cv-import-item-wh-"]').filter({ hasText: "rengimo centras" }), "and never work history").toHaveCount(0);
+  await expect(inMain(page).getByTestId("cv-import-level-en").last(), "English keeps its own level").toHaveValue("B2");
+  await expect(inMain(page).getByTestId("cv-import-level-ru").last(), "Russian is not given English's level").not.toHaveValue("B2");
+
+  // Read, never confirmed: nothing of this reaches the Living CV.
+  const cv = await livingCv(page);
+  await expect(cv.getByText(company)).toHaveCount(0);
+  await ctx.close();
+});
+
+test("P-6c (UF-3). a PDF CV keeps Lithuanian letters in the name, the employer and the title", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  // Fixed synthetic strings carrying every Lithuanian letter class: caron
+  // (Š, Ž), ogonek (Ą, į, ų), dot (ė) and macron (ū). The PDF uses a Type0 /
+  // ToUnicode font, the shape Word and Chrome export, built in memory.
+  const name = "QA-SYNTHETIC Žydrūnė Ąžuolaitė";
+  const company = "UAB Šiaurės Ąžuolų Statyba";
+  const title = "Vyresnioji įrangos montuotoja";
+  const lines = [
+    name,
+    "Darbo patirtis",
+    title,
+    company,
+    "2018 – 2024",
+    "Išsilavinimas",
+    "QA Synthetic Ąžuolyno rengimo centras, profesinis mokymas 2015–2017",
+    "Kalbos",
+    "Lietuvių gimtoji, anglų B2",
+  ];
+  await page.goto("/lt/dashboard");
+  await say(page, "Įkelk mano CV");
+  await inMain(page).getByTestId("chat-chip-cv").filter({ visible: true }).last().click({ timeout: 60_000 });
+  const input = page.locator('[data-testid="cv-import-upload"] input[type="file"]').last();
+  await input.waitFor({ state: "attached", timeout: 60_000 });
+  await input.setInputFiles({
+    name: "qa-synthetic-cv-lithuanian.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from(makeUnicodePdf(lines.join("\n"))),
+  });
+  const review = inMain(page).getByTestId("cv-import-section-review").last();
+  const error = inMain(page).getByTestId("cv-import-error").last();
+  await expect(review.or(error)).toBeVisible({ timeout: 60_000 });
+  if (await error.isVisible()) throw new Error(`PDF CV not read: ${(await error.innerText()).slice(0, 120)}`);
+
+  const job = inMain(page).getByTestId("cv-import-item-wh-0").last();
+  await expect(job, "the title keeps į").toContainText(title, { timeout: 30_000 });
+  await expect(job, "the employer keeps Š, ė, Ą, ž and ų").toContainText(company);
+  await expect(job, "the dates are kept").toContainText("2018");
+  await expect(
+    page.locator('[data-testid^="cv-import-item-unplaced-"]').filter({ hasText: name }),
+    "the name line keeps Ž, ū, ė and Ą, offered to place, not dropped",
+  ).toHaveCount(1);
+  await expect(inMain(page).getByTestId("cv-import-level-lt").last(), "Lithuanian is read from \"Lietuvių\"").toHaveValue("native");
+
+  // Read, never confirmed: nothing of this reaches the Living CV.
+  const cv = await livingCv(page);
+  await expect(cv.getByText(company)).toHaveCount(0);
   await ctx.close();
 });
 
@@ -951,6 +1040,52 @@ test("P-24 (2.5). experience: failed save, save, reload, repeat and remove, with
   await timed("experience remove to row gone", () => expect(rowsIn(main)).toHaveCount(0, { timeout: 60_000 }));
   main = await profileAt(page, "capabilities");
   await expect(rowsIn(main), "stays removed after a reload").toHaveCount(0, { timeout: 30_000 });
+  await ctx.close();
+});
+
+test("P-25 (UF-3). a job with no organization reads as the person stated it on the Living CV", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  const title = `${TAG} tik metai`;
+  const main = await profileAt(page, "capabilities");
+  await main.getByTestId("add-experience-open").click();
+  const form = main.getByTestId("add-experience-form");
+  await form.getByTestId("add-experience-title").fill(title);
+  await form.getByTestId("add-experience-start-year").fill("2019");
+  await form.getByTestId("add-experience-current").check();
+  addedHistory.push(title);
+  await form.getByTestId("add-experience-save").click();
+  await expect(main.getByTestId("capability-experience-row").filter({ hasText: title }).first()).toBeVisible({ timeout: 60_000 });
+
+  const cv = await livingCv(page);
+  // The title leads the row (#3084), not the word for the relationship.
+  const row = cv.getByTestId("premium-cv-experience-row").filter({ hasText: title });
+  await expect(row, "the Living CV names the job by its title").toHaveCount(1, { timeout: 30_000 });
+  // Only the year was stated (#3086): no month, no day, on screen or in print.
+  await expect(row, "a stated year has no invented month").toContainText("2019");
+  await expect(row).not.toContainText("2019-01");
+  const printed = cv.getByTestId("cv-history-node").filter({ hasText: title });
+  await expect(printed, "the printed list reads the same").toHaveCount(1);
+  await expect(printed).not.toContainText("2019-01");
+  await ctx.close();
+});
+
+test("P-26 (2.1). the summary save answers on screen, every time, with real times", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  // One run saw the save stored and no "saved" for 30 s (41994411748, cleanup). This
+  // reports what a person sees on each try. A try with no answer fails the walk.
+  let main = await profileAt(page, "profile-public-summary");
+  const original = await main.getByTestId("profile-public-headline").inputValue();
+  summaryOriginal ??= { headline: original, bio: await main.getByTestId("profile-public-bio").inputValue() };
+  for (const attempt of [1, 2, 3]) {
+    main = await profileAt(page, "profile-public-summary");
+    await main.getByTestId("profile-public-headline").fill(`${TAG} bandymas ${attempt}`);
+    const saved = main.getByTestId("profile-public-summary-saved");
+    const error = main.getByTestId("profile-public-summary-error");
+    const started = Date.now();
+    await main.getByTestId("profile-public-summary-save").click();
+    await expect(saved.or(error), `try ${attempt}: the save answers on screen`).toBeVisible({ timeout: 60_000 });
+    console.info(`[save-proof] summary try ${attempt}: ${(await saved.isVisible()) ? "saved" : "error"} after ${Date.now() - started} ms`);
+  }
   await ctx.close();
 });
 
