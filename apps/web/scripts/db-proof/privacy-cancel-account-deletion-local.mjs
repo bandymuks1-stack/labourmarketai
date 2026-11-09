@@ -285,6 +285,14 @@ const OPCLOSED = H(7);    // (d) operator-closed
 const OTHER = H(8);       // (f)
 const ADMIN = H(9);       // (g) admin review queue unchanged
 const RB = H(10);         // (i) after re-apply
+const PRE = H(11);        // confirmed before the migration
+const AGAIN = H(12);      // a new request after a withdrawal
+const TWO = H(13);        // two open requests
+const EDGE = H(14);       // (h) boundary
+
+/** sets confirmed_at = now() - <iv> and reads due_v1 in the SAME transaction (same now()) — the exact `<=` boundary */
+const dueAtSameNow = (req, iv) => one(`update public.privacy_erasure_confirmations_v1 set confirmed_at = now() - (${iv}) where request_id = '${req}';
+  set role service_role; select coalesce(string_agg(request_id::text, ','), '') from public.privacy_erasure_due_v1(50)`).split(",").includes(req);
 
 function createUser(id) {
   psql(`insert into auth.users (id, email, raw_user_meta_data, last_sign_in_at) values ('${id}', 'u${id.slice(-2)}@example.test', '{"role":"worker"}', now())`);
@@ -349,8 +357,28 @@ cluster: <repo>/.tmp/pgcancel-${process.pid} (port ${port}, throwaway, synthetic
     const before = defs();
     ok(Object.keys(before).length === 4, "baseline: guard, due_v1, mark_v1 and erase_user_account_v3 exist from the real migrations");
 
+    // a request confirmed BEFORE the migration (as on production): its schedule must
+    // follow its own confirmed_at, never be reset by applying the migration
+    createUser(PRE);
+    const reqPre = submitDeletion(PRE);
+    confirmDeletion(PRE);
+    backdate(reqPre, "10 days");
+    const preConfirmedAt = one(`select confirmed_at::text from public.privacy_erasure_confirmations_v1 where request_id = '${reqPre}'`);
+    ok(dueIds().includes(reqPre), "pre: before the migration the 10-day-old confirmed request is due (no grace yet)");
+
     applyFile(MIGRATION, "20261109120000");
     const after = defs();
+    ok(one(`select confirmed_at::text from public.privacy_erasure_confirmations_v1 where request_id = '${reqPre}'`) === preConfirmedAt,
+      "pre: applying the migration keeps the pre-existing confirmed_at unchanged");
+    const sPre = status(PRE);
+    ok(sPre?.status === "pending" && sPre.request_id === reqPre
+      && Math.abs(new Date(sPre.scheduled_erasure_at) - new Date(sPre.deletion_confirmed_at) - 30 * 864e5) < 1000
+      && Math.abs(new Date(sPre.scheduled_erasure_at) - Date.now() - 20 * 864e5) < 60000,
+      "pre: it is scheduled at its OWN confirmed_at + 30 days (about 20 days from now), not reset to now + 30");
+    ok(!dueIds().includes(reqPre), "pre: after the migration it is not due until its own confirmed_at + 30 days");
+    backdate(reqPre, "30 days 1 second");
+    ok(dueIds().includes(reqPre), "pre: once its confirmed_at is past 30 days it is due");
+    ok(cancel(PRE)?.status === "ok" && confirmations(reqPre) === 0, "pre: the holder of a pre-migration confirmation can cancel it");
     ok(newObjects() === 5, "20261109120000 applied: 4 new functions + the privacy-row trigger");
     ok(psqlFile(MIGRATION).status === 0 && newObjects() === 5, "20261109120000 re-applies on the same database (idempotent)");
     ok(one("select pg_catalog.array_to_string(proacl, ' ') from pg_proc where proname = 'privacy_cancel_account_deletion_v1'").includes("authenticated=X")
@@ -360,7 +388,7 @@ cluster: <repo>/.tmp/pgcancel-${process.pid} (port ${port}, throwaway, synthetic
       "grants: grace constant not executable by PUBLIC / anon / authenticated");
     ok(one("select prosecdef::text from pg_proc where proname = 'customer_requests_privacy_row_guard'") === "false", "privacy-row guard is an INVOKER trigger function (current_user = caller)");
 
-    for (const u of [HOLDER, RACE_CANCEL, RACE_EXEC, RACE_MARK, STALE, GRACE, OPCLOSED, OTHER, ADMIN, RB]) createUser(u);
+    for (const u of [HOLDER, RACE_CANCEL, RACE_EXEC, RACE_MARK, STALE, GRACE, OPCLOSED, OTHER, ADMIN, RB, AGAIN, TWO, EDGE]) createUser(u);
     psql(`update public.profiles set active_role = 'admin' where id = '${ADMIN}'`);
 
     // ── (e) signed out ─────────────────────────────────────────────────
@@ -379,9 +407,9 @@ cluster: <repo>/.tmp/pgcancel-${process.pid} (port ${port}, throwaway, synthetic
     confirmDeletion(HOLDER);
     psql(`insert into public.privacy_erasure_notices_v1 (request_id, kind, recipient_email, status) values ('${reqH}', 'erasure_completed', 'u01@example.test', 'held'), ('${reqH}', 'erasure_review', 'u01@example.test', 'queued')`);
     const s0 = status(HOLDER);
-    ok(s0?.status === "pending" && s0.cancellable === true && s0.request_id === reqH && s0.confirmed_at && s0.submitted_at
-      && Math.abs(new Date(s0.scheduled_erasure_at) - new Date(s0.confirmed_at) - 30 * 864e5) < 1000,
-      `a1 status before cancel: pending, cancellable, scheduled_erasure_at = confirmed_at + 30 days (${JSON.stringify(Object.keys(s0 || {}))})`);
+    ok(s0?.status === "pending" && s0.cancellable === true && s0.request_id === reqH && s0.deletion_confirmed_at && !("confirmed_at" in s0) && s0.submitted_at
+      && Math.abs(new Date(s0.scheduled_erasure_at) - new Date(s0.deletion_confirmed_at) - 30 * 864e5) < 1000,
+      `a1 status before cancel: pending, cancellable, key deletion_confirmed_at (no bare confirmed_at), scheduled_erasure_at = deletion_confirmed_at + 30 days (${JSON.stringify(Object.keys(s0 || {}))})`);
     const c1 = cancel(HOLDER);
     ok(c1?.status === "ok" && c1.request_id === reqH && Object.keys(c1).length === 2, `a2 cancel -> ${JSON.stringify(c1 && { ...c1, request_id: c1.request_id === reqH ? "<req>" : c1.request_id })}`);
     const r1 = reqRow(reqH);
@@ -393,7 +421,7 @@ cluster: <repo>/.tmp/pgcancel-${process.pid} (port ${port}, throwaway, synthetic
     ok(r1.payload.privacy_request_type === "account_deletion" && r1.profile_id === HOLDER, "a5 the request stays an account-deletion row of the holder (history kept)");
     ok(confirmations(reqH) === 0 && notices(reqH) === 0, "a6 confirmation row and held + queued notices deleted in the same transaction");
     const s1 = status(HOLDER);
-    ok(s1?.status === "withdrawn" && s1.cancellable === false && s1.confirmed_at === null && s1.scheduled_erasure_at === null, "a7 status after cancel: withdrawn, not cancellable, no schedule");
+    ok(s1?.status === "withdrawn" && s1.cancellable === false && s1.deletion_confirmed_at === null && s1.scheduled_erasure_at === null, "a7 status after cancel: withdrawn, not cancellable, no schedule");
     ok(!dueIds().includes(reqH), "a8 the runner no longer sees it (privacy_erasure_due_v1)");
     const c2 = cancel(HOLDER);
     ok(c2?.status === "ok_already" && c2.request_id === reqH, "b1 second cancel -> {status:ok_already, request_id}");
@@ -458,6 +486,46 @@ cluster: <repo>/.tmp/pgcancel-${process.pid} (port ${port}, throwaway, synthetic
     ok(dueIds().includes(reqG), "h4 confirmed 31 days ago -> due");
     ok(one("set role service_role; select public.privacy_account_deletion_grace()::text") === "30 days", "h5 the grace is the one named constant (30 days, owner decision 2026-11-09)");
     ok(cancel(GRACE)?.status === "ok" && !dueIds().includes(reqG), "h6 a due request the runner has not picked yet is still cancellable and then not due");
+    const reqEdge = submitDeletion(EDGE);
+    confirmDeletion(EDGE);
+    ok(dueAtSameNow(reqEdge, "interval '30 days' - interval '1 second'") === false, "h7 confirmed exactly 30 days MINUS 1 second before now() -> not due");
+    ok(dueAtSameNow(reqEdge, "interval '30 days'") === true, "h8 confirmed EXACTLY 30 days before now() -> due (the boundary is <=)");
+    ok(dueAtSameNow(reqEdge, "interval '30 days' + interval '1 second'") === true, "h9 confirmed 30 days PLUS 1 second before now() -> due");
+
+    // ── a new request after a withdrawal ──────────────────────────────
+    console.log("\n[n] a new request after a withdrawal");
+    const reqOld = submitDeletion(AGAIN);
+    confirmDeletion(AGAIN);
+    backdate(reqOld, "20 days");
+    ok(cancel(AGAIN)?.status === "ok" && confirmations(reqOld) === 0, "n1 first request withdrawn, its confirmation deleted");
+    const reqNew = submitDeletion(AGAIN);
+    const sNew0 = status(AGAIN);
+    ok(sNew0?.status === "pending" && sNew0.request_id === reqNew && sNew0.deletion_confirmed_at === null && sNew0.scheduled_erasure_at === null && sNew0.cancellable === true,
+      "n2 new submit -> status shows the NEW request, pending, not yet confirmed, no schedule");
+    ok(confirmDeletion(AGAIN) === reqNew, "n3 confirmation binds to the new request");
+    const sNew = status(AGAIN);
+    ok(sNew?.request_id === reqNew && Math.abs(new Date(sNew.scheduled_erasure_at) - Date.now() - 30 * 864e5) < 60000,
+      "n4 the new request has its OWN 30-day schedule from its own confirmation (not the old 20-day-old one)");
+    ok(confirmations(reqOld) === 0 && reqRow(reqOld).closed_outcome === "withdrawn" && !dueIds().includes(reqOld) && !dueIds().includes(reqNew),
+      "n5 the old confirmation stays gone, the old request stays withdrawn, neither is due");
+    ok(cancel(AGAIN)?.request_id === reqNew && confirmations(reqNew) === 0, "n6 cancel now withdraws the new request");
+
+    // ── two open requests from one holder ─────────────────────────────
+    console.log("\n[t] two open deletion requests from one holder");
+    const reqT1 = submitDeletion(TWO);
+    const reqT2 = submitDeletion(TWO);
+    ok(reqRow(reqT1).status === "in_review" && reqRow(reqT2).status === "in_review", "t1 two open requests exist");
+    const sT = status(TWO);
+    ok(sT?.request_id === reqT2 && sT.status === "pending", "t2 status shows the latest open one");
+    ok(confirmDeletion(TWO) === reqT2, "t3 confirmation binds to the latest open one");
+    psql(`insert into public.privacy_erasure_confirmations_v1 (request_id, profile_id, method) values ('${reqT1}', '${TWO}', 'owner_written_approval')`);
+    const cT = cancel(TWO);
+    ok(cT?.status === "ok" && cT.request_id === reqT2, "t4 cancel -> {status:ok, request_id: the latest}");
+    ok(reqRow(reqT1).closed_outcome === "withdrawn" && reqRow(reqT2).closed_outcome === "withdrawn" && confirmations(reqT1) === 0 && confirmations(reqT2) === 0,
+      "t5 BOTH open requests withdrawn and both confirmations deleted");
+    const sT2 = status(TWO);
+    ok(sT2?.status === "withdrawn" && sT2.request_id === reqT2 && sT2.cancellable === false, "t6 status after cancel: withdrawn, the latest request");
+    ok(cancel(TWO)?.status === "ok_already", "t7 cancelling again -> ok_already");
 
     // ── (c1) race: cancel first, runner (mark_v1) waits ───────────────
     console.log("\n[c1] race: holder cancels first (holds the row), runner marks second");

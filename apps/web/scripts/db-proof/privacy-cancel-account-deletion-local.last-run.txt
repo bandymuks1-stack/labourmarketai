@@ -1,7 +1,13 @@
-privacy-cancel-account-deletion-local — 2026-11-09T09:33:04.128Z
-cluster: <repo>/.tmp/pgcancel-60088 (port 5517, throwaway, synthetic ids only)
+privacy-cancel-account-deletion-local — 2026-11-09T10:28:29.906Z
+cluster: <repo>/.tmp/pgcancel-66168 (port 5517, throwaway, synthetic ids only)
 server: PostgreSQL 16.13
 PASS  baseline: guard, due_v1, mark_v1 and erase_user_account_v3 exist from the real migrations
+PASS  pre: before the migration the 10-day-old confirmed request is due (no grace yet)
+PASS  pre: applying the migration keeps the pre-existing confirmed_at unchanged
+PASS  pre: it is scheduled at its OWN confirmed_at + 30 days (about 20 days from now), not reset to now + 30
+PASS  pre: after the migration it is not due until its own confirmed_at + 30 days
+PASS  pre: once its confirmed_at is past 30 days it is due
+PASS  pre: the holder of a pre-migration confirmation can cancel it
 PASS  20261109120000 applied: 4 new functions + the privacy-row trigger
 PASS  20261109120000 re-applies on the same database (idempotent)
 PASS  grants: cancel executable by authenticated, not by PUBLIC / anon
@@ -16,7 +22,7 @@ PASS  e4 anon cannot execute the status RPC (permission denied)
 
 [a][b] holder cancels, then cancels again
 PASS  a0 no request yet -> cancel {status:not_found}, status {status:none}
-PASS  a1 status before cancel: pending, cancellable, scheduled_erasure_at = confirmed_at + 30 days (["status","request_id","cancellable","confirmed_at","submitted_at","scheduled_erasure_at"])
+PASS  a1 status before cancel: pending, cancellable, key deletion_confirmed_at (no bare confirmed_at), scheduled_erasure_at = deletion_confirmed_at + 30 days (["status","request_id","cancellable","submitted_at","scheduled_erasure_at","deletion_confirmed_at"])
 PASS  a2 cancel -> {"status":"ok","request_id":"<req>"}
 PASS  a3 row: status closed, closed_outcome withdrawn
 PASS  a4 log entry {status, outcome, at, by:'holder'} appended, no other field (no personal data)
@@ -59,10 +65,30 @@ PASS  h3 confirmed 29 days ago -> not due
 PASS  h4 confirmed 31 days ago -> due
 PASS  h5 the grace is the one named constant (30 days, owner decision 2026-11-09)
 PASS  h6 a due request the runner has not picked yet is still cancellable and then not due
+PASS  h7 confirmed exactly 30 days MINUS 1 second before now() -> not due
+PASS  h8 confirmed EXACTLY 30 days before now() -> due (the boundary is <=)
+PASS  h9 confirmed 30 days PLUS 1 second before now() -> due
+
+[n] a new request after a withdrawal
+PASS  n1 first request withdrawn, its confirmation deleted
+PASS  n2 new submit -> status shows the NEW request, pending, not yet confirmed, no schedule
+PASS  n3 confirmation binds to the new request
+PASS  n4 the new request has its OWN 30-day schedule from its own confirmation (not the old 20-day-old one)
+PASS  n5 the old confirmation stays gone, the old request stays withdrawn, neither is due
+PASS  n6 cancel now withdraws the new request
+
+[t] two open deletion requests from one holder
+PASS  t1 two open requests exist
+PASS  t2 status shows the latest open one
+PASS  t3 confirmation binds to the latest open one
+PASS  t4 cancel -> {status:ok, request_id: the latest}
+PASS  t5 BOTH open requests withdrawn and both confirmations deleted
+PASS  t6 status after cancel: withdrawn, the latest request
+PASS  t7 cancelling again -> ok_already
 
 [c1] race: holder cancels first (holds the row), runner marks second
 PASS  c1.0 due before the race
-PASS  c1.1 the runner's mark_v1 WAITED on the row lock (2649 ms)
+PASS  c1.1 the runner's mark_v1 WAITED on the row lock (2344 ms)
 PASS  c1.2 the cancel committed: {status:ok}
 PASS  c1.3 then mark_v1 -> {"ok":false,"error":"not_confirmed"} (runner stops: nothing approved)
 PASS  c1.4 request withdrawn, account still exists, nothing due
@@ -71,14 +97,14 @@ PASS  c1.5 no erasure receipt
 [c2] race: executor erases first (holds the row), holder cancels second
 PASS  c2.0 after the runner's mark: status in_progress, not cancellable
 PASS  c2.1 the executor erased (receipt written)
-PASS  c2.2 the cancel WAITED on the row lock (2733 ms)
+PASS  c2.2 the cancel WAITED on the row lock (2861 ms)
 PASS  c2.3 then cancel -> {status:not_cancellable, request_id} ("not_cancellable")
 PASS  c2.4 the account is gone, the request is closed as executed (not withdrawn)
 PASS  d3 a later cancel with the erased person's stale session -> {status:not_found} (the row is severed to the sentinel; nothing of theirs remains)
 
 [c3] race: runner marks approved first (holds the row), holder cancels second
 PASS  c3.1 the runner marked approved
-PASS  c3.2 the cancel WAITED on the row lock (2953 ms)
+PASS  c3.2 the cancel WAITED on the row lock (2519 ms)
 PASS  c3.3 then cancel -> {status:not_cancellable} (d: approved)
 PASS  c3.4 the confirmation and the approval stand (cancel changed nothing)
 
@@ -100,4 +126,4 @@ PASS  i8 after re-apply: grace in force again and the holder cancels
 PASS  i9 after re-apply: the raw payload PATCH is refused again
 PASS  no deadlock reported by the server during the races
 
-SUMMARY: 76 PASS, 0 FAIL  (finished 2026-11-09T09:34:56.338Z)
+SUMMARY: 98 PASS, 0 FAIL  (finished 2026-11-09T10:30:46.969Z)

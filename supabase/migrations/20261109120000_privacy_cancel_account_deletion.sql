@@ -23,7 +23,7 @@
 --      own row only, authenticated only:
 --        {"status":"none"} |
 --        {"status":"pending"|"withdrawn"|"in_progress"|"done", "request_id",
---         "submitted_at", "confirmed_at"|null, "scheduled_erasure_at"|null,
+--         "submitted_at", "deletion_confirmed_at"|null, "scheduled_erasure_at"|null,
 --         "cancellable": bool}
 --   3. HARDENING — privacy_erasure_mark_v1 and erase_user_account_v3 now lock
 --      the request row FOR UPDATE first and re-check that it is not closed and
@@ -299,7 +299,7 @@ begin
                    else 'pending' end,
     'request_id', r.id,
     'submitted_at', r.created_at,
-    'confirmed_at', v_confirmed,
+    'deletion_confirmed_at', v_confirmed,
     'scheduled_erasure_at', v_confirmed + public.privacy_account_deletion_grace(),
     'cancellable', r.status in ('submitted', 'in_review', 'needs_followup')
   );
@@ -308,7 +308,7 @@ $$;
 revoke all on function public.privacy_account_deletion_status_v1() from public, anon;
 grant execute on function public.privacy_account_deletion_status_v1() to authenticated;
 comment on function public.privacy_account_deletion_status_v1() is
-  'The signed-in holder''s latest account-deletion request (an approved one first, else the latest open, else the latest): {status: none|pending|withdrawn|in_progress|done, request_id, submitted_at, confirmed_at, scheduled_erasure_at, cancellable}. Own row only. 20261109120000.';
+  'The signed-in holder''s latest account-deletion request (an approved one first, else the latest open, else the latest): {status: none|pending|withdrawn|in_progress|done, request_id, submitted_at, deletion_confirmed_at, scheduled_erasure_at, cancellable}. Own row only. 20261109120000.';
 
 -- ─────────────────────────────────────────────────────────────────────────
 -- 5 · runner primitives: grace period + row lock (20261019140000 otherwise unchanged)
