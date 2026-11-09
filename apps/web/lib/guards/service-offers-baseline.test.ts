@@ -46,8 +46,9 @@ describe("Guard: cinematic baseline is preserved (no visual rebuild)", () => {
     // 2026-09-30 the baseline was the LIVE scene; the owner removed that
     // arm, and the baseline is the landing that remains.)
     const page = landingTreeSource(APP_ROOT, 2);
+    // `LivingWorkerHero` left the baseline on 2026-11-09: owner order, no
+    // fictional people on public pages.
     for (const sym of [
-      "LivingWorkerHero",
       "MarketProofBand",
       "LandingOpenJobsBand",
     ]) {

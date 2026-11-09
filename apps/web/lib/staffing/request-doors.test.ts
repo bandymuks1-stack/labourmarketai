@@ -242,7 +242,9 @@ describe("the page", () => {
     expect(read("components/marketing/landing-request-doors-form.tsx")).not.toMatch(/type="file"/);
   });
 
-  it("both landing heroes carry the doors", () => {
-    expect(read("app/[locale]/focus-landing/focus-landing.tsx").match(/<LandingRequestDoors /g)).toHaveLength(2);
+  // One hero since the fictional living-worker hero was withdrawn (owner order
+  // 2026-11-09): the entry hero carries the doors, exactly once.
+  it("the landing hero carries the doors", () => {
+    expect(read("app/[locale]/focus-landing/focus-landing.tsx").match(/<LandingRequestDoors /g)).toHaveLength(1);
   });
 });
