@@ -5853,7 +5853,7 @@
           "heading": "Jūsų teisės",
           "items": [
             "Galite prašyti susipažinti su apie jus saugomais duomenimis, juos ištaisyti, gauti jų kopiją, apriboti jų naudojimą arba juos ištrinti.",
-            "Savo duomenų kopiją JSON failu ir darbo žurnalą CSV failu galite atsisiųsti patys iš savo paskyros. Paskyros ištrynimo galite paprašyti paskyros puslapyje „Privatumas“ ir patvirtinti prašymą prisijungę iš naujo; tada sistema paskyrą ištrina automatiškai ir išsiunčia patvirtinimą į paskyros el. paštą. Jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Taip pat galite susisiekti su mumis — žr. puslapį „Paskyros ir duomenų ištrynimas“.",
+            "Savo duomenų kopiją JSON failu ir darbo žurnalą CSV failu galite atsisiųsti patys iš savo paskyros. Paskyros ištrynimo galite paprašyti paskyros puslapyje „Privatumas“ ir patvirtinti prašymą prisijungę iš naujo; praėjus 30 dienų nuo patvirtinimo sistema paskyrą ištrina automatiškai (iki tol prašymą galite atšaukti puslapyje „Privatumas“) ir išsiunčia patvirtinimą į paskyros el. paštą. Jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Taip pat galite susisiekti su mumis — žr. puslapį „Paskyros ir duomenų ištrynimas“.",
             "Kai tvarkymas grindžiamas sutikimu, sutikimą galite bet kada atšaukti."
           ]
         },
@@ -6171,7 +6171,7 @@
     "dataDeletion": {
       "title": "Paskyros ir duomenų ištrynimas",
       "description": "Kaip paprašyti ištrinti savo LabourMarket.ai paskyrą ir asmens duomenis.",
-      "intro": "Galite paprašyti LabourMarket.ai ištrinti jūsų paskyrą ir asmens duomenis. Jei galite prisijungti, prašymą galite pateikti patys: atidarykite paskyros puslapį „Privatumas“ (mobiliojoje programėlėje: Nustatymai → Privatumas), pasirinkite paskyros ištrynimą ir patvirtinkite jį prisijungę iš naujo. Tada sistema paskyrą ištrina automatiškai ir išsiunčia patvirtinimą į paskyros el. paštą; jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Ištrynimo taip pat galite paprašyti el. paštu, kaip aprašyta toliau; žmogus atsako per vieną mėnesį.",
+      "intro": "Galite paprašyti LabourMarket.ai ištrinti jūsų paskyrą ir asmens duomenis. Jei galite prisijungti, prašymą galite pateikti patys: atidarykite paskyros puslapį „Privatumas“ (mobiliojoje programėlėje: Nustatymai → Privatumas), pasirinkite paskyros ištrynimą ir patvirtinkite jį prisijungę iš naujo. Praėjus 30 dienų nuo patvirtinimo sistema paskyrą ištrina automatiškai (iki tol prašymą galite atšaukti puslapyje „Privatumas“) ir išsiunčia patvirtinimą į paskyros el. paštą; jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Ištrynimo taip pat galite paprašyti el. paštu, kaip aprašyta toliau; žmogus atsako per vieną mėnesį.",
       "howTitle": "Kaip paprašyti ištrynimo",
       "howSteps": [
         "Parašykite el. laišką adresu {email} iš el. pašto adreso, susieto su jūsų LabourMarket.ai paskyra.",
