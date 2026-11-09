@@ -130,6 +130,9 @@ const schema = z.object({
   AI_MAX_RETRIES: z.string().optional(),
   AI_MAX_OUTPUT_TOKENS: z.string().optional(),
   AI_DAILY_RUN_BUDGET: z.string().optional(),
+  // Monthly euro cap on vendor runs (lib/ai/runtime/monthly-cost-cap.ts).
+  // Unset/empty/invalid = OFF; parsed there, so a bad value never fails boot.
+  AI_MONTHLY_COST_CAP_EUR: z.string().optional(),
   // ZERO PAID API BUDGET (owner 2026-10-27): metered AI providers (Gemini,
   // Anthropic, OpenAI, xAI, DeepL Pro) never run — not even as a fallback —
   // unless this is exactly "true". Free tiers and local models are unaffected.
@@ -253,6 +256,7 @@ const parsed = schema.safeParse({
   AI_MAX_RETRIES: process.env.AI_MAX_RETRIES,
   AI_MAX_OUTPUT_TOKENS: process.env.AI_MAX_OUTPUT_TOKENS,
   AI_DAILY_RUN_BUDGET: process.env.AI_DAILY_RUN_BUDGET,
+  AI_MONTHLY_COST_CAP_EUR: process.env.AI_MONTHLY_COST_CAP_EUR,
   AI_PAID_PROVIDERS_ALLOWED: process.env.AI_PAID_PROVIDERS_ALLOWED,
   AI_OPENAI_ENABLED: process.env.AI_OPENAI_ENABLED,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,

@@ -36,6 +36,10 @@ import {
   countOrgAiRunsTodayBestEffort,
   resolveOrgDailyRunCap,
 } from "./runtime/org-run-cap";
+import {
+  readMonthAiSpendEurBestEffort,
+  resolveMonthlyCostCapEur,
+} from "./runtime/monthly-cost-cap";
 import { persistUsageCostEvent } from "@/lib/usage/usage-cost-store";
 import { resolveAnalyticsAttribution } from "@/lib/telemetry/analytics-attribution";
 import { getPromptEntry } from "./registry/registry";
@@ -80,6 +84,18 @@ export async function runAiAgent<T = unknown>(
     }
   }
 
+  // Monthly euro cap (live runs only; OFF unless AI_MONTHLY_COST_CAP_EUR is
+  // set). FAIL-CLOSED: an unreadable spend stays null and the core refuses —
+  // see runtime/monthly-cost-cap.ts.
+  let monthlyCostCapEur = opts.monthlyCostCapEur;
+  let monthAiSpendEur = opts.monthAiSpendEur;
+  if (monthlyCostCapEur === undefined && cfg.state === "live") {
+    monthlyCostCapEur = resolveMonthlyCostCapEur();
+    if (monthlyCostCapEur !== null && monthAiSpendEur === undefined) {
+      monthAiSpendEur = await readMonthAiSpendEurBestEffort();
+    }
+  }
+
   // The server boundary is the only place that can observe what the operator
   // configured, so it is the only place that can hand the core a chain. Callers
   // that pass their own states (tests, evals) keep them.
@@ -88,6 +104,8 @@ export async function runAiAgent<T = unknown>(
     runsToday,
     orgRunsToday,
     orgDailyRunCap,
+    monthlyCostCapEur,
+    monthAiSpendEur,
     providerStates: opts.providerStates ?? getAiProviderStates(ctx),
     // A provider that just answered 429 / 5xx / timed out is tried LAST on the
     // next run (free allowances stay spent for a window). Callers that supply

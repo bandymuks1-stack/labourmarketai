@@ -31,6 +31,7 @@ import { providerKindFor, type AiRuntimeConfig, type AiDisabledReason } from "./
 import type { AiCompletionRequest, AiCompletionResult, AiLocale, AiErrorCode } from "./runtime/types";
 import type { PromptRegistryEntry, AiAgentKey } from "./registry/types";
 import { assessOrgRunBudget } from "./runtime/org-run-cap";
+import { assessMonthlyCostCap } from "./runtime/monthly-cost-cap";
 import {
   computeActualCostUsd,
   estimateCostUsd,
@@ -115,6 +116,15 @@ export interface RunAgentOptions {
    */
   readonly orgRunsToday?: number;
   readonly orgDailyRunCap?: number;
+  /**
+   * Monthly euro cap on vendor runs (lib/ai/runtime/monthly-cost-cap.ts) and
+   * this UTC month's recorded spend. Supplied by the server wrapper on live
+   * runs only when AI_MONTHLY_COST_CAP_EUR is set; an absent/null cap = OFF.
+   * With a cap present, a null/absent spend means "unreadable" and refuses
+   * (fail-closed).
+   */
+  readonly monthlyCostCapEur?: number | null;
+  readonly monthAiSpendEur?: number | null;
   /** Language of the run — a routing dimension (activates languageRouting). */
   readonly language?: string;
   /** Input-source LABEL for the audit trail (e.g. "cv_upload") — never content. */
@@ -357,6 +367,27 @@ export async function runAiAgentCore<T = unknown>(
       status: "needs_review",
       reason: "budget_exceeded",
       detail: `organization daily AI allowance reached (${opts.orgRunsToday}/${opts.orgDailyRunCap}); resets at 00:00 UTC`,
+      routing: skippedAudit(decision),
+    };
+  }
+
+  // Monthly euro cap — vendor tiers only (a deterministic resolution engages
+  // no vendor and costs nothing).
+  if (
+    opts.monthlyCostCapEur !== undefined &&
+    opts.monthlyCostCapEur !== null &&
+    decision.tier !== "deterministic" &&
+    assessMonthlyCostCap(opts.monthAiSpendEur ?? null, opts.monthlyCostCapEur) ===
+      "budget_exceeded"
+  ) {
+    const spend = opts.monthAiSpendEur ?? null;
+    return {
+      status: "needs_review",
+      reason: "budget_exceeded",
+      detail:
+        spend === null
+          ? "monthly AI cost cap set but this month's spend is unreadable; refusing (fail-closed)"
+          : `monthly AI cost cap reached (€${spend.toFixed(2)}/€${opts.monthlyCostCapEur.toFixed(2)}); resets on the 1st, 00:00 UTC`,
       routing: skippedAudit(decision),
     };
   }
