@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { __resetRateLimitsForTest } from "@/lib/security/rate-limit";
@@ -123,5 +126,20 @@ describe("the refusal log", () => {
     expect(recordPublicFormRefusal("request-door", "advert")).toBe(1);
     expect(info).toHaveBeenLastCalledWith("[public-form-guard] refused", { surface: "request-door", reason: "advert", count: 1 });
     info.mockRestore();
+  });
+});
+
+describe("the company-need form still posts without JavaScript", () => {
+  // Browser smoke 2026-11-09: a client wrapper as the form action rendered
+  // `javascript:throw …` in the static markup, so a no-JS send never reached
+  // the server and the no_timestamp review path could not happen.
+  const src = readFileSync(join(process.cwd(), "components/app/company-need-form.tsx"), "utf8");
+
+  it("keeps the server action itself as the form action", () => {
+    expect(src).toMatch(/action=\{formAction\}/);
+  });
+
+  it("carries the fill time in a hidden field written after hydration", () => {
+    expect(src).toMatch(/<input type="hidden" name="started" ref=\{stampRef\} defaultValue="" \/>/);
   });
 });
