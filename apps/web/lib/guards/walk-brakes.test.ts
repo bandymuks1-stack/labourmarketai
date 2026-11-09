@@ -239,12 +239,14 @@ describe("SR-1 readings privacy check", () => {
     expect(judgeSr1Readings(file(header, { ...result, term: ["a"] })).publish).toBe(false);
     expect(judgeSr1Readings(file(header, { ...result, term: "x".repeat(81) })).publish).toBe(false);
     expect(judgeSr1Readings(file(header, { ...result, term: "someone@example.com" })).publish).toBe(false);
+    // A duplicated key: JSON.parse keeps the last value, the published file still holds the first.
+    expect(judgeSr1Readings(file(header, '{"at":"2026-11-09T07:01:00.000Z","term":"someone@example.com","term":"kock"}')).publish).toBe(false);
   });
 
   it("says why with a line number, never the field or the value", () => {
-    const why = judgeSr1Readings(file(header, { ...result, secret_field: "someone@example.com" })).why;
+    const why = judgeSr1Readings(file(header, { ...result, secret_field: "private value" })).why;
     expect(why).toBe("line 2 has a field no reading writes");
-    expect(why).not.toMatch(/secret_field|example/);
+    expect(why).not.toMatch(/secret_field|private/);
   });
 });
 
