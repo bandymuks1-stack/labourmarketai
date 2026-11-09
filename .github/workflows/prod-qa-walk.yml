@@ -147,6 +147,9 @@ on:
           - review-scope
           # Owner P0 2026-11-09: the job-search regression cases (SR-1…SR-4, SR-10) and three Norwegian ads read as text (#3033). Read-only.
           - search-regression
+          # Owner P0 2026-11-09: account-deletion self-cancel on the synthetic worker2 only (files, confirms when the minted sign-in
+          # is fresh, reads the 30-day date, cancels; afterAll always cancels) + the public 30-day / 7-day copy. Dispatch only.
+          - deletion-cancel
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -505,6 +508,7 @@ jobs:
             public-readiness) SPEC=tests/e2e/prod-public-readiness.spec.ts ;;
             review-scope) SPEC=tests/e2e/prod-review-scope.spec.ts ;;
             search-regression) SPEC=tests/e2e/prod-search-regression.spec.ts ;;
+            deletion-cancel) SPEC=tests/e2e/prod-deletion-cancel.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
