@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-import { toFeedItem } from "./commercial-requests-feed";
+import { commercialRequestType, toFeedItem } from "./commercial-requests-feed";
 
 /** Synthetic rows only. */
 const row = (contact_email: string | null) =>
@@ -27,5 +27,15 @@ describe("a walk's contact is labelled synthetic in the commercial feed", () => 
     [null, false],
   ])("%s → synthetic %s", (email, synthetic) => {
     expect(toFeedItem(row(email)).synthetic).toBe(synthetic);
+  });
+});
+
+describe("a send marked for review is still a company-need request", () => {
+  it.each([
+    ["/en/company-need", "company-need"],
+    ["/lt/company-need?review=no-js", "company-need"],
+    ["/lt/company-need?other=1", "other"],
+  ])("%s → %s", (path, type) => {
+    expect(commercialRequestType(path)).toBe(type);
   });
 });

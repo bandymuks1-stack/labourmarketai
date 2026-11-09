@@ -144,11 +144,13 @@ describe("spam guard: one generic answer, nothing stored, no AI, no alert (owner
     return f;
   };
 
-  it("honeypot, too fast, no fill time, a refused store and a rate limit all answer identically", async () => {
+  it("honeypot, too fast, a forged fill time, a refused store and a rate limit all answer identically", async () => {
     const answers = [
       await submitCompanyNeedAction(null, formWith({ website: "https://spam.example" })),
       await submitCompanyNeedAction(null, formWith({ started: String(Date.now()) })),
-      await submitCompanyNeedAction(null, formWith({ started: "" })),
+      await submitCompanyNeedAction(null, formWith({ started: "soon" })),
+      await submitCompanyNeedAction(null, formWith({ started: String(Date.now() + 60 * 60 * 1000) })),
+      await submitCompanyNeedAction(null, formWith({ website: "x", started: "" })),
     ];
     expect(persistPublicCompanyNeed).not.toHaveBeenCalled();
     persistPublicCompanyNeed.mockResolvedValueOnce({ ok: false, code: "rejected" });
@@ -160,6 +162,23 @@ describe("spam guard: one generic answer, nothing stored, no AI, no alert (owner
     expect(answers[0]).toEqual({ ok: true, persisted: false, isConstruction: true, draftStatus: "disabled" });
     expect(draftVacancyFromNeed).not.toHaveBeenCalled();
     expect(sendCompanyNeedOwnerAlert).not.toHaveBeenCalled();
+  });
+
+  it("no fill time (no JavaScript) and a clean need: stored, marked for review in source_path", async () => {
+    draftVacancyFromNeed.mockResolvedValue({ ...okNeed, draft: { status: "disabled", reason: "ai_disabled" } });
+    const state = await submitCompanyNeedAction(null, formWith({ started: "" }));
+    expect(state).toMatchObject({ ok: true, persisted: true });
+    expect(persistPublicCompanyNeed).toHaveBeenCalledTimes(1);
+    expect(persistPublicCompanyNeed.mock.calls[0][0].sourcePath).toBe("/en/company-need?review=no-js");
+    // The rate and content checks still run inside the store: a refusal there is the generic answer.
+    persistPublicCompanyNeed.mockResolvedValueOnce({ ok: false, code: "rejected" });
+    expect(await submitCompanyNeedAction(null, formWith({ started: "" }))).toMatchObject({ persisted: false, draftStatus: "disabled" });
+  });
+
+  it("a send with a fill time is not marked", async () => {
+    draftVacancyFromNeed.mockResolvedValue({ ...okNeed, draft: { status: "disabled", reason: "ai_disabled" } });
+    await submitCompanyNeedAction(null, syntheticForm());
+    expect(persistPublicCompanyNeed.mock.calls[0][0].sourcePath).toBe("/en/company-need");
   });
 
   it("the refusal log carries the surface and reason only, never what was typed", async () => {

@@ -10,7 +10,7 @@ import { rateLimit } from "@/lib/security/rate-limit";
  * "Form spam protection: IMPLEMENT NOW in a separate PR, with rate limiting,
  * validation, abuse prevention and tests.").
  *
- * The public company-need form stored 5 link adverts out of 7 rows. Every
+ * Link-advert spam reached the public intake. Every
  * no-signup commercial form lands in `company_need_public_intakes` through
  * `persistPublicCompanyNeed`, so the checks live here once and both callers use
  * them: the `/company-need` form (`company-need-form-actions.ts`) and the three
@@ -35,6 +35,14 @@ import { rateLimit } from "@/lib/security/rate-limit";
  * reason), so a server render time would be the build time; the form records
  * `Date.now()` when it appears. A bot that forges the field passes this one
  * check and still meets the honeypot, the rate limits and the content checks.
+ *
+ * NO FILL TIME AT ALL (`no_timestamp`) is a send without JavaScript — the
+ * company-need form still posts then — or a bot. Refusing it would lose a real
+ * lead, so the company-need action STORES it when the honeypot is empty and the
+ * rate and content checks pass, marked for review in `source_path` (the queue
+ * shows that column; the claiming company never sees it). A timestamp that is
+ * present but garbage or far in the future (`bad_timestamp`) is forged and
+ * refused. The doors refuse both: they only send through JavaScript.
  */
 
 /** The hidden field a person leaves empty. Same name as the doors' existing one. */
@@ -45,12 +53,20 @@ export const STARTED_FIELD = "started";
 export const MIN_FILL_MS = 3000;
 /** A clock a little ahead of ours is fine; a time well in the future is forged. */
 const MAX_CLOCK_SKEW_MS = 5 * 60 * 1000;
+/**
+ * Appended to `source_path` for a company-need send that came with no fill time,
+ * so the operator reviews it before trusting it. The feed still types it
+ * `company-need` (`commercial-requests-feed.ts`).
+ */
+export const NO_JS_REVIEW_MARK = "?review=no-js";
+
 /** A real need may carry its own site and one more link; three or more is a pitch. */
 export const MAX_LINKS = 2;
 
 export type SpamReason =
   | "honeypot"
   | "no_timestamp"
+  | "bad_timestamp"
   | "too_fast"
   | "too_many_links"
   | "link_in_name"
@@ -62,9 +78,10 @@ export type SpamReason =
 export function screenPublicFormTiming(read: (name: string) => string, nowMs: number = Date.now()): SpamReason | null {
   if (read(HONEYPOT_FIELD).trim() !== "") return "honeypot";
   const raw = read(STARTED_FIELD).trim();
+  if (raw === "") return "no_timestamp";
   const started = /^\d{10,16}$/.test(raw) ? Number(raw) : NaN;
-  if (!Number.isFinite(started) || started <= 0) return "no_timestamp";
-  if (started - nowMs > MAX_CLOCK_SKEW_MS) return "no_timestamp";
+  if (!Number.isFinite(started) || started <= 0) return "bad_timestamp";
+  if (started - nowMs > MAX_CLOCK_SKEW_MS) return "bad_timestamp";
   if (nowMs - started < MIN_FILL_MS) return "too_fast";
   return null;
 }

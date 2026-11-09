@@ -15,7 +15,7 @@ import { aiActionRateLimited } from "../security/ai-action-throttle";
 import { sendCompanyNeedOwnerAlert } from "../notifications/telegram-owner-alerts";
 import { isConstructionWorkType } from "../taxonomy/work-categories";
 import { aiLocaleFor, type AiLocale } from "../ai/runtime/types";
-import { recordPublicFormRefusal, screenPublicFormTiming } from "../security/public-form-guard";
+import { NO_JS_REVIEW_MARK, recordPublicFormRefusal, screenPublicFormTiming } from "../security/public-form-guard";
 
 export interface CompanyNeedFormState {
   readonly ok: boolean;
@@ -79,8 +79,12 @@ export async function submitCompanyNeedAction(
   formData: FormData,
 ): Promise<CompanyNeedFormState> {
   // Spam guard, form layer: honeypot + minimum fill time, before anything else.
+  // No fill time at all is a send without JavaScript: it goes on to the rate and
+  // content checks and, if it passes them, is stored marked for review — refusing
+  // it would lose a real lead. A forged or too-fast time is refused.
   const timing = screenPublicFormTiming((name) => String(formData.get(name) ?? ""));
-  if (timing) {
+  const needsReview = timing === "no_timestamp";
+  if (timing && !needsReview) {
     recordPublicFormRefusal("company-need", timing);
     return notStored(str(formData.get("profession")) ?? "");
   }
@@ -124,6 +128,7 @@ export async function submitCompanyNeedAction(
 
   const rawLocale = await getLocale();
   const locale = toAiLocale(rawLocale);
+  const sourcePath = `/${rawLocale}/company-need${needsReview ? NO_JS_REVIEW_MARK : ""}`;
 
   // Persist the structured need for follow-up (anonymous path, v1). This is
   // the real backend now: a success means a row was stored for the operator.
@@ -146,7 +151,7 @@ export async function submitCompanyNeedAction(
     languages: raw.languageRequirements.join(", ") || undefined,
     engagementType: raw.engagementModel,
     description: raw.description,
-    sourcePath: `/${rawLocale}/company-need`,
+    sourcePath,
   });
   const persisted = persist.ok;
 
@@ -179,7 +184,7 @@ export async function submitCompanyNeedAction(
         startOrDate: raw.startDate,
         duration: raw.expectedDuration,
         languages: raw.languageRequirements.join(", ") || undefined,
-        sourcePath: `/${rawLocale}/company-need`,
+        sourcePath,
       });
     } catch {
       // never surfaced to the user

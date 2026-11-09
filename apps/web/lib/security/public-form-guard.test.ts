@@ -35,13 +35,21 @@ describe("form layer: honeypot and fill time", () => {
     expect(screenPublicFormTiming(reader({ started: String(NOW - MIN_FILL_MS) }), NOW)).toBeNull();
   });
 
+  it("no fill time at all (a send without JavaScript) is told apart from a forged one", () => {
+    expect(screenPublicFormTiming(reader({}), NOW)).toBe("no_timestamp");
+    expect(screenPublicFormTiming(reader({ started: "  " }), NOW)).toBe("no_timestamp");
+  });
+
+  it("the honeypot wins over a missing fill time", () => {
+    expect(screenPublicFormTiming(reader({ website: "x" }), NOW)).toBe("honeypot");
+  });
+
   it.each([
-    ["missing", ""],
     ["not a number", "soon"],
     ["negative", "-5"],
     ["far in the future", String(NOW + 60 * 60 * 1000)],
-  ])("a fill time that is %s is refused", (_n, started) => {
-    expect(screenPublicFormTiming(reader({ started }), NOW)).toBe("no_timestamp");
+  ])("a fill time that is %s is forged", (_n, started) => {
+    expect(screenPublicFormTiming(reader({ started }), NOW)).toBe("bad_timestamp");
   });
 });
 
