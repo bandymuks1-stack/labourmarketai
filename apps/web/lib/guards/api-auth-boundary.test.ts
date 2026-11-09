@@ -154,6 +154,10 @@ const CLASSIFICATION: Record<
     class: "shared",
     why: "The MCP door for external clients (ChatGPT connector, future agents). Bearer is its primary transport by nature; it resolves identity through the one boundary and every tool call runs the caller's own RLS-scoped client via lib/capabilities.",
   },
+  "mcp/read/route.ts": {
+    class: "shared",
+    why: "The read-only profile of the same MCP door (lib/mcp/door.ts), for an app-directory review: same one identity boundary and brake, lists only kind=read capabilities and refuses every other name. Each tool runs on the caller's own RLS-scoped client.",
+  },
   "dashboard-search/route.ts": {
     class: "shared-blocked",
     why: "The route would be trivial to convert and it would be a LIE: getDashboardSearchGroups() takes no client and fans out to helpers that each call createClient() themselves, so the search would silently run as the cookie session (or as nobody) while the route reported the bearer caller's identity. The coupling is below the route layer — 257 of 892 lib modules resolve their own cookie client. Converting this route needs the shared-core refactor, not a header.",
@@ -203,7 +207,11 @@ describe("one resolver, never nine parsers", () => {
   it("shared routes go through resolveApiIdentity and not the cookie client", () => {
     for (const [route, entry] of Object.entries(CLASSIFICATION)) {
       if (entry.class !== "shared") continue;
-      const src = read(route);
+      // Both MCP routes are three lines over one door module; the door is
+      // what must go through the boundary, so the door is what is read.
+      const src = /from "@\/lib\/mcp\/door"/.test(read(route))
+        ? readFileSync(join(APP_ROOT, "lib", "mcp", "door.ts"), "utf8")
+        : read(route);
       expect(src, `${route} must resolve identity through the boundary`).toMatch(
         /resolveApiIdentity/,
       );

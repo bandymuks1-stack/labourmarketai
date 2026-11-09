@@ -563,7 +563,8 @@ describe("no letter stands in for the mark in the authenticated product", () => 
  * declare the right asset, never that ChatGPT drew it.
  */
 describe("the ChatGPT / MCP surface carries the canonical brand", () => {
-  const MCP_ROUTE = read("app/api/mcp/route.ts");
+  // The door both MCP routes serve (`/api/mcp` and its read profile).
+  const MCP_ROUTE = read("lib/mcp/door.ts");
 
   it("declares the canonical mark, not a new or placeholder one", () => {
     expect(MCP_ROUTE, "the MCP server declares no identity").toContain("title:");
