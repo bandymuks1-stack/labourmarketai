@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link, redirect } from "@/lib/i18n/navigation";
 import { matchProfessionAcrossLocales } from "@/lib/vacancy-store/public-vacancy-profession-match";
+import { readCountryParam } from "@/lib/vacancy-store/public-vacancy-country-param";
 import { activeLocales } from "@/lib/i18n/config";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
@@ -245,6 +246,21 @@ const UNAVAILABLE: L = {
   pl: "Tablica ofert pracy nie odpowiedziała na czas. Spróbuj ponownie za chwilę.",
 };
 
+/**
+ * `?country=` IS NOT A FILTER YET (owner 2026-11-09). The search has no country
+ * argument until the RED country filter is applied, so a link to
+ * `/jobs?country=NO` must not look like the Norwegian jobs: the page says it is
+ * showing every country. See lib/vacancy-store/public-vacancy-country-param.ts.
+ */
+const COUNTRY_NOT_FILTERED: Record<ActiveLocale, (country: string | null) => string> = {
+  en: (c) => `${c ? `Filtering by country (${c}) is` : "Filtering by country is"} not available yet. Showing jobs from all countries.`,
+  lt: (c) => `${c ? `Filtras pagal šalį (${c})` : "Filtras pagal šalį"} dar neveikia. Rodomi visų šalių darbo skelbimai.`,
+  ru: (c) => `${c ? `Фильтр по стране (${c})` : "Фильтр по стране"} пока недоступен. Показаны вакансии из всех стран.`,
+  nl: (c) => `${c ? `Filteren op land (${c})` : "Filteren op land"} is nog niet beschikbaar. Vacatures uit alle landen worden getoond.`,
+  de: (c) => `${c ? `Der Länderfilter (${c})` : "Der Länderfilter"} ist noch nicht verfügbar. Angezeigt werden Stellen aus allen Ländern.`,
+  pl: (c) => `${c ? `Filtr według kraju (${c})` : "Filtr według kraju"} nie jest jeszcze dostępny. Pokazujemy oferty ze wszystkich krajów.`,
+};
+
 const SAVED_TAB: L = {
   en: "Saved",
   lt: "Išsaugoti",
@@ -332,6 +348,7 @@ export default async function JobsPage({
     page?: string;
     saved?: string;
     profession?: string;
+    country?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -343,6 +360,8 @@ export default async function JobsPage({
   // Closed set: an unknown slug becomes "no filter" rather than reaching the
   // SQL function as free text.
   const profession = readProfessionSlugParam(sp.profession);
+  // Read only to SAY it is not applied: the search takes no country yet.
+  const countryParam = readCountryParam(sp.country);
   // The ONE registry — slug → name in the reader's language. 17,145 browsable
   // ads carry a slug the categorizer derived, so this is how a worker searches
   // Swedish supply in Lithuanian without knowing a word of Swedish.
@@ -603,6 +622,18 @@ export default async function JobsPage({
             {SAVED_TAB[active]} ({mySaved.vacancyIds.size})
           </Link>
         </nav>
+      )}
+
+      {countryParam.requested && !showSaved && (
+        <p
+          role="note"
+          data-testid="public-jobs-country-not-filtered"
+          className="mt-6 rounded-md border border-dashed p-4 text-sm text-text-muted"
+        >
+          {COUNTRY_NOT_FILTERED[active](
+            countryParam.code ? (regionName?.of(countryParam.code) ?? countryParam.code) : null,
+          )}
+        </p>
       )}
 
       {showSaved ? (
