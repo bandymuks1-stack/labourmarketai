@@ -1,5 +1,5 @@
-privacy-cancel-account-deletion-local — 2026-11-09T09:20:33.245Z
-cluster: <repo>/.tmp/pgcancel-111840 (port 5517, throwaway, synthetic ids only)
+privacy-cancel-account-deletion-local — 2026-11-09T09:33:04.128Z
+cluster: <repo>/.tmp/pgcancel-60088 (port 5517, throwaway, synthetic ids only)
 server: PostgreSQL 16.13
 PASS  baseline: guard, due_v1, mark_v1 and erase_user_account_v3 exist from the real migrations
 PASS  20261109120000 applied: 4 new functions + the privacy-row trigger
@@ -62,7 +62,7 @@ PASS  h6 a due request the runner has not picked yet is still cancellable and th
 
 [c1] race: holder cancels first (holds the row), runner marks second
 PASS  c1.0 due before the race
-PASS  c1.1 the runner's mark_v1 WAITED on the row lock (2534 ms)
+PASS  c1.1 the runner's mark_v1 WAITED on the row lock (2649 ms)
 PASS  c1.2 the cancel committed: {status:ok}
 PASS  c1.3 then mark_v1 -> {"ok":false,"error":"not_confirmed"} (runner stops: nothing approved)
 PASS  c1.4 request withdrawn, account still exists, nothing due
@@ -71,14 +71,14 @@ PASS  c1.5 no erasure receipt
 [c2] race: executor erases first (holds the row), holder cancels second
 PASS  c2.0 after the runner's mark: status in_progress, not cancellable
 PASS  c2.1 the executor erased (receipt written)
-PASS  c2.2 the cancel WAITED on the row lock (2684 ms)
+PASS  c2.2 the cancel WAITED on the row lock (2733 ms)
 PASS  c2.3 then cancel -> {status:not_cancellable, request_id} ("not_cancellable")
 PASS  c2.4 the account is gone, the request is closed as executed (not withdrawn)
 PASS  d3 a later cancel with the erased person's stale session -> {status:not_found} (the row is severed to the sentinel; nothing of theirs remains)
 
 [c3] race: runner marks approved first (holds the row), holder cancels second
 PASS  c3.1 the runner marked approved
-PASS  c3.2 the cancel WAITED on the row lock (3020 ms)
+PASS  c3.2 the cancel WAITED on the row lock (2953 ms)
 PASS  c3.3 then cancel -> {status:not_cancellable} (d: approved)
 PASS  c3.4 the confirmation and the approval stand (cancel changed nothing)
 
@@ -100,4 +100,4 @@ PASS  i8 after re-apply: grace in force again and the holder cancels
 PASS  i9 after re-apply: the raw payload PATCH is refused again
 PASS  no deadlock reported by the server during the races
 
-SUMMARY: 76 PASS, 0 FAIL  (finished 2026-11-09T09:22:36.397Z)
+SUMMARY: 76 PASS, 0 FAIL  (finished 2026-11-09T09:34:56.338Z)

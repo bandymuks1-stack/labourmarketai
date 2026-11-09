@@ -70,6 +70,8 @@
 -- the three new functions; withdrawn rows stay as ordinary closed history).
 
 begin;
+-- fail fast instead of queueing every customer_requests write behind CREATE TRIGGER / CREATE OR REPLACE
+set local lock_timeout = '5s';
 
 -- ─────────────────────────────────────────────────────────────────────────
 -- 0 · the grace period — ONE named constant

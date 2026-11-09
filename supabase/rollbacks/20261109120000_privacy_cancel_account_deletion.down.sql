@@ -16,6 +16,8 @@
 -- PATCH a privacy row's payload — i.e. the pre-20261109120000 state.
 
 begin;
+-- fail fast instead of queueing every customer_requests write behind CREATE TRIGGER / CREATE OR REPLACE
+set local lock_timeout = '5s';
 
 create or replace function public.customer_requests_status_transition_guard()
 returns trigger
