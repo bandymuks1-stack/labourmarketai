@@ -41,6 +41,9 @@ test("N-1. an anonymous visitor submits the public company-need form and the int
   await form.locator('input[name="number_of_workers"]').fill("3");
   await form.locator('input[name="city_region"]').fill("Vilnius");
   await form.locator('textarea[name="description"]').fill(`Three workers for a 4-week site job (${RUN}).`);
+  // A send inside the spam guard's minimum fill time (3 s, lib/security/public-form-guard.ts)
+  // is refused and stores nothing, so wait it out like a person would.
+  await page.waitForTimeout(3_500);
   await form.getByTestId("company-need-submit").click();
 
   const result = page.getByTestId("company-need-result");

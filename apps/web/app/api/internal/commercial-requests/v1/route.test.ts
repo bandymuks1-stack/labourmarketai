@@ -41,6 +41,7 @@ const TOKEN = "t".repeat(40);
 const ID_1 = "11111111-1111-4111-8111-111111111111";
 const ID_2 = "22222222-2222-4222-8222-222222222222";
 const ID_3 = "33333333-3333-4333-8333-333333333333";
+const ID_4 = "44444444-4444-4444-8444-444444444444";
 const PRIVATE = ["Private Company", "Private Person", "person@firm.test", "+37060000000", "Private text"];
 
 function row(id: string, createdAt: string, over: Record<string, unknown> = {}) {
@@ -146,11 +147,12 @@ describe("what it returns", () => {
         row(ID_1, "2026-11-07T10:00:00+00:00", { company_name: "[QA-SYNTHETIC] Gama" }),
         row(ID_2, "2026-11-07T10:00:01+00:00", { contact_email: "walk@example.invalid" }),
         row(ID_3, "2026-11-07T10:00:02+00:00"),
+        row(ID_4, "2026-11-07T10:00:03+00:00", { contact_email: "run-1@e2e-proof.local" }),
       ],
       error: null,
     };
     const body = await (await get()).json();
-    expect(body.items.map((i: { synthetic: boolean }) => i.synthetic)).toEqual([true, true, false]);
+    expect(body.items.map((i: { synthetic: boolean }) => i.synthetic)).toEqual([true, true, false, true]);
   });
 
   it("doesn't pass on a status outside the known list", async () => {

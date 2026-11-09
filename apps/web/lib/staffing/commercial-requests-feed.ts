@@ -54,7 +54,9 @@ export interface FeedCursor {
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|[+-]\d{2}:\d{2})$/;
 const COMPANY_NEED_PATH = /^\/[a-z]{2}\/company-need$/;
-const TEST_MAILBOX = /@example\.invalid$/i;
+/** Mailboxes only our own walks use: `example.invalid` (RFC 2606) and the e2e proof
+ *  domain `e2e-proof.local` (owner order 2026-11-09: such a contact is synthetic). */
+const TEST_MAILBOX = /@(?:example\.invalid|e2e-proof\.local)$/i;
 
 export function commercialRequestType(sourcePath: string | null): CommercialRequestType {
   const door = requestDoorFromSourcePath(sourcePath);

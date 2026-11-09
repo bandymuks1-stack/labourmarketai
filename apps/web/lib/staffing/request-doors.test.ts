@@ -130,7 +130,8 @@ describe("the action never claims what did not happen", () => {
     sendSmtp.mockResolvedValue({ status: "sent" });
     info = vi.spyOn(console, "info").mockImplementation(() => undefined);
   });
-  const send = (extra: Record<string, string> = {}) => submitRequestDoorAction(form({ door: "b2b", ...VALID.b2b, ...extra }));
+  const send = (extra: Record<string, string> = {}) =>
+    submitRequestDoorAction(form({ door: "b2b", ...VALID.b2b, started: String(Date.now() - 10_000), ...extra }));
 
   it("received: stored once, with the active locale in the path", async () => {
     expect(await send()).toBe("received");
@@ -165,7 +166,7 @@ describe("the action never claims what did not happen", () => {
   });
 
   it("not stored is never received, and no one is alerted", async () => {
-    for (const [code, answer] of [["rate_limited", "limited"], ["unavailable", "unavailable"], ["error", "unavailable"], ["invalid", "invalid"]]) {
+    for (const [code, answer] of [["rate_limited", "limited"], ["rejected", "unavailable"], ["unavailable", "unavailable"], ["error", "unavailable"], ["invalid", "invalid"]]) {
       sendSmtp.mockClear();
       persist.mockResolvedValue({ ok: false, code });
       expect(await send()).toBe(answer);
@@ -189,9 +190,12 @@ describe("the action never claims what did not happen", () => {
     expect(persist).not.toHaveBeenCalled();
   });
 
-  it("a bot filling the hidden field, or sending at once, stores nothing and alerts no one", async () => {
-    expect(await send({ website: "http://spam" })).toBe("received");
-    expect(await send({ started: String(Date.now()) })).toBe("received");
+  it("a bot filling the hidden field, sending at once, or with no fill time, stores nothing and alerts no one", async () => {
+    // One generic "could not send" whichever check tripped (owner spam order 2026-11-09):
+    // never "received" for a request that was dropped.
+    expect(await send({ website: "http://spam" })).toBe("unavailable");
+    expect(await send({ started: String(Date.now()) })).toBe("unavailable");
+    expect(await send({ started: "" })).toBe("unavailable");
     expect(persist).not.toHaveBeenCalled();
     expect(sendSmtp).not.toHaveBeenCalled();
   });

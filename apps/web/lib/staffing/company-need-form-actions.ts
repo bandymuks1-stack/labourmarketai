@@ -15,6 +15,7 @@ import { aiActionRateLimited } from "../security/ai-action-throttle";
 import { sendCompanyNeedOwnerAlert } from "../notifications/telegram-owner-alerts";
 import { isConstructionWorkType } from "../taxonomy/work-categories";
 import { aiLocaleFor, type AiLocale } from "../ai/runtime/types";
+import { recordPublicFormRefusal, screenPublicFormTiming } from "../security/public-form-guard";
 
 export interface CompanyNeedFormState {
   readonly ok: boolean;
@@ -57,10 +58,33 @@ function csv(value: FormDataEntryValue | null): string[] {
     .filter(Boolean);
 }
 
+/**
+ * The ONE answer for anything not stored on purpose: a rate limit, a filled
+ * honeypot, a too-fast send, a pile of links, an advert. It is the honest
+ * "prepared, not sent" state the form already shows when the backend is down, so
+ * a bot learns nothing about which check tripped and a person caught by mistake
+ * is never told "received" for a request that was dropped. No AI run, no alert.
+ */
+function notStored(profession: string): CompanyNeedFormState {
+  return {
+    ok: true,
+    persisted: false,
+    isConstruction: isConstructionWorkType(profession),
+    draftStatus: "disabled",
+  };
+}
+
 export async function submitCompanyNeedAction(
   _prev: CompanyNeedFormState | null,
   formData: FormData,
 ): Promise<CompanyNeedFormState> {
+  // Spam guard, form layer: honeypot + minimum fill time, before anything else.
+  const timing = screenPublicFormTiming((name) => String(formData.get(name) ?? ""));
+  if (timing) {
+    recordPublicFormRefusal("company-need", timing);
+    return notStored(str(formData.get("profession")) ?? "");
+  }
+
   const workers = Number(formData.get("number_of_workers"));
   const urgencyRaw = str(formData.get("urgency"));
   const urgency =
@@ -130,13 +154,9 @@ export async function submitCompanyNeedAction(
   // the AI draft. The limiter used to guard only the DB insert, leaving the
   // model call below as unmetered anonymous work reachable from a public
   // page (2026-08-17 audit, AI boundary gap). No AI run for a flooded key.
-  if (!persist.ok && persist.code === "rate_limited") {
-    return {
-      ok: true,
-      persisted: false,
-      isConstruction: isConstructionWorkType(raw.profession),
-      draftStatus: "disabled",
-    };
+  // A refused send (spam guard, `rejected`) gets the very same answer.
+  if (!persist.ok && (persist.code === "rate_limited" || persist.code === "rejected")) {
+    return notStored(raw.profession);
   }
 
   // Best-effort owner demand-signal alert (Telegram, server-only + env-gated).
@@ -145,7 +165,7 @@ export async function submitCompanyNeedAction(
   // Telegram failure can never affect the submission, persistence, or queue.
   if (persisted) {
     try {
-      // An advert is stored like any request, and raises no alert.
+      // An advert is refused before the store; the flag is kept as a second lock.
       if (!persist.advertising) await sendCompanyNeedOwnerAlert({
         companyName: raw.companyName,
         contact: [raw.contactPerson, str(formData.get("contact_email"))]

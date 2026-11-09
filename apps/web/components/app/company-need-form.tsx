@@ -139,6 +139,19 @@ export function CompanyNeedForm({
     setIf("description", prefill.description, [""]);
   }, []);
 
+  // Spam guard: when the form appeared, added to every send. Taken after
+  // hydration (the page is static markup) and kept in a ref, not a field, so
+  // React's reset of the form after a send cannot blank it for a retry. A send
+  // without it is refused like a bot's (lib/security/public-form-guard.ts).
+  const shownAt = useRef(0);
+  useEffect(() => {
+    shownAt.current = Date.now();
+  }, []);
+  function send(data: FormData) {
+    if (shownAt.current > 0) data.set("started", String(shownAt.current));
+    formAction(data);
+  }
+
   function handleFirstInteraction() {
     if (startedRef.current) return;
     startedRef.current = true;
@@ -167,7 +180,7 @@ export function CompanyNeedForm({
     <div className="flex flex-col gap-6">
       <form
         ref={formRef}
-        action={formAction}
+        action={send}
         className="flex flex-col gap-4"
         data-testid="company-need-form"
         onFocusCapture={handleFirstInteraction}
@@ -181,6 +194,9 @@ export function CompanyNeedForm({
           <h1 className="font-display text-lg font-semibold text-text-primary">{labels.title}</h1>
           <p className="text-sm text-text-secondary">{labels.subtitle}</p>
         </header>
+
+        {/* Left empty by a person: out of sight, out of the tab order, not autofilled. */}
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.companyName}</span>
