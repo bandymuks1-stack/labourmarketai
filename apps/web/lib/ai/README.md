@@ -15,19 +15,19 @@ adapter (boundary guard, property d).
 |---|---|
 | `run-agent-server.ts` | The canonical entrypoint: resolves env config, runs the agent, persists the `ai_runs` audit row + `usage_cost_events` for vendor runs. |
 | `run-agent.ts` | `runAiAgentCore()` — the pure core the server wrapper feeds. |
-| `registry/` | The 12 registered agent prompts (`AiAgentKey`) + strict input schemas. |
+| `registry/` | The 9 registered agent prompts (`AiAgentKey`, one file each under `registry/agents/`) + strict input schemas. |
 | `schemas/envelope.ts` | The strict suggestion envelope every output must satisfy. |
 | `runtime/config.ts` / `config-core.ts` | Env gate. **OFF by default** — `disabled` unless `AI_PROVIDER_MODE` is `mock` or `live`; a cloud provider without a real key never goes live. |
 | `runtime/task-routing.ts` | Cost-aware routing: task policies (allowed/prohibited fields, cost ceilings, tiers), agent→task map, route audit record. |
-| `runtime/data-sensitivity.ts` + `runtime/data-egress.ts` | The data veto: PUBLIC → SENSITIVE_FREE_TEXT classes, default-deny egress grants (grant table empty), free-tier ceiling. |
+| `runtime/data-sensitivity.ts` + `runtime/data-egress.ts` | The data veto: PUBLIC → SENSITIVE_FREE_TEXT classes, default-deny egress grants (`AI_EGRESS_GRANTS`: two owner grants, below), free-tier ceiling. |
 | `runtime/provider-chain.ts` + `runtime/providers/` | Cheapest-sufficient provider selection; adapters for anthropic / openai / gemini / xai / deepl / local / mock / disabled. |
 | `runtime/model-pricing.ts` / `model-candidates.ts` | Owner-reviewed prices + alias→model tables; an unpriced model blocks rather than spends. |
 | `runtime/provider-cooldown.ts` / `provider-counters.ts` | In-memory, per process: a provider that just failed is tried last; every chain attempt is counted per provider (requests, latency, rate limits, errors by class). No payload, no export. |
 | `runtime/audit-store.ts` | Best-effort persistence into the applied `ai_runs` table. |
 | `evals/` | Offline eval harness over the registered agents (mock provider). |
 
-**Wired production surfaces** (the `runAiAgent` call sites — six, five agent
-keys; pinned with their sensitivity classes by
+**Wired production surfaces** (the `runAiAgent` call sites — ten, nine agent
+keys; each agent's sensitivity class is pinned by
 `lib/guards/ai-wired-surface-sensitivity.test.ts`):
 
 - `worker_profile` — `lib/profile/cv-ai-structuring-actions.ts` and
@@ -35,13 +35,22 @@ keys; pinned with their sensitivity classes by
 - `work_journal` — `lib/journal/journal-ai-suggestions-actions.ts` (PERSONAL)
 - `matching_explanation` — `lib/staffing/match-preview-actions.ts` (PERSONAL)
 - `company_need` — `lib/staffing/company-need-actions.ts` (LOW_RISK_PROJECT_DATA)
+- `country_readiness` — `lib/country-readiness/readiness-reading-actions.ts`
+  (LOW_RISK_PROJECT_DATA: matrix rows, no person, kept at its task's class)
 - `market_explanation` — `lib/market/market-explanation-actions.ts` (PUBLIC —
   the one task that may reach an ungranted external provider; proven live on
   Gemini in production)
+- `conversation_intent` — `lib/conversation/llm-proposal.ts` (SENSITIVE_FREE_TEXT)
+- `translation_copy` — `lib/communication/translation-read.ts` (SENSITIVE_FREE_TEXT)
+- `vacancy_translation` — `lib/vacancy-store/vacancy-translation-read.ts`
+  (SENSITIVE_FREE_TEXT — published ad text, kept off PUBLIC by owner review)
 
-The PERSONAL and LOW_RISK surfaces resolve vendorlessly until the owner adds an
-egress grant — the runtime routes them, audits them, and honestly declines to
-send a person's data to a provider that has no grant.
+Two tasks hold an owner egress grant (`runtime/data-egress.ts`, Gemini only, paid
+tier, least-privilege by task): `propose_conversation_intent` (`conversation_intent`,
+2026-09-05) and `translate_message` (`translation_copy`, 2026-09-17). Every other
+surface except `market_explanation` resolves vendorlessly until the owner adds a
+grant — the runtime routes it, audits it, and honestly declines to send that data
+to a provider that has no grant.
 
 Rules that still bind every run: AI only **drafts / clarifies / explains**.
 Every output is a schema-validated `suggestion`; it never verifies a skill,
