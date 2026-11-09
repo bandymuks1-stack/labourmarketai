@@ -5711,7 +5711,34 @@
       "reauth": "Zaloguj się ponownie",
       "confirmedTitle": "Usunięcie potwierdzone",
       "confirmedBody": "System usunie konto w ciągu kilku minut i wyśle potwierdzenie na adres e-mail konta. Jeśli coś będzie wymagało przeglądu, poinformujemy Cię.",
-      "inReview": "Automatyczne usunięcie wstrzymano do przeglądu: konto zawiera dane, które mogą wymagać przechowywania na mocy prawa lub dotyczą innych osób. Decyzję i jej uzasadnienie otrzymasz e-mailem w ciągu miesiąca. Do tego czasu Twój profil nie jest widoczny w wyszukiwaniu."
+      "inReview": "Automatyczne usunięcie wstrzymano do przeglądu: konto zawiera dane, które mogą wymagać przechowywania na mocy prawa lub dotyczą innych osób. Decyzję i jej uzasadnienie otrzymasz e-mailem w ciągu miesiąca. Do tego czasu Twój profil nie jest widoczny w wyszukiwaniu.",
+      "confirmLabelWaiting": "Rozumiem, że konto i jego dane zostaną usunięte nieodwracalnie 30 dni po potwierdzeniu, chyba że wcześniej anuluję.",
+      "confirmStepBodyWaiting": "Twój wniosek o usunięcie konta został złożony. Potwierdź go — konto zostanie zachowane przez 30 dni i w tym czasie możesz anulować na tej stronie. Potem system usunie konto automatycznie i wyśle potwierdzenie e-mailem.",
+      "confirmedBodyWaiting": "Konto zostanie usunięte za 30 dni. Do tego czasu możesz anulować na tej stronie. Po usunięciu wyślemy potwierdzenie na adres e-mail konta.",
+      "status": {
+        "pending": "Twój wniosek o usunięcie konta został złożony.",
+        "pendingConfirmed": "Usunięcie konta jest potwierdzone i zaplanowane.",
+        "withdrawn": "Usunięcie konta zostało anulowane. Twoje konto pozostaje aktywne.",
+        "inProgress": "Usuwanie konta już trwa — nie można go już anulować.",
+        "done": "Konto zostało usunięte.",
+        "submittedAt": "Złożono: {date}",
+        "scheduledAt": "Konto zostanie usunięte {date} (po 30 dniach oczekiwania).",
+        "cancelUntil": "Do tego czasu możesz anulować.",
+        "loadError": "Nie udało się wczytać stanu usuwania konta. Odśwież stronę i spróbuj ponownie."
+      },
+      "cancel": {
+        "button": "Anuluj usunięcie konta",
+        "question": "Anulować usunięcie konta? Twoje konto i dane zostaną.",
+        "confirm": "Tak, anuluj",
+        "keep": "Wróć",
+        "working": "Anulowanie…",
+        "cancelled": "Usunięcie konta zostało anulowane. Twoje konto pozostaje aktywne.",
+        "notCancellable": "Usuwanie konta już się rozpoczęło, więc nie można go już anulować. Wynik otrzymasz na adres e-mail konta.",
+        "notFound": "Nie znaleziono otwartego wniosku o usunięcie konta — nie ma czego anulować.",
+        "notSignedIn": "Zaloguj się, aby anulować usunięcie konta.",
+        "unavailable": "Anulowanie jest teraz niedostępne.",
+        "error": "Nie udało się anulować usunięcia konta. Spróbuj ponownie."
+      }
     },
     "requests": {
       "title": "Twoje złożone wnioski",

@@ -5711,7 +5711,34 @@
       "reauth": "Sign in again",
       "confirmedTitle": "Deletion confirmed",
       "confirmedBody": "The system will delete the account within the next few minutes and send a confirmation to your account email. If anything needs review, we will tell you.",
-      "inReview": "Automatic deletion is paused for review: the account holds data that may have to be kept by law or that concerns other people. You will receive the decision and its reasons by email within one month. Meanwhile your profile is not shown in search."
+      "inReview": "Automatic deletion is paused for review: the account holds data that may have to be kept by law or that concerns other people. You will receive the decision and its reasons by email within one month. Meanwhile your profile is not shown in search.",
+      "confirmLabelWaiting": "I understand that the account and its data are deleted irreversibly 30 days after confirmation, unless I cancel before then.",
+      "confirmStepBodyWaiting": "Your account deletion request is filed. Confirm it — the account is kept for 30 days, and you can cancel on this page during that time. After that the system deletes the account automatically and emails you a confirmation.",
+      "confirmedBodyWaiting": "The account will be deleted in 30 days. Until then you can cancel on this page. Once it is deleted, we will send a confirmation to your account email.",
+      "status": {
+        "pending": "Your account deletion request is filed.",
+        "pendingConfirmed": "Account deletion is confirmed and scheduled.",
+        "withdrawn": "Account deletion cancelled. Your account stays active.",
+        "inProgress": "Account deletion is already running — it can no longer be cancelled.",
+        "done": "The account has been deleted.",
+        "submittedAt": "Filed: {date}",
+        "scheduledAt": "The account will be deleted on {date} (after a 30-day waiting period).",
+        "cancelUntil": "Until then you can cancel.",
+        "loadError": "Could not load the account deletion status. Refresh the page and try again."
+      },
+      "cancel": {
+        "button": "Cancel account deletion",
+        "question": "Cancel account deletion? Your account and data stay.",
+        "confirm": "Yes, cancel",
+        "keep": "Go back",
+        "working": "Cancelling…",
+        "cancelled": "Account deletion cancelled. Your account stays active.",
+        "notCancellable": "Account deletion has already started, so it can no longer be cancelled. You will receive the result at your account email.",
+        "notFound": "No open account deletion request was found — there is nothing to cancel.",
+        "notSignedIn": "Sign in to cancel the account deletion.",
+        "unavailable": "Cancelling is not available right now.",
+        "error": "Could not cancel the account deletion. Try again."
+      }
     },
     "requests": {
       "title": "Your filed requests",

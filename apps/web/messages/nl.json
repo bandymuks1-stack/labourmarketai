@@ -5711,7 +5711,34 @@
       "reauth": "Opnieuw inloggen",
       "confirmedTitle": "Verwijdering bevestigd",
       "confirmedBody": "Het systeem verwijdert het account binnen enkele minuten en stuurt een bevestiging naar het e-mailadres van je account. Moet iets worden beoordeeld, dan laten we het je weten.",
-      "inReview": "Automatische verwijdering is gepauzeerd voor beoordeling: het account bevat gegevens die mogelijk wettelijk bewaard moeten blijven of die andere mensen betreffen. Je ontvangt het besluit en de redenen binnen een maand per e-mail. Intussen wordt je profiel niet getoond in zoekresultaten."
+      "inReview": "Automatische verwijdering is gepauzeerd voor beoordeling: het account bevat gegevens die mogelijk wettelijk bewaard moeten blijven of die andere mensen betreffen. Je ontvangt het besluit en de redenen binnen een maand per e-mail. Intussen wordt je profiel niet getoond in zoekresultaten.",
+      "confirmLabelWaiting": "Ik begrijp dat het account en de gegevens 30 dagen na bevestiging onherroepelijk worden verwijderd, tenzij ik eerder annuleer.",
+      "confirmStepBodyWaiting": "Je verzoek om je account te verwijderen is ingediend. Bevestig het — het account blijft nog 30 dagen bestaan en in die tijd kun je op deze pagina annuleren. Daarna verwijdert het systeem het account automatisch en stuurt je een bevestiging per e-mail.",
+      "confirmedBodyWaiting": "Het account wordt over 30 dagen verwijderd. Tot die tijd kun je op deze pagina annuleren. Na het verwijderen sturen we een bevestiging naar het e-mailadres van je account.",
+      "status": {
+        "pending": "Je verzoek om je account te verwijderen is ingediend.",
+        "pendingConfirmed": "Het verwijderen van je account is bevestigd en ingepland.",
+        "withdrawn": "Het verwijderen van je account is geannuleerd. Je account blijft actief.",
+        "inProgress": "Je account wordt al verwijderd — dit kan niet meer worden geannuleerd.",
+        "done": "Het account is verwijderd.",
+        "submittedAt": "Ingediend: {date}",
+        "scheduledAt": "Het account wordt verwijderd op {date} (na een wachttijd van 30 dagen).",
+        "cancelUntil": "Tot die tijd kun je annuleren.",
+        "loadError": "De status van het verwijderen van je account kon niet worden geladen. Vernieuw de pagina en probeer het opnieuw."
+      },
+      "cancel": {
+        "button": "Accountverwijdering annuleren",
+        "question": "Accountverwijdering annuleren? Je account en gegevens blijven bestaan.",
+        "confirm": "Ja, annuleren",
+        "keep": "Terug",
+        "working": "Bezig met annuleren…",
+        "cancelled": "Het verwijderen van je account is geannuleerd. Je account blijft actief.",
+        "notCancellable": "Het verwijderen van je account is al begonnen en kan niet meer worden geannuleerd. Je ontvangt het resultaat op het e-mailadres van je account.",
+        "notFound": "Er is geen open verzoek om je account te verwijderen gevonden — er valt niets te annuleren.",
+        "notSignedIn": "Log in om het verwijderen van je account te annuleren.",
+        "unavailable": "Annuleren is nu niet beschikbaar.",
+        "error": "Het verwijderen van je account kon niet worden geannuleerd. Probeer het opnieuw."
+      }
     },
     "requests": {
       "title": "Je ingediende verzoeken",
