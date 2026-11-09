@@ -51,7 +51,7 @@ export type DeletionStatusView =
       readonly status: DeletionRequestStatus;
       readonly requestId: string;
       readonly submittedAt: string | null;
-      readonly confirmedAt: string | null;
+      readonly deletionConfirmedAt: string | null;
       readonly scheduledErasureAt: string | null;
       /** Only ever true for a `pending` request (defensive: a withdrawn or
        *  started erasure never offers a cancel, whatever the payload says). */
@@ -76,12 +76,16 @@ export function parseDeletionStatus(
   const requestId = str(row.request_id);
   if (!requestId) return { kind: "error" };
   const typed = status as DeletionRequestStatus;
+  // The RPC's `confirmed_at` is when the person confirmed the DELETION
+  // request — it says nothing about e-mail verification. It is read under its
+  // own name so it can never be mistaken for auth.users.email_confirmed_at.
+  const { confirmed_at: deletionConfirmedAtRaw } = row;
   return {
     kind: "request",
     status: typed,
     requestId,
     submittedAt: str(row.submitted_at),
-    confirmedAt: str(row.confirmed_at),
+    deletionConfirmedAt: str(deletionConfirmedAtRaw),
     scheduledErasureAt: str(row.scheduled_erasure_at),
     cancellable: typed === "pending" && row.cancellable === true,
   };
@@ -175,7 +179,7 @@ export function deletionStatusLabelKey(
 ): DeletionStatusLabelKey {
   switch (view.status) {
     case "pending":
-      return view.confirmedAt ? "pendingConfirmed" : "pending";
+      return view.deletionConfirmedAt ? "pendingConfirmed" : "pending";
     case "withdrawn":
       return "withdrawn";
     case "in_progress":
@@ -214,6 +218,6 @@ export function deletionSectionMode(
       return "status-only";
     case "pending":
       if (openRequestStatus === "needs_followup") return "in-review";
-      return view.confirmedAt ? "status-only" : "confirm-step";
+      return view.deletionConfirmedAt ? "status-only" : "confirm-step";
   }
 }

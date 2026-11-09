@@ -69,7 +69,7 @@ describe("status contract → view", () => {
       status: "pending",
       requestId: PENDING.request_id,
       submittedAt: PENDING.submitted_at,
-      confirmedAt: null,
+      deletionConfirmedAt: null,
       scheduledErasureAt: PENDING.scheduled_erasure_at,
       cancellable: true,
     });
