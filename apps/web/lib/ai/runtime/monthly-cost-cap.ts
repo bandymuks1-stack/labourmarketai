@@ -12,7 +12,8 @@
  * (run-agent-server.ts → usage-cost-store.ts). Same read handle as the org cap
  * (`usageLedgerReadClient`); no second cost store, no migration. A row's spend
  * is its `cost.actualCents`, else its `cost.estimatedCents` (a run with only an
- * estimate still spent something); a row with neither adds nothing.
+ * estimate still spent something); a row with neither adds nothing. Rows with
+ * `status='rejected'` (pre-dispatch refusals — no vendor ran) are excluded.
  *
  * MONTH: the UTC calendar month containing `now` — [1st 00:00Z, next 1st 00:00Z).
  *
@@ -68,10 +69,12 @@ export interface MonthSpendDb {
   from(table: string): {
     select(cols: string): {
       eq(col: string, v: string): {
-        gte(col: string, v: string): {
-          lt(col: string, v: string): {
-            order(col: string, opts: { ascending: boolean }): {
-              range(from: number, to: number): LedgerPage;
+        neq(col: string, v: string): {
+          gte(col: string, v: string): {
+            lt(col: string, v: string): {
+              order(col: string, opts: { ascending: boolean }): {
+                range(from: number, to: number): LedgerPage;
+              };
             };
           };
         };
@@ -110,6 +113,11 @@ export async function readMonthAiSpendEurBestEffort(
         .from("usage_cost_events")
         .select("cost")
         .eq("event_type", "usage")
+        // `rejected` = the router refused BEFORE dispatch (cost ceiling,
+        // unpriced model, human gate). buildUsageCostEventRow keeps the pre-run
+        // estimate on those rows, but no vendor ran — they are not spend.
+        // `error` rows did dispatch and stay counted (conservative).
+        .neq("status", "rejected")
         .gte("occurred_at", startIso)
         .lt("occurred_at", endIso)
         // PK order keeps the paging stable while new rows land.

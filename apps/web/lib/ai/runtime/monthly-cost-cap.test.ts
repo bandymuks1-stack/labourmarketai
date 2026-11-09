@@ -14,6 +14,7 @@ import {
 import { resolveAiRuntimeConfig } from "./config-core";
 import { runAiAgentCore } from "../run-agent";
 import { matchingExplanationEntry } from "../registry/agents/matching-explanation";
+import { buildUsageCostEventRow } from "@/lib/usage/usage-cost-store";
 
 const MOCK = resolveAiRuntimeConfig({
   mode: "mock", provider: undefined, apiKey: undefined, model: undefined,
@@ -45,9 +46,10 @@ const validMock = {
   },
 };
 
-type Row = { cost: Record<string, unknown> | null };
+type Row = { cost: Record<string, unknown> | null; status?: string };
 
-/** Fake ledger: records the filters and serves `pages` in order. */
+/** Fake ledger: records the filters and serves `pages` in order, applying the
+ *  `neq` filter like PostgREST would (so a dropped filter fails the tests). */
 function fakeDb(
   pages: Array<Row[] | { error: string }>,
   calls: Array<Record<string, unknown>> = [],
@@ -64,23 +66,33 @@ function fakeDb(
             eq(col, v) {
               call[`eq:${col}`] = v;
               return {
-                gte(col2, v2) {
-                  call[`gte:${col2}`] = v2;
+                neq(colN, vN) {
+                  call[`neq:${colN}`] = vN;
                   return {
-                    lt(col3, v3) {
-                      call[`lt:${col3}`] = v3;
+                    gte(col2, v2) {
+                      call[`gte:${col2}`] = v2;
                       return {
-                        order(col4) {
-                          call.order = col4;
+                        lt(col3, v3) {
+                          call[`lt:${col3}`] = v3;
                           return {
-                            range(from, to) {
-                              call.range = [from, to];
-                              const page = pages[i++] ?? [];
-                              return Promise.resolve(
-                                Array.isArray(page)
-                                  ? { data: page, error: null }
-                                  : { data: null, error: { message: page.error } },
-                              );
+                            order(col4) {
+                              call.order = col4;
+                              return {
+                                range(from, to) {
+                                  call.range = [from, to];
+                                  const page = pages[i++] ?? [];
+                                  if (!Array.isArray(page)) {
+                                    return Promise.resolve({
+                                      data: null,
+                                      error: { message: page.error },
+                                    });
+                                  }
+                                  const kept = page.filter(
+                                    (r) => (r as Record<string, unknown>)[colN] !== vN,
+                                  );
+                                  return Promise.resolve({ data: kept, error: null });
+                                },
+                              };
                             },
                           };
                         },
@@ -163,6 +175,7 @@ describe("month boundary (UTC calendar month)", () => {
       table: "usage_cost_events",
       select: "cost",
       "eq:event_type": "usage",
+      "neq:status": "rejected",
       "gte:occurred_at": "2026-11-01T00:00:00.000Z",
       "lt:occurred_at": "2026-12-01T00:00:00.000Z",
     });
@@ -182,6 +195,38 @@ describe("readMonthAiSpendEurBestEffort — usage_cost_events sum", () => {
       ]),
     );
     expect(spend).toBeCloseTo(2, 10);
+  });
+
+  it("a cost-ceiling refusal row (rejected, estimate kept) never counts as spend", async () => {
+    // A REAL pre-dispatch refusal, mapped by the real ledger writer.
+    const refused = await runAiAgentCore(matchingExplanationEntry, input, MOCK, {
+      locale: "en", mock: validMock,
+      route: { attempt: 1, estimatedCostUsd: 100 },
+    });
+    expect(refused.routing?.blocked).toBe("cost_ceiling");
+    const row = buildUsageCostEventRow(refused.routing!);
+    expect(row.status).toBe("rejected");
+    // The writer keeps the pre-run estimate — exactly why the read must filter.
+    expect(row.cost.estimatedCents).toBeGreaterThan(0);
+
+    const calls: Array<Record<string, unknown>> = [];
+    const spend = await readMonthAiSpendEurBestEffort(
+      fakeDb(
+        [[
+          { status: row.status, cost: row.cost },
+          { status: "success", cost: { actualCents: 120 } },
+          { status: "error", cost: { estimatedCents: 30 } },
+        ]],
+        calls,
+      ),
+    );
+    expect(calls[0]?.["neq:status"]).toBe("rejected");
+    expect(spend).toBeCloseTo(1.5, 10);
+    // …so a month of nothing but refusals leaves a cap of €1 untouched.
+    const onlyRefusals = await readMonthAiSpendEurBestEffort(
+      fakeDb([[{ status: row.status, cost: row.cost }]]),
+    );
+    expect(assessMonthlyCostCap(onlyRefusals, 1)).toBe("ok");
   });
 
   it("pages until a short page", async () => {
