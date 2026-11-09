@@ -54,6 +54,12 @@ export const PRIORITY_MARKETS: readonly string[] = [
   "CH",
 ];
 
+/** Markets with no evidence page whose job ads ARE on the public board, so
+ *  "coming soon" would be false. Measured 2026-11-04: Sweden 46,022 and Norway
+ *  8,457 live ads, and no other country. The card links to the board and claims
+ *  nothing else about the market. */
+export const MARKETS_WITH_PUBLIC_JOB_ADS: readonly string[] = ["SE", "NO"];
+
 export interface CountrySignal {
   readonly country: CountryCode;
   /** Stable id (also the i18n key under countryEvidence.<COUNTRY>.<id>). */

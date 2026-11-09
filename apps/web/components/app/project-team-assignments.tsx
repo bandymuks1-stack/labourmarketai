@@ -30,8 +30,11 @@ const field =
   "min-h-11 sm:min-h-9 rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary";
 const button =
   "inline-flex min-h-11 sm:min-h-9 items-center rounded-md border border-ink-500 px-3 py-1 text-xs font-semibold text-text-secondary hover:border-brand-blue disabled:opacity-60";
+// SECONDARY on purpose: this form repeats once per project card, so a gold
+// fill here made a dozen "main" buttons on the Work page (owner design pass
+// 2026-10-26: one primary per screen — the action deck's "New project").
 const primary =
-  "inline-flex min-h-11 sm:min-h-9 items-center rounded-md bg-gradient-cta px-4 py-1 text-xs font-semibold text-text-on-brand disabled:opacity-60";
+  "inline-flex min-h-11 sm:min-h-9 items-center rounded-md border border-brand-blue/60 px-4 py-1 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60";
 
 export function ProjectTeamAssignments({
   projectId,

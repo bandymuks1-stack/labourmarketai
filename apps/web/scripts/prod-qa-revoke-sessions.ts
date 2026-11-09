@@ -19,6 +19,12 @@
  * Until 2026-10-26 it never failed and the files were deleted before it ran,
  * so it reported a clean 0/0 while every session stayed live.
  *
+ * ONE exception, per slot: a walk that signs its own session out through the
+ * app (digest-setup S-5) leaves `.storage-state.prod-qa.<slot>.signed-out.json`
+ * once the sign-out landed. Supabase then answers 403/404 for that session —
+ * it is already ended — and only for THAT slot, only with that marker, such an
+ * answer counts as done. Every other slot and every other status stays strict.
+ *
  *   PROD_QA_ANON_KEY=… pnpm exec tsx scripts/prod-qa-revoke-sessions.ts
  */
 import { readdirSync, readFileSync, unlinkSync } from "node:fs";
@@ -28,6 +34,9 @@ import { PRODUCTION_ORIGIN, PROD_QA_IDENTITIES } from "../lib/testing/prod-qa-gu
 
 const DIR = resolve(__dirname, "..", "tests", "e2e");
 const FILE_RX = /^\.storage-state\.prod-qa(\.[a-z0-9-]{1,24})?\.json$/;
+/** Left by a walk after its own in-app sign-out of that slot (see the header). */
+const SIGNED_OUT_RX = /^\.storage-state\.prod-qa(\.[a-z0-9-]{1,24})?\.signed-out\.json$/;
+const slotOf = (name: string, rx: RegExp): string => rx.exec(name)?.[1] ?? "";
 
 function accessTokenOf(file: string): string | null {
   try {
@@ -62,9 +71,13 @@ function vetted(token: string): boolean {
 
 async function main(): Promise<void> {
   const anon = process.env.PROD_QA_ANON_KEY ?? "";
-  const files = readdirSync(DIR).filter((f) => FILE_RX.test(f));
+  const all = readdirSync(DIR);
+  const files = all.filter((f) => FILE_RX.test(f));
+  const markers = all.filter((f) => SIGNED_OUT_RX.test(f));
+  const signedOutSlots = new Set(markers.map((f) => slotOf(f, SIGNED_OUT_RX)));
   const seen = new Set<string>();
   let revoked = 0;
+  let endedByOwnSignOut = 0;
   let skipped = 0;
   const statuses: number[] = [];
   for (const name of files) {
@@ -80,6 +93,7 @@ async function main(): Promise<void> {
         });
         statuses.push(res.status);
         if (res.status === 204 || res.status === 200) revoked += 1;
+        else if ((res.status === 403 || res.status === 404) && signedOutSlots.has(slotOf(name, FILE_RX))) endedByOwnSignOut += 1;
       } catch {
         statuses.push(0);
       }
@@ -88,12 +102,15 @@ async function main(): Promise<void> {
     }
     unlinkSync(path);
   }
+  for (const name of markers) unlinkSync(join(DIR, name));
   console.info(
     `[prod-qa-revoke] files=${files.length} deleted=${files.length} sessions_revoked=${revoked}/${seen.size} ` +
-      `unvetted_or_unreadable=${skipped} statuses=${statuses.join(",") || "none"}`,
+      `ended_by_own_signout=${endedByOwnSignOut} unvetted_or_unreadable=${skipped} statuses=${statuses.join(",") || "none"}`,
   );
   const problems: string[] = [];
-  if (revoked < seen.size) problems.push(`${seen.size - revoked} session(s) not revoked`);
+  if (revoked + endedByOwnSignOut < seen.size) {
+    problems.push(`${seen.size - revoked - endedByOwnSignOut} session(s) not revoked`);
+  }
   if (skipped > 0) problems.push(`${skipped} unreadable or unvetted session file(s)`);
   if (process.env.PROD_QA_REVOKE_EXPECT_FILES === "1" && files.length === 0) {
     problems.push("sessions were minted but no session file reached the revoke");

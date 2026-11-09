@@ -1,5 +1,22 @@
 {
   "companyModel": {
+    "today": {
+      "goApprove": "Sprawdź i zatwierdź",
+      "amount": {
+        "hours": "{n} godz.",
+        "days": "{n} dn.",
+        "minutes": "{n} min."
+      },
+      "people": "{n, plural, one {# osoba} few {# osoby} many {# osób} other {# osoby}}",
+      "entries": "{n, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
+      "unclear": "Niejasne godziny: {n}",
+      "noHours": "Bez godzin: {n}",
+      "noFigure": "Nie podano godzin",
+      "elsewhere": "Gdzie indziej na twoje zatwierdzenie czeka jeszcze: {n}.",
+      "notReviewer": "W tej organizacji nie zatwierdzasz godzin: wymaga to relacji kierownika lub właściciela.",
+      "decisionsClear": "Teraz nie czekają żadne inne decyzje.",
+      "doors": "Ludzie i projekty"
+    },
     "title": "Zarządzanie firmą",
     "need": "Czego potrzebujemy",
     "offer": "Co oferujemy",
@@ -15,7 +32,22 @@
     "work": "Praca i godziny",
     "results": "Wyniki",
     "history": "Historia",
-    "areasTitle": "Obszary firmy"
+    "areasTitle": "Obszary firmy",
+    "approvals": {
+      "title": "Czeka na zatwierdzenie: {n}",
+      "titleUnknown": "Czeka na zatwierdzenie",
+      "what": "Godziny i prace zapisane przez pracowników. Zatwierdź lub odrzuć je od razu tutaj.",
+      "seeAll": "Wszystkie oczekujące ({n})",
+      "emptyTitle": "Obecnie żadne godziny pracowników nie czekają na zatwierdzenie.",
+      "emptyNext": "Gdy pracownik zapisze pracę, pojawi się tutaj.",
+      "noEmployees": "Ta organizacja nie ma jeszcze pracowników, których godziny mógłbyś zatwierdzić.",
+      "people": "Ludzie i zespół",
+      "reviewOff": "Zatwierdzanie jest wyłączone dla {off} z {total} pracowników. Ich godziny nie pojawią się tutaj, dopóki go nie włączysz.",
+      "enable": "Włącz w sekcji Ludzie i zespół",
+      "own": "Twoje niepotwierdzone wpisy: {n}. Nie możesz zatwierdzić własnej pracy: może to zrobić inny kierownik tej organizacji.",
+      "ownAlone": "Twoje niepotwierdzone wpisy: {n}. Nie możesz zatwierdzić własnej pracy, a ta organizacja nie ma innego kierownika, więc pozostają zapisane jako Twoja własna praca.",
+      "ownUnknown": "Twoje niepotwierdzone wpisy: {n}. Nie możesz zatwierdzić własnej pracy: pozostają zapisane jako Twoja własna praca, dopóki nie potwierdzi ich inny kierownik."
+    }
   },
   "publicDemand": {
     "title": "Aktualny popyt na rynku",
@@ -122,7 +154,26 @@
     "descriptionLabel": "O firmie (pokazywane na publicznej stronie)",
     "descriptionPlaceholder": "Czym się zajmujesz, gdzie działasz, czego może oczekiwać klient lub pracownik…",
     "descriptionHint": "Do 2000 znaków. To główny blok tekstu na Twojej publicznej stronie.",
-    "errorDescription": "Publikacja zapisana, ale nie udało się zapisać opisu. Spróbuj ponownie."
+    "errorDescription": "Publikacja zapisana, ale nie udało się zapisać opisu. Spróbuj ponownie.",
+    "team": {
+      "eyebrow": "Profil firmy",
+      "aboutEyebrow": "O firmie",
+      "aboutTitle": "Kim są",
+      "offersEyebrow": "Ogłoszenia",
+      "offersTitle": "Co oferują",
+      "seekingEyebrow": "Poszukiwane",
+      "seekingTitle": "Czego szukają",
+      "seekingSub": "Ogłoszenia poszukiwania samej firmy. To nie są oferty pracy.",
+      "contactEyebrow": "Kontakt",
+      "contactTitle": "Skontaktuj się z firmą",
+      "contactNote": "Firma sama opublikowała te kontakty. Zwracasz się bezpośrednio do niej, nie przez labourmarket.ai.",
+      "contactNone": "Firma nie opublikowała kontaktu, więc przez tę stronę nie można do niej dotrzeć.",
+      "actionEmail": "Napisz e-mail",
+      "actionPhone": "Zadzwoń",
+      "actionWebsite": "Otwórz stronę firmy",
+      "heroContact": "Jak się skontaktować",
+      "provenance": "Firma sama wypełniła tę stronę."
+    }
   },
   "marketplaceListings": {
     "pageTitle": "Giełda",
@@ -3171,6 +3222,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Wygląda na reklamę",
       "eyebrow": "POTRZEBY FIRM",
       "title": "Kolejka publicznych potrzeb firm",
       "subtitle": "Anonimowe potrzeby zgłoszone przez publiczny formularz /company-need. Przejrzyj każdą i ręcznie oznacz kolejny krok. Nic nie jest wysyłane automatycznie — cały kontakt prowadzi człowiek.",
@@ -5659,7 +5711,34 @@
       "reauth": "Zaloguj się ponownie",
       "confirmedTitle": "Usunięcie potwierdzone",
       "confirmedBody": "System usunie konto w ciągu kilku minut i wyśle potwierdzenie na adres e-mail konta. Jeśli coś będzie wymagało przeglądu, poinformujemy Cię.",
-      "inReview": "Automatyczne usunięcie wstrzymano do przeglądu: konto zawiera dane, które mogą wymagać przechowywania na mocy prawa lub dotyczą innych osób. Decyzję i jej uzasadnienie otrzymasz e-mailem w ciągu miesiąca. Do tego czasu Twój profil nie jest widoczny w wyszukiwaniu."
+      "inReview": "Automatyczne usunięcie wstrzymano do przeglądu: konto zawiera dane, które mogą wymagać przechowywania na mocy prawa lub dotyczą innych osób. Decyzję i jej uzasadnienie otrzymasz e-mailem w ciągu miesiąca. Do tego czasu Twój profil nie jest widoczny w wyszukiwaniu.",
+      "confirmLabelWaiting": "Rozumiem, że konto i jego dane zostaną usunięte nieodwracalnie 30 dni po potwierdzeniu, chyba że wcześniej anuluję.",
+      "confirmStepBodyWaiting": "Twój wniosek o usunięcie konta został złożony. Potwierdź go — konto zostanie zachowane przez 30 dni i w tym czasie możesz anulować na tej stronie. Potem system usunie konto automatycznie i wyśle potwierdzenie e-mailem.",
+      "confirmedBodyWaiting": "Konto zostanie usunięte za 30 dni. Do tego czasu możesz anulować na tej stronie. Po usunięciu wyślemy potwierdzenie na adres e-mail konta.",
+      "status": {
+        "pending": "Twój wniosek o usunięcie konta został złożony.",
+        "pendingConfirmed": "Usunięcie konta jest potwierdzone i zaplanowane.",
+        "withdrawn": "Usunięcie konta zostało anulowane. Twoje konto pozostaje aktywne.",
+        "inProgress": "Usuwanie konta już trwa — nie można go już anulować.",
+        "done": "Konto zostało usunięte.",
+        "submittedAt": "Złożono: {date}",
+        "scheduledAt": "Konto zostanie usunięte {date} (po 30 dniach oczekiwania).",
+        "cancelUntil": "Do tego czasu możesz anulować.",
+        "loadError": "Nie udało się wczytać stanu usuwania konta. Odśwież stronę i spróbuj ponownie."
+      },
+      "cancel": {
+        "button": "Anuluj usunięcie konta",
+        "question": "Anulować usunięcie konta? Twoje konto i dane zostaną.",
+        "confirm": "Tak, anuluj",
+        "keep": "Wróć",
+        "working": "Anulowanie…",
+        "cancelled": "Usunięcie konta zostało anulowane. Twoje konto pozostaje aktywne.",
+        "notCancellable": "Usuwanie konta już się rozpoczęło, więc nie można go już anulować. Wynik otrzymasz na adres e-mail konta.",
+        "notFound": "Nie znaleziono otwartego wniosku o usunięcie konta — nie ma czego anulować.",
+        "notSignedIn": "Zaloguj się, aby anulować usunięcie konta.",
+        "unavailable": "Anulowanie jest teraz niedostępne.",
+        "error": "Nie udało się anulować usunięcia konta. Spróbuj ponownie."
+      }
     },
     "requests": {
       "title": "Twoje złożone wnioski",
@@ -5694,6 +5773,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Twoja umowa na jakąkolwiek usługę platformy jest zawierana z UAB „Nonstop Group”. Faktury wystawia i płatności otrzymuje UAB „Nonstop Group”.",
       "title": "Regulamin",
       "sections": [
         {
@@ -5723,6 +5803,7 @@
     },
     "privacy": {
       "title": "Polityka prywatności",
+      "metaDescription": "Ta strona wyjaśnia prostym językiem, jakich danych osobowych używa LabourMarket.ai, w jakim celu i jakie masz prawa. Opisuje platformę taką, jaka działa dzisiaj.",
       "intro": "Ta strona wyjaśnia prostym językiem, jakich danych osobowych używa Labour Market AI, w jakim celu i jakie masz prawa. Opisuje platformę taką, jaka działa dzisiaj.",
       "sections": [
         {
@@ -5742,7 +5823,8 @@
             "Informacje o firmie wprowadzane przez użytkowników firmowych: dane firmy, zapotrzebowania na pracowników, projekty i rezerwacje.",
             "Wiadomości, które wysyłasz i otrzymujesz na platformie.",
             "Zapisy zgód: gdy udzielasz lub wycofujesz zgodę, zapisywane są czynność i jej czas.",
-            "Dane techniczne potrzebne do działania usługi, takie jak pliki cookie logowania (zobacz Politykę plików cookie)."
+            "Dane techniczne potrzebne do działania usługi, takie jak pliki cookie logowania (zobacz Politykę plików cookie).",
+            "Tylko za Twoją zgodą: pomiar korzystania na naszych własnych serwerach (osiągnięte strony i kroki, codzienna aktywność) oraz kampania, która Cię przyprowadziła, przechowywana z Twoim kontem. Zobacz Politykę cookies."
           ]
         },
         {
@@ -5798,7 +5880,7 @@
           "heading": "Twoje prawa",
           "items": [
             "Możesz poprosić o wgląd w dane, które Cię dotyczą, o ich poprawienie, o otrzymanie ich kopii, o ograniczenie ich wykorzystania lub o ich usunięcie.",
-            "Kopię swoich danych w pliku JSON oraz dziennik pracy w pliku CSV możesz pobrać samodzielnie ze swojego konta. O usunięcie konta możesz poprosić na stronie Prywatność na swoim koncie i potwierdzić wniosek po ponownym zalogowaniu; system usuwa wtedy konto automatycznie i wysyła potwierdzenie na adres e-mail konta. Jeśli dane muszą być przechowywane na mocy prawa lub dotyczą innych osób, wniosek jest rozpatrywany, a decyzję otrzymujesz w ciągu jednego miesiąca. Możesz też skontaktować się z nami — zob. stronę „Usunięcie konta i danych”.",
+            "Kopię swoich danych w pliku JSON oraz dziennik pracy w pliku CSV możesz pobrać samodzielnie ze swojego konta. O usunięcie konta możesz poprosić na stronie Prywatność na swoim koncie i potwierdzić wniosek po ponownym zalogowaniu; 30 dni po potwierdzeniu system usuwa konto automatycznie (do tego czasu możesz anulować wniosek na stronie Prywatność) i wysyła potwierdzenie na adres e-mail konta. Po ostatecznym usunięciu usunięte dane mogą pozostawać w zaszyfrowanych kopiach zapasowych bazy danych do 7 dni; nie są tam wykorzystywane, a następnie zostają nadpisane. Jeśli dane muszą być przechowywane na mocy prawa lub dotyczą innych osób, wniosek jest rozpatrywany, a decyzję otrzymujesz w ciągu jednego miesiąca. Możesz też skontaktować się z nami — zob. stronę „Usunięcie konta i danych”.",
             "Gdy przetwarzanie opiera się na zgodzie, możesz tę zgodę wycofać w dowolnym momencie."
           ]
         },
@@ -5834,10 +5916,36 @@
         {
           "name": "Preferencja wyświetlania dla administratora (lm_hide_admin_ui)",
           "purpose": "Używany wyłącznie na kontach administratorów. Zapamiętuje, czy elementy administracyjne są ukryte, i nie zmienia niczego w uprawnieniach."
+        },
+        {
+          "name": "Znacznik próby logowania (lm.oauth.trace)",
+          "purpose": "Pamięć karty, usuwana po jej zamknięciu. Losowy kod łączący jedną próbę logowania z jej wynikiem, aby można było zbadać nieudane logowanie. Niezbędny dla rozpoczętego przez Ciebie logowania; nie zawiera danych konta."
         }
       ],
-      "localStorageNote": "W pamięci przeglądarki (nie w plikach cookie) przechowywanych jest kilka elementów: Twój wybór jasnego lub ciemnego motywu; która strona lub kampania po raz pierwszy Cię tu sprowadziła — zapisane jednorazowo, aby późniejszą rejestrację można było do niej przypisać; losowy identyfikator sesji dla każdej karty, znikający po jej zamknięciu; oraz drobne udogodnienia, takie jak zamknięte powiadomienia, ostatnio oglądane elementy i język wprowadzania mową. Nic z tego nie jest udostępniane stronom trzecim ani wykorzystywane do reklam, a wszystko możesz w każdej chwili wyczyścić w przeglądarce.",
-      "noTracking": "Na platformie nie ma dziś żadnych plików cookie analitycznych, reklamowych ani śledzących innych firm. Jeśli kiedykolwiek się to zmieni, ta strona zostanie zaktualizowana jako pierwsza."
+      "localStorageNote": "Pamięć przeglądarki (nie pliki cookie) przechowuje też kilka elementów, o które sam poprosiłeś: wybór jasnego lub ciemnego motywu, Twoją decyzję w sprawie pomiaru korzystania oraz drobne udogodnienia, np. ukryte powiadomienia, ostatnio oglądane pozycje i język wprowadzania głosowego. Pozostają one na Twoim urządzeniu i w każdej chwili możesz je wyczyścić w przeglądarce.",
+      "noTracking": "Na platformie nie ma reklamowych ani śledzących plików cookie stron trzecich i nic nie jest przekazywane stronom trzecim w celach reklamowych.",
+      "settingsLink": "Ustawienia cookies",
+      "analyticsTitle": "Pomiar korzystania — tylko za Twoją zgodą",
+      "analyticsIntro": "Za Twoją zgodą mierzymy, jak korzysta się z produktu: które strony i kroki są osiągane, kroki rejestracji, codzienną aktywność oraz która kampania przyprowadziła odwiedzającego. Zdarzenia są przechowywane na naszych własnych serwerach i, jeśli jesteś zalogowany, powiązane z Twoim kontem. Bez Twojej zgody żaden z poniższych elementów nie jest zapisywany i żadne zdarzenie pomiarowe nie jest wysyłane z Twojej przeglądarki.",
+      "analyticsItems": [
+        {
+          "name": "Kampania pierwszej wizyty (lm.attr.first)",
+          "purpose": "Pamięć przeglądarki. Tagi kampanii (utm_*), strona odsyłająca i strona wejścia przy pierwszej wizycie. Przy rejestracji są kopiowane do rekordu Twojego konta, aby można było policzyć kampanię, która Cię przyprowadziła."
+        },
+        {
+          "name": "Identyfikator sesji (lm.pilot.session)",
+          "purpose": "Pamięć karty, usuwana po jej zamknięciu. Losowy identyfikator wysyłany z każdym zdarzeniem pomiarowym, aby kroki w jednej karcie liczyć razem."
+        },
+        {
+          "name": "Znaczniki aktywności (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
+          "purpose": "Pamięć przeglądarki. Ostatni dzień Twojej aktywności i znacznik, że trwa rejestracja."
+        },
+        {
+          "name": "Znaczniki jednorazowego liczenia (lm.funnel.*)",
+          "purpose": "Pamięć karty. Zapobiega dwukrotnemu policzeniu tego samego zdarzenia pomiarowego."
+        }
+      ],
+      "analyticsBasis": "Odmowa lub wycofanie zgody od razu usuwa te elementy z tego urządzenia; jeśli jesteś zalogowany, usuwana jest też kampania przechowywana z Twoim kontem. Sam pomiar opiera się na naszym prawnie uzasadnionym interesie w ulepszaniu produktu (art. 6 ust. 1 lit. f RODO) i możesz się mu sprzeciwić w sposób opisany w Polityce prywatności."
     },
     "requestContact": "Aby zadać pytanie lub zgłosić żądanie dotyczące swoich danych, skontaktuj się z nami — sprawę rozpatrzy człowiek.",
     "related": "Powiązane strony",
@@ -5847,6 +5955,7 @@
     },
     "dataProtection": {
       "title": "Ochrona danych",
+      "metaDescription": "Ta strona wyjaśnia prostymi słowami, jak chronione są dane wewnątrz LabourMarket.ai. Opisuje wyłącznie to, co jest dziś faktycznie wbudowane w platformę.",
       "intro": "Ta strona wyjaśnia prostymi słowami, jak chronione są dane wewnątrz Labour Market AI. Opisuje wyłącznie to, co jest dziś faktycznie wbudowane w platformę.",
       "sections": [
         {
@@ -6089,7 +6198,7 @@
     "dataDeletion": {
       "title": "Usunięcie konta i danych",
       "description": "Jak poprosić o usunięcie konta LabourMarket.ai i danych osobowych.",
-      "intro": "Możesz poprosić LabourMarket.ai o usunięcie konta i danych osobowych. Jeśli możesz się zalogować, możesz złożyć wniosek samodzielnie: otwórz stronę Prywatność na swoim koncie (w aplikacji mobilnej: Ustawienia → Prywatność), wybierz usunięcie konta i potwierdź je po ponownym zalogowaniu. System usuwa wtedy konto automatycznie i wysyła potwierdzenie na adres e-mail konta; jeśli dane muszą być przechowywane na mocy prawa lub dotyczą innych osób, wniosek jest rozpatrywany, a decyzję otrzymujesz w ciągu jednego miesiąca. O usunięcie możesz też poprosić e-mailem, jak opisano poniżej; człowiek odpowiada w ciągu jednego miesiąca.",
+      "intro": "Możesz poprosić LabourMarket.ai o usunięcie konta i danych osobowych. Jeśli możesz się zalogować, możesz złożyć wniosek samodzielnie: otwórz stronę Prywatność na swoim koncie (w aplikacji mobilnej: Ustawienia → Prywatność), wybierz usunięcie konta i potwierdź je po ponownym zalogowaniu. 30 dni po potwierdzeniu system usuwa konto automatycznie (do tego czasu możesz anulować wniosek na stronie Prywatność) i wysyła potwierdzenie na adres e-mail konta; jeśli dane muszą być przechowywane na mocy prawa lub dotyczą innych osób, wniosek jest rozpatrywany, a decyzję otrzymujesz w ciągu jednego miesiąca. Po ostatecznym usunięciu usunięte dane mogą pozostawać w zaszyfrowanych kopiach zapasowych bazy danych do 7 dni; nie są tam wykorzystywane, a następnie zostają nadpisane. O usunięcie możesz też poprosić e-mailem, jak opisano poniżej; człowiek odpowiada w ciągu jednego miesiąca.",
       "howTitle": "Jak poprosić o usunięcie",
       "howSteps": [
         "Napisz na {email} z adresu e-mail powiązanego z Twoim kontem LabourMarket.ai.",
@@ -6377,6 +6486,17 @@
       "pending": "Scalanie…",
       "done": "Scalono. Wiersze i ich wpisy zostają; lista projektów pokazuje teraz zachowany projekt.",
       "failed": "Nie scalono. Dla nieprzetworzonych wierszy nic nie zmieniono — odśwież i spróbuj ponownie."
+    },
+    "deck": {
+      "label": "Co możesz zrobić",
+      "new": "Nowy projekt",
+      "newHint": "Utwórz i zacznij",
+      "assign": "Przypisz pracownika",
+      "assignHint": "Do projektu",
+      "teams": "Przypisz zespół",
+      "teamsHint": "Ekipę do projektu lub zadania",
+      "chat": "Rozmowy",
+      "toolsLabel": "Inne narzędzia"
     }
   },
   "projectOps": {
@@ -7638,7 +7758,7 @@
     "campaigns": {
       "title": "Kampania → oferta → konto",
       "empty": "W tym oknie nie ma jeszcze zdarzeń oznaczonych kampanią.",
-      "help": "Pierwszy kontakt utm_campaign × utm_content w tym samym oknie, z tym samym filtrem populacji. To wystąpienia zdarzeń, nie unikalni odwiedzający — późniejsza kolumna nie jest podzbiorem wcześniejszej, więc żaden stosunek dwóch kolumn nie jest współczynnikiem konwersji. 25 najczęstszych według wejść; ruch nieoznaczony (organiczny) nie jest wymieniony. Kolumna zainteresowania jest emitowana po stronie serwera, gdzie kampania nie jest dostępna, więc z założenia pozostaje 0 — to brak pomiaru, nie zmierzone zero.",
+      "help": "Pierwszy kontakt utm_campaign × utm_content w tym samym oknie, z tym samym filtrem populacji. To wystąpienia zdarzeń, nie unikalni odwiedzający — późniejsza kolumna nie jest podzbiorem wcześniejszej, więc żaden stosunek dwóch kolumn nie jest współczynnikiem konwersji. 25 najczęstszych według wejść; ruch nieoznaczony (organiczny) nie jest wymieniony. Kolumna zainteresowania jest emitowana po stronie serwera, gdzie kampania nie jest dostępna, więc z założenia pozostaje 0 — to brak pomiaru, nie zmierzone zero. Cztery kolumny po rejestracji liczą zdarzenia, nie osoby (wpisy w dzienniku to każdy zapisany wpis, nie pierwszy), i tylko dla kont, których własny rekord zawiera kampanię: rejestracje z dozwoloną analityką, a rejestracje przez Google dopiero od 2026-11-03. Odwiedzający, którzy odmówili analityki, w ogóle nie trafiają do tej tabeli.",
       "col": {
         "campaign": "Kampania / wariant",
         "landing": "Wejścia",
@@ -7648,7 +7768,11 @@
         "signupCompleted": "Utworzono konto",
         "returnedToJob": "Powrót do oferty",
         "compared": "Porównano",
-        "interest": "Zainteresowanie"
+        "interest": "Zainteresowanie",
+        "profileSaved": "Profil zapisany",
+        "profileMatchable": "Profil gotowy do dopasowania",
+        "journalEntrySaved": "Wpisy w dzienniku",
+        "jobSearch": "Szukanie pracy"
       }
     },
     "funnel": {
@@ -8606,6 +8730,98 @@
       "emptyCapabilities": "Brak umiejętności. Tu pojawią się dodane umiejętności i praca, która je pokazuje.",
       "emptyExperience": "Brak historii pracy. Tworzą ją Twój dziennik i zapisy organizacji, w których pracowałeś.",
       "untitled": "Praca bez nazwy w źródle"
+    },
+    "athlete": {
+      "earlyNote": "Wczesny układ Twojego Living CV. Liczby to Twoje prawdziwe wpisy; wygląd nie jest jeszcze ostateczny.",
+      "fullCv": "Otwórz pełne CV",
+      "hero": {
+        "portraitAlt": "Zdjęcie: {name}",
+        "noRole": "Nie dodano jeszcze zawodu",
+        "availableFrom": "od {date}",
+        "onlyYou": "Tutaj widzisz to tylko Ty."
+      },
+      "stats": {
+        "aria": "Liczby i kto za nimi stoi",
+        "unknown": "Nie udało się teraz odczytać",
+        "organizationCount": "{count, plural, one {# organizacja} few {# organizacje} many {# organizacji} other {# organizacji}}",
+        "confirmedBy": "Potwierdzone we wpisie: {who}",
+        "confirmedBySomeone": "Jest wpis przełożonego lub organizacji",
+        "confirmedSelfOnly": "Na razie tylko Twoje własne potwierdzenie; żaden inny przełożony ani organizacja tego nie potwierdzili",
+        "someSelfConfirmed": "Część: {qualifier}",
+        "truncated": "Twój dziennik jest długi, więc starsze wpisy mogą być poza tymi liczbami.",
+        "confirmed": {
+          "label": "godziny we wpisie przełożonego lub organizacji",
+          "none": "Żaden wpis przełożonego ani organizacji nie potwierdza jeszcze Twojej pracy"
+        },
+        "total": {
+          "label": "godziny doświadczenia",
+          "behind": "Twój dziennik i wpisy organizacji, każda godzina raz"
+        },
+        "journal": {
+          "label": "zapisane godziny",
+          "behind": "Twój własny dziennik pracy",
+          "none": "Nic jeszcze nie zapisano"
+        },
+        "organization": {
+          "label": "godziny we wpisach organizacji",
+          "behind": "Wpisy organizacji"
+        },
+        "projects": {
+          "label": "projekty",
+          "behind": "Z Twoich wpisów"
+        }
+      },
+      "seasons": {
+        "eyebrow": "Kariera",
+        "title": "Kariera według sezonów",
+        "empty": "Nie ma jeszcze sezonów. Zapisz jeden dzień pracy, a stanie się pierwszą linią Twojej historii.",
+        "emptyAction": "Zapisz pracę",
+        "undated": "Nie podano dat",
+        "hoursNotStated": "Nie podano godzin",
+        "hoursRecorded": "Zapisano: {hours}",
+        "hoursConfirmed": "We wpisie przełożonego: {confirmed} · zapisano: {recorded}",
+        "orgDayHours": "{hours}, {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
+        "orgPeriodHours": "{hours}, podane jako suma za okres",
+        "note": "Sezon pokazuje godziny podane w jego własnych wpisach. Suma powyżej liczy każdą godzinę raz.",
+        "confirmedBy": "Potwierdzone we wpisie: {who}",
+        "placement": "Praktyka",
+        "reconstructed": "Odtworzono z wcześniejszego wpisu",
+        "photoAlt": "Zdjęcie z pracy: {name}",
+        "evidence": {
+          "confirmed": "Potwierdzone we wpisie przełożonego lub organizacji",
+          "client_accepted": "Przyjął klient",
+          "organization_record": "Wpis organizacji",
+          "own_record": "Twój własny wpis",
+          "stated": "Podajesz to sam; na razie nic tego nie pokazuje"
+        }
+      },
+      "skills": {
+        "eyebrow": "Umiejętności",
+        "title": "Co potrafisz i co to pokazuje",
+        "empty": "Nie ma jeszcze umiejętności. Dodaj, co potrafisz, a resztę pokażą Twoje wpisy.",
+        "emptyAction": "Dodaj umiejętności",
+        "potentialFrom": "Wskazuje na to Twoja praca: {skills}; na razie nie pokazuje tego żaden wpis",
+        "documentUnverified": "Dokument dodajesz sam; nikt go nie sprawdził",
+        "involved": "Udział w {hours}, nieprzypisany wyłącznie do tej umiejętności",
+        "timeUnknown": "Nie udało się teraz odczytać dziennika, więc umiejętności nie mają godzin.",
+        "noScore": "Nic tu nie sprowadza człowieka do jednej liczby. Widzisz, co pokazują wpisy i kto za nimi stoi.",
+        "state": {
+          "confirmed": "Praca potwierdzona przez przełożonego",
+          "certified": "Certyfikowane",
+          "recorded": "W Twoich wpisach",
+          "declared": "Podane przez Ciebie",
+          "potential": "Możliwe"
+        }
+      },
+      "next": {
+        "eyebrow": "Następny krok",
+        "title": "Dokąd może prowadzić Twoja praca",
+        "confirmed": "Potwierdzone przez przełożonego: {list}",
+        "inRecords": "W Twoich wpisach: {list}",
+        "missing": "Brakuje: {list}",
+        "none": "Nie ma jeszcze następnego kroku do pokazania. Więcej zapisanej pracy da więcej podstaw.",
+        "unknown": "Nie udało się teraz odczytać."
+      }
     }
   },
   "todayScreen": {
@@ -10404,6 +10620,7 @@
   },
   "matchPreview": {
     "title": "Podgląd dopasowania",
+    "metaDescription": "Wpisz dane pracownika i potrzebę firmy i zobacz, jak do siebie pasują. Narzędzie wyjaśnia dopasowanie, ale niczego nie rezerwuje ani nie zapisuje.",
     "subtitle": "Wprowadź dane pracownika i zapotrzebowanie firmy, aby zobaczyć dopasowanie. To narzędzie podglądowe — oblicza dopasowanie i je wyjaśnia, ale niczego nie rezerwuje ani nie zapisuje.",
     "previewOnly": "Tylko podgląd — nic nie zarezerwowano ani nie zapisano jako wniosek o rezerwację.",
     "workerSection": "Pracownik",
@@ -10741,11 +10958,11 @@
   },
   "about": {
     "metaTitle": "Czym jest LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai to operacyjna platforma rynku pracy: prawdziwa praca staje się dla osoby historią zawodową, dowodami i żywym CV, a dla organizacji — historią wykonanej pracy i jej możliwości.",
+    "metaDescription": "LabourMarket.ai to międzynarodowa platforma pracy, specjalistów i usług. Prawdziwa praca staje się historią zawodową, dowodami i żywym CV.",
     "navLabel": "O LabourMarket.ai",
     "eyebrow": "O platformie",
     "title": "Czym jest LabourMarket.ai",
-    "lede": "LabourMarket.ai to operacyjna platforma rynku pracy. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — od pierwszej rozmowy do następnej szansy.",
+    "lede": "LabourMarket.ai to międzynarodowa platforma pracy, specjalistów i usług. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — od pierwszej rozmowy do następnej szansy.",
     "hero": {
       "lead": "Zawodowa wartość człowieka nie powinna znikać za każdym razem, gdy zmienia pracodawcę. Prawdziwa praca może stać się trwałą historią zawodową: co osoba robiła, gdzie, kiedy, jak długo, w jakiej roli, z jakimi umiejętnościami i jakie dowody oraz potwierdzenia to wspierają.",
       "leadOrg": "Dla organizacji ta sama prawdziwa praca buduje historię tego, co firma faktycznie zrobiła: projekty, zespoły, wykonane prace, godziny, kompetencje i dowody.",
@@ -11347,6 +11564,7 @@
       "empty": "Nic tego dnia."
     },
     "year": {
+      "hint": "Liczba pokazuje, ile pozycji przypada na ten miesiąc: rezerwacje, projekty, zadania, wpisy pracy, urlopy i inne. Pozycja obejmująca kilka miesięcy liczy się w każdym z nich.",
       "count": "{count, plural, =0 {brak pozycji} one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}"
     },
     "emptyFiltered": "Brak pozycji tego typu.",
@@ -12434,6 +12652,7 @@
     },
     "invitePage": {
       "eyebrow": "ZAPROSZENIE",
+      "pageTitle": "Zaproszenie",
       "notEnabled": "Chwilowo niedostępne.",
       "loadError": "Nie udało się teraz wczytać zaproszenia. Spróbuj ponownie.",
       "invalidTitle": "Nie znaleziono zaproszenia",
@@ -12852,15 +13071,35 @@
   "cvImport": {
     "reviewTitle": "Co znaleźliśmy w Twoim CV",
     "reviewHint": "System tylko sugeruje. Zapisz lub odrzuć każdy wpis — Ty decydujesz.",
+    "edit": "Popraw",
+    "editDone": "Gotowe",
+    "fieldTitle": "Nazwa",
+    "fieldText": "Tekst",
+    "fieldInstitution": "Szkoła lub organizator",
+    "fieldProgram": "Program",
+    "fieldKind": "Rodzaj",
+    "fieldStart": "Początek",
+    "fieldEnd": "Koniec",
+    "fieldYear": "Rok",
+    "dateHint": "np. 2019 lub 2019-03",
+    "unplacedHint": "Tych wierszy nie udało się przypisać. Wybierz sekcję lub odrzuć.",
+    "placeAs": "Gdzie to należy?",
+    "confidence": {
+      "high": "Wyraźnie podane w CV",
+      "medium": "Sprawdź, czy odczytano to poprawnie",
+      "low": "Przypuszczenie: koniecznie sprawdź"
+    },
     "empty": "Nie udało się odczytać żadnych sekcji z tego tekstu — możesz dodać je ręcznie.",
     "groups": {
       "workHistory": "Historia zatrudnienia",
       "education": "Wykształcenie",
+      "training": "Szkolenia i kursy",
       "languages": "Języki",
       "certificates": "Certyfikaty",
       "achievements": "Osiągnięcia",
       "salary": "Oczekiwania płacowe",
-      "availability": "Dostępność"
+      "availability": "Dostępność",
+      "unplaced": "Nierozpoznane"
     },
     "confirm": "Zapisz",
     "saving": "Zapisywanie…",
@@ -15147,6 +15386,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Zamów poszukiwanie pracowników",
+        "body": "Podaj zawód, liczbę osób, kraj i termin rozpoczęcia pracy."
+      },
+      "b2b": {
+        "title": "Wyślij zapytanie B2B",
+        "body": "Opisz rodzaj prac, miejsce, zakres i terminy."
+      },
+      "project": {
+        "title": "Zamów realizację indywidualnego projektu",
+        "body": "Dla klientów prywatnych i firm: opisz potrzebny projekt lub usługę."
+      },
+      "title": "Wyślij zapytanie",
+      "promise": "Wyślij zapytanie – skontaktujemy się z tobą w ciągu 24 godzin.",
+      "name": "Imię lub firma",
+      "email": "E-mail",
+      "phone": "Telefon",
+      "country": "Kraj",
+      "countryChoose": "Wybierz kraj",
+      "city": "Miasto",
+      "profession": "Zawód",
+      "workers": "Liczba pracowników",
+      "start": "Rozpoczęcie pracy",
+      "details": "Dodatkowe wymagania",
+      "work": "Rodzaj prac",
+      "place": "Miejsce",
+      "scope": "Zakres",
+      "deadline": "Terminy",
+      "need": "Potrzebny projekt lub usługa",
+      "customer": "Klient",
+      "customerPrivate": "Osoba prywatna",
+      "customerBusiness": "Firma",
+      "optional": "opcjonalnie",
+      "send": "Wyślij zapytanie",
+      "sending": "Wysyłanie…",
+      "receivedTitle": "Otrzymaliśmy twoje zapytanie",
+      "receivedBody": "Skontaktujemy się z tobą w ciągu 24 godzin, korzystając z podanych danych.",
+      "invalid": "Sprawdź pola i spróbuj ponownie. Wpisane dane zostają w formularzu.",
+      "limited": "Teraz jest zbyt wiele zapytań. Spróbuj później: wpisane dane zostają w formularzu.",
+      "unavailable": "Nie udało się wysłać zapytania i nie zostało ono odebrane. Wpisane dane zostają w formularzu, spróbuj ponownie.",
+      "notice": "Wysyłając zapytanie, potwierdzasz, że zapoznałeś się z <privacy>Polityką prywatności</privacy>."
+    },
     "audienceValueEyebrow": "Wartość dla każdej strony pracy",
     "audienceValueTitle": "Co zyskuje każda grupa",
     "how": {
@@ -15361,8 +15643,8 @@
       "noStars": "Nigdzie nie ma ocen w gwiazdkach: człowiek nigdy nie jest sprowadzany do punktacji. Każde dopasowanie jest wyjaśnione wobec konkretnego zapotrzebowania — z widocznymi liczbami."
     },
     "hero": {
-      "headline": "Żywy system możliwości pracy i biznesu.",
-      "sub": "W jednym miejscu pokaż, co umiesz, co oferujesz albo czego szukasz. Odkrywaj pracowników, pracę, wykonawców, usługi i towary — a twoje doświadczenie i możliwości pozostają stale dostępne."
+      "headline": "Praca, pracownicy, usługi i możliwości biznesowe – w jednym miejscu.",
+      "sub": "Szukaj pracy, specjalistów, pracowników, klientów lub partnerów do projektów w swoim kraju i na całym świecie. Stwórz swój profil zawodowy, pokaż doświadczenie, oferuj usługi i odkrywaj nowe możliwości."
     },
     "entry": {
       "label": "Napisz, czego potrzebujesz — własnymi słowami",
@@ -16123,6 +16405,7 @@
       "allowanceRemaining": "Pozostało {count} z {limit} tłumaczeń",
       "allowanceExhausted": "Wykorzystano wszystkie {limit} tłumaczeń zawartych w planie. Ogłoszenie nadal można czytać w języku oryginału.",
       "unavailable": "Nie udało się teraz przetłumaczyć tego ogłoszenia. Poniżej słowa samego ogłoszeniodawcy.",
+      "notSwitchedOn": "Automatyczne tłumaczenie ogłoszeń nie jest jeszcze włączone. Poniżej słowa samego ogłoszeniodawcy.",
       "signedOut": "Zaloguj się, aby przetłumaczyć to ogłoszenie."
     }
   },
@@ -20092,6 +20375,23 @@
       "invalid": "Sprawdź imię i wiadomość.",
       "error": "Coś poszło nie tak. Spróbuj ponownie.",
       "cooldown": "Twoja prośba została niedawno odrzucona. Możesz poprosić tę grupę ponownie 30 dni po decyzji."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "Korzystanie ze stron i źródło kampanii mierzymy tylko za Twoją zgodą.",
+      "accept": "Zezwól na pomiar",
+      "refuse": "Odmów",
+      "more": "Więcej",
+      "label": "Wybór dotyczący pomiaru korzystania"
+    },
+    "control": {
+      "title": "Pomiar korzystania i przypisanie kampanii",
+      "granted": "Wyraziłeś zgodę. Możesz ją w każdej chwili wycofać — wtedy wpisy zostaną usunięte z tego urządzenia.",
+      "refused": "Odmówiłeś. Na tym urządzeniu nic nie jest zapisywane na potrzeby pomiaru.",
+      "undecided": "Nie dokonałeś jeszcze wyboru, więc nic nie jest zapisywane na potrzeby pomiaru.",
+      "allow": "Zezwól",
+      "refuse": "Odmów"
     }
   }
 }

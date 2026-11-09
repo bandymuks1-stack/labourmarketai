@@ -139,6 +139,20 @@ export function CompanyNeedForm({
     setIf("description", prefill.description, [""]);
   }, []);
 
+  // Spam guard: when the form appeared, sent in a hidden field. Taken after
+  // hydration (the page is static markup) and written back after every answer,
+  // because React resets the form's fields after a send. The form keeps
+  // `action={formAction}` so it still posts WITHOUT JavaScript: the field then
+  // stays empty and the server stores the need marked for review
+  // (lib/security/public-form-guard.ts). A client wrapper as the action would
+  // render `javascript:` in the static markup and a no-JS send could not post.
+  const shownAt = useRef(0);
+  const stampRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (shownAt.current === 0) shownAt.current = Date.now();
+    if (stampRef.current) stampRef.current.value = String(shownAt.current);
+  }, [state]);
+
   function handleFirstInteraction() {
     if (startedRef.current) return;
     startedRef.current = true;
@@ -181,6 +195,10 @@ export function CompanyNeedForm({
           <h1 className="font-display text-lg font-semibold text-text-primary">{labels.title}</h1>
           <p className="text-sm text-text-secondary">{labels.subtitle}</p>
         </header>
+
+        {/* Left empty by a person: out of sight, out of the tab order, not autofilled. */}
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
+        <input type="hidden" name="started" ref={stampRef} defaultValue="" />
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.companyName}</span>

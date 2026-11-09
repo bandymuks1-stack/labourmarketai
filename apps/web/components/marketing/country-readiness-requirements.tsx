@@ -42,7 +42,9 @@ import {
  */
 
 const LEVEL_TONE: Record<RequirementLevel, string> = {
-  required: "border-brand-blue/40 bg-brand-blue/10 text-brand-blue",
+  // Text stays primary: gold text on its own gold tint fell below WCAG AA
+  // (axe color-contrast, 2026-11-04). The tint and border carry the level.
+  required: "border-brand-blue/40 bg-brand-blue/10 text-text-primary",
   recommended: "border-border-subtle bg-surface-2 text-text-secondary",
   conditional: "border-border-subtle bg-surface-2 text-text-secondary",
 };
@@ -146,7 +148,7 @@ export async function CountryReadinessRequirements({
             href={readiness.nationalPostingInfoUrl}
             target="_blank"
             rel="noopener noreferrer nofollow"
-            className="text-brand-blue hover:text-brand-champagne"
+            className="text-brand-blue underline underline-offset-2 hover:text-brand-champagne"
           >
             {t("nationalInfoLink")}
           </a>
@@ -223,7 +225,7 @@ function ScopeBlock({
                   href={r.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
-                  className="text-brand-blue hover:text-brand-champagne"
+                  className="text-brand-blue underline underline-offset-2 hover:text-brand-champagne"
                 >
                   {r.sourceTitle}
                 </a>

@@ -323,7 +323,7 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // one route (plus its page path for diff matching), one PR, A-01 only.
     const hours = SCOPED_OWNER_WAIVERS[5];
     expect(hours.axioms).toEqual(["A-01"]);
-    expect(hours.pullRequests).toEqual([1344, 2101, 2159, 2234, 2526]);
+    expect(hours.pullRequests).toEqual([1344, 2101, 2159, 2234, 2526, 3140]);
     expect(hours.files).toEqual([
       "/dashboard/hours",
       "apps/web/app/[locale]/dashboard/hours/page.tsx",
@@ -607,8 +607,18 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // the job-page hreflang fix." Bounded — not general authority.
     expect(jobs.pullRequests).toEqual([
       1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838, 1837, 1890,
-      1892, 1991, 1993, 2045, 2101, 2211, 2253, 2388, 2467, 2771,
+      1892, 1991, 1993, 2045, 2101, 2211, 2253, 2388, 2467, 2771, 2984, 2991, 3087,
+      3149,
+      3154,
+      3171,
+      3123,
     ]);
+    // #3123 (2026-11-09) on the owner's verbatim approval: "I approve adding ONLY PR 3123 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3171 (2026-11-09) on the owner's verbatim approval: "I approve adding ONLY PR 3171 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3154 (2026-11-08) on the owner's verbatim approval: "I approve adding ONLY PR 3154 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3149 (2026-11-08) on the owner's verbatim approval: "I approve adding ONLY PR 3149 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #2984 + #2991 (2026-11-03) on the owner's verbatim approval: "I approve adding ONLY PR 2991 and PR 2984 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3087 (2026-11-04) on the owner's verbatim approval: "I approve adding ONLY PR 3087 to the existing public-acquisition-route-jobs waiver pullRequests list."
     // #2771 (2026-10-25) on the owner's verbatim approval: "Patvirtinu PR #2771 įtraukimą į `public-acquisition-route-jobs` išimties `pullRequests` sąrašą. Pridėk tik `#2771`, nekeisk kitų išimties sąlygų ir nesilpnink saugiklių."
     // Markup only — the two /jobs page wrappers become <div> (one <main>).
     // #2467 (2026-10-18) on the owner's verbatim scoped approval: "Patvirtinu

@@ -330,6 +330,13 @@ export function DecideJoinRequest({
   const [state, action, pending] = useActionState(decideCohortJoinAction, IDLE);
   // Accepting creates a student relationship, so it takes a second, explicit
   // click; declining stays one click.
+  //
+  // Every button has its own `key`, and the two toggles prevent the default:
+  // without that React REUSES the clicked DOM <button> for the button that
+  // replaces it in the same position. The state flip runs inside the click, so
+  // the browser's default action then saw a `type="submit"` button — "Accept"
+  // submitted the accept at once (no confirm step), and "Cancel" would have
+  // submitted a DECLINE (production walk 41603432961).
   const [confirming, setConfirming] = useState(false);
   return (
     <form action={action} className="flex flex-wrap items-center gap-2" data-testid={`cohort-join-decide-${cohortId}-${profileId}`}>
@@ -338,6 +345,7 @@ export function DecideJoinRequest({
       {confirming ? (
         <>
           <button
+            key="accept-confirm"
             type="submit"
             name="decision"
             value="accept"
@@ -348,9 +356,13 @@ export function DecideJoinRequest({
             {labels.acceptConfirm}
           </button>
           <button
+            key="accept-cancel"
             type="button"
             disabled={pending}
-            onClick={() => setConfirming(false)}
+            onClick={(e) => {
+              e.preventDefault();
+              setConfirming(false);
+            }}
             className="text-xs text-text-muted hover:text-text-secondary hover:underline disabled:opacity-60"
           >
             {labels.cancel}
@@ -359,15 +371,20 @@ export function DecideJoinRequest({
       ) : (
         <>
           <button
+            key="accept"
             type="button"
             disabled={pending}
-            onClick={() => setConfirming(true)}
+            onClick={(e) => {
+              e.preventDefault();
+              setConfirming(true);
+            }}
             className={btnCls}
             data-testid={`cohort-join-accept-${cohortId}-${profileId}`}
           >
             {labels.accept}
           </button>
           <button
+            key="decline"
             type="submit"
             name="decision"
             value="decline"

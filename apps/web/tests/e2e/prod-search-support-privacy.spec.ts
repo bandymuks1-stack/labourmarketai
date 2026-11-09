@@ -1,7 +1,7 @@
 import { existsSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
+import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 
@@ -74,6 +74,13 @@ const ENABLED =
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 test.describe.configure({ mode: "serial", timeout: 240_000, retries: 0 });
 test.use({ actionTimeout: 30_000 });
+
+/**
+ * The page content, never the streaming holder: a hidden copy can sit outside <main>
+ * beside the rendered one, and a bare testid then fails strict mode (runs 42295346345,
+ * 42304775215). Menus, dialogs and the print page keep their page-wide selectors.
+ */
+const inMain = (page: Page): Locator => page.getByRole("main");
 
 async function as(browser: Browser, slot: string | null, locale = "lt-LT"): Promise<{ ctx: BrowserContext; page: Page }> {
   const ctx = await browser.newContext({ ...(slot ? { storageState: state(slot) } : {}), locale });
@@ -168,10 +175,10 @@ test("P-1 (9.12). the legal pages render in lt, en and ru, each in its own langu
 test("P-2 (9.5). the worker downloads their own data bundle (measured, never read, deleted)", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker2");
   await page.goto("/lt/dashboard/privacy#rights");
-  await expect(page.getByTestId("privacy-export")).toBeVisible({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("privacy-export")).toBeVisible({ timeout: 60_000 });
   const [download] = await Promise.all([
     page.waitForEvent("download", { timeout: 60_000 }),
-    page.getByTestId("privacy-export-download").click(),
+    inMain(page).getByTestId("privacy-export-download").click(),
   ]);
   try {
     expect(await download.failure(), "the bundle downloaded").toBeNull();
@@ -187,7 +194,7 @@ test("P-2 (9.5). the worker downloads their own data bundle (measured, never rea
 test("P-3 (9.4). the deletion form opens and is left WITHOUT filing anything", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker2");
   await page.goto("/lt/dashboard/privacy#privacy-deletion");
-  const section = page.getByTestId("privacy-deletion");
+  const section = inMain(page).getByTestId("privacy-deletion");
   await expect(section).toBeVisible({ timeout: 60_000 });
   // Belt and braces: while this step is on the page NOTHING can be posted, so
   // not even a mis-click could file a request.
@@ -228,14 +235,14 @@ test("P-3 (9.4). the deletion form opens and is left WITHOUT filing anything", a
 /** Expand the map page's collapsed "advanced" block, where the capture controls live. */
 async function openCapture(page: Page): Promise<void> {
   await page.goto("/lt/dashboard/market-map");
-  const adv = page.getByTestId("market-map-advanced");
+  const adv = inMain(page).getByTestId("market-map-advanced");
   await expect(adv).toBeAttached({ timeout: 60_000 });
   if ((await adv.getAttribute("open")) === null) await adv.locator("summary").first().click();
-  await expect(page.getByTestId("capture-preferred")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("capture-preferred")).toBeVisible({ timeout: 30_000 });
 }
 
 const taggedLocationRow = (page: Page) =>
-  page.getByTestId("capture-preferred-row").filter({ hasText: "QA-SYNTHETIC" }).first();
+  inMain(page).getByTestId("capture-preferred-row").filter({ hasText: "QA-SYNTHETIC" }).first();
 
 /** Change the tagged row's visibility through its own select, then prove it on fresh loads. */
 async function setLocationVisibility(page: Page, value: string): Promise<void> {
@@ -261,10 +268,10 @@ test("P-4 (9.13). a preferred location's visibility changes, persists and is put
   let created = false;
   if ((await row.count()) === 0) {
     // One synthetic row, reused by every later run (no delete exists; it is disabled after).
-    await page.getByTestId("capture-preferred-country").selectOption("LT");
-    await page.getByTestId("capture-preferred-note").fill(TAG);
-    await page.getByTestId("capture-preferred-add").click();
-    await expect(page.getByTestId("capture-status")).toBeVisible({ timeout: 30_000 });
+    await inMain(page).getByTestId("capture-preferred-country").selectOption("LT");
+    await inMain(page).getByTestId("capture-preferred-note").fill(TAG);
+    await inMain(page).getByTestId("capture-preferred-add").click();
+    await expect(inMain(page).getByTestId("capture-status")).toBeVisible({ timeout: 30_000 });
     row = taggedLocationRow(page);
     await expect(row).toBeVisible({ timeout: 30_000 });
     created = true;
@@ -298,11 +305,11 @@ test("P-5 (4.21). an unrelated organization opens the worker's page and sees no 
   console.info(`P-5: unrelated viewer = ${viewer}`);
   const { ctx, page } = await as(browser, viewer);
   await page.goto(`/lt/dashboard/people/${worker2Id}`);
-  const restricted = page.getByTestId("person-restricted");
-  const person = page.getByTestId("person-page");
+  const restricted = inMain(page).getByTestId("person-restricted");
+  const person = inMain(page).getByTestId("person-page");
   await expect(restricted.or(person).first()).toBeVisible({ timeout: 60_000 });
   if (await person.isVisible().catch(() => false)) {
-    await expect(page.getByTestId("person-name"), "the heading is the anonymous label").toHaveText(
+    await expect(inMain(page).getByTestId("person-name"), "the heading is the anonymous label").toHaveText(
       anonymousLabel(worker2Id),
     );
   } else {
@@ -318,35 +325,35 @@ test("P-5 (4.21). an unrelated organization opens the worker's page and sees no 
 test("P-6 (4.28). the worker declares their own supply, sees it persist, and withdraws it", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker2");
   await page.goto("/lt/dashboard/privacy#partner-supply");
-  const choice = page.getByTestId("partner-supply-choice");
-  const managed = page.getByTestId("partner-supply-managed");
+  const choice = inMain(page).getByTestId("partner-supply-choice");
+  const managed = inMain(page).getByTestId("partner-supply-managed");
   await expect(choice.or(managed).first()).toBeVisible({ timeout: 60_000 });
   if (await managed.isVisible().catch(() => false)) {
     // A representation consent (and maybe a declaration) already exists: it is
     // not this walk's to overwrite or withdraw. Read it back, write nothing.
-    await expect(page.getByTestId("partner-supply-status")).toBeVisible();
-    await expect(page.getByTestId("partner-supply-no-worker")).toHaveCount(0);
-    const current = page.getByTestId("partner-supply-current");
+    await expect(inMain(page).getByTestId("partner-supply-status")).toBeVisible();
+    await expect(inMain(page).getByTestId("partner-supply-no-worker")).toHaveCount(0);
+    const current = inMain(page).getByTestId("partner-supply-current");
     if (await current.isVisible().catch(() => false)) {
-      expect((await page.getByTestId("partner-supply-current-intent").innerText()).trim().length).toBeGreaterThan(0);
+      expect((await inMain(page).getByTestId("partner-supply-current-intent").innerText()).trim().length).toBeGreaterThan(0);
     }
     console.info("P-6: a pre-existing representation consent — read back, nothing written");
     await ctx.close();
     return;
   }
   // No consent before this run: grant it, declare, and leave it exactly as found (no consent).
-  await page.getByTestId("partner-supply-open").click();
-  await page.getByTestId("partner-supply-grant").click();
+  await inMain(page).getByTestId("partner-supply-open").click();
+  await inMain(page).getByTestId("partner-supply-grant").click();
   supplyGrantedHere = true;
   await expect(managed).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("partner-supply-no-worker")).toHaveCount(0);
-  if (!(await page.getByTestId("partner-supply-form").isVisible().catch(() => false))) {
-    await page.getByTestId("partner-supply-edit").click();
+  await expect(inMain(page).getByTestId("partner-supply-no-worker")).toHaveCount(0);
+  if (!(await inMain(page).getByTestId("partner-supply-form").isVisible().catch(() => false))) {
+    await inMain(page).getByTestId("partner-supply-edit").click();
   }
   // Minimal declaration: open to offers, Lithuania only, NO authority beyond matching.
-  await page.getByTestId("partner-supply-intent-OPEN_TO_OFFERS").check();
-  await page.getByTestId("partner-supply-work-countries").fill("LT");
-  await page.getByTestId("partner-supply-markets").fill("LT");
+  await inMain(page).getByTestId("partner-supply-intent-OPEN_TO_OFFERS").check();
+  await inMain(page).getByTestId("partner-supply-work-countries").fill("LT");
+  await inMain(page).getByTestId("partner-supply-markets").fill("LT");
   for (const id of [
     "partner-supply-contact-authority",
     "partner-supply-publication-authority",
@@ -354,22 +361,22 @@ test("P-6 (4.28). the worker declares their own supply, sees it persist, and wit
   ]) {
     await page.getByTestId(id).uncheck();
   }
-  await page.getByTestId("partner-supply-valid-days").selectOption("30");
-  await page.getByTestId("partner-supply-save").click();
-  await expect(page.getByTestId("partner-supply-saved")).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("partner-supply-error")).toHaveCount(0);
+  await inMain(page).getByTestId("partner-supply-valid-days").selectOption("30");
+  await inMain(page).getByTestId("partner-supply-save").click();
+  await expect(inMain(page).getByTestId("partner-supply-saved")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("partner-supply-error")).toHaveCount(0);
   // Persistence: a fresh load reads the declaration back.
   await page.reload();
   // The stored intent, not its wording: #2741 replaced the raw code on screen
   // with a readable label (run 40199732022 still looked for "OPEN_TO_OFFERS").
-  const current = page.getByTestId("partner-supply-current-intent");
+  const current = inMain(page).getByTestId("partner-supply-current-intent");
   await expect(current).toHaveAttribute("data-intent", "OPEN_TO_OFFERS", { timeout: 60_000 });
   await expect(current, "the label is words, never the raw code").not.toContainText("OPEN_TO_OFFERS");
-  await expect(page.getByTestId("partner-supply-current-markets")).toContainText("LT");
+  await expect(inMain(page).getByTestId("partner-supply-current-markets")).toContainText("LT");
   // Withdraw it again — the declaration, then the permission.
-  await page.getByTestId("partner-supply-withdraw-declaration").click();
-  await expect(page.getByTestId("partner-supply-current")).toHaveCount(0, { timeout: 30_000 });
-  await page.getByTestId("partner-supply-withdraw-consent").click();
+  await inMain(page).getByTestId("partner-supply-withdraw-declaration").click();
+  await expect(inMain(page).getByTestId("partner-supply-current")).toHaveCount(0, { timeout: 30_000 });
+  await inMain(page).getByTestId("partner-supply-withdraw-consent").click();
   await expect(choice).toBeVisible({ timeout: 30_000 });
   await page.reload();
   await expect(choice, "the withdrawal persisted").toBeVisible({ timeout: 60_000 });
@@ -407,7 +414,7 @@ test("S-1 (5.17). the worker opens a support conversation and finds it in their 
   }
   expect(supportId).toMatch(/^[0-9a-f-]{36}$/);
   await page.goto("/lt/dashboard/communication");
-  await expect(page.getByTestId(`conversation-row-${supportId}`), "the thread is in the own inbox").toBeVisible({
+  await expect(inMain(page).getByTestId(`conversation-row-${supportId}`), "the thread is in the own inbox").toBeVisible({
     timeout: 60_000,
   });
   console.info("S-1: the support thread stays (the UI offers no close); one per run, labelled");
@@ -434,7 +441,7 @@ test("S-2 (5.18). the global dashboard search finds that conversation and opens 
 test("S-3 (9.15). a synthetic organization is findable in the network directory", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker2");
   await page.goto(`/lt/dashboard/network?q=${encodeURIComponent(GAMA)}`);
-  await expect(page.getByTestId("network-search-results")).toBeVisible({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("network-search-results")).toBeVisible({ timeout: 60_000 });
   const companies = page.locator('[data-testid^="network-company-"]', { hasText: "Gama" });
   await expect.poll(() => companies.count(), { timeout: 30_000 }).toBeGreaterThan(0);
   await ctx.close();
@@ -443,8 +450,8 @@ test("S-3 (9.15). a synthetic organization is findable in the network directory"
 test("S-4 (5.9, partial). the weekly digest's in-app channel control exists (no email preview UI)", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker2");
   await page.goto("/lt/dashboard/account");
-  await expect(page.getByTestId("account-notification-preferences")).toBeAttached({ timeout: 60_000 });
-  await expect(page.getByTestId("notification-pref-weekly_digest-in_app")).toBeAttached({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("account-notification-preferences")).toBeAttached({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("notification-pref-weekly_digest-in_app")).toBeAttached({ timeout: 30_000 });
   await ctx.close();
 });
 
@@ -452,9 +459,9 @@ test("S-5 (5.19). the company opens the review inbox and its printable report", 
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto("/lt/dashboard/inbox");
-  const link = page.getByTestId("inbox-report-link");
+  const link = inMain(page).getByTestId("inbox-report-link");
   await expect(
-    link.or(page.getByTestId("inbox-summary")).or(page.getByTestId("inbox-empty-state")).first(),
+    link.or(inMain(page).getByTestId("inbox-summary")).or(inMain(page).getByTestId("inbox-empty-state")).first(),
   ).toBeVisible({ timeout: 60_000 });
   if (await link.isVisible().catch(() => false)) {
     await link.click();
@@ -479,7 +486,7 @@ test("S-6 (10.27). the map renders markers, with no external geocoding call", as
     }
   });
   await page.goto("/lt/dashboard/market-map");
-  await expect(page.getByTestId("market-map")).toBeVisible({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("market-map")).toBeVisible({ timeout: 60_000 });
   const markers = page.locator("path[data-anchor-id]");
   const shown = await expect
     .poll(() => markers.count(), { timeout: 60_000 })
@@ -487,7 +494,7 @@ test("S-6 (10.27). the map renders markers, with no external geocoding call", as
     .then(() => true)
     .catch(() => false);
   if (!shown) {
-    const layer = await page.getByTestId("market-map-world").getAttribute("data-world-layer").catch(() => null);
+    const layer = await inMain(page).getByTestId("market-map-world").getAttribute("data-world-layer").catch(() => null);
     console.info(`S-6 diagnostics: markers=0 layer=${layer ?? "?"}`);
   }
   expect(await markers.count(), "the map draws markers").toBeGreaterThan(0);
@@ -507,15 +514,15 @@ let needCreatedHere = false;
 
 async function submitNeed(page: Page): Promise<"done" | "limit"> {
   await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
-  await page.getByTestId("demand-role").fill(NEED_ROLE);
-  await page.getByTestId("demand-description").fill(`${TAG}: synthetic need for the production matching walk, 1 mūrininkas.`);
-  await page.getByTestId("demand-next").click();
-  const size = page.getByTestId("demand-team-size");
+  await inMain(page).getByTestId("demand-role").fill(NEED_ROLE);
+  await inMain(page).getByTestId("demand-description").fill(`${TAG}: synthetic need for the production matching walk, 1 mūrininkas.`);
+  await inMain(page).getByTestId("demand-next").click();
+  const size = inMain(page).getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
-  await page.getByTestId("demand-next").click();
-  await page.getByTestId("demand-create").click();
-  const done = page.getByTestId("demand-done");
-  const limit = page.getByTestId("demand-open-need-limit");
+  await inMain(page).getByTestId("demand-next").click();
+  await inMain(page).getByTestId("demand-create").click();
+  const done = inMain(page).getByTestId("demand-done");
+  const limit = inMain(page).getByTestId("demand-open-need-limit");
   await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
   return (await limit.isVisible()) ? "limit" : "done";
 }
@@ -548,8 +555,8 @@ async function closeSyntheticLeftovers(page: Page): Promise<number> {
 /** Close one of Gama's needs through the product's own controls (Gama is the active workspace). */
 async function closeNeed(page: Page, id: string): Promise<"closed" | "already-closed"> {
   await page.goto(`/lt/dashboard/company/scouting?request=${id}`);
-  const controls = page.getByTestId("demand-lifecycle-controls").first();
-  const unstructured = page.getByTestId("scouting-not-structured").first();
+  const controls = inMain(page).getByTestId("demand-lifecycle-controls").first();
+  const unstructured = inMain(page).getByTestId("scouting-not-structured").first();
   await expect(controls.or(unstructured).first()).toBeVisible({ timeout: 30_000 });
   if (await controls.isVisible()) {
     if ((await controls.getAttribute("data-demand-status")) === "closed") return "already-closed";
@@ -562,12 +569,12 @@ async function closeNeed(page: Page, id: string): Promise<"closed" | "already-cl
   // for every submitted need — the chat workspace's candidates result
   // (`?result=candidates&demand=`, `company.close-demand`).
   await page.goto(`/lt/dashboard?result=candidates&demand=${id}`);
-  const close = page.getByTestId("candidates-close-demand").filter({ visible: true }).first();
-  const reopen = page.getByTestId("candidates-reopen-demand").filter({ visible: true }).first();
+  const close = inMain(page).getByTestId("candidates-close-demand").filter({ visible: true }).first();
+  const reopen = inMain(page).getByTestId("candidates-reopen-demand").filter({ visible: true }).first();
   await expect(close.or(reopen).first(), "the need's own close/reopen action").toBeVisible({ timeout: 60_000 });
   if (await reopen.isVisible()) return "already-closed";
   await close.click();
-  const error = page.getByTestId("candidates-close-demand-error").first();
+  const error = inMain(page).getByTestId("candidates-close-demand-error").first();
   await expect(reopen.or(error).first()).toBeVisible({ timeout: 30_000 });
   if (await error.isVisible()) throw new Error(`close refused: ${(await error.innerText()).slice(0, 120)}`);
   return "closed";
@@ -592,7 +599,7 @@ test("M-0. Gama posts this run's need through the demand intake", async ({ brows
 test("M-1 (4.5). the worker sees why Gama's need fits them", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/opportunities?view=all");
-  await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const cards = page
     .locator(`li[id="opp-${requestId}"]`)
     .filter({ has: page.getByTestId("opportunity-company").filter({ hasText: GAMA }) })
@@ -622,11 +629,11 @@ test("M-2 (4.10). Gama discovers supply for its need: candidates and available w
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  await expect(page.getByTestId("scouting-pool-note")).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByTestId(`scout-candidate-${workerId}`), "the synthetic worker is discovered").toBeVisible({
+  await expect(inMain(page).getByTestId("scouting-pool-note")).toBeVisible({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId(`scout-candidate-${workerId}`), "the synthetic worker is discovered").toBeVisible({
     timeout: 60_000,
   });
-  const supply = page.getByTestId("available-supply-section");
+  const supply = inMain(page).getByTestId("available-supply-section");
   await expect(supply, "the available-workforce half of discovery renders").toBeVisible();
   await expect(
     supply
@@ -643,18 +650,18 @@ test("M-3 (4.13). the need carries its automatic-matching receipt", async ({ bro
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  await expect(page.getByTestId("scouting-pool-note")).toBeVisible({ timeout: 60_000 });
-  const receipt = page.getByTestId("scouting-auto-match-receipt");
+  await expect(inMain(page).getByTestId("scouting-pool-note")).toBeVisible({ timeout: 60_000 });
+  const receipt = inMain(page).getByTestId("scouting-auto-match-receipt");
   if (!(await receipt.isVisible().catch(() => false))) {
     // The product's own trigger for an existing need: confirming its requirement set.
-    const confirm = page.getByTestId("demand-confirm-need");
+    const confirm = inMain(page).getByTestId("demand-confirm-need");
     if (await confirm.isVisible().catch(() => false)) {
       console.info("M-3: no receipt yet — confirming the need's requirements (the auto-match trigger)");
       await confirm.click();
-      await expect(page.getByTestId("demand-need-confirmed")).toBeVisible({ timeout: 30_000 });
+      await expect(inMain(page).getByTestId("demand-need-confirmed")).toBeVisible({ timeout: 30_000 });
       await page.reload();
     } else {
-      const status = await page.getByTestId("demand-lifecycle-controls").getAttribute("data-demand-status").catch(() => null);
+      const status = await inMain(page).getByTestId("demand-lifecycle-controls").getAttribute("data-demand-status").catch(() => null);
       console.info(`M-3 diagnostics: no receipt, no confirm door, need status=${status ?? "?"}`);
     }
   }
@@ -667,12 +674,12 @@ test("M-4 (4.19). Gama asks for the worker's contact details: the ask is pending
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  const candidate = page.getByTestId(`scout-candidate-${workerId}`);
+  const candidate = inMain(page).getByTestId(`scout-candidate-${workerId}`);
   await expect(candidate).toBeVisible({ timeout: 60_000 });
-  const canContact = await page.getByTestId(`scout-comms-${workerId}`).getAttribute("data-can-contact").catch(() => null);
+  const canContact = await inMain(page).getByTestId(`scout-comms-${workerId}`).getAttribute("data-can-contact").catch(() => null);
   expect(canContact, "the contact door is offered for this candidate").toBe("true");
-  const status = page.getByTestId(`contact-request-status-${workerId}`);
-  const ask = page.getByTestId(`contact-request-open-${workerId}`);
+  const status = inMain(page).getByTestId(`contact-request-status-${workerId}`);
+  const ask = inMain(page).getByTestId(`contact-request-open-${workerId}`);
   await expect(status.or(ask).first()).toBeVisible({ timeout: 30_000 });
   // Record what was there. An ask this walk did not make — open or answered —
   // is read back and left exactly as it is.
@@ -689,15 +696,15 @@ test("M-4 (4.19). Gama asks for the worker's contact details: the ask is pending
   await ask.click();
   contactAskCreatedHere = true;
   await expect(
-    status.or(page.getByTestId(`contact-request-limit-${workerId}`)).or(page.getByTestId(`contact-request-error-${workerId}`)).first(),
+    status.or(inMain(page).getByTestId(`contact-request-limit-${workerId}`)).or(inMain(page).getByTestId(`contact-request-error-${workerId}`)).first(),
   ).toBeVisible({ timeout: 30_000 });
-  expect(await page.getByTestId(`contact-request-limit-${workerId}`).count(), "not rate-limited").toBe(0);
-  expect(await page.getByTestId(`contact-request-error-${workerId}`).count(), "no error").toBe(0);
+  expect(await inMain(page).getByTestId(`contact-request-limit-${workerId}`).count(), "not rate-limited").toBe(0);
+  expect(await inMain(page).getByTestId(`contact-request-error-${workerId}`).count(), "no error").toBe(0);
   // Persistence: a fresh load shows the ask pending (and gives the withdraw control its row id).
   await page.reload();
   await expect(status).toHaveAttribute("data-status", "created", { timeout: 60_000 });
   // Restore: the ask this run made is taken back.
-  await page.getByTestId(`contact-request-withdraw-${workerId}`).click();
+  await inMain(page).getByTestId(`contact-request-withdraw-${workerId}`).click();
   await expect(status).toHaveAttribute("data-status", "withdrawn", { timeout: 30_000 });
   contactAskCreatedHere = false;
   await ctx.close();
@@ -706,24 +713,24 @@ test("M-4 (4.19). Gama asks for the worker's contact details: the ask is pending
 test("M-5 (4.14). a candidate draft is created, seen after a reload, and deleted", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await page.goto("/lt/dashboard/candidates");
-  await expect(page.getByTestId("candidate-drafts-manager")).toBeVisible({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("candidate-drafts-manager")).toBeVisible({ timeout: 60_000 });
   // Record the owner's existing drafts: this run adds one, uniquely named, and
   // removes only that one — the others must be exactly as found.
-  const draftsBefore = await page.getByTestId("candidate-draft-card").count();
-  const create = page.getByTestId("candidate-draft-create");
+  const draftsBefore = await inMain(page).getByTestId("candidate-draft-card").count();
+  const create = inMain(page).getByTestId("candidate-draft-create");
   await create.getByTestId("draft-name-input").fill(DRAFT);
   await create.getByTestId("draft-create-submit").click();
   draftCreated = true;
-  const card = page.getByTestId("candidate-draft-card").filter({ hasText: DRAFT });
+  const card = inMain(page).getByTestId("candidate-draft-card").filter({ hasText: DRAFT });
   await expect(card).toHaveCount(1, { timeout: 30_000 });
   await page.reload();
   await expect(card, "the draft persisted").toHaveCount(1, { timeout: 60_000 });
   await card.getByTestId("draft-delete").click();
   await expect(card).toHaveCount(0, { timeout: 30_000 });
   await page.reload();
-  await expect(page.getByTestId("candidate-drafts-manager")).toBeVisible({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("candidate-drafts-manager")).toBeVisible({ timeout: 60_000 });
   await expect(card, "the deletion persisted").toHaveCount(0);
-  await expect(page.getByTestId("candidate-draft-card"), "every other draft is untouched").toHaveCount(draftsBefore);
+  await expect(inMain(page).getByTestId("candidate-draft-card"), "every other draft is untouched").toHaveCount(draftsBefore);
   draftCreated = false;
   await ctx.close();
 });
@@ -742,21 +749,21 @@ test("P-7 (9.10). rate limiting — not walked", async () => {
 /** Employer visibility: ONE tap on the choice screen (never decided or withdrawn — the text and the
  *  grant are already on screen), the result is said, and it holds on a fresh load. */
 async function grantVisibility(page: Page): Promise<void> {
-  await expect(page.getByTestId("discoverability-grant"), "the choice screen offers the grant directly").toBeVisible({
+  await expect(inMain(page).getByTestId("discoverability-grant"), "the choice screen offers the grant directly").toBeVisible({
     timeout: 30_000,
   });
-  await page.getByTestId("discoverability-grant").click();
-  await expect(page.getByTestId("discoverability-granted-note"), "the result is said").toBeVisible({ timeout: 30_000 });
+  await inMain(page).getByTestId("discoverability-grant").click();
+  await expect(inMain(page).getByTestId("discoverability-granted-note"), "the result is said").toBeVisible({ timeout: 30_000 });
   await page.reload();
-  await expect(page.getByTestId("discoverability-granted"), "the grant persisted").toBeVisible({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("discoverability-granted"), "the grant persisted").toBeVisible({ timeout: 60_000 });
 }
 
 /** Employer visibility: ONE tap on the granted screen, the result is said, and it holds on a fresh load. */
 async function withdrawVisibility(page: Page): Promise<void> {
-  await page.getByTestId("discoverability-withdraw").click();
-  await expect(page.getByTestId("discoverability-withdrawn-note"), "the result is said").toBeVisible({ timeout: 30_000 });
+  await inMain(page).getByTestId("discoverability-withdraw").click();
+  await expect(inMain(page).getByTestId("discoverability-withdrawn-note"), "the result is said").toBeVisible({ timeout: 30_000 });
   await page.reload();
-  await expect(page.getByTestId("discoverability-choice"), "the withdrawal persisted").toBeVisible({
+  await expect(inMain(page).getByTestId("discoverability-choice"), "the withdrawal persisted").toBeVisible({
     timeout: 60_000,
   });
 }
@@ -767,8 +774,8 @@ async function withdrawVisibility(page: Page): Promise<void> {
 test("P-8 (2.35 / 4.17). the worker turns employer visibility off, it persists, and turns it back on", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker2");
   await page.goto("/lt/dashboard/privacy#visibility");
-  const granted = page.getByTestId("discoverability-granted");
-  const choice = page.getByTestId("discoverability-choice");
+  const granted = inMain(page).getByTestId("discoverability-granted");
+  const choice = inMain(page).getByTestId("discoverability-choice");
   await expect(granted.or(choice).first()).toBeVisible({ timeout: 60_000 });
   // A withdrawn consent is the choice screen too (one tap back on, 2026-10-24).
   visibilityInitial = (await granted.isVisible()) ? "granted" : "choice";
@@ -804,10 +811,10 @@ test.afterAll(async ({ browser }) => {
       when: () => contactAskCreatedHere && requestId !== "",
       run: async (page) => {
         await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-        const status = page.getByTestId(`contact-request-status-${workerId}`);
-        await expect(page.getByTestId(`scout-candidate-${workerId}`)).toBeVisible({ timeout: 60_000 });
+        const status = inMain(page).getByTestId(`contact-request-status-${workerId}`);
+        await expect(inMain(page).getByTestId(`scout-candidate-${workerId}`)).toBeVisible({ timeout: 60_000 });
         if ((await status.getAttribute("data-status").catch(() => null)) === "created") {
-          await page.getByTestId(`contact-request-withdraw-${workerId}`).click();
+          await inMain(page).getByTestId(`contact-request-withdraw-${workerId}`).click();
           await expect(status).toHaveAttribute("data-status", "withdrawn", { timeout: 30_000 });
         }
       },
@@ -833,8 +840,8 @@ test.afterAll(async ({ browser }) => {
       when: () => draftCreated,
       run: async (page) => {
         await page.goto("/lt/dashboard/candidates");
-        await expect(page.getByTestId("candidate-drafts-manager")).toBeVisible({ timeout: 60_000 });
-        const cards = page.getByTestId("candidate-draft-card").filter({ hasText: TAG });
+        await expect(inMain(page).getByTestId("candidate-drafts-manager")).toBeVisible({ timeout: 60_000 });
+        const cards = inMain(page).getByTestId("candidate-draft-card").filter({ hasText: TAG });
         while ((await cards.count()) > 0) {
           const n = await cards.count();
           await cards.first().getByTestId("draft-delete").click();
@@ -850,13 +857,13 @@ test.afterAll(async ({ browser }) => {
       when: () => supplyGrantedHere,
       run: async (page) => {
         await page.goto("/lt/dashboard/privacy#partner-supply");
-        const withdrawConsent = page.getByTestId("partner-supply-withdraw-consent");
-        await expect(withdrawConsent.or(page.getByTestId("partner-supply-choice")).first()).toBeVisible({
+        const withdrawConsent = inMain(page).getByTestId("partner-supply-withdraw-consent");
+        await expect(withdrawConsent.or(inMain(page).getByTestId("partner-supply-choice")).first()).toBeVisible({
           timeout: 60_000,
         });
         if (await withdrawConsent.isVisible().catch(() => false)) {
           await withdrawConsent.click();
-          await expect(page.getByTestId("partner-supply-choice")).toBeVisible({ timeout: 30_000 });
+          await expect(inMain(page).getByTestId("partner-supply-choice")).toBeVisible({ timeout: 30_000 });
         }
       },
     },
@@ -889,8 +896,8 @@ test.afterAll(async ({ browser }) => {
       when: () => visibilityTouched && visibilityInitial !== "",
       run: async (page) => {
         await page.goto("/lt/dashboard/privacy#visibility");
-        const granted = page.getByTestId("discoverability-granted");
-        const hidden = page.getByTestId("discoverability-choice");
+        const granted = inMain(page).getByTestId("discoverability-granted");
+        const hidden = inMain(page).getByTestId("discoverability-choice");
         await expect(granted.or(hidden).first()).toBeVisible({ timeout: 60_000 });
         const isGranted = await granted.isVisible();
         if (visibilityInitial === "granted" && !isGranted) await grantVisibility(page);

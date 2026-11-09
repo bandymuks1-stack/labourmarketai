@@ -107,6 +107,7 @@ jobs:
         tests/e2e/auth-field-touch-floor.spec.ts
         tests/e2e/social-auth-matrix.spec.ts
         tests/e2e/country-readiness-public.spec.ts
+        tests/e2e/translated-page-survives.spec.ts
       # Excludes the env-dependent describe block named above. If that title
       # ever changes, the block comes BACK IN and this job goes red — it can
       # never silently drop coverage, which is the safe direction. And if the
@@ -123,7 +124,8 @@ jobs:
       # country-readiness-public adds 5 (2026-09-14). Measured, not guessed:
       # run against a local `next start` with the runner's own Chromium, all
       # five passed in 7.2 s before this floor was raised.
-      MIN_EXPECTED: "32"
+      # translated-page-survives adds 1 (2026-11-06).
+      MIN_EXPECTED: "33"
 
     steps:
       - name: Checkout
@@ -166,6 +168,9 @@ jobs:
 
       # Env-independent in this repo (see quality.yml). No secrets, no DB.
       - name: Build
+        env:
+          # Same heap as deploy-vps.yml: the default of about 2 GB fails now and then.
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build
 
       - name: Start server

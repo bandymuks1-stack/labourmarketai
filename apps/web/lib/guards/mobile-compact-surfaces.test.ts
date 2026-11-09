@@ -83,8 +83,12 @@ describe("MANO DARBAS — the records live on a calendar, not in a list of dates
     expect(cal).toMatch(/hours === 0 \? `<\$\{hoursFmt\.format\(0\.1\)\}`/);
     // an untimed record is real work, never rendered as "0 h" (SEP-7)
     expect(cal).not.toMatch(/totalMinutes \|\| 0\s*\}/);
-    // the page hands over the SAME confirmed derivation it uses elsewhere
-    expect(page).toMatch(/deriveReviewResult\(e\.journal_entry_confirmations\) === "approved"/);
+    // the page hands over the SAME confirmed derivation it uses elsewhere —
+    // the independent one, so the person's own approval never marks a day
+    // confirmed (decision 0028 J-2.2, audit 2026-11-03)
+    expect(page).toMatch(
+      /deriveIndependentReviewResult\(e\.journal_entry_confirmations, user\.id\) === "approved"/,
+    );
   });
 
   it("every calendar control meets the product's own 44px rule", () => {
@@ -284,13 +288,10 @@ describe("MANO CV — a document with a way in, and never a dead anchor", () => 
 
 describe("the calendar never claims independence the data cannot support", () => {
   /**
-   * `deriveReviewResult` returns "approved" for a SELF-approval too (a worker
-   * who manages their own organization), and the journal page's reader selects
-   * `confirmation_scope, created_at, confirmer_role` — NOT `confirmer_id` — so
-   * `isSelfConfirmation` cannot be evaluated there. The day marker must
-   * therefore say a JOURNAL RECORD is confirmed, never that a MANAGER
-   * confirmed it: the second would dress self-declared evidence as external
-   * confirmation (SEP-3). Found by review on #1729.
+   * The day marker says a JOURNAL RECORD is confirmed, never that a MANAGER
+   * confirmed it: the count now excludes the person's own approval
+   * (`deriveIndependentReviewResult`), but the marker's words still claim no
+   * more than the data supports (SEP-3). Found by review on #1729.
    */
   const SERVED = ["lt", "en", "ru", "nl", "de", "pl"] as const;
   const MANAGER = /manager|vadov|руковод|Manager/;

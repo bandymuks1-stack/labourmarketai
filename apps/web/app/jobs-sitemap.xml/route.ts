@@ -25,12 +25,15 @@
  * Engine's /questions-sitemap.xml already uses.
  */
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
+import { PUBLIC_VACANCY_SITEMAP_SHARD_SIZE } from "@/lib/vacancy-store/public-vacancy-preview";
 import {
-  PUBLIC_VACANCY_SITEMAP_SHARD_SIZE,
-  readPublicVacancySupplyCounts,
-} from "@/lib/vacancy-store/public-vacancy-preview";
+  SITEMAP_CACHE_CONTROL,
+  readCachedActiveVacancyCount,
+} from "@/lib/vacancy-store/public-vacancy-sitemap-cache";
 
-export const revalidate = 3600;
+// Count cached for an hour in public-vacancy-sitemap-cache.ts; never
+// prerendered at build time.
+export const dynamic = "force-dynamic";
 
 function esc(s: string): string {
   return s
@@ -41,9 +44,9 @@ function esc(s: string): string {
 }
 
 export async function GET(): Promise<Response> {
-  let counts: Awaited<ReturnType<typeof readPublicVacancySupplyCounts>>;
+  let activeVacancies: number | null;
   try {
-    counts = await readPublicVacancySupplyCounts();
+    activeVacancies = await readCachedActiveVacancyCount();
   } catch {
     // The count is a real query that can exceed the anon statement timeout on
     // a cold buffer pool (P0-1b, 2026-09-03). A crawler must never read that
@@ -60,8 +63,8 @@ export async function GET(): Promise<Response> {
   // nothing to advertise. A crawler must still receive a VALID, EMPTY index —
   // never a 404 or a 500, which would be read as a broken sitemap.
   const shardCount =
-    counts.status === "ok" && counts.activeVacancies > 0
-      ? Math.ceil(counts.activeVacancies / PUBLIC_VACANCY_SITEMAP_SHARD_SIZE)
+    activeVacancies !== null && activeVacancies > 0
+      ? Math.ceil(activeVacancies / PUBLIC_VACANCY_SITEMAP_SHARD_SIZE)
       : 0;
 
   const sitemaps = Array.from({ length: shardCount }, (_, i) => {
@@ -74,7 +77,7 @@ export async function GET(): Promise<Response> {
   return new Response(body, {
     headers: {
       "Content-Type": "application/xml",
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": SITEMAP_CACHE_CONTROL,
     },
   });
 }

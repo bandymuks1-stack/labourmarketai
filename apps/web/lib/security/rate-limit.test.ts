@@ -159,14 +159,16 @@ describe("anonymous write paths are actually throttled (audit M-03)", () => {
 
   it("the anonymous company-need intake rate-limits before touching Supabase", () => {
     const src = read("lib/staffing/company-need-public-intake.ts");
-    expect(src).toContain("rateLimit(");
+    // The per-IP and per-e-mail windows live in the spam guard (owner order 2026-11-09).
+    expect(src).toContain("publicIntakeRateLimited(");
+    expect(read("lib/security/public-form-guard.ts")).toContain("rateLimit(");
     expect(src).toContain("clientKeyFromHeaders");
     expect(src, "the caller needs a distinct code to degrade honestly").toContain(
       "rate_limited",
     );
     // Order matters: throttle before the network call, or a flood still costs us.
     expect(
-      src.indexOf("rateLimit("),
+      src.indexOf("publicIntakeRateLimited("),
       "rate limiting must happen BEFORE the Supabase client is constructed",
     ).toBeLessThan(src.indexOf("createSupabaseClient("));
   });
@@ -181,7 +183,7 @@ describe("anonymous write paths are actually throttled (audit M-03)", () => {
       "app/api/waitlist/route.ts",
       "lib/staffing/company-need-public-intake.ts",
     ] as const;
-    const missing = surfaces.filter((s) => !read(s).includes("rateLimit("));
+    const missing = surfaces.filter((s) => !/\brateLimit\(|publicIntakeRateLimited\(/.test(read(s)));
     expect(missing, `anonymous write surfaces with no throttle: ${missing.join(", ")}`).toEqual(
       [],
     );

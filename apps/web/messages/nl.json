@@ -1,5 +1,22 @@
 {
   "companyModel": {
+    "today": {
+      "goApprove": "Bekijken en goedkeuren",
+      "amount": {
+        "hours": "{n} u",
+        "days": "{n} dg",
+        "minutes": "{n} min."
+      },
+      "people": "{n, plural, one {# persoon} other {# personen}}",
+      "entries": "{n, plural, one {# registratie} other {# registraties}}",
+      "unclear": "Uren onduidelijk: {n}",
+      "noHours": "Zonder uren: {n}",
+      "noFigure": "Geen uren vermeld",
+      "elsewhere": "Elders wachten nog {n} op je goedkeuring.",
+      "notReviewer": "Je keurt in deze organisatie geen uren goed: daarvoor is een relatie als manager of eigenaar nodig.",
+      "decisionsClear": "Er wachten nu geen andere beslissingen.",
+      "doors": "Mensen en projecten"
+    },
     "title": "Bedrijfsbeheer",
     "need": "Wat we nodig hebben",
     "offer": "Wat we aanbieden",
@@ -15,7 +32,22 @@
     "work": "Werk & uren",
     "results": "Resultaten",
     "history": "Geschiedenis",
-    "areasTitle": "Bedrijfsgebieden"
+    "areasTitle": "Bedrijfsgebieden",
+    "approvals": {
+      "title": "Wacht op goedkeuring: {n}",
+      "titleUnknown": "Wacht op goedkeuring",
+      "what": "Uren en werk die je medewerkers hebben vastgelegd. Keur ze hier meteen goed of af.",
+      "seeAll": "Alles wat wacht ({n})",
+      "emptyTitle": "Er wachten nu geen uren van medewerkers op goedkeuring.",
+      "emptyNext": "Zodra een medewerker werk vastlegt, verschijnt het hier.",
+      "noEmployees": "Deze organisatie heeft nog geen medewerkers van wie je uren kunt goedkeuren.",
+      "people": "Mensen en team",
+      "reviewOff": "Goedkeuring staat uit voor {off} van de {total} medewerkers. Hun uren verschijnen hier pas als je het inschakelt.",
+      "enable": "Inschakelen bij Mensen en team",
+      "own": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren: dat kan een andere manager van deze organisatie.",
+      "ownAlone": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren en deze organisatie heeft geen andere manager, dus ze blijven vastgelegd als je eigen werk.",
+      "ownUnknown": "Je eigen onbevestigde registraties: {n}. Je eigen werk kun je niet goedkeuren: ze blijven vastgelegd als je eigen werk tot een andere manager ze bevestigt."
+    }
   },
   "publicDemand": {
     "title": "Actuele marktvraag",
@@ -122,7 +154,26 @@
     "descriptionLabel": "Over het bedrijf (zichtbaar op de openbare pagina)",
     "descriptionPlaceholder": "Wat u doet, waar u werkt, wat een klant of werker kan verwachten…",
     "descriptionHint": "Maximaal 2000 tekens. Dit is het hoofdtekstblok van uw openbare pagina.",
-    "errorDescription": "Publicatie opgeslagen, maar de beschrijving kon niet worden opgeslagen. Probeer opnieuw."
+    "errorDescription": "Publicatie opgeslagen, maar de beschrijving kon niet worden opgeslagen. Probeer opnieuw.",
+    "team": {
+      "eyebrow": "Bedrijfsprofiel",
+      "aboutEyebrow": "Over het bedrijf",
+      "aboutTitle": "Wie ze zijn",
+      "offersEyebrow": "Advertenties",
+      "offersTitle": "Wat ze aanbieden",
+      "seekingEyebrow": "Gezocht",
+      "seekingTitle": "Waar ze naar zoeken",
+      "seekingSub": "Zoekadvertenties van het bedrijf zelf. Dit zijn geen vacatures.",
+      "contactEyebrow": "Contactgegevens",
+      "contactTitle": "Neem contact op met het bedrijf",
+      "contactNote": "Het bedrijf heeft deze gegevens zelf gepubliceerd. U bereikt het rechtstreeks, niet via labourmarket.ai.",
+      "contactNone": "Het bedrijf heeft geen contactgegevens gepubliceerd, dus via deze pagina is het niet te bereiken.",
+      "actionEmail": "E-mail sturen",
+      "actionPhone": "Bellen",
+      "actionWebsite": "Website van het bedrijf openen",
+      "heroContact": "Hoe u contact opneemt",
+      "provenance": "Het bedrijf heeft deze pagina zelf ingevuld."
+    }
   },
   "marketplaceListings": {
     "pageTitle": "Marktplaats",
@@ -3171,6 +3222,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Lijkt op reclame",
       "eyebrow": "PERSONEELSBEHOEFTEN",
       "title": "Openbare wachtrij met personeelsbehoeften",
       "subtitle": "Anonieme behoeften die via het openbare /company-need-formulier zijn ingediend. Beoordeel ze stuk voor stuk en markeer de volgende stap handmatig. Er wordt niets automatisch verstuurd — al het contact verloopt via een mens.",
@@ -5659,7 +5711,34 @@
       "reauth": "Opnieuw inloggen",
       "confirmedTitle": "Verwijdering bevestigd",
       "confirmedBody": "Het systeem verwijdert het account binnen enkele minuten en stuurt een bevestiging naar het e-mailadres van je account. Moet iets worden beoordeeld, dan laten we het je weten.",
-      "inReview": "Automatische verwijdering is gepauzeerd voor beoordeling: het account bevat gegevens die mogelijk wettelijk bewaard moeten blijven of die andere mensen betreffen. Je ontvangt het besluit en de redenen binnen een maand per e-mail. Intussen wordt je profiel niet getoond in zoekresultaten."
+      "inReview": "Automatische verwijdering is gepauzeerd voor beoordeling: het account bevat gegevens die mogelijk wettelijk bewaard moeten blijven of die andere mensen betreffen. Je ontvangt het besluit en de redenen binnen een maand per e-mail. Intussen wordt je profiel niet getoond in zoekresultaten.",
+      "confirmLabelWaiting": "Ik begrijp dat het account en de gegevens 30 dagen na bevestiging onherroepelijk worden verwijderd, tenzij ik eerder annuleer.",
+      "confirmStepBodyWaiting": "Je verzoek om je account te verwijderen is ingediend. Bevestig het — het account blijft nog 30 dagen bestaan en in die tijd kun je op deze pagina annuleren. Daarna verwijdert het systeem het account automatisch en stuurt je een bevestiging per e-mail.",
+      "confirmedBodyWaiting": "Het account wordt over 30 dagen verwijderd. Tot die tijd kun je op deze pagina annuleren. Na het verwijderen sturen we een bevestiging naar het e-mailadres van je account.",
+      "status": {
+        "pending": "Je verzoek om je account te verwijderen is ingediend.",
+        "pendingConfirmed": "Het verwijderen van je account is bevestigd en ingepland.",
+        "withdrawn": "Het verwijderen van je account is geannuleerd. Je account blijft actief.",
+        "inProgress": "Je account wordt al verwijderd — dit kan niet meer worden geannuleerd.",
+        "done": "Het account is verwijderd.",
+        "submittedAt": "Ingediend: {date}",
+        "scheduledAt": "Het account wordt verwijderd op {date} (na een wachttijd van 30 dagen).",
+        "cancelUntil": "Tot die tijd kun je annuleren.",
+        "loadError": "De status van het verwijderen van je account kon niet worden geladen. Vernieuw de pagina en probeer het opnieuw."
+      },
+      "cancel": {
+        "button": "Accountverwijdering annuleren",
+        "question": "Accountverwijdering annuleren? Je account en gegevens blijven bestaan.",
+        "confirm": "Ja, annuleren",
+        "keep": "Terug",
+        "working": "Bezig met annuleren…",
+        "cancelled": "Het verwijderen van je account is geannuleerd. Je account blijft actief.",
+        "notCancellable": "Het verwijderen van je account is al begonnen en kan niet meer worden geannuleerd. Je ontvangt het resultaat op het e-mailadres van je account.",
+        "notFound": "Er is geen open verzoek om je account te verwijderen gevonden — er valt niets te annuleren.",
+        "notSignedIn": "Log in om het verwijderen van je account te annuleren.",
+        "unavailable": "Annuleren is nu niet beschikbaar.",
+        "error": "Het verwijderen van je account kon niet worden geannuleerd. Probeer het opnieuw."
+      }
     },
     "requests": {
       "title": "Je ingediende verzoeken",
@@ -5694,6 +5773,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Uw overeenkomst voor elke platformdienst wordt gesloten met UAB “Nonstop Group”. Facturen worden opgesteld door en betalingen ontvangen door UAB “Nonstop Group”.",
       "title": "Gebruiksvoorwaarden",
       "sections": [
         {
@@ -5723,6 +5803,7 @@
     },
     "privacy": {
       "title": "Privacybeleid",
+      "metaDescription": "In gewone taal: welke persoonsgegevens LabourMarket.ai gebruikt, waarom, en welke rechten je hebt. Het platform zoals het vandaag werkt.",
       "intro": "Deze pagina legt in gewone taal uit welke persoonsgegevens Labour Market AI gebruikt, waarom, en welke rechten je hebt. De pagina beschrijft het platform zoals het vandaag werkt.",
       "sections": [
         {
@@ -5742,7 +5823,8 @@
             "Bedrijfsinformatie die door bedrijfsgebruikers is ingevoerd: bedrijfsgegevens, behoeften, projecten en boekingen.",
             "Berichten die je op het platform verstuurt en ontvangt.",
             "Toestemmingsrecords: wanneer je een toestemming geeft of intrekt, worden de actie en het tijdstip opgeslagen.",
-            "Technische gegevens die nodig zijn om de dienst te laten draaien, zoals inlogcookies (zie het cookiebeleid)."
+            "Technische gegevens die nodig zijn om de dienst te laten draaien, zoals inlogcookies (zie het cookiebeleid).",
+            "Alleen met je toestemming: gebruiksmeting op onze eigen servers (bereikte pagina's en stappen, dagelijkse activiteit) en de campagne die je bracht, bewaard bij je account. Zie het cookiebeleid."
           ]
         },
         {
@@ -5798,7 +5880,7 @@
           "heading": "Je rechten",
           "items": [
             "Je kunt vragen om de gegevens die over je worden bewaard in te zien, te corrigeren, er een kopie van te ontvangen, het gebruik ervan te beperken of ze te laten verwijderen.",
-            "Je kunt zelf vanuit je account een kopie van je eigen gegevens downloaden als JSON-bestand en je werkjournaal als CSV-bestand. Je kunt verwijdering van je account aanvragen op de privacypagina van je account en het verzoek bevestigen nadat je opnieuw bent ingelogd; het systeem verwijdert het account dan automatisch en stuurt een bevestiging naar het e-mailadres van het account. Als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Je kunt ook contact met ons opnemen — zie de pagina „Account en gegevens verwijderen”.",
+            "Je kunt zelf vanuit je account een kopie van je eigen gegevens downloaden als JSON-bestand en je werkjournaal als CSV-bestand. Je kunt verwijdering van je account aanvragen op de privacypagina van je account en het verzoek bevestigen nadat je opnieuw bent ingelogd; 30 dagen na bevestiging verwijdert het systeem het account automatisch (tot die tijd kun je het verzoek op de privacypagina annuleren) en stuurt een bevestiging naar het e-mailadres van het account. Na de definitieve verwijdering kunnen verwijderde gegevens nog tot 7 dagen in versleutelde databaseback-ups staan; ze worden daar niet gebruikt en daarna overschreven. Als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Je kunt ook contact met ons opnemen — zie de pagina „Account en gegevens verwijderen”.",
             "Waar verwerking op toestemming is gebaseerd, kun je die toestemming op elk moment intrekken."
           ]
         },
@@ -5834,10 +5916,36 @@
         {
           "name": "Weergavevoorkeur voor beheerders (lm_hide_admin_ui)",
           "purpose": "Wordt alleen gebruikt op beheerdersaccounts. Onthoudt of beheerdersbedieningen verborgen zijn en verandert niets aan rechten."
+        },
+        {
+          "name": "Inlogpoging-markering (lm.oauth.trace)",
+          "purpose": "Tabbladopslag, verwijderd als het tabblad sluit. Een willekeurige code die één inlogpoging aan het resultaat koppelt, zodat een mislukte inlog kan worden onderzocht. Nodig voor de inlog die je startte; bevat geen accountgegevens."
         }
       ],
-      "localStorageNote": "In de eigen opslag van je browser (geen cookies) staan enkele zaken: je keuze voor een licht of donker thema; welke pagina of campagne je hier voor het eerst bracht, eenmalig opgeslagen zodat een latere registratie eraan kan worden toegeschreven; een willekeurige sessie-identificatie per tabblad die verdwijnt als het tabblad sluit; en kleine gemakken zoals weggeklikte meldingen, recent bekeken items en je spraakinvoertaal. Niets hiervan wordt met derden gedeeld of voor advertenties gebruikt, en je kunt het op elk moment via je browser wissen.",
-      "noTracking": "Er zijn vandaag geen analyse-, advertentie- of trackingcookies van derden op het platform. Als dit ooit verandert, wordt deze pagina als eerste bijgewerkt."
+      "localStorageNote": "De eigen opslag van je browser (geen cookies) bevat daarnaast een paar items waar je zelf om vroeg: je keuze voor een licht of donker thema, je keuze over gebruiksmeting en kleine gemakken zoals weggeklikte meldingen, recent bekeken items en de taal van spraakinvoer. Ze blijven op je apparaat en je kunt ze op elk moment via je browser wissen.",
+      "noTracking": "Er zijn op het platform geen advertentie- of trackingcookies van derden, en niets wordt voor advertenties met derden gedeeld.",
+      "settingsLink": "Cookie-instellingen",
+      "analyticsTitle": "Gebruiksmeting — alleen met je toestemming",
+      "analyticsIntro": "Met je toestemming meten we hoe het product wordt gebruikt: welke pagina's en stappen mensen bereiken, de stappen van de registratie, dagelijkse activiteit en welke campagne een bezoeker bracht. Gebeurtenissen worden op onze eigen servers bewaard en, als je bent ingelogd, aan je account gekoppeld. Zonder je toestemming wordt geen van de onderstaande items geschreven en wordt er geen meetgebeurtenis vanuit je browser verzonden.",
+      "analyticsItems": [
+        {
+          "name": "Campagne van het eerste bezoek (lm.attr.first)",
+          "purpose": "Browseropslag. De campagnetags (utm_*), de verwijzende site en de landingspagina van je eerste bezoek. Bij registratie worden ze naar je eigen accountgegevens gekopieerd, zodat de campagne die je bracht kan worden geteld."
+        },
+        {
+          "name": "Sessie-ID (lm.pilot.session)",
+          "purpose": "Tabbladopslag, verwijderd als het tabblad sluit. Een willekeurige code die met elke meetgebeurtenis wordt meegestuurd, zodat de stappen in één tabblad samen kunnen worden geteld."
+        },
+        {
+          "name": "Activiteitsmarkeringen (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
+          "purpose": "Browseropslag. De laatste dag dat je actief was, en een markering dat een registratie bezig is."
+        },
+        {
+          "name": "Eenmaal-tellen-markeringen (lm.funnel.*)",
+          "purpose": "Tabbladopslag. Voorkomt dat dezelfde meetgebeurtenis twee keer wordt geteld."
+        }
+      ],
+      "analyticsBasis": "Weigeren of intrekken verwijdert deze items direct van dit apparaat; als je bent ingelogd, wordt ook de campagne bij je account gewist. De meting zelf is gebaseerd op ons gerechtvaardigd belang bij het verbeteren van het product (art. 6, lid 1, onder f, AVG), en je kunt er bezwaar tegen maken zoals beschreven in het privacybeleid."
     },
     "requestContact": "Neem contact met ons op om een vraag te stellen of een verzoek over je gegevens in te dienen — een persoon zal het beoordelen.",
     "related": "Gerelateerde pagina's",
@@ -5847,6 +5955,7 @@
     },
     "dataProtection": {
       "title": "Gegevensbescherming",
+      "metaDescription": "Deze pagina legt in gewone woorden uit hoe gegevens binnen LabourMarket.ai worden beschermd. Ze beschrijft alleen wat vandaag daadwerkelijk in het platform is ingebouwd.",
       "intro": "Deze pagina legt in gewone woorden uit hoe gegevens binnen Labour Market AI worden beschermd. Ze beschrijft alleen wat vandaag daadwerkelijk in het platform is ingebouwd.",
       "sections": [
         {
@@ -6089,7 +6198,7 @@
     "dataDeletion": {
       "title": "Account en gegevens verwijderen",
       "description": "Hoe u verwijdering van uw LabourMarket.ai-account en persoonsgegevens aanvraagt.",
-      "intro": "U kunt LabourMarket.ai vragen uw account en persoonsgegevens te verwijderen. Als je kunt inloggen, kun je het verzoek zelf indienen: open de privacypagina van je account (in de mobiele app: Instellingen → Privacy), kies voor het verwijderen van je account en bevestig dit nadat je opnieuw bent ingelogd. Het systeem verwijdert het account dan automatisch en stuurt een bevestiging naar het e-mailadres van het account; als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Je kunt verwijdering ook per e-mail aanvragen zoals hieronder beschreven; een mens antwoordt binnen één maand.",
+      "intro": "U kunt LabourMarket.ai vragen uw account en persoonsgegevens te verwijderen. Als je kunt inloggen, kun je het verzoek zelf indienen: open de privacypagina van je account (in de mobiele app: Instellingen → Privacy), kies voor het verwijderen van je account en bevestig dit nadat je opnieuw bent ingelogd. 30 dagen na bevestiging verwijdert het systeem het account automatisch (tot die tijd kun je het verzoek op de privacypagina annuleren) en stuurt een bevestiging naar het e-mailadres van het account; als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Na de definitieve verwijdering kunnen verwijderde gegevens nog tot 7 dagen in versleutelde databaseback-ups staan; ze worden daar niet gebruikt en daarna overschreven. Je kunt verwijdering ook per e-mail aanvragen zoals hieronder beschreven; een mens antwoordt binnen één maand.",
       "howTitle": "Hoe u verwijdering aanvraagt",
       "howSteps": [
         "Stuur een e-mail naar {email} vanaf het e-mailadres dat aan uw LabourMarket.ai-account is gekoppeld.",
@@ -6377,6 +6486,17 @@
       "pending": "Bezig met samenvoegen…",
       "done": "Samengevoegd. De regels en registraties blijven bewaard; de projectlijst toont nu het behouden project.",
       "failed": "Niet samengevoegd. Voor regels die niet zijn verwerkt is niets gewijzigd — herlaad en probeer opnieuw."
+    },
+    "deck": {
+      "label": "Wat je kunt doen",
+      "new": "Nieuw project",
+      "newHint": "Maak het aan en begin",
+      "assign": "Werknemer toewijzen",
+      "assignHint": "Aan een project",
+      "teams": "Team toewijzen",
+      "teamsHint": "Een ploeg voor een project of taak",
+      "chat": "Gesprekken",
+      "toolsLabel": "Andere hulpmiddelen"
     }
   },
   "projectOps": {
@@ -7638,7 +7758,7 @@
     "campaigns": {
       "title": "Campagne → vacature → account",
       "empty": "Nog geen gebeurtenissen met een campagnelabel in dit venster.",
-      "help": "First-touch utm_campaign × utm_content over hetzelfde venster en dezelfde populatiefilter. Dit zijn aantallen gebeurtenissen, geen unieke bezoekers — een latere kolom is geen deelverzameling van een eerdere, dus een verhouding tussen twee kolommen is geen conversie. Maximaal 25 rijen op bezoeken; verkeer zonder label (organisch) wordt niet getoond. De interessekolom wordt server-side verstuurd, waar geen campagne beschikbaar is, dus hij blijft per constructie 0 — dat is een ontbrekende meting, geen gemeten nul.",
+      "help": "First-touch utm_campaign × utm_content over hetzelfde venster en dezelfde populatiefilter. Dit zijn aantallen gebeurtenissen, geen unieke bezoekers — een latere kolom is geen deelverzameling van een eerdere, dus een verhouding tussen twee kolommen is geen conversie. Maximaal 25 rijen op bezoeken; verkeer zonder label (organisch) wordt niet getoond. De interessekolom wordt server-side verstuurd, waar geen campagne beschikbaar is, dus hij blijft per constructie 0 — dat is een ontbrekende meting, geen gemeten nul. De vier kolommen na registratie tellen gebeurtenissen, geen mensen (logboekregels zijn elke opgeslagen regel, niet de eerste), en alleen voor accounts waarvan het eigen record de campagne draagt: registraties die analyse toestonden, en Google-registraties pas vanaf 2026-11-03. Bezoekers die analyse weigerden staan helemaal niet in deze tabel.",
       "col": {
         "campaign": "Campagne / variant",
         "landing": "Bezoeken",
@@ -7648,7 +7768,11 @@
         "signupCompleted": "Account aangemaakt",
         "returnedToJob": "Terug naar vacature",
         "compared": "Vergeleken",
-        "interest": "Interesse"
+        "interest": "Interesse",
+        "profileSaved": "Profiel opgeslagen",
+        "profileMatchable": "Profiel matchbaar",
+        "journalEntrySaved": "Logboekregels",
+        "jobSearch": "Vacatures zoeken"
       }
     },
     "funnel": {
@@ -8606,6 +8730,98 @@
       "emptyCapabilities": "Nog geen vaardigheden. Hier verschijnen je vaardigheden en het werk dat ze laat zien.",
       "emptyExperience": "Nog geen werkgeschiedenis. Je journaal en de registraties van organisaties waar je werkte bouwen die op.",
       "untitled": "Werk zonder naam in de bron"
+    },
+    "athlete": {
+      "earlyNote": "Vroege opmaak van je Living CV. De cijfers zijn je echte gegevens; het uiterlijk is nog niet definitief.",
+      "fullCv": "Volledig cv openen",
+      "hero": {
+        "portraitAlt": "Foto van {name}",
+        "noRole": "Nog geen beroep toegevoegd",
+        "availableFrom": "vanaf {date}",
+        "onlyYou": "Alleen jij ziet dit hier."
+      },
+      "stats": {
+        "aria": "Cijfers en wie erachter staat",
+        "unknown": "Kon nu niet worden gelezen",
+        "organizationCount": "{count, plural, one {# organisatie} other {# organisaties}}",
+        "confirmedBy": "Bevestigd in de registratie van {who}",
+        "confirmedBySomeone": "Er is een registratie van een leidinggevende of organisatie",
+        "confirmedSelfOnly": "Tot nu toe alleen je eigen bevestiging; geen andere leidinggevende of organisatie heeft dit bevestigd",
+        "someSelfConfirmed": "Deels: {qualifier}",
+        "truncated": "Je logboek is lang, dus oudere regels kunnen buiten deze cijfers vallen.",
+        "confirmed": {
+          "label": "uren in de registratie van een leidinggevende of organisatie",
+          "none": "Nog geen registratie van een leidinggevende of organisatie bevestigt je werk"
+        },
+        "total": {
+          "label": "uren ervaring",
+          "behind": "Je logboek en gegevens van organisaties, elk uur één keer"
+        },
+        "journal": {
+          "label": "geregistreerde uren",
+          "behind": "Je eigen werklogboek",
+          "none": "Nog niets geregistreerd"
+        },
+        "organization": {
+          "label": "uren in gegevens van organisaties",
+          "behind": "Gegevens van organisaties"
+        },
+        "projects": {
+          "label": "projecten",
+          "behind": "Uit je gegevens"
+        }
+      },
+      "seasons": {
+        "eyebrow": "Loopbaan",
+        "title": "Loopbaan per seizoen",
+        "empty": "Nog geen seizoenen. Noteer een werkdag en die wordt de eerste regel van je geschiedenis.",
+        "emptyAction": "Werk registreren",
+        "undated": "Geen datums vermeld",
+        "hoursNotStated": "Geen uren vermeld",
+        "hoursRecorded": "{hours} geregistreerd",
+        "hoursConfirmed": "{confirmed} in de registratie van een leidinggevende · {recorded} geregistreerd",
+        "orgDayHours": "{hours} over {count, plural, one {# regel} other {# regels}}",
+        "orgPeriodHours": "{hours} vermeld als totaal over een periode",
+        "note": "Een seizoen toont de uren die zijn eigen gegevens vermelden. Het totaal hierboven telt elk uur één keer.",
+        "confirmedBy": "Bevestigd in de registratie van {who}",
+        "placement": "Stage",
+        "reconstructed": "Herleid uit een eerdere registratie",
+        "photoAlt": "Foto van het werk aan {name}",
+        "evidence": {
+          "confirmed": "Bevestigd in de registratie van een leidinggevende of organisatie",
+          "client_accepted": "Geaccepteerd door de klant",
+          "organization_record": "Gegevens van de organisatie",
+          "own_record": "Je eigen registratie",
+          "stated": "Dit heb je zelf vermeld; nog niets laat het zien"
+        }
+      },
+      "skills": {
+        "eyebrow": "Vaardigheden",
+        "title": "Wat je kunt en wat dat laat zien",
+        "empty": "Nog geen vaardigheden. Voeg toe wat je kunt; je gegevens laten de rest zien.",
+        "emptyAction": "Vaardigheden toevoegen",
+        "potentialFrom": "Je werk aan {skills} wijst hierop; nog geen registratie laat het zien",
+        "documentUnverified": "Je hebt het document zelf toegevoegd; niemand heeft het gecontroleerd",
+        "involved": "Betrokken bij {hours}, niet alleen aan deze vaardigheid toegerekend",
+        "timeUnknown": "Je logboek kon nu niet worden gelezen, dus vaardigheden tonen geen uren.",
+        "noScore": "Niets hier vat een persoon samen in één getal. Je ziet wat de gegevens laten zien en wie erachter staat.",
+        "state": {
+          "confirmed": "Werk bevestigd door een leidinggevende",
+          "certified": "Gecertificeerd",
+          "recorded": "In je gegevens",
+          "declared": "Zelf vermeld",
+          "potential": "Mogelijk"
+        }
+      },
+      "next": {
+        "eyebrow": "Volgende stap",
+        "title": "Waar je werk toe kan leiden",
+        "confirmed": "Bevestigd door een leidinggevende: {list}",
+        "inRecords": "In je gegevens: {list}",
+        "missing": "Ontbreekt: {list}",
+        "none": "Nog geen volgende stap te tonen. Meer geregistreerd werk geeft hier meer houvast.",
+        "unknown": "Kon nu niet worden gelezen."
+      }
     }
   },
   "todayScreen": {
@@ -10404,6 +10620,7 @@
   },
   "matchPreview": {
     "title": "Matchvoorbeeld",
+    "metaDescription": "Voer de gegevens van een werknemer en een personeelsbehoefte in en zie hoe ze passen. Deze tool legt de fit uit, maar boekt of bewaart niets.",
     "subtitle": "Voer de gegevens van een werknemer en een personeelsbehoefte in om te zien hoe ze bij elkaar passen. Dit is een voorbeeldtool — hij berekent de fit en legt die uit, maar boekt of bewaart niets.",
     "previewOnly": "Alleen een voorbeeld — niet geboekt en niet opgeslagen als boekingsaanvraag.",
     "workerSection": "Werknemer",
@@ -10741,11 +10958,11 @@
   },
   "about": {
     "metaTitle": "Wat is LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai is een besturingsplatform voor de arbeidsmarkt: echt werk wordt professionele geschiedenis, bewijs en een levend cv voor een persoon, en een werkgeschiedenis en capaciteitsoverzicht voor een organisatie.",
+    "metaDescription": "LabourMarket.ai is een internationaal platform voor werk, specialisten en diensten. Echt werk wordt professionele geschiedenis, bewijs en een levend cv.",
     "navLabel": "Over LabourMarket.ai",
     "eyebrow": "Over het platform",
     "title": "Wat is LabourMarket.ai",
-    "lede": "LabourMarket.ai is een besturingsplatform voor de arbeidsmarkt. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — van het eerste gesprek tot de volgende kans.",
+    "lede": "LabourMarket.ai is een internationaal platform voor werk, specialisten en diensten. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — van het eerste gesprek tot de volgende kans.",
     "hero": {
       "lead": "De professionele waarde van een persoon mag niet verdwijnen telkens wanneer die van werkgever wisselt. Echt werk kan blijvende professionele geschiedenis worden: wat de persoon deed, waar, wanneer, hoe lang, in welke rol, met welke vaardigheden en welk bewijs en welke bevestiging dat ondersteunt.",
       "leadOrg": "Voor organisaties bouwt datzelfde echte werk het overzicht op van wat het bedrijf werkelijk heeft gedaan: projecten, teams, uitgevoerd werk, uren, competenties en bewijs.",
@@ -11347,6 +11564,7 @@
       "empty": "Niets op deze dag."
     },
     "year": {
+      "hint": "Het getal is hoeveel items in die maand vallen: reserveringen, projecten, taken, werkregistraties, verlof en andere. Een item over meerdere maanden telt in elk daarvan mee.",
       "count": "{count, plural, =0 {geen items} one {# item} other {# items}}"
     },
     "emptyFiltered": "Geen items van dit type.",
@@ -12434,6 +12652,7 @@
     },
     "invitePage": {
       "eyebrow": "UITNODIGING",
+      "pageTitle": "Uitnodiging",
       "notEnabled": "Momenteel niet beschikbaar.",
       "loadError": "De uitnodiging kon nu niet worden geladen. Probeer het opnieuw.",
       "invalidTitle": "Uitnodiging niet gevonden",
@@ -12852,15 +13071,35 @@
   "cvImport": {
     "reviewTitle": "Gedetecteerde cv-onderdelen",
     "reviewHint": "Het systeem stelt alleen voor. Sla elk item op of verwijder het — jij beslist.",
+    "edit": "Corrigeren",
+    "editDone": "Klaar",
+    "fieldTitle": "Titel",
+    "fieldText": "Tekst",
+    "fieldInstitution": "School of aanbieder",
+    "fieldProgram": "Opleiding",
+    "fieldKind": "Soort",
+    "fieldStart": "Begin",
+    "fieldEnd": "Einde",
+    "fieldYear": "Jaar",
+    "dateHint": "bijv. 2019 of 2019-03",
+    "unplacedHint": "Deze regels konden we niet plaatsen. Kies waar ze horen of verwijder ze.",
+    "placeAs": "Waar hoort dit?",
+    "confidence": {
+      "high": "Duidelijk vermeld in het cv",
+      "medium": "Controleer of dit goed is gelezen",
+      "low": "Een gok: controleer dit"
+    },
     "empty": "Geen gestructureerde items gevonden in de tekst.",
     "groups": {
       "workHistory": "Werkervaring",
       "education": "Opleiding",
+      "training": "Trainingen en cursussen",
       "languages": "Talen",
       "certificates": "Certificaten",
       "achievements": "Prestaties",
       "salary": "Salarisverwachting",
-      "availability": "Beschikbaarheid"
+      "availability": "Beschikbaarheid",
+      "unplaced": "Niet herkend"
     },
     "confirm": "Opslaan",
     "saving": "Opslaan…",
@@ -15147,6 +15386,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Zoektocht naar werknemers aanvragen",
+        "body": "Geef het beroep, het aantal mensen, het land en de startdatum door."
+      },
+      "b2b": {
+        "title": "B2B-aanvraag versturen",
+        "body": "Beschrijf het soort werk, de locatie, de omvang en de termijnen."
+      },
+      "project": {
+        "title": "Individueel project aanvragen",
+        "body": "Voor particulieren en bedrijven: beschrijf welk project of welke dienst je nodig hebt."
+      },
+      "title": "Stuur een aanvraag",
+      "promise": "Stuur je aanvraag – we nemen binnen 24 uur contact met je op.",
+      "name": "Naam of bedrijf",
+      "email": "E-mail",
+      "phone": "Telefoon",
+      "country": "Land",
+      "countryChoose": "Kies een land",
+      "city": "Plaats",
+      "profession": "Beroep",
+      "workers": "Aantal werknemers",
+      "start": "Startdatum",
+      "details": "Aanvullende eisen",
+      "work": "Soort werk",
+      "place": "Locatie",
+      "scope": "Omvang",
+      "deadline": "Termijnen",
+      "need": "Welk project of welke dienst",
+      "customer": "Opdrachtgever",
+      "customerPrivate": "Particulier",
+      "customerBusiness": "Bedrijf",
+      "optional": "optioneel",
+      "send": "Aanvraag versturen",
+      "sending": "Versturen…",
+      "receivedTitle": "We hebben je aanvraag ontvangen",
+      "receivedBody": "We nemen binnen 24 uur contact met je op via de opgegeven gegevens.",
+      "invalid": "Controleer de velden en probeer het opnieuw. Wat je hebt ingevuld staat nog in dit formulier.",
+      "limited": "Er zijn nu te veel aanvragen. Probeer het later opnieuw: wat je hebt ingevuld blijft staan.",
+      "unavailable": "Je aanvraag kon niet worden verstuurd en is niet ontvangen. Wat je hebt ingevuld blijft staan, probeer het opnieuw.",
+      "notice": "Door een aanvraag te versturen bevestig je dat je het <privacy>Privacybeleid</privacy> hebt gelezen."
+    },
     "audienceValueEyebrow": "Waarde voor elke kant van werk",
     "audienceValueTitle": "Wat elke doelgroep krijgt",
     "how": {
@@ -15361,8 +15643,8 @@
       "noStars": "Nergens sterren: een mens wordt nooit tot een score gereduceerd. Elke match wordt uitgelegd tegen een concrete behoefte — met zichtbare cijfers."
     },
     "hero": {
-      "headline": "Een levend systeem van werk- en zakelijke kansen.",
-      "sub": "Laat op één plek zien wat je kunt, wat je aanbiedt of wat je zoekt. Ontdek werknemers, banen, aannemers, diensten en goederen — en je ervaring en kansen blijven altijd bereikbaar."
+      "headline": "Werk, werknemers, diensten en zakelijke kansen – op één plek.",
+      "sub": "Zoek werk, specialisten, werknemers, klanten of projectpartners, dichtbij en wereldwijd. Maak je professionele profiel, laat je ervaring zien, bied diensten aan en ontdek nieuwe kansen."
     },
     "entry": {
       "label": "Schrijf wat u nodig heeft — in uw eigen woorden",
@@ -16123,6 +16405,7 @@
       "allowanceRemaining": "Nog {count} van {limit} vertalingen over",
       "allowanceExhausted": "Je hebt al je {limit} inbegrepen vertalingen gebruikt. De vacature blijft volledig leesbaar in de oorspronkelijke taal.",
       "unavailable": "Deze vacature kon nu niet worden vertaald. Hieronder staan de eigen woorden van de adverteerder.",
+      "notSwitchedOn": "Automatisch vertalen van vacatures staat nog niet aan. Hieronder staan de eigen woorden van de adverteerder.",
       "signedOut": "Meld je aan om deze vacature te vertalen."
     }
   },
@@ -20092,6 +20375,23 @@
       "invalid": "Controleer de naam en het bericht.",
       "error": "Er ging iets mis. Probeer het opnieuw.",
       "cooldown": "Je verzoek is onlangs afgewezen. Je kunt deze groep 30 dagen na het besluit opnieuw vragen."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "We meten paginagebruik en via welke campagne je kwam alleen als je dat toestaat.",
+      "accept": "Meting toestaan",
+      "refuse": "Weigeren",
+      "more": "Meer",
+      "label": "Keuze over gebruiksmeting"
+    },
+    "control": {
+      "title": "Gebruiksmeting en campagnetoewijzing",
+      "granted": "Je hebt toestemming gegeven. Je kunt die altijd intrekken; de items worden dan van dit apparaat verwijderd.",
+      "refused": "Je hebt geweigerd. Op dit apparaat wordt niets voor meting opgeslagen.",
+      "undecided": "Je hebt nog niet gekozen, dus er wordt niets voor meting opgeslagen.",
+      "allow": "Toestaan",
+      "refuse": "Weigeren"
     }
   }
 }

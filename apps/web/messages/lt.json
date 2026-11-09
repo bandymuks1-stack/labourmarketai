@@ -1,5 +1,22 @@
 {
   "companyModel": {
+    "today": {
+      "goApprove": "Peržiūrėti ir patvirtinti",
+      "amount": {
+        "hours": "{n} val.",
+        "days": "{n} d.",
+        "minutes": "{n} min."
+      },
+      "people": "{n, plural, one {# žmogus} few {# žmonės} many {# žmogaus} other {# žmonių}}",
+      "entries": "{n, plural, one {# įrašas} few {# įrašai} many {# įrašo} other {# įrašų}}",
+      "unclear": "Neaiškios valandos: {n}",
+      "noHours": "Be valandų: {n}",
+      "noFigure": "Valandų nenurodyta",
+      "elsewhere": "Kitur tavo patvirtinimo laukia dar: {n}.",
+      "notReviewer": "Šioje organizacijoje valandų nepatvirtini: tam reikia vadovo ar savininko ryšio su organizacija.",
+      "decisionsClear": "Kitų sprendimų dabar nelaukia.",
+      "doors": "Žmonės ir projektai"
+    },
     "title": "Įmonės valdymas",
     "need": "Ko mums reikia",
     "offer": "Ką siūlome",
@@ -15,7 +32,22 @@
     "work": "Darbas ir valandos",
     "results": "Rezultatai",
     "history": "Istorija",
-    "areasTitle": "Įmonės sritys"
+    "areasTitle": "Įmonės sritys",
+    "approvals": {
+      "title": "Laukia patvirtinimo: {n}",
+      "titleUnknown": "Laukia patvirtinimo",
+      "what": "Darbuotojų įrašytos valandos ir darbai. Patvirtink arba atmesk čia pat.",
+      "seeAll": "Visi laukiantys ({n})",
+      "emptyTitle": "Šiuo metu darbuotojų valandos patvirtinimo nelaukia.",
+      "emptyNext": "Kai darbuotojas įrašys darbą, jis atsiras čia.",
+      "noEmployees": "Organizacijoje dar nėra darbuotojų, kurių valandas galėtum patvirtinti.",
+      "people": "Žmonės ir komanda",
+      "reviewOff": "Patvirtinimas neįjungtas: {off} iš {total} darbuotojų. Jų valandos čia neatsiras, kol jo neįjungsi.",
+      "enable": "Įjungti skiltyje „Žmonės ir komanda“",
+      "own": "Tavo paties nepatvirtintų įrašų: {n}. Savo darbo pats patvirtinti negali: jį gali patvirtinti kitas šios organizacijos vadovas.",
+      "ownAlone": "Tavo paties nepatvirtintų įrašų: {n}. Savo darbo pats patvirtinti negali, o kito vadovo šioje organizacijoje nėra, todėl jie lieka įrašyti kaip tavo paties darbas.",
+      "ownUnknown": "Tavo paties nepatvirtintų įrašų: {n}. Savo darbo pats patvirtinti negali: jie lieka įrašyti kaip tavo paties darbas, kol juos patvirtina kitas vadovas."
+    }
   },
   "publicDemand": {
     "title": "Dabartinė rinkos paklausa",
@@ -122,7 +154,26 @@
     "descriptionLabel": "Apie įmonę (rodoma viešame puslapyje)",
     "descriptionPlaceholder": "Ką darai, kur dirbi, ko gali tikėtis klientas ar darbuotojas…",
     "descriptionHint": "Iki 2000 ženklų. Tai pagrindinis tavo viešo puslapio teksto blokas.",
-    "errorDescription": "Publikavimas išsaugotas, bet aprašymo išsaugoti nepavyko. Pabandyk dar kartą."
+    "errorDescription": "Publikavimas išsaugotas, bet aprašymo išsaugoti nepavyko. Pabandyk dar kartą.",
+    "team": {
+      "eyebrow": "Įmonės profilis",
+      "aboutEyebrow": "Apie įmonę",
+      "aboutTitle": "Kas jie",
+      "offersEyebrow": "Skelbimai",
+      "offersTitle": "Ką siūlo",
+      "seekingEyebrow": "Paieška",
+      "seekingTitle": "Ko ieško",
+      "seekingSub": "Pačios įmonės paieškos skelbimai. Tai ne darbo vietos.",
+      "contactEyebrow": "Kontaktai",
+      "contactTitle": "Susisiek su įmone",
+      "contactNote": "Kontaktus paskelbė pati įmonė. Kreipiesi tiesiai į ją, ne per labourmarket.ai.",
+      "contactNone": "Įmonė viešų kontaktų nepaskelbė, todėl per šį puslapį jos pasiekti negalima.",
+      "actionEmail": "Rašyti el. laišką",
+      "actionPhone": "Skambinti",
+      "actionWebsite": "Atidaryti įmonės svetainę",
+      "heroContact": "Kaip susisiekti",
+      "provenance": "Šį puslapį užpildė pati įmonė."
+    }
   },
   "marketplaceListings": {
     "pageTitle": "Prekyvietė",
@@ -3171,6 +3222,7 @@
       }
     },
     "companyNeedIntakes": {
+      "advertising": "Panašu į reklamą",
       "eyebrow": "ĮMONIŲ POREIKIAI",
       "title": "Viešų įmonių poreikių eilė",
       "subtitle": "Anoniminiai poreikiai, pateikti per viešą /company-need formą. Peržiūrėk ir rankiniu būdu pažymėk tolesnį žingsnį. Nieko neišsiunčiama automatiškai — visą kontaktą atlieka žmogus.",
@@ -5659,7 +5711,34 @@
       "reauth": "Prisijungti iš naujo",
       "confirmedTitle": "Ištrynimas patvirtintas",
       "confirmedBody": "Sistema paskyrą ištrins per artimiausias kelias minutes ir atsiųs patvirtinimą paskyros el. paštu. Jei kažką reikės peržiūrėti, apie tai pranešime.",
-      "inReview": "Automatinis ištrynimas sustabdytas peržiūrai: paskyroje yra duomenų, kuriuos gali tekti saugoti pagal įstatymą arba kurie susiję su kitais žmonėmis. Sprendimą ir priežastis gausi el. paštu per vieną mėnesį. Tuo metu tavo profilis nerodomas paieškoje."
+      "inReview": "Automatinis ištrynimas sustabdytas peržiūrai: paskyroje yra duomenų, kuriuos gali tekti saugoti pagal įstatymą arba kurie susiję su kitais žmonėmis. Sprendimą ir priežastis gausi el. paštu per vieną mėnesį. Tuo metu tavo profilis nerodomas paieškoje.",
+      "confirmLabelWaiting": "Suprantu, kad paskyra ir jos duomenys bus ištrinti negrįžtamai po 30 dienų nuo patvirtinimo, nebent iki tol atšauksiu.",
+      "confirmStepBodyWaiting": "Tavo paskyros šalinimo užklausa pateikta. Patvirtink ją — paskyra bus išlaikyta 30 dienų, per tą laiką gali atšaukti šiame puslapyje. Po to sistema paskyrą ištrins automatiškai ir atsiųs patvirtinimą el. paštu.",
+      "confirmedBodyWaiting": "Paskyra bus ištrinta po 30 dienų. Iki tol gali atšaukti šiame puslapyje. Ištrynus atsiųsime patvirtinimą į paskyros el. paštą.",
+      "status": {
+        "pending": "Paskyros ištrynimo užklausa pateikta.",
+        "pendingConfirmed": "Paskyros ištrynimas patvirtintas ir suplanuotas.",
+        "withdrawn": "Paskyros ištrynimas atšauktas. Tavo paskyra lieka aktyvi.",
+        "inProgress": "Paskyros ištrynimas jau vyksta — jo atšaukti nebegalima.",
+        "done": "Paskyra ištrinta.",
+        "submittedAt": "Pateikta: {date}",
+        "scheduledAt": "Paskyra bus ištrinta {date} (po 30 dienų laukimo).",
+        "cancelUntil": "Iki tol gali atšaukti.",
+        "loadError": "Nepavyko įkelti paskyros ištrynimo būsenos. Atnaujink puslapį ir pabandyk dar kartą."
+      },
+      "cancel": {
+        "button": "Atšaukti paskyros ištrynimą",
+        "question": "Atšaukti paskyros ištrynimą? Tavo paskyra ir duomenys liks.",
+        "confirm": "Taip, atšaukti",
+        "keep": "Grįžti",
+        "working": "Atšaukiama…",
+        "cancelled": "Paskyros ištrynimas atšauktas. Tavo paskyra lieka aktyvi.",
+        "notCancellable": "Paskyros ištrynimas jau prasidėjo, todėl jo atšaukti nebegalima. Rezultatą gausi paskyros el. paštu.",
+        "notFound": "Aktyvios paskyros ištrynimo užklausos nerasta — atšaukti nėra ko.",
+        "notSignedIn": "Prisijunk, kad galėtum atšaukti paskyros ištrynimą.",
+        "unavailable": "Atšaukimas šiuo metu nepasiekiamas.",
+        "error": "Nepavyko atšaukti paskyros ištrynimo. Pabandyk dar kartą."
+      }
     },
     "requests": {
       "title": "Tavo pateiktos užklausos",
@@ -5694,6 +5773,7 @@
       ]
     },
     "terms": {
+      "metaDescription": "Jūsų sutartis dėl bet kurios platformos paslaugos sudaroma su UAB „Nonstop Group“. Sąskaitas išrašo ir mokėjimus gauna UAB „Nonstop Group“.",
       "title": "Naudojimo sąlygos",
       "sections": [
         {
@@ -5723,6 +5803,7 @@
     },
     "privacy": {
       "title": "Privatumo politika",
+      "metaDescription": "Paprastais žodžiais: kokius asmens duomenis naudoja LabourMarket.ai, kodėl ir kokias teises turite. Platforma aprašyta tokia, kokia veikia šiandien.",
       "intro": "Šis puslapis paprastais žodžiais paaiškina, kokius asmens duomenis naudoja Labour Market AI, kodėl juos naudoja ir kokias teises turite. Jis aprašo platformą tokią, kokia ji veikia šiandien.",
       "sections": [
         {
@@ -5742,7 +5823,8 @@
             "Įmonių naudotojų įvesta įmonės informacija: įmonės duomenys, poreikiai, projektai ir rezervacijos.",
             "Žinutės, kurias siunčiate ir gaunate platformoje.",
             "Sutikimų įrašai: kai duodate ar atšaukiate sutikimą, išsaugomas veiksmas ir jo laikas.",
-            "Techniniai duomenys, reikalingi paslaugai veikti, pavyzdžiui, prisijungimo slapukai (žr. Slapukų politiką)."
+            "Techniniai duomenys, reikalingi paslaugai veikti, pavyzdžiui, prisijungimo slapukai (žr. Slapukų politiką).",
+            "Tik su tavo sutikimu: naudojimo matavimas mūsų pačių serveriuose (pasiekti puslapiai ir žingsniai, kasdienis aktyvumas) ir tave atvedusi kampanija, saugoma kartu su tavo paskyra. Žr. Slapukų politiką."
           ]
         },
         {
@@ -5798,7 +5880,7 @@
           "heading": "Jūsų teisės",
           "items": [
             "Galite prašyti susipažinti su apie jus saugomais duomenimis, juos ištaisyti, gauti jų kopiją, apriboti jų naudojimą arba juos ištrinti.",
-            "Savo duomenų kopiją JSON failu ir darbo žurnalą CSV failu galite atsisiųsti patys iš savo paskyros. Paskyros ištrynimo galite paprašyti paskyros puslapyje „Privatumas“ ir patvirtinti prašymą prisijungę iš naujo; tada sistema paskyrą ištrina automatiškai ir išsiunčia patvirtinimą į paskyros el. paštą. Jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Taip pat galite susisiekti su mumis — žr. puslapį „Paskyros ir duomenų ištrynimas“.",
+            "Savo duomenų kopiją JSON failu ir darbo žurnalą CSV failu galite atsisiųsti patys iš savo paskyros. Paskyros ištrynimo galite paprašyti paskyros puslapyje „Privatumas“ ir patvirtinti prašymą prisijungę iš naujo; praėjus 30 dienų nuo patvirtinimo sistema paskyrą ištrina automatiškai (iki tol prašymą galite atšaukti puslapyje „Privatumas“) ir išsiunčia patvirtinimą į paskyros el. paštą. Po galutinio ištrynimo ištrinti duomenys dar iki 7 dienų gali likti užšifruotose duomenų bazės atsarginėse kopijose; ten jie nenaudojami, o vėliau perrašomi. Jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Taip pat galite susisiekti su mumis — žr. puslapį „Paskyros ir duomenų ištrynimas“.",
             "Kai tvarkymas grindžiamas sutikimu, sutikimą galite bet kada atšaukti."
           ]
         },
@@ -5821,23 +5903,49 @@
     },
     "cookies": {
       "title": "Slapukų politika",
-      "intro": "Šiame puslapyje išvardyta, ką platforma šiandien iš tikrųjų saugo jūsų naršyklėje. Sąmoningai — labai nedaug.",
+      "intro": "Šiame puslapyje išvardyta, ką platforma šiandien iš tikrųjų saugo tavo naršyklėje. Sąmoningai — labai nedaug.",
       "items": [
         {
           "name": "Prisijungimo slapukai",
-          "purpose": "Nustatomi prisijungus, kad liktumėte prisijungę naršydami tarp puslapių. Būtini — be jų paslauga negali išlaikyti jūsų prisijungimo."
+          "purpose": "Nustatomi prisijungus, kad naršant tarp puslapių prisijungimas išliktų. Būtini — be jų paslauga negali išlaikyti tavo prisijungimo."
         },
         {
           "name": "Kalbos slapukas (NEXT_LOCALE)",
-          "purpose": "Gali būti nustatytas, kad įsimintų jūsų kalbos pasirinkimą ir puslapiai atsidarytų jūsų kalba."
+          "purpose": "Gali būti nustatytas, kad įsimintų tavo kalbos pasirinkimą ir puslapiai atsidarytų tavo kalba."
         },
         {
           "name": "Administratoriaus rodymo nuostata (lm_hide_admin_ui)",
           "purpose": "Naudojama tik administratorių paskyrose. Įsimena, ar paslėpti administratoriaus valdikliai, ir nekeičia jokių teisių."
+        },
+        {
+          "name": "Prisijungimo bandymo žymė (lm.oauth.trace)",
+          "purpose": "Kortelės saugykla, pašalinama uždarius kortelę. Atsitiktinis kodas, susiejantis vieną prisijungimo bandymą su jo rezultatu, kad būtų galima ištirti nepavykusį prisijungimą. Būtina tavo pradėtam prisijungimui; joje nėra paskyros duomenų."
         }
       ],
-      "localStorageNote": "Naršyklės saugykloje (ne slapukuose) laikomi keli dalykai: jūsų šviesios ar tamsios temos pasirinkimas; kuris puslapis ar kampanija jus čia atvedė pirmą kartą — įrašoma vieną kartą, kad vėlesnę registraciją būtų galima jai priskirti; atsitiktinis kiekvienos kortelės sesijos identifikatorius, išnykstantis uždarius kortelę; ir smulkūs patogumai, pvz., paslėpti pranešimai, neseniai peržiūrėti įrašai ir kalbos įvesties kalba. Niekas iš to neperduodama trečiosioms šalims ir nenaudojama reklamai; viską bet kada galite išvalyti savo naršyklėje.",
-      "noTracking": "Platformoje šiandien nėra analitikos, reklamos ar trečiųjų šalių sekimo slapukų. Jei tai kada nors keistųsi, pirmiausia bus atnaujintas šis puslapis."
+      "localStorageNote": "Naršyklės saugykloje (ne slapukuose) taip pat laikomi keli tavo prašyti dalykai: šviesios ar tamsios temos pasirinkimas, tavo sprendimas dėl naudojimo matavimo ir smulkūs patogumai, pvz., paslėpti pranešimai, neseniai peržiūrėti įrašai ir kalbos įvesties kalba. Jie lieka tavo įrenginyje, ir juos bet kada gali išvalyti savo naršyklėje.",
+      "noTracking": "Platformoje nėra reklamos ar trečiųjų šalių sekimo slapukų, ir niekas neperduodama trečiosioms šalims reklamai.",
+      "settingsLink": "Slapukų nustatymai",
+      "analyticsTitle": "Naudojimo matavimas — tik su tavo sutikimu",
+      "analyticsIntro": "Tau sutikus, matuojame, kaip naudojamasi produktu: kuriuos puslapius ir žingsnius žmonės pasiekia, registracijos žingsnius, kasdienį aktyvumą ir kuri kampanija atvedė lankytoją. Įvykiai saugomi mūsų pačių serveriuose ir, jei prisijungei, susiejami su tavo paskyra. Be tavo sutikimo nė vienas toliau išvardytas įrašas nesukuriamas ir iš tavo naršyklės nesiunčiamas joks matavimo įvykis.",
+      "analyticsItems": [
+        {
+          "name": "Pirmojo apsilankymo kampanija (lm.attr.first)",
+          "purpose": "Naršyklės saugykla. Pirmojo apsilankymo kampanijos žymos (utm_*), nukreipusi svetainė ir nusileidimo puslapis. Registruojantis jos nukopijuojamos į tavo paskyros įrašą, kad būtų galima suskaičiuoti, kuri kampanija tave atvedė."
+        },
+        {
+          "name": "Sesijos identifikatorius (lm.pilot.session)",
+          "purpose": "Kortelės saugykla, pašalinama uždarius kortelę. Atsitiktinis identifikatorius, siunčiamas su kiekvienu matavimo įvykiu, kad vienos kortelės žingsnius būtų galima skaičiuoti kartu."
+        },
+        {
+          "name": "Aktyvumo žymės (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
+          "purpose": "Naršyklės saugykla. Paskutinė diena, kai naudojaisi platforma, ir žymė, kad vyksta registracija."
+        },
+        {
+          "name": "Vienkartinio skaičiavimo žymės (lm.funnel.*)",
+          "purpose": "Kortelės saugykla. Neleidžia to paties matavimo įvykio suskaičiuoti du kartus."
+        }
+      ],
+      "analyticsBasis": "Atsisakius ar atšaukus sutikimą, šie įrašai iš karto pašalinami iš šio įrenginio; jei prisijungei, ištrinama ir su tavo paskyra saugoma kampanija. Pats matavimas grindžiamas mūsų teisėtu interesu tobulinti produktą (BDAR 6 str. 1 d. f p.), ir gali jam prieštarauti, kaip aprašyta Privatumo politikoje."
     },
     "requestContact": "Norėdami užduoti klausimą ar pateikti prašymą dėl savo duomenų, susisiekite su mumis — jį peržiūrės žmogus.",
     "related": "Susiję puslapiai",
@@ -5847,6 +5955,7 @@
     },
     "dataProtection": {
       "title": "Duomenų apsauga",
+      "metaDescription": "Šis puslapis paprastais žodžiais paaiškina, kaip saugomi duomenys LabourMarket.ai platformoje. Aprašoma tik tai, kas šiandien iš tikrųjų įdiegta.",
       "intro": "Šis puslapis paprastais žodžiais paaiškina, kaip saugomi duomenys Labour Market AI platformoje. Aprašoma tik tai, kas šiandien iš tikrųjų įdiegta.",
       "sections": [
         {
@@ -6089,7 +6198,7 @@
     "dataDeletion": {
       "title": "Paskyros ir duomenų ištrynimas",
       "description": "Kaip paprašyti ištrinti savo LabourMarket.ai paskyrą ir asmens duomenis.",
-      "intro": "Galite paprašyti LabourMarket.ai ištrinti jūsų paskyrą ir asmens duomenis. Jei galite prisijungti, prašymą galite pateikti patys: atidarykite paskyros puslapį „Privatumas“ (mobiliojoje programėlėje: Nustatymai → Privatumas), pasirinkite paskyros ištrynimą ir patvirtinkite jį prisijungę iš naujo. Tada sistema paskyrą ištrina automatiškai ir išsiunčia patvirtinimą į paskyros el. paštą; jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Ištrynimo taip pat galite paprašyti el. paštu, kaip aprašyta toliau; žmogus atsako per vieną mėnesį.",
+      "intro": "Galite paprašyti LabourMarket.ai ištrinti jūsų paskyrą ir asmens duomenis. Jei galite prisijungti, prašymą galite pateikti patys: atidarykite paskyros puslapį „Privatumas“ (mobiliojoje programėlėje: Nustatymai → Privatumas), pasirinkite paskyros ištrynimą ir patvirtinkite jį prisijungę iš naujo. Praėjus 30 dienų nuo patvirtinimo sistema paskyrą ištrina automatiškai (iki tol prašymą galite atšaukti puslapyje „Privatumas“) ir išsiunčia patvirtinimą į paskyros el. paštą; jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Po galutinio ištrynimo ištrinti duomenys dar iki 7 dienų gali likti užšifruotose duomenų bazės atsarginėse kopijose; ten jie nenaudojami, o vėliau perrašomi. Ištrynimo taip pat galite paprašyti el. paštu, kaip aprašyta toliau; žmogus atsako per vieną mėnesį.",
       "howTitle": "Kaip paprašyti ištrynimo",
       "howSteps": [
         "Parašykite el. laišką adresu {email} iš el. pašto adreso, susieto su jūsų LabourMarket.ai paskyra.",
@@ -6377,6 +6486,17 @@
       "pending": "Jungiama…",
       "done": "Sujungta. Eilutės ir jų įrašai išsaugoti; projektų sąraše dabar rodomas išlaikomas projektas.",
       "failed": "Nesujungta. Nepavykusioms eilutėms niekas nepakeista — atnaujink ir bandyk dar kartą."
+    },
+    "deck": {
+      "label": "Ką gali padaryti",
+      "new": "Naujas projektas",
+      "newHint": "Sukurk ir pradėk dirbti",
+      "assign": "Priskirti darbuotoją",
+      "assignHint": "Prie projekto",
+      "teams": "Paskirti komandą",
+      "teamsHint": "Brigada projektui ar užduočiai",
+      "chat": "Pokalbiai",
+      "toolsLabel": "Kiti įrankiai"
     }
   },
   "projectOps": {
@@ -7638,7 +7758,7 @@
     "campaigns": {
       "title": "Kampanija → skelbimas → paskyra",
       "empty": "Šiame lange dar nėra įvykių su kampanijos žyma.",
-      "help": "Pirmojo prisilietimo utm_campaign × utm_content tame pačiame lange ir su ta pačia auditorijos atranka. Tai įvykių skaičiai, ne unikalūs lankytojai — tolesnis stulpelis nėra ankstesniojo poaibis, todėl santykis tarp dviejų stulpelių nėra konversija. Rodoma iki 25 eilučių pagal apsilankymus; nepažymėtas (organinis) srautas nerodomas. Susidomėjimo stulpelis siunčiamas serverio pusėje, kur kampanijos duomenų nėra, todėl jis lieka 0 dėl sandaros — tai neišmatuota, o ne išmatuotas nulis.",
+      "help": "Pirmojo prisilietimo utm_campaign × utm_content tame pačiame lange ir su ta pačia auditorijos atranka. Tai įvykių skaičiai, ne unikalūs lankytojai — tolesnis stulpelis nėra ankstesniojo poaibis, todėl santykis tarp dviejų stulpelių nėra konversija. Rodoma iki 25 eilučių pagal apsilankymus; nepažymėtas (organinis) srautas nerodomas. Susidomėjimo stulpelis siunčiamas serverio pusėje, kur kampanijos duomenų nėra, todėl jis lieka 0 dėl sandaros — tai neišmatuota, o ne išmatuotas nulis. Keturi stulpeliai po registracijos skaičiuoja įvykius, ne žmones (žurnalo įrašai — kiekvienas išsaugotas įrašas, ne pirmasis), ir tik paskyras, kurių įraše yra kampanija: registracijas, kuriose leista analitika, o „Google“ registracijas — tik nuo 2026-11-03. Analitikos atsisakę lankytojai šioje lentelėje visai nepatenka.",
       "col": {
         "campaign": "Kampanija / variantas",
         "landing": "Apsilankymai",
@@ -7648,7 +7768,11 @@
         "signupCompleted": "Sukurta paskyrų",
         "returnedToJob": "Grįžo prie skelbimo",
         "compared": "Palyginta",
-        "interest": "Pareikšta susidomėjimo"
+        "interest": "Pareikšta susidomėjimo",
+        "profileSaved": "Profilis išsaugotas",
+        "profileMatchable": "Profilis tinkamas atrankai",
+        "journalEntrySaved": "Žurnalo įrašai",
+        "jobSearch": "Darbo paieška"
       }
     },
     "funnel": {
@@ -8606,6 +8730,98 @@
       "emptyCapabilities": "Gebėjimų dar nėra. Čia atsiras tavo pridėti gebėjimai ir juos rodantis darbas.",
       "emptyExperience": "Darbo istorijos dar nėra. Ją kuria tavo žurnalas ir organizacijų, kuriose dirbai, įrašai.",
       "untitled": "Darbas be pavadinimo šaltinyje"
+    },
+    "athlete": {
+      "earlyNote": "Ankstyvas tavo Living CV išdėstymas. Skaičiai yra tikri tavo įrašai, o išvaizda dar ne galutinė.",
+      "fullCv": "Atidaryti visą CV",
+      "hero": {
+        "portraitAlt": "{name} nuotrauka",
+        "noRole": "Profesija dar nepridėta",
+        "availableFrom": "nuo {date}",
+        "onlyYou": "Čia tai matai tik tu."
+      },
+      "stats": {
+        "aria": "Skaičiai ir kas už jų stovi",
+        "unknown": "Dabar nepavyko perskaityti",
+        "organizationCount": "{count, plural, one {# organizacija} few {# organizacijos} many {# organizacijos} other {# organizacijų}}",
+        "confirmedBy": "Įrašą patvirtino: {who}",
+        "confirmedBySomeone": "Patvirtinimas yra įrašytas",
+        "confirmedSelfOnly": "Kol kas tik tavo paties patvirtinimas; kiti vadovai ar organizacijos dar nepatvirtino",
+        "someSelfConfirmed": "Dalį: {qualifier}",
+        "truncated": "Tavo žurnalas ilgas, todėl senesni įrašai gali būti neįskaičiuoti.",
+        "confirmed": {
+          "label": "valandos vadovo ar organizacijos įraše",
+          "none": "Tavo darbo dar nepatvirtina joks vadovo ar organizacijos įrašas"
+        },
+        "total": {
+          "label": "patirties valandos",
+          "behind": "Tavo žurnalas ir organizacijų įrašai, kiekviena valanda vieną kartą"
+        },
+        "journal": {
+          "label": "įrašytos valandos",
+          "behind": "Tavo paties darbo žurnalas",
+          "none": "Dar nieko neįrašyta"
+        },
+        "organization": {
+          "label": "valandos organizacijų įrašuose",
+          "behind": "Organizacijų įrašai"
+        },
+        "projects": {
+          "label": "projektai",
+          "behind": "Iš tavo įrašų"
+        }
+      },
+      "seasons": {
+        "eyebrow": "Karjera",
+        "title": "Karjera sezonais",
+        "empty": "Sezonų dar nėra. Įrašyk vieną darbo dieną, ir ji taps pirma tavo istorijos eilute.",
+        "emptyAction": "Įrašyti darbą",
+        "undated": "Datos nenurodytos",
+        "hoursNotStated": "Valandos nenurodytos",
+        "hoursRecorded": "Įrašyta: {hours}",
+        "hoursConfirmed": "Vadovo įraše: {confirmed} · įrašyta: {recorded}",
+        "orgDayHours": "{hours}, {count, plural, one {# įrašas} few {# įrašai} many {# įrašo} other {# įrašų}}",
+        "orgPeriodHours": "{hours}, nurodyta kaip viso laikotarpio suma",
+        "note": "Sezonas rodo valandas, kurias nurodo jo paties įrašai. Bendra suma viršuje kiekvieną valandą skaičiuoja vieną kartą.",
+        "confirmedBy": "Įrašą patvirtino: {who}",
+        "placement": "Praktika",
+        "reconstructed": "Atkurta iš ankstesnio įrašo",
+        "photoAlt": "Darbo nuotrauka: {name}",
+        "evidence": {
+          "confirmed": "Patvirtinta vadovo ar organizacijos įraše",
+          "client_accepted": "Priėmė klientas",
+          "organization_record": "Organizacijos įrašas",
+          "own_record": "Tavo paties įrašas",
+          "stated": "Nurodei pats; kol kas to niekas nerodo"
+        }
+      },
+      "skills": {
+        "eyebrow": "Gebėjimai",
+        "title": "Ką moki ir kas tai rodo",
+        "empty": "Gebėjimų dar nėra. Pridėk, ką moki, o likusį vaizdą parodys tavo įrašai.",
+        "emptyAction": "Pridėti gebėjimų",
+        "potentialFrom": "Į tai rodo tavo darbas: {skills}; kol kas to nerodo joks įrašas",
+        "documentUnverified": "Dokumentą pridėjai pats; jo niekas netikrino",
+        "involved": "Dalyvavo {hours}, bet šios valandos nepriskirtos vien šiam gebėjimui",
+        "timeUnknown": "Dabar nepavyko perskaityti žurnalo, todėl prie gebėjimų valandų nėra.",
+        "noScore": "Čia niekas nesutraukia žmogaus į vieną skaičių. Matai, ką rodo įrašai ir kas už jų stovi.",
+        "state": {
+          "confirmed": "Vadovo patvirtintas darbas",
+          "certified": "Sertifikuota",
+          "recorded": "Tavo įrašuose",
+          "declared": "Nurodei pats",
+          "potential": "Galimas"
+        }
+      },
+      "next": {
+        "eyebrow": "Kitas žingsnis",
+        "title": "Kur gali nuvesti tavo darbas",
+        "confirmed": "Vadovo patvirtinta: {list}",
+        "inRecords": "Tavo įrašuose: {list}",
+        "missing": "Trūksta: {list}",
+        "none": "Kito žingsnio kol kas parodyti negalime. Daugiau įrašyto darbo duos daugiau pagrindo.",
+        "unknown": "Dabar nepavyko perskaityti."
+      }
     }
   },
   "todayScreen": {
@@ -10404,6 +10620,7 @@
   },
   "matchPreview": {
     "title": "Atitikimo peržiūra",
+    "metaDescription": "Įvesk darbuotojo duomenis ir įmonės poreikį ir pamatyk, kaip jie dera. Peržiūros įrankis apskaičiuoja atitikimą ir jį paaiškina, bet nieko neišsaugo.",
     "subtitle": "Įvesk darbuotojo duomenis ir įmonės poreikį, kad pamatytum, kaip jie dera. Tai peržiūros įrankis — jis apskaičiuoja atitikimą ir jį paaiškina, bet nieko nerezervuoja ir neišsaugo.",
     "previewOnly": "Tik peržiūra — nerezervuota ir neišsaugota kaip rezervacijos užklausa.",
     "workerSection": "Darbuotojas",
@@ -10741,11 +10958,11 @@
   },
   "about": {
     "metaTitle": "Kas yra LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai — darbo rinkos operacinė platforma: tikras darbas tampa profesine istorija, įrodymais ir gyvu CV žmogui, o įmonei — realiai atlikto darbo istorija ir gebėjimais.",
+    "metaDescription": "LabourMarket.ai – tarptautinė darbo, specialistų ir paslaugų platforma. Tikras darbas tampa profesine istorija, įrodymais ir gyvu CV.",
     "navLabel": "Apie LabourMarket.ai",
     "eyebrow": "Apie platformą",
     "title": "Kas yra LabourMarket.ai",
-    "lede": "LabourMarket.ai — darbo rinkos operacinė platforma. Ji jungia žmones, darbdavius, agentūras, komandas, projektus, mokymus ir darbo rinkos paslaugas aplink tikrą darbą — nuo pirmo pokalbio iki kitos galimybės.",
+    "lede": "LabourMarket.ai – tarptautinė darbo, specialistų ir paslaugų platforma. Ji jungia žmones, darbdavius, agentūras, komandas, projektus, mokymus ir darbo rinkos paslaugas aplink tikrą darbą — nuo pirmo pokalbio iki kitos galimybės.",
     "hero": {
       "lead": "Žmogaus profesinė vertė neturi dingti kaskart, kai jis keičia darbdavį. Tikras darbas gali tapti ilgalaike profesine istorija: ką žmogus dirbo, kur, kada, kiek laiko, kokiu vaidmeniu, kokiais įgūdžiais ir kokie įrodymai bei patvirtinimai tai remia.",
       "leadOrg": "Organizacijoms tas pats tikras darbas kaupia įmonės realiai atlikto darbo istoriją: projektus, komandas, atliktus darbus, valandas, kompetencijas ir įrodymus.",
@@ -11347,6 +11564,7 @@
       "empty": "Šią dieną įrašų nėra."
     },
     "year": {
+      "hint": "Skaičius rodo, kiek įrašų patenka į tą mėnesį: rezervacijos, projektai, užduotys, darbo įrašai, atostogos ir kiti. Keliems mėnesiams skirtas įrašas skaičiuojamas kiekviename iš jų.",
       "count": "{count, plural, =0 {nėra įrašų} one {# įrašas} few {# įrašai} other {# įrašų}}"
     },
     "emptyFiltered": "Šio tipo įrašų nėra.",
@@ -12434,6 +12652,7 @@
     },
     "invitePage": {
       "eyebrow": "KVIETIMAS",
+      "pageTitle": "Kvietimas",
       "notEnabled": "Šiuo metu nepasiekiama.",
       "loadError": "Kvietimo šiuo metu nepavyko įkelti. Bandyk dar kartą.",
       "invalidTitle": "Kvietimas nerastas",
@@ -12852,15 +13071,35 @@
   "cvImport": {
     "reviewTitle": "Ką radome tavo CV",
     "reviewHint": "Sistema tik siūlo. Kiekvieną įrašą išsaugok arba atmesk — sprendi tu.",
+    "edit": "Taisyti",
+    "editDone": "Baigti taisyti",
+    "fieldTitle": "Pavadinimas",
+    "fieldText": "Tekstas",
+    "fieldInstitution": "Mokymo įstaiga",
+    "fieldProgram": "Programa",
+    "fieldKind": "Rūšis",
+    "fieldStart": "Pradžia",
+    "fieldEnd": "Pabaiga",
+    "fieldYear": "Metai",
+    "dateHint": "pvz. 2019 arba 2019-03",
+    "unplacedHint": "Šių eilučių nepriskyrėme. Pasirink, kur priklauso, arba atmesk.",
+    "placeAs": "Kur priskirti?",
+    "confidence": {
+      "high": "Aiškiai parašyta CV",
+      "medium": "Patikrink, ar perskaityta teisingai",
+      "low": "Spėjimas: būtinai patikrink"
+    },
     "empty": "Iš šio teksto dalių nuskaityti nepavyko — gali jas įrašyti ranka.",
     "groups": {
       "workHistory": "Darbo patirtis",
       "education": "Išsilavinimas",
+      "training": "Mokymai ir kursai",
       "languages": "Kalbos",
       "certificates": "Sertifikatai",
       "achievements": "Pasiekimai",
       "salary": "Atlyginimo lūkestis",
-      "availability": "Prieinamumas"
+      "availability": "Prieinamumas",
+      "unplaced": "Neatpažinta"
     },
     "confirm": "Išsaugoti",
     "saving": "Įrašoma…",
@@ -15147,6 +15386,49 @@
     }
   },
   "landing": {
+    "requestDoors": {
+      "workerSearch": {
+        "title": "Užsakyti darbuotojų paiešką",
+        "body": "Nurodykite specialybę, kiek žmonių reikia, šalį ir kada pradėti."
+      },
+      "b2b": {
+        "title": "Pateikti B2B užklausą",
+        "body": "Aprašykite darbų pobūdį, vietą, apimtį ir terminus."
+      },
+      "project": {
+        "title": "Užsakyti individualaus projekto vykdymą",
+        "body": "Privatiems ir verslo užsakovams: aprašykite projekto ar paslaugos poreikį."
+      },
+      "title": "Pateikite užklausą",
+      "promise": "Pateikite užklausą – susisieksime per 24 valandas.",
+      "name": "Vardas arba įmonė",
+      "email": "El. paštas",
+      "phone": "Telefonas",
+      "country": "Šalis",
+      "countryChoose": "Pasirinkite šalį",
+      "city": "Miestas",
+      "profession": "Specialybė",
+      "workers": "Darbuotojų skaičius",
+      "start": "Darbo pradžia",
+      "details": "Papildomi reikalavimai",
+      "work": "Darbų pobūdis",
+      "place": "Vieta",
+      "scope": "Apimtis",
+      "deadline": "Terminai",
+      "need": "Projekto ar paslaugos poreikis",
+      "customer": "Užsakovas",
+      "customerPrivate": "Privatus asmuo",
+      "customerBusiness": "Verslas",
+      "optional": "nebūtina",
+      "send": "Siųsti užklausą",
+      "sending": "Siunčiama…",
+      "receivedTitle": "Užklausą gavome",
+      "receivedBody": "Susisieksime su jumis per 24 valandas nurodytais kontaktais.",
+      "invalid": "Patikrinkite laukus ir bandykite dar kartą. Jūsų įvestis išsaugota šioje formoje.",
+      "limited": "Šiuo metu gauta per daug užklausų. Bandykite vėliau: jūsų įvestis lieka formoje.",
+      "unavailable": "Užklausos išsiųsti nepavyko, ji nebuvo gauta. Jūsų įvestis lieka formoje, bandykite dar kartą.",
+      "notice": "Pateikdami užklausą patvirtinate, kad susipažinote su <privacy>Privatumo politika</privacy>."
+    },
     "audienceValueEyebrow": "Vertė kiekvienai pusei",
     "audienceValueTitle": "Ką gauna kiekviena auditorija",
     "how": {
@@ -15361,8 +15643,8 @@
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
     },
     "hero": {
-      "headline": "Tai gyva darbo ir verslo galimybių sistema.",
-      "sub": "Vienoje vietoje parodyk, ką moki, ką siūlai arba ko ieškai. Atrask darbuotojus, darbus, rangovus, paslaugas ir prekes, o tavo patirtis bei galimybės išlieka pasiekiamos nuolat."
+      "headline": "Darbas, darbuotojai, paslaugos ir verslo galimybės – vienoje vietoje.",
+      "sub": "Ieškokite darbo, specialistų, darbuotojų, klientų ar projektų partnerių Lietuvoje ir visame pasaulyje. Kurkite savo profesinį profilį, pristatykite patirtį, siūlykite paslaugas ir atraskite naujas galimybes."
     },
     "entry": {
       "label": "Parašyk, ko reikia — savais žodžiais",
@@ -16123,6 +16405,7 @@
       "allowanceRemaining": "Liko {count} iš {limit} vertimų",
       "allowanceExhausted": "Išnaudojai visus {limit} tau skirtus vertimus. Skelbimą ir toliau galima skaityti originalo kalba.",
       "unavailable": "Šio skelbimo dabar išversti nepavyko. Žemiau rodomi paties skelbėjo žodžiai.",
+      "notSwitchedOn": "Automatinio skelbimų vertimo dar nėra. Žemiau – paties skelbėjo žodžiai.",
       "signedOut": "Prisijunk, kad galėtum išversti šį skelbimą."
     }
   },
@@ -20092,6 +20375,23 @@
       "invalid": "Patikrink vardą ir žinutę.",
       "error": "Kažkas nepavyko. Bandyk dar kartą.",
       "cooldown": "Neseniai gavai atsisakymą. Šios grupės vėl paprašyti galėsi praėjus 30 dienų nuo sprendimo."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "Puslapių naudojimą ir kampaniją, iš kurios atėjai, matuojame tik tau leidus.",
+      "accept": "Leisti matavimą",
+      "refuse": "Atsisakyti",
+      "more": "Daugiau",
+      "label": "Naudojimo matavimo pasirinkimas"
+    },
+    "control": {
+      "title": "Naudojimo matavimas ir kampanijos priskyrimas",
+      "granted": "Leidai. Gali bet kada atšaukti — tada įrašai pašalinami iš šio įrenginio.",
+      "refused": "Atsisakei. Šiame įrenginyje matavimui niekas nesaugoma.",
+      "undecided": "Dar nepasirinkai, todėl matavimui niekas nesaugoma.",
+      "allow": "Leisti",
+      "refuse": "Atsisakyti"
     }
   }
 }

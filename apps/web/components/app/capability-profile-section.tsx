@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Wrench } from "lucide-react";
+import { statedDateLabel } from "@/lib/cv/period-dates";
+import { useSavedRows } from "@/lib/hooks/use-saved-rows";
 import { cn } from "@/lib/utils";
 import type { ProfileSkillClaimRow } from "@/lib/profile/profile-skill-claims";
 import type { SkillPresentation } from "@/lib/cv-export/skill-presentation";
@@ -192,6 +194,12 @@ export function CapabilityProfileSection({
   const [removeError, setRemoveError] = useState<string | null>(null);
   const [isRemoving, startRemove] = useTransition();
 
+  const {
+    rows: engagementRows,
+    showSaved,
+    hideRemoved,
+  } = useSavedRows(engagements);
+
   function removeExperience(id: string) {
     setRemoveError(null);
     setRemovingId(id);
@@ -199,7 +207,10 @@ export function CapabilityProfileSection({
       void removeSelfDeclaredWorkHistoryAction(id)
         .then((res) => {
           setRemovingId(null);
-          if (res.ok) return;
+          if (res.ok) {
+            hideRemoved(id);
+            return;
+          }
           setRemoveError(
             res.code === "conflict" ? t("expRemoveInUse") : t("expRemoveError"),
           );
@@ -253,13 +264,25 @@ export function CapabilityProfileSection({
       })
         .then((res) => {
           if (res.ok) {
+            // The server's confirmed row, on screen while the page catches up.
+            if (res.id) {
+              showSaved({
+                id: res.id,
+                orgName: title,
+                relationship: "employee",
+                startedAt: res.startedAt ?? null,
+                endedAt: res.endedAt ?? null,
+                title,
+                isPrimary: false,
+                selfDeclared: true,
+              });
+            }
             setExpTitle("");
             setExpStartYear("");
             setExpStartMonth("");
             setExpEndYear("");
             setExpEndMonth("");
             setExpCurrent(false);
-            router.refresh();
           } else if (res.code === "needs_migration") {
             setExpError(t("expNeedsMigration"));
           } else if (res.code === "invalid") {
@@ -276,7 +299,7 @@ export function CapabilityProfileSection({
   }
 
   const hasClaims = savedClaims.length > 0;
-  const hasEngagements = engagements.length > 0;
+  const hasEngagements = engagementRows.length > 0;
   // Always render — the manual-add form needs to be available even
   // when the user has no claims yet. The original "return null when
   // empty" preserved the slim-display invariant but blocked manual
@@ -413,9 +436,13 @@ export function CapabilityProfileSection({
             {t("experienceTitle")}
           </h3>
           <ul className="flex flex-col gap-3">
-            {engagements.map((c) => {
-              const start = fmt(c.startedAt);
-              const end = c.endedAt ? fmt(c.endedAt) : tEng("present");
+            {engagementRows.map((c) => {
+              const start = c.selfDeclared ? statedDateLabel(c.startedAt, "start", locale, "month") : fmt(c.startedAt);
+              const end = !c.endedAt
+                ? tEng("present")
+                : c.selfDeclared
+                  ? statedDateLabel(c.endedAt, "end", locale, "month")
+                  : fmt(c.endedAt);
               return (
                 <li key={c.id} className="card-border p-4" data-testid="capability-experience-row">
                   <div className="flex items-start justify-between gap-3">

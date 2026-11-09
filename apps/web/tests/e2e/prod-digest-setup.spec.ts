@@ -6,6 +6,7 @@ import {
   SLOT,
   assertSyntheticSession,
   expectNoSidewaysScroll as noSidewaysScroll,
+  markSignedOut,
   myEmailConsents,
   myWorkerId,
   onboardAsWorker,
@@ -137,6 +138,7 @@ test("S-5. 390 px: signed out through the account menu; the account is kept for 
     await page.getByTestId("account-menu-trigger").filter({ visible: true }).first().click();
     await page.getByTestId("account-menu-signout").filter({ visible: true }).first().click();
     await page.waitForURL((u) => !/\/dashboard/.test(u.pathname), { timeout: 30_000 });
+    markSignedOut();
     console.info(`[digest-setup] signed out, landed on ${new URL(page.url()).pathname}; the account stays until digest-check erases it`);
   } finally {
     await ctx.close();

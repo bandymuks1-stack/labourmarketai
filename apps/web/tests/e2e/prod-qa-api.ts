@@ -80,7 +80,7 @@ export function bearerOf(slot: string): string {
 export async function qaApi(
   path: `/${string}`,
   token: string | null,
-  init: { method?: "GET" | "POST"; body?: unknown } = {},
+  init: { method?: "GET" | "POST" | "DELETE"; body?: unknown } = {},
 ): Promise<Response> {
   const origin = qaApiOrigin();
   const anon = process.env.PROD_QA_ANON_KEY ?? "";

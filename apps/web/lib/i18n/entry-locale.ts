@@ -1,4 +1,4 @@
-import { activeLocales } from "./config";
+import { activeLocales, defaultLocale } from "./config";
 import { UNSUPPORTED_LANGUAGE_FALLBACK } from "./unsupported-language";
 
 /**
@@ -34,4 +34,23 @@ export function entryLocaleForUnmatchedLanguage(
     if (routed.includes(base)) return null;
   }
   return stated > 0 ? UNSUPPORTED_LANGUAGE_FALLBACK : null;
+}
+
+/**
+ * The bare root asked with no language and no earlier choice: a crawler, not a
+ * person, since browsers always state a language. It gets the default locale's
+ * home as a PERMANENT redirect.
+ *
+ * Search Console 2026-11-04: Google chose `/` as canonical over `/lt`, because
+ * a temporary redirect names its source as the URL to keep. So `/lt` stayed out
+ * of the index, and the hreflang set lost its Lithuanian page. Everyone else
+ * keeps next-intl's 307 and its language negotiation.
+ */
+export function languageFreeRootTarget(
+  pathname: string,
+  acceptLanguage: string | null,
+  localeCookie: string | null,
+): string | null {
+  if (pathname !== "/" || acceptLanguage?.trim() || localeCookie) return null;
+  return `/${defaultLocale}`;
 }

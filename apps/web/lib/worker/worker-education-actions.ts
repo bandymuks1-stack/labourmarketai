@@ -8,8 +8,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import {
   classifyEducationError,
+  EDUCATION_COLUMNS,
   EDUCATION_MAX_ROWS,
+  educationEntryFromRow,
+  findSameEducation,
   validateEducationInput,
+  type WorkerEducationEntry,
 } from "./worker-education-model";
 
 /**
@@ -25,7 +29,7 @@ import {
  */
 
 export type WorkerEducationActionResult =
-  | { ok: true; id?: string }
+  | { ok: true; id?: string; entry?: WorkerEducationEntry }
   | {
       ok: false;
       code: "needs_migration" | "unauthenticated" | "invalid" | "limit" | "error";
@@ -75,13 +79,17 @@ export async function saveWorkerEducationAction(
   const id = String(formData.get("id") ?? "").trim();
 
   if (id === "") {
-    // App-side row cap (the table itself has no cap).
-    const { count, error: countError } = await asAny(supabase)
+    const { data: ownRows, error: ownError } = await asAny(supabase)
       .from("worker_education")
-      .select("id", { count: "exact", head: true })
+      .select(EDUCATION_COLUMNS)
       .eq("profile_id", user.id);
-    if (countError) return mapError(countError.code);
-    if ((count ?? 0) >= EDUCATION_MAX_ROWS) return { ok: false, code: "limit" };
+    if (ownError) return mapError(ownError.code);
+    const own = ((ownRows ?? []) as Parameters<typeof educationEntryFromRow>[0][]).map(educationEntryFromRow);
+    // Already stated: the save answers with that row, it does not store it twice.
+    const already = findSameEducation(own, input);
+    if (already) return { ok: true, id: already.id, entry: already };
+    // App-side row cap (the table itself has no cap).
+    if (own.length >= EDUCATION_MAX_ROWS) return { ok: false, code: "limit" };
 
     const { data, error } = await asAny(supabase)
       .from("worker_education")
@@ -95,9 +103,15 @@ export async function saveWorkerEducationAction(
         is_current: input.isCurrent,
         note: input.note,
       })
-      .select("id")
+      .select(EDUCATION_COLUMNS)
       .single();
     if (error) {
+      // Another request stored the same row first: answer with that row.
+      if (error.code === "23505") {
+        const { data: now } = await asAny(supabase).from("worker_education").select(EDUCATION_COLUMNS).eq("profile_id", user.id);
+        const stored = findSameEducation(((now ?? []) as Parameters<typeof educationEntryFromRow>[0][]).map(educationEntryFromRow), input);
+        return stored ? { ok: true, id: stored.id, entry: stored } : { ok: true };
+      }
       const mapped = mapError(error.code);
       if (mapped.ok === false && mapped.code === "error") {
         console.error("[worker-education] insert failed:", error.code, error.message);
@@ -105,10 +119,11 @@ export async function saveWorkerEducationAction(
       return mapped;
     }
     revalidatePath("/", "layout");
-    return { ok: true, id: (data as { id: string } | null)?.id };
+    const entry = educationEntryFromRow(data as Parameters<typeof educationEntryFromRow>[0]);
+    return { ok: true, id: entry.id, entry };
   }
 
-  const { error } = await asAny(supabase)
+  const { data: updated, error } = await asAny(supabase)
     .from("worker_education")
     .update({
       institution_name: input.institutionName,
@@ -121,8 +136,12 @@ export async function saveWorkerEducationAction(
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
-    .eq("profile_id", user.id);
+    .eq("profile_id", user.id)
+    .select(EDUCATION_COLUMNS)
+    .maybeSingle();
   if (error) {
+    // Edited into the same words as another row: nothing changed, and it does not say saved.
+    if (error.code === "23505") return { ok: false, code: "invalid" };
     const mapped = mapError(error.code);
     if (mapped.ok === false && mapped.code === "error") {
       console.error("[worker-education] update failed:", error.code, error.message);
@@ -130,7 +149,11 @@ export async function saveWorkerEducationAction(
     return mapped;
   }
   revalidatePath("/", "layout");
-  return { ok: true, id };
+  return {
+    ok: true,
+    id,
+    entry: updated ? educationEntryFromRow(updated as Parameters<typeof educationEntryFromRow>[0]) : undefined,
+  };
 }
 
 export async function removeWorkerEducationAction(

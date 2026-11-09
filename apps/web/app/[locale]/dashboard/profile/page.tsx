@@ -413,8 +413,9 @@ export default async function ProfilePage({
   let learningCompass: LearningCompassRead | null = null;
   let cohortJoin: CohortJoinRead | null = null;
   let workerAchievements: WorkerAchievementsRead | null = null;
-  let projectLinkedEntryCount = 0;
-  let certificateDocCount = 0;
+  // null = the count read failed (SEP-7): that card is left out, never "empty".
+  let projectLinkedEntryCount: number | null = 0;
+  let certificateDocCount: number | null = 0;
   // Trust signals were awaited inside the JSX; resolved in stage 5 now.
   let trustSignals: Awaited<ReturnType<typeof getOwnTrustSignals>> | null = null;
   if (workerId) {
@@ -568,8 +569,8 @@ export default async function ProfilePage({
     learningCompass = compassRes;
     cohortJoin = cohortJoinRes;
     workerAchievements = achRes;
-    projectLinkedEntryCount = projCountRes.count ?? 0;
-    certificateDocCount = certDocsRes.count ?? 0;
+    projectLinkedEntryCount = projCountRes.error ? null : (projCountRes.count ?? 0);
+    certificateDocCount = certDocsRes.error ? null : (certDocsRes.count ?? 0);
     trustSignals = trust;
 
     const wpAll = wpAllRes.data;
@@ -833,7 +834,7 @@ export default async function ProfilePage({
     const declaredCerts = achEntries.filter(
       (a) => a.achievementTypeSlug === "declared_certificate",
     ).length;
-    return [
+    const cards: (Omit<CvSectionCard, "filled"> & { filled: boolean | null })[] = [
       {
         key: "summary",
         filled: savedProfileText.trim().length > 0,
@@ -853,7 +854,8 @@ export default async function ProfilePage({
       },
       {
         key: "certificates",
-        filled: certificateDocCount > 0 || declaredCerts > 0,
+        filled:
+          declaredCerts > 0 ? true : certificateDocCount === null ? null : certificateDocCount > 0,
         href: DOCUMENTS_READINESS_ENABLED
           ? `/${locale}/dashboard/documents`
           : "#cv-achievements",
@@ -865,7 +867,7 @@ export default async function ProfilePage({
       },
       {
         key: "projects",
-        filled: projectLinkedEntryCount > 0,
+        filled: projectLinkedEntryCount === null ? null : projectLinkedEntryCount > 0,
         href: `/${locale}/dashboard/journal`,
       },
       {
@@ -886,6 +888,8 @@ export default async function ProfilePage({
         href: "#cv-availability",
       },
     ];
+    // A card whose read failed is not shown at all — never as "○ empty".
+    return cards.filter((c): c is CvSectionCard => c.filled !== null);
   })();
 
   /**

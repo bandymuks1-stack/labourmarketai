@@ -1,8 +1,9 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { test, expect, firstVisit, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
+import { FIRST_VISIT_CAMPAIGN, refuseOnFirstVisit } from "./first-visit-consent";
 import { bearerOf, qaApi } from "./prod-qa-api";
 
 /**
@@ -134,6 +135,32 @@ async function arriveAtOnboarding(page: Page): Promise<boolean> {
   const fresh = /\/onboarding/.test(new URL(page.url()).pathname);
   console.info(`[fresh] landed on ${new URL(page.url()).pathname} — ${fresh ? "onboarding" : "onboarding already done"}`);
   return fresh;
+}
+
+/**
+ * The real first visit (owner P0 2026-11-03): every other context of this walk
+ * is a returning browser with a seeded refusal, so without this test no
+ * production walk ever met the banner on the sign-up page. A browser that has
+ * never been here opens /lt/auth/signup with a campaign in the URL, finds the
+ * banner below the form, refuses it, and nothing analytics-related is stored
+ * before or after. Signed out, and the form is NEVER submitted: production
+ * accounts are owner-created only (owner decision 2026-10-28) — the full
+ * sign-up after refusing is walked in signup-isolated.spec.ts.
+ */
+for (const viewport of [{ width: 360, height: 740 }, PHONE]) {
+  test(`first visit at ${viewport.width}x${viewport.height}: the sign-up page's consent banner is refused, nothing is stored`, async ({ browser }) => {
+    const ctx = await browser.newContext(firstVisit({ locale: "lt-LT", viewport, isMobile: true, hasTouch: true }));
+    try {
+      const page = await ctx.newPage();
+      await page.goto(`/lt/auth/signup?${FIRST_VISIT_CAMPAIGN}`);
+      await refuseOnFirstVisit(page);
+      const cookies = (await ctx.cookies()).map((c) => c.name);
+      console.info(`[fresh] first visit ${viewport.width}px: refused; cookies=${cookies.join(",") || "-"}`);
+      expect(cookies.filter((n) => /^(_ga|_gid|_gcl|_fbp|_hj|lm[._-]?attr|lm[._-]?funnel)/i.test(n)), "no analytics cookie").toEqual([]);
+    } finally {
+      await ctx.close();
+    }
+  });
 }
 
 test("fresh worker: onboarding keeps its place, then the first journal entry reaches the Living CV", async ({ browser }) => {
