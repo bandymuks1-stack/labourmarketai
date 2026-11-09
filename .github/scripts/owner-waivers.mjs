@@ -706,6 +706,11 @@ export const SCOPED_OWNER_WAIVERS = [
       // noindex. Only the number is added; axiom, codes, surfaces, files, expiry
       // and subset rule are unchanged.
       3154,
+      // OWNER APPROVAL 2026-11-09, verbatim (given to the coordinator in its own
+      // session): "I approve adding ONLY PR 3171 to the existing public-acquisition-route-jobs waiver pullRequests list."
+      // #3171: a ?country= link says country filtering is not available yet instead of looking applied. Only the number is added; axiom, codes, surfaces, files,
+      // expiry and subset rule are unchanged.
+      3171,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
