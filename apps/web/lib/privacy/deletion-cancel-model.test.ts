@@ -17,7 +17,7 @@ const PENDING = {
   status: "pending",
   request_id: "00000000-0000-4000-8000-000000000001",
   submitted_at: "2026-11-09T08:00:00Z",
-  confirmed_at: null,
+  deletion_confirmed_at: null,
   scheduled_erasure_at: "2026-11-09T09:00:00Z",
   cancellable: true,
 };
@@ -91,7 +91,7 @@ describe("status contract → view", () => {
         { kind: "request" }
       >;
     expect(deletionStatusLabelKey(view({}))).toBe("pending");
-    expect(deletionStatusLabelKey(view({ confirmed_at: "2026-11-09T08:05:00Z" }))).toBe(
+    expect(deletionStatusLabelKey(view({ deletion_confirmed_at: "2026-11-09T08:05:00Z" }))).toBe(
       "pendingConfirmed",
     );
     expect(deletionStatusLabelKey(view({ status: "withdrawn" }))).toBe("withdrawn");
@@ -154,7 +154,7 @@ describe("deletion section mode", () => {
 
   it("with a status", () => {
     expect(deletionSectionMode(req({}), "submitted")).toBe("confirm-step");
-    expect(deletionSectionMode(req({ confirmed_at: "2026-11-09T08:05:00Z" }), "approved")).toBe(
+    expect(deletionSectionMode(req({ deletion_confirmed_at: "2026-11-09T08:05:00Z" }), "approved")).toBe(
       "status-only",
     );
     expect(deletionSectionMode(req({}), "needs_followup")).toBe("in-review");

@@ -76,16 +76,14 @@ export function parseDeletionStatus(
   const requestId = str(row.request_id);
   if (!requestId) return { kind: "error" };
   const typed = status as DeletionRequestStatus;
-  // The RPC's `confirmed_at` is when the person confirmed the DELETION
-  // request — it says nothing about e-mail verification. It is read under its
-  // own name so it can never be mistaken for auth.users.email_confirmed_at.
-  const { confirmed_at: deletionConfirmedAtRaw } = row;
+  // `deletion_confirmed_at`: when the person confirmed the DELETION request —
+  // nothing to do with e-mail verification.
   return {
     kind: "request",
     status: typed,
     requestId,
     submittedAt: str(row.submitted_at),
-    deletionConfirmedAt: str(deletionConfirmedAtRaw),
+    deletionConfirmedAt: str(row.deletion_confirmed_at),
     scheduledErasureAt: str(row.scheduled_erasure_at),
     cancellable: typed === "pending" && row.cancellable === true,
   };
