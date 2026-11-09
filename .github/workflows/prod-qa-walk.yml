@@ -621,10 +621,51 @@ jobs:
             prod-qa-result.json
             prod-qa-walk.log
 
+      # A withheld result still started a walk. The daily budget counts walks
+      # from their `prod-qa-<spec>-<run id>` artefacts (`walk-brakes.mjs count`),
+      # so a withheld result leaves a marker under the same name that holds no
+      # walk data: withholding never frees a walk from the budget. The error
+      # brake reads it as "no result file", as before.
+      - name: Mark a withheld result (counts toward the daily budget)
+        if: always() && steps.privacy.outputs.published != 'true'
+        shell: bash
+        run: echo "the walk result was withheld by the privacy check" > prod-qa-withheld.txt
+
+      - name: Upload the withheld marker
+        if: always() && steps.privacy.outputs.published != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-qa-${{ needs.debounce.outputs.spec }}-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: prod-qa-withheld.txt
+
+      # FAIL CLOSED like the result: the readings are published only when every
+      # line is a reading the spec writes (`walk-brakes.mjs sr1-check`: known
+      # fields, scalar values, no address). A file that fails or cannot be read
+      # is deleted and the step fails; node's stderr is dropped, its stdout says
+      # why with a line number only.
+      - name: Check the SR-1 readings before they are published
+        id: sr1
+        if: always() && needs.debounce.outputs.spec == 'sr1-first-search'
+        shell: bash
+        run: |
+          if [ ! -e sr1-readings.jsonl ]; then
+            echo "no SR-1 readings file"
+            exit 0
+          fi
+          if [ -f sr1-readings.jsonl ] && node .github/scripts/walk-brakes.mjs sr1-check sr1-readings.jsonl 2>/dev/null; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            rm -f sr1-readings.jsonl 2>/dev/null || true
+            echo "::error::the SR-1 readings did not pass the privacy check; they are not published"
+            exit 1
+          fi
+
       # The SR-1 timings, apart from the walk's artefact and kept one day: artefacts of this public repo are
       # readable by any signed-in GitHub user, so whoever records the readings deletes this one after copying them.
       - name: Upload the SR-1 readings (one day)
-        if: always() && needs.debounce.outputs.spec == 'sr1-first-search'
+        if: always() && needs.debounce.outputs.spec == 'sr1-first-search' && steps.sr1.outputs.published == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: sr1-readings-${{ github.run_id }}
