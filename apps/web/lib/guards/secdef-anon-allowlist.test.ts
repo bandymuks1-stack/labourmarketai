@@ -312,10 +312,10 @@ describe("no new migration may re-open anonymous reachability", () => {
   /** Signatures a later migration DROPPED and replaced; each entry names that migration. */
   const SUPERSEDED_ANON_SIGNATURES = [
     {
-      // 20261109120000 recreates it with a fifth argument, p_country (owner 2026-11-09).
+      // 20261109140000 recreates it with a fifth argument, p_country (owner 2026-11-09).
       signature:
         "search_public_vacancy_previews_v1(p_query text, p_profession_slug text, p_limit integer, p_offset integer)",
-      droppedBy: "20261109120000_",
+      droppedBy: "20261109140000_",
     },
   ] as const;
 

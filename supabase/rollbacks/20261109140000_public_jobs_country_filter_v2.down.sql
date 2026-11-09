@@ -1,4 +1,4 @@
--- ROLLBACK for 20261109120000_public_jobs_country_filter_v2.
+-- ROLLBACK for 20261109140000_public_jobs_country_filter_v2.
 -- Returns to the #3083 state exactly: the v6 search with four arguments, the #3083 sync
 -- function and update trigger, the production refresh body (2026-11-09). Everything this
 -- removes is derived (the per-country totals, the copied country, an index): no source

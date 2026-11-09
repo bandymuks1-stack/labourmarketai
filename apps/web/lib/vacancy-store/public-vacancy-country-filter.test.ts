@@ -10,7 +10,7 @@ import {
 } from "./public-vacancy-preview";
 
 /**
- * THE COUNTRY FILTER (owner 2026-11-09, migration 20261109120000, RED). `?country=NO`
+ * THE COUNTRY FILTER (owner 2026-11-09, migration 20261109140000, RED). `?country=NO`
  * really restricts the board, in every combination with a word and a profession, and
  * an app that sends no country makes exactly the call it made before.
  */
@@ -76,7 +76,7 @@ describe("the page never shows a country it did not filter by", () => {
   );
 
   it("filters only by a country the facet answered for, and says so otherwise", () => {
-    expect(page).toContain('const country = countries?.status === "ok" ? requestedCountry : null;');
+    expect(page).toContain('const country = countries?.status === "ok" && countryParam.requested ? countryParam.code : null;');
     expect(page).toContain('data-testid="public-jobs-country-not-filtered"');
     expect(page).toContain('data-testid="public-jobs-country-choice"');
   });
@@ -89,8 +89,8 @@ describe("the page never shows a country it did not filter by", () => {
 
 describe("the migration and its rollback", () => {
   const root = join(__dirname, "..", "..", "..", "..", "supabase");
-  const up = readFileSync(join(root, "migrations", "20261109120000_public_jobs_country_filter_v2.sql"), "utf8");
-  const down = readFileSync(join(root, "rollbacks", "20261109120000_public_jobs_country_filter_v2.down.sql"), "utf8");
+  const up = readFileSync(join(root, "migrations", "20261109140000_public_jobs_country_filter_v2.sql"), "utf8");
+  const down = readFileSync(join(root, "rollbacks", "20261109140000_public_jobs_country_filter_v2.down.sql"), "utf8");
 
   it("extends the ONE search; no second search function", () => {
     expect(up).toContain("p_country text default null)");

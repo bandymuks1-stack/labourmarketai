@@ -23,7 +23,8 @@ import {
   cvSectionVisibility,
   orderSkillsForNeed,
 } from "@/lib/cv-export/cv-sections";
-import { CV_TEMPLATES, parseCvTemplateId } from "@/lib/cv-export/templates";
+import { CV_TEMPLATES, isCvProfileTemplate, parseCvTemplateId } from "@/lib/cv-export/templates";
+import { AthleteProfilePage } from "@/components/app/cv/athlete-profile-page";
 import {
   loadTailoredNeed,
   type TailoredNeedResult,
@@ -168,6 +169,12 @@ export default async function VerifiedCvPage({
 
   const { cv } = result;
   const cvProfileId = (await (await createSupabaseServerClient()).auth.getUser()).data.user?.id ?? null;
+
+  // The athlete-profile form (owner order 2026-11-07): a view over the SAME
+  // `cv`, reachable only by this query value. Everything below is untouched.
+  if (isCvProfileTemplate(sp.template)) {
+    return <AthleteProfilePage cv={cv} locale={locale} profileId={cvProfileId} />;
+  }
 
   // Tailored mode — read-only reuse of the gated worker demand RPC + the §19
   // fit engine. Anything not "ok" falls back to the standard CV honestly.

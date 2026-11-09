@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link, redirect } from "@/lib/i18n/navigation";
-import { matchProfessionAcrossLocales } from "@/lib/vacancy-store/public-vacancy-profession-match";
+import {
+  matchProfessionAcrossLocales,
+  professionRedirectHref,
+} from "@/lib/vacancy-store/public-vacancy-profession-match";
+import { readCountryParam } from "@/lib/vacancy-store/public-vacancy-country-param";
 import { activeLocales } from "@/lib/i18n/config";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
@@ -377,15 +381,12 @@ export default async function JobsPage({
   const profession = readProfessionSlugParam(sp.profession);
   // THE COUNTRY FILTER (owner 2026-11-09): `?country=NO` really restricts every
   // search. The live countries come from one maintained row; when they cannot be
-  // read the board filters by no country and says so, never silently.
-  const requestedCountry =
-    typeof sp.country === "string" && /^[A-Za-z]{2}$/.test(sp.country.trim())
-      ? sp.country.trim().toUpperCase()
-      : null;
-  const countryRequested = typeof sp.country === "string" && sp.country.trim() !== "";
+  // read the board filters by no country and says so, never silently. The one
+  // parser is the one the interim note used (lib/vacancy-store/public-vacancy-country-param.ts).
+  const countryParam = readCountryParam(sp.country);
   const countriesRead = readPublicVacancyCountries();
-  const countries = countryRequested ? await countriesRead : null;
-  const country = countries?.status === "ok" ? requestedCountry : null;
+  const countries = countryParam.requested ? await countriesRead : null;
+  const country = countries?.status === "ok" && countryParam.requested ? countryParam.code : null;
   // The ONE registry — slug → name in the reader's language. 17,145 browsable
   // ads carry a slug the categorizer derived, so this is how a worker searches
   // Swedish supply in Lithuanian without knowing a word of Swedish.
@@ -429,7 +430,7 @@ export default async function JobsPage({
     const mapped = matchProfessionAcrossLocales(query, professionOptions, others);
     if (mapped) {
       redirect({
-        href: `/jobs?profession=${mapped}${country ? `&country=${country}` : ""}`,
+        href: `${professionRedirectHref(mapped, sp.page)}${country ? `&country=${country}` : ""}`,
         locale: active,
       });
     }
@@ -693,7 +694,7 @@ export default async function JobsPage({
         </nav>
       )}
 
-      {!showSaved && countryRequested && !country && (
+      {!showSaved && countryParam.requested && !country && (
         <p
           role="note"
           data-testid="public-jobs-country-not-filtered"

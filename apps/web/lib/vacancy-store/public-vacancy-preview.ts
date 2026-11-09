@@ -265,7 +265,7 @@ export async function searchPublicVacancyPreviews(
     query?: string | null;
     professionSlug?: string | null;
     /** ISO alpha-2. Sent only when set, so a call without it is the same call as before
-     *  20261109120000 (an app ahead of that migration must never send it). */
+     *  20261109140000 (an app ahead of that migration must never send it). */
     country?: string | null;
     page?: number;
   },

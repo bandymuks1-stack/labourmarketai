@@ -1,5 +1,5 @@
 -- @human-gate-approved
--- 20261109120000_public_jobs_country_filter_v2
+-- 20261109140000_public_jobs_country_filter_v2
 --
 -- NOT APPROVED FOR PRODUCTION. RED by the migration-safety gate (a SECURITY DEFINER
 -- function dropped and recreated with one more argument, a definer body replaced).
@@ -37,7 +37,7 @@
 --
 -- ANON BOUNDARY: the country is exposed only as the filter value and the facet, which
 -- the board already shows per card as the ad's source. No new column is returned.
--- Rollback: supabase/rollbacks/20261109120000_public_jobs_country_filter_v2.down.sql
+-- Rollback: supabase/rollbacks/20261109140000_public_jobs_country_filter_v2.down.sql
 
 -- 1. The narrow copy carries the country.
 alter table public.public_vacancy_search add column if not exists country text collate "C";
@@ -366,4 +366,4 @@ comment on function public.list_public_vacancy_countries_v1() is
 select public.refresh_public_vacancy_supply_counts_v1();
 
 -- ROLLBACK
--- see supabase/rollbacks/20261109120000_public_jobs_country_filter_v2.down.sql
+-- see supabase/rollbacks/20261109140000_public_jobs_country_filter_v2.down.sql

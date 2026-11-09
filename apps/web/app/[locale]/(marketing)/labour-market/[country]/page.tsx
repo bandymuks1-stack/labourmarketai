@@ -6,7 +6,9 @@ import { LabourMarketEvidence } from "@/components/marketing/labour-market-evide
 import { CountryReadinessRequirements } from "@/components/marketing/country-readiness-requirements";
 import {
   SUPPORTED_COUNTRIES,
+  countrySignals,
   isSupportedCountry,
+  type CountryCode,
 } from "@/lib/labour-market/country-evidence";
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -35,7 +37,7 @@ export async function generateMetadata({
     locale,
     path: `/labour-market/${country.toLowerCase()}`,
     title: t(`countryNames.${code}`),
-    description: t(`countryEvidence.${code}.intro`),
+    description: `${t(`countryEvidence.${code}.intro`)} ${t(`countryEvidence.${code}.${countrySignals(code as CountryCode)[0]!.id}.title`)}.`,
   });
 }
 

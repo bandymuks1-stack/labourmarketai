@@ -57,7 +57,7 @@ begin
       ('cpp',            'C++ utvecklare',                      'Programmerare',       'd', 'e', 1, true, null),
       ('csharp',         'C# utvecklare',                       'Programmerare',       'd', 'e', 1, true, null),
       ('slash',          'Kock / Servitör',                     'Restaurang',          'd', 'e', 1, true, null),
-      ('long_title',     repeat('Långtitel ', 30) || 'slutord', 'Annat',             'd', 'e', 1, true, null),
+      ('long_title',     repeat('Långtitel ', 29) || 'slutord', 'Annat',             'd', 'e', 1, true, null),
       ('hidden_fields',  'Vanligt jobb',                        'Vanligt',             'hemligbeskrivning', 'hemligarbetsgivare', 1, true, null),
       ('expired',        'Utgångenyrke',                        'Utgånget',            'd', 'e', 1, true, interval '-1 day'),
       ('withdrawn',      'Tillbakadragenyrke',                  'Tillbakadraget',      'd', 'e', 1, false, null),

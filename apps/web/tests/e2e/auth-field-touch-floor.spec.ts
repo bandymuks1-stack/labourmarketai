@@ -22,6 +22,23 @@ const ROUTES = [
   "/lt/auth/forgot-password",
 ] as const;
 
+/** iOS Safari zooms on focus under 16 px (DS-1, DS-2): every width below `sm`. */
+for (const width of WIDTHS.filter((w) => w < 640)) {
+  for (const route of ROUTES) {
+    test(`${route} at ${width}px: fields are 16 px, so iOS does not zoom`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto(route);
+      await page.locator("input").first().waitFor();
+      const small = await page.evaluate(() =>
+        [...document.querySelectorAll<HTMLElement>('input[type="email"], input[type="password"], input[type="text"], textarea, select')]
+          .filter((el) => el.getClientRects().length > 0 && parseFloat(getComputedStyle(el).fontSize) < 16)
+          .map((el) => el.getAttribute("name") ?? el.tagName),
+      );
+      expect(small).toEqual([]);
+    });
+  }
+}
+
 async function measure(page: Page): Promise<{
   short: string[];
   overflow: number;

@@ -20,6 +20,13 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * Request door wording (owner order 2026-11-07): the promise and the B2B door's title
+ * only. Moved: the `lt`, `en`, `ru` landing namespaces.
+ *
+ * Three commercial request doors (owner P0 2026-11-07): `LandingRequestDoors` under the
+ * hero and the new `landing.requestDoors` copy. Moved: focus-landing.tsx and the frozen
+ * `lt`, `en`, `ru` landing namespaces. No other frozen artefact.
+ *
  * Owner-approved hero text (owner decision 2026-11-05): `landing.hero.headline`
  * and `.sub` in the six active locales. Lithuanian is the owner's own words; the
  * other five are machine-drafted, with no native review yet. EXACTLY THREE namespace

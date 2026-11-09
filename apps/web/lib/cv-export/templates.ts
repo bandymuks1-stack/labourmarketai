@@ -31,3 +31,15 @@ export function parseCvTemplateId(raw: string | string[] | undefined): string {
   const s = (Array.isArray(raw) ? raw[0] : raw)?.trim() ?? "";
   return CV_TEMPLATES.some((t) => t.id === s) ? s : DEFAULT_CV_TEMPLATE;
 }
+
+/**
+ * The athlete-profile form of the Living CV (owner order 2026-11-07), reachable
+ * only by this query value while its visual direction awaits the owner's
+ * verdict. Deliberately NOT a row in CV_TEMPLATES: that list draws the template
+ * links on the default CV, and this form is neither linked nor a print layout.
+ */
+export const CV_PROFILE_TEMPLATE = "profile";
+
+export function isCvProfileTemplate(raw: string | string[] | undefined): boolean {
+  return (Array.isArray(raw) ? raw[0] : raw)?.trim() === CV_PROFILE_TEMPLATE;
+}
