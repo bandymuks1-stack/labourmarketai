@@ -26,6 +26,12 @@ test("N-1. an anonymous visitor submits the public company-need form and the int
   await page.goto(`${BASE}/en/company-need`);
   const form = page.getByTestId("company-need-form");
   await expect(form, "the public form renders without an account").toBeVisible({ timeout: 30_000 });
+  // The form is server markup that also posts without JavaScript; a send before
+  // hydration takes that path and is stored marked `?review=no-js`. This walk is
+  // the JavaScript visitor, so it waits until hydration has written the fill time.
+  await expect(form.locator('input[name="started"]'), "hydration wrote the fill time").not.toHaveValue("", {
+    timeout: 60_000,
+  });
 
   await form.locator('input[name="company_name"]').fill(COMPANY);
   await form.locator('input[name="contact_person"]').fill("Synthetic Contact");
