@@ -9,6 +9,7 @@ import { readCountryParam } from "@/lib/vacancy-store/public-vacancy-country-par
 import { activeLocales } from "@/lib/i18n/config";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
+import { jobsCanonicalPath } from "@/lib/seo/jobs-canonical";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import {
   searchPublicVacancyPreviews,
@@ -56,11 +57,13 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ q?: string; page?: string; saved?: string; profession?: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return buildPageMetadataFor("jobs", locale, "/jobs");
+  return buildPageMetadataFor("jobs", locale, jobsCanonicalPath(await searchParams));
 }
 
 type L = Record<ActiveLocale, string>;
