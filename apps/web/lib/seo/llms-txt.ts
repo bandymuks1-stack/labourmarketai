@@ -13,6 +13,7 @@
  */
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { activeLocales, defaultLocale } from "@/lib/i18n/config";
+import { WORKER_GUIDES } from "@/lib/seo/worker-guides";
 
 /** Public marketing paths that carry the canonical explanation, in reading order. */
 export const LLMS_TXT_PUBLIC_PATHS: ReadonlyArray<{ path: string; label: string }> = [
@@ -45,6 +46,12 @@ export function buildLlmsTxt(
   const pages = LLMS_TXT_PUBLIC_PATHS.map(
     ({ path, label }) => `- [${label}](${url(path, "en")})`,
   ).join("\n");
+  // Worker guides are written in ONE content language each and served under
+  // the UI locale that language maps to (lib/seo/worker-guides.ts), so they
+  // are listed by their own URL — swapping the prefix would 404.
+  const guides = WORKER_GUIDES.map(
+    (g) => `- [${g.h1}](${o}/${g.homeLocale}${g.path}) (${g.language})`,
+  ).join("\n");
 
   return [
     "# LabourMarket.ai",
@@ -61,6 +68,12 @@ export function buildLlmsTxt(
     "## Public pages",
     "",
     pages,
+    "",
+    "## Guides for workers already in Europe",
+    "",
+    "Country and profession guides in the language the worker searches in: who may work in the country, what is needed on site, official sources, and how to register. Turkish guides are served under /en because the interface has no Turkish yet; their text is Turkish. They are general information, not legal advice.",
+    "",
+    guides,
     "",
     "## Facts to keep straight",
     "",
