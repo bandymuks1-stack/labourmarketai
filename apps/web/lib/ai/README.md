@@ -19,7 +19,7 @@ adapter (boundary guard, property d).
 | `schemas/envelope.ts` | The strict suggestion envelope every output must satisfy. |
 | `runtime/config.ts` / `config-core.ts` | Env gate. **OFF by default** — `disabled` unless `AI_PROVIDER_MODE` is `mock` or `live`; a cloud provider without a real key never goes live. |
 | `runtime/task-routing.ts` | Cost-aware routing: task policies (allowed/prohibited fields, cost ceilings, tiers), agent→task map, route audit record. |
-| `runtime/data-sensitivity.ts` + `runtime/data-egress.ts` | The data veto: PUBLIC → SENSITIVE_FREE_TEXT classes, default-deny egress grants (`AI_EGRESS_GRANTS`: two owner grants, below), free-tier ceiling. |
+| `runtime/data-sensitivity.ts` + `runtime/data-egress.ts` | The data veto: PUBLIC → SENSITIVE_FREE_TEXT classes, default-deny egress grants (`AI_EGRESS_GRANTS`, owner-approved rows only), free-tier ceiling. |
 | `runtime/provider-chain.ts` + `runtime/providers/` | Cheapest-sufficient provider selection; adapters for anthropic / openai / gemini / xai / deepl / local / mock / disabled. |
 | `runtime/model-pricing.ts` / `model-candidates.ts` | Owner-reviewed prices + alias→model tables; an unpriced model blocks rather than spends. |
 | `runtime/provider-cooldown.ts` / `provider-counters.ts` | In-memory, per process: a provider that just failed is tried last; every chain attempt is counted per provider (requests, latency, rate limits, errors by class). No payload, no export. |
@@ -45,12 +45,10 @@ keys; each agent's sensitivity class is pinned by
 - `vacancy_translation` — `lib/vacancy-store/vacancy-translation-read.ts`
   (SENSITIVE_FREE_TEXT — published ad text, kept off PUBLIC by owner review)
 
-Two tasks hold an owner egress grant (`runtime/data-egress.ts`, Gemini only, paid
-tier, least-privilege by task): `propose_conversation_intent` (`conversation_intent`,
-2026-09-05) and `translate_message` (`translation_copy`, 2026-09-17). Every other
-surface except `market_explanation` resolves vendorlessly until the owner adds a
-grant — the runtime routes it, audits it, and honestly declines to send that data
-to a provider that has no grant.
+A surface reaches an external provider only when its task is PUBLIC or the owner
+has granted it in `runtime/data-egress.ts` (which tasks are granted is recorded
+there, not here). Without that, the runtime routes it, audits it, and honestly
+declines to send the data to a provider that has no grant.
 
 Rules that still bind every run: AI only **drafts / clarifies / explains**.
 Every output is a schema-validated `suggestion`; it never verifies a skill,
