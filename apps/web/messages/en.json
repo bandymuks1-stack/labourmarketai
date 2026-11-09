@@ -5853,7 +5853,7 @@
           "heading": "Your rights",
           "items": [
             "You can ask to see the data held about you, to correct it, to receive a copy of it, to restrict how it is used, or to have it deleted.",
-            "You can download a copy of your own data as a JSON file and your work journal as a CSV file yourself, from your account. You can request deletion of your account on your account's Privacy page and confirm it after signing in again; 30 days after confirmation the system deletes the account automatically (until then you can cancel the request on the Privacy page) and sends a confirmation to your account email. If data must be kept by law or concerns other people, the request is reviewed and you receive the decision within one month. You can also contact us — see the page “Account and data deletion”.",
+            "You can download a copy of your own data as a JSON file and your work journal as a CSV file yourself, from your account. You can request deletion of your account on your account's Privacy page and confirm it after signing in again; 30 days after confirmation the system deletes the account automatically (until then you can cancel the request on the Privacy page) and sends a confirmation to your account email. After the final deletion, deleted data may remain in encrypted database backups for up to 7 days; it is not used there and is then overwritten. If data must be kept by law or concerns other people, the request is reviewed and you receive the decision within one month. You can also contact us — see the page “Account and data deletion”.",
             "Where processing is based on consent, you can withdraw that consent at any time."
           ]
         },
@@ -6171,7 +6171,7 @@
     "dataDeletion": {
       "title": "Account and data deletion",
       "description": "How to request deletion of your LabourMarket.ai account and personal data.",
-      "intro": "You can ask LabourMarket.ai to delete your account and personal data. If you can sign in, you can file the request yourself: open your account's Privacy page (in the mobile app: Settings → Privacy), choose account deletion and confirm it after signing in again. 30 days after confirmation the system deletes the account automatically (until then you can cancel the request on the Privacy page) and sends a confirmation to your account email; if data must be kept by law or concerns other people, the request is reviewed and you receive the decision within one month. You can also request deletion by email as described below; a person answers within one month.",
+      "intro": "You can ask LabourMarket.ai to delete your account and personal data. If you can sign in, you can file the request yourself: open your account's Privacy page (in the mobile app: Settings → Privacy), choose account deletion and confirm it after signing in again. 30 days after confirmation the system deletes the account automatically (until then you can cancel the request on the Privacy page) and sends a confirmation to your account email; if data must be kept by law or concerns other people, the request is reviewed and you receive the decision within one month. After the final deletion, deleted data may remain in encrypted database backups for up to 7 days; it is not used there and is then overwritten. You can also request deletion by email as described below; a person answers within one month.",
       "howTitle": "How to request deletion",
       "howSteps": [
         "Email {email} from the email address associated with your LabourMarket.ai account.",
