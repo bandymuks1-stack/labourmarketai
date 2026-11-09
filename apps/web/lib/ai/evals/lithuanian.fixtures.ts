@@ -203,6 +203,8 @@ export const LITHUANIAN_EVAL_CASES: readonly LithuanianEvalCase[] = [
     c: {
       name: "LT translation_copy: canonical message rendered in Lithuanian",
       locale: "lt",
+      // English source → Lithuanian target; never an LT→LT request.
+      sourceLanguage: "en",
       input: { canonicalMessage: "Upload your A1 certificate.", locale: "lt" },
       mock: envelope("translation_copy", "canonical_message", "message", {
         localized_copy: "Įkelkite savo A1 pažymėjimą.",
@@ -327,6 +329,7 @@ export const LITHUANIAN_CHECKER_NEGATIVES: readonly (LithuanianEvalCase & {
     c: {
       name: "CHECK: English answer to a Lithuanian request is caught",
       locale: "lt",
+      sourceLanguage: "en",
       input: { canonicalMessage: "Upload your A1 certificate.", locale: "lt" },
       mock: envelope("translation_copy", "canonical_message", "message", {
         localized_copy: "Upload your A1 certificate to the profile.",

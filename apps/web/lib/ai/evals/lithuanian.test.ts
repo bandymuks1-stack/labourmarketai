@@ -7,6 +7,7 @@
  */
 import { describe, it, expect } from "vitest";
 import {
+  evalRunOptions,
   inventedFacts,
   judgeLithuanianCase,
   looksLithuanian,
@@ -32,6 +33,14 @@ describe("Lithuanian evals — coverage", () => {
     for (const agent of Object.keys(LITHUANIAN_EVAL_EXCLUDED)) {
       expect(covered.has(agent as never)).toBe(false);
     }
+  });
+
+  it("a translation case sends its English SOURCE language, not the LT target", () => {
+    const translation = LITHUANIAN_EVAL_CASES.find(({ entry }) => entry.agent === "translation_copy");
+    expect(translation?.c.sourceLanguage).toBe("en");
+    expect(translation?.c.locale).toBe("lt");
+    // The options both the mock harness and the live runner send.
+    expect(evalRunOptions(translation!.c).language).toBe("en");
   });
 
   it("every case is a Lithuanian request", () => {

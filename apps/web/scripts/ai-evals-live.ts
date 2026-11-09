@@ -23,7 +23,7 @@
  *
  * Exit codes: 0 all PASS · 1 at least one FAIL · 2 no live provider configured.
  */
-import { judgeLithuanianCase } from "../lib/ai/evals/harness";
+import { evalRunOptions, judgeLithuanianCase } from "../lib/ai/evals/harness";
 import {
   LITHUANIAN_EVAL_CASES,
   LITHUANIAN_EVAL_EXCLUDED,
@@ -65,9 +65,10 @@ async function main(): Promise<void> {
   for (const { entry, c } of LITHUANIAN_EVAL_CASES) {
     const out = await runAiAgentCore(entry, c.input, cfg, {
       locale: c.locale,
-      language: c.locale,
       providerStates,
-      ...(c.maxOutputTokens !== undefined ? { maxOutputTokens: c.maxOutputTokens } : {}),
+      // Same options the mock harness passes: the SOURCE language (when the
+      // case has one) as `language`, never the target locale.
+      ...evalRunOptions(c),
     });
     const v = judgeLithuanianCase(entry, c.input, out);
     if (!v.pass) failed += 1;

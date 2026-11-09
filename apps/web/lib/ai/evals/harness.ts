@@ -20,6 +20,10 @@ export interface AgentEvalCase {
   /** The output-token cap the product call site passes (sizes the route's
    *  cost ceiling exactly as in production). Omitted = runtime default. */
   readonly maxOutputTokens?: number;
+  /** Language of the INPUT text, when it differs from the target `locale`
+   *  (a translation). Passed as the run's `language`, which run-agent
+   *  forwards as `request.sourceLanguage` — never the target locale. */
+  readonly sourceLanguage?: string;
   readonly expect:
     | { readonly status: "suggestion" }
     | { readonly status: "needs_review"; readonly reason?: string }
@@ -44,8 +48,20 @@ export async function runAgentEval(
   return runAiAgentCore(entry, c.input, MOCK_CFG, {
     locale: c.locale,
     mock: c.mock,
-    ...(c.maxOutputTokens !== undefined ? { maxOutputTokens: c.maxOutputTokens } : {}),
+    ...evalRunOptions(c),
   });
+}
+
+/** Per-case run options shared by the mock harness and the live runner, so
+ *  both send the same request shape. */
+export function evalRunOptions(c: AgentEvalCase): {
+  maxOutputTokens?: number;
+  language?: string;
+} {
+  return {
+    ...(c.maxOutputTokens !== undefined ? { maxOutputTokens: c.maxOutputTokens } : {}),
+    ...(c.sourceLanguage !== undefined ? { language: c.sourceLanguage } : {}),
+  };
 }
 
 // ── Lithuanian eval checks (target language + no invented facts) ───────────
