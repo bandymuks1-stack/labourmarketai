@@ -11,7 +11,7 @@
 -- may sit anywhere in a word, as in v5, so `ok` still finds Kock and `snickare` finds Byggsnickare;
 -- every ad v5 finds for a term, v6 finds too (owner 2026-11-09: keep short-term recall). A
 -- whole-word match comes first, then the newest. A term
--- with nothing searchable in it (`-`, `%`) finds nothing. Case, marks and ß/ss do not matter.
+-- with nothing searchable in it (`-`, `%`) uses v5's own occupation predicate, so it finds what v5 finds. Case, marks and ß/ss do not matter.
 -- PROOF: scripts/db-proof/search-title-oracle.sql, scripts/db-proof/search-title-cases.sql.
 -- Rollback: supabase/rollbacks/20261105100100_search_public_vacancy_previews_narrow_v6.down.sql (the v5 body verbatim).
 
@@ -47,6 +47,7 @@ declare
   v_folded text;
   v_match text;
   v_word text;
+  v_raw text;
   v_limit integer := least(greatest(coalesce(p_limit, 20), 1), 50);
   v_offset integer := greatest(coalesce(p_offset, 0), 0);
   v_total bigint;
@@ -55,11 +56,64 @@ begin
     -- The fold leaves no LIKE wildcard, so nothing here needs escaping.
     v_folded := btrim(public.public_vacancy_search_fold(v_needle));
     if v_folded = '' then
-      return;
+      -- Nothing for the fold to keep (`-`, `/`): v5's own predicate on the occupation, its own
+      -- escaping, so a symbol finds exactly what v5 finds (owner 2026-11-09: keep v5's recall).
+      v_raw := '%' || lower(replace(replace(v_needle, '%', '\%'), '_', '\_')) || '%';
     end if;
     v_word := '% ' || v_folded || ' %';
     -- Every term matches anywhere in a word, as v5 did (owner 2026-11-09): `ok` still finds Kock.
     v_match := '%' || v_folded || '%';
+  end if;
+
+  -- A symbol-only term: v5's two free-text branches verbatim, on v_raw.
+  if v_raw is not null then
+    if p_profession_slug is null then
+      return query
+        with match as materialized (
+          select h.id, h.published_at
+          from public.public_vacancies h
+          where h.is_active and coalesce(h.expires_at, 'infinity'::timestamptz) > now()
+            and lower(h.occupation_raw) collate "C" like v_raw),
+        total as (select count(*) as n from match),
+        hit as (
+          select m.id, m.published_at
+          from match m
+          order by m.published_at desc nulls last, m.id
+          limit v_limit offset v_offset)
+        select v.id, null::text, v.profession_slug, v.occupation_raw, v.employment_form,
+               v.working_time, v.positions,
+               case when v.compensation_min is not null or v.compensation_max is not null
+                    then v.compensation_currency end,
+               v.compensation_min, v.compensation_max, v.source_language,
+               null::text, v.published_at, (select t.n from total t)
+        from hit
+        join public.public_vacancies v on v.id = hit.id
+        order by hit.published_at desc nulls last, hit.id;
+    else
+      select count(*) into v_total from public.public_vacancies v
+        where v.is_active and (v.expires_at is null or v.expires_at > now())
+          and v.profession_slug = p_profession_slug
+          and lower(v.occupation_raw) collate "C" like v_raw;
+      return query
+        with hit as (
+          select h.id, h.published_at
+          from public.public_vacancies h
+          where h.is_active and (h.expires_at is null or h.expires_at > now())
+            and h.profession_slug = p_profession_slug
+            and lower(h.occupation_raw) collate "C" like v_raw
+          order by h.published_at desc nulls last, h.id
+          limit v_limit offset v_offset)
+        select v.id, null::text, v.profession_slug, v.occupation_raw, v.employment_form,
+               v.working_time, v.positions,
+               case when v.compensation_min is not null or v.compensation_max is not null
+                    then v.compensation_currency end,
+               v.compensation_min, v.compensation_max, v.source_language,
+               null::text, v.published_at, v_total
+        from hit
+        join public.public_vacancies v on v.id = hit.id
+        order by hit.published_at desc nulls last, hit.id;
+    end if;
+    return;
   end if;
 
   if p_profession_slug is null and v_needle is null then

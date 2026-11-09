@@ -94,8 +94,10 @@ describe("search v6", () => {
     expect(fn).toMatch(/v_folded := btrim\(public\.public_vacancy_search_fold\(v_needle\)\);/);
   });
 
-  it("finds nothing for a term with nothing searchable in it", () => {
-    expect(fn).toMatch(/if v_folded = '' then\s+return;\s+end if;/);
+  it("a symbol-only term runs v5's own predicate, so it finds what v5 finds (owner 2026-11-09)", () => {
+    expect(fn).toContain("v_raw := '%' || lower(replace(replace(v_needle, '%', '\\%'), '_', '\\_')) || '%';");
+    expect(fn.match(/lower\((h|v)\.occupation_raw\) collate "C" like v_raw/g)).toHaveLength(3);
+    expect(fn).toMatch(/if v_raw is not null then[\s\S]*?return;\s+end if;/);
   });
 
   it("searches and returns nothing non-public, and returns the title as NULL", () => {
@@ -132,9 +134,9 @@ describe("search v6", () => {
     const oracle = read("scripts/db-proof/search-title-oracle.sql");
     expect(oracle).toMatch(/^begin transaction isolation level repeatable read read only;$/m);
     expect(oracle).toMatch(/raise exception 'title search differs/);
-    // SUPERSET (owner 2026-11-09): any ad v5 finds that v6 misses is a difference, for every term
-    // with something searchable in it, the short ones included.
-    expect(oracle).toMatch(/or \(v_lost > 0 and v_folded <> ''\) then/);
+    // SUPERSET (owner 2026-11-09): any ad v5 finds that v6 misses is a difference, for every term,
+    // the short ones and the symbols included.
+    expect(oracle).toMatch(/-- SUPERSET: every ad v5 finds, v6 finds too, for EVERY term, symbols included\.\s+or v_lost > 0 then/);
     for (const term of ["'a'", "'e'", "'el'", "'ok'", "'it'", "'vd'"]) expect(oracle, term).toContain(term);
     const cases = read("scripts/db-proof/search-title-cases.sql");
     expect(cases).toMatch(/^rollback;$/m);

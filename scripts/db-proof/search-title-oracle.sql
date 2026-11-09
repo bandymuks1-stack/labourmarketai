@@ -37,9 +37,11 @@ begin
     -- Anywhere in a word for every length, as v5 (owner 2026-11-09).
     v_like := '%' || v_folded || '%';
     v_today := '%' || lower(replace(replace(btrim(v_term), '%', '\%'), '_', '\_')) || '%';
-    select count(*) filter (where v_folded <> '' and x.t like v_like),
+    -- The rule: folded title + occupation anywhere; a term with nothing for the fold to keep uses
+    -- v5's own occupation predicate (owner 2026-11-09).
+    select count(*) filter (where case when v_folded = '' then x.o like v_today else x.t like v_like end),
            count(*) filter (where x.o like v_today),
-           count(*) filter (where x.o like v_today and not (v_folded <> '' and x.t like v_like)),
+           count(*) filter (where x.o like v_today and not (case when v_folded = '' then x.o like v_today else x.t like v_like end)),
            count(*) filter (where x.o like v_today and v_folded <> '' and not (x.t like v_like) and x.t like '% ' || v_folded || '%')
       into v_oracle, v_found_today, v_lost, v_lost_word
     from (
@@ -53,12 +55,12 @@ begin
     from public.search_public_vacancy_previews_v1(v_term, null, 50, 0) f;
     v_cases := v_cases + 1;
     if v_total is distinct from v_oracle or v_title <> 0 or v_rows > 50
-       -- SUPERSET: every ad v5 finds for a term with something searchable in it, v6 finds too.
-       or (v_lost > 0 and v_folded <> '') then
+       -- SUPERSET: every ad v5 finds, v6 finds too, for EVERY term, symbols included.
+       or v_lost > 0 then
       v_diffs := v_diffs + 1;
       raise warning 'DIFF term=% oracle=% total=% rows=% titles=% lost=% lost_word=%', v_term, v_oracle, v_total, v_rows, v_title, v_lost, v_lost_word;
     end if;
-    raise notice 'term=% v5=% v6=% v5_only=% %', v_term, v_found_today, v_total, v_lost, case when v_folded = '' and v_lost > 0 then ' (symbol-only term: finds nothing by rule)' else '' end;
+    raise notice 'term=% v5=% v6=% v5_only=%', v_term, v_found_today, v_total, v_lost;
   end loop;
   raise notice 'ORACLE cases=% diffs=%', v_cases, v_diffs;
   if v_diffs > 0 then

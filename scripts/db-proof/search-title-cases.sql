@@ -54,6 +54,7 @@ begin
       ('elektriker',     'Elektriker',                          'Installation',        'd', 'e', 1, true, null),
       ('hotell',         'Hotell receptionist',                 'Personal',            'd', 'e', 1, true, null),
       ('occ_only',       'Jobb',                                'Byggsnickare',        'd', 'e', 1, true, null),
+      ('occ_hyphen',     'Tjänst',                              'Lager-medarbetare',   'd', 'e', 1, true, null),
       ('cpp',            'C++ utvecklare',                      'Programmerare',       'd', 'e', 1, true, null),
       ('csharp',         'C# utvecklare',                       'Programmerare',       'd', 'e', 1, true, null),
       ('slash',          'Kock / Servitör',                     'Restaurang',          'd', 'e', 1, true, null),
@@ -112,6 +113,8 @@ begin
       ('kock servitör',   array['slash'],                      array[]::text[]),
       ('kock / servitör', array['slash'],                      array[]::text[]),
       ('c++',             array['cpp'],                        array['csharp']),
+      -- A symbol finds what v5 finds: the occupation that holds it, not a title (owner 2026-11-09).
+      ('-',               array['occ_hyphen'],                 array['it_hyphen','el_hyphen']),
       ('c#',              array['csharp'],                     array['cpp']),
       ('slutord',         array['long_title'],                 array[]::text[]),
       ('hemligbeskrivning', array[]::text[],                   array['hidden_fields']),
@@ -137,8 +140,8 @@ begin
     end if;
   end loop;
 
-  -- Nothing searchable: nothing found, not everything.
-  foreach v_label in array array['-', '%', '_', '\', '  .  ', '()'] loop
+  -- A symbol no ad's occupation holds: nothing found, never everything (v5's predicate, escaped).
+  foreach v_label in array array['%', '_', '\', '  .  ', '()'] loop
     v_cases := v_cases + 1;
     if exists (select 1 from public.search_public_vacancy_previews_v1(v_label, null, 20, 0)) then
       v_fail := v_fail + 1;
