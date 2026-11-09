@@ -7,6 +7,14 @@
  * still canonicalize to the board itself, so filter combinations never become
  * indexable duplicates.
  */
+/**
+ * The deepest page that names itself. Every ad already has its own URL in
+ * /jobs-sitemap.xml, so deep listing pages add no discovery; past this point
+ * they fold back to the board, which keeps crawlers off deep OFFSET scans
+ * (page 2,500 took 2 s on 2026-11-03).
+ */
+export const JOBS_SELF_CANONICAL_MAX_PAGE = 100;
+
 export function jobsCanonicalPath(sp: {
   q?: string;
   page?: string;
@@ -16,5 +24,7 @@ export function jobsCanonicalPath(sp: {
   const raw = sp.page ?? "1";
   const page = /^\d+$/.test(raw) ? Number(raw) : 1;
   const filtered = Boolean(sp.q || sp.profession || sp.saved);
-  return !filtered && page > 1 ? `/jobs?page=${page}` : "/jobs";
+  return !filtered && page > 1 && page <= JOBS_SELF_CANONICAL_MAX_PAGE
+    ? `/jobs?page=${page}`
+    : "/jobs";
 }

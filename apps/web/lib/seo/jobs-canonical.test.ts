@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { jobsCanonicalPath } from "./jobs-canonical";
+import { JOBS_SELF_CANONICAL_MAX_PAGE, jobsCanonicalPath } from "./jobs-canonical";
 import { buildPageMetadataFor } from "./metadata";
 
 describe("jobsCanonicalPath", () => {
@@ -11,6 +11,18 @@ describe("jobsCanonicalPath", () => {
   it("page 2+ of the unfiltered board is its own canonical", () => {
     expect(jobsCanonicalPath({ page: "2" })).toBe("/jobs?page=2");
     expect(jobsCanonicalPath({ page: "57" })).toBe("/jobs?page=57");
+  });
+
+  it("pages past the cap fold back to the board (no deep OFFSET crawl)", () => {
+    expect(jobsCanonicalPath({ page: String(JOBS_SELF_CANONICAL_MAX_PAGE) })).toBe(
+      `/jobs?page=${JOBS_SELF_CANONICAL_MAX_PAGE}`,
+    );
+    expect(jobsCanonicalPath({ page: String(JOBS_SELF_CANONICAL_MAX_PAGE + 1) })).toBe("/jobs");
+    expect(jobsCanonicalPath({ page: "2500" })).toBe("/jobs");
+  });
+
+  it("an unapplied ?country= does not change the canonical (it is not a filter yet)", () => {
+    expect(jobsCanonicalPath({ page: "2", country: "NO" } as never)).toBe("/jobs?page=2");
   });
 
   it("filtered and saved views canonicalize to the board", () => {
