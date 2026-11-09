@@ -7,6 +7,7 @@ import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import {
+  readPublicVacancyCountries,
   searchPublicVacancyPreviews,
   type PublicVacancyPreview,
 } from "@/lib/vacancy-store/public-vacancy-preview";
@@ -245,6 +246,36 @@ const UNAVAILABLE: L = {
   pl: "Tablica ofert pracy nie odpowiedziała na czas. Spróbuj ponownie za chwilę.",
 };
 
+/** The board's country choice (owner 2026-11-09): every option is a plain link. */
+const ALL_COUNTRIES: L = {
+  en: "All countries",
+  lt: "Visos šalys",
+  ru: "Все страны",
+  nl: "Alle landen",
+  de: "Alle Länder",
+  pl: "Wszystkie kraje",
+};
+
+/** A chosen country with no live ad is an answer about that country, not "nothing". */
+const EMPTY_IN_COUNTRY: Record<ActiveLocale, (c: string) => string> = {
+  en: (c) => `No open jobs in ${c} match this right now.`,
+  lt: (c) => `Šiuo metu ${c} tinkamų laisvų darbo vietų nėra.`,
+  ru: (c) => `Сейчас нет подходящих открытых вакансий: ${c}.`,
+  nl: (c) => `Momenteel geen passende openstaande vacatures in ${c}.`,
+  de: (c) => `Derzeit keine passenden offenen Stellen in ${c}.`,
+  pl: (c) => `Obecnie brak pasujących otwartych ofert pracy: ${c}.`,
+};
+
+/** The facet did not answer: the board says it is NOT filtering, never pretends. */
+const COUNTRY_NOT_FILTERED: L = {
+  en: "Filtering by country is not available right now. Showing jobs from all countries.",
+  lt: "Filtras pagal šalį šiuo metu neveikia. Rodomi visų šalių darbo skelbimai.",
+  ru: "Фильтр по стране сейчас недоступен. Показаны вакансии из всех стран.",
+  nl: "Filteren op land is nu niet beschikbaar. Vacatures uit alle landen worden getoond.",
+  de: "Der Länderfilter ist gerade nicht verfügbar. Angezeigt werden Stellen aus allen Ländern.",
+  pl: "Filtr według kraju jest teraz niedostępny. Pokazujemy oferty ze wszystkich krajów.",
+};
+
 const SAVED_TAB: L = {
   en: "Saved",
   lt: "Išsaugoti",
@@ -332,6 +363,7 @@ export default async function JobsPage({
     page?: string;
     saved?: string;
     profession?: string;
+    country?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -343,6 +375,17 @@ export default async function JobsPage({
   // Closed set: an unknown slug becomes "no filter" rather than reaching the
   // SQL function as free text.
   const profession = readProfessionSlugParam(sp.profession);
+  // THE COUNTRY FILTER (owner 2026-11-09): `?country=NO` really restricts every
+  // search. The live countries come from one maintained row; when they cannot be
+  // read the board filters by no country and says so, never silently.
+  const requestedCountry =
+    typeof sp.country === "string" && /^[A-Za-z]{2}$/.test(sp.country.trim())
+      ? sp.country.trim().toUpperCase()
+      : null;
+  const countryRequested = typeof sp.country === "string" && sp.country.trim() !== "";
+  const countriesRead = readPublicVacancyCountries();
+  const countries = countryRequested ? await countriesRead : null;
+  const country = countries?.status === "ok" ? requestedCountry : null;
   // The ONE registry — slug → name in the reader's language. 17,145 browsable
   // ads carry a slug the categorizer derived, so this is how a worker searches
   // Swedish supply in Lithuanian without knowing a word of Swedish.
@@ -384,7 +427,12 @@ export default async function JobsPage({
         }),
     );
     const mapped = matchProfessionAcrossLocales(query, professionOptions, others);
-    if (mapped) redirect({ href: `/jobs?profession=${mapped}`, locale: active });
+    if (mapped) {
+      redirect({
+        href: `/jobs?profession=${mapped}${country ? `&country=${country}` : ""}`,
+        locale: active,
+      });
+    }
   }
   const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
   const wantsSaved = sp.saved === "1";
@@ -403,6 +451,7 @@ export default async function JobsPage({
     searchPublicVacancyPreviews({
       query,
       professionSlug: profession,
+      country,
       page,
     });
   // The board's read needs nothing from the session, so a signed-in person does
@@ -447,10 +496,21 @@ export default async function JobsPage({
     // Dropping the filter on page 2 would silently widen the result set under
     // the reader — the same bug class as a search box that forgets its term.
     if (profession) qs.set("profession", profession);
+    if (country) qs.set("country", country);
     if (p > 1) qs.set("page", String(p));
     const s = qs.toString();
     return s ? `/jobs?${s}` : "/jobs";
   };
+  // The same search in another country (or in all of them).
+  const countryHref = (code: string | null) => {
+    const qs = new URLSearchParams();
+    if (query) qs.set("q", query);
+    if (profession) qs.set("profession", profession);
+    if (code) qs.set("country", code);
+    const s = qs.toString();
+    return s ? `/jobs?${s}` : "/jobs";
+  };
+  const countryChoice = countries ?? (await countriesRead);
 
   // MEMBER FACTS (owner P0-3, 2026-11-03): a signed-in person's card shows who
   // publishes the ad and where the work is. Read under their OWN client for
@@ -605,6 +665,44 @@ export default async function JobsPage({
         </nav>
       )}
 
+      {!showSaved && countryChoice.status === "ok" && countryChoice.countries.length > 1 && (
+        <nav
+          aria-label={ALL_COUNTRIES[active]}
+          data-testid="public-jobs-country-choice"
+          className="mt-6 flex flex-wrap gap-2 text-sm"
+        >
+          {[null, ...countryChoice.countries.map((c) => c.code)].map((code) => {
+            const selected = code === country;
+            const total = countryChoice.countries.find((c) => c.code === code)?.activeVacancies;
+            return (
+              <Link
+                key={code ?? "all"}
+                href={countryHref(code) as "/jobs"}
+                aria-current={selected ? "page" : undefined}
+                className={
+                  selected
+                    ? "rounded-full border border-text-primary px-3 py-1 font-medium"
+                    : "rounded-full border px-3 py-1 text-text-muted"
+                }
+              >
+                {code ? (regionName?.of(code) ?? code) : ALL_COUNTRIES[active]}
+                {total !== undefined && ` (${new Intl.NumberFormat(active).format(total)})`}
+              </Link>
+            );
+          })}
+        </nav>
+      )}
+
+      {!showSaved && countryRequested && !country && (
+        <p
+          role="note"
+          data-testid="public-jobs-country-not-filtered"
+          className="mt-6 rounded-md border border-dashed p-4 text-sm text-text-muted"
+        >
+          {COUNTRY_NOT_FILTERED[active]}
+        </p>
+      )}
+
       {showSaved ? (
         <>
           <p className="mt-6 text-sm text-text-muted">
@@ -668,7 +766,9 @@ export default async function JobsPage({
                     )
                   : profession
                     ? EMPTY_FOR_PROFESSION[active](professionName(profession))
-                    : EMPTY[active]}
+                    : country
+                      ? EMPTY_IN_COUNTRY[active](regionName?.of(country) ?? country)
+                      : EMPTY[active]}
               </p>
               {profession && (
                 <Link

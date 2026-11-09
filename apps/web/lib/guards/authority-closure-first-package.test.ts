@@ -208,6 +208,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261104160000_",
       "20261105100000_",
       "20261105100100_",
+      // 2026-11-09: country filter on the public board, stacked on #3083. RED draft, NOT applied.
+      "20261109120000_",
       "20261104160100_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
       "20261104060000_",

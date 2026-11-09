@@ -256,6 +256,7 @@ function remember(key: string, entry: CacheEntry): void {
 export function __resetPublicVacancyCache(): void {
   resultCache.clear();
   inFlight.clear();
+  countriesCache = null;
   lastTimeoutAt = 0;
 }
 
@@ -263,6 +264,9 @@ export async function searchPublicVacancyPreviews(
   input: {
     query?: string | null;
     professionSlug?: string | null;
+    /** ISO alpha-2. Sent only when set, so a call without it is the same call as before
+     *  20261109120000 (an app ahead of that migration must never send it). */
+    country?: string | null;
     page?: number;
   },
   suppliedClient?: SupabaseClient,
@@ -272,7 +276,8 @@ export async function searchPublicVacancyPreviews(
   const offset = (page - 1) * limit;
   const queryParam = input.query?.trim() || null;
   const slugParam = input.professionSlug?.trim() || null;
-  const key = cacheKey(queryParam, slugParam, offset);
+  const countryParam = input.country?.trim().toUpperCase() || null;
+  const key = cacheKey(queryParam, slugParam, offset) + (countryParam ? `|c:${countryParam}` : "");
   const now = Date.now();
 
   const cached = resultCache.get(key);
@@ -290,7 +295,7 @@ export async function searchPublicVacancyPreviews(
   if (pending) return pending;
 
   const run = (async (): Promise<PublicVacancySearchResult> => {
-    const result = await runSearch({ queryParam, slugParam, limit, offset }, suppliedClient);
+    const result = await runSearch({ queryParam, slugParam, countryParam, limit, offset }, suppliedClient);
     if (result.status === "ok") remember(key, { kind: "fresh", at: Date.now(), value: result });
     else if (result.status === "unavailable") remember(key, { kind: "cooldown", at: Date.now() });
     return result;
@@ -308,12 +313,13 @@ async function runSearch(
   params: {
     queryParam: string | null;
     slugParam: string | null;
+    countryParam: string | null;
     limit: number;
     offset: number;
   },
   suppliedClient?: SupabaseClient,
 ): Promise<PublicVacancySearchResult> {
-  const { queryParam, slugParam, limit, offset } = params;
+  const { queryParam, slugParam, countryParam, limit, offset } = params;
 
   const supabase = suppliedClient ?? (await createClient());
   const call = () =>
@@ -322,6 +328,7 @@ async function runSearch(
       p_profession_slug: slugParam,
       p_limit: limit,
       p_offset: offset,
+      ...(countryParam ? { p_country: countryParam } : {}),
     }) as Promise<{ data: unknown; error: { code?: string; message?: string } | null }>;
   // ONE retry on a statement timeout (57014). A free-text search that is fast
   // on a warm cache can pass the anonymous statement timeout on a cold one —
@@ -406,6 +413,48 @@ export async function readPublicVacancyPreviewWith(
   const rows = (data ?? []) as PreviewRow[];
   const row = rows[0];
   return row ? toPreview(row) : null;
+}
+
+/** The countries a reader can choose on the board (owner 2026-11-09). */
+export type PublicVacancyCountries =
+  | { readonly status: "ok"; readonly countries: readonly { code: string; activeVacancies: number }[] }
+  /** The facet function is not applied yet, or did not answer: the board offers no
+   *  country choice and filters by none, and says so (never a fake list). */
+  | { readonly status: "not_available" };
+
+/**
+ * The live countries and their maintained totals (`list_public_vacancy_countries_v1`,
+ * one singleton row, constant cost). Any error is `not_available`: a country choice is
+ * an extra, so its absence must never break the board.
+ */
+let countriesCache: { at: number; value: PublicVacancyCountries } | null = null;
+/** The totals are maintained every 10 minutes; one minute of reuse costs nothing in
+ *  truth and keeps the anonymous board at one search query per view. */
+const COUNTRIES_FRESH_MS = 60_000;
+
+export async function readPublicVacancyCountries(
+  suppliedClient?: SupabaseClient,
+): Promise<PublicVacancyCountries> {
+  if (!suppliedClient && countriesCache && Date.now() - countriesCache.at < COUNTRIES_FRESH_MS) {
+    return countriesCache.value;
+  }
+  try {
+    const supabase = suppliedClient ?? (await createClient());
+    const { data, error } = await asAny(supabase).rpc("list_public_vacancy_countries_v1");
+    if (error) return { status: "not_available" };
+    const countries = ((data ?? []) as { country: unknown; active_vacancies: unknown }[])
+      .filter((r) => typeof r.country === "string" && /^[A-Z]{2}$/.test(r.country))
+      .map((r) => ({
+        code: r.country as string,
+        activeVacancies: toNumber(r.active_vacancies as number | string | null) ?? 0,
+      }))
+      .filter((c) => c.activeVacancies > 0);
+    const value = { status: "ok" as const, countries };
+    if (!suppliedClient) countriesCache = { at: Date.now(), value };
+    return value;
+  } catch {
+    return { status: "not_available" };
+  }
 }
 
 /**
