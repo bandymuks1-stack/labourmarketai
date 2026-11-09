@@ -18,6 +18,7 @@ import {
 } from "@/lib/opportunities/saved-opportunities";
 import { SaveVacancyButton } from "@/components/marketing/save-vacancy-button";
 import { formatUtcDate } from "@/lib/time/display";
+import { jobPageDescription } from "@/lib/seo/job-page-description";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { buildJobDetailJsonLd } from "@/lib/seo/public-job-json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
@@ -124,7 +125,14 @@ export async function generateMetadata({
     locale: active,
     path: `/jobs/${id}`,
     title,
-    description: DESCRIPTION[active],
+    // Distinct per ad (2026-11-09 indexing audit): built only from what a
+    // signed-out reader already sees on this page — the anonymous preview.
+    description: jobPageDescription({
+      locale: active,
+      title,
+      chips: vacancyFactChips(preview, active),
+      published: preview.publishedAt ? formatUtcDate(preview.publishedAt, active) : null,
+    }),
   });
 }
 
@@ -140,15 +148,6 @@ async function localizedProfessionName(
 }
 
 type L = Record<ActiveLocale, string>;
-
-const DESCRIPTION: L = {
-  en: "Open vacancy on LabourMarket.ai. Sign in to see the employer, the location and how to apply.",
-  lt: "Laisva darbo vieta LabourMarket.ai. Prisijunk, kad matytum darbdavį, vietovę ir kaip kandidatuoti.",
-  ru: "Открытая вакансия на LabourMarket.ai. Войдите, чтобы увидеть работодателя, местоположение и способ подачи заявки.",
-  nl: "Openstaande vacature op LabourMarket.ai. Log in om de werkgever, de locatie en de sollicitatiewijze te zien.",
-  de: "Offene Stelle auf LabourMarket.ai. Melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
-  pl: "Otwarta oferta pracy na LabourMarket.ai. Zaloguj się, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
-};
 
 /** Metadata/heading fallback when even the occupation label is missing. */
 const GENERIC_TITLE: L = {
@@ -716,6 +715,13 @@ export default async function JobDetailPage({
     : undefined;
   const localizedProfession = await localizedProfessionName(active, preview.professionSlug);
   const factChips = vacancyFactChips(preview, active);
+  // The same per-ad description as the <meta> (anonymous facts only).
+  const pageDescription = jobPageDescription({
+    locale: active,
+    title: localizedProfession ?? preview.occupation ?? GENERIC_TITLE[active],
+    chips: factChips,
+    published: preview.publishedAt ? published : null,
+  });
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
@@ -732,7 +738,7 @@ export default async function JobDetailPage({
             buildJobDetailJsonLd({
               origin: MARKETING_ORIGIN,
               locale: active,
-              description: DESCRIPTION[active],
+              description: pageDescription,
               preview,
               genericTitle: GENERIC_TITLE[active],
             }),
