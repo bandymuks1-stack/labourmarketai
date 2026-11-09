@@ -12,8 +12,8 @@ import { test, expect, firstVisit, type Browser, type Page } from "./prod-walk";
  * Read-only. S-cases run signed out; H-1 reads three Norwegian ads as the synthetic
  * worker, because the description is members-only. Nothing is saved, sent or clicked
  * that writes. A known defect is a FAIL here, never a skip: byggarbetare (SR-10), a
- * typed profession losing its page (SR-4) and the ignored country parameter stay red
- * until they are fixed.
+ * typed profession losing its page (SR-4) stay red until they are fixed. A country in
+ * the URL passes when it narrows the board or the board says it is not a filter (#3171).
  *
  * Logs carry counts, lengths and hashes only, never an ad's own words (public run
  * logs; the ad text is licensed content). H-1 prints SHA-256 of the description's
@@ -96,7 +96,13 @@ test("S-1…S-8. free text and filters find the ads that exist (signed out)", as
   // The board offers no country filter; a country in the URL must still narrow, or it is ignored.
   for (const c of ["NO", "SE"]) {
     const b = await board(page, `/lt/jobs?country=${c}`);
-    record(`S-8 country=${c} narrows the board`, overlap(b, unfiltered) < b.ids.length, `${line(b)} same_as_unfiltered=${overlap(b, unfiltered)}/${b.ids.length}`);
+    // #3171: until a country filter exists, the board says so instead of silently ignoring it.
+    const note = await page.getByTestId("public-jobs-country-not-filtered").isVisible();
+    record(
+      `S-8 country=${c} narrows the board or says it does not`,
+      overlap(b, unfiltered) < b.ids.length || note,
+      `${line(b)} same_as_unfiltered=${overlap(b, unfiltered)}/${b.ids.length} not_filtered_note=${note}`,
+    );
   }
   await ctx.close();
 });
