@@ -140,8 +140,11 @@ export function CompanyNeedForm({
   }, []);
 
   // Spam guard: when the form appeared, sent in a hidden field. Taken after
-  // hydration (the page is static markup) and written back after every answer,
-  // because React resets the form's fields after a send. The form keeps
+  // hydration (the page is static markup), written after every answer (React
+  // resets the form after a send) AND again at submit time, before React builds
+  // the action's FormData: the field carries no React value or defaultValue,
+  // because React re-applying defaultValue="" on any re-render blanks a hidden
+  // input's value — every JS visitor was then stored as no-JS. The form keeps
   // `action={formAction}` so it still posts WITHOUT JavaScript: the field then
   // stays empty and the server stores the need marked for review
   // (lib/security/public-form-guard.ts). A client wrapper as the action would
@@ -152,6 +155,9 @@ export function CompanyNeedForm({
     if (shownAt.current === 0) shownAt.current = Date.now();
     if (stampRef.current) stampRef.current.value = String(shownAt.current);
   }, [state]);
+  function stampOnSubmit() {
+    if (stampRef.current && shownAt.current > 0) stampRef.current.value = String(shownAt.current);
+  }
 
   function handleFirstInteraction() {
     if (startedRef.current) return;
@@ -185,6 +191,7 @@ export function CompanyNeedForm({
         className="flex flex-col gap-4"
         data-testid="company-need-form"
         onFocusCapture={handleFirstInteraction}
+        onSubmitCapture={stampOnSubmit}
       >
         {/* <h1>, not <h2>: this form carries the only title on /company-need,
             and the page had NO top-level heading at all (V5.1 finding). The
@@ -198,7 +205,7 @@ export function CompanyNeedForm({
 
         {/* Left empty by a person: out of sight, out of the tab order, not autofilled. */}
         <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
-        <input type="hidden" name="started" ref={stampRef} defaultValue="" />
+        <input type="hidden" name="started" ref={stampRef} />
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.companyName}</span>
