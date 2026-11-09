@@ -81,14 +81,16 @@ describe("search v6", () => {
     return s.slice(a, b);
   };
 
-  it("both free-text branches read the one folded text, and short terms must start a word", () => {
+  it("both free-text branches read the one folded text, and every term matches inside a word as v5 did", () => {
     const freeText = branch(fn, "elsif p_profession_slug is null then", "end if;\nend;");
     expect(freeText.match(/search_text like v_match/g)).toHaveLength(2);
     expect(freeText.match(/search_text like v_word/g)).toHaveLength(2);
     expect(freeText.match(/order by m\.rank desc, m\.published_at desc nulls last, m\.id/g)).toHaveLength(2);
     expect(freeText.match(/total as \(select count\(\*\) as n from match\)/g)).toHaveLength(2);
     expect(freeText).not.toMatch(/\blower\(/);
-    expect(fn).toMatch(/v_match := case when length\(v_folded\) <= 3 then '% ' \|\| v_folded \|\| '%' else '%' \|\| v_folded \|\| '%' end;/);
+    // Owner 2026-11-09: short terms keep v5's recall, so there is no word-start rule.
+    expect(fn).toMatch(/v_match := '%' \|\| v_folded \|\| '%';/);
+    expect(fn).not.toMatch(/length\(v_folded\) <= 3/);
     expect(fn).toMatch(/v_folded := btrim\(public\.public_vacancy_search_fold\(v_needle\)\);/);
   });
 
@@ -130,10 +132,17 @@ describe("search v6", () => {
     const oracle = read("scripts/db-proof/search-title-oracle.sql");
     expect(oracle).toMatch(/^begin transaction isolation level repeatable read read only;$/m);
     expect(oracle).toMatch(/raise exception 'title search differs/);
+    // SUPERSET (owner 2026-11-09): any ad v5 finds that v6 misses is a difference, for every term
+    // with something searchable in it, the short ones included.
+    expect(oracle).toMatch(/or \(v_lost > 0 and v_folded <> ''\) then/);
+    for (const term of ["'a'", "'e'", "'el'", "'ok'", "'it'", "'vd'"]) expect(oracle, term).toContain(term);
     const cases = read("scripts/db-proof/search-title-cases.sql");
     expect(cases).toMatch(/^rollback;$/m);
     expect(cases).toMatch(/Never run it on production/);
     expect(cases).toMatch(/raise exception 'title search failed/);
     for (const term of ["'byggarbetare'", "'ok'", "'-'", "'лікар'", "'šaltkalvis'", "'schweisser'", "'larare'"]) expect(cases, term).toContain(term);
+    // ok finds a word that only contains it (Bokhållare), under a profession too.
+    expect(cases).toMatch(/\('ok',\s+array\['ok_word','bokhallare','forskollarare'\]/);
+    expect(cases).toContain("PROFESSION ok must find Bokhallare inside a word");
   });
 });

@@ -98,10 +98,13 @@ begin
       ('żołnierz',        array['zolnierz'],                   array[]::text[]),
       ('лікар',           array['likar'],                      array[]::text[]),
       ('sykepleier',      array['sykepleier'],                 array[]::text[]),
-      ('ok',              array['ok_word'],                    array['kock_old','bokhallare','kockbitrade']),
-      ('it',              array['it_hyphen','it_quoted'],      array['fritids']),
-      ('el',              array['el_hyphen','elektriker'],     array['hotell']),
-      ('e',               array['el_hyphen','elektriker'],     array['hotell','fritids']),
+      -- Short terms keep v5's recall (owner 2026-11-09): inside a word too, so `ok` finds Bokhållare and
+      -- "sökes". Kock has no "ok" in it (k-o-c-k), so v5 never found it for `ok` and v6 does not either.
+      ('ok',              array['ok_word','bokhallare','forskollarare'], array['kock_old','kockbitrade']),
+      ('it',              array['it_hyphen','it_quoted','fritids'], array[]::text[]),
+      ('el',              array['el_hyphen','elektriker','hotell'], array[]::text[]),
+      ('e',               array['el_hyphen','elektriker','hotell','fritids'], array[]::text[]),
+      ('vd',              array[]::text[],                     array['kock_old']),
       ('kock',            array['kock_old','kockbitrade','slash'], array['ok_word']),
       ('snickare',        array['occ_only'],                   array[]::text[]),
       ('it tekniker',     array['it_hyphen'],                  array[]::text[]),
@@ -161,10 +164,26 @@ begin
     raise warning 'ORDER %', v_all;
   end if;
 
+  -- A short term: the whole word comes first, the ads that only contain it follow (owner 2026-11-09).
+  v_cases := v_cases + 1;
+  select a.label into v_top
+  from public.search_public_vacancy_previews_v1('ok', null, 1, 0) f
+  join case_ads a on a.id = f.id;
+  if v_top is distinct from 'ok_word' then
+    v_fail := v_fail + 1;
+    raise warning 'ORDER short term: whole word not first, top=%', v_top;
+  end if;
+
   -- The profession filter narrows, and the same word means the same thing under it.
   v_cases := v_cases + 1;
+  -- No cook ad here has "ok" in its title or occupation, so `ok` under the cook filter finds none (as v5).
   if (select count(*) from public.search_public_vacancy_previews_v1('ok', 'case-cook', 20, 0)) <> 0 then
-    v_fail := v_fail + 1; raise warning 'PROFESSION ok must not find kock inside a word';
+    v_fail := v_fail + 1; raise warning 'PROFESSION ok found a cook ad that holds no ok';
+  end if;
+  -- `ok` inside a word under a profession: Bokhållare's own filter finds it, as v5 does.
+  v_cases := v_cases + 1;
+  if not exists (select 1 from public.search_public_vacancy_previews_v1('ok', 'case-other', 50, 0) f join case_ads a on a.id = f.id where a.label = 'bokhallare') then
+    v_fail := v_fail + 1; raise warning 'PROFESSION ok must find Bokhallare inside a word';
   end if;
   v_cases := v_cases + 1;
   if (select max(f.total_count) from public.search_public_vacancy_previews_v1('kock', 'case-cook', 1, 0) f) <> 3 then

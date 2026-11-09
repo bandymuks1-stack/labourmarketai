@@ -7,9 +7,10 @@
 -- still returned as NULL. ONLY the two branches with free text change, and both read the same
 -- folded text from public_vacancy_search. Apply only after the reconcile script reports 0.
 --
--- RULE (SR-10): a search finds an ad by its public title or its occupation. A term of up to three
--- characters must start a word, so `ok` does not find Kock; a longer one may sit anywhere in a
--- word, so `snickare` finds Byggsnickare. A whole-word match comes first, then the newest. A term
+-- RULE (SR-10): a search finds an ad by its public title or its occupation. A term of any length
+-- may sit anywhere in a word, as in v5, so `ok` still finds Kock and `snickare` finds Byggsnickare;
+-- every ad v5 finds for a term, v6 finds too (owner 2026-11-09: keep short-term recall). A
+-- whole-word match comes first, then the newest. A term
 -- with nothing searchable in it (`-`, `%`) finds nothing. Case, marks and ß/ss do not matter.
 -- PROOF: scripts/db-proof/search-title-oracle.sql, scripts/db-proof/search-title-cases.sql.
 -- Rollback: supabase/rollbacks/20261105100100_search_public_vacancy_previews_narrow_v6.down.sql (the v5 body verbatim).
@@ -57,7 +58,8 @@ begin
       return;
     end if;
     v_word := '% ' || v_folded || ' %';
-    v_match := case when length(v_folded) <= 3 then '% ' || v_folded || '%' else '%' || v_folded || '%' end;
+    -- Every term matches anywhere in a word, as v5 did (owner 2026-11-09): `ok` still finds Kock.
+    v_match := '%' || v_folded || '%';
   end if;
 
   if p_profession_slug is null and v_needle is null then
@@ -155,7 +157,7 @@ end;
 $function$;
 
 comment on function public.search_public_vacancy_previews_v1(text, text, integer, integer) is
-  'Anonymous board projection. plpgsql with one branch per filter combination so each branch is planned with a usable index. Free text matches the public title and the occupation through public_vacancy_search, a derived folded copy of active ads, whose scan answers the exact total and the page; neither the title nor the copy is returned. A term of up to three characters must start a word. total_count: singleton when unfiltered (<= 10 min stale), exact live count otherwise.';
+  'Anonymous board projection. plpgsql with one branch per filter combination so each branch is planned with a usable index. Free text matches the public title and the occupation through public_vacancy_search, a derived folded copy of active ads, whose scan answers the exact total and the page; neither the title nor the copy is returned. Every term matches anywhere in a word, as in v5; a whole word ranks first. total_count: singleton when unfiltered (<= 10 min stale), exact live count otherwise.';
 
 -- ROLLBACK
 -- see supabase/rollbacks/20261105100100_search_public_vacancy_previews_narrow_v6.down.sql

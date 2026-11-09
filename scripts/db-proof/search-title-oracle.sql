@@ -34,7 +34,8 @@ declare
 begin
   foreach v_term in array v_terms loop
     v_folded := btrim(regexp_replace(regexp_replace(normalize(translate(replace(lower(btrim(v_term)), 'ß', 'ss'), 'øæłđ', 'oald'), NFD), '[\u0300-\u036f]', '', 'g'), '[^[:alnum:]+#]+', ' ', 'g'));
-    v_like := case when length(v_folded) <= 3 then '% ' || v_folded || '%' else '%' || v_folded || '%' end;
+    -- Anywhere in a word for every length, as v5 (owner 2026-11-09).
+    v_like := '%' || v_folded || '%';
     v_today := '%' || lower(replace(replace(btrim(v_term), '%', '\%'), '_', '\_')) || '%';
     select count(*) filter (where v_folded <> '' and x.t like v_like),
            count(*) filter (where x.o like v_today),
@@ -52,11 +53,12 @@ begin
     from public.search_public_vacancy_previews_v1(v_term, null, 50, 0) f;
     v_cases := v_cases + 1;
     if v_total is distinct from v_oracle or v_title <> 0 or v_rows > 50
-       or v_lost_word > 0 or (v_lost > 0 and length(v_folded) > 3) then
+       -- SUPERSET: every ad v5 finds for a term with something searchable in it, v6 finds too.
+       or (v_lost > 0 and v_folded <> '') then
       v_diffs := v_diffs + 1;
       raise warning 'DIFF term=% oracle=% total=% rows=% titles=% lost=% lost_word=%', v_term, v_oracle, v_total, v_rows, v_title, v_lost, v_lost_word;
     end if;
-    raise notice 'term=% v5=% v6=% v5_only=%', v_term, v_found_today, v_total, v_lost;
+    raise notice 'term=% v5=% v6=% v5_only=% %', v_term, v_found_today, v_total, v_lost, case when v_folded = '' and v_lost > 0 then ' (symbol-only term: finds nothing by rule)' else '' end;
   end loop;
   raise notice 'ORACLE cases=% diffs=%', v_cases, v_diffs;
   if v_diffs > 0 then
