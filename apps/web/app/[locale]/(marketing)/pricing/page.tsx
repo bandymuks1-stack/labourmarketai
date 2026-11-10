@@ -29,6 +29,9 @@ import {
 // the build never needs Supabase. It degrades gracefully if unreachable.
 export const dynamic = "force-dynamic";
 
+/** Position of "How is billing handled?" in `pricing.faq` (pinned by a guard). */
+const BILLING_FAQ_INDEX = 2;
+
 export default async function PricingPage({
   params,
   searchParams,
@@ -58,7 +61,12 @@ export default async function PricingPage({
   const activationOpen = pricesConfirmed && billingLive;
   setRequestLocale(locale);
   const t = await getTranslations("pricing");
-  const faq = t.raw("faq") as { q: string; a: string }[];
+  // The billing answer ("card payment through Stripe, invoices in your
+  // account") is true only once activation is open; until then the same
+  // question gets the closed-state answer (owner P0 2026-11-10).
+  const faq = (t.raw("faq") as { q: string; a: string }[]).map((item, i) =>
+    i === BILLING_FAQ_INDEX && !activationOpen ? { q: item.q, a: t("faqBillingClosed") } : item,
+  );
 
   return (
     <>

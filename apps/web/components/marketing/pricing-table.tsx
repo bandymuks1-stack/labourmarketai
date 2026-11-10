@@ -66,7 +66,12 @@ export async function PricingTable() {
               data-testid={`pricing-price-state-${slug}`}
               data-state={PRICING_READINESS_STATE}
             >
-              {t(`priceState.${PRICING_READINESS_STATE}` as never)}
+              {/* Confirmed prices while online payment is closed must not say
+                  "activation happens in your organization account" (owner P0
+                  2026-11-10): the closed state has its own sentence. */}
+              {confirmed && !billingOn
+                ? t("priceState.owner_confirmed_closed")
+                : t(`priceState.${PRICING_READINESS_STATE}` as never)}
             </p>
 
             <p className="mt-6 font-mono text-meta uppercase tracking-label text-text-muted">

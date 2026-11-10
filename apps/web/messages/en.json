@@ -5713,7 +5713,8 @@
     ],
     "priceState": {
       "draft_pricing": "Prices are being prepared — nothing can be bought yet.",
-      "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page."
+      "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page.",
+      "owner_confirmed_closed": "Prices confirmed by the owner. Online payment is not open yet; nothing is charged on this page."
     },
     "individual": {
       "name": "Special requirements",
@@ -5725,7 +5726,8 @@
     "priceFree": "€0",
     "pricePerMonth": "€{price}/month",
     "ctaStartFree": "Start free in your organization account",
-    "ctaSubscribe": "Activate in your organization account"
+    "ctaSubscribe": "Activate in your organization account",
+    "faqBillingClosed": "Online payment is not open to the public yet, so nothing can be bought here. Registration and one active position are free. For paid work, first clients are served directly and the price is confirmed with you before anything starts."
   },
   "privacySelfService": {
     "title": "Privacy and your data",
