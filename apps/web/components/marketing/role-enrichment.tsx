@@ -110,6 +110,7 @@ export async function RoleEnrichment({
         </h2>
         <div className="mt-8">
           <BenefitCards
+            nested
             items={features.map((f) => ({ title: f.title, body: f.desc }))}
           />
         </div>
