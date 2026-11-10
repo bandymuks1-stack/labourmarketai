@@ -229,7 +229,14 @@ These keep job seekers out, because these adverts are for employers:
 - **After consent:**
   - `landing_viewed` carries audience `companies`, the landing path and the five `utm_*` values.
   - `cta_clicked` carries `cta_id = companies_market_<m>`.
-  - `company_need_started` and `company_need_submitted` carry the first-touch `utm_*` values.
+  - `company_need_started` carries **no** `utm_*` values, only the audience. Tie it to a campaign
+    through its `session_id`, which it shares with that visit's `landing_viewed` and `cta_clicked`.
+  - `company_need_submitted` carries the first-touch `utm_*` values and `landing_path`. It is
+    sent only when the inquiry was really stored.
+  - Neither event holds the stored inquiry's id. To find the inquiry behind a submitted event,
+    match `company_need_public_intakes` on time (within seconds), `source_path` and country.
+  - The inquiry's `locale` column holds only `lt`, `en` or `ru` today. A German or Dutch
+    inquiry is stored as `lt`, so read the language from `source_path` (`/de/company-need`).
 - **Where to read it:** the admin conversion funnel. The campaign table groups by `utm_campaign` and
   `utm_content`.
 - **No third-party pixel, tag or tracker** (Google tag, Meta pixel, LinkedIn Insight) is installed.
