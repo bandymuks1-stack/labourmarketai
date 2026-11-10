@@ -239,7 +239,7 @@ export function CompanyNeedForm({
           </select>
         </label>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.country}</span>
             <select name="country" required defaultValue="" className={FIELD} data-testid="company-need-country">
@@ -262,7 +262,7 @@ export function CompanyNeedForm({
           <span className={HELP}>{labels.cityRegionHelp}</span>
         </label>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.startDate}</span>
             <input type="date" name="start_date" className={FIELD} />
