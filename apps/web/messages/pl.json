@@ -10496,7 +10496,7 @@
   },
   "workerIntake": {
     "title": "Zgłoszenie pracownika",
-    "subtitle": "Podaj swój zawód i dostępność, a potem załóż bezpłatny profil, aby wszystko zapisać — nic nie jest publikowane automatycznie.",
+    "subtitle": "Podaj swój zawód i dostępność, aby sprawdzić swoje dane. Ten formularz niczego nie zapisuje — aby pracodawcy mogli Cię znaleźć, załóż bezpłatny profil i wpisz tam swoje dane.",
     "fullName": "Imię i nazwisko",
     "profession": "Branża i rodzaj pracy",
     "professionPlaceholder": "Wybierz branżę i rodzaj pracy",
@@ -10526,7 +10526,7 @@
     "submit": "Sprawdź moje dane",
     "aiBadge": "Sugestia AI",
     "aiNotVerified": "Sprawdź przed zapisaniem — nic nie zapisuje się automatycznie.",
-    "aiDisabled": "Nic z tego formularza nie zostało zapisane, a automatyczna propozycja nie jest teraz dostępna. Aby zapisać swoje dane, utwórz poniżej bezpłatny profil pracownika.",
+    "aiDisabled": "Nic z tego formularza nie zostało zapisane, a automatyczna propozycja nie jest teraz dostępna. Aby pracodawcy mogli Cię znaleźć, utwórz poniżej bezpłatny profil pracownika i wpisz tam swoje dane.",
     "aiHeadline": "Proponowany nagłówek",
     "aiSkills": "Proponowane umiejętności",
     "aiMissing": "Wciąż brakuje",
