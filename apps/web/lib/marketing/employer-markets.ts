@@ -5,9 +5,12 @@
  *
  * A market version is the same page with `?market=<code>`: its own headline,
  * three plain points and ONE call to action, the canonical company-need entry
- * with the country already chosen. It is not a second route, so the canonical
- * URL and the hreflang set stay those of `/for-companies` and search engines
- * see one page, not three near-copies.
+ * with the country already chosen. It is not a second route, but it IS its own
+ * indexable page (owner P0 2026-11-10, SEO): `employerMarketPath` is its
+ * self-canonical address, it carries its own hreflang set and sitemap entry,
+ * and an advert's `utm_*` parameters canonicalise back to it. Before, every
+ * market version declared `/for-companies` as canonical, so Luxembourg, the
+ * Netherlands and Denmark had no page a search engine would index.
  *
  * `locales` are the languages a market's adverts are written in. Another
  * active locale still renders the market copy (every active catalogue carries
@@ -32,6 +35,16 @@ export function readEmployerMarket(raw: unknown): EmployerMarket | null {
   const code = value.trim().toLowerCase();
   return Object.hasOwn(EMPLOYER_MARKETS, code) ? (code as EmployerMarket) : null;
 }
+
+/** A market version's own indexable address (canonical, hreflang, sitemap). */
+export function employerMarketPath(market: EmployerMarket): string {
+  return `/for-companies?market=${market}`;
+}
+
+/** Every market version's address, for the sitemap. */
+export const EMPLOYER_MARKET_PATHS: readonly string[] = (
+  Object.keys(EMPLOYER_MARKETS) as EmployerMarket[]
+).map(employerMarketPath);
 
 /** The company-need query a market page's one call to action carries. */
 export function employerMarketNeedQuery(market: EmployerMarket): string {
