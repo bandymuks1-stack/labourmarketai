@@ -5527,7 +5527,51 @@
       "screenshot": "Įmonės paklausos srautas",
       "cta": "Pradėti darbuotojų užklausą",
       "calculatorBody": "Prieš ieškodamas darbuotojų, įvertink darbą: darbo valandas, medžiagas, įrangą ir keliones — savo skaičiais.",
-      "calculatorLink": "Apskaičiuok projekto kainą"
+      "calculatorLink": "Apskaičiuok projekto kainą",
+      "markets": {
+        "lu": {
+          "metaTitle": "Specialistai statybvietėms Liuksemburge",
+          "metaDescription": "Statybos įmonėms Liuksemburge: aprašyk, kokių suvirintojų, elektrikų, dailidžių ar pastolių montuotojų reikia. Nemokamai; atsako žmogus.",
+          "eyebrow": "Darbdaviams Liuksemburge",
+          "title": "Specialistai tavo statybvietėms",
+          "titleAccent": "Liuksemburge.",
+          "subcopy": "Rangovams ir subrangovams statybose. Parašyk, kokių specialistų reikia — suvirintojų, elektrikų, dailidžių, pastolių montuotojų, — kiek, kur ir nuo kada.",
+          "cta": "Aprašyk, ko reikia",
+          "points": [
+            "Užklausą išsiųsti nemokama. Tam reikia nemokamos paskyros, ir niekas neskelbiama automatiškai.",
+            "Ieškome žmonių, kurių užfiksuotas darbas atitinka tavo poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
+            "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
+          ]
+        },
+        "nl": {
+          "metaTitle": "Specialistai statybvietėms Nyderlanduose",
+          "metaDescription": "Statybos įmonėms Nyderlanduose: aprašyk, kokių suvirintojų, elektrikų, dailidžių ar pastolių montuotojų reikia. Nemokamai; atsako žmogus.",
+          "eyebrow": "Darbdaviams Nyderlanduose",
+          "title": "Specialistai tavo statybvietėms",
+          "titleAccent": "Nyderlanduose.",
+          "subcopy": "Rangovams ir subrangovams statybose. Parašyk, kokių specialistų reikia — suvirintojų, elektrikų, dailidžių, pastolių montuotojų, — kiek, kur ir nuo kada.",
+          "cta": "Aprašyk, ko reikia",
+          "points": [
+            "Užklausą išsiųsti nemokama. Tam reikia nemokamos paskyros, ir niekas neskelbiama automatiškai.",
+            "Ieškome žmonių, kurių užfiksuotas darbas atitinka tavo poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
+            "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
+          ]
+        },
+        "dk": {
+          "metaTitle": "Specialistai statybvietėms Danijoje",
+          "metaDescription": "Statybos įmonėms Danijoje: aprašyk, kokių suvirintojų, elektrikų, dailidžių ar pastolių montuotojų reikia. Nemokamai; atsako žmogus.",
+          "eyebrow": "Darbdaviams Danijoje",
+          "title": "Specialistai tavo statybvietėms",
+          "titleAccent": "Danijoje.",
+          "subcopy": "Rangovams ir subrangovams statybose. Parašyk, kokių specialistų reikia — suvirintojų, elektrikų, dailidžių, pastolių montuotojų, — kiek, kur ir nuo kada.",
+          "cta": "Aprašyk, ko reikia",
+          "points": [
+            "Užklausą išsiųsti nemokama. Tam reikia nemokamos paskyros, ir niekas neskelbiama automatiškai.",
+            "Ieškome žmonių, kurių užfiksuotas darbas atitinka tavo poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
+            "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
+          ]
+        }
+      }
     },
     "agencies": {
       "eyebrow": "Agentūroms",

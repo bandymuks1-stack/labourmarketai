@@ -5527,7 +5527,51 @@
       "screenshot": "Company demand flow",
       "cta": "Start a workforce inquiry",
       "calculatorBody": "Before you post a need, size the work: labour hours, materials, equipment and travel, in your own numbers.",
-      "calculatorLink": "Estimate a project’s cost"
+      "calculatorLink": "Estimate a project’s cost",
+      "markets": {
+        "lu": {
+          "metaTitle": "Skilled trades workers for sites in Luxembourg",
+          "metaDescription": "Construction contractors in Luxembourg: describe the welders, electricians, carpenters or scaffolders you need. Free to submit; a person follows up.",
+          "eyebrow": "For employers in Luxembourg",
+          "title": "Skilled trades for your sites",
+          "titleAccent": "in Luxembourg.",
+          "subcopy": "For construction contractors and subcontractors. Tell us which specialists you need — welders, electricians, carpenters, scaffolders — how many, where and from when.",
+          "cta": "Describe the workers you need",
+          "points": [
+            "Submitting an inquiry is free. You need a free account to send it, and nothing is published automatically.",
+            "We look for people whose recorded work fits your need. If no suitable match is available yet, we say so.",
+            "For construction inquiries, our partner company can coordinate documents and onboarding, with a person handling each step."
+          ]
+        },
+        "nl": {
+          "metaTitle": "Skilled trades workers for sites in the Netherlands",
+          "metaDescription": "Construction contractors in the Netherlands: describe the welders, electricians, carpenters or scaffolders you need. Free to submit; a person follows up.",
+          "eyebrow": "For employers in the Netherlands",
+          "title": "Skilled trades for your sites",
+          "titleAccent": "in the Netherlands.",
+          "subcopy": "For construction contractors and subcontractors. Tell us which specialists you need — welders, electricians, carpenters, scaffolders — how many, where and from when.",
+          "cta": "Describe the workers you need",
+          "points": [
+            "Submitting an inquiry is free. You need a free account to send it, and nothing is published automatically.",
+            "We look for people whose recorded work fits your need. If no suitable match is available yet, we say so.",
+            "For construction inquiries, our partner company can coordinate documents and onboarding, with a person handling each step."
+          ]
+        },
+        "dk": {
+          "metaTitle": "Skilled trades workers for sites in Denmark",
+          "metaDescription": "Construction contractors in Denmark: describe the welders, electricians, carpenters or scaffolders you need. Free to submit; a person follows up.",
+          "eyebrow": "For employers in Denmark",
+          "title": "Skilled trades for your sites",
+          "titleAccent": "in Denmark.",
+          "subcopy": "For construction contractors and subcontractors. Tell us which specialists you need — welders, electricians, carpenters, scaffolders — how many, where and from when.",
+          "cta": "Describe the workers you need",
+          "points": [
+            "Submitting an inquiry is free. You need a free account to send it, and nothing is published automatically.",
+            "We look for people whose recorded work fits your need. If no suitable match is available yet, we say so.",
+            "For construction inquiries, our partner company can coordinate documents and onboarding, with a person handling each step."
+          ]
+        }
+      }
     },
     "agencies": {
       "eyebrow": "For agencies",
