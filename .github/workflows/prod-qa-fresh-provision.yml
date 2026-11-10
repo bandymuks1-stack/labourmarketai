@@ -4,8 +4,8 @@ run-name: prod-qa-fresh-provision ${{ inputs.action }} ${{ inputs.who }}
 # OWNER-DISPATCH ONLY. Creates (or bans) owner-approved synthetic production
 # identities (owner decisions 2026-10-26):
 #
-#   who=fresh-pair  qa.freshworker+act1@labourmarket.ai   a brand-new worker
-#                   qa.freshcompany+act1@labourmarket.ai  a brand-new company
+#   who=fresh-pair  qa.freshworker+act2@labourmarket.ai   a brand-new worker (act1 pair, 2026-10-26, is onboarded)
+#                   qa.freshcompany+act2@labourmarket.ai  a brand-new company
 #   who=buyer       qa.buyer+act1@labourmarket.ai         one buyer (customer role) for 6.4
 #
 # Creating an account is an owner action: an agent does not dispatch this
@@ -81,7 +81,7 @@ jobs:
           if [ "${WHO}" = "buyer" ]; then
             targets="qa.buyer+act1@labourmarket.ai"
           else
-            targets="qa.freshworker+act1@labourmarket.ai qa.freshcompany+act1@labourmarket.ai"
+            targets="qa.freshworker+act2@labourmarket.ai qa.freshcompany+act2@labourmarket.ai"
           fi
           for who in ${targets}; do
             PROD_QA_PROVISION_IDENTITY="$who" pnpm exec tsx scripts/prod-qa-provision.ts --i-understand-production ${flag}

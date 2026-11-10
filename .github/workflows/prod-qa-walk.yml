@@ -408,8 +408,8 @@ jobs:
             PROD_QA_IDENTITY="$1" PROD_QA_STORAGE_SLOT="$2" pnpm exec tsx scripts/prod-qa-mint-session.ts
           }
           if [ "${{ needs.debounce.outputs.spec }}" = "fresh-activation" ]; then
-            mint_existing "qa.freshworker+act1@labourmarket.ai"  freshworker
-            mint_existing "qa.freshcompany+act1@labourmarket.ai" freshcompany
+            mint_existing "qa.freshworker+act2@labourmarket.ai"  freshworker
+            mint_existing "qa.freshcompany+act2@labourmarket.ai" freshcompany
           fi
           if [ "${{ needs.debounce.outputs.spec }}" = "buyer-workspace" ]; then
             mint_existing "qa.buyer+act1@labourmarket.ai" buyer
