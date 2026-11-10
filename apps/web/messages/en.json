@@ -5481,9 +5481,9 @@
   "pages": {
     "workers": {
       "eyebrow": "For workers",
-      "title": "Your skills,",
-      "titleAccent": "discoverable.",
-      "subcopy": "Build one profile, set your availability, and let real demand find you across borders — no recruiters in the middle.",
+      "title": "Find work",
+      "titleAccent": "with one free profile.",
+      "subcopy": "Build one profile, set your availability, and let real demand find you across borders.",
       "benefits": [
         {
           "title": "One profile, every market",
@@ -5507,9 +5507,9 @@
     },
     "companies": {
       "eyebrow": "For companies",
-      "title": "Opportunity flow,",
-      "titleAccent": "in context.",
-      "subcopy": "Post what you need on each project and see which available workers and agencies fit it.",
+      "title": "Find the workers",
+      "titleAccent": "your projects need.",
+      "subcopy": "Tell us which specialists each project needs, how many and from when. Sending the inquiry is free and needs no account; a free account also shows you which available workers and agencies fit.",
       "benefits": [
         {
           "title": "Post demand per project",
@@ -5525,7 +5525,7 @@
         }
       ],
       "screenshot": "Company demand flow",
-      "cta": "Start a workforce inquiry",
+      "cta": "Describe the workers you need",
       "calculatorBody": "Before you post a need, size the work: labour hours, materials, equipment and travel, in your own numbers.",
       "calculatorLink": "Estimate a project’s cost",
       "markets": {

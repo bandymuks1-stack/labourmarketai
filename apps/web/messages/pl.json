@@ -5481,9 +5481,9 @@
   "pages": {
     "workers": {
       "eyebrow": "Dla pracowników",
-      "title": "Twoje umiejętności,",
-      "titleAccent": "widoczne dla rynku.",
-      "subcopy": "Zbuduj jeden profil, ustaw dostępność i pozwól, by realne zapotrzebowanie znalazło Cię ponad granicami — bez rekruterów pośrodku.",
+      "title": "Znajdź pracę",
+      "titleAccent": "z jednym darmowym profilem.",
+      "subcopy": "Zbuduj jeden profil, ustaw dostępność i pozwól, by realne zapotrzebowanie znalazło Cię ponad granicami.",
       "benefits": [
         {
           "title": "Jeden profil, wszystkie rynki",
@@ -5507,9 +5507,9 @@
     },
     "companies": {
       "eyebrow": "Dla firm",
-      "title": "Przepływ możliwości,",
-      "titleAccent": "w kontekście.",
-      "subcopy": "Zgłoś, czego potrzebujesz w każdym projekcie, i zobacz, którzy dostępni pracownicy i agencje do tego pasują.",
+      "title": "Znajdź pracowników",
+      "titleAccent": "do swoich projektów.",
+      "subcopy": "Napisz, jakich specjalistów potrzebuje każdy projekt, ilu i od kiedy. Zgłoszenie jest bezpłatne i nie wymaga konta; z darmowym kontem zobaczysz też, którzy dostępni pracownicy i agencje pasują.",
       "benefits": [
         {
           "title": "Zgłaszaj zapotrzebowanie dla każdego projektu",
@@ -5525,7 +5525,7 @@
         }
       ],
       "screenshot": "Ścieżka zapotrzebowania firmy",
-      "cta": "Zgłoś zapotrzebowanie na pracowników",
+      "cta": "Opisz, jakich pracowników potrzebujesz",
       "calculatorBody": "Zanim poprosisz o wykonawców, oszacuj pracę: godziny, materiały, sprzęt i dojazdy — na własnych liczbach.",
       "calculatorLink": "Oblicz koszt projektu",
       "markets": {

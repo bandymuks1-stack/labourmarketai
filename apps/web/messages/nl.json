@@ -5481,9 +5481,9 @@
   "pages": {
     "workers": {
       "eyebrow": "Voor werknemers",
-      "title": "Jouw vaardigheden,",
-      "titleAccent": "vindbaar.",
-      "subcopy": "Bouw één profiel, stel je beschikbaarheid in en laat echte vraag jou over de grens vinden — zonder recruiters ertussen.",
+      "title": "Vind werk",
+      "titleAccent": "met één gratis profiel.",
+      "subcopy": "Bouw één profiel, stel je beschikbaarheid in en laat echte vraag jou over de grens vinden.",
       "benefits": [
         {
           "title": "Eén profiel, elke markt",
@@ -5507,9 +5507,9 @@
     },
     "companies": {
       "eyebrow": "Voor bedrijven",
-      "title": "Stroom van kansen,",
-      "titleAccent": "in context.",
-      "subcopy": "Plaats wat je per project nodig hebt en zie welke beschikbare werknemers en uitzendbureaus erbij passen.",
+      "title": "Vind de mensen",
+      "titleAccent": "die je projecten nodig hebben.",
+      "subcopy": "Vertel ons welke vakmensen elk project nodig heeft, hoeveel en vanaf wanneer. De aanvraag is gratis en zonder account; met een gratis account zie je ook welke beschikbare werknemers en uitzendbureaus passen.",
       "benefits": [
         {
           "title": "Plaats je vraag per project",
@@ -5525,7 +5525,7 @@
         }
       ],
       "screenshot": "Bedrijfsvraagflow",
-      "cta": "Start een personeelsaanvraag",
+      "cta": "Beschrijf welke mensen je nodig hebt",
       "calculatorBody": "Schat het werk in voordat je het uitvraagt: arbeidsuren, materialen, materieel en reizen, met je eigen cijfers.",
       "calculatorLink": "Bereken de kosten van een project",
       "markets": {
