@@ -79,9 +79,13 @@ describe("a11y basics v1", () => {
     expect(src).toMatch(/<input\s+id="journal-photo"\s+type="file"/);
   });
 
-  it("benefit cards use h2 (first heading level after the page h1)", () => {
+  it("benefit cards use h2 at page level and h3 only under a section h2", () => {
     const src = read("components/marketing/benefit-cards.tsx");
-    expect(src).not.toMatch(/<h3/);
-    expect(src).toMatch(/<h2/);
+    // Page level (directly under the page h1): h2. Nested inside a section that
+    // already carries its own h2 (`nested`): h3 — never a skipped level.
+    expect(src).toMatch(/const Title = nested \? "h3" : "h2";/);
+    expect(src).toMatch(/nested = false/);
+    const nestedCalls = read("components/marketing/role-enrichment.tsx");
+    expect(nestedCalls).toMatch(/<BenefitCards\s+nested/);
   });
 });
