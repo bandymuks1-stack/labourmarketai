@@ -3,12 +3,16 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import sitemap from "@/app/sitemap";
 import { activeLocales } from "@/lib/i18n/config";
+import { localizedUrl } from "@/lib/seo/metadata";
 
 import {
+  EMPLOYER_MARKET_PATHS,
   EMPLOYER_MARKETS,
   employerAdLink,
   employerMarketNeedQuery,
+  employerMarketPath,
   readEmployerMarket,
 } from "./employer-markets";
 
@@ -76,4 +80,53 @@ describe("every active catalogue carries the market copy", () => {
       }
     });
   }
+});
+
+describe("each market version is its own indexable page (owner P0 2026-11-10)", () => {
+  const web = join(__dirname, "..", "..");
+  const markets = Object.keys(EMPLOYER_MARKETS) as (keyof typeof EMPLOYER_MARKETS)[];
+
+  it("has its own address, without advert parameters", () => {
+    expect(markets.map(employerMarketPath)).toEqual([
+      "/for-companies?market=lu",
+      "/for-companies?market=nl",
+      "/for-companies?market=dk",
+    ]);
+    expect(EMPLOYER_MARKET_PATHS).toEqual(markets.map(employerMarketPath));
+  });
+
+  it("the page declares that address as canonical, not /for-companies", () => {
+    const page = readFileSync(join(web, "app", "[locale]", "(marketing)", "for-companies", "page.tsx"), "utf8");
+    const meta = page.slice(page.indexOf("export async function generateMetadata"), page.indexOf("export default"));
+    expect(meta).toContain("path: employerMarketPath(market)");
+    expect(meta).not.toMatch(/path: "\/for-companies",/);
+  });
+
+  it("is in the sitemap in every active locale, with hreflang to the same market", () => {
+    const entries = sitemap();
+    for (const path of EMPLOYER_MARKET_PATHS) {
+      for (const locale of activeLocales) {
+        const e = entries.find((x) => x.url === localizedUrl(locale, path));
+        expect(e, `${locale}${path}`).toBeTruthy();
+        const langs = e?.alternates?.languages as Record<string, string>;
+        for (const l of activeLocales) expect(langs[l]).toBe(localizedUrl(l, path));
+        expect(langs["x-default"]).toBe(localizedUrl("en", path));
+      }
+    }
+  });
+
+  it("title, H1 and description differ between markets and from the plain page", () => {
+    const messages = join(web, "messages");
+    for (const locale of activeLocales) {
+      const j = JSON.parse(readFileSync(join(messages, `${locale}.json`), "utf8"));
+      const m = j.pages.companies.markets;
+      for (const field of ["metaTitle", "metaDescription"]) {
+        expect(new Set(markets.map((k) => m[k][field])).size, `${locale} ${field}`).toBe(markets.length);
+      }
+      const h1 = markets.map((k) => `${m[k].title} ${m[k].titleAccent}`);
+      expect(new Set(h1).size, `${locale} H1`).toBe(markets.length);
+      const plain = `${j.pages.companies.title} ${j.pages.companies.titleAccent}`;
+      expect(h1, `${locale} H1 vs plain page`).not.toContain(plain);
+    }
+  });
 });
