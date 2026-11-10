@@ -24,6 +24,8 @@ import {
   ConciergeAccessBanner,
   ConciergeOfferSection,
 } from "@/components/marketing/concierge-offer";
+import { faqPageJsonLd } from "@/lib/seo/faq-json-ld";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 // getPlans() reads the live `plans` table; keep this page request-time so
 // the build never needs Supabase. It degrades gracefully if unreachable.
@@ -59,6 +61,8 @@ export default async function PricingPage({
   setRequestLocale(locale);
   const t = await getTranslations("pricing");
   const faq = t.raw("faq") as { q: string; a: string }[];
+  // The same items the list below renders (AEO, decision 0009).
+  const faqLd = faqPageJsonLd(faq, locale);
 
   return (
     <>
@@ -132,6 +136,9 @@ export default async function PricingPage({
             </div>
           ))}
         </dl>
+        {faqLd ? (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(faqLd) }} />
+        ) : null}
       </section>
     </>
   );
