@@ -16,6 +16,7 @@ import { sendCompanyNeedOwnerAlert } from "../notifications/telegram-owner-alert
 import { isConstructionWorkType } from "../taxonomy/work-categories";
 import { aiLocaleFor, type AiLocale } from "../ai/runtime/types";
 import { NO_JS_REVIEW_MARK, recordPublicFormRefusal, screenPublicFormTiming } from "../security/public-form-guard";
+import { COMPANY_NEED_ENTRY } from "./company-need-prefill";
 
 export interface CompanyNeedFormState {
   readonly ok: boolean;
@@ -128,7 +129,13 @@ export async function submitCompanyNeedAction(
 
   const rawLocale = await getLocale();
   const locale = toAiLocale(rawLocale);
-  const sourcePath = `/${rawLocale}/company-need${needsReview ? NO_JS_REVIEW_MARK : ""}`;
+  // The public button that opened the form rides on source_path (no new
+  // column): "/de/company-need?from=companies_market_lu". Re-validated here.
+  const entryRaw = str(formData.get("from"));
+  const entry = entryRaw && COMPANY_NEED_ENTRY.test(entryRaw) ? entryRaw : null;
+  const sourcePath = `/${rawLocale}/company-need${needsReview ? NO_JS_REVIEW_MARK : ""}${
+    entry ? `${needsReview ? "&" : "?"}from=${entry}` : ""
+  }`;
 
   // Persist the structured need for follow-up (anonymous path, v1). This is
   // the real backend now: a success means a row was stored for the operator.

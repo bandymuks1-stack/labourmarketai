@@ -53,8 +53,9 @@ export interface FeedCursor {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|[+-]\d{2}:\d{2})$/;
-/** `?review=no-js` marks a send that came without JavaScript (public-form-guard.ts). */
-const COMPANY_NEED_PATH = /^\/[a-z]{2}\/company-need(?:\?review=no-js)?$/;
+/** `?review=no-js` marks a send that came without JavaScript (public-form-guard.ts);
+ *  `from=` names the public button that opened the form (company-need-prefill.ts). */
+const COMPANY_NEED_PATH = /^\/[a-z]{2}\/company-need(?:\?review=no-js)?(?:[?&]from=[a-z0-9_]{1,40})?$/;
 /** Mailboxes only our own walks use: `example.invalid` (RFC 2606) and the e2e proof
  *  domain `e2e-proof.local` (owner order 2026-11-09: such a contact is synthetic). */
 const TEST_MAILBOX = /@(?:example\.invalid|e2e-proof\.local)$/i;

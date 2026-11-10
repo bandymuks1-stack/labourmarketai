@@ -13,6 +13,11 @@
  * (non-PII, non-price). The other fields are accepted for completeness but
  * every value is length-bounded and used purely as a form default the user
  * reviews before submitting. PURE — no fs, no net, client-safe.
+ *
+ * `from` (owner P0 2026-11-10, attribution): the id of the public button that
+ * opened the form (e.g. `companies_market_lu`), so an inquiry records which
+ * page it came from. A page's own button id, never a person's identifier or
+ * a campaign tag; a bounded slug or nothing.
  */
 import { ALL_ISO_COUNTRIES } from "@/lib/location/country-model";
 import { isWorkTypeSlug } from "@/lib/taxonomy/work-categories";
@@ -23,7 +28,11 @@ export interface CompanyNeedPrefill {
   readonly profession?: string;
   readonly expectedDuration?: string;
   readonly description?: string;
+  readonly entry?: string;
 }
+
+/** A public button id: lower-case slug, bounded. */
+export const COMPANY_NEED_ENTRY = /^[a-z0-9_]{1,40}$/;
 
 const MAX_WORKERS = 1000; // mirrors the form input's max
 const MAX_DURATION_CHARS = 120; // mirrors the form input's maxLength
@@ -45,6 +54,7 @@ export function parseCompanyNeedPrefill(
     profession?: string;
     expectedDuration?: string;
     description?: string;
+    entry?: string;
   } = {};
 
   const workersRaw = params.get("number_of_workers");
@@ -75,6 +85,9 @@ export function parseCompanyNeedPrefill(
 
   const description = text(params.get("description"), MAX_DESCRIPTION_CHARS);
   if (description) out.description = description;
+
+  const entry = params.get("from")?.trim();
+  if (entry && COMPANY_NEED_ENTRY.test(entry)) out.entry = entry;
 
   return out;
 }

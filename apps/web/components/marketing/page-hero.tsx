@@ -93,7 +93,8 @@ export function PageHero({
           </TrackedCta>
         ) : ctaKind === "companyNeed" ? (
           <TrackedCta
-            href={ctaNeedQuery ? `/company-need?${ctaNeedQuery}` : "/company-need"}
+            // `from=` tells the inquiry which button opened it (company-need-prefill.ts).
+            href={`/company-need?${[ctaNeedQuery, `from=${ctaSource}`].filter(Boolean).join("&")}`}
             ctaId={ctaSource}
             audience="companies"
             className={buttonLinkClassName()}
