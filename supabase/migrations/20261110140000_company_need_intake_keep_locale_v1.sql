@@ -1,3 +1,6 @@
+-- @human-gate-approved
+-- (Acknowledges the SECURITY DEFINER re-create for CI only. The owner approved PREPARING this
+--  migration on 2026-11-10; applying it to production needs a separate owner approval.)
 -- ============================================================================
 -- 20261110140000 — public company-need intake keeps the visitor's language
 --
