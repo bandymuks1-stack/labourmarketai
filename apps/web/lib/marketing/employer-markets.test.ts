@@ -69,6 +69,8 @@ describe("every active catalogue carries the market copy", () => {
           expect(typeof c[k] === "string" && c[k].trim().length > 0, `${locale} ${m}.${k}`).toBe(true);
         }
         expect(c.points).toHaveLength(3);
+        // /company-need is a no-signup public intake: the copy may never say an account is required.
+        if (locale === "en") expect(c.points[0]).toContain("needs no account");
         expect(c.metaTitle.length).toBeLessThanOrEqual(60);
         expect(c.metaDescription.length).toBeLessThanOrEqual(160);
       }

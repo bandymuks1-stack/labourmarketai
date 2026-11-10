@@ -30,7 +30,7 @@ and its test.
 These follow the honesty doctrine and the product as it is on 2026-11-10.
 
 **May say** (true today):
-- Submitting an inquiry is free. A free account is needed to send it.
+- Submitting an inquiry is free and needs no account, only a contact e-mail.
 - Nothing is published automatically.
 - A person follows up on the inquiry.
 - For construction inquiries, a partner company can coordinate documents and onboarding.
