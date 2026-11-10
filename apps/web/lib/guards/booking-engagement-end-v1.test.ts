@@ -1780,6 +1780,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-09: the holder cancels their own account-deletion request; 30-day grace (owner decision); row lock
       // in the erasure runner and executor. RED draft #3172, the marker is the human-gate acknowledgement, NOT applied.
       "20261109120000_privacy_cancel_account_deletion.sql",
+      // 2026-11-10: the company-need intake keeps the visitor's locale (SECURITY DEFINER replace, one line).
+      // RED draft #3195, the marker is the human-gate acknowledgement, NOT applied.
+      "20261110140000_company_need_intake_keep_locale_v1.sql",
 ]);
   });
 
