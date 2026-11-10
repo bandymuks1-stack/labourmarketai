@@ -5666,13 +5666,13 @@
         "tagline": "Dla organizacji, które aktywnie rekrutują i budują zespoły",
         "features": [
           "Bez stałego limitu aktywnych stanowisk",
-          "Wszystko z planu Free, w skali operacyjnej",
+          "Wszystko z planu bezpłatnego, w skali operacyjnej",
           "Jeden plan dla każdego rodzaju organizacji",
           "Operacje projektowe, raporty i eksport CSV"
         ]
       },
       "agency": {
-        "name": "Agency",
+        "name": "Agencja",
         "tagline": "Dla partnerów pracy tymczasowej.",
         "features": [
           "Nieograniczona liczba zarządzanych pracowników",
@@ -10496,7 +10496,7 @@
   },
   "workerIntake": {
     "title": "Zgłoszenie pracownika",
-    "subtitle": "Podaj swój zawód i dostępność. Zamienimy to w szkic profilu, który sprawdzisz — nic nie jest publikowane automatycznie.",
+    "subtitle": "Podaj swój zawód i dostępność, a potem załóż bezpłatny profil, aby wszystko zapisać — nic nie jest publikowane automatycznie.",
     "fullName": "Imię i nazwisko",
     "profession": "Branża i rodzaj pracy",
     "professionPlaceholder": "Wybierz branżę i rodzaj pracy",
@@ -10522,11 +10522,11 @@
     "languages": "Języki",
     "languagesHelp": "Języki, którymi mówisz, oddzielone przecinkami (na przykład: angielski, litewski).",
     "comment": "Coś jeszcze",
-    "commentHelp": "Kilka zdań o Twoim doświadczeniu — asystent wykorzysta je do przygotowania szkicu profilu.",
-    "submit": "Utwórz szkic profilu",
+    "commentHelp": "Kilka zdań o Twoim doświadczeniu.",
+    "submit": "Sprawdź moje dane",
     "aiBadge": "Sugestia AI",
     "aiNotVerified": "Sprawdź przed zapisaniem — nic nie zapisuje się automatycznie.",
-    "aiDisabled": "Szkic AI nie został wygenerowany — asystent nie jest włączony. Twoje dane nie są zapisywane.",
+    "aiDisabled": "Nic z tego formularza nie zostało zapisane, a automatyczna propozycja nie jest teraz dostępna. Aby zapisać swoje dane, utwórz poniżej bezpłatny profil pracownika.",
     "aiHeadline": "Proponowany nagłówek",
     "aiSkills": "Proponowane umiejętności",
     "aiMissing": "Wciąż brakuje",
@@ -10552,7 +10552,7 @@
   },
   "companyNeed": {
     "title": "Rozpocznij zapytanie o pracowników",
-    "subtitle": "Opisz, jakich ludzi potrzebujesz. Zamienimy to w przejrzysty szkic ogłoszenia, który sprawdzisz — nigdy nie wymyślamy wynagrodzenia i nigdy nie publikujemy automatycznie.",
+    "subtitle": "Opisz, jakich ludzi potrzebujesz. Zachowamy Twoje zapytanie i skontaktujemy się z Tobą — nigdy nie wymyślamy wynagrodzenia i nigdy nie publikujemy automatycznie.",
     "companyName": "Nazwa firmy",
     "profession": "Sektor i rodzaj potrzebnej pracy",
     "country": "Kraj",
@@ -10606,11 +10606,11 @@
     "engSubcontracting": "Podwykonawstwo",
     "engAgency": "Dostawa przez agencję",
     "description": "Opisz swoje zapytanie",
-    "descriptionHelp": "Na czym polega praca, gdzie i jakie są wymagania — asystent wykorzysta to do przygotowania przejrzystego ogłoszenia.",
-    "submit": "Utwórz szkic ogłoszenia",
+    "descriptionHelp": "Na czym polega praca, gdzie i jakie są wymagania.",
+    "submit": "Wyślij zapytanie",
     "aiBadge": "Propozycja AI",
     "aiNotVerified": "Sprawdź przed publikacją — nic nie jest publikowane automatycznie.",
-    "aiDisabled": "Szkic AI nie został jeszcze wygenerowany — asystent nie jest włączony. Twoje dane nie zostały zapisane.",
+    "aiDisabled": "Automatyczna propozycja nie jest teraz przygotowywana. Twoje zapytanie jest obsługiwane normalnie.",
     "aiRole": "Rola",
     "aiSkills": "Wymagane umiejętności",
     "aiDocs": "Wymagane dokumenty",
