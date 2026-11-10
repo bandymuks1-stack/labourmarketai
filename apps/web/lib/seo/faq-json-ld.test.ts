@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
@@ -58,10 +58,11 @@ describe("FAQPage appears only where the page renders that Q&A list", () => {
   it("no other file emits FAQPage", () => {
     const hits: string[] = [];
     const walk = (dir: string) => {
-      for (const name of readdirSync(dir)) {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const name = entry.name;
         if (name === "node_modules" || name.startsWith(".")) continue;
         const p = join(dir, name);
-        if (statSync(p).isDirectory()) walk(p);
+        if (entry.isDirectory()) walk(p);
         else if (/\.(ts|tsx)$/.test(name) && !/\.test\.tsx?$/.test(name) && readFileSync(p, "utf8").includes("FAQPage")) {
           hits.push(p.slice(WEB.length + 1).replace(/\\/g, "/"));
         }
