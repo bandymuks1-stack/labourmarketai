@@ -134,3 +134,22 @@ describe("lt/en/ru parity for the new intake keys", () => {
     }
   });
 });
+
+describe("the inquiry-to-account link is described as it works (owner P0 2026-11-10)", () => {
+  // The claim bridge (lib/company/claim-public-intake.ts) shows an intake only
+  // to an account whose PROVEN e-mail equals the intake's contact e-mail, and
+  // the company takes it over by hand. The copy must say "same address",
+  // "confirmed" and "not automatic" — never promise an automatic link.
+  const SAME_ADDRESS = /same e-mail|tuo pačiu el\. pašto|derselben E-Mail|hetzelfde e-mailadres|tym samym adresem|тем же адресом/i;
+  const NOT_AUTOMATIC = /not linked automatically|nesusiejama automatiškai|nicht automatisch verknüpft|niet automatisch gekoppeld|nie jest łączone automatycznie|не связывается автоматически/i;
+  it("receivedBody names the same address and says it is not automatic", () => {
+    for (const loc of ACTIVE) {
+      const body = String(catalog(loc).companyNeed.receivedBody ?? "");
+      expect(body, `${loc} receivedBody`).toMatch(SAME_ADDRESS);
+      expect(body, `${loc} receivedBody`).toMatch(NOT_AUTOMATIC);
+    }
+  });
+  it("bridgeNote names the same address", () => {
+    for (const loc of ACTIVE) expect(String(catalog(loc).companyNeed.bridgeNote), loc).toMatch(SAME_ADDRESS);
+  });
+});
