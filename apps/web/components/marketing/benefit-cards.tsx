@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils";
  *  broke words mid-word — and title with h3 under that h2.
  *
  *  Columns follow the count, so no card is left alone on a row: three → 3,
- *  four → 2 then 4, otherwise 2 then 3. */
+ *  four → 2 then 4, otherwise 2 then 3. Titles hyphenate (the page sets
+ *  `lang`), so long German / Dutch compounds wrap at a syllable, not mid-letter. */
 export function BenefitCards({
   items,
   nested = false,
@@ -39,7 +40,7 @@ export function BenefitCards({
           <span className="inline-grid h-9 w-9 place-items-center rounded-md border border-brand-blue/40 font-mono text-sm text-brand-blue">
             {i + 1}
           </span>
-          <Title className="mt-4 font-display text-lg font-semibold tracking-tight text-text-primary">
+          <Title className="mt-4 hyphens-auto font-display text-lg font-semibold tracking-tight text-text-primary">
             {it.title}
           </Title>
           <p className="mt-2 text-sm leading-relaxed text-text-secondary">
