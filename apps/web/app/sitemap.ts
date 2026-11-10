@@ -4,6 +4,7 @@ import { localizedUrl, hreflangAlternates } from "@/lib/seo/metadata";
 import { SUPPORTED_COUNTRIES } from "@/lib/labour-market/country-evidence";
 import { isVisionPublic } from "@/lib/config/vision-publication";
 import { publishedCategories } from "@/lib/answer-engine/publishing";
+import { WORKER_GUIDES, guideHreflang, guideUrl } from "@/lib/seo/worker-guides";
 
 /**
  * /sitemap.xml — only public, indexable marketing pages, on the apex
@@ -95,6 +96,21 @@ function answerCategoryEntries(): MetadataRoute.Sitemap {
   return entries;
 }
 
+/**
+ * Worker acquisition guides (lib/seo/worker-guides.ts). Each guide exists in
+ * ONE content language under ONE UI locale, so it is emitted once — never per
+ * active locale (every other locale 404s) — with the hreflang cluster of the
+ * same guide in its other languages.
+ */
+function workerGuideEntries(): MetadataRoute.Sitemap {
+  return WORKER_GUIDES.map((g) => ({
+    url: guideUrl(g),
+    changeFrequency: "monthly",
+    priority: 0.7,
+    alternates: { languages: guideHreflang(g) },
+  }));
+}
+
 /** Per-country labour-market evidence pages, e.g. /labour-market/lt. */
 const COUNTRY_PATHS: readonly string[] = SUPPORTED_COUNTRIES.map(
   (c) => `/labour-market/${c.toLowerCase()}`,
@@ -141,6 +157,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }
 
   entries.push(...answerCategoryEntries());
+  entries.push(...workerGuideEntries());
 
   return entries;
 }

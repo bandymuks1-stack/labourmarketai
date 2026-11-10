@@ -475,6 +475,76 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     worldStateCanControlIt: false,
   },
   {
+    // WORKER ACQUISITION GUIDES — owner P0 2026-11-09 (global worker
+    // acquisition SEO/GEO). One page per country and per profession × country
+    // where the profession has a true, country-specific note, in the
+    // language the worker searches in (RU under /ru, TR under /en with a
+    // Turkish body). Pre-auth, like /jobs and /create-cv: the five World-State
+    // answers are honestly "no" for an anonymous reader arriving from search.
+    id: "/work-abroad/[guide]",
+    kind: "screen",
+    originAxiom: "A-04",
+    purpose:
+      "A country or profession × country guide for a worker already living in Europe, in their own search language: who may work there, what is needed on site, official sources, and the existing free worker sign-up and public job board as the next step.",
+    whyNotChat:
+      "The audience is an anonymous person arriving from a search engine or an AI answer, before any account, conversation or World State exists. After sign-up the AI-first workspace owns the journey.",
+    whyNotExistingComponent:
+      "/work-abroad is one overview with no per-country or per-profession facts and stays the hub that links every guide. /labour-market/[country] shows market evidence, not work rights or site requirements. /questions publishes one question in all six UI locales from HUMAN_APPROVED answers, while a guide is ONE content language that may have no UI locale (Turkish). This route adds no intake, no board and no second CV — its CTAs are the existing /auth/signup and /jobs.",
+    owner:
+      "Product owner — AGENT TASK LabourMarket.ai Global Worker Acquisition SEO/GEO, P0 (2026-11-09), Phase B",
+    ownsAction: null,
+
+    worldElement: "market_world_map",
+    whyNotExistingElement:
+      "Same element as /jobs: the public, pre-auth view of the market by country and profession. No new element is introduced.",
+    chatIntegration:
+      "One-way at the pre-auth boundary: the sign-up CTA carries ?next=/dashboard/profile, so the visitor resumes in the workspace where the assistant drives the profile, journal and opportunities.",
+    avatarEffect:
+      "None until the visitor creates an account; the page writes nothing and stores no personal data.",
+    mapEffect: "None — recorded honestly rather than invented.",
+    journalRelation:
+      "It explains that recorded real work becomes evidence; the page itself writes no journal entry.",
+
+    pillar: "world_map",
+    objectType: "job",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "A worker already in Europe searching 'работа электриком в Германии' or 'Almanya'da inşaat işi' learns whether and how they may work there, then registers free.",
+      graphEdge:
+        "SUPPLY ↔ JURISDICTIONS ↔ MOBILITY ↔ DEMAND: the pre-auth edge from a person's search intent (profession + country) to the supply side of the graph, which no public surface serves per country and profession.",
+      whyReuseDamages:
+        "Folding the guides into /work-abroad would put ten countries and two languages on one URL (no per-intent page for search or AI answers); folding them into /questions would force a Turkish page to exist in six UI locales or be HUMAN_APPROVED without a human, both false.",
+      evidence: [
+        "docs/program/FUNCTION_REGISTER.md LNG-4: lt/en/ru/nl/de/pl routed; Turkish and Ukrainian readers end on /en",
+        "lib/i18n/unsupported-language.ts ACQUISITION_ONLY_LANGUAGES lists tr and uk as acquisition-copy languages with no UI catalog",
+      ],
+      ownerRuling:
+        "Owner task 2026-11-09 (P0): 'Implement and publish the first high-quality Russian and Turkish worker acquisition pages, using the existing localization system' and 'Each indexable page must provide distinct, useful information, correct localization and a meaningful registration path.'",
+    },
+  },
+  {
     id: "components/marketing/public-vacancy-card.tsx",
     kind: "persistent_card",
     originAxiom: "A-04",

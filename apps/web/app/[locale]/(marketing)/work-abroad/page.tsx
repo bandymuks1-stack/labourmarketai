@@ -3,6 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
 import { Link } from "@/lib/i18n/navigation";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
+import { GUIDE_CHROME } from "@/content/worker-guides/professions";
+import { GUIDE_LANGUAGES, guidesInLanguage } from "@/lib/seo/worker-guides";
 
 export async function generateMetadata({
   params,
@@ -107,6 +109,32 @@ export default async function WorkAbroadPage({
           </Link>
         </div>
       </section>
+
+      {/* Country and profession guides (lib/seo/worker-guides.ts). Each
+          language's list is shown on EVERY locale's hub, in its own language
+          and marked with `lang`, so a Turkish reader who lands on /de or /ru
+          still finds the Turkish guides. Links carry the guide's own UI locale
+          (a Turkish guide lives under /en). */}
+      {GUIDE_LANGUAGES.map((language) => (
+        <section key={language} lang={language} className="mt-12" data-guide-hub={language}>
+          <h2 className="font-display text-2xl font-bold text-text-primary">
+            {GUIDE_CHROME[language].hubTitle}
+          </h2>
+          <ul className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {guidesInLanguage(language).map((g) => (
+              <li key={g.key}>
+                <Link
+                  href={g.path}
+                  locale={g.homeLocale}
+                  className="text-sm font-semibold text-brand-blue hover:text-brand-champagne"
+                >
+                  {g.h1} →
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
 
       {/* Honest capability statement: CV text is structured by the
           deterministic extractor and every suggestion is human-confirmed.
