@@ -176,10 +176,13 @@ describe("canonical demand funnel — action CTAs route to /company-need only", 
     const hero = read("components/marketing/page-hero.tsx");
     expect(hero).toContain('ctaKind === "companyNeed"');
     // The one route, optionally with the form's own bounded prefill query
-    // (an employer market page preselects its country) — never another path.
+    // (an employer market page preselects its country) and the button's own
+    // id (`from=`, company-need-prefill.ts) — never another path.
     expect(hero).toContain(
-      'href={ctaNeedQuery ? `/company-need?${ctaNeedQuery}` : "/company-need"}',
+      'href={`/company-need?${[ctaNeedQuery, `from=${ctaSource}`].filter(Boolean).join("&")}`}',
     );
+    const companyNeedHrefs = hero.match(/href=\{`\/[a-z-]+\?/g) ?? [];
+    expect(companyNeedHrefs).toEqual(["href={`/company-need?"]);
   });
 });
 
