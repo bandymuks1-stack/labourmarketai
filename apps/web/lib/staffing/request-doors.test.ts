@@ -252,3 +252,16 @@ describe("the page", () => {
     expect(read("app/[locale]/focus-landing/focus-landing.tsx").match(/<LandingRequestDoors /g)).toHaveLength(1);
   });
 });
+
+describe("the doors store no answer they did not ask (owner P0 2026-11-10)", () => {
+  it.each(REQUEST_DOORS)("%s", (door) => {
+    const intake = requestDoorIntake(door, "lt", reader(VALID[door]))!;
+    expect(intake.urgency).toBeNull();
+    expect(intake.accommodation).toBeNull();
+    expect(intake.transportNeeded).toBeNull();
+    // Only the worker-search door asks how many people; only the B2B door is,
+    // by choosing it, subcontracting.
+    if (door !== "worker-search") expect(intake.headcount).toBeNull();
+    expect(intake.engagementType).toBe(door === "b2b" ? "subcontracting" : null);
+  });
+});

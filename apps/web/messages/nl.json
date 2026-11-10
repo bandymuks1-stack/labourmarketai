@@ -10628,7 +10628,8 @@
     "receivedTitle": "Aanvraag ontvangen",
     "receivedBody": "We hebben je aanvraag ontvangen en bewaren die voor opvolging met jou. Om die te bekijken en te beheren, maak je hieronder een account aan of log je in.",
     "partnerRouteTitle": "Voor bouwaanvragen — een route via partnerbedrijven",
-    "partnerRouteBody": "Als er nog geen geschikte directe match met een werknemer is, kunnen wij voor bouwaanvragen eerst aanraden contact op te nemen met onze partner UAB “Nonstop Group” (LT) — de exploitant van het platform. Dat helpt documenten, verantwoordelijkheden en onboarding sneller te coördineren, met een mens die elke stap begeleidt."
+    "partnerRouteBody": "Als er nog geen geschikte directe match met een werknemer is, kunnen wij voor bouwaanvragen eerst aanraden contact op te nemen met onze partner UAB “Nonstop Group” (LT) — de exploitant van het platform. Dat helpt documenten, verantwoordelijkheden en onboarding sneller te coördineren, met een mens die elke stap begeleidt.",
+    "notSpecified": "Niet opgegeven"
   },
   "candidatePool": {
     "title": "Kandidatenpool",

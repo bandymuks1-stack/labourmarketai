@@ -10628,7 +10628,8 @@
     "receivedTitle": "Anfrage erhalten",
     "receivedBody": "Wir haben Ihre Anfrage erhalten und bewahren sie für die Nachverfolgung mit Ihnen auf. Um sie anzusehen und zu verwalten, erstellen Sie unten ein Konto oder melden Sie sich an.",
     "partnerRouteTitle": "Für Bauanfragen — ein Weg über Partnerunternehmen",
-    "partnerRouteBody": "Wenn noch keine passende direkte Arbeitskraft verfügbar ist, können wir für Bauanfragen zunächst empfehlen, unsere Partnerin UAB „Nonstop Group“ (LT) — die Betreiberin der Plattform — zu kontaktieren. Das hilft, Dokumente, Zuständigkeiten und Onboarding schneller abzustimmen, wobei ein Mensch jeden Schritt koordiniert."
+    "partnerRouteBody": "Wenn noch keine passende direkte Arbeitskraft verfügbar ist, können wir für Bauanfragen zunächst empfehlen, unsere Partnerin UAB „Nonstop Group“ (LT) — die Betreiberin der Plattform — zu kontaktieren. Das hilft, Dokumente, Zuständigkeiten und Onboarding schneller abzustimmen, wobei ein Mensch jeden Schritt koordiniert.",
+    "notSpecified": "Keine Angabe"
   },
   "candidatePool": {
     "title": "Kandidatenpool",
