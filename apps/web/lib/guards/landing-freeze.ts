@@ -20,6 +20,12 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * Hero layout repair (owner order 2026-11-10, design completion): with the story
+ * column withdrawn the desktop first screen was half empty and the `order-1`
+ * wrapper put the entry above the h1 on phones. Source order is now promise →
+ * entry → doors, the entry beside the promise from `xl`. EXACTLY ONE hash moved:
+ * focus-landing.tsx. No copy, no namespace.
+ *
  * No fictional people (owner order 2026-11-09): the living worker hero — sample
  * personas with names, professions and careers under a "Sample" label — is
  * withdrawn from the landing; the entry hero is the first screen. EXACTLY ONE
