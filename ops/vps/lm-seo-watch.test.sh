@@ -34,8 +34,11 @@ case "$U" in
 Sitemap: b
 Sitemap: c';;
   "$B/sitemap.xml") body="<urlset><url><loc>$B/lt</loc></url></urlset>"; [ "${BREAK:-}" = private ] && body="$body<loc>$B/en/dashboard</loc>";;
-  "$B/jobs-sitemap.xml") body=""; for i in $(seq 0 40); do body="$body<sitemap><loc>$B/jobs-sitemap/$i.xml</loc></sitemap>
-"; done; [ "${BREAK:-}" = shards ] && body="<sitemap><loc>$B/jobs-sitemap/0.xml</loc></sitemap>";;
+  # ONELINE=1 serves the index as production does (2026-11-10): every <sitemap> on one line, no newline at all.
+  "$B/jobs-sitemap.xml") nl="
+"; [ "${ONELINE:-}" = 1 ] && nl=""
+    body='<?xml version="1.0" encoding="UTF-8"?><sitemapindex>'; for i in $(seq 0 40); do body="$body<sitemap><loc>$B/jobs-sitemap/$i.xml</loc></sitemap>$nl"; done
+    body="$body</sitemapindex>"; [ "${BREAK:-}" = shards ] && body="<sitemapindex><sitemap><loc>$B/jobs-sitemap/0.xml</loc></sitemap></sitemapindex>";;
   "$B"/jobs-sitemap/*) body="<url><loc>$B/en/jobs/a1</loc></url>
 <url><loc>$B/en/jobs/a2</loc></url>"; [ "${BREAK:-}" = shard500 ] && { code=503; body=""; };;
   "$B/") code=301; loc="$B/lt"; [ "${BREAK:-}" = root ] && code=307; body="";;
@@ -63,6 +66,13 @@ reset
 expect "all good: healthy" "$(run)" 0
 expect "all good: no mail" "$(mails)" 0
 expect "the paused app host is told, not alerted" "$(grep -c 'app_host=402' "$T/out")" 1
+
+reset
+expect "one-line job index (production layout): healthy" "$(ONELINE=1 run)" 0
+expect "one-line job index: no mail" "$(mails)" 0
+reset
+expect "one-line job index with one shard: a problem" "$(ONELINE=1 run shards)" 1
+expect "one-line job index with one shard: says jobs_shards:1" "$(grep -c 'jobs_shards:1' "$T/out")" 1
 
 for b in canonical noindex hreflang private shards shard500 root dashboard oauth status; do
   reset
