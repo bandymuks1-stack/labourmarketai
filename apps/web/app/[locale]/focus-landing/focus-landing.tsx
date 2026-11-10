@@ -163,12 +163,14 @@ export async function FocusLanding({
                 people or numbers as if real, and carry no sample labels, so the
                 hero is withdrawn and the entry hero below is the landing's
                 first screen. The component stays in the repository unused. */}
-              <section className="grid gap-8 lg:items-start">
-                <div className="order-1 max-w-3xl lg:col-start-1 lg:row-start-1 lg:self-center">
-                  {promise}
-                  <LandingThreeWays />
-                  <LandingRequestDoors locale={locale} />
-                </div>
+              {/* With the story column gone, the left-only hero left the right
+                  half of the first screen empty on desktop, and the `order-1`
+                  wrapper put the entry ABOVE the h1 on phones. Source order is
+                  now the phone order — promise → entry → doors — and from `xl`
+                  the entry takes the right column beside the promise, with the
+                  three ways and the request doors full width beneath. */}
+              <section className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] xl:items-center">
+                <div className="max-w-3xl">{promise}</div>
                 <div className="scroll-mt-24" id="find">
                 <PublicEntry
                   supply={
@@ -181,6 +183,10 @@ export async function FocusLanding({
                       : null
                   }
                 />
+                </div>
+                <div className="-mt-8 xl:col-span-2">
+                  <LandingThreeWays />
+                  <LandingRequestDoors locale={locale} />
                 </div>
               </section>
 
