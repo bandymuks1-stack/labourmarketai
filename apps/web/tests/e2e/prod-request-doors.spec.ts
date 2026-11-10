@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { test, expect, firstVisit, type Browser, type Page } from "./prod-walk";
 
 /**
@@ -20,7 +22,10 @@ const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const TAG = `QA-SYNTHETIC R${RUN}`;
 const DOORS = ["worker-search", "b2b", "project"] as const;
 type Door = (typeof DOORS)[number];
-const PROMISE: Record<string, string> = { lt: "24 valand", en: "24 hours" };
+// The promise line as each catalog has it (owner 2026-11-10: no reply time is
+// promised, only that the team reviews the request and gets in touch).
+const PROMISE = (locale: string): string =>
+  JSON.parse(readFileSync(join(__dirname, "..", "..", "messages", `${locale}.json`), "utf8")).landing.requestDoors.promise;
 const PHONE = { width: 390, height: 844 };
 const MIN_FILL_MS = 4_000;
 const short = (e: unknown) => (e as Error).message.split("\n")[0].slice(0, 160);
@@ -68,7 +73,7 @@ test("every door is visible with its promise, on a phone and a computer, in ever
         for (const door of DOORS) visible.push(await page.getByTestId(`request-door-${door}-open`).first().isVisible());
         const body = await page.locator("body").innerText();
         const wide = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
-        const promise = PROMISE[locale] ? body.includes(PROMISE[locale]) : /24/.test(body);
+        const promise = body.includes(PROMISE(locale));
         record(label, visible.every(Boolean) && promise && !wide, `doors=${visible.filter(Boolean).length}/3 promise=${promise} sideways=${wide}`);
         await ctx.close();
       } catch (e) {
