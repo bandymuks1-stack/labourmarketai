@@ -5481,9 +5481,9 @@
   "pages": {
     "workers": {
       "eyebrow": "Für Arbeitskräfte",
-      "title": "Ihre Fähigkeiten,",
-      "titleAccent": "auffindbar.",
-      "subcopy": "Erstellen Sie ein Profil, legen Sie Ihre Verfügbarkeit fest und lassen Sie sich von echter Nachfrage über Grenzen hinweg finden — ohne Recruiter dazwischen.",
+      "title": "Arbeit finden",
+      "titleAccent": "mit einem kostenlosen Profil.",
+      "subcopy": "Erstellen Sie ein Profil, legen Sie Ihre Verfügbarkeit fest und lassen Sie sich von echter Nachfrage über Grenzen hinweg finden.",
       "benefits": [
         {
           "title": "Ein Profil, jeder Markt",
@@ -5507,9 +5507,9 @@
     },
     "companies": {
       "eyebrow": "Für Unternehmen",
-      "title": "Chancenfluss,",
-      "titleAccent": "im Kontext.",
-      "subcopy": "Veröffentlichen Sie, was Sie in jedem Projekt brauchen, und sehen Sie, welche verfügbaren Arbeitskräfte und Personalagenturen dazu passen.",
+      "title": "Arbeitskräfte finden,",
+      "titleAccent": "die Ihre Projekte brauchen.",
+      "subcopy": "Sagen Sie uns, welche Fachkräfte jedes Projekt braucht, wie viele und ab wann. Die Anfrage ist kostenlos und braucht kein Konto; mit einem kostenlosen Konto sehen Sie außerdem, welche verfügbaren Arbeitskräfte und Personalagenturen passen.",
       "benefits": [
         {
           "title": "Bedarf pro Projekt veröffentlichen",
@@ -5525,7 +5525,7 @@
         }
       ],
       "screenshot": "Bedarfsablauf für Unternehmen",
-      "cta": "Personalanfrage starten",
+      "cta": "Benötigte Arbeitskräfte beschreiben",
       "calculatorBody": "Bevor Sie Arbeit anfragen, schätzen Sie sie ein: Arbeitsstunden, Material, Geräte und Reisen — mit Ihren eigenen Zahlen.",
       "calculatorLink": "Projektkosten berechnen",
       "markets": {

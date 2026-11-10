@@ -5481,9 +5481,9 @@
   "pages": {
     "workers": {
       "eyebrow": "Darbuotojams",
-      "title": "Tavo įgūdžiai —",
-      "titleAccent": "matomi.",
-      "subcopy": "Susikurk vieną profilį, nurodyk, kada esi laisvas, ir leisk realiai paklausai tave surasti — be tarpininkų.",
+      "title": "Rask darbą",
+      "titleAccent": "su vienu nemokamu profiliu.",
+      "subcopy": "Susikurk vieną profilį, nurodyk, kada esi laisvas, ir leisk realiai paklausai tave surasti – ir kitose šalyse.",
       "benefits": [
         {
           "title": "Vienas profilis visoms rinkoms",
@@ -5507,9 +5507,9 @@
     },
     "companies": {
       "eyebrow": "Įmonėms",
-      "title": "Galimybių srautas —",
-      "titleAccent": "kontekste.",
-      "subcopy": "Nurodyk, ko reikia kiekviename projekte, ir matyk, kurie laisvi darbuotojai ir agentūros tam tinka.",
+      "title": "Rask darbuotojų",
+      "titleAccent": "savo projektams.",
+      "subcopy": "Nurodyk, kokių specialistų, kiek ir nuo kada reikia kiekvienam projektui. Užklausa nemokama ir be paskyros; su nemokama paskyra dar matysi, kurie laisvi darbuotojai ir agentūros tinka.",
       "benefits": [
         {
           "title": "Paklausa pagal projektą",
@@ -5525,7 +5525,7 @@
         }
       ],
       "screenshot": "Įmonės paklausos srautas",
-      "cta": "Pradėti darbuotojų užklausą",
+      "cta": "Aprašyti, kokių darbuotojų reikia",
       "calculatorBody": "Prieš ieškodamas darbuotojų, įvertink darbą: darbo valandas, medžiagas, įrangą ir keliones — savo skaičiais.",
       "calculatorLink": "Apskaičiuok projekto kainą",
       "markets": {
