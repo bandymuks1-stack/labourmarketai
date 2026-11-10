@@ -20,6 +20,11 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * No reply-time promise (owner decision 2026-11-10): the request doors no longer
+ * promise contact "within 24 hours" — the request is received and the team gets
+ * in touch after reviewing it. `requestDoors.promise` and `receivedBody` only.
+ * Moved: the `lt`, `en`, `ru` landing namespaces. No source file.
+ *
  * Hero layout repair (owner order 2026-11-10, design completion): with the story
  * column withdrawn the desktop first screen was half empty and the `order-1`
  * wrapper put the entry above the h1 on phones. Source order is now promise →

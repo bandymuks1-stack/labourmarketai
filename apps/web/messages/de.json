@@ -15444,7 +15444,7 @@
         "body": "Für Privat- und Geschäftskunden: Beschreiben Sie das benötigte Projekt oder die Dienstleistung."
       },
       "title": "Anfrage senden",
-      "promise": "Senden Sie Ihre Anfrage – wir melden uns innerhalb von 24 Stunden bei Ihnen.",
+      "promise": "Senden Sie Ihre Anfrage – unser Team prüft sie und meldet sich bei Ihnen.",
       "name": "Name oder Firma",
       "email": "E-Mail",
       "phone": "Telefon",
@@ -15467,7 +15467,7 @@
       "send": "Anfrage senden",
       "sending": "Wird gesendet…",
       "receivedTitle": "Ihre Anfrage ist bei uns eingegangen",
-      "receivedBody": "Wir melden uns innerhalb von 24 Stunden über die angegebenen Kontaktdaten.",
+      "receivedBody": "Ihre Anfrage ist eingegangen. Unser Team prüft sie und meldet sich über die angegebenen Kontaktdaten bei Ihnen.",
       "invalid": "Bitte prüfen Sie die Felder und versuchen Sie es erneut. Ihre Eingaben bleiben im Formular.",
       "limited": "Gerade gehen zu viele Anfragen ein. Bitte versuchen Sie es später: Ihre Eingaben bleiben im Formular.",
       "unavailable": "Ihre Anfrage konnte nicht gesendet werden und ist nicht eingegangen. Ihre Eingaben bleiben im Formular, bitte versuchen Sie es erneut.",

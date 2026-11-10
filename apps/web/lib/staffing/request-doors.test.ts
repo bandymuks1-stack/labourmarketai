@@ -215,7 +215,9 @@ describe("the page", () => {
     expect(d.workerSearch.title).toBe("Užsakyti darbuotojų paiešką");
     expect(d.b2b.title).toBe("Pateikti B2B užklausą");
     expect(d.project.title).toBe("Užsakyti individualaus projekto vykdymą");
-    expect(d.promise).toBe("Pateikite užklausą – susisieksime per 24 valandas.");
+    // Owner 2026-11-10: no reply time until a service term is guaranteed —
+    // the request is received and the team gets in touch after reviewing it.
+    expect(d.promise).toBe("Pateikite užklausą – komanda ją išnagrinės ir susisieks su jumis.");
   });
 
   it.each(["lt", "en", "ru", "nl", "de", "pl"])("%s has every key, and the notice links the policy", (locale) => {
@@ -223,7 +225,9 @@ describe("the page", () => {
     const en = JSON.parse(read("messages/en.json")).landing.requestDoors;
     expect(Object.keys(d).sort()).toEqual(Object.keys(en).sort());
     expect(d.notice).toMatch(/<privacy>.+<\/privacy>/);
-    expect(d.promise).toMatch(/24/);
+    expect(d.promise.length).toBeGreaterThan(20);
+    expect(d.promise).not.toMatch(/\d/);
+    expect(d.receivedBody).not.toMatch(/\d/);
   });
 
   it("a failed send keeps the input: no form action, which would reset it", () => {

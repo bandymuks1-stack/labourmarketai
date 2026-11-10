@@ -15444,7 +15444,7 @@
         "body": "For private and business customers: describe the project or service you need."
       },
       "title": "Send a request",
-      "promise": "Send your request – we will contact you within 24 hours.",
+      "promise": "Send your request – our team reviews it and gets in touch with you.",
       "name": "Name or company",
       "email": "Email",
       "phone": "Phone",
@@ -15467,7 +15467,7 @@
       "send": "Send request",
       "sending": "Sending…",
       "receivedTitle": "We have your request",
-      "receivedBody": "We will contact you within 24 hours using the details you gave.",
+      "receivedBody": "Your request has been received. Our team will review it and contact you using the details you gave.",
       "invalid": "Check the fields and try again. What you typed is still in this form.",
       "limited": "Too many requests right now. Please try later: what you typed stays in the form.",
       "unavailable": "Your request could not be sent and was not received. What you typed stays in the form, so please try again.",

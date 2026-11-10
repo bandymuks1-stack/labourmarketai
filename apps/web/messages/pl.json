@@ -15444,7 +15444,7 @@
         "body": "Dla klientów prywatnych i firm: opisz potrzebny projekt lub usługę."
       },
       "title": "Wyślij zapytanie",
-      "promise": "Wyślij zapytanie – skontaktujemy się z tobą w ciągu 24 godzin.",
+      "promise": "Wyślij zapytanie – nasz zespół je przeanalizuje i skontaktuje się z tobą.",
       "name": "Imię lub firma",
       "email": "E-mail",
       "phone": "Telefon",
@@ -15467,7 +15467,7 @@
       "send": "Wyślij zapytanie",
       "sending": "Wysyłanie…",
       "receivedTitle": "Otrzymaliśmy twoje zapytanie",
-      "receivedBody": "Skontaktujemy się z tobą w ciągu 24 godzin, korzystając z podanych danych.",
+      "receivedBody": "Twoje zapytanie zostało przyjęte. Nasz zespół je przeanalizuje i skontaktuje się z tobą, korzystając z podanych danych.",
       "invalid": "Sprawdź pola i spróbuj ponownie. Wpisane dane zostają w formularzu.",
       "limited": "Teraz jest zbyt wiele zapytań. Spróbuj później: wpisane dane zostają w formularzu.",
       "unavailable": "Nie udało się wysłać zapytania i nie zostało ono odebrane. Wpisane dane zostają w formularzu, spróbuj ponownie.",
