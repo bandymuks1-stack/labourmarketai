@@ -24,6 +24,20 @@ import { isSuperadmin } from "@/lib/auth/superadmin";
  * - `VISION_PUBLIC = true` — back to a normal indexable marketing page.
  *   The flip is a one-line owner-authored PR after smoke PASSES.
  */
+// Per request, never prerendered: who is asking decides 404 or the page. A
+// prerender has no session, so the static build served a 500 (e2e-smoke).
+export const dynamic = "force-dynamic";
+
+/** Superadmin only, failing CLOSED: a missing session, an auth error or an
+ *  unreachable role signal is "no" (a 404), never a 500 and never a grant. */
+async function canSeeInternalPreview(): Promise<boolean> {
+  try {
+    return await isSuperadmin();
+  } catch {
+    return false;
+  }
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -34,7 +48,7 @@ export async function generateMetadata({
   const t = await getTranslations("vision");
   const publishedPublicly = isVisionPublic();
   // A visitor who gets the 404 gets no title or description of the page either.
-  if (!publishedPublicly && !(await isSuperadmin())) {
+  if (!publishedPublicly && !(await canSeeInternalPreview())) {
     return { robots: { index: false, follow: false, googleBot: { index: false, follow: false } } };
   }
   return {
@@ -55,7 +69,7 @@ export default async function VisionPage({
   setRequestLocale(locale);
   const t = await getTranslations("vision");
   const publishedPublicly = isVisionPublic();
-  if (!publishedPublicly && !(await isSuperadmin())) notFound();
+  if (!publishedPublicly && !(await canSeeInternalPreview())) notFound();
 
   return (
     <article className="mx-auto flex max-w-container flex-col gap-12 px-6 py-12 sm:gap-16 sm:px-12 sm:py-16">
