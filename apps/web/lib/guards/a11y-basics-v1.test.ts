@@ -86,6 +86,6 @@ describe("a11y basics v1", () => {
     expect(src).toMatch(/const Title = nested \? "h3" : "h2";/);
     expect(src).toMatch(/nested = false/);
     const nestedCalls = read("components/marketing/role-enrichment.tsx");
-    expect(nestedCalls).toMatch(/<BenefitCards\s+nested/);
+    expect(nestedCalls).toMatch(/<BenefitCards\s+nested\s/);
   });
 });
