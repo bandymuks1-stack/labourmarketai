@@ -7,6 +7,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { Card } from "@/components/ui/Card";
 import {
   employerMarketNeedQuery,
+  employerMarketPath,
   readEmployerMarket,
   type EmployerMarket,
 } from "@/lib/marketing/employer-markets";
@@ -23,12 +24,12 @@ export async function generateMetadata({
   const { locale } = await params;
   const market = readEmployerMarket((await searchParams).market);
   if (!market) return buildPageMetadataFor("companies", locale, "/for-companies");
-  // A market version keeps the page's own canonical and hreflang set: one
-  // indexable page, the advert copy on top of it.
+  // A market version is its own indexable page: self-canonical, its own
+  // hreflang set and sitemap entry. Advert `utm_*` parameters fall away here.
   const t = await getTranslations({ locale: resolveActiveLocale(locale), namespace: "pages.companies.markets" });
   return buildPageMetadata({
     locale: resolveActiveLocale(locale),
-    path: "/for-companies",
+    path: employerMarketPath(market),
     title: t(`${market}.metaTitle`),
     description: t(`${market}.metaDescription`),
   });

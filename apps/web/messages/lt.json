@@ -5481,9 +5481,9 @@
   "pages": {
     "workers": {
       "eyebrow": "Darbuotojams",
-      "title": "Tavo įgūdžiai —",
-      "titleAccent": "matomi.",
-      "subcopy": "Susikurk vieną profilį, nurodyk, kada esi laisvas, ir leisk realiai paklausai tave surasti — be tarpininkų.",
+      "title": "Rask darbą",
+      "titleAccent": "su vienu nemokamu profiliu.",
+      "subcopy": "Susikurk vieną profilį, nurodyk, kada esi laisvas, ir leisk realiai paklausai tave surasti – ir kitose šalyse.",
       "benefits": [
         {
           "title": "Vienas profilis visoms rinkoms",
@@ -5507,9 +5507,9 @@
     },
     "companies": {
       "eyebrow": "Įmonėms",
-      "title": "Galimybių srautas —",
-      "titleAccent": "kontekste.",
-      "subcopy": "Nurodyk, ko reikia kiekviename projekte, ir matyk, kurie laisvi darbuotojai ir agentūros tam tinka.",
+      "title": "Rask darbuotojų",
+      "titleAccent": "savo projektams.",
+      "subcopy": "Nurodyk, kokių specialistų, kiek ir nuo kada reikia kiekvienam projektui. Užklausa nemokama ir be paskyros; su nemokama paskyra dar matysi, kurie laisvi darbuotojai ir agentūros tinka.",
       "benefits": [
         {
           "title": "Paklausa pagal projektą",
@@ -5525,7 +5525,7 @@
         }
       ],
       "screenshot": "Įmonės paklausos srautas",
-      "cta": "Pradėti darbuotojų užklausą",
+      "cta": "Aprašyti, kokių darbuotojų reikia",
       "calculatorBody": "Prieš ieškodamas darbuotojų, įvertink darbą: darbo valandas, medžiagas, įrangą ir keliones — savo skaičiais.",
       "calculatorLink": "Apskaičiuok projekto kainą",
       "markets": {
@@ -10496,7 +10496,7 @@
   },
   "workerIntake": {
     "title": "Darbuotojo registracija",
-    "subtitle": "Nurodyk savo amatą ir laisvumą. Iš to sukuriame profilio juodraštį, kurį peržiūri — niekas nepublikuojama automatiškai.",
+    "subtitle": "Nurodyk savo amatą ir kada esi laisvas, tada susikurk nemokamą profilį, kad viską išsaugotum — niekas nepublikuojama automatiškai.",
     "fullName": "Vardas ir pavardė",
     "profession": "Sektorius ir darbo tipas",
     "professionPlaceholder": "Pasirink sektorių ir darbo tipą",
@@ -10522,11 +10522,11 @@
     "languages": "Kalbos",
     "languagesHelp": "Kalbos, kuriomis kalbi, atskirtos kableliais (pavyzdžiui: anglų, lietuvių).",
     "comment": "Kita informacija",
-    "commentHelp": "Keli sakiniai apie tavo patirtį — asistentas pagal tai paruošia tavo profilį.",
-    "submit": "Sukurti profilio juodraštį",
+    "commentHelp": "Keli sakiniai apie tavo patirtį.",
+    "submit": "Patikrinti duomenis",
     "aiBadge": "AI pasiūlymas",
     "aiNotVerified": "Peržiūrėk prieš išsaugant — niekas neišsaugoma automatiškai.",
-    "aiDisabled": "AI juodraštis dar nesukurtas — asistentas neįjungtas. Tavo duomenys neišsaugomi.",
+    "aiDisabled": "Iš šios formos niekas neišsaugota, o automatinio pasiūlymo dabar nėra. Kad išsaugotum duomenis, žemiau susikurk nemokamą darbuotojo profilį.",
     "aiHeadline": "Siūloma antraštė",
     "aiSkills": "Siūlomi įgūdžiai",
     "aiMissing": "Vis dar trūksta",
@@ -10552,7 +10552,7 @@
   },
   "companyNeed": {
     "title": "Pradėti darbuotojų užklausą",
-    "subtitle": "Aprašyk, kokių žmonių tau reikia. Iš to sukuriame tvarkingą skelbimo juodraštį, kurį peržiūri — mes neišgalvojame atlyginimo ir nepublikuojame automatiškai.",
+    "subtitle": "Aprašyk, kokių žmonių tau reikia. Užklausą išsaugome ir su tavimi susisiekiame — neišgalvojame atlyginimo ir nieko nepublikuojame automatiškai.",
     "companyName": "Įmonės pavadinimas",
     "profession": "Reikalingas sektorius ir darbo tipas",
     "country": "Šalis",
@@ -10606,11 +10606,11 @@
     "engSubcontracting": "Subranga",
     "engAgency": "Tiekimas per agentūrą",
     "description": "Aprašyk užklausą",
-    "descriptionHelp": "Koks darbas, kur ir kokie reikalavimai — asistentas pagal tai paruošia tvarkingą skelbimą.",
-    "submit": "Sukurti skelbimo juodraštį",
+    "descriptionHelp": "Koks darbas, kur ir kokie reikalavimai.",
+    "submit": "Siųsti užklausą",
     "aiBadge": "AI pasiūlymas",
     "aiNotVerified": "Peržiūrėk prieš publikuojant — niekas nepublikuojama automatiškai.",
-    "aiDisabled": "AI juodraštis dar nesukurtas — asistentas neįjungtas. Tavo duomenys neišsaugomi.",
+    "aiDisabled": "Automatinis pasiūlymas šiuo metu neruošiamas. Tavo užklausa tvarkoma įprastai.",
     "aiRole": "Pareigybė",
     "aiSkills": "Reikalingi įgūdžiai",
     "aiDocs": "Reikalingi dokumentai",

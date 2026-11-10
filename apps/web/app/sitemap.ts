@@ -4,6 +4,7 @@ import { localizedUrl, hreflangAlternates } from "@/lib/seo/metadata";
 import { SUPPORTED_COUNTRIES, isCountryPageIndexable } from "@/lib/labour-market/country-evidence";
 import { isVisionPublic } from "@/lib/config/vision-publication";
 import { publishedCategories } from "@/lib/answer-engine/publishing";
+import { EMPLOYER_MARKET_PATHS } from "@/lib/marketing/employer-markets";
 
 /**
  * /sitemap.xml — only public, indexable marketing pages, on the apex
@@ -125,7 +126,9 @@ function priorityFor(path: string): number {
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const paths = [...STATIC_PATHS, ...FLAGGED_PATHS, ...COUNTRY_PATHS];
+  // EMPLOYER_MARKET_PATHS: the LU/NL/DK employer versions of /for-companies,
+  // each its own self-canonical page (lib/marketing/employer-markets.ts).
+  const paths = [...STATIC_PATHS, ...FLAGGED_PATHS, ...COUNTRY_PATHS, ...EMPLOYER_MARKET_PATHS];
   const entries: MetadataRoute.Sitemap = [];
 
   for (const path of paths) {

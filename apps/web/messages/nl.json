@@ -5481,9 +5481,9 @@
   "pages": {
     "workers": {
       "eyebrow": "Voor werknemers",
-      "title": "Jouw vaardigheden,",
-      "titleAccent": "vindbaar.",
-      "subcopy": "Bouw één profiel, stel je beschikbaarheid in en laat echte vraag jou over de grens vinden — zonder recruiters ertussen.",
+      "title": "Vind werk",
+      "titleAccent": "met één gratis profiel.",
+      "subcopy": "Bouw één profiel, stel je beschikbaarheid in en laat echte vraag jou over de grens vinden.",
       "benefits": [
         {
           "title": "Eén profiel, elke markt",
@@ -5507,9 +5507,9 @@
     },
     "companies": {
       "eyebrow": "Voor bedrijven",
-      "title": "Stroom van kansen,",
-      "titleAccent": "in context.",
-      "subcopy": "Plaats wat je per project nodig hebt en zie welke beschikbare werknemers en uitzendbureaus erbij passen.",
+      "title": "Vind de mensen",
+      "titleAccent": "die je projecten nodig hebben.",
+      "subcopy": "Vertel ons welke vakmensen elk project nodig heeft, hoeveel en vanaf wanneer. De aanvraag is gratis en zonder account; met een gratis account zie je ook welke beschikbare werknemers en uitzendbureaus passen.",
       "benefits": [
         {
           "title": "Plaats je vraag per project",
@@ -5525,7 +5525,7 @@
         }
       ],
       "screenshot": "Bedrijfsvraagflow",
-      "cta": "Start een personeelsaanvraag",
+      "cta": "Beschrijf welke mensen je nodig hebt",
       "calculatorBody": "Schat het werk in voordat je het uitvraagt: arbeidsuren, materialen, materieel en reizen, met je eigen cijfers.",
       "calculatorLink": "Bereken de kosten van een project",
       "markets": {
@@ -5672,7 +5672,7 @@
         ]
       },
       "agency": {
-        "name": "Agency",
+        "name": "Bureau",
         "tagline": "Voor uitzendpartners.",
         "features": [
           "Onbeperkt beheerde werknemers",
@@ -10496,7 +10496,7 @@
   },
   "workerIntake": {
     "title": "Werknemersintake",
-    "subtitle": "Vertel ons je vak en beschikbaarheid. Wij maken er een conceptprofiel van dat jij beoordeelt — niets wordt automatisch gepubliceerd.",
+    "subtitle": "Vertel ons je vak en beschikbaarheid en maak dan je gratis profiel aan om alles op te slaan — niets wordt automatisch gepubliceerd.",
     "fullName": "Volledige naam",
     "profession": "Sector & type werk",
     "professionPlaceholder": "Kies je sector en type werk",
@@ -10522,11 +10522,11 @@
     "languages": "Talen",
     "languagesHelp": "Kommagescheiden (bijv. en, lt).",
     "comment": "Nog iets anders",
-    "commentHelp": "Een paar zinnen over je ervaring — de assistent gebruikt dit om een concept van je profiel op te stellen.",
-    "submit": "Maak conceptprofiel",
+    "commentHelp": "Een paar zinnen over je ervaring.",
+    "submit": "Mijn gegevens controleren",
     "aiBadge": "AI-suggestie",
     "aiNotVerified": "Beoordeel voordat je opslaat — niets wordt automatisch opgeslagen.",
-    "aiDisabled": "AI-concept nog niet gegenereerd — de assistent is niet ingeschakeld. Je gegevens worden niet opgeslagen.",
+    "aiDisabled": "Er is niets uit dit formulier opgeslagen en er is nu geen automatisch voorstel beschikbaar. Maak hieronder je gratis werknemersprofiel aan om je gegevens op te slaan.",
     "aiHeadline": "Voorgestelde kopregel",
     "aiSkills": "Voorgestelde vaardigheden",
     "aiMissing": "Ontbreekt nog",
@@ -10552,7 +10552,7 @@
   },
   "companyNeed": {
     "title": "Start een personeelsaanvraag",
-    "subtitle": "Beschrijf de mensen die je nodig hebt. Wij maken er een net vacatureconcept van dat jij beoordeelt — we verzinnen nooit loon en publiceren nooit automatisch.",
+    "subtitle": "Beschrijf de mensen die je nodig hebt. We bewaren je aanvraag en nemen contact met je op — we verzinnen nooit loon en publiceren nooit automatisch.",
     "companyName": "Bedrijfsnaam",
     "profession": "Sector & type werk dat nodig is",
     "country": "Land",
@@ -10606,11 +10606,11 @@
     "engSubcontracting": "Onderaanneming",
     "engAgency": "Via uitzendbureau",
     "description": "Beschrijf je aanvraag",
-    "descriptionHelp": "Wat het werk is, waar, en eventuele eisen — de assistent gebruikt dit om een net vacatureconcept op te stellen.",
-    "submit": "Maak vacatureconcept",
+    "descriptionHelp": "Wat het werk is, waar, en eventuele eisen.",
+    "submit": "Aanvraag versturen",
     "aiBadge": "AI-suggestie",
     "aiNotVerified": "Beoordeel voordat je publiceert — niets wordt automatisch gepubliceerd.",
-    "aiDisabled": "AI-concept nog niet gegenereerd — de assistent is niet ingeschakeld. Je gegevens worden niet opgeslagen.",
+    "aiDisabled": "Er wordt op dit moment geen automatisch voorstel gemaakt. Je aanvraag wordt gewoon behandeld.",
     "aiRole": "Genormaliseerde rol",
     "aiSkills": "Vereiste vaardigheden",
     "aiDocs": "Vereiste documenten",
