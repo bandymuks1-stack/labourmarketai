@@ -106,6 +106,23 @@ describe("company-need copy is operational, not weak 'preview' framing", () => {
   });
 });
 
+describe("the bridge never says an account is needed to send an inquiry", () => {
+  // The form stores the inquiry without an account (persisted → "received").
+  // The always-visible bridge under it once read "To submit this inquiry,
+  // create a free account" — an employer took that as "not sent" (lane D
+  // audit 2026-11-10). The account is offered for managing it, not sending it.
+  const SEND_NEEDS_ACCOUNT =
+    /to submit this inquiry|um diese anfrage .*einzureichen|om deze aanvraag in te dienen|kad pateiktum šią užklausą|aby przesłać to zapytanie|чтобы отправить этот запрос|and submit your inquiry|und anfrage einreichen|en dien je aanvraag in|ir pateikti užklausą|i prześlij zapytanie|и отправить запрос/i;
+  it("bridgeNote and bridgeSignup in every active locale", () => {
+    for (const loc of ACTIVE) {
+      const cn = catalog(loc).companyNeed;
+      for (const k of ["bridgeNote", "bridgeSignup"]) {
+        expect(String(cn[k] ?? ""), `${loc} companyNeed.${k}`).not.toMatch(SEND_NEEDS_ACCOUNT);
+      }
+    }
+  });
+});
+
 describe("lt/en/ru parity for the new intake keys", () => {
   it("all new keys exist and are non-empty in every active locale", () => {
     for (const loc of ACTIVE) {

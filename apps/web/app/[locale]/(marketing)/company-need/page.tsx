@@ -137,9 +137,8 @@ export default async function CompanyNeedPage({
       id="main-content"
     >
       {/* Honest-capability note ABOVE the form (nav/funnel consistency PR):
-          this public step prepares a reviewable draft; nothing is saved or
-          published here. The real submission happens after signup (bridge
-          below). */}
+          the inquiry is structured and stored for follow-up; nothing is
+          published automatically. */}
       <p
         className="card-border p-4 text-sm leading-relaxed text-text-secondary"
         data-testid="company-need-honest-note"
@@ -153,9 +152,10 @@ export default async function CompanyNeedPage({
         countryOptions={countryOptions}
       />
 
-      {/* Funnel bridge: this public form only previews/drafts (no persistence).
-          To post a real need and run scouting/matching, the employer continues
-          into the real account + dashboard demand flow. */}
+      {/* Funnel bridge: sending the form already stores the inquiry for
+          follow-up (no account needed). The account is the next step — to
+          follow and manage the inquiry, post jobs and save candidates — never
+          a condition for the inquiry to count. */}
       <div className="card-border flex flex-col gap-3 p-5" data-testid="need-bridge">
         <p className="text-sm leading-relaxed text-text-secondary">{t("bridgeNote")}</p>
         <div className="flex flex-col gap-2 sm:flex-row">
