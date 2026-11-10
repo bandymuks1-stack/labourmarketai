@@ -100,7 +100,9 @@ else
   fi
 fi
 
-for p in /lt /en /en/jobs /en/about /en/labour-market/lt; do check_page "$BASE$p" "$p"; done
+# /en/labour-market, not a country page: country pages are noindex until they carry
+# text of their own (IDX-20, country-evidence.ts INDEXABLE_COUNTRY_PAGES).
+for p in /lt /en /en/jobs /en/about /en/labour-market; do check_page "$BASE$p" "$p"; done
 [ -z "$JOB1" ] || check_page "$JOB1" job_first
 [ -z "$JOB2" ] || [ "$JOB2" = "$JOB1" ] || check_page "$JOB2" job_last
 

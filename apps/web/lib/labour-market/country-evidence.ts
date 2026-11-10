@@ -209,6 +209,25 @@ export const COUNTRY_SIGNALS: Record<CountryCode, readonly CountrySignal[]> = {
   ],
 };
 
+/**
+ * Country pages a search engine may index (IDX-20, owner P0 2026-11-10).
+ *
+ * Measured in production on 2026-11-10 (`/en/labour-market/{lt,lv,ee,pl,de,nl}`):
+ * of about 1,930 words per page only 130-145 are the country's own, a single
+ * EURES sentence; the requirements matrix, the framing and the EU backdrop are
+ * the same text on all six. Search engines read them as near-copies and did not
+ * index them. So every country page is `noindex, follow` and stays out of the
+ * sitemap, while readers still reach it from `/labour-market`.
+ *
+ * A country joins this list only when its page carries real, sourced text of its
+ * own: never by copying a neighbour's text, and never by inventing a figure.
+ */
+export const INDEXABLE_COUNTRY_PAGES: readonly CountryCode[] = [];
+
+export function isCountryPageIndexable(code: CountryCode): boolean {
+  return INDEXABLE_COUNTRY_PAGES.includes(code);
+}
+
 export function isSupportedCountry(code: string): code is CountryCode {
   return (SUPPORTED_COUNTRIES as readonly string[]).includes(code);
 }

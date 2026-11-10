@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { activeLocales } from "@/lib/i18n/config";
 import { localizedUrl, hreflangAlternates } from "@/lib/seo/metadata";
-import { SUPPORTED_COUNTRIES } from "@/lib/labour-market/country-evidence";
+import { SUPPORTED_COUNTRIES, isCountryPageIndexable } from "@/lib/labour-market/country-evidence";
 import { isVisionPublic } from "@/lib/config/vision-publication";
 import { publishedCategories } from "@/lib/answer-engine/publishing";
 
@@ -95,8 +95,9 @@ function answerCategoryEntries(): MetadataRoute.Sitemap {
   return entries;
 }
 
-/** Per-country labour-market evidence pages, e.g. /labour-market/lt. */
-const COUNTRY_PATHS: readonly string[] = SUPPORTED_COUNTRIES.map(
+/** Per-country labour-market evidence pages, e.g. /labour-market/lt — only the
+ *  ones with enough text of their own to be indexed (IDX-20). */
+const COUNTRY_PATHS: readonly string[] = SUPPORTED_COUNTRIES.filter(isCountryPageIndexable).map(
   (c) => `/labour-market/${c.toLowerCase()}`,
 );
 
