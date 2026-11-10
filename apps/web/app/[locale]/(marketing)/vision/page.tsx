@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LabourMarketOsMap } from "@/components/marketing/labour-market-os-map";
+import { notFound } from "next/navigation";
 import { isVisionPublic } from "@/lib/config/vision-publication";
+import { isSuperadmin } from "@/lib/auth/superadmin";
 
 /**
  * Public vision page — the one-page system explanation for
@@ -12,12 +14,13 @@ import { isVisionPublic } from "@/lib/config/vision-publication";
  *
  * Publication state is gated on `lib/config/vision-publication.ts`:
  *
- * - `VISION_PUBLIC = false` (current) — route stays reachable by direct
- *   URL so the owner can run the smoke checklist against it, but
- *   metadata emits `robots: noindex,nofollow`, the marketing site nav
- *   drops the link, and the page itself renders an "internal preview"
- *   banner above the hero. Founders can still share the URL one-on-one
- *   with invited pilot participants.
+ * - `VISION_PUBLIC = false` (current) — INTERNAL ONLY (owner P0
+ *   2026-11-10): a platform superadmin sees the page with the "internal
+ *   preview" banner, so the owner can run the smoke checklist; every other
+ *   visitor, signed in or not, gets a plain 404 — not a login redirect,
+ *   which would confirm the page exists. Metadata still emits
+ *   `robots: noindex,nofollow` and the marketing nav drops the link.
+ *   (It used to be reachable by anyone with the URL, banner included.)
  * - `VISION_PUBLIC = true` — back to a normal indexable marketing page.
  *   The flip is a one-line owner-authored PR after smoke PASSES.
  */
@@ -30,6 +33,10 @@ export async function generateMetadata({
   setRequestLocale(locale);
   const t = await getTranslations("vision");
   const publishedPublicly = isVisionPublic();
+  // A visitor who gets the 404 gets no title or description of the page either.
+  if (!publishedPublicly && !(await isSuperadmin())) {
+    return { robots: { index: false, follow: false, googleBot: { index: false, follow: false } } };
+  }
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
@@ -48,6 +55,7 @@ export default async function VisionPage({
   setRequestLocale(locale);
   const t = await getTranslations("vision");
   const publishedPublicly = isVisionPublic();
+  if (!publishedPublicly && !(await isSuperadmin())) notFound();
 
   return (
     <article className="mx-auto flex max-w-container flex-col gap-12 px-6 py-12 sm:gap-16 sm:px-12 sm:py-16">
