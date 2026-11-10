@@ -206,6 +206,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261103171100_",
       "20261103171300_",
       "20261104160000_",
+      "20261105100000_",
+      "20261105100100_",
       "20261104160100_",
       // 2026-11-09 holder-cancelled account deletion (holder cancels own account-deletion request + 30-day grace + row lock; RED draft #3172, needs-human-gate, NOT applied).
       "20261109120000_",
