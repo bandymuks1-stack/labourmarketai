@@ -5527,7 +5527,51 @@
       "screenshot": "Ścieżka zapotrzebowania firmy",
       "cta": "Zgłoś zapotrzebowanie na pracowników",
       "calculatorBody": "Zanim poprosisz o wykonawców, oszacuj pracę: godziny, materiały, sprzęt i dojazdy — na własnych liczbach.",
-      "calculatorLink": "Oblicz koszt projektu"
+      "calculatorLink": "Oblicz koszt projektu",
+      "markets": {
+        "lu": {
+          "metaTitle": "Fachowcy na budowy w Luksemburgu",
+          "metaDescription": "Firmy budowlane w Luksemburgu: opisz, jakich spawaczy, elektryków, cieśli lub monterów rusztowań potrzebujesz. Bezpłatnie; odpowiada człowiek.",
+          "eyebrow": "Dla pracodawców w Luksemburgu",
+          "title": "Fachowcy na Twoje budowy",
+          "titleAccent": "w Luksemburgu.",
+          "subcopy": "Dla wykonawców i podwykonawców budowlanych. Napisz, jakich specjalistów potrzebujesz — spawaczy, elektryków, cieśli, monterów rusztowań — ilu, gdzie i od kiedy.",
+          "cta": "Opisz, kogo potrzebujesz",
+          "points": [
+            "Wysłanie zapytania jest bezpłatne i nie wymaga konta, tylko adresu e-mail do kontaktu. Nic nie jest publikowane automatycznie.",
+            "Szukamy osób, których zapisana praca pasuje do Twoich potrzeb. Jeśli nie ma jeszcze dopasowania, mówimy o tym wprost.",
+            "Przy zapytaniach budowlanych nasza firma partnerska może koordynować dokumenty i wdrożenie — każdy krok prowadzi człowiek."
+          ]
+        },
+        "nl": {
+          "metaTitle": "Fachowcy na budowy w Holandii",
+          "metaDescription": "Firmy budowlane w Holandii: opisz, jakich spawaczy, elektryków, cieśli lub monterów rusztowań potrzebujesz. Bezpłatnie; odpowiada człowiek.",
+          "eyebrow": "Dla pracodawców w Holandii",
+          "title": "Fachowcy na Twoje budowy",
+          "titleAccent": "w Holandii.",
+          "subcopy": "Dla wykonawców i podwykonawców budowlanych. Napisz, jakich specjalistów potrzebujesz — spawaczy, elektryków, cieśli, monterów rusztowań — ilu, gdzie i od kiedy.",
+          "cta": "Opisz, kogo potrzebujesz",
+          "points": [
+            "Wysłanie zapytania jest bezpłatne i nie wymaga konta, tylko adresu e-mail do kontaktu. Nic nie jest publikowane automatycznie.",
+            "Szukamy osób, których zapisana praca pasuje do Twoich potrzeb. Jeśli nie ma jeszcze dopasowania, mówimy o tym wprost.",
+            "Przy zapytaniach budowlanych nasza firma partnerska może koordynować dokumenty i wdrożenie — każdy krok prowadzi człowiek."
+          ]
+        },
+        "dk": {
+          "metaTitle": "Fachowcy na budowy w Danii",
+          "metaDescription": "Firmy budowlane w Danii: opisz, jakich spawaczy, elektryków, cieśli lub monterów rusztowań potrzebujesz. Bezpłatnie; odpowiada człowiek.",
+          "eyebrow": "Dla pracodawców w Danii",
+          "title": "Fachowcy na Twoje budowy",
+          "titleAccent": "w Danii.",
+          "subcopy": "Dla wykonawców i podwykonawców budowlanych. Napisz, jakich specjalistów potrzebujesz — spawaczy, elektryków, cieśli, monterów rusztowań — ilu, gdzie i od kiedy.",
+          "cta": "Opisz, kogo potrzebujesz",
+          "points": [
+            "Wysłanie zapytania jest bezpłatne i nie wymaga konta, tylko adresu e-mail do kontaktu. Nic nie jest publikowane automatycznie.",
+            "Szukamy osób, których zapisana praca pasuje do Twoich potrzeb. Jeśli nie ma jeszcze dopasowania, mówimy o tym wprost.",
+            "Przy zapytaniach budowlanych nasza firma partnerska może koordynować dokumenty i wdrożenie — każdy krok prowadzi człowiek."
+          ]
+        }
+      }
     },
     "agencies": {
       "eyebrow": "Dla agencji",

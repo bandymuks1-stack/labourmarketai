@@ -5527,7 +5527,51 @@
       "screenshot": "Bedarfsablauf für Unternehmen",
       "cta": "Personalanfrage starten",
       "calculatorBody": "Bevor Sie Arbeit anfragen, schätzen Sie sie ein: Arbeitsstunden, Material, Geräte und Reisen — mit Ihren eigenen Zahlen.",
-      "calculatorLink": "Projektkosten berechnen"
+      "calculatorLink": "Projektkosten berechnen",
+      "markets": {
+        "lu": {
+          "metaTitle": "Fachkräfte für Baustellen in Luxemburg",
+          "metaDescription": "Bauunternehmen in Luxemburg: Beschreiben Sie, welche Schweißer, Elektriker, Zimmerer oder Gerüstbauer Sie brauchen. Kostenlos; ein Mensch meldet sich.",
+          "eyebrow": "Für Arbeitgeber in Luxemburg",
+          "title": "Fachkräfte für Ihre Baustellen",
+          "titleAccent": "in Luxemburg.",
+          "subcopy": "Für Bauunternehmen und Subunternehmer. Sagen Sie uns, welche Fachkräfte Sie brauchen — Schweißer, Elektriker, Zimmerer, Gerüstbauer —, wie viele, wo und ab wann.",
+          "cta": "Benötigte Arbeitskräfte beschreiben",
+          "points": [
+            "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
+            "Wir suchen Menschen, deren erfasste Arbeit zu Ihrem Bedarf passt. Gibt es noch keine passende Person, sagen wir es Ihnen.",
+            "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
+          ]
+        },
+        "nl": {
+          "metaTitle": "Fachkräfte für Baustellen in den Niederlanden",
+          "metaDescription": "Bauunternehmen in den Niederlanden: Beschreiben Sie, welche Schweißer, Elektriker, Zimmerer oder Gerüstbauer Sie brauchen. Kostenlos; ein Mensch meldet sich.",
+          "eyebrow": "Für Arbeitgeber in den Niederlanden",
+          "title": "Fachkräfte für Ihre Baustellen",
+          "titleAccent": "in den Niederlanden.",
+          "subcopy": "Für Bauunternehmen und Subunternehmer. Sagen Sie uns, welche Fachkräfte Sie brauchen — Schweißer, Elektriker, Zimmerer, Gerüstbauer —, wie viele, wo und ab wann.",
+          "cta": "Benötigte Arbeitskräfte beschreiben",
+          "points": [
+            "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
+            "Wir suchen Menschen, deren erfasste Arbeit zu Ihrem Bedarf passt. Gibt es noch keine passende Person, sagen wir es Ihnen.",
+            "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
+          ]
+        },
+        "dk": {
+          "metaTitle": "Fachkräfte für Baustellen in Dänemark",
+          "metaDescription": "Bauunternehmen in Dänemark: Beschreiben Sie, welche Schweißer, Elektriker, Zimmerer oder Gerüstbauer Sie brauchen. Kostenlos; ein Mensch meldet sich.",
+          "eyebrow": "Für Arbeitgeber in Dänemark",
+          "title": "Fachkräfte für Ihre Baustellen",
+          "titleAccent": "in Dänemark.",
+          "subcopy": "Für Bauunternehmen und Subunternehmer. Sagen Sie uns, welche Fachkräfte Sie brauchen — Schweißer, Elektriker, Zimmerer, Gerüstbauer —, wie viele, wo und ab wann.",
+          "cta": "Benötigte Arbeitskräfte beschreiben",
+          "points": [
+            "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
+            "Wir suchen Menschen, deren erfasste Arbeit zu Ihrem Bedarf passt. Gibt es noch keine passende Person, sagen wir es Ihnen.",
+            "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
+          ]
+        }
+      }
     },
     "agencies": {
       "eyebrow": "Für Personalagenturen",

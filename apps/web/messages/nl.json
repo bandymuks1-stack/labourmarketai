@@ -5527,7 +5527,51 @@
       "screenshot": "Bedrijfsvraagflow",
       "cta": "Start een personeelsaanvraag",
       "calculatorBody": "Schat het werk in voordat je het uitvraagt: arbeidsuren, materialen, materieel en reizen, met je eigen cijfers.",
-      "calculatorLink": "Bereken de kosten van een project"
+      "calculatorLink": "Bereken de kosten van een project",
+      "markets": {
+        "lu": {
+          "metaTitle": "Vakmensen voor bouwplaatsen in Luxemburg",
+          "metaDescription": "Bouwbedrijven in Luxemburg: beschrijf welke lassers, elektriciens, timmerlieden of steigerbouwers u zoekt. Gratis; een mens neemt contact op.",
+          "eyebrow": "Voor werkgevers in Luxemburg",
+          "title": "Vakmensen voor uw bouwplaatsen",
+          "titleAccent": "in Luxemburg.",
+          "subcopy": "Voor aannemers en onderaannemers. Vertel ons welke vakmensen u nodig hebt — lassers, elektriciens, timmerlieden, steigerbouwers — hoeveel, waar en vanaf wanneer.",
+          "cta": "Beschrijf de mensen die u zoekt",
+          "points": [
+            "Een aanvraag versturen is gratis en vraagt geen account, alleen een contact-e-mailadres. Niets wordt automatisch gepubliceerd.",
+            "Wij zoeken mensen van wie het vastgelegde werk past bij uw behoefte. Is er nog geen passende match, dan zeggen we dat.",
+            "Bij bouwaanvragen kan ons partnerbedrijf documenten en inwerken coördineren, met een mens die elke stap begeleidt."
+          ]
+        },
+        "nl": {
+          "metaTitle": "Vakmensen voor bouwplaatsen in Nederland",
+          "metaDescription": "Bouwbedrijven in Nederland: beschrijf welke lassers, elektriciens, timmerlieden of steigerbouwers u zoekt. Gratis; een mens neemt contact op.",
+          "eyebrow": "Voor werkgevers in Nederland",
+          "title": "Vakmensen voor uw bouwplaatsen",
+          "titleAccent": "in Nederland.",
+          "subcopy": "Voor aannemers en onderaannemers. Vertel ons welke vakmensen u nodig hebt — lassers, elektriciens, timmerlieden, steigerbouwers — hoeveel, waar en vanaf wanneer.",
+          "cta": "Beschrijf de mensen die u zoekt",
+          "points": [
+            "Een aanvraag versturen is gratis en vraagt geen account, alleen een contact-e-mailadres. Niets wordt automatisch gepubliceerd.",
+            "Wij zoeken mensen van wie het vastgelegde werk past bij uw behoefte. Is er nog geen passende match, dan zeggen we dat.",
+            "Bij bouwaanvragen kan ons partnerbedrijf documenten en inwerken coördineren, met een mens die elke stap begeleidt."
+          ]
+        },
+        "dk": {
+          "metaTitle": "Vakmensen voor bouwplaatsen in Denemarken",
+          "metaDescription": "Bouwbedrijven in Denemarken: beschrijf welke lassers, elektriciens, timmerlieden of steigerbouwers u zoekt. Gratis; een mens neemt contact op.",
+          "eyebrow": "Voor werkgevers in Denemarken",
+          "title": "Vakmensen voor uw bouwplaatsen",
+          "titleAccent": "in Denemarken.",
+          "subcopy": "Voor aannemers en onderaannemers. Vertel ons welke vakmensen u nodig hebt — lassers, elektriciens, timmerlieden, steigerbouwers — hoeveel, waar en vanaf wanneer.",
+          "cta": "Beschrijf de mensen die u zoekt",
+          "points": [
+            "Een aanvraag versturen is gratis en vraagt geen account, alleen een contact-e-mailadres. Niets wordt automatisch gepubliceerd.",
+            "Wij zoeken mensen van wie het vastgelegde werk past bij uw behoefte. Is er nog geen passende match, dan zeggen we dat.",
+            "Bij bouwaanvragen kan ons partnerbedrijf documenten en inwerken coördineren, met een mens die elke stap begeleidt."
+          ]
+        }
+      }
     },
     "agencies": {
       "eyebrow": "Voor uitzendbureaus",
