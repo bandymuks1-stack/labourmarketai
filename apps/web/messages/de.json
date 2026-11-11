@@ -3945,8 +3945,8 @@
       "description": "Ein Ort, um die von Ihnen angebotenen Dienstleistungen zu veröffentlichen."
     },
     "matching": {
-      "label": "Matching",
-      "description": "Dieses Produkt hat keine Matching-/Ranking-Engine und wird keine haben, bis eine ehrlich ausgeliefert werden kann."
+      "label": "KI-Matching",
+      "description": "KI-gestütztes Matching von Menschen und Bedarf."
     },
     "marketplace": {
       "label": "Marktplatz",
@@ -3963,7 +3963,12 @@
     "network": {
       "label": "Netzwerk",
       "description": "Personen und Unternehmen: Suche, Einladungen und Ihre Beziehungen."
-    }
+    },
+    "rule_matching": {
+      "label": "Regelbasiertes Matching",
+      "description": "Kandidaten für einen Bedarf werden nach festen Regeln gereiht, und jede Passung wird erklärt."
+    },
+    "matching_reason": "Ausgeschaltet: Es ist kein KI-Dienst angebunden. Das regelbasierte Matching funktioniert bereits."
   },
   "structuring": {
     "groupEyebrow": "Vorgeschlagene Fähigkeiten",

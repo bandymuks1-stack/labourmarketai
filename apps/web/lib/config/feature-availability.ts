@@ -20,6 +20,18 @@
 
 export type FeatureAvailability = "active" | "preparing" | "hidden";
 
+/**
+ * WHY A STATUS IS WHAT IT IS (owner P0 2026-11-10: MERGED ≠ DEPLOYED ≠ WORKS).
+ * An `active` row names its production proof: the FUNCTION_REGISTER row
+ * (docs/program/FUNCTION_REGISTER.md) and a `proof` text that appears IN that
+ * row — a production walk run id, or the owner session the row records.
+ * `lib/guards/catalog-status-evidence.test.ts` reads the register and fails
+ * when a row is missing, not verified, or no longer carries the proof, so a
+ * status cannot go stale silently again. A `preparing` / `hidden` row
+ * carries a concrete `reason` instead (internal, English).
+ */
+export type CatalogEvidence = { readonly register: string; readonly proof: string };
+
 export type FeatureKey =
   // Active surfaces backing the first working beta.
   | "overview"
@@ -41,6 +53,7 @@ export type FeatureKey =
   | "team_offers"
   | "work_needs"
   | "service_offers"
+  | "rule_matching"
   // Explicitly hidden so the honesty guard has a canonical home.
   | "matching"
   | "marketplace";
@@ -61,6 +74,10 @@ export type FeatureConfig = {
    *  Preparing features may still appear inside the dashboard as cards,
    *  but they MUST NOT live in the primary nav. */
   safeToShowInPrimaryNav: boolean;
+  /** Production proof of an `active` row (see CatalogEvidence). */
+  evidence?: readonly CatalogEvidence[];
+  /** Concrete reason a row is `preparing` / `hidden` (internal). */
+  reason?: string;
 };
 
 /**
@@ -74,6 +91,7 @@ export const FEATURES: readonly FeatureConfig[] = [
   {
     key: "overview",
     availability: "active",
+    evidence: [{ register: "1.5", proof: "41280157502" }],
     labelKey: "features.overview.label",
     descriptionKey: "features.overview.description",
     primaryRoute: "/dashboard",
@@ -88,6 +106,7 @@ export const FEATURES: readonly FeatureConfig[] = [
     // which remains `hidden` (honesty guard home).
     key: "marketplace_hub",
     availability: "active",
+    evidence: [{ register: "12.1", proof: "owner session 10-23" }],
     labelKey: "features.marketplace_hub.label",
     descriptionKey: "features.marketplace_hub.description",
     // Rebuild W5: point at the REAL surface — /dashboard/marketplace is a
@@ -105,6 +124,7 @@ export const FEATURES: readonly FeatureConfig[] = [
     // fake data. It is the "Žemėlapis" global nav tab.
     key: "market_map",
     availability: "active",
+    evidence: [{ register: "12.1", proof: "owner session 10-23" }],
     labelKey: "features.market_map.label",
     descriptionKey: "features.market_map.description",
     primaryRoute: "/dashboard/market-map",
@@ -116,6 +136,7 @@ export const FEATURES: readonly FeatureConfig[] = [
     // reachable from Mano erdvė and the account menu, not as a global tab.
     key: "profile_text_first",
     availability: "active",
+    evidence: [{ register: "2.1", proof: "41282258795" }],
     labelKey: "features.profile_text_first.label",
     descriptionKey: "features.profile_text_first.description",
     primaryRoute: "/dashboard/profile",
@@ -130,6 +151,7 @@ export const FEATURES: readonly FeatureConfig[] = [
     // primary tabs.
     key: "journal_text_first",
     availability: "active",
+    evidence: [{ register: "2.19", proof: "41279196446" }],
     labelKey: "features.journal_text_first.label",
     descriptionKey: "features.journal_text_first.description",
     primaryRoute: "/dashboard/journal",
@@ -142,6 +164,7 @@ export const FEATURES: readonly FeatureConfig[] = [
     // even though the conversation row really exists and RLS lets them read it.
     key: "communication",
     availability: "active",
+    evidence: [{ register: "5.4", proof: "41717112150" }],
     labelKey: "features.communication.label",
     descriptionKey: "features.communication.description",
     primaryRoute: "/dashboard/communication",
@@ -155,6 +178,7 @@ export const FEATURES: readonly FeatureConfig[] = [
     // tasks / journal, so it gets a real nav tab. No second calendar.
     key: "planning",
     availability: "active",
+    evidence: [{ register: "3.14", proof: "39571666417" }, { register: "5.11", proof: "40007491242" }],
     labelKey: "features.planning.label",
     descriptionKey: "features.planning.description",
     primaryRoute: "/dashboard/planning",
@@ -168,6 +192,7 @@ export const FEATURES: readonly FeatureConfig[] = [
     // dashboard — this is the existing surface, only made findable.
     key: "network",
     availability: "active",
+    evidence: [{ register: "1.9", proof: "41430482903" }],
     labelKey: "features.network.label",
     descriptionKey: "features.network.description",
     primaryRoute: "/dashboard/network",
@@ -179,6 +204,7 @@ export const FEATURES: readonly FeatureConfig[] = [
     // to "do" — it lives in the avatar / account menu, not the global nav.
     key: "account_roles",
     availability: "active",
+    evidence: [{ register: "1.5", proof: "41280157502" }],
     labelKey: "features.account_roles.label",
     descriptionKey: "features.account_roles.description",
     primaryRoute: "/dashboard/account",
@@ -193,91 +219,115 @@ export const FEATURES: readonly FeatureConfig[] = [
     // is reached from the market (/dashboard/listings) and the spine signals.
     key: "service_offers",
     availability: "active",
+    evidence: [{ register: "6.1", proof: "41729310761" }],
     labelKey: "features.service_offers.label",
     descriptionKey: "features.service_offers.description",
     primaryRoute: "/dashboard/services",
     safeToShowInPrimaryNav: false,
   },
 
-  // ── Preparing surfaces (visible as cards, no broken CTA) ───────────
+  // ── Shipped 2026-10/11, proven by production walks (were "preparing") ──
+  // Flipped 2026-11-10 (owner P0): /vision listed these as "coming soon"
+  // although every one runs in production; the catalogue was never updated
+  // after delivery.
   {
     key: "role_expansion",
-    availability: "preparing",
+    availability: "active",
+    evidence: [{ register: "J-13", proof: "41480104268" }, { register: "1.5", proof: "41280157502" }],
     labelKey: "features.role_expansion.label",
     descriptionKey: "features.role_expansion.description",
-    preparingReasonKey: "features.preparing_generic_reason",
     safeToShowInPrimaryNav: false,
   },
   {
     key: "external_confirmation",
-    availability: "preparing",
+    availability: "active",
+    evidence: [{ register: "2.20", proof: "41478434884" }, { register: "W-3", proof: "41478434884" }],
     labelKey: "features.external_confirmation.label",
     descriptionKey: "features.external_confirmation.description",
-    preparingReasonKey: "features.preparing_generic_reason",
     safeToShowInPrimaryNav: false,
   },
   {
     key: "company_workspace",
-    availability: "preparing",
+    availability: "active",
+    evidence: [{ register: "E-1", proof: "41279196446" }, { register: "3.1", proof: "owner session 10-23" }],
     labelKey: "features.company_workspace.label",
     descriptionKey: "features.company_workspace.description",
-    preparingReasonKey: "features.preparing_generic_reason",
     safeToShowInPrimaryNav: false,
   },
   {
+    // A-2 (agency documents readiness and client records) is still NOT VERIFIED:
+    // no walk opens those two surfaces. The roster/client/need/offer chain (A-1) is.
     key: "agency_workspace",
-    availability: "preparing",
+    availability: "active",
+    evidence: [{ register: "A-1", proof: "41787046374" }],
     labelKey: "features.agency_workspace.label",
     descriptionKey: "features.agency_workspace.description",
-    preparingReasonKey: "features.preparing_generic_reason",
     safeToShowInPrimaryNav: false,
   },
   {
     key: "customer_workspace",
-    availability: "preparing",
+    availability: "active",
+    evidence: [{ register: "C-1", proof: "41785749357" }, { register: "6.4", proof: "41713787541" }],
     labelKey: "features.customer_workspace.label",
     descriptionKey: "features.customer_workspace.description",
-    preparingReasonKey: "features.preparing_generic_reason",
     safeToShowInPrimaryNav: false,
   },
   {
+    // The agency-side document check (A-2) is still NOT VERIFIED; the organization
+    // register and approvals (HR-2) and personal documents (2.18) are proven.
     key: "document_records",
-    availability: "preparing",
+    availability: "active",
+    evidence: [{ register: "HR-2", proof: "41786102850" }, { register: "2.18", proof: "41716118134" }],
     labelKey: "features.document_records.label",
     descriptionKey: "features.document_records.description",
-    preparingReasonKey: "features.preparing_generic_reason",
     safeToShowInPrimaryNav: false,
   },
   {
     key: "team_offers",
-    availability: "preparing",
+    availability: "active",
+    evidence: [{ register: "4.6", proof: "41350506578" }, { register: "SC-7", proof: "41350506578" }],
     labelKey: "features.team_offers.label",
     descriptionKey: "features.team_offers.description",
-    preparingReasonKey: "features.preparing_generic_reason",
     safeToShowInPrimaryNav: false,
   },
   {
     key: "work_needs",
-    availability: "preparing",
+    availability: "active",
+    evidence: [{ register: "SC-5", proof: "41672031864" }, { register: "4.1", proof: "41279196446" }],
     labelKey: "features.work_needs.label",
     descriptionKey: "features.work_needs.description",
-    preparingReasonKey: "features.preparing_generic_reason",
+    safeToShowInPrimaryNav: false,
+  },
+
+  {
+    // Rule-based matching: candidates for a need are ranked by stated rules
+    // and each fit is explained (shortlist, SC-5 / J-5). No AI involved.
+    key: "rule_matching",
+    availability: "active",
+    evidence: [{ register: "SC-5", proof: "41672031864" }, { register: "J-5", proof: "company-talent-history" }],
+    labelKey: "features.rule_matching.label",
+    descriptionKey: "features.rule_matching.description",
+    safeToShowInPrimaryNav: false,
+  },
+
+  // ── Preparing ──────────────────────────────────────────────────────
+  {
+    // AI (LLM) matching. Built, but switched off: no AI provider key is set and
+    // paid AI is not allowed (0 EUR AI budget). Never shown as working AI.
+    key: "matching",
+    availability: "preparing",
+    reason: "AI matching is switched off (no provider key, paid AI not allowed); rule-based matching (rule_matching) works.",
+    labelKey: "features.matching.label",
+    descriptionKey: "features.matching.description",
+    preparingReasonKey: "features.matching_reason",
     safeToShowInPrimaryNav: false,
   },
 
   // ── Hidden: explicitly out of scope (no UI, no CTAs) ───────────────
-  // These rows exist so the honesty guard has a canonical home. Flipping
-  // them to "active" without shipping real behaviour fails the guard.
-  {
-    key: "matching",
-    availability: "hidden",
-    labelKey: "features.matching.label",
-    descriptionKey: "features.matching.description",
-    safeToShowInPrimaryNav: false,
-  },
   {
     key: "marketplace",
     availability: "hidden",
+    reason: "The full two-sided automated marketplace is not built; the market index, service offers and needs are separate active rows.",
     labelKey: "features.marketplace.label",
     descriptionKey: "features.marketplace.description",
     safeToShowInPrimaryNav: false,

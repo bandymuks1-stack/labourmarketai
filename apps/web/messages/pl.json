@@ -3945,8 +3945,8 @@
       "description": "Miejsce do publikowania usług, które świadczysz."
     },
     "matching": {
-      "label": "Dopasowanie",
-      "description": "Ten produkt nie ma silnika dopasowania / rankingu i nie będzie go mieć, dopóki nie będzie można go uczciwie wdrożyć."
+      "label": "Dopasowanie AI",
+      "description": "Dopasowanie ludzi i potrzeb ze wsparciem AI."
     },
     "marketplace": {
       "label": "Rynek usług",
@@ -3963,7 +3963,12 @@
     "network": {
       "label": "Sieć kontaktów",
       "description": "Ludzie i firmy: wyszukiwanie, zaproszenia i Twoje relacje."
-    }
+    },
+    "rule_matching": {
+      "label": "Dopasowanie według reguł",
+      "description": "Kandydaci do potrzeby są szeregowani według jasnych reguł, a każde dopasowanie jest wyjaśnione."
+    },
+    "matching_reason": "Wyłączone: nie podłączono żadnej usługi AI. Dopasowanie według reguł już działa."
   },
   "structuring": {
     "groupEyebrow": "Sugerowane umiejętności",

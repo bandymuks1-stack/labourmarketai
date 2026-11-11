@@ -3945,8 +3945,8 @@
       "description": "Vieta paskelbti tavo teikiamas paslaugas."
     },
     "matching": {
-      "label": "Atitikimas",
-      "description": "Šiame produkte nėra atitikimo / reitingavimo variklio ir nebus, kol jis nebus padarytas sąžiningai."
+      "label": "DI atitikimas",
+      "description": "Žmonių ir poreikių atitikimas padedant dirbtiniam intelektui."
     },
     "marketplace": {
       "label": "Prekyvietė",
@@ -3963,7 +3963,12 @@
     "network": {
       "label": "Ryšiai",
       "description": "Žmonės ir įmonės: paieška, kvietimai ir tavo ryšiai."
-    }
+    },
+    "rule_matching": {
+      "label": "Atitikimas pagal taisykles",
+      "description": "Kandidatai poreikiui surikiuojami pagal aiškias taisykles, o kiekvienas atitikimas paaiškinamas."
+    },
+    "matching_reason": "Išjungta: neprijungta jokia DI paslauga. Kol kas veikia atitikimas pagal taisykles."
   },
   "structuring": {
     "groupEyebrow": "Siūlomi įgūdžiai",

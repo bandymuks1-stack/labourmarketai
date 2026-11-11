@@ -3945,8 +3945,8 @@
       "description": "Een plek om de diensten die je levert te publiceren."
     },
     "matching": {
-      "label": "Matching",
-      "description": "Dit product heeft geen matching- / ranking-engine en krijgt die niet totdat er een eerlijk uitgebracht kan worden."
+      "label": "AI-matching",
+      "description": "Matching van mensen en behoeften met hulp van AI."
     },
     "marketplace": {
       "label": "Marktplaats",
@@ -3963,7 +3963,12 @@
     "network": {
       "label": "Netwerk",
       "description": "Mensen en bedrijven: zoeken, uitnodigingen en je relaties."
-    }
+    },
+    "rule_matching": {
+      "label": "Matching op regels",
+      "description": "Kandidaten voor een behoefte worden op vaste regels gerangschikt, en elke match wordt uitgelegd."
+    },
+    "matching_reason": "Uitgeschakeld: er is geen AI-dienst gekoppeld. Matching op regels werkt al."
   },
   "structuring": {
     "groupEyebrow": "Voorgestelde vaardigheden",
