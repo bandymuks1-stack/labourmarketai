@@ -26,8 +26,8 @@ export const JOBS_WIDGET_TOOL_META = {
 export const JOBS_WIDGET_TOOLS = ["jobs_search", "jobs_get"] as const;
 
 const LABELS = {
-  en: { empty: "No open jobs match this search.", positions: "positions", open: "Open", more: "More jobs on the next page." },
-  lt: { empty: "Šios paieškos neatitinka nė vienas atviras darbas.", positions: "vietos", open: "Atidaryti", more: "Daugiau darbų kitame puslapyje." },
+  en: { empty: "No open jobs match this search.", unavailable: "The job board could not be read just now. Nothing was searched — try again.", positions: "positions", open: "Open", more: "More jobs on the next page.", from: "from", upTo: "up to" },
+  lt: { empty: "Šios paieškos neatitinka nė vienas atviras darbas.", unavailable: "Darbų lentos šiuo metu nepavyko perskaityti. Niekas neieškota — bandykite dar kartą.", positions: "vietos", open: "Atidaryti", more: "Daugiau darbų kitame puslapyje.", from: "nuo", upTo: "iki" },
 } as const;
 
 function widgetHtml(origin: string): string {
@@ -57,21 +57,33 @@ p{margin:12px;color:var(--muted)}
     if(window.openai&&typeof window.openai.openExternal==="function") window.openai.openExternal({href:href});
     else window.open(href,"_blank","noopener");
   }
-  function pay(j){
-    if(j.compensationMin==null&&j.compensationMax==null) return "";
-    var r=[j.compensationMin,j.compensationMax].filter(function(v){return v!=null;}).join("–");
-    return r+(j.compensationCurrency?" "+j.compensationCurrency:"");
+  // The same wording as lib/vacancy-store/vacancy-pay-label.ts payLabel: a
+  // one-sided bound keeps its direction ("from" / "up to"), never an exact
+  // amount the publisher did not state; no currency or no amount = nothing.
+  function pay(j,L){
+    var c=String(j.compensationCurrency||"").trim().toUpperCase();
+    if(!/^[A-Z]{3}$/.test(c)) return "";
+    function v(n){ return typeof n==="number"&&isFinite(n)&&n>0?Math.round(n):null; }
+    var lo=v(j.compensationMin), hi=v(j.compensationMax);
+    if(lo!=null&&hi!=null&&hi>lo) return lo+"–"+hi+" "+c;
+    if(lo!=null&&hi!=null) return lo+" "+c;
+    if(lo!=null) return L.from+" "+lo+" "+c;
+    if(hi!=null) return L.upTo+" "+hi+" "+c;
+    return "";
   }
   function render(){
     var L=labels(), root=document.getElementById("root"); root.textContent="";
-    var out=window.openai&&window.openai.toolOutput, data=out&&out.data;
-    var jobs=data?(data.jobs||(data.job?[data.job]:[])):[];
+    var out=window.openai&&window.openai.toolOutput;
+    if(!out) return;
+    // A failed read ({ok:false, code}) is not an empty search: say so.
+    if(out.ok===false||!out.data){ root.appendChild(el("p",null,L.unavailable)); return; }
+    var data=out.data, jobs=data.jobs||(data.job?[data.job]:[]);
     if(!jobs.length){ root.appendChild(el("p",null,L.empty)); return; }
     var ul=el("ul");
     jobs.forEach(function(j){
       var li=el("li"), info=el("div");
       info.appendChild(el("div","t",j.occupation||j.professionSlug||""));
-      var meta=[j.employmentForm,j.workingTime,j.positions?j.positions+" "+L.positions:null,pay(j)].filter(Boolean).join(" · ");
+      var meta=[j.employmentForm,j.workingTime,j.positions?j.positions+" "+L.positions:null,pay(j,L)].filter(Boolean).join(" · ");
       if(meta) info.appendChild(el("div","m",meta));
       var b=el("button",null,L.open); b.addEventListener("click",function(){open(j.webPath);});
       li.appendChild(info); li.appendChild(b); ul.appendChild(li);
