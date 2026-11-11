@@ -3886,63 +3886,112 @@
     "preparing_badge": "Coming soon",
     "overview": {
       "label": "Overview",
-      "description": "Main view with the starting steps, suggestions and opportunities."
+      "description": "Your starting view opens for every role you hold.",
+      "claims": {
+        "home_per_role": "Your starting view opens for every role you hold."
+      }
     },
     "market_map": {
       "label": "Market map",
-      "description": "One unified labour-market map — your own signal, company needs and real data by country / region."
+      "description": "A map marks where work and people are.",
+      "claims": {
+        "map": "A map marks where work and people are."
+      }
     },
     "profile_text_first": {
       "label": "Profile",
-      "description": "Describe yourself in your own words or paste a CV. The system suggests skills, but you select them."
+      "description": "Describe your work in your own words and build your professional profile.",
+      "claims": {
+        "profile": "Describe your work in your own words and build your professional profile."
+      }
     },
     "journal_text_first": {
       "label": "Work or activity record",
-      "description": "Record today's work or activity. The system helps you structure it, but you decide the facts."
+      "description": "Record the work you did today — the entry goes into your Living CV.",
+      "claims": {
+        "entry_to_cv": "Record the work you did today — the entry goes into your Living CV."
+      }
     },
     "communication": {
       "label": "Messages",
-      "description": "Conversations and requests you receive. When someone messages you or sends a request, you'll find it here."
+      "description": "Write to people and companies — the conversation stays in one thread.",
+      "claims": {
+        "threads": "Write to people and companies — the conversation stays in one thread."
+      }
     },
     "account_roles": {
       "label": "Roles",
-      "description": "Review your roles. Working as a person is active today; other actions are added step by step."
+      "description": "One account holds several roles, and you switch between them.",
+      "claims": {
+        "several_roles": "One account holds several roles, and you switch between them."
+      }
     },
     "role_expansion": {
       "label": "More roles",
-      "description": "The same account can also run a company, an agency or buying — you add them when you need them."
+      "description": "You can set up a company from the same account. You can start buying services from the same account.",
+      "claims": {
+        "add_company": "You can set up a company from the same account.",
+        "add_buying": "You can start buying services from the same account."
+      }
     },
     "external_confirmation": {
       "label": "Work records from others",
-      "description": "A manager, client or partner can confirm the work records you send them."
+      "description": "An authorised manager in your organisation confirms the work you recorded.",
+      "claims": {
+        "manager_confirms": "An authorised manager in your organisation confirms the work you recorded."
+      }
     },
     "company_workspace": {
       "label": "Company space",
-      "description": "Team, project and need management for companies."
+      "description": "Set up your organisation and post its first need. The company home opens for the organisation's people.",
+      "claims": {
+        "setup_and_need": "Set up your organisation and post its first need.",
+        "company_home": "The company home opens for the organisation's people."
+      }
     },
     "agency_workspace": {
       "label": "Agency space",
-      "description": "Candidate pool and service offer management for agencies."
+      "description": "An agency keeps its people, connects with clients and offers people for a client's need.",
+      "claims": {
+        "roster_clients_offers": "An agency keeps its people, connects with clients and offers people for a client's need."
+      }
     },
     "customer_workspace": {
       "label": "Customer space",
-      "description": "Service requests and reports for customers."
+      "description": "Save your buyer details and keep your requests in your own list.",
+      "claims": {
+        "record_and_requests": "Save your buyer details and keep your requests in your own list."
+      }
     },
     "document_records": {
       "label": "Document records",
-      "description": "A place for certificates and documents."
+      "description": "Keep your documents and see when each one expires. A company keeps a register of its documents and approvals.",
+      "claims": {
+        "own_documents": "Keep your documents and see when each one expires.",
+        "company_register": "A company keeps a register of its documents and approvals."
+      }
     },
     "team_offers": {
       "label": "Team offers",
-      "description": "A place to form teams and post joint offers."
+      "description": "A team is offered for a need and taken on as one unit.",
+      "claims": {
+        "team_as_unit": "A team is offered for a need and taken on as one unit."
+      }
     },
     "work_needs": {
       "label": "Work needs",
-      "description": "A place to record what work or help you need."
+      "description": "A company describes the people it needs in one form. People who are interested answer the need.",
+      "claims": {
+        "one_form": "A company describes the people it needs in one form.",
+        "people_answer": "People who are interested answer the need."
+      }
     },
     "service_offers": {
       "label": "Service offers",
-      "description": "A place to publish the services you provide."
+      "description": "Publish the services you offer and receive requests for them.",
+      "claims": {
+        "offer_and_requests": "Publish the services you offer and receive requests for them."
+      }
     },
     "matching": {
       "label": "Matching with AI",
@@ -3954,21 +4003,35 @@
     },
     "marketplace_hub": {
       "label": "Marketplace",
-      "description": "A compact hub connecting the map, opportunities and your companies."
+      "description": "Takes you to the map that shows work and people.",
+      "claims": {
+        "map": "Takes you to the map that shows work and people."
+      }
     },
     "planning": {
       "label": "Calendar",
-      "description": "One calendar: bookings, projects, tasks, journal entries, invitations and payment deadlines."
+      "description": "A company plans its people's work on a calendar. You see your own work on a calendar.",
+      "claims": {
+        "company_calendar": "A company plans its people's work on a calendar.",
+        "own_calendar": "You see your own work on a calendar."
+      }
     },
     "network": {
       "label": "Network",
-      "description": "People and companies: search, invitations and your relationships."
+      "description": "Invitations to join a company's team arrive here, and you accept them here.",
+      "claims": {
+        "invitations": "Invitations to join a company's team arrive here, and you accept them here."
+      }
     },
     "rule_matching": {
       "label": "Candidate shortlist",
-      "description": "A stated need gets a shortlist of people who fit it, with the reason for each."
+      "description": "A stated need gets a shortlist of people who fit it, with the reason for each.",
+      "claims": {
+        "shortlist_with_reason": "A stated need gets a shortlist of people who fit it, with the reason for each."
+      }
     },
-    "matching_reason": "Switched off: no AI service is connected. The candidate shortlist works meanwhile."
+    "matching_reason": "Switched off: no AI service is connected. The candidate shortlist works meanwhile.",
+    "notCheckedYet": "This part has not been checked in production."
   },
   "structuring": {
     "groupEyebrow": "Suggested skills",

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { FEATURES, type CatalogEvidence } from "@/lib/config/feature-availability";
+import { FEATURES, type CatalogClaim, type CatalogEvidence } from "@/lib/config/feature-availability";
 import { LABOUR_MARKET_ROLES, LIVE_ROLE_IDS } from "@/lib/config/roles";
 import { ACTIVITY_TYPES } from "@/lib/config/activity-types";
 import { activeLocales } from "@/lib/i18n/config";
@@ -28,15 +28,17 @@ const REGISTER = readFileSync(
 );
 
 /** All register table rows whose first cell is `id`. */
-function rows(id: string): string[] {
+function rows(id: string, register: string): string[] {
   const esc = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return REGISTER.split("\n").filter((l) => new RegExp(`^\\|\\s*${esc}\\s*\\|`).test(l));
+  return register.split("\n").filter((l) => new RegExp(`^\\|\\s*${esc}\\s*\\|`).test(l));
 }
 const VERIFIED = /\|\s*(LIVE_VERIFIED|PASS|complete)\s*\|/;
 const BROKEN = /\|\s*(FAIL|NOT[ _]VERIFIED|BLOCKED|NOT_IMPLEMENTED)\s*\||\bREGRESSION\b/;
 
-function proven(e: CatalogEvidence): string | null {
-  const found = rows(e.register);
+/** null when the register (the real one unless a control passes another)
+ *  holds a verified row `e.register` that still carries `e.proof`. */
+function proven(e: CatalogEvidence, register: string = REGISTER): string | null {
+  const found = rows(e.register, register);
   if (found.length === 0) return `register row ${e.register} not found`;
   const carrying = found.filter((l) => l.includes(e.proof));
   if (carrying.length === 0) return `register row ${e.register} does not carry "${e.proof}"`;
@@ -47,7 +49,7 @@ function proven(e: CatalogEvidence): string | null {
 
 type Row = { id: string; availability: string; evidence?: readonly CatalogEvidence[]; reason?: string };
 const CATALOGUES: Record<string, Row[]> = {
-  features: FEATURES.map((f) => ({ id: f.key, availability: f.availability, evidence: f.evidence, reason: f.reason })),
+  features: FEATURES.map((f) => ({ id: f.key, availability: f.availability, evidence: f.claims, reason: f.reason })),
   roles: LABOUR_MARKET_ROLES.map((r) => ({ id: r.id, availability: r.availability, evidence: r.evidence, reason: r.reason })),
   activityTypes: ACTIVITY_TYPES.map((a) => ({ id: a.id, availability: a.availability, evidence: a.evidence, reason: a.reason })),
 };
@@ -87,19 +89,149 @@ describe("every row that is not active says why, concretely", () => {
   });
 });
 
+/**
+ * WHAT THE DESCRIPTION SAYS = WHAT PRODUCTION PROVED (owner P0 2026-11-11).
+ * Present tense alone does not make a description true. Each active feature
+ * lists its `claims`; the description users read is exactly those claim
+ * sentences joined, in every active locale, so it cannot name a capability
+ * without a claim. Each claim cites a verified register row that carries a
+ * production walk run id (an owner session is not enough). A claim on a row
+ * that is not verified must be `partial` and its sentence must say so.
+ *
+ * Limit, stated plainly: the test proves every sentence has its own verified
+ * walk and that nothing unclaimed is written; whether one sentence fairly
+ * reads its walk is checked by the reviewer of that one-line pair.
+ */
+const MESSAGES = Object.fromEntries(
+  activeLocales.map((l) => [l, JSON.parse(readFileSync(join(__dirname, "..", "..", "messages", `${l}.json`), "utf8"))]),
+) as Record<string, { features: Record<string, { description?: string; claims?: Record<string, string> }> & { notCheckedYet?: string } }>;
+/** A GitHub Actions run id — what a production walk leaves in the register. */
+const WALK_RUN_ID = /^\d{10,12}$/;
+
+type FeatureCopy = { description?: string; claims?: Record<string, string> };
+
+/** null when a feature's copy says exactly its claims: every claim has a
+ *  sentence, a partial claim's sentence carries the not-checked marker, no
+ *  claim message is unused, and the description is the sentences joined. */
+function copyProblem(claims: readonly CatalogClaim[], node: FeatureCopy | undefined, marker: string): string | null {
+  const sentences = claims.map((c) => node?.claims?.[c.id] ?? "");
+  for (const [i, c] of claims.entries()) {
+    if (!/\S/.test(sentences[i])) return `claim ${c.id} has no sentence`;
+    if (c.partial && !sentences[i].includes(marker)) return `partial claim ${c.id} does not say it is not checked`;
+  }
+  const extra = Object.keys(node?.claims ?? {}).filter((k) => !claims.some((c) => c.id === k));
+  if (extra.length > 0) return `claim messages without a claim: ${extra.join(", ")}`;
+  if (node?.description !== sentences.join(" ")) return "the description is not exactly its claim sentences";
+  return null;
+}
+
+/** null when a claim may stand: its proof is a walk run id, and its row is
+ *  verified — or, for a partial claim, its row is honestly not verified. */
+function claimProblem(c: CatalogClaim, register: string = REGISTER): string | null {
+  if (!WALK_RUN_ID.test(c.proof)) return `proof "${c.proof}" is not a walk run id`;
+  const problem = proven(c, register);
+  if (c.partial) return problem ? null : "marked partial but its row is verified";
+  return problem;
+}
+
+describe("an active feature's description is its proven claims, in every locale", () => {
+  for (const f of FEATURES.filter((x) => x.availability === "active")) {
+    const claims: readonly CatalogClaim[] = f.claims ?? [];
+    it(`${f.key}: every claim has a verified walk`, () => {
+      expect(claims.length, `${f.key} has no claims`).toBeGreaterThan(0);
+      expect(new Set(claims.map((c) => c.id)).size, `${f.key} claim ids are unique`).toBe(claims.length);
+      for (const c of claims) expect(claimProblem(c), `${f.key}.${c.id}`).toBeNull();
+    });
+    for (const locale of activeLocales) {
+      it(`${locale}: ${f.key} says exactly its claims`, () => {
+        const marker = MESSAGES[locale].features.notCheckedYet ?? "";
+        expect(copyProblem(claims, MESSAGES[locale].features[f.key], marker), `${locale} ${f.key}`).toBeNull();
+      });
+    }
+  }
+
+  it("a claim on an unverified row cannot pass as verified (A-2 today)", () => {
+    expect(proven({ register: "A-2", proof: "agency-chain" })).not.toBeNull();
+  });
+
+  it("every locale has the not-checked marker a partial claim must carry", () => {
+    for (const locale of activeLocales) expect(MESSAGES[locale].features.notCheckedYet, locale).toMatch(/\S/);
+  });
+});
+
+/**
+ * NEGATIVE CONTROLS (owner P0 2026-11-11). The same two checks the guard runs
+ * above, fed a deliberately broken copy or register. Each one MUST report a
+ * problem — if a control ever passes, the guard has stopped guarding.
+ */
+describe("negative controls: the guard catches a broken description or register", () => {
+  const f = FEATURES.find((x) => x.key === "market_map")!;
+  const claims = f.claims ?? [];
+  const en = MESSAGES.en.features.market_map;
+  const marker = MESSAGES.en.features.notCheckedYet ?? "";
+  const row = rows(claims[0].register, REGISTER)[0];
+
+  it("control baseline: the real copy and register pass", () => {
+    expect(copyProblem(claims, en, marker)).toBeNull();
+    expect(claimProblem(claims[0])).toBeNull();
+  });
+
+  it("(a) the description gains a capability no claim carries", () => {
+    const broken = { ...en, description: `${en.description} It also plans your routes.` };
+    expect(copyProblem(claims, broken, marker)).not.toBeNull();
+  });
+
+  it("(a) the description is reworded but the claims are not", () => {
+    const broken = { ...en, description: "A map marks work, people and prices." };
+    expect(copyProblem(claims, broken, marker)).not.toBeNull();
+  });
+
+  it("(a) a claim sentence is added to the copy without a claim in the config", () => {
+    const broken = { ...en, claims: { ...en.claims, routes: "It plans your routes." } };
+    expect(copyProblem(claims, broken, marker)).not.toBeNull();
+  });
+
+  it("(b) the cited register row turns FAIL", () => {
+    expect(claimProblem(claims[0], REGISTER.replace(row, row.replace("| LIVE_VERIFIED |", "| FAIL |")))).not.toBeNull();
+  });
+
+  it("(b) the cited register row turns NOT VERIFIED", () => {
+    expect(claimProblem(claims[0], REGISTER.replace(row, row.replace("| LIVE_VERIFIED |", "| NOT VERIFIED |")))).not.toBeNull();
+  });
+
+  it("(b) the cited register row loses its walk run id", () => {
+    expect(claimProblem(claims[0], REGISTER.replace(row, row.split(claims[0].proof).join("")))).not.toBeNull();
+  });
+
+  it("(b) the cited register row disappears", () => {
+    expect(claimProblem(claims[0], REGISTER.replace(row, ""))).not.toBeNull();
+  });
+
+  it("an owner session is not a walk run id", () => {
+    expect(claimProblem({ id: "x", register: "12.1", proof: "owner session 10-23" })).not.toBeNull();
+  });
+
+  it("a partial claim must say it is not checked", () => {
+    const partial: CatalogClaim[] = [{ ...claims[0], partial: true }];
+    expect(copyProblem(partial, en, marker)).not.toBeNull();
+  });
+});
+
 describe("an active row never describes itself as coming later", () => {
   // Codex P2 on #3212: /vision renders the description beside the working
   // badge, so "you will later be able to…" under "works" contradicts itself.
   const FUTURE: Record<string, RegExp> = {
-    en: /\blater\b|will be able|when (they are )?ready/i,
-    lt: /\bvėliau\b|\bgalės(i|ite)?\b|kai (jie |jos )?bus paruošt/i,
+    en: /\b(later|soon|will)\b|when (they are )?ready/i,
+    lt: /\b(vėliau|netrukus|greitai)\b|\bgalės(i|ite)?\b|\bbus\b/i,
+    de: /\b(später|bald|demnächst|künftig)\b|wird[^.]*können/i,
+    pl: /(później|wkrótce|niebawem|będzie|będziesz)/i,
+    nl: /\b(later|binnenkort|straks|zal|zullen)\b/i,
+    ru: /(позже|скоро|вскоре|в будущем|будет|сможете)/i,
   };
   for (const [locale, future] of Object.entries(FUTURE)) {
     it(`${locale}: active feature descriptions are in the present tense`, () => {
-      const m = JSON.parse(readFileSync(join(__dirname, "..", "..", "messages", `${locale}.json`), "utf8"));
-      const text = (key: string) => key.split(".").reduce((o, k) => o?.[k], m) as unknown as string;
       for (const f of FEATURES.filter((x) => x.availability === "active"))
-        expect(text(f.descriptionKey), `${locale} ${f.key}`).not.toMatch(future);
+        expect(MESSAGES[locale].features[f.key]?.description, `${locale} ${f.key}`).not.toMatch(future);
     });
   }
 });

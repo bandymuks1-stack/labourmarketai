@@ -24,13 +24,24 @@ export type FeatureAvailability = "active" | "preparing" | "hidden";
  * WHY A STATUS IS WHAT IT IS (owner P0 2026-11-10: MERGED ≠ DEPLOYED ≠ WORKS).
  * An `active` row names its production proof: the FUNCTION_REGISTER row
  * (docs/program/FUNCTION_REGISTER.md) and a `proof` text that appears IN that
- * row — a production walk run id, or the owner session the row records.
+ * row — for a feature, one production walk run id per claim (CatalogClaim).
  * `lib/guards/catalog-status-evidence.test.ts` reads the register and fails
  * when a row is missing, not verified, or no longer carries the proof, so a
  * status cannot go stale silently again. A `preparing` / `hidden` row
  * carries a concrete `reason` instead (internal, English).
  */
 export type CatalogEvidence = { readonly register: string; readonly proof: string };
+
+/**
+ * One thing an active feature's description SAYS it does (owner P0
+ * 2026-11-11). The description shown to users is exactly the feature's claim
+ * sentences (`features.<key>.claims.<id>`) joined, in every active locale, so
+ * it cannot mention a capability that has no claim — and every claim names
+ * the register row and the production walk run id that proved it. A claim on
+ * a row that is not verified yet must be `partial` and its sentence must
+ * carry `features.notCheckedYet`. Pinned by catalog-status-evidence.test.ts.
+ */
+export type CatalogClaim = CatalogEvidence & { readonly id: string; readonly partial?: true };
 
 export type FeatureKey =
   // Active surfaces backing the first working beta.
@@ -74,8 +85,9 @@ export type FeatureConfig = {
    *  Preparing features may still appear inside the dashboard as cards,
    *  but they MUST NOT live in the primary nav. */
   safeToShowInPrimaryNav: boolean;
-  /** Production proof of an `active` row (see CatalogEvidence). */
-  evidence?: readonly CatalogEvidence[];
+  /** What an `active` row's description claims, each with its production
+   *  proof (see CatalogClaim). */
+  claims?: readonly CatalogClaim[];
   /** Concrete reason a row is `preparing` / `hidden` (internal). */
   reason?: string;
 };
@@ -91,7 +103,9 @@ export const FEATURES: readonly FeatureConfig[] = [
   {
     key: "overview",
     availability: "active",
-    evidence: [{ register: "1.5", proof: "41280157502" }],
+    claims: [
+      { id: "home_per_role", register: "1.5", proof: "41280157502" },
+    ],
     labelKey: "features.overview.label",
     descriptionKey: "features.overview.description",
     primaryRoute: "/dashboard",
@@ -106,7 +120,9 @@ export const FEATURES: readonly FeatureConfig[] = [
     // which remains `hidden` (honesty guard home).
     key: "marketplace_hub",
     availability: "active",
-    evidence: [{ register: "12.1", proof: "owner session 10-23" }],
+    claims: [
+      { id: "map", register: "10.27", proof: "41283989921" },
+    ],
     labelKey: "features.marketplace_hub.label",
     descriptionKey: "features.marketplace_hub.description",
     // Rebuild W5: point at the REAL surface — /dashboard/marketplace is a
@@ -124,7 +140,9 @@ export const FEATURES: readonly FeatureConfig[] = [
     // fake data. It is the "Žemėlapis" global nav tab.
     key: "market_map",
     availability: "active",
-    evidence: [{ register: "12.1", proof: "owner session 10-23" }],
+    claims: [
+      { id: "map", register: "10.27", proof: "41283989921" },
+    ],
     labelKey: "features.market_map.label",
     descriptionKey: "features.market_map.description",
     primaryRoute: "/dashboard/market-map",
@@ -136,7 +154,9 @@ export const FEATURES: readonly FeatureConfig[] = [
     // reachable from Mano erdvė and the account menu, not as a global tab.
     key: "profile_text_first",
     availability: "active",
-    evidence: [{ register: "2.1", proof: "41282258795" }],
+    claims: [
+      { id: "profile", register: "2.1", proof: "41282258795" },
+    ],
     labelKey: "features.profile_text_first.label",
     descriptionKey: "features.profile_text_first.description",
     primaryRoute: "/dashboard/profile",
@@ -151,7 +171,9 @@ export const FEATURES: readonly FeatureConfig[] = [
     // primary tabs.
     key: "journal_text_first",
     availability: "active",
-    evidence: [{ register: "2.19", proof: "41279196446" }],
+    claims: [
+      { id: "entry_to_cv", register: "2.19", proof: "41279196446" },
+    ],
     labelKey: "features.journal_text_first.label",
     descriptionKey: "features.journal_text_first.description",
     primaryRoute: "/dashboard/journal",
@@ -164,7 +186,9 @@ export const FEATURES: readonly FeatureConfig[] = [
     // even though the conversation row really exists and RLS lets them read it.
     key: "communication",
     availability: "active",
-    evidence: [{ register: "5.4", proof: "41717112150" }],
+    claims: [
+      { id: "threads", register: "5.4", proof: "41717112150" },
+    ],
     labelKey: "features.communication.label",
     descriptionKey: "features.communication.description",
     primaryRoute: "/dashboard/communication",
@@ -178,7 +202,10 @@ export const FEATURES: readonly FeatureConfig[] = [
     // tasks / journal, so it gets a real nav tab. No second calendar.
     key: "planning",
     availability: "active",
-    evidence: [{ register: "3.14", proof: "39571666417" }, { register: "5.11", proof: "40007491242" }],
+    claims: [
+      { id: "company_calendar", register: "3.14", proof: "39571666417" },
+      { id: "own_calendar", register: "5.11", proof: "40007491242" },
+    ],
     labelKey: "features.planning.label",
     descriptionKey: "features.planning.description",
     primaryRoute: "/dashboard/planning",
@@ -192,7 +219,9 @@ export const FEATURES: readonly FeatureConfig[] = [
     // dashboard — this is the existing surface, only made findable.
     key: "network",
     availability: "active",
-    evidence: [{ register: "1.9", proof: "41430482903" }],
+    claims: [
+      { id: "invitations", register: "1.9", proof: "41430482903" },
+    ],
     labelKey: "features.network.label",
     descriptionKey: "features.network.description",
     primaryRoute: "/dashboard/network",
@@ -204,7 +233,9 @@ export const FEATURES: readonly FeatureConfig[] = [
     // to "do" — it lives in the avatar / account menu, not the global nav.
     key: "account_roles",
     availability: "active",
-    evidence: [{ register: "1.5", proof: "41280157502" }],
+    claims: [
+      { id: "several_roles", register: "1.5", proof: "41280157502" },
+    ],
     labelKey: "features.account_roles.label",
     descriptionKey: "features.account_roles.description",
     primaryRoute: "/dashboard/account",
@@ -219,7 +250,9 @@ export const FEATURES: readonly FeatureConfig[] = [
     // is reached from the market (/dashboard/listings) and the spine signals.
     key: "service_offers",
     availability: "active",
-    evidence: [{ register: "6.1", proof: "41729310761" }],
+    claims: [
+      { id: "offer_and_requests", register: "6.1", proof: "41729310761" },
+    ],
     labelKey: "features.service_offers.label",
     descriptionKey: "features.service_offers.description",
     primaryRoute: "/dashboard/services",
@@ -233,7 +266,10 @@ export const FEATURES: readonly FeatureConfig[] = [
   {
     key: "role_expansion",
     availability: "active",
-    evidence: [{ register: "J-13", proof: "41480104268" }, { register: "1.5", proof: "41280157502" }],
+    claims: [
+      { id: "add_company", register: "E-1", proof: "41279196446" },
+      { id: "add_buying", register: "J-13", proof: "41480104268" },
+    ],
     labelKey: "features.role_expansion.label",
     descriptionKey: "features.role_expansion.description",
     safeToShowInPrimaryNav: false,
@@ -241,7 +277,9 @@ export const FEATURES: readonly FeatureConfig[] = [
   {
     key: "external_confirmation",
     availability: "active",
-    evidence: [{ register: "2.20", proof: "41478434884" }, { register: "W-3", proof: "41478434884" }],
+    claims: [
+      { id: "manager_confirms", register: "2.20", proof: "41478434884" },
+    ],
     labelKey: "features.external_confirmation.label",
     descriptionKey: "features.external_confirmation.description",
     safeToShowInPrimaryNav: false,
@@ -249,7 +287,10 @@ export const FEATURES: readonly FeatureConfig[] = [
   {
     key: "company_workspace",
     availability: "active",
-    evidence: [{ register: "E-1", proof: "41279196446" }, { register: "3.1", proof: "owner session 10-23" }],
+    claims: [
+      { id: "setup_and_need", register: "E-1", proof: "41279196446" },
+      { id: "company_home", register: "3.1", proof: "39783147517" },
+    ],
     labelKey: "features.company_workspace.label",
     descriptionKey: "features.company_workspace.description",
     safeToShowInPrimaryNav: false,
@@ -259,7 +300,9 @@ export const FEATURES: readonly FeatureConfig[] = [
     // no walk opens those two surfaces. The roster/client/need/offer chain (A-1) is.
     key: "agency_workspace",
     availability: "active",
-    evidence: [{ register: "A-1", proof: "41787046374" }],
+    claims: [
+      { id: "roster_clients_offers", register: "A-1", proof: "41787046374" },
+    ],
     labelKey: "features.agency_workspace.label",
     descriptionKey: "features.agency_workspace.description",
     safeToShowInPrimaryNav: false,
@@ -267,7 +310,9 @@ export const FEATURES: readonly FeatureConfig[] = [
   {
     key: "customer_workspace",
     availability: "active",
-    evidence: [{ register: "C-1", proof: "41785749357" }, { register: "6.4", proof: "41713787541" }],
+    claims: [
+      { id: "record_and_requests", register: "C-1", proof: "41785749357" },
+    ],
     labelKey: "features.customer_workspace.label",
     descriptionKey: "features.customer_workspace.description",
     safeToShowInPrimaryNav: false,
@@ -277,7 +322,10 @@ export const FEATURES: readonly FeatureConfig[] = [
     // register and approvals (HR-2) and personal documents (2.18) are proven.
     key: "document_records",
     availability: "active",
-    evidence: [{ register: "HR-2", proof: "41786102850" }, { register: "2.18", proof: "41716118134" }],
+    claims: [
+      { id: "own_documents", register: "2.18", proof: "41716118134" },
+      { id: "company_register", register: "HR-2", proof: "41786102850" },
+    ],
     labelKey: "features.document_records.label",
     descriptionKey: "features.document_records.description",
     safeToShowInPrimaryNav: false,
@@ -285,7 +333,9 @@ export const FEATURES: readonly FeatureConfig[] = [
   {
     key: "team_offers",
     availability: "active",
-    evidence: [{ register: "4.6", proof: "41350506578" }, { register: "SC-7", proof: "41350506578" }],
+    claims: [
+      { id: "team_as_unit", register: "4.6", proof: "41350506578" },
+    ],
     labelKey: "features.team_offers.label",
     descriptionKey: "features.team_offers.description",
     safeToShowInPrimaryNav: false,
@@ -293,7 +343,10 @@ export const FEATURES: readonly FeatureConfig[] = [
   {
     key: "work_needs",
     availability: "active",
-    evidence: [{ register: "SC-5", proof: "41672031864" }, { register: "4.1", proof: "41279196446" }],
+    claims: [
+      { id: "one_form", register: "4.1", proof: "41279196446" },
+      { id: "people_answer", register: "SC-5", proof: "41672031864" },
+    ],
     labelKey: "features.work_needs.label",
     descriptionKey: "features.work_needs.description",
     safeToShowInPrimaryNav: false,
@@ -303,7 +356,9 @@ export const FEATURES: readonly FeatureConfig[] = [
     // The candidate shortlist for a stated need (SC-5 / J-5). No AI involved.
     key: "rule_matching",
     availability: "active",
-    evidence: [{ register: "SC-5", proof: "41672031864" }, { register: "J-5", proof: "company-talent-history" }],
+    claims: [
+      { id: "shortlist_with_reason", register: "4.5", proof: "41279265278" },
+    ],
     labelKey: "features.rule_matching.label",
     descriptionKey: "features.rule_matching.description",
     safeToShowInPrimaryNav: false,

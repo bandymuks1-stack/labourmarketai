@@ -3886,63 +3886,112 @@
     "preparing_badge": "W przygotowaniu",
     "overview": {
       "label": "Przegląd",
-      "description": "Główny widok z krokami startowymi, sugestiami i możliwościami."
+      "description": "Widok startowy otwiera się dla każdej Twojej roli.",
+      "claims": {
+        "home_per_role": "Widok startowy otwiera się dla każdej Twojej roli."
+      }
     },
     "market_map": {
       "label": "Mapa rynku",
-      "description": "Jedna zunifikowana mapa rynku pracy — Twój własny sygnał, zapotrzebowania firm i rzeczywiste dane według kraju / regionu."
+      "description": "Mapa zaznacza, gdzie jest praca i ludzie.",
+      "claims": {
+        "map": "Mapa zaznacza, gdzie jest praca i ludzie."
+      }
     },
     "profile_text_first": {
       "label": "Profil",
-      "description": "Opisz siebie własnymi słowami albo wklej CV. System sugeruje umiejętności, ale to Ty je wybierasz."
+      "description": "Opisz swoją pracę własnymi słowami i zbuduj profil zawodowy.",
+      "claims": {
+        "profile": "Opisz swoją pracę własnymi słowami i zbuduj profil zawodowy."
+      }
     },
     "journal_text_first": {
       "label": "Zapis pracy lub aktywności",
-      "description": "Zapisz dzisiejszą pracę lub aktywność. System pomaga ją uporządkować, ale to Ty decydujesz o faktach."
+      "description": "Zapisz, co dziś robiłeś — wpis trafia do Twojego Living CV.",
+      "claims": {
+        "entry_to_cv": "Zapisz, co dziś robiłeś — wpis trafia do Twojego Living CV."
+      }
     },
     "communication": {
       "label": "Wiadomości",
-      "description": "Rozmowy i zapytania, które otrzymujesz. Gdy ktoś napisze do Ciebie lub wyśle zapytanie, znajdziesz to tutaj."
+      "description": "Pisz do ludzi i firm — rozmowa zostaje w jednym wątku.",
+      "claims": {
+        "threads": "Pisz do ludzi i firm — rozmowa zostaje w jednym wątku."
+      }
     },
     "account_roles": {
       "label": "Role",
-      "description": "Przejrzyj swoje role. Praca jako osoba jest dziś aktywna; inne czynności są dodawane stopniowo."
+      "description": "Jedno konto ma kilka ról, między którymi się przełączasz.",
+      "claims": {
+        "several_roles": "Jedno konto ma kilka ról, między którymi się przełączasz."
+      }
     },
     "role_expansion": {
       "label": "Więcej ról",
-      "description": "To samo konto może prowadzić także firmę, agencję lub zakupy — dodajesz je, gdy są potrzebne."
+      "description": "Z tego samego konta możesz założyć firmę. Z tego samego konta możesz zacząć kupować usługi.",
+      "claims": {
+        "add_company": "Z tego samego konta możesz założyć firmę.",
+        "add_buying": "Z tego samego konta możesz zacząć kupować usługi."
+      }
     },
     "external_confirmation": {
       "label": "Dowody pracy od innych",
-      "description": "Kierownik, klient lub partner może potwierdzić wpisy pracy, które mu wyślesz."
+      "description": "Upoważniony kierownik w Twojej organizacji potwierdza pracę, którą zapisałeś.",
+      "claims": {
+        "manager_confirms": "Upoważniony kierownik w Twojej organizacji potwierdza pracę, którą zapisałeś."
+      }
     },
     "company_workspace": {
       "label": "Przestrzeń firmy",
-      "description": "Zarządzanie zespołem, projektami i zapotrzebowaniem dla firm."
+      "description": "Załóż organizację i opublikuj jej pierwsze zapotrzebowanie. Strona główna firmy otwiera się dla ludzi organizacji.",
+      "claims": {
+        "setup_and_need": "Załóż organizację i opublikuj jej pierwsze zapotrzebowanie.",
+        "company_home": "Strona główna firmy otwiera się dla ludzi organizacji."
+      }
     },
     "agency_workspace": {
       "label": "Przestrzeń agencji",
-      "description": "Zarządzanie pulą kandydatów i ofertą usług dla agencji."
+      "description": "Agencja prowadzi swoich ludzi, łączy się z klientami i oferuje ludzi do potrzeby klienta.",
+      "claims": {
+        "roster_clients_offers": "Agencja prowadzi swoich ludzi, łączy się z klientami i oferuje ludzi do potrzeby klienta."
+      }
     },
     "customer_workspace": {
       "label": "Przestrzeń klienta",
-      "description": "Zapytania o usługi i raporty dla klientów."
+      "description": "Zapisz swoje dane zamawiającego i trzymaj zapytania na własnej liście.",
+      "claims": {
+        "record_and_requests": "Zapisz swoje dane zamawiającego i trzymaj zapytania na własnej liście."
+      }
     },
     "document_records": {
       "label": "Dokumenty",
-      "description": "Miejsce na certyfikaty i dokumenty."
+      "description": "Przechowuj dokumenty i sprawdzaj, kiedy każdy z nich wygasa. Firma prowadzi rejestr swoich dokumentów i zatwierdzeń.",
+      "claims": {
+        "own_documents": "Przechowuj dokumenty i sprawdzaj, kiedy każdy z nich wygasa.",
+        "company_register": "Firma prowadzi rejestr swoich dokumentów i zatwierdzeń."
+      }
     },
     "team_offers": {
       "label": "Oferty zespołów",
-      "description": "Miejsce do tworzenia zespołów i publikowania wspólnych ofert."
+      "description": "Zespół jest oferowany do potrzeby i przyjmowany jako jedna całość.",
+      "claims": {
+        "team_as_unit": "Zespół jest oferowany do potrzeby i przyjmowany jako jedna całość."
+      }
     },
     "work_needs": {
       "label": "Zapotrzebowania na pracę",
-      "description": "Miejsce do zapisania, jakiej pracy lub pomocy potrzebujesz."
+      "description": "Firma w jednym formularzu opisuje, jakich ludzi potrzebuje. Zainteresowane osoby odpowiadają na potrzebę.",
+      "claims": {
+        "one_form": "Firma w jednym formularzu opisuje, jakich ludzi potrzebuje.",
+        "people_answer": "Zainteresowane osoby odpowiadają na potrzebę."
+      }
     },
     "service_offers": {
       "label": "Oferty usług",
-      "description": "Miejsce do publikowania usług, które świadczysz."
+      "description": "Opublikuj usługi, które świadczysz, i otrzymuj na nie zapytania.",
+      "claims": {
+        "offer_and_requests": "Opublikuj usługi, które świadczysz, i otrzymuj na nie zapytania."
+      }
     },
     "matching": {
       "label": "Dopasowanie AI",
@@ -3954,21 +4003,35 @@
     },
     "marketplace_hub": {
       "label": "Rynek usług",
-      "description": "Kompaktowe centrum łączące mapę, możliwości i Twoje firmy."
+      "description": "Prowadzi do mapy, która pokazuje pracę i ludzi.",
+      "claims": {
+        "map": "Prowadzi do mapy, która pokazuje pracę i ludzi."
+      }
     },
     "planning": {
       "label": "Kalendarz",
-      "description": "Jeden kalendarz: rezerwacje, projekty, zadania, wpisy w dzienniku, zaproszenia i terminy płatności."
+      "description": "Firma planuje pracę swoich ludzi w kalendarzu. Swoją pracę widzisz w kalendarzu.",
+      "claims": {
+        "company_calendar": "Firma planuje pracę swoich ludzi w kalendarzu.",
+        "own_calendar": "Swoją pracę widzisz w kalendarzu."
+      }
     },
     "network": {
       "label": "Sieć kontaktów",
-      "description": "Ludzie i firmy: wyszukiwanie, zaproszenia i Twoje relacje."
+      "description": "Tu trafiają zaproszenia do zespołu firmy i tu je przyjmujesz.",
+      "claims": {
+        "invitations": "Tu trafiają zaproszenia do zespołu firmy i tu je przyjmujesz."
+      }
     },
     "rule_matching": {
       "label": "Krótka lista kandydatów",
-      "description": "Do zgłoszonej potrzeby powstaje krótka lista pasujących osób, z powodem dla każdej z nich."
+      "description": "Opisana potrzeba otrzymuje krótką listę pasujących osób z powodem dla każdej.",
+      "claims": {
+        "shortlist_with_reason": "Opisana potrzeba otrzymuje krótką listę pasujących osób z powodem dla każdej."
+      }
     },
-    "matching_reason": "Wyłączone: nie podłączono żadnej usługi AI. Krótka lista kandydatów już działa."
+    "matching_reason": "Wyłączone: nie podłączono żadnej usługi AI. Krótka lista kandydatów już działa.",
+    "notCheckedYet": "Ta część nie została sprawdzona w działającej usłudze."
   },
   "structuring": {
     "groupEyebrow": "Sugerowane umiejętności",
