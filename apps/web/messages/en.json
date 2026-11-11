@@ -20437,5 +20437,47 @@
       "allow": "Allow",
       "refuse": "Refuse"
     }
+  },
+  "companyClaim": {
+    "email": {
+      "subject": "Take over the {company} profile on LabourMarket.ai",
+      "intro": "You are invited to manage the profile of {company} on LabourMarket.ai. It is free.",
+      "open": "Open this one-time link:",
+      "validity": "The link is valid for 14 days and works only with this e-mail address.",
+      "notYou": "If you don't represent this company, do nothing: nothing changes without you."
+    },
+    "invite": {
+      "eyebrow": "Company profile",
+      "title": "Take over the {company} profile",
+      "body": "Confirm that you represent this company. This is a request: another LabourMarket.ai operator checks it, and only then do you become the profile's owner.",
+      "verifyFirst": "First confirm that this e-mail address is yours.",
+      "roleLabel": "Your role in the company",
+      "rolePlaceholder": "For example, managing director",
+      "authorityLabel": "I confirm that I may act for {company}.",
+      "submit": "Send the request",
+      "decidedBy": "Another operator decides, not the one who invited you.",
+      "expires": "The invitation is valid until {date}.",
+      "requestedTitle": "Request sent",
+      "requestedBody": "An operator will check your request. Once it is approved, you manage the profile. Until then nothing changes.",
+      "closedTitle": "This invitation can no longer be used",
+      "verifySend": "Send the confirmation link",
+      "pending": "Sending…",
+      "outcome": {
+        "claim_requested": "Request sent.",
+        "already_requested": "You have already sent a request.",
+        "already_used": "This invitation has already been used.",
+        "expired": "The invitation has expired. Ask for a new one.",
+        "revoked": "The invitation was withdrawn.",
+        "email_mismatch": "This invitation is for another e-mail address. Sign in with the address the e-mail was sent to.",
+        "email_not_verified": "First confirm your e-mail address.",
+        "authority_not_confirmed": "Tick the box to confirm that you may act for the company.",
+        "invalid_role": "Enter your role (2–80 characters).",
+        "not_claimable": "This company profile can no longer be taken over.",
+        "inviter_cannot_claim": "The operator who sent the invitation cannot use it to take over the company.",
+        "verify_sent": "We sent a link to your e-mail. Open it and you'll come back here.",
+        "verify_rate_limited": "We sent a link a moment ago. Check your e-mail or try again later.",
+        "error": "That didn't work. Try again later."
+      }
+    }
   }
 }

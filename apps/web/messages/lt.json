@@ -20437,5 +20437,47 @@
       "allow": "Leisti",
       "refuse": "Atsisakyti"
     }
+  },
+  "companyClaim": {
+    "email": {
+      "subject": "Perimk {company} profilį LabourMarket.ai",
+      "intro": "Tave pakvietė valdyti įmonės {company} profilį LabourMarket.ai. Tai nemokama.",
+      "open": "Atidaryk šią vienkartinę nuorodą:",
+      "validity": "Nuoroda galioja 14 dienų ir veikia tik su šiuo el. pašto adresu.",
+      "notYou": "Jei tu neatstovauji šiai įmonei, nieko nedaryk: be tavęs niekas nepasikeis."
+    },
+    "invite": {
+      "eyebrow": "Įmonės profilis",
+      "title": "Perimk {company} profilį",
+      "body": "Patvirtink, kad atstovauji šiai įmonei. Tai prašymas: kitas LabourMarket.ai operatorius jį patikrins, ir tik tada tapsi profilio savininku.",
+      "verifyFirst": "Pirmiausia patvirtink, kad šis el. pašto adresas tavo.",
+      "roleLabel": "Tavo pareigos įmonėje",
+      "rolePlaceholder": "Pvz., direktorius",
+      "authorityLabel": "Patvirtinu, kad turiu teisę atstovauti įmonei {company}.",
+      "submit": "Pateikti prašymą",
+      "decidedBy": "Sprendžia kitas operatorius, ne tas, kuris tave pakvietė.",
+      "expires": "Kvietimas galioja iki {date}.",
+      "requestedTitle": "Prašymas pateiktas",
+      "requestedBody": "Operatorius patikrins tavo prašymą. Kai jis bus patvirtintas, profilį valdysi tu. Iki tol niekas nepasikeis.",
+      "closedTitle": "Šio kvietimo naudoti nebegalima",
+      "verifySend": "Siųsti patvirtinimo nuorodą",
+      "pending": "Siunčiama…",
+      "outcome": {
+        "claim_requested": "Prašymas pateiktas.",
+        "already_requested": "Prašymą jau pateikei.",
+        "already_used": "Šis kvietimas jau panaudotas.",
+        "expired": "Kvietimo galiojimas baigėsi. Paprašyk naujo.",
+        "revoked": "Kvietimas atšauktas.",
+        "email_mismatch": "Šis kvietimas skirtas kitam el. pašto adresui. Prisijunk su tuo adresu, kuriuo gavai laišką.",
+        "email_not_verified": "Pirmiausia patvirtink savo el. pašto adresą.",
+        "authority_not_confirmed": "Pažymėk, kad turi teisę atstovauti įmonei.",
+        "invalid_role": "Įrašyk savo pareigas (2–80 simbolių).",
+        "not_claimable": "Šios įmonės profilio perimti nebegalima.",
+        "inviter_cannot_claim": "Kvietimą siuntęs operatorius negali juo perimti įmonės.",
+        "verify_sent": "Išsiuntėme nuorodą į tavo el. paštą. Atidaryk ją ir grįši čia.",
+        "verify_rate_limited": "Nuorodą neseniai jau siuntėme. Patikrink el. paštą arba bandyk vėliau.",
+        "error": "Nepavyko. Bandyk dar kartą vėliau."
+      }
+    }
   }
 }
