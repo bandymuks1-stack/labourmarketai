@@ -21,6 +21,49 @@ These sit next to the jobs, opportunities, post-a-need and availability screens 
 
 ---
 
+## 0. Shortest path to TestFlight internal + Play internal testing (update 2026-11-11)
+
+**Goal:** a signed build in the hands of internal testers on both stores. A public release comes after (§6 items 8–10).
+
+**Build route chosen: EAS Build + EAS Submit**, started by hand from GitHub Actions (`eas-release.yml`, its own PR). The GitHub Actions signed build was rejected, for four reasons:
+
+- **No Mac.** The owner works on Windows. EAS builds iOS on Expo's macOS machines and creates the distribution certificate and provisioning profile itself. A GitHub macOS runner would need them made by hand first.
+- **Fewest secrets in GitHub.** The signing material (iOS certificate + profile, Android upload keystore) and the store keys (App Store Connect API key, Play service account) stay in the owner's Expo account. GitHub holds ONE secret, `EXPO_TOKEN`. The repository is public. The GitHub route would put five or more signing secrets beside it and need renewal by hand.
+- **Cost 0 €.** The repository already pins EAS profiles (`apps/mobile/eas.json`, guarded by `mobile-release-config.test.ts`). The Expo free plan has a monthly build quota and a slower queue; check expo.dev/pricing before relying on a number. The store fees below are unavoidable on either route.
+- **A fallback stays.** `android.yml` already builds a release AAB with Gradle. If the EAS quota ever blocks a release, the same job can sign with an upload key, at the cost of one keystore secret. That stays an owner decision.
+
+### 0.1 Owner steps, in order (the parts only the owner can do)
+
+| # | Step | Detail | Time / cost |
+|---|---|---|---|
+| O-1 | **Apple Developer Program** | Enrol at developer.apple.com, as an individual or an organization. An organization needs a D-U-N-S number; an individual is the faster route. | 99 USD/year; individual about 1–2 days, organization longer |
+| O-2 | **App Store Connect record** | New app, bundle id `ai.labourmarket.app`, name "LabourMarket.ai", primary language. Then create an **App Store Connect API key** (Users and Access → Integrations, App Manager role) and upload it to EAS: `eas credentials` → iOS → App Store Connect API key. | minutes |
+| O-3 | **Google Play Console** | Choose the account type deliberately. **Personal:** before production access, a closed test must run with at least **12 testers opted in for 14 days in a row**. Internal testing is open immediately. **Organization:** no such rule, but it needs a D-U-N-S number and organization verification. | 25 USD once |
+| O-4 | **Expo account + `eas init`** | Create a free account at expo.dev. Run `cd apps/mobile && npx eas-cli@latest login && npx eas-cli@latest init`. This writes `extra.eas.projectId` (and `owner`) into `app.json`; the agent then commits that public id. Create an access token (expo.dev → Access tokens) and store it as the GitHub secret `EXPO_TOKEN`. | minutes, 0 € |
+| O-5 | **Public build configuration in EAS** | The app bundle needs the three public values, as plain-text EAS variables in the `production` environment: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` (the publishable anon key, the same as `vars.PROD_QA_ANON_KEY`) and `EXPO_PUBLIC_API_BASE_URL=https://labourmarket.ai`. Set them with `eas env:create --environment production --visibility plaintext`. **Never** set the service-role key; client-core refuses it at runtime anyway. | minutes |
+| O-6 | **Signing** | Run the first build interactively from the owner's own terminal, so EAS can create and store the credentials: `eas build -p ios --profile production` (Apple ID sign-in, then EAS creates the certificate + profile) and `eas build -p android --profile production` (EAS generates the upload keystore). On Play, keep **Play App Signing** on (it is mandatory for new apps). Google then holds the app-signing key and EAS holds the upload key. | one build each |
+| O-7 | **First Play upload is manual** | The Play API cannot create an app's first release. Upload the first AAB by hand under Testing → Internal testing. After that, `eas submit -p android` works with a Play **service account** JSON uploaded to EAS (`eas credentials` → Android → Google Service Account). | once |
+| O-8 | **App Links + Universal Links** | Set `ANDROID_CERT_FINGERPRINTS` on the production web deploy to the **Play App Signing** SHA-256 (Play Console → App integrity), and also the upload key's SHA-256 if testers sideload. Set `APPLE_TEAM_ID`. Until then `/.well-known/assetlinks.json` and `apple-app-site-association` return 404, by design. | minutes |
+| O-9 | **Reviewer / tester account** | ONE synthetic worker account with a password, at least one confirmed journal entry and one workspace (§6 item 4). Its credentials go only into the store consoles' review fields and the `production-qa` secret `MOBILE_QA_PASSWORD`, never into the repo or a PR. | minutes |
+| O-10 | **Testers** | TestFlight **internal**: up to 100 App Store Connect users, no Beta App Review. Play **internal testing**: up to 100 e-mail addresses on a list. | minutes |
+
+### 0.2 What then runs without the owner, and what never does
+
+- **GitHub → Actions → "EAS release build" → Run workflow** (platform: ios / android / all). It builds signed packages on EAS.
+- **Upload is off by default.** The workflow's `submit` input defaults to `false`. Setting it to `true` uploads to **TestFlight / Play internal testing only**: the `production` submit profile names no release track or review, and promotion to production stays a click in each console.
+- **No secret: no build.** Without `EXPO_TOKEN` or `extra.eas.projectId` the workflow **skips cleanly**. It exits 0 and says which value is missing in its summary. Nothing in the repository becomes a key.
+- **Every run is the owner's decision.** The job runs in the `store-release` GitHub environment. Add the owner as its required reviewer (Settings → Environments), so no agent-started run can build or upload without the owner's click.
+
+### 0.3 Known gaps a reviewer may raise (status 2026-11-11)
+
+| Gap | Risk | Status |
+|---|---|---|
+| Account deletion is a link to the web, not an in-app action | Apple 5.1.1(v): deletion must be **initiated in the app**. A link is accepted only when it goes straight to the deletion step. | The capability is not exposed through `/api/mcp`: the request exists only as a web server action calling `submit_privacy_request_v1`. Making it reachable from the app needs a new MCP capability. That is a privacy decision for the owner, so it is held. |
+| No push notifications | none for review | options in §8, nothing added |
+| No offers screen | none for review | proposed separately; client reuse only |
+
+---
+
 ## 1. What the native app is (the scope every listing must match)
 
 Expo / React Native app `apps/mobile`, id `ai.labourmarket.app`, version 0.1.0. Data reaches the app only through `/api/mcp` under the signed-in person's own permissions.
@@ -239,7 +282,7 @@ Submission goes through `claude.ai/directory/manage`. New listings start as **Co
 | 2 | Google Play Console account + upload key / Play App Signing; then set `ANDROID_CERT_FINGERPRINTS` on production | Play, App Links | account, identity, payment |
 | 3 | Apple Developer Program + App Store Connect record; then set `APPLE_TEAM_ID` | App Store, TestFlight, Universal Links | account, identity, payment |
 | 4 | Create ONE synthetic review account with a password (e.g. the QA worker identity) and store it as the `production-qa` environment secret `MOBILE_QA_PASSWORD` | Play + Apple + ChatGPT + Claude reviewer access; signed-in mobile CI journey | an agent may not create credentials |
-| 5 | `eas init` (EAS project id) or a local signed build with the upload key | the uploadable AAB / IPA | signing keys |
+| 5 | `eas init` (EAS project id), `EXPO_TOKEN`, EAS public variables, first interactive build: §0.1 O-4…O-7 | the uploadable AAB / IPA | signing keys |
 | 6 | OpenAI Platform: verify publisher identity, create the plugin draft, copy the domain token into `OPENAI_APPS_CHALLENGE_TOKEN`, submit with §4 cases | ChatGPT directory | account, identity |
 | 7 | Claude: open `claude.ai/directory/manage`, add the custom connector once to test OAuth, submit with §5 | Claude directory | account |
 | 8 | Lawyer-reviewed privacy policy / terms (remove the pending banner), retention periods | Claude + ChatGPT review, GDPR | legal sign-off |
@@ -273,3 +316,30 @@ Submission goes through `claude.ai/directory/manage`. New listings start as **Co
 - the landing page;
 - the design D1–D7 work (#2367, #2370 open for the design agent);
 - #2362 dates (analysis posted; owner chooses A/B/C).
+
+---
+
+## 8. Push notifications — options for the owner (2026-11-11; nothing added)
+
+Today the app has **in-app** notifications only (`notification_list`, read when the screen opens). Push needs an owner choice first, because it adds a processor and a new kind of personal data: a device token per phone.
+
+| | A. Expo Push Service | B. FCM + APNs directly |
+|---|---|---|
+| Price | 0 € (no per-message fee) | 0 € (FCM and APNs are free) |
+| Path a message takes | our server → Expo → FCM (Android) / APNs (iOS) → phone | our server → FCM / APNs → phone |
+| Who processes the data | Expo (650 Industries, USA), Google and Apple | Google and Apple |
+| What the owner sets up | the FCM v1 service account and the APNs key, both uploaded to EAS (EAS can create the APNs key) | a Firebase project plus a server-side service-account secret on the VPS, and an APNs `.p8` key on the VPS |
+| App code | `expo-notifications` + `getExpoPushTokenAsync` | `expo-notifications` + `getDevicePushTokenAsync` (raw FCM / APNs tokens; no Firebase SDK on iOS) |
+| Server code | one HTTPS call to Expo's push API, plus reading its receipts | two senders (FCM HTTP v1, APNs HTTP/2) and token refresh |
+| Speed to ship | faster | slower |
+
+**Needed under either option**, all of which an owner approves first:
+- a device-token table (a migration with RLS: own rows only, deleted on sign-out and on account erasure);
+- a store-and-forget sender;
+- opt-in on the phone (iOS asks; Android 13+ asks, so `POST_NOTIFICATIONS` gets added to the CI permission allow-list on purpose);
+- the existing `notification_preference_set` as the per-category off switch;
+- privacy policy, Play Data safety ("Device or other IDs") and the Apple privacy label updated **before** the build ships.
+
+**What a push should carry, recommended for both options:** no names, no message text, no project or company. A neutral line ("You have something new in LabourMarket.ai") and the notification id only. The app then reads the content through `/api/mcp` under the person's own permissions. This keeps message content out of Expo, Google and Apple, and it suits the EU-first market.
+
+**Recommendation:** A, if the owner accepts Expo as a processor (it needs its DPA reviewed); otherwise B. Either one is one GREEN app PR plus one RED migration PR, after the owner chooses.
