@@ -23,8 +23,12 @@
 -- (address binding), session_email_verified_v1 (mailbox proof, independent of "Confirm email"),
 -- organization_claims, has_platform_capability('marketplace_company_ingest'), audit_logs.
 --
--- CLOSED: request_organization_claim_v1 and decide_organization_claim_v1 are no longer executable by
--- `authenticated`. They stay defined (nothing calls them in the app) so the rollback restores them as is.
+-- CLOSED: request_organization_claim_v1 and decide_organization_claim_v1 are no longer executable by any
+-- client role. They stay defined and STAY CLOSED after a rollback (owner rule 2026-11-11).
+--
+-- REPLACED (one existing body): mirror_company_to_org gains one guard, so the link can create the
+-- company's operational `companies` row without the mirror inserting a second organization. The body
+-- is otherwise verbatim; the rollback restores it byte for byte.
 --
 -- @plan-cache-proof: n/a — uniqueness only, no RPC filters by it (organization_claims_invitation_uq: one claim per invitation)
 -- SAFETY CLASS: RED (SECURITY DEFINER functions, GRANT/REVOKE, CHECK widening, additive columns).
@@ -83,6 +87,39 @@ as $$
       or exists (select 1 from public.platform_capability_grants g
                   where g.profile_id = p_profile_id and g.revoked_at is null)
 $$;
+
+-- The operational company of a claimed organization. A claim links an EXISTING organization, so the
+-- mirror must not create another one while the link inserts the companies row (transaction-local flag).
+create or replace function public.mirror_company_to_org()
+ returns trigger
+ language plpgsql
+ security definer
+ set search_path to 'public'
+as $function$
+begin
+  if (tg_op = 'INSERT') then
+    if coalesce(current_setting('lm.claim_link', true), '') = 'on' then
+      return new;
+    end if;
+    insert into public.organizations
+      (owner_profile_id, organization_type, legal_name, display_name, country,
+       vat_number, website, description, trust_score, legacy_company_id)
+    values
+      (new.profile_id, 'company', new.legal_name, new.display_name, new.country,
+       new.vat_number, new.website, new.description, new.trust_score, new.id);
+  elsif (tg_op = 'UPDATE') then
+    update public.organizations set
+      owner_profile_id = case when new.profile_id is distinct from old.profile_id
+                              then new.profile_id else owner_profile_id end,
+      legal_name = new.legal_name,
+      display_name = new.display_name, country = new.country,
+      vat_number = new.vat_number, website = new.website,
+      description = new.description, trust_score = new.trust_score,
+      updated_at = now()
+    where legacy_company_id = new.id;
+  end if;
+  return new;
+end $function$;
 
 -- 2. What the representative stated ------------------------------------------------------------
 alter table public.organization_claims
@@ -250,6 +287,13 @@ begin
     return jsonb_build_object('outcome', 'invalid_role');
   end if;
 
+  -- The same person's earlier request for this company gives way to the invited claim, so the
+  -- invitation's rules (two operators) apply to what is decided.
+  update public.organization_claims
+     set state = 'withdrawn', decision_note = 'superseded by an invited claim'
+   where organization_id = v_org.id and claimant_profile_id = uid and state = 'requested'
+     and invitation_id is null;
+
   insert into public.organization_claims
     (organization_id, claimant_profile_id, state, verification_method, verification_evidence_ref,
      invitation_id, representative_role, authority_confirmed_at)
@@ -342,8 +386,9 @@ security definer
 set search_path = public
 as $$
 declare
-  v_claim public.organization_claims%rowtype;
-  v_org   public.organizations%rowtype;
+  v_claim   public.organization_claims%rowtype;
+  v_org     public.organizations%rowtype;
+  v_company uuid;
 begin
   select * into v_claim from public.organization_claims where id = p_claim_id;
   if not found then return 'not_found'; end if;
@@ -360,6 +405,18 @@ begin
   update public.organizations
      set owner_profile_id = v_claim.claimant_profile_id, claim_state = 'claimed', updated_at = now()
    where id = v_org.id;
+
+  -- The operational company (employer gate, company workspace): one companies row, bound by
+  -- legacy_company_id, created without the mirror adding a second organization.
+  if v_org.legacy_company_id is null and v_org.organization_type = 'company' then
+    perform set_config('lm.claim_link', 'on', true);
+    insert into public.companies (profile_id, legal_name, display_name, country, website, description)
+    values (v_claim.claimant_profile_id, v_org.legal_name, v_org.display_name, v_org.country,
+            v_org.website, v_org.description)
+    returning id into v_company;
+    perform set_config('lm.claim_link', '', true);
+    update public.organizations set legacy_company_id = v_company where id = v_org.id;
+  end if;
 
   -- The owner triggers fire on INSERT only, so the link writes what they would have.
   insert into public.company_memberships (organization_id, profile_id, role, status, accepted_at, source)
@@ -383,7 +440,12 @@ begin
   update public.organization_claims set state = 'linked' where id = p_claim_id;
   update public.organization_claims
      set state = 'rejected', decided_by = p_decider, decided_at = now(), decision_note = 'superseded by a linked claim'
-   where organization_id = v_org.id and id <> p_claim_id and state in ('invited', 'requested');
+   where organization_id = v_org.id and id <> p_claim_id and state in ('invited', 'requested')
+     and claimant_profile_id <> p_decider;
+  update public.organization_claims
+     set state = 'withdrawn', decision_note = 'superseded by a linked claim'
+   where organization_id = v_org.id and id <> p_claim_id and state in ('invited', 'requested')
+     and claimant_profile_id = p_decider;
   update public.invitations set status = 'revoked', revoked_at = now()
    where organization_id = v_org.id and invitation_type = 'claim_organization' and status = 'pending';
 
@@ -414,7 +476,7 @@ begin
   if not (public.is_admin() or public.has_platform_capability('marketplace_company_ingest')) then
     raise exception 'Not authorized to decide claims' using errcode = '42501';
   end if;
-  if p_decision not in ('verify', 'reject') then
+  if p_decision is null or p_decision not in ('verify', 'reject') then
     raise exception 'Decision must be verify or reject' using errcode = '22023';
   end if;
 

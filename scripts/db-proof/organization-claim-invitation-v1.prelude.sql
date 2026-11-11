@@ -22,6 +22,8 @@ insert into public.countries values ('LT'), ('IT');
 create table public.organizations (
   id uuid primary key default gen_random_uuid(),
   display_name text not null,
+  legal_name text, website text, description text, vat_number text, trust_score numeric,
+  legacy_company_id uuid,
   country text,
   organization_type text not null default 'company',
   owner_profile_id uuid references public.profiles(id),
@@ -31,6 +33,27 @@ create table public.organizations (
   updated_at timestamptz not null default now(),
   constraint organizations_unclaimed_has_no_owner check (claim_state = 'claimed' or owner_profile_id is null)
 );
+
+create table public.companies (
+  id uuid primary key default gen_random_uuid(), profile_id uuid, legal_name text, display_name text,
+  country text, vat_number text, trust_score numeric, description text, website text
+);
+-- Production body of mirror_company_to_org (read 2026-11-11); the migration replaces it.
+create function public.mirror_company_to_org() returns trigger language plpgsql security definer set search_path to 'public' as $function$
+begin
+  if (tg_op = 'INSERT') then
+    insert into public.organizations
+      (owner_profile_id, organization_type, legal_name, display_name, country,
+       vat_number, website, description, trust_score, legacy_company_id)
+    values
+      (new.profile_id, 'company', new.legal_name, coalesce(new.display_name, 'x'), new.country,
+       new.vat_number, new.website, new.description, new.trust_score, new.id);
+  elsif (tg_op = 'UPDATE') then
+    update public.organizations set display_name = new.display_name, updated_at = now() where legacy_company_id = new.id;
+  end if;
+  return new;
+end $function$;
+create trigger on_company_mirror_org after insert or update on public.companies for each row execute function public.mirror_company_to_org();
 
 create table public.invitations (
   id uuid primary key default gen_random_uuid(),

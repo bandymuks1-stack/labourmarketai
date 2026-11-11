@@ -140,12 +140,15 @@ r=$(as $OTH oth@other.example "select submit_organization_verification_request_v
 check "requests are limited per person" "too_many_requests" "$(outcome "$r")"
 
 echo "== the decision and the link"
+check "a NULL decision is refused" "1" "$(as $OPB opb@ops.example "select decide_organization_claim_v2('$C1',null,'register extract',null)" | grep -c 'verify or reject')"
 check "verification needs evidence" "1" "$(as $OPB opb@ops.example "select decide_organization_claim_v2('$C1','verify','',null)" | grep -c 'documented evidence')"
 r=$(as $OPB opb@ops.example "select decide_organization_claim_v2('$C1','verify','register extract QA-1','checked')")
 check "operator B verifies and links" "linked" "$(outcome "$r")"
 check "the representative owns the company" "claimed|$REP" "$(q "select claim_state||'|'||owner_profile_id from organizations where id='$O1'")"
 check "the owner membership exists" "owner|active" "$(q "select role||'|'||status from company_memberships where organization_id='$O1' and profile_id='$REP'")"
 check "the owner engagement exists" "1" "$(q "select count(*) from engagement_contexts where organization_id='$O1' and profile_id='$REP' and relationship_slug='owner'")"
+check "the link binds one operational company to the claimed organization" "1" "$(q "select count(*) from companies c join organizations o on o.legacy_company_id = c.id where o.id='$O1' and c.profile_id='$REP'")"
+check "the link creates no second organization" "5" "$(q "select count(*) from organizations")"
 check "no operator holds a membership" "0" "$(q "select count(*) from company_memberships where organization_id='$O1' and profile_id in ('$OPA','$OPB')")"
 check "the audit has invited, requested, verified, linked" "4" "$(q "select count(distinct action) from audit_logs where entity_id='$O1'")"
 r=$(as $OPB opb@ops.example "select decide_organization_claim_v2('$C1','verify','again',null)")
@@ -158,6 +161,21 @@ check "an owned company takes no new request" "not_claimable" "$(outcome "$r")"
 K5=$(q "insert into organization_claims (organization_id, claimant_profile_id, state, verification_method, verification_evidence_ref) values ('$O5','$R2','requested','operator_manual_review','seed') returning id")
 r=$(as $OPB opb@ops.example "select decide_organization_claim_v2('$K5','verify','x',null)")
 check "an owned company cannot be linked again" "already_claimed" "$(outcome "$r")"
+
+echo "== an invitation after a request; a decider with a competing claim"
+O6=20000000-0000-4000-8000-000000000006
+$PSQL -c "insert into organizations (id, display_name, country, claim_state) values ('$O6','QA-SYNTHETIC Zeta','LT','discovered')" >/dev/null
+r=$(as $R3 r3@x.example "select submit_organization_verification_request_v1('$O6','Director','https://register.example/6',true)")
+check "the representative first sends a request" "request_submitted" "$(outcome "$r")"
+as $OPA opa@ops.example "select create_claim_invitation_v1('$O6','r3@x.example','$(hash $(tok o6))','lt')" >/dev/null
+r=$(as $R3 r3@x.example "select accept_claim_invitation_v1('$(tok o6)','Director',true)")
+check "the later invitation is still accepted" "claim_requested" "$(outcome "$r")"
+check "the earlier request gave way to the invited claim" "withdrawn" "$(q "select state from organization_claims where organization_id='$O6' and invitation_id is null")"
+KB=$(q "insert into organization_claims (organization_id, claimant_profile_id, state, verification_method, verification_evidence_ref) values ('$O6','$OPB','requested','operator_manual_review','seed: filed before the rule') returning id")
+K6=$(q "select id from organization_claims where organization_id='$O6' and invitation_id is not null")
+r=$(as $OPB opb@ops.example "select decide_organization_claim_v2('$K6','verify','register QA-6',null)")
+check "a decider with a competing claim can still verify another claim" "linked" "$(outcome "$r")"
+check "the decider's own competing claim is withdrawn, not self-decided" "withdrawn|" "$(q "select state||'|'||coalesce(decided_by::text,'') from organization_claims where id='$KB'")"
 
 echo "== race: two operators verify two requests for one company at once"
 as $R2 r2@x.example "select submit_organization_verification_request_v1('$O4','Director','https://register.example/4a',true)" >/dev/null
@@ -172,12 +190,17 @@ check "the company has exactly one owner membership" "1" "$(q "select count(*) f
 check "every other open request on it is closed" "0" "$(q "select count(*) from organization_claims where organization_id='$O4' and state='requested'")"
 
 echo "== rollback"
-check "rollback refuses while claim rows exist" "1" "$($PSQL -v ON_ERROR_STOP=1 -f "$DOWN" 2>&1 | grep -c 'rollback refused')"
-check "a refused rollback changes nothing" "1" "$(q "select count(*) from pg_proc where proname='decide_organization_claim_v2'")"
+ROWS=$(q "select count(*) from organization_claims")
+check "with claim rows the rollback pauses" "1" "$($PSQL -v ON_ERROR_STOP=1 -f "$DOWN" 2>&1 | grep -c 'company takeover paused')"
+check "paused: no data is lost" "$ROWS" "$(q "select count(*) from organization_claims")"
+check "paused: the new doors are closed" "1" "$(as $OPA opa@ops.example "select create_claim_invitation_v1('$O3','x@y.example','$(hash $(tok p1))','lt')" | grep -c 'permission denied')"
+check "paused: the old claim door stays closed" "1" "$(as $OTH oth@other.example "select request_organization_claim_v1('$O3','operator_manual_review','x')" | grep -c 'permission denied')"
+check "paused: the old decide door stays closed" "1" "$(as $OPB opb@ops.example "select decide_organization_claim_v1(gen_random_uuid(),'verify','x',null)" | grep -c 'permission denied')"
 $PSQL -c "truncate audit_logs, company_memberships, engagement_contexts, organization_claims, invitations cascade" >/dev/null
 run_file "$DOWN"
 check "rollback restores the old type list" "0" "$(q "select count(*) from pg_constraint where conname='invitations_invitation_type_check' and pg_get_constraintdef(oid) like '%claim_organization%'")"
-check "rollback reopens the old claim door" "t " "$(as $OTH oth@other.example "select request_organization_claim_v1('$O3','operator_manual_review','x') is null")"
+check "a clean rollback keeps the old claim door closed" "1" "$(as $OTH oth@other.example "select request_organization_claim_v1('$O3','operator_manual_review','x')" | grep -c 'permission denied')"
+check "a clean rollback restores the mirror (a new company mirrors to an organization)" "1" "$(q "insert into companies (profile_id, display_name) values ('$OTH','QA-SYNTHETIC Mirror'); select count(*) from organizations where display_name='QA-SYNTHETIC Mirror'" | tail -1)"
 run_file "$MIG"; run_file "$MIG"
 check "re-apply twice is idempotent" "1" "$(q "select count(*) from pg_trigger where tgname='claim_invitation_accept_guard'")"
 

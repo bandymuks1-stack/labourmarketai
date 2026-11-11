@@ -88,9 +88,30 @@ describe("two operators, and no operator ever owns", () => {
 });
 
 describe("rollback", () => {
-  it("is one transaction that refuses while claim rows exist", () => {
+  it("is one transaction", () => {
     expect(down).toMatch(/^begin;$/m);
     expect(down).toMatch(/^commit;$/m);
-    expect(down).toMatch(/rollback refused/);
+  });
+
+  // Owner rule 2026-11-11: a rollback never reopens the old open claim doors.
+  it("keeps the old claim doors closed and never grants them back", () => {
+    const code = down.replace(/^\s*--.*$/gm, "");
+    expect(code).toMatch(/revoke execute on function public\.request_organization_claim_v1\(uuid, text, text\) from public, anon, authenticated;/);
+    expect(code).toMatch(/revoke execute on function public\.decide_organization_claim_v1\(uuid, text, text, text\) from public, anon, authenticated;/);
+    expect(code).not.toMatch(/\bgrant\b/i);
+  });
+
+  it("pauses with claim rows present: closes the new doors and keeps the data", () => {
+    const code = down.replace(/^\s*--.*$/gm, "");
+    expect(code).toMatch(/company takeover paused/);
+    for (const fn of ["create_claim_invitation_v1", "accept_claim_invitation_v1", "submit_organization_verification_request_v1", "decide_organization_claim_v2", "get_claim_invitation_preview_v1"]) {
+      expect(code).toContain(`revoke execute on function public.${fn}(`);
+      expect(code).toMatch(new RegExp(`public\\.${fn}\\([^)]*\\) from public, anon, authenticated;`));
+    }
+  });
+
+  it("restores mirror_company_to_org without the claim-link guard", () => {
+    const restored = down.slice(down.lastIndexOf("create or replace function public.mirror_company_to_org()"));
+    expect(restored).not.toMatch(/lm\.claim_link/);
   });
 });
