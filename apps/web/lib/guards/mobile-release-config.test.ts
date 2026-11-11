@@ -338,7 +338,10 @@ describe("store builds are owner-started, skip without secrets and upload to int
   });
 
   it("upload is opt-in and lands on internal tracks as a draft", () => {
-    expect(wf).toMatch(/submit:\n(?:\s+.*\n)*?\s+default: false/);
+    // The `submit` input block runs from its key to the next top-level key.
+    const submitInput = wf.slice(wf.indexOf("      submit:"), wf.indexOf("\npermissions:"));
+    expect(submitInput).toContain("type: boolean");
+    expect(submitInput).toContain("default: false");
     expect(wf).toContain('if [ "$SUBMIT" = "true" ]');
     expect(eas.submit.production.android).toEqual({ track: "internal", releaseStatus: "draft" });
     expect(eas.build.production.environment).toBe("production");
