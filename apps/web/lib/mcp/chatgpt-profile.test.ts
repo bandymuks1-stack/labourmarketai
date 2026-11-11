@@ -13,7 +13,7 @@ vi.mock("next-intl/server", () => ({
 
 import { exposedCapabilities } from "@/lib/capabilities/registry";
 
-import { CHATGPT_TOOL_PROFILE, chatgptProfileToolDefs } from "./chatgpt-profile";
+import { CHATGPT_PUBLIC_TOOLS, CHATGPT_TOOL_PROFILE, chatgptProfileToolDefs } from "./chatgpt-profile";
 import { protectedResourceMetadata } from "./protected-resource-metadata";
 import { toolDefsOf } from "./toolset";
 
@@ -94,5 +94,14 @@ describe("the curated ChatGPT tool profile", () => {
     expect(curated.resource).toBe("https://labourmarket.ai/api/mcp/chatgpt");
     expect(full.resource).toBe("https://labourmarket.ai/api/mcp");
     expect(curated.authorization_servers).toEqual(full.authorization_servers);
+  });
+
+  it("only the two public job reads run without sign-in, and both are read-only (owner decision to widen)", () => {
+    expect([...CHATGPT_PUBLIC_TOOLS]).toEqual(["jobs_search", "jobs_get"]);
+    for (const name of CHATGPT_PUBLIC_TOOLS) {
+      const def = PROFILE.find((d) => d.name === name);
+      expect(def?.annotations?.readOnlyHint, name).toBe(true);
+      expect(def?.annotations?.destructiveHint, name).toBe(false);
+    }
   });
 });

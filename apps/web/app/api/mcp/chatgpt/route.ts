@@ -1,6 +1,7 @@
 import {
   CHATGPT_PROFILE_INSTRUCTIONS,
   CHATGPT_PROFILE_PATH,
+  CHATGPT_PUBLIC_TOOLS,
   chatgptProfileToolDefs,
 } from "@/lib/mcp/chatgpt-profile";
 import { createMcpDoor } from "@/lib/mcp/http-door";
@@ -15,12 +16,17 @@ export const dynamic = "force-dynamic";
  * `lib/mcp/chatgpt-profile.ts`. Its 401 points at its OWN RFC 9728 document,
  * whose `resource` is this URL, so a client that enters this address is told
  * the resource it entered.
+ *
+ * PUBLIC JOB SEARCH WITHOUT SIGN-IN (owner approval needed): a caller with
+ * no credential may run `CHATGPT_PUBLIC_TOOLS` only, on the anonymous client
+ * (the same anonymous projection the public /jobs page shows).
  */
 const door = createMcpDoor({
   door: CHATGPT_PROFILE_PATH,
   selectTools: chatgptProfileToolDefs,
   instructions: CHATGPT_PROFILE_INSTRUCTIONS,
   metadataPath: CHATGPT_PROTECTED_RESOURCE_METADATA_PATH,
+  anonymousTools: CHATGPT_PUBLIC_TOOLS,
 });
 
 export const POST = door.POST;
