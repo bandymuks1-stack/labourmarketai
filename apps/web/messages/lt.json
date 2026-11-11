@@ -5571,6 +5571,36 @@
             "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
           ]
         }
+      },
+      "needs": {
+        "subcontracting": {
+          "metaTitle": "Statybų subrangovai ir brigados Europoje",
+          "metaDescription": "Aprašyk darbų paketą, vietą ir terminus. Subrangovai ir agentūros gali pasiūlyti visą brigadą; palygini pasiūlymus ir susitari dėl sąlygų. Nemokamai.",
+          "eyebrow": "Rangovams",
+          "title": "Subrangovai ir brigados",
+          "titleAccent": "tavo projektui.",
+          "subcopy": "Generaliniams rangovams ir įmonėms, kurios perduoda darbų paketą. Parašyk specialybę, apimtį, vietą ir terminus — ir ar reikia vieno subrangovo, ar visos brigados.",
+          "cta": "Aprašyk darbų paketą",
+          "points": [
+            "Darbų paketą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
+            "Su nemokama įmonės paskyra subrangovai ir agentūros gali pasiūlyti tau brigadą kaip vieną vienetą. Palygini pasiūlymus ir dėl sąlygų susitari tiesiogiai su jais.",
+            "Kai brigada dirba tavo projekte, jos nariai ten pažymi valandas, o tu jas matai. Jei tinkamos brigados dar nėra, taip ir pasakome."
+          ]
+        },
+        "agency": {
+          "metaTitle": "Personalo ar įdarbinimo agentūra partnerė Europoje",
+          "metaDescription": "Aprašyk, kokių žmonių reikia, ir pasirink tiekimą per agentūrą. LabourMarket.ai agentūros nurodo, kokius darbuotojus gali pasiūlyti. Nemokamai.",
+          "eyebrow": "Darbdaviams, ieškantiems agentūros",
+          "title": "Personalo partneris",
+          "titleAccent": "tau reikalingiems žmonėms.",
+          "subcopy": "Įmonėms, kurios nori, kad agentūra parūpintų ar atrinktų darbuotojus. Parašyk, kokių žmonių reikia, kiek, kur ir nuo kada, ir pasirink tiekimą per agentūrą.",
+          "cta": "Aprašyk, ko reikia",
+          "points": [
+            "Užklausą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
+            "LabourMarket.ai personalo agentūros nurodo, kokius darbuotojus gali pasiūlyti. Su nemokama įmonės paskyra tą pasiūlą matai.",
+            "Darbuotojai, įmonės ir agentūros naudojasi ta pačia platforma. Jei tinkamo partnerio dar nėra, taip ir pasakome — atitikmens neišgalvojame."
+          ]
+        }
       }
     },
     "agencies": {

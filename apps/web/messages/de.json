@@ -5571,6 +5571,36 @@
             "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
           ]
         }
+      },
+      "needs": {
+        "subcontracting": {
+          "metaTitle": "Subunternehmer und Bautrupps in Europa",
+          "metaDescription": "Beschreiben Sie Gewerk, Ort und Termine. Subunternehmer und Agenturen können einen ganzen Trupp anbieten; Sie vergleichen und vereinbaren die Bedingungen.",
+          "eyebrow": "Für Bauunternehmen",
+          "title": "Subunternehmer und Trupps",
+          "titleAccent": "für Ihr Projekt.",
+          "subcopy": "Für Generalunternehmer und Firmen, die ein Gewerk vergeben. Nennen Sie Gewerk, Umfang, Ort und Termine — und ob Sie einen Subunternehmer oder einen ganzen Trupp brauchen.",
+          "cta": "Gewerk beschreiben",
+          "points": [
+            "Das Gewerk zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
+            "Mit einem kostenlosen Firmenkonto können Subunternehmer und Agenturen Ihnen einen Trupp als eine Einheit anbieten. Sie vergleichen die Angebote und vereinbaren die Bedingungen direkt mit ihnen.",
+            "Arbeitet ein Trupp in Ihrem Projekt, erfassen seine Mitglieder dort ihre Stunden, und Sie sehen sie. Gibt es noch keinen passenden Trupp, sagen wir es Ihnen."
+          ]
+        },
+        "agency": {
+          "metaTitle": "Personaldienstleister als Partner in Europa finden",
+          "metaDescription": "Beschreiben Sie, wen Sie brauchen, und wählen Sie die Überlassung durch eine Agentur. Agenturen geben hier an, wen sie stellen können. Kostenlos.",
+          "eyebrow": "Für Arbeitgeber, die eine Agentur suchen",
+          "title": "Ein Personalpartner",
+          "titleAccent": "für die Menschen, die Sie brauchen.",
+          "subcopy": "Für Firmen, die Arbeitskräfte über eine Agentur überlassen oder vermitteln lassen möchten. Sagen Sie uns, wen Sie brauchen, wie viele, wo und ab wann, und wählen Sie die Überlassung durch eine Personalagentur.",
+          "cta": "Benötigte Arbeitskräfte beschreiben",
+          "points": [
+            "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
+            "Personalagenturen auf LabourMarket.ai geben an, welche Arbeitskräfte sie stellen können. Mit einem kostenlosen Firmenkonto sehen Sie dieses Angebot.",
+            "Arbeitskräfte, Firmen und Agenturen nutzen dieselbe Plattform. Gibt es noch keinen passenden Partner, sagen wir es Ihnen — wir erfinden keinen Treffer."
+          ]
+        }
       }
     },
     "agencies": {

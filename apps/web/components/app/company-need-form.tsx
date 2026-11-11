@@ -137,6 +137,7 @@ export function CompanyNeedForm({
     setIf("profession", prefill.profession, [""]);
     setIf("expected_duration", prefill.expectedDuration, [""]);
     setIf("description", prefill.description, [""]);
+    setIf("engagement_model", prefill.engagement, ["employment"]); // employment is the untouched default
   }, []);
 
   // Spam guard: when the form appeared, sent in a hidden field. Taken after
