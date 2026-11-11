@@ -179,6 +179,9 @@ export function DemandRequestButton({
   const countryOptions: { value: string; label: string }[] = countryOptionsForLocale(locale);
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
+  // A need with no country is invisible to every country filter (workers,
+  // agencies, search). The market is never guessed, so it is asked for.
+  const [showCountryError, setShowCountryError] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);
   const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual" | "workspaceChanged">(
     "idle",
@@ -330,6 +333,7 @@ export function DemandRequestButton({
   const talentPoolDisclosure = requiresTalentPoolDisclosure(advV2);
 
   const descOk = description.trim().length > 0;
+  const countryOk = country !== "";
   // The estimate is OPTIONAL. It only blocks submit when the user actually
   // engaged it AND it is invalid (negatives / impossible %). An untouched
   // estimate never blocks and is never persisted.
@@ -347,6 +351,13 @@ export function DemandRequestButton({
       return;
     }
     setShowDescError(false);
+    // Step 2 gate: the country is what puts the need in front of workers and
+    // agencies in that market. Without it the need is saved but never found.
+    if (step === 2 && !countryOk) {
+      setShowCountryError(true);
+      return;
+    }
+    setShowCountryError(false);
     // Deterministic auto-suggest: when entering the criteria step, pre-fill the
     // structured selects from the free text (only empty ones, never overriding
     // the user). Closed-set values only; the user reviews and can correct.
@@ -373,6 +384,11 @@ export function DemandRequestButton({
     if (!descOk) {
       setStep(1);
       setShowDescError(true);
+      return;
+    }
+    if (!countryOk) {
+      setStep(2);
+      setShowCountryError(true);
       return;
     }
     setState("sending");
@@ -723,12 +739,24 @@ export function DemandRequestButton({
               <Label>{tc("country")}</Label>
               <DarkListbox
                 value={country}
-                onChange={setCountry}
+                onChange={(v) => {
+                  setCountry(v);
+                  if (v) setShowCountryError(false);
+                }}
                 options={countryOptions}
                 ariaLabel={tc("country")}
                 placeholder="—"
                 testId="demand-country-select"
               />
+              {showCountryError && (
+                <span
+                  className="text-xs text-state-danger"
+                  role="alert"
+                  data-testid="demand-country-error"
+                >
+                  {t("form.countryRequired")}
+                </span>
+              )}
             </label>
             <label className="flex flex-col gap-1.5">
               <Label>{tc("numberOfWorkers")}</Label>
@@ -999,7 +1027,7 @@ export function DemandRequestButton({
             type="button"
             size="sm"
             onClick={create}
-            disabled={state === "sending" || !descOk || !estimateOk}
+            disabled={state === "sending" || !descOk || !countryOk || !estimateOk}
             // Mobile-first: the room's primary action is a full-width tap target
             // on phones, compact on larger screens.
             className="w-full sm:w-auto sm:self-start"

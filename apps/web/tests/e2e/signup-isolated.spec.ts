@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { FIRST_VISIT_CAMPAIGN, refuseOnFirstVisit, storedAnalytics } from "./first-visit-consent";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * SELF-SERVE SIGN-UP, end to end, on a THROWAWAY LOCAL Supabase stack
@@ -244,6 +245,7 @@ test("S-8. a company publishes its first need for free", async ({ page }) => {
   await main.getByTestId("demand-next").click();
   const size = main.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("2");
+  await chooseDemandCountryIfEmpty(page);
   await main.getByTestId("demand-next").click();
   await main.getByTestId("demand-create").click();
   await expect(main.getByTestId("demand-done"), "the first need is accepted on the free plan").toBeVisible({ timeout: 30_000 });
