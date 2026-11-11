@@ -3965,10 +3965,10 @@
     },
     "document_records": {
       "label": "Dokumentų įrašai",
-      "description": "Laikyk savo dokumentus ir matyk, kada baigiasi kiekvieno galiojimas. Įmonė veda savo dokumentų ir patvirtinimų registrą.",
+      "description": "Laikyk savo dokumentus ir matyk, kada baigiasi kiekvieno galiojimas. Įmonė veda savo dokumentų registrą.",
       "claims": {
         "own_documents": "Laikyk savo dokumentus ir matyk, kada baigiasi kiekvieno galiojimas.",
-        "company_register": "Įmonė veda savo dokumentų ir patvirtinimų registrą."
+        "company_register": "Įmonė veda savo dokumentų registrą."
       }
     },
     "team_offers": {
@@ -3980,9 +3980,9 @@
     },
     "work_needs": {
       "label": "Darbo poreikiai",
-      "description": "Įmonė viena forma aprašo, kokių žmonių jai reikia. Susidomėję žmonės atsiliepia į poreikį.",
+      "description": "Įmonė vienoje vietoje aprašo, kokių žmonių jai reikia. Susidomėję žmonės atsiliepia į poreikį.",
       "claims": {
-        "one_form": "Įmonė viena forma aprašo, kokių žmonių jai reikia.",
+        "one_form": "Įmonė vienoje vietoje aprašo, kokių žmonių jai reikia.",
         "people_answer": "Susidomėję žmonės atsiliepia į poreikį."
       }
     },

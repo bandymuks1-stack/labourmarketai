@@ -3965,10 +3965,10 @@
     },
     "document_records": {
       "label": "Dokumenteneinträge",
-      "description": "Bewahren Sie Ihre Dokumente auf und sehen Sie, wann jedes abläuft. Ein Unternehmen führt ein Register seiner Dokumente und Freigaben.",
+      "description": "Bewahren Sie Ihre Dokumente auf und sehen Sie, wann jedes abläuft. Ein Unternehmen führt ein Register seiner Dokumente.",
       "claims": {
         "own_documents": "Bewahren Sie Ihre Dokumente auf und sehen Sie, wann jedes abläuft.",
-        "company_register": "Ein Unternehmen führt ein Register seiner Dokumente und Freigaben."
+        "company_register": "Ein Unternehmen führt ein Register seiner Dokumente."
       }
     },
     "team_offers": {
@@ -3980,9 +3980,9 @@
     },
     "work_needs": {
       "label": "Arbeitsbedarf",
-      "description": "Ein Unternehmen beschreibt in einem Formular, welche Leute es braucht. Interessierte Personen melden sich auf den Bedarf.",
+      "description": "Ein Unternehmen beschreibt an einer Stelle, welche Leute es braucht. Interessierte Personen melden sich auf den Bedarf.",
       "claims": {
-        "one_form": "Ein Unternehmen beschreibt in einem Formular, welche Leute es braucht.",
+        "one_form": "Ein Unternehmen beschreibt an einer Stelle, welche Leute es braucht.",
         "people_answer": "Interessierte Personen melden sich auf den Bedarf."
       }
     },

@@ -3965,10 +3965,10 @@
     },
     "document_records": {
       "label": "Document records",
-      "description": "Keep your documents and see when each one expires. A company keeps a register of its documents and approvals.",
+      "description": "Keep your documents and see when each one expires. A company keeps a register of its documents.",
       "claims": {
         "own_documents": "Keep your documents and see when each one expires.",
-        "company_register": "A company keeps a register of its documents and approvals."
+        "company_register": "A company keeps a register of its documents."
       }
     },
     "team_offers": {
@@ -3980,9 +3980,9 @@
     },
     "work_needs": {
       "label": "Work needs",
-      "description": "A company describes the people it needs in one form. People who are interested answer the need.",
+      "description": "A company describes the people it needs in one place. People who are interested answer the need.",
       "claims": {
-        "one_form": "A company describes the people it needs in one form.",
+        "one_form": "A company describes the people it needs in one place.",
         "people_answer": "People who are interested answer the need."
       }
     },

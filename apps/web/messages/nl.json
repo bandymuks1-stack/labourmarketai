@@ -3965,10 +3965,10 @@
     },
     "document_records": {
       "label": "Documentregistraties",
-      "description": "Bewaar je documenten en zie wanneer elk ervan verloopt. Een bedrijf houdt een register bij van zijn documenten en goedkeuringen.",
+      "description": "Bewaar je documenten en zie wanneer elk ervan verloopt. Een bedrijf houdt een register bij van zijn documenten.",
       "claims": {
         "own_documents": "Bewaar je documenten en zie wanneer elk ervan verloopt.",
-        "company_register": "Een bedrijf houdt een register bij van zijn documenten en goedkeuringen."
+        "company_register": "Een bedrijf houdt een register bij van zijn documenten."
       }
     },
     "team_offers": {
@@ -3980,9 +3980,9 @@
     },
     "work_needs": {
       "label": "Werkbehoeften",
-      "description": "Een bedrijf beschrijft in één formulier welke mensen het nodig heeft. Geïnteresseerde mensen reageren op de behoefte.",
+      "description": "Een bedrijf beschrijft op één plek welke mensen het nodig heeft. Geïnteresseerde mensen reageren op de behoefte.",
       "claims": {
-        "one_form": "Een bedrijf beschrijft in één formulier welke mensen het nodig heeft.",
+        "one_form": "Een bedrijf beschrijft op één plek welke mensen het nodig heeft.",
         "people_answer": "Geïnteresseerde mensen reageren op de behoefte."
       }
     },

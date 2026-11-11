@@ -3965,10 +3965,10 @@
     },
     "document_records": {
       "label": "Dokumenty",
-      "description": "Przechowuj dokumenty i sprawdzaj, kiedy każdy z nich wygasa. Firma prowadzi rejestr swoich dokumentów i zatwierdzeń.",
+      "description": "Przechowuj dokumenty i sprawdzaj, kiedy każdy z nich wygasa. Firma prowadzi rejestr swoich dokumentów.",
       "claims": {
         "own_documents": "Przechowuj dokumenty i sprawdzaj, kiedy każdy z nich wygasa.",
-        "company_register": "Firma prowadzi rejestr swoich dokumentów i zatwierdzeń."
+        "company_register": "Firma prowadzi rejestr swoich dokumentów."
       }
     },
     "team_offers": {
@@ -3980,9 +3980,9 @@
     },
     "work_needs": {
       "label": "Zapotrzebowania na pracę",
-      "description": "Firma w jednym formularzu opisuje, jakich ludzi potrzebuje. Zainteresowane osoby odpowiadają na potrzebę.",
+      "description": "Firma w jednym miejscu opisuje, jakich ludzi potrzebuje. Zainteresowane osoby odpowiadają na potrzebę.",
       "claims": {
-        "one_form": "Firma w jednym formularzu opisuje, jakich ludzi potrzebuje.",
+        "one_form": "Firma w jednym miejscu opisuje, jakich ludzi potrzebuje.",
         "people_answer": "Zainteresowane osoby odpowiadają na potrzebę."
       }
     },

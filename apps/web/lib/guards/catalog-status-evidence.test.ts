@@ -49,7 +49,9 @@ function proven(e: CatalogEvidence, register: string = REGISTER): string | null 
 
 type Row = { id: string; availability: string; evidence?: readonly CatalogEvidence[]; reason?: string };
 const CATALOGUES: Record<string, Row[]> = {
-  features: FEATURES.map((f) => ({ id: f.key, availability: f.availability, evidence: f.claims, reason: f.reason })),
+  // A partial claim honestly cites an unverified row; it is checked by
+  // claimProblem() below. Here an active feature needs at least one VERIFIED claim.
+  features: FEATURES.map((f) => ({ id: f.key, availability: f.availability, evidence: f.claims?.filter((c) => !c.partial), reason: f.reason })),
   roles: LABOUR_MARKET_ROLES.map((r) => ({ id: r.id, availability: r.availability, evidence: r.evidence, reason: r.reason })),
   activityTypes: ACTIVITY_TYPES.map((a) => ({ id: a.id, availability: a.availability, evidence: a.evidence, reason: a.reason })),
 };
@@ -130,7 +132,10 @@ function copyProblem(claims: readonly CatalogClaim[], node: FeatureCopy | undefi
 function claimProblem(c: CatalogClaim, register: string = REGISTER): string | null {
   if (!WALK_RUN_ID.test(c.proof)) return `proof "${c.proof}" is not a walk run id`;
   const problem = proven(c, register);
-  if (c.partial) return problem ? null : "marked partial but its row is verified";
+  if (c.partial) {
+    if (rows(c.register, register).length === 0) return `register row ${c.register} not found`;
+    return problem ? null : "marked partial but its row is verified";
+  }
   return problem;
 }
 
@@ -209,6 +214,13 @@ describe("negative controls: the guard catches a broken description or register"
 
   it("an owner session is not a walk run id", () => {
     expect(claimProblem({ id: "x", register: "12.1", proof: "owner session 10-23" })).not.toBeNull();
+  });
+
+  it("a partial claim on an unverified row passes when its sentence says so (Codex P2 on #3212)", () => {
+    const partial: CatalogClaim = { id: "docs", register: "A-2", proof: "41787046374", partial: true };
+    const copy = { description: `Agency documents. ${marker}`, claims: { docs: `Agency documents. ${marker}` } };
+    expect(claimProblem(partial)).toBeNull();
+    expect(copyProblem([partial], copy, marker)).toBeNull();
   });
 
   it("a partial claim must say it is not checked", () => {
