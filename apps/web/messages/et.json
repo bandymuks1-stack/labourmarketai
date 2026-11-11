@@ -402,7 +402,15 @@
         "event_journal_review_decided_changes_requested": "Sinu töölogi kande kohta on küsitud muudatusi",
         "event_weekly_digest_profile_completion": "Sobivate tööde näitamiseks kinnita, millist tööd sa teed",
         "event_weekly_digest_journal": "Sinu nädala tööpäeviku kokkuvõte on valmis",
-        "event_history_link_offered": "Organisatsioon pakub siduda sinu registreeritud tööajaloo sinu kontoga"
+        "event_history_link_offered": "Organisatsioon pakub siduda sinu registreeritud tööajaloo sinu kontoga",
+        "event_team_offer_received": "Meeskond pakkus end teie vajadusele",
+        "event_team_offer_answered": "Teie meeskonna pakkumisele vastati",
+        "event_team_offer_answered_accepted": "Teie meeskonna pakkumine võeti vastu",
+        "event_team_offer_answered_declined": "Teie meeskonna pakkumine lükati tagasi",
+        "event_candidate_offer_received": "Agentuur pakkus teie vajadusele kandidaadi",
+        "event_candidate_offer_answered": "Teie pakutud kandidaadile vastati",
+        "event_candidate_offer_answered_accepted": "Teie pakutud kandidaat võeti vastu",
+        "event_candidate_offer_answered_declined": "Teie pakutud kandidaat lükati tagasi"
       },
       "email": {
         "open": "Ava LabourMarket.ai-s:",

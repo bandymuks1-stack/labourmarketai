@@ -5069,7 +5069,15 @@
         "event_invitation_accepted": "Iemand heeft je uitnodiging aangenomen",
         "event_weekly_digest_profile_completion": "Om je passende banen te tonen, bevestig welk werk je doet",
         "event_weekly_digest_journal": "Het weekoverzicht van je werkjournaal is klaar",
-        "event_history_link_offered": "Een organisatie biedt aan je geregistreerde werkgeschiedenis aan je account te koppelen"
+        "event_history_link_offered": "Een organisatie biedt aan je geregistreerde werkgeschiedenis aan je account te koppelen",
+        "event_team_offer_received": "Een team heeft zich aangeboden voor uw vraag",
+        "event_team_offer_answered": "Er is gereageerd op het aanbod van uw team",
+        "event_team_offer_answered_accepted": "Het aanbod van uw team is geaccepteerd",
+        "event_team_offer_answered_declined": "Het aanbod van uw team is afgewezen",
+        "event_candidate_offer_received": "Een bureau heeft een kandidaat voorgesteld voor uw vraag",
+        "event_candidate_offer_answered": "Er is gereageerd op uw voorgestelde kandidaat",
+        "event_candidate_offer_answered_accepted": "Uw voorgestelde kandidaat is geaccepteerd",
+        "event_candidate_offer_answered_declined": "Uw voorgestelde kandidaat is afgewezen"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",

@@ -4,6 +4,10 @@ import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  emitOfferAnsweredNotification,
+  emitOfferReceivedNotification,
+} from "@/lib/notifications/event-emitters";
 
 import type { MatchNeed } from "@/lib/market/match-v1";
 import { matchTeamToNeed } from "@/lib/market/match-team-v1";
@@ -195,7 +199,18 @@ export async function offerTeamToDemand(input: {
   });
   if (error) return { status: offerRefusalOf(error) };
   const parsed = parseOfferResult(data);
-  return parsed ? { status: "ok", ...parsed } : { status: "error" };
+  if (!parsed) return { status: "error" };
+  // The demand owner hears of a NEW offer, after the write (an existing open
+  // offer was already announced). Awaited, never fails the offer.
+  if (parsed.outcome === "created") {
+    await emitOfferReceivedNotification({
+      kind: "team",
+      offerId: parsed.offerId,
+      requestId: input.requestId,
+      actorProfileId: ctx.userId,
+    });
+  }
+  return { status: "ok", ...parsed };
 }
 
 export async function withdrawTeamOffer(
@@ -232,6 +247,15 @@ export async function respondToTeamOffer(input: {
   }
   if (error) return { status: offerRefusalOf(error) };
   if (data === "accepted" || data === "declined" || data === "already_accepted" || data === "already_declined") {
+    // The team that offered hears the answer — once, on the real decision.
+    if (data === "accepted" || data === "declined") {
+      await emitOfferAnsweredNotification({
+        kind: "team",
+        offerId: input.offerId,
+        actorProfileId: ctx.userId,
+        decision: data,
+      });
+    }
     return { status: "ok", outcome: data };
   }
   return { status: "error" };

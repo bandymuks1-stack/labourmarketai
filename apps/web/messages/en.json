@@ -5069,7 +5069,15 @@
         "event_invitation_accepted": "Somebody accepted your invitation",
         "event_weekly_digest_profile_completion": "To see jobs that fit you, confirm what work you do",
         "event_weekly_digest_journal": "Your week’s work journal summary is ready",
-        "event_history_link_offered": "An organization offered to connect your recorded work history to your account"
+        "event_history_link_offered": "An organization offered to connect your recorded work history to your account",
+        "event_team_offer_received": "A team offered itself for your need",
+        "event_team_offer_answered": "Your team's offer was answered",
+        "event_team_offer_answered_accepted": "Your team's offer was accepted",
+        "event_team_offer_answered_declined": "Your team's offer was declined",
+        "event_candidate_offer_received": "An agency proposed a candidate for your need",
+        "event_candidate_offer_answered": "Your candidate proposal was answered",
+        "event_candidate_offer_answered_accepted": "Your candidate proposal was accepted",
+        "event_candidate_offer_answered_declined": "Your candidate proposal was declined"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
