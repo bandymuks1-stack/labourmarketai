@@ -12550,6 +12550,8 @@
         "team": "Komanda",
         "other": "Organizacija"
       },
+      "unconfirmed": "Nepatvirtinta",
+      "unconfirmedHint": "Nepatvirtinta: įmonė dar neperėmė šio profilio. Rodomi tik vieši duomenys.",
       "visibilityReason": "Rodomi tik žmonės, kurie sutiko būti randami arba turi realų darbo ryšį su tavimi.",
       "noContactYet": "Žinutę čia galima rašyti tik po pakvietimo ar bendro darbo. Pakviesk — arba pasirink jo paslaugą."
     },
@@ -20437,17 +20439,5 @@
       "allow": "Leisti",
       "refuse": "Atsisakyti"
     }
-  },
-  "businessDirectory": {
-    "title": "Įmonių paieška",
-    "intro": "Rask įmones, darbdavius ir partnerius LabourMarket.ai. Rodome tik viešus duomenis.",
-    "searchLabel": "Įmonės pavadinimas",
-    "searchButton": "Ieškoti",
-    "hint": "Įrašyk bent 2 raides.",
-    "empty": "Tokios įmonės neradome.",
-    "unconfirmed": "Nepatvirtinta",
-    "unconfirmedHint": "Nepatvirtinta – įmonė dar nevaldo šio profilio. Rodomi tik vieši duomenys.",
-    "notEnabled": "Įmonių paieška dar neveikia.",
-    "unavailable": "Paieška dabar neatsako. Bandyk vėliau."
   }
 }

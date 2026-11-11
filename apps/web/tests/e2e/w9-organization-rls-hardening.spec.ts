@@ -252,10 +252,11 @@ test.describe("W9 slice 2 — organization RLS hardening", () => {
   });
 
   // ── the directory RPC ─────────────────────────────────────────────────────
+  // v2 (20261111090000, owner decision 2026-11-11 D2) replaced v1 for signed-in callers and closed v1.
 
   test("the directory finds an organization the caller is not a member of", async () => {
     const { data, error } = await s.strangerClient.rpc(
-      "search_organizations_directory_v1",
+      "search_organizations_directory_v2",
       { p_term: `W9S2 OrgA ${s.run}` },
     );
     if (error) throw new Error(`directory rpc: ${error.message}`);
@@ -265,13 +266,14 @@ test.describe("W9 slice 2 — organization RLS hardening", () => {
 
   test("the directory projection carries no private field", async () => {
     const { data, error } = await s.strangerClient.rpc(
-      "search_organizations_directory_v1",
+      "search_organizations_directory_v2",
       { p_term: `W9S2 OrgA ${s.run}` },
     );
     if (error) throw new Error(`directory rpc: ${error.message}`);
     const row = ((data ?? []) as Record<string, unknown>[])[0];
     expect(row).toBeTruthy();
     expect(Object.keys(row).sort()).toEqual([
+      "confirmed",
       "country",
       "display_name",
       "id",
@@ -286,7 +288,7 @@ test.describe("W9 slice 2 — organization RLS hardening", () => {
   test("the directory refuses a one-character wildcard dump", async () => {
     for (const term of ["a", "%", "_", ""]) {
       const { data, error } = await s.strangerClient.rpc(
-        "search_organizations_directory_v1",
+        "search_organizations_directory_v2",
         { p_term: term },
       );
       if (error) throw new Error(`directory rpc "${term}": ${error.message}`);
@@ -294,8 +296,15 @@ test.describe("W9 slice 2 — organization RLS hardening", () => {
     }
   });
 
+  test("v1 is closed to a signed-in caller (v2 replaced it, 20261111090000)", async () => {
+    const { error } = await s.strangerClient.rpc("search_organizations_directory_v1", {
+      p_term: `W9S2 OrgA ${s.run}`,
+    });
+    expect(error).toBeTruthy();
+  });
+
   test("anon cannot execute the directory RPC", async () => {
-    const { error } = await s.anonClient.rpc("search_organizations_directory_v1", {
+    const { error } = await s.anonClient.rpc("search_organizations_directory_v2", {
       p_term: `W9S2 OrgA ${s.run}`,
     });
     expect(error).toBeTruthy();

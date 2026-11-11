@@ -32,16 +32,31 @@ create table public.organizations (
 create table public.organization_facts (
   id uuid primary key default gen_random_uuid(), organization_id uuid not null, field text not null, value jsonb,
   source_kind text not null, superseded_by uuid);
-insert into public.organizations (id, owner_profile_id, organization_type, display_name, country, claim_state,
+-- Production v1 (20260802170000), granted to authenticated as production holds it.
+create function public.search_organizations_directory_v1(p_term text)
+returns table (id uuid, display_name text, organization_type text, country text)
+language sql stable security definer set search_path = public as $$
+  select o.id, btrim(coalesce(nullif(btrim(o.display_name), ''), nullif(btrim(o.legal_name), ''), '')),
+         o.organization_type, o.country
+    from public.organizations o
+   where char_length(coalesce(p_term, '')) >= 2
+     and (o.display_name ilike '%' || p_term || '%' or o.legal_name ilike '%' || p_term || '%')
+   limit 20;
+$$;
+revoke all on function public.search_organizations_directory_v1(text) from public;
+grant execute on function public.search_organizations_directory_v1(text) to authenticated;
+insert into public.organizations (id, owner_profile_id, organization_type, display_name, legal_name, country, claim_state,
   public_profile_enabled, public_slug, public_contact_email, vat_number, archived_at, archived_reason) values
- ('00000000-0000-4000-8000-000000000001', gen_random_uuid(), 'company', 'QA-SYNTHETIC Statyba Opted', 'LT', 'claimed', true,  'qa-statyba', 'x@company.example', 'LT1', null, null),
- ('00000000-0000-4000-8000-000000000002', gen_random_uuid(), 'company', 'QA-SYNTHETIC Statyba Private', 'LT', 'claimed', false, null, 'y@company.example', 'LT2', null, null),
- ('00000000-0000-4000-8000-000000000003', null, 'company', 'QA-SYNTHETIC Statyba Register', 'IT', 'discovered', false, null, null, null, null, null),
- ('00000000-0000-4000-8000-000000000004', null, 'company', 'QA-SYNTHETIC Statyba Referral', 'LT', 'discovered', false, null, null, null, null, null),
- ('00000000-0000-4000-8000-000000000005', null, 'company', 'QA-SYNTHETIC Statyba Archived', 'LT', 'discovered', false, null, null, null, now(), 'test'),
- ('00000000-0000-4000-8000-000000000006', gen_random_uuid(), 'team', 'QA-SYNTHETIC Statyba Brigade', 'LT', 'claimed', true, 'qa-brigade', null, null, null, null),
- ('00000000-0000-4000-8000-000000000007', null, 'company', 'QA-SYNTHETIC Statyba Superseded', 'LT', 'invited', false, null, null, null, null, null),
- ('00000000-0000-4000-8000-000000000008', null, 'company', 'QA-SYNTHETIC Statyba Private Name', 'LT', 'discovered', false, null, null, null, null, null);
+ ('00000000-0000-4000-8000-000000000001', gen_random_uuid(), 'company', 'QA-SYNTHETIC Statyba Opted', null, 'LT', 'claimed', true,  'qa-statyba', 'x@company.example', 'LT1', null, null),
+ ('00000000-0000-4000-8000-000000000002', gen_random_uuid(), 'company', 'QA-SYNTHETIC Statyba Private', null, 'LT', 'claimed', false, null, 'y@company.example', 'LT2', null, null),
+ ('00000000-0000-4000-8000-000000000003', null, 'company', 'QA-SYNTHETIC Statyba Register', null, 'IT', 'discovered', false, null, null, null, null, null),
+ ('00000000-0000-4000-8000-000000000004', null, 'company', 'QA-SYNTHETIC Statyba Referral', null, 'LT', 'discovered', false, null, null, null, null, null),
+ ('00000000-0000-4000-8000-000000000005', null, 'company', 'QA-SYNTHETIC Statyba Archived', null, 'LT', 'discovered', false, null, null, null, now(), 'test'),
+ ('00000000-0000-4000-8000-000000000006', gen_random_uuid(), 'team', 'QA-SYNTHETIC Statyba Brigade', null, 'LT', 'claimed', false, null, null, null, null, null),
+ ('00000000-0000-4000-8000-000000000007', null, 'company', 'QA-SYNTHETIC Statyba Superseded', null, 'LT', 'invited', false, null, null, null, null, null),
+ ('00000000-0000-4000-8000-000000000008', null, 'company', 'QA-SYNTHETIC Statyba Private Name', null, 'LT', 'discovered', false, null, null, null, null, null),
+ ('00000000-0000-4000-8000-000000000009', gen_random_uuid(), 'team', 'QA-SYNTHETIC Statyba Old Brigade', null, 'LT', 'claimed', false, null, null, null, now(), 'test'),
+ ('00000000-0000-4000-8000-00000000000a', null, 'company', 'QA-SYNTHETIC Zeta', 'QA-SYNTHETIC Statyba Hidden Legal', 'LT', 'discovered', false, null, null, null, null, null);
 insert into public.organization_facts (organization_id, field, value, source_kind, superseded_by) values
  ('00000000-0000-4000-8000-000000000003', 'display_name', to_jsonb('QA-SYNTHETIC Statyba Register'::text), 'public_register', null),
  ('00000000-0000-4000-8000-000000000003', 'country', to_jsonb('IT'::text), 'public_register', null),
@@ -50,30 +65,44 @@ insert into public.organization_facts (organization_id, field, value, source_kin
  ('00000000-0000-4000-8000-000000000005', 'display_name', to_jsonb('QA-SYNTHETIC Statyba Archived'::text), 'public_register', null),
  ('00000000-0000-4000-8000-000000000007', 'display_name', to_jsonb('QA-SYNTHETIC Statyba Superseded'::text), 'company_website', gen_random_uuid()),
  -- a later public ingest with another name; the shown name is still the private one
- ('00000000-0000-4000-8000-000000000008', 'legal_name', to_jsonb('QA-SYNTHETIC Statyba Public Register Name'::text), 'public_register', null);
+ ('00000000-0000-4000-8000-000000000008', 'legal_name', to_jsonb('QA-SYNTHETIC Statyba Public Register Name'::text), 'public_register', null),
+ ('00000000-0000-4000-8000-00000000000a', 'display_name', to_jsonb('QA-SYNTHETIC Zeta'::text), 'public_register', null);
 SQL
 
 pass=0; fail=0
 check() { if [ "$2" = "$3" ]; then echo "  PASS  $1"; pass=$((pass+1)); else echo "  FAIL  $1 (expected [$2], got [$3])"; fail=$((fail+1)); fi; }
 q() { $PSQL -c "$1" 2>&1 | tr -d '\r' | paste -sd'|' -; }
-anon() { printf 'set role anon;\n%s\n' "$1" | $PSQL -f - 2>&1 | tr -d '\r' | paste -sd'|' -; }
+as_role() { printf 'set role %s;\n%s\n' "$1" "$2" | $PSQL -f - 2>&1 | tr -d '\r' | paste -sd'|' -; }
+user() { as_role authenticated "$1"; }
+anon() { as_role anon "$1"; }
+
+check "before: v1 lists archived and privately named organizations to a signed-in caller" "10" \
+  "$(user "select count(*) from search_organizations_directory_v1('statyba')")"
 
 $PSQL -v ON_ERROR_STOP=1 -f "$MIG" >/dev/null || { echo "apply failed"; exit 1; }
-echo "== who is listed"
-check "an anonymous visitor lists the opted-in company and the publicly sourced one" \
-  "QA-SYNTHETIC Statyba Opted:true:qa-statyba|QA-SYNTHETIC Statyba Register:false:" \
-  "$(anon "select display_name||':'||confirmed||':'||coalesce(public_slug,'') from search_organizations_directory_v2('statyba')")"
-check "no contact, identifier, owner or description column exists" "id,display_name,organization_type,country,public_slug,confirmed" \
+echo "== who a signed-in caller finds"
+check "claimed organizations (opted in or not, team included) as confirmed; publicly named unclaimed ones as not confirmed" \
+  "QA-SYNTHETIC Statyba Brigade:true|QA-SYNTHETIC Statyba Opted:true|QA-SYNTHETIC Statyba Private:true|QA-SYNTHETIC Statyba Register:false" \
+  "$(user "select display_name||':'||confirmed from search_organizations_directory_v2('statyba')")"
+check "never an archived company or team" "0|0" "$(user "select count(*) from search_organizations_directory_v2('archived')")|$(user "select count(*) from search_organizations_directory_v2('old brigade')")"
+check "a privately sourced name is never listed, even with a public fact under another name" "0" "$(user "select count(*) from search_organizations_directory_v2('private name')")"
+check "an unclaimed company is not found by a legal name nobody published" "0" "$(user "select count(*) from search_organizations_directory_v2('hidden legal')")"
+check "exactly five columns: no contact, identifier, owner, slug or description" "id,display_name,organization_type,country,confirmed" \
   "$(q "select string_agg(a, ',' order by n) from (select unnest(proargnames[2:]) a, generate_subscripts(proargnames[2:],1) n from pg_proc where proname='search_organizations_directory_v2') x")"
-check "a public fact with another name does not publish a privately sourced name" "0" "$(anon "select count(*) from search_organizations_directory_v2('private name')")"
 $PSQL -c "update organizations set display_name='QA-SYNTHETIC Statyba Nocountry' where id='00000000-0000-4000-8000-000000000004'; update organization_facts set source_kind='public_register', value=to_jsonb('QA-SYNTHETIC Statyba Nocountry'::text) where organization_id='00000000-0000-4000-8000-000000000004'" >/dev/null
-check "an unconfirmed company's country is shown only with a public fact" "IT|" "$(anon "select coalesce(country,'') from search_organizations_directory_v2('statyba') where not confirmed order by display_name desc")"
-check "a term under two characters lists nothing" "0" "$(anon "select count(*) from search_organizations_directory_v2('s')")"
-check "a wildcard term lists nothing" "0" "$(anon "select count(*) from search_organizations_directory_v2('%%')")"
+check "an unconfirmed company's country is shown only with a public fact" "IT|" "$(user "select coalesce(country,'') from search_organizations_directory_v2('statyba') where not confirmed order by display_name desc")"
+check "a term under two characters lists nothing" "0" "$(user "select count(*) from search_organizations_directory_v2('s')")"
+check "a wildcard term lists nothing" "0" "$(user "select count(*) from search_organizations_directory_v2('%%')")"
+echo "== who may call"
+check "an anonymous visitor cannot call v2" "1" "$(anon "select count(*) from search_organizations_directory_v2('statyba')" | grep -c 'permission denied')"
+check "v1 is closed to a signed-in caller" "1" "$(user "select count(*) from search_organizations_directory_v1('statyba')" | grep -c 'permission denied')"
+check "v1 is closed to an anonymous visitor" "1" "$(anon "select count(*) from search_organizations_directory_v1('statyba')" | grep -c 'permission denied')"
 check "an anonymous visitor still cannot read organizations directly" "1" "$(anon "select count(*) from organizations" | grep -c 'permission denied')"
 echo "== rollback"
 $PSQL -v ON_ERROR_STOP=1 -f "$DOWN" >/dev/null || { echo "rollback failed"; exit 1; }
-check "rollback removes the function" "0" "$(q "select count(*) from pg_proc where proname='search_organizations_directory_v2'")"
+check "rollback removes v2" "0" "$(q "select count(*) from pg_proc where proname='search_organizations_directory_v2'")"
+check "rollback gives v1 back to a signed-in caller (the app's fallback)" "1" "$(user "select count(*) > 0 from search_organizations_directory_v1('statyba')" | grep -c '^t$')"
+check "rollback does not open v1 to anon" "1" "$(anon "select count(*) from search_organizations_directory_v1('statyba')" | grep -c 'permission denied')"
 $PSQL -v ON_ERROR_STOP=1 -f "$MIG" >/dev/null && $PSQL -v ON_ERROR_STOP=1 -f "$MIG" >/dev/null
 check "re-apply twice is idempotent" "1" "$(q "select count(*) from pg_proc where proname='search_organizations_directory_v2'")"
 echo "passed=$pass failed=$fail"

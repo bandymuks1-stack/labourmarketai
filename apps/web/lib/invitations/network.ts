@@ -269,6 +269,11 @@ export type NetworkCompany = {
   displayName: string;
   organizationType: string;
   country: string | null;
+  /**
+   * false: the company has not taken over its profile yet (listed only under a publicly sourced
+   * name). null: unknown, the pre-v2 read does not say.
+   */
+  confirmed: boolean | null;
 };
 
 export type PeopleCompanySearchResult = {
@@ -278,6 +283,8 @@ export type PeopleCompanySearchResult = {
 
 /** PostgREST code for "function does not exist" — the migration is not applied. */
 const UNDEFINED_FUNCTION_CODE = "42883";
+/** v2 not applied yet: Postgres "undefined function" or PostgREST "not in the schema cache". */
+const DIRECTORY_V2_ABSENT_CODES: readonly string[] = [UNDEFINED_FUNCTION_CODE, "PGRST202"];
 
 type DirectoryOrgRow = {
   id: string;
@@ -285,14 +292,20 @@ type DirectoryOrgRow = {
   legal_name?: string | null;
   organization_type: string;
   country: string | null;
+  confirmed?: boolean;
 };
 
 /**
  * Organization directory read.
  *
- * Canonical path: `search_organizations_directory_v1` (20260802170000) — a
- * SECURITY DEFINER function whose projection is fixed by its signature, so the
- * caller cannot widen it to owner_profile_id / vat_number / contact fields.
+ * Canonical path: `search_organizations_directory_v2` (20261111090000, owner
+ * decision 2026-11-11 option D2) — a SECURITY DEFINER function whose projection
+ * is fixed by its signature (id, name, type, country, confirmed), so the caller
+ * cannot widen it to owner_profile_id / vat_number / contact fields. It never
+ * lists an archived organization, and an unclaimed company only under a
+ * publicly sourced name, marked not confirmed. Until it is applied (42883 /
+ * PGRST202) the read falls back to `search_organizations_directory_v1`
+ * (20260802170000), which the same migration then closes.
  *
  * Fallback path: the pre-hardening direct table read, used ONLY when the RPC
  * is absent (42883). That is the real production state until the migration is
@@ -303,6 +316,15 @@ async function searchOrganizationsDirectory(
   supabase: Awaited<ReturnType<typeof createClient>>,
   term: string,
 ): Promise<{ data: DirectoryOrgRow[] | null; error: unknown }> {
+  const v2 = await asAny(supabase).rpc("search_organizations_directory_v2", {
+    p_term: term,
+  });
+  if (!v2.error) {
+    return { data: (v2.data ?? []) as DirectoryOrgRow[], error: null };
+  }
+  if (!DIRECTORY_V2_ABSENT_CODES.includes(v2.error?.code ?? "")) {
+    return { data: null, error: v2.error };
+  }
   const rpc = await asAny(supabase).rpc("search_organizations_directory_v1", {
     p_term: term,
   });
@@ -327,9 +349,9 @@ async function searchOrganizationsDirectory(
  * People & companies search — RLS does the privacy work: the workers read
  * goes through the fail-closed `can_view_worker` SELECT policy (only
  * consented-discoverable people or real work relationships come back), and
- * organizations come back through `search_organizations_directory_v1`
- * (20260802170000), whose fixed projection is id + display name + type +
- * country. No email, no phone, no exact address is selected — ever.
+ * organizations come back through `search_organizations_directory_v2`
+ * (20261111090000; v1 until it is applied), whose fixed projection is id +
+ * display name + type + country + confirmed. No email, no phone, no exact address is selected — ever.
  *
  * W9 slice 2: this is the ONE surface that legitimately reads organizations
  * the caller is not a member of, so it is the one that gets an RPC. Before
@@ -389,6 +411,7 @@ export async function searchPeopleAndCompanies(
           displayName: (o.display_name ?? o.legal_name ?? "").trim(),
           organizationType: o.organization_type,
           country: o.country,
+          confirmed: typeof o.confirmed === "boolean" ? o.confirmed : null,
         }))
         .filter((o) => o.displayName.length > 0);
   return { people, companies };

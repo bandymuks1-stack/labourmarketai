@@ -12550,6 +12550,8 @@
         "team": "Team",
         "other": "Organisation"
       },
+      "unconfirmed": "Nicht bestätigt",
+      "unconfirmedHint": "Nicht bestätigt: Das Unternehmen hat dieses Profil noch nicht übernommen. Es werden nur öffentliche Daten gezeigt.",
       "visibilityReason": "Angezeigt werden nur Personen, die auffindbar sein möchten oder eine echte Arbeitsbeziehung zu Ihnen haben.",
       "noContactYet": "Nachrichten sind erst nach einer Einladung oder gemeinsamer Arbeit möglich. Laden Sie ein — oder fragen Sie eine Dienstleistung an."
     },
@@ -20437,17 +20439,5 @@
       "allow": "Erlauben",
       "refuse": "Ablehnen"
     }
-  },
-  "businessDirectory": {
-    "title": "Unternehmenssuche",
-    "intro": "Finden Sie Unternehmen, Arbeitgeber und Partner auf LabourMarket.ai. Gezeigt werden nur öffentliche Daten.",
-    "searchLabel": "Name des Unternehmens",
-    "searchButton": "Suchen",
-    "hint": "Geben Sie mindestens 2 Buchstaben ein.",
-    "empty": "Kein Unternehmen gefunden.",
-    "unconfirmed": "Nicht bestätigt",
-    "unconfirmedHint": "Nicht bestätigt: Das Unternehmen verwaltet dieses Profil noch nicht. Gezeigt werden nur öffentliche Daten.",
-    "notEnabled": "Die Unternehmenssuche ist noch nicht verfügbar.",
-    "unavailable": "Die Suche antwortet gerade nicht. Versuchen Sie es später."
   }
 }

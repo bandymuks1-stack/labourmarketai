@@ -203,10 +203,6 @@ const NATIVE_NAV = new Set([
   // no async submit to show a pending state for: the browser performs a full
   // navigation. Same reasoning as the agreements-register filter form above.
   "app/[locale]/(marketing)/jobs/page.tsx",
-  // Public company search (owner decision 2026-11-11) — the same plain GET search
-  // (`method="get"`, no server action, no client state); feedback is the
-  // re-rendered list and its role="status" empty / unavailable line.
-  "app/[locale]/business/page.tsx",
 ]);
 
 const PENDING_SIGNAL =

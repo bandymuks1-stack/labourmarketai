@@ -12550,6 +12550,8 @@
         "team": "Team",
         "other": "Organization"
       },
+      "unconfirmed": "Unconfirmed",
+      "unconfirmedHint": "Unconfirmed: the company has not taken over this profile yet. Only public data is shown.",
       "visibilityReason": "Only people who consented to be discoverable, or who have a real work relationship with you, are shown.",
       "noContactYet": "Messaging opens only after an invitation or shared work. Invite them — or request one of their services."
     },
@@ -20437,17 +20439,5 @@
       "allow": "Allow",
       "refuse": "Refuse"
     }
-  },
-  "businessDirectory": {
-    "title": "Company search",
-    "intro": "Find companies, employers and partners on LabourMarket.ai. Only public data is shown.",
-    "searchLabel": "Company name",
-    "searchButton": "Search",
-    "hint": "Type at least 2 letters.",
-    "empty": "No company found.",
-    "unconfirmed": "Unconfirmed",
-    "unconfirmedHint": "Unconfirmed: the company does not manage this profile yet. Only public data is shown.",
-    "notEnabled": "Company search is not available yet.",
-    "unavailable": "The search is not answering right now. Try again later."
   }
 }

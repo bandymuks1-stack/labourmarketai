@@ -213,7 +213,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261109120000_",
       // 2026-11-10 company-need intake keeps the visitor's locale (one-line RPC re-create; RED draft #3195, needs-human-gate, NOT applied).
       "20261110140000_",
-      // 2026-11-11 public company search with unconfirmed companies marked (RED draft, needs-human-gate, NOT applied).
+      // 2026-11-11 signed-in company search with unconfirmed companies marked (RED draft, needs-human-gate, NOT applied).
       "20261111090000_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
       "20261104060000_",
