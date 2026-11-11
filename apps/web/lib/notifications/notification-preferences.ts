@@ -11,6 +11,8 @@
  *   - NO ROW means the channel default applies.
  *   - EMAIL defaults OFF — email goes out ONLY where an explicit
  *     (profile, type, email, enabled=true) row exists (consent-first).
+ *     ONE owner-approved exception, per type: `NOTIFICATION_TYPE_EMAIL_DEFAULTS`
+ *     (a new chat message is e-mailed by default, with opt-out).
  *   - IN-APP defaults ON — today's behaviour; a row can turn one off.
  *   - An explicit row ALWAYS wins over the default, both directions.
  *
@@ -44,6 +46,23 @@ export const NOTIFICATION_CHANNEL_DEFAULTS: Readonly<
   email: false,
 };
 
+/**
+ * Per-type e-mail defaults that override the channel default when the person
+ * stored no row. OWNER DECISION 2026-11-11: a new message in a thread the
+ * person takes part in is e-mailed BY DEFAULT, with opt-out in the settings
+ * surface (a stored `enabled=false` row always wins). It is a service notice
+ * about the person's own conversation, never marketing: the e-mail carries
+ * only the bell's subject and a link, never the message text or a contact.
+ * Nothing else may be added here without its own owner decision.
+ *
+ * An UNREADABLE preference store must not turn this default into a send to
+ * someone who opted out: callers that cannot read the rows pass
+ * `{ rowsUnreadable: true }` and the e-mail channel falls back to OFF.
+ */
+export const NOTIFICATION_TYPE_EMAIL_DEFAULTS: Readonly<Record<string, boolean>> = {
+  message_received: true,
+};
+
 /** One stored preference fact (the caller's own row; profile_id is implicit).
  *  `push` rows exist only as the per-person push opt-in (`PUSH_OPT_IN_TYPE`);
  *  push has no per-type matrix — it mirrors the bell. */
@@ -70,17 +89,24 @@ export function resolvePushOptIn(rows: readonly NotificationPreferenceRow[]): bo
 
 /**
  * Resolve whether a (type, channel) is enabled for a person, given their stored
- * rows. An explicit row wins; otherwise the channel default applies. Pure.
+ * rows. An explicit row wins; otherwise the per-type e-mail default, then the
+ * channel default. With `rowsUnreadable` (the store could not be read) a
+ * per-type e-mail default is NOT applied — e-mail fails closed. Pure.
  */
 export function resolveChannelEnabled(
   rows: readonly NotificationPreferenceRow[],
   notificationType: string,
   channel: NotificationChannel,
+  opts: { readonly rowsUnreadable?: boolean } = {},
 ): boolean {
   const row = rows.find(
     (r) => r.notificationType === notificationType && r.channel === channel,
   );
   if (row) return row.enabled;
+  if (channel === "email" && !opts.rowsUnreadable) {
+    const typeDefault = NOTIFICATION_TYPE_EMAIL_DEFAULTS[notificationType];
+    if (typeof typeDefault === "boolean") return typeDefault;
+  }
   return NOTIFICATION_CHANNEL_DEFAULTS[channel];
 }
 

@@ -151,8 +151,18 @@ async function readPrefRowsFailOpen(
   admin: AdminClient,
   recipientProfileId: string,
 ): Promise<readonly NotificationPreferenceRow[]> {
+  return (await readPrefRowsWithState(admin, recipientProfileId)).rows;
+}
+
+/** The same fail-open read, also saying whether the store was readable, so
+ *  the e-mail hop can fail CLOSED for a per-type default-on e-mail (an
+ *  outage must not mail someone who opted out). */
+async function readPrefRowsWithState(
+  admin: AdminClient,
+  recipientProfileId: string,
+): Promise<{ readonly rows: readonly NotificationPreferenceRow[]; readonly unreadable: boolean }> {
   const prefs = await readNotificationPreferencesFor(admin, recipientProfileId);
-  return prefs.kind === "ok" ? prefs.rows : [];
+  return prefs.kind === "ok" ? { rows: prefs.rows, unreadable: false } : { rows: [], unreadable: true };
 }
 
 /** The email dispatcher's outcome tag (`sent`, `send_failed`, ...). */
@@ -363,7 +373,8 @@ async function deliverDetailed(
   if (isNotificationStoreWriteBlocked()) {
     return { outcome: "write_blocked", email: null };
   }
-  const prefRows = await readPrefRowsFailOpen(admin, input.recipientProfileId);
+  const prefs = await readPrefRowsWithState(admin, input.recipientProfileId);
+  const prefRows = prefs.rows;
   if (!resolveChannelEnabled(prefRows, input.eventType, "in_app")) {
     // APPROVED silence: the recipient turned this type off themselves.
     return { outcome: "suppressed_preference", email: null };
@@ -377,7 +388,9 @@ async function deliverDetailed(
   }
   let email: NotificationEmailDispatchOutcome | null = null;
   if (outcome.kind === "written") {
-    email = await maybeDispatchNotificationEmail(admin, input, prefRows);
+    email = await maybeDispatchNotificationEmail(admin, input, prefRows, {
+      preferencesUnreadable: prefs.unreadable,
+    });
     reportEmailOutcome(input.eventType, email);
     // COM-3 push hop: the same event, the same recipient, the same copy as
     // the bell. Inert until the owner switches the channel on (flag + VAPID
