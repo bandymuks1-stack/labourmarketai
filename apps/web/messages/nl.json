@@ -20506,5 +20506,48 @@
       "allow": "Toestaan",
       "refuse": "Weigeren"
     }
+  },
+  "companyClaim": {
+    "email": {
+      "subject": "Neem het profiel van {company} op LabourMarket.ai over",
+      "intro": "Je bent uitgenodigd om het profiel van {company} op LabourMarket.ai te beheren. Het is gratis.",
+      "open": "Open deze eenmalige link:",
+      "validity": "De link is 14 dagen geldig en werkt alleen met dit e-mailadres.",
+      "notYou": "Vertegenwoordig je dit bedrijf niet, doe dan niets: zonder jou verandert er niets."
+    },
+    "invite": {
+      "eyebrow": "Bedrijfsprofiel",
+      "title": "Neem het profiel van {company} over",
+      "body": "Bevestig dat je dit bedrijf vertegenwoordigt. Dit is een verzoek: een andere LabourMarket.ai-operator controleert het, pas daarna word je eigenaar van het profiel.",
+      "verifyFirst": "Bevestig eerst dat dit e-mailadres van jou is.",
+      "roleLabel": "Je functie in het bedrijf",
+      "rolePlaceholder": "Bijvoorbeeld directeur",
+      "authorityLabel": "Ik bevestig dat ik {company} mag vertegenwoordigen.",
+      "submit": "Verzoek versturen",
+      "decidedBy": "Een andere operator beslist, niet degene die je uitnodigde.",
+      "expires": "De uitnodiging is geldig tot {date}.",
+      "requestedTitle": "Verzoek verstuurd",
+      "requestedBody": "Een operator controleert je verzoek. Na goedkeuring beheer jij het profiel. Tot dan verandert er niets.",
+      "closedTitle": "Deze uitnodiging kan niet meer worden gebruikt",
+      "verifySend": "Bevestigingslink sturen",
+      "pending": "Bezig met versturen…",
+      "outcome": {
+        "claim_requested": "Verzoek verstuurd.",
+        "already_requested": "Je hebt al een verzoek verstuurd.",
+        "already_used": "Deze uitnodiging is al gebruikt.",
+        "expired": "De uitnodiging is verlopen. Vraag een nieuwe aan.",
+        "revoked": "De uitnodiging is ingetrokken.",
+        "email_mismatch": "Deze uitnodiging is voor een ander e-mailadres. Log in met het adres waarop je de e-mail ontving.",
+        "email_not_verified": "Bevestig eerst je e-mailadres.",
+        "authority_not_confirmed": "Vink aan dat je het bedrijf mag vertegenwoordigen.",
+        "invalid_role": "Vul je functie in (2–80 tekens).",
+        "not_claimable": "Dit bedrijfsprofiel kan niet meer worden overgenomen.",
+        "inviter_cannot_claim": "De operator die de uitnodiging stuurde, kan die niet zelf gebruiken.",
+        "operator_cannot_claim": "Iemand met operatorrechten kan geen bedrijf overnemen.",
+        "verify_sent": "We hebben een link naar je e-mail gestuurd. Open die en je komt hier terug.",
+        "verify_rate_limited": "We hebben net een link gestuurd. Kijk in je e-mail of probeer het later opnieuw.",
+        "error": "Dat lukte niet. Probeer het later opnieuw."
+      }
+    }
   }
 }

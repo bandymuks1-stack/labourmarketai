@@ -20506,5 +20506,48 @@
       "allow": "Zezwól",
       "refuse": "Odmów"
     }
+  },
+  "companyClaim": {
+    "email": {
+      "subject": "Przejmij profil {company} w LabourMarket.ai",
+      "intro": "Zaproszono cię do zarządzania profilem firmy {company} w LabourMarket.ai. To bezpłatne.",
+      "open": "Otwórz ten jednorazowy link:",
+      "validity": "Link jest ważny 14 dni i działa tylko z tym adresem e-mail.",
+      "notYou": "Jeśli nie reprezentujesz tej firmy, nic nie rób: bez ciebie nic się nie zmieni."
+    },
+    "invite": {
+      "eyebrow": "Profil firmy",
+      "title": "Przejmij profil {company}",
+      "body": "Potwierdź, że reprezentujesz tę firmę. To prośba: inny operator LabourMarket.ai ją sprawdzi i dopiero wtedy zostaniesz właścicielem profilu.",
+      "verifyFirst": "Najpierw potwierdź, że ten adres e-mail należy do ciebie.",
+      "roleLabel": "Twoje stanowisko w firmie",
+      "rolePlaceholder": "Na przykład dyrektor",
+      "authorityLabel": "Potwierdzam, że mogę reprezentować {company}.",
+      "submit": "Wyślij prośbę",
+      "decidedBy": "Decyduje inny operator, nie ten, który cię zaprosił.",
+      "expires": "Zaproszenie jest ważne do {date}.",
+      "requestedTitle": "Prośba wysłana",
+      "requestedBody": "Operator sprawdzi twoją prośbę. Po zatwierdzeniu to ty zarządzasz profilem. Do tego czasu nic się nie zmieni.",
+      "closedTitle": "Tego zaproszenia nie można już użyć",
+      "verifySend": "Wyślij link potwierdzający",
+      "pending": "Wysyłanie…",
+      "outcome": {
+        "claim_requested": "Prośba wysłana.",
+        "already_requested": "Prośba została już wysłana.",
+        "already_used": "To zaproszenie zostało już użyte.",
+        "expired": "Zaproszenie wygasło. Poproś o nowe.",
+        "revoked": "Zaproszenie zostało wycofane.",
+        "email_mismatch": "To zaproszenie jest dla innego adresu e-mail. Zaloguj się adresem, na który przyszedł e-mail.",
+        "email_not_verified": "Najpierw potwierdź swój adres e-mail.",
+        "authority_not_confirmed": "Zaznacz, że możesz reprezentować firmę.",
+        "invalid_role": "Wpisz swoje stanowisko (2–80 znaków).",
+        "not_claimable": "Tego profilu firmy nie można już przejąć.",
+        "inviter_cannot_claim": "Operator, który wysłał zaproszenie, nie może sam go użyć.",
+        "operator_cannot_claim": "Osoba z uprawnieniami operatora nie może przejąć firmy.",
+        "verify_sent": "Wysłaliśmy link na twój e-mail. Otwórz go, a wrócisz tutaj.",
+        "verify_rate_limited": "Link został wysłany przed chwilą. Sprawdź e-mail lub spróbuj później.",
+        "error": "Nie udało się. Spróbuj później."
+      }
+    }
   }
 }
