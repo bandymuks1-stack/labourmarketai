@@ -92,6 +92,14 @@ describe("the trigger", () => {
     expect(workflow).not.toMatch(/secrets\.CRON_SECRET/);
   });
 
+  it("never overlaps, never echoes the token, and skips cleanly without it", () => {
+    expect(workflow).toMatch(/concurrency:\s+group: operator-alerts\s+cancel-in-progress: false/);
+    expect(workflow.replace(/^\s*#.*$/gm, "")).not.toMatch(/set -x|set -o xtrace/);
+    expect(workflow).toMatch(/::add-mask::\$TOKEN/);
+    expect(workflow).toMatch(/Skipped: OPERATOR_ALERTS_TRIGGER_TOKEN is not set[^\n]*GITHUB_STEP_SUMMARY/);
+    expect(workflow).toMatch(/exit 0/);
+  });
+
   it("uses its own machine secret, fail-closed, never CRON_SECRET", () => {
     expect(auth).toContain("OPERATOR_ALERTS_TRIGGER_TOKEN");
     expect(auth).toMatch(/MIN_TOKEN_LENGTH = 32/);

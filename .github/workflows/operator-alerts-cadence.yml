@@ -10,7 +10,14 @@ name: operator-alerts-cadence
 # The token only starts this sweep: it is not CRON_SECRET and opens no other route. The sweep is
 # idempotent per application, stage and recipient, so an extra or late run sends nothing twice.
 #
-# GitHub may start scheduled runs late or skip them under load: delivery within 5 minutes is NOT promised.
+# GitHub schedules are best effort: runs can start late or be dropped under load. 5 minutes is a target,
+# not a promise. Resending is prevented by the database ledger, not by timing.
+# Cost: the repository is public, so GitHub-hosted Actions minutes are free (~288 short runs a day).
+#
+# Why /api/internal/ and its own token, not /api/cron/ with CRON_SECRET: nginx answers 404 for
+# /api/cron/* from the internet (ops/vps/labourmarket.ai.nginx.conf), so GitHub cannot reach a cron
+# route without a VPS change; and CRON_SECRET authorises every local cron route (privacy erasure
+# among them), which is not a minimal-scope secret to copy into GitHub.
 
 on:
   schedule:
@@ -33,16 +40,20 @@ jobs:
       - name: Run the operator alerts sweep
         env:
           TOKEN: ${{ secrets.OPERATOR_ALERTS_TRIGGER_TOKEN }}
+        # No `set -x`: the token must never reach the log. GitHub masks secrets already; the explicit
+        # add-mask is a second lock in case a value is ever passed through another variable.
         run: |
+          set +x
           if [ -z "$TOKEN" ]; then
-            echo "::error::OPERATOR_ALERTS_TRIGGER_TOKEN is not set in the operator-alerts environment."
-            exit 1
+            echo "Skipped: OPERATOR_ALERTS_TRIGGER_TOKEN is not set (the owner creates it). Nothing was sent." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
+          echo "::add-mask::$TOKEN"
           code=$(curl -sS -o body.json -w '%{http_code}' --max-time 120 -X POST \
             -H "Authorization: Bearer $TOKEN" \
             https://labourmarket.ai/api/internal/operator-alerts/v1) || code=000
-          # The body is counts and a reason code only.
-          cat body.json 2>/dev/null; echo
+          # The body is counts and a reason code only: no id, no address.
+          { echo "Operator alerts sweep: HTTP $code"; cat body.json 2>/dev/null; echo; } | tee -a "$GITHUB_STEP_SUMMARY"
           if [ "$code" != "200" ]; then
             echo "::error::operator alerts sweep answered $code"
             exit 1
