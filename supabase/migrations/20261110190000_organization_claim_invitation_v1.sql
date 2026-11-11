@@ -26,6 +26,7 @@
 -- CLOSED: request_organization_claim_v1 and decide_organization_claim_v1 are no longer executable by
 -- `authenticated`. They stay defined (nothing calls them in the app) so the rollback restores them as is.
 --
+-- @plan-cache-proof: n/a — uniqueness only, no RPC filters by it (organization_claims_invitation_uq: one claim per invitation)
 -- SAFETY CLASS: RED (SECURITY DEFINER functions, GRANT/REVOKE, CHECK widening, additive columns).
 -- ZERO existing rows change at apply time. Rollback: supabase/rollbacks/<this name>.down.sql.
 -- ============================================================================
