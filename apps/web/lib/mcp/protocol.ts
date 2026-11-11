@@ -118,7 +118,16 @@ export type McpToolDef = {
   readonly annotations?: McpToolAnnotations;
   /** Host-specific metadata (`_meta`), e.g. `openai/fileParams`. */
   readonly _meta?: Readonly<Record<string, unknown>>;
+  /**
+   * Per-tool auth requirement (OpenAI Apps SDK): `noauth` and/or `oauth2`.
+   * Absent = the door's own rule (every call needs a credential).
+   */
+  readonly securitySchemes?: readonly McpSecurityScheme[];
 };
+
+export type McpSecurityScheme =
+  | { readonly type: "noauth" }
+  | { readonly type: "oauth2"; readonly scopes?: readonly string[] };
 
 export type McpToolOutcome = {
   readonly isError: boolean;
@@ -131,6 +140,9 @@ export type McpToolOutcome = {
    * in full (both in the text and as `structuredContent`), never destroyed.
    */
   readonly humanText?: string;
+  /** Result-level `_meta`, e.g. `mcp/www_authenticate` asking the host to
+   *  link the account before a tool that needs it is run. */
+  readonly meta?: Readonly<Record<string, unknown>>;
 };
 
 export type McpServerDeps = {
@@ -289,6 +301,7 @@ export async function handleMcpMessage(
             description: t.description,
             inputSchema: t.inputSchema,
             ...(t.annotations ? { annotations: t.annotations } : {}),
+            ...(t.securitySchemes ? { securitySchemes: t.securitySchemes } : {}),
             ...(t._meta ? { _meta: t._meta } : {}),
           })),
           // 2026-07-28 cache directives. Additive: an older client ignores
@@ -327,6 +340,7 @@ export async function handleMcpMessage(
           ],
           structuredContent: outcome.payload,
           isError: outcome.isError,
+          ...(outcome.meta ? { _meta: outcome.meta } : {}),
         },
       };
     }

@@ -9,12 +9,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type Auth =
   | { ok: true; identity: { userId: string; transport: "bearer"; supabase: unknown } }
-  | { ok: false; reason: "no-credentials" };
+  | { ok: false; reason: "no-credentials" | "invalid-bearer" };
+const ANON_CLIENT = { anonymous: true };
 let auth: Auth = { ok: true, identity: { userId: "u-1", transport: "bearer", supabase: {} } };
 
 vi.mock("@/lib/api/api-identity", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/api/api-identity")>();
-  return { ...actual, resolveApiIdentity: vi.fn(async () => auth) };
+  return { ...actual, resolveApiIdentity: vi.fn(async () => auth), anonymousApiClient: vi.fn(async () => ANON_CLIENT) };
 });
 vi.mock("@/lib/env", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/env")>()),
@@ -22,6 +23,7 @@ vi.mock("@/lib/env", async (importOriginal) => ({
 }));
 
 const ran: string[] = [];
+const callers: { userId: string; supabase: unknown }[] = [];
 vi.mock("@/lib/capabilities/registry", () => {
   const cap = (id: string) => ({
     id,
@@ -32,12 +34,13 @@ vi.mock("@/lib/capabilities/registry", () => {
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     inputSchema: { "~standard": {} },
   });
-  // One tool inside the profile, one outside it.
-  const caps = [cap("jobs.search"), cap("evidence.person.create")];
+  // A public profile tool, a signed-in profile tool, and one outside it.
+  const caps = [cap("jobs.search"), cap("demand.list"), cap("evidence.person.create")];
   return {
     exposedCapabilities: () => caps,
-    runCapability: vi.fn(async (id: string) => {
+    runCapability: vi.fn(async (id: string, caller: { userId: string; supabase: unknown }) => {
       ran.push(id);
+      callers.push(caller);
       return { ok: true, data: {} };
     }),
   };
@@ -76,14 +79,15 @@ async function toolNames(post: (r: Request) => Promise<Response>, path: string):
 
 beforeEach(() => {
   ran.length = 0;
+  callers.length = 0;
   auth = { ok: true, identity: { userId: "u-1", transport: "bearer", supabase: {} } };
   vi.spyOn(console, "info").mockImplementation(() => undefined);
 });
 
 describe("the curated ChatGPT door (/api/mcp/chatgpt)", () => {
   it("lists only profile tools, while /api/mcp still lists every exposed tool", async () => {
-    expect(await toolNames(curatedPost, "/api/mcp/chatgpt")).toEqual(["jobs_search"]);
-    expect(await toolNames(fullPost, "/api/mcp")).toEqual(["jobs_search", "evidence_person_create"]);
+    expect(await toolNames(curatedPost, "/api/mcp/chatgpt")).toEqual(["jobs_search", "demand_list"]);
+    expect(await toolNames(fullPost, "/api/mcp")).toEqual(["jobs_search", "demand_list", "evidence_person_create"]);
   });
 
   it("refuses a tool outside the profile without running it; the full door runs the same tool", async () => {
@@ -102,12 +106,15 @@ describe("the curated ChatGPT door (/api/mcp/chatgpt)", () => {
   });
 
   it("a 401 points at the curated door's own metadata document; the full door's still points at the root one", async () => {
-    auth = { ok: false, reason: "no-credentials" };
+    // With no credential at all the curated door answers anonymously (below);
+    // a rejected token is its 401.
+    auth = { ok: false, reason: "invalid-bearer" };
     const curated = await curatedPost(rpc("/api/mcp/chatgpt", "tools/list"));
     expect(curated.status).toBe(401);
-    expect(curated.headers.get("www-authenticate")).toBe(
-      'Bearer resource_metadata="https://labourmarket.ai/.well-known/oauth-protected-resource/api/mcp/chatgpt"',
+    expect(curated.headers.get("www-authenticate")).toContain(
+      'resource_metadata="https://labourmarket.ai/.well-known/oauth-protected-resource/api/mcp/chatgpt"',
     );
+    auth = { ok: false, reason: "no-credentials" };
     const full = await fullPost(rpc("/api/mcp", "tools/list"));
     expect(full.headers.get("www-authenticate")).toBe(
       'Bearer resource_metadata="https://labourmarket.ai/.well-known/oauth-protected-resource"',
@@ -116,6 +123,64 @@ describe("the curated ChatGPT door (/api/mcp/chatgpt)", () => {
 
   it("its public GET reports the profile's own count", async () => {
     const body = (await (await curatedGet()).json()) as { toolCount: number };
-    expect(body.toolCount).toBe(1);
+    expect(body.toolCount).toBe(2);
+  });
+});
+
+type ListedTool = { name: string; securitySchemes?: { type: string }[]; _meta?: { securitySchemes?: unknown } };
+type CallResult = { result: { isError: boolean; structuredContent: { code?: string }; _meta?: Record<string, unknown> } };
+
+describe("public job search without sign-in (curated door only; owner approval needed)", () => {
+  beforeEach(() => {
+    auth = { ok: false, reason: "no-credentials" };
+  });
+
+  it("a caller with no credential can discover the door; every tool states its auth requirement", async () => {
+    const res = await curatedPost(rpc("/api/mcp/chatgpt", "tools/list"));
+    expect(res.status).toBe(200);
+    const tools = ((await res.json()) as { result: { tools: ListedTool[] } }).result.tools;
+    const schemes = Object.fromEntries(tools.map((t) => [t.name, t.securitySchemes?.map((s) => s.type)]));
+    expect(schemes).toEqual({ jobs_search: ["noauth", "oauth2"], demand_list: ["oauth2"] });
+    expect(tools.every((t) => t._meta?.securitySchemes !== undefined)).toBe(true);
+  });
+
+  it("runs a public tool on the ANONYMOUS client, as nobody", async () => {
+    const res = await curatedPost(rpc("/api/mcp/chatgpt", "tools/call", { name: "jobs_search", arguments: {} }));
+    expect(res.status).toBe(200);
+    expect(ran).toEqual(["jobs.search"]);
+    expect(callers[0]).toMatchObject({ userId: "", supabase: ANON_CLIENT });
+  });
+
+  it("NEGATIVE CONTROL: a signed-in tool runs nothing and asks the host to link the account", async () => {
+    const res = await curatedPost(rpc("/api/mcp/chatgpt", "tools/call", { name: "demand_list", arguments: {} }));
+    const body = (await res.json()) as CallResult;
+    expect(ran).toEqual([]);
+    expect(body.result.isError).toBe(true);
+    expect(body.result.structuredContent.code).toBe("sign_in_required");
+    expect(body.result._meta?.["mcp/www_authenticate"]).toEqual([
+      'Bearer resource_metadata="https://labourmarket.ai/.well-known/oauth-protected-resource/api/mcp/chatgpt"',
+    ]);
+  });
+
+  it("NEGATIVE CONTROL: a tool outside the profile is still unknown, anonymously too", async () => {
+    const res = await curatedPost(rpc("/api/mcp/chatgpt", "tools/call", { name: "evidence_person_create", arguments: {} }));
+    expect(((await res.json()) as { error?: { message: string } }).error?.message).toContain("Unknown tool");
+    expect(ran).toEqual([]);
+  });
+
+  it("NEGATIVE CONTROL: a present-but-bad token is a 401, never anonymous", async () => {
+    auth = { ok: false, reason: "invalid-bearer" };
+    const res = await curatedPost(rpc("/api/mcp/chatgpt", "tools/call", { name: "jobs_search", arguments: {} }));
+    expect(res.status).toBe(401);
+    expect(ran).toEqual([]);
+  });
+
+  it("NEGATIVE CONTROL: the full door has no anonymous mode and no securitySchemes", async () => {
+    expect((await fullPost(rpc("/api/mcp", "tools/call", { name: "jobs_search", arguments: {} }))).status).toBe(401);
+    expect(ran).toEqual([]);
+    auth = { ok: true, identity: { userId: "u-1", transport: "bearer", supabase: {} } };
+    const tools = ((await (await fullPost(rpc("/api/mcp", "tools/list"))).json()) as { result: { tools: ListedTool[] } })
+      .result.tools;
+    expect(tools.some((t) => t.securitySchemes !== undefined)).toBe(false);
   });
 });
