@@ -75,10 +75,15 @@ export function OffersScreen() {
   const invitations = useCapability<InvitationsListData>("invitations.list", NO_ARGS);
   const [flow, setFlow] = useState<FlowState>({ kind: "listing" });
 
+  // Depend on the two stable `reload` callbacks, never on the hook results:
+  // those are new objects every render, and `useReloadOnReturn` re-runs its
+  // focus effect whenever this callback changes — a reload loop.
+  const reloadBookings = bookings.reload;
+  const reloadInvitations = invitations.reload;
   const reloadBoth = useCallback(() => {
-    bookings.reload();
-    invitations.reload();
-  }, [bookings, invitations]);
+    reloadBookings();
+    reloadInvitations();
+  }, [reloadBookings, reloadInvitations]);
   useReloadOnReturn(reloadBoth, () => flow.kind === "listing");
 
   const live = useRef(true);
