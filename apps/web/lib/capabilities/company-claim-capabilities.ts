@@ -270,14 +270,18 @@ const decideFields = z
 
 const decideFingerprint = (claimId: string, decision: string, state: string) => `company-claim-decide:${claimId}:${decision}:${state}`;
 
-async function readClaim(caller: CapabilityCaller, claimId: string) {
-  const { data } = await asAny(caller.supabase)
+/** The claim, or "needs_migration" when the claim-invitation columns are not there yet (42703). */
+async function readClaim(caller: CapabilityCaller, claimId: string): Promise<ClaimRow | null | "needs_migration"> {
+  const { data, error } = await asAny(caller.supabase)
     .from("organization_claims")
     .select("id, organization_id, state, verification_method, representative_role, invitation_id, created_at")
     .eq("id", claimId)
     .maybeSingle();
+  if (error?.code === "42703") return "needs_migration";
   return data as ClaimRow | null;
 }
+
+const NEEDS_MIGRATION: ExecResult = { ok: false, code: "needs_migration", message: "Company claims are not enabled on this environment." };
 
 const companyClaimDecidePreview: CapabilityDescriptor = {
   id: "company.claim.decide.preview",
@@ -298,6 +302,7 @@ const companyClaimDecidePreview: CapabilityDescriptor = {
       return { ok: false, code: "evidence_required", message: "Say what you checked before verifying." };
     }
     const claim = await readClaim(caller, parsed.claimId);
+    if (claim === "needs_migration") return NEEDS_MIGRATION;
     if (!claim) return { ok: false, code: "not_found", message: "No such claim." };
     if (claim.state !== "requested") return { ok: false, code: "not_pending", message: `This claim is ${claim.state}.` };
     const org = await readCompany(caller, claim.organization_id);
@@ -339,6 +344,7 @@ const companyClaimDecideConfirm: CapabilityDescriptor = {
     const denied = await authority(caller);
     if (denied) return denied;
     const claim = await readClaim(caller, parsed.claimId);
+    if (claim === "needs_migration") return NEEDS_MIGRATION;
     if (!claim) return { ok: false, code: "not_found", message: "No such claim." };
     const verdict = await verifyCapabilityConfirmation({
       actionId: "company.claim.decide.confirm",

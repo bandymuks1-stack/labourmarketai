@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { requestEmailVerificationAction } from "@/lib/auth/email-verification-actions";
+import { toActiveLocale } from "@/lib/i18n/config";
 import { createClient } from "@/lib/supabase/server";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,7 +16,8 @@ const ROLE_MAX = 80;
 
 /** Form action on the invite page. Lands back on it with the database's outcome as `?claim=`. */
 export async function acceptClaimInvitationFormAction(formData: FormData): Promise<void> {
-  const locale = String(formData.get("locale") ?? "lt").slice(0, 5);
+  // Only an active locale, so the redirect can never leave this site (e.g. a "//host" locale).
+  const locale = toActiveLocale(String(formData.get("locale") ?? ""));
   const token = String(formData.get("token") ?? "");
   const role = String(formData.get("role") ?? "").trim().slice(0, ROLE_MAX);
   const authority = formData.get("authority") === "on";
@@ -38,7 +40,8 @@ export async function acceptClaimInvitationFormAction(formData: FormData): Promi
 
 /** Sends the existing mailbox-proof link; the proof brings the representative back to this invitation. */
 export async function requestClaimEmailProofFormAction(formData: FormData): Promise<void> {
-  const locale = String(formData.get("locale") ?? "lt").slice(0, 5);
+  // Only an active locale, so the redirect can never leave this site (e.g. a "//host" locale).
+  const locale = toActiveLocale(String(formData.get("locale") ?? ""));
   const token = String(formData.get("token") ?? "");
   const back = `/${locale}/invite/${encodeURIComponent(token)}`;
   const r = await requestEmailVerificationAction({ locale, next: back });

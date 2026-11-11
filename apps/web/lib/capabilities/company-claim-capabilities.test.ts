@@ -81,6 +81,22 @@ describe("company claim operator tools", () => {
     expect(r).toMatchObject({ ok: false, code: "evidence_required" });
   });
 
+  it("before the migration a decide answers needs_migration, not 'no such claim'", async () => {
+    const { c } = caller(true);
+    const missingColumn = { select: () => missingColumn, eq: () => missingColumn, maybeSingle: () => Promise.resolve({ data: null, error: { code: "42703" } }) };
+    (c as unknown as { supabase: { from: () => unknown } }).supabase.from = () => missingColumn;
+    for (const id of ["company.claim.decide.preview", "company.claim.decide.confirm"]) {
+      const r = await byId[id].run(c, { claimId: ORG, decision: "reject", ...(id.endsWith("confirm") ? { confirmationToken: "x".repeat(12) } : {}) });
+      expect(r, id).toMatchObject({ ok: false, code: "needs_migration" });
+    }
+  });
+
+  it("the invite actions redirect only under an active locale (no open redirect)", () => {
+    const src = readFileSync(join(__dirname, "..", "organization-claims", "claim-invitation-actions.ts"), "utf8");
+    expect(src.match(/const locale = toActiveLocale\(/g)?.length).toBe(2);
+    expect(src).not.toMatch(/formData\.get\("locale"\)\s*\?\?\s*"lt"\)\.slice/);
+  });
+
   it("writes only through the migration's functions", () => {
     const src = readFileSync(join(__dirname, "company-claim-capabilities.ts"), "utf8");
     expect(src).toMatch(/rpc\("create_claim_invitation_v1"/);
