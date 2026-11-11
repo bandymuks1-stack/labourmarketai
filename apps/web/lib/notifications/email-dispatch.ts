@@ -15,7 +15,10 @@ import "server-only";
  * CONSENT-FIRST (migration 20260823160000 §4, binding): email defaults OFF.
  * An email goes out ONLY where the recipient stored an explicit
  * (type, email, enabled=true) preference row — `resolveChannelEnabled`
- * returns the channel default (false) otherwise. Never flip that.
+ * returns the channel default (false) otherwise. Never flip the CHANNEL
+ * default. The one exception is per type and owner-approved
+ * (`NOTIFICATION_TYPE_EMAIL_DEFAULTS`, 2026-11-11: a new chat message, with
+ * opt-out); it never applies while the preference store is unreadable.
  *
  * ORDER OF GATES (each produces a distinct tagged outcome — a silent skip
  * indistinguishable from success is the exact failure mode that hid the dead
@@ -89,10 +92,21 @@ export async function maybeDispatchNotificationEmail(
     "recipientProfileId" | "eventType" | "entityType" | "metadata"
   >,
   prefRows: readonly NotificationPreferenceRow[],
+  opts: {
+    /** The preference store could not be read: `prefRows` is empty for that
+     *  reason, not because the person stored nothing. A per-type default-on
+     *  e-mail must not go out then (it could override a stored opt-out). */
+    readonly preferencesUnreadable?: boolean;
+  } = {},
 ): Promise<NotificationEmailDispatchOutcome> {
   try {
-    // 1. Explicit opt-in only (email channel default is OFF).
-    if (!resolveChannelEnabled(prefRows, input.eventType, "email")) {
+    // 1. Explicit opt-in, or the type's owner-approved default
+    // (NOTIFICATION_TYPE_EMAIL_DEFAULTS); the channel default is OFF.
+    if (
+      !resolveChannelEnabled(prefRows, input.eventType, "email", {
+        rowsUnreadable: opts.preferencesUnreadable,
+      })
+    ) {
       return { kind: "channel_disabled" };
     }
 

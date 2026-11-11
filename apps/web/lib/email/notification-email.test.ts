@@ -34,7 +34,7 @@ describe("renderNotificationEmail", () => {
     );
   });
 
-  it("defaults to the platform default locale when none (or an inactive one) is given", async () => {
+  it("defaults to the platform default locale when none is given, and to English for an unrouted one", async () => {
     const rendered = await renderNotificationEmail({
       eventType: "booking_proposed",
       entityType: "booking_request",
@@ -49,8 +49,10 @@ describe("renderNotificationEmail", () => {
       entityType: "booking_request",
       locale: "xx",
     });
+    // A stored but unrouted language reads English, like the pages
+    // (lib/i18n/entry-locale.ts) — never Lithuanian (chat audit 2026-11-11).
     expect(inactive!.deepLink).toBe(
-      `${CANONICAL_ORIGIN}/lt/dashboard/bookings`,
+      `${CANONICAL_ORIGIN}/en/dashboard/bookings`,
     );
   });
 
