@@ -30,7 +30,7 @@ create table public.organizations (
   public_contact_email text, public_contact_phone text, archived_at timestamptz, archived_reason text,
   claim_state text not null default 'claimed');
 create table public.organization_facts (
-  id uuid primary key default gen_random_uuid(), organization_id uuid not null, field text not null, value text,
+  id uuid primary key default gen_random_uuid(), organization_id uuid not null, field text not null, value jsonb,
   source_kind text not null, superseded_by uuid);
 insert into public.organizations (id, owner_profile_id, organization_type, display_name, country, claim_state,
   public_profile_enabled, public_slug, public_contact_email, vat_number, archived_at, archived_reason) values
@@ -40,13 +40,16 @@ insert into public.organizations (id, owner_profile_id, organization_type, displ
  ('00000000-0000-4000-8000-000000000004', null, 'company', 'QA-SYNTHETIC Statyba Referral', 'LT', 'discovered', false, null, null, null, null, null),
  ('00000000-0000-4000-8000-000000000005', null, 'company', 'QA-SYNTHETIC Statyba Archived', 'LT', 'discovered', false, null, null, null, now(), 'test'),
  ('00000000-0000-4000-8000-000000000006', gen_random_uuid(), 'team', 'QA-SYNTHETIC Statyba Brigade', 'LT', 'claimed', true, 'qa-brigade', null, null, null, null),
- ('00000000-0000-4000-8000-000000000007', null, 'company', 'QA-SYNTHETIC Statyba Superseded', 'LT', 'invited', false, null, null, null, null, null);
+ ('00000000-0000-4000-8000-000000000007', null, 'company', 'QA-SYNTHETIC Statyba Superseded', 'LT', 'invited', false, null, null, null, null, null),
+ ('00000000-0000-4000-8000-000000000008', null, 'company', 'QA-SYNTHETIC Statyba Private Name', 'LT', 'discovered', false, null, null, null, null, null);
 insert into public.organization_facts (organization_id, field, value, source_kind, superseded_by) values
- ('00000000-0000-4000-8000-000000000003', 'display_name', 'QA-SYNTHETIC Statyba Register', 'public_register', null),
- ('00000000-0000-4000-8000-000000000003', 'contact_public_email', 'z@company.example', 'public_register', null),
- ('00000000-0000-4000-8000-000000000004', 'display_name', 'QA-SYNTHETIC Statyba Referral', 'partner_referral', null),
- ('00000000-0000-4000-8000-000000000005', 'display_name', 'QA-SYNTHETIC Statyba Archived', 'public_register', null),
- ('00000000-0000-4000-8000-000000000007', 'display_name', 'QA-SYNTHETIC Statyba Superseded', 'company_website', gen_random_uuid());
+ ('00000000-0000-4000-8000-000000000003', 'display_name', to_jsonb('QA-SYNTHETIC Statyba Register'::text), 'public_register', null),
+ ('00000000-0000-4000-8000-000000000003', 'contact_public_email', to_jsonb('z@company.example'::text), 'public_register', null),
+ ('00000000-0000-4000-8000-000000000004', 'display_name', to_jsonb('QA-SYNTHETIC Statyba Referral'::text), 'partner_referral', null),
+ ('00000000-0000-4000-8000-000000000005', 'display_name', to_jsonb('QA-SYNTHETIC Statyba Archived'::text), 'public_register', null),
+ ('00000000-0000-4000-8000-000000000007', 'display_name', to_jsonb('QA-SYNTHETIC Statyba Superseded'::text), 'company_website', gen_random_uuid()),
+ -- a later public ingest with another name; the shown name is still the private one
+ ('00000000-0000-4000-8000-000000000008', 'legal_name', to_jsonb('QA-SYNTHETIC Statyba Public Register Name'::text), 'public_register', null);
 SQL
 
 pass=0; fail=0
@@ -61,6 +64,7 @@ check "an anonymous visitor lists the opted-in company and the publicly sourced 
   "$(anon "select display_name||':'||confirmed||':'||coalesce(public_slug,'') from search_organizations_directory_v2('statyba')")"
 check "no contact, identifier, owner or description column exists" "id,display_name,organization_type,country,public_slug,confirmed" \
   "$(q "select string_agg(a, ',' order by n) from (select unnest(proargnames[2:]) a, generate_subscripts(proargnames[2:],1) n from pg_proc where proname='search_organizations_directory_v2') x")"
+check "a public fact with another name does not publish a privately sourced name" "0" "$(anon "select count(*) from search_organizations_directory_v2('private name')")"
 check "a term under two characters lists nothing" "0" "$(anon "select count(*) from search_organizations_directory_v2('s')")"
 check "a wildcard term lists nothing" "0" "$(anon "select count(*) from search_organizations_directory_v2('%%')")"
 check "an anonymous visitor still cannot read organizations directly" "1" "$(anon "select count(*) from organizations" | grep -c 'permission denied')"

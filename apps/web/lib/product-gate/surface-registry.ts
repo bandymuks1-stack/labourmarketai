@@ -427,7 +427,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
         "Putting the list on `/business/[slug]` would turn one company's profile into a directory; reusing the signed-in organization lists would expose internal fields and require an account the visitor does not have.",
       evidence: [
         "search_organizations_directory_v1 (20260802170000) is granted to authenticated only and does not filter on public_profile_enabled or on where a name came from.",
-        "Production 2026-11-11: 98 organizations in claim_state discovered, 93 claimed; the 98 are invisible to the public today.",
+        "Companies recorded from public sources but not yet claimed have no public surface at all today (production volumes are kept in the private Internal Brain, AGENTS.md).",
       ],
       ownerRuling:
         "Owner decision 2026-11-11, item 3: show unconfirmed companies in a public company search, marked Unconfirmed, public data only, no contacts, no rights. (To be confirmed by the owner as the A-14 ruling for /business.)",

@@ -64,7 +64,10 @@ as $$
                where f.organization_id = o.id
                  and f.field in ('display_name', 'legal_name')
                  and f.source_kind in ('public_register', 'company_website', 'job_posting')
-                 and f.superseded_by is null))
+                 and f.superseded_by is null
+                 -- The public fact must be the name actually shown: a later public
+                 -- ingest never overwrites a privately sourced organizations column.
+                 and lower(btrim(f.value #>> '{}')) = lower(btrim(o.display_name))))
      )
    order by (o.claim_state = 'claimed') desc, o.display_name, o.id
    limit 20;
