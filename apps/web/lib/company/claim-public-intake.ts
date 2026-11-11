@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { readVerifiedSessionEmail } from "@/lib/auth/verified-email-gate";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { demandWrittenLanguage } from "@/lib/demand/demand-written-language";
+import { resolveCountryCode } from "@/lib/location/country-model";
 
 /**
  * Canonical-journey P3 — claim bridge: public /company-need intake → the
@@ -193,15 +195,15 @@ export async function claimPublicIntake(intakeId: string): Promise<ClaimIntakeRe
     : "";
   const payload = {
     title: (intake.sector ?? "").slice(0, 120) || undefined,
-    capabilities:
-      join(
-        [
-          intake.description,
-          intake.headcount != null ? `Darbuotojų: ${intake.headcount}` : null,
-        ],
-        "\n",
-      ).slice(0, 4000) || undefined,
-    location: join([intake.city_or_region, intake.country], ", ").slice(0, 160) || undefined,
+    // The employer's own words, unchanged. The headcount is its own field (it
+    // was appended here as hard-coded Lithuanian text).
+    capabilities: (intake.description ?? "").trim().slice(0, 4000) || undefined,
+    teamSize: intake.headcount != null ? String(intake.headcount) : undefined,
+    // The intake's country is an ISO code chosen from a required select. It
+    // was folded into the free-text location only, so the draft (and the need
+    // submitted from it) had no `customer_requests.country`.
+    country: resolveCountryCode(intake.country ?? undefined) ?? undefined,
+    location: (intake.city_or_region ?? "").trim().slice(0, 160) || undefined,
     timing: join([intake.start_window, intake.expected_duration], "; ").slice(0, 160) || undefined,
     accommodation,
     languages: (intake.languages ?? "").slice(0, 160) || undefined,
@@ -236,20 +238,33 @@ export async function claimPublicIntake(intakeId: string): Promise<ClaimIntakeRe
     p_kind: "company_request",
     p_title: payload.title ?? intake.company_name ?? null,
     p_payload: payload,
-    p_original_language: "lt",
+    p_original_language: await demandWrittenLanguage(),
   };
-  let { error: draftErr } = await asAny(supabase).rpc("save_demand_draft_v2", {
+  let { data: draftId, error: draftErr } = await asAny(supabase).rpc("save_demand_draft_v2", {
     ...draftArgs,
     p_organization_id: employer.ok ? employer.organizationId : null,
   });
   if (draftErr && ["42883", "PGRST202"].includes((draftErr as { code?: string }).code ?? "")) {
-    ({ error: draftErr } = await asAny(supabase).rpc("save_demand_draft", draftArgs));
+    ({ data: draftId, error: draftErr } = await asAny(supabase).rpc("save_demand_draft", draftArgs));
   }
   if (draftErr) {
     if ((draftErr as { code?: string }).code === "42883") {
       return { ok: false, reason: "needs_migration" };
     }
     return { ok: false, reason: "error" };
+  }
+
+  // The country lives on the COLUMN the wizard prefills and the submit keeps:
+  // the same owner-scoped stamp `saveDemandDraft` makes. A failure here never
+  // fails the claim (the draft exists; the wizard then asks for the country).
+  if (typeof draftId === "string" && payload.country) {
+    const { error: countryErr } = await asAny(supabase)
+      .from("customer_requests")
+      .update({ country: payload.country })
+      .eq("id", draftId)
+      .eq("profile_id", sessionUser.id)
+      .eq("status", "draft");
+    if (countryErr) console.error("[claim-public-intake] country stamp failed:", countryErr.message);
   }
 
   // Mark the true outcome. Draft creation already succeeded — a failure here
