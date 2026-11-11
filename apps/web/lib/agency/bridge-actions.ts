@@ -313,18 +313,23 @@ export async function submitOfferAction(
   if (error) return mapErr(error.code, error.message);
   emitFirstRealAction("agency", "offer_candidate", "agency_candidate_offer");
   // The client company's demand owner hears of the candidate, after the
-  // write. The agency reads its own offer row (request) under its RLS.
+  // write. Resolved from the OFFER ROW, under the agency's own session: its
+  // offer names the request, and the share it holds lets it read that
+  // request's owner (customer_requests_select_agency_share). Never from input.
   if (typeof offerId === "string" && isBridgeUuid(offerId)) {
     const [{ data: auth }, { data: offerRow }] = await Promise.all([
       supabase.auth.getUser(),
       rpc(supabase).from("agency_candidate_offers").select("request_id").eq("id", offerId).maybeSingle(),
     ]);
-    const requestId = (offerRow as { request_id?: string } | null)?.request_id;
-    if (auth.user && requestId) {
+    const requestId = (offerRow as { request_id?: string } | null)?.request_id ?? null;
+    const { data: need } = requestId
+      ? await rpc(supabase).from("customer_requests").select("profile_id").eq("id", requestId).maybeSingle()
+      : { data: null };
+    if (auth.user) {
       await emitOfferReceivedNotification({
         kind: "candidate",
         offerId,
-        requestId,
+        recipientProfileId: (need as { profile_id?: string | null } | null)?.profile_id ?? null,
         actorProfileId: auth.user.id,
       });
     }
@@ -367,7 +372,7 @@ export async function respondCandidateOfferAction(
     await emitOfferAnsweredNotification({
       kind: "candidate",
       offerId,
-      offeredByProfileId: (offerRow as { created_by?: string | null } | null)?.created_by ?? null,
+      recipientProfileId: (offerRow as { created_by?: string | null } | null)?.created_by ?? null,
       actorProfileId: auth.user.id,
       decision,
     });

@@ -67,7 +67,5 @@ alter table public.notification_events
     'organization_person'
   ));
 
-revoke select (id, request_id, offered_by) on public.team_demand_offers from service_role;
-revoke select (id, profile_id) on public.customer_requests from service_role;
 
 commit;

@@ -13,7 +13,8 @@
 --   candidate_offer_answered  -> who proposed     (entity agency_candidate_offer_response)
 --
 -- STRICT SUPERSET: every row valid before is valid after. NO data change, NO
--- RLS change. Two column-scoped service_role reads (see below).
+-- RLS change, NO grant: the recipient is resolved by the write path under the
+-- caller's own session (lib/notifications/event-emitters.ts, B2B OFFERS).
 -- ROLLBACK: supabase/rollbacks/20261111230000_offer_notification_types_v1.down.sql
 --   (refuses while any offer notification row exists).
 -- POST-APPLY: select conname, pg_get_constraintdef(oid) from pg_constraint
@@ -84,14 +85,5 @@ alter table public.notification_events
     'agency_candidate_offer_response'
   ));
 
--- RECIPIENT READS, server-side, column-scoped (precedent:
--- 20261012120000_service_role_notification_reads_v1). No other column, no
--- anon/authenticated grant, no policy change.
---   * an offer's recipient is the DEMAND OWNER, whom the offering team or
---     agency cannot read under its own RLS;
---   * a team offer's answer goes to `offered_by`, which the answering company
---     cannot read (team_demand_offers_select_v1 admits the team side only).
-grant select (id, profile_id) on public.customer_requests to service_role;
-grant select (id, request_id, offered_by) on public.team_demand_offers to service_role;
 
 commit;

@@ -73,6 +73,20 @@ async function authed(): Promise<{ supabase: SupabaseClient; userId: string } | 
   return user ? { supabase, userId: user.id } : null;
 }
 
+/**
+ * The OTHER party of a team offer, as the recipient of its notification: for
+ * the team that offered, the owner of the need; for the company answering,
+ * the person who made the offer. Neither side can read the other under its
+ * own RLS, so it comes from the gated SECURITY DEFINER
+ * `team_offer_counterpart_v1`, which answers only a party to the offer. That
+ * function is a separate owner-gated migration: until it exists this is null
+ * and the notification names an unresolved recipient instead of guessing.
+ */
+async function teamOfferCounterpart(supabase: SupabaseClient, offerId: string): Promise<string | null> {
+  const { data, error } = await asAny(supabase).rpc("team_offer_counterpart_v1", { p_offer_id: offerId });
+  return !error && typeof data === "string" ? data : null;
+}
+
 async function readRows<T>(
   rpc: string,
   args: Record<string, unknown>,
@@ -206,7 +220,7 @@ export async function offerTeamToDemand(input: {
     await emitOfferReceivedNotification({
       kind: "team",
       offerId: parsed.offerId,
-      requestId: input.requestId,
+      recipientProfileId: await teamOfferCounterpart(ctx.supabase, parsed.offerId),
       actorProfileId: ctx.userId,
     });
   }
@@ -252,6 +266,7 @@ export async function respondToTeamOffer(input: {
       await emitOfferAnsweredNotification({
         kind: "team",
         offerId: input.offerId,
+        recipientProfileId: await teamOfferCounterpart(ctx.supabase, input.offerId),
         actorProfileId: ctx.userId,
         decision: data,
       });
