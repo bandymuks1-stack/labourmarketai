@@ -20437,5 +20437,17 @@
       "allow": "Allow",
       "refuse": "Refuse"
     }
+  },
+  "businessDirectory": {
+    "title": "Company search",
+    "intro": "Find companies, employers and partners on LabourMarket.ai. Only public data is shown.",
+    "searchLabel": "Company name",
+    "searchButton": "Search",
+    "hint": "Type at least 2 letters.",
+    "empty": "No company found.",
+    "unconfirmed": "Unconfirmed",
+    "unconfirmedHint": "Unconfirmed: the company does not manage this profile yet. Only public data is shown.",
+    "notEnabled": "Company search is not available yet.",
+    "unavailable": "The search is not answering right now. Try again later."
   }
 }

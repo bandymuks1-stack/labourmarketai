@@ -20437,5 +20437,17 @@
       "allow": "Erlauben",
       "refuse": "Ablehnen"
     }
+  },
+  "businessDirectory": {
+    "title": "Unternehmenssuche",
+    "intro": "Finden Sie Unternehmen, Arbeitgeber und Partner auf LabourMarket.ai. Gezeigt werden nur öffentliche Daten.",
+    "searchLabel": "Name des Unternehmens",
+    "searchButton": "Suchen",
+    "hint": "Geben Sie mindestens 2 Buchstaben ein.",
+    "empty": "Kein Unternehmen gefunden.",
+    "unconfirmed": "Nicht bestätigt",
+    "unconfirmedHint": "Nicht bestätigt: Das Unternehmen verwaltet dieses Profil noch nicht. Gezeigt werden nur öffentliche Daten.",
+    "notEnabled": "Die Unternehmenssuche ist noch nicht verfügbar.",
+    "unavailable": "Die Suche antwortet gerade nicht. Versuchen Sie es später."
   }
 }

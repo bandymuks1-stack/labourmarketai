@@ -20437,5 +20437,17 @@
       "allow": "Toestaan",
       "refuse": "Weigeren"
     }
+  },
+  "businessDirectory": {
+    "title": "Bedrijven zoeken",
+    "intro": "Vind bedrijven, werkgevers en partners op LabourMarket.ai. Alleen openbare gegevens worden getoond.",
+    "searchLabel": "Bedrijfsnaam",
+    "searchButton": "Zoeken",
+    "hint": "Typ minstens 2 letters.",
+    "empty": "Geen bedrijf gevonden.",
+    "unconfirmed": "Niet bevestigd",
+    "unconfirmedHint": "Niet bevestigd: het bedrijf beheert dit profiel nog niet. Alleen openbare gegevens worden getoond.",
+    "notEnabled": "Bedrijven zoeken is nog niet beschikbaar.",
+    "unavailable": "Het zoeken antwoordt nu niet. Probeer het later."
   }
 }

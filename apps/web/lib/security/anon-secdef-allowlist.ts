@@ -150,6 +150,23 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
       "Discloses the exact count and publication-date distribution of the live corpus by allowing full enumeration of public job URLs. Those URLs are intended to be public and indexed, so this is the requirement rather than a side effect. `last_modified` is `published_at` and never an ingestion timestamp, so the sitemap cannot make a false freshness claim.",
   },
   {
+    name: "search_organizations_directory_v2",
+    identityArgs: "p_term text",
+    mutates: false,
+    publicCaller:
+      "Public company search (app/[locale]/business), owner decision 2026-11-11. Reachable logged-out by design.",
+    authorization:
+      "Lists only a claimed company that opted in to its public profile, or an unclaimed company whose name was recorded from a public source (public register, company website, job ad). Never archived, never a team. Returns id, name, type, country, public slug and confirmed, nothing else.",
+    inputValidation:
+      "The v1 term rules: LIKE and PostgREST metacharacters stripped, 80 characters, at least 2; no wildcard dump; 20 rows.",
+    abuseControls:
+      "No DB-level rate limit. Read-only and idempotent; each call returns at most 20 rows of data that is public already.",
+    definerJustification:
+      "`organizations` has no anon SELECT grant and no anon RLS policy; DEFINER narrows anon access to the listed columns of the listed rows instead of opening the table.",
+    residualRisk:
+      "Name-by-name enumeration of the listed companies is possible; they are listed because their names are public. An unclaimed company's id is returned and is not secret.",
+  },
+  {
     name: "get_public_business_profile_v1",
     identityArgs: "p_slug text",
     mutates: false,

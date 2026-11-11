@@ -1783,6 +1783,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-10: the company-need intake keeps the visitor's locale (SECURITY DEFINER replace, one line).
       // RED draft #3195, the marker is the human-gate acknowledgement, NOT applied.
       "20261110140000_company_need_intake_keep_locale_v1.sql",
+      // 2026-11-11: public company search, unconfirmed companies marked (SECURITY DEFINER read granted to anon).
+      // RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261111090000_search_organizations_directory_v2.sql",
 ]);
   });
 

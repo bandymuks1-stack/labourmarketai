@@ -20437,5 +20437,17 @@
       "allow": "Zezwól",
       "refuse": "Odmów"
     }
+  },
+  "businessDirectory": {
+    "title": "Wyszukiwarka firm",
+    "intro": "Znajdź firmy, pracodawców i partnerów w LabourMarket.ai. Pokazujemy tylko dane publiczne.",
+    "searchLabel": "Nazwa firmy",
+    "searchButton": "Szukaj",
+    "hint": "Wpisz co najmniej 2 litery.",
+    "empty": "Nie znaleziono firmy.",
+    "unconfirmed": "Niepotwierdzone",
+    "unconfirmedHint": "Niepotwierdzone: firma nie zarządza jeszcze tym profilem. Pokazujemy tylko dane publiczne.",
+    "notEnabled": "Wyszukiwarka firm nie jest jeszcze dostępna.",
+    "unavailable": "Wyszukiwarka teraz nie odpowiada. Spróbuj później."
   }
 }
