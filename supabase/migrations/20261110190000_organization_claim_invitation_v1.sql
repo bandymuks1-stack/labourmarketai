@@ -69,6 +69,21 @@ create trigger claim_invitation_accept_guard
   before update on public.invitations
   for each row execute function public.claim_invitation_accept_guard_v1();
 
+-- An operator never becomes a company's owner through a claim: admins and holders of an active
+-- ingest grant are refused as claimants. Internal; read by the functions below only.
+create or replace function public.claimant_is_operator_v1(p_profile_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from public.profiles p where p.id = p_profile_id and p.active_role = 'admin')
+      or exists (select 1 from public.profile_roles r where r.profile_id = p_profile_id and r.role = 'admin')
+      or exists (select 1 from public.platform_capability_grants g
+                  where g.profile_id = p_profile_id and g.revoked_at is null)
+$$;
+
 -- 2. What the representative stated ------------------------------------------------------------
 alter table public.organization_claims
   add column if not exists invitation_id uuid references public.invitations(id) on delete set null,
@@ -222,6 +237,9 @@ begin
   if v_inv.inviter_profile_id = uid then
     return jsonb_build_object('outcome', 'inviter_cannot_claim');
   end if;
+  if public.claimant_is_operator_v1(uid) then
+    return jsonb_build_object('outcome', 'operator_cannot_claim');
+  end if;
   if v_org.archived_at is not null or v_org.claim_state <> 'invited' or v_org.owner_profile_id is not null then
     return jsonb_build_object('outcome', 'not_claimable');
   end if;
@@ -288,6 +306,7 @@ begin
   if v_org.claim_state = 'claimed' or v_org.owner_profile_id is not null then
     return jsonb_build_object('outcome', 'not_claimable');
   end if;
+  if public.claimant_is_operator_v1(uid) then return jsonb_build_object('outcome', 'operator_cannot_claim'); end if;
   if p_authority_confirmed is not true then return jsonb_build_object('outcome', 'authority_not_confirmed'); end if;
   if char_length(v_role) not between 2 and 80 then return jsonb_build_object('outcome', 'invalid_role'); end if;
   if char_length(v_ev) not between 3 and 500 then return jsonb_build_object('outcome', 'invalid_evidence'); end if;
@@ -336,6 +355,7 @@ begin
     return 'already_claimed';
   end if;
   if p_decider is null or v_claim.claimant_profile_id = p_decider then return 'refused'; end if;
+  if public.claimant_is_operator_v1(v_claim.claimant_profile_id) then return 'operator_claimant'; end if;
 
   update public.organizations
      set owner_profile_id = v_claim.claimant_profile_id, claim_state = 'claimed', updated_at = now()
@@ -434,6 +454,9 @@ begin
   if v_org.owner_profile_id is not null or v_org.claim_state = 'claimed' or v_org.archived_at is not null then
     return jsonb_build_object('outcome', 'already_claimed');
   end if;
+  if public.claimant_is_operator_v1(v_claim.claimant_profile_id) then
+    return jsonb_build_object('outcome', 'operator_claimant');
+  end if;
 
   update public.organization_claims
      set state = 'representative_verified', decided_by = uid, decided_at = now(),
@@ -454,6 +477,7 @@ end $$;
 
 -- 9. Grants ---------------------------------------------------------------------------------------
 revoke all on function public.claim_invitation_accept_guard_v1() from public, anon, authenticated;
+revoke all on function public.claimant_is_operator_v1(uuid) from public, anon, authenticated;
 revoke all on function public.create_claim_invitation_v1(uuid, text, text, text) from public, anon;
 grant execute on function public.create_claim_invitation_v1(uuid, text, text, text) to authenticated;
 revoke all on function public.get_claim_invitation_preview_v1(text) from public, anon;

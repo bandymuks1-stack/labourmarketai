@@ -25,6 +25,7 @@ drop function if exists public.accept_claim_invitation_v1(text, text, boolean);
 drop function if exists public.get_claim_invitation_preview_v1(text);
 drop function if exists public.create_claim_invitation_v1(uuid, text, text, text);
 
+drop function if exists public.claimant_is_operator_v1(uuid);
 drop index if exists public.organization_claims_invitation_uq;
 alter table public.organization_claims drop constraint if exists organization_claims_representative_role_chk;
 alter table public.organization_claims

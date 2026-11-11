@@ -14,7 +14,8 @@ create function auth.uid() returns uuid language sql stable as
 create function auth.jwt() returns jsonb language sql stable as
   $$ select coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb) $$;
 
-create table public.profiles (id uuid primary key, email text, is_admin boolean not null default false);
+create table public.profiles (id uuid primary key, email text, is_admin boolean not null default false, active_role text);
+create table public.profile_roles (profile_id uuid, role text);
 create table public.countries (code text primary key);
 insert into public.countries values ('LT'), ('IT');
 
@@ -99,13 +100,13 @@ create table public.audit_logs (
   occurred_at timestamptz
 );
 
-create table public.platform_capability_grants (profile_id uuid, capability text);
+create table public.platform_capability_grants (profile_id uuid, capability text, revoked_at timestamptz);
 create table public.proven_emails (profile_id uuid, email text);
 
 create function public.is_admin() returns boolean language sql stable security definer set search_path = public as
   $$ select coalesce((select is_admin from public.profiles where id = auth.uid()), false) $$;
 create function public.has_platform_capability(p_capability text) returns boolean language sql stable security definer set search_path = public as
-  $$ select exists (select 1 from public.platform_capability_grants g where g.profile_id = auth.uid() and g.capability = p_capability) $$;
+  $$ select exists (select 1 from public.platform_capability_grants g where g.profile_id = auth.uid() and g.capability = p_capability and g.revoked_at is null) $$;
 -- Production: the mailbox-proof ledger (20261003151000). Here: a row in proven_emails for the session's address.
 create function public.session_email_verified_v1() returns boolean language sql stable security definer set search_path = public as
   $$ select exists (select 1 from public.proven_emails p where p.profile_id = auth.uid()

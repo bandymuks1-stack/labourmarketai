@@ -71,6 +71,14 @@ describe("two operators, and no operator ever owns", () => {
     expect(f).toMatch(/if v_claim\.state = 'linked' then return 'already_linked'/);
   });
 
+  it("a claimant with operator rights is refused at every step", () => {
+    expect(fn("claimant_is_operator_v1")).toMatch(/platform_capability_grants g\s+where g\.profile_id = p_profile_id and g\.revoked_at is null/);
+    for (const name of ["accept_claim_invitation_v1", "submit_organization_verification_request_v1", "decide_organization_claim_v2", "link_verified_organization_claim_v1"]) {
+      expect(fn(name), name).toMatch(/claimant_is_operator_v1\(/);
+    }
+    expect(code).toMatch(/revoke all on function public\.claimant_is_operator_v1\(uuid\) from public, anon, authenticated;/);
+  });
+
   it("no client role can call the link, and the old open doors are closed", () => {
     expect(code).toMatch(/revoke all on function public\.link_verified_organization_claim_v1\(uuid, uuid\) from public, anon, authenticated;/);
     expect(code).not.toMatch(/grant execute on function public\.link_verified_organization_claim_v1/);

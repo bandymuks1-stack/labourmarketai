@@ -122,11 +122,19 @@ check "operator A, who sent the invitation, cannot decide" "1" "$(as $OPA opa@op
 echo "== request without an invitation"
 r=$(as $UNV unv@company.example "select submit_organization_verification_request_v1('$O3','Director','https://register.example/1',true)")
 check "a request needs mailbox proof" "email_not_verified" "$(outcome "$r")"
-r=$(as $OPC opc@ops.example "select submit_organization_verification_request_v1('$O3','Owner','https://register.example/3',true)")
+K0=$(q "insert into organization_claims (organization_id, claimant_profile_id, state, verification_method, verification_evidence_ref) values ('$O3','$OPC','requested','operator_manual_review','seed: filed before the rule') returning id")
+r=$(as $OPC opc@ops.example "select submit_organization_verification_request_v1('$O2','Owner','https://register.example/3',true)")
+check "an operator cannot file a request" "operator_cannot_claim" "$(outcome "$r")"
+r=$(as $R2 r2@x.example "select submit_organization_verification_request_v1('$O3','Owner','https://register.example/3',true)")
 check "a verified user can ask" "request_submitted" "$(outcome "$r")"
 check "the request changes nothing on the company" "discovered|" "$(q "select claim_state||'|'||coalesce(owner_profile_id::text,'') from organizations where id='$O3'")"
-C3=$(q "select id from organization_claims where organization_id='$O3'")
+C3="$K0"
 check "operator C cannot decide their own request" "1" "$(as $OPC opc@ops.example "select decide_organization_claim_v2('$C3','verify','x',null)" | grep -c 'own claim')"
+r=$(as $OPB opb@ops.example "select decide_organization_claim_v2('$C3','verify','register QA-3',null)")
+check "another operator cannot make operator C an owner" "operator_claimant" "$(outcome "$r")"
+check "the company stays without an owner" "discovered|" "$(q "select claim_state||'|'||coalesce(owner_profile_id::text,'') from organizations where id='$O3'")"
+check "the link itself refuses an operator claimant" "operator_claimant" "$(q "update organization_claims set state='representative_verified', decided_by='$OPB', decided_at=now() where id='$C3'; select link_verified_organization_claim_v1('$C3','$OPB')" | tail -1)"
+$PSQL -c "update organization_claims set state='requested', decided_by=null, decided_at=null where id='$C3'" >/dev/null
 for o in "$O2" "$O4" "$O3"; do as $OTH oth@other.example "select submit_organization_verification_request_v1('$o','Director','https://register.example/r',true)" >/dev/null; done
 r=$(as $OTH oth@other.example "select submit_organization_verification_request_v1('$O1','Director','https://register.example/r',true)")
 check "requests are limited per person" "too_many_requests" "$(outcome "$r")"
