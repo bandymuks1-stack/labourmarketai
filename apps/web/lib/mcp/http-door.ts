@@ -19,6 +19,7 @@ import {
   parseErrorResponse,
   MCP_PROTOCOL_VERSION,
   SUPPORTED_PROTOCOL_VERSIONS,
+  type McpResource,
   type McpSecurityScheme,
   type McpToolDef,
 } from "@/lib/mcp/protocol";
@@ -84,6 +85,14 @@ export type McpDoorConfig = {
    * running. A present-but-bad token is NEVER treated as anonymous.
    */
   readonly anonymousTools?: readonly string[];
+  /**
+   * Static resources this door serves (`resources/list`, `resources/read`),
+   * built for the request's public origin — the curated door's widget.
+   * Absent = no resources capability (the full door).
+   */
+  readonly resources?: (origin: string) => readonly McpResource[];
+  /** Extra tool `_meta` by tool name (e.g. the widget's output template). */
+  readonly toolMeta?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
 };
 
 const PUBLIC_SCHEMES: readonly McpSecurityScheme[] = [{ type: "noauth" }, { type: "oauth2" }];
@@ -243,7 +252,11 @@ export function createMcpDoor(config: McpDoorConfig) {
   function toolDefs(): McpToolDef[] {
     if (TOOL_DEFS) return TOOL_DEFS;
     const all = toolDefsOf(exposedCapabilities());
-    const selected = config.selectTools ? config.selectTools(all) : all;
+    const picked = config.selectTools ? config.selectTools(all) : all;
+    const extra = config.toolMeta;
+    const selected = extra
+      ? picked.map((d) => (extra[d.name] ? { ...d, _meta: { ...d._meta, ...extra[d.name] } } : d))
+      : picked;
     TOOL_DEFS = ANONYMOUS
       ? selected.map((d) => {
           const schemes = ANONYMOUS.has(d.name) ? PUBLIC_SCHEMES : SIGNED_IN_SCHEMES;
@@ -420,6 +433,7 @@ export function createMcpDoor(config: McpDoorConfig) {
       transportProtocolVersion: req.headers.get("mcp-protocol-version"),
       serverInfo: serverInfo(requestPublicOrigin(req), toolsetVersion()),
       instructions: config.instructions,
+      resources: config.resources?.(requestPublicOrigin(req)),
       tools: toolDefs(),
       callTool: async (name, args) => {
         const capabilityId = capabilityIdForTool(name);
@@ -551,6 +565,7 @@ export function createMcpDoor(config: McpDoorConfig) {
       transportProtocolVersion: req.headers.get("mcp-protocol-version"),
       serverInfo: serverInfo(origin, toolsetVersion()),
       instructions: config.instructions,
+      resources: config.resources?.(requestPublicOrigin(req)),
       tools: toolDefs(),
       callTool: async (name, args) => {
         const capabilityId = capabilityIdForTool(name);

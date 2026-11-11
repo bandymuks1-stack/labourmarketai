@@ -78,11 +78,21 @@ export const PROTOCOL_VERSION_META_KEY = "io.modelcontextprotocol/protocolVersio
 export const SERVER_INFO_META_KEY = "io.modelcontextprotocol/serverInfo";
 
 /**
- * What this server tells a 2026-era client it can do. Tools only — no
- * resources, no prompts, no completions. Declaring a capability we do not
+ * What this server tells a 2026-era client it can do. Tools — plus
+ * resources ONLY on a door that serves some (the curated ChatGPT door's
+ * widget); no prompts, no completions. Declaring a capability we do not
  * serve would make the client offer a person something that then fails.
  */
 const MCP_2026_CAPABILITIES = { tools: { listChanged: false } } as const;
+
+function capabilitiesOf(deps: McpServerDeps) {
+  return deps.resources && deps.resources.length > 0
+    ? { ...MCP_2026_CAPABILITIES, resources: { listChanged: false } }
+    : MCP_2026_CAPABILITIES;
+}
+
+/** MCP "resource not found" (spec error code). */
+const RESOURCE_NOT_FOUND = -32002;
 
 /**
  * Cache directives for list-shaped results (2026-07-28).
@@ -145,9 +155,25 @@ export type McpToolOutcome = {
   readonly meta?: Readonly<Record<string, unknown>>;
 };
 
+/**
+ * A static resource a door serves (`resources/list`, `resources/read`) — today
+ * only the curated ChatGPT door's job-list widget. Contains no user data: a
+ * widget is a template the host fills with a tool's own result.
+ */
+export type McpResource = {
+  readonly uri: string;
+  readonly name: string;
+  readonly description?: string;
+  readonly mimeType: string;
+  readonly text: string;
+  readonly _meta?: Readonly<Record<string, unknown>>;
+};
+
 export type McpServerDeps = {
   readonly serverInfo: { readonly name: string; readonly version: string };
   readonly instructions?: string;
+  /** Absent or empty = the door serves no resources (the methods stay unknown). */
+  readonly resources?: readonly McpResource[];
   readonly tools: readonly McpToolDef[];
   readonly callTool: (
     name: string,
@@ -268,7 +294,7 @@ export async function handleMcpMessage(
         result: {
           resultType: "complete",
           supportedVersions: [...SUPPORTED_PROTOCOL_VERSIONS],
-          capabilities: MCP_2026_CAPABILITIES,
+          capabilities: capabilitiesOf(deps),
           ...(deps.instructions ? { instructions: deps.instructions } : {}),
           ttlMs: LIST_CACHE_TTL_MS,
           cacheScope: LIST_CACHE_SCOPE,
@@ -282,7 +308,7 @@ export async function handleMcpMessage(
         id,
         result: {
           protocolVersion: SUPPORTED_VERSIONS.has(requested) ? requested : MCP_PROTOCOL_VERSION,
-          capabilities: { tools: { listChanged: false } },
+          capabilities: capabilitiesOf(deps),
           serverInfo: deps.serverInfo,
           ...(deps.instructions ? { instructions: deps.instructions } : {}),
         },
@@ -344,7 +370,36 @@ export async function handleMcpMessage(
         },
       };
     }
+    case "resources/list":
+      if (!deps.resources?.length) break;
+      return {
+        jsonrpc: "2.0",
+        id,
+        result: {
+          resources: deps.resources.map((r) => ({
+            uri: r.uri,
+            name: r.name,
+            ...(r.description ? { description: r.description } : {}),
+            mimeType: r.mimeType,
+            ...(r._meta ? { _meta: r._meta } : {}),
+          })),
+        },
+      };
+    case "resources/read": {
+      if (!deps.resources?.length) break;
+      const uri = typeof params.uri === "string" ? params.uri : "";
+      const r = deps.resources.find((x) => x.uri === uri);
+      if (!r) return rpcError(id, RESOURCE_NOT_FOUND, `Unknown resource "${uri}".`);
+      return {
+        jsonrpc: "2.0",
+        id,
+        result: {
+          contents: [{ uri: r.uri, mimeType: r.mimeType, text: r.text, ...(r._meta ? { _meta: r._meta } : {}) }],
+        },
+      };
+    }
     default:
-      return rpcError(id, METHOD_NOT_FOUND, `Method "${msg.method}" is not supported.`);
+      break;
   }
+  return rpcError(id, METHOD_NOT_FOUND, `Method "${msg.method}" is not supported.`);
 }

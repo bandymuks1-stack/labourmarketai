@@ -184,3 +184,42 @@ describe("public job search without sign-in (curated door only; owner approval n
     expect(tools.some((t) => t.securitySchemes !== undefined)).toBe(false);
   });
 });
+
+describe("the job-list widget (curated door only)", () => {
+  type Init = { result: { capabilities: Record<string, unknown> } };
+
+  it("the curated door declares resources and serves the widget; the full door does neither", async () => {
+    const curated = (await (await curatedPost(rpc("/api/mcp/chatgpt", "initialize", { protocolVersion: "2025-06-18" }))).json()) as Init;
+    expect(curated.result.capabilities.resources).toBeDefined();
+    const full = (await (await fullPost(rpc("/api/mcp", "initialize", { protocolVersion: "2025-06-18" }))).json()) as Init;
+    expect(full.result.capabilities.resources).toBeUndefined();
+    const fullList = (await (await fullPost(rpc("/api/mcp", "resources/list"))).json()) as { error?: { code: number } };
+    expect(fullList.error?.code).toBe(-32601);
+  });
+
+  it("resources/list and resources/read return the skybridge template, signed out too", async () => {
+    auth = { ok: false, reason: "no-credentials" };
+    const list = (await (await curatedPost(rpc("/api/mcp/chatgpt", "resources/list"))).json()) as {
+      result: { resources: { uri: string; mimeType: string }[] };
+    };
+    expect(list.result.resources).toEqual([
+      expect.objectContaining({ uri: "ui://widget/labourmarket-jobs.html", mimeType: "text/html+skybridge" }),
+    ]);
+    const read = (await (
+      await curatedPost(rpc("/api/mcp/chatgpt", "resources/read", { uri: "ui://widget/labourmarket-jobs.html" }))
+    ).json()) as { result: { contents: { text: string }[] } };
+    expect(read.result.contents[0].text).toContain("https://labourmarket.ai");
+    const missing = (await (await curatedPost(rpc("/api/mcp/chatgpt", "resources/read", { uri: "ui://other" }))).json()) as {
+      error?: { code: number };
+    };
+    expect(missing.error?.code).toBe(-32002);
+  });
+
+  it("only the job reads point at the widget", async () => {
+    const tools = ((await (await curatedPost(rpc("/api/mcp/chatgpt", "tools/list"))).json()) as {
+      result: { tools: { name: string; _meta?: Record<string, unknown> }[] };
+    }).result.tools;
+    const templates = Object.fromEntries(tools.map((t) => [t.name, t._meta?.["openai/outputTemplate"]]));
+    expect(templates).toEqual({ jobs_search: "ui://widget/labourmarket-jobs.html", demand_list: undefined });
+  });
+});
