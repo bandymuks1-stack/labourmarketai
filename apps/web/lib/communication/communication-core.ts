@@ -248,7 +248,7 @@ export async function createConversationCore(
     return {
       ok: false,
       code: "insert_failed",
-      message: `Pokalbio sukurti nepavyko: ${insertConv.error?.message ?? "nežinoma klaida"}`,
+      message: "Pokalbio sukurti nepavyko. Bandykite dar kartą.",
     };
   }
   const conversationId = insertConv.data.id as string;
@@ -278,7 +278,7 @@ export async function createConversationCore(
     return {
       ok: false,
       code: "insert_failed",
-      message: `Pokalbio dalyviai nepridėti: ${insertPart.error?.message ?? "nežinoma klaida"}`,
+      message: "Pokalbio dalyvių pridėti nepavyko. Bandykite dar kartą.",
     };
   }
 
@@ -490,7 +490,7 @@ export async function sendMessageCore(
     return {
       ok: false,
       code: "insert_failed",
-      message: `Žinutės išsiųsti nepavyko: ${msg || "nežinoma klaida"}`,
+      message: "Žinutės išsiųsti nepavyko. Bandykite dar kartą.",
     };
   }
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Paperclip, RotateCw, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { sendMessage } from "@/lib/communication/actions";
+import { composerErrorKey } from "@/lib/communication/composer-error-key";
 import {
   communicationLanguageNames,
   communicationLocales,
@@ -276,8 +277,9 @@ export function CommunicationComposer({
       });
       if (!result.ok) {
         // The typed text AND the uploaded tray stay intact — the user can
-        // retry the send without redoing anything.
-        setError(result.message);
+        // retry the send without redoing anything. The reader's language,
+        // from the code — never the server's (Lithuanian) message text.
+        setError(t(`composer.errors.${composerErrorKey(result.code)}`));
         recordEvent("communication_message_send_error", {
           result_kind: result.code,
         });
