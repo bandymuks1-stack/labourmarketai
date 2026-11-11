@@ -23,6 +23,8 @@ describe("who the public search lists", () => {
     expect(sql).toMatch(/f\.field in \('display_name', 'legal_name'\)/);
     expect(sql).toMatch(/f\.source_kind in \('public_register', 'company_website', 'job_posting'\)/);
     expect(sql).toMatch(/f\.superseded_by is null/);
+    // an unconfirmed company's country needs a matching public fact too
+    expect(sql).toMatch(/c\.field = 'country'/);
     // the public fact is the name shown, not just any public name fact
     expect(sql).toMatch(/lower\(btrim\(f\.value #>> '\{\}'\)\) = lower\(btrim\(o\.display_name\)\)/);
   });

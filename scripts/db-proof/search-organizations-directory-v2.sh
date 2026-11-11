@@ -44,6 +44,7 @@ insert into public.organizations (id, owner_profile_id, organization_type, displ
  ('00000000-0000-4000-8000-000000000008', null, 'company', 'QA-SYNTHETIC Statyba Private Name', 'LT', 'discovered', false, null, null, null, null, null);
 insert into public.organization_facts (organization_id, field, value, source_kind, superseded_by) values
  ('00000000-0000-4000-8000-000000000003', 'display_name', to_jsonb('QA-SYNTHETIC Statyba Register'::text), 'public_register', null),
+ ('00000000-0000-4000-8000-000000000003', 'country', to_jsonb('IT'::text), 'public_register', null),
  ('00000000-0000-4000-8000-000000000003', 'contact_public_email', to_jsonb('z@company.example'::text), 'public_register', null),
  ('00000000-0000-4000-8000-000000000004', 'display_name', to_jsonb('QA-SYNTHETIC Statyba Referral'::text), 'partner_referral', null),
  ('00000000-0000-4000-8000-000000000005', 'display_name', to_jsonb('QA-SYNTHETIC Statyba Archived'::text), 'public_register', null),
@@ -65,6 +66,8 @@ check "an anonymous visitor lists the opted-in company and the publicly sourced 
 check "no contact, identifier, owner or description column exists" "id,display_name,organization_type,country,public_slug,confirmed" \
   "$(q "select string_agg(a, ',' order by n) from (select unnest(proargnames[2:]) a, generate_subscripts(proargnames[2:],1) n from pg_proc where proname='search_organizations_directory_v2') x")"
 check "a public fact with another name does not publish a privately sourced name" "0" "$(anon "select count(*) from search_organizations_directory_v2('private name')")"
+$PSQL -c "update organizations set display_name='QA-SYNTHETIC Statyba Nocountry' where id='00000000-0000-4000-8000-000000000004'; update organization_facts set source_kind='public_register', value=to_jsonb('QA-SYNTHETIC Statyba Nocountry'::text) where organization_id='00000000-0000-4000-8000-000000000004'" >/dev/null
+check "an unconfirmed company's country is shown only with a public fact" "IT|" "$(anon "select coalesce(country,'') from search_organizations_directory_v2('statyba') where not confirmed order by display_name desc")"
 check "a term under two characters lists nothing" "0" "$(anon "select count(*) from search_organizations_directory_v2('s')")"
 check "a wildcard term lists nothing" "0" "$(anon "select count(*) from search_organizations_directory_v2('%%')")"
 check "an anonymous visitor still cannot read organizations directly" "1" "$(anon "select count(*) from organizations" | grep -c 'permission denied')"

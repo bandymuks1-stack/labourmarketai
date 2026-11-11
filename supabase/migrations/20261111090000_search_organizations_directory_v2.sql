@@ -47,7 +47,14 @@ as $$
   select o.id,
          btrim(o.display_name) as display_name,
          o.organization_type,
-         o.country,
+         -- An unconfirmed company's country is shown only when a public fact says the same.
+         case when o.claim_state = 'claimed' or exists (
+                select 1 from public.organization_facts c
+                 where c.organization_id = o.id and c.field = 'country'
+                   and c.source_kind in ('public_register', 'company_website', 'job_posting')
+                   and c.superseded_by is null
+                   and lower(btrim(c.value #>> '{}')) = lower(btrim(o.country)))
+              then o.country end as country,
          case when o.claim_state = 'claimed' then o.public_slug end as public_slug,
          (o.claim_state = 'claimed') as confirmed
     from public.organizations o, t
