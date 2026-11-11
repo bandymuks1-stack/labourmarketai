@@ -3847,6 +3847,7 @@
       "blockedLabel": "Geblokkeerd",
       "nonWorkerLabel": "Ruimtes voor bedrijven / uitzendbureaus / klanten",
       "nonWorkerStatus": "In voorbereiding",
+      "nonWorkerStatusActive": "Werkt",
       "fakeClaimsLabel": "Nep-AI / nepmatching / nepreputatie",
       "fakeClaimsStatus": "Nooit gebruikt"
     },
@@ -3886,67 +3887,116 @@
     "preparing_badge": "In voorbereiding",
     "overview": {
       "label": "Overzicht",
-      "description": "Hoofdweergave met de eerste stappen, suggesties en kansen."
+      "description": "Je startweergave opent voor elke rol die je hebt.",
+      "claims": {
+        "home_per_role": "Je startweergave opent voor elke rol die je hebt."
+      }
     },
     "market_map": {
       "label": "Marktkaart",
-      "description": "Eén samenhangende arbeidsmarktkaart — je eigen signaal, personeelsbehoeften en echte data per land / regio."
+      "description": "Een kaart markeert waar werk en mensen zijn.",
+      "claims": {
+        "map": "Een kaart markeert waar werk en mensen zijn."
+      }
     },
     "profile_text_first": {
       "label": "Profiel",
-      "description": "Beschrijf jezelf in je eigen woorden of plak een cv. Het systeem stelt vaardigheden voor, maar jij selecteert ze."
+      "description": "Beschrijf je werk in je eigen woorden en bouw je professionele profiel.",
+      "claims": {
+        "profile": "Beschrijf je werk in je eigen woorden en bouw je professionele profiel."
+      }
     },
     "journal_text_first": {
       "label": "Werk- of activiteitenregistratie",
-      "description": "Leg het werk of de activiteit van vandaag vast. Het systeem helpt je het te structureren, maar jij bepaalt de feiten."
+      "description": "Leg vast wat je vandaag hebt gedaan — de registratie komt in je Living CV.",
+      "claims": {
+        "entry_to_cv": "Leg vast wat je vandaag hebt gedaan — de registratie komt in je Living CV."
+      }
     },
     "communication": {
       "label": "Berichten",
-      "description": "Gesprekken en verzoeken die je ontvangt. Wanneer iemand je een bericht of een verzoek stuurt, vind je het hier."
+      "description": "Schrijf mensen en bedrijven — het gesprek blijft in één draad.",
+      "claims": {
+        "threads": "Schrijf mensen en bedrijven — het gesprek blijft in één draad."
+      }
     },
     "account_roles": {
       "label": "Rollen",
-      "description": "Bekijk je rollen. Werken als persoon is vandaag actief; andere acties worden stap voor stap toegevoegd."
+      "description": "Eén account heeft meerdere rollen, en je wisselt ertussen.",
+      "claims": {
+        "several_roles": "Eén account heeft meerdere rollen, en je wisselt ertussen."
+      }
     },
     "role_expansion": {
       "label": "Meer rollen",
-      "description": "Later kun je bedrijfs-, uitzendbureau- en inkoopacties toevoegen wanneer ze klaar zijn."
+      "description": "Vanuit hetzelfde account kun je een bedrijf opzetten. Vanuit hetzelfde account kun je diensten inkopen.",
+      "claims": {
+        "add_company": "Vanuit hetzelfde account kun je een bedrijf opzetten.",
+        "add_buying": "Vanuit hetzelfde account kun je diensten inkopen."
+      }
     },
     "external_confirmation": {
       "label": "Werkregistraties van anderen",
-      "description": "Een manager, klant of partner kan later bijdragen aan je werkregistraties."
+      "description": "Een bevoegde manager in je organisatie bevestigt het werk dat je hebt vastgelegd.",
+      "claims": {
+        "manager_confirms": "Een bevoegde manager in je organisatie bevestigt het werk dat je hebt vastgelegd."
+      }
     },
     "company_workspace": {
       "label": "Bedrijfsruimte",
-      "description": "Beheer van ploegen, projecten en personeelsbehoeften voor bedrijven."
+      "description": "Zet je organisatie op en publiceer haar eerste behoefte. De bedrijfsstartpagina opent voor de mensen van de organisatie.",
+      "claims": {
+        "setup_and_need": "Zet je organisatie op en publiceer haar eerste behoefte.",
+        "company_home": "De bedrijfsstartpagina opent voor de mensen van de organisatie."
+      }
     },
     "agency_workspace": {
       "label": "Uitzendbureauruimte",
-      "description": "Beheer van kandidatenpool en dienstenaanbod voor uitzendbureaus."
+      "description": "Een bureau beheert zijn mensen, verbindt zich met klanten en biedt mensen aan voor de behoefte van een klant.",
+      "claims": {
+        "roster_clients_offers": "Een bureau beheert zijn mensen, verbindt zich met klanten en biedt mensen aan voor de behoefte van een klant."
+      }
     },
     "customer_workspace": {
       "label": "Klantruimte",
-      "description": "Dienstverzoeken en rapporten voor klanten."
+      "description": "Sla je gegevens als opdrachtgever op en houd je aanvragen in je eigen lijst.",
+      "claims": {
+        "record_and_requests": "Sla je gegevens als opdrachtgever op en houd je aanvragen in je eigen lijst."
+      }
     },
     "document_records": {
       "label": "Documentregistraties",
-      "description": "Een plek voor certificaten en documenten."
+      "description": "Bewaar je documenten en zie wanneer elk ervan verloopt. Een bedrijf houdt een register bij van zijn documenten.",
+      "claims": {
+        "own_documents": "Bewaar je documenten en zie wanneer elk ervan verloopt.",
+        "company_register": "Een bedrijf houdt een register bij van zijn documenten."
+      }
     },
     "team_offers": {
       "label": "Ploegaanbiedingen",
-      "description": "Een plek om ploegen te vormen en gezamenlijke aanbiedingen te plaatsen."
+      "description": "Een team wordt voor een behoefte aangeboden en als één geheel aangenomen.",
+      "claims": {
+        "team_as_unit": "Een team wordt voor een behoefte aangeboden en als één geheel aangenomen."
+      }
     },
     "work_needs": {
       "label": "Werkbehoeften",
-      "description": "Een plek om vast te leggen welk werk of welke hulp je nodig hebt."
+      "description": "Een bedrijf beschrijft op één plek welke mensen het nodig heeft. Geïnteresseerde mensen reageren op de behoefte.",
+      "claims": {
+        "one_form": "Een bedrijf beschrijft op één plek welke mensen het nodig heeft.",
+        "people_answer": "Geïnteresseerde mensen reageren op de behoefte."
+      }
     },
     "service_offers": {
       "label": "Dienstenaanbod",
-      "description": "Een plek om de diensten die je levert te publiceren."
+      "description": "Publiceer de diensten die je aanbiedt en ontvang er aanvragen voor.",
+      "claims": {
+        "offer_and_requests": "Publiceer de diensten die je aanbiedt en ontvang er aanvragen voor."
+      }
     },
     "matching": {
-      "label": "Matching",
-      "description": "Dit product heeft geen matching- / ranking-engine en krijgt die niet totdat er een eerlijk uitgebracht kan worden."
+      "label": "Matching met AI",
+      "description": "Matching van mensen en behoeften met hulp van AI."
     },
     "marketplace": {
       "label": "Marktplaats",
@@ -3954,16 +4004,35 @@
     },
     "marketplace_hub": {
       "label": "Marktplaats",
-      "description": "Een compacte hub die de kaart, kansen en je bedrijven verbindt."
+      "description": "Brengt je naar de kaart die werk en mensen toont.",
+      "claims": {
+        "map": "Brengt je naar de kaart die werk en mensen toont."
+      }
     },
     "planning": {
       "label": "Kalender",
-      "description": "Eén kalender: boekingen, projecten, taken, journaalnotities, uitnodigingen en betaaltermijnen."
+      "description": "Een bedrijf plant het werk van zijn mensen in een kalender. Je ziet je eigen werk in een kalender.",
+      "claims": {
+        "company_calendar": "Een bedrijf plant het werk van zijn mensen in een kalender.",
+        "own_calendar": "Je ziet je eigen werk in een kalender."
+      }
     },
     "network": {
       "label": "Netwerk",
-      "description": "Mensen en bedrijven: zoeken, uitnodigingen en je relaties."
-    }
+      "description": "Uitnodigingen voor het team van een bedrijf komen hier binnen, en hier accepteer je ze.",
+      "claims": {
+        "invitations": "Uitnodigingen voor het team van een bedrijf komen hier binnen, en hier accepteer je ze."
+      }
+    },
+    "rule_matching": {
+      "label": "Shortlist van kandidaten",
+      "description": "Een beschreven behoefte krijgt een shortlist van passende mensen, met de reden voor elk.",
+      "claims": {
+        "shortlist_with_reason": "Een beschreven behoefte krijgt een shortlist van passende mensen, met de reden voor elk."
+      }
+    },
+    "matching_reason": "Uitgeschakeld: er is geen AI-dienst gekoppeld. De shortlist van kandidaten werkt al.",
+    "notCheckedYet": "Dit deel is in de live omgeving nog niet gecontroleerd."
   },
   "structuring": {
     "groupEyebrow": "Voorgestelde vaardigheden",

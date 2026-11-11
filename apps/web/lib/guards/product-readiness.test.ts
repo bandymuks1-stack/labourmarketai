@@ -312,7 +312,7 @@ describe("central config drives role + suggestion + activity surfaces", () => {
       /id:\s*"externally_confirmed",[\s\S]{0,300}availability:\s*"preparing"/,
     );
   });
-  it("activity-type config exists, only work_done + skill_claim are active", () => {
+  it("activity-type config exists, only the production-proven types are active", () => {
     const txt = readWeb("lib/config/activity-types.ts");
     expect(txt).toMatch(/ACTIVITY_TYPES/);
     // Split by `id:` and read each row's availability independently — a
@@ -326,16 +326,21 @@ describe("central config drives role + suggestion + activity surfaces", () => {
         return id && avail === "active" ? id : null;
       })
       .filter((id): id is string => !!id);
-    expect(new Set(active)).toEqual(new Set(["work_done", "skill_claim"]));
+    // 2026-11-10 (owner P0): five more types run in production and are proven
+    // by walks; each active row names its FUNCTION_REGISTER proof, checked by
+    // lib/guards/catalog-status-evidence.test.ts.
+    expect(new Set(active)).toEqual(
+      new Set(["work_done", "skill_claim", "service_offer", "worker_need", "project_need", "team_offer", "document_record"]),
+    );
   });
-  it("feature-availability blocks matching / marketplace by config", () => {
+  it("feature-availability keeps AI matching / marketplace out of the active set", () => {
     // The catalogue was reshaped in PR #36 to use FeatureKey ids instead
-    // of dotted keys. Matching + marketplace remain `hidden` here; the
-    // earlier ai.* / score.* rows are covered by the messages-level
-    // honest-claims guard above (which forbids "AI verified", etc.).
+    // of dotted keys. Marketplace remains `hidden`; AI matching is switched
+    // off and listed as `preparing` with its reason (2026-11-10), while
+    // rule-based matching is the separate proven `rule_matching` row.
     const txt = readWeb("lib/config/feature-availability.ts");
     expect(txt).toMatch(
-      /key:\s*"matching",[\s\S]{0,200}availability:\s*"hidden"/,
+      /key:\s*"matching",[\s\S]{0,200}availability:\s*"preparing"/,
     );
     expect(txt).toMatch(
       /key:\s*"marketplace",[\s\S]{0,200}availability:\s*"hidden"/,
@@ -505,14 +510,26 @@ describe("feature-availability + config-driven dashboard", () => {
         // one market → requested → accepted → conversation) is live and
         // proven on production; the catalogue said "preparing" (stale).
         "service_offers",
+        // 2026-11-10 (owner P0): shipped and proven by production walks, still
+        // "preparing" in the catalogue. Each names its register proof
+        // (lib/guards/catalog-status-evidence.test.ts).
+        "role_expansion",
+        "external_confirmation",
+        "company_workspace",
+        "agency_workspace",
+        "customer_workspace",
+        "document_records",
+        "team_offers",
+        "work_needs",
+        "rule_matching",
       ]),
     );
   });
 
-  it("matching + marketplace are hidden by config", () => {
+  it("AI matching is not active and marketplace is hidden by config", () => {
     const txt = readWeb("lib/config/feature-availability.ts");
     expect(txt).toMatch(
-      /key:\s*"matching",[\s\S]{0,200}availability:\s*"hidden"/,
+      /key:\s*"matching",[\s\S]{0,200}availability:\s*"preparing"/,
     );
     expect(txt).toMatch(
       /key:\s*"marketplace",[\s\S]{0,200}availability:\s*"hidden"/,

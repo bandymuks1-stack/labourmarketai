@@ -3847,6 +3847,7 @@
       "blockedLabel": "Užblokuota",
       "nonWorkerLabel": "Įmonės / agentūros / pirkėjo erdvės",
       "nonWorkerStatus": "Netrukus",
+      "nonWorkerStatusActive": "Veikia",
       "fakeClaimsLabel": "Netikras dirbtinis intelektas / netikras atitikimas / netikra reputacija",
       "fakeClaimsStatus": "Niekada nenaudojama"
     },
@@ -3886,67 +3887,116 @@
     "preparing_badge": "Netrukus",
     "overview": {
       "label": "Apžvalga",
-      "description": "Pagrindinis langas su pradžia, pasiūlymais ir galimybėmis."
+      "description": "Pradžios vaizdas atsidaro kiekvienam tavo turimam vaidmeniui.",
+      "claims": {
+        "home_per_role": "Pradžios vaizdas atsidaro kiekvienam tavo turimam vaidmeniui."
+      }
     },
     "market_map": {
       "label": "Rinkos žemėlapis",
-      "description": "Vieningas darbo rinkos žemėlapis — tavo signalas, įmonių poreikiai ir realūs duomenys pagal šalį / regioną."
+      "description": "Žemėlapis žymekliais rodo, kur yra darbo ir žmonių.",
+      "claims": {
+        "map": "Žemėlapis žymekliais rodo, kur yra darbo ir žmonių."
+      }
     },
     "profile_text_first": {
       "label": "Profilis",
-      "description": "Apibūdink save savais žodžiais arba įklijuok CV. Sistema pasiūlys įgūdžius, kuriuos pasirinksi tu."
+      "description": "Savais žodžiais aprašyk savo darbą ir susikurk profesinį profilį.",
+      "claims": {
+        "profile": "Savais žodžiais aprašyk savo darbą ir susikurk profesinį profilį."
+      }
     },
     "journal_text_first": {
       "label": "Darbo ar veiklos įrašas",
-      "description": "Užfiksuok šiandienos darbą arba veiklą. Sistema padės struktūruoti, bet faktus nustatai tu."
+      "description": "Užsirašyk, ką šiandien dirbai — įrašas patenka į tavo Gyvą CV.",
+      "claims": {
+        "entry_to_cv": "Užsirašyk, ką šiandien dirbai — įrašas patenka į tavo Gyvą CV."
+      }
     },
     "communication": {
       "label": "Žinutės",
-      "description": "Pokalbiai ir gauti prašymai. Kai kas nors tau parašo arba atsiunčia prašymą, jį rasi čia."
+      "description": "Rašyk žmonėms ir įmonėms — pokalbis lieka vienoje gijoje.",
+      "claims": {
+        "threads": "Rašyk žmonėms ir įmonėms — pokalbis lieka vienoje gijoje."
+      }
     },
     "account_roles": {
       "label": "Vaidmenys",
-      "description": "Peržiūrėk savo vaidmenis. Veikla kaip asmuo aktyvi šiandien; kiti veiksmai pridedami palaipsniui."
+      "description": "Vienoje paskyroje gali būti keli vaidmenys, o tarp jų persijungi.",
+      "claims": {
+        "several_roles": "Vienoje paskyroje gali būti keli vaidmenys, o tarp jų persijungi."
+      }
     },
     "role_expansion": {
       "label": "Daugiau vaidmenų",
-      "description": "Vėliau galėsi pridėti įmonės, agentūros ir pirkimo veiksmus, kai jie bus paruošti."
+      "description": "Iš tos pačios paskyros gali susikurti įmonę. Iš tos pačios paskyros gali pradėti pirkti paslaugas.",
+      "claims": {
+        "add_company": "Iš tos pačios paskyros gali susikurti įmonę.",
+        "add_buying": "Iš tos pačios paskyros gali pradėti pirkti paslaugas."
+      }
     },
     "external_confirmation": {
       "label": "Darbo įrašai iš kitų",
-      "description": "Vadovas, klientas ar partneris vėliau galės papildyti tavo darbo įrašus."
+      "description": "Įgaliotas tavo organizacijos vadovas patvirtina darbą, kurį užrašei.",
+      "claims": {
+        "manager_confirms": "Įgaliotas tavo organizacijos vadovas patvirtina darbą, kurį užrašei."
+      }
     },
     "company_workspace": {
       "label": "Įmonės erdvė",
-      "description": "Komandų, projektų ir poreikių valdymo erdvė įmonėms."
+      "description": "Susikurk organizaciją ir paskelbk pirmą jos poreikį. Įmonės pradžia atsidaro organizacijos žmonėms.",
+      "claims": {
+        "setup_and_need": "Susikurk organizaciją ir paskelbk pirmą jos poreikį.",
+        "company_home": "Įmonės pradžia atsidaro organizacijos žmonėms."
+      }
     },
     "agency_workspace": {
       "label": "Agentūros erdvė",
-      "description": "Kandidatų ir paslaugų pasiūlos valdymo erdvė agentūroms."
+      "description": "Agentūra turi savo žmones, susijungia su klientais ir siūlo žmones kliento poreikiui.",
+      "claims": {
+        "roster_clients_offers": "Agentūra turi savo žmones, susijungia su klientais ir siūlo žmones kliento poreikiui."
+      }
     },
     "customer_workspace": {
       "label": "Pirkėjo erdvė",
-      "description": "Paslaugų užklausų ir ataskaitų erdvė klientams."
+      "description": "Išsaugok savo pirkėjo duomenis ir laikyk užklausas savo sąraše.",
+      "claims": {
+        "record_and_requests": "Išsaugok savo pirkėjo duomenis ir laikyk užklausas savo sąraše."
+      }
     },
     "document_records": {
       "label": "Dokumentų įrašai",
-      "description": "Pažymėjimų ir dokumentų saugojimo erdvė."
+      "description": "Laikyk savo dokumentus ir matyk, kada baigiasi kiekvieno galiojimas. Įmonė veda savo dokumentų registrą.",
+      "claims": {
+        "own_documents": "Laikyk savo dokumentus ir matyk, kada baigiasi kiekvieno galiojimas.",
+        "company_register": "Įmonė veda savo dokumentų registrą."
+      }
     },
     "team_offers": {
       "label": "Komandos pasiūlymai",
-      "description": "Komandų suformavimo ir bendrų pasiūlymų erdvė."
+      "description": "Komanda pasiūloma ir priimama poreikiui kaip vienas vienetas.",
+      "claims": {
+        "team_as_unit": "Komanda pasiūloma ir priimama poreikiui kaip vienas vienetas."
+      }
     },
     "work_needs": {
       "label": "Darbo poreikiai",
-      "description": "Vieta užfiksuoti, kokio darbo ar pagalbos tau reikia."
+      "description": "Įmonė vienoje vietoje aprašo, kokių žmonių jai reikia. Susidomėję žmonės atsiliepia į poreikį.",
+      "claims": {
+        "one_form": "Įmonė vienoje vietoje aprašo, kokių žmonių jai reikia.",
+        "people_answer": "Susidomėję žmonės atsiliepia į poreikį."
+      }
     },
     "service_offers": {
       "label": "Paslaugų pasiūla",
-      "description": "Vieta paskelbti tavo teikiamas paslaugas."
+      "description": "Paskelbk paslaugas, kurias teiki, ir gauk jų užklausas.",
+      "claims": {
+        "offer_and_requests": "Paskelbk paslaugas, kurias teiki, ir gauk jų užklausas."
+      }
     },
     "matching": {
-      "label": "Atitikimas",
-      "description": "Šiame produkte nėra atitikimo / reitingavimo variklio ir nebus, kol jis nebus padarytas sąžiningai."
+      "label": "DI atitikimas",
+      "description": "Žmonių ir poreikių atitikimas padedant dirbtiniam intelektui."
     },
     "marketplace": {
       "label": "Prekyvietė",
@@ -3954,16 +4004,35 @@
     },
     "marketplace_hub": {
       "label": "Prekyvietė",
-      "description": "Kompaktiškas centras, jungiantis žemėlapį, galimybes ir tavo įmones."
+      "description": "Atveda į žemėlapį, kuriame matyti darbai ir žmonės.",
+      "claims": {
+        "map": "Atveda į žemėlapį, kuriame matyti darbai ir žmonės."
+      }
     },
     "planning": {
       "label": "Kalendorius",
-      "description": "Vienas kalendorius: rezervacijos, projektai, užduotys, žurnalo įrašai, kvietimai ir mokėjimų terminai."
+      "description": "Įmonė planuoja savo žmonių darbus kalendoriuje. Savo darbus matai kalendoriuje.",
+      "claims": {
+        "company_calendar": "Įmonė planuoja savo žmonių darbus kalendoriuje.",
+        "own_calendar": "Savo darbus matai kalendoriuje."
+      }
     },
     "network": {
       "label": "Ryšiai",
-      "description": "Žmonės ir įmonės: paieška, kvietimai ir tavo ryšiai."
-    }
+      "description": "Čia gauni kvietimus prisijungti prie įmonės komandos ir juos priimi.",
+      "claims": {
+        "invitations": "Čia gauni kvietimus prisijungti prie įmonės komandos ir juos priimi."
+      }
+    },
+    "rule_matching": {
+      "label": "Kandidatų trumpasis sąrašas",
+      "description": "Aprašytam poreikiui sudaromas tinkamų žmonių sąrašas su kiekvieno priežastimi.",
+      "claims": {
+        "shortlist_with_reason": "Aprašytam poreikiui sudaromas tinkamų žmonių sąrašas su kiekvieno priežastimi."
+      }
+    },
+    "matching_reason": "Išjungta: neprijungta jokia DI paslauga. Kol kas veikia kandidatų trumpasis sąrašas.",
+    "notCheckedYet": "Ši dalis produkcijoje dar nepatikrinta."
   },
   "structuring": {
     "groupEyebrow": "Siūlomi įgūdžiai",
