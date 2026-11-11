@@ -66,11 +66,12 @@ describe("Guard: roleSwitcherTargetForRole routes start-available / partial role
     }
   });
 
-  it("missing agency routes to /dashboard/start/agency", () => {
+  it("missing agency routes to the company setup form, as an agency (owner decision 2026-11-11)", () => {
     const t = roleSwitcherTargetForRole(ROLE_BY_ID.agency, false);
     expect(t.kind).toBe("navigate");
     if (t.kind === "navigate") {
-      expect(t.route).toBe("/dashboard/start/company");
+      // The path production walk A-1 proved — never a separate agency start.
+      expect(t.route).toBe("/dashboard/start/company?type=staffing_agency");
     }
   });
 
@@ -116,17 +117,24 @@ describe("Guard: header chip parity with the dashboard catalogue per role", () =
     expect(ROLE_BY_ID.company.setupRoute).toBe("/dashboard/start/company");
   });
 
-  it("agency is HIDDEN from add/start surfaces (company-role-simplicity-v1: agency is a companyType, not a root role)", () => {
-    expect(ROLE_BY_ID.agency.availability).toBe("hidden");
-    expect(ROLE_BY_ID.agency.safeToShowInRoleSurfaces).toBe(false);
-    expect(ROLE_BY_ID.agency.canBeAddedLater).toBe(false);
+  // OWNER DECISION 2026-11-11 — agency and buyer are OFFERED to new users
+  // (superseding the hiding in company-role-simplicity-v1 / systemic-ux-roles-v1).
+  // Offered means START-AVAILABLE through the setup form production proved —
+  // never "active" (that needs every surface proven), never a new start route.
+  it("agency is start-available as a company of type staffing_agency (owner decision 2026-11-11; A-1)", () => {
+    expect(ROLE_BY_ID.agency.availability).toBe("start-available");
+    expect(ROLE_BY_ID.agency.entryPoint).toBe(true);
+    expect(ROLE_BY_ID.agency.safeToShowInRoleSurfaces).toBe(true);
+    expect(ROLE_BY_ID.agency.setupRoute).toBe("/dashboard/start/company?type=staffing_agency");
+    expect(ROLE_BY_ID.agency.reason).toMatch(/owner decision 2026-11-11/);
   });
 
-  it("customer is HIDDEN from add/start surfaces (systemic-ux-roles-v1: buying is an action, not a top-level identity); setupRoute kept for the legacy form", () => {
-    expect(ROLE_BY_ID.customer.availability).toBe("hidden");
-    expect(ROLE_BY_ID.customer.safeToShowInRoleSurfaces).toBe(false);
-    expect(ROLE_BY_ID.customer.canBeAddedLater).toBe(false);
+  it("customer is start-available through the one buyer setup form (owner decision 2026-11-11; J-13, C-1)", () => {
+    expect(ROLE_BY_ID.customer.availability).toBe("start-available");
+    expect(ROLE_BY_ID.customer.entryPoint).toBe(true);
+    expect(ROLE_BY_ID.customer.safeToShowInRoleSurfaces).toBe(true);
     expect(ROLE_BY_ID.customer.setupRoute).toBe("/dashboard/start/buyer");
+    expect(ROLE_BY_ID.customer.reason).toMatch(/owner decision 2026-11-11/);
   });
 
   it("worker stays active", () => {

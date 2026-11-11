@@ -4308,6 +4308,10 @@
             "title": "Ik werk in werving of het leveren van personeel",
             "desc": "Personeelsaanbod, klanten, behoeften, plaatsingen en lopend werk."
           },
+          "buy": {
+            "title": "Ik koop diensten in of geef werk uit",
+            "desc": "Beschrijf wat je nodig hebt, vind wie het doet en vraag het aan."
+          },
           "student": {
             "title": "Ik leer / bereid me voor op een beroep",
             "desc": "Leren en stage horen al bij je professionele geschiedenis. Verbind je met je onderwijsinstelling."
@@ -4362,6 +4366,14 @@
         "s3": "Publiceer een behoefte, bied capaciteit aan — of allebei",
         "s4": "Praat met de mensen en organisaties die passen en voer het werk samen uit",
         "note": "Je organisatie is meteen bruikbaar. Verificatie is een aparte, sterkere vertrouwensstap."
+      },
+      "nextStepsBuyer": {
+        "eyebrow": "Hierna — je gegevens als opdrachtgever",
+        "s1": "Sla op wie je bent, waar je bent en hoe je bereikbaar bent",
+        "s2": "Beschrijf wat je nodig hebt — de aanvraag wordt in je eigen lijst bewaard",
+        "s3": "Vind een dienst die iemand aanbiedt en vraag die aan",
+        "s4": "Al je aanvragen op één plek",
+        "note": "Registreren is gratis. Er wordt niets naar iemand verstuurd tot je zelf een aanvraag verstuurt."
       },
       "display_name_label": "Weergavenaam",
       "country_label": "Waar woon je nu?",

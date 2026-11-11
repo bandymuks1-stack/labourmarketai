@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   FIRST_RUN_INTENTS,
+  asksAboutOwnWork,
   asksForCurrentEducation,
   companyPresetForIntents,
   identitiesForIntents,
@@ -102,20 +103,33 @@ describe("first-run intent router (pure)", () => {
 
 /**
  * Owner correction 2026-09-26 — the first screen names CONTEXTS, not an
- * episode of looking for something. The six cards must keep every existing
+ * episode of looking for something. The cards (six, plus the buyer card of
+ * owner decision 2026-11-11) must keep every existing
  * continuation (identities, the study question,
  * the next screen) and the new "part of a company or team" card must stay a
  * PERSON: it never opens a company identity or the company setup form.
  */
-describe("the six first-screen contexts keep onboarding's continuation", () => {
+describe("the first-screen contexts keep onboarding's continuation", () => {
   const route = (intents: FirstRunIntent[]) => ({
     identities: identitiesForIntents(intents),
     study: asksForCurrentEducation(intents),
     next: nextPathForIntents(intents),
   });
 
-  it("six cards, in the order the screen shows them", () => {
-    expect(FIRST_RUN_INTENTS).toEqual(["work", "member", "hire", "agency", "student", "education"]);
+  it("seven cards, in the order the screen shows them", () => {
+    expect(FIRST_RUN_INTENTS).toEqual(["work", "member", "hire", "agency", "buy", "student", "education"]);
+  });
+
+  it("H — buying services / ordering work (owner decision 2026-11-11): a person, handed to the one buyer setup form", () => {
+    expect(route(["buy"])).toEqual({ identities: ["worker"], study: false, next: "/dashboard/start/buyer" });
+    // Never a company shell the buyer did not ask for.
+    expect(companyPresetForIntents(["buy"])).toBeNull();
+    // A buyer is not asked what work they do; a worker who also buys is.
+    expect(asksAboutOwnWork(["buy"])).toBe(false);
+    expect(asksAboutOwnWork(["buy", "work"])).toBe(true);
+    // An organisation that also buys goes to its organisation setup first.
+    expect(route(["hire", "buy"]).next).toBe("/dashboard/start/company");
+    expect(route(["student", "buy"]).next).toBe("/dashboard/profile#learning-compass");
   });
 
   it("A — only 'I work': the person, their own space", () => {

@@ -4308,6 +4308,10 @@
             "title": "Ich arbeite in der Personalvermittlung oder -überlassung",
             "desc": "Personalangebot, Kunden, Bedarfe, Einsätze und laufende Arbeit."
           },
+          "buy": {
+            "title": "Ich kaufe Leistungen ein oder vergebe Aufträge",
+            "desc": "Beschreiben Sie, was Sie brauchen, finden Sie, wer es macht, und fragen Sie dort an."
+          },
           "student": {
             "title": "Ich lerne / bereite mich auf einen Beruf vor",
             "desc": "Lernen und Praktika gehören schon zu Ihrem beruflichen Werdegang. Verbinden Sie sich mit Ihrer Bildungseinrichtung."
@@ -4362,6 +4366,14 @@
         "s3": "Veröffentlichen Sie einen Bedarf, bieten Sie Kapazität an — oder beides",
         "s4": "Sprich mit passenden Personen und Organisationen und erledigt die Arbeit gemeinsam",
         "note": "Ihre Organisation ist sofort nutzbar. Die Verifizierung ist ein separater, stärkerer Vertrauensschritt."
+      },
+      "nextStepsBuyer": {
+        "eyebrow": "Danach — Ihre Angaben als Auftraggeber",
+        "s1": "Speichern Sie, wer Sie sind, wo Sie sind und wie man Sie erreicht",
+        "s2": "Beschreiben Sie, was Sie brauchen — die Anfrage wird in Ihrer eigenen Liste gespeichert",
+        "s3": "Finden Sie eine angebotene Leistung und fragen Sie sie an",
+        "s4": "Alle Ihre Anfragen an einem Ort",
+        "note": "Die Registrierung ist kostenlos. Es wird nichts verschickt, bis Sie selbst eine Anfrage senden."
       },
       "display_name_label": "Anzeigename",
       "country_label": "Wo wohnen Sie zurzeit?",

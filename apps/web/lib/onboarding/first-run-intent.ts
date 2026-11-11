@@ -6,8 +6,11 @@
  * canonical identity model instead of into a generic dashboard. The cards
  * name CONTEXTS a person is in (owner correction 2026-09-26: LabourMarket.ai
  * is a daily work system, not an episode of looking for something), never a
- * role they are locked into. Six intents, TWO base identities (owner
- * directives company-role-simplicity-v1 + systemic-ux-roles-v1):
+ * role they are locked into. Seven intents, TWO base identities (owner
+ * directives company-role-simplicity-v1 + systemic-ux-roles-v1). Owner
+ * decision 2026-11-11: worker, company, AGENCY and BUYER are all offered to a
+ * new user at sign-up — the identities stay two, each choice opens the path
+ * already proven in production:
  *
  *   work       → person  (worker) — "I work / have professional experience"
  *   member     → person  (worker) — "I am part of a company or team": a
@@ -23,6 +26,13 @@
  *   hire       → company (employer)
  *   agency     → company with company_type = 'staffing_agency' — an agency is
  *                a company TYPE, never a root role.
+ *   buy        → person  (worker) + the buyer record — "I buy services or
+ *                order work". The person's own space; onboarding hands them
+ *                to the ONE buyer setup form (/dashboard/start/buyer), whose
+ *                save_customer_setup adds the customer role and the
+ *                customers row (production walk J-13 / C-1). Nothing is
+ *                created for it here, so a buyer is never given a company
+ *                shell they did not ask for.
  *   education  → company that declares the `training_provider` capability —
  *                an institution is an organisation with an education role.
  *
@@ -38,6 +48,7 @@ export const FIRST_RUN_INTENTS = [
   "member",
   "hire",
   "agency",
+  "buy",
   "student",
   "education",
 ] as const;
@@ -52,6 +63,7 @@ export const INTENT_IDENTITY: Readonly<Record<FirstRunIntent, FirstRunIdentity>>
   student: "worker",
   hire: "company",
   agency: "company",
+  buy: "worker",
   education: "company",
 };
 
@@ -95,6 +107,13 @@ export function identitiesForIntents(
  * weighted criterion, never a gate. An unanswered field means "not stated
  * here", never "has no profession".
  */
+/** Whether the person's own WORK is part of what they chose — the work-type
+ *  question and the employer-visibility choice belong to that. A buyer-only
+ *  sign-up opens the person identity too, but was never asked what they do. */
+export function asksAboutOwnWork(intents: readonly FirstRunIntent[]): boolean {
+  return intents.some((i) => i === "work" || i === "member" || i === "student");
+}
+
 export function asksForCurrentEducation(intents: readonly FirstRunIntent[]): boolean {
   return intents.includes("student");
 }
@@ -139,7 +158,10 @@ export function nextPathForIntents(intents: readonly FirstRunIntent[]): string |
     // A student lands on the Learning Compass — the student home that the
     // current-education row they just created makes render — instead of the
     // generic worker setup card that says nothing about studying.
-    return intents.includes("student") ? "/dashboard/profile#learning-compass" : null;
+    if (intents.includes("student")) return "/dashboard/profile#learning-compass";
+    // A buyer goes to the ONE buyer setup form — the path production walk
+    // J-13 proved (record saved → the buyer workspace opens).
+    return intents.includes("buy") ? "/dashboard/start/buyer" : null;
   }
   const params = new URLSearchParams();
   if (preset.companyType) params.set("type", preset.companyType);

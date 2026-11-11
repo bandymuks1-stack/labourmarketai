@@ -21,7 +21,8 @@ const { OnboardingWizard } = await import("@/components/app/onboarding-wizard");
 const WEB = join(__dirname, "..", "..");
 const LOCALES = ["lt", "en", "da", "de", "et", "lv", "nl", "no", "pl", "ru", "sv"];
 const catalog = (loc: string) => JSON.parse(readFileSync(join(WEB, "messages", `${loc}.json`), "utf8"));
-const ORDER = ["work", "member", "hire", "agency", "student", "education"];
+// Seven since owner decision 2026-11-11 (the buyer card).
+const ORDER = ["work", "member", "hire", "agency", "buy", "student", "education"];
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#x27;").replace(/"/g, "&quot;");
 
 function render(loc: string, defaultIntents: string[] = []) {
@@ -45,7 +46,7 @@ function render(loc: string, defaultIntents: string[] = []) {
 }
 
 describe("onboarding first screen — contexts, not an episode of searching", () => {
-  it("lt: the owner's exact heading, explanation, note and six cards in order, then Tęsti", () => {
+  it("lt: the owner's exact heading, explanation, note and seven cards in order, then Tęsti", () => {
     const html = render("lt");
     expect(html).toContain(">Pradėkime</h1>");
     expect(html).toContain(
@@ -68,7 +69,7 @@ describe("onboarding first screen — contexts, not an episode of searching", ()
       expect(html.indexOf(esc(title), pos), title).toBeGreaterThan(pos);
       at = pos;
     }
-    expect(html.match(/data-testid="onboarding-intent-[a-z]+"/g)).toHaveLength(6);
+    expect(html.match(/data-testid="onboarding-intent-[a-z]+"/g)).toHaveLength(7);
     expect(html).toContain('data-testid="onboarding-intents-continue"');
     expect(html).toContain(">Tęsti</button>");
   });
@@ -89,15 +90,15 @@ describe("onboarding first screen — contexts, not an episode of searching", ()
 
   it("multi-select: every card is a toggle; nothing is pre-chosen, Continue waits for a choice", () => {
     const html = render("lt");
-    expect(html.match(/aria-pressed="false"/g)).toHaveLength(6);
+    expect(html.match(/aria-pressed="false"/g)).toHaveLength(7);
     expect(html).toMatch(/data-testid="onboarding-intents-continue"[^>]*disabled=""|disabled=""[^>]*data-testid="onboarding-intents-continue"/);
     // Several pre-ticked contexts (a landing door or sentence) stay several.
     const many = render("lt", ["work", "member", "hire"]);
     expect(many.match(/aria-pressed="true"/g)).toHaveLength(3);
-    expect(many.match(/aria-pressed="false"/g)).toHaveLength(3);
+    expect(many.match(/aria-pressed="false"/g)).toHaveLength(4);
   });
 
-  it("desktop: one card height for all six (every row as tall as the tallest card); mobile stays natural", () => {
+  it("desktop: one card height for all seven (every row as tall as the tallest card); mobile stays natural", () => {
     const html = render("lt");
     const grid = html.match(/<ul class="([^"]*)" data-testid="onboarding-intents"/);
     expect(grid, "the card grid").not.toBeNull();
@@ -113,7 +114,7 @@ describe("onboarding first screen — contexts, not an episode of searching", ()
     }
   });
 
-  it("every catalogue carries the screen: heading, explanation, note, six titled cards, no journal box", () => {
+  it("every catalogue carries the screen: heading, explanation, note, seven titled cards, no journal box", () => {
     for (const loc of LOCALES) {
       const rp = catalog(loc).auth.onboarding.rolePicker;
       expect(rp.intentHeading, loc).toMatch(/\S/);
@@ -128,7 +129,7 @@ describe("onboarding first screen — contexts, not an episode of searching", ()
       expect(rp.infoBox, loc).toBeUndefined();
       const html = render(loc);
       expect(html, loc).toContain(esc(rp.intentHeading));
-      expect(html.match(/data-testid="onboarding-intent-[a-z]+"/g), loc).toHaveLength(6);
+      expect(html.match(/data-testid="onboarding-intent-[a-z]+"/g), loc).toHaveLength(7);
     }
   });
 });

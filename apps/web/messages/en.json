@@ -4308,6 +4308,10 @@
             "title": "I work in recruitment or workforce supply",
             "desc": "Workforce supply, clients, needs, placements and ongoing work."
           },
+          "buy": {
+            "title": "I buy services or order work",
+            "desc": "Describe what you need, find who does it and ask them for it."
+          },
           "student": {
             "title": "I'm learning / preparing for a profession",
             "desc": "Learning and practice are already part of your professional history. Connect to your school."
@@ -4362,6 +4366,14 @@
         "s3": "Publish a need, offer capacity — or both",
         "s4": "Talk to the people and organisations that fit, then run the work together",
         "note": "Your organisation is usable straight away. Verification is a separate, stronger trust step."
+      },
+      "nextStepsBuyer": {
+        "eyebrow": "After this — your buyer details",
+        "s1": "Save who you are, where you are and how to reach you",
+        "s2": "Describe what you need — the request is saved in your own list",
+        "s3": "Find a service someone offers and ask them for it",
+        "s4": "All your requests are in one place",
+        "note": "Signing up is free. Nothing is sent to anyone until you send a request yourself."
       },
       "display_name_label": "Display name",
       "country_label": "Where do you live now?",

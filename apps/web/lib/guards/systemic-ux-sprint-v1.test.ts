@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { ROLE_BY_ID, baseIdentityForRole } from "@/lib/config/roles";
+import { BASE_IDENTITY_ORDER, ROLE_BY_ID, baseIdentityForRole } from "@/lib/config/roles";
 import { activeLocales } from "@/lib/i18n/config";
 
 /**
@@ -36,11 +36,13 @@ describe("the workspace selector shows spaces, not 'Agentūra'/'Pirkėjas' as to
     expect(baseIdentityForRole("company")).toBe("company");
   });
 
-  it("customer + agency are HIDDEN from the role catalogue (config-level)", () => {
-    expect(ROLE_BY_ID.customer.availability).toBe("hidden");
-    expect(ROLE_BY_ID.customer.safeToShowInRoleSurfaces).toBe(false);
-    expect(ROLE_BY_ID.agency.availability).toBe("hidden");
-    expect(ROLE_BY_ID.agency.safeToShowInRoleSurfaces).toBe(false);
+  // Owner decision 2026-11-11: customer + agency are OFFERED at sign-up
+  // (start-available), but they are still never their own space — the fold
+  // above is what keeps "Agentūra" / "Pirkėjas" out of the switcher.
+  it("customer + agency are offered as start paths, never as active spaces (owner decision 2026-11-11)", () => {
+    expect(ROLE_BY_ID.customer.availability).toBe("start-available");
+    expect(ROLE_BY_ID.agency.availability).toBe("start-available");
+    expect(BASE_IDENTITY_ORDER).toEqual(["person", "company"]);
   });
 
   it("base-identity space labels exist in every active locale", () => {

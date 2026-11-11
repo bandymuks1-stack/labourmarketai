@@ -4308,6 +4308,10 @@
             "title": "Dirbu su darbuotojų atranka ar tiekimu",
             "desc": "Darbuotojų pasiūla, klientai, poreikiai, paskyrimai ir vykstantis darbas."
           },
+          "buy": {
+            "title": "Perku paslaugas ar užsakau darbus",
+            "desc": "Aprašyk, ko reikia, rask, kas tai daro, ir paprašyk pasiūlymo."
+          },
           "student": {
             "title": "Mokausi / ruošiuosi profesijai",
             "desc": "Mokymasis ir praktika jau yra tavo profesinės istorijos dalis. Prisijunk prie savo mokymo įstaigos."
@@ -4362,6 +4366,14 @@
         "s3": "Paskelbk poreikį, pasiūlyk pajėgumus — arba abu",
         "s4": "Susisiek su tinkamais žmonėmis ir organizacijomis, tada vykdyk darbą kartu",
         "note": "Organizacija naudojama iš karto. Patvirtinimas yra atskiras, stipresnis pasitikėjimo žingsnis."
+      },
+      "nextStepsBuyer": {
+        "eyebrow": "Toliau — tavo pirkėjo duomenys",
+        "s1": "Įrašyk, kas esi, kur esi ir kaip su tavimi susisiekti",
+        "s2": "Aprašyk, ko reikia — užklausa išsisaugo tavo sąraše",
+        "s3": "Rask paslaugą, kurią kas nors siūlo, ir paprašyk jos",
+        "s4": "Visos tavo užklausos matomos vienoje vietoje",
+        "note": "Registracija nemokama. Niekam nieko neišsiunčiama, kol pats neišsiųsi užklausos."
       },
       "display_name_label": "Rodomas vardas",
       "country_label": "Kur dabar gyveni?",

@@ -4308,6 +4308,10 @@
             "title": "Zajmuję się rekrutacją lub dostarczaniem pracowników",
             "desc": "Oferta pracowników, klienci, potrzeby, oddelegowania i bieżąca praca."
           },
+          "buy": {
+            "title": "Kupuję usługi lub zlecam prace",
+            "desc": "Opisz, czego potrzebujesz, znajdź, kto to robi, i poproś o to."
+          },
           "student": {
             "title": "Uczę się / przygotowuję do zawodu",
             "desc": "Nauka i praktyki są już częścią Twojej historii zawodowej. Połącz się ze swoją szkołą."
@@ -4362,6 +4366,14 @@
         "s3": "Opublikuj zapotrzebowanie, zaoferuj moce — albo jedno i drugie",
         "s4": "Porozmawiaj z pasującymi osobami i organizacjami, a potem realizujcie pracę razem",
         "note": "Z organizacji można korzystać od razu. Weryfikacja to osobny, silniejszy krok zaufania."
+      },
+      "nextStepsBuyer": {
+        "eyebrow": "Dalej — Twoje dane zamawiającego",
+        "s1": "Zapisz, kim jesteś, gdzie jesteś i jak się z Tobą skontaktować",
+        "s2": "Opisz, czego potrzebujesz — zapytanie zapisze się na Twojej liście",
+        "s3": "Znajdź usługę, którą ktoś oferuje, i poproś o nią",
+        "s4": "Wszystkie Twoje zapytania w jednym miejscu",
+        "note": "Rejestracja jest bezpłatna. Nic nie jest nikomu wysyłane, dopóki sam nie wyślesz zapytania."
       },
       "display_name_label": "Nazwa wyświetlana",
       "country_label": "Gdzie teraz mieszkasz?",

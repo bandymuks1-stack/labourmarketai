@@ -84,7 +84,9 @@ describe("onboarding asks what work the person does", () => {
     expect(src).toContain('data-testid="onboarding-profession-suggestions"');
     // Asked only of a worker — a company-only signup is not a person looking
     // for work, and asking them would be a question with no honest answer.
-    expect(src).toContain('roles.has("worker") && (');
+    // Nor is a buyer-only signup (owner decision 2026-11-11): the person
+    // identity opens, but they said nothing about their own work.
+    expect(src).toContain('roles.has("worker") && ownWork && (');
     // A list of entries, each removable; a registry pick and the person's own
     // words are different KINDS and are submitted in different fields, so
     // neither can be mistaken for the other.

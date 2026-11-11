@@ -151,51 +151,50 @@ export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
     sortOrder: 20,
   },
   {
-    // Owner directive (company-role-simplicity-v1): an agency is NOT a
-    // separate root role — it is a COMPANY whose company_type is
-    // 'staffing_agency', picked inside the one canonical company profile.
-    // `hidden` removes agency from every add-role / start surface for new
-    // users. Users who ALREADY hold the agency role keep it: the switcher
-    // renders held roles from profile_roles regardless of availability, and
-    // /dashboard/agency + its tools stay live for them (legacy continuity).
+    // OWNER DECISION 2026-11-11 (supersedes the hiding half of
+    // company-role-simplicity-v1): an agency is OFFERED to new users — the
+    // sign-up card "agency" (lib/onboarding/first-run-intent.ts) and this
+    // start route. What an agency IS does not change: a COMPANY whose
+    // company_type is 'staffing_agency', set up in the one canonical company
+    // form — the exact path production walk A-1 proved. /dashboard/agency
+    // stays a redirect into the company workspace; no second agency system.
     id: "agency",
     evidence: [{ register: "A-1", proof: "41787046374" }],
-    reason: "Owner directive company-role-simplicity-v1: an agency is a company type, not a root role. Hidden from add-role surfaces; holders keep a working workspace (A-1).",
+    reason: "Start-available (owner decision 2026-11-11): offered at sign-up; the agency is a company of type staffing_agency set up through /dashboard/start/company (A-1). Not 'active' while A-2 (documents readiness, client records) is unverified.",
     labelKey: "auth.signup.role.agency",
     descriptionKey: "roles.agency.description",
-    availability: "hidden",
-    entryPoint: false,
-    canBeAddedLater: false,
+    availability: "start-available",
+    entryPoint: true,
+    canBeAddedLater: true,
     primaryFeatureKey: "agency_workspace",
     primaryRoute: "/dashboard",
-    setupRoute: "/dashboard/start/company",
-    preparingReasonKey: "roles.preparingReason.default",
-    safeToShowInRoleSurfaces: false,
+    setupRoute: "/dashboard/start/company?type=staffing_agency",
+    preparingReasonKey: "roles.preparingReason.startAvailable",
+    safeToShowInRoleSurfaces: true,
     sortOrder: 30,
   },
   {
-    // Owner directive (systemic-ux-roles-v1): "Pirkėjas" (buyer) is NOT a
-    // top-level identity — buying is an ACTION a person or a company takes.
-    // Mirrors the agency treatment: `hidden` removes buyer from every
-    // add-role / start / "My spaces" surface. Buying stays reachable as an
-    // action card (IdentityActions → /dashboard/buyer). Users who already
-    // hold the customer role keep route access (legacy continuity); the
-    // switcher folds it into the Įmonė identity rather than showing
-    // "Pirkėjas" as a peer space. setupRoute is kept so the legacy
-    // /dashboard/start/buyer form still resolves.
+    // OWNER DECISION 2026-11-11 (supersedes the hiding half of
+    // systemic-ux-roles-v1): "Pirkėjas" (buyer) is OFFERED to new users — the
+    // sign-up card "buy" and this start route, the one buyer setup form
+    // whose save_customer_setup adds the role and the customers row
+    // (production walk J-13: a person who is not a buyer becomes one and
+    // opens the buyer workspace). The identity model does not change: the
+    // switcher still folds the customer role into a base identity and never
+    // shows "Pirkėjas" as a peer space.
     id: "customer",
-    evidence: [{ register: "C-1", proof: "41785749357" }],
-    reason: "Owner directive systemic-ux-roles-v1: buying is an action, not an identity. Hidden from add-role surfaces; holders keep a working workspace (C-1).",
+    evidence: [{ register: "C-1", proof: "41785749357" }, { register: "J-13", proof: "41480104268" }],
+    reason: "Start-available (owner decision 2026-11-11): offered at sign-up; the buyer record is created by the /dashboard/start/buyer form (J-13, C-1). The buyer is a person, never handed a company shell.",
     labelKey: "auth.signup.role.customer",
     descriptionKey: "roles.customer.description",
-    availability: "hidden",
-    entryPoint: false,
-    canBeAddedLater: false,
+    availability: "start-available",
+    entryPoint: true,
+    canBeAddedLater: true,
     primaryFeatureKey: "customer_workspace",
     primaryRoute: "/dashboard",
     setupRoute: "/dashboard/start/buyer",
     preparingReasonKey: "roles.preparingReason.startAvailable",
-    safeToShowInRoleSurfaces: false,
+    safeToShowInRoleSurfaces: true,
     sortOrder: 40,
   },
   // ── Forward-looking roles — hidden until UI surfaces ship ─────────

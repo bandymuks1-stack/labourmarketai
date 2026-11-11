@@ -30,6 +30,7 @@ import {
 import {
   FIRST_RUN_INTENTS,
   INTENT_IDENTITY,
+  asksAboutOwnWork,
   asksForCurrentEducation,
   identitiesForIntents,
   nextPathForIntents,
@@ -88,7 +89,10 @@ const ROLE_CARDS: { key: Role }[] = [{ key: "worker" }, { key: "company" }];
  *  organisation model, never from this screen), an agency is a company TYPE,
  *  an education institution is a company CAPABILITY, a student is a person
  *  whose evidence starts in learning. Multi-select stays — one account
- *  carries all of it, and the person can change it later. */
+ *  carries all of it, and the person can change it later.
+ *  Owner decision 2026-11-11: worker, company, agency AND buyer are offered
+ *  at sign-up. A buyer is a person whose next screen is the one buyer setup
+ *  form — still two identities, no new account system. */
 const INTENT_CARDS: readonly FirstRunIntent[] = FIRST_RUN_INTENTS;
 
 /** Icon for an intent card = the icon of the identity it opens. */
@@ -98,6 +102,7 @@ const INTENT_ICON_ROLE: Record<FirstRunIntent, Role> = {
   student: "worker",
   hire: "company",
   agency: "company",
+  buy: "customer",
   education: "company",
 };
 
@@ -215,7 +220,14 @@ export function OnboardingWizard({
   // The preview names the path the person actually chose: an agency, a
   // company or an education provider with no personal work context was shown
   // "import your CV, add your skills" (agency onboarding walk 2026-10-08).
-  const nextStepsKey = roles.has("worker") || roles.size === 0 ? "nextSteps" : "nextStepsOrganization";
+  // A buyer-only sign-up is told what a buyer does next, not "import your CV".
+  const ownWork = asksAboutOwnWork(intentList);
+  const nextStepsKey =
+    ownWork || intents.size === 0
+      ? "nextSteps"
+      : roles.has("company")
+        ? "nextStepsOrganization"
+        : "nextStepsBuyer";
   const [displayName, setDisplayName] = useState(defaultName);
   // No pre-selected country — the user chooses (placeholder until they do).
   const [country, setCountry] = useState<string>("");
@@ -434,7 +446,7 @@ export function OnboardingWizard({
     // beside them in their own field, so neither kind can be mistaken for the
     // other. The locale goes too: it is the language of THIS session, the only
     // honest source for what language they wrote in.
-    if (roles.has("worker")) {
+    if (roles.has("worker") && ownWork) {
       const registrySlugs = professions
         .map((p) => p.slug)
         .filter((slug): slug is string => !!slug);
@@ -871,7 +883,7 @@ export function OnboardingWizard({
         </fieldset>
       )}
 
-      {roles.has("worker") && (
+      {roles.has("worker") && ownWork && (
         <div
           className="flex flex-col gap-1.5 text-xs text-text-secondary"
           data-testid="onboarding-profession-field"
@@ -979,7 +991,7 @@ export function OnboardingWizard({
         </div>
       )}
 
-      {employerVisibility && roles.has("worker") ? (
+      {employerVisibility && roles.has("worker") && ownWork ? (
         <div data-testid="onboarding-employer-visibility">{employerVisibility}</div>
       ) : null}
 

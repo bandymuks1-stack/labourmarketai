@@ -440,6 +440,14 @@
         "s4": "Tal med de personer og organisationer, der passer, og udfør arbejdet sammen",
         "note": "Din organisation kan bruges med det samme. Verifikation er et separat, stærkere tillidstrin."
       },
+      "nextStepsBuyer": {
+        "eyebrow": "Derefter — dine oplysninger som køber",
+        "s1": "Gem, hvem du er, hvor du er, og hvordan man kontakter dig",
+        "s2": "Beskriv, hvad du har brug for — forespørgslen gemmes på din egen liste",
+        "s3": "Find en tjeneste, som nogen tilbyder, og bed om den",
+        "s4": "Alle dine forespørgsler samlet ét sted",
+        "note": "Det er gratis at tilmelde sig. Intet sendes til nogen, før du selv sender en forespørgsel."
+      },
       "display_name_label": "[EN] Display name",
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",
@@ -463,6 +471,10 @@
           "agency": {
             "title": "Jeg arbejder med rekruttering eller levering af arbejdskraft",
             "desc": "Udbud af arbejdskraft, kunder, behov, placeringer og igangværende arbejde."
+          },
+          "buy": {
+            "title": "Jeg køber tjenester eller bestiller arbejde",
+            "desc": "Beskriv, hvad du har brug for, find dem, der gør det, og spørg dem."
           },
           "student": {
             "title": "Jeg lærer / forbereder mig til et fag",
