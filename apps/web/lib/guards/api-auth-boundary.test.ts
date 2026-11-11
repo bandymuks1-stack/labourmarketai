@@ -110,6 +110,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open trigger.",
   },
+  "internal/operator-alerts/v1/route.ts": {
+    class: "public",
+    why: "The GitHub Actions schedule (.github/workflows/operator-alerts-cadence.yml) knocks on it; identity is the OPERATOR_ALERTS_TRIGGER_TOKEN machine secret (lib/api/operator-alerts-auth.ts), not a user and not CRON_SECRET - 401 while unset, so never an open trigger. POST only. It mails the responsible operators about waiting company applications through three service-only database functions, idempotent per application, stage and recipient. Answers counts and reason codes only - no id, no address.",
+  },
   "internal/supply-feed/first-party-v1/route.ts": {
     class: "public",
     why: "The partner opportunity network pulls it; identity is the SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open worker API. Deliberately NOT shared: it answers with every authorised person’s projection at once, which no signed-in account has a reason to ask for, so there is no user path to conflate. The body carries the v1 projection only — opaque actorRef, trades, availability, geography, agreed markets, four authorities — and holds no name, email, phone or address to leak.",

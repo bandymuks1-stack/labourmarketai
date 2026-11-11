@@ -1,0 +1,49 @@
+name: operator-alerts-cadence
+# OPERATOR ALERTS (owner decision 2026-11-11, P1): every 5 minutes, ask the app to mail the responsible
+# operators about new company applications, a reminder at 24 h and an escalation to admins at 48 h.
+# The app does the work (POST /api/internal/operator-alerts/v1); this job only knocks.
+#
+# INERT until the owner switches it on. Two switches, both owner-only:
+#   * repository variable OPERATOR_ALERTS_SCHEDULE_ENABLED = 'true' (without it every run is skipped);
+#   * environment `operator-alerts` secret OPERATOR_ALERTS_TRIGGER_TOKEN (>= 32 random characters),
+#     the SAME value as OPERATOR_ALERTS_TRIGGER_TOKEN in the production app environment.
+# The token only starts this sweep: it is not CRON_SECRET and opens no other route. The sweep is
+# idempotent per application, stage and recipient, so an extra or late run sends nothing twice.
+#
+# GitHub may start scheduled runs late or skip them under load: delivery within 5 minutes is NOT promised.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: operator-alerts
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    if: vars.OPERATOR_ALERTS_SCHEDULE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    environment: operator-alerts
+    steps:
+      - name: Run the operator alerts sweep
+        env:
+          TOKEN: ${{ secrets.OPERATOR_ALERTS_TRIGGER_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::OPERATOR_ALERTS_TRIGGER_TOKEN is not set in the operator-alerts environment."
+            exit 1
+          fi
+          code=$(curl -sS -o body.json -w '%{http_code}' --max-time 120 -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            https://labourmarket.ai/api/internal/operator-alerts/v1) || code=000
+          # The body is counts and a reason code only.
+          cat body.json 2>/dev/null; echo
+          if [ "$code" != "200" ]; then
+            echo "::error::operator alerts sweep answered $code"
+            exit 1
+          fi

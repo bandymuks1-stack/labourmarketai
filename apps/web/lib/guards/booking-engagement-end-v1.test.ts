@@ -1786,6 +1786,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-10: partner registration Slice 1, company takeover invitation + two-operator decision + link.
       // RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261110190000_organization_claim_invitation_v1.sql",
+      // 2026-11-12: operator alerts for waiting company applications (three service-only SECURITY DEFINER functions).
+      // RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261112090000_operator_application_alerts_v1.sql",
 ]);
   });
 
