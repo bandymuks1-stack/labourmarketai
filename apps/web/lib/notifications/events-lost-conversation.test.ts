@@ -127,6 +127,33 @@ describe("old bells of a thread the reader was removed from", () => {
     expect(r.unreadCount).toBe(3);
   });
 
+  it("unread rows beyond the loaded window are scanned only when the total says they exist", async () => {
+    const { client } = readerClient({
+      feed: FEED,
+      // 5 unread in total, only 3 in the window: the bounded scan runs (the
+      // fake returns the window's unread chat rows: n1 lost, n2 open).
+      exactUnread: 5,
+      participants: [
+        { conversation_id: LOST, revoked_at: "2026-11-11T11:30:00Z" },
+        { conversation_id: OPEN, revoked_at: null },
+      ],
+    });
+    const r = await readMyNotificationEvents(client as never);
+    if (r.kind !== "ready") throw new Error(r.kind);
+    expect(r.unreadCount).toBe(4);
+  });
+
+  it("a feed with no chat rows costs no extra request", async () => {
+    let calls = 0;
+    const { client } = readerClient({ feed: [booking], exactUnread: 1, participants: [] });
+    const counting = { from: (t: string) => (calls++, client.from(t)) };
+    const r = await readMyNotificationEvents(counting as never);
+    if (r.kind !== "ready") throw new Error(r.kind);
+    expect(r.events).toHaveLength(1);
+    // The feed read and the unread count — nothing else.
+    expect(calls).toBe(2);
+  });
+
   it("a failed participant read hides nothing (the thread itself stays closed by RLS)", async () => {
     const { client } = readerClient({ feed: FEED, exactUnread: 3, participants: "error" });
     const r = await readMyNotificationEvents(client as never);
