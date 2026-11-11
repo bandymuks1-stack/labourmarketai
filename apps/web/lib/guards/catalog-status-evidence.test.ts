@@ -87,6 +87,23 @@ describe("every row that is not active says why, concretely", () => {
   });
 });
 
+describe("an active row never describes itself as coming later", () => {
+  // Codex P2 on #3212: /vision renders the description beside the working
+  // badge, so "you will later be able to…" under "works" contradicts itself.
+  const FUTURE: Record<string, RegExp> = {
+    en: /\blater\b|will be able|when (they are )?ready/i,
+    lt: /\bvėliau\b|\bgalės(i|ite)?\b|kai (jie |jos )?bus paruošt/i,
+  };
+  for (const [locale, future] of Object.entries(FUTURE)) {
+    it(`${locale}: active feature descriptions are in the present tense`, () => {
+      const m = JSON.parse(readFileSync(join(__dirname, "..", "..", "messages", `${locale}.json`), "utf8"));
+      const text = (key: string) => key.split(".").reduce((o, k) => o?.[k], m) as unknown as string;
+      for (const f of FEATURES.filter((x) => x.availability === "active"))
+        expect(text(f.descriptionKey), `${locale} ${f.key}`).not.toMatch(future);
+    });
+  }
+});
+
 describe("AI matching is never shown as working", () => {
   it("rule-based matching is active, AI matching is not", () => {
     expect(FEATURES.find((f) => f.key === "rule_matching")?.availability).toBe("active");

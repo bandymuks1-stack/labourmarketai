@@ -3910,11 +3910,11 @@
     },
     "role_expansion": {
       "label": "Meer rollen",
-      "description": "Later kun je bedrijfs-, uitzendbureau- en inkoopacties toevoegen wanneer ze klaar zijn."
+      "description": "Hetzelfde account kan ook een bedrijf, een uitzendbureau of inkoop voeren — je voegt ze toe wanneer je ze nodig hebt."
     },
     "external_confirmation": {
       "label": "Werkregistraties van anderen",
-      "description": "Een manager, klant of partner kan later bijdragen aan je werkregistraties."
+      "description": "Een manager, klant of partner kan de werkregistraties bevestigen die je hem stuurt."
     },
     "company_workspace": {
       "label": "Bedrijfsruimte",

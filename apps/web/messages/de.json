@@ -3910,11 +3910,11 @@
     },
     "role_expansion": {
       "label": "Weitere Rollen",
-      "description": "Später können Sie Aktionen für Unternehmen, Personalagenturen und Einkauf hinzufügen, sobald sie bereit sind."
+      "description": "Dasselbe Konto kann auch ein Unternehmen, eine Personalagentur oder den Einkauf führen — Sie fügen sie hinzu, wenn Sie sie brauchen."
     },
     "external_confirmation": {
       "label": "Arbeitseinträge von anderen",
-      "description": "Ein Vorgesetzter, Kunde oder Partner kann später Ihre Arbeitseinträge ergänzen."
+      "description": "Ein Vorgesetzter, Kunde oder Partner kann die Arbeitseinträge bestätigen, die Sie ihm senden."
     },
     "company_workspace": {
       "label": "Unternehmensbereich",

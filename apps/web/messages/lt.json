@@ -3910,11 +3910,11 @@
     },
     "role_expansion": {
       "label": "Daugiau vaidmenų",
-      "description": "Vėliau galėsi pridėti įmonės, agentūros ir pirkimo veiksmus, kai jie bus paruošti."
+      "description": "Ta pati paskyra gali turėti ir įmonę, agentūrą ar pirkimą — pridedi, kai prireikia."
     },
     "external_confirmation": {
       "label": "Darbo įrašai iš kitų",
-      "description": "Vadovas, klientas ar partneris vėliau galės papildyti tavo darbo įrašus."
+      "description": "Vadovas, klientas ar partneris gali patvirtinti tavo darbo įrašus, kuriuos jam nusiunti."
     },
     "company_workspace": {
       "label": "Įmonės erdvė",

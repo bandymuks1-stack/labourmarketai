@@ -3910,11 +3910,11 @@
     },
     "role_expansion": {
       "label": "More roles",
-      "description": "Later you'll be able to add company, agency and buying actions when they are ready."
+      "description": "The same account can also run a company, an agency or buying — you add them when you need them."
     },
     "external_confirmation": {
       "label": "Work records from others",
-      "description": "A manager, client or partner will later be able to add to your work records."
+      "description": "A manager, client or partner can confirm the work records you send them."
     },
     "company_workspace": {
       "label": "Company space",
