@@ -71,7 +71,20 @@ export default async function ConversationDetailPage({
     .select("id, subject, kind, created_by, updated_at")
     .eq("id", conversationId)
     .maybeSingle();
-  if (!convRes.data) notFound();
+  if (!convRes.data) {
+    // A person REMOVED from the thread (revoked_at set) still sees their own
+    // participant row. Tell them honestly that it is no longer available and
+    // send them to the inbox — no thread shell, subject or participants.
+    // Anyone else gets the plain 404, as before.
+    const { data: ownRow } = await asAny(supabase)
+      .from("conversation_participants")
+      .select("revoked_at")
+      .eq("conversation_id", conversationId)
+      .eq("profile_id", user.id)
+      .maybeSingle();
+    if (ownRow?.revoked_at) redirect(`/${locale}/dashboard/communication?notice=unavailable`);
+    notFound();
+  }
   const conversation = convRes.data;
 
   // Same honest context model as the list — so the thread header tells the

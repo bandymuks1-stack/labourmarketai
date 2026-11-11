@@ -7202,6 +7202,10 @@
       "title": "Unterhaltung konnte nicht geöffnet werden",
       "body": "Möglicherweise haben Sie keine Berechtigung, dieser Person zu schreiben, oder sie ist nicht mehr verfügbar. Es wurde nichts gesendet."
     },
+    "noLongerAvailable": {
+      "title": "Diese Unterhaltung ist nicht mehr verfügbar",
+      "body": "Sie nehmen nicht mehr daran teil, daher werden ihre Nachrichten nicht angezeigt."
+    },
     "scope": {
       "support": "Support-Kanal",
       "unknown": "Kontext nicht angegeben",

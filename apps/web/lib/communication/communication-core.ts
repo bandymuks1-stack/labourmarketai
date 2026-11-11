@@ -303,6 +303,27 @@ export function activeParticipantIds(
     .filter((id): id is string => typeof id === "string" && id.length > 0);
 }
 
+/** Is this person still a live participant of the thread, as the sender's
+ *  session sees it right now? False when it cannot be read. */
+export async function isLiveParticipant(
+  supabase: SupabaseClient,
+  conversationId: string,
+  profileId: string,
+): Promise<boolean> {
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("conversation_participants")
+      .select("profile_id")
+      .eq("conversation_id", conversationId)
+      .eq("profile_id", profileId)
+      .is("revoked_at", null)
+      .maybeSingle();
+    return !error && !!data;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Read the thread's participants under the SENDER's own session
  * (`conversation_participants_select` admits co-participants; service_role
@@ -332,6 +353,12 @@ async function notifyOtherParticipants(
       conversationId,
       authorProfileId: authorId,
       participantProfileIds,
+      // Asked again right before each channel: a removal that lands between
+      // the read above and a delivery stops the remaining channels. Under the
+      // sender's session, so a sender who was removed meanwhile sees no live
+      // row and alerts nobody. Unreadable = not eligible (fail closed).
+      isStillParticipant: (profileId) =>
+        isLiveParticipant(supabase, conversationId, profileId),
     });
   } catch {
     console.warn("[communication] notify: emit threw");

@@ -571,6 +571,77 @@ const FEED_LIMIT = 20;
  *  list) — a page is not an export; larger reads stay a deliberate API. */
 const FEED_LIMIT_MAX = 200;
 
+/** The thread a conversation-entity row points at, or null. */
+function rowConversationId(row: {
+  readonly entityType: string;
+  readonly metadata: NotificationEventMetadata;
+}): string | null {
+  if (row.entityType !== "conversation") return null;
+  const id = row.metadata?.conversationId;
+  return typeof id === "string" && id.length > 0 ? id : null;
+}
+
+export function isLostConversationRow(
+  row: { readonly entityType: string; readonly metadata: NotificationEventMetadata },
+  lost: ReadonlySet<string>,
+): boolean {
+  const id = rowConversationId(row);
+  return id !== null && lost.has(id);
+}
+
+/**
+ * The threads the READER can no longer open, among those their bell rows
+ * point at (P0 chat privacy, owner 2026-11-11). Read under the reader's own
+ * session: `conversation_participants_select` shows a live participant every
+ * row of the thread, but a REMOVED participant only their own (revoked) row.
+ * So a thread is still open to the reader exactly when they can see at least
+ * one live (`revoked_at is null`) row of it — their own.
+ *
+ * Read-time only: the rows stay in the store as audit facts (never deleted,
+ * never re-marked). `unreadHidden` counts the reader's UNREAD rows of lost
+ * threads (bounded scan), so the badge does not count what the feed hides.
+ * A failed read hides nothing — the feed is then exactly as before, and the
+ * thread itself stays closed by RLS. Exported for tests.
+ */
+export async function lostConversationIds(
+  client: DbClient,
+  loaded: readonly { readonly entityType: string; readonly metadata: NotificationEventMetadata }[],
+): Promise<{ readonly ids: ReadonlySet<string>; readonly unreadHidden: number }> {
+  const none = { ids: new Set<string>(), unreadHidden: 0 };
+  try {
+    const unreadRes = await client
+      .from("notification_events")
+      .select("metadata")
+      .eq("entity_type", "conversation")
+      .is("read_at", null)
+      .limit(FEED_LIMIT_MAX);
+    const unreadIds = unreadRes.error
+      ? []
+      : ((unreadRes.data ?? []) as { metadata?: NotificationEventMetadata | null }[])
+          .map((r) => rowConversationId({ entityType: "conversation", metadata: r.metadata ?? {} }))
+          .filter((id): id is string => id !== null);
+    const ids = new Set<string>([
+      ...loaded.map(rowConversationId).filter((id): id is string => id !== null),
+      ...unreadIds,
+    ]);
+    if (ids.size === 0) return none;
+    const { data, error } = await client
+      .from("conversation_participants")
+      .select("conversation_id, revoked_at")
+      .in("conversation_id", [...ids]);
+    if (error) return none;
+    const open = new Set(
+      ((data ?? []) as { conversation_id: string; revoked_at: string | null }[])
+        .filter((r) => r.revoked_at == null)
+        .map((r) => r.conversation_id),
+    );
+    const lost = new Set([...ids].filter((id) => !open.has(id)));
+    return { ids: lost, unreadHidden: unreadIds.filter((id) => lost.has(id)).length };
+  } catch {
+    return none;
+  }
+}
+
 /** The recipient's own feed, newest first, with the true unread count.
  *  `limit` defaults to the bell's 20; the activity page passes a higher
  *  value (clamped to FEED_LIMIT_MAX) so stored facts older than the bell
@@ -601,7 +672,7 @@ export async function readMyNotificationEvents(
       }
       return { kind: "unexpected_error", code: error.code ?? "unknown" };
     }
-    const events = (data ?? []).map((row) => {
+    const loaded = (data ?? []).map((row) => {
       const r = row as Record<string, unknown>;
       return {
         id: String(r.id),
@@ -613,13 +684,17 @@ export async function readMyNotificationEvents(
         metadata: (r.metadata as NotificationEventMetadata) ?? {},
       };
     });
+    // A thread the reader was REMOVED from keeps its rows (audit facts, never
+    // deleted) but they leave the active feed and the unread total.
+    const lost = await lostConversationIds(client, loaded);
+    const events = loaded.filter((e) => !isLostConversationRow(e, lost.ids));
     const windowUnread = events.filter((e) => e.readAt === null).length;
     const exact =
       !unreadRes.error && typeof unreadRes.count === "number" ? unreadRes.count : null;
     return {
       kind: "ready",
       events,
-      unreadCount: exact ?? windowUnread,
+      unreadCount: exact === null ? windowUnread : Math.max(0, exact - lost.unreadHidden),
       ...(exact === null ? { unreadCountIsWindowOnly: true } : {}),
     };
   } catch {

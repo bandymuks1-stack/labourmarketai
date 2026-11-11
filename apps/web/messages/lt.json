@@ -7202,6 +7202,10 @@
       "title": "Nepavyko atidaryti pokalbio",
       "body": "Galbūt neturi teisės rašyti šiam asmeniui arba jis nebepasiekiamas. Niekas neišsiųsta."
     },
+    "noLongerAvailable": {
+      "title": "Šis pokalbis jums nebepasiekiamas",
+      "body": "Jūs nebe šio pokalbio dalyvis, todėl jo žinutės nerodomos."
+    },
     "scope": {
       "support": "Pagalbos kanalas",
       "unknown": "Kontekstas nepatikslintas",

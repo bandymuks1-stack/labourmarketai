@@ -7202,6 +7202,10 @@
       "title": "Kon dat gesprek niet openen",
       "body": "Je hebt mogelijk geen toestemming om deze persoon te berichten, of deze is niet meer beschikbaar. Er is niets verzonden."
     },
+    "noLongerAvailable": {
+      "title": "Dit gesprek is niet meer beschikbaar",
+      "body": "Je neemt er niet meer aan deel, dus de berichten worden niet getoond."
+    },
     "scope": {
       "support": "Supportkanaal",
       "unknown": "Context niet gespecificeerd",
