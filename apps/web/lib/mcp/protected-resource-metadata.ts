@@ -41,6 +41,15 @@
 /** The path of the one protected resource. Pinned by the conformance guard. */
 export const MCP_RESOURCE_PATH = "/api/mcp" as const;
 
+/**
+ * The curated ChatGPT door (`lib/mcp/chatgpt-profile.ts`) is a second
+ * resource on the same server, with its own document at its own
+ * path-suffixed location. Not in the list below: that list is the full
+ * door's, and the 401 of each door points at its own document.
+ */
+export const CHATGPT_PROTECTED_RESOURCE_METADATA_PATH =
+  "/.well-known/oauth-protected-resource/api/mcp/chatgpt" as const;
+
 /** RFC 9728 well-known paths at which the document is served. */
 export const PROTECTED_RESOURCE_METADATA_PATHS = [
   "/.well-known/oauth-protected-resource",
@@ -58,13 +67,15 @@ export type ProtectedResourceMetadata = {
  * @param origin        the deployment origin the request arrived at, e.g.
  *                      `https://labourmarket.ai` (no trailing slash)
  * @param supabaseUrl   `NEXT_PUBLIC_SUPABASE_URL`
+ * @param resourcePath  the door this document describes (default `/api/mcp`)
  */
 export function protectedResourceMetadata(
   origin: string,
   supabaseUrl: string,
+  resourcePath: string = MCP_RESOURCE_PATH,
 ): ProtectedResourceMetadata {
   return {
-    resource: `${origin.replace(/\/$/, "")}${MCP_RESOURCE_PATH}`,
+    resource: `${origin.replace(/\/$/, "")}${resourcePath}`,
     // The AS identifier is the auth service path, not the bare project
     // origin: Supabase serves RFC 8414 discovery at
     // /.well-known/oauth-authorization-server/auth/v1, which clients derive
