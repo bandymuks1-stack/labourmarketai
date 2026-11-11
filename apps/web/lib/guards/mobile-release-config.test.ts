@@ -346,4 +346,16 @@ describe("store builds are owner-started, skip without secrets and upload to int
     expect(eas.submit.production.android).toEqual({ track: "internal", releaseStatus: "draft" });
     expect(eas.build.production.environment).toBe("production");
   });
+
+  it("an iOS upload waits for the App Store Connect app id, which never lands in eas.json", () => {
+    // Non-interactive iOS submit needs `ascAppId`; eas.json carries no account
+    // id (asserted above), so the id is a repository VARIABLE, checked in the
+    // prerequisite step and written into the runner's copy only.
+    const check = wf.slice(wf.indexOf("- name: Check owner prerequisites"), wf.indexOf("- name: Set up pnpm"));
+    expect(check).toContain("ASC_APP_ID: ${{ vars.ASC_APP_ID }}");
+    expect(check).toMatch(/\[ "\$SUBMIT" = "true" \] && \[ "\$PLATFORM" != "android" \]/);
+    expect(check).toContain("repository variable ASC_APP_ID");
+    expect(wf).toContain("ascAppId:process.env.ASC_APP_ID");
+    expect(eas.submit.production.ios).toBeUndefined();
+  });
 });

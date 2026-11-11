@@ -62,6 +62,9 @@ jobs:
         id: pre
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          PLATFORM: ${{ inputs.platform }}
+          SUBMIT: ${{ inputs.submit }}
+          ASC_APP_ID: ${{ vars.ASC_APP_ID }}
         run: |
           missing=""
           if [ -z "$EXPO_TOKEN" ]; then
@@ -70,6 +73,14 @@ jobs:
           PROJECT_ID=$(node -e 'const a=require("./apps/mobile/app.json");process.stdout.write(String(a.expo?.extra?.eas?.projectId??""))')
           if [ -z "$PROJECT_ID" ]; then
             missing="${missing}- extra.eas.projectId in apps/mobile/app.json (run eas init in apps/mobile)\n"
+          fi
+          # A non-interactive iOS upload needs the App Store Connect app id in
+          # the submit profile (Expo: "In non-interactive mode, your submission
+          # profile also needs ascAppId"). eas.json holds no account id (pinned
+          # by mobile-release-config.test.ts), so it comes from the repository
+          # VARIABLE ASC_APP_ID and is written into the runner's copy only.
+          if [ "$SUBMIT" = "true" ] && [ "$PLATFORM" != "android" ] && ! printf '%s' "$ASC_APP_ID" | grep -Eq '^[0-9]{6,}$'; then
+            missing="${missing}- repository variable ASC_APP_ID (App Store Connect, the app, App Information, Apple ID; digits only), needed to upload to TestFlight\n"
           fi
           if [ -n "$missing" ]; then
             {
@@ -109,11 +120,16 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           PLATFORM: ${{ inputs.platform }}
           SUBMIT: ${{ inputs.submit }}
+          ASC_APP_ID: ${{ vars.ASC_APP_ID }}
         run: |
           set -euo pipefail
           args="--platform $PLATFORM --profile production --non-interactive --no-wait"
           if [ "$SUBMIT" = "true" ]; then
             args="$args --auto-submit"
+            if [ "$PLATFORM" != "android" ]; then
+              # Runner copy only; never committed (checked digits-only above).
+              node -e 'const f="eas.json",fs=require("fs"),e=JSON.parse(fs.readFileSync(f,"utf8"));e.submit.production.ios={ascAppId:process.env.ASC_APP_ID};fs.writeFileSync(f,JSON.stringify(e,null,2))'
+            fi
           fi
           npx --yes eas-cli@25.3.0 build $args
           {
