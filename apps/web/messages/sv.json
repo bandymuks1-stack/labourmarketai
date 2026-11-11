@@ -1953,7 +1953,7 @@
     "partners": {
       "heading": "Partner",
       "empty": "Inga partner ännu.",
-      "agency": "Byrå",
+      "agency": "Bemanningsföretag",
       "client": "Kund",
       "team": "Lag",
       "members": "{count, plural, =1 {1 medlem} other {# medlemmar}}",
@@ -2003,7 +2003,7 @@
   "journey": {
     "eyebrow": "Så fungerar det",
     "title": "En profil. En guidad väg till möjligheter.",
-    "subcopy": "Ärliga profiler och riktiga noteringar, omvandlade till möjligheter — för arbetstagare, företag och byråer.",
+    "subcopy": "Ärliga profiler och riktiga noteringar, omvandlade till möjligheter — för arbetstagare, företag och bemanningsföretag.",
     "s1": "Starta ditt utrymme",
     "s2": "Bygg identitet",
     "s3": "Lägg till noteringar",
@@ -4417,7 +4417,7 @@
         "s2": "Lägg till dina riktiga färdigheter",
         "s3": "Ange din tillgänglighet",
         "s4": "Lägg till arbetslivserfarenhet och bevis",
-        "note": "Färdigheter är först självangivna. Dokument, din arbetsdagbok och bekräftelser från personer gör dem starkare med tiden."
+        "note": "Färdigheter är först självangivna. Dokument, din arbetsjournal och bekräftelser från personer gör dem starkare med tiden."
       },
       "nextStepsOrganization": {
         "eyebrow": "Därefter — din organisation",
@@ -5751,7 +5751,7 @@
         ]
       },
       "agency": {
-        "name": "Agentur",
+        "name": "Bemanningsföretag",
         "tagline": "För bemanningspartner.",
         "features": [
           "Obegränsat antal hanterade arbetare",
@@ -7090,7 +7090,7 @@
       "calendarNote": "Planera arbete och bokningar",
       "map": "Karta",
       "mapNote": "Var arbetet och tjänsterna finns",
-      "diary": "Arbetsdagbok",
+      "diary": "Arbetsjournal",
       "diaryNote": "Utfört arbete registreras som fakta",
       "scouting": "Kandidater",
       "scoutingNote": "Hitta rätt personer för dina behov",
@@ -9592,7 +9592,7 @@
       "marketplaceNote": "Tjänsteförfrågningar och deras status",
       "map": "Karta",
       "mapNote": "Var arbete och bokningar finns",
-      "diary": "Arbetsdagbok",
+      "diary": "Arbetsjournal",
       "diaryNote": "Registrera vad som faktiskt hände"
     },
     "propose": {
@@ -14149,8 +14149,8 @@
           "description": "Låt ett anslutet bemanningsföretag se ett av dina behov och föreslå kandidater."
         },
         "respondOffer": {
-          "label": "Svara på en byrås erbjudande",
-          "description": "Acceptera eller avböj en kandidat som en byrå erbjudit för ert behov."
+          "label": "Svara på ett bemanningsföretags erbjudande",
+          "description": "Acceptera eller avböj en kandidat som ett bemanningsföretag erbjudit för ert behov."
         },
         "moveWorker": {
           "label": "Flytta en person till ett annat projekt",
@@ -14818,7 +14818,7 @@
       "unpinDone": "Borttaget från Mitt utrymme.",
       "projectCreateIntro": "Ett nytt projekt. Namn och stad — sedan tilldelar du folk direkt här.",
       "projectCreatedNext": "Projekt skapat. Tilldela folk direkt här — eller återkom till det senare från ”Mina projekt”.",
-      "clientOffersIntro": "Kandidater som byråer erbjudit för era behov:",
+      "clientOffersIntro": "Kandidater som bemanningsföretag erbjudit för era behov:",
       "clientOffersNone": "Ingen har ännu erbjudit kandidater, ett arbetslag eller ett företag för dina öppna behov.",
       "clientBridgeInvitesIntro": "Bemanningsföretag som bjuder in dig till samarbete:",
       "clientBridgeShareIntro": "Behov som du kan dela med ett anslutet bemanningsföretag:",
@@ -14833,7 +14833,7 @@
       "chipOfferAccept": "Acceptera",
       "chipOfferDecline": "Avböj",
       "offerAccepted": "Accepterat. Kandidaten fick ett bokningsförslag — svaret ser du här.",
-      "offerDeclined": "Avböjt. Byrån ser ditt beslut.",
+      "offerDeclined": "Avböjt. Bemanningsföretaget ser ditt beslut.",
       "offerDecisionFailed": "Beslutet kunde inte sparas — erbjudandet kan redan vara stängt. Kontrollera kandidatlistan.",
       "documentAddIntro": "Låt oss registrera dokumentet: typ, land och giltighet. Filen kan du bifoga direkt efter att du sparat.",
       "documentAddDone": "Dokument registrerat. Så här ser din beredskap ut nu:",
@@ -15626,13 +15626,13 @@
       "cta": "Mer för arbetsgivare"
     },
     "agencies": {
-      "title": "För byråer",
+      "title": "För bemanningsföretag",
       "lead": "Samla din kandidatportfölj och arbetsgivarnas behov i ett strukturerat flöde.",
       "i1": "Kandidatportföljen — strukturerad och aktuell på ett ställe.",
       "i2": "Jämför kandidater med arbetsgivarbehov med en förklarad grund.",
       "i3": "Dela kandidatdata lagligt: åtkomst ges uttryckligen, loggas och kan återkallas.",
       "i4": "Arbeta på flera marknader och språk från ett konto.",
-      "cta": "Mer för byråer"
+      "cta": "Mer för bemanningsföretag"
     },
     "training": {
       "title": "För utbildningsinstitutioner",
@@ -15669,7 +15669,7 @@
       "subcopy": "Fem dörrar in till samma plattform — välj din.",
       "worker": "Jag är arbetstagare",
       "employer": "Jag är arbetsgivare",
-      "agency": "Jag företräder en byrå",
+      "agency": "Jag företräder ett bemanningsföretag",
       "partner": "Jag vill bli partner",
       "institution": "Jag företräder en skola eller ett universitet"
     },
@@ -19947,10 +19947,10 @@
     "eyebrow": "KOM IGÅNG",
     "title": "Var du ska börja",
     "subtitle": "Tre sätt att delta. Var och ett visar var du är — redan påbörjat eller väntar på ditt nästa steg.",
-    "agency": "Byrå",
+    "agency": "Bemanningsföretag",
     "started": "✓ Påbörjad",
-    "agencyStarted": "Byråprofil påbörjad.",
-    "agencyIsCompanyType": "Framöver är en byrå en företagstyp — skapa en ny byrå som ett företag av typen ”Bemanningsföretag”.",
+    "agencyStarted": "Profil för bemanningsföretag påbörjad.",
+    "agencyIsCompanyType": "Framöver är ett bemanningsföretag en företagstyp — skapa det som ett nytt företag av typen ”Bemanningsföretag”.",
     "legalName": "Juridiskt namn",
     "country": "Land",
     "company": "Företag",
@@ -20203,9 +20203,9 @@
       "approvedAutomatic": "Bekräftat automatiskt enligt en regel",
       "rejected": "Avvisat",
       "changesRequested": "Ändring begärd",
-      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bekräftad registrering} other {# bekräftade registreringar}}} other {Living CV uppdaterat: {skills}}}",
-      "cvUnlinked": "Living CV: bekräftat arbete, ännu inte kopplat till en färdighet",
-      "cvUnknown": "Living CV: kunde inte läsas",
+      "cv": "{count, plural, one {Levande CV: {skills} · {entries, plural, one {# bekräftad registrering} other {# bekräftade registreringar}}} other {Levande CV uppdaterat: {skills}}}",
+      "cvUnlinked": "Levande CV: bekräftat arbete, ännu inte kopplat till en färdighet",
+      "cvUnknown": "Levande CV: kunde inte läsas",
       "matching": "Matchningen ser bekräftat arbete: {skills}",
       "matchingRepeated": "Matchningen ser upprepat bekräftat arbete: {skills}"
     },
@@ -20342,7 +20342,7 @@
       "returned": "Skickat tillbaka för rättelse: {count}",
       "confirmed": "Bekräftat av en annan part: {count}",
       "confirmedUnknown": "Antalet bekräftelser kunde inte fastställas",
-      "livingCv": "Bekräftat arbete räknas i de anställdas Living CV"
+      "livingCv": "Bekräftat arbete räknas i de anställdas Levande CV"
     },
     "review": "Granska de väntande ({count})",
     "stageDone": "Etappen ”{name}” avslutad",
