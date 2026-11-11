@@ -3910,11 +3910,11 @@
     },
     "role_expansion": {
       "label": "Więcej ról",
-      "description": "Później będziesz mógł dodać czynności firmy, agencji i kupowania, gdy będą gotowe."
+      "description": "To samo konto może prowadzić także firmę, agencję lub zakupy — dodajesz je, gdy są potrzebne."
     },
     "external_confirmation": {
       "label": "Dowody pracy od innych",
-      "description": "Kierownik, klient lub partner będzie mógł później dodawać do Twoich dowodów pracy."
+      "description": "Kierownik, klient lub partner może potwierdzić wpisy pracy, które mu wyślesz."
     },
     "company_workspace": {
       "label": "Przestrzeń firmy",
