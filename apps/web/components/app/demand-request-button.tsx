@@ -1027,7 +1027,7 @@ export function DemandRequestButton({
             type="button"
             size="sm"
             onClick={create}
-            disabled={state === "sending" || !descOk || !countryOk || !estimateOk}
+            disabled={state === "sending" || !descOk || !estimateOk || !countryOk}
             // Mobile-first: the room's primary action is a full-width tap target
             // on phones, compact on larger screens.
             className="w-full sm:w-auto sm:self-start"

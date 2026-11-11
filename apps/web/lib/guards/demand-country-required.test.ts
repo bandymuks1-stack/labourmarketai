@@ -29,7 +29,7 @@ describe("company-need wizard requires the country", () => {
 
   it("refuses to create without a country and sends the person back to it", () => {
     expect(wizard).toMatch(/if \(!countryOk\) \{\s*setStep\(2\);\s*setShowCountryError\(true\);\s*return;/);
-    expect(wizard).toMatch(/disabled=\{state === "sending" \|\| !descOk \|\| !countryOk \|\| !estimateOk\}/);
+    expect(wizard).toMatch(/disabled=\{state === "sending" \|\| !descOk \|\| !estimateOk \|\| !countryOk\}/);
   });
 
   it("says why, next to the picker", () => {
