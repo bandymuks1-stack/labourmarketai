@@ -3965,10 +3965,10 @@
       "description": "Ludzie i firmy: wyszukiwanie, zaproszenia i Twoje relacje."
     },
     "rule_matching": {
-      "label": "Dopasowanie według reguł",
-      "description": "Kandydaci do potrzeby są szeregowani według jasnych reguł, a każde dopasowanie jest wyjaśnione."
+      "label": "Krótka lista kandydatów",
+      "description": "Do zgłoszonej potrzeby powstaje krótka lista pasujących osób, z powodem dla każdej z nich."
     },
-    "matching_reason": "Wyłączone: nie podłączono żadnej usługi AI. Dopasowanie według reguł już działa."
+    "matching_reason": "Wyłączone: nie podłączono żadnej usługi AI. Krótka lista kandydatów już działa."
   },
   "structuring": {
     "groupEyebrow": "Sugerowane umiejętności",

@@ -3965,10 +3965,10 @@
       "description": "Mensen en bedrijven: zoeken, uitnodigingen en je relaties."
     },
     "rule_matching": {
-      "label": "Matching op regels",
-      "description": "Kandidaten voor een behoefte worden op vaste regels gerangschikt, en elke match wordt uitgelegd."
+      "label": "Shortlist van kandidaten",
+      "description": "Bij een opgegeven behoefte hoort een shortlist van mensen die passen, met de reden per persoon."
     },
-    "matching_reason": "Uitgeschakeld: er is geen AI-dienst gekoppeld. Matching op regels werkt al."
+    "matching_reason": "Uitgeschakeld: er is geen AI-dienst gekoppeld. De shortlist van kandidaten werkt al."
   },
   "structuring": {
     "groupEyebrow": "Voorgestelde vaardigheden",

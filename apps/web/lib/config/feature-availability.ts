@@ -300,8 +300,7 @@ export const FEATURES: readonly FeatureConfig[] = [
   },
 
   {
-    // Rule-based matching: candidates for a need are ranked by stated rules
-    // and each fit is explained (shortlist, SC-5 / J-5). No AI involved.
+    // The candidate shortlist for a stated need (SC-5 / J-5). No AI involved.
     key: "rule_matching",
     availability: "active",
     evidence: [{ register: "SC-5", proof: "41672031864" }, { register: "J-5", proof: "company-talent-history" }],
@@ -316,7 +315,7 @@ export const FEATURES: readonly FeatureConfig[] = [
     // paid AI is not allowed (0 EUR AI budget). Never shown as working AI.
     key: "matching",
     availability: "preparing",
-    reason: "AI matching is switched off (no provider key, paid AI not allowed); rule-based matching (rule_matching) works.",
+    reason: "AI matching is switched off (no provider key, paid AI not allowed); the candidate shortlist (rule_matching) works.",
     labelKey: "features.matching.label",
     descriptionKey: "features.matching.description",
     preparingReasonKey: "features.matching_reason",

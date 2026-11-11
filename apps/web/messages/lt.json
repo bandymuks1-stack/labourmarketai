@@ -3965,10 +3965,10 @@
       "description": "Žmonės ir įmonės: paieška, kvietimai ir tavo ryšiai."
     },
     "rule_matching": {
-      "label": "Atitikimas pagal taisykles",
-      "description": "Kandidatai poreikiui surikiuojami pagal aiškias taisykles, o kiekvienas atitikimas paaiškinamas."
+      "label": "Kandidatų trumpasis sąrašas",
+      "description": "Nurodytam poreikiui sudaromas jam tinkančių žmonių sąrašas su kiekvieno tinkamumo priežastimi."
     },
-    "matching_reason": "Išjungta: neprijungta jokia DI paslauga. Kol kas veikia atitikimas pagal taisykles."
+    "matching_reason": "Išjungta: neprijungta jokia DI paslauga. Kol kas veikia kandidatų trumpasis sąrašas."
   },
   "structuring": {
     "groupEyebrow": "Siūlomi įgūdžiai",

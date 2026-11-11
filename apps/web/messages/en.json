@@ -3965,10 +3965,10 @@
       "description": "People and companies: search, invitations and your relationships."
     },
     "rule_matching": {
-      "label": "Rule-based matching",
-      "description": "Candidates for a need are ranked by stated rules, and each fit is explained."
+      "label": "Candidate shortlist",
+      "description": "A stated need gets a shortlist of people who fit it, with the reason for each."
     },
-    "matching_reason": "Switched off: no AI service is connected. Rule-based matching works meanwhile."
+    "matching_reason": "Switched off: no AI service is connected. The candidate shortlist works meanwhile."
   },
   "structuring": {
     "groupEyebrow": "Suggested skills",

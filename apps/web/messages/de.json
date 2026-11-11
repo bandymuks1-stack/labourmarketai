@@ -3965,10 +3965,10 @@
       "description": "Personen und Unternehmen: Suche, Einladungen und Ihre Beziehungen."
     },
     "rule_matching": {
-      "label": "Regelbasiertes Matching",
-      "description": "Kandidaten für einen Bedarf werden nach festen Regeln gereiht, und jede Passung wird erklärt."
+      "label": "Kandidaten-Shortlist",
+      "description": "Für einen angegebenen Bedarf entsteht eine Shortlist passender Menschen, jeweils mit Begründung."
     },
-    "matching_reason": "Ausgeschaltet: Es ist kein KI-Dienst angebunden. Das regelbasierte Matching funktioniert bereits."
+    "matching_reason": "Ausgeschaltet: Es ist kein KI-Dienst angebunden. Die Kandidaten-Shortlist funktioniert bereits."
   },
   "structuring": {
     "groupEyebrow": "Vorgeschlagene Fähigkeiten",
