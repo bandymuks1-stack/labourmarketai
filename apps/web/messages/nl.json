@@ -3847,6 +3847,7 @@
       "blockedLabel": "Geblokkeerd",
       "nonWorkerLabel": "Ruimtes voor bedrijven / uitzendbureaus / klanten",
       "nonWorkerStatus": "In voorbereiding",
+      "nonWorkerStatusActive": "Werkt",
       "fakeClaimsLabel": "Nep-AI / nepmatching / nepreputatie",
       "fakeClaimsStatus": "Nooit gebruikt"
     },

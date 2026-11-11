@@ -3847,6 +3847,7 @@
       "blockedLabel": "Zablokowane",
       "nonWorkerLabel": "Przestrzenie firmy / agencji / klienta",
       "nonWorkerStatus": "W przygotowaniu",
+      "nonWorkerStatusActive": "Działa",
       "fakeClaimsLabel": "Fałszywe AI / fałszywe dopasowanie / fałszywa reputacja",
       "fakeClaimsStatus": "Nigdy niestosowane"
     },

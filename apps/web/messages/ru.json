@@ -3847,6 +3847,7 @@
       "blockedLabel": "Заблокировано",
       "nonWorkerLabel": "Пространства компаний / агентств / заказчиков",
       "nonWorkerStatus": "Скоро",
+      "nonWorkerStatusActive": "Работает",
       "fakeClaimsLabel": "Фальшивый ИИ / фальшивый подбор / фальшивая репутация",
       "fakeClaimsStatus": "Никогда не используется"
     },

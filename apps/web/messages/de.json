@@ -3847,6 +3847,7 @@
       "blockedLabel": "Blockiert",
       "nonWorkerLabel": "Unternehmens- / Agentur- / Kundenbereiche",
       "nonWorkerStatus": "In Vorbereitung",
+      "nonWorkerStatusActive": "In Betrieb",
       "fakeClaimsLabel": "Gefälschte KI / gefälschtes Matching / gefälschte Reputation",
       "fakeClaimsStatus": "Nie verwendet"
     },

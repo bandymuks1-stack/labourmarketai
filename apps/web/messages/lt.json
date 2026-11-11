@@ -3847,6 +3847,7 @@
       "blockedLabel": "Užblokuota",
       "nonWorkerLabel": "Įmonės / agentūros / pirkėjo erdvės",
       "nonWorkerStatus": "Netrukus",
+      "nonWorkerStatusActive": "Veikia",
       "fakeClaimsLabel": "Netikras dirbtinis intelektas / netikras atitikimas / netikra reputacija",
       "fakeClaimsStatus": "Niekada nenaudojama"
     },

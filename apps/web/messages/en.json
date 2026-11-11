@@ -3847,6 +3847,7 @@
       "blockedLabel": "Blocked",
       "nonWorkerLabel": "Company / agency / customer spaces",
       "nonWorkerStatus": "Coming soon",
+      "nonWorkerStatusActive": "Working",
       "fakeClaimsLabel": "Fake AI / fake matching / fake reputation",
       "fakeClaimsStatus": "Never used"
     },

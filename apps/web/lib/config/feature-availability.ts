@@ -400,6 +400,19 @@ export function isFeatureActive(key: FeatureKey): boolean {
   return FEATURE_BY_KEY[key]?.availability === "active";
 }
 
+/** The three non-worker spaces /vision's control room reports as one row. */
+export const NON_WORKER_WORKSPACES = ["company_workspace", "agency_workspace", "customer_workspace"] as const;
+
+/** That row's state, read from the catalogue — never a fixed "coming soon"
+ *  (Codex P2 on #3212). Takes the list so a guard can feed it a broken one. */
+export function nonWorkerSpacesState(
+  features: readonly Pick<FeatureConfig, "key" | "availability">[] = FEATURES,
+): "active" | "preparing" {
+  return NON_WORKER_WORKSPACES.every((k) => features.find((f) => f.key === k)?.availability === "active")
+    ? "active"
+    : "preparing";
+}
+
 export function isFeaturePreparing(key: FeatureKey): boolean {
   return FEATURE_BY_KEY[key]?.availability === "preparing";
 }

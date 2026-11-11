@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { FEATURES, type CatalogClaim, type CatalogEvidence } from "@/lib/config/feature-availability";
+import {
+  FEATURES,
+  NON_WORKER_WORKSPACES,
+  nonWorkerSpacesState,
+  type CatalogClaim,
+  type CatalogEvidence,
+} from "@/lib/config/feature-availability";
 import { LABOUR_MARKET_ROLES, LIVE_ROLE_IDS } from "@/lib/config/roles";
 import { ACTIVITY_TYPES } from "@/lib/config/activity-types";
 import { activeLocales } from "@/lib/i18n/config";
@@ -262,6 +268,36 @@ describe("AI matching is never shown as working", () => {
       expect(f.rule_matching.description).not.toMatch(/\bAI\b|\bKI\b|\bDI\b|\bИИ\b/);
     });
   }
+});
+
+describe("/vision's control room reads the catalogue, not a fixed 'coming soon'", () => {
+  const map = readFileSync(join(__dirname, "..", "..", "components", "marketing", "labour-market-os-map.tsx"), "utf8");
+  it("the company / agency / customer row follows the three workspaces' availability (Codex P2 on #3212)", () => {
+    expect(map).toContain("const nonWorker = nonWorkerSpacesState();");
+    expect(map).toContain("kind: nonWorker,");
+    expect(map).toContain('nonWorker === "active" ? "vision.controlRoom.nonWorkerStatusActive" : "vision.controlRoom.nonWorkerStatus"');
+    // Today all three are proven active, so the row says "working".
+    expect(nonWorkerSpacesState()).toBe("active");
+    for (const locale of activeLocales)
+      expect(JSON.parse(readFileSync(join(__dirname, "..", "..", "messages", `${locale}.json`), "utf8")).vision.controlRoom.nonWorkerStatusActive, locale).toMatch(/\S/);
+  });
+
+  it("no row on the page is hard-wired to 'preparing' or to a 'coming soon' status", () => {
+    // Every status chip in the component is derived: a literal preparing kind
+    // or the bare nonWorkerStatus key outside its condition would bring back
+    // a fixed "coming soon" beside the active catalogue.
+    expect(map).not.toMatch(/kind:\s*"preparing"/);
+    expect(map.match(/"vision\.controlRoom\.nonWorkerStatus"/g)?.length).toBe(1);
+    expect(map).toMatch(/: "vision\.controlRoom\.nonWorkerStatus"/);
+  });
+
+  it("negative control: one workspace not active turns the row back to preparing", () => {
+    for (const key of NON_WORKER_WORKSPACES) {
+      const broken = FEATURES.map((f) => (f.key === key ? { ...f, availability: "preparing" as const } : f));
+      expect(nonWorkerSpacesState(broken), key).toBe("preparing");
+    }
+    expect(nonWorkerSpacesState(FEATURES.filter((f) => f.key !== "agency_workspace"))).toBe("preparing");
+  });
 });
 
 describe("the account page shows a held live role as working", () => {
