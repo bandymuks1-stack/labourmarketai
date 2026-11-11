@@ -97,6 +97,21 @@ describe("company claim operator tools", () => {
     expect(src).not.toMatch(/formData\.get\("locale"\)\s*\?\?\s*"lt"\)\.slice/);
   });
 
+  it("a confirm with other evidence than the preview is refused", async () => {
+    const claim = { id: ORG, organization_id: ORG, state: "requested", verification_method: "x", representative_role: "Director", invitation_id: null, created_at: "2026-11-11" };
+    const { rpcs, c } = caller(true);
+    const t = { select: () => t, eq: () => t, maybeSingle: () => Promise.resolve({ data: claim, error: null }) };
+    (c as unknown as { supabase: { from: () => unknown } }).supabase.from = () => t;
+    const preview = await byId["company.claim.decide.preview"].run(c, { claimId: ORG, decision: "verify", evidence: "register extract QA-1" });
+    expect(preview.ok).toBe(true);
+    const token = (preview as { data: { confirmationToken: string } }).data.confirmationToken;
+    const r = await byId["company.claim.decide.confirm"].run(c, { claimId: ORG, decision: "verify", evidence: "something else", confirmationToken: token });
+    expect(r).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(rpcs.map((x) => x.fn)).not.toContain("decide_organization_claim_v2");
+    await byId["company.claim.decide.confirm"].run(c, { claimId: ORG, decision: "verify", evidence: " register extract QA-1 ", confirmationToken: token });
+    expect(rpcs.map((x) => x.fn)).toContain("decide_organization_claim_v2");
+  });
+
   it("writes only through the migration's functions", () => {
     const src = readFileSync(join(__dirname, "company-claim-capabilities.ts"), "utf8");
     expect(src).toMatch(/rpc\("create_claim_invitation_v1"/);

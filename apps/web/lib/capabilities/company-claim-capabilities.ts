@@ -268,6 +268,14 @@ const decideFields = z
   })
   .strict();
 
+/** What the operator reviewed: changing the evidence or the note needs another preview. */
+const decideTokenInput = (claimId: string, p: { decision: string; evidence?: string | null; note?: string | null }) => ({
+  claimId,
+  decision: p.decision,
+  evidence: (p.evidence ?? "").trim(),
+  note: (p.note ?? "").trim(),
+});
+
 const decideFingerprint = (claimId: string, decision: string, state: string) => `company-claim-decide:${claimId}:${decision}:${state}`;
 
 /** The claim, or "needs_migration" when the claim-invitation columns are not there yet (42703). */
@@ -308,7 +316,7 @@ const companyClaimDecidePreview: CapabilityDescriptor = {
     const org = await readCompany(caller, claim.organization_id);
     const token = mintCapabilityConfirmation({
       actionId: "company.claim.decide.confirm",
-      input: { claimId: claim.id, decision: parsed.decision },
+      input: decideTokenInput(claim.id, parsed),
       userId: caller.userId,
       stateFingerprint: decideFingerprint(claim.id, parsed.decision, claim.state),
     });
@@ -349,7 +357,7 @@ const companyClaimDecideConfirm: CapabilityDescriptor = {
     const verdict = await verifyCapabilityConfirmation({
       actionId: "company.claim.decide.confirm",
       token: confirmationToken,
-      input: { claimId: claim.id, decision: parsed.decision },
+      input: decideTokenInput(claim.id, parsed),
       userId: caller.userId,
       currentStateFingerprint: decideFingerprint(claim.id, parsed.decision, claim.state),
     });
