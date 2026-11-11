@@ -94,4 +94,7 @@ begin
   return new;
 end $function$;
 
+-- A trigger function: no client role calls it (production ACL is postgres only).
+revoke execute on function public.mirror_company_to_org() from public, anon, authenticated;
+
 commit;

@@ -121,6 +121,9 @@ begin
   return new;
 end $function$;
 
+-- A trigger function: no client role calls it (production ACL is postgres only).
+revoke execute on function public.mirror_company_to_org() from public, anon, authenticated;
+
 -- 2. What the representative stated ------------------------------------------------------------
 alter table public.organization_claims
   add column if not exists invitation_id uuid references public.invitations(id) on delete set null,
