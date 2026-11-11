@@ -192,6 +192,64 @@ function recordBearerFailure(key: string): void {
 }
 
 /**
+ * THE TOKEN'S AUDIENCE (C-3, owner P0 2026-11-11 — needs owner approval).
+ *
+ * `auth.getUser(jwt)` proves the token is this project's, unexpired and for a
+ * user who still exists. It does not say WHO THE TOKEN WAS FOR. Every user
+ * token Supabase Auth issues today — the web session, the mobile app, the
+ * production walks and the OAuth 2.1 tokens ChatGPT receives — carries
+ * `aud: "authenticated"` (the platform default; this project has no
+ * access-token hook that changes it). An audience naming a resource URL is
+ * what an RFC 8707 / MCP-bound token carries, and such a token is accepted
+ * only by THAT resource.
+ *
+ * So, after verification:
+ *   - `aud` contains `"authenticated"`                          → accepted;
+ *   - `aud` contains this request's own public URL (origin + path) → accepted;
+ *   - anything else, including a token with no `aud` at all    → refused as
+ *     `invalid-bearer`, the same indistinguishable 401 as every verdict.
+ *
+ * The payload is read only AFTER the auth server verified the signature, so
+ * decoding it here is reading a fact, never trusting a claim.
+ */
+export const SUPABASE_USER_AUDIENCE = "authenticated" as const;
+
+/** The `aud` claim of a JWT as a list, or null when unreadable or absent. */
+export function tokenAudiences(token: string): string[] | null {
+  const payload = token.split(".")[1];
+  if (!payload) return null;
+  try {
+    const claims: unknown = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    if (typeof claims !== "object" || claims === null) return null;
+    const aud = (claims as { aud?: unknown }).aud;
+    const list = typeof aud === "string" ? [aud] : Array.isArray(aud) ? aud : null;
+    if (!list || list.length === 0 || !list.every((a) => typeof a === "string")) return null;
+    return list as string[];
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * PURE: whether a verified token's audience admits it to `resource` (the
+ * request's own public origin + path, no trailing slash). `resource` is a
+ * function so the origin is only worked out when a URL audience needs it.
+ */
+export function audienceAccepted(aud: readonly string[] | null, resource: () => string): boolean {
+  if (aud === null) return false;
+  if (aud.includes(SUPABASE_USER_AUDIENCE)) return true;
+  const own = resource();
+  return aud.some((a) => a.replace(/\/$/, "") === own);
+}
+
+async function requestResource(req: Request): Promise<string> {
+  // Loaded only for a resource-bound token: the public-origin rule (bind host,
+  // forwarded host, PUBLIC_ORIGIN) lives in one place and is not restated here.
+  const { requestPublicOrigin } = await import("@/lib/mcp/public-origin");
+  return `${requestPublicOrigin(req)}${new URL(req.url).pathname.replace(/\/$/, "")}`;
+}
+
+/**
  * Verify a bearer token and build the caller's client.
  *
  * Verification uses the platform's OWN mechanism (`auth.getUser(jwt)` against
@@ -204,6 +262,7 @@ function recordBearerFailure(key: string): void {
  */
 async function identityFromBearer(
   token: string,
+  req: Request,
 ): Promise<ApiIdentityResult> {
   const { url, anonKey } = requireSupabaseClientEnv();
 
@@ -236,6 +295,9 @@ async function identityFromBearer(
       return { ok: false, reason: authErrorIsInfrastructure(error) ? "identity-unavailable" : "invalid-bearer" };
     }
     if (!data?.user) return { ok: false, reason: "invalid-bearer" };
+    const aud = tokenAudiences(token);
+    const own = aud?.includes(SUPABASE_USER_AUDIENCE) ? "" : await requestResource(req);
+    if (!audienceAccepted(aud, () => own)) return { ok: false, reason: "invalid-bearer" };
     // The no-argument `auth.getUser()` of a session-less client has no session
     // to read and answers "no user" — so any domain helper that asks the
     // client who is calling (the cookie client's own idiom) would see an
@@ -296,7 +358,7 @@ export async function resolveApiIdentity(
       return { ok: false, reason: "malformed-bearer" };
     }
 
-    const result = await identityFromBearer(bearer.token);
+    const result = await identityFromBearer(bearer.token, req);
     // A REJECTED token is a failure the caller caused; an unreachable auth
     // server is not. Only the first spends failure budget.
     if (!result.ok && result.reason === "invalid-bearer") {
