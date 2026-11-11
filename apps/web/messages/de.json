@@ -20474,6 +20474,7 @@
         "invalid_role": "Geben Sie Ihre Funktion an (2–80 Zeichen).",
         "not_claimable": "Dieses Unternehmensprofil kann nicht mehr übernommen werden.",
         "inviter_cannot_claim": "Der Operator, der die Einladung gesendet hat, kann sie nicht selbst verwenden.",
+        "operator_cannot_claim": "Eine Person mit Operator-Rechten kann kein Unternehmen übernehmen.",
         "verify_sent": "Wir haben Ihnen einen Link geschickt. Öffnen Sie ihn, dann kommen Sie hierher zurück.",
         "verify_rate_limited": "Wir haben gerade erst einen Link gesendet. Prüfen Sie Ihre E-Mails oder versuchen Sie es später.",
         "error": "Das hat nicht geklappt. Versuchen Sie es später erneut."

@@ -20474,6 +20474,7 @@
         "invalid_role": "Vul je functie in (2–80 tekens).",
         "not_claimable": "Dit bedrijfsprofiel kan niet meer worden overgenomen.",
         "inviter_cannot_claim": "De operator die de uitnodiging stuurde, kan die niet zelf gebruiken.",
+        "operator_cannot_claim": "Iemand met operatorrechten kan geen bedrijf overnemen.",
         "verify_sent": "We hebben een link naar je e-mail gestuurd. Open die en je komt hier terug.",
         "verify_rate_limited": "We hebben net een link gestuurd. Kijk in je e-mail of probeer het later opnieuw.",
         "error": "Dat lukte niet. Probeer het later opnieuw."

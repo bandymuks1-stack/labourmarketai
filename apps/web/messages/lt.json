@@ -20474,6 +20474,7 @@
         "invalid_role": "Įrašyk savo pareigas (2–80 simbolių).",
         "not_claimable": "Šios įmonės profilio perimti nebegalima.",
         "inviter_cannot_claim": "Kvietimą siuntęs operatorius negali juo perimti įmonės.",
+        "operator_cannot_claim": "Operatoriaus teises turintis asmuo negali perimti įmonės.",
         "verify_sent": "Išsiuntėme nuorodą į tavo el. paštą. Atidaryk ją ir grįši čia.",
         "verify_rate_limited": "Nuorodą neseniai jau siuntėme. Patikrink el. paštą arba bandyk vėliau.",
         "error": "Nepavyko. Bandyk dar kartą vėliau."

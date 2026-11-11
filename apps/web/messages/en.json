@@ -20474,6 +20474,7 @@
         "invalid_role": "Enter your role (2–80 characters).",
         "not_claimable": "This company profile can no longer be taken over.",
         "inviter_cannot_claim": "The operator who sent the invitation cannot use it to take over the company.",
+        "operator_cannot_claim": "A person with operator rights cannot take over a company.",
         "verify_sent": "We sent a link to your e-mail. Open it and you'll come back here.",
         "verify_rate_limited": "We sent a link a moment ago. Check your e-mail or try again later.",
         "error": "That didn't work. Try again later."

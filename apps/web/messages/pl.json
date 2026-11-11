@@ -20474,6 +20474,7 @@
         "invalid_role": "Wpisz swoje stanowisko (2–80 znaków).",
         "not_claimable": "Tego profilu firmy nie można już przejąć.",
         "inviter_cannot_claim": "Operator, który wysłał zaproszenie, nie może sam go użyć.",
+        "operator_cannot_claim": "Osoba z uprawnieniami operatora nie może przejąć firmy.",
         "verify_sent": "Wysłaliśmy link na twój e-mail. Otwórz go, a wrócisz tutaj.",
         "verify_rate_limited": "Link został wysłany przed chwilą. Sprawdź e-mail lub spróbuj później.",
         "error": "Nie udało się. Spróbuj później."

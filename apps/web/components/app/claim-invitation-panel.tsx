@@ -21,6 +21,7 @@ const KNOWN_OUTCOMES = new Set([
   "invalid_role",
   "not_claimable",
   "inviter_cannot_claim",
+  "operator_cannot_claim",
   "verify_sent",
   "verify_rate_limited",
 ]);
