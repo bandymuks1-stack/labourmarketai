@@ -104,7 +104,7 @@ describe("company claim operator tools", () => {
     (c as unknown as { supabase: { from: () => unknown } }).supabase.from = () => t;
     const preview = await byId["company.claim.decide.preview"].run(c, { claimId: ORG, decision: "verify", evidence: "register extract QA-1" });
     expect(preview.ok).toBe(true);
-    const token = (preview as { data: { confirmationToken: string } }).data.confirmationToken;
+    const token = (preview as unknown as { data: { confirmationToken: string } }).data.confirmationToken;
     const r = await byId["company.claim.decide.confirm"].run(c, { claimId: ORG, decision: "verify", evidence: "something else", confirmationToken: token });
     expect(r).toMatchObject({ ok: false, code: "confirmation_rejected" });
     expect(rpcs.map((x) => x.fn)).not.toContain("decide_organization_claim_v2");
