@@ -33,7 +33,7 @@ on:
       - "apps/web/tests/e2e/app-nav-goals-isolated.spec.ts"
       - "apps/web/lib/navigation/home-goals*"
       - "apps/web/components/app/home/home-goal-cards.tsx"
-      - "apps/web/components/app/home/ask-assistant-entry.tsx"
+      - "apps/web/components/app/home/ask-composer-entry.tsx"
       - "apps/web/components/app/conversation/chat/my-space-row.tsx"
       - "apps/web/lib/workspace/pin*"
       - "apps/web/lib/journal/entry-skill-retraction.ts"
