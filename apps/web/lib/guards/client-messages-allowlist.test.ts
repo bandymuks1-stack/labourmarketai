@@ -6,6 +6,8 @@ import {
   AUTH_CLIENT_MESSAGE_ROOTS,
   BASE_CLIENT_MESSAGE_ROOTS,
   CLIENT_MESSAGE_ROOTS,
+  LANDING_CLIENT_LANDING_KEYS,
+  LANDING_CLIENT_MESSAGE_ROOTS,
   MARKETING_CLIENT_MESSAGE_ROOTS,
   pickClientMessages,
   pickMessages,
@@ -119,6 +121,8 @@ interface DerivedClientUsage {
   /** Top-level roots of literal useTranslations("…") calls in reachable
    *  "use client" files. */
   literalRoots: Set<string>;
+  /** Every literal namespace a client file names, whole ("landing.entry"). */
+  literalNamespaces: Set<string>;
   /** Reachable "use client" files containing a NON-literal
    *  useTranslations(…) call (whole tree / variable namespace). */
   dynamicCallFiles: string[];
@@ -148,12 +152,14 @@ function deriveClientUsage(entryFiles: string[]): DerivedClientUsage {
     }
   }
   const literalRoots = new Set<string>();
+  const literalNamespaces = new Set<string>();
   const dynamicCallFiles = new Set<string>();
   for (const f of seen) {
     const src = readFileSync(f, "utf8");
     if (!src.slice(0, 300).includes('"use client"')) continue;
     for (const m of src.matchAll(/useTranslations\("([^"]+)"\)/g)) {
       literalRoots.add(m[1].split(".")[0]);
+      literalNamespaces.add(m[1]);
     }
     for (const m of src.matchAll(/useTranslations\((?!\s*")([^)]*)\)/g)) {
       dynamicCallFiles.add(
@@ -163,6 +169,7 @@ function deriveClientUsage(entryFiles: string[]): DerivedClientUsage {
   }
   return {
     literalRoots,
+    literalNamespaces,
     dynamicCallFiles: [...dynamicCallFiles].sort(),
     unresolved: [...unresolved].sort(),
   };
@@ -274,19 +281,28 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
     );
   });
 
-  it("focus-landing tree ⊆ MARKETING_CLIENT_MESSAGE_ROOTS", () => {
-    // FOCUS is the restored previous production landing. It rendered inside
-    // the (marketing) route group, whose layout supplied the provider; at
-    // `/{locale}` it mounts that SAME marketing pick itself, so it is a
-    // subset tree in its own right rather than a provider-less one.
+  it("focus-landing tree ⊆ LANDING_CLIENT_MESSAGE_ROOTS", () => {
+    // The landing mounts its OWN, smaller pick (a lighter first screen,
+    // 2026-11-12): only the roots its client components can reach.
     const usage = deriveClientUsage(
       treeEntries(join(LOCALE_DIR, "focus-landing")),
     );
     assertGroupCovered(
       usage,
-      MARKETING_CLIENT_MESSAGE_ROOTS,
+      LANDING_CLIENT_MESSAGE_ROOTS,
       "focus-landing",
     );
+    // Inside `landing` the pick is narrower still: every `landing.<key>` a
+    // client component of this tree names must be shipped, and none may read
+    // the whole `landing` namespace.
+    const landingKeys = [...usage.literalNamespaces]
+      .filter((n) => n === "landing" || n.startsWith("landing."))
+      .map((n) => n.split(".")[1] ?? "(whole namespace)");
+    const shipped: ReadonlySet<string> = new Set(LANDING_CLIENT_LANDING_KEYS);
+    expect(
+      landingKeys.filter((k) => !shipped.has(k)).sort(),
+      "focus-landing: a client component reads a landing.* namespace the landing pick does not ship",
+    ).toEqual([]);
   });
 
   it("auth tree ⊆ AUTH_CLIENT_MESSAGE_ROOTS", () => {
@@ -404,6 +420,12 @@ describe("each layout ships its pick, not the full tree", () => {
   it("(marketing) layout ships the MARKETING pick", () => {
     expect(layoutSrc("(marketing)", "layout.tsx")).toMatch(
       /NextIntlClientProvider[\s\S]{0,200}?messages=\{pickMessages\(\s*await getMessages\(\),\s*MARKETING_CLIENT_MESSAGE_ROOTS,?\s*\)\}/,
+    );
+  });
+
+  it("the landing ships its own, smaller pick", () => {
+    expect(layoutSrc("focus-landing", "focus-landing.tsx")).toMatch(
+      /NextIntlClientProvider[\s\S]{0,200}?messages=\{pickLandingMessages\(await getMessages\(\)\)\}/,
     );
   });
 

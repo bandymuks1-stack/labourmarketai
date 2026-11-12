@@ -160,6 +160,11 @@ describe("desktop and mobile render ONE list", () => {
       "<SiteNav goalsOnPage />",
     );
     expect(read("app/[locale]/(marketing)/layout.tsx")).not.toMatch(/goalsOnPage/);
+    // ONE goal bar element: the header's second row on inner pages, folded
+    // into the first row on the landing (no sparse second row there).
+    expect(nav.match(/<IntentMegaMenu/g)).toHaveLength(1);
+    expect(nav).toMatch(/\{goalsOnPage && megaMenu\}/);
+    expect(nav).toMatch(/\{!goalsOnPage && megaMenu\}/);
   });
 
   it("the account-creating action is named Sign up, in the header and on the phone's first screen", () => {
@@ -204,6 +209,33 @@ describe("the disclosure is accessible", () => {
     expect(mobile).toMatch(/mobile-intent-toggle-[\s\S]{0,400}min-h-11/);
     expect(mega).toMatch(/motion-reduce:transition-none/);
     expect(mobile).toMatch(/motion-reduce:transition-none/);
+  });
+
+  it("a shell may put a first group of direct links before the goals, on both menus", async () => {
+    vi.doMock("@/lib/i18n/navigation", () => ({
+      Link: ({ href, children, ...rest }: { href: string; children: unknown }) =>
+        createElement("a", { href, ...rest }, children as never),
+    }));
+    const { IntentMegaMenu } = await import("@/components/layouts/intent-mega-menu");
+    const lead = [
+      { key: "home", href: "/dashboard", label: "My space", current: true },
+      { key: "journal", href: "/dashboard/journal", label: "Work journal" },
+    ];
+    const html = renderToStaticMarkup(
+      createElement(IntentMegaMenu, { intents: [], lead, navLabel: "Main", accountLabel: "x" }),
+    );
+    expect(html).toContain('data-testid="intent-lead-home"');
+    expect(html).toMatch(/aria-current="page"[^>]*>My space</);
+    expect(html).toMatch(/href="\/dashboard\/journal"[^>]*>Work journal</);
+    expect(html.match(/aria-current/g)).toHaveLength(1);
+    // The public shell passes none, so its bar is unchanged.
+    const none = renderToStaticMarkup(
+      createElement(IntentMegaMenu, { intents: [], navLabel: "Main", accountLabel: "x" }),
+    );
+    expect(none).not.toContain("intent-lead-");
+    expect(read("components/layouts/site-nav.tsx")).not.toMatch(/lead=/);
+    expect(mobile).toMatch(/data-testid="mobile-nav-lead"/);
+    expect(mobile).toMatch(/lead\.length > 0 &&/);
   });
 
   it("renders six named, collapsed intents with no panel on first paint", async () => {

@@ -151,6 +151,22 @@ export async function SiteNav({
       {tSpace("overview")}
     </AuthCtaLink>
   );
+  // ONE goal bar element, placed by the page: the header's second row on
+  // inner pages; on the landing (no goals in it) it sits in the first row.
+  const megaMenu = (
+    <IntentMegaMenu
+      className="hidden lg:block"
+      intents={intents}
+      goalsOnPage={goalsOnPage}
+      navLabel={tIntent("trigger")}
+      accountLabel={tIntent("account")}
+      assistant={assistant}
+      more={{
+        label: tIntent("more"),
+        links: links.map((l) => ({ key: l.key, href: l.href, label: t(l.key) })),
+      }}
+    />
+  );
   const themeLabels = { toDark: t("themeToDark"), toLight: t("themeToLight") };
 
   return (
@@ -190,6 +206,7 @@ export async function SiteNav({
           </span>
         </Link>
 
+        {goalsOnPage && megaMenu}
 
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3 md:gap-4">
           {/* Auth CTAs pin to the app origin on marketing hosts so OAuth's
@@ -258,18 +275,7 @@ export async function SiteNav({
           visible, each two actions from the start of its function. Below `lg`
           the same six open the menu above. The panel anchors to the <header>
           (the nearest positioned box), so it spans the full width. */}
-      <IntentMegaMenu
-        className="hidden border-t border-ink-600/60 lg:block"
-        intents={intents}
-        goalsOnPage={goalsOnPage}
-        navLabel={tIntent("trigger")}
-        accountLabel={tIntent("account")}
-        assistant={assistant}
-        more={{
-          label: tIntent("more"),
-          links: links.map((l) => ({ key: l.key, href: l.href, label: t(l.key) })),
-        }}
-      />
+      {!goalsOnPage && megaMenu}
     </header>
   );
 }

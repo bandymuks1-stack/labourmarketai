@@ -37,3 +37,17 @@ export type RenderedIntent = {
     readonly account: boolean;
   }>;
 };
+
+/**
+ * The FIRST GROUP of the one navigation, where a shell has one: the places a
+ * signed-in person returns to all day (home, journal, calendar, messages).
+ * Plain links, shown before the goals in the bar and at the top of the menu.
+ * The public shell passes none.
+ */
+export type NavLeadLink = {
+  readonly key: string;
+  readonly href: string;
+  readonly label: string;
+  /** True for the page the person is on (`aria-current="page"`). */
+  readonly current?: boolean;
+};

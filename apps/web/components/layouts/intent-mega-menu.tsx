@@ -5,7 +5,11 @@ import { LogIn, MessageCircle } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { INTENT_ICONS, type RenderedIntent } from "@/components/layouts/intent-icons";
+import {
+  INTENT_ICONS,
+  type NavLeadLink,
+  type RenderedIntent,
+} from "@/components/layouts/intent-icons";
 
 /**
  * THE INTENT BAR + MEGA-MENU of the public header (desktop, `lg` and up) —
@@ -32,6 +36,7 @@ import { INTENT_ICONS, type RenderedIntent } from "@/components/layouts/intent-i
 export function IntentMegaMenu({
   intents: allIntents,
   goalsOnPage = false,
+  lead = [],
   navLabel,
   accountLabel,
   assistant,
@@ -42,6 +47,10 @@ export function IntentMegaMenu({
   /** True where the page itself shows the six goals (the landing): the bar
    *  then carries only "More" and the assistant, so the goals appear once. */
   goalsOnPage?: boolean;
+  /** The first group: direct links shown before the goals (signed-in: home,
+   *  journal, calendar, messages). Shown on every page, also where the goals
+   *  are on the page itself. */
+  lead?: readonly NavLeadLink[];
   /** Accessible name of the intent navigation. */
   navLabel: string;
   /** Short note beside links that live inside the signed-in product. */
@@ -95,14 +104,47 @@ export function IntentMegaMenu({
       ref={rootRef}
       aria-label={navLabel}
       data-testid="intent-bar"
-      className={className}
+      // Inner pages: the goal bar is the header's second row. The landing has
+      // no goal bar (its cards carry the goals), so "More" and the assistant
+      // sit in the header's first row and no second row is drawn.
+      className={cn(className, !goalsOnPage && "border-t border-ink-600/60")}
       onBlur={(e) => {
         const next = e.relatedTarget as Node | null;
         if (next && rootRef.current && !rootRef.current.contains(next)) setActive(null);
       }}
     >
-      <div className="mx-auto flex max-w-container items-center gap-1 px-12">
-        <ul className="flex min-w-0 flex-1 items-center gap-1">
+      <div
+        className={cn(
+          "flex items-center gap-1",
+          !goalsOnPage && "mx-auto max-w-container px-12",
+        )}
+      >
+        <ul className={cn("flex min-w-0 items-center gap-1", !goalsOnPage && "flex-1")}>
+          {lead.map((link, i) => (
+            <li
+              key={link.key}
+              className={cn(
+                "shrink-0",
+                // A hairline closes the group before the goals / "More".
+                i === lead.length - 1 && "mr-1 border-r border-ink-600 pr-2",
+              )}
+            >
+              <Link
+                href={link.href}
+                aria-current={link.current ? "page" : undefined}
+                data-testid={`intent-lead-${link.key}`}
+                onClick={() => setActive(null)}
+                className={cn(
+                  "inline-flex min-h-11 items-center whitespace-nowrap rounded-control px-2 text-sm font-medium transition-colors motion-reduce:transition-none xl:px-3",
+                  link.current
+                    ? "bg-ink-800 text-text-primary"
+                    : "text-text-secondary hover:bg-ink-800/60 hover:text-text-primary",
+                )}
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
           {intents.map((intent) => {
             const Icon = INTENT_ICONS[intent.iconKey];
             const isActive = active === intent.id;

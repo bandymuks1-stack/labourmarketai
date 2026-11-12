@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, LogIn, Menu, MessageCircle, X } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { INTENT_ICONS, type RenderedIntent } from "@/components/layouts/intent-icons";
+import { INTENT_ICONS, type NavLeadLink, type RenderedIntent } from "@/components/layouts/intent-icons";
 
 export type MobileNavItem = {
   key: string;
@@ -42,6 +42,7 @@ export function MobileNavMenu({
   className,
   authSection,
   intents = [],
+  lead = [],
   accountLabel = "",
   assistant,
 }: {
@@ -55,6 +56,9 @@ export function MobileNavMenu({
   authSection?: ReactNode;
   /** The six public intents, labels resolved on the server. */
   intents?: readonly RenderedIntent[];
+  /** The first group (signed-in: home, journal, calendar, messages): direct
+   *  links at the top of the menu, before the goals. */
+  lead?: readonly NavLeadLink[];
   /** Short note beside links that live inside the signed-in product. */
   accountLabel?: string;
   /** The "ask the assistant" entry — the existing conversation home. */
@@ -127,6 +131,25 @@ export function MobileNavMenu({
               2026-11-12): on a 360px phone sign in / sign up were below the
               fold of the panel, after five links nobody came for. */}
           {authSection}
+          {lead.length > 0 && (
+            <ul data-testid="mobile-nav-lead" className="mb-1.5 border-b border-ink-600 pb-1.5">
+              {lead.map((link) => (
+                <li key={link.key}>
+                  <Link
+                    href={link.href}
+                    aria-current={link.current ? "page" : undefined}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-ink-800 hover:text-text-primary motion-reduce:transition-none",
+                      link.current ? "bg-ink-800 text-text-primary" : "text-text-secondary",
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
           {intents.length > 0 && (
             <ul data-testid="mobile-nav-intents" className="mb-1.5 border-b border-ink-600 pb-1.5">
               {intents.map((intent) => {
