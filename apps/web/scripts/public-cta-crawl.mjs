@@ -18,6 +18,7 @@
  *   - every button that is visible, enabled and not a form submit: clicked once;
  *     "dead" when the click changes nothing a person could notice (no navigation,
  *     no request, no DOM change, no new tab);
+ *     an error thrown or a script that fails to load when a button is pressed is a finding too;
  *   - banned words in the visible copy ("demo", doctrine §18).
  *
  * READ-ONLY BY CONSTRUCTION. Signed out, no cookies kept between pages, and every
@@ -130,6 +131,9 @@ async function resolveTarget(request, url) {
   return p;
 }
 
+/** Writes the crawl has aborted so far (see the route below). */
+let writesBlocked = 0;
+
 async function newContext(browser, width) {
   const context = await browser.newContext({
     viewport: { width, height: width < 600 ? 780 : 900 },
@@ -140,7 +144,10 @@ async function newContext(browser, width) {
   // The write lock: nothing but GET / HEAD ever leaves the browser.
   await context.route("**/*", async (route) => {
     const req = route.request();
-    if (!["GET", "HEAD"].includes(req.method())) return route.abort("blockedbyclient");
+    if (!["GET", "HEAD"].includes(req.method())) {
+      writesBlocked++; // the crawl stopped a write: an error that follows is the crawl's doing
+      return route.abort("blockedbyclient");
+    }
     // Other sites (analytics, sign-in widgets, fonts) are not under test and are never loaded.
     if (!req.url().startsWith(ORIGIN) && !/^(data|blob):/.test(req.url())) return route.abort("blockedbyclient");
     // --static-via-node: when the crawl itself sits behind a URL-normalising proxy that breaks
@@ -218,6 +225,9 @@ async function crawlPage(context, path, width, discovered) {
   if (screen.notFound && status === 200) report("not-found-screen", path, width, "not-found content behind HTTP 200");
   for (const f of new Set(failedScripts)) report("script-failed", path, width, f);
   for (const e of new Set(pageErrors)) report("page-error", path, width, e);
+  // What follows is collected again after the controls are pressed.
+  failedScripts.length = 0;
+  pageErrors.length = 0;
   if (screen.overflow > 1) report("horizontal-overflow", path, width, `${screen.overflow}px wider than the screen`);
   for (const re of BANNED) {
     const m = screen.text.match(re);
@@ -332,6 +342,7 @@ async function crawlPage(context, path, width, discovered) {
       if (pressed >= 2) continue;
       pressCount.set(sigKey, (pressCount.get(sigKey) ?? 0) + 1);
       pressCount.set(`${width}|*|${info.signature}`, (pressCount.get(`${width}|*|${info.signature}`) ?? 0) + 0.25);
+      const blockedBefore = writesBlocked;
       // Focus first: a press always moves focus to the control, and that alone is not an effect.
       await button.focus({ timeout: 800 }).catch(() => {});
       presses++;
@@ -367,6 +378,16 @@ async function crawlPage(context, path, width, discovered) {
         if (changed) break;
       }
       if (dead) report("dead-button", path, width, `"${info.text || info.testid || "(no text)"}" does nothing when pressed`);
+      // A press that throws, or loads a script that fails, is a broken control even though
+      // "something happened". Not when the crawl itself aborted the control's write: the
+      // error is then the crawl's doing, and the errors are dropped unreported.
+      if (writesBlocked === blockedBefore) {
+        const name = `"${info.text || info.testid || "(no text)"}"`;
+        for (const f of new Set(failedScripts)) report("script-failed", path, width, `after pressing ${name}: ${f}`);
+        for (const e of new Set(pageErrors)) report("page-error", path, width, `after pressing ${name}: ${e}`);
+      }
+      failedScripts.length = 0;
+      pageErrors.length = 0;
       const after = { open: opened ? 1 : 0 };
       const before = { open: 0 };
       // close whatever opened, so the next button is reachable
