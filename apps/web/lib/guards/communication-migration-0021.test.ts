@@ -172,8 +172,10 @@ describe("communication v1 — no service_role, no file upload, no fake indicato
     expect(all).not.toMatch(/\btyping\.\.\./i);
   });
 
-  it("composer surfaces the precise server-side error message (no generic blob)", () => {
-    expect(composer).toMatch(/setError\(result\.message\)/);
+  it("composer surfaces the precise error for the failure (no generic blob)", () => {
+    // 2026-11-12 (Swedish employer audit N-3): precise per failure CODE, in the
+    // person's language — the server's text is a Lithuanian developer message.
+    expect(composer).toMatch(/setError\(t\(`errors\.\$\{communicationErrorKey\(result\.code\)\}`\)\)/);
   });
 });
 

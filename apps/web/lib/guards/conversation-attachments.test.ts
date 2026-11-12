@@ -123,7 +123,7 @@ describe("app flow — composer honesty", () => {
   const code = stripComments(composer);
   it("failure paths keep the typed text (setBody('') only after a successful send)", () => {
     // Every early-return error branch precedes the single setBody("") reset.
-    const errorReturn = code.indexOf("setError(result.message)");
+    const errorReturn = code.indexOf("setError(t(`errors.${communicationErrorKey(result.code)}`))");
     const bodyReset = code.indexOf('setBody("")');
     expect(errorReturn).toBeGreaterThan(-1);
     expect(bodyReset).toBeGreaterThan(errorReturn);
