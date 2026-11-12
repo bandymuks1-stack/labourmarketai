@@ -34,6 +34,6 @@ describe("DashboardChrome keeps RSC slots behind a non-DOM boundary", () => {
     // so those slots no longer exist; if a server-authored slot comes back it
     // must be wrapped again.
     expect(src).not.toMatch(/fullHeader|fullBottomNav/);
-    expect(src).toMatch(/<ConversationHeader title=\{headerTitle\} nav=\{nav\} goalBar=\{goalBar\} \/>/);
+    expect(src).toMatch(/<ConversationHeader title=\{headerTitle\} nav=\{nav\} \/>/);
   });
 });

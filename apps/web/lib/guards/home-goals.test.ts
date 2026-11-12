@@ -545,37 +545,3 @@ describe("the signed-in skip link (WCAG 2.4.1)", () => {
     expect(chat.indexOf("id={APP_CONTENT_ID}")).toBeGreaterThan(chat.indexOf("<ConversationHeader title={labels.headerTitle}"));
   });
 });
-
-describe("one header rule: the shared goal bar on every signed-in page but the home", () => {
-  const header = read("components/app/conversation/chat/conversation-header.tsx");
-  const loader = read("lib/navigation/home-goals-server.ts");
-
-  it("is the public header's own component, never a second bar", () => {
-    expect(header).toMatch(/import \{ IntentMegaMenu \} from "@\/components\/layouts\/intent-mega-menu";/);
-    expect((header.match(/<IntentMegaMenu\b/g) ?? []).length).toBe(1);
-    // From 1024px, and never on the home, where the goal cards are the navigation.
-    expect(header).toMatch(/const showGoalBar = Boolean\(goalBar && goalBar\.intents\.length > 0 && !mobile && pathname !== "\/dashboard"\);/);
-    expect(header).toMatch(/data-testid="app-goal-bar" className="relative z-20 hidden [^"]*lg:block"/);
-  });
-
-  it("is fed with the SAME goals under the SAME admission as the home", () => {
-    expect(loader).toMatch(/signedInGoals\(role, admission\)\.map/);
-    expect(loader).toMatch(/loadGoalAdmission\(\),/);
-    // The same names as the public bar and the home's rail.
-    expect(loader).toMatch(/short: t\(`intents\.\$\{goal\.id\}\.short`\)/);
-    // The employer's need door is the first function of its goal in the bar.
-    expect(loader).toMatch(/links: \[\.\.\.\(door \? \[door\] : \[\]\), \.\.\.goal\.functions\]/);
-    expect(read("app/[locale]/dashboard/layout.tsx")).toMatch(/goalBar = await loadSignedInGoalBar\(\{ activeRole \}\);/);
-  });
-
-  it("every shell that mounts the header hands it the bar", () => {
-    const chrome = read("components/app/dashboard-chrome.tsx");
-    expect((chrome.match(/<ConversationHeader title=\{headerTitle\} nav=\{nav\} goalBar=\{goalBar\} \/>/g) ?? []).length).toBe(2);
-  });
-
-  it("the old top items each keep one place: icons in the top row, functions under a goal", () => {
-    const goals = read("lib/navigation/home-goals.ts");
-    for (const href of ["/dashboard/journal", "/dashboard/planning"]) expect(goals, href).toContain(`"${href}"`);
-    expect(header).toMatch(/const CORE_LABEL = "sr-only"/);
-  });
-});

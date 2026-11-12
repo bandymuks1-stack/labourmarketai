@@ -4,18 +4,7 @@ import { readActiveRoleRows } from "@/lib/auth/profile-roles";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 import { resolveNeedsAudience } from "@/lib/company/agency-capability";
-import { getTranslations } from "next-intl/server";
-
-import type { RenderedIntent } from "@/components/layouts/intent-icons";
-import {
-  GOAL_FUNCTIONS,
-  goalIsAdmitted,
-  isDoorFor,
-  signedInGoals,
-  type GoalAdmission,
-  type HomeGoalRole,
-} from "@/lib/navigation/home-goals";
-import { ASSISTANT_HREF, PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
+import type { GoalAdmission } from "@/lib/navigation/home-goals";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { createClient } from "@/lib/supabase/server";
 
@@ -74,67 +63,4 @@ export async function loadOrganizationGoalRole(): Promise<"company" | "agency"> 
   const companyType =
     active.companyType ?? (active.organizationType === "agency" ? "staffing_agency" : null);
   return resolveNeedsAudience({ companyType, capabilities }).audience === "offer" ? "agency" : "company";
-}
-
-/** What the shared intent bar needs, with every label already resolved. */
-export type SignedInGoalBar = {
-  readonly intents: readonly RenderedIntent[];
-  readonly navLabel: string;
-  readonly accountLabel: string;
-  readonly assistant: { readonly href: string; readonly label: string };
-};
-
-/**
- * THE SIGNED-IN GOAL BAR (one header rule, 2026-11-12): what the shared
- * intent bar (`components/layouts/intent-mega-menu.tsx`, the public header's
- * own component) shows on every signed-in page that does not draw the goal
- * cards itself — the role's goals, each opening its functions. The SAME data
- * the home's navigator draws (`signedInGoals`), under the SAME admission, so
- * the bar can never offer a destination the home would not.
- *
- * Which list: the active organization's (employer or agency) for a person who
- * governs it, the customer's for a person acting as one, otherwise the
- * person's own. `null` when there is nothing to offer (the bar is then
- * absent, never empty).
- */
-export async function loadSignedInGoalBar(input: {
-  readonly activeRole: string | null;
-}): Promise<SignedInGoalBar | null> {
-  const [admission, t, tAll] = await Promise.all([
-    loadGoalAdmission(),
-    getTranslations("siteNav"),
-    getTranslations(),
-  ]);
-  const governs = admission.opensCompanySpace && (input.activeRole === "company" || input.activeRole === "agency");
-  const role: HomeGoalRole = governs
-    ? await loadOrganizationGoalRole()
-    : input.activeRole === "customer"
-      ? "customer"
-      : "worker";
-  const icons = new Map(PUBLIC_INTENTS.map((intent) => [intent.id, intent.iconKey]));
-  const intents = signedInGoals(role, admission).map((goal) => {
-    // The employer's need door is a function of its goal here: the bar has no
-    // separate tracked link, and the address is the door's own.
-    const door = GOAL_FUNCTIONS[goal.id].find((fn) => isDoorFor(role, fn) && goalIsAdmitted(fn, admission));
-    return {
-      id: goal.id,
-      iconKey: icons.get(goal.id)!,
-      title: t(`intents.${goal.id}.title`),
-      short: t(`intents.${goal.id}.short`),
-      description: t(`intents.${goal.id}.description`),
-      links: [...(door ? [door] : []), ...goal.functions].map((fn) => ({
-        id: fn.id,
-        href: fn.href,
-        label: tAll(fn.labelKey),
-        account: false,
-      })),
-    };
-  });
-  if (intents.length === 0) return null;
-  return {
-    intents,
-    navLabel: t("trigger"),
-    accountLabel: t("account"),
-    assistant: { href: ASSISTANT_HREF, label: t("assistant") },
-  };
 }
