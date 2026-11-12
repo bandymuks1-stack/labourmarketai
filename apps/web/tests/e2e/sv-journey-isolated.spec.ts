@@ -122,13 +122,21 @@ for (const { name, viewport } of VIEWPORTS) {
       await expectSwedish(page);
     });
 
-    test(`SV-4 ${name}: a job search stays Swedish and keeps the query`, async ({ page }) => {
+    test(`SV-4 ${name}: a Swedish profession word becomes its filter, and a free word stays a search`, async ({ page }) => {
       await page.goto(`${BASE}/sv/jobs`);
       await expectSwedish(page);
-      const q = page.locator("#q");
-      await q.fill("svetsare");
-      await q.press("Enter");
-      await page.waitForURL(/\/sv\/jobs\?.*q=svetsare/, { timeout: 30_000 });
+      // "svetsare" is the Swedish catalogue's own word for a welder, so the
+      // board answers with the profession filter — not a text search.
+      await page.locator("#q").fill("svetsare");
+      await page.locator("#q").press("Enter");
+      await page.waitForURL(/\/sv\/jobs\?.*profession=welder/, { timeout: 30_000 });
+      await expectSwedish(page);
+      await expect(page.getByTestId("public-jobs-unavailable")).toHaveCount(0);
+      // A word no catalogue names stays a free-text search, still in Swedish.
+      await page.goto(`${BASE}/sv/jobs`);
+      await page.locator("#q").fill("Göteborg");
+      await page.locator("#q").press("Enter");
+      await page.waitForURL(/\/sv\/jobs\?.*q=G/, { timeout: 30_000 });
       await expectSwedish(page);
       // Either real results or an honest Swedish empty state — never an error page.
       await expect(page.getByTestId("public-jobs-unavailable")).toHaveCount(0);

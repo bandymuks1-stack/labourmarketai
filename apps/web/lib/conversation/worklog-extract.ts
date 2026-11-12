@@ -83,7 +83,7 @@ function durationLabel(mins: number): string {
 // into more digits or a further "-NN" segment ("2026-09-11", "12-13-14",
 // "A-7-12" are none of them spans).
 const SPAN_RE =
-  /(?<![\p{L}\p{N}_\-–—/.:])(?:nuo|from|с|von|van)?\s*(\d{1,2})(?:[:.](\d{2}))?\s*(?:iki|to|до|bis|tot|[-–—])\s*(\d{1,2})(?:[:.](\d{2}))?(?!\p{N}|[-–—/]\p{N})/iu;
+  /(?<![\p{L}\p{N}_\-–—/.:])(?:nuo|from|с|von|van|från)?\s*(\d{1,2})(?:[:.](\d{2}))?\s*(?:iki|to|до|bis|tot|till|[-–—])\s*(\d{1,2})(?:[:.](\d{2}))?(?!\p{N}|[-–—/]\p{N})/iu;
 // Polish "od 7 do 16" — read ONLY as the od…do PAIR: a bare "2 do 3 godzin"
 // is a range of hours (2–3 h), never the clock span 02:00–03:00. Measured
 // 2026-10-11: without it a Polish welder's "od 7 do 16, 30 min przerwy"
@@ -101,7 +101,7 @@ const OVERNIGHT_EARLIEST_START = 12 * 60;
  *  working day: a comma/semicolon/plus or one "and" word, nothing else.
  *  "8-12 ir 13-17" is a split shift; "8-17, sumontavau 3-4 langus" is one
  *  span followed by a count. */
-const SPAN_JOINER_RE = /^\s*(?:[,;+&/]\s*)?(?:(?:ir|and|и|und|en|i|oraz|a|bei)\s+)?$/iu;
+const SPAN_JOINER_RE = /^\s*(?:[,;+&/]\s*)?(?:(?:ir|and|и|und|en|i|oraz|a|bei|och)\s+)?$/iu;
 
 type ResolvedSpans = {
   /** Minutes since midnight of the first span's start. */
@@ -166,20 +166,21 @@ function resolveClockSpans(raw: string): ResolvedSpans | null {
 const BREAK_RE =
   /(\d{1,3})\s*(?:min|минут|мин)\w*/iu;
 // `\b` bounds the ASCII "break" only — "breakdown" is work, not a pause.
-const BREAK_CONTEXT_RE = /(pertrauk|piet[uū]|\bbreaks?\b|lunch|обед|перерыв|pauze|pause|przerw|mittag)/iu;
+const BREAK_CONTEXT_RE = /(pertrauk|piet[uū]|\bbreaks?\b|lunch|обед|перерыв|pauze|pause|przerw|mittag|(?<!\p{L})paus(?!\p{L})|(?<!\p{L})rast(?:en)?(?!\p{L}))/iu;
 // A break stated in HOURS — "1 h break", "1 val. pertrauka", "перерыв 1 час".
 // Read only when the hour figure stands BESIDE the break word, so the day's
 // own "9 valandas" is never taken for the break.
-const BREAK_HOUR_UNIT = String.raw`(\d{1,2})(?:[.,](\d))?\s*(?:h(?!\p{L})|hrs?(?!\p{L})|hour\w*|val\.?|valand\w*|ч(?!\p{L})|час\w*)`;
-const BREAK_WORD = String.raw`(?:pertrauk\w*|piet\w*|\bbreaks?\b|lunch|обед\w*|перерыв\w*|pauze|pause|przerw\w*|mittag\w*)`;
+const BREAK_HOUR_UNIT = String.raw`(\d{1,2})(?:[.,](\d))?\s*(?:h(?!\p{L})|hrs?(?!\p{L})|hour\w*|val\.?|valand\w*|ч(?!\p{L})|час\w*|timm(?:e|es|ar|ars)|tim\.?(?!\p{L}))`;
+const BREAK_WORD = String.raw`(?:pertrauk\w*|piet\w*|\bbreaks?\b|lunch|обед\w*|перерыв\w*|pauze|pause|przerw\w*|mittag\w*|(?<!\p{L})paus(?!\p{L})|(?<!\p{L})rast(?:en)?(?!\p{L}))`;
 const BREAK_HOURS_RE = new RegExp(
   `${BREAK_HOUR_UNIT}\\s*${BREAK_WORD}|${BREAK_WORD}\\s*(?:of\\s+|for\\s+|[:–—-]\\s*)?${BREAK_HOUR_UNIT}`,
   "iu",
 );
 // explicit "8 valandas / hours / часов"
 // pl "8,5 godziny" / "8 godz." and de "8 Std." were not read (walk 2026-10-11:
-// a Polish entry saved with no duration).
-const EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?|godz\w*|std\.?(?!\p{L}))/iu;
+// a Polish entry saved with no duration). sv "8 timmar" / "8 tim" added with
+// the Swedish activation (2026-11-12).
+const EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?|godz\w*|std\.?(?!\p{L})|timm(?:e|es|ar|ars)(?!\p{L})|tim\.?(?!\p{L}))/iu;
 // site after "objekte X" / "statyboje X" / "site X" / "на объекте в X" —
 // the locative forms only: "Statyba" inside a company name is a NAME, not
 // a place word (the context rules below read it)
@@ -193,7 +194,7 @@ const EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|ho
 // a function word, not a time word, not a number, not a verb form.
 // `(?<!\p{L})` keeps "website" from reading as "site".
 const SITE_RE =
-  /(?<!\p{L})(?:objekt\p{L}*|statybo(?:je|se)|site|на\s+объекте|op\s+de\s+locatie|op\s+de\s+bouwplaats|auf\s+der\s+baustelle|na\s+budowie|na\s+obiekcie)(?:\s+(?:in|at|в|w|we|im|in\s+der|bei|op|te|ant|prie))?\s+(\p{L}[\p{L}\p{N}'’-]{1,40})/giu;
+  /(?<!\p{L})(?:objekt\p{L}*|statybo(?:je|se)|site|на\s+объекте|op\s+de\s+locatie|op\s+de\s+bouwplaats|auf\s+der\s+baustelle|na\s+budowie|na\s+obiekcie|på\s+bygget|på\s+byggarbetsplatsen|på\s+arbetsplatsen)(?:\s+(?:in|at|в|w|we|im|in\s+der|bei|op|te|ant|prie|i|vid))?\s+(\p{L}[\p{L}\p{N}'’-]{1,40})/giu;
 /** Words that follow a place word in ordinary work sentences and are never
  *  the place itself: prepositions, articles, conjunctions, day words, the
  *  hours units and generic quantifiers, in the six active languages. */
@@ -217,13 +218,16 @@ const SITE_STOP_WORDS: ReadonlySet<string> = new Set([
   // pl
   "i", "z", "od", "do", "przez", "dla", "dzisiaj", "dziś", "wczoraj", "godzin", "godziny",
   "cały", "dzień", "też", "także",
+  // sv
+  "och", "med", "från", "till", "för", "på", "vid", "en", "ett", "hela", "dagen", "idag",
+  "igår", "timmar", "timme", "tim", "också", "även",
 ]);
 /** A past-tense / participle shape (LT -au, EN -ed/-ing, DE/NL ge…t/en,
  *  RU -л/-ла/-ли, PL -łem/-łam/-ł…) — a verb, never a place. A lower-case
  *  LT word ending in -au is a first-person verb ("mūrijau", "dirbau"), not a
  *  locative place (-e, -oje, -uose, -yje). */
 const SITE_VERB_SHAPE_RE =
-  /^(?:\p{L}{2,}(?:au|ome|ėme)|[a-z]{2,}(?:ed|ing)|ge\p{L}{3,}(?:t|en)|\p{L}{2,}(?:ал|ала|али|ил|ила|или|ял|яла|яли|ел|ела|ели)|\p{L}{2,}(?:łem|łam|łeś|łaś|ł|ła|li|ły))$/iu;
+  /^(?:\p{L}{2,}(?:au|ome|ėme)|[a-z]{2,}(?:ed|ing)|ge\p{L}{3,}(?:t|en)|\p{L}{2,}(?:ал|ала|али|ил|ила|или|ял|яла|яли|ел|ела|ели)|\p{L}{2,}(?:łem|łam|łeś|łaś|ł|ła|li|ły)|\p{L}{3,}ade)$/iu;
 
 /** True when the word after a place word can be a site name. A capitalised
  *  word ("Berlin", "Roterdame", "Kaunas") always can; a lower-case one only
@@ -281,13 +285,13 @@ function trimName(name: string): string {
   return name.replace(/[.,:;!?]+$/u, "").trim();
 }
 // "šiandien" today, "vakar" yesterday, explicit ISO, "liepos 24"/"24 d."
-const TODAY_RE = /(šiandien|today|сегодня|vandaag|heute|dzisiaj|dziś)/iu;
-const YESTERDAY_RE = /(vakar|yesterday|вчера|gisteren|gestern|wczoraj)/iu;
+const TODAY_RE = /(šiandien|today|сегодня|vandaag|heute|dzisiaj|dziś|(?<!\p{L})i\s?dag(?!\p{L}))/iu;
+const YESTERDAY_RE = /(vakar|yesterday|вчера|gisteren|gestern|wczoraj|(?<!\p{L})i\s?går(?!\p{L}))/iu;
 // Checked FIRST: every one of these CONTAINS its language's "yesterday"
 // (už-VAKAR, поза-ВЧЕРА, vor-GESTERN, eer-GISTEREN, przed-WCZORAJ), so a
 // day-before-yesterday sentence used to be filed one day late.
 const DAY_BEFORE_YESTERDAY_RE =
-  /(užvakar|uzvakar|day\s+before\s+yesterday|позавчера|vorgestern|eergisteren|przedwczoraj)/iu;
+  /(užvakar|uzvakar|day\s+before\s+yesterday|позавчера|vorgestern|eergisteren|przedwczoraj|(?<!\p{L})(?:i\s+)?förrgår(?!\p{L}))/iu;
 const ISO_RE = /\b(\d{4})-(\d{2})-(\d{2})\b/;
 
 /** Add `deltaDays` to an ISO date string, staying pure (no Date.now). */
