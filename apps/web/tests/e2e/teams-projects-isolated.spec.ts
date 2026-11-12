@@ -175,7 +175,10 @@ async function inviteToTeam(co: Page, name: string, address: string, previousLin
   const code = co.getByTestId("team-invite-link").locator("code");
   const typed = co.getByTestId(`team-invite-email-${s.teamId}`);
   const fresher = async () => {
-    const text = (await code.innerText().catch(() => "")).trim();
+    // count() first: innerText() on a link that is not there yet WAITS for it,
+    // and the address question would never be noticed.
+    if ((await code.count()) === 0) return "";
+    const text = (await code.first().innerText().catch(() => "")).trim();
     return text && text !== previousLink ? text : "";
   };
   // The owner may not be able to read the person's address; the product then
