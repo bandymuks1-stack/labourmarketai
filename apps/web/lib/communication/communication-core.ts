@@ -286,10 +286,50 @@ export async function createConversationCore(
 }
 
 /**
+ * The people a new message may alert: participants whose grant is still
+ * live. A revoked participant (`revoked_at` set) can no longer open the
+ * thread under RLS (`is_conversation_participant`), so a bell row, e-mail or
+ * push to them would leak that the thread is still active and link to a page
+ * they cannot read. Co-participants CAN see revoked rows
+ * (`conversation_participants_select`), which is why the filter lives here.
+ * Pure.
+ */
+export function activeParticipantIds(
+  rows: readonly { profile_id?: string | null; revoked_at?: string | null }[],
+): string[] {
+  return rows
+    .filter((r) => r.revoked_at == null)
+    .map((r) => r.profile_id)
+    .filter((id): id is string => typeof id === "string" && id.length > 0);
+}
+
+/** Is this person still a live participant of the thread, as the sender's
+ *  session sees it right now? False when it cannot be read. */
+export async function isLiveParticipant(
+  supabase: SupabaseClient,
+  conversationId: string,
+  profileId: string,
+): Promise<boolean> {
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("conversation_participants")
+      .select("profile_id")
+      .eq("conversation_id", conversationId)
+      .eq("profile_id", profileId)
+      .is("revoked_at", null)
+      .maybeSingle();
+    return !error && !!data;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Read the thread's participants under the SENDER's own session
  * (`conversation_participants_select` admits co-participants; service_role
- * holds no grant here) and hand them to the durable emitter. Best-effort by
- * design: any failure is a console line, never an error to the sender.
+ * holds no grant here) and hand the still-live ones to the durable emitter.
+ * Best-effort by design: any failure is a console line, never an error to
+ * the sender.
  */
 async function notifyOtherParticipants(
   supabase: SupabaseClient,
@@ -299,19 +339,26 @@ async function notifyOtherParticipants(
   try {
     const { data, error } = await asAny(supabase)
       .from("conversation_participants")
-      .select("profile_id")
-      .eq("conversation_id", conversationId);
+      .select("profile_id, revoked_at")
+      .eq("conversation_id", conversationId)
+      .is("revoked_at", null);
     if (error) {
       console.warn("[communication] notify: participants unreadable:", error.code ?? "unknown");
       return;
     }
-    const participantProfileIds = ((data ?? []) as { profile_id?: string | null }[])
-      .map((r) => r.profile_id)
-      .filter((id): id is string => typeof id === "string" && id.length > 0);
+    const participantProfileIds = activeParticipantIds(
+      (data ?? []) as { profile_id?: string | null; revoked_at?: string | null }[],
+    );
     await emitMessageReceivedNotifications({
       conversationId,
       authorProfileId: authorId,
       participantProfileIds,
+      // Asked again right before each channel: a removal that lands between
+      // the read above and a delivery stops the remaining channels. Under the
+      // sender's session, so a sender who was removed meanwhile sees no live
+      // row and alerts nobody. Unreadable = not eligible (fail closed).
+      isStillParticipant: (profileId) =>
+        isLiveParticipant(supabase, conversationId, profileId),
     });
   } catch {
     console.warn("[communication] notify: emit threw");

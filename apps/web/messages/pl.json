@@ -7202,6 +7202,10 @@
       "title": "Nie udało się otworzyć rozmowy",
       "body": "Możesz nie mieć uprawnień, aby napisać do tej osoby, lub jest ona już niedostępna. Nic nie zostało wysłane."
     },
+    "noLongerAvailable": {
+      "title": "Ta rozmowa nie jest już dostępna",
+      "body": "Nie jesteś już jej uczestnikiem, więc jej wiadomości nie są wyświetlane."
+    },
     "scope": {
       "support": "Kanał wsparcia",
       "unknown": "Nie podano kontekstu",
