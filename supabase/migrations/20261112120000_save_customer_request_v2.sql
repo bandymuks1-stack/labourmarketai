@@ -5,8 +5,9 @@
 -- and `original_language` columns, so every buyer request is stored with both
 -- NULL: indistinguishable from legacy rows, and no reader can tell its
 -- language. v2 is the SAME function (copied byte-for-byte from 0028) with one
--- more parameter, writing on INSERT ONLY:
---   * kind = 'buyer_request' - the kind the 20260530150000 CHECK already allows
+-- more parameter:
+--   * kind = 'buyer_request' once the request is SUBMITTED (inserted as
+--     submitted, or a NULL-kind draft moved to submitted) - the kind the 20260530150000 CHECK already allows
 --     for this form, and the one the worker board's allow-list already reads
 --     (`cr.kind is null or cr.kind in ('company_request','buyer_request')`).
 --     NOT 'customer_request': that kind is the help-panel and privacy intakes
@@ -14,8 +15,12 @@
 --     buyer need stored as it would vanish from the board;
 --   * original_language = the app's UI language when it is one of the app's
 --     locales, else NULL (unknown is never guessed).
--- The UPDATE path is unchanged: an existing row's kind and language are never
--- rewritten (no guessing of existing rows, owner rule).
+-- DRAFTS KEEP kind NULL, exactly as today: 20260530150000 holds ONE draft
+-- per (profile, kind) (`customer_requests_one_draft_per_kind`), and the buyer
+-- form keeps several drafts, so a kinded draft would collide with the next.
+-- A NULL-kind draft takes 'buyer_request' when it is submitted through this
+-- form; a row that already has a kind keeps it, and a language is written on
+-- INSERT only (an existing row's language is never guessed).
 -- v1 is left untouched; the app calls v2 and falls back to v1 until this is
 -- applied, so nothing breaks in either order.
 --
@@ -104,7 +109,7 @@ begin
       nullif(trim(coalesce(p_language_requirement, '')), ''),
       nullif(trim(coalesce(p_notes, '')), ''),
       cleaned_status,
-      'buyer_request',
+      case when cleaned_status = 'draft' then null else 'buyer_request' end,
       v_language
     )
     returning id into resolved_id;
@@ -140,6 +145,10 @@ begin
     language_requirement = nullif(trim(coalesce(p_language_requirement, '')), ''),
     notes                = nullif(trim(coalesce(p_notes, '')), ''),
     status               = cleaned_status,
+    kind                 = case
+                             when kind is null and cleaned_status <> 'draft' then 'buyer_request'
+                             else kind
+                           end,
     updated_at           = now()
    where id = p_request_id
      and (profile_id = uid or public.is_admin())

@@ -27,14 +27,15 @@ describe("a buyer request records its kind and language", () => {
     expect(src.slice(v2, v1)).toMatch(/\[RPC_NOT_FOUND_CODE, "PGRST202"\]\.includes/);
   });
 
-  it("v2 writes 'buyer_request' and a known language on insert only; v1 is untouched", () => {
+  it("v2 kinds a request once submitted, keeps drafts NULL (one draft per kind), language on insert only; v1 untouched", () => {
     const sql = read(REPO, "supabase", "migrations", `${NAME}.sql`).replace(/^\s*--.*$/gm, "");
     expect(sql).toContain("create or replace function public.save_customer_request_v2(");
     expect(sql).not.toMatch(/function public\.save_customer_request\(/);
-    expect(sql).toContain("'buyer_request',");
+    expect(sql).toContain("case when cleaned_status = 'draft' then null else 'buyer_request' end,");
     expect(sql).not.toContain("'customer_request'\n");
     const update = sql.slice(sql.indexOf("update public.customer_requests set"));
-    expect(update).not.toMatch(/\bkind\b|original_language/);
+    expect(update).toMatch(/when kind is null and cleaned_status <> 'draft' then 'buyer_request'\s+else kind/);
+    expect(update).not.toMatch(/original_language/);
     expect(sql).toMatch(/revoke all on function public\.save_customer_request_v2\([^)]*\) from public, anon;/);
   });
 

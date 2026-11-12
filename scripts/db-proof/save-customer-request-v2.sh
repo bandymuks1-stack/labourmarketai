@@ -23,6 +23,10 @@ $PSQL -v ON_ERROR_STOP=1 >/dev/null 2>"$LFD/err" <<'SQL' || { echo "COLUMNS FAIL
 alter table public.customer_requests add column if not exists kind text
   check (kind in ('company_request','agency_offer','buyer_request','customer_request'));
 alter table public.customer_requests add column if not exists original_language text;
+-- The uniqueness contract of 20260530150000 the buyer drafts must live with.
+create unique index if not exists customer_requests_one_draft_per_kind
+  on public.customer_requests (profile_id, kind)
+  where status = 'draft';
 SQL
 U=a0000000-0000-0000-0000-000000000001; O=a0000000-0000-0000-0000-000000000002
 $PSQL -c "insert into profiles (id) values ('$U'),('$O')" >/dev/null
@@ -38,12 +42,20 @@ $PSQL -v ON_ERROR_STOP=1 -f "$LFD/$NAME.sql" >/dev/null 2>"$LFD/err" || { echo "
 $PSQL -v ON_ERROR_STOP=1 -f "$LFD/$NAME.sql" >/dev/null 2>"$LFD/err" || { echo "FORWARD (re-run) FAILED"; cat "$LFD/err"; exit 1; }
 check "forward migration re-runs cleanly" "ok" "ok"
 
-id2=$(as_user $U "select public.save_customer_request_v2(null, 'Two welders', null, 'SE', null, null, null, null, null, null, null, 'draft', 'sv')")
-check "v2 insert: kind buyer_request, language sv, country kept" "$($PSQL -c "select kind||'/'||original_language||'/'||country from customer_requests where id='$id2'")" "buyer_request/sv/SE"
+id2=$(as_user $U "select public.save_customer_request_v2(null, 'Two welders', null, 'SE', null, null, null, null, null, null, null, 'submitted', 'sv')")
+check "v2 submitted insert: kind buyer_request, language sv, country kept" "$($PSQL -c "select kind||'/'||original_language||'/'||country from customer_requests where id='$id2'")" "buyer_request/sv/SE"
+d1=$(as_user $U "select public.save_customer_request_v2(null, 'Draft one', null, 'SE', null, null, null, null, null, null, null, 'draft', 'sv')")
+d2=$(as_user $U "select public.save_customer_request_v2(null, 'Draft two', null, 'SE', null, null, null, null, null, null, null, 'draft', 'sv')")
+check "two buyer drafts live side by side (kind NULL, one-draft-per-kind index holds)" "$($PSQL -c "select count(*) from customer_requests where id in ('$d1','$d2') and kind is null and status='draft' and original_language='sv'")" "2"
+as_user $U "select public.save_customer_request_v2('$d1', 'Draft one', null, 'SE', null, null, null, null, null, null, null, 'submitted', 'sv')" >/dev/null
+check "a draft submitted through v2 takes kind buyer_request" "$($PSQL -c "select kind||'/'||status from customer_requests where id='$d1'")" "buyer_request/submitted"
 id3=$(as_user $U "select public.save_customer_request_v2(null, 'Crew', null, 'SE', null, null, null, null, null, null, null, 'draft', 'Klingon')")
-check "v2: a language outside the app's set is NULL, never guessed" "$($PSQL -c "select kind||'/'||coalesce(original_language,'-') from customer_requests where id='$id3'")" "buyer_request/-"
+check "v2: a language outside the app's set is NULL, never guessed (a draft stays kind NULL)" "$($PSQL -c "select coalesce(kind,'-')||'/'||coalesce(original_language,'-') from customer_requests where id='$id3'")" "-/-"
 as_user $U "select public.save_customer_request_v2('$id1', 'Two welders edited', null, 'SE', null, null, null, null, null, null, null, 'draft', 'en')" >/dev/null
-check "v2 update never rewrites an existing row's kind or language" "$($PSQL -c "select coalesce(kind,'-')||'/'||coalesce(original_language,'-')||'/'||title from customer_requests where id='$id1'")" "-/-/Two welders edited"
+check "a v2 draft edit keeps kind NULL and never invents a language" "$($PSQL -c "select coalesce(kind,'-')||'/'||coalesce(original_language,'-')||'/'||title from customer_requests where id='$id1'")" "-/-/Two welders edited"
+$PSQL -c "update customer_requests set kind='company_request' where id='$id1'" >/dev/null
+as_user $U "select public.save_customer_request_v2('$id1', 'Two welders edited', null, 'SE', null, null, null, null, null, null, null, 'submitted', 'en')" >/dev/null
+check "a row that already has a kind keeps it" "$($PSQL -c "select kind from customer_requests where id='$id1'")" "company_request"
 as_user $O "select public.save_customer_request_v2('$id2', 'Taken over', null, 'SE')" >/dev/null 2>&1
 check "v2 update of another person's row is refused (row unchanged)" "$($PSQL -c "select title from customer_requests where id='$id2'")" "Two welders"
 check "anon cannot execute v2" "$($PSQL -c "select has_function_privilege('anon', 'public.save_customer_request_v2(uuid, text, text, text, text, text, integer, text, text, text, text, text, text)', 'execute')")" "f"
@@ -53,6 +65,6 @@ check "v1 still exists, unchanged signature" "$($PSQL -c "select count(*) from p
 $PSQL -v ON_ERROR_STOP=1 -f "$LFD/$NAME.down.sql" >/dev/null 2>"$LFD/err" || { echo "ROLLBACK FAILED"; cat "$LFD/err"; exit 1; }
 $PSQL -v ON_ERROR_STOP=1 -f "$LFD/$NAME.down.sql" >/dev/null 2>"$LFD/err" || { echo "ROLLBACK (re-run) FAILED"; cat "$LFD/err"; exit 1; }
 check "rollback drops v2 (re-runnable)" "$($PSQL -c "select count(*) from pg_proc where proname='save_customer_request_v2'")" "0"
-check "rollback keeps v1 and the rows" "$($PSQL -c "select count(*) from pg_proc where proname='save_customer_request'")/$($PSQL -c "select count(*) from customer_requests")" "1/3"
+check "rollback keeps v1 and the rows" "$($PSQL -c "select count(*) from pg_proc where proname='save_customer_request'")/$($PSQL -c "select count(*) from customer_requests")" "1/5"
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" = 0 ]
