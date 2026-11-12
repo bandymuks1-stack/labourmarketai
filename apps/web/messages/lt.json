@@ -20605,5 +20605,28 @@
       "functions": "Ką čia galite daryti",
       "professions": "Darbo skelbimai pagal profesiją"
     }
+  },
+  "homePins": {
+    "title": "Prisegta",
+    "edit": "Keisti",
+    "done": "Baigti",
+    "empty": "Nieko neprisegta. Pasirinkite „Keisti“ ir prisekite sritį.",
+    "more": "Kitos sritys",
+    "recent": "Neseniai atidaryta",
+    "quickTitle": "Aktyvu",
+    "pin": "Prisegti: {name}",
+    "unpin": "Atsegti: {name}",
+    "moveEarlier": "Perkelti anksčiau: {name}",
+    "moveLater": "Perkelti vėliau: {name}",
+    "limit": "Galite prisegti iki {max} sričių.",
+    "deviceOnly": "Kol kas išsaugota tik šiame įrenginyje.",
+    "saveFailed": "Nepavyko išsaugoti. Pakeitimas lieka tik šiame ekrane.",
+    "readFailed": "Nepavyko perskaityti prisegtų sričių.",
+    "unread": "{count} neskaitytų",
+    "quick": {
+      "projects": "Projektai",
+      "orders": "Užklausos ir užsakymai",
+      "conversations": "Pokalbiai"
+    }
   }
 }

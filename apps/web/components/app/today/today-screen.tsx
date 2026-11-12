@@ -14,6 +14,7 @@ import {
 } from "@/components/app/home/home-regions";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { AreaSwitcher } from "@/components/app/area-switcher";
+import { HomePinsPending, HomePinsSection } from "@/components/app/home/home-pins-section";
 import { deriveTodayState } from "@/lib/today/today-model";
 import { PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
@@ -240,6 +241,15 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           chosen one in front, from the ONE area model (`PERSONAL_WORK_AREAS`,
           derived from TODAY_STATIONS — opportunities first). Rendered at once:
           no read stands behind it, and its track is a fixed height. */}
+      {/* PINNED (owner P0 2026-11-12): the person's own first areas, their
+          order, the same on every device. It reads one small row, so it holds
+          a fixed-height placeholder while it does — the frame does not move. */}
+      <div data-testid="today-pins" className="border-t border-ink-600/70 pt-4 sm:pt-5">
+        <Suspense fallback={<HomePinsPending />}>
+          <HomePinsSection context="person" role="worker" />
+        </Suspense>
+      </div>
+
       <div data-testid="today-stations" className="border-t border-ink-600/70 pt-4 sm:pt-5">
         <AreaSwitcher
           title={t("stations.title")}

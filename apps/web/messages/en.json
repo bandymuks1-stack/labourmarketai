@@ -20605,5 +20605,28 @@
       "functions": "What you can do here",
       "professions": "Browse jobs by profession"
     }
+  },
+  "homePins": {
+    "title": "Pinned",
+    "edit": "Edit",
+    "done": "Done",
+    "empty": "Nothing is pinned. Choose Edit to pin an area.",
+    "more": "More areas",
+    "recent": "Recently opened",
+    "quickTitle": "Active",
+    "pin": "Pin {name}",
+    "unpin": "Unpin {name}",
+    "moveEarlier": "Move {name} earlier",
+    "moveLater": "Move {name} later",
+    "limit": "You can pin up to {max} areas.",
+    "deviceOnly": "Saved on this device only for now.",
+    "saveFailed": "Could not save. The change is kept on this screen only.",
+    "readFailed": "Could not read your pinned areas.",
+    "unread": "{count} unread",
+    "quick": {
+      "projects": "Projects",
+      "orders": "Requests and orders",
+      "conversations": "Conversations"
+    }
   }
 }

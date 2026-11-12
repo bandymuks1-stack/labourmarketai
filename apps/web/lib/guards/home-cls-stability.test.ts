@@ -74,8 +74,10 @@ describe("no late region appears out of nothing above the stations", () => {
     expect(aboveStations).not.toMatch(/fallback=\{null\}/);
     const boundaries = aboveStations.match(/<Suspense fallback=\{[^}]*\}/g) ?? [];
     // header profession + header state + WAITING + visibility + TRACE +
-    // RUNNING + OUTSIDE + BECAUSE.
-    expect(boundaries.length).toBe(8);
+    // RUNNING + OUTSIDE + BECAUSE + PINNED (owner P0 2026-11-12: the pinned
+    // strip reads one small row and holds a fixed-height placeholder).
+    expect(boundaries.length).toBe(9);
+    expect(aboveStations).toMatch(/<Suspense fallback=\{<HomePinsPending \/>\}>\s*<HomePinsSection/);
   });
 
   it("the regions reserve their height while they read", () => {

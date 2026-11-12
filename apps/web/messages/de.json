@@ -20605,5 +20605,28 @@
       "functions": "Was Sie hier tun können",
       "professions": "Stellen nach Beruf"
     }
+  },
+  "homePins": {
+    "title": "Angeheftet",
+    "edit": "Bearbeiten",
+    "done": "Fertig",
+    "empty": "Nichts angeheftet. Wählen Sie Bearbeiten, um einen Bereich anzuheften.",
+    "more": "Weitere Bereiche",
+    "recent": "Zuletzt geöffnet",
+    "quickTitle": "Aktiv",
+    "pin": "{name} anheften",
+    "unpin": "{name} lösen",
+    "moveEarlier": "{name} nach vorn",
+    "moveLater": "{name} nach hinten",
+    "limit": "Sie können bis zu {max} Bereiche anheften.",
+    "deviceOnly": "Vorerst nur auf diesem Gerät gespeichert.",
+    "saveFailed": "Speichern fehlgeschlagen. Die Änderung bleibt nur auf diesem Bildschirm.",
+    "readFailed": "Ihre angehefteten Bereiche konnten nicht gelesen werden.",
+    "unread": "{count} ungelesen",
+    "quick": {
+      "projects": "Projekte",
+      "orders": "Anfragen und Aufträge",
+      "conversations": "Unterhaltungen"
+    }
   }
 }

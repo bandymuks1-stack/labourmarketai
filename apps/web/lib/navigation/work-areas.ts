@@ -123,7 +123,7 @@ export const ORGANIZATION_WORK_AREAS: readonly WorkArea[] = [
  * membership (`requireRoleOrRedirect` → `workspaceOpensCompanySpace`), which
  * is why an agency owner can open them too.
  */
-const HEADER_AREA_LEADS: Record<"company" | "agency", readonly string[]> = {
+export const HEADER_AREA_LEADS: Record<"company" | "agency", readonly string[]> = {
   company: ["people", "projects", "work"],
   agency: ["people", "clients", "projects"],
 };

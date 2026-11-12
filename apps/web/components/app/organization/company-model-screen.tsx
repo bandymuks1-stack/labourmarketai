@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { OrganizationApprovalsCard } from "@/components/app/arena/confirm-pulse";
 import { AreaSwitcher } from "@/components/app/area-switcher";
+import { HomePinsPending, HomePinsSection } from "@/components/app/home/home-pins-section";
 import { NeedDoorLink } from "@/components/app/need-door-link";
 import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
 
@@ -27,7 +29,12 @@ import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
  * workforce zone, which the context-parity guard records as a different
  * capability, not a calendar.
  */
-export async function CompanyModelScreen() {
+export async function CompanyModelScreen({
+  role = "company",
+}: {
+  /** Whose defaults the pinned strip starts from. */
+  role?: "company" | "agency";
+} = {}) {
   const [t, tAll, tNav] = await Promise.all([
     getTranslations("companyModel"),
     getTranslations(),
@@ -50,6 +57,11 @@ export async function CompanyModelScreen() {
         testId="company-model-primary"
         className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-blue px-5 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
       />
+      {/* Pinned first (owner P0 2026-11-12): the organisation's doors this
+          person chose, in their order — kept apart from their personal home. */}
+      <Suspense fallback={<HomePinsPending />}>
+        <HomePinsSection context="company" role={role} />
+      </Suspense>
       {/* Every door of the company, by priority (the everyday six first),
           as the light 3D area switcher — one source: ORGANIZATION_WORK_AREAS.
           The carousel replaces the six-tile grid + "More" disclosure: the

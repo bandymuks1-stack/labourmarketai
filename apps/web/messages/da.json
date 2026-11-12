@@ -7998,5 +7998,28 @@
       "functions": "Det kan du gøre her",
       "professions": "Job efter fag"
     }
+  },
+  "homePins": {
+    "title": "Fastgjort",
+    "edit": "Rediger",
+    "done": "Færdig",
+    "empty": "Intet er fastgjort. Vælg Rediger for at fastgøre et område.",
+    "more": "Flere områder",
+    "recent": "Åbnet for nylig",
+    "quickTitle": "Aktivt",
+    "pin": "Fastgør {name}",
+    "unpin": "Frigør {name}",
+    "moveEarlier": "Flyt {name} frem",
+    "moveLater": "Flyt {name} tilbage",
+    "limit": "Du kan fastgøre op til {max} områder.",
+    "deviceOnly": "Indtil videre kun gemt på denne enhed.",
+    "saveFailed": "Kunne ikke gemme. Ændringen findes kun på denne skærm.",
+    "readFailed": "Dine fastgjorte områder kunne ikke læses.",
+    "unread": "{count} ulæste",
+    "quick": {
+      "projects": "Projekter",
+      "orders": "Forespørgsler og ordrer",
+      "conversations": "Samtaler"
+    }
   }
 }

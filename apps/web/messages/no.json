@@ -7998,5 +7998,28 @@
       "functions": "Dette kan du gjøre her",
       "professions": "Jobber etter yrke"
     }
+  },
+  "homePins": {
+    "title": "Festet",
+    "edit": "Rediger",
+    "done": "Ferdig",
+    "empty": "Ingenting er festet. Velg Rediger for å feste et område.",
+    "more": "Flere områder",
+    "recent": "Nylig åpnet",
+    "quickTitle": "Aktivt",
+    "pin": "Fest {name}",
+    "unpin": "Løsne {name}",
+    "moveEarlier": "Flytt {name} fram",
+    "moveLater": "Flytt {name} bak",
+    "limit": "Du kan feste opptil {max} områder.",
+    "deviceOnly": "Foreløpig bare lagret på denne enheten.",
+    "saveFailed": "Kunne ikke lagre. Endringen finnes bare på denne skjermen.",
+    "readFailed": "De festede områdene dine kunne ikke leses.",
+    "unread": "{count} uleste",
+    "quick": {
+      "projects": "Prosjekter",
+      "orders": "Forespørsler og bestillinger",
+      "conversations": "Samtaler"
+    }
   }
 }

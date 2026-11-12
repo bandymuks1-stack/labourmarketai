@@ -20605,5 +20605,28 @@
       "functions": "Co możesz tu zrobić",
       "professions": "Oferty pracy według zawodu"
     }
+  },
+  "homePins": {
+    "title": "Przypięte",
+    "edit": "Edytuj",
+    "done": "Gotowe",
+    "empty": "Nic nie przypięto. Wybierz Edytuj, aby przypiąć obszar.",
+    "more": "Więcej obszarów",
+    "recent": "Ostatnio otwierane",
+    "quickTitle": "Aktywne",
+    "pin": "Przypnij: {name}",
+    "unpin": "Odepnij: {name}",
+    "moveEarlier": "Przesuń wcześniej: {name}",
+    "moveLater": "Przesuń później: {name}",
+    "limit": "Możesz przypiąć do {max} obszarów.",
+    "deviceOnly": "Na razie zapisane tylko na tym urządzeniu.",
+    "saveFailed": "Nie udało się zapisać. Zmiana pozostaje tylko na tym ekranie.",
+    "readFailed": "Nie udało się odczytać przypiętych obszarów.",
+    "unread": "{count} nieprzeczytanych",
+    "quick": {
+      "projects": "Projekty",
+      "orders": "Zapytania i zlecenia",
+      "conversations": "Rozmowy"
+    }
   }
 }

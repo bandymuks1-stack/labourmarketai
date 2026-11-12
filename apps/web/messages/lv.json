@@ -7998,5 +7998,28 @@
       "functions": "Ko šeit varat darīt",
       "professions": "Darba sludinājumi pēc profesijas"
     }
+  },
+  "homePins": {
+    "title": "Piespraustie",
+    "edit": "Rediģēt",
+    "done": "Gatavs",
+    "empty": "Nekas nav piesprausts. Izvēlieties Rediģēt, lai piespraustu sadaļu.",
+    "more": "Citas sadaļas",
+    "recent": "Nesen atvērtās",
+    "quickTitle": "Aktīvs",
+    "pin": "Piespraust: {name}",
+    "unpin": "Atspraust: {name}",
+    "moveEarlier": "Pārvietot agrāk: {name}",
+    "moveLater": "Pārvietot vēlāk: {name}",
+    "limit": "Varat piespraust līdz {max} sadaļām.",
+    "deviceOnly": "Pagaidām saglabāts tikai šajā ierīcē.",
+    "saveFailed": "Neizdevās saglabāt. Izmaiņa paliek tikai šajā ekrānā.",
+    "readFailed": "Neizdevās nolasīt piespraustās sadaļas.",
+    "unread": "{count} nelasītas",
+    "quick": {
+      "projects": "Projekti",
+      "orders": "Pieprasījumi un pasūtījumi",
+      "conversations": "Sarunas"
+    }
   }
 }

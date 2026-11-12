@@ -7998,5 +7998,28 @@
       "functions": "Det här kan du göra här",
       "professions": "Jobb efter yrke"
     }
+  },
+  "homePins": {
+    "title": "Fästa",
+    "edit": "Redigera",
+    "done": "Klar",
+    "empty": "Inget är fäst. Välj Redigera för att fästa ett område.",
+    "more": "Fler områden",
+    "recent": "Nyligen öppnade",
+    "quickTitle": "Aktivt",
+    "pin": "Fäst {name}",
+    "unpin": "Lossa {name}",
+    "moveEarlier": "Flytta {name} framåt",
+    "moveLater": "Flytta {name} bakåt",
+    "limit": "Du kan fästa upp till {max} områden.",
+    "deviceOnly": "Sparas tills vidare bara på den här enheten.",
+    "saveFailed": "Det gick inte att spara. Ändringen finns bara på den här skärmen.",
+    "readFailed": "Dina fästa områden kunde inte läsas.",
+    "unread": "{count} olästa",
+    "quick": {
+      "projects": "Projekt",
+      "orders": "Förfrågningar och beställningar",
+      "conversations": "Samtal"
+    }
   }
 }

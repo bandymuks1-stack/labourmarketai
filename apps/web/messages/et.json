@@ -7998,5 +7998,28 @@
       "functions": "Mida siin teha saab",
       "professions": "Töökuulutused ameti järgi"
     }
+  },
+  "homePins": {
+    "title": "Kinnitatud",
+    "edit": "Muuda",
+    "done": "Valmis",
+    "empty": "Midagi pole kinnitatud. Vali Muuda, et ala kinnitada.",
+    "more": "Veel alasid",
+    "recent": "Hiljuti avatud",
+    "quickTitle": "Aktiivne",
+    "pin": "Kinnita: {name}",
+    "unpin": "Eemalda kinnitus: {name}",
+    "moveEarlier": "Liiguta ettepoole: {name}",
+    "moveLater": "Liiguta tahapoole: {name}",
+    "limit": "Kinnitada saab kuni {max} ala.",
+    "deviceOnly": "Praegu salvestatud ainult selles seadmes.",
+    "saveFailed": "Salvestamine ebaõnnestus. Muudatus jääb ainult sellele ekraanile.",
+    "readFailed": "Kinnitatud alasid ei õnnestunud lugeda.",
+    "unread": "{count} lugemata",
+    "quick": {
+      "projects": "Projektid",
+      "orders": "Päringud ja tellimused",
+      "conversations": "Vestlused"
+    }
   }
 }

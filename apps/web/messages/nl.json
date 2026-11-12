@@ -20605,5 +20605,28 @@
       "functions": "Wat je hier kunt doen",
       "professions": "Vacatures per beroep"
     }
+  },
+  "homePins": {
+    "title": "Vastgezet",
+    "edit": "Bewerken",
+    "done": "Klaar",
+    "empty": "Niets vastgezet. Kies Bewerken om een onderdeel vast te zetten.",
+    "more": "Meer onderdelen",
+    "recent": "Recent geopend",
+    "quickTitle": "Actief",
+    "pin": "{name} vastzetten",
+    "unpin": "{name} losmaken",
+    "moveEarlier": "{name} eerder zetten",
+    "moveLater": "{name} later zetten",
+    "limit": "Je kunt maximaal {max} onderdelen vastzetten.",
+    "deviceOnly": "Voorlopig alleen op dit apparaat opgeslagen.",
+    "saveFailed": "Opslaan is niet gelukt. De wijziging blijft alleen op dit scherm.",
+    "readFailed": "Je vastgezette onderdelen konden niet worden gelezen.",
+    "unread": "{count} ongelezen",
+    "quick": {
+      "projects": "Projecten",
+      "orders": "Aanvragen en opdrachten",
+      "conversations": "Gesprekken"
+    }
   }
 }

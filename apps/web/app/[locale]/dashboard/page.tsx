@@ -409,7 +409,9 @@ export default async function DashboardHomePage({
   // re-sends them.
   // The company workspace opens on the company model (existing doors).
   const companyModel =
-    activeOrgWorkspace && identity === "company" ? <CompanyModelScreen /> : null;
+    activeOrgWorkspace && identity === "company" ? (
+      <CompanyModelScreen role={activeRole === "agency" ? "agency" : "company"} />
+    ) : null;
   // The pilot pass pointer leads it — the employer home is where an owner
   // looks first, and it renders nothing unless the pass is theirs to start.
   const companyOpeningContext = companyModel ? (
