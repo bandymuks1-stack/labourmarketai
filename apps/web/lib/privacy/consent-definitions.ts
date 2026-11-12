@@ -34,7 +34,7 @@ import { createHash } from "node:crypto";
 // 2026-11-12: `sv` drafted for owner review (owner decision 2026-11-11, option A; Swedish business
 // tester programme). Adding it moves every purpose's hash; versions stay because scope, recipients,
 // data categories and use are unchanged. Re-pinned (with the grant RPC locale allowlist) in
-// supabase/migrations/20261112120000_privacy_consent_locale_sv_v1.sql — RED, not applied. Until the
+// supabase/migrations/20261112210000_privacy_consent_locale_sv_v1.sql — RED, not applied. Until the
 // owner approves and applies it, this file must not be deployed: the UI shows `sv` users the clearly
 // labelled English text (J-2 fallback).
 export const CONSENT_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;

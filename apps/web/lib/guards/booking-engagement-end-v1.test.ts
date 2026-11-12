@@ -1789,7 +1789,7 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-12: Swedish consent texts — three data-only re-pins + `sv` in the three grant RPC locale
       // allowlists (bodies byte-identical to production). RED draft, the marker is the human-gate
       // acknowledgement, NOT applied.
-      "20261112120000_privacy_consent_locale_sv_v1.sql",
+      "20261112210000_privacy_consent_locale_sv_v1.sql",
 ]);
   });
 

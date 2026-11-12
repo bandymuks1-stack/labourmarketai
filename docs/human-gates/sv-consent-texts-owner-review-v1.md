@@ -56,7 +56,7 @@ After the apply, a Swedish grant is recorded with `locale = 'sv'` and the new ha
 
 ## Migration and rollback
 
-The migration is `supabase/migrations/20261112120000_privacy_consent_locale_sv_v1.sql` (RED, draft, NOT applied). It is modelled on the PL pair 20260920173000 + 20260922140000, folded into one file. It does two things:
+The migration is `supabase/migrations/20261112210000_privacy_consent_locale_sv_v1.sql` (RED, draft, NOT applied). It is modelled on the PL pair 20260920173000 + 20260922140000, folded into one file. It does two things:
 - re-pins three hashes; each UPDATE names the hash it replaces, and a check refuses the file unless all three moved;
 - adds `'sv'` to the locale allowlist of the three grant functions. The bodies are otherwise byte-identical to production (prosrc md5 matched).
 
@@ -72,7 +72,7 @@ PG16 proof: `scripts/db-proof/privacy-consent-locale-sv-v1.sh`, 19/19. It covers
 
 **Safe rollback:** roll the app back first (remove `sv`), then run the down file. Swedish consent events stay as evidence.
 
-Owner sentence that closes this packet: **"APPROVE SV CONSENT TEXTS v1"** (optionally with edits inline), plus a separate apply approval for 20261112120000.
+Owner sentence that closes this packet: **"APPROVE SV CONSENT TEXTS v1"** (optionally with edits inline), plus a separate apply approval for 20261112210000.
 
 ## The texts
 

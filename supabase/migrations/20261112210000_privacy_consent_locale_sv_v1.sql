@@ -1,41 +1,64 @@
--- Rollback of 20261112120000_privacy_consent_locale_sv_v1. Restores the three pre-sv hashes and the
--- six-locale allowlist, everything else byte-identical. Consent events recorded with locale 'sv' are
--- evidence and are NOT touched; they keep their own version and hash.
+-- @human-gate-approved
+-- The marker above is the human-gate ACKNOWLEDGEMENT, not an approval. NO OWNER APPROVAL OF THIS SQL
+-- EXISTS YET. Draft PR + needs-human-gate. NOT applied. Apply only via Supabase MCP apply_migration.
+-- ============================================================================
+-- 20261112210000_privacy_consent_locale_sv_v1 — Swedish consent texts (owner decision 2026-11-11, A)
 --
--- SAFE ORDER: roll the APP back first (remove `sv` from CONSENT_LOCALES), then run this file. Between
--- the two steps a new grant is refused as stale, never recorded against the wrong text. Running this
--- file while the app still carries `sv` refuses every new grant in every language until the app follows.
+-- Modelled on the PL pair 20260920173000 (hash re-pin) + 20260922140000 (RPC locale allowlist),
+-- folded into ONE file so the pins and the allowlist can never be applied apart.
+--
+-- 1. RE-PIN (data only, three UPDATE rows on public.privacy_consent_purposes).
+--    consentTextHash() hashes every locale in CONSENT_LOCALES; `sv` joins that set, so all three
+--    purposes hash differently while every lt/en/ru/nl/de/pl text is byte-identical. Scope,
+--    recipients, data categories and use are unchanged (the sv text is content-equivalent to `en`,
+--    docs/human-gates/sv-consent-texts-owner-review-v1.md), so the registry's own rule requires NO
+--    version bump: 2026-07-11.v2 / 2026-07-11.v2 / 2026-09-04.v1 stay. Each UPDATE also names the
+--    hash it replaces, and a check refuses the file unless all three moved.
+-- 2. LOCALE ALLOWLIST: exactly one condition in each of the three grant functions gains 'sv'. Every
+--    other byte equals the production definition read 2026-11-12 (md5 of prosrc matched
+--    20260922140000 for all three). SECURITY DEFINER, search_path and grants are unchanged and
+--    re-asserted below.
+--
+-- EVIDENCE KEPT: no consent event is touched. Each event already records its own version, hash,
+-- locale and created_at, so a past grant keeps proving the text that was in force when it was given.
+-- EFFECT ON EXISTING GRANTS: profile_discoverability readers compare the version only, so current
+-- grants stay granted. The grant RPCs compare version AND hash and fail closed
+-- (stale_consent_version), so this file is applied in the SAME step as the deploy of the registry
+-- change: between the two, a new grant attempt is refused, never recorded against the wrong text.
+--
+-- ROLLBACK: supabase/rollbacks/20261112210000_privacy_consent_locale_sv_v1.down.sql
+-- ============================================================================
 
 begin;
 
 update public.privacy_consent_purposes
-   set current_text_hash = 'd4145ac3d118b17e5bc3bd68c3f2737ff0c872e08a38df034464213aad534549',
+   set current_text_hash = 'aed377c0113d0649c587a517ae63adea0c91354dbb0484f290a634710ffc46f9',
        updated_at = now()
  where purpose = 'profile_discoverability'
    and current_version = '2026-07-11.v2'
-   and current_text_hash = 'aed377c0113d0649c587a517ae63adea0c91354dbb0484f290a634710ffc46f9';
+   and current_text_hash = 'd4145ac3d118b17e5bc3bd68c3f2737ff0c872e08a38df034464213aad534549';
 
 update public.privacy_consent_purposes
-   set current_text_hash = '6f57d9167a6313220ba34ae46a1ca03357db0737d17f5985b3dd5f1e75b6fb81',
+   set current_text_hash = 'eed33d481b7cb620087d8e34448651d8cfa0651d5e77515e51491c02c63ac0e0',
        updated_at = now()
  where purpose = 'employer_data_disclosure'
    and current_version = '2026-07-11.v2'
-   and current_text_hash = 'eed33d481b7cb620087d8e34448651d8cfa0651d5e77515e51491c02c63ac0e0';
+   and current_text_hash = '6f57d9167a6313220ba34ae46a1ca03357db0737d17f5985b3dd5f1e75b6fb81';
 
 update public.privacy_consent_purposes
-   set current_text_hash = '28b2a552ae56b5e0f260896664a9f5f7a5a918fe536e613c62c0028ac267db7f',
+   set current_text_hash = 'f5d40f6757f6e71c3c7712a214ef3f2465f7dc27d319c33b7a2fad1bdacf3262',
        updated_at = now()
  where purpose = 'partner_supply_representation'
    and current_version = '2026-09-04.v1'
-   and current_text_hash = 'f5d40f6757f6e71c3c7712a214ef3f2465f7dc27d319c33b7a2fad1bdacf3262';
+   and current_text_hash = '28b2a552ae56b5e0f260896664a9f5f7a5a918fe536e613c62c0028ac267db7f';
 
 do $$
 begin
   -- Fail closed: every pin must have moved, or the whole file rolls back.
   if (select count(*) from public.privacy_consent_purposes where
-        (purpose = 'profile_discoverability' and current_text_hash = 'd4145ac3d118b17e5bc3bd68c3f2737ff0c872e08a38df034464213aad534549')
-     or (purpose = 'employer_data_disclosure' and current_text_hash = '6f57d9167a6313220ba34ae46a1ca03357db0737d17f5985b3dd5f1e75b6fb81')
-     or (purpose = 'partner_supply_representation' and current_text_hash = '28b2a552ae56b5e0f260896664a9f5f7a5a918fe536e613c62c0028ac267db7f')) <> 3 then
+        (purpose = 'profile_discoverability' and current_text_hash = 'aed377c0113d0649c587a517ae63adea0c91354dbb0484f290a634710ffc46f9')
+     or (purpose = 'employer_data_disclosure' and current_text_hash = 'eed33d481b7cb620087d8e34448651d8cfa0651d5e77515e51491c02c63ac0e0')
+     or (purpose = 'partner_supply_representation' and current_text_hash = 'f5d40f6757f6e71c3c7712a214ef3f2465f7dc27d319c33b7a2fad1bdacf3262')) <> 3 then
     raise exception 'consent re-pin: expected 3 pins at the new hashes';
   end if;
 end $$;
@@ -61,7 +84,7 @@ begin
   then
     return jsonb_build_object('ok', false, 'error', 'stale_consent_version');
   end if;
-  if p_locale not in ('lt', 'en', 'ru', 'nl', 'de', 'pl') then
+  if p_locale not in ('lt', 'en', 'ru', 'nl', 'de', 'pl', 'sv') then
     return jsonb_build_object('ok', false, 'error', 'unsupported_locale');
   end if;
   if coalesce(char_length(btrim(p_source)), 0) not between 1 and 60 then
@@ -96,7 +119,7 @@ begin
   then
     return jsonb_build_object('ok', false, 'error', 'stale_consent_version');
   end if;
-  if p_locale not in ('lt', 'en', 'ru', 'nl', 'de', 'pl') then
+  if p_locale not in ('lt', 'en', 'ru', 'nl', 'de', 'pl', 'sv') then
     return jsonb_build_object('ok', false, 'error', 'unsupported_locale');
   end if;
   if coalesce(char_length(btrim(p_source)), 0) not between 1 and 60 then
@@ -137,7 +160,7 @@ begin
   then
     return jsonb_build_object('ok', false, 'error', 'stale_consent_version');
   end if;
-  if p_locale not in ('lt', 'en', 'ru', 'nl', 'de', 'pl') then
+  if p_locale not in ('lt', 'en', 'ru', 'nl', 'de', 'pl', 'sv') then
     return jsonb_build_object('ok', false, 'error', 'unsupported_locale');
   end if;
   if coalesce(char_length(btrim(p_source)), 0) not between 1 and 60 then

@@ -67,7 +67,7 @@ describe("all seven consent locales have complete consent texts (test 23)", () =
       // TEXTS v1 WITH REQUIRED INLINE EDITS"; the en fallback in the three readers
       // now only covers a future UI locale without its own blocks.
       // SV drafted 2026-11-12 for owner review (owner decision 2026-11-11, option A); RED re-pin
-      // 20261112120000 is NOT applied, so this registry change ships only together with it.
+      // 20261112210000 is NOT applied, so this registry change ships only together with it.
       expect(CONSENT_LOCALES).toEqual(["lt", "en", "ru", "nl", "de", "pl", "sv"]);
       for (const locale of CONSENT_LOCALES) {
         const t = def.texts[locale];

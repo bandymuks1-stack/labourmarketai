@@ -9,7 +9,7 @@ set -uo pipefail
 export PGCLIENTENCODING=UTF8
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
-NAME=20261112120000_privacy_consent_locale_sv_v1
+NAME=20261112210000_privacy_consent_locale_sv_v1
 MIG="$REPO/supabase/migrations/$NAME.sql"; DOWN="$REPO/supabase/rollbacks/$NAME.down.sql"
 PL="$REPO/supabase/migrations/20260922140000_privacy_consent_rpc_locale_pl_v1.sql"
 PGPROOF_HOST=${PGPROOF_HOST:-127.0.0.1}; PGPROOF_PORT=${PGPROOF_PORT:-58741}
