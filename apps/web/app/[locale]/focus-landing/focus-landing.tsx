@@ -26,6 +26,7 @@ import {
 import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { LandingThreeWays } from "@/components/marketing/landing-three-ways";
+import { LandingIntentChoice } from "@/components/marketing/landing-intent-choice";
 import { LandingRequestDoors } from "@/components/marketing/landing-request-doors";
 import { BRAND_NAME } from "@/lib/seo/metadata";
 
@@ -107,7 +108,15 @@ export async function FocusLanding({
         {tHero("headline")}
       </h1>
       <p className="mt-3 text-lead text-text-secondary">{tHero("sub")}</p>
+      {/* THE FIRST SCREEN IS THE CHOICE (owner priority 2026-11-12): six
+          plainly named intents — the same six as the header — each one link
+          to the start of its function, directly under the promise. Added
+          above the existing pair; nothing the earlier owner orders put on
+          this screen was removed. */}
       <div className="mt-6">
+        <LandingIntentChoice />
+      </div>
+      <div className="mt-4">
         <LandingPrimaryActions locale={locale} surface="landing_hero" />
       </div>
       {/* The doors sit further down: from the first screen, one plain way to them. */}

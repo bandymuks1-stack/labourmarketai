@@ -20,6 +20,11 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * The first screen is the choice (owner priority 2026-11-12, navigation is launch
+ * blocker No. 1): six intent cards — the header's own six — directly under the
+ * promise, above the existing primary pair. ADDED, nothing removed. EXACTLY ONE
+ * hash moved: focus-landing.tsx. No copy, no namespace (the labels are `siteNav`).
+ *
  * No reply-time promise (owner decision 2026-11-10): the request doors no longer
  * promise contact "within 24 hours" — the request is received and the team gets
  * in touch after reviewing it. `requestDoors.promise` and `receivedBody` only.
