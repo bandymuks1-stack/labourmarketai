@@ -439,7 +439,16 @@
       "outcomeBlocked": "not confirmed ({code})",
       "receipt": "Confirmed: {title}",
       "receiptSkills": "{count, plural, one {# skill} other {# skills}}",
-      "skillsUnavailable": "The skill list could not be read — the tap confirms the entry only."
+      "skillsUnavailable": "The skill list could not be read — the tap confirms the entry only.",
+      "projectFilterLabel": "Project",
+      "projectAll": "All projects ({n})",
+      "projectNone": "No project ({n})",
+      "projectUnnamed": "Project, name not available",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Show",
+      "projectResult": "Showing {shown} of {total} entries",
+      "projectOnCard": "Project: {name}",
+      "noProjectOnCard": "No project"
     },
     "loadFailed": "The review queue could not be loaded. That does not mean there is nothing to review — try again."
   },

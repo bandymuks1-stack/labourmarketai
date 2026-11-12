@@ -99,7 +99,16 @@
       "outcomeBlocked": "[EN] not confirmed ({code})",
       "receipt": "Bekreftet: {title}",
       "receiptSkills": "{count, plural, one {# ferdighet} other {# ferdigheter}}",
-      "skillsUnavailable": "Ferdighetslisten kunne ikke leses — trykket bekrefter bare selve oppføringen."
+      "skillsUnavailable": "Ferdighetslisten kunne ikke leses — trykket bekrefter bare selve oppføringen.",
+      "projectFilterLabel": "Prosjekt",
+      "projectAll": "Alle prosjekter ({n})",
+      "projectNone": "Uten prosjekt ({n})",
+      "projectUnnamed": "Prosjekt, navnet vises ikke",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Vis",
+      "projectResult": "Viser {shown} av {total} oppføringer",
+      "projectOnCard": "Prosjekt: {name}",
+      "noProjectOnCard": "Uten prosjekt"
     },
     "result": {
       "entrySuperseded": "Oppføringen er allerede erstattet av en nyere versjon — kortet er ikke lenger aktuelt og fjernes fra listen.",

@@ -439,7 +439,16 @@
       "outcomeBlocked": "niepotwierdzone ({code})",
       "receipt": "Potwierdzono: {title}",
       "receiptSkills": "{count, plural, one {# umiejętność} few {# umiejętności} many {# umiejętności} other {# umiejętności}}",
-      "skillsUnavailable": "Nie udało się odczytać listy umiejętności — dotknięcie potwierdzi tylko sam wpis."
+      "skillsUnavailable": "Nie udało się odczytać listy umiejętności — dotknięcie potwierdzi tylko sam wpis.",
+      "projectFilterLabel": "Projekt",
+      "projectAll": "Wszystkie projekty ({n})",
+      "projectNone": "Bez projektu ({n})",
+      "projectUnnamed": "Projekt, nazwa niedostępna",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Pokaż",
+      "projectResult": "Pokazano {shown} z {total} wpisów",
+      "projectOnCard": "Projekt: {name}",
+      "noProjectOnCard": "Bez projektu"
     },
     "loadFailed": "Nie udało się wczytać kolejki do przeglądu. To nie znaczy, że nie ma nic do przejrzenia — spróbuj ponownie."
   },

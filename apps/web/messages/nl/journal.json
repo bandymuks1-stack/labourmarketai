@@ -439,7 +439,16 @@
       "outcomeBlocked": "niet bevestigd ({code})",
       "receipt": "Bevestigd: {title}",
       "receiptSkills": "{count, plural, one {# vaardigheid} other {# vaardigheden}}",
-      "skillsUnavailable": "De vaardighedenlijst kon niet worden gelezen — de tik bevestigt alleen de invoer zelf."
+      "skillsUnavailable": "De vaardighedenlijst kon niet worden gelezen — de tik bevestigt alleen de invoer zelf.",
+      "projectFilterLabel": "Project",
+      "projectAll": "Alle projecten ({n})",
+      "projectNone": "Geen project ({n})",
+      "projectUnnamed": "Project, naam niet zichtbaar",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Tonen",
+      "projectResult": "{shown} van {total} registraties getoond",
+      "projectOnCard": "Project: {name}",
+      "noProjectOnCard": "Geen project"
     },
     "loadFailed": "De beoordelingswachtrij kon niet worden geladen. Dat betekent niet dat er niets te beoordelen is — probeer het opnieuw."
   },

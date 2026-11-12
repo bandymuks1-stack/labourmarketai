@@ -6,6 +6,17 @@ import { QuickConfirmQueue } from "@/components/app/quick-confirm-queue";
 import { quickConfirmEntryView } from "@/lib/journal/quick-confirm-model";
 import { fetchQuickReviewQueue } from "@/lib/journal/review-queue";
 import { groupByOrganization, reviewScopeOf, rowsInScope } from "@/lib/journal/review-scope";
+import {
+  NO_PROJECT,
+  chosenProject,
+  projectChoices,
+  rowsForProject,
+  type ProjectChoice,
+} from "@/lib/journal/review-project-filter";
+import { Button } from "@/components/ui/Button";
+import { FilterBar } from "@/components/ui/FilterBar";
+import { Label } from "@/components/ui/Label";
+import { Select } from "@/components/ui/Select";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { fetchBatchExceptions } from "@/lib/journal/batch-review";
 import { createClient } from "@/lib/supabase/server";
@@ -24,10 +35,13 @@ export const generateMetadata = dashboardPageMetadata("/dashboard/inbox/quick");
  *  the day. No auto-confirm: every confirmation is an explicit manager tap. */
 export default async function QuickConfirmPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ project?: string | string[] }>;
 }) {
   const { locale } = await params;
+  const sp = (await searchParams) ?? {};
   setRequestLocale(locale);
   const t = await getTranslations("journal");
   const tSkill = await getTranslations("skillNames");
@@ -57,10 +71,26 @@ export default async function QuickConfirmPage({
   const groups = scope.kind === "all" ? groupByOrganization(scoped.rows) : [];
   const labelled = groups.length > 1 || groups.some((g) => g.organizationId === null);
   const organizationLabel = (name: string | null) => name ?? t("inbox.quick.unnamedOrganization");
-  const ordered = scope.kind === "all" ? groups.flatMap((g) => g.rows) : scoped.rows;
+  const inScope = scope.kind === "all" ? groups.flatMap((g) => g.rows) : scoped.rows;
+  // BY PROJECT (?project=): the company reads one project's work reports. The
+  // choices come from the queue itself; an unknown value shows everything.
+  const choices = projectChoices(inScope);
+  const chosen = chosenProject(sp.project, choices);
+  const ordered = rowsForProject(inScope, chosen);
+  // A card names its project whenever the list could mix projects.
+  const projectLabelled = chosen === null && choices.length > 1;
+  const projectLabel = (e: { projectId: string | null; projectName: string | null }) =>
+    e.projectId
+      ? t("inbox.quick.projectOnCard", { name: e.projectName ?? t("inbox.quick.projectUnnamed") })
+      : t("inbox.quick.noProjectOnCard");
+  const choiceLabel = (c: ProjectChoice) =>
+    c.value === NO_PROJECT
+      ? t("inbox.quick.projectNone", { n: c.count })
+      : t("inbox.quick.projectOption", { name: c.name ?? t("inbox.quick.projectUnnamed"), n: c.count });
   const entries: QuickConfirmEntryView[] = ordered.map((e) => ({
     ...quickConfirmEntryView(e, tSkill, tUnit),
     ...(labelled ? { organization: organizationLabel(e.organizationName) } : {}),
+    ...(projectLabelled ? { project: projectLabel(e) } : {}),
   }));
 
   // "Confirm all of today" — strictly the entries created today. "Today" is
@@ -105,6 +135,49 @@ export default async function QuickConfirmPage({
         <p className="text-sm leading-relaxed text-text-secondary" data-testid="quick-elsewhere">
           {t("inbox.quick.elsewhere", { n: scoped.elsewhere })}
         </p>
+      ) : null}
+
+      {/* Narrow to one project. A plain GET form: works without JavaScript,
+          the choice is in the address and survives a reload. Shown only when
+          there is something to choose between. */}
+      {choices.length > 1 ? (
+        <FilterBar
+          as="form"
+          method="get"
+          label={t("inbox.quick.projectFilterLabel")}
+          testId="quick-project-filter"
+          filters={
+            <div className="flex min-w-0 flex-col gap-1 max-sm:w-full">
+              <Label htmlFor="quick-project">{t("inbox.quick.projectFilterLabel")}</Label>
+              <Select
+                id="quick-project"
+                name="project"
+                defaultValue={chosen ?? ""}
+                className="min-w-0 sm:w-72"
+                data-testid="quick-project-select"
+              >
+                <option value="">{t("inbox.quick.projectAll", { n: inScope.length })}</option>
+                {choices.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {choiceLabel(c)}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          }
+          actions={
+            <Button type="submit" variant="secondary" size="sm" data-testid="quick-project-show">
+              {t("inbox.quick.projectShow")}
+            </Button>
+          }
+          result={
+            chosen !== null ? (
+              <span data-testid="quick-project-result">
+                {t("inbox.quick.projectResult", { shown: ordered.length, total: inScope.length })}
+              </span>
+            ) : undefined
+          }
+        />
       ) : null}
 
       {/* One client boundary that stays mounted across the post-tap

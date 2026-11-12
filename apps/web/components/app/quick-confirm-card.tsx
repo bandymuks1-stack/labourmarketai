@@ -36,6 +36,9 @@ export type QuickConfirmEntryView = {
   /** The organization the entry belongs to, shown when the queue spans several, so no
    *  card is approved without saying whose hours it is. Absent: one organization. */
   organization?: string;
+  /** The project the entry was recorded for, shown when the queue holds entries of more
+   *  than one project (or of none), so a report is read against its project. */
+  project?: string;
 };
 
 /** What a successful tap reports upward — the queue keeps it as a receipt
@@ -202,6 +205,11 @@ export function QuickConfirmCard({
       {entry.organization ? (
         <p className="text-meta font-medium text-text-secondary" data-testid={`quick-organization-${entry.id}`}>
           {entry.organization}
+        </p>
+      ) : null}
+      {entry.project ? (
+        <p className="text-meta font-medium text-text-secondary" data-testid={`quick-project-${entry.id}`}>
+          {entry.project}
         </p>
       ) : null}
       {/* WHO + WHEN — one glance. */}
