@@ -7248,7 +7248,7 @@
         "notParticipant": "You can't write in this conversation — you don't have access to it.",
         "rateLimited": "You've sent many messages in the last hour. Wait a little and try again.",
         "rateCheckUnavailable": "The safety check couldn't run, so nothing was sent. Try again.",
-        "attachmentsUnavailable": "Sending attachments isn't switched on here yet — add some text to the message.",
+        "attachmentsUnavailable": "Attachments can't be sent in this conversation yet — add some text to the message.",
         "sendFailed": "The message couldn't be sent. Your text is still here — try again."
       }
     },
