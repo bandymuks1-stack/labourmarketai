@@ -7,7 +7,7 @@
 --   never `supabase db push`.)
 --
 -- ── OWNER DECISION V-1 (2026-11-12) ──────────────────────────────────────
--- Until now a worker saw a company's need only when the company was VERIFIED (7 of 52).
+-- Until now a worker saw a company's need only when the company was VERIFIED.
 -- From now on a submitted need of an UNCONFIRMED company is also shown — to workers and to
 -- signed-out visitors — when (1) the required fields are filled and (2) deterministic
 -- security + antispam checks pass. It is labelled "Company not confirmed" and never carries a
