@@ -716,6 +716,17 @@ export const SCOPED_OWNER_WAIVERS = [
       // #3123: a typed profession word keeps its page (SR-4). Only the number is
       // added; axiom, codes, surfaces, files, expiry and subset rule are unchanged.
       3123,
+      // OWNER APPROVAL 2026-11-12, verbatim (given to the coordinator in its own
+      // session): "Leidžiu tikslinį #3256 įtraukimą į produkto vartų išimtį, jeigu nepriklausoma patikra patvirtina, kad tai nekeičia ir nesusilpnina saugumo taisyklių."
+      // Checked by the coordinator (not the author) on head 1d8d50e5f, gate run
+      // twice: as PR 3256 → 18 findings, every one with the single reason
+      // `pr-not-covered`; as an already listed PR → pass, zero new findings.
+      // #3256: the /jobs board gains a section of company needs that the
+      // company itself chose to publish. Only the number is added; axiom,
+      // codes, surfaces, files, expiry and subset rule are unchanged;
+      // `product-gate.mjs` is not touched. This line is NOT an approval of the
+      // PR's migration or of its merge: both stay behind the owner's gate.
+      3256,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
