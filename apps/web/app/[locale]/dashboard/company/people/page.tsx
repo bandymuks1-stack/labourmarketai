@@ -405,15 +405,6 @@ export default async function CompanyPeoplePage({
         <CompanyTeamStructure
           organizationName={(companyRow.displayName || companyRow.legalName || "").trim()}
           teams={teamBrigades.teams}
-          // The company's people by BOTH roads the page already reads: the
-          // legacy worker list and the people linked by an active relationship
-          // (a person who joined by link is only in the second).
-          people={mergeRosterLinkCandidates(
-            activeWorkerRows
-              .filter((w) => w.status === "active")
-              .map((w) => ({ workerId: w.workerId, profileId: w.profileId, name: w.displayName ?? w.email ?? w.workerId })),
-            engagementCandidates,
-          ).map((c) => ({ profileId: c.profileId ?? null, name: c.name }))}
         />
       ) : null}
       {teamBrigades.applied ? (

@@ -2,32 +2,27 @@ import { getTranslations } from "next-intl/server";
 
 import { StructureTree, type StructureNode } from "@/components/ui/StructureTree";
 import type { TeamBrigade } from "@/lib/company/team-brigades";
+import { peopleOutsideTeams } from "@/lib/company/people-outside-teams";
 
 /**
  * THE COMPANY'S TEAM STRUCTURE, read from what the people door already holds:
  * company → teams → people, plus the company's people who are in no team.
  *
- * A view only. It reads no new data and stores nothing: the teams are the ones
- * the teams panel lists for this person, the people are the active roster the
- * page already read. A team (a shift, a care team, a crew) has no stored link
+ * A view only. It reads no new data and stores nothing: the teams, their
+ * members and the company's people who could be added are exactly what the
+ * teams panel already holds (names included; an id is never shown as a name). A team (a shift, a care team, a crew) has no stored link
  * to a parent team, so this is two levels and never draws a hierarchy the data
  * does not hold. Drawn by the shared `StructureTree` (DESIGN.md §10).
  */
 export async function CompanyTeamStructure({
   organizationName,
   teams,
-  people,
 }: {
   organizationName: string;
   teams: readonly TeamBrigade[];
-  /** The company's active people (profile id + shown name). */
-  people: readonly { profileId: string | null; name: string }[];
 }) {
   const t = await getTranslations("teamBrigades.structure");
-  const inTeam = new Set(teams.flatMap((team) => team.members.map((m) => m.profileId)));
-  // A person without a profile yet (an unclaimed roster row) cannot be a team
-  // member, so they are listed outside the teams, never dropped.
-  const outside = people.filter((p) => !p.profileId || !inTeam.has(p.profileId));
+  const outside = peopleOutsideTeams(teams);
 
   const teamNodes: StructureNode[] = teams.map((team) => ({
     id: `team-${team.id}`,
@@ -49,14 +44,14 @@ export async function CompanyTeamStructure({
       empty: t("noTeams"),
       children: [
         ...teamNodes,
-        ...(outside.length > 0
+        ...(outside !== null && outside.length > 0
           ? [
               {
                 id: "outside",
                 label: t("outside"),
                 count: outside.length,
-                children: outside.map((p, i) => ({
-                  id: `outside-${p.profileId ?? i}`,
+                children: outside.map((p) => ({
+                  id: `outside-${p.profileId}`,
                   label: <span className="break-words">{p.name}</span>,
                 })),
               },
