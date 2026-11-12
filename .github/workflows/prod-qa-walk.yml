@@ -38,6 +38,9 @@ on:
           - employee-beta-gate
           - role-routes
           - chat-continuity
+          # P0 chat privacy (#3224): A-B-C removal walk, synthetic thread; owner SQL removes the
+          # thread afterwards. Dispatch only, never in the rotation.
+          - chat-removal
           - journal-confirm
           - calendar-planning
           # CAL-8 rota / shift-pattern walk (weekly + N-on/M-off, collision warns, UI cancel). Dispatch only.
@@ -446,6 +449,7 @@ jobs:
             employee-beta-gate) SPEC=tests/e2e/employee-beta-gate.spec.ts ;;
             role-routes) SPEC=tests/e2e/prod-role-routes.spec.ts ;;
             chat-continuity) SPEC=tests/e2e/prod-chat-continuity.spec.ts ;;
+            chat-removal) SPEC=tests/e2e/prod-chat-removal.spec.ts ;;
             journal-confirm) SPEC=tests/e2e/prod-journal-confirm.spec.ts ;;
             calendar-planning) SPEC=tests/e2e/prod-calendar-planning.spec.ts ;;
             rota-repeat) SPEC=tests/e2e/prod-rota-repeat.spec.ts ;;

@@ -4,8 +4,9 @@
 #
 # P0 chat privacy (owner 2026-11-11). Proves, on a THROWAWAY native cluster
 # with the REAL chat migrations (0021, 20260612170000 revocation,
-# 20261006100100 server authority), that once a participant is removed:
-#   3. they cannot read the thread, its messages (old or new) or write to it;
+# 20260712130000 attachments, 20261006100100 server authority), that once a participant is removed:
+#   3. they cannot read the thread, its messages (old or new), its attachments
+#      (metadata rows or stored files) or write to it;
 #   4. they cannot re-add or un-revoke themselves;
 #   6. a removal committed while a send is in flight closes the send on every
 #      path the database decides: the message insert, the sender-side
@@ -32,6 +33,7 @@ REPO="$(cd "$HERE/../.." && pwd)"
 M="$REPO/supabase/migrations"
 LFD="$(mktemp -d)"
 for f in "$M"/0021_communication.sql "$M"/20260612170000_conversation_participant_revocation.sql \
+         "$M"/20260712130000_conversation_message_attachments.sql \
          "$M"/20261006100100_conversation_participants_server_authority_v1.sql; do
   tr -d '\r' < "$f" > "$LFD/$(basename "$f")"
 done
@@ -42,10 +44,11 @@ case "$PGPROOF_HOST" in 127.0.0.1|localhost|/*) ;; *) echo "refusing non-local h
 PSQL="psql -h $PGPROOF_HOST -p $PGPROOF_PORT -U postgres -d postgres -tA -q"
 
 echo "Rebuilding a clean proof database ..."
-$PSQL -c "drop schema if exists public cascade; create schema public; drop schema if exists auth cascade;" >/dev/null 2>&1
+$PSQL -c "drop schema if exists public cascade; create schema public; drop schema if exists auth cascade; drop schema if exists storage cascade;" >/dev/null 2>&1
 for f in "$HERE/chat-participant-revocation.prelude.sql" \
          "$LFD/0021_communication.sql" \
          "$LFD/20260612170000_conversation_participant_revocation.sql" \
+         "$LFD/20260712130000_conversation_message_attachments.sql" \
          "$LFD/20261006100100_conversation_participants_server_authority_v1.sql"; do
   tr -d '\r' < "$f" | $PSQL -v ON_ERROR_STOP=1 -f - >/dev/null 2>"$LFD/err" || { echo "BASELINE FAILED: $f"; cat "$LFD/err"; exit 1; }
 done
@@ -81,7 +84,16 @@ recheck() { as "$1" "select count(*) from public.conversation_participants where
 # READER's session: is any live row of the thread visible to them?
 open_to() { as "$1" "select count(*) from public.conversation_participants where conversation_id='$2' and revoked_at is null;"; }
 
+ATT=a0000000-0000-4000-8000-0000000000a1
+APATH="$CONV/$OWNER/$ATT/photo.png"
+MSG1=$($PSQL -c "select id from public.conversation_messages where conversation_id='$CONV' and body='before removal';" | tr -d '' | head -1)
+check "the owner uploads a file into their own folder of the thread" "INSERT 0 1" "$(printf '%s
+' "set role authenticated; set request.jwt.claim.sub='$OWNER'; insert into storage.objects(bucket_id, name) values ('conversation-attachments','$APATH');" | psql -h $PGPROOF_HOST -p $PGPROOF_PORT -U postgres -d postgres -tA -f - 2>&1 | tr -d '' | tail -1)"
+as $OWNER "select public.register_conversation_message_attachment('$ATT','$MSG1','photo.png','image/png',120,'$APATH');" >/dev/null
+
 echo; echo "== Before removal: everyone in the thread reads it"
+check "GONE sees the attachment row before removal" "1" "$(as $GONE "select count(*) from public.conversation_message_attachments where conversation_id='$CONV';")"
+check "GONE sees the stored file before removal" "1" "$(as $GONE "select count(*) from storage.objects where bucket_id='conversation-attachments' and name='$APATH';")"
 check "GONE reads the thread's message before removal" "1" "$(as $GONE "select count(*) from public.conversation_messages where conversation_id='$CONV';")"
 check "re-check: GONE is eligible before removal" "1" "$(recheck $OWNER $CONV $GONE)"
 
@@ -95,6 +107,11 @@ check "no message visible (old or new)" "0" "$(as $GONE "select count(*) from pu
 check "co-participant rows hidden; only their own revoked row" "1" "$(as $GONE "select count(*) from public.conversation_participants where conversation_id='$CONV';")"
 has "sending is refused by RLS" "row-level security|violates" "$(as $GONE "insert into public.conversation_messages(conversation_id, author_id, body) values ('$CONV','$GONE','still here?');")"
 check "nothing was written by the refused send" "0" "$(q "select count(*) from public.conversation_messages where author_id='$GONE';")"
+
+check "attachment rows hidden" "0" "$(as $GONE "select count(*) from public.conversation_message_attachments where conversation_id='$CONV';")"
+check "the stored file is hidden (no download)" "0" "$(as $GONE "select count(*) from storage.objects where bucket_id='conversation-attachments' and name='$APATH';")"
+has "uploading into the thread is refused" "row-level security|violates" "$(as $GONE "insert into storage.objects(bucket_id, name) values ('conversation-attachments','$CONV/$GONE/$ATT/x.png');")"
+has "registering an attachment is refused" "not|denied|participant|42501" "$(as $GONE "select public.register_conversation_message_attachment('a0000000-0000-4000-8000-0000000000a2','$MSG1','x.png','image/png',10,'$CONV/$GONE/a0000000-0000-4000-8000-0000000000a2/x.png');")"
 
 echo; echo "== 4. A removed participant cannot re-add or un-revoke themselves"
 has "un-revoke via UPDATE is refused (column grant: last_read_at only)" "permission denied" "$(as $GONE "update public.conversation_participants set revoked_at = null where conversation_id='$CONV' and profile_id='$GONE';")"
@@ -127,6 +144,7 @@ check "LIVE can still send" "INSERT 0 1" "$(printf '%s\n' "set role authenticate
 check "re-check: LIVE is still eligible" "1" "$(recheck $OWNER $CONV $LIVE)"
 check "re-check: OWNER is eligible for LIVE's messages" "1" "$(recheck $LIVE $CONV $OWNER)"
 check "read-time bell filter: the thread stays open to LIVE" "2" "$(open_to $LIVE $CONV)"
+check "LIVE still sees the attachment row and the file" "1 1" "$(as $LIVE "select count(*) from public.conversation_message_attachments where conversation_id='$CONV';") $(as $LIVE "select count(*) from storage.objects where name='$APATH';")"
 check "LIVE still sees GONE's revoked row (why the fan-out must filter it)" "1" "$(as $LIVE "select count(*) from public.conversation_participants where conversation_id='$CONV' and profile_id='$GONE' and revoked_at is not null;")"
 
 echo; echo "Result: $pass passed, $fail failed"
