@@ -8025,6 +8025,14 @@
     "ask": {
       "label": "Küsi assistendilt",
       "hint": "Kirjuta oma sõnadega, mida vajad"
+    },
+    "quick": {
+      "title": "Jätka sealt, kus pooleli jäi",
+      "projects": "Käimasolevad projektid",
+      "needs": "Avatud vajadused",
+      "allProjects": "Kõik projektid",
+      "allNeeds": "Kõik vajadused",
+      "untitledProject": "Nimetu projekt"
     }
   }
 }

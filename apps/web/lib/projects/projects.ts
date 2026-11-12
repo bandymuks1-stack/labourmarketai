@@ -177,7 +177,13 @@ export async function countManagedProjects(): Promise<{
  * instead of a list that only says "100 of 180 shown".
  */
 export async function listManagedProjects(
-  opts: { readonly finishedPage?: number } = {},
+  opts: {
+    readonly finishedPage?: number;
+    /** Read the WORKING bucket only. A caller that lists a few active
+     *  projects (the home's quick access) must not pay for the finished
+     *  bucket it will throw away: one query instead of two. */
+    readonly activeOnly?: boolean;
+  } = {},
 ): Promise<ManagedProject[]> {
   const finishedPage = Math.max(0, Math.floor(opts.finishedPage ?? 0));
   const supabase = await createClient();
@@ -213,7 +219,10 @@ export async function listManagedProjects(
     }
     return r;
   };
-  const [activeRes, finishedRes] = await Promise.all([bucket(false), bucket(true)]);
+  const [activeRes, finishedRes] = await Promise.all([
+    bucket(false),
+    opts.activeOnly ? { data: [] as unknown[], error: null } : bucket(true),
+  ]);
   // The working list is the contract: if it cannot be read, nothing is shown
   // (as before). An unreadable finished bucket degrades to working-only.
   if (activeRes.error) return [];

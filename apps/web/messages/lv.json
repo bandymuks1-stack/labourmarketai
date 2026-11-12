@@ -8025,6 +8025,14 @@
     "ask": {
       "label": "Jautāt asistentam",
       "hint": "Uzrakstiet saviem vārdiem, kas jums vajadzīgs"
+    },
+    "quick": {
+      "title": "Turpiniet, kur beidzāt",
+      "projects": "Aktīvie projekti",
+      "needs": "Atvērtās vajadzības",
+      "allProjects": "Visi projekti",
+      "allNeeds": "Visas vajadzības",
+      "untitledProject": "Projekts bez nosaukuma"
     }
   }
 }

@@ -20632,6 +20632,14 @@
     "ask": {
       "label": "Paklausk asistento",
       "hint": "Parašyk savais žodžiais, ko tau reikia"
+    },
+    "quick": {
+      "title": "Tęsk ten, kur baigei",
+      "projects": "Vykdomi projektai",
+      "needs": "Atviri poreikiai",
+      "allProjects": "Visi projektai",
+      "allNeeds": "Visi poreikiai",
+      "untitledProject": "Projektas be pavadinimo"
     }
   }
 }

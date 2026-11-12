@@ -231,6 +231,68 @@ describe("a visible way to ask the assistant, opening the ONE conversation (step
   }
 });
 
+describe("quick access: the organization's active projects and open needs, by name (step 3)", () => {
+  const quick = read("components/app/home/home-quick-access.tsx");
+  const code = quick.replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("reads through existing readers — no new query text, table or store", () => {
+    expect(code).toMatch(/await listManagedProjects\(\{ activeOnly: true \}\)/);
+    // The needs are the request-cached list the home's opening brief already
+    // read: zero extra queries, and an agency's offers are not in it (SEP-4).
+    expect(code).toMatch(/await listCompanyDemands\(\)/);
+    expect(code).not.toMatch(/\.from\(|createClient|supabase/);
+    expect(read("lib/scouting/scouting.ts")).toMatch(/const readCompanyDemandsOnce = cache\(/);
+    // The working bucket only: the finished bucket is not read to be thrown away.
+    expect(read("lib/projects/projects.ts")).toMatch(
+      /opts\.activeOnly \? \{ data: \[\] as unknown\[\], error: null \} : bucket\(true\)/,
+    );
+  });
+
+  it("stays inside the active workspace and lists a few rows, not a wall", () => {
+    expect(code).toMatch(/p\.organizationId === organizationId && p\.status !== "completed"/);
+    expect(code).toMatch(/r\.status !== "closed"/);
+    expect(code).toMatch(/export const QUICK_ACCESS_LIMIT = 3;/);
+    expect((code.match(/\.slice\(0, QUICK_ACCESS_LIMIT\)/g) ?? []).length).toBe(2);
+  });
+
+  it("claims nothing it could not read: an empty or failed list is absent", () => {
+    expect(code).toMatch(/if \(projects\.length === 0 && needs\.length === 0\) return null;/);
+    expect(code).toMatch(/\{projects\.length > 0 && \(/);
+    expect(code).toMatch(/\{needs\.length > 0 && \(/);
+    // No "0 projects" or "nothing yet" sentence on this block.
+    for (const locale of locales) {
+      const q = JSON.parse(read(`messages/${locale}.json`)).homeGoals.quick as Record<string, string>;
+      for (const text of Object.values(q)) expect(text, locale).not.toMatch(/\b0\b|\[EN\]|\bdemo\b/i);
+    }
+  });
+
+  it("is drawn only where the layout's gate admits the person, and every row is a real link", () => {
+    expect(code).toMatch(/routeIsAdmitted\(PROJECTS_HREF, admission\) \? loadActiveProjects\(organizationId\) : \[\]/);
+    expect(code).toMatch(/routeIsAdmitted\(NEEDS_HREF, admission\) \? loadOpenNeeds\(\) : \[\]/);
+    expect(code).toMatch(/href: `\$\{PROJECTS_HREF\}\/\$\{p\.id\}`/);
+    expect(existsSync(join(APP, "app", "[locale]", "dashboard", "projects", "[id]", "page.tsx"))).toBe(true);
+    // The needs list is a section the Needs door really holds.
+    expect(read("app/[locale]/dashboard/company/needs/page.tsx")).toMatch(/id="company-requests"/);
+    expect(code).toMatch(/min-h-11/);
+    expect(code).toMatch(/focus-visible:ring-2/);
+  });
+
+  it("closes the organization home behind its own boundary, so it cannot push the goals down", () => {
+    const company = read("components/app/organization/company-model-screen.tsx");
+    expect(company).toMatch(/<Suspense fallback=\{null\}>\s*<HomeQuickAccess \/>\s*<\/Suspense>/);
+    expect(company.indexOf("<HomeQuickAccess />")).toBeGreaterThan(company.indexOf("<AreaSwitcher"));
+  });
+
+  for (const locale of locales) {
+    it(`${locale}: quick access copy`, () => {
+      const q = JSON.parse(read(`messages/${locale}.json`)).homeGoals?.quick as Record<string, string> | undefined;
+      for (const key of ["title", "projects", "needs", "allProjects", "allNeeds", "untitledProject"]) {
+        expect(q?.[key], `${locale}.${key}`).toBeTruthy();
+      }
+    });
+  }
+});
+
 describe("plain copy in every catalog", () => {
   for (const locale of locales) {
     it(`${locale}: every goal has a label, and a hint unless its action is a shared door`, () => {

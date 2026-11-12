@@ -20632,6 +20632,14 @@
     "ask": {
       "label": "Ask the assistant",
       "hint": "Write what you need in your own words"
+    },
+    "quick": {
+      "title": "Pick up where you left off",
+      "projects": "Active projects",
+      "needs": "Open needs",
+      "allProjects": "All projects",
+      "allNeeds": "All needs",
+      "untitledProject": "Project without a name"
     }
   }
 }

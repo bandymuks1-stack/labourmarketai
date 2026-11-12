@@ -8025,6 +8025,14 @@
     "ask": {
       "label": "Spør assistenten",
       "hint": "Skriv med egne ord hva du trenger"
+    },
+    "quick": {
+      "title": "Fortsett der du slapp",
+      "projects": "Aktive prosjekter",
+      "needs": "Åpne behov",
+      "allProjects": "Alle prosjekter",
+      "allNeeds": "Alle behov",
+      "untitledProject": "Prosjekt uten navn"
     }
   }
 }

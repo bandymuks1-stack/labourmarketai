@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { OrganizationApprovalsCard } from "@/components/app/arena/confirm-pulse";
@@ -7,6 +8,7 @@ import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
 import { HOME_GOALS, areasBeyondGoals } from "@/lib/navigation/home-goals";
 import { loadOrganizationGoalRole } from "@/lib/navigation/home-goals-server";
 import { HOME_GOAL_SLOT_LINK, HomeGoalCards } from "@/components/app/home/home-goal-cards";
+import { HomeQuickAccess } from "@/components/app/home/home-quick-access";
 
 /**
  * THE COMPANY CONTEXT'S CENTRE (owner order 2026-10-01): the company home is
@@ -81,6 +83,13 @@ export async function CompanyModelScreen() {
           testId: `company-model-${a.id}`,
         }))}
       />
+      {/* QUICK ACCESS — the organization's active projects and open needs, by
+          name. It closes the screen and streams on its own: its two reads are
+          the slowest thing here, it is absent when there is nothing to list,
+          and arriving last it cannot push the goals or the doors down. */}
+      <Suspense fallback={null}>
+        <HomeQuickAccess />
+      </Suspense>
     </section>
   );
 }

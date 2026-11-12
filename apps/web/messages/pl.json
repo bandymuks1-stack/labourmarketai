@@ -20632,6 +20632,14 @@
     "ask": {
       "label": "Zapytaj asystenta",
       "hint": "Napisz własnymi słowami, czego potrzebujesz"
+    },
+    "quick": {
+      "title": "Kontynuuj rozpoczętą pracę",
+      "projects": "Aktywne projekty",
+      "needs": "Otwarte potrzeby",
+      "allProjects": "Wszystkie projekty",
+      "allNeeds": "Wszystkie potrzeby",
+      "untitledProject": "Projekt bez nazwy"
     }
   }
 }

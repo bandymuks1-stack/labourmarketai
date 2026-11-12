@@ -20632,6 +20632,14 @@
     "ask": {
       "label": "Vraag het de assistent",
       "hint": "Schrijf in je eigen woorden wat je nodig hebt"
+    },
+    "quick": {
+      "title": "Ga verder waar je was gebleven",
+      "projects": "Lopende projecten",
+      "needs": "Open behoeften",
+      "allProjects": "Alle projecten",
+      "allNeeds": "Alle behoeften",
+      "untitledProject": "Project zonder naam"
     }
   }
 }
