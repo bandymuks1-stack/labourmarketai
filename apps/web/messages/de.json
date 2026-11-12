@@ -11434,7 +11434,8 @@
       "needsMigration": "Diese Funktion ist auf dem Server noch nicht aktiviert. Ihr Profil bleibt privat.",
       "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
       "declinedNote": "In Ordnung — Ihr Profil bleibt privat. Diese Wahl finden Sie hier jederzeit.",
-      "readFailed": "Es konnte nicht geprüft werden, ob Arbeitgeber Ihr Profil sehen können. Das heißt nicht, dass die Sichtbarkeit ausgeschaltet ist — bitte versuchen Sie es später erneut."
+      "readFailed": "Es konnte nicht geprüft werden, ob Arbeitgeber Ihr Profil sehen können. Das heißt nicht, dass die Sichtbarkeit ausgeschaltet ist — bitte versuchen Sie es später erneut.",
+      "legalTextInEnglish": "Dieser Rechtstext wird auf Englisch angezeigt: Die Fassung in Ihrer Sprache ist noch nicht freigegeben. Es gilt der englische Text."
     },
     "disclosures": {
       "intro": "Jede Übermittlung Ihres Lebenslaufs, Ihrer Kontaktdaten oder anderer Daten an ein bestimmtes Unternehmen erfolgt erst nach Ihrer gesonderten Bestätigung.",

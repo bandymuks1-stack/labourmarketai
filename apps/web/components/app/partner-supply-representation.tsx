@@ -59,6 +59,8 @@ import type { ConsentLegalTexts } from "@/components/app/discoverability-consent
  */
 
 export interface PartnerSupplyLabels {
+  /** Set only when the legal text is NOT in the reader's language. */
+  legalLanguageNote?: string | null;
   sectionIntro: string;
   noWorkerProfile: string;
 
@@ -368,7 +370,19 @@ export function PartnerSupplyRepresentation({
   );
 
   const legalBlock = (
-    <div className="mt-3 flex flex-col gap-2 text-sm leading-relaxed text-text-primary">
+    <div
+      className="mt-3 flex flex-col gap-2 text-sm leading-relaxed text-text-primary"
+      lang={labels.legalLanguageNote ? "en" : undefined}
+    >
+      {labels.legalLanguageNote ? (
+        <p
+          lang={locale}
+          className="text-xs text-text-secondary"
+          data-testid="partner-supply-legal-language-note"
+        >
+          {labels.legalLanguageNote}
+        </p>
+      ) : null}
       <p>{legal.summary}</p>
       <p>{legal.visibleData}</p>
       <p>{legal.invisibleData}</p>

@@ -115,7 +115,7 @@ describe("every door opens the ONE existing consent — nothing else grants", ()
     // person looks, not a door to another page below the fold.
     const HUB = read("components/app/profile-hub-overview.tsx");
     expect(HUB).toMatch(/<DiscoverabilityConsent[\s\S]{0,120}source="profile"/);
-    expect(HUB).toContain("labels={discoverabilityConsentLabels(tConsent)}");
+    expect(HUB).toContain("labels={discoverabilityConsentLabels(tConsent, locale)}");
     expect(HUB).toContain("legal={PROFILE_DISCOVERABILITY_V1.texts[toConsentLocale(locale)]}");
     // The hub asks only for a worker; a non-worker identity gets nothing.
     expect(HUB).toContain("hasWorker ? getMyDiscoverabilityState() : Promise.resolve(null)");

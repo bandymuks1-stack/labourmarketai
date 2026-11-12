@@ -11434,7 +11434,8 @@
       "needsMigration": "This feature is not yet enabled on the server. Your profile stays private.",
       "error": "Could not save. Please try again.",
       "declinedNote": "Okay — your profile stays private. You can find this choice here at any time.",
-      "readFailed": "Could not check whether employers can see your profile. That does not mean visibility is off — please try again later."
+      "readFailed": "Could not check whether employers can see your profile. That does not mean visibility is off — please try again later.",
+      "legalTextInEnglish": "This legal text is shown in English: its version in your language has not been approved yet. The English text is the one that applies."
     },
     "disclosures": {
       "intro": "Every transfer of your CV, contacts or other data to a specific company happens only after your separate confirmation.",

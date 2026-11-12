@@ -11434,7 +11434,8 @@
       "needsMigration": "Deze functie is nog niet ingeschakeld op de server. Je profiel blijft privé.",
       "error": "Opslaan is niet gelukt. Probeer het opnieuw.",
       "declinedNote": "Prima — je profiel blijft privé. Je vindt deze keuze hier op elk moment.",
-      "readFailed": "Kon niet controleren of werkgevers je profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — probeer het later opnieuw."
+      "readFailed": "Kon niet controleren of werkgevers je profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — probeer het later opnieuw.",
+      "legalTextInEnglish": "Deze juridische tekst wordt in het Engels getoond: de versie in jouw taal is nog niet goedgekeurd. De Engelse tekst is de tekst die geldt."
     },
     "disclosures": {
       "intro": "Elke overdracht van je cv, contactgegevens of andere gegevens aan een specifiek bedrijf gebeurt pas na je afzonderlijke bevestiging.",

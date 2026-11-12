@@ -550,7 +550,7 @@ export async function ProfileHubOverview({
             state={discoverability}
             legal={PROFILE_DISCOVERABILITY_V1.texts[toConsentLocale(locale)]}
             preview={discoverabilityPreviewFields(visibilityPreview, tConsent)}
-            labels={discoverabilityConsentLabels(tConsent)}
+            labels={discoverabilityConsentLabels(tConsent, locale)}
           />
         </div>
       )}

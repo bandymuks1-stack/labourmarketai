@@ -28,6 +28,7 @@ import {
   discoverabilityConsentLabels,
   discoverabilityPreviewFields,
   toConsentLocale,
+  consentLegalLanguageNote,
 } from "@/lib/privacy/discoverability-view";
 import { getMyPartnerSupplyState } from "@/lib/privacy/partner-supply-actions";
 import {
@@ -215,7 +216,7 @@ export default async function PrivacyPage({
             state={state}
             legal={legal}
             preview={previewFields}
-            labels={discoverabilityConsentLabels(tc)}
+            labels={discoverabilityConsentLabels(tc, locale)}
           />
         </div>
       </section>
@@ -236,6 +237,7 @@ export default async function PrivacyPage({
             state={partnerSupplyState}
             legal={partnerLegal}
             labels={{
+              legalLanguageNote: consentLegalLanguageNote(tc, locale),
               sectionIntro: tps("sectionIntro"),
               noWorkerProfile: tps("noWorkerProfile"),
               statusNotRepresented: tps("statusNotRepresented"),

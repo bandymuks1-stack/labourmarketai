@@ -11434,7 +11434,8 @@
       "needsMigration": "Den här funktionen är ännu inte aktiverad på servern. Din profil förblir privat.",
       "error": "Det gick inte att spara. Försök igen.",
       "declinedNote": "Okej – din profil förblir privat. Du hittar det här valet här när som helst.",
-      "readFailed": "Det gick inte att kontrollera om arbetsgivare kan se din profil. Det betyder inte att synligheten är avstängd – försök igen senare."
+      "readFailed": "Det gick inte att kontrollera om arbetsgivare kan se din profil. Det betyder inte att synligheten är avstängd – försök igen senare.",
+      "legalTextInEnglish": "Den här juridiska texten visas på engelska: den svenska versionen är inte godkänd ännu. Det är den engelska texten som gäller."
     },
     "disclosures": {
       "intro": "Varje överföring av ditt CV, dina kontaktuppgifter eller andra uppgifter till ett visst företag sker först efter din separata bekräftelse.",

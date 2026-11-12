@@ -200,3 +200,43 @@ describe("i18n completeness for the consent UI (test 23)", () => {
     expect(lt.preview.title).toBe("Taip tavo profilį matys įmonės");
   });
 });
+
+describe("a consent legal text in another language says so (owner 2026-11-12)", () => {
+  // A routed locale whose legal texts the owner has not approved yet (sv, until
+  // #3232) reads the ENGLISH consent texts inside its own UI. That is honest
+  // only if the screen says it: the reader must never take an English legal
+  // text for a translation that happens to look odd.
+  it("every active locale carries the note, in its own words", () => {
+    const seen = new Set<string>();
+    for (const locale of activeLocales) {
+      const note = JSON.parse(read(`messages/${locale}.json`)).privacyConsent.labels.legalTextInEnglish;
+      expect(typeof note, locale).toBe("string");
+      expect(note.length, locale).toBeGreaterThan(30);
+      expect(note, locale).not.toMatch(/^\[EN\]/);
+      seen.add(note);
+    }
+    expect(seen.size, "one wording per language, not a copied English line").toBe(activeLocales.length);
+    const sv = JSON.parse(read("messages/sv.json")).privacyConsent.labels.legalTextInEnglish;
+    expect(sv).toMatch(/engelska/);
+    expect(sv).toMatch(/inte godkänd/);
+  });
+
+  it("the note is decided by the ONE consent-locale rule and shown by both consent components", () => {
+    const view = read("lib/privacy/discoverability-view.ts");
+    expect(view).toMatch(/toConsentLocale\(locale\) === locale \? null : tc\("labels\.legalTextInEnglish"\)/);
+    for (const file of ["components/app/discoverability-consent.tsx", "components/app/partner-supply-representation.tsx"]) {
+      const src = read(file);
+      expect(src, file).toMatch(/lang=\{labels\.legalLanguageNote \? "en" : undefined\}/);
+      expect(src, file).toMatch(/legal-language-note"/);
+    }
+    // Every place that renders a consent passes the reader's locale to the rule.
+    for (const file of [
+      "app/[locale]/dashboard/privacy/page.tsx",
+      "components/app/profile-hub-overview.tsx",
+      "lib/conversation/employer-visibility-chat.ts",
+    ]) {
+      expect(read(file), file).toMatch(/discoverabilityConsentLabels\(\w+, locale\)/);
+    }
+    expect(read("app/[locale]/dashboard/privacy/page.tsx")).toMatch(/legalLanguageNote: consentLegalLanguageNote\(tc, locale\)/);
+  });
+});
