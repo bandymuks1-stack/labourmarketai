@@ -172,6 +172,15 @@ describe("the disclosure is accessible", () => {
     expect(mega).not.toMatch(/role="menuitem"/);
   });
 
+  it("panel titles are not headings, the icon-only assistant is 44px, account links are not prefetched", () => {
+    // Independent review of e251185 (P3 x3).
+    expect(mega).not.toMatch(/<h[1-6]\b/);
+    expect(mega).toMatch(/data-testid="intent-bar-assistant"[\s\S]{0,120}min-h-11 min-w-11/);
+    expect(mega).toMatch(/prefetch=\{link\.account \? false : undefined\}/);
+    expect(mobile).toMatch(/prefetch=\{link\.account \? false : undefined\}/);
+    expect(mega.match(/prefetch=\{false\}/g)).toHaveLength(1);
+  });
+
   it("rows are 44px touch targets and motion respects reduced motion", () => {
     expect(mega).toMatch(/min-h-11/);
     expect(mobile).toMatch(/mobile-intent-toggle-[\s\S]{0,400}min-h-11/);

@@ -9,6 +9,7 @@ import {
   goalHref,
 } from "@/lib/navigation/public-intents";
 import {
+  AREA_ICONS,
   FUNCTION_ICONS,
   GOAL_ICONS,
   PROFESSION_ICONS,
@@ -149,6 +150,25 @@ describe("two actions to a function", () => {
     expect(navigator).toMatch(/<form action=\{`\/\$\{locale\}\/jobs`\} method="get"/);
     expect(navigator).toMatch(/data-testid="profession-full-list"/);
     expect(navigator).toMatch(/data-testid="sector-chips"/);
+  });
+});
+
+describe("the pin slot (signed-in homes build on it)", () => {
+  it("is a sibling of the card's link, never nested in it, with its own name and state", () => {
+    const link = rail.slice(rail.indexOf("<CardLink"), rail.indexOf("</CardLink>"));
+    expect(link).not.toMatch(/<button/);
+    expect(rail).toMatch(/<\/CardLink>\s*\{card\.pin && \(\s*<button/);
+    expect(rail).toMatch(/aria-pressed=\{card\.pin\.pressed\}/);
+    expect(rail).toMatch(/aria-label=\{card\.pin\.label\}/);
+    expect(rail).toMatch(/absolute right-0 top-0 inline-flex size-11/);
+  });
+
+  it("the shared icon set carries the signed-in areas' icons", () => {
+    for (const key of Object.values(AREA_ICONS)) expect(NAV_CARD_ICONS[key]).toBeTruthy();
+  });
+
+  it("signed-in destinations are never prefetched from a public page", () => {
+    expect(rail).toMatch(/prefetch=\{href\.startsWith\("\/dashboard"\) \? false : undefined\}/);
   });
 });
 

@@ -89,7 +89,15 @@ export const GOAL_ICONS = {
   agencies: "building",
 } as const satisfies Record<string, string>;
 
+/** Signed-in areas the pinned row and the role home draw (Lane A2). */
+export const AREA_ICONS = {
+  journal: "notebook",
+  hours: "clock",
+  projects: "folder",
+} as const satisfies Record<string, string>;
+
 export type NavCardIconKey =
+  | (typeof AREA_ICONS)[keyof typeof AREA_ICONS]
   | (typeof FUNCTION_ICONS)[keyof typeof FUNCTION_ICONS]
   | (typeof PROFESSION_ICONS)[keyof typeof PROFESSION_ICONS]
   | (typeof GOAL_ICONS)[keyof typeof GOAL_ICONS];

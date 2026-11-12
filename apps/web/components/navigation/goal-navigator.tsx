@@ -144,12 +144,12 @@ export function GoalNavigator({
           className="flex min-w-0 flex-col gap-4 rounded-2xl border border-ink-600 bg-ink-900/60 p-4 sm:p-6"
         >
           <div className="flex items-start justify-between gap-3">
-            <h3
+            <h2
               aria-live="polite"
               className="font-display text-lg font-semibold text-text-primary sm:text-xl"
             >
               {active.title}
-            </h3>
+            </h2>
             <button
               type="button"
               onClick={close}

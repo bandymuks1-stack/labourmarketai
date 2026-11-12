@@ -151,8 +151,11 @@ export function IntentMegaMenu({
         {assistant && (
           <Link
             href={assistant.href}
+            // The conversation home is behind sign-in: never prefetch it from
+            // a public page (a guest would request it on every view).
+            prefetch={false}
             data-testid="intent-bar-assistant"
-            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-control px-2.5 text-sm font-medium text-text-primary transition-colors hover:text-brand-blue motion-reduce:transition-none"
+            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-control px-2.5 text-sm font-medium text-text-primary transition-colors hover:text-brand-blue motion-reduce:transition-none"
           >
             <MessageCircle aria-hidden className="h-4 w-4 text-brand-blue" />
             <span className="sr-only xl:not-sr-only">{assistant.label}</span>
@@ -190,9 +193,11 @@ export function IntentMegaMenu({
                       <Icon className="h-5 w-5" />
                     </span>
                     <div className="min-w-0">
-                      <h2 className="font-display text-base font-semibold text-text-primary">
+                      {/* Not a heading: this sits in the site header, before the
+                          page's own h1, and must not enter the page outline. */}
+                      <p className="font-display text-base font-semibold text-text-primary">
                         {intent.title}
-                      </h2>
+                      </p>
                       <p className="mt-0.5 text-sm leading-snug text-text-secondary">
                         {intent.description}
                       </p>
@@ -203,6 +208,7 @@ export function IntentMegaMenu({
                       <li key={link.id}>
                         <Link
                           href={link.href}
+                          prefetch={link.account ? false : undefined}
                           onClick={() => setActive(null)}
                           data-testid={`intent-link-${intent.id}-${link.id}`}
                           className="flex min-h-11 items-center justify-between gap-2 rounded-lg px-2 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary motion-reduce:transition-none"

@@ -10,7 +10,7 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pin, PinOff } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
 import { NAV_CARD_ICONS } from "@/components/navigation/nav-card-icon";
@@ -24,7 +24,8 @@ const CardLink = forwardRef<HTMLAnchorElement, ComponentPropsWithoutRef<"a"> & {
     return href.startsWith("#") ? (
       <a ref={ref} href={href} {...rest} />
     ) : (
-      <Link ref={ref} href={href} {...rest} />
+      // A signed-in destination is never prefetched from a public page.
+      <Link ref={ref} href={href} prefetch={href.startsWith("/dashboard") ? false : undefined} {...rest} />
     );
   },
 );
@@ -40,6 +41,17 @@ export type RailCard = {
   /** A small factual line, e.g. "Opens now". */
   readonly note?: string;
   readonly iconKey: NavCardIconKey;
+  /**
+   * A pin toggle in the card's corner (signed-in homes). It renders as a
+   * SIBLING of the card's link — never inside it — so the two controls have
+   * separate names, separate focus stops and separate 44px targets.
+   */
+  readonly pin?: {
+    readonly pressed: boolean;
+    /** The full accessible name, e.g. "Pin Journal" / "Unpin Journal". */
+    readonly label: string;
+    readonly onToggle: () => void;
+  };
 };
 
 /**
@@ -182,7 +194,7 @@ export function CardRail({
               <li
                 key={card.id}
                 className={cn(
-                  "shrink-0 snap-start",
+                  "relative shrink-0 snap-start",
                   compact ? "w-[5.75rem] sm:w-auto sm:min-w-40 sm:flex-1" : "w-36 sm:w-44",
                 )}
               >
@@ -231,6 +243,26 @@ export function CardRail({
                     )}
                   </span>
                 </CardLink>
+                {card.pin && (
+                  <button
+                    type="button"
+                    aria-pressed={card.pin.pressed}
+                    aria-label={card.pin.label}
+                    title={card.pin.label}
+                    data-rail-pin={card.id}
+                    onClick={card.pin.onToggle}
+                    className={cn(
+                      "absolute right-0 top-0 inline-flex size-11 items-center justify-center rounded-xl transition-colors motion-reduce:transition-none",
+                      card.pin.pressed ? "text-brand-blue" : "text-text-muted hover:text-text-primary",
+                    )}
+                  >
+                    {card.pin.pressed ? (
+                      <PinOff aria-hidden className="size-4" />
+                    ) : (
+                      <Pin aria-hidden className="size-4" />
+                    )}
+                  </button>
+                )}
               </li>
             );
           })}

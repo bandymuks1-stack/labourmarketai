@@ -166,6 +166,28 @@ for (const width of [320, 375, 768] as const) {
   });
 }
 
+test.describe("signed-out visitor follows an account link", () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+  // Independent review of e251185 (P3): the one account link with a query.
+  test("Set up your agency → login keeps the whole destination, query included", async ({ page }) => {
+    await page.goto("/en/pricing");
+    await page.getByTestId("intent-toggle-agencies").click();
+    await page.getByTestId("intent-link-agencies-setUpAgency").click();
+    await page.waitForURL(/\/(auth\/login|dashboard\/start\/company)/);
+    // The login redirect is the middleware's, and it needs the auth backend.
+    // A server started without one (no Supabase environment) lets the request
+    // through, which proves nothing either way — so say so instead of passing.
+    test.skip(
+      !/\/auth\/login/.test(page.url()),
+      "No auth backend in this environment: the signed-out redirect cannot be exercised. Run against the local stack or a deployed build.",
+    );
+    await expect(page).toHaveURL(/\/en\/auth\/login\?next=/);
+    const next = new URL(page.url()).searchParams.get("next") ?? "";
+    expect(next).toContain("/dashboard/start/company");
+    expect(next).toContain("type=staffing_agency");
+  });
+});
+
 test.describe("phone header", () => {
   for (const width of [360, 375] as const) {
     // Lithuanian (the default), German and Polish: the longest Sign in labels.

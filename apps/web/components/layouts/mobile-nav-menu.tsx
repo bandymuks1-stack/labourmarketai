@@ -162,6 +162,7 @@ export function MobileNavMenu({
                           <Link
                             key={link.id}
                             href={link.href}
+                            prefetch={link.account ? false : undefined}
                             onClick={() => setOpen(false)}
                             data-testid={`mobile-intent-link-${intent.id}-${link.id}`}
                             className="flex min-h-11 items-center justify-between gap-2 rounded-lg px-2 py-2 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary"
@@ -185,6 +186,7 @@ export function MobileNavMenu({
           {assistant && (
             <Link
               href={assistant.href}
+              prefetch={false}
               onClick={() => setOpen(false)}
               data-testid="mobile-nav-assistant"
               className="mb-1.5 flex min-h-11 items-center gap-3 rounded-lg border-b border-ink-600 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-ink-800"
