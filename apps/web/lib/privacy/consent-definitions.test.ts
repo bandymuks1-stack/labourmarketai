@@ -172,7 +172,7 @@ describe("Swedish texts are content-equivalent to the English source", () => {
         if (en.includes(fact)) expect(sv, `${def.purpose}/sv/${key} lost "${fact}"`).toContain(fact);
       }
       // the same emphasised negation (NOT -> INTE) where en shouts one
-      if (/NOT/.test(en)) expect(sv, `${def.purpose}/sv/${key}`).toMatch(/INTE/);
+      if (/\bNOT\b/.test(en)) expect(sv, `${def.purpose}/sv/${key}`).toMatch(/\bINTE\b/);
     }
   });
 
