@@ -1,3 +1,4 @@
+import { ProfessionCarousel } from "@/components/marketing/browse-carousels";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link, redirect } from "@/lib/i18n/navigation";
@@ -557,6 +558,16 @@ export default async function JobsPage({
       <p className="mt-3 max-w-2xl text-sm text-text-muted sm:text-base">
         {(user ? INTRO_MEMBER : INTRO)[active]}
       </p>
+
+      {/* Browse by profession (owner P0 2026-11-12): every catalogue
+          profession, sectors interleaved, each card the board's own
+          `?profession=` URL. Shown on the unfiltered board only — once a
+          profession is picked the row has done its job. */}
+      {!profession && !showSaved && (
+        <div className="mt-6 min-w-0">
+          <ProfessionCarousel />
+        </div>
+      )}
 
       {/* A PLAIN GET FORM, no client JS. The board is the crawler-facing
           surface and the first thing a worker with a poor connection loads;

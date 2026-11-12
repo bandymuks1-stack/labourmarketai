@@ -20600,6 +20600,10 @@
       "partnerWithUs": "Word partner",
       "forAgencies": "Zo werkt het voor bureaus",
       "setUpAgency": "Richt je bureau in"
+    },
+    "carousels": {
+      "functions": "Wat je hier kunt doen",
+      "professions": "Vacatures per beroep"
     }
   }
 }

@@ -20600,6 +20600,10 @@
       "partnerWithUs": "Partner werden",
       "forAgencies": "So funktioniert es für Agenturen",
       "setUpAgency": "Agentur einrichten"
+    },
+    "carousels": {
+      "functions": "Was Sie hier tun können",
+      "professions": "Stellen nach Beruf"
     }
   }
 }

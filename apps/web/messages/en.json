@@ -20600,6 +20600,10 @@
       "partnerWithUs": "Partner with us",
       "forAgencies": "How it works for agencies",
       "setUpAgency": "Set up your agency"
+    },
+    "carousels": {
+      "functions": "What you can do here",
+      "professions": "Browse jobs by profession"
     }
   }
 }

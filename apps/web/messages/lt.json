@@ -20600,6 +20600,10 @@
       "partnerWithUs": "Tapti partneriu",
       "forAgencies": "Kaip tai veikia agentūroms",
       "setUpAgency": "Sukurti agentūrą"
+    },
+    "carousels": {
+      "functions": "Ką čia galite daryti",
+      "professions": "Darbo skelbimai pagal profesiją"
     }
   }
 }

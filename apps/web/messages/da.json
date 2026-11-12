@@ -7993,6 +7993,10 @@
       "partnerWithUs": "Bliv partner",
       "forAgencies": "Sådan virker det for bureauer",
       "setUpAgency": "Opret dit bureau"
+    },
+    "carousels": {
+      "functions": "Det kan du gøre her",
+      "professions": "Job efter fag"
     }
   }
 }

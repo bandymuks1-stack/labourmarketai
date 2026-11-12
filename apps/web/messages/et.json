@@ -7993,6 +7993,10 @@
       "partnerWithUs": "Hakka partneriks",
       "forAgencies": "Kuidas see agentuuridele toimib",
       "setUpAgency": "Loo agentuur"
+    },
+    "carousels": {
+      "functions": "Mida siin teha saab",
+      "professions": "Töökuulutused ameti järgi"
     }
   }
 }

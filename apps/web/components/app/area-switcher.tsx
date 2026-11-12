@@ -15,6 +15,8 @@ export type AreaSwitcherItem = {
   readonly href: string;
   readonly label: string;
   readonly iconKey: WorkAreaIconKey;
+  /** One short line under the label (e.g. a profession's sector). */
+  readonly caption?: string;
   readonly testId?: string;
 };
 
@@ -284,7 +286,12 @@ export function AreaSwitcher({
                       />
                     )}
                   </span>
-                  <span className="text-support font-semibold leading-snug text-text-primary">{item.label}</span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="line-clamp-2 text-support font-semibold leading-snug text-text-primary">{item.label}</span>
+                    {item.caption && (
+                      <span className="truncate text-meta text-text-muted">{item.caption}</span>
+                    )}
+                  </span>
                 </Link>
               </li>
             );

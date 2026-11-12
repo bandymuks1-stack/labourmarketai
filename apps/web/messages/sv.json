@@ -7993,6 +7993,10 @@
       "partnerWithUs": "Bli partner",
       "forAgencies": "Så fungerar det för bemanningsföretag",
       "setUpAgency": "Starta ditt bemanningsföretag"
+    },
+    "carousels": {
+      "functions": "Det här kan du göra här",
+      "professions": "Jobb efter yrke"
     }
   }
 }

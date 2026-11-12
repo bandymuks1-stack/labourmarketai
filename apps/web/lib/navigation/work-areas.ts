@@ -40,7 +40,27 @@ export type WorkAreaIconKey =
   | "gauge"
   | "activity"
   | "barChart"
-  | "history";
+  | "history"
+  // Public browse carousels (owner P0 2026-11-12): one icon per work sector
+  // and per public function. Same switcher, same icon map.
+  | "hardHat"
+  | "factory"
+  | "warehouse"
+  | "truck"
+  | "sprout"
+  | "sparkles"
+  | "utensils"
+  | "heartHandshake"
+  | "tractor"
+  | "building"
+  | "shoppingBag"
+  | "code"
+  | "graduationCap"
+  | "scissors"
+  | "wrench"
+  | "fileSignature"
+  | "globe"
+  | "layers";
 
 export type WorkArea = {
   readonly id: string;

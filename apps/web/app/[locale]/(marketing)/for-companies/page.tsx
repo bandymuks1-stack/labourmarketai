@@ -1,3 +1,4 @@
+import { FunctionCarousel } from "@/components/marketing/browse-carousels";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadata, buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
@@ -87,6 +88,7 @@ export default async function ForCompaniesPage({
         ctaSource="companies_cta"
         ctaKind="signup"
       />
+      <FunctionCarousel />
     </>
   );
 }

@@ -7993,6 +7993,10 @@
       "partnerWithUs": "Kļūt par partneri",
       "forAgencies": "Kā tas darbojas aģentūrām",
       "setUpAgency": "Izveidot aģentūru"
+    },
+    "carousels": {
+      "functions": "Ko šeit varat darīt",
+      "professions": "Darba sludinājumi pēc profesijas"
     }
   }
 }
