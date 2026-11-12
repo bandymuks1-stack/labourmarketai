@@ -306,8 +306,12 @@ export function ConversationHeader({
 
 /** Label shown beside the icon on every item once the bar fits every locale. */
 const WIDE_LABEL = "hidden min-[1800px]:inline";
-/** The core loop names itself from `xl`: three-second clarity on a laptop. */
-const CORE_LABEL = "hidden xl:inline";
+/** The core loop is ICONS with names for assistive technology and a tooltip
+ *  (one header rule, 2026-11-12): the goals are the main navigation; home,
+ *  journal, calendar and messages stay one tap away in the top row but must
+ *  not read as a second menu beside the goals. The destination the person
+ *  stands in still names itself (`ACTIVE_LABEL`). */
+const CORE_LABEL = "sr-only";
 /** The ACTIVE destination names itself as soon as the row has room for one
  *  label (`lg`); below that its filled pill is the "you are here" mark and the
  *  page title right under the bar names it. */

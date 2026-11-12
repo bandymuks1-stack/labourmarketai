@@ -936,6 +936,12 @@ for (const { role, person, home } of ROLES.filter((r) => r.role !== "service bus
       console.log(
         `[app-nav-walk] ${role} @ 1440px: ${row.cards} goals in ${row.tops} row, rail ${row.width}px wide, overflow ${row.overflow}px, arrows ${row.arrows}`,
       );
+      // EXACTLY ONE RAIL at rest: the goals. Nothing else on the home is a rail.
+      const rails = await desk.page.locator('[data-rail-part="track"]').count();
+      console.log(`[app-nav-walk] ${role} @ 1440px: ${rails} rail on the home at rest`);
+      expect(rails, "exactly one rail on the home").toBe(1);
+      // One of everything: the page is drawn once.
+      await expect(desk.page.getByTestId("conversation-chat"), "the home is drawn once").toHaveCount(1);
       expect(row.tops, "one row").toBe(1);
       expect(row.overflow, "nothing scrolled out of the row").toBeLessThanOrEqual(1);
       expect(row.arrows, "no arrows are needed").toBe(0);
