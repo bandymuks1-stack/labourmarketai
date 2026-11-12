@@ -1789,7 +1789,7 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-12: team_offer_counterpart_v1, the gated recipient of a team offer's notification
       // (SECURITY DEFINER + EXECUTE to authenticated). RED draft #3231, the marker is the human-gate
       // acknowledgement, NOT applied.
-      "20261112090000_team_offer_counterpart_v1.sql",
+      "20261112213100_team_offer_counterpart_v1.sql",
 ]);
   });
 

@@ -1,4 +1,4 @@
--- 20261112090000 - team_offer_counterpart_v1: the OTHER party of a team offer,
+-- 20261112213100 - team_offer_counterpart_v1: the OTHER party of a team offer,
 -- to the party asking, so the offer notifications (v12, 20261111230000) reach
 -- a person (Swedish employer audit 2026-11-11, N-1).
 --
@@ -18,7 +18,7 @@
 -- GATE: RED (privilege surface: a new SECURITY DEFINER + EXECUTE to
 -- authenticated). Owner approval before apply. Apply via Supabase MCP
 -- apply_migration only, never db push.
--- ROLLBACK: supabase/rollbacks/20261112090000_team_offer_counterpart_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261112213100_team_offer_counterpart_v1.down.sql
 -- @human-gate-approved
 
 begin;
