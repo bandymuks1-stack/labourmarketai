@@ -11,6 +11,7 @@ import {
   setUpCompany,
   signUp,
   sql,
+  signIn,
   sqlExec,
   userId,
 } from "./isolated-web-a-helpers";
@@ -33,7 +34,14 @@ import {
  *   N-4  a pin never grants access: a pin to an employer page stored for a
  *        worker is not drawn, the page itself still refuses, and the pin can
  *        be removed;
- *   N-5  pin · move · unpin in the row, each change proven in the stored rows.
+ *   N-5  pin · move · unpin in the row, each change proven in the stored rows;
+ *   N-6  a pin survives sign-out and sign-in, and shows in a second session;
+ *   N-7  EVERY function target is opened as each role and classified:
+ *        works (opens and offers something to act on), empty (opens, nothing
+ *        to act on), refused (the gate turns the person away). What the home
+ *        offers a role must never be refused; the table is printed;
+ *   N-8  the home at 360 and 1440 px in the light and the dark theme, with
+ *        and without a goal open — screenshots for a person to look at.
  *
  * WHAT THIS DOES NOT PROVE. The owner's acceptance is that a NEW PERSON
  * understands the main choices within five seconds. A script that already
@@ -507,3 +515,179 @@ test("N-5. a worker adds a shortcut, moves it, and removes it — each change is
     await ctx.close();
   }
 });
+
+// ── N-6 · pins persist across sign-out and in a second session ──────────────
+
+test("N-6. a pin survives sign-out and sign-in, and a second session shows it", async ({ browser }) => {
+  const address = email("worker");
+  const workerId = await userId(address);
+  const first = await as(browser, "worker", VIEWPORTS[1]);
+  let pinned: string | null = null;
+  try {
+    await openHome(first.page, "worker", "today-screen");
+    await first.page.getByTestId("my-space-manage").click();
+    const add = first.page.getByTestId("my-space-editor").getByTestId("my-space-add").first();
+    pinned = await add.getAttribute("data-ref");
+    expect(pinned, "the home offers something to pin").toBeTruthy();
+    await add.click();
+    const chip = (page: Page) => page.locator(`[data-testid="my-space-pin"][data-ref="${pinned}"]`);
+    await expect(chip(first.page)).toBeVisible({ timeout: 30_000 });
+
+    // Sign out: the session is gone. Sign in again: the pin is still there.
+    await first.page.goto(`${BASE}/en/auth/logout`);
+    await first.page.goto(`${BASE}/en/dashboard`);
+    await first.page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+    await signIn(first.page, BASE, address);
+    await openHome(first.page, "worker", "today-screen");
+    await expect(chip(first.page), "the pin survives sign-out and sign-in").toBeVisible({ timeout: 30_000 });
+
+    // A second device: a fresh browser context with its own sign-in.
+    const secondCtx = await browser.newContext({ viewport: VIEWPORTS[0] });
+    const second = await secondCtx.newPage();
+    try {
+      await signIn(second, BASE, address);
+      await openHome(second, "worker", "today-screen");
+      await expect(chip(second), "a second session shows the same pin").toBeVisible({ timeout: 30_000 });
+      // Removed there, gone here after a reload: one stored list, not two.
+      await second.getByTestId("my-space-manage").click();
+      await second
+        .locator(`[data-testid="my-space-edit-item"][data-ref="${pinned}"]`)
+        .getByTestId("my-space-remove")
+        .click();
+      await expect(chip(second)).toHaveCount(0);
+    } finally {
+      await secondCtx.close();
+    }
+    await openHome(first.page, "worker", "today-screen");
+    await expect(chip(first.page), "the removal reached the first session").toHaveCount(0);
+    expect(
+      sql<{ n: number }>(`select count(*)::int as n from public.workspace_pins where profile_id = ${lit(workerId)}`)[0]?.n,
+    ).toBe(0);
+    // The first context signed in again: later tests use this fresh session.
+    sessions.set("worker", await first.ctx.storageState());
+  } finally {
+    await first.ctx.close();
+  }
+});
+
+// ── N-7 · every function target, opened as each role ────────────────────────
+
+/** Every function the signed-in goals can open (`lib/navigation/home-goals.ts`). */
+const FUNCTION_TARGETS: ReadonlyArray<{ fn: string; route: string }> = [
+  { fn: "find work", route: "/dashboard/opportunities" },
+  { fn: "record work", route: "/dashboard/journal" },
+  { fn: "my CV", route: "/cv" },
+  { fn: "describe a need", route: "/dashboard/company/needs" },
+  { fn: "my people", route: "/dashboard/company/people" },
+  { fn: "find candidates", route: "/dashboard/company/scouting" },
+  { fn: "projects and teams", route: "/dashboard/projects" },
+  { fn: "work and hours", route: "/dashboard/hours" },
+  { fn: "your services", route: "/dashboard/services" },
+  { fn: "service requests", route: "/dashboard/service-requests" },
+  { fn: "market listings", route: "/dashboard/listings" },
+  { fn: "proposals and contracts", route: "/dashboard/commercial" },
+  { fn: "your network", route: "/dashboard/network" },
+  { fn: "clients", route: "/dashboard/company/partners" },
+];
+
+/** What the home OFFERS each person, by route — the claim this test checks. */
+const OFFERED: Record<Person, (route: string) => boolean> = {
+  // A worker is offered nothing in the employer space.
+  worker: (route) => !route.startsWith("/dashboard/company"),
+  // The walk's owners signed up as organizations and hold no worker role, so
+  // the worker-only job board is not offered to them.
+  company: (route) => route !== "/dashboard/opportunities",
+  agency: (route) => route !== "/dashboard/opportunities",
+};
+
+type Verdict = "works" | "empty" | "refused";
+
+/**
+ * Open a route and say what the person got. `refused`: the gate sent them
+ * away (to the home with a notice, or anywhere that is not the route).
+ * `works`: the page opened and its main area offers at least one thing to act
+ * on (a button, a field or a link). `empty`: it opened and offers nothing.
+ * A fresh account has no data, so "works" here means "can start", not "has
+ * content".
+ */
+async function classify(page: Page, route: string): Promise<{ verdict: Verdict; controls: number; text: number }> {
+  await page.goto(`${BASE}/en${route}`);
+  await page.waitForLoadState("networkidle", { timeout: 60_000 }).catch(() => {});
+  const url = new URL(page.url());
+  if (url.searchParams.has("notice") || url.pathname !== `/en${route}`) {
+    return { verdict: "refused", controls: 0, text: 0 };
+  }
+  const main = page.getByRole("main").first();
+  await expect(main).toBeVisible({ timeout: 30_000 });
+  const controls = await main
+    .locator("button:visible, a[href]:visible, input:visible, textarea:visible, select:visible")
+    .count();
+  const text = ((await main.innerText().catch(() => "")) ?? "").trim().length;
+  return { verdict: controls > 0 && text > 0 ? "works" : "empty", controls, text };
+}
+
+for (const person of ["worker", "company", "agency"] as const) {
+  test(`N-7. ${person}: every function target opened — works, empty or refused`, async ({ browser }) => {
+    const { ctx, page } = await as(browser, person, VIEWPORTS[1]);
+    const rows: string[] = [];
+    const wrong: string[] = [];
+    try {
+      if (person !== "worker") await openHome(page, person, "company-model", orgOf[person]);
+      for (const { fn, route } of FUNCTION_TARGETS) {
+        const got = await classify(page, route);
+        const offered = OFFERED[person](route);
+        rows.push(`${fn} | ${route} | ${offered ? "offered" : "not offered"} | ${got.verdict} (controls ${got.controls}, text ${got.text})`);
+        // What the home offers must open; what it hides in the employer space
+        // must be refused by the gate itself (a card was never the barrier).
+        if (offered && got.verdict === "refused") wrong.push(`${fn}: offered but refused`);
+        if (!offered && route.startsWith("/dashboard/company") && got.verdict !== "refused") {
+          wrong.push(`${fn}: not offered, yet the gate let the ${person} in`);
+        }
+      }
+    } finally {
+      console.log(`[app-nav-walk] function x role — ${person}\n` + rows.map((r) => `[app-nav-walk]   ${r}`).join("\n"));
+      await ctx.close();
+    }
+    expect(wrong, `${person}: the home's offer and the gate disagree`).toEqual([]);
+  });
+}
+
+// ── N-8 · light and dark, 360 and 1440: screenshots for a person ────────────
+
+for (const theme of ["light", "dark"] as const) {
+  test(`N-8. the home in the ${theme} theme at 360 and 1440 px, with and without a goal open`, async ({ browser }) => {
+    for (const { person, home, slug } of [
+      { person: "worker", home: "today-screen", slug: "worker" },
+      { person: "company", home: "company-model", slug: "employer" },
+      { person: "agency", home: "company-model", slug: "agency" },
+    ] as const) {
+      for (const viewport of VIEWPORTS) {
+        const { ctx, page } = await as(browser, person, viewport);
+        try {
+          // The product's own theme choice (the one shared "theme" key).
+          await ctx.addInitScript((t) => {
+            try {
+              localStorage.setItem("theme", t);
+            } catch {
+              /* no storage */
+            }
+          }, theme);
+          await openHome(page, person, home, orgOf[person]);
+          await expect(page.locator("html")).toHaveAttribute("data-theme", theme, { timeout: 15_000 });
+          await page.screenshot({ path: path.join(SHOTS, `v2-${slug}-${viewport.name}-${theme}-home.png`) });
+          const firstGoal = page.getByTestId("goal-rail").locator("[data-card-id]").first();
+          await firstGoal.click();
+          await expect(page.getByTestId("goal-panel")).toBeVisible({ timeout: 15_000 });
+          await page.screenshot({ path: path.join(SHOTS, `v2-${slug}-${viewport.name}-${theme}-goal.png`) });
+          // Nothing scrolls the page sideways in either theme.
+          const sideways = await page.evaluate(
+            () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          );
+          expect(sideways, `${slug} ${viewport.name}px ${theme}`).toBeLessThanOrEqual(1);
+        } finally {
+          await ctx.close();
+        }
+      }
+    }
+  });
+}
