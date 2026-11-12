@@ -571,6 +571,10 @@ export type InvitationRef =
 
 export type InvitationOffer = {
   readonly ref: InvitationRef;
+  /** What accepting makes the person: the web's own two fields
+   *  (`invitations.list`), e.g. employee vs. intern of the same organization. */
+  readonly invitationType?: string | null;
+  readonly relationshipSlug?: string | null;
   readonly organizationName: string | null;
   readonly projectTitle: string | null;
   readonly inviterName: string | null;

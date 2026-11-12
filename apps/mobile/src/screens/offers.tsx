@@ -305,11 +305,30 @@ function BookingSummary({ offer }: { offer: BookingOffer }) {
   );
 }
 
+/** The web's twelve relationship types (relationship-types.json). An unknown
+ *  slug shows nothing rather than a raw code. */
+const RELATIONSHIP_SLUGS = new Set([
+  "collaborator", "consultant", "employee", "freelancer", "manager", "owner",
+  "student", "unemployed", "volunteer", "intern", "external_manager", "other",
+]);
+
 function InvitationSummary({ offer }: { offer: InvitationOffer }) {
   const { t } = useLocale();
+  // What accepting makes the person (employee vs. intern of the same
+  // organization): shown in the list AND in the confirmation preview, the
+  // way the web's invitation list names the capacity.
+  const relationship =
+    offer.relationshipSlug && RELATIONSHIP_SLUGS.has(offer.relationshipSlug)
+      ? t(`offers.relationship.${offer.relationshipSlug}` as MessageKey)
+      : null;
   return (
     <View style={styles.row}>
       <Body>{offer.organizationName ?? offer.inviterName ?? t("offers.untitledInvitation")}</Body>
+      {relationship !== null ? (
+        <Body>
+          {t("offers.as")}: {relationship}
+        </Body>
+      ) : null}
       {offer.projectTitle !== null ? <Body muted>{offer.projectTitle}</Body> : null}
       {offer.inviterName !== null && offer.organizationName !== null ? (
         <Body muted>
