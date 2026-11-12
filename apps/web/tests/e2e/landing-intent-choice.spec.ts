@@ -35,6 +35,12 @@ const card = (page: Page, rail: string, id: string) =>
 const part = (page: Page, rail: string, name: string) =>
   page.getByTestId(rail).locator(`[data-rail-part="${name}"]`);
 
+/** The Next.js development indicator (a round button, bottom left) exists
+ *  only under `next dev`; hide it so the evidence shows product UI only. */
+async function hideDevTools(page: Page): Promise<void> {
+  await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
+}
+
 async function sidewaysOverflow(page: Page): Promise<number> {
   return page.evaluate(() => document.body.scrollWidth - window.innerWidth);
 }
@@ -85,6 +91,31 @@ for (const vp of [
         expect(last.x + last.width).toBeLessThanOrEqual(vp.width);
         await expect(part(page, "goal-rail", "next")).toHaveCount(0);
       }
+      if (vp.width < 640) {
+        // Phone: the header has room for Sign in only, so Sign up is an
+        // action on the first screen (and first in the menu).
+        const signUp = page.getByTestId("landing-signup").getByRole("link");
+        await expect(signUp).toBeVisible();
+        await expect(signUp).toHaveAttribute("href", /\/auth\/signup$/);
+        const box = (await signUp.boundingBox())!;
+        expect(box.y + box.height, "Sign up is above the fold").toBeLessThan(vp.height);
+        expect(box.height).toBeGreaterThanOrEqual(43.5);
+      } else {
+        await expect(page.getByTestId("landing-signup")).toBeHidden();
+        await expect(page.getByTestId("header-auth").getByRole("link", { name: "Sign up" })).toBeVisible();
+      }
+      if (vp.width >= 1024) {
+        // The goals appear ONCE on the landing: as cards. The header bar keeps
+        // More and the assistant only.
+        await expect(page.getByTestId("intent-bar")).toBeVisible();
+        await expect(page.getByTestId("intent-bar").getByRole("button")).toHaveCount(1);
+        await expect(page.getByTestId("intent-toggle-more")).toBeVisible();
+        await expect(page.getByTestId("intent-bar-assistant")).toBeVisible();
+        await page.getByTestId("intent-toggle-more").click();
+        await expect(page.getByTestId("intent-more-links").getByRole("link").first()).toBeVisible();
+        await page.keyboard.press("Escape");
+      }
+      await hideDevTools(page);
       await page.screenshot({ path: join(SHOTS, `home-${vp.name}.png`) });
     });
 
@@ -112,6 +143,7 @@ for (const vp of [
         expect(Math.abs((await railScroll()) - before)).toBeLessThanOrEqual(2);
         expect(await sidewaysOverflow(page)).toBeLessThanOrEqual(1);
         if (task.role === "worker") {
+          await hideDevTools(page);
           await page.screenshot({ path: join(SHOTS, `goal-${vp.name}.png`) });
         }
 
@@ -137,6 +169,7 @@ for (const vp of [
       await expect(page.getByTestId("function-rail")).toHaveCount(0);
       const box = page.getByTestId("profession-box");
       await expect(box).toBeVisible();
+      await hideDevTools(page);
       await page.screenshot({ path: join(SHOTS, `professions-${vp.name}.png`) });
 
       const allCount = await page.getByTestId("profession-rail").locator("a").count();

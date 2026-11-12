@@ -8045,6 +8045,7 @@
     }
   },
   "siteNav": {
+    "signUp": "Reģistrēties",
     "trigger": "Galvenās izvēles",
     "account": "Pēc pieteikšanās",
     "intents": {

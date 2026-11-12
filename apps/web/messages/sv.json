@@ -8045,6 +8045,7 @@
     }
   },
   "siteNav": {
+    "signUp": "Registrera dig",
     "trigger": "Huvudval",
     "account": "Efter inloggning",
     "intents": {

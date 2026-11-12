@@ -150,7 +150,9 @@ describe("the landing has one arm", () => {
     expect(code(focus).match(/<LandingPrimaryActions[\s/>]/g) ?? []).toHaveLength(0);
     // Its chrome is the (marketing) layout's, reproduced — not approximated.
     expect(focus).toContain("<AmbientGlow />");
-    expect(focus).toContain("<SiteNav />");
+    // The landing shows the six goals as cards, so its header bar does not
+    // repeat them (owner gate 2026-11-12: no duplicated main menu).
+    expect(focus).toContain("<SiteNav goalsOnPage />");
     expect(focus).toContain("<SiteFooter />");
     expect(focus).toContain("<MarketingFunnelBeacon />");
     expect(focus).toContain('id="main-content"');

@@ -8045,6 +8045,7 @@
     }
   },
   "siteNav": {
+    "signUp": "Registreeru",
     "trigger": "Peamised valikud",
     "account": "Pärast sisselogimist",
     "intents": {

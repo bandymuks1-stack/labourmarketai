@@ -20661,6 +20661,7 @@
     }
   },
   "siteNav": {
+    "signUp": "Registrieren",
     "trigger": "Hauptauswahl",
     "account": "Nach Anmeldung",
     "intents": {
