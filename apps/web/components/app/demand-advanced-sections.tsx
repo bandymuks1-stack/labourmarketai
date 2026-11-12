@@ -26,6 +26,7 @@ import { DarkListbox } from "@/components/ui/DarkListbox";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import {
+  DEMAND_CURRENCY_OPTIONS,
   ACCOMMODATION_AMENITIES,
   ACCOMMODATION_PAYERS,
   ACCOMMODATION_STATES,
@@ -57,7 +58,7 @@ import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-mode
 /** Language display names: the ONE native-name map (worker-languages-model). */
 const LANGUAGE_NATIVE_NAMES: Record<string, string> = WORKER_LANGUAGE_NATIVE_NAMES;
 
-const CURRENCY_OPTIONS = ["EUR", "PLN", "SEK", "NOK", "DKK"] as const;
+const CURRENCY_OPTIONS = DEMAND_CURRENCY_OPTIONS;
 
 /**
  * THE CLUSTERS THAT OPEN ALREADY EXPANDED — the demand-first launch path.

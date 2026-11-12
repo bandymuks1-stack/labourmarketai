@@ -21,6 +21,7 @@ import {
 import type { DemandPrefill, DemandUrgency } from "@/lib/demand/demand-request";
 import { DemandAdvancedSections } from "@/components/app/demand-advanced-sections";
 import {
+  defaultCurrencyForCountry,
   buildStructuredV2Input,
   storedV2ToFormState,
   EMPTY_ADVANCED_DEMAND_STATE,
@@ -191,6 +192,18 @@ export function DemandRequestButton({
   });
   const patchAdv = (patch: Partial<AdvancedDemandFormState>) =>
     setAdv((prev) => ({ ...prev, ...patch }));
+  // The pay currency follows the chosen country (SE → SEK) while no amount is
+  // typed yet: a default the person sees in the picker and can change, never
+  // a conversion of numbers already written (Swedish employer audit M-1).
+  useEffect(() => {
+    const currency = defaultCurrencyForCountry(country);
+    if (!currency) return;
+    setAdv((prev) =>
+      prev.compMin.trim() === "" && prev.compMax.trim() === "" && prev.currency !== currency
+        ? { ...prev, currency }
+        : prev,
+    );
+  }, [country]);
   // Duplicate-and-edit: prefill the whole wizard from the owner's OWN last
   // request (repeat action, Capability E/G). Own data only; nothing invented.
   const [prefillState, setPrefillState] = useState<
