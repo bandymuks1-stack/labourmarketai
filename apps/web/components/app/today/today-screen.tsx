@@ -13,10 +13,7 @@ import {
   HomeWaiting,
 } from "@/components/app/home/home-regions";
 import type { ActiveLocale } from "@/lib/i18n/config";
-import { HomeAreaRail } from "@/components/app/home/home-area-rail";
 import { deriveTodayState } from "@/lib/today/today-model";
-import { PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
-import { HOME_GOALS, areasBeyondGoals } from "@/lib/navigation/home-goals";
 import { HomeGoalCards, HomeGoalCardsPending } from "@/components/app/home/home-goal-cards";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import {
@@ -129,10 +126,6 @@ function TodayScreenPending() {
         <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-5 lg:gap-6">
           <HomeRegionPending />
         </div>
-      </div>
-      <div data-testid="today-stations-pending" className="border-t border-ink-600/70 pt-4 sm:pt-5">
-        <span className="block h-7 w-32 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
-        <div className="mt-2 h-32" />
       </div>
     </div>
   );
@@ -249,24 +242,6 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
             <HomeBecause locale={locale} plainOnly />
           </Suspense>
         </div>
-      </div>
-
-      {/* 6 · STATIONS — the contextual workspaces, one tap each, on the ONE
-          shared rail (V2: one rail, one card), from the ONE area model
-          (`PERSONAL_WORK_AREAS`, derived from TODAY_STATIONS). The stations
-          the goal cards above already offer are left out — a destination is
-          shown once. Rendered at once: no read stands behind it. */}
-      <div data-testid="today-stations" className="border-t border-ink-600/70 pt-4 sm:pt-5">
-        <HomeAreaRail
-          title={t("stations.title")}
-          testId="today-area-rail"
-          areas={areasBeyondGoals(PERSONAL_WORK_AREAS, HOME_GOALS.worker).map((s) => ({
-            id: s.id,
-            href: s.href,
-            iconKey: s.iconKey,
-            label: t(`stations.${s.id}`),
-          }))}
-        />
       </div>
 
       {/* PARTIAL vs TOTAL unavailability — from the same request-cached

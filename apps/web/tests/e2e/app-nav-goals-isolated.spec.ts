@@ -623,17 +623,15 @@ test("N-6. a pin survives sign-out and sign-in, and a second session shows it", 
   let pinned: string | null = null;
   try {
     await openHome(first.page, "worker", "today-screen");
-    await first.page.getByTestId("my-space-manage").click();
-    const add = first.page.getByTestId("my-space-editor").getByTestId("my-space-add").first();
-    pinned = await add.getAttribute("data-ref");
-    expect(pinned, "the home offers something to pin").toBeTruthy();
-    await add.click();
-    // While managing the shortcut is an editable chip; "Done" makes it a
-    // shortcut again.
-    await expect(
-      first.page.locator(`[data-testid="my-space-edit-item"][data-ref="${pinned}"]`),
-    ).toBeVisible({ timeout: 30_000 });
-    await first.page.getByTestId("my-space-manage").click();
+    // Nothing is pinned, so the row is absent: the first shortcut is made
+    // from a function card's own pin toggle.
+    await expect(first.page.getByTestId("my-space-row")).toHaveCount(0);
+    pinned = "link:/dashboard/opportunities";
+    await first.page.getByTestId("goal-rail").locator('[data-card-id="work"]').click();
+    const toggle = first.page.getByTestId("function-rail").locator('[data-rail-pin="findWork"]');
+    await expect(toggle).toBeVisible({ timeout: 30_000 });
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-pressed", "true", { timeout: 30_000 });
     const chip = (page: Page) => page.locator(`[data-testid="my-space-pin"][data-ref="${pinned}"]`);
     await expect(chip(first.page)).toBeVisible({ timeout: 30_000 });
 
@@ -704,6 +702,14 @@ const FUNCTION_TARGETS: ReadonlyArray<{ fn: string; route: string }> = [
   { fn: "proposals and contracts", route: "/dashboard/commercial" },
   { fn: "your network", route: "/dashboard/network" },
   { fn: "clients", route: "/dashboard/company/partners" },
+  // The areas that are function cards of a goal since the second rail left.
+  { fn: "calendar", route: "/dashboard/planning" },
+  { fn: "my activity in numbers", route: "/dashboard/work-in-numbers" },
+  { fn: "my profile", route: "/dashboard/profile" },
+  { fn: "gallery", route: "/dashboard/gallery" },
+  { fn: "capacity", route: "/dashboard/company/planning" },
+  { fn: "results", route: "/dashboard/reports" },
+  { fn: "history", route: "/dashboard/company/history" },
 ];
 
 /** What the home OFFERS each person, by route — the claim this test checks. */

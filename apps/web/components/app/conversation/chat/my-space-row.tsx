@@ -188,8 +188,10 @@ export function MySpaceRow({
     toggleFromCard.current = onCardToggle;
   });
 
-  // Nothing pinned, nothing recent and no way to add: the row is absent.
-  if (pins.length === 0 && recent.length === 0 && !editor) return null;
+  // Nothing pinned, nothing recent, nothing to tidy: the row is absent, so on
+  // a phone the goals are not pushed down by an empty row. The first shortcut
+  // is made from a function card's pin toggle; the row appears with it.
+  if (pins.length === 0 && recent.length === 0 && (!editor || editor.withheld.length === 0)) return null;
 
   const labels = editor?.labels;
   const addable = (places ?? []).filter((p) => !pinnedRefs.has(p.ref));
@@ -326,11 +328,13 @@ export function MySpaceRow({
   const shown = draft ?? pins;
 
   return (
-    <div className="border-b border-border-subtle" data-testid="my-space">
+    <div className="border-b border-ink-600" data-testid="my-space">
       <div
         className="flex flex-wrap items-center gap-2 px-3 py-2"
         data-testid="my-space-row"
-        role="toolbar"
+        // A labelled group, not a toolbar: every chip is its own Tab stop and
+        // the arrow keys mean "move this chip" while managing.
+        role="group"
         aria-label={title}
       >
         {(pins.length > 0 || recent.length > 0) && (
@@ -432,7 +436,7 @@ export function MySpaceRow({
           id="my-space-editor"
           data-testid="my-space-editor"
           aria-busy={busy}
-          className="flex flex-col gap-3 border-t border-border-subtle px-3 py-3"
+          className="flex flex-col gap-3 border-t border-ink-600 px-3 py-3"
           onKeyDown={(e) => {
             if (e.key !== "Escape") return;
             setEditing(false);

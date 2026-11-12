@@ -71,7 +71,7 @@ export async function HomeQuickAccess() {
 
   return (
     <section aria-label={t("title")} data-testid="home-quick-access" className="flex flex-col gap-3">
-      <h2 className="text-support font-medium text-text-muted">{t("title")}</h2>
+      <h2 className="font-display text-lg font-semibold text-text-primary sm:text-xl">{t("title")}</h2>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {projects.length > 0 && (
           <QuickList
@@ -128,7 +128,7 @@ function QuickList({
   allLabel: string;
 }) {
   return (
-    <div data-testid={testId} className="flex flex-col gap-1 rounded-xl border border-ink-600 bg-ink-800 p-2">
+    <div data-testid={testId} className="flex flex-col gap-1 rounded-2xl border border-ink-600 bg-ink-900/60 p-2">
       <h3 className="flex items-center gap-2 px-2 pt-1 text-meta font-medium text-text-muted">
         {icon}
         {heading}

@@ -65,9 +65,11 @@ describe("the ŠIANDIEN frame paints first — its head awaits nothing slow", ()
   });
 });
 
-describe("no late region appears out of nothing above the stations", () => {
+describe("no late region appears out of nothing in the frame", () => {
   const head = fnBody(SCREEN, /async function TodayScreenHead\b/);
-  const aboveStations = head.slice(0, head.indexOf('data-testid="today-stations"'));
+  // The stations left the frame on 2026-11-12 (they are function cards of a
+  // goal now); what remains is everything above the availability line.
+  const aboveStations = head.slice(0, head.lastIndexOf("<Suspense", head.indexOf("<HomeAvailability />")));
 
   it("every boundary above the stations has a pending state that takes room", () => {
     expect(aboveStations.indexOf('data-testid="today-header"')).toBeGreaterThan(-1);
@@ -93,21 +95,18 @@ describe("no late region appears out of nothing above the stations", () => {
     expect(REGIONS).toMatch(/data-testid="home-line-pending"\s*className="min-h-\d+/);
   });
 
-  it("the availability line — failure-only, known last — closes the frame after the stations", () => {
-    const stations = head.indexOf('data-testid="today-stations"');
+  it("the availability line — failure-only, known last — closes the frame", () => {
     const availability = head.indexOf("<HomeAvailability />");
-    expect(availability).toBeGreaterThan(stations);
+    expect(availability).toBeGreaterThan(head.indexOf('data-testid="today-regions"'));
+    expect(head.slice(availability)).not.toMatch(/<Suspense|<Home(Waiting|Trace|Outside|Because)/);
   });
 
-  it("the frame-level pending state draws the whole footprint, stations included", () => {
+  it("the frame-level pending state draws the whole footprint, goals included", () => {
     const pending = fnBody(SCREEN, /function TodayScreenPending\b/);
     expect(pending).toMatch(/<HomeRegionPending size="action" \/>/);
     expect(pending).toMatch(/<HomeLinePending \/>/);
-    expect(pending).toMatch(/data-testid="today-stations-pending"/);
-    // The stations are cards of the shared rail (regular card: at least
-    // `7.5rem` tall, plus the rail's own padding); the reservation matches it.
-    expect(pending).toMatch(/className="mt-2 h-32"/);
-    expect(read("components/navigation/card-rail.tsx")).toMatch(/"min-h-\[7\.5rem\] sm:p-4"/);
+    // The goals lead the frame and their placeholder reserves their room.
+    expect(pending).toMatch(/<HomeGoalCardsPending \/>/);
   });
 });
 

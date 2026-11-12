@@ -20643,6 +20643,15 @@
         "hint": "What you asked for and who answered"
       }
     },
+    "areas": {
+      "calendar": "Calendar",
+      "numbers": "My activity in numbers",
+      "profile": "My profile",
+      "gallery": "Gallery",
+      "capacity": "Capacity",
+      "results": "Results",
+      "history": "History"
+    },
     "ask": {
       "label": "Ask the assistant",
       "hint": "Write what you need in your own words"

@@ -8027,6 +8027,15 @@
         "hint": "Ko jūs lūdzāt un kas atbildēja"
       }
     },
+    "areas": {
+      "calendar": "Kalendārs",
+      "numbers": "Mana darbība skaitļos",
+      "profile": "Mans profils",
+      "gallery": "Galerija",
+      "capacity": "Kapacitāte",
+      "results": "Rezultāti",
+      "history": "Vēsture"
+    },
     "ask": {
       "label": "Jautāt asistentam",
       "hint": "Uzrakstiet saviem vārdiem, kas jums vajadzīgs"

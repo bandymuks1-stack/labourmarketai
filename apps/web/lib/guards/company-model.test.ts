@@ -21,16 +21,17 @@ describe("the company context's centre is the company model, over existing surfa
     expect(screen).toMatch(/id: "calendar", href: "\/dashboard\/planning"/);
     expect(screen).toMatch(/id: "capacity", href: "\/dashboard\/company\/planning"/);
   });
-  it("the screen renders every door from the area model, on the shared rail", () => {
+  it("every door of the company is reached from the goals: one rail, no second list", () => {
     const view = read("components/app/organization/company-model-screen.tsx");
-    // Since 2026-11-12 the goals lead (lib/navigation/home-goals.ts) and the
-    // switcher holds the doors the goals do not already offer — still from
-    // the ONE area model, never a second list.
-    expect(view).toMatch(/areasBeyondGoals\(ORGANIZATION_WORK_AREAS, HOME_GOALS\[role\]\)\.map/);
-    // V2 (2026-11-12): on the ONE shared rail, not a second carousel.
-    expect(view).toMatch(/<HomeAreaRail\b/);
-    expect(view).not.toMatch(/<AreaSwitcher\b/);
-    expect(view).toMatch(/testId="company-model-areas"/);
+    // V2 (2026-11-12): the goals lead and each area is a function card of the
+    // goal it belongs to (lib/navigation/home-goals.ts); the screen draws no
+    // rail of areas of its own.
+    expect(view).toMatch(/<HomeGoalCards role=\{role\} \/>/);
+    expect(view).not.toMatch(/<AreaSwitcher\b|HomeAreaRail|areasBeyondGoals/);
+    const goals = read("lib/navigation/home-goals.ts");
+    for (const href of ["/dashboard/company/planning", "/dashboard/reports", "/dashboard/company/history", "/dashboard/planning"]) {
+      expect(goals, href).toContain(`"${href}"`);
+    }
   });
   it("is mounted as the opening context only inside a company organization workspace", () => {
     const page = read("app/[locale]/dashboard/page.tsx");

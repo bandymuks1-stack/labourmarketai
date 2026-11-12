@@ -2,10 +2,7 @@ import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { OrganizationApprovalsCard } from "@/components/app/arena/confirm-pulse";
-import { HomeAreaRail } from "@/components/app/home/home-area-rail";
 import { NeedDoorLink } from "@/components/app/need-door-link";
-import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
-import { HOME_GOALS, areasBeyondGoals } from "@/lib/navigation/home-goals";
 import { loadOrganizationGoalRole } from "@/lib/navigation/home-goals-server";
 import { HomeGoalCards } from "@/components/app/home/home-goal-cards";
 import { HomeQuickAccess } from "@/components/app/home/home-quick-access";
@@ -37,9 +34,8 @@ import { HomeQuickAccess } from "@/components/app/home/home-quick-access";
  * capability, not a calendar.
  */
 export async function CompanyModelScreen() {
-  const [t, tAll, role] = await Promise.all([
+  const [t, role] = await Promise.all([
     getTranslations("companyModel"),
-    getTranslations(),
     loadOrganizationGoalRole(),
   ]);
   return (
@@ -48,7 +44,11 @@ export async function CompanyModelScreen() {
       data-testid="company-model"
       className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 pb-2 pt-4"
     >
-      <h2 className="font-display text-card-title font-semibold text-text-primary">
+      {/* THE GOALS — the shared goal navigator, in this role's order, opening
+          the product's own functions. The FIRST block under the header, as
+          on the landing: only its own heading stands above the goal cards. */}
+      <HomeGoalCards role={role} />
+      <h2 className="font-display text-lg font-semibold text-text-primary sm:text-xl">
         {t("title")}
       </h2>
       {/* The employer's ONE need door — the shared, tracked link (address,
@@ -61,26 +61,10 @@ export async function CompanyModelScreen() {
           className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-blue px-5 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
         />
       ) : null}
-      {/* THE GOALS — the shared goal navigator, in this role's order, opening
-          the product's own functions. */}
-      <HomeGoalCards role={role} />
       {/* What needs the owner: the real reviewable-entry queue, approved right
           here, directly under the goals (the goals lead so they are whole on
           a phone's first screen) (honest unknown when unreadable, says why when empty). */}
       <OrganizationApprovalsCard />
-      {/* Every other door of the company on the ONE shared rail (V2: one
-          rail, one card) — one source: ORGANIZATION_WORK_AREAS, minus the
-          doors the goals above already offer (a destination is shown once). */}
-      <HomeAreaRail
-        title={t("areasTitle")}
-        testId="company-model-areas"
-        areas={areasBeyondGoals(ORGANIZATION_WORK_AREAS, HOME_GOALS[role]).map((a) => ({
-          id: a.id,
-          href: a.href,
-          iconKey: a.iconKey,
-          label: tAll(a.labelKey),
-        }))}
-      />
       {/* QUICK ACCESS — the organization's active projects and open needs, by
           name. It closes the screen and streams on its own: its two reads are
           the slowest thing here, it is absent when there is nothing to list,

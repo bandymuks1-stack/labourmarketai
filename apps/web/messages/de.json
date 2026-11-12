@@ -20643,6 +20643,15 @@
         "hint": "Was Sie angefragt haben und wer geantwortet hat"
       }
     },
+    "areas": {
+      "calendar": "Kalender",
+      "numbers": "Meine Tätigkeit in Zahlen",
+      "profile": "Mein Profil",
+      "gallery": "Galerie",
+      "capacity": "Kapazität",
+      "results": "Ergebnisse",
+      "history": "Verlauf"
+    },
     "ask": {
       "label": "Assistenten fragen",
       "hint": "Schreiben Sie in eigenen Worten, was Sie brauchen"

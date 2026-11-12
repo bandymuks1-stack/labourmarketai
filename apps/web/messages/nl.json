@@ -20643,6 +20643,15 @@
         "hint": "Wat je hebt gevraagd en wie antwoordde"
       }
     },
+    "areas": {
+      "calendar": "Agenda",
+      "numbers": "Mijn activiteit in cijfers",
+      "profile": "Mijn profiel",
+      "gallery": "Galerij",
+      "capacity": "Capaciteit",
+      "results": "Resultaten",
+      "history": "Geschiedenis"
+    },
     "ask": {
       "label": "Vraag het de assistent",
       "hint": "Schrijf in je eigen woorden wat je nodig hebt"

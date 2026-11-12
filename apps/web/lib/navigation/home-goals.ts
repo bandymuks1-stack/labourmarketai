@@ -27,7 +27,7 @@ import { routeRequirement } from "@/lib/auth/role-gated-routes";
 import { NEED_DOOR_HREF } from "@/lib/company/need-door";
 import { AREA_ICONS, type NavCardIconKey } from "@/lib/navigation/nav-card-icons";
 import type { PublicIntentId } from "@/lib/navigation/public-intents";
-import type { WorkArea, WorkAreaIconKey } from "@/lib/navigation/work-areas";
+import type { WorkArea } from "@/lib/navigation/work-areas";
 
 /**
  * The acting roles that have a goal home. `company` covers both the employer
@@ -74,6 +74,17 @@ const shared = (id: string, href: string, iconKey: NavCardIconKey, link: string)
   labelKey: `siteNav.links.${link}`,
 });
 
+/** An area the home used to draw on a second rail, now a function of the
+ *  goal it belongs to — under the name the product already gives it
+ *  (`homeGoals.areas.*`, the same words in all eleven catalogs). */
+const area = (id: string, href: string, iconKey: NavCardIconKey, labelKey: string): HomeGoal => ({
+  id,
+  href,
+  iconKey,
+  labelKey,
+});
+
+const CALENDAR = area("calendar", "/dashboard/planning", "calendarCheck", "homeGoals.areas.calendar");
 const PEOPLE = g("people", "/dashboard/company/people", "users", "homeGoals.company.people");
 const CANDIDATES = g("candidates", "/dashboard/company/scouting", "userSearch", "homeGoals.agency.candidates");
 const CLIENTS = g("clients", "/dashboard/company/partners", "handshake", "homeGoals.agency.clients");
@@ -89,6 +100,13 @@ export const GOAL_FUNCTIONS: Readonly<Record<PublicIntentId, readonly HomeGoal[]
     g("findWork", "/dashboard/opportunities", "search", "homeGoals.worker.findWork"),
     g("recordWork", "/dashboard/journal", AREA_ICONS.journal, "homeGoals.worker.recordWork"),
     g("myCv", "/cv", "idCard", "homeGoals.worker.myCv"),
+    // The person's other areas (ONE rail on the home: what a second rail
+    // used to hold is a function of the goal it belongs to — two actions,
+    // and it can be pinned).
+    CALENDAR,
+    area("numbers", "/dashboard/work-in-numbers", "barChart", "homeGoals.areas.numbers"),
+    area("profile", "/dashboard/profile", "info", "homeGoals.areas.profile"),
+    area("gallery", "/dashboard/gallery", "layoutGrid", "homeGoals.areas.gallery"),
   ],
   workers: [
     // The ONE need door (`lib/company/need-door.ts`), entered through the
@@ -98,6 +116,11 @@ export const GOAL_FUNCTIONS: Readonly<Record<PublicIntentId, readonly HomeGoal[]
     CANDIDATES,
     g("projects", "/dashboard/projects", AREA_ICONS.projects, "homeGoals.company.projects"),
     g("hours", "/dashboard/hours", AREA_ICONS.hours, "homeGoals.company.hours"),
+    // The organization's other areas, each once.
+    CALENDAR,
+    area("capacity", "/dashboard/company/planning", "ruler", "homeGoals.areas.capacity"),
+    area("results", "/dashboard/reports", "barChart", "homeGoals.areas.results"),
+    area("history", "/dashboard/company/history", "fileText", "homeGoals.areas.history"),
   ],
   services: [
     shared("offerServices", "/dashboard/services", "wrench", "myServices"),
@@ -254,31 +277,3 @@ export function areasBeyondGoals(
   const offered = new Set(goals.map((g) => routePath(g.href)));
   return areas.filter((a) => !offered.has(routePath(a.href)));
 }
-
-/**
- * An area's icon on the shared card. The area model names its icons in its
- * own vocabulary (`WorkAreaIconKey`, drawn by the header and the phone
- * sheet); the shared card system has its own set. This is the one bridge
- * between them, so an area drawn as a rail card needs no second icon set.
- */
-export const AREA_CARD_ICONS: Readonly<Record<WorkAreaIconKey, NavCardIconKey>> = {
-  compass: "compass",
-  journal: AREA_ICONS.journal,
-  chart: "barChart",
-  user: "info",
-  idCard: "idCard",
-  images: "layoutGrid",
-  userSearch: "userSearch",
-  package: "package",
-  store: "store",
-  users: "users",
-  folder: AREA_ICONS.projects,
-  messages: "messagesSquare",
-  handshake: "handshake",
-  briefcase: "briefcase",
-  calendar: "calendarCheck",
-  gauge: "ruler",
-  activity: AREA_ICONS.hours,
-  barChart: "barChart",
-  history: "fileText",
-};

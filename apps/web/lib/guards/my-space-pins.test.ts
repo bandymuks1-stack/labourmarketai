@@ -19,10 +19,13 @@ const ROW = read("components/app/conversation/chat/my-space-row.tsx");
 
 describe("the pinned row is a reference row over the ONE chip handler", () => {
   it("is never pre-filled, and every pin runs handleChip with its ref", () => {
-    // Pin to home (owner P0 No. 1, 2026-11-12): with nothing pinned the row
-    // holds only the way to add a shortcut — it is absent altogether when the
-    // store cannot be read (`editor === null`). Nothing is pinned for anyone.
-    expect(ROW).toMatch(/if \(pins\.length === 0 && recent\.length === 0 && !editor\) return null;/);
+    // Pin to home (owner P0 No. 1, 2026-11-12): nothing is pinned for anyone.
+    // With nothing pinned, nothing recent and nothing to tidy the row is
+    // absent, so it never pushes the goals down a phone's first screen; the
+    // first shortcut is made from a function card's pin toggle.
+    expect(ROW).toMatch(
+      /if \(pins\.length === 0 && recent\.length === 0 && \(!editor \|\| editor\.withheld\.length === 0\)\) return null;/,
+    );
     expect(CHAT).toMatch(/onPin=\{\(ref\) => handleChip\(\{ id: ref, label: pinLabelFor\(ref\) \}\)\}/);
     expect(CHAT).toMatch(/editor=\{\s*pinsAvailable\s*\?/);
   });

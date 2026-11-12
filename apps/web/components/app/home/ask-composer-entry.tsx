@@ -33,7 +33,7 @@ export function AskAssistantEntry({ label, hint }: { label: string; hint: string
       }}
       className="ua-press mt-2 flex min-h-14 w-full items-center gap-2.5 rounded-xl border border-dashed border-ink-500 bg-ink-800/60 p-3 text-left outline-none transition-colors duration-150 hover:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue motion-reduce:transition-none sm:mt-3 sm:gap-3 sm:p-3.5"
     >
-      <span className="flex size-9 flex-none items-center justify-center rounded-lg bg-ink-700/70 text-text-secondary sm:size-10">
+      <span className="flex size-10 flex-none items-center justify-center rounded-lg bg-ink-700/70 text-text-secondary">
         <MessageCircleQuestion {...iconControl()} aria-hidden />
       </span>
       <span className="flex min-w-0 flex-col">

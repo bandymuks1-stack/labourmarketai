@@ -8027,6 +8027,15 @@
         "hint": "Hva du har bedt om, og hvem som svarte"
       }
     },
+    "areas": {
+      "calendar": "Kalender",
+      "numbers": "Min aktivitet i tall",
+      "profile": "Min profil",
+      "gallery": "Galleri",
+      "capacity": "Kapasitet",
+      "results": "Resultater",
+      "history": "Historikk"
+    },
     "ask": {
       "label": "Spør assistenten",
       "hint": "Skriv med egne ord hva du trenger"

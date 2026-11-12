@@ -20643,6 +20643,15 @@
         "hint": "O co pytasz i kto odpowiedział"
       }
     },
+    "areas": {
+      "calendar": "Kalendarz",
+      "numbers": "Moja aktywność w liczbach",
+      "profile": "Mój profil",
+      "gallery": "Galeria",
+      "capacity": "Zdolności",
+      "results": "Wyniki",
+      "history": "Historia"
+    },
     "ask": {
       "label": "Zapytaj asystenta",
       "hint": "Napisz własnymi słowami, czego potrzebujesz"

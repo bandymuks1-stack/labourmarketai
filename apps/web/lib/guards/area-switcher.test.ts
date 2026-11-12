@@ -128,17 +128,14 @@ describe("the switcher is a chooser, not a sideways strip", () => {
   });
 });
 
-describe("the homes draw their areas on the ONE shared rail (V2, owner-approved 2026-11-12)", () => {
-  // One navigation system means one rail and one card. The two homes that
-  // mounted this switcher (owner order 2026-10-25) now hand the same areas,
-  // from the same ONE area model, to the shared `CardRail`
-  // (`components/app/home/home-area-rail.tsx`). The switcher component is
-  // kept but mounted nowhere; retiring the file is the navigation lead's call.
-  it("neither home mounts the switcher any more; both use the shared rail", () => {
+describe("the homes no longer mount it (V2, owner decision 2026-11-12: one rail)", () => {
+  // One navigation system means one rail. The two homes that mounted this
+  // switcher (owner order 2026-10-25) now reach every area through a goal's
+  // function panel. The component is kept but mounted nowhere; retiring the
+  // file is the navigation lead's call.
+  it("neither home mounts the switcher or any rail of areas", () => {
     for (const file of ["components/app/today/today-screen.tsx", "components/app/organization/company-model-screen.tsx"]) {
-      expect(read(file), file).not.toMatch(/<AreaSwitcher\b/);
-      expect(read(file), file).toMatch(/<HomeAreaRail\b/);
+      expect(read(file), file).not.toMatch(/<AreaSwitcher\b|HomeAreaRail/);
     }
-    expect(read("components/app/home/home-area-rail.tsx")).toMatch(/<CardRail\b/);
   });
 });

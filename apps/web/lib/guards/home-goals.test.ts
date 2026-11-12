@@ -7,7 +7,6 @@ import { ROLE_GATED_PREFIXES } from "@/lib/auth/role-gated-routes";
 import { NEED_DOOR_HREF } from "@/lib/company/need-door";
 import { locales } from "@/lib/i18n/config";
 import {
-  AREA_CARD_ICONS,
   GOAL_FUNCTIONS,
   HOME_GOALS,
   ROLE_GOAL_ORDER,
@@ -104,10 +103,11 @@ describe("one navigation system: the shared navigator and the shared goals", () 
     expect(today).toMatch(/<HomeGoalCardsPending \/>/);
     const company = read("components/app/organization/company-model-screen.tsx");
     expect(company.indexOf("<HomeGoalCards")).toBeGreaterThan(-1);
-    expect(company.indexOf("<HomeGoalCards")).toBeLessThan(company.indexOf("<HomeAreaRail"));
-    // The goals lead the organization home too: only its title and the one
-    // need door stand before them, and it uses the wide column so the six
-    // goals share one row on a desktop, as on the landing.
+    // The goals lead the organization home too — the first block, before its
+    // title and the need door — and it uses the wide column so the goals
+    // share one row on a desktop, as on the landing.
+    expect(company.indexOf("<HomeGoalCards")).toBeLessThan(company.indexOf("<NeedDoorLink"));
+    expect(company.indexOf("<HomeGoalCards")).toBeLessThan(company.indexOf("<h2 "));
     expect(company.indexOf("<HomeGoalCards")).toBeLessThan(company.indexOf("<OrganizationApprovalsCard"));
     expect(company).toMatch(/data-testid="company-model"\s+className="mx-auto flex w-full max-w-6xl /);
     expect(read("app/[locale]/dashboard/page.tsx")).toMatch(/openingContextWide=\{Boolean\(workerToday \|\| companyOpeningContext\)\}/);
@@ -137,7 +137,9 @@ describe("every function starts at an existing page", () => {
   it("a small set per goal: a rail a person reads at a glance", () => {
     for (const [goal, functions] of Object.entries(GOAL_FUNCTIONS)) {
       expect(functions.length, goal).toBeGreaterThanOrEqual(2);
-      expect(functions.length, goal).toBeLessThanOrEqual(5);
+      // A goal also holds the areas that belong to it (one rail on the home),
+      // so the bound is the longest honest list, not a glance of five.
+      expect(functions.length, goal).toBeLessThanOrEqual(9);
     }
   });
 });
@@ -164,24 +166,23 @@ describe("at most two navigation actions to the start of any function", () => {
 });
 
 describe("a destination is shown once on the home", () => {
-  it("the area switcher under the goals holds only the areas the goals do not offer", () => {
-    const worker = areasBeyondGoals(PERSONAL_WORK_AREAS, HOME_GOALS.worker).map((a) => a.id);
-    expect(worker).toEqual(["numbers", "profile", "gallery"]);
-    const company = areasBeyondGoals(ORGANIZATION_WORK_AREAS, HOME_GOALS.company).map((a) => a.id);
-    expect(company).toEqual(["messages", "calendar", "capacity", "results", "history"]);
+  it("no second rail: every area is a function of a goal, or the header's own destination", () => {
+    // What the goals do not offer of the person's own areas: nothing.
+    expect(areasBeyondGoals(PERSONAL_WORK_AREAS, HOME_GOALS.worker).map((a) => a.id)).toEqual([]);
+    // Of an organization's areas: only Messages, which is the header's own
+    // (status, one tap from every page), never a card.
+    expect(areasBeyondGoals(ORGANIZATION_WORK_AREAS, HOME_GOALS.company).map((a) => a.id)).toEqual(["messages"]);
+    expect(areasBeyondGoals(ORGANIZATION_WORK_AREAS, HOME_GOALS.agency).map((a) => a.id)).toEqual(["messages"]);
     // The need door and the needs area are the same place.
     expect(routePath(NEED_DOOR_HREF)).toBe("/dashboard/company/needs");
-    const agency = areasBeyondGoals(ORGANIZATION_WORK_AREAS, HOME_GOALS.agency).map((a) => a.id);
-    for (const gone of ["need", "clients", "people", "candidates"]) expect(agency).not.toContain(gone);
   });
 
-  it("both homes pass the filtered list to the switcher", () => {
-    expect(read("components/app/today/today-screen.tsx")).toMatch(
-      /areasBeyondGoals\(PERSONAL_WORK_AREAS, HOME_GOALS\.worker\)\.map/,
-    );
-    expect(read("components/app/organization/company-model-screen.tsx")).toMatch(
-      /areasBeyondGoals\(ORGANIZATION_WORK_AREAS, HOME_GOALS\[role\]\)\.map/,
-    );
+  it("neither home draws a rail of areas, in any form", () => {
+    for (const file of ["components/app/today/today-screen.tsx", "components/app/organization/company-model-screen.tsx"]) {
+      const code = read(file).replace(/\/\*[\s\S]*?\*\//g, "");
+      expect(code, file).not.toMatch(/AreaSwitcher|area-switcher|HomeAreaRail|<CardRail\b|areasBeyondGoals/);
+    }
+    expect(existsSync(join(APP, "components/app/home/home-area-rail.tsx"))).toBe(false);
   });
 
   it("the employer's need door is on the home once: the tracked link, never also a rail card", () => {
@@ -316,34 +317,6 @@ describe("the two people who had no home: a customer, and an employee inside an 
       expect(m.label, locale).toBeTruthy();
       expect(m.hint, locale).toBeTruthy();
       expect(`${m.label} ${m.hint}`).not.toMatch(/^\[EN\]|\bdemo\b/i);
-    }
-  });
-});
-
-describe("one rail on the home: the remaining areas are cards of the shared rail", () => {
-  const rail = read("components/app/home/home-area-rail.tsx").replace(/\/\*[\s\S]*?\*\//g, "");
-
-  it("neither home mounts a second carousel; both hand their areas to the shared rail", () => {
-    for (const file of ["components/app/today/today-screen.tsx", "components/app/organization/company-model-screen.tsx"]) {
-      const code = read(file).replace(/\/\*[\s\S]*?\*\//g, "");
-      expect(code, file).not.toMatch(/AreaSwitcher|area-switcher/);
-      expect(code, file).toMatch(/<HomeAreaRail\b/);
-    }
-    expect(rail).toMatch(/import \{ CardRail \} from "@\/components\/navigation\/card-rail";/);
-    expect(rail).toMatch(/<CardRail\b/);
-    expect(rail).not.toMatch(/<Link\b|<a\b|<button\b|overflow-x-|snap-x|perspective|lucide-react/);
-  });
-
-  it("every area has a card icon, and no rail shows one icon twice", () => {
-    for (const [areas, goals, name] of [
-      [PERSONAL_WORK_AREAS, HOME_GOALS.worker, "worker"],
-      [ORGANIZATION_WORK_AREAS, HOME_GOALS.company, "company"],
-      [ORGANIZATION_WORK_AREAS, HOME_GOALS.agency, "agency"],
-    ] as const) {
-      const left = areasBeyondGoals(areas, goals);
-      const icons = left.map((a) => AREA_CARD_ICONS[a.iconKey]);
-      for (const [i, icon] of icons.entries()) expect(NAV_CARD_ICONS[icon], `${name}.${left[i].id}`).toBeTruthy();
-      expect(new Set(icons).size, `${name} area icons`).toBe(icons.length);
     }
   });
 });
@@ -501,7 +474,7 @@ describe("quick access: the organization's active projects and open needs, by na
   it("closes the organization home behind its own boundary, so it cannot push the goals down", () => {
     const company = read("components/app/organization/company-model-screen.tsx");
     expect(company).toMatch(/<Suspense fallback=\{null\}>\s*<HomeQuickAccess \/>\s*<\/Suspense>/);
-    expect(company.indexOf("<HomeQuickAccess />")).toBeGreaterThan(company.indexOf("<HomeAreaRail"));
+    expect(company.indexOf("<HomeQuickAccess />")).toBeGreaterThan(company.indexOf("<HomeGoalCards"));
   });
 
   for (const locale of locales) {

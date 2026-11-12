@@ -20643,6 +20643,15 @@
         "hint": "Ko prašei ir kas atsakė"
       }
     },
+    "areas": {
+      "calendar": "Kalendorius",
+      "numbers": "Mano veikla skaičiais",
+      "profile": "Mano profilis",
+      "gallery": "Galerija",
+      "capacity": "Pajėgumai",
+      "results": "Rezultatai",
+      "history": "Istorija"
+    },
     "ask": {
       "label": "Paklausk asistento",
       "hint": "Parašyk savais žodžiais, ko tau reikia"

@@ -8027,6 +8027,15 @@
         "hint": "Mida sa küsisid ja kes vastas"
       }
     },
+    "areas": {
+      "calendar": "Kalender",
+      "numbers": "Minu tegevus arvudes",
+      "profile": "Minu profiil",
+      "gallery": "Galerii",
+      "capacity": "Võimekus",
+      "results": "Tulemused",
+      "history": "Ajalugu"
+    },
     "ask": {
       "label": "Küsi assistendilt",
       "hint": "Kirjuta oma sõnadega, mida vajad"
