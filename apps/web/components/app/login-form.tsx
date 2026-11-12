@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
+import { useUrlQuery } from "@/lib/auth/use-url-query";
 
 import { AuthCarriedIntent } from "@/components/app/auth-carried-intent";
 import { Button } from "@/components/ui/Button";
@@ -78,7 +78,9 @@ export function LoginForm({
   // Honour the `?next=…` the middleware sets when it bounces an
   // unauthenticated user from a protected route to login. Sanitised via
   // `getSafeReturnPath` so an open-redirect query can't survive.
-  const searchParams = useSearchParams();
+  // Read with `useUrlQuery`, not `useSearchParams()`: the latter keeps this
+  // whole form out of the server HTML (see lib/auth/use-url-query.ts).
+  const searchParams = useUrlQuery();
   const nextParam = searchParams.get("next");
   const nextPath = getSafeReturnPath(nextParam, locale);
   const oauthErrorCode = searchParams.get("error");

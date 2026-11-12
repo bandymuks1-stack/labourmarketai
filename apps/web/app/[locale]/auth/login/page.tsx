@@ -1,5 +1,4 @@
 import { authPageMetadata } from "@/lib/auth/auth-page-metadata";
-import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
 import { LoginForm } from "@/components/app/login-form";
 import { getEnabledProviders } from "@/lib/auth/enabled-providers";
@@ -9,9 +8,9 @@ import { getEnabledProviders } from "@/lib/auth/enabled-providers";
  *  revalidates on the same window instead of being frozen at build time. */
 export const revalidate = 300;
 
-/** Login page. The form reads `?next=…` via `useSearchParams()`, so we wrap
- *  it in `<Suspense>` to keep the rest of the auth shell statically
- *  prerenderable (Next 15 requirement for CSR-bailout components).
+/** Login page. The form is in the server HTML: it reads `?next=…` through
+ *  `useUrlQuery` (lib/auth/use-url-query.ts), which does not make Next drop
+ *  the component from the prerender the way `useSearchParams()` did.
  *
  *  Provider flags are fetched HERE (server) from the auth server's own
  *  settings endpoint and passed down as plain booleans — the client form
@@ -34,11 +33,9 @@ export default async function LoginPage({
   setRequestLocale(locale);
   const providers = await getEnabledProviders();
   return (
-    <Suspense fallback={null}>
-      <LoginForm
-        linkedinEnabled={providers.linkedin_oidc}
-        facebookEnabled={providers.facebook}
-      />
-    </Suspense>
+    <LoginForm
+      linkedinEnabled={providers.linkedin_oidc}
+      facebookEnabled={providers.facebook}
+    />
   );
 }
