@@ -97,6 +97,12 @@ check "GONE sees the stored file before removal" "1" "$(as $GONE "select count(*
 check "GONE reads the thread's message before removal" "1" "$(as $GONE "select count(*) from public.conversation_messages where conversation_id='$CONV';")"
 check "re-check: GONE is eligible before removal" "1" "$(recheck $OWNER $CONV $GONE)"
 
+# GONE writes one message of its own while still a participant, so the
+# post-removal registration probe below fails for being REMOVED, not for
+# naming someone else's message.
+MSGG=$(as $GONE "insert into public.conversation_messages(conversation_id, author_id, body) values ('$CONV','$GONE','gone before removal') returning id;" | grep -oE '[0-9a-f-]{36}' | head -1)
+check "GONE could write while a participant" "36" "${#MSGG}"
+
 echo; echo "== The owner removes GONE"
 check "revoke_conversation_participant → ok" "ok" "$(as $OWNER "select public.revoke_conversation_participant('$CONV','$GONE');")"
 $PSQL -c "insert into public.conversation_messages(conversation_id, author_id, body) values ('$CONV','$OWNER','after removal');" >/dev/null
@@ -106,12 +112,12 @@ check "conversation row hidden" "0" "$(as $GONE "select count(*) from public.con
 check "no message visible (old or new)" "0" "$(as $GONE "select count(*) from public.conversation_messages where conversation_id='$CONV';")"
 check "co-participant rows hidden; only their own revoked row" "1" "$(as $GONE "select count(*) from public.conversation_participants where conversation_id='$CONV';")"
 has "sending is refused by RLS" "row-level security|violates" "$(as $GONE "insert into public.conversation_messages(conversation_id, author_id, body) values ('$CONV','$GONE','still here?');")"
-check "nothing was written by the refused send" "0" "$(q "select count(*) from public.conversation_messages where author_id='$GONE';")"
+check "nothing was written by the refused send" "0" "$(q "select count(*) from public.conversation_messages where author_id='$GONE' and body='still here?';")"
 
 check "attachment rows hidden" "0" "$(as $GONE "select count(*) from public.conversation_message_attachments where conversation_id='$CONV';")"
 check "the stored file is hidden (no download)" "0" "$(as $GONE "select count(*) from storage.objects where bucket_id='conversation-attachments' and name='$APATH';")"
 has "uploading into the thread is refused" "row-level security|violates" "$(as $GONE "insert into storage.objects(bucket_id, name) values ('conversation-attachments','$CONV/$GONE/$ATT/x.png');")"
-has "registering an attachment is refused" "not|denied|participant|42501" "$(as $GONE "select public.register_conversation_message_attachment('a0000000-0000-4000-8000-0000000000a2','$MSG1','x.png','image/png',10,'$CONV/$GONE/a0000000-0000-4000-8000-0000000000a2/x.png');")"
+has "registering an attachment on their OWN earlier message is refused" "not|denied|participant|42501" "$(as $GONE "select public.register_conversation_message_attachment('a0000000-0000-4000-8000-0000000000a2','$MSGG','x.png','image/png',10,'$CONV/$GONE/a0000000-0000-4000-8000-0000000000a2/x.png');")"
 
 echo; echo "== 4. A removed participant cannot re-add or un-revoke themselves"
 has "un-revoke via UPDATE is refused (column grant: last_read_at only)" "permission denied" "$(as $GONE "update public.conversation_participants set revoked_at = null where conversation_id='$CONV' and profile_id='$GONE';")"
@@ -139,7 +145,7 @@ has "a send that lands after the concurrent removal commits is refused" "row-lev
 check "re-check after the concurrent removal: GONE not eligible" "0" "$(recheck $LIVE $OTHER $GONE)"
 
 echo; echo "== 1 / 7. The live participants are untouched"
-check "LIVE reads both messages" "2" "$(as $LIVE "select count(*) from public.conversation_messages where conversation_id='$CONV';")"
+check "LIVE reads the thread's messages (incl. GONE's earlier one)" "3" "$(as $LIVE "select count(*) from public.conversation_messages where conversation_id='$CONV';")"
 check "LIVE can still send" "INSERT 0 1" "$(printf '%s\n' "set role authenticated; set request.jwt.claim.sub='$LIVE'; insert into public.conversation_messages(conversation_id, author_id, body) values ('$CONV','$LIVE','hello');" | psql -h $PGPROOF_HOST -p $PGPROOF_PORT -U postgres -d postgres -tA -f - 2>&1 | tr -d '\r' | tail -1)"
 check "re-check: LIVE is still eligible" "1" "$(recheck $OWNER $CONV $LIVE)"
 check "re-check: OWNER is eligible for LIVE's messages" "1" "$(recheck $LIVE $CONV $OWNER)"

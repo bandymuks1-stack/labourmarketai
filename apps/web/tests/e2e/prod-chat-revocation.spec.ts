@@ -123,18 +123,26 @@ async function sendAsA(browser: Browser, body: string, withFile: boolean): Promi
   await ctx.close();
 }
 
-/** Does the person's bell show a row that links to the thread? */
-async function bellLinksToThread(browser: Browser, slot: string): Promise<number> {
+/**
+ * How many of the person's bell rows link to the thread. No fixed sleeps
+ * (root-cause ratchet): the page settles, the bell opens, and the panel's
+ * own state marker — a row or the empty state — says the feed is drawn.
+ * `expectAny` polls until a row links to the thread (the control before the
+ * removal); otherwise one settled reading is taken.
+ */
+async function bellLinksToThread(browser: Browser, slot: string, expectAny: boolean): Promise<number> {
   const { ctx, page } = await as(browser, slot);
   await page.goto("/lt/dashboard");
+  await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => undefined);
   const bell = page.locator('[data-testid="notification-bell"]:visible').first();
   await expect(bell).toBeVisible({ timeout: 30_000 });
-  await page.waitForTimeout(3_000);
   await bell.click();
-  await page.waitForTimeout(3_000);
-  const n = await page
-    .locator(`[data-testid="notification-row"]:visible a[href*="/dashboard/communication/${conv}"]`)
-    .count();
+  await expect(
+    page.locator('[data-testid="notification-row"]:visible, [data-testid="notification-empty-state"]:visible').first(),
+  ).toBeVisible({ timeout: 30_000 });
+  const links = page.locator(`[data-testid="notification-row"]:visible a[href*="/dashboard/communication/${conv}"]`);
+  if (expectAny) await expect.poll(() => links.count(), { timeout: 30_000 }).toBeGreaterThan(0);
+  const n = await links.count();
   await ctx.close();
   return n;
 }
@@ -178,7 +186,7 @@ test("3. B and C read message 1 and its attachment, and hold a bell row", async 
     expect(file.status, `${slot} downloads the file`).toBe(200);
     await expect.poll(() => bellRows(t), { timeout: 60_000 }).toBeGreaterThan(0);
   }
-  expect(await bellLinksToThread(browser, "worker2"), "C's bell links to the thread before removal").toBeGreaterThan(0);
+  expect(await bellLinksToThread(browser, "worker2", true), "C's bell links to the thread before removal").toBeGreaterThan(0);
 });
 
 test("4. A removes C", async () => {
@@ -241,7 +249,7 @@ test("8. C gets no new bell; e-mail and push are reported, not assumed", async (
 });
 
 test("9. C's old bell is not an active link; the old URL shows the honest notice", async ({ browser }) => {
-  expect(await bellLinksToThread(browser, "worker2"), "no bell row links to the thread").toBe(0);
+  expect(await bellLinksToThread(browser, "worker2", false), "no bell row links to the thread").toBe(0);
   const { ctx, page } = await as(browser, "worker2");
   await page.goto(`/lt/dashboard/communication/${conv}`);
   await expect(page).toHaveURL(/\/dashboard\/communication\?notice=unavailable/, { timeout: 60_000 });
