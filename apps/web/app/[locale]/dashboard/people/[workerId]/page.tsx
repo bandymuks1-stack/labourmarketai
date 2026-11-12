@@ -106,6 +106,7 @@ export default async function PersonPage({
   const serviceRequestLabels: PersonServiceRequestLabels = {
     request: tMarket("request"),
     requested: tMarket("requested"),
+    myRequests: tMarket("outgoingHeading"),
     duplicate: tMarket("duplicate"),
     offeringInactive: tMarket("offeringInactive"),
     notAvailable: tMarket("notAvailable"),
