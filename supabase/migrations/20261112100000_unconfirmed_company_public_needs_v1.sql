@@ -134,6 +134,9 @@ comment on table public.customer_request_publications is
 -- @plan-cache-proof: n/a — one latest-event probe per need on a table that grows by explicit company clicks; no search plan depends on it.
 create index if not exists customer_request_publications_request_idx
   on public.customer_request_publications (request_id, seq desc);
+-- @plan-cache-proof: n/a — serves the 24 h rate window and the earlier-publication duplicate probe inside need_public_state_v1 (bounded by publications, see the PG16 timing proof); no search plan.
+create index if not exists customer_request_publications_publish_time_idx
+  on public.customer_request_publications (created_at, request_id) where action = 'publish';
 
 alter table public.customer_request_publications enable row level security;
 revoke all on public.customer_request_publications from public, anon, authenticated, service_role;
@@ -162,16 +165,22 @@ set search_path to 'public'
 as $function$
 begin
   if tg_op = 'UPDATE' then
-    if tg_table_name = 'customer_request_publications'
-       and new.actor_id is null and old.actor_id is not null
-       and (to_jsonb(new) - 'actor_id') = (to_jsonb(old) - 'actor_id') then
-      return new;
-    end if;
-    if tg_table_name = 'customer_request_public_reviews'
-       and new.decided_by is null and old.decided_by is not null
-       and (to_jsonb(new) - 'decided_by') = (to_jsonb(old) - 'decided_by') then
-      return new;
-    end if;
+    -- The person reference column differs per table; it is named by tg_table_name and read
+    -- through jsonb only, so a row of one table never touches the other's column (R2 re-review:
+    -- plpgsql does not short-circuit AND, and new.actor_id on a decision row raised).
+    declare
+      v_col text := case tg_table_name
+                      when 'customer_request_publications' then 'actor_id'
+                      when 'customer_request_public_reviews' then 'decided_by'
+                    end;
+    begin
+      if v_col is not null
+         and (to_jsonb(new) ->> v_col) is null
+         and (to_jsonb(old) ->> v_col) is not null
+         and (to_jsonb(new) - v_col) = (to_jsonb(old) - v_col) then
+        return new;  -- erasure: the person reference blanked, nothing else changed
+      end if;
+    end;
     raise exception 'append_only' using errcode = '42501';
   end if;
   -- DELETE: allowed only as the cascade of the need's own deletion.
@@ -323,6 +332,9 @@ begin
   if nullif(trim(coalesce(c.country, '')), '') is null then v_reasons := v_reasons || 'missing_company_country'::text; end if;
   if c.verification_status = 'draft' then v_reasons := v_reasons || 'company_draft'::text; end if;
   v_missing := cardinality(v_reasons) > 0;
+  -- A company whose own automated checks have NOT passed is never published automatically:
+  -- the need is held for an operator (owner rule, as relayed for R2 P3-8).
+  if c.verification_status = 'needs_checks' then v_reasons := v_reasons || 'company_checks_pending'::text; end if;
 
   -- (2) every free-text field a reader returns is screened (R2 P1-2: start_period too)
   v_shown := public.need_public_text_flags_v1(concat_ws(' ', r.role_or_work_type, v_loc, v_name, r.start_period));
@@ -335,25 +347,31 @@ begin
 
   -- (3) rate: more than 5 needs of one organization first PUBLISHED within the 24 h up to this
   --     need's first publication — server times only (R2 P2-3).
-  if (select count(distinct o.id)
-        from public.customer_requests o
-        join public.customer_request_publications p on p.request_id = o.id and p.action = 'publish'
-       where coalesce(o.organization_id, o.profile_id) = coalesce(r.organization_id, r.profile_id)
-         and (o.kind is null or o.kind in ('company_request', 'buyer_request'))
+  -- Driven from the publication events in the 24 h window (index on created_at), joined to
+  -- needs by primary key: bounded by the publications in that window, never by all needs.
+  if (select count(distinct p.request_id)
+        from public.customer_request_publications p
+        join public.customer_requests o on o.id = p.request_id
+       where p.action = 'publish'
          and p.created_at >  v_first_pub - interval '24 hours'
-         and p.created_at <= v_first_pub) > 5 then
+         and p.created_at <= v_first_pub
+         and coalesce(o.organization_id, o.profile_id) = coalesce(r.organization_id, r.profile_id)
+         and (o.kind is null or o.kind in ('company_request', 'buyer_request'))) > 5 then
     v_reasons := v_reasons || 'rate'::text;
   end if;
 
   -- (4) duplicate: the same summary first PUBLISHED EARLIER (server time) by another
   --     organization. Only published needs are compared (bounded cost; R2 P2-3/P2-4).
   v_summary := lower(regexp_replace(trim(coalesce(r.need_summary, '')), '\s+', ' ', 'g'));
+  -- Driven from the publish events that came BEFORE this need's first one (index on
+  -- created_at), joined to needs by primary key: bounded by earlier publications only.
   if char_length(v_summary) >= 40 and exists (
        select 1
-         from public.customer_requests o
-         join lateral (select min(p.created_at) as first_pub
-                         from public.customer_request_publications p
-                        where p.request_id = o.id and p.action = 'publish') op on op.first_pub is not null
+         from (select p.request_id, min(p.created_at) as first_pub
+                 from public.customer_request_publications p
+                where p.action = 'publish' and p.created_at <= v_first_pub
+                group by p.request_id) op
+         join public.customer_requests o on o.id = op.request_id
         where o.id <> r.id
           and o.status = 'submitted'
           and coalesce(o.organization_id, o.profile_id) <> coalesce(r.organization_id, r.profile_id)
@@ -586,14 +604,15 @@ begin
          cr.created_at,
          coalesce(nullif(trim(c.display_name), ''), nullif(trim(c.legal_name), '')) as company_name,
          false as company_confirmed
-    from public.customer_requests cr
+    -- Driven from the publication events (R2 re-review P2): only needs a company ever chose
+    -- to publish are looked up, by primary key — the read never scans all needs.
+    from (select distinct p.request_id from public.customer_request_publications p) pub
+    join public.customer_requests cr on cr.id = pub.request_id
     join public.companies c
       on c.id = public.demand_company_id_v1(cr.organization_id, cr.profile_id)
     cross join lateral public.need_public_state_v1(cr.id) st
    where cr.status = 'submitted'
      and (cr.kind is null or cr.kind in ('company_request', 'buyer_request'))
-     -- Only needs that have a publication event are evaluated at all (bounded cost, R2 P2-4).
-     and exists (select 1 from public.customer_request_publications p where p.request_id = cr.id)
      and c.verification_status is distinct from 'verified'
      -- Principle C (7): verified companies' needs keep their existing visibility — the
      -- worker board only. This reader returns ONLY published, admitted needs of

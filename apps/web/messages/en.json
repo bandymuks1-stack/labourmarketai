@@ -2015,6 +2015,7 @@
       "missing_company_name": "company name missing",
       "missing_company_country": "company country missing",
       "company_draft": "company profile not activated yet",
+      "company_checks_pending": "the company’s own checks have not passed yet",
       "link": "a link in the shown text",
       "email": "an e-mail address in the shown text",
       "phone": "a phone number in the shown text",

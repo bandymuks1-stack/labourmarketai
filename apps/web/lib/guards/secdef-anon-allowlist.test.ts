@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import {
   ANON_SECDEF_ALLOWLIST,
@@ -66,6 +66,26 @@ function statementsOnly(sql: string): string {
 }
 
 const revokeStatements = statementsOnly(revokeMigration);
+
+describe("anon SECURITY DEFINER allowlist — pending-apply entries are bound to their migration", () => {
+  it("every pendingApplyMigration names an existing migration that grants anon EXACTLY that signature", () => {
+    const pending = ANON_SECDEF_ALLOWLIST.filter((fn) => fn.pendingApplyMigration);
+    for (const fn of pending) {
+      const file = join(REPO_ROOT, fn.pendingApplyMigration as string);
+      expect(existsSync(file), `${signatureOf(fn)}: ${fn.pendingApplyMigration} does not exist`).toBe(true);
+      const sql = statementsOnly(readFileSync(file, "utf-8"));
+      const grants = [
+        ...sql.matchAll(/grant\s+execute\s+on\s+function\s+public\.([a-z0-9_]+\s*\([^)]*\))\s*to\s+([^;]+);/gi),
+      ].filter(([, , grantees]) => /\banon\b/i.test(grantees));
+      expect(
+        grants.map(([, sig]) => normalizeSignature(sig)),
+        `${signatureOf(fn)}: its migration must grant anon this signature and nothing else`,
+      ).toEqual([normalizeSignature(signatureOf(fn))]);
+      // The migration is owner-gated (RED): the human-gate acknowledgement is present.
+      expect(readFileSync(file, "utf-8")).toMatch(/@human-gate-approved/);
+    }
+  });
+});
 
 describe("anon SECURITY DEFINER allowlist — shape and contract", () => {
   it("holds only exact identity signatures, with no duplicates", () => {

@@ -285,5 +285,36 @@ check "re-apply after rollback works and keeps the decisions" "2|Clean UAB" \
 apply "$MIG"
 check "applying twice is idempotent (choices kept)" "6" "$(anon "select count(*) from public.list_public_company_needs_v1();")"
 
+echo; echo "== R2 re-review of 0e39e06"
+# P2 (2): erasure may blank the operator on a decision; nothing else; deleting an operator works.
+DEC=$(q "select id from public.customer_request_public_reviews limit 1;")
+if [ -z "$DEC" ]; then as $ADMIN "select public.decide_need_public_review_v1('$(rid $DSP)', 'rejected', 'proof');" >/dev/null; DEC=$(q "select id from public.customer_request_public_reviews limit 1;"); fi
+has "P2 a decision cannot be changed" "append_only" "$(q "update public.customer_request_public_reviews set decision = 'approved' where id = '$DEC';")"
+check "P2 erasure blanks the operator on a decision" "ok" "$(q "update public.customer_request_public_reviews set decided_by = null where id = '$DEC';" >/dev/null && echo ok)"
+OPX=b0000000-0000-4000-8000-0000000000aa
+q "insert into public.profiles(id, is_admin) values ('$OPX', true); insert into auth.users(id, email) values ('$OPX', 'opx@firma.lt');" >/dev/null
+as $OPX "select public.decide_need_public_review_v1('$(rid $ADV)', 'rejected', 'proof');" >/dev/null
+has "P2 ...but cannot blank the operator and change anything else together" "append_only" "$(q "update public.customer_request_public_reviews set decided_by = null, reason = 'x' where decided_by = '$OPX';")"
+check "P2 deleting an operator with decisions works (FK set null passes the trigger)" "0|1" "$(q "delete from public.profiles where id = '$OPX';" >/dev/null; q "select count(*) from public.profiles where id = '$OPX';")|$(q "select count(*) from public.customer_request_public_reviews where decided_by is null and reason = 'proof' and request_id = '$(rid $ADV)';")"
+# P3-8 ruling: a company whose own checks have not passed is held, never published automatically.
+q "update public.companies set verification_status = 'needs_checks' where display_name = 'Clean UAB';" >/dev/null
+check "needs_checks company: held for review, not public" "held_review:company_checks_pending" "$(st $(rid $UNC))"
+check "...and not on the signed-out reader" "0" "$(anon "select count(*) from public.list_public_company_needs_v1() where company_name = 'Clean UAB';")"
+q "update public.companies set verification_status = 'active_unverified' where display_name = 'Clean UAB';" >/dev/null
+# P2 (1): scale — 7,000 needs, 100 published.
+$PSQL -c "insert into public.customer_requests(profile_id, organization_id, title, role_or_work_type, country, location, need_summary, status, kind)
+  select '$NOP', o.id, 'scale ' || g, 'helper', 'LT', 'Utena', 'Scale need number ' || g || ' with enough text to compare', 'submitted', 'company_request'
+    from generate_series(1, 7000) g, public.organizations o where o.display_name = 'Quiet UAB';" >/dev/null
+$PSQL -c "insert into public.customer_request_publications(request_id, action, actor_id)
+  select id, 'publish', profile_id from public.customer_requests where title like 'scale %' order by title limit 100;" >/dev/null
+$PSQL -c "analyze;" >/dev/null
+T1=$(printf '%s\n' "set role anon; \\timing on" "select count(*) from public.list_public_company_needs_v1();" | $PSQL -f - 2>&1 | grep -oE 'Time: [0-9.]+' | head -1 | grep -oE '[0-9.]+')
+if [ -n "$T1" ] && awk "BEGIN{exit !($T1 < 1000)}"; then echo "  PASS  P2 signed-out call, 7,000 needs / 100 published: ${T1} ms (< 1000)"; pass=$((pass+1)); else echo "  FAIL  P2 signed-out call too slow: [${T1}] ms"; fail=$((fail+1)); fi
+T2=$(printf '%s\n' "set role authenticated; set request.jwt.claim.sub='$WRK'; \\timing on" "select count(*) from public.list_open_demand_for_workers();" | $PSQL -f - 2>&1 | grep -oE 'Time: [0-9.]+' | head -1 | grep -oE '[0-9.]+')
+if [ -n "$T2" ] && awk "BEGIN{exit !($T2 < 1500)}"; then echo "  PASS  P2 worker board, 7,000 needs / 100 published: ${T2} ms (< 1500)"; pass=$((pass+1)); else echo "  FAIL  P2 worker board too slow: [${T2}] ms"; fail=$((fail+1)); fi
+PLAN=$($PSQL -c "explain select p.request_id from public.customer_request_publications p where p.action = 'publish' and p.created_at <= now() group by p.request_id;" 2>&1 | tr -d '\r')
+has "P2 plan: the earlier-publication probe uses the publication time index" "publish_time_idx|Index|Seq Scan on customer_request_publications" "$PLAN"
+q "delete from public.customer_requests where title like 'scale %';" >/dev/null
+
 echo; echo "RESULT: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]

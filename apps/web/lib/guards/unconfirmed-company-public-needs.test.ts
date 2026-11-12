@@ -262,7 +262,7 @@ describe("V-1: copy in every catalog", () => {
     for (const k of ["publish", "withdraw", "explain", "failed", "saving"]) {
       expect(typeof d.demandReadback?.publication?.[k], `publication.${k}`).toBe("string");
     }
-    expect(Object.keys(d.demandReadback.publicReason).length).toBe(14);
+    expect(Object.keys(d.demandReadback.publicReason).length).toBe(15);
   });
 
   it("Lithuanian says exactly what the owner wrote", () => {

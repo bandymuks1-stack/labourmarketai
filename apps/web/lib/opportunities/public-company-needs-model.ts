@@ -82,6 +82,7 @@ export const NEED_PUBLIC_REASONS = [
   "missing_company_name",
   "missing_company_country",
   "company_draft",
+  "company_checks_pending",
   "link",
   "email",
   "phone",

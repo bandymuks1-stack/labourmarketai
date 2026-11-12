@@ -34,6 +34,7 @@
       "missing_company_name": "ettevõtte nimi puudub",
       "missing_company_country": "ettevõtte riik puudub",
       "company_draft": "ettevõtte profiil pole veel aktiveeritud",
+      "company_checks_pending": "ettevõtte kontrollid pole veel läbitud",
       "link": "link näidatavas tekstis",
       "email": "e-posti aadress näidatavas tekstis",
       "phone": "telefoninumber näidatavas tekstis",

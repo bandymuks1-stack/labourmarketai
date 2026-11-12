@@ -34,6 +34,7 @@
       "missing_company_name": "virksomhedsnavn mangler",
       "missing_company_country": "virksomhedens land mangler",
       "company_draft": "virksomhedsprofilen er ikke aktiveret endnu",
+      "company_checks_pending": "virksomhedens kontroller er endnu ikke bestået",
       "link": "et link i den viste tekst",
       "email": "en e-mailadresse i den viste tekst",
       "phone": "et telefonnummer i den viste tekst",

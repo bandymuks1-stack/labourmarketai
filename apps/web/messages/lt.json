@@ -2015,6 +2015,7 @@
       "missing_company_name": "nenurodytas įmonės pavadinimas",
       "missing_company_country": "nenurodyta įmonės šalis",
       "company_draft": "įmonės profilis dar neaktyvuotas",
+      "company_checks_pending": "įmonės patikros dar nepraėjo",
       "link": "nuoroda rodomame tekste",
       "email": "el. pašto adresas rodomame tekste",
       "phone": "telefono numeris rodomame tekste",

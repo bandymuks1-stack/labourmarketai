@@ -74,7 +74,7 @@ describe("state and reason parsing", () => {
     expect(parseNeedPublicState("held_review")).toBe("held_review");
     expect(parseNeedPublicState("approved")).toBeNull();
     expect(parseNeedPublicReasons(["phone", "made_up", 1, "rate"])).toEqual(["phone", "rate"]);
-    expect(NEED_PUBLIC_REASONS.length).toBe(14);
+    expect(NEED_PUBLIC_REASONS.length).toBe(15);
   });
 });
 

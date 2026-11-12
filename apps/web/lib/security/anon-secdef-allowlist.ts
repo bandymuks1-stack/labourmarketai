@@ -53,6 +53,16 @@ export type AnonSecdefContract = {
   readonly definerJustification: string;
   /** Known residual risk accepted by the owner. */
   readonly residualRisk: string;
+  /**
+   * NOT YET APPLIED. The repo path of the reviewed RED migration that creates
+   * this function and grants it to anon. While the function does not exist in
+   * the checked database, the live guard reports it as "pending apply" instead
+   * of a stale entry. The moment the function exists, EVERY other condition is
+   * enforced in full (anon grant present, no PUBLIC, exact signature). The
+   * static guard requires the file to exist and to grant anon exactly this
+   * signature. Remove this field in the first change after the apply.
+   */
+  readonly pendingApplyMigration?: string;
 };
 
 /**
@@ -232,6 +242,7 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
       "No DB-level rate limit. Read-only and idempotent; at most 50 rows of nine non-contact columns, so the abuse ceiling is scraping of needs their companies posted to the market.",
     definerJustification:
       "`customer_requests` and `companies` have no anon grant or anon policy; DEFINER is what narrows anonymous access to exactly nine columns of eligible needs instead of opening either table.",
+    pendingApplyMigration: "supabase/migrations/20261112100000_unconfirmed_company_public_needs_v1.sql",
     residualRisk:
       "Exposes the company's display name next to a need, including for a company that is not verified (labelled as such). Contact e-mail and phone, the poster, title, description, notes and payload are never returned. The antispam rule is deterministic and can be evaded by a careful spammer; such a need would still carry the 'Company not confirmed' label and no contact data.",
   },

@@ -34,6 +34,7 @@
       "missing_company_name": "företagsnamn saknas",
       "missing_company_country": "företagets land saknas",
       "company_draft": "företagsprofilen är inte aktiverad ännu",
+      "company_checks_pending": "företagets kontroller är inte godkända ännu",
       "link": "en länk i den visade texten",
       "email": "en e-postadress i den visade texten",
       "phone": "ett telefonnummer i den visade texten",

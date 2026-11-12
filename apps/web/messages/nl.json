@@ -2015,6 +2015,7 @@
       "missing_company_name": "bedrijfsnaam ontbreekt",
       "missing_company_country": "land van het bedrijf ontbreekt",
       "company_draft": "bedrijfsprofiel nog niet geactiveerd",
+      "company_checks_pending": "de controles van het bedrijf zijn nog niet geslaagd",
       "link": "een link in de getoonde tekst",
       "email": "een e-mailadres in de getoonde tekst",
       "phone": "een telefoonnummer in de getoonde tekst",
