@@ -106,6 +106,8 @@ export type IntentHandlerId =
   // Owner program 2026-09-23: rename the ACTIVE organization by sentence.
   | "renameOrganization"
   | "lmc"
+  | "commercial"
+  | "billingPlan"
   | "adminApprovals"
   | "adminRequests"
   | "timesheets"
@@ -306,6 +308,13 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // renamed by THIS person, so a refusal is said before any form appears.
   "rename-organization": { domain: "company", access: "write", handler: "renameOrganization", ownTyping: true },
   lmc: { domain: "money", access: "route", handler: "lmc", ownTyping: false },
+  // ORDERS (owner P0 2026-11-12): proposals, contracts and service requests
+  // by sentence. `route`: chips to the two canonical screens — a sentence
+  // never creates, sends, accepts or signs a commercial obligation.
+  commercial: { domain: "money", access: "route", handler: "commercial", ownTyping: false },
+  // PLAN / SUBSCRIPTION (same order): `route` to the account plan fold and
+  // nothing else — no financial operation is reachable from a sentence.
+  "billing-plan": { domain: "money", access: "route", handler: "billingPlan", ownTyping: false },
   "admin-approvals": { domain: "admin", access: "route", handler: "adminApprovals", ownTyping: false },
   "admin-requests": { domain: "admin", access: "route", handler: "adminRequests", ownTyping: false },
   // The timesheet document area of the planning page — a `link:` chip to the

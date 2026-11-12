@@ -473,6 +473,9 @@ describe("the registry itself", () => {
       "project.forecast.get",
       "forecast.mode.set_draft",
       "forecast.mode.set_confirm",
+      "work_history.get",
+      "billing.subscription.get",
+      "search.query",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
@@ -750,6 +753,9 @@ describe("the registry itself", () => {
       "project.forecast.get",
       "forecast.mode.set_draft",
       "forecast.mode.set_confirm",
+      "work_history.get",
+      "billing.subscription.get",
+      "search.query",
     ]);
   });
 

@@ -906,6 +906,22 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Benenne meine Firma in Nonstop Group um",
     pl: "Zmień nazwę firmy na Nonstop Group",
   },
+  commercial: {
+    lt: "Parodyk mano sutartis",
+    en: "Show my contracts",
+    ru: "Покажи мои договоры",
+    nl: "Toon mijn contracten",
+    de: "Zeig meine Verträge",
+    pl: "Pokaż moje umowy",
+  },
+  "billing-plan": {
+    lt: "Kokia mano prenumerata?",
+    en: "What subscription do I have?",
+    ru: "Какая у меня подписка?",
+    nl: "Wat is mijn abonnement?",
+    de: "Welches Abonnement habe ich?",
+    pl: "Jaka jest moja subskrypcja?",
+  },
   lmc: {
     lt: "Kiek turiu LMC?",
     en: "How much LMC do I have?",

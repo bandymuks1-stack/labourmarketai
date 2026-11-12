@@ -100,6 +100,12 @@ const CHAT_KEYS = [
   // walked past it, because that matcher is a search box and not a router.
   "lmcHint",
   "chipLmc",
+  // Orders and the plan, reachable by asking (owner P0 2026-11-12). Both are
+  // doors to the canonical screens; neither sentence can commit money.
+  "commercialHint",
+  "chipCommercial",
+  "billingPlanHint",
+  "chipBillingPlan",
   "adminRouteHint",
   "adminApprovalsChip",
   "adminRequestsChip",

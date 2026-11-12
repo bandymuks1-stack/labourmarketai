@@ -143,6 +143,11 @@ export type ConversationIntent =
   //    the owner's rename request was answered with CV / profile / job chips.
   | "rename-organization" // "pervadink agentūrą į X" / "rename my company to X"
   | "lmc" // "kiek turiu LMC?" / "už ką buvo nuskaičiuota?" — the credit ledger
+  // ── ORDERS AND MONEY BY SENTENCE (owner P0 2026-11-12, chat as the one
+  //    control layer). Both had a page and MCP tools and NO sentence: "parodyk
+  //    mano sutartis" and "kokia mano prenumerata?" scored 0 on every rule.
+  | "commercial" // "parodyk mano sutartis" / "my orders" — proposals, contracts, service requests
+  | "billing-plan" // "kokia mano prenumerata?" / "what plan am I on?" — plan + subscription, read-only
   // ── V9 value-intent: a stated OFFER of value (goods to sell, free
   //    capacity) — the structurer (lib/structuring/value-statement.ts)
   //    refines it; the router only opens the door. ─────────────────────────
@@ -3571,6 +3576,57 @@ const RULES: IntentRule[] = [
         "(už\\s+ką|for\\s+what|за\\s+что|wofür|waarvoor|za\\s+co)\\s*.{0,20}(nuskait|charg|списал|сняли|abgebucht|abgezogen|afgeschreven|pobran|naliczon)",
         5,
       ),
+    ],
+  },
+  /**
+   * ORDERS — commercial proposals, contracts and service requests.
+   *
+   * A ROUTE, not a read and never a write: the answer is the two canonical
+   * screens (`/dashboard/commercial`, `/dashboard/service-requests`). Creating,
+   * sending, accepting or signing anything stays an explicit act there (and,
+   * for an assistant, the draft → confirm capability pair) — a sentence
+   * commits nobody to a commercial obligation.
+   *
+   * The noun alone is NOT enough: "sutartis" / "contract" is also a DOCUMENT
+   * a person uploads (`add-document`) — so every pattern needs a possessive or
+   * a show verb, and none fires when the sentence carries an upload verb.
+   */
+  {
+    intent: "commercial",
+    patterns: [
+      p(
+        "^(?!.*(ikel|pridek|pridet|upload|\\badd\\b|import|загруз|добав|hochlad|hinzufug|uploaden|toevoeg|wgra|dodaj|przesl)).*\\b(mano|musu|my|our|мои|мой|наши|meine|unsere|mijn|onze|moje|nasze)\\s+.{0,16}(sutart|contracts?\\b|договор|vertrag|vertrage|contracten|umow)",
+        6,
+      ),
+      p(
+        "^(?!.*(ikel|pridek|pridet|upload|\\badd\\b|import|загруз|добав|hochlad|hinzufug|uploaden|toevoeg|wgra|dodaj|przesl)).*(parodyk|rodyk|perziur|atidaryk|\\bshow\\b|\\blist\\b|\\bview\\b|покажи|открой|zeig|toon|pokaz)[^\\s]*\\s+.{0,24}(sutart|contracts?\\b|договор|vertrag|vertrage|contracten|umow)",
+        6,
+      ),
+      p("(komercin[^\\s]*\\s+pasiulym|commercial\\s+(proposal|offer)|коммерческ[^\\s]*\\s+предложени|kommerziell[^\\s]*\\s+angebot|commercie[^\\s]*\\s+(voorstel|offerte)|ofert[^\\s]*\\s+handlow)", 6),
+      p(
+        "\\b(mano|musu|my|our|мои|наши|meine|unsere|mijn|onze|moje|nasze)\\s+.{0,12}(uzsakym|orders?\\b|заказ|auftrag|auftrage|bestelling|opdracht|zamowien)",
+        5,
+      ),
+    ],
+  },
+  /**
+   * PLAN AND SUBSCRIPTION — what the workspace is on.
+   *
+   * A ROUTE to the one account screen (`/dashboard/account#account-plan`),
+   * and deliberately nothing more: ordering, paying, cancelling or changing a
+   * plan is the person's own click there. No sentence, and no assistant, runs
+   * a financial operation. The LMC credit ledger keeps its own intent above.
+   */
+  {
+    intent: "billing-plan",
+    patterns: [
+      p("(prenumerat|subscription|подписк|\\babonnement|subskrypc)", 6),
+      p("(тариф|\\btarif\\b|\\btarifplan)", 5),
+      p("(mokam[^\\s]*|paid|pricing|payment|платн[^\\s]*|bezahl[^\\s]*|betaald[^\\s]*|platn[^\\s]*)\\s+plan", 5),
+      // A bare "mano planas" stays the CALENDAR reading (a plan is first a
+      // schedule); only a named subscription / tariff / paid plan lands here.
+      p("\\b(mano|musu|my|our|мои|наши|meine|unsere|mijn|onze|moje|nasze)\\s+.{0,12}(mokejim|payments?\\b|платеж|zahlung|betaling|platnosc)", 5),
+      p("\\bbilling\\b", 5),
     ],
   },
   {

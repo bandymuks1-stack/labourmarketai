@@ -103,6 +103,10 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "invite-student": "an education institution invites a student / learner",
   programmes: "an institution's programmes, cohorts or learner assignment",
   lmc: "credits, balance or payments (LMC)",
+  commercial:
+    "the speaker's own commercial proposals, contracts, orders or service requests — to LOOK at them ('parodyk mano sutartis', 'my orders'). NOT uploading a contract as a document, and NOT a job offer.",
+  "billing-plan":
+    "which plan or subscription the account or organization is on, its status, or the payments for it ('kokia mano prenumerata?', 'what plan am I on?'). NOT the LMC credit balance.",
   "admin-approvals": "the approvals area (what awaits approval)",
   "admin-requests": "admin requests area",
   timesheets: "timesheets and planning area",

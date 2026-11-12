@@ -134,7 +134,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 91 -> 92: open-conversation - 'parašyk Jonui' opens the ONE conversation.
     // 92 -> 93: new-jobs - the new ads over the one job-alert matching.
     // 93 -> 94: what-changed - the ONE consequence trace, read in the chat.
-    expect(entries.length).toBe(94);
+    // 94 -> 96: commercial + billing-plan - orders and the plan by sentence
+    // (owner P0 2026-11-12); both route-class, neither can commit money.
+    expect(entries.length).toBe(96);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -215,6 +217,12 @@ describe("the intent registry is the enumerable routing contract", () => {
       "activity",
       "admin-approvals",
       "admin-requests",
+      // "Kokia mano prenumerata?" — the account plan fold. A door only:
+      // ordering, paying and cancelling stay the person's own click there.
+      "billing-plan",
+      // "Parodyk mano sutartis" — the commercial and service-request screens.
+      // Nothing is created, sent, accepted or signed by the sentence.
+      "commercial",
       "company-overview",
       "create-organization",
       // The three CV doors are all route-class on purpose: each hands over a
