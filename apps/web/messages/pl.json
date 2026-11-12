@@ -20611,6 +20611,15 @@
     "carousels": {
       "functions": "Co możesz tu zrobić",
       "professions": "Oferty pracy według zawodu"
+    },
+    "start": {
+      "back": "Wszystkie opcje",
+      "functions": "Co możesz zrobić",
+      "searchLabel": "Szukaj pracy",
+      "searchPlaceholder": "Stanowisko lub słowo kluczowe",
+      "searchSubmit": "Szukaj",
+      "viewAll": "Wszystkie oferty",
+      "choose": "Wybierz, po co przychodzisz"
     }
   }
 }

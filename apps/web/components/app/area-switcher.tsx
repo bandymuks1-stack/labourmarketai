@@ -55,6 +55,7 @@ export function AreaSwitcher({
   nextLabel,
   hereLabel,
   testId,
+  fitAll = false,
 }: {
   title: string;
   items: readonly AreaSwitcherItem[];
@@ -62,6 +63,10 @@ export function AreaSwitcher({
   nextLabel: string;
   hereLabel: string;
   testId?: string;
+  /** Show every card at once when the track is wide enough for all of them
+   *  (the six goals on a wide screen); otherwise the usual window with the
+   *  next card peeking. */
+  fitAll?: boolean;
 }) {
   const pathname = usePathname();
   const activeIndex = items.findIndex((i) => pathIsInside(pathname, i.href));
@@ -101,7 +106,11 @@ export function AreaSwitcher({
   // narrower than a label or wider than a comfortable tile.
   const GAP = 12;
   const trackWidth = width || 900;
-  const cardWidth = Math.round(Math.max(148, Math.min(196, (trackWidth - GAP * 4) / 4.3)));
+  const evenWidth = (trackWidth - GAP * (items.length - 1)) / items.length;
+  const cardWidth =
+    fitAll && evenWidth >= 148
+      ? Math.floor(Math.min(240, evenWidth))
+      : Math.round(Math.max(148, Math.min(196, (trackWidth - GAP * 4) / 4.3)));
   const step = cardWidth + GAP;
   const visible = Math.max(1, Math.floor((trackWidth + GAP) / step));
   const fits = items.length <= visible;
@@ -287,9 +296,9 @@ export function AreaSwitcher({
                     )}
                   </span>
                   <span className="flex min-w-0 flex-col">
-                    <span className="line-clamp-2 text-support font-semibold leading-snug text-text-primary">{item.label}</span>
+                    <span className={cn("text-support font-semibold leading-snug text-text-primary", item.caption ? "truncate" : "line-clamp-2")}>{item.label}</span>
                     {item.caption && (
-                      <span className="truncate text-meta text-text-muted">{item.caption}</span>
+                      <span className="line-clamp-2 text-meta leading-snug text-text-muted">{item.caption}</span>
                     )}
                   </span>
                 </Link>

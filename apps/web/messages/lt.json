@@ -20611,6 +20611,15 @@
     "carousels": {
       "functions": "Ką čia galite daryti",
       "professions": "Darbo skelbimai pagal profesiją"
+    },
+    "start": {
+      "back": "Visi pasirinkimai",
+      "functions": "Ką galite daryti",
+      "searchLabel": "Ieškoti darbo",
+      "searchPlaceholder": "Pareigos arba raktažodis",
+      "searchSubmit": "Ieškoti",
+      "viewAll": "Visi darbo skelbimai",
+      "choose": "Pasirinkite, ko atėjote"
     }
   }
 }

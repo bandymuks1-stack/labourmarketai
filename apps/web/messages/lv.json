@@ -8004,6 +8004,15 @@
     "carousels": {
       "functions": "Ko šeit varat darīt",
       "professions": "Darba sludinājumi pēc profesijas"
+    },
+    "start": {
+      "back": "Visas izvēles",
+      "functions": "Ko varat darīt",
+      "searchLabel": "Meklēt darbu",
+      "searchPlaceholder": "Amats vai atslēgvārds",
+      "searchSubmit": "Meklēt",
+      "viewAll": "Visi sludinājumi",
+      "choose": "Izvēlieties, kāpēc atnācāt"
     }
   }
 }

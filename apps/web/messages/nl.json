@@ -20611,6 +20611,15 @@
     "carousels": {
       "functions": "Wat je hier kunt doen",
       "professions": "Vacatures per beroep"
+    },
+    "start": {
+      "back": "Alle keuzes",
+      "functions": "Wat je kunt doen",
+      "searchLabel": "Vacatures zoeken",
+      "searchPlaceholder": "Functie of trefwoord",
+      "searchSubmit": "Zoeken",
+      "viewAll": "Alle vacatures",
+      "choose": "Kies waarvoor je komt"
     }
   }
 }

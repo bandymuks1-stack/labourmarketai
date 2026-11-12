@@ -107,16 +107,16 @@ export async function FocusLanding({
       <h1 className="font-display text-4xl font-bold leading-[1.04] tracking-tightest text-text-primary sm:text-5xl lg:text-6xl mt-2">
         {tHero("headline")}
       </h1>
-      <p className="mt-3 text-lead text-text-secondary">{tHero("sub")}</p>
       {/* THE FIRST SCREEN IS THE CHOICE (owner priority 2026-11-12): six
           plainly named intents — the same six as the header — each one link
-          to the start of its function, directly under the promise. Added
-          above the existing pair; nothing the earlier owner orders put on
+          to the start of its function, directly under the headline, so the
+          choice is on a 360px phone's first screen. Added; nothing the earlier owner orders put on
           this screen was removed. */}
-      <div className="mt-6">
+      <div className="mt-5">
         <LandingIntentChoice />
       </div>
-      <div className="mt-4">
+      <p className="mt-4 text-lead text-text-secondary">{tHero("sub")}</p>
+      <div className="mt-6">
         <LandingPrimaryActions locale={locale} surface="landing_hero" />
       </div>
       {/* The doors sit further down: from the first screen, one plain way to them. */}

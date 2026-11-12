@@ -132,6 +132,20 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
  */
 export const ASSISTANT_HREF = "/dashboard";
 
+/**
+ * LEVEL 2 of the navigation — the goal's own start view
+ * (`app/[locale]/(marketing)/start/[goal]`): only that goal's functions, and
+ * for the goals that have one, its catalogue. A real page with a real URL, so
+ * browser Back returns to the choice.
+ */
+export function goalHref(id: PublicIntentId): string {
+  return `/start/${id}`;
+}
+
+export function isPublicIntentId(value: string): value is PublicIntentId {
+  return (PUBLIC_INTENT_IDS as readonly string[]).includes(value);
+}
+
 /** The first link of an intent is its primary destination. */
 export function primaryHref(intent: PublicIntent): string {
   return intent.links[0].href;

@@ -1,44 +1,19 @@
-import { getTranslations } from "next-intl/server";
-
-import { Link } from "@/lib/i18n/navigation";
-import { INTENT_ICONS } from "@/components/layouts/intent-icons";
-import { PUBLIC_INTENTS, primaryHref } from "@/lib/navigation/public-intents";
+import { GoalRail } from "@/components/navigation/goal-rail";
 
 /**
  * THE FIRST SCREEN IS THE CHOICE (owner priority 2026-11-12: a partner did
  * not go deeper because the navigation was not self-evident).
  *
- * Six plainly named cards — the SAME six intents as the header
- * (`lib/navigation/public-intents.ts`) — directly under the promise. Each is
- * one link to the start of that function (the intent's first destination, a
- * real page the intent guard checks). No slogan, no "Start now": the label
- * says what you get.
- *
- * Two columns on a phone, three from `sm`, so all six fit the first screen.
+ * Level 1 of the one navigation system: the six goals as a card rail — the
+ * SAME six as the header (`lib/navigation/public-intents.ts`) — directly
+ * under the promise. A card opens the goal's own view (level 2), where its
+ * functions are one more action away. On a wide screen the rail shows as many
+ * as fit; on a phone it swipes with the next card peeking.
  */
-export async function LandingIntentChoice() {
-  const t = await getTranslations("siteNav");
+export function LandingIntentChoice() {
   return (
-    <nav aria-label={t("trigger")} data-testid="landing-intent-choice">
-      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
-        {PUBLIC_INTENTS.map((intent) => {
-          const Icon = INTENT_ICONS[intent.iconKey];
-          return (
-            <li key={intent.id}>
-              <Link
-                href={primaryHref(intent)}
-                data-testid={`landing-intent-${intent.id}`}
-                className="flex h-full min-h-[4.5rem] flex-col justify-between gap-2 rounded-xl border border-ink-600 bg-ink-800/50 p-3 transition-colors hover:border-brand-blue motion-reduce:transition-none sm:p-4"
-              >
-                <Icon aria-hidden className="h-5 w-5 text-brand-blue" />
-                <span className="text-sm font-semibold leading-snug text-text-primary">
-                  {t(`intents.${intent.id}.title`)}
-                </span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
+    <div data-testid="landing-intent-choice">
+      <GoalRail />
+    </div>
   );
 }

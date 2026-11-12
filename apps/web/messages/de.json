@@ -20611,6 +20611,15 @@
     "carousels": {
       "functions": "Was Sie hier tun können",
       "professions": "Stellen nach Beruf"
+    },
+    "start": {
+      "back": "Alle Optionen",
+      "functions": "Was Sie tun können",
+      "searchLabel": "Stellen suchen",
+      "searchPlaceholder": "Jobtitel oder Stichwort",
+      "searchSubmit": "Suchen",
+      "viewAll": "Alle Stellen",
+      "choose": "Wählen Sie Ihr Anliegen"
     }
   }
 }

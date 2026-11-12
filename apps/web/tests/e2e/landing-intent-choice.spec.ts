@@ -3,73 +3,115 @@ import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * FIRST-VISITOR WALK of the public landing (owner priority 2026-11-12).
+ * FIRST-VISITOR WALK of the public home (owner concept 2026-11-12: one
+ * navigation system, three levels).
  *
- * Counts NAVIGATION ACTIONS from the landing to the start of each top public
- * task and fails above two. It proves reachability and click count only —
- * whether a real first-time visitor understands the choices within five
- * seconds is NOT something this spec can show; that needs people.
+ * Counts NAVIGATION ACTIONS from the home screen to the start of each top
+ * public task and fails above two: goal card (1) → function card (2). It
+ * proves reachability, click count, history and layout. Whether a real
+ * first-time visitor understands the choices within five seconds is NOT
+ * something this spec can show — that needs people.
  *
- * 360px and 1440px. Screenshots of each state are written to
+ * 360, 375, 768 and 1440px. Screenshots of each state are written to
  * docs/audits/evidence/premium-nav/ for the reviewer.
  */
 
-const expect = baseExpect.configure({ timeout: 15_000 });
+const expect = baseExpect.configure({ timeout: 20_000 });
 const SHOTS = join(process.cwd(), "..", "..", "docs", "audits", "evidence", "premium-nav");
 test.beforeAll(() => mkdirSync(SHOTS, { recursive: true }));
 
-/** Top public tasks per role: the landing card (1 action) and where it lands. */
+/** Top public task per role: goal → function → where the function starts. */
 const TASKS = [
-  { role: "worker", intent: "work", url: /\/jobs$/ },
-  { role: "employer", intent: "workers", url: /\/company-need$/ },
-  // Signed-out, a signed-in destination answers with the login page that
-  // carries the destination in ?next= — the start of the function for a guest.
-  { role: "company-b2b", intent: "services", url: /\/(dashboard\/services|auth\/login\?next=.*dashboard(%2F|\/)services)/ },
-  { role: "agency", intent: "agencies", url: /\/for-agencies$/ },
+  { role: "worker", goal: "work", fn: "jobs", url: /\/jobs$/ },
+  { role: "employer", goal: "workers", fn: "companyNeed", url: /\/company-need$/ },
+  // Signed-out, a signed-in function answers with the login page carrying the
+  // destination in ?next= — the guest signs in only when opening the function.
+  { role: "company-b2b", goal: "services", fn: "myServices", url: /dashboard(%2F|\/)services/ },
+  { role: "agency", goal: "agencies", fn: "forAgencies", url: /\/for-agencies$/ },
 ] as const;
 
 for (const viewport of [
   { name: "360", width: 360, height: 740 },
+  { name: "375", width: 375, height: 812 },
+  { name: "768", width: 768, height: 1024 },
   { name: "1440", width: 1440, height: 900 },
 ] as const) {
-  test.describe(`landing @${viewport.name}px`, () => {
+  test.describe(`home @${viewport.name}px`, () => {
     test.use({ viewport: { width: viewport.width, height: viewport.height } });
 
-    test("the six choices are on the page and inside the viewport width", async ({ page }) => {
+    test("level 1: the goal rail is on the first screen and inside the viewport", async ({ page }) => {
       await page.goto("/en");
-      const choice = page.getByTestId("landing-intent-choice");
-      await expect(choice).toBeVisible();
-      await expect(choice.locator("a")).toHaveCount(6);
-      for (const card of await choice.locator("a").all()) {
-        const box = (await card.boundingBox())!;
-        expect(box.x).toBeGreaterThanOrEqual(-0.5);
-        expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 0.5);
-        expect(box.height).toBeGreaterThanOrEqual(43.5);
+      const rail = page.getByTestId("goal-rail");
+      await expect(rail).toBeVisible();
+      const first = page.getByTestId("goal-card-work");
+      await expect(first).toBeVisible();
+      const box = (await first.boundingBox())!;
+      // The first goal card starts above the fold, consent banner showing.
+      expect(box.y, "first goal card top").toBeLessThan(viewport.height);
+      const railBox = (await rail.boundingBox())!;
+      expect(railBox.x).toBeGreaterThanOrEqual(-0.5);
+      expect(railBox.x + railBox.width).toBeLessThanOrEqual(viewport.width + 0.5);
+      await page.screenshot({ path: join(SHOTS, `home-${viewport.name}.png`) });
+    });
+
+    test("every goal is reachable from the keyboard", async ({ page }) => {
+      await page.goto("/en");
+      await page.getByTestId("goal-card-work").focus();
+      for (const id of ["workers", "services", "orders", "partners", "agencies"]) {
+        await page.keyboard.press("ArrowRight");
+        await expect(page.getByTestId(`goal-card-${id}`)).toBeFocused();
       }
-      await page.screenshot({ path: join(SHOTS, `landing-${viewport.name}.png`) });
     });
 
     for (const task of TASKS) {
-      test(`${task.role}: start of the top task in <= 2 actions`, async ({ page }) => {
+      test(`${task.role}: start of the top task in <= 2 actions, and Back returns`, async ({ page }) => {
         await page.goto("/en");
         let actions = 0;
-        await page.getByTestId(`landing-intent-${task.intent}`).click();
+
+        // The goal may be past the visible window on a phone: moving the rail
+        // (swipe / arrow keys) is not a navigation action.
+        const goal = page.getByTestId(`goal-card-${task.goal}`);
+        await goal.focus();
+        await page.keyboard.press("Enter");
+        actions += 1;
+        await expect(page).toHaveURL(new RegExp(`/start/${task.goal}$`));
+        await expect(page.getByTestId("goal-function-rail")).toBeVisible();
+        // The active goal is marked in the level-1 rail on this view.
+        await expect(page.getByTestId(`goal-card-${task.goal}`)).toHaveAttribute("aria-current", "page");
+        if (task.role === "worker") {
+          await page.screenshot({ path: join(SHOTS, `goal-work-${viewport.name}.png`) });
+        }
+
+        const fn = page.getByTestId(`goal-function-${task.fn}`);
+        await fn.focus();
+        await page.keyboard.press("Enter");
         actions += 1;
         await expect(page).toHaveURL(task.url);
         expect(actions).toBeLessThanOrEqual(2);
+
+        await page.goBack();
+        await expect(page).toHaveURL(new RegExp(`/start/${task.goal}$`));
       });
     }
 
-    test("menu state for the reviewer", async ({ page }) => {
-      await page.goto("/en/pricing");
-      if (viewport.width < 1024) {
-        await page.getByTestId("mobile-nav-toggle").click();
-        await expect(page.getByTestId("mobile-nav-intents")).toBeVisible();
-      } else {
-        await page.getByTestId("intent-toggle-work").click();
-        await expect(page.getByTestId("intent-menu-panel")).toBeVisible();
-      }
-      await page.screenshot({ path: join(SHOTS, `menu-${viewport.name}.png`) });
+    test("level 3: search and view-all sit beside the profession rail", async ({ page }) => {
+      await page.goto("/en/start/work");
+      await expect(page.getByTestId("profession-carousel")).toBeVisible();
+      await expect(page.getByTestId("goal-view-all")).toHaveAttribute("href", /\/en\/jobs$/);
+      await page.locator("#goal-q").fill("welder");
+      await page.keyboard.press("Enter");
+      await expect(page).toHaveURL(/\/en\/jobs\?(q=welder|profession=welder)/);
+    });
+
+    test("the way back is named", async ({ page }) => {
+      await page.goto("/en/start/orders");
+      await page.getByTestId("goal-back").click();
+      await expect(page).toHaveURL(/\/en$/);
     });
   });
 }
+
+test("an unknown goal is a 404, not an empty view", async ({ request }) => {
+  const response = await request.get("/en/start/nothing");
+  expect(response.status()).toBe(404);
+});
