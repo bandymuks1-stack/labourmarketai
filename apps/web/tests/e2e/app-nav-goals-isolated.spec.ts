@@ -29,7 +29,7 @@ import {
  *   N-2  keyboard only: the first goal and "Ask the assistant" are reached
  *        with Tab and opened with Enter;
  *   N-3  320–1440 px with reduced motion: the home does not scroll sideways
- *        and every goal card is a full touch target inside the viewport;
+ *        and every goal card is a full touch target;
  *   N-4  a pin never grants access: a pin to an employer page stored for a
  *        worker is not drawn, the page itself still refuses, and the pin can
  *        be removed;
@@ -71,8 +71,11 @@ const sessions = new Map<Person, Session>();
 type Task = {
   /** What the person wants, in plain words (the report's row name). */
   readonly name: string;
-  /** The home goal card that starts it, when the home offers one. */
+  /** The goal card in the shared goal rail, and the function card under it. */
   readonly goal?: string;
+  readonly fn?: string;
+  /** A tracked door on the home itself (the employer's need door). */
+  readonly door?: string;
   /** Otherwise the header destination (the core loop). */
   readonly nav?: string;
   /** Where the function starts. */
@@ -89,10 +92,10 @@ const ROLES: ReadonlyArray<{ role: string; person: Person; home: string; tasks: 
     person: "worker",
     home: "today-screen",
     tasks: [
-      { name: "find work", goal: "findWork", url: /\/en\/dashboard\/opportunities/ },
-      { name: "record work", goal: "recordWork", url: /\/en\/dashboard\/journal/, start: "journal-quick-record-text" },
-      { name: "my CV", goal: "myCv", url: /\/en\/cv(\?|$)/ },
-      { name: "messages", goal: "messages", url: /\/en\/dashboard\/communication/ },
+      { name: "find work", goal: "work", fn: "findWork", url: /\/en\/dashboard\/opportunities/ },
+      { name: "record work", goal: "work", fn: "recordWork", url: /\/en\/dashboard\/journal/, start: "journal-quick-record-text" },
+      { name: "my CV", goal: "work", fn: "myCv", url: /\/en\/cv(\?|$)/ },
+      { name: "messages", nav: "communication", url: /\/en\/dashboard\/communication/ },
       { name: "calendar", nav: "planning", url: /\/en\/dashboard\/planning/ },
     ],
   },
@@ -101,9 +104,10 @@ const ROLES: ReadonlyArray<{ role: string; person: Person; home: string; tasks: 
     person: "company",
     home: "company-model",
     tasks: [
-      { name: "find workers", goal: "findWorkers", url: /\/en\/dashboard\/company\/needs/, start: "demand-role" },
-      { name: "projects and teams", goal: "projects", url: /\/en\/dashboard\/projects/ },
-      { name: "my people", goal: "people", url: /\/en\/dashboard\/company\/people/ },
+      { name: "find workers", door: "company-model-primary", url: /\/en\/dashboard\/company\/needs/, start: "demand-role" },
+      { name: "projects and teams", goal: "workers", fn: "projects", url: /\/en\/dashboard\/projects/ },
+      { name: "my people", goal: "workers", fn: "people", url: /\/en\/dashboard\/company\/people/ },
+      { name: "find candidates", goal: "workers", fn: "candidates", url: /\/en\/dashboard\/company\/scouting/ },
       { name: "messages", nav: "communication", url: /\/en\/dashboard\/communication/ },
       { name: "calendar", nav: "planning", url: /\/en\/dashboard\/planning/ },
     ],
@@ -113,9 +117,11 @@ const ROLES: ReadonlyArray<{ role: string; person: Person; home: string; tasks: 
     person: "company",
     home: "company-model",
     tasks: [
-      { name: "offer services", goal: "offerServices", url: /\/en\/dashboard\/services/ },
-      { name: "requests and orders", goal: "orders", url: /\/en\/dashboard\/service-requests/ },
-      { name: "work and hours", goal: "hours", url: /\/en\/dashboard\/hours/ },
+      { name: "offer services", goal: "services", fn: "offerServices", url: /\/en\/dashboard\/services/ },
+      { name: "requests and orders", goal: "services", fn: "orders", url: /\/en\/dashboard\/service-requests/ },
+      { name: "market listings", goal: "orders", fn: "listings", url: /\/en\/dashboard\/listings/ },
+      { name: "proposals and contracts", goal: "orders", fn: "commercial", url: /\/en\/dashboard\/commercial/ },
+      { name: "work and hours", goal: "workers", fn: "hours", url: /\/en\/dashboard\/hours/ },
     ],
   },
   {
@@ -123,10 +129,10 @@ const ROLES: ReadonlyArray<{ role: string; person: Person; home: string; tasks: 
     person: "agency",
     home: "company-model",
     tasks: [
-      { name: "offer your people", goal: "offerPeople", url: /\/en\/dashboard\/company\/needs/ },
-      { name: "clients", goal: "clients", url: /\/en\/dashboard\/company\/partners/ },
-      { name: "my people", goal: "people", url: /\/en\/dashboard\/company\/people/ },
-      { name: "find candidates", goal: "candidates", url: /\/en\/dashboard\/company\/scouting/ },
+      { name: "offer your people", goal: "agencies", fn: "offerPeople", url: /\/en\/dashboard\/company\/needs/ },
+      { name: "clients", goal: "agencies", fn: "clients", url: /\/en\/dashboard\/company\/partners/ },
+      { name: "my people", goal: "agencies", fn: "people", url: /\/en\/dashboard\/company\/people/ },
+      { name: "find candidates", goal: "agencies", fn: "candidates", url: /\/en\/dashboard\/company\/scouting/ },
     ],
   },
 ];
@@ -193,9 +199,21 @@ async function openHome(page: Page, person: Person, home: string, orgId?: string
  */
 async function reach(page: Page, task: Task, viewport: ViewportName): Promise<number> {
   let actions = 0;
-  if (task.goal) {
-    const card = page.getByTestId(`home-goal-${task.goal}`);
-    await expect(card, `"${task.name}" is a card on the home`).toBeVisible();
+  if (task.door) {
+    const door = page.getByTestId(task.door);
+    await expect(door, `"${task.name}" is on the home itself`).toBeVisible();
+    await door.click();
+    actions += 1;
+  } else if (task.goal && task.fn) {
+    // The shared goal rail: choose the goal, then its function card.
+    const goal = page.getByTestId("goal-rail").locator(`[data-card-id="${task.goal}"]`);
+    await expect(goal, `the goal for "${task.name}" is in the rail`).toBeVisible();
+    await goal.scrollIntoViewIfNeeded();
+    await goal.click();
+    actions += 1;
+    await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", task.goal, { timeout: 15_000 });
+    const card = page.getByTestId("function-rail").locator(`[data-card-id="${task.fn}"]`);
+    await expect(card, `"${task.name}" is a function card of its goal`).toBeVisible();
     await card.scrollIntoViewIfNeeded();
     await card.click();
     actions += 1;
@@ -221,11 +239,13 @@ async function reach(page: Page, task: Task, viewport: ViewportName): Promise<nu
   return actions;
 }
 
-/** Which goal card (if any) holds keyboard focus. */
-function focusedGoal(page: Page): Promise<string | null> {
-  return page.evaluate(
-    () => document.activeElement?.closest('[data-testid^="home-goal-"]')?.getAttribute("data-testid") ?? null,
-  );
+/** Which card of which rail (if any) holds keyboard focus: "goal-rail:work". */
+function focusedCard(page: Page): Promise<string | null> {
+  return page.evaluate(() => {
+    const card = document.activeElement?.closest("[data-card-id]");
+    const rail = card?.closest('[data-testid="goal-rail"], [data-testid="function-rail"]');
+    return card && rail ? `${rail.getAttribute("data-testid")}:${card.getAttribute("data-card-id")}` : null;
+  });
 }
 function focusedTestId(page: Page): Promise<string | null> {
   return page.evaluate(() => document.activeElement?.getAttribute("data-testid") ?? null);
@@ -265,6 +285,8 @@ test("N-0b. a company signs up, sets up its organization and lands on the employ
   orgOf.company = ownedOrg(await userId(email("company")));
   await openHome(page, "company", "company-model", orgOf.company);
   await expect(page.getByTestId("home-goals")).toHaveAttribute("data-role", "company");
+  await expect(page.getByTestId("goal-rail").locator("[data-card-id]").first()).toHaveAttribute("data-card-id", "workers");
+  await expect(page.getByTestId("goal-rail").locator('[data-card-id="agencies"]')).toHaveCount(0);
   sessions.set("company", await ctx.storageState());
   await ctx.close();
 });
@@ -279,8 +301,8 @@ test("N-0c. a staffing agency signs up and its home opens on what it offers, nev
   await openHome(page, "agency", "company-model", orgOf.agency);
   await expect(page.getByTestId("home-goals")).toHaveAttribute("data-role", "agency");
   // DEMAND ≠ SUPPLY: the agency is not shown the employer's need door.
-  await expect(page.getByTestId("home-goal-findWorkers")).toHaveCount(0);
-  await expect(page.getByTestId("home-goal-offerPeople")).toBeVisible();
+  await expect(page.getByTestId("company-model-primary")).toHaveCount(0);
+  await expect(page.getByTestId("goal-rail").locator("[data-card-id]").first()).toHaveAttribute("data-card-id", "agencies");
   sessions.set("agency", await ctx.storageState());
   await ctx.close();
 });
@@ -317,12 +339,19 @@ for (const { role, person, home, tasks } of ROLES.filter((r) => r.role !== "serv
   test(`N-2. ${role}, keyboard only: the first goal and the assistant open with Tab and Enter`, async ({ browser }) => {
     const { ctx, page } = await as(browser, person, VIEWPORTS[1]);
     try {
-      const first = tasks[0];
+      const first = tasks.find((t) => t.goal && t.fn)!;
       await openHome(page, person, home, orgOf[person]);
       await page.locator("body").focus();
-      const toGoal = await tabUntil(page, async () => (await focusedGoal(page)) === `home-goal-${first.goal}`);
+      const toGoal = await tabUntil(page, async () => (await focusedCard(page)) === `goal-rail:${first.goal}`);
+      await page.keyboard.press("Enter");
+      await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", first.goal!, { timeout: 15_000 });
+      await tabUntil(page, async () => (await focusedCard(page)) === `function-rail:${first.fn}`);
       await page.keyboard.press("Enter");
       await page.waitForURL(first.url, { timeout: 60_000 });
+      // Browser Back returns to the home with the goal's panel still open
+      // (the goal is URL state), and Back again closes it.
+      await page.goBack();
+      await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", first.goal!, { timeout: 30_000 });
 
       await openHome(page, person, home, orgOf[person]);
       await page.locator("body").focus();
@@ -333,7 +362,7 @@ for (const { role, person, home, tasks } of ROLES.filter((r) => r.role !== "serv
         .toBe("composer-input");
       // Still the home: the entry opens the ONE conversation, not another place.
       expect(new URL(page.url()).pathname).toBe("/en/dashboard");
-      console.log(`[app-nav-walk] ${role} keyboard: first goal after ${toGoal} Tab, assistant after ${toAsk} Tab`);
+      console.log(`[app-nav-walk] ${role} keyboard: first goal card after ${toGoal} Tab, assistant after ${toAsk} Tab`);
     } finally {
       await ctx.close();
     }
@@ -352,17 +381,17 @@ for (const { role, person, home } of ROLES.filter((r) => r.role !== "service bus
           () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
         );
         expect(sideways, `${role} at ${width}px scrolls sideways`).toBeLessThanOrEqual(1);
-        const cards = await page.locator('[data-testid^="home-goal-"]').evaluateAll((els) =>
+        const cards = await page.getByTestId("goal-rail").locator("[data-card-id]").evaluateAll((els) =>
           els.map((el) => {
             const r = el.getBoundingClientRect();
-            return { id: el.getAttribute("data-testid"), left: r.left, right: r.right, height: r.height };
+            return { id: el.getAttribute("data-card-id"), height: r.height, width: r.width };
           }),
         );
         expect(cards.length, `${role} at ${width}px has goal cards`).toBeGreaterThanOrEqual(3);
         for (const card of cards) {
+          // The rail scrolls sideways by design; each card is a full target.
           expect(card.height, `${card.id} at ${width}px is a touch target`).toBeGreaterThanOrEqual(44);
-          expect(card.left, `${card.id} at ${width}px starts inside the screen`).toBeGreaterThanOrEqual(0);
-          expect(card.right, `${card.id} at ${width}px ends inside the screen`).toBeLessThanOrEqual(width + 1);
+          expect(card.width, `${card.id} at ${width}px is a touch target`).toBeGreaterThanOrEqual(44);
         }
         const ask = await page.getByTestId("home-ask-assistant").boundingBox();
         expect(ask?.height ?? 0, `the assistant entry at ${width}px is a touch target`).toBeGreaterThanOrEqual(44);

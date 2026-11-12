@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { CONVERSATION_ACTIONS } from "@/lib/conversation/action-registry";
 import { ROLE_GATED_PREFIXES } from "@/lib/auth/role-gated-routes";
-import { HOME_GOALS } from "@/lib/navigation/home-goals";
+import { HOME_GOALS, admittedHomeGoals } from "@/lib/navigation/home-goals";
 import { ORGANIZATION_WORK_AREAS, PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
 import { CHIP_GATE_ROUTE, admittedPins, pinIsAdmitted, withheldPins } from "./pin-admission";
 import { isPinnableRef } from "./pins-model";
@@ -218,16 +218,24 @@ describe("the home applies it before the row sees a pin", () => {
   });
 
   it("every goal and area a home offers to pin is admitted for the person that home is for", () => {
-    for (const goal of HOME_GOALS.worker) {
+    // The worker's goal order reaches functions of shared goals that are the
+    // employer's (a partner list); the home offers only the admitted ones, and
+    // a pin to one of the others would not be drawn either.
+    for (const goal of admittedHomeGoals("worker", WORKER)) {
       const ref = `link:${goal.href}`;
       if (isPinnableRef(ref)) expect(pinIsAdmitted(ref, WORKER), ref).toBe(true);
     }
+    const closed = HOME_GOALS.worker.filter((g) => !admittedHomeGoals("worker", WORKER).includes(g));
+    expect(closed.map((g) => g.href)).toEqual(["/dashboard/company/partners"]);
+    for (const goal of closed) expect(pinIsAdmitted(`link:${goal.href}`, WORKER), goal.href).toBe(false);
     for (const area of PERSONAL_WORK_AREAS) {
       const ref = `link:${area.href}`;
       if (isPinnableRef(ref)) expect(pinIsAdmitted(ref, WORKER), ref).toBe(true);
     }
     for (const place of [...HOME_GOALS.company, ...HOME_GOALS.agency, ...ORGANIZATION_WORK_AREAS]) {
-      const ref = `link:${place.href}`;
+      // The CV lives outside /dashboard and is offered through the `cv`
+      // reference instead (checked above).
+      const ref = place.href === "/cv" ? "cv" : `link:${place.href}`;
       expect(isPinnableRef(ref), ref).toBe(true);
       expect(pinIsAdmitted(ref, MANAGER_BY_MEMBERSHIP), ref).toBe(true);
     }

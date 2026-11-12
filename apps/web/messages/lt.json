@@ -5120,86 +5120,86 @@
         "line2": "kortelėje, kuri kalba už tave."
       },
       "subcopy": "Tavo kortelė kuriama iš realiai atlikto darbo ir darbo įrašų, o ne pačių rašyto CV. Atitikimo signalai rodomi kontekste — aprėptis ir pasirengimas konkrečiam poreikiui, niekada kaip vienas universalus įvertinimas.",
-      "bullets": {
-        "0": "Darbo pasirengimas — sąžiningi signalai (kiek iš jų įvykdyta) ir aiškus kitas žingsnis. Niekada vienas universalus įvertinimas.",
-        "1": "Ką moku — deklaruoti įgūdžiai, darbo žurnalu pagrįsti įgūdžiai ir realūs patvirtinimai, ne tik pačių rašytas CV.",
-        "2": "Kada ir kur galiu dirbti — prieinamumas, data nuo kada ir šalis, visada aktualu.",
-        "3": "Patirties įrodymai — darbo istorija, dokumentai ir augimo juosta iš realių įrašų."
-      }
+      "bullets": [
+        "Darbo pasirengimas — sąžiningi signalai (kiek iš jų įvykdyta) ir aiškus kitas žingsnis. Niekada vienas universalus įvertinimas.",
+        "Ką moku — deklaruoti įgūdžiai, darbo žurnalu pagrįsti įgūdžiai ir realūs patvirtinimai, ne tik pačių rašytas CV.",
+        "Kada ir kur galiu dirbti — prieinamumas, data nuo kada ir šalis, visada aktualu.",
+        "Patirties įrodymai — darbo istorija, dokumentai ir augimo juosta iš realių įrašų."
+      ]
     },
     "journey": {
       "eyebrow": "Tavo kelionė",
       "headline": "Kelionė: nuo registracijos iki samdymo",
-      "steps": {
-        "0": {
+      "steps": [
+        {
           "title": "Užpildykit profilį (5 min)",
           "desc": "Nurodyk profesiją, patirtį ir prieinamumą."
         },
-        "1": {
+        {
           "title": "Kaupk darbo įrašus",
           "desc": "Tavo darbo įrašai ir pažymėjimai parodo, ką moki."
         },
-        "2": {
+        {
           "title": "Matyk galimybių atitikimo kryptį",
           "desc": "Tave suranda darbai pagal profesiją, įkainį ir vietą."
         },
-        "3": {
+        {
           "title": "Dirbk ir gauk vertinimą",
           "desc": "Atliktas darbas stiprina tavo įrašus ir pasirengimą."
         }
-      }
+      ]
     },
     "features": {
       "eyebrow": "Ką gauni",
       "headline": "Sukurta darbuotojui, ne tarpininkui",
-      "items": {
-        "0": {
+      "items": [
+        {
           "title": "Pasirengimas pagal realų darbą",
           "desc": "Pasirengimas atspindi atliktą darbą ir įrašus, rodomas kontekste — ne pažadus."
         },
-        "1": {
+        {
           "title": "Įgūdžiai iš įrašų",
           "desc": "Iš tavo darbo įrašų ir pažymėjimų."
         },
-        "2": {
+        {
           "title": "Tarpvalstybinės galimybės",
           "desc": "Sukurta darbui visoje Europoje."
         },
-        "3": {
+        {
           "title": "Tiesioginis kontaktas su darbdaviu",
           "desc": "Be neskaidrių tarpininkų."
         },
-        "4": {
+        {
           "title": "Paaiškinamas atitikimas",
           "desc": "Matyk, kodėl darbas tau gali tikti."
         },
-        "5": {
+        {
           "title": "Auganti istorija",
           "desc": "Kiekvienas darbas kuria perkeliamą istoriją."
         }
-      }
+      ]
     },
     "faq": {
       "eyebrow": "DUK darbuotojams",
       "headline": "Aiškūs atsakymai",
-      "items": {
-        "0": {
+      "items": [
+        {
           "q": "Iš kur atsiranda įgūdžių signalai?",
           "a": "Iš tavo darbo žurnalo įrašų už atliktą darbą ir įkeltų pažymėjimų — niekada vien iš pačių parašyto teiginio."
         },
-        "1": {
+        {
           "q": "Kiek kainuoja darbuotojui?",
           "a": "Asmenims viskas nemokama — profilis, atitikimai, paieška ir žinutės darbuotojui nieko nekainuoja. Mokami planai skirti tik organizacijoms ir paskelbti kainodaros puslapyje."
         },
-        "2": {
+        {
           "q": "Kas mato mano profilį?",
           "a": "Tik registruoti darbdaviai ir agentūros, kuriems esi matomas — tu valdai prieinamumą ir matomumą."
         },
-        "3": {
+        {
           "q": "Ar galiu dirbti kelioms įmonėms?",
           "a": "Taip. Profilis priklauso tau; gali priimti darbus iš bet kurios įmonės platformoje."
         }
-      }
+      ]
     },
     "cta": {
       "headline": {
@@ -5218,86 +5218,86 @@
         "line2": "galimybių srautas."
       },
       "subcopy": "Nurodyk, ko reikia kiekvienam projektui, ir matyk paaiškinamą atitikimo kryptį iš laisvų darbuotojų ir agentūrų — per valandas, ne savaites.",
-      "bullets": {
-        "0": "Projektas + vieta — tiksliai apibrėžk poreikį.",
-        "1": "Žmonių skaičius — kiek kiekvienos pareigybės reikia.",
-        "2": "Reikalingi įgūdžiai — lyginami su darbuotojų įgūdžių įrašais.",
-        "3": "Atitikimo kryptis — darbuotojai, kurių gebėjimai gali tikti šiam poreikiui."
-      }
+      "bullets": [
+        "Projektas + vieta — tiksliai apibrėžk poreikį.",
+        "Žmonių skaičius — kiek kiekvienos pareigybės reikia.",
+        "Reikalingi įgūdžiai — lyginami su darbuotojų įgūdžių įrašais.",
+        "Atitikimo kryptis — darbuotojai, kurių gebėjimai gali tikti šiam poreikiui."
+      ]
     },
     "journey": {
       "eyebrow": "Kaip veikia atitikimo kryptis tau",
       "headline": "Nuo poreikio iki samdymo",
-      "steps": {
-        "0": {
+      "steps": [
+        {
           "title": "Sukurk projektą ir poreikį",
           "desc": "Apibrėžk pareigybes, skaičių ir įgūdžius."
         },
-        "1": {
+        {
           "title": "Pamatyk, kas tinka",
           "desc": "Darbuotojai ir agentūros, kurių įrašai atitinka tavo poreikį, išrikiuojami pagal atitiktį su priežastimis — tai signalas, ne garantija. Su kuo susisiekti, sprendi tu."
         },
-        "2": {
+        {
           "title": "Susisiek tiesiogiai",
           "desc": "Susisiek su norimais žmonėmis — be tarpininko."
         },
-        "3": {
+        {
           "title": "Samdyk greičiau",
           "desc": "Užpildyk pareigybes per dienas, atsekamai."
         }
-      }
+      ]
     },
     "features": {
       "eyebrow": "Kodėl įmonės",
       "headline": "Pasiūla, su kuria galima veikti",
-      "items": {
-        "0": {
+      "items": [
+        {
           "title": "Paaiškinama atitikimo kryptis",
           "desc": "Kiekvienas atitikimo signalas pateikia priežastis."
         },
-        "1": {
+        {
           "title": "Tarpvalstybinis darbuotojų rezervas",
           "desc": "Pasiūla iš visų rinkų, kuriose veikiame, vienoje vietoje."
         },
-        "2": {
+        {
           "title": "Be neskaidrių tarpininkų",
           "desc": "Tu matai ir valdai santykį."
         },
-        "3": {
+        {
           "title": "Įgūdžių įrašai + atitikimo signalai",
           "desc": "Samdyk pagal įrašus, ne pažadus."
         },
-        "4": {
+        {
           "title": "Pasiūlos signalai",
           "desc": "Matyk deklaruotą darbuotojų prieinamumą, kai profiliai atnaujinami."
         },
-        "5": {
+        {
           "title": "Tiesioginis kontaktas",
           "desc": "Santykis su darbuotoju priklauso tau."
         }
-      }
+      ]
     },
     "faq": {
       "eyebrow": "DUK įmonėms",
       "headline": "Aiškūs atsakymai",
-      "items": {
-        "0": {
+      "items": [
+        {
           "q": "Kaip rodomi atitikimo signalai?",
           "a": "Visada konkrečiam poreikiui: aprėptis ir atitikimas pagal darbuotojų įgūdžių įrašus, patikimumą ir saugą, su priežastimis. Niekada vienas universalus įvertinimas, palyginamas tarp žmonių."
         },
-        "1": {
+        {
           "q": "Kiek kainuoja įmonei?",
           "a": "Kainos paskelbtos kainodaros puslapyje: viena aktyvi pozicija organizacijai — nemokamai, daugiau pozicijų — organizacijos planas, kurį aktyvuoji paskyroje. Darbuotojų užklausa pateikiama nemokamai."
         },
-        "2": {
+        {
           "q": "Ar galima atrinkti pagal lokaciją?",
           "a": "Taip — pagal šalį ir regioną, atsižvelgiant į darbuotojo vietą ir pasirengimą keltis."
         },
-        "3": {
+        {
           "q": "Kaip parodoma darbuotojo patirtis?",
           "a": "Pagal darbuotojų įgūdžių įrašus, struktūruotą darbo istoriją ir kontekstinius atitikimo signalus — ne savadarbiai CV."
         }
-      }
+      ]
     },
     "cta": {
       "headline": {
@@ -5316,86 +5316,86 @@
         "line2": "vienoje vietoje."
       },
       "subcopy": "Valdyk darbuotojus, susiek juos su klientų poreikiu ir tarpininkauk — neprarasdamas matomumo ir kontrolės.",
-      "bullets": {
-        "0": "Rezervo dydis — visi kuruojami darbuotojai iškart.",
-        "1": "Pasiskirstymas pagal profesiją — pajėgumas pagal įgūdį.",
-        "2": "Paskyrimų būsena — Aktyvūs, Laukiantys, Laisvi.",
-        "3": "Keli klientai — tinkami žmonės skirtingiems klientams."
-      }
+      "bullets": [
+        "Rezervo dydis — visi kuruojami darbuotojai iškart.",
+        "Pasiskirstymas pagal profesiją — pajėgumas pagal įgūdį.",
+        "Paskyrimų būsena — Aktyvūs, Laukiantys, Laisvi.",
+        "Keli klientai — tinkami žmonės skirtingiems klientams."
+      ]
     },
     "journey": {
       "eyebrow": "Agentūros eiga",
       "headline": "Valdyk rezervą kaip biuras",
-      "steps": {
-        "0": {
+      "steps": [
+        {
           "title": "Įtrauk savo darbuotojus",
           "desc": "Suvesk kuruojamą rezervą į vieną erdvę."
         },
-        "1": {
+        {
           "title": "Susiek su klientų poreikiu",
           "desc": "Priderink žmones prie klientų poreikių."
         },
-        "2": {
+        {
           "title": "Valdyk paskyrimus",
           "desc": "Sek aktyvius, laukiančius ir laisvus."
         },
-        "3": {
+        {
           "title": "Augink savo rezervą",
           "desc": "Pridėk pajėgumo, kur auga paklausa."
         }
-      }
+      ]
     },
     "features": {
       "eyebrow": "Kodėl agentūros",
       "headline": "Svertas, ne kontrolės praradimas",
-      "items": {
-        "0": {
+      "items": [
+        {
           "title": "Valdyk rezervą",
           "desc": "Darbuotojai, prieinamumas ir būsena vienoje vietoje."
         },
-        "1": {
+        {
           "title": "Skelbk klientų vardu",
           "desc": "Tarpininkauk neprarasdamas santykio."
         },
-        "2": {
+        {
           "title": "Atitikimo kryptis",
           "desc": "Greičiau įdarbink tinkamus."
         },
-        "3": {
+        {
           "title": "Matomumo valdymas",
           "desc": "Vieša, tik agentūroms ar tiesioginė — tavo sprendimas."
         },
-        "4": {
+        {
           "title": "Tarpvalstybinis pasiekiamumas",
           "desc": "Klientai ir darbuotojai visose rinkose, kuriose veikiame."
         },
-        "5": {
+        {
           "title": "Augink biurą",
           "desc": "Pajėgumo įžvalgos keičiantis paklausai."
         }
-      }
+      ]
     },
     "faq": {
       "eyebrow": "DUK agentūroms",
       "headline": "Aiškūs atsakymai",
-      "items": {
-        "0": {
+      "items": [
+        {
           "q": "Ar išlaikome santykius su klientais?",
           "a": "Taip. Tu tarpininkauji ir valdai — platforma tavęs neaplenkia."
         },
-        "1": {
+        {
           "q": "Kiek kainuoja agentūroms?",
           "a": "Agentūra yra organizacija ir naudojasi tais pačiais planais: viena aktyvi pozicija — nemokamai, daugiau — organizacijos planas iš kainodaros puslapio. Atskiro agentūrų tarifo nėra."
         },
-        "2": {
+        {
           "q": "Ar galime valdyti darbuotojų matomumą?",
           "a": "Taip — vieša, tik agentūroms ar tiesioginė, kiekvienam darbuotojui ir poreikiui."
         },
-        "3": {
+        {
           "q": "Ar darbuotojas gali aptarnauti kelis klientus?",
           "a": "Taip, su paskyrimų būsenos sekimu, kad nebūtų dvigubų rezervacijų."
         }
-      }
+      ]
     },
     "cta": {
       "headline": {
@@ -5553,24 +5553,24 @@
       "title": "Rask darbą",
       "titleAccent": "su vienu nemokamu profiliu.",
       "subcopy": "Susikurk vieną profilį, nurodyk, kada esi laisvas, ir leisk realiai paklausai tave surasti – ir kitose šalyse.",
-      "benefits": {
-        "0": {
+      "benefits": [
+        {
           "title": "Vienas profilis visoms rinkoms",
           "body": "Vienas avataras su įrašais paremtais įgūdžiais ir prieinamumu — matomas registruotiems darbdaviams įvairiose šalyse."
         },
-        "1": {
+        {
           "title": "Reali paklausa",
           "body": "Matyk atvirus darbo poreikius, atitinkančius tavo profesiją, įgūdžius ir miestą — ir vienu paspaudimu pareikšk susidomėjimą."
         },
-        "2": {
+        {
           "title": "Sąžiningi signalai",
           "body": "Skaidrūs, kontekstiniai atitikimo signalai — be išpūstų pažadų, be universalaus įvertinimo, be mokamų reitingų."
         },
-        "3": {
+        {
           "title": "Auga, kol dirbi",
           "body": "Fiksuok atliktus darbus ir rezultatus — tavo profesinė istorija turtėja, o galimybių paieška darosi vis tikslesnė, net kai aktyviai naujo darbo neieškai."
         }
-      },
+      ],
       "screenshot": "Darbuotojo profilio srautas",
       "cta": "Sukurti nemokamą profilį"
     },
@@ -5579,20 +5579,20 @@
       "title": "Rask darbuotojų",
       "titleAccent": "savo projektams.",
       "subcopy": "Nurodyk, kokių specialistų, kiek ir nuo kada reikia kiekvienam projektui. Užklausa nemokama ir be paskyros; su nemokama paskyra dar matysi, kurie laisvi darbuotojai ir agentūros tinka.",
-      "benefits": {
-        "0": {
+      "benefits": [
+        {
           "title": "Paklausa pagal projektą",
           "body": "Apibrėžk pareigybes, žmonių skaičių ir įgūdžius kiekvienam projektui — ne miglotus skelbimus."
         },
-        "1": {
+        {
           "title": "Atitiktis konkrečiam darbui",
           "body": "Matai, kurie laisvi darbuotojai ir agentūros tinka kiekvienam konkrečiam poreikiui — sąžiningai, pagal poreikį."
         },
-        "2": {
+        {
           "title": "Agentūros, kai reikia",
           "body": "Pasinaudok registruotų agentūrų rezervu papildomam pajėgumui neprarasdamas matomumo."
         }
-      },
+      ],
       "screenshot": "Įmonės paklausos srautas",
       "cta": "Aprašyti, kokių darbuotojų reikia",
       "calculatorBody": "Prieš ieškodamas darbuotojų, įvertink darbą: darbo valandas, medžiagas, įrangą ir keliones — savo skaičiais.",
@@ -5606,11 +5606,11 @@
           "titleAccent": "Liuksemburge.",
           "subcopy": "Rangovams ir subrangovams statybose. Parašyk, kokių specialistų reikia — suvirintojų, elektrikų, dailidžių, pastolių montuotojų, — kiek, kur ir nuo kada.",
           "cta": "Aprašyk, ko reikia",
-          "points": {
-            "0": "Užklausą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
-            "1": "Ieškome žmonių, kurių užfiksuotas darbas atitinka tavo poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
-            "2": "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
-          }
+          "points": [
+            "Užklausą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
+            "Ieškome žmonių, kurių užfiksuotas darbas atitinka tavo poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
+            "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
+          ]
         },
         "nl": {
           "metaTitle": "Specialistai statybvietėms Nyderlanduose",
@@ -5620,11 +5620,11 @@
           "titleAccent": "Nyderlanduose.",
           "subcopy": "Rangovams ir subrangovams statybose. Parašyk, kokių specialistų reikia — suvirintojų, elektrikų, dailidžių, pastolių montuotojų, — kiek, kur ir nuo kada.",
           "cta": "Aprašyk, ko reikia",
-          "points": {
-            "0": "Užklausą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
-            "1": "Ieškome žmonių, kurių užfiksuotas darbas atitinka tavo poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
-            "2": "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
-          }
+          "points": [
+            "Užklausą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
+            "Ieškome žmonių, kurių užfiksuotas darbas atitinka tavo poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
+            "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
+          ]
         },
         "dk": {
           "metaTitle": "Specialistai statybvietėms Danijoje",
@@ -5634,11 +5634,11 @@
           "titleAccent": "Danijoje.",
           "subcopy": "Rangovams ir subrangovams statybose. Parašyk, kokių specialistų reikia — suvirintojų, elektrikų, dailidžių, pastolių montuotojų, — kiek, kur ir nuo kada.",
           "cta": "Aprašyk, ko reikia",
-          "points": {
-            "0": "Užklausą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
-            "1": "Ieškome žmonių, kurių užfiksuotas darbas atitinka tavo poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
-            "2": "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
-          }
+          "points": [
+            "Užklausą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
+            "Ieškome žmonių, kurių užfiksuotas darbas atitinka tavo poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
+            "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
+          ]
         }
       }
     },
@@ -5647,20 +5647,20 @@
       "title": "Tavo rezervas —",
       "titleAccent": "judantis.",
       "subcopy": "Valdyk kuruojamus darbuotojus, skelbk paklausą klientų vardu ir tarpininkauk — viskas vienoje vietoje.",
-      "benefits": {
-        "0": {
+      "benefits": [
+        {
           "title": "Valdyk rezervą",
           "body": "Kuruojami darbuotojai, prieinamumas ir būsenos — viskas vienoje darbo erdvėje."
         },
-        "1": {
+        {
           "title": "Tarpininkavimas su pranašumu",
           "body": "Dalinkis klientų poreikiais ir greičiau įdarbink tinkamus žmones su paaiškinama atitikimo kryptimi."
         },
-        "2": {
+        {
           "title": "Matomumo valdymas",
           "body": "Pasirink, kas vieša, tik agentūroms ar tiesioginė — matomumą valdai tu."
         }
-      },
+      ],
       "screenshot": "Agentūros režimo srautas",
       "cta": "Sukurti agentūros paskyrą"
     },
@@ -5670,39 +5670,39 @@
       "titleAccent": "nemokamai.",
       "subcopy": "Susikurk CV nuo nulio arba importuok esamą PDF ar DOCX. Peržiūrėk kiekvieną ištrauktą faktą, pasirink tvarkingą šabloną ir atsisiųsk PDF — nemokamai. Jei norėsi, ta pati informacija gali tapti tavo darbuotojo profiliu ir parodyti tikrus darbo skelbimus iš oficialių viešų šaltinių.",
       "cta": "Kurti mano CV — nemokamai",
-      "benefits": {
-        "0": {
+      "benefits": [
+        {
           "title": "Importuok arba pradėk iš naujo",
           "body": "Įkelk esamą CV (PDF, DOCX ar tekstą) arba pradėk nuo tuščio lapo. Ištraukti faktai lieka pasiūlymais, kol jų nepriimi."
         },
-        "1": {
+        {
           "title": "Sąžininga struktūra",
           "body": "Tavo patirtis, išsilavinimas, kalbos ir įgūdžiai struktūruojami tavo peržiūrai — niekas neišgalvojama ir niekas neišsaugoma be tavo sutikimo."
         },
-        "2": {
+        {
           "title": "Tvarkingi šablonai, tikras PDF",
           "body": "Pasirink profesionalų šabloną ir eksportuok į A4 PDF per naršyklę — be vandens ženklų, be mokesčių."
         },
-        "3": {
+        {
           "title": "Daugiau nei dokumentas",
           "body": "Su aiškiu tavo sutikimu tie patys faktai gali sukurti darbuotojo profilį, susieti įgūdžius su bendru Europos įgūdžių katalogu ir parodyti tinkamus viešus darbo skelbimus. Ilgainiui fiksuojant atliktus darbus tavo profesinė istorija nuolat auga — o galimybių paieška darosi vis tikslesnė."
         }
-      },
+      ],
       "stepsTitle": "Kaip tai veikia",
-      "steps": {
-        "0": {
+      "steps": [
+        {
           "title": "Registruokis nemokamai",
           "body": "Paskyra leidžia CV redaguoti, o duomenys lieka tavo kontrolėje — bet kada gali juos ištrinti."
         },
-        "1": {
+        {
           "title": "Pridėk savo patirtį",
           "body": "Importuok seną CV arba įrašyk pats — tada peržiūrėk kiekvieną faktą ir nuspręsk, ką pasilikti, prieš jį panaudojant."
         },
-        "2": {
+        {
           "title": "Atsisiųsk ir spręsk",
           "body": "Eksportuok CV kaip PDF. Tapti matomam darbdaviams — atskiras, neprivalomas pasirinkimas."
         }
-      },
+      ],
       "privacyNote": "Tavo CV pagal nutylėjimą lieka privatus. Niekas nesidalinama su darbdaviais, kol pats neįjungi matomumo, o jį bet kada gali išjungti."
     }
   },
@@ -5723,63 +5723,63 @@
       "free": {
         "name": "Nemokamas",
         "tagline": "Pradžiai",
-        "features": {
-          "0": "1 aktyvi pozicija",
-          "1": "Atrankos sąrašas ir kandidatų kontaktas",
-          "2": "Rezervacijos, projektai, nurodymai",
-          "3": "Darbo patvirtinimas ir patvirtinti įgūdžiai"
-        }
+        "features": [
+          "1 aktyvi pozicija",
+          "Atrankos sąrašas ir kandidatų kontaktas",
+          "Rezervacijos, projektai, nurodymai",
+          "Darbo patvirtinimas ir patvirtinti įgūdžiai"
+        ]
       },
       "business": {
         "name": "Organizacija",
         "tagline": "Organizacijoms, kurios aktyviai samdo ir buria komandas",
-        "features": {
-          "0": "Be fiksuoto aktyvių pozicijų limito",
-          "1": "Viskas, kas nemokamame plane — darbiniu mastu",
-          "2": "Vienas planas visoms organizacijų rūšims",
-          "3": "Projektų valdymas, ataskaitos ir CSV eksportas"
-        }
+        "features": [
+          "Be fiksuoto aktyvių pozicijų limito",
+          "Viskas, kas nemokamame plane — darbiniu mastu",
+          "Vienas planas visoms organizacijų rūšims",
+          "Projektų valdymas, ataskaitos ir CSV eksportas"
+        ]
       },
       "agency": {
         "name": "Agentūros",
         "tagline": "Personalo partneriams.",
-        "features": {
-          "0": "Neriboti kuruojami darbuotojai",
-          "1": "Tarpininkavimo įrankiai",
-          "2": "Darbuotojų paieška",
-          "3": "Prioritetinė pagalba"
-        }
+        "features": [
+          "Neriboti kuruojami darbuotojai",
+          "Tarpininkavimo įrankiai",
+          "Darbuotojų paieška",
+          "Prioritetinė pagalba"
+        ]
       },
       "enterprise": {
         "name": "Įmonių",
         "tagline": "Mastui ir kontrolei.",
-        "features": {
-          "0": "Neriboti projektai",
-          "1": "SSO",
-          "2": "SLA",
-          "3": "Skirta pagalba"
-        }
+        "features": [
+          "Neriboti projektai",
+          "SSO",
+          "SLA",
+          "Skirta pagalba"
+        ]
       }
     },
     "faqTitle": "Kainų DUK",
-    "faq": {
-      "0": {
+    "faq": [
+      {
         "q": "Kodėl tik vienas mokamas planas?",
         "a": "Kiekviena organizacija — darbdavys, personalo tiekėjas, rangovas ar mokymo įstaiga — gauna tą patį produktą. Skiriasi tik mastas: 1 aktyvi pozicija nemokamai, o už 99 €/mėn. — be fiksuoto aktyvių pozicijų limito."
       },
-      "1": {
+      {
         "q": "Ar nemokamas planas liks nemokamas?",
         "a": "Taip. Asmenims viskas nemokama, o organizacija gali turėti vieną aktyvią poziciją be jokio mokesčio."
       },
-      "2": {
+      {
         "q": "Kaip vyks atsiskaitymai?",
         "a": "Mokėjimas kortele per Stripe. Sąskaitos, mokėjimų istorija ir atšaukimas — organizacijos paskyroje."
       },
-      "3": {
+      {
         "q": "Ar yra aktyvių pozicijų limitas?",
         "a": "Nemokamas planas apima 1 aktyvią poziciją. Plane „Organizacija“ nėra fiksuoto aktyvių pozicijų limito. Įprastos apsaugos nuo piktnaudžiavimo, pavyzdžiui, užklausų skaičiaus ribos, ir toliau galioja."
       }
-    },
+    ],
     "priceState": {
       "draft_pricing": "Kainos ruošiamos — nieko įsigyti dar negalima.",
       "owner_confirmed": "Kainos patvirtintos savininko. Aktyvavimas vyksta organizacijos paskyroje; šiame puslapyje niekas nenuskaičiuojama."
@@ -5874,190 +5874,190 @@
     "marketplaceRules": {
       "title": "Prekyvietės taisyklės",
       "intro": "Šios taisyklės užtikrina, kad prekyvietė liktų saugi ir sąžininga. Jos galioja visiems vartotojams ir pasiūlymams.",
-      "rules": {
-        "0": "Sistema nepatvirtina teisės dirbti ar legalaus tinkamumo be reikiamų dokumentų.",
-        "1": "Statusas „patvirtinta“ rodomas tik po realaus žmogaus patikrinimo — jokio automatinio patvirtinimo.",
-        "2": "Kontaktai nerodomi be vartotojo leidimo.",
-        "3": "Vieši pasiūlymai rodomi tik po moderavimo; nepatikimi ar įtartini pasiūlymai paslepiami.",
-        "4": "Draudžiama prekiauti reguliuojamomis ar neteisėtomis prekėmis ir paslaugomis.",
-        "5": "Žemėlapyje taškas atsiranda tik su patvirtintomis koordinatėmis — jokių netikrų žymeklių.",
-        "6": "Mokėjimai tarp naudotojų per platformą nevyksta; per ją mokamas tik mokestis už platformos paslaugas.",
-        "7": "Apie netinkamą elgesį ar įtartiną veiklą galima pranešti — moderatoriai peržiūri."
-      }
+      "rules": [
+        "Sistema nepatvirtina teisės dirbti ar legalaus tinkamumo be reikiamų dokumentų.",
+        "Statusas „patvirtinta“ rodomas tik po realaus žmogaus patikrinimo — jokio automatinio patvirtinimo.",
+        "Kontaktai nerodomi be vartotojo leidimo.",
+        "Vieši pasiūlymai rodomi tik po moderavimo; nepatikimi ar įtartini pasiūlymai paslepiami.",
+        "Draudžiama prekiauti reguliuojamomis ar neteisėtomis prekėmis ir paslaugomis.",
+        "Žemėlapyje taškas atsiranda tik su patvirtintomis koordinatėmis — jokių netikrų žymeklių.",
+        "Mokėjimai tarp naudotojų per platformą nevyksta; per ją mokamas tik mokestis už platformos paslaugas.",
+        "Apie netinkamą elgesį ar įtartiną veiklą galima pranešti — moderatoriai peržiūri."
+      ]
     },
     "terms": {
       "metaDescription": "Jūsų sutartis dėl bet kurios platformos paslaugos sudaroma su UAB „Nonstop Group“. Sąskaitas išrašo ir mokėjimus gauna UAB „Nonstop Group“.",
       "title": "Naudojimo sąlygos",
-      "sections": {
-        "0": {
+      "sections": [
+        {
           "heading": "Su kuo sudarote sutartį",
-          "items": {
-            "0": "Visas platformos paslaugas komerciškai teikia ir parduoda UAB „Nonstop Group“, įmonės kodas 302676973, PVM kodas LT100010790613, registruota buveinė Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lietuva.",
-            "1": "Jūsų sutartis dėl bet kurios platformos paslaugos sudaroma su UAB „Nonstop Group“. Sąskaitas išrašo ir mokėjimus gauna UAB „Nonstop Group“.",
-            "2": "Labour Market AI Sp. z o.o. (Varšuva, Lenkija; KRS 0001218752) priklauso LabourMarket.ai programinė įranga, prekės ženklas ir susijusi intelektinė nuosavybė, kurią ji licencijuoja UAB „Nonstop Group“. Ji nėra jūsų sutarties šalis."
-          }
+          "items": [
+            "Visas platformos paslaugas komerciškai teikia ir parduoda UAB „Nonstop Group“, įmonės kodas 302676973, PVM kodas LT100010790613, registruota buveinė Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lietuva.",
+            "Jūsų sutartis dėl bet kurios platformos paslaugos sudaroma su UAB „Nonstop Group“. Sąskaitas išrašo ir mokėjimus gauna UAB „Nonstop Group“.",
+            "Labour Market AI Sp. z o.o. (Varšuva, Lenkija; KRS 0001218752) priklauso LabourMarket.ai programinė įranga, prekės ženklas ir susijusi intelektinė nuosavybė, kurią ji licencijuoja UAB „Nonstop Group“. Ji nėra jūsų sutarties šalis."
+          ]
         },
-        "1": {
+        {
           "heading": "Taikoma teisė ir ginčai",
-          "items": {
-            "0": "Šioms sąlygoms ir kiekvienai klientų sutarčiai taikoma Lietuvos Respublikos teisė, o ginčus sprendžia kompetentingi Lietuvos teismai, išskyrus atvejus, kai privalomos vartotojų, darbo, duomenų apsaugos ar kitos taikytinos teisės normos suteikia jums neatimamų teisių ar kitą teismą.",
-            "1": "Jeigu esate vartotojas, visada išsaugote savo gyvenamosios valstybės privalomas teises."
-          }
+          "items": [
+            "Šioms sąlygoms ir kiekvienai klientų sutarčiai taikoma Lietuvos Respublikos teisė, o ginčus sprendžia kompetentingi Lietuvos teismai, išskyrus atvejus, kai privalomos vartotojų, darbo, duomenų apsaugos ar kitos taikytinos teisės normos suteikia jums neatimamų teisių ar kitą teismą.",
+            "Jeigu esate vartotojas, visada išsaugote savo gyvenamosios valstybės privalomas teises."
+          ]
         },
-        "2": {
+        {
           "heading": "Kas platforma yra ir kuo ji nėra",
-          "items": {
-            "0": "Platforma padeda rasti, pristatyti ir koordinuoti darbo rinkos galimybes dalyvaujant žmogui operatoriui.",
-            "1": "Naudojimasis platforma savaime nesukuria darbo santykių ir nėra darbo ar darbuotojų garantija.",
-            "2": "Darbuotojų profiliai, CV ir kontaktai perduodami tik pagal platformos sutikimų taisykles — žr. Privatumo politiką."
-          }
+          "items": [
+            "Platforma padeda rasti, pristatyti ir koordinuoti darbo rinkos galimybes dalyvaujant žmogui operatoriui.",
+            "Naudojimasis platforma savaime nesukuria darbo santykių ir nėra darbo ar darbuotojų garantija.",
+            "Darbuotojų profiliai, CV ir kontaktai perduodami tik pagal platformos sutikimų taisykles — žr. Privatumo politiką."
+          ]
         }
-      }
+      ]
     },
     "privacy": {
       "title": "Privatumo politika",
       "metaDescription": "Paprastais žodžiais: kokius asmens duomenis naudoja LabourMarket.ai, kodėl ir kokias teises turite. Platforma aprašyta tokia, kokia veikia šiandien.",
       "intro": "Šis puslapis paprastais žodžiais paaiškina, kokius asmens duomenis naudoja Labour Market AI, kodėl juos naudoja ir kokias teises turite. Jis aprašo platformą tokią, kokia ji veikia šiandien.",
-      "sections": {
-        "0": {
+      "sections": [
+        {
           "heading": "Kas atsako už jūsų duomenis",
-          "items": {
-            "0": "LabourMarket.ai platformos duomenų valdytoja yra UAB „Nonstop Group“, įmonės kodas 302676973, registruota buveinė Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lietuva.",
-            "1": "Privatumo kontaktas: info@labourmarket.ai. Duomenų apsaugos pareigūnas nepaskirtas.",
-            "2": "Labour Market AI Sp. z o.o. (Varšuva, Lenkija) priklauso platformos programinė įranga ir prekės ženklas, kuriuos ji licencijuoja UAB „Nonstop Group“. IP nuosavybė nesuteikia jai prieigos prie jūsų asmens duomenų: ji neturi įprastinės prieigos prie produkcijos duomenų bazės, profilių, CV, kontaktų ar dokumentų.",
-            "3": "Turite teisę pateikti skundą priežiūros institucijai; pagal valdytojos buveinę tai — Valstybinė duomenų apsaugos inspekcija (VDAI)."
-          }
+          "items": [
+            "LabourMarket.ai platformos duomenų valdytoja yra UAB „Nonstop Group“, įmonės kodas 302676973, registruota buveinė Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lietuva.",
+            "Privatumo kontaktas: info@labourmarket.ai. Duomenų apsaugos pareigūnas nepaskirtas.",
+            "Labour Market AI Sp. z o.o. (Varšuva, Lenkija) priklauso platformos programinė įranga ir prekės ženklas, kuriuos ji licencijuoja UAB „Nonstop Group“. IP nuosavybė nesuteikia jai prieigos prie jūsų asmens duomenų: ji neturi įprastinės prieigos prie produkcijos duomenų bazės, profilių, CV, kontaktų ar dokumentų.",
+            "Turite teisę pateikti skundą priežiūros institucijai; pagal valdytojos buveinę tai — Valstybinė duomenų apsaugos inspekcija (VDAI)."
+          ]
         },
-        "1": {
+        {
           "heading": "Kokius duomenis platforma naudoja",
-          "items": {
-            "0": "Paskyros duomenys: jūsų el. pašto adresas ir su juo susietas prisijungimas.",
-            "1": "Turinys, kurį įvedate patys: profilio ir CV informacija, įgūdžiai, darbo žurnalo įrašai, prie įrašų pridėtos nuotraukos ir jūsų dokumentų sąraše nurodyti dokumentai.",
-            "2": "Įmonių naudotojų įvesta įmonės informacija: įmonės duomenys, poreikiai, projektai ir rezervacijos.",
-            "3": "Žinutės, kurias siunčiate ir gaunate platformoje.",
-            "4": "Sutikimų įrašai: kai duodate ar atšaukiate sutikimą, išsaugomas veiksmas ir jo laikas.",
-            "5": "Techniniai duomenys, reikalingi paslaugai veikti, pavyzdžiui, prisijungimo slapukai (žr. Slapukų politiką).",
-            "6": "Tik su tavo sutikimu: naudojimo matavimas mūsų pačių serveriuose (pasiekti puslapiai ir žingsniai, kasdienis aktyvumas) ir tave atvedusi kampanija, saugoma kartu su tavo paskyra. Žr. Slapukų politiką."
-          }
+          "items": [
+            "Paskyros duomenys: jūsų el. pašto adresas ir su juo susietas prisijungimas.",
+            "Turinys, kurį įvedate patys: profilio ir CV informacija, įgūdžiai, darbo žurnalo įrašai, prie įrašų pridėtos nuotraukos ir jūsų dokumentų sąraše nurodyti dokumentai.",
+            "Įmonių naudotojų įvesta įmonės informacija: įmonės duomenys, poreikiai, projektai ir rezervacijos.",
+            "Žinutės, kurias siunčiate ir gaunate platformoje.",
+            "Sutikimų įrašai: kai duodate ar atšaukiate sutikimą, išsaugomas veiksmas ir jo laikas.",
+            "Techniniai duomenys, reikalingi paslaugai veikti, pavyzdžiui, prisijungimo slapukai (žr. Slapukų politiką).",
+            "Tik su tavo sutikimu: naudojimo matavimas mūsų pačių serveriuose (pasiekti puslapiai ir žingsniai, kasdienis aktyvumas) ir tave atvedusi kampanija, saugoma kartu su tavo paskyra. Žr. Slapukų politiką."
+          ]
         },
-        "2": {
+        {
           "heading": "Prisijungimas per „Google“, „Facebook“ arba „LinkedIn“",
-          "items": {
-            "0": "Paskyrą susikurti ir prisijungti galite savo „Google“, „Facebook“ arba „LinkedIn“ paskyra, užuot jungęsi el. pašto adresu. Tai naudojama tik jūsų prisijungimui.",
-            "1": "Kai pasirenkate vieną iš jų, tas paslaugų teikėjas patvirtina jūsų tapatybę ir perduoda platformai jūsų el. pašto adresą, vardą ir jūsų paskyros pas tą teikėją identifikatorių. Platforma neprašo jokių papildomų leidimų — jokios prieigos prie jūsų draugų ar kontaktų, įrašų ar puslapių — ir niekada nieko neskelbia jūsų vardu.",
-            "2": "Jūsų el. pašto adresas tampa paskyros el. paštu. Teikėjo perduotas vardas naudojamas tik laikinam vardui, paimtam iš jūsų el. pašto adreso, pakeisti; jūsų pačių įvestas vardas niekada neperrašomas. Prisijungimo įrašą (teikėją, jūsų paskyros pas jį identifikatorių ir jo perduotus duomenis) saugo mūsų autentifikavimo paslaugų teikėjas „Supabase“, susietą su jūsų paskyra.",
-            "3": "Norėdami ištrinti šiuos duomenis, ištrinkite savo LabourMarket.ai paskyrą — veiksmai aprašyti puslapyje „Paskyros ir duomenų ištrynimas“. LabourMarket.ai pašalinimas iš „Facebook“, „Google“ ar „LinkedIn“ nustatymų pats savaime neištrina jūsų LabourMarket.ai paskyros ir jos duomenų."
-          }
+          "items": [
+            "Paskyrą susikurti ir prisijungti galite savo „Google“, „Facebook“ arba „LinkedIn“ paskyra, užuot jungęsi el. pašto adresu. Tai naudojama tik jūsų prisijungimui.",
+            "Kai pasirenkate vieną iš jų, tas paslaugų teikėjas patvirtina jūsų tapatybę ir perduoda platformai jūsų el. pašto adresą, vardą ir jūsų paskyros pas tą teikėją identifikatorių. Platforma neprašo jokių papildomų leidimų — jokios prieigos prie jūsų draugų ar kontaktų, įrašų ar puslapių — ir niekada nieko neskelbia jūsų vardu.",
+            "Jūsų el. pašto adresas tampa paskyros el. paštu. Teikėjo perduotas vardas naudojamas tik laikinam vardui, paimtam iš jūsų el. pašto adreso, pakeisti; jūsų pačių įvestas vardas niekada neperrašomas. Prisijungimo įrašą (teikėją, jūsų paskyros pas jį identifikatorių ir jo perduotus duomenis) saugo mūsų autentifikavimo paslaugų teikėjas „Supabase“, susietą su jūsų paskyra.",
+            "Norėdami ištrinti šiuos duomenis, ištrinkite savo LabourMarket.ai paskyrą — veiksmai aprašyti puslapyje „Paskyros ir duomenų ištrynimas“. LabourMarket.ai pašalinimas iš „Facebook“, „Google“ ar „LinkedIn“ nustatymų pats savaime neištrina jūsų LabourMarket.ai paskyros ir jos duomenų."
+          ]
         },
-        "3": {
+        {
           "heading": "Kam duomenys naudojami",
-          "items": {
-            "0": "Kad veiktų jūsų naudojamos funkcijos: profilis ir CV, darbo žurnalas, jūsų patvirtinami įgūdžių pasiūlymai, rinkos žemėlapis, projektai, komandos, rezervacijos ir susirašinėjimas.",
-            "1": "Kad jūsų informaciją matytų tik tie, kam tai leidžia aiški prieigos taisyklė — žr. puslapį „Jūsų duomenys ir kas juos mato“.",
-            "2": "Kad būtų išsaugota sąžininga sutikimų ir svarbiausių prieigos pakeitimų istorija.",
-            "3": "Platforma nenaudoja trečiųjų šalių reklamos ar analitikos sekimo įrankių ir nekuria elgsenos profilių."
-          }
+          "items": [
+            "Kad veiktų jūsų naudojamos funkcijos: profilis ir CV, darbo žurnalas, jūsų patvirtinami įgūdžių pasiūlymai, rinkos žemėlapis, projektai, komandos, rezervacijos ir susirašinėjimas.",
+            "Kad jūsų informaciją matytų tik tie, kam tai leidžia aiški prieigos taisyklė — žr. puslapį „Jūsų duomenys ir kas juos mato“.",
+            "Kad būtų išsaugota sąžininga sutikimų ir svarbiausių prieigos pakeitimų istorija.",
+            "Platforma nenaudoja trečiųjų šalių reklamos ar analitikos sekimo įrankių ir nekuria elgsenos profilių."
+          ]
         },
-        "4": {
+        {
           "heading": "Kas gali matyti jūsų duomenis",
-          "items": {
-            "0": "Prieiga uždara pagal nutylėjimą: jūsų įvesti duomenys priklauso jūsų paskyrai, kiti vartotojai nemato nieko, nebent tai leidžia konkreti taisyklė.",
-            "1": "Jūsų profesinis profilis pagal nutylėjimą NĖRA matomas įmonėms ar agentūroms. Įmonių paieškoje jis gali atsirasti tik jums patiems įjungus darbdavių matomumą privatumo nustatymuose — registracija, taisyklių priėmimas ar profilio užpildymas matomumo nesuteikia.",
-            "2": "Net įjungus matomumą, įmonės mato tik ribotą profesinę santrauką (profesiją, patirtį, įgūdžius, apytikslį regioną, prieinamumą, kalbas, atlygio lūkestį, jei jį įvedėte). Pavardė, telefonas, el. paštas, tikslus adresas, CV failas ir dokumentai niekada į ją nepatenka.",
-            "3": "Jūsų CV, kontaktai ar dokumentai konkrečiai įmonei perduodami tik po atskiro jūsų patvirtinimo tai įmonei ir tam poreikiui. Kiekvienas įvykdytas perdavimas fiksuojamas jums matomame perdavimų žurnale.",
-            "4": "Darbuotojo dokumentai nerodomi darbdaviams ar agentūroms be darbuotojo sutikimo, o darbdaviai negali matyti darbuotojo išsaugotų vietų.",
-            "5": "Žinutės matomos tik pokalbio dalyviams."
-          }
+          "items": [
+            "Prieiga uždara pagal nutylėjimą: jūsų įvesti duomenys priklauso jūsų paskyrai, kiti vartotojai nemato nieko, nebent tai leidžia konkreti taisyklė.",
+            "Jūsų profesinis profilis pagal nutylėjimą NĖRA matomas įmonėms ar agentūroms. Įmonių paieškoje jis gali atsirasti tik jums patiems įjungus darbdavių matomumą privatumo nustatymuose — registracija, taisyklių priėmimas ar profilio užpildymas matomumo nesuteikia.",
+            "Net įjungus matomumą, įmonės mato tik ribotą profesinę santrauką (profesiją, patirtį, įgūdžius, apytikslį regioną, prieinamumą, kalbas, atlygio lūkestį, jei jį įvedėte). Pavardė, telefonas, el. paštas, tikslus adresas, CV failas ir dokumentai niekada į ją nepatenka.",
+            "Jūsų CV, kontaktai ar dokumentai konkrečiai įmonei perduodami tik po atskiro jūsų patvirtinimo tai įmonei ir tam poreikiui. Kiekvienas įvykdytas perdavimas fiksuojamas jums matomame perdavimų žurnale.",
+            "Darbuotojo dokumentai nerodomi darbdaviams ar agentūroms be darbuotojo sutikimo, o darbdaviai negali matyti darbuotojo išsaugotų vietų.",
+            "Žinutės matomos tik pokalbio dalyviams."
+          ]
         },
-        "5": {
+        {
           "heading": "Sutikimas",
-          "items": {
-            "0": "Sutikimų tikslai atskirti: profesinio profilio matomumas darbdaviams ir duomenų perdavimas konkrečiai įmonei yra du skirtingi pasirinkimai — nė vienas nesujungtas su taisyklėmis, nepažymėtas iš anksto ir nebūtinas paskyrai, CV ar darbo žurnalui naudoti.",
-            "1": "Kiekviename sutikimo ekrane rodomas tikslus versijuotas tekstas, kas taps matoma, kas liks privatu, ir abu pasirinkimai greta (įjungti / dabar neįjungti). Atsisakymas nieko nekeičia jūsų paskyroje.",
-            "2": "Bet kurį sutikimą galite atšaukti bet kada privatumo nustatymuose vienu žingsniu. Po atšaukimo profilis iškart nustoja rodytis naujose įmonių paieškose; duomenys, kuriuos įmonė teisėtai gavo leidimo galiojimo metu, gali likti pas tą įmonę.",
-            "3": "Sutikimų istorija yra tik pildoma: kiekvienas suteikimas ir atšaukimas — atskiras nekintamas įrašas su teksto versija, kalba, laiku ir tikslu. Niekas — įskaitant administratorius — negali jo redaguoti ar ištrinti, o administratorius negali duoti sutikimo jūsų vardu."
-          }
+          "items": [
+            "Sutikimų tikslai atskirti: profesinio profilio matomumas darbdaviams ir duomenų perdavimas konkrečiai įmonei yra du skirtingi pasirinkimai — nė vienas nesujungtas su taisyklėmis, nepažymėtas iš anksto ir nebūtinas paskyrai, CV ar darbo žurnalui naudoti.",
+            "Kiekviename sutikimo ekrane rodomas tikslus versijuotas tekstas, kas taps matoma, kas liks privatu, ir abu pasirinkimai greta (įjungti / dabar neįjungti). Atsisakymas nieko nekeičia jūsų paskyroje.",
+            "Bet kurį sutikimą galite atšaukti bet kada privatumo nustatymuose vienu žingsniu. Po atšaukimo profilis iškart nustoja rodytis naujose įmonių paieškose; duomenys, kuriuos įmonė teisėtai gavo leidimo galiojimo metu, gali likti pas tą įmonę.",
+            "Sutikimų istorija yra tik pildoma: kiekvienas suteikimas ir atšaukimas — atskiras nekintamas įrašas su teksto versija, kalba, laiku ir tikslu. Niekas — įskaitant administratorius — negali jo redaguoti ar ištrinti, o administratorius negali duoti sutikimo jūsų vardu."
+          ]
         },
-        "6": {
+        {
           "heading": "Paslaugų teikėjai, kurie tvarko duomenis platformai",
-          "items": {
-            "0": "„Supabase“ — duomenų bazė, naudotojų prisijungimas ir failų saugykla.",
-            "1": "„Cloudflare“ — tinklas prieš svetainę (domeno vardų sistema, šifravimas perdavimo metu, podėlis ir apsauga nuo atakų); per jį eina kiekviena užklausa į svetainę.",
-            "2": "„Stripe“ — mokėjimų už mokamas platformos paslaugas apdorojimas. Kai organizacija pradeda apmokėjimą, „Stripe“ gauna mokančio naudotojo el. pašto adresą ir vidinį paskyros identifikatorių; kortelės duomenys įvedami pačios „Stripe“ mokėjimo puslapyje ir platforma jų nesaugo.",
-            "3": "„Google“, „Facebook“ („Meta“) ir „LinkedIn“ — tik jei pasirenkate prisijungti per juos, kaip aprašyta aukščiau.",
-            "4": "„Google“ (Gemini API) — tik taip, kaip aprašyta toliau esančiame skyriuje apie DI.",
-            "5": "Visas infrastruktūros paslaugų teikėjų sąrašas pateiktas puslapyje „Duomenų apsauga“."
-          }
+          "items": [
+            "„Supabase“ — duomenų bazė, naudotojų prisijungimas ir failų saugykla.",
+            "„Cloudflare“ — tinklas prieš svetainę (domeno vardų sistema, šifravimas perdavimo metu, podėlis ir apsauga nuo atakų); per jį eina kiekviena užklausa į svetainę.",
+            "„Stripe“ — mokėjimų už mokamas platformos paslaugas apdorojimas. Kai organizacija pradeda apmokėjimą, „Stripe“ gauna mokančio naudotojo el. pašto adresą ir vidinį paskyros identifikatorių; kortelės duomenys įvedami pačios „Stripe“ mokėjimo puslapyje ir platforma jų nesaugo.",
+            "„Google“, „Facebook“ („Meta“) ir „LinkedIn“ — tik jei pasirenkate prisijungti per juos, kaip aprašyta aukščiau.",
+            "„Google“ (Gemini API) — tik taip, kaip aprašyta toliau esančiame skyriuje apie DI.",
+            "Visas infrastruktūros paslaugų teikėjų sąrašas pateiktas puslapyje „Duomenų apsauga“."
+          ]
         },
-        "7": {
+        {
           "heading": "Jūsų teisės",
-          "items": {
-            "0": "Galite prašyti susipažinti su apie jus saugomais duomenimis, juos ištaisyti, gauti jų kopiją, apriboti jų naudojimą arba juos ištrinti.",
-            "1": "Savo duomenų kopiją JSON failu ir darbo žurnalą CSV failu galite atsisiųsti patys iš savo paskyros. Paskyros ištrynimo galite paprašyti paskyros puslapyje „Privatumas“ ir patvirtinti prašymą prisijungę iš naujo; praėjus 30 dienų nuo patvirtinimo sistema paskyrą ištrina automatiškai (iki tol prašymą galite atšaukti puslapyje „Privatumas“) ir išsiunčia patvirtinimą į paskyros el. paštą. Po galutinio ištrynimo ištrinti duomenys dar iki 7 dienų gali likti užšifruotose duomenų bazės atsarginėse kopijose; ten jie nenaudojami, o vėliau perrašomi. Jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Taip pat galite susisiekti su mumis — žr. puslapį „Paskyros ir duomenų ištrynimas“.",
-            "2": "Kai tvarkymas grindžiamas sutikimu, sutikimą galite bet kada atšaukti."
-          }
+          "items": [
+            "Galite prašyti susipažinti su apie jus saugomais duomenimis, juos ištaisyti, gauti jų kopiją, apriboti jų naudojimą arba juos ištrinti.",
+            "Savo duomenų kopiją JSON failu ir darbo žurnalą CSV failu galite atsisiųsti patys iš savo paskyros. Paskyros ištrynimo galite paprašyti paskyros puslapyje „Privatumas“ ir patvirtinti prašymą prisijungę iš naujo; praėjus 30 dienų nuo patvirtinimo sistema paskyrą ištrina automatiškai (iki tol prašymą galite atšaukti puslapyje „Privatumas“) ir išsiunčia patvirtinimą į paskyros el. paštą. Po galutinio ištrynimo ištrinti duomenys dar iki 7 dienų gali likti užšifruotose duomenų bazės atsarginėse kopijose; ten jie nenaudojami, o vėliau perrašomi. Jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Taip pat galite susisiekti su mumis — žr. puslapį „Paskyros ir duomenų ištrynimas“.",
+            "Kai tvarkymas grindžiamas sutikimu, sutikimą galite bet kada atšaukti."
+          ]
         },
-        "8": {
+        {
           "heading": "Kiek laiko duomenys saugomi",
-          "items": {
-            "0": "Duomenys saugomi, kol jūsų paskyra aktyvi ir kol juos naudoja funkcija, kuriai jie priklauso.",
-            "1": "Sutikimų ir audito įrašai saugomi kaip istorija: atšaukimas įrašomas, o ne ištrinamas."
-          }
+          "items": [
+            "Duomenys saugomi, kol jūsų paskyra aktyvi ir kol juos naudoja funkcija, kuriai jie priklauso.",
+            "Sutikimų ir audito įrašai saugomi kaip istorija: atšaukimas įrašomas, o ne ištrinamas."
+          ]
         },
-        "9": {
+        {
           "heading": "DI ir prijungti DI asistentai",
-          "items": {
-            "0": "Kai kurios funkcijos naudoja „Google“ DI modelį (Gemini API). Šiandien jam perduodama tik vieša rinkos statistika — pavyzdžiui, kiek laisvų darbo vietų turi profesija — trumpam paaiškinimui parengti. Žinučių ir darbo skelbimų vertimas bei pokalbyje įvesto sakinio aiškinimas yra paruošti, bet išjungti: jiems nesiunčiamas nei žinučių tekstas, nei asmens duomenys. Jei kuri nors iš šių funkcijų būtų įjungta, šis pranešimas tai nurodys, o siunčiamas būtų tik tam darbui reikalingas tekstas. Kiekvienas rezultatas yra pasiūlymas — niekas neišsaugoma kaip faktas apie jus, kol to nepatvirtinate.",
-            "1": "LabourMarket.ai galite prijungti prie DI asistento, pvz., ChatGPT ar Claude. Kiekvieną prijungimą patvirtinate patys sutikimo ekrane; asistentas tada veikia tik jūsų pačių teisėmis, o pasekmių turintiems veiksmams reikia atskiro patvirtinimo. Prijungtas programėles bet kada matote ir atjungiate paskyros nustatymuose.",
-            "2": "Ką DI asistento teikėjas daro su jūsų pokalbiu, nustato to teikėjo privatumo sąlygos."
-          }
+          "items": [
+            "Kai kurios funkcijos naudoja „Google“ DI modelį (Gemini API). Šiandien jam perduodama tik vieša rinkos statistika — pavyzdžiui, kiek laisvų darbo vietų turi profesija — trumpam paaiškinimui parengti. Žinučių ir darbo skelbimų vertimas bei pokalbyje įvesto sakinio aiškinimas yra paruošti, bet išjungti: jiems nesiunčiamas nei žinučių tekstas, nei asmens duomenys. Jei kuri nors iš šių funkcijų būtų įjungta, šis pranešimas tai nurodys, o siunčiamas būtų tik tam darbui reikalingas tekstas. Kiekvienas rezultatas yra pasiūlymas — niekas neišsaugoma kaip faktas apie jus, kol to nepatvirtinate.",
+            "LabourMarket.ai galite prijungti prie DI asistento, pvz., ChatGPT ar Claude. Kiekvieną prijungimą patvirtinate patys sutikimo ekrane; asistentas tada veikia tik jūsų pačių teisėmis, o pasekmių turintiems veiksmams reikia atskiro patvirtinimo. Prijungtas programėles bet kada matote ir atjungiate paskyros nustatymuose.",
+            "Ką DI asistento teikėjas daro su jūsų pokalbiu, nustato to teikėjo privatumo sąlygos."
+          ]
         }
-      }
+      ]
     },
     "cookies": {
       "title": "Slapukų politika",
       "intro": "Šiame puslapyje išvardyta, ką platforma šiandien iš tikrųjų saugo tavo naršyklėje. Sąmoningai — labai nedaug.",
-      "items": {
-        "0": {
+      "items": [
+        {
           "name": "Prisijungimo slapukai",
           "purpose": "Nustatomi prisijungus, kad naršant tarp puslapių prisijungimas išliktų. Būtini — be jų paslauga negali išlaikyti tavo prisijungimo."
         },
-        "1": {
+        {
           "name": "Kalbos slapukas (NEXT_LOCALE)",
           "purpose": "Gali būti nustatytas, kad įsimintų tavo kalbos pasirinkimą ir puslapiai atsidarytų tavo kalba."
         },
-        "2": {
+        {
           "name": "Administratoriaus rodymo nuostata (lm_hide_admin_ui)",
           "purpose": "Naudojama tik administratorių paskyrose. Įsimena, ar paslėpti administratoriaus valdikliai, ir nekeičia jokių teisių."
         },
-        "3": {
+        {
           "name": "Prisijungimo bandymo žymė (lm.oauth.trace)",
           "purpose": "Kortelės saugykla, pašalinama uždarius kortelę. Atsitiktinis kodas, susiejantis vieną prisijungimo bandymą su jo rezultatu, kad būtų galima ištirti nepavykusį prisijungimą. Būtina tavo pradėtam prisijungimui; joje nėra paskyros duomenų."
         }
-      },
+      ],
       "localStorageNote": "Naršyklės saugykloje (ne slapukuose) taip pat laikomi keli tavo prašyti dalykai: šviesios ar tamsios temos pasirinkimas, tavo sprendimas dėl naudojimo matavimo ir smulkūs patogumai, pvz., paslėpti pranešimai, neseniai peržiūrėti įrašai ir kalbos įvesties kalba. Jie lieka tavo įrenginyje, ir juos bet kada gali išvalyti savo naršyklėje.",
       "noTracking": "Platformoje nėra reklamos ar trečiųjų šalių sekimo slapukų, ir niekas neperduodama trečiosioms šalims reklamai.",
       "settingsLink": "Slapukų nustatymai",
       "analyticsTitle": "Naudojimo matavimas — tik su tavo sutikimu",
       "analyticsIntro": "Tau sutikus, matuojame, kaip naudojamasi produktu: kuriuos puslapius ir žingsnius žmonės pasiekia, registracijos žingsnius, kasdienį aktyvumą ir kuri kampanija atvedė lankytoją. Įvykiai saugomi mūsų pačių serveriuose ir, jei prisijungei, susiejami su tavo paskyra. Be tavo sutikimo nė vienas toliau išvardytas įrašas nesukuriamas ir iš tavo naršyklės nesiunčiamas joks matavimo įvykis.",
-      "analyticsItems": {
-        "0": {
+      "analyticsItems": [
+        {
           "name": "Pirmojo apsilankymo kampanija (lm.attr.first)",
           "purpose": "Naršyklės saugykla. Pirmojo apsilankymo kampanijos žymos (utm_*), nukreipusi svetainė ir nusileidimo puslapis. Registruojantis jos nukopijuojamos į tavo paskyros įrašą, kad būtų galima suskaičiuoti, kuri kampanija tave atvedė."
         },
-        "1": {
+        {
           "name": "Sesijos identifikatorius (lm.pilot.session)",
           "purpose": "Kortelės saugykla, pašalinama uždarius kortelę. Atsitiktinis identifikatorius, siunčiamas su kiekvienu matavimo įvykiu, kad vienos kortelės žingsnius būtų galima skaičiuoti kartu."
         },
-        "2": {
+        {
           "name": "Aktyvumo žymės (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
           "purpose": "Naršyklės saugykla. Paskutinė diena, kai naudojaisi platforma, ir žymė, kad vyksta registracija."
         },
-        "3": {
+        {
           "name": "Vienkartinio skaičiavimo žymės (lm.funnel.*)",
           "purpose": "Kortelės saugykla. Neleidžia to paties matavimo įvykio suskaičiuoti du kartus."
         }
-      },
+      ],
       "analyticsBasis": "Atsisakius ar atšaukus sutikimą, šie įrašai iš karto pašalinami iš šio įrenginio; jei prisijungei, ištrinama ir su tavo paskyra saugoma kampanija. Pats matavimas grindžiamas mūsų teisėtu interesu tobulinti produktą (BDAR 6 str. 1 d. f p.), ir gali jam prieštarauti, kaip aprašyta Privatumo politikoje."
     },
     "requestContact": "Norėdami užduoti klausimą ar pateikti prašymą dėl savo duomenų, susisiekite su mumis — jį peržiūrės žmogus.",
@@ -6070,116 +6070,116 @@
       "title": "Duomenų apsauga",
       "metaDescription": "Šis puslapis paprastais žodžiais paaiškina, kaip saugomi duomenys LabourMarket.ai platformoje. Aprašoma tik tai, kas šiandien iš tikrųjų įdiegta.",
       "intro": "Šis puslapis paprastais žodžiais paaiškina, kaip saugomi duomenys Labour Market AI platformoje. Aprašoma tik tai, kas šiandien iš tikrųjų įdiegta.",
-      "sections": {
-        "0": {
+      "sections": [
+        {
           "heading": "Uždaryta pagal nutylėjimą",
-          "items": {
-            "0": "Naudotojų duomenų lentelės apsaugotos prieigos taisyklėmis pačioje duomenų bazėje. Jei jokia taisyklė aiškiai nesuteikia prieigos, duomenys nematomi — net kitiems prisijungusiems naudotojams.",
-            "1": "Šios taisyklės veikia duomenų bazės lygmenyje, ne tik sąsajoje, ir yra dengiamos automatiniais testais."
-          }
+          "items": [
+            "Naudotojų duomenų lentelės apsaugotos prieigos taisyklėmis pačioje duomenų bazėje. Jei jokia taisyklė aiškiai nesuteikia prieigos, duomenys nematomi — net kitiems prisijungusiems naudotojams.",
+            "Šios taisyklės veikia duomenų bazės lygmenyje, ne tik sąsajoje, ir yra dengiamos automatiniais testais."
+          ]
         },
-        "1": {
+        {
           "heading": "Istorija vietoj tylių pakeitimų",
-          "items": {
-            "0": "Prieigos suteikimai yra įrašai, o ne jungikliai: kai prieiga atimama, įrašas pažymimas kaip atšauktas, o ne ištrinamas, todėl istorija lieka atsekama.",
-            "1": "Taip pat saugoma ir sutikimų istorija."
-          }
+          "items": [
+            "Prieigos suteikimai yra įrašai, o ne jungikliai: kai prieiga atimama, įrašas pažymimas kaip atšauktas, o ne ištrinamas, todėl istorija lieka atsekama.",
+            "Taip pat saugoma ir sutikimų istorija."
+          ]
         },
-        "2": {
+        {
           "heading": "Jokių sekimo įrankių, jokio profiliavimo",
-          "items": {
-            "0": "Platformoje nėra trečiųjų šalių reklamos ar analitikos sekimo įrankių, sesijų įrašinėjimo priemonių ar elgsenos vertinimo balų."
-          }
+          "items": [
+            "Platformoje nėra trečiųjų šalių reklamos ar analitikos sekimo įrankių, sesijų įrašinėjimo priemonių ar elgsenos vertinimo balų."
+          ]
         },
-        "3": {
+        {
           "heading": "Statistika, sauganti asmenis",
-          "items": {
-            "0": "Rinkos statistika yra apibendrinta. Vidurkiai nerodomi iš tokių mažų imčių, kad galėtų atskleisti vieną asmenį, o mažos imtys pažymimos.",
-            "1": "Tyrimų tipo duomenų rinkiniai struktūriškai anonimiški: juose nėra vardų, el. pašto adresų ar asmens identifikatorių."
-          }
+          "items": [
+            "Rinkos statistika yra apibendrinta. Vidurkiai nerodomi iš tokių mažų imčių, kad galėtų atskleisti vieną asmenį, o mažos imtys pažymimos.",
+            "Tyrimų tipo duomenų rinkiniai struktūriškai anonimiški: juose nėra vardų, el. pašto adresų ar asmens identifikatorių."
+          ]
         },
-        "4": {
+        {
           "heading": "Failai ir nuotraukos",
-          "items": {
-            "0": "Nuotraukos ir failai laikomi privačioje saugykloje ir atidaromi per trumpalaikes nuorodas, o ne viešais adresais."
-          }
+          "items": [
+            "Nuotraukos ir failai laikomi privačioje saugykloje ir atidaromi per trumpalaikes nuorodas, o ne viešais adresais."
+          ]
         },
-        "5": {
+        {
           "heading": "Administratorių prieiga",
-          "items": {
-            "0": "Administratorių ekranai prieinami tik mažam platformos administratorių ratui ir užsidaro saugiai: be administratoriaus rolės jie nepasiekiami."
-          }
+          "items": [
+            "Administratorių ekranai prieinami tik mažam platformos administratorių ratui ir užsidaro saugiai: be administratoriaus rolės jie nepasiekiami."
+          ]
         },
-        "6": {
+        {
           "heading": "Eksportas ir ištrynimas",
-          "items": {
-            "0": "Savo duomenis JSON failu ir darbo žurnalą CSV failu galite atsisiųsti iš savo paskyros. Paskyros ištrynimo prašoma iš paskyros ir jis patvirtinamas prisijungus iš naujo; tada sistema paskyrą ištrina automatiškai. Prašymą, susijusį su duomenimis, kuriuos privaloma saugoti pagal įstatymą arba kurie susiję su kitais žmonėmis, peržiūri žmogus. Taip pat galite susisiekti su mumis, ir prašymą apdoros žmogus."
-          }
+          "items": [
+            "Savo duomenis JSON failu ir darbo žurnalą CSV failu galite atsisiųsti iš savo paskyros. Paskyros ištrynimo prašoma iš paskyros ir jis patvirtinamas prisijungus iš naujo; tada sistema paskyrą ištrina automatiškai. Prašymą, susijusį su duomenimis, kuriuos privaloma saugoti pagal įstatymą arba kurie susiję su kitais žmonėmis, peržiūri žmogus. Taip pat galite susisiekti su mumis, ir prašymą apdoros žmogus."
+          ]
         },
-        "7": {
+        {
           "heading": "Infrastruktūros paslaugų teikėjai (pagalbiniai tvarkytojai)",
-          "items": {
-            "0": "Supabase — duomenų bazė, naudotojų prisijungimas ir failų saugykla. Duomenys laikomi Europos Sąjungoje (eu-west-1 regione).",
-            "1": "Hostinger — virtualus privatus serveris (VPS), kuriame veikia svetainė.",
-            "2": "Cloudflare — tinklas prieš svetainę: domeno vardų sistema, šifravimas perdavimo metu, podėlis ir apsauga nuo atakų. Per jį eina kiekviena užklausa į svetainę.",
-            "3": "GitHub — programinio kodo saugykla. Naudotojų duomenys ten nesaugomi.",
-            "4": "„Google“ (Gemini API) — DI apdorojimas žinutėms ir darbo skelbimams versti ir pasiūlyti, ko prašoma pokalbyje įvestu sakiniu. Siunčiamas tik tam darbui reikalingas tekstas.",
-            "5": "„Stripe“ — mokėjimų apdorojimas. Kliento įrašas sukuriamas tik tada, kai organizacija pradeda prenumeratos apmokėjimą.",
-            "6": "Joks kitas el. pašto, DI, vertimo ar mokėjimų paslaugų teikėjas neveikia. Jei toks būtų įjungtas, pirmiausia būtų atnaujintas šis sąrašas."
-          }
+          "items": [
+            "Supabase — duomenų bazė, naudotojų prisijungimas ir failų saugykla. Duomenys laikomi Europos Sąjungoje (eu-west-1 regione).",
+            "Hostinger — virtualus privatus serveris (VPS), kuriame veikia svetainė.",
+            "Cloudflare — tinklas prieš svetainę: domeno vardų sistema, šifravimas perdavimo metu, podėlis ir apsauga nuo atakų. Per jį eina kiekviena užklausa į svetainę.",
+            "GitHub — programinio kodo saugykla. Naudotojų duomenys ten nesaugomi.",
+            "„Google“ (Gemini API) — DI apdorojimas žinutėms ir darbo skelbimams versti ir pasiūlyti, ko prašoma pokalbyje įvestu sakiniu. Siunčiamas tik tam darbui reikalingas tekstas.",
+            "„Stripe“ — mokėjimų apdorojimas. Kliento įrašas sukuriamas tik tada, kai organizacija pradeda prenumeratos apmokėjimą.",
+            "Joks kitas el. pašto, DI, vertimo ar mokėjimų paslaugų teikėjas neveikia. Jei toks būtų įjungtas, pirmiausia būtų atnaujintas šis sąrašas."
+          ]
         },
-        "8": {
+        {
           "heading": "Sąžiningos ribos",
-          "items": {
-            "0": "Jokia sistema negali pažadėti absoliutaus saugumo. Pastebėję problemą, susisiekite su mumis — ją peržiūrės žmogus."
-          }
+          "items": [
+            "Jokia sistema negali pažadėti absoliutaus saugumo. Pastebėję problemą, susisiekite su mumis — ją peržiūrės žmogus."
+          ]
         }
-      }
+      ]
     },
     "dataAccess": {
       "title": "Jūsų duomenys ir kas juos mato",
       "intro": "Paprastas paaiškinimas, kokios prieigos taisyklės platformoje iš tikrųjų veikia šiandien. Čia neteigiama nieko daugiau, nei daro pačios taisyklės.",
-      "sections": {
-        "0": {
+      "sections": [
+        {
           "heading": "Atskaitos taškas",
-          "items": {
-            "0": "Jūsų eilutės yra jūsų: įvesti duomenys priklauso jūsų paskyrai. Kiti naudotojai nemato nieko, ko neleidžia konkreti prieigos taisyklė."
-          }
+          "items": [
+            "Jūsų eilutės yra jūsų: įvesti duomenys priklauso jūsų paskyrai. Kiti naudotojai nemato nieko, ko neleidžia konkreti prieigos taisyklė."
+          ]
         },
-        "1": {
+        {
           "heading": "Ką įmonės mato apie darbuotojus",
-          "items": {
-            "0": "Paieškos vaizduose darbuotojo informacija rodoma anonimizuota, o kontaktai niekada nerodomi be darbuotojo leidimo.",
-            "1": "Darbdaviai negali matyti darbuotojo išsaugotų vietovių.",
-            "2": "Darbuotojo dokumentai nerodomi darbdaviams ar agentūroms be darbuotojo sutikimo — daugiausia tik skaičiai, kuriais darbuotojas sutiko dalytis."
-          }
+          "items": [
+            "Paieškos vaizduose darbuotojo informacija rodoma anonimizuota, o kontaktai niekada nerodomi be darbuotojo leidimo.",
+            "Darbdaviai negali matyti darbuotojo išsaugotų vietovių.",
+            "Darbuotojo dokumentai nerodomi darbdaviams ar agentūroms be darbuotojo sutikimo — daugiausia tik skaičiai, kuriais darbuotojas sutiko dalytis."
+          ]
         },
-        "2": {
+        {
           "heading": "Ką darbuotojai mato apie įmones",
-          "items": {
-            "0": "Darbuotojai mato tai, ką įmonė nusprendžia skelbti: vieši poreikiai ir pasiūlymai rodomi tik po moderavimo."
-          }
+          "items": [
+            "Darbuotojai mato tai, ką įmonė nusprendžia skelbti: vieši poreikiai ir pasiūlymai rodomi tik po moderavimo."
+          ]
         },
-        "3": {
+        {
           "heading": "Žinutės",
-          "items": {
-            "0": "Pokalbį mato tik jo dalyviai. Tos pačios įmonės kolegos, kurie nėra dalyviai, nemato nieko — net to, kad pokalbis egzistuoja.",
-            "1": "Jei prieiga suteikiama papildomam asmeniui (pavyzdžiui, objekto užsakovui), ji galioja tik kol suteikimas aktyvus. Jį atšaukus, prieiga baigiasi, o istorija lieka įrašyta."
-          }
+          "items": [
+            "Pokalbį mato tik jo dalyviai. Tos pačios įmonės kolegos, kurie nėra dalyviai, nemato nieko — net to, kad pokalbis egzistuoja.",
+            "Jei prieiga suteikiama papildomam asmeniui (pavyzdžiui, objekto užsakovui), ji galioja tik kol suteikimas aktyvus. Jį atšaukus, prieiga baigiasi, o istorija lieka įrašyta."
+          ]
         },
-        "4": {
+        {
           "heading": "Administratoriai",
-          "items": {
-            "0": "Mažas platformos administratorių ratas mato veiklos eiles, reikalingas platformai veikti, pavyzdžiui, pagalbos ir peržiūros eiles. Administratorių puslapiai riboti ir užsidaro saugiai."
-          }
+          "items": [
+            "Mažas platformos administratorių ratas mato veiklos eiles, reikalingas platformai veikti, pavyzdžiui, pagalbos ir peržiūros eiles. Administratorių puslapiai riboti ir užsidaro saugiai."
+          ]
         },
-        "5": {
+        {
           "heading": "Jei kažkas atrodo ne taip",
-          "items": {
-            "0": "Prieigos taisyklės duomenų bazėje yra tiesos šaltinis, o šis puslapis jas atspindi. Jei kas nors čia neatitinka to, ką matote, susisiekite su mumis — peržiūrės žmogus."
-          }
+          "items": [
+            "Prieigos taisyklės duomenų bazėje yra tiesos šaltinis, o šis puslapis jas atspindi. Jei kas nors čia neatitinka to, ką matote, susisiekite su mumis — peržiūrės žmogus."
+          ]
         }
-      },
+      ],
       "matrix": {
         "title": "Teisių matrica: kas ką mato ir gali keisti",
         "intro": "Žemiau esanti lentelė išvardija pagrindines produkto sritis ir kiekvienai rolei nurodo, ką ji gali matyti ir ką keisti. Ji parašyta pagal faktines prieigos taisykles duomenų bazėje ir maršrutų apsaugose — kiekviena eilutė nurodo tikslią taisyklę, kuri ją užtikrina. Kur taisyklė siauresnė, nei telpa į trumpą žymą, eilutės paaiškinimas ribą apibūdina paprastais žodžiais.",
@@ -6313,12 +6313,12 @@
       "description": "Kaip paprašyti ištrinti savo LabourMarket.ai paskyrą ir asmens duomenis.",
       "intro": "Galite paprašyti LabourMarket.ai ištrinti jūsų paskyrą ir asmens duomenis. Jei galite prisijungti, prašymą galite pateikti patys: atidarykite paskyros puslapį „Privatumas“ (mobiliojoje programėlėje: Nustatymai → Privatumas), pasirinkite paskyros ištrynimą ir patvirtinkite jį prisijungę iš naujo. Praėjus 30 dienų nuo patvirtinimo sistema paskyrą ištrina automatiškai (iki tol prašymą galite atšaukti puslapyje „Privatumas“) ir išsiunčia patvirtinimą į paskyros el. paštą; jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Po galutinio ištrynimo ištrinti duomenys dar iki 7 dienų gali likti užšifruotose duomenų bazės atsarginėse kopijose; ten jie nenaudojami, o vėliau perrašomi. Ištrynimo taip pat galite paprašyti el. paštu, kaip aprašyta toliau; žmogus atsako per vieną mėnesį.",
       "howTitle": "Kaip paprašyti ištrynimo",
-      "howSteps": {
-        "0": "Parašykite el. laišką adresu {email} iš el. pašto adreso, susieto su jūsų LabourMarket.ai paskyra.",
-        "1": "Laiško temoje nurodykite „Paskyros ir duomenų ištrynimo prašymas“ ir parašykite, kad norite, jog jūsų LabourMarket.ai paskyra ir asmens duomenys būtų ištrinti.",
-        "2": "Prieš vykdydami prašymą galime paprašyti patvirtinti, kad jį pateikė paskyros savininkas.",
-        "3": "Prašymą peržiūrės ir įvykdys žmogus; jei reikės patvirtinimo ar patikslinimo, su jumis susisieksime."
-      },
+      "howSteps": [
+        "Parašykite el. laišką adresu {email} iš el. pašto adreso, susieto su jūsų LabourMarket.ai paskyra.",
+        "Laiško temoje nurodykite „Paskyros ir duomenų ištrynimo prašymas“ ir parašykite, kad norite, jog jūsų LabourMarket.ai paskyra ir asmens duomenys būtų ištrinti.",
+        "Prieš vykdydami prašymą galime paprašyti patvirtinti, kad jį pateikė paskyros savininkas.",
+        "Prašymą peržiūrės ir įvykdys žmogus; jei reikės patvirtinimo ar patikslinimo, su jumis susisieksime."
+      ],
       "mailSubject": "Paskyros ir duomenų ištrynimo prašymas",
       "coversTitle": "Ką apima ištrynimas",
       "coversBody": "Prašymas taikomas jūsų LabourMarket.ai paskyrai ir platformoje saugomiems jūsų asmens duomenims. Kai kuriuos įrašus gali reikėti išsaugoti, jei to reikalauja taikytini teisės aktai arba jei audito, sutikimo, saugumo, ginčo ar kitą įrašą privaloma teisėtai išsaugoti. Duomenims, kurie jau teisėtai atskleisti kitam nepriklausomam gavėjui, toliau gali būti taikomos to gavėjo teisinės pareigos.",
@@ -8049,63 +8049,63 @@
     "includesLabel": "Įeina",
     "cta": "Gauti pasiūlymą",
     "note": "Kainos yra orientacinės įprasto projekto pradžios sumos. Galutinę apimtį ir kainą suderiname kartu prieš pradedant darbą, o sąskaitos už tave čia niekada nepradedamos — kiekvienas paketas prasideda pokalbiu.",
-    "offers": {
-      "0": {
+    "offers": [
+      {
         "name": "DI procesų automatizavimas",
         "summary": "Išsiaiškiname pasikartojantį darbą tavo versle ir rankinį procesą pakeičiame patikimu automatizuotu srautu, kuris priklauso tau.",
         "priceFrom": "Nuo 900 €",
         "timeline": "Įprastai įgyvendinama per 1–3 sav.",
-        "includes": {
-          "0": "Proceso analizė ir apimties pokalbis",
-          "1": "Vienas pilnas automatizuotas srautas",
-          "2": "Perdavimo dokumentai ir trumpas pristatymas"
-        }
+        "includes": [
+          "Proceso analizė ir apimties pokalbis",
+          "Vienas pilnas automatizuotas srautas",
+          "Perdavimo dokumentai ir trumpas pristatymas"
+        ]
       },
-      "1": {
+      {
         "name": "Integracijos · n8n · API srautai",
         "summary": "Sujungiame įrankius, kuriuos jau naudoji — CRM, paštą, lenteles, vidines programas — per n8n ar tiesiogines API, kad duomenys judėtų be kopijavimo.",
         "priceFrom": "Nuo 600 €",
         "timeline": "Įprastai įgyvendinama per 1–2 sav.",
-        "includes": {
-          "0": "Iki 3 sujungtų sistemų",
-          "1": "n8n arba individualus API srautas",
-          "2": "Klaidų pranešimai ir pakartojimai"
-        }
+        "includes": [
+          "Iki 3 sujungtų sistemų",
+          "n8n arba individualus API srautas",
+          "Klaidų pranešimai ir pakartojimai"
+        ]
       },
-      "2": {
+      {
         "name": "Verslo procesų automatizavimas",
         "summary": "Didesnis darbas: keli susieti srautai, perimantys visą procesą — priėmimą, paskirstymą, priminimus — iš tavo komandos.",
         "priceFrom": "Nuo 1 200 €",
         "timeline": "Įprastai įgyvendinama per 2–5 sav.",
-        "includes": {
-          "0": "Kelių žingsnių proceso automatizavimas",
-          "1": "Būsenos lentos ir matomumas",
-          "2": "Du tobulinimo etapai po paleidimo"
-        }
+        "includes": [
+          "Kelių žingsnių proceso automatizavimas",
+          "Būsenos lentos ir matomumas",
+          "Du tobulinimo etapai po paleidimo"
+        ]
       },
-      "3": {
+      {
         "name": "Individualus DI asistentas",
         "summary": "Vidinis asistentas, paremtas tavo dokumentais ir duomenimis, kuriantis atsakymus bei juodraščius komandai — ne viešas pokalbių robotas.",
         "priceFrom": "Nuo 1 500 €",
         "timeline": "Įprastai įgyvendinama per 2–4 sav.",
-        "includes": {
-          "0": "Asistentas, paremtas tavo turiniu",
-          "1": "Privatus, prieigos kontroliuojamas diegimas",
-          "2": "Užklausų ir apsaugų derinimas"
-        }
+        "includes": [
+          "Asistentas, paremtas tavo turiniu",
+          "Privatus, prieigos kontroliuojamas diegimas",
+          "Užklausų ir apsaugų derinimas"
+        ]
       },
-      "4": {
+      {
         "name": "Svetainė + rinkodaros automatizavimas",
         "summary": "Moderni svetainė kartu su už jos veikiančiomis automatizacijomis — kontaktų rinkimu, priminimų sekomis ir ataskaitomis.",
         "priceFrom": "Nuo 1 900 €",
         "timeline": "Įprastai įgyvendinama per 3–6 sav.",
-        "includes": {
-          "0": "Rinkodaros svetainės kūrimas",
-          "1": "Kontaktų rinkimas ir priminimai",
-          "2": "Analitikos ir ataskaitų paruošimas"
-        }
+        "includes": [
+          "Rinkodaros svetainės kūrimas",
+          "Kontaktų rinkimas ir priminimai",
+          "Analitikos ir ataskaitų paruošimas"
+        ]
       }
-    }
+    ]
   },
   "playerCard": {
     "pageTitle": "Mano profesinis profilis",
@@ -9834,24 +9834,24 @@
       "cta": "Pateikti darbuotojų užklausą"
     },
     "title": "Kaip veikia pirmoji mokama paslauga",
-    "steps": {
-      "0": {
+    "steps": [
+      {
         "title": "Pateik užklausą nemokamai",
         "body": "Aprašyk reikalingus darbuotojus ar brigadą užklausos formoje. Jokio mokesčio, jokios kortelės, niekas nepublikuojama automatiškai."
       },
-      "1": {
+      {
         "title": "Užklausą peržiūri žmogus",
         "body": "Operatorius perskaito kiekvieną užklausą, susisiekia ir patikslina apimtį, terminus ir sąlygas prieš bet kokį tolimesnį žingsnį."
       },
-      "2": {
+      {
         "title": "Gauni rankiniu būdu patikrintą trumpąjį sąrašą",
         "body": "Realūs kandidatai ar brigados, žmogaus patikrinti pagal tavo užklausą. Jei tinkamo trumpojo sąrašo sudaryti nepavyksta — mokesčio nėra, o mes niekada nežadame, kad kandidatas tikrai bus rastas."
       },
-      "3": {
+      {
         "title": "Moki tik už suteiktą paslaugą",
         "body": "Fiksuotas sėkmės mokestis taikomas už įdarbintą darbuotoją, brigadą ar įmonę. Atskiras koordinavimo mokestis taikomas tik tada, kai realiai atliekamas dokumentų ar įvedimo koordinavimas. Galutinė kaina patvirtinama prieš pradedant mokamą darbą."
       }
-    },
+    ],
     "note": "Kartu veikia du dalykai, o šiame puslapyje aprašytas antrasis. Pati platforma veikia automatiškai: darbo skelbimai yra vieši, atitikimo peržiūra atidaryta be paskyros, o įvardyta užklausa sugeneruoja surikiuotą kandidatų sąrašą su paaiškinimu, kodėl kiekvienas žmogus tinka — viena aktyvi pozicija be mokesčio. Mokama paslauga aukščiau yra žmogaus darbas: operatorius perskaito tavo užklausą, susisiekia su tavimi ir sąrašą patikrina rankomis, prieš pasiūlydamas bet kurį kandidatą. Visa brigada jau gali pasiūlyti save tavo užklausai kaip vienas vienetas ir, abiem pusėms susitarus, prisijungti prie tavo projekto kaip viena komanda; automatinio visų brigadų siūlymo sąraše dar nėra — sąrašas rikiuoja žmones po vieną.",
     "ctaLabel": "Pateikti darbuotojų užklausą →"
   },
@@ -9972,36 +9972,36 @@
     "titleAccent": "žingsnis po žingsnio",
     "subcopy": "Darbas Europoje — viena iš galimybių, kurias atveria LabourMarket.ai. Susikurk vieną darbo profilį, pamatyk, ko reikia kiekvienoje šalyje, ir leisk darbdaviams tave rasti, kai būsi pasiruošęs. Mes niekada nežadame darbo ar atlyginimo — padedame pasiruošti ir būti suderintiems.",
     "stepsTitle": "Kaip tai veikia",
-    "steps": {
-      "0": {
+    "steps": [
+      {
         "title": "1. Nurodyk savo profesiją",
         "body": "Pridėk profesiją, patirtį ir laisvumą. Užtrunka kelias minutes."
       },
-      "1": {
+      {
         "title": "2. DI paruošia juodraštį",
         "body": "Asistentas tavo žodžius paverčia struktūruotu profiliu ir gyvenimo aprašymo juodraščiu — pasiūlymu, kurį peržiūri ir redaguoji. Jis niekada neišgalvoja patirties."
       },
-      "2": {
+      {
         "title": "3. Patikrink šalies pasirengimą",
         "body": "Pamatyk, kokių dokumentų ir žingsnių tikėtina prireiks norimoje šalyje — su šaltiniais ir ne kaip teisinė konsultacija."
       },
-      "3": {
+      {
         "title": "4. Būk suderintas",
         "body": "Kai darbdavio poreikis atitinka tavo profesiją, prieinamumą, apgyvendinimą, transportą ir kalbą, jis atsiranda tavo galimybių lentoje su sąžiningu atitikimo paaiškinimu."
       },
-      "4": {
+      {
         "title": "5. Susidomėjimas ir kontaktas",
         "body": "Pareikšk susidomėjimą tinkančiu poreikiu. Įmonė jį peržiūri, o tu matai sąžiningą statusą — peržiūrėta arba susisiekta. Sutartys ir apmokėjimas kol kas lieka už platformos ribų."
       }
-    },
+    ],
     "needTitle": "Ko gali prireikti",
-    "needItems": {
-      "0": "Profesijos, kurioje dirbi",
-      "1": "Tavo laisvumo nuo datos",
-      "2": "Ar reikia apgyvendinimo, ar turi savo",
-      "3": "Transporto: savo, vairuotojo pažymėjimo ar paėmimo",
-      "4": "Dokumentų, kurių gali prireikti šaliai"
-    },
+    "needItems": [
+      "Profesijos, kurioje dirbi",
+      "Tavo laisvumo nuo datos",
+      "Ar reikia apgyvendinimo, ar turi savo",
+      "Transporto: savo, vairuotojo pažymėjimo ar paėmimo",
+      "Dokumentų, kurių gali prireikti šaliai"
+    ],
     "directionsTitle": "Kur žmonės dirba",
     "directionsNote": "Atverk šalių puslapius ir pamatyk darbo rinkos signalus su šaltiniais.",
     "directionsCta": "Žiūrėti šalis",
@@ -11084,227 +11084,227 @@
       "lead": "Žmogaus profesinė vertė neturi dingti kaskart, kai jis keičia darbdavį. Tikras darbas gali tapti ilgalaike profesine istorija: ką žmogus dirbo, kur, kada, kiek laiko, kokiu vaidmeniu, kokiais įgūdžiais ir kokie įrodymai bei patvirtinimai tai remia.",
       "leadOrg": "Organizacijoms tas pats tikras darbas kaupia įmonės realiai atlikto darbo istoriją: projektus, komandas, atliktus darbus, valandas, kompetencijas ir įrodymus.",
       "railPeopleLabel": "Žmogui",
-      "railPeople": {
-        "0": "Žmonės",
-        "1": "Galimybės",
-        "2": "Tikras darbas",
-        "3": "Įrodymai",
-        "4": "Profesinis augimas"
-      },
+      "railPeople": [
+        "Žmonės",
+        "Galimybės",
+        "Tikras darbas",
+        "Įrodymai",
+        "Profesinis augimas"
+      ],
       "railCompaniesLabel": "Įmonei",
-      "railCompanies": {
-        "0": "Įmonės",
-        "1": "Žmonės",
-        "2": "Projektai",
-        "3": "Patvirtintas darbas",
-        "4": "Organizacijos gebėjimai"
-      },
+      "railCompanies": [
+        "Įmonės",
+        "Žmonės",
+        "Projektai",
+        "Patvirtintas darbas",
+        "Organizacijos gebėjimai"
+      ],
       "accumulate": "Kiekvienas tikras darbo laikotarpis prideda prie istorijos — ji nesibaigia pakeitus darbdavį.",
       "railAria": "Kaip žmonės ir įmonės auga iš tikro darbo"
     },
     "lifecycle": {
       "label": "Visas profesinio darbo ciklas",
-      "steps": {
-        "0": "Galimybė",
-        "1": "Įdarbinimas / bendradarbiavimas",
-        "2": "Tikras darbas",
-        "3": "Darbo žurnalas",
-        "4": "Projektai ir užduotys",
-        "5": "Darbo laikas",
-        "6": "Darbo įrodymai",
-        "7": "Patvirtinimai",
-        "8": "Įgūdžiai ir kompetencijos",
-        "9": "Gyvas CV — gyva profesinė istorija",
-        "10": "Naujos galimybės",
-        "11": "Komandos",
-        "12": "Įmonės gebėjimai",
-        "13": "Darbo rinkos paslaugos"
-      },
+      "steps": [
+        "Galimybė",
+        "Įdarbinimas / bendradarbiavimas",
+        "Tikras darbas",
+        "Darbo žurnalas",
+        "Projektai ir užduotys",
+        "Darbo laikas",
+        "Darbo įrodymai",
+        "Patvirtinimai",
+        "Įgūdžiai ir kompetencijos",
+        "Gyvas CV — gyva profesinė istorija",
+        "Naujos galimybės",
+        "Komandos",
+        "Įmonės gebėjimai",
+        "Darbo rinkos paslaugos"
+      ],
       "note": "Tai sistemos paaiškinimas, o ne jos riba: seką papildo ir kitos darbo rinkos dalys."
     },
-    "loops": {
-      "0": {
+    "loops": [
+      {
         "id": "people",
         "heading": "Žmonėms",
         "lead": "Profesinis profilis — tai ne kortelė ar taškai, o tikro žmogaus patirtis, darbo istorija ir įrodymai.",
-        "flow": {
-          "0": "Rasti galimybes",
-          "1": "Pateikti profesinę patirtį",
-          "2": "Dirbti",
-          "3": "Fiksuoti atliktą darbą",
-          "4": "Išsaugoti įrodymus",
-          "5": "Gauti patvirtinimus, kai taikoma",
-          "6": "Kaupti profesinę istoriją — gyvas CV",
-          "7": "Naudoti sukauptą patirtį naujoms galimybėms"
-        },
+        "flow": [
+          "Rasti galimybes",
+          "Pateikti profesinę patirtį",
+          "Dirbti",
+          "Fiksuoti atliktą darbą",
+          "Išsaugoti įrodymus",
+          "Gauti patvirtinimus, kai taikoma",
+          "Kaupti profesinę istoriją — gyvas CV",
+          "Naudoti sukauptą patirtį naujoms galimybėms"
+        ],
         "pointsLabel": "Ką atspindi profesinis profilis",
-        "points": {
-          "0": "patirtį ir darbo istoriją;",
-          "1": "įgūdžius ir kompetencijas;",
-          "2": "kvalifikacijas ir pažymėjimus, kai jie užfiksuoti;",
-          "3": "atliktą darbą, valandas, projektus ir objektus;",
-          "4": "įrodymus ir patvirtinimus;",
-          "5": "prieinamumą ir profesinius pageidavimus, kai taikoma."
-        }
+        "points": [
+          "patirtį ir darbo istoriją;",
+          "įgūdžius ir kompetencijas;",
+          "kvalifikacijas ir pažymėjimus, kai jie užfiksuoti;",
+          "atliktą darbą, valandas, projektus ir objektus;",
+          "įrodymus ir patvirtinimus;",
+          "prieinamumą ir profesinius pageidavimus, kai taikoma."
+        ]
       },
-      "1": {
+      {
         "id": "employers",
         "heading": "Darbdaviams",
         "lead": "Darbdavio vertė — ne vien paskelbtos vakansijos. Svarbu išsaugoti žinias, kas dirbo, ką padarė, kur, kada, kiek laiko, kas užbaigta, kokie įrodymai yra ir kokį gebėjimą organizacija sukaupė.",
-        "flow": {
-          "0": "Poreikis",
-          "1": "Žmonės",
-          "2": "Komanda",
-          "3": "Projektas / objektas",
-          "4": "Darbas",
-          "5": "Valandos ir eiga",
-          "6": "Įrodymai",
-          "7": "Patvirtinimas",
-          "8": "Įmonės realiai atlikto darbo istorija",
-          "9": "Būsimas darbo jėgos planavimas (kryptis)"
-        },
+        "flow": [
+          "Poreikis",
+          "Žmonės",
+          "Komanda",
+          "Projektas / objektas",
+          "Darbas",
+          "Valandos ir eiga",
+          "Įrodymai",
+          "Patvirtinimas",
+          "Įmonės realiai atlikto darbo istorija",
+          "Būsimas darbo jėgos planavimas (kryptis)"
+        ],
         "pointsLabel": "Ką organizacija išsaugo",
-        "points": {
-          "0": "kas dirbo ir kokiame vaidmenyje;",
-          "1": "kokie darbai atlikti, kur ir kada;",
-          "2": "kiek valandų ir kokia eiga;",
-          "3": "kokie įrodymai ir patvirtinimai yra;",
-          "4": "kokius gebėjimus kolektyvas realiai sukaupė."
-        }
+        "points": [
+          "kas dirbo ir kokiame vaidmenyje;",
+          "kokie darbai atlikti, kur ir kada;",
+          "kiek valandų ir kokia eiga;",
+          "kokie įrodymai ir patvirtinimai yra;",
+          "kokius gebėjimus kolektyvas realiai sukaupė."
+        ]
       },
-      "2": {
+      {
         "id": "network",
         "heading": "Agentūroms ir kitiems darbo rinkos dalyviams",
         "lead": "LabourMarket.ai nėra vien darbuotojo ir darbdavio sistema. Tame pačiame darbo rinkos tinkle yra vieta ir kitiems teisėtiems dalyviams.",
-        "flow": {},
-        "participants": {
-          "0": "Įdarbinimo ir atrankos agentūros",
-          "1": "Personalo nuomos įmonės",
-          "2": "Rangovai ir subrangovai",
-          "3": "Mokymo teikėjai",
-          "4": "Mokyklos ir profesinio mokymo įstaigos",
-          "5": "Savarankiški specialistai",
-          "6": "Darbo rinkos paslaugų teikėjai",
-          "7": "Kiti teisėti darbo rinkos dalyviai"
-        },
+        "flow": [],
+        "participants": [
+          "Įdarbinimo ir atrankos agentūros",
+          "Personalo nuomos įmonės",
+          "Rangovai ir subrangovai",
+          "Mokymo teikėjai",
+          "Mokyklos ir profesinio mokymo įstaigos",
+          "Savarankiški specialistai",
+          "Darbo rinkos paslaugų teikėjai",
+          "Kiti teisėti darbo rinkos dalyviai"
+        ],
         "pointsLabel": "Jų vieta tame pačiame tinkle",
-        "points": {
-          "0": "dirba su tais pačiais tikrais darbo įrašais, o ne su atskirais failais;",
-          "1": "vaidmuo ir atsakomybė aiškiai atskirti: kas paskelbė, kas dirbo, kas patvirtino."
-        }
+        "points": [
+          "dirba su tais pačiais tikrais darbo įrašais, o ne su atskirais failais;",
+          "vaidmuo ir atsakomybė aiškiai atskirti: kas paskelbė, kas dirbo, kas patvirtino."
+        ]
       }
-    },
+    ],
     "evidence": {
       "heading": "Tikras darbas tampa profesiniu įrodymu",
       "lead": "Vienas darbo įvykis — vienas įrašas. Jis gali papildyti kelis vaizdus, bet nėra kopijuojamas ir niekada nekuriamas iš nieko.",
       "chainLabel": "Įrodymų seka",
-      "chain": {
-        "0": "Žmogus",
-        "1": "Data / laikotarpis",
-        "2": "Valandos",
-        "3": "Projektas / objektas",
-        "4": "Atliktas darbas",
-        "5": "Įgūdžiai ir kompetencijos",
-        "6": "Šaltinis / įrodymas",
-        "7": "Patvirtinimas",
-        "8": "Profesinė istorija — gyvas CV"
-      },
+      "chain": [
+        "Žmogus",
+        "Data / laikotarpis",
+        "Valandos",
+        "Projektas / objektas",
+        "Atliktas darbas",
+        "Įgūdžiai ir kompetencijos",
+        "Šaltinis / įrodymas",
+        "Patvirtinimas",
+        "Profesinė istorija — gyvas CV"
+      ],
       "projectionsLabel": "Tas pats įrašas — keli vaizdai",
-      "projections": {
-        "0": "Žmogaus profesinė istorija",
-        "1": "Komandos istorija",
-        "2": "Projekto istorija",
-        "3": "Įmonės gebėjimų istorija"
-      },
+      "projections": [
+        "Žmogaus profesinė istorija",
+        "Komandos istorija",
+        "Projekto istorija",
+        "Įmonės gebėjimų istorija"
+      ],
       "note": "Vienas darbo įvykis gali papildyti kelis vaizdus. Įrodymai nekopijuojami ir nekuriami."
     },
     "afterHire": {
       "heading": "Kam naudotis, kai darbas jau rastas?",
       "lead": "Įprasta skelbimų svetainė daugiausia vertės suteikia iki įdarbinimo. LabourMarket.ai turi tapti naudingesnė tada, kai prasideda tikras darbas.",
       "boardLabel": "Įprasta darbo skelbimų svetainė",
-      "boardPoints": {
-        "0": "Vertė didžiausia ieškant darbo.",
-        "1": "Po įdarbinimo istorija lieka atskirose sistemose.",
-        "2": "Naujas darbdavys pradeda nuo nulio."
-      },
-      "platformPoints": {
-        "0": "Kiekvienas tikras darbo laikotarpis prideda prie profesinės istorijos.",
-        "1": "Auga įrodymai, kompetencijos ir gyvas CV.",
-        "2": "Kartu auga komandos ir įmonės realiai atlikto darbo istorija.",
-        "3": "Sukaupta patirtis tampa kontekstu naujoms galimybėms."
-      },
-      "stages": {
-        "0": "Paieška",
-        "1": "Įdarbinimas",
-        "2": "Darbas",
-        "3": "Vėlesnės galimybės"
-      },
+      "boardPoints": [
+        "Vertė didžiausia ieškant darbo.",
+        "Po įdarbinimo istorija lieka atskirose sistemose.",
+        "Naujas darbdavys pradeda nuo nulio."
+      ],
+      "platformPoints": [
+        "Kiekvienas tikras darbo laikotarpis prideda prie profesinės istorijos.",
+        "Auga įrodymai, kompetencijos ir gyvas CV.",
+        "Kartu auga komandos ir įmonės realiai atlikto darbo istorija.",
+        "Sukaupta patirtis tampa kontekstu naujoms galimybėms."
+      ],
+      "stages": [
+        "Paieška",
+        "Įdarbinimas",
+        "Darbas",
+        "Vėlesnės galimybės"
+      ],
       "schematicNote": "Schema, o ne matavimo rezultatas.",
       "conclusion": "Vertė nesibaigia, kai priimamas sprendimas dėl darbo — ji auga kiekvieną dieną, kai dirbama."
     },
     "trust": {
       "heading": "Pasitikėjimas: faktas ≠ išvesta ≠ patvirtinta",
       "lead": "Originalūs įrodymai ir jų šaltinis išsaugomi. Tai, ką nurodė šaltinis, visada atskirta nuo to, ką išvedė sistema, ir nuo to, ką patvirtino žmogus ar organizacija. Dirbtinio intelekto interpretacija niekada nelaikoma faktu.",
-      "tiers": {
-        "0": {
+      "tiers": [
+        {
           "term": "Faktas",
           "meaning": "Tai, ką šaltinis pats nurodė: data, valandos, darbo aprašymas.",
           "example": "Pavyzdžiui, „8 val., 2025-03-12“ šaltinio lentelėje."
         },
-        "1": {
+        {
           "term": "Išvesta",
           "meaning": "Sistemos ar taisyklių interpretacija. Visada pažymima kaip išvesta ir niekada netampa faktu.",
           "example": "Pavyzdžiui, įgūdis, atpažintas iš darbo aprašymo teksto."
         },
-        "2": {
+        {
           "term": "Patvirtinta",
           "meaning": "Žmogaus ar organizacijos patvirtinimas. Atskirtas nuo paties žmogaus pateiktos informacijos.",
           "example": "Pavyzdžiui, vadovas patvirtino darbo laikotarpį."
         }
-      },
+      ],
       "noLabel": "Ko čia nėra",
-      "no": {
-        "0": "Jokių žvaigždučių įvertinimų.",
-        "1": "Jokių taškų.",
-        "2": "Jokių darbuotojų reitingų lentelių.",
-        "3": "Jokio dirbtinio žmogaus vertės reitingavimo."
-      }
+      "no": [
+        "Jokių žvaigždučių įvertinimų.",
+        "Jokių taškų.",
+        "Jokių darbuotojų reitingų lentelių.",
+        "Jokio dirbtinio žmogaus vertės reitingavimo."
+      ]
     },
     "privacy": {
       "heading": "Privatumas",
       "lead": "Profesiniai įrodymai gali būti detalūs privačiai. Viešas atradimas neatskleidžia to, ką privaloma saugoti.",
       "privateLabel": "Detalu tik privačiai",
-      "private": {
-        "0": "Išsamūs darbo įrašai ir įrodymai.",
-        "1": "Darbo žurnalas.",
-        "2": "Projektų ir objektų detalės."
-      },
+      "private": [
+        "Išsamūs darbo įrašai ir įrodymai.",
+        "Darbo žurnalas.",
+        "Projektų ir objektų detalės."
+      ],
       "publicNotLabel": "Vieša paieška neatskleidžia",
-      "publicNot": {
-        "0": "privačių kontaktų;",
-        "1": "konfidencialių klientų;",
-        "2": "privataus darbo žurnalo informacijos;",
-        "3": "ribojamos asmeninės informacijos;",
-        "4": "konfidencialios projekto informacijos."
-      },
+      "publicNot": [
+        "privačių kontaktų;",
+        "konfidencialių klientų;",
+        "privataus darbo žurnalo informacijos;",
+        "ribojamos asmeninės informacijos;",
+        "konfidencialios projekto informacijos."
+      ],
       "control": "Žmonės ir organizacijos išlaiko tinkamą kontrolę, kas matoma viešai."
     },
     "europe": {
       "heading": "Europos darbo rinka",
       "body": "LabourMarket.ai kuriama pirmiausia Europai, bet gali plėstis visame pasaulyje. Tai ne vienos šalies skelbimų svetainė: tikslas — jungti darbo rinkos dalyvius skirtingose šalyse, profesijose ir sektoriuose.",
-      "points": {
-        "0": "Daugiakalbė sąsaja; originalus tekstas visada išsaugomas.",
-        "1": "Šalies dokumentų ir reikalavimų aiškinimas pagal šalį.",
-        "2": "Viešų darbo skelbimų šaltiniai jungiami šalis po šalies — tik kai šaltinio sąlygos patvirtintos."
-      }
+      "points": [
+        "Daugiakalbė sąsaja; originalus tekstas visada išsaugomas.",
+        "Šalies dokumentų ir reikalavimų aiškinimas pagal šalį.",
+        "Viešų darbo skelbimų šaltiniai jungiami šalis po šalies — tik kai šaltinio sąlygos patvirtintos."
+      ]
     },
     "notYet": {
       "heading": "Ko platforma nedaro",
-      "points": {
-        "0": "Ji pati nieko nepažymi kaip patvirtinto — patvirtinta būsena visada ateina iš tikro žmogaus.",
-        "1": "Ji neteikia teisinių konsultacijų. Dokumentų gairės yra tik informacinės.",
-        "2": "Ji nevertina žmonių taškais ar reitingais."
-      }
+      "points": [
+        "Ji pati nieko nepažymi kaip patvirtinto — patvirtinta būsena visada ateina iš tikro žmogaus.",
+        "Ji neteikia teisinių konsultacijų. Dokumentų gairės yra tik informacinės.",
+        "Ji nevertina žmonių taškais ar reitingais."
+      ]
     },
     "data": {
       "heading": "Tavo duomenys",
@@ -18978,25 +18978,25 @@
       "country": "Norvegija",
       "pay": "nuo 2 800 €"
     },
-    "opportunities": {
-      "0": {
+    "opportunities": [
+      {
         "role": "Virėja",
         "place": "Restoranas · Oslas",
-        "fits": {
-          "0": "Profesija",
-          "1": "Šalis",
-          "2": "Atlygis"
-        }
+        "fits": [
+          "Profesija",
+          "Šalis",
+          "Atlygis"
+        ]
       },
-      "1": {
+      {
         "role": "Virtuvės darbuotoja",
         "place": "Viešbutis · Bergenas",
-        "fits": {
-          "0": "Šalis",
-          "1": "Atlygis"
-        }
+        "fits": [
+          "Šalis",
+          "Atlygis"
+        ]
       }
-    },
+    ],
     "conversation": {
       "employer": "Ar galėtum pradėti spalio 6 d.?",
       "person": "Taip, galiu."
@@ -19009,15 +19009,15 @@
     "week": {
       "label": "Ši savaitė",
       "total": "40 val.",
-      "days": {
-        "0": "Pr",
-        "1": "An",
-        "2": "Tr",
-        "3": "Kt",
-        "4": "Pn",
-        "5": "Št",
-        "6": "Sk"
-      }
+      "days": [
+        "Pr",
+        "An",
+        "Tr",
+        "Kt",
+        "Pn",
+        "Št",
+        "Sk"
+      ]
     },
     "confirmedBy": "Vadovas patvirtino 5 darbo žurnalo įrašus",
     "facts": {
@@ -19025,18 +19025,18 @@
       "confirmed": "val. su vadovo įrašu",
       "days": "darbo dienos"
     },
-    "cv": {
-      "0": {
+    "cv": [
+      {
         "org": "Restoranas „Fjordas“ · Oslas",
         "period": "2026 — dabar",
         "standing": "Darbo žurnalo įrašus patvirtino vadovas"
       },
-      "1": {
+      {
         "org": "Restoranas „Ąžuolas“ · Vilnius",
         "period": "2021–2026 m.",
         "standing": "Nurodė pati"
       }
-    },
+    ],
     "next": {
       "role": "Vyresnioji virėja",
       "place": "Restoranas · Bergenas",

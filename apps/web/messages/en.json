@@ -5120,86 +5120,86 @@
         "line2": "a card that speaks for you."
       },
       "subcopy": "Your card is built from your real completed work and work records, not a self-written CV. Fit signals are shown in context — coverage and readiness for a specific need, never one universal rating.",
-      "bullets": {
-        "0": "Work readiness — honest signals (met out of total) with a clear next step. Never one universal rating.",
-        "1": "What I can do — declared skills, journal-supported skills and real confirmations, not just a self-written CV.",
-        "2": "When and where I can work — availability, a from-date and the country, always current.",
-        "3": "Evidence of experience — work history, documents and a growth timeline built from real entries."
-      }
+      "bullets": [
+        "Work readiness — honest signals (met out of total) with a clear next step. Never one universal rating.",
+        "What I can do — declared skills, journal-supported skills and real confirmations, not just a self-written CV.",
+        "When and where I can work — availability, a from-date and the country, always current.",
+        "Evidence of experience — work history, documents and a growth timeline built from real entries."
+      ]
     },
     "journey": {
       "eyebrow": "Your journey",
       "headline": "Your journey: from signup to hire",
-      "steps": {
-        "0": {
+      "steps": [
+        {
           "title": "Build your profile (5 min)",
           "desc": "Add your trade, experience and availability."
         },
-        "1": {
+        {
           "title": "Build your work records",
           "desc": "Your work records and certificates show what you can do."
         },
-        "2": {
+        {
           "title": "See opportunity-fit direction",
           "desc": "Roles that fit your trade, rate and location find you."
         },
-        "3": {
+        {
           "title": "Work, earn, build your record",
           "desc": "Completed work strengthens your records and readiness."
         }
-      }
+      ]
     },
     "features": {
       "eyebrow": "What you get",
       "headline": "Built around the worker, not the middleman",
-      "items": {
-        "0": {
+      "items": [
+        {
           "title": "Readiness from real work",
           "desc": "Your readiness reflects completed work and records, shown in context — not promises."
         },
-        "1": {
+        {
           "title": "Records-backed skills",
           "desc": "Built from your work records and certificates."
         },
-        "2": {
+        {
           "title": "Cross-border opportunities",
           "desc": "Built for cross-border work across Europe."
         },
-        "3": {
+        {
           "title": "Direct employer contact",
           "desc": "No opaque agents in the middle."
         },
-        "4": {
+        {
           "title": "Explainable fit",
           "desc": "See why a role may fit you."
         },
-        "5": {
+        {
           "title": "Growing track record",
           "desc": "Every job builds a portable history."
         }
-      }
+      ]
     },
     "faq": {
       "eyebrow": "Worker FAQ",
       "headline": "Straight answers",
-      "items": {
-        "0": {
+      "items": [
+        {
           "q": "Where do skill signals come from?",
           "a": "From your work-journal records on completed work and uploaded certificates — never a self-written claim alone."
         },
-        "1": {
+        {
           "q": "How much does it cost workers?",
           "a": "Everything is free for individuals — your profile, matches, search and messaging never cost a worker anything. Paid plans exist only for organisations and are published on the pricing page."
         },
-        "2": {
+        {
           "q": "Who sees my profile?",
           "a": "Only registered employers and agencies you're visible to — you control your availability and exposure."
         },
-        "3": {
+        {
           "q": "Can I work for multiple companies?",
           "a": "Yes. Your profile is yours; you can take roles from any company on the platform."
         }
-      }
+      ]
     },
     "cta": {
       "headline": {
@@ -5218,86 +5218,86 @@
         "line2": "looks like."
       },
       "subcopy": "Post what each project needs and see explainable fit direction from available workers and agencies — in hours, not weeks.",
-      "bullets": {
-        "0": "Project + location — scope each need precisely.",
-        "1": "Headcount — how many of each role you need.",
-        "2": "Required skills — compared with workers' skill records.",
-        "3": "Fit direction — workers whose abilities may fit this need."
-      }
+      "bullets": [
+        "Project + location — scope each need precisely.",
+        "Headcount — how many of each role you need.",
+        "Required skills — compared with workers' skill records.",
+        "Fit direction — workers whose abilities may fit this need."
+      ]
     },
     "journey": {
       "eyebrow": "How fit direction works for you",
       "headline": "From demand to hire",
-      "steps": {
-        "0": {
+      "steps": [
+        {
           "title": "Create project + post demand",
           "desc": "Define roles, headcount and skills."
         },
-        "1": {
+        {
           "title": "See who fits",
           "desc": "Workers and agencies whose records fit your need are listed by fit, with the reasons — a signal, not a guarantee. You decide whom to contact."
         },
-        "2": {
+        {
           "title": "Reach out directly",
           "desc": "Contact the people you want — no gatekeeper."
         },
-        "3": {
+        {
           "title": "Hire faster",
           "desc": "Close roles in days, with accountable decisions."
         }
-      }
+      ]
     },
     "features": {
       "eyebrow": "Why companies",
       "headline": "Supply you can act on",
-      "items": {
-        "0": {
+      "items": [
+        {
           "title": "Explainable fit direction",
           "desc": "Every fit signal shows the reasons behind it."
         },
-        "1": {
+        {
           "title": "Cross-border worker pool",
           "desc": "Supply from every market we operate in, in one place."
         },
-        "2": {
+        {
           "title": "No opaque middlemen",
           "desc": "You see and own the relationship."
         },
-        "3": {
+        {
           "title": "Skill records + fit signals",
           "desc": "Hire on records, not on claims."
         },
-        "4": {
+        {
           "title": "Supply signals",
           "desc": "See workers' declared availability as profiles are updated."
         },
-        "5": {
+        {
           "title": "Direct contact",
           "desc": "You own the worker relationship."
         }
-      }
+      ]
     },
     "faq": {
       "eyebrow": "Company FAQ",
       "headline": "Straight answers",
-      "items": {
-        "0": {
+      "items": [
+        {
           "q": "How are fit signals shown?",
           "a": "Always against a specific need: coverage and fit from workers' skill records, reliability and on-site records, with the reasons. Never one universal rating comparable across people."
         },
-        "1": {
+        {
           "q": "How much does it cost?",
           "a": "Prices are published on the pricing page: one active position per organisation is free; more positions need the organisation plan, activated in your account. Submitting a workforce need is free."
         },
-        "2": {
+        {
           "q": "Can we filter by location?",
           "a": "Yes — by country and region, matched to worker location and willingness to relocate."
         },
-        "3": {
+        {
           "q": "How is worker experience shown?",
           "a": "Through workers' skill records, structured work history and contextual fit signals — not self-reported CVs."
         }
-      }
+      ]
     },
     "cta": {
       "headline": {
@@ -5316,86 +5316,86 @@
         "line2": "in one room."
       },
       "subcopy": "Manage your workers, connect them to client needs and broker introductions — without losing visibility or control.",
-      "bullets": {
-        "0": "Pool size — every managed worker at a glance.",
-        "1": "Trade breakdown — capacity by skill, as declared in profiles.",
-        "2": "Assignment status — Active, Pending, Available.",
-        "3": "Multi-client — place the right people across clients."
-      }
+      "bullets": [
+        "Pool size — every managed worker at a glance.",
+        "Trade breakdown — capacity by skill, as declared in profiles.",
+        "Assignment status — Active, Pending, Available.",
+        "Multi-client — place the right people across clients."
+      ]
     },
     "journey": {
       "eyebrow": "Agency workflow",
       "headline": "Run your pool like a desk",
-      "steps": {
-        "0": {
+      "steps": [
+        {
           "title": "Onboard your workers",
           "desc": "Bring your managed pool into one workspace."
         },
-        "1": {
+        {
           "title": "Connect to client demand",
           "desc": "Direct your people toward open client roles."
         },
-        "2": {
+        {
           "title": "Manage assignments",
           "desc": "Track active, pending and available."
         },
-        "3": {
+        {
           "title": "Grow your pool",
           "desc": "Add capacity where demand is rising."
         }
-      }
+      ]
     },
     "features": {
       "eyebrow": "Why agencies",
       "headline": "Leverage, not loss of control",
-      "items": {
-        "0": {
+      "items": [
+        {
           "title": "Manage your pool",
           "desc": "Workers, availability and status in one place."
         },
-        "1": {
+        {
           "title": "Post on behalf of clients",
           "desc": "Broker demand without losing the relationship."
         },
-        "2": {
+        {
           "title": "Fit direction",
           "desc": "Place the right people faster."
         },
-        "3": {
+        {
           "title": "Visibility controls",
           "desc": "Public, agencies-only or direct — your call."
         },
-        "4": {
+        {
           "title": "Cross-border reach",
           "desc": "Clients and workers across every market we operate in."
         },
-        "5": {
+        {
           "title": "Grow your desk",
           "desc": "Capacity insights as demand shifts."
         }
-      }
+      ]
     },
     "faq": {
       "eyebrow": "Agency FAQ",
       "headline": "Straight answers",
-      "items": {
-        "0": {
+      "items": [
+        {
           "q": "Do we keep our client relationships?",
           "a": "Yes. You broker and stay in control — the platform never disintermediates you."
         },
-        "1": {
+        {
           "q": "How much does it cost agencies?",
           "a": "An agency is an organisation and uses the same plans: one active position is free, more need the organisation plan from the pricing page. There is no separate agency tariff."
         },
-        "2": {
+        {
           "q": "Can we control worker visibility?",
           "a": "Yes — public, agencies-only or direct, per worker and per demand."
         },
-        "3": {
+        {
           "q": "Can one worker serve multiple clients?",
           "a": "Yes, with assignment status tracking so nothing is double-booked."
         }
-      }
+      ]
     },
     "cta": {
       "headline": {
@@ -5553,24 +5553,24 @@
       "title": "Find work",
       "titleAccent": "with one free profile.",
       "subcopy": "Build one profile, set your availability, and let real demand find you across borders.",
-      "benefits": {
-        "0": {
+      "benefits": [
+        {
           "title": "One profile, every market",
           "body": "Maintain a single avatar with records-backed skills and availability — visible to registered employers across borders."
         },
-        "1": {
+        {
           "title": "Real demand",
           "body": "See open work needs relevant to your trade, skills and city — and express interest in one click."
         },
-        "2": {
+        {
           "title": "Honest signals",
           "body": "Transparent, contextual fit signals — no inflated claims, no universal rating, no pay-to-rank."
         },
-        "3": {
+        {
           "title": "Grows while you work",
           "body": "Record completed work and results as you go — your professional history becomes richer, and opportunity search keeps getting more precise, even when you are not actively looking."
         }
-      },
+      ],
       "screenshot": "Worker avatar flow",
       "cta": "Create free profile"
     },
@@ -5579,20 +5579,20 @@
       "title": "Find the workers",
       "titleAccent": "your projects need.",
       "subcopy": "Tell us which specialists each project needs, how many and from when. Sending the inquiry is free and needs no account; a free account also shows you which available workers and agencies fit.",
-      "benefits": {
-        "0": {
+      "benefits": [
+        {
           "title": "Post demand per project",
           "body": "Define roles, headcount and skills per project — not vague job ads."
         },
-        "1": {
+        {
           "title": "Fit to the specific job",
           "body": "You see which available workers and agencies fit each concrete need — honestly, per need."
         },
-        "2": {
+        {
           "title": "Agencies, when you need them",
           "body": "Tap registered agency pools for surge capacity without losing visibility."
         }
-      },
+      ],
       "screenshot": "Company demand flow",
       "cta": "Describe the workers you need",
       "calculatorBody": "Before you post a need, size the work: labour hours, materials, equipment and travel, in your own numbers.",
@@ -5606,11 +5606,11 @@
           "titleAccent": "in Luxembourg.",
           "subcopy": "For construction contractors and subcontractors. Tell us which specialists you need — welders, electricians, carpenters, scaffolders — how many, where and from when.",
           "cta": "Describe the workers you need",
-          "points": {
-            "0": "Submitting an inquiry is free and needs no account, only a contact e-mail. Nothing is published automatically.",
-            "1": "We look for people whose recorded work fits your need. If no suitable match is available yet, we say so.",
-            "2": "For construction inquiries, our partner company can coordinate documents and onboarding, with a person handling each step."
-          }
+          "points": [
+            "Submitting an inquiry is free and needs no account, only a contact e-mail. Nothing is published automatically.",
+            "We look for people whose recorded work fits your need. If no suitable match is available yet, we say so.",
+            "For construction inquiries, our partner company can coordinate documents and onboarding, with a person handling each step."
+          ]
         },
         "nl": {
           "metaTitle": "Skilled trades workers for sites in the Netherlands",
@@ -5620,11 +5620,11 @@
           "titleAccent": "in the Netherlands.",
           "subcopy": "For construction contractors and subcontractors. Tell us which specialists you need — welders, electricians, carpenters, scaffolders — how many, where and from when.",
           "cta": "Describe the workers you need",
-          "points": {
-            "0": "Submitting an inquiry is free and needs no account, only a contact e-mail. Nothing is published automatically.",
-            "1": "We look for people whose recorded work fits your need. If no suitable match is available yet, we say so.",
-            "2": "For construction inquiries, our partner company can coordinate documents and onboarding, with a person handling each step."
-          }
+          "points": [
+            "Submitting an inquiry is free and needs no account, only a contact e-mail. Nothing is published automatically.",
+            "We look for people whose recorded work fits your need. If no suitable match is available yet, we say so.",
+            "For construction inquiries, our partner company can coordinate documents and onboarding, with a person handling each step."
+          ]
         },
         "dk": {
           "metaTitle": "Skilled trades workers for sites in Denmark",
@@ -5634,11 +5634,11 @@
           "titleAccent": "in Denmark.",
           "subcopy": "For construction contractors and subcontractors. Tell us which specialists you need — welders, electricians, carpenters, scaffolders — how many, where and from when.",
           "cta": "Describe the workers you need",
-          "points": {
-            "0": "Submitting an inquiry is free and needs no account, only a contact e-mail. Nothing is published automatically.",
-            "1": "We look for people whose recorded work fits your need. If no suitable match is available yet, we say so.",
-            "2": "For construction inquiries, our partner company can coordinate documents and onboarding, with a person handling each step."
-          }
+          "points": [
+            "Submitting an inquiry is free and needs no account, only a contact e-mail. Nothing is published automatically.",
+            "We look for people whose recorded work fits your need. If no suitable match is available yet, we say so.",
+            "For construction inquiries, our partner company can coordinate documents and onboarding, with a person handling each step."
+          ]
         }
       }
     },
@@ -5647,20 +5647,20 @@
       "title": "Your pool,",
       "titleAccent": "in motion.",
       "subcopy": "Manage your managed workers, post demand on behalf of clients, and broker introductions — all in one place.",
-      "benefits": {
-        "0": {
+      "benefits": [
+        {
           "title": "Manage your pool",
           "body": "Keep your managed workers, availability and statuses organised in one workspace."
         },
-        "1": {
+        {
           "title": "Broker with leverage",
           "body": "Share client needs and place the right people faster with explainable fit direction."
         },
-        "2": {
+        {
           "title": "Visibility controls",
           "body": "Choose what is public, agencies-only, or direct — you control exposure."
         }
-      },
+      ],
       "screenshot": "Agency mode flow",
       "cta": "Create an agency account"
     },
@@ -5670,39 +5670,39 @@
       "titleAccent": "free.",
       "subcopy": "Create a CV from scratch or import your existing PDF or DOCX. Review every extracted fact, pick a clean template and download as PDF — free. If you choose, the same information can build your worker profile and show you real job ads from official public sources.",
       "cta": "Create my CV — free",
-      "benefits": {
-        "0": {
+      "benefits": [
+        {
           "title": "Import or start fresh",
           "body": "Upload an existing CV (PDF, DOCX or text) or start from a blank page. Extracted facts stay suggestions until you accept them."
         },
-        "1": {
+        {
           "title": "Honest structure",
           "body": "Your experience, education, languages and skills are structured for your review — nothing is invented and nothing is saved without your approval."
         },
-        "2": {
+        {
           "title": "Clean templates, real PDF",
           "body": "Choose a professional template and export to A4 PDF through your browser — no watermark, no paywall."
         },
-        "3": {
+        {
           "title": "More than a document",
           "body": "With your explicit consent, the same facts can build your worker profile, connect your skills to the common European skills catalogue and show you matching public job ads. As you record completed work over time, your professional history keeps growing — and opportunity search keeps improving."
         }
-      },
+      ],
       "stepsTitle": "How it works",
-      "steps": {
-        "0": {
+      "steps": [
+        {
           "title": "Sign up free",
           "body": "An account keeps your CV editable and your data under your control — you can delete it at any time."
         },
-        "1": {
+        {
           "title": "Add your experience",
           "body": "Import your old CV or write it in — then review each fact and decide what to keep before it is used."
         },
-        "2": {
+        {
           "title": "Download and decide",
           "body": "Export your CV as PDF. Becoming discoverable to employers stays a separate, optional choice."
         }
-      },
+      ],
       "privacyNote": "Your CV stays private by default. Nothing is shared with employers unless you explicitly turn on discoverability, and you can turn it off at any time."
     }
   },
@@ -5723,63 +5723,63 @@
       "free": {
         "name": "Free",
         "tagline": "For getting started",
-        "features": {
-          "0": "1 active position",
-          "1": "Matching shortlist and candidate contact",
-          "2": "Bookings, projects, instructions",
-          "3": "Work confirmation by the employer"
-        }
+        "features": [
+          "1 active position",
+          "Matching shortlist and candidate contact",
+          "Bookings, projects, instructions",
+          "Work confirmation by the employer"
+        ]
       },
       "business": {
         "name": "Organization",
         "tagline": "For organizations actively hiring and building teams",
-        "features": {
-          "0": "No fixed limit on active positions",
-          "1": "Everything in Free, at operating scale",
-          "2": "One plan for every kind of organization",
-          "3": "Project operations, reports and CSV export"
-        }
+        "features": [
+          "No fixed limit on active positions",
+          "Everything in Free, at operating scale",
+          "One plan for every kind of organization",
+          "Project operations, reports and CSV export"
+        ]
       },
       "agency": {
         "name": "Agency",
         "tagline": "For staffing partners.",
-        "features": {
-          "0": "Unlimited managed workers",
-          "1": "Broker tools",
-          "2": "Worker search",
-          "3": "Priority support"
-        }
+        "features": [
+          "Unlimited managed workers",
+          "Broker tools",
+          "Worker search",
+          "Priority support"
+        ]
       },
       "enterprise": {
         "name": "Enterprise",
         "tagline": "For scale and control.",
-        "features": {
-          "0": "Unlimited projects",
-          "1": "SSO",
-          "2": "SLA",
-          "3": "Dedicated support"
-        }
+        "features": [
+          "Unlimited projects",
+          "SSO",
+          "SLA",
+          "Dedicated support"
+        ]
       }
     },
     "faqTitle": "Pricing FAQ",
-    "faq": {
-      "0": {
+    "faq": [
+      {
         "q": "Why only one paid plan?",
         "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product. What changes is scale: 1 active position free, and no fixed limit on active positions for €99/month."
       },
-      "1": {
+      {
         "q": "Will the Free tier stay free?",
         "a": "Yes. Persons stay free, and an organization can run one active position at no cost."
       },
-      "2": {
+      {
         "q": "How is billing handled?",
         "a": "Card payment through Stripe. Invoices, payment history and cancellation live in your organization account."
       },
-      "3": {
+      {
         "q": "Is there a limit on active positions?",
         "a": "Free includes 1 active position. The Organization plan has no fixed limit on active positions. Normal protections against abuse, such as request rate limits, still apply."
       }
-    },
+    ],
     "priceState": {
       "draft_pricing": "Prices are being prepared — nothing can be bought yet.",
       "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page."
@@ -5874,190 +5874,190 @@
     "marketplaceRules": {
       "title": "Marketplace rules",
       "intro": "These rules keep the marketplace safe and fair. They apply to all users and offers.",
-      "rules": {
-        "0": "The system never confirms the right to work or legal eligibility without the required documents.",
-        "1": "A verified status appears only after a real human check — never automatically.",
-        "2": "Contacts are not shown without the user's permission.",
-        "3": "Public offers appear only after moderation; untrusted or suspicious offers are hidden.",
-        "4": "Trading regulated or illegal goods and services is prohibited.",
-        "5": "A map point appears only with verified coordinates — no fake markers.",
-        "6": "Payments between users do not run through the platform; only fees for platform services are paid through it.",
-        "7": "Inappropriate behaviour or suspicious activity can be reported — moderators review it."
-      }
+      "rules": [
+        "The system never confirms the right to work or legal eligibility without the required documents.",
+        "A verified status appears only after a real human check — never automatically.",
+        "Contacts are not shown without the user's permission.",
+        "Public offers appear only after moderation; untrusted or suspicious offers are hidden.",
+        "Trading regulated or illegal goods and services is prohibited.",
+        "A map point appears only with verified coordinates — no fake markers.",
+        "Payments between users do not run through the platform; only fees for platform services are paid through it.",
+        "Inappropriate behaviour or suspicious activity can be reported — moderators review it."
+      ]
     },
     "terms": {
       "metaDescription": "Your contract for any platform service is concluded with UAB “Nonstop Group”. Invoices are issued by and payments are received by UAB “Nonstop Group”.",
       "title": "Terms of Service",
-      "sections": {
-        "0": {
+      "sections": [
+        {
           "heading": "Who you contract with",
-          "items": {
-            "0": "All platform services are provided commercially and sold by UAB “Nonstop Group”, company code 302676973, VAT LT100010790613, registered office Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lithuania.",
-            "1": "Your contract for any platform service is concluded with UAB “Nonstop Group”. Invoices are issued by and payments are received by UAB “Nonstop Group”.",
-            "2": "Labour Market AI Sp. z o.o. (Warsaw, Poland; KRS 0001218752) owns the LabourMarket.ai software, brand and related intellectual property and licenses it to UAB “Nonstop Group”. It is not a party to your contract."
-          }
+          "items": [
+            "All platform services are provided commercially and sold by UAB “Nonstop Group”, company code 302676973, VAT LT100010790613, registered office Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lithuania.",
+            "Your contract for any platform service is concluded with UAB “Nonstop Group”. Invoices are issued by and payments are received by UAB “Nonstop Group”.",
+            "Labour Market AI Sp. z o.o. (Warsaw, Poland; KRS 0001218752) owns the LabourMarket.ai software, brand and related intellectual property and licenses it to UAB “Nonstop Group”. It is not a party to your contract."
+          ]
         },
-        "1": {
+        {
           "heading": "Governing law and disputes",
-          "items": {
-            "0": "These terms and every customer contract are governed by the law of the Republic of Lithuania, and disputes are resolved by the competent Lithuanian courts, except where mandatory consumer, employment, data-protection or other applicable law gives you rights or a forum that cannot be taken away.",
-            "1": "If you are a consumer, you always keep the mandatory rights of the country where you live."
-          }
+          "items": [
+            "These terms and every customer contract are governed by the law of the Republic of Lithuania, and disputes are resolved by the competent Lithuanian courts, except where mandatory consumer, employment, data-protection or other applicable law gives you rights or a forum that cannot be taken away.",
+            "If you are a consumer, you always keep the mandatory rights of the country where you live."
+          ]
         },
-        "2": {
+        {
           "heading": "What the platform is and is not",
-          "items": {
-            "0": "The platform supports finding, presenting and coordinating labour-market opportunities with a human operator involved.",
-            "1": "Using the platform does not by itself create an employment relationship and does not promise work or workers.",
-            "2": "Worker profiles, CVs and contact details are shared only under the platform's consent rules — see the Privacy Policy."
-          }
+          "items": [
+            "The platform supports finding, presenting and coordinating labour-market opportunities with a human operator involved.",
+            "Using the platform does not by itself create an employment relationship and does not promise work or workers.",
+            "Worker profiles, CVs and contact details are shared only under the platform's consent rules — see the Privacy Policy."
+          ]
         }
-      }
+      ]
     },
     "privacy": {
       "title": "Privacy Policy",
       "metaDescription": "This page explains in plain language what personal data LabourMarket.ai uses, why it uses it, and what rights you have. It describes the platform as it works today.",
       "intro": "This page explains in plain language what personal data Labour Market AI uses, why it uses it, and what rights you have. It describes the platform as it works today.",
-      "sections": {
-        "0": {
+      "sections": [
+        {
           "heading": "Who is responsible for your data",
-          "items": {
-            "0": "The data controller of the LabourMarket.ai platform is UAB “Nonstop Group”, company code 302676973, registered office Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lithuania.",
-            "1": "Privacy contact: info@labourmarket.ai. A data protection officer is not appointed.",
-            "2": "Labour Market AI Sp. z o.o. (Warsaw, Poland) owns the platform software and brand and licenses them to UAB “Nonstop Group”. IP ownership gives it no access to your personal data: it has no routine access to the production database, profiles, CVs, contacts or documents.",
-            "3": "You have the right to lodge a complaint with your supervisory authority; for the controller's establishment this is the Lithuanian State Data Protection Inspectorate (VDAI)."
-          }
+          "items": [
+            "The data controller of the LabourMarket.ai platform is UAB “Nonstop Group”, company code 302676973, registered office Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lithuania.",
+            "Privacy contact: info@labourmarket.ai. A data protection officer is not appointed.",
+            "Labour Market AI Sp. z o.o. (Warsaw, Poland) owns the platform software and brand and licenses them to UAB “Nonstop Group”. IP ownership gives it no access to your personal data: it has no routine access to the production database, profiles, CVs, contacts or documents.",
+            "You have the right to lodge a complaint with your supervisory authority; for the controller's establishment this is the Lithuanian State Data Protection Inspectorate (VDAI)."
+          ]
         },
-        "1": {
+        {
           "heading": "What data the platform uses",
-          "items": {
-            "0": "Account data: your email address and the sign-in linked to it.",
-            "1": "Content you enter yourself: profile and CV details, skills, work journal entries, photos you attach to entries, and the documents you list in your document inventory.",
-            "2": "Company information entered by company users: company details, needs, projects and bookings.",
-            "3": "Messages you send and receive on the platform.",
-            "4": "Consent records: when you give or revoke a consent, the action and its time are stored.",
-            "5": "Technical data needed to run the service, such as sign-in cookies (see the Cookie Policy).",
-            "6": "Only with your consent: usage measurement on our own servers (pages and steps reached, daily activity) and the campaign that brought you, kept with your account. See the Cookie Policy."
-          }
+          "items": [
+            "Account data: your email address and the sign-in linked to it.",
+            "Content you enter yourself: profile and CV details, skills, work journal entries, photos you attach to entries, and the documents you list in your document inventory.",
+            "Company information entered by company users: company details, needs, projects and bookings.",
+            "Messages you send and receive on the platform.",
+            "Consent records: when you give or revoke a consent, the action and its time are stored.",
+            "Technical data needed to run the service, such as sign-in cookies (see the Cookie Policy).",
+            "Only with your consent: usage measurement on our own servers (pages and steps reached, daily activity) and the campaign that brought you, kept with your account. See the Cookie Policy."
+          ]
         },
-        "2": {
+        {
           "heading": "Signing in with Google, Facebook or LinkedIn",
-          "items": {
-            "0": "You can create an account and sign in with your Google, Facebook or LinkedIn account instead of signing in with your email address. This is used only to sign you in.",
-            "1": "When you choose one of them, that provider confirms your identity and passes the platform your email address, your name and the identifier of your account with that provider. The platform asks for no additional permissions — no access to your friends or contacts, posts or pages — and never posts anything on your behalf.",
-            "2": "Your email address becomes your account email. The name from the provider is used only to replace a placeholder name taken from your email address; a name you entered yourself is never overwritten. The sign-in record (the provider, your account identifier with it and the details it passed) is kept by our authentication provider, Supabase, linked to your account.",
-            "3": "To delete this data, delete your LabourMarket.ai account — the steps are on the page “Account and data deletion”. Removing LabourMarket.ai from your Facebook, Google or LinkedIn settings does not by itself delete your LabourMarket.ai account or its data."
-          }
+          "items": [
+            "You can create an account and sign in with your Google, Facebook or LinkedIn account instead of signing in with your email address. This is used only to sign you in.",
+            "When you choose one of them, that provider confirms your identity and passes the platform your email address, your name and the identifier of your account with that provider. The platform asks for no additional permissions — no access to your friends or contacts, posts or pages — and never posts anything on your behalf.",
+            "Your email address becomes your account email. The name from the provider is used only to replace a placeholder name taken from your email address; a name you entered yourself is never overwritten. The sign-in record (the provider, your account identifier with it and the details it passed) is kept by our authentication provider, Supabase, linked to your account.",
+            "To delete this data, delete your LabourMarket.ai account — the steps are on the page “Account and data deletion”. Removing LabourMarket.ai from your Facebook, Google or LinkedIn settings does not by itself delete your LabourMarket.ai account or its data."
+          ]
         },
-        "3": {
+        {
           "heading": "What the data is used for",
-          "items": {
-            "0": "To run the features you use: profile and CV, work journal, skill suggestions you confirm, market map, projects, teams, bookings and messaging.",
-            "1": "To show your information only to people an explicit access rule allows — see the page “Your data and who can see it”.",
-            "2": "To keep an honest history of consents and key access changes.",
-            "3": "The platform does not use third-party advertising or analytics trackers and does not build behavioural profiles."
-          }
+          "items": [
+            "To run the features you use: profile and CV, work journal, skill suggestions you confirm, market map, projects, teams, bookings and messaging.",
+            "To show your information only to people an explicit access rule allows — see the page “Your data and who can see it”.",
+            "To keep an honest history of consents and key access changes.",
+            "The platform does not use third-party advertising or analytics trackers and does not build behavioural profiles."
+          ]
         },
-        "4": {
+        {
           "heading": "Who can see your data",
-          "items": {
-            "0": "Access is closed by default: data you enter belongs to your account, and other users see nothing unless a specific rule allows it.",
-            "1": "Your professional profile is NOT visible to companies or agencies by default. It can appear in company searches only after you yourself switch on employer visibility in your privacy settings — registration, accepting the terms or filling in your profile never makes it visible.",
-            "2": "Even with visibility on, companies see only a limited professional summary (profession, experience, skills, approximate region, availability, languages, pay expectation if you entered it). Your surname, phone, email, exact address, CV file and documents are never part of it.",
-            "3": "Your CV, contact details or documents reach a specific company only after your separate confirmation for that company and that need. Every completed transfer is recorded in a disclosure log you can see.",
-            "4": "Worker documents are not shown to employers or agencies without the worker's consent, and employers cannot read a worker's saved locations.",
-            "5": "Messages are visible only to the participants of the conversation."
-          }
+          "items": [
+            "Access is closed by default: data you enter belongs to your account, and other users see nothing unless a specific rule allows it.",
+            "Your professional profile is NOT visible to companies or agencies by default. It can appear in company searches only after you yourself switch on employer visibility in your privacy settings — registration, accepting the terms or filling in your profile never makes it visible.",
+            "Even with visibility on, companies see only a limited professional summary (profession, experience, skills, approximate region, availability, languages, pay expectation if you entered it). Your surname, phone, email, exact address, CV file and documents are never part of it.",
+            "Your CV, contact details or documents reach a specific company only after your separate confirmation for that company and that need. Every completed transfer is recorded in a disclosure log you can see.",
+            "Worker documents are not shown to employers or agencies without the worker's consent, and employers cannot read a worker's saved locations.",
+            "Messages are visible only to the participants of the conversation."
+          ]
         },
-        "5": {
+        {
           "heading": "Consent",
-          "items": {
-            "0": "Consent purposes are separate: employer visibility of your professional profile and a data transfer to a specific company are two different choices — neither is bundled with the Terms, pre-ticked, or required to use your account, CV or work journal.",
-            "1": "Every consent screen shows the exact versioned text, what becomes visible, what stays private, and both choices side by side (enable / not now). Declining changes nothing about your account.",
-            "2": "You can withdraw any consent at any time in your privacy settings, in one step. After withdrawal your profile stops appearing in new company searches immediately; data a company already lawfully received while the permission was valid may still be held by that company.",
-            "3": "The consent history is permanent: every grant and every withdrawal is kept as a separate unchangeable record with its text version, language, time and purpose. Nobody — including administrators — can edit or delete it, and no administrator can give consent on your behalf."
-          }
+          "items": [
+            "Consent purposes are separate: employer visibility of your professional profile and a data transfer to a specific company are two different choices — neither is bundled with the Terms, pre-ticked, or required to use your account, CV or work journal.",
+            "Every consent screen shows the exact versioned text, what becomes visible, what stays private, and both choices side by side (enable / not now). Declining changes nothing about your account.",
+            "You can withdraw any consent at any time in your privacy settings, in one step. After withdrawal your profile stops appearing in new company searches immediately; data a company already lawfully received while the permission was valid may still be held by that company.",
+            "The consent history is permanent: every grant and every withdrawal is kept as a separate unchangeable record with its text version, language, time and purpose. Nobody — including administrators — can edit or delete it, and no administrator can give consent on your behalf."
+          ]
         },
-        "6": {
+        {
           "heading": "Service providers that process data for the platform",
-          "items": {
-            "0": "Supabase — database, user sign-in and file storage.",
-            "1": "Cloudflare — the network in front of the website (domain name service, encryption in transit, caching and protection against attacks); every request to the website passes through it.",
-            "2": "Stripe — payment processing for paid platform services. When an organisation starts a checkout, Stripe receives the paying user's email address and an internal account identifier; card details are entered on Stripe's own payment page and are not stored by the platform.",
-            "3": "Google, Facebook (Meta) and LinkedIn — only if you choose to sign in with them, as described above.",
-            "4": "Google (Gemini API) — only as described in the section on AI below.",
-            "5": "The full list of infrastructure providers is on the page “Data protection”."
-          }
+          "items": [
+            "Supabase — database, user sign-in and file storage.",
+            "Cloudflare — the network in front of the website (domain name service, encryption in transit, caching and protection against attacks); every request to the website passes through it.",
+            "Stripe — payment processing for paid platform services. When an organisation starts a checkout, Stripe receives the paying user's email address and an internal account identifier; card details are entered on Stripe's own payment page and are not stored by the platform.",
+            "Google, Facebook (Meta) and LinkedIn — only if you choose to sign in with them, as described above.",
+            "Google (Gemini API) — only as described in the section on AI below.",
+            "The full list of infrastructure providers is on the page “Data protection”."
+          ]
         },
-        "7": {
+        {
           "heading": "Your rights",
-          "items": {
-            "0": "You can ask to see the data held about you, to correct it, to receive a copy of it, to restrict how it is used, or to have it deleted.",
-            "1": "You can download a copy of your own data as a JSON file and your work journal as a CSV file yourself, from your account. You can request deletion of your account on your account's Privacy page and confirm it after signing in again; 30 days after confirmation the system deletes the account automatically (until then you can cancel the request on the Privacy page) and sends a confirmation to your account email. After the final deletion, deleted data may remain in encrypted database backups for up to 7 days; it is not used there and is then overwritten. If data must be kept by law or concerns other people, the request is reviewed and you receive the decision within one month. You can also contact us — see the page “Account and data deletion”.",
-            "2": "Where processing is based on consent, you can withdraw that consent at any time."
-          }
+          "items": [
+            "You can ask to see the data held about you, to correct it, to receive a copy of it, to restrict how it is used, or to have it deleted.",
+            "You can download a copy of your own data as a JSON file and your work journal as a CSV file yourself, from your account. You can request deletion of your account on your account's Privacy page and confirm it after signing in again; 30 days after confirmation the system deletes the account automatically (until then you can cancel the request on the Privacy page) and sends a confirmation to your account email. After the final deletion, deleted data may remain in encrypted database backups for up to 7 days; it is not used there and is then overwritten. If data must be kept by law or concerns other people, the request is reviewed and you receive the decision within one month. You can also contact us — see the page “Account and data deletion”.",
+            "Where processing is based on consent, you can withdraw that consent at any time."
+          ]
         },
-        "8": {
+        {
           "heading": "How long data is kept",
-          "items": {
-            "0": "Data is kept while your account is active and the feature it belongs to still uses it.",
-            "1": "Consent and audit records are kept as history: a revocation is recorded rather than the record being erased."
-          }
+          "items": [
+            "Data is kept while your account is active and the feature it belongs to still uses it.",
+            "Consent and audit records are kept as history: a revocation is recorded rather than the record being erased."
+          ]
         },
-        "9": {
+        {
           "heading": "AI and connected AI assistants",
-          "items": {
-            "0": "Some features use an AI model from Google (the Gemini API). Today it receives only public market statistics — for example how many open positions a profession has — to phrase a short explanation. Translating messages and job ads, and interpreting a sentence you type in the chat, are prepared but not in use: no message text and no personal data is sent for them. If one of them is put into use, this notice will say so, and only the text that task needs would be sent. Every result is a suggestion — nothing is saved as a fact about you until you confirm it.",
-            "1": "You can connect LabourMarket.ai to an AI assistant such as ChatGPT or Claude. You approve each connection yourself on a consent screen; the assistant then acts only with your own permissions, and actions with consequences need a separate confirmation. You can see and disconnect connected apps in your account settings at any time.",
-            "2": "What an AI assistant's provider does with your conversation is governed by that provider's own privacy terms."
-          }
+          "items": [
+            "Some features use an AI model from Google (the Gemini API). Today it receives only public market statistics — for example how many open positions a profession has — to phrase a short explanation. Translating messages and job ads, and interpreting a sentence you type in the chat, are prepared but not in use: no message text and no personal data is sent for them. If one of them is put into use, this notice will say so, and only the text that task needs would be sent. Every result is a suggestion — nothing is saved as a fact about you until you confirm it.",
+            "You can connect LabourMarket.ai to an AI assistant such as ChatGPT or Claude. You approve each connection yourself on a consent screen; the assistant then acts only with your own permissions, and actions with consequences need a separate confirmation. You can see and disconnect connected apps in your account settings at any time.",
+            "What an AI assistant's provider does with your conversation is governed by that provider's own privacy terms."
+          ]
         }
-      }
+      ]
     },
     "cookies": {
       "title": "Cookie Policy",
       "intro": "This page lists what the platform actually stores in your browser today. There is deliberately little of it.",
-      "items": {
-        "0": {
+      "items": [
+        {
           "name": "Sign-in cookies",
           "purpose": "Set when you sign in, so you stay signed in as you move between pages. Essential — the service cannot keep you signed in without them."
         },
-        "1": {
+        {
           "name": "Language cookie (NEXT_LOCALE)",
           "purpose": "May be set to remember your language choice, so pages open in your language."
         },
-        "2": {
+        {
           "name": "Administrator display preference (lm_hide_admin_ui)",
           "purpose": "Used only on administrator accounts. Remembers whether administrator controls are hidden and changes nothing about permissions."
         },
-        "3": {
+        {
           "name": "Sign-in attempt marker (lm.oauth.trace)",
           "purpose": "Tab storage, removed when the tab closes. A random code that links one sign-in attempt to its result, so a failed sign-in can be diagnosed. Essential for the sign-in you started; it carries no account data."
         }
-      },
+      ],
       "localStorageNote": "Your browser's own storage (not cookies) also holds a few items you asked for: your light or dark theme choice, your choice about usage measurement, and small conveniences such as dismissed notices, recently viewed items and your speech-input language. They stay on your device and you can clear them at any time through your browser.",
       "noTracking": "There are no advertising or third-party tracking cookies on the platform, and nothing is shared with a third party for advertising.",
       "settingsLink": "Cookie settings",
       "analyticsTitle": "Usage measurement — only with your consent",
       "analyticsIntro": "With your consent we measure how the product is used: which pages and steps people reach, sign-up steps, daily activity and which campaign brought a visitor. Events are stored on our own servers, linked to your account if you are signed in. Without your consent none of the items below is written and no measurement event is sent from your browser.",
-      "analyticsItems": {
-        "0": {
+      "analyticsItems": [
+        {
           "name": "First-visit campaign (lm.attr.first)",
           "purpose": "Browser storage. The campaign tags (utm_*), the referring site and the landing page of your first visit. At sign-up they are copied into your own account record, so the campaign that brought you can be counted."
         },
-        "1": {
+        {
           "name": "Session identifier (lm.pilot.session)",
           "purpose": "Tab storage, removed when the tab closes. A random identifier sent with each measurement event, so the steps in one tab can be counted together."
         },
-        "2": {
+        {
           "name": "Activity markers (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
           "purpose": "Browser storage. The last day you were active, and a marker that a sign-up is in progress."
         },
-        "3": {
+        {
           "name": "Count-once markers (lm.funnel.*)",
           "purpose": "Tab storage. Stops the same measurement event being counted twice."
         }
-      },
+      ],
       "analyticsBasis": "Refusing or withdrawing removes these items from this device at once; if you are signed in, the campaign kept with your account is cleared too. The measurement itself is based on our legitimate interest in improving the product (GDPR Art. 6(1)(f)), and you can object to it as described in the Privacy Policy."
     },
     "requestContact": "To ask a question or make a request about your data, get in touch with us — a person will review it.",
@@ -6070,116 +6070,116 @@
       "title": "Data protection",
       "metaDescription": "This page explains in plain words how data inside LabourMarket.ai is protected. It describes only what is actually built into the platform today.",
       "intro": "This page explains in plain words how data inside Labour Market AI is protected. It describes only what is actually built into the platform today.",
-      "sections": {
-        "0": {
+      "sections": [
+        {
           "heading": "Closed by default",
-          "items": {
-            "0": "User data tables are protected by access rules inside the database itself. If no rule explicitly grants access, the data is not visible — even to other signed-in users.",
-            "1": "These rules work at the database layer, not only in the interface, and are covered by automated tests."
-          }
+          "items": [
+            "User data tables are protected by access rules inside the database itself. If no rule explicitly grants access, the data is not visible — even to other signed-in users.",
+            "These rules work at the database layer, not only in the interface, and are covered by automated tests."
+          ]
         },
-        "1": {
+        {
           "heading": "History instead of silent changes",
-          "items": {
-            "0": "Access grants are records, not switches: when access is withdrawn, the record is marked as revoked instead of being deleted, so history stays traceable.",
-            "1": "Consent history is kept the same way."
-          }
+          "items": [
+            "Access grants are records, not switches: when access is withdrawn, the record is marked as revoked instead of being deleted, so history stays traceable.",
+            "Consent history is kept the same way."
+          ]
         },
-        "2": {
+        {
           "heading": "No trackers, no profiling",
-          "items": {
-            "0": "The platform contains no third-party advertising or analytics trackers, no session-recording tools and no behavioural scoring."
-          }
+          "items": [
+            "The platform contains no third-party advertising or analytics trackers, no session-recording tools and no behavioural scoring."
+          ]
         },
-        "3": {
+        {
           "heading": "Statistics that protect individuals",
-          "items": {
-            "0": "Market statistics are aggregated. Averages are not shown for samples so small that they could point to a single person, and small samples are flagged.",
-            "1": "Research-type data sets are structurally anonymous: they contain no names, email addresses or personal identifiers."
-          }
+          "items": [
+            "Market statistics are aggregated. Averages are not shown for samples so small that they could point to a single person, and small samples are flagged.",
+            "Research-type data sets are structurally anonymous: they contain no names, email addresses or personal identifiers."
+          ]
         },
-        "4": {
+        {
           "heading": "Files and photos",
-          "items": {
-            "0": "Photos and files are kept in private storage and opened through short-lived links, not public addresses."
-          }
+          "items": [
+            "Photos and files are kept in private storage and opened through short-lived links, not public addresses."
+          ]
         },
-        "5": {
+        {
           "heading": "Administrator access",
-          "items": {
-            "0": "Administrator screens are limited to a small set of platform administrators and fail closed: without the administrator role they are not reachable."
-          }
+          "items": [
+            "Administrator screens are limited to a small set of platform administrators and fail closed: without the administrator role they are not reachable."
+          ]
         },
-        "6": {
+        {
           "heading": "Export and deletion",
-          "items": {
-            "0": "You can download your own data as a JSON file and your work journal as a CSV file from your account. Account deletion is requested from your account and confirmed after signing in again; the system then deletes the account automatically. A request involving data that must be kept by law or that concerns other people is reviewed by a person. You can also contact us and a person will process the request."
-          }
+          "items": [
+            "You can download your own data as a JSON file and your work journal as a CSV file from your account. Account deletion is requested from your account and confirmed after signing in again; the system then deletes the account automatically. A request involving data that must be kept by law or that concerns other people is reviewed by a person. You can also contact us and a person will process the request."
+          ]
         },
-        "7": {
+        {
           "heading": "Infrastructure providers (subprocessors)",
-          "items": {
-            "0": "Supabase — database, user sign-in and file storage. Data is hosted in the European Union (eu-west-1 region).",
-            "1": "Hostinger — the virtual private server (VPS) that runs the application.",
-            "2": "Cloudflare — the network in front of the website: domain name service, encryption in transit, caching and protection against attacks. Every request to the website passes through it.",
-            "3": "GitHub — source code hosting. No user data is stored there.",
-            "4": "Google (Gemini API) — AI processing for translating messages and job ads and for suggesting what a typed chat sentence asks for. Only the text the task needs is sent.",
-            "5": "Stripe — payment processing. A customer record is created only when an organisation starts a subscription checkout.",
-            "6": "No other email, AI, translation or payment provider is active. If one is activated, this list is updated first."
-          }
+          "items": [
+            "Supabase — database, user sign-in and file storage. Data is hosted in the European Union (eu-west-1 region).",
+            "Hostinger — the virtual private server (VPS) that runs the application.",
+            "Cloudflare — the network in front of the website: domain name service, encryption in transit, caching and protection against attacks. Every request to the website passes through it.",
+            "GitHub — source code hosting. No user data is stored there.",
+            "Google (Gemini API) — AI processing for translating messages and job ads and for suggesting what a typed chat sentence asks for. Only the text the task needs is sent.",
+            "Stripe — payment processing. A customer record is created only when an organisation starts a subscription checkout.",
+            "No other email, AI, translation or payment provider is active. If one is activated, this list is updated first."
+          ]
         },
-        "8": {
+        {
           "heading": "Honest limits",
-          "items": {
-            "0": "No system can promise absolute security. If you notice a problem, contact us — a person will review it."
-          }
+          "items": [
+            "No system can promise absolute security. If you notice a problem, contact us — a person will review it."
+          ]
         }
-      }
+      ]
     },
     "dataAccess": {
       "title": "Your data and who can see it",
       "intro": "A plain-language summary of the access rules the platform actually enforces today. It claims nothing broader than what the rules do.",
-      "sections": {
-        "0": {
+      "sections": [
+        {
           "heading": "The starting point",
-          "items": {
-            "0": "Your rows are yours: data you enter belongs to your account. Other users see nothing unless a specific access rule allows it."
-          }
+          "items": [
+            "Your rows are yours: data you enter belongs to your account. Other users see nothing unless a specific access rule allows it."
+          ]
         },
-        "1": {
+        {
           "heading": "What companies can see about workers",
-          "items": {
-            "0": "In scouting views, worker information appears in an anonymised form, and contact details are never shown without the worker's permission.",
-            "1": "Employers cannot read a worker's saved locations.",
-            "2": "Worker documents are not shown to employers or agencies without the worker's consent — at most, counts that the worker agreed to share."
-          }
+          "items": [
+            "In scouting views, worker information appears in an anonymised form, and contact details are never shown without the worker's permission.",
+            "Employers cannot read a worker's saved locations.",
+            "Worker documents are not shown to employers or agencies without the worker's consent — at most, counts that the worker agreed to share."
+          ]
         },
-        "2": {
+        {
           "heading": "What workers can see about companies",
-          "items": {
-            "0": "Workers see what a company chooses to publish: public needs and offers appear only after moderation."
-          }
+          "items": [
+            "Workers see what a company chooses to publish: public needs and offers appear only after moderation."
+          ]
         },
-        "3": {
+        {
           "heading": "Messages",
-          "items": {
-            "0": "A conversation is visible only to its participants. Colleagues from the same company who are not participants see nothing — not even that the conversation exists.",
-            "1": "If an extra person is granted access (for example the object owner), that access lasts only while the grant is active. When it is revoked, access ends, and the history stays recorded."
-          }
+          "items": [
+            "A conversation is visible only to its participants. Colleagues from the same company who are not participants see nothing — not even that the conversation exists.",
+            "If an extra person is granted access (for example the object owner), that access lasts only while the grant is active. When it is revoked, access ends, and the history stays recorded."
+          ]
         },
-        "4": {
+        {
           "heading": "Administrators",
-          "items": {
-            "0": "A small set of platform administrators can see the operational queues needed to run the platform, such as support and review queues. Administrator pages are restricted and fail closed."
-          }
+          "items": [
+            "A small set of platform administrators can see the operational queues needed to run the platform, such as support and review queues. Administrator pages are restricted and fail closed."
+          ]
         },
-        "5": {
+        {
           "heading": "If something looks wrong",
-          "items": {
-            "0": "The access rules in the database are the source of truth, and this page follows them. If something here does not match what you see, contact us — a person will review it."
-          }
+          "items": [
+            "The access rules in the database are the source of truth, and this page follows them. If something here does not match what you see, contact us — a person will review it."
+          ]
         }
-      },
+      ],
       "matrix": {
         "title": "Permission matrix: who can see and change what",
         "intro": "The table below lists the main product surfaces and, for each role, what that role can see and what it can change. It is written from the actual access rules in the database and in the route guards — each row points to the exact rule that enforces it. Where a rule is narrower than a short label can express, the row's note explains the boundary in plain words.",
@@ -6313,12 +6313,12 @@
       "description": "How to request deletion of your LabourMarket.ai account and personal data.",
       "intro": "You can ask LabourMarket.ai to delete your account and personal data. If you can sign in, you can file the request yourself: open your account's Privacy page (in the mobile app: Settings → Privacy), choose account deletion and confirm it after signing in again. 30 days after confirmation the system deletes the account automatically (until then you can cancel the request on the Privacy page) and sends a confirmation to your account email; if data must be kept by law or concerns other people, the request is reviewed and you receive the decision within one month. After the final deletion, deleted data may remain in encrypted database backups for up to 7 days; it is not used there and is then overwritten. You can also request deletion by email as described below; a person answers within one month.",
       "howTitle": "How to request deletion",
-      "howSteps": {
-        "0": "Email {email} from the email address associated with your LabourMarket.ai account.",
-        "1": "Use the subject “Account and data deletion request” and state that you want your LabourMarket.ai account and personal data deleted.",
-        "2": "We may need to verify that the request comes from the account holder before processing it.",
-        "3": "A person will review and process the request and will contact you if verification or clarification is required."
-      },
+      "howSteps": [
+        "Email {email} from the email address associated with your LabourMarket.ai account.",
+        "Use the subject “Account and data deletion request” and state that you want your LabourMarket.ai account and personal data deleted.",
+        "We may need to verify that the request comes from the account holder before processing it.",
+        "A person will review and process the request and will contact you if verification or clarification is required."
+      ],
       "mailSubject": "Account and data deletion request",
       "coversTitle": "What deletion covers",
       "coversBody": "The request applies to your LabourMarket.ai account and personal data held by the platform. Some records may need to be retained where applicable law requires it or where an audit, consent, security, dispute, or other record must lawfully be preserved. Data already lawfully disclosed to another independent recipient may also remain subject to that recipient’s own legal obligations.",
@@ -8049,63 +8049,63 @@
     "includesLabel": "Includes",
     "cta": "Get a proposal",
     "note": "Prices are indicative starting points for a typical project. The final scope and price are agreed together before any work begins, and billing is never started for you here — every package begins with a conversation.",
-    "offers": {
-      "0": {
+    "offers": [
+      {
         "name": "AI workflow automation",
         "summary": "We map a repetitive task in your business and replace the manual steps with a reliable automated workflow you own.",
         "priceFrom": "From €900",
         "timeline": "Typical delivery 1–3 weeks",
-        "includes": {
-          "0": "Process mapping & scoping call",
-          "1": "One end-to-end automated workflow",
-          "2": "Handover docs + a short walkthrough"
-        }
+        "includes": [
+          "Process mapping & scoping call",
+          "One end-to-end automated workflow",
+          "Handover docs + a short walkthrough"
+        ]
       },
-      "1": {
+      {
         "name": "Integrations · n8n · API workflows",
         "summary": "We connect the tools you already use — CRM, email, sheets, internal apps — through n8n or direct APIs so data moves without copy-paste.",
         "priceFrom": "From €600",
         "timeline": "Typical delivery 1–2 weeks",
-        "includes": {
-          "0": "Up to 3 connected systems",
-          "1": "n8n or custom API workflow",
-          "2": "Error alerts + retry handling"
-        }
+        "includes": [
+          "Up to 3 connected systems",
+          "n8n or custom API workflow",
+          "Error alerts + retry handling"
+        ]
       },
-      "2": {
+      {
         "name": "Business process automation",
         "summary": "A larger engagement: several connected workflows that take a whole process — intake, routing, follow-up — off your team's plate.",
         "priceFrom": "From €1,200",
         "timeline": "Typical delivery 2–5 weeks",
-        "includes": {
-          "0": "Multi-step process automation",
-          "1": "Dashboards & status visibility",
-          "2": "Two iteration rounds after launch"
-        }
+        "includes": [
+          "Multi-step process automation",
+          "Dashboards & status visibility",
+          "Two iteration rounds after launch"
+        ]
       },
-      "3": {
+      {
         "name": "Custom AI assistant",
         "summary": "An internal assistant grounded in your own documents and data, built to answer questions and draft work for your team — not a public chatbot.",
         "priceFrom": "From €1,500",
         "timeline": "Typical delivery 2–4 weeks",
-        "includes": {
-          "0": "Assistant grounded in your content",
-          "1": "Private, access-controlled deployment",
-          "2": "Prompt + guardrail tuning"
-        }
+        "includes": [
+          "Assistant grounded in your content",
+          "Private, access-controlled deployment",
+          "Prompt + guardrail tuning"
+        ]
       },
-      "4": {
+      {
         "name": "Website + marketing automation",
         "summary": "A modern site paired with the automations behind it — lead capture, follow-up sequences, and reporting wired together.",
         "priceFrom": "From €1,900",
         "timeline": "Typical delivery 3–6 weeks",
-        "includes": {
-          "0": "Marketing site or landing build",
-          "1": "Lead capture + follow-up automation",
-          "2": "Analytics & reporting setup"
-        }
+        "includes": [
+          "Marketing site or landing build",
+          "Lead capture + follow-up automation",
+          "Analytics & reporting setup"
+        ]
       }
-    }
+    ]
   },
   "playerCard": {
     "pageTitle": "My professional profile",
@@ -9834,24 +9834,24 @@
       "cta": "Submit a workforce inquiry"
     },
     "title": "How the first paid service works",
-    "steps": {
-      "0": {
+    "steps": [
+      {
         "title": "Submit your inquiry for free",
         "body": "Describe the workers or crew you need in the inquiry form. No fee, no card, nothing is published automatically."
       },
-      "1": {
+      {
         "title": "A person reviews it",
         "body": "An operator reads every inquiry, contacts you and clarifies scope, timing and conditions before anything moves."
       },
-      "2": {
+      {
         "title": "You get a manually checked shortlist",
         "body": "Real candidates or crews, checked by a person against your inquiry. If we cannot put together a suitable shortlist, there is no fee — and we never promise that a candidate will always be found."
       },
-      "3": {
+      {
         "title": "You pay only for delivered service",
         "body": "A fixed success fee applies per hired worker, crew or company placement. A separate coordination fee applies only when document or onboarding coordination is actually delivered. The final price is confirmed before paid work starts."
       }
-    },
+    ],
     "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — one active position at no cost. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. A whole crew can already offer itself against your inquiry as one unit and, once both sides agree, join your project as one team; the automatic shortlist does not yet propose whole crews — it ranks people one by one.",
     "ctaLabel": "Submit a workforce inquiry →"
   },
@@ -9972,36 +9972,36 @@
     "titleAccent": "step by step",
     "subcopy": "Working across Europe is one of the paths LabourMarket.ai opens up. Build one work profile, see what each country needs, and let employers reach you when you are ready. We never promise a job or a wage — we help you get ready and get matched.",
     "stepsTitle": "How it works",
-    "steps": {
-      "0": {
+    "steps": [
+      {
         "title": "1. Tell us your profession",
         "body": "Add your profession, experience and availability. It takes a few minutes."
       },
-      "1": {
+      {
         "title": "2. AI prepares a draft",
         "body": "The assistant turns your words into a structured profile and CV draft — a suggestion you review and edit. It never invents experience."
       },
-      "2": {
+      {
         "title": "3. Check country readiness",
         "body": "See what documents and steps are likely required for the country you want — sourced, and not legal advice."
       },
-      "3": {
+      {
         "title": "4. Get matched",
         "body": "When an employer's need fits your profession, availability, accommodation, transport and language, it appears on your opportunity board with an honest fit explanation."
       },
-      "4": {
+      {
         "title": "5. Interest and contact",
         "body": "Express interest on a need that fits. The company reviews it and you see the honest status — reviewed or contacted. Contracts and payment stay outside the platform for now."
       }
-    },
+    ],
     "needTitle": "What you may need",
-    "needItems": {
-      "0": "A profession you work in",
-      "1": "Your availability from a date",
-      "2": "Whether you need accommodation or have your own",
-      "3": "Transport: your own, a licence, or a pickup",
-      "4": "Documents that may be required for the country"
-    },
+    "needItems": [
+      "A profession you work in",
+      "Your availability from a date",
+      "Whether you need accommodation or have your own",
+      "Transport: your own, a licence, or a pickup",
+      "Documents that may be required for the country"
+    ],
     "directionsTitle": "Where people are working",
     "directionsNote": "Open the per-country pages to see sourced labour-market signals.",
     "directionsCta": "See countries",
@@ -11084,227 +11084,227 @@
       "lead": "A person's professional value should not disappear every time they change employer. Real work can become lasting professional history: what the person did, where, when, for how long, in what role, with which skills, and what evidence and confirmation supports it.",
       "leadOrg": "For organisations, the same real work builds the record of what the company has actually done: projects, teams, work performed, hours, competencies and evidence.",
       "railPeopleLabel": "For a person",
-      "railPeople": {
-        "0": "People",
-        "1": "Opportunities",
-        "2": "Real work",
-        "3": "Evidence",
-        "4": "Professional growth"
-      },
+      "railPeople": [
+        "People",
+        "Opportunities",
+        "Real work",
+        "Evidence",
+        "Professional growth"
+      ],
       "railCompaniesLabel": "For a company",
-      "railCompanies": {
-        "0": "Companies",
-        "1": "People",
-        "2": "Projects",
-        "3": "Verified work",
-        "4": "Organisational capability"
-      },
+      "railCompanies": [
+        "Companies",
+        "People",
+        "Projects",
+        "Verified work",
+        "Organisational capability"
+      ],
       "accumulate": "Every real period of work adds to the history — it does not end when the employer changes.",
       "railAria": "How people and companies grow from real work"
     },
     "lifecycle": {
       "label": "The whole professional-work lifecycle",
-      "steps": {
-        "0": "Opportunity",
-        "1": "Employment / cooperation",
-        "2": "Real work",
-        "3": "Work Journal",
-        "4": "Projects and tasks",
-        "5": "Working time",
-        "6": "Work evidence",
-        "7": "Confirmations",
-        "8": "Skills and competencies",
-        "9": "Living CV — a living professional CV",
-        "10": "New opportunities",
-        "11": "Teams",
-        "12": "Company capability",
-        "13": "Labour-market services"
-      },
+      "steps": [
+        "Opportunity",
+        "Employment / cooperation",
+        "Real work",
+        "Work Journal",
+        "Projects and tasks",
+        "Working time",
+        "Work evidence",
+        "Confirmations",
+        "Skills and competencies",
+        "Living CV — a living professional CV",
+        "New opportunities",
+        "Teams",
+        "Company capability",
+        "Labour-market services"
+      ],
       "note": "This explains the system; it is not its boundary. Other parts of the labour market extend the chain."
     },
-    "loops": {
-      "0": {
+    "loops": [
+      {
         "id": "people",
         "heading": "For people",
         "lead": "A professional profile is not a card or a score. It is a real person's experience, work history and evidence.",
-        "flow": {
-          "0": "Find opportunities",
-          "1": "Present professional experience",
-          "2": "Work",
-          "3": "Record the work actually done",
-          "4": "Preserve evidence",
-          "5": "Receive confirmations where applicable",
-          "6": "Build professional history — Living CV",
-          "7": "Use accumulated experience for future opportunities"
-        },
+        "flow": [
+          "Find opportunities",
+          "Present professional experience",
+          "Work",
+          "Record the work actually done",
+          "Preserve evidence",
+          "Receive confirmations where applicable",
+          "Build professional history — Living CV",
+          "Use accumulated experience for future opportunities"
+        ],
         "pointsLabel": "What a professional profile represents",
-        "points": {
-          "0": "experience and work history;",
-          "1": "skills and competencies;",
-          "2": "qualifications and certificates, where recorded;",
-          "3": "completed work, hours, projects and objects;",
-          "4": "evidence and confirmations;",
-          "5": "availability and professional preferences, where applicable."
-        }
+        "points": [
+          "experience and work history;",
+          "skills and competencies;",
+          "qualifications and certificates, where recorded;",
+          "completed work, hours, projects and objects;",
+          "evidence and confirmations;",
+          "availability and professional preferences, where applicable."
+        ]
       },
-      "1": {
+      {
         "id": "employers",
         "heading": "For employers",
         "lead": "An employer's value is not only posting vacancies. What matters is keeping the knowledge of who worked, what they did, where, when, for how long, what was completed, what evidence exists and what capability the organisation has built.",
-        "flow": {
-          "0": "Need",
-          "1": "People",
-          "2": "Team",
-          "3": "Project / object",
-          "4": "Work",
-          "5": "Hours and progress",
-          "6": "Evidence",
-          "7": "Confirmation",
-          "8": "The company's history of work actually done",
-          "9": "Future workforce planning (a direction)"
-        },
+        "flow": [
+          "Need",
+          "People",
+          "Team",
+          "Project / object",
+          "Work",
+          "Hours and progress",
+          "Evidence",
+          "Confirmation",
+          "The company's history of work actually done",
+          "Future workforce planning (a direction)"
+        ],
         "pointsLabel": "What the organisation keeps",
-        "points": {
-          "0": "who worked, and in what role;",
-          "1": "what work was done, where and when;",
-          "2": "how many hours and what progress;",
-          "3": "what evidence and confirmations exist;",
-          "4": "what capabilities the team has really built."
-        }
+        "points": [
+          "who worked, and in what role;",
+          "what work was done, where and when;",
+          "how many hours and what progress;",
+          "what evidence and confirmations exist;",
+          "what capabilities the team has really built."
+        ]
       },
-      "2": {
+      {
         "id": "network",
         "heading": "For agencies and other labour-market participants",
         "lead": "LabourMarket.ai is not only a worker-and-employer system. Other legitimate participants have a place in the same labour-market network.",
-        "flow": {},
-        "participants": {
-          "0": "Recruitment and selection agencies",
-          "1": "Staffing companies",
-          "2": "Contractors and subcontractors",
-          "3": "Training providers",
-          "4": "Schools and vocational institutions",
-          "5": "Independent professionals",
-          "6": "Labour-market service providers",
-          "7": "Other legitimate labour-market participants"
-        },
+        "flow": [],
+        "participants": [
+          "Recruitment and selection agencies",
+          "Staffing companies",
+          "Contractors and subcontractors",
+          "Training providers",
+          "Schools and vocational institutions",
+          "Independent professionals",
+          "Labour-market service providers",
+          "Other legitimate labour-market participants"
+        ],
         "pointsLabel": "Their place in the same network",
-        "points": {
-          "0": "they work with the same real work records, not separate files;",
-          "1": "roles and responsibility stay clearly separate: who published, who worked, who confirmed."
-        }
+        "points": [
+          "they work with the same real work records, not separate files;",
+          "roles and responsibility stay clearly separate: who published, who worked, who confirmed."
+        ]
       }
-    },
+    ],
     "evidence": {
       "heading": "Real work becomes professional evidence",
       "lead": "One work event is one record. It can feed several views, but it is never copied and never created from nothing.",
       "chainLabel": "The evidence chain",
-      "chain": {
-        "0": "Person",
-        "1": "Date / period",
-        "2": "Hours",
-        "3": "Project / object",
-        "4": "Work performed",
-        "5": "Skills and competencies",
-        "6": "Source / evidence",
-        "7": "Confirmation",
-        "8": "Professional history — Living CV"
-      },
+      "chain": [
+        "Person",
+        "Date / period",
+        "Hours",
+        "Project / object",
+        "Work performed",
+        "Skills and competencies",
+        "Source / evidence",
+        "Confirmation",
+        "Professional history — Living CV"
+      ],
       "projectionsLabel": "The same record — several views",
-      "projections": {
-        "0": "The person's professional history",
-        "1": "Team history",
-        "2": "Project history",
-        "3": "Company capability history"
-      },
+      "projections": [
+        "The person's professional history",
+        "Team history",
+        "Project history",
+        "Company capability history"
+      ],
       "note": "One work event can feed several views. Evidence is never duplicated or fabricated."
     },
     "afterHire": {
       "heading": "Why use it after you have found the job?",
       "lead": "A conventional job board delivers most of its value before hiring. LabourMarket.ai should become more useful once real work begins.",
       "boardLabel": "A conventional job board",
-      "boardPoints": {
-        "0": "Value is highest while searching.",
-        "1": "After hiring, the history stays in separate systems.",
-        "2": "A new employer starts from zero."
-      },
-      "platformPoints": {
-        "0": "Every real period of work adds to professional history.",
-        "1": "Evidence, competencies and the Living CV grow.",
-        "2": "Team and company work history grows with it.",
-        "3": "Accumulated experience becomes context for new opportunities."
-      },
-      "stages": {
-        "0": "Search",
-        "1": "Hiring",
-        "2": "Work",
-        "3": "Later opportunities"
-      },
+      "boardPoints": [
+        "Value is highest while searching.",
+        "After hiring, the history stays in separate systems.",
+        "A new employer starts from zero."
+      ],
+      "platformPoints": [
+        "Every real period of work adds to professional history.",
+        "Evidence, competencies and the Living CV grow.",
+        "Team and company work history grows with it.",
+        "Accumulated experience becomes context for new opportunities."
+      ],
+      "stages": [
+        "Search",
+        "Hiring",
+        "Work",
+        "Later opportunities"
+      ],
       "schematicNote": "Schematic — not a measurement.",
       "conclusion": "Value does not end when a hiring decision is made — it grows every day work is done."
     },
     "trust": {
       "heading": "Trust: fact ≠ derived ≠ confirmed",
       "lead": "The original evidence and its source are preserved. What the source stated is always kept apart from what the system derived and from what a person or organisation confirmed. An AI interpretation is never treated as a fact.",
-      "tiers": {
-        "0": {
+      "tiers": [
+        {
           "term": "Fact",
           "meaning": "What the source itself stated: a date, hours, a description of the work.",
           "example": "For example, “8 h, 2025-03-12” in the source table."
         },
-        "1": {
+        {
           "term": "Derived",
           "meaning": "An interpretation by the system or by rules. Always marked as derived and never becomes a fact.",
           "example": "For example, a skill recognised from the text of a work description."
         },
-        "2": {
+        {
           "term": "Confirmed",
           "meaning": "Confirmation by a person or an organisation. Kept apart from what the person reported about themselves.",
           "example": "For example, a manager confirmed the period of work."
         }
-      },
+      ],
       "noLabel": "What is not here",
-      "no": {
-        "0": "No star ratings.",
-        "1": "No points.",
-        "2": "No worker leaderboards.",
-        "3": "No artificial ranking of a person's worth."
-      }
+      "no": [
+        "No star ratings.",
+        "No points.",
+        "No worker leaderboards.",
+        "No artificial ranking of a person's worth."
+      ]
     },
     "privacy": {
       "heading": "Privacy",
       "lead": "Professional evidence can be detailed privately. Public discovery does not expose what must be protected.",
       "privateLabel": "Detailed only in private",
-      "private": {
-        "0": "Full work records and evidence.",
-        "1": "The Work Journal.",
-        "2": "Project and object details."
-      },
+      "private": [
+        "Full work records and evidence.",
+        "The Work Journal.",
+        "Project and object details."
+      ],
       "publicNotLabel": "Public search does not expose",
-      "publicNot": {
-        "0": "private contacts;",
-        "1": "confidential clients;",
-        "2": "private Work Journal information;",
-        "3": "restricted personal information;",
-        "4": "confidential project information."
-      },
+      "publicNot": [
+        "private contacts;",
+        "confidential clients;",
+        "private Work Journal information;",
+        "restricted personal information;",
+        "confidential project information."
+      ],
       "control": "People and organisations keep appropriate control over what is public."
     },
     "europe": {
       "heading": "The European labour market",
       "body": "LabourMarket.ai is built for Europe first and can extend worldwide. It is not one country's job board: the aim is to connect labour-market participants across countries, professions and sectors.",
-      "points": {
-        "0": "A multilingual interface; the original text is always kept.",
-        "1": "Country-specific document and requirement guidance.",
-        "2": "Public job-ad sources are connected country by country — only once the source's terms are confirmed."
-      }
+      "points": [
+        "A multilingual interface; the original text is always kept.",
+        "Country-specific document and requirement guidance.",
+        "Public job-ad sources are connected country by country — only once the source's terms are confirmed."
+      ]
     },
     "notYet": {
       "heading": "What the platform does not do",
-      "points": {
-        "0": "It never marks anything as confirmed itself — a confirmed state always comes from a real person.",
-        "1": "It does not give legal advice. Document guidance is for information only.",
-        "2": "It does not rate people with points or rankings."
-      }
+      "points": [
+        "It never marks anything as confirmed itself — a confirmed state always comes from a real person.",
+        "It does not give legal advice. Document guidance is for information only.",
+        "It does not rate people with points or rankings."
+      ]
     },
     "data": {
       "heading": "Your data",
@@ -18978,25 +18978,25 @@
       "country": "Norway",
       "pay": "from €2,800"
     },
-    "opportunities": {
-      "0": {
+    "opportunities": [
+      {
         "role": "Cook",
         "place": "Restaurant · Oslo",
-        "fits": {
-          "0": "Profession",
-          "1": "Country",
-          "2": "Pay"
-        }
+        "fits": [
+          "Profession",
+          "Country",
+          "Pay"
+        ]
       },
-      "1": {
+      {
         "role": "Kitchen worker",
         "place": "Hotel · Bergen",
-        "fits": {
-          "0": "Country",
-          "1": "Pay"
-        }
+        "fits": [
+          "Country",
+          "Pay"
+        ]
       }
-    },
+    ],
     "conversation": {
       "employer": "Could you start on 6 October?",
       "person": "Yes, I can."
@@ -19009,15 +19009,15 @@
     "week": {
       "label": "This week",
       "total": "40 h",
-      "days": {
-        "0": "Mo",
-        "1": "Tu",
-        "2": "We",
-        "3": "Th",
-        "4": "Fr",
-        "5": "Sa",
-        "6": "Su"
-      }
+      "days": [
+        "Mo",
+        "Tu",
+        "We",
+        "Th",
+        "Fr",
+        "Sa",
+        "Su"
+      ]
     },
     "confirmedBy": "A manager confirmed 5 work journal entries",
     "facts": {
@@ -19025,18 +19025,18 @@
       "confirmed": "h with a manager's record",
       "days": "days worked"
     },
-    "cv": {
-      "0": {
+    "cv": [
+      {
         "org": "Restaurant Fjord · Oslo",
         "period": "2026 — now",
         "standing": "Journal entries confirmed by a manager"
       },
-      "1": {
+      {
         "org": "Restaurant Ąžuolas · Vilnius",
         "period": "2021 — 2026",
         "standing": "Stated by herself"
       }
-    },
+    ],
     "next": {
       "role": "Senior cook",
       "place": "Restaurant · Bergen",
