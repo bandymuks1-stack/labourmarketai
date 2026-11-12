@@ -15,7 +15,11 @@ name: Signup Isolated (local Supabase)
 #     is built or started; no project is linked, no access token is used;
 #   - the app runs with LM_ACCEPTANCE_MODE=1 and refuses a non-local target;
 #   - payments, AI providers and outbound alerts stay off;
-#   - only Playwright's list output is kept (no traces, no screenshots).
+#   - only Playwright's list output is kept (no traces), plus ONE set of
+#     screenshots: the signed-in home screens of the synthetic accounts the
+#     navigation walk creates (app-nav-goals-isolated.spec.ts), uploaded as the
+#     `app-nav-walk` artifact. They show QA-SYNTHETIC names on a database that
+#     dies with the job; no other spec's screen is kept.
 
 on:
   workflow_dispatch:
@@ -26,6 +30,12 @@ on:
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
       - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
       - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
+      - "apps/web/tests/e2e/app-nav-goals-isolated.spec.ts"
+      - "apps/web/lib/navigation/home-goals*"
+      - "apps/web/components/app/home/home-goal-cards.tsx"
+      - "apps/web/components/app/home/ask-composer-entry.tsx"
+      - "apps/web/components/app/conversation/chat/my-space-row.tsx"
+      - "apps/web/lib/workspace/pin*"
       - "apps/web/lib/journal/entry-skill-retraction.ts"
       - "apps/web/lib/journal/journal-entry-skills-actions.ts"
       - "apps/web/lib/journal/skill-pipeline-actions.ts"
@@ -92,8 +102,10 @@ jobs:
       # agency roles / permissions walk (agency-roles-isolated.spec.ts), the
       # Web A walks, the role journeys, and the journal -> skills -> Living CV
       # -> matching -> dispute chain (skills-chain-isolated.spec.ts), and job fit from evidence
-      # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts
+      # (job-fit-evidence-isolated.spec.ts), and the signed-in home by role:
+      # navigation actions counted to every top task
+      # (app-nav-goals-isolated.spec.ts).
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/app-nav-goals-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -268,6 +280,18 @@ jobs:
           MAIL_APP_BASE: http://127.0.0.1:3001
           APP_MAIL_API: http://127.0.0.1:54334
         run: pnpm exec playwright test $SPEC --reporter=list --trace=off
+
+      # The navigation walk's home screens (synthetic accounts, local stack) —
+      # the only screenshots this job keeps. Uploaded even when a walk fails,
+      # so a failure can be looked at.
+      - name: Keep the navigation walk's home screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: app-nav-walk
+          path: apps/web/test-results/app-nav-walk/*.png
+          if-no-files-found: ignore
+          retention-days: 14
 
       # APP-ROLLBACK COMPATIBILITY (owner gate for 20261029190000, deploy order
       # migration -> app): the LAST app build before the job-fit code (#2887)
