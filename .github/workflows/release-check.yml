@@ -1,0 +1,135 @@
+name: Release check (public surface, read-only)
+
+# ONE citable answer to "is the public product whole on this production build?"
+# (owner 2026-11-12: the product is checked as one system before launch).
+#
+# What it does, signed out and read-only:
+#   - reads the production build id from /api/health at the start and at the end
+#     (a deploy in the middle makes the result unusable, and the run says so);
+#   - checks the security headers a stranger's browser receives;
+#   - crawls every sitemap page in every routed locale at 360 and 1440 px
+#     (apps/web/scripts/public-cta-crawl.mjs): error screens, failed scripts,
+#     404 and 5xx link targets, links with no target, buttons that do nothing,
+#     sideways overflow, banned words. One job per locale.
+#
+# What it does NOT do: sign in. The signed-in journeys (worker, employer, B2B,
+# agency, chat, mobile surfaces) are the walks in prod-qa-walk.yml; cite their
+# run ids next to this one. Accessibility audits, performance budgets and
+# visual regression are not measured here.
+#
+# No secret, no account, no write: the crawler aborts every request that is not
+# GET or HEAD before it leaves the browser, and every request to another site.
+# One page at a time per locale, so it is never a load source.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/release-check.yml"
+      - "apps/web/scripts/public-cta-crawl.mjs"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      build: ${{ steps.build.outputs.build }}
+    steps:
+      - name: Production build under test
+        id: build
+        run: |
+          set -euo pipefail
+          body=$(curl -sS --max-time 30 https://labourmarket.ai/api/health)
+          build=$(printf '%s' "$body" | grep -oE '"build":"[0-9a-f]+"' | cut -d'"' -f4)
+          [ -n "$build" ] || { echo "::error::/api/health did not name a build"; exit 1; }
+          printf '%s' "$body" | grep -q '"ok":true' || { echo "::error::/api/health is not ok"; exit 1; }
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+          echo "### Release check — production build \`$build\` ($(date -u +%Y-%m-%dT%H:%MZ))" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Security headers a stranger's browser receives
+        run: |
+          set -euo pipefail
+          h=$(curl -sS -o /dev/null -D - --max-time 30 https://labourmarket.ai/en | tr -d '\r')
+          fail=0
+          need() {
+            if printf '%s\n' "$h" | grep -qiE "^$1: .*$2"; then echo "ok   $1"; else echo "FAIL $1 (expected to contain: $2)"; fail=1; fi
+          }
+          need "x-frame-options" "DENY"
+          need "x-content-type-options" "nosniff"
+          need "referrer-policy" "strict-origin-when-cross-origin"
+          need "strict-transport-security" "max-age="
+          need "permissions-policy" "."
+          if printf '%s\n' "$h" | grep -qi '^x-powered-by:'; then echo "FAIL x-powered-by is advertised"; fail=1; else echo "ok   no x-powered-by"; fi
+          [ "$fail" -eq 0 ]
+
+  crawl:
+    needs: identity
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        locale: [lt, en, ru, nl, de, pl]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.33.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter=!mobile
+
+      - name: Install Playwright chromium
+        run: pnpm -F web exec playwright install --with-deps chromium
+
+      # A locale added to lib/i18n/config.ts but not to the matrix above would be
+      # silently unchecked; this turns that into a red run.
+      - name: The matrix covers every routed locale
+        run: |
+          set -euo pipefail
+          routed=$(grep -oE 'export const activeLocales = \[[^]]+\]' apps/web/lib/i18n/config.ts | grep -oE '"[a-z]{2}"' | tr -d '"' | sort | tr '\n' ' ')
+          [ "$routed" = "de en lt nl pl ru " ] || { echo "::error::routed locales are '$routed' but the matrix checks 'de en lt nl pl ru'"; exit 1; }
+
+      - name: Crawl /${{ matrix.locale }} at 360 and 1440 px
+        run: |
+          set -euo pipefail
+          node apps/web/scripts/public-cta-crawl.mjs --origin https://labourmarket.ai --locales "${{ matrix.locale }}" --out "crawl-${{ matrix.locale }}.json" | tee crawl.log
+
+      - name: Summary
+        if: always()
+        run: |
+          set -euo pipefail
+          after=$(curl -sS --max-time 30 https://labourmarket.ai/api/health | grep -oE '"build":"[0-9a-f]+"' | cut -d'"' -f4 || true)
+          {
+            echo "#### /${{ matrix.locale }} — build \`${{ needs.identity.outputs.build }}\`"
+            if [ "$after" != "${{ needs.identity.outputs.build }}" ]; then echo "**The build changed during the crawl (now \`${after:-unreadable}\`): do not cite this run.**"; fi
+            echo '```'
+            if [ -f crawl.log ]; then sed -n '/^pages crawled/,$p' crawl.log | head -150; else echo "the crawl produced no log"; fi
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$after" = "${{ needs.identity.outputs.build }}" ]
+
+      - name: Keep the report (14 days)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-check-${{ matrix.locale }}
+          path: crawl-${{ matrix.locale }}.json
+          if-no-files-found: ignore
+          retention-days: 14

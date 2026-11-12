@@ -4,7 +4,7 @@
  *
  *   node apps/web/scripts/public-cta-crawl.mjs [--origin https://labourmarket.ai]
  *        [--locales lt,en] [--widths 360,1440] [--max-pages 0] [--out report.json]
- *        [--no-clicks] [--delay-ms 150] [--static-via-node]
+ *        [--no-clicks] [--max-presses 25] [--delay-ms 150] [--static-via-node]
  *
  * What it reports, per page and width:
  *   Requests to other sites are aborted too (analytics, sign-in widgets): they are
@@ -57,6 +57,12 @@ const DELAY_MS = Number(arg("delay-ms", "150"));
 const OUT = arg("out", "");
 const CLICKS = !flag("no-clicks");
 const STATIC_VIA_NODE = flag("static-via-node");
+/** --only /en/pricing: crawl just these paths (comma-separated). --verbose: time each phase. */
+const ONLY = arg("only", "");
+const VERBOSE = flag("verbose");
+const lap = (t0, what) => VERBOSE && console.log(`      ${what}: ${Date.now() - t0} ms`);
+/** Buttons pressed per page and width; shared controls are skipped once proven elsewhere. */
+const MAX_PRESSES = Number(arg("max-presses", "25"));
 
 /** Banned in product copy (doctrine §18; lib/guards/product-copy-forbidden-terms.test.ts). */
 const BANNED = [/\bdemo\b/i, /\bdemonstrac/i, /\bдемо\b/i];
@@ -76,6 +82,8 @@ function report(kind, page, width, detail) {
   }
   seenFinding.add(key);
   findings.push({ key, kind, page, widths: [width], detail });
+  // Said at once as well as in the summary: a crawl that is stopped early has still reported.
+  console.log(`  ! ${kind} ${page} @${width} — ${detail}`);
 }
 
 const localeOf = (path) => path.split("/")[1] ?? "";
@@ -174,6 +182,7 @@ async function crawlPage(context, path, width, discovered) {
   page.on("pageerror", (e) => pageErrors.push(String(e).slice(0, 160)));
   page.on("dialog", (d) => d.dismiss().catch(() => {}));
 
+  let t0 = Date.now();
   let response;
   try {
     response = await page.goto(url, { waitUntil: "load", timeout: 45_000 });
@@ -183,6 +192,8 @@ async function crawlPage(context, path, width, discovered) {
     return;
   }
   await page.waitForLoadState("networkidle", { timeout: 2_500 }).catch(() => {});
+  lap(t0, "load");
+  t0 = Date.now();
   const status = response?.status() ?? 0;
   if (status !== 200) report("page-status", path, width, `HTTP ${status}`);
 
@@ -276,10 +287,14 @@ async function crawlPage(context, path, width, discovered) {
     if (!NOT_A_PUBLIC_PAGE.test(targetPath) && LOCALES.includes(localeOf(targetPath)) && res.status === 200) discovered.add(targetPath.split("#")[0]);
   }
 
+  lap(t0, `links (${links.length}, own targets ${ownTargets.length})`);
+  t0 = Date.now();
+
   // ---- buttons -----------------------------------------------------------
   if (CLICKS) {
     const count = await page.locator("button, [role=button]").count();
-    for (let i = 0; i < Math.min(count, 60); i++) {
+    let presses = 0;
+    for (let i = 0; i < Math.min(count, 80) && presses < MAX_PRESSES; i++) {
       // A previous click may have navigated: come back so indexes still mean the same page.
       if (!samePage(page.url(), url)) {
         await page.goto(url, { waitUntil: "load", timeout: 45_000 }).catch(() => {});
@@ -293,6 +308,8 @@ async function crawlPage(context, path, width, discovered) {
           disabled: el.disabled === true || el.getAttribute("aria-disabled") === "true",
           visible: !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length),
           inLink: !!el.closest("a[href]"),
+          // The step, tab or option a person is already on: pressing it rightly changes nothing.
+          current: el.hasAttribute("aria-current") && el.getAttribute("aria-current") !== "false" || el.getAttribute("aria-selected") === "true",
           testid: el.getAttribute("data-testid") ?? "",
           // Where the control sits, without its words: the same header or footer control on
           // another page or in another language has the same signature.
@@ -302,9 +319,9 @@ async function crawlPage(context, path, width, discovered) {
               parts.push(`${n.tagName}${n.getAttribute("data-testid") ? `#${n.getAttribute("data-testid")}` : ""}:${n.parentElement ? [...n.parentElement.children].indexOf(n) : 0}`);
             return `${el.getAttribute("aria-controls") ?? ""}|${el.getAttribute("aria-haspopup") ?? ""}|${parts.join(">")}`;
           })(),
-        }))
+        }), undefined, { timeout: 1_500 }) // a control that left the page is skipped, not waited for
         .catch(() => null);
-      if (!info || !info.visible || info.disabled || info.submit || info.inLink) continue;
+      if (!info || !info.visible || info.disabled || info.submit || info.inLink || info.current) continue;
       // A shared control (header, footer, cookie bar) is pressed on the first pages that
       // carry it, not on all of them: twice per width and page shape proves it.
       const sigKey = `${width}|${pageShape(path)}|${info.signature}`;
@@ -312,31 +329,48 @@ async function crawlPage(context, path, width, discovered) {
       if (pressed >= 2) continue;
       pressCount.set(sigKey, (pressCount.get(sigKey) ?? 0) + 1);
       pressCount.set(`${width}|*|${info.signature}`, (pressCount.get(`${width}|*|${info.signature}`) ?? 0) + 0.25);
-      const before = await visiblePageState(page);
-      let requests = 0;
-      let popup = false;
-      const onRequest = () => requests++;
-      const onPopup = (p) => {
-        popup = true;
-        p.close().catch(() => {});
-      };
-      page.on("request", onRequest);
-      context.on("page", onPopup);
-      const clicked = await button.click({ timeout: 800 }).then(() => true).catch(() => false);
-      await page.waitForTimeout(250);
-      page.off("request", onRequest);
-      context.off("page", onPopup);
-      if (!clicked) continue; // covered or moved away: not something a person could press either
-      const after = await visiblePageState(page).catch(() => null);
-      if (!after) continue;
-      const changed =
-        popup || requests > 0 || after.url !== before.url || Math.abs(after.html - before.html) > 0 || after.open !== before.open ||
-        after.pressed !== before.pressed || after.theme !== before.theme || after.focus !== before.focus || after.scroll !== before.scroll;
-      if (!changed) report("dead-button", path, width, `"${info.text || info.testid || "(no text)"}" does nothing when pressed`);
+      // Focus first: a press always moves focus to the control, and that alone is not an effect.
+      await button.focus({ timeout: 800 }).catch(() => {});
+      presses++;
+      // Pressed up to twice: a press that lands while the page is still wiring itself up can
+      // be lost once, and a control is only called dead when a second press is lost too.
+      let dead = false;
+      let opened = false;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        const before = await visiblePageState(page);
+        let requests = 0;
+        let popup = false;
+        const onRequest = () => requests++;
+        const onPopup = (p) => {
+          popup = true;
+          p.close().catch(() => {});
+        };
+        page.on("request", onRequest);
+        context.on("page", onPopup);
+        const tc = Date.now();
+        const clicked = await button.click({ timeout: 800 }).then(() => true).catch(() => false);
+        await page.waitForTimeout(attempt === 1 ? 250 : 700);
+        page.off("request", onRequest);
+        context.off("page", onPopup);
+        lap(tc, `press "${info.text.slice(0, 30)}" ${clicked ? "ok" : "not pressable"}`);
+        if (!clicked) break; // covered or moved away: not something a person could press either
+        const after = await visiblePageState(page).catch(() => null);
+        if (!after) break;
+        const changed =
+          popup || requests > 0 || after.url !== before.url || after.html !== before.html || after.open !== before.open ||
+          after.pressed !== before.pressed || after.theme !== before.theme || after.focus !== before.focus || after.scroll !== before.scroll;
+        opened = after.open > before.open;
+        dead = !changed;
+        if (changed) break;
+      }
+      if (dead) report("dead-button", path, width, `"${info.text || info.testid || "(no text)"}" does nothing when pressed`);
+      const after = { open: opened ? 1 : 0 };
+      const before = { open: 0 };
       // close whatever opened, so the next button is reachable
       if (after.open !== before.open) await page.keyboard.press("Escape").catch(() => {});
     }
   }
+  lap(t0, "buttons");
   await page.close();
 }
 
@@ -349,13 +383,14 @@ const languageNames = /^(lietuvi|english|русский|nederlands|deutsch|polsk
 
 async function main() {
   const all = await sitemapPaths();
-  let pages = all.filter((p) => LOCALES.includes(localeOf(p)));
+  let pages = ONLY ? ONLY.split(",") : all.filter((p) => LOCALES.includes(localeOf(p)));
   console.log(`origin ${ORIGIN} · locales ${LOCALES.join(",")} · widths ${WIDTHS.join(",")} · sitemap pages ${pages.length}`);
   // PW_CHROMIUM_PATH: a Chromium that is already on the machine, when the pinned download is not.
   const browser = await chromium.launch(process.env.PW_CHROMIUM_PATH ? { executablePath: process.env.PW_CHROMIUM_PATH } : {});
   const discovered = new Set();
   const visited = new Set();
   let done = 0;
+  const startedAt = Date.now();
   const run = async (list) => {
     for (const path of list) {
       if (visited.has(path) || (MAX_PAGES > 0 && visited.size >= MAX_PAGES)) continue;
@@ -370,7 +405,7 @@ async function main() {
         await context.close();
         await new Promise((r) => setTimeout(r, DELAY_MS));
       }
-      if (++done % 10 === 0) console.log(`  ${done} pages · ${findings.length} findings so far`);
+      console.log(`  ${++done}/${list.length} ${path} · ${Math.round((Date.now() - startedAt) / 1000)}s · ${findings.length} findings`);
     }
   };
   await run(pages);
@@ -396,7 +431,7 @@ async function main() {
     // The same defect on the same page in every locale reads as one line.
     const grouped = new Map();
     for (const f of list) {
-      const k = `${f.page.replace(/^\/[a-z]{2}(?=\/|$|\?)/, "/:locale")} — ${f.detail.replace(/\/(lt|en|ru|nl|de|pl)(?=\/|$|\?| )/g, "/:locale")}`;
+      const k = `${f.page.replace(/^\/[a-z]{2}(?=\/|$|\?)/, "/:locale")} — ${f.detail.replace(/(?<!lands in )\/(lt|en|ru|nl|de|pl)(?=\/|$|\?| )/g, "/:locale")}`;
       const g = grouped.get(k) ?? { locales: new Set(), widths: new Set() };
       g.locales.add(localeOf(f.page));
       f.widths.forEach((w) => g.widths.add(w));
