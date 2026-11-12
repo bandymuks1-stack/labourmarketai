@@ -168,7 +168,10 @@ type DeliverOutcome =
   | "write_blocked"
   | "unexpected_error"
   /** The recipient stored an explicit in-app opt-out for this type. */
-  | "suppressed_preference";
+  | "suppressed_preference"
+  /** The send-time re-check said the recipient may no longer be told (a
+   *  participant removed between the read and the delivery). */
+  | "recipient_ineligible";
 
 /**
  * Why a write-path emitter did not deliver. The LOGGED reasons are real
@@ -192,6 +195,9 @@ export type NotificationUndeliveredReason =
   | "self_action"
   /** Approved silence: the recipient stored an in-app opt-out. */
   | "suppressed_preference"
+  /** Approved silence: the send-time re-check found the recipient no longer
+   *  eligible (removed from the thread) — no channel ran after that. */
+  | "recipient_ineligible"
   /** Approved silence: this event type does not carry this status. */
   | "not_applicable"
   /** Named degradation: the store is not applied here. */
@@ -354,6 +360,11 @@ function reportEmailOutcome(
 async function deliverDetailed(
   admin: AdminClient,
   input: NotificationEventInput,
+  opts?: {
+    /** Asked right before EACH channel (bell, e-mail, push); false stops
+     *  that channel and every later one. */
+    readonly isEligible?: () => Promise<boolean>;
+  },
 ): Promise<{
   readonly outcome: DeliverOutcome;
   readonly email: NotificationEmailDispatchOutcome | null;
@@ -368,6 +379,15 @@ async function deliverDetailed(
     // APPROVED silence: the recipient turned this type off themselves.
     return { outcome: "suppressed_preference", email: null };
   }
+  const eligible = async (): Promise<boolean> => {
+    if (!opts?.isEligible) return true;
+    try {
+      return (await opts.isEligible()) === true;
+    } catch {
+      return false;
+    }
+  };
+  if (!(await eligible())) return { outcome: "recipient_ineligible", email: null };
   const outcome = await emitNotificationEvent(admin, input);
   if (outcome.kind === "unexpected_error") {
     // `duplicate` and `feature_unavailable` are approved outcomes and stay
@@ -377,11 +397,15 @@ async function deliverDetailed(
   }
   let email: NotificationEmailDispatchOutcome | null = null;
   if (outcome.kind === "written") {
+    // Re-checked again: the bell insert above took a round trip, and a
+    // removal in that window must not reach the person's inbox or device.
+    if (!(await eligible())) return { outcome: outcome.kind, email: null };
     email = await maybeDispatchNotificationEmail(admin, input, prefRows);
     reportEmailOutcome(input.eventType, email);
     // COM-3 push hop: the same event, the same recipient, the same copy as
     // the bell. Inert until the owner switches the channel on (flag + VAPID
     // keys) AND the person opted in on a device; never fails the insert.
+    if (!(await eligible())) return { outcome: outcome.kind, email };
     const push = await maybeDispatchWebPush(admin, input, prefRows);
     if (push.kind === "send_failed") {
       console.warn("[notifications/push] not delivered", { eventType: input.eventType, reason: push.reason });
@@ -1762,6 +1786,13 @@ export interface MessageReceivedNotificationFacts {
   /** All participant profile ids as read under the sender's session (the
    *  sender may be included; it is filtered here). */
   readonly participantProfileIds: readonly string[];
+  /** SEND-TIME eligibility (P0 chat privacy, owner 2026-11-11): asked again
+   *  right before EACH channel (bell insert, e-mail, push) for each
+   *  recipient, so a removal that lands between the participant read and the
+   *  delivery stops the remaining channels. Read by the send path under the
+   *  author's session (service_role holds no grant on the participant table).
+   *  Must answer false when it cannot tell. Absent = no re-check. */
+  readonly isStillParticipant?: (profileId: string) => Promise<boolean>;
   /** Clock seam - epoch ms; defaults to now. */
   readonly nowMs?: number;
 }
@@ -1790,13 +1821,18 @@ export async function emitMessageReceivedNotifications(
     );
     const results: NotificationEmitResult[] = [];
     for (const recipient of recipients) {
-      const d = await deliverDetailed(admin, {
-        recipientProfileId: recipient,
-        eventType: "message_received",
-        entityType: "conversation",
-        entityId,
-        metadata: { conversationId: facts.conversationId },
-      });
+      const recheck = facts.isStillParticipant;
+      const d = await deliverDetailed(
+        admin,
+        {
+          recipientProfileId: recipient,
+          eventType: "message_received",
+          entityType: "conversation",
+          entityId,
+          metadata: { conversationId: facts.conversationId },
+        },
+        recheck ? { isEligible: () => recheck(recipient) } : undefined,
+      );
       results.push(resultFromOutcome(d.outcome, d.email?.kind ?? null));
     }
     return combineResults(results, "message_received");
@@ -1941,6 +1977,7 @@ import {
   type JobAlertPairReader,
 } from "@/lib/opportunities/job-alert-candidates";
 import type { StoredPublicVacancyV1 } from "@/lib/vacancy-store/vacancy-read";
+import { claimJobAlertEvaluation } from "./job-alert-throttle";
 
 export interface JobAlertRunCounts {
   written: number;
@@ -1989,10 +2026,6 @@ async function announceJobs(
   return counts;
 }
 
-/** Best-effort throttle for the read-time path: one evaluation per person per
- *  window per warm instance. The dedupe key, not this map, is the authority. */
-const JOB_ALERT_READ_TIME_TTL_MS = 30 * 60 * 1000;
-const jobAlertLastRun = new Map<string, number>();
 
 /**
  * Read-time entrance — fired from the worker's own dashboard render, detached
@@ -2008,9 +2041,8 @@ export function maybeEmitJobAlertsInBackground(): void {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
-      const last = jobAlertLastRun.get(user.id) ?? 0;
-      if (Date.now() - last < JOB_ALERT_READ_TIME_TTL_MS) return;
-      jobAlertLastRun.set(user.id, Date.now());
+      // Best-effort throttle (job-alert-throttle.ts); a work-card save resets it.
+      if (!claimJobAlertEvaluation(user.id)) return;
 
       const ctx = await buildOwnWorkerContext(supabase, user.id);
       if (!ctx) return;

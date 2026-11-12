@@ -1751,6 +1751,41 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-29: owner approved #2887 in chat (production apply, at dbd1363ef).
       // The worker reader projects the need's required skills as catalogue slugs.
       "20261029190000_worker_board_need_skill_slugs_v1.sql",
+      // 2026-11-02: J-12 learner join requests (#2959) — RED draft, the marker is the
+      // human-gate acknowledgement, NOT applied until the owner approves.
+      "20261102160000_education_cohort_join_requests_v1.sql",
+      // 2026-11-03: J-12 follow-up — the member command refuses request rows. RED draft,
+      // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261103090000_education_cohort_member_request_guard_v1.sql",
+      // 2026-11-03: work-plan scope predicate made internal only (client EXECUTE revoked). RED, owner-approved, the marker is the
+      // human-gate acknowledgement; APPLIED ledger 20261103170942.
+      "20261103120000_work_plan_worker_in_scope_internal_only_v1.sql",
+      // 2026-11-03: agency docs readiness reads the live agency roster. RED, owner-approved, the marker is the
+      // human-gate acknowledgement; APPLIED ledger 20261103171024.
+      "20261103130000_agency_pool_docs_readiness_live_roster_v1.sql",
+      // 2026-11-03: agency client records follow owns_company. RED, owner-approved, the marker is the
+      // human-gate acknowledgement; APPLIED ledger 20261103171134.
+      "20261103140000_agency_clients_company_authority_v1.sql",
+      // 2026-11-03: pg_trgm for the job search trigram index (create-extension). RED draft,
+      // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261103171000_pg_trgm_extension_v1.sql",
+      // 2026-11-03: production rollback record of the trigram index (drop index). RED, APPLIED ledger 20261103194208.
+      "20261103171300_public_vacancies_occupation_trgm_idx_rollback_v1.sql",
+      // 2026-11-04: one scan for the free-text job search (SECURITY DEFINER replace). RED draft,
+      // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261104160100_search_public_vacancy_previews_live_scan_v5.sql",
+      // 2026-11-05: narrow search table for the free-text job search. RED draft, NOT applied.
+      "20261105100000_public_vacancy_search_table_v1.sql",
+      "20261105100100_search_public_vacancy_previews_narrow_v6.sql",
+      // 2026-11-09: the holder cancels their own account-deletion request; 30-day grace (owner decision); row lock
+      // in the erasure runner and executor. RED draft #3172, the marker is the human-gate acknowledgement, NOT applied.
+      "20261109120000_privacy_cancel_account_deletion.sql",
+      // 2026-11-10: the company-need intake keeps the visitor's locale (SECURITY DEFINER replace, one line).
+      // RED draft #3195, the marker is the human-gate acknowledgement, NOT applied.
+      "20261110140000_company_need_intake_keep_locale_v1.sql",
+      // 2026-11-10: partner registration Slice 1, company takeover invitation + two-operator decision + link.
+      // RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261110190000_organization_claim_invitation_v1.sql",
 ]);
   });
 

@@ -591,7 +591,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/candidates", "lib/scouting"],
     coreModule: "lib/candidates/candidate-drafts.ts",
     surfaces: ["app/[locale]/dashboard/candidates"],
-    note: "The surface a person actually reaches is `/dashboard/candidates`, linked from the planning zone, the operations board and the setup choice. `/dashboard/talent` is a superadmin sample preview with NO inbound link anywhere — it was named as this row's surface until the navigation guard proved nothing leads there.",
+    note: "The surface a person actually reaches is `/dashboard/candidates`, linked from the planning zone, the operations board and the setup choice. `/dashboard/talent` is a superadmin sample preview with NO inbound link — the public /for-companies lifecycle step linked there until 2026-11-03 and now opens `/dashboard/company/scouting`; the preview-surface guard covers that component too.",
   },
   {
     id: "ORG-8",
@@ -870,9 +870,8 @@ const EVIDENCE: readonly CapabilityRow[] = [
     anchors: ["lib/journal"],
     coreModule: null,
     surfaces: ["app/[locale]/dashboard/journal"],
-    note: "13 confirmations in production, 3 of them self-confirmed by one person holding an owner engagement.",
-    ownerDecision:
-      "Block self-confirmation in review_journal_entry, or rely on the weaker classification (§6.3 item 1).",
+    note:
+      "13 confirmations in production, 3 of them self-confirmed by one person holding an owner engagement. RESOLVED by the owner 2026-11-02 (decision 0028): a person's own confirmation is a lawful personal declaration, kept apart from independent confirmation; only presenting oneself as the independent confirmer is refused (enforced since 20261003150500). Re-proof against 0028 by the journal-confirm production walk.",
   },
   {
     id: "EVID-3",

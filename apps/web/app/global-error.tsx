@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 
 import { activeLocales, defaultLocale, type ActiveLocale } from "@/lib/i18n/config";
+import { LmLogo } from "@/components/ui/lm-logo";
 import { reportClientError } from "@/lib/telemetry/report-client-error";
 
 /**
@@ -102,6 +103,10 @@ export default function GlobalError({
           font: "15px/1.6 ui-sans-serif, system-ui, sans-serif",
         }}
       >
+        {/* No stylesheet is guaranteed here, so the size comes from the box. */}
+        <div style={{ width: "51px" }}>
+          <LmLogo />
+        </div>
         <p
           style={{ maxWidth: "26rem" }}
           data-testid="global-error-message"

@@ -698,7 +698,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
     synonyms: {
       en: ["find workers", "scouting", "staff", "hire", "worker search", "find a team"],
-      lt: ["darbuotojai", "rasti darbuotojų", "atranka", "samdyti", "darbuotojų paieška", "rasti komandą"],
+      lt: ["kandidatai", "darbuotojai", "rasti darbuotojų", "atranka", "samdyti", "darbuotojų paieška", "rasti komandą"],
       ru: ["работники", "найти работников", "подбор", "нанять", "поиск работников", "найти команду"],
       nl: ["werknemers", "personeel", "werknemers vinden", "werven", "personeel zoeken", "team vinden"],
       de: ["arbeiter", "arbeitskräfte", "personal finden", "einstellen", "personalsuche", "team finden"],
@@ -792,7 +792,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
     synonyms: {
       en: ["candidates", "candidate pool", "drafts"],
-      lt: ["kandidatai", "kandidatų sąrašas"],
+      lt: ["kandidatų juodraščiai", "kandidatų sąrašas"],
       ru: ["кандидаты", "список кандидатов"],
       nl: ["kandidaten", "kandidatenlijst", "concepten"],
       de: ["kandidaten", "kandidatenliste", "entwürfe"],

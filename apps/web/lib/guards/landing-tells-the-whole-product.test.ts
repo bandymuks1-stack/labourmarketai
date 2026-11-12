@@ -405,8 +405,10 @@ describe("§22 the first screen says what this is, then offers one next step", (
     // the hero pair exists exactly once in the file; the closing band is its own component
     expect(focus.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(1);
     const body = focus.slice(bodyStart);
-    // each hero branch renders the promise before the working entry
-    for (const branch of [body.indexOf("<LivingWorkerHero"), body.indexOf('<section className="grid gap-8 lg:items-start')]) {
+    // the hero renders the promise before the working entry (one branch since
+    // the fictional living-worker hero was withdrawn, owner order 2026-11-09)
+    expect(body).not.toContain("<LivingWorkerHero");
+    for (const branch of [body.indexOf('<section className="grid gap-8 xl:grid-cols-')]) {
       expect(branch).toBeGreaterThan(-1);
       const from = body.slice(branch);
       expect(from.indexOf("{promise}")).toBeGreaterThan(-1);

@@ -17,6 +17,7 @@ export function PageHero({
   ctaSource,
   ctaNext,
   ctaAudience,
+  ctaNeedQuery,
 }: {
   eyebrow: string;
   title: string;
@@ -58,6 +59,12 @@ export function PageHero({
    * findings. A no-op edit is not free.
    */
   ctaAudience?: string;
+  /**
+   * OPT-IN query for a `companyNeed` CTA (e.g. `country=LU`), read by the
+   * form's bounded prefill. Used by the employer market versions of
+   * `/for-companies`; every other caller keeps the plain entry.
+   */
+  ctaNeedQuery?: string;
 }) {
   const signupHref = ctaNext
     ? `/auth/signup?next=${encodeURIComponent(ctaNext)}`
@@ -86,7 +93,7 @@ export function PageHero({
           </TrackedCta>
         ) : ctaKind === "companyNeed" ? (
           <TrackedCta
-            href="/company-need"
+            href={ctaNeedQuery ? `/company-need?${ctaNeedQuery}` : "/company-need"}
             ctaId={ctaSource}
             audience="companies"
             className={buttonLinkClassName()}

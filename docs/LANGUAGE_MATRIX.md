@@ -3,6 +3,7 @@
 > **Status:** canonical audit, 2026-08-27; catalog + prod-DB numbers
 > re-measured **2026-08-30** (repo at `632ad088`, prod SQL). Derived from CODE
 > and the PRODUCTION DATABASE, not from the presence of locale files.
+> **Newer coverage numbers, 2026-11-05:** `docs/program/FUNCTION_REGISTER.md`, "EU language coverage". They replace §1 and §2.1 here.
 > **This file is the ONE canonical source for language-coverage numbers.**
 > Any other doc or code comment that carries a language/ESCO count is a
 > snapshot of its own date and must defer here when it disagrees.

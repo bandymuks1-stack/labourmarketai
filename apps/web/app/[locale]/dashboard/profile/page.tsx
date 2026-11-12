@@ -66,6 +66,8 @@ import { Link } from "@/lib/i18n/navigation";
 import { type CvSectionCard } from "@/components/app/cv-completeness-grid";
 import { WorkerEducationSection } from "@/components/app/worker-education-section";
 import { LearningCompassSection } from "@/components/app/learning-compass-section";
+import { LearnerCohortJoinSection } from "@/components/app/learner-cohort-join-section";
+import { readJoinableCohorts, type CohortJoinRead } from "@/lib/education/cohort-join";
 import { readLearningCompass, type LearningCompassRead } from "@/lib/learning/learning-compass";
 import { WorkerAchievementsSection } from "@/components/app/worker-achievements-section";
 import {
@@ -409,9 +411,11 @@ export default async function ProfilePage({
   // count of project-linked journal entries powering the completeness grid.
   let workerEducation: WorkerEducationRead | null = null;
   let learningCompass: LearningCompassRead | null = null;
+  let cohortJoin: CohortJoinRead | null = null;
   let workerAchievements: WorkerAchievementsRead | null = null;
-  let projectLinkedEntryCount = 0;
-  let certificateDocCount = 0;
+  // null = the count read failed (SEP-7): that card is left out, never "empty".
+  let projectLinkedEntryCount: number | null = 0;
+  let certificateDocCount: number | null = 0;
   // Trust signals were awaited inside the JSX; resolved in stage 5 now.
   let trustSignals: Awaited<ReturnType<typeof getOwnTrustSignals>> | null = null;
   if (workerId) {
@@ -450,6 +454,7 @@ export default async function ProfilePage({
       playerCardRes,
       experienceRelationships,
       standingSkills,
+      cohortJoinRes,
     ] = await Promise.all([
       getOwnAvailabilityPrefs(),
       // Learning Compass (Track C): own records + the board's match results;
@@ -534,6 +539,9 @@ export default async function ProfilePage({
       // (lib/evidence/skill-confirmation-standing.ts) — request-cached, the
       // player card above shares the same read.
       readOwnStandingConfirmedSkillIds(workerId),
+      // J-12: learning groups open for a learner's own join request, and the
+      // learner's requests (migration 20261102160000; absent → renders nothing).
+      readJoinableCohorts().catch((): CohortJoinRead | null => null),
     ]);
 
     availabilityPrefs = prefsRes;
@@ -559,9 +567,10 @@ export default async function ProfilePage({
     externalProfiles = extRes;
     workerEducation = eduRes;
     learningCompass = compassRes;
+    cohortJoin = cohortJoinRes;
     workerAchievements = achRes;
-    projectLinkedEntryCount = projCountRes.count ?? 0;
-    certificateDocCount = certDocsRes.count ?? 0;
+    projectLinkedEntryCount = projCountRes.error ? null : (projCountRes.count ?? 0);
+    certificateDocCount = certDocsRes.error ? null : (certDocsRes.count ?? 0);
     trustSignals = trust;
 
     const wpAll = wpAllRes.data;
@@ -825,7 +834,7 @@ export default async function ProfilePage({
     const declaredCerts = achEntries.filter(
       (a) => a.achievementTypeSlug === "declared_certificate",
     ).length;
-    return [
+    const cards: (Omit<CvSectionCard, "filled"> & { filled: boolean | null })[] = [
       {
         key: "summary",
         filled: savedProfileText.trim().length > 0,
@@ -845,7 +854,8 @@ export default async function ProfilePage({
       },
       {
         key: "certificates",
-        filled: certificateDocCount > 0 || declaredCerts > 0,
+        filled:
+          declaredCerts > 0 ? true : certificateDocCount === null ? null : certificateDocCount > 0,
         href: DOCUMENTS_READINESS_ENABLED
           ? `/${locale}/dashboard/documents`
           : "#cv-achievements",
@@ -857,7 +867,7 @@ export default async function ProfilePage({
       },
       {
         key: "projects",
-        filled: projectLinkedEntryCount > 0,
+        filled: projectLinkedEntryCount === null ? null : projectLinkedEntryCount > 0,
         href: `/${locale}/dashboard/journal`,
       },
       {
@@ -878,6 +888,8 @@ export default async function ProfilePage({
         href: "#cv-availability",
       },
     ];
+    // A card whose read failed is not shown at all — never as "○ empty".
+    return cards.filter((c): c is CvSectionCard => c.filled !== null);
   })();
 
   /**
@@ -1183,6 +1195,15 @@ export default async function ProfilePage({
           imported history). Student path only; nothing generated. */}
       {learningCompass?.status === "ok" && learningCompass.student ? (
         <LearningCompassSection compass={learningCompass.compass} />
+      ) : null}
+
+      {/* J-12: ask to join a learning group; the learner's own record stays
+          their declaration until the institution confirms it. */}
+      {cohortJoin ? (
+        <LearnerCohortJoinSection
+          read={cohortJoin}
+          student={learningCompass?.status === "ok" && learningCompass.student}
+        />
       ) : null}
 
       {/* W7-S1: the readiness/summary surfaces that used to stand here —

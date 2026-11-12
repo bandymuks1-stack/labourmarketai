@@ -65,6 +65,7 @@ import { readModuleFieldValues } from "@/lib/journal/journal-module-fields";
 import { readOwnOccupationPath } from "@/lib/journal/journal-occupation-path";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import {
+  deriveIndependentReviewResult,
   deriveReviewResult,
   deriveReviewTimeline,
   isSelfConfirmedOnly,
@@ -788,8 +789,8 @@ export default async function JournalPage({
   // Entries with their metrics + confirmation status — read through THE
   // canonical journal-list core (G4): v3 lifecycle select (deleted_at,
   // superseded_by hidden), legacy projection fallback while migration 0018
-  // is unapplied, newest first. A failed read renders as an empty list,
-  // exactly as the inline query degraded before the extraction.
+  // is unapplied, newest first. A failed read is `null` and renders as
+  // "could not be read" — never as an empty journal (SEP-7: UNKNOWN ≠ ZERO).
   type JournalEntryRow = JournalEntryListRow;
   const entries: JournalEntryRow[] | null = entriesRead.ok
     ? entriesRead.entries
@@ -892,9 +893,12 @@ export default async function JournalPage({
   // Evidence Status Strip (v1) for the list status zone — a compact legend
   // showing which honest states the worker's entries are actually in. Derived
   // purely from the existing review result; "confirmed" lights up ONLY when a
-  // real approved confirmation exists, never automatically.
+  // real approved confirmation exists, never automatically. The signed-in
+  // person IS the subject, so their own approval of their own entry never
+  // counts here (decision 0028 J-2.2): the strip's "confirmed" chip and the
+  // CV bridge's "confirmed" count mean another person confirmed it.
   const evidenceStatuses = (entries ?? []).map((e) =>
-    deriveReviewResult(e.journal_entry_confirmations),
+    deriveIndependentReviewResult(e.journal_entry_confirmations, user.id),
   );
 
   // Diary day-grouping (CV/records feed cleanup): the feed reads as a dated
@@ -1020,22 +1024,13 @@ export default async function JournalPage({
       totalMinutes: g.totalMinutes,
       /**
        * The SAME derivation the rest of the page uses for "confirmed"
-       * (`deriveReviewResult` === "approved") — never a second rule.
-       *
-       * WHAT THIS COUNT CANNOT SAY, and why the calendar's words are careful:
-       * `deriveReviewResult` also returns "approved" when the SUBJECT
-       * approved their own entry (a worker who manages their organization),
-       * and this page's reader selects `confirmation_scope, created_at,
-       * confirmer_role` — not `confirmer_id` — so `isSelfConfirmation` cannot
-       * be evaluated here (review-status.ts documents exactly this). The
-       * marker therefore says a JOURNAL RECORD is confirmed and never that a
-       * MANAGER confirmed it: claiming independence the data cannot support
-       * would dress self-declared evidence as external confirmation (SEP-3).
-       * Widening the reader's select is a change to a shared canonical reader
-       * and belongs in its own slice, not in a UX pass.
+       * (`deriveIndependentReviewResult` === "approved") — never a second
+       * rule. The signed-in person is the subject, so a self-approval
+       * (decision 0028 J-2.2) never counts as a confirmed day.
        */
       confirmedCount: g.entries.filter(
-        (e) => deriveReviewResult(e.journal_entry_confirmations) === "approved",
+        (e) =>
+          deriveIndependentReviewResult(e.journal_entry_confirmations, user.id) === "approved",
       ).length,
       reportedMinutes: reportedByDay.get(g.isoKey) ?? 0,
     })).concat(
@@ -1696,12 +1691,14 @@ export default async function JournalPage({
           className="text-meta leading-relaxed text-text-muted"
           data-testid="journal-cv-bridge"
         >
-          {totalEntryCount > 0
-            ? t("cvBridge", {
-                confirmed: confirmedEntryCount,
-                total: totalEntryCount,
-              })
-            : t("cvBridgeEmpty")}{" "}
+          {entries === null
+            ? t("cvBridgeUnavailable")
+            : totalEntryCount > 0
+              ? t("cvBridge", {
+                  confirmed: confirmedEntryCount,
+                  total: totalEntryCount,
+                })
+              : t("cvBridgeEmpty")}{" "}
           <Link
             href="/cv"
             className="font-medium text-brand-blue hover:underline"
@@ -1711,28 +1708,42 @@ export default async function JournalPage({
           </Link>
         </p>
         {/* Proof-engine loop strip — ONE dense row, real counts only:
-            įrašai → įgūdžių įrodymai → CV → pasiūlymai. */}
-        <p
-          className="text-meta leading-relaxed text-text-muted"
-          data-testid="journal-proof-loop"
-        >
-          {t("proofLoop.stripPeriod", {
-            entries: entriesThisMonth,
-            period: t("intelligence.period.month"),
-            evidenced: evidencedSkillIds.size,
-            confirmed: verifiedSkillIds.size,
-          })}{" "}
-          <Link
-            href="/cv"
-            className="font-medium text-brand-blue hover:underline"
-            data-testid="journal-proof-loop-cv-link"
+            įrašai → įgūdžių įrodymai → CV → pasiūlymai. A failed
+            list read shows no counts at all (SEP-7). */}
+        {entries !== null && (
+          <p
+            className="text-meta leading-relaxed text-text-muted"
+            data-testid="journal-proof-loop"
           >
-            {t("proofLoop.cvLink")} →
-          </Link>
-        </p>
+            {t("proofLoop.stripPeriod", {
+              entries: entriesThisMonth,
+              period: t("intelligence.period.month"),
+              evidenced: evidencedSkillIds.size,
+              confirmed: verifiedSkillIds.size,
+            })}{" "}
+            <Link
+              href="/cv"
+              className="font-medium text-brand-blue hover:underline"
+              data-testid="journal-proof-loop-cv-link"
+            >
+              {t("proofLoop.cvLink")} →
+            </Link>
+          </p>
+        )}
           </div>
         </details>
-        {diaryScope !== "recent" && visibleDayGroups.length === 0 ? (
+        {entries === null ? (
+          /* The list read FAILED. Not an empty journal and not an empty day:
+             no first-entry door, no "nothing on this day" (SEP-7). */
+          <div
+            role="status"
+            className="flex flex-col gap-1 rounded-md border border-border-subtle bg-surface-1/40 px-4 py-4"
+            data-testid="journal-list-unavailable"
+          >
+            <p className="text-sm font-medium text-text-primary">{t("listUnavailableTitle")}</p>
+            <p className="text-sm leading-relaxed text-text-secondary">{t("listUnavailable")}</p>
+          </div>
+        ) : diaryScope !== "recent" && visibleDayGroups.length === 0 ? (
           /* A day — or a period — the person navigated to that holds no
              records. A real answer over a known window (SEP-7: a recorded
              zero, not an unknown), with the one action that changes it and

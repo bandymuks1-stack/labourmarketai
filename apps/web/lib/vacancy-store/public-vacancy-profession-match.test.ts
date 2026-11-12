@@ -1,5 +1,12 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
-import { matchProfessionAcrossLocales, matchProfessionByLabel } from "./public-vacancy-profession-match";
+import {
+  matchProfessionAcrossLocales,
+  matchProfessionByLabel,
+  professionRedirectHref,
+} from "./public-vacancy-profession-match";
 
 const LT = [
   { slug: "baker", label: "Kepėjas" },
@@ -63,5 +70,81 @@ describe("the same word in another active language", () => {
     const X = [{ slug: "baker", label: "Welder" }];
     expect(matchProfessionAcrossLocales("welder", LT, [EN, X])).toBeNull();
     expect(matchProfessionAcrossLocales("lagerarbetare", LT, [EN, RU])).toBeNull();
+  });
+});
+
+describe("the real catalogue: a word people type for a profession stays the filter", () => {
+  const ACTIVE = ["en", "lt", "ru", "nl", "de", "pl"] as const;
+  const catalogue = (l: string) =>
+    Object.entries(
+      JSON.parse(readFileSync(join(__dirname, "..", "..", "messages", l, "professions.json"), "utf8")) as Record<string, string>,
+    ).map(([slug, label]) => ({ slug, label }));
+
+  it("elektriker goes to the electrician filter on every active board, not to free text", () => {
+    for (const board of ACTIVE) {
+      const others = ACTIVE.filter((l) => l !== board).map(catalogue);
+      expect(matchProfessionAcrossLocales("elektriker", catalogue(board), others), board).toBe("electrician");
+    }
+  });
+
+  it("schweisser is the same word as the catalogue's Schweißer, on every active board", () => {
+    for (const board of ACTIVE) {
+      const others = ACTIVE.filter((l) => l !== board).map(catalogue);
+      for (const term of ["schweißer", "schweisser", "Schweisser", "SCHWEISSER"]) {
+        expect(matchProfessionAcrossLocales(term, catalogue(board), others), `${board} ${term}`).toBe("welder");
+      }
+    }
+  });
+
+  it("ae, oe and ue typed for ä, ö and ü reach the catalogue's label", () => {
+    const de = [{ slug: "kitchen_helper", label: "Küchenhilfe" }, { slug: "baker", label: "Bäcker" }, { slug: "tax", label: "Steuerberater" }];
+    for (const [term, slug] of [["kuechenhilfe", "kitchen_helper"], ["küchenhilfe", "kitchen_helper"], ["kuchenhilfe", "kitchen_helper"], ["baecker", "baker"], ["backer", "baker"], ["steuerberater", "tax"]] as const) {
+      expect(matchProfessionByLabel(term, de), term).toBe(slug);
+    }
+    expect(matchProfessionByLabel("zzqxue", de)).toBeNull();
+  });
+
+  it("a word no label names reaches its profession, on every active board", () => {
+    const words: readonly (readonly [string, string])[] = [
+      ["truck driver", "driver"],
+      ["Sunkvezimio vairuotojas", "driver"],
+      ["LKW-Fahrer", "driver"],
+      ["дальнобойщик", "driver"],
+      ["szef kuchni", "cook"],
+      ["Küchenchef", "cook"],
+      ["ontwikkelaar", "software_developer"],
+      ["учитель", "teacher"],
+      ["SANDELININKAS", "warehouse_worker"],
+      ["magazynier", "warehouse_worker"],
+    ];
+    for (const board of ACTIVE) {
+      const others = ACTIVE.filter((l) => l !== board).map(catalogue);
+      for (const [term, slug] of words) {
+        expect(matchProfessionAcrossLocales(term, catalogue(board), others), `${board} ${term}`).toBe(slug);
+      }
+      // Publisher words on the Swedish and Norwegian supply stay a text search.
+      for (const term of ["chef", "programmer", "lagerist"]) {
+        expect(matchProfessionAcrossLocales(term, catalogue(board), others), `${board} ${term}`).toBeNull();
+      }
+    }
+  });
+
+  it("words the catalogue does not name stay free text", () => {
+    const others = ACTIVE.filter((l) => l !== "lt").map(catalogue);
+    for (const term of ["kock", "el", "ab", "ter", "snickare", "undersköterska", "zzqx"]) {
+      expect(matchProfessionAcrossLocales(term, catalogue("lt"), others), term).toBeNull();
+    }
+  });
+});
+
+describe("professionRedirectHref (SR-4)", () => {
+  it("keeps a page past the first", () => {
+    expect(professionRedirectHref("electrician", "2")).toBe("/jobs?profession=electrician&page=2");
+  });
+
+  it("adds nothing for the first page, no page or a page that is not a number", () => {
+    for (const raw of [undefined, "1", "0", "-3", "abc", ""]) {
+      expect(professionRedirectHref("electrician", raw)).toBe("/jobs?profession=electrician");
+    }
   });
 });

@@ -353,6 +353,50 @@ const en = {
     "An approval round passed its deadline",
   "notifications.type.event_workflow_step_pending":
     "An approval request is waiting for your decision",
+  "today.openProjects":
+    "My projects",
+  "projects.title":
+    "My projects",
+  "projects.detailTitle":
+    "Project",
+  "projects.none":
+    "You are not assigned to any project.",
+  "projects.active":
+    "Active",
+  "projects.ended":
+    "Ended",
+  "projects.asksCount":
+    "Still needed from you",
+  "projects.moreOnWeb":
+    "Only your first projects are shown here. The website lists all of them.",
+  "projects.notFound":
+    "This project is not one of yours, or it is not among the projects shown here.",
+  "projects.asksTitle":
+    "Still needed from you",
+  "projects.asksShownOf":
+    "Shown here / still open in all — the full list is on the website",
+  "projects.asksUnavailable":
+    "What is still needed from you could not be read just now. Try again, or open the project on the website.",
+  "projects.asksNotRead":
+    "This assignment has ended. What was asked of you on it is on the project's web page.",
+  "projects.asksIncomplete":
+    "More is open across your projects than the app can list, so this project's part may not be shown. Its web page has the full list.",
+  "projects.asksNone":
+    "Nothing is open for you on this project.",
+  "projects.ask.needed":
+    "Needed",
+  "projects.ask.missing":
+    "Missing",
+  "projects.ask.rejected":
+    "Rejected — needs a new one",
+  "projects.ask.expired":
+    "Expired",
+  "projects.instructionTitle":
+    "Latest instruction",
+  "projects.answerInstruction":
+    "Answer in Messages",
+  "projects.webDetail":
+    "The full project page — stages, documents and the team — is on the website.",
   "messages.threadNotShown":
     "The conversation is not on screen yet. Wait for it to load, read it, then review your reply.",
   "messages.newBeforeReview":
@@ -819,6 +863,50 @@ const lt: Catalogue = {
     "Tvirtinimo etapas viršijo terminą",
   "notifications.type.event_workflow_step_pending":
     "Tvirtinimo prašymas laukia tavo sprendimo",
+  "today.openProjects":
+    "Mano projektai",
+  "projects.title":
+    "Mano projektai",
+  "projects.detailTitle":
+    "Projektas",
+  "projects.none":
+    "Tau nepriskirtas joks projektas.",
+  "projects.active":
+    "Aktyvus",
+  "projects.ended":
+    "Baigtas",
+  "projects.asksCount":
+    "Dar reikia iš tavęs",
+  "projects.moreOnWeb":
+    "Čia rodomi tik pirmieji tavo projektai. Svetainėje matysi visus.",
+  "projects.notFound":
+    "Šis projektas nėra tavo arba jo nėra tarp čia rodomų projektų.",
+  "projects.asksTitle":
+    "Dar reikia iš tavęs",
+  "projects.asksShownOf":
+    "Rodoma čia / iš viso dar atvira – visas sąrašas svetainėje",
+  "projects.asksUnavailable":
+    "Šiuo metu nepavyko nuskaityti, ko dar reikia iš tavęs. Bandyk dar kartą arba atidaryk projektą svetainėje.",
+  "projects.asksNotRead":
+    "Šis priskyrimas baigtas. Kas jame buvo prašyta iš tavęs, matysi projekto puslapyje svetainėje.",
+  "projects.asksIncomplete":
+    "Tavo projektuose atvira daugiau, nei programėlė gali išvardyti, todėl šio projekto dalis gali būti neparodyta. Visas sąrašas – projekto puslapyje svetainėje.",
+  "projects.asksNone":
+    "Šiame projekte tau nieko neliko atlikti.",
+  "projects.ask.needed":
+    "Reikia",
+  "projects.ask.missing":
+    "Trūksta",
+  "projects.ask.rejected":
+    "Atmesta – reikia naujo",
+  "projects.ask.expired":
+    "Nebegalioja",
+  "projects.instructionTitle":
+    "Naujausias nurodymas",
+  "projects.answerInstruction":
+    "Atsakyti žinutėse",
+  "projects.webDetail":
+    "Visas projekto puslapis – etapai, dokumentai ir komanda – yra svetainėje.",
   "messages.threadNotShown":
     "Pokalbis dar neparodytas. Palauk, kol jis įsikels, perskaityk jį ir tada peržiūrėk savo atsakymą.",
   "messages.newBeforeReview":
@@ -1281,6 +1369,50 @@ const ru: Catalogue = {
     "Этап согласования превысил срок",
   "notifications.type.event_workflow_step_pending":
     "Запрос на согласование ждёт вашего решения",
+  "today.openProjects":
+    "Мои проекты",
+  "projects.title":
+    "Мои проекты",
+  "projects.detailTitle":
+    "Проект",
+  "projects.none":
+    "У вас нет назначенных проектов.",
+  "projects.active":
+    "Активный",
+  "projects.ended":
+    "Завершён",
+  "projects.asksCount":
+    "Ещё нужно от вас",
+  "projects.moreOnWeb":
+    "Здесь показаны только первые ваши проекты. На сайте видны все.",
+  "projects.notFound":
+    "Этот проект не ваш или его нет среди показанных здесь.",
+  "projects.asksTitle":
+    "Ещё нужно от вас",
+  "projects.asksShownOf":
+    "Показано здесь / всего открыто — полный список на сайте",
+  "projects.asksUnavailable":
+    "Сейчас не удалось прочитать, что ещё нужно от вас. Попробуйте ещё раз или откройте проект на сайте.",
+  "projects.asksNotRead":
+    "Это назначение завершено. Что по нему требовалось от вас, видно на странице проекта на сайте.",
+  "projects.asksIncomplete":
+    "В ваших проектах открыто больше, чем приложение может показать, поэтому часть этого проекта может быть не видна. Полный список — на странице проекта на сайте.",
+  "projects.asksNone":
+    "По этому проекту от вас ничего не требуется.",
+  "projects.ask.needed":
+    "Нужно",
+  "projects.ask.missing":
+    "Отсутствует",
+  "projects.ask.rejected":
+    "Отклонено — нужен новый",
+  "projects.ask.expired":
+    "Истёк срок",
+  "projects.instructionTitle":
+    "Последнее указание",
+  "projects.answerInstruction":
+    "Ответить в сообщениях",
+  "projects.webDetail":
+    "Полная страница проекта — этапы, документы и команда — на сайте.",
   "messages.threadNotShown":
     "Разговор ещё не показан. Дождитесь загрузки, прочитайте его, затем проверьте свой ответ.",
   "messages.newBeforeReview":
@@ -1743,6 +1875,50 @@ const nl: Catalogue = {
     "Een goedkeuringsronde heeft haar termijn overschreden",
   "notifications.type.event_workflow_step_pending":
     "Een goedkeuringsverzoek wacht op je beslissing",
+  "today.openProjects":
+    "Mijn projecten",
+  "projects.title":
+    "Mijn projecten",
+  "projects.detailTitle":
+    "Project",
+  "projects.none":
+    "Je bent aan geen enkel project toegewezen.",
+  "projects.active":
+    "Actief",
+  "projects.ended":
+    "Beëindigd",
+  "projects.asksCount":
+    "Nog nodig van jou",
+  "projects.moreOnWeb":
+    "Hier staan alleen je eerste projecten. De website toont ze allemaal.",
+  "projects.notFound":
+    "Dit project is niet van jou, of het staat niet bij de projecten die hier worden getoond.",
+  "projects.asksTitle":
+    "Nog nodig van jou",
+  "projects.asksShownOf":
+    "Hier getoond / in totaal nog open — de volledige lijst staat op de website",
+  "projects.asksUnavailable":
+    "Wat er nog van je nodig is, kon nu niet worden gelezen. Probeer het opnieuw of open het project op de website.",
+  "projects.asksNotRead":
+    "Deze toewijzing is beëindigd. Wat er daarbij van je werd gevraagd, staat op de projectpagina op de website.",
+  "projects.asksIncomplete":
+    "Er staat in je projecten meer open dan de app kan tonen, dus het deel van dit project wordt mogelijk niet getoond. De projectpagina op de website heeft de volledige lijst.",
+  "projects.asksNone":
+    "Voor jou staat er op dit project niets open.",
+  "projects.ask.needed":
+    "Nodig",
+  "projects.ask.missing":
+    "Ontbreekt",
+  "projects.ask.rejected":
+    "Afgewezen — er is een nieuwe nodig",
+  "projects.ask.expired":
+    "Verlopen",
+  "projects.instructionTitle":
+    "Laatste instructie",
+  "projects.answerInstruction":
+    "Antwoorden in Berichten",
+  "projects.webDetail":
+    "De volledige projectpagina — fasen, documenten en het team — staat op de website.",
   "messages.threadNotShown":
     "Het gesprek staat nog niet op het scherm. Wacht tot het geladen is, lees het en bekijk dan je antwoord.",
   "messages.newBeforeReview":
@@ -2208,6 +2384,50 @@ const de: Catalogue = {
     "Eine Freigaberunde hat ihre Frist überschritten",
   "notifications.type.event_workflow_step_pending":
     "Eine Freigabeanfrage wartet auf Ihre Entscheidung",
+  "today.openProjects":
+    "Meine Projekte",
+  "projects.title":
+    "Meine Projekte",
+  "projects.detailTitle":
+    "Projekt",
+  "projects.none":
+    "Sie sind keinem Projekt zugewiesen.",
+  "projects.active":
+    "Aktiv",
+  "projects.ended":
+    "Beendet",
+  "projects.asksCount":
+    "Noch von Ihnen benötigt",
+  "projects.moreOnWeb":
+    "Hier werden nur Ihre ersten Projekte angezeigt. Die Website zeigt alle.",
+  "projects.notFound":
+    "Dieses Projekt gehört nicht zu Ihren oder ist nicht unter den hier gezeigten Projekten.",
+  "projects.asksTitle":
+    "Noch von Ihnen benötigt",
+  "projects.asksShownOf":
+    "Hier angezeigt / insgesamt noch offen – die vollständige Liste finden Sie auf der Website",
+  "projects.asksUnavailable":
+    "Was noch von Ihnen benötigt wird, konnte gerade nicht gelesen werden. Versuchen Sie es erneut oder öffnen Sie das Projekt auf der Website.",
+  "projects.asksNotRead":
+    "Dieser Einsatz ist beendet. Was dabei von Ihnen verlangt wurde, steht auf der Projektseite der Website.",
+  "projects.asksIncomplete":
+    "In Ihren Projekten ist mehr offen, als die App anzeigen kann; der Teil dieses Projekts wird daher möglicherweise nicht gezeigt. Die vollständige Liste steht auf der Projektseite der Website.",
+  "projects.asksNone":
+    "Für Sie ist in diesem Projekt nichts offen.",
+  "projects.ask.needed":
+    "Benötigt",
+  "projects.ask.missing":
+    "Fehlt",
+  "projects.ask.rejected":
+    "Abgelehnt – ein neues wird benötigt",
+  "projects.ask.expired":
+    "Abgelaufen",
+  "projects.instructionTitle":
+    "Letzte Anweisung",
+  "projects.answerInstruction":
+    "In Nachrichten antworten",
+  "projects.webDetail":
+    "Die vollständige Projektseite – Phasen, Dokumente und Team – finden Sie auf der Website.",
   "messages.threadNotShown":
     "Das Gespräch wird noch nicht angezeigt. Warten Sie, bis es geladen ist, lesen Sie es und prüfen Sie dann Ihre Antwort.",
   "messages.newBeforeReview":
@@ -2660,6 +2880,50 @@ const pl: Catalogue = {
     "Etap zatwierdzania przekroczył termin",
   "notifications.type.event_workflow_step_pending":
     "Wniosek o zatwierdzenie czeka na Twoją decyzję",
+  "today.openProjects":
+    "Moje projekty",
+  "projects.title":
+    "Moje projekty",
+  "projects.detailTitle":
+    "Projekt",
+  "projects.none":
+    "Nie masz przypisanego żadnego projektu.",
+  "projects.active":
+    "Aktywny",
+  "projects.ended":
+    "Zakończony",
+  "projects.asksCount":
+    "Jeszcze potrzebne od Ciebie",
+  "projects.moreOnWeb":
+    "Tutaj widać tylko Twoje pierwsze projekty. Na stronie widać wszystkie.",
+  "projects.notFound":
+    "Ten projekt nie jest Twój albo nie ma go wśród pokazanych tutaj.",
+  "projects.asksTitle":
+    "Jeszcze potrzebne od Ciebie",
+  "projects.asksShownOf":
+    "Pokazane tutaj / łącznie otwarte — pełna lista jest na stronie internetowej",
+  "projects.asksUnavailable":
+    "Nie udało się teraz odczytać, co jeszcze jest potrzebne od Ciebie. Spróbuj ponownie albo otwórz projekt na stronie internetowej.",
+  "projects.asksNotRead":
+    "To przypisanie się zakończyło. Co było w nim od Ciebie wymagane, zobaczysz na stronie projektu.",
+  "projects.asksIncomplete":
+    "W Twoich projektach otwartych jest więcej, niż aplikacja może pokazać, więc część tego projektu może nie być widoczna. Pełna lista jest na stronie projektu.",
+  "projects.asksNone":
+    "W tym projekcie nic nie czeka na Ciebie.",
+  "projects.ask.needed":
+    "Potrzebne",
+  "projects.ask.missing":
+    "Brakuje",
+  "projects.ask.rejected":
+    "Odrzucone — potrzebny nowy",
+  "projects.ask.expired":
+    "Wygasło",
+  "projects.instructionTitle":
+    "Najnowsze polecenie",
+  "projects.answerInstruction":
+    "Odpowiedz w wiadomościach",
+  "projects.webDetail":
+    "Pełna strona projektu — etapy, dokumenty i zespół — jest na stronie internetowej.",
   "messages.threadNotShown":
     "Rozmowa nie jest jeszcze widoczna. Poczekaj, aż się wczyta, przeczytaj ją, a potem sprawdź swoją odpowiedź.",
   "messages.newBeforeReview":

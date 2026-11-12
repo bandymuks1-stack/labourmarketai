@@ -469,17 +469,25 @@ export interface PublicVacancySitemapPage {
   readonly entries: readonly PublicVacancySitemapEntry[];
 }
 
-/** Rows per sitemap shard. Well under the sitemaps.org 50,000-per-file ceiling. */
-export const PUBLIC_VACANCY_SITEMAP_SHARD_SIZE = 5000;
+/**
+ * Rows per sitemap shard — PostgREST's own `max_rows` (supabase/config.toml:
+ * 1000). The server answers at most that many rows per RPC call and says
+ * nothing about the rest, so a larger shard is silently cut: at 5000 every
+ * shard returned 1000 rows and the index (ceil(count / 5000) shards) left
+ * four in five live job pages out of the sitemap (production, 2026-11-03:
+ * 11,000 of 53,095). One shard = one call = one full page.
+ */
+export const PUBLIC_VACANCY_SITEMAP_SHARD_SIZE = 1000;
 
-export async function listPublicVacancySitemapEntries(input: {
-  shard: number;
-}): Promise<PublicVacancySitemapPage> {
+export async function listPublicVacancySitemapEntries(
+  input: { shard: number },
+  suppliedClient?: SupabaseClient,
+): Promise<PublicVacancySitemapPage> {
   const shard = Math.max(0, Math.floor(input.shard));
   const limit = PUBLIC_VACANCY_SITEMAP_SHARD_SIZE;
   const offset = shard * limit;
 
-  const supabase = await createClient();
+  const supabase = suppliedClient ?? (await createClient());
   const { data, error } = await asAny(supabase).rpc(
     "list_public_vacancy_sitemap_v1",
     { p_limit: limit, p_offset: offset },

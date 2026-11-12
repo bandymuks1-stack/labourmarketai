@@ -101,6 +101,14 @@ export default function ShellLayout() {
         options={{ href: null, title: t("messages.title") }}
       />
       <Tabs.Screen
+        name="projects"
+        options={{ href: null, title: t("projects.title") }}
+      />
+      <Tabs.Screen
+        name="project"
+        options={{ href: null, title: t("projects.detailTitle") }}
+      />
+      <Tabs.Screen
         name="notifications"
         options={{ href: null, title: t("notifications.title") }}
       />

@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { proveActionTiles } from "./action-tile-proof";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 
@@ -606,4 +607,18 @@ test("B-1 (6.4). a customer saves a request draft on the buyer workspace", async
     timeout: 30_000,
   });
   await ctx.close();
+});
+
+// ── T (#2828, owner A-09 ruling 2026-11-03): the bookings page's related-door
+// grid is the ONE action tile. Read-only: real links, no gold primary (these
+// are related doors), no destination twice, at 1280 and 390.
+test("T-1 (#2828). the bookings related-door grid renders as action tiles", async ({ browser }) => {
+  await proveActionTiles(
+    async (mobile) => {
+      const { ctx, page } = await as(browser, "manager", mobile);
+      return { page, close: () => ctx.close() };
+    },
+    "/lt/dashboard/bookings",
+    { scopeTestId: "bookings-connections", primaries: 0, prepare: (page) => useWorkspace(page, GAMA) },
+  );
 });

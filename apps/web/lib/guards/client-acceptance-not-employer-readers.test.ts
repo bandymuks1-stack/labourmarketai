@@ -79,7 +79,7 @@ describe("reader: player card own confirmations count", () => {
   it("is filtered to employer-path rows (static pin; the function is private)", () => {
     const src = read("lib/player-card/player-card.ts");
     const fn = src.slice(src.indexOf("async function ownConfirmationsCount"));
-    expect(fn.slice(0, fn.indexOf("\n}\n"))).toContain(".or(EMPLOYER_BASIS_OR_FILTER)");
+    expect(fn.slice(0, fn.indexOf("\n}\n"))).toContain("countConfirmedEntries(");
   });
 });
 
@@ -104,8 +104,8 @@ describe("reader: capability evidence (independently confirmed entries)", () => 
 
 describe("static pins for readers whose queries are inside large functions", () => {
   const cases: [string, string, RegExp][] = [
-    ["matching workbench confirmation count", "lib/admin/matching-workbench.ts", /select\("entry_id, confirmation_scope"\)[\s\S]{0,400}withoutCounterpartyRows/],
-    ["agency pool confirmation count", "lib/agency/pool.ts", /select\("entry_id, confirmation_scope"\)[\s\S]{0,400}withoutCounterpartyRows/],
+    ["matching workbench confirmation count", "lib/admin/matching-workbench.ts", /confirmedEntriesByWorker\(entryRows\)/],
+    ["agency pool confirmation count", "lib/agency/pool.ts", /confirmedEntriesByWorker\(entries\)/],
     ["capability registry journal.list confirmations", "lib/capabilities/registry.ts", /confirmations: withoutCounterpartyRows\(e\.journal_entry_confirmations\)\.length/],
     ["task evidence confirmedAt", "lib/journal/task-evidence.ts", /journal_entry_confirmations\(confirmation_scope, created_at, confirmer_id\)[\s\S]{0,12000}isConfirmedEntry\(confirmations/],
     ["weekly intelligence confirmedCount", "lib/worker/weekly-intelligence.ts", /select\("entry_id, confirmation_scope, created_at, confirmer_id"\)[\s\S]{0,900}countConfirmedEntries/],

@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link, redirect } from "@/lib/i18n/navigation";
-import { matchProfessionAcrossLocales } from "@/lib/vacancy-store/public-vacancy-profession-match";
+import {
+  matchProfessionAcrossLocales,
+  professionRedirectHref,
+} from "@/lib/vacancy-store/public-vacancy-profession-match";
+import { readCountryParam } from "@/lib/vacancy-store/public-vacancy-country-param";
 import { activeLocales } from "@/lib/i18n/config";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
+import { jobsCanonicalPath } from "@/lib/seo/jobs-canonical";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import {
   searchPublicVacancyPreviews,
@@ -20,7 +25,10 @@ import {
   listSavedPublicVacancyIds,
   resolveOwnWorkerId,
 } from "@/lib/opportunities/saved-opportunities";
-import { listPublicVacancyPreviewsByIds } from "@/lib/vacancy-store/vacancy-read";
+import {
+  listMemberVacancyFactsByIds,
+  listPublicVacancyPreviewsByIds,
+} from "@/lib/vacancy-store/vacancy-read";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { buildJobsListJsonLd } from "@/lib/seo/public-job-json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
@@ -49,11 +57,13 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ q?: string; page?: string; saved?: string; profession?: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return buildPageMetadataFor("jobs", locale, "/jobs");
+  return buildPageMetadataFor("jobs", locale, jobsCanonicalPath(await searchParams));
 }
 
 type L = Record<ActiveLocale, string>;
@@ -242,6 +252,21 @@ const UNAVAILABLE: L = {
   pl: "Tablica ofert pracy nie odpowiedziała na czas. Spróbuj ponownie za chwilę.",
 };
 
+/**
+ * `?country=` IS NOT A FILTER YET (owner 2026-11-09). The search has no country
+ * argument until the RED country filter is applied, so a link to
+ * `/jobs?country=NO` must not look like the Norwegian jobs: the page says it is
+ * showing every country. See lib/vacancy-store/public-vacancy-country-param.ts.
+ */
+const COUNTRY_NOT_FILTERED: Record<ActiveLocale, (country: string | null) => string> = {
+  en: (c) => `${c ? `Filtering by country (${c}) is` : "Filtering by country is"} not available yet. Showing jobs from all countries.`,
+  lt: (c) => `${c ? `Filtras pagal šalį (${c})` : "Filtras pagal šalį"} dar neveikia. Rodomi visų šalių darbo skelbimai.`,
+  ru: (c) => `${c ? `Фильтр по стране (${c})` : "Фильтр по стране"} пока недоступен. Показаны вакансии из всех стран.`,
+  nl: (c) => `${c ? `Filteren op land (${c})` : "Filteren op land"} is nog niet beschikbaar. Vacatures uit alle landen worden getoond.`,
+  de: (c) => `${c ? `Der Länderfilter (${c})` : "Der Länderfilter"} ist noch nicht verfügbar. Angezeigt werden Stellen aus allen Ländern.`,
+  pl: (c) => `${c ? `Filtr według kraju (${c})` : "Filtr według kraju"} nie jest jeszcze dostępny. Pokazujemy oferty ze wszystkich krajów.`,
+};
+
 const SAVED_TAB: L = {
   en: "Saved",
   lt: "Išsaugoti",
@@ -281,6 +306,17 @@ const SAVED_EMPTY: L = {
   pl: "Nie masz jeszcze zapisanej żadnej oferty pracy. Otwórz ofertę i użyj „Zapisz”.",
 };
 
+/** The anonymous card's honest line where the member facts would be (owner
+ *  P0-3, 2026-11-03): they exist, they open after sign-in (directive 2026-08-24). */
+const LOCKED_FACTS: L = {
+  en: "Employer and location: after sign-in",
+  lt: "Darbdavys ir vieta: prisijungus",
+  ru: "Работодатель и место: после входа",
+  nl: "Werkgever en locatie: na inloggen",
+  de: "Arbeitgeber und Ort: nach der Anmeldung",
+  pl: "Pracodawca i miejsce: po zalogowaniu",
+};
+
 const SAVED_BADGE: L = {
   en: "Saved",
   lt: "Išsaugota",
@@ -318,6 +354,7 @@ export default async function JobsPage({
     page?: string;
     saved?: string;
     profession?: string;
+    country?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -329,6 +366,8 @@ export default async function JobsPage({
   // Closed set: an unknown slug becomes "no filter" rather than reaching the
   // SQL function as free text.
   const profession = readProfessionSlugParam(sp.profession);
+  // Read only to SAY it is not applied: the search takes no country yet.
+  const countryParam = readCountryParam(sp.country);
   // The ONE registry — slug → name in the reader's language. 17,145 browsable
   // ads carry a slug the categorizer derived, so this is how a worker searches
   // Swedish supply in Lithuanian without knowing a word of Swedish.
@@ -370,7 +409,7 @@ export default async function JobsPage({
         }),
     );
     const mapped = matchProfessionAcrossLocales(query, professionOptions, others);
-    if (mapped) redirect({ href: `/jobs?profession=${mapped}`, locale: active });
+    if (mapped) redirect({ href: professionRedirectHref(mapped, sp.page), locale: active });
   }
   const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
   const wantsSaved = sp.saved === "1";
@@ -385,13 +424,29 @@ export default async function JobsPage({
   // never touches the auth server.
   const signedIn = await hasSessionCookie();
   const supabase = signedIn ? await createClient() : null;
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
-  const workerId =
-    supabase && user ? await resolveOwnWorkerId(supabase, user.id) : null;
-  const mySaved =
-    supabase && workerId
-      ? await listSavedPublicVacancyIds(supabase, workerId)
-      : { vacancyIds: new Set<string>(), available: false };
+  const runBoardSearch = () =>
+    searchPublicVacancyPreviews({
+      query,
+      professionSlug: profession,
+      page,
+    });
+  // The board's read needs nothing from the session, so a signed-in person does
+  // not wait for their bookmarks before it starts (2026-11-04: on a first search
+  // the two together took 1.1 s in sequence before the search's own 1.1 s). The
+  // saved view reads no board unless its bookmarks turn out to be unavailable.
+  const [member, earlyBoardSearch] = await Promise.all([
+    (async () => {
+      const u = supabase ? (await supabase.auth.getUser()).data.user : null;
+      const id = supabase && u ? await resolveOwnWorkerId(supabase, u.id) : null;
+      const saved =
+        supabase && id
+          ? await listSavedPublicVacancyIds(supabase, id)
+          : { vacancyIds: new Set<string>(), available: false };
+      return { user: u, mySaved: saved };
+    })(),
+    wantsSaved ? null : runBoardSearch(),
+  ]);
+  const { user, mySaved } = member;
 
   // Saved view: the worker's own ids, resolved to previews through the member
   // read path under their OWN client. Expired/withdrawn bookmarks drop out
@@ -409,11 +464,7 @@ export default async function JobsPage({
 
   const result = showSaved
     ? { status: "ok" as const, vacancies: [], totalCount: 0, hasMore: false }
-    : await searchPublicVacancyPreviews({
-        query,
-        professionSlug: profession,
-        page,
-      });
+    : (earlyBoardSearch ?? (await runBoardSearch()));
 
   const pageHref = (p: number) => {
     const qs = new URLSearchParams();
@@ -425,6 +476,34 @@ export default async function JobsPage({
     const s = qs.toString();
     return s ? `/jobs?${s}` : "/jobs";
   };
+
+  // MEMBER FACTS (owner P0-3, 2026-11-03): a signed-in person's card shows who
+  // publishes the ad and where the work is. Read under their OWN client for
+  // exactly the rows this page shows; an anonymous visitor costs no extra read.
+  const shownIds = [
+    ...savedPreviews.map((v) => v.id),
+    ...(result.status === "ok" ? result.vacancies.map((v) => v.id) : []),
+  ];
+  const memberFacts =
+    supabase && user && shownIds.length > 0
+      ? await listMemberVacancyFactsByIds(supabase, shownIds)
+      : null;
+  const regionName = (() => {
+    try {
+      return new Intl.DisplayNames([active], { type: "region" });
+    } catch {
+      return null;
+    }
+  })();
+  const cardFacts = (id: string) => {
+    if (!memberFacts) return undefined;
+    const f = memberFacts.get(id);
+    if (!f) return null;
+    const country = f.country ? (regionName?.of(f.country.toUpperCase()) ?? f.country) : null;
+    const place = [f.city ?? f.region, country].filter(Boolean).join(", ") || null;
+    return { employer: f.employerName, place };
+  };
+  const lockedFactsLabel = user ? undefined : LOCKED_FACTS[active];
 
   // A PAGE PAST THE END IS NOT AN EMPTY BOARD (2026-10-08 walk). The count
   // rides on the page's own rows, so `?page=9999` read "0 vacancies found"
@@ -551,6 +630,18 @@ export default async function JobsPage({
         </nav>
       )}
 
+      {countryParam.requested && !showSaved && (
+        <p
+          role="note"
+          data-testid="public-jobs-country-not-filtered"
+          className="mt-6 rounded-md border border-dashed p-4 text-sm text-text-muted"
+        >
+          {COUNTRY_NOT_FILTERED[active](
+            countryParam.code ? (regionName?.of(countryParam.code) ?? countryParam.code) : null,
+          )}
+        </p>
+      )}
+
       {showSaved ? (
         <>
           <p className="mt-6 text-sm text-text-muted">
@@ -572,6 +663,8 @@ export default async function JobsPage({
                     }
                     genericTitle={GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
+                    memberFacts={cardFacts(v.id)}
+                    lockedFactsLabel={lockedFactsLabel}
                     savedLabel={SAVED_BADGE[active]}
                   />
                 </li>
@@ -635,6 +728,8 @@ export default async function JobsPage({
                     }
                     genericTitle={GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
+                    memberFacts={cardFacts(v.id)}
+                    lockedFactsLabel={lockedFactsLabel}
                     savedLabel={
                       mySaved.vacancyIds.has(v.id)
                         ? SAVED_BADGE[active]

@@ -81,7 +81,9 @@ export async function PrePaymentPlanBoundary() {
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {PRE_PAYMENT_PLANS.map((plan) => {
+        {/* The internal administrator plan is staff tooling, not an offer:
+            a public visitor cannot choose it, so the public page never lists it. */}
+        {PRE_PAYMENT_PLANS.filter((plan) => plan.audience !== "admin").map((plan) => {
           // Registry-derived boundary: only features the plan actually
           // declares (boolean true or limit > 0). `false` entries (e.g.
           // priority_visibility on worker_plus) are never claimed.

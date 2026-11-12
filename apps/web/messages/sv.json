@@ -1774,6 +1774,10 @@
       "title": "Det gick inte att öppna konversationen",
       "body": "Du kanske inte har behörighet att meddela den här personen, eller så är personen inte längre tillgänglig. Inget skickades."
     },
+    "noLongerAvailable": {
+      "title": "Den här konversationen är inte längre tillgänglig",
+      "body": "Du deltar inte längre i den, så dess meddelanden visas inte."
+    },
     "originalLanguage": "[EN] Original ({lang})",
     "priority": {
       "awaitingYou": "[EN] Awaiting your reply",
@@ -2024,6 +2028,17 @@
       "pending": "Slår ihop…",
       "done": "Sammanslaget. Raderna och deras poster finns kvar; projektlistan visar nu det behållna projektet.",
       "failed": "Inte sammanslaget. Inget ändrades för rader som inte gick igenom — ladda om och försök igen."
+    },
+    "deck": {
+      "label": "Det här kan du göra",
+      "new": "Nytt projekt",
+      "newHint": "Skapa det och kom igång",
+      "assign": "Tilldela en arbetare",
+      "assignHint": "Till ett projekt",
+      "teams": "Tilldela ett team",
+      "teamsHint": "Ett team för ett projekt eller en uppgift",
+      "chat": "Samtal",
+      "toolsLabel": "Andra verktyg"
     },
     "assign": {
       "reservation": {
@@ -4196,6 +4211,7 @@
       "eduCohortCreated": "Grupp skapad. Du kan tilldela elever.",
       "eduAssignNoCohort": "Inga grupper ännu — skapa först en grupp.",
       "eduAssignNoLearners": "Inga accepterade elever ännu. Bjud in en elev — du kan tilldela när inbjudan har accepterats.",
+      "eduMembersNotForRole": "Gruppmedlemskap är inte tillgängligt för din roll. Bara institutionens egen ägare, administratör eller chef kan tilldela elever.",
       "eduAssignDone": "Elev tilldelad gruppen.",
       "eduNotInstitution": "Den här organisationen är ännu inte markerad som utbildningsinstitution. Markera det i företagsavsnittet.",
       "eduUnavailable": "Programmen kan inte läsas just nu. Det betyder inte att det inte finns några.",
@@ -7886,5 +7902,49 @@
     "error": "That didn't work. Nothing was changed.",
     "notAllowed": "The organization's owner or a manager can do this.",
     "notSameWork": "These records no longer match — refresh the page."
+  },
+  "learnerCohortJoin": {
+    "title": "Lärgrupp",
+    "declaredNote": "Du kan alltid registrera din praktik och ditt arbete, även innan en utbildningsanordnare har antagit dig. Tills anordnarens behöriga person bekräftar det visas det som angivet av dig, inte som bekräftat.",
+    "journalLink": "Öppna journalen",
+    "find": "{count, plural, one {# öppen grupp} other {# öppna grupper}}",
+    "empty": "Ingen utbildningsanordnare tar emot förfrågningar om att gå med just nu.",
+    "unavailable": "Lärgrupperna kunde inte laddas just nu. Försök igen senare.",
+    "status": {
+      "requested": "Förfrågan skickad, väntar på anordnarens beslut.",
+      "declined": "Anordnaren godkände inte den här förfrågan."
+    },
+    "form": {
+      "nameLabel": "Ditt namn som anordnaren känner dig",
+      "nameHint": "Anordnaren ser bara det här namnet och ditt meddelande, inte din profil eller journal.",
+      "noteLabel": "Meddelande till anordnaren (valfritt)",
+      "send": "Be om att gå med",
+      "withdraw": "dra tillbaka förfrågan",
+      "saving": "Skickar…",
+      "requested": "Förfrågan skickad.",
+      "alreadyMember": "Du är redan medlem i den här gruppen.",
+      "withdrawn": "Förfrågan har dragits tillbaka.",
+      "closed": "Den här gruppen tar inte emot nya förfrågningar.",
+      "invalid": "Kontrollera namnet och meddelandet.",
+      "error": "Något gick fel. Försök igen.",
+      "cooldown": "Din förfrågan avslogs nyligen. Du kan fråga den här gruppen igen 30 dagar efter beslutet."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "Vi mäter sidanvändning och vilken kampanj som förde dig hit bara om du tillåter det.",
+      "accept": "Tillåt mätning",
+      "refuse": "Avböj",
+      "more": "Mer",
+      "label": "Val om användningsmätning"
+    },
+    "control": {
+      "title": "Användningsmätning och kampanjattribution",
+      "granted": "Du har gett tillåtelse. Du kan när som helst återkalla den; posterna tas då bort från den här enheten.",
+      "refused": "Du har avböjt. Inget för mätning sparas på den här enheten.",
+      "undecided": "Du har inte valt ännu, så inget för mätning sparas.",
+      "allow": "Tillåt",
+      "refuse": "Avböj"
+    }
   }
 }

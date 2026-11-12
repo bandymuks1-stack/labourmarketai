@@ -26,6 +26,12 @@ test("N-1. an anonymous visitor submits the public company-need form and the int
   await page.goto(`${BASE}/en/company-need`);
   const form = page.getByTestId("company-need-form");
   await expect(form, "the public form renders without an account").toBeVisible({ timeout: 30_000 });
+  // The form is server markup that also posts without JavaScript; a send before
+  // hydration takes that path and is stored marked `?review=no-js`. This walk is
+  // the JavaScript visitor, so it waits until hydration has written the fill time.
+  await expect(form.locator('input[name="started"]'), "hydration wrote the fill time").not.toHaveValue("", {
+    timeout: 60_000,
+  });
 
   await form.locator('input[name="company_name"]').fill(COMPANY);
   await form.locator('input[name="contact_person"]').fill("Synthetic Contact");
@@ -41,6 +47,9 @@ test("N-1. an anonymous visitor submits the public company-need form and the int
   await form.locator('input[name="number_of_workers"]').fill("3");
   await form.locator('input[name="city_region"]').fill("Vilnius");
   await form.locator('textarea[name="description"]').fill(`Three workers for a 4-week site job (${RUN}).`);
+  // A send inside the spam guard's minimum fill time (3 s, lib/security/public-form-guard.ts)
+  // is refused and stores nothing, so wait it out like a person would.
+  await page.waitForTimeout(3_500);
   await form.getByTestId("company-need-submit").click();
 
   const result = page.getByTestId("company-need-result");

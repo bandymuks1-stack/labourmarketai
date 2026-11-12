@@ -141,9 +141,10 @@ describe("the mechanism — tests/e2e/prod-walk.ts", () => {
   it("every browser.newContext (and so newPage) is wrapped: zone forced, cookie seeded before it is returned", () => {
     const b = MECHANISM.slice(MECHANISM.indexOf("browser: ["));
     expect(b.length).toBeLessThan(MECHANISM.length);
-    expect(b).toMatch(/browser\.newContext = async \(options\?: BrowserContextOptions\) => \{/);
-    // The zone comes AFTER the caller's options, so no caller can make it disagree with the cookie.
-    expect(b).toContain("newContext.call(browser, { ...options, timezoneId: WALK_TIME_ZONE })");
+    expect(b).toMatch(/browser\.newContext = async \(options\?: FirstVisitContextOptions\) => \{/);
+    // The zone comes AFTER the caller's options, so no caller can make it disagree with the cookie
+    // (`rest` is the caller's options minus the first-visit marker, which only skips the consent seed).
+    expect(b).toContain("newContext.call(browser, { ...rest, timezoneId: WALK_TIME_ZONE })");
     expect(b.indexOf("await seedViewerTimeZone(ctx);")).toBeGreaterThan(0);
     expect(b.indexOf("await seedViewerTimeZone(ctx);")).toBeLessThan(b.indexOf("return ctx;"));
     // Worker-scoped: walk tests get their own workers; the original is restored afterwards.

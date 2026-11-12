@@ -37,6 +37,23 @@ name: signed-in-journey
 - tapOn:
     id: "email"
 - inputText: ${MOBILE_QA_EMAIL}
+# The iOS driver has typed a DIFFERENT address here (run 41403100804: the
+# server refused it while the password arrived whole; the review address has
+# a "+", on the email keyboard's symbol layer). The field is read back and
+# typed once more when it differs; this step's COMPLETED / SKIPPED in the log
+# is the record of whether that happened.
+- copyTextFrom:
+    id: "email"
+- evalScript: ${output.emailTyped = maestro.copiedText === MOBILE_QA_EMAIL}
+- runFlow:
+    label: "EMAIL_RETYPED (the first typing differed)"
+    when:
+      true: ${output.emailTyped !== true}
+    commands:
+      - tapOn:
+          id: "email"
+      - eraseText: 80
+      - inputText: ${MOBILE_QA_EMAIL}
 - tapOn:
     id: "password"
 - inputText: ${MOBILE_QA_PASSWORD}
@@ -199,10 +216,22 @@ name: signed-in-journey
           commands:
             - tapOn:
                 id: "journal-compose-option-0"
+            # Picking a context sends the draft again: the form shows while it
+            # runs, then the preview puts "save" where "review" was. Wait for
+            # the preview here, or the review tap below lands on save and
+            # stores the entry behind the flow's back (runs 41543478450,
+            # 41543455043).
+            - extendedWaitUntil:
+                visible:
+                  id: "journal-compose-save"
+                timeout: 20000
+                optional: true
       - runFlow:
           when:
             visible:
               id: "journal-compose-review"
+            notVisible:
+              id: "journal-compose-save"
           commands:
             - waitForAnimationToEnd
             - tapOn:
@@ -226,10 +255,22 @@ name: signed-in-journey
           commands:
             - tapOn:
                 id: "journal-compose-option-0"
+            # Picking a context sends the draft again: the form shows while it
+            # runs, then the preview puts "save" where "review" was. Wait for
+            # the preview here, or the review tap below lands on save and
+            # stores the entry behind the flow's back (runs 41543478450,
+            # 41543455043).
+            - extendedWaitUntil:
+                visible:
+                  id: "journal-compose-save"
+                timeout: 20000
+                optional: true
       - runFlow:
           when:
             visible:
               id: "journal-compose-review"
+            notVisible:
+              id: "journal-compose-save"
           commands:
             - waitForAnimationToEnd
             - tapOn:
@@ -253,10 +294,22 @@ name: signed-in-journey
           commands:
             - tapOn:
                 id: "journal-compose-option-0"
+            # Picking a context sends the draft again: the form shows while it
+            # runs, then the preview puts "save" where "review" was. Wait for
+            # the preview here, or the review tap below lands on save and
+            # stores the entry behind the flow's back (runs 41543478450,
+            # 41543455043).
+            - extendedWaitUntil:
+                visible:
+                  id: "journal-compose-save"
+                timeout: 20000
+                optional: true
       - runFlow:
           when:
             visible:
               id: "journal-compose-review"
+            notVisible:
+              id: "journal-compose-save"
           commands:
             - waitForAnimationToEnd
             - tapOn:

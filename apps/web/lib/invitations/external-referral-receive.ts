@@ -158,11 +158,14 @@ export async function receiveExternalReferral(input: {
       subject: buildInvitationSubject(tEmail, "join_platform"),
       text: buildInvitationBody(tEmail, { link: inviteUrl, personalMessage: null }),
     }, { kind: "invitation", requireLedger: true });
-    delivery = sent.status === "sent" ? "sent" : "delivery_failed";
-    await asAny(admin).rpc("mark_external_referral_delivery_v1", {
-      p_invitation_id: invitationId,
-      p_outcome: delivery,
-    });
+    // A synthetic QA plus-address is never mailed by design: it stays not_sent.
+    if (sent.status !== "suppressed_synthetic_address") {
+      delivery = sent.status === "sent" ? "sent" : "delivery_failed";
+      await asAny(admin).rpc("mark_external_referral_delivery_v1", {
+        p_invitation_id: invitationId,
+        p_outcome: delivery,
+      });
+    }
   }
 
   return { outcome: "created", invitationId, inviteUrl, delivery };

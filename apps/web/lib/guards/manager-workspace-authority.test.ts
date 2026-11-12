@@ -75,7 +75,9 @@ describe("READ ≠ EDIT — one implementation, two access modes", () => {
 describe("the company gate's membership arm — layout, page gate, dispatcher", () => {
   it("the dispatcher's held roles carry `company` from the ACTIVE workspace", () => {
     const src = code(read("lib/conversation/dispatch.ts"));
-    expect(src).toMatch(/if \(workspaceOpensCompanySpace\(workspace\)\) set\.add\("company"\)/);
+    expect(src).toMatch(/opensCompanySpace: workspaceOpensCompanySpace\(workspace\)/);
+    const core = code(read("lib/conversation/dispatch-core.ts"));
+    expect(core).toMatch(/if \(params\.opensCompanySpace\) set\.add\("company"\)/);
     // Both entry points resolve the workspace BEFORE authorization.
     const prepare = src.indexOf("export async function prepareConfirmationAction");
     const dispatch = src.indexOf("export async function dispatchWorkerAction");
@@ -87,6 +89,14 @@ describe("the company gate's membership arm — layout, page gate, dispatcher", 
       expect(authzAt).toBeGreaterThan(wsAt);
       expect(body).toMatch(/heldRolesOf\(supabase, user\.id, ws\)/);
     }
+  });
+
+  it("the dispatcher's held roles carry `worker` from the person's OWN worker profile, via the web's workers-row core", () => {
+    const src = code(read("lib/conversation/dispatch.ts"));
+    expect(src).toMatch(/await readWorkerCoreRow\(\{ supabase, userId \}\)/);
+    expect(src).toMatch(/ownsWorkerProfile = worker\.ok && worker\.value !== null/);
+    const core = code(read("lib/conversation/dispatch-core.ts"));
+    expect(core).toMatch(/if \(params\.ownsWorkerProfile\) set\.add\("worker"\)/);
   });
 
   it("the Work door admits the employer context, not only the acting identity", () => {

@@ -159,6 +159,7 @@ The service-role client (`lib/supabase/admin.ts`, `createAdminClient()`,
 | `lib/billing/effective-entitlements.ts` | **runtime** | **No** — READ-ONLY `billing_subscriptions` for an ORGANIZATION billing subject only (payments production calm v1, 2026-09-22) | ✅ legitimate; the table's only SELECT policy is `owner_id = auth.uid() or is_admin()`, so through the user client an organization's plan was visible ONLY to the profile that paid — a co-manager with `manage-billing` in the same workspace resolved as free. The read is scoped by the SERVER-resolved subject (`resolveBillingSubject` → `resolveEmployerCompanyContext`, the caller's own active `company_memberships` row through the RLS-scoped session — the same subject the checkout route binds a session to), filtered by adapter mode, projects plan_key / status / provider_subscription_id / updated_at only (no payer identity, no customer id), writes nothing (P7 guard), falls back to the user client when no service key is configured; personal subjects keep the user-scoped read. No RLS change; no chat table; nothing outbound |
 | `lib/admin/company-need-intakes.ts` | **runtime** | **No** — reads/updates `company_need_public_intakes` only (Public Intake Owner Queue v1, `isSuperadmin`-gated) | ✅ legitimate; the table has no anon/authenticated RLS policy by design (PR #678: write-only via anon RPC, read-only via service role); status update only, writes nothing outbound |
 | `lib/sales/lead-intake.ts` | **runtime** | **No** — READ-ONLY `waitlist` SELECT (§8.14 intake panel, `isSuperadmin`-gated) | ✅ legitimate; `waitlist` has no authenticated read policy by design (0005: anon INSERT only, reads service-role only); writes nothing |
+| `lib/forecast/forecast-store.ts` | **runtime** (VPS cron `forecast-recompute` only) | **No** — calls ONLY the three service-role-granted SECURITY DEFINER doors of the forecast migration (`forecast_due_candidates_v1`, `forecast_project_facts_v1`, `forecast_record_v1`); no table read or written directly | ✅ legitimate; the scheduler has no user session. The facts door returns opaque keys, statuses, dates and numeric metric rows only (no names, no entry text); writes go only to the forecast tables (derived readings, SEP-1). No chat table, nothing outbound |
 | `lib/env.ts` | env plumbing (`requireSupabaseServiceEnv`) | No | ✅ |
 | `scripts/admin-promote.ts` | CLI (interactive) | No (`profiles`) | ✅ operator tool |
 | `scripts/admin-grant-superadmin.ts` | CLI (dry-run + double flag) | No (`profiles`/`profile_roles`) | ✅ operator tool |
@@ -417,6 +418,15 @@ audit.
   `SUPPLY_FEED_BEARER_TOKEN` is unset. Pinned in the
   `chat-visibility-rls.test.ts` caller inventory. Full design and acceptance
   evidence: `docs/handoffs/FIRST_PARTY_SUPPLY_BRIDGE_V1.md`.
+
+- `app/api/internal/commercial-requests/v1/route.ts` (2026-11-07) — the Agentai OS
+  pull of commercial requests. Behind its own `COMMERCIAL_REQUESTS_FEED_TOKEN`
+  machine secret (401 while unset). Service role is needed because no signed-in
+  user's RLS view holds these rows (RLS on, no policies), and it reads with the
+  `select` grant from `20260713190000`. Names, e-mail, company and description are
+  read only to recognise a test row; the body holds id, door, creation time, status,
+  admin link and that flag (`lib/staffing/commercial-requests-feed.ts`). Touches no
+  chat table and sends nothing.
 
 - `app/api/internal/capability-readback/v1/route.ts` (2026-10-22) — the
   Agentai OS capability readback. Behind the same `SUPPLY_FEED_BEARER_TOKEN`

@@ -98,6 +98,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it every 10 minutes; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. It acts only on account-deletion requests the holder confirmed with a fresh sign-in (or the owner approved in writing), and every decision is the database's own plan (privacy_erasure_executor_v3). Answers counts only — no ids, no addresses.",
   },
+  "cron/forecast-recompute/route.ts": {
+    class: "public",
+    why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it every 5 minutes; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. It recomputes FORECASTS only (derived readings, SEP-1) through three service-only database doors, bounded to 25 projects / 60 s per pass, and never writes a fact. Answers counts only — no ids, no names, no project numbers.",
+  },
   "cron/job-alerts/route.ts": {
     class: "public",
     why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. Answers counts and a reason code only.",
@@ -109,6 +113,10 @@ const CLASSIFICATION: Record<
   "internal/supply-feed/first-party-v1/route.ts": {
     class: "public",
     why: "The partner opportunity network pulls it; identity is the SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open worker API. Deliberately NOT shared: it answers with every authorised person’s projection at once, which no signed-in account has a reason to ask for, so there is no user path to conflate. The body carries the v1 projection only — opaque actorRef, trades, availability, geography, agreed markets, four authorities — and holds no name, email, phone or address to leak.",
+  },
+  "internal/commercial-requests/v1/route.ts": {
+    class: "public",
+    why: "Agentai OS pulls request ids, doors, times and statuses from it; identity is the COMMERCIAL_REQUESTS_FEED_TOKEN machine secret (lib/api/commercial-requests-feed-auth.ts), not a user, and while the secret is unset the route refuses every call. It returns no name, e-mail, phone, company or free text.",
   },
   "internal/capability-readback/v1/route.ts": {
     class: "public",

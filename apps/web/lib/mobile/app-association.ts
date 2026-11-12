@@ -81,6 +81,8 @@ export const NATIVE_APP_PATHS: readonly string[] = [
   "/availability",
   "/jobs",
   "/need",
+  "/project",
+  "/projects",
   "/notifications",
   "/conversation",
   "/messages",

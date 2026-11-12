@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { proveActionTiles } from "./action-tile-proof";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 
@@ -629,4 +630,21 @@ test.afterAll(async ({ browser }) => {
   } finally {
     await ctx.close();
   }
+});
+
+// ── T (#2828): the Work page's action tiles. Read-only: real links, exactly
+// ONE gold primary ("Naujas projektas"), no route twice, 1280 and 390.
+test("T-1 (#2828). Alfa's Work page shows one primary action tile and its tools", async ({ browser }) => {
+  await proveActionTiles(
+    async (mobile) => {
+      const ctx = await browser.newContext({
+        storageState: state("owner"),
+        locale: "lt-LT",
+        ...(mobile ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : { viewport: { width: 1280, height: 900 } }),
+      });
+      return { page: await ctx.newPage(), close: () => ctx.close() };
+    },
+    "/lt/dashboard/projects",
+    { primaries: 1, prepare: (page) => useWorkspace(page, ALFA) },
+  );
 });

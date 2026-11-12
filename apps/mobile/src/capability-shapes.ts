@@ -474,3 +474,69 @@ export type NotificationItem = {
 };
 
 export type NotificationListData = { readonly items: readonly NotificationItem[] };
+
+/**
+ * `worker.projects.list` — the projects the caller is assigned to, the same
+ * read the worker's project page uses (RLS-scoped to their own assignments):
+ * active first, at most a handful, each with what the project still needs
+ * from THIS person (the manager's open checklist rows, labels verbatim) and
+ * the manager's latest instruction. `kind: "empty"` is a LOADED answer of
+ * no assignments; a failed read arrives as a failure, never as empty.
+ */
+export type WorkerProjectAsk = {
+  readonly itemKey: string;
+  readonly label: string;
+  readonly status: "needed" | "missing" | "rejected" | "expired";
+};
+
+export type WorkerProject = {
+  readonly projectId: string;
+  readonly title: string;
+  readonly place: string | null;
+  readonly assignmentStatus: "active" | "ended";
+  readonly asks: readonly WorkerProjectAsk[];
+  /** Every open ask; `asks` names only the first few. Absent from a server
+   *  older than the field: then only `asks.length` is known. */
+  readonly asksTotal?: number;
+  /** Whether the asks are a real answer: "ok" = read (empty = nothing
+   *  open); "unavailable" = the read failed; "not_read" = not asked (an
+   *  ended assignment). Absent from an older server: then an empty list is
+   *  NOT known to be empty. */
+  readonly asksRead?: "ok" | "unavailable" | "not_read";
+  /** `asksTotal` is a lower bound. */
+  readonly asksTotalAtLeast?: boolean;
+  readonly instruction: {
+    readonly conversationId: string;
+    readonly authorName: string | null;
+    readonly text: string;
+  } | null;
+};
+
+/** All asks still open on a project: the server's total, never fewer than
+ *  the asks it named. */
+export function asksTotal(p: WorkerProject): number {
+  return Math.max(p.asksTotal ?? 0, p.asks.length);
+}
+
+/** The total as shown: "N+" when the server could only count a lower bound. */
+export function asksTotalLabel(p: WorkerProject): string {
+  return `${asksTotal(p)}${p.asksTotalAtLeast === true ? "+" : ""}`;
+}
+
+/** What may be said about the asks: only a COMPLETE read checklist may say
+ *  "none". "incomplete" = the read answered but hit its row cap
+ *  (`asksTotalAtLeast`), so a project with no row in it may still have some. */
+export function asksState(p: WorkerProject): "ok" | "unavailable" | "not_read" | "incomplete" {
+  if (p.asks.length > 0) return "ok";
+  const read = p.asksRead ?? "unavailable";
+  if (read === "ok" && p.asksTotalAtLeast === true) return "incomplete";
+  return read;
+}
+
+export type WorkerProjectsData =
+  | {
+      readonly kind: "ok";
+      readonly projects: readonly WorkerProject[];
+      readonly activeCount: number;
+    }
+  | { readonly kind: "empty" };

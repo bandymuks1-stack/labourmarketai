@@ -8,6 +8,7 @@ import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { LmLogo } from "@/components/ui/lm-logo";
 import { OnboardingWizard } from "@/components/app/onboarding-wizard";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
+import { FirstTouchAccountCopy } from "@/components/app/first-touch-account-copy";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session-profile";
@@ -179,6 +180,7 @@ export default async function OnboardingPage({
           `signup_completed` from the pending marker — every genuinely new
           account passes through here first. */}
       <SessionTelemetry surface="onboarding" />
+      <FirstTouchAccountCopy />
       <AmbientGlow />
       {/* V8 W4-B: language stays switchable DURING onboarding — the wizard
           writes profiles.locale from the URL locale at completion, so the

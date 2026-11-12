@@ -45,12 +45,14 @@ import { MARKETPLACE_CAPABILITIES } from "./marketplace-capabilities";
 import { TEAM_ASSIGNMENT_CAPABILITIES } from "./team-assignment-capabilities";
 import { MESSAGING_CAPABILITIES } from "./messaging-capabilities";
 import { COMPANY_INGEST_CAPABILITIES } from "./company-ingest-capabilities";
+import { COMPANY_CLAIM_CAPABILITIES } from "./company-claim-capabilities";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
 import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
 import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES } from "./conversation-action-bridge";
 import { WORKSPACE_READ_CAPABILITIES } from "./workspace-read-capabilities";
 import { DOMAIN_ACTION_CAPABILITIES } from "./domain-action-capabilities";
 import { PUBLIC_JOBS_CAPABILITIES } from "./public-jobs-capabilities";
+import { FORECAST_CAPABILITIES } from "./forecast-capabilities";
 import {
   workerExpressInterestSchema,
   workerLogWorkSchema,
@@ -1947,6 +1949,7 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // Real market companies in as DISCOVERED organizations (owner NULL) —
   // the marketplace_company_ingest capability only; import is never a claim.
   ...COMPANY_INGEST_CAPABILITIES,
+  ...COMPANY_CLAIM_CAPABILITIES,
   // Organization evidence import — the FIFTEEN capabilities (thirteen steps;
   // attest and withdraw are each a draft→confirm pair) that give an
   // authorized assistant the same historical-import flow the web UI performs,
@@ -1978,6 +1981,11 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // 2026-10-16): the same read the website's /jobs page performs, in the same
   // anonymous projection. See public-jobs-capabilities.ts.
   ...PUBLIC_JOBS_CAPABILITIES,
+  // Project FORECASTS (Stage 7, owner order 2026-10-24): the latest forecast
+  // and its history for a managed project, and the organization's recompute
+  // cadence (draft → confirm, administrators only, audited). See
+  // forecast-capabilities.ts.
+  ...FORECAST_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

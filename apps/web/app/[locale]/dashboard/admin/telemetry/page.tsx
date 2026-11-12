@@ -403,7 +403,7 @@ export default async function AdminTelemetryPage({
                 </p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-[760px] text-left text-xs">
+                  <table className="min-w-[1040px] text-left text-xs">
                     <thead className="border-b border-ink-600/60 text-text-muted">
                       <tr>
                         <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">
@@ -433,6 +433,18 @@ export default async function AdminTelemetryPage({
                         <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
                           {t("campaigns.col.interest")}
                         </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.profileSaved")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.profileMatchable")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.journalEntrySaved")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.jobSearch")}
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -459,6 +471,10 @@ export default async function AdminTelemetryPage({
                               c.returnedToJob,
                               c.compared,
                               c.interest,
+                              c.profileSaved,
+                              c.profileMatchable,
+                              c.journalEntrySaved,
+                              c.jobSearch,
                             ] as const
                           ).map((n, i) => (
                             <td

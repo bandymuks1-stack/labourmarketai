@@ -1774,6 +1774,10 @@
       "title": "Kunne ikke åbne samtalen",
       "body": "Du har muligvis ikke tilladelse til at skrive til denne person, eller personen er ikke længere tilgængelig. Der blev ikke sendt noget."
     },
+    "noLongerAvailable": {
+      "title": "Denne samtale er ikke længere tilgængelig",
+      "body": "Du deltager ikke længere i den, så dens beskeder vises ikke."
+    },
     "originalLanguage": "[EN] Original ({lang})",
     "priority": {
       "awaitingYou": "[EN] Awaiting your reply",
@@ -2024,6 +2028,17 @@
       "pending": "Lægger sammen…",
       "done": "Lagt sammen. Rækkerne og deres poster bevares; projektlisten viser nu det beholdte projekt.",
       "failed": "Ikke lagt sammen. Intet blev ændret for rækker, der ikke gik igennem — genindlæs og prøv igen."
+    },
+    "deck": {
+      "label": "Det kan du gøre",
+      "new": "Nyt projekt",
+      "newHint": "Opret det og kom i gang",
+      "assign": "Tildel en medarbejder",
+      "assignHint": "Til et projekt",
+      "teams": "Tildel et hold",
+      "teamsHint": "Et hold til et projekt eller en opgave",
+      "chat": "Samtaler",
+      "toolsLabel": "Andre værktøjer"
     },
     "assign": {
       "reservation": {
@@ -4196,6 +4211,7 @@
       "eduCohortCreated": "Hold oprettet. Du kan tildele elever.",
       "eduAssignNoCohort": "Ingen hold endnu — opret først et hold.",
       "eduAssignNoLearners": "Ingen accepterede elever endnu. Inviter en elev — du kan tildele, når invitationen er accepteret.",
+      "eduMembersNotForRole": "Gruppemedlemskab er ikke tilgængeligt for din rolle. Kun institutionens egen ejer, administrator eller leder kan tildele elever.",
       "eduAssignDone": "Elev tildelt holdet.",
       "eduNotInstitution": "Denne organisation er endnu ikke markeret som uddannelsesinstitution. Marker det i virksomhedsafsnittet.",
       "eduUnavailable": "Programmer kan ikke læses lige nu. Det betyder ikke, at der ingen er.",
@@ -7886,5 +7902,49 @@
     "error": "That didn't work. Nothing was changed.",
     "notAllowed": "The organization's owner or a manager can do this.",
     "notSameWork": "These records no longer match — refresh the page."
+  },
+  "learnerCohortJoin": {
+    "title": "Læringsgruppe",
+    "declaredNote": "Du kan altid registrere din praktik og dit arbejde, også før en institution har optaget dig. Indtil institutionens bemyndigede person bekræfter det, vises det som erklæret af dig, ikke som bekræftet.",
+    "journalLink": "Åbn journalen",
+    "find": "{count, plural, one {# åben gruppe} other {# åbne grupper}}",
+    "empty": "Ingen institution modtager anmodninger om at deltage lige nu.",
+    "unavailable": "Læringsgrupperne kunne ikke indlæses lige nu. Prøv igen senere.",
+    "status": {
+      "requested": "Anmodning sendt, venter på institutionens beslutning.",
+      "declined": "Institutionen godkendte ikke denne anmodning."
+    },
+    "form": {
+      "nameLabel": "Dit navn, som institutionen kender dig",
+      "nameHint": "Institutionen ser kun dette navn og din besked, ikke din profil eller journal.",
+      "noteLabel": "Besked til institutionen (valgfri)",
+      "send": "Bed om at deltage",
+      "withdraw": "træk anmodningen tilbage",
+      "saving": "Sender…",
+      "requested": "Anmodning sendt.",
+      "alreadyMember": "Du er allerede medlem af denne gruppe.",
+      "withdrawn": "Anmodningen er trukket tilbage.",
+      "closed": "Denne gruppe modtager ikke flere anmodninger.",
+      "invalid": "Tjek navn og besked.",
+      "error": "Noget gik galt. Prøv igen.",
+      "cooldown": "Din anmodning blev for nylig afvist. Du kan spørge denne gruppe igen 30 dage efter afgørelsen."
+    }
+  },
+  "consent": {
+    "banner": {
+      "text": "Vi måler sidebrug, og hvilken kampagne der bragte dig hertil, kun hvis du tillader det.",
+      "accept": "Tillad måling",
+      "refuse": "Afvis",
+      "more": "Mere",
+      "label": "Valg om brugsmåling"
+    },
+    "control": {
+      "title": "Brugsmåling og kampagnetilskrivning",
+      "granted": "Du har givet tilladelse. Du kan til enhver tid trække den tilbage; elementerne fjernes så fra denne enhed.",
+      "refused": "Du har afvist. Intet til måling gemmes på denne enhed.",
+      "undecided": "Du har ikke valgt endnu, så intet til måling gemmes.",
+      "allow": "Tillad",
+      "refuse": "Afvis"
+    }
   }
 }

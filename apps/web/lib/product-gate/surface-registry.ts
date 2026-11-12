@@ -1763,6 +1763,74 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     },
   },
 
+  // OWNER APPROVAL 2026-11-03, verbatim (given to the coordinator in its own
+  // session): "Patvirtinu #2828 komponento `premium-action-card` registravimą
+  // kaip atskiro veiksmų pasirinkimo paviršiaus pagal A-09 taisyklę. Tai nėra
+  // leidimas kurti papildomų dubliuojančių kortelių sistemų."
+  {
+    id: "components/ui/premium-action-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-09",
+    purpose:
+      "The one action-choice tile: on a page where a person chooses what to do next (projects, bookings, service requests) each tile is a link to a real destination, with one primary action per screen.",
+    whyNotChat:
+      "Choosing among a page's next steps is a glance at a few labelled doors; a chat reply cannot hold a stable, tappable set of destinations with one marked primary and the current one marked, and the conversation remains available beside it for anything typed.",
+    whyNotExistingComponent:
+      "It REPLACES the audit-PR8 ActionCard (deleted in #2828; bookings and service-requests moved onto this tile's list layout), so there is exactly one action-choice primitive. It never replaces PersonIdentityCard, the Player Card, the vacancy card or the capability card — those present an entity's state, this only chooses an action — and the guard premium-action-card.test.ts forbids any second ActionCard / ActionTile / ActionDeck export.",
+    owner: "Product owner - design direction A (2026-11-03), owner approval of #2828 the same day",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "No new world element: every tile links to an existing surface (a project, the journal, bookings, service requests) that already owns its action; the tile holds no data and decides nothing.",
+    chatIntegration:
+      "Every destination a tile links to is reachable from the conversation through the command registry / MCP capabilities; the tile is a shortcut to the same doors, not a separate path.",
+    avatarEffect: "None - recorded honestly; a navigation choice changes no state of the person.",
+    mapEffect: "None - recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Indirect: some tiles lead to the Work Journal or its project context; the tile itself reads and writes nothing.",
+
+    pillar: "work_journal",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "A person on a work page (their projects, bookings or service requests) picks the next thing to do from a small set of labelled destinations, with the one main action made obvious.",
+      graphEdge:
+        "PERSON - next ACTION on an existing node (project, journal, booking, service request); a presentation of doors the graph already has, not a new edge and not an entity view.",
+      whyReuseDamages:
+        "Reusing an entity card (identity, Player Card, vacancy, capability) for navigation would make a door look like a record and blur 'this is a person / job' with 'go here'; keeping two action-card families (the old ActionCard beside this tile) would give the same job two looks, which the owner's ruling forbids.",
+      evidence: [
+        "apps/web/components/ui/premium-action-card.tsx: link-only tile, one emphasis=\"primary\" per screen, aria-current for the current place, 44 px targets, no motion under prefers-reduced-motion",
+        "apps/web/lib/guards/premium-action-card.test.ts: no other component may export an ActionCard / ActionTile / ActionDeck (the audit-PR8 ActionCard is deleted, no exception)",
+        "#2828 comments 6604167149 and 6609654286: current vs proposed at 390 and 1440 px, light and dark, tilt removed (hover is a 1 px lift), bookings and service-requests on the list layout",
+      ],
+      ownerRuling:
+        "Owner approval 2026-11-03 (coordinator session): register `premium-action-card` as a distinct action-choice surface under A-09; explicitly not a licence for additional duplicate card systems; design direction A, one primary action per screen, no 3D tilt, accessibility kept.",
+    },
+  },
+
 ] as const;
 
 /**

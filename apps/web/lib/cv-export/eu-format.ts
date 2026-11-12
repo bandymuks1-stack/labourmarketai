@@ -39,6 +39,7 @@
  * pass labels in; this decides only WHAT is in the document and in what order.
  */
 
+import type { PeriodEdge } from "@/lib/cv/period-dates";
 import type { CvSkillTier } from "./skill-tiers";
 import type { CvOrganizationHistoryEntry } from "./organization-history";
 import type { VerifiedCvData } from "./verified-cv";
@@ -147,6 +148,7 @@ export interface EuFormatResolvers {
   readonly declaredCertificate?: string;
   /** ISO date → the reader's format, or null when the date is absent. */
   readonly date: (iso: string | null) => string | null;
+  readonly statedDate: (iso: string | null, edge: PeriodEdge) => string | null;
   /** "2019 – 2022", "2019 – present", "2019" — never an invented endpoint. */
   readonly present: string;
   /** One organization-provided history entry -> its printed lines. Absent in
@@ -200,8 +202,9 @@ export function resolveEuFormatDocument(
     heading: e.title ?? r.relationship(e.relationship),
     subheading: e.organization,
     period: period(
-      r.date(e.startedAt),
-      r.date(e.endedAt),
+      // No organization: the person's own statement, at the precision stated.
+      e.organization ? r.date(e.startedAt) : r.statedDate(e.startedAt, "start"),
+      e.organization ? r.date(e.endedAt) : r.statedDate(e.endedAt, "end"),
       r.present,
       e.ongoing ?? e.endedAt === null,
     ),

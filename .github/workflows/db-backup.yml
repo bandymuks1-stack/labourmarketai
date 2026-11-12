@@ -32,26 +32,67 @@ name: DB backup (Supabase → VPS, encrypted)
 # and no access token is needed.
 #
 # What it does, every night and on demand:
-#   1. pg_dump (PG 17 client), custom format: `public` AND `auth` (accounts and
-#      sign-in identities); if the auth part cannot be read the job falls back to
-#      `public` only and says so as a warning and in the summary;
-#   2. RESTORE DRILL into a throw-away postgres:17 service container, fail if it fails;
-#   3. encrypt with `age` to the VPS backup public key (ops/vps/backup.age.pub —
+#   1. pg_dump (PG 17 client), custom format, every schema a restore needs
+#      (2026-11-03): `public` (product), `auth` (accounts, identities), `storage`
+#      (bucket + object METADATA) and `supabase_migrations` (the applied-migration
+#      ledger). If that cannot be read the job falls back to `public` only and says
+#      so as a warning and in the summary. Left out on purpose:
+#        - `vault`: Supabase-managed secrets, encrypted with this project's own key;
+#          ciphertext is useless in any other project and must not travel;
+#        - `realtime`: Supabase's runtime (subscriptions, short-lived broadcast
+#          partitions) that the platform recreates; no product data;
+#        - `cron`: pg_cron's tables belong to the extension (pg_dump of the schema
+#          would emit data for tables a plain restore cannot create), so the JOB
+#          DEFINITIONS are exported separately into the files bundle (step 3).
+#   2. RESTORE DRILL into a throw-away postgres:17 service container, with the
+#      Supabase roles (`anon`, `authenticated`, `service_role`) and the extensions
+#      the schema uses (`btree_gist`, `pgcrypto`, `uuid-ossp` in `extensions`)
+#      created first, as in a real Supabase target. PROOF, not "the file restored":
+#      per schema, the exact count of tables, views, indexes, constraints,
+#      policies, triggers and functions equals the source; so do the grants, per
+#      schema and kind, by count and hash (every role of the source is created first
+#      and object owners are kept, so the ACLs can come back as they were); every
+#      table's row count lands inside its source window [before dump, after dump] (key
+#      tables fail the job, others warn); every journal entry keeps its worker.
+#   3. STORAGE FILES (pg_dump never holds them, nor do Supabase's own DB backups):
+#      every object listed in `storage.objects` is downloaded through the Storage
+#      API with the service-role key (never a public URL), checked object by
+#      object against its recorded size, then tarred with a manifest and the cron
+#      job definitions → `lm-files-<stamp>.tar.age`.
+#   4. encrypt with `age` to the VPS backup public key (ops/vps/backup.age.pub —
 #      the private key lives only on the VPS, 600, plus the owner's offline copy);
-#   4. ship over the forced-command SSH channel (`backup` action in
+#   5. ship both over the forced-command SSH channel (`backup` action in
 #      ops/vps/lm-deploy-receive.sh) → /root/lm-prod/backups/ (700), 14 days kept.
-# The plaintext dump never leaves the runner and is shredded before the job ends.
-# Nothing is uploaded as a GitHub artifact (public repository). No token,
-# password or URL is ever printed; API failures print the HTTP status only.
+# Plaintext (the dump AND the files — personal data) never leaves the runner and is
+# shredded before the job ends. Nothing is uploaded as a GitHub artifact (public
+# repository). No token, password, URL or object name is ever printed; API
+# failures print the HTTP status (and an object's index) only.
+#
+# Restore procedure end to end: docs/ops/VPS_PRODUCTION_RUNBOOK.md §9.1.1.
 #
 # Secrets (names only): SUPABASE_ACCESS_TOKEN (owner-created) or
-# SUPABASE_BACKUP_DB_URL (optional alternative); VPS_DEPLOY_SSH_KEY,
-# VPS_DEPLOY_HOST, VPS_DEPLOY_KNOWN_HOSTS (the deploy trio). Without them the
-# job FAILS loudly — a backup that did not happen must never look green.
+# SUPABASE_BACKUP_DB_URL (optional alternative); SUPABASE_SERVICE_ROLE_KEY (Storage
+# files, read only here); VPS_DEPLOY_SSH_KEY, VPS_DEPLOY_HOST,
+# VPS_DEPLOY_KNOWN_HOSTS (the deploy trio). Without them the job FAILS loudly — a
+# backup that did not happen must never look green.
 
 on:
   schedule:
-    - cron: "30 3 * * *"   # 03:30 UTC nightly (after the 03:00 legacy cron, before EU office hours)
+    # Every 4 h, and the guard job below skips the run when a backup reached the VPS
+    # in the last 18 h. GitHub's schedule has started the single 03:30 slot hours late
+    # and can drop a slot, so one slot a day is not a reliable daily backup. 18 h rather
+    # than "this UTC day": a late run one day plus an early run the next stays under the
+    # 26 h freshness limit (ingestion-freshness.yml).
+    - cron: "30 3,7,11,15,19,23 * * *"
+  # GitHub's scheduler starves this repository (measured 2026-11-04: frequent workflows
+  # lost 83-98% of their slots), so a finished Quality Gates run on main also starts this.
+  # It is an addition to the schedule, under the same guard. Nothing from the triggering
+  # run is checked out or used. A backup and a deploy can overlap: they share nothing but
+  # the VPS, in different directories (runs 41815407585 and 41824425911 overlapped one).
+  workflow_run:
+    workflows: ["Quality Gates"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       restore_drill_only:
@@ -67,7 +108,47 @@ permissions:
   contents: read
 
 jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decide whether this run backs up
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          WR_EVENT: ${{ github.event.workflow_run.event }}
+          WR_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          WR_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+        run: |
+          set -u
+          SKIP_WITHIN_S=$(( 18 * 3600 ))
+          # A person's dispatch always runs. An unreadable answer also runs: an extra
+          # backup costs little, a missed one is what this workflow exists to prevent.
+          decision=true
+          if [ "$EVENT" = "workflow_run" ] && { [ "$WR_EVENT" != "push" ] || [ "$WR_BRANCH" != "main" ] || [ "$WR_REPO" != "$GITHUB_REPOSITORY" ]; }; then
+            # The branch filter above also matches a pull request from a fork's `main`.
+            echo "started by a run that is not a push to this repository's main"
+            decision=false
+          elif [ "$EVENT" = "schedule" ] || [ "$EVENT" = "workflow_run" ]; then
+            if last=$(bash .github/scripts/db-backup-last-shipped.sh) && [ -n "$last" ]; then
+              age=$(( $(date +%s) - $(date -d "$last" +%s) ))
+              echo "last backup on the VPS: $last ($(( age / 3600 )) h ago)"
+              [ "$age" -lt "$SKIP_WITHIN_S" ] && decision=false
+            fi
+          fi
+          echo "run=$decision" >> "$GITHUB_OUTPUT"
+          echo "backup this run: $decision" | tee -a "$GITHUB_STEP_SUMMARY"
+
   backup:
+    needs: guard
+    if: needs.guard.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     services:
@@ -82,6 +163,83 @@ jobs:
       TZ: UTC
       # The production project (public: it is in every page's Supabase URL).
       SUPABASE_PROJECT_REF: gorgitwvdzxbnaxhrsrw
+      # Restore proof, run identically on the source and on the drill database
+      # (psql variable :'schemas' = the dumped schemas, comma-separated). Counts
+      # only; nothing from a row is read. Extension-owned objects are excluded on
+      # both sides (the target's own CREATE EXTENSION makes them).
+      PROOF_OBJECTS_SQL: |
+        select n.nspname, o.k, count(*) from (
+          select c.relnamespace ns, case when c.relkind in ('r','p') then 'tables' when c.relkind = 'v' then 'views'
+                 when c.relkind = 'm' then 'matviews' when c.relkind in ('i','I') then 'indexes' else 'sequences' end k
+            from pg_class c where c.relkind in ('r','p','v','m','i','I','S')
+             and not exists (select 1 from pg_depend d where d.classid = 'pg_class'::regclass and d.objid = c.oid and d.deptype = 'e')
+          union all select connamespace, 'constraints' from pg_constraint
+          union all select c.relnamespace, 'policies' from pg_policy p join pg_class c on c.oid = p.polrelid
+          union all select c.relnamespace, 'triggers' from pg_trigger t join pg_class c on c.oid = t.tgrelid where not t.tgisinternal
+          union all select p.pronamespace, 'functions' from pg_proc p
+           where not exists (select 1 from pg_depend d where d.classid = 'pg_proc'::regclass and d.objid = p.oid and d.deptype = 'e')
+        ) o join pg_namespace n on n.oid = o.ns
+        where n.nspname = any(string_to_array(:'schemas', ','))
+        group by 1, 2 order by 1, 2;
+      # The grants, per schema and kind: how many (grantee, privilege, grant option)
+      # entries, and a hash of them with their objects. Default ACLs count as what they
+      # mean, so NULL equals an explicit default. The grantor is left out: it does not
+      # change who may do what. Only the count is ever printed (public repository). The
+      # search_path is fixed because function arguments print by it, and Supabase's differs.
+      PROOF_GRANTS_SQL: |
+        set search_path = pg_catalog;
+        with ext as (select classid, objid from pg_depend where deptype = 'e'),
+        entries as (
+          select c.relnamespace ns, case when c.relkind = 'S' then 'sequences' else 'relations' end k, c.relname::text obj, a.grantee, a.privilege_type, a.is_grantable
+            from pg_class c
+            cross join lateral aclexplode(coalesce(c.relacl, acldefault((case when c.relkind = 'S' then 's' else 'r' end)::"char", c.relowner))) a
+           where c.relkind in ('r','p','v','m','f','S')
+             and not exists (select 1 from ext where classid = 'pg_class'::regclass and objid = c.oid)
+          union all
+          select c.relnamespace, 'columns', c.relname::text || '.' || t.attname::text, a.grantee, a.privilege_type, a.is_grantable
+            from pg_attribute t join pg_class c on c.oid = t.attrelid
+            cross join lateral aclexplode(t.attacl) a
+           where t.attacl is not null and t.attnum > 0 and not t.attisdropped
+             and not exists (select 1 from ext where classid = 'pg_class'::regclass and objid = c.oid)
+          union all
+          select p.pronamespace, 'functions', p.proname::text || '(' || pg_get_function_identity_arguments(p.oid) || ')', a.grantee, a.privilege_type, a.is_grantable
+            from pg_proc p
+            cross join lateral aclexplode(coalesce(p.proacl, acldefault('f'::"char", p.proowner))) a
+           where not exists (select 1 from ext where classid = 'pg_proc'::regclass and objid = p.oid)
+          union all
+          select y.typnamespace, 'types', y.typname::text, a.grantee, a.privilege_type, a.is_grantable
+            from pg_type y
+            cross join lateral aclexplode(y.typacl) a
+           where y.typacl is not null
+             and not exists (select 1 from ext where classid = 'pg_type'::regclass and objid = y.oid)
+          union all
+          select n.oid, 'schema', n.nspname::text, a.grantee, a.privilege_type, a.is_grantable
+            from pg_namespace n
+            cross join lateral aclexplode(coalesce(n.nspacl, acldefault('n'::"char", n.nspowner))) a
+          union all
+          select d.defaclnamespace, 'default_privileges', pg_get_userbyid(d.defaclrole) || '/' || d.defaclobjtype::text, a.grantee, a.privilege_type, a.is_grantable
+            from pg_default_acl d
+            cross join lateral aclexplode(d.defaclacl) a
+           where d.defaclnamespace <> 0
+        ),
+        named as (
+          select e.ns, e.k, e.obj || '|' || coalesce(r.rolname::text, 'PUBLIC') || '|' || e.privilege_type || '|' || e.is_grantable::text as line
+            from entries e left join pg_roles r on r.oid = e.grantee
+        )
+        select n.nspname, x.k, count(*), md5(string_agg(x.line, E'\n' order by x.line collate "C"))
+          from named x join pg_namespace n on n.oid = x.ns
+         where n.nspname = any(string_to_array(:'schemas', ','))
+         group by 1, 2 order by 1, 2;
+      # Exact row count of every table in the dumped schemas, in ONE statement
+      # (query_to_xml runs each count; works inside a read-only transaction).
+      PROOF_ROWS_SQL: |
+        select format('%s.%s', n.nspname, c.relname),
+               (xpath('/row/c/text()', query_to_xml(format('select count(*) as c from %I.%I', n.nspname, c.relname), false, true, '')))[1]::text
+          from pg_class c join pg_namespace n on n.oid = c.relnamespace
+         where c.relkind in ('r','p') and not c.relispartition
+           and n.nspname = any(string_to_array(:'schemas', ','))
+           and not exists (select 1 from pg_depend d where d.classid = 'pg_class'::regclass and d.objid = c.oid and d.deptype = 'e')
+         order by 1;
     steps:
       - name: Require secrets (no silent no-op)
         env:
@@ -90,8 +248,10 @@ jobs:
           HAS_KEY: ${{ secrets.VPS_DEPLOY_SSH_KEY != '' }}
           HAS_HOST: ${{ secrets.VPS_DEPLOY_HOST != '' }}
           HAS_KH: ${{ secrets.VPS_DEPLOY_KNOWN_HOSTS != '' }}
+          HAS_SRK: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
           DRILL_ONLY: ${{ inputs.restore_drill_only }}
         run: |
+          [ "$HAS_SRK" = "true" ] || { echo "::error::secrets.SUPABASE_SERVICE_ROLE_KEY missing — the Storage files cannot be backed up"; exit 1; }
           [ "$HAS_PAT" = "true" ] || [ "$HAS_DB" = "true" ] || { echo "::error::neither secrets.SUPABASE_ACCESS_TOKEN (a scoped Supabase personal access token: this project, Database read-write) nor secrets.SUPABASE_BACKUP_DB_URL is configured — no backup taken (runbook docs/ops/VPS_PRODUCTION_RUNBOOK.md §5)"; exit 1; }
           if [ "$HAS_DB" = "true" ]; then echo "credential: SUPABASE_BACKUP_DB_URL" | tee -a "$GITHUB_STEP_SUMMARY"; else echo "credential: temporary CLI login role via SUPABASE_ACCESS_TOKEN" | tee -a "$GITHUB_STEP_SUMMARY"; fi
           if [ "$DRILL_ONLY" != "true" ]; then
@@ -169,44 +329,53 @@ jobs:
           echo "MODE=$MODE" >> "$GITHUB_ENV"
 
           out="lm-db-$stamp.dump"
-          # public + auth first (auth = accounts, identities: what a project restore needs besides
-          # the product tables). If auth cannot be read (e.g. a URL role with public-only rights,
-          # first drill 2026-10-17: "permission denied for schema auth"), fall back to public only —
-          # loudly, never silently.
-          # Restore proof (2026-11-01): exact row counts of the key tables, read from the
-          # source right before and right after the dump. The restore drill must land
-          # every table inside that window - "the file restored" is not proof that the
-          # data did. Counts only; no row content leaves the database.
-          KEY_TABLES="public.profiles public.workers public.organizations public.journal_entries public.journal_entry_confirmations auth.users"
-          # One table per query, so a table this role cannot read (auth.* for a
-          # public-only URL role) leaves only ITS line out; -q keeps the `SET`
-          # command status out of the output; only "<table>\t<number>" lines
-          # are kept.
-          count_source() {
-            local t n pre=""
-            [ "$MODE" = "pat" ] && pre="set role postgres; "
-            for t in $KEY_TABLES; do
-              n=$(psql "$CONN" -q -v ON_ERROR_STOP=1 -tA -c "${pre}select count(*) from $t" 2>/dev/null | tail -1) || continue
-              case "$n" in ''|*[!0-9]*) continue ;; esac
-              printf '%s\t%s\n' "$t" "$n"
-            done
+          # Every schema a restore needs (2026-11-03; header §1 says why vault, realtime
+          # and cron are not here). If that cannot be read (e.g. a URL role with
+          # public-only rights, first drill 2026-10-17: "permission denied for schema
+          # auth"), fall back to public only — loudly, never silently.
+          FULL_SCHEMAS="public,auth,storage,supabase_migrations"
+          # Restore proof: exact counts read from the source right before and right after
+          # the dump (rows: every table; objects: per schema). The drill must land every
+          # table inside that window - "the file restored" is not proof that the data
+          # did. Counts only; no row content leaves the database. The KEY tables fail the
+          # job when outside their window; any other table only warns (a busy table such
+          # as auth.sessions can move both ways between the two reads).
+          KEY_TABLES="public.profiles public.workers public.organizations public.journal_entries public.journal_entry_confirmations auth.users storage.objects supabase_migrations.schema_migrations"
+          # One query on the source (psql reads it from stdin so :'schemas' is
+          # interpolated); -q keeps the `SET` status out of the output.
+          src() {
+            { if [ "$MODE" = "pat" ]; then echo "set role postgres;"; fi; printf '%s\n' "$1"; } \
+              | psql "$CONN" -X -q -v ON_ERROR_STOP=1 -v schemas="$2" -tA -F "$(printf '\t')"
           }
-          SCOPE="public+auth"
-          connect && { count_source > "$T/counts.before" || : > "$T/counts.before"; }
-          if ! { connect && pg_dump "$CONN" "${ROLE_ARGS[@]}" -Fc --no-owner --no-privileges --schema=public --schema=auth -f "$out" 2> "$T/dump.err"; }; then
-            echo "::warning::dump of public+auth failed ($(grep -m1 -oE 'ERROR: +[a-z ]+' "$T/dump.err" || echo 'see log')) — retrying public only"
+          SCOPE="$FULL_SCHEMAS"
+          connect && src "$PROOF_ROWS_SQL" "$FULL_SCHEMAS" > "$T/rows.before"
+          connect && src "$PROOF_OBJECTS_SQL" "$FULL_SCHEMAS" > "$T/objects.before"
+          connect && src "$PROOF_GRANTS_SQL" "$FULL_SCHEMAS" > "$T/grants.before"
+          # Role names, for the drill only: grants and owners need them. Never printed.
+          connect && src "select rolname from pg_roles where rolname !~ '^pg_' order by 1;" "" > "$T/roles.source"
+          schema_args=(); for s in ${FULL_SCHEMAS//,/ }; do schema_args+=("--schema=$s"); done
+          if ! { connect && pg_dump "$CONN" "${ROLE_ARGS[@]}" -Fc --no-owner "${schema_args[@]}" -f "$out" 2> "$T/dump.err"; }; then
+            echo "::warning::dump of $FULL_SCHEMAS failed ($(grep -m1 -oE 'ERROR: +[a-z ]+' "$T/dump.err" || echo 'see log')) — retrying public only"
             rm -f "$out"; SCOPE="public"
             connect
-            pg_dump "$CONN" "${ROLE_ARGS[@]}" -Fc --no-owner --no-privileges --schema=public -f "$out"
+            pg_dump "$CONN" "${ROLE_ARGS[@]}" -Fc --no-owner --schema=public -f "$out"
           fi
-          connect && { count_source > "$T/counts.after" || : > "$T/counts.after"; }
+          connect && src "$PROOF_ROWS_SQL" "$FULL_SCHEMAS" > "$T/rows.after"
+          connect && src "$PROOF_OBJECTS_SQL" "$FULL_SCHEMAS" > "$T/objects.after"
+          connect && src "$PROOF_GRANTS_SQL" "$FULL_SCHEMAS" > "$T/grants.after"
+          # The Storage object list (bucket, name, recorded size) and the pg_cron job
+          # definitions, for the files bundle. 600 files on the runner; never printed.
+          connect && src "select json_build_object('b', bucket_id, 'n', name, 's', (metadata->>'size')::bigint) from storage.objects order by bucket_id, name;" "" > "$T/objects.jsonl"
+          connect && src "copy (select jobid, jobname, schedule, command, database, username, active from cron.job order by jobid) to stdout with (format csv, header);" "" > "$T/cron-jobs.csv"
+          connect && CRON_JOBS=$(src "select count(*) from cron.job;" "")
           rm -f "$PGPASSFILE" "$T/dump.err"
           echo "SCOPE=$SCOPE" >> "$GITHUB_ENV"
           echo "KEY_TABLES=$KEY_TABLES" >> "$GITHUB_ENV"
-          echo "source key-table counts read: before=$(wc -l < "$T/counts.before") after=$(wc -l < "$T/counts.after") tables"
+          echo "CRON_JOBS=$CRON_JOBS" >> "$GITHUB_ENV"
+          echo "source counts read: tables before=$(wc -l < "$T/rows.before") after=$(wc -l < "$T/rows.after"); storage objects listed=$(wc -l < "$T/objects.jsonl"); cron jobs=$CRON_JOBS"
           size=$(stat -c %s "$out"); echo "dump scope=$SCOPE bytes=$size" | tee -a "$GITHUB_STEP_SUMMARY"
           [ "$size" -gt 100000 ] || { echo "::error::dump is suspiciously small ($size bytes)"; exit 1; }
-          [ "$SCOPE" = "public+auth" ] || echo "::warning::this backup holds the public schema only — accounts (auth.users) are NOT in it (runbook §5)"
+          [ "$SCOPE" = "$FULL_SCHEMAS" ] || echo "::warning::this backup holds the public schema only — accounts (auth), Storage metadata and the migration ledger are NOT in it (runbook §9.1)"
       - name: Drop the temporary login role (always)
         if: always() && env.MODE == 'pat'
         env:
@@ -222,58 +391,170 @@ jobs:
           PGPASSWORD: drill
         run: |
           set -euo pipefail
-          psql -h 127.0.0.1 -p 55432 -U postgres -c "create database drill_restore" >/dev/null
-          # Roles/extension objects referenced by the dump may not exist here; errors on those are tolerated
-          # (pg_restore continues past errors by default — the former `--exit-on-error=false` was not a
-          # valid option: the flag takes no value, so pg_restore refused to start), but the restore must
-          # end with the public tables present and populated.
-          pg_restore -h 127.0.0.1 -p 55432 -U postgres -d drill_restore --no-owner --no-privileges "lm-db-$STAMP.dump" 2> restore.err || true
-          q() { psql -h 127.0.0.1 -p 55432 -U postgres -d drill_restore -tAc "$1"; }
-          tables=$(q "select count(*) from information_schema.tables where table_schema='public'")
-          rows=$(q "select coalesce(sum(n_live_tup),0) from pg_stat_user_tables where schemaname='public'")
-          auth_tables=$(q "select count(*) from information_schema.tables where table_schema='auth'")
+          P="psql -h 127.0.0.1 -p 55432 -U postgres -X -q -v ON_ERROR_STOP=1"
+          # GitHub prints a service container's log at the end of the job, failed statements
+          # included. A failed GRANT must not reach a public log.
+          $P -c "alter system set log_min_messages = 'fatal'" -c "alter system set log_min_error_statement = 'panic'" -c "select pg_reload_conf()" >/dev/null
+          sleep 1
+          $P -c "create database drill_restore" >/dev/null
+          # A Supabase target already has these; a plain postgres:17 does not. Created
+          # first so the drill measures the DUMP, not the missing platform: without
+          # them every policy (`to authenticated`) and the one exclusion constraint
+          # (needs btree_gist) failed — 195 error lines on 2026-11-03.
+          $P -d drill_restore >/dev/null <<'SQL'
+          create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
+          create schema extensions;
+          create extension btree_gist with schema extensions;
+          create extension pgcrypto with schema extensions;
+          create extension "uuid-ossp" with schema extensions;
+          SQL
+          # Every other role of the source, so grants and owners can come back. Owners are
+          # kept here: a grant is made by, and measured against, the object's owner.
+          $P -d drill_restore -v roles="$(paste -sd, "$RUNNER_TEMP/lmdb/roles.source")" >/dev/null <<'SQL'
+          select format('create role %I nologin', r) from unnest(string_to_array(:'roles', ',')) r
+           where not exists (select 1 from pg_roles where rolname = r)
+          \gexec
+          SQL
+          # pg_restore continues past errors by default; the proof below decides.
+          pg_restore -h 127.0.0.1 -p 55432 -U postgres -d drill_restore "lm-db-$STAMP.dump" 2> restore.err || true
+          q() { psql -h 127.0.0.1 -p 55432 -U postgres -X -d drill_restore -tAc "$1"; }
+          dq() { printf '%s\n' "$1" | $P -d drill_restore -v schemas="$SCOPE" -tA -F "$(printf '\t')"; }
+          # Error lines that concern roles or grants are counted, never printed.
+          printable_errors() { grep "ERROR" restore.err | grep -v 'schema "public" already exists' | grep -v -i -E 'role |privilege|permission|grant|revoke|owner' || true; }
+          # Error lines, by class (counts only). "schema public already exists" is
+          # pg_restore meeting the database's own public schema: harmless.
           errs=$(grep -c "ERROR" restore.err || true)
-          echo "restore drill: scope=$SCOPE public tables=$tables rows≈$rows auth tables=$auth_tables restore-errors=$errs" | tee -a "$GITHUB_STEP_SUMMARY"
-          [ "$tables" -ge 50 ] && [ "$rows" -ge 1 ] || { echo "::error::restore drill failed (tables=$tables rows=$rows)"; head -20 restore.err; exit 1; }
-          if [ "$SCOPE" = "public+auth" ]; then
-            [ "$auth_tables" -ge 1 ] && [ "$(q "select count(*) > 0 from auth.users")" = "t" ] \
-              || { echo "::error::restore drill: the auth schema did not restore (auth tables=$auth_tables)"; exit 1; }
-          fi
-          [ "$errs" = "0" ] || { echo "::warning::pg_restore reported $errs error line(s); first ones:"; grep -m5 "ERROR" restore.err | cut -c1-200 || true; }
-          # Every key table must restore with a row count inside the source window
-          # [before, after]; a table the source could not count fails the proof
-          # instead of passing silently.
-          B="$RUNNER_TEMP/lmdb/counts.before"; A="$RUNNER_TEMP/lmdb/counts.after"
-          [ -s "$B" ] && [ -s "$A" ] || { echo "::error::restore proof: the source key-table counts could not be read"; exit 1; }
+          harmless=$(grep -c 'ERROR: *schema "public" already exists' restore.err || true)
+          other=$((errs - harmless))
+          tables=$(q "select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind in ('r','p')")
+          views=$(q "select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='v'")
+          rows=$(q "select coalesce(sum(n_live_tup),0) from pg_stat_user_tables where schemaname='public'")
+          echo "restore drill: scope=$SCOPE public base tables=$tables views=$views rows≈$rows restore-errors=$errs (harmless=$harmless other=$other)" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$tables" -ge 50 ] && [ "$rows" -ge 1 ] || { echo "::error::restore drill failed (tables=$tables rows=$rows)"; printable_errors | head -20 | cut -c1-200; exit 1; }
+          [ "$other" = "0" ] || { echo "::warning::pg_restore reported $other unexpected error line(s); first ones that may be printed:"; printable_errors | head -10 | cut -c1-200; }
+          D="$RUNNER_TEMP/lmdb"
           bad=0
-          for t in $KEY_TABLES; do
-            case "$t" in auth.*) [ "$SCOPE" = "public+auth" ] || continue ;; esac
-            before=$(awk -F'\t' -v t="$t" '$1==t{print $2}' "$B")
-            after=$(awk -F'\t' -v t="$t" '$1==t{print $2}' "$A")
-            if [ -z "$before" ]; then echo "::error::restore proof: the source count of $t could not be read"; bad=1; continue; fi
-            got=$(q "select count(*) from $t" 2>/dev/null || echo missing)
-            [ -n "$after" ] || after="$before"
-            lo=$(( before < after ? before : after )); hi=$(( before > after ? before : after ))
-            if [ "$got" = "missing" ] || [ -z "$got" ] || [ "$got" -lt "$lo" ] || [ "$got" -gt "$hi" ]; then
-              echo "::error::restore proof: $t restored ${got:-nothing}, source window [$lo, $hi]"; bad=1
-            else
-              echo "restore proof: $t restored $got rows, source window [$lo, $hi]" | tee -a "$GITHUB_STEP_SUMMARY"
-            fi
-          done
+          # 1. Schema objects: per schema and kind, the restore equals the source exactly.
+          dq "$PROOF_OBJECTS_SQL" > "$D/objects.restored"
+          cmp -s "$D/objects.before" "$D/objects.after" \
+            || echo "::warning::the source schema changed while the dump ran; comparing with the state before it"
+          awk -F'\t' -v sc=",$SCOPE," 'index(sc, "," $1 ",")' "$D/objects.before" > "$D/objects.expected"
+          [ -s "$D/objects.expected" ] && [ -s "$D/objects.restored" ] || { echo "::error::restore proof: the schema-object counts could not be read"; exit 1; }
+          if cmp -s "$D/objects.expected" "$D/objects.restored"; then
+            echo "restore proof: schema objects equal the source ($(awk -F'\t' '{printf "%s%s.%s=%s", (NR > 1 ? " " : ""), $1, $2, $3}' "$D/objects.restored"))" | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::error::restore proof: schema objects differ from the source (schema/kind, source, restored):"
+            join -t "$(printf '\t')" -a1 -a2 -e 0 -o 0,1.2,2.2 \
+              <(awk -F'\t' '{print $1"/"$2"\t"$3}' "$D/objects.expected" | sort) \
+              <(awk -F'\t' '{print $1"/"$2"\t"$3}' "$D/objects.restored" | sort) | awk -F'\t' '$2 != $3'
+            bad=1
+          fi
+          # 2. Grants: per schema and kind, the restore equals the source, by count and
+          # hash, as it stood before or after the dump. Only counts are printed.
+          dq "$PROOF_GRANTS_SQL" > "$D/grants.restored"
+          for w in before after; do awk -F'\t' -v sc=",$SCOPE," 'index(sc, "," $1 ",")' "$D/grants.$w" > "$D/grants.expected.$w"; done
+          [ -s "$D/grants.expected.before" ] && [ -s "$D/grants.restored" ] || { echo "::error::restore proof: the grants could not be read"; exit 1; }
+          if cmp -s "$D/grants.expected.before" "$D/grants.restored" || cmp -s "$D/grants.expected.after" "$D/grants.restored"; then
+            echo "restore proof: grants equal the source ($(awk -F'\t' '{printf "%s%s.%s=%s", (NR > 1 ? " " : ""), $1, $2, $3}' "$D/grants.restored"))" | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::error::restore proof: grants differ from the source (schema/kind, source count, restored count; equal counts mean different content):"
+            join -t "$(printf '\t')" -a1 -a2 -e 0 -o 0,1.2,2.2,1.3,2.3 \
+              <(awk -F'\t' '{print $1"/"$2"\t"$3"\t"$4}' "$D/grants.expected.before" | sort) \
+              <(awk -F'\t' '{print $1"/"$2"\t"$3"\t"$4}' "$D/grants.restored" | sort) | awk -F'\t' '$4 != $5 {print $1"\t"$2"\t"$3}'
+            bad=1
+          fi
+          # 3. Rows: every table inside its source window [before, after].
+          dq "$PROOF_ROWS_SQL" > "$D/rows.restored"
+          [ -s "$D/rows.before" ] && [ -s "$D/rows.after" ] || { echo "::error::restore proof: the source row counts could not be read"; exit 1; }
+          awk -F'\t' -v sc=",$SCOPE," -v keys=" $KEY_TABLES " '
+            FILENAME == ARGV[1] { b[$1] = $2; next }
+            FILENAME == ARGV[2] { a[$1] = $2; next }
+            { r[$1] = $2 }
+            END {
+              n = 0; out = 0; keybad = 0; zero = 0; missing = 0
+              for (t in b) {
+                split(t, p, "."); if (!index(sc, "," p[1] ",")) continue
+                n++; lo = b[t] + 0; hi = (t in a) ? a[t] + 0 : lo; if (hi < lo) { x = lo; lo = hi; hi = x }
+                iskey = index(keys, " " t " ") > 0
+                if (!(t in r)) { print "MISSING\t" t; missing++; continue }
+                g = r[t] + 0
+                if (g < lo || g > hi) {
+                  print (iskey ? "KEY_OUT\t" : "OUT\t") t "\t" g "\t" lo "\t" hi
+                  if (iskey) keybad++; else out++
+                  if (g == 0 && lo > 0) zero++
+                } else if (iskey) print "KEY_OK\t" t "\t" g "\t" lo "\t" hi
+              }
+              print "TOTAL\t" n "\t" out "\t" keybad "\t" zero "\t" missing
+            }' "$D/rows.before" "$D/rows.after" "$D/rows.restored" > "$D/rows.verdict"
+          while IFS="$(printf '\t')" read -r kind t g lo hi; do
+            case "$kind" in
+              KEY_OK)  echo "restore proof: $t restored $g rows, source window [$lo, $hi]" | tee -a "$GITHUB_STEP_SUMMARY" ;;
+              KEY_OUT) echo "::error::restore proof: $t restored $g rows, source window [$lo, $hi]" ;;
+              OUT)     echo "::warning::restore proof: $t restored $g rows, source window [$lo, $hi]" ;;
+              MISSING) echo "::error::restore proof: $t did not restore" ;;
+            esac
+          done < "$D/rows.verdict"
+          read -r _ n out keybad zero missing < <(grep '^TOTAL' "$D/rows.verdict" | tr '\t' ' ')
+          echo "restore proof: $n tables compared; outside their window: $keybad key, $out other ($zero restored empty); missing: $missing" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$keybad" = "0" ] && [ "$zero" = "0" ] && [ "$missing" = "0" ] || bad=1
           [ "$bad" = "0" ] || exit 1
-          # Append-only evidence must come back whole: no journal entry without its worker.
+          # 4. Append-only evidence must come back whole: no journal entry without its worker.
           orphans=$(q "select count(*) from public.journal_entries j where not exists (select 1 from public.workers w where w.id = j.worker_id)")
           [ "$orphans" = "0" ] || { echo "::error::restore proof: $orphans journal entries restored without their worker"; exit 1; }
-          echo "restore proof: every key table inside its source window; every journal entry has its worker" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "restore proof: schema objects and grants exact; every key table inside its source window; every journal entry has its worker" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Storage files + cron job definitions (plaintext stays on this runner only)
+        env:
+          SRK: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/lmdb"; F="$D/files"; mkdir -p "$F/storage"
+          BASE="https://${SUPABASE_PROJECT_REF}.supabase.co/storage/v1/object"
+          L="$D/objects.jsonl"
+          n=$(wc -l < "$L"); want_bytes=$(jq -s 'map(.s // 0) | add // 0' "$L")
+          : > "$F/storage-manifest.jsonl"
+          i=0; got=0; got_bytes=0; failed=0
+          # Object names are personal data: never printed — an error names the object's index only.
+          while IFS= read -r line; do
+            i=$((i + 1))
+            b=$(jq -r '.b' <<<"$line"); name=$(jq -r '.n' <<<"$line"); size=$(jq -r '.s // -1' <<<"$line")
+            # Path safety: no absolute path, no '..' segment, no control character.
+            if [[ "$b" == */* || "$b" == .* || "$name" == /* || "/$name/" == */../* || "$name" =~ [[:cntrl:]] ]]; then
+              echo "::error::object #$i has an unsafe path; not written"; failed=$((failed + 1)); continue
+            fi
+            enc=$(jq -r '.n | split("/") | map(@uri) | join("/")' <<<"$line")
+            benc=$(jq -rn --arg b "$b" '$b | @uri')
+            dest="$F/storage/$b/$name"; mkdir -p "$(dirname "$dest")"
+            code=$(curl -sS --retry 3 --retry-all-errors -o "$dest" -w '%{http_code}' \
+                     -H "apikey: $SRK" -H "Authorization: Bearer $SRK" "$BASE/$benc/$enc" 2>/dev/null || echo 000)
+            have=$(stat -c %s "$dest" 2>/dev/null || echo -1)
+            if [ "$code" != "200" ] || [ "$have" != "$size" ]; then
+              echo "::error::object #$i: HTTP $code, bytes $have, recorded $size"; failed=$((failed + 1)); rm -f "$dest"; continue
+            fi
+            got=$((got + 1)); got_bytes=$((got_bytes + have))
+            jq -c --arg sha "$(sha256sum "$dest" | cut -d' ' -f1)" '. + {sha256: $sha}' <<<"$line" >> "$F/storage-manifest.jsonl"
+          done < "$L"
+          cp "$D/cron-jobs.csv" "$F/cron-jobs.csv"
+          cron_rows=$(( $(wc -l < "$F/cron-jobs.csv") - 1 ))
+          per_bucket=$(jq -rs 'group_by(.b) | map("\(.[0].b)=\(length)") | join(" ")' "$F/storage-manifest.jsonl")
+          echo "storage files: objects=$got/$n bytes=$got_bytes/$want_bytes ($per_bucket); cron jobs=$cron_rows/$CRON_JOBS" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$failed" = "0" ] && [ "$got" = "$n" ] && [ "$got_bytes" = "$want_bytes" ] \
+            || { echo "::error::storage files incomplete ($failed failed)"; exit 1; }
+          [ "$cron_rows" = "$CRON_JOBS" ] || { echo "::error::cron job export has $cron_rows rows, source $CRON_JOBS"; exit 1; }
+          tar -C "$F" -cf "lm-files-$STAMP.tar" .
+          echo "files bundle bytes=$(stat -c %s "lm-files-$STAMP.tar")"
       - name: Encrypt to the VPS backup key
         run: |
           set -euo pipefail
           umask 077
           [ -s ops/vps/backup.age.pub ] || { echo "::error::ops/vps/backup.age.pub missing (generate on the VPS, commit the PUBLIC key)"; exit 1; }
-          age -R ops/vps/backup.age.pub -o "lm-db-$STAMP.dump.age" "lm-db-$STAMP.dump"
-          shred -u "lm-db-$STAMP.dump"
-          sha=$(sha256sum "lm-db-$STAMP.dump.age" | cut -d' ' -f1); echo "SHA256=$sha" >> "$GITHUB_ENV"
-          echo "encrypted bytes=$(stat -c %s "lm-db-$STAMP.dump.age") sha256=$sha" | tee -a "$GITHUB_STEP_SUMMARY"
+          for f in "lm-db-$STAMP.dump" "lm-files-$STAMP.tar"; do
+            age -R ops/vps/backup.age.pub -o "$f.age" "$f"
+            shred -u "$f"
+            echo "encrypted $f.age bytes=$(stat -c %s "$f.age") sha256=$(sha256sum "$f.age" | cut -d' ' -f1)" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          find "$RUNNER_TEMP/lmdb/files" -type f -exec shred -u {} + 2>/dev/null || true
+          rm -rf "$RUNNER_TEMP/lmdb/files"
       - name: Ship to the VPS (forced-command receiver, action backup)
         if: ${{ !inputs.restore_drill_only }}
         env:
@@ -284,11 +565,67 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key; printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
-          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes "lmdeploy@${HOST}" "backup lm-db-${STAMP}.dump.age ${SHA256}" < "lm-db-$STAMP.dump.age" | tee ship.log
-          grep -q '^BACKUP_OK ' ship.log || { echo "::error::receiver did not confirm BACKUP_OK"; exit 1; }
+          ship() {
+            local f="$1" sha; sha=$(sha256sum "$f" | cut -d' ' -f1)
+            ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes "lmdeploy@${HOST}" "backup $f $sha" < "$f" | tee ship.log || true
+            grep -q "^BACKUP_OK $f\$" ship.log
+          }
+          # The database first: it is the backup that matters most and must not wait on the files.
+          ship "lm-db-$STAMP.dump.age" || { echo "::error::receiver did not confirm BACKUP_OK for the database dump"; exit 1; }
+          if ! ship "lm-files-$STAMP.tar.age"; then
+            if grep -q 'BACKUP_FAIL bad name' ship.log; then
+              echo "::error::the receiver installed on the VPS predates the Storage-files bundle — install ops/vps/lm-deploy-receive.sh from main (runbook §9.1); the database dump IS stored"
+            else
+              echo "::error::receiver did not confirm BACKUP_OK for the Storage-files bundle; the database dump IS stored"
+            fi
+            exit 1
+          fi
           rm -f ~/.ssh/deploy_key
       - name: Clean the runner
         if: always()
         run: |
-          shred -u lm-db-*.dump lm-db-*.dump.age 2>/dev/null || true
-          rm -rf "$RUNNER_TEMP/lmdb"
+          shred -u lm-db-*.dump lm-db-*.dump.age lm-files-*.tar lm-files-*.tar.age 2>/dev/null || true
+          find "$RUNNER_TEMP/lmdb" -type f -exec shred -u {} + 2>/dev/null || true
+          rm -rf "$RUNNER_TEMP/lmdb" ~/.ssh/deploy_key
+
+  # One open issue while backups fail, closed by the next backup that ships. The
+  # repository is public: the text carries the run link and nothing else. A failed
+  # scheduled run also sends GitHub's own failure e-mail. A test from a branch is not
+  # the production backup: it neither opens nor closes the issue.
+  notify:
+    needs: [guard, backup]
+    if: always() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Open, update or close the backup issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          GUARD: ${{ needs.guard.result }}
+          BACKUP: ${{ needs.backup.result }}
+          DRILL_ONLY: ${{ inputs.restore_drill_only }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -u
+          LABEL="db-backup-failed"
+          open_issue=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty')
+          case "$GUARD/$BACKUP" in
+            failure/*|cancelled/*|*/failure|*/cancelled)
+              if [ -n "$open_issue" ]; then
+                gh issue comment "$open_issue" --body "Failed again: $RUN_URL"
+              else
+                gh label create "$LABEL" --color B60205 --description "DB backup failed or stale (auto-managed)" 2>/dev/null || true
+                gh issue create --label "$LABEL" --title "DB backup failed" --body "Failed run: $RUN_URL"
+              fi
+              ;;
+            */success)
+              if [ "$DRILL_ONLY" != "true" ] && [ -n "$open_issue" ]; then
+                gh issue comment "$open_issue" --body "Recovered, backup shipped: $RUN_URL"
+                gh issue close "$open_issue"
+              fi
+              ;;
+          esac
