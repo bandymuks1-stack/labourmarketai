@@ -6871,6 +6871,17 @@
         "into": "This row was merged into",
         "canonical": "the kept project",
         "includes": "{count, plural, one {Includes # merged project row — its records are shown here.} other {Includes # merged project rows — their records are shown here.}}"
+      },
+      "teams": {
+        "title": "Who works on this project",
+        "unnamed": "Unnamed team",
+        "unnamedMember": "Member",
+        "noMembers": "No members right now.",
+        "unavailable": "The teams could not be loaded. Try again.",
+        "manage": "Change teams",
+        "kindTeam": "team",
+        "individual": "Assigned one by one",
+        "personTeam": "On team: {team}"
       }
     },
     "workerView": {
@@ -7683,6 +7694,27 @@
       "failed": "Not disbanded: a membership could not be ended. Nothing was changed.",
       "historyTitle": "{count, plural, one {# disbanded brigade} other {# disbanded brigades}}",
       "historyLine": "disbanded {date}"
+    },
+    "structure": {
+      "title": "Team structure",
+      "scopeNote": "Shows the teams you manage and the company's active people.",
+      "kindTeam": "team",
+      "teamEmpty": "No members yet.",
+      "company": "Company",
+      "teamsCount": "teams",
+      "noTeams": "No teams yet.",
+      "outside": "Not in a team"
+    },
+    "addSearch": "Search people",
+    "addSearchNone": "No one matches.",
+    "removeMember": {
+      "label": "Remove",
+      "question": "Remove {name} from this team? Their work history stays. If the team is on a project, they are no longer on it through the team.",
+      "confirm": "Yes, remove",
+      "cancel": "Cancel",
+      "done": "Removed from the team.",
+      "notAllowed": "You cannot remove this member.",
+      "failed": "Could not remove. Try again."
     }
   },
   "teamEnquiries": {

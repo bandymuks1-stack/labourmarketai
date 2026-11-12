@@ -2086,6 +2086,17 @@
         "into": "Šī rinda apvienota ar",
         "canonical": "saglabāto projektu",
         "includes": "{count, plural, zero {Ietver # apvienotu projekta rindu — ieraksti redzami šeit.} one {Ietver # apvienotu projekta rindu — tās ieraksti redzami šeit.} other {Ietver # apvienotas projekta rindas — to ieraksti redzami šeit.}}"
+      },
+      "teams": {
+        "title": "Kas strādā šajā projektā",
+        "unnamed": "Komanda",
+        "unnamedMember": "Dalībnieks",
+        "noMembers": "Pašlaik dalībnieku nav.",
+        "unavailable": "Komandas neizdevās ielādēt. Mēģiniet vēlreiz.",
+        "manage": "Mainīt komandas",
+        "kindTeam": "komanda",
+        "individual": "Piešķirti pa vienam",
+        "personTeam": "Komanda: {team}"
       }
     },
     "workerView": {
@@ -8020,5 +8031,28 @@
       "fullList": "Pilns saraksts"
     },
     "more": "Vairāk"
+  },
+  "teamBrigades": {
+    "structure": {
+      "title": "Komandu struktūra",
+      "scopeNote": "Rāda komandas, kuras vadāt, un uzņēmuma aktīvos cilvēkus.",
+      "kindTeam": "komanda",
+      "teamEmpty": "Dalībnieku vēl nav.",
+      "company": "Uzņēmums",
+      "teamsCount": "komandas",
+      "noTeams": "Komandu vēl nav.",
+      "outside": "Nav komandā"
+    },
+    "addSearch": "Meklēt cilvēkus",
+    "addSearchNone": "Neviens neatbilst.",
+    "removeMember": {
+      "label": "Noņemt",
+      "question": "Noņemt {name} no šīs komandas? Darba vēsture paliek. Ja komanda strādā projektā, šis cilvēks tajā caur komandu vairs nepiedalās.",
+      "confirm": "Jā, noņemt",
+      "cancel": "Atcelt",
+      "done": "Noņemts no komandas.",
+      "notAllowed": "Šo dalībnieku nevarat noņemt.",
+      "failed": "Neizdevās noņemt. Mēģiniet vēlreiz."
+    }
   }
 }

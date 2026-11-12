@@ -6871,6 +6871,17 @@
         "into": "Ten wiersz scalono z",
         "canonical": "zachowanym projektem",
         "includes": "{count, plural, one {Obejmuje # scalony wiersz projektu — jego wpisy są tutaj.} few {Obejmuje # scalone wiersze projektu — ich wpisy są tutaj.} many {Obejmuje # scalonych wierszy projektu — ich wpisy są tutaj.} other {Obejmuje # scalonego wiersza projektu — wpisy są tutaj.}}"
+      },
+      "teams": {
+        "title": "Kto pracuje w tym projekcie",
+        "unnamed": "Zespół",
+        "unnamedMember": "Członek",
+        "noMembers": "Obecnie brak członków.",
+        "unavailable": "Nie udało się wczytać zespołów. Spróbuj ponownie.",
+        "manage": "Zmień zespoły",
+        "kindTeam": "zespół",
+        "individual": "Przypisani pojedynczo",
+        "personTeam": "Zespół: {team}"
       }
     },
     "workerView": {
@@ -7683,6 +7694,27 @@
       "failed": "Nie rozwiązano: nie udało się zakończyć członkostwa. Nic nie zostało zmienione.",
       "historyTitle": "{count, plural, one {# rozwiązana brygada} few {# rozwiązane brygady} many {# rozwiązanych brygad} other {# rozwiązanych brygad}}",
       "historyLine": "rozwiązana {date}"
+    },
+    "structure": {
+      "title": "Struktura zespołów",
+      "scopeNote": "Pokazuje zespoły, którymi zarządzasz, i aktywne osoby w firmie.",
+      "kindTeam": "zespół",
+      "teamEmpty": "Brak członków.",
+      "company": "Firma",
+      "teamsCount": "zespoły",
+      "noTeams": "Brak zespołów.",
+      "outside": "Poza zespołem"
+    },
+    "addSearch": "Szukaj osób",
+    "addSearchNone": "Nikt nie pasuje.",
+    "removeMember": {
+      "label": "Usuń",
+      "question": "Usunąć {name} z tego zespołu? Historia pracy zostaje. Jeśli zespół pracuje w projekcie, ta osoba nie będzie już w nim przez zespół.",
+      "confirm": "Tak, usuń",
+      "cancel": "Anuluj",
+      "done": "Usunięto z zespołu.",
+      "notAllowed": "Nie możesz usunąć tego członka.",
+      "failed": "Nie udało się usunąć. Spróbuj ponownie."
     }
   },
   "teamEnquiries": {

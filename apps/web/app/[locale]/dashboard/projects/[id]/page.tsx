@@ -18,6 +18,11 @@ import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { getProjectStadium } from "@/lib/projects/stadium";
+import { getProjectTeamAssignments } from "@/lib/projects/team-assignment";
+import { projectPageTeams, teamsByPerson } from "@/lib/projects/project-page-teams";
+import { Badge } from "@/components/ui/Badge";
+import { Notice } from "@/components/ui/Notice";
+import { StructureTree } from "@/components/ui/StructureTree";
 import { ProjectCourseTrack } from "@/components/app/projects/project-course-track";
 import { deriveProjectCourse } from "@/lib/projects/project-course";
 import { ProjectForecastPanel } from "@/components/app/projects/project-forecast-panel";
@@ -123,7 +128,22 @@ export default async function ProjectStadiumPage({
   const hasTeam = ops.workers.length > 0;
   // Workers with a real relationship here + their active counterparty link
   // (null = unreadable, rendered as "could not load", never as "none").
-  const linkCandidates = await readLinkCandidates(supabase, id);
+  // The link candidates and the teams are independent reads: one wave.
+  const [linkCandidates, teamAssignments] = await Promise.all([
+    readLinkCandidates(supabase, id),
+    getProjectTeamAssignments([id]),
+  ]);
+  // WHICH teams work here (not only "N via team"). A read that failed is said
+  // as such below - it is never shown as "no teams" (SEP-7).
+  const teamRows = teamAssignments.status === "ok" ? (teamAssignments.byProject.get(id) ?? []) : [];
+  const pageTeams = projectPageTeams(teamRows);
+  const personTeams = teamsByPerson(teamRows);
+  const tTeam = await getTranslations("projectOps.stadium.teams");
+  const teamsOf = (w: { workerId: string; workerProfileId: string }) =>
+    personTeams.get(w.workerProfileId) ?? personTeams.get(w.workerId) ?? [];
+  // People assigned one by one (a person who is also in a team stays here:
+  // the individual assignment is the stronger fact, lib/projects/assigned-people.ts).
+  const individuals = ops.workers.filter((w) => !w.viaTeam);
 
   // systemic-ux-project-v1: honest location status (no fake marker) + project
   // place line, reusing the signal-only market-map mappability rule.
@@ -403,6 +423,15 @@ export default async function ProjectStadiumPage({
                     </p>
                   </div>
                 </Link>
+                {teamsOf(w).length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5" data-testid="stadium-player-teams">
+                    {teamsOf(w).map((name, i) => (
+                      <Badge key={`${name ?? "team"}-${i}`} tone="neutral" className="max-w-full break-words normal-case">
+                        {tTeam("personTeam", { team: name ?? tTeam("unnamed") })}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : null}
                 <div className="flex flex-wrap gap-2">
                   <span className="inline-flex items-center gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1 font-mono text-meta text-text-secondary">
                     <NotebookPen className="h-3 w-3" aria-hidden />
@@ -475,6 +504,83 @@ export default async function ProjectStadiumPage({
         )}
       </section>
 
+      {/* ── WHO WORKS HERE, AS A STRUCTURE: project → teams → people, plus the
+            people assigned one by one. The same rows the assignment screen
+            reads; changing them stays there. Shared StructureTree (DESIGN §10). ── */}
+      {teamAssignments.status !== "ok" || hasTeam || pageTeams.length > 0 ? (
+        <section id="stadium-teams" className="flex scroll-mt-20 flex-col gap-3" data-testid="stadium-teams">
+          <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {tTeam("title")}
+          </h2>
+          {teamAssignments.status !== "ok" ? (
+            <Notice tone="error" testId="stadium-teams-unavailable">
+              {tTeam("unavailable")}
+            </Notice>
+          ) : null}
+          <StructureTree
+            label={tTeam("title")}
+            testId="stadium-structure"
+            openDepth={2}
+            nodes={[
+              {
+                id: "project",
+                label: ops.project.title ?? t("eyebrow"),
+                count: ops.counters.totalAssigned,
+                children: [
+                  ...pageTeams.map((team) => ({
+                    id: `team-${team.teamOrgId}`,
+                    label: (
+                      <span className="break-words" data-testid="stadium-team">
+                        {team.name ?? tTeam("unnamed")}
+                      </span>
+                    ),
+                    meta: tTeam("kindTeam"),
+                    count: team.members.length,
+                    empty: tTeam("noMembers"),
+                    children: team.members.map((m) => ({
+                      id: `team-${team.teamOrgId}-${m.key}`,
+                      label: (
+                        <span className="break-words" data-testid="stadium-team-member">
+                          {m.name ?? tTeam("unnamedMember")}
+                        </span>
+                      ),
+                    })),
+                  })),
+                  ...(individuals.length > 0
+                    ? [
+                        {
+                          id: "individual",
+                          label: <span data-testid="stadium-individual">{tTeam("individual")}</span>,
+                          count: individuals.length,
+                          children: individuals.map((w) => ({
+                            id: `person-${w.workerId}`,
+                            label: (
+                              <Link
+                                href={`/${locale}/dashboard/people/${w.workerId}`}
+                                className="break-words underline-offset-4 hover:underline focus-visible:underline"
+                              >
+                                {w.name}
+                              </Link>
+                            ),
+                            meta: positionLabel(w.workerId),
+                          })),
+                        },
+                      ]
+                    : []),
+                ],
+                empty: t("emptyTeam"),
+              },
+            ]}
+          />
+          <Link
+            href={`/${locale}/dashboard/projects#project-teams`}
+            className="inline-flex min-h-11 items-center self-start text-sm font-medium text-brand-blue underline-offset-4 hover:underline focus-visible:underline"
+            data-testid="stadium-teams-manage"
+          >
+            {tTeam("manage")} →
+          </Link>
+        </section>
+      ) : null}
 
       {/* ── Location: a project is a real work object, with honest place
             context. NO fake marker — a map point only ever appears with

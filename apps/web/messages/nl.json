@@ -6871,6 +6871,17 @@
         "into": "Deze regel is samengevoegd met",
         "canonical": "het behouden project",
         "includes": "{count, plural, one {Bevat # samengevoegde projectregel — de registraties staan hier.} other {Bevat # samengevoegde projectregels — de registraties staan hier.}}"
+      },
+      "teams": {
+        "title": "Wie werkt er op dit project",
+        "unnamed": "Ploeg zonder naam",
+        "unnamedMember": "Lid",
+        "noMembers": "Nu geen leden.",
+        "unavailable": "De ploegen konden niet worden geladen. Probeer het opnieuw.",
+        "manage": "Ploegen wijzigen",
+        "kindTeam": "ploeg",
+        "individual": "Eén voor één toegewezen",
+        "personTeam": "Ploeg: {team}"
       }
     },
     "workerView": {
@@ -7683,6 +7694,27 @@
       "failed": "Niet opgeheven: een lidmaatschap kon niet worden beëindigd. Er is niets gewijzigd.",
       "historyTitle": "{count, plural, one {# opgeheven ploeg} other {# opgeheven ploegen}}",
       "historyLine": "opgeheven {date}"
+    },
+    "structure": {
+      "title": "Ploegstructuur",
+      "scopeNote": "Toont de ploegen die je beheert en de actieve mensen van het bedrijf.",
+      "kindTeam": "ploeg",
+      "teamEmpty": "Nog geen leden.",
+      "company": "Bedrijf",
+      "teamsCount": "ploegen",
+      "noTeams": "Nog geen ploegen.",
+      "outside": "Niet in een ploeg"
+    },
+    "addSearch": "Mensen zoeken",
+    "addSearchNone": "Niemand gevonden.",
+    "removeMember": {
+      "label": "Verwijderen",
+      "question": "{name} uit deze ploeg verwijderen? De werkgeschiedenis blijft. Staat de ploeg op een project, dan zit deze persoon er via de ploeg niet meer op.",
+      "confirm": "Ja, verwijderen",
+      "cancel": "Annuleren",
+      "done": "Uit de ploeg verwijderd.",
+      "notAllowed": "Je kunt dit lid niet verwijderen.",
+      "failed": "Verwijderen is mislukt. Probeer het opnieuw."
     }
   },
   "teamEnquiries": {

@@ -2086,6 +2086,17 @@
         "into": "Raden slogs ihop med",
         "canonical": "det behållna projektet",
         "includes": "{count, plural, one {Omfattar # sammanslagen projektrad — dess poster visas här.} other {Omfattar # sammanslagna projektrader — deras poster visas här.}}"
+      },
+      "teams": {
+        "title": "Vilka som arbetar i projektet",
+        "unnamed": "Team utan namn",
+        "unnamedMember": "Medlem",
+        "noMembers": "Inga medlemmar just nu.",
+        "unavailable": "Teamen kunde inte läsas in. Försök igen.",
+        "manage": "Ändra team",
+        "kindTeam": "arbetslag",
+        "individual": "Tilldelade en och en",
+        "personTeam": "Team: {team}"
       }
     },
     "workerView": {
@@ -8020,5 +8031,28 @@
       "fullList": "Hela listan"
     },
     "more": "Mer"
+  },
+  "teamBrigades": {
+    "structure": {
+      "title": "Teamstruktur",
+      "scopeNote": "Visar teamen du leder och företagets aktiva personer.",
+      "kindTeam": "arbetslag",
+      "teamEmpty": "Inga medlemmar ännu.",
+      "company": "Företag",
+      "teamsCount": "arbetslag",
+      "noTeams": "Inga team ännu.",
+      "outside": "Inte i något team"
+    },
+    "addSearch": "Sök personer",
+    "addSearchNone": "Ingen matchar.",
+    "removeMember": {
+      "label": "Ta bort",
+      "question": "Ta bort {name} från teamet? Arbetshistoriken finns kvar. Om teamet är i ett projekt är personen inte längre med via teamet.",
+      "confirm": "Ja, ta bort",
+      "cancel": "Avbryt",
+      "done": "Borttagen från teamet.",
+      "notAllowed": "Du kan inte ta bort den här medlemmen.",
+      "failed": "Det gick inte att ta bort. Försök igen."
+    }
   }
 }

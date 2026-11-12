@@ -6871,6 +6871,17 @@
         "into": "Diese Zeile wurde zusammengeführt in",
         "canonical": "das beibehaltene Projekt",
         "includes": "{count, plural, one {Enthält # zusammengeführte Projektzeile — ihre Nachweise stehen hier.} other {Enthält # zusammengeführte Projektzeilen — ihre Nachweise stehen hier.}}"
+      },
+      "teams": {
+        "title": "Wer in diesem Projekt arbeitet",
+        "unnamed": "Team ohne Namen",
+        "unnamedMember": "Mitglied",
+        "noMembers": "Derzeit keine Mitglieder.",
+        "unavailable": "Die Teams konnten nicht geladen werden. Bitte erneut versuchen.",
+        "manage": "Teams ändern",
+        "kindTeam": "Team",
+        "individual": "Einzeln zugewiesen",
+        "personTeam": "Team: {team}"
       }
     },
     "workerView": {
@@ -7683,6 +7694,27 @@
       "failed": "Nicht aufgelöst: Eine Mitgliedschaft konnte nicht beendet werden. Es wurde nichts geändert.",
       "historyTitle": "{count, plural, one {# aufgelöste Brigade} other {# aufgelöste Brigaden}}",
       "historyLine": "aufgelöst am {date}"
+    },
+    "structure": {
+      "title": "Teamstruktur",
+      "scopeNote": "Zeigt die Teams, die Sie verwalten, und die aktiven Personen des Unternehmens.",
+      "kindTeam": "Team",
+      "teamEmpty": "Noch keine Mitglieder.",
+      "company": "Unternehmen",
+      "teamsCount": "Teams",
+      "noTeams": "Noch keine Teams.",
+      "outside": "In keinem Team"
+    },
+    "addSearch": "Personen suchen",
+    "addSearchNone": "Keine Treffer.",
+    "removeMember": {
+      "label": "Entfernen",
+      "question": "{name} aus diesem Team entfernen? Der Arbeitsverlauf bleibt. Ist das Team in einem Projekt, gehört die Person über das Team nicht mehr dazu.",
+      "confirm": "Ja, entfernen",
+      "cancel": "Abbrechen",
+      "done": "Aus dem Team entfernt.",
+      "notAllowed": "Sie können dieses Mitglied nicht entfernen.",
+      "failed": "Entfernen fehlgeschlagen. Bitte erneut versuchen."
     }
   },
   "teamEnquiries": {

@@ -2086,6 +2086,17 @@
         "into": "See rida liideti projektiga",
         "canonical": "säilitatud projekt",
         "includes": "{count, plural, one {Sisaldab # liidetud projektirida — selle kirjed on siin.} other {Sisaldab # liidetud projektirida — nende kirjed on siin.}}"
+      },
+      "teams": {
+        "title": "Kes selles projektis töötab",
+        "unnamed": "Meeskond",
+        "unnamedMember": "Liige",
+        "noMembers": "Praegu liikmeid pole.",
+        "unavailable": "Meeskondi ei õnnestunud laadida. Proovige uuesti.",
+        "manage": "Muuda meeskondi",
+        "kindTeam": "meeskond",
+        "individual": "Määratud ükshaaval",
+        "personTeam": "Meeskond: {team}"
       }
     },
     "workerView": {
@@ -8020,5 +8031,28 @@
       "fullList": "Täielik nimekiri"
     },
     "more": "Veel"
+  },
+  "teamBrigades": {
+    "structure": {
+      "title": "Meeskondade struktuur",
+      "scopeNote": "Näitab meeskondi, mida juhite, ja ettevõtte aktiivseid inimesi.",
+      "kindTeam": "meeskond",
+      "teamEmpty": "Liikmeid veel pole.",
+      "company": "Ettevõte",
+      "teamsCount": "meeskonda",
+      "noTeams": "Meeskondi veel pole.",
+      "outside": "Meeskonnata"
+    },
+    "addSearch": "Otsi inimesi",
+    "addSearchNone": "Vasteid pole.",
+    "removeMember": {
+      "label": "Eemalda",
+      "question": "Kas eemaldada {name} sellest meeskonnast? Tööajalugu jääb alles. Kui meeskond on projektis, ei ole inimene seal enam meeskonna kaudu.",
+      "confirm": "Jah, eemalda",
+      "cancel": "Tühista",
+      "done": "Meeskonnast eemaldatud.",
+      "notAllowed": "Te ei saa seda liiget eemaldada.",
+      "failed": "Eemaldamine ebaõnnestus. Proovige uuesti."
+    }
   }
 }
