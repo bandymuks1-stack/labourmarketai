@@ -174,7 +174,7 @@ test("G-1. a worker signs up on a phone, fills the profile, and reads it back on
   await page.goto(`${BASE}/en/dashboard/profile#cv-languages`);
   const languages = page.getByTestId("worker-languages");
   await expect(languages).toBeVisible({ timeout: 60_000 });
-  await choose(page, languages.getByTestId("worker-languages-lang"), /German/i);
+  await choose(page, languages.getByTestId("worker-languages-lang"), /Deutsch/i);
   await choose(page, languages.getByTestId("worker-languages-level"), /B2/);
   await languages.getByTestId("worker-languages-add").click();
   await expect(languages.getByTestId("worker-language-de"), "the language is listed").toBeVisible({ timeout: 30_000 });
@@ -222,7 +222,7 @@ test("G-1. a worker signs up on a phone, fills the profile, and reads it back on
   expect(cv, "the CV names the person").toContain(WORKER_NAME);
   expect(cv, "the CV carries the education line").toContain(SCHOOL);
   expect(cv, "the CV carries the experience line").toContain(JOB_TITLE);
-  await expect(page.getByTestId("cv-languages"), "the CV carries the language").toContainText(/German/i);
+  await expect(page.getByTestId("cv-languages"), "the CV carries the language").toContainText(/German|Deutsch/i);
   await expect(page.getByTestId("cv-back-link"), "the CV has a way back").toBeVisible();
   await expectNoSidewaysScroll(page, "CV");
   await ctx.close();
