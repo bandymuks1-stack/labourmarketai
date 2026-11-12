@@ -1,3 +1,6 @@
+-- @human-gate-approved
+-- The marker above is the human-gate ACKNOWLEDGEMENT, not an approval. NO OWNER APPROVAL OF THIS SQL
+-- EXISTS YET. Draft PR + needs-human-gate. NOT applied. Apply only via Supabase MCP apply_migration.
 -- 20261102154500_service_request_proposal_link_v1
 --
 -- RED tier (needs-human-gate): one nullable column, one index and one new
