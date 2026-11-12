@@ -803,6 +803,10 @@ export default async function CompanyScoutingPage({
                   <PersonIdentityCard
                     variant="candidate-review"
                     testid={`scout-identity-${h.workerId}`}
+                    // The name opens the person page. That page decides by itself
+                    // what this viewer may see: no name and no private text for
+                    // someone found through the visibility consent.
+                    nameHref={`/dashboard/people/${h.workerId}` as "/dashboard"}
                     name={who?.name ?? `${t("candidate")} ${anonymizedToken(p.anonymizedLabel)}`}
                     initials={
                       who?.name ? personMonogram(who.name) : anonymizedToken(p.anonymizedLabel).slice(0, 2)
@@ -1189,6 +1193,9 @@ export default async function CompanyScoutingPage({
                 <PersonIdentityCard
                   variant="candidate-review"
                   testid={`scout-identity-${c.workerId}`}
+                  // The name opens the person page; what it shows is that
+                  // page's own, database-decided view of this person.
+                  nameHref={`/dashboard/people/${c.workerId}` as "/dashboard"}
                   name={
                     applicantIdentity.get(c.workerId)?.name ??
                     `${t("candidate")} ${anonymizedToken(p.anonymizedLabel)}`
