@@ -20564,6 +20564,7 @@
     }
   },
   "siteNav": {
+    "signUp": "Registreren",
     "trigger": "Hoofdkeuzes",
     "account": "Na inloggen",
     "intents": {

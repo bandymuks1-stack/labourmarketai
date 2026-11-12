@@ -20564,6 +20564,7 @@
     }
   },
   "siteNav": {
+    "signUp": "Zarejestruj się",
     "trigger": "Główne wybory",
     "account": "Po zalogowaniu",
     "intents": {

@@ -7948,6 +7948,7 @@
     }
   },
   "siteNav": {
+    "signUp": "Registrer deg",
     "trigger": "Hovedvalg",
     "account": "Etter innlogging",
     "intents": {

@@ -30,7 +30,8 @@ import { INTENT_ICONS, type RenderedIntent } from "@/components/layouts/intent-i
  * spells no route of its own.
  */
 export function IntentMegaMenu({
-  intents,
+  intents: allIntents,
+  goalsOnPage = false,
   navLabel,
   accountLabel,
   assistant,
@@ -38,6 +39,9 @@ export function IntentMegaMenu({
   className,
 }: {
   intents: readonly RenderedIntent[];
+  /** True where the page itself shows the six goals (the landing): the bar
+   *  then carries only "More" and the assistant, so the goals appear once. */
+  goalsOnPage?: boolean;
   /** Accessible name of the intent navigation. */
   navLabel: string;
   /** Short note beside links that live inside the signed-in product. */
@@ -51,6 +55,7 @@ export function IntentMegaMenu({
   };
   className?: string;
 }) {
+  const intents = goalsOnPage ? [] : allIntents;
   const [active, setActive] = useState<string | null>(null);
   const rootRef = useRef<HTMLElement>(null);
   const openerRef = useRef<HTMLButtonElement | null>(null);
@@ -169,7 +174,12 @@ export function IntentMegaMenu({
           data-testid="intent-menu-panel"
           className="absolute inset-x-0 top-full z-50 border-b border-ink-600 bg-ink-900/95 shadow-xl backdrop-blur-md"
         >
-          <ul className="mx-auto grid max-w-container grid-cols-3 gap-3 px-12 py-6">
+          <ul
+            className={cn(
+              "mx-auto grid max-w-container grid-cols-3 gap-3 px-12 py-6",
+              intents.length === 0 && "hidden",
+            )}
+          >
             {intents.map((intent) => {
               const Icon = INTENT_ICONS[intent.iconKey];
               return (
