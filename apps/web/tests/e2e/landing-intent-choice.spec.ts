@@ -46,8 +46,10 @@ async function sidewaysOverflow(page: Page): Promise<number> {
 }
 
 for (const vp of [
+  { name: "320", width: 320, height: 640, touch: true },
   { name: "360", width: 360, height: 740, touch: true },
   { name: "375", width: 375, height: 812, touch: true },
+  { name: "390", width: 390, height: 844, touch: true },
   { name: "768", width: 768, height: 1024, touch: true },
   { name: "1440", width: 1440, height: 900, touch: false },
 ] as const) {
@@ -114,6 +116,13 @@ for (const vp of [
         await page.getByTestId("intent-toggle-more").click();
         await expect(page.getByTestId("intent-more-links").getByRole("link").first()).toBeVisible();
         await page.keyboard.press("Escape");
+        // No sparse second row: More and the assistant sit in the header's
+        // first row, level with the logo.
+        const logo = (await page.locator("header a").first().boundingBox())!;
+        const more = (await page.getByTestId("intent-toggle-more").boundingBox())!;
+        expect(Math.abs(more.y + more.height / 2 - (logo.y + logo.height / 2))).toBeLessThan(12);
+        // Leave no focus ring in the evidence image.
+        await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
       }
       await hideDevTools(page);
       await page.screenshot({ path: join(SHOTS, `home-${vp.name}.png`) });
@@ -282,4 +291,47 @@ test("an unknown goal in the address opens nothing", async ({ page }) => {
   await page.goto("/en#goal=nothing");
   await expect(page.getByTestId("goal-rail")).toBeVisible();
   await expect(page.getByTestId("goal-panel")).toHaveCount(0);
+});
+
+// Evidence only: the same screen in the dark theme, and the phone menu.
+for (const vp of [
+  { name: "360", width: 360, height: 740 },
+  { name: "1440", width: 1440, height: 900 },
+] as const) {
+  test(`evidence: an open goal in the dark theme @${vp.name}px`, async ({ browser }) => {
+    const context = await browser.newContext({
+      viewport: { width: vp.width, height: vp.height },
+      hasTouch: vp.width < 1000,
+      isMobile: vp.width < 700,
+    });
+    await context.addInitScript(() => {
+      try {
+        localStorage.setItem("theme", "dark");
+      } catch {
+        /* storage blocked: the page keeps its default theme */
+      }
+    });
+    const page = await context.newPage();
+    await page.goto("/en#goal=work");
+    await expect(page.getByTestId("goal-panel")).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await hideDevTools(page);
+    await page.screenshot({ path: join(SHOTS, `goal-${vp.name}-dark.png`) });
+    await context.close();
+  });
+}
+
+test("evidence: the phone menu @360px", async ({ browser }) => {
+  const context = await browser.newContext({
+    viewport: { width: 360, height: 740 },
+    hasTouch: true,
+    isMobile: true,
+  });
+  const page = await context.newPage();
+  await page.goto("/en");
+  await page.getByTestId("mobile-nav-toggle").tap();
+  await expect(page.getByTestId("mobile-nav-menu")).toBeVisible();
+  await hideDevTools(page);
+  await page.screenshot({ path: join(SHOTS, "menu-360.png") });
+  await context.close();
 });

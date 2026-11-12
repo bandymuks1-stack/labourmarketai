@@ -20564,6 +20564,10 @@
     }
   },
   "siteNav": {
+    "ask": {
+      "placeholder": "Schreiben Sie, was Sie brauchen",
+      "submit": "Fragen"
+    },
     "signUp": "Registrieren",
     "trigger": "Hauptauswahl",
     "account": "Nach Anmeldung",

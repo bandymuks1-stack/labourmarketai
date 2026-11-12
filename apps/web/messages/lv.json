@@ -7948,6 +7948,10 @@
     }
   },
   "siteNav": {
+    "ask": {
+      "placeholder": "Uzrakstiet, kas jums vajadzīgs",
+      "submit": "Jautāt"
+    },
     "signUp": "Reģistrēties",
     "trigger": "Galvenās izvēles",
     "account": "Pēc pieteikšanās",

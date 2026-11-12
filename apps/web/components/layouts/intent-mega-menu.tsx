@@ -32,6 +32,7 @@ import { INTENT_ICONS, type RenderedIntent } from "@/components/layouts/intent-i
 export function IntentMegaMenu({
   intents: allIntents,
   goalsOnPage = false,
+  askInHeader = false,
   navLabel,
   accountLabel,
   assistant,
@@ -42,6 +43,9 @@ export function IntentMegaMenu({
   /** True where the page itself shows the six goals (the landing): the bar
    *  then carries only "More" and the assistant, so the goals appear once. */
   goalsOnPage?: boolean;
+  /** True where the header row carries the assistant INPUT (inner pages):
+   *  the bar then shows no second "ask the assistant" entry. */
+  askInHeader?: boolean;
   /** Accessible name of the intent navigation. */
   navLabel: string;
   /** Short note beside links that live inside the signed-in product. */
@@ -95,14 +99,22 @@ export function IntentMegaMenu({
       ref={rootRef}
       aria-label={navLabel}
       data-testid="intent-bar"
-      className={className}
+      // Inner pages: the goal bar is the header's second row. The landing has
+      // no goal bar (its cards carry the goals), so "More" and the assistant
+      // sit in the header's first row and no second row is drawn.
+      className={cn(className, !goalsOnPage && "border-t border-ink-600/60")}
       onBlur={(e) => {
         const next = e.relatedTarget as Node | null;
         if (next && rootRef.current && !rootRef.current.contains(next)) setActive(null);
       }}
     >
-      <div className="mx-auto flex max-w-container items-center gap-1 px-12">
-        <ul className="flex min-w-0 flex-1 items-center gap-1">
+      <div
+        className={cn(
+          "flex items-center gap-1",
+          !goalsOnPage && "mx-auto max-w-container px-12",
+        )}
+      >
+        <ul className={cn("flex min-w-0 items-center gap-1", !goalsOnPage && "flex-1")}>
           {intents.map((intent) => {
             const Icon = INTENT_ICONS[intent.iconKey];
             const isActive = active === intent.id;
@@ -153,7 +165,7 @@ export function IntentMegaMenu({
             </li>
           )}
         </ul>
-        {assistant && (
+        {assistant && !askInHeader && (
           <Link
             href={assistant.href}
             // The conversation home is behind sign-in: never prefetch it from

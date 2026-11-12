@@ -7948,6 +7948,10 @@
     }
   },
   "siteNav": {
+    "ask": {
+      "placeholder": "Kirjutage, mida vajate",
+      "submit": "Küsi"
+    },
     "signUp": "Registreeru",
     "trigger": "Peamised valikud",
     "account": "Pärast sisselogimist",

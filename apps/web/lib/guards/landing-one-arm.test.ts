@@ -156,7 +156,8 @@ describe("the landing has one arm", () => {
     expect(focus).toContain("<SiteFooter />");
     expect(focus).toContain("<MarketingFunnelBeacon />");
     expect(focus).toContain('id="main-content"');
-    expect(focus).toContain("MARKETING_CLIENT_MESSAGE_ROOTS");
+    // The landing ships its own, smaller client pick (2026-11-12).
+    expect(focus).toContain("pickLandingMessages(await getMessages())");
     // The historical wrapper + the #how-it-works anchor it carried. Its top
     // padding shrank on phones on 2026-11-12 (owner fix list 2026-11-12 (one navigation; whole logo; Sign in visible on a phone; shorter first screen)).
     expect(focus).toContain(

@@ -43,6 +43,9 @@ const SUBMIT = /type=\s*["']submit["']/;
 // NATIVE-NAV: server-action / native POST forms whose success redirects or
 // reloads. Feedback is the navigation; inline pending/error is optional.
 const NATIVE_NAV = new Set([
+  // The public assistant input: a plain GET to the conversation home with
+  // the sentence in the address. Feedback is the navigation itself.
+  "components/layouts/assistant-ask.tsx",
   "components/app/account-menu.tsx", // logout POST → redirect
   // OAuth consent (owner directive 2026-08-29 §4) — approve/deny is a
   // NATIVE-NAV server action that ALWAYS redirects: to the client's

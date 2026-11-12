@@ -7948,6 +7948,10 @@
     }
   },
   "siteNav": {
+    "ask": {
+      "placeholder": "Skriv, hvad du har brug for",
+      "submit": "Spørg"
+    },
     "signUp": "Opret konto",
     "trigger": "Hovedvalg",
     "account": "Efter login",

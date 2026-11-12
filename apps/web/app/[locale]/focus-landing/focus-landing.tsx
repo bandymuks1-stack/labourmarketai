@@ -19,10 +19,7 @@ import { StartingContextsBand } from "@/components/marketing/starting-contexts-b
    The component file and the map capability are untouched. */
 import { LandingClosingBand } from "@/components/marketing/landing-primary-actions";
 import { LandingOpenJobsBand } from "@/components/marketing/landing-open-jobs-band";
-import {
-  MARKETING_CLIENT_MESSAGE_ROOTS,
-  pickMessages,
-} from "@/lib/i18n/client-messages";
+import { pickLandingMessages } from "@/lib/i18n/client-messages";
 import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { LandingIntentChoice } from "@/components/marketing/landing-intent-choice";
@@ -113,10 +110,7 @@ export async function FocusLanding({
 
   return (
     <NextIntlClientProvider
-      messages={pickMessages(
-        await getMessages(),
-        MARKETING_CLIENT_MESSAGE_ROOTS,
-      )}
+      messages={pickLandingMessages(await getMessages())}
     >
       <div className="relative min-h-screen" data-landing-mode="focus">
         <a
