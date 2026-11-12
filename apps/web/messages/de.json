@@ -20553,5 +20553,53 @@
         "error": "Das hat nicht geklappt. Versuchen Sie es später erneut."
       }
     }
+  },
+  "siteNav": {
+    "trigger": "Entdecken",
+    "account": "Nach Anmeldung",
+    "intents": {
+      "work": {
+        "title": "Ich suche Arbeit",
+        "description": "Finden Sie Stellen und zeigen Sie, was Sie können."
+      },
+      "workers": {
+        "title": "Ich suche Arbeitskräfte",
+        "description": "Beschreiben Sie, welche Arbeit Sie brauchen."
+      },
+      "services": {
+        "title": "Ich biete Leistungen an",
+        "description": "Veröffentlichen Sie Ihr Angebot und beantworten Sie Anfragen."
+      },
+      "orders": {
+        "title": "Ich suche Aufträge und Verträge",
+        "description": "Finden Sie Arbeitsanfragen und halten Sie Angebote beisammen."
+      },
+      "partners": {
+        "title": "Ich suche Partner",
+        "description": "Vernetzen Sie sich mit Menschen und Organisationen, mit denen Sie arbeiten."
+      },
+      "agencies": {
+        "title": "Für Agenturen",
+        "description": "Verwalten Sie Personal, Kunden und Angebote Ihrer Agentur."
+      }
+    },
+    "links": {
+      "jobs": "Stellenbörse",
+      "workOpportunities": "Arbeitsmöglichkeiten",
+      "createCv": "Kostenlosen Lebenslauf erstellen",
+      "workAbroad": "Arbeiten im Ausland",
+      "forWorkers": "So funktioniert es für Arbeitskräfte",
+      "companyNeed": "Bedarf beschreiben",
+      "forCompanies": "So funktioniert es für Unternehmen",
+      "labourMarket": "Arbeitsmarkt nach Land",
+      "myServices": "Ihre Leistungen",
+      "serviceRequests": "Leistungsanfragen",
+      "marketListings": "Marktangebote",
+      "commercial": "Angebote und Verträge",
+      "network": "Ihr Netzwerk",
+      "partnerWithUs": "Partner werden",
+      "forAgencies": "So funktioniert es für Agenturen",
+      "setUpAgency": "Agentur einrichten"
+    }
   }
 }

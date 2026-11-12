@@ -4,6 +4,9 @@ import { buttonLinkClassName } from "@/components/ui/Button";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
 import { NavAuthCtas } from "@/components/layouts/nav-auth-ctas";
 import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
+import { IntentMegaMenu } from "@/components/layouts/intent-mega-menu";
+import type { RenderedIntent } from "@/components/layouts/intent-icons";
+import { PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
 import { LmLogo } from "@/components/ui/lm-logo";
@@ -84,6 +87,23 @@ export async function SiteNav() {
   const tSpace = await getTranslations("auth.dashboard.tabs");
   const locale = await getLocale();
   const links = visibleLinks();
+  // Premium navigation (owner P0 2026-11-12): the six intents, labels resolved
+  // HERE so the desktop mega-menu and the mobile menu render ONE list. The
+  // strings live in their own `siteNav` namespace — `nav` is frozen with the
+  // landing (lib/guards/landing-freeze.ts).
+  const tIntent = await getTranslations("siteNav");
+  const intents: RenderedIntent[] = PUBLIC_INTENTS.map((intent) => ({
+    id: intent.id,
+    iconKey: intent.iconKey,
+    title: tIntent(`intents.${intent.id}.title`),
+    description: tIntent(`intents.${intent.id}.description`),
+    links: intent.links.map((link) => ({
+      id: link.id,
+      href: link.href,
+      label: tIntent(`links.${link.id}`),
+      account: link.account,
+    })),
+  }));
 
   // ONE definition, rendered in exactly one place at any given width: in the
   // header from `sm` up, inside the disclosure below it. Sharing the fragment
@@ -145,7 +165,15 @@ export async function SiteNav() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 lg:flex">
+        <nav className="hidden items-center gap-4 lg:flex xl:gap-6">
+          {/* The intents come first: they are the top of the hierarchy. The
+              panel anchors to the <header> (the nearest positioned box), so
+              it spans the full width under the bar. */}
+          <IntentMegaMenu
+            intents={intents}
+            triggerLabel={tIntent("trigger")}
+            accountLabel={tIntent("account")}
+          />
           {links.map((l) => (
             <Link
               key={l.key}
@@ -187,6 +215,8 @@ export async function SiteNav() {
             items={links.map((l) => ({ key: l.key, href: l.href, label: t(l.key) }))}
             openLabel={t("menuOpen")}
             closeLabel={t("menuClose")}
+            intents={intents}
+            accountLabel={tIntent("account")}
             // Below `sm` the panel also carries the auth CTAs the header row
             // cannot fit; from `sm` up the whole section is display:none and
             // the header renders them instead. `sm:hidden` sits on the

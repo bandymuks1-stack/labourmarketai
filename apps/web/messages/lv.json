@@ -7946,5 +7946,53 @@
       "allow": "Atļaut",
       "refuse": "Atteikties"
     }
+  },
+  "siteNav": {
+    "trigger": "Pārlūkot",
+    "account": "Pēc pieteikšanās",
+    "intents": {
+      "work": {
+        "title": "Meklēju darbu",
+        "description": "Atrodiet darbu un parādiet, ko protat."
+      },
+      "workers": {
+        "title": "Meklēju darbiniekus",
+        "description": "Aprakstiet, kāds darbs jāpaveic."
+      },
+      "services": {
+        "title": "Piedāvāju pakalpojumus",
+        "description": "Publicējiet savu piedāvājumu un atbildiet uz pieprasījumiem."
+      },
+      "orders": {
+        "title": "Meklēju pasūtījumus un līgumus",
+        "description": "Atrodiet darba pieprasījumus un glabājiet piedāvājumus vienuviet."
+      },
+      "partners": {
+        "title": "Meklēju partnerus",
+        "description": "Sazinieties ar cilvēkiem un organizācijām, ar kuriem strādājat."
+      },
+      "agencies": {
+        "title": "Aģentūrām",
+        "description": "Pārvaldiet aģentūras cilvēkus, klientus un piedāvājumus."
+      }
+    },
+    "links": {
+      "jobs": "Darba sludinājumi",
+      "workOpportunities": "Darba iespējas",
+      "createCv": "Izveidot bezmaksas CV",
+      "workAbroad": "Darbs ārzemēs",
+      "forWorkers": "Kā tas darbojas darbiniekiem",
+      "companyNeed": "Aprakstīt vajadzību",
+      "forCompanies": "Kā tas darbojas uzņēmumiem",
+      "labourMarket": "Darba tirgus pa valstīm",
+      "myServices": "Jūsu pakalpojumi",
+      "serviceRequests": "Pakalpojumu pieprasījumi",
+      "marketListings": "Tirgus sludinājumi",
+      "commercial": "Piedāvājumi un līgumi",
+      "network": "Jūsu tīkls",
+      "partnerWithUs": "Kļūt par partneri",
+      "forAgencies": "Kā tas darbojas aģentūrām",
+      "setUpAgency": "Izveidot aģentūru"
+    }
   }
 }

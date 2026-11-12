@@ -7946,5 +7946,53 @@
       "allow": "Luba",
       "refuse": "Keeldu"
     }
+  },
+  "siteNav": {
+    "trigger": "Avasta",
+    "account": "Pärast sisselogimist",
+    "intents": {
+      "work": {
+        "title": "Otsin tööd",
+        "description": "Leia tööpakkumisi ja näita, mida oskad."
+      },
+      "workers": {
+        "title": "Otsin töötajaid",
+        "description": "Kirjelda, millist tööd on vaja."
+      },
+      "services": {
+        "title": "Pakun teenuseid",
+        "description": "Avalda oma pakkumine ja vasta päringutele."
+      },
+      "orders": {
+        "title": "Otsin tellimusi ja lepinguid",
+        "description": "Leia tööpäringuid ja hoia pakkumised ühes kohas."
+      },
+      "partners": {
+        "title": "Otsin partnereid",
+        "description": "Ühendu inimeste ja organisatsioonidega, kellega töötad."
+      },
+      "agencies": {
+        "title": "Agentuuridele",
+        "description": "Halda agentuuri inimesi, kliente ja pakkumisi."
+      }
+    },
+    "links": {
+      "jobs": "Töökuulutused",
+      "workOpportunities": "Töövõimalused",
+      "createCv": "Loo tasuta CV",
+      "workAbroad": "Töö välismaal",
+      "forWorkers": "Kuidas see töötajatele toimib",
+      "companyNeed": "Kirjelda vajadust",
+      "forCompanies": "Kuidas see ettevõtetele toimib",
+      "labourMarket": "Tööturg riigiti",
+      "myServices": "Sinu teenused",
+      "serviceRequests": "Teenusepäringud",
+      "marketListings": "Turu kuulutused",
+      "commercial": "Pakkumised ja lepingud",
+      "network": "Sinu võrgustik",
+      "partnerWithUs": "Hakka partneriks",
+      "forAgencies": "Kuidas see agentuuridele toimib",
+      "setUpAgency": "Loo agentuur"
+    }
   }
 }

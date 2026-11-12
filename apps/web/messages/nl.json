@@ -20553,5 +20553,53 @@
         "error": "Dat lukte niet. Probeer het later opnieuw."
       }
     }
+  },
+  "siteNav": {
+    "trigger": "Ontdekken",
+    "account": "Na inloggen",
+    "intents": {
+      "work": {
+        "title": "Ik zoek werk",
+        "description": "Vind vacatures en laat zien wat je kunt."
+      },
+      "workers": {
+        "title": "Ik zoek medewerkers",
+        "description": "Beschrijf welk werk je nodig hebt."
+      },
+      "services": {
+        "title": "Ik bied diensten aan",
+        "description": "Publiceer wat je aanbiedt en beantwoord aanvragen."
+      },
+      "orders": {
+        "title": "Ik zoek opdrachten en contracten",
+        "description": "Vind werkaanvragen en houd voorstellen bij elkaar."
+      },
+      "partners": {
+        "title": "Ik zoek partners",
+        "description": "Verbind je met de mensen en organisaties waarmee je werkt."
+      },
+      "agencies": {
+        "title": "Voor bureaus",
+        "description": "Beheer de mensen, klanten en aanbiedingen van je bureau."
+      }
+    },
+    "links": {
+      "jobs": "Vacaturebank",
+      "workOpportunities": "Werkmogelijkheden",
+      "createCv": "Maak een gratis cv",
+      "workAbroad": "Werken in het buitenland",
+      "forWorkers": "Zo werkt het voor werknemers",
+      "companyNeed": "Beschrijf je behoefte",
+      "forCompanies": "Zo werkt het voor bedrijven",
+      "labourMarket": "Arbeidsmarkt per land",
+      "myServices": "Jouw diensten",
+      "serviceRequests": "Dienstaanvragen",
+      "marketListings": "Marktaanbod",
+      "commercial": "Voorstellen en contracten",
+      "network": "Jouw netwerk",
+      "partnerWithUs": "Word partner",
+      "forAgencies": "Zo werkt het voor bureaus",
+      "setUpAgency": "Richt je bureau in"
+    }
   }
 }

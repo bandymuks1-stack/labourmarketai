@@ -1,0 +1,227 @@
+import { describe, expect, it, vi } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { join, resolve } from "node:path";
+
+import { PUBLIC_INTENTS, PUBLIC_INTENT_IDS } from "@/lib/navigation/public-intents";
+import { routeRequirement } from "@/lib/auth/role-gated-routes";
+
+/**
+ * PREMIUM NAVIGATION — the six public intents (owner P0 2026-11-12).
+ *
+ * What this proves, on every CI run:
+ *  1. the six intents, in the owner's order, and no seventh;
+ *  2. EVERY destination is a real page in the route tree (no dead card, no
+ *     "coming soon" link) — checked against `app/[locale]/…/page.tsx`;
+ *  3. a destination inside the signed-in product is never role-gated, so a
+ *     link never promises a page the person will be refused; the public ones
+ *     are never inside `/dashboard`;
+ *  4. desktop and mobile render ONE list built in SiteNav (no second literal,
+ *     no href spelled inside either menu);
+ *  5. the disclosure pattern is accessible: aria-expanded/aria-controls,
+ *     Escape returns focus, outside click and Tab-away close, 44px rows;
+ *  6. every label exists, is non-empty and is not English in a non-English
+ *     catalogue, in all 11 locales — and the frozen `nav` namespace is not
+ *     where they live.
+ */
+
+const APP_ROOT = resolve(__dirname, "..", "..");
+const read = (rel: string) => readFileSync(join(APP_ROOT, rel), "utf8");
+const LOCALE_ROOT = join(APP_ROOT, "app", "[locale]");
+
+function pageExists(href: string): boolean {
+  const path = href.replace(/[?#].*$/, "").replace(/^\/+/, "");
+  const candidates = [
+    join(LOCALE_ROOT, path, "page.tsx"),
+    join(LOCALE_ROOT, "(marketing)", path, "page.tsx"),
+  ];
+  return candidates.some((c) => existsSync(c));
+}
+
+const ALL_LINKS = PUBLIC_INTENTS.flatMap((i) =>
+  i.links.map((l) => ({ intent: i.id, ...l })),
+);
+
+describe("the six intents", () => {
+  it("are exactly the owner's six, in order", () => {
+    expect(PUBLIC_INTENTS.map((i) => i.id)).toEqual([...PUBLIC_INTENT_IDS]);
+    expect(PUBLIC_INTENT_IDS).toEqual([
+      "work",
+      "workers",
+      "services",
+      "orders",
+      "partners",
+      "agencies",
+    ]);
+  });
+
+  it("each intent has at least one destination and unique link ids", () => {
+    for (const intent of PUBLIC_INTENTS) {
+      expect(intent.links.length, intent.id).toBeGreaterThan(0);
+    }
+    const ids = ALL_LINKS.map((l) => l.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe("every destination is real and reachable for the right person", () => {
+  it.each(ALL_LINKS.map((l) => [l.intent, l.id, l.href] as const))(
+    "%s → %s (%s) is an existing page",
+    (_intent, _id, href) => {
+      expect(href.startsWith("/"), `${href} must be an internal path`).toBe(true);
+      expect(pageExists(href), `${href} has no page.tsx under app/[locale]`).toBe(true);
+    },
+  );
+
+  it("account destinations live in the signed-in product and are not role-gated", () => {
+    for (const l of ALL_LINKS.filter((x) => x.account)) {
+      const path = l.href.replace(/[?#].*$/, "");
+      expect(path.startsWith("/dashboard"), `${l.id}: ${l.href}`).toBe(true);
+      expect(
+        routeRequirement(path),
+        `${l.id}: ${l.href} is role-gated — a nav link would promise a refusal`,
+      ).toBeNull();
+    }
+  });
+
+  it("public destinations are public (never inside /dashboard)", () => {
+    for (const l of ALL_LINKS.filter((x) => !x.account)) {
+      expect(l.href.startsWith("/dashboard"), `${l.id}: ${l.href}`).toBe(false);
+    }
+  });
+
+  it("the worker-facing hire path is the one canonical demand entry", () => {
+    const workers = PUBLIC_INTENTS.find((i) => i.id === "workers");
+    expect(workers?.links[0].href).toBe("/company-need");
+    for (const l of ALL_LINKS) expect(l.href).not.toMatch(/^\/api\//);
+  });
+});
+
+describe("desktop and mobile render ONE list", () => {
+  const nav = read("components/layouts/site-nav.tsx");
+  const mega = read("components/layouts/intent-mega-menu.tsx");
+  const mobile = read("components/layouts/mobile-nav-menu.tsx");
+
+  it("SiteNav builds the intents once and hands the same value to both menus", () => {
+    expect(nav).toMatch(/PUBLIC_INTENTS\.map\(/);
+    expect(nav).toMatch(/<IntentMegaMenu[\s\S]*?intents=\{intents\}/);
+    expect(nav).toMatch(/<MobileNavMenu[\s\S]*?intents=\{intents\}/);
+  });
+
+  it("neither menu spells a route of its own", () => {
+    for (const src of [mega, mobile]) {
+      expect(src).not.toMatch(/href[=:]\s*["'`]\//);
+    }
+    expect(mega).toMatch(/href=\{link\.href\}/);
+    expect(mobile).toMatch(/href=\{link\.href\}/);
+  });
+
+  it("the mega-menu mounts inside the breakpoint-gated desktop nav", () => {
+    const desktopNav = nav.match(/<nav className="hidden[^"]*lg:flex[^"]*">([\s\S]*?)<\/nav>/);
+    expect(desktopNav?.[1]).toMatch(/<IntentMegaMenu/);
+  });
+
+  it("the strings live in `siteNav`, not the frozen `nav` namespace", () => {
+    expect(nav).toMatch(/getTranslations\("siteNav"\)/);
+  });
+});
+
+describe("the disclosure is accessible", () => {
+  const mega = read("components/layouts/intent-mega-menu.tsx");
+  const mobile = read("components/layouts/mobile-nav-menu.tsx");
+
+  it("mega-menu: Escape returns focus, outside click and Tab-away close", () => {
+    expect(mega).toMatch(/e\.key === "Escape"/);
+    expect(mega).toMatch(/buttonRef\.current\?\.focus\(\)/);
+    expect(mega).toMatch(/mousedown/);
+    expect(mega).toMatch(/onBlur=/);
+    expect(mega).toMatch(/onClick=\{\(\)\s*=>\s*setOpen\(false\)\}/);
+    // Disclosure navigation, not an ARIA menu: links stay links.
+    expect(mega).not.toMatch(/role="menu"/);
+    expect(mega).not.toMatch(/role="menuitem"/);
+  });
+
+  it("rows are 44px touch targets and motion respects reduced motion", () => {
+    expect(mega).toMatch(/min-h-11/);
+    expect(mobile).toMatch(/mobile-intent-toggle-[\s\S]{0,400}min-h-11/);
+    expect(mega).toMatch(/motion-reduce:transition-none/);
+    expect(mobile).toMatch(/motion-reduce:transition-none/);
+  });
+
+  it("renders a collapsed, labelled trigger with no panel on first paint", async () => {
+    vi.doMock("@/lib/i18n/navigation", () => ({
+      Link: ({ href, children }: { href: string; children: unknown }) =>
+        createElement("a", { href }, children as never),
+    }));
+    const { IntentMegaMenu } = await import("@/components/layouts/intent-mega-menu");
+    const html = renderToStaticMarkup(
+      createElement(IntentMegaMenu, {
+        intents: [
+          {
+            id: "work",
+            iconKey: "briefcase",
+            title: "Looking for work",
+            description: "x",
+            links: [{ id: "jobs", href: "/jobs", label: "Job board", account: false }],
+          },
+        ],
+        triggerLabel: "Explore",
+        accountLabel: "After sign-in",
+      }),
+    );
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).toMatch(/aria-controls="[^"]+"/);
+    expect(html).toContain(">Explore<");
+    expect(html).not.toContain('data-testid="intent-menu-panel"');
+    expect(html).not.toContain("/jobs");
+  });
+});
+
+describe("labels exist and are translated in all 11 locales", () => {
+  const LOCALES = readdirSync(join(APP_ROOT, "messages"))
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => f.replace(/\.json$/, ""));
+  type SiteNav = {
+    trigger: string;
+    account: string;
+    intents: Record<string, { title: string; description: string }>;
+    links: Record<string, string>;
+  };
+  const siteNav = (loc: string) =>
+    (JSON.parse(read(`messages/${loc}.json`)) as { siteNav: SiteNav }).siteNav;
+  const en = siteNav("en");
+
+  function leaves(s: SiteNav): Array<[string, string]> {
+    const out: Array<[string, string]> = [
+      ["trigger", s.trigger],
+      ["account", s.account],
+    ];
+    for (const id of PUBLIC_INTENT_IDS) {
+      out.push([`intents.${id}.title`, s.intents?.[id]?.title]);
+      out.push([`intents.${id}.description`, s.intents?.[id]?.description]);
+    }
+    for (const l of ALL_LINKS) out.push([`links.${l.id}`, s.links?.[l.id]]);
+    return out;
+  }
+
+  it("all 11 catalogues are covered", () => {
+    expect(LOCALES).toHaveLength(11);
+  });
+
+  it.each(LOCALES)("%s carries every siteNav label, translated", (loc) => {
+    const s = siteNav(loc);
+    const enLeaves = new Map(leaves(en));
+    for (const [key, value] of leaves(s)) {
+      expect(typeof value, `${loc} siteNav.${key} missing`).toBe("string");
+      expect(value.trim(), `${loc} siteNav.${key} empty`).not.toBe("");
+      expect(value, `${loc} siteNav.${key} placeholder`).not.toContain("[EN]");
+      expect(value.toLowerCase(), `${loc} siteNav.${key}: banned word`).not.toMatch(/\bdemo\b/);
+      if (loc !== "en") {
+        expect(value, `${loc} siteNav.${key} is untranslated English`).not.toBe(
+          enLeaves.get(key),
+        );
+      }
+    }
+  });
+});

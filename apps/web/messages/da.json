@@ -7946,5 +7946,53 @@
       "allow": "Tillad",
       "refuse": "Afvis"
     }
+  },
+  "siteNav": {
+    "trigger": "Udforsk",
+    "account": "Efter login",
+    "intents": {
+      "work": {
+        "title": "Jeg søger arbejde",
+        "description": "Find job og vis, hvad du kan."
+      },
+      "workers": {
+        "title": "Jeg søger medarbejdere",
+        "description": "Beskriv, hvilket arbejde du har brug for."
+      },
+      "services": {
+        "title": "Jeg tilbyder ydelser",
+        "description": "Offentliggør dit tilbud og besvar forespørgsler."
+      },
+      "orders": {
+        "title": "Jeg søger opgaver og kontrakter",
+        "description": "Find arbejdsforespørgsler og hold tilbud samlet."
+      },
+      "partners": {
+        "title": "Jeg søger partnere",
+        "description": "Forbind dig med de mennesker og organisationer, du arbejder med."
+      },
+      "agencies": {
+        "title": "For bureauer",
+        "description": "Styr bureauets folk, kunder og tilbud."
+      }
+    },
+    "links": {
+      "jobs": "Jobopslag",
+      "workOpportunities": "Jobmuligheder",
+      "createCv": "Lav et gratis CV",
+      "workAbroad": "Arbejde i udlandet",
+      "forWorkers": "Sådan virker det for medarbejdere",
+      "companyNeed": "Beskriv dit behov",
+      "forCompanies": "Sådan virker det for virksomheder",
+      "labourMarket": "Arbejdsmarked pr. land",
+      "myServices": "Dine ydelser",
+      "serviceRequests": "Forespørgsler på ydelser",
+      "marketListings": "Markedsopslag",
+      "commercial": "Tilbud og kontrakter",
+      "network": "Dit netværk",
+      "partnerWithUs": "Bliv partner",
+      "forAgencies": "Sådan virker det for bureauer",
+      "setUpAgency": "Opret dit bureau"
+    }
   }
 }
