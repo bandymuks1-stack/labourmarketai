@@ -127,7 +127,7 @@ export async function FocusLanding({
         </a>
         <AmbientGlow />
         <MarketingFunnelBeacon />
-        <SiteNav />
+        <SiteNav goalsOnPage />
         <main id="main-content" className="relative">
           {/* ── The restored landing body, verbatim from 7179882 ────────── */}
           <div className="mx-auto max-w-container px-4 pb-14 pt-5 sm:px-12 sm:pt-10">

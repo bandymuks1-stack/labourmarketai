@@ -20564,6 +20564,7 @@
     }
   },
   "siteNav": {
+    "signUp": "Sign up",
     "trigger": "Main choices",
     "account": "After sign-in",
     "intents": {

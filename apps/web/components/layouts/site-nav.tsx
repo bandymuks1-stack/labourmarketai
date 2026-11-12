@@ -80,7 +80,15 @@ function visibleLinks(): readonly NavLink[] {
   );
 }
 
-export async function SiteNav() {
+/**
+ * `goalsOnPage` — the landing shows the six goals as cards on its first
+ * screen, so its header bar does not repeat them (owner gate 2026-11-12: no
+ * duplicated main menu on one screen). The bar keeps "More" and the assistant
+ * there; on every inner page it carries the six goals.
+ */
+export async function SiteNav({
+  goalsOnPage = false,
+}: { goalsOnPage?: boolean } = {}) {
   const t = await getTranslations("nav");
   // "My space" already exists as the dashboard's own tab label; reusing it keeps
   // the frozen `nav` namespace untouched.
@@ -130,7 +138,9 @@ export async function SiteNav() {
       relPath={`/${locale}/auth/signup`}
       className={buttonLinkClassName("primary", "sm")}
     >
-      {t("startNow")}
+      {/* Named for what it does (owner 2026-11-12): "Start now" did not say
+          that it creates an account. */}
+      {tIntent("signUp")}
     </AuthCtaLink>
   );
   const memberCta = (
@@ -251,6 +261,7 @@ export async function SiteNav() {
       <IntentMegaMenu
         className="hidden border-t border-ink-600/60 lg:block"
         intents={intents}
+        goalsOnPage={goalsOnPage}
         navLabel={tIntent("trigger")}
         accountLabel={tIntent("account")}
         assistant={assistant}

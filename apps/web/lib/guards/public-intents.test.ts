@@ -152,6 +152,24 @@ describe("desktop and mobile render ONE list", () => {
     expect(nav.match(/assistant=\{assistant\}/g)).toHaveLength(2);
   });
 
+  it("the landing shows the goals once: its bar drops them, inner pages keep them", () => {
+    expect(nav).toMatch(/goalsOnPage = false/);
+    expect(nav).toMatch(/<IntentMegaMenu[\s\S]*?goalsOnPage=\{goalsOnPage\}/);
+    expect(mega).toMatch(/const intents = goalsOnPage \? \[\] : allIntents/);
+    expect(read("app/[locale]/focus-landing/focus-landing.tsx")).toContain(
+      "<SiteNav goalsOnPage />",
+    );
+    expect(read("app/[locale]/(marketing)/layout.tsx")).not.toMatch(/goalsOnPage/);
+  });
+
+  it("the account-creating action is named Sign up, in the header and on the phone's first screen", () => {
+    expect(nav).toMatch(/\{tIntent\("signUp"\)\}/);
+    expect(nav).not.toMatch(/t\("startNow"\)/);
+    const choice = read("components/marketing/landing-intent-choice.tsx");
+    expect(choice).toMatch(/data-testid="landing-signup"/);
+    expect(choice).toMatch(/auth\/signup/);
+  });
+
   it("the strings live in `siteNav`, not the frozen `nav` namespace", () => {
     expect(nav).toMatch(/getTranslations\("siteNav"\)/);
   });
@@ -237,6 +255,7 @@ describe("labels exist and are translated in all 11 locales", () => {
 
   function leaves(s: SiteNav): Array<[string, string]> {
     const out: Array<[string, string]> = [
+      ["signUp", (s as unknown as { signUp: string }).signUp],
       ["trigger", s.trigger],
       ["account", s.account],
       ["assistant", s.assistant],

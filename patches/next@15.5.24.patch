@@ -154,3 +154,43 @@ index 608080693a2ee86c94438eacaa7ca0345c79de61..70a2429778b1a3a0c1bafdd6f650659c
              if (!minimalMode && fallbackMode !== FallbackMode.BLOCKING_STATIC_RENDER && staticPathKey && !didRespond && !isDraftMode && pageIsDynamic && (isProduction || !isPrerendered)) {
                  // if the page has dynamicParams: false and this pathname wasn't
                  // prerendered trigger the no fallback handling
+diff --git a/dist/esm/server/lib/router-utils/filesystem.js b/dist/esm/server/lib/router-utils/filesystem.js
+index 6fe5d4d08e290de916a1b1ca7a7d90a16ffaa800..3112c998c34a18ffe218b80742df4cfcfb69219a 100644
+--- a/dist/esm/server/lib/router-utils/filesystem.js
++++ b/dist/esm/server/lib/router-utils/filesystem.js
+@@ -393,6 +393,15 @@ export async function setupFsCheck(opts) {
+                             // encode the special characters in the path and retrieve again to determine if path exists.
+                             const encodedCurItemPath = encodeURIPath(curItemPath);
+                             matchedItem = items.has(encodedCurItemPath);
++                            // labourmarket.ai patch (2026-11-12): a proxy that percent-encodes every
++                            // reserved character asks for `%5Blocale%5D/%28marketing%29/...`, while the
++                            // item is registered as `%5Blocale%5D/(marketing)/...` (encodeURIComponent
++                            // leaves `( ) ! ' * ~` alone). Re-encode the DECODED path so every spelling
++                            // of one existing file resolves to it.
++                            if (!matchedItem && curDecodedItemPath !== curItemPath) {
++                                matchedItem = items.has(encodeURIPath(curDecodedItemPath));
++                                if (matchedItem) curItemPath = curDecodedItemPath;
++                            }
+                         } catch  {}
+                     }
+                 }
+diff --git a/dist/server/lib/router-utils/filesystem.js b/dist/server/lib/router-utils/filesystem.js
+index 027577b69b9547bb3ce2155611f7bc132cb679d2..ef230b587e31b06e905f9aead18626c940bd8ecd 100644
+--- a/dist/server/lib/router-utils/filesystem.js
++++ b/dist/server/lib/router-utils/filesystem.js
+@@ -461,6 +461,15 @@ async function setupFsCheck(opts) {
+                             // encode the special characters in the path and retrieve again to determine if path exists.
+                             const encodedCurItemPath = (0, _encodeuripath.encodeURIPath)(curItemPath);
+                             matchedItem = items.has(encodedCurItemPath);
++                            // labourmarket.ai patch (2026-11-12): a proxy that percent-encodes every
++                            // reserved character asks for `%5Blocale%5D/%28marketing%29/...`, while the
++                            // item is registered as `%5Blocale%5D/(marketing)/...` (encodeURIComponent
++                            // leaves `( ) ! ' * ~` alone). Re-encode the DECODED path so every spelling
++                            // of one existing file resolves to it.
++                            if (!matchedItem && curDecodedItemPath !== curItemPath) {
++                                matchedItem = items.has((0, _encodeuripath.encodeURIPath)(curDecodedItemPath));
++                                if (matchedItem) curItemPath = curDecodedItemPath;
++                            }
+                         } catch  {}
+                     }
+                 }

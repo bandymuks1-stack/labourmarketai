@@ -20564,6 +20564,7 @@
     }
   },
   "siteNav": {
+    "signUp": "Registruotis",
     "trigger": "Pagrindiniai pasirinkimai",
     "account": "Prisijungus",
     "intents": {
