@@ -179,6 +179,14 @@ jobs:
           echo $! > /tmp/next.pid
           npx --yes wait-on -t 120000 http://127.0.0.1:3000/lt
 
+      # 2026-11-12: production answered 404 to a route-group chunk requested with
+      # percent-encoded parentheses (what a URL-normalising proxy sends), and the
+      # home page became the error screen. This is the pre-deploy proof that the
+      # server built from this commit serves both spellings; the hourly
+      # reachability-probe is the same check against production.
+      - name: Route-group chunks load as linked and fully percent-encoded
+        run: node .github/scripts/encoded-chunk-probe.mjs http://127.0.0.1:3000
+
       - name: Run E2E subset
         env:
           # The server is already up; Playwright must not try to start its own.
