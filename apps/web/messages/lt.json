@@ -9238,6 +9238,7 @@
       "view": "Atverti pokalbį",
       "error": "Pokalbio atverti nepavyko. Bandyk dar kartą.",
       "limitReached": "Pasiektas dienos naujų pokalbių limitas. Bandyk rytoj.",
+      "authorOnly": "Pokalbį gali pradėti tik tas, kas paskelbė šį poreikį.",
       "shortlistFirst": "Pirmiausia įtrauk darbuotoją į trumpąjį sąrašą, tada galėsi prašyti pokalbio."
     },
     "how": {

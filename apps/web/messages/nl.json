@@ -9238,6 +9238,7 @@
       "view": "Gesprek openen",
       "error": "Kon het gesprek niet openen. Probeer het opnieuw.",
       "limitReached": "Daglimiet voor nieuwe gesprekken bereikt. Probeer het morgen opnieuw.",
+      "authorOnly": "Alleen wie deze behoefte heeft geplaatst, kan het gesprek starten.",
       "shortlistFirst": "Zet de persoon eerst op je shortlist, daarna kun je een gesprek aanvragen."
     },
     "how": {
