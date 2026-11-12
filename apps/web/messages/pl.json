@@ -7245,7 +7245,16 @@
         "blockedFailed": "Usuń lub prześlij ponownie nieudany załącznik.",
         "partialFailure": "Wiadomość została wysłana, ale niektórych załączników nie udało się dołączyć. Spróbuj wysłać je ponownie."
       },
-      "languageLabel": "Piszę w języku"
+      "languageLabel": "Piszę w języku",
+      "errors": {
+        "notAuthenticated": "Sesja wygasła. Zaloguj się ponownie i wyślij wiadomość.",
+        "invalidInput": "Tej wiadomości nie można wysłać: może być za długa albo załącznik nie jest obsługiwany.",
+        "notParticipant": "Nie możesz pisać w tej rozmowie — nie masz do niej dostępu.",
+        "rateLimited": "W ostatniej godzinie wysłałeś wiele wiadomości. Poczekaj chwilę i spróbuj ponownie.",
+        "rateCheckUnavailable": "Nie udało się przeprowadzić kontroli bezpieczeństwa, więc nic nie zostało wysłane. Spróbuj ponownie.",
+        "attachmentsUnavailable": "Wysyłanie załączników nie jest tu jeszcze włączone — dodaj tekst do wiadomości.",
+        "sendFailed": "Nie udało się wysłać wiadomości. Twój tekst został zachowany — spróbuj ponownie."
+      }
     },
     "launcher": {
       "openLabel": "Skontaktuj się ze wsparciem",
