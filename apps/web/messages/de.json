@@ -2205,7 +2205,7 @@
         },
         "noCompany": {
           "title": "Starten Sie Ihr Unternehmensprofil",
-          "body": "Sie haben noch kein Unternehmensprofil. Erstellen Sie eines — es ist sofort aktiv und nutzbar, ohne Warten auf eine Freigabe. Ihre eingestellten Anfragen sehen Arbeitskräfte und Besucher mit dem Hinweis „Unternehmen nicht verifiziert“, sobald die Pflichtangaben zum Unternehmen ausgefüllt und die automatischen Prüfungen bestanden sind; unvollständige oder auffällige warten auf eine Prüfung.",
+          "body": "Sie haben noch kein Unternehmensprofil. Erstellen Sie eines — es ist sofort aktiv und nutzbar, ohne Warten auf eine Freigabe. Ihre eingestellten Anfragen sehen Arbeitskräfte und Besucher mit dem Hinweis „Unternehmen nicht bestätigt“, sobald die Pflichtangaben zum Unternehmen ausgefüllt und die automatischen Prüfungen bestanden sind; unvollständige oder auffällige warten auf eine Prüfung.",
           "cta": "Unternehmenseinrichtung starten"
         },
         "personalSpace": {
@@ -2240,7 +2240,7 @@
         "formTitle": "Unternehmensprofil-Anfrage",
         "formTitleCreate": "Unternehmensprofil erstellen",
         "formTitleEdit": "Unternehmensprofil bearbeiten",
-        "formSubtitle": "Erstellen Sie Ihr Organisationsprofil aus Ihrem persönlichen Konto. Es ist sofort aktiv und nutzbar — ohne Warten auf eine Freigabe. Die Verifizierung ist ein stärkerer, separater Vertrauensschritt. Ihre eingestellten Anfragen sehen Arbeitskräfte und Besucher mit dem Hinweis „Unternehmen nicht verifiziert“, sobald die Pflichtangaben zum Unternehmen ausgefüllt und die automatischen Prüfungen bestanden sind; unvollständige oder auffällige warten auf eine Prüfung.",
+        "formSubtitle": "Erstellen Sie Ihr Organisationsprofil aus Ihrem persönlichen Konto. Es ist sofort aktiv und nutzbar — ohne Warten auf eine Freigabe. Die Verifizierung ist ein stärkerer, separater Vertrauensschritt. Ihre eingestellten Anfragen sehen Arbeitskräfte und Besucher mit dem Hinweis „Unternehmen nicht bestätigt“, sobald die Pflichtangaben zum Unternehmen ausgefüllt und die automatischen Prüfungen bestanden sind; unvollständige oder auffällige warten auf eine Prüfung.",
         "existingHeading": "Unternehmensprofil",
         "legalName": "Offizieller Unternehmensname",
         "legalNameHelp": "Erforderlich. 2–200 Zeichen.",
@@ -2313,10 +2313,10 @@
         },
         "verificationExplainer": {
           "draft": "Entwurf. Speichern Sie, um Ihr Unternehmen zu aktivieren — es wird sofort nutzbar.",
-          "active_unverified": "Jetzt aktiv und nutzbar. Grundlegende automatische Prüfungen bestanden. Noch nicht identitätsverifiziert — das ist ein separater, stärkerer Schritt. Ihre eingestellten Anfragen sehen Arbeitskräfte und Besucher mit dem Hinweis „Unternehmen nicht verifiziert“, sobald die Pflichtangaben zum Unternehmen ausgefüllt und die automatischen Prüfungen bestanden sind; unvollständige oder auffällige warten auf eine Prüfung.",
+          "active_unverified": "Jetzt aktiv und nutzbar. Grundlegende automatische Prüfungen bestanden. Noch nicht identitätsverifiziert — das ist ein separater, stärkerer Schritt. Ihre eingestellten Anfragen sehen Arbeitskräfte und Besucher mit dem Hinweis „Unternehmen nicht bestätigt“, sobald die Pflichtangaben zum Unternehmen ausgefüllt und die automatischen Prüfungen bestanden sind; unvollständige oder auffällige warten auf eine Prüfung.",
           "needs_checks": "Aktiv und nutzbar, aber eine grundlegende Prüfung benötigt Aufmerksamkeit (z. B. Land ergänzen oder eine fehlerhafte Nummer / Website / E-Mail korrigieren). Bis das behoben ist, warten Ihre eingestellten Anfragen auf eine Prüfung und werden Arbeitskräften nicht angezeigt.",
-          "pending_verification": "Sie haben eine optionale manuelle Prüfung angefordert. Ihr Unternehmen bleibt währenddessen voll nutzbar. Ihre eingestellten Anfragen sehen Arbeitskräfte und Besucher mit dem Hinweis „Unternehmen nicht verifiziert“, sobald die Pflichtangaben zum Unternehmen ausgefüllt und die automatischen Prüfungen bestanden sind; unvollständige oder auffällige warten auf eine Prüfung.",
-          "unverified": "Nicht verifiziert. Sie können Ihr Unternehmen normal weiter nutzen. Ihre eingestellten Anfragen sehen Arbeitskräfte und Besucher mit dem Hinweis „Unternehmen nicht verifiziert“, sobald die Pflichtangaben zum Unternehmen ausgefüllt und die automatischen Prüfungen bestanden sind; unvollständige oder auffällige warten auf eine Prüfung.",
+          "pending_verification": "Sie haben eine optionale manuelle Prüfung angefordert. Ihr Unternehmen bleibt währenddessen voll nutzbar. Ihre eingestellten Anfragen sehen Arbeitskräfte und Besucher mit dem Hinweis „Unternehmen nicht bestätigt“, sobald die Pflichtangaben zum Unternehmen ausgefüllt und die automatischen Prüfungen bestanden sind; unvollständige oder auffällige warten auf eine Prüfung.",
+          "unverified": "Nicht verifiziert. Sie können Ihr Unternehmen normal weiter nutzen. Ihre eingestellten Anfragen sehen Arbeitskräfte und Besucher mit dem Hinweis „Unternehmen nicht bestätigt“, sobald die Pflichtangaben zum Unternehmen ausgefüllt und die automatischen Prüfungen bestanden sind; unvollständige oder auffällige warten auf eine Prüfung.",
           "verified": "Verifiziert — ein stärkerer Vertrauensstatus, der nur nach einer echten Prüfung vergeben wird."
         },
         "goToWorkspace": "Unternehmens-Arbeitsbereich öffnen",
