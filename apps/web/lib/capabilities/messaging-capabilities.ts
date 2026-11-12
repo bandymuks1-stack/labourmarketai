@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 
 import { sendMessageCore } from "@/lib/communication/communication-core";
+import { isCommunicationLocale } from "@/lib/i18n/config";
 import {
   getOrCreateDirectConversationCore,
   planDirectContact,
@@ -185,6 +186,17 @@ const sendFields = z
     projectId: z.string().uuid().optional(),
     subject: z.string().trim().max(240).nullish(),
     body: z.string().trim().min(1).max(4000),
+    /** The language the text is WRITTEN in (ISO 639-1: sv, lt, pl, ru, en …).
+     *  Optional. Without it the message is stored as "language unknown" —
+     *  never the request's UI locale, which says nothing about what the
+     *  person typed (chat audit 2026-11-11, defect 1: a Swedish text sent
+     *  from an assistant was stamped Lithuanian). */
+    language: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .refine((v) => isCommunicationLocale(v), { message: "Not a supported message language code." })
+      .optional(),
   })
   .strict()
   .refine((v) => !!v.conversationId !== !!v.recipientProfileId, {
@@ -247,6 +259,7 @@ const tokenInput = (i: SendInput) => ({
   projectId: i.projectId ?? null,
   subject: i.subject ?? null,
   body: i.body,
+  language: i.language ?? null,
 });
 const fingerprint = (p: Extract<SendPlan, { ok: true }>) => `message:${p.conversationId ?? "new"}:${p.lastId}:${p.permission}`;
 
@@ -345,7 +358,14 @@ const messageSendConfirm: CapabilityDescriptor = {
       conversationId = opened.data.id;
       created = opened.data.created;
     }
-    const sent = await sendMessageCore(commCaller, { conversationId, body: parsed.body, locale: caller.locale });
+    const sent = await sendMessageCore(commCaller, {
+      conversationId,
+      body: parsed.body,
+      locale: caller.locale,
+      originalLanguage: parsed.language ?? null,
+      // The request locale is a UI hint, not the language of the text.
+      languageFallback: "unknown",
+    });
     if (!sent.ok) return { ok: false, code: sent.code, message: sent.message };
 
     // CANONICAL READ-BACK: the message row as the database holds it, and the

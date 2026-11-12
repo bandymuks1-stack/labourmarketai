@@ -95,7 +95,14 @@ describe("message.send — draft, human confirm, the one core", () => {
     expect(ok.ok).toBe(true);
     expect(openConv).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send.mock.calls[0][1]).toEqual({ conversationId: "conv-new", body: BODY, locale: "lt" });
+    expect(send.mock.calls[0][1]).toEqual({
+      conversationId: "conv-new",
+      body: BODY,
+      locale: "lt",
+      // No declared language: stored as unknown, never the request locale.
+      originalLanguage: null,
+      languageFallback: "unknown",
+    });
     const data = ok.ok ? (ok.data as { readBack: { id: string; bodyMatches: boolean; recipientIsParticipant: boolean } }) : null;
     expect(data!.readBack).toMatchObject({ id: "msg-1", bodyMatches: true, recipientIsParticipant: true });
   });
