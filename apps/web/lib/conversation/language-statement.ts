@@ -21,23 +21,33 @@ function fold(s: string): string {
     .toLowerCase();
 }
 
-/** Stems, folded, in the served locales. Order matters only for display. */
+/**
+ * Stems, folded, in the served locales. Order matters only for display.
+ *
+ * sv (2026-11-12): "Jag talar svenska och engelska" routed to
+ * `language-statement` and this reader returned [] — the router knew the
+ * Swedish names and the reader did not, so the chat asked which languages the
+ * person had just named. The Swedish names sit beside the others; the short
+ * ones are word-bounded because a bare stem would open on another language's
+ * everyday word (`rysk` is Lithuanian "ryškus" folded, `tysk` / `norsk` are
+ * kept whole so nothing longer can carry them).
+ */
 const STEMS: ReadonlyArray<readonly [WorkerLanguageCode, RegExp]> = [
-  ["en", /(anglisk|anglu\b|english|англ|englisch|angielsk)/u],
-  ["ru", /(rusisk|rusu\b|russian|русск|по-русски|russisch|rosyjsk)/u],
-  ["lt", /(lietuvisk|lietuviu\b|lithuanian|литовск|litauisch|litewsk)/u],
-  ["lv", /(latvisk|latviu\b|latvian|латышск|lettisch|lotewsk|łotewsk)/u],
-  ["et", /(estisk|estu\b|estonian|эстонск|estnisch|estonsk)/u],
-  ["nl", /(olandisk|olandu\b|dutch|голландск|нидерландск|niederlandisch|niderlandzk)/u],
-  ["de", /(vokisk|vokieciu\b|german|немецк|deutsch|niemieck)/u],
-  ["da", /(danisk|danu\b|danish|датск|danisch|dunsk|duńsk)/u],
-  ["no", /(norvegisk|norvegu\b|norwegian|норвежск|norwegisch|norwesk)/u],
-  ["sv", /(svedisk|svedu\b|swedish|шведск|schwedisch|szwedzk)/u],
+  ["en", /(anglisk|anglu\b|english|англ|englisch|angielsk|engelsk)/u],
+  ["ru", /(rusisk|rusu\b|russian|русск|по-русски|russisch|rosyjsk|\bryska\b)/u],
+  ["lt", /(lietuvisk|lietuviu\b|lithuanian|литовск|litauisch|litewsk|litauisk)/u],
+  ["lv", /(latvisk|latviu\b|latvian|латышск|lettisch|lotewsk|łotewsk|lettisk)/u],
+  ["et", /(estisk|estu\b|estonian|эстонск|estnisch|estonsk|estnisk)/u],
+  ["nl", /(olandisk|olandu\b|dutch|голландск|нидерландск|niederlandisch|niderlandzk|nederlandsk|hollandsk)/u],
+  ["de", /(vokisk|vokieciu\b|german|немецк|deutsch|niemieck|\btyska?\b)/u],
+  ["da", /(danisk|danu\b|danish|датск|danisch|dunsk|duńsk|\bdansk)/u],
+  ["no", /(norvegisk|norvegu\b|norwegian|норвежск|norwegisch|norwesk|\bnorska?\b)/u],
+  ["sv", /(svedisk|svedu\b|swedish|шведск|schwedisch|szwedzk|svensk)/u],
   ["pl", /(lenkisk|lenku\b|polish|польск|polnisch|polsk)/u],
 ];
 
 const CEFR = /\b(a1|a2|b1|b2|c1|c2)\b/u;
-const NATIVE = /(gimtoji|gimtąja|gimtaja|native|mother\s+tongue|родн|muttersprach|moedertaal|ojczyst)/u;
+const NATIVE = /(gimtoji|gimtąja|gimtaja|native|mother\s+tongue|родн|muttersprach|moedertaal|ojczyst|modersmal)/u;
 
 export function readStatedLanguages(text: string): StatedLanguage[] {
   const q = fold(text ?? "");

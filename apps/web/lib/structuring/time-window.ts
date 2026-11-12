@@ -69,6 +69,7 @@ const KIND_NEEDLES: ReadonlyArray<{ kind: TimeWindowKind; res: RegExp[] }> = [
       /следующ[\p{L}]*\s+недел/u,
       /volgende\s+week/u,
       /nachste\s+woche/u,
+      /nasta\s+vecka/u, // sv "nästa vecka" (folded)
     ],
   },
   {
@@ -80,6 +81,7 @@ const KIND_NEEDLES: ReadonlyArray<{ kind: TimeWindowKind; res: RegExp[] }> = [
       /эту\s+недел/u,
       /deze\s+week/u,
       /diese\s+woche/u,
+      /den\s+har\s+veckan|denna\s+vecka/u, // sv "den här veckan"
     ],
   },
   {
@@ -92,6 +94,7 @@ const KIND_NEEDLES: ReadonlyArray<{ kind: TimeWindowKind; res: RegExp[] }> = [
       /следующ[\p{L}]*\s+месяц/u,
       /volgende\s+maand/u,
       /nachsten?\s+monat/u,
+      /nasta\s+manad/u, // sv "nästa månad"
     ],
   },
 ];
@@ -112,12 +115,12 @@ const KIND_NEEDLES: ReadonlyArray<{ kind: TimeWindowKind; res: RegExp[] }> = [
 const MONTH_WORDS: ReadonlyArray<RegExp> = [
   /^(?:saus(?:is|io|i|yje)|jan(?:uary)?|январ\p{L}*|januari?|stycz(?:en|nia|niu))$/u,
   /^(?:vasar(?:is|io|i|yje)|feb(?:ruary)?|феврал\p{L}*|februari?|lut(?:y|ego|ym)?)$/u,
-  /^(?:kov(?:as|o|a|e)|mar(?:ch)?|март\p{L}*|maart|marz|marzec|marc(?:a|u))$/u,
+  /^(?:kov(?:as|o|a|e)|mar(?:ch)?|март\p{L}*|maart|marz|marzec|marc(?:a|u)|mars)$/u,
   /^(?:baland(?:is|zio|i|yje)|apr(?:il)?|апрел\p{L}*|kwie(?:cien|tnia|tniu))$/u,
   /^(?:geguz(?:e|es|eje)|may|ма[йяе]|mei|mai|maj(?:a|u)?)$/u,
   /^(?:birzel(?:is|io|i|yje)|june?|июн\p{L}*|juni|czerw(?:iec|ca|cu))$/u,
   /^(?:liep(?:a|os|oje)|july?|июл\p{L}*|juli|lip(?:iec|ca|cu))$/u,
-  /^(?:rugpj(?:utis|ucio|uti|utyje)|aug(?:ust|ustus)?|август\p{L}*|sierp(?:ien|nia|niu))$/u,
+  /^(?:rugpj(?:utis|ucio|uti|utyje)|aug(?:ust|ustus)?|август\p{L}*|sierp(?:ien|nia|niu)|augusti)$/u,
   /^(?:rugsej(?:is|o|i|yje)|sep(?:t|tember)?|сентябр\p{L}*|wrze(?:sien|snia|sniu))$/u,
   /^(?:spal(?:is|io|i|yje)|oct(?:ober)?|октябр\p{L}*|oktober|pazdziernik(?:a|u)?)$/u,
   /^(?:lapkri(?:tis|cio|ti|tyje)|nov(?:ember)?|ноябр\p{L}*|listopad(?:a|zie)?)$/u,
@@ -125,7 +128,10 @@ const MONTH_WORDS: ReadonlyArray<RegExp> = [
 ];
 
 /** "from" across the locales — the word that turns a date into a START. */
-const FROM_WORD = "(?:nuo|from|starting|с|со|vanaf|ab|od)";
+// sv: "från 1 december", "från den 1 december", "från och med den 1 december",
+// "fr.o.m. 1 december" — the article and "och med" belong to the from-word.
+const FROM_WORD =
+  "(?:nuo|from|starting|с|со|vanaf|ab|od|(?:fran(?:\\s+och\\s+med)?|fr\\.?\\s?o\\.?\\s?m\\.?)(?:\\s+den)?)";
 
 /** The month (1–12) one FOLDED word names, or `null`. Whole word only — see
  *  MONTH_WORDS for why a prefix is not enough. */
@@ -199,7 +205,7 @@ export function parseStartDate(text: string, todayIso: string): string | null {
     }
   }
   // "rytoj" / "nuo rytojaus" / "tomorrow" / "завтра" / "morgen" / "jutro".
-  if (/(?:^|[^\p{L}])(?:rytoj|tomorrow|завтра|morgen|jutro)/u.test(folded)) {
+  if (/(?:^|[^\p{L}])(?:rytoj|tomorrow|завтра|morgen|jutro|i\s?morgon)/u.test(folded)) {
     return plusDays(todayIso, 1);
   }
   return null;
@@ -243,7 +249,12 @@ export function mentionsStartTime(text: string): boolean {
 }
 
 /** "until" across the locales — the word that turns a date into an END. */
-const UNTIL_WORD = "(?:iki|until|till|to|до|tot|t/m|bis|do)";
+// sv: "till den 20 december", "till och med 20 december", "t.o.m. 20
+// december", "fram till …", "senast den 20 december" (a deadline). The longer
+// Swedish forms come first so the bare English/Swedish "till" cannot stop short
+// of the article.
+const UNTIL_WORD =
+  "(?:(?:fram\\s+till|till\\s+och\\s+med|t\\.?\\s?o\\.?\\s?m\\.?|senast|till)\\s+den|fram\\s+till|till\\s+och\\s+med|t\\.o\\.m\\.?|senast|iki|until|till|to|до|tot|t/m|bis|do)";
 
 /**
  * An absolute END date ("iki spalio 20", "until 20 October", "до 20 октября",
@@ -328,10 +339,10 @@ function validIsoDate(y: string, m: string, d: string): string | null {
 
 /** Duration units, folded stems: weeks / months across the locales. */
 // `\w` is ASCII-only in JS — Cyrillic and Lithuanian endings need `\p{L}`.
-const WEEK_WORD = /^(savait[\p{L}]*|weeks?|недел[\p{L}]*|weken|week|wochen?|tygodn[\p{L}]*)$/u;
+const WEEK_WORD = /^(savait[\p{L}]*|weeks?|недел[\p{L}]*|weken|week|wochen?|tygodn[\p{L}]*|vecka|veckor|veckors)$/u;
 // LT month forms only — "mėn.", "mėnuo", "mėnesį", "mėnesiams" (folded) —
 // never a bare "men…" stem: Dutch "4 mensen" (people) read as four months.
-const MONTH_WORD = /^(men|menuo|menes[\p{L}]*|months?|месяц[\p{L}]*|maand[\p{L}]*|monat[\p{L}]*|miesi[\p{L}]*)$/u;
+const MONTH_WORD = /^(men|menuo|menes[\p{L}]*|months?|месяц[\p{L}]*|maand[\p{L}]*|monat[\p{L}]*|miesi[\p{L}]*|manad|manader|manaders)$/u;
 /** Years: ONLY the Lithuanian dative "metams" ("for a year", "2 metams").
  *  Every other year word ("3 metų", "3 years", "3 года") is far more often
  *  EXPERIENCE than a duration, and must not turn into an end date. */
@@ -381,7 +392,10 @@ export function parseDurationDays(text: string): number | null {
   // lata", "voor 2 jaar". Without it ("3 years experience", "опыт 3 года")
   // a year count is experience, never an end date.
   for (let i = 2; i < folded.length; i++) {
-    if (!YEAR_WORD.test(folded[i]) || !DURATION_PREPOSITION.test(folded[i - 2])) continue;
+    // sv "i 2 år" / "under 2 år": read off the RAW token — folded, "år" is
+    // "ar", the Lithuanian "or" ("į 2 ar 3 objektus").
+    const svYear = /^år$/iu.test(tokens[i]) && /^(i|under)$/u.test(folded[i - 2]);
+    if (!svYear && (!YEAR_WORD.test(folded[i]) || !DURATION_PREPOSITION.test(folded[i - 2]))) continue;
     const candidate = tokens[i - 1];
     const digits = /^\d{1,2}$/.test(candidate) ? Number.parseInt(candidate, 10) : null;
     const value = digits ?? parseWordNumber(candidate);
@@ -399,7 +413,7 @@ export function parseDurationDays(text: string): number | null {
 }
 
 /** Day-count words across the locales (folded stems). */
-const DAY_WORD = /^(dien\w*|days?|день|дня|дней|дни|dagen|dag|tage?n?)$/u;
+const DAY_WORD = /^(dien\w*|days?|день|дня|дней|дни|dagen|dag|tage?n?|dagar|dagars)$/u;
 
 /** "N days" — digits or word-numbers within two tokens before a day word. */
 function findDayCount(text: string): number | null {

@@ -116,7 +116,9 @@ export const PRESENT_ACTIVITY_VERB_SOURCE =
   "i\\s+(?:repair|fix|paint|clean|install|teach|tutor|mow|sew|weld|build|design|translate|babysit|cut\\s+hair)|" +
   "ремонтирую|чиню|крашу|убираю|монтирую|обучаю|шью|вожу|программирую|перевожу|стригу|строю|консультирую|" +
   "ich\\s+(?:repariere|streiche|putze|montiere|unterrichte|nahe|schweisse|baue|ubersetze)|" +
-  "ik\\s+(?:repareer|schilder|monteer|naai|las|bouw|vertaal)";
+  "ik\\s+(?:repareer|schilder|monteer|naai|las|bouw|vertaal)|" +
+  // sv — "jag reparerar cyklar", "jag målar hus" (folded)
+  "jag\\s+(?:reparerar|lagar|malar|stadar|installerar|monterar|undervisar|syr|svetsar|bygger|oversatter|klipper)";
 const PRESENT_ACTIVITY_RE = new RegExp(
   `(?<![\\p{L}])(?:${PRESENT_ACTIVITY_VERB_SOURCE})(?![\\p{L}])`,
   "u",
@@ -137,6 +139,11 @@ const OFFER_RES: RegExp[] = [
   /\bavailable\b/u,
   /\bbied\b|\bverkoop/u, // nl (opportunistic)
   /\bbiete\b|verkaufe/u, // de (opportunistic)
+  // sv (2026-11-12): "Jag vill sälja 500 träpallar" / "Vi erbjuder …" / "Vi
+  // har 20 svetsare tillgängliga" / "hyr ut" routed to the offer intents and
+  // arrived here with no axis at all.
+  /\bsalj(?:er|a|es)\b|till\s+salu|\berbjud(?:er|a)\b|\bhyr(?:a|s)?\s+ut\b|\buthyr/u,
+  /\bledig(?:a|t)?\b|tillganglig/u,
   // "remontuoju automobilius" — stating what one DOES is an offer of it.
   PRESENT_ACTIVITY_RE,
 ];
@@ -151,13 +158,14 @@ const SEEK_RES: RegExp[] = [
   /\bbrauch|\bsuche\b|\bsuchen\b|benotig|gesucht/u, // de
   /\bzoek|\bnodig\b|gezocht/u, // nl
   /potrzeb|szuka(m|my)\b|poszukuj/u, // pl
+  /\bbehov(?:er|s)\b|\bsok(?:er|es)\b|\bletar\s+efter\b|\befterlys/u, // sv
 ];
 
 /** Goods-shaped units — a thing you weigh/count, not a surface you worked. */
 const GOODS_UNITS = new Set(["kg", "t", "vnt", "ha", "m2", "m3"]);
 
 /** A STRONG sell verb — enough for goods even without a unit quantity. */
-const STRONG_SELL_RE = /parduo|продам|прода(ю|ем)|\bsell(ing)?\b|verkoop|verkaufe/u;
+const STRONG_SELL_RE = /parduo|продам|прода(ю|ем)|\bsell(ing)?\b|verkoop|verkaufe|\bsalj(?:er|a|es)\b|till\s+salu/u;
 
 /** Person/occupation nouns that make a number a HEADCOUNT. */
 const PERSON_NOUN_RES: RegExp[] = [
@@ -170,9 +178,11 @@ const PERSON_NOUN_RES: RegExp[] = [
   /\bwerknemers?\b|\bmedewerkers?\b|\bmensen\b/u, // nl
   /\bmitarbeiter|\barbeiter|\barbeitskraft|\bleute\b/u, // de
   /pracownik|\bosob\b|\bludzi\b/u, // pl
+  // sv — never `personal` (the English adjective) or `folk`.
+  /\bpersoner\b|\bmedarbetare\b|arbetare\b|\banstallda\b/u,
 ];
 
-const SERVICE_RE = /paslaug|\bservices?\b|услуг|dienst(en)?\b/u;
+const SERVICE_RE = /paslaug|\bservices?\b|услуг|dienst(en)?\b|\btjanst(?:er|en|erna)?\b/u;
 
 /** Service VERBS (V10): "galiu versti / suremontuoti" states a service even
  *  without the word "paslauga". Folded needles, LT/EN/RU. */
@@ -192,17 +202,17 @@ const OFFER_ACTIVITY_RE =
 
 /** V10 equipment-capacity reading: the MACHINE is free, not a person. */
 const EQUIPMENT_RE =
-  /ekskavator|krautuv|traktor|kran(as|a|o|u)\b|buldozer|stakl|pastoli|betonmais|betono\s*mais|generator|kompresor|perforator|priekab|excavator|forklift|\bcranes?\b|scaffold|bulldozer|compressor|экскаватор|погрузчик|трактор|кран\b|станок|компрессор|генератор/u;
+  /ekskavator|krautuv|traktor|kran(as|a|o|u)\b|buldozer|stakl|pastoli|betonmais|betono\s*mais|generator|kompresor|perforator|priekab|excavator|forklift|\bcranes?\b|scaffold|bulldozer|compressor|экскаватор|погрузчик|трактор|кран\b|станок|компрессор|генератор|gravmaskin|lyftkran|byggkran|byggstallning|hjullastar|kompressor|slapvagn/u;
 /** …unless the sentence is about the OPERATOR of it (a person). */
-const OPERATOR_RE = /inink|operat|vairuotoj|driver|masinist|машинист/u;
+const OPERATOR_RE = /inink|operat|vairuotoj|driver|masinist|машинист|forare\b|chauffor/u;
 /** Explicit rental verbs vs plain stated availability. */
 const RENTAL_MODE_RE =
-  /nuomo|isnuomo|\brent(al|ing)?\b|\bhire\b|аренд|сда(м|ю|ем)|verhuur|vermiete/u;
-const AVAILABILITY_RE = /laisv|\bavailable\b|\bfree\b|свободн/u;
+  /nuomo|isnuomo|\brent(al|ing)?\b|\bhire\b|аренд|сда(м|ю|ем)|verhuur|vermiete|\bhyr(?:a|s)?\s+ut\b|\buthyr/u;
+const AVAILABILITY_RE = /laisv|\bavailable\b|\bfree\b|свободн|\bledig(?:a|t)?\b|tillganglig/u;
 
 /** Words that end a subject-label echo (connectives / new clauses). */
 const LABEL_STOP_RE =
-  /\s+(?:ir|bei|kad|nes|and|или|и|kuriuos|kurias)\s+|[,.;!?]/u;
+  /\s+(?:ir|bei|kad|nes|and|или|и|kuriuos|kurias|och|eller)\s+|[,.;!?]/u;
 
 const LABEL_MAX = 60;
 
@@ -283,7 +293,7 @@ function detectHeadcount(text: string, folded: string): number | null {
   // "reikia 4" / "need 4" with the occupation elsewhere in the sentence —
   // unless a unit follows the number ("reikia 3 metų patirties").
   const m = folded.match(
-    /(?:reikia|truks(?:ta)?|need|нужн[\p{L}]*|требуется|ищем|brauchen|suchen|zoeken|potrzebujemy|szukamy)\s+(\d{1,4})(?!\p{N})\s*([^\s\d.,;:!?()/]*)/u,
+    /(?:reikia|truks(?:ta)?|need|нужн[\p{L}]*|требуется|ищем|brauchen|suchen|zoeken|potrzebujemy|szukamy|behover|soker)\s+(\d{1,4})(?!\p{N})\s*([^\s\d.,;:!?()/]*)/u,
   );
   if (m && !isCountUnitWord(m[2])) {
     const n = Number.parseInt(m[1], 10);
@@ -294,7 +304,7 @@ function detectHeadcount(text: string, folded: string): number | null {
 
 /** Time-ish counted nouns a bare count must never read as goods amounts. */
 const TIME_NOUN_RE =
-  /^(dien|day|дн|день|дня|дней|savait|week|недел|men(es)?|month|месяц|val\b|valand|hour|час|met(u|ai)|year|лет|год)/u;
+  /^(dien|day|дн|день|дня|дней|savait|week|недел|men(es)?|month|месяц|val\b|valand|hour|час|met(u|ai)|year|лет|год|dag(?:ar|ars)?$|veck|manad|timm)/u;
 
 /** V10: a BARE count with no unit ("500 medinių palečių") — the amount the
  *  person actually stated. No unit is invented; the counted noun must be a

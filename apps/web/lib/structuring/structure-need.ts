@@ -53,55 +53,60 @@ export interface NeedStructureSuggestion {
 /** Work-type needles → slug. Order matters: more specific rows sit first so a
  *  "truck driver" matches transport before a bare "driver", etc. Slugs are
  *  validated against the taxonomy at module load. */
+// sv (2026-11-12): the Swedish occupation nouns sit at the END of each rule's
+// needles, folded ("ställningsbyggare" → `stallningsbyggar`), because the
+// reader matches against the folded sentence as well as the raw one. Without
+// them "Vi behöver 5 svetsare" routed to the need form and arrived there with
+// no work type and no headcount — the count is read off the recognised noun.
 export const WORK_TYPE_RULES: { slug: string; needles: string[] }[] = [
   // Construction trades added 2026-09-04 (owner contract §9). PERSON stems
   // only — "pastolinink" (the scaffolder), never "pastol" (the scaffold): a
   // sentence about equipment must not become a workforce need.
-  { slug: "scaffolder", needles: ["scaffolder", "pastolinink", "монтажник строительных лесов", "монтажник лесов", "gerustbauer", "steigerbouwer", "rusztowaniow"] },
-  { slug: "concrete_worker", needles: ["concrete worker", "concreter", "betonuotoj", "бетонщик", "betonbauer", "betonwerker", "betoniarz"] },
+  { slug: "scaffolder", needles: ["scaffolder", "pastolinink", "монтажник строительных лесов", "монтажник лесов", "gerustbauer", "steigerbouwer", "rusztowaniow", "stallningsbyggar"] },
+  { slug: "concrete_worker", needles: ["concrete worker", "concreter", "betonuotoj", "бетонщик", "betonbauer", "betonwerker", "betoniarz", "betongarbetar"] },
   { slug: "plasterer", needles: ["plasterer", "tinkuotoj", "штукатур", "stuckateur", "stukadoor", "tynkarz"] },
-  { slug: "steel_fixer", needles: ["steel fixer", "rebar", "armaturinink", "арматурщик", "eisenflechter", "betonstaalvlechter", "zbrojarz"] },
-  { slug: "insulation_worker", needles: ["insulation worker", "insulator", "izoliuotoj", "изолировщик", "isolierer", "isolatiemonteur"] },
+  { slug: "steel_fixer", needles: ["steel fixer", "rebar", "armaturinink", "арматурщик", "eisenflechter", "betonstaalvlechter", "zbrojarz", "armerare"] },
+  { slug: "insulation_worker", needles: ["insulation worker", "insulator", "izoliuotoj", "изолировщик", "isolierer", "isolatiemonteur", "isolerare"] },
   // NL needles are SINGULAR stems ("lasser" also reads "lassers"): a plural-
   // only needle left "Lasser gezocht" with no occupation at all.
-  { slug: "welder", needles: ["welder", "weld", "suvirin", "сварщик", "сварк", "lasser", "schweisser", "spawacz"] },
-  { slug: "electrician", needles: ["electrician", "elektrik", "электрик", "elektricien", "elektryk"] },
-  { slug: "plumber", needles: ["plumber", "santechnik", "сантехник", "loodgieter", "klempner", "hydraulik"] },
-  { slug: "carpenter", needles: ["carpenter", "stalius", "столяр", "плотник", "timmerman", "timmerlieden", "timmerlui", "zimmerer", "zimmermann", "tischler", "schreiner", "stolarz", "ciesl"] },
-  { slug: "mason", needles: ["mason", "bricklayer", "mūrinink", "murinink", "каменщик", "metselaar", "maurer", "murarz", "murarzy"] },
-  { slug: "painter", needles: ["painter", "dažytoj", "dazytoj", "маляр", "schilder", "malarz", "malarzy"] },
-  { slug: "tiler", needles: ["tiler", "plytel", "плиточник", "tegelzetter", "fliesenleger", "glazurnik", "plytkarz"] },
-  { slug: "roofer", needles: ["roofer", "stogden", "кровельщик", "dakdekker", "dachdecker", "dekarz", "dekarzy"] },
-  { slug: "crane_operator", needles: ["crane operator", "crane", "krano operat", "крановщик", "kraanmachinist", "kranfuhrer", "operator zurawia"] },
-  { slug: "excavator_operator", needles: ["excavator", "ekskavator", "экскаватор"] },
+  { slug: "welder", needles: ["welder", "weld", "suvirin", "сварщик", "сварк", "lasser", "schweisser", "spawacz", "svets"] },
+  { slug: "electrician", needles: ["electrician", "elektrik", "электрик", "elektricien", "elektryk", "elmontor", "elinstallator"] },
+  { slug: "plumber", needles: ["plumber", "santechnik", "сантехник", "loodgieter", "klempner", "hydraulik", "rormokar", "rorlaggar", "vvs-montor", "vvs montor"] },
+  { slug: "carpenter", needles: ["carpenter", "stalius", "столяр", "плотник", "timmerman", "timmerlieden", "timmerlui", "zimmerer", "zimmermann", "tischler", "schreiner", "stolarz", "ciesl", "snickar"] },
+  { slug: "mason", needles: ["mason", "bricklayer", "mūrinink", "murinink", "каменщик", "metselaar", "maurer", "murarz", "murarzy", "murare"] },
+  { slug: "painter", needles: ["painter", "dažytoj", "dazytoj", "маляр", "schilder", "malarz", "malarzy", "malare"] },
+  { slug: "tiler", needles: ["tiler", "plytel", "плиточник", "tegelzetter", "fliesenleger", "glazurnik", "plytkarz", "plattsattar"] },
+  { slug: "roofer", needles: ["roofer", "stogden", "кровельщик", "dakdekker", "dachdecker", "dekarz", "dekarzy", "taklaggar"] },
+  { slug: "crane_operator", needles: ["crane operator", "crane", "krano operat", "крановщик", "kraanmachinist", "kranfuhrer", "operator zurawia", "kranforar"] },
+  { slug: "excavator_operator", needles: ["excavator", "ekskavator", "экскаватор", "gravmaskin"] },
   { slug: "heavy_equipment_operator", needles: ["heavy equipment", "heavy machine", "sunkiosios technik", "спецтехник"] },
-  { slug: "forklift_operator", needles: ["forklift", "krautuv", "погрузчик", "heftruckchauffeur", "heftruck", "staplerfahrer", "wozek widlowy", "operator wozka"] },
+  { slug: "forklift_operator", needles: ["forklift", "krautuv", "погрузчик", "heftruckchauffeur", "heftruck", "staplerfahrer", "wozek widlowy", "operator wozka", "truckforar"] },
   { slug: "truck_driver_ce", needles: ["ce driver", "driver ce", "vilkik", "фуры", "фура"] },
-  { slug: "truck_driver_c", needles: ["truck driver", "lorry", "sunkvežim", "sunkvezim", "грузовик", "vrachtwagenchauffeur", "lkw-fahrer", "lkw fahrer", "berufskraftfahrer"] },
+  { slug: "truck_driver_c", needles: ["truck driver", "lorry", "sunkvežim", "sunkvezim", "грузовик", "vrachtwagenchauffeur", "lkw-fahrer", "lkw fahrer", "berufskraftfahrer", "lastbilschauffor", "lastbilsforar"] },
   { slug: "delivery_driver", needles: ["delivery driver", "delivery", "pristatym", "доставк"] },
   { slug: "courier", needles: ["courier", "kurjer", "курьер"] },
-  { slug: "order_picker", needles: ["order picker", "picker", "rinkėj", "rinkej", "комплектов"] },
+  { slug: "order_picker", needles: ["order picker", "picker", "rinkėj", "rinkej", "комплектов", "orderplock"] },
   { slug: "packer", needles: ["packer", "packing", "pakuotoj", "упаковщик"] },
-  { slug: "warehouse_worker", needles: ["warehouse", "sandėl", "sandel", "склад", "magazijnmedewerker", "lagerist", "lagermitarbeiter", "lagerhelfer", "magazynier"] },
+  { slug: "warehouse_worker", needles: ["warehouse", "sandėl", "sandel", "склад", "magazijnmedewerker", "lagerist", "lagermitarbeiter", "lagerhelfer", "magazynier", "lagerarbetar", "lagerpersonal", "lagermedarbetar"] },
   { slug: "assembler", needles: ["assembler", "assembly", "surink", "сборщик", "сборк"] },
-  { slug: "machine_operator", needles: ["machine operator", "cnc", "staklių operat", "stakliu operat", "оператор станк"] },
+  { slug: "machine_operator", needles: ["machine operator", "cnc", "staklių operat", "stakliu operat", "оператор станк", "maskinoperator"] },
   { slug: "quality_control", needles: ["quality control", "quality inspector", "kokybės kontrol", "kokybes kontrol", "контролёр качества", "контролер качества"] },
-  { slug: "production_worker", needles: ["production worker", "factory worker", "gamybos darbinink", "производственн", "productiemedewerker", "produktionsmitarbeiter", "pracownik produkcj", "pracownikow produkcj"] },
-  { slug: "cook", needles: ["cook", "chef", "virėj", "virej", "повар", "kucharz", "kucharzy"] },
-  { slug: "kitchen_helper", needles: ["kitchen helper", "kitchen porter", "virtuvės pagalb", "virtuves pagalb", "помощник повара"] },
-  { slug: "dishwasher", needles: ["dishwasher", "indų plov", "indu plov", "посудомой"] },
-  { slug: "waiter", needles: ["waiter", "waitress", "padavėj", "padavej", "официант", "kellner", "kelner"] },
+  { slug: "production_worker", needles: ["production worker", "factory worker", "gamybos darbinink", "производственн", "productiemedewerker", "produktionsmitarbeiter", "pracownik produkcj", "pracownikow produkcj", "produktionsmedarbetar", "produktionspersonal", "industriarbetar"] },
+  { slug: "cook", needles: ["cook", "chef", "virėj", "virej", "повар", "kucharz", "kucharzy", "kock"] },
+  { slug: "kitchen_helper", needles: ["kitchen helper", "kitchen porter", "virtuvės pagalb", "virtuves pagalb", "помощник повара", "koksbitrad"] },
+  { slug: "dishwasher", needles: ["dishwasher", "indų plov", "indu plov", "посудомой", "diskare"] },
+  { slug: "waiter", needles: ["waiter", "waitress", "padavėj", "padavej", "официант", "kellner", "kelner", "servitor", "servitris"] },
   { slug: "housekeeper", needles: ["housekeeper", "housekeeping", "room attendant", "kambarin", "горничн"] },
-  { slug: "elderly_carer", needles: ["elderly care", "elderly carer", "senior care", "pagyvenusi", "сиделк"] },
-  { slug: "care_assistant", needles: ["care assistant", "caregiver", "nurse", "nursing", "slaug", "уход", "сиделк", "verzorgende", "verzorger", "pflegekraft", "pflegekrafte", "altenpfleger", "pfleger", "opiekun"] },
+  { slug: "elderly_carer", needles: ["elderly care", "elderly carer", "senior care", "pagyvenusi", "сиделк", "aldreomsorg", "hemtjanst"] },
+  { slug: "care_assistant", needles: ["care assistant", "caregiver", "nurse", "nursing", "slaug", "уход", "сиделк", "verzorgende", "verzorger", "pflegekraft", "pflegekrafte", "altenpfleger", "pfleger", "opiekun", "underskotersk", "sjukskotersk", "vardbitrad"] },
   { slug: "support_worker", needles: ["support worker", "pagalbos darbuotoj", "социальн"] },
   { slug: "industrial_cleaner", needles: ["industrial clean", "pramoninis valytoj", "промышленн уборщ"] },
-  { slug: "cleaner", needles: ["cleaner", "cleaning", "valytoj", "valymas", "уборщик", "уборк", "schoonmaker", "reinigungskraft", "sprzatacz"] },
+  { slug: "cleaner", needles: ["cleaner", "cleaning", "valytoj", "valymas", "уборщик", "уборк", "schoonmaker", "reinigungskraft", "sprzatacz", "stadare", "lokalvardar"] },
   { slug: "facility_worker", needles: ["facility", "patalpų prižiūr", "patalpu priziur", "обслуживан"] },
   { slug: "harvest_worker", needles: ["harvest", "picking fruit", "derliaus", "сбор урожая", "сборщик урожая"] },
   { slug: "greenhouse_worker", needles: ["greenhouse", "šiltnam", "siltnam", "теплич"] },
   { slug: "farm_worker", needles: ["farm", "agricultur", "žemės ūki", "zemes uki", "сельхоз", "ферм"] },
-  { slug: "general_laborer", needles: ["laborer", "labourer", "general worker", "helper", "pagalbinis darbinink", "разнорабоч", "подсобн", "bauhelfer", "pomocnik", "pomocnikow"] },
+  { slug: "general_laborer", needles: ["laborer", "labourer", "general worker", "helper", "pagalbinis darbinink", "разнорабоч", "подсобн", "bauhelfer", "pomocnik", "pomocnikow", "hantlangar", "grovarbetar"] },
 ];
 
 const KNOWN_SLUGS = new Set(ALL_WORK_TYPE_SLUGS);
@@ -281,13 +286,13 @@ function escapeForRegex(s: string): string {
  */
 /** A number directly followed by a word for PEOPLE. */
 const PEOPLE_COUNT_RE =
-  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек)/i;
+  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек|personer|medarbetare|arbetare|anst[äa]llda)/i;
 
 /** Demand verbs. "ieškau/ieškome" (LT) and "ищу" (RU) were the missing
  *  halves of pairs whose other half was already here; DE/PL/NL the same
  *  verbs the value-statement reader already knows. */
 const DEMAND_VERB_COUNT_RE =
-  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauchen|suchen|zoeken|potrzebujemy|szukamy)\s+(?:about\s+|apie\s+|около\s+)?(\d{1,4})\b/i;
+  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauchen|suchen|zoeken|potrzebujemy|szukamy|beh[öo]ver|s[öo]ker)\s+(?:about\s+|apie\s+|около\s+|cirka\s+|ungef[äa]r\s+)?(\d{1,4})\b/i;
 
 /**
  * Words that make the number before them a MEASURE, never a headcount:
@@ -300,7 +305,7 @@ const DEMAND_VERB_COUNT_RE =
  * abbreviation is matched in its written form "mėn".
  */
 const COUNT_UNIT_WORD_RE =
-  /^(?:years?|yrs?|metų|metu|metai|metus|metams|met|m|months?|mėn\p{L}*|mėnes\p{L}*|menes\p{L}*|weeks?|savait\p{L}*|days?|dien\p{L}*|d|hours?|hrs?|h|val\p{L}*|eur\p{L}*|euro|€|nok|sek|dkk|pln|usd|zl|zł|лет|год\p{L}*|месяц\p{L}*|мес|недел\p{L}*|дн\p{L}*|день|час\p{L}*|евро|руб\p{L}*|jahre?n?|monate?n?|monat|wochen?|tage?n?|stunden?|std|lata?|rok\p{L}*|miesi\p{L}*|tygodn\p{L}*|dni|godzin\p{L}*|jaar|jaren|maand\p{L}*|weken|dagen|uur|uren|%|km)$/u;
+  /^(?:years?|yrs?|metų|metu|metai|metus|metams|met|m|months?|mėn\p{L}*|mėnes\p{L}*|menes\p{L}*|weeks?|savait\p{L}*|days?|dien\p{L}*|d|hours?|hrs?|h|val\p{L}*|eur\p{L}*|euro|€|nok|sek|dkk|pln|usd|zl|zł|лет|год\p{L}*|месяц\p{L}*|мес|недел\p{L}*|дн\p{L}*|день|час\p{L}*|евро|руб\p{L}*|jahre?n?|monate?n?|monat|wochen?|tage?n?|stunden?|std|lata?|rok\p{L}*|miesi\p{L}*|tygodn\p{L}*|dni|godzin\p{L}*|jaar|jaren|maand\p{L}*|weken|dagen|uur|uren|år|månad\p{L}*|manad\p{L}*|veck(?:a|or|ors|an)|dag|dagar|dagars|timm\p{L}*|tim|kr|kronor|%|km)$/u;
 
 /** Is this one token a unit of time, money or percent (see COUNT_UNIT_WORD_RE)? */
 export function isCountUnitWord(token: string | null | undefined): boolean {
@@ -342,14 +347,16 @@ export type TeamCompositionReading =
 // Team nouns, folded, all six locales. The foreman ("brigadininkas",
 // "бригадир", "brygadzista") is a PERSON, not a team, and is excluded.
 const TEAM_NOUN =
-  "(?:brigad(?!inink)\\p{L}*|crews?|brigades?|gangs?|teams?|бригад(?!ир)\\p{L}*|звен\\p{L}*|команд\\p{L}*|kolonnen?|trupps?|brigaden?|brygad(?!zist)\\p{L}*|ekip\\p{L}*|ploeg(?:en)?)";
+  "(?:brigad(?!inink)\\p{L}*|crews?|brigades?|gangs?|teams?|бригад(?!ир)\\p{L}*|звен\\p{L}*|команд\\p{L}*|kolonnen?|trupps?|brigaden?|brygad(?!zist)\\p{L}*|ekip\\p{L}*|ploeg(?:en)?|arbetslag(?:et|en)?|lag(?:et|en)?)";
 // The generic "team"/"команда" ("our team", "the command") only counts when a
 // number and a size are both stated; a bare mention never asks for a size.
 const STRICT_TEAM_NOUN =
-  "(?:brigad(?!inink)\\p{L}*|crews?|brigades?|gangs?|бригад(?!ир)\\p{L}*|звен\\p{L}*|kolonnen?|trupps?|brigaden?|brygad(?!zist)\\p{L}*|ekip\\p{L}*|ploeg(?:en)?)";
+  "(?:brigad(?!inink)\\p{L}*|crews?|brigades?|gangs?|бригад(?!ир)\\p{L}*|звен\\p{L}*|kolonnen?|trupps?|brigaden?|brygad(?!zist)\\p{L}*|ekip\\p{L}*|ploeg(?:en)?|arbetslag(?:et|en)?)";
 /** "po" (lt, pl), "of" (en), "по" (ru), "zu/mit/je/à" (de), "van" (nl) —
  *  and "a team OF n": "iš" (lt), "из" (ru), "aus" (de), "z" (pl), "uit" (nl). */
-const PER_TEAM_WORD = "(?:po|of|по|zu|mit|je|a|van|is|из|aus|z|uit)";
+// sv "3 lag om 4 personer" / "med 4". `om` is also the Dutch "at" of a clock
+// time ("ploeg om 4 uur"), so it counts only when no hour follows the number.
+const PER_TEAM_WORD = "(?:po|of|по|zu|mit|je|a|van|is|из|aus|z|uit|med|om(?!\\s+\\d{1,3}\\s*(?:uur|u(?![\\p{L}])|[:.]\\d)))";
 const EDGE = "(?:^|[^\\p{L}\\p{N}])";
 const COUNT = "(\\d{1,3}|\\p{L}+)";
 const RANGE = "(\\d{1,3})\\s*[-–—]\\s*(\\d{1,3})";
@@ -362,12 +369,12 @@ const KNOWN_RE = new RegExp(
 );
 /** A team noun in the SINGULAR — "brigada iš 4", "бригада из 4", "eine Kolonne
  *  aus 4": one team of that size even with no count word before it. */
-const SINGULAR_TEAM_TOKEN = /^(?:brigada|brigados|crew|team|gang|brigade|бригада|бригаду|kolonne|trupp|brygada|brygady|brygade|ekipa|ekipy|ekipe|ploeg)$/u;
+const SINGULAR_TEAM_TOKEN = /^(?:brigada|brigados|crew|team|gang|brigade|бригада|бригаду|kolonne|trupp|brygada|brygady|brygade|ekipa|ekipy|ekipe|ploeg|arbetslag|lag)$/u;
 
 const STRICT_TEAM_TOKEN = new RegExp(`^${STRICT_TEAM_NOUN}$`, "u");
 /** A verb that REQUESTS what follows it ("reikia brigados", "need a crew"). */
 const TEAM_REQUEST_VERB =
-  /^(?:reikia|reikalinga|reikalingos|reikalingi|ieskome|ieskau|need|needs|needed|hiring|seeking|require|нужна|нужны|нужен|нужно|требуется|требуются|ищем|ищу|suchen|brauchen|benotigen|szukamy|potrzebujemy|poszukujemy|zatrudnimy|zoeken|zoekt)$/u;
+  /^(?:reikia|reikalinga|reikalingos|reikalingi|ieskome|ieskau|need|needs|needed|hiring|seeking|require|нужна|нужны|нужен|нужно|требуется|требуются|ищем|ищу|suchen|brauchen|benotigen|szukamy|potrzebujemy|poszukujemy|zatrudnimy|zoeken|zoekt|behover|soker|anstaller)$/u;
 /** …or one that follows the noun ("Kolonne gesucht", "ploeg gezocht"). */
 const TEAM_REQUEST_AFTER =
   /^(?:gesucht|gezocht|wanted|needed|nodig|reikalinga|reikalingos|требуется|нужна|potrzebna|potrzebne|poszukiwana)$/u;
@@ -382,7 +389,7 @@ const LEADER_AFTER = /^(?:vadov\p{L}*|leader|lead|chief|manager|foreman|kierowni
 const LEADER_BEFORE = /^(?:kierownik\p{L}*|руководител\p{L}*|начальник\p{L}*|leader|lead|manager|vadov\p{L}*)$/u;
 
 /** One team, said with an article or the numeral "one". */
-const ONE_TEAM_WORD = /^(?:a|an|one|ein|eine|einen|een|jedna|jedne|jedno|одна|одну|одной|viena|vienos|vieną)$/u;
+const ONE_TEAM_WORD = /^(?:a|an|one|ein|eine|einen|een|jedna|jedne|jedno|одна|одну|одной|viena|vienos|vieną|ett)$/u;
 
 /**
  * A team REQUESTED without a size — "reikia brigados", "Need 2 crews", "Нужна
@@ -513,19 +520,19 @@ function detectTeamSize(hay: string, occupationNeedle: string | null): number | 
 }
 
 function detectStartPeriod(hay: string): StartPeriod | null {
-  if (/\b(urgent|urgently|asap|immediately|right away|skub\w*|nedels\w*|срочн\w*|как можно скор)/i.test(hay))
+  if (/\b(urgent|urgently|asap|immediately|right away|skub\w*|nedels\w*|срочн\w*|как можно скор|akut|omg[åa]ende|snarast|br[åa]dskande)/i.test(hay))
     return "urgent";
-  if (/\b(this week|within days|next week|šią savait|sia savait|kitą savait|kita savait|на этой недел|на следующей недел)/i.test(hay))
+  if (/\b(this week|within days|next week|šią savait|sia savait|kitą savait|kita savait|на этой недел|на следующей недел|den h[äa]r veckan|denna vecka|n[äa]sta vecka)/i.test(hay))
     return "this_week";
-  if (/\b(next month|in a month|flexible|any time|anytime|lankst\w*|kitą mėn|kita men|через месяц|гибк\w*|со следующего месяца)/i.test(hay))
+  if (/\b(next month|in a month|flexible|any time|anytime|lankst\w*|kitą mėn|kita men|через месяц|гибк\w*|со следующего месяца|n[äa]sta m[åa]nad|flexibel|flexibelt)/i.test(hay))
     return "flexible";
   return null;
 }
 
 function detectAccommodation(hay: string): AccommodationOffer | null {
-  const hasAcc = /(accommodation|housing|lodging|apgyvendin\w*|būst\w*|bust\w*|жиль|прожив\w*|общежит)/i.test(hay);
+  const hasAcc = /(accommodation|housing|lodging|apgyvendin\w*|būst\w*|bust\w*|жиль|прожив\w*|общежит|boende|bostad|logi\b)/i.test(hay);
   if (!hasAcc) return null;
-  if (/\b(no|without|not provided|be apgyvendin|без жил)\b/i.test(hay)) return "not_provided";
+  if (/\b(no|without|not provided|be apgyvendin|без жил|utan|inget|ingen)\b/i.test(hay)) return "not_provided";
   if (/(deducted|deduct|išskaič|isskaic|удержан)/i.test(hay)) return "provided_deducted";
   if (/(paid accommodation|accommodation.{0,12}paid|mokam\w* apgyvendin|платн\w* жиль)/i.test(hay))
     return "provided_paid";

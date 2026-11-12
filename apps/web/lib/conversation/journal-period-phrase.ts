@@ -29,16 +29,18 @@ export type JournalPeriodPhrase = WorkPeriodKey | "yesterday";
 
 /** Order = precedence: the narrowest window a sentence names wins. */
 const PERIOD_WORDS: ReadonlyArray<readonly [JournalPeriodPhrase, string]> = [
-  ["today", "siandien|today|сегодня|heute|vandaag|dzisiaj|dzis"],
-  ["yesterday", "vakar|yesterday|вчера|gestern|gisteren|wczoraj"],
-  ["week", "savait\\p{L}*|week(?!end)|недел\\p{L}*|woche\\p{L}*|weken"],
-  ["month", "menes\\p{L}*|month\\p{L}*|месяц\\p{L}*|monat\\p{L}*|maand\\p{L}*"],
+  ["today", "siandien|today|сегодня|heute|vandaag|dzisiaj|dzis|idag|i dag"],
+  ["yesterday", "vakar|yesterday|вчера|gestern|gisteren|wczoraj|igar|i gar"],
+  ["week", "savait\\p{L}*|week(?!end)|недел\\p{L}*|woche\\p{L}*|weken|veck(?:a|an|or|ans|ors)"],
+  ["month", "menes\\p{L}*|month\\p{L}*|месяц\\p{L}*|monat\\p{L}*|maand\\p{L}*|manad\\p{L}*"],
   // LT "metu" is deliberately absent: folded, it is both "metų" (of the year)
   // and "darbo metu" (during work) — the second is not a period.
-  ["year", "met(?:us|ais|ai)|year\\p{L}*|год\\p{L}*|jahr\\p{L}*|jaar"],
+  // sv "år" folds to "ar" — the Lithuanian "or" — so the bare word is never
+  // read: only "i år", "förra året", "året", "årets".
+  ["year", "met(?:us|ais|ai)|year\\p{L}*|год\\p{L}*|jahr\\p{L}*|jaar|i ar|aret|arets"],
   [
     "all",
-    "is viso|visa laika|per visa|in total|all time|all-time|overall|всего|за все время|insgesamt|gesamt\\p{L}*|in totaal|totaal|alles bij elkaar",
+    "is viso|visa laika|per visa|in total|all time|all-time|overall|всего|за все время|insgesamt|gesamt\\p{L}*|in totaal|totaal|alles bij elkaar|totalt|sammanlagt|hittills|hela tiden",
   ],
 ];
 

@@ -55,22 +55,23 @@ const EVERYDAY_ENUM_WORDS: Readonly<
       "met huisvesting", "huisvesting", "onderdak",
       "mit unterkunft", "unterkunft", "wohnung gestellt",
       "z zakwaterowaniem", "zakwaterowanie", "mieszkanie zapewnione",
+      "med boende", "boende", "bostad", "logi",
     ],
     provided_paid: [
       "su būstu", "būstas", "apgyvendinimu", "with housing", "with accommodation",
       "housing", "accommodation", "с жильем", "с жильём", "жилье", "жильё",
       "проживание", "met huisvesting", "huisvesting", "mit unterkunft",
-      "unterkunft", "z zakwaterowaniem", "zakwaterowanie",
+      "unterkunft", "z zakwaterowaniem", "zakwaterowanie", "med boende", "boende", "bostad", "logi",
     ],
     provided_deducted: [
       "su būstu", "būstas", "apgyvendinimu", "with housing", "with accommodation",
       "housing", "accommodation", "с жильем", "с жильём", "жилье", "жильё",
       "проживание", "met huisvesting", "huisvesting", "mit unterkunft",
-      "unterkunft", "z zakwaterowaniem", "zakwaterowanie",
+      "unterkunft", "z zakwaterowaniem", "zakwaterowanie", "med boende", "boende", "bostad", "logi",
     ],
     not_provided: [
       "be būsto", "be apgyvendinimo", "without housing", "no accommodation",
-      "без жилья", "zonder huisvesting", "ohne unterkunft", "bez zakwaterowania",
+      "без жилья", "zonder huisvesting", "ohne unterkunft", "bez zakwaterowania", "utan boende", "utan bostad",
     ],
   },
 };
@@ -211,8 +212,8 @@ export async function buildWorkspaceVocabulary(
     })),
   );
   const EVERYDAY_TYPE_WORDS: Readonly<Record<string, readonly string[]>> = {
-    internship: ["praktika", "stažuotė", "internship", "стажировка", "практика", "stage", "praktikum"],
-    apprenticeship: ["pameistrystė", "apprenticeship", "ученичество", "leerwerkplek", "ausbildung", "lehrstelle"],
+    internship: ["praktika", "stažuotė", "internship", "стажировка", "практика", "stage", "praktikum", "praktik", "praktikplats"],
+    apprenticeship: ["pameistrystė", "apprenticeship", "ученичество", "leerwerkplek", "ausbildung", "lehrstelle", "lärlingsplats", "lärling"],
   };
   // EVERY type of the closed set is a term, marked available only when a
   // demand of that type is on the person's board. Prod walk 2026-09-04: with

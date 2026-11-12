@@ -56,6 +56,7 @@ const RENAME_VERBS = [
   "hernoem", // nl
   "umbenenn", "benenn", // de — "umbenennen", "Benenne … in X um"
   "przemianuj", "nazwij", // pl
+  "döp", "namnge", // sv — "döp om företaget till X"
 ] as const;
 
 const CHANGE_VERBS = [
@@ -71,6 +72,8 @@ const CHANGE_VERBS = [
   "änder", "aender", "aktualisier", "korrigier",
   // pl
   "zmień", "zmien", "popraw", "ustaw",
+  // sv — "byt namn på … till X", "ändra företagets namn till X"
+  "byt", "ändra", "andra", "uppdatera",
 ] as const;
 
 const verbRe = (stems: readonly string[]): RegExp =>
@@ -83,14 +86,14 @@ const CHANGE_VERB_RE = verbRe(CHANGE_VERBS);
 const IN_TAKES_NAME = /^(hernoem|wijzig|verander|umbenenn|benenn|änder|aender)/iu;
 
 /** Markers that introduce the target name, compared lower-cased. */
-const MARKERS: ReadonlySet<string> = new Set(["į", "to", "into", "в", "во", "на", "naar", "na", "zu", "auf"]);
+const MARKERS: ReadonlySet<string> = new Set(["į", "to", "into", "в", "во", "на", "naar", "na", "zu", "auf", "till"]);
 
 /** Paired quotes. Single quotes are left out on purpose: an apostrophe is
  *  part of real names ("O'Brien Ltd"). */
 const QUOTED_RE = /[„“"«]\s*([^„“”"«»\n]{2,200}?)\s*[“”"»]/u;
 
 const TRAILING_POLITE_RE =
-  /[,\s]+(prašau|prasau|please|bitte|пожалуйста|alsjeblieft|alstublieft|proszę|prosze)$/iu;
+  /[,\s]+(prašau|prasau|please|bitte|пожалуйста|alsjeblieft|alstublieft|proszę|prosze|tack)$/iu;
 
 /** Tidy a candidate: one line, no trailing punctuation, no separable `um`. */
 function clean(raw: string): string | null {

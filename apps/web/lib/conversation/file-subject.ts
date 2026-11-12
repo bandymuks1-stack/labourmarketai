@@ -80,12 +80,15 @@ const DEPOSIT = [
   "hierbij", "dit is mijn", "dit zijn", "ik upload", "bijgevoegd",
   // de
   "hier ist", "hier sind", "anbei", "ich lade", "beigefugt", "das ist mein",
+  // sv (folded) — "här är", "jag laddar upp", "bifogar", "det här är mitt"
+  "har ar ", "har kommer ", "laddar upp", "ladda upp", "bifogar", "bifogat ", "skickar over", "det har ar mi",
 ] as const;
 
 /** First-person possessive — the ONLY thing that makes a file the speaker's. */
 const SELF = [
   "mano ", "savo ", "my ", "mijn ", "mein ", "meine ", "moj", "мой", "моя",
   "мое", "моё", "мои", "свое", "своё", "свой", "своя",
+  " min ", " mitt ", " mina ",
 ] as const;
 
 /** Another single human, named by role rather than by name. */
@@ -94,6 +97,7 @@ const ANOTHER_PERSON = [
   "candidate", "applicant", "worker's", "employee's", "person's",
   "кандидата", "соискателя", "работника", "сотрудника",
   "kandidaat", "sollicitant", "medewerker", "bewerber", "mitarbeiter",
+  "kandidatens ", "medarbetarens ", "anstalldes ", "personens ",
 ] as const;
 
 /** Several humans. Plural role nouns, and any of them beside a number. */
@@ -102,6 +106,7 @@ const MANY_PEOPLE = [
   "candidates", "applicants", "workers", "employees", "people",
   "кандидатов", "соискателей", "работников", "сотрудников",
   "kandidaten", "sollicitanten", "medewerkers", "bewerber", "mitarbeiter",
+  "kandidater", "medarbetarnas", "anstallda", "arbetssokande",
 ] as const;
 
 /** The organization itself is the owner ("mūsų darbuotojų", "įmonės"). */
@@ -110,6 +115,7 @@ const ORGANIZATION = [
   "our ", "company's ", "the company", "of the company",
   "нашей компании", "наших", "компании", "организации",
   "ons bedrijf", "onze ", "unser", "unsere", "der firma", "firmen",
+  "foretagets ", "vart foretag", "bolagets ", "organisationens ",
 ] as const;
 
 /** Learners — an institution's cohort. */
@@ -118,6 +124,7 @@ const COHORT = [
   "students", "student's", "learners", "cohort", "class list",
   "студентов", "учащихся", "группы",
   "studenten", "leerlingen", "schuler", "kursteilnehmer",
+  "studenter", "elever", "klasslista", "deltagarlista", "kursdeltagare",
 ] as const;
 
 /** Photographs / images of finished work. */
@@ -127,7 +134,7 @@ const WORK_EVIDENCE = [
 ] as const;
 
 /** A table of people rather than one person's document. */
-const TABLE = ["excel", "xlsx", ".csv", "csv", "lentel", "sarasas", "sąrašas", "spreadsheet", "tabel", "tabelle", "таблиц", "список"] as const;
+const TABLE = ["excel", "xlsx", ".csv", "csv", "lentel", "sarasas", "sąrašas", "spreadsheet", "tabel", "tabelle", "таблиц", "список", "kalkylblad"] as const;
 
 const hasAny = (hay: string, needles: readonly string[]): boolean =>
   needles.some((n) => hay.includes(n));
@@ -151,7 +158,7 @@ const hasAny = (hay: string, needles: readonly string[]): boolean =>
 // Written in already-FOLDED form (the query is folded before it is tested):
 // "įkeltą" → "ikelta", "geüpload" → "geupload".
 const READBACK_FORMS =
-  /(?<!\p{L})(ikelt\p{L}*|uploaded|загружен\p{L}*|hochgeladen\p{L}*|geupload\p{L}*)(?!\p{L})/giu;
+  /(?<!\p{L})(ikelt\p{L}*|uploaded|загружен\p{L}*|hochgeladen\p{L}*|geupload\p{L}*|uppladdad\p{L}*)(?!\p{L})/giu;
 
 /** The sentence with its past upload forms removed — what the deposit test sees. */
 export function withoutReadbackForms(folded: string): string {

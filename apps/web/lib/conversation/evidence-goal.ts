@@ -260,11 +260,11 @@ export function answerDimension(
  */
 export function readRole(text: string): EvidenceRole | null {
   const t = text.toLowerCase();
-  if (/pad[ėe]j|talkin|help|assist|hielp|geholfen|halfen|помог|assisted/.test(t)) {
+  if (/pad[ėe]j|talkin|help|assist|hielp|geholfen|halfen|помог|assisted|hj[äa]lpte|medhj[äa]lp/.test(t)) {
     return "assisted";
   }
-  if (/vadovav|brigadinink|meistr|led\b|lead|leit|руковод|supervis/.test(t)) return "led";
-  if (/pats|pati|montavau|dariau|atlik|myself|self|selbst|zelf|сам/.test(t)) {
+  if (/vadovav|brigadinink|meistr|led\b|lead|leit|руковод|supervis|ledde|arbetsled|lagbas/.test(t)) return "led";
+  if (/pats|pati|montavau|dariau|atlik|myself|self|selbst|zelf|сам|sj[äa]lv|utf[öo]rde/.test(t)) {
     return "performed";
   }
   return null;

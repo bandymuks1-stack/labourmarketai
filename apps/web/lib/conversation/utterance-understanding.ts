@@ -86,6 +86,8 @@ const POSSESSIVES: ReadonlySet<string> = new Set([
   // de
   "mein", "meine", "meinen", "meiner", "meines",
   "unser", "unsere", "unseren", "unserer",
+  // sv
+  "min", "mitt", "mina", "vår", "vårt", "våra",
 ]);
 
 /** Strip leading/trailing punctuation from a token, keeping letters. */

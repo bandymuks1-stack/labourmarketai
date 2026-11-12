@@ -28,16 +28,17 @@ const num = (s: string) => Number.parseFloat(s.replace(",", "."));
 export function readCorrectionAsk(text: string): CorrectionAsk {
   const q = fold(text ?? "");
   // "ne 5, o 6" / "not 5 but 6" / "не 5, а 6" / "nicht 5, sondern 6" / "niet 5 maar 6" / "nie 5, a 6"
+  // / sv "inte 5 utan 6 timmar"
   const pair =
-    /\b(?:ne|not|не|nicht|niet|nie)\s+(\d+(?:[.,]\d+)?)\s*(?:val\w*|h|hours?|час\w*|std\w*|uur|godz\w*)?\s*,?\s*(?:o|but|а|sondern|maar|a|ale)\s+(\d+(?:[.,]\d+)?)/u.exec(q);
+    /\b(?:ne|not|не|nicht|niet|nie|inte)\s+(\d+(?:[.,]\d+)?)\s*(?:val\w*|h|hours?|час\w*|std\w*|uur|godz\w*|timm\w*|tim)?\s*,?\s*(?:o|but|а|sondern|maar|a|ale|utan)\s+(\d+(?:[.,]\d+)?)/u.exec(q);
   if (pair) {
     const to = num(pair[2]!);
     if (to > 0 && to <= 24) return { kind: "hours", from: num(pair[1]!), to };
   }
-  if (/\b(uzvakar|day\s+before\s+yesterday|позавчера|vorgestern|eergisteren|przedwczoraj)/u.test(q)) {
+  if (/\b(uzvakar|day\s+before\s+yesterday|позавчера|vorgestern|eergisteren|przedwczoraj|i\s?forrgar\b)/u.test(q)) {
     return { kind: "day", day: "day-before" };
   }
-  if (/\b(vakar|yesterday|вчера|gestern|gisteren|wczoraj)\b/u.test(q)) return { kind: "day", day: "yesterday" };
+  if (/\b(vakar|yesterday|вчера|gestern|gisteren|wczoraj|i\s?gar)\b/u.test(q)) return { kind: "day", day: "yesterday" };
   return { kind: "unspecified" };
 }
 

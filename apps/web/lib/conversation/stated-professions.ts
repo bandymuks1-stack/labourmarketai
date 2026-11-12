@@ -8,8 +8,8 @@ import { readProfessionStatement, type ProfessionStatementReading } from "@/lib/
  * clause, each clause carrying the sentence's own verb. Nothing is inferred —
  * a clause the reader cannot read adds nothing. Pure.
  */
-const VERB = /(?:^|[^\p{L}])(esu|dirbu|dirbau|i am|i'm|i work as|я|работаю|ich bin|ik ben|jestem)(?![\p{L}])/iu;
-const JOIN = /\s*,\s*|\s+(?:ir|and|и|und|en|oraz|i)\s+/iu;
+const VERB = /(?:^|[^\p{L}])(esu|dirbu|dirbau|i am|i'm|i work as|я|работаю|ich bin|ik ben|jestem|jag [äa]r|jag (?:jobbar|arbetar) som)(?![\p{L}])/iu;
+const JOIN = /\s*,\s*|\s+(?:ir|and|и|und|en|oraz|i|och|samt)\s+/iu;
 
 export function readStatedProfessions(text: string): ProfessionStatementReading[] {
   const out: ProfessionStatementReading[] = [];

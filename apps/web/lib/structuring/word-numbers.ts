@@ -75,6 +75,14 @@ const WORD_NUMBERS: Record<string, number> = {
   negen: 9, tien: 10, elf: 11, twaalf: 12, twintig: 20,
   zwei: 2, drei: 3, funf: 5, sechs: 6, sieben: 7, acht: 8, neun: 9,
   zehn: 10, zwolf: 12, zwanzig: 20,
+  // ── Swedish (folded: "två" → tva, "åtta" → atta) ──
+  // No `en` / `ett` (the article, and `en` is the Dutch "and"), no `sex` (an
+  // English word) and no `tre` / `sju` / `tio` clash to guard — those three
+  // are unambiguous and stay.
+  tva: 2, tre: 3, fyra: 4, fem: 5, sju: 7, atta: 8, nio: 9, tio: 10,
+  elva: 11, tolv: 12, tretton: 13, fjorton: 14, femton: 15, sexton: 16,
+  sjutton: 17, arton: 18, nitton: 19, tjugo: 20, trettio: 30, fyrtio: 40,
+  femtio: 50, hundra: 100,
 };
 
 /** Parse ONE token as a written number; null when it is not one. */

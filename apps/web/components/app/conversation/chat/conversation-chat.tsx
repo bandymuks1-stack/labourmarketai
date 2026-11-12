@@ -53,10 +53,11 @@ import {
 import { loadEducationWorkspaceForChat } from "@/lib/conversation/education-workspace";
 import { loadEducationAnswerForChat } from "@/lib/conversation/education-answers";
 import {
-  educationQuestionKind,
+  educationModeFromText,
   isEducationQuestionKind,
   type EducationQuestionKind,
 } from "@/lib/conversation/education-question";
+import { readStatedProgress } from "@/lib/conversation/progress-status-phrase";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { openTeamOfferThreadForChat } from "@/lib/company/team-offer-conversation";
@@ -66,7 +67,7 @@ import { guessDocumentType } from "@/lib/conversation/document-type-guess";
 import { readMyCvState } from "@/lib/conversation/cv-state-server";
 import { readCapabilityAnswer } from "@/lib/conversation/capability-answer-server";
 import { aiStateMessageKey, understand } from "@/lib/conversation/utterance-understanding";
-import { matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
+import { asksForPersonalWorkspace, matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
 import { readRenameTarget } from "@/lib/conversation/organization-rename-phrase";
 import { readRenameTargetForChat } from "@/lib/conversation/organization-rename-chat";
 import {
@@ -2593,14 +2594,17 @@ export function ConversationChat({
         withTyping(() => assistant(t("switchContextUnavailable")));
         return;
       }
-      const folded = fold(text);
-      // "asmenin…" / "personal" / "личн…" / "persoonlijk…" / "persönlich…"
-      // (folded: persönlich → personlich) — the personal space by name.
-      const wantsPersonal = ["asmenin", "personal", "личн", "persoonlijk", "personlich"].some(
-        (hint) => folded.includes(hint),
-      );
       const organizations = workspaces.filter(
         (w) => w.kind === "organization" && w.name.trim() !== "",
+      );
+      // "asmenin…" / "personal" / "личн…" / "persoonlijk…" / "persönlich…" /
+      // "personlig" / "privat" — the personal space by name. One reader
+      // (`asksForPersonalWorkspace`); a hint inside one of the person's own
+      // organization names is that organization, never the personal space.
+      const wantsPersonal = asksForPersonalWorkspace(
+        text,
+        fold,
+        organizations.map((w) => w.name),
       );
       let target: WorkspaceInfo | undefined = wantsPersonal
         ? workspaces.find((w) => w.kind === "personal")

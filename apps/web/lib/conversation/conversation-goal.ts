@@ -297,8 +297,8 @@ const REJECTION: readonly RegExp[] = [
 
 /** A plain yes — proceed with what was proposed. */
 const CONFIRMATION: readonly RegExp[] = [
-  rx("^\\s*(taip|gerai|tinka|sutinku|ok|okay|oké|gut|ja|da|да|yes|yep|prima|akkoord|einverstanden)\\b\\s*[.!]?\\s*$"),
-  rx("^\\s*(tęsk|tęsti|pirmyn|continue|go\\s+ahead|davai|давай|weiter|ga\\s+door)\\b"),
+  rx("^\\s*(taip|gerai|tinka|sutinku|ok|okay|oké|gut|ja|da|да|yes|yep|prima|akkoord|einverstanden|okej|japp|visst|absolut|garna|ja\\s+tack|det\\s+stammer)\\b\\s*[.!]?\\s*$"),
+  rx("^\\s*(tęsk|tęsti|pirmyn|continue|go\\s+ahead|davai|давай|weiter|ga\\s+door|fortsatt|kor\\s+pa)\\b"),
 ];
 
 /**
@@ -345,6 +345,9 @@ const CONTINUATION_OPENER: readonly RegExp[] = [
   rx("^\\s*(vanaf|tot|en|of|ook|alleen|liever|zij|we|kan)\\b"),
   // DE
   rx("^\\s*(ab|bis|und|oder|auch|nur|lieber|sie|wir|kann)\\b"),
+  // SV — "från oktober", "och i Malmö", "bara heltid", "helst i Göteborg".
+  // No `de` / `men`: a Dutch article and an English noun open with them.
+  rx("^\\s*(fran|till|och|eller|ocksa|bara|endast|helst|kanske|vi)\\b"),
 ];
 
 const anyMatch = (patterns: readonly RegExp[], folded: string): boolean =>

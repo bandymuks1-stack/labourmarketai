@@ -8,7 +8,7 @@
  * languages; anything that does not name a week keeps today's behaviour.
  */
 const WEEK_RX =
-  /(savait|\bweek\b|недел|woche|\bweek\b|tydzie|tygodni|tygodn)/;
+  /(savait|\bweek\b|недел|woche|\bweek\b|tydzie|tygodni|tygodn|\bveck(a|an|or|ans)\b)/;
 
 export function asksAboutAWeek(text: string | null | undefined): boolean {
   if (!text) return false;

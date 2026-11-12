@@ -15,11 +15,11 @@ import type { PlayerCardMode } from "@/lib/player-card/card-modes";
  * "kur dirbu" is work).
  */
 const RULES: readonly [PlayerCardMode, RegExp][] = [
-  ["skills", /(igudz|gebejim|kompetencij|\bskills?\b|навык|умени|f[aä]higkeit|kompetenz|vaardighe|umiej[eę]tno)/],
-  ["history", /(istorij|anksciau|dirbau|\bhistory\b|worked\b|previous\s+jobs?|истори|раньше\s+работал|verlauf|fr[uü]her|geschiedenis|historia|pracowa[lł]em)/],
-  ["evidence", /(irasai|irasu|irodym|dokument|\brecords?\b|\bdocuments?\b|записи|документ|nachweis|eintr[aä]ge|bewijs|registraties|wpisy|dowod)/],
-  ["next", /(galimyb|toliau|kur\s+galiu|\bnext\b|opportunit|where\s+can\s+i|дальше|возможност|weiter|m[oö]glichkeit|volgende|kansen|dalej|mo[zż]liwo[sś]c)/],
-  ["work", /(kur\s+dirbu|dirbu\s+dabar|valand|\bhours\b|work\s+now|current\s+work|сейчас\s+работаю|часы|arbeite\s+jetzt|stunden|werk\s+nu|uren|pracuj[eę]\s+teraz|godzin)/],
+  ["skills", /(igudz|gebejim|kompetencij|\bskills?\b|навык|умени|f[aä]higkeit|kompetenz|vaardighe|umiej[eę]tno|fardighet|\bkompetenser?\b)/],
+  ["history", /(istorij|anksciau|dirbau|\bhistory\b|worked\b|previous\s+jobs?|истори|раньше\s+работал|verlauf|fr[uü]her|geschiedenis|historia|pracowa[lł]em|historik|tidigare\s+(jobb|arbete)|\bjobbade\b|\barbetade\b)/],
+  ["evidence", /(irasai|irasu|irodym|dokument|\brecords?\b|\bdocuments?\b|записи|документ|nachweis|eintr[aä]ge|bewijs|registraties|wpisy|dowod|\binlagg\b|\bintyg\b|\bbevis\b)/],
+  ["next", /(galimyb|toliau|kur\s+galiu|\bnext\b|opportunit|where\s+can\s+i|дальше|возможност|weiter|m[oö]glichkeit|volgende|kansen|dalej|mo[zż]liwo[sś]c|mojlighet|harnast|nasta\s+steg)/],
+  ["work", /(kur\s+dirbu|dirbu\s+dabar|valand|\bhours\b|work\s+now|current\s+work|сейчас\s+работаю|часы|arbeite\s+jetzt|stunden|werk\s+nu|uren|pracuj[eę]\s+teraz|godzin|\btimmar\b|jobbar\s+(jag\s+)?nu|arbetar\s+(jag\s+)?nu)/],
 ];
 
 export function cardModeFromText(text: string | null | undefined): PlayerCardMode {

@@ -17,7 +17,7 @@ export interface SkillStatement {
 }
 
 const VERB =
-  /(?:^|[^\p{L}])(išmokau|ismokau|išmokęs|išmokusi|moku|gebu|sugebu|learned|learnt|i know how to|skilled in|научился|научилась|умею|gelernt|beherrsche|geleerd|beheers|nauczyłem się|nauczyłam się|potrafię|umiem)(?![\p{L}])/iu;
+  /(?:^|[^\p{L}])(išmokau|ismokau|išmokęs|išmokusi|moku|gebu|sugebu|learned|learnt|i know how to|skilled in|научился|научилась|умею|gelernt|beherrsche|geleerd|beheers|nauczyłem się|nauczyłam się|potrafię|umiem|har lärt mig|lärde mig|behärskar|har lart mig|larde mig|beharskar)(?![\p{L}])/iu;
 
 export function readSkillStatement(text: string): SkillStatement | null {
   const m = VERB.exec(text ?? "");

@@ -17,7 +17,7 @@
  */
 const QUOTED = /[„“"«]([^„“”"«»]{2,120})[“”"»]/u;
 const AFTER_NAMING_WORD =
-  /(?:\bcalled|\bnamed|\bgenaamd|\bpavadinimu|\bnazwie|\bnamens|\bNamen|под\s+названием)\s+([^,;.\n]{2,120})/iu;
+  /(?:\bcalled|\bnamed|\bgenaamd|\bpavadinimu|\bnazwie|\bnamens|\bNamen|под\s+названием|\bsom\s+heter|\bmed\s+namnet|\bvid\s+namn)\s+([^,;.\n]{2,120})/iu;
 const AFTER_COLON = /:\s*([^,;.\n]{2,120})/u;
 
 export function projectTitleFromSentence(sentence: string): string | null {

@@ -25,6 +25,9 @@ import {
   DURATION_UNIT_SOURCE,
   TRADE_STEM_SOURCE,
   PROFESSION_STATEMENT_ANCHOR_SOURCE,
+  SV_OCCUPATION_STEM_SOURCE,
+  SV_PROFESSION_STATEMENT_ANCHOR_SOURCE,
+  SV_SEEK_VERB_SOURCE,
   ROLE_NOUN_EXCLUSION_SOURCE,
   ROLE_SUFFIX_GENITIVE_SOURCE,
   ROLE_SUFFIX_INSTRUMENTAL_SOURCE,
@@ -460,23 +463,6 @@ const RENAME_NAMED_DE =
 const RENAME_ORG_PL = "(\\bfirm|agencj|organizacj|sp[oó][lł]k)";
 const RENAME_ORG_SV = "(foretag|firma|firman|bolag|organisation|byra|agentur)";
 
-/**
- * SWEDISH TRADE NOUNS (sv activation, 2026-11-12), folded. `TRADE_STEM_SOURCE`
- * (lib/structuring/role-label.ts) carries only `elektrik` of these, so the
- * Swedish demand / supply / self-introduction shapes below read this list
- * beside it. It belongs in the shared source; it is stated here only until it
- * moves there, and every sv rule reads THIS one copy.
- */
-const SV_TRADE_SOURCE =
-  "svetsar|elektriker|rormokar|snickar|malar(e|na)\\b|murar(e|na)\\b|plattsattar|stallningsbyggar|betongarbetar|" +
-  "byggarbetar|chauffor|\\bkock(ar|en|arna)?\\b|stadar(e|na)\\b|lagerarbetar|truckforar|montor|installator|" +
-  "sjukskotersk|underskotersk|vardbitrad|programmerar(e|na)\\b|utvecklar(e|na)\\b|mekaniker|servitor|servitris|" +
-  "platslagar|taklaggar|isolerar(e|na)\\b|golvlaggar|lackerar(e|na)\\b|frisor";
-/** Swedish professional nouns for the self-introduction shape (folded). */
-const SV_PROFESSION_SOURCE =
-  "ekonom|redovisning|revisor|bokforar|jurist|advokat|ingenjor|arkitekt|analytiker|konsult|radgivar|larare|" +
-  "forelasar|tekniker|specialist|projektledar|chef\\b|operator|saljar|receptionist|designer|forskollarar|kassor";
-
 const RULES: IntentRule[] = [
   /**
    * ── SUPPLY DIRECTION — "AŠ TURIU / GALIU" (owner window 7 §4, 2026-09-06)
@@ -693,7 +679,7 @@ const RULES: IntentRule[] = [
       // erbjuda 15 montörer". The count must be a HEADCOUNT, never a duration:
       // "Jag har 3 års erfarenhet som svetsare" is the person, not an offer.
       p("(vi\\s+har|har\\s+vi|jag\\s+har|disponerar)\\s*.{0,10}[0-9]{1,4}(?![0-9])(?!\\s*(timm|tim\\b|dag|veck|manad|ar\\b|ars\\b))\\s*.{0,30}(ledig|tillganglig)", 10),
-      p(`(vi\\s+har|har\\s+vi)\\s*.{0,16}[0-9]{1,4}(?![0-9])(?!\\s*(timm|tim\\b|dag|veck|manad|ar\\b|ars\\b))\\s*.{0,24}(?:${SV_TRADE_SOURCE}|${TRADE_STEM_SOURCE})`, 9),
+      p(`(vi\\s+har|har\\s+vi)\\s*.{0,16}[0-9]{1,4}(?![0-9])(?!\\s*(timm|tim\\b|dag|veck|manad|ar\\b|ars\\b))\\s*.{0,24}(?:${TRADE_STEM_SOURCE})`, 9),
       p("(vi\\s+har|har\\s+vi)\\s*.{0,20}([0-9]{1,4}|medarbetare|personal|folk|arbetslag|team)\\w*\\s*.{0,40}(soker|letar\\s+efter)\\s*.{0,30}(jobb|arbete|uppdrag|projekt)", 10),
       p("(soker|letar\\s+efter|hitta)\\s*.{0,20}(jobb|arbete|uppdrag|projekt)\\w*\\s*.{0,24}\\b(till|for|at)\\s+(vara|vart)\\b\\s*.{0,24}(medarbetare|personal|folk|arbetslag|team|anstallda)", 10),
       p("\\b(at|till|for)\\s+dem\\b\\s*.{0,20}(jobb|arbete|uppdrag|projekt)", 10),
@@ -3068,7 +3054,10 @@ const RULES: IntentRule[] = [
       // "Vi söker personal", "Vi behöver 3 svetsare". The words between the
       // verb and the noun may never be a WORK noun: "Jag söker jobb som
       // svetsare" is the person's own job search.
-      p(`(behover|soker|letar\\s+efter|vill\\s+anstalla|rekryterar|anstaller)\\s+(?:(?!jobb|arbete)[^\\s]+\\s+){0,3}?(?:${SV_TRADE_SOURCE}|${TRADE_STEM_SOURCE})`, 6),
+      // The verbs and the nouns are the reader's own (`readRoleLabel` in
+      // lib/structuring/role-label.ts), so "Vi behöver en redovisningsekonom"
+      // is routed AND read from one vocabulary.
+      p(`(${SV_SEEK_VERB_SOURCE})\\s+(?:(?![^\\s]*jobb|arbete|tjanst|anstalln|praktik|uppdrag)[^\\s]+\\s+){0,3}?(?:${TRADE_STEM_SOURCE}|${SV_OCCUPATION_STEM_SOURCE})`, 6),
       p("(behover|soker|letar\\s+efter|vill\\s+anstalla|rekryterar|saknar)\\s+(?:(?!jobb|arbete)[^\\s]+\\s+){0,3}?(personal|medarbetare|arbetare|folk|manniskor|personer|arbetskraft|anstallda)\\b", 6),
       p("\\b(behover|soker|letar\\s+efter)\\s+[0-9]{1,4}\\s+(?!(timm|tim\\b|dag|veck|manad|ar\\b))", 3),
       p("\\b(anstalla|rekrytera|rekryterar|rekrytering)\\b", 3),
@@ -3454,8 +3443,8 @@ const RULES: IntentRule[] = [
       // of years + a past work verb is the person's work history — the
       // handler opens the self-declared history form. A calendar date
       // ("2026-09-28 dirbau 5 val.") is not a period and stays log-work.
-      p("(?<![-./\\d])(19|20)\\d{2}(?![-./]\\d{1,2}(?!\\d))\\s*(m\\.?\\s*)?(-|–|—|iki|to|until|до|по|bis|tot|do)\\s*((19|20)\\d{2}|dabar|siol|now|present|сейчас|heute|nu|teraz|obecnie)(?=.*(dirbau|dirbo|worked|работал|arbeitete|werkte|pracowa))", 8),
-      p("(dirbau|dirbo|worked|работал|arbeitete|werkte|pracowa).*(?<![-./\\d])(19|20)\\d{2}(?![-./]\\d{1,2}(?!\\d))\\s*(-|–|—|iki|to|until|до|по|bis|tot|do)\\s*((19|20)\\d{2}|dabar|now|present|сейчас|heute|nu|teraz)", 8),
+      p("(?<![-./\\d])(19|20)\\d{2}(?![-./]\\d{1,2}(?!\\d))\\s*(m\\.?\\s*)?(-|–|—|iki|to|until|до|по|bis|tot|do|till)\\s*((19|20)\\d{2}|dabar|siol|now|present|сейчас|heute|nu|teraz|obecnie)(?=.*(dirbau|dirbo|worked|работал|arbeitete|werkte|pracowa|jobbade|arbetade|jobbat|arbetat))", 8),
+      p("(dirbau|dirbo|worked|работал|arbeitete|werkte|pracowa|jobbade|arbetade|jobbat|arbetat).*(?<![-./\\d])(19|20)\\d{2}(?![-./]\\d{1,2}(?!\\d))\\s*(-|–|—|iki|to|until|до|по|bis|tot|do|till)\\s*((19|20)\\d{2}|dabar|now|present|сейчас|heute|nu|teraz)", 8),
       p("(?<![-./\\d])(19|20)\\d{2}\\s*(m\\.|metais|metu)\\s.{0,30}(dirbau|dirbo)", 8),
       pNoSeek(
         // NB `[^\s]`, never `\S`: pattern sources are lower-cased and `\S`
@@ -3490,7 +3479,7 @@ const RULES: IntentRule[] = [
       // anchor is first person singular; `pNoSeek` keeps "… och söker
       // arbete" on find-work.
       pNoSeek(
-        `\\b(jag\\s+ar|jag\\s+(jobbar|arbetar|jobbade|arbetade|har\\s+jobbat|har\\s+arbetat)\\s+som)\\s+(?:[^\\s]+\\s+){0,2}?(${SV_PROFESSION_SOURCE}|${SV_TRADE_SOURCE})`,
+        `\\b(${SV_PROFESSION_STATEMENT_ANCHOR_SOURCE})\\s+(?:[^\\s]+\\s+){0,2}?(${SV_OCCUPATION_STEM_SOURCE}|${TRADE_STEM_SOURCE})`,
         6,
       ),
     ],

@@ -24,6 +24,14 @@ export type PayStatement =
   | { readonly kind: "max"; readonly max: number }
   /** A rate per hour / day — not the card's monthly unit; ask. */
   | { readonly kind: "not-monthly" }
+  /**
+   * A figure stated in a currency the work card cannot hold ("30 000 kr",
+   * "8000 zł"). The card's range is `salary_min_eur` / `salary_max_eur`, so a
+   * krona or złoty amount is NEVER copied into it as if it were euros — that
+   * would record a pay expectation ten times what the person said. Read,
+   * named, and left for the person to state in euros.
+   */
+  | { readonly kind: "other-currency"; readonly currency: string }
   /** No usable figure (or a contradictory one) — ask. */
   | { readonly kind: "none" };
 
@@ -48,10 +56,15 @@ function toInt(raw: string): number | null {
 
 // Anchored at the figure: "15 €/val.", "120 eur per day", "20 € в час".
 const PER_TIME =
-  /^[\s.,]*(\/|per|pr\.?|a|в|за|pro|je|na)?\s*(val\b|val\.|valand|hour|h\b|hr\b|час|stunde|std\b|uur|godz|dien|day\b|день|tag\b|dag\b)/;
+  /^[\s.,]*(\/|per|pr\.?|a|в|за|pro|je|na|i)?\s*(val\b|val\.|valand|hour|h\b|hr\b|час|stunde|std\b|uur|godz|dien|day\b|день|tag\b|dag\b|dagen\b|timm|tim\b|veck)/;
 
-const FROM_WORDS = String.raw`(?:nuo|maziausiai|ne\s+maziau(?:\s+(?:kaip|nei))?|bent|from|at\s+least|minimum|min\.?|от|минимум|не\s+менее|ab|mindestens|vanaf|minimaal|od|co\s+najmniej|minimum)`;
-const TO_WORDS = String.raw`(?:iki|daugiausia|ne\s+daugiau(?:\s+(?:kaip|nei))?|up\s+to|to|max(?:imum)?\.?|до|максимум|не\s+более|bis|hochstens|tot|maximaal|do|maksymalnie)`;
+// A named currency that is not the euro, right after a figure ("30 000 kr",
+// "8000 zł", "3000 SEK") or right before it ("SEK 30000", "$3000"). Folded.
+const OTHER_CURRENCY_AFTER = /^\s*(kr(?![\p{L}])|kronor|sek(?![\p{L}])|nok(?![\p{L}])|dkk(?![\p{L}])|zł|zl(?![\p{L}])|pln(?![\p{L}])|usd(?![\p{L}])|gbp(?![\p{L}])|chf(?![\p{L}])|\$|£)/u;
+const OTHER_CURRENCY_BEFORE = /(?:^|[^\p{L}])(sek|nok|dkk|pln|usd|gbp|chf|\$|£)\s*$/u;
+
+const FROM_WORDS = String.raw`(?:nuo|maziausiai|ne\s+maziau(?:\s+(?:kaip|nei))?|bent|from|at\s+least|minimum|min\.?|от|минимум|не\s+менее|ab|mindestens|vanaf|minimaal|od|co\s+najmniej|minimum|fran|minst|lagst)`;
+const TO_WORDS = String.raw`(?:iki|daugiausia|ne\s+daugiau(?:\s+(?:kaip|nei))?|up\s+to|to|max(?:imum)?\.?|до|максимум|не\s+более|bis|hochstens|tot|maximaal|do|maksymalnie|upp\s+till|till|hogst|som\s+mest)`;
 const CUR = String.raw`\s*(?:€|eur\w*|евро)?\s*`;
 
 export function readPayStatement(text: string): PayStatement {
@@ -64,9 +77,16 @@ export function readPayStatement(text: string): PayStatement {
 
   // A rate right after a figure ("15 €/val.", "120 eur per day") is not monthly.
   for (const n of nums) {
-    if (PER_TIME.test(q.slice(n.end, n.end + 16).replace(/^\s*(€|eur\w*|евро)?/, ""))) {
+    if (PER_TIME.test(q.slice(n.end, n.end + 16).replace(/^\s*(€|eur\w*|евро|kr(?![\p{L}])|kronor|sek(?![\p{L}]))?/u, ""))) {
       return { kind: "not-monthly" };
     }
+  }
+  // Not euros → never a euro figure (see `other-currency`).
+  for (const n of figures) {
+    const after = OTHER_CURRENCY_AFTER.exec(q.slice(n.end, n.end + 8));
+    const before = OTHER_CURRENCY_BEFORE.exec(q.slice(Math.max(0, n.at - 6), n.at));
+    const currency = after?.[1] ?? before?.[1];
+    if (currency) return { kind: "other-currency", currency };
   }
 
   const ok = (v: number) => v >= MIN_MONTHLY && v <= MAX_MONTHLY;
@@ -79,6 +99,13 @@ export function readPayStatement(text: string): PayStatement {
     if (min !== null && max !== null && ok(min) && ok(max)) {
       return min <= max ? { kind: "range", min, max } : { kind: "none" };
     }
+  }
+  // sv "mellan 3000 och 3500 euro" — "och" joins a range only after "mellan".
+  const between = new RegExp(String.raw`mellan${CUR}${NUM}${CUR}och${CUR}${NUM}`).exec(q);
+  if (between) {
+    const min = toInt(between[1]!);
+    const max = toInt(between[2]!);
+    if (min !== null && max !== null && ok(min) && ok(max) && min <= max) return { kind: "range", min, max };
   }
   const from = new RegExp(String.raw`${FROM_WORDS}${CUR}${NUM}`).exec(q);
   if (from) {
