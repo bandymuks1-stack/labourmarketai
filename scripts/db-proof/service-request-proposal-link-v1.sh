@@ -113,6 +113,7 @@ check "rollback REFUSES while a proposal is linked" "refused" "$([ $RC -ne 0 ] &
 check "the refused rollback changed nothing (function and column still there)" "1:1" "$(q "select (select count(*) from pg_proc where proname='create_proposal_from_service_request_v1')||':'||(select count(*) from information_schema.columns where table_name='proposals' and column_name='service_offering_request_id');")"
 $PSQL -c "update public.proposals set service_offering_request_id = null;" >/dev/null
 $PSQL -v ON_ERROR_STOP=1 -f "$LFD/$NAME.down.sql" >/dev/null 2>"$LFD/err" && { echo "  PASS  rollback applies once unlinked"; pass=$((pass+1)); } || { echo "  FAIL  rollback"; cat "$LFD/err"; fail=$((fail+1)); }
+$PSQL -v ON_ERROR_STOP=1 -f "$LFD/$NAME.down.sql" >/dev/null 2>"$LFD/err" && { echo "  PASS  rollback re-runs cleanly (column already gone)"; pass=$((pass+1)); } || { echo "  FAIL  rollback re-run"; cat "$LFD/err"; fail=$((fail+1)); }
 check "rollback restores the exact column set" "$C0" "$(colmd5)"
 check "rollback leaves every other function and ACL as before" "$F0" "$(premd5)"
 check "rollback leaves every policy as before" "$P0" "$(polmd5)"

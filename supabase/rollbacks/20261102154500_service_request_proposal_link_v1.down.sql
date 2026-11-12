@@ -11,8 +11,16 @@ drop function if exists public.create_proposal_from_service_request_v1(uuid, tex
 drop index if exists public.proposals_service_offering_request_idx;
 
 do $$
+declare v_linked boolean := false;
 begin
-  if exists (select 1 from public.proposals where service_offering_request_id is not null) then
+  -- Re-runnable: once the column is gone there is nothing left to protect.
+  if exists (select 1 from information_schema.columns
+              where table_schema = 'public' and table_name = 'proposals'
+                and column_name = 'service_offering_request_id') then
+    execute 'select exists (select 1 from public.proposals where service_offering_request_id is not null)'
+      into v_linked;
+  end if;
+  if v_linked then
     raise exception 'proposals still linked to service requests; refusing to drop the link column';
   end if;
 end $$;

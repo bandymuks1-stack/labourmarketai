@@ -60,7 +60,10 @@ describe("service request → proposal link (RED-1)", () => {
 
   it("rolls back without erasing a linked offer", () => {
     expect(down).toMatch(/drop function if exists public\.create_proposal_from_service_request_v1\(uuid, text, bigint, text, text, date\);/);
-    expect(down).toMatch(/if exists \(select 1 from public\.proposals where service_offering_request_id is not null\) then\s+raise exception/);
+    expect(down).toMatch(/select exists \(select 1 from public\.proposals where service_offering_request_id is not null\)/);
+    expect(down).toMatch(/if v_linked then\s+raise exception/);
+    // Re-runnable: the linked-row check only runs while the column exists.
+    expect(down).toMatch(/information_schema\.columns[\s\S]+column_name = 'service_offering_request_id'/);
     expect(down.indexOf("raise exception")).toBeLessThan(down.indexOf("drop column"));
   });
 });
