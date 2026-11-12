@@ -46,7 +46,7 @@
 | No rate limiting beyond Supabase defaults on auth endpoints | credential stuffing slows only at Supabase's layer | evaluate before public launch |
 | Notification spine missing | security emails/alerts have no in-product mirror | audit §17.4 owner decision |
 | Chat removal and an alert already in flight (2026-11-12, #3224) | low; no message content is involved | open item; the analysis and the fix proposal are in the owner's private Internal Brain (public repo, AGENTS.md) |
-| Chat attachment link issued before a removal (2026-11-12) | low: a participant's attachment link is signed for 300 s, so a link already issued keeps working until it expires after that person is removed; it reaches only files they could already see, and new access is refused | open item; fix options: (a) a shorter link lifetime, (b) downloads through an app route that re-checks participation (needs owner OK) |
+| Chat attachment access around a removal (2026-11-12) | low; only files the person could already see | open item; the analysis and the fix options are in the owner's private Internal Brain (public repo, AGENTS.md) |
 
 ## 4. Responsibility split
 
