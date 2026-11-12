@@ -581,142 +581,134 @@ function rowConversationId(row: {
   return typeof id === "string" && id.length > 0 ? id : null;
 }
 
-export function isLostConversationRow(
-  row: { readonly entityType: string; readonly metadata: NotificationEventMetadata },
-  lost: ReadonlySet<string>,
-): boolean {
-  const id = rowConversationId(row);
-  return id !== null && lost.has(id);
-}
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** Upper bound on the threads one person was removed from that the filter
+ *  carries (it travels in the request URL). Beyond it the oldest removals
+ *  simply stay visible as before — never a wrong hide. */
+const LOST_THREADS_MAX = 200;
 
 /**
- * The threads the READER can no longer open, among those their bell rows
- * point at (P0 chat privacy, owner 2026-11-11). Read under the reader's own
- * session: `conversation_participants_select` shows a live participant every
- * row of the thread, but a REMOVED participant only their own (revoked) row.
- * So a thread is still open to the reader exactly when they can see at least
- * one live (`revoked_at is null`) row of it — their own.
- *
- * Read-time only: the rows stay in the store as audit facts (never deleted,
- * never re-marked). `unreadHidden` counts the reader's UNREAD rows of lost
- * threads so the badge does not count what the feed hides. The extra scan
- * for unread rows OUTSIDE the loaded window runs only when the caller says
- * such rows exist (`scanUnreadBeyondWindow`), and the participant read only
- * when some row points at a thread — so a feed with no chat rows costs no
- * extra request (the dashboard request budget,
- * lib/perf/dashboard-render-request-count.test.ts).
- * A failed read hides nothing — the feed is then exactly as before, and the
- * thread itself stays closed by RLS. Exported for tests.
+ * The threads the READER was removed from (P0 chat privacy, owner
+ * 2026-11-11): their OWN participant rows with `revoked_at` set, read under
+ * their own session (`conversation_participants_select` always shows a
+ * person their own row). Exact and small — one row per removal, never the
+ * co-participants of live threads, so no API row cap can truncate it into a
+ * wrong answer. Null when it cannot be read: the caller then hides nothing
+ * (the thread itself stays closed by RLS). Exported for tests.
  */
 export async function lostConversationIds(
   client: DbClient,
-  loaded: readonly {
-    readonly entityType: string;
-    readonly metadata: NotificationEventMetadata;
-    readonly readAt?: string | null;
-  }[],
-  opts: { readonly scanUnreadBeyondWindow?: boolean } = {},
-): Promise<{ readonly ids: ReadonlySet<string>; readonly unreadHidden: number }> {
-  const none = { ids: new Set<string>(), unreadHidden: 0 };
+  readerProfileId: string,
+): Promise<readonly string[] | null> {
   try {
-    const windowIds = loaded.map(rowConversationId);
-    // The unread rows the badge counts: the loaded window's, or — when the
-    // total says more exist beyond it — a bounded scan of all of them.
-    let unreadIds = loaded
-      .filter((r) => r.readAt === null)
-      .map(rowConversationId)
-      .filter((id): id is string => id !== null);
-    if (opts.scanUnreadBeyondWindow) {
-      const unreadRes = await client
-        .from("notification_events")
-        .select("metadata")
-        .eq("entity_type", "conversation")
-        .is("read_at", null)
-        .limit(FEED_LIMIT_MAX);
-      if (!unreadRes.error) {
-        unreadIds = ((unreadRes.data ?? []) as { metadata?: NotificationEventMetadata | null }[])
-          .map((r) => rowConversationId({ entityType: "conversation", metadata: r.metadata ?? {} }))
-          .filter((id): id is string => id !== null);
-      }
-    }
-    const ids = new Set<string>([
-      ...windowIds.filter((id): id is string => id !== null),
-      ...unreadIds,
-    ]);
-    if (ids.size === 0) return none;
     const { data, error } = await client
       .from("conversation_participants")
-      .select("conversation_id, revoked_at")
-      .in("conversation_id", [...ids]);
-    if (error) return none;
-    const open = new Set(
-      ((data ?? []) as { conversation_id: string; revoked_at: string | null }[])
-        .filter((r) => r.revoked_at == null)
-        .map((r) => r.conversation_id),
-    );
-    const lost = new Set([...ids].filter((id) => !open.has(id)));
-    return { ids: lost, unreadHidden: unreadIds.filter((id) => lost.has(id)).length };
+      .select("conversation_id")
+      .eq("profile_id", readerProfileId)
+      .not("revoked_at", "is", null)
+      .limit(LOST_THREADS_MAX);
+    if (error) return null;
+    return ((data ?? []) as { conversation_id?: string | null }[])
+      .map((r) => r.conversation_id)
+      .filter((id): id is string => typeof id === "string" && UUID_RE.test(id));
   } catch {
-    return none;
+    return null;
   }
+}
+
+/** The PostgREST filter that keeps every row except a lost thread's chat
+ *  rows. Applied IN the query, so the page limit and the unread count are
+ *  both computed over what the reader may still see. Ids are uuid-checked
+ *  before they reach the filter string. */
+export function lostThreadsFilter(lost: readonly string[]): string | null {
+  const ids = lost.filter((id) => UUID_RE.test(id));
+  if (ids.length === 0) return null;
+  return `entity_type.neq.conversation,metadata->>conversationId.is.null,metadata->>conversationId.not.in.(${ids.join(",")})`;
+}
+
+type RawFeedRow = Record<string, unknown>;
+
+function toEventRow(row: RawFeedRow): NotificationEventRow {
+  return {
+    id: String(row.id),
+    eventType: row.event_type as NotificationEventType,
+    entityType: row.entity_type as NotificationEntityType,
+    entityId: String(row.entity_id),
+    createdAt: String(row.created_at),
+    readAt: (row.read_at as string | null) ?? null,
+    metadata: (row.metadata as NotificationEventMetadata) ?? {},
+  };
 }
 
 /** The recipient's own feed, newest first, with the true unread count.
  *  `limit` defaults to the bell's 20; the activity page passes a higher
  *  value (clamped to FEED_LIMIT_MAX) so stored facts older than the bell
- *  window stay reachable. */
+ *  window stay reachable.
+ *
+ *  A thread the reader was REMOVED from keeps its rows (audit facts, never
+ *  deleted or re-marked) but they leave the feed and the unread total. The
+ *  removal check runs only when it can matter — the page holds a chat row,
+ *  or more unread rows exist than the page shows — so an ordinary feed costs
+ *  no extra request; when it finds a removal, the feed and the count are
+ *  read again with those threads excluded IN the query (a full page, an
+ *  exact count). */
 export async function readMyNotificationEvents(
   client: DbClient,
   limit: number = FEED_LIMIT,
 ): Promise<NotificationFeedResult> {
   const rowLimit = Math.max(1, Math.min(Math.floor(limit), FEED_LIMIT_MAX));
-  try {
-    const [{ data, error }, unreadRes] = await Promise.all([
-      client
-        .from("notification_events")
-        .select("id, event_type, entity_type, entity_id, created_at, read_at, metadata")
-        .order("created_at", { ascending: false })
-        .limit(rowLimit),
-      // The unread TOTAL is its own count query: counting unread rows inside
-      // the loaded window capped it at the window (20 by default) and let the
-      // "unread" number disagree with the real backlog.
-      client
-        .from("notification_events")
-        .select("id", { count: "exact", head: true })
-        .is("read_at", null),
+  const read = (filter: string | null) => {
+    const feed = client
+      .from("notification_events")
+      .select("id, recipient_profile_id, event_type, entity_type, entity_id, created_at, read_at, metadata");
+    // The unread TOTAL is its own count query: counting unread rows inside
+    // the loaded window capped it at the window (20 by default) and let the
+    // "unread" number disagree with the real backlog.
+    const count = client
+      .from("notification_events")
+      .select("id", { count: "exact", head: true });
+    return Promise.all([
+      (filter ? feed.or(filter) : feed).order("created_at", { ascending: false }).limit(rowLimit),
+      (filter ? count.or(filter) : count).is("read_at", null),
     ]);
+  };
+  try {
+    const [{ data, error }, unreadRes] = await read(null);
     if (error) {
       if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
         return { kind: "feature_unavailable" };
       }
       return { kind: "unexpected_error", code: error.code ?? "unknown" };
     }
-    const loaded = (data ?? []).map((row) => {
-      const r = row as Record<string, unknown>;
-      return {
-        id: String(r.id),
-        eventType: r.event_type as NotificationEventType,
-        entityType: r.entity_type as NotificationEntityType,
-        entityId: String(r.entity_id),
-        createdAt: String(r.created_at),
-        readAt: (r.read_at as string | null) ?? null,
-        metadata: (r.metadata as NotificationEventMetadata) ?? {},
-      };
-    });
-    // A thread the reader was REMOVED from keeps its rows (audit facts, never
-    // deleted) but they leave the active feed and the unread total.
-    const exact =
+    const firstRaw = (data ?? []) as RawFeedRow[];
+    let rows = firstRaw.map(toEventRow);
+    let exact =
       !unreadRes.error && typeof unreadRes.count === "number" ? unreadRes.count : null;
-    const loadedUnread = loaded.filter((e) => e.readAt === null).length;
-    const lost = await lostConversationIds(client, loaded, {
-      scanUnreadBeyondWindow: exact !== null && exact > loadedUnread,
-    });
-    const events = loaded.filter((e) => !isLostConversationRow(e, lost.ids));
+
+    // Every row is the reader's own (RLS), so any row names the reader.
+    const owner = firstRaw.find((r) => typeof r.recipient_profile_id === "string");
+    const reader = owner ? String(owner.recipient_profile_id) : null;
+    const loadedUnread = rows.filter((r) => r.readAt === null).length;
+    const mayHoldChat =
+      rows.some((r) => rowConversationId(r) !== null) || (exact !== null && exact > loadedUnread);
+    if (reader && mayHoldChat) {
+      const filter = lostThreadsFilter((await lostConversationIds(client, reader)) ?? []);
+      if (filter) {
+        const [again, againUnread] = await read(filter);
+        if (!again.error) {
+          rows = ((again.data ?? []) as RawFeedRow[]).map(toEventRow);
+          exact =
+            !againUnread.error && typeof againUnread.count === "number" ? againUnread.count : null;
+        }
+      }
+    }
+
+    const events: NotificationEventRow[] = rows;
     const windowUnread = events.filter((e) => e.readAt === null).length;
     return {
       kind: "ready",
       events,
-      unreadCount: exact === null ? windowUnread : Math.max(0, exact - lost.unreadHidden),
+      unreadCount: exact ?? windowUnread,
       ...(exact === null ? { unreadCountIsWindowOnly: true } : {}),
     };
   } catch {
