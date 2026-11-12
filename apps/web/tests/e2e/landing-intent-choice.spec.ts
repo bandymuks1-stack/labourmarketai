@@ -180,6 +180,31 @@ for (const vp of [
   });
 }
 
+test.describe("Close never leaves the page it was opened on", () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+  // Codex P2 on c1caca4: two goals, Back, Close went back past the landing.
+  test("jobs → home → work → workers → Back → Close stays on home", async ({ page }) => {
+    await page.goto("/en/pricing");
+    await page.goto("/en");
+    await page.getByTestId("goal-rail").locator('[data-card-id="work"]').click();
+    await page.getByTestId("goal-rail").locator('[data-card-id="workers"]').click();
+    await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", "workers");
+    await page.goBack();
+    await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", "work");
+    await page.getByTestId("goal-panel-close").click();
+    await expect(page.getByTestId("goal-panel")).toHaveCount(0);
+    await expect(page).toHaveURL(/\/en$/);
+    // And once more through Forward: still the same page.
+    await page.goForward();
+    await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", "work");
+    await page.goForward();
+    await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", "workers");
+    await page.getByTestId("goal-panel-close").click();
+    await expect(page.getByTestId("goal-panel")).toHaveCount(0);
+    await expect(page).toHaveURL(/\/en$/);
+  });
+});
+
 test.describe("swipe", () => {
   test.use({ viewport: { width: 360, height: 740 }, hasTouch: true, isMobile: true });
   test("a sideways swipe moves the goal rail and the page stays put", async ({ page }) => {

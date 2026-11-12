@@ -112,8 +112,11 @@ describe("the URL is the state — a fragment, not a page", () => {
   it("the active goal is read from the fragment; choosing pushes it without a jump", () => {
     expect(navigator).toMatch(/useSyncExternalStore\(subscribeToFragment, readFragment, readServerFragment\)/);
     expect(navigator).toMatch(/goalFromFragment\(fragment\)/);
-    expect(navigator).toMatch(/window\.history\.pushState\(null, "", goalHref\(card\.id as PublicIntentId\)\)/);
-    expect(navigator).toMatch(/window\.history\.go\(-steps\)/);
+    expect(navigator).toMatch(/window\.history\.pushState\(\s*(?:\/\/[^\n]*\n\s*)*\{ \[GOAL_DEPTH_KEY\]: goalDepth\(\) \+ 1 \},/);
+    // Close reads the depth from the CURRENT history entry (Codex P2 on
+    // c1caca4): a running count of selections went too far after Back.
+    expect(navigator).toMatch(/const depth = goalDepth\(\);\s*if \(depth > 0\) \{[\s\S]{0,120}window\.history\.go\(-depth\)/);
+    expect(navigator).not.toMatch(/useRef|pushed\.current/);
     expect(navigator).toMatch(/addEventListener\("popstate", onChange\)/);
   });
 

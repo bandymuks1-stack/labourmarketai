@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { X } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -43,6 +43,13 @@ function subscribeToFragment(onChange: () => void) {
   };
 }
 const readFragment = () => window.location.hash;
+
+/** History-state key: goal entries between this entry and the origin page. */
+const GOAL_DEPTH_KEY = "lmGoalDepth";
+function goalDepth(): number {
+  const value = (window.history.state as Record<string, unknown> | null)?.[GOAL_DEPTH_KEY];
+  return typeof value === "number" && value > 0 ? value : 0;
+}
 /** The server renders no fragment: nothing chosen, the rail alone. */
 const readServerFragment = () => "";
 
@@ -81,8 +88,6 @@ export function GoalNavigator({
   const fragment = useSyncExternalStore(subscribeToFragment, readFragment, readServerFragment);
   const activeId = goalFromFragment(fragment);
   const active = goals.find((g) => g.id === activeId) ?? null;
-  /** How many goals this visit opened — Close then goes Back. */
-  const pushed = useRef(0);
   const [tab, setTab] = useState<"functions" | "professions">("functions");
   const [sector, setSector] = useState<string | null>(null);
   const [fullList, setFullList] = useState(false);
@@ -92,22 +97,33 @@ export function GoalNavigator({
     if (card.id === activeId) return;
     setTab("functions");
     // pushState, not `location.hash =`: no element carries this id, and the
-    // page must not jump. popstate is not fired by pushState, so say so.
-    window.history.pushState(null, "", goalHref(card.id as PublicIntentId));
-    pushed.current += 1;
+    // page must not jump. The entry itself records how many goal entries lie
+    // between it and the page the visitor chose from, so Close is right
+    // however they moved through history in between (Back, Forward, another
+    // goal). popstate is not fired by pushState, so say so.
+    window.history.pushState(
+      // Only our own key: the router adds its own bookkeeping to a new
+      // entry, and copying the current entry's would hand it a stale one.
+      { [GOAL_DEPTH_KEY]: goalDepth() + 1 },
+      "",
+      goalHref(card.id as PublicIntentId),
+    );
     window.dispatchEvent(new HashChangeEvent("hashchange"));
   };
 
   const close = () => {
-    if (pushed.current > 0) {
-      const steps = pushed.current;
-      pushed.current = 0;
-      // Back to where the visitor chose from.
-      window.history.go(-steps);
+    const depth = goalDepth();
+    if (depth > 0) {
+      // Back to exactly where the visitor chose from — never further.
+      window.history.go(-depth);
       return;
     }
     // Opened from a shared link: drop the fragment, stay on the page.
-    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    window.history.replaceState(
+      window.history.state,
+      "",
+      window.location.pathname + window.location.search,
+    );
     window.dispatchEvent(new HashChangeEvent("hashchange"));
   };
 
