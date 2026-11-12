@@ -3,7 +3,7 @@
  * Public CTA crawl — every public page, every routed locale, phone and desktop.
  *
  *   node apps/web/scripts/public-cta-crawl.mjs [--origin https://labourmarket.ai]
- *        [--locales lt,en] [--widths 360,1440] [--max-pages 0] [--out report.json]
+ *        [--locales lt,en] [--widths 360,1440] [--press-widths 360,1440] [--max-pages 0] [--out report.json]
  *        [--no-clicks] [--max-presses 25] [--delay-ms 150] [--static-via-node]
  *
  * What it reports, per page and width:
@@ -18,6 +18,8 @@
  *     "dead" when the click changes nothing a person could notice (no navigation,
  *     no request, no DOM change, no new tab);
  *     an error thrown or a script that fails to load when a button is pressed is a finding too;
+ *   - acceptance gates: sign-in and sign-up reachable within two actions on every page, no
+ *     menu shown twice, no visible control that cannot be pressed;
  *   - banned words in the visible copy ("demo", doctrine §18).
  *
  * READ-ONLY BY CONSTRUCTION. Signed out, no cookies kept between pages, and every
@@ -53,6 +55,8 @@ function activeLocales() {
 const ORIGIN = arg("origin", "https://labourmarket.ai").replace(/\/+$/, "");
 const LOCALES = arg("locales", activeLocales().join(",")).split(",");
 const WIDTHS = arg("widths", "360,1440").split(",").map(Number);
+/** Widths at which buttons are pressed (default: every width). Layout, links and the acceptance checks run at all widths. */
+const PRESS_WIDTHS = arg("press-widths", "") ? arg("press-widths", "").split(",").map(Number) : WIDTHS;
 const MAX_PAGES = Number(arg("max-pages", "0"));
 const DELAY_MS = Number(arg("delay-ms", "150"));
 const OUT = arg("out", "");
@@ -238,6 +242,45 @@ async function crawlPage(context, path, width, discovered) {
     return; // nothing on a crashed page is worth clicking
   }
 
+  // ---- acceptance: sign-in and sign-up within two actions; one main menu ------
+  if (!/\/auth\//.test(path)) {
+    const authVisible = () =>
+      page.evaluate(() => {
+        const seen = (re) => [...document.querySelectorAll("a[href]")].some((a) => re.test(a.getAttribute("href") ?? "") && !!(a.offsetWidth || a.offsetHeight || a.getClientRects().length));
+        return { login: seen(/\/auth\/(login|sign-?in)/), signup: seen(/\/auth\/(signup|sign-?up|register)/) };
+      });
+    let auth = await authVisible();
+    let actions = 1; // one press on the visible link
+    if (!auth.login || !auth.signup) {
+      // One more action is allowed: opening the page's menu.
+      const toggle = page.locator('[data-testid="mobile-nav-toggle"], header button[aria-controls][aria-expanded="false"]').first();
+      if (await toggle.isVisible().catch(() => false)) {
+        await toggle.click({ timeout: 1_500 }).catch(() => {});
+        await page.waitForTimeout(300);
+        const opened = await authVisible();
+        auth = { login: auth.login || opened.login, signup: auth.signup || opened.signup };
+        actions = 2;
+        await page.keyboard.press("Escape").catch(() => {});
+        if (await toggle.getAttribute("aria-expanded").catch(() => null) === "true") await toggle.click({ timeout: 1_500 }).catch(() => {});
+      }
+    }
+    if (!auth.login) report("auth-not-findable", path, width, `sign-in is not reachable within 2 actions`);
+    if (!auth.signup) report("auth-not-findable", path, width, `sign-up is not reachable within 2 actions`);
+    authActions.push(actions);
+  }
+  // Two visible menus that offer mostly the same destinations are one menu shown twice.
+  const menus = await page.evaluate(() =>
+    [...document.querySelectorAll("nav, [role=navigation]")]
+      .filter((n) => !n.closest("footer") && !!(n.offsetWidth || n.offsetHeight || n.getClientRects().length))
+      .map((n) => [...new Set([...n.querySelectorAll("a[href]")].filter((a) => !!(a.offsetWidth || a.offsetHeight || a.getClientRects().length)).map((a) => a.getAttribute("href")))])
+      .filter((hrefs) => hrefs.length >= 3),
+  );
+  for (let i = 0; i < menus.length; i++)
+    for (let j = i + 1; j < menus.length; j++) {
+      const shared = menus[i].filter((h) => menus[j].includes(h)).length;
+      if (shared / Math.min(menus[i].length, menus[j].length) >= 0.6) report("duplicate-menu", path, width, `two visible menus share ${shared} of ${Math.min(menus[i].length, menus[j].length)} destinations`);
+    }
+
   // ---- links -------------------------------------------------------------
   const links = await page.evaluate(() =>
     [...document.querySelectorAll("a")].map((a) => ({
@@ -301,7 +344,7 @@ async function crawlPage(context, path, width, discovered) {
   t0 = Date.now();
 
   // ---- buttons -----------------------------------------------------------
-  if (CLICKS) {
+  if (CLICKS && PRESS_WIDTHS.includes(width)) {
     const count = await page.locator("button, [role=button]").count();
     let presses = 0;
     for (let i = 0; i < Math.min(count, 80) && presses < MAX_PRESSES; i++) {
@@ -364,7 +407,14 @@ async function crawlPage(context, path, width, discovered) {
         page.off("request", onRequest);
         context.off("page", onPopup);
         lap(tc, `press "${info.text.slice(0, 30)}" ${clicked ? "ok" : "not pressable"}`);
-        if (!clicked) break; // covered or moved away: not something a person could press either
+        if (!clicked) {
+          // Still there, still enabled, and the press could not land: something covers it or
+          // it sits outside what can be scrolled to. Checked twice before it is said.
+          const still = await button.evaluate((el) => !!(el.offsetWidth || el.offsetHeight) && el.disabled !== true && el.isConnected, undefined, { timeout: 1_000 }).catch(() => false);
+          if (still && attempt === 2) report("control-not-pressable", path, width, `"${info.text || info.testid || "(no text)"}" is visible and enabled but cannot be pressed (covered or clipped)`);
+          if (still && attempt === 1) continue;
+          break;
+        }
         const after = await visiblePageState(page).catch(() => null);
         if (!after) break;
         const changed =
@@ -397,6 +447,8 @@ async function crawlPage(context, path, width, discovered) {
 
 const activeLocaleSet = new Set(activeLocales());
 const pressCount = new Map();
+/** Actions needed to reach sign-in and sign-up, one entry per page and width (1 = visible, 2 = behind the menu). */
+const authActions = [];
 /** A page's shape: its path without the locale and without ids. */
 const pageShape = (p) => p.split("?")[0].split("/").slice(2).map((s) => (/\d/.test(s) || s.length > 24 ? ":id" : s)).join("/");
 /** A language switcher is allowed to leave the locale. */
@@ -447,6 +499,8 @@ async function main() {
   const byKind = {};
   for (const f of findings) (byKind[f.kind] ??= []).push(f);
   console.log(`\npages crawled: ${visited.size} × ${WIDTHS.length} widths · link targets resolved: ${resolved.size} · findings: ${findings.length}`);
+  const maxAuth = authActions.length ? Math.max(...authActions) : 0;
+  console.log(`acceptance: sign-in and sign-up checked on ${authActions.length} page views, most actions needed ${maxAuth}; widths ${WIDTHS.join("/")}`);
   for (const [kind, list] of Object.entries(byKind).sort()) {
     console.log(`\n${kind} (${list.length})`);
     // The same defect on the same page in every locale reads as one line.
