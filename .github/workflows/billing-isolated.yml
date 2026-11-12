@@ -164,6 +164,10 @@ jobs:
           [ "$files" -eq "$rows" ] || { echo "::error::replay incomplete"; exit 1; }
 
       - name: Build
+        env:
+          # The same heap the other build jobs use (e2e-smoke.yml, quality.yml):
+          # at Node's default limit this build runs out of memory intermittently.
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build
 
       - name: Guard — the build inlined the local Supabase URL
