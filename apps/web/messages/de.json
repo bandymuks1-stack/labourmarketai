@@ -1969,11 +1969,13 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Ihr Unternehmen ist noch nicht verifiziert; die hier eingereichten Anfragen werden Arbeitskräften erst nach Abschluss der Verifizierung angezeigt.",
+    "notVerifiedYetUnconfirmedShown": "Ihr Unternehmen ist noch nicht verifiziert. Ihre Anfragen können trotzdem Arbeitskräften und auf der öffentlichen Jobbörse angezeigt werden, gekennzeichnet mit „Unternehmen nicht bestätigt“, sobald die Pflichtfelder ausgefüllt sind und die automatischen Prüfungen bestanden sind; sonst warten sie auf die Prüfung durch unser Team.",
     "notVerifiedHowTo": "Registernummer ergänzen und eine Prüfung anfragen",
     "statusOther": "In Prüfung",
     "heading": "Ihre eingereichten Anfragen",
     "note": "In Ihrem privaten Bereich gespeichert und manuell geprüft — wir schlagen keine Kandidaten automatisch vor. Statusaktualisierungen erscheinen hier.",
     "workerVisibilityNote": "Ehrlicher Status: Anfragen verifizierter Unternehmen werden Arbeitskräften auf ihrem Chancen-Board angezeigt. Die Verifizierung ist eine manuelle Prüfung — bis Ihr Unternehmen verifiziert ist, bleiben Ihre Anfragen privat für Sie und das Prüfteam.",
+    "workerVisibilityNoteUnconfirmedShown": "Ehrlicher Status: Anfragen verifizierter Unternehmen werden Arbeitskräften angezeigt. Eine Anfrage eines nicht verifizierten Unternehmens wird ebenfalls angezeigt, gekennzeichnet mit „Unternehmen nicht bestätigt“, wenn die Pflichtfelder ausgefüllt sind und die automatischen Prüfungen bestanden sind. Bei jeder Anfrage steht, ob sie angezeigt wird oder auf Prüfung wartet.",
     "empty": "Noch keine Anfragen eingereicht. Reichen Sie Ihre Anfrage oben ein — sie erscheint hier mit ihrem Status.",
     "created": "Erstellt",
     "manageHelp": "Schließen Sie eine Anfrage ab, nehmen Sie sie vom Markt oder veröffentlichen Sie sie erneut direkt in dieser Liste; einen Entwurf können Sie fortsetzen oder verwerfen. Das Bestätigen der erkannten Fähigkeiten erfolgt über die Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
@@ -1998,7 +2000,29 @@
     "supplyHeading": "Von Ihnen angebotene Kapazität",
     "supplyNote": "Das sind Menschen, von denen Sie dem Markt gesagt haben, dass Sie sie HABEN — nicht solche, die Sie suchen. Sie sind gespeichert und für Sie sichtbar. Arbeitgeber können angebotene Kapazität noch nicht durchsuchen, daher hat sich dazu noch niemand gemeldet.",
     "capacityNeeded": "{count} benötigt",
-    "capacityInterested": "{count} interessiert"
+    "capacityInterested": "{count} interessiert",
+    "publicState": {
+      "unconfirmed_public": "Öffentlich angezeigt · gekennzeichnet mit „Unternehmen nicht bestätigt“",
+      "held_incomplete": "Wartet auf Prüfung: ein Pflichtfeld fehlt",
+      "held_review": "Wartet auf Prüfung durch unser Team",
+      "rejected": "Nach Prüfung nicht öffentlich angezeigt"
+    },
+    "publicReason": {
+      "missing_role": "Tätigkeit fehlt",
+      "missing_country": "Land fehlt",
+      "missing_location": "Ort fehlt",
+      "missing_company_name": "Firmenname fehlt",
+      "missing_company_country": "Land des Unternehmens fehlt",
+      "company_draft": "Unternehmensprofil noch nicht aktiviert",
+      "link": "ein Link im angezeigten Text",
+      "email": "eine E-Mail-Adresse im angezeigten Text",
+      "phone": "eine Telefonnummer im angezeigten Text",
+      "contact_channel": "ein Messenger-Kontakt im angezeigten Text",
+      "pitch": "liest sich wie Werbung",
+      "rate": "viele Anfragen in 24 Stunden",
+      "duplicate_text": "derselbe Text wurde zuvor von einem anderen Unternehmen veröffentlicht",
+      "disposable_email": "mit einer Wegwerf-E-Mail-Adresse registriert"
+    }
   },
   "journey": {
     "eyebrow": "So funktioniert es",
@@ -3219,6 +3243,17 @@
         "needsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
         "saving": "Wird gespeichert…",
         "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+      },
+      "needsQueue": {
+        "title": "Bedarfe, die auf die Prüfung zur Veröffentlichung warten",
+        "subtitle": "Bedarfe nicht verifizierter Unternehmen, die von den automatischen Prüfungen zurückgehalten wurden. Freigeben, um einen mit „Unternehmen nicht bestätigt“ gekennzeichnet anzuzeigen; ablehnen, um ihn privat zu halten. Eine Entscheidung gilt nur für den aktuellen Text: Eine Änderung wird erneut geprüft.",
+        "empty": "Keine Bedarfe warten auf Prüfung.",
+        "unavailable": "Die Prüfwarteschlange konnte nicht gelesen werden. Das ist nicht dasselbe wie eine leere Warteschlange.",
+        "approve": "Freigeben: als nicht bestätigt anzeigen",
+        "reject": "Ablehnen",
+        "reasonsLabel": "Warum zurückgehalten",
+        "saved": "Entscheidung gespeichert.",
+        "failed": "Die Entscheidung wurde nicht gespeichert. Nichts wurde geändert."
       }
     },
     "companyNeedIntakes": {
@@ -10565,7 +10600,8 @@
       "emptyTitle": "Gerade nichts Passendes",
       "emptyBody": "Keine geprüfte Möglichkeit passt gut genug zu Ihren Angaben, um sie zu empfehlen. Ergänzen Sie Beruf, Fähigkeiten oder Länder, in denen Sie arbeiten möchten — oder sehen Sie sich den ganzen Markt an.",
       "improveProfile": "Profil ergänzen"
-    }
+    },
+    "companyNotConfirmed": "Unternehmen nicht bestätigt"
   },
   "workerIntake": {
     "title": "Arbeitskraft-Aufnahme",
@@ -20553,5 +20589,13 @@
         "error": "Das hat nicht geklappt. Versuchen Sie es später erneut."
       }
     }
+  },
+  "publicCompanyNeeds": {
+    "title": "Bedarfe, die Unternehmen auf LabourMarket.ai veröffentlicht haben",
+    "intro": "Direkt von Unternehmen veröffentlicht. „Unternehmen nicht bestätigt“ heißt, dass wir das Unternehmen noch nicht verifiziert haben; sein Bedarf hat unsere automatischen Prüfungen bestanden. Kontaktdaten werden hier nie angezeigt — melden Sie sich an, um zu antworten.",
+    "people": "{count, plural, one {# Person} other {# Personen}}",
+    "respond": "Anmelden, um zu antworten",
+    "openBoard": "In Ihren Möglichkeiten öffnen",
+    "roleUnknown": "Arbeit"
   }
 }

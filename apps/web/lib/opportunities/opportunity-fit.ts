@@ -166,6 +166,10 @@ export function workerOpportunityNextAction(input: {
 
 export const WORKER_VISIBLE_ROUTE_STATUSES: readonly string[] = [
   "approved_direct_partner",
+  // Owner decision V-1 (2026-11-12): a need of a company that is NOT verified,
+  // admitted by the database's one rule (need_public_state_v1). Shown with a
+  // "Company not confirmed" label, never with the verified badge.
+  "unconfirmed_company",
   "trusted_partner",
   "works_through_approved_route",
   "our_operating_company_approved",

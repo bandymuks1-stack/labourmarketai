@@ -218,6 +218,23 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
     residualRisk:
       "Bounded spam: at most 30 rows/hour platform-wide of ≤ ~8 KB each, and unsolicited PII may still arrive within that bound. Returns only the row's own id (the earlier one on an exact resubmission), so it is not an enumeration oracle.",
   },
+  {
+    name: "list_public_company_needs_v1",
+    identityArgs: "p_query text, p_country text",
+    mutates: false,
+    publicCaller:
+      "Owner decision V-1 (2026-11-12): the 'Needs posted by companies' section of the public job board (app/[locale]/(marketing)/jobs) and the MCP `jobs.search` capability. Lists submitted demand of verified companies and, labelled 'Company not confirmed', of unconfirmed companies the one rule admitted.",
+    authorization:
+      "Every row passes `need_public_state_v1` (the ONE rule, 20261112100000): submitted, a demand kind, a company resolved through the need's own organization, and either a verified company or an unconfirmed one whose required fields are filled and whose deterministic antispam checks passed (or an operator approved this exact content). Synthetic QA fixtures are always excluded. Drafts, closed needs, supply offers, held and rejected needs are never returned.",
+    inputValidation:
+      "`p_query` truncated to 80 chars, lower-cased and stripped to letters, digits, spaces and hyphens before a `strpos` match (no LIKE wildcard reaches the plan); `p_country` used only when it matches ^[A-Z]{2}$, otherwise ignored. Bounded by `limit 50`.",
+    abuseControls:
+      "No DB-level rate limit. Read-only and idempotent; at most 50 rows of nine non-contact columns, so the abuse ceiling is scraping of needs their companies posted to the market.",
+    definerJustification:
+      "`customer_requests` and `companies` have no anon grant or anon policy; DEFINER is what narrows anonymous access to exactly nine columns of eligible needs instead of opening either table.",
+    residualRisk:
+      "Exposes the company's display name next to a need, including for a company that is not verified (labelled as such). Contact e-mail and phone, the poster, title, description, notes and payload are never returned. The antispam rule is deterministic and can be evaded by a careful spammer; such a need would still carry the 'Company not confirmed' label and no contact data.",
+  },
 ] as const;
 
 /** `name(identityArgs)` — the canonical key used for every comparison. */

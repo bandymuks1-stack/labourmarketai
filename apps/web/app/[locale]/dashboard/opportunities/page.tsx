@@ -121,6 +121,7 @@ import type {
 import { createUtcFormatter } from "@/lib/time/display";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+import { UNCONFIRMED_COMPANY_ROUTE_STATUS } from "@/lib/opportunities/public-company-needs-model";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
 export const generateMetadata = dashboardPageMetadata("/dashboard/opportunities", "opportunities.world.title");
@@ -1478,6 +1479,14 @@ export default async function OpportunitiesPage({
                                                 data-testid="opportunity-company-verified"
                                               >
                                                 {t("companyVerified")}
+                                              </span>
+                                            ) : need.routeStatus === UNCONFIRMED_COMPANY_ROUTE_STATUS ? (
+                                              /* Owner decision V-1: shown, and SAID to be unconfirmed. */
+                                              <span
+                                                className="ml-2 rounded-sm border border-state-warning/40 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning"
+                                                data-testid="opportunity-company-not-confirmed"
+                                              >
+                                                {t("companyNotConfirmed")}
                                               </span>
                                             ) : null}
                                           </>

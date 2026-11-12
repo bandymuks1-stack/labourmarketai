@@ -75,6 +75,7 @@ export async function projectOpportunitiesResult(
       needSkillsUnconfirmed: m.needSkillsUnconfirmed,
       isNew: m.isNew,
       companyName: m.companyName,
+      companyConfirmed: m.companyConfirmed,
       fitStatus: m.status,
       // The worker's own signal, from the same view — never guessed, and
       // absent-key means "no signal", not "not interested".

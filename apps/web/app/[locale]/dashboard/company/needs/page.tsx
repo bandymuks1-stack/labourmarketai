@@ -12,6 +12,8 @@ import {
 import { actsAsAgency, resolveNeedsAudience } from "@/lib/company/agency-capability";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
+import { readMyNeedPublicStates } from "@/lib/opportunities/public-company-needs";
+import { demandReachesWorkers } from "@/lib/market-lifecycle/adapters";
 import { listClaimablePublicIntakesState } from "@/lib/company/claim-public-intake";
 import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
 import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interest";
@@ -124,6 +126,25 @@ export default async function CompanyNeedsPage({
       readDemandReadbackLabels(),
       readOpenNeedsUsage(),
     ]);
+
+  // OWNER DECISION V-1: for a company that is not verified, each submitted need
+  // says whether the one database rule shows it (labelled "Company not
+  // confirmed"), holds it for review, or rejected it.
+  // The V-1 wording is used only once the rule exists in this database.
+  const v1 = demandReachesWorkers(companyRow.verificationStatus)
+    ? null
+    : await readMyNeedPublicStates(
+        demandReadback.kind === "ok"
+          ? demandReadback.rows
+              .filter((r) => r.direction === "demand" && r.status === "submitted")
+              .map((r) => r.id)
+          : [],
+      );
+  const unconfirmedShown = v1?.provisioned === true;
+  const publicStates = unconfirmedShown ? v1.states : undefined;
+  const readbackLabelsV1 = unconfirmedShown
+    ? { ...readbackLabels, workerVisibilityNote: tReadback("workerVisibilityNoteUnconfirmedShown") }
+    : readbackLabels;
 
   // An unverified address reads NOTHING from the intake queue (the service role is
   // never reached); the page offers the progressive proof instead — and says
@@ -245,21 +266,21 @@ export default async function CompanyNeedsPage({
             usage={openNeedsUsage}
             organizationId={employerCtx.kind === "ok" ? employerCtx.organizationId : null}
           />
-          {/* HONEST VISIBILITY (2026-09-22): `list_open_demand_for_workers`
-              shows a need to workers ONLY when companies.verification_status
-              = 'verified' (migration 20260906140000, the join on
-              c.verification_status). Every other status — active_unverified,
-              needs_checks, pending_verification, unverified, draft — keeps the
-              need private to this company and the review team, so the page
-              says so in the person's language instead of implying a reach it
-              does not have. Status-aware: a verified company never sees it. */}
+          {/* HONEST VISIBILITY (owner decision V-1, 2026-11-12): a verified
+              company's needs reach workers as before. A company that is not
+              verified sees that its needs are shown, marked "Company not
+              confirmed", only when the database's one rule
+              (need_public_state_v1) admits them; each row below says which.
+              Status-aware: a verified company never sees this note. */}
           {companyRow.verificationStatus !== "verified" ? (
             <p
               className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-meta leading-relaxed text-text-secondary"
               data-testid="company-needs-not-verified-note"
               data-verification-status={companyRow.verificationStatus}
             >
-              {tReadback("notVerifiedYet")}{" "}
+              {unconfirmedShown
+                ? tReadback("notVerifiedYetUnconfirmedShown")
+                : tReadback("notVerifiedYet")}{" "}
               {/* The way forward, not only the fact: the company setup screen
                   holds the registration code and the optional review request
                   an operator verifies against. Nothing is verified here. */}
@@ -287,10 +308,11 @@ export default async function CompanyNeedsPage({
           honest stored status only, with the per-demand scouting deep link. */}
       <DemandRequestsReadback
         result={demandReadback}
-        labels={readbackLabels}
+        labels={readbackLabelsV1}
         locale={locale}
         pendingInterest={pendingInterest}
         companyVerificationStatus={companyRow.verificationStatus}
+        publicStates={publicStates}
       />
 
       {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC

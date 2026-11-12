@@ -46,6 +46,7 @@ function oppFacts(over: Partial<WeeklyOpportunityFacts> = {}): WeeklyOpportunity
 
 function rec(over: Partial<JobRecommendation> = {}): JobRecommendation {
   return {
+    companyConfirmed: true,
     requestId: "req-1",
     roleSlug: "welder",
     country: "LT",

@@ -10,6 +10,8 @@ import {
 } from "@/components/app/company-verification-review";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+import { listNeedPublicReviewQueue } from "@/lib/admin/need-public-review";
+import { NeedPublicReviewControls } from "@/components/app/need-public-review-controls";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
 export const generateMetadata = dashboardPageMetadata("/dashboard/admin/company-verification");
@@ -47,7 +49,12 @@ export default async function AdminCompanyVerificationPage({
 
   const t = await getTranslations("admin.companyVerification");
   const tReq = await getTranslations("roleDashboards.company.setup");
-  const result = await listCompanyVerificationRequests();
+  const [result, needsQueue] = await Promise.all([
+    listCompanyVerificationRequests(),
+    listNeedPublicReviewQueue(),
+  ]);
+  const tQueue = await getTranslations("admin.companyVerification.needsQueue");
+  const tReadbackQ = await getTranslations("demandReadback");
   const rows = result.kind === "ok" ? result.rows : [];
   const migrationNeeded = result.kind === "needs-migration";
   const pendingCount = rows.filter(
@@ -86,6 +93,70 @@ export default async function AdminCompanyVerificationPage({
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
         <PageBack href={"/dashboard/admin" as "/dashboard"}>{t("back")}</PageBack>
       </header>
+
+      {/* OWNER DECISION V-1 (2026-11-12): needs of companies that are not
+          verified, held by the database's one rule (need_public_state_v1).
+          Approving shows a need marked "Company not confirmed" — it never
+          verifies the company; verifying stays the list below. */}
+      {/* Always rendered: before the V-1 migration is applied its reader
+          fails and the section says it could not be read (never "empty"). */}
+        <section className="flex flex-col gap-3" aria-labelledby="need-public-review-title" data-testid="need-public-review-queue">
+          <h2 id="need-public-review-title" className="font-display text-base font-semibold text-text-primary">
+            {tQueue("title")}
+          </h2>
+          <p className="text-sm text-text-secondary">{tQueue("subtitle")}</p>
+          {needsQueue.kind === "error" ? (
+            <p role="status" className="rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning">
+              {tQueue("unavailable")}
+            </p>
+          ) : needsQueue.rows.length === 0 ? (
+            <p className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-muted" data-testid="need-public-review-empty">
+              {tQueue("empty")}
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {needsQueue.rows.map((n) => (
+                <li
+                  key={n.requestId}
+                  className="flex flex-col gap-2 rounded-md border border-border-default p-4"
+                  data-testid={`need-public-review-row-${n.requestId}`}
+                  data-state={n.state}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <span className="text-sm font-semibold text-text-primary">{n.roleText ?? n.title ?? "—"}</span>
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        {n.companyName ?? "—"} · {[n.locationLabel, n.country].filter(Boolean).join(" · ") || "—"}
+                      </span>
+                    </div>
+                    <span className="rounded-sm border border-state-warning/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">
+                      {n.state === "held_incomplete" || n.state === "held_review" || n.state === "rejected"
+                        ? tReadbackQ(`publicState.${n.state}`)
+                        : n.state}
+                    </span>
+                  </div>
+                  {n.reasons.length > 0 ? (
+                    <p className="text-meta text-text-secondary">
+                      <span className="font-mono uppercase tracking-label text-text-muted">{tQueue("reasonsLabel")}:</span>{" "}
+                      {n.reasons.map((code) => tReadbackQ(`publicReason.${code}` as never)).join(", ")}
+                    </p>
+                  ) : null}
+                  <NeedPublicReviewControls
+                    requestId={n.requestId}
+                    labels={{
+                      approve: tQueue("approve"),
+                      reject: tQueue("reject"),
+                      noteLabel: t("noteLabel"),
+                      saved: tQueue("saved"),
+                      failed: tQueue("failed"),
+                      saving: t("result.saving"),
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
       {migrationNeeded ? (
         <p

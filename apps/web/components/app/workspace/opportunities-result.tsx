@@ -369,6 +369,16 @@ function MatchRow({
         >
           {tFind(FIT_LABEL[match.fitStatus] ?? FIT_LABEL.insufficient)}
         </span>
+        {/* Owner decision V-1: a company that is not verified is SAID so —
+            a label, never a softer verification badge. */}
+        {match.companyName && match.companyConfirmed === false && (
+          <span
+            className="rounded-full border border-state-warning/40 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning"
+            data-testid="opportunities-match-company-not-confirmed"
+          >
+            {tOpp("companyNotConfirmed")}
+          </span>
+        )}
         {claimNovelty && match.isNew && (
           <span
             className="rounded-full bg-brand-cyan/15 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"

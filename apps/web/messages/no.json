@@ -1,6 +1,7 @@
 {
   "demandReadback": {
     "notVerifiedYet": "Bedriften din er ennå ikke verifisert, så behovene du sender inn her vises ikke for arbeidere før verifiseringen er fullført.",
+    "notVerifiedYetUnconfirmedShown": "Bedriften din er ikke verifisert ennå. Forespørslene dine kan likevel vises for arbeidstakere og på den offentlige jobbtavlen, merket «Bedriften er ikke bekreftet», når de obligatoriske feltene er fylt ut og de automatiske kontrollene er bestått; ellers venter de på gjennomgang av teamet vårt.",
     "notVerifiedHowTo": "Legg til organisasjonsnummer og be om en gjennomgang",
     "heading": "[EN] Your submitted requests",
     "note": "[EN] Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
@@ -17,7 +18,30 @@
     "supplyHeading": "Kapasitet du har tilbudt",
     "supplyNote": "Dette er personer du har fortalt markedet at du HAR, ikke personer du søker etter. De er lagret og synlige for deg. Arbeidsgivere kan ennå ikke søke i tilbudt kapasitet, så ingen har tatt kontakt om disse.",
     "capacityNeeded": "{count} trengs",
-    "capacityInterested": "{count} interesserte"
+    "capacityInterested": "{count} interesserte",
+    "workerVisibilityNoteUnconfirmedShown": "Ærlig status: forespørsler fra verifiserte bedrifter vises for arbeidstakere. En forespørsel fra en bedrift som ikke er verifisert, vises også, merket «Bedriften er ikke bekreftet», når de obligatoriske feltene er fylt ut og de automatiske kontrollene er bestått. Ved hver forespørsel står det om den vises eller venter på gjennomgang.",
+    "publicState": {
+      "unconfirmed_public": "Vises offentlig · merket «Bedriften er ikke bekreftet»",
+      "held_incomplete": "Venter på gjennomgang: et obligatorisk felt mangler",
+      "held_review": "Venter på gjennomgang av teamet vårt",
+      "rejected": "Vises ikke offentlig etter gjennomgang"
+    },
+    "publicReason": {
+      "missing_role": "arbeid mangler",
+      "missing_country": "land mangler",
+      "missing_location": "sted mangler",
+      "missing_company_name": "bedriftsnavn mangler",
+      "missing_company_country": "bedriftens land mangler",
+      "company_draft": "bedriftsprofilen er ikke aktivert ennå",
+      "link": "en lenke i den viste teksten",
+      "email": "en e-postadresse i den viste teksten",
+      "phone": "et telefonnummer i den viste teksten",
+      "contact_channel": "en meldingskontakt i den viste teksten",
+      "pitch": "leses som en reklame",
+      "rate": "mange forespørsler på 24 timer",
+      "duplicate_text": "samme tekst ble tidligere publisert av en annen bedrift",
+      "disposable_email": "registrert med en engangs-e-postadresse"
+    }
   },
   "journey": {
     "eyebrow": "Slik fungerer det",
@@ -2423,7 +2447,8 @@
       "profession": "hva slags arbeid du gjør",
       "country": "hvilke land du vil jobbe i",
       "cta": "Fyll ut mine ønsker"
-    }
+    },
+    "companyNotConfirmed": "Bedriften er ikke bekreftet"
   },
   "scouting": {
     "pool": {
@@ -7946,5 +7971,13 @@
       "allow": "Tillat",
       "refuse": "Avslå"
     }
+  },
+  "publicCompanyNeeds": {
+    "title": "Behov som bedrifter har publisert på LabourMarket.ai",
+    "intro": "Publisert direkte av bedrifter. «Bedriften er ikke bekreftet» betyr at vi ikke har verifisert bedriften ennå; behovet har bestått de automatiske kontrollene våre. Kontaktopplysninger vises aldri her — logg inn for å svare.",
+    "people": "{count, plural, one {# person} other {# personer}}",
+    "respond": "Logg inn for å svare",
+    "openBoard": "Åpne i mulighetene dine",
+    "roleUnknown": "Arbeid"
   }
 }

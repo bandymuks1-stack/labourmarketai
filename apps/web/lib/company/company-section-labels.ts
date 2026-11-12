@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
 import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
+import { NEED_PUBLIC_REASONS } from "@/lib/opportunities/public-company-needs-model";
 
 /**
  * ORGANIZATION SECTION LABELS — the message plumbing the company hub used to
@@ -62,6 +63,16 @@ export async function readDemandReadbackLabels() {
     },
     opportunityTypeValues: Object.fromEntries(
       OPPORTUNITY_TYPES.map((v) => [v, tStructured(`opportunityType.${v}`)]),
+    ),
+    // Owner decision V-1: the states and reasons of the one database rule.
+    publicState: {
+      unconfirmed_public: tReadback("publicState.unconfirmed_public"),
+      held_incomplete: tReadback("publicState.held_incomplete"),
+      held_review: tReadback("publicState.held_review"),
+      rejected: tReadback("publicState.rejected"),
+    },
+    publicReason: Object.fromEntries(
+      NEED_PUBLIC_REASONS.map((code) => [code, tReadback(`publicReason.${code}` as never) as string]),
     ),
     urgencyValues: {
       flexible: tWow("demand.form.urgencyFlexible"),

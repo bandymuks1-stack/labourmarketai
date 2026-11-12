@@ -1969,11 +1969,13 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Je bedrijf is nog niet geverifieerd; de aanvragen die je hier indient worden pas aan werknemers getoond zodra de verificatie is afgerond.",
+    "notVerifiedYetUnconfirmedShown": "Je bedrijf is nog niet geverifieerd. Je aanvragen kunnen toch aan werkenden en op het openbare vacaturebord worden getoond, gemarkeerd met „Bedrijf niet bevestigd”, zodra de verplichte velden zijn ingevuld en de automatische controles slagen; anders wachten ze op beoordeling door ons team.",
     "notVerifiedHowTo": "Registratienummer toevoegen en een controle aanvragen",
     "statusOther": "In beoordeling",
     "heading": "Je ingediende aanvragen",
     "note": "Opgeslagen in je privéruimte en handmatig beoordeeld — we stellen niet automatisch kandidaten voor. Statusupdates verschijnen hier.",
     "workerVisibilityNote": "Eerlijke status: personeelsaanvragen van geverifieerde bedrijven worden aan werknemers getoond op hun kansenbord. Verificatie is een handmatige beoordeling — totdat je bedrijf geverifieerd is, blijven je aanvragen privé voor jou en het beoordelingsteam.",
+    "workerVisibilityNoteUnconfirmedShown": "Eerlijke status: aanvragen van geverifieerde bedrijven worden aan werkenden getoond. Een aanvraag van een niet-geverifieerd bedrijf wordt ook getoond, gemarkeerd met „Bedrijf niet bevestigd”, als de verplichte velden zijn ingevuld en de automatische controles slagen. Bij elke aanvraag staat of ze wordt getoond of op beoordeling wacht.",
     "empty": "Nog geen aanvragen ingediend. Dien je aanvraag hierboven in en die verschijnt hier met de status.",
     "created": "Aangemaakt",
     "manageHelp": "Rond een aanvraag af, haal haar van de markt of publiceer haar opnieuw, direct in deze lijst; een concept kun je voortzetten of verwerpen. Het bevestigen van de herkende vaardigheden doe je vanuit de scoutingweergave. Ingediende tekst bewerken is nog niet mogelijk.",
@@ -1998,7 +2000,29 @@
     "supplyHeading": "Door u aangeboden capaciteit",
     "supplyNote": "Dit zijn mensen waarvan u de markt hebt verteld dat u ze HEEFT, niet mensen die u zoekt. Ze zijn opgeslagen en voor u zichtbaar. Werkgevers kunnen aangeboden capaciteit nog niet doorzoeken, dus hierover heeft nog niemand contact opgenomen.",
     "capacityNeeded": "{count} nodig",
-    "capacityInterested": "{count} geïnteresseerd"
+    "capacityInterested": "{count} geïnteresseerd",
+    "publicState": {
+      "unconfirmed_public": "Openbaar getoond · gemarkeerd met „Bedrijf niet bevestigd”",
+      "held_incomplete": "Wacht op beoordeling: een verplicht veld ontbreekt",
+      "held_review": "Wacht op beoordeling door ons team",
+      "rejected": "Na beoordeling niet openbaar getoond"
+    },
+    "publicReason": {
+      "missing_role": "functie ontbreekt",
+      "missing_country": "land ontbreekt",
+      "missing_location": "plaats ontbreekt",
+      "missing_company_name": "bedrijfsnaam ontbreekt",
+      "missing_company_country": "land van het bedrijf ontbreekt",
+      "company_draft": "bedrijfsprofiel nog niet geactiveerd",
+      "link": "een link in de getoonde tekst",
+      "email": "een e-mailadres in de getoonde tekst",
+      "phone": "een telefoonnummer in de getoonde tekst",
+      "contact_channel": "een messengercontact in de getoonde tekst",
+      "pitch": "leest als een advertentie",
+      "rate": "veel aanvragen in 24 uur",
+      "duplicate_text": "dezelfde tekst is eerder door een ander bedrijf geplaatst",
+      "disposable_email": "aangemeld met een wegwerp-e-mailadres"
+    }
   },
   "journey": {
     "eyebrow": "Hoe het werkt",
@@ -3219,6 +3243,17 @@
         "needsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw.",
         "saving": "Opslaan…",
         "error": "Er is iets misgegaan. Probeer het opnieuw."
+      },
+      "needsQueue": {
+        "title": "Behoeften die wachten op beoordeling voor publicatie",
+        "subtitle": "Behoeften van niet-geverifieerde bedrijven, tegengehouden door de automatische controles. Keur goed om er een te tonen met „Bedrijf niet bevestigd”; wijs af om hem privé te houden. Een besluit geldt alleen voor de huidige tekst: een wijziging wordt opnieuw gecontroleerd.",
+        "empty": "Er wachten geen behoeften op beoordeling.",
+        "unavailable": "De beoordelingswachtrij kon niet worden gelezen. Dat is niet hetzelfde als een lege wachtrij.",
+        "approve": "Goedkeuren: tonen als niet bevestigd",
+        "reject": "Afwijzen",
+        "reasonsLabel": "Waarom tegengehouden",
+        "saved": "Besluit opgeslagen.",
+        "failed": "Het besluit is niet opgeslagen. Er is niets veranderd."
       }
     },
     "companyNeedIntakes": {
@@ -10565,7 +10600,8 @@
       "emptyTitle": "Nu niets passends",
       "emptyBody": "Geen enkele bekeken mogelijkheid past goed genoeg bij je gegevens om aan te raden. Vul je beroep, vaardigheden of landen waar je wilt werken aan — of bekijk de hele markt.",
       "improveProfile": "Profiel aanvullen"
-    }
+    },
+    "companyNotConfirmed": "Bedrijf niet bevestigd"
   },
   "workerIntake": {
     "title": "Werknemersintake",
@@ -20553,5 +20589,13 @@
         "error": "Dat lukte niet. Probeer het later opnieuw."
       }
     }
+  },
+  "publicCompanyNeeds": {
+    "title": "Behoeften die bedrijven op LabourMarket.ai plaatsten",
+    "intro": "Direct door bedrijven geplaatst. „Bedrijf niet bevestigd” betekent dat we het bedrijf nog niet hebben geverifieerd; de behoefte heeft onze automatische controles doorstaan. Contactgegevens worden hier nooit getoond — log in om te reageren.",
+    "people": "{count, plural, one {# persoon} other {# personen}}",
+    "respond": "Log in om te reageren",
+    "openBoard": "Openen in je kansen",
+    "roleUnknown": "Werk"
   }
 }

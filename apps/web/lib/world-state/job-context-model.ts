@@ -29,6 +29,7 @@ import type { WorkerNextAction } from "@/lib/opportunities/opportunity-fit";
 import type { MatchResultV1 } from "@/lib/market/match-v1";
 import type { StructuredDemandPublic } from "@/lib/opportunities/structured-public";
 import { CONTEXT_RECOMMENDATION_LIMIT } from "./entity-context";
+import { isUnconfirmedCompanyRoute } from "@/lib/opportunities/public-company-needs-model";
 
 /** The route status the worker-facing "verified company" badge keys on. The
  *  SAME real signal the opportunities board uses — never copy, never a guess. */
@@ -61,6 +62,8 @@ export interface JobContextModel {
   readonly companyName: string | null;
   /** True only for an admin-verified supply route (real signal, not copy). */
   readonly verifiedRoute: boolean;
+  /** True for a need of a company that is not verified (owner decision V-1). */
+  readonly unconfirmedCompany: boolean;
   readonly roleSlug: string | null;
   readonly country: string | null;
   readonly locationLabel: string | null;
@@ -136,6 +139,7 @@ export function deriveJobContextModel(card: OpportunityCard): JobContextModel {
     requestId: need.id,
     companyName: need.companyName ?? null,
     verifiedRoute: need.routeStatus === VERIFIED_ROUTE_STATUS,
+    unconfirmedCompany: isUnconfirmedCompanyRoute(need.routeStatus),
     roleSlug: need.roleText,
     country: need.country,
     locationLabel: need.locationLabel ?? null,

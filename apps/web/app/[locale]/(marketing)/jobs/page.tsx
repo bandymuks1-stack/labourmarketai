@@ -36,6 +36,8 @@ import {
   PUBLIC_VACANCY_PROFESSION_SLUGS,
   readProfessionSlugParam,
 } from "@/lib/vacancy-store/public-vacancy-professions";
+import { PublicCompanyNeedsSection } from "@/components/marketing/public-company-needs-section";
+import { listPublicCompanyNeeds } from "@/lib/opportunities/public-company-needs";
 
 /**
  * THE PUBLIC JOB BOARD.
@@ -434,7 +436,12 @@ export default async function JobsPage({
   // not wait for their bookmarks before it starts (2026-11-04: on a first search
   // the two together took 1.1 s in sequence before the search's own 1.1 s). The
   // saved view reads no board unless its bookmarks turn out to be unavailable.
-  const [member, earlyBoardSearch] = await Promise.all([
+  // Owner decision V-1 (2026-11-12): needs companies posted on the platform —
+  // verified ones and, labelled "Company not confirmed", unconfirmed ones the
+  // database's one rule admitted. First page of the board only, never the
+  // personal saved view. Its own anonymous-safe reader, in parallel.
+  const showCompanyNeeds = !wantsSaved && page === 1;
+  const [member, earlyBoardSearch, companyNeeds] = await Promise.all([
     (async () => {
       const u = supabase ? (await supabase.auth.getUser()).data.user : null;
       const id = supabase && u ? await resolveOwnWorkerId(supabase, u.id) : null;
@@ -445,6 +452,7 @@ export default async function JobsPage({
       return { user: u, mySaved: saved };
     })(),
     wantsSaved ? null : runBoardSearch(),
+    showCompanyNeeds ? listPublicCompanyNeeds({ query }, supabase ?? undefined) : null,
   ]);
   const { user, mySaved } = member;
 
@@ -686,6 +694,10 @@ export default async function JobsPage({
         </p>
       ) : (
         <>
+          {companyNeeds?.status === "ok" ? (
+            <PublicCompanyNeedsSection needs={companyNeeds.needs} signedIn={user !== null} locale={active} />
+          ) : null}
+
           {/* role="status": a search is a full navigation, so the result count
               is the one thing a screen reader must hear after it lands. */}
           <p role="status" className="mt-6 text-sm text-text-muted">

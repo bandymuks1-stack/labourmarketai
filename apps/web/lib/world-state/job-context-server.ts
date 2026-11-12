@@ -224,7 +224,12 @@ async function localizeJobContext(
     title,
     // Keyed on the RPC's real route status, exactly like the board's badge —
     // an unverified company simply gets no badge, never a softer wording.
-    badge: model.verifiedRoute ? (t("companyVerified") as string) : null,
+    // V-1: a company that is not verified is labelled as such — never badged.
+    badge: model.verifiedRoute
+      ? (t("companyVerified") as string)
+      : model.unconfirmedCompany
+        ? (t("companyNotConfirmed") as string)
+        : null,
     // The §19 basis line IS the description of this match — the same sentence
     // every other marketplace surface renders for the same demand.
     description: basisLine,
