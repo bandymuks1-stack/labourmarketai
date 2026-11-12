@@ -274,6 +274,27 @@ test("10. C cannot re-add or un-revoke itself, nor add someone to read for it", 
   expect(rows.length === 1 && rows[0]!.revoked_at !== null, "still removed").toBe(true);
 });
 
+test("cleanup dry-run: exactly the rows the owner SQL would delete, all of this thread", async () => {
+  const a = bearerOf("owner");
+  const list = async (path: `/${string}`, token: string) => {
+    const res = await qaApi(path, token);
+    expect(res.status, `dry-run read ${path.split("?")[0]}`).toBe(200);
+    return (await res.json()) as { conversation_id?: string; id?: string; profile_id?: string }[];
+  };
+  const participants = await list(`/rest/v1/conversation_participants?select=conversation_id,profile_id&conversation_id=eq.${conv}`, a);
+  const messages = await list(`/rest/v1/conversation_messages?select=id,conversation_id&conversation_id=eq.${conv}`, a);
+  const attachments = await list(`/rest/v1/conversation_message_attachments?select=id,conversation_id&conversation_id=eq.${conv}`, a);
+  // Every listed row belongs to THIS thread — the delete is by id, never by pattern.
+  for (const r of [...participants, ...messages, ...attachments]) expect(r.conversation_id).toBe(conv);
+  expect(new Set(participants.map((p) => p.profile_id)), "only A, B and C").toEqual(new Set([A, B, C]));
+  const bells: Record<string, number> = {};
+  for (const slot of ["worker", "worker2"]) bells[slot] = await bellRows(bearerOf(slot));
+  console.info(
+    `[chat-revocation] dry-run for thread ${conv}: conversations 1, participants ${participants.length}, ` +
+      `messages ${messages.length}, attachments ${attachments.length}, bell rows B ${bells.worker} C ${bells.worker2}`,
+  );
+});
+
 test("cleanup: the file goes, the bells are read; the thread is an owner SQL step", async () => {
   if (attachmentPath) {
     const del = await qaStorage(`/storage/v1/object/${BUCKET}/${attachmentPath}`, bearerOf("owner"), {
