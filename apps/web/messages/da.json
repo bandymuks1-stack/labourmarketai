@@ -1,7 +1,7 @@
 {
   "demandReadback": {
     "notVerifiedYet": "Din virksomhed er endnu ikke verificeret, så de behov, du indsender her, vises ikke for arbejdere, før verificeringen er gennemført.",
-    "notVerifiedYetUnconfirmedShown": "Din virksomhed er endnu ikke verificeret. Dine forespørgsler kan stadig vises for arbejdstagere og på den offentlige jobtavle, markeret „Virksomheden er ikke bekræftet“, når de obligatoriske felter er udfyldt og de automatiske kontroller er bestået; ellers venter de på gennemgang af vores team.",
+    "notVerifiedYetUnconfirmedShown": "Din virksomhed er endnu ikke verificeret. En forespørgsel, du vælger at „Offentliggør“, vises for arbejdstagere og på den offentlige jobtavle, markeret „Virksomheden er ikke bekræftet“, når de obligatoriske felter er udfyldt og de automatiske kontroller er bestået; ellers venter den på gennemgang af vores team. Intet er offentligt, før du vælger det.",
     "notVerifiedHowTo": "Tilføj registreringsnummer og anmod om en gennemgang",
     "heading": "[EN] Your submitted requests",
     "note": "[EN] Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
@@ -19,8 +19,9 @@
     "supplyNote": "Det er personer, du har fortalt markedet, at du HAR, ikke personer du søger. De er gemt og synlige for dig. Arbejdsgivere kan endnu ikke søge i tilbudt kapacitet, så ingen har henvendt sig om disse.",
     "capacityNeeded": "{count} behøves",
     "capacityInterested": "{count} interesserede",
-    "workerVisibilityNoteUnconfirmedShown": "Ærlig status: forespørgsler fra verificerede virksomheder vises for arbejdstagere. En forespørgsel fra en virksomhed, der ikke er verificeret, vises også, markeret „Virksomheden er ikke bekræftet“, når de obligatoriske felter er udfyldt og de automatiske kontroller er bestået. Ved hver forespørgsel står der, om den vises eller venter på gennemgang.",
+    "workerVisibilityNoteUnconfirmedShown": "Ærlig status: forespørgsler fra verificerede virksomheder vises for arbejdstagere. En forespørgsel fra en virksomhed, der ikke er verificeret, vises kun, hvis du vælger „Offentliggør“ for den, markeret „Virksomheden er ikke bekræftet“, når de obligatoriske felter er udfyldt og de automatiske kontroller er bestået. Ved hver forespørgsel står der, om den er offentliggjort, vises eller venter på gennemgang.",
     "publicState": {
+      "not_published": "Ikke offentlig: du har ikke valgt at offentliggøre",
       "unconfirmed_public": "Vises offentligt · markeret „Virksomheden er ikke bekræftet“",
       "held_incomplete": "Venter på gennemgang: et obligatorisk felt mangler",
       "held_review": "Venter på gennemgang af vores team",
@@ -41,6 +42,13 @@
       "rate": "mange forespørgsler på 24 timer",
       "duplicate_text": "samme tekst blev tidligere slået op af en anden virksomhed",
       "disposable_email": "tilmeldt med en engangs-e-mailadresse"
+    },
+    "publication": {
+      "publish": "Offentliggør",
+      "withdraw": "Stop offentliggørelse",
+      "explain": "Når forespørgslen offentliggøres, vises den på den offentlige jobtavle og for arbejdstagere, markeret „Virksomheden er ikke bekræftet“: type arbejde, land, sted, holdstørrelse, start, dato og din virksomheds navn. Indloggede arbejdstagere ser også de vilkår, du har angivet (løn, skema, bolig, transport, krav). Dine kontaktoplysninger, beskrivelse, noter og dokumenter vises aldrig. Vores kontroller kører først og kan tilbageholde den til gennemgang. Du kan stoppe offentliggørelsen når som helst.",
+      "failed": "Dit valg blev ikke gemt. Intet blev ændret.",
+      "saving": "Gemmer…"
     }
   },
   "journey": {

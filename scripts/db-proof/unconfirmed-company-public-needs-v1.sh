@@ -55,11 +55,13 @@ DUP=b0000000-0000-4000-8000-000000000007   # unconfirmed, copies UNC's summary
 ADV=b0000000-0000-4000-8000-000000000008   # unconfirmed, advert pitch in private notes
 SYN=b0000000-0000-4000-8000-000000000009   # unconfirmed synthetic QA fixture
 DRF=b0000000-0000-4000-8000-00000000000b   # company still in draft
+NOP=b0000000-0000-4000-8000-00000000000c   # unconfirmed, clean, NEVER published (default off)
+MGR=b0000000-0000-4000-8000-00000000000d   # a manager of the clean company (not the poster)
 OUT=b0000000-0000-4000-8000-00000000000a   # signed-in stranger
 
 $PSQL -v ON_ERROR_STOP=1 >/dev/null 2>"$ERR" <<SQL || { echo "seed FAILED"; cat "$ERR"; exit 1; }
 insert into public.profiles(id, is_admin) values ('$ADMIN', true), ('$WRK', false), ('$VER', false), ('$UNC', false),
-  ('$SPM', false), ('$INC', false), ('$DSP', false), ('$RAT', false), ('$DUP', false), ('$ADV', false), ('$SYN', false), ('$OUT', false), ('$DRF', false);
+  ('$SPM', false), ('$INC', false), ('$DSP', false), ('$RAT', false), ('$DUP', false), ('$ADV', false), ('$SYN', false), ('$OUT', false), ('$DRF', false), ('$NOP', false), ('$MGR', false);
 insert into auth.users(id, email) select id, 'p' || substr(id::text, 34) || '@firma.lt' from public.profiles;
 update auth.users set email = 'x@mailinator.com' where id = '$DSP';
 insert into public.workers(profile_id) values ('$WRK');
@@ -72,7 +74,7 @@ begin
       ('$SPM'::uuid, 'Spam UAB', 'active_unverified'), ('$INC'::uuid, 'Incomplete UAB', 'pending_verification'),
       ('$DSP'::uuid, 'Disposable UAB', 'active_unverified'), ('$RAT'::uuid, 'Burst UAB', 'active_unverified'),
       ('$DUP'::uuid, 'Copy UAB', 'active_unverified'), ('$ADV'::uuid, 'Advert UAB', 'unverified'),
-      ('$SYN'::uuid, 'QA-SYNTHETIC UAB', 'active_unverified'), ('$DRF'::uuid, 'Draft UAB', 'draft')) v(pid, name, st)
+      ('$SYN'::uuid, 'QA-SYNTHETIC UAB', 'active_unverified'), ('$DRF'::uuid, 'Draft UAB', 'draft'), ('$NOP'::uuid, 'Quiet UAB', 'active_unverified')) v(pid, name, st)
   loop
     insert into public.companies(profile_id, display_name, country, contact_email, contact_phone, verification_status)
       values (p.pid, p.name, 'LT', 'secret@firma.lt', '+37060000000', p.st) returning id into c;
@@ -97,6 +99,9 @@ select pg_temp.need('$DUP', 'electrician', 'Vilnius', 'Wiring of a new warehouse
 select pg_temp.need('$ADV', 'driver', 'Panevezys', 'Driver.', 'We sell b2b data: 5 million companies, lifetime deal at www.leads.io');
 select pg_temp.need('$SYN', 'mason', 'Vilnius', 'Masonry.');
 select pg_temp.need('$DRF', 'plumber', 'Vilnius', 'Plumbing.');
+select pg_temp.need('$NOP', 'roofer', 'Utena', 'Roof repair on a school building, two weeks in spring.');
+insert into public.company_memberships
+  select '$MGR', o.id, 'active', 'manager' from public.organizations o where o.display_name = 'Clean UAB';
 insert into public.customer_requests(profile_id, organization_id, title, role_or_work_type, country, location, status, kind)
   select '$UNC', o.id, 'draft', 'roofer', 'LT', 'Kaunas', 'draft', 'company_request'
     from public.organizations o join public.companies c on c.id = o.legacy_company_id where c.profile_id = '$UNC';
@@ -115,18 +120,26 @@ echo; echo "== Before (20261029190000): workers see only the verified company"
 check "board = verified only" "Verified UAB:approved_direct_partner" "$(board)"
 
 apply "$MIG"
-echo; echo "== After V-1: one rule"
+echo; echo "== Principle C: nothing is public before the company's explicit choice"
+check "no need of an unconfirmed company is shown before any choice (worker board)" "Verified UAB:approved_direct_partner" "$(board)"
+check "no need at all on the signed-out reader before any choice" "0" "$(anon "select count(*) from public.list_public_company_needs_v1();")"
+check "a clean need without a choice is not_published (not held, not in the queue)" "not_published" "$(q "select state from public.need_public_state_v1('$(rid $UNC)');")"
+# The companies' explicit choice, seeded as publish events for every unconfirmed need but Quiet UAB's.
+$PSQL -c "insert into public.customer_request_publications (request_id, action, actor_id)
+  select cr.id, 'publish', cr.profile_id from public.customer_requests cr
+   where cr.status = 'submitted' and cr.profile_id not in ('$VER', '$NOP');" >/dev/null
+echo; echo "== After the choice: one rule"
 check "worker board: verified unchanged + clean unconfirmed labelled; burst shows its first 5" \
   "Burst UAB:unconfirmed_company,Burst UAB:unconfirmed_company,Burst UAB:unconfirmed_company,Burst UAB:unconfirmed_company,Burst UAB:unconfirmed_company,Clean UAB:unconfirmed_company,Verified UAB:approved_direct_partner" "$(board)"
-check "signed-out public reader agrees (same set)" \
-  "Burst UAB:false,Burst UAB:false,Burst UAB:false,Burst UAB:false,Burst UAB:false,Clean UAB:false,Verified UAB:true" \
+check "signed-out reader: published unconfirmed only; verified needs keep their visibility (not here)" \
+  "Burst UAB:false,Burst UAB:false,Burst UAB:false,Burst UAB:false,Burst UAB:false,Clean UAB:false" \
   "$(anon "select string_agg(company_name || ':' || company_confirmed, ',' order by company_name) from public.list_public_company_needs_v1();")"
 check "public reader returns exactly 9 columns, no contact/poster/text" \
   "id,role_text,country,location_label,team_size,start_period,created_at,company_name,company_confirmed" \
   "$(q "select string_agg(a, ',' order by o) from unnest((select proargnames from pg_proc where proname='list_public_company_needs_v1')) with ordinality t(a,o) where a not like 'p\_%';")"
 has "public reader leaks no contact e-mail or phone" "^0$" "$(anon "select count(*) from public.list_public_company_needs_v1() x where x::text ~ '(secret@|\\+3706)';")"
 check "query filter: 'electr' finds the clean need only" "electrician" "$(anon "select string_agg(role_text, ',') from public.list_public_company_needs_v1('electr');")"
-check "country filter: a bad code is ignored, LV finds nothing" "7|0" "$(anon "select count(*) from public.list_public_company_needs_v1(null, 'lt; drop');")|$(anon "select count(*) from public.list_public_company_needs_v1(null, 'LV');")"
+check "country filter: a bad code is ignored, LV finds nothing" "6|0" "$(anon "select count(*) from public.list_public_company_needs_v1(null, 'lt; drop');")|$(anon "select count(*) from public.list_public_company_needs_v1(null, 'LV');")"
 check "synthetic QA fixture never public" "0" "$(anon "select count(*) from public.list_public_company_needs_v1() where company_name ~ 'SYNTHETIC';")"
 check "draft need never public" "0" "$(anon "select count(*) from public.list_public_company_needs_v1() where role_text = 'roofer';")"
 
@@ -134,6 +147,7 @@ echo; echo "== The checks (states and reasons)"
 st() { q "select s.state || ':' || array_to_string(s.reasons, '+') from public.need_public_state_v1('$1') s;"; }
 check "verified"            "verified:"                    "$(st $(rid $VER))"
 check "clean unconfirmed"   "unconfirmed_public:"          "$(st $(rid $UNC))"
+check "clean but never published" "not_published:"         "$(st $(rid $NOP))"
 check "phone in role"       "held_review:phone"            "$(st $(rid $SPM))"
 check "no place"            "held_incomplete:missing_location" "$(st $(rid $INC))"
 check "disposable e-mail"   "held_review:disposable_email" "$(st $(rid $DSP))"
@@ -166,6 +180,22 @@ as $WRK "insert into public.demand_interest_signals(worker_id, status, request_i
 check "worker may raise a hand on a labelled need (policy unchanged)" "1" "$(q "select count(*) from public.demand_interest_signals where request_id = '$(rid $UNC)';")"
 has "...but not on a held one"               "row-level security" "$(as $WRK "insert into public.demand_interest_signals(worker_id, status, request_id) select w.id, 'interested', '$(rid $SPM)' from public.workers w where w.profile_id = auth.uid();")"
 
+echo; echo "== The company's choice: who may make it, and withdrawal"
+has "anon cannot choose"                   "permission denied" "$(anon "select public.set_need_public_publication_v1('$(rid $NOP)', true);")"
+has "a stranger cannot publish another company's need" "not_allowed" "$(as $OUT "select public.set_need_public_publication_v1('$(rid $NOP)', true);")"
+has "a company cannot write the choice table directly" "permission denied" "$(as $NOP "insert into public.customer_request_publications(request_id, action) values ('$(rid $NOP)', 'publish');")"
+check "the poster publishes: shown at once"  "unconfirmed_public" "$(as $NOP "select public.set_need_public_publication_v1('$(rid $NOP)', true);")"
+check "...on the signed-out reader"          "1" "$(anon "select count(*) from public.list_public_company_needs_v1() where company_name = 'Quiet UAB';")"
+check "publishing twice records one event"   "unconfirmed_public|1" "$(as $NOP "select public.set_need_public_publication_v1('$(rid $NOP)', true);")|$(q "select count(*) from public.customer_request_publications where request_id = '$(rid $NOP)';")"
+check "an org manager (not the poster) withdraws the clean need" "not_published" "$(as $MGR "select public.set_need_public_publication_v1('$(rid $UNC)', false);")"
+check "...gone from the signed-out reader"   "0" "$(anon "select count(*) from public.list_public_company_needs_v1() where company_name = 'Clean UAB';")"
+check "...and from the worker board"         "0" "$(as $WRK "select count(*) from public.list_open_demand_for_workers() where company_name = 'Clean UAB';")"
+check "the manager publishes it again"       "unconfirmed_public" "$(as $MGR "select public.set_need_public_publication_v1('$(rid $UNC)', true);")"
+check "every event names who chose"          "0" "$(q "select count(*) from public.customer_request_publications where actor_id is null;")"
+has "an operator cannot make the company's choice" "not_allowed" "$(as $ADMIN "select public.set_need_public_publication_v1('$(rid $NOP)', false);")"
+check "the poster withdraws"                "not_published" "$(as $NOP "select public.set_need_public_publication_v1('$(rid $NOP)', false);")"
+has "a not-published need is not reviewable" "not_reviewable" "$(as $ADMIN "select public.decide_need_public_review_v1('$(rid $NOP)', 'approved');")"
+
 echo; echo "== Operator decisions bind to content"
 check "approve the phone need"           "unconfirmed_public" "$(as $ADMIN "select public.decide_need_public_review_v1('$(rid $SPM)', 'approved', 'checked by phone');")"
 check "...now public"                    "1" "$(anon "select count(*) from public.list_public_company_needs_v1() where company_name = 'Spam UAB';")"
@@ -180,13 +210,14 @@ check "decisions are recorded with the operator" "2|2" "$(q "select count(*) fro
 echo; echo "== Rollback"
 apply "$DOWN"
 check "board back to verified only"  "Verified UAB:approved_direct_partner" "$(board)"
-check "public reader gone"           "0" "$(q "select count(*) from pg_proc where proname in ('list_public_company_needs_v1','need_public_state_v1','get_my_need_public_states_v1','list_need_public_review_queue_v1','decide_need_public_review_v1');")"
+check "public reader and doors gone"  "0" "$(q "select count(*) from pg_proc where proname in ('list_public_company_needs_v1','need_public_state_v1','get_my_need_public_states_v1','list_need_public_review_queue_v1','decide_need_public_review_v1','set_need_public_publication_v1');")"
+check "the companies' choices kept (evidence)" "1" "$(q "select count(*) from pg_class where relname = 'customer_request_publications';")"
 check "decisions kept (evidence)"    "2" "$(q "select count(*) from public.customer_request_public_reviews;")"
 apply "$MIG"
 check "re-apply after rollback works and keeps the decisions" "2|Clean UAB" \
   "$(q "select count(*) from public.customer_request_public_reviews;")|$(anon "select company_name from public.list_public_company_needs_v1('electr');")"
 apply "$MIG"
-check "applying twice is idempotent" "7" "$(anon "select count(*) from public.list_public_company_needs_v1();")"
+check "applying twice is idempotent (choices kept)" "6" "$(anon "select count(*) from public.list_public_company_needs_v1();")"
 
 echo; echo "RESULT: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]

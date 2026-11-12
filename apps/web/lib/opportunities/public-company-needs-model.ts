@@ -63,6 +63,7 @@ export function parsePublicCompanyNeedRows(data: unknown): PublicCompanyNeed[] {
 export const NEED_PUBLIC_STATES = [
   "not_listed",
   "verified",
+  "not_published",
   "unconfirmed_public",
   "held_incomplete",
   "held_review",

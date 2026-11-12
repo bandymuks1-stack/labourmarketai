@@ -100,10 +100,10 @@ const jobsSearch: CapabilityDescriptor = {
     "Optional free-text `query`, a `profession` work-type slug, and a 1-based " +
     "`page` of " +
     PUBLIC_VACANCY_PAGE_SIZE +
-    ". Answers totalCount and hasMore. On page 1 it also answers `companyNeeds`: needs companies " +
-    "posted on LabourMarket.ai itself (role, place, team size, company name, companyConfirmed). " +
-    "companyConfirmed=false means the company is NOT verified — say 'Company not confirmed' and never " +
-    "call it verified; such a need passed automatic checks only. No contact details are returned. " +
+    ". Answers totalCount and hasMore. On page 1 it also answers `companyNeeds`: needs that companies " +
+    "NOT yet verified chose to publish publicly on LabourMarket.ai (role, place, team size, company name). " +
+    "Every one has companyConfirmed=false — say 'Company not confirmed' and never call it verified; " +
+    "such a need passed automatic checks only. No contact details are returned. " +
     "Reads nothing about the caller; writes nothing.",
   exposed: true,
   annotations: READ,

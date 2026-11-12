@@ -4,9 +4,9 @@
 -- signature, so the dependant policy demand_interest_signals_worker_insert is untouched),
 -- removes every new door and helper, and closes the public reader first.
 --
--- Operator decisions are evidence of who allowed what, when. The decision table is dropped
--- ONLY when it holds zero rows; otherwise it stays (RLS on, no client grant, no policy) and
--- nothing reads it — no data is lost and nothing becomes visible.
+-- Operator decisions and the companies' publication choices are evidence of who allowed what,
+-- when. Each table is dropped ONLY when it holds zero rows; otherwise it stays (RLS on, no
+-- client grant, no policy) and nothing reads it — no data is lost and nothing becomes visible.
 
 begin;
 
@@ -157,6 +157,7 @@ revoke all on function public.list_open_demand_for_workers() from public, anon;
 grant execute on function public.list_open_demand_for_workers() to authenticated;
 revoke all on function public.list_open_demand_for_workers() from service_role;
 
+drop function if exists public.set_need_public_publication_v1(uuid, boolean);
 drop function if exists public.decide_need_public_review_v1(uuid, text, text);
 drop function if exists public.list_need_public_review_queue_v1();
 drop function if exists public.get_my_need_public_states_v1(uuid[]);
@@ -175,6 +176,15 @@ begin
     drop table public.customer_request_public_reviews;
   else
     raise notice 'customer_request_public_reviews kept: it holds operator decisions (evidence); nothing reads it';
+  end if;
+  if not exists (select 1 from public.customer_request_publications) then
+    if to_regclass('public.privacy_erasure_registry_v3') is not null then
+      delete from public.privacy_erasure_registry_v3
+       where schema_name = 'public' and table_name = 'customer_request_publications' and column_name = 'actor_id';
+    end if;
+    drop table public.customer_request_publications;
+  else
+    raise notice 'customer_request_publications kept: it holds the companies'' publication choices (evidence); nothing reads it';
   end if;
 end
 $$;

@@ -1,7 +1,7 @@
 {
   "demandReadback": {
     "notVerifiedYet": "Jūsu uzņēmums vēl nav verificēts, tāpēc šeit iesniegtās vajadzības darbiniekiem netiek rādītas, kamēr verifikācija nav pabeigta.",
-    "notVerifiedYetUnconfirmedShown": "Tavs uzņēmums vēl nav verificēts. Tavi pieprasījumi tomēr var tikt rādīti darbiniekiem un publiskajā darba sludinājumu dēlī ar atzīmi “Uzņēmums nav apstiprināts”, kad obligātie lauki ir aizpildīti un automātiskās pārbaudes ir izietas; pretējā gadījumā tie gaida mūsu komandas pārskatīšanu.",
+    "notVerifiedYetUnconfirmedShown": "Tavs uzņēmums vēl nav verificēts. Pieprasījums, kuram izvēlies “Publicēt publiski”, tiek rādīts darbiniekiem un publiskajā darba sludinājumu dēlī ar atzīmi “Uzņēmums nav apstiprināts”, kad obligātie lauki ir aizpildīti un automātiskās pārbaudes ir izietas; pretējā gadījumā tas gaida mūsu komandas pārskatīšanu. Nekas nav publisks, kamēr tu to neizvēlies.",
     "notVerifiedHowTo": "Pievienot reģistrācijas numuru un pieprasīt pārbaudi",
     "heading": "[EN] Your submitted requests",
     "note": "[EN] Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
@@ -19,8 +19,9 @@
     "supplyNote": "Šie ir cilvēki, kurus jūs tirgum norādījāt kā PIEEJAMUS, nevis tie, kurus meklējat. Tie ir saglabāti un redzami jums. Darba devēji pagaidām nevar meklēt piedāvāto kapacitāti, tāpēc par tiem vēl neviens nav sazinājies.",
     "capacityNeeded": "Nepieciešami {count}",
     "capacityInterested": "{count} ieinteresēti",
-    "workerVisibilityNoteUnconfirmedShown": "Godīgs statuss: verificētu uzņēmumu pieprasījumi tiek rādīti darbiniekiem. Neverificēta uzņēmuma pieprasījums arī tiek rādīts ar atzīmi “Uzņēmums nav apstiprināts”, ja obligātie lauki ir aizpildīti un automātiskās pārbaudes ir izietas. Pie katra pieprasījuma ir rakstīts, vai tas tiek rādīts vai gaida pārskatīšanu.",
+    "workerVisibilityNoteUnconfirmedShown": "Godīgs statuss: verificētu uzņēmumu pieprasījumi tiek rādīti darbiniekiem. Neverificēta uzņēmuma pieprasījums tiek rādīts tikai tad, ja tam izvēlies “Publicēt publiski”, ar atzīmi “Uzņēmums nav apstiprināts”, kad obligātie lauki ir aizpildīti un automātiskās pārbaudes ir izietas. Pie katra pieprasījuma ir rakstīts, vai tas ir publicēts, tiek rādīts vai gaida pārskatīšanu.",
     "publicState": {
+      "not_published": "Nav publisks: tu neesi izvēlējies publicēt",
       "unconfirmed_public": "Rādīts publiski · ar atzīmi “Uzņēmums nav apstiprināts”",
       "held_incomplete": "Gaida pārskatīšanu: trūkst obligāta lauka",
       "held_review": "Gaida mūsu komandas pārskatīšanu",
@@ -41,6 +42,13 @@
       "rate": "daudz pieprasījumu 24 stundās",
       "duplicate_text": "to pašu tekstu agrāk publicēja cits uzņēmums",
       "disposable_email": "reģistrēts ar vienreizējas lietošanas e-pasta adresi"
+    },
+    "publication": {
+      "publish": "Publicēt publiski",
+      "withdraw": "Pārtraukt publicēšanu",
+      "explain": "Publicējot šis pieprasījums tiek rādīts publiskajā darba sludinājumu dēlī un darbiniekiem ar atzīmi “Uzņēmums nav apstiprināts”: darba veids, valsts, vieta, komandas lielums, sākums, datums un tava uzņēmuma nosaukums. Pieslēgušies darbinieki redz arī ievadītos nosacījumus (atalgojumu, grafiku, izmitināšanu, transportu, prasības). Tavi kontakti, apraksts, piezīmes un dokumenti nekad netiek rādīti. Vispirms darbojas mūsu pārbaudes, kas var to aizturēt pārskatīšanai. Publicēšanu vari pārtraukt jebkurā laikā.",
+      "failed": "Tava izvēle netika saglabāta. Nekas nemainījās.",
+      "saving": "Saglabā…"
     }
   },
   "journey": {

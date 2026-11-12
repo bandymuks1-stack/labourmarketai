@@ -1,7 +1,7 @@
 {
   "demandReadback": {
     "notVerifiedYet": "Ditt företag är ännu inte verifierat, så de behov du skickar in här visas inte för arbetare förrän verifieringen är klar.",
-    "notVerifiedYetUnconfirmedShown": "Ditt företag är inte verifierat ännu. Dina förfrågningar kan ändå visas för arbetstagare och på den offentliga jobbtavlan, märkta ”Företaget är inte bekräftat”, när de obligatoriska fälten är ifyllda och de automatiska kontrollerna godkänts; annars väntar de på granskning av vårt team.",
+    "notVerifiedYetUnconfirmedShown": "Ditt företag är inte verifierat ännu. En förfrågan som du väljer att ”Publicera offentligt” visas för arbetstagare och på den offentliga jobbtavlan, märkt ”Företaget är inte bekräftat”, när de obligatoriska fälten är ifyllda och de automatiska kontrollerna godkänts; annars väntar den på granskning av vårt team. Inget är offentligt förrän du väljer det.",
     "notVerifiedHowTo": "Lägg till organisationsnummer och begär en granskning",
     "heading": "[EN] Your submitted requests",
     "note": "[EN] Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
@@ -19,8 +19,9 @@
     "supplyNote": "Det här är personer som du har sagt till marknaden att du HAR, inte personer du söker. De är sparade och synliga för dig. Arbetsgivare kan ännu inte söka bland erbjuden kapacitet, så ingen har hört av sig om dessa.",
     "capacityNeeded": "{count} behövs",
     "capacityInterested": "{count} intresserade",
-    "workerVisibilityNoteUnconfirmedShown": "Ärlig status: förfrågningar från verifierade företag visas för arbetstagare. En förfrågan från ett företag som inte är verifierat visas också, märkt ”Företaget är inte bekräftat”, när de obligatoriska fälten är ifyllda och de automatiska kontrollerna godkänts. Vid varje förfrågan står om den visas eller väntar på granskning.",
+    "workerVisibilityNoteUnconfirmedShown": "Ärlig status: förfrågningar från verifierade företag visas för arbetstagare. En förfrågan från ett företag som inte är verifierat visas bara om du väljer ”Publicera offentligt” för den, märkt ”Företaget är inte bekräftat”, när de obligatoriska fälten är ifyllda och de automatiska kontrollerna godkänts. Vid varje förfrågan står om den är publicerad, visas eller väntar på granskning.",
     "publicState": {
+      "not_published": "Inte offentlig: du har inte valt att publicera",
       "unconfirmed_public": "Visas offentligt · märkt ”Företaget är inte bekräftat”",
       "held_incomplete": "Väntar på granskning: ett obligatoriskt fält saknas",
       "held_review": "Väntar på granskning av vårt team",
@@ -41,6 +42,13 @@
       "rate": "många förfrågningar på 24 timmar",
       "duplicate_text": "samma text publicerades tidigare av ett annat företag",
       "disposable_email": "registrerad med en engångsadress för e-post"
+    },
+    "publication": {
+      "publish": "Publicera offentligt",
+      "withdraw": "Sluta publicera",
+      "explain": "När förfrågan publiceras visas den på den offentliga jobbtavlan och för arbetstagare, märkt ”Företaget är inte bekräftat”: typ av arbete, land, ort, lagstorlek, start, datum och ditt företags namn. Inloggade arbetstagare ser även villkoren du angav (lön, schema, boende, transport, krav). Dina kontaktuppgifter, beskrivning, anteckningar och dokument visas aldrig. Våra kontroller körs först och kan hålla den för granskning. Du kan sluta publicera när som helst.",
+      "failed": "Ditt val sparades inte. Inget ändrades.",
+      "saving": "Sparar…"
     }
   },
   "journey": {

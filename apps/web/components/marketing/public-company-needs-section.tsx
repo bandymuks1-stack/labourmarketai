@@ -15,9 +15,11 @@ import { Card } from "@/components/ui/Card";
  * is confirmed. There is no contact, poster, description or link field to
  * render — the database never sends one — so this component cannot leak it.
  *
- * A company that is not verified is SAID so ("Company not confirmed") on every
- * card. A verified company gets the same "Verified company" wording the worker
- * board uses. No other badge exists (SEP-3 EVIDENCE != VERIFICATION).
+ * Only needs of companies that are NOT verified and that the company itself
+ * chose to "Publish publicly" are listed (owner principle C); each card SAYS
+ * "Company not confirmed". Verified companies' needs keep their existing
+ * visibility (the worker board) and never appear here. No badge implies
+ * verification (SEP-3 EVIDENCE != VERIFICATION).
  *
  * WHO is listed is not decided here: the database's one rule
  * (`need_public_state_v1`) already held every incomplete or suspicious need.
@@ -78,15 +80,11 @@ export async function PublicCompanyNeedsSection({
               <p className="font-medium text-text-primary">{roleLabel(n.roleText)}</p>
               <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-secondary">
                 {n.companyName ? <span>{n.companyName}</span> : null}
-                {n.companyConfirmed ? (
-                  <span data-testid="public-company-need-verified">
-                    <Badge tone="positive">{tOpp("companyVerified")}</Badge>
-                  </span>
-                ) : (
-                  <span data-testid="public-company-need-not-confirmed">
-                    <Badge tone="warning">{tOpp("companyNotConfirmed")}</Badge>
-                  </span>
-                )}
+                {/* Principle C: this reader returns only unconfirmed companies'
+                    published needs; a verified badge cannot appear here. */}
+                <span data-testid="public-company-need-not-confirmed">
+                  <Badge tone="warning">{tOpp("companyNotConfirmed")}</Badge>
+                </span>
               </p>
               <p className="mt-1 text-meta text-text-muted">
                 {[place || null, n.teamSize ? t("people", { count: n.teamSize }) : null]

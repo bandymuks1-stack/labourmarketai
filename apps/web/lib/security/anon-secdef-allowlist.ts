@@ -223,9 +223,9 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
     identityArgs: "p_query text, p_country text",
     mutates: false,
     publicCaller:
-      "Owner decision V-1 (2026-11-12): the 'Needs posted by companies' section of the public job board (app/[locale]/(marketing)/jobs) and the MCP `jobs.search` capability. Lists submitted demand of verified companies and, labelled 'Company not confirmed', of unconfirmed companies the one rule admitted.",
+      "Owner principle C (2026-11-12): the 'Needs posted by companies' section of the public job board (app/[locale]/(marketing)/jobs) and the MCP `jobs.search` capability. Lists ONLY needs of unconfirmed companies that the company itself chose to 'Publish publicly' and that the one rule admitted, labelled 'Company not confirmed'. Verified companies' needs are not listed (their visibility is unchanged).",
     authorization:
-      "Every row passes `need_public_state_v1` (the ONE rule, 20261112100000): submitted, a demand kind, a company resolved through the need's own organization, and either a verified company or an unconfirmed one whose required fields are filled and whose deterministic antispam checks passed (or an operator approved this exact content). Synthetic QA fixtures are always excluded. Drafts, closed needs, supply offers, held and rejected needs are never returned.",
+      "Every row passes `need_public_state_v1` (the ONE rule, 20261112100000): submitted, a demand kind, a company resolved through the need's own organization, an unconfirmed company, the company's explicit per-need 'Publish publicly' choice (latest event in customer_request_publications), required fields filled and the deterministic checks passed (or an operator approved this exact content). Verified companies' needs are excluded. Synthetic QA fixtures are always excluded. Drafts, closed needs, supply offers, held and rejected needs are never returned.",
     inputValidation:
       "`p_query` truncated to 80 chars, lower-cased and stripped to letters, digits, spaces and hyphens before a `strpos` match (no LIKE wildcard reaches the plan); `p_country` used only when it matches ^[A-Z]{2}$, otherwise ignored. Bounded by `limit 50`.",
     abuseControls:

@@ -1969,13 +1969,13 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Twoja firma nie jest jeszcze zweryfikowana, dlatego zgłoszone tu zapytania nie są pokazywane pracownikom do czasu zakończenia weryfikacji.",
-    "notVerifiedYetUnconfirmedShown": "Twoja firma nie jest jeszcze zweryfikowana. Twoje zapytania mogą być jednak pokazywane pracownikom i na publicznej tablicy ofert z oznaczeniem „Firma niepotwierdzona”, gdy wymagane pola są wypełnione, a automatyczne kontrole przejdą pomyślnie; w przeciwnym razie czekają na przegląd przez nasz zespół.",
+    "notVerifiedYetUnconfirmedShown": "Twoja firma nie jest jeszcze zweryfikowana. Zapytanie, dla którego wybierzesz „Opublikuj publicznie”, jest pokazywane pracownikom i na publicznej tablicy ofert z oznaczeniem „Firma niepotwierdzona”, gdy wymagane pola są wypełnione, a automatyczne kontrole przejdą; w przeciwnym razie czeka na przegląd przez nasz zespół. Nic nie jest publiczne, dopóki tego nie wybierzesz.",
     "notVerifiedHowTo": "Dodaj numer rejestrowy i poproś o weryfikację",
     "statusOther": "W trakcie przeglądu",
     "heading": "Twoje przesłane zapytania",
     "note": "Zapisane w Twojej prywatnej przestrzeni i sprawdzane ręcznie — nie proponujemy kandydatów automatycznie. Aktualizacje statusu pojawiają się tutaj.",
     "workerVisibilityNote": "Rzetelny status: zapytania od zweryfikowanych firm są pokazywane pracownikom na ich tablicy ofert. Weryfikacja to ręczny przegląd — dopóki Twoja firma nie zostanie zweryfikowana, Twoje zapytania pozostają widoczne tylko dla Ciebie i zespołu przeglądającego.",
-    "workerVisibilityNoteUnconfirmedShown": "Uczciwy status: zapytania zweryfikowanych firm są pokazywane pracownikom. Zapytanie firmy niezweryfikowanej też jest pokazywane, z oznaczeniem „Firma niepotwierdzona”, gdy wymagane pola są wypełnione, a automatyczne kontrole przejdą. Przy każdym zapytaniu widać, czy jest pokazywane, czy czeka na przegląd.",
+    "workerVisibilityNoteUnconfirmedShown": "Uczciwy status: zapytania zweryfikowanych firm są pokazywane pracownikom. Zapytanie firmy niezweryfikowanej jest pokazywane tylko wtedy, gdy wybierzesz dla niego „Opublikuj publicznie”, z oznaczeniem „Firma niepotwierdzona”, gdy wymagane pola są wypełnione, a automatyczne kontrole przejdą. Przy każdym zapytaniu widać, czy jest opublikowane, pokazywane, czy czeka na przegląd.",
     "empty": "Nie przesłano jeszcze żadnych zapytań. Prześlij zapytanie powyżej, a pojawi się tutaj wraz ze statusem.",
     "created": "Utworzono",
     "manageHelp": "Zakończ zapytanie, usuń je z rynku lub opublikuj ponownie bezpośrednio na tej liście; szkic możesz kontynuować lub odrzucić. Potwierdzenie rozpoznanych umiejętności odbywa się w widoku scoutingu. Edycja przesłanego tekstu nie jest jeszcze dostępna.",
@@ -2002,6 +2002,7 @@
     "capacityNeeded": "Potrzeba {count}",
     "capacityInterested": "{count} zainteresowanych",
     "publicState": {
+      "not_published": "Niepubliczne: nie wybrano publikacji",
       "unconfirmed_public": "Pokazywane publicznie · z oznaczeniem „Firma niepotwierdzona”",
       "held_incomplete": "Czeka na przegląd: brakuje wymaganego pola",
       "held_review": "Czeka na przegląd przez nasz zespół",
@@ -2022,6 +2023,13 @@
       "rate": "wiele zapytań w 24 godziny",
       "duplicate_text": "ten sam tekst opublikowała wcześniej inna firma",
       "disposable_email": "rejestracja z jednorazowym adresem e-mail"
+    },
+    "publication": {
+      "publish": "Opublikuj publicznie",
+      "withdraw": "Przestań publikować",
+      "explain": "Po publikacji to zapytanie jest widoczne na publicznej tablicy ofert i dla pracowników, z oznaczeniem „Firma niepotwierdzona”: rodzaj pracy, kraj, miejsce, wielkość zespołu, początek, data i nazwa Twojej firmy. Zalogowani pracownicy widzą też wpisane warunki (wynagrodzenie, grafik, zakwaterowanie, transport, wymagania). Twoje kontakty, opis, notatki i dokumenty nigdy nie są pokazywane. Najpierw działają nasze kontrole, które mogą wstrzymać je do przeglądu. Publikację możesz zakończyć w każdej chwili.",
+      "failed": "Twój wybór nie został zapisany. Nic się nie zmieniło.",
+      "saving": "Zapisywanie…"
     }
   },
   "journey": {

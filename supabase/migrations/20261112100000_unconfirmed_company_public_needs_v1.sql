@@ -8,11 +8,15 @@
 --
 -- ── OWNER DECISION V-1 (2026-11-12) ──────────────────────────────────────
 -- Until now a worker saw a company's need only when the company was VERIFIED.
--- From now on a submitted need of an UNCONFIRMED company is also shown — to workers and to
--- signed-out visitors — when (1) the required fields are filled and (2) deterministic
--- security + antispam checks pass. It is labelled "Company not confirmed" and never carries a
--- verification badge (SEP-3 EVIDENCE != VERIFICATION). A suspicious or incomplete need is HELD
--- for an operator, who approves or rejects it; the company sees that it is waiting.
+-- Owner principle (variant C, approved 2026-11-12): a need of an UNCONFIRMED company may be
+-- shown — to workers and to signed-out visitors — only when ALL hold:
+--   (1) the company itself explicitly chose "Publish publicly" for THAT need (default off);
+--   (2) the required data is filled; (3) the automated quality and security checks pass;
+--   (4) a suspicious posting is held for an operator; (5) it is labelled "Company not
+--   confirmed" and never carries a verification badge (SEP-3); (6) no private company or user
+--   data is exposed; (7) the EXISTING visibility of verified companies' needs is unchanged:
+--   still the worker board only, never the signed-out reader.
+-- Nothing becomes public retroactively: no publication row exists for any existing need.
 --
 -- ── ONE RULE, ONE PLACE ──────────────────────────────────────────────────
 -- `need_public_state_v1(request_id)` is the ONLY place that decides whether a need may be
@@ -24,9 +28,12 @@
 --   decide_need_public_review_v1(...)       the operator decision (binds to the content)
 -- States (closed set):
 --   not_listed          not a submitted demand-kind need, or no company — never shown
---   verified            the company is verified — shown exactly as before (badge unchanged)
---   unconfirmed_public  unconfirmed company, every check passed (or an operator approved this
---                       exact content) — shown, labelled "Company not confirmed"
+--   verified            the company is verified — worker board exactly as before (badge
+--                       unchanged); NOT on the signed-out reader
+--   not_published       unconfirmed company, the company has not chosen "Publish publicly"
+--                       (the default) or withdrew it — not shown, not in the operator queue
+--   unconfirmed_public  unconfirmed company, published, every check passed (or an operator
+--                       approved this exact content) — shown, labelled "Company not confirmed"
 --   held_incomplete     a required field is missing — not shown, waits for the company/operator
 --   held_review         an antispam / security check tripped — not shown, waits for an operator
 --   rejected            an operator rejected this exact content — not shown
@@ -56,11 +63,17 @@
 -- who allowed what, when — so it is its own append-only row, readable only through the doors
 -- below. No translation columns, no denormalized names.
 --
+-- ── THE COMPANY'S CHOICE (customer_request_publications) ─────────────────
+-- Append-only publish / withdraw events per need. The latest event decides; no event = not
+-- published. Set only through set_need_public_publication_v1 by the need's poster or an
+-- organization member with demand authority (has_org_demand_access). RLS on, no policy, no
+-- client grant: a company cannot write the row directly, and nobody else can read it.
+--
 -- ── WHAT A SIGNED-OUT VISITOR RECEIVES (list_public_company_needs_v1) ────
 -- id, role_text, country, location_label, team_size, start_period, created_at, company_name,
--- company_confirmed. Never: contact e-mail/phone, the poster, title, summary, notes, payload,
--- registration code, website, address. Max 50 rows, bounded inputs. Synthetic QA fixtures are
--- never returned.
+-- company_confirmed (always false: only unconfirmed, published, admitted needs are returned).
+-- Never: contact e-mail/phone, the poster, title, summary, notes, payload, pay, registration
+-- code, website, address. Max 50 rows, bounded inputs. Synthetic QA fixtures never returned.
 --
 -- Rollback: supabase/rollbacks/20261112100000_unconfirmed_company_public_needs_v1.down.sql
 
@@ -101,6 +114,38 @@ begin
   ('public', 'customer_request_public_reviews', 'decided_by', 'profiles', 'set null', 'set_null', 'engineering', false,
    'nullable reference; severed by NULL',
    'FK already SET NULL; the operator is an actor on a need decision, never its subject')
+  on conflict (schema_name, table_name, column_name) do nothing;
+end $$;
+
+-- ── 1b. The company's explicit per-need choice (append-only) ─────────────
+create table if not exists public.customer_request_publications (
+  id         uuid primary key default gen_random_uuid(),
+  request_id uuid not null references public.customer_requests(id) on delete cascade,
+  action     text not null check (action in ('publish', 'withdraw')),
+  actor_id   uuid references public.profiles(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+comment on table public.customer_request_publications is
+  'The company''s explicit "Publish publicly" choice per need of an unconfirmed company (owner principle C, 2026-11-12). Append-only publish/withdraw events; the latest decides; none = not published. Written only by set_need_public_publication_v1, read only by need_public_state_v1.';
+
+-- @plan-cache-proof: n/a — one latest-event probe per need on a table that grows by explicit company clicks; no search plan depends on it.
+create index if not exists customer_request_publications_request_idx
+  on public.customer_request_publications (request_id, created_at desc);
+
+alter table public.customer_request_publications enable row level security;
+revoke all on public.customer_request_publications from public, anon, authenticated, service_role;
+
+do $$
+begin
+  if to_regclass('public.privacy_erasure_registry_v3') is null then
+    return;
+  end if;
+  insert into public.privacy_erasure_registry_v3
+    (schema_name, table_name, column_name, parent, fk_rule_expected, treatment, decided_by, legal_review, legal_basis, note) values
+  ('public', 'customer_request_publications', 'actor_id', 'profiles', 'set null', 'set_null', 'engineering', false,
+   'nullable reference; severed by NULL',
+   'FK already SET NULL; the person is an actor on a need publication choice, never its subject')
   on conflict (schema_name, table_name, column_name) do nothing;
 end $$;
 
@@ -170,6 +215,7 @@ declare
   v_decision text;
   v_email    text;
   v_summary  text;
+  v_published boolean;
 begin
   select * into r from public.customer_requests x where x.id = p_request_id;
   if not found
@@ -252,7 +298,16 @@ begin
     v_reasons := v_reasons || 'disposable_email'::text;
   end if;
 
-  -- An operator's decision on THIS content wins.
+  -- (6) THE COMPANY'S CHOICE: the latest publish / withdraw event; none = not published.
+  v_published := coalesce(
+    (select p.action = 'publish'
+       from public.customer_request_publications p
+      where p.request_id = r.id
+      order by p.created_at desc, p.id desc
+      limit 1),
+    false);
+
+  -- An operator's decision on THIS content wins (over the checks, never over the choice).
   select d.decision into v_decision
     from public.customer_request_public_reviews d
    where d.request_id = r.id and d.content_hash = v_hash
@@ -261,6 +316,7 @@ begin
 
   return query select
     case
+      when not v_published then 'not_published'
       when v_decision = 'approved' then 'unconfirmed_public'
       when v_decision = 'rejected' then 'rejected'
       when cardinality(v_reasons) = 0 then 'unconfirmed_public'
@@ -464,14 +520,17 @@ begin
          cr.start_period,
          cr.created_at,
          coalesce(nullif(trim(c.display_name), ''), nullif(trim(c.legal_name), '')) as company_name,
-         (st.state = 'verified') as company_confirmed
+         false as company_confirmed
     from public.customer_requests cr
     join public.companies c
       on c.id = public.demand_company_id_v1(cr.organization_id, cr.profile_id)
     cross join lateral public.need_public_state_v1(cr.id) st
    where cr.status = 'submitted'
      and (cr.kind is null or cr.kind in ('company_request', 'buyer_request'))
-     and st.state in ('verified', 'unconfirmed_public')
+     -- Principle C (7): verified companies' needs keep their existing visibility — the
+     -- worker board only. This reader returns ONLY published, admitted needs of
+     -- unconfirmed companies.
+     and st.state = 'unconfirmed_public'
      and not public.demand_is_synthetic_fixture_v1(cr.organization_id, cr.profile_id)
      and (v_country is null or cr.country = v_country)
      and (v_q is null
@@ -598,7 +657,7 @@ begin
 
   select st.state, st.content_hash into v_state, v_hash
     from public.need_public_state_v1(p_request_id) st;
-  if v_state in ('not_listed', 'verified') or v_hash is null then
+  if v_state in ('not_listed', 'verified', 'not_published') or v_hash is null then
     raise exception 'not_reviewable' using errcode = '22023';
   end if;
 
@@ -612,6 +671,54 @@ $function$;
 
 revoke all on function public.decide_need_public_review_v1(uuid, text, text) from public, anon, service_role;
 grant execute on function public.decide_need_public_review_v1(uuid, text, text) to authenticated;
+
+-- ── 9. The company's choice: publish / withdraw one need ────────────────
+create or replace function public.set_need_public_publication_v1(p_request_id uuid, p_publish boolean)
+returns text
+language plpgsql
+volatile
+security definer
+set search_path to 'public'
+as $function$
+declare
+  uid      uuid := auth.uid();
+  r        public.customer_requests%rowtype;
+  v_now    boolean;
+  v_state  text;
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  if p_publish is null then
+    raise exception 'invalid_choice' using errcode = '22023';
+  end if;
+  select * into r from public.customer_requests x where x.id = p_request_id for update;
+  if not found then
+    raise exception 'not_found' using errcode = 'P0002';
+  end if;
+  -- Who may choose: the need's poster, or an organization member with demand authority.
+  if not coalesce((r.profile_id = uid or public.has_org_demand_access(r.organization_id)), false) then
+    raise exception 'not_allowed' using errcode = '42501';
+  end if;
+  if not (r.kind is null or r.kind in ('company_request', 'buyer_request')) then
+    raise exception 'not_a_need' using errcode = '22023';
+  end if;
+  v_now := coalesce(
+    (select p.action = 'publish' from public.customer_request_publications p
+      where p.request_id = r.id order by p.created_at desc, p.id desc limit 1),
+    false);
+  -- Only a real change is recorded.
+  if v_now is distinct from p_publish then
+    insert into public.customer_request_publications (request_id, action, actor_id)
+    values (r.id, case when p_publish then 'publish' else 'withdraw' end, uid);
+  end if;
+  select st.state into v_state from public.need_public_state_v1(r.id) st;
+  return v_state;
+end
+$function$;
+
+revoke all on function public.set_need_public_publication_v1(uuid, boolean) from public, anon, service_role;
+grant execute on function public.set_need_public_publication_v1(uuid, boolean) to authenticated;
 
 commit;
 

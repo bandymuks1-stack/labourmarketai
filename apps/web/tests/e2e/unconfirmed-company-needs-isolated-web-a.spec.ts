@@ -15,14 +15,16 @@ import {
 } from "./isolated-web-a-helpers";
 
 /**
- * OWNER DECISION V-1 (2026-11-12), end to end on the THROWAWAY local stack
+ * OWNER PRINCIPLE C (2026-11-12), end to end on the THROWAWAY local stack
  * (.github/workflows/signup-isolated.yml, every migration applied by
  * `supabase db reset`):
- *   V1-1  a signed-out visitor sees a clean need of an UNCONFIRMED company on
+ *   V1-0  nothing is public before the company's explicit "Publish publicly";
+ *         each company then publishes its need through the real button;
+ *   V1-1  a signed-out visitor sees the clean need of an UNCONFIRMED company on
  *         /jobs, labelled "Company not confirmed", with no verified badge and no
  *         contact data;
- *   V1-2  a need of an unconfirmed company with a phone number in its shown
- *         text is NOT shown — and its company sees "Waiting for review".
+ *   V1-2  a published need with a phone number in its shown text is NOT shown —
+ *         and its company sees "Waiting for review".
  * Both companies are created through the real sign-up, onboarding, company
  * setup and need intake. The only direct write is to the need's own text, so
  * the walk does not depend on how the intake wizard maps its fields.
@@ -59,7 +61,18 @@ async function companyWithNeed(
 let cleanId = "";
 let spamId = "";
 
-test("V1-0. two unconfirmed companies each post a need", async ({ browser }) => {
+/** The company's own explicit choice, through the needs page's real button. */
+async function publishViaUi(browser: import("@playwright/test").Browser, address: string, id: string): Promise<void> {
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await signIn(page, BASE, address);
+  await page.goto(`${BASE}/en/dashboard/company/needs`);
+  await page.getByTestId(`need-publish-${id}`).click();
+  await expect(page.getByTestId(`need-withdraw-${id}`), "the choice is saved").toBeVisible({ timeout: 60_000 });
+  await ctx.close();
+}
+
+test("V1-0. two unconfirmed companies each post a need; nothing is public until each publishes it", async ({ browser }) => {
   cleanId = await companyWithNeed(browser, CLEAN, `V1 Clean ${RUN} UAB`);
   spamId = await companyWithNeed(browser, SPAM, `V1 Spam ${RUN} UAB`);
   // Neither company is verified: the walk is about the unconfirmed path.
@@ -88,6 +101,23 @@ test("V1-0. two unconfirmed companies each post a need", async ({ browser }) => 
     `update public.customer_requests set location = 'Vilnius', role_or_work_type = 'tiler call +370 612 34567',
             need_summary = ${lit(`Spam tiling job ${RUN}.`)} where id = ${lit(spamId)}`,
   );
+  const stateOf = () =>
+    Object.fromEntries(
+      sql<{ id: string; state: string }>(
+        `select cr.id, (public.need_public_state_v1(cr.id)).state from public.customer_requests cr
+          where cr.id in (${lit(cleanId)}, ${lit(spamId)})`,
+      ).map((s) => [s.id, s.state]),
+    );
+  // Principle C: the default is OFF — nothing is public before the company's choice.
+  expect(stateOf(), "nothing is published by default").toEqual({ [cleanId]: "not_published", [spamId]: "not_published" });
+  const anon = await browser.newContext();
+  const before = await anon.newPage();
+  await before.goto(`${BASE}/en/jobs`);
+  await expect(before.getByTestId(`public-company-need-${cleanId}`), "not on /jobs before the choice").toHaveCount(0);
+  await anon.close();
+
+  await publishViaUi(browser, CLEAN, cleanId);
+  await publishViaUi(browser, SPAM, spamId);
   const states = sql<{ id: string; state: string }>(
     `select cr.id, (public.need_public_state_v1(cr.id)).state from public.customer_requests cr
       where cr.id in (${lit(cleanId)}, ${lit(spamId)})`,

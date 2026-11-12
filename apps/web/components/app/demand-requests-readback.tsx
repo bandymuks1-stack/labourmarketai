@@ -18,6 +18,7 @@ import { MarketEntryChip } from "@/components/app/market-entry-lifecycle";
 import { DemandEntryLifecycle } from "@/components/app/demand-entry-lifecycle";
 import { demandAdapter, demandReachesWorkers } from "@/lib/market-lifecycle/adapters";
 import type { NeedPublicReason, NeedPublicState } from "@/lib/opportunities/public-company-needs-model";
+import { NeedPublicationToggle, type NeedPublicationLabels } from "@/components/app/need-publication-toggle";
 
 /** The statuses the owner moves (lifecycle contract); the rest are the admin
  *  review pipeline and keep their own honest label. */
@@ -107,6 +108,8 @@ export interface DemandRequestsReadbackLabels {
    *  and why it is held. Optional: absent → the row renders as before. */
   readonly publicState?: Readonly<Partial<Record<NeedPublicState, string>>>;
   readonly publicReason?: Readonly<Partial<Record<NeedPublicReason, string>>>;
+  /** The company's explicit per-need "Publish publicly" choice (principle C). */
+  readonly publication?: NeedPublicationLabels;
 }
 
 /** One need's state under the V-1 rule (get_my_need_public_states_v1). */
@@ -235,13 +238,24 @@ function RequestRow({
           data-public-state={publicState.state}
         >
           {labels.publicState[publicState.state]}
-          {publicState.state !== "unconfirmed_public" && publicState.reasons.length > 0
+          {publicState.state !== "unconfirmed_public" &&
+          publicState.state !== "not_published" &&
+          publicState.reasons.length > 0
             ? `: ${publicState.reasons
                 .map((code) => labels.publicReason?.[code])
                 .filter(Boolean)
                 .join(", ")}`
             : null}
         </p>
+      ) : null}
+      {/* PRINCIPLE C: nothing is public until the company chooses, per need.
+          The door re-checks who may choose; withdrawal is one click. */}
+      {publicState && labels.publication && r.status === "submitted" ? (
+        <NeedPublicationToggle
+          requestId={r.id}
+          published={publicState.state !== "not_published"}
+          labels={labels.publication}
+        />
       ) : null}
       {/* THE ONE LIFECYCLE CONTRACT on the row itself: whether workers can
           find it, and complete / remove from market / publish again /

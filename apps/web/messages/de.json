@@ -1969,13 +1969,13 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Ihr Unternehmen ist noch nicht verifiziert; die hier eingereichten Anfragen werden Arbeitskräften erst nach Abschluss der Verifizierung angezeigt.",
-    "notVerifiedYetUnconfirmedShown": "Ihr Unternehmen ist noch nicht verifiziert. Ihre Anfragen können trotzdem Arbeitskräften und auf der öffentlichen Jobbörse angezeigt werden, gekennzeichnet mit „Unternehmen nicht bestätigt“, sobald die Pflichtfelder ausgefüllt sind und die automatischen Prüfungen bestanden sind; sonst warten sie auf die Prüfung durch unser Team.",
+    "notVerifiedYetUnconfirmedShown": "Ihr Unternehmen ist noch nicht verifiziert. Eine Anfrage, für die Sie „Öffentlich veröffentlichen“ wählen, wird Arbeitskräften und auf der öffentlichen Jobbörse angezeigt, gekennzeichnet mit „Unternehmen nicht bestätigt“, sobald die Pflichtfelder ausgefüllt sind und die automatischen Prüfungen bestanden sind; sonst wartet sie auf die Prüfung durch unser Team. Nichts ist öffentlich, bevor Sie es wählen.",
     "notVerifiedHowTo": "Registernummer ergänzen und eine Prüfung anfragen",
     "statusOther": "In Prüfung",
     "heading": "Ihre eingereichten Anfragen",
     "note": "In Ihrem privaten Bereich gespeichert und manuell geprüft — wir schlagen keine Kandidaten automatisch vor. Statusaktualisierungen erscheinen hier.",
     "workerVisibilityNote": "Ehrlicher Status: Anfragen verifizierter Unternehmen werden Arbeitskräften auf ihrem Chancen-Board angezeigt. Die Verifizierung ist eine manuelle Prüfung — bis Ihr Unternehmen verifiziert ist, bleiben Ihre Anfragen privat für Sie und das Prüfteam.",
-    "workerVisibilityNoteUnconfirmedShown": "Ehrlicher Status: Anfragen verifizierter Unternehmen werden Arbeitskräften angezeigt. Eine Anfrage eines nicht verifizierten Unternehmens wird ebenfalls angezeigt, gekennzeichnet mit „Unternehmen nicht bestätigt“, wenn die Pflichtfelder ausgefüllt sind und die automatischen Prüfungen bestanden sind. Bei jeder Anfrage steht, ob sie angezeigt wird oder auf Prüfung wartet.",
+    "workerVisibilityNoteUnconfirmedShown": "Ehrlicher Status: Anfragen verifizierter Unternehmen werden Arbeitskräften angezeigt. Eine Anfrage eines nicht verifizierten Unternehmens wird nur angezeigt, wenn Sie dafür „Öffentlich veröffentlichen“ wählen, gekennzeichnet mit „Unternehmen nicht bestätigt“, sobald die Pflichtfelder ausgefüllt sind und die automatischen Prüfungen bestanden sind. Bei jeder Anfrage steht, ob sie veröffentlicht ist, angezeigt wird oder auf Prüfung wartet.",
     "empty": "Noch keine Anfragen eingereicht. Reichen Sie Ihre Anfrage oben ein — sie erscheint hier mit ihrem Status.",
     "created": "Erstellt",
     "manageHelp": "Schließen Sie eine Anfrage ab, nehmen Sie sie vom Markt oder veröffentlichen Sie sie erneut direkt in dieser Liste; einen Entwurf können Sie fortsetzen oder verwerfen. Das Bestätigen der erkannten Fähigkeiten erfolgt über die Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
@@ -2002,6 +2002,7 @@
     "capacityNeeded": "{count} benötigt",
     "capacityInterested": "{count} interessiert",
     "publicState": {
+      "not_published": "Nicht öffentlich: Sie haben die Veröffentlichung nicht gewählt",
       "unconfirmed_public": "Öffentlich angezeigt · gekennzeichnet mit „Unternehmen nicht bestätigt“",
       "held_incomplete": "Wartet auf Prüfung: ein Pflichtfeld fehlt",
       "held_review": "Wartet auf Prüfung durch unser Team",
@@ -2022,6 +2023,13 @@
       "rate": "viele Anfragen in 24 Stunden",
       "duplicate_text": "derselbe Text wurde zuvor von einem anderen Unternehmen veröffentlicht",
       "disposable_email": "mit einer Wegwerf-E-Mail-Adresse registriert"
+    },
+    "publication": {
+      "publish": "Öffentlich veröffentlichen",
+      "withdraw": "Veröffentlichung beenden",
+      "explain": "Bei Veröffentlichung erscheint diese Anfrage auf der öffentlichen Jobbörse und für Arbeitskräfte, gekennzeichnet mit „Unternehmen nicht bestätigt“: Tätigkeit, Land, Ort, Teamgröße, Beginn, Datum und der Name Ihres Unternehmens. Angemeldete Arbeitskräfte sehen auch die eingegebenen Bedingungen (Lohn, Zeitplan, Unterkunft, Transport, Anforderungen). Ihre Kontakte, Beschreibung, Notizen und Dokumente werden nie angezeigt. Zuerst laufen unsere Prüfungen, die sie zur Prüfung zurückhalten können. Sie können die Veröffentlichung jederzeit beenden.",
+      "failed": "Ihre Wahl wurde nicht gespeichert. Nichts wurde geändert.",
+      "saving": "Wird gespeichert…"
     }
   },
   "journey": {

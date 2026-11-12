@@ -1969,13 +1969,13 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Je bedrijf is nog niet geverifieerd; de aanvragen die je hier indient worden pas aan werknemers getoond zodra de verificatie is afgerond.",
-    "notVerifiedYetUnconfirmedShown": "Je bedrijf is nog niet geverifieerd. Je aanvragen kunnen toch aan werkenden en op het openbare vacaturebord worden getoond, gemarkeerd met „Bedrijf niet bevestigd”, zodra de verplichte velden zijn ingevuld en de automatische controles slagen; anders wachten ze op beoordeling door ons team.",
+    "notVerifiedYetUnconfirmedShown": "Je bedrijf is nog niet geverifieerd. Een aanvraag waarvoor je „Openbaar publiceren” kiest, wordt aan werkenden en op het openbare vacaturebord getoond, gemarkeerd met „Bedrijf niet bevestigd”, zodra de verplichte velden zijn ingevuld en de automatische controles slagen; anders wacht ze op beoordeling door ons team. Niets is openbaar tot je dat kiest.",
     "notVerifiedHowTo": "Registratienummer toevoegen en een controle aanvragen",
     "statusOther": "In beoordeling",
     "heading": "Je ingediende aanvragen",
     "note": "Opgeslagen in je privéruimte en handmatig beoordeeld — we stellen niet automatisch kandidaten voor. Statusupdates verschijnen hier.",
     "workerVisibilityNote": "Eerlijke status: personeelsaanvragen van geverifieerde bedrijven worden aan werknemers getoond op hun kansenbord. Verificatie is een handmatige beoordeling — totdat je bedrijf geverifieerd is, blijven je aanvragen privé voor jou en het beoordelingsteam.",
-    "workerVisibilityNoteUnconfirmedShown": "Eerlijke status: aanvragen van geverifieerde bedrijven worden aan werkenden getoond. Een aanvraag van een niet-geverifieerd bedrijf wordt ook getoond, gemarkeerd met „Bedrijf niet bevestigd”, als de verplichte velden zijn ingevuld en de automatische controles slagen. Bij elke aanvraag staat of ze wordt getoond of op beoordeling wacht.",
+    "workerVisibilityNoteUnconfirmedShown": "Eerlijke status: aanvragen van geverifieerde bedrijven worden aan werkenden getoond. Een aanvraag van een niet-geverifieerd bedrijf wordt alleen getoond als je er „Openbaar publiceren” voor kiest, gemarkeerd met „Bedrijf niet bevestigd”, als de verplichte velden zijn ingevuld en de automatische controles slagen. Bij elke aanvraag staat of ze gepubliceerd is, getoond wordt of op beoordeling wacht.",
     "empty": "Nog geen aanvragen ingediend. Dien je aanvraag hierboven in en die verschijnt hier met de status.",
     "created": "Aangemaakt",
     "manageHelp": "Rond een aanvraag af, haal haar van de markt of publiceer haar opnieuw, direct in deze lijst; een concept kun je voortzetten of verwerpen. Het bevestigen van de herkende vaardigheden doe je vanuit de scoutingweergave. Ingediende tekst bewerken is nog niet mogelijk.",
@@ -2002,6 +2002,7 @@
     "capacityNeeded": "{count} nodig",
     "capacityInterested": "{count} geïnteresseerd",
     "publicState": {
+      "not_published": "Niet openbaar: je hebt niet gekozen om te publiceren",
       "unconfirmed_public": "Openbaar getoond · gemarkeerd met „Bedrijf niet bevestigd”",
       "held_incomplete": "Wacht op beoordeling: een verplicht veld ontbreekt",
       "held_review": "Wacht op beoordeling door ons team",
@@ -2022,6 +2023,13 @@
       "rate": "veel aanvragen in 24 uur",
       "duplicate_text": "dezelfde tekst is eerder door een ander bedrijf geplaatst",
       "disposable_email": "aangemeld met een wegwerp-e-mailadres"
+    },
+    "publication": {
+      "publish": "Openbaar publiceren",
+      "withdraw": "Publicatie stoppen",
+      "explain": "Na publicatie staat deze aanvraag op het openbare vacaturebord en bij werkenden, gemarkeerd met „Bedrijf niet bevestigd”: soort werk, land, plaats, teamgrootte, start, datum en de naam van je bedrijf. Ingelogde werkenden zien ook de ingevulde voorwaarden (loon, rooster, huisvesting, vervoer, eisen). Je contactgegevens, beschrijving, notities en documenten worden nooit getoond. Eerst lopen onze controles, die haar kunnen tegenhouden voor beoordeling. Je kunt de publicatie altijd stoppen.",
+      "failed": "Je keuze is niet opgeslagen. Er is niets veranderd.",
+      "saving": "Opslaan…"
     }
   },
   "journey": {

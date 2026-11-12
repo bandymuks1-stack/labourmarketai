@@ -66,10 +66,18 @@ export async function readDemandReadbackLabels() {
     ),
     // Owner decision V-1: the states and reasons of the one database rule.
     publicState: {
+      not_published: tReadback("publicState.not_published"),
       unconfirmed_public: tReadback("publicState.unconfirmed_public"),
       held_incomplete: tReadback("publicState.held_incomplete"),
       held_review: tReadback("publicState.held_review"),
       rejected: tReadback("publicState.rejected"),
+    },
+    publication: {
+      publish: tReadback("publication.publish"),
+      withdraw: tReadback("publication.withdraw"),
+      explain: tReadback("publication.explain"),
+      failed: tReadback("publication.failed"),
+      saving: tReadback("publication.saving"),
     },
     publicReason: Object.fromEntries(
       NEED_PUBLIC_REASONS.map((code) => [code, tReadback(`publicReason.${code}` as never) as string]),

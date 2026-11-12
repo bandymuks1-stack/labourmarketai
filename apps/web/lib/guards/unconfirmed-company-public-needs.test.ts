@@ -57,15 +57,45 @@ describe("V-1: one eligibility rule in the database", () => {
   it("no reader keeps its own verified-only gate", () => {
     for (const fn of ["list_open_demand_for_workers", "list_public_company_needs_v1"]) {
       expect(fnBody(fn), fn).not.toMatch(/verification_status\s*=\s*'verified'/);
-      expect(fnBody(fn), fn).toMatch(/st\.state in \('verified', 'unconfirmed_public'\)/);
     }
+    // The worker board keeps verified needs exactly as before, plus admitted unconfirmed ones.
+    expect(fnBody("list_open_demand_for_workers")).toMatch(/st\.state in \('verified', 'unconfirmed_public'\)/);
+  });
+
+  it("principle C (7): the signed-out reader never returns a verified company's need", () => {
+    const body = fnBody("list_public_company_needs_v1");
+    expect(body).toMatch(/and st\.state = 'unconfirmed_public'/);
+    expect(body).not.toMatch(/'verified'/);
+    expect(body).toMatch(/false as company_confirmed/);
+  });
+
+  it("principle C (1): nothing is public without the company's explicit per-need choice", () => {
+    const rule = fnBody("need_public_state_v1");
+    // The choice is checked before every other outcome, operator approval included.
+    expect(rule).toMatch(/case\s+when not v_published then 'not_published'\s+when v_decision = 'approved'/);
+    expect(rule).toMatch(/from public\.customer_request_publications p\s+where p\.request_id = r\.id\s+order by p\.created_at desc, p\.id desc/);
+    expect(rule).toMatch(/v_published := coalesce\([\s\S]*?false\);/);
+    // The choice table: append-only, sealed, written only by the door.
+    expect(up).toMatch(/alter table public\.customer_request_publications enable row level security;/);
+    expect(up).toMatch(/revoke all on public\.customer_request_publications from public, anon, authenticated, service_role;/);
+    // No backfill: the migration never inserts a publication.
+    const writes = up.match(/insert into public\.customer_request_publications/g) ?? [];
+    expect(writes.length, "only the door writes a choice").toBe(1);
+    expect(fnBody("set_need_public_publication_v1")).toMatch(/insert into public\.customer_request_publications/);
+  });
+
+  it("principle C: only the poster or an org member with demand authority may choose", () => {
+    const door = fnBody("set_need_public_publication_v1");
+    expect(door).toMatch(/if not coalesce\(\(r\.profile_id = uid or public\.has_org_demand_access\(r\.organization_id\)\), false\) then/);
+    expect(door).not.toMatch(/is_admin\(\)/);
+    expect(up).toMatch(/grant execute on function public\.set_need_public_publication_v1\(uuid, boolean\) to authenticated;/);
   });
 
   it("every reason the SQL can give is in the app's closed list", async () => {
     const { NEED_PUBLIC_REASONS } = await import("@/lib/opportunities/public-company-needs-model");
     const body = fnBody("need_public_state_v1") + fnBody("need_public_text_flags_v1");
     const codes = new Set([...body.matchAll(/'([a-z_]+)'::text|then '([a-z_]+)' end/g)].map((m) => m[1] ?? m[2]));
-    for (const c of ["verified", "not_listed", "unconfirmed_public", "rejected", "held_incomplete", "held_review", "pitch"]) codes.delete(c);
+    for (const c of ["verified", "not_listed", "not_published", "unconfirmed_public", "rejected", "held_incomplete", "held_review", "pitch"]) codes.delete(c);
     codes.add("pitch");
     expect([...codes].sort()).toEqual([...NEED_PUBLIC_REASONS].sort());
   });
@@ -193,8 +223,11 @@ describe("V-1: copy in every catalog", () => {
       expect(typeof d.publicCompanyNeeds?.[k], k).toBe("string");
     }
     expect(d.publicCompanyNeeds.intro).toContain(label);
-    for (const k of ["unconfirmed_public", "held_incomplete", "held_review", "rejected"]) {
+    for (const k of ["not_published", "unconfirmed_public", "held_incomplete", "held_review", "rejected"]) {
       expect(typeof d.demandReadback?.publicState?.[k], k).toBe("string");
+    }
+    for (const k of ["publish", "withdraw", "explain", "failed", "saving"]) {
+      expect(typeof d.demandReadback?.publication?.[k], `publication.${k}`).toBe("string");
     }
     expect(Object.keys(d.demandReadback.publicReason).length).toBe(14);
   });
@@ -202,5 +235,6 @@ describe("V-1: copy in every catalog", () => {
   it("Lithuanian says exactly what the owner wrote", () => {
     const lt = JSON.parse(readFileSync(join(WEB, "messages", "lt.json"), "utf8"));
     expect(lt.opportunities.companyNotConfirmed).toBe("Įmonė nepatvirtinta");
+    expect(lt.demandReadback.publication.publish).toBe("Skelbti viešai");
   });
 });

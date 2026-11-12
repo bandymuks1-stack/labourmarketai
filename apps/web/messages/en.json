@@ -1969,13 +1969,13 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Your company is not verified yet, so the inquiries you submit here are not shown to workers until verification is complete.",
-    "notVerifiedYetUnconfirmedShown": "Your company is not verified yet. Your inquiries can still be shown to workers and on the public job board, marked “Company not confirmed”, once the required fields are filled and the automatic checks pass; otherwise they wait for review by our team.",
+    "notVerifiedYetUnconfirmedShown": "Your company is not verified yet. An inquiry you choose to “Publish publicly” is shown to workers and on the public job board, marked “Company not confirmed”, once its required fields are filled and the automatic checks pass; otherwise it waits for review by our team. Nothing is public until you choose.",
     "notVerifiedHowTo": "Add your registration code and request a review",
     "statusOther": "In review",
     "heading": "Your submitted inquiries",
     "note": "Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
     "workerVisibilityNote": "Honest status: inquiries from verified companies are shown to workers on their opportunities board. Verification is a manual review — until your company is verified, your inquiries stay private to you and the review team.",
-    "workerVisibilityNoteUnconfirmedShown": "Honest status: inquiries from verified companies are shown to workers. An inquiry from a company that is not verified is shown too, marked “Company not confirmed”, when its required fields are filled and the automatic checks pass. Each inquiry below says whether it is shown or waiting for review.",
+    "workerVisibilityNoteUnconfirmedShown": "Honest status: inquiries from verified companies are shown to workers. An inquiry from a company that is not verified is shown only if you choose “Publish publicly” for it, marked “Company not confirmed”, once its required fields are filled and the automatic checks pass. Each inquiry below says whether it is published, shown or waiting for review.",
     "empty": "No inquiries submitted yet. Submit your inquiry above and it will appear here with its status.",
     "created": "Created",
     "manageHelp": "Complete an inquiry, remove it from the market or publish it again right here in the list; a draft can be continued or discarded. Confirming its recognized skills is done from its scouting view. Editing submitted text is not available yet.",
@@ -2002,6 +2002,7 @@
     "capacityNeeded": "{count} needed",
     "capacityInterested": "{count} interested",
     "publicState": {
+      "not_published": "Not public: you have not chosen to publish it",
       "unconfirmed_public": "Shown publicly · marked “Company not confirmed”",
       "held_incomplete": "Waiting for review: a required field is missing",
       "held_review": "Waiting for review by our team",
@@ -2022,6 +2023,13 @@
       "rate": "many inquiries in 24 hours",
       "duplicate_text": "the same text was posted earlier by another company",
       "disposable_email": "signed up with a disposable e-mail address"
+    },
+    "publication": {
+      "publish": "Publish publicly",
+      "withdraw": "Stop publishing",
+      "explain": "Publishing shows this inquiry on the public job board and to workers, marked “Company not confirmed”: type of work, country, place, team size, start, date and your company’s name. Signed-in workers also see the terms you entered (pay, schedule, accommodation, transport, requirements). Your contacts, description, notes and documents are never shown. Our checks run first and may hold it for review. You can stop publishing at any time.",
+      "failed": "Your choice was not saved. Nothing changed.",
+      "saving": "Saving…"
     }
   },
   "journey": {

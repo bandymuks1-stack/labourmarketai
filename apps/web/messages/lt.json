@@ -1969,13 +1969,13 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Tavo įmonė dar neverifikuota, todėl čia pateiktos užklausos darbuotojams nerodomos, kol verifikacija nebaigta.",
-    "notVerifiedYetUnconfirmedShown": "Tavo įmonė dar neverifikuota. Tavo užklausos vis tiek gali būti rodomos darbuotojams ir viešoje darbo skelbimų lentoje su žyma „Įmonė nepatvirtinta“, kai užpildyti privalomi laukai ir praeina automatinės patikros; kitaip jos laukia mūsų komandos peržiūros.",
+    "notVerifiedYetUnconfirmedShown": "Tavo įmonė dar neverifikuota. Užklausa, kurią pasirenki „Skelbti viešai“, rodoma darbuotojams ir viešoje darbo skelbimų lentoje su žyma „Įmonė nepatvirtinta“, kai užpildyti privalomi laukai ir praeina automatinės patikros; kitaip ji laukia mūsų komandos peržiūros. Niekas nerodoma viešai, kol nepasirenki.",
     "notVerifiedHowTo": "Pridėti registracijos kodą ir prašyti peržiūros",
     "statusOther": "Peržiūrima",
     "heading": "Tavo pateiktos užklausos",
     "note": "Išsaugoma tavo privačioje erdvėje ir peržiūrima rankiniu būdu — kandidatų nesiūlome automatiškai. Būsenos atnaujinimai matomi čia.",
     "workerVisibilityNote": "Sąžininga būsena: patvirtintų (verifikuotų) įmonių užklausas darbuotojai mato savo galimybių lentoje. Verifikacija — rankinė peržiūra; kol tavo įmonė neverifikuota, užklausos matomos tik tau ir peržiūros komandai.",
-    "workerVisibilityNoteUnconfirmedShown": "Sąžininga būsena: verifikuotų įmonių užklausos rodomos darbuotojams. Neverifikuotos įmonės užklausa irgi rodoma su žyma „Įmonė nepatvirtinta“, kai užpildyti privalomi laukai ir praeina automatinės patikros. Prie kiekvienos užklausos parašyta, ar ji rodoma, ar laukia peržiūros.",
+    "workerVisibilityNoteUnconfirmedShown": "Sąžininga būsena: verifikuotų įmonių užklausos rodomos darbuotojams. Neverifikuotos įmonės užklausa rodoma tik jei jai pasirenki „Skelbti viešai“, su žyma „Įmonė nepatvirtinta“, kai užpildyti privalomi laukai ir praeina automatinės patikros. Prie kiekvienos užklausos parašyta, ar ji paskelbta, rodoma ar laukia peržiūros.",
     "empty": "Dar nepateikei nė vienos užklausos. Pateik užklausą viršuje ir ji atsiras čia su savo būsena.",
     "created": "Sukurta",
     "manageHelp": "Užbaik užklausą, pašalink ją iš rinkos arba paskelbk iš naujo tiesiai šiame sąraše; juodraštį gali tęsti arba atmesti. Atpažintų įgūdžių patvirtinimas atliekamas jos kandidatų atrankos vaizde. Pateikto teksto redagavimas dar negalimas.",
@@ -2002,6 +2002,7 @@
     "capacityNeeded": "Reikia {count}",
     "capacityInterested": "{count} pareiškė norą",
     "publicState": {
+      "not_published": "Neskelbiama viešai: nepasirinkai jos skelbti",
       "unconfirmed_public": "Rodoma viešai · su žyma „Įmonė nepatvirtinta“",
       "held_incomplete": "Laukia peržiūros: trūksta privalomo lauko",
       "held_review": "Laukia mūsų komandos peržiūros",
@@ -2022,6 +2023,13 @@
       "rate": "daug užklausų per 24 valandas",
       "duplicate_text": "tą patį tekstą anksčiau paskelbė kita įmonė",
       "disposable_email": "užsiregistruota su vienkartiniu el. pašto adresu"
+    },
+    "publication": {
+      "publish": "Skelbti viešai",
+      "withdraw": "Nebeskelbti viešai",
+      "explain": "Paskelbus ši užklausa rodoma viešoje darbo skelbimų lentoje ir darbuotojams su žyma „Įmonė nepatvirtinta“: darbo rūšis, šalis, vieta, komandos dydis, pradžia, data ir tavo įmonės pavadinimas. Prisijungę darbuotojai taip pat mato tavo įvestas sąlygas (atlyginimą, grafiką, apgyvendinimą, transportą, reikalavimus). Tavo kontaktai, aprašymas, pastabos ir dokumentai niekada nerodomi. Pirmiausia vykdomos mūsų patikros, jos gali sulaikyti užklausą peržiūrai. Skelbti nustoti gali bet kada.",
+      "failed": "Tavo pasirinkimas neišsaugotas. Niekas nepasikeitė.",
+      "saving": "Saugoma…"
     }
   },
   "journey": {
