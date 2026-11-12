@@ -205,6 +205,20 @@ test.describe("Close never leaves the page it was opened on", () => {
   });
 });
 
+test.describe("Close after arriving on a shared goal link", () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+  // Codex P2 on ecd546d: shared link, another goal, Close left the first goal open.
+  test("shared #goal=work → workers → Close: no panel, still on the page, one click", async ({ page }) => {
+    await page.goto("/en#goal=work");
+    await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", "work");
+    await page.getByTestId("goal-rail").locator('[data-card-id="workers"]').click();
+    await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", "workers");
+    await page.getByTestId("goal-panel-close").click();
+    await expect(page.getByTestId("goal-panel")).toHaveCount(0);
+    await expect(page).toHaveURL(/\/en$/);
+  });
+});
+
 test.describe("swipe", () => {
   test.use({ viewport: { width: 360, height: 740 }, hasTouch: true, isMobile: true });
   test("a sideways swipe moves the goal rail and the page stays put", async ({ page }) => {

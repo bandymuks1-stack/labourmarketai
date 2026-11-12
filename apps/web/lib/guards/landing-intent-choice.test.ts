@@ -115,7 +115,12 @@ describe("the URL is the state — a fragment, not a page", () => {
     expect(navigator).toMatch(/window\.history\.pushState\(\s*(?:\/\/[^\n]*\n\s*)*\{ \[GOAL_DEPTH_KEY\]: goalDepth\(\) \+ 1 \},/);
     // Close reads the depth from the CURRENT history entry (Codex P2 on
     // c1caca4): a running count of selections went too far after Back.
-    expect(navigator).toMatch(/const depth = goalDepth\(\);\s*if \(depth > 0\) \{[\s\S]{0,120}window\.history\.go\(-depth\)/);
+    expect(navigator).toMatch(/const depth = goalDepth\(\);/);
+    expect(navigator).toMatch(/window\.history\.go\(-depth\)/);
+    // Close always ends with NO goal open, even when the origin entry is a
+    // shared goal link (Codex P2 on ecd546d).
+    expect(navigator).toMatch(/window\.addEventListener\("popstate", clearGoal, \{ once: true \}\);\s*window\.history\.go\(-depth\)/);
+    expect(navigator).toMatch(/if \(depth === 0\) \{[\s\S]{0,120}clearGoal\(\)/);
     expect(navigator).not.toMatch(/useRef|pushed\.current/);
     expect(navigator).toMatch(/addEventListener\("popstate", onChange\)/);
   });

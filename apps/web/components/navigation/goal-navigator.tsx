@@ -111,20 +111,29 @@ export function GoalNavigator({
     window.dispatchEvent(new HashChangeEvent("hashchange"));
   };
 
-  const close = () => {
-    const depth = goalDepth();
-    if (depth > 0) {
-      // Back to exactly where the visitor chose from — never further.
-      window.history.go(-depth);
-      return;
-    }
-    // Opened from a shared link: drop the fragment, stay on the page.
+  /** Drop the goal fragment from the current entry, staying on the page. */
+  const clearGoal = () => {
+    if (!goalFromFragment(window.location.hash)) return;
     window.history.replaceState(
       window.history.state,
       "",
       window.location.pathname + window.location.search,
     );
     window.dispatchEvent(new HashChangeEvent("hashchange"));
+  };
+
+  const close = () => {
+    const depth = goalDepth();
+    if (depth === 0) {
+      // Opened from a shared link: drop the fragment, stay on the page.
+      clearGoal();
+      return;
+    }
+    // Back to exactly where the visitor chose from — never further. If that
+    // entry itself carries a goal (they arrived on a shared goal link and
+    // then picked another), Close still means "no goal": clear it there too.
+    window.addEventListener("popstate", clearGoal, { once: true });
+    window.history.go(-depth);
   };
 
   const shown = useMemo(
