@@ -9310,7 +9310,8 @@
       "title": "Zawęź listę",
       "availableNow": "Dostępny teraz",
       "clear": "Wyczyść filtry",
-      "noMatches": "Żaden kandydat nie pasuje do wybranych filtrów."
+      "noMatches": "Żaden kandydat nie pasuje do wybranych filtrów.",
+      "noMatchesCountry": "W widocznej ofercie nie ma jeszcze nikogo w kraju {country}. Pokaż wszystkich albo poszerz zapotrzebowanie."
     },
     "pool": {
       "factsUnreadable": "Części tego, co te osoby zapisały, nie udało się teraz odczytać, więc ta kolejność nie jest wiarygodna. Nikt nie jest tu pokazany jako mający mniej, niż ma — po prostu brakuje faktów do porównania. Odśwież za chwilę.",

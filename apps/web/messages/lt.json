@@ -9310,7 +9310,8 @@
       "title": "Susiaurinti sąrašą",
       "availableNow": "Laisvas dabar",
       "clear": "Išvalyti filtrus",
-      "noMatches": "Nė vienas kandidatas neatitinka pasirinktų filtrų."
+      "noMatches": "Nė vienas kandidatas neatitinka pasirinktų filtrų.",
+      "noMatchesCountry": "Matomoje pasiūloje dar nėra nė vieno žmogaus šalyje {country}. Rodyk visus arba praplėsk poreikį."
     },
     "pool": {
       "factsUnreadable": "Kai ko iš to, ką šie žmonės yra užfiksavę, dabar nepavyko perskaityti, todėl ši eilė nėra patikima. Niekas čia nėra parodytas turintis mažiau, nei turi — tiesiog trūksta faktų, pagal kuriuos lyginama. Perkrauk po akimirkos.",
