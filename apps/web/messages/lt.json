@@ -2205,7 +2205,7 @@
         },
         "noCompany": {
           "title": "Pradėk įmonės profilį",
-          "body": "Dar neturi įmonės profilio. Sukurk jį: juo gali naudotis iš karto. Darbuotojai tavo paskelbtus poreikius mato, kai įmonė patvirtinta.",
+          "body": "Dar neturi įmonės profilio. Sukurk jį: juo gali naudotis iš karto. Darbuotojai tavo paskelbtus poreikius mato po įmonės patvirtinimo.",
           "cta": "Pradėti įmonės nustatymą"
         },
         "personalSpace": {

@@ -36,7 +36,7 @@ describe("setup copy names the condition for worker visibility", () => {
       const c = catalog(l).roleDashboards.company;
       for (const s of [c.nextActions.noCompany.body, c.setup.formSubtitle as string]) {
         expect(s, l).not.toMatch(/no waiting for approval|nereikia laukti patvirtinimo|ждать одобрения не нужно|zonder te wachten|ohne Warten|bez czekania/i);
-        expect(s, l).toMatch(/verif|patvirtin|подтвержд/i);
+        expect(s, l).toMatch(/verif|weryfik|patvirtin|подтвержд/i);
       }
     });
   }

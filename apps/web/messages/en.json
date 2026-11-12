@@ -2205,7 +2205,7 @@
         },
         "noCompany": {
           "title": "Start your company profile",
-          "body": "You don't have a company profile yet. Create one: you can use it straight away. Workers see the needs you post once your company is verified.",
+          "body": "You don't have a company profile yet. Create one: you can use it straight away. Workers see the needs you post after the company's verification.",
           "cta": "Start company setup"
         },
         "personalSpace": {
