@@ -22,6 +22,8 @@ export interface Contract {
   readonly id: string;
   readonly number: string | null;
   readonly title: string;
+  /** The proposal this contract was made from (contracts.proposal_id), if any. */
+  readonly proposalId: string | null;
   readonly parties: string | null;
   readonly valueCents: number;
   readonly status: ContractStatus;

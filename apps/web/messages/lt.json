@@ -405,6 +405,8 @@
     "noSignatureNote": "Sutartys saugo būseną ir neprivalomą dokumento nuorodą. Elektroninis parašas nekuriamas ir neteigiamas.",
     "contractsEmpty": "Sutarčių dar nėra.",
     "addContract": "Pridėti sutartį",
+    "contractFromProposal": "Sukurti sutartį",
+    "fromProposal": "Iš pasiūlymo: {title}",
     "contractTitlePlaceholder": "Sutarties pavadinimas",
     "docRef": "Dok. nuoroda",
     "docRefLabel": "Dokumento nuoroda",

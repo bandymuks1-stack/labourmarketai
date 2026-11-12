@@ -405,6 +405,8 @@
     "noSignatureNote": "Umowy zapisują status i opcjonalne odniesienie do dokumentu. Nie tworzy się ani nie deklaruje żadnego podpisu elektronicznego.",
     "contractsEmpty": "Brak jeszcze umów.",
     "addContract": "Dodaj umowę",
+    "contractFromProposal": "Utwórz umowę",
+    "fromProposal": "Z oferty: {title}",
     "contractTitlePlaceholder": "Tytuł umowy",
     "docRef": "Nr dokumentu",
     "docRefLabel": "Odniesienie do dokumentu",

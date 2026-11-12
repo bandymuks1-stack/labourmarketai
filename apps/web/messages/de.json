@@ -405,6 +405,8 @@
     "noSignatureNote": "Verträge speichern einen Status und eine optionale Dokumentreferenz. Es wird keine elektronische Signatur erstellt oder behauptet.",
     "contractsEmpty": "Noch keine Verträge.",
     "addContract": "Vertrag hinzufügen",
+    "contractFromProposal": "Vertrag erstellen",
+    "fromProposal": "Aus Angebot: {title}",
     "contractTitlePlaceholder": "Vertragstitel",
     "docRef": "Dok.-Ref.",
     "docRefLabel": "Dokumentreferenz",

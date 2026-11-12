@@ -61,10 +61,10 @@ export async function getMyCommercial(): Promise<CommercialData> {
 
   const cRes = await asAny(supabase)
     .from("contracts")
-    .select("id, number, title, parties, value_cents, status, signed_document_ref, start_date, end_date")
+    .select("id, number, title, proposal_id, parties, value_cents, status, signed_document_ref, start_date, end_date")
     .order("created_at", { ascending: false })
     .limit(200);
-  type CRow = { id: string; number: string | null; title: string; parties: string | null; value_cents: number | string; status: string; signed_document_ref: string | null; start_date: string | null; end_date: string | null };
+  type CRow = { id: string; number: string | null; title: string; proposal_id: string | null; parties: string | null; value_cents: number | string; status: string; signed_document_ref: string | null; start_date: string | null; end_date: string | null };
   const contracts: Contract[] = cRes.error
     ? []
     : ((cRes.data ?? []) as CRow[])
@@ -73,6 +73,7 @@ export async function getMyCommercial(): Promise<CommercialData> {
           id: r.id,
           number: r.number,
           title: r.title,
+          proposalId: r.proposal_id,
           parties: r.parties,
           valueCents: Number(r.value_cents) || 0,
           status: r.status as Contract["status"],

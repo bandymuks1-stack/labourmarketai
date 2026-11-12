@@ -405,6 +405,8 @@
     "noSignatureNote": "Contracten bewaren een status en een optionele documentverwijzing. Er wordt geen elektronische handtekening gemaakt of geclaimd.",
     "contractsEmpty": "Nog geen contracten.",
     "addContract": "Contract toevoegen",
+    "contractFromProposal": "Contract aanmaken",
+    "fromProposal": "Uit offerte: {title}",
     "contractTitlePlaceholder": "Contracttitel",
     "docRef": "Doc.ref",
     "docRefLabel": "Documentverwijzing",
