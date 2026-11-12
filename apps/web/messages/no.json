@@ -7960,7 +7960,8 @@
       "workingTime": {
         "full_time": "Heltid",
         "part_time": "Deltid"
-      }
+      },
+      "untitled": "Ledig stilling"
     }
   }
 }

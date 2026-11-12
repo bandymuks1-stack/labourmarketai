@@ -7960,7 +7960,8 @@
       "workingTime": {
         "full_time": "Täistööaeg",
         "part_time": "Osaline tööaeg"
-      }
+      },
+      "untitled": "Tööpakkumine"
     }
   }
 }

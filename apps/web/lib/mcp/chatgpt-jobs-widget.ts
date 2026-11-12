@@ -35,7 +35,7 @@ export type JobsWidgetLabels = Readonly<
   Record<string, Readonly<Record<string, string | Readonly<Record<string, string>>>>>
 >;
 
-const LABEL_KEYS = ["empty", "unavailable", "positions", "open", "more", "from", "upTo"] as const;
+const LABEL_KEYS = ["empty", "unavailable", "positions", "open", "more", "from", "upTo", "untitled"] as const;
 /** Fact words keyed by the projection's slugs; an unknown slug is omitted,
  *  never shown as an internal identifier (same rule as the job card). */
 const FACT_GROUPS = ["employmentForm", "workingTime"] as const;
@@ -64,7 +64,15 @@ export async function loadJobsWidgetLabels(): Promise<JobsWidgetLabels> {
           return [g, map];
         }),
       );
-      return [locale, { ...words, ...facts }] as const;
+      // Profession names: the reader's canonical taxonomy catalog
+      // (messages/<locale>/professions.json), keyed by the projection's slug.
+      const prof = (await import(`../../messages/${locale}/professions.json`)) as {
+        default: Record<string, unknown>;
+      };
+      const professions = Object.fromEntries(
+        Object.entries(prof.default).filter((e): e is [string, string] => typeof e[1] === "string"),
+      );
+      return [locale, { ...words, ...facts, professions }] as const;
     }),
   );
   return Object.fromEntries(entries);
@@ -122,7 +130,11 @@ p{margin:12px;color:var(--muted)}
     var ul=el("ul");
     jobs.forEach(function(j){
       var li=el("li"), info=el("div");
-      info.appendChild(el("div","t",j.occupation||j.professionSlug||""));
+      // The job card's heading order: the profession in the reader's words,
+      // then the publisher's own occupation, then a generic title — never a
+      // database slug.
+      var P=L.professions, prof=j.professionSlug&&P&&typeof P[j.professionSlug]==="string"?P[j.professionSlug]:null;
+      info.appendChild(el("div","t",prof||j.occupation||L.untitled));
       // Fact words from the catalog by slug; an unknown slug is left out.
       function fact(group,slug){ var m=L[group]; return slug&&m&&typeof m[slug]==="string"?m[slug]:null; }
       var meta=[pay(j,L),fact("employmentForm",j.employmentForm),fact("workingTime",j.workingTime),j.positions>1?j.positions+" "+L.positions:null].filter(Boolean).join(" · ");

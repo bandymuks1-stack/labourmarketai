@@ -7960,7 +7960,8 @@
       "workingTime": {
         "full_time": "Fuld tid",
         "part_time": "Deltid"
-      }
+      },
+      "untitled": "Ledigt job"
     }
   }
 }

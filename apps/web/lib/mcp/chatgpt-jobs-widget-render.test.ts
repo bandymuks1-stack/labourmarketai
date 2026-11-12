@@ -111,6 +111,17 @@ describe("job-list widget rendering", () => {
     expect(leaked).not.toMatch(/unknown|shift_work_xyz|_/);
   });
 
+  it("Codex P1: the heading is the profession in the reader's words, never a slug", () => {
+    const heading = (over: Record<string, unknown>, locale: string) =>
+      render({ ok: true, data: { jobs: [{ webPath: "/ru/jobs/1", ...over }] } }, locale)[0];
+    const ru = LABELS.ru as Record<string, Record<string, string> | string>;
+    const professions = ru.professions as Record<string, string>;
+    expect(heading({ professionSlug: "welder" }, "ru")).toBe(professions.welder);
+    expect(heading({ professionSlug: "welder" }, "ru")).not.toBe("welder");
+    expect(heading({ professionSlug: "not_a_known_slug", occupation: "Svetsare" }, "ru")).toBe("Svetsare");
+    expect(heading({ professionSlug: "not_a_known_slug" }, "ru")).toBe(ru.untitled);
+  });
+
   it("draws nothing before the host has handed over a result", () => {
     expect(render(undefined)).toEqual([]);
   });

@@ -20567,7 +20567,8 @@
       "workingTime": {
         "full_time": "Full time",
         "part_time": "Part time"
-      }
+      },
+      "untitled": "Job opening"
     }
   }
 }

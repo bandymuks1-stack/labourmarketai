@@ -20567,7 +20567,8 @@
       "workingTime": {
         "full_time": "Pełny etat",
         "part_time": "Niepełny etat"
-      }
+      },
+      "untitled": "Oferta pracy"
     }
   }
 }
