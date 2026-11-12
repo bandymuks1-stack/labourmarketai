@@ -78,11 +78,16 @@ test("P-2. a new session still has it, and pressing it does what the sentence di
   await home(page);
   const pin = row(page).getByTestId("my-space-pin");
   await expect(pin, "the pin is a stored fact, not a browser memory").toHaveCount(1, { timeout: 30_000 });
-  const before = (await page.getByRole("main").innerText()).length;
+  const main = page.getByRole("main");
+  // The press echoes the person's words at once; that alone proves nothing. The proof is
+  // an ASSISTANT turn (answer or question) after the echo, and no error turn.
+  const answers = main.locator('[data-testid="msg-assistant"], [data-testid="msg-question"]');
+  const [users, answered, errors] = [await main.getByTestId("msg-user").count(), await answers.count(), await main.getByTestId("msg-error").count()];
   await pin.click();
-  await expect
-    .poll(async () => (await page.getByRole("main").innerText()).length, { timeout: 45_000, message: "the pin answers in the conversation" })
-    .toBeGreaterThan(before);
+  await expect(main.getByTestId("msg-user"), "the pin says what the sentence said").toHaveCount(users + 1, { timeout: 30_000 });
+  await expect.poll(() => answers.count(), { timeout: 60_000, message: "the job search answers after the pin is pressed" }).toBeGreaterThan(answered);
+  await expect(main.getByTestId("chat-typing"), "the answer finished").toHaveCount(0, { timeout: 60_000 });
+  await expect(main.getByTestId("msg-error"), "the pinned action did not fail").toHaveCount(errors);
   await expect(page.getByTestId("global-error-message")).toHaveCount(0);
   await expect(page.getByTestId("error-boundary-message")).toHaveCount(0);
   await ctx.close();
