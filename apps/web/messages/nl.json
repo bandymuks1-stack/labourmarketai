@@ -15093,12 +15093,11 @@
       "planStep": "Stap {n} van {count}",
       "pinAdd": "Snelkoppeling toevoegen",
       "pinEditDone": "Klaar",
-      "pinEditYours": "Je snelkoppelingen",
       "pinAddHeading": "Een snelkoppeling toevoegen",
       "pinAddNone": "Alles hier is al toegevoegd.",
       "pinRecent": "Onlangs",
-      "pinMoveEarlier": "‘{label}’ naar voren verplaatsen",
-      "pinMoveLater": "‘{label}’ naar achteren verplaatsen",
+      "pinMoveHandle": "“{label}”: sleep of verplaats met de pijltjestoetsen",
+      "pinManageHint": "Sleep een snelkoppeling of verplaats die met de pijltjestoetsen. ✕ verwijdert die.",
       "pinRemove": "‘{label}’ verwijderen",
       "pinAdded": "Toegevoegd.",
       "pinMoved": "Volgorde opgeslagen.",
@@ -20636,6 +20635,12 @@
       "candidates": {
         "label": "Kandidaten vinden",
         "hint": "Zoek naar mensen"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Mijn aanvragen",
+        "hint": "Wat je hebt gevraagd en wie antwoordde"
       }
     },
     "ask": {

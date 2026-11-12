@@ -27,11 +27,16 @@ import { routeRequirement } from "@/lib/auth/role-gated-routes";
 import { NEED_DOOR_HREF } from "@/lib/company/need-door";
 import { AREA_ICONS, type NavCardIconKey } from "@/lib/navigation/nav-card-icons";
 import type { PublicIntentId } from "@/lib/navigation/public-intents";
-import type { WorkArea } from "@/lib/navigation/work-areas";
+import type { WorkArea, WorkAreaIconKey } from "@/lib/navigation/work-areas";
 
-/** The acting roles that have a goal home. `company` covers both the employer
- *  and the business that sells a service — one organization is often both. */
-export type HomeGoalRole = "worker" | "company" | "agency";
+/**
+ * The acting roles that have a goal home. `company` covers both the employer
+ * and the business that sells a service — one organization is often both.
+ * `worker` is also what a person sees inside an organization they work for
+ * but do not manage (an employee: the same person, the same own functions).
+ * `customer` is a person who orders services and holds no organization.
+ */
+export type HomeGoalRole = "worker" | "company" | "agency" | "customer";
 
 export type HomeGoal = {
   /** Stable id (test ids, React keys). */
@@ -97,6 +102,10 @@ export const GOAL_FUNCTIONS: Readonly<Record<PublicIntentId, readonly HomeGoal[]
   services: [
     shared("offerServices", "/dashboard/services", "wrench", "myServices"),
     shared("orders", "/dashboard/service-requests", "inbox", "serviceRequests"),
+    // The customer's own door (what they asked for and who answered). The
+    // route is the customer's by the gate table, so only a person who holds
+    // that role is ever shown the card.
+    g("myRequests", "/dashboard/buyer", "shoppingBag", "homeGoals.customer.myRequests"),
   ],
   orders: [
     shared("listings", "/dashboard/listings", "store", "marketListings"),
@@ -123,6 +132,7 @@ export const ROLE_GOAL_ORDER: Readonly<Record<HomeGoalRole, readonly PublicInten
   worker: ["work", "services", "orders", "partners"],
   company: ["workers", "services", "orders", "partners", "work"],
   agency: ["agencies", "workers", "services", "orders", "partners", "work"],
+  customer: ["services", "orders", "partners", "work"],
 };
 
 /** Does this role enter this function through a tracked door on its home? */
@@ -162,6 +172,7 @@ export const HOME_GOALS: Readonly<Record<HomeGoalRole, readonly HomeGoal[]>> = {
   worker: functionsOf("worker"),
   company: functionsOf("company"),
   agency: functionsOf("agency"),
+  customer: functionsOf("customer"),
 };
 
 /** A route without its query and hash — what a gate and a page are keyed on. */
@@ -243,3 +254,31 @@ export function areasBeyondGoals(
   const offered = new Set(goals.map((g) => routePath(g.href)));
   return areas.filter((a) => !offered.has(routePath(a.href)));
 }
+
+/**
+ * An area's icon on the shared card. The area model names its icons in its
+ * own vocabulary (`WorkAreaIconKey`, drawn by the header and the phone
+ * sheet); the shared card system has its own set. This is the one bridge
+ * between them, so an area drawn as a rail card needs no second icon set.
+ */
+export const AREA_CARD_ICONS: Readonly<Record<WorkAreaIconKey, NavCardIconKey>> = {
+  compass: "compass",
+  journal: AREA_ICONS.journal,
+  chart: "barChart",
+  user: "info",
+  idCard: "idCard",
+  images: "layoutGrid",
+  userSearch: "userSearch",
+  package: "package",
+  store: "store",
+  users: "users",
+  folder: AREA_ICONS.projects,
+  messages: "messagesSquare",
+  handshake: "handshake",
+  briefcase: "briefcase",
+  calendar: "calendarCheck",
+  gauge: "ruler",
+  activity: AREA_ICONS.hours,
+  barChart: "barChart",
+  history: "fileText",
+};

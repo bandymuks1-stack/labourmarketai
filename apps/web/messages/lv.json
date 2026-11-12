@@ -571,7 +571,7 @@
     "localeSwitch": "[EN] Language",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
-    "skipToContent": "[EN] Skip to content",
+    "skipToContent": "Pāriet uz saturu",
     "loading": "Ielādē…",
     "dashboardSections": "Paneļa sadaļas",
     "nav": {
@@ -4406,12 +4406,11 @@
       "whatChangedUnavailable": "Pašlaik neizdevās pārbaudīt, kas mainījās. Jūsu ieraksti ir drošībā — mēģiniet pēc brīža vai atveriet žurnālu.",
       "pinAdd": "Pievienot saīsni",
       "pinEditDone": "Gatavs",
-      "pinEditYours": "Jūsu saīsnes",
       "pinAddHeading": "Pievienot saīsni",
       "pinAddNone": "Šeit viss jau ir pievienots.",
       "pinRecent": "Nesenie",
-      "pinMoveEarlier": "Pārvietot “{label}” agrāk",
-      "pinMoveLater": "Pārvietot “{label}” vēlāk",
+      "pinMoveHandle": "“{label}”: velciet vai pārvietojiet ar bulttaustiņiem",
+      "pinManageHint": "Velciet saīsni vai pārvietojiet to ar bulttaustiņiem. ✕ to noņem.",
       "pinRemove": "Noņemt “{label}”",
       "pinAdded": "Pievienots.",
       "pinMoved": "Secība saglabāta.",
@@ -8020,6 +8019,12 @@
       "candidates": {
         "label": "Atrast kandidātus",
         "hint": "Meklējiet cilvēkus"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Mani pieprasījumi",
+        "hint": "Ko jūs lūdzāt un kas atbildēja"
       }
     },
     "ask": {

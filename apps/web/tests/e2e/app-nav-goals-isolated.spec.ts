@@ -34,7 +34,8 @@ import {
  *   N-4  a pin never grants access: a pin to an employer page stored for a
  *        worker is not drawn, the page itself still refuses, and the pin can
  *        be removed;
- *   N-5  pin · move · unpin in the row, each change proven in the stored rows;
+ *   N-5  pin · move (arrow keys, then a drag) · unpin in the row's Manage
+ *        mode, each change proven in the stored rows;
  *   N-5b the pin toggle on a function card and the row are one list: a pin
  *        made on the card shows in the row and in the stored rows, and back;
  *   N-6  a pin survives sign-out and sign-in, and shows in a second session;
@@ -353,6 +354,17 @@ for (const { role, person, home, tasks } of ROLES.filter((r) => r.role !== "serv
       await openHome(page, person, home, orgOf[person]);
       await page.locator("body").focus();
       const toGoal = await tabUntil(page, async () => (await focusedCard(page)) === `goal-rail:${first.goal}`);
+      // THE SKIP LINK: the first Tab of the screen lands on it, Enter moves
+      // past the header, and the first goal is then a short way off.
+      await openHome(page, person, home, orgOf[person]);
+      await page.locator("body").focus();
+      await page.keyboard.press("Tab");
+      expect(await focusedTestId(page), "the skip link is the first focus stop").toBe("app-skip-link");
+      await expect(page.getByTestId("app-skip-link")).toBeInViewport();
+      await page.keyboard.press("Enter");
+      const afterSkip = await tabUntil(page, async () => (await focusedCard(page)) === `goal-rail:${first.goal}`);
+      expect(afterSkip, "the skip link shortens the way to the first goal").toBeLessThan(toGoal);
+      console.log(`[app-nav-walk] ${role} keyboard with the skip link: first goal card after 2 keys + ${afterSkip} Tab`);
       await page.keyboard.press("Enter");
       await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", first.goal!, { timeout: 15_000 });
       await tabUntil(page, async () => (await focusedCard(page)) === `function-rail:${first.fn}`);
@@ -484,24 +496,43 @@ test("N-5. a worker adds a shortcut, moves it, and removes it — each change is
     const added = await add.getAttribute("data-ref");
     expect(added, "the home offers something to pin").toBeTruthy();
     await add.click();
-    await expect(page.locator(`[data-testid="my-space-pin"][data-ref="${added}"]`), "the new shortcut is in the row").toBeVisible({
-      timeout: 30_000,
-    });
+    // While managing, a shortcut is a chip with a handle and a small remove
+    // control, in the row itself.
+    const item = (ref: string) => page.locator(`[data-testid="my-space-edit-item"][data-ref="${ref}"]`);
+    await expect(item(added!), "the new shortcut is in the row").toBeVisible({ timeout: 30_000 });
     await expect.poll(stored, { message: "the pin is stored", timeout: 30_000 }).toEqual([OWN_PIN, added]);
     // The home is still the home: editing did not start a conversation.
     await expect(page.getByTestId("today-screen")).toBeVisible();
+    await expect(page.getByTestId("my-space-manage-hint")).toBeVisible();
 
-    // MOVE — the new shortcut goes before the older one.
-    await editor
-      .locator(`[data-testid="my-space-edit-item"][data-ref="${added}"]`)
-      .getByTestId("my-space-move-earlier")
-      .click();
+    // MOVE BY KEYBOARD — focus the chip, press the left arrow: it goes before
+    // the older one, and the focus stays on it.
+    const handle = item(added!).getByTestId("my-space-handle");
+    await handle.focus();
+    await page.keyboard.press("ArrowLeft");
     await expect.poll(stored, { message: "the new order is stored", timeout: 30_000 }).toEqual([added, OWN_PIN]);
+    await expect(handle, "the moved chip keeps the focus").toBeFocused();
+    await expect(page.getByTestId("my-space-status")).not.toHaveText("\u00a0", { timeout: 15_000 });
 
+    // MOVE BY DRAG — press the chip, carry it over the other one, let go.
+    const from = await item(added!).getByTestId("my-space-handle").boundingBox();
+    const to = await item(OWN_PIN).getByTestId("my-space-handle").boundingBox();
+    expect(from && to, "both chips are on screen").toBeTruthy();
+    await page.mouse.move(from!.x + from!.width / 2, from!.y + from!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(to!.x + to!.width / 2, to!.y + to!.height / 2, { steps: 12 });
+    await page.mouse.up();
+    await expect.poll(stored, { message: "the dragged order is stored", timeout: 30_000 }).toEqual([OWN_PIN, added]);
+    // Managing opens nothing: the person is still on the home.
+    expect(new URL(page.url()).pathname).toBe("/en/dashboard");
+
+    // DONE ends managing; the chips are shortcuts again, in the stored order.
+    await page.getByTestId("my-space-manage").click();
+    await expect(page.getByTestId("my-space-edit-item")).toHaveCount(0);
     // A reload shows the same order: it came from the stored rows.
     await openHome(page, "worker", "today-screen");
     const refs = await page.getByTestId("my-space-pin").evaluateAll((els) => els.map((e) => e.getAttribute("data-ref")));
-    expect(refs).toEqual([added, OWN_PIN]);
+    expect(refs).toEqual([OWN_PIN, added]);
 
     // UNPIN both.
     await page.getByTestId("my-space-manage").click();
@@ -698,33 +729,47 @@ for (const person of ["worker", "company", "agency"] as const) {
   });
 }
 
-// ── N-8 · light and dark, 360 and 1440: screenshots for a person ────────────
+// ── N-8 · the evidence set: light and dark, 375 and 1440 ────────────────────
+//
+// Screenshots a person can compare with the public landing's. Synthetic
+// accounts only (every name carries "QA-SYNTHETIC"), on the throwaway stack.
+
+const SHOT_VIEWPORTS = [
+  { name: "375", width: 375, height: 812 },
+  { name: "1440", width: 1440, height: 900 },
+] as const;
+
+const SHOT_ROLES = [
+  { person: "worker", home: "today-screen", slug: "worker", goal: "work" },
+  { person: "company", home: "company-model", slug: "employer", goal: "workers" },
+  { person: "company", home: "company-model", slug: "service-business", goal: "services" },
+  { person: "agency", home: "company-model", slug: "agency", goal: "agencies" },
+] as const;
 
 for (const theme of ["light", "dark"] as const) {
-  test(`N-8. the home in the ${theme} theme at 360 and 1440 px, with and without a goal open`, async ({ browser }) => {
-    for (const { person, home, slug } of [
-      { person: "worker", home: "today-screen", slug: "worker" },
-      { person: "company", home: "company-model", slug: "employer" },
-      { person: "agency", home: "company-model", slug: "agency" },
-    ] as const) {
-      for (const viewport of VIEWPORTS) {
+  test(`N-8. the homes in the ${theme} theme at 375 and 1440 px: home, a function panel, the pin row, Manage`, async ({ browser }) => {
+    const setTheme = (ctx: BrowserContext) =>
+      // The product's own theme choice (the one shared "theme" key).
+      ctx.addInitScript((t) => {
+        try {
+          localStorage.setItem("theme", t);
+        } catch {
+          /* no storage */
+        }
+      }, theme);
+    for (const { person, home, slug, goal } of SHOT_ROLES) {
+      for (const viewport of SHOT_VIEWPORTS) {
         const { ctx, page } = await as(browser, person, viewport);
         try {
-          // The product's own theme choice (the one shared "theme" key).
-          await ctx.addInitScript((t) => {
-            try {
-              localStorage.setItem("theme", t);
-            } catch {
-              /* no storage */
-            }
-          }, theme);
+          await setTheme(ctx);
           await openHome(page, person, home, orgOf[person]);
           await expect(page.locator("html")).toHaveAttribute("data-theme", theme, { timeout: 15_000 });
-          await page.screenshot({ path: path.join(SHOTS, `v2-${slug}-${viewport.name}-${theme}-home.png`) });
-          const firstGoal = page.getByTestId("goal-rail").locator("[data-card-id]").first();
-          await firstGoal.click();
-          await expect(page.getByTestId("goal-panel")).toBeVisible({ timeout: 15_000 });
-          await page.screenshot({ path: path.join(SHOTS, `v2-${slug}-${viewport.name}-${theme}-goal.png`) });
+          await page.screenshot({ path: path.join(SHOTS, `home-${slug}-${viewport.name}-${theme}.png`) });
+          await page.getByTestId("goal-rail").locator(`[data-card-id="${goal}"]`).click();
+          await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", goal, { timeout: 15_000 });
+          await expect(page.getByTestId("function-rail")).toBeVisible();
+          await page.getByTestId("goal-panel").scrollIntoViewIfNeeded();
+          await page.screenshot({ path: path.join(SHOTS, `panel-${slug}-${viewport.name}-${theme}.png`) });
           // Nothing scrolls the page sideways in either theme.
           const sideways = await page.evaluate(
             () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -733,6 +778,41 @@ for (const theme of ["light", "dark"] as const) {
         } finally {
           await ctx.close();
         }
+      }
+    }
+
+    // THE PIN ROW AND MANAGE — the worker pins two functions from their cards,
+    // the row is captured as shortcuts and then while managing, and the walk
+    // leaves nothing pinned behind.
+    const workerId = await userId(email("worker"));
+    const count = () =>
+      sql<{ n: number }>(`select count(*)::int as n from public.workspace_pins where profile_id = ${lit(workerId)}`)[0]?.n;
+    for (const viewport of SHOT_VIEWPORTS) {
+      const { ctx, page } = await as(browser, "worker", viewport);
+      try {
+        await setTheme(ctx);
+        await openHome(page, "worker", "today-screen");
+        await page.getByTestId("goal-rail").locator('[data-card-id="work"]').click();
+        for (const fn of ["recordWork", "myCv"]) {
+          const toggle = page.getByTestId("function-rail").locator(`[data-rail-pin="${fn}"]`);
+          await expect(toggle).toBeVisible({ timeout: 30_000 });
+          await toggle.click();
+          await expect(toggle).toHaveAttribute("aria-pressed", "true", { timeout: 30_000 });
+        }
+        await expect(page.getByTestId("my-space-pin")).toHaveCount(2);
+        await page.getByTestId("my-space").scrollIntoViewIfNeeded();
+        await page.screenshot({ path: path.join(SHOTS, `pins-worker-${viewport.name}-${theme}.png`) });
+        await page.getByTestId("my-space-manage").click();
+        await expect(page.getByTestId("my-space-edit-item")).toHaveCount(2);
+        await page.screenshot({ path: path.join(SHOTS, `manage-worker-${viewport.name}-${theme}.png`) });
+        // ✕ on each chip removes it.
+        for (let left = 2; left > 0; left -= 1) {
+          await page.getByTestId("my-space-edit-item").first().getByTestId("my-space-remove").click();
+          await expect(page.getByTestId("my-space-edit-item")).toHaveCount(left - 1, { timeout: 30_000 });
+        }
+        await expect.poll(count, { timeout: 30_000 }).toBe(0);
+      } finally {
+        await ctx.close();
       }
     }
   });

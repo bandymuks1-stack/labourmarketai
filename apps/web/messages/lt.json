@@ -15093,12 +15093,11 @@
       "planStep": "{n} žingsnis iš {count}",
       "pinAdd": "Pridėti nuorodą",
       "pinEditDone": "Baigta",
-      "pinEditYours": "Tavo nuorodos",
       "pinAddHeading": "Pridėti nuorodą",
       "pinAddNone": "Čia viskas jau pridėta.",
       "pinRecent": "Neseniai",
-      "pinMoveEarlier": "Perkelti „{label}“ anksčiau",
-      "pinMoveLater": "Perkelti „{label}“ vėliau",
+      "pinMoveHandle": "„{label}“: vilk arba perkelk rodyklių klavišais",
+      "pinManageHint": "Vilk nuorodą arba perkelk ją rodyklių klavišais. ✕ ją pašalina.",
       "pinRemove": "Pašalinti „{label}“",
       "pinAdded": "Pridėta.",
       "pinMoved": "Tvarka išsaugota.",
@@ -20636,6 +20635,12 @@
       "candidates": {
         "label": "Rasti kandidatų",
         "hint": "Ieškok žmonių"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Mano užklausos",
+        "hint": "Ko prašei ir kas atsakė"
       }
     },
     "ask": {

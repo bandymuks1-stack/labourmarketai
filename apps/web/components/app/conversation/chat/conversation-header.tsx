@@ -26,6 +26,11 @@ import { MobileSheet } from "@/components/ui/MobileSheet";
 import { WorkspaceChip } from "./workspace-chip";
 import { iconControl } from "./icon-scale";
 
+/** The id the header's skip link points at: the start of the screen's own
+ *  content, right under the one top bar. Each shell that mounts the header
+ *  puts it on exactly one element. */
+export const APP_CONTENT_ID = "app-content";
+
 export type ConversationNavLabels = {
   chat: string;
   journal: string;
@@ -120,6 +125,28 @@ export function ConversationHeader({
         !mobile && "md:flex-nowrap md:gap-x-3",
       )}
     >
+      {/* SKIP LINK — the first focus stop of every signed-in screen (WCAG
+          2.4.1): one key press past the header's destinations to the screen's
+          own content (`APP_CONTENT_ID`, set by whichever shell mounts this
+          header). Out of the flow until focused, so the bar's layout is
+          untouched; the same look as the public shell's skip link. */}
+      <a
+        href={`#${APP_CONTENT_ID}`}
+        data-testid="app-skip-link"
+        // Move the focus without touching the address: the home keeps its
+        // open goal in the URL fragment (`#goal=…`), and a plain fragment
+        // jump would close it. The href stays as the no-script fallback.
+        onClick={(e) => {
+          const target = document.getElementById(APP_CONTENT_ID);
+          if (!target) return;
+          e.preventDefault();
+          target.focus();
+          target.scrollIntoView({ block: "start" });
+        }}
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:border focus:border-brand-blue focus:bg-ink-800 focus:px-4 focus:py-2 focus:font-mono focus:text-meta focus:uppercase focus:tracking-label focus:text-text-primary"
+      >
+        {t("common.skipToContent")}
+      </a>
       {/* IDENTITY — never shrinks, so the logo is never cut ("Labour…"). */}
       <span className={cn("order-1 flex flex-none items-center gap-2", !mobile && "md:order-none")}>
         {isProjection && (

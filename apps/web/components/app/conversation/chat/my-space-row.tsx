@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Plus, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { Plus, X } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
 import { pinAction, reorderPinsAction, unpinAction } from "@/lib/workspace/pins-actions";
@@ -25,9 +25,11 @@ import { iconControl } from "./icon-scale";
  * to add a shortcut. Tapping a pin runs the same handler its chip runs — no
  * second action system.
  *
- * EDITING IS DIRECT (2026-11-12): add, remove and move earlier / later happen
- * in the row itself, through the same three server actions the chat's pin
- * chips call (`pinAction` · `unpinAction` · `reorderPinsAction`, rows in
+ * EDITING IS DIRECT (2026-11-12): "Manage" turns the row's own chips into
+ * the editor — a chip is moved by dragging it (mouse or finger) or, focused,
+ * with the arrow keys; a small ✕ on the chip removes it; "Done" ends it.
+ * Adding is a list under the row. All of it goes through the same three
+ * server actions the chat's pin chips call (`pinAction` · `unpinAction` · `reorderPinsAction`, rows in
  * `workspace_pins`, so the result follows the person to every device).
  * Editing never writes into the conversation, so it never replaces the home
  * the person is looking at. Every control is a real button with a name, at
@@ -56,14 +58,14 @@ export interface MySpacePlace {
 export interface MySpaceEditLabels {
   readonly add: string;
   readonly done: string;
-  readonly yours: string;
   readonly addHeading: string;
   readonly addNone: string;
   readonly recent: string;
   /** Carry `{label}`. */
-  readonly moveEarlier: string;
-  readonly moveLater: string;
+  readonly moveHandle: string;
   readonly remove: string;
+  /** One line: how to move and remove while managing. */
+  readonly manageHint: string;
   readonly added: string;
   readonly removed: string;
   readonly moved: string;
@@ -114,6 +116,19 @@ export function MySpaceRow({
   const [status, setStatus] = useState("");
   const [recent, setRecent] = useState<readonly MySpacePlace[]>([]);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  /** The order shown while a chip is being dragged (stored on release). */
+  const [draft, setDraft] = useState<readonly MySpacePinView[] | null>(null);
+  const [dragging, setDragging] = useState<string | null>(null);
+  const drag = useRef<{ ref: string; x: number; y: number; moved: boolean } | null>(null);
+  const itemEls = useRef(new Map<string, HTMLElement>());
+  const handleEls = useRef(new Map<string, HTMLButtonElement>());
+  /** The chip to give the focus back to after a keyboard move re-ordered it. */
+  const refocus = useRef<string | null>(null);
+  useEffect(() => {
+    if (!refocus.current) return;
+    handleEls.current.get(refocus.current)?.focus();
+    refocus.current = null;
+  }, [pins]);
 
   const pinnedRefs = useMemo(() => new Set(pins.map((p) => p.ref)), [pins]);
   const places = editor?.places;
@@ -230,17 +245,70 @@ export function MySpaceRow({
       setBusy(false);
     }
   };
-  const move = (index: number, delta: -1 | 1) => {
-    const to = index + delta;
-    if (to < 0 || to >= pins.length) return;
-    const next = [...pins];
-    [next[index], next[to]] = [next[to], next[index]];
+  const sameOrder = (a: readonly MySpacePinView[], b: readonly MySpacePinView[]) =>
+    a.length === b.length && a.every((p, i) => p.ref === b[i].ref);
+  const saveOrder = (next: readonly MySpacePinView[]) => {
+    if (sameOrder(next, pins)) return;
     void run(
       () => reorderPinsAction({ refs: next.map((p) => p.ref), expectedWorkspaceId: editor?.expectedWorkspaceId }),
       next,
       labels?.moved ?? "",
     );
   };
+
+  // ARROW KEYS on a focused chip move it one place. The chip keeps the focus
+  // through the re-order (see the effect above), so a person can keep pressing.
+  const onHandleKey = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const delta =
+      e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : 0;
+    if (delta === 0) return;
+    e.preventDefault();
+    const to = index + delta;
+    if (busy || to < 0 || to >= pins.length) return;
+    const next = [...pins];
+    [next[index], next[to]] = [next[to], next[index]];
+    refocus.current = pins[index].ref;
+    saveOrder(next);
+  };
+
+  // DRAG with a mouse or a finger (pointer events, so it works on touch where
+  // HTML drag-and-drop does not). While dragging the row shows the order as
+  // it would be; it is stored once, on release.
+  const onHandleDown = (e: PointerEvent<HTMLButtonElement>, ref: string) => {
+    if (busy || (e.pointerType === "mouse" && e.button !== 0)) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { ref, x: e.clientX, y: e.clientY, moved: false };
+  };
+  const onHandleMove = (e: PointerEvent<HTMLButtonElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    if (!d.moved && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 8) return;
+    if (!d.moved) setDragging(d.ref);
+    d.moved = true;
+    const order = draft ?? pins;
+    const over = order.find((p) => {
+      const r = itemEls.current.get(p.ref)?.getBoundingClientRect();
+      return r && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    });
+    if (!over || over.ref === d.ref) return;
+    const from = order.findIndex((p) => p.ref === d.ref);
+    const to = order.findIndex((p) => p.ref === over.ref);
+    if (from < 0 || to < 0) return;
+    const next = [...order];
+    next.splice(to, 0, next.splice(from, 1)[0]);
+    setDraft(next);
+  };
+  const onHandleUp = () => {
+    const d = drag.current;
+    drag.current = null;
+    if (!d) return;
+    const next = draft;
+    setDraft(null);
+    setDragging(null);
+    if (d.moved && next) saveOrder(next);
+  };
+
+  const shown = draft ?? pins;
 
   return (
     <div className="border-b border-border-subtle" data-testid="my-space">
@@ -253,18 +321,65 @@ export function MySpaceRow({
         {(pins.length > 0 || recent.length > 0) && (
           <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">{title}</span>
         )}
-        {pins.map((p) => (
-          <button
-            key={p.ref}
-            type="button"
-            onClick={() => onPin(p.ref)}
-            className={CHIP}
-            data-testid="my-space-pin"
-            data-ref={p.ref}
-          >
-            {p.label}
-          </button>
-        ))}
+        {editing && labels
+          ? shown.map((p, i) => (
+              // MANAGE: the chip is a handle (drag, or arrow keys) with its
+              // own small remove control. It opens nothing while managing.
+              <span
+                key={p.ref}
+                ref={(el) => {
+                  if (el) itemEls.current.set(p.ref, el);
+                  else itemEls.current.delete(p.ref);
+                }}
+                data-testid="my-space-edit-item"
+                data-ref={p.ref}
+                data-dragging={dragging === p.ref ? true : undefined}
+                className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-dashed border-ink-500 bg-ink-800 data-[dragging]:border-brand-blue"
+              >
+                <button
+                  type="button"
+                  ref={(el) => {
+                    if (el) handleEls.current.set(p.ref, el);
+                    else handleEls.current.delete(p.ref);
+                  }}
+                  aria-label={labels.moveHandle.replace("{label}", p.label)}
+                  aria-keyshortcuts="ArrowLeft ArrowRight"
+                  aria-disabled={busy || undefined}
+                  onKeyDown={(e) => onHandleKey(e, i)}
+                  onPointerDown={(e) => onHandleDown(e, p.ref)}
+                  onPointerMove={onHandleMove}
+                  onPointerUp={onHandleUp}
+                  onPointerCancel={onHandleUp}
+                  className="min-h-11 cursor-grab touch-none select-none rounded-l-full pl-4 pr-1 text-support font-medium text-text-primary outline-none focus-visible:ring-2 focus-visible:ring-brand-blue active:cursor-grabbing"
+                  data-testid="my-space-handle"
+                >
+                  {p.label}
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void remove(p.ref)}
+                  aria-label={labels.remove.replace("{label}", p.label)}
+                  title={labels.remove.replace("{label}", p.label)}
+                  className="flex size-11 flex-none items-center justify-center rounded-full text-text-muted outline-none hover:text-text-primary focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-40"
+                  data-testid="my-space-remove"
+                >
+                  <X aria-hidden className="size-3.5" />
+                </button>
+              </span>
+            ))
+          : pins.map((p) => (
+              <button
+                key={p.ref}
+                type="button"
+                onClick={() => onPin(p.ref)}
+                className={CHIP}
+                data-testid="my-space-pin"
+                data-ref={p.ref}
+              >
+                {p.label}
+              </button>
+            ))}
         {recent.length > 0 && labels && (
           <>
             <span className="shrink-0 pl-1 text-meta text-text-muted">{labels.recent}</span>
@@ -313,54 +428,9 @@ export function MySpaceRow({
           }}
         >
           {pins.length > 0 && (
-            <section aria-label={labels.yours} className="flex flex-col gap-1.5">
-              <h3 className="text-meta font-medium text-text-muted">{labels.yours}</h3>
-              <ul className="flex flex-col gap-1.5">
-                {pins.map((p, i) => (
-                  <li
-                    key={p.ref}
-                    data-testid="my-space-edit-item"
-                    data-ref={p.ref}
-                    className="flex items-center gap-1.5"
-                  >
-                    <span className="min-w-0 flex-1 truncate text-support text-text-primary">{p.label}</span>
-                    <button
-                      type="button"
-                      disabled={busy || i === 0}
-                      onClick={() => move(i, -1)}
-                      aria-label={labels.moveEarlier.replace("{label}", p.label)}
-                      title={labels.moveEarlier.replace("{label}", p.label)}
-                      className={ICON_BUTTON}
-                      data-testid="my-space-move-earlier"
-                    >
-                      <ArrowLeft {...iconControl()} aria-hidden />
-                    </button>
-                    <button
-                      type="button"
-                      disabled={busy || i === pins.length - 1}
-                      onClick={() => move(i, 1)}
-                      aria-label={labels.moveLater.replace("{label}", p.label)}
-                      title={labels.moveLater.replace("{label}", p.label)}
-                      className={ICON_BUTTON}
-                      data-testid="my-space-move-later"
-                    >
-                      <ArrowRight {...iconControl()} aria-hidden />
-                    </button>
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => void remove(p.ref)}
-                      aria-label={labels.remove.replace("{label}", p.label)}
-                      title={labels.remove.replace("{label}", p.label)}
-                      className={ICON_BUTTON}
-                      data-testid="my-space-remove"
-                    >
-                      <X {...iconControl()} aria-hidden />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <p data-testid="my-space-manage-hint" className="text-support text-text-secondary">
+              {labels.manageHint}
+            </p>
           )}
 
           {editor.withheld.length > 0 && (

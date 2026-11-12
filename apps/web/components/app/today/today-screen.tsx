@@ -13,7 +13,7 @@ import {
   HomeWaiting,
 } from "@/components/app/home/home-regions";
 import type { ActiveLocale } from "@/lib/i18n/config";
-import { AreaSwitcher } from "@/components/app/area-switcher";
+import { HomeAreaRail } from "@/components/app/home/home-area-rail";
 import { deriveTodayState } from "@/lib/today/today-model";
 import { PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
 import { HOME_GOALS, areasBeyondGoals } from "@/lib/navigation/home-goals";
@@ -131,8 +131,8 @@ function TodayScreenPending() {
         </div>
       </div>
       <div data-testid="today-stations-pending" className="border-t border-ink-600/70 pt-4 sm:pt-5">
-        <span className="block h-5 w-32 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
-        <div className="mt-2 h-40" />
+        <span className="block h-7 w-32 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
+        <div className="mt-2 h-32" />
       </div>
     </div>
   );
@@ -150,9 +150,8 @@ export function TodayScreen({ locale }: { locale: ActiveLocale }) {
  *  only (`home-cls-stability.test.ts` pins that no player-card read is
  *  awaited here). The slow readers stream inside the frame it draws. */
 async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
-  const [t, tNav, displayName] = await Promise.all([
+  const [t, displayName] = await Promise.all([
     getTranslations("todayScreen.home"),
-    getTranslations("common.nav"),
     loadTodayDisplayName(),
   ]);
 
@@ -250,25 +249,20 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
         </div>
       </div>
 
-      {/* 6 · STATIONS — the contextual workspaces, one tap each, as the light
-          3D area switcher (owner order 2026-10-25): cards with depth, the
-          chosen one in front, from the ONE area model (`PERSONAL_WORK_AREAS`,
-          derived from TODAY_STATIONS). The stations the goal cards above
-          already offer are left out — a destination is shown once. Rendered
-          at once: no read stands behind it, and its track is a fixed height. */}
+      {/* 6 · STATIONS — the contextual workspaces, one tap each, on the ONE
+          shared rail (V2: one rail, one card), from the ONE area model
+          (`PERSONAL_WORK_AREAS`, derived from TODAY_STATIONS). The stations
+          the goal cards above already offer are left out — a destination is
+          shown once. Rendered at once: no read stands behind it. */}
       <div data-testid="today-stations" className="border-t border-ink-600/70 pt-4 sm:pt-5">
-        <AreaSwitcher
+        <HomeAreaRail
           title={t("stations.title")}
-          prevLabel={tNav("previous")}
-          nextLabel={tNav("next")}
-          hereLabel={tNav("youAreHere")}
-          testId="today-area-switcher"
-          items={areasBeyondGoals(PERSONAL_WORK_AREAS, HOME_GOALS.worker).map((s) => ({
+          testId="today-area-rail"
+          areas={areasBeyondGoals(PERSONAL_WORK_AREAS, HOME_GOALS.worker).map((s) => ({
             id: s.id,
             href: s.href,
             iconKey: s.iconKey,
             label: t(`stations.${s.id}`),
-            testId: `today-station-${s.id}`,
           }))}
         />
       </div>

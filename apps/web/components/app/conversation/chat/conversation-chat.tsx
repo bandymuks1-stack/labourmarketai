@@ -18,7 +18,7 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { SkeletonText } from "@/components/app/skeleton";
 import { useAuthOptional } from "@/lib/auth/context";
-import { ConversationHeader } from "./conversation-header";
+import { APP_CONTENT_ID, ConversationHeader } from "./conversation-header";
 import { MySpaceRow, type MySpacePlace } from "./my-space-row";
 import { pinAction, reorderPinsAction, unpinAction } from "@/lib/workspace/pins-actions";
 import {
@@ -571,12 +571,11 @@ export type ChatLabels = {
   // Pin to home (owner P0 No. 1, 2026-11-12): the row's own edit mode.
   pinAdd: string;
   pinEditDone: string;
-  pinEditYours: string;
   pinAddHeading: string;
   pinAddNone: string;
   pinRecent: string;
-  pinMoveEarlier: string;
-  pinMoveLater: string;
+  pinMoveHandle: string;
+  pinManageHint: string;
   pinRemove: string;
   pinAdded: string;
   pinMoved: string;
@@ -8288,6 +8287,10 @@ export function ConversationChat({
         data-testid="conversation-chat"
       >
         <ConversationHeader title={labels.headerTitle} nav={nav} mobile={mobile} />
+        {/* Where the header's skip link lands: the start of this screen's own
+            content. An empty focus target, so the next Tab is the first
+            control under the bar. */}
+        <span id={APP_CONTENT_ID} tabIndex={-1} className="sr-only" />
         {/* Directly under the one top bar, above everything the person came
             here to do: the answer to "why am I on this screen?" has to arrive
             before they start reading the conversation, not after. */}
@@ -8321,12 +8324,11 @@ export function ConversationChat({
                   labels: {
                     add: labels.pinAdd,
                     done: labels.pinEditDone,
-                    yours: labels.pinEditYours,
                     addHeading: labels.pinAddHeading,
                     addNone: labels.pinAddNone,
                     recent: labels.pinRecent,
-                    moveEarlier: labels.pinMoveEarlier,
-                    moveLater: labels.pinMoveLater,
+                    moveHandle: labels.pinMoveHandle,
+                    manageHint: labels.pinManageHint,
                     remove: labels.pinRemove,
                     added: labels.pinAdded,
                     removed: labels.unpinDone,

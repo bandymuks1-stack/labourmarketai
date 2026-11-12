@@ -7,6 +7,7 @@ import { ROLE_GATED_PREFIXES } from "@/lib/auth/role-gated-routes";
 import { NEED_DOOR_HREF } from "@/lib/company/need-door";
 import { locales } from "@/lib/i18n/config";
 import {
+  AREA_CARD_ICONS,
   GOAL_FUNCTIONS,
   HOME_GOALS,
   ROLE_GOAL_ORDER,
@@ -97,7 +98,7 @@ describe("one navigation system: the shared navigator and the shared goals", () 
     expect(today).toMatch(/<HomeGoalCardsPending \/>/);
     const company = read("components/app/organization/company-model-screen.tsx");
     expect(company.indexOf("<HomeGoalCards")).toBeGreaterThan(-1);
-    expect(company.indexOf("<HomeGoalCards")).toBeLessThan(company.indexOf("<AreaSwitcher"));
+    expect(company.indexOf("<HomeGoalCards")).toBeLessThan(company.indexOf("<HomeAreaRail"));
   });
 });
 
@@ -259,6 +260,82 @@ describe("DEMAND ≠ SUPPLY on the organization home (SEP-4)", () => {
   });
 });
 
+describe("the two people who had no home: a customer, and an employee inside an organization", () => {
+  const CUSTOMER = { heldRoles: ["customer"], opensCompanySpace: false };
+  const EMPLOYEE = { heldRoles: ["worker"], opensCompanySpace: false };
+  const page = read("app/[locale]/dashboard/page.tsx");
+
+  it("a customer with no organization meets their own requests first, and nothing they cannot open", () => {
+    const goals = signedInGoals("customer", CUSTOMER);
+    expect(goals.map((g) => g.id)).toEqual(["services", "orders", "partners"]);
+    expect(goals[0].functions.map((fn) => fn.id)).toContain("myRequests");
+    for (const goal of goals) {
+      for (const fn of goal.functions) expect(routeIsAdmitted(fn.href, CUSTOMER), fn.id).toBe(true);
+    }
+    // "Find work" needs the worker role: the goal is not offered at all.
+    expect(goals.map((g) => g.id)).not.toContain("work");
+  });
+
+  it("the customer's own door is shown only to a person who holds that role", () => {
+    for (const role of ["worker", "company", "agency"] as const) {
+      const ids = signedInGoals(role, role === "worker" ? WORKER : COMPANY_ONLY).flatMap((g) => g.functions.map((fn) => fn.id));
+      expect(ids, role).not.toContain("myRequests");
+    }
+    expect(routeIsAdmitted("/dashboard/buyer", WORKER)).toBe(false);
+  });
+
+  it("an employee inside an organization gets their own functions, never the employer's", () => {
+    const goals = signedInGoals("worker", EMPLOYEE);
+    expect(goals[0].id).toBe("work");
+    const hrefs = goals.flatMap((g) => g.functions.map((fn) => fn.href));
+    expect(hrefs).toContain("/dashboard/journal");
+    expect(hrefs.some((h) => h.startsWith("/dashboard/company"))).toBe(false);
+  });
+
+  it("the page gives them the shared navigator only where no role home exists", () => {
+    expect(page).toMatch(/workerToday \|\| \(activeOrgWorkspace && identity === "company"\)\s*\? null\s*: activeRole === "customer"\s*\? "customer"\s*: "worker";/);
+    expect(page).toMatch(/<section data-testid="goals-home"[^>]*>\s*<HomeGoalCards role=\{goalsOnlyRole\} \/>/);
+    expect(page).toMatch(/!companyModel && goalsOnlyRole \? \(/);
+  });
+
+  it("the customer card has its text in all 11 catalogs", () => {
+    for (const locale of ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"]) {
+      const m = JSON.parse(read(`messages/${locale}.json`)).homeGoals.customer.myRequests;
+      expect(m.label, locale).toBeTruthy();
+      expect(m.hint, locale).toBeTruthy();
+      expect(`${m.label} ${m.hint}`).not.toMatch(/^\[EN\]|\bdemo\b/i);
+    }
+  });
+});
+
+describe("one rail on the home: the remaining areas are cards of the shared rail", () => {
+  const rail = read("components/app/home/home-area-rail.tsx").replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("neither home mounts a second carousel; both hand their areas to the shared rail", () => {
+    for (const file of ["components/app/today/today-screen.tsx", "components/app/organization/company-model-screen.tsx"]) {
+      const code = read(file).replace(/\/\*[\s\S]*?\*\//g, "");
+      expect(code, file).not.toMatch(/AreaSwitcher|area-switcher/);
+      expect(code, file).toMatch(/<HomeAreaRail\b/);
+    }
+    expect(rail).toMatch(/import \{ CardRail \} from "@\/components\/navigation\/card-rail";/);
+    expect(rail).toMatch(/<CardRail\b/);
+    expect(rail).not.toMatch(/<Link\b|<a\b|<button\b|overflow-x-|snap-x|perspective|lucide-react/);
+  });
+
+  it("every area has a card icon, and no rail shows one icon twice", () => {
+    for (const [areas, goals, name] of [
+      [PERSONAL_WORK_AREAS, HOME_GOALS.worker, "worker"],
+      [ORGANIZATION_WORK_AREAS, HOME_GOALS.company, "company"],
+      [ORGANIZATION_WORK_AREAS, HOME_GOALS.agency, "agency"],
+    ] as const) {
+      const left = areasBeyondGoals(areas, goals);
+      const icons = left.map((a) => AREA_CARD_ICONS[a.iconKey]);
+      for (const [i, icon] of icons.entries()) expect(NAV_CARD_ICONS[icon], `${name}.${left[i].id}`).toBeTruthy();
+      expect(new Set(icons).size, `${name} area icons`).toBe(icons.length);
+    }
+  });
+});
+
 describe("pinning from a function card: the shared slot, the row as the one writer", () => {
   const strip = (file: string) => read(file).replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
   const client = strip("components/app/home/home-goal-navigator.tsx");
@@ -412,7 +489,7 @@ describe("quick access: the organization's active projects and open needs, by na
   it("closes the organization home behind its own boundary, so it cannot push the goals down", () => {
     const company = read("components/app/organization/company-model-screen.tsx");
     expect(company).toMatch(/<Suspense fallback=\{null\}>\s*<HomeQuickAccess \/>\s*<\/Suspense>/);
-    expect(company.indexOf("<HomeQuickAccess />")).toBeGreaterThan(company.indexOf("<AreaSwitcher"));
+    expect(company.indexOf("<HomeQuickAccess />")).toBeGreaterThan(company.indexOf("<HomeAreaRail"));
   });
 
   for (const locale of locales) {
@@ -456,4 +533,30 @@ describe("plain copy in every catalog", () => {
       }
     });
   }
+});
+
+describe("the signed-in skip link (WCAG 2.4.1)", () => {
+  const header = read("components/app/conversation/chat/conversation-header.tsx");
+
+  it("is the first thing in the one header, named in every catalog, and never changes the address", () => {
+    const body = header.slice(header.indexOf('data-testid="app-header"'));
+    expect(body.indexOf('data-testid="app-skip-link"')).toBeGreaterThan(-1);
+    expect(body.indexOf('data-testid="app-skip-link"')).toBeLessThan(body.indexOf("<Link"));
+    expect(header).toMatch(/href=\{`#\$\{APP_CONTENT_ID\}`\}/);
+    expect(header).toMatch(/e\.preventDefault\(\);\s*target\.focus\(\);/);
+    expect(header).toMatch(/sr-only focus:not-sr-only/);
+    for (const locale of ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"]) {
+      const text = JSON.parse(read(`messages/${locale}.json`)).common.skipToContent as string;
+      expect(text, locale).toBeTruthy();
+      expect(text, locale).not.toMatch(/^\[EN\]/);
+    }
+  });
+
+  it("every shell that mounts the header gives the link exactly one place to land", () => {
+    const chrome = read("components/app/dashboard-chrome.tsx");
+    expect((chrome.match(/<main id=\{APP_CONTENT_ID\} tabIndex=\{-1\}/g) ?? []).length).toBe(2);
+    const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+    expect((chat.match(/id=\{APP_CONTENT_ID\}/g) ?? []).length).toBe(1);
+    expect(chat.indexOf("id={APP_CONTENT_ID}")).toBeGreaterThan(chat.indexOf("<ConversationHeader title={labels.headerTitle}"));
+  });
 });

@@ -15093,12 +15093,11 @@
       "planStep": "Schritt {n} von {count}",
       "pinAdd": "Verknüpfung hinzufügen",
       "pinEditDone": "Fertig",
-      "pinEditYours": "Ihre Verknüpfungen",
       "pinAddHeading": "Eine Verknüpfung hinzufügen",
       "pinAddNone": "Hier ist bereits alles hinzugefügt.",
       "pinRecent": "Zuletzt",
-      "pinMoveEarlier": "„{label}“ nach vorne verschieben",
-      "pinMoveLater": "„{label}“ nach hinten verschieben",
+      "pinMoveHandle": "„{label}“: ziehen oder mit den Pfeiltasten verschieben",
+      "pinManageHint": "Ziehen Sie einen Schnellzugriff oder verschieben Sie ihn mit den Pfeiltasten. ✕ entfernt ihn.",
       "pinRemove": "„{label}“ entfernen",
       "pinAdded": "Hinzugefügt.",
       "pinMoved": "Reihenfolge gespeichert.",
@@ -20636,6 +20635,12 @@
       "candidates": {
         "label": "Kandidaten finden",
         "hint": "Nach Personen suchen"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Meine Anfragen",
+        "hint": "Was Sie angefragt haben und wer geantwortet hat"
       }
     },
     "ask": {

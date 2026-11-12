@@ -236,7 +236,8 @@ describe("the home applies it before the row sees a pin", () => {
       if (isPinnableRef(ref)) expect(pinIsAdmitted(ref, WORKER), ref).toBe(true);
     }
     const closed = HOME_GOALS.worker.filter((g) => !admittedHomeGoals("worker", WORKER).includes(g));
-    expect(closed.map((g) => g.href)).toEqual(["/dashboard/company/partners"]);
+    // …and the customer's own door, which is the customer role's alone.
+    expect(closed.map((g) => g.href)).toEqual(["/dashboard/buyer", "/dashboard/company/partners"]);
     for (const goal of closed) expect(pinIsAdmitted(`link:${goal.href}`, WORKER), goal.href).toBe(false);
     for (const area of PERSONAL_WORK_AREAS) {
       const ref = `link:${area.href}`;
@@ -245,7 +246,14 @@ describe("the home applies it before the row sees a pin", () => {
     for (const place of [...HOME_GOALS.company, ...HOME_GOALS.agency, ...ORGANIZATION_WORK_AREAS]) {
       const ref = `link:${place.href}`;
       expect(isPinnableRef(ref), ref).toBe(true);
-      expect(pinIsAdmitted(ref, MANAGER_BY_MEMBERSHIP), ref).toBe(true);
+      // The one place on an organization home a manager may not hold is the
+      // customer's own door: not offered, and a pin to it is not drawn.
+      expect(pinIsAdmitted(ref, MANAGER_BY_MEMBERSHIP), ref).toBe(place.href !== "/dashboard/buyer");
     }
+    const CUSTOMER = { heldRoles: ["customer"], opensCompanySpace: false };
+    for (const goal of admittedHomeGoals("customer", CUSTOMER)) {
+      expect(pinIsAdmitted(`link:${goal.href}`, CUSTOMER), goal.href).toBe(true);
+    }
+    expect(pinIsAdmitted("link:/dashboard/buyer", CUSTOMER)).toBe(true);
   });
 });

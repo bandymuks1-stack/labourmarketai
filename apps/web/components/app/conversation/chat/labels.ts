@@ -256,12 +256,11 @@ const CHAT_KEYS = [
   // Pin to home (owner P0 No. 1, 2026-11-12): the row's own edit mode.
   "pinAdd",
   "pinEditDone",
-  "pinEditYours",
   "pinAddHeading",
   "pinAddNone",
   "pinRecent",
-  "pinMoveEarlier",
-  "pinMoveLater",
+  "pinMoveHandle",
+  "pinManageHint",
   "pinRemove",
   "pinAdded",
   "pinMoved",
@@ -479,8 +478,7 @@ const WORKLOG_KEYS = [
 const PIN_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "pinCap",
   "reorderDone",
-  "pinMoveEarlier",
-  "pinMoveLater",
+  "pinMoveHandle",
   "pinRemove",
 ]);
 

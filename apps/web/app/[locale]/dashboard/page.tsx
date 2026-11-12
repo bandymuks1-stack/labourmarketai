@@ -63,6 +63,7 @@ import {
 } from "@/lib/auth/dashboard-role-decision";
 import { TodayScreen } from "@/components/app/today/today-screen";
 import { CompanyModelScreen } from "@/components/app/organization/company-model-screen";
+import { HomeGoalCards } from "@/components/app/home/home-goal-cards";
 import { PilotPassInvite } from "@/components/app/pilot-pass-invite";
 import { conversationOpeningContext } from "@/lib/today/today-route";
 import { AccessRefusalNotice } from "@/components/app/access-refusal-notice";
@@ -297,6 +298,18 @@ export default async function DashboardHomePage({
   // this home is resolved the same way: the acting role's goals and areas,
   // already filtered to the admitted ones.
   const goalAdmission = await loadGoalAdmission();
+  // EVERYONE ELSE gets the goals too (owner P0 No. 1, 2026-11-12): a person
+  // inside an organization they work for but do not manage, and a customer
+  // with no organization, had no opening context at all — only the header.
+  // They get the same shared goal navigator, with their own functions, and
+  // nothing else is invented for them. Which list: the customer's when the
+  // person acts as a customer, otherwise the person's own.
+  const goalsOnlyRole: "worker" | "customer" | null =
+    workerToday || (activeOrgWorkspace && identity === "company")
+      ? null
+      : activeRole === "customer"
+        ? "customer"
+        : "worker";
   const drawnPins = pins ? admittedPins(pins, goalAdmission) : null;
   // The pins NOT drawn are still the person's rows and still count toward the
   // cap, so the row's edit panel lists them with "remove" only — a reference
@@ -304,7 +317,7 @@ export default async function DashboardHomePage({
   const withheld = pins ? withheldPins(pins, goalAdmission) : [];
   const pinPlaces = pins
     ? await loadPinPlaces({
-        home: workerToday ? "worker" : activeOrgWorkspace && identity === "company" ? "organization" : null,
+        home: workerToday ? "worker" : activeOrgWorkspace && identity === "company" ? "organization" : goalsOnlyRole,
         admission: goalAdmission,
       })
     : [];
@@ -435,12 +448,22 @@ export default async function DashboardHomePage({
     activeOrgWorkspace && identity === "company" ? <CompanyModelScreen /> : null;
   // The pilot pass pointer leads it — the employer home is where an owner
   // looks first, and it renders nothing unless the pass is theirs to start.
+  // A person with no role home (an employee inside an organization, a
+  // customer with no organization) opens on the shared goal navigator alone.
+  const goalsOnlyHome =
+    !companyModel && goalsOnlyRole ? (
+      <section data-testid="goals-home" className="mx-auto flex w-full max-w-6xl flex-col gap-4">
+        <HomeGoalCards role={goalsOnlyRole} />
+      </section>
+    ) : null;
   const companyOpeningContext = companyModel ? (
     <>
       <PilotPassInvite className="mb-4" />
       {companyModel}
     </>
-  ) : null;
+  ) : (
+    goalsOnlyHome
+  );
   const conversationKey = `${rootWorkspace.activeWorkspaceId}:${identity}`;
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
@@ -475,7 +498,7 @@ export default async function DashboardHomePage({
         // chat's own opening composition (the worker's "now" above the
         // greeting and the composer). One home, one conversation.
         openingContext={workerToday ? <TodayScreen locale={locale as ActiveLocale} /> : companyOpeningContext}
-        openingContextWide={Boolean(workerToday)}
+        openingContextWide={Boolean(workerToday || goalsOnlyHome)}
         countryLabels={countryLabels}
         educationWorkspace={educationWorkspace}
         agencyWorkspace={agencyWorkspace}

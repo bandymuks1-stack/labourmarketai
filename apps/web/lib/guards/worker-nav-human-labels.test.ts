@@ -147,7 +147,7 @@ describe("ONE home — the conversation; ŠIANDIEN is its opening context (owner
     expect(screen).toMatch(/areasBeyondGoals\(PERSONAL_WORK_AREAS, HOME_GOALS\.worker\)\.map/);
     expect(screen).toMatch(/<HomeGoalCards role="worker" \/>/);
     expect(read("lib/navigation/work-areas.ts")).toMatch(/TODAY_STATIONS\.map/);
-    expect(screen).toMatch(/today-station-\$\{s\.id\}/);
+    expect(screen).toMatch(/<HomeAreaRail\b[\s\S]*?label: t\(`stations\.\$\{s\.id\}`\)/);
     // Every station has a human label in LT and EN (the former tab label
     // "Pasaulis" / "World" moved here, so nothing was retyped by a machine).
     for (const s of TODAY_STATIONS) {

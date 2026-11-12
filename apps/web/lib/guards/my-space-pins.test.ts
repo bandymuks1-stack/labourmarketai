@@ -36,8 +36,23 @@ describe("the pinned row is a reference row over the ONE chip handler", () => {
     expect(rowCode).not.toMatch(/handleChip|assistant\(/);
     // Keyboard and assistive tech: named buttons, a disclosed panel, a polite status.
     expect(ROW).toMatch(/aria-expanded=\{editing\}/);
-    expect(ROW).toMatch(/aria-label=\{labels\.moveEarlier\.replace\("\{label\}", p\.label\)\}/);
-    expect(ROW).toMatch(/aria-label=\{labels\.moveLater\.replace\("\{label\}", p\.label\)\}/);
+    // MANAGE (V2): the chip itself is the handle — arrow keys or a drag (pointer
+    // events, so a finger works too) — with a small remove control; no list of
+    // arrow buttons. A keyboard move keeps the focus on the moved chip.
+    expect(ROW).toMatch(/aria-label=\{labels\.moveHandle\.replace\("\{label\}", p\.label\)\}/);
+    expect(ROW).toMatch(/aria-keyshortcuts="ArrowLeft ArrowRight"/);
+    expect(ROW).toMatch(/e\.key === "ArrowLeft" \|\| e\.key === "ArrowUp" \? -1/);
+    expect(ROW).toMatch(/onPointerDown=\{\(e\) => onHandleDown\(e, p\.ref\)\}/);
+    expect(ROW).toMatch(/setPointerCapture\(e\.pointerId\)/);
+    expect(ROW).toMatch(/touch-none/);
+    expect(ROW).toMatch(/refocus\.current = pins\[index\]\.ref;/);
+    expect(ROW).toMatch(/handleEls\.current\.get\(refocus\.current\)\?\.focus\(\)/);
+    // One stored write per gesture: the drag previews locally and saves on release.
+    expect(ROW).toMatch(/if \(d\.moved && next\) saveOrder\(next\);/);
+    expect(rowCode).not.toMatch(/my-space-move-earlier|my-space-move-later|draggable/);
+    // The remove control is small to look at and a full 44px to press.
+    expect(ROW).toMatch(/flex size-11 flex-none[^"]*"\s*data-testid="my-space-remove"/);
+    expect(ROW).toMatch(/\{labels\.manageHint\}/);
     expect(ROW).toMatch(/aria-label=\{labels\.remove\.replace\("\{label\}", p\.label\)\}/);
     expect(ROW).toMatch(/role="status" aria-live="polite"/);
     expect(ROW).toMatch(/e\.key !== "Escape"/);
@@ -104,12 +119,12 @@ describe("the pinned row is a reference row over the ONE chip handler", () => {
   it("copy exists in all 11 catalogs", () => {
     for (const locale of ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"]) {
       const chat = JSON.parse(read(`messages/${locale}.json`)).conversation.chat as Record<string, string>;
-      for (const key of ["mySpaceTitle", "chipManagePins", "pinAsk", "chipPinYes", "chipPinNo", "pinDone", "pinCap", "pinUnavailable", "pinsManageIntro", "pinsNone", "unpinPrefix", "unpinDone", "pinFirstPrefix", "reorderDone", "pinAdd", "pinEditDone", "pinEditYours", "pinAddHeading", "pinAddNone", "pinRecent", "pinMoveEarlier", "pinMoveLater", "pinRemove", "pinAdded", "pinMoved", "pinHiddenHeading"]) {
+      for (const key of ["mySpaceTitle", "chipManagePins", "pinAsk", "chipPinYes", "chipPinNo", "pinDone", "pinCap", "pinUnavailable", "pinsManageIntro", "pinsNone", "unpinPrefix", "unpinDone", "pinFirstPrefix", "reorderDone", "pinAdd", "pinEditDone", "pinAddHeading", "pinAddNone", "pinRecent", "pinMoveHandle", "pinManageHint", "pinRemove", "pinAdded", "pinMoved", "pinHiddenHeading"]) {
         expect(chat[key], `${locale}.${key}`).toBeTypeOf("string");
         expect(chat[key]).not.toMatch(/^\[EN\]/);
       }
       expect(chat.pinCap).toContain("{max}");
-      for (const key of ["pinMoveEarlier", "pinMoveLater", "pinRemove"]) expect(chat[key], `${locale}.${key}`).toContain("{label}");
+      for (const key of ["pinMoveHandle", "pinRemove"]) expect(chat[key], `${locale}.${key}`).toContain("{label}");
       for (const key of ["pinAdd", "pinEditDone", "pinAdded", "pinMoved"]) expect(chat[key]).not.toMatch(/\bdemo\b/i);
     }
   });
@@ -139,10 +154,10 @@ describe("the row's templated labels reach the client as templates, in every bui
         translator("projects.assign.reservation") as never,
       ) as unknown as Record<string, string>;
       expect(labels.pinCap).toContain("{max}");
-      for (const key of ["reorderDone", "pinMoveEarlier", "pinMoveLater", "pinRemove"]) {
+      for (const key of ["reorderDone", "pinMoveHandle", "pinRemove"]) {
         expect(labels[key], `${locale}.${key}`).toContain("{label}");
       }
-      for (const key of ["pinCap", "reorderDone", "pinMoveEarlier", "pinMoveLater", "pinRemove", "pinAdd", "pinHiddenHeading"]) {
+      for (const key of ["pinCap", "reorderDone", "pinMoveHandle", "pinManageHint", "pinRemove", "pinAdd", "pinHiddenHeading"]) {
         expect(labels[key], `${locale}.${key}`).not.toMatch(/^conversation\.chat\./);
         expect(errors.filter((m) => m.includes(`conversation.chat.${key}`)), `${locale}.${key}`).toEqual([]);
       }

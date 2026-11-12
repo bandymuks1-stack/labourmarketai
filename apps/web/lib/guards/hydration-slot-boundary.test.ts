@@ -19,7 +19,7 @@ describe("DashboardChrome keeps RSC slots behind a non-DOM boundary", () => {
   });
 
   it("every <main> opens with SlotBoundary, never a bare slot", () => {
-    const mains = [...src.matchAll(/<main className="[^"]*">([\s\S]*?)<\/main>/g)].map((m) => m[1].trim());
+    const mains = [...src.matchAll(/<main\b[^>]*className="[^"]*">([\s\S]*?)<\/main>/g)].map((m) => m[1].trim());
     expect(mains.length).toBeGreaterThanOrEqual(2);
     for (const body of mains) {
       expect(body.startsWith("<SlotBoundary>")).toBe(true);

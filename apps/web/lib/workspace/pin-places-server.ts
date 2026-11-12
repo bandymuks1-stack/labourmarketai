@@ -29,16 +29,16 @@ export type PinPlace = {
  * WHAT CAN BE PINNED FROM THIS HOME — the acting role's goals and the
  * workspace's areas, from the ONE goal model and the ONE area model (no third
  * list), filtered by the same admission the cards use and by the pin model's
- * own closed reference rule. A person in a workspace with no goal home (a
- * customer outside an organization, an employee inside one) is offered
- * nothing here; the chat's "add it?" ask still works for them.
+ * own closed reference rule. A customer outside an organization and an
+ * employee inside one have the goals-only home (`worker` / `customer` here),
+ * so they are offered the same kind of list.
  */
 export async function loadPinPlaces(input: {
-  readonly home: "worker" | "organization" | null;
+  readonly home: "worker" | "customer" | "organization" | null;
   readonly admission: GoalAdmission;
 }): Promise<readonly PinPlace[]> {
   if (!input.home) return [];
-  const role: HomeGoalRole = input.home === "worker" ? "worker" : await loadOrganizationGoalRole();
+  const role: HomeGoalRole = input.home === "organization" ? await loadOrganizationGoalRole() : input.home;
   const tAll = await getTranslations();
   const out: PinPlace[] = [];
   const seen = new Set<string>();
@@ -50,7 +50,7 @@ export async function loadPinPlaces(input: {
     out.push({ ref, href, label, onHome });
   };
   for (const goal of HOME_GOALS[role]) add(goal.href, tAll(goal.labelKey), true);
-  for (const area of workAreasFor(input.home === "worker" ? "personal" : "organization")) {
+  for (const area of workAreasFor(input.home === "organization" ? "organization" : "personal")) {
     add(area.href, tAll(area.labelKey), false);
   }
   return out;

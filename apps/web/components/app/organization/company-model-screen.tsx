@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { OrganizationApprovalsCard } from "@/components/app/arena/confirm-pulse";
-import { AreaSwitcher } from "@/components/app/area-switcher";
+import { HomeAreaRail } from "@/components/app/home/home-area-rail";
 import { NeedDoorLink } from "@/components/app/need-door-link";
 import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
 import { HOME_GOALS, areasBeyondGoals } from "@/lib/navigation/home-goals";
@@ -37,10 +37,9 @@ import { HomeQuickAccess } from "@/components/app/home/home-quick-access";
  * capability, not a calendar.
  */
 export async function CompanyModelScreen() {
-  const [t, tAll, tNav, role] = await Promise.all([
+  const [t, tAll, role] = await Promise.all([
     getTranslations("companyModel"),
     getTranslations(),
-    getTranslations("common.nav"),
     loadOrganizationGoalRole(),
   ]);
   return (
@@ -68,21 +67,17 @@ export async function CompanyModelScreen() {
       {/* THE GOALS — the shared goal navigator, in this role's order, opening
           the product's own functions. */}
       <HomeGoalCards role={role} />
-      {/* Every other door of the company as the light 3D area switcher — one
-          source: ORGANIZATION_WORK_AREAS, minus the doors the goals above
-          already offer (a destination is shown once). */}
-      <AreaSwitcher
+      {/* Every other door of the company on the ONE shared rail (V2: one
+          rail, one card) — one source: ORGANIZATION_WORK_AREAS, minus the
+          doors the goals above already offer (a destination is shown once). */}
+      <HomeAreaRail
         title={t("areasTitle")}
-        prevLabel={tNav("previous")}
-        nextLabel={tNav("next")}
-        hereLabel={tNav("youAreHere")}
         testId="company-model-areas"
-        items={areasBeyondGoals(ORGANIZATION_WORK_AREAS, HOME_GOALS[role]).map((a) => ({
+        areas={areasBeyondGoals(ORGANIZATION_WORK_AREAS, HOME_GOALS[role]).map((a) => ({
           id: a.id,
           href: a.href,
           iconKey: a.iconKey,
           label: tAll(a.labelKey),
-          testId: `company-model-${a.id}`,
         }))}
       />
       {/* QUICK ACCESS — the organization's active projects and open needs, by

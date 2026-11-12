@@ -104,9 +104,10 @@ describe("no late region appears out of nothing above the stations", () => {
     expect(pending).toMatch(/<HomeRegionPending size="action" \/>/);
     expect(pending).toMatch(/<HomeLinePending \/>/);
     expect(pending).toMatch(/data-testid="today-stations-pending"/);
-    // The area switcher's track is `h-40`; the reservation matches it.
-    expect(pending).toMatch(/className="mt-2 h-40"/);
-    expect(read("components/app/area-switcher.tsx")).toMatch(/className="relative h-40 /);
+    // The stations are cards of the shared rail (regular card: at least
+    // `7.5rem` tall, plus the rail's own padding); the reservation matches it.
+    expect(pending).toMatch(/className="mt-2 h-32"/);
+    expect(read("components/navigation/card-rail.tsx")).toMatch(/"min-h-\[7\.5rem\] sm:p-4"/);
   });
 });
 

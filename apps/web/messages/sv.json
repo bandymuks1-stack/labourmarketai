@@ -571,7 +571,7 @@
     "localeSwitch": "[EN] Language",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
-    "skipToContent": "[EN] Skip to content",
+    "skipToContent": "Hoppa till innehållet",
     "loading": "Laddar…",
     "dashboardSections": "Översiktens avsnitt",
     "nav": {
@@ -4406,12 +4406,11 @@
       "whatChangedUnavailable": "Jag kunde inte kontrollera vad som ändrades just nu. Dina registreringar är säkra – försök igen om en stund eller öppna journalen.",
       "pinAdd": "Lägg till genväg",
       "pinEditDone": "Klar",
-      "pinEditYours": "Dina genvägar",
       "pinAddHeading": "Lägg till en genväg",
       "pinAddNone": "Allt här är redan tillagt.",
       "pinRecent": "Senaste",
-      "pinMoveEarlier": "Flytta ”{label}” tidigare",
-      "pinMoveLater": "Flytta ”{label}” senare",
+      "pinMoveHandle": "”{label}”: dra eller flytta med piltangenterna",
+      "pinManageHint": "Dra en genväg eller flytta den med piltangenterna. ✕ tar bort den.",
       "pinRemove": "Ta bort ”{label}”",
       "pinAdded": "Tillagd.",
       "pinMoved": "Ordningen är sparad.",
@@ -8020,6 +8019,12 @@
       "candidates": {
         "label": "Hitta kandidater",
         "hint": "Sök efter personer"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Mina förfrågningar",
+        "hint": "Vad du har frågat efter och vem som svarade"
       }
     },
     "ask": {

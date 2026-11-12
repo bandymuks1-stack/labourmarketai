@@ -15093,12 +15093,11 @@
       "planStep": "Step {n} of {count}",
       "pinAdd": "Add shortcut",
       "pinEditDone": "Done",
-      "pinEditYours": "Your shortcuts",
       "pinAddHeading": "Add a shortcut",
       "pinAddNone": "Everything here is already added.",
       "pinRecent": "Recent",
-      "pinMoveEarlier": "Move “{label}” earlier",
-      "pinMoveLater": "Move “{label}” later",
+      "pinMoveHandle": "“{label}”: drag it or use the arrow keys to move it",
+      "pinManageHint": "Drag a shortcut or use the arrow keys to move it. ✕ removes it.",
       "pinRemove": "Remove “{label}”",
       "pinAdded": "Added.",
       "pinMoved": "Order saved.",
@@ -20636,6 +20635,12 @@
       "candidates": {
         "label": "Find candidates",
         "hint": "Search for people"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "My requests",
+        "hint": "What you asked for and who answered"
       }
     },
     "ask": {

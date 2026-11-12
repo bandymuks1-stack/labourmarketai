@@ -15093,12 +15093,11 @@
       "planStep": "Krok {n} z {count}",
       "pinAdd": "Dodaj skrót",
       "pinEditDone": "Gotowe",
-      "pinEditYours": "Twoje skróty",
       "pinAddHeading": "Dodaj skrót",
       "pinAddNone": "Wszystko tutaj jest już dodane.",
       "pinRecent": "Ostatnie",
-      "pinMoveEarlier": "Przesuń „{label}” wcześniej",
-      "pinMoveLater": "Przesuń „{label}” później",
+      "pinMoveHandle": "„{label}”: przeciągnij lub przesuń klawiszami strzałek",
+      "pinManageHint": "Przeciągnij skrót lub przesuń go klawiszami strzałek. ✕ go usuwa.",
       "pinRemove": "Usuń „{label}”",
       "pinAdded": "Dodano.",
       "pinMoved": "Kolejność zapisana.",
@@ -20636,6 +20635,12 @@
       "candidates": {
         "label": "Znajdź kandydatów",
         "hint": "Szukaj ludzi"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Moje zapytania",
+        "hint": "O co pytasz i kto odpowiedział"
       }
     },
     "ask": {

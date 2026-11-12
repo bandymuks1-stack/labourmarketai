@@ -7,7 +7,7 @@ const read = (rel: string): string => readFileSync(join(WEB, rel), "utf8");
 
 describe("the company context's centre is the company model, over existing surfaces", () => {
   // The doors moved into the ONE area model (2026-10-25, phase 2 of the one
-  // navigation system); the screen renders them through the area switcher.
+  // navigation system); the screen renders them on the shared rail.
   const screen = read("lib/navigation/work-areas.ts");
   it("every entry is an existing canonical route", () => {
     const hrefs = [...screen.matchAll(/href: "(\/dashboard[^"]*)"/g)].map((m) => m[1]);
@@ -21,14 +21,16 @@ describe("the company context's centre is the company model, over existing surfa
     expect(screen).toMatch(/id: "calendar", href: "\/dashboard\/planning"/);
     expect(screen).toMatch(/id: "capacity", href: "\/dashboard\/company\/planning"/);
   });
-  it("the screen renders every door from the area model, through the area switcher", () => {
+  it("the screen renders every door from the area model, on the shared rail", () => {
     const view = read("components/app/organization/company-model-screen.tsx");
     // Since 2026-11-12 the goals lead (lib/navigation/home-goals.ts) and the
     // switcher holds the doors the goals do not already offer — still from
     // the ONE area model, never a second list.
     expect(view).toMatch(/areasBeyondGoals\(ORGANIZATION_WORK_AREAS, HOME_GOALS\[role\]\)\.map/);
-    expect(view).toMatch(/<AreaSwitcher\b/);
-    expect(view).toMatch(/testId: `company-model-\$\{a\.id\}`/);
+    // V2 (2026-11-12): on the ONE shared rail, not a second carousel.
+    expect(view).toMatch(/<HomeAreaRail\b/);
+    expect(view).not.toMatch(/<AreaSwitcher\b/);
+    expect(view).toMatch(/testId="company-model-areas"/);
   });
   it("is mounted as the opening context only inside a company organization workspace", () => {
     const page = read("app/[locale]/dashboard/page.tsx");

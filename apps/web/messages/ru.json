@@ -15093,12 +15093,11 @@
       "planStep": "Шаг {n} из {count}",
       "pinAdd": "Добавить ярлык",
       "pinEditDone": "Готово",
-      "pinEditYours": "Ваши ярлыки",
       "pinAddHeading": "Добавить ярлык",
       "pinAddNone": "Здесь всё уже добавлено.",
       "pinRecent": "Недавнее",
-      "pinMoveEarlier": "Переместить «{label}» раньше",
-      "pinMoveLater": "Переместить «{label}» позже",
+      "pinMoveHandle": "«{label}»: перетащите или переместите клавишами со стрелками",
+      "pinManageHint": "Перетащите ярлык или переместите его клавишами со стрелками. ✕ убирает его.",
       "pinRemove": "Убрать «{label}»",
       "pinAdded": "Добавлено.",
       "pinMoved": "Порядок сохранён.",
@@ -20636,6 +20635,12 @@
       "candidates": {
         "label": "Найти кандидатов",
         "hint": "Поиск людей"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Мои запросы",
+        "hint": "Что вы запросили и кто ответил"
       }
     },
     "ask": {

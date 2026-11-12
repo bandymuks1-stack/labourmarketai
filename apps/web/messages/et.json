@@ -571,7 +571,7 @@
     "localeSwitch": "[EN] Language",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
-    "skipToContent": "[EN] Skip to content",
+    "skipToContent": "Liigu sisu juurde",
     "loading": "Laadimine…",
     "dashboardSections": "Töölaua jaotised",
     "nav": {
@@ -4406,12 +4406,11 @@
       "whatChangedUnavailable": "Praegu ei õnnestunud kontrollida, mis muutus. Sinu kirjed on alles — proovi hetke pärast uuesti või ava tööpäevik.",
       "pinAdd": "Lisa otsetee",
       "pinEditDone": "Valmis",
-      "pinEditYours": "Sinu otseteed",
       "pinAddHeading": "Lisa otsetee",
       "pinAddNone": "Siin on kõik juba lisatud.",
       "pinRecent": "Hiljutised",
-      "pinMoveEarlier": "Liiguta „{label}“ ettepoole",
-      "pinMoveLater": "Liiguta „{label}“ tahapoole",
+      "pinMoveHandle": "„{label}“: lohista või liiguta nooleklahvidega",
+      "pinManageHint": "Lohista otseteed või liiguta seda nooleklahvidega. ✕ eemaldab selle.",
       "pinRemove": "Eemalda „{label}“",
       "pinAdded": "Lisatud.",
       "pinMoved": "Järjekord salvestatud.",
@@ -8020,6 +8019,12 @@
       "candidates": {
         "label": "Leia kandidaate",
         "hint": "Otsi inimesi"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Minu päringud",
+        "hint": "Mida sa küsisid ja kes vastas"
       }
     },
     "ask": {
