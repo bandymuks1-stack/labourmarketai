@@ -7,9 +7,8 @@ import { activeLocales } from "@/lib/i18n/config";
 /**
  * A company need saved without a country is invisible to every country
  * filter — the worker board, agency offers and search all read
- * `customer_requests.country`. In production most open needs had none, and
- * no need had Sweden: the wizard's country picker was optional and the
- * location field said "Location or country", so a company typing
+ * `customer_requests.country`. The wizard's country picker was optional and
+ * the location field said "Location or country", so a company typing
  * "Stockholm, Sweden" there believed the market was set.
  *
  * The country is never guessed (owner rule), so the wizard asks for it:
