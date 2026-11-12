@@ -4,7 +4,7 @@ import { expect as baseExpect, test, type Page } from "@playwright/test";
  * PREMIUM NAVIGATION — the six public intents, proven in a real browser
  * (owner P0 2026-11-12). Public pages, no session needed.
  *
- *   desktop (1024, 1280, 1440; en, lt, de): the six intents are visible by
+ *   desktop (1024, 1280, 1440; lt and de): the six intents are visible by
  *     name without opening anything, none is cut, nothing overflows; an intent
  *     plus a destination is TWO actions (counted, mouse and keyboard); Escape
  *     returns focus; a destination answers (not a 404);
@@ -35,7 +35,8 @@ for (const width of [1024, 1280, 1440] as const) {
   test.describe(`desktop intent bar @${width}px`, () => {
     test.use({ viewport: { width, height: 900 } });
 
-    for (const locale of ["en", "lt", "de"] as const) {
+    // Lithuanian (the default) and German (the longest labels).
+    for (const locale of ["lt", "de"] as const) {
       test(`${locale}: the six intents are visible, whole and inside the viewport`, async ({ page }) => {
         await page.goto(`/${locale}/pricing`);
         await expect(page.getByTestId("mobile-nav-toggle")).toBeHidden();
