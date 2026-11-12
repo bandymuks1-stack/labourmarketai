@@ -27,6 +27,8 @@ export type RenderedIntent = {
   readonly id: string;
   readonly iconKey: PublicIntentIconKey;
   readonly title: string;
+  /** The short name used where room is tight (the desktop intent bar). */
+  readonly short: string;
   readonly description: string;
   readonly links: ReadonlyArray<{
     readonly id: string;

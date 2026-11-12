@@ -4,9 +4,10 @@ import { expect as baseExpect, test, type Page } from "@playwright/test";
  * PREMIUM NAVIGATION — the six public intents, proven in a real browser
  * (owner P0 2026-11-12). Public pages, no session needed.
  *
- *   desktop (1024, 1280, 1440): the mega-menu opens from the keyboard, shows
- *     all six intents, Tab walks its links, Escape closes it and returns focus,
- *     and following a link navigates to a page that answers (not a 404);
+ *   desktop (1024, 1280, 1440; en, lt, de): the six intents are visible by
+ *     name without opening anything, none is cut, nothing overflows; an intent
+ *     plus a destination is TWO actions (counted, mouse and keyboard); Escape
+ *     returns focus; a destination answers (not a 404);
  *   mobile (320, 375, 768): the hamburger shows the same six intents, each
  *     expands to its links, nothing in the header escapes the viewport, every
  *     row is a 44px target, and a link navigates.
@@ -31,48 +32,73 @@ async function headerOverflow(page: Page): Promise<string[]> {
 }
 
 for (const width of [1024, 1280, 1440] as const) {
-  test.describe(`desktop mega-menu @${width}px`, () => {
+  test.describe(`desktop intent bar @${width}px`, () => {
     test.use({ viewport: { width, height: 900 } });
 
-    test("opens from the keyboard, shows six intents, closes on Escape", async ({ page }) => {
+    for (const locale of ["en", "lt", "de"] as const) {
+      test(`${locale}: the six intents are visible, whole and inside the viewport`, async ({ page }) => {
+        await page.goto(`/${locale}/pricing`);
+        await expect(page.getByTestId("mobile-nav-toggle")).toBeHidden();
+        for (const id of INTENTS) {
+          const t = page.getByTestId(`intent-toggle-${id}`);
+          await expect(t).toBeVisible();
+          await expect(t).toHaveAttribute("aria-expanded", "false");
+          // The name is not cut: its text box is as wide as its content.
+          const cut = await t.locator("span").evaluate((el) => el.scrollWidth > el.clientWidth + 1);
+          expect(cut, `${locale} ${id} label is cut at ${width}px`).toBe(false);
+        }
+        expect(await headerOverflow(page), "header overflow").toEqual([]);
+      });
+    }
+
+    test("keyboard: Enter on an intent, Enter on its first destination — two actions", async ({ page }) => {
       await page.goto("/en/pricing");
-      expect(await headerOverflow(page), "closed header overflow").toEqual([]);
-
-      const toggle = page.getByTestId("intent-menu-toggle");
-      await expect(toggle).toBeVisible();
-      await expect(toggle).toHaveAttribute("aria-expanded", "false");
-      await expect(page.getByTestId("mobile-nav-toggle")).toBeHidden();
-
+      const toggle = page.getByTestId("intent-toggle-workers");
       await toggle.focus();
-      await page.keyboard.press("Enter");
+      await page.keyboard.press("Enter"); // action 1
       await expect(toggle).toHaveAttribute("aria-expanded", "true");
-      const panel = page.getByTestId("intent-menu-panel");
-      await expect(panel).toBeVisible();
+      await expect(page.getByTestId("intent-menu-panel")).toBeVisible();
       for (const id of INTENTS) {
         await expect(page.getByTestId(`intent-column-${id}`)).toBeVisible();
       }
-
-      // Tab moves INTO the panel: the first destination of the first intent.
-      await page.keyboard.press("Tab");
-      await expect(page.getByTestId("intent-link-work-jobs")).toBeFocused();
-
-      await page.keyboard.press("Escape");
-      await expect(panel).toHaveCount(0);
-      await expect(toggle).toBeFocused();
-    });
-
-    test("a destination navigates to a page that answers", async ({ page }) => {
-      await page.goto("/en/pricing");
-      await page.getByTestId("intent-menu-toggle").click();
-      const link = page.getByTestId("intent-link-workers-companyNeed");
-      await expect(link).toHaveAttribute("href", /\/company-need$/);
+      await expect(page.getByTestId("intent-column-workers")).toHaveAttribute("data-active", "true");
+      const first = page.getByTestId("intent-link-workers-companyNeed");
+      await expect(first).toBeFocused();
       const [response] = await Promise.all([
         page.waitForNavigation(),
-        link.click(),
+        page.keyboard.press("Enter"), // action 2
       ]);
       expect(response?.status() ?? 200).toBeLessThan(400);
       await expect(page).toHaveURL(/\/company-need$/);
       await expect(page.getByTestId("intent-menu-panel")).toHaveCount(0);
+    });
+
+    test("Escape closes the panel and returns focus to the intent that opened it", async ({ page }) => {
+      await page.goto("/en/pricing");
+      const toggle = page.getByTestId("intent-toggle-work");
+      await toggle.click();
+      await expect(page.getByTestId("intent-link-work-jobs")).toBeFocused();
+      await page.keyboard.press("Escape");
+      await expect(page.getByTestId("intent-menu-panel")).toHaveCount(0);
+      await expect(toggle).toBeFocused();
+    });
+
+    test("every intent reaches each of its destinations in two actions", async ({ page }) => {
+      await page.goto("/en/pricing");
+      for (const id of INTENTS) {
+        await page.getByTestId(`intent-toggle-${id}`).click(); // action 1
+        const links = page.getByTestId(`intent-column-${id}`).locator("a");
+        expect(await links.count()).toBeGreaterThan(0);
+        for (const link of await links.all()) {
+          await expect(link).toBeVisible(); // action 2 would be this click
+        }
+        await page.keyboard.press("Escape");
+      }
+    });
+
+    test("the assistant entry is in the bar and points at the conversation home", async ({ page }) => {
+      await page.goto("/en/pricing");
+      await expect(page.getByTestId("intent-bar-assistant")).toHaveAttribute("href", /\/en\/dashboard$/);
     });
   });
 }
@@ -83,10 +109,11 @@ for (const width of [320, 375, 768] as const) {
 
     test("the hamburger carries the six intents and their links", async ({ page }) => {
       await page.goto("/lt/pricing");
-      await expect(page.getByTestId("intent-menu-toggle")).toBeHidden();
+      await expect(page.getByTestId("intent-bar")).toBeHidden();
 
       await page.getByTestId("mobile-nav-toggle").click();
       await expect(page.getByTestId("mobile-nav-intents")).toBeVisible();
+      await expect(page.getByTestId("mobile-nav-assistant")).toBeVisible();
       expect(await headerOverflow(page), "open header overflow").toEqual([]);
 
       for (const id of INTENTS) {

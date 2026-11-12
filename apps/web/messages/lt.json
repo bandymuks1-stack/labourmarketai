@@ -20555,32 +20555,38 @@
     }
   },
   "siteNav": {
-    "trigger": "Naršyti",
+    "trigger": "Pagrindiniai pasirinkimai",
     "account": "Prisijungus",
     "intents": {
       "work": {
         "title": "Ieškau darbo",
-        "description": "Raskite darbą ir parodykite, ką mokate."
+        "description": "Raskite darbą ir parodykite, ką mokate.",
+        "short": "Ieškau darbo"
       },
       "workers": {
         "title": "Ieškau darbuotojų",
-        "description": "Aprašykite, kokio darbo reikia."
+        "description": "Aprašykite, kokio darbo reikia.",
+        "short": "Ieškau darbuotojų"
       },
       "services": {
         "title": "Siūlau paslaugas",
-        "description": "Paskelbkite, ką siūlote, ir atsakykite į užklausas."
+        "description": "Paskelbkite, ką siūlote, ir atsakykite į užklausas.",
+        "short": "Siūlau paslaugas"
       },
       "orders": {
         "title": "Ieškau užsakymų ir sutarčių",
-        "description": "Raskite darbo užklausas ir laikykite pasiūlymus vienoje vietoje."
+        "description": "Raskite darbo užklausas ir laikykite pasiūlymus vienoje vietoje.",
+        "short": "Ieškau užsakymų"
       },
       "partners": {
         "title": "Ieškau partnerių",
-        "description": "Susiekite su žmonėmis ir organizacijomis, su kuriais dirbate."
+        "description": "Susiekite su žmonėmis ir organizacijomis, su kuriais dirbate.",
+        "short": "Ieškau partnerių"
       },
       "agencies": {
         "title": "Agentūroms",
-        "description": "Valdykite agentūros žmones, klientus ir pasiūlymus."
+        "description": "Valdykite agentūros žmones, klientus ir pasiūlymus.",
+        "short": "Agentūroms"
       }
     },
     "links": {
@@ -20600,6 +20606,7 @@
       "partnerWithUs": "Tapti partneriu",
       "forAgencies": "Kaip tai veikia agentūroms",
       "setUpAgency": "Sukurti agentūrą"
-    }
+    },
+    "assistant": "Klausti asistento"
   }
 }

@@ -20555,32 +20555,38 @@
     }
   },
   "siteNav": {
-    "trigger": "Entdecken",
+    "trigger": "Hauptauswahl",
     "account": "Nach Anmeldung",
     "intents": {
       "work": {
         "title": "Ich suche Arbeit",
-        "description": "Finden Sie Stellen und zeigen Sie, was Sie können."
+        "description": "Finden Sie Stellen und zeigen Sie, was Sie können.",
+        "short": "Arbeit finden"
       },
       "workers": {
         "title": "Ich suche Arbeitskräfte",
-        "description": "Beschreiben Sie, welche Arbeit Sie brauchen."
+        "description": "Beschreiben Sie, welche Arbeit Sie brauchen.",
+        "short": "Personal finden"
       },
       "services": {
         "title": "Ich biete Leistungen an",
-        "description": "Veröffentlichen Sie Ihr Angebot und beantworten Sie Anfragen."
+        "description": "Veröffentlichen Sie Ihr Angebot und beantworten Sie Anfragen.",
+        "short": "Leistungen anbieten"
       },
       "orders": {
         "title": "Ich suche Aufträge und Verträge",
-        "description": "Finden Sie Arbeitsanfragen und halten Sie Angebote beisammen."
+        "description": "Finden Sie Arbeitsanfragen und halten Sie Angebote beisammen.",
+        "short": "Aufträge finden"
       },
       "partners": {
         "title": "Ich suche Partner",
-        "description": "Vernetzen Sie sich mit Menschen und Organisationen, mit denen Sie arbeiten."
+        "description": "Vernetzen Sie sich mit Menschen und Organisationen, mit denen Sie arbeiten.",
+        "short": "Partner finden"
       },
       "agencies": {
         "title": "Für Agenturen",
-        "description": "Verwalten Sie Personal, Kunden und Angebote Ihrer Agentur."
+        "description": "Verwalten Sie Personal, Kunden und Angebote Ihrer Agentur.",
+        "short": "Für Agenturen"
       }
     },
     "links": {
@@ -20600,6 +20606,7 @@
       "partnerWithUs": "Partner werden",
       "forAgencies": "So funktioniert es für Agenturen",
       "setUpAgency": "Agentur einrichten"
-    }
+    },
+    "assistant": "Assistenten fragen"
   }
 }

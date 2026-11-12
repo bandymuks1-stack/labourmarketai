@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ChevronDown, LogIn, Menu, X } from "lucide-react";
+import { ChevronDown, LogIn, Menu, MessageCircle, X } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { INTENT_ICONS, type RenderedIntent } from "@/components/layouts/intent-icons";
@@ -43,6 +43,7 @@ export function MobileNavMenu({
   authSection,
   intents = [],
   accountLabel = "",
+  assistant,
 }: {
   items: readonly MobileNavItem[];
   openLabel: string;
@@ -56,6 +57,8 @@ export function MobileNavMenu({
   intents?: readonly RenderedIntent[];
   /** Short note beside links that live inside the signed-in product. */
   accountLabel?: string;
+  /** The "ask the assistant" entry — the existing conversation home. */
+  assistant?: { readonly href: string; readonly label: string };
 }) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -165,6 +168,35 @@ export function MobileNavMenu({
               })}
             </ul>
           )}
+          {assistant && (
+            <Link
+              href={assistant.href}
+              onClick={() => setOpen(false)}
+              data-testid="mobile-nav-assistant"
+              className="mb-1.5 flex min-h-11 items-center gap-3 rounded-lg border-b border-ink-600 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-ink-800"
+            >
+              <MessageCircle aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
+              <span className="min-w-0 flex-1">{assistant.label}</span>
+              <span className="inline-flex shrink-0 items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
+                <LogIn aria-hidden className="h-3.5 w-3.5" />
+                {accountLabel}
+              </span>
+            </Link>
+          )}
+          {/* Rendered verbatim, container and breakpoint included: which
+              widths the panel owns the auth CTAs at is SiteNav's decision,
+              and duplicating that `sm` here would be a second place to keep
+              in sync with the header.
+
+              No onClick close either: AuthCtaLink is a plain <a>, so
+              following it is a FULL document navigation that unmounts this
+              menu with the rest of the page. A handler would be dead code
+              pretending to do work the browser already does.
+
+              It sits ABOVE the secondary links (first-visitor finding
+              2026-11-12): on a 360px phone sign in / sign up were below the
+              fold of the panel, after five links nobody came for. */}
+          {authSection}
           {items.map((item) => (
             <Link
               key={item.key}
@@ -175,16 +207,6 @@ export function MobileNavMenu({
               {item.label}
             </Link>
           ))}
-          {/* Rendered verbatim, container and breakpoint included: which
-              widths the panel owns the auth CTAs at is SiteNav's decision,
-              and duplicating that `sm` here would be a second place to keep
-              in sync with the header.
-
-              No onClick close either: AuthCtaLink is a plain <a>, so
-              following it is a FULL document navigation that unmounts this
-              menu with the rest of the page. A handler would be dead code
-              pretending to do work the browser already does. */}
-          {authSection}
         </nav>
       )}
     </div>

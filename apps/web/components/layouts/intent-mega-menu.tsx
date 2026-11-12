@@ -1,55 +1,65 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { ChevronDown, LogIn } from "lucide-react";
+import { LogIn, MessageCircle } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { INTENT_ICONS, type RenderedIntent } from "@/components/layouts/intent-icons";
 
 /**
- * The public header's MEGA-MENU (desktop, `lg` and up) — owner P0 2026-11-12.
+ * THE INTENT BAR + MEGA-MENU of the public header (desktop, `lg` and up) —
+ * owner P0 2026-11-12.
  *
- * One disclosure button opens a panel with the six top-level intents
- * (`lib/navigation/public-intents.ts`), each a column: icon, name, one plain
- * line, and its real destinations. It is the disclosure-navigation pattern
- * (a button with aria-expanded controlling a region of plain links), NOT an
- * ARIA `menu`: links stay links, Tab walks them in reading order, and screen
- * readers announce them as navigation.
+ * The six intents (`lib/navigation/public-intents.ts`) are the FIRST LEVEL of
+ * the header: a row of six plainly named buttons, always visible, so a first
+ * visitor reads the main choices without opening anything. Pressing one opens
+ * the panel with all six columns, marks that intent's column and moves focus
+ * to its first destination — so the start of a function is two actions away
+ * (intent, destination), by mouse or by keyboard (Enter, Enter).
  *
- * Closing rules match the mobile menu and the locale switcher in the same
- * header: Escape (focus returns to the trigger), an outside click, a link
- * click, and focus leaving the whole widget with Tab.
+ * It is the disclosure-navigation pattern (buttons with aria-expanded
+ * controlling a region of plain links), NOT an ARIA `menu`: links stay links,
+ * Tab walks them in reading order, screen readers announce navigation.
+ *
+ * Closing: Escape (focus returns to the intent that opened it), an outside
+ * click, a link click, pressing the open intent again, and focus leaving the
+ * widget with Tab.
  *
  * Every href arrives as data from the server-side SiteNav; this component
  * spells no route of its own.
  */
 export function IntentMegaMenu({
   intents,
-  triggerLabel,
+  navLabel,
   accountLabel,
+  assistant,
   className,
 }: {
   intents: readonly RenderedIntent[];
-  triggerLabel: string;
+  /** Accessible name of the intent navigation. */
+  navLabel: string;
   /** Short note beside links that live inside the signed-in product. */
   accountLabel: string;
+  /** The "ask the assistant" entry — the existing conversation home. */
+  assistant?: { readonly href: string; readonly label: string };
   className?: string;
 }) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [active, setActive] = useState<string | null>(null);
+  const rootRef = useRef<HTMLElement>(null);
+  const openerRef = useRef<HTMLButtonElement | null>(null);
   const panelId = useId();
+  const open = active !== null;
 
   useEffect(() => {
     if (!open) return;
     const onDocClick = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setActive(null);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setOpen(false);
-        buttonRef.current?.focus();
+        setActive(null);
+        openerRef.current?.focus();
       }
     };
     document.addEventListener("mousedown", onDocClick);
@@ -60,41 +70,72 @@ export function IntentMegaMenu({
     };
   }, [open]);
 
+  // Opening an intent puts focus on its first destination: the second action
+  // is then one key press (or one click) away.
+  useEffect(() => {
+    if (!active) return;
+    rootRef.current
+      ?.querySelector<HTMLAnchorElement>(`[data-intent-column="${active}"] a`)
+      ?.focus();
+  }, [active]);
+
   return (
-    <div
+    <nav
       ref={rootRef}
+      aria-label={navLabel}
+      data-testid="intent-bar"
       className={className}
       onBlur={(e) => {
-        // Tab past the last link (or Shift+Tab before the trigger) closes it.
         const next = e.relatedTarget as Node | null;
-        if (next && rootRef.current && !rootRef.current.contains(next)) setOpen(false);
+        if (next && rootRef.current && !rootRef.current.contains(next)) setActive(null);
       }}
     >
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-controls={panelId}
-        data-testid="intent-menu-toggle"
-        className="inline-flex min-h-11 items-center gap-1.5 rounded-control px-2 text-sm font-medium text-text-primary transition-colors hover:text-brand-blue"
-      >
-        {triggerLabel}
-        <ChevronDown
-          aria-hidden
-          className={cn(
-            "h-4 w-4 transition-transform motion-reduce:transition-none",
-            open && "rotate-180",
-          )}
-        />
-      </button>
+      <div className="mx-auto flex max-w-container items-center gap-1 px-12">
+        <ul className="flex min-w-0 flex-1 items-center gap-1">
+          {intents.map((intent) => {
+            const Icon = INTENT_ICONS[intent.iconKey];
+            const isActive = active === intent.id;
+            return (
+              <li key={intent.id} className="min-w-0">
+                <button
+                  type="button"
+                  aria-expanded={isActive}
+                  aria-controls={panelId}
+                  data-testid={`intent-toggle-${intent.id}`}
+                  onClick={(e) => {
+                    openerRef.current = e.currentTarget;
+                    setActive(isActive ? null : intent.id);
+                  }}
+                  className={cn(
+                    "inline-flex min-h-11 items-center gap-1.5 rounded-control px-2 text-sm font-medium transition-colors motion-reduce:transition-none xl:px-3",
+                    isActive
+                      ? "bg-ink-800 text-text-primary"
+                      : "text-text-secondary hover:bg-ink-800/60 hover:text-text-primary",
+                  )}
+                >
+                  <Icon aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
+                  <span className="whitespace-nowrap">{intent.short}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        {assistant && (
+          <Link
+            href={assistant.href}
+            data-testid="intent-bar-assistant"
+            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-control px-2.5 text-sm font-medium text-text-primary transition-colors hover:text-brand-blue motion-reduce:transition-none"
+          >
+            <MessageCircle aria-hidden className="h-4 w-4 text-brand-blue" />
+            <span className="sr-only xl:not-sr-only">{assistant.label}</span>
+          </Link>
+        )}
+      </div>
 
       {open && (
         <div
           id={panelId}
           data-testid="intent-menu-panel"
-          role="region"
-          aria-label={triggerLabel}
           className="absolute inset-x-0 top-full z-50 border-b border-ink-600 bg-ink-900/95 shadow-xl backdrop-blur-md"
         >
           <ul className="mx-auto grid max-w-container grid-cols-3 gap-3 px-12 py-6">
@@ -104,7 +145,14 @@ export function IntentMegaMenu({
                 <li
                   key={intent.id}
                   data-testid={`intent-column-${intent.id}`}
-                  className="rounded-xl border border-ink-600/70 bg-ink-800/40 p-4"
+                  data-intent-column={intent.id}
+                  data-active={active === intent.id || undefined}
+                  className={cn(
+                    "rounded-xl border p-4",
+                    active === intent.id
+                      ? "border-brand-blue/60 bg-ink-800/70"
+                      : "border-ink-600/70 bg-ink-800/40",
+                  )}
                 >
                   <div className="flex items-start gap-3">
                     <span
@@ -127,9 +175,9 @@ export function IntentMegaMenu({
                       <li key={link.id}>
                         <Link
                           href={link.href}
-                          onClick={() => setOpen(false)}
+                          onClick={() => setActive(null)}
                           data-testid={`intent-link-${intent.id}-${link.id}`}
-                          className="flex min-h-11 items-center justify-between gap-2 rounded-lg px-2 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary"
+                          className="flex min-h-11 items-center justify-between gap-2 rounded-lg px-2 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary motion-reduce:transition-none"
                         >
                           <span>{link.label}</span>
                           {link.account && (
@@ -148,6 +196,6 @@ export function IntentMegaMenu({
           </ul>
         </div>
       )}
-    </div>
+    </nav>
   );
 }
