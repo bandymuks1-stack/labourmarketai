@@ -3,6 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import type { PublicCompanyNeed } from "@/lib/opportunities/public-company-needs-model";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
+import { Badge } from "@/components/ui/Badge";
+import { Card } from "@/components/ui/Card";
 
 /**
  * NEEDS POSTED BY COMPANIES — the public /jobs section (owner decision V-1,
@@ -67,28 +69,22 @@ export async function PublicCompanyNeedsSection({
         {needs.map((n) => {
           const place = [n.locationLabel, countryLabel(n.country)].filter(Boolean).join(" · ");
           return (
-            <li
-              key={n.id}
-              className="rounded-md border p-3"
-              data-testid={`public-company-need-${n.id}`}
-              data-company-confirmed={n.companyConfirmed ? "true" : "false"}
-            >
+            <li key={n.id}>
+              <Card
+                compact
+                data-testid={`public-company-need-${n.id}`}
+                data-company-confirmed={n.companyConfirmed ? "true" : "false"}
+              >
               <p className="font-medium text-text-primary">{roleLabel(n.roleText)}</p>
               <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-secondary">
                 {n.companyName ? <span>{n.companyName}</span> : null}
                 {n.companyConfirmed ? (
-                  <span
-                    className="rounded-sm border border-state-success/40 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-state-success"
-                    data-testid="public-company-need-verified"
-                  >
-                    {tOpp("companyVerified")}
+                  <span data-testid="public-company-need-verified">
+                    <Badge tone="positive">{tOpp("companyVerified")}</Badge>
                   </span>
                 ) : (
-                  <span
-                    className="rounded-sm border border-state-warning/40 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning"
-                    data-testid="public-company-need-not-confirmed"
-                  >
-                    {tOpp("companyNotConfirmed")}
+                  <span data-testid="public-company-need-not-confirmed">
+                    <Badge tone="warning">{tOpp("companyNotConfirmed")}</Badge>
                   </span>
                 )}
               </p>
@@ -104,6 +100,7 @@ export async function PublicCompanyNeedsSection({
               >
                 {signedIn ? t("openBoard") : t("respond")}
               </Link>
+              </Card>
             </li>
           );
         })}

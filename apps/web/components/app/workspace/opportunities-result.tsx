@@ -25,6 +25,7 @@ import {
   selectReadbackRows,
 } from "@/lib/opportunities/opportunities-view";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
+import { Badge } from "@/components/ui/Badge";
 
 /**
  * THE OPPORTUNITIES RESULT — a SHORT READBACK, not the station.
@@ -372,11 +373,8 @@ function MatchRow({
         {/* Owner decision V-1: a company that is not verified is SAID so —
             a label, never a softer verification badge. */}
         {match.companyName && match.companyConfirmed === false && (
-          <span
-            className="rounded-full border border-state-warning/40 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning"
-            data-testid="opportunities-match-company-not-confirmed"
-          >
-            {tOpp("companyNotConfirmed")}
+          <span data-testid="opportunities-match-company-not-confirmed">
+            <Badge tone="warning">{tOpp("companyNotConfirmed")}</Badge>
           </span>
         )}
         {claimNovelty && match.isNew && (

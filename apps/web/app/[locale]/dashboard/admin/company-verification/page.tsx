@@ -12,6 +12,8 @@ import { PageTitle } from "@/components/app/premium/page-title";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 import { listNeedPublicReviewQueue } from "@/lib/admin/need-public-review";
 import { NeedPublicReviewControls } from "@/components/app/need-public-review-controls";
+import { Badge } from "@/components/ui/Badge";
+import { Card } from "@/components/ui/Card";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
 export const generateMetadata = dashboardPageMetadata("/dashboard/admin/company-verification");
@@ -116,12 +118,13 @@ export default async function AdminCompanyVerificationPage({
           ) : (
             <ul className="flex flex-col gap-3">
               {needsQueue.rows.map((n) => (
-                <li
-                  key={n.requestId}
-                  className="flex flex-col gap-2 rounded-md border border-border-default p-4"
-                  data-testid={`need-public-review-row-${n.requestId}`}
-                  data-state={n.state}
-                >
+                <li key={n.requestId}>
+                  <Card
+                    compact
+                    className="flex flex-col gap-2"
+                    data-testid={`need-public-review-row-${n.requestId}`}
+                    data-state={n.state}
+                  >
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="flex min-w-0 flex-col gap-0.5">
                       <span className="text-sm font-semibold text-text-primary">{n.roleText ?? n.title ?? "—"}</span>
@@ -129,11 +132,11 @@ export default async function AdminCompanyVerificationPage({
                         {n.companyName ?? "—"} · {[n.locationLabel, n.country].filter(Boolean).join(" · ") || "—"}
                       </span>
                     </div>
-                    <span className="rounded-sm border border-state-warning/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">
+                    <Badge tone={n.state === "rejected" ? "critical" : "warning"}>
                       {n.state === "held_incomplete" || n.state === "held_review" || n.state === "rejected"
                         ? tReadbackQ(`publicState.${n.state}`)
                         : n.state}
-                    </span>
+                    </Badge>
                   </div>
                   {n.reasons.length > 0 ? (
                     <p className="text-meta text-text-secondary">
@@ -152,6 +155,7 @@ export default async function AdminCompanyVerificationPage({
                       saving: t("result.saving"),
                     }}
                   />
+                  </Card>
                 </li>
               ))}
             </ul>
