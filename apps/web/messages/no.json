@@ -2088,14 +2088,15 @@
         "includes": "{count, plural, one {Omfatter # sammenslått prosjektrad — postene vises her.} other {Omfatter # sammenslåtte prosjektrader — postene vises her.}}"
       },
       "teams": {
-        "title": "Team på dette prosjektet",
-        "members": "{n, plural, one {# person} other {# personer}}",
-        "personTeam": "Team: {team}",
+        "title": "Hvem jobber på prosjektet",
         "unnamed": "Team uten navn",
         "unnamedMember": "Medlem",
         "noMembers": "Ingen medlemmer akkurat nå.",
         "unavailable": "Teamene kunne ikke lastes inn. Prøv igjen.",
-        "manage": "Endre team"
+        "manage": "Endre team",
+        "kindTeam": "arbeidslag",
+        "individual": "Tildelt én og én",
+        "personTeam": "Team: {team}"
       }
     },
     "workerView": {
@@ -8030,5 +8031,19 @@
       "fullList": "Full liste"
     },
     "more": "Mer"
+  },
+  "teamBrigades": {
+    "structure": {
+      "title": "Teamstruktur",
+      "scopeNote": "Viser teamene du leder og bedriftens aktive personer.",
+      "kindTeam": "arbeidslag",
+      "teamEmpty": "Ingen medlemmer ennå.",
+      "company": "Bedrift",
+      "teamsCount": "arbeidslag",
+      "noTeams": "Ingen team ennå.",
+      "outside": "Ikke i noe team"
+    },
+    "addSearch": "Søk personer",
+    "addSearchNone": "Ingen treff."
   }
 }

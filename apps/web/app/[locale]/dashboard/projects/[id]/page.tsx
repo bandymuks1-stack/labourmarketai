@@ -21,7 +21,8 @@ import { getProjectStadium } from "@/lib/projects/stadium";
 import { getProjectTeamAssignments } from "@/lib/projects/team-assignment";
 import { projectPageTeams, teamsByPerson } from "@/lib/projects/project-page-teams";
 import { Badge } from "@/components/ui/Badge";
-import { Card } from "@/components/ui/Card";
+import { Notice } from "@/components/ui/Notice";
+import { StructureTree } from "@/components/ui/StructureTree";
 import { ProjectCourseTrack } from "@/components/app/projects/project-course-track";
 import { deriveProjectCourse } from "@/lib/projects/project-course";
 import { ProjectForecastPanel } from "@/components/app/projects/project-forecast-panel";
@@ -140,6 +141,9 @@ export default async function ProjectStadiumPage({
   const tTeam = await getTranslations("projectOps.stadium.teams");
   const teamsOf = (w: { workerId: string; workerProfileId: string }) =>
     personTeams.get(w.workerProfileId) ?? personTeams.get(w.workerId) ?? [];
+  // People assigned one by one (a person who is also in a team stays here:
+  // the individual assignment is the stronger fact, lib/projects/assigned-people.ts).
+  const individuals = ops.workers.filter((w) => !w.viaTeam);
 
   // systemic-ux-project-v1: honest location status (no fake marker) + project
   // place line, reusing the signal-only market-map mappability rule.
@@ -500,48 +504,74 @@ export default async function ProjectStadiumPage({
         )}
       </section>
 
-      {/* ── THE TEAMS on this project, by name, with who is in each now. The
-            same rows the assignment screen reads; changing them stays there. ── */}
-      {teamAssignments.status !== "ok" || pageTeams.length > 0 ? (
+      {/* ── WHO WORKS HERE, AS A STRUCTURE: project → teams → people, plus the
+            people assigned one by one. The same rows the assignment screen
+            reads; changing them stays there. Shared StructureTree (DESIGN §10). ── */}
+      {teamAssignments.status !== "ok" || hasTeam || pageTeams.length > 0 ? (
         <section id="stadium-teams" className="flex scroll-mt-20 flex-col gap-3" data-testid="stadium-teams">
           <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
             {tTeam("title")}
           </h2>
           {teamAssignments.status !== "ok" ? (
-            <Card compact variant="empty" data-testid="stadium-teams-unavailable">
-              <p className="text-sm leading-relaxed text-text-secondary">{tTeam("unavailable")}</p>
-            </Card>
-          ) : (
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {pageTeams.map((team) => (
-                <li key={team.teamOrgId} className="min-w-0" data-testid="stadium-team">
-                  <Card compact className="flex h-full flex-col gap-3">
-                    <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <h3 className="min-w-0 break-words font-display text-lg font-semibold leading-tight text-text-primary">
+            <Notice tone="error" testId="stadium-teams-unavailable">
+              {tTeam("unavailable")}
+            </Notice>
+          ) : null}
+          <StructureTree
+            label={tTeam("title")}
+            testId="stadium-structure"
+            openDepth={2}
+            nodes={[
+              {
+                id: "project",
+                label: ops.project.title ?? t("eyebrow"),
+                count: ops.counters.totalAssigned,
+                children: [
+                  ...pageTeams.map((team) => ({
+                    id: `team-${team.teamOrgId}`,
+                    label: (
+                      <span className="break-words" data-testid="stadium-team">
                         {team.name ?? tTeam("unnamed")}
-                      </h3>
-                      <span className="font-mono text-meta tabular-nums text-text-muted" data-testid="stadium-team-count">
-                        {tTeam("members", { n: team.members.length })}
                       </span>
-                    </div>
-                    {team.members.length > 0 ? (
-                      <ul className="flex flex-wrap gap-1.5">
-                        {team.members.map((m) => (
-                          <li key={m.key}>
-                            <Badge tone="neutral" className="max-w-full break-words normal-case">
-                              {m.name ?? tTeam("unnamedMember")}
-                            </Badge>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-text-secondary">{tTeam("noMembers")}</p>
-                    )}
-                  </Card>
-                </li>
-              ))}
-            </ul>
-          )}
+                    ),
+                    meta: tTeam("kindTeam"),
+                    count: team.members.length,
+                    empty: tTeam("noMembers"),
+                    children: team.members.map((m) => ({
+                      id: `team-${team.teamOrgId}-${m.key}`,
+                      label: (
+                        <span className="break-words" data-testid="stadium-team-member">
+                          {m.name ?? tTeam("unnamedMember")}
+                        </span>
+                      ),
+                    })),
+                  })),
+                  ...(individuals.length > 0
+                    ? [
+                        {
+                          id: "individual",
+                          label: <span data-testid="stadium-individual">{tTeam("individual")}</span>,
+                          count: individuals.length,
+                          children: individuals.map((w) => ({
+                            id: `person-${w.workerId}`,
+                            label: (
+                              <Link
+                                href={`/${locale}/dashboard/people/${w.workerId}`}
+                                className="break-words underline-offset-4 hover:underline focus-visible:underline"
+                              >
+                                {w.name}
+                              </Link>
+                            ),
+                            meta: positionLabel(w.workerId),
+                          })),
+                        },
+                      ]
+                    : []),
+                ],
+                empty: t("emptyTeam"),
+              },
+            ]}
+          />
           <Link
             href={`/${locale}/dashboard/projects#project-teams`}
             className="inline-flex min-h-11 items-center self-start text-sm font-medium text-brand-blue underline-offset-4 hover:underline focus-visible:underline"

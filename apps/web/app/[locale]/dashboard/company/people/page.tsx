@@ -18,6 +18,7 @@ import {
 } from "@/lib/company/company-workers";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
+import { CompanyTeamStructure } from "@/components/app/organization/company-team-structure";
 import { listManagedProjects } from "@/lib/projects/projects";
 import { getWorkerReadiness } from "@/lib/company/worker-readiness";
 import { getManagerEvidence } from "@/lib/operations/manager-evidence";
@@ -400,6 +401,15 @@ export default async function CompanyPeoplePage({
       {/* Teams / brigades (§8.3): a brigade is an organizations row
           (organization_type='team'); membership arrives ONLY via an accepted
           join_team invitation; honest not-applied state otherwise. */}
+      {teamBrigades.applied && teamBrigades.teams.length > 0 ? (
+        <CompanyTeamStructure
+          organizationName={(companyRow.displayName || companyRow.legalName || "").trim()}
+          teams={teamBrigades.teams}
+          people={activeWorkerRows
+            .filter((w) => w.status === "active")
+            .map((w) => ({ profileId: w.profileId ?? null, name: w.displayName ?? w.email ?? "—" }))}
+        />
+      ) : null}
       {teamBrigades.applied ? (
         <TeamBrigadesPanel
           teams={teamBrigades.teams}

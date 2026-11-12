@@ -6873,14 +6873,15 @@
         "includes": "{count, plural, one {Includes # merged project row — its records are shown here.} other {Includes # merged project rows — their records are shown here.}}"
       },
       "teams": {
-        "title": "Teams on this project",
-        "members": "{n, plural, one {# person} other {# people}}",
-        "personTeam": "On team: {team}",
+        "title": "Who works on this project",
         "unnamed": "Unnamed team",
         "unnamedMember": "Member",
         "noMembers": "No members right now.",
         "unavailable": "The teams could not be loaded. Try again.",
-        "manage": "Change teams"
+        "manage": "Change teams",
+        "kindTeam": "team",
+        "individual": "Assigned one by one",
+        "personTeam": "On team: {team}"
       }
     },
     "workerView": {
@@ -7693,7 +7694,19 @@
       "failed": "Not disbanded: a membership could not be ended. Nothing was changed.",
       "historyTitle": "{count, plural, one {# disbanded brigade} other {# disbanded brigades}}",
       "historyLine": "disbanded {date}"
-    }
+    },
+    "structure": {
+      "title": "Team structure",
+      "scopeNote": "Shows the teams you manage and the company's active people.",
+      "kindTeam": "team",
+      "teamEmpty": "No members yet.",
+      "company": "Company",
+      "teamsCount": "teams",
+      "noTeams": "No teams yet.",
+      "outside": "Not in a team"
+    },
+    "addSearch": "Search people",
+    "addSearchNone": "No one matches."
   },
   "teamEnquiries": {
     "enquireButton": "Ask this team about work",

@@ -40,6 +40,21 @@ import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-wo
  *   manager-confirmed). It is not a team rating and never claims team-level
  *   verification.
  */
+/** The name search appears once the list is longer than this. */
+const SEARCH_FROM = 5;
+
+/** The people whose name contains the typed text (any case). The person
+ *  already chosen stays in the list, so a search never silently unpicks them. */
+export function matchingAddable<T extends { workerId: string; name: string }>(
+  addable: readonly T[],
+  query: string | undefined,
+  chosen: string | undefined,
+): readonly T[] {
+  const q = (query ?? "").trim().toLocaleLowerCase();
+  if (!q) return addable;
+  return addable.filter((w) => w.workerId === chosen || w.name.toLocaleLowerCase().includes(q));
+}
+
 export function TeamBrigadesPanel({
   teams,
   locale,
@@ -72,6 +87,9 @@ export function TeamBrigadesPanel({
   // are own-row-only). Asked for only after the server said so.
   const [askEmail, setAskEmail] = useState<Record<string, boolean>>({});
   const [emails, setEmails] = useState<Record<string, string>>({});
+  // Find a person in a long list: narrows the picker by name, per team. The
+  // list itself is unchanged (the company's own people, read by the server).
+  const [search, setSearch] = useState<Record<string, string>>({});
   // The invitation link of the last invite — the delivery while e-mail is off.
   const [link, setLink] = useState<{ teamId: string; url: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -413,6 +431,24 @@ export function TeamBrigadesPanel({
                 <p className="text-meta text-text-muted">{t("noAddable")}</p>
               ) : (
                 <div className="flex flex-col gap-1.5">
+                  {team.addable.length > SEARCH_FROM ? (
+                    <Input
+                      type="search"
+                      autoComplete="off"
+                      className="min-w-0 sm:w-auto sm:max-w-xs"
+                      placeholder={t("addSearch")}
+                      aria-label={t("addSearch")}
+                      value={search[team.id] ?? ""}
+                      onChange={(e) => setSearch((m) => ({ ...m, [team.id]: e.target.value }))}
+                      data-testid={`team-add-search-${team.id}`}
+                    />
+                  ) : null}
+                  {team.addable.length > SEARCH_FROM &&
+                  matchingAddable(team.addable, search[team.id], selected[team.id]).length === 0 ? (
+                    <p className="text-meta text-text-muted" role="status" data-testid={`team-add-search-none-${team.id}`}>
+                      {t("addSearchNone")}
+                    </p>
+                  ) : null}
                   <div className="flex flex-wrap items-center gap-2">
                     <label
                       className="text-xs text-text-secondary"
@@ -429,7 +465,7 @@ export function TeamBrigadesPanel({
                       }
                     >
                       <option value="">—</option>
-                      {team.addable.map((w) => (
+                      {matchingAddable(team.addable, search[team.id], selected[team.id]).map((w) => (
                         <option key={w.workerId} value={w.workerId}>
                           {w.invitePending
                             ? t("invitePendingOption", { name: w.name })

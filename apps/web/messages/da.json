@@ -2088,14 +2088,15 @@
         "includes": "{count, plural, one {Omfatter # sammenlagt projektrække — dens poster vises her.} other {Omfatter # sammenlagte projektrækker — deres poster vises her.}}"
       },
       "teams": {
-        "title": "Hold på dette projekt",
-        "members": "{n, plural, one {# person} other {# personer}}",
-        "personTeam": "Hold: {team}",
+        "title": "Hvem arbejder på projektet",
         "unnamed": "Hold",
         "unnamedMember": "Medlem",
         "noMembers": "Ingen medlemmer lige nu.",
         "unavailable": "Holdene kunne ikke indlæses. Prøv igen.",
-        "manage": "Skift hold"
+        "manage": "Skift hold",
+        "kindTeam": "hold",
+        "individual": "Tildelt enkeltvis",
+        "personTeam": "Hold: {team}"
       }
     },
     "workerView": {
@@ -8030,5 +8031,19 @@
       "fullList": "Fuld liste"
     },
     "more": "Mere"
+  },
+  "teamBrigades": {
+    "structure": {
+      "title": "Holdstruktur",
+      "scopeNote": "Viser de hold, du leder, og virksomhedens aktive personer.",
+      "kindTeam": "hold",
+      "teamEmpty": "Ingen medlemmer endnu.",
+      "company": "Virksomhed",
+      "teamsCount": "hold",
+      "noTeams": "Ingen hold endnu.",
+      "outside": "Ikke på et hold"
+    },
+    "addSearch": "Søg personer",
+    "addSearchNone": "Ingen matcher."
   }
 }

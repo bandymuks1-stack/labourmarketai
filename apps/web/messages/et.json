@@ -2088,14 +2088,15 @@
         "includes": "{count, plural, one {Sisaldab # liidetud projektirida — selle kirjed on siin.} other {Sisaldab # liidetud projektirida — nende kirjed on siin.}}"
       },
       "teams": {
-        "title": "Meeskonnad selles projektis",
-        "members": "{n, plural, one {# inimene} other {# inimest}}",
-        "personTeam": "Meeskond: {team}",
+        "title": "Kes selles projektis töötab",
         "unnamed": "Meeskond",
         "unnamedMember": "Liige",
         "noMembers": "Praegu liikmeid pole.",
         "unavailable": "Meeskondi ei õnnestunud laadida. Proovige uuesti.",
-        "manage": "Muuda meeskondi"
+        "manage": "Muuda meeskondi",
+        "kindTeam": "meeskond",
+        "individual": "Määratud ükshaaval",
+        "personTeam": "Meeskond: {team}"
       }
     },
     "workerView": {
@@ -8030,5 +8031,19 @@
       "fullList": "Täielik nimekiri"
     },
     "more": "Veel"
+  },
+  "teamBrigades": {
+    "structure": {
+      "title": "Meeskondade struktuur",
+      "scopeNote": "Näitab meeskondi, mida juhite, ja ettevõtte aktiivseid inimesi.",
+      "kindTeam": "meeskond",
+      "teamEmpty": "Liikmeid veel pole.",
+      "company": "Ettevõte",
+      "teamsCount": "meeskonda",
+      "noTeams": "Meeskondi veel pole.",
+      "outside": "Meeskonnata"
+    },
+    "addSearch": "Otsi inimesi",
+    "addSearchNone": "Vasteid pole."
   }
 }

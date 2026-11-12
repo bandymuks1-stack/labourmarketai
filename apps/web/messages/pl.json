@@ -6873,14 +6873,15 @@
         "includes": "{count, plural, one {Obejmuje # scalony wiersz projektu — jego wpisy są tutaj.} few {Obejmuje # scalone wiersze projektu — ich wpisy są tutaj.} many {Obejmuje # scalonych wierszy projektu — ich wpisy są tutaj.} other {Obejmuje # scalonego wiersza projektu — wpisy są tutaj.}}"
       },
       "teams": {
-        "title": "Zespoły w tym projekcie",
-        "members": "{n, plural, one {# osoba} few {# osoby} other {# osób}}",
-        "personTeam": "Zespół: {team}",
+        "title": "Kto pracuje w tym projekcie",
         "unnamed": "Zespół",
         "unnamedMember": "Członek",
         "noMembers": "Obecnie brak członków.",
         "unavailable": "Nie udało się wczytać zespołów. Spróbuj ponownie.",
-        "manage": "Zmień zespoły"
+        "manage": "Zmień zespoły",
+        "kindTeam": "zespół",
+        "individual": "Przypisani pojedynczo",
+        "personTeam": "Zespół: {team}"
       }
     },
     "workerView": {
@@ -7693,7 +7694,19 @@
       "failed": "Nie rozwiązano: nie udało się zakończyć członkostwa. Nic nie zostało zmienione.",
       "historyTitle": "{count, plural, one {# rozwiązana brygada} few {# rozwiązane brygady} many {# rozwiązanych brygad} other {# rozwiązanych brygad}}",
       "historyLine": "rozwiązana {date}"
-    }
+    },
+    "structure": {
+      "title": "Struktura zespołów",
+      "scopeNote": "Pokazuje zespoły, którymi zarządzasz, i aktywne osoby w firmie.",
+      "kindTeam": "zespół",
+      "teamEmpty": "Brak członków.",
+      "company": "Firma",
+      "teamsCount": "zespoły",
+      "noTeams": "Brak zespołów.",
+      "outside": "Poza zespołem"
+    },
+    "addSearch": "Szukaj osób",
+    "addSearchNone": "Nikt nie pasuje."
   },
   "teamEnquiries": {
     "enquireButton": "Zapytaj ten zespół o pracę",
