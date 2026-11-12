@@ -131,7 +131,7 @@ const MONTH_WORDS: ReadonlyArray<RegExp> = [
 // sv: "från 1 december", "från den 1 december", "från och med den 1 december",
 // "fr.o.m. 1 december" — the article and "och med" belong to the from-word.
 const FROM_WORD =
-  "(?:nuo|from|starting|с|со|vanaf|ab|od|(?:fran(?:\\s+och\\s+med)?|fr\\.?\\s?o\\.?\\s?m\\.?)(?:\\s+den)?)";
+  "(?:nuo|from|starting|с|со|vanaf|ab|od|(?:fran(?:\\s+och\\s+med)?|fr\\.o\\.m\\.?)(?:\\s+den)?)";
 
 /** The month (1–12) one FOLDED word names, or `null`. Whole word only — see
  *  MONTH_WORDS for why a prefix is not enough. */
@@ -254,7 +254,7 @@ export function mentionsStartTime(text: string): boolean {
 // Swedish forms come first so the bare English/Swedish "till" cannot stop short
 // of the article.
 const UNTIL_WORD =
-  "(?:(?:fram\\s+till|till\\s+och\\s+med|t\\.?\\s?o\\.?\\s?m\\.?|senast|till)\\s+den|fram\\s+till|till\\s+och\\s+med|t\\.o\\.m\\.?|senast|iki|until|till|to|до|tot|t/m|bis|do)";
+  "(?:(?:fram\\s+till|till\\s+och\\s+med|t\\.o\\.m\\.?|senast|till)\\s+den|fram\\s+till|till\\s+och\\s+med|t\\.o\\.m\\.?|senast|iki|until|till|to|до|tot|t/m|bis|do)";
 
 /**
  * An absolute END date ("iki spalio 20", "until 20 October", "до 20 октября",

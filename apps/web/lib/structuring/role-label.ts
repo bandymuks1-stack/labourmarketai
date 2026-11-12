@@ -313,17 +313,23 @@ const SV_SEEK_RE = new RegExp(`(?:${SV_SEEK_VERB_SOURCE})$`, "u");
 /** A Swedish occupation noun — matched INSIDE the folded token, because the
  *  head of a Swedish compound comes last ("lastbilschaufför"). The shared
  *  professional stems stay prefix-anchored ("jag är designer"). */
-const SV_NOUN_RE = new RegExp(
-  `(?:${SV_OCCUPATION_STEM_SOURCE}|${SV_TRADE_STEM_SOURCE})|^(?:${OCCUPATION_STEM_SOURCE})`,
-  "u",
-);
+const SV_NOUN_RE = new RegExp(`(?:${SV_OCCUPATION_STEM_SOURCE}|${SV_TRADE_STEM_SOURCE})`, "u");
+/** The shortest first part a compound may have. "klarare" (clearer) holds
+ *  "lärare" after ONE letter and is no teacher; "förskollärare" is. The
+ *  router's Swedish patterns state the same floor (`SV_COMPOUND_PREFIX_SOURCE`). */
+export const SV_COMPOUND_PREFIX_MIN = 3;
+/** Regex source for that first part, for patterns built on a folded sentence. */
+export const SV_COMPOUND_PREFIX_SOURCE = `(?:[^\\s]{${SV_COMPOUND_PREFIX_MIN},})?`;
 /** "jag är INTE svetsare" states no profession. */
 const SV_NEGATION_RE = /^(inte|ingen|inga|aldrig|ej)$/u;
 /** "söker JOBB som svetsare" is a person looking for work, never a need. */
 const SV_OWN_SEARCH_RE = /^(?:\p{L}*jobb|arbete|tjanst|anstalln|praktik|uppdrag)/u;
 
 function isSwedishOccupation(tok: Token): boolean {
-  return tok.folded.length >= 4 && !EXCLUDED_RE.test(tok.folded) && SV_NOUN_RE.test(tok.folded);
+  if (tok.folded.length < 4 || EXCLUDED_RE.test(tok.folded)) return false;
+  if (STEM_RE.test(tok.folded)) return true;
+  const hit = SV_NOUN_RE.exec(tok.folded);
+  return hit !== null && (hit.index === 0 || hit.index >= SV_COMPOUND_PREFIX_MIN);
 }
 
 /** Words that END the noun phrase: prepositions, connectives, time words,

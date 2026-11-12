@@ -26,6 +26,7 @@ import {
   TRADE_STEM_SOURCE,
   PROFESSION_STATEMENT_ANCHOR_SOURCE,
   SV_OCCUPATION_STEM_SOURCE,
+  SV_COMPOUND_PREFIX_SOURCE,
   SV_PROFESSION_STATEMENT_ANCHOR_SOURCE,
   SV_SEEK_VERB_SOURCE,
   ROLE_NOUN_EXCLUSION_SOURCE,
@@ -3057,7 +3058,7 @@ const RULES: IntentRule[] = [
       // The verbs and the nouns are the reader's own (`readRoleLabel` in
       // lib/structuring/role-label.ts), so "Vi behöver en redovisningsekonom"
       // is routed AND read from one vocabulary.
-      p(`(${SV_SEEK_VERB_SOURCE})\\s+(?:(?![^\\s]*jobb|arbete|tjanst|anstalln|praktik|uppdrag)[^\\s]+\\s+){0,3}?(?:${TRADE_STEM_SOURCE}|${SV_OCCUPATION_STEM_SOURCE})`, 6),
+      p(`(${SV_SEEK_VERB_SOURCE})\\s+(?:(?![^\\s]*jobb|arbete|tjanst|anstalln|praktik|uppdrag)[^\\s]+\\s+){0,3}?${SV_COMPOUND_PREFIX_SOURCE}(?:${TRADE_STEM_SOURCE}|${SV_OCCUPATION_STEM_SOURCE})`, 6),
       p("(behover|soker|letar\\s+efter|vill\\s+anstalla|rekryterar|saknar)\\s+(?:(?!jobb|arbete)[^\\s]+\\s+){0,3}?(personal|medarbetare|arbetare|folk|manniskor|personer|arbetskraft|anstallda)\\b", 6),
       p("\\b(behover|soker|letar\\s+efter)\\s+[0-9]{1,4}\\s+(?!(timm|tim\\b|dag|veck|manad|ar\\b))", 3),
       p("\\b(anstalla|rekrytera|rekryterar|rekrytering)\\b", 3),
@@ -3479,7 +3480,7 @@ const RULES: IntentRule[] = [
       // anchor is first person singular; `pNoSeek` keeps "… och söker
       // arbete" on find-work.
       pNoSeek(
-        `\\b(${SV_PROFESSION_STATEMENT_ANCHOR_SOURCE})\\s+(?:[^\\s]+\\s+){0,2}?(${SV_OCCUPATION_STEM_SOURCE}|${TRADE_STEM_SOURCE})`,
+        `\\b(${SV_PROFESSION_STATEMENT_ANCHOR_SOURCE})\\s+(?:[^\\s]+\\s+){0,2}?${SV_COMPOUND_PREFIX_SOURCE}(${SV_OCCUPATION_STEM_SOURCE}|${TRADE_STEM_SOURCE})`,
         6,
       ),
     ],
