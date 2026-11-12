@@ -1,3 +1,5 @@
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
+
 /**
  * Person-name matching for "write to / open the conversation with X" — PURE.
  *
@@ -21,10 +23,16 @@
 const STOP = new Set([
   "su", "ir", "to", "the", "with", "and", "for", "man", "mano", "pas", "per",
   "ar", "kad", "pokalbi", "pokalbis", "conversation", "message", "zinute",
-  // sv — "Öppna en konversation MED Jonas": the preposition is three letters
-  // and would otherwise prefix-match a name ("Medina").
-  "med", "och", "till", "konversation", "samtal", "meddelande", "chatt",
 ]);
+
+/**
+ * sv — "Öppna en konversation MED Jonas": the preposition is three letters and
+ * would otherwise prefix-match a name ("Medina"). Dropped from a SWEDISH
+ * sentence only: "Till" is a German first name and "Med" opens "Medina", so
+ * in any other sentence these are the name the person asked for (review
+ * finding 11: "Schreib Till Schmidt" could no longer find Till).
+ */
+const SV_STOP = new Set(["med", "och", "till", "konversation", "samtal", "meddelande", "chatt"]);
 
 /** Lower-case, strip diacritics, keep letters/digits only. */
 export function foldName(value: string): string {
@@ -67,7 +75,10 @@ export function matchPeopleByName<T>(
   query: string,
   candidates: readonly NamedCandidate<T>[],
 ): T[] {
-  const q = nameTokens(query).filter((t) => !STOP.has(t) && t.length >= 2);
+  const swedish = looksSwedish(query);
+  const q = nameTokens(query).filter(
+    (t) => !STOP.has(t) && !(swedish && SV_STOP.has(t)) && t.length >= 2,
+  );
   if (q.length === 0) return [];
   const scored: { item: T; hits: number; score: number }[] = [];
   for (const c of candidates) {

@@ -39,6 +39,7 @@
  * from the same definitions — one vocabulary per fact, nothing to drift.
  */
 import { detectNeedProfession } from "@/lib/market/need-skills";
+import { looksSwedish } from "./looks-swedish";
 import { foldText } from "./normalize";
 import { maskServiceNoun } from "./structure-need";
 import { findWordNumbers } from "./word-numbers";
@@ -99,7 +100,7 @@ export const ROLE_SUFFIX_GENITIVE_SOURCE =
  *
  * Stems, not words: they must match every case ending the languages use.
  */
-const TRADE_STEM_BASE_SOURCE =
+export const TRADE_STEM_SOURCE =
   "suvirin|elektrik|santechnik|stali(aus|ų|u)|mūrinink|dažytoj|stogden|plytel|vairuotoj|krautuv|ekskavator|virėj|padavėj|valytoj|pakuotoj|rinkėj|(?<!pa)slaug|welder|electrician|plumber|carpenter|painter|driver|cleaner|cook|сварщик|электрик|сантехник|водител|повар|уборщ|маляр|плотник|каменщик|schweißer|schweisser|klempner|maler|fahrer|koch|lasser|loodgieter|schilder|chauffeur|schoonmaker|kok\\b|tischler|timmerman|pastolinink|scaffolder|betonuotoj|concrete|tinkuotoj|plasterer|armat[uū]rinink|rebar|steel\\s+fixer|izoliuotoj|insulat|монтажник|бетонщик|штукатур|арматурщик|изолировщик|ger[uü]stbauer|steigerbouwer|betonbauer|betonwerker|stuckateur|stukadoor|betoniarz|tynkarz|zbrojarz|rusztowa|" +
   // 2026-09-09: "We need a team of 6 FITTERS for next week" measured
   // `unknown` while the same sentence with "welders" was understood — the
@@ -115,11 +116,18 @@ const TRADE_STEM_BASE_SOURCE =
  * only `elektrik` of them — which is the #1669 defect again: the ROUTER could
  * read "Jag jobbar som svetsare" and the READER below could not, so the chat
  * understood the sentence and then asked for the profession the person had
- * just named. It lives here now, is part of `TRADE_STEM_SOURCE` like every
- * other language's trades, and is ALSO exported by itself because Swedish
- * builds compounds with the head LAST ("lastbilschaufför", "byggnadssnickare",
- * "redovisningsekonom"): the Swedish statement reader matches these inside a
- * word, which the prefix-anchored stems of the other languages must not do.
+ * just named. It lives here now, ONE list the router's Swedish patterns and
+ * the Swedish reader below both build from.
+ *
+ * It is NOT part of `TRADE_STEM_SOURCE`, and must not become part of it: that
+ * source is composed into shared patterns that run on every language's
+ * sentences ("potrzebuj… <trade>", "have … <n> <trade>"), where a Swedish stem
+ * is another language's word (`montor`, `installator`, `malar…`, `kock`). The
+ * Swedish nouns count only in a sentence `looksSwedish` reads as Swedish.
+ * Swedish also builds compounds with the head LAST ("lastbilschaufför",
+ * "byggnadssnickare", "redovisningsekonom"): the Swedish statement reader
+ * matches these inside a word, which the prefix-anchored stems of the other
+ * languages must not do.
  */
 export const SV_TRADE_STEM_SOURCE =
   "svetsar|elektriker|rormokar|snickar|malar(e|na)\\b|murar(e|na)\\b|plattsattar|stallningsbyggar|betongarbetar|" +
@@ -132,12 +140,6 @@ export const SV_TRADE_STEM_SOURCE =
 export const SV_OCCUPATION_STEM_SOURCE =
   "ekonom|redovisning|revisor|bokforar|jurist|advokat|ingenjor|arkitekt|analytiker|konsult|radgivar|larare|" +
   "forelasar|tekniker|specialist|projektledar|chef\\b|operator|saljar|receptionist|designer|forskollarar|kassor";
-
-/**
- * THE MANUAL TRADES — the list every direction reads. The Swedish nouns are
- * composed in rather than typed twice.
- */
-export const TRADE_STEM_SOURCE = `${TRADE_STEM_BASE_SOURCE}|${SV_TRADE_STEM_SOURCE}`;
 
 /**
  * THE PEOPLE A SENTENCE CAN OFFER — one person, several, or a whole brigade.
@@ -301,8 +303,16 @@ const EXCLUDED_RE = new RegExp(`^(?:${ROLE_NOUN_EXCLUSION_SOURCE})`, "u");
 const GENITIVE_RE = new RegExp(`(?:${ROLE_SUFFIX_GENITIVE_SOURCE})$`, "u");
 const NOMINATIVE_RE = new RegExp(`(?:${ROLE_SUFFIX_NOMINATIVE_SOURCE})$`, "u");
 const INSTRUMENTAL_RE = new RegExp(`(?:${ROLE_SUFFIX_INSTRUMENTAL_SOURCE})$`, "u");
-const SEEK_RE = new RegExp(`(?:^|[^\\p{L}])(?:${SEEK_VERB_SOURCE}|${SV_SEEK_VERB_SOURCE})(?![\\p{L}])`, "u");
+const SEEK_RE = new RegExp(`(?:^|[^\\p{L}])(?:${SEEK_VERB_SOURCE})(?![\\p{L}])`, "u");
 const STATEMENT_RE = new RegExp(
+  `(?:^|[^\\p{L}])(?:as\\s+)?(${PROFESSION_STATEMENT_ANCHOR_SOURCE})(?![\\p{L}])`,
+  "u",
+);
+// The same two readers WITH the Swedish verbs and anchors — used only for a
+// sentence `looksSwedish` reads as Swedish, so a Swedish word can never change
+// how another language's sentence is read.
+const SEEK_WITH_SV_RE = new RegExp(`(?:^|[^\\p{L}])(?:${SEEK_VERB_SOURCE}|${SV_SEEK_VERB_SOURCE})(?![\\p{L}])`, "u");
+const STATEMENT_WITH_SV_RE = new RegExp(
   `(?:^|[^\\p{L}])(?:as\\s+)?(${PROFESSION_STATEMENT_ANCHOR_SOURCE}|${SV_PROFESSION_STATEMENT_ANCHOR_SOURCE})(?![\\p{L}])`,
   "u",
 );
@@ -322,6 +332,22 @@ export const SV_COMPOUND_PREFIX_MIN = 3;
 export const SV_COMPOUND_PREFIX_SOURCE = `(?:[^\\s]{${SV_COMPOUND_PREFIX_MIN},})?`;
 /** "jag är INTE svetsare" states no profession. */
 const SV_NEGATION_RE = /^(inte|ingen|inga|aldrig|ej)$/u;
+/**
+ * Swedish words that END the phrase after "jag är": a preposition or a
+ * possessive opens a new phrase, and the noun behind it is somebody else.
+ * "Jag är nöjd med min chef" (I am happy with my boss) read the profession
+ * "Chef" (review finding 12) — the anchor scanned five tokens ahead and the
+ * shared stop words know no Swedish.
+ */
+const SV_STOP_WORD_RE =
+  /^(med|min|mitt|mina|din|ditt|dina|hans|hennes|var|vart|vara|deras|pa|hos|av|for|till|om|fran|at|utan|mot|over|under|efter|innan|nar|eftersom|men|att|som|dar)$/u;
+/**
+ * Years of EXPERIENCE said in Swedish (folded): "i 5 år", "under 5 år", "sedan
+ * 5 år", "5 års erfarenhet". A bare "28 år" is the person's AGE ("Jag är
+ * svetsare, 28 år") and is never read (review finding 12).
+ */
+const SV_YEARS_RE =
+  /(?:(?:^|[^\p{L}])(?:i|under|sedan|over|i\s+over|i\s+mer\s+an|mer\s+an)\s+(\d{1,2})\s*ar(?![\p{L}])(?!\s+gammal))|(?:(\d{1,2})\s*ars?\s+(?:\p{L}*erfarenhet|\p{L}*vana)(?![\p{L}]))/u;
 /** "söker JOBB som svetsare" is a person looking for work, never a need. */
 const SV_OWN_SEARCH_RE = /^(?:\p{L}*jobb|arbete|tjanst|anstalln|praktik|uppdrag)/u;
 
@@ -426,7 +452,7 @@ function tokenize(text: string): Token[] {
 
 function isNumberToken(tok: Token): boolean {
   if (/^\d{1,4}$/.test(tok.raw)) return true;
-  return findWordNumbers(tok.raw).length === 1;
+  return findWordNumbers(tok.raw, false).length === 1;
 }
 
 /** Is this token an occupation noun in the given case? Returns the
@@ -479,7 +505,8 @@ export function readRoleLabel(text: string): RoleLabelReading | null {
   const raw = (text ?? "").trim();
   if (!raw) return null;
   const folded = foldAligned(raw);
-  const seek = SEEK_RE.exec(folded);
+  const swedish = looksSwedish(text);
+  const seek = (swedish ? SEEK_WITH_SV_RE : SEEK_RE).exec(folded);
   if (!seek) return null;
   const tokens = tokenize(raw);
   // The first token strictly after the seek verb's END (offsets line up:
@@ -489,7 +516,7 @@ export function readRoleLabel(text: string): RoleLabelReading | null {
   if (start === -1) return null;
   // Up to four tokens after the verb may precede the head: a number, an
   // article, up to three attributes.
-  const isSv = SV_SEEK_RE.test(seek[0]);
+  const isSv = swedish && SV_SEEK_RE.test(seek[0]);
   for (let i = start; i < Math.min(tokens.length, start + 5); i++) {
     const t = tokens[i];
     if (STOP_WORD_RE.test(t.folded) && !/^(mano|musu|jusu|savo)$/u.test(t.folded)) break;
@@ -520,13 +547,14 @@ export function readProfessionStatement(text: string): ProfessionStatementReadin
   const raw = (text ?? "").trim();
   if (!raw) return null;
   const folded = foldAligned(raw);
-  const anchor = STATEMENT_RE.exec(folded);
+  const swedish = looksSwedish(raw);
+  const anchor = (swedish ? STATEMENT_WITH_SV_RE : STATEMENT_RE).exec(folded);
   if (!anchor) return null;
   const verb = anchor[1];
   const tense: ProfessionStatementReading["tense"] = PAST_RE.test(verb) ? "past" : "present";
   const isLtNominative = verb === "esu";
   const isInstrumental = verb === "dirbu" || verb === "dirbau";
-  const isSv = SV_ANCHOR_RE.test(verb);
+  const isSv = swedish && SV_ANCHOR_RE.test(verb);
   const tokens = tokenize(raw);
   const verbEnd = anchor.index + anchor[0].length;
   const start = tokens.findIndex((t) => t.at >= verbEnd);
@@ -537,7 +565,7 @@ export function readProfessionStatement(text: string): ProfessionStatementReadin
     // after the verb adds a trade, it does not end the phrase.
     if (i === start && /^(ir|and|и|und|en)$/u.test(t.folded)) continue;
     if (STOP_WORD_RE.test(t.folded)) break;
-    if (isSv && SV_NEGATION_RE.test(t.folded)) break;
+    if (isSv && (SV_NEGATION_RE.test(t.folded) || SV_STOP_WORD_RE.test(t.folded))) break;
     // A capitalised word after "esu" / "dirbu" is a NAME ("esu Jonas"), never
     // a role — the suffix classes are open enough that a surname ("Ivanovas")
     // could pass them. German capitalises every noun, and the EN/NL/DE paths
@@ -559,9 +587,9 @@ export function readProfessionStatement(text: string): ProfessionStatementReadin
     // "i 5 år" — read only behind a Swedish anchor: folded, "ar" is also the
     // Lithuanian "or" ("5 ar 6 metus").
     const yearsMatch = isSv
-      ? folded.match(/(\d{1,2})\s*ar(?![\p{L}])/u)
+      ? folded.match(SV_YEARS_RE)
       : folded.match(/(\d{1,2})\s*(?:met|years?|yrs?|лет|год)/u);
-    const years = yearsMatch ? Number.parseInt(yearsMatch[1], 10) : null;
+    const years = yearsMatch ? Number.parseInt(yearsMatch[1] ?? yearsMatch[2], 10) : null;
     return {
       label,
       raw: phraseOf([...attrs, t]),

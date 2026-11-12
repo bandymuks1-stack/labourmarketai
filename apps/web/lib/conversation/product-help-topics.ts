@@ -36,6 +36,14 @@ export type HelpChip = {
 export type HelpTopic = {
   readonly id: HelpTopicId;
   readonly sources: readonly string[];
+  /**
+   * The SWEDISH sources — apart from `sources` on purpose. Both the router
+   * (`sv()` patterns) and the reader count them only for a sentence
+   * `looksSwedish` reads as Swedish, so a Swedish question shape ("var …
+   * timmar", "vad betyder …") can never change how another language's
+   * sentence is routed or read.
+   */
+  readonly svSources: readonly string[];
   readonly chips: readonly HelpChip[];
 };
 
@@ -49,6 +57,8 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bhoe\\s+(?:gebruik|werk)\\s+ik\\s+(?:met\\s+)?(?:dit\\s+|het\\s+)?project",
       "\\bwie\\s+(?:benutze|nutze|verwende)\\s+ich\\s+(?:dieses\\s+|das\\s+)?projekt",
       "\\bjak\\s+korzystac\\s+z\\s+(?:tego\\s+)?projekt",
+    ],
+    svSources: [
       "\\bhur\\s+(?:anvander|borjar)\\s+jag\\s+(?:det\\s+har\\s+|detta\\s+)?projekt",
     ],
     chips: [{ target: "/dashboard/projects", label: "chipHelpProjects" }],
@@ -62,6 +72,8 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bhoe\\s+voeg\\s+ik\\s+[^.]{0,20}(?:persoon|medewerker|werknemer|mensen|teamlid)",
       "\\bwie\\s+f(?:u|ue)ge\\s+ich\\s+[^.]{0,20}(?:person|mitarbeiter|mitglied|leute)",
       "\\bjak\\s+dodac\\s+(?:osobe|pracownik|czlowiek|czlonk)",
+    ],
+    svSources: [
       "\\bhur\\s+(?:lagger\\s+jag\\s+till|bjuder\\s+jag\\s+in)\\s+(?:en\\s+)?(?:ny\\s+)?(?:person|personer|medarbetare|anstalld|kollega|deltagare)",
     ],
     chips: [{ target: "/dashboard/network", label: "chipHelpPeople" }],
@@ -75,6 +87,8 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bwaar\\s+(?:zijn|zie\\s+ik|vind\\s+ik)\\s+(?:mijn\\s+)?uren",
       "\\bwo\\s+(?:sind|sehe\\s+ich|finde\\s+ich)\\s+(?:meine\\s+)?(?:arbeits)?stunden",
       "\\bgdzie\\s+(?:sa\\s+|zobacze\\s+)?(?:moje\\s+)?godzin",
+    ],
+    svSources: [
       "\\bvar\\s+(?:ser\\s+jag\\s+|hittar\\s+jag\\s+|finns\\s+|ar\\s+)?(?:mina\\s+|vara\\s+)?(?:arbets)?(?:timmar|tidrapport)",
     ],
     chips: [{ target: "/dashboard/hours", label: "workHoursChip" }],
@@ -88,6 +102,8 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bhoe\\s+bied\\s+ik\\s+(?:een\\s+)?dienst",
       "\\bwie\\s+biete\\s+ich\\s+(?:eine\\s+)?(?:dienstleistung|leistung)",
       "\\bjak\\s+zaoferowac\\s+usluge",
+    ],
+    svSources: [
       "\\bhur\\s+erbjuder\\s+jag\\s+(?:en\\s+|mina\\s+)?tjanst",
     ],
     chips: [{ target: "/dashboard/services", label: "chipHelpServices" }],
@@ -101,6 +117,8 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bwaarom\\s+(?:zie\\s+ik|is\\s+er|krijg\\s+ik)\\s+(?:deze\\s+|een\\s+)?waarschuwing",
       "\\bwarum\\s+(?:erscheint|sehe\\s+ich|gibt\\s+es|bekomme\\s+ich)\\s+(?:diese\\s+|eine\\s+)?warnung",
       "\\bdlaczego\\s+(?:pojawilo\\s+sie|widze|jest)\\s+(?:to\\s+|ta\\s+)?ostrzezeni",
+    ],
+    svSources: [
       "\\bvarfor\\s+(?:fick\\s+jag|ser\\s+jag|finns\\s+det)\\s+(?:den\\s+har\\s+|en\\s+)?varning",
     ],
     chips: [{ target: "/dashboard/activity", label: "activityChip" }],
@@ -114,6 +132,8 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bwat\\s+betekent\\s+(?:deze\\s+|de\\s+)?prognose",
       "\\bwas\\s+bedeutet\\s+(?:diese\\s+|die\\s+)?prognose",
       "\\bco\\s+oznacza\\s+(?:ta\\s+)?prognoza",
+    ],
+    svSources: [
       "\\bvad\\s+betyder\\s+(?:den\\s+har\\s+|denna\\s+)?prognos",
     ],
     chips: [{ target: "/dashboard/planning", label: "chipHelpPlanning" }],
@@ -127,6 +147,8 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bhoe\\s+plan\\s+ik\\s+(?:een\\s+)?(?:medewerker|werknemer|persoon)",
       "\\bwie\\s+plane\\s+ich\\s+(?:einen\\s+|eine\\s+)?(?:mitarbeiter|person)",
       "\\bjak\\s+zaplanowac\\s+(?:pracownik|osobe)",
+    ],
+    svSources: [
       "\\bhur\\s+planerar\\s+jag\\s+(?:in\\s+)?(?:en\\s+)?(?:medarbetare|anstalld|person|arbetslag)",
     ],
     chips: [{ target: "/dashboard/planning", label: "chipHelpPlanning" }],
@@ -141,6 +163,8 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bwaar\\s+(?:zie|vind)\\s+ik\\s+(?:het\\s+)?(?:uitgevoerde|gedane|afgeronde)\\s+werk",
       "\\bwo\\s+(?:sehe|finde)\\s+ich\\s+(?:die\\s+)?(?:erledigte|geleistete|abgeschlossene)\\s+arbeit",
       "\\bgdzie\\s+(?:zobacze|widze)\\s+wykonan",
+    ],
+    svSources: [
       "\\bvar\\s+(?:ser|hittar)\\s+jag\\s+(?:mitt\\s+)?(?:utfort|genomfort|gjort|klart)\\w*\\s+arbete",
     ],
     chips: [

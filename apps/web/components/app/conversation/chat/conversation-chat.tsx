@@ -4882,7 +4882,14 @@ export function ConversationChat({
   const startTaskStatus = useCallback(
     (sentence: string) => {
       const lower = sentence.toLowerCase();
-      const status: WorkTaskStatus = readStatedProgress(sentence);
+      // The state the sentence SAYS — never a default. A sentence that names a
+      // task and states no state ("Was ist mit der Aufgabe Malen?") writes
+      // nothing: it used to be recorded as done.
+      const status: WorkTaskStatus | null = readStatedProgress(sentence, "task");
+      if (status === null) {
+        assistant(fallbackText, starterChips);
+        return;
+      }
       setTyping(true);
       loadOpenTasksForChat()
         .then((res) => {
@@ -4911,7 +4918,7 @@ export function ConversationChat({
           assistant(labels.taskUnavailable);
         });
     },
-    [identity, assistant, labels, runTaskStatus],
+    [identity, assistant, labels, runTaskStatus, fallbackText, starterChips],
   );
 
   /** "Kuris projektas rizikoje?" (§11 / §16): every live project with the SAME
@@ -5049,7 +5056,13 @@ export function ConversationChat({
         return;
       }
       const lower = sentence.toLowerCase();
-      const status: StageStatus = readStatedProgress(sentence);
+      // The state the sentence SAYS — never a default. "Erkläre die Etappe
+      // Fundament" is a question; a stage is not marked done by one.
+      const status: StageStatus | null = readStatedProgress(sentence, "stage");
+      if (status === null) {
+        assistant(fallbackText, [{ id: "projects", label: labels.chipProjects }]);
+        return;
+      }
       setTyping(true);
       loadCompanyStagesForChat()
         .then((res) => {

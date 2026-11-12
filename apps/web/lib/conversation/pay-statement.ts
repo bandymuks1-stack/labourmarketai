@@ -1,3 +1,5 @@
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
+
 /**
  * A STATED PAY EXPECTATION (owner continuation command 2026-09-29 §5).
  *
@@ -56,19 +58,33 @@ function toInt(raw: string): number | null {
 
 // Anchored at the figure: "15 €/val.", "120 eur per day", "20 € в час".
 const PER_TIME =
-  /^[\s.,]*(\/|per|pr\.?|a|в|за|pro|je|na|i)?\s*(val\b|val\.|valand|hour|h\b|hr\b|час|stunde|std\b|uur|godz|dien|day\b|день|tag\b|dag\b|dagen\b|timm|tim\b|veck)/;
+  /^[\s.,]*(\/|per|pr\.?|a|в|за|pro|je|na)?\s*(val\b|val\.|valand|hour|h\b|hr\b|час|stunde|std\b|uur|godz|dien|day\b|день|tag\b|dag\b)/;
+// sv "200 kr i timmen", "1500 kr per dag", "per vecka" — a Swedish sentence
+// only (`looksSwedish`): `timm` opens the Dutch "timmerman" and "dagen" is the
+// Dutch plural "days" (review finding 6).
+const SV_PER_TIME = /^[\s.,]*(\/|per|pr\.?|i)?\s*(dag\b|dagen\b|timm|tim\b|veck)/;
 
 // A named currency that is not the euro, right after a figure ("30 000 kr",
 // "8000 zł", "3000 SEK") or right before it ("SEK 30000", "$3000"). Folded.
 const OTHER_CURRENCY_AFTER = /^\s*(kr(?![\p{L}])|kronor|sek(?![\p{L}])|nok(?![\p{L}])|dkk(?![\p{L}])|zł|zl(?![\p{L}])|pln(?![\p{L}])|usd(?![\p{L}])|gbp(?![\p{L}])|chf(?![\p{L}])|\$|£)/u;
 const OTHER_CURRENCY_BEFORE = /(?:^|[^\p{L}])(sek|nok|dkk|pln|usd|gbp|chf|\$|£)\s*$/u;
 
-const FROM_WORDS = String.raw`(?:nuo|maziausiai|ne\s+maziau(?:\s+(?:kaip|nei))?|bent|from|at\s+least|minimum|min\.?|от|минимум|не\s+менее|ab|mindestens|vanaf|minimaal|od|co\s+najmniej|minimum|fran|minst|lagst)`;
-const TO_WORDS = String.raw`(?:iki|daugiausia|ne\s+daugiau(?:\s+(?:kaip|nei))?|up\s+to|to|max(?:imum)?\.?|до|максимум|не\s+более|bis|hochstens|tot|maximaal|do|maksymalnie|upp\s+till|till|hogst|som\s+mest)`;
+const FROM_WORDS = String.raw`(?:nuo|maziausiai|ne\s+maziau(?:\s+(?:kaip|nei))?|bent|from|at\s+least|minimum|min\.?|от|минимум|не\s+менее|ab|mindestens|vanaf|minimaal|od|co\s+najmniej|minimum)`;
+const TO_WORDS = String.raw`(?:iki|daugiausia|ne\s+daugiau(?:\s+(?:kaip|nei))?|up\s+to|to|max(?:imum)?\.?|до|максимум|не\s+более|bis|hochstens|tot|maximaal|do|maksymalnie)`;
+// sv — a Swedish sentence only. Unanchored inside the shared list, `till`
+// matched inside the English "still": "My salary expectation is still 3000
+// euro" was a minimum and became a maximum (review finding 7).
+// (`[a-z]`, not `\p{L}`: these sources are compiled without the `u` flag, and
+// the sentence is already folded to base letters.)
+const SV_FROM_WORDS = String.raw`(?:(?<![a-z])(?:fran|minst|lagst))`;
+const SV_TO_WORDS = String.raw`(?:(?<![a-z])(?:upp\s+till|till|hogst|som\s+mest)(?![a-z]))`;
 const CUR = String.raw`\s*(?:€|eur\w*|евро)?\s*`;
 
 export function readPayStatement(text: string): PayStatement {
   const q = fold(text ?? "");
+  const swedish = looksSwedish(text);
+  const fromWords = swedish ? `(?:${FROM_WORDS}|${SV_FROM_WORDS})` : FROM_WORDS;
+  const toWords = swedish ? `(?:${TO_WORDS}|${SV_TO_WORDS})` : TO_WORDS;
   const nums = [...q.matchAll(new RegExp(NUM, "g"))]
     .map((m) => ({ value: toInt(m[1]!), at: m.index ?? 0, end: (m.index ?? 0) + m[0].length }))
     .filter((n): n is { value: number; at: number; end: number } => n.value !== null);
@@ -77,8 +93,11 @@ export function readPayStatement(text: string): PayStatement {
 
   // A rate right after a figure ("15 €/val.", "120 eur per day") is not monthly.
   for (const n of nums) {
-    if (PER_TIME.test(q.slice(n.end, n.end + 16).replace(/^\s*(€|eur\w*|евро|kr(?![\p{L}])|kronor|sek(?![\p{L}]))?/u, ""))) {
-      return { kind: "not-monthly" };
+    const after = q.slice(n.end, n.end + 16);
+    if (PER_TIME.test(after.replace(/^\s*(€|eur\w*|евро)?/, ""))) return { kind: "not-monthly" };
+    if (swedish) {
+      const svAfter = after.replace(/^\s*(€|eur\w*|евро|kr(?![\p{L}])|kronor|sek(?![\p{L}]))?/u, "");
+      if (PER_TIME.test(svAfter) || SV_PER_TIME.test(svAfter)) return { kind: "not-monthly" };
     }
   }
   // Not euros → never a euro figure (see `other-currency`).
@@ -92,7 +111,7 @@ export function readPayStatement(text: string): PayStatement {
   const ok = (v: number) => v >= MIN_MONTHLY && v <= MAX_MONTHLY;
 
   const range =
-    new RegExp(String.raw`(?:${FROM_WORDS}\s+)?${CUR}${NUM}${CUR}(?:-|–|—|${TO_WORDS})${CUR}${NUM}`).exec(q);
+    new RegExp(String.raw`(?:${fromWords}\s+)?${CUR}${NUM}${CUR}(?:-|–|—|${toWords})${CUR}${NUM}`).exec(q);
   if (range) {
     const min = toInt(range[1]!);
     const max = toInt(range[2]!);
@@ -101,18 +120,18 @@ export function readPayStatement(text: string): PayStatement {
     }
   }
   // sv "mellan 3000 och 3500 euro" — "och" joins a range only after "mellan".
-  const between = new RegExp(String.raw`mellan${CUR}${NUM}${CUR}och${CUR}${NUM}`).exec(q);
+  const between = swedish ? new RegExp(String.raw`mellan${CUR}${NUM}${CUR}och${CUR}${NUM}`).exec(q) : null;
   if (between) {
     const min = toInt(between[1]!);
     const max = toInt(between[2]!);
     if (min !== null && max !== null && ok(min) && ok(max) && min <= max) return { kind: "range", min, max };
   }
-  const from = new RegExp(String.raw`${FROM_WORDS}${CUR}${NUM}`).exec(q);
+  const from = new RegExp(String.raw`${fromWords}${CUR}${NUM}`).exec(q);
   if (from) {
     const min = toInt(from[1]!);
     if (min !== null && ok(min)) return { kind: "min", min };
   }
-  const to = new RegExp(String.raw`${TO_WORDS}${CUR}${NUM}`).exec(q);
+  const to = new RegExp(String.raw`${toWords}${CUR}${NUM}`).exec(q);
   if (to) {
     const max = toInt(to[1]!);
     if (max !== null && ok(max)) return { kind: "max", max };

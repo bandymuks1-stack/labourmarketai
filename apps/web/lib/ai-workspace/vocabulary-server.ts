@@ -55,23 +55,22 @@ const EVERYDAY_ENUM_WORDS: Readonly<
       "met huisvesting", "huisvesting", "onderdak",
       "mit unterkunft", "unterkunft", "wohnung gestellt",
       "z zakwaterowaniem", "zakwaterowanie", "mieszkanie zapewnione",
-      "med boende", "boende", "bostad", "logi",
     ],
     provided_paid: [
       "su būstu", "būstas", "apgyvendinimu", "with housing", "with accommodation",
       "housing", "accommodation", "с жильем", "с жильём", "жилье", "жильё",
       "проживание", "met huisvesting", "huisvesting", "mit unterkunft",
-      "unterkunft", "z zakwaterowaniem", "zakwaterowanie", "med boende", "boende", "bostad", "logi",
+      "unterkunft", "z zakwaterowaniem", "zakwaterowanie",
     ],
     provided_deducted: [
       "su būstu", "būstas", "apgyvendinimu", "with housing", "with accommodation",
       "housing", "accommodation", "с жильем", "с жильём", "жилье", "жильё",
       "проживание", "met huisvesting", "huisvesting", "mit unterkunft",
-      "unterkunft", "z zakwaterowaniem", "zakwaterowanie", "med boende", "boende", "bostad", "logi",
+      "unterkunft", "z zakwaterowaniem", "zakwaterowanie",
     ],
     not_provided: [
       "be būsto", "be apgyvendinimo", "without housing", "no accommodation",
-      "без жилья", "zonder huisvesting", "ohne unterkunft", "bez zakwaterowania", "utan boende", "utan bostad",
+      "без жилья", "zonder huisvesting", "ohne unterkunft", "bez zakwaterowania",
     ],
   },
 };
@@ -86,6 +85,45 @@ const ENUM_LABEL_NAMESPACES = {
 export interface WorkspaceVocabulary {
   readonly terms: readonly VocabularyTerm[];
   readonly facets: DiscoveryFacets;
+}
+
+/**
+ * The SWEDISH everyday words for the same values — `svTerms`, matched only
+ * against a Swedish sentence (see `VocabularyTerm.svTerms`). "logi" in the
+ * shared list read "logistics" as "accommodation provided".
+ */
+const SV_EVERYDAY_ENUM_WORDS: Readonly<
+  Partial<Record<WorldStateDimension, Readonly<Record<string, readonly string[]>>>>
+> = {
+  accommodation: {
+    provided_free: ["med boende", "boende", "bostad", "logi"],
+    provided_paid: ["med boende", "boende", "bostad", "logi"],
+    provided_deducted: ["med boende", "boende", "bostad", "logi"],
+    not_provided: ["utan boende", "utan bostad"],
+  },
+};
+
+/**
+ * The names of one value, kept apart by who contributes them: every language
+ * but Swedish in `terms`, what only Swedish adds in `svTerms`. A name both
+ * share ("Portugal") is simply a shared name.
+ */
+class TermNames {
+  private readonly shared = new Set<string>();
+  private readonly swedish = new Set<string>();
+  constructor(initial: readonly string[] = []) {
+    for (const name of initial) this.shared.add(name);
+  }
+  add(name: string, locale?: string): void {
+    (locale === "sv" ? this.swedish : this.shared).add(name);
+  }
+  get size(): number {
+    return this.shared.size + this.swedish.size;
+  }
+  split(): { terms: string[]; svTerms?: string[] } {
+    const svTerms = [...this.swedish].filter((name) => !this.shared.has(name));
+    return svTerms.length > 0 ? { terms: [...this.shared], svTerms } : { terms: [...this.shared] };
+  }
 }
 
 /**
@@ -123,16 +161,16 @@ export async function buildWorkspaceVocabulary(
     })),
   );
   for (const code of facets.countries) {
-    const names = new Set<string>();
+    const names = new TermNames();
     for (const { locale, t } of countryCatalogues) {
-      if (t.has(code)) names.add(t(code));
+      if (t.has(code)) names.add(t(code), locale);
       const icu = countryDisplayName(code, locale);
       // `countryDisplayName` returns the raw code when it cannot name it —
       // never add that, or "DE" would match any word starting with "de".
-      if (icu && icu.toUpperCase() !== code.toUpperCase()) names.add(icu);
+      if (icu && icu.toUpperCase() !== code.toUpperCase()) names.add(icu, locale);
     }
     if (names.size > 0) {
-      terms.push({ dimension: "country", value: code, terms: [...names], available: true });
+      terms.push({ dimension: "country", value: code, ...names.split(), available: true });
     }
   }
 
@@ -140,14 +178,14 @@ export async function buildWorkspaceVocabulary(
   // The work-type taxonomy labels the slug in each language. A demand whose
   // role is free text (not a taxonomy slug) contributes the raw value, so the
   // person can still name it the way the demand does.
-  const workTypeMaps = activeLocales.map((locale) => buildWorkTypeLabelMap(locale));
+  const workTypeMaps = activeLocales.map((locale) => ({ locale, map: buildWorkTypeLabelMap(locale) }));
   for (const slug of facets.professions) {
-    const names = new Set<string>([slug]);
-    for (const map of workTypeMaps) {
+    const names = new TermNames([slug]);
+    for (const { locale, map } of workTypeMaps) {
       const label = map[slug];
-      if (label) names.add(label);
+      if (label) names.add(label, locale);
     }
-    terms.push({ dimension: "profession", value: slug, terms: [...names], available: true });
+    terms.push({ dimension: "profession", value: slug, ...names.split(), available: true });
   }
 
   // ── enum dimensions ──────────────────────────────────────────────────────
@@ -160,14 +198,15 @@ export async function buildWorkspaceVocabulary(
     [keyof typeof ENUM_LABEL_NAMESPACES, string]
   >) {
     const catalogues = await Promise.all(
-      activeLocales.map((locale) =>
-        getTranslations({ locale, namespace: `opportunities.${namespace}` }),
-      ),
+      activeLocales.map(async (locale) => ({
+        locale,
+        t: await getTranslations({ locale, namespace: `opportunities.${namespace}` }),
+      })),
     );
     for (const value of enumValues[dimension]) {
-      const names = new Set<string>();
-      for (const t of catalogues) {
-        if (t.has(value)) names.add(t(value) as string);
+      const names = new TermNames();
+      for (const { locale, t } of catalogues) {
+        if (t.has(value)) names.add(t(value) as string, locale);
       }
       // THE WORDS PEOPLE ACTUALLY TYPE (owner P0 2026-09-22 §5). Measured:
       // the accommodation vocabulary held ONLY the enum LABELS
@@ -177,8 +216,9 @@ export async function buildWorkspaceVocabulary(
       // idiom as EVERYDAY_TYPE_WORDS below: the catalogue labels stay the
       // display names; the everyday stems only make the value recognisable.
       for (const word of EVERYDAY_ENUM_WORDS[dimension]?.[value] ?? []) names.add(word);
+      for (const word of SV_EVERYDAY_ENUM_WORDS[dimension]?.[value] ?? []) names.add(word, "sv");
       if (names.size > 0) {
-        terms.push({ dimension, value, terms: [...names], available: true });
+        terms.push({ dimension, value, ...names.split(), available: true });
       }
     }
   }
@@ -186,15 +226,18 @@ export async function buildWorkspaceVocabulary(
   // ── tools ────────────────────────────────────────────────────────────────
   // The SAME closed taxonomy the demand's required-tools list is drawn from.
   const toolCatalogues = await Promise.all(
-    activeLocales.map((locale) => getTranslations({ locale, namespace: "skillNames" })),
+    activeLocales.map(async (locale) => ({
+      locale,
+      t: await getTranslations({ locale, namespace: "skillNames" }),
+    })),
   );
   for (const slug of facets.tools) {
-    const names = new Set<string>();
-    for (const t of toolCatalogues) {
-      if (t.has(slug)) names.add(t(slug) as string);
+    const names = new TermNames();
+    for (const { locale, t } of toolCatalogues) {
+      if (t.has(slug)) names.add(t(slug) as string, locale);
     }
     if (names.size > 0) {
-      terms.push({ dimension: "tool", value: slug, terms: [...names], available: true });
+      terms.push({ dimension: "tool", value: slug, ...names.split(), available: true });
     }
   }
 
@@ -212,8 +255,13 @@ export async function buildWorkspaceVocabulary(
     })),
   );
   const EVERYDAY_TYPE_WORDS: Readonly<Record<string, readonly string[]>> = {
-    internship: ["praktika", "stažuotė", "internship", "стажировка", "практика", "stage", "praktikum", "praktik", "praktikplats"],
-    apprenticeship: ["pameistrystė", "apprenticeship", "ученичество", "leerwerkplek", "ausbildung", "lehrstelle", "lärlingsplats", "lärling"],
+    internship: ["praktika", "stažuotė", "internship", "стажировка", "практика", "stage", "praktikum"],
+    apprenticeship: ["pameistrystė", "apprenticeship", "ученичество", "leerwerkplek", "ausbildung", "lehrstelle"],
+  };
+  // sv — `svTerms`, matched only against a Swedish sentence.
+  const SV_EVERYDAY_TYPE_WORDS: Readonly<Record<string, readonly string[]>> = {
+    internship: ["praktik", "praktikplats"],
+    apprenticeship: ["lärlingsplats", "lärling"],
   };
   // EVERY type of the closed set is a term, marked available only when a
   // demand of that type is on the person's board. Prod walk 2026-09-04: with
@@ -226,19 +274,27 @@ export async function buildWorkspaceVocabulary(
   // the person's own language comes first, then the other catalogues, then
   // the everyday stems.
   for (const value of OPPORTUNITY_TYPES) {
-    const names = new Set<string>();
+    const names = new TermNames();
+    // A Swedish reader's own label is a Swedish name (`svTerms`), so what the
+    // answer SHOWS for the value is carried apart from what it matches on.
+    let displayName: string | undefined;
     for (const { locale, t } of typeCatalogues) {
-      if (locale === currentLocale && t.has(value)) names.add(t(value) as string);
+      if (locale === currentLocale && t.has(value)) {
+        names.add(t(value) as string, locale);
+        if (locale === "sv") displayName = t(value) as string;
+      }
     }
-    for (const { t } of typeCatalogues) {
-      if (t.has(value)) names.add(t(value) as string);
+    for (const { locale, t } of typeCatalogues) {
+      if (t.has(value)) names.add(t(value) as string, locale);
     }
     for (const word of EVERYDAY_TYPE_WORDS[value] ?? []) names.add(word);
+    for (const word of SV_EVERYDAY_TYPE_WORDS[value] ?? []) names.add(word, "sv");
     if (names.size > 0) {
       terms.push({
         dimension: "opportunityType",
         value,
-        terms: [...names],
+        ...names.split(),
+        ...(displayName ? { displayName } : {}),
         available: facets.opportunityTypes.includes(value),
       });
     }
@@ -271,14 +327,14 @@ export async function buildUnavailableCountryTerms(
   // full of two-letter false positives).
   for (const code of MARKET_COUNTRIES) {
     if (onBoard.has(code)) continue;
-    const names = new Set<string>();
+    const names = new TermNames();
     for (const { locale, t } of catalogues) {
-      if (t.has(code)) names.add(t(code));
+      if (t.has(code)) names.add(t(code), locale);
       const icu = countryDisplayName(code, locale);
-      if (icu && icu.toUpperCase() !== code.toUpperCase()) names.add(icu);
+      if (icu && icu.toUpperCase() !== code.toUpperCase()) names.add(icu, locale);
     }
     if (names.size > 0) {
-      out.push({ dimension: "country", value: code, terms: [...names], available: false });
+      out.push({ dimension: "country", value: code, ...names.split(), available: false });
     }
   }
   return out;

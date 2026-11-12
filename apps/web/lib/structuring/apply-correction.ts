@@ -18,13 +18,14 @@
  * windows.
  */
 import { foldText } from "./normalize";
-import { COUNTRY_RULES, WORK_TYPE_RULES, hayHasNeedle } from "./structure-need";
+import { COUNTRY_RULES, hayHasNeedle, workTypeRulesFor } from "./structure-need";
 import { parseTimeWindow, type TimeWindow } from "./time-window";
 import type {
   ValueOfferMode,
   ValueQuantity,
   ValueStatement,
 } from "./value-statement";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
 export type CorrectedField =
   | "quantity"
@@ -52,13 +53,16 @@ const MARKERS: RegExp[] = [
   /(?:^|\s)не\s+[^,.;]{0,48}?,?\s+а\s+/u, // RU: не X, а Y
   /\bnot\s+[^,.;]{0,48}?,?\s+but\s+/u, // EN: not X but Y
   /^no,?\s+/u, // EN: "No, 300 kg"
+];
+/** The Swedish markers — a Swedish sentence only (`looksSwedish`). */
+const SV_MARKERS: RegExp[] = [
   /(?:^|\s)inte\s+[^,.;]{0,48}?,?\s+utan\s+/u, // SV: inte X utan Y
   /^nej,?\s+/u, // SV: "Nej, 300 kg"
 ];
 
 function correctionTail(raw: string): string | null {
   const folded = foldText(raw);
-  for (const re of MARKERS) {
+  for (const re of looksSwedish(raw) ? [...MARKERS, ...SV_MARKERS] : MARKERS) {
     const m = folded.match(re);
     if (m && m.index !== undefined) {
       // fold preserves length for LT/RU/EN input, so the folded index maps
@@ -71,8 +75,10 @@ function correctionTail(raw: string): string | null {
 
 const KNOWN_UNITS = new Set(["kg", "t", "vnt", "ha", "m2", "m3", "km", "cm", "mm"]);
 
-const RENTAL_RE = /nuomo|isnuomo|\brent(al|ing)?\b|\bhire\b|аренд|сда(м|ю|ем)|\bhyr(?:a|s)?\s+ut\b|\buthyr/u;
-const SALE_RE = /parduo|\bsell(ing)?\b|прода(м|ю|ем)|\bsalj(?:er|a|es)\b|till\s+salu/u;
+const RENTAL_RE = /nuomo|isnuomo|\brent(al|ing)?\b|\bhire\b|аренд|сда(м|ю|ем)/u;
+const SALE_RE = /parduo|\bsell(ing)?\b|прода(м|ю|ем)/u;
+const SV_RENTAL_RE = /\bhyr(?:a|s)?\s+ut\b|\buthyr/u;
+const SV_SALE_RE = /\bsalj(?:er|a|es)\b|till\s+salu/u;
 
 function quantityDisplay(q: ValueQuantity | null): string | null {
   if (!q) return null;
@@ -158,7 +164,7 @@ export function applyCorrection(
   }
 
   // 4. Profession/category: "ne suvirintojų, o elektrikų".
-  for (const r of WORK_TYPE_RULES) {
+  for (const r of workTypeRulesFor(looksSwedish(raw))) {
     if (r.needles.some((n) => foldedTail.includes(n))) {
       if (r.slug !== prev.workType) {
         changes.push({ field: "workType", previous: prev.workType, next: r.slug });
@@ -169,9 +175,10 @@ export function applyCorrection(
   }
 
   // 5. Intent shape: "ne parduoti, o išnuomoti".
-  const modeNext: ValueOfferMode | null = RENTAL_RE.test(foldedTail)
+  const swedish = looksSwedish(raw);
+  const modeNext: ValueOfferMode | null = RENTAL_RE.test(foldedTail) || (swedish && SV_RENTAL_RE.test(foldedTail))
     ? "rental"
-    : SALE_RE.test(foldedTail)
+    : SALE_RE.test(foldedTail) || (swedish && SV_SALE_RE.test(foldedTail))
       ? "sale"
       : null;
   if (modeNext && modeNext !== prev.offerMode) {

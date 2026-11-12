@@ -35,6 +35,7 @@
  */
 import { fold } from "@/lib/conversation/intent-router";
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
 /** Whose the file is. `unstated` is a question, never an assumption. */
 export type FileSubject =
@@ -80,15 +81,31 @@ const DEPOSIT = [
   "hierbij", "dit is mijn", "dit zijn", "ik upload", "bijgevoegd",
   // de
   "hier ist", "hier sind", "anbei", "ich lade", "beigefugt", "das ist mein",
-  // sv (folded) — "här är", "jag laddar upp", "bifogar", "det här är mitt"
-  "har ar ", "har kommer ", "laddar upp", "ladda upp", "bifogar", "bifogat ", "skickar over", "det har ar mi",
 ] as const;
+
+// ── SWEDISH (folded) ────────────────────────────────────────────────────────
+// Every Swedish list below is read ONLY for a sentence `looksSwedish` reads as
+// Swedish. They sat inside the shared lists, where " min " — Swedish "my" —
+// made "Hierbij het cv van Jan, min of meer compleet" and "Here is John's
+// certificate, a 5 min scan" the SPEAKER's own file, and "elever" read the
+// Dutch "opgeleverd" as a cohort (review finding 9). A sentence about another
+// person must never reach `self`; a Swedish possessive cannot decide that for
+// a sentence that is not Swedish.
+/** "här är", "jag laddar upp", "bifogar", "det här är mitt". */
+const SV_DEPOSIT = ["har ar ", "har kommer ", "laddar upp", "ladda upp", "bifogar", "bifogat ", "skickar over", "det har ar mi"] as const;
+const SV_SELF = [" mitt ", " mina "] as const;
+/** Swedish "min" (my) — but never the minutes of "en 5 min scan". */
+const SV_SELF_MIN_RE = /(?<![0-9]) min (?![0-9])/u;
+const SV_ANOTHER_PERSON = ["kandidatens ", "medarbetarens ", "anstalldes ", "personens "] as const;
+const SV_MANY_PEOPLE = ["kandidater", "medarbetarnas", "anstallda", "arbetssokande"] as const;
+const SV_ORGANIZATION = ["foretagets ", "vart foretag", "bolagets ", "organisationens "] as const;
+const SV_COHORT = ["studenter", "elever", "klasslista", "deltagarlista", "kursdeltagare"] as const;
+const SV_TABLE = ["kalkylblad"] as const;
 
 /** First-person possessive — the ONLY thing that makes a file the speaker's. */
 const SELF = [
   "mano ", "savo ", "my ", "mijn ", "mein ", "meine ", "moj", "мой", "моя",
   "мое", "моё", "мои", "свое", "своё", "свой", "своя",
-  " min ", " mitt ", " mina ",
 ] as const;
 
 /** Another single human, named by role rather than by name. */
@@ -97,7 +114,6 @@ const ANOTHER_PERSON = [
   "candidate", "applicant", "worker's", "employee's", "person's",
   "кандидата", "соискателя", "работника", "сотрудника",
   "kandidaat", "sollicitant", "medewerker", "bewerber", "mitarbeiter",
-  "kandidatens ", "medarbetarens ", "anstalldes ", "personens ",
 ] as const;
 
 /** Several humans. Plural role nouns, and any of them beside a number. */
@@ -106,7 +122,6 @@ const MANY_PEOPLE = [
   "candidates", "applicants", "workers", "employees", "people",
   "кандидатов", "соискателей", "работников", "сотрудников",
   "kandidaten", "sollicitanten", "medewerkers", "bewerber", "mitarbeiter",
-  "kandidater", "medarbetarnas", "anstallda", "arbetssokande",
 ] as const;
 
 /** The organization itself is the owner ("mūsų darbuotojų", "įmonės"). */
@@ -115,7 +130,6 @@ const ORGANIZATION = [
   "our ", "company's ", "the company", "of the company",
   "нашей компании", "наших", "компании", "организации",
   "ons bedrijf", "onze ", "unser", "unsere", "der firma", "firmen",
-  "foretagets ", "vart foretag", "bolagets ", "organisationens ",
 ] as const;
 
 /** Learners — an institution's cohort. */
@@ -124,7 +138,6 @@ const COHORT = [
   "students", "student's", "learners", "cohort", "class list",
   "студентов", "учащихся", "группы",
   "studenten", "leerlingen", "schuler", "kursteilnehmer",
-  "studenter", "elever", "klasslista", "deltagarlista", "kursdeltagare",
 ] as const;
 
 /** Photographs / images of finished work. */
@@ -134,7 +147,7 @@ const WORK_EVIDENCE = [
 ] as const;
 
 /** A table of people rather than one person's document. */
-const TABLE = ["excel", "xlsx", ".csv", "csv", "lentel", "sarasas", "sąrašas", "spreadsheet", "tabel", "tabelle", "таблиц", "список", "kalkylblad"] as const;
+const TABLE = ["excel", "xlsx", ".csv", "csv", "lentel", "sarasas", "sąrašas", "spreadsheet", "tabel", "tabelle", "таблиц", "список"] as const;
 
 const hasAny = (hay: string, needles: readonly string[]): boolean =>
   needles.some((n) => hay.includes(n));
@@ -158,11 +171,13 @@ const hasAny = (hay: string, needles: readonly string[]): boolean =>
 // Written in already-FOLDED form (the query is folded before it is tested):
 // "įkeltą" → "ikelta", "geüpload" → "geupload".
 const READBACK_FORMS =
-  /(?<!\p{L})(ikelt\p{L}*|uploaded|загружен\p{L}*|hochgeladen\p{L}*|geupload\p{L}*|uppladdad\p{L}*)(?!\p{L})/giu;
+  /(?<!\p{L})(ikelt\p{L}*|uploaded|загружен\p{L}*|hochgeladen\p{L}*|geupload\p{L}*)(?!\p{L})/giu;
+const SV_READBACK_FORMS = /(?<!\p{L})uppladdad\p{L}*(?!\p{L})/giu;
 
 /** The sentence with its past upload forms removed — what the deposit test sees. */
-export function withoutReadbackForms(folded: string): string {
-  return folded.replace(READBACK_FORMS, " ");
+export function withoutReadbackForms(folded: string, swedish = false): string {
+  const out = folded.replace(READBACK_FORMS, " ");
+  return swedish ? out.replace(SV_READBACK_FORMS, " ") : out;
 }
 
 /**
@@ -181,12 +196,15 @@ export function readFileIntent(text: string): FileIntent | null {
   // "Ką ČIA galiu padaryti?" asks WHERE/WHAT, it hands nothing over: a question
   // word directly before "čia" is not the deposit "čia mano CV" (production
   // 2026-10-01: the capabilities question was answered with "Kieno šis dokumentas?").
-  const asked = withoutReadbackForms(q).replace(/(?<!\p{L})(ka|kas|kur|kaip|kodel|kam|ko|kuo|koks|kokia|kokie)\s+cia(?!\p{L})/gu, " ");
-  if (!hasAny(asked, DEPOSIT)) return null;
+  const swedish = looksSwedish(raw);
+  const has = (hay: string, shared: readonly string[], sv: readonly string[]): boolean =>
+    hasAny(hay, shared) || (swedish && hasAny(hay, sv));
+  const asked = withoutReadbackForms(q, swedish).replace(/(?<!\p{L})(ka|kas|kur|kaip|kodel|kam|ko|kuo|koks|kokia|kokie)\s+cia(?!\p{L})/gu, " ");
+  if (!has(asked, DEPOSIT, SV_DEPOSIT)) return null;
 
   const documentTypeSlug = guessDocumentType(raw);
   const evidence = hasAny(q, WORK_EVIDENCE);
-  const table = hasAny(q, TABLE);
+  const table = has(q, TABLE, SV_TABLE);
 
   // ── SUBJECT ─────────────────────────────────────────────────────────────
   //
@@ -201,12 +219,15 @@ export function readFileIntent(text: string): FileIntent | null {
   // pins that no subject except `self` can reach the self CV importer.
   const numbered = /\d/.test(q);
   let subject: FileSubject;
-  if (hasAny(q, COHORT)) subject = "cohort";
-  else if (hasAny(q, ORGANIZATION)) subject = "organization";
-  else if (hasAny(q, MANY_PEOPLE) || (numbered && hasAny(q, ANOTHER_PERSON)))
+  if (has(q, COHORT, SV_COHORT)) subject = "cohort";
+  else if (has(q, ORGANIZATION, SV_ORGANIZATION)) subject = "organization";
+  // sv "kandidatens CV" is ONE candidate's — the genitive holds the Dutch /
+  // German plural "kandidaten" of the shared list, and is not several people.
+  else if (swedish && !numbered && hasAny(q, SV_ANOTHER_PERSON) && !hasAny(q, SV_MANY_PEOPLE)) subject = "another_person";
+  else if (has(q, MANY_PEOPLE, SV_MANY_PEOPLE) || (numbered && has(q, ANOTHER_PERSON, SV_ANOTHER_PERSON)))
     subject = "many_people";
-  else if (hasAny(q, ANOTHER_PERSON)) subject = "another_person";
-  else if (hasAny(q, SELF)) subject = "self";
+  else if (has(q, ANOTHER_PERSON, SV_ANOTHER_PERSON)) subject = "another_person";
+  else if (has(q, SELF, SV_SELF) || (swedish && SV_SELF_MIN_RE.test(q))) subject = "self";
   else subject = "unstated";
 
   // ── KIND ────────────────────────────────────────────────────────────────

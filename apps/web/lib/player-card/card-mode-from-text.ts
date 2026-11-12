@@ -1,4 +1,5 @@
 import type { PlayerCardMode } from "@/lib/player-card/card-modes";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
 /**
  * WHICH LENS DID THE PERSON ASK FOR? (owner command 2026-09-29 §21, item 4:
@@ -15,12 +16,21 @@ import type { PlayerCardMode } from "@/lib/player-card/card-modes";
  * "kur dirbu" is work).
  */
 const RULES: readonly [PlayerCardMode, RegExp][] = [
-  ["skills", /(igudz|gebejim|kompetencij|\bskills?\b|навык|умени|f[aä]higkeit|kompetenz|vaardighe|umiej[eę]tno|fardighet|\bkompetenser?\b)/],
-  ["history", /(istorij|anksciau|dirbau|\bhistory\b|worked\b|previous\s+jobs?|истори|раньше\s+работал|verlauf|fr[uü]her|geschiedenis|historia|pracowa[lł]em|historik|tidigare\s+(jobb|arbete)|\bjobbade\b|\barbetade\b)/],
-  ["evidence", /(irasai|irasu|irodym|dokument|\brecords?\b|\bdocuments?\b|записи|документ|nachweis|eintr[aä]ge|bewijs|registraties|wpisy|dowod|\binlagg\b|\bintyg\b|\bbevis\b)/],
-  ["next", /(galimyb|toliau|kur\s+galiu|\bnext\b|opportunit|where\s+can\s+i|дальше|возможност|weiter|m[oö]glichkeit|volgende|kansen|dalej|mo[zż]liwo[sś]c|mojlighet|harnast|nasta\s+steg)/],
-  ["work", /(kur\s+dirbu|dirbu\s+dabar|valand|\bhours\b|work\s+now|current\s+work|сейчас\s+работаю|часы|arbeite\s+jetzt|stunden|werk\s+nu|uren|pracuj[eę]\s+teraz|godzin|\btimmar\b|jobbar\s+(jag\s+)?nu|arbetar\s+(jag\s+)?nu)/],
+  ["skills", /(igudz|gebejim|kompetencij|\bskills?\b|навык|умени|f[aä]higkeit|kompetenz|vaardighe|umiej[eę]tno)/],
+  ["history", /(istorij|anksciau|dirbau|\bhistory\b|worked\b|previous\s+jobs?|истори|раньше\s+работал|verlauf|fr[uü]her|geschiedenis|historia|pracowa[lł]em)/],
+  ["evidence", /(irasai|irasu|irodym|dokument|\brecords?\b|\bdocuments?\b|записи|документ|nachweis|eintr[aä]ge|bewijs|registraties|wpisy|dowod)/],
+  ["next", /(galimyb|toliau|kur\s+galiu|\bnext\b|opportunit|where\s+can\s+i|дальше|возможност|weiter|m[oö]glichkeit|volgende|kansen|dalej|mo[zż]liwo[sś]c)/],
+  ["work", /(kur\s+dirbu|dirbu\s+dabar|valand|\bhours\b|work\s+now|current\s+work|сейчас\s+работаю|часы|arbeite\s+jetzt|stunden|werk\s+nu|uren|pracuj[eę]\s+teraz|godzin)/],
 ];
+/** The Swedish words for the same sides (folded) — read after the shared rule
+ *  of the same side, in a Swedish sentence only (`looksSwedish`). */
+const SV_RULES: Readonly<Partial<Record<PlayerCardMode, RegExp>>> = {
+  skills: /(fardighet|\bkompetenser?\b)/,
+  history: /(historik|tidigare\s+(jobb|arbete)|\bjobbade\b|\barbetade\b)/,
+  evidence: /(\binlagg\b|\bintyg\b|\bbevis\b)/,
+  next: /(mojlighet|harnast|nasta\s+steg)/,
+  work: /(\btimmar\b|jobbar\s+(jag\s+)?nu|arbetar\s+(jag\s+)?nu)/,
+};
 
 export function cardModeFromText(text: string | null | undefined): PlayerCardMode {
   if (!text) return "identity";
@@ -28,6 +38,9 @@ export function cardModeFromText(text: string | null | undefined): PlayerCardMod
     .toLowerCase()
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "");
-  for (const [mode, rx] of RULES) if (rx.test(t)) return mode;
+  const swedish = looksSwedish(text);
+  for (const [mode, rx] of RULES) {
+    if (rx.test(t) || (swedish && SV_RULES[mode]?.test(t))) return mode;
+  }
   return "identity";
 }

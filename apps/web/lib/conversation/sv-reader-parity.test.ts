@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { readAvailabilityDay } from "@/lib/conversation/availability-day";
@@ -149,9 +152,27 @@ describe("profession-statement → readProfessionStatement", () => {
     expect(readProfessionStatement("Jag är här")).toBeNull();
   });
 
-  it("the router and the reader share ONE Swedish trade list", () => {
-    expect(TRADE_STEM_SOURCE).toContain(SV_TRADE_STEM_SOURCE);
+  it("a noun behind a preposition is somebody else, and an age is not experience (review finding 12)", () => {
+    // "I am happy with my boss" — the anchor used to scan on to "chef".
+    expect(readProfessionStatement("Jag är nöjd med min chef")).toBeNull();
+    expect(readProfessionStatement("Jag är chef på ett byggföretag")?.label).toBe("Chef");
+    // "28 år" alone is the person's age; "i 28 år" / "28 års erfarenhet" is experience.
+    expect(readProfessionStatement("Jag är svetsare, 28 år")).toMatchObject({ label: "Svetsare", years: null });
+    expect(readProfessionStatement("Jag är svetsare, 28 år gammal")?.years).toBeNull();
+    expect(readProfessionStatement("Jag har jobbat som svetsare i 28 år")?.years).toBe(28);
+    expect(readProfessionStatement("Jag är svetsare med 12 års erfarenhet")?.years).toBe(12);
+  });
+
+  it("the router and the reader share ONE Swedish trade list — kept OUT of the shared trades", () => {
     expect(SV_TRADE_STEM_SOURCE).toContain("svetsar");
+    // `TRADE_STEM_SOURCE` is composed into patterns that run on every
+    // language's sentences; a Swedish stem inside it ("montor", "kock",
+    // "installator") changes how those are read. The Swedish list is its own
+    // source, used by the router's `sv()` patterns and by the Swedish reader.
+    expect(TRADE_STEM_SOURCE).not.toContain("svetsar");
+    expect(TRADE_STEM_SOURCE).not.toContain(SV_TRADE_STEM_SOURCE);
+    const ROUTER = readFileSync(join(process.cwd(), "lib/conversation/intent-router.ts"), "utf8");
+    expect(ROUTER).toMatch(/\$\{TRADE_STEM_SOURCE\}\|\$\{SV_TRADE_STEM_SOURCE\}/);
   });
 
   it("controls: the other languages read exactly as before", () => {
@@ -513,26 +534,63 @@ describe("journal questions → the period, week and skill readers", () => {
 describe("task-status / stage-status → readStatedProgress", () => {
   it("a blocked or started Swedish task is not written down as done", () => {
     expect(intentOf("Uppgiften montera ställningen är klar")).toBe("task-status");
-    expect(readStatedProgress("Uppgiften montera ställningen är klar")).toBe("done");
+    expect(readStatedProgress("Uppgiften montera ställningen är klar", "task")).toBe("done");
     expect(intentOf("Uppgiften montera ställningen är blockerad")).toBe("task-status");
-    expect(readStatedProgress("Uppgiften montera ställningen är blockerad")).toBe("blocked");
-    expect(readStatedProgress("Uppgiften montera ställningen är påbörjad")).toBe("in_progress");
+    expect(readStatedProgress("Uppgiften montera ställningen är blockerad", "task")).toBe("blocked");
+    expect(readStatedProgress("Uppgiften montera ställningen är påbörjad", "task")).toBe("in_progress");
     expect(intentOf("Etappen grundläggning är klar")).toBe("stage-status");
-    expect(readStatedProgress("Etappen grundläggning är klar")).toBe("done");
-    expect(readStatedProgress("Etappen grundläggning har fastnat")).toBe("blocked");
-    expect(readStatedProgress("Etappen tak sitter fast")).toBe("blocked");
-    expect(readStatedProgress("Vi började på etappen tak")).toBe("in_progress");
-    expect(readStatedProgress("Etappen tak är igång")).toBe("in_progress");
+    expect(readStatedProgress("Etappen grundläggning är klar", "stage")).toBe("done");
+    expect(readStatedProgress("Etappen grundläggning har fastnat", "stage")).toBe("blocked");
+    expect(readStatedProgress("Etappen tak sitter fast", "stage")).toBe("blocked");
+    expect(readStatedProgress("Vi började på etappen tak", "stage")).toBe("in_progress");
+    expect(readStatedProgress("Etappen tak är igång", "stage")).toBe("in_progress");
   });
 
   it("controls: the six earlier languages, and English 'fast' is not 'stuck'", () => {
-    expect(readStatedProgress("Stage foundations is done")).toBe("done");
-    expect(readStatedProgress("Task install scaffolding is blocked")).toBe("blocked");
-    expect(readStatedProgress("Užduotis pradėta")).toBe("in_progress");
-    expect(readStatedProgress("Aufgabe ist blockiert")).toBe("blocked");
-    expect(readStatedProgress("Задача заблокирована")).toBe("blocked");
-    expect(readStatedProgress("Zadanie zablokowane")).toBe("blocked");
-    expect(readStatedProgress("The task was done fast")).toBe("done");
+    expect(readStatedProgress("Stage foundations is done", "stage")).toBe("done");
+    expect(readStatedProgress("Task install scaffolding is blocked", "task")).toBe("blocked");
+    expect(readStatedProgress("Užduotis pradėta", "task")).toBe("in_progress");
+    expect(readStatedProgress("Aufgabe ist blockiert", "task")).toBe("blocked");
+    expect(readStatedProgress("Задача заблокирована", "task")).toBe("blocked");
+    expect(readStatedProgress("Zadanie zablokowane", "task")).toBe("blocked");
+    expect(readStatedProgress("The task was done fast", "task")).toBe("done");
+  });
+
+  it("a sentence that states NO state reads as none — never as done (review finding 4)", () => {
+    // The German question that reached the stage handler through an
+    // unanchored Swedish `klar` ("erKLÄRe") and would have marked the stage done.
+    expect(intentOf("Erkläre die Etappe Fundament")).not.toBe("stage-status");
+    expect(readStatedProgress("Erkläre die Etappe Fundament", "stage")).toBeNull();
+    expect(readStatedProgress("Was ist mit der Etappe Fundament?", "stage")).toBeNull();
+    expect(readStatedProgress("What about the task painting", "task")).toBeNull();
+    expect(readStatedProgress("Kokia etapo Pamatai būsena?", "stage")).toBeNull();
+    // Swedish: "förKLARa" holds "klar" and states nothing; a question states nothing.
+    expect(intentOf("Kan du förklara etappen grundläggning?")).not.toBe("stage-status");
+    expect(readStatedProgress("Kan du förklara etappen grundläggning", "stage")).toBeNull();
+    expect(readStatedProgress("Är etappen grundläggning klar?", "stage")).toBeNull();
+    // German "klar" / "klären" is not the Swedish state word.
+    expect(readStatedProgress("Alles klar mit der Etappe Dach", "stage")).toBeNull();
+    expect(readStatedProgress("Ich muss die Etappe Fundament noch klären", "stage")).toBeNull();
+    // A blocked stage is blocked in Polish too (it used to be written as done).
+    expect(readStatedProgress("Etap fundamenty zablokowany", "stage")).toBe("blocked");
+  });
+});
+
+describe("language-statement: the router names only languages the reader can hold (review finding 12)", () => {
+  it("a language outside the closed set is not sent to the language reader", () => {
+    // `worker_languages.lang` is a closed set with no Finnish in it. The router
+    // used to send "Jag talar finska" to a reader that returned nothing.
+    expect(intentOf("Jag talar finska")).not.toBe("language-statement");
+    expect(intentOf("Jag talar ukrainska och svenska")).toBe("language-statement");
+    expect(readStatedLanguages("Jag talar ukrainska och svenska").map((l) => l.lang)).toEqual(["uk", "sv"]);
+  });
+});
+
+describe("file-subject: Swedish 'min' is 'my', not a minute", () => {
+  it("minutes never make a file the speaker's own", () => {
+    expect(readFileIntent("Här är min meritförteckning")?.subject).toBe("self");
+    expect(readFileIntent("Här är kandidatens certifikat")?.subject).toBe("another_person");
+    expect(readFileIntent("Här är ett certifikat, 5 min scan")?.subject).toBe("unstated");
   });
 });
 
@@ -624,9 +682,14 @@ describe("the smaller readers", () => {
   });
 
   it("a plain yes, and a role in a piece of work", () => {
-    for (const yes of ["ja", "okej", "japp", "visst", "absolut", "ja tack"]) {
+    for (const yes of ["ja", "japp", "visst", "gärna", "ja tack", "det stämmer"]) {
       expect(isPlainAffirmation(yes), yes).toBe(true);
     }
+    // "okej" is also Polish and "absolut" German. Alone they carry nothing
+    // that says Swedish, so they keep the reading every other language's
+    // sentence had before Swedish was activated (not a plain yes).
+    expect(isPlainAffirmation("okej")).toBe(false);
+    expect(isPlainAffirmation("absolut")).toBe(false);
     expect(isPlainAffirmation("nej")).toBe(false);
     expect(isPlainAffirmation("yes")).toBe(true);
     expect(isPlainAffirmation("taip")).toBe(true);

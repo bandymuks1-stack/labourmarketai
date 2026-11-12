@@ -24,34 +24,56 @@
  */
 import type { WorkPeriodKey } from "@/lib/journal/work-intelligence";
 import { fold } from "./intent-router";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
 export type JournalPeriodPhrase = WorkPeriodKey | "yesterday";
 
 /** Order = precedence: the narrowest window a sentence names wins. */
 const PERIOD_WORDS: ReadonlyArray<readonly [JournalPeriodPhrase, string]> = [
-  ["today", "siandien|today|сегодня|heute|vandaag|dzisiaj|dzis|idag|i dag"],
-  ["yesterday", "vakar|yesterday|вчера|gestern|gisteren|wczoraj|igar|i gar"],
-  ["week", "savait\\p{L}*|week(?!end)|недел\\p{L}*|woche\\p{L}*|weken|veck(?:a|an|or|ans|ors)"],
-  ["month", "menes\\p{L}*|month\\p{L}*|месяц\\p{L}*|monat\\p{L}*|maand\\p{L}*|manad\\p{L}*"],
+  ["today", "siandien|today|сегодня|heute|vandaag|dzisiaj|dzis"],
+  ["yesterday", "vakar|yesterday|вчера|gestern|gisteren|wczoraj"],
+  ["week", "savait\\p{L}*|week(?!end)|недел\\p{L}*|woche\\p{L}*|weken"],
+  ["month", "menes\\p{L}*|month\\p{L}*|месяц\\p{L}*|monat\\p{L}*|maand\\p{L}*"],
   // LT "metu" is deliberately absent: folded, it is both "metų" (of the year)
   // and "darbo metu" (during work) — the second is not a period.
-  // sv "år" folds to "ar" — the Lithuanian "or" — so the bare word is never
-  // read: only "i år", "förra året", "året", "årets".
-  ["year", "met(?:us|ais|ai)|year\\p{L}*|год\\p{L}*|jahr\\p{L}*|jaar|i ar|aret|arets"],
+  ["year", "met(?:us|ais|ai)|year\\p{L}*|год\\p{L}*|jahr\\p{L}*|jaar"],
   [
     "all",
-    "is viso|visa laika|per visa|in total|all time|all-time|overall|всего|за все время|insgesamt|gesamt\\p{L}*|in totaal|totaal|alles bij elkaar|totalt|sammanlagt|hittills|hela tiden",
+    "is viso|visa laika|per visa|in total|all time|all-time|overall|всего|за все время|insgesamt|gesamt\\p{L}*|in totaal|totaal|alles bij elkaar",
   ],
+];
+
+/**
+ * The SWEDISH period words (folded), same precedence — read only for a
+ * sentence `looksSwedish` reads as Swedish. "år" folds to "ar", the Lithuanian
+ * "or": inside the shared list, "i ar" read "Kiek dirbau į ar iš Vilniaus?"
+ * as THIS YEAR (review finding 11). Even behind the gate the bare word is
+ * never read: only "i år", "året", "årets".
+ */
+const SV_PERIOD_WORDS: ReadonlyArray<readonly [JournalPeriodPhrase, string]> = [
+  ["today", "idag|i dag"],
+  ["yesterday", "igar|i gar"],
+  ["week", "veck(?:a|an|or|ans|ors)"],
+  ["month", "manad\\p{L}*"],
+  ["year", "i ar|aret|arets"],
+  ["all", "totalt|sammanlagt|hittills|hela tiden"],
 ];
 
 const PERIOD_RX: ReadonlyArray<readonly [JournalPeriodPhrase, RegExp]> = PERIOD_WORDS.map(
   ([key, source]) => [key, new RegExp(`(?<!\\p{L})(?:${source})(?!\\p{L})`, "u")] as const,
 );
 
+const SV_PERIOD_RX: ReadonlyMap<JournalPeriodPhrase, RegExp> = new Map(
+  SV_PERIOD_WORDS.map(([key, source]) => [key, new RegExp(`(?<!\\p{L})(?:${source})(?!\\p{L})`, "u")] as const),
+);
+
 /** The period a journal question names, or `null` when it names none. */
 export function parseJournalPeriodPhrase(text: string | null | undefined): JournalPeriodPhrase | null {
   if (!text) return null;
   const folded = fold(text);
-  for (const [key, rx] of PERIOD_RX) if (rx.test(folded)) return key;
+  const swedish = looksSwedish(text);
+  for (const [key, rx] of PERIOD_RX) {
+    if (rx.test(folded) || (swedish && SV_PERIOD_RX.get(key)?.test(folded))) return key;
+  }
   return null;
 }

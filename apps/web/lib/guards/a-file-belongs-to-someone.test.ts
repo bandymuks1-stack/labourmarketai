@@ -202,6 +202,10 @@ describe("no second import system was built", () => {
     expect(imports.sort()).toEqual([
       "@/lib/conversation/document-type-guess",
       "@/lib/conversation/intent-router",
+      // Pure (no IO): decides whether the Swedish word lists apply to the
+      // sentence, so a Swedish possessive can never make another language's
+      // sentence the speaker's own file.
+      "@/lib/structuring/looks-swedish",
     ]);
     for (const forbidden of [
       "createClient",

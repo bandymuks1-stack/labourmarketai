@@ -1,3 +1,5 @@
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
+
 /**
  * PAST WORK STATED WITH ITS YEARS (owner continuation 2026-09-29 §6).
  *
@@ -33,33 +35,42 @@ function fold(s: string): string {
     .toLowerCase();
 }
 
+const PAST_VERB = /(dirbau|dirbo|dirbome|worked|работал|arbeitete|werkte|pracowa)/u;
 // sv: "jobbade" / "arbetade" and the perfect "har jobbat" / "har arbetat".
-const PAST_VERB = /(dirbau|dirbo|dirbome|worked|работал|arbeitete|werkte|pracowa|jobbade|arbetade|jobbat|arbetat)/u;
+// Every SV_ reader below applies to a Swedish sentence only (`looksSwedish`).
+const SV_PAST_VERB = /(jobbade|arbetade|jobbat|arbetat)/u;
 const NOW_WORDS = "dabar|siol|now|present|today|сейчас|настоящее|heute|jetzt|nu|teraz|obecnie";
 // A year that is part of a calendar date (2026-09-28, 28.09.2026) is not a period.
 // (a separator + 1–2 digits that END is a month/day; "2019-2022" stays a range)
 const YEAR = String.raw`((?:19|20)\d{2})(?![-./]\d{1,2}(?!\d))`;
 const RANGE = new RegExp(
-  String.raw`(?<![-./\d])${YEAR}\s*(?:m\.?\s*)?(?:-|–|—|iki|to|until|до|по|bis|tot|do|till)\s*(?:${YEAR}|(${NOW_WORDS}))`,
+  String.raw`(?<![-./\d])${YEAR}\s*(?:m\.?\s*)?(?:-|–|—|iki|to|until|до|по|bis|tot|do)\s*(?:${YEAR}|(${NOW_WORDS}))`,
+  "u",
+);
+const SV_RANGE = new RegExp(
+  String.raw`(?<![-./\d])${YEAR}\s*(?:-|–|—|till)\s*(?:${YEAR}|(${NOW_WORDS}))`,
   "u",
 );
 const SINGLE = new RegExp(
-  String.raw`(?:(?<![-./\d])${YEAR}\s*(?:m\.|metais|metu)|\bin\s+${YEAR}\b|(?:^|\s)в\s+${YEAR}\s*(?:году|г\.)|\bim\s+jahr\s+${YEAR}|\bin\s+${YEAR}|\bw\s+${YEAR}\s*r|(?:^|\s)ar\s+${YEAR})`,
+  String.raw`(?:(?<![-./\d])${YEAR}\s*(?:m\.|metais|metu)|\bin\s+${YEAR}\b|(?:^|\s)в\s+${YEAR}\s*(?:году|г\.)|\bim\s+jahr\s+${YEAR}|\bin\s+${YEAR}|\bw\s+${YEAR}\s*r)`,
   "u",
 );
+/** sv "år 2019" (folded "ar 2019"). */
+const SV_SINGLE = new RegExp(String.raw`(?:^|\s)ar\s+${YEAR}`, "u");
 
 export function readPastWorkPeriod(text: string, currentYear: number): PastWorkPeriod | null {
   const q = fold(text ?? "");
-  if (!PAST_VERB.test(q)) return null;
+  const swedish = looksSwedish(text);
+  if (!PAST_VERB.test(q) && !(swedish && SV_PAST_VERB.test(q))) return null;
   const ok = (y: number) => y >= 1950 && y <= currentYear;
-  const r = RANGE.exec(q);
+  const r = RANGE.exec(q) ?? (swedish ? SV_RANGE.exec(q) : null);
   if (r) {
     const start = Number(r[1]);
     if (r[3]) return ok(start) ? { startYear: start, endYear: null, isCurrent: true } : null;
     const end = Number(r[2]);
     return ok(start) && ok(end) && start <= end ? { startYear: start, endYear: end, isCurrent: false } : null;
   }
-  const one = SINGLE.exec(q);
+  const one = SINGLE.exec(q) ?? (swedish ? SV_SINGLE.exec(q) : null);
   if (one) {
     const y = Number(one.slice(1).find((g) => g !== undefined));
     return ok(y) ? { startYear: y, endYear: y, isCurrent: false } : null;
@@ -73,10 +84,20 @@ export function readPastWorkPeriod(text: string, currentYear: number): PastWorkP
  * "įmonėje Baumeister GmbH Vokietijoje". Their words, never a generated label.
  */
 export function pastWorkOwnWords(text: string): string {
-  return (text ?? "")
-    .replace(/(?<![-./\d])(?:19|20)\d{2}\s*(?:m\.|metais|metų)?\s*(?:-|–|—|iki|to|until|до|по|bis|tot|do|till)?\s*(?:(?:19|20)\d{2}|dabar|šiol|now|present|сейчас|heute|nu|teraz)?/giu, " ")
-    .replace(/(?<![\p{L}])(nuo|from|с|von|van|od|in|в|im jahr|w|från|sedan|år)\s+(?=\s|$)/giu, " ")
-    .replace(/(?<![\p{L}])(dirbau|dirbo|dirbome|i\s+worked|worked|я\s+работал[аи]?|работал[аи]?|ich\s+arbeitete|arbeitete|ik\s+werkte|werkte|pracowa[lł][\p{L}]*|jag\s+(?:jobbade|arbetade)|(?:jobbade|arbetade)\s+jag|jag\s+har\s+(?:jobbat|arbetat)|jobbade|arbetade)(?![\p{L}])/giu, " ")
+  const swedish = looksSwedish(text);
+  let out = text ?? "";
+  // The Swedish joiner first, so "2019 till 2022" leaves as ONE span.
+  if (swedish) out = out.replace(/(?<![-./\d])(?:19|20)\d{2}\s*till\s*(?:(?:19|20)\d{2}|nu)/giu, " ");
+  out = out
+    .replace(/(?<![-./\d])(?:19|20)\d{2}\s*(?:m\.|metais|metų)?\s*(?:-|–|—|iki|to|until|до|по|bis|tot|do)?\s*(?:(?:19|20)\d{2}|dabar|šiol|now|present|сейчас|heute|nu|teraz)?/giu, " ")
+    .replace(/(?<![\p{L}])(nuo|from|с|von|van|od|in|в|im jahr|w)\s+(?=\s|$)/giu, " ")
+    .replace(/(?<![\p{L}])(dirbau|dirbo|dirbome|i\s+worked|worked|я\s+работал[аи]?|работал[аи]?|ich\s+arbeitete|arbeitete|ik\s+werkte|werkte|pracowa[lł][\p{L}]*)(?![\p{L}])/giu, " ");
+  if (swedish) {
+    out = out
+      .replace(/(?<![\p{L}])(från|sedan|år)\s+(?=\s|$)/giu, " ")
+      .replace(/(?<![\p{L}])(jag\s+(?:jobbade|arbetade)|(?:jobbade|arbetade)\s+jag|jag\s+har\s+(?:jobbat|arbetat)|jobbade|arbetade)(?![\p{L}])/giu, " ");
+  }
+  return out
     .replace(/\s+/g, " ")
     .replace(/^[\s,.;:–—-]+|[\s,.;:–—-]+$/g, "")
     .slice(0, 200);

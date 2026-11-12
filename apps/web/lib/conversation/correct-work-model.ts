@@ -1,3 +1,5 @@
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
+
 /**
  * "NE 5, O 6 VALANDAS" — a correction said in words (owner continuation
  * 2026-09-29 §7). Walked on production: after an entry was saved, "Ne 5, o 6
@@ -27,18 +29,25 @@ const num = (s: string) => Number.parseFloat(s.replace(",", "."));
 
 export function readCorrectionAsk(text: string): CorrectionAsk {
   const q = fold(text ?? "");
+  // Swedish words are read in a Swedish sentence only (`looksSwedish`).
+  const swedish = looksSwedish(text);
   // "ne 5, o 6" / "not 5 but 6" / "не 5, а 6" / "nicht 5, sondern 6" / "niet 5 maar 6" / "nie 5, a 6"
   // / sv "inte 5 utan 6 timmar"
   const pair =
-    /\b(?:ne|not|не|nicht|niet|nie|inte)\s+(\d+(?:[.,]\d+)?)\s*(?:val\w*|h|hours?|час\w*|std\w*|uur|godz\w*|timm\w*|tim)?\s*,?\s*(?:o|but|а|sondern|maar|a|ale|utan)\s+(\d+(?:[.,]\d+)?)/u.exec(q);
+    /\b(?:ne|not|не|nicht|niet|nie)\s+(\d+(?:[.,]\d+)?)\s*(?:val\w*|h|hours?|час\w*|std\w*|uur|godz\w*)?\s*,?\s*(?:o|but|а|sondern|maar|a|ale)\s+(\d+(?:[.,]\d+)?)/u.exec(q) ??
+    (swedish
+      ? /\binte\s+(\d+(?:[.,]\d+)?)\s*(?:timm\w*|tim|h)?\s*,?\s*utan\s+(\d+(?:[.,]\d+)?)/u.exec(q)
+      : null);
   if (pair) {
     const to = num(pair[2]!);
     if (to > 0 && to <= 24) return { kind: "hours", from: num(pair[1]!), to };
   }
-  if (/\b(uzvakar|day\s+before\s+yesterday|позавчера|vorgestern|eergisteren|przedwczoraj|i\s?forrgar\b)/u.test(q)) {
+  if (/\b(uzvakar|day\s+before\s+yesterday|позавчера|vorgestern|eergisteren|przedwczoraj)/u.test(q) || (swedish && /\bi\s?forrgar\b/u.test(q))) {
     return { kind: "day", day: "day-before" };
   }
-  if (/\b(vakar|yesterday|вчера|gestern|gisteren|wczoraj|i\s?gar)\b/u.test(q)) return { kind: "day", day: "yesterday" };
+  if (/\b(vakar|yesterday|вчера|gestern|gisteren|wczoraj)\b/u.test(q) || (swedish && /\bi\s?gar\b/u.test(q))) {
+    return { kind: "day", day: "yesterday" };
+  }
   return { kind: "unspecified" };
 }
 

@@ -1,3 +1,5 @@
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
+
 /**
  * The project NAME a "create a project" sentence already carried, so the
  * inline form opens with it filled in (visible, editable, still confirmed).
@@ -17,7 +19,9 @@
  */
 const QUOTED = /[„“"«]([^„“”"«»]{2,120})[“”"»]/u;
 const AFTER_NAMING_WORD =
-  /(?:\bcalled|\bnamed|\bgenaamd|\bpavadinimu|\bnazwie|\bnamens|\bNamen|под\s+названием|\bsom\s+heter|\bmed\s+namnet|\bvid\s+namn)\s+([^,;.\n]{2,120})/iu;
+  /(?:\bcalled|\bnamed|\bgenaamd|\bpavadinimu|\bnazwie|\bnamens|\bNamen|под\s+названием)\s+([^,;.\n]{2,120})/iu;
+/** sv "som heter X", "med namnet X", "vid namn X" — a Swedish sentence only. */
+const SV_AFTER_NAMING_WORD = /(?:\bsom\s+heter|\bmed\s+namnet|\bvid\s+namn)\s+([^,;.\n]{2,120})/iu;
 const AFTER_COLON = /:\s*([^,;.\n]{2,120})/u;
 
 export function projectTitleFromSentence(sentence: string): string | null {
@@ -25,6 +29,7 @@ export function projectTitleFromSentence(sentence: string): string | null {
   const raw =
     text.match(QUOTED)?.[1] ??
     text.match(AFTER_NAMING_WORD)?.[1] ??
+    (looksSwedish(text) ? text.match(SV_AFTER_NAMING_WORD)?.[1] : undefined) ??
     text.match(AFTER_COLON)?.[1] ??
     "";
   const title = raw.trim().replace(/\s+/g, " ");

@@ -63,6 +63,7 @@ import {
   type StatedWorkFacts,
   type WorkEvidenceDraft,
 } from "./evidence-goal";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
 /**
  * ONE pattern builder, the same two corrections the router's `p()` makes —
@@ -297,8 +298,19 @@ const REJECTION: readonly RegExp[] = [
 
 /** A plain yes — proceed with what was proposed. */
 const CONFIRMATION: readonly RegExp[] = [
-  rx("^\\s*(taip|gerai|tinka|sutinku|ok|okay|oké|gut|ja|da|да|yes|yep|prima|akkoord|einverstanden|okej|japp|visst|absolut|garna|ja\\s+tack|det\\s+stammer)\\b\\s*[.!]?\\s*$"),
-  rx("^\\s*(tęsk|tęsti|pirmyn|continue|go\\s+ahead|davai|давай|weiter|ga\\s+door|fortsatt|kor\\s+pa)\\b"),
+  rx("^\\s*(taip|gerai|tinka|sutinku|ok|okay|oké|gut|ja|da|да|yes|yep|prima|akkoord|einverstanden)\\b\\s*[.!]?\\s*$"),
+  rx("^\\s*(tęsk|tęsti|pirmyn|continue|go\\s+ahead|davai|давай|weiter|ga\\s+door)\\b"),
+];
+
+/**
+ * The same two shapes in SWEDISH — read only for a sentence `looksSwedish`
+ * reads as Swedish. "Okej" is also Polish and "absolut" German: a bare word
+ * with no Swedish marker beside it keeps the neutral reading, exactly as on
+ * every other language's sentence before Swedish was activated.
+ */
+const SV_CONFIRMATION: readonly RegExp[] = [
+  rx("^\\s*(okej|japp|visst|absolut|garna|ja\\s+tack|det\\s+stammer)\\b\\s*[.!]?\\s*$"),
+  rx("^\\s*(fortsatt|kor\\s+pa)\\b"),
 ];
 
 /**
@@ -345,10 +357,12 @@ const CONTINUATION_OPENER: readonly RegExp[] = [
   rx("^\\s*(vanaf|tot|en|of|ook|alleen|liever|zij|we|kan)\\b"),
   // DE
   rx("^\\s*(ab|bis|und|oder|auch|nur|lieber|sie|wir|kann)\\b"),
-  // SV — "från oktober", "och i Malmö", "bara heltid", "helst i Göteborg".
-  // No `de` / `men`: a Dutch article and an English noun open with them.
-  rx("^\\s*(fran|till|och|eller|ocksa|bara|endast|helst|kanske|vi)\\b"),
 ];
+// SV — "från oktober", "och i Malmö", "bara heltid", "helst i Göteborg". No
+// `de` / `men`: a Dutch article and an English noun open with them. Swedish
+// sentences only (`looksSwedish`): "till", "bara" and "vi" open other
+// languages' sentences too.
+const SV_CONTINUATION_OPENER = rx("^\\s*(fran|till|och|eller|ocksa|bara|endast|helst|kanske|vi)\\b");
 
 const anyMatch = (patterns: readonly RegExp[], folded: string): boolean =>
   patterns.some((re) => re.test(folded));
@@ -360,7 +374,8 @@ const anyMatch = (patterns: readonly RegExp[], folded: string): boolean =>
  * must never read as acceptance.
  */
 export function isPlainAffirmation(text: string): boolean {
-  return CONFIRMATION[0].test(fold((text ?? "").trim()));
+  const folded = fold((text ?? "").trim());
+  return CONFIRMATION[0].test(folded) || (looksSwedish(text) && SV_CONFIRMATION[0].test(folded));
 }
 
 /** Words in the sentence — Unicode-aware, so LT and Cyrillic count correctly. */
@@ -432,7 +447,8 @@ export function classifyTurn(input: ClassifyTurnInput): TurnKind {
   }
 
   if (anyMatch(REJECTION, folded)) return "rejection";
-  if (anyMatch(CONFIRMATION, folded)) return "confirmation";
+  const swedish = looksSwedish(input.text);
+  if (anyMatch(CONFIRMATION, folded) || (swedish && anyMatch(SV_CONFIRMATION, folded))) return "confirmation";
 
   // A goal-bearing reading this weak is a side effect of one matched word,
   // not a stated destination (see NEW_GOAL_MIN_SCORE).
@@ -476,6 +492,7 @@ export function classifyTurn(input: ClassifyTurnInput): TurnKind {
     weak &&
     wordCount(folded) <= FOLLOW_UP_MAX_WORDS &&
     (anyMatch(CONTINUATION_OPENER, folded) ||
+      (swedish && SV_CONTINUATION_OPENER.test(folded)) ||
       CARRIES_VALUE.test(folded) ||
       input.routedScore > 0)
   ) {
