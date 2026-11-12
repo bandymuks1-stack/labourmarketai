@@ -3847,6 +3847,7 @@
       "blockedLabel": "Geblokkeerd",
       "nonWorkerLabel": "Ruimtes voor bedrijven / uitzendbureaus / klanten",
       "nonWorkerStatus": "In voorbereiding",
+      "nonWorkerStatusActive": "Werkt",
       "fakeClaimsLabel": "Nep-AI / nepmatching / nepreputatie",
       "fakeClaimsStatus": "Nooit gebruikt"
     },
@@ -3886,67 +3887,116 @@
     "preparing_badge": "In voorbereiding",
     "overview": {
       "label": "Overzicht",
-      "description": "Hoofdweergave met de eerste stappen, suggesties en kansen."
+      "description": "Je startweergave opent voor elke rol die je hebt.",
+      "claims": {
+        "home_per_role": "Je startweergave opent voor elke rol die je hebt."
+      }
     },
     "market_map": {
       "label": "Marktkaart",
-      "description": "Eén samenhangende arbeidsmarktkaart — je eigen signaal, personeelsbehoeften en echte data per land / regio."
+      "description": "Een kaart markeert waar werk en mensen zijn.",
+      "claims": {
+        "map": "Een kaart markeert waar werk en mensen zijn."
+      }
     },
     "profile_text_first": {
       "label": "Profiel",
-      "description": "Beschrijf jezelf in je eigen woorden of plak een cv. Het systeem stelt vaardigheden voor, maar jij selecteert ze."
+      "description": "Beschrijf je werk in je eigen woorden en bouw je professionele profiel.",
+      "claims": {
+        "profile": "Beschrijf je werk in je eigen woorden en bouw je professionele profiel."
+      }
     },
     "journal_text_first": {
       "label": "Werk- of activiteitenregistratie",
-      "description": "Leg het werk of de activiteit van vandaag vast. Het systeem helpt je het te structureren, maar jij bepaalt de feiten."
+      "description": "Leg vast wat je vandaag hebt gedaan — de registratie komt in je Living CV.",
+      "claims": {
+        "entry_to_cv": "Leg vast wat je vandaag hebt gedaan — de registratie komt in je Living CV."
+      }
     },
     "communication": {
       "label": "Berichten",
-      "description": "Gesprekken en verzoeken die je ontvangt. Wanneer iemand je een bericht of een verzoek stuurt, vind je het hier."
+      "description": "Schrijf mensen en bedrijven — het gesprek blijft in één draad.",
+      "claims": {
+        "threads": "Schrijf mensen en bedrijven — het gesprek blijft in één draad."
+      }
     },
     "account_roles": {
       "label": "Rollen",
-      "description": "Bekijk je rollen. Werken als persoon is vandaag actief; andere acties worden stap voor stap toegevoegd."
+      "description": "Eén account heeft meerdere rollen, en je wisselt ertussen.",
+      "claims": {
+        "several_roles": "Eén account heeft meerdere rollen, en je wisselt ertussen."
+      }
     },
     "role_expansion": {
       "label": "Meer rollen",
-      "description": "Later kun je bedrijfs-, uitzendbureau- en inkoopacties toevoegen wanneer ze klaar zijn."
+      "description": "Vanuit hetzelfde account kun je een bedrijf opzetten. Vanuit hetzelfde account kun je diensten inkopen.",
+      "claims": {
+        "add_company": "Vanuit hetzelfde account kun je een bedrijf opzetten.",
+        "add_buying": "Vanuit hetzelfde account kun je diensten inkopen."
+      }
     },
     "external_confirmation": {
       "label": "Werkregistraties van anderen",
-      "description": "Een manager, klant of partner kan later bijdragen aan je werkregistraties."
+      "description": "Een bevoegde manager in je organisatie bevestigt het werk dat je hebt vastgelegd.",
+      "claims": {
+        "manager_confirms": "Een bevoegde manager in je organisatie bevestigt het werk dat je hebt vastgelegd."
+      }
     },
     "company_workspace": {
       "label": "Bedrijfsruimte",
-      "description": "Beheer van ploegen, projecten en personeelsbehoeften voor bedrijven."
+      "description": "Zet je organisatie op en publiceer haar eerste behoefte. De bedrijfsstartpagina opent voor de mensen van de organisatie.",
+      "claims": {
+        "setup_and_need": "Zet je organisatie op en publiceer haar eerste behoefte.",
+        "company_home": "De bedrijfsstartpagina opent voor de mensen van de organisatie."
+      }
     },
     "agency_workspace": {
       "label": "Uitzendbureauruimte",
-      "description": "Beheer van kandidatenpool en dienstenaanbod voor uitzendbureaus."
+      "description": "Een bureau beheert zijn mensen, verbindt zich met klanten en biedt mensen aan voor de behoefte van een klant.",
+      "claims": {
+        "roster_clients_offers": "Een bureau beheert zijn mensen, verbindt zich met klanten en biedt mensen aan voor de behoefte van een klant."
+      }
     },
     "customer_workspace": {
       "label": "Klantruimte",
-      "description": "Dienstverzoeken en rapporten voor klanten."
+      "description": "Sla je gegevens als opdrachtgever op en houd je aanvragen in je eigen lijst.",
+      "claims": {
+        "record_and_requests": "Sla je gegevens als opdrachtgever op en houd je aanvragen in je eigen lijst."
+      }
     },
     "document_records": {
       "label": "Documentregistraties",
-      "description": "Een plek voor certificaten en documenten."
+      "description": "Bewaar je documenten en zie wanneer elk ervan verloopt. Een bedrijf houdt een register bij van zijn documenten.",
+      "claims": {
+        "own_documents": "Bewaar je documenten en zie wanneer elk ervan verloopt.",
+        "company_register": "Een bedrijf houdt een register bij van zijn documenten."
+      }
     },
     "team_offers": {
       "label": "Ploegaanbiedingen",
-      "description": "Een plek om ploegen te vormen en gezamenlijke aanbiedingen te plaatsen."
+      "description": "Een team wordt voor een behoefte aangeboden en als één geheel aangenomen.",
+      "claims": {
+        "team_as_unit": "Een team wordt voor een behoefte aangeboden en als één geheel aangenomen."
+      }
     },
     "work_needs": {
       "label": "Werkbehoeften",
-      "description": "Een plek om vast te leggen welk werk of welke hulp je nodig hebt."
+      "description": "Een bedrijf beschrijft op één plek welke mensen het nodig heeft. Geïnteresseerde mensen reageren op de behoefte.",
+      "claims": {
+        "one_form": "Een bedrijf beschrijft op één plek welke mensen het nodig heeft.",
+        "people_answer": "Geïnteresseerde mensen reageren op de behoefte."
+      }
     },
     "service_offers": {
       "label": "Dienstenaanbod",
-      "description": "Een plek om de diensten die je levert te publiceren."
+      "description": "Publiceer de diensten die je aanbiedt en ontvang er aanvragen voor.",
+      "claims": {
+        "offer_and_requests": "Publiceer de diensten die je aanbiedt en ontvang er aanvragen voor."
+      }
     },
     "matching": {
-      "label": "Matching",
-      "description": "Dit product heeft geen matching- / ranking-engine en krijgt die niet totdat er een eerlijk uitgebracht kan worden."
+      "label": "Matching met AI",
+      "description": "Matching van mensen en behoeften met hulp van AI."
     },
     "marketplace": {
       "label": "Marktplaats",
@@ -3954,16 +4004,35 @@
     },
     "marketplace_hub": {
       "label": "Marktplaats",
-      "description": "Een compacte hub die de kaart, kansen en je bedrijven verbindt."
+      "description": "Brengt je naar de kaart die werk en mensen toont.",
+      "claims": {
+        "map": "Brengt je naar de kaart die werk en mensen toont."
+      }
     },
     "planning": {
       "label": "Kalender",
-      "description": "Eén kalender: boekingen, projecten, taken, journaalnotities, uitnodigingen en betaaltermijnen."
+      "description": "Een bedrijf plant het werk van zijn mensen in een kalender. Je ziet je eigen werk in een kalender.",
+      "claims": {
+        "company_calendar": "Een bedrijf plant het werk van zijn mensen in een kalender.",
+        "own_calendar": "Je ziet je eigen werk in een kalender."
+      }
     },
     "network": {
       "label": "Netwerk",
-      "description": "Mensen en bedrijven: zoeken, uitnodigingen en je relaties."
-    }
+      "description": "Uitnodigingen voor het team van een bedrijf komen hier binnen, en hier accepteer je ze.",
+      "claims": {
+        "invitations": "Uitnodigingen voor het team van een bedrijf komen hier binnen, en hier accepteer je ze."
+      }
+    },
+    "rule_matching": {
+      "label": "Shortlist van kandidaten",
+      "description": "Een beschreven behoefte krijgt een shortlist van passende mensen, met de reden voor elk.",
+      "claims": {
+        "shortlist_with_reason": "Een beschreven behoefte krijgt een shortlist van passende mensen, met de reden voor elk."
+      }
+    },
+    "matching_reason": "Uitgeschakeld: er is geen AI-dienst gekoppeld. De shortlist van kandidaten werkt al.",
+    "notCheckedYet": "Dit deel is in de live omgeving nog niet gecontroleerd."
   },
   "structuring": {
     "groupEyebrow": "Voorgestelde vaardigheden",
@@ -7133,6 +7202,10 @@
       "title": "Kon dat gesprek niet openen",
       "body": "Je hebt mogelijk geen toestemming om deze persoon te berichten, of deze is niet meer beschikbaar. Er is niets verzonden."
     },
+    "noLongerAvailable": {
+      "title": "Dit gesprek is niet meer beschikbaar",
+      "body": "Je neemt er niet meer aan deel, dus de berichten worden niet getoond."
+    },
     "scope": {
       "support": "Supportkanaal",
       "unknown": "Context niet gespecificeerd",
@@ -7172,7 +7245,16 @@
         "blockedFailed": "Verwijder de mislukte bijlage of upload deze opnieuw.",
         "partialFailure": "Het bericht is verzonden, maar sommige bijlagen konden niet worden toegevoegd. Probeer ze opnieuw te verzenden."
       },
-      "languageLabel": "Ik schrijf in"
+      "languageLabel": "Ik schrijf in",
+      "errors": {
+        "notAuthenticated": "Je sessie is verlopen. Log opnieuw in en verstuur het bericht.",
+        "invalidInput": "Dit bericht kan niet worden verstuurd: het is mogelijk te lang, of een bijlage wordt niet ondersteund.",
+        "notParticipant": "Je kunt in dit gesprek niet schrijven — je hebt er geen toegang toe.",
+        "rateLimited": "Je hebt het afgelopen uur veel berichten verstuurd. Wacht even en probeer het opnieuw.",
+        "rateCheckUnavailable": "De veiligheidscontrole kon niet worden uitgevoerd, dus er is niets verstuurd. Probeer het opnieuw.",
+        "attachmentsUnavailable": "Bijlagen versturen is hier nog niet ingeschakeld — voeg tekst toe aan het bericht.",
+        "sendFailed": "Het bericht kon niet worden verstuurd. Je tekst staat er nog — probeer het opnieuw."
+      }
     },
     "launcher": {
       "openLabel": "Neem contact op met support",
@@ -20438,6 +20520,49 @@
       "undecided": "Je hebt nog niet gekozen, dus er wordt niets voor meting opgeslagen.",
       "allow": "Toestaan",
       "refuse": "Weigeren"
+    }
+  },
+  "companyClaim": {
+    "email": {
+      "subject": "Neem het profiel van {company} op LabourMarket.ai over",
+      "intro": "Je bent uitgenodigd om het profiel van {company} op LabourMarket.ai te beheren. Het is gratis.",
+      "open": "Open deze eenmalige link:",
+      "validity": "De link is 14 dagen geldig en werkt alleen met dit e-mailadres.",
+      "notYou": "Vertegenwoordig je dit bedrijf niet, doe dan niets: zonder jou verandert er niets."
+    },
+    "invite": {
+      "eyebrow": "Bedrijfsprofiel",
+      "title": "Neem het profiel van {company} over",
+      "body": "Bevestig dat je dit bedrijf vertegenwoordigt. Dit is een verzoek: een andere LabourMarket.ai-operator controleert het, pas daarna word je eigenaar van het profiel.",
+      "verifyFirst": "Bevestig eerst dat dit e-mailadres van jou is.",
+      "roleLabel": "Je functie in het bedrijf",
+      "rolePlaceholder": "Bijvoorbeeld directeur",
+      "authorityLabel": "Ik bevestig dat ik {company} mag vertegenwoordigen.",
+      "submit": "Verzoek versturen",
+      "decidedBy": "Een andere operator beslist, niet degene die je uitnodigde.",
+      "expires": "De uitnodiging is geldig tot {date}.",
+      "requestedTitle": "Verzoek verstuurd",
+      "requestedBody": "Een operator controleert je verzoek. Na goedkeuring beheer jij het profiel. Tot dan verandert er niets.",
+      "closedTitle": "Deze uitnodiging kan niet meer worden gebruikt",
+      "verifySend": "Bevestigingslink sturen",
+      "pending": "Bezig met versturen…",
+      "outcome": {
+        "claim_requested": "Verzoek verstuurd.",
+        "already_requested": "Je hebt al een verzoek verstuurd.",
+        "already_used": "Deze uitnodiging is al gebruikt.",
+        "expired": "De uitnodiging is verlopen. Vraag een nieuwe aan.",
+        "revoked": "De uitnodiging is ingetrokken.",
+        "email_mismatch": "Deze uitnodiging is voor een ander e-mailadres. Log in met het adres waarop je de e-mail ontving.",
+        "email_not_verified": "Bevestig eerst je e-mailadres.",
+        "authority_not_confirmed": "Vink aan dat je het bedrijf mag vertegenwoordigen.",
+        "invalid_role": "Vul je functie in (2–80 tekens).",
+        "not_claimable": "Dit bedrijfsprofiel kan niet meer worden overgenomen.",
+        "inviter_cannot_claim": "De operator die de uitnodiging stuurde, kan die niet zelf gebruiken.",
+        "operator_cannot_claim": "Iemand met operatorrechten kan geen bedrijf overnemen.",
+        "verify_sent": "We hebben een link naar je e-mail gestuurd. Open die en je komt hier terug.",
+        "verify_rate_limited": "We hebben net een link gestuurd. Kijk in je e-mail of probeer het later opnieuw.",
+        "error": "Dat lukte niet. Probeer het later opnieuw."
+      }
     }
   }
 }

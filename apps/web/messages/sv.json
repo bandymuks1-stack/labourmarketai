@@ -1774,6 +1774,10 @@
       "title": "Det gick inte att öppna konversationen",
       "body": "Du kanske inte har behörighet att meddela den här personen, eller så är personen inte längre tillgänglig. Inget skickades."
     },
+    "noLongerAvailable": {
+      "title": "Den här konversationen är inte längre tillgänglig",
+      "body": "Du deltar inte längre i den, så dess meddelanden visas inte."
+    },
     "originalLanguage": "[EN] Original ({lang})",
     "priority": {
       "awaitingYou": "[EN] Awaiting your reply",
