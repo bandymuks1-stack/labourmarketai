@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, Plus, X } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { pinAction, reorderPinsAction, unpinAction } from "@/lib/workspace/pins-actions";
 import { PIN_CAP } from "@/lib/workspace/pins-model";
+import { publishPinned, setPinToggleHandler, type PinToggleHandler } from "@/lib/workspace/pin-sync";
 import {
   parseRecentPlaces,
   recentPlacesKey,
@@ -130,6 +131,45 @@ export function MySpaceRow({
       setRecent([]);
     }
   }, [places, userId, pinnedRefs]);
+
+  // The function cards of the home draw a pin toggle from THIS row's state and
+  // ask this row to change it (`lib/workspace/pin-sync.ts`): one list, one
+  // writer. Without an editor nothing is published, so no card offers one.
+  const canEdit = editor !== null;
+  useEffect(() => {
+    publishPinned(canEdit ? pins.map((p) => p.ref) : null);
+  }, [pins, canEdit]);
+  useEffect(() => () => publishPinned(null), []);
+  const toggleFromCard = useRef<PinToggleHandler>(async () => ({ ok: false }));
+  useEffect(() => setPinToggleHandler((request) => toggleFromCard.current(request)), []);
+
+  const onCardToggle: PinToggleHandler = async ({ ref, label }) => {
+    if (!editor || busy) return { ok: false };
+    const labels = editor.labels;
+    const isPinned = pinnedRefs.has(ref);
+    setBusy(true);
+    try {
+      const result = isPinned
+        ? await unpinAction({ ref, expectedWorkspaceId: editor.expectedWorkspaceId })
+        : await pinAction({ ref, label, expectedWorkspaceId: editor.expectedWorkspaceId });
+      if (result.ok) {
+        editor.onChange(isPinned ? pins.filter((p) => p.ref !== ref) : [...pins, { ref, label }]);
+        setStatus(isPinned ? labels.removed : labels.added);
+        return { ok: true };
+      }
+      return {
+        ok: false,
+        message: result.code === "cap" ? labels.cap.replace("{max}", String(PIN_CAP)) : labels.unavailable,
+      };
+    } catch {
+      return { ok: false, message: labels.unavailable };
+    } finally {
+      setBusy(false);
+    }
+  };
+  useEffect(() => {
+    toggleFromCard.current = onCardToggle;
+  });
 
   // Nothing pinned, nothing recent and no way to add: the row is absent.
   if (pins.length === 0 && recent.length === 0 && !editor) return null;

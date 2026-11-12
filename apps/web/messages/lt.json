@@ -20649,6 +20649,10 @@
       "allProjects": "Visi projektai",
       "allNeeds": "Visi poreikiai",
       "untitledProject": "Projektas be pavadinimo"
+    },
+    "pin": {
+      "add": "Pridėti „{label}“ prie savo nuorodų",
+      "remove": "Pašalinti „{label}“ iš savo nuorodų"
     }
   },
   "siteNav": {

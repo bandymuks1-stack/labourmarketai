@@ -8033,6 +8033,10 @@
       "allProjects": "Alle prosjekter",
       "allNeeds": "Alle behov",
       "untitledProject": "Prosjekt uten navn"
+    },
+    "pin": {
+      "add": "Legg til «{label}» i snarveiene dine",
+      "remove": "Fjern «{label}» fra snarveiene dine"
     }
   },
   "siteNav": {

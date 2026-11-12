@@ -25,7 +25,7 @@
 
 import { routeRequirement } from "@/lib/auth/role-gated-routes";
 import { NEED_DOOR_HREF } from "@/lib/company/need-door";
-import type { NavCardIconKey } from "@/lib/navigation/nav-card-icons";
+import { AREA_ICONS, type NavCardIconKey } from "@/lib/navigation/nav-card-icons";
 import type { PublicIntentId } from "@/lib/navigation/public-intents";
 import type { WorkArea } from "@/lib/navigation/work-areas";
 
@@ -82,7 +82,7 @@ const CLIENTS = g("clients", "/dashboard/company/partners", "handshake", "homeGo
 export const GOAL_FUNCTIONS: Readonly<Record<PublicIntentId, readonly HomeGoal[]>> = {
   work: [
     g("findWork", "/dashboard/opportunities", "search", "homeGoals.worker.findWork"),
-    g("recordWork", "/dashboard/journal", "clipboardList", "homeGoals.worker.recordWork"),
+    g("recordWork", "/dashboard/journal", AREA_ICONS.journal, "homeGoals.worker.recordWork"),
     g("myCv", "/cv", "idCard", "homeGoals.worker.myCv"),
   ],
   workers: [
@@ -91,8 +91,8 @@ export const GOAL_FUNCTIONS: Readonly<Record<PublicIntentId, readonly HomeGoal[]
     { id: "findWorkers", href: NEED_DOOR_HREF, iconKey: "clipboardList", labelKey: "homeGoals.company.findWorkers.label", door: true },
     PEOPLE,
     CANDIDATES,
-    g("projects", "/dashboard/projects", "briefcase", "homeGoals.company.projects"),
-    g("hours", "/dashboard/hours", "barChart", "homeGoals.company.hours"),
+    g("projects", "/dashboard/projects", AREA_ICONS.projects, "homeGoals.company.projects"),
+    g("hours", "/dashboard/hours", AREA_ICONS.hours, "homeGoals.company.hours"),
   ],
   services: [
     shared("offerServices", "/dashboard/services", "wrench", "myServices"),

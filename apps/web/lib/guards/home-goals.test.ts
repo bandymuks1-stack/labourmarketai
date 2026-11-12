@@ -20,6 +20,7 @@ import {
   type HomeGoalRole,
 } from "@/lib/navigation/home-goals";
 import { PUBLIC_INTENT_IDS } from "@/lib/navigation/public-intents";
+import { isPinnableRef } from "@/lib/workspace/pins-model";
 import { ORGANIZATION_WORK_AREAS, PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
 
 /**
@@ -56,8 +57,14 @@ describe("one navigation system: the shared navigator and the shared goals", () 
   const code = cards.replace(/\/\*[\s\S]*?\*\//g, "");
 
   it("the home renders Lane A's GoalNavigator and defines no card or rail of its own", () => {
-    expect(code).toMatch(/import \{ GoalNavigator \} from "@\/components\/navigation\/goal-navigator";/);
-    expect(code).toMatch(/<GoalNavigator\b/);
+    expect(code).toMatch(/import \{ HomeGoalNavigator \} from "@\/components\/app\/home\/home-goal-navigator";/);
+    expect(code).toMatch(/<HomeGoalNavigator\b/);
+    // The client half is the shared navigator with the shared card's pin slot
+    // filled in — it draws no control of its own.
+    const client = read("components/app/home/home-goal-navigator.tsx").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(client).toMatch(/import \{ GoalNavigator, type NavigatorGoal \} from "@\/components\/navigation\/goal-navigator";/);
+    expect(client).toMatch(/<GoalNavigator\b/);
+    expect(client).not.toMatch(/<button\b|<Link\b|<a\b|grid-cols-|overflow-x-|snap-x|lucide-react/);
     // No second implementation: no grid of links, no scroller, no 3D track.
     expect(code).not.toMatch(/<Link\b|grid-cols-|overflow-x-|snap-x|perspective|<AreaSwitcher/);
     expect(code).toMatch(/signedInGoals\(role, admission\)/);
@@ -249,6 +256,55 @@ describe("DEMAND ≠ SUPPLY on the organization home (SEP-4)", () => {
     // No second agency rule: the type is never compared here.
     expect(server).not.toMatch(/===\s*"staffing_agency"/);
     expect(read("components/app/organization/company-model-screen.tsx")).toMatch(/loadOrganizationGoalRole\(\)/);
+  });
+});
+
+describe("pinning from a function card: the shared slot, the row as the one writer", () => {
+  const strip = (file: string) => read(file).replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  const client = strip("components/app/home/home-goal-navigator.tsx");
+  const row = strip("components/app/conversation/chat/my-space-row.tsx");
+  const cards = strip("components/app/home/home-goal-cards.tsx");
+
+  it("a card offers a pin only for a reference the pin store accepts, with both names", () => {
+    expect(cards).toMatch(/const ref = `link:\$\{fn\.href\}`;/);
+    expect(cards).toMatch(/pinning: isPinnableRef\(ref\)/);
+    expect(cards).toMatch(/tGoals\("pin\.add", \{ label \}\)/);
+    expect(cards).toMatch(/tGoals\("pin\.remove", \{ label \}\)/);
+    for (const role of ROLES) {
+      for (const fn of HOME_GOALS[role]) {
+        if (fn.door) continue;
+        expect(isPinnableRef(`link:${fn.href}`), `${role}.${fn.id} can be pinned`).toBe(true);
+      }
+    }
+  });
+
+  it("the card never writes: it asks the row, and draws what the row published", () => {
+    expect(client).not.toMatch(/pins-actions|pinAction|unpinAction/);
+    expect(client).toMatch(/requestPinToggle\(\{ ref, label \}\)/);
+    expect(client).toMatch(/if \(!pinning \|\| !pinned\.available\) return card;/);
+    expect(row).toMatch(/publishPinned\(canEdit \? pins\.map\(\(p\) => p\.ref\) : null\)/);
+    expect(row).toMatch(/setPinToggleHandler\(/);
+  });
+
+  it("the shared state: nothing is offered until the row announces itself", async () => {
+    const sync = await import("@/lib/workspace/pin-sync");
+    expect(sync.readPinnedOnServer()).toEqual({ available: false, refs: [] });
+    expect(await sync.requestPinToggle({ ref: "link:/cv", label: "x" })).toEqual({ ok: false });
+    let calls = 0;
+    const stop = sync.subscribePinned(() => {
+      calls += 1;
+    });
+    sync.publishPinned(["link:/cv"]);
+    sync.publishPinned(["link:/cv"]);
+    expect(calls, "an unchanged list does not re-render the cards").toBe(1);
+    expect(sync.readPinned()).toEqual({ available: true, refs: ["link:/cv"] });
+    const off = sync.setPinToggleHandler(async ({ ref }) => ({ ok: ref === "link:/cv" }));
+    expect(await sync.requestPinToggle({ ref: "link:/cv", label: "x" })).toEqual({ ok: true });
+    off();
+    expect(await sync.requestPinToggle({ ref: "link:/cv", label: "x" })).toEqual({ ok: false });
+    sync.publishPinned(null);
+    expect(sync.readPinned().available).toBe(false);
+    stop();
   });
 });
 

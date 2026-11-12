@@ -20649,6 +20649,10 @@
       "allProjects": "Alle projecten",
       "allNeeds": "Alle behoeften",
       "untitledProject": "Project zonder naam"
+    },
+    "pin": {
+      "add": "“{label}” aan je snelkoppelingen toevoegen",
+      "remove": "“{label}” uit je snelkoppelingen verwijderen"
     }
   },
   "siteNav": {

@@ -1,11 +1,12 @@
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { AskAssistantEntry } from "@/components/app/home/ask-composer-entry";
-import { GoalNavigator } from "@/components/navigation/goal-navigator";
+import { HomeGoalNavigator } from "@/components/app/home/home-goal-navigator";
 import { GOAL_ICONS } from "@/lib/navigation/nav-card-icons";
 import { signedInGoals, type HomeGoalRole } from "@/lib/navigation/home-goals";
 import { loadGoalAdmission } from "@/lib/navigation/home-goals-server";
 import { goalHref } from "@/lib/navigation/public-intents";
+import { isPinnableRef } from "@/lib/workspace/pins-model";
 
 /**
  * THE SIGNED-IN HOME'S GOAL NAVIGATION (owner P0 No. 1, 2026-11-12; V2: ONE
@@ -13,7 +14,8 @@ import { goalHref } from "@/lib/navigation/public-intents";
  *
  * This is the server half only. It renders Lane A's shared `GoalNavigator`
  * (`components/navigation/goal-navigator.tsx`, which draws every rail with
- * the one `CardRail`) — the SAME component the public home mounts, with the
+ * the one `CardRail`; `home-goal-navigator.tsx` only fills the shared card's
+ * pin slot from the pinned row's state) — the SAME component the public home mounts, with the
  * same six goals and the same goal names (`siteNav.intents.*`). No card, rail,
  * panel or motion is defined here.
  *
@@ -42,7 +44,7 @@ export async function HomeGoalCards({ role, className }: { role: HomeGoalRole; c
   if (goals.length === 0) return null;
   return (
     <div data-testid="home-goals" data-role={role} className={className}>
-      <GoalNavigator
+      <HomeGoalNavigator
         locale={locale}
         headingLevel="h2"
         goals={goals.map((goal) => ({
@@ -53,13 +55,22 @@ export async function HomeGoalCards({ role, className }: { role: HomeGoalRole; c
           title: t(`intents.${goal.id}.title`),
           iconKey: GOAL_ICONS[goal.id],
           hasCatalogue: false,
-          functions: goal.functions.map((fn) => ({
-            id: fn.id,
-            href: fn.href,
-            label: tAll(fn.labelKey),
-            description: fn.hintKey ? tAll(fn.hintKey) : undefined,
-            iconKey: fn.iconKey,
-          })),
+          functions: goal.functions.map((fn) => {
+            const label = tAll(fn.labelKey);
+            // The same closed reference rule the pin store applies: a card
+            // offers a pin only for a place the row could hold.
+            const ref = `link:${fn.href}`;
+            return {
+              id: fn.id,
+              href: fn.href,
+              label,
+              description: fn.hintKey ? tAll(fn.hintKey) : undefined,
+              iconKey: fn.iconKey,
+              pinning: isPinnableRef(ref)
+                ? { ref, add: tGoals("pin.add", { label }), remove: tGoals("pin.remove", { label }) }
+                : undefined,
+            };
+          }),
         }))}
         professions={[]}
         sectors={[]}

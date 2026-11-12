@@ -8033,6 +8033,10 @@
       "allProjects": "Kõik projektid",
       "allNeeds": "Kõik vajadused",
       "untitledProject": "Nimetu projekt"
+    },
+    "pin": {
+      "add": "Lisa „{label}“ oma otseteede hulka",
+      "remove": "Eemalda „{label}“ oma otseteede hulgast"
     }
   },
   "siteNav": {

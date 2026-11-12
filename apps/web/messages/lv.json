@@ -8033,6 +8033,10 @@
       "allProjects": "Visi projekti",
       "allNeeds": "Visas vajadzības",
       "untitledProject": "Projekts bez nosaukuma"
+    },
+    "pin": {
+      "add": "Pievienot “{label}” savām saīsnēm",
+      "remove": "Noņemt “{label}” no savām saīsnēm"
     }
   },
   "siteNav": {

@@ -20649,6 +20649,10 @@
       "allProjects": "Alle Projekte",
       "allNeeds": "Alle Bedarfe",
       "untitledProject": "Projekt ohne Namen"
+    },
+    "pin": {
+      "add": "„{label}“ zu Ihren Schnellzugriffen hinzufügen",
+      "remove": "„{label}“ aus Ihren Schnellzugriffen entfernen"
     }
   },
   "siteNav": {

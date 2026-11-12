@@ -8033,6 +8033,10 @@
       "allProjects": "Alla projekt",
       "allNeeds": "Alla behov",
       "untitledProject": "Projekt utan namn"
+    },
+    "pin": {
+      "add": "Lägg till ”{label}” bland dina genvägar",
+      "remove": "Ta bort ”{label}” från dina genvägar"
     }
   },
   "siteNav": {

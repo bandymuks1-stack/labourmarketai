@@ -35,6 +35,8 @@ import {
  *        worker is not drawn, the page itself still refuses, and the pin can
  *        be removed;
  *   N-5  pin · move · unpin in the row, each change proven in the stored rows;
+ *   N-5b the pin toggle on a function card and the row are one list: a pin
+ *        made on the card shows in the row and in the stored rows, and back;
  *   N-6  a pin survives sign-out and sign-in, and shows in a second session;
  *   N-7  EVERY function target is opened as each role and classified:
  *        works (opens and offers something to act on), empty (opens, nothing
@@ -515,6 +517,50 @@ test("N-5. a worker adds a shortcut, moves it, and removes it — each change is
     await ctx.close();
   }
 });
+
+// ── N-5b · the card's pin toggle and the row are one list ───────────────────
+
+for (const viewport of VIEWPORTS) {
+  test(`N-5b. at ${viewport.width} px a function card's pin toggle adds and removes the row's shortcut`, async ({ browser }) => {
+    const workerId = await userId(email("worker"));
+    const stored = () =>
+      sql<{ ref: string }>(
+        `select ref from public.workspace_pins where profile_id = ${lit(workerId)} and organization_id is null order by position, ref`,
+      ).map((r) => r.ref);
+    const { ctx, page } = await as(browser, "worker", viewport);
+    try {
+      expect(stored(), "the walk starts with nothing pinned").toEqual([]);
+      await openHome(page, "worker", "today-screen");
+      await page.getByTestId("goal-rail").locator('[data-card-id="work"]').click();
+      const rail = page.getByTestId("function-rail");
+      const toggle = rail.locator('[data-rail-pin="recordWork"]');
+      await expect(toggle, "the card carries a pin toggle once the row is there").toBeVisible({ timeout: 30_000 });
+      await expect(toggle).toHaveAttribute("aria-pressed", "false");
+      // A separate control from the card's link, with its own name and a full
+      // touch target.
+      const box = await toggle.boundingBox();
+      expect(box && box.width >= 44 && box.height >= 44, "the toggle is a 44 px target").toBe(true);
+      expect(await toggle.evaluate((el) => el.closest("a") === null), "the toggle is not inside the card's link").toBe(true);
+      expect((await toggle.getAttribute("aria-label"))?.length ?? 0).toBeGreaterThan(3);
+
+      await toggle.click();
+      await expect(toggle).toHaveAttribute("aria-pressed", "true", { timeout: 30_000 });
+      await expect(page.locator(`[data-testid="my-space-pin"][data-ref="${OWN_PIN}"]`), "the row shows the same pin").toBeVisible();
+      await expect.poll(stored, { message: "the pin is stored", timeout: 30_000 }).toEqual([OWN_PIN]);
+      // Pinning did not navigate: the goal is still open on the home.
+      await expect(rail).toBeVisible();
+
+      // Keyboard: the toggle is its own focus stop and Enter unpins.
+      await toggle.focus();
+      await page.keyboard.press("Enter");
+      await expect(toggle).toHaveAttribute("aria-pressed", "false", { timeout: 30_000 });
+      await expect(page.locator(`[data-testid="my-space-pin"][data-ref="${OWN_PIN}"]`)).toHaveCount(0);
+      await expect.poll(stored, { message: "the pin is deleted", timeout: 30_000 }).toEqual([]);
+    } finally {
+      await ctx.close();
+    }
+  });
+}
 
 // ── N-6 · pins persist across sign-out and in a second session ──────────────
 

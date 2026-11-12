@@ -20649,6 +20649,10 @@
       "allProjects": "All projects",
       "allNeeds": "All needs",
       "untitledProject": "Project without a name"
+    },
+    "pin": {
+      "add": "Add “{label}” to your shortcuts",
+      "remove": "Remove “{label}” from your shortcuts"
     }
   },
   "siteNav": {

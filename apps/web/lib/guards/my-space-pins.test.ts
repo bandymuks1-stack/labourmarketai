@@ -65,11 +65,19 @@ describe("the pinned row is a reference row over the ONE chip handler", () => {
     expect(CHAT).toMatch(/id: `pin:\$\{ref\}`, label: labels\.chipPinYes/);
     expect(CHAT).toMatch(/id: `pin-no:\$\{ref\}`, label: labels\.chipPinNo/);
     // No automatic pinAction: the chat calls it only for the explicit "Add"
-    // chip, the row only for a pressed "add" button.
+    // chip, the row only for a pressed control: its own "add" button, and the
+    // pin toggle a person presses on a function card (the card asks the row
+    // through `lib/workspace/pin-sync.ts`; the card itself never writes).
     const pinCalls = CHAT.match(/\bpinAction\(\{/g) ?? [];
     expect(pinCalls.length).toBe(1);
-    expect((ROW.match(/\bpinAction\(\{/g) ?? []).length).toBe(1);
+    expect((ROW.match(/\bpinAction\(\{/g) ?? []).length).toBe(2);
     expect(ROW).toMatch(/onClick=\{\(\) => void add\(place\)\}/);
+    expect(ROW).toMatch(/const onCardToggle: PinToggleHandler = async \(\{ ref, label \}\) => \{/);
+    expect(ROW).toMatch(/setPinToggleHandler\(\(request\) => toggleFromCard\.current\(request\)\)/);
+    // The only caller of the row's handler is a pressed toggle on a card.
+    const CARD = readFileSync(join(process.cwd(), "components/app/home/home-goal-navigator.tsx"), "utf8");
+    expect((CARD.match(/requestPinToggle\(/g) ?? []).length).toBe(1);
+    expect(CARD).toMatch(/onToggle: \(\) => toggle\(pinning\.ref, card\.label\)/);
   });
 
   it("pin chips are handled before usage counting; unpin lives in the manage list", () => {
