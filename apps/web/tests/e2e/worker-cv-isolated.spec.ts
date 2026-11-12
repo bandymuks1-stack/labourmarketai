@@ -56,7 +56,9 @@ const SCHOOL = `Synthetic Vocational School ${RUN}`;
 const JOB_TITLE = `Bathroom tiler at Synthetic Works ${RUN}`;
 const PRIVATE_WORD = `cellar${RUN}`;
 const WORK_TEXT = `Tiled the bathroom floor, waterproofing in the shower at the ${PRIVATE_WORD}, 7 hours`;
-const NEED_ROLE = `Wet-room finishing specialist ${RUN}`;
+// A title no other isolated walk uses: job-fit-main-compat-isolated.spec.ts
+// finds ITS needs by title, on the same database, after this walk has run.
+const NEED_ROLE = `Shower-room tiling hand ${RUN}`;
 
 const PHONE = { width: 390, height: 844 };
 
