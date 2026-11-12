@@ -93,6 +93,10 @@ async function billingView(): Promise<{ state: string | null; status: string | n
 
 async function expectRefused(role: string): Promise<void> {
   const before = activeNeeds();
+  // The intake's address ends in a #fragment: going to it from the same page
+  // is a same-document navigation that keeps the form's "sent" state. Leave
+  // the page first, so the person meets a fresh form.
+  await page.goto(`${BASE}/en/dashboard/account`);
   await submitNeed(page, BASE, role, "LT");
   await expect(page.getByRole("main").getByTestId("demand-open-need-limit"), "the server refuses the need").toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("main").getByTestId("demand-done")).toHaveCount(0);
