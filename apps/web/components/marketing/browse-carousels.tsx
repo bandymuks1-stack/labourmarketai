@@ -4,7 +4,7 @@ import { AreaSwitcher } from "@/components/app/area-switcher";
 import { PUBLIC_INTENTS, type PublicIntentIconKey } from "@/lib/navigation/public-intents";
 import { professionCards, SECTOR_ICONS } from "@/lib/navigation/profession-sectors";
 import { WORK_CATEGORIES, type WorkLabel } from "@/lib/taxonomy/work-categories";
-import type { WorkAreaIconKey } from "@/lib/navigation/work-areas";
+import type { WorkAreaIconKey } from "@/lib/navigation/work-area-icon-key";
 
 /**
  * THE PUBLIC BROWSE CAROUSELS (owner P0 2026-11-12) — functions and

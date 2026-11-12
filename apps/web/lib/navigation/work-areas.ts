@@ -21,46 +21,12 @@
 import type { NavItem } from "@/lib/config/navigation";
 import { TODAY_STATIONS, type TodayStationId } from "@/lib/today/today-route";
 
-export type WorkAreaIconKey =
-  | "compass"
-  | "journal"
-  | "chart"
-  | "user"
-  | "idCard"
-  | "images"
-  | "userSearch"
-  | "package"
-  | "store"
-  | "users"
-  | "folder"
-  | "messages"
-  | "handshake"
-  | "briefcase"
-  | "calendar"
-  | "gauge"
-  | "activity"
-  | "barChart"
-  | "history"
-  // Public browse carousels (owner P0 2026-11-12): one icon per work sector
-  // and per public function. Same switcher, same icon map.
-  | "hardHat"
-  | "factory"
-  | "warehouse"
-  | "truck"
-  | "sprout"
-  | "sparkles"
-  | "utensils"
-  | "heartHandshake"
-  | "tractor"
-  | "building"
-  | "shoppingBag"
-  | "code"
-  | "graduationCap"
-  | "scissors"
-  | "wrench"
-  | "fileSignature"
-  | "globe"
-  | "layers";
+// The icon ids live in a leaf module (no imports) so a public surface that
+// renders the area switcher does not pull this file's graph (today-route →
+// the conversation) into its bundle analysis. Re-exported for every existing
+// importer.
+import type { WorkAreaIconKey } from "@/lib/navigation/work-area-icon-key";
+export type { WorkAreaIconKey };
 
 export type WorkArea = {
   readonly id: string;

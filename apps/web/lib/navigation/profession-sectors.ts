@@ -15,7 +15,7 @@
 
 import professionCatalogue from "../../messages/en/professions.json";
 import { WORK_CATEGORIES, type WorkCategoryKey } from "@/lib/taxonomy/work-categories";
-import type { WorkAreaIconKey } from "@/lib/navigation/work-areas";
+import type { WorkAreaIconKey } from "@/lib/navigation/work-area-icon-key";
 
 export const CATALOGUE_PROFESSION_SLUGS: readonly string[] = Object.keys(
   professionCatalogue as Record<string, string>,

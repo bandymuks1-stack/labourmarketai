@@ -4,8 +4,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Link, usePathname } from "@/lib/i18n/navigation";
-import { pathIsInside } from "@/lib/navigation/header-place";
-import type { WorkAreaIconKey } from "@/lib/navigation/work-areas";
+import { pathIsInside } from "@/lib/navigation/path-inside";
+import type { WorkAreaIconKey } from "@/lib/navigation/work-area-icon-key";
 import { WORK_AREA_ICONS } from "@/components/app/work-area-icons";
 import { iconControl } from "@/components/app/conversation/chat/icon-scale";
 import { cn } from "@/lib/utils";

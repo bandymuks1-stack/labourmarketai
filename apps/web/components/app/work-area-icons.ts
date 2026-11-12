@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import type { WorkAreaIconKey } from "@/lib/navigation/work-areas";
+import type { WorkAreaIconKey } from "@/lib/navigation/work-area-icon-key";
 
 /**
  * ONE ICON PER WORK AREA — the area model carries only the icon id; lucide is

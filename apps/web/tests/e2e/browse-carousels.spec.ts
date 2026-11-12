@@ -13,14 +13,12 @@ import { expect as baseExpect, test } from "@playwright/test";
 
 const expect = baseExpect.configure({ timeout: 15_000 });
 
-async function pageOverflow(page: import("@playwright/test").Page, testId: string) {
-  return page.evaluate((id) => {
+async function rowOverflow(row: import("@playwright/test").Locator) {
+  return row.evaluate((root) => {
     const vw = window.innerWidth;
-    const root = document.querySelector(`[data-testid="${id}"]`);
-    if (!root) return ["missing"];
     const r = root.getBoundingClientRect();
     return r.right > vw + 0.5 || r.left < -0.5 ? [`${Math.round(r.left)}..${Math.round(r.right)} vw=${vw}`] : [];
-  }, testId);
+  });
 }
 
 for (const width of [320, 768, 1440] as const) {
@@ -31,7 +29,7 @@ for (const width of [320, 768, 1440] as const) {
       await page.goto("/en/jobs");
       const row = page.getByTestId("profession-carousel");
       await expect(row).toBeVisible();
-      expect(await pageOverflow(page, "profession-carousel")).toEqual([]);
+      expect(await rowOverflow(row)).toEqual([]);
 
       const first = row.locator("a[data-area-index='0']");
       await first.focus();
@@ -54,7 +52,7 @@ for (const width of [320, 768, 1440] as const) {
       const row = page.getByTestId("function-carousel");
       await row.scrollIntoViewIfNeeded();
       await expect(row).toBeVisible();
-      expect(await pageOverflow(page, "function-carousel")).toEqual([]);
+      expect(await rowOverflow(row)).toEqual([]);
       const card = page.getByTestId("function-card-jobs");
       const [response] = await Promise.all([page.waitForNavigation(), card.click()]);
       expect(response?.status() ?? 200).toBeLessThan(400);
