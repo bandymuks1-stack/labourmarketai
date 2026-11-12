@@ -37,5 +37,9 @@ describe("wiring", () => {
     expect(composer).toContain("useState<string>(startLang)");
     // A choice saved in this browser still overrides it.
     expect(composer).toContain("window.localStorage.getItem(WRITE_LANG_STORAGE_KEY)");
+    // Every explicit choice is saved, including the page's own locale.
+    const onChange = composer.slice(composer.indexOf("function onWriteLangChange"));
+    expect(onChange.slice(0, 600)).toContain("if (next) window.localStorage.setItem(WRITE_LANG_STORAGE_KEY, next)");
+    expect(onChange.slice(0, 600)).not.toContain("next === locale");
   });
 });

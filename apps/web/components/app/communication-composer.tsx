@@ -106,8 +106,12 @@ export function CommunicationComposer({
   function onWriteLangChange(next: string) {
     setWriteLang(next);
     try {
-      if (next === locale) window.localStorage.removeItem(WRITE_LANG_STORAGE_KEY);
-      else window.localStorage.setItem(WRITE_LANG_STORAGE_KEY, next);
+      // Every explicit choice is remembered — also one equal to the page's
+      // locale: the starting language is no longer always the UI locale
+      // (initialWriteLanguage), so "English on /en" must not fall back to
+      // the browser's Swedish next time (Codex review on #3246).
+      if (next) window.localStorage.setItem(WRITE_LANG_STORAGE_KEY, next);
+      else window.localStorage.removeItem(WRITE_LANG_STORAGE_KEY);
     } catch {
       /* ignore */
     }
