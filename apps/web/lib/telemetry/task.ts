@@ -28,6 +28,12 @@ import type {
   FunnelMetadata,
 } from "@/lib/telemetry/funnel-events";
 import { isNonProductionHostname } from "@/lib/telemetry/production-host";
+import {
+  WEB_VITALS_EVENT,
+  buildWebVitalsSample,
+  webVitalsRoute,
+  type WebVitalsReading,
+} from "@/lib/telemetry/web-vitals";
 import { hasAnalyticsConsent } from "@/lib/consent/analytics-consent";
 
 const SESSION_KEY = "lm.pilot.session";
@@ -95,6 +101,9 @@ function fire(
     durationMs?: number | null;
     errorCode?: string | null;
     metadata?: Record<string, unknown> | null;
+    /** Filed under this route instead of the current path (web vitals: the
+     *  path with ids and tokens removed). */
+    route?: string | null;
   } = {},
 ): void {
   // Skip when there's no window — the helper is used by client
@@ -105,7 +114,7 @@ function fire(
   if (!hasAnalyticsConsent()) return;
   const payload = {
     sessionId: getPilotSessionId(),
-    route: currentRoute(),
+    route: opts.route ?? currentRoute(),
     locale: currentLocale(),
     eventName,
     taskName: opts.taskName ?? null,
@@ -240,6 +249,21 @@ export function trackFunnelFailure(
   const enriched: Record<string, unknown> = { ...(metadata ?? {}) };
   if (isNonProductionHost()) enriched.preview_host = true;
   fire(eventName, "error", { errorCode: errorCode.slice(0, 64), metadata: enriched });
+}
+
+/** One real-visitor page-speed sample for this page load (see
+ *  lib/telemetry/web-vitals.ts). Sent only with consent, like every event
+ *  here; a load with no usable Largest Contentful Paint sends nothing. */
+export function trackWebVitals(pathname: string, reading: WebVitalsReading): void {
+  const sample = buildWebVitalsSample(reading);
+  if (!sample) return;
+  const metadata: Record<string, unknown> = { ...sample.metadata };
+  if (isNonProductionHost()) metadata.preview_host = true;
+  fire(WEB_VITALS_EVENT, "info", {
+    durationMs: sample.durationMs,
+    route: webVitalsRoute(pathname),
+    metadata,
+  });
 }
 
 // ── Signup-completion pending flag (Worker Launch Readiness v1) ──────────────

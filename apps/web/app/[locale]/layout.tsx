@@ -13,6 +13,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/lib/i18n/routing";
 import { ThemeReapply } from "@/components/app/theme-reapply";
 import { ViewerTimeZone } from "@/components/app/viewer-time-zone";
+import { WebVitalsBeacon } from "@/components/app/web-vitals-beacon";
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/answer-engine/answer-seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
@@ -205,6 +206,7 @@ export default async function LocaleLayout({
             watcher restores the saved theme before the next paint. */}
         <ThemeReapply />
         <ViewerTimeZone />
+        <WebVitalsBeacon />
         {/* Performance Reality Audit v1+v2: v1 replaced the FULL runtime
             message tree (~440 KB minified serialized into EVERY page's RSC
             flight payload) with the union client allowlist. v2 moves the
