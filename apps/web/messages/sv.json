@@ -7942,5 +7942,26 @@
       "allow": "Tillåt",
       "refuse": "Avböj"
     }
+  },
+  "mcpWidget": {
+    "jobs": {
+      "empty": "Inga lediga jobb matchar den här sökningen.",
+      "unavailable": "Jobbtavlan kunde inte läsas just nu. Ingenting söktes — försök igen.",
+      "positions": "platser",
+      "open": "Öppna",
+      "more": "Fler jobb på nästa sida.",
+      "from": "från",
+      "upTo": "upp till",
+      "employmentForm": {
+        "permanent": "Tillsvidare",
+        "temporary": "Tidsbegränsad",
+        "seasonal": "Säsongsarbete"
+      },
+      "workingTime": {
+        "full_time": "Heltid",
+        "part_time": "Deltid"
+      },
+      "untitled": "Ledigt jobb"
+    }
   }
 }

@@ -7942,5 +7942,26 @@
       "allow": "Tillad",
       "refuse": "Afvis"
     }
+  },
+  "mcpWidget": {
+    "jobs": {
+      "empty": "Ingen ledige job matcher denne søgning.",
+      "unavailable": "Jobtavlen kunne ikke læses lige nu. Der blev ikke søgt — prøv igen.",
+      "positions": "stillinger",
+      "open": "Åbn",
+      "more": "Flere job på næste side.",
+      "from": "fra",
+      "upTo": "op til",
+      "employmentForm": {
+        "permanent": "Fastansættelse",
+        "temporary": "Midlertidig",
+        "seasonal": "Sæsonarbejde"
+      },
+      "workingTime": {
+        "full_time": "Fuld tid",
+        "part_time": "Deltid"
+      },
+      "untitled": "Ledigt job"
+    }
   }
 }

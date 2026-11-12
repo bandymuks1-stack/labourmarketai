@@ -7942,5 +7942,26 @@
       "allow": "Tillat",
       "refuse": "Avslå"
     }
+  },
+  "mcpWidget": {
+    "jobs": {
+      "empty": "Ingen ledige jobber passer til dette søket.",
+      "unavailable": "Jobbtavlen kunne ikke leses akkurat nå. Ingenting ble søkt — prøv igjen.",
+      "positions": "stillinger",
+      "open": "Åpne",
+      "more": "Flere jobber på neste side.",
+      "from": "fra",
+      "upTo": "opptil",
+      "employmentForm": {
+        "permanent": "Fast",
+        "temporary": "Midlertidig",
+        "seasonal": "Sesongarbeid"
+      },
+      "workingTime": {
+        "full_time": "Heltid",
+        "part_time": "Deltid"
+      },
+      "untitled": "Ledig stilling"
+    }
   }
 }

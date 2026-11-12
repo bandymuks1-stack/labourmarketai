@@ -7942,5 +7942,26 @@
       "allow": "Atļaut",
       "refuse": "Atteikties"
     }
+  },
+  "mcpWidget": {
+    "jobs": {
+      "empty": "Šim meklējumam neatbilst neviena brīva vakance.",
+      "unavailable": "Vakanču tāfeli pašlaik neizdevās nolasīt. Nekas netika meklēts — mēģiniet vēlreiz.",
+      "positions": "vietas",
+      "open": "Atvērt",
+      "more": "Vairāk vakanču nākamajā lapā.",
+      "from": "no",
+      "upTo": "līdz",
+      "employmentForm": {
+        "permanent": "Beztermiņa",
+        "temporary": "Uz noteiktu laiku",
+        "seasonal": "Sezonāls"
+      },
+      "workingTime": {
+        "full_time": "Pilna slodze",
+        "part_time": "Nepilna slodze"
+      },
+      "untitled": "Darba piedāvājums"
+    }
   }
 }

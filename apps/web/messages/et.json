@@ -7942,5 +7942,26 @@
       "allow": "Luba",
       "refuse": "Keeldu"
     }
+  },
+  "mcpWidget": {
+    "jobs": {
+      "empty": "Sellele otsingule ei vasta ühtegi avatud tööd.",
+      "unavailable": "Töötahvlit ei õnnestunud praegu lugeda. Midagi ei otsitud — proovi uuesti.",
+      "positions": "kohta",
+      "open": "Ava",
+      "more": "Rohkem töid järgmisel lehel.",
+      "from": "alates",
+      "upTo": "kuni",
+      "employmentForm": {
+        "permanent": "Tähtajatu",
+        "temporary": "Tähtajaline",
+        "seasonal": "Hooajatöö"
+      },
+      "workingTime": {
+        "full_time": "Täistööaeg",
+        "part_time": "Osaline tööaeg"
+      },
+      "untitled": "Tööpakkumine"
+    }
   }
 }

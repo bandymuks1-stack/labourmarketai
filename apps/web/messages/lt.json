@@ -20549,5 +20549,26 @@
         "error": "Nepavyko. Bandyk dar kartą vėliau."
       }
     }
+  },
+  "mcpWidget": {
+    "jobs": {
+      "empty": "Šios paieškos neatitinka nė vienas atviras darbas.",
+      "unavailable": "Darbų lentos šiuo metu nepavyko perskaityti. Niekas neieškota — bandyk dar kartą.",
+      "positions": "vietos",
+      "open": "Atidaryti",
+      "more": "Daugiau darbų kitame puslapyje.",
+      "from": "nuo",
+      "upTo": "iki",
+      "employmentForm": {
+        "permanent": "Neterminuota",
+        "temporary": "Terminuota",
+        "seasonal": "Sezoninis"
+      },
+      "workingTime": {
+        "full_time": "Visa darbo diena",
+        "part_time": "Ne visa darbo diena"
+      },
+      "untitled": "Darbo pasiūlymas"
+    }
   }
 }
