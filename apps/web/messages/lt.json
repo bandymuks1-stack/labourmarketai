@@ -20553,5 +20553,69 @@
         "error": "Nepavyko. Bandyk dar kartą vėliau."
       }
     }
+  },
+  "homeGoals": {
+    "title": "Ką nori daryti?",
+    "worker": {
+      "findWork": {
+        "label": "Rasti darbą",
+        "hint": "Darbai pagal tavo įgūdžius"
+      },
+      "recordWork": {
+        "label": "Įrašyti darbą",
+        "hint": "Pridėk šiandienos darbą į žurnalą"
+      },
+      "myCv": {
+        "label": "Mano CV",
+        "hint": "Peržiūrėk ir pasidalyk savo CV"
+      },
+      "messages": {
+        "label": "Žinutės",
+        "hint": "Tavo pokalbiai"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Rasti darbuotojų"
+      },
+      "projects": {
+        "label": "Projektai ir komandos",
+        "hint": "Objektai, užduotys ir kas kur dirba"
+      },
+      "people": {
+        "label": "Mano žmonės",
+        "hint": "Tavo komanda ir kvietimai"
+      },
+      "hours": {
+        "label": "Darbas ir valandos",
+        "hint": "Įrašytas darbas ir valandos"
+      },
+      "offerServices": {
+        "label": "Siūlyti paslaugas",
+        "hint": "Ką siūlo tavo įmonė"
+      },
+      "orders": {
+        "label": "Užklausos ir užsakymai",
+        "hint": "Išsiųstos ir gautos paslaugų užklausos"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Siūlyti savo žmones",
+        "hint": "Nurodyk, kas laisvas ir kada"
+      },
+      "clients": {
+        "label": "Klientai",
+        "hint": "Įmonės, kurioms dirbi"
+      },
+      "people": {
+        "label": "Mano žmonės",
+        "hint": "Tavo žmonės ir kvietimai"
+      },
+      "candidates": {
+        "label": "Rasti kandidatų",
+        "hint": "Ieškok žmonių"
+      }
+    }
   }
 }

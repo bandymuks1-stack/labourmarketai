@@ -7946,5 +7946,69 @@
       "allow": "Tillad",
       "refuse": "Afvis"
     }
+  },
+  "homeGoals": {
+    "title": "Hvad vil du gøre?",
+    "worker": {
+      "findWork": {
+        "label": "Find arbejde",
+        "hint": "Arbejde, der passer til dine færdigheder"
+      },
+      "recordWork": {
+        "label": "Registrer arbejde",
+        "hint": "Tilføj dagens arbejde til din journal"
+      },
+      "myCv": {
+        "label": "Mit CV",
+        "hint": "Se og del dit CV"
+      },
+      "messages": {
+        "label": "Beskeder",
+        "hint": "Dine samtaler"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Find medarbejdere"
+      },
+      "projects": {
+        "label": "Projekter og teams",
+        "hint": "Pladser, opgaver og hvem der arbejder hvor"
+      },
+      "people": {
+        "label": "Mine folk",
+        "hint": "Dit team og invitationer"
+      },
+      "hours": {
+        "label": "Arbejde og timer",
+        "hint": "Registreret arbejde og timer"
+      },
+      "offerServices": {
+        "label": "Tilbyd ydelser",
+        "hint": "Hvad din virksomhed tilbyder"
+      },
+      "orders": {
+        "label": "Forespørgsler og ordrer",
+        "hint": "Forespørgsler om ydelser, sendte og modtagne"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Tilbyd dine folk",
+        "hint": "Angiv, hvem der er ledig og hvornår"
+      },
+      "clients": {
+        "label": "Kunder",
+        "hint": "Virksomheder, du arbejder for"
+      },
+      "people": {
+        "label": "Mine folk",
+        "hint": "Dine folk og invitationer"
+      },
+      "candidates": {
+        "label": "Find kandidater",
+        "hint": "Søg efter personer"
+      }
+    }
   }
 }

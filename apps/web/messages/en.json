@@ -20553,5 +20553,69 @@
         "error": "That didn't work. Try again later."
       }
     }
+  },
+  "homeGoals": {
+    "title": "What do you want to do?",
+    "worker": {
+      "findWork": {
+        "label": "Find work",
+        "hint": "Jobs that fit your skills"
+      },
+      "recordWork": {
+        "label": "Record work",
+        "hint": "Add today's work to your journal"
+      },
+      "myCv": {
+        "label": "My CV",
+        "hint": "See and share your CV"
+      },
+      "messages": {
+        "label": "Messages",
+        "hint": "Your conversations"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Find workers"
+      },
+      "projects": {
+        "label": "Projects and teams",
+        "hint": "Sites, tasks and who works where"
+      },
+      "people": {
+        "label": "My people",
+        "hint": "Your team and invitations"
+      },
+      "hours": {
+        "label": "Work and hours",
+        "hint": "Recorded work and hours"
+      },
+      "offerServices": {
+        "label": "Offer services",
+        "hint": "What your company offers"
+      },
+      "orders": {
+        "label": "Requests and orders",
+        "hint": "Service requests, sent and received"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Offer your people",
+        "hint": "Say who is free and when"
+      },
+      "clients": {
+        "label": "Clients",
+        "hint": "Companies you work for"
+      },
+      "people": {
+        "label": "My people",
+        "hint": "Your people and invitations"
+      },
+      "candidates": {
+        "label": "Find candidates",
+        "hint": "Search for people"
+      }
+    }
   }
 }

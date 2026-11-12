@@ -20553,5 +20553,69 @@
         "error": "Das hat nicht geklappt. Versuchen Sie es später erneut."
       }
     }
+  },
+  "homeGoals": {
+    "title": "Was möchten Sie tun?",
+    "worker": {
+      "findWork": {
+        "label": "Arbeit finden",
+        "hint": "Arbeit, die zu Ihren Fähigkeiten passt"
+      },
+      "recordWork": {
+        "label": "Arbeit eintragen",
+        "hint": "Tragen Sie die heutige Arbeit ins Journal ein"
+      },
+      "myCv": {
+        "label": "Mein Lebenslauf",
+        "hint": "Lebenslauf ansehen und teilen"
+      },
+      "messages": {
+        "label": "Nachrichten",
+        "hint": "Ihre Unterhaltungen"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Arbeitskräfte finden"
+      },
+      "projects": {
+        "label": "Projekte und Teams",
+        "hint": "Baustellen, Aufgaben und wer wo arbeitet"
+      },
+      "people": {
+        "label": "Meine Leute",
+        "hint": "Ihr Team und Einladungen"
+      },
+      "hours": {
+        "label": "Arbeit und Stunden",
+        "hint": "Eingetragene Arbeit und Stunden"
+      },
+      "offerServices": {
+        "label": "Leistungen anbieten",
+        "hint": "Was Ihr Unternehmen anbietet"
+      },
+      "orders": {
+        "label": "Anfragen und Aufträge",
+        "hint": "Leistungsanfragen, gesendet und erhalten"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Eigene Leute anbieten",
+        "hint": "Geben Sie an, wer wann frei ist"
+      },
+      "clients": {
+        "label": "Kunden",
+        "hint": "Unternehmen, für die Sie arbeiten"
+      },
+      "people": {
+        "label": "Meine Leute",
+        "hint": "Ihre Leute und Einladungen"
+      },
+      "candidates": {
+        "label": "Kandidaten finden",
+        "hint": "Nach Personen suchen"
+      }
+    }
   }
 }

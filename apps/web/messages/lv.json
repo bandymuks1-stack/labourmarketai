@@ -7946,5 +7946,69 @@
       "allow": "Atļaut",
       "refuse": "Atteikties"
     }
+  },
+  "homeGoals": {
+    "title": "Ko vēlaties darīt?",
+    "worker": {
+      "findWork": {
+        "label": "Atrast darbu",
+        "hint": "Darbs, kas atbilst jūsu prasmēm"
+      },
+      "recordWork": {
+        "label": "Ierakstīt darbu",
+        "hint": "Pievienojiet šodienas darbu žurnālam"
+      },
+      "myCv": {
+        "label": "Mans CV",
+        "hint": "Apskatiet savu CV un dalieties ar to"
+      },
+      "messages": {
+        "label": "Ziņas",
+        "hint": "Jūsu sarunas"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Atrast darbiniekus"
+      },
+      "projects": {
+        "label": "Projekti un komandas",
+        "hint": "Objekti, uzdevumi un kas kur strādā"
+      },
+      "people": {
+        "label": "Mani cilvēki",
+        "hint": "Jūsu komanda un ielūgumi"
+      },
+      "hours": {
+        "label": "Darbs un stundas",
+        "hint": "Ierakstītais darbs un stundas"
+      },
+      "offerServices": {
+        "label": "Piedāvāt pakalpojumus",
+        "hint": "Ko piedāvā jūsu uzņēmums"
+      },
+      "orders": {
+        "label": "Pieprasījumi un pasūtījumi",
+        "hint": "Pakalpojumu pieprasījumi, nosūtītie un saņemtie"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Piedāvāt savus cilvēkus",
+        "hint": "Norādiet, kas ir brīvs un kad"
+      },
+      "clients": {
+        "label": "Klienti",
+        "hint": "Uzņēmumi, kuriem jūs strādājat"
+      },
+      "people": {
+        "label": "Mani cilvēki",
+        "hint": "Jūsu cilvēki un ielūgumi"
+      },
+      "candidates": {
+        "label": "Atrast kandidātus",
+        "hint": "Meklējiet cilvēkus"
+      }
+    }
   }
 }

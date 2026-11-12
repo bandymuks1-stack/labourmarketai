@@ -37,6 +37,15 @@ const CV_TITLE: Record<(typeof LOCS)[number], string> = {
   ru: "Моё CV",
 };
 
+/**
+ * A DOOR to the /cv page may carry the page's own title — a link named after
+ * the page it opens is the opposite of the confusion this guard prevents
+ * (another SURFACE calling itself "Mano CV"). The home's goal card is that
+ * door (owner P0 No. 1, 2026-11-12; `lib/navigation/home-goals.ts` pins that
+ * the `myCv` goal leads to `/cv`).
+ */
+const CV_DOOR_LABELS = new Set(["homeGoals.worker.myCv.label"]);
+
 function walkValues(obj: unknown, path: string, out: Array<{ path: string; value: string }>): void {
   if (typeof obj === "string") out.push({ path, value: obj });
   else if (obj && typeof obj === "object" && !Array.isArray(obj)) {
@@ -55,7 +64,12 @@ describe("Guard: the /cv page is the ONLY surface titled 'Mano CV'", () => {
       walkValues(b, "", all);
       walkValues(journalNs(loc), "journal", all);
       const offenders = all
-        .filter((e) => e.path !== "cvExport.pageTitle" && e.value.includes(CV_TITLE[loc]))
+        .filter(
+          (e) =>
+            e.path !== "cvExport.pageTitle" &&
+            !CV_DOOR_LABELS.has(e.path) &&
+            e.value.includes(CV_TITLE[loc]),
+        )
         .map((e) => `${e.path}: ${e.value}`);
       expect(
         offenders,
@@ -63,6 +77,11 @@ describe("Guard: the /cv page is the ONLY surface titled 'Mano CV'", () => {
       ).toEqual([]);
     });
   }
+
+  it("the one excepted label is a door that really opens /cv", async () => {
+    const { HOME_GOALS } = await import("@/lib/navigation/home-goals");
+    expect(HOME_GOALS.worker.find((g) => g.id === "myCv")?.href).toBe("/cv");
+  });
 
   it("the renamed surfaces describe what they are (records language, not CV)", () => {
     const lt = base("lt");

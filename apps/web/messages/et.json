@@ -7946,5 +7946,69 @@
       "allow": "Luba",
       "refuse": "Keeldu"
     }
+  },
+  "homeGoals": {
+    "title": "Mida soovid teha?",
+    "worker": {
+      "findWork": {
+        "label": "Leia tööd",
+        "hint": "Sinu oskustele sobiv töö"
+      },
+      "recordWork": {
+        "label": "Kirjuta töö üles",
+        "hint": "Lisa tänane töö päevikusse"
+      },
+      "myCv": {
+        "label": "Minu CV",
+        "hint": "Vaata ja jaga oma CV-d"
+      },
+      "messages": {
+        "label": "Sõnumid",
+        "hint": "Sinu vestlused"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Leia töötajaid"
+      },
+      "projects": {
+        "label": "Projektid ja meeskonnad",
+        "hint": "Objektid, ülesanded ja kes kus töötab"
+      },
+      "people": {
+        "label": "Minu inimesed",
+        "hint": "Sinu meeskond ja kutsed"
+      },
+      "hours": {
+        "label": "Töö ja tunnid",
+        "hint": "Kirja pandud töö ja tunnid"
+      },
+      "offerServices": {
+        "label": "Paku teenuseid",
+        "hint": "Mida sinu ettevõte pakub"
+      },
+      "orders": {
+        "label": "Päringud ja tellimused",
+        "hint": "Teenusepäringud, saadetud ja saadud"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Paku oma inimesi",
+        "hint": "Märgi, kes on vaba ja millal"
+      },
+      "clients": {
+        "label": "Kliendid",
+        "hint": "Ettevõtted, kelle heaks töötad"
+      },
+      "people": {
+        "label": "Minu inimesed",
+        "hint": "Sinu inimesed ja kutsed"
+      },
+      "candidates": {
+        "label": "Leia kandidaate",
+        "hint": "Otsi inimesi"
+      }
+    }
   }
 }

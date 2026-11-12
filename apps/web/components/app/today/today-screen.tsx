@@ -16,6 +16,8 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import { AreaSwitcher } from "@/components/app/area-switcher";
 import { deriveTodayState } from "@/lib/today/today-model";
 import { PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
+import { HOME_GOALS, areasBeyondGoals } from "@/lib/navigation/home-goals";
+import { HomeGoalCards, HomeGoalCardsPending } from "@/components/app/home/home-goal-cards";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import {
   loadTodayDisplayName,
@@ -36,6 +38,9 @@ import {
  *
  *   1. header      name · profession · today's state
  *                  (replaces the opening intro card for the worker)
+ *   1a. GOALS      what the person came to do — find work, record work, my
+ *                  CV, messages — as large cards, one tap each (owner P0
+ *                  No. 1, 2026-11-12; `lib/navigation/home-goals.ts`)
  *   2. WAITING     the work-card's ONE next action (the one gold action) +
  *                  what is waiting on the person (offers · invitations ·
  *                  unread · journal items)
@@ -43,8 +48,8 @@ import {
  *   4. BECAUSE     what happened and — only where the event's own fact IS a
  *                  state change — event → consequence → state
  *   5. OUTSIDE     the market: one opportunity sentence with band counts
- *   6. stations    the contextual workspaces, as text links, one tap —
- *                  opportunities (the former PASAULIS tab) first
+ *   6. stations    the contextual workspaces the goals do not already
+ *                  offer, one tap each (a destination is shown once)
  *
  * Regions 2–5 are the owner-FROZEN four-region home (design class
  * 4e695e261), re-ported through main's readers and the restraint directives
@@ -111,6 +116,7 @@ function TodayScreenPending() {
         <span className="h-9 w-56 animate-pulse rounded bg-ink-700 motion-reduce:animate-none sm:h-10" />
         <span className="h-5 w-40 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
       </div>
+      <HomeGoalCardsPending role="worker" />
       <div className="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-7 lg:gap-6">
           <HomeRegionPending size="action" />
@@ -171,6 +177,13 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           </Suspense>
         </p>
       </header>
+
+      {/* 1a · GOALS — what the person came to do, before anything they have
+          to read (owner P0 No. 1, 2026-11-12): large cards, one tap to the
+          start of each function. No boundary of its own: its only reads are
+          the request-cached ones the layout already ran, and the frame-level
+          placeholder reserves the same footprint. */}
+      <HomeGoalCards role="worker" />
 
       {/* THE FOUR REGIONS — two columns from lg (01+02 | 03+04), one column
           on a phone in DOM order 01→04 (the one primary action first). Each
@@ -238,8 +251,9 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
       {/* 6 · STATIONS — the contextual workspaces, one tap each, as the light
           3D area switcher (owner order 2026-10-25): cards with depth, the
           chosen one in front, from the ONE area model (`PERSONAL_WORK_AREAS`,
-          derived from TODAY_STATIONS — opportunities first). Rendered at once:
-          no read stands behind it, and its track is a fixed height. */}
+          derived from TODAY_STATIONS). The stations the goal cards above
+          already offer are left out — a destination is shown once. Rendered
+          at once: no read stands behind it, and its track is a fixed height. */}
       <div data-testid="today-stations" className="border-t border-ink-600/70 pt-4 sm:pt-5">
         <AreaSwitcher
           title={t("stations.title")}
@@ -247,7 +261,7 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           nextLabel={tNav("next")}
           hereLabel={tNav("youAreHere")}
           testId="today-area-switcher"
-          items={PERSONAL_WORK_AREAS.map((s) => ({
+          items={areasBeyondGoals(PERSONAL_WORK_AREAS, HOME_GOALS.worker).map((s) => ({
             id: s.id,
             href: s.href,
             iconKey: s.iconKey,

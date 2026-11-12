@@ -7946,5 +7946,69 @@
       "allow": "Tillåt",
       "refuse": "Avböj"
     }
+  },
+  "homeGoals": {
+    "title": "Vad vill du göra?",
+    "worker": {
+      "findWork": {
+        "label": "Hitta jobb",
+        "hint": "Jobb som passar dina färdigheter"
+      },
+      "recordWork": {
+        "label": "Registrera arbete",
+        "hint": "Lägg till dagens arbete i din journal"
+      },
+      "myCv": {
+        "label": "Mitt CV",
+        "hint": "Se och dela ditt CV"
+      },
+      "messages": {
+        "label": "Meddelanden",
+        "hint": "Dina konversationer"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Hitta arbetare"
+      },
+      "projects": {
+        "label": "Projekt och team",
+        "hint": "Arbetsplatser, uppgifter och vem som jobbar var"
+      },
+      "people": {
+        "label": "Mina medarbetare",
+        "hint": "Ditt team och inbjudningar"
+      },
+      "hours": {
+        "label": "Arbete och timmar",
+        "hint": "Registrerat arbete och timmar"
+      },
+      "offerServices": {
+        "label": "Erbjud tjänster",
+        "hint": "Vad ditt företag erbjuder"
+      },
+      "orders": {
+        "label": "Förfrågningar och beställningar",
+        "hint": "Tjänsteförfrågningar, skickade och mottagna"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Erbjud din personal",
+        "hint": "Ange vem som är ledig och när"
+      },
+      "clients": {
+        "label": "Kunder",
+        "hint": "Företag du arbetar åt"
+      },
+      "people": {
+        "label": "Mina medarbetare",
+        "hint": "Din personal och inbjudningar"
+      },
+      "candidates": {
+        "label": "Hitta kandidater",
+        "hint": "Sök efter personer"
+      }
+    }
   }
 }

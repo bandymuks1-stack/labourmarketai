@@ -23,7 +23,10 @@ describe("the company context's centre is the company model, over existing surfa
   });
   it("the screen renders every door from the area model, through the area switcher", () => {
     const view = read("components/app/organization/company-model-screen.tsx");
-    expect(view).toMatch(/ORGANIZATION_WORK_AREAS\.map/);
+    // Since 2026-11-12 the goals lead (lib/navigation/home-goals.ts) and the
+    // switcher holds the doors the goals do not already offer — still from
+    // the ONE area model, never a second list.
+    expect(view).toMatch(/areasBeyondGoals\(ORGANIZATION_WORK_AREAS, HOME_GOALS\[role\]\)\.map/);
     expect(view).toMatch(/<AreaSwitcher\b/);
     expect(view).toMatch(/testId: `company-model-\$\{a\.id\}`/);
   });
