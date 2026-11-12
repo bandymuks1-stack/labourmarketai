@@ -29,6 +29,8 @@ begin
   end if;
 end $$;
 
+drop function if exists public.set_team_member_role_v1(uuid, text);
+
 drop index if exists public.engagement_contexts_one_team_lead_uq;
 drop index if exists public.organizations_parent_idx;
 
