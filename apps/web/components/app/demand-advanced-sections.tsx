@@ -26,7 +26,6 @@ import { DarkListbox } from "@/components/ui/DarkListbox";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import {
-  DEMAND_CURRENCY_OPTIONS,
   ACCOMMODATION_AMENITIES,
   ACCOMMODATION_PAYERS,
   ACCOMMODATION_STATES,
@@ -52,6 +51,7 @@ import type {
   DeductionRow,
   LanguageRow,
 } from "@/lib/demand/structured-demand-form";
+import { DEMAND_CURRENCY_OPTIONS } from "@/lib/demand/structured-demand-form";
 import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
 
