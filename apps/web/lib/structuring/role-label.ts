@@ -327,6 +327,8 @@ const SV_OWN_SEARCH_RE = /^(?:\p{L}*jobb|arbete|tjanst|anstalln|praktik|uppdrag)
 
 function isSwedishOccupation(tok: Token): boolean {
   if (tok.folded.length < 4 || EXCLUDED_RE.test(tok.folded)) return false;
+  // "ekonomiskt oberoende", "arkitektoniska" — an adjective built on the noun.
+  if (/isk[at]?$/u.test(tok.folded)) return false;
   if (STEM_RE.test(tok.folded)) return true;
   const hit = SV_NOUN_RE.exec(tok.folded);
   return hit !== null && (hit.index === 0 || hit.index >= SV_COMPOUND_PREFIX_MIN);

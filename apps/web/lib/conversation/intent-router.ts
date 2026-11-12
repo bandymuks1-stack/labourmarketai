@@ -3360,8 +3360,8 @@ const RULES: IntentRule[] = [
       // reads the FIRST-PERSON SINGULAR pronoun before the seek verb: "Jag är
       // redovisningsekonom och söker arbete" is one person's search, "Vi har
       // 20 svetsare och söker jobb åt dem" (no `jag`) stays supply.
-      p("\\bjag\\b.{0,40}\\b(soker|letar\\s+efter|vill\\s+ha|behover)\\s+(?:[^\\s]+\\s+){0,3}?(jobb(et)?|arbete|anstallning|en\\s+tjanst)\\b", 10),
-      p("\\bsoker\\s+(?:[^\\s]+\\s+){0,2}?(jobb|arbete)\\b", 3),
+      p("\\bjag\\b.{0,40}\\b(soker|letar\\s+efter|vill\\s+ha|behover)\\s+(?:[^\\s]+\\s+){0,3}?([^\\s]*jobb(et)?|arbete|anstallning|en\\s+tjanst)\\b", 10),
+      p("\\bsoker\\s+(?:[^\\s]+\\s+){0,2}?([^\\s]*jobb|arbete)\\b", 3),
       p("\\b(hitta|leta\\s+upp)\\b\\s+(mig\\s+)?(ett\\s+)?(jobb|arbete)\\b", 3),
       p("\\bvill\\s+(jobba|arbeta|ha\\s+(ett\\s+)?jobb)", 3),
       p("\\b(jobb|arbete)\\b", 1),

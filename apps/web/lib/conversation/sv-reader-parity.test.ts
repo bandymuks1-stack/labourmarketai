@@ -145,6 +145,7 @@ describe("profession-statement → readProfessionStatement", () => {
   it("states nothing when the sentence denies it or names no occupation", () => {
     expect(readProfessionStatement("Jag är inte svetsare")).toBeNull();
     expect(readProfessionStatement("Jag är trött idag")).toBeNull();
+    expect(readProfessionStatement("Jag är ekonomiskt oberoende")).toBeNull();
     expect(readProfessionStatement("Jag är här")).toBeNull();
   });
 
@@ -223,6 +224,9 @@ describe("need-workers / offer-capacity / offer-value → the value and need rea
     expect(readRoleLabel("Jag söker extrajobb som ekonom")).toBeNull();
     expect(intentOf("Jag söker jobb som svetsare")).not.toBe("need-workers");
     expect(intentOf("Jag söker tjänst som ekonom")).not.toBe("need-workers");
+    // A compound job noun is still the person's own search.
+    expect(intentOf("Jag söker sommarjobb som kock")).toBe("find-work");
+    expect(intentOf("Jag söker jobb i Sverige")).toBe("find-work");
   });
 
   it("reads supply and a sale", () => {
@@ -484,6 +488,17 @@ describe("journal questions → the period, week and skill readers", () => {
     expect(extractJournalSuggestions("Hur mycket har jag svetsat?").skillSlugs).toContain("welding-blueprint");
     expect(extractJournalSuggestions("Var använde jag plattsättning?").skillSlugs).toContain("tiling");
     expect(extractJournalSuggestions("Hur mycket har jag programmerat?").skillSlugs).toContain("programming");
+  });
+
+  it("reads the hours a Swedish work sentence states", () => {
+    expect(intentOf("Idag svetsade jag rör i 6 timmar")).toBe("log-work");
+    const read = extractJournalSuggestions("Idag svetsade jag rör i 6 timmar");
+    expect(read.time).toEqual({ value: 6, unitSlug: "hours" });
+    expect(read.skillSlugs).toContain("welding-blueprint");
+    expect(extractJournalSuggestions("Målade väggar i 2 dagar").time).toEqual({ value: 2, unitSlug: "days" });
+    expect(extractJournalSuggestions("Today I welded pipes for 6 hours").time).toEqual({ value: 6, unitSlug: "hours" });
+    // "Tim" is a name, not an hour.
+    expect(extractJournalSuggestions("Helped 2 Tim brothers move").time).toBeNull();
   });
 
   it("controls: Lithuanian 'ar' is no year, the other languages read as before", () => {
