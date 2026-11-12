@@ -53,6 +53,12 @@ describe("company-need wizard requires the country", () => {
     expect(en.locationLabel).not.toMatch(/country/i);
   });
 
+  it("the chat draft leg keeps the country the person entered", () => {
+    const exec = read("lib/conversation/company-executors.ts");
+    const draft = exec.slice(exec.indexOf('saveDemandDraftAction("company_request", {'));
+    expect(draft.slice(0, draft.indexOf("});"))).toContain("country: input.country ?? undefined,");
+  });
+
   it("the end-to-end walks choose a country instead of skipping it", () => {
     const helper = read("tests/e2e/demand-country.ts");
     expect(helper).toContain("demand-country-select");
