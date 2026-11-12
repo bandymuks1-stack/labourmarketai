@@ -6,7 +6,7 @@ import { NavAuthCtas } from "@/components/layouts/nav-auth-ctas";
 import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
 import { IntentMegaMenu } from "@/components/layouts/intent-mega-menu";
 import type { RenderedIntent } from "@/components/layouts/intent-icons";
-import { PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
+import { ASSISTANT_HREF, PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
 import { LmLogo } from "@/components/ui/lm-logo";
@@ -96,6 +96,7 @@ export async function SiteNav() {
     id: intent.id,
     iconKey: intent.iconKey,
     title: tIntent(`intents.${intent.id}.title`),
+    short: tIntent(`intents.${intent.id}.short`),
     description: tIntent(`intents.${intent.id}.description`),
     links: intent.links.map((link) => ({
       id: link.id,
@@ -104,6 +105,9 @@ export async function SiteNav() {
       account: link.account,
     })),
   }));
+  // "Ask the assistant" — the existing conversation home (`/dashboard` IS the
+  // chat). A signed-out visitor is sent to login and lands back in it.
+  const assistant = { href: ASSISTANT_HREF, label: tIntent("assistant") };
 
   // ONE definition, rendered in exactly one place at any given width: in the
   // header from `sm` up, inside the disclosure below it. Sharing the fragment
@@ -165,15 +169,7 @@ export async function SiteNav() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-4 lg:flex xl:gap-6">
-          {/* The intents come first: they are the top of the hierarchy. The
-              panel anchors to the <header> (the nearest positioned box), so
-              it spans the full width under the bar. */}
-          <IntentMegaMenu
-            intents={intents}
-            triggerLabel={tIntent("trigger")}
-            accountLabel={tIntent("account")}
-          />
+        <nav className="hidden items-center gap-6 lg:flex">
           {links.map((l) => (
             <Link
               key={l.key}
@@ -217,6 +213,7 @@ export async function SiteNav() {
             closeLabel={t("menuClose")}
             intents={intents}
             accountLabel={tIntent("account")}
+            assistant={assistant}
             // Below `sm` the panel also carries the auth CTAs the header row
             // cannot fit; from `sm` up the whole section is display:none and
             // the header renders them instead. `sm:hidden` sits on the
@@ -242,6 +239,18 @@ export async function SiteNav() {
           />
         </div>
       </div>
+      {/* THE INTENT BAR (owner P0 2026-11-12): the six intents are the first
+          level of the header from `lg` up — six plainly named choices, always
+          visible, each two actions from the start of its function. Below `lg`
+          the same six open the menu above. The panel anchors to the <header>
+          (the nearest positioned box), so it spans the full width. */}
+      <IntentMegaMenu
+        className="hidden border-t border-ink-600/60 lg:block"
+        intents={intents}
+        navLabel={tIntent("trigger")}
+        accountLabel={tIntent("account")}
+        assistant={assistant}
+      />
     </header>
   );
 }

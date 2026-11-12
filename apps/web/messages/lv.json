@@ -7948,32 +7948,38 @@
     }
   },
   "siteNav": {
-    "trigger": "Pārlūkot",
+    "trigger": "Galvenās izvēles",
     "account": "Pēc pieteikšanās",
     "intents": {
       "work": {
         "title": "Meklēju darbu",
-        "description": "Atrodiet darbu un parādiet, ko protat."
+        "description": "Atrodiet darbu un parādiet, ko protat.",
+        "short": "Meklēju darbu"
       },
       "workers": {
         "title": "Meklēju darbiniekus",
-        "description": "Aprakstiet, kāds darbs jāpaveic."
+        "description": "Aprakstiet, kāds darbs jāpaveic.",
+        "short": "Meklēju darbiniekus"
       },
       "services": {
         "title": "Piedāvāju pakalpojumus",
-        "description": "Publicējiet savu piedāvājumu un atbildiet uz pieprasījumiem."
+        "description": "Publicējiet savu piedāvājumu un atbildiet uz pieprasījumiem.",
+        "short": "Piedāvāju pakalpojumus"
       },
       "orders": {
         "title": "Meklēju pasūtījumus un līgumus",
-        "description": "Atrodiet darba pieprasījumus un glabājiet piedāvājumus vienuviet."
+        "description": "Atrodiet darba pieprasījumus un glabājiet piedāvājumus vienuviet.",
+        "short": "Meklēju pasūtījumus"
       },
       "partners": {
         "title": "Meklēju partnerus",
-        "description": "Sazinieties ar cilvēkiem un organizācijām, ar kuriem strādājat."
+        "description": "Sazinieties ar cilvēkiem un organizācijām, ar kuriem strādājat.",
+        "short": "Meklēju partnerus"
       },
       "agencies": {
         "title": "Aģentūrām",
-        "description": "Pārvaldiet aģentūras cilvēkus, klientus un piedāvājumus."
+        "description": "Pārvaldiet aģentūras cilvēkus, klientus un piedāvājumus.",
+        "short": "Aģentūrām"
       }
     },
     "links": {
@@ -7994,6 +8000,7 @@
       "forAgencies": "Kā tas darbojas aģentūrām",
       "setUpAgency": "Izveidot aģentūru"
     },
+    "assistant": "Jautāt asistentam",
     "carousels": {
       "functions": "Ko šeit varat darīt",
       "professions": "Darba sludinājumi pēc profesijas"

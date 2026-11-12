@@ -7948,32 +7948,38 @@
     }
   },
   "siteNav": {
-    "trigger": "Avasta",
+    "trigger": "Peamised valikud",
     "account": "Pärast sisselogimist",
     "intents": {
       "work": {
         "title": "Otsin tööd",
-        "description": "Leia tööpakkumisi ja näita, mida oskad."
+        "description": "Leia tööpakkumisi ja näita, mida oskad.",
+        "short": "Otsin tööd"
       },
       "workers": {
         "title": "Otsin töötajaid",
-        "description": "Kirjelda, millist tööd on vaja."
+        "description": "Kirjelda, millist tööd on vaja.",
+        "short": "Otsin töötajaid"
       },
       "services": {
         "title": "Pakun teenuseid",
-        "description": "Avalda oma pakkumine ja vasta päringutele."
+        "description": "Avalda oma pakkumine ja vasta päringutele.",
+        "short": "Pakun teenuseid"
       },
       "orders": {
         "title": "Otsin tellimusi ja lepinguid",
-        "description": "Leia tööpäringuid ja hoia pakkumised ühes kohas."
+        "description": "Leia tööpäringuid ja hoia pakkumised ühes kohas.",
+        "short": "Otsin tellimusi"
       },
       "partners": {
         "title": "Otsin partnereid",
-        "description": "Ühendu inimeste ja organisatsioonidega, kellega töötad."
+        "description": "Ühendu inimeste ja organisatsioonidega, kellega töötad.",
+        "short": "Otsin partnereid"
       },
       "agencies": {
         "title": "Agentuuridele",
-        "description": "Halda agentuuri inimesi, kliente ja pakkumisi."
+        "description": "Halda agentuuri inimesi, kliente ja pakkumisi.",
+        "short": "Agentuuridele"
       }
     },
     "links": {
@@ -7994,6 +8000,7 @@
       "forAgencies": "Kuidas see agentuuridele toimib",
       "setUpAgency": "Loo agentuur"
     },
+    "assistant": "Küsi assistendilt",
     "carousels": {
       "functions": "Mida siin teha saab",
       "professions": "Töökuulutused ameti järgi"

@@ -4,7 +4,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { PUBLIC_INTENTS, PUBLIC_INTENT_IDS } from "@/lib/navigation/public-intents";
+import {
+  ASSISTANT_HREF,
+  PUBLIC_INTENTS,
+  PUBLIC_INTENT_IDS,
+} from "@/lib/navigation/public-intents";
+import { CANONICAL_HOME } from "@/lib/config/navigation";
 import { routeRequirement } from "@/lib/auth/role-gated-routes";
 
 /**
@@ -117,9 +122,27 @@ describe("desktop and mobile render ONE list", () => {
     expect(mobile).toMatch(/href=\{link\.href\}/);
   });
 
-  it("the mega-menu mounts inside the breakpoint-gated desktop nav", () => {
-    const desktopNav = nav.match(/<nav className="hidden[^"]*lg:flex[^"]*">([\s\S]*?)<\/nav>/);
-    expect(desktopNav?.[1]).toMatch(/<IntentMegaMenu/);
+  it("the intent bar is the header's first level from lg up — the exact complement of the mobile menu", () => {
+    expect(nav).toMatch(/<IntentMegaMenu\s+className="hidden [^"]*lg:block"/);
+    expect(nav).toMatch(/<MobileNavMenu[\s\S]*?className="lg:hidden"/);
+  });
+
+  it("the bar shows every intent by name without opening anything", () => {
+    expect(mega).toMatch(/intents\.map\(\(intent\) =>[\s\S]{0,1500}\{intent\.short\}/);
+    // No single "menu" trigger hides the choices.
+    expect(mega).not.toMatch(/triggerLabel/);
+  });
+
+  it("opening an intent moves focus to its first destination (two actions to start)", () => {
+    expect(mega).toMatch(/\[data-intent-column="\$\{active\}"\] a/);
+    expect(mega).toMatch(/\?\.focus\(\)/);
+  });
+
+  it("the assistant entry is the existing conversation home, on both menus", () => {
+    expect(nav).toMatch(/href: ASSISTANT_HREF, label: tIntent\("assistant"\)/);
+    expect(ASSISTANT_HREF).toBe(CANONICAL_HOME);
+    expect(routeRequirement(ASSISTANT_HREF)).toBeNull();
+    expect(nav.match(/assistant=\{assistant\}/g)).toHaveLength(2);
   });
 
   it("the strings live in `siteNav`, not the frozen `nav` namespace", () => {
@@ -133,10 +156,10 @@ describe("the disclosure is accessible", () => {
 
   it("mega-menu: Escape returns focus, outside click and Tab-away close", () => {
     expect(mega).toMatch(/e\.key === "Escape"/);
-    expect(mega).toMatch(/buttonRef\.current\?\.focus\(\)/);
+    expect(mega).toMatch(/openerRef\.current\?\.focus\(\)/);
     expect(mega).toMatch(/mousedown/);
     expect(mega).toMatch(/onBlur=/);
-    expect(mega).toMatch(/onClick=\{\(\)\s*=>\s*setOpen\(false\)\}/);
+    expect(mega).toMatch(/onClick=\{\(\)\s*=>\s*setActive\(null\)\}/);
     // Disclosure navigation, not an ARIA menu: links stay links.
     expect(mega).not.toMatch(/role="menu"/);
     expect(mega).not.toMatch(/role="menuitem"/);
@@ -149,7 +172,7 @@ describe("the disclosure is accessible", () => {
     expect(mobile).toMatch(/motion-reduce:transition-none/);
   });
 
-  it("renders a collapsed, labelled trigger with no panel on first paint", async () => {
+  it("renders six named, collapsed intents with no panel on first paint", async () => {
     vi.doMock("@/lib/i18n/navigation", () => ({
       Link: ({ href, children }: { href: string; children: unknown }) =>
         createElement("a", { href }, children as never),
@@ -162,17 +185,19 @@ describe("the disclosure is accessible", () => {
             id: "work",
             iconKey: "briefcase",
             title: "Looking for work",
+            short: "Find work",
             description: "x",
             links: [{ id: "jobs", href: "/jobs", label: "Job board", account: false }],
           },
         ],
-        triggerLabel: "Explore",
+        navLabel: "Main choices",
         accountLabel: "After sign-in",
       }),
     );
     expect(html).toContain('aria-expanded="false"');
     expect(html).toMatch(/aria-controls="[^"]+"/);
-    expect(html).toContain(">Explore<");
+    expect(html).toContain('aria-label="Main choices"');
+    expect(html).toContain(">Find work<");
     expect(html).not.toContain('data-testid="intent-menu-panel"');
     expect(html).not.toContain("/jobs");
   });
@@ -185,7 +210,8 @@ describe("labels exist and are translated in all 11 locales", () => {
   type SiteNav = {
     trigger: string;
     account: string;
-    intents: Record<string, { title: string; description: string }>;
+    assistant: string;
+    intents: Record<string, { title: string; short: string; description: string }>;
     links: Record<string, string>;
   };
   const siteNav = (loc: string) =>
@@ -196,9 +222,11 @@ describe("labels exist and are translated in all 11 locales", () => {
     const out: Array<[string, string]> = [
       ["trigger", s.trigger],
       ["account", s.account],
+      ["assistant", s.assistant],
     ];
     for (const id of PUBLIC_INTENT_IDS) {
       out.push([`intents.${id}.title`, s.intents?.[id]?.title]);
+      out.push([`intents.${id}.short`, s.intents?.[id]?.short]);
       out.push([`intents.${id}.description`, s.intents?.[id]?.description]);
     }
     for (const l of ALL_LINKS) out.push([`links.${l.id}`, s.links?.[l.id]]);

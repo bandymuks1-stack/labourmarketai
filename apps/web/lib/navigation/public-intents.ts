@@ -122,6 +122,16 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
   },
 ];
 
+/**
+ * "Ask the assistant" — the signed-in conversation home (`/dashboard` IS the
+ * chat). Spelled here, not imported from `lib/config/navigation`, because that
+ * module's import graph reaches the dashboard's client components and the
+ * public shell ships only a small message pick
+ * (`lib/guards/client-messages-allowlist.test.ts`). The intent guard asserts
+ * it equals `CANONICAL_HOME`, so the two cannot drift.
+ */
+export const ASSISTANT_HREF = "/dashboard";
+
 /** The first link of an intent is its primary destination. */
 export function primaryHref(intent: PublicIntent): string {
   return intent.links[0].href;

@@ -20555,32 +20555,38 @@
     }
   },
   "siteNav": {
-    "trigger": "Explore",
+    "trigger": "Main choices",
     "account": "After sign-in",
     "intents": {
       "work": {
         "title": "Looking for work",
-        "description": "Find jobs and show what you can do."
+        "description": "Find jobs and show what you can do.",
+        "short": "Find work"
       },
       "workers": {
         "title": "Looking for workers",
-        "description": "Describe the work you need done."
+        "description": "Describe the work you need done.",
+        "short": "Find workers"
       },
       "services": {
         "title": "Offering services",
-        "description": "Publish what you offer and answer requests."
+        "description": "Publish what you offer and answer requests.",
+        "short": "Offer services"
       },
       "orders": {
         "title": "Looking for orders and contracts",
-        "description": "Find work requests and keep proposals together."
+        "description": "Find work requests and keep proposals together.",
+        "short": "Find orders"
       },
       "partners": {
         "title": "Looking for partners",
-        "description": "Connect with the people and organisations you work with."
+        "description": "Connect with the people and organisations you work with.",
+        "short": "Find partners"
       },
       "agencies": {
         "title": "For agencies",
-        "description": "Run your agency's people, clients and offers."
+        "description": "Run your agency's people, clients and offers.",
+        "short": "For agencies"
       }
     },
     "links": {
@@ -20601,6 +20607,7 @@
       "forAgencies": "How it works for agencies",
       "setUpAgency": "Set up your agency"
     },
+    "assistant": "Ask the assistant",
     "carousels": {
       "functions": "What you can do here",
       "professions": "Browse jobs by profession"

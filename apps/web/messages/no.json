@@ -7948,32 +7948,38 @@
     }
   },
   "siteNav": {
-    "trigger": "Utforsk",
+    "trigger": "Hovedvalg",
     "account": "Etter innlogging",
     "intents": {
       "work": {
         "title": "Jeg søker arbeid",
-        "description": "Finn jobber og vis hva du kan."
+        "description": "Finn jobber og vis hva du kan.",
+        "short": "Finn arbeid"
       },
       "workers": {
         "title": "Jeg søker arbeidstakere",
-        "description": "Beskriv hvilket arbeid du trenger."
+        "description": "Beskriv hvilket arbeid du trenger.",
+        "short": "Finn arbeidstakere"
       },
       "services": {
         "title": "Jeg tilbyr tjenester",
-        "description": "Publiser tilbudet ditt og svar på forespørsler."
+        "description": "Publiser tilbudet ditt og svar på forespørsler.",
+        "short": "Tilby tjenester"
       },
       "orders": {
         "title": "Jeg søker oppdrag og kontrakter",
-        "description": "Finn arbeidsforespørsler og hold tilbud samlet."
+        "description": "Finn arbeidsforespørsler og hold tilbud samlet.",
+        "short": "Finn oppdrag"
       },
       "partners": {
         "title": "Jeg søker partnere",
-        "description": "Knytt deg til menneskene og organisasjonene du jobber med."
+        "description": "Knytt deg til menneskene og organisasjonene du jobber med.",
+        "short": "Finn partnere"
       },
       "agencies": {
         "title": "For byråer",
-        "description": "Styr byråets folk, kunder og tilbud."
+        "description": "Styr byråets folk, kunder og tilbud.",
+        "short": "For byråer"
       }
     },
     "links": {
@@ -7994,6 +8000,7 @@
       "forAgencies": "Slik fungerer det for byråer",
       "setUpAgency": "Opprett byrået ditt"
     },
+    "assistant": "Spør assistenten",
     "carousels": {
       "functions": "Dette kan du gjøre her",
       "professions": "Jobber etter yrke"

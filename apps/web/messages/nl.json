@@ -20555,32 +20555,38 @@
     }
   },
   "siteNav": {
-    "trigger": "Ontdekken",
+    "trigger": "Hoofdkeuzes",
     "account": "Na inloggen",
     "intents": {
       "work": {
         "title": "Ik zoek werk",
-        "description": "Vind vacatures en laat zien wat je kunt."
+        "description": "Vind vacatures en laat zien wat je kunt.",
+        "short": "Werk zoeken"
       },
       "workers": {
         "title": "Ik zoek medewerkers",
-        "description": "Beschrijf welk werk je nodig hebt."
+        "description": "Beschrijf welk werk je nodig hebt.",
+        "short": "Mensen zoeken"
       },
       "services": {
         "title": "Ik bied diensten aan",
-        "description": "Publiceer wat je aanbiedt en beantwoord aanvragen."
+        "description": "Publiceer wat je aanbiedt en beantwoord aanvragen.",
+        "short": "Diensten aanbieden"
       },
       "orders": {
         "title": "Ik zoek opdrachten en contracten",
-        "description": "Vind werkaanvragen en houd voorstellen bij elkaar."
+        "description": "Vind werkaanvragen en houd voorstellen bij elkaar.",
+        "short": "Opdrachten zoeken"
       },
       "partners": {
         "title": "Ik zoek partners",
-        "description": "Verbind je met de mensen en organisaties waarmee je werkt."
+        "description": "Verbind je met de mensen en organisaties waarmee je werkt.",
+        "short": "Partners zoeken"
       },
       "agencies": {
         "title": "Voor bureaus",
-        "description": "Beheer de mensen, klanten en aanbiedingen van je bureau."
+        "description": "Beheer de mensen, klanten en aanbiedingen van je bureau.",
+        "short": "Voor bureaus"
       }
     },
     "links": {
@@ -20601,6 +20607,7 @@
       "forAgencies": "Zo werkt het voor bureaus",
       "setUpAgency": "Richt je bureau in"
     },
+    "assistant": "Vraag de assistent",
     "carousels": {
       "functions": "Wat je hier kunt doen",
       "professions": "Vacatures per beroep"

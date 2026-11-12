@@ -20555,32 +20555,38 @@
     }
   },
   "siteNav": {
-    "trigger": "Odkryj",
+    "trigger": "Główne wybory",
     "account": "Po zalogowaniu",
     "intents": {
       "work": {
         "title": "Szukam pracy",
-        "description": "Znajdź oferty i pokaż, co potrafisz."
+        "description": "Znajdź oferty i pokaż, co potrafisz.",
+        "short": "Szukam pracy"
       },
       "workers": {
         "title": "Szukam pracowników",
-        "description": "Opisz, jakiej pracy potrzebujesz."
+        "description": "Opisz, jakiej pracy potrzebujesz.",
+        "short": "Szukam pracowników"
       },
       "services": {
         "title": "Oferuję usługi",
-        "description": "Opublikuj swoją ofertę i odpowiadaj na zapytania."
+        "description": "Opublikuj swoją ofertę i odpowiadaj na zapytania.",
+        "short": "Oferuję usługi"
       },
       "orders": {
         "title": "Szukam zleceń i umów",
-        "description": "Znajdź zapytania o pracę i trzymaj oferty w jednym miejscu."
+        "description": "Znajdź zapytania o pracę i trzymaj oferty w jednym miejscu.",
+        "short": "Szukam zleceń"
       },
       "partners": {
         "title": "Szukam partnerów",
-        "description": "Połącz się z ludźmi i organizacjami, z którymi pracujesz."
+        "description": "Połącz się z ludźmi i organizacjami, z którymi pracujesz.",
+        "short": "Szukam partnerów"
       },
       "agencies": {
         "title": "Dla agencji",
-        "description": "Zarządzaj ludźmi, klientami i ofertami agencji."
+        "description": "Zarządzaj ludźmi, klientami i ofertami agencji.",
+        "short": "Dla agencji"
       }
     },
     "links": {
@@ -20601,6 +20607,7 @@
       "forAgencies": "Jak to działa dla agencji",
       "setUpAgency": "Załóż agencję"
     },
+    "assistant": "Zapytaj asystenta",
     "carousels": {
       "functions": "Co możesz tu zrobić",
       "professions": "Oferty pracy według zawodu"

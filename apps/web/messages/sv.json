@@ -7948,32 +7948,38 @@
     }
   },
   "siteNav": {
-    "trigger": "Utforska",
+    "trigger": "Huvudval",
     "account": "Efter inloggning",
     "intents": {
       "work": {
         "title": "Jag söker arbete",
-        "description": "Hitta jobb och visa vad du kan."
+        "description": "Hitta jobb och visa vad du kan.",
+        "short": "Hitta arbete"
       },
       "workers": {
         "title": "Jag söker medarbetare",
-        "description": "Beskriv vilket arbete du behöver."
+        "description": "Beskriv vilket arbete du behöver.",
+        "short": "Hitta medarbetare"
       },
       "services": {
         "title": "Jag erbjuder tjänster",
-        "description": "Publicera ditt erbjudande och svara på förfrågningar."
+        "description": "Publicera ditt erbjudande och svara på förfrågningar.",
+        "short": "Erbjud tjänster"
       },
       "orders": {
         "title": "Jag söker uppdrag och kontrakt",
-        "description": "Hitta arbetsförfrågningar och håll offerter samlade."
+        "description": "Hitta arbetsförfrågningar och håll offerter samlade.",
+        "short": "Hitta uppdrag"
       },
       "partners": {
         "title": "Jag söker partner",
-        "description": "Knyt an till människorna och organisationerna du arbetar med."
+        "description": "Knyt an till människorna och organisationerna du arbetar med.",
+        "short": "Hitta partner"
       },
       "agencies": {
         "title": "För bemanningsföretag",
-        "description": "Hantera byråns personal, kunder och erbjudanden."
+        "description": "Hantera byråns personal, kunder och erbjudanden.",
+        "short": "För bemanning"
       }
     },
     "links": {
@@ -7994,6 +8000,7 @@
       "forAgencies": "Så fungerar det för bemanningsföretag",
       "setUpAgency": "Starta ditt bemanningsföretag"
     },
+    "assistant": "Fråga assistenten",
     "carousels": {
       "functions": "Det här kan du göra här",
       "professions": "Jobb efter yrke"
