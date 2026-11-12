@@ -5,8 +5,10 @@ import { join, resolve } from "node:path";
 import {
   PUBLIC_INTENTS,
   PUBLIC_INTENT_IDS,
+  MORE_GOAL_ID,
   goalFromFragment,
   goalHref,
+  goalIdFromFragment,
 } from "@/lib/navigation/public-intents";
 import {
   AREA_ICONS,
@@ -38,6 +40,8 @@ const read = (rel: string) => readFileSync(join(APP_ROOT, rel), "utf8");
 const landing = read("app/[locale]/focus-landing/focus-landing.tsx");
 const choice = read("components/marketing/landing-intent-choice.tsx");
 const navigator = read("components/navigation/goal-navigator.tsx");
+/** CardRail mounts in the navigator: goals, functions, professions. */
+const navigatorRails = 3;
 const server = read("components/navigation/goal-navigation.tsx");
 const rail = read("components/navigation/card-rail.tsx");
 
@@ -111,7 +115,8 @@ describe("one rail, one panel", () => {
 describe("the URL is the state — a fragment, not a page", () => {
   it("the active goal is read from the fragment; choosing pushes it without a jump", () => {
     expect(navigator).toMatch(/useSyncExternalStore\(subscribeToFragment, readFragment, readServerFragment\)/);
-    expect(navigator).toMatch(/goalFromFragment\(fragment\)/);
+    // The fragment names a card of THIS navigator, or nothing opens.
+    expect(navigator).toMatch(/goals\.find\(\(g\) => g\.id === goalIdFromFragment\(fragment\)\) \?\? null/);
     expect(navigator).toMatch(/window\.history\.pushState\(\s*(?:\/\/[^\n]*\n\s*)*\{ \[GOAL_DEPTH_KEY\]: goalDepth\(\) \+ 1 \},/);
     // Close reads the depth from the CURRENT history entry (Codex P2 on
     // c1caca4): a running count of selections went too far after Back.
@@ -133,6 +138,12 @@ describe("the URL is the state — a fragment, not a page", () => {
     }
     for (const bad of ["", "#", "#goal=", "#goal=admin", "#goal=work/..", "#other=work"]) {
       expect(goalFromFragment(bad), bad).toBeNull();
+    }
+    // The navigator's own reader takes any well-formed id and nothing else;
+    // an id with no card of that name opens nothing (checked above).
+    expect(goalIdFromFragment("#goal=more")).toBe(MORE_GOAL_ID);
+    for (const bad of ["", "#", "#goal=", "#goal=work/..", "#goal=<x>", "#other=work", "#goal=Work"]) {
+      expect(goalIdFromFragment(bad), bad).toBeNull();
     }
     expect(rail).toMatch(/if \(e\.metaKey \|\| e\.ctrlKey \|\| e\.shiftKey \|\| e\.altKey \|\| e\.button !== 0\) return;/);
   });
@@ -158,6 +169,23 @@ describe("two actions to a function", () => {
     expect(navigator).toMatch(/<form action=\{`\/\$\{locale\}\/jobs`\} method="get"/);
     expect(navigator).toMatch(/data-testid="profession-full-list"/);
     expect(navigator).toMatch(/data-testid="sector-chips"/);
+  });
+});
+
+describe("an optional More card (signed-in homes: the areas that belong to no goal)", () => {
+  it("is one extra card after the goals with the fixed id, opened by its own fragment", () => {
+    expect(navigator).toMatch(/more\?: Omit<NavigatorGoal, "id" \| "hasCatalogue">;/);
+    expect(navigator).toMatch(
+      /more \? \[\.\.\.ownGoals, \{ \.\.\.more, id: MORE_GOAL_ID, hasCatalogue: false \}\] : ownGoals/,
+    );
+    expect(MORE_GOAL_ID).toBe("more");
+    expect(goalHref(MORE_GOAL_ID)).toBe("#goal=more");
+    // Still one rail and one panel: the card goes through the same list.
+    expect(navigator.match(/<CardRail/g)!.length).toBe(navigatorRails);
+  });
+
+  it("the public landing passes none: its remaining links sit behind the header's More", () => {
+    expect(server).not.toMatch(/more=/);
   });
 });
 

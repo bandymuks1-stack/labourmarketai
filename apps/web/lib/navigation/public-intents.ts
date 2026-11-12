@@ -141,7 +141,7 @@ export const ASSISTANT_HREF = "/dashboard";
  */
 export const GOAL_FRAGMENT_PREFIX = "#goal=";
 
-export function goalHref(id: PublicIntentId): string {
+export function goalHref(id: PublicIntentId | typeof MORE_GOAL_ID): string {
   return `${GOAL_FRAGMENT_PREFIX}${id}`;
 }
 
@@ -150,6 +150,21 @@ export function goalFromFragment(hash: string): PublicIntentId | null {
   if (!hash.startsWith(GOAL_FRAGMENT_PREFIX)) return null;
   const id = hash.slice(GOAL_FRAGMENT_PREFIX.length);
   return isPublicIntentId(id) ? id : null;
+}
+
+/**
+ * The one extra card a goal navigator may carry after its goals: "More" — the
+ * remaining areas that belong to no goal (signed-in: work in numbers, profile,
+ * gallery …), mirroring the header bar's "More". Its fragment is `#goal=more`.
+ */
+export const MORE_GOAL_ID = "more";
+
+/** `#goal=<id>` → `<id>` as written; anything else → null. The navigator
+ *  itself decides whether it has a card with that id. */
+export function goalIdFromFragment(hash: string): string | null {
+  if (!hash.startsWith(GOAL_FRAGMENT_PREFIX)) return null;
+  const id = hash.slice(GOAL_FRAGMENT_PREFIX.length);
+  return /^[a-z][a-z0-9_-]{0,40}$/.test(id) ? id : null;
 }
 
 export function isPublicIntentId(value: string): value is PublicIntentId {

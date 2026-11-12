@@ -4,7 +4,11 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { X } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
-import { goalFromFragment, goalHref, type PublicIntentId } from "@/lib/navigation/public-intents";
+import {
+  GOAL_FRAGMENT_PREFIX,
+  MORE_GOAL_ID,
+  goalIdFromFragment,
+} from "@/lib/navigation/public-intents";
 import { CardRail, type RailCard } from "@/components/navigation/card-rail";
 import { cn } from "@/lib/utils";
 
@@ -54,7 +58,7 @@ function goalDepth(): number {
 const readServerFragment = () => "";
 
 /**
- * THE GOAL NAVIGATOR — the six goals in one rail and ONE active panel under
+ * THE GOAL NAVIGATOR — the goals (and an optional "More") in one rail and ONE active panel under
  * it (owner-approved structure, 2026-11-12).
  *
  * Nothing chosen: the rail alone, so the first screen stays short. Choosing a
@@ -71,7 +75,8 @@ const readServerFragment = () => "";
  * The rail is a native scroller, so choosing never resets its position.
  */
 export function GoalNavigator({
-  goals,
+  goals: ownGoals,
+  more,
   professions,
   sectors,
   labels,
@@ -79,6 +84,14 @@ export function GoalNavigator({
   headingLevel = "h2",
 }: {
   goals: readonly NavigatorGoal[];
+  /**
+   * One extra card after the goals: "More" — the areas that belong to no
+   * goal (signed-in: work in numbers, profile, gallery …). It behaves like a
+   * goal: its panel lists those areas as function cards. Its id is `more`.
+   * Omit it where every destination already belongs to a goal (the public
+   * landing, whose remaining links sit behind the header's "More").
+   */
+  more?: Omit<NavigatorGoal, "id" | "hasCatalogue">;
   professions: readonly NavigatorProfession[];
   sectors: ReadonlyArray<{ readonly key: string; readonly label: string }>;
   labels: NavigatorLabels;
@@ -86,8 +99,13 @@ export function GoalNavigator({
   headingLevel?: "h1" | "h2";
 }) {
   const fragment = useSyncExternalStore(subscribeToFragment, readFragment, readServerFragment);
-  const activeId = goalFromFragment(fragment);
-  const active = goals.find((g) => g.id === activeId) ?? null;
+  const goals = useMemo<readonly NavigatorGoal[]>(
+    () => (more ? [...ownGoals, { ...more, id: MORE_GOAL_ID, hasCatalogue: false }] : ownGoals),
+    [ownGoals, more],
+  );
+  // The fragment names a card of THIS navigator, or nothing is open.
+  const active = goals.find((g) => g.id === goalIdFromFragment(fragment)) ?? null;
+  const activeId = active?.id ?? null;
   const [tab, setTab] = useState<"functions" | "professions">("functions");
   const [sector, setSector] = useState<string | null>(null);
   const [fullList, setFullList] = useState(false);
@@ -106,14 +124,14 @@ export function GoalNavigator({
       // entry, and copying the current entry's would hand it a stale one.
       { [GOAL_DEPTH_KEY]: goalDepth() + 1 },
       "",
-      goalHref(card.id as PublicIntentId),
+      `${GOAL_FRAGMENT_PREFIX}${card.id}`,
     );
     window.dispatchEvent(new HashChangeEvent("hashchange"));
   };
 
   /** Drop the goal fragment from the current entry, staying on the page. */
   const clearGoal = () => {
-    if (!goalFromFragment(window.location.hash)) return;
+    if (!goalIdFromFragment(window.location.hash)) return;
     window.history.replaceState(
       window.history.state,
       "",

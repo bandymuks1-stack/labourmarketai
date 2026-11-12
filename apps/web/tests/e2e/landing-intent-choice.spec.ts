@@ -293,12 +293,17 @@ test("an unknown goal in the address opens nothing", async ({ page }) => {
   await expect(page.getByTestId("goal-panel")).toHaveCount(0);
 });
 
-// Evidence only: the same screen in the dark theme, and the phone menu.
+// Evidence only: the same screens in the dark theme at every checked width,
+// and the phone menu.
 for (const vp of [
+  { name: "320", width: 320, height: 640 },
   { name: "360", width: 360, height: 740 },
+  { name: "375", width: 375, height: 812 },
+  { name: "390", width: 390, height: 844 },
+  { name: "768", width: 768, height: 1024 },
   { name: "1440", width: 1440, height: 900 },
 ] as const) {
-  test(`evidence: an open goal in the dark theme @${vp.name}px`, async ({ browser }) => {
+  test(`evidence: the landing and an open goal in the dark theme @${vp.name}px`, async ({ browser }) => {
     const context = await browser.newContext({
       viewport: { width: vp.width, height: vp.height },
       hasTouch: vp.width < 1000,
@@ -312,9 +317,14 @@ for (const vp of [
       }
     });
     const page = await context.newPage();
+    await page.goto("/en");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await expect(page.getByTestId("goal-rail")).toBeVisible();
+    expect(await sidewaysOverflow(page), "page scrolls sideways (dark)").toBeLessThanOrEqual(1);
+    await hideDevTools(page);
+    await page.screenshot({ path: join(SHOTS, `home-${vp.name}-dark.png`) });
     await page.goto("/en#goal=work");
     await expect(page.getByTestId("goal-panel")).toBeVisible();
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await hideDevTools(page);
     await page.screenshot({ path: join(SHOTS, `goal-${vp.name}-dark.png`) });
     await context.close();

@@ -5,7 +5,11 @@ import { LogIn, MessageCircle } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { INTENT_ICONS, type RenderedIntent } from "@/components/layouts/intent-icons";
+import {
+  INTENT_ICONS,
+  type NavLeadLink,
+  type RenderedIntent,
+} from "@/components/layouts/intent-icons";
 
 /**
  * THE INTENT BAR + MEGA-MENU of the public header (desktop, `lg` and up) —
@@ -33,6 +37,7 @@ export function IntentMegaMenu({
   intents: allIntents,
   goalsOnPage = false,
   askInHeader = false,
+  lead = [],
   navLabel,
   accountLabel,
   assistant,
@@ -46,6 +51,10 @@ export function IntentMegaMenu({
   /** True where the header row carries the assistant INPUT (inner pages):
    *  the bar then shows no second "ask the assistant" entry. */
   askInHeader?: boolean;
+  /** The first group: direct links shown before the goals (signed-in: home,
+   *  journal, calendar, messages). Shown on every page, also where the goals
+   *  are on the page itself. */
+  lead?: readonly NavLeadLink[];
   /** Accessible name of the intent navigation. */
   navLabel: string;
   /** Short note beside links that live inside the signed-in product. */
@@ -115,6 +124,31 @@ export function IntentMegaMenu({
         )}
       >
         <ul className={cn("flex min-w-0 items-center gap-1", !goalsOnPage && "flex-1")}>
+          {lead.map((link, i) => (
+            <li
+              key={link.key}
+              className={cn(
+                "shrink-0",
+                // A hairline closes the group before the goals / "More".
+                i === lead.length - 1 && "mr-1 border-r border-ink-600 pr-2",
+              )}
+            >
+              <Link
+                href={link.href}
+                aria-current={link.current ? "page" : undefined}
+                data-testid={`intent-lead-${link.key}`}
+                onClick={() => setActive(null)}
+                className={cn(
+                  "inline-flex min-h-11 items-center whitespace-nowrap rounded-control px-2 text-sm font-medium transition-colors motion-reduce:transition-none xl:px-3",
+                  link.current
+                    ? "bg-ink-800 text-text-primary"
+                    : "text-text-secondary hover:bg-ink-800/60 hover:text-text-primary",
+                )}
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
           {intents.map((intent) => {
             const Icon = INTENT_ICONS[intent.iconKey];
             const isActive = active === intent.id;
