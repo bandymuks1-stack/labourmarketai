@@ -49,7 +49,10 @@ const MESSAGING_REFUSAL_EN: Readonly<Record<string, string>> = {
   invalid_input: "The message is empty, too long or not valid for this conversation. Nothing was sent.",
   no_permission:
     "There is no working relationship, application or connection that allows starting a conversation with this person. Nothing was sent.",
-  rate_limited: "The daily limit for new conversations is reached. Nothing was sent; try again tomorrow.",
+  // One code for two limits (lib/communication/rate-caps.ts): messages per
+  // rolling hour, and new conversations per rolling day. Name neither.
+  rate_limited:
+    "A sending limit was reached (too many messages, or too many new conversations, in a short time). Nothing was sent; wait and try again.",
   rate_check_unavailable: "The safety check could not run, so nothing was sent. Try again.",
   insert_failed: "The message could not be stored. Nothing was sent; try again.",
   not_a_participant: "The caller is not a participant of this conversation. Nothing was sent.",

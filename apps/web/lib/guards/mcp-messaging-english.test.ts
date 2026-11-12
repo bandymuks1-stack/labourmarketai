@@ -22,6 +22,11 @@ describe("MCP messaging refusals are English, by code", () => {
     expect(src).toContain("return messagingRefusal(sent.code);");
   });
 
+  it("rate_limited asserts neither limit nor a retry day", () => {
+    const r = messagingRefusal("rate_limited");
+    expect(r.ok ? "" : r.message).not.toMatch(/tomorrow|daily/i);
+  });
+
   it.each([
     "invalid_input",
     "no_permission",
