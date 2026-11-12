@@ -175,6 +175,19 @@ const conversationGet: CapabilityDescriptor = {
 
 // ── message.send_draft / message.send_confirm ──────────────────────────────
 
+/** The language the text is WRITTEN in (ISO 639-1: sv, lt, pl, ru, en …).
+ *  Optional. Without it the message is stored as "language unknown" — never
+ *  the request's UI locale, which says nothing about what the person typed
+ *  (chat audit 2026-11-11, defect 1: a Swedish text sent from an assistant
+ *  was stamped Lithuanian). ONE field for the draft AND the confirm schema,
+ *  so a language-bearing draft can always be confirmed. */
+const languageField = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .refine((v) => isCommunicationLocale(v), { message: "Not a supported message language code." })
+  .optional();
+
 const sendFields = z
   .object({
     /** An existing conversation the caller is part of … */
@@ -186,17 +199,7 @@ const sendFields = z
     projectId: z.string().uuid().optional(),
     subject: z.string().trim().max(240).nullish(),
     body: z.string().trim().min(1).max(4000),
-    /** The language the text is WRITTEN in (ISO 639-1: sv, lt, pl, ru, en …).
-     *  Optional. Without it the message is stored as "language unknown" —
-     *  never the request's UI locale, which says nothing about what the
-     *  person typed (chat audit 2026-11-11, defect 1: a Swedish text sent
-     *  from an assistant was stamped Lithuanian). */
-    language: z
-      .string()
-      .trim()
-      .toLowerCase()
-      .refine((v) => isCommunicationLocale(v), { message: "Not a supported message language code." })
-      .optional(),
+    language: languageField,
   })
   .strict()
   .refine((v) => !!v.conversationId !== !!v.recipientProfileId, {
@@ -313,6 +316,7 @@ const sendConfirmInput = z
     projectId: z.string().uuid().optional(),
     subject: z.string().trim().max(240).nullish(),
     body: z.string().trim().min(1).max(4000),
+    language: languageField,
     confirmationToken: z.string().min(10),
   })
   .strict();
