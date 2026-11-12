@@ -22,8 +22,21 @@ name: Post-deploy smoke (public critical path, read-only)
 #     for-workers, for-companies, company-need, jobs, pricing, sign-in, sign-up
 #     — error screens, failed scripts, broken link targets, dead buttons.
 #
-# What it does NOT check: anything signed in. Worker, employer need posting,
-# messaging and the other journeys stay with prod-qa-walk.yml, unchanged.
+# Then, never on a pull request, the `signed-in` job opens FOUR signed-in
+# documents with two synthetic sessions, read-only: the worker's home and work
+# journal, the employer's needs surface, the inbox
+# (apps/web/tests/e2e/prod-deploy-smoke.spec.ts). It proves those surfaces OPEN
+# on the new build. Posting a need, sending a message and every other signed-in
+# journey stay with prod-qa-walk.yml, which is unchanged: this adds to the full
+# walks and replaces none of them.
+#
+# COST PER DEPLOY (so the owner can see it): 16 public pages at two widths plus
+# their link targets, and 4 signed-in documents — about 36 Supabase calls each
+# by the measurement recorded in prod-qa-walk.yml, so roughly 150 calls, plus
+# two session mints and two sign-outs. The post-merge role-routes walk is 114
+# signed-in documents; this is under 4 % of one. It is NOT counted in
+# PROD_QA_WALK_DAILY_BUDGET (that counts prod-qa-walk runs) and it keeps the
+# walk's health and deploy brakes.
 #
 # QUEUEING, NOT CANCELLING: runs share one concurrency group with
 # cancel-in-progress false, so a smoke that has started always finishes and
@@ -53,6 +66,8 @@ jobs:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      build: ${{ steps.build.outputs.build }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -150,3 +165,117 @@ jobs:
           path: smoke.json
           if-no-files-found: ignore
           retention-days: 14
+
+  signed-in:
+    # After the public half: by then the deploy brake's five quiet minutes have
+    # passed. Never on a pull request — a PR must not reach production sessions.
+    needs: smoke
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production-qa
+    # Its own queue. It does not take the walk's lock (`prod-qa-walk`): GitHub keeps one
+    # waiting run per group, so sharing it could push a waiting walk out. It only reads,
+    # and its sign-out is `scope=local`, so a walk running beside it is not disturbed.
+    concurrency:
+      group: post-deploy-smoke-signed-in
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      actions: read # the deploy brake reads deploy-vps.yml runs
+    env:
+      PROD_QA_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      PROD_QA_ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
+      E2E_NO_SERVER: "1"
+      E2E_BASE_URL: https://labourmarket.ai
+      PROD_QA_WALK: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.33.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter=!mobile
+
+      - name: Install Playwright chromium
+        run: pnpm -F web exec playwright install --with-deps chromium
+
+      # The walk's own brakes, right before anything signs in. The deploy brake wants
+      # five quiet minutes after a deploy; it is asked again for up to eight minutes.
+      - name: "Brake: no production deploy running or just finished"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 16); do
+            if node .github/scripts/walk-brakes.mjs deploy; then exit 0; fi
+            sleep 30
+          done
+          echo "::error::a production deploy was running or had just finished for eight minutes: the signed-in smoke did not start"
+          exit 1
+
+      - name: "Brake: production health"
+        run: node .github/scripts/walk-brakes.mjs health
+
+      # Sessions for two existing synthetic accounts only. No provisioning step: the
+      # mint refuses an account that does not exist, so the smoke never creates one.
+      - name: Mint two synthetic sessions (worker, company owner)
+        id: mint
+        run: |
+          set -euo pipefail
+          [ -n "${PROD_QA_ANON_KEY}" ] || { echo "::error::vars.PROD_QA_ANON_KEY is not set"; exit 1; }
+          cd apps/web
+          PROD_QA_IDENTITY="qa.worker+multiw@labourmarket.ai" PROD_QA_STORAGE_SLOT=worker pnpm exec tsx scripts/prod-qa-mint-session.ts
+          PROD_QA_IDENTITY="qa.owner+multiw@labourmarket.ai" PROD_QA_STORAGE_SLOT=owner pnpm exec tsx scripts/prod-qa-mint-session.ts
+
+      # The Playwright output stays in a file that is never uploaded: this repository is
+      # public. Only test titles (written in the spec) and pass / fail reach the summary.
+      - name: Worker, employer and messaging surfaces open
+        run: |
+          set -uo pipefail
+          cd apps/web
+          code=0
+          PLAYWRIGHT_JSON_OUTPUT_FILE="$RUNNER_TEMP/smoke-result.json" \
+            pnpm exec playwright test tests/e2e/prod-deploy-smoke.spec.ts --project=chromium --trace=off --reporter=json \
+            > "$RUNNER_TEMP/smoke-run.log" 2>&1 || code=$?
+          {
+            echo "#### Signed-in smoke — build \`${{ needs.smoke.outputs.build }}\`"
+            node -e 'const r=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));const out=[];const walk=(s)=>{for(const c of s.suites??[])walk(c);for(const t of s.specs??[])out.push((t.ok?"PASS ":"FAIL ")+t.title)};for(const s of r.suites??[])walk(s);if(out.length===0)throw new Error("no tests");console.log(out.join("\n"))' \
+              "$RUNNER_TEMP/smoke-result.json" 2>/dev/null || echo "no readable result: treat as FAIL"
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$code" -eq 0 ] || echo "::error::the signed-in smoke failed (exit ${code})"
+          exit "$code"
+
+      - name: Revoke and delete the synthetic sessions
+        if: always()
+        env:
+          PROD_QA_REVOKE_EXPECT_FILES: ${{ steps.mint.outcome == 'success' && '1' || '0' }}
+        run: |
+          cd apps/web
+          pnpm exec tsx scripts/prod-qa-revoke-sessions.ts
+          ls tests/e2e/.storage-state.prod-qa*.json 2>/dev/null && { echo "::error::a session file survived cleanup"; exit 1; } || echo "no session file left"
+
+      - name: Destroy session files (always, belt and braces)
+        if: always()
+        run: rm -f apps/web/tests/e2e/.storage-state.prod-qa*.json
+
+      - name: The build did not change under the smoke
+        if: always()
+        run: |
+          set -euo pipefail
+          after=$(curl -sS --max-time 30 https://labourmarket.ai/api/health | jq -r 'if .ok == true then .build else empty end' || true)
+          if [ "$after" != "${{ needs.smoke.outputs.build }}" ]; then
+            echo "**The build changed during the signed-in smoke (now \`${after:-unreadable or not ok}\`): this run records nothing.**" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
