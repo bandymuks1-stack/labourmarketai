@@ -1795,7 +1795,7 @@
     "errors": {
       "invalid_input": "Ziņa ir tukša vai pārāk gara. Pārbaudiet to un sūtiet vēlreiz.",
       "no_permission": "Ar šo cilvēku vēl nevar sākt sarunu: starp jums nav darba attiecību, pieteikuma vai savienojuma.",
-      "rate_limited": "Šodien sākts pārāk daudz jaunu sarunu. Mēģiniet rīt.",
+      "rate_limited": "Īsā laikā nosūtīts daudz ziņu vai sākts daudz sarunu. Uzgaidiet un mēģiniet vēlreiz.",
       "rate_check_unavailable": "Drošības pārbaudi nevarēja veikt, tāpēc nekas netika nosūtīts. Mēģiniet vēlreiz.",
       "insert_failed": "Ziņa netika nosūtīta. Mēģiniet vēlreiz.",
       "not_a_participant": "Šajā sarunā nevar rakstīt: jūs tajā nepiedalāties.",

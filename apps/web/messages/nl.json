@@ -7309,7 +7309,7 @@
     "errors": {
       "invalid_input": "Het bericht is leeg of te lang. Controleer het en verstuur opnieuw.",
       "no_permission": "Je kunt nog geen gesprek met deze persoon beginnen: er is geen werkrelatie, sollicitatie of koppeling tussen jullie.",
-      "rate_limited": "Vandaag zijn te veel nieuwe gesprekken gestart. Probeer het morgen opnieuw.",
+      "rate_limited": "Je hebt in korte tijd veel berichten verstuurd of gesprekken gestart. Wacht even en probeer het opnieuw.",
       "rate_check_unavailable": "De veiligheidscontrole kon niet worden uitgevoerd, dus er is niets verstuurd. Probeer het opnieuw.",
       "insert_failed": "Het bericht is niet verstuurd. Probeer het opnieuw.",
       "not_a_participant": "Je kunt niet in dit gesprek schrijven: je neemt er niet aan deel.",

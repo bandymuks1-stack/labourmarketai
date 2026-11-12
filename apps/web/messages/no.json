@@ -1795,7 +1795,7 @@
     "errors": {
       "invalid_input": "Meldingen er tom eller for lang. Sjekk den og send på nytt.",
       "no_permission": "Du kan ikke starte en samtale med denne personen ennå: det finnes ingen arbeidsrelasjon, søknad eller kobling mellom dere.",
-      "rate_limited": "For mange nye samtaler er startet i dag. Prøv igjen i morgen.",
+      "rate_limited": "Du har sendt mange meldinger eller startet mange samtaler på kort tid. Vent litt og prøv igjen.",
       "rate_check_unavailable": "Sikkerhetskontrollen kunne ikke kjøres, så ingenting ble sendt. Prøv igjen.",
       "insert_failed": "Meldingen ble ikke sendt. Prøv igjen.",
       "not_a_participant": "Du kan ikke skrive i denne samtalen: du deltar ikke i den.",

@@ -42,6 +42,13 @@ describe("messaging errors read in the person's language", () => {
     expect(communicationErrorKey(undefined)).toBe("generic");
   });
 
+  it("rate_limited names no one limit and no retry day (it is the hourly message cap OR the daily new-conversation cap)", () => {
+    for (const l of ALL) {
+      const v = JSON.parse(read("messages", `${l}.json`)).communication.errors.rate_limited as string;
+      expect(v, l).not.toMatch(/tomorrow|rytoj|завтра|morgen|jutro|i morgen|homme|rīt/i);
+    }
+  });
+
   it("the English line is English", () => {
     const errors = JSON.parse(read("messages", "en.json")).communication.errors as Record<string, string>;
     for (const v of Object.values(errors)) expect(v).not.toMatch(/[ąčęėįšųūž]/i);

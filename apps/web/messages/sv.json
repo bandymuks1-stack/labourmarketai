@@ -1795,7 +1795,7 @@
     "errors": {
       "invalid_input": "Meddelandet är tomt eller för långt. Kontrollera det och skicka igen.",
       "no_permission": "Du kan inte starta ett samtal med den här personen än: det finns ingen arbetsrelation, ansökan eller koppling mellan er.",
-      "rate_limited": "För många nya samtal har startats i dag. Försök igen i morgon.",
+      "rate_limited": "Du har skickat många meddelanden eller startat många samtal på kort tid. Vänta en stund och försök igen.",
       "rate_check_unavailable": "Säkerhetskontrollen kunde inte köras, så inget skickades. Försök igen.",
       "insert_failed": "Meddelandet skickades inte. Försök igen.",
       "not_a_participant": "Du kan inte skriva i det här samtalet: du deltar inte i det.",

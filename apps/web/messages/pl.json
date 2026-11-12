@@ -7309,7 +7309,7 @@
     "errors": {
       "invalid_input": "Wiadomość jest pusta lub zbyt długa. Sprawdź ją i wyślij ponownie.",
       "no_permission": "Nie możesz jeszcze rozpocząć rozmowy z tą osobą: nie łączy was relacja zawodowa, zgłoszenie ani połączenie.",
-      "rate_limited": "Dziś rozpoczęto zbyt wiele nowych rozmów. Spróbuj jutro.",
+      "rate_limited": "W krótkim czasie wysłano wiele wiadomości lub rozpoczęto wiele rozmów. Odczekaj chwilę i spróbuj ponownie.",
       "rate_check_unavailable": "Nie udało się przeprowadzić kontroli bezpieczeństwa, więc nic nie wysłano. Spróbuj ponownie.",
       "insert_failed": "Wiadomość nie została wysłana. Spróbuj ponownie.",
       "not_a_participant": "Nie możesz pisać w tej rozmowie: nie bierzesz w niej udziału.",

@@ -1795,7 +1795,7 @@
     "errors": {
       "invalid_input": "Beskeden er tom eller for lang. Tjek den og send igen.",
       "no_permission": "Du kan ikke starte en samtale med denne person endnu: der er ingen arbejdsrelation, ansøgning eller forbindelse mellem jer.",
-      "rate_limited": "Der er startet for mange nye samtaler i dag. Prøv igen i morgen.",
+      "rate_limited": "Du har sendt mange beskeder eller startet mange samtaler på kort tid. Vent lidt, og prøv igen.",
       "rate_check_unavailable": "Sikkerhedstjekket kunne ikke køre, så intet blev sendt. Prøv igen.",
       "insert_failed": "Beskeden blev ikke sendt. Prøv igen.",
       "not_a_participant": "Du kan ikke skrive i denne samtale: du deltager ikke i den.",

@@ -7309,7 +7309,7 @@
     "errors": {
       "invalid_input": "Die Nachricht ist leer oder zu lang. Prüfen Sie sie und senden Sie erneut.",
       "no_permission": "Sie können mit dieser Person noch kein Gespräch beginnen: Zwischen Ihnen besteht keine Arbeitsbeziehung, Bewerbung oder Verbindung.",
-      "rate_limited": "Heute wurden zu viele neue Gespräche begonnen. Versuchen Sie es morgen erneut.",
+      "rate_limited": "Sie haben in kurzer Zeit viele Nachrichten gesendet oder Gespräche begonnen. Warten Sie etwas und versuchen Sie es erneut.",
       "rate_check_unavailable": "Die Sicherheitsprüfung konnte nicht laufen, daher wurde nichts gesendet. Versuchen Sie es erneut.",
       "insert_failed": "Die Nachricht wurde nicht gesendet. Versuchen Sie es erneut.",
       "not_a_participant": "Sie können in diesem Gespräch nicht schreiben: Sie nehmen nicht daran teil.",

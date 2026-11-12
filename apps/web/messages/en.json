@@ -7309,7 +7309,7 @@
     "errors": {
       "invalid_input": "The message is empty or too long. Check it and send again.",
       "no_permission": "You can't start a conversation with this person yet: there is no working relationship, application or connection between you.",
-      "rate_limited": "Too many new conversations today. Try again tomorrow.",
+      "rate_limited": "You've sent many messages or started many conversations in a short time. Wait a while and try again.",
       "rate_check_unavailable": "The safety check could not run, so nothing was sent. Try again.",
       "insert_failed": "The message was not sent. Try again.",
       "not_a_participant": "You can't write in this conversation: you are not part of it.",
