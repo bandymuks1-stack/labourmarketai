@@ -26,8 +26,7 @@ describe("claiming a public intake keeps its country", () => {
   it("stamps it on the column, owner-scoped, after the draft exists", () => {
     const draftAt = src.indexOf('rpc("save_demand_draft_v2"');
     const failAt = src.indexOf('return { ok: false, reason: "error" };', draftAt);
-    const stampAt = src.indexOf('.from("customer_requests")
-      .update({', src.indexOf("const headcount ="));
+    const stampAt = src.indexOf('.from("customer_requests")\n      .update({', src.indexOf("const headcount ="));
     expect(stampAt).toBeGreaterThan(failAt);
     const stamp = src.slice(stampAt, stampAt + 600);
     expect(stamp).toContain('.eq("profile_id", sessionUser.id)');
