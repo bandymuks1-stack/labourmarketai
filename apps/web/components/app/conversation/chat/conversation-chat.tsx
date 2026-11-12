@@ -580,6 +580,7 @@ export type ChatLabels = {
   pinRemove: string;
   pinAdded: string;
   pinMoved: string;
+  pinHiddenHeading: string;
   projectCreateIntro: string;
   projectCreatedNext: string;
   clientOffersIntro: string;
@@ -928,6 +929,7 @@ export function ConversationChat({
   workspaceContextLine = null,
   pins = null,
   pinPlaces = [],
+  withheldPins = [],
   actingIdentity = "person",
 }: {
   /**
@@ -1028,6 +1030,9 @@ export function ConversationChat({
   /** What this person may pin from the home: destinations they are already
    *  admitted to, named as the home names them (server-resolved). */
   pinPlaces?: readonly MySpacePlace[];
+  /** The person's stored pins the home does not draw (not admitted right
+   *  now). Listed in the row's edit panel with "remove" only. */
+  withheldPins?: readonly WorkspacePin[];
 }) {
   const auth0 = useAuthOptional();
   const router = useRouter();
@@ -5391,6 +5396,7 @@ export function ConversationChat({
    */
   const [pinned, setPinned] = useState<WorkspacePin[]>(() => (pins ?? []).slice(0, PIN_CAP));
   const pinsAvailable = pins !== null;
+  const [withheld, setWithheld] = useState<readonly WorkspacePin[]>(() => withheldPins);
   const pendingPinLabelRef = useRef(new Map<string, string>());
   const pinLabelFor = useCallback(
     (ref: string): string => {
@@ -8299,6 +8305,8 @@ export function ConversationChat({
             pinsAvailable
               ? {
                   places: pinPlaces,
+                  withheld: withheld.map((p) => ({ ref: p.ref, label: p.label ?? pinLabelFor(p.ref) })),
+                  onWithheldRemoved: (ref) => setWithheld((prev) => prev.filter((p) => p.ref !== ref)),
                   expectedWorkspaceId,
                   userId: auth0?.user?.id ?? null,
                   onChange: (next) =>
@@ -8323,6 +8331,7 @@ export function ConversationChat({
                     added: labels.pinAdded,
                     removed: labels.unpinDone,
                     moved: labels.pinMoved,
+                    hiddenHeading: labels.pinHiddenHeading,
                     cap: labels.pinCap,
                     unavailable: labels.pinUnavailable,
                   },

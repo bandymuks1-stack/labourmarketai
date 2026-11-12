@@ -66,6 +66,7 @@ export interface MySpaceEditLabels {
   readonly added: string;
   readonly removed: string;
   readonly moved: string;
+  readonly hiddenHeading: string;
   /** Carries `{max}`. */
   readonly cap: string;
   readonly unavailable: string;
@@ -73,6 +74,10 @@ export interface MySpaceEditLabels {
 
 export interface MySpaceEditor {
   readonly places: readonly MySpacePlace[];
+  /** Stored pins the home does not draw for this person right now. They still
+   *  count toward the cap, so they can be REMOVED here — and only removed. */
+  readonly withheld: readonly MySpacePinView[];
+  readonly onWithheldRemoved: (ref: string) => void;
   readonly labels: MySpaceEditLabels;
   /** The workspace the screen was rendered for (stale-screen refusal). */
   readonly expectedWorkspaceId?: string;
@@ -167,6 +172,24 @@ export function MySpaceRow({
       pins.filter((p) => p.ref !== ref),
       labels?.removed ?? "",
     );
+  const removeWithheld = async (ref: string) => {
+    if (!editor || !labels || busy) return;
+    setBusy(true);
+    setStatus("");
+    try {
+      const result = await unpinAction({ ref, expectedWorkspaceId: editor.expectedWorkspaceId });
+      if (result.ok) {
+        editor.onWithheldRemoved(ref);
+        setStatus(labels.removed);
+      } else {
+        setStatus(labels.unavailable);
+      }
+    } catch {
+      setStatus(labels.unavailable);
+    } finally {
+      setBusy(false);
+    }
+  };
   const move = (index: number, delta: -1 | 1) => {
     const to = index + delta;
     if (to < 0 || to >= pins.length) return;
@@ -291,6 +314,36 @@ export function MySpaceRow({
                       title={labels.remove.replace("{label}", p.label)}
                       className={ICON_BUTTON}
                       data-testid="my-space-remove"
+                    >
+                      <X {...iconControl()} aria-hidden />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {editor.withheld.length > 0 && (
+            <section aria-label={labels.hiddenHeading} className="flex flex-col gap-1.5">
+              <h3 className="text-meta font-medium text-text-muted">{labels.hiddenHeading}</h3>
+              <ul className="flex flex-col gap-1.5">
+                {editor.withheld.map((p) => (
+                  <li
+                    key={p.ref}
+                    data-testid="my-space-withheld-item"
+                    data-ref={p.ref}
+                    className="flex items-center gap-1.5"
+                  >
+                    {/* Text only: a withheld pin is never something to press. */}
+                    <span className="min-w-0 flex-1 truncate text-support text-text-secondary">{p.label}</span>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void removeWithheld(p.ref)}
+                      aria-label={labels.remove.replace("{label}", p.label)}
+                      title={labels.remove.replace("{label}", p.label)}
+                      className={ICON_BUTTON}
+                      data-testid="my-space-withheld-remove"
                     >
                       <X {...iconControl()} aria-hidden />
                     </button>
