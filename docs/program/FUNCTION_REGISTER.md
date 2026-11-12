@@ -1261,6 +1261,40 @@ Evaluate in this order: Poland, Lithuania, Forem, Latvia, then Finland and VDAB;
 | 13.16 | Browser crash reports | NOT_VERIFIED | — | only a registry citation; no primary evidence recoverable | unproven |  |
 | 13.17 | Env parity after hosting move | FAIL | 2026-10-27 | 2026-10-27 read-only: last real AI call gemini 2026-10-15 16:07; since then provider=disabled reason=mode_disabled (AI_PROVIDER_MODE not live) - 25 calls to 10-27; lifetime AI spend actual $0.16 (Oct $0.09/234 calls). In… | no | OWNER+LEGAL: AI off coincides with owner 10-15 Gemini personal-data restriction (needs billed key + AI_GEMINI_PAID_TIER_CONFIRMED=1 / DPA). SMTP: LM_SMTP_PASS + INVITE_EMAIL_PROVIDER=smtp via lm-env-set.sh |
 
+## Future modules (planned after the V2 launch, NOT counted in the 288)
+
+Added 2026-11-12 by owner order. **Specification only**: nothing is built, migrated or connected. These rows
+are deliberately outside the readiness totals above: their IDs carry the prefix `P` and the table has its own
+header, so no total, map or completion measure counts them. A row moves into a numbered section, with a normal
+ID, only when the owner approves building it. Specification:
+[`launch/FUTURE_MODULES_SPEC.md`](launch/FUTURE_MODULES_SPEC.md).
+
+| Planned ID | Function | State | For whom | Depends on | Owner gate |
+|---|---|---|---|---|---|
+| P14.1 | Assessment catalog by profession | PLANNED / NOT_IMPLEMENTED | worker, job seeker | 2.12, ESCO catalog | prototype approval |
+| P14.2 | Voluntary knowledge assessment with result | PLANNED / NOT_IMPLEMENTED | worker | P14.1 | prototype approval; RED schema |
+| P14.3 | Practical-skill assessment by a human assessor | PLANNED / NOT_IMPLEMENTED | worker, assessor | 11.10 | assessor authority (ARCH-2) |
+| P14.4 | Work-style self-reflection (no score, no ranking) | PLANNED / NOT_IMPLEMENTED | worker | P14.1 | methodological + legal review |
+| P14.5 | Assessment result in the Living CV as its own evidence source | PLANNED / NOT_IMPLEMENTED | worker | 2.14, P14.2 | RED schema |
+| P14.6 | Per-employer consent to disclose a result | PLANNED / NOT_IMPLEMENTED | worker | 2.35, consent ledger | RED schema |
+| P14.7 | Withdraw consent, hide or delete a result; history | PLANNED / NOT_IMPLEMENTED | worker | P14.6 | RED schema |
+| P14.8 | Employer view of a disclosed result with stated limits | PLANNED / NOT_IMPLEMENTED | company, agency | P14.6 | legal + security review before real selection |
+| P14.9 | Method governance: reliability, bias, accessibility record | PLANNED / NOT_IMPLEMENTED | operator | P14.1 | who signs the method |
+| P14.10 | No automated filtering, ranking or rejection by results | PLANNED / NOT_IMPLEMENTED | system | matching guards | — |
+| P15.1 | Connections page (personal and organization) | PLANNED / NOT_IMPLEMENTED | user, org admin | 10.3 | prototype approval |
+| P15.2 | Connect an external account by OAuth + PKCE, minimal scopes | PLANNED / NOT_IMPLEMENTED | user, org admin | P15.6 | each real connection |
+| P15.3 | Google Workspace connector | PLANNED / NOT_IMPLEMENTED | user, company | P15.2 | provider verification |
+| P15.4 | Microsoft 365 connector | PLANNED / NOT_IMPLEMENTED | user, company | P15.2 | provider verification |
+| P15.5 | Generic connector contract for other business systems | PLANNED / NOT_IMPLEMENTED | company | P15.2 | each real connection |
+| P15.6 | Encrypted token vault, rotation, revocation | PLANNED / NOT_IMPLEMENTED | system | secret store | RED schema; security review |
+| P15.7 | Assistant skill catalog | PLANNED / NOT_IMPLEMENTED | user, org admin | 10.1 | — |
+| P15.8 | Skill access by user, organization, role and plan | PLANNED / NOT_IMPLEMENTED | org admin | 7.x plan matrix | plan placement |
+| P15.9 | Confirmation before every external write | PLANNED / NOT_IMPLEMENTED | user | confirmation tokens | — |
+| P15.10 | Connection and action audit log | PLANNED / NOT_IMPLEMENTED | user, org admin | 10.17 | — |
+| P15.11 | Organization policy: allowed connectors and skills, disable all | PLANNED / NOT_IMPLEMENTED | org owner / admin | 3.x roles | RED schema |
+| P15.12 | Honest error handling: expired or revoked token, provider limits | PLANNED / NOT_IMPLEMENTED | user | P15.2 | — |
+| P15.13 | Agentai OS attachment through the existing integration contract | PLANNED / NOT_IMPLEMENTED | operator | 10.4, 10.15 | AGENT-1..4, X-2 |
+
 ## Function map data
 
 Source for the interactive function map, added 2026-11-05. **Status, evidence and date still come only from the function rows above.** IDs are those row IDs.

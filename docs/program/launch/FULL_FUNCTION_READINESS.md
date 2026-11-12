@@ -562,6 +562,6 @@ Module membership (all row IDs):
 
 - No walk was run for this file. A PASS (production proof) holds for the date and build in its row, not for the build in production today.
 - "Plan" reflects what the code enforces, not a price list; the intended tier of every function waits for the owner.
-- V2 design states come from unmerged code inventories; 221 of 290 rows are NOT ASSESSED.
+- V2 design states come from unmerged code inventories; 219 of the 288 counted rows are NOT ASSESSED (the 290 table rows include the two DUPLICATE rows 4.17 and 7.10, which are not counted).
 - "For whom" comes from a draft map table in the register.
 

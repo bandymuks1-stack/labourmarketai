@@ -83,7 +83,7 @@ suvestinės lentelė atsilieka viena eilute (196 ir 6 vietoje 197 ir 5).
 
 - Parašyta kode: 266 iš 288 (92 %), įskaitant neveikiančias, užblokuotas ir nepatikrintas.
 - Patikrinta produkcijoje šiandienos versijai: tik tai, kas išvardyta 1 skyriuje.
-- Atitiktis V2 dizainui: 8 funkcijos suvienodintos, 50 mišrios, 11 seno dizaino, 221 neįvertinta.
+- Atitiktis V2 dizainui: 8 funkcijos suvienodintos, 50 mišrios, 11 seno dizaino, 219 neįvertinta (iš 288; dvi DUPLICATE eilutės 4.17 ir 7.10 neskaičiuojamos).
 - Telefonu patikrinta: 1 funkcija turi mobilų produkcijos testą, 2 turi vietinių programėlių keliones;
   likusios NOT TESTED.
 - Registre nėra eilučių septynioms komandų ir projektų funkcijoms, kurių kode nėra: komandos vadovas,

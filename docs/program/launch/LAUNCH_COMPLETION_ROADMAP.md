@@ -64,7 +64,7 @@ M (funkcijų registras), R (nepriklausoma GREEN peržiūra), R2 (nepriklausoma R
 | 39 BLOCKED funkcijos | savininkas, pagal modulį | sprendimai, paskyros, konfigūracija | savininko veiksmai | daugiausia sprendimai | priklauso nuo sprendimų | būsena pakeista su įrodymu |
 | 16 NOT TESTED funkcijų | F, pagal modulį | testas | – | testų rašymas | nenustatyta | produkcijos arba izoliuotas testas |
 | 22 NOT IMPLEMENTED funkcijos | pagal modulį | įgyvendinta arba išbraukta savininko sprendimu | dalis RED | neįvertinta | nenustatyta | registro eilutė PASS |
-| Dizaino suvienodinimas: 61 įvertinta funkcija mišri arba sena, 221 neįvertinta | A, G, H, C, D, B | visi P0 ekranai ant vienos sistemos | #3273 | didelė | nenustatyta | A krypties sąrašas (#3272) be „mišrus“ ir „senas“ |
+| Dizaino suvienodinimas: 61 įvertinta funkcija mišri arba sena, 219 neįvertinta | A, G, H, C, D, B | visi P0 ekranai ant vienos sistemos | #3273 | didelė | nenustatyta | A krypties sąrašas (#3272) be „mišrus“ ir „senas“ |
 | Mobilus veikimas: 285 funkcijos be mobilaus testo | F, pagal modulį | testai 320–1440 px | – | didelė | nenustatyta | nėra perpildymo, veiksmai pasiekiami lietimu |
 | Kitos kalbos: da 30 %, no, et, lv apie 22 %, fi be sąsajos katalogo | E | pagal savininko prioritetą | švedų kalba | didelė | nenustatyta | kalbos kelionė PASS |
 | Realių naudotojų greitaveikos matavimas | S | LCP, CLS, INP tik su sutikimu | – | maža | po V2 | 75-asis procentilis ≤ tikslų |
