@@ -70,7 +70,8 @@ export function WorkerDocumentForm({
   typeOptions: readonly (readonly [string, string])[];
   /** [value, localized label] for ready/missing/blocked. */
   statusOptions: readonly (readonly [string, string])[];
-  countryOptions: readonly string[];
+  /** [ISO code, localized country name] — the code is what is submitted. */
+  countryOptions: readonly (readonly [string, string])[];
 }) {
   const locale = useLocale();
   const [state, action, pending] = useActionState<
@@ -111,9 +112,9 @@ export function WorkerDocumentForm({
           <Label>{labels.countryLabel}</Label>
           <Select name="country" defaultValue="">
             <option value="">{labels.countryNone}</option>
-            {countryOptions.map((c) => (
-              <option key={c} value={c}>
-                {c}
+            {countryOptions.map(([code, label]) => (
+              <option key={code} value={code}>
+                {label}
               </option>
             ))}
           </Select>
