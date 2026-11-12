@@ -77,3 +77,17 @@ describe("state and reason parsing", () => {
     expect(NEED_PUBLIC_REASONS.length).toBe(14);
   });
 });
+
+describe("condition 9: the label travels with the company name", () => {
+  it("labels an unconfirmed route, with or without a name; leaves verified alone", async () => {
+    const { safeApprovedCompanyName } = await import("./opportunity-fit");
+    const L = "Company not confirmed";
+    expect(safeApprovedCompanyName({ company_name: "Clean UAB", route_status: "unconfirmed_company" }, L)).toBe(
+      "Clean UAB · Company not confirmed",
+    );
+    expect(safeApprovedCompanyName({ company_name: "", route_status: "unconfirmed_company" }, L)).toBe(L);
+    expect(safeApprovedCompanyName({ company_name: "Verified UAB", route_status: "approved_direct_partner" }, L)).toBe(
+      "Verified UAB",
+    );
+  });
+});

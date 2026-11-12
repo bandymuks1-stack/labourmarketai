@@ -163,6 +163,8 @@ drop function if exists public.list_need_public_review_queue_v1();
 drop function if exists public.get_my_need_public_states_v1(uuid[]);
 drop function if exists public.list_public_company_needs_v1(text, text);
 drop function if exists public.need_public_state_v1(uuid);
+-- The append-only triggers stay with any kept history table (the evidence stays protected);
+-- the trigger function is dropped only when neither table remains (end of this file).
 drop function if exists public.is_disposable_email_domain_v1(text);
 drop function if exists public.need_public_text_flags_v1(text);
 
@@ -185,6 +187,10 @@ begin
     drop table public.customer_request_publications;
   else
     raise notice 'customer_request_publications kept: it holds the companies'' publication choices (evidence); nothing reads it';
+  end if;
+  if to_regclass('public.customer_request_publications') is null
+     and to_regclass('public.customer_request_public_reviews') is null then
+    drop function if exists public.need_public_history_append_only_v1();
   end if;
 end
 $$;

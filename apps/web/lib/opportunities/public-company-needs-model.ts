@@ -12,6 +12,9 @@
  *  is not verified but passed the V-1 checks. Shown, labelled, never badged. */
 export const UNCONFIRMED_COMPANY_ROUTE_STATUS = "unconfirmed_company";
 
+/** The label in tool DATA (MCP option labels), where no request locale exists. */
+export const COMPANY_NOT_CONFIRMED_DATA_LABEL = "Company not confirmed";
+
 /** True when a worker-board row belongs to a company that is not confirmed. */
 export function isUnconfirmedCompanyRoute(routeStatus: string | null | undefined): boolean {
   return routeStatus === UNCONFIRMED_COMPANY_ROUTE_STATUS;

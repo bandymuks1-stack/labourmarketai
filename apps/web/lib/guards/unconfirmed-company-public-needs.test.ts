@@ -55,9 +55,11 @@ describe("V-1: one eligibility rule in the database", () => {
   });
 
   it("no reader keeps its own verified-only gate", () => {
-    for (const fn of ["list_open_demand_for_workers", "list_public_company_needs_v1"]) {
-      expect(fnBody(fn), fn).not.toMatch(/verification_status\s*=\s*'verified'/);
-    }
+    // The board's join no longer requires verification; verification is only a cheap
+    // prefilter beside "has a publication event" (R2 P2-4), then the one rule decides.
+    const board = fnBody("list_open_demand_for_workers");
+    expect(board).not.toMatch(/on c\.id = public\.demand_company_id_v1\(cr\.organization_id, cr\.profile_id\)\s+and c\.verification_status/);
+    expect(board).toMatch(/and \(c\.verification_status = 'verified'\s+or exists \(select 1 from public\.customer_request_publications p where p\.request_id = cr\.id\)\)/);
     // The worker board keeps verified needs exactly as before, plus admitted unconfirmed ones.
     expect(fnBody("list_open_demand_for_workers")).toMatch(/st\.state in \('verified', 'unconfirmed_public'\)/);
   });
@@ -65,15 +67,23 @@ describe("V-1: one eligibility rule in the database", () => {
   it("principle C (7): the signed-out reader never returns a verified company's need", () => {
     const body = fnBody("list_public_company_needs_v1");
     expect(body).toMatch(/and st\.state = 'unconfirmed_public'/);
-    expect(body).not.toMatch(/'verified'/);
+    expect(body).toMatch(/and c\.verification_status is distinct from 'verified'/);
+    expect(body).not.toMatch(/st\.state in \('verified'/);
+    // R2 P1-2: only a closed start value reaches a signed-out caller.
+    expect(body).toMatch(/case when cr\.start_period in \('flexible', 'this_week', 'urgent'\) then cr\.start_period end/);
     expect(body).toMatch(/false as company_confirmed/);
   });
 
   it("principle C (1): nothing is public without the company's explicit per-need choice", () => {
     const rule = fnBody("need_public_state_v1");
     // The choice is checked before every other outcome, operator approval included.
-    expect(rule).toMatch(/case\s+when not v_published then 'not_published'\s+when v_decision = 'approved'/);
-    expect(rule).toMatch(/from public\.customer_request_publications p\s+where p\.request_id = r\.id\s+order by p\.created_at desc, p\.id desc/);
+    expect(rule).toMatch(/if not v_published then\s+return query select 'not_published'/);
+    expect(rule.indexOf("if not v_published then")).toBeLessThan(rule.indexOf("v_loc := coalesce("));
+    // Ordered by the server sequence (R2 P3-5); the checks use server publication times (P2-3).
+    expect(rule).toMatch(/from public\.customer_request_publications p\s+where p\.request_id = r\.id\s+order by p\.seq desc/);
+    expect(rule).not.toMatch(/r\.created_at/);
+    // An approval never lifts a missing field (R2 P3-6).
+    expect(rule).toMatch(/when v_decision = 'rejected' then 'rejected'\s+when v_missing then 'held_incomplete'\s+when v_decision = 'approved'/);
     expect(rule).toMatch(/v_published := coalesce\([\s\S]*?false\);/);
     // The choice table: append-only, sealed, written only by the door.
     expect(up).toMatch(/alter table public\.customer_request_publications enable row level security;/);
@@ -86,8 +96,11 @@ describe("V-1: one eligibility rule in the database", () => {
 
   it("principle C: only the author or an active org owner / admin / manager may choose", () => {
     const door = fnBody("set_need_public_publication_v1");
-    expect(door).toMatch(/if not coalesce\(\(\s+r\.profile_id = uid\s+or exists \(select 1 from public\.company_memberships m/);
-    expect(door).toMatch(/and m\.status = 'active'\s+and m\.role in \('owner', 'admin', 'manager'\)\)/);
+    // R2 P1-1: even the author leg needs an active membership of the need's organization.
+    expect(door).toMatch(/and m\.status = 'active'\s+and \(m\.role in \('owner', 'admin', 'manager'\) or r\.profile_id = uid\)\)/);
+    expect(door).not.toMatch(/r\.profile_id = uid\s+or exists/);
+    // R2 P3-9: no dormant choice for a verified company's need.
+    expect(door).toMatch(/raise exception 'verified_company'/);
     // has_org_demand_access also admits external managers — the owner's list does not.
     expect(door).not.toMatch(/has_org_demand_access/);
     expect(door).not.toMatch(/is_admin\(\)/);
@@ -123,6 +136,11 @@ describe("V-1: one eligibility rule in the database", () => {
     expect(fnBody("need_public_state_v1")).toMatch(/d\.content_hash = v_hash/);
     expect(fnBody("decide_need_public_review_v1")).toMatch(/if uid is null or not public\.is_admin\(\)/);
     expect(fnBody("list_need_public_review_queue_v1")).toMatch(/not public\.is_admin\(\)/);
+  });
+
+  it("both histories are append-only by trigger, not only by absent grants (R2 P3-7)", () => {
+    expect(up).toMatch(/create trigger customer_request_publications_append_only\s+before update or delete on public\.customer_request_publications/);
+    expect(up).toMatch(/create trigger customer_request_public_reviews_append_only\s+before update or delete on public\.customer_request_public_reviews/);
   });
 
   it("the decision table is sealed: RLS on, no policy, no client grant", () => {
@@ -204,9 +222,21 @@ describe("V-1: the app reads the rule, never re-implements it", () => {
   it("the verified badge is keyed on the verified route only", () => {
     const page = readFileSync(join(WEB, "app/[locale]/dashboard/opportunities/page.tsx"), "utf8");
     expect(page).toMatch(/need\.routeStatus === "approved_direct_partner" \?/);
-    expect(page).toMatch(/need\.routeStatus === UNCONFIRMED_COMPANY_ROUTE_STATUS \?/);
     const ctx = readFileSync(join(WEB, "lib/world-state/job-context-server.ts"), "utf8");
-    expect(ctx).toMatch(/model\.verifiedRoute\s*\?\s*\(t\("companyVerified"\)/);
+    expect(ctx).toMatch(/badge: model\.verifiedRoute \? \(t\("companyVerified"\) as string\) : null/);
+  });
+
+  it("condition 9: every worker surface gets the label with the company name, at the one source", () => {
+    const loader = readFileSync(join(WEB, "lib/opportunities/load-worker-opportunities.ts"), "utf8");
+    expect(loader).toMatch(/companyName: safeApprovedCompanyName\(row, notConfirmedLabel\)/);
+    const interest = readFileSync(join(WEB, "lib/opportunities/interest.ts"), "utf8");
+    expect(interest).toMatch(/companyName: safeApprovedCompanyName\(visibleRow, await readNotConfirmedLabelForSnapshot\(\)\)/);
+    // No other caller may read the board's company name without the label.
+    const offenders = sources.filter((f) => {
+      const s = readFileSync(f, "utf8");
+      return /safeApprovedCompanyName\(\s*[a-zA-Z]+\s*\)/.test(s) && !f.endsWith("opportunity-fit.ts");
+    });
+    expect(offenders).toEqual([]);
   });
 });
 

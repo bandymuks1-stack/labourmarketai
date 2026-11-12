@@ -89,6 +89,7 @@ import type {
   CapabilityCaller,
   CapabilityDescriptor,
 } from "./contract";
+import { COMPANY_NOT_CONFIRMED_DATA_LABEL } from "@/lib/opportunities/public-company-needs-model";
 
 /**
  * THE capability registry — one entry per domain action an external client
@@ -1013,7 +1014,8 @@ function demandOptionLabel(row: Record<string, unknown>): string {
     typeof row.role_text === "string" && row.role_text.trim() !== ""
       ? row.role_text.trim()
       : String(row.id);
-  const company = safeApprovedCompanyName(row);
+  // Condition 9: an unconfirmed company is labelled in the option text too.
+  const company = safeApprovedCompanyName(row, COMPANY_NOT_CONFIRMED_DATA_LABEL);
   const location =
     typeof row.location_label === "string" && row.location_label.trim() !== ""
       ? row.location_label.trim()

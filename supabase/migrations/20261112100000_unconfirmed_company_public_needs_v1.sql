@@ -47,9 +47,8 @@
 --   pitch lists are the ones the public intake already uses (lib/staffing/intake-advertising.ts).
 -- On the text that is NOT shown (title, summary, notes): an advertising pitch only — a company
 --   may legitimately write its own phone in its private notes.
--- Rate: more than 5 demand-kind needs from one organization in the 24 h up to this one.
--- Duplicate: the same summary (>= 40 chars, whitespace/case folded) submitted EARLIER by
---   ANOTHER organization (only the later copy is held, so copying never hides the original).
+-- Rate and duplicate: decided on the server time of each need's first PUBLICATION (never on a
+--   column the company can write), and only among published needs.
 -- Disposable e-mail: the poster's sign-in address is on a disposable-mail domain.
 --
 -- ── OPERATOR DECISIONS ───────────────────────────────────────────────────
@@ -120,10 +119,13 @@ end $$;
 -- ── 1b. The company's explicit per-need choice (append-only) ─────────────
 create table if not exists public.customer_request_publications (
   id         uuid primary key default gen_random_uuid(),
+  -- Commit-order-safe ordering: one global sequence, assigned at insert (R2 P3-5).
+  seq        bigint generated always as identity,
   request_id uuid not null references public.customer_requests(id) on delete cascade,
   action     text not null check (action in ('publish', 'withdraw')),
   actor_id   uuid references public.profiles(id) on delete set null,
-  created_at timestamptz not null default now()
+  -- Wall clock of the insert (not the transaction start), server-set.
+  created_at timestamptz not null default clock_timestamp()
 );
 
 comment on table public.customer_request_publications is
@@ -131,7 +133,7 @@ comment on table public.customer_request_publications is
 
 -- @plan-cache-proof: n/a — one latest-event probe per need on a table that grows by explicit company clicks; no search plan depends on it.
 create index if not exists customer_request_publications_request_idx
-  on public.customer_request_publications (request_id, created_at desc);
+  on public.customer_request_publications (request_id, seq desc);
 
 alter table public.customer_request_publications enable row level security;
 revoke all on public.customer_request_publications from public, anon, authenticated, service_role;
@@ -148,6 +150,49 @@ begin
    'FK already SET NULL; the person is an actor on a need publication choice, never its subject')
   on conflict (schema_name, table_name, column_name) do nothing;
 end $$;
+
+-- ── 1c. Both histories are append-only (R2 P3-7) ─────────────────────────
+-- No UPDATE except the erasure executor blanking the person reference (actor_id / decided_by
+-- -> NULL with every other column unchanged). No DELETE while the need still exists: the only
+-- delete is the FK cascade when the need itself is deleted (erasure / operator delete).
+create or replace function public.need_public_history_append_only_v1()
+returns trigger
+language plpgsql
+set search_path to 'public'
+as $function$
+begin
+  if tg_op = 'UPDATE' then
+    if tg_table_name = 'customer_request_publications'
+       and new.actor_id is null and old.actor_id is not null
+       and (to_jsonb(new) - 'actor_id') = (to_jsonb(old) - 'actor_id') then
+      return new;
+    end if;
+    if tg_table_name = 'customer_request_public_reviews'
+       and new.decided_by is null and old.decided_by is not null
+       and (to_jsonb(new) - 'decided_by') = (to_jsonb(old) - 'decided_by') then
+      return new;
+    end if;
+    raise exception 'append_only' using errcode = '42501';
+  end if;
+  -- DELETE: allowed only as the cascade of the need's own deletion.
+  if exists (select 1 from public.customer_requests r where r.id = old.request_id) then
+    raise exception 'append_only' using errcode = '42501';
+  end if;
+  return old;
+end
+$function$;
+
+revoke all on function public.need_public_history_append_only_v1() from public, anon, authenticated, service_role;
+
+drop trigger if exists customer_request_publications_append_only on public.customer_request_publications;
+create trigger customer_request_publications_append_only
+  before update or delete on public.customer_request_publications
+  for each row execute function public.need_public_history_append_only_v1();
+
+drop trigger if exists customer_request_public_reviews_append_only on public.customer_request_public_reviews;
+create trigger customer_request_public_reviews_append_only
+  before update or delete on public.customer_request_public_reviews
+  for each row execute function public.need_public_history_append_only_v1();
 
 -- ── 2. Deterministic text checks ─────────────────────────────────────────
 -- Returns the closed flags the text trips: link | email | phone | contact_channel | pitch.
@@ -203,19 +248,20 @@ stable
 set search_path to 'public'
 as $function$
 declare
-  r          public.customer_requests%rowtype;
-  c          public.companies%rowtype;
-  v_loc      text;
-  v_name     text;
-  v_hash     text;
-  v_reasons  text[] := '{}';
-  v_missing  boolean;
-  v_shown    text[];
-  v_private  text[];
-  v_decision text;
-  v_email    text;
-  v_summary  text;
+  r           public.customer_requests%rowtype;
+  c           public.companies%rowtype;
+  v_loc       text;
+  v_name      text;
+  v_hash      text;
+  v_reasons   text[] := '{}';
+  v_missing   boolean;
+  v_shown     text[];
+  v_private   text[];
+  v_decision  text;
+  v_email     text;
+  v_summary   text;
   v_published boolean;
+  v_first_pub timestamptz;
 begin
   select * into r from public.customer_requests x where x.id = p_request_id;
   if not found
@@ -238,6 +284,25 @@ begin
     return;
   end if;
 
+  -- THE COMPANY'S CHOICE FIRST (principle C; R2 P2-4): the latest publish / withdraw event,
+  -- ordered by the server sequence. Not published -> nothing else is computed.
+  v_published := coalesce(
+    (select p.action = 'publish'
+       from public.customer_request_publications p
+      where p.request_id = r.id
+      order by p.seq desc
+      limit 1),
+    false);
+  if not v_published then
+    return query select 'not_published'::text, '{}'::text[], false, null::text;
+    return;
+  end if;
+  -- Server time of the need's FIRST publication — the ordering the checks trust (R2 P2-3);
+  -- customer_requests.created_at is writable by its owner and is never used here.
+  select min(p.created_at) into v_first_pub
+    from public.customer_request_publications p
+   where p.request_id = r.id and p.action = 'publish';
+
   v_loc := coalesce(
     (select nullif(trim(coalesce(cdl.city, cdl.location_label)), '')
        from public.company_demand_locations cdl
@@ -246,21 +311,21 @@ begin
       limit 1),
     nullif(trim(r.location), ''));
   v_name := coalesce(nullif(trim(c.display_name), ''), nullif(trim(c.legal_name), ''));
+  -- Every field a reader returns is inside the hash an approval binds to (R2 P1-2).
   v_hash := md5(concat_ws(chr(31), r.title, r.role_or_work_type, r.need_summary, r.notes,
-                          v_loc, r.country, v_name));
+                          v_loc, r.country, v_name, r.start_period, r.team_size::text));
 
-  -- (1) required fields
+  -- (1) required fields and an activated company
   if char_length(coalesce(trim(r.role_or_work_type), '')) < 2 then v_reasons := v_reasons || 'missing_role'::text; end if;
   if coalesce(r.country, '') !~ '^[A-Z]{2}$' then v_reasons := v_reasons || 'missing_country'::text; end if;
   if v_loc is null then v_reasons := v_reasons || 'missing_location'::text; end if;
   if v_name is null then v_reasons := v_reasons || 'missing_company_name'::text; end if;
   if nullif(trim(coalesce(c.country, '')), '') is null then v_reasons := v_reasons || 'missing_company_country'::text; end if;
-  -- a company still in draft was never activated by its owner
   if c.verification_status = 'draft' then v_reasons := v_reasons || 'company_draft'::text; end if;
   v_missing := cardinality(v_reasons) > 0;
 
-  -- (2) the text that is shown: every flag
-  v_shown := public.need_public_text_flags_v1(concat_ws(' ', r.role_or_work_type, v_loc, v_name));
+  -- (2) every free-text field a reader returns is screened (R2 P1-2: start_period too)
+  v_shown := public.need_public_text_flags_v1(concat_ws(' ', r.role_or_work_type, v_loc, v_name, r.start_period));
   v_reasons := v_reasons || v_shown;
   -- the text that is not shown: an advertising pitch only
   v_private := public.need_public_text_flags_v1(concat_ws(' ', r.title, r.need_summary, r.notes));
@@ -268,26 +333,31 @@ begin
     v_reasons := v_reasons || 'pitch'::text;
   end if;
 
-  -- (3) rate of posting: more than 5 demand-kind needs from one organization in 24 h
-  if (select count(*)
+  -- (3) rate: more than 5 needs of one organization first PUBLISHED within the 24 h up to this
+  --     need's first publication — server times only (R2 P2-3).
+  if (select count(distinct o.id)
         from public.customer_requests o
+        join public.customer_request_publications p on p.request_id = o.id and p.action = 'publish'
        where coalesce(o.organization_id, o.profile_id) = coalesce(r.organization_id, r.profile_id)
          and (o.kind is null or o.kind in ('company_request', 'buyer_request'))
-         and o.status <> 'draft'
-         and o.created_at >  r.created_at - interval '24 hours'
-         and o.created_at <= r.created_at) > 5 then
+         and p.created_at >  v_first_pub - interval '24 hours'
+         and p.created_at <= v_first_pub) > 5 then
     v_reasons := v_reasons || 'rate'::text;
   end if;
 
-  -- (4) duplicate text from another organization
+  -- (4) duplicate: the same summary first PUBLISHED EARLIER (server time) by another
+  --     organization. Only published needs are compared (bounded cost; R2 P2-3/P2-4).
   v_summary := lower(regexp_replace(trim(coalesce(r.need_summary, '')), '\s+', ' ', 'g'));
   if char_length(v_summary) >= 40 and exists (
-       select 1 from public.customer_requests o
+       select 1
+         from public.customer_requests o
+         join lateral (select min(p.created_at) as first_pub
+                         from public.customer_request_publications p
+                        where p.request_id = o.id and p.action = 'publish') op on op.first_pub is not null
         where o.id <> r.id
-          and o.status <> 'draft'
+          and o.status = 'submitted'
           and coalesce(o.organization_id, o.profile_id) <> coalesce(r.organization_id, r.profile_id)
-          -- only the LATER copy is held: copying a company's text never hides the original
-          and (o.created_at < r.created_at or (o.created_at = r.created_at and o.id < r.id))
+          and (op.first_pub < v_first_pub or (op.first_pub = v_first_pub and o.id < r.id))
           and lower(regexp_replace(trim(coalesce(o.need_summary, '')), '\s+', ' ', 'g')) = v_summary) then
     v_reasons := v_reasons || 'duplicate_text'::text;
   end if;
@@ -298,16 +368,8 @@ begin
     v_reasons := v_reasons || 'disposable_email'::text;
   end if;
 
-  -- (6) THE COMPANY'S CHOICE: the latest publish / withdraw event; none = not published.
-  v_published := coalesce(
-    (select p.action = 'publish'
-       from public.customer_request_publications p
-      where p.request_id = r.id
-      order by p.created_at desc, p.id desc
-      limit 1),
-    false);
-
-  -- An operator's decision on THIS content wins (over the checks, never over the choice).
+  -- An operator's decision on THIS content. It can lift a check, never a missing required
+  -- field or a draft company (R2 P3-6), and never the company's choice (checked above).
   select d.decision into v_decision
     from public.customer_request_public_reviews d
    where d.request_id = r.id and d.content_hash = v_hash
@@ -316,11 +378,10 @@ begin
 
   return query select
     case
-      when not v_published then 'not_published'
-      when v_decision = 'approved' then 'unconfirmed_public'
       when v_decision = 'rejected' then 'rejected'
-      when cardinality(v_reasons) = 0 then 'unconfirmed_public'
       when v_missing then 'held_incomplete'
+      when v_decision = 'approved' then 'unconfirmed_public'
+      when cardinality(v_reasons) = 0 then 'unconfirmed_public'
       else 'held_review'
     end::text,
     v_reasons,
@@ -424,7 +485,8 @@ begin
     -- THE NEED'S OWN COMPANY — the one rule (20261020010000).
     join public.companies c
       on c.id = public.demand_company_id_v1(cr.organization_id, cr.profile_id)
-    -- WHO MAY SEE IT — the one rule (20261112100000, owner decision V-1).
+    -- WHO MAY SEE IT — the one rule (20261112100000, principle C), evaluated only for a
+    -- verified company's need or one that has a publication event (bounded cost, R2 P2-4).
     cross join lateral public.need_public_state_v1(cr.id) st
     -- 1. the company's confirmed set; 2. the set derived at intake.
     left join lateral (
@@ -469,6 +531,8 @@ begin
              end as source
     ) ns
    where cr.status = 'submitted'
+     and (c.verification_status = 'verified'
+          or exists (select 1 from public.customer_request_publications p where p.request_id = cr.id))
      and st.state in ('verified', 'unconfirmed_public')
      -- DIRECTION OF THE MARKET (owner window 7 section 4). A worker board
      -- shows DEMAND. agency_offer is an agency offering the people it HAS -
@@ -517,7 +581,8 @@ begin
              limit 1),
            nullif(trim(cr.location), '')) as location_label,
          cr.team_size,
-         cr.start_period,
+         -- Closed value set only: free text never reaches a signed-out caller (R2 P1-2).
+         case when cr.start_period in ('flexible', 'this_week', 'urgent') then cr.start_period end,
          cr.created_at,
          coalesce(nullif(trim(c.display_name), ''), nullif(trim(c.legal_name), '')) as company_name,
          false as company_confirmed
@@ -527,6 +592,9 @@ begin
     cross join lateral public.need_public_state_v1(cr.id) st
    where cr.status = 'submitted'
      and (cr.kind is null or cr.kind in ('company_request', 'buyer_request'))
+     -- Only needs that have a publication event are evaluated at all (bounded cost, R2 P2-4).
+     and exists (select 1 from public.customer_request_publications p where p.request_id = cr.id)
+     and c.verification_status is distinct from 'verified'
      -- Principle C (7): verified companies' needs keep their existing visibility — the
      -- worker board only. This reader returns ONLY published, admitted needs of
      -- unconfirmed companies.
@@ -617,6 +685,7 @@ begin
    where cr.status = 'submitted'
      and (cr.kind is null or cr.kind in ('company_request', 'buyer_request'))
      and c.verification_status is distinct from 'verified'
+     and exists (select 1 from public.customer_request_publications p where p.request_id = cr.id)
      and st.state in ('held_incomplete', 'held_review', 'rejected')
    order by cr.created_at desc
    limit 200;
@@ -660,6 +729,10 @@ begin
   if v_state in ('not_listed', 'verified', 'not_published') or v_hash is null then
     raise exception 'not_reviewable' using errcode = '22023';
   end if;
+  -- A missing required field or a draft company is the company's to fix (R2 P3-6).
+  if v_state = 'held_incomplete' and p_decision = 'approved' then
+    raise exception 'incomplete' using errcode = '22023';
+  end if;
 
   insert into public.customer_request_public_reviews (request_id, decision, content_hash, reason, decided_by)
   values (p_request_id, p_decision, v_hash, nullif(trim(p_reason), ''), uid);
@@ -696,25 +769,35 @@ begin
   if not found then
     raise exception 'not_found' using errcode = 'P0002';
   end if;
-  -- Who may choose (owner condition): the need's author, or an ACTIVE owner, administrator or
-  -- manager of the need's own organization. Not an external manager, not an agency, not an
-  -- operator. Null-safe: a missing organization or row denies.
+  -- Who may choose (owner condition): the need's author WHILE an active member of the need's
+  -- organization, or an ACTIVE owner, administrator or manager of it. Not an external manager,
+  -- not an agency, not an operator, not a former member.
+  -- The author leg needs the membership too (R2 P1-1): customer_requests.profile_id is
+  -- writable by an operator under the table's existing UPDATE policy, so the column alone
+  -- never proves authority. organization_id is immutable once set (20260806200000).
+  -- Null-safe: a missing organization or row denies.
   if not coalesce((
-       r.profile_id = uid
-       or exists (select 1 from public.company_memberships m
-                   where m.profile_id = uid
-                     and m.organization_id = r.organization_id
-                     and m.status = 'active'
-                     and m.role in ('owner', 'admin', 'manager'))
+       exists (select 1 from public.company_memberships m
+                where m.profile_id = uid
+                  and m.organization_id = r.organization_id
+                  and m.status = 'active'
+                  and (m.role in ('owner', 'admin', 'manager') or r.profile_id = uid))
      ), false) then
     raise exception 'not_allowed' using errcode = '42501';
   end if;
   if not (r.kind is null or r.kind in ('company_request', 'buyer_request')) then
     raise exception 'not_a_need' using errcode = '22023';
   end if;
+  -- A verified company's need keeps its existing visibility; no dormant choice is recorded
+  -- for it (R2 P3-9).
+  if exists (select 1 from public.companies c
+              where c.id = public.demand_company_id_v1(r.organization_id, r.profile_id)
+                and c.verification_status = 'verified') then
+    raise exception 'verified_company' using errcode = '22023';
+  end if;
   v_now := coalesce(
     (select p.action = 'publish' from public.customer_request_publications p
-      where p.request_id = r.id order by p.created_at desc, p.id desc limit 1),
+      where p.request_id = r.id order by p.seq desc limit 1),
     false);
   -- Only a real change is recorded.
   if v_now is distinct from p_publish then

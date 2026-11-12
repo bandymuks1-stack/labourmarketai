@@ -244,7 +244,8 @@ export async function expressInterestCore(
       roleText: (visibleRow.role_text as string | null) ?? null,
       country: (visibleRow.country as string | null) ?? null,
       locationLabel: (visibleRow.location_label as string | null) ?? null,
-      companyName: safeApprovedCompanyName(visibleRow),
+      // Condition 9: the snapshot keeps the label with the name.
+      companyName: safeApprovedCompanyName(visibleRow, await readNotConfirmedLabelForSnapshot()),
     }),
     cv: buildInterestCvStash({
       cvTemplate: input.cvTemplate,
@@ -768,5 +769,15 @@ export async function listPendingInterestCountsForCompany(): Promise<
     return counts;
   } catch {
     return empty;
+  }
+}
+
+async function readNotConfirmedLabelForSnapshot(): Promise<string> {
+  try {
+    const { getTranslations } = await import("next-intl/server");
+    const t = await getTranslations("opportunities");
+    return t("companyNotConfirmed");
+  } catch {
+    return "Company not confirmed";
   }
 }

@@ -58,7 +58,12 @@ create table public.customer_requests (
 alter table public.customer_requests enable row level security;
 create policy customer_requests_select on public.customer_requests for select
   using (profile_id = auth.uid() or public.is_admin());
-grant select on public.customer_requests to authenticated;
+-- The REAL update policy and grant of 0028 (R2: the proof must see what an owner and an
+-- operator can write on customer_requests).
+create policy customer_requests_update on public.customer_requests for update
+  using (profile_id = auth.uid() or public.is_admin())
+  with check (profile_id = auth.uid() or public.is_admin());
+grant select, update on public.customer_requests to authenticated;
 
 create table public.company_demand_locations (
   request_id uuid references public.customer_requests(id) on delete cascade,

@@ -436,10 +436,11 @@ export default async function JobsPage({
   // not wait for their bookmarks before it starts (2026-11-04: on a first search
   // the two together took 1.1 s in sequence before the search's own 1.1 s). The
   // saved view reads no board unless its bookmarks turn out to be unavailable.
-  // Owner decision V-1 (2026-11-12): needs companies posted on the platform —
-  // verified ones and, labelled "Company not confirmed", unconfirmed ones the
-  // database's one rule admitted. First page of the board only, never the
-  // personal saved view. Its own anonymous-safe reader, in parallel.
+  // Owner principle C (2026-11-12): needs of companies that are NOT verified and
+  // that the company itself chose to "Publish publicly", admitted by the
+  // database's one rule and labelled "Company not confirmed". Verified
+  // companies' needs are not listed here (their visibility is unchanged).
+  // First page of the board only, never the personal saved view.
   const showCompanyNeeds = !wantsSaved && page === 1;
   const [member, earlyBoardSearch, companyNeeds] = await Promise.all([
     (async () => {

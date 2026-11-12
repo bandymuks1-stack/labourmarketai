@@ -137,9 +137,12 @@ check "no need of an unconfirmed company is shown before any choice (worker boar
 check "no need at all on the signed-out reader before any choice" "0" "$(anon "select count(*) from public.list_public_company_needs_v1();")"
 check "a clean need without a choice is not_published (not held, not in the queue)" "not_published" "$(q "select state from public.need_public_state_v1('$(rid $UNC)');")"
 # The companies' explicit choice, seeded as publish events for every unconfirmed need but Quiet UAB's.
-$PSQL -c "insert into public.customer_request_publications (request_id, action, actor_id)
-  select cr.id, 'publish', cr.profile_id from public.customer_requests cr
-   where cr.status = 'submitted' and cr.profile_id not in ('$VER', '$NOP');" >/dev/null
+$PSQL -c "do \$\$ declare x record; begin
+  for x in select cr.id, cr.profile_id from public.customer_requests cr
+            where cr.status = 'submitted' and cr.profile_id not in ('$VER', '$NOP')
+            order by cr.created_at, cr.id loop
+    insert into public.customer_request_publications (request_id, action, actor_id) values (x.id, 'publish', x.profile_id);
+  end loop; end \$\$;" >/dev/null
 echo; echo "== After the choice: one rule"
 check "worker board: verified unchanged + clean unconfirmed labelled; burst shows its first 5" \
   "Burst UAB:unconfirmed_company,Burst UAB:unconfirmed_company,Burst UAB:unconfirmed_company,Burst UAB:unconfirmed_company,Burst UAB:unconfirmed_company,Clean UAB:unconfirmed_company,Verified UAB:approved_direct_partner" "$(board)"
@@ -214,6 +217,50 @@ check "every event names who chose"          "0" "$(q "select count(*) from publ
 has "an operator cannot make the company's choice" "not_allowed" "$(as $ADMIN "select public.set_need_public_publication_v1('$(rid $NOP)', false);")"
 check "the poster withdraws"                "not_published" "$(as $NOP "select public.set_need_public_publication_v1('$(rid $NOP)', false);")"
 has "a not-published need is not reviewable" "not_reviewable" "$(as $ADMIN "select public.decide_need_public_review_v1('$(rid $NOP)', 'approved');")"
+
+echo; echo "== R2 findings (independent review of f4c03ca), each reproduced and closed"
+# P1-1: an operator rewrites the author column (allowed by the table's UPDATE policy), then tries
+# to publish as the "author". The door also requires an active membership of the need's org.
+as $ADMIN "update public.customer_requests set profile_id = '$ADMIN' where id = '$(rid $NOP)';" >/dev/null
+NOPID=$(q "select id from public.customer_requests where profile_id = '$ADMIN' and title = 'Need of roofer';")
+has "P1-1 an operator who rewrote the author column still cannot publish" "not_allowed" "$(as $ADMIN "select public.set_need_public_publication_v1('$NOPID', true);")"
+check "P1-1 ...and the need is not on the signed-out reader" "0" "$(anon "select count(*) from public.list_public_company_needs_v1() where company_name = 'Quiet UAB';")"
+as $ADMIN "update public.customer_requests set profile_id = '$NOP' where id = '$NOPID';" >/dev/null
+# P1-2: free text in start_period is screened and never reaches a signed-out caller.
+q "update public.customer_requests set start_period = 'call +370 612 34567' where id = '$(rid $UNC)';" >/dev/null
+check "P1-2 contact data in the start field holds the need" "held_review:phone" "$(st $(rid $UNC))"
+check "P1-2 ...and it is gone from the signed-out reader" "0" "$(anon "select count(*) from public.list_public_company_needs_v1() where company_name = 'Clean UAB';")"
+q "update public.customer_requests set start_period = 'next spring' where id = '$(rid $UNC)';" >/dev/null
+check "P1-2 a harmless free-text start is shown as nothing (closed set only)" "unconfirmed_public|" "$(q "select state from public.need_public_state_v1('$(rid $UNC)');")|$(anon "select coalesce(start_period, '') from public.list_public_company_needs_v1() where company_name = 'Clean UAB';")"
+q "update public.customer_requests set start_period = 'urgent' where id = '$(rid $UNC)';" >/dev/null
+check "P1-2 a closed-set start is shown" "urgent" "$(anon "select start_period from public.list_public_company_needs_v1() where company_name = 'Clean UAB';")"
+# P2-3: the poster backdates created_at (the table's UPDATE grant allows it): rate unchanged.
+as $RAT "update public.customer_requests set created_at = now() - interval '30 days' where profile_id = auth.uid() and status = 'submitted' and id <> '$(rid $RAT)';" >/dev/null
+check "P2-3 backdating created_at does not evade the rate check" "held_review:rate" "$(st $(rid $RAT))"
+# P2-3: a third organization copies Clean UAB's text and backdates its own need: Clean stays public.
+q "update public.customer_requests set need_summary = (select need_summary from public.customer_requests where id = '$(rid $UNC)'), created_at = now() - interval '400 days' where id = '$(rid $DSP)';" >/dev/null
+check "P2-3 a backdated copy cannot push the original off every surface" "unconfirmed_public" "$(q "select state from public.need_public_state_v1('$(rid $UNC)');")"
+# P3-5: publish then withdraw inside ONE transaction ends withdrawn (sequence order).
+printf '%s\n' "begin; set local role authenticated; set local request.jwt.claim.sub='$NOP'; select public.set_need_public_publication_v1('$(rid $NOP)', true); select public.set_need_public_publication_v1('$(rid $NOP)', false); commit;" | $PSQL -f - >/dev/null 2>&1
+check "P3-5 publish then withdraw in one transaction ends not published" "not_published" "$(q "select state from public.need_public_state_v1('$(rid $NOP)');")"
+# P3-7: the histories are append-only even for the database owner; a need deletion cascades.
+has "P3-7 a consent event cannot be updated (even by the owner role)" "append_only" "$(q "update public.customer_request_publications set action = 'publish' where request_id = '$(rid $NOP)';")"
+has "P3-7 a consent event cannot be deleted while its need exists" "append_only" "$(q "delete from public.customer_request_publications where request_id = '$(rid $NOP)';")"
+check "P3-7 erasure may blank the person on an event" "ok" "$(q "update public.customer_request_publications set actor_id = null where request_id = '$(rid $NOP)' and actor_id is not null;" >/dev/null && echo ok)"
+# P3-9: no dormant choice for a verified company's need.
+has "P3-9 a verified company's need takes no publication choice" "verified_company" "$(as $VER "select public.set_need_public_publication_v1('$(rid $VER)', true);")"
+# P3-6: approval never lifts a missing required field.
+has "P3-6 an incomplete need cannot be approved" "incomplete" "$(as $ADMIN "select public.decide_need_public_review_v1('$(rid $INC)', 'approved');")"
+# P2-4: cost with many unpublished needs (the reader looks only at needs with a choice).
+$PSQL -c "insert into public.customer_requests(profile_id, organization_id, title, role_or_work_type, country, location, need_summary, status, kind)
+  select '$NOP', o.id, 'bulk ' || g, 'helper', 'LT', 'Utena', 'Bulk unpublished need number ' || g || ' with enough text to compare', 'submitted', 'company_request'
+    from generate_series(1, 3000) g, public.organizations o where o.display_name = 'Quiet UAB';" >/dev/null
+MS=$(printf '%s\n' "set role anon; \\timing on" "select count(*) from public.list_public_company_needs_v1();" | $PSQL -f - 2>&1 | grep -oE 'Time: [0-9.]+' | head -1 | grep -oE '[0-9.]+')
+if [ -n "$MS" ] && awk "BEGIN{exit !($MS < 500)}"; then echo "  PASS  P2-4 signed-out call with 3,000 unpublished needs: ${MS} ms (< 500)"; pass=$((pass+1)); else echo "  FAIL  P2-4 signed-out call too slow: [${MS}] ms"; fail=$((fail+1)); fi
+MSW=$(printf '%s\n' "set role authenticated; set request.jwt.claim.sub='$WRK'; \\timing on" "select count(*) from public.list_open_demand_for_workers();" | $PSQL -f - 2>&1 | grep -oE 'Time: [0-9.]+' | head -1 | grep -oE '[0-9.]+')
+if [ -n "$MSW" ] && awk "BEGIN{exit !($MSW < 500)}"; then echo "  PASS  P2-4 worker board with 3,000 unpublished needs: ${MSW} ms (< 500)"; pass=$((pass+1)); else echo "  FAIL  P2-4 worker board too slow: [${MSW}] ms"; fail=$((fail+1)); fi
+q "delete from public.customer_requests where title like 'bulk %';" >/dev/null
+check "P3-7 deleting needs cascades their (empty) history; others intact" "0" "$(q "select count(*) from public.customer_requests where title like 'bulk %';")"
 
 echo; echo "== Operator decisions bind to content"
 check "approve the phone need"           "unconfirmed_public" "$(as $ADMIN "select public.decide_need_public_review_v1('$(rid $SPM)', 'approved', 'checked by phone');")"
