@@ -2086,6 +2086,16 @@
         "into": "Raden er slått sammen med",
         "canonical": "det beholdte prosjektet",
         "includes": "{count, plural, one {Omfatter # sammenslått prosjektrad — postene vises her.} other {Omfatter # sammenslåtte prosjektrader — postene vises her.}}"
+      },
+      "teams": {
+        "title": "Team på dette prosjektet",
+        "members": "{n, plural, one {# person} other {# personer}}",
+        "personTeam": "Team: {team}",
+        "unnamed": "Team uten navn",
+        "unnamedMember": "Medlem",
+        "noMembers": "Ingen medlemmer akkurat nå.",
+        "unavailable": "Teamene kunne ikke lastes inn. Prøv igjen.",
+        "manage": "Endre team"
       }
     },
     "workerView": {

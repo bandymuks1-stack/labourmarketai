@@ -6871,6 +6871,16 @@
         "into": "Ten wiersz scalono z",
         "canonical": "zachowanym projektem",
         "includes": "{count, plural, one {Obejmuje # scalony wiersz projektu — jego wpisy są tutaj.} few {Obejmuje # scalone wiersze projektu — ich wpisy są tutaj.} many {Obejmuje # scalonych wierszy projektu — ich wpisy są tutaj.} other {Obejmuje # scalonego wiersza projektu — wpisy są tutaj.}}"
+      },
+      "teams": {
+        "title": "Zespoły w tym projekcie",
+        "members": "{n, plural, one {# osoba} few {# osoby} other {# osób}}",
+        "personTeam": "Zespół: {team}",
+        "unnamed": "Zespół",
+        "unnamedMember": "Członek",
+        "noMembers": "Obecnie brak członków.",
+        "unavailable": "Nie udało się wczytać zespołów. Spróbuj ponownie.",
+        "manage": "Zmień zespoły"
       }
     },
     "workerView": {

@@ -6871,6 +6871,16 @@
         "into": "Ši eilutė sujungta į",
         "canonical": "išlaikomą projektą",
         "includes": "{count, plural, one {Apima # sujungtą projekto eilutę — jos įrašai rodomi čia.} few {Apima # sujungtas projekto eilutes — jų įrašai rodomi čia.} other {Apima # sujungtų projekto eilučių — jų įrašai rodomi čia.}}"
+      },
+      "teams": {
+        "title": "Komandos šiame projekte",
+        "members": "{n, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
+        "personTeam": "Komanda: {team}",
+        "unnamed": "Komanda",
+        "unnamedMember": "Narys",
+        "noMembers": "Šiuo metu narių nėra.",
+        "unavailable": "Komandų įkelti nepavyko. Bandykite dar kartą.",
+        "manage": "Keisti komandas"
       }
     },
     "workerView": {

@@ -6871,6 +6871,16 @@
         "into": "Deze regel is samengevoegd met",
         "canonical": "het behouden project",
         "includes": "{count, plural, one {Bevat # samengevoegde projectregel — de registraties staan hier.} other {Bevat # samengevoegde projectregels — de registraties staan hier.}}"
+      },
+      "teams": {
+        "title": "Ploegen op dit project",
+        "members": "{n, plural, one {# persoon} other {# personen}}",
+        "personTeam": "Ploeg: {team}",
+        "unnamed": "Ploeg zonder naam",
+        "unnamedMember": "Lid",
+        "noMembers": "Nu geen leden.",
+        "unavailable": "De ploegen konden niet worden geladen. Probeer het opnieuw.",
+        "manage": "Ploegen wijzigen"
       }
     },
     "workerView": {
