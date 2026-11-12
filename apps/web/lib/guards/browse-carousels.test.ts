@@ -85,11 +85,14 @@ describe("professions cover every sector, not one trade", () => {
     for (const c of cards) expect(c.href).toBe(`/jobs?profession=${c.slug}`);
   });
 
-  it("every sector has an icon and a name in the six routed locales", () => {
+  it("every sector has an icon and a name in each language the sector list carries", () => {
     for (const c of WORK_CATEGORIES) {
       expect(WORK_AREA_ICONS[SECTOR_ICONS[c.key]], `${c.key} icon`).toBeTruthy();
-      for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
-        expect(c[loc].trim(), `${c.key} ${loc}`).not.toBe("");
+      // Every label the sector carries (one per routed language it knows).
+      const labels = Object.entries(c).filter(([k, v]) => k.length === 2 && typeof v === "string");
+      expect(labels.length, `${c.key} labels`).toBeGreaterThanOrEqual(6);
+      for (const [loc, value] of labels) {
+        expect((value as string).trim(), `${c.key} ${loc}`).not.toBe("");
       }
     }
   });
