@@ -236,7 +236,7 @@ describe("quick access: the organization's active projects and open needs, by na
   const code = quick.replace(/\/\*[\s\S]*?\*\//g, "");
 
   it("reads through existing readers — no new query text, table or store", () => {
-    expect(code).toMatch(/await listManagedProjects\(\{ activeOnly: true \}\)/);
+    expect(code).toMatch(/await listManagedProjects\(\{ activeOnly: true, organizationId \}\)/);
     // The needs are the request-cached list the home's opening brief already
     // read: zero extra queries, and an agency's offers are not in it (SEP-4).
     expect(code).toMatch(/await listCompanyDemands\(\)/);
@@ -249,7 +249,13 @@ describe("quick access: the organization's active projects and open needs, by na
   });
 
   it("stays inside the active workspace and lists a few rows, not a wall", () => {
-    expect(code).toMatch(/p\.organizationId === organizationId && p\.status !== "completed"/);
+    // The organization is part of the QUERY, before the reader's page limit
+    // (Codex P2 on #3269): another organization's newer projects cannot crowd
+    // this one's out of a capped page.
+    expect(read("lib/projects/projects.ts")).toMatch(
+      /if \(opts\.organizationId\) q = q\.eq\("organization_id", opts\.organizationId\);/,
+    );
+    expect(code).toMatch(/all\.filter\(\(p\) => p\.status !== "completed"\)/);
     expect(code).toMatch(/r\.status !== "closed"/);
     expect(code).toMatch(/export const QUICK_ACCESS_LIMIT = 3;/);
     expect((code.match(/\.slice\(0, QUICK_ACCESS_LIMIT\)/g) ?? []).length).toBe(2);
@@ -271,8 +277,13 @@ describe("quick access: the organization's active projects and open needs, by na
     expect(code).toMatch(/routeIsAdmitted\(NEEDS_HREF, admission\) \? loadOpenNeeds\(\) : \[\]/);
     expect(code).toMatch(/href: `\$\{PROJECTS_HREF\}\/\$\{p\.id\}`/);
     expect(existsSync(join(APP, "app", "[locale]", "dashboard", "projects", "[id]", "page.tsx"))).toBe(true);
-    // The needs list is a section the Needs door really holds.
-    expect(read("app/[locale]/dashboard/company/needs/page.tsx")).toMatch(/id="company-requests"/);
+    // The needs rows open the Needs door's READBACK of saved needs — not the
+    // intake section above it (Codex P2 on #3269).
+    expect(code).toMatch(/#demand-readback-title/);
+    expect(code).not.toMatch(/#company-requests/);
+    expect(read("components/app/demand-requests-readback.tsx")).toMatch(/id="demand-readback-title"/);
+    // A stored stand-in title is shown through the readback's own resolver.
+    expect(code).toMatch(/resolveDemandTitle\(n\.title, \{/);
     expect(code).toMatch(/min-h-11/);
     expect(code).toMatch(/focus-visible:ring-2/);
   });
