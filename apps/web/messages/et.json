@@ -1791,7 +1791,19 @@
       "sent": "[EN] Reply sent."
     },
     "translationUnavailable": "Originaal ({lang}) — tõlge pole saadaval",
-    "loadError": "Sõnumeid ei õnnestunud praegu laadida. See, mida näed, pole täielik pilt — proovi uuesti."
+    "loadError": "Sõnumeid ei õnnestunud praegu laadida. See, mida näed, pole täielik pilt — proovi uuesti.",
+    "errors": {
+      "invalid_input": "Sõnum on tühi või liiga pikk. Kontrollige ja saatke uuesti.",
+      "no_permission": "Selle inimesega ei saa veel vestlust alustada: teie vahel pole töösuhet, kandideerimist ega ühendust.",
+      "rate_limited": "Täna on alustatud liiga palju uusi vestlusi. Proovige homme uuesti.",
+      "rate_check_unavailable": "Turvakontrolli ei saanud teha, seega midagi ei saadetud. Proovige uuesti.",
+      "insert_failed": "Sõnumit ei saadetud. Proovige uuesti.",
+      "not_a_participant": "Selles vestluses ei saa kirjutada: te ei osale selles.",
+      "rpc_unavailable": "Sõnumid pole praegu saadaval. Proovige hiljem.",
+      "not_authenticated": "Seanss on lõppenud. Logige uuesti sisse.",
+      "update_failed": "Muudatust ei salvestatud. Proovige uuesti.",
+      "generic": "Midagi läks valesti. Proovige uuesti."
+    }
   },
   "trust": {
     "unreadHint": "Osa sellest ei õnnestunud praegu kokku lugeda ja on näidatud kui „—“. See ei tähenda, et sul neid ei ole — lihtsalt ei õnnestunud numbreid lugeda. Laadi hetke pärast uuesti.",

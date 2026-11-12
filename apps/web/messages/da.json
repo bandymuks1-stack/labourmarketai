@@ -1791,7 +1791,19 @@
       "sent": "[EN] Reply sent."
     },
     "translationUnavailable": "Original ({lang}) — ingen oversættelse tilgængelig",
-    "loadError": "Beskederne kunne ikke indlæses lige nu. Det, du ser, er ikke det fulde billede — prøv igen."
+    "loadError": "Beskederne kunne ikke indlæses lige nu. Det, du ser, er ikke det fulde billede — prøv igen.",
+    "errors": {
+      "invalid_input": "Beskeden er tom eller for lang. Tjek den og send igen.",
+      "no_permission": "Du kan ikke starte en samtale med denne person endnu: der er ingen arbejdsrelation, ansøgning eller forbindelse mellem jer.",
+      "rate_limited": "Der er startet for mange nye samtaler i dag. Prøv igen i morgen.",
+      "rate_check_unavailable": "Sikkerhedstjekket kunne ikke køre, så intet blev sendt. Prøv igen.",
+      "insert_failed": "Beskeden blev ikke sendt. Prøv igen.",
+      "not_a_participant": "Du kan ikke skrive i denne samtale: du deltager ikke i den.",
+      "rpc_unavailable": "Beskeder er ikke tilgængelige lige nu. Prøv senere.",
+      "not_authenticated": "Din session er udløbet. Log ind igen.",
+      "update_failed": "Ændringen blev ikke gemt. Prøv igen.",
+      "generic": "Noget gik galt. Prøv igen."
+    }
   },
   "trust": {
     "unreadHint": "Noget af dette kunne ikke tælles lige nu og vises som “—”. Det betyder ikke, at du ingen har — tallene kunne bare ikke læses. Genindlæs om et øjeblik.",

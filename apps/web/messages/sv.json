@@ -1791,7 +1791,19 @@
       "sent": "[EN] Reply sent."
     },
     "translationUnavailable": "Original ({lang}) — ingen översättning tillgänglig",
-    "loadError": "Meddelandena kunde inte läsas in just nu. Det du ser är inte hela bilden — försök igen."
+    "loadError": "Meddelandena kunde inte läsas in just nu. Det du ser är inte hela bilden — försök igen.",
+    "errors": {
+      "invalid_input": "Meddelandet är tomt eller för långt. Kontrollera det och skicka igen.",
+      "no_permission": "Du kan inte starta ett samtal med den här personen än: det finns ingen arbetsrelation, ansökan eller koppling mellan er.",
+      "rate_limited": "För många nya samtal har startats i dag. Försök igen i morgon.",
+      "rate_check_unavailable": "Säkerhetskontrollen kunde inte köras, så inget skickades. Försök igen.",
+      "insert_failed": "Meddelandet skickades inte. Försök igen.",
+      "not_a_participant": "Du kan inte skriva i det här samtalet: du deltar inte i det.",
+      "rpc_unavailable": "Meddelanden är inte tillgängliga just nu. Försök senare.",
+      "not_authenticated": "Din session har gått ut. Logga in igen.",
+      "update_failed": "Ändringen sparades inte. Försök igen.",
+      "generic": "Något gick fel. Försök igen."
+    }
   },
   "trust": {
     "unreadHint": "En del av detta gick inte att räkna just nu och visas som ”—”. Det betyder inte att du saknar dem — siffrorna gick bara inte att läsa. Ladda om om en stund.",

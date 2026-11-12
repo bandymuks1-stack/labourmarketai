@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { communicationErrorKey } from "@/lib/communication/error-copy";
 import { useRouter } from "next/navigation";
 import { Paperclip, RotateCw, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -277,7 +278,7 @@ export function CommunicationComposer({
       if (!result.ok) {
         // The typed text AND the uploaded tray stay intact — the user can
         // retry the send without redoing anything.
-        setError(result.message);
+        setError(t(`errors.${communicationErrorKey(result.code)}`));
         recordEvent("communication_message_send_error", {
           result_kind: result.code,
         });

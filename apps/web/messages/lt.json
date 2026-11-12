@@ -7305,7 +7305,19 @@
     "translatedFrom": "Mašininis vertimas iš {lang}",
     "showOriginal": "Originalas ({lang})",
     "translationUnavailable": "Originalas ({lang}) — vertimo nėra",
-    "loadError": "Šiuo metu žinučių įkelti nepavyko. Tai, ką matai, nėra visas vaizdas — bandyk dar kartą."
+    "loadError": "Šiuo metu žinučių įkelti nepavyko. Tai, ką matai, nėra visas vaizdas — bandyk dar kartą.",
+    "errors": {
+      "invalid_input": "Žinutė tuščia arba per ilga. Patikrink ir siųsk dar kartą.",
+      "no_permission": "Pokalbio su šiuo asmeniu dar pradėti negali: tarp jūsų nėra darbo ryšio, paraiškos ar sujungimo.",
+      "rate_limited": "Šiandien pradėta per daug naujų pokalbių. Bandyk rytoj.",
+      "rate_check_unavailable": "Saugumo patikra neatlikta, todėl niekas neišsiųsta. Bandyk dar kartą.",
+      "insert_failed": "Žinutė neišsiųsta. Bandyk dar kartą.",
+      "not_a_participant": "Šiame pokalbyje rašyti negali: tu jame nedalyvauji.",
+      "rpc_unavailable": "Žinutės šiuo metu nepasiekiamos. Bandyk vėliau.",
+      "not_authenticated": "Sesija baigėsi. Prisijunk iš naujo.",
+      "update_failed": "Pakeitimas neišsaugotas. Bandyk dar kartą.",
+      "generic": "Kažkas nepavyko. Bandyk dar kartą."
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Tavo organizacija",

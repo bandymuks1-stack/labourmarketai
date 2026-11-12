@@ -7305,7 +7305,19 @@
     "translatedFrom": "Machine translation from {lang}",
     "showOriginal": "Original ({lang})",
     "translationUnavailable": "Original ({lang}) — no translation available",
-    "loadError": "Could not load messages right now. What you see is not the full picture — try again."
+    "loadError": "Could not load messages right now. What you see is not the full picture — try again.",
+    "errors": {
+      "invalid_input": "The message is empty or too long. Check it and send again.",
+      "no_permission": "You can't start a conversation with this person yet: there is no working relationship, application or connection between you.",
+      "rate_limited": "Too many new conversations today. Try again tomorrow.",
+      "rate_check_unavailable": "The safety check could not run, so nothing was sent. Try again.",
+      "insert_failed": "The message was not sent. Try again.",
+      "not_a_participant": "You can't write in this conversation: you are not part of it.",
+      "rpc_unavailable": "Messaging is not available right now. Try again later.",
+      "not_authenticated": "Your session ended. Sign in again.",
+      "update_failed": "The change was not saved. Try again.",
+      "generic": "Something went wrong. Try again."
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Your organisation",
