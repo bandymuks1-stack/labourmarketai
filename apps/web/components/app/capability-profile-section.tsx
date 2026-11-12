@@ -648,62 +648,72 @@ export function CapabilityProfileSection({
               data-testid="add-experience-title"
             />
           </div>
-          <div className="flex flex-wrap gap-3">
-            <div className="flex flex-1 flex-col gap-1.5">
+          {/* One column on a phone, so a year field is never squeezed to a
+              letter; two from the small breakpoint up. */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
               <Label id="add-experience-start-label">{t("expStartLabel")}</Label>
+              {/* The shared Input is full width, so each field's width is its
+                  wrapper's: a fixed slot for the month, the rest for the year. */}
               <div className="flex gap-2" role="group" aria-labelledby="add-experience-start-label">
-                <Input
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={12}
-                  value={expStartMonth}
-                  onChange={(e) => setExpStartMonth(e.target.value)}
-                  placeholder={t("expMonthPlaceholder")}
-                  aria-label={`${t("expStartLabel")}: ${t("expMonthPlaceholder")}`}
-                  className="w-20 px-3"
-                />
-                <Input
-                  type="number"
-                  inputMode="numeric"
-                  min={1900}
-                  max={2100}
-                  value={expStartYear}
-                  onChange={(e) => setExpStartYear(e.target.value)}
-                  placeholder={t("expYearPlaceholder")}
-                  aria-label={`${t("expStartLabel")}: ${t("expYearPlaceholder")}`}
-                  data-testid="add-experience-start-year"
-                  className="w-28 px-3"
-                />
+                <div className="w-20 flex-none">
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    max={12}
+                    value={expStartMonth}
+                    onChange={(e) => setExpStartMonth(e.target.value)}
+                    placeholder={t("expMonthPlaceholder")}
+                    aria-label={`${t("expStartLabel")}: ${t("expMonthPlaceholder")}`}
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    min={1900}
+                    max={2100}
+                    value={expStartYear}
+                    onChange={(e) => setExpStartYear(e.target.value)}
+                    placeholder={t("expYearPlaceholder")}
+                    aria-label={`${t("expStartLabel")}: ${t("expYearPlaceholder")}`}
+                    data-testid="add-experience-start-year"
+                  />
+                </div>
               </div>
             </div>
-            <div className="flex flex-1 flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5">
               <Label id="add-experience-end-label">{t("expEndLabel")}</Label>
+              {/* The shared Input is full width, so each field's width is its
+                  wrapper's: a fixed slot for the month, the rest for the year. */}
               <div className="flex gap-2" role="group" aria-labelledby="add-experience-end-label">
-                <Input
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={12}
-                  value={expEndMonth}
-                  disabled={expCurrent}
-                  onChange={(e) => setExpEndMonth(e.target.value)}
-                  placeholder={t("expMonthPlaceholder")}
-                  aria-label={`${t("expEndLabel")}: ${t("expMonthPlaceholder")}`}
-                  className="w-20 px-3 disabled:opacity-40"
-                />
-                <Input
-                  type="number"
-                  inputMode="numeric"
-                  min={1900}
-                  max={2100}
-                  value={expEndYear}
-                  disabled={expCurrent}
-                  onChange={(e) => setExpEndYear(e.target.value)}
-                  placeholder={t("expYearPlaceholder")}
-                  aria-label={`${t("expEndLabel")}: ${t("expYearPlaceholder")}`}
-                  className="w-28 px-3 disabled:opacity-40"
-                />
+                <div className="w-20 flex-none">
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    max={12}
+                    value={expEndMonth}
+                    disabled={expCurrent}
+                    onChange={(e) => setExpEndMonth(e.target.value)}
+                    placeholder={t("expMonthPlaceholder")}
+                    aria-label={`${t("expEndLabel")}: ${t("expMonthPlaceholder")}`} className="disabled:opacity-40"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    min={1900}
+                    max={2100}
+                    value={expEndYear}
+                    disabled={expCurrent}
+                    onChange={(e) => setExpEndYear(e.target.value)}
+                    placeholder={t("expYearPlaceholder")}
+                    aria-label={`${t("expEndLabel")}: ${t("expYearPlaceholder")}`} className="disabled:opacity-40"
+                  />
+                </div>
               </div>
             </div>
           </div>
