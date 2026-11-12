@@ -188,7 +188,7 @@ describe("DEMAND ≠ SUPPLY on the organization home (SEP-4)", () => {
 });
 
 describe("a visible way to ask the assistant, opening the ONE conversation (step 4)", () => {
-  const entry = read("components/app/home/ask-assistant-entry.tsx");
+  const entry = read("components/app/home/ask-composer-entry.tsx");
 
   it("sits with the goals on both homes and is a real, named button", () => {
     const cards = read("components/app/home/home-goal-cards.tsx");
