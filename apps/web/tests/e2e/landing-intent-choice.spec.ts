@@ -106,7 +106,7 @@ for (const vp of [
         const panel = page.getByTestId("goal-panel");
         await expect(panel).toBeVisible();
         await expect(panel).toHaveAttribute("data-goal", task.goal);
-        await expect(page).toHaveURL(new RegExp(`/en/start/${task.goal}$`));
+        await expect(page).toHaveURL(new RegExp(`/en#goal=${task.goal}$`));
         await expect(card(page, "goal-rail", task.goal)).toHaveAttribute("aria-current", "true");
         // Choosing a goal does not reset the rail's position.
         expect(Math.abs((await railScroll()) - before)).toBeLessThanOrEqual(2);
@@ -170,10 +170,11 @@ for (const vp of [
     });
 
     test("a shared goal link opens the same view with the panel open", async ({ page }) => {
-      await page.goto("/en/start/orders");
+      await page.goto("/en#goal=orders");
       await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", "orders");
       await expect(card(page, "goal-rail", "orders")).toHaveAttribute("aria-current", "true");
       await press(page, "goal-panel-close");
+      await expect(page.getByTestId("goal-panel")).toHaveCount(0);
       await expect(page).toHaveURL(/\/en$/);
     });
   });
@@ -205,7 +206,8 @@ test.describe("swipe", () => {
   });
 });
 
-test("an unknown goal is a 404, not an empty view", async ({ request }) => {
-  const response = await request.get("/en/start/nothing");
-  expect(response.status()).toBe(404);
+test("an unknown goal in the address opens nothing", async ({ page }) => {
+  await page.goto("/en#goal=nothing");
+  await expect(page.getByTestId("goal-rail")).toBeVisible();
+  await expect(page.getByTestId("goal-panel")).toHaveCount(0);
 });

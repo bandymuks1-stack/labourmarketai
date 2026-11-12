@@ -4,8 +4,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Link, usePathname } from "@/lib/i18n/navigation";
-import { pathIsInside } from "@/lib/navigation/path-inside";
-import type { WorkAreaIconKey } from "@/lib/navigation/work-area-icon-key";
+import { pathIsInside } from "@/lib/navigation/header-place";
+import type { WorkAreaIconKey } from "@/lib/navigation/work-areas";
 import { WORK_AREA_ICONS } from "@/components/app/work-area-icons";
 import { iconControl } from "@/components/app/conversation/chat/icon-scale";
 import { cn } from "@/lib/utils";
@@ -15,8 +15,6 @@ export type AreaSwitcherItem = {
   readonly href: string;
   readonly label: string;
   readonly iconKey: WorkAreaIconKey;
-  /** One short line under the label (e.g. a profession's sector). */
-  readonly caption?: string;
   readonly testId?: string;
 };
 
@@ -55,7 +53,6 @@ export function AreaSwitcher({
   nextLabel,
   hereLabel,
   testId,
-  fitAll = false,
 }: {
   title: string;
   items: readonly AreaSwitcherItem[];
@@ -63,10 +60,6 @@ export function AreaSwitcher({
   nextLabel: string;
   hereLabel: string;
   testId?: string;
-  /** Show every card at once when the track is wide enough for all of them
-   *  (the six goals on a wide screen); otherwise the usual window with the
-   *  next card peeking. */
-  fitAll?: boolean;
 }) {
   const pathname = usePathname();
   const activeIndex = items.findIndex((i) => pathIsInside(pathname, i.href));
@@ -106,11 +99,7 @@ export function AreaSwitcher({
   // narrower than a label or wider than a comfortable tile.
   const GAP = 12;
   const trackWidth = width || 900;
-  const evenWidth = (trackWidth - GAP * (items.length - 1)) / items.length;
-  const cardWidth =
-    fitAll && evenWidth >= 148
-      ? Math.floor(Math.min(240, evenWidth))
-      : Math.round(Math.max(148, Math.min(196, (trackWidth - GAP * 4) / 4.3)));
+  const cardWidth = Math.round(Math.max(148, Math.min(196, (trackWidth - GAP * 4) / 4.3)));
   const step = cardWidth + GAP;
   const visible = Math.max(1, Math.floor((trackWidth + GAP) / step));
   const fits = items.length <= visible;
@@ -295,12 +284,7 @@ export function AreaSwitcher({
                       />
                     )}
                   </span>
-                  <span className="flex min-w-0 flex-col">
-                    <span className={cn("text-support font-semibold leading-snug text-text-primary", item.caption ? "truncate" : "line-clamp-2")}>{item.label}</span>
-                    {item.caption && (
-                      <span className="line-clamp-2 text-meta leading-snug text-text-muted">{item.caption}</span>
-                    )}
-                  </span>
+                  <span className="text-support font-semibold leading-snug text-text-primary">{item.label}</span>
                 </Link>
               </li>
             );

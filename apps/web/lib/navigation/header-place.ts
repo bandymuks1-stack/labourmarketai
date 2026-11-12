@@ -21,12 +21,11 @@ import {
 } from "@/lib/dashboard/dashboard-module-registry";
 import type { NavItem } from "@/lib/config/navigation";
 
-// `pathIsInside` lives in its own leaf module so a surface that only needs
-// that one question (the area switcher on public pages) does not pull the
-// dashboard module registry into its import graph. Re-exported: every
-// existing importer keeps working.
-import { pathIsInside } from "@/lib/navigation/path-inside";
-export { pathIsInside };
+/** Does `pathname` stand inside the area that starts at `href`? */
+export function pathIsInside(pathname: string, href: string): boolean {
+  if (href === "/dashboard") return pathname === "/dashboard";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 /** The nav item whose area holds `pathname` — the deepest one wins. */
 export function activeNavItem(

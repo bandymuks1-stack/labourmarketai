@@ -25,13 +25,6 @@ const STATIC_PATHS: readonly string[] = [
   "/skills",
   "/professions",
   "/company-need",
-  // The six goal start views (level 2 of the navigation, owner 2026-11-12).
-  "/start/work",
-  "/start/workers",
-  "/start/services",
-  "/start/orders",
-  "/start/partners",
-  "/start/agencies",
   "/worker-intake",
   // Free CV builder — worker acquisition entry (beta train v2 §12).
   "/create-cv",

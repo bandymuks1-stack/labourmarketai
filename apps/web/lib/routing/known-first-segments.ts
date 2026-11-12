@@ -34,7 +34,6 @@ export const KNOWN_FIRST_SEGMENTS: ReadonlyMap<string, number> = new Map([
   ["professions", 1],
   ["questions", 3],
   ["skills", 1],
-  ["start", 2],
   ["vision", 1],
   ["work-abroad", 1],
   ["work-opportunities", 1],

@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { X } from "lucide-react";
 
-import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
+import { Link } from "@/lib/i18n/navigation";
+import { goalFromFragment, goalHref, type PublicIntentId } from "@/lib/navigation/public-intents";
 import { CardRail, type RailCard } from "@/components/navigation/card-rail";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +34,17 @@ export type NavigatorLabels = {
   readonly viewAll: string;
 };
 
-const GOAL_PATH = /^\/start\/([a-z]+)\/?$/;
+function subscribeToFragment(onChange: () => void) {
+  window.addEventListener("hashchange", onChange);
+  window.addEventListener("popstate", onChange);
+  return () => {
+    window.removeEventListener("hashchange", onChange);
+    window.removeEventListener("popstate", onChange);
+  };
+}
+const readFragment = () => window.location.hash;
+/** The server renders no fragment: nothing chosen, the rail alone. */
+const readServerFragment = () => "";
 
 /**
  * THE GOAL NAVIGATOR — the six goals in one rail and ONE active panel under
@@ -45,10 +56,11 @@ const GOAL_PATH = /^\/start\/([a-z]+)\/?$/;
  * with a catalogue, a "Functions | Professions" switch: search, sector chips,
  * the profession rail and a full-list toggle. Only one rail shows at a time.
  *
- * THE URL IS THE STATE. The active goal is read from the path
- * (`/start/<goal>`); choosing a goal pushes that address without leaving the
- * page, so browser Back closes the panel, a reload or a shared link opens the
- * same view, and the goal cards are real links that work without JavaScript.
+ * THE URL IS THE STATE — as a fragment of this page (`#goal=work`), never a
+ * page of its own. Choosing a goal sets the fragment, so browser Back closes
+ * the panel and a reload or a shared link opens the same view; the page
+ * itself stays one static document and no new screen is added. The server
+ * renders the rail alone; the panel appears once the fragment is read.
  * The rail is a native scroller, so choosing never resets its position.
  */
 export function GoalNavigator({
@@ -66,11 +78,10 @@ export function GoalNavigator({
   locale: string;
   headingLevel?: "h1" | "h2";
 }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const activeId = GOAL_PATH.exec(pathname)?.[1] ?? null;
+  const fragment = useSyncExternalStore(subscribeToFragment, readFragment, readServerFragment);
+  const activeId = goalFromFragment(fragment);
   const active = goals.find((g) => g.id === activeId) ?? null;
-  /** How many goal views this visit pushed — Close then goes Back. */
+  /** How many goals this visit opened — Close then goes Back. */
   const pushed = useRef(0);
   const [tab, setTab] = useState<"functions" | "professions">("functions");
   const [sector, setSector] = useState<string | null>(null);
@@ -80,18 +91,24 @@ export function GoalNavigator({
   const select = (card: RailCard) => {
     if (card.id === activeId) return;
     setTab("functions");
-    window.history.pushState(null, "", `/${locale}/start/${card.id}`);
+    // pushState, not `location.hash =`: no element carries this id, and the
+    // page must not jump. popstate is not fired by pushState, so say so.
+    window.history.pushState(null, "", goalHref(card.id as PublicIntentId));
     pushed.current += 1;
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
   };
 
   const close = () => {
     if (pushed.current > 0) {
+      const steps = pushed.current;
       pushed.current = 0;
-      // Back to wherever the visitor chose from.
-      window.history.go(-1);
+      // Back to where the visitor chose from.
+      window.history.go(-steps);
       return;
     }
-    router.push("/");
+    // Opened from a shared link: drop the fragment, stay on the page.
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
   };
 
   const shown = useMemo(

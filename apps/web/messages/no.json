@@ -8001,18 +8001,11 @@
       "setUpAgency": "Opprett byrået ditt"
     },
     "assistant": "Spør assistenten",
-    "carousels": {
-      "functions": "Dette kan du gjøre her",
-      "professions": "Jobber etter yrke"
-    },
     "start": {
-      "back": "Alle valg",
-      "functions": "Dette kan du gjøre",
       "searchLabel": "Søk jobber",
       "searchPlaceholder": "Stillingstittel eller søkeord",
       "searchSubmit": "Søk",
-      "viewAll": "Alle jobber",
-      "choose": "Velg hva du kom for"
+      "viewAll": "Alle jobber"
     },
     "nav": {
       "heading": "Hva vil du gjøre?",

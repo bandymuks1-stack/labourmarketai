@@ -133,13 +133,23 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
 export const ASSISTANT_HREF = "/dashboard";
 
 /**
- * LEVEL 2 of the navigation — the goal's own start view
- * (`app/[locale]/(marketing)/start/[goal]`): only that goal's functions, and
- * for the goals that have one, its catalogue. A real page with a real URL, so
- * browser Back returns to the choice.
+ * THE ADDRESS OF A GOAL — a fragment of the page the navigator is on
+ * (`#goal=work`), never a page of its own. A fragment keeps everything a URL
+ * state needs (browser Back closes the panel, a shared link opens it, the
+ * landing stays one static page) without adding a new public screen, which
+ * the product constitution (A-09) reserves for an owner decision.
  */
+export const GOAL_FRAGMENT_PREFIX = "#goal=";
+
 export function goalHref(id: PublicIntentId): string {
-  return `/start/${id}`;
+  return `${GOAL_FRAGMENT_PREFIX}${id}`;
+}
+
+/** `#goal=work` → `work`; anything else → null. */
+export function goalFromFragment(hash: string): PublicIntentId | null {
+  if (!hash.startsWith(GOAL_FRAGMENT_PREFIX)) return null;
+  const id = hash.slice(GOAL_FRAGMENT_PREFIX.length);
+  return isPublicIntentId(id) ? id : null;
 }
 
 export function isPublicIntentId(value: string): value is PublicIntentId {

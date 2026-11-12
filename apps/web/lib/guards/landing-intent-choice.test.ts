@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { PUBLIC_INTENTS, PUBLIC_INTENT_IDS, goalHref } from "@/lib/navigation/public-intents";
+import {
+  PUBLIC_INTENTS,
+  PUBLIC_INTENT_IDS,
+  goalFromFragment,
+  goalHref,
+} from "@/lib/navigation/public-intents";
 import {
   FUNCTION_ICONS,
   GOAL_ICONS,
@@ -16,11 +21,11 @@ import { NAV_CARD_ICONS } from "@/components/navigation/nav-card-icon";
  * rail and ONE active panel under it, on the first screen.
  *
  *  1. first screen: the navigator sits directly under the headline, before
- *     the sentence entry, and is the same component `/start/<goal>` renders;
+ *     the sentence entry;
  *  2. one rail component for goals, functions and professions; one panel;
  *     only one rail inside the panel at a time;
- *  3. the URL is the state (real links, pushState, Back closes), unknown
- *     goals are a 404;
+ *  3. the URL is the state, as a FRAGMENT of the page (real links,
+ *     pushState, Back closes) — no new public screen is added;
  *  4. two actions to a function: goal card, then a card that IS the function;
  *  5. every function has its own icon and every profession a DISTINCT one;
  *  6. no level numbers, route addresses or sample labels in the UI copy;
@@ -34,7 +39,6 @@ const choice = read("components/marketing/landing-intent-choice.tsx");
 const navigator = read("components/navigation/goal-navigator.tsx");
 const server = read("components/navigation/goal-navigation.tsx");
 const rail = read("components/navigation/card-rail.tsx");
-const page = read("app/[locale]/(marketing)/start/[goal]/page.tsx");
 
 describe("the choice is the first screen", () => {
   it("mounts once, under the headline and before the sentence entry", () => {
@@ -51,10 +55,12 @@ describe("the choice is the first screen", () => {
     expect(landing).toMatch(/<LandingRequestDoors locale=\{locale\} \/>/);
   });
 
-  it("home and /start/<goal> render the SAME navigator", () => {
+  it("the home mounts the one navigator; no second goal view or page exists", () => {
     expect(choice).toMatch(/<GoalNavigation \/>/);
-    expect(page).toMatch(/<GoalNavigation headingLevel="h1" \/>/);
     expect(existsSync(join(APP_ROOT, "components/navigation/goal-rail.tsx"))).toBe(false);
+    // A new public screen is an owner decision (constitution A-09): the goal
+    // state is a fragment of this page, not a route.
+    expect(existsSync(join(APP_ROOT, "app/[locale]/(marketing)/start"))).toBe(false);
   });
 });
 
@@ -101,26 +107,30 @@ describe("one rail, one panel", () => {
   });
 });
 
-describe("the URL is the state", () => {
-  it("the active goal is read from the path; choosing pushes the goal's address", () => {
-    expect(navigator).toMatch(/GOAL_PATH\.exec\(pathname\)/);
-    expect(navigator).toMatch(/window\.history\.pushState\(null, "", `\/\$\{locale\}\/start\/\$\{card\.id\}`\)/);
-    expect(navigator).toMatch(/window\.history\.go\(-1\)/);
+describe("the URL is the state — a fragment, not a page", () => {
+  it("the active goal is read from the fragment; choosing pushes it without a jump", () => {
+    expect(navigator).toMatch(/useSyncExternalStore\(subscribeToFragment, readFragment, readServerFragment\)/);
+    expect(navigator).toMatch(/goalFromFragment\(fragment\)/);
+    expect(navigator).toMatch(/window\.history\.pushState\(null, "", goalHref\(card\.id as PublicIntentId\)\)/);
+    expect(navigator).toMatch(/window\.history\.go\(-steps\)/);
+    expect(navigator).toMatch(/addEventListener\("popstate", onChange\)/);
   });
 
-  it("goal cards are real links to the same address (works without JavaScript)", () => {
+  it("goal cards are real links to that fragment; only known goals open a panel", () => {
     expect(server).toMatch(/href: goalHref\(intent\.id\)/);
-    expect(PUBLIC_INTENT_IDS.map((id) => goalHref(id))).toEqual(
-      PUBLIC_INTENT_IDS.map((id) => `/start/${id}`),
-    );
+    for (const id of PUBLIC_INTENT_IDS) {
+      expect(goalHref(id)).toBe(`#goal=${id}`);
+      expect(goalFromFragment(goalHref(id))).toBe(id);
+    }
+    for (const bad of ["", "#", "#goal=", "#goal=admin", "#goal=work/..", "#other=work"]) {
+      expect(goalFromFragment(bad), bad).toBeNull();
+    }
     expect(rail).toMatch(/if \(e\.metaKey \|\| e\.ctrlKey \|\| e\.shiftKey \|\| e\.altKey \|\| e\.button !== 0\) return;/);
   });
 
-  it("every goal is a static page and an unknown goal is a 404", () => {
-    expect(page).toMatch(/PUBLIC_INTENT_IDS\.map\(\(goal\) => \(\{ goal \}\)\)/);
-    expect(page).toMatch(/export const dynamicParams = false;/);
-    expect(page).toMatch(/if \(!isPublicIntentId\(goal\)\) notFound\(\);/);
-    expect(read("app/sitemap.ts")).toMatch(/"\/start\/work"/);
+  it("the server renders the rail alone, so the landing stays one static page", () => {
+    expect(navigator).toMatch(/const readServerFragment = \(\) => "";/);
+    expect(server).not.toMatch(/cookies\(|headers\(|searchParams/);
   });
 });
 
@@ -192,7 +202,7 @@ describe("copy", () => {
         expect(value.trim(), `${loc} ${group}.${key}`).not.toBe("");
         expect(value).not.toContain("[EN]");
         // No level numbers, route addresses or sample labels in the UI.
-        expect(value, `${loc} ${group}.${key}`).not.toMatch(/level\s*\d|\/start|\/dashboard|prototype|sample|\bdemo\b/i);
+        expect(value, `${loc} ${group}.${key}`).not.toMatch(/level\s*\d|#goal|\/dashboard|prototype|sample|\bdemo\b/i);
         if (loc !== "en") expect(value, `${loc} ${group}.${key} untranslated`).not.toBe(en[group][key]);
       }
     }

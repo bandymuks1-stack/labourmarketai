@@ -8001,18 +8001,11 @@
       "setUpAgency": "Opret dit bureau"
     },
     "assistant": "Spørg assistenten",
-    "carousels": {
-      "functions": "Det kan du gøre her",
-      "professions": "Job efter fag"
-    },
     "start": {
-      "back": "Alle valg",
-      "functions": "Det kan du gøre",
       "searchLabel": "Søg job",
       "searchPlaceholder": "Jobtitel eller søgeord",
       "searchSubmit": "Søg",
-      "viewAll": "Alle job",
-      "choose": "Vælg, hvad du kom for"
+      "viewAll": "Alle job"
     },
     "nav": {
       "heading": "Hvad vil du gøre?",

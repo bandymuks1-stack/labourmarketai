@@ -8001,18 +8001,11 @@
       "setUpAgency": "Starta ditt bemanningsföretag"
     },
     "assistant": "Fråga assistenten",
-    "carousels": {
-      "functions": "Det här kan du göra här",
-      "professions": "Jobb efter yrke"
-    },
     "start": {
-      "back": "Alla val",
-      "functions": "Det här kan du göra",
       "searchLabel": "Sök jobb",
       "searchPlaceholder": "Jobbtitel eller sökord",
       "searchSubmit": "Sök",
-      "viewAll": "Alla jobb",
-      "choose": "Välj vad du kom för"
+      "viewAll": "Alla jobb"
     },
     "nav": {
       "heading": "Vad vill du göra?",

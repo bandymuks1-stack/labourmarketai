@@ -1,4 +1,3 @@
-import { FunctionCarousel } from "@/components/marketing/browse-carousels";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
@@ -38,7 +37,6 @@ export default async function ForWorkersPage({
       />
       <WorkLifecycleSection audience="workers" />
       <BenefitCards items={benefits} />
-      <FunctionCarousel />
     </>
   );
 }

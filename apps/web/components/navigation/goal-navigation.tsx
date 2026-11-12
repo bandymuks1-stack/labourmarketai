@@ -17,9 +17,8 @@ const CATALOGUE_GOALS = new Set(["work"]);
  * The goal navigator's server half: resolves every label and hands the client
  * island plain data. The lists are the navigation's own
  * (`lib/navigation/public-intents.ts`, `profession-sectors.ts`,
- * `nav-card-icons.ts`); nothing is spelled here. Used on the public home and
- * on `/start/<goal>` — the same component, so it is one experience; the
- * signed-in home (Lane A2) mounts it the same way.
+ * `nav-card-icons.ts`); nothing is spelled here. Mounted on the public home; the
+ * signed-in home (Lane A2) mounts the same component.
  */
 export async function GoalNavigation({ headingLevel = "h2" }: { headingLevel?: "h1" | "h2" }) {
   const [t, tNav, tProf, locale] = await Promise.all([

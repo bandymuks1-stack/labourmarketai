@@ -8001,18 +8001,11 @@
       "setUpAgency": "Loo agentuur"
     },
     "assistant": "Küsi assistendilt",
-    "carousels": {
-      "functions": "Mida siin teha saab",
-      "professions": "Töökuulutused ameti järgi"
-    },
     "start": {
-      "back": "Kõik valikud",
-      "functions": "Mida saad teha",
       "searchLabel": "Otsi tööd",
       "searchPlaceholder": "Ametinimetus või märksõna",
       "searchSubmit": "Otsi",
-      "viewAll": "Kõik kuulutused",
-      "choose": "Vali, milleks tulid"
+      "viewAll": "Kõik kuulutused"
     },
     "nav": {
       "heading": "Mida soovid teha?",

@@ -1,10 +1,12 @@
 "use client";
 
 import {
+  forwardRef,
   useCallback,
   useEffect,
   useRef,
   useState,
+  type ComponentPropsWithoutRef,
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
@@ -15,9 +17,22 @@ import { NAV_CARD_ICONS } from "@/components/navigation/nav-card-icon";
 import type { NavCardIconKey } from "@/lib/navigation/nav-card-icons";
 import { cn } from "@/lib/utils";
 
+/** A fragment (`#…`) stays on the page, so it is a plain anchor; everything
+ *  else goes through the locale-aware Link. */
+const CardLink = forwardRef<HTMLAnchorElement, ComponentPropsWithoutRef<"a"> & { href: string }>(
+  function CardLink({ href, ...rest }, ref) {
+    return href.startsWith("#") ? (
+      <a ref={ref} href={href} {...rest} />
+    ) : (
+      <Link ref={ref} href={href} {...rest} />
+    );
+  },
+);
+
 export type RailCard = {
   readonly id: string;
-  /** Locale-less internal path. Every card is a real link. */
+  /** Locale-less internal path, or a fragment of the current page. Every
+   *  card is a real link. */
   readonly href: string;
   readonly label: string;
   /** One short line; hidden on phones in the compact size. */
@@ -171,7 +186,7 @@ export function CardRail({
                   compact ? "w-[5.75rem] sm:w-auto sm:min-w-40 sm:flex-1" : "w-36 sm:w-44",
                 )}
               >
-                <Link
+                <CardLink
                   href={card.href}
                   data-rail-card
                   data-card-id={card.id}
@@ -215,7 +230,7 @@ export function CardRail({
                       <span className="text-xs leading-snug text-text-muted">{card.note}</span>
                     )}
                   </span>
-                </Link>
+                </CardLink>
               </li>
             );
           })}

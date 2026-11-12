@@ -20608,18 +20608,11 @@
       "setUpAgency": "Richt je bureau in"
     },
     "assistant": "Vraag de assistent",
-    "carousels": {
-      "functions": "Wat je hier kunt doen",
-      "professions": "Vacatures per beroep"
-    },
     "start": {
-      "back": "Alle keuzes",
-      "functions": "Wat je kunt doen",
       "searchLabel": "Vacatures zoeken",
       "searchPlaceholder": "Functie of trefwoord",
       "searchSubmit": "Zoeken",
-      "viewAll": "Alle vacatures",
-      "choose": "Kies waarvoor je komt"
+      "viewAll": "Alle vacatures"
     },
     "nav": {
       "heading": "Wat wil je doen?",

@@ -20608,18 +20608,11 @@
       "setUpAgency": "Set up your agency"
     },
     "assistant": "Ask the assistant",
-    "carousels": {
-      "functions": "What you can do here",
-      "professions": "Browse jobs by profession"
-    },
     "start": {
-      "back": "All choices",
-      "functions": "What you can do",
       "searchLabel": "Search jobs",
       "searchPlaceholder": "Job title or keyword",
       "searchSubmit": "Search",
-      "viewAll": "View all jobs",
-      "choose": "Choose what you came to do"
+      "viewAll": "View all jobs"
     },
     "nav": {
       "heading": "What do you want to do?",

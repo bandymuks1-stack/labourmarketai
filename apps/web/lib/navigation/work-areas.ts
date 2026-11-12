@@ -21,12 +21,26 @@
 import type { NavItem } from "@/lib/config/navigation";
 import { TODAY_STATIONS, type TodayStationId } from "@/lib/today/today-route";
 
-// The icon ids live in a leaf module (no imports) so a public surface that
-// renders the area switcher does not pull this file's graph (today-route →
-// the conversation) into its bundle analysis. Re-exported for every existing
-// importer.
-import type { WorkAreaIconKey } from "@/lib/navigation/work-area-icon-key";
-export type { WorkAreaIconKey };
+export type WorkAreaIconKey =
+  | "compass"
+  | "journal"
+  | "chart"
+  | "user"
+  | "idCard"
+  | "images"
+  | "userSearch"
+  | "package"
+  | "store"
+  | "users"
+  | "folder"
+  | "messages"
+  | "handshake"
+  | "briefcase"
+  | "calendar"
+  | "gauge"
+  | "activity"
+  | "barChart"
+  | "history";
 
 export type WorkArea = {
   readonly id: string;

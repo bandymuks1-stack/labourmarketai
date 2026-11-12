@@ -1,6 +1,6 @@
 /**
- * WHICH SECTOR A CATALOGUE PROFESSION BELONGS TO — for the public "browse by
- * profession" carousel (owner P0 2026-11-12). PURE.
+ * WHICH SECTOR A CATALOGUE PROFESSION BELONGS TO — for the profession
+ * catalogue of the goal navigator (owner P0 2026-11-12). PURE.
  *
  * Nothing new is invented here. The professions are the catalogue's
  * (`messages/{locale}/professions.json`, doctrine §10); the sectors are the
@@ -8,14 +8,13 @@
  * also a work type takes that work type's sector; the catalogue professions
  * the work-type list does not name are placed by the small table below.
  *
- * `lib/guards/browse-carousels.test.ts` fails when a catalogue profession has
+ * `lib/guards/profession-sectors.test.ts` fails when a catalogue profession has
  * no sector, so a new profession is classified the day it is added — and no
  * single trade can ever be the whole row (no tiler hardcode).
  */
 
 import professionCatalogue from "../../messages/en/professions.json";
 import { WORK_CATEGORIES, type WorkCategoryKey } from "@/lib/taxonomy/work-categories";
-import type { WorkAreaIconKey } from "@/lib/navigation/work-area-icon-key";
 
 export const CATALOGUE_PROFESSION_SLUGS: readonly string[] = Object.keys(
   professionCatalogue as Record<string, string>,
@@ -49,24 +48,6 @@ const PLACED: Readonly<Record<string, WorkCategoryKey>> = {
 export function professionSector(slug: string): WorkCategoryKey | null {
   return FROM_WORK_TYPES.get(slug) ?? PLACED[slug] ?? null;
 }
-
-export const SECTOR_ICONS: Readonly<Record<WorkCategoryKey, WorkAreaIconKey>> = {
-  construction: "hardHat",
-  manufacturing: "factory",
-  warehouse_logistics: "warehouse",
-  transport: "truck",
-  agriculture: "sprout",
-  cleaning_facility: "sparkles",
-  hospitality_food: "utensils",
-  care_support: "heartHandshake",
-  machinery_operators: "tractor",
-  office_business: "building",
-  retail_sales: "shoppingBag",
-  it_digital: "code",
-  education_training: "graduationCap",
-  beauty_personal: "scissors",
-  other: "layers",
-};
 
 export type ProfessionCard = {
   readonly slug: string;

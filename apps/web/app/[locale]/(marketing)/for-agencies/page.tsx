@@ -1,4 +1,3 @@
-import { FunctionCarousel } from "@/components/marketing/browse-carousels";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
@@ -47,7 +46,6 @@ export default async function ForAgenciesPage({
         ctaKind="signup"
         ctaNext={AGENCY_DOOR_NEXT}
       />
-      <FunctionCarousel />
     </>
   );
 }
