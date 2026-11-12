@@ -1,6 +1,7 @@
 import "server-only";
 
 import { resolveCountryCode } from "@/lib/location/country-model";
+import { demandWrittenLanguage } from "@/lib/demand/demand-written-language";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -248,7 +249,7 @@ export async function saveCustomerRequest(
     return { kind: "invalid", message: "Choose the country where the work takes place." };
   }
   const supabase = await createClient();
-  const { data, error } = await asAny(supabase).rpc("save_customer_request", {
+  const args = {
     p_request_id: input.requestId ?? null,
     p_title: title,
     p_need_summary: input.needSummary?.trim() || null,
@@ -261,7 +262,16 @@ export async function saveCustomerRequest(
     p_language_requirement: input.languageRequirement?.trim() || null,
     p_notes: input.notes?.trim() || null,
     p_status: input.status ?? "draft",
+  };
+  // v2 records the request's kind ('buyer_request') and the language it was
+  // written in (RED 20261112120000); until it is applied, v1 exactly as before.
+  let { data, error } = await asAny(supabase).rpc("save_customer_request_v2", {
+    ...args,
+    p_original_language: await demandWrittenLanguage(),
   });
+  if (error && [RPC_NOT_FOUND_CODE, "PGRST202"].includes(error.code ?? "")) {
+    ({ data, error } = await asAny(supabase).rpc("save_customer_request", args));
+  }
   if (error) {
     if (error.code === RPC_NOT_FOUND_CODE) return { kind: "needs-migration" };
     return { kind: "error", message: error.message };
