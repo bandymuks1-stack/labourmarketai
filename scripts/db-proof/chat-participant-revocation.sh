@@ -86,13 +86,12 @@ open_to() { as "$1" "select count(*) from public.conversation_participants where
 
 ATT=a0000000-0000-4000-8000-0000000000a1
 APATH="$CONV/$OWNER/$ATT/photo.png"
-MSG1=$($PSQL -c "select id from public.conversation_messages where conversation_id='$CONV' and body='before removal';" | tr -d '' | head -1)
-check "the owner uploads a file into their own folder of the thread" "INSERT 0 1" "$(printf '%s
-' "set role authenticated; set request.jwt.claim.sub='$OWNER'; insert into storage.objects(bucket_id, name) values ('conversation-attachments','$APATH');" | psql -h $PGPROOF_HOST -p $PGPROOF_PORT -U postgres -d postgres -tA -f - 2>&1 | tr -d '' | tail -1)"
+MSG1=$($PSQL -c "select id from public.conversation_messages where conversation_id='$CONV' and body='before removal';" | tr -d '\r' | head -1)
+check "the owner uploads a file into their own folder of the thread" "INSERT 0 1" "$(printf '%s\n' "set role authenticated; set request.jwt.claim.sub='$OWNER'; insert into storage.objects(bucket_id, name) values ('conversation-attachments','$APATH');" | psql -h $PGPROOF_HOST -p $PGPROOF_PORT -U postgres -d postgres -tA -f - 2>&1 | tr -d '\r' | tail -1)"
 as $OWNER "select public.register_conversation_message_attachment('$ATT','$MSG1','photo.png','image/png',120,'$APATH');" >/dev/null
 
 echo; echo "== Before removal: everyone in the thread reads it"
-check "GONE sees the attachment row before removal" "1" "$(as $GONE "select count(*) from public.conversation_message_attachments where conversation_id='$CONV';")"
+check "GONE sees the owner's attachment row before removal" "1" "$(as $GONE "select count(*) from public.conversation_message_attachments where conversation_id='$CONV';")"
 check "GONE sees the stored file before removal" "1" "$(as $GONE "select count(*) from storage.objects where bucket_id='conversation-attachments' and name='$APATH';")"
 check "GONE reads the thread's message before removal" "1" "$(as $GONE "select count(*) from public.conversation_messages where conversation_id='$CONV';")"
 check "re-check: GONE is eligible before removal" "1" "$(recheck $OWNER $CONV $GONE)"
@@ -102,6 +101,13 @@ check "re-check: GONE is eligible before removal" "1" "$(recheck $OWNER $CONV $G
 # naming someone else's message.
 MSGG=$(as $GONE "insert into public.conversation_messages(conversation_id, author_id, body) values ('$CONV','$GONE','gone before removal') returning id;" | grep -oE '[0-9a-f-]{36}' | head -1)
 check "GONE could write while a participant" "36" "${#MSGG}"
+# Control: while still a participant, GONE can attach a file to its own
+# message (upload into its own folder + register). The same call after the
+# removal must fail for exactly one reason: the participation check.
+GATT=a0000000-0000-4000-8000-0000000000b1
+GPATH="$CONV/$GONE/$GATT/g.png"
+as $GONE "insert into storage.objects(bucket_id, name) values ('conversation-attachments','$GPATH');" >/dev/null
+has "control: an active GONE registers an attachment on its own message" "$GATT" "$(as $GONE "select public.register_conversation_message_attachment('$GATT','$MSGG','g.png','image/png',10,'$GPATH');")"
 
 echo; echo "== The owner removes GONE"
 check "revoke_conversation_participant → ok" "ok" "$(as $OWNER "select public.revoke_conversation_participant('$CONV','$GONE');")"
@@ -117,7 +123,7 @@ check "nothing was written by the refused send" "0" "$(q "select count(*) from p
 check "attachment rows hidden" "0" "$(as $GONE "select count(*) from public.conversation_message_attachments where conversation_id='$CONV';")"
 check "the stored file is hidden (no download)" "0" "$(as $GONE "select count(*) from storage.objects where bucket_id='conversation-attachments' and name='$APATH';")"
 has "uploading into the thread is refused" "row-level security|violates" "$(as $GONE "insert into storage.objects(bucket_id, name) values ('conversation-attachments','$CONV/$GONE/$ATT/x.png');")"
-has "registering an attachment on their OWN earlier message is refused" "not|denied|participant|42501" "$(as $GONE "select public.register_conversation_message_attachment('a0000000-0000-4000-8000-0000000000a2','$MSGG','x.png','image/png',10,'$CONV/$GONE/a0000000-0000-4000-8000-0000000000a2/x.png');")"
+has "after removal, the same registration on their OWN message fails on participation" "Not a conversation participant" "$(as $GONE "select public.register_conversation_message_attachment('a0000000-0000-4000-8000-0000000000b2','$MSGG','g2.png','image/png',10,'$CONV/$GONE/a0000000-0000-4000-8000-0000000000b2/g2.png');")"
 
 echo; echo "== 4. A removed participant cannot re-add or un-revoke themselves"
 has "un-revoke via UPDATE is refused (column grant: last_read_at only)" "permission denied" "$(as $GONE "update public.conversation_participants set revoked_at = null where conversation_id='$CONV' and profile_id='$GONE';")"
@@ -150,7 +156,7 @@ check "LIVE can still send" "INSERT 0 1" "$(printf '%s\n' "set role authenticate
 check "re-check: LIVE is still eligible" "1" "$(recheck $OWNER $CONV $LIVE)"
 check "re-check: OWNER is eligible for LIVE's messages" "1" "$(recheck $LIVE $CONV $OWNER)"
 check "read-time bell filter: the thread stays open to LIVE" "2" "$(open_to $LIVE $CONV)"
-check "LIVE still sees the attachment row and the file" "1 1" "$(as $LIVE "select count(*) from public.conversation_message_attachments where conversation_id='$CONV';") $(as $LIVE "select count(*) from storage.objects where name='$APATH';")"
+check "LIVE still sees the attachment rows and the owner's file" "2 1" "$(as $LIVE "select count(*) from public.conversation_message_attachments where conversation_id='$CONV';") $(as $LIVE "select count(*) from storage.objects where name='$APATH';")"
 check "LIVE still sees GONE's revoked row (why the fan-out must filter it)" "1" "$(as $LIVE "select count(*) from public.conversation_participants where conversation_id='$CONV' and profile_id='$GONE' and revoked_at is not null;")"
 
 echo; echo "Result: $pass passed, $fail failed"

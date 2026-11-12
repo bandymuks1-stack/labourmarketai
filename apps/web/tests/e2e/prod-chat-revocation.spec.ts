@@ -3,6 +3,8 @@ import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
 
+import { chatWalkCleanup } from "../../lib/testing/chat-walk-cleanup";
+
 import { bearerOf, qaApi, qaServiceAddParticipants, qaStorage, subOf } from "./prod-qa-api";
 
 /**
@@ -295,12 +297,26 @@ test("cleanup dry-run: exactly the rows the owner SQL would delete, all of this 
   // Every listed row belongs to THIS thread — the delete is by id, never by pattern.
   for (const r of [...participants, ...messages, ...attachments]) expect(r.conversation_id).toBe(conv);
   expect(new Set(participants.map((p) => p.profile_id)), "only A, B and C").toEqual(new Set([A, B, C]));
-  const bells: Record<string, number> = {};
-  for (const slot of ["worker", "worker2"]) bells[slot] = await bellRows(bearerOf(slot));
-  console.info(
-    `[chat-revocation] dry-run for thread ${conv}: conversations 1, participants ${participants.length}, ` +
-      `messages ${messages.length}, attachments ${attachments.length}, bell rows B ${bells.worker} C ${bells.worker2}`,
-  );
+  // B's and C's own bell rows for this thread (each reads only their own).
+  const notificationIds: string[] = [];
+  for (const slot of ["worker", "worker2"]) {
+    const own = await list(
+      `/rest/v1/notification_events?select=id&event_type=eq.message_received&metadata->>conversationId=eq.${conv}`,
+      bearerOf(slot),
+    );
+    notificationIds.push(...own.map((r) => r.id as string));
+  }
+  // Deterministic plan for the owner: row list + one transaction by id.
+  const plan = chatWalkCleanup({
+    threadId: conv,
+    subject: SUBJECT,
+    profileIds: participants.map((p) => p.profile_id as string),
+    messageIds: messages.map((m) => m.id as string),
+    attachmentIds: attachments.map((x) => x.id as string),
+    notificationIds,
+  });
+  console.info(`[chat-revocation] cleanup dry-run (read-only):\n${plan.dryRun.join("\n")}`);
+  console.info(`[chat-revocation] owner cleanup SQL (separate approval):\n${plan.sql}`);
 });
 
 test("cleanup (thread): an owner SQL step", async () => {
