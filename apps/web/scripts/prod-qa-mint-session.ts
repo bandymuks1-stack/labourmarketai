@@ -133,12 +133,19 @@ async function main(): Promise<void> {
   // A FRESH identity is created by the owner only (owner decision 2026-10-26).
   // A magic link for an address with no account could sign it up, so the mint
   // checks first and refuses — a walk can never be the thing that creates it.
-  if (PROD_QA_FRESH_IDENTITIES.includes(target.email)) {
+  //
+  // PROD_QA_MINT_EXISTING_ONLY=1 asks for the same refusal for ANY allowlisted
+  // identity: the post-deploy smoke (post-deploy-smoke.yml) mints without the
+  // provisioning step and must never be the thing that creates an account.
+  const existingOnly = process.env.PROD_QA_MINT_EXISTING_ONLY === "1";
+  if (existingOnly || PROD_QA_FRESH_IDENTITIES.includes(target.email)) {
     const existing = await findAuthUserByEmail(admin, target.email);
     if (!existing) {
       fail(
-        `${target.email} has not been created. Fresh identities are created by the ` +
-          "owner only (prod-qa-fresh-provision.yml); the walk never creates an account.",
+        existingOnly
+          ? `${target.email} does not exist. This run mints existing accounts only and never creates one.`
+          : `${target.email} has not been created. Fresh identities are created by the ` +
+              "owner only (prod-qa-fresh-provision.yml); the walk never creates an account.",
       );
       return;
     }

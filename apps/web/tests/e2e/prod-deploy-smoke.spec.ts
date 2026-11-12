@@ -18,7 +18,8 @@ import { test, expect, type Page } from "./prod-walk";
  *
  * The `check` below is the role-routes walk's rule for "a surface opened"
  * (prod-role-routes.spec.ts), kept in step with it by hand: status, no bounce to sign-in,
- * no error screen, no not-found page, and real content.
+ * no error screen, no not-found page, and real content — plus one stricter rule: the page
+ * must END on the route asked for (role-routes records a role redirect; here it fails).
  */
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1";
@@ -34,6 +35,11 @@ async function check(page: Page, route: string): Promise<string | null> {
   if (await page.getByTestId("error-boundary-message").isVisible().catch(() => false)) return "error boundary rendered";
   if (await page.getByTestId("global-error-message").isVisible().catch(() => false)) return "global error rendered";
   if (await page.getByTestId("branded-not-found").isVisible().catch(() => false)) return "not found (404 page)";
+  // Unlike role-routes, a redirect is a FAILURE here: each journey names the one surface it
+  // promises. A role refusal lands on the home with a notice, where the composer would
+  // otherwise read as success.
+  const landed = new URL(page.url()).pathname.replace(/\/$/, "");
+  if (landed !== route) return `redirected to ${landed}${new URL(page.url()).searchParams.has("notice") ? " with a notice" : ""}`;
   if (new URL(page.url()).pathname.replace(/\/$/, "") === "/lt/dashboard") {
     const composer = page.getByTestId("composer-input");
     return (await composer.waitFor({ state: "visible", timeout: 20_000 }).then(() => true, () => false)) ? null : "chat composer missing";

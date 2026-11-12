@@ -228,10 +228,14 @@ jobs:
       - name: "Brake: production health"
         run: node .github/scripts/walk-brakes.mjs health
 
-      # Sessions for two existing synthetic accounts only. No provisioning step: the
-      # mint refuses an account that does not exist, so the smoke never creates one.
+      # Sessions for two existing synthetic accounts only. No provisioning step, and
+      # PROD_QA_MINT_EXISTING_ONLY makes the mint look the account up first and refuse
+      # when it is missing (a magic link for an unknown address could sign it up), so
+      # the smoke can never be the thing that creates an account.
       - name: Mint two synthetic sessions (worker, company owner)
         id: mint
+        env:
+          PROD_QA_MINT_EXISTING_ONLY: "1"
         run: |
           set -euo pipefail
           [ -n "${PROD_QA_ANON_KEY}" ] || { echo "::error::vars.PROD_QA_ANON_KEY is not set"; exit 1; }
