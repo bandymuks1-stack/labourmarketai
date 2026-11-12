@@ -7245,7 +7245,16 @@
         "blockedFailed": "Pašalink arba iš naujo įkelk nepavykusį priedą.",
         "partialFailure": "Žinutė išsiųsta, bet dalies priedų prisegti nepavyko. Pabandyk juos išsiųsti dar kartą."
       },
-      "languageLabel": "Rašau"
+      "languageLabel": "Rašau",
+      "errors": {
+        "notAuthenticated": "Sesija baigėsi. Prisijunk iš naujo ir išsiųsk žinutę.",
+        "invalidInput": "Šios žinutės išsiųsti negalima: ji gali būti per ilga arba priedas nepalaikomas.",
+        "notParticipant": "Šiame pokalbyje rašyti negali — neturi prieigos.",
+        "rateLimited": "Per pastarąją valandą išsiuntei daug žinučių. Šiek tiek palauk ir bandyk dar kartą.",
+        "rateCheckUnavailable": "Saugumo patikros atlikti nepavyko, todėl niekas neišsiųsta. Bandyk dar kartą.",
+        "attachmentsUnavailable": "Priedų siuntimas čia dar neįjungtas — įrašyk ir tekstą.",
+        "sendFailed": "Žinutės išsiųsti nepavyko. Tavo tekstas liko — bandyk dar kartą."
+      }
     },
     "launcher": {
       "openLabel": "Susisiekti su pagalba",

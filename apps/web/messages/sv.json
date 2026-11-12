@@ -7241,7 +7241,16 @@
         "blockedFailed": "Ta bort eller ladda upp den misslyckade bilagan igen.",
         "partialFailure": "Meddelandet skickades, men vissa bilagor kunde inte bifogas. Försök skicka dem igen."
       },
-      "languageLabel": "Jag skriver på"
+      "languageLabel": "Jag skriver på",
+      "errors": {
+        "notAuthenticated": "Din session har avslutats. Logga in igen och skicka meddelandet.",
+        "invalidInput": "Meddelandet kan inte skickas: det kan vara för långt, eller så stöds inte en bilaga.",
+        "notParticipant": "Du kan inte skriva i den här konversationen – du har inte åtkomst till den.",
+        "rateLimited": "Du har skickat många meddelanden den senaste timmen. Vänta en stund och försök igen.",
+        "rateCheckUnavailable": "Säkerhetskontrollen kunde inte köras, så ingenting skickades. Försök igen.",
+        "attachmentsUnavailable": "Bilagor kan ännu inte skickas i den här konversationen – lägg till lite text i meddelandet.",
+        "sendFailed": "Meddelandet kunde inte skickas. Din text finns kvar – försök igen."
+      }
     },
     "launcher": {
       "openLabel": "Kontakta support",

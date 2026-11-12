@@ -469,6 +469,10 @@ describe("G8 — candidates and projects route to the chip handlers", () => {
  */
 // 2026-09-20: `pl` re-joins the ratchet — Polish patterns now exist in
 // lib/conversation/intent-router.ts, so every row below is real coverage.
+// 2026-11-12: `sv` joins the same way — Swedish patterns sit beside the
+// Polish ones in the router, one natural Swedish sentence per row. The one
+// row the router alone cannot open is `product-help`: its patterns are read
+// from lib/conversation/product-help-topics.ts (the help answer's own data).
 const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 type ActiveLocale = (typeof ACTIVE_LOCALES)[number];
 

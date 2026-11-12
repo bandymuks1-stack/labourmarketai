@@ -114,6 +114,7 @@ describe("public entry — one sentence, the one router (P1 acceptance)", () => 
       nl: /accountant/i,
       de: /buchhalter/i,
       pl: /księgow/i,
+      sv: /redovisningsekonom/i,
     };
     for (const locale of ACTIVE_LOCALES) {
       expect(entryExamples(locale).professional).toMatch(WORD[locale]);
