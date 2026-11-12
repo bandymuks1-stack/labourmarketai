@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { X } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -54,6 +54,29 @@ function goalDepth(): number {
   const value = (window.history.state as Record<string, unknown> | null)?.[GOAL_DEPTH_KEY];
   return typeof value === "number" && value > 0 ? value : 0;
 }
+/**
+ * The goal fragment the person last ASKED for — from every announced change
+ * of the address (a card, Close, Back, a link). Kept at module level so it is
+ * listening from the moment this script loads, before the component has
+ * rendered or attached anything: a tap can land in that gap. `null` until the
+ * first announcement. The router's silent rewrites announce nothing, so they
+ * never reach it.
+ */
+let askedFragment: string | null = null;
+/** When, after mounting, the address is checked for a dropped fragment. */
+const STARTUP_CHECKS_MS = [0, 100, 250, 500, 800, 1200, 1800, 2500, 3500, 5000] as const;
+/** Navigators on screen. When the last one leaves (the person went to another
+ *  page), what was asked there is forgotten, so coming back opens nothing. */
+let mountedNavigators = 0;
+if (typeof window !== "undefined") {
+  const note = () => {
+    const now = window.location.hash;
+    askedFragment = goalIdFromFragment(now) ? now : "";
+  };
+  window.addEventListener("hashchange", note);
+  window.addEventListener("popstate", note);
+}
+
 /** The server renders no fragment: nothing chosen, the rail alone. */
 const readServerFragment = () => "";
 
@@ -106,6 +129,45 @@ export function GoalNavigator({
   // The fragment names a card of THIS navigator, or nothing is open.
   const active = goals.find((g) => g.id === goalIdFromFragment(fragment)) ?? null;
   const activeId = active?.id ?? null;
+  // A GOAL CHOSEN WHILE THE PAGE IS STARTING IS NOT LOST. The goal cards are
+  // real links, so a tap before the scripts attach sets the fragment
+  // natively; and for a moment after they attach, the framework's router is
+  // still putting the address it loaded with back — silently, with no event —
+  // which drops the fragment, and the choice with it (found by the evidence
+  // walk, 2026-11-12). So for the first seconds the fragment the person last
+  // asked for (`askedFragment`, or the address at first render) is put back
+  // if it disappears without anyone having closed the panel.
+  const [bootFragment] = useState(() =>
+    typeof window === "undefined" ? "" : window.location.hash,
+  );
+  useEffect(() => {
+    mountedNavigators += 1;
+    const restore = () => {
+      // What the person last asked for; before any announcement, the address
+      // this component first saw.
+      const wanted = askedFragment ?? (goalIdFromFragment(bootFragment) ? bootFragment : "");
+      if (!wanted || window.location.hash !== "") return;
+      window.history.replaceState(
+        window.history.state,
+        "",
+        window.location.pathname + window.location.search + wanted,
+      );
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    };
+    restore();
+    // A fixed handful of checks while the page starts, then never again:
+    // after that the address is left alone.
+    const checks = STARTUP_CHECKS_MS.map((ms) => window.setTimeout(restore, ms));
+    return () => {
+      checks.forEach((t) => window.clearTimeout(t));
+      mountedNavigators -= 1;
+      // After the current task: a development double-mount is not a leave.
+      window.setTimeout(() => {
+        if (mountedNavigators === 0) askedFragment = null;
+      }, 0);
+    };
+  }, [bootFragment]);
+
   const [tab, setTab] = useState<"functions" | "professions">("functions");
   const [sector, setSector] = useState<string | null>(null);
   const [fullList, setFullList] = useState(false);
@@ -131,7 +193,12 @@ export function GoalNavigator({
 
   /** Drop the goal fragment from the current entry, staying on the page. */
   const clearGoal = () => {
-    if (!goalIdFromFragment(window.location.hash)) return;
+    if (!goalIdFromFragment(window.location.hash)) {
+      // Nothing in the address (the router may have rewritten it while the
+      // page was starting): still say so, so an open panel closes.
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+      return;
+    }
     window.history.replaceState(
       window.history.state,
       "",

@@ -1,4 +1,6 @@
 import { expect as baseExpect, test, type Page } from "@playwright/test";
+import { mkdirSync } from "node:fs";
+import { join } from "node:path";
 
 /**
  * PREMIUM NAVIGATION — the six public intents, proven in a real browser
@@ -221,3 +223,39 @@ test.describe("phone header", () => {
     }
   }
 });
+
+// Evidence: an inner page's header at every checked width, light and dark.
+const INNER_SHOTS = join(process.cwd(), "..", "..", "docs", "audits", "evidence", "premium-nav");
+for (const vp of [
+  { name: "320", width: 320, height: 640 },
+  { name: "375", width: 375, height: 812 },
+  { name: "390", width: 390, height: 844 },
+  { name: "768", width: 768, height: 1024 },
+  { name: "1440", width: 1440, height: 900 },
+] as const) {
+  for (const theme of ["light", "dark"] as const) {
+    test(`evidence: inner page header @${vp.name}px, ${theme}`, async ({ browser }) => {
+      mkdirSync(INNER_SHOTS, { recursive: true });
+      const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+      await context.addInitScript((t) => {
+        try {
+          localStorage.setItem("theme", t);
+        } catch {
+          /* storage blocked: the page keeps its default theme */
+        }
+      }, theme);
+      const page = await context.newPage();
+      await page.goto("/en/pricing");
+      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+      expect(await headerOverflow(page), `header overflow @${vp.name} ${theme}`).toEqual([]);
+      if (vp.width >= 1024) await expect(page.getByTestId("intent-bar")).toBeVisible();
+      else await expect(page.getByTestId("mobile-nav-toggle")).toBeVisible();
+      // The Next.js development indicator exists only under `next dev`.
+      await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
+      await page.screenshot({
+        path: join(INNER_SHOTS, `inner-${vp.name}${theme === "dark" ? "-dark" : ""}.png`),
+      });
+      await context.close();
+    });
+  }
+}
