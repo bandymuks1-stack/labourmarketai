@@ -183,6 +183,11 @@ export async function listManagedProjects(
      *  projects (the home's quick access) must not pay for the finished
      *  bucket it will throw away: one query instead of two. */
     readonly activeOnly?: boolean;
+    /** Only this organization's projects — applied IN the query, before the
+     *  bucket limit. A person who manages several organizations would
+     *  otherwise get the newest 100 across all of them, and a client-side
+     *  filter over that capped page could miss this organization's projects. */
+    readonly organizationId?: string;
   } = {},
 ): Promise<ManagedProject[]> {
   const finishedPage = Math.max(0, Math.floor(opts.finishedPage ?? 0));
@@ -202,7 +207,8 @@ export async function listManagedProjects(
   const run = (columns: string, completed: boolean) => {
     // DUPLICATE rows are filtered in the query, so a page holds a full
     // bucket of real projects and its boundaries match countManagedProjects.
-    const q = asAny(supabase).from("projects").select(columns).neq("record_state", "duplicate");
+    let q = asAny(supabase).from("projects").select(columns).neq("record_state", "duplicate");
+    if (opts.organizationId) q = q.eq("organization_id", opts.organizationId);
     const ordered = (
       completed ? q.eq("status", "completed") : q.or("status.is.null,status.neq.completed")
     )

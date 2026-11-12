@@ -7,6 +7,7 @@ import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { Link } from "@/lib/i18n/navigation";
 import { routeIsAdmitted } from "@/lib/navigation/home-goals";
 import { loadGoalAdmission } from "@/lib/navigation/home-goals-server";
+import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 import { listManagedProjects } from "@/lib/projects/projects";
 import { listCompanyDemands } from "@/lib/scouting/scouting";
 
@@ -15,8 +16,9 @@ export const QUICK_ACCESS_LIMIT = 3;
 
 const PROJECTS_HREF = "/dashboard/projects";
 const NEEDS_HREF = "/dashboard/company/needs";
-/** The Needs door's own list of what the organization already asked for or offered. */
-const NEEDS_LIST_HREF = `${NEEDS_HREF}#company-requests`;
+/** The Needs door's own readback of what the organization already asked for
+ *  (`DemandRequestsReadback`) — not the intake section above it. */
+const NEEDS_LIST_HREF = `${NEEDS_HREF}#demand-readback-title`;
 
 const ROW =
   "flex min-h-11 items-center gap-2 rounded-lg px-2 text-support text-text-primary outline-none transition-colors duration-150 hover:bg-ink-700/60 focus-visible:ring-2 focus-visible:ring-brand-blue motion-reduce:transition-none";
@@ -51,8 +53,9 @@ const ROW =
  * its own rights under RLS.
  */
 export async function HomeQuickAccess() {
-  const [t, admission, workspace] = await Promise.all([
+  const [t, tReadback, admission, workspace] = await Promise.all([
     getTranslations("homeGoals.quick"),
+    getTranslations("demandReadback"),
     loadGoalAdmission(),
     getWorkspaceContext(),
   ]);
@@ -89,7 +92,17 @@ export async function HomeQuickAccess() {
             testId="home-quick-needs"
             heading={t("needs")}
             icon={<UserSearch {...iconControl("text-text-secondary")} aria-hidden />}
-            rows={needs.map((n) => ({ key: n.id, href: NEEDS_LIST_HREF, label: n.title }))}
+            // A need saved without a role carries a stored English stand-in
+            // title; the readback's own resolver shows the localized one and
+            // leaves the person's own words untouched.
+            rows={needs.map((n) => ({
+              key: n.id,
+              href: NEEDS_LIST_HREF,
+              label: resolveDemandTitle(n.title, {
+                hiringWorkers: tReadback("syntheticTitle.hiringWorkers"),
+                agencyPartnership: tReadback("syntheticTitle.agencyPartnership"),
+              }),
+            }))}
             allHref={NEEDS_LIST_HREF}
             allLabel={t("allNeeds")}
           />
@@ -149,10 +162,10 @@ function QuickList({
  *  answers nothing (the reader's own contract), so nothing is claimed. */
 async function loadActiveProjects(organizationId: string) {
   try {
-    const all = await listManagedProjects({ activeOnly: true });
-    return all
-      .filter((p) => p.organizationId === organizationId && p.status !== "completed")
-      .slice(0, QUICK_ACCESS_LIMIT);
+    // The organization is part of the QUERY (before the reader's page
+    // limit), so another organization's newer projects cannot crowd these out.
+    const all = await listManagedProjects({ activeOnly: true, organizationId });
+    return all.filter((p) => p.status !== "completed").slice(0, QUICK_ACCESS_LIMIT);
   } catch {
     return [];
   }
