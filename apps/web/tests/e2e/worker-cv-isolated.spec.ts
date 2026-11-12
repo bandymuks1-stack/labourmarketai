@@ -222,7 +222,7 @@ test("G-1. a worker signs up on a phone, fills the profile, and reads it back on
   expect(cv, "the CV names the person").toContain(WORKER_NAME);
   expect(cv, "the CV carries the education line").toContain(SCHOOL);
   expect(cv, "the CV carries the experience line").toContain(JOB_TITLE);
-  await expect(page.getByTestId("cv-languages"), "the CV carries the language").toContainText(/German|Deutsch/i);
+  await expect(page.getByTestId("cv-languages"), "the CV carries the language").toContainText(/(Deutsch|German|DE) · B2/);
   await expect(page.getByTestId("cv-back-link"), "the CV has a way back").toBeVisible();
   await expectNoSidewaysScroll(page, "CV");
   await ctx.close();
