@@ -625,6 +625,49 @@ export async function acceptInvitationByIdAction(input: {
   return { status: "ok", outcome };
 }
 
+/**
+ * Decline from the person's own list (the network page). The list holds
+ * invitation ids, never tokens, so this is the by-id twin of
+ * `declineInvitationAction`: the database function applies the same gate as
+ * the by-id accept (signed in, verified mailbox, the invited address) and
+ * the same body as the token decline.
+ *
+ * `needs-migration` while 20261112180000_decline_invitation_by_id_v1 is not
+ * applied: the caller then offers no decline at all rather than a dead one.
+ */
+export async function declineInvitationByIdAction(input: {
+  invitationId: string;
+  locale: string;
+}): Promise<SimpleInvitationResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { status: "not-authed" };
+  const { data, error } = await asAny(supabase).rpc("decline_invitation_by_id_v1", {
+    p_invitation_id: input.invitationId,
+  });
+  if (error) {
+    return isMissingSchema(error) || isMissingV2(error)
+      ? { status: "needs-migration" }
+      : { status: "ok", outcome: "error" };
+  }
+  const outcome = (data?.outcome ?? "error") as string;
+  if (outcome === "declined") {
+    emitServerFunnelEvent(FUNNEL_EVENTS.invitationDeclined, {
+      source: "invitations",
+      route: "/dashboard/network",
+      metadata: {
+        surface: "network",
+        entity_type: String(data?.invitation_type ?? "unknown"),
+        success: true,
+      },
+    });
+  }
+  revalidatePath(`/${input.locale}/dashboard/network`);
+  return { status: "ok", outcome };
+}
+
 export type ShareableInvitationOutcome =
   | "created"
   | "sent"

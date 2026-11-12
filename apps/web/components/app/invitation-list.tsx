@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { REVIEW_NOTICE_VERSION, showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
@@ -9,6 +10,7 @@ import { Check, Copy } from "lucide-react";
 
 import {
   acceptInvitationByIdAction,
+  declineInvitationByIdAction,
   resendInvitationAction,
   revokeInvitationAction,
 } from "@/lib/invitations/actions";
@@ -266,6 +268,28 @@ export function IncomingInvitationList({
     }
   }
 
+  // Decline is offered until the database says its door is not there yet
+  // (the function ships in a migration that needs the owner's approval);
+  // after that answer the button is withdrawn rather than left dead.
+  const [declineAvailable, setDeclineAvailable] = useState(true);
+
+  async function onDecline(row: IncomingInvitationRow) {
+    setBusyId(row.id);
+    setNotice(null);
+    try {
+      const r = await declineInvitationByIdAction({ invitationId: row.id, locale });
+      if (r.status === "needs-migration") {
+        setDeclineAvailable(false);
+        setNotice(t("notices.error"));
+        return;
+      }
+      setNotice(r.status === "ok" ? t(`notices.${r.outcome}`) : t("notices.error"));
+      router.refresh();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   if (items.length === 0) return null;
 
   return (
@@ -342,6 +366,19 @@ export function IncomingInvitationList({
               >
                 {busyId === row.id ? t("accepting") : t("accept")}
               </button>
+              {declineAvailable ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="min-h-11"
+                  onClick={() => onDecline(row)}
+                  disabled={busyId === row.id}
+                  data-testid={`incoming-invitation-decline-${row.id}`}
+                >
+                  {tPage("decline")}
+                </Button>
+              ) : null}
               <span className="text-meta text-text-muted">
                 {t("expires", {
                   date: formatUtcDate(row.expiresAt, locale) ?? "",
