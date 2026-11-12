@@ -92,17 +92,24 @@ describe("needs reach workers only after verification — the copy says so (2026
     expect(en.demandReadback.notVerifiedYet).toMatch(/the inquiries you submit here are not shown to workers until verification/i);
   });
 
-  // The setup explainers no longer say "only after verification": owner
-  // decision V-1 (2026-11-12) shows an unconfirmed company's complete,
-  // check-passing needs with an "unverified" mark. Their words are pinned in
-  // company-verification-worker-visibility-copy.test.ts. Every key still exists.
-  it("every setup explainer key still exists in the active locales", () => {
+  it("every non-verified setup explainer (active locales) says needs reach workers only after verification", () => {
+    // One word each locale's sentence must carry — the verification term.
+    const TERM: Record<(typeof ACTIVE)[number], RegExp> = {
+      en: /shown to workers only after your company is verified/i,
+      lt: /darbuotojams rodomos tik po įmonės verifikacijos/i,
+      ru: /показываются работникам только после верификации/i,
+      nl: /pas na verificatie van je bedrijf aan werknemers getoond/i,
+      de: /erst nach der Verifizierung Ihres Unternehmens angezeigt/i,
+      pl: /pokazywane pracownikom dopiero po weryfikacji/i,
+    };
     for (const locale of ACTIVE) {
       const msgs = JSON.parse(read(`messages/${locale}.json`));
       const explainer = msgs.roleDashboards?.company?.setup?.verificationExplainer ?? {};
       for (const key of EXPLAINER_KEYS) {
-        expect(String(explainer[key] ?? "").length, `${locale} verificationExplainer.${key}`).toBeGreaterThan(20);
+        expect(String(explainer[key] ?? ""), `${locale} verificationExplainer.${key}`).toMatch(TERM[locale]);
       }
+      // The verified explainer needs no such caveat — it IS the visible state.
+      expect(String(explainer.verified ?? "")).not.toMatch(TERM[locale]);
     }
   });
 });

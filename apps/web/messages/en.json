@@ -2205,7 +2205,7 @@
         },
         "noCompany": {
           "title": "Start your company profile",
-          "body": "You don't have a company profile yet. Create one — it's active and usable straight away, no waiting for approval. Needs you post are shown to workers and visitors, marked \"Company not verified\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
+          "body": "You don't have a company profile yet. Create one: you can use it straight away. Workers see the needs you post after the company's verification.",
           "cta": "Start company setup"
         },
         "personalSpace": {
@@ -2240,7 +2240,7 @@
         "formTitle": "Company profile request",
         "formTitleCreate": "Create company profile",
         "formTitleEdit": "Edit company profile",
-        "formSubtitle": "Create your organisation profile from your personal account. It's active and usable straight away — no waiting for approval. Verification is a stronger, separate trust step. Needs you post are shown to workers and visitors, marked \"Company not verified\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
+        "formSubtitle": "Create your organisation profile from your personal account. You can use it straight away: projects, team, work journal. Workers see the needs you post once your company is verified; ask for verification below.",
         "existingHeading": "Company profile",
         "legalName": "Company legal name",
         "legalNameHelp": "Required. 2–200 characters.",
@@ -2294,7 +2294,7 @@
         "agencyConnectionPending": "Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company.",
         "legalLockedNotice": "This company is verified. Its legal details (legal name, registration code, country and registered address) are locked here and cannot be overwritten — contact support to request a legal change. You can still update contacts, website, company type and your role.",
         "saveDraft": "Save company",
-        "submitRequest": "Request manual review (optional)",
+        "submitRequest": "Request verification (workers see your needs once verified)",
         "statusDraftSaved": "Company saved — it's active and usable now.",
         "statusSubmitted": "Manual review requested (optional). Your company stays usable in the meantime.",
         "statusNeedsMigration": "Couldn’t complete the action. Please try again.",
@@ -2313,10 +2313,10 @@
         },
         "verificationExplainer": {
           "draft": "Draft. Save to activate your company — it becomes usable straight away.",
-          "active_unverified": "Active and usable now. Basic automated checks passed. Not yet identity-verified — that's a separate, stronger step. Needs you post are shown to workers and visitors, marked \"Company not verified\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
-          "needs_checks": "Active and usable, but a basic check needs attention (e.g. add your country, or fix a malformed code / website / email). Until it is fixed, needs you post wait for a review and are not shown to workers.",
-          "pending_verification": "You asked for an optional manual review. Your company stays fully usable while it waits. Needs you post are shown to workers and visitors, marked \"Company not verified\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
-          "unverified": "Not verified. You can keep using your company normally. Needs you post are shown to workers and visitors, marked \"Company not verified\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
+          "active_unverified": "Active and usable now. Basic automated checks passed. Not yet identity-verified — that's a separate, stronger step. Inquiries you post are shown to workers only after your company is verified.",
+          "needs_checks": "Active and usable, but a basic check needs attention (e.g. add your country, or fix a malformed code / website / email). Inquiries you post are shown to workers only after your company is verified.",
+          "pending_verification": "You asked for verification. Your company stays fully usable while it waits. Inquiries you post are shown to workers only after your company is verified.",
+          "unverified": "Not verified. You can keep using your company normally. Inquiries you post are shown to workers only after your company is verified.",
           "verified": "Verified — a stronger trust state, granted only after a real check."
         },
         "goToWorkspace": "Open the company workspace",

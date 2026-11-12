@@ -2205,7 +2205,7 @@
         },
         "noCompany": {
           "title": "Pradėk įmonės profilį",
-          "body": "Dar neturi įmonės profilio. Sukurk jį — jis iškart aktyvus ir naudojamas, nereikia laukti patvirtinimo. Tavo paskelbti poreikiai rodomi darbuotojams ir lankytojams su žyma „Įmonė nepatvirtinta“, kai užpildyti privalomi įmonės duomenys ir praeina automatinės patikros; neišsamūs ar įtartini laukia peržiūros.",
+          "body": "Dar neturi įmonės profilio. Sukurk jį: juo gali naudotis iš karto. Darbuotojai tavo paskelbtus poreikius mato po įmonės patvirtinimo.",
           "cta": "Pradėti įmonės nustatymą"
         },
         "personalSpace": {
@@ -2240,7 +2240,7 @@
         "formTitle": "Įmonės profilio užklausa",
         "formTitleCreate": "Sukurti įmonės profilį",
         "formTitleEdit": "Redaguoti įmonės profilį",
-        "formSubtitle": "Sukurk organizacijos profilį iš savo asmeninės paskyros. Jis iškart aktyvus ir naudojamas — nereikia laukti patvirtinimo. Patvirtinimas yra atskiras, stipresnis pasitikėjimo žingsnis. Tavo paskelbti poreikiai rodomi darbuotojams ir lankytojams su žyma „Įmonė nepatvirtinta“, kai užpildyti privalomi įmonės duomenys ir praeina automatinės patikros; neišsamūs ar įtartini laukia peržiūros.",
+        "formSubtitle": "Sukurk organizacijos profilį iš savo asmeninės paskyros. Juo gali naudotis iš karto: projektai, komanda, darbo žurnalas. Darbuotojai tavo paskelbtus poreikius mato, kai įmonė patvirtinta; patvirtinimo paprašyk žemiau.",
         "existingHeading": "Įmonės profilis",
         "legalName": "Įmonės teisinis pavadinimas",
         "legalNameHelp": "Privaloma. 2–200 simbolių.",
@@ -2294,7 +2294,7 @@
         "agencyConnectionPending": "Kvietimas priimtas. Personalo agentūra nori užmegzti ryšį su tavo įmone — pirmiausia sukurk įmonės profilį; ryšio prašymas tada lauks tavo puslapyje „Klientai ir partneriai“, kur jį patvirtinsi šios įmonės vardu.",
         "legalLockedNotice": "Ši įmonė yra patvirtinta. Jos juridiniai duomenys (pavadinimas, įmonės kodas, šalis ir registracijos adresas) čia užrakinti ir negali būti perrašyti — dėl juridinių duomenų keitimo kreipkis į palaikymą. Kontaktus, svetainę, veiklos tipą ir savo vaidmenį vis tiek gali atnaujinti.",
         "saveDraft": "Išsaugoti įmonę",
-        "submitRequest": "Prašyti rankinės peržiūros (neprivaloma)",
+        "submitRequest": "Prašyti patvirtinimo (darbuotojai poreikius mato po patvirtinimo)",
         "statusDraftSaved": "Įmonė išsaugota — ji aktyvi ir naudojama dabar.",
         "statusSubmitted": "Rankinė peržiūra paprašyta (neprivaloma). Įmonė tuo metu lieka naudojama.",
         "statusNeedsMigration": "Nepavyko atlikti veiksmo. Bandyk dar kartą.",
@@ -2313,10 +2313,10 @@
         },
         "verificationExplainer": {
           "draft": "Juodraštis. Išsaugok, kad aktyvuotum įmonę — ji iškart taps naudojama.",
-          "active_unverified": "Aktyvi ir naudojama dabar. Bazinės automatinės patikros praėjo. Dar ne tapatybės patvirtinta — tai atskiras, stipresnis žingsnis. Tavo paskelbti poreikiai rodomi darbuotojams ir lankytojams su žyma „Įmonė nepatvirtinta“, kai užpildyti privalomi įmonės duomenys ir praeina automatinės patikros; neišsamūs ar įtartini laukia peržiūros.",
-          "needs_checks": "Aktyvi ir naudojama, bet vieną bazinę patikrą reikia patikslinti (pvz., nurodyti šalį arba pataisyti netaisyklingą kodą / svetainę / el. paštą). Kol tai nepataisyta, tavo paskelbti poreikiai laukia peržiūros ir darbuotojams nerodomi.",
-          "pending_verification": "Paprašei neprivalomos rankinės peržiūros. Įmonė lieka pilnai naudojama, kol laukiama. Tavo paskelbti poreikiai rodomi darbuotojams ir lankytojams su žyma „Įmonė nepatvirtinta“, kai užpildyti privalomi įmonės duomenys ir praeina automatinės patikros; neišsamūs ar įtartini laukia peržiūros.",
-          "unverified": "Nepatvirtinta. Gali toliau normaliai naudotis įmone. Tavo paskelbti poreikiai rodomi darbuotojams ir lankytojams su žyma „Įmonė nepatvirtinta“, kai užpildyti privalomi įmonės duomenys ir praeina automatinės patikros; neišsamūs ar įtartini laukia peržiūros.",
+          "active_unverified": "Aktyvi ir naudojama dabar. Bazinės automatinės patikros praėjo. Dar ne tapatybės patvirtinta — tai atskiras, stipresnis žingsnis. Tavo pateiktos užklausos darbuotojams rodomos tik po įmonės verifikacijos.",
+          "needs_checks": "Aktyvi ir naudojama, bet vieną bazinę patikrą reikia patikslinti (pvz., nurodyti šalį arba pataisyti netaisyklingą kodą / svetainę / el. paštą). Tavo pateiktos užklausos darbuotojams rodomos tik po įmonės verifikacijos.",
+          "pending_verification": "Paprašei patvirtinimo. Įmonė lieka pilnai naudojama, kol laukiama. Tavo pateiktos užklausos darbuotojams rodomos tik po įmonės verifikacijos.",
+          "unverified": "Nepatvirtinta. Gali toliau normaliai naudotis įmone. Tavo pateiktos užklausos darbuotojams rodomos tik po įmonės verifikacijos.",
           "verified": "Patvirtinta — stipresnė pasitikėjimo būsena, suteikiama tik po realios patikros."
         },
         "goToWorkspace": "Atidaryti įmonės darbo erdvę",
