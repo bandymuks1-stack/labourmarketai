@@ -4403,7 +4403,18 @@
       "teamOfferThreadFailed": "Denne samtale kan ikke åbnes.",
       "whatChangedIntro": "{count, plural, one {Her er kæden fra dit seneste arbejde: hvad du gjorde, hvad der ændrede sig, hvad det åbnede.} other {Her er # kæder fra dit seneste arbejde: hvad du gjorde, hvad der ændrede sig, hvad det åbnede.}}",
       "whatChangedNone": "Der kom intet nyt ud af dit arbejde de seneste 14 dage. Når du registrerer arbejde, og det bliver bekræftet, viser jeg, hvad det ændrede.",
-      "whatChangedUnavailable": "Jeg kunne ikke tjekke, hvad der ændrede sig lige nu. Dine registreringer er i sikkerhed – prøv igen om lidt eller åbn journalen."
+      "whatChangedUnavailable": "Jeg kunne ikke tjekke, hvad der ændrede sig lige nu. Dine registreringer er i sikkerhed – prøv igen om lidt eller åbn journalen.",
+      "pinAdd": "Tilføj genvej",
+      "pinEditDone": "Færdig",
+      "pinEditYours": "Dine genveje",
+      "pinAddHeading": "Tilføj en genvej",
+      "pinAddNone": "Alt her er allerede tilføjet.",
+      "pinRecent": "Seneste",
+      "pinMoveEarlier": "Flyt “{label}” tidligere",
+      "pinMoveLater": "Flyt “{label}” senere",
+      "pinRemove": "Fjern “{label}”",
+      "pinAdded": "Tilføjet.",
+      "pinMoved": "Rækkefølgen er gemt."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

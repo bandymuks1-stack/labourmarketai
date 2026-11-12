@@ -19,11 +19,12 @@ import { useTranslations } from "next-intl";
 import { SkeletonText } from "@/components/app/skeleton";
 import { useAuthOptional } from "@/lib/auth/context";
 import { ConversationHeader } from "./conversation-header";
-import { MySpaceRow } from "./my-space-row";
+import { MySpaceRow, type MySpacePlace } from "./my-space-row";
 import { pinAction, reorderPinsAction, unpinAction } from "@/lib/workspace/pins-actions";
 import {
   PIN_CAP,
   isPinnableRef,
+  pinKindFor,
   recordPinUsage,
   shouldAskToPin,
   type PinUsage,
@@ -567,6 +568,18 @@ export type ChatLabels = {
   pinsNone: string;
   unpinPrefix: string;
   unpinDone: string;
+  // Pin to home (owner P0 No. 1, 2026-11-12): the row's own edit mode.
+  pinAdd: string;
+  pinEditDone: string;
+  pinEditYours: string;
+  pinAddHeading: string;
+  pinAddNone: string;
+  pinRecent: string;
+  pinMoveEarlier: string;
+  pinMoveLater: string;
+  pinRemove: string;
+  pinAdded: string;
+  pinMoved: string;
   projectCreateIntro: string;
   projectCreatedNext: string;
   clientOffersIntro: string;
@@ -914,6 +927,7 @@ export function ConversationChat({
   contextFallback = null,
   workspaceContextLine = null,
   pins = null,
+  pinPlaces = [],
   actingIdentity = "person",
 }: {
   /**
@@ -1011,6 +1025,9 @@ export function ConversationChat({
    *  the store is unavailable (migration unapplied / read failed): no row,
    *  no ask — never an invented empty desktop. */
   pins?: readonly WorkspacePin[] | null;
+  /** What this person may pin from the home: destinations they are already
+   *  admitted to, named as the home names them (server-resolved). */
+  pinPlaces?: readonly MySpacePlace[];
 }) {
   const auth0 = useAuthOptional();
   const router = useRouter();
@@ -8274,7 +8291,44 @@ export function ConversationChat({
           title={labels.mySpaceTitle}
           manageLabel={labels.chipManagePins}
           onPin={(ref) => handleChip({ id: ref, label: pinLabelFor(ref) })}
-          onManage={() => handleChip({ id: "pins:manage", label: labels.chipManagePins })}
+          /* Editing is the row's own (add · remove · move), through the same
+             three pin actions the chips call — and it never writes into the
+             thread, so it cannot replace the home the person is looking at.
+             No store, no editor and no ask. */
+          editor={
+            pinsAvailable
+              ? {
+                  places: pinPlaces,
+                  expectedWorkspaceId,
+                  userId: auth0?.user?.id ?? null,
+                  onChange: (next) =>
+                    setPinned(
+                      next.map((p, i) => ({
+                        ref: p.ref,
+                        kind: pinKindFor(p.ref) ?? "view",
+                        label: p.label,
+                        position: i,
+                      })),
+                    ),
+                  labels: {
+                    add: labels.pinAdd,
+                    done: labels.pinEditDone,
+                    yours: labels.pinEditYours,
+                    addHeading: labels.pinAddHeading,
+                    addNone: labels.pinAddNone,
+                    recent: labels.pinRecent,
+                    moveEarlier: labels.pinMoveEarlier,
+                    moveLater: labels.pinMoveLater,
+                    remove: labels.pinRemove,
+                    added: labels.pinAdded,
+                    removed: labels.unpinDone,
+                    moved: labels.pinMoved,
+                    cap: labels.pinCap,
+                    unavailable: labels.pinUnavailable,
+                  },
+                }
+              : null
+          }
         />
         {/* Column on phones (panel docks under the composer, collapsed until
             something is selected), row from `lg` (panel is the right column

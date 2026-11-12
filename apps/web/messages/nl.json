@@ -15081,7 +15081,18 @@
       "whatChangedUnavailable": "Ik kon nu niet nagaan wat er veranderde. Je registraties zijn veilig — probeer het zo opnieuw of open het logboek.",
       "planIntro": "{count, plural, one {Dat is # stap.} other {Dat zijn # stappen, op volgorde. Hier is de eerste — tik op de volgende wanneer je klaar bent.}}",
       "planNextOffer": "Volgende stap:",
-      "planStep": "Stap {n} van {count}"
+      "planStep": "Stap {n} van {count}",
+      "pinAdd": "Snelkoppeling toevoegen",
+      "pinEditDone": "Klaar",
+      "pinEditYours": "Je snelkoppelingen",
+      "pinAddHeading": "Een snelkoppeling toevoegen",
+      "pinAddNone": "Alles hier is al toegevoegd.",
+      "pinRecent": "Onlangs",
+      "pinMoveEarlier": "‘{label}’ naar voren verplaatsen",
+      "pinMoveLater": "‘{label}’ naar achteren verplaatsen",
+      "pinRemove": "‘{label}’ verwijderen",
+      "pinAdded": "Toegevoegd.",
+      "pinMoved": "Volgorde opgeslagen."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

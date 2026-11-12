@@ -15081,7 +15081,18 @@
       "whatChangedUnavailable": "I couldn't check what changed right now. Your records are safe; try again in a moment or open the journal.",
       "planIntro": "{count, plural, one {That is # step.} other {That is # steps, in order. Here is the first — tap the next one when you are ready.}}",
       "planNextOffer": "Next step:",
-      "planStep": "Step {n} of {count}"
+      "planStep": "Step {n} of {count}",
+      "pinAdd": "Add shortcut",
+      "pinEditDone": "Done",
+      "pinEditYours": "Your shortcuts",
+      "pinAddHeading": "Add a shortcut",
+      "pinAddNone": "Everything here is already added.",
+      "pinRecent": "Recent",
+      "pinMoveEarlier": "Move “{label}” earlier",
+      "pinMoveLater": "Move “{label}” later",
+      "pinRemove": "Remove “{label}”",
+      "pinAdded": "Added.",
+      "pinMoved": "Order saved."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

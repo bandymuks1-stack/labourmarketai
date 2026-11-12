@@ -47,6 +47,9 @@ import {
   personHasUsableProfile,
 } from "@/lib/conversation/starters";
 import { listMyPins } from "@/lib/workspace/pins";
+import { admittedPins } from "@/lib/workspace/pin-admission";
+import { loadPinPlaces } from "@/lib/workspace/pin-places-server";
+import { loadGoalAdmission } from "@/lib/navigation/home-goals-server";
 import { Link } from "@/lib/i18n/navigation";
 import { WorkspaceChip } from "@/components/app/conversation/chat/workspace-chip";
 import {
@@ -285,6 +288,22 @@ export default async function DashboardHomePage({
     getTranslations("relationshipTypes"),
   ]);
   const pins = pinsRead.kind === "ok" ? pinsRead.pins : null;
+  // A PIN NEVER GRANTS ACCESS (owner P0 No. 1, 2026-11-12). The row draws a
+  // stored pin only when the gates that already exist admit the person to
+  // what it points at — the same two facts the layout's gate used for this
+  // request (no new read). A role that was removed, or a workspace the person
+  // no longer governs, takes its pins off the home; the row itself stays, so
+  // they can still be managed once access returns. What CAN be pinned from
+  // this home is resolved the same way: the acting role's goals and areas,
+  // already filtered to the admitted ones.
+  const goalAdmission = await loadGoalAdmission();
+  const drawnPins = pins ? admittedPins(pins, goalAdmission) : null;
+  const pinPlaces = pins
+    ? await loadPinPlaces({
+        home: workerToday ? "worker" : activeOrgWorkspace && identity === "company" ? "organization" : null,
+        admission: goalAdmission,
+      })
+    : [];
   const tReservationLabels = await getTranslations("projects.assign.reservation");
   const labels = resolveChatLabels(tChat, tReservationLabels);
   const workLogLabels = resolveWorkLogLabels(tWorkLog);
@@ -462,7 +481,8 @@ export default async function DashboardHomePage({
         }
         contextFallback={contextFallback}
         workspaceContextLine={workspaceContextLine}
-        pins={pins}
+        pins={drawnPins}
+        pinPlaces={pinPlaces}
       />
     </>
   );

@@ -15081,7 +15081,18 @@
       "whatChangedUnavailable": "Dabar nepavyko patikrinti, kas pasikeitė. Tavo įrašai niekur nedingo — pabandyk po akimirkos arba atidaryk žurnalą.",
       "planIntro": "{count, plural, one {Tai # žingsnis.} few {Tai # žingsniai, iš eilės. Štai pirmasis — paspausk kitą, kai būsi pasiruošęs.} other {Tai # žingsnių, iš eilės. Štai pirmasis — paspausk kitą, kai būsi pasiruošęs.}}",
       "planNextOffer": "Kitas žingsnis:",
-      "planStep": "{n} žingsnis iš {count}"
+      "planStep": "{n} žingsnis iš {count}",
+      "pinAdd": "Pridėti nuorodą",
+      "pinEditDone": "Baigta",
+      "pinEditYours": "Tavo nuorodos",
+      "pinAddHeading": "Pridėti nuorodą",
+      "pinAddNone": "Čia viskas jau pridėta.",
+      "pinRecent": "Neseniai",
+      "pinMoveEarlier": "Perkelti „{label}“ anksčiau",
+      "pinMoveLater": "Perkelti „{label}“ vėliau",
+      "pinRemove": "Pašalinti „{label}“",
+      "pinAdded": "Pridėta.",
+      "pinMoved": "Tvarka išsaugota."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
