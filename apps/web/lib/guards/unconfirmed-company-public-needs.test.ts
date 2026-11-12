@@ -84,9 +84,12 @@ describe("V-1: one eligibility rule in the database", () => {
     expect(fnBody("set_need_public_publication_v1")).toMatch(/insert into public\.customer_request_publications/);
   });
 
-  it("principle C: only the poster or an org member with demand authority may choose", () => {
+  it("principle C: only the author or an active org owner / admin / manager may choose", () => {
     const door = fnBody("set_need_public_publication_v1");
-    expect(door).toMatch(/if not coalesce\(\(r\.profile_id = uid or public\.has_org_demand_access\(r\.organization_id\)\), false\) then/);
+    expect(door).toMatch(/if not coalesce\(\(\s+r\.profile_id = uid\s+or exists \(select 1 from public\.company_memberships m/);
+    expect(door).toMatch(/and m\.status = 'active'\s+and m\.role in \('owner', 'admin', 'manager'\)\)/);
+    // has_org_demand_access also admits external managers — the owner's list does not.
+    expect(door).not.toMatch(/has_org_demand_access/);
     expect(door).not.toMatch(/is_admin\(\)/);
     expect(up).toMatch(/grant execute on function public\.set_need_public_publication_v1\(uuid, boolean\) to authenticated;/);
   });

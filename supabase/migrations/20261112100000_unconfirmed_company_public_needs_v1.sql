@@ -65,8 +65,8 @@
 --
 -- ── THE COMPANY'S CHOICE (customer_request_publications) ─────────────────
 -- Append-only publish / withdraw events per need. The latest event decides; no event = not
--- published. Set only through set_need_public_publication_v1 by the need's poster or an
--- organization member with demand authority (has_org_demand_access). RLS on, no policy, no
+-- published. Set only through set_need_public_publication_v1 by the need's author or an
+-- active owner / administrator / manager of its organization. RLS on, no policy, no
 -- client grant: a company cannot write the row directly, and nobody else can read it.
 --
 -- ── WHAT A SIGNED-OUT VISITOR RECEIVES (list_public_company_needs_v1) ────
@@ -696,8 +696,17 @@ begin
   if not found then
     raise exception 'not_found' using errcode = 'P0002';
   end if;
-  -- Who may choose: the need's poster, or an organization member with demand authority.
-  if not coalesce((r.profile_id = uid or public.has_org_demand_access(r.organization_id)), false) then
+  -- Who may choose (owner condition): the need's author, or an ACTIVE owner, administrator or
+  -- manager of the need's own organization. Not an external manager, not an agency, not an
+  -- operator. Null-safe: a missing organization or row denies.
+  if not coalesce((
+       r.profile_id = uid
+       or exists (select 1 from public.company_memberships m
+                   where m.profile_id = uid
+                     and m.organization_id = r.organization_id
+                     and m.status = 'active'
+                     and m.role in ('owner', 'admin', 'manager'))
+     ), false) then
     raise exception 'not_allowed' using errcode = '42501';
   end if;
   if not (r.kind is null or r.kind in ('company_request', 'buyer_request')) then

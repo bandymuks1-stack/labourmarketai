@@ -57,11 +57,16 @@ SYN=b0000000-0000-4000-8000-000000000009   # unconfirmed synthetic QA fixture
 DRF=b0000000-0000-4000-8000-00000000000b   # company still in draft
 NOP=b0000000-0000-4000-8000-00000000000c   # unconfirmed, clean, NEVER published (default off)
 MGR=b0000000-0000-4000-8000-00000000000d   # a manager of the clean company (not the poster)
+EXT=b0000000-0000-4000-8000-00000000000e   # an EXTERNAL manager of the clean company (has demand access)
+EXM=b0000000-0000-4000-8000-00000000000f   # a former (ended) admin of the clean company
+OAD=b0000000-0000-4000-8000-000000000010   # an active admin of the clean company
+OOW=b0000000-0000-4000-8000-000000000011   # a second active owner of the clean company (not the poster)
+WMB=b0000000-0000-4000-8000-000000000012   # an active plain member (worker) of the clean company
 OUT=b0000000-0000-4000-8000-00000000000a   # signed-in stranger
 
 $PSQL -v ON_ERROR_STOP=1 >/dev/null 2>"$ERR" <<SQL || { echo "seed FAILED"; cat "$ERR"; exit 1; }
 insert into public.profiles(id, is_admin) values ('$ADMIN', true), ('$WRK', false), ('$VER', false), ('$UNC', false),
-  ('$SPM', false), ('$INC', false), ('$DSP', false), ('$RAT', false), ('$DUP', false), ('$ADV', false), ('$SYN', false), ('$OUT', false), ('$DRF', false), ('$NOP', false), ('$MGR', false);
+  ('$SPM', false), ('$INC', false), ('$DSP', false), ('$RAT', false), ('$DUP', false), ('$ADV', false), ('$SYN', false), ('$OUT', false), ('$DRF', false), ('$NOP', false), ('$MGR', false), ('$EXT', false), ('$EXM', false), ('$OAD', false), ('$OOW', false), ('$WMB', false);
 insert into auth.users(id, email) select id, 'p' || substr(id::text, 34) || '@firma.lt' from public.profiles;
 update auth.users set email = 'x@mailinator.com' where id = '$DSP';
 insert into public.workers(profile_id) values ('$WRK');
@@ -102,6 +107,13 @@ select pg_temp.need('$DRF', 'plumber', 'Vilnius', 'Plumbing.');
 select pg_temp.need('$NOP', 'roofer', 'Utena', 'Roof repair on a school building, two weeks in spring.');
 insert into public.company_memberships
   select '$MGR', o.id, 'active', 'manager' from public.organizations o where o.display_name = 'Clean UAB';
+insert into public.company_memberships
+  select '$EXT', o.id, 'active', 'external_manager' from public.organizations o where o.display_name = 'Clean UAB';
+insert into public.company_memberships
+  select '$EXM', o.id, 'ended', 'admin' from public.organizations o where o.display_name = 'Clean UAB';
+insert into public.company_memberships select '$OAD', o.id, 'active', 'admin'  from public.organizations o where o.display_name = 'Clean UAB';
+insert into public.company_memberships select '$OOW', o.id, 'active', 'owner'  from public.organizations o where o.display_name = 'Clean UAB';
+insert into public.company_memberships select '$WMB', o.id, 'active', 'member' from public.organizations o where o.display_name = 'Clean UAB';
 insert into public.customer_requests(profile_id, organization_id, title, role_or_work_type, country, location, status, kind)
   select '$UNC', o.id, 'draft', 'roofer', 'LT', 'Kaunas', 'draft', 'company_request'
     from public.organizations o join public.companies c on c.id = o.legacy_company_id where c.profile_id = '$UNC';
@@ -187,10 +199,17 @@ has "a company cannot write the choice table directly" "permission denied" "$(as
 check "the poster publishes: shown at once"  "unconfirmed_public" "$(as $NOP "select public.set_need_public_publication_v1('$(rid $NOP)', true);")"
 check "...on the signed-out reader"          "1" "$(anon "select count(*) from public.list_public_company_needs_v1() where company_name = 'Quiet UAB';")"
 check "publishing twice records one event"   "unconfirmed_public|1" "$(as $NOP "select public.set_need_public_publication_v1('$(rid $NOP)', true);")|$(q "select count(*) from public.customer_request_publications where request_id = '$(rid $NOP)';")"
+has "an external manager (demand access, not owner/admin/manager) cannot choose" "not_allowed" "$(as $EXT "select public.set_need_public_publication_v1('$(rid $UNC)', false);")"
+has "a former admin (membership ended) cannot choose" "not_allowed" "$(as $EXM "select public.set_need_public_publication_v1('$(rid $UNC)', false);")"
+check "...and nothing was recorded for either" "1" "$(q "select count(*) from public.customer_request_publications where request_id = '$(rid $UNC)';")"
 check "an org manager (not the poster) withdraws the clean need" "not_published" "$(as $MGR "select public.set_need_public_publication_v1('$(rid $UNC)', false);")"
 check "...gone from the signed-out reader"   "0" "$(anon "select count(*) from public.list_public_company_needs_v1() where company_name = 'Clean UAB';")"
 check "...and from the worker board"         "0" "$(as $WRK "select count(*) from public.list_open_demand_for_workers() where company_name = 'Clean UAB';")"
 check "the manager publishes it again"       "unconfirmed_public" "$(as $MGR "select public.set_need_public_publication_v1('$(rid $UNC)', true);")"
+check "an org admin withdraws"               "not_published" "$(as $OAD "select public.set_need_public_publication_v1('$(rid $UNC)', false);")"
+check "a second org owner publishes"         "unconfirmed_public" "$(as $OOW "select public.set_need_public_publication_v1('$(rid $UNC)', true);")"
+has "a plain member cannot choose"            "not_allowed" "$(as $WMB "select public.set_need_public_publication_v1('$(rid $UNC)', false);")"
+check "the author (poster) withdraws and publishes again" "not_published|unconfirmed_public" "$(as $UNC "select public.set_need_public_publication_v1('$(rid $UNC)', false);")|$(as $UNC "select public.set_need_public_publication_v1('$(rid $UNC)', true);")"
 check "every event names who chose"          "0" "$(q "select count(*) from public.customer_request_publications where actor_id is null;")"
 has "an operator cannot make the company's choice" "not_allowed" "$(as $ADMIN "select public.set_need_public_publication_v1('$(rid $NOP)', false);")"
 check "the poster withdraws"                "not_published" "$(as $NOP "select public.set_need_public_publication_v1('$(rid $NOP)', false);")"
