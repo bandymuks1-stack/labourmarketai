@@ -95,7 +95,7 @@ describe("the logo is the way home from every authenticated route", () => {
     // would be a second header coming back.
     const chrome = read("components/app/dashboard-chrome.tsx");
     const full = chrome.slice(chrome.indexOf('data-chrome="full"'));
-    expect(full).toMatch(/<ConversationHeader title=\{headerTitle\} nav=\{nav\} \/>/);
+    expect(full).toMatch(/<ConversationHeader title=\{headerTitle\} nav=\{nav\} goalBar=\{goalBar\} \/>/);
     const layout = read("app/[locale]/dashboard/layout.tsx");
     expect(layout).not.toMatch(/data-testid="shell-logo-home"/);
     // The mark sits beside the wordmark, which never truncates ("Labour…").

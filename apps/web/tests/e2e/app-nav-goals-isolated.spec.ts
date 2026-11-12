@@ -936,6 +936,11 @@ for (const { role, person, home } of ROLES.filter((r) => r.role !== "service bus
       console.log(
         `[app-nav-walk] ${role} @ 1440px: ${row.cards} goals in ${row.tops} row, rail ${row.width}px wide, overflow ${row.overflow}px, arrows ${row.arrows}`,
       );
+      // EXACTLY ONE RAIL at rest: the goals. Nothing else on the home is a rail.
+      const rails = await desk.page.locator('[data-rail-part="track"]').count();
+      console.log(`[app-nav-walk] ${role} @ 1440px: ${rails} rail on the home at rest`);
+      expect(rails, "exactly one rail on the home").toBe(1);
+      await expect(desk.page.getByTestId("app-goal-bar"), "the home draws the goal cards, not the goal bar").toHaveCount(0);
       expect(row.tops, "one row").toBe(1);
       expect(row.overflow, "nothing scrolled out of the row").toBeLessThanOrEqual(1);
       expect(row.arrows, "no arrows are needed").toBe(0);
@@ -1095,3 +1100,67 @@ test("N-11. a person who holds the customer role is offered their requests; with
     sqlExec(`delete from public.profile_roles where profile_id = ${lit(workerId)} and role = 'customer'`);
   }
 });
+
+// ── N-12 · the one header: the goal bar on inner pages ──────────────────────
+
+for (const { role, person, home, tasks } of ROLES.filter((r) => r.role !== "service business")) {
+  test(`N-12. ${role}: an inner page carries the shared goal bar, two actions to a function, and the top row keeps its icons`, async ({ browser }) => {
+    const first = tasks.find((t) => t.goal && t.fn)!;
+    const desk = await as(browser, person, VIEWPORTS[1]);
+    try {
+      await openHome(desk.page, person, home, orgOf[person]);
+      await desk.page.goto(`${BASE}/en/dashboard/network`);
+      const bar = desk.page.getByTestId("app-goal-bar");
+      await expect(bar, "the goal bar is under the top row").toBeVisible({ timeout: 60_000 });
+      await expect(desk.page.getByTestId("intent-bar"), "one goal bar, the shared component").toHaveCount(1);
+      // The same goals, in the same order, as the home's rail.
+      const toggles = await bar.locator('[data-testid^="intent-toggle-"]').evaluateAll((els) =>
+        els.map((e) => (e.getAttribute("data-testid") ?? "").replace("intent-toggle-", "")),
+      );
+      expect(toggles[0], "the role's own goal first").toBe(first.goal);
+      // Two actions: the goal, then its function.
+      await bar.getByTestId(`intent-toggle-${first.goal}`).click();
+      const link = desk.page.getByTestId(`intent-link-${first.goal}-${first.fn}`);
+      await expect(link).toBeVisible({ timeout: 15_000 });
+      await link.click();
+      await desk.page.waitForURL(first.url, { timeout: 60_000 });
+      expect(desk.page.url()).not.toContain("notice=");
+      // Keyboard: Enter on a goal moves the focus to its first function.
+      await desk.page.goto(`${BASE}/en/dashboard/network`);
+      const toggle = desk.page.getByTestId("app-goal-bar").getByTestId(`intent-toggle-${first.goal}`);
+      await toggle.focus();
+      await desk.page.keyboard.press("Enter");
+      await expect
+        .poll(() => desk.page.evaluate(() => document.activeElement?.getAttribute("data-testid") ?? ""), { timeout: 10_000 })
+        .toMatch(new RegExp(`^intent-link-${first.goal}-`));
+      await desk.page.keyboard.press("Escape");
+      await expect(toggle, "Escape returns the focus to the goal").toBeFocused();
+      // The top row keeps home, journal, calendar and messages as named icons.
+      for (const id of ["journal", "planning", "communication"]) {
+        const icon = desk.page.getByTestId(`header-core-nav-${id}`);
+        await expect(icon).toBeVisible();
+        expect(((await icon.getAttribute("aria-label")) ?? "").length, `${id} has a name`).toBeGreaterThan(2);
+      }
+      const sideways = await desk.page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(sideways).toBeLessThanOrEqual(1);
+      mkdirSync(SHOTS, { recursive: true });
+      await desk.page.screenshot({ path: path.join(SHOTS, `inner-${role.replace(/\s+/g, "-")}-1440-light.png`) });
+      console.log(`[app-nav-walk] ${role} inner page @ 1440px: goal bar ${toggles.join(", ")}; ${first.name} in 2 actions`);
+    } finally {
+      await desk.ctx.close();
+    }
+    // Phone: no second row; the goals are the home's cards and the sheet.
+    const phone = await as(browser, person, { width: 375, height: 740 });
+    try {
+      await openHome(phone.page, person, home, orgOf[person]);
+      await phone.page.goto(`${BASE}/en/dashboard/network`);
+      await expect(phone.page.getByTestId("app-header")).toBeVisible({ timeout: 60_000 });
+      await expect(phone.page.getByTestId("app-goal-bar")).toBeHidden();
+      await expect(phone.page.getByTestId("header-nav-sheet-trigger")).toBeVisible();
+    } finally {
+      await phone.ctx.close();
+    }
+  });
+}

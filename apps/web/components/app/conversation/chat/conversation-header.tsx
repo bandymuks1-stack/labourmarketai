@@ -15,6 +15,8 @@ import { activeNavItem, headerPlaceLabelKey } from "@/lib/navigation/header-plac
 import { NAV_ICONS } from "@/components/app/nav-icons";
 import { NavLinkPending } from "@/components/app/nav-link-pending";
 import { cn } from "@/lib/utils";
+import { IntentMegaMenu } from "@/components/layouts/intent-mega-menu";
+import type { RenderedIntent } from "@/components/layouts/intent-icons";
 import { useAuthOptional } from "@/lib/auth/context";
 import { HeaderSearch } from "@/components/app/header-search";
 import { NotificationPanel } from "@/components/app/notification-panel";
@@ -30,6 +32,15 @@ import { iconControl } from "./icon-scale";
  *  content, right under the one top bar. Each shell that mounts the header
  *  puts it on exactly one element. */
 export const APP_CONTENT_ID = "app-content";
+
+/** What the shared intent bar needs, resolved on the server
+ *  (`loadSignedInGoalBar`). */
+export type ConversationGoalBar = {
+  readonly intents: readonly RenderedIntent[];
+  readonly navLabel: string;
+  readonly accountLabel: string;
+  readonly assistant: { readonly href: string; readonly label: string };
+};
 
 export type ConversationNavLabels = {
   chat: string;
@@ -77,9 +88,13 @@ export function ConversationHeader({
   title,
   nav,
   mobile = false,
+  goalBar = null,
 }: {
   title: string;
   nav: ConversationNavLabels;
+  /** The shared goal bar's data (one header rule). Drawn from 1024px on
+   *  every page that does not show the goal cards itself. */
+  goalBar?: ConversationGoalBar | null;
   /** Force the phone layout (used by the mobile design preview). */
   mobile?: boolean;
 }) {
@@ -117,7 +132,16 @@ export function ConversationHeader({
   const badges = auth?.badges ?? {};
   const badgeOf = (item: NavItem) => (item.id === "admin" ? 0 : (badges[item.id] ?? 0));
 
+  // THE GOAL BAR — the ONE main navigation of the signed-in product from
+  // 1024px (one header rule, 2026-11-12): the public header's own component
+  // with this person's goals, each opening its functions (two actions). The
+  // home shows the goal cards itself, so the bar is left out there and the
+  // goals appear once. Below 1024px the goals are the home's cards and the
+  // phone sheet carries the destinations.
+  const showGoalBar = Boolean(goalBar && goalBar.intents.length > 0 && !mobile && pathname !== "/dashboard");
+
   return (
+    <>
     <header
       data-testid="app-header"
       className={cn(
@@ -301,13 +325,29 @@ export function ConversationHeader({
         {auth && <AccountMenu />}
       </div>
     </header>
+    {showGoalBar && goalBar && (
+      // Positioned, so the bar's panel (absolute, full width) hangs under it.
+      <div data-testid="app-goal-bar" className="relative z-20 hidden flex-none border-b border-ink-600 bg-ink-900/80 backdrop-blur lg:block">
+        <IntentMegaMenu
+          intents={goalBar.intents}
+          navLabel={goalBar.navLabel}
+          accountLabel={goalBar.accountLabel}
+          assistant={goalBar.assistant}
+        />
+      </div>
+    )}
+    </>
   );
 }
 
 /** Label shown beside the icon on every item once the bar fits every locale. */
 const WIDE_LABEL = "hidden min-[1800px]:inline";
-/** The core loop names itself from `xl`: three-second clarity on a laptop. */
-const CORE_LABEL = "hidden xl:inline";
+/** The core loop is ICONS with names for assistive technology and a tooltip
+ *  (one header rule, 2026-11-12): the goal bar is the one main navigation;
+ *  home, journal, calendar and messages stay one tap away in the top row but
+ *  must not read as a second menu beside the goals. The destination the
+ *  person stands in still names itself (`ACTIVE_LABEL`). */
+const CORE_LABEL = "sr-only";
 /** The ACTIVE destination names itself as soon as the row has room for one
  *  label (`lg`); below that its filled pill is the "you are here" mark and the
  *  page title right under the bar names it. */

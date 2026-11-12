@@ -6,6 +6,7 @@ import { dashboardChromeMode } from "@/lib/config/navigation";
 import {
   APP_CONTENT_ID,
   ConversationHeader,
+  type ConversationGoalBar,
   type ConversationNavLabels,
 } from "@/components/app/conversation/chat/conversation-header";
 
@@ -117,11 +118,15 @@ export function DashboardChrome({
   headerTitle,
   nav,
   rexora,
+  goalBar = null,
 }: {
   children: React.ReactNode;
   headerTitle: string;
   nav: ConversationNavLabels;
   rexora: React.ReactNode;
+  /** The shared goal bar's data for this person (one header rule); the
+   *  header draws it on every page but the home. */
+  goalBar?: ConversationGoalBar | null;
 }) {
   const pathname = usePathname();
   const mode = dashboardChromeMode(pathname);
@@ -151,7 +156,7 @@ export function DashboardChrome({
   if (mode === "panel") {
     return (
       <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="simple" data-surface={mode}>
-        <ConversationHeader title={headerTitle} nav={nav} />
+        <ConversationHeader title={headerTitle} nav={nav} goalBar={goalBar} />
         <main id={APP_CONTENT_ID} tabIndex={-1} className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] outline-none sm:px-12 md:pb-8">
           <SlotBoundary>
             {children}
@@ -178,7 +183,7 @@ export function DashboardChrome({
   // carries every destination at once.
   return (
     <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="full" data-surface={mode}>
-      <ConversationHeader title={headerTitle} nav={nav} />
+      <ConversationHeader title={headerTitle} nav={nav} goalBar={goalBar} />
       <main id={APP_CONTENT_ID} tabIndex={-1} className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] outline-none sm:px-12 md:pb-8">
         <SlotBoundary>
           {children}

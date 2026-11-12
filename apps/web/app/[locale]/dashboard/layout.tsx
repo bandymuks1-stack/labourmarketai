@@ -1,3 +1,4 @@
+import { loadSignedInGoalBar, type SignedInGoalBar } from "@/lib/navigation/home-goals-server";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -253,6 +254,17 @@ export default async function DashboardLayout({
   // Simple-mode nav labels + the Rexora footer credit, resolved once and passed
   // to the client chrome selector (which needs no data fetch of its own).
   const tChat = await getTranslations("conversation.chat");
+  // THE ONE HEADER RULE (2026-11-12): every signed-in page that does not
+  // draw the goal cards itself carries the shared goal bar under the top
+  // row — the public header's own component, fed with this person's goals.
+  // The home draws the cards, so the header leaves the bar out there. A
+  // failed read leaves the bar out; it never takes the page down with it.
+  let goalBar: SignedInGoalBar | null = null;
+  try {
+    goalBar = await loadSignedInGoalBar({ activeRole });
+  } catch {
+    goalBar = null;
+  }
   const tFooter = await getTranslations("footer");
   const nav: ConversationNavLabels = {
     chat: tChat("navChat"),
@@ -343,6 +355,7 @@ export default async function DashboardLayout({
           nav={nav}
           headerTitle={tChat("headerTitle")}
           rexora={rexora}
+          goalBar={goalBar}
         >
           {/* Same reason: after a switch the shell and the chip commit as soon
               as the layout's own reads finish; the page streams in under the
