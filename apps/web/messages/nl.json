@@ -5218,7 +5218,7 @@
         },
         {
           "q": "Hoeveel kost het?",
-          "a": "De prijzen staan op de prijzenpagina: één actieve positie per organisatie is gratis; voor meer posities is het organisatieplan nodig, dat je in je account activeert. Een personeelsbehoefte indienen is gratis."
+          "a": "Registreren en een personeelsbehoefte indienen zijn gratis. Het betaalde organisatieplan, de prijs en of het vandaag al kan worden geactiveerd, staan op de prijzenpagina."
         },
         {
           "q": "Kunnen we filteren op locatie?",
@@ -5316,7 +5316,7 @@
         },
         {
           "q": "Wat kost het voor uitzendbureaus?",
-          "a": "Een bureau is een organisatie en gebruikt dezelfde plannen: één actieve positie is gratis, voor meer is het organisatieplan van de prijzenpagina nodig. Er is geen apart bureautarief."
+          "a": "Een bureau is een organisatie en gebruikt dezelfde plannen. Registreren en het personeel vermelden dat je kunt leveren zijn gratis; het betaalde organisatieplan, de prijs en of het vandaag al kan worden geactiveerd, staan op de prijzenpagina. Er is geen apart bureautarief."
         },
         {
           "q": "Kunnen we de zichtbaarheid van werknemers bepalen?",
@@ -5659,6 +5659,12 @@
           "Matching-shortlist en kandidaatcontact",
           "Boekingen, projecten, instructies",
           "Werkbevestiging en bevestigde vaardigheden"
+        ],
+        "featuresClosed": [
+          "Personeelsbehoeften plaatsen",
+          "Matching-shortlist en kandidaatcontact",
+          "Boekingen, projecten, instructies",
+          "Werkbevestiging en bevestigde vaardigheden"
         ]
       },
       "business": {
@@ -5727,7 +5733,12 @@
     "pricePerMonth": "€{price}/maand",
     "ctaStartFree": "Gratis starten in uw organisatieaccount",
     "ctaSubscribe": "Activeren in uw organisatieaccount",
-    "faqBillingClosed": "Online betalen is nog niet open voor het publiek, dus hier kan niets worden gekocht. Registratie en één actieve positie zijn gratis. Voor betaald werk helpen we eerste klanten rechtstreeks en bevestigen we de prijs met je voordat er iets begint."
+    "faqClosed": [
+      "Elke organisatie — werkgever, uitzender, aannemer of opleider — krijgt hetzelfde product en hetzelfde ene betaalde plan. Online betalen is nog niet open, dus vandaag wordt niets in rekening gebracht.",
+      "Ja. Personen blijven gratis, en een organisatie registreren en haar personeelsbehoeften plaatsen is gratis.",
+      "Online betalen is nog niet open voor het publiek, dus hier kan niets worden gekocht. Registratie en het plaatsen van personeelsbehoeften zijn gratis. Voor betaald werk helpen we eerste klanten rechtstreeks en bevestigen we de prijs met je voordat er iets begint.",
+      "Het plan Organisatie kent geen vaste limiet op actieve posities. Online betalen is nog niet open; een limiet van het gratis plan geldt alleen voor een organisatie waarvan het account facturering als actief toont, en dat account toont dan die limiet. Gebruikelijke bescherming tegen misbruik, zoals limieten op het aantal verzoeken, blijft gelden."
+    ]
   },
   "privacySelfService": {
     "title": "Privacy en je gegevens",
@@ -9386,7 +9397,7 @@
       "owner_confirmed": "De plannen zijn alleen voorbereid — er kan niets worden gekocht totdat betalingen zijn ingeschakeld."
     },
     "featuresLabel": "Inbegrepen in deze afbakening",
-    "limitValue": "tot {count}",
+    "limitValue": "tot {count} zodra betaalde plannen starten",
     "freeToday": {
       "freeTitle": "Vandaag gratis",
       "free": "Alles wat je op dit moment in het product kunt gebruiken is gratis — de pilot draait zonder betalingen en niets vraagt om een kaart.",
@@ -9781,7 +9792,7 @@
         "body": "Per aangenomen werknemer, ploeg of bedrijfsplaatsing geldt een vaste succesfee. Een aparte coördinatievergoeding geldt alleen wanneer document- of onboardingcoördinatie daadwerkelijk wordt geleverd. De definitieve prijs wordt bevestigd voordat betaald werk begint."
       }
     ],
-    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — één actieve positie kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest uw aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een hele ploeg kan zich al als één geheel op uw aanvraag aanbieden en, zodra beide kanten akkoord zijn, als één team in uw project instappen; de automatische kandidatenlijst stelt nog niet hele ploegen voor — ze rangschikt mensen één voor één.",
+    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — een aanvraag indienen is kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest uw aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een hele ploeg kan zich al als één geheel op uw aanvraag aanbieden en, zodra beide kanten akkoord zijn, als één team in uw project instappen; de automatische kandidatenlijst stelt nog niet hele ploegen voor — ze rangschikt mensen één voor één.",
     "ctaLabel": "Dien een personeelsaanvraag in →"
   },
   "adminLaunchReadiness": {

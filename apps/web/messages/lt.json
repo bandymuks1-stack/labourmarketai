@@ -5218,7 +5218,7 @@
         },
         {
           "q": "Kiek kainuoja įmonei?",
-          "a": "Kainos paskelbtos kainodaros puslapyje: viena aktyvi pozicija organizacijai — nemokamai, daugiau pozicijų — organizacijos planas, kurį aktyvuoji paskyroje. Darbuotojų užklausa pateikiama nemokamai."
+          "a": "Registracija ir darbuotojų užklausos pateikimas nemokami. Mokamas organizacijos planas, jo kaina ir ar jį šiandien galima aktyvuoti — kainodaros puslapyje."
         },
         {
           "q": "Ar galima atrinkti pagal lokaciją?",
@@ -5316,7 +5316,7 @@
         },
         {
           "q": "Kiek kainuoja agentūroms?",
-          "a": "Agentūra yra organizacija ir naudojasi tais pačiais planais: viena aktyvi pozicija — nemokamai, daugiau — organizacijos planas iš kainodaros puslapio. Atskiro agentūrų tarifo nėra."
+          "a": "Agentūra yra organizacija ir naudojasi tais pačiais planais. Registracija ir turimų darbuotojų pajėgumų paskelbimas nemokami; mokamas organizacijos planas, jo kaina ir ar jį šiandien galima aktyvuoti — kainodaros puslapyje. Atskiro agentūrų tarifo nėra."
         },
         {
           "q": "Ar galime valdyti darbuotojų matomumą?",
@@ -5659,6 +5659,12 @@
           "Atrankos sąrašas ir kandidatų kontaktas",
           "Rezervacijos, projektai, nurodymai",
           "Darbo patvirtinimas ir patvirtinti įgūdžiai"
+        ],
+        "featuresClosed": [
+          "Darbuotojų poreikių skelbimas",
+          "Atrankos sąrašas ir kandidatų kontaktas",
+          "Rezervacijos, projektai, nurodymai",
+          "Darbo patvirtinimas ir patvirtinti įgūdžiai"
         ]
       },
       "business": {
@@ -5727,7 +5733,12 @@
     "pricePerMonth": "{price} €/mėn.",
     "ctaStartFree": "Pradėti nemokamai organizacijos paskyroje",
     "ctaSubscribe": "Aktyvuoti organizacijos paskyroje",
-    "faqBillingClosed": "Mokėjimas internetu viešai dar neatidarytas, todėl čia nieko nusipirkti negalima. Registracija ir viena aktyvi pozicija nemokamos. Mokamam darbui pirmieji klientai aptarnaujami tiesiogiai, o kaina su tavimi suderinama prieš pradedant."
+    "faqClosed": [
+      "Kiekviena organizacija — darbdavys, personalo tiekėjas, rangovas ar mokymo įstaiga — gauna tą patį produktą ir tą patį vienintelį mokamą planą. Mokėjimas internetu dar neatidarytas, todėl šiandien niekas nenuskaičiuojama.",
+      "Taip. Asmenims viskas nemokama, o organizacijos registracija ir darbuotojų poreikių skelbimas — nemokami.",
+      "Mokėjimas internetu viešai dar neatidarytas, todėl čia nieko nusipirkti negalima. Registracija ir darbuotojų poreikių skelbimas nemokami. Mokamam darbui pirmieji klientai aptarnaujami tiesiogiai, o kaina su tavimi suderinama prieš pradedant.",
+      "Plane „Organizacija“ nėra fiksuoto aktyvių pozicijų limito. Mokėjimas internetu dar neatidarytas; nemokamo plano limitas taikomas tik organizacijai, kurios paskyroje atsiskaitymai rodomi kaip aktyvūs, ir tada paskyra tą limitą parodo. Įprastos apsaugos nuo piktnaudžiavimo, pavyzdžiui, užklausų skaičiaus ribos, ir toliau galioja."
+    ]
   },
   "privacySelfService": {
     "title": "Privatumas ir tavo duomenys",
@@ -9386,7 +9397,7 @@
       "owner_confirmed": "Planai kol kas tik parengti — nieko negalima nusipirkti, kol mokėjimai neįjungti."
     },
     "featuresLabel": "Ką apima ši riba",
-    "limitValue": "iki {count}",
+    "limitValue": "iki {count}, kai prasidės mokami planai",
     "freeToday": {
       "freeTitle": "Nemokama šiandien",
       "free": "Viskas, kuo šiuo metu gali naudotis produkte, yra nemokama — pilotas vyksta be mokėjimų ir kortelės niekas neprašo.",
@@ -9781,7 +9792,7 @@
         "body": "Fiksuotas sėkmės mokestis taikomas už įdarbintą darbuotoją, brigadą ar įmonę. Atskiras koordinavimo mokestis taikomas tik tada, kai realiai atliekamas dokumentų ar įvedimo koordinavimas. Galutinė kaina patvirtinama prieš pradedant mokamą darbą."
       }
     ],
-    "note": "Kartu veikia du dalykai, o šiame puslapyje aprašytas antrasis. Pati platforma veikia automatiškai: darbo skelbimai yra vieši, atitikimo peržiūra atidaryta be paskyros, o įvardyta užklausa sugeneruoja surikiuotą kandidatų sąrašą su paaiškinimu, kodėl kiekvienas žmogus tinka — viena aktyvi pozicija be mokesčio. Mokama paslauga aukščiau yra žmogaus darbas: operatorius perskaito tavo užklausą, susisiekia su tavimi ir sąrašą patikrina rankomis, prieš pasiūlydamas bet kurį kandidatą. Visa brigada jau gali pasiūlyti save tavo užklausai kaip vienas vienetas ir, abiem pusėms susitarus, prisijungti prie tavo projekto kaip viena komanda; automatinio visų brigadų siūlymo sąraše dar nėra — sąrašas rikiuoja žmones po vieną.",
+    "note": "Kartu veikia du dalykai, o šiame puslapyje aprašytas antrasis. Pati platforma veikia automatiškai: darbo skelbimai yra vieši, atitikimo peržiūra atidaryta be paskyros, o įvardyta užklausa sugeneruoja surikiuotą kandidatų sąrašą su paaiškinimu, kodėl kiekvienas žmogus tinka — užklausa pateikiama be mokesčio. Mokama paslauga aukščiau yra žmogaus darbas: operatorius perskaito tavo užklausą, susisiekia su tavimi ir sąrašą patikrina rankomis, prieš pasiūlydamas bet kurį kandidatą. Visa brigada jau gali pasiūlyti save tavo užklausai kaip vienas vienetas ir, abiem pusėms susitarus, prisijungti prie tavo projekto kaip viena komanda; automatinio visų brigadų siūlymo sąraše dar nėra — sąrašas rikiuoja žmones po vieną.",
     "ctaLabel": "Pateikti darbuotojų užklausą →"
   },
   "adminLaunchReadiness": {

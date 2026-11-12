@@ -5218,7 +5218,7 @@
         },
         {
           "q": "How much does it cost?",
-          "a": "Prices are published on the pricing page: one active position per organisation is free; more positions need the organisation plan, activated in your account. Submitting a workforce need is free."
+          "a": "Registering and submitting a workforce need are free. The paid organisation plan, its price and whether it can be activated today are shown on the pricing page."
         },
         {
           "q": "Can we filter by location?",
@@ -5316,7 +5316,7 @@
         },
         {
           "q": "How much does it cost agencies?",
-          "a": "An agency is an organisation and uses the same plans: one active position is free, more need the organisation plan from the pricing page. There is no separate agency tariff."
+          "a": "An agency is an organisation and uses the same plans. Registering and stating the workforce you can supply are free; the paid organisation plan, its price and whether it can be activated today are on the pricing page. There is no separate agency tariff."
         },
         {
           "q": "Can we control worker visibility?",
@@ -5659,6 +5659,12 @@
           "Matching shortlist and candidate contact",
           "Bookings, projects, instructions",
           "Work confirmation by the employer"
+        ],
+        "featuresClosed": [
+          "Post workforce needs",
+          "Matching shortlist and candidate contact",
+          "Bookings, projects, instructions",
+          "Work confirmation by the employer"
         ]
       },
       "business": {
@@ -5727,7 +5733,12 @@
     "pricePerMonth": "€{price}/month",
     "ctaStartFree": "Start free in your organization account",
     "ctaSubscribe": "Activate in your organization account",
-    "faqBillingClosed": "Online payment is not open to the public yet, so nothing can be bought here. Registration and one active position are free. For paid work, first clients are served directly and the price is confirmed with you before anything starts."
+    "faqClosed": [
+      "Every organization — employer, staffing provider, contractor or training provider — gets the same product and the same one paid plan. Online payment is not open yet, so nothing is charged today.",
+      "Yes. Persons stay free, and registering an organization and posting its workforce needs are free.",
+      "Online payment is not open to the public yet, so nothing can be bought here. Registration and posting workforce needs are free. For paid work, first clients are served directly and the price is confirmed with you before anything starts.",
+      "The Organization plan has no fixed limit on active positions. Online payment is not open yet; a free-plan limit applies only to an organization whose account shows billing as active, and that account then shows the limit. Normal protections against abuse, such as request rate limits, still apply."
+    ]
   },
   "privacySelfService": {
     "title": "Privacy and your data",
@@ -9386,7 +9397,7 @@
       "owner_confirmed": "Plans are prepared only — nothing can be bought until payments are enabled."
     },
     "featuresLabel": "Included in this boundary",
-    "limitValue": "up to {count}",
+    "limitValue": "up to {count} once paid plans start",
     "freeToday": {
       "freeTitle": "Free today",
       "free": "Everything you can currently use in the product is free — the pilot runs without payments and nothing asks for a card.",
@@ -9781,7 +9792,7 @@
         "body": "A fixed success fee applies per hired worker, crew or company placement. A separate coordination fee applies only when document or onboarding coordination is actually delivered. The final price is confirmed before paid work starts."
       }
     ],
-    "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — one active position at no cost. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. A whole crew can already offer itself against your inquiry as one unit and, once both sides agree, join your project as one team; the automatic shortlist does not yet propose whole crews — it ranks people one by one.",
+    "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — and this part is free. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. A whole crew can already offer itself against your inquiry as one unit and, once both sides agree, join your project as one team; the automatic shortlist does not yet propose whole crews — it ranks people one by one.",
     "ctaLabel": "Submit a workforce inquiry →"
   },
   "adminLaunchReadiness": {
