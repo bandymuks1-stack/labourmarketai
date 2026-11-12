@@ -54,10 +54,6 @@ export default async function MarketingLayout({
           {children}
         </main>
         <SiteFooter />
-        {/* Room for the assistant bar fixed to the bottom below `lg`
-            (components/layouts/assistant-ask.tsx), so it never covers the
-            end of the footer. */}
-        <div aria-hidden className="h-16 lg:hidden" />
       </div>
     </NextIntlClientProvider>
   );

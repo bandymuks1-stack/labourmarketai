@@ -14534,13 +14534,6 @@
           "this_week": "diese Woche",
           "next_month": "nächsten Monat"
         },
-        "ask": {
-          "location": "Wo (Stadt oder Land)?",
-          "window": "Wann — welche Woche oder welcher Monat?",
-          "quantity": "Welche Menge?",
-          "headcount": "Wie viele Personen werden benötigt?",
-          "team_size": "Wie viele Teams und wie viele Personen pro Team?"
-        },
         "unclear": "Ich bin nicht sicher, ob Sie etwas anbieten oder etwas suchen. Schreiben Sie, was Sie haben oder was Sie brauchen.",
         "goodsChannelGated": "Sie können dies am Anzeigenbrett unter „Waren“ einstellen — dort sehen es die Personen, die das Brett durchsehen. Nichts wird gespeichert, bis Sie es veröffentlichen.",
         "chipListings": "Anzeigen öffnen",

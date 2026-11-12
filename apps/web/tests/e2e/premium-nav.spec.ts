@@ -110,24 +110,9 @@ for (const width of [1024, 1280, 1440] as const) {
       await expect(more).toBeFocused();
     });
 
-    test("the assistant input is in the header; asking carries the words to the conversation home", async ({ page }) => {
+    test("the assistant entry is in the bar and points at the conversation home", async ({ page }) => {
       await page.goto("/en/pricing");
-      const ask = page.getByTestId("header-ask");
-      await expect(ask).toBeVisible();
-      // One assistant entry, not two: the bar has no second link beside it.
-      await expect(page.getByTestId("intent-bar-assistant")).toHaveCount(0);
-      await expect(page.getByTestId("bottom-ask")).toBeHidden();
-      expect(await headerOverflow(page), "header overflow with the input").toEqual([]);
-      const field = ask.getByRole("textbox");
-      expect((await field.boundingBox())!.height).toBeGreaterThanOrEqual(MIN_TOUCH_PX);
-      await field.fill("I need two welders in Kaunas");
-      await field.press("Enter");
-      await page.waitForURL(/say(=|%3D)/, { timeout: 60_000 });
-      // Signed in: the conversation home with the sentence. Signed out: the
-      // sign-in page carrying the same destination. Either way the words travel.
-      expect(decodeURIComponent(decodeURIComponent(page.url())).replace(/\+/g, " ")).toContain(
-        "say=I need two welders in Kaunas",
-      );
+      await expect(page.getByTestId("intent-bar-assistant")).toHaveAttribute("href", /\/en\/dashboard$/);
     });
   });
 }
@@ -236,56 +221,3 @@ test.describe("phone header", () => {
     }
   }
 });
-
-for (const width of [320, 375, 768] as const) {
-  test.describe(`assistant bar @${width}px`, () => {
-    test.use({ viewport: { width, height: 800 } });
-
-    test("inner page: the bar is at the bottom, inside the screen, and leaves while a field has focus", async ({ page }) => {
-      await page.goto("/en/company-need");
-      const bar = page.getByTestId("bottom-ask");
-      await expect(bar).toBeVisible();
-      await expect(page.getByTestId("header-ask")).toBeHidden();
-      const box = (await bar.boundingBox())!;
-      expect(box.x).toBeGreaterThanOrEqual(0);
-      expect(box.x + box.width).toBeLessThanOrEqual(width + 0.5);
-      expect(Math.round(box.y + box.height)).toBe(800);
-      expect((await bar.getByRole("textbox").boundingBox())!.height).toBeGreaterThanOrEqual(MIN_TOUCH_PX);
-      expect((await bar.getByRole("button").boundingBox())!.height).toBeGreaterThanOrEqual(MIN_TOUCH_PX);
-      expect(
-        await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
-        "page scrolls sideways",
-      ).toBeLessThanOrEqual(1);
-
-      // A field of the page's own form takes focus: the bar gets out of the way.
-      // A text field (a radio or a checkbox opens no keyboard and leaves the bar).
-      const own = page
-        .locator('main textarea, main input[type="text"], main input[type="email"], main input[type="number"], main input:not([type])')
-        // Not the hidden spam-trap field.
-        .locator("visible=true")
-        .first();
-      await own.focus();
-      await expect(bar).toBeHidden();
-      await own.blur();
-      await expect(bar).toBeVisible();
-      // Its own field does not hide it.
-      await bar.getByRole("textbox").focus();
-      await expect(bar).toBeVisible();
-    });
-
-    test("the bar never covers the end of the page", async ({ page }) => {
-      await page.goto("/en/pricing");
-      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-      const barTop = (await page.getByTestId("bottom-ask").boundingBox())!.y;
-      const lastLink = page.locator("footer a").last();
-      const link = (await lastLink.boundingBox())!;
-      expect(link.y + link.height, "last footer link is above the bar").toBeLessThanOrEqual(barTop + 0.5);
-    });
-
-    test("the landing has its own sentence field and no assistant bar", async ({ page }) => {
-      await page.goto("/en");
-      await expect(page.getByTestId("bottom-ask")).toHaveCount(0);
-      await expect(page.getByTestId("header-ask")).toHaveCount(0);
-    });
-  });
-}
