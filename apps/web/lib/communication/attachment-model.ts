@@ -15,6 +15,16 @@ export const CONVERSATION_ATTACHMENT_MAX_BYTES = 10 * 1024 * 1024;
 export const CONVERSATION_ATTACHMENTS_PER_MESSAGE_MAX = 5;
 export const CONVERSATION_ATTACHMENT_BUCKET = "conversation-attachments";
 
+/**
+ * How long a participant's attachment link works. A signed Storage link is a
+ * bearer capability: Storage checks only the signature, not whether the
+ * holder is still in the thread, so a link issued before someone is removed
+ * keeps working until it expires (security model §3, honest gaps). Short on
+ * purpose; the thread page re-renders while visible (RefreshOnFocus, 60 s)
+ * and mints fresh links each time.
+ */
+export const CONVERSATION_ATTACHMENT_SIGNED_URL_TTL_SECONDS = 60;
+
 export const CONVERSATION_ATTACHMENT_ALLOWED_MIME = [
   "application/pdf",
   "image/jpeg",
