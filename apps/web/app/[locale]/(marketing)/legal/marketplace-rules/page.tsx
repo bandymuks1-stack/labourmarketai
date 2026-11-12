@@ -15,7 +15,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "legal.marketplaceRules" });
-  return buildPageMetadata({ locale, path: "/legal/marketplace-rules", title: t("title") });
+  return buildPageMetadata({
+    locale,
+    path: "/legal/marketplace-rules",
+    title: t("title"),
+    // The page's own opening line. Without it the page carried the home
+    // page's description in every locale (head-tag pass, 2026-11-12).
+    description: t("intro"),
+  });
 }
 
 export default async function MarketplaceRulesPage({
