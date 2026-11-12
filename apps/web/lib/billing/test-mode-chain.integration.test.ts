@@ -399,6 +399,35 @@ const chain = {
   subscriptionEvent: {} as Record<string, unknown>,
 };
 
+// ─── Lifecycle event builders (steps 6–14) ──────────────────────────────────
+let lifeClock = Math.floor(Date.now() / 1000) + 100;
+
+function signedEvent(id: string, type: string, object: Record<string, unknown>): Record<string, unknown> {
+  lifeClock += 10;
+  return { id, object: "event", type, api_version: STRIPE_PINNED_API_VERSION, created: lifeClock, livemode: false, data: { object } };
+}
+
+/** customer.subscription.* for the chain's subscription, with a state override. */
+function subEvent(id: string, over: Record<string, unknown>, type = "customer.subscription.updated"): Record<string, unknown> {
+  const base = (chain.subscriptionEvent.data as { object: Row }).object;
+  return signedEvent(id, type, { ...base, cancel_at_period_end: false, ...over });
+}
+
+/** invoice.* in the post-Basil shape (parent.subscription_details.subscription). */
+function invoiceEvent(id: string, type: string, over: Record<string, unknown>): Record<string, unknown> {
+  return signedEvent(id, type, {
+    id: `in_${id}`, object: "invoice", livemode: false, customer: chain.customerId, currency: "eur",
+    parent: { type: "subscription_details", subscription_details: { subscription: chain.subscriptionId } },
+    ...over,
+  });
+}
+
+async function deliver(event: Record<string, unknown>): Promise<void> {
+  const res = await webhookPOST(signedDelivery(event));
+  expect(res.status, String(event.id)).toBe(200);
+  expect(await res.json(), String(event.id)).toMatchObject({ ok: true, processed: true });
+}
+
 describe("test-mode chain: config → checkout → signed webhook → entitlement (offline, real modules)", () => {
   it("1. config: the real resolver yields stripe_test for test-shaped input, and the env-fed wrapper agrees", () => {
     const direct = resolveBillingConfig({
@@ -614,6 +643,108 @@ describe("test-mode chain: config → checkout → signed webhook → entitlemen
     signIn(ids.PILOT_ORG);
     const ctx = await getEffectiveEntitlements();
     expect(ctx).toMatchObject({ effectivePlanKey: ORGANIZATION_PLAN_KEY, source: "subscription", active: true });
+  });
+
+  // ─── 6–12. LIFECYCLE after activation (owner approval 2026-11-12 (a)) ─────
+  // Renewal, payment failure (dunning), recovery, refund, pause, cancellation
+  // at period end and final deletion — every state the subscription row can
+  // reach after checkout, through the SAME signed-webhook route and the SAME
+  // entitlement resolver. Each event is newer than the last (ordering guard).
+
+  it("6. VAT: the checkout asked Stripe Tax for VAT, a billing address and the buyer's VAT id (EU B2B reverse charge)", () => {
+    // Stripe Tax computes Swedish 25 % VAT, or 0 % + "reverse charge" when a
+    // valid EU VAT id is collected; the rates themselves live in the Stripe
+    // dashboard (tax registrations), never in this code.
+    expect(chain.checkoutParams.automatic_tax).toEqual({ enabled: true });
+    expect(chain.checkoutParams.tax_id_collection).toEqual({ enabled: true });
+    expect(chain.checkoutParams.billing_address_collection).toBe("required");
+    expect(chain.checkoutParams.customer_update).toEqual({ address: "auto", name: "auto" });
+  });
+
+  it("7. renewal: trial → active and the first paid invoice records a succeeded payment", async () => {
+    await deliver(subEvent("evt_life_active", { status: "active" }));
+    await deliver(invoiceEvent("evt_life_inv_paid_1", "invoice.paid", { amount_paid: 12375, billing_reason: "subscription_cycle" }));
+    expect(ourSubs()[0]).toMatchObject({ status: "active", last_payment_status: "succeeded" });
+    signIn(ids.PILOT_ORG);
+    expect(await getEffectiveEntitlements()).toMatchObject({
+      effectivePlanKey: ORGANIZATION_PLAN_KEY, source: "subscription", subscriptionStatus: "active", active: true, grace: false,
+    });
+  });
+
+  it("8. payment failure: invoice.payment_failed moves the row to past_due — still entitled, flagged as grace", async () => {
+    await deliver(invoiceEvent("evt_life_inv_failed", "invoice.payment_failed", { amount_paid: 0, attempt_count: 1 }));
+    expect(ourSubs()[0]).toMatchObject({ status: "past_due", last_payment_status: "failed" });
+    signIn(ids.PILOT_ORG);
+    const ctx = await getEffectiveEntitlements();
+    expect(ctx).toMatchObject({ effectivePlanKey: ORGANIZATION_PLAN_KEY, subscriptionStatus: "past_due", active: true, grace: true });
+    expect(entitlementAllows(ctx, "company_create_needs")).toBe(true);
+  });
+
+  it("9. dunning exhausted: Stripe marks the subscription unpaid → the organization falls back to FREE (1 open need), enforced", async () => {
+    await deliver(subEvent("evt_life_unpaid", { status: "unpaid" }));
+    expect(ourSubs()[0]).toMatchObject({ status: "unpaid" });
+    signIn(ids.PILOT_ORG);
+    const ctx = await getEffectiveEntitlements();
+    expect(ctx).toMatchObject({ effectivePlanKey: FREE_ORGANIZATION_PLAN_KEY, enforced: true, active: false, grace: false });
+    expect(limitFor(getPlan(ctx.effectivePlanKey)!, "company_create_needs")).toBe(1);
+  });
+
+  it("10. recovery: the retried invoice is paid and the subscription is active again → the paid plan returns", async () => {
+    await deliver(invoiceEvent("evt_life_inv_paid_2", "invoice.paid", { amount_paid: 12375, billing_reason: "subscription_cycle" }));
+    await deliver(subEvent("evt_life_recovered", { status: "active" }));
+    expect(ourSubs()[0]).toMatchObject({ status: "active", last_payment_status: "succeeded" });
+    signIn(ids.PILOT_ORG);
+    expect(await getEffectiveEntitlements()).toMatchObject({ effectivePlanKey: ORGANIZATION_PLAN_KEY, active: true, grace: false });
+  });
+
+  it("11. refund: charge.refunded is RECORDED with its amounts and changes no subscription state", async () => {
+    const before = { ...ourSubs()[0] };
+    await deliver(signedEvent("evt_life_refund", "charge.refunded", {
+      id: "ch_test_life", object: "charge", livemode: false, payment_intent: "pi_test_life",
+      invoice: "in_test_life_2", amount_refunded: 12375, currency: "eur", refunded: true,
+    }));
+    const rec = db.tables.payment_webhook_events.find((e) => e.event_id === "evt_life_refund");
+    expect(rec).toMatchObject({ event_type: "charge.refunded", test_mode: true });
+    expect(JSON.stringify(rec)).toContain("12375");
+    expect(ourSubs()[0]).toMatchObject({ status: before.status, last_payment_status: before.last_payment_status });
+    signIn(ids.PILOT_ORG);
+    expect(await getEffectiveEntitlements()).toMatchObject({ effectivePlanKey: ORGANIZATION_PLAN_KEY, active: true });
+  });
+
+  it("12. pause: a paused subscription collects nothing → no paid grace, FREE plan", async () => {
+    await deliver(subEvent("evt_life_paused", { status: "paused" }));
+    expect(ourSubs()[0]).toMatchObject({ status: "unpaid" });
+    signIn(ids.PILOT_ORG);
+    expect(await getEffectiveEntitlements()).toMatchObject({ effectivePlanKey: FREE_ORGANIZATION_PLAN_KEY, active: false, grace: false });
+    // …and resuming it (a payment method added) restores the paid plan.
+    await deliver(subEvent("evt_life_resumed", { status: "active" }));
+    expect(await getEffectiveEntitlements()).toMatchObject({ effectivePlanKey: ORGANIZATION_PLAN_KEY, active: true });
+  });
+
+  it("13. cancellation at period end: still entitled until the period ends, and the account says so", async () => {
+    await deliver(subEvent("evt_life_cancel_at_end", { status: "active", cancel_at_period_end: true }));
+    expect(ourSubs()[0]).toMatchObject({ status: "active", cancel_at_period_end: true });
+    signIn(ids.PILOT_ORG);
+    expect(await getEffectiveEntitlements()).toMatchObject({
+      effectivePlanKey: ORGANIZATION_PLAN_KEY, active: true, cancelAtPeriodEnd: true,
+    });
+  });
+
+  it("14. deletion: customer.subscription.deleted ends the paid plan → FREE, and a late 'active' event cannot revive it", async () => {
+    await deliver(subEvent("evt_life_deleted", { status: "canceled" }, "customer.subscription.deleted"));
+    expect(ourSubs()[0]).toMatchObject({ status: "cancelled" });
+    signIn(ids.PILOT_ORG);
+    const ctx = await getEffectiveEntitlements();
+    expect(ctx).toMatchObject({ effectivePlanKey: FREE_ORGANIZATION_PLAN_KEY, enforced: true, active: false });
+    expect(limitFor(getPlan(ctx.effectivePlanKey)!, "company_create_needs")).toBe(1);
+
+    // A delayed 'active' delivery (newer timestamp, same subscription id) is
+    // refused by the terminal-state rule: Stripe never revives a cancelled id.
+    const late = await webhookPOST(signedDelivery(subEvent("evt_life_late_active", { status: "active" })));
+    expect(late.status).toBe(200);
+    expect(ourSubs()[0]).toMatchObject({ status: "cancelled" });
+    expect(await getEffectiveEntitlements()).toMatchObject({ effectivePlanKey: FREE_ORGANIZATION_PLAN_KEY, active: false });
+    expect(ourSubs()).toHaveLength(1);
   });
 
   it("the chain touched only the modelled tables and made no unexpected Stripe network call", () => {
