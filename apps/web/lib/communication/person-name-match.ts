@@ -21,6 +21,9 @@
 const STOP = new Set([
   "su", "ir", "to", "the", "with", "and", "for", "man", "mano", "pas", "per",
   "ar", "kad", "pokalbi", "pokalbis", "conversation", "message", "zinute",
+  // sv — "Öppna en konversation MED Jonas": the preposition is three letters
+  // and would otherwise prefix-match a name ("Medina").
+  "med", "och", "till", "konversation", "samtal", "meddelande", "chatt",
 ]);
 
 /** Lower-case, strip diacritics, keep letters/digits only. */

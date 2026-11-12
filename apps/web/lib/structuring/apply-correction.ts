@@ -52,6 +52,8 @@ const MARKERS: RegExp[] = [
   /(?:^|\s)не\s+[^,.;]{0,48}?,?\s+а\s+/u, // RU: не X, а Y
   /\bnot\s+[^,.;]{0,48}?,?\s+but\s+/u, // EN: not X but Y
   /^no,?\s+/u, // EN: "No, 300 kg"
+  /(?:^|\s)inte\s+[^,.;]{0,48}?,?\s+utan\s+/u, // SV: inte X utan Y
+  /^nej,?\s+/u, // SV: "Nej, 300 kg"
 ];
 
 function correctionTail(raw: string): string | null {
@@ -69,8 +71,8 @@ function correctionTail(raw: string): string | null {
 
 const KNOWN_UNITS = new Set(["kg", "t", "vnt", "ha", "m2", "m3", "km", "cm", "mm"]);
 
-const RENTAL_RE = /nuomo|isnuomo|\brent(al|ing)?\b|\bhire\b|аренд|сда(м|ю|ем)/u;
-const SALE_RE = /parduo|\bsell(ing)?\b|прода(м|ю|ем)/u;
+const RENTAL_RE = /nuomo|isnuomo|\brent(al|ing)?\b|\bhire\b|аренд|сда(м|ю|ем)|\bhyr(?:a|s)?\s+ut\b|\buthyr/u;
+const SALE_RE = /parduo|\bsell(ing)?\b|прода(м|ю|ем)|\bsalj(?:er|a|es)\b|till\s+salu/u;
 
 function quantityDisplay(q: ValueQuantity | null): string | null {
   if (!q) return null;

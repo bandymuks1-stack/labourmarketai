@@ -303,22 +303,6 @@ function PersonalWorkspaceIntroPending() {
  * already carries — it pre-fills the ONE field and the person only confirms.
  * Shape gate only; the canonical validators stay authoritative server-side.
  */
-/** Which of the institution's commands a "programmes" sentence asks for —
- *  create / cohort / assign, else a plain list. Folded, five locales. */
-function educationModeFromText(text: string): "list" | "create" | "cohort" | "assign" | EducationQuestionKind {
-  const q = (text ?? "").toLowerCase();
-  // Window 6 (lane C): a lecturer's QUESTION about students (outcomes, who
-  // fits, what skills are missing, where to do practice) is answered from the
-  // institution's real reads — never routed to the owner's own worker answer.
-  const question = educationQuestionKind(q);
-  if (question) return question;
-  if (/priskir|assign|zuweis|toewijz|назнач|zapisz/.test(q)) return "assign";
-  const creates = /sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов/.test(q);
-  if (creates && /grup|kohort|cohort|groep|gruppe|групп|поток|когорт/.test(q)) return "cohort";
-  if (creates) return "create";
-  return "list";
-}
-
 function extractEmail(sentence: string): string | null {
   const m = sentence.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
   return m ? m[0].toLowerCase() : null;
@@ -4898,11 +4882,7 @@ export function ConversationChat({
   const startTaskStatus = useCallback(
     (sentence: string) => {
       const lower = sentence.toLowerCase();
-      const status: WorkTaskStatus = /u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял|zablok/.test(lower)
-        ? "blocked"
-        : /prad[eė]|prasid[eė]|start|begonnen|angefangen|начал|rozpocz/.test(lower)
-          ? "in_progress"
-          : "done";
+      const status: WorkTaskStatus = readStatedProgress(sentence);
       setTyping(true);
       loadOpenTasksForChat()
         .then((res) => {
@@ -5069,11 +5049,7 @@ export function ConversationChat({
         return;
       }
       const lower = sentence.toLowerCase();
-      const status: StageStatus = /u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял/.test(lower)
-        ? "blocked"
-        : /prad[eė]|prasid[eė]|start|begonnen|angefangen|начал/.test(lower)
-          ? "in_progress"
-          : "done";
+      const status: StageStatus = readStatedProgress(sentence);
       setTyping(true);
       loadCompanyStagesForChat()
         .then((res) => {
