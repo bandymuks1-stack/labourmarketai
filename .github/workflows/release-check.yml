@@ -7,15 +7,19 @@ name: Release check (public surface, read-only)
 #   - reads the production build id from /api/health at the start and at the end
 #     (a deploy in the middle makes the result unusable, and the run says so);
 #   - checks the security headers a stranger's browser receives;
-#   - crawls every sitemap page in every routed locale at 360 and 1440 px
-#     (apps/web/scripts/public-cta-crawl.mjs): error screens, failed scripts,
-#     404 and 5xx link targets, links with no target, buttons that do nothing,
-#     sideways overflow, banned words. One job per locale.
+#   - crawls every sitemap page in every routed locale at 320, 375, 390, 768
+#     and 1440 px (apps/web/scripts/public-cta-crawl.mjs): error screens, failed
+#     scripts, 404 and 5xx link targets, links with no target, buttons that do
+#     nothing or cannot be pressed, sideways overflow, banned words, sign-in and
+#     sign-up within two actions, no menu shown twice. One job per locale.
+#   - Lighthouse on the main public pages (.github/scripts/lighthouse-gate.mjs):
+#     accessibility >= 95, SEO >= 95, LCP <= 2.5 s, CLS <= 0.1 — medians of three
+#     lab runs, PRELIMINARY (not real-user data; INP cannot be measured in a lab).
 #
 # What it does NOT do: sign in. The signed-in journeys (worker, employer, B2B,
 # agency, chat, mobile surfaces) are the walks in prod-qa-walk.yml; cite their
-# run ids next to this one. Accessibility audits, performance budgets and
-# visual regression are not measured here.
+# run ids next to this one. Keyboard-only operation, real-user speed, human
+# comprehension and visual regression are not measured here.
 #
 # No secret, no account, no write: the crawler aborts every request that is not
 # GET or HEAD before it leaves the browser, and every request to another site.
@@ -26,6 +30,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/release-check.yml"
+      - ".github/scripts/lighthouse-gate.mjs"
       - "apps/web/scripts/public-cta-crawl.mjs"
 
 permissions:
@@ -73,7 +78,7 @@ jobs:
   crawl:
     needs: identity
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     strategy:
       fail-fast: false
       matrix:
@@ -107,10 +112,13 @@ jobs:
           routed=$(grep -oE 'export const activeLocales = \[[^]]+\]' apps/web/lib/i18n/config.ts | grep -oE '"[a-z]{2}"' | tr -d '"' | sort | tr '\n' ' ')
           [ "$routed" = "de en lt nl pl ru " ] || { echo "::error::routed locales are '$routed' but the matrix checks 'de en lt nl pl ru'"; exit 1; }
 
-      - name: Crawl /${{ matrix.locale }} at 360 and 1440 px
+      - name: Crawl /${{ matrix.locale }} at 320, 375, 390, 768 and 1440 px
         run: |
           set -euo pipefail
-          node apps/web/scripts/public-cta-crawl.mjs --origin https://labourmarket.ai --locales "${{ matrix.locale }}" --out "crawl-${{ matrix.locale }}.json" | tee crawl.log
+          # Acceptance widths (owner 2026-11-12). Layout, links and the sign-in / menu gates run at
+          # all five; buttons are pressed at the phone and the desktop width.
+          node apps/web/scripts/public-cta-crawl.mjs --origin https://labourmarket.ai --locales "${{ matrix.locale }}" \
+            --widths 320,375,390,768,1440 --press-widths 375,1440 --out "crawl-${{ matrix.locale }}.json" | tee crawl.log
 
       - name: Summary
         if: always()
@@ -134,3 +142,43 @@ jobs:
           path: crawl-${{ matrix.locale }}.json
           if-no-files-found: ignore
           retention-days: 14
+
+  lighthouse:
+    needs: identity
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        locale: [lt, en]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      # Indexable pages first; the two sign-in pages after `!` are measured but their
+      # SEO score is not gated (they are not meant to be indexed).
+      - name: Lighthouse, three runs per page, /${{ matrix.locale }}
+        run: |
+          set -euo pipefail
+          L="/${{ matrix.locale }}"
+          {
+            echo "#### Lighthouse /${{ matrix.locale }} — build \`${{ needs.identity.outputs.build }}\` (lab medians, PRELIMINARY)"
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+          node .github/scripts/lighthouse-gate.mjs https://labourmarket.ai 3 \
+            "$L" "$L/jobs" "$L/for-workers" "$L/for-companies" "$L/for-agencies" "$L/pricing" "$L/company-need" "$L/work-opportunities" \
+            "!$L/auth/login" "!$L/auth/signup" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: The build did not change under the measurement
+        if: always()
+        run: |
+          set -euo pipefail
+          after=$(curl -sS --max-time 30 https://labourmarket.ai/api/health | jq -r 'if .ok == true then .build else empty end' || true)
+          [ "$after" = "${{ needs.identity.outputs.build }}" ] || { echo "**The build changed during the measurement: do not cite this run.**" >> "$GITHUB_STEP_SUMMARY"; exit 1; }
