@@ -98,6 +98,8 @@ _No new product surface was added by this PR._
 - `not_world_state_driven` on `components/app/counterparty-review-card.tsx` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
 - `not_reflected_on_map` on `components/app/counterparty-review-card.tsx` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
 - `requires_new_page` on `components/app/counterparty-review-card.tsx` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `components/ui/premium-action-card.tsx` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `components/ui/premium-action-card.tsx` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
 - `world_state_cannot_control_it` on `components/app/historical-player-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `components/app/identity/person-identity-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `/dashboard/work-in-numbers` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
@@ -110,6 +112,7 @@ _No new product surface was added by this PR._
 - `world_state_cannot_control_it` on `/dashboard/company/settings` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `/dashboard/inbox/counterparty` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `components/app/counterparty-review-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `components/ui/premium-action-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 
 ## Rules that were checked
 
