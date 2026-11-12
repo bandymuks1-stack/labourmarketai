@@ -4,7 +4,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { PUBLIC_INTENTS, PUBLIC_INTENT_IDS } from "@/lib/navigation/public-intents";
+import {
+  ASSISTANT_HREF,
+  PUBLIC_INTENTS,
+  PUBLIC_INTENT_IDS,
+} from "@/lib/navigation/public-intents";
+import { CANONICAL_HOME } from "@/lib/config/navigation";
 import { routeRequirement } from "@/lib/auth/role-gated-routes";
 
 /**
@@ -134,7 +139,9 @@ describe("desktop and mobile render ONE list", () => {
   });
 
   it("the assistant entry is the existing conversation home, on both menus", () => {
-    expect(nav).toMatch(/href: CANONICAL_HOME, label: tIntent\("assistant"\)/);
+    expect(nav).toMatch(/href: ASSISTANT_HREF, label: tIntent\("assistant"\)/);
+    expect(ASSISTANT_HREF).toBe(CANONICAL_HOME);
+    expect(routeRequirement(ASSISTANT_HREF)).toBeNull();
     expect(nav.match(/assistant=\{assistant\}/g)).toHaveLength(2);
   });
 
