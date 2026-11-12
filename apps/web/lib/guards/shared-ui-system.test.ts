@@ -185,3 +185,141 @@ describe("the primitives render what they promise", () => {
     expect(teamC.slice(0, teamC.indexOf("<ul"))).not.toMatch(/font-mono/);
   });
 });
+
+describe("the form and data primitives requested by the other modules", () => {
+  it("Input, Select and Textarea let a caller's width replace the default full width", async () => {
+    const { Input } = await import("@/components/ui/Input");
+    const { Select } = await import("@/components/ui/Select");
+    const { Textarea } = await import("@/components/ui/Textarea");
+    const { hasOwnWidth } = await import("@/components/ui/own-width");
+    expect(renderToStaticMarkup(createElement(Input, {}))).toMatch(/class="w-full /);
+    const narrow = renderToStaticMarkup(createElement(Input, { className: "w-40" }));
+    expect(narrow).toContain("w-40");
+    expect(narrow).not.toContain("w-full");
+    expect(renderToStaticMarkup(createElement(Select, { className: "w-auto" }))).not.toContain("w-full");
+    expect(renderToStaticMarkup(createElement(Textarea, { className: "w-64" }))).not.toContain("w-full");
+    // A width behind a breakpoint keeps the control full width below it.
+    expect(hasOwnWidth("sm:w-40 mt-2")).toBe(false);
+    expect(renderToStaticMarkup(createElement(Input, { className: "sm:w-40" }))).toContain("w-full");
+  });
+
+  it("Checkbox is a native checkbox inside its label; RadioGroup is a fieldset with a legend", async () => {
+    const { Checkbox, RadioGroup } = await import("@/components/ui/Choice");
+    const box = renderToStaticMarkup(
+      createElement(Checkbox, { name: "agree", label: "I agree", hint: "You can change this later" }),
+    );
+    expect(box).toMatch(/^<label[^>]*min-h-11/);
+    expect(box).toContain('type="checkbox"');
+    expect(box).toContain("You can change this later");
+    const radios = renderToStaticMarkup(
+      createElement(RadioGroup, {
+        legend: "Work type",
+        name: "type",
+        defaultValue: "b",
+        error: "Choose one",
+        options: [
+          { value: "a", label: "Full time" },
+          { value: "b", label: "Part time" },
+        ],
+      }),
+    );
+    expect(radios).toMatch(/^<fieldset[^>]*aria-describedby=/);
+    expect(radios).toContain("<legend");
+    expect(radios.match(/type="radio"/g)).toHaveLength(2);
+    expect(radios.match(/checked=""/g)).toHaveLength(1);
+    expect(radios).toContain('role="alert"');
+  });
+
+  it("ToggleChip is a pressed-state button; RemovableChip names its remove control", async () => {
+    const { ToggleChip, RemovableChip } = await import("@/components/ui/Chip");
+    // Children go in as an argument, typed loosely: the props object alone
+    // does not satisfy a required `children`.
+    const chipEl = createElement as unknown as (
+      type: unknown,
+      props: Record<string, unknown>,
+      child: string,
+    ) => ReturnType<typeof createElement>;
+    const on = renderToStaticMarkup(
+      chipEl(ToggleChip, { pressed: true, onPressedChange: () => {} }, "Night shifts"),
+    );
+    const off = renderToStaticMarkup(
+      chipEl(ToggleChip, { pressed: false, onPressedChange: () => {} }, "Night shifts"),
+    );
+    expect(on).toContain('aria-pressed="true"');
+    expect(off).toContain('aria-pressed="false"');
+    // Pressed is shown by a mark as well as colour.
+    expect(on).toContain("<svg");
+    expect(off).not.toContain("<svg");
+    expect(on).toContain("min-h-11");
+    const chip = renderToStaticMarkup(
+      chipEl(RemovableChip, { onRemove: () => {}, removeLabel: "Remove Welding" }, "Welding"),
+    );
+    expect(chip).toContain('aria-label="Remove Welding"');
+    expect(chip).toMatch(/<button[^>]*h-11 w-11/);
+    expect(chip).toContain(">Welding<");
+  });
+
+  it("Table is a captioned table with column and row headers, and says when it is empty", async () => {
+    const { Table } = await import("@/components/ui/Table");
+    const columns = [
+      { key: "who", header: "Person" },
+      { key: "hours", header: "Hours", align: "end" as const },
+      { key: "note", header: "Note", wideOnly: true },
+    ];
+    const html = renderToStaticMarkup(
+      createElement(Table, {
+        caption: "Hours this week",
+        columns,
+        rows: [{ id: "1", cells: { who: "A. Person", hours: "38", note: "—" } }],
+        empty: "No hours recorded",
+      }),
+    );
+    expect(html).toContain("<caption");
+    expect(html.match(/scope="col"/g)).toHaveLength(3);
+    expect(html.match(/scope="row"/g)).toHaveLength(1);
+    expect(html).toContain("overflow-x-auto");
+    expect(html).toContain("hidden md:table-cell");
+    expect(html).not.toContain("No hours recorded");
+    const none = renderToStaticMarkup(
+      createElement(Table, { caption: "Hours", captionHidden: true, columns, rows: [], empty: "No hours recorded" }),
+    );
+    expect(none).toContain('colSpan="3"');
+    expect(none).toContain("No hours recorded");
+    expect(none).toMatch(/<caption class="sr-only"/);
+  });
+
+  it("StructureTree nests lists by level, opens to the asked depth and names an empty branch", async () => {
+    const { StructureTree } = await import("@/components/ui/StructureTree");
+    const html = renderToStaticMarkup(
+      createElement(StructureTree, {
+        label: "Company structure",
+        openDepth: 1,
+        nodes: [
+          {
+            id: "c",
+            label: "Company",
+            count: 2,
+            children: [
+              { id: "t1", label: "Team one", count: 1, children: [{ id: "p1", label: "A. Person", meta: "Lead" }] },
+              { id: "t2", label: "Team two", count: 0, children: [], empty: "No people in this team" },
+            ],
+          },
+        ],
+      }),
+    );
+    expect(html).toMatch(/^<nav aria-label="Company structure"/);
+    expect(html.match(/<ul/g)).toHaveLength(3);
+    expect(html.match(/<details/g)).toHaveLength(3);
+    // Only the top level starts open.
+    expect(html.match(/<details open=""/g)).toHaveLength(1);
+    expect(html).toContain("No people in this team");
+    expect(html).not.toContain('role="tree"');
+  });
+
+  it("ui/EmptyState is the one empty state, not a second implementation", async () => {
+    const ui = await import("@/components/ui/EmptyState");
+    const app = await import("@/components/app/empty-state");
+    expect(ui.EmptyState).toBe(app.EmptyState);
+    expect(read("components/ui/EmptyState.tsx")).not.toMatch(/function |=>/);
+  });
+});
