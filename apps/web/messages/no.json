@@ -4414,7 +4414,8 @@
       "pinMoveLater": "Flytt «{label}» senere",
       "pinRemove": "Fjern «{label}»",
       "pinAdded": "Lagt til.",
-      "pinMoved": "Rekkefølgen er lagret."
+      "pinMoved": "Rekkefølgen er lagret.",
+      "pinHiddenHeading": "Ikke tilgjengelig for deg akkurat nå"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

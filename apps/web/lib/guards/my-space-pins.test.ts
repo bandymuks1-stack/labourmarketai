@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { createTranslator } from "next-intl";
+
+import { resolveChatLabels } from "@/components/app/conversation/chat/labels";
 
 /**
  * MY SPACE — wiring guard (owner contract 2026-09-04 §4C). The pinned row is
@@ -93,7 +96,7 @@ describe("the pinned row is a reference row over the ONE chip handler", () => {
   it("copy exists in all 11 catalogs", () => {
     for (const locale of ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"]) {
       const chat = JSON.parse(read(`messages/${locale}.json`)).conversation.chat as Record<string, string>;
-      for (const key of ["mySpaceTitle", "chipManagePins", "pinAsk", "chipPinYes", "chipPinNo", "pinDone", "pinCap", "pinUnavailable", "pinsManageIntro", "pinsNone", "unpinPrefix", "unpinDone", "pinFirstPrefix", "reorderDone", "pinAdd", "pinEditDone", "pinEditYours", "pinAddHeading", "pinAddNone", "pinRecent", "pinMoveEarlier", "pinMoveLater", "pinRemove", "pinAdded", "pinMoved"]) {
+      for (const key of ["mySpaceTitle", "chipManagePins", "pinAsk", "chipPinYes", "chipPinNo", "pinDone", "pinCap", "pinUnavailable", "pinsManageIntro", "pinsNone", "unpinPrefix", "unpinDone", "pinFirstPrefix", "reorderDone", "pinAdd", "pinEditDone", "pinEditYours", "pinAddHeading", "pinAddNone", "pinRecent", "pinMoveEarlier", "pinMoveLater", "pinRemove", "pinAdded", "pinMoved", "pinHiddenHeading"]) {
         expect(chat[key], `${locale}.${key}`).toBeTypeOf("string");
         expect(chat[key]).not.toMatch(/^\[EN\]/);
       }
@@ -103,3 +106,58 @@ describe("the pinned row is a reference row over the ONE chip handler", () => {
     }
   });
 });
+
+describe("the row's templated labels reach the client as templates, in every build", () => {
+  // Codex P2 on #3264. `t(key)` on a message with a placeholder and no value
+  // is a formatting error: a production build returns the template, a
+  // DEVELOPMENT build returns the message key — the row's buttons were then
+  // named "conversation.chat.pinRemove". Vitest runs the development build,
+  // so this drives the real resolver over the real catalogs.
+  for (const locale of ["en", "lt", "ru", "nl", "de", "pl", "sv"]) {
+    it(`${locale}: placeholders survive and no label is a message key`, () => {
+      const messages = JSON.parse(read(`messages/${locale}.json`));
+      const errors: string[] = [];
+      const translator = (namespace: string) =>
+        createTranslator({
+          locale,
+          messages,
+          namespace: namespace as never,
+          // The other templated chat labels keep their historical path and
+          // report here in a development build; only the pin row's are pinned.
+          onError: (e) => errors.push(e.message),
+        });
+      const labels = resolveChatLabels(
+        translator("conversation.chat") as never,
+        translator("projects.assign.reservation") as never,
+      ) as unknown as Record<string, string>;
+      expect(labels.pinCap).toContain("{max}");
+      for (const key of ["reorderDone", "pinMoveEarlier", "pinMoveLater", "pinRemove"]) {
+        expect(labels[key], `${locale}.${key}`).toContain("{label}");
+      }
+      for (const key of ["pinCap", "reorderDone", "pinMoveEarlier", "pinMoveLater", "pinRemove", "pinAdd", "pinHiddenHeading"]) {
+        expect(labels[key], `${locale}.${key}`).not.toMatch(/^conversation\.chat\./);
+        expect(errors.filter((m) => m.includes(`conversation.chat.${key}`)), `${locale}.${key}`).toEqual([]);
+      }
+    });
+  }
+});
+
+describe("a pin that is not drawn can still be removed — and only removed", () => {
+  it("the page hands the withheld pins to the row separately from the drawn ones", () => {
+    expect(PAGE).toMatch(/const withheld = pins \? withheldPins\(pins, goalAdmission\) : \[\];/);
+    expect(PAGE).toMatch(/withheldPins=\{withheld\}/);
+  });
+
+  it("the row lists them as text with one control: remove", () => {
+    const start = ROW.indexOf("editor.withheld.length > 0");
+    const block = ROW.slice(start, ROW.indexOf("(places?.length ?? 0) > 0", start));
+    expect(start).toBeGreaterThan(-1);
+    expect(block).toMatch(/data-testid="my-space-withheld-remove"/);
+    expect(block).toMatch(/onClick=\{\(\) => void removeWithheld\(p\.ref\)\}/);
+    // Never launchable: no onPin, no link, exactly one button.
+    expect(block).not.toMatch(/onPin|<Link|href=/);
+    expect((block.match(/<button/g) ?? []).length).toBe(1);
+    expect(ROW).toMatch(/await unpinAction\(\{ ref, expectedWorkspaceId: editor\.expectedWorkspaceId \}\)/);
+  });
+});
+

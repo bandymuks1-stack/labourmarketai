@@ -79,6 +79,20 @@ export function pinIsAdmitted(ref: string, admission: GoalAdmission): boolean {
   return gate === null ? true : routeIsAdmitted(gate, admission);
 }
 
+/**
+ * The stored pins the home must NOT draw as shortcuts for this person, order
+ * kept. They are still the person's rows and still count toward the pin cap,
+ * so the row lists them in its edit panel with REMOVE only — never as a
+ * button that opens anything (Codex P2 on #3264: a person who lost a role with
+ * six pins saved saw an empty row and could neither add nor free a slot).
+ */
+export function withheldPins<T extends Pick<WorkspacePin, "ref">>(
+  pins: readonly T[],
+  admission: GoalAdmission,
+): T[] {
+  return pins.filter((p) => !pinIsAdmitted(p.ref, admission));
+}
+
 /** The pins the home may draw for this person, order kept. */
 export function admittedPins<T extends Pick<WorkspacePin, "ref">>(
   pins: readonly T[],

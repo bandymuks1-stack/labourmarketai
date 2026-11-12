@@ -6,7 +6,7 @@ import { CONVERSATION_ACTIONS } from "@/lib/conversation/action-registry";
 import { ROLE_GATED_PREFIXES } from "@/lib/auth/role-gated-routes";
 import { HOME_GOALS } from "@/lib/navigation/home-goals";
 import { ORGANIZATION_WORK_AREAS, PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
-import { CHIP_GATE_ROUTE, admittedPins, pinIsAdmitted } from "./pin-admission";
+import { CHIP_GATE_ROUTE, admittedPins, pinIsAdmitted, withheldPins } from "./pin-admission";
 import { isPinnableRef } from "./pins-model";
 
 /**
@@ -170,6 +170,37 @@ describe("the home applies it before the row sees a pin", () => {
     expect(admittedPins(pins, WORKER).map((p) => p.ref)).toEqual(["logwork", "link:/dashboard/journal"]);
     expect(admittedPins(pins, OWNER)).toHaveLength(4);
     expect(admittedPins(pins, NOBODY).map((p) => p.ref)).toEqual(["logwork", "link:/dashboard/journal"]);
+  });
+
+  it("the pins not drawn are exactly the rest — nothing is lost, nothing is in both", () => {
+    const pins = [
+      { ref: "link:/dashboard/company/people" },
+      { ref: "logwork" },
+      { ref: "f:company.create-demand" },
+      { ref: "link:/dashboard/journal" },
+      { ref: "link:/dashboard/admin" },
+    ];
+    for (const who of [NOBODY, WORKER, OWNER, EVERYTHING]) {
+      const drawn = admittedPins(pins, who).map((p) => p.ref);
+      const held = withheldPins(pins, who).map((p) => p.ref);
+      expect([...drawn, ...held].sort()).toEqual(pins.map((p) => p.ref).sort());
+      expect(drawn.filter((r) => held.includes(r))).toEqual([]);
+    }
+    expect(withheldPins(pins, WORKER).map((p) => p.ref)).toEqual([
+      "link:/dashboard/company/people",
+      "f:company.create-demand",
+      "link:/dashboard/admin",
+    ]);
+  });
+
+  it("the CV — outside /dashboard — is offered through the reference the pin model already has", () => {
+    const places = read("lib/workspace/pin-places-server.ts");
+    expect(places).toMatch(/"\/cv": "cv"/);
+    expect(places).toMatch(/const ref = PLACE_REF\[href\] \?\? `link:\$\{href\}`;/);
+    expect(isPinnableRef("link:/cv")).toBe(false);
+    expect(isPinnableRef("cv")).toBe(true);
+    expect(pinIsAdmitted("cv", WORKER)).toBe(true);
+    expect(HOME_GOALS.worker.some((g) => g.href === "/cv")).toBe(true);
   });
 
   it("the dashboard root filters the stored pins on the server and hands the row only the admitted ones", () => {

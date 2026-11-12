@@ -15092,7 +15092,8 @@
       "pinMoveLater": "Переместить «{label}» позже",
       "pinRemove": "Убрать «{label}»",
       "pinAdded": "Добавлено.",
-      "pinMoved": "Порядок сохранён."
+      "pinMoved": "Порядок сохранён.",
+      "pinHiddenHeading": "Сейчас вам недоступно"
     },
     "worklog": {
       "understood": "Вот что я понял — сохранить?",

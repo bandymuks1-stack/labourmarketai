@@ -47,7 +47,7 @@ import {
   personHasUsableProfile,
 } from "@/lib/conversation/starters";
 import { listMyPins } from "@/lib/workspace/pins";
-import { admittedPins } from "@/lib/workspace/pin-admission";
+import { admittedPins, withheldPins } from "@/lib/workspace/pin-admission";
 import { loadPinPlaces } from "@/lib/workspace/pin-places-server";
 import { loadGoalAdmission } from "@/lib/navigation/home-goals-server";
 import { Link } from "@/lib/i18n/navigation";
@@ -298,6 +298,10 @@ export default async function DashboardHomePage({
   // already filtered to the admitted ones.
   const goalAdmission = await loadGoalAdmission();
   const drawnPins = pins ? admittedPins(pins, goalAdmission) : null;
+  // The pins NOT drawn are still the person's rows and still count toward the
+  // cap, so the row's edit panel lists them with "remove" only — a reference
+  // and a label, never something that opens.
+  const withheld = pins ? withheldPins(pins, goalAdmission) : [];
   const pinPlaces = pins
     ? await loadPinPlaces({
         home: workerToday ? "worker" : activeOrgWorkspace && identity === "company" ? "organization" : null,
@@ -483,6 +487,7 @@ export default async function DashboardHomePage({
         workspaceContextLine={workspaceContextLine}
         pins={drawnPins}
         pinPlaces={pinPlaces}
+        withheldPins={withheld}
       />
     </>
   );

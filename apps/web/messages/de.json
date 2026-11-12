@@ -15092,7 +15092,8 @@
       "pinMoveLater": "„{label}“ nach hinten verschieben",
       "pinRemove": "„{label}“ entfernen",
       "pinAdded": "Hinzugefügt.",
-      "pinMoved": "Reihenfolge gespeichert."
+      "pinMoved": "Reihenfolge gespeichert.",
+      "pinHiddenHeading": "Für Sie derzeit nicht verfügbar"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

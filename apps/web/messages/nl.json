@@ -15092,7 +15092,8 @@
       "pinMoveLater": "‘{label}’ naar achteren verplaatsen",
       "pinRemove": "‘{label}’ verwijderen",
       "pinAdded": "Toegevoegd.",
-      "pinMoved": "Volgorde opgeslagen."
+      "pinMoved": "Volgorde opgeslagen.",
+      "pinHiddenHeading": "Nu niet beschikbaar voor jou"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

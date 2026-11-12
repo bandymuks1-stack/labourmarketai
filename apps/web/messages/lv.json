@@ -4414,7 +4414,8 @@
       "pinMoveLater": "Pārvietot “{label}” vēlāk",
       "pinRemove": "Noņemt “{label}”",
       "pinAdded": "Pievienots.",
-      "pinMoved": "Secība saglabāta."
+      "pinMoved": "Secība saglabāta.",
+      "pinHiddenHeading": "Pašlaik jums nav pieejams"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

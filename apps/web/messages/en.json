@@ -15092,7 +15092,8 @@
       "pinMoveLater": "Move “{label}” later",
       "pinRemove": "Remove “{label}”",
       "pinAdded": "Added.",
-      "pinMoved": "Order saved."
+      "pinMoved": "Order saved.",
+      "pinHiddenHeading": "Not available to you right now"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

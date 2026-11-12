@@ -4414,7 +4414,8 @@
       "pinMoveLater": "Liiguta „{label}“ tahapoole",
       "pinRemove": "Eemalda „{label}“",
       "pinAdded": "Lisatud.",
-      "pinMoved": "Järjekord salvestatud."
+      "pinMoved": "Järjekord salvestatud.",
+      "pinHiddenHeading": "Praegu sulle kättesaamatu"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

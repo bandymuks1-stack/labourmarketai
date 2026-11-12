@@ -4414,7 +4414,8 @@
       "pinMoveLater": "Flytta ”{label}” senare",
       "pinRemove": "Ta bort ”{label}”",
       "pinAdded": "Tillagd.",
-      "pinMoved": "Ordningen är sparad."
+      "pinMoved": "Ordningen är sparad.",
+      "pinHiddenHeading": "Inte tillgängligt för dig just nu"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

@@ -15092,7 +15092,8 @@
       "pinMoveLater": "Przesuń „{label}” później",
       "pinRemove": "Usuń „{label}”",
       "pinAdded": "Dodano.",
-      "pinMoved": "Kolejność zapisana."
+      "pinMoved": "Kolejność zapisana.",
+      "pinHiddenHeading": "Teraz dla ciebie niedostępne"
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",

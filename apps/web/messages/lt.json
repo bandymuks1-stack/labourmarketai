@@ -15092,7 +15092,8 @@
       "pinMoveLater": "Perkelti „{label}“ vėliau",
       "pinRemove": "Pašalinti „{label}“",
       "pinAdded": "Pridėta.",
-      "pinMoved": "Tvarka išsaugota."
+      "pinMoved": "Tvarka išsaugota.",
+      "pinHiddenHeading": "Šiuo metu tau nepasiekiama"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
