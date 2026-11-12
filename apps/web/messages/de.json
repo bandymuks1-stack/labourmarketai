@@ -14297,7 +14297,9 @@
         "supplyRole": "Welcher Beruf",
         "supplyRolePlaceholder": "Z. B. Schweißer",
         "supplyTeamSize": "Wie viele Menschen Sie haben",
-        "supplyLocation": "Wo sie arbeiten können"
+        "supplyLocation": "Wo sie arbeiten können",
+        "demandCountry": "Land, in dem gearbeitet wird",
+        "demandCountryPlaceholder": "z. B. Schweden oder SE"
       },
       "availability": {
         "available": "Verfügbar",

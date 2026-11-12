@@ -14297,7 +14297,9 @@
         "supplyRole": "What profession",
         "supplyRolePlaceholder": "E.g. welder",
         "supplyTeamSize": "How many people you have",
-        "supplyLocation": "Where they can work"
+        "supplyLocation": "Where they can work",
+        "demandCountry": "Country where the work is",
+        "demandCountryPlaceholder": "e.g. Sweden or SE"
       },
       "availability": {
         "available": "Available",

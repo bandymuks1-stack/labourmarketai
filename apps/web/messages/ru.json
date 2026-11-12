@@ -14297,7 +14297,9 @@
         "supplyRole": "Какая профессия",
         "supplyRolePlaceholder": "Например: сварщик",
         "supplyTeamSize": "Сколько человек у вас есть",
-        "supplyLocation": "Где они могут работать"
+        "supplyLocation": "Где они могут работать",
+        "demandCountry": "Страна, где будет работа",
+        "demandCountryPlaceholder": "напр., Швеция или SE"
       },
       "availability": {
         "available": "Доступен",

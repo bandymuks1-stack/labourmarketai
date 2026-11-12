@@ -3909,7 +3909,9 @@
         "supplyRole": "Vilket yrke",
         "supplyRolePlaceholder": "T.ex. svetsare",
         "supplyTeamSize": "Hur många personer ni har",
-        "supplyLocation": "Var de kan arbeta"
+        "supplyLocation": "Var de kan arbeta",
+        "demandCountry": "Land där arbetet utförs",
+        "demandCountryPlaceholder": "t.ex. Sverige eller SE"
       },
       "availability": {
         "available": "[EN] Available",

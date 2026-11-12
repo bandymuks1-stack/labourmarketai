@@ -409,6 +409,14 @@ export function DemandRequestButton({
         estimate: estimateEngaged ? estimate : undefined,
         structuredV2: withTeam(advWire),
       }, { expectedOrganizationId: organizationId });
+      // The server is the rule (web, chat and MCP share it): a refused country
+      // sends the person back to the picker with the reason beside it.
+      if (!res.ok && res.code === "country_required") {
+        setState("idle");
+        setStep(2);
+        setShowCountryError(true);
+        return;
+      }
       setState(
         res.ok
           ? "done"

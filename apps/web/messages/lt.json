@@ -14297,7 +14297,9 @@
         "supplyRole": "Kokios profesijos žmonės",
         "supplyRolePlaceholder": "Pvz., suvirintojas",
         "supplyTeamSize": "Kiek žmonių turi",
-        "supplyLocation": "Kur jie gali dirbti"
+        "supplyLocation": "Kur jie gali dirbti",
+        "demandCountry": "Šalis, kurioje bus dirbama",
+        "demandCountryPlaceholder": "Pvz., Švedija arba SE"
       },
       "availability": {
         "available": "Laisvas",

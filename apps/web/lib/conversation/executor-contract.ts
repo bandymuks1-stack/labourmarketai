@@ -8,7 +8,14 @@
 
 export type ExecResult =
   | { ok: true; data?: Record<string, unknown> }
-  | { ok: false; code: string; message?: string; existing?: string };
+  | {
+      ok: false;
+      code: string;
+      message?: string;
+      existing?: string;
+      /** Fields the caller must supply before retrying (e.g. ["country"]). */
+      missing?: readonly string[];
+    };
 
 /**
  * Workspace context carried into every executor (rebuild W4). Resolved

@@ -14297,7 +14297,9 @@
         "supplyRole": "Jaki zawód",
         "supplyRolePlaceholder": "Np. spawacz",
         "supplyTeamSize": "Ilu macie ludzi",
-        "supplyLocation": "Gdzie mogą pracować"
+        "supplyLocation": "Gdzie mogą pracować",
+        "demandCountry": "Kraj, w którym będzie praca",
+        "demandCountryPlaceholder": "np. Szwecja lub SE"
       },
       "availability": {
         "available": "Dostępny/a",

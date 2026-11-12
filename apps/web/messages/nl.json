@@ -14297,7 +14297,9 @@
         "supplyRole": "Welk beroep",
         "supplyRolePlaceholder": "Bijv. lasser",
         "supplyTeamSize": "Hoeveel mensen je hebt",
-        "supplyLocation": "Waar zij kunnen werken"
+        "supplyLocation": "Waar zij kunnen werken",
+        "demandCountry": "Land waar het werk plaatsvindt",
+        "demandCountryPlaceholder": "bijv. Zweden of SE"
       },
       "availability": {
         "available": "Beschikbaar",

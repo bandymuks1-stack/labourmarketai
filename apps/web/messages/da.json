@@ -3909,7 +3909,9 @@
         "supplyRole": "Hvilket fag",
         "supplyRolePlaceholder": "F.eks. svejser",
         "supplyTeamSize": "Hvor mange folk I har",
-        "supplyLocation": "Hvor de kan arbejde"
+        "supplyLocation": "Hvor de kan arbejde",
+        "demandCountry": "Land, hvor arbejdet udføres",
+        "demandCountryPlaceholder": "f.eks. Sverige eller SE"
       },
       "availability": {
         "available": "[EN] Available",

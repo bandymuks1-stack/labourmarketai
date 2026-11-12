@@ -158,7 +158,11 @@ export type DemandRequestResult =
         // server resolves now (the workspace was switched in another tab).
         // Nothing is written — a need is never posted into a company the
         // person did not see on screen.
-        | "workspace_changed";
+        | "workspace_changed"
+        // No resolvable ISO country. A need without one is invisible to every
+        // country filter (worker board, agency offers, search), so no surface
+        // (web, chat, MCP) may create one; the market is never guessed.
+        | "country_required";
       limit?: number;
       used?: number;
       next?: "upgrade" | "individual_plan";
@@ -283,6 +287,9 @@ export async function submitDemandRequestCore(
     typeof fields?.country === "string" && isIsoCountry(fields.country.toUpperCase())
       ? fields.country.toUpperCase()
       : null;
+  // Before any write: every surface reaches this core, so this is the one
+  // place the rule holds for the web wizard, the chat form and the MCP tools.
+  if (!country) return { ok: false, code: "country_required" };
   const teamSize =
     typeof fields?.teamSize === "number" &&
     Number.isInteger(fields.teamSize) &&
