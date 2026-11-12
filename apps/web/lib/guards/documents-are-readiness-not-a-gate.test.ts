@@ -83,7 +83,7 @@ describe("'checked' wording never claims a stored copy or independent verificati
       expect(block, loc).toBeTruthy();
       for (const k of ["outstanding", "clear", "unknown"]) expect(block[k], `${loc}.${k}`).toBeTruthy();
       for (const st of ["contract", "assignment", "mobilisation", "work_start"]) expect(block.stage[st], `${loc}.${st}`).toBeTruthy();
-      expect(JSON.stringify(block)).not.toMatch(/uploaded|įkelt|hochgeladen|geüpload|przes[łl]an|загруж|stored copy|verified by LabourMarket/i);
+      expect(JSON.stringify(block)).not.toMatch(/uploaded|įkelt|hochgeladen|geüpload|przes[łl]an|загруж|uppladda|laddats upp|stored copy|verified by LabourMarket/i);
     }
   });
 });

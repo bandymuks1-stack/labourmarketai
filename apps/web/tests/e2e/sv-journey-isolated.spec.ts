@@ -55,7 +55,13 @@ async function expectSwedish(page: Page): Promise<void> {
   expect(new URL(page.url()).pathname, "the reader stays on the Swedish route").toMatch(/^\/sv(\/|$)/);
   const text = await page.locator("body").innerText();
   expect(text, "no English placeholder").not.toContain("[EN]");
-  expect(text, "no unresolved message key").not.toMatch(/MISSING_MESSAGE/);
+  // next-intl renders a missing message as its dotted key path ("auth.signup.title").
+  // Any such token on the page, other than a host name, is an unresolved key.
+  // Segments of 3+ letters, so Swedish abbreviations (fr.o.m., t.o.m., o.s.v.) do not count.
+  const keyLike = (text.match(/\b[a-zA-Z][a-zA-Z0-9]{2,}(?:\.[a-zA-Z][a-zA-Z0-9_]{2,}){2,}\b/g) ?? []).filter(
+    (token) => !/labourmarket|\.(?:ai|com|se|eu|org|net|lt)$/i.test(token),
+  );
+  expect(keyLike, "no unresolved message key on the page").toEqual([]);
 }
 
 const VIEWPORTS = [

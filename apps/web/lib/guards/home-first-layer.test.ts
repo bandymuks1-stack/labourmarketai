@@ -58,7 +58,7 @@ describe("the found-postings heading does not deny an assessment that happened",
       };
       const title = messages.conversation.results.opportunities.titleDiscovery;
       expect(title).toBeTruthy();
-      expect(title).not.toMatch(/\(|neįvertint|not yet assessed|nicht bewertet|niet beoordeeld|nieocenion|не оценен/i);
+      expect(title).not.toMatch(/\(|neįvertint|not yet assessed|nicht bewertet|niet beoordeeld|nieocenion|не оценен|inte bedöm|ej bedöm/i);
     });
   }
 });

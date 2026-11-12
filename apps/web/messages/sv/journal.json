@@ -271,7 +271,7 @@
   "projectAuto": "Projekt: {name}",
   "projectViaTeam": "{project} (via team {team})",
   "projectClient": "{project} (kundprojekt)",
-  "unconfirmedTimeBlocked": "{count} registrerade varaktigheter väntar fortfarande på granskning och skulle inte sparas. Behåll eller ta bort dem först.",
+  "unconfirmedTimeBlocked": "{count, plural, one {# registrerad varaktighet väntar fortfarande på din granskning och skulle inte sparas.} other {# registrerade varaktigheter väntar fortfarande på din granskning och skulle inte sparas.}} Behåll eller ta bort dem först.",
   "entry": {
     "reviewedBy": "Granskad av",
     "confirmerRole": {

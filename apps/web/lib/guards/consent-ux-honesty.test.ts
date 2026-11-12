@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -12,6 +12,16 @@ import { activeLocales } from "@/lib/i18n/config";
 
 const web = join(__dirname, "..", "..");
 const read = (p: string) => readFileSync(join(web, p), "utf8");
+/** Every non-test .ts/.tsx source under a directory, as web-relative paths. */
+function listSources(dir: string, out: string[] = []): string[] {
+  for (const name of readdirSync(join(web, dir))) {
+    if (name === "node_modules" || name.startsWith(".")) continue;
+    const rel = `${dir}/${name}`;
+    if (statSync(join(web, rel)).isDirectory()) listSources(rel, out);
+    else if (/\.tsx?$/.test(name) && !/\.(test|spec)\.tsx?$/.test(name)) out.push(rel);
+  }
+  return out;
+}
 
 const consentComponent = read("components/app/discoverability-consent.tsx");
 const privacyPage = read("app/[locale]/dashboard/privacy/page.tsx");
@@ -224,11 +234,25 @@ describe("a consent legal text in another language says so (owner 2026-11-12)", 
   it("the note is decided by the ONE consent-locale rule and shown by both consent components", () => {
     const view = read("lib/privacy/discoverability-view.ts");
     expect(view).toMatch(/toConsentLocale\(locale\) === locale \? null : tc\("labels\.legalTextInEnglish"\)/);
-    for (const file of ["components/app/discoverability-consent.tsx", "components/app/partner-supply-representation.tsx"]) {
+    // ALL THREE consents — discoverability, partner supply, employer data
+    // disclosure. The third was missed at first (independent review 2026-11-12).
+    for (const file of [
+      "components/app/discoverability-consent.tsx",
+      "components/app/partner-supply-representation.tsx",
+      "components/app/contact-disclosure-requests.tsx",
+    ]) {
       const src = read(file);
       expect(src, file).toMatch(/lang=\{labels\.legalLanguageNote \? "en" : undefined\}/);
       expect(src, file).toMatch(/legal-language-note"/);
     }
+    // Every component that renders a versioned consent text is one of those three.
+    const consentRenderers = ["components/app", "app"].flatMap((dir) => listSources(dir))
+      .filter((f) => /legal\.(visibleData|invisibleData)\b/.test(read(f)));
+    expect(consentRenderers.sort()).toEqual([
+      "components/app/contact-disclosure-requests.tsx",
+      "components/app/discoverability-consent.tsx",
+      "components/app/partner-supply-representation.tsx",
+    ]);
     // Every place that renders a consent passes the reader's locale to the rule.
     for (const file of [
       "app/[locale]/dashboard/privacy/page.tsx",
@@ -237,6 +261,27 @@ describe("a consent legal text in another language says so (owner 2026-11-12)", 
     ]) {
       expect(read(file), file).toMatch(/discoverabilityConsentLabels\(\w+, locale\)/);
     }
-    expect(read("app/[locale]/dashboard/privacy/page.tsx")).toMatch(/legalLanguageNote: consentLegalLanguageNote\(tc, locale\)/);
+    const privacyPage = read("app/[locale]/dashboard/privacy/page.tsx");
+    // partner supply + employer data disclosure labels are built inline there.
+    expect(privacyPage.match(/legalLanguageNote: consentLegalLanguageNote\(tc, locale\)/g)).toHaveLength(2);
+  });
+
+  it("the text a person is SHOWN and the text RECORDED as agreed are picked by one rule", () => {
+    // partner-supply-actions.ts used to carry its own copy that fell back to
+    // "lt": a Swedish reader saw the English text and had the Lithuanian one
+    // recorded. There is ONE toConsentLocale; every consent write imports it.
+    const definitions = ["lib", "app", "components"].flatMap((dir) => listSources(dir))
+      .filter((f) => /function toConsentLocale\b/.test(read(f)));
+    expect(definitions).toEqual(["lib/privacy/discoverability-view.ts"]);
+    expect(read("lib/privacy/discoverability-view.ts")).toMatch(/: "en";/);
+    for (const file of [
+      "lib/privacy/discoverability-actions.ts",
+      "lib/privacy/partner-supply-actions.ts",
+      "lib/privacy/contact-disclosure-actions.ts",
+    ]) {
+      const src = read(file);
+      expect(src, file).toMatch(/import \{ toConsentLocale \} from "@\/lib\/privacy\/discoverability-view";/);
+      expect(src, file).toMatch(/p_locale: toConsentLocale\(input\.locale\)/);
+    }
   });
 });

@@ -59,7 +59,7 @@ describe("4.16 scouting: a raised hand is a working contact door, said so", () =
   it.each(ACTIVE)("%s: no 'messaging comes later' copy; the interest-door line exists", (l) => {
     const s = catalog(l).scouting as { comms: Record<string, string> };
     expect(s.comms.interestDoor).toBeTruthy();
-    expect(s.comms.eligible).not.toMatch(/vėliau|later|позже|later stap|späteren|kolejnym/i);
+    expect(s.comms.eligible).not.toMatch(/vėliau|later|позже|later stap|späteren|kolejnym|senare/i);
   });
   it("the counterpart reader translates the RPC's English pseudonym", () => {
     const src = read("lib/communication/contact-permission.ts");

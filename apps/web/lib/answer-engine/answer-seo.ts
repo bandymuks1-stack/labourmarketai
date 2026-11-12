@@ -101,15 +101,31 @@ export function buildStaticQuestionsMetadata(
   path: string,
   title: string,
   description: string,
+  /** Locales in which THIS page has content. Omitted → every active locale.
+   *  A hub or category page exists in a locale only once that locale has a
+   *  published answer; naming the others as alternates points search engines
+   *  at a 404 (category) or at an empty page (hub). */
+  publishedIn?: readonly ActiveLocale[],
 ): Metadata {
-  // The ONE public-page hreflang set (all active locales + x-default = English).
-  const langs = hreflangAlternates(path);
+  // The ONE public-page hreflang set (all active locales + x-default = English),
+  // narrowed to the locales where the page really has content.
+  const all = hreflangAlternates(path);
+  const langs: Record<string, string> = {};
+  if (publishedIn) {
+    for (const l of publishedIn) langs[l] = all[l]!;
+    const fallback = publishedIn.includes("en") ? "en" : publishedIn[0];
+    if (fallback) langs["x-default"] = all[fallback]!;
+  } else {
+    Object.assign(langs, all);
+  }
+  const hasContent = !publishedIn || publishedIn.includes(locale);
   const canonical = url(locale, path);
   return {
     title: brandedTitle(title),
     description,
-    alternates: { canonical, languages: langs },
-    robots: { index: true, follow: true },
+    alternates: { canonical, languages: hasContent ? langs : {} },
+    // Nothing to read here yet in this locale: reachable, not indexable.
+    robots: { index: hasContent, follow: true },
     openGraph: {
       type: "website",
       siteName: BRAND_NAME,

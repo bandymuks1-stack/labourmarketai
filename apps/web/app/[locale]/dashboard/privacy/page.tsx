@@ -331,6 +331,7 @@ export default async function PrivacyPage({
             locale={locale}
             requests={contactRequestCards}
             labels={{
+              legalLanguageNote: consentLegalLanguageNote(tc, locale),
               empty: tc("contactRequests.empty"),
               requestedFields: tc("contactRequests.requestedFields"),
               acceptNote: tc("contactRequests.acceptNote"),

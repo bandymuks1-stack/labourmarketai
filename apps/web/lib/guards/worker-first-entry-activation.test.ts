@@ -118,6 +118,7 @@ describe("#5 — one honest 'Save', then the Living CV and a calm way back", () 
       nl: /nog door niemand bevestigd/,
       de: /noch von niemandem bestätigt/,
       pl: /niepotwierdzon/,
+      sv: /inte bekräfta|ännu inte bekräftat|obekräfta/,
     };
     for (const loc of activeLocales) {
       const w = at(mono(loc), "conversation.worklog") as Record<string, string>;
@@ -125,10 +126,12 @@ describe("#5 — one honest 'Save', then the Living CV and a calm way back", () 
         expect(w[k]?.trim(), `${loc} conversation.worklog.${k}`).toBeTruthy();
       }
       expect(w.continue, `${loc}: the first button must not read as a save`).not.toBe(w.save);
+      // A locale without a pattern must FAIL here, not pass on toMatch(undefined).
+      expect(NOT_CONFIRMED[loc], `${loc}: no NOT_CONFIRMED pattern`).toBeInstanceOf(RegExp);
       expect(w.livingCvNote, `${loc}: says it is NOT confirmed`).toMatch(NOT_CONFIRMED[loc]!);
       const all = `${w.livingCvNote} ${w.comeBackNote} ${w.viewLivingCv}`;
-      expect(all, loc).not.toMatch(/\bverified\b|patikrint|verifiz|zweryfikow|проверен/i);
-      expect(all, loc).not.toMatch(/streak|\bXP\b|level[- ]?up|points|taškai|балл|punkty|\bdemo\b/i);
+      expect(all, loc).not.toMatch(/\bverified\b|patikrint|verifiz|zweryfikow|проверен|verifiera/i);
+      expect(all, loc).not.toMatch(/streak|\bXP\b|level[- ]?up|points|taškai|балл|punkty|poäng|\bdemo\b/i);
     }
     expect((at(mono("lt"), "conversation.worklog") as Record<string, string>).continue).toBe("Toliau");
   });

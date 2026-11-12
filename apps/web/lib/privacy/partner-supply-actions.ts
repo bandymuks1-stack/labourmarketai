@@ -6,11 +6,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
 import {
-  CONSENT_LOCALES,
   PARTNER_SUPPLY_REPRESENTATION_V1,
   consentTextHash,
-  type ConsentLocale,
 } from "@/lib/privacy/consent-definitions";
+import { toConsentLocale } from "@/lib/privacy/discoverability-view";
 import { resolveCountryList } from "@/lib/location/country-model";
 import { createClient } from "@/lib/supabase/server";
 import { WORKER_INTENT_STATES } from "@/lib/supply-bridge/first-party-signal-contract";
@@ -47,11 +46,11 @@ function asAny(c: SupabaseClient): any {
   return c;
 }
 
-function toConsentLocale(locale: string): ConsentLocale {
-  return (CONSENT_LOCALES as readonly string[]).includes(locale)
-    ? (locale as ConsentLocale)
-    : "lt";
-}
+// The consent locale is the ONE `toConsentLocale` in discoverability-view.ts —
+// the same rule the privacy screen uses to pick the text it SHOWS. This file
+// used to carry its own copy that fell back to "lt": once a routed locale
+// without consent texts existed (sv, 2026-11-12), a person who read the English
+// text had the Lithuanian one recorded as what they agreed to.
 
 export type PartnerSupplyActionResult =
   | { kind: "ok" }

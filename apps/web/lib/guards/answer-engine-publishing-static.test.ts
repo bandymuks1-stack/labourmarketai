@@ -143,3 +143,38 @@ describe("publishing engine — static invariants", () => {
     expect([...ANSWER_ENGINE_LOCALES].sort()).toEqual(ACTIVE);
   });
 });
+
+describe("a locale whose answers await review is not advertised (independent review 2026-11-12)", () => {
+  // sv has 45 complete answers stamped LOCAL_REVIEW_REQUIRED: none is published.
+  // The hub and category pages must therefore not be named as Swedish
+  // alternates of the other locales' pages, and the Swedish hub (an empty
+  // state) must not be indexable or listed in the sitemap.
+  it("real data: sv publishes nothing, the reviewed locales still do", async () => {
+    const { localesPublishingAnyAnswer, publishedCategories } = await import("@/lib/answer-engine/publishing");
+    expect(publishedCategories("sv")).toEqual([]);
+    expect(localesPublishingAnyAnswer()).not.toContain("sv");
+    expect(localesPublishingAnyAnswer()).toEqual(expect.arrayContaining(["lt", "en"]));
+  });
+
+  it("hub metadata: no sv alternate from other locales; the sv hub is noindex with no alternates", async () => {
+    const { buildStaticQuestionsMetadata } = await import("@/lib/answer-engine/answer-seo");
+    const { localesPublishingAnyAnswer } = await import("@/lib/answer-engine/publishing");
+    const publishedIn = localesPublishingAnyAnswer();
+    const en = buildStaticQuestionsMetadata("en", "/questions", "T", "D", publishedIn);
+    const enLangs = en.alternates?.languages as Record<string, string>;
+    expect(Object.keys(enLangs)).not.toContain("sv");
+    expect(enLangs["x-default"]).toBe("https://labourmarket.ai/en/questions");
+    expect(en.robots).toMatchObject({ index: true });
+    const sv = buildStaticQuestionsMetadata("sv", "/questions", "T", "D", publishedIn);
+    expect(sv.robots).toMatchObject({ index: false, follow: true });
+    expect(sv.alternates?.languages).toEqual({});
+  });
+
+  it("the pages pass the published set, and the sitemap lists the hub only where it has content", () => {
+    expect(read("app/[locale]/(marketing)/questions/page.tsx")).toMatch(/localesPublishingAnyAnswer\(\),/);
+    expect(read("app/[locale]/(marketing)/questions/category/[category]/page.tsx")).toMatch(/localesPublishingCategory\(category\),/);
+    const sitemap = read("app/sitemap.ts");
+    expect(sitemap).not.toMatch(/^\s*"\/questions",$/m);
+    expect(sitemap).toMatch(/entries\.push\(\.\.\.answerHubEntries\(\)\);/);
+  });
+});

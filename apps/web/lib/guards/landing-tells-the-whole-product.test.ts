@@ -206,7 +206,9 @@ describe("§17 the public map is real geography and claims no activity", () => {
     // defined over ASCII `\w`, so `/\bне\b/` never matches Russian at all —
     // it failed on this very catalogue on the first run, on a string that
     // plainly reads "а не сегодняшняя активность".
-    const word = (w: string) => new RegExp(`(?<!\\p{L})${w}(?!\\p{L})`, "iu");
+    // The alternatives are GROUPED: ungrouped, `a|b` bounds only the first on the
+    // left and the last on the right, so `inte|inga?` matched almost anything.
+    const word = (w: string) => new RegExp(`(?<!\\p{L})(?:${w})(?!\\p{L})`, "iu");
     const NEGATION: Readonly<Record<(typeof ACTIVE)[number], RegExp>> = {
       lt: word("ne"),
       en: word("not"),
