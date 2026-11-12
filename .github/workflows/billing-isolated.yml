@@ -1,0 +1,212 @@
+name: Billing Isolated (local Supabase, Stripe TEST state, no Stripe credential)
+
+# PLAN ACCESS ON A THROWAWAY STACK (owner 2026-11-12: production Stripe is NOT
+# switched from LIVE to TEST). The same isolated runner as signup-isolated.yml:
+# local Supabase replayed from the migrations, the app on 127.0.0.1, production
+# hosts resolving to nowhere, and NO repository secret.
+#
+# Billing is armed in TEST state with PLACEHOLDER values that have the shape of
+# test credentials and open nothing at Stripe. The walk signs its own webhook
+# events with the placeholder webhook secret, so the app's real signature
+# verification, webhook route, subscription store, entitlement resolver and the
+# one need gate run against a real local database and a real browser.
+#
+# NOT walked here: Stripe's hosted Checkout / Customer Portal and Stripe's own
+# event delivery. Those need a Stripe TEST account and stay BLOCKED BY
+# PRECONDITION; this job never claims them.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/billing-isolated.yml"
+      - "apps/web/tests/e2e/billing-isolated.spec.ts"
+      - "apps/web/tests/e2e/isolated-web-a-helpers.ts"
+      - "apps/web/lib/billing/**"
+      - "apps/web/app/api/billing/**"
+      - "apps/web/lib/commercial/plan-catalogue.ts"
+      - "apps/web/lib/demand/demand-request.ts"
+      - "apps/web/lib/demand/demand-lifecycle*"
+      - "apps/web/components/app/account-billing-section.tsx"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: billing-isolated-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  billing-isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      APP_ORIGIN: http://127.0.0.1:3000
+      SKIP_MIGRATION: 20261025120000_business_history_periods_vivatrex_lmai_bounds_v1.sql
+      SKIP_MIGRATION_SHA256: e4dea150dbd1c344ab7319af74066f12090f764ccdb5511571be65e8244b233e
+      # TEST state, placeholders only: test-SHAPED strings, not credentials.
+      # A live-shaped value here would resolve to stripe_live_blocked by design.
+      PAYMENTS_ENABLED: "true"
+      BILLING_PROVIDER: stripe
+      STRIPE_MODE: test
+      STRIPE_SECRET_KEY: sk_test_isolated_placeholder_opens_nothing
+      STRIPE_WEBHOOK_SECRET: whsec_isolated_placeholder_signs_local_events_only
+      STRIPE_PRICE_COMPANY_PILOT: price_test_isolated_placeholder
+      # Every organization on THIS throwaway stack is in the pilot; the
+      # production list is a server value this job cannot read or change.
+      BILLING_PILOT_ORGANIZATION_IDS: ALL_ORGANIZATIONS
+      AI_PROVIDER_MODE: disabled
+      OWNER_TELEGRAM_ALERTS_ENABLED: "false"
+      AGENTAI_OS_ALERTS_ENABLED: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Guard — this workflow reads no secrets; no linked project or env files
+        run: |
+          set -euo pipefail
+          if grep -nE 'secrets\.' .github/workflows/billing-isolated.yml | grep -v 'grep -nE'; then
+            echo "::error title=Secret reference::billing-isolated.yml must never read a repository secret"; exit 1
+          fi
+          if [ -e supabase/.temp/project-ref ]; then echo "::error::linked project present"; exit 1; fi
+          for f in apps/web/.env apps/web/.env.local apps/web/.env.production apps/web/.env.production.local .env .env.local; do
+            if [ -e "$f" ]; then echo "::error::$f exists in the checkout"; exit 1; fi
+          done
+          grep -qE '^enable_confirmations = false' supabase/config.toml || { echo "::error::local Confirm email must be off for this walk"; exit 1; }
+
+      - name: Guard — production hosts resolve to nowhere on this runner
+        run: |
+          set -euo pipefail
+          HOSTS="gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app"
+          # Leading newline: a hosts file without a trailing newline would glue the
+          # first entry onto its last line (and that line's address). IPv4 AND IPv6
+          # blackholes, so neither address family reaches real DNS.
+          { printf '\n'; for h in $HOSTS; do printf '0.0.0.0 %s\n:: %s\n' "$h" "$h"; done; } | sudo tee -a /etc/hosts >/dev/null
+          for h in gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai; do
+            addrs="$(getent ahosts "$h" | awk '{print $1}' | sort -u)"
+            bad="$(printf '%s\n' "$addrs" | grep -vxE '0\.0\.0\.0|::' || true)"
+            [ -n "$addrs" ] && [ -z "$bad" ] || { echo "::error::$h still resolves (${bad:-no answer})"; exit 1; }
+          done
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.33.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter=!mobile
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@b60b5899c73b63a2d2d651b1e90db8d4c9392f51 # v1.6.0
+        with:
+          version: 2.116.0
+
+      - name: Install Playwright chromium
+        run: pnpm -F web exec playwright install --with-deps chromium
+
+      - name: Set aside the one non-replayable migration (hash-pinned)
+        run: |
+          set -euo pipefail
+          f="supabase/migrations/$SKIP_MIGRATION"
+          if [ ! -e "$f" ]; then echo "::notice::$SKIP_MIGRATION is gone — replay runs every file."; exit 0; fi
+          echo "$SKIP_MIGRATION_SHA256  $f" | sha256sum -c - || { echo "::error::$SKIP_MIGRATION changed — re-decide"; exit 1; }
+          mv "$f" "$RUNNER_TEMP/"
+
+      - name: Start local Supabase (migrations replayed from scratch)
+        run: |
+          # The runner shell is `bash -e`: without +e a failed start exits before
+          # its log is printed and the cause (e.g. a migration error) is lost.
+          set +e -uo pipefail
+          supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
+          rc=$?
+          grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | tail -n 60
+          exit $rc
+
+      - name: Export the LOCAL stack env (masked; refuses anything non-local)
+        run: |
+          set -euo pipefail
+          supabase status -o env > "$RUNNER_TEMP/sb.env"
+          get() { sed -n "s/^$1=\"\{0,1\}\([^\"]*\)\"\{0,1\}$/\1/p" "$RUNNER_TEMP/sb.env" | head -1; }
+          API_URL="$(get API_URL)"; ANON="$(get ANON_KEY)"; SERVICE="$(get SERVICE_ROLE_KEY)"
+          [ -n "$ANON" ] || ANON="$(get PUBLISHABLE_KEY)"; [ -n "$SERVICE" ] || SERVICE="$(get SECRET_KEY)"
+          rm -f "$RUNNER_TEMP/sb.env"
+          for v in "$ANON" "$SERVICE"; do [ -n "$v" ] && echo "::add-mask::$v"; done
+          [ "$API_URL" = "http://127.0.0.1:54321" ] || { echo "::error::API_URL is not the local stack"; exit 1; }
+          [ -n "$ANON" ] && [ -n "$SERVICE" ] || { echo "::error::supabase status returned no keys"; exit 1; }
+          for k in "$ANON" "$SERVICE"; do
+            node -e 'const p=JSON.parse(Buffer.from((process.argv[1].split(".")[1]||""),"base64url").toString()||"{}");if(p.ref){console.error("cloud key");process.exit(1)}' "$k"
+          done
+          CTS="$(openssl rand -hex 32)"; echo "::add-mask::$CTS"
+          CRON="$(openssl rand -hex 24)"; echo "::add-mask::$CRON"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE"
+            echo "E2E_SUPABASE_URL=$API_URL"
+            echo "E2E_SUPABASE_SERVICE_ROLE_KEY=$SERVICE"
+            echo "CONVERSATION_TOKEN_SECRET=$CTS"
+            echo "CRON_SECRET=$CRON"
+            echo "LM_ACCEPTANCE_MODE=1"
+          } >> "$GITHUB_ENV"
+
+      - name: Prove the replay — ledger rows equal migration files
+        run: |
+          set -euo pipefail
+          files=$(ls supabase/migrations/*.sql | wc -l)
+          rows=$(docker exec supabase_db_labourmarketai psql -U postgres -tAc "select count(*) from supabase_migrations.schema_migrations")
+          echo "migration files=$files ledger rows=$rows"
+          [ "$files" -eq "$rows" ] || { echo "::error::replay incomplete"; exit 1; }
+
+      - name: Build
+        run: pnpm -F web build
+
+      - name: Guard — the build inlined the local Supabase URL
+        run: grep -rqF "127.0.0.1:54321" apps/web/.next/static apps/web/.next/server || { echo "::error::build lacks the local Supabase URL"; exit 1; }
+
+      - name: Start app (acceptance mode — refuses a non-local target)
+        run: |
+          set -euo pipefail
+          pnpm -F web exec next start -H 127.0.0.1 -p 3000 > "$RUNNER_TEMP/next.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/next.pid"
+          for i in $(seq 1 60); do curl -fsS -o /dev/null "$APP_ORIGIN/en" && break; sleep 2; done
+          curl -fsS -o /dev/null "$APP_ORIGIN/en"
+
+      # APP MAIL (notifications-isolated-web-a.spec.ts). The product sends its
+      # own mail over SMTP with implicit TLS on 465 (lib/email/smtp.ts). A
+      # CI-only catcher — the stack's own Mailpit image, a second container —
+      # listens on 127.0.0.1:465 with a throwaway self-signed certificate and
+      # accepts any login; it relays nothing. Only a SECOND app instance (3001)
+      # is pointed at it, so the walks on 3000 keep the "no mailbox" product.
+      - name: Guard — Stripe is unreachable from this runner (no call can leave)
+        run: |
+          set -euo pipefail
+          { printf '\n'; for h in api.stripe.com checkout.stripe.com billing.stripe.com; do printf '0.0.0.0 %s\n:: %s\n' "$h" "$h"; done; } | sudo tee -a /etc/hosts >/dev/null
+          addrs="$(getent ahosts api.stripe.com | awk '{print $1}' | sort -u)"
+          bad="$(printf '%s\n' "$addrs" | grep -vxE '0\.0\.0\.0|::' || true)"
+          [ -n "$addrs" ] && [ -z "$bad" ] || { echo "::error::api.stripe.com still resolves"; exit 1; }
+
+      - name: Run the plan-access walk
+        working-directory: apps/web
+        env:
+          SIGNUP_ISOLATED: "1"
+          BILLING_ISOLATED: "1"
+          E2E_BASE_URL: http://127.0.0.1:3000
+          E2E_NO_SERVER: "1"
+          E2E_LOCAL_STACK: "1"
+        run: pnpm exec playwright test tests/e2e/billing-isolated.spec.ts --reporter=list --trace=off
+
+      - name: App log tail on failure (no secrets are printed by the app)
+        if: failure()
+        run: grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/next.log" | tail -n 80 || true
+
+      - name: Stop app and local Supabase
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/next.pid" ]; then kill "$(cat "$RUNNER_TEMP/next.pid")" 2>/dev/null || true; fi
+          supabase stop --no-backup || true
