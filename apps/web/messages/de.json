@@ -1830,7 +1830,9 @@
       "errorName": "Geben Sie einen Projektnamen ein (mindestens 2 Zeichen).",
       "errorNoCompany": "Nur ein Unternehmenskonto kann einen Projektkontext anlegen.",
       "errorNotAuthorized": "Projekte anlegen ist hier dem Inhaber oder Administrator der Organisation vorbehalten. Bitten Sie sie, das Projekt anzulegen oder Ihrer Rolle das Recht zu geben.",
-      "error": "Konnte nicht erstellt werden. Bitte versuchen Sie es erneut."
+      "error": "Konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+      "countryLabel": "Land",
+      "errorCountry": "Wählen Sie das Land des Projektorts."
     },
     "needsTitle": "Anfragen",
     "needsBody": "Reichen Sie eine strukturierte Anfrage ein und verfolgen Sie ihren Status.",
@@ -6470,7 +6472,9 @@
       "cityLabel": "Stadt (optional)",
       "cityPlaceholder": "z. B. Vilnius",
       "submit": "Projekt erstellen",
-      "noCompany": "Erstellen Sie zuerst ein Unternehmensprofil."
+      "noCompany": "Erstellen Sie zuerst ein Unternehmensprofil.",
+      "countryLabel": "Land",
+      "errorCountry": "Wählen Sie das Land des Projektorts."
     },
     "assign": {
       "title": "Eine Arbeitskraft einem Projekt zuweisen",
@@ -14300,7 +14304,9 @@
         "supplyRole": "Welcher Beruf",
         "supplyRolePlaceholder": "Z. B. Schweißer",
         "supplyTeamSize": "Wie viele Menschen Sie haben",
-        "supplyLocation": "Wo sie arbeiten können"
+        "supplyLocation": "Wo sie arbeiten können",
+        "projectCountry": "Land",
+        "projectCountryPlaceholder": "z. B. Schweden oder SE"
       },
       "availability": {
         "available": "Verfügbar",

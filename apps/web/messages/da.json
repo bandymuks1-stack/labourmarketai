@@ -2048,6 +2048,10 @@
           "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
         }
       }
+    },
+    "create": {
+      "countryLabel": "Land",
+      "errorCountry": "Vælg landet, hvor projektets sted ligger."
     }
   },
   "projectOps": {
@@ -3910,7 +3914,9 @@
         "supplyRole": "Hvilket fag",
         "supplyRolePlaceholder": "F.eks. svejser",
         "supplyTeamSize": "Hvor mange folk I har",
-        "supplyLocation": "Hvor de kan arbejde"
+        "supplyLocation": "Hvor de kan arbejde",
+        "projectCountry": "Land",
+        "projectCountryPlaceholder": "f.eks. Sverige eller SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -7945,6 +7951,12 @@
       "undecided": "Du har ikke valgt endnu, så intet til måling gemmes.",
       "allow": "Tillad",
       "refuse": "Afvis"
+    }
+  },
+  "companyOps": {
+    "createProject": {
+      "countryLabel": "Land",
+      "errorCountry": "Vælg landet, hvor projektets sted ligger."
     }
   }
 }

@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { resolveOrganizationIdForCompany } from "@/lib/company/resolve-organization-id";
+import { resolveCountryCode } from "@/lib/location/country-model";
 
 /**
  * THE one project-creation core (rebuild W5). Both existing entry points —
@@ -23,7 +24,7 @@ export const PROJECT_TITLE_MAX = 200;
 
 export type CreateProjectCoreResult =
   | { ok: true; id: string }
-  | { ok: false; reason: "invalid_title" | "insert_failed"; code?: string; message?: string };
+  | { ok: false; reason: "invalid_title" | "country_required" | "insert_failed"; code?: string; message?: string };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
@@ -33,11 +34,20 @@ function asAny(c: SupabaseClient): any {
 export async function insertProjectForCompany(
   supabase: SupabaseClient,
   companyId: string,
-  input: { title: string; city: string | null },
+  input: { title: string; city: string | null; country?: string | null },
 ): Promise<CreateProjectCoreResult> {
   const title = input.title.trim();
   if (title.length < PROJECT_TITLE_MIN || title.length > PROJECT_TITLE_MAX) {
     return { ok: false, reason: "invalid_title" };
+  }
+  // A project with a place carries its COUNTRY as an ISO code, never guessed
+  // (owner decision 2026-11-12, Swedish employer audit J-1): every project was
+  // created with `projects.country` NULL, so no country reading could place
+  // it. A project with no place at all may stay without one; a typed value
+  // that is not a country is refused rather than dropped.
+  const country = resolveCountryCode(input.country ?? null);
+  if ((input.country?.trim() && !country) || (input.city?.trim() && !country)) {
+    return { ok: false, reason: "country_required" };
   }
 
   // W10: bind the canonical organization at creation so the project is never
@@ -51,6 +61,7 @@ export async function insertProjectForCompany(
       organization_id: organizationId,
       title,
       city: input.city,
+      country,
       status: "draft",
     })
     .select("id")

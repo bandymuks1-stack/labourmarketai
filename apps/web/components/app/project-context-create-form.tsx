@@ -1,5 +1,6 @@
 "use client";
 
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { useActionState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
@@ -63,7 +64,9 @@ export function ProjectContextCreateForm() {
           ? t("errorNoCompany")
           : state.code === "not_authorized"
             ? t("errorNotAuthorized")
-            : t("error")
+            : state.code === "country_required"
+              ? t("errorCountry")
+              : t("error")
       : null;
 
   return (
@@ -86,6 +89,25 @@ export function ProjectContextCreateForm() {
       <label className="flex flex-col gap-1 text-xs text-text-secondary">
         {t("locationLabel")}
         <Input name="location" maxLength={200} placeholder={t("locationPlaceholder")} />
+      </label>
+
+      {/* The place's country: required by the server whenever a location is
+          given (owner decision 2026-11-12, J-1). */}
+      <label className="flex flex-col gap-1 text-xs text-text-secondary">
+        {t("countryLabel")}
+        <select
+          name="country"
+          defaultValue=""
+          className="min-h-11 rounded-md border border-ink-500 bg-ink-700 px-3 text-sm text-text-primary outline-none focus:border-brand-blue"
+          data-testid="project-country-select"
+        >
+          <option value="">—</option>
+          {countryOptionsForLocale(locale).map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
       </label>
 
       <label className="flex flex-col gap-1 text-xs text-text-secondary">

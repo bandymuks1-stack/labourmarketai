@@ -57,6 +57,10 @@ export interface ProjectManagerLabels {
   createNameLabel: string;
   createNamePlaceholder: string;
   createCityLabel: string;
+  /** The country select on the inline create (ISO list, page locale). */
+  createCountryLabel: string;
+  createCountryOptions: ReadonlyArray<{ readonly value: string; readonly label: string }>;
+  countryRequired: string;
   createCityPlaceholder: string;
   createSubmit: string;
   noCompany: string;
@@ -169,7 +173,9 @@ function resultError(
         ? l.needsMigration
         : r.code === "no_company"
           ? l.noCompany
-          : l.errorMsg;
+          : r.code === "country_required"
+            ? l.countryRequired
+            : l.errorMsg;
   return (
     <span className="text-xs text-state-danger" role="status">
       {msg}
@@ -493,6 +499,17 @@ export function ProjectAssignmentManager({
         <label className="flex flex-col gap-1 text-xs">
           <span className="font-mono uppercase tracking-label text-text-muted">{labels.createCityLabel}</span>
           <input name="city" placeholder={labels.createCityPlaceholder} className={field} data-testid="project-create-city" />
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="font-mono uppercase tracking-label text-text-muted">{labels.createCountryLabel}</span>
+          <select name="country" defaultValue="" className={field} data-testid="project-create-country">
+            <option value="">—</option>
+            {labels.createCountryOptions.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
         </label>
         <div className="flex flex-wrap items-center gap-3">
           <button type="submit" disabled={creating} className={primary} data-testid="project-create-inline-submit">

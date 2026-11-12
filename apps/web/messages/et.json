@@ -2048,6 +2048,10 @@
           "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
         }
       }
+    },
+    "create": {
+      "countryLabel": "Riik",
+      "errorCountry": "Valige riik, kus projekti asukoht on."
     }
   },
   "projectOps": {
@@ -3910,7 +3914,9 @@
         "supplyRole": "Milline amet",
         "supplyRolePlaceholder": "Nt keevitaja",
         "supplyTeamSize": "Kui palju inimesi sul on",
-        "supplyLocation": "Kus nad saavad töötada"
+        "supplyLocation": "Kus nad saavad töötada",
+        "projectCountry": "Riik",
+        "projectCountryPlaceholder": "nt Rootsi või SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -7945,6 +7951,12 @@
       "undecided": "Sa pole veel valinud, seega mõõtmiseks ei salvestata midagi.",
       "allow": "Luba",
       "refuse": "Keeldu"
+    }
+  },
+  "companyOps": {
+    "createProject": {
+      "countryLabel": "Riik",
+      "errorCountry": "Valige riik, kus projekti asukoht on."
     }
   }
 }

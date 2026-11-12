@@ -1,3 +1,4 @@
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { redirect } from "next/navigation";
 import { PageBack } from "@/components/app/premium/page-back";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -380,6 +381,9 @@ export default async function ProjectsPage({
     createNameLabel: t("create.nameLabel"),
     createNamePlaceholder: t("create.namePlaceholder"),
     createCityLabel: t("create.cityLabel"),
+    createCountryLabel: t("create.countryLabel"),
+    createCountryOptions: countryOptionsForLocale(locale),
+    countryRequired: t("create.errorCountry"),
     createCityPlaceholder: t("create.cityPlaceholder"),
     createSubmit: t("create.submit"),
     noCompany: t("create.noCompany"),

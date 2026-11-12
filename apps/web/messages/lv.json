@@ -2048,6 +2048,10 @@
           "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
         }
       }
+    },
+    "create": {
+      "countryLabel": "Valsts",
+      "errorCountry": "Izvēlieties valsti, kurā atrodas projekta vieta."
     }
   },
   "projectOps": {
@@ -3910,7 +3914,9 @@
         "supplyRole": "Kāda profesija",
         "supplyRolePlaceholder": "Piem., metinātājs",
         "supplyTeamSize": "Cik cilvēku jums ir",
-        "supplyLocation": "Kur viņi var strādāt"
+        "supplyLocation": "Kur viņi var strādāt",
+        "projectCountry": "Valsts",
+        "projectCountryPlaceholder": "piem., Zviedrija vai SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -7945,6 +7951,12 @@
       "undecided": "Jūs vēl neesat izvēlējušies, tāpēc mērīšanai nekas netiek glabāts.",
       "allow": "Atļaut",
       "refuse": "Atteikties"
+    }
+  },
+  "companyOps": {
+    "createProject": {
+      "countryLabel": "Valsts",
+      "errorCountry": "Izvēlieties valsti, kurā atrodas projekta vieta."
     }
   }
 }

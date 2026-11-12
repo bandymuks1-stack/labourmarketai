@@ -395,7 +395,7 @@ export const COMPANY_EXECUTORS: {
     // core (`insertProjectForCompany`) sits behind the canonical server action
     // the company page uses; RLS `projects_insert` (owns_company) gates the
     // row. Never a second insert path.
-    const r = await createProjectAction(null, fd({ title: input.title, city: input.city ?? "" }));
+    const r = await createProjectAction(null, fd({ title: input.title, city: input.city ?? "", country: input.country ?? "" }));
     if (!r.ok) return mapProjectCreate(r);
     emitServerFunnelEvent(FUNNEL_EVENTS.firstRealAction, {
       source: "projects-chat",
