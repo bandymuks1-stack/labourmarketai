@@ -8020,6 +8020,10 @@
         "label": "Find kandidater",
         "hint": "Søg efter personer"
       }
+    },
+    "ask": {
+      "label": "Spørg assistenten",
+      "hint": "Skriv med dine egne ord, hvad du har brug for"
     }
   }
 }

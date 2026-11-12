@@ -187,6 +187,50 @@ describe("DEMAND ≠ SUPPLY on the organization home (SEP-4)", () => {
   });
 });
 
+describe("a visible way to ask the assistant, opening the ONE conversation (step 4)", () => {
+  const entry = read("components/app/home/ask-assistant-entry.tsx");
+
+  it("sits with the goals on both homes and is a real, named button", () => {
+    const cards = read("components/app/home/home-goal-cards.tsx");
+    expect(cards).toMatch(/<AskAssistantEntry label=\{t\("ask\.label"\)\} hint=\{t\("ask\.hint"\)\} \/>/);
+    expect(entry).toMatch(/<button\s+type="button"\s+data-testid="home-ask-assistant"/);
+    expect(entry).toMatch(/min-h-14/);
+    expect(entry).toMatch(/focus-visible:ring-2/);
+  });
+
+  it("opens nothing new: it moves focus to the composer the home already has", () => {
+    expect(entry).toContain(`COMPOSER_INPUT_SELECTOR = '[data-testid="composer-input"]'`);
+    expect(entry).toMatch(/input\.focus\(\{ preventScroll: true \}\)/);
+    // The composer still carries the marker the entry looks for.
+    expect(read("components/app/conversation/chat/composer.tsx")).toMatch(/data-testid="composer-input"/);
+    // No second chat, dialog or route behind the entry.
+    const code = entry.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(code).not.toMatch(/<Link|href=|router\.|useRouter|<dialog|MobileSheet|fetch\(/);
+  });
+
+  it("honours reduced motion", () => {
+    expect(entry).toMatch(/prefers-reduced-motion: reduce/);
+    expect(entry).toMatch(/motion-reduce:transition-none/);
+  });
+
+  it("the composer is on screen under an opening context, so the entry always has a target", () => {
+    const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+    expect(chat).toMatch(/\{opening && !openingContext \? null : \(\s*<Composer/);
+  });
+
+  for (const locale of locales) {
+    it(`${locale}: the entry has plain copy`, () => {
+      const ask = JSON.parse(read(`messages/${locale}.json`)).homeGoals?.ask as { label?: string; hint?: string };
+      expect(ask?.label, locale).toBeTruthy();
+      expect(ask?.hint, locale).toBeTruthy();
+      for (const text of [ask.label!, ask.hint!]) {
+        expect(text).not.toMatch(/\[EN\]|\bdemo\b/i);
+        expect(text.length).toBeLessThanOrEqual(56);
+      }
+    });
+  }
+});
+
 describe("plain copy in every catalog", () => {
   for (const locale of locales) {
     it(`${locale}: every goal has a label, and a hint unless its action is a shared door`, () => {

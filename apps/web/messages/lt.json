@@ -20627,6 +20627,10 @@
         "label": "Rasti kandidatų",
         "hint": "Ieškok žmonių"
       }
+    },
+    "ask": {
+      "label": "Paklausk asistento",
+      "hint": "Parašyk savais žodžiais, ko tau reikia"
     }
   }
 }

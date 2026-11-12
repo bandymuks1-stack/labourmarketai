@@ -20627,6 +20627,10 @@
         "label": "Znajdź kandydatów",
         "hint": "Szukaj ludzi"
       }
+    },
+    "ask": {
+      "label": "Zapytaj asystenta",
+      "hint": "Napisz własnymi słowami, czego potrzebujesz"
     }
   }
 }

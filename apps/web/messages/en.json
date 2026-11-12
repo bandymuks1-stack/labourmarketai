@@ -20627,6 +20627,10 @@
         "label": "Find candidates",
         "hint": "Search for people"
       }
+    },
+    "ask": {
+      "label": "Ask the assistant",
+      "hint": "Write what you need in your own words"
     }
   }
 }

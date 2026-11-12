@@ -8020,6 +8020,10 @@
         "label": "Atrast kandidātus",
         "hint": "Meklējiet cilvēkus"
       }
+    },
+    "ask": {
+      "label": "Jautāt asistentam",
+      "hint": "Uzrakstiet saviem vārdiem, kas jums vajadzīgs"
     }
   }
 }

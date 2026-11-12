@@ -66,7 +66,9 @@ import {
  * md up the regions read in their canonical order.
  *
  * There is no "ask" door any more: the composer IS the door, and the
- * conversation is the home (the former PAKLAUSK tab is retired).
+ * conversation is the home (the former PAKLAUSK tab is retired). The goals'
+ * "Ask the assistant" entry (2026-11-12) is not a door either — it puts the
+ * cursor in that same composer.
  *
  * Every figure is a reader's figure (`lib/today/today-server.ts`) read
  * through the pure model (`lib/today/today-model.ts`); a reader that could

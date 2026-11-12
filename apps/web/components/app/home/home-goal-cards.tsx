@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
+import { AskAssistantEntry } from "@/components/app/home/ask-assistant-entry";
 import { WORK_AREA_ICONS } from "@/components/app/work-area-icons";
 import { iconControl } from "@/components/app/conversation/chat/icon-scale";
 import { NavLinkPending } from "@/components/app/nav-link-pending";
@@ -102,6 +103,9 @@ export async function HomeGoalCards({
           );
         })}
       </ul>
+      {/* Anything that is not a card: say it in your own words. Opens the
+          ONE composer already on this screen — no second chat. */}
+      <AskAssistantEntry label={t("ask.label")} hint={t("ask.hint")} />
     </nav>
   );
 }
@@ -125,6 +129,7 @@ export function HomeGoalCardsPending({ role }: { role: HomeGoalRole }) {
           <span key={i} className={cn(CARD, "animate-pulse motion-reduce:animate-none")} />
         ))}
       </div>
+      <span className="mt-2 block min-h-14 animate-pulse rounded-xl border border-dashed border-ink-600 motion-reduce:animate-none sm:mt-3" />
     </div>
   );
 }

@@ -8020,6 +8020,10 @@
         "label": "Leia kandidaate",
         "hint": "Otsi inimesi"
       }
+    },
+    "ask": {
+      "label": "Küsi assistendilt",
+      "hint": "Kirjuta oma sõnadega, mida vajad"
     }
   }
 }
