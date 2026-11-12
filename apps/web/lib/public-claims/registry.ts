@@ -262,15 +262,6 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
     pages: [{ path: P.companies, locales: ALL, fragments: [k("companies.faq.items[1].a")] }],
   },
   {
-    claimId: "employer.one-position-free",
-    audience: "EMPLOYER",
-    capabilityId: "MKT-7",
-    capabilityCaveat: BILLING_CAVEAT,
-    status: "LIVE",
-    structural: null,
-    pages: [{ path: P.pricing, locales: ALL, fragments: [k("pricing.faq[1].a")] }],
-  },
-  {
     claimId: "employer.organization-plan-99-per-month",
     audience: "EMPLOYER",
     capabilityId: "MKT-7",
@@ -346,6 +337,15 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
     pages: [],
   },
   // ── RETIRED — listed so a consumer stops citing them; never deleted ──────
+  {
+    claimId: "employer.one-position-free",
+    audience: "EMPLOYER",
+    capabilityId: "MKT-7",
+    status: "RETIRED",
+    structural: null,
+    note: "\"An organization can run one active position at no cost\" — the free-position limit is enforced only for an organization whose billing is armed (open-needs-gate is permissive otherwise), so while public activation is closed /pricing no longer says it (owner approval 2026-11-12 (b)). Free registration and free need submission remain claimed by employer.inquiry-free.",
+    pages: [],
+  },
   {
     claimId: "employer.organization-plan-price",
     audience: "EMPLOYER",

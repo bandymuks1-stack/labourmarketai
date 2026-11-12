@@ -48,6 +48,14 @@ describe("closed online payment is said as closed", () => {
     expect(page).toContain("faqPageJsonLd(faq, locale)");
   });
 
+  it("the public claims registry no longer serves the free-position claim as LIVE", () => {
+    // AGENTS.md § Public claims registry: when the page stops saying a claim,
+    // it is RETIRED (listed, no pages), so outreach stops citing it.
+    const registry = read("lib/public-claims/registry.ts");
+    const entry = registry.slice(registry.indexOf('claimId: "employer.one-position-free"'));
+    expect(entry.slice(0, entry.indexOf("},"))).toMatch(/status: "RETIRED"[\s\S]*pages: \[\]/);
+  });
+
   for (const locale of activeLocales) {
     it(`${locale}: closed sentences promise no payment and no unenforced limit`, () => {
       const m = JSON.parse(read(`messages/${locale}.json`));
