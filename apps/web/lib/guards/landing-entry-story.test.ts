@@ -25,12 +25,17 @@ describe("landing entry", () => {
   // 2026-11-12: the hero's "Start now" pair gave way to the goal navigator —
   // owner instruction 2026-11-12 ("Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori atlikti").
   // The h1 keeps the owner's words at a reading size; the choice follows it.
-  it("the hero keeps its h1, offers the choice and keeps the working sentence entry", () => {
-    expect(FOCUS).toMatch(/<h1 className="mt-2 max-w-3xl font-display text-2xl/);
+  it("the first screen is the question (the h1), the owner's line, and the working sentence entry", () => {
+    // The h1 is the goal navigator's own heading; the owner's headline is the
+    // one supporting line under the goals.
+    expect(readFileSync(join(ROOT, "components/marketing/landing-intent-choice.tsx"), "utf8")).toContain(
+      '<GoalNavigation headingLevel="h1" />',
+    );
+    expect(FOCUS).not.toMatch(/<h1\b/);
     expect(FOCUS).toContain('{tHero("headline")}');
     const body = FOCUS.slice(FOCUS.lastIndexOf("<NextIntlClientProvider"));
     expect(body.indexOf("<LandingIntentChoice />")).toBeGreaterThan(-1);
-    expect(body.indexOf("<LandingIntentChoice />")).toBeLessThan(body.indexOf("<PublicEntry"));
-    expect(FOCUS).toContain("<PublicEntry");
+    expect(body.indexOf("<LandingIntentChoice />")).toBeLessThan(body.indexOf("{promise}"));
+    expect(body.indexOf("{promise}")).toBeLessThan(body.indexOf("<PublicEntry"));
   });
 });

@@ -97,6 +97,19 @@ for (const width of [1024, 1280, 1440] as const) {
       }
     });
 
+    test("More holds the older links: pricing and about are two actions away", async ({ page }) => {
+      await page.goto("/en");
+      const more = page.getByTestId("intent-toggle-more");
+      await more.focus();
+      await page.keyboard.press("Enter");
+      const links = page.getByTestId("intent-more-links");
+      await expect(links.locator("a").first()).toBeFocused();
+      await expect(links.locator("a[href$='/pricing']")).toBeVisible();
+      await expect(links.locator("a[href$='/about']")).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(more).toBeFocused();
+    });
+
     test("the assistant entry is in the bar and points at the conversation home", async ({ page }) => {
       await page.goto("/en/pricing");
       await expect(page.getByTestId("intent-bar-assistant")).toHaveAttribute("href", /\/en\/dashboard$/);
@@ -152,3 +165,59 @@ for (const width of [320, 375, 768] as const) {
     });
   });
 }
+
+test.describe("signed-out visitor follows an account link", () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+  // Independent review of e251185 (P3): the one account link with a query.
+  test("Set up your agency → login keeps the whole destination, query included", async ({ page }) => {
+    await page.goto("/en/pricing");
+    await page.getByTestId("intent-toggle-agencies").click();
+    await page.getByTestId("intent-link-agencies-setUpAgency").click();
+    await page.waitForURL(/\/(auth\/login|dashboard\/start\/company)/);
+    // The login redirect is the middleware's, and it needs the auth backend.
+    // A server started without one (no Supabase environment) lets the request
+    // through, which proves nothing either way — so say so instead of passing.
+    test.skip(
+      !/\/auth\/login/.test(page.url()),
+      "No auth backend in this environment: the signed-out redirect cannot be exercised. Run against the local stack or a deployed build.",
+    );
+    await expect(page).toHaveURL(/\/en\/auth\/login\?next=/);
+    const next = new URL(page.url()).searchParams.get("next") ?? "";
+    expect(next).toContain("/dashboard/start/company");
+    expect(next).toContain("type=staffing_agency");
+  });
+});
+
+test.describe("phone header", () => {
+  for (const width of [360, 375] as const) {
+    // Lithuanian (the default), German and Polish: the longest Sign in labels.
+    for (const locale of ["lt", "pl"] as const) {
+      test(`${locale} @${width}px: whole logo, language, Sign in and the menu, nothing clipped`, async ({ browser }) => {
+        const context = await browser.newContext({
+          viewport: { width, height: 740 },
+          hasTouch: true,
+          isMobile: true,
+        });
+        const page = await context.newPage();
+        await page.goto(`/${locale}`);
+        expect(await headerOverflow(page), "header overflow").toEqual([]);
+        // The wordmark is whole: visible and not cut.
+        const word = page.locator("header a span").first();
+        await expect(word).toBeVisible();
+        expect(await word.evaluate((el) => el.scrollWidth > el.clientWidth + 1)).toBe(false);
+        await expect(page.getByTestId("header-auth").locator("a[href*='/auth/login']")).toBeVisible();
+        await expect(page.getByTestId("header-auth").locator("a[href*='/auth/signup']")).toBeHidden();
+        await expect(page.getByTestId("mobile-nav-toggle")).toBeVisible();
+        // The goals start within the first ~300px of the screen.
+        const rail = (await page.getByTestId("goal-rail").boundingBox())!;
+        expect(rail.y, "goal rail top").toBeLessThan(300);
+        // Sign up and the theme toggle are the first row of the menu.
+        await page.getByTestId("mobile-nav-toggle").tap();
+        const auth = page.getByTestId("mobile-nav-auth");
+        await expect(auth.locator("a[href*='/auth/signup']")).toBeVisible();
+        await expect(auth.getByTestId("menu-theme-toggle")).toBeVisible();
+        await context.close();
+      });
+    }
+  }
+});

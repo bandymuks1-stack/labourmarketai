@@ -9,6 +9,7 @@ import {
   goalHref,
 } from "@/lib/navigation/public-intents";
 import {
+  AREA_ICONS,
   FUNCTION_ICONS,
   GOAL_ICONS,
   PROFESSION_ICONS,
@@ -41,13 +42,13 @@ const server = read("components/navigation/goal-navigation.tsx");
 const rail = read("components/navigation/card-rail.tsx");
 
 describe("the choice is the first screen", () => {
-  it("mounts once, under the headline and before the sentence entry", () => {
+  it("mounts once, first, carrying the page's h1; the owner's line and the entry follow", () => {
     expect(landing.match(/<LandingIntentChoice \/>/g)).toHaveLength(1);
-    const headline = landing.indexOf('{tHero("headline")}');
     const body = landing.slice(landing.lastIndexOf("<NextIntlClientProvider"));
-    expect(headline).toBeGreaterThan(-1);
-    expect(body.indexOf("{promise}")).toBeLessThan(body.indexOf("<LandingIntentChoice />"));
-    expect(body.indexOf("<LandingIntentChoice />")).toBeLessThan(body.indexOf("<PublicEntry"));
+    expect(landing).toContain('{tHero("headline")}');
+    expect(landing).not.toMatch(/<h1\b/);
+    expect(body.indexOf("<LandingIntentChoice />")).toBeLessThan(body.indexOf("{promise}"));
+    expect(body.indexOf("{promise}")).toBeLessThan(body.indexOf("<PublicEntry"));
   });
 
   it("the sentence entry and the request doors stay", () => {
@@ -56,7 +57,7 @@ describe("the choice is the first screen", () => {
   });
 
   it("the home mounts the one navigator; no second goal view or page exists", () => {
-    expect(choice).toMatch(/<GoalNavigation \/>/);
+    expect(choice).toMatch(/<GoalNavigation headingLevel="h1" \/>/);
     expect(existsSync(join(APP_ROOT, "components/navigation/goal-rail.tsx"))).toBe(false);
     // A new public screen is an owner decision (constitution A-09): the goal
     // state is a fragment of this page, not a route.
@@ -111,8 +112,16 @@ describe("the URL is the state — a fragment, not a page", () => {
   it("the active goal is read from the fragment; choosing pushes it without a jump", () => {
     expect(navigator).toMatch(/useSyncExternalStore\(subscribeToFragment, readFragment, readServerFragment\)/);
     expect(navigator).toMatch(/goalFromFragment\(fragment\)/);
-    expect(navigator).toMatch(/window\.history\.pushState\(null, "", goalHref\(card\.id as PublicIntentId\)\)/);
-    expect(navigator).toMatch(/window\.history\.go\(-steps\)/);
+    expect(navigator).toMatch(/window\.history\.pushState\(\s*(?:\/\/[^\n]*\n\s*)*\{ \[GOAL_DEPTH_KEY\]: goalDepth\(\) \+ 1 \},/);
+    // Close reads the depth from the CURRENT history entry (Codex P2 on
+    // c1caca4): a running count of selections went too far after Back.
+    expect(navigator).toMatch(/const depth = goalDepth\(\);/);
+    expect(navigator).toMatch(/window\.history\.go\(-depth\)/);
+    // Close always ends with NO goal open, even when the origin entry is a
+    // shared goal link (Codex P2 on ecd546d).
+    expect(navigator).toMatch(/window\.addEventListener\("popstate", clearGoal, \{ once: true \}\);\s*window\.history\.go\(-depth\)/);
+    expect(navigator).toMatch(/if \(depth === 0\) \{[\s\S]{0,120}clearGoal\(\)/);
+    expect(navigator).not.toMatch(/useRef|pushed\.current/);
     expect(navigator).toMatch(/addEventListener\("popstate", onChange\)/);
   });
 
@@ -149,6 +158,25 @@ describe("two actions to a function", () => {
     expect(navigator).toMatch(/<form action=\{`\/\$\{locale\}\/jobs`\} method="get"/);
     expect(navigator).toMatch(/data-testid="profession-full-list"/);
     expect(navigator).toMatch(/data-testid="sector-chips"/);
+  });
+});
+
+describe("the pin slot (signed-in homes build on it)", () => {
+  it("is a sibling of the card's link, never nested in it, with its own name and state", () => {
+    const link = rail.slice(rail.indexOf("<CardLink"), rail.indexOf("</CardLink>"));
+    expect(link).not.toMatch(/<button/);
+    expect(rail).toMatch(/<\/CardLink>\s*\{card\.pin && \(\s*<button/);
+    expect(rail).toMatch(/aria-pressed=\{card\.pin\.pressed\}/);
+    expect(rail).toMatch(/aria-label=\{card\.pin\.label\}/);
+    expect(rail).toMatch(/absolute right-0 top-0 inline-flex size-11/);
+  });
+
+  it("the shared icon set carries the signed-in areas' icons", () => {
+    for (const key of Object.values(AREA_ICONS)) expect(NAV_CARD_ICONS[key]).toBeTruthy();
+  });
+
+  it("signed-in destinations are never prefetched from a public page", () => {
+    expect(rail).toMatch(/prefetch=\{href\.startsWith\("\/dashboard"\) \? false : undefined\}/);
   });
 });
 

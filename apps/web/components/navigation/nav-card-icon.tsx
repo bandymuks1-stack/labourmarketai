@@ -1,9 +1,9 @@
 import {
   Armchair, BarChart3, Blocks, BrickWall, Briefcase, Building2, CalendarCheck, Car, ChefHat,
-  ClipboardCheck, ClipboardList, Code, Coffee, Compass, ConciergeBell, Construction, Croissant,
-  Factory, FileSignature, FileText, Flame, Flower2, Globe, GraduationCap, Grid3x3, Hammer, Hand,
+  ClipboardCheck, ClipboardList, Clock, Code, Coffee, Compass, ConciergeBell, Construction, Croissant,
+  Factory, FileSignature, FileText, Flame, Flower2, FolderKanban, Globe, GraduationCap, Grid3x3, Hammer, Hand,
   HandPlatter, Handshake, HardHat, Headset, HeartHandshake, Home, IdCard, Inbox, Info, Languages,
-  LayoutGrid, LayoutPanelTop, MessagesSquare, Package, PaintRoller, Ruler, Scissors, Search,
+  LayoutGrid, LayoutPanelTop, MessagesSquare, NotebookPen, Package, PaintRoller, Ruler, Scissors, Search,
   ShieldCheck, ShoppingBag, ShowerHead, Shovel, Sparkles, SprayCan, Store, Tractor, Truck,
   UserSearch, Users, Utensils, Warehouse, WashingMachine, Wheat, Wrench, Zap,
 } from "lucide-react";
@@ -26,5 +26,6 @@ export const NAV_CARD_ICONS: Record<NavCardIconKey, LucideIcon> = {
   scissors: Scissors, search: Search, shieldCheck: ShieldCheck, shoppingBag: ShoppingBag,
   showerHead: ShowerHead, shovel: Shovel, sparkles: Sparkles, sprayCan: SprayCan, store: Store,
   tractor: Tractor, truck: Truck, userSearch: UserSearch, users: Users, utensils: Utensils,
+  notebook: NotebookPen, clock: Clock, folder: FolderKanban,
   warehouse: Warehouse, washingMachine: WashingMachine, wheat: Wheat, wrench: Wrench, zap: Zap,
 };

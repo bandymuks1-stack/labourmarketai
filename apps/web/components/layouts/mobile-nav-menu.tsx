@@ -113,6 +113,20 @@ export function MobileNavMenu({
           aria-label={openLabel}
           className="absolute right-0 z-50 mt-2 max-h-[calc(100dvh-5.5rem)] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-xl border border-ink-600 bg-ink-900/95 p-1.5 shadow-xl backdrop-blur-md"
         >
+          {/* Rendered verbatim, container and breakpoint included: which
+              widths the panel owns the auth CTAs at is SiteNav's decision,
+              and duplicating that `sm` here would be a second place to keep
+              in sync with the header.
+
+              No onClick close either: AuthCtaLink is a plain <a>, so
+              following it is a FULL document navigation that unmounts this
+              menu with the rest of the page. A handler would be dead code
+              pretending to do work the browser already does.
+
+              It sits ABOVE the secondary links (first-visitor finding
+              2026-11-12): on a 360px phone sign in / sign up were below the
+              fold of the panel, after five links nobody came for. */}
+          {authSection}
           {intents.length > 0 && (
             <ul data-testid="mobile-nav-intents" className="mb-1.5 border-b border-ink-600 pb-1.5">
               {intents.map((intent) => {
@@ -148,6 +162,7 @@ export function MobileNavMenu({
                           <Link
                             key={link.id}
                             href={link.href}
+                            prefetch={link.account ? false : undefined}
                             onClick={() => setOpen(false)}
                             data-testid={`mobile-intent-link-${intent.id}-${link.id}`}
                             className="flex min-h-11 items-center justify-between gap-2 rounded-lg px-2 py-2 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary"
@@ -171,6 +186,7 @@ export function MobileNavMenu({
           {assistant && (
             <Link
               href={assistant.href}
+              prefetch={false}
               onClick={() => setOpen(false)}
               data-testid="mobile-nav-assistant"
               className="mb-1.5 flex min-h-11 items-center gap-3 rounded-lg border-b border-ink-600 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-ink-800"
@@ -183,20 +199,6 @@ export function MobileNavMenu({
               </span>
             </Link>
           )}
-          {/* Rendered verbatim, container and breakpoint included: which
-              widths the panel owns the auth CTAs at is SiteNav's decision,
-              and duplicating that `sm` here would be a second place to keep
-              in sync with the header.
-
-              No onClick close either: AuthCtaLink is a plain <a>, so
-              following it is a FULL document navigation that unmounts this
-              menu with the rest of the page. A handler would be dead code
-              pretending to do work the browser already does.
-
-              It sits ABOVE the secondary links (first-visitor finding
-              2026-11-12): on a 360px phone sign in / sign up were below the
-              fold of the panel, after five links nobody came for. */}
-          {authSection}
           {items.map((item) => (
             <Link
               key={item.key}
