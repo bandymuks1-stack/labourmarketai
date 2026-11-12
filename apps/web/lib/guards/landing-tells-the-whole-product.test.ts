@@ -392,27 +392,25 @@ describe("§22 the first screen says what this is, then offers one next step", (
     expect(countPrimary(`${html}${html}`)).toBe(2);
   });
 
-  it("the page mounts the pair once in the hero and once as the closing band", () => {
+  // 2026-11-12 — owner instruction 2026-11-12 ("Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori atlikti"):
+  // the first screen's one next step is now the CHOICE (the goal navigator),
+  // mounted once before the working entry; the "Start now" pair remains only
+  // as the closing band at the end of the page.
+  it("the page offers the choice once in the hero and the pair once as the closing band", () => {
     const focus = read("app/[locale]/focus-landing/focus-landing.tsx");
-    // Owner directive 2026-09-29 (living worker hero): the pair lives in ONE
-    // `promise` element that whichever hero is shown renders — the living
-    // worker hero over its photographs, or the entry hero without them. The
-    // rule is unchanged: mounted once, as `landing_hero`, before the entry.
     const bodyStart = focus.lastIndexOf("<NextIntlClientProvider"); // the tag, not a comment naming it
     const promise = focus.slice(focus.indexOf("const promise = ("), bodyStart);
-    expect(promise.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(1);
-    expect(promise).toContain('surface="landing_hero"');
-    // the hero pair exists exactly once in the file; the closing band is its own component
-    expect(focus.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(1);
+    expect(promise).toContain('{tHero("headline")}');
+    expect(focus.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(0);
+    expect(focus.match(/<LandingIntentChoice\b/g) ?? []).toHaveLength(1);
     const body = focus.slice(bodyStart);
-    // the hero renders the promise before the working entry (one branch since
-    // the fictional living-worker hero was withdrawn, owner order 2026-11-09)
     expect(body).not.toContain("<LivingWorkerHero");
-    for (const branch of [body.indexOf('<section className="grid gap-8 xl:grid-cols-')]) {
+    for (const branch of [body.indexOf('<section className="flex min-w-0 flex-col gap-6">')]) {
       expect(branch).toBeGreaterThan(-1);
       const from = body.slice(branch);
       expect(from.indexOf("{promise}")).toBeGreaterThan(-1);
-      expect(from.indexOf("{promise}")).toBeLessThan(from.indexOf("<PublicEntry"));
+      expect(from.indexOf("{promise}")).toBeLessThan(from.indexOf("<LandingIntentChoice"));
+      expect(from.indexOf("<LandingIntentChoice")).toBeLessThan(from.indexOf("<PublicEntry"));
     }
     expect(focus.indexOf("<LandingClosingBand")).toBeGreaterThan(focus.indexOf("<TrustBand"));
     // And still no per-request read: the landing stays static.

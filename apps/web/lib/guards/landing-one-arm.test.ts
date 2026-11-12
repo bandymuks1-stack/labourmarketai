@@ -122,13 +122,19 @@ describe("the landing has one arm", () => {
         `import { ${original} } from "@/components/marketing/`,
       );
     }
+    // 2026-11-12 — owner instruction 2026-11-12 ("Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori atlikti"):
+    // the hero's next step is the goal navigator (six goals, one panel), not
+    // the "Start now" pair. The closing band is unchanged.
     expect(focus).toContain(
-      'import { LandingPrimaryActions, LandingClosingBand } from "@/components/marketing/landing-primary-actions"',
+      'import { LandingClosingBand } from "@/components/marketing/landing-primary-actions"',
+    );
+    expect(focus).toContain(
+      'import { LandingIntentChoice } from "@/components/marketing/landing-intent-choice"',
     );
     // Code only — the file's own history may NAME the retired hero in prose.
     expect(code(focus)).not.toContain("HeroLiveDemo");
     const order = [
-      "LandingPrimaryActions",
+      "LandingIntentChoice",
       "PublicEntry",
       "MarketProofBand",
       "LandingOpenJobsBand",
@@ -140,7 +146,8 @@ describe("the landing has one arm", () => {
     expect(order.every((i) => i > 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     // The next step is in the hero, BEFORE the entry — not inside it.
-    expect(code(focus).match(/<LandingPrimaryActions[\s/>]/g) ?? []).toHaveLength(1);
+    expect(code(focus).match(/<LandingIntentChoice[\s/>]/g) ?? []).toHaveLength(1);
+    expect(code(focus).match(/<LandingPrimaryActions[\s/>]/g) ?? []).toHaveLength(0);
     // Its chrome is the (marketing) layout's, reproduced — not approximated.
     expect(focus).toContain("<AmbientGlow />");
     expect(focus).toContain("<SiteNav />");

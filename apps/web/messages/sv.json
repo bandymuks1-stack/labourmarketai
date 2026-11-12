@@ -8013,6 +8013,17 @@
       "searchSubmit": "Sök",
       "viewAll": "Alla jobb",
       "choose": "Välj vad du kom för"
+    },
+    "nav": {
+      "heading": "Vad vill du göra?",
+      "swipe": "Svep",
+      "close": "Stäng",
+      "functions": "Funktioner",
+      "professions": "Yrken",
+      "opensNow": "Öppnas direkt",
+      "signInWhenOpen": "Logga in vid öppning",
+      "allSectors": "Alla branscher",
+      "fullList": "Hela listan"
     }
   }
 }

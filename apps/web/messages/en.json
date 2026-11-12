@@ -20620,6 +20620,17 @@
       "searchSubmit": "Search",
       "viewAll": "View all jobs",
       "choose": "Choose what you came to do"
+    },
+    "nav": {
+      "heading": "What do you want to do?",
+      "swipe": "Swipe",
+      "close": "Close",
+      "functions": "Functions",
+      "professions": "Professions",
+      "opensNow": "Opens now",
+      "signInWhenOpen": "Sign in when you open it",
+      "allSectors": "All sectors",
+      "fullList": "Full list"
     }
   }
 }

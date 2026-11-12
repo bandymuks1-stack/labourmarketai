@@ -20,10 +20,13 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
- * The first screen is the choice (owner priority 2026-11-12, navigation is launch
- * blocker No. 1): six intent cards — the header's own six — directly under the
- * promise, above the existing primary pair. ADDED, nothing removed. EXACTLY ONE
- * hash moved: focus-landing.tsx. No copy, no namespace (the labels are `siteNav`).
+ * The first screen is the choice (owner instruction 2026-11-12: "Sumažink pagrindinio
+ * puslapio sudėtingumą. Pašalink nereikalingus tekstus, abstrakčius šūkius ir
+ * pasikartojančius blokus. Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori
+ * atlikti."): the goal navigator under the owner's headline (now at a reading size);
+ * the second paragraph, the hero's "Start now" pair, the link down to the request doors
+ * and the three abstract cards left the first screen. EXACTLY ONE hash moved:
+ * focus-landing.tsx. No copy changed and no namespace moved (the labels are `siteNav`).
  *
  * No reply-time promise (owner decision 2026-11-10): the request doors no longer
  * promise contact "within 24 hours" — the request is received and the team gets

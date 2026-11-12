@@ -20620,6 +20620,17 @@
       "searchSubmit": "Ieškoti",
       "viewAll": "Visi darbo skelbimai",
       "choose": "Pasirinkite, ko atėjote"
+    },
+    "nav": {
+      "heading": "Ką norite padaryti?",
+      "swipe": "Braukite",
+      "close": "Uždaryti",
+      "functions": "Funkcijos",
+      "professions": "Profesijos",
+      "opensNow": "Atsidaro iškart",
+      "signInWhenOpen": "Prisijungsite atidarę",
+      "allSectors": "Visi sektoriai",
+      "fullList": "Visas sąrašas"
     }
   }
 }

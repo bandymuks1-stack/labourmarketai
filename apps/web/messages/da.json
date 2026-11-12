@@ -8013,6 +8013,17 @@
       "searchSubmit": "Søg",
       "viewAll": "Alle job",
       "choose": "Vælg, hvad du kom for"
+    },
+    "nav": {
+      "heading": "Hvad vil du gøre?",
+      "swipe": "Stryg",
+      "close": "Luk",
+      "functions": "Funktioner",
+      "professions": "Fag",
+      "opensNow": "Åbner med det samme",
+      "signInWhenOpen": "Log ind ved åbning",
+      "allSectors": "Alle brancher",
+      "fullList": "Fuld liste"
     }
   }
 }

@@ -8013,6 +8013,17 @@
       "searchSubmit": "Meklēt",
       "viewAll": "Visi sludinājumi",
       "choose": "Izvēlieties, kāpēc atnācāt"
+    },
+    "nav": {
+      "heading": "Ko vēlaties darīt?",
+      "swipe": "Velciet",
+      "close": "Aizvērt",
+      "functions": "Funkcijas",
+      "professions": "Profesijas",
+      "opensNow": "Atveras uzreiz",
+      "signInWhenOpen": "Pieteikšanās atverot",
+      "allSectors": "Visas nozares",
+      "fullList": "Pilns saraksts"
     }
   }
 }

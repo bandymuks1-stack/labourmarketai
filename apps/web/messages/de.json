@@ -20620,6 +20620,17 @@
       "searchSubmit": "Suchen",
       "viewAll": "Alle Stellen",
       "choose": "Wählen Sie Ihr Anliegen"
+    },
+    "nav": {
+      "heading": "Was möchten Sie tun?",
+      "swipe": "Wischen",
+      "close": "Schließen",
+      "functions": "Funktionen",
+      "professions": "Berufe",
+      "opensNow": "Öffnet sofort",
+      "signInWhenOpen": "Anmeldung beim Öffnen",
+      "allSectors": "Alle Branchen",
+      "fullList": "Vollständige Liste"
     }
   }
 }

@@ -20620,6 +20620,17 @@
       "searchSubmit": "Szukaj",
       "viewAll": "Wszystkie oferty",
       "choose": "Wybierz, po co przychodzisz"
+    },
+    "nav": {
+      "heading": "Co chcesz zrobić?",
+      "swipe": "Przesuń",
+      "close": "Zamknij",
+      "functions": "Funkcje",
+      "professions": "Zawody",
+      "opensNow": "Otwiera się od razu",
+      "signInWhenOpen": "Logowanie przy otwarciu",
+      "allSectors": "Wszystkie branże",
+      "fullList": "Pełna lista"
     }
   }
 }

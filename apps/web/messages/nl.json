@@ -20620,6 +20620,17 @@
       "searchSubmit": "Zoeken",
       "viewAll": "Alle vacatures",
       "choose": "Kies waarvoor je komt"
+    },
+    "nav": {
+      "heading": "Wat wil je doen?",
+      "swipe": "Veeg",
+      "close": "Sluiten",
+      "functions": "Functies",
+      "professions": "Beroepen",
+      "opensNow": "Opent direct",
+      "signInWhenOpen": "Inloggen bij openen",
+      "allSectors": "Alle sectoren",
+      "fullList": "Volledige lijst"
     }
   }
 }
