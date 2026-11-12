@@ -26,17 +26,6 @@ export type PinPlace = {
 };
 
 /**
- * A destination outside `/dashboard` cannot be a `link:` pin (the pin model's
- * link rule is closed to the dashboard on purpose). Where the model already
- * has a reference for it, the home offers that one: the CV is the `cv` chip
- * the conversation has always resolved (Codex P2 on #3264 — without this the
- * worker's "My CV" was silently missing from the list of shortcuts to add).
- */
-const PLACE_REF: Readonly<Record<string, string>> = {
-  "/cv": "cv",
-};
-
-/**
  * WHAT CAN BE PINNED FROM THIS HOME — the acting role's goals and the
  * workspace's areas, from the ONE goal model and the ONE area model (no third
  * list), filtered by the same admission the cards use and by the pin model's
@@ -54,7 +43,7 @@ export async function loadPinPlaces(input: {
   const out: PinPlace[] = [];
   const seen = new Set<string>();
   const add = (href: string, label: string, onHome: boolean) => {
-    const ref = PLACE_REF[href] ?? `link:${href}`;
+    const ref = `link:${href}`;
     const path = routePath(href);
     if (seen.has(path) || !isPinnableRef(ref) || !routeIsAdmitted(href, input.admission)) return;
     seen.add(path);

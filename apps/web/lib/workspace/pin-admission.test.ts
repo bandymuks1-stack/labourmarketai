@@ -149,6 +149,7 @@ describe("nothing unknown is ever drawn", () => {
   it.each([
     "link:https://evil.example",
     "link:/auth/login",
+    "link:/cv/../dashboard/admin",
     "link:/dashboard/../admin",
     "javascript:alert(1)",
     "",
@@ -193,14 +194,23 @@ describe("the home applies it before the row sees a pin", () => {
     ]);
   });
 
-  it("the CV — outside /dashboard — is offered through the reference the pin model already has", () => {
-    const places = read("lib/workspace/pin-places-server.ts");
-    expect(places).toMatch(/"\/cv": "cv"/);
-    expect(places).toMatch(/const ref = PLACE_REF\[href\] \?\? `link:\$\{href\}`;/);
-    expect(isPinnableRef("link:/cv")).toBe(false);
-    expect(isPinnableRef("cv")).toBe(true);
-    expect(pinIsAdmitted("cv", WORKER)).toBe(true);
+  it("the CV page — the one destination outside /dashboard — pins as itself, not as the import flow", () => {
+    // Codex P2 on #3270: the bare `cv` reference opens the CV IMPORT flow in
+    // the chat; a shortcut added from "My CV" must open the /cv page the card
+    // opens. Exactly this path is accepted outside the dashboard.
+    expect(isPinnableRef("link:/cv")).toBe(true);
+    for (const other of ["link:/cv/edit", "link:/cv?x=1", "link:/cvx", "link:/jobs", "link:/", "link://evil.example/cv"]) {
+      expect(isPinnableRef(other), other).toBe(false);
+    }
+    expect(pinIsAdmitted("link:/cv", WORKER)).toBe(true);
     expect(HOME_GOALS.worker.some((g) => g.href === "/cv")).toBe(true);
+    const places = read("lib/workspace/pin-places-server.ts");
+    expect(places).toMatch(/const ref = `link:\$\{href\}`;/);
+    expect(places).not.toMatch(/"\/cv": "cv"/);
+    // The chat opens any stored link reference as the route it names.
+    expect(read("components/app/conversation/chat/conversation-chat.tsx")).toMatch(
+      /chip\.id\.startsWith\("link:"\)\) \{[\s\S]{0,260}router\.push\(chip\.id\.slice\(5\)/,
+    );
   });
 
   it("the dashboard root filters the stored pins on the server and hands the row only the admitted ones", () => {
@@ -233,9 +243,7 @@ describe("the home applies it before the row sees a pin", () => {
       if (isPinnableRef(ref)) expect(pinIsAdmitted(ref, WORKER), ref).toBe(true);
     }
     for (const place of [...HOME_GOALS.company, ...HOME_GOALS.agency, ...ORGANIZATION_WORK_AREAS]) {
-      // The CV lives outside /dashboard and is offered through the `cv`
-      // reference instead (checked above).
-      const ref = place.href === "/cv" ? "cv" : `link:${place.href}`;
+      const ref = `link:${place.href}`;
       expect(isPinnableRef(ref), ref).toBe(true);
       expect(pinIsAdmitted(ref, MANAGER_BY_MEMBERSHIP), ref).toBe(true);
     }
