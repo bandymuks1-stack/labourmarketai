@@ -1830,7 +1830,9 @@
       "errorName": "Wprowadź nazwę projektu (co najmniej 2 znaki).",
       "errorNoCompany": "Tylko konto firmowe może utworzyć kontekst projektu.",
       "errorNotAuthorized": "Tworzenie projektów jest tu zastrzeżone dla właściciela lub administratora organizacji. Poproś ich o utworzenie projektu albo o przyznanie Twojej roli tego prawa.",
-      "error": "Nie udało się utworzyć. Spróbuj ponownie."
+      "error": "Nie udało się utworzyć. Spróbuj ponownie.",
+      "countryLabel": "Kraj",
+      "errorCountry": "Wybierz kraj, w którym jest miejsce projektu."
     },
     "needsTitle": "Zapytania",
     "needsBody": "Złóż ustrukturyzowane zapytanie i śledź jego status.",
@@ -6470,7 +6472,9 @@
       "cityLabel": "Miasto (opcjonalnie)",
       "cityPlaceholder": "np. Wilno",
       "submit": "Utwórz projekt",
-      "noCompany": "Najpierw utwórz profil firmy."
+      "noCompany": "Najpierw utwórz profil firmy.",
+      "countryLabel": "Kraj",
+      "errorCountry": "Wybierz kraj, w którym jest miejsce projektu."
     },
     "assign": {
       "title": "Przypisz pracownika do projektu",
@@ -14300,7 +14304,9 @@
         "supplyRole": "Jaki zawód",
         "supplyRolePlaceholder": "Np. spawacz",
         "supplyTeamSize": "Ilu macie ludzi",
-        "supplyLocation": "Gdzie mogą pracować"
+        "supplyLocation": "Gdzie mogą pracować",
+        "projectCountry": "Kraj",
+        "projectCountryPlaceholder": "np. Szwecja lub SE"
       },
       "availability": {
         "available": "Dostępny/a",
@@ -14336,7 +14342,8 @@
         "errorStale": "Podczas sprawdzania coś się zmieniło (na przykład aktywna przestrzeń robocza). Nic nie zostało zapisane — zacznij od nowa.",
         "errorConflict": "Ta wartość jest już inna. Otwórz tryb zaawansowany, aby ją zastąpić.",
         "errorOpenNeedLimitUpgrade": "Plan bezpłatny tej organizacji pozwala na 1 aktywną pozycję. Zamknij jedną lub aktywuj plan Organizacja (99 €/mies.) na koncie organizacji.",
-        "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit aktywnych pozycji swojego planu. Nic nie pobrano ani nie zmieniono. Skontaktuj się z nami."
+        "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit aktywnych pozycji swojego planu. Nic nie pobrano ani nie zmieniono. Skontaktuj się z nami.",
+        "errorCountryRequired": "Podaj kraj miejsca (nazwę lub kod, np. Szwecja lub SE)."
       },
       "urgency": {
         "flexible": "Elastycznie",

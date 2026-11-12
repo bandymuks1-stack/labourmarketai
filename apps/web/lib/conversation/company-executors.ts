@@ -395,7 +395,7 @@ export const COMPANY_EXECUTORS: {
     // core (`insertProjectForCompany`) sits behind the canonical server action
     // the company page uses; RLS `projects_insert` (owns_company) gates the
     // row. Never a second insert path.
-    const r = await createProjectAction(null, fd({ title: input.title, city: input.city ?? "" }));
+    const r = await createProjectAction(null, fd({ title: input.title, city: input.city ?? "", country: input.country ?? "" }));
     if (!r.ok) return mapProjectCreate(r);
     emitServerFunnelEvent(FUNNEL_EVENTS.firstRealAction, {
       source: "projects-chat",
@@ -702,6 +702,9 @@ export const COMPANY_EXECUTORS: {
 function mapProjectCreate(r: Extract<ProjectActionResult, { ok: false }>): ExecResult {
   if (r.code === "needs_migration") return { ok: false, code: "needs_migration" };
   if (r.code === "invalid") return { ok: false, code: "invalid" };
+  // A place without a (resolvable) country is the person's input to correct,
+  // never a permission refusal.
+  if (r.code === "country_required") return { ok: false, code: "country_required" };
   if (r.code === "error") return { ok: false, code: "error", message: r.message };
   return { ok: false, code: "not_authorized" };
 }

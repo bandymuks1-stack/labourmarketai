@@ -1,5 +1,6 @@
 import type { FormState, WorkerFormSpec } from "@/lib/conversation/worker-forms";
 import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
+import { resolveCountryCode } from "@/lib/location/country-model";
 
 /**
  * Declarative inline-form specs for the EMPLOYER-side conversation actions
@@ -291,8 +292,24 @@ export const AGENCY_FORMS: readonly WorkerFormSpec[] = [
         placeholderKey: "conversation.forms.fields.projectCityPlaceholder",
         maxLength: 120,
       },
+      {
+        // The country of the place: a code or a name, resolved to ISO. The
+        // canonical core requires it whenever a city is given.
+        name: "country",
+        kind: "text",
+        labelKey: "conversation.forms.fields.projectCountry",
+        placeholderKey: "conversation.forms.fields.projectCountryPlaceholder",
+        maxLength: 80,
+      },
     ],
-    build: (st: FormState) => ({ title: s(st.title), city: s(st.city) || null }),
+    build: (st: FormState) => ({
+      title: s(st.title),
+      city: s(st.city) || null,
+      // Resolved to ISO; a typed value that is NOT a country travels as typed
+      // so the canonical core refuses it (country_required), instead of
+      // reading as "no country" and silently creating a project without one.
+      country: resolveCountryCode(s(st.country)) ?? (s(st.country) || null),
+    }),
   },
 ] as const;
 

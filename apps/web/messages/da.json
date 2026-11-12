@@ -2048,6 +2048,10 @@
           "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
         }
       }
+    },
+    "create": {
+      "countryLabel": "Land",
+      "errorCountry": "Vælg landet, hvor projektets sted ligger."
     }
   },
   "projectOps": {
@@ -3910,7 +3914,9 @@
         "supplyRole": "Hvilket fag",
         "supplyRolePlaceholder": "F.eks. svejser",
         "supplyTeamSize": "Hvor mange folk I har",
-        "supplyLocation": "Hvor de kan arbejde"
+        "supplyLocation": "Hvor de kan arbejde",
+        "projectCountry": "Land",
+        "projectCountryPlaceholder": "f.eks. Sverige eller SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3940,7 +3946,8 @@
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
         "errorOpenNeedLimitUpgrade": "Denne organisations gratis plan tillader 1 aktiv stilling. Luk én, eller aktivér planen „Organisation“ (99 €/md.) i din organisationskonto.",
-        "errorOpenNeedLimitIndividual": "Denne organisation har nået grænsen for aktive stillinger i sin plan. Intet blev opkrævet eller ændret. Kontakt os."
+        "errorOpenNeedLimitIndividual": "Denne organisation har nået grænsen for aktive stillinger i sin plan. Intet blev opkrævet eller ændret. Kontakt os.",
+        "errorCountryRequired": "Angiv stedets land (navn eller kode, f.eks. Sverige eller SE)."
       },
       "urgency": {
         "flexible": "Fleksibel",
@@ -7945,6 +7952,12 @@
       "undecided": "Du har ikke valgt endnu, så intet til måling gemmes.",
       "allow": "Tillad",
       "refuse": "Afvis"
+    }
+  },
+  "companyOps": {
+    "createProject": {
+      "countryLabel": "Land",
+      "errorCountry": "Vælg landet, hvor projektets sted ligger."
     }
   }
 }

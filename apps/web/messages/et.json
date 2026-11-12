@@ -2048,6 +2048,10 @@
           "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
         }
       }
+    },
+    "create": {
+      "countryLabel": "Riik",
+      "errorCountry": "Valige riik, kus projekti asukoht on."
     }
   },
   "projectOps": {
@@ -3910,7 +3914,9 @@
         "supplyRole": "Milline amet",
         "supplyRolePlaceholder": "Nt keevitaja",
         "supplyTeamSize": "Kui palju inimesi sul on",
-        "supplyLocation": "Kus nad saavad töötada"
+        "supplyLocation": "Kus nad saavad töötada",
+        "projectCountry": "Riik",
+        "projectCountryPlaceholder": "nt Rootsi või SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3940,7 +3946,8 @@
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
         "errorOpenNeedLimitUpgrade": "Selle organisatsiooni tasuta plaan lubab 1 aktiivse ametikoha. Sulge üks või aktiveeri plaan „Organisatsioon“ (99 €/kuu) organisatsiooni kontol.",
-        "errorOpenNeedLimitIndividual": "See organisatsioon on saavutanud oma plaani aktiivsete ametikohtade piiri. Midagi ei võetud ega muudetud. Võta meiega ühendust."
+        "errorOpenNeedLimitIndividual": "See organisatsioon on saavutanud oma plaani aktiivsete ametikohtade piiri. Midagi ei võetud ega muudetud. Võta meiega ühendust.",
+        "errorCountryRequired": "Lisage asukoha riik (nimi või kood, nt Rootsi või SE)."
       },
       "urgency": {
         "flexible": "Paindlik",
@@ -7945,6 +7952,12 @@
       "undecided": "Sa pole veel valinud, seega mõõtmiseks ei salvestata midagi.",
       "allow": "Luba",
       "refuse": "Keeldu"
+    }
+  },
+  "companyOps": {
+    "createProject": {
+      "countryLabel": "Riik",
+      "errorCountry": "Valige riik, kus projekti asukoht on."
     }
   }
 }

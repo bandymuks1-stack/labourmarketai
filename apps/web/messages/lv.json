@@ -2048,6 +2048,10 @@
           "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
         }
       }
+    },
+    "create": {
+      "countryLabel": "Valsts",
+      "errorCountry": "Izvēlieties valsti, kurā atrodas projekta vieta."
     }
   },
   "projectOps": {
@@ -3910,7 +3914,9 @@
         "supplyRole": "Kāda profesija",
         "supplyRolePlaceholder": "Piem., metinātājs",
         "supplyTeamSize": "Cik cilvēku jums ir",
-        "supplyLocation": "Kur viņi var strādāt"
+        "supplyLocation": "Kur viņi var strādāt",
+        "projectCountry": "Valsts",
+        "projectCountryPlaceholder": "piem., Zviedrija vai SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3940,7 +3946,8 @@
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
         "errorOpenNeedLimitUpgrade": "Šīs organizācijas bezmaksas plāns ļauj 1 aktīvu pozīciju. Aizveriet vienu vai aktivizējiet plānu „Organizācija” (99 €/mēn.) organizācijas kontā.",
-        "errorOpenNeedLimitIndividual": "Šī organizācija ir sasniegusi sava plāna aktīvo pozīciju ierobežojumu. Nekas netika iekasēts vai mainīts. Sazinieties ar mums."
+        "errorOpenNeedLimitIndividual": "Šī organizācija ir sasniegusi sava plāna aktīvo pozīciju ierobežojumu. Nekas netika iekasēts vai mainīts. Sazinieties ar mums.",
+        "errorCountryRequired": "Norādiet vietas valsti (nosaukumu vai kodu, piem., Zviedrija vai SE)."
       },
       "urgency": {
         "flexible": "Elastīgi",
@@ -7945,6 +7952,12 @@
       "undecided": "Jūs vēl neesat izvēlējušies, tāpēc mērīšanai nekas netiek glabāts.",
       "allow": "Atļaut",
       "refuse": "Atteikties"
+    }
+  },
+  "companyOps": {
+    "createProject": {
+      "countryLabel": "Valsts",
+      "errorCountry": "Izvēlieties valsti, kurā atrodas projekta vieta."
     }
   }
 }

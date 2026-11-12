@@ -1830,7 +1830,9 @@
       "errorName": "Enter a project name (at least 2 characters).",
       "errorNoCompany": "Only a company account can create project context.",
       "errorNotAuthorized": "Creating projects here is held by the organization's owner or admin. Ask them to create it, or to grant your role the right.",
-      "error": "Could not create. Please try again."
+      "error": "Could not create. Please try again.",
+      "countryLabel": "Country",
+      "errorCountry": "Choose the country of the project's place."
     },
     "needsTitle": "Inquiries",
     "needsBody": "Submit a structured inquiry and track its status.",
@@ -6470,7 +6472,9 @@
       "cityLabel": "City (optional)",
       "cityPlaceholder": "e.g. Vilnius",
       "submit": "Create project",
-      "noCompany": "Create a company profile first."
+      "noCompany": "Create a company profile first.",
+      "countryLabel": "Country",
+      "errorCountry": "Choose the country of the project's place."
     },
     "assign": {
       "title": "Assign a worker to a project",
@@ -14300,7 +14304,9 @@
         "supplyRole": "What profession",
         "supplyRolePlaceholder": "E.g. welder",
         "supplyTeamSize": "How many people you have",
-        "supplyLocation": "Where they can work"
+        "supplyLocation": "Where they can work",
+        "projectCountry": "Country",
+        "projectCountryPlaceholder": "e.g. Sweden or SE"
       },
       "availability": {
         "available": "Available",
@@ -14336,7 +14342,8 @@
         "errorStale": "Something changed while you were reviewing (for example, the active workspace). Nothing was saved — start again.",
         "errorConflict": "This value already differs. Open advanced mode to replace it.",
         "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month) in your organization account.",
-        "errorOpenNeedLimitIndividual": "This organization has reached the active-position limit of its plan. Nothing was charged or changed. Contact us."
+        "errorOpenNeedLimitIndividual": "This organization has reached the active-position limit of its plan. Nothing was charged or changed. Contact us.",
+        "errorCountryRequired": "Add the country of the place (a name or a code, e.g. Sweden or SE)."
       },
       "urgency": {
         "flexible": "Flexible",

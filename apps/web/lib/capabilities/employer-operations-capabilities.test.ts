@@ -75,7 +75,7 @@ const cap = (id: string) => {
 const PROJECT = "11111111-1111-4111-8111-111111111111";
 const WORKER_PROFILE = "22222222-2222-4222-8222-222222222222";
 const projectRow = (org: string) => ({
-  data: { id: PROJECT, title: "Site A", status: "draft", city: "Vilnius", company_id: "comp-x", organization_id: org },
+  data: { id: PROJECT, title: "Site A", status: "draft", city: "Vilnius", country: "LT", company_id: "comp-x", organization_id: org },
   error: null,
 });
 
@@ -148,22 +148,22 @@ describe("employer operations capabilities", () => {
 
   it("project: the confirm writes only with the draft's token, for the SAME organization", async () => {
     const { caller } = makeCaller({ projects: { data: { id: "proj-new", title: "Site A" }, error: null } });
-    const d = await cap("project.create_draft").run(caller, { title: "Site A", city: "Vilnius" });
+    const d = await cap("project.create_draft").run(caller, { title: "Site A", city: "Vilnius", country: "LT" });
     expect(d.ok).toBe(true);
     expect(insertProject).not.toHaveBeenCalled();
     const token = d.ok ? (d.data as { confirmationToken: string }).confirmationToken : "";
 
     // Tampered input → rejected, nothing written.
-    const bad = await cap("project.create_confirm").run(caller, { title: "Site B", city: "Vilnius", confirmationToken: token });
+    const bad = await cap("project.create_confirm").run(caller, { title: "Site B", city: "Vilnius", country: "LT", confirmationToken: token });
     expect(bad.ok === false && bad.code).toBe("confirmation_rejected");
 
     // Workspace switched to another org between draft and confirm → rejected.
     employerGate.mockResolvedValueOnce({ ok: true, companyId: "comp-2", organizationId: "org-2", organizationName: "Org Two", role: "owner" });
-    const switched = await cap("project.create_confirm").run(caller, { title: "Site A", city: "Vilnius", confirmationToken: token });
+    const switched = await cap("project.create_confirm").run(caller, { title: "Site A", city: "Vilnius", country: "LT", confirmationToken: token });
     expect(switched.ok === false && switched.code).toBe("confirmation_rejected");
     expect(insertProject).not.toHaveBeenCalled();
 
-    const ok = await cap("project.create_confirm").run(caller, { title: "Site A", city: "Vilnius", confirmationToken: token });
+    const ok = await cap("project.create_confirm").run(caller, { title: "Site A", city: "Vilnius", country: "LT", confirmationToken: token });
     expect(ok.ok).toBe(true);
     expect(insertProject).toHaveBeenCalledTimes(1);
     expect(insertProject.mock.calls[0]).toContain("comp-1");

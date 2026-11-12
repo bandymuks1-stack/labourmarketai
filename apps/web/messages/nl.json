@@ -1830,7 +1830,9 @@
       "errorName": "Voer een projectnaam in (minimaal 2 tekens).",
       "errorNoCompany": "Alleen een bedrijfsaccount kan een projectcontext aanmaken.",
       "errorNotAuthorized": "Projecten aanmaken is hier voorbehouden aan de eigenaar of beheerder van de organisatie. Vraag hen het project aan te maken of je rol dat recht te geven.",
-      "error": "Aanmaken is niet gelukt. Probeer het opnieuw."
+      "error": "Aanmaken is niet gelukt. Probeer het opnieuw.",
+      "countryLabel": "Land",
+      "errorCountry": "Kies het land waar de projectlocatie ligt."
     },
     "needsTitle": "Aanvragen",
     "needsBody": "Dien een gestructureerde aanvraag in en volg de status.",
@@ -6470,7 +6472,9 @@
       "cityLabel": "Stad (optioneel)",
       "cityPlaceholder": "bijv. Vilnius",
       "submit": "Project aanmaken",
-      "noCompany": "Maak eerst een bedrijfsprofiel aan."
+      "noCompany": "Maak eerst een bedrijfsprofiel aan.",
+      "countryLabel": "Land",
+      "errorCountry": "Kies het land waar de projectlocatie ligt."
     },
     "assign": {
       "title": "Een werknemer aan een project toewijzen",
@@ -14300,7 +14304,9 @@
         "supplyRole": "Welk beroep",
         "supplyRolePlaceholder": "Bijv. lasser",
         "supplyTeamSize": "Hoeveel mensen je hebt",
-        "supplyLocation": "Waar zij kunnen werken"
+        "supplyLocation": "Waar zij kunnen werken",
+        "projectCountry": "Land",
+        "projectCountryPlaceholder": "bijv. Zweden of SE"
       },
       "availability": {
         "available": "Beschikbaar",
@@ -14336,7 +14342,8 @@
         "errorStale": "Tijdens het controleren is er iets veranderd (bijvoorbeeld de actieve werkruimte). Er is niets opgeslagen — begin opnieuw.",
         "errorConflict": "Deze waarde verschilt al. Open geavanceerde modus om te vervangen.",
         "errorOpenNeedLimitUpgrade": "Het gratis plan van deze organisatie staat 1 actieve positie toe. Sluit er een, of activeer het plan Organisatie (€99/maand) in je organisatieaccount.",
-        "errorOpenNeedLimitIndividual": "Deze organisatie heeft de limiet voor actieve posities van haar plan bereikt. Er is niets afgeschreven of gewijzigd. Neem contact met ons op."
+        "errorOpenNeedLimitIndividual": "Deze organisatie heeft de limiet voor actieve posities van haar plan bereikt. Er is niets afgeschreven of gewijzigd. Neem contact met ons op.",
+        "errorCountryRequired": "Vul het land van de locatie in (naam of code, bijv. Zweden of SE)."
       },
       "urgency": {
         "flexible": "Flexibel",

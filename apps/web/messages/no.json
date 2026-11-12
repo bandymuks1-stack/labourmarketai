@@ -2048,6 +2048,10 @@
           "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
         }
       }
+    },
+    "create": {
+      "countryLabel": "Land",
+      "errorCountry": "Velg landet der prosjektets sted ligger."
     }
   },
   "projectOps": {
@@ -3910,7 +3914,9 @@
         "supplyRole": "Hvilket yrke",
         "supplyRolePlaceholder": "F.eks. sveiser",
         "supplyTeamSize": "Hvor mange folk dere har",
-        "supplyLocation": "Hvor de kan arbeide"
+        "supplyLocation": "Hvor de kan arbeide",
+        "projectCountry": "Land",
+        "projectCountryPlaceholder": "f.eks. Sverige eller SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3940,7 +3946,8 @@
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
         "errorOpenNeedLimitUpgrade": "Gratisplanen til denne organisasjonen tillater 1 aktiv stilling. Lukk én, eller aktiver Organisasjon-planen (99 €/måned) i organisasjonskontoen.",
-        "errorOpenNeedLimitIndividual": "Denne organisasjonen har nådd grensen for aktive stillinger i planen sin. Ingenting ble belastet eller endret. Kontakt oss."
+        "errorOpenNeedLimitIndividual": "Denne organisasjonen har nådd grensen for aktive stillinger i planen sin. Ingenting ble belastet eller endret. Kontakt oss.",
+        "errorCountryRequired": "Oppgi stedets land (navn eller kode, f.eks. Sverige eller SE)."
       },
       "urgency": {
         "flexible": "Fleksibel",
@@ -7945,6 +7952,12 @@
       "undecided": "Du har ikke valgt ennå, så ingenting for måling lagres.",
       "allow": "Tillat",
       "refuse": "Avslå"
+    }
+  },
+  "companyOps": {
+    "createProject": {
+      "countryLabel": "Land",
+      "errorCountry": "Velg landet der prosjektets sted ligger."
     }
   }
 }
