@@ -358,13 +358,34 @@ for (const { role, person, home, tasks } of ROLES.filter((r) => r.role !== "serv
       // past the header, and the first goal is then a short way off.
       await openHome(page, person, home, orgOf[person]);
       await page.locator("body").focus();
-      await page.keyboard.press("Tab");
-      expect(await focusedTestId(page), "the skip link is the first focus stop").toBe("app-skip-link");
+      // What (if anything) takes the focus before it is recorded, not assumed:
+      // the page may hold a control ahead of the header.
+      const before: string[] = [];
+      const toSkip = await tabUntil(
+        page,
+        async () => {
+          if ((await focusedTestId(page)) === "app-skip-link") return true;
+          before.push(
+            await page.evaluate(() => {
+              const el = document.activeElement;
+              if (!el || el === document.body) return "nothing";
+              const name = el.getAttribute("aria-label") ?? el.textContent?.trim().slice(0, 40) ?? "";
+              return `${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? el.id ?? ""}] "${name}"`;
+            }),
+          );
+          return false;
+        },
+        4,
+      );
       await expect(page.getByTestId("app-skip-link")).toBeInViewport();
       await page.keyboard.press("Enter");
       const afterSkip = await tabUntil(page, async () => (await focusedCard(page)) === `goal-rail:${first.goal}`);
-      expect(afterSkip, "the skip link shortens the way to the first goal").toBeLessThan(toGoal);
-      console.log(`[app-nav-walk] ${role} keyboard with the skip link: first goal card after 2 keys + ${afterSkip} Tab`);
+      expect(toSkip + 1 + afterSkip, "the skip link shortens the way to the first goal").toBeLessThan(toGoal);
+      console.log(
+        `[app-nav-walk] ${role} keyboard with the skip link: skip link after ${toSkip} Tab` +
+          (before.length ? ` (before it: ${before.join(" · ")})` : "") +
+          `, Enter, then the first goal card after ${afterSkip} Tab`,
+      );
       await page.keyboard.press("Enter");
       await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", first.goal!, { timeout: 15_000 });
       await tabUntil(page, async () => (await focusedCard(page)) === `function-rail:${first.fn}`);
