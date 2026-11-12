@@ -68,9 +68,14 @@ export function CommunicationComposer({
   conversationId,
   locale,
   teamOfferId = null,
+  defaultWriteLanguage,
 }: {
   conversationId: string;
   locale: string;
+  /** The language to start in when this browser saved no choice — chosen by
+   *  the page (`initialWriteLanguage`: own last message, then the browser's
+   *  languages, then the UI locale). Absent = the UI locale. */
+  defaultWriteLanguage?: string;
   /** The offer this thread was opened from (party-checked by the page); each
    *  message sent here is labelled with it, the database guard deciding. */
   teamOfferId?: string | null;
@@ -83,9 +88,13 @@ export function CommunicationComposer({
   // Georgian: the choice is stamped on the message (`original_language`) so
   // every reader gets an honest badge and a correctly-sourced translation.
   // Remembered per browser as a convenience only (the truth is on each row).
-  const [writeLang, setWriteLang] = useState<string>(() =>
-    isCommunicationLocale(locale) ? locale : "",
-  );
+  const startLang =
+    defaultWriteLanguage && isCommunicationLocale(defaultWriteLanguage)
+      ? defaultWriteLanguage
+      : isCommunicationLocale(locale)
+        ? locale
+        : "";
+  const [writeLang, setWriteLang] = useState<string>(startLang);
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(WRITE_LANG_STORAGE_KEY);
