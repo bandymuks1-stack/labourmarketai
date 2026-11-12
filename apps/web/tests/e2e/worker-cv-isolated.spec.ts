@@ -26,8 +26,8 @@ import {
  *       reads none of it: not through its own row-level security, not through
  *       the discovery function, not on the person page.
  *   G-3 employer-side worker search: the worker agrees to be found and
- *       records a day of work; the company finds them from its need, narrows
- *       the list with the filters, and opens the person page. That page shows
+ *       records a day of work; the company finds them from its need, uses the
+ *       filters, and opens the person page. That page shows
  *       no name and makes no claim about records it did not read. The
  *       worker's private rows stay unreadable to the company.
  *
@@ -343,19 +343,21 @@ test("G-3. the worker agrees to be found; the company finds them, filters the li
     expect(found, "the search result shows no name, address or private text").not.toContain(secret);
   }
 
-  // FILTERS. The worker's own country keeps them; another country drops them;
-  // clearing brings them back. The filter is the server's, so the address is
-  // the control: the same list is asked for again with the filter in it.
+  // FILTERS. The chips come from the people actually found, and the server
+  // only accepts a value that is one of them: the worker's own country keeps
+  // them, and a country nobody in the list is in is ignored, so an address
+  // cannot be used to probe where hidden people are. (That a filter narrows a
+  // mixed list is covered by lib/scouting/scout-filters.test.ts.)
   const filters = main.getByTestId("scouting-filters");
   await expect(filters).toBeVisible();
   await filters.getByTestId("scout-filter-country-LT").click();
   await page.waitForURL(/country=LT/, { timeout: 30_000 });
   await expect(card, "filter by the worker's country keeps them").toBeVisible({ timeout: 30_000 });
+  await expect(main.getByTestId("scout-filter-clear"), "an active filter can be cleared").toBeVisible();
   await page.goto(`${search}&country=NO`);
-  await expect(main.getByTestId("scouting-filters").or(main.getByTestId("scouting-empty")).first()).toBeVisible({
-    timeout: 30_000,
-  });
-  await expect(card, "filter by another country drops them").toHaveCount(0);
+  await expect(card, "a country nobody found is in is not applied").toBeVisible({ timeout: 30_000 });
+  await expect(main.getByTestId("scout-filter-country-NO"), "and it is not offered as a filter").toHaveCount(0);
+  await expect(main.getByTestId("scout-filter-clear"), "no filter is active").toHaveCount(0);
   await page.goto(search);
   await expect(card, "without a filter they are back").toBeVisible({ timeout: 30_000 });
   const skillChip = main.locator('[data-testid^="scout-filter-skill-"]').first();
