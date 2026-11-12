@@ -99,7 +99,16 @@
       "outcomeBlocked": "[EN] not confirmed ({code})",
       "receipt": "Bekräftat: {title}",
       "receiptSkills": "{count, plural, one {# färdighet} other {# färdigheter}}",
-      "skillsUnavailable": "Färdighetslistan kunde inte läsas — trycket bekräftar bara själva posten."
+      "skillsUnavailable": "Färdighetslistan kunde inte läsas — trycket bekräftar bara själva posten.",
+      "projectFilterLabel": "Projekt",
+      "projectAll": "Alla projekt ({n})",
+      "projectNone": "Utan projekt ({n})",
+      "projectUnnamed": "Projekt, namnet visas inte",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Visa",
+      "projectResult": "Visar {shown} av {total} poster",
+      "projectOnCard": "Projekt: {name}",
+      "noProjectOnCard": "Utan projekt"
     },
     "result": {
       "entrySuperseded": "Posten har redan ersatts av en nyare version — kortet är inte längre aktuellt och tas bort från listan.",

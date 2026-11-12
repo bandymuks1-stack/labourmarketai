@@ -439,7 +439,16 @@
       "outcomeBlocked": "nepatvirtinta ({code})",
       "receipt": "Patvirtinta: {title}",
       "receiptSkills": "{count, plural, one {# įgūdis} few {# įgūdžiai} other {# įgūdžių}}",
-      "skillsUnavailable": "Įgūdžių sąrašo nepavyko nuskaityti — palietimas patvirtins tik patį įrašą."
+      "skillsUnavailable": "Įgūdžių sąrašo nepavyko nuskaityti — palietimas patvirtins tik patį įrašą.",
+      "projectFilterLabel": "Projektas",
+      "projectAll": "Visi projektai ({n})",
+      "projectNone": "Be projekto ({n})",
+      "projectUnnamed": "Projektas, pavadinimas nematomas",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Rodyti",
+      "projectResult": "Rodoma {shown} iš {total} įrašų",
+      "projectOnCard": "Projektas: {name}",
+      "noProjectOnCard": "Be projekto"
     },
     "loadFailed": "Peržiūros eilės nepavyko įkelti. Tai nereiškia, kad peržiūrėti nėra ko — pabandyk dar kartą."
   },

@@ -206,6 +206,12 @@ const NATIVE_NAV = new Set([
   // Goal navigator — its ONE form is the same plain GET search, submitted to
   // the public board: the feedback is the board itself.
   "components/navigation/goal-navigator.tsx",
+  // Review queue (Lane H) — the ONE form on this page is the plain GET
+  // project filter (`method="get"`, no server action, no client state): the
+  // browser navigates and the feedback is the narrowed queue with its
+  // "showing N of M" line. The approve/reject controls are client components
+  // in their own files and stay under the general rule.
+  "app/[locale]/dashboard/inbox/quick/page.tsx",
 ]);
 
 const PENDING_SIGNAL =

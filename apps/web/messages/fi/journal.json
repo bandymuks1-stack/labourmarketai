@@ -228,7 +228,16 @@
       "outcomeBlocked": "ei vahvistettu ({code})",
       "receipt": "Vahvistettu: {title}",
       "receiptSkills": "{count, plural, one {# taito} other {# taitoa}}",
-      "skillsUnavailable": "Taitoluetteloa ei voitu lukea — napautus vahvistaa vain itse merkinnän."
+      "skillsUnavailable": "Taitoluetteloa ei voitu lukea — napautus vahvistaa vain itse merkinnän.",
+      "projectFilterLabel": "Projekti",
+      "projectAll": "Kaikki projektit ({n})",
+      "projectNone": "Ei projektia ({n})",
+      "projectUnnamed": "Projekti, nimi ei näy",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Näytä",
+      "projectResult": "Näytetään {shown} / {total} merkintää",
+      "projectOnCard": "Projekti: {name}",
+      "noProjectOnCard": "Ei projektia"
     }
   },
   "listEmpty": "Sinulla ei ole vielä työtietoja — kirjauksesi näkyvät täällä.",
