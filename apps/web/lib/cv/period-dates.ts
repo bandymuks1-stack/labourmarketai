@@ -14,6 +14,8 @@
  * calendar table via Date.UTC of explicit fields).
  */
 
+import { formatUtcDate } from "@/lib/time/display";
+
 import type { CvDatePart } from "./structured-parse";
 
 const MIN_YEAR = 1900;
@@ -52,4 +54,55 @@ export function periodEndIso(p: CvDatePart | null | undefined): string | null {
   if (p.month === null) return iso(p.year, 12, 31);
   if (p.day === null) return iso(p.year, p.month, daysInMonth(p.year, p.month));
   return iso(p.year, p.month, p.day);
+}
+
+/**
+ * THE OTHER HALF OF THAT CONTRACT: READING IT BACK (found 2026-11-04, UF-3).
+ *
+ * A self-declared date column has no precision of its own, so a person who wrote
+ * "2018-2019" was printed as "2018-01-01 - 2019-12-31": a day and a month nobody
+ * stated. The stored edge says what was stated, as far as it can be told: the
+ * first day of a year or month starts that unit, its last day ends it. An exact
+ * date that happens to fall there reads less precisely, which invents nothing.
+ *
+ * ONLY for dates a person stated about themselves. An organization's recorded
+ * start of 1 January is a real date, so its rows keep their own formatting.
+ */
+export type PeriodEdge = "start" | "end";
+export type StatedPrecision = "year" | "month" | "day";
+
+export function statedPrecision(iso: string | null | undefined, edge: PeriodEdge): StatedPrecision | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso ?? "");
+  if (!m) return null;
+  const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  if (edge === "start") {
+    if (day !== 1) return "day";
+    return month === 1 ? "year" : "month";
+  }
+  if (day !== daysInMonth(year, month)) return "day";
+  return month === 12 ? "year" : "month";
+}
+
+/** The stated part of a stored date in the same ISO shape: 2018, 2018-03, 2018-03-14. */
+export function statedIsoText(iso: string | null | undefined, edge: PeriodEdge): string | null {
+  const precision = statedPrecision(iso, edge);
+  if (!precision || !iso) return null;
+  return iso.slice(0, precision === "year" ? 4 : precision === "month" ? 7 : 10);
+}
+
+/** The stated part of a stored date, localized. `finest` is how fine the surface
+ *  ever goes: a list that shows months keeps showing months for a stated day. */
+export function statedDateLabel(
+  iso: string | null | undefined,
+  edge: PeriodEdge,
+  locale: string,
+  finest: "month" | "day" = "day",
+): string | null {
+  const precision = statedPrecision(iso, edge);
+  if (!precision || !iso) return null;
+  if (precision === "year") return formatUtcDate(iso, locale, { year: "numeric" });
+  if (precision === "month" || finest === "month") {
+    return formatUtcDate(iso, locale, { year: "numeric", month: "short" });
+  }
+  return formatUtcDate(iso, locale);
 }

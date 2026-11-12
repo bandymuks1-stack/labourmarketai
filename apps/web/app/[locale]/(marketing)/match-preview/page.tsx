@@ -26,7 +26,7 @@ export async function generateMetadata({
     locale,
     path: "/match-preview",
     title: t("title"),
-    description: t("subtitle"),
+    description: t("metaDescription"),
   });
 }
 

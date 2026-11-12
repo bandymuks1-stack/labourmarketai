@@ -139,6 +139,26 @@ export function CompanyNeedForm({
     setIf("description", prefill.description, [""]);
   }, []);
 
+  // Spam guard: when the form appeared, sent in a hidden field. Taken after
+  // hydration (the page is static markup), written after every answer (React
+  // resets the form after a send) AND again at submit time, before React builds
+  // the action's FormData: the field carries no React value or defaultValue,
+  // because React re-applying defaultValue="" on any re-render blanks a hidden
+  // input's value — every JS visitor was then stored as no-JS. The form keeps
+  // `action={formAction}` so it still posts WITHOUT JavaScript: the field then
+  // stays empty and the server stores the need marked for review
+  // (lib/security/public-form-guard.ts). A client wrapper as the action would
+  // render `javascript:` in the static markup and a no-JS send could not post.
+  const shownAt = useRef(0);
+  const stampRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (shownAt.current === 0) shownAt.current = Date.now();
+    if (stampRef.current) stampRef.current.value = String(shownAt.current);
+  }, [state]);
+  function stampOnSubmit() {
+    if (stampRef.current && shownAt.current > 0) stampRef.current.value = String(shownAt.current);
+  }
+
   function handleFirstInteraction() {
     if (startedRef.current) return;
     startedRef.current = true;
@@ -171,6 +191,7 @@ export function CompanyNeedForm({
         className="flex flex-col gap-4"
         data-testid="company-need-form"
         onFocusCapture={handleFirstInteraction}
+        onSubmitCapture={stampOnSubmit}
       >
         {/* <h1>, not <h2>: this form carries the only title on /company-need,
             and the page had NO top-level heading at all (V5.1 finding). The
@@ -181,6 +202,10 @@ export function CompanyNeedForm({
           <h1 className="font-display text-lg font-semibold text-text-primary">{labels.title}</h1>
           <p className="text-sm text-text-secondary">{labels.subtitle}</p>
         </header>
+
+        {/* Left empty by a person: out of sight, out of the tab order, not autofilled. */}
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
+        <input type="hidden" name="started" ref={stampRef} />
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.companyName}</span>
@@ -214,7 +239,7 @@ export function CompanyNeedForm({
           </select>
         </label>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.country}</span>
             <select name="country" required defaultValue="" className={FIELD} data-testid="company-need-country">
@@ -237,7 +262,7 @@ export function CompanyNeedForm({
           <span className={HELP}>{labels.cityRegionHelp}</span>
         </label>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.startDate}</span>
             <input type="date" name="start_date" className={FIELD} />

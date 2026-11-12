@@ -93,6 +93,50 @@ for (const slot of ["worker", "owner"] as const) {
   });
 }
 
+/**
+ * /vision while unpublished (owner P0 2026-11-10): superadmin only. Anyone
+ * else, signed in or not, gets a plain 404; never a 500 and never a response a
+ * shared cache may keep. Reads one page per session, changes nothing.
+ */
+async function visionAnswer(page: Page): Promise<{ status: number | null; cache: string; ms: number }> {
+  const started = Date.now();
+  const res = await page.goto("/lt/vision", { waitUntil: "domcontentloaded", timeout: 45_000 });
+  return { status: res?.status() ?? null, cache: res?.headers()["cache-control"] ?? "", ms: Date.now() - started };
+}
+const PUBLICLY_CACHEABLE = /\bpublic\b|s-maxage=[1-9]/i;
+
+for (const slot of ["anonymous", "worker", "owner"] as const) {
+  test(`/vision: ${slot} gets a 404, not cacheable`, async ({ browser }) => {
+    test.setTimeout(60_000);
+    if (slot !== "anonymous") test.skip(!existsSync(state(slot)), `no session for ${slot}`);
+    const ctx = await browser.newContext(
+      slot === "anonymous" ? { locale: "lt-LT" } : { storageState: state(slot), locale: "lt-LT" },
+    );
+    const page = await ctx.newPage();
+    const r = await visionAnswer(page);
+    console.info(`[admin-console] vision ${slot} -> HTTP ${r.status} cache-control="${r.cache}" nav_ms=${r.ms}`);
+    expect(r.status, `${slot} /lt/vision`).toBe(404);
+    expect(r.cache, `${slot} /lt/vision cache-control`).not.toMatch(PUBLICLY_CACHEABLE);
+    await expect(page.getByTestId("vision-internal-preview")).toHaveCount(0);
+    await ctx.close();
+  });
+}
+
+test("/vision: a superadmin opens the internal preview", async ({ browser }) => {
+  test.skip(
+    !existsSync(state("admin")),
+    "NOT VERIFIED: no synthetic admin identity exists (see the admin walk below).",
+  );
+  const ctx = await browser.newContext({ storageState: state("admin"), locale: "lt-LT" });
+  const page = await ctx.newPage();
+  const r = await visionAnswer(page);
+  console.info(`[admin-console] vision admin -> HTTP ${r.status} cache-control="${r.cache}" nav_ms=${r.ms}`);
+  expect(r.status).toBe(200);
+  expect(r.cache).not.toMatch(PUBLICLY_CACHEABLE);
+  await expect(page.getByTestId("vision-internal-preview")).toBeVisible();
+  await ctx.close();
+});
+
 test("admin: every operator page opens and renders (read-only)", async ({ browser }) => {
   test.skip(
     !existsSync(state("admin")),

@@ -62,20 +62,39 @@ case "$ACTION" in
     sh "$BIN/lm-prod-run.sh" "$SHA" >/dev/null && wait_healthy && echo "ROLLBACK_OK $SHA health=$(health)" || { echo "ROLLBACK_FAIL $SHA health=$(health)"; exit 1; };;
   backup)
     # backup <name> <sha256>  — an age-ENCRYPTED backup on stdin (db-backup.yml): the pg_dump
-    # (lm-db-*.dump.age) or the Storage-files bundle (lm-files-*.tar.age). Stored 600 under a 700 dir,
+    # (lm-db-*.dump.age) or the Storage-files bundle (lm-files-*.tar.age). Stored 600 under a 700 dir (640 under 750 for group lmwatch once that exists),
     # verified, 14-day rotation. The age private key (/root/lm-prod/backup.age.key, 600) is never read here.
     NAME="$SHA"; SUM="$3"; BK=$D/backups
     case "$NAME" in lm-db-[0-9]*T[0-9]*Z.dump.age|lm-files-[0-9]*T[0-9]*Z.tar.age) ;; *) echo "BACKUP_FAIL bad name"; exit 1;; esac
     case "$NAME" in *[!A-Za-z0-9.-]*) echo "BACKUP_FAIL bad name"; exit 1;; esac
     hex64 "$SUM" || { echo "BACKUP_FAIL bad sha256"; exit 1; }
-    umask 077; mkdir -p "$BK"; chmod 700 "$BK"
+    umask 077; mkdir -p "$BK"
+    [ ! -L "$BK" ] || { echo "BACKUP_FAIL the folder is a link"; exit 1; }
+    # >>> group read (variant B): only with an owner-installed group lmwatch; without it, exactly as before (700, 600).
+    # Never follows a link: plain files only, -h on chgrp, no recursion. Never fatal: a watchdog that cannot read alerts.
+    group_read() {
+      getent group lmwatch >/dev/null 2>&1 || return 0
+      [ ! -L "$1" ] && [ -f "$1" ] || { echo "group read refused: not a plain file"; return 0; }
+      chgrp -h lmwatch "$1" 2>/dev/null && chmod 640 "$1" 2>/dev/null || echo "group read not set"
+    }
+    if getent group lmwatch >/dev/null 2>&1; then
+      chgrp -h lmwatch "$BK" 2>/dev/null && chmod u=rwx,g=rx,o=,g-s "$BK" 2>/dev/null || { chmod 700 "$BK"; echo "group read not set"; }
+    else
+      chmod 700 "$BK"
+    fi
+    # <<< group read
     cat > "$BK/$NAME.part"
     echo "$SUM  $BK/$NAME.part" | sha256sum -c - >/dev/null || { rm -f "$BK/$NAME.part"; echo "BACKUP_FAIL sha256 mismatch"; exit 1; }
     head -c 8 "$BK/$NAME.part" | grep -q 'age-encr' || { rm -f "$BK/$NAME.part"; echo "BACKUP_FAIL not an age file"; exit 1; }
-    mv "$BK/$NAME.part" "$BK/$NAME"; chmod 600 "$BK/$NAME"
+    mv "$BK/$NAME.part" "$BK/$NAME"; chmod 600 "$BK/$NAME"; group_read "$BK/$NAME"
     find "$BK" \( -name 'lm-db-*.dump.age' -o -name 'lm-files-*.tar.age' \) -mtime +14 -print -delete | sed 's/^/rotated /'
     # What was verified above, for the backup watchdog (lm-backup-watchdog.sh): time, name, bytes, sha256.
-    printf '%s %s %s %s\n' "$(date -u +%s)" "$NAME" "$(stat -c %s "$BK/$NAME")" "$SUM" >> "$BK/verified.log" || echo "verified record not written"
+    if [ -L "$BK/verified.log" ]; then
+      echo "verified record not written: it is a link"
+    else
+      printf '%s %s %s %s\n' "$(date -u +%s)" "$NAME" "$(stat -c %s "$BK/$NAME")" "$SUM" >> "$BK/verified.log" || echo "verified record not written"
+      group_read "$BK/verified.log"
+    fi
     echo "stored bytes=$(stat -c %s "$BK/$NAME") kept=$(ls -1 "$BK" | grep -c 'dump.age$') kept_files=$(ls -1 "$BK" | grep -c '^lm-files-.*tar.age$') free_mb=$(df -m "$BK" | awk 'NR==2{print $4}')"
     echo "BACKUP_OK $NAME";;
   *) echo "refused: unknown command"; exit 1;;

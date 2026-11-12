@@ -39,7 +39,7 @@ describe("isSyntheticQaPlusAddress", () => {
     "person+qa.worker@labourmarket.ai",
     "xqa.worker+tag@labourmarket.ai",
     "qa.+tag@labourmarket.ai",
-    "jonas+work@gmail.com",
+    "jonas+work@example.org",
   ])("keeps %s deliverable", (address) => {
     expect(isSyntheticQaPlusAddress(address)).toBe(false);
   });

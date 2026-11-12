@@ -1,6 +1,6 @@
 import "server-only";
 
-import { withoutCounterpartyRows } from "@/lib/journal/review-status";
+import { CONFIRMABLE_ENTRY_BY_WORKER_COLUMNS, confirmedEntriesByWorker } from "@/lib/journal/review-status";
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { withCrossPartyStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
 import { readCrossPartyStandingStates } from "@/lib/evidence/skill-confirmation-standing-read";
@@ -315,7 +315,7 @@ export async function listWorkbench(
         .select("worker_id, skill_id, verified, skills ( esco_uri )")
         .in("worker_id", workerIds),
       liveJournalEntriesOnly(
-        asAny(supabase).from("journal_entries").select("id, worker_id").in("worker_id", workerIds),
+        asAny(supabase).from("journal_entries").select(CONFIRMABLE_ENTRY_BY_WORKER_COLUMNS).in("worker_id", workerIds),
       ),
       // The stored `verified` flag is sticky; whether each recorded
       // confirmation still STANDS is the cross-party door's answer.
@@ -361,35 +361,17 @@ export async function listWorkbench(
       }
     }
 
-    const entryRows = (entries.data ?? []) as { id: string; worker_id: string }[];
-    const workerByEntry = new Map<string, string>();
+    const entryRows = (entries.data ?? []) as Parameters<typeof confirmedEntriesByWorker>[0];
     for (const e of entryRows) {
       entriesByWorker.set(
         e.worker_id,
         (entriesByWorker.get(e.worker_id) ?? 0) + 1,
       );
-      workerByEntry.set(e.id, e.worker_id);
     }
-    if (entryRows.length > 0) {
-      const { data: confs } = await asAny(supabase)
-        .from("journal_entry_confirmations")
-        .select("entry_id, confirmation_scope")
-        .in(
-          "entry_id",
-          entryRows.map((e) => e.id),
-        );
-      // Employer confirmations only: a client's acceptance is another signal
-      // (decision 0018) and must not raise a worker's confirmation count.
-      for (const c of withoutCounterpartyRows(
-        (confs ?? []) as { entry_id: string; confirmation_scope: unknown }[],
-      )) {
-        const wid = workerByEntry.get(c.entry_id);
-        if (!wid) continue;
-        confirmationsByWorker.set(
-          wid,
-          (confirmationsByWorker.get(wid) ?? 0) + 1,
-        );
-      }
+    // Confirmed entries by the one rule: employer decisions only (decision 0018), and
+    // never the person's own (EVID-2).
+    for (const [workerId, confirmed] of confirmedEntriesByWorker(entryRows)) {
+      confirmationsByWorker.set(workerId, confirmed);
     }
   }
 

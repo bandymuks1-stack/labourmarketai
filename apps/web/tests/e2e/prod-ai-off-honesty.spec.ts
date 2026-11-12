@@ -500,7 +500,7 @@ test("C-1 (4.26). signed out: the match preview computes the fit and says the AI
   expect(failures, failures.join("\n")).toEqual([]);
 });
 
-test("C-2 (7.14, 8.3). a foreign-language advert keeps its own words; asking for a translation answers with a note, not a rendering", async ({ browser }) => {
+test("C-2 (7.14, 8.3). a foreign-language advert keeps its own words; with translation off it says so instead of offering a button", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   // A Lithuanian reader; the Scandinavian boards carry adverts in their own language.
   const seen = new Set<string>();
@@ -527,12 +527,13 @@ test("C-2 (7.14, 8.3). a foreign-language advert keeps its own words; asking for
   await expect(page.getByTestId("vacancy-source-language"), "the advert names its own language").toBeVisible();
   const before = (await page.locator("main").innerText()).length;
   await settle(page);
-  await page.getByTestId("vacancy-translate-button").click();
-  const note = page.getByTestId("vacancy-translate-note");
-  const rendering = page.getByTestId("vacancy-translate-result");
-  await expect(note.or(rendering).first(), "the request answers").toBeVisible({ timeout: 45_000 });
-  expect(await rendering.count(), "translation is off in production: no rendering is shown").toBe(0);
-  expect((await note.innerText()).trim().length, "the note says why, in words").toBeGreaterThan(5);
+  // Since #3034 an off translation shows its note, never a button that can only
+  // fail; the owner (2026-11-09) keeps Scandinavian adverts in their own language.
+  const off = page.getByTestId("vacancy-translate-off");
+  await expect(off, "translation is off: the page says so").toBeVisible({ timeout: 45_000 });
+  expect((await off.innerText()).trim().length, "the note says why, in words").toBeGreaterThan(5);
+  expect(await page.getByTestId("vacancy-translate-button").count(), "no button that can only fail").toBe(0);
+  expect(await page.getByTestId("vacancy-translate-result").count(), "no rendering is shown").toBe(0);
   expect((await page.locator("main").innerText()).length, "the publisher's own words stay on the page").toBeGreaterThanOrEqual(before - 5);
   await ctx.close();
 });

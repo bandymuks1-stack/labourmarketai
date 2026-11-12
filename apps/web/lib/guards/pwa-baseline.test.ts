@@ -27,6 +27,12 @@ describe("web app manifest", () => {
     expect(manifest).toMatch(/display: "standalone"/);
     expect(manifest).toMatch(/background_color: "#000000"/);
     expect(manifest).toMatch(/theme_color: "#000000"/);
+    // Install identity + navigation scope, and the language of the manifest's
+    // own (English) strings. Production audit 2026-11-08 found lang absent.
+    expect(manifest).toMatch(/id: "\/"/);
+    expect(manifest).toMatch(/scope: "\/"/);
+    expect(manifest).toMatch(/lang: "en"/);
+    expect(manifest).toMatch(/dir: "ltr"/);
   });
 
   it("carries the store taxonomy (readiness v2) — descriptive only", () => {
@@ -39,7 +45,7 @@ describe("web app manifest", () => {
   it("references only icons that exist at stable URLs", () => {
     expect(manifest).toMatch(/\/app-icon\.svg/);
     expect(existsSync(join(ROOT, "public/app-icon.svg"))).toBe(true);
-    expect(existsSync(join(ROOT, "app/favicon.ico"))).toBe(true);
+    expect(existsSync(join(ROOT, "public/favicon.ico"))).toBe(true);
   });
 
   it("makes no offline promise (the only SW is push-only: no fetch handler, no cache)", () => {
@@ -71,6 +77,11 @@ describe("layout viewport + apple metadata", () => {
   it("declares Apple add-to-home-screen chrome", () => {
     expect(layout).toMatch(/appleWebApp: \{/);
     expect(layout).toMatch(/capable: true/);
+    // Next 15 emits only `mobile-web-app-capable` for `capable: true`; iOS
+    // before 16.4 needs the Apple-prefixed tag (absent in production
+    // 2026-11-08), so it is declared explicitly.
+    expect(layout).toMatch(/"apple-mobile-web-app-capable": "yes"/);
+    expect(layout).toMatch(/title: BRAND_NAME/);
   });
 });
 

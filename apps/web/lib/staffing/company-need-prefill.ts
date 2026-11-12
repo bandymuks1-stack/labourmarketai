@@ -14,7 +14,7 @@
  * every value is length-bounded and used purely as a form default the user
  * reviews before submitting. PURE — no fs, no net, client-safe.
  */
-import { READINESS_COUNTRIES } from "@/lib/country-readiness/types";
+import { ALL_ISO_COUNTRIES } from "@/lib/location/country-model";
 import { isWorkTypeSlug } from "@/lib/taxonomy/work-categories";
 
 export interface CompanyNeedPrefill {
@@ -58,7 +58,9 @@ export function parseCompanyNeedPrefill(
   const countryRaw = params.get("country");
   if (countryRaw) {
     const code = countryRaw.trim().toUpperCase();
-    if ((READINESS_COUNTRIES as readonly string[]).includes(code)) {
+    // Any ISO country the form lists, so a market page can preselect it (LU is
+    // not a readiness country, and the select offers every ISO code).
+    if (ALL_ISO_COUNTRIES.includes(code)) {
       out.country = code;
     }
   }

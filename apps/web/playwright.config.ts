@@ -59,6 +59,13 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: LOCAL_STACK ? 0 : process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
+  /**
+   * NO COMMIT IDENTITY IN REPORTS (privacy, 2026-11-08). On CI Playwright
+   * copies the commit's author and committer, email addresses included, into
+   * every JSON report's metadata, and this public repo's artefacts are readable
+   * by any signed-in GitHub user. No report needs them: the run names its SHA.
+   */
+  captureGitInfo: { commit: false, diff: false },
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000",
     trace: "on-first-retry",
@@ -102,7 +109,8 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      // Production walks run in the Chrome build the runner carries, not Playwright's Chromium.
+      use: { ...devices["Desktop Chrome"], ...(process.env.PROD_QA_WALK === "1" ? { channel: "chrome" } : {}) },
     },
   ],
 });

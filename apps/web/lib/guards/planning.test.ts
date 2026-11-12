@@ -745,6 +745,7 @@ describe("8. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "planning.month.hint",
     "planning.day.empty",
     "planning.year.count",
+    "planning.year.hint",
     // The myZone module-label keys left with the second dashboard's control
     // room (W3 Package 4); planning's own catalogue copy above is the label
     // source that survives.

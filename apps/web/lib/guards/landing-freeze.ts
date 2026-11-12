@@ -20,6 +20,35 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * No reply-time promise (owner decision 2026-11-10): the request doors no longer
+ * promise contact "within 24 hours" — the request is received and the team gets
+ * in touch after reviewing it. `requestDoors.promise` and `receivedBody` only.
+ * Moved: the `lt`, `en`, `ru` landing namespaces. No source file.
+ *
+ * Hero layout repair (owner order 2026-11-10, design completion): with the story
+ * column withdrawn the desktop first screen was half empty and the `order-1`
+ * wrapper put the entry above the h1 on phones. Source order is now promise →
+ * entry → doors, the entry beside the promise from `xl`. EXACTLY ONE hash moved:
+ * focus-landing.tsx. No copy, no namespace.
+ *
+ * No fictional people (owner order 2026-11-09): the living worker hero — sample
+ * personas with names, professions and careers under a "Sample" label — is
+ * withdrawn from the landing; the entry hero is the first screen. EXACTLY ONE
+ * hash moved: focus-landing.tsx. No namespace, no other frozen file.
+ *
+ * Request door wording (owner order 2026-11-07): the promise and the B2B door's title
+ * only. Moved: the `lt`, `en`, `ru` landing namespaces.
+ *
+ * Three commercial request doors (owner P0 2026-11-07): `LandingRequestDoors` under the
+ * hero and the new `landing.requestDoors` copy. Moved: focus-landing.tsx and the frozen
+ * `lt`, `en`, `ru` landing namespaces. No other frozen artefact.
+ *
+ * Owner-approved hero text (owner decision 2026-11-05): `landing.hero.headline`
+ * and `.sub` in the six active locales. Lithuanian is the owner's own words; the
+ * other five are machine-drafted, with no native review yet. EXACTLY THREE namespace
+ * hashes moved (lt, en, ru; nl, de and pl are outside the frozen set) and no file: the
+ * page, its layout and every test rule are untouched.
+ *
  * W14 Slice 1 (owner directive 2026-08-02) — "Remove fabricated AI
  * confidence". The hero rendered "Confidence 86%" from a literal in
  * `landing-scenario.ts` (W14 audit P0-1). Removing it necessarily changed a

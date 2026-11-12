@@ -25,9 +25,8 @@ import {
 } from "@/lib/i18n/client-messages";
 import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
-import { buildLivingWorkerHero } from "@/lib/marketing/living-worker-hero";
-import { LivingWorkerHero } from "@/components/marketing/living-worker-hero";
 import { LandingThreeWays } from "@/components/marketing/landing-three-ways";
+import { LandingRequestDoors } from "@/components/marketing/landing-request-doors";
 import { BRAND_NAME } from "@/lib/seo/metadata";
 
 /**
@@ -86,14 +85,14 @@ export async function FocusLanding({
   const activeLocale = resolveActiveLocale(locale);
   // The ONE canonical market snapshot, through its 300 s `unstable_cache`
   // entry — one market truth, one freshness window (owner command §9/§12).
-  const [market, t, tHero, livingHero] = await Promise.all([
+  const [market, t, tHero] = await Promise.all([
     // The landing renders the supply counts only; it reads `professions`
     // nowhere, so it does not pay for the per-profession reads.
     readLiveMarketLandingSnapshot({ resolveProfessions: false }),
     getTranslations("common"),
     getTranslations("landing.hero"),
-    buildLivingWorkerHero(),
   ]);
+  const tRequest = await getTranslations("landing.requestDoors");
 
   // THE PROMISE — one headline, one sub, one set of primary doors, whichever
   // hero carries it (the living worker hero, or the entry hero without it).
@@ -111,6 +110,10 @@ export async function FocusLanding({
       <div className="mt-6">
         <LandingPrimaryActions locale={locale} surface="landing_hero" />
       </div>
+      {/* The doors sit further down: from the first screen, one plain way to them. */}
+      <a href="#request" className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-text-secondary underline underline-offset-4 hover:text-text-primary" data-testid="landing-request-doors-link">
+        {tRequest("promise")}
+      </a>
     </>
   );
 
@@ -153,44 +156,21 @@ export async function FocusLanding({
                 for the entry hero ONLY). Desktop: the promise left, the
                 product story right, the working sentence entry full width
                 beneath. Phone: promise → entry → story, so the working entry
-                stays near the top. The story is the product's own pieces with
-                the landing's sample persona — see <LandingJourney>. */}
-            {/* THE LIVING WORKER HERO (owner 2026-09-29): with its
-                photographs in place, the same sample person stands at the
-                centre of the hero and the promise sits over them; the working
-                sentence entry follows. Without the photographs, the entry
-                hero above stays exactly as it was — never an abstract
-                stand-in. */}
-            {livingHero ? (
-              <>
-                {/* THE MESSAGE IN SECONDS (owner positioning 2026-10-21): the
-                    three ways right under the promise — inside it on a phone
-                    (above the photograph), under the hero on a wide screen. */}
-                <LivingWorkerHero data={livingHero}>
-                  {promise}
-                  <LandingThreeWays placement="phone" />
-                </LivingWorkerHero>
-                <LandingThreeWays placement="wide" />
-                <section className="mt-8 scroll-mt-24" id="find">
-              <PublicEntry
-                  supply={
-                    market.activeVacancies !== null && market.distinctEmployers !== null
-                      ? {
-                          vacancies: market.activeVacancies,
-                          employers: market.distinctEmployers,
-                          refreshedAt: market.lastRefreshedAt,
-                        }
-                      : null
-                  }
-                />
-                </section>
-              </>
-            ) : (
-              <section className="grid gap-8 lg:items-start">
-                <div className="order-1 max-w-3xl lg:col-start-1 lg:row-start-1 lg:self-center">
-                  {promise}
-                  <LandingThreeWays />
-                </div>
+                stays near the top. */}
+            {/* NO FICTIONAL PEOPLE (owner order 2026-11-09): the living worker
+                hero showed sample personas with names, professions and
+                careers under a "Sample" label. Public pages show no invented
+                people or numbers as if real, and carry no sample labels, so the
+                hero is withdrawn and the entry hero below is the landing's
+                first screen. The component stays in the repository unused. */}
+              {/* With the story column gone, the left-only hero left the right
+                  half of the first screen empty on desktop, and the `order-1`
+                  wrapper put the entry ABOVE the h1 on phones. Source order is
+                  now the phone order — promise → entry → doors — and from `xl`
+                  the entry takes the right column beside the promise, with the
+                  three ways and the request doors full width beneath. */}
+              <section className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] xl:items-center">
+                <div className="max-w-3xl">{promise}</div>
                 <div className="scroll-mt-24" id="find">
                 <PublicEntry
                   supply={
@@ -204,8 +184,11 @@ export async function FocusLanding({
                   }
                 />
                 </div>
+                <div className="-mt-8 xl:col-span-2">
+                  <LandingThreeWays />
+                  <LandingRequestDoors locale={locale} />
+                </div>
               </section>
-            )}
 
             {/* ── §17 THE MARKET, IN PLACES ─────────────────────────────
                    Second, directly under the entry, because it answers the

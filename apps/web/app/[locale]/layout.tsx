@@ -4,6 +4,7 @@ import { Bricolage_Grotesque, Inter, Instrument_Serif, JetBrains_Mono } from "ne
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { AnalyticsConsentBanner } from "@/components/app/analytics-consent";
+import { CONSENT_BOOTSTRAP_SCRIPT } from "@/lib/consent/analytics-consent";
 import {
   BASE_CLIENT_MESSAGE_ROOTS,
   pickMessages,
@@ -17,6 +18,8 @@ import { jsonLdScript } from "@/lib/seo/json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { BRAND_NAME, BRAND_SEO, resolveActiveLocale } from "@/lib/seo/metadata";
 import { REGEXP_LOOKBEHIND_SHIM } from "@/lib/compat/regexp-lookbehind-shim";
+import { TRANSLATED_DOM_SHIM } from "@/lib/compat/translated-dom-shim";
+import { ConnectionNotice } from "@/components/app/connection-notice";
 import { CLIENT_ERROR_EARLY_SCRIPT } from "@/lib/telemetry/client-error-early-script";
 import "../globals.css";
 
@@ -95,6 +98,11 @@ export async function generateMetadata({
       title: BRAND_NAME,
       statusBarStyle: "black-translucent",
     },
+    // Next 15 renders `capable: true` as the standard
+    // `mobile-web-app-capable` tag only. iOS Safari before 16.4 reads only
+    // the Apple-prefixed tag for a standalone home-screen launch, so it is
+    // emitted explicitly too. Install chrome only, no offline claim.
+    other: { "apple-mobile-web-app-capable": "yes" },
     robots: { index: true, follow: true },
     openGraph: {
       type: "website",
@@ -159,13 +167,18 @@ export default async function LocaleLayout({
             see (module evaluation, unhandled rejections, a missing chunk).
             Sanitised, at most three per page, logged — never stored. */}
         <script dangerouslySetInnerHTML={{ __html: CLIENT_ERROR_EARLY_SCRIPT }} />
+        {/* Third, before React starts: a page the browser translates has
+            lost the text nodes React holds, and the next update beside one
+            died with "Application error" (2026-11-05 incident). A no-op
+            unless the node a call names has left its parent. */}
+        <script dangerouslySetInnerHTML={{ __html: TRANSLATED_DOM_SHIM }} />
         {/* Organization + WebSite structured data on EVERY locale page
             (2026-09-19): the landing is outside the marketing route group
             and is a frozen composition, so the publisher nodes live here
             once. Real values only — name, url, logo, language. */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd(locale)) }}
         />
         <script
           type="application/ld+json"
@@ -181,8 +194,12 @@ export default async function LocaleLayout({
               THEME_BOOTSTRAP_SCRIPT,
           }}
         />
+        {/* Before paint, so a person who already chose never sees the banner that
+            the server renders for everyone else (UX-3). */}
+        <script dangerouslySetInnerHTML={{ __html: CONSENT_BOOTSTRAP_SCRIPT }} />
       </head>
       <body>
+        <ConnectionNotice locale={locale} />
         {/* Locale-theme continuity (area D): a locale switch re-renders
             <html lang> and React strips the bootstrap's data-theme — this
             watcher restores the saved theme before the next paint. */}
