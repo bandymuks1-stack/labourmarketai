@@ -7202,6 +7202,10 @@
       "title": "Unterhaltung konnte nicht geöffnet werden",
       "body": "Möglicherweise haben Sie keine Berechtigung, dieser Person zu schreiben, oder sie ist nicht mehr verfügbar. Es wurde nichts gesendet."
     },
+    "noLongerAvailable": {
+      "title": "Diese Unterhaltung ist nicht mehr verfügbar",
+      "body": "Sie nehmen nicht mehr daran teil, daher werden ihre Nachrichten nicht angezeigt."
+    },
     "scope": {
       "support": "Support-Kanal",
       "unknown": "Kontext nicht angegeben",
@@ -7241,7 +7245,16 @@
         "blockedFailed": "Entfernen Sie den fehlgeschlagenen Anhang oder laden Sie ihn erneut hoch.",
         "partialFailure": "Die Nachricht wurde gesendet, aber einige Anhänge konnten nicht angehängt werden. Versuchen Sie, sie erneut zu senden."
       },
-      "languageLabel": "Ich schreibe auf"
+      "languageLabel": "Ich schreibe auf",
+      "errors": {
+        "notAuthenticated": "Ihre Sitzung ist abgelaufen. Melden Sie sich erneut an und senden Sie die Nachricht.",
+        "invalidInput": "Diese Nachricht kann nicht gesendet werden: Sie ist möglicherweise zu lang, oder ein Anhang wird nicht unterstützt.",
+        "notParticipant": "Sie können in dieser Unterhaltung nicht schreiben — Sie haben keinen Zugriff darauf.",
+        "rateLimited": "Sie haben in der letzten Stunde viele Nachrichten gesendet. Warten Sie kurz und versuchen Sie es erneut.",
+        "rateCheckUnavailable": "Die Sicherheitsprüfung konnte nicht ausgeführt werden, daher wurde nichts gesendet. Versuchen Sie es erneut.",
+        "attachmentsUnavailable": "Das Senden von Anhängen ist hier noch nicht aktiviert — fügen Sie der Nachricht Text hinzu.",
+        "sendFailed": "Die Nachricht konnte nicht gesendet werden. Ihr Text ist noch da — versuchen Sie es erneut."
+      }
     },
     "launcher": {
       "openLabel": "Support kontaktieren",
