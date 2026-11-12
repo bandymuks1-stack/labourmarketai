@@ -175,7 +175,19 @@ export function ConversationHeader({
           {/* The canonical mark (owner §19) — never a letter standing in for
               it. Decorative: the Link's aria-label already names the product. */}
           <LmLogo title="" className="h-6 w-auto shrink-0" />
-          <span className={`whitespace-nowrap font-display text-card-title font-bold tracking-tightest text-text-primary ${mobile ? "hidden" : "hidden min-[1800px]:inline"}`}>{title}</span>
+          {/* THE WHOLE LOGO WHERE IT FITS (integrated check 2026-11-12: the
+              phone showed the mark alone while the landing shows mark and
+              name). A phone's first row holds only the brand and the right
+              cluster, so the name fits there at the landing's own phone size;
+              from `md` the core navigation shares the row and the name
+              returns only once the row is wide enough for all of it. It is
+              shown whole or not at all. */}
+          <span
+            data-testid="shell-logo-wordmark"
+            className={`whitespace-nowrap font-display font-bold tracking-tightest text-text-primary ${mobile ? "inline text-support" : "inline text-support md:hidden min-[1800px]:inline min-[1800px]:text-card-title"}`}
+          >
+            {title}
+          </span>
         </Link>
       </span>
 

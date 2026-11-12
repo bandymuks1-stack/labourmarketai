@@ -113,12 +113,12 @@ function TodayScreenPending() {
       data-testid="today-screen-pending"
       className="mx-auto flex w-full max-w-6xl flex-col gap-4 sm:gap-5 lg:gap-6"
     >
+      <HomeGoalCardsPending />
       <div className="flex flex-col gap-1">
         <span className="h-5 w-24 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
         <span className="h-9 w-56 animate-pulse rounded bg-ink-700 motion-reduce:animate-none sm:h-10" />
         <span className="h-5 w-40 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
       </div>
-      <HomeGoalCardsPending />
       <div className="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-7 lg:gap-6">
           <HomeRegionPending size="action" />
@@ -157,6 +157,15 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
 
   return (
     <div data-testid="today-screen" className="mx-auto flex w-full max-w-6xl flex-col gap-4 sm:gap-5 lg:gap-6">
+      {/* 0 · GOALS — what the person came to do, before anything they have
+          to read (owner P0 No. 1, 2026-11-12). FIRST on the screen, above
+          the person's own header: on a phone the conversation's composer
+          covers the bottom of the first screen, and the goals must be whole
+          above it (integrated check 2026-11-12). No boundary of its own: its
+          only reads are the request-cached ones the layout already ran, and
+          the frame-level placeholder reserves the same footprint. */}
+      <HomeGoalCards role="worker" />
+
       {/* 1 · HEADER — who, what they do, where today stands. The name is in
           hand at once; the profession and the state each stream into the
           SAME line behind a same-line placeholder, so the header's height is
@@ -178,13 +187,6 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           </Suspense>
         </p>
       </header>
-
-      {/* 1a · GOALS — what the person came to do, before anything they have
-          to read (owner P0 No. 1, 2026-11-12): large cards, one tap to the
-          start of each function. No boundary of its own: its only reads are
-          the request-cached ones the layout already ran, and the frame-level
-          placeholder reserves the same footprint. */}
-      <HomeGoalCards role="worker" />
 
       {/* THE FOUR REGIONS — two columns from lg (01+02 | 03+04), one column
           on a phone in DOM order 01→04 (the one primary action first). Each

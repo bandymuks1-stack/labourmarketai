@@ -498,7 +498,7 @@ export default async function DashboardHomePage({
         // chat's own opening composition (the worker's "now" above the
         // greeting and the composer). One home, one conversation.
         openingContext={workerToday ? <TodayScreen locale={locale as ActiveLocale} /> : companyOpeningContext}
-        openingContextWide={Boolean(workerToday || goalsOnlyHome)}
+        openingContextWide={Boolean(workerToday || companyOpeningContext)}
         countryLabels={countryLabels}
         educationWorkspace={educationWorkspace}
         agencyWorkspace={agencyWorkspace}

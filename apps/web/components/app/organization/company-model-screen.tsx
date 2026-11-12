@@ -46,14 +46,11 @@ export async function CompanyModelScreen() {
     <section
       aria-label={t("title")}
       data-testid="company-model"
-      className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 pb-2 pt-4"
+      className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 pb-2 pt-4"
     >
       <h2 className="font-display text-card-title font-semibold text-text-primary">
         {t("title")}
       </h2>
-      {/* What needs the owner first: the real reviewable-entry queue, approved
-          right here (honest unknown when unreadable, says why when empty). */}
-      <OrganizationApprovalsCard />
       {/* The employer's ONE need door — the shared, tracked link (address,
           click event and wording are one thing by contract). An agency is
           never shown it: its goals open on what it offers (SEP-4). */}
@@ -67,6 +64,10 @@ export async function CompanyModelScreen() {
       {/* THE GOALS — the shared goal navigator, in this role's order, opening
           the product's own functions. */}
       <HomeGoalCards role={role} />
+      {/* What needs the owner: the real reviewable-entry queue, approved right
+          here, directly under the goals (the goals lead so they are whole on
+          a phone's first screen) (honest unknown when unreadable, says why when empty). */}
+      <OrganizationApprovalsCard />
       {/* Every other door of the company on the ONE shared rail (V2: one
           rail, one card) — one source: ORGANIZATION_WORK_AREAS, minus the
           doors the goals above already offer (a destination is shown once). */}

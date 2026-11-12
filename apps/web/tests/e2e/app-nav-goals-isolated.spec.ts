@@ -856,3 +856,236 @@ for (const theme of ["light", "dark"] as const) {
     }
   });
 }
+
+// ── N-9 · the integrated check's differences (2026-11-12) ───────────────────
+//
+// What a person saw next to the landing and the follow-up changes: the goals
+// whole on a phone's first screen, all of a role's goals in one row on a
+// desktop, and the whole logo on the phone header.
+
+for (const { role, person, home } of ROLES.filter((r) => r.role !== "service business")) {
+  test(`N-9. ${role}: the goals are whole on a 375×740 phone screen, in one row at 1440, under the whole logo`, async ({ browser }) => {
+    // PHONE — the goal rail's first card ends above the composer that covers
+    // the bottom of the screen (or above the fold where there is none).
+    const phone = await as(browser, person, { width: 375, height: 740 });
+    try {
+      await openHome(phone.page, person, home, orgOf[person]);
+      // A returning person: the consent notice has been answered.
+      const refuse = phone.page.getByTestId("analytics-consent-refuse");
+      const withNotice = await refuse.isVisible().catch(() => false);
+      const measure = async () =>
+        phone.page.evaluate(() => {
+          const card = document.querySelector('[data-testid="goal-rail"] [data-card-id]');
+          const composer = document.querySelector('[data-testid="composer-input"]');
+          const c = card?.getBoundingClientRect();
+          const k = composer?.getBoundingClientRect();
+          return {
+            cardTop: c ? Math.round(c.top + window.scrollY) : -1,
+            cardBottom: c ? Math.round(c.bottom + window.scrollY) : -1,
+            limit: Math.round(k && k.top > 0 && k.top < window.innerHeight ? k.top : window.innerHeight),
+          };
+        });
+      const first = await measure();
+      if (withNotice) {
+        await refuse.click();
+        await expect(refuse).toHaveCount(0);
+      }
+      const settled = await measure();
+      console.log(
+        `[app-nav-walk] ${role} @ 375×740: first goal card ${settled.cardTop}–${settled.cardBottom}px, visible down to ${settled.limit}px` +
+          (withNotice ? ` (with the consent notice showing: ${first.cardTop}–${first.cardBottom}px)` : ""),
+      );
+      expect(settled.cardTop, "the goal rail is on the screen").toBeGreaterThan(0);
+      expect(settled.cardBottom, "the first goal card is whole on the first screen").toBeLessThanOrEqual(settled.limit);
+      // The whole logo: mark and name, on one line, nothing cut.
+      const wordmark = phone.page.getByTestId("shell-logo-wordmark").first();
+      await expect(wordmark, "the product's name is beside the mark on a phone").toBeVisible();
+      const fits = await wordmark.evaluate((el) => el.scrollWidth <= el.clientWidth + 1 && el.getBoundingClientRect().right <= window.innerWidth);
+      expect(fits, "the name is whole and inside the screen").toBe(true);
+      const sideways = await phone.page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(sideways, "the header does not push the page sideways").toBeLessThanOrEqual(1);
+    } finally {
+      await phone.ctx.close();
+    }
+
+    // DESKTOP — every goal of the role in one row: none scrolled out of the
+    // rail, no arrows needed.
+    const desk = await as(browser, person, VIEWPORTS[1]);
+    try {
+      await openHome(desk.page, person, home, orgOf[person]);
+      const rail = desk.page.getByTestId("goal-rail");
+      const row = await rail.evaluate((el) => {
+        const track = el.querySelector('[data-rail-part="track"]') as HTMLElement | null;
+        const cards = [...el.querySelectorAll("[data-card-id]")].map((c) => c.getBoundingClientRect());
+        return {
+          cards: cards.length,
+          tops: [...new Set(cards.map((r) => Math.round(r.top)))].length,
+          overflow: track ? track.scrollWidth - track.clientWidth : -1,
+          arrows: el.querySelectorAll('[data-rail-part="prev"], [data-rail-part="next"]').length,
+          width: track ? Math.round(track.getBoundingClientRect().width) : -1,
+        };
+      });
+      console.log(
+        `[app-nav-walk] ${role} @ 1440px: ${row.cards} goals in ${row.tops} row, rail ${row.width}px wide, overflow ${row.overflow}px, arrows ${row.arrows}`,
+      );
+      expect(row.tops, "one row").toBe(1);
+      expect(row.overflow, "nothing scrolled out of the row").toBeLessThanOrEqual(1);
+      expect(row.arrows, "no arrows are needed").toBe(0);
+    } finally {
+      await desk.ctx.close();
+    }
+  });
+}
+
+// ── N-10 · an employee inside an organization ───────────────────────────────
+
+test("N-10. an employee inside an organization opens on their own goals, never the employer's", async ({ browser }) => {
+  const orgId = orgOf.company!;
+  expect(orgId, "the walk's company exists").toBeTruthy();
+  const address = email("employee");
+
+  // The company's owner creates a single-use "join my organization" link.
+  const owner = await as(browser, "company", VIEWPORTS[1]);
+  let link = "";
+  try {
+    await owner.page.goto(`${BASE}/en/dashboard/network?invite=1&type=join_organization&org=${orgId}#network-invite`);
+    const panel = owner.page.getByTestId("invite-panel");
+    await expect(panel).toBeVisible({ timeout: 30_000 });
+    await panel.getByTestId("invite-mode-link").click();
+    await panel.getByTestId("invite-name").fill(`QA-SYNTHETIC Nav Employee ${RUN}`);
+    await panel.getByTestId("invite-submit").click();
+    const copy = panel.getByTestId("invite-copy-link").first();
+    await expect(copy).toBeVisible({ timeout: 30_000 });
+    const u = new URL((await copy.getAttribute("data-invite-link"))!);
+    link = `${BASE}${u.pathname}${u.search}`;
+  } finally {
+    await owner.ctx.close();
+  }
+
+  // The invited person registers through it and joins as an employee.
+  const ctx = await browser.newContext({ viewport: VIEWPORTS[1] });
+  const page = await ctx.newPage();
+  try {
+    await page.goto(link);
+    await page.getByTestId("invite-register").click();
+    await page.waitForURL(/\/en\/auth\/signup/, { timeout: 30_000 });
+    await page.locator('input[type="email"]').fill(address);
+    await page.locator('input[name="password"]').fill("Synthetic-Pass-2026!");
+    const confirm = page.locator('input[name="confirm_password"]');
+    if (await confirm.count()) await confirm.fill("Synthetic-Pass-2026!");
+    await page.locator('form button[type="submit"]').click();
+    await page.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
+    if (/\/onboarding/.test(page.url())) await onboard(page, "work", `QA-SYNTHETIC Nav Employee ${RUN}`);
+    await page.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
+    if (/\/invite\//.test(page.url())) {
+      const accept = page.getByTestId("invite-accept");
+      if (await accept.isVisible().catch(() => false)) await accept.click();
+    }
+    const employeeId = await userId(address);
+    await expect
+      .poll(
+        () =>
+          sql<{ n: number }>(
+            `select count(*)::int as n from public.engagement_contexts where profile_id = ${lit(employeeId)} and organization_id = ${lit(orgId)} and relationship_slug = 'employee' and status = 'active'`,
+          )[0]?.n,
+        { message: "the person is an employee of the company", timeout: 30_000 },
+      )
+      .toBe(1);
+
+    // Stand in the organization through the header's own workspace switch.
+    await page.goto(`${BASE}/en/dashboard`);
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 60_000 });
+    const goalsHome = page.getByTestId("goals-home");
+    if (!(await goalsHome.isVisible().catch(() => false))) {
+      const trigger = page
+        .locator('[data-testid="workspace-chip"] button[aria-haspopup="menu"]')
+        .filter({ visible: true })
+        .first();
+      await trigger.click();
+      await page.getByTestId(`workspace-option-${orgId}`).click();
+    }
+    await expect(goalsHome, "an employee in the organization opens on the goals").toBeVisible({ timeout: 60_000 });
+    // Not the employer's home, and none of the employer's goals.
+    await expect(page.getByTestId("company-model")).toHaveCount(0);
+    await expect(page.getByTestId("company-model-primary")).toHaveCount(0);
+    await expect(page.getByTestId("home-goals")).toHaveAttribute("data-role", "worker");
+    const goals = await page.getByTestId("goal-rail").locator("[data-card-id]").evaluateAll((els) =>
+      els.map((e) => e.getAttribute("data-card-id")),
+    );
+    expect(goals[0], "their own goal first").toBe("work");
+    expect(goals, "no employer goal").not.toContain("workers");
+    expect(goals, "no agency goal").not.toContain("agencies");
+
+    // Two actions to recording work; the employer's pages still refuse.
+    await page.getByTestId("goal-rail").locator('[data-card-id="work"]').click();
+    const cards = await page.getByTestId("function-rail").locator("[data-card-id]").evaluateAll((els) =>
+      els.map((e) => e.getAttribute("href") ?? ""),
+    );
+    expect(cards.some((h) => h.includes("/dashboard/company")), "no employer function is offered").toBe(false);
+    await page.getByTestId("function-rail").locator('[data-card-id="recordWork"]').click();
+    await page.waitForURL(/\/en\/dashboard\/journal/, { timeout: 60_000 });
+    expect(page.url()).not.toContain("notice=");
+    await page.goto(`${BASE}/en/dashboard/company/people`);
+    await page.waitForLoadState("domcontentloaded");
+    expect(
+      /notice=/.test(page.url()) || !/\/dashboard\/company\/people/.test(new URL(page.url()).pathname),
+      "the employer's people page turns an employee away",
+    ).toBe(true);
+    console.log(`[app-nav-walk] employee inside an organization: goals ${goals.join(", ")}; record work in 2 actions; employer page refused`);
+  } finally {
+    await ctx.close();
+  }
+});
+
+// ── N-11 · the customer role ────────────────────────────────────────────────
+//
+// "Customer" is a legacy role: nobody can choose it at sign-up any more, and
+// the people who hold it keep their access (lib/config/roles.ts). The walk
+// therefore cannot create one through a form; it gives the synthetic worker
+// the role the way those accounts hold it (one row in the throwaway
+// database) and removes it again.
+
+test("N-11. a person who holds the customer role is offered their requests; without it they are not, and the page refuses", async ({ browser }) => {
+  const workerId = await userId(email("worker"));
+  const servicesCards = async (page: Page) => {
+    await openHome(page, "worker", "today-screen");
+    await page.getByTestId("goal-rail").locator('[data-card-id="services"]').click();
+    await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", "services", { timeout: 15_000 });
+    return page.getByTestId("function-rail").locator("[data-card-id]").evaluateAll((els) =>
+      els.map((e) => e.getAttribute("data-card-id")),
+    );
+  };
+
+  // WITHOUT the role: no card, and the page turns the person away.
+  const before = await as(browser, "worker", VIEWPORTS[1]);
+  try {
+    expect(await servicesCards(before.page), "no customer card without the role").not.toContain("myRequests");
+    await before.page.goto(`${BASE}/en/dashboard/buyer`);
+    await before.page.waitForLoadState("domcontentloaded");
+    expect(
+      /notice=/.test(before.page.url()) || new URL(before.page.url()).pathname !== "/en/dashboard/buyer",
+      "the customer page refuses a person without the role",
+    ).toBe(true);
+  } finally {
+    await before.ctx.close();
+  }
+
+  sqlExec(`insert into public.profile_roles (profile_id, role) values (${lit(workerId)}, 'customer')`);
+  try {
+    const after = await as(browser, "worker", VIEWPORTS[1]);
+    try {
+      expect(await servicesCards(after.page), "the customer's own card is offered").toContain("myRequests");
+      await after.page.getByTestId("function-rail").locator('[data-card-id="myRequests"]').click();
+      await after.page.waitForURL(/\/en\/dashboard\/buyer/, { timeout: 60_000 });
+      expect(after.page.url(), "the customer page opens").not.toContain("notice=");
+      await expect(after.page.getByRole("main").first()).toBeVisible({ timeout: 30_000 });
+      console.log("[app-nav-walk] customer role: \"My requests\" offered and opens in 2 actions; not offered and refused without the role");
+    } finally {
+      await after.ctx.close();
+    }
+  } finally {
+    sqlExec(`delete from public.profile_roles where profile_id = ${lit(workerId)} and role = 'customer'`);
+  }
+});

@@ -42,7 +42,10 @@ describe("mobile layout invariants", () => {
       expect(link, "the brand Link").not.toBeNull();
       expect(link![0]).toMatch(/className="flex flex-none items-center/);
       expect(link![0]).not.toMatch(/truncate/);
-      expect(link![0]).toMatch(/whitespace-nowrap[^`]*"hidden min-\[1800px\]:inline"/);
+      // Whole on a phone (its first row is the brand and the right cluster),
+      // hidden while the core navigation shares the row, whole again from 1800px.
+      expect(link![0]).toMatch(/"inline text-support md:hidden min-\[1800px\]:inline min-\[1800px\]:text-card-title"/);
+      expect(link![0]).toMatch(/className=\{`whitespace-nowrap /);
       expect(link![0]).toMatch(/<LmLogo[^>]*className="[^"]*shrink-0[^"]*"/);
     });
 

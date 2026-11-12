@@ -92,13 +92,25 @@ describe("one navigation system: the shared navigator and the shared goals", () 
 
   it("both homes render the goals above everything a person has to read", () => {
     const today = read("components/app/today/today-screen.tsx");
-    expect(today.indexOf('<HomeGoalCards role="worker" />')).toBeGreaterThan(today.indexOf('data-testid="today-header"'));
+    // FIRST, above the person's own header: on a phone the composer covers the
+    // bottom of the first screen and the goals must be whole above it
+    // (integrated check 2026-11-12).
+    expect(today.indexOf('<HomeGoalCards role="worker" />')).toBeGreaterThan(-1);
+    expect(today.indexOf('<HomeGoalCards role="worker" />')).toBeLessThan(today.indexOf('data-testid="today-header"'));
     expect(today.indexOf('<HomeGoalCards role="worker" />')).toBeLessThan(today.indexOf('data-testid="today-regions"'));
+    const pendingFrame = today.slice(today.indexOf("function TodayScreenPending"), today.indexOf("export function TodayScreen"));
+    expect(pendingFrame.indexOf("<HomeGoalCardsPending />")).toBeLessThan(pendingFrame.indexOf("h-9 w-56"));
     // The frame-level placeholder reserves the navigation's footprint (home CLS).
     expect(today).toMatch(/<HomeGoalCardsPending \/>/);
     const company = read("components/app/organization/company-model-screen.tsx");
     expect(company.indexOf("<HomeGoalCards")).toBeGreaterThan(-1);
     expect(company.indexOf("<HomeGoalCards")).toBeLessThan(company.indexOf("<HomeAreaRail"));
+    // The goals lead the organization home too: only its title and the one
+    // need door stand before them, and it uses the wide column so the six
+    // goals share one row on a desktop, as on the landing.
+    expect(company.indexOf("<HomeGoalCards")).toBeLessThan(company.indexOf("<OrganizationApprovalsCard"));
+    expect(company).toMatch(/data-testid="company-model"\s+className="mx-auto flex w-full max-w-6xl /);
+    expect(read("app/[locale]/dashboard/page.tsx")).toMatch(/openingContextWide=\{Boolean\(workerToday \|\| companyOpeningContext\)\}/);
   });
 });
 
