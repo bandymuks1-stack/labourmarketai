@@ -8000,6 +8000,10 @@
       "forAgencies": "Kuidas see agentuuridele toimib",
       "setUpAgency": "Loo agentuur"
     },
-    "assistant": "Küsi assistendilt"
+    "assistant": "Küsi assistendilt",
+    "carousels": {
+      "functions": "Mida siin teha saab",
+      "professions": "Töökuulutused ameti järgi"
+    }
   }
 }

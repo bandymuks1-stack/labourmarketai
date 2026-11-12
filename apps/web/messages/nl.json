@@ -20607,6 +20607,10 @@
       "forAgencies": "Zo werkt het voor bureaus",
       "setUpAgency": "Richt je bureau in"
     },
-    "assistant": "Vraag de assistent"
+    "assistant": "Vraag de assistent",
+    "carousels": {
+      "functions": "Wat je hier kunt doen",
+      "professions": "Vacatures per beroep"
+    }
   }
 }

@@ -8000,6 +8000,10 @@
       "forAgencies": "Så fungerar det för bemanningsföretag",
       "setUpAgency": "Starta ditt bemanningsföretag"
     },
-    "assistant": "Fråga assistenten"
+    "assistant": "Fråga assistenten",
+    "carousels": {
+      "functions": "Det här kan du göra här",
+      "professions": "Jobb efter yrke"
+    }
   }
 }

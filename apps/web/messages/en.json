@@ -20607,6 +20607,10 @@
       "forAgencies": "How it works for agencies",
       "setUpAgency": "Set up your agency"
     },
-    "assistant": "Ask the assistant"
+    "assistant": "Ask the assistant",
+    "carousels": {
+      "functions": "What you can do here",
+      "professions": "Browse jobs by profession"
+    }
   }
 }

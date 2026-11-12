@@ -20607,6 +20607,10 @@
       "forAgencies": "Jak to działa dla agencji",
       "setUpAgency": "Załóż agencję"
     },
-    "assistant": "Zapytaj asystenta"
+    "assistant": "Zapytaj asystenta",
+    "carousels": {
+      "functions": "Co możesz tu zrobić",
+      "professions": "Oferty pracy według zawodu"
+    }
   }
 }

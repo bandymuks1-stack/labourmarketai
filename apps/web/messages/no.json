@@ -8000,6 +8000,10 @@
       "forAgencies": "Slik fungerer det for byråer",
       "setUpAgency": "Opprett byrået ditt"
     },
-    "assistant": "Spør assistenten"
+    "assistant": "Spør assistenten",
+    "carousels": {
+      "functions": "Dette kan du gjøre her",
+      "professions": "Jobber etter yrke"
+    }
   }
 }

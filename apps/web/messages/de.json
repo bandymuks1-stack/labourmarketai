@@ -20607,6 +20607,10 @@
       "forAgencies": "So funktioniert es für Agenturen",
       "setUpAgency": "Agentur einrichten"
     },
-    "assistant": "Assistenten fragen"
+    "assistant": "Assistenten fragen",
+    "carousels": {
+      "functions": "Was Sie hier tun können",
+      "professions": "Stellen nach Beruf"
+    }
   }
 }

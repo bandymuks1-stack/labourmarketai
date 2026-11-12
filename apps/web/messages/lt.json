@@ -20607,6 +20607,10 @@
       "forAgencies": "Kaip tai veikia agentūroms",
       "setUpAgency": "Sukurti agentūrą"
     },
-    "assistant": "Klausti asistento"
+    "assistant": "Klausti asistento",
+    "carousels": {
+      "functions": "Ką čia galite daryti",
+      "professions": "Darbo skelbimai pagal profesiją"
+    }
   }
 }
