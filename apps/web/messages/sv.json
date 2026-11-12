@@ -2086,6 +2086,16 @@
         "into": "Raden slogs ihop med",
         "canonical": "det behållna projektet",
         "includes": "{count, plural, one {Omfattar # sammanslagen projektrad — dess poster visas här.} other {Omfattar # sammanslagna projektrader — deras poster visas här.}}"
+      },
+      "teams": {
+        "title": "Team i det här projektet",
+        "members": "{n, plural, one {# person} other {# personer}}",
+        "personTeam": "Team: {team}",
+        "unnamed": "Team utan namn",
+        "unnamedMember": "Medlem",
+        "noMembers": "Inga medlemmar just nu.",
+        "unavailable": "Teamen kunde inte läsas in. Försök igen.",
+        "manage": "Ändra team"
       }
     },
     "workerView": {

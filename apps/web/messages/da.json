@@ -2086,6 +2086,16 @@
         "into": "Rækken er lagt sammen med",
         "canonical": "det beholdte projekt",
         "includes": "{count, plural, one {Omfatter # sammenlagt projektrække — dens poster vises her.} other {Omfatter # sammenlagte projektrækker — deres poster vises her.}}"
+      },
+      "teams": {
+        "title": "Hold på dette projekt",
+        "members": "{n, plural, one {# person} other {# personer}}",
+        "personTeam": "Hold: {team}",
+        "unnamed": "Hold",
+        "unnamedMember": "Medlem",
+        "noMembers": "Ingen medlemmer lige nu.",
+        "unavailable": "Holdene kunne ikke indlæses. Prøv igen.",
+        "manage": "Skift hold"
       }
     },
     "workerView": {

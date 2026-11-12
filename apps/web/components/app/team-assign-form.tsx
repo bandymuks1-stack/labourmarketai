@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Select";
 import { assignTeamToWorkAction } from "@/lib/projects/team-assignment-actions";
 import type { TeamAssignResult } from "@/lib/projects/team-assignment";
 
@@ -58,11 +59,11 @@ export function TeamAssignForm({
         <label className="sr-only" htmlFor={`${uid}-project`}>
           {t("form.projectLabel")}
         </label>
-        <select
+        <Select
           id={`${uid}-project`}
           value={projectId}
           onChange={(e) => setProjectId(e.target.value)}
-          className="min-h-11 sm:min-h-9 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+          className="min-w-0 sm:w-auto sm:max-w-xs"
           data-testid="team-assign-project"
         >
           <option value="">{t("form.projectPlaceholder")}</option>
@@ -71,7 +72,7 @@ export function TeamAssignForm({
               {p.title ?? p.id.slice(0, 8)}
             </option>
           ))}
-        </select>
+        </Select>
         <Button
           type="button"
           size="sm"

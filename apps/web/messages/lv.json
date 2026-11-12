@@ -2086,6 +2086,16 @@
         "into": "Šī rinda apvienota ar",
         "canonical": "saglabāto projektu",
         "includes": "{count, plural, zero {Ietver # apvienotu projekta rindu — ieraksti redzami šeit.} one {Ietver # apvienotu projekta rindu — tās ieraksti redzami šeit.} other {Ietver # apvienotas projekta rindas — to ieraksti redzami šeit.}}"
+      },
+      "teams": {
+        "title": "Komandas šajā projektā",
+        "members": "{n, plural, zero {# cilvēku} one {# cilvēks} other {# cilvēki}}",
+        "personTeam": "Komanda: {team}",
+        "unnamed": "Komanda",
+        "unnamedMember": "Dalībnieks",
+        "noMembers": "Pašlaik dalībnieku nav.",
+        "unavailable": "Komandas neizdevās ielādēt. Mēģiniet vēlreiz.",
+        "manage": "Mainīt komandas"
       }
     },
     "workerView": {
