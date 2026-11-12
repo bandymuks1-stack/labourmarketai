@@ -2205,7 +2205,7 @@
         },
         "noCompany": {
           "title": "Start your company profile",
-          "body": "You don't have a company profile yet. Create one — it's active and usable straight away, no waiting for approval. Needs you post are shown to workers and visitors, marked \"Company not confirmed\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
+          "body": "You don't have a company profile yet. Create one — it's active and usable straight away, no waiting for approval. Needs you post are shown to workers and visitors, marked \"Company not verified\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
           "cta": "Start company setup"
         },
         "personalSpace": {
@@ -2240,7 +2240,7 @@
         "formTitle": "Company profile request",
         "formTitleCreate": "Create company profile",
         "formTitleEdit": "Edit company profile",
-        "formSubtitle": "Create your organisation profile from your personal account. It's active and usable straight away — no waiting for approval. Verification is a stronger, separate trust step. Needs you post are shown to workers and visitors, marked \"Company not confirmed\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
+        "formSubtitle": "Create your organisation profile from your personal account. It's active and usable straight away — no waiting for approval. Verification is a stronger, separate trust step. Needs you post are shown to workers and visitors, marked \"Company not verified\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
         "existingHeading": "Company profile",
         "legalName": "Company legal name",
         "legalNameHelp": "Required. 2–200 characters.",
@@ -2313,10 +2313,10 @@
         },
         "verificationExplainer": {
           "draft": "Draft. Save to activate your company — it becomes usable straight away.",
-          "active_unverified": "Active and usable now. Basic automated checks passed. Not yet identity-verified — that's a separate, stronger step. Needs you post are shown to workers and visitors, marked \"Company not confirmed\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
+          "active_unverified": "Active and usable now. Basic automated checks passed. Not yet identity-verified — that's a separate, stronger step. Needs you post are shown to workers and visitors, marked \"Company not verified\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
           "needs_checks": "Active and usable, but a basic check needs attention (e.g. add your country, or fix a malformed code / website / email). Until it is fixed, needs you post wait for a review and are not shown to workers.",
-          "pending_verification": "You asked for an optional manual review. Your company stays fully usable while it waits. Needs you post are shown to workers and visitors, marked \"Company not confirmed\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
-          "unverified": "Not verified. You can keep using your company normally. Needs you post are shown to workers and visitors, marked \"Company not confirmed\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
+          "pending_verification": "You asked for an optional manual review. Your company stays fully usable while it waits. Needs you post are shown to workers and visitors, marked \"Company not verified\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
+          "unverified": "Not verified. You can keep using your company normally. Needs you post are shown to workers and visitors, marked \"Company not verified\", once the required company details are filled in and the automatic checks pass; incomplete or suspicious ones wait for a review.",
           "verified": "Verified — a stronger trust state, granted only after a real check."
         },
         "goToWorkspace": "Open the company workspace",

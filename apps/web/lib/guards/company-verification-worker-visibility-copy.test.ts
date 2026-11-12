@@ -30,7 +30,7 @@ const company = (l: string) =>
 
 const ONLY_AFTER_VERIFICATION =
   /only after your company is verified|tik po įmonės verifikacijos|erst nach der Verifizierung|pas na verificatie|dopiero po weryfikacji|только после верификации/i;
-const UNVERIFIED_MARK = /Company not confirmed|Įmonė nepatvirtinta|Unternehmen nicht bestätigt|Bedrijf niet bevestigd|Firma niepotwierdzona|Компания не подтверждена/;
+const UNVERIFIED_MARK = /Company not verified|Įmonė nepatvirtinta|Unternehmen nicht verifiziert|Bedrijf niet geverifieerd|Firma niezweryfikowana|Компания не подтверждена/;
 const VISITORS = /visitors|lankytoj|Besucher|bezoekers|odwiedzając|посетител/i;
 
 describe("setup copy states the V-1 visibility rule", () => {
