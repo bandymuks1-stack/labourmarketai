@@ -54,6 +54,7 @@ const HEADING: L<(name: string) => string> = {
   nl: (n) => `${n}: vacatures`,
   de: (n) => `${n}: offene Stellen`,
   pl: (n) => `${n}: oferty pracy`,
+  sv: (n) => `${n}: lediga jobb`,
 };
 
 /** "label: number" keeps the noun in one form for every count. */
@@ -70,6 +71,8 @@ const DESCRIPTION_WITH_COUNT: L<(name: string, count: string) => string> = {
     `${n}: ${c} offene Stellen aus offiziellen öffentlichen Quellen. Kostenlos anmelden für Arbeitgeber, Ort und Bewerbungsweg.`,
   pl: (n, c) =>
     `${n}: otwartych ofert pracy z oficjalnych źródeł – ${c}. Zaloguj się bezpłatnie: pracodawca, miejsce i sposób aplikowania.`,
+  sv: (n, c) =>
+    `${n}: lediga jobb från officiella offentliga källor – ${c}. Logga in gratis för att se arbetsgivaren, platsen och hur du söker.`,
 };
 
 const DESCRIPTION_NO_COUNT: L<(name: string) => string> = {
@@ -85,6 +88,8 @@ const DESCRIPTION_NO_COUNT: L<(name: string) => string> = {
     `${n}: offene Stellen aus offiziellen öffentlichen Quellen. Kostenlos anmelden für Arbeitgeber, Ort und Bewerbungsweg.`,
   pl: (n) =>
     `${n}: otwarte oferty pracy z oficjalnych źródeł. Zaloguj się bezpłatnie: pracodawca, miejsce i sposób aplikowania.`,
+  sv: (n) =>
+    `${n}: lediga jobb från officiella offentliga källor. Logga in gratis för att se arbetsgivaren, platsen och hur du söker.`,
 };
 
 /** The line under the h1 that says which part of the board this is. */
@@ -95,6 +100,7 @@ const SCOPE_NOTE: L<(name: string) => string> = {
   nl: (n) => `Hier staan alleen vacatures voor het beroep “${n}”.`,
   de: (n) => `Hier stehen nur Stellen für den Beruf „${n}“.`,
   pl: (n) => `Tutaj są tylko oferty pracy w zawodzie „${n}”.`,
+  sv: (n) => `Här visas bara lediga jobb inom yrket ”${n}”.`,
 };
 
 const ALL_JOBS_LINK: L = {
@@ -104,6 +110,7 @@ const ALL_JOBS_LINK: L = {
   nl: "Alle openstaande vacatures",
   de: "Alle offenen Stellen",
   pl: "Wszystkie otwarte oferty pracy",
+  sv: "Alla lediga jobb",
 };
 
 const BROWSE_HEADING: L = {
@@ -113,6 +120,7 @@ const BROWSE_HEADING: L = {
   nl: "Vacatures per beroep",
   de: "Stellen nach Beruf",
   pl: "Oferty pracy według zawodu",
+  sv: "Lediga jobb efter yrke",
 };
 
 export interface ProfessionPageCopy {
