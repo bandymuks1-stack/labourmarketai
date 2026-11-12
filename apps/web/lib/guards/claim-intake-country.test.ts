@@ -26,11 +26,14 @@ describe("claiming a public intake keeps its country", () => {
   it("stamps it on the column, owner-scoped, after the draft exists", () => {
     const draftAt = src.indexOf('rpc("save_demand_draft_v2"');
     const failAt = src.indexOf('return { ok: false, reason: "error" };', draftAt);
-    const stampAt = src.indexOf(".update({ country: payload.country })");
+    const stampAt = src.indexOf('.from("customer_requests")
+      .update({', src.indexOf("const headcount ="));
     expect(stampAt).toBeGreaterThan(failAt);
-    const stamp = src.slice(stampAt, stampAt + 300);
+    const stamp = src.slice(stampAt, stampAt + 600);
     expect(stamp).toContain('.eq("profile_id", sessionUser.id)');
     expect(stamp).toContain('.eq("status", "draft")');
+    // The headcount reaches the wizard too: it reads `team_size`, not the payload.
+    expect(stamp).toContain("...(headcount != null ? { team_size: headcount } : {}),");
   });
 
   it("writes no Lithuanian into the employer's words and no fixed language", () => {

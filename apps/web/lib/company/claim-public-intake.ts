@@ -254,13 +254,21 @@ export async function claimPublicIntake(intakeId: string): Promise<ClaimIntakeRe
     return { ok: false, reason: "error" };
   }
 
-  // The country lives on the COLUMN the wizard prefills and the submit keeps:
-  // the same owner-scoped stamp `saveDemandDraft` makes. A failure here never
-  // fails the claim (the draft exists; the wizard then asks for the country).
-  if (typeof draftId === "string" && payload.country) {
+  // The country and the headcount live on the COLUMNS the wizard prefills
+  // (`toDemandPrefill` reads `country` and `team_size`, not the payload): the
+  // same owner-scoped stamp `saveDemandDraft` makes for the country. A failure
+  // here never fails the claim (the draft exists; the wizard then asks).
+  const headcount =
+    typeof intake.headcount === "number" && Number.isInteger(intake.headcount) && intake.headcount > 0
+      ? intake.headcount
+      : null;
+  if (typeof draftId === "string" && (payload.country || headcount != null)) {
     const { error: countryErr } = await asAny(supabase)
       .from("customer_requests")
-      .update({ country: payload.country })
+      .update({
+        ...(payload.country ? { country: payload.country } : {}),
+        ...(headcount != null ? { team_size: headcount } : {}),
+      })
       .eq("id", draftId)
       .eq("profile_id", sessionUser.id)
       .eq("status", "draft");
