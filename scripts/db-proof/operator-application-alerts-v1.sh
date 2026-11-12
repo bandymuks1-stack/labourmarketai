@@ -102,12 +102,15 @@ check "age comes from requested_at; a fresh updated_at does not reset it" "30" "
 check "no name, contact or free text column" "entity,entity_id,stage,age_hours,country,from_door" \
   "$(q "select string_agg(a, ',' order by n) from (select unnest(proargnames) a, generate_subscripts(proargnames,1) n from pg_proc where proname='operator_alerts_due_v1') x")"
 
-echo "== who receives it, from the rights valid now"
-check "immediate and reminder: active operators with an address only" "a0000000-0000-4000-8000-000000000001" "$(svc "select profile_id from operator_alert_recipients_v1('immediate')")"
-check "escalation: admins by either signal" "a0000000-0000-4000-8000-000000000004|a0000000-0000-4000-8000-000000000005" "$(svc "select profile_id from operator_alert_recipients_v1('escalation_48h')")"
-check "an unknown stage has no recipient" "0" "$(svc "select count(*) from operator_alert_recipients_v1('everyone')")"
+echo "== who receives it: the people who can review that application, from the rights valid now"
+A4=a0000000-0000-4000-8000-000000000004; A5=a0000000-0000-4000-8000-000000000005
+check "intakes: admins only, by either signal (the review page is superadmin-only)" "$A4|$A5" "$(svc "select profile_id from operator_alert_recipients_v1('company_need_public_intakes','immediate')")"
+check "company verification: admins only, at the reminder too" "$A4|$A5" "$(svc "select profile_id from operator_alert_recipients_v1('companies','reminder_24h')")"
+check "claims, immediate: active grant holders with an address plus admins" "$OPA|$A4|$A5" "$(svc "select profile_id from operator_alert_recipients_v1('organization_claims','immediate')")"
+check "claims, escalation: admins only" "$A4|$A5" "$(svc "select profile_id from operator_alert_recipients_v1('organization_claims','escalation_48h')")"
+check "an unknown stage or entity has no recipient" "0|0" "$(svc "select count(*) from operator_alert_recipients_v1('organization_claims','everyone')")|$(svc "select count(*) from operator_alert_recipients_v1('profiles','immediate')")"
 $PSQL -c "update platform_capability_grants set revoked_at = now() where profile_id='$OPA'" >/dev/null
-check "a right revoked a moment ago removes the recipient at once" "0" "$(svc "select count(*) from operator_alert_recipients_v1('immediate')")"
+check "a right revoked a moment ago removes the recipient at once" "$A4|$A5" "$(svc "select profile_id from operator_alert_recipients_v1('organization_claims','immediate')")"
 $PSQL -c "update platform_capability_grants set revoked_at = null where profile_id='$OPA'" >/dev/null
 
 echo "== the ledger: reserved, sent, failed, skipped"
@@ -139,6 +142,44 @@ check "an unknown entity is refused" "1" "$(rec "'reserve','profiles','$OPA','im
 check "an unknown stage is refused" "1" "$(rec "'reserve','companies','$OPA','soon','$OPA'" | grep -c 'unknown stage')"
 check "the ledger is append-only" "1" "$(q "update audit_logs set action='x' where action like 'operator_alert.%'" | grep -c 'append-only')"
 
+echo "== the queue moves on: completed deliveries leave it before the limit"
+GEN() { q "select to_char(requested_at at time zone 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.US') from companies where id='$1'"; }
+SENT() { $PSQL -c "insert into audit_logs (action, entity, entity_id, payload) values ('operator_alert.$6','$1','$2', jsonb_build_object('stage','$3','generation','$4','recipient','$5','token',gen_random_uuid()::text))" >/dev/null; }
+SENT company_need_public_intakes $I1 immediate "" $A4 sent
+check "sent to one of two reviewers: still due" "1" "$(svc "select count(*) from operator_alerts_due_v1() where entity_id='$I1'")"
+SENT company_need_public_intakes $I1 immediate "" $A5 sent
+check "sent to every current reviewer: no longer due" "0" "$(svc "select count(*) from operator_alerts_due_v1() where entity_id='$I1'")"
+CO2=40000000-0000-4000-8000-000000000002; G2=$(GEN $CO2)
+SENT companies $CO2 reminder_24h "$G2" $A4 sent
+for n in 1 2 3 4 5; do SENT companies $CO2 reminder_24h "$G2" $A5 failed; done
+check "a reviewer the run gave up on (5 failures) does not hold the item open" "0" "$(svc "select count(*) from operator_alerts_due_v1() where entity_id='$CO2'")"
+$PSQL -c "update profiles set email = null where id in ('$A4','$A5')" >/dev/null
+check "with no reviewer at all the item stays due until the skip is logged" "1" "$(svc "select count(*) from operator_alerts_due_v1() where entity_id='$I3'")"
+rec "'skipped_no_recipient','company_need_public_intakes','$I3','escalation_48h'" >/dev/null
+check "after the skip is logged it leaves the queue" "0" "$(svc "select count(*) from operator_alerts_due_v1() where entity_id='$I3'")"
+$PSQL -c "update profiles set email = 'admin1@ops.example' where id='$A4'" -c "update profiles set email = 'admin2@ops.example' where id='$A5'" >/dev/null
+check "a reviewer configured later reopens it" "1" "$(svc "select count(*) from operator_alerts_due_v1() where entity_id='$I3'")"
+$PSQL -v ON_ERROR_STOP=1 >/dev/null <<SQL2
+insert into company_need_public_intakes (id, created_at, status, country, source_path)
+  select ('50000000-0000-4000-8000-' || lpad(n::text, 12, '0'))::uuid, now() - interval '2 hours' - make_interval(secs => n), 'new', 'LT', '/lt/company-need'
+    from generate_series(1, 250) n;
+insert into audit_logs (action, entity, entity_id, payload)
+  select 'operator_alert.sent', 'company_need_public_intakes', ('50000000-0000-4000-8000-' || lpad(n::text, 12, '0'))::uuid,
+         jsonb_build_object('stage','immediate','generation','','recipient',r,'token',gen_random_uuid()::text)
+    from generate_series(51, 250) n, unnest(array['$A4','$A5']) r;
+SQL2
+check "250 waiting, the 200 oldest already delivered: exactly the 50 newest are due" "50|0" \
+  "$(svc "select count(*) from operator_alerts_due_v1() where entity_id::text like '50000000-%'")|$(svc "select count(*) from operator_alerts_due_v1() where entity_id::text like '50000000-%' and entity_id > '50000000-0000-4000-8000-000000000050'")"
+
+echo "== a resubmitted company is a new application for the ledger"
+CO1=40000000-0000-4000-8000-000000000001
+for a in $A4 $A5; do t=$(svc "select record_operator_alert_v1('reserve','companies','$CO1','immediate','$a') ->> 'token'"); rec "'sent','companies','$CO1','immediate','$a','$t'" >/dev/null; done
+check "delivered to both admins: the first request leaves the queue" "0" "$(svc "select count(*) from operator_alerts_due_v1() where entity_id='$CO1'")"
+check "the same request is never mailed twice" "already_sent" "$(rec "'reserve','companies','$CO1','immediate','$A4'")"
+$PSQL -c "insert into audit_logs (action, entity, entity_id, payload, occurred_at) values ('admin_set_company_verification','companies','$CO1','{}', now() - interval '2 hours')" -c "update companies set requested_at = now() - interval '1 hour' where id='$CO1'" >/dev/null
+check "after review the company asks again: due again from the new request time" "immediate|1" "$(svc "select stage||'|'||age_hours from operator_alerts_due_v1() where entity_id='$CO1'")"
+check "the new request is reserved afresh, not 'already_sent'" "reserved" "$(rec "'reserve','companies','$CO1','immediate','$A4'")"
+
 echo "== concurrency: two runs reserve the same key at the same moment"
 C=30000000-0000-4000-8000-000000000001
 ( printf "set role service_role;\nbegin;\nselect record_operator_alert_v1('reserve','organization_claims','$C','immediate','$OPA') ->> 'outcome';\nselect pg_sleep(2);\ncommit;\n" | $PSQL -f - 2>&1 | tr -d '\r' | head -1 > /tmp/oaa1-a.txt ) &
@@ -150,7 +191,7 @@ check "one reservation row for that key" "1" "$(q "select count(*) from audit_lo
 rm -f /tmp/oaa1-a.txt /tmp/oaa1-b.txt
 
 echo "== who may call"
-for f in "operator_alerts_due_v1()" "operator_alert_recipients_v1('immediate')"; do
+for f in "operator_alerts_due_v1()" "operator_alert_recipients_v1('organization_claims','immediate')"; do
   check "anon cannot call $f" "1" "$(as_role anon "select count(*) from $f" | grep -c 'permission denied')"
   check "a signed-in user cannot call $f" "1" "$(as_role authenticated "select count(*) from $f" | grep -c 'permission denied')"
 done

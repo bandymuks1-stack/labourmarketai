@@ -11,7 +11,7 @@
 -- apply time. The ledger is the existing append-only public.audit_logs.
 --
 --   operator_alerts_due_v1()               what waits, at which stage (no name, no contact)
---   operator_alert_recipients_v1(stage)    who may receive it, from the rights valid NOW
+--   operator_alert_recipients_v1(entity, stage)  who can review it, from the rights valid NOW
 --   record_operator_alert_v1(...)          reserve / sent / failed / skipped_no_recipient
 --
 -- WHAT WAITS ON A HUMAN (and nothing else):
@@ -33,7 +33,8 @@
 -- inbox on arrival (request-door-actions.ts), so it gets no `immediate` alert here: only the
 -- reminder and the escalation, which nothing else sends.
 --
--- LEDGER STATES per (application, stage, recipient), as append-only audit rows:
+-- LEDGER STATES per (application, generation, stage, recipient), as append-only audit rows
+-- (a company's generation is its requested_at, so a resubmission is alerted afresh):
 --   operator_alert.reserved   a sender holds it; expires after 15 minutes without an outcome
 --   operator_alert.sent       final; never sent again
 --   operator_alert.failed     retried on a later run, at most 5 failures, then it stops
@@ -50,7 +51,51 @@
 
 begin;
 
--- 1. What waits ------------------------------------------------------------------------------------
+-- 1. Who may receive it: the people who can REVIEW that application, from the rights valid now ----
+--   company_need_public_intakes, companies   admins only, every stage: both review pages sit behind
+--                                            requireSuperadmin (dashboard/admin/layout.tsx), so a
+--                                            capability holder could not act on the mail.
+--   organization_claims                      immediate + reminder: whoever passes the claim tools'
+--                                            authority (has_platform_capability('marketplace_company_ingest')
+--                                            = an admin OR an active grant holder); escalation: admins.
+-- "Admin" uses the same two signals as public.is_admin() and isSuperadmin().
+create or replace function public.operator_alert_recipients_v1(p_entity text, p_stage text)
+returns table (profile_id uuid, email text)
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  with admins as (
+    select p.id from public.profiles p
+     where p.active_role = 'admin'
+        or exists (select 1 from public.profile_roles r where r.profile_id = p.id and r.role = 'admin')
+  ), granted as (
+    select g.profile_id as id from public.platform_capability_grants g
+     where g.capability = 'marketplace_company_ingest' and g.revoked_at is null
+  ), audience as (
+    select id from admins
+     where p_entity in ('company_need_public_intakes', 'companies', 'organization_claims')
+       and p_stage in ('immediate', 'reminder_24h', 'escalation_48h')
+    union
+    select id from granted
+     where p_entity = 'organization_claims' and p_stage in ('immediate', 'reminder_24h')
+  )
+  select p.id, btrim(p.email)
+    from public.profiles p
+    join audience a on a.id = p.id
+   where nullif(btrim(p.email), '') is not null
+     and position('@' in p.email) > 1
+   order by p.id;
+$$;
+
+-- 2. What waits -----------------------------------------------------------------------------------
+-- GENERATION: a company that is reviewed and asks again keeps its id but gets a new requested_at;
+-- that timestamp is the request's generation, so a resubmission is a NEW application for the ledger.
+-- Intakes and claims never restart (created_at is fixed), so their generation is ''.
+-- PROGRESS: a delivery is complete when every current recipient has it sent (or gave up after 5
+-- failures), or, with no recipient at all, when the skip was logged. Completed deliveries are
+-- removed BEFORE the limit, so older applications can never hold the queue shut for newer ones.
 create or replace function public.operator_alerts_due_v1()
 returns table (
   entity      text,
@@ -67,18 +112,19 @@ set search_path = public, pg_temp
 as $$
   with waiting as (
     select 'company_need_public_intakes'::text as entity, i.id as entity_id, i.created_at as since,
-           i.country, coalesce(i.source_path, '') like '%/request/%' as from_door
+           ''::text as generation, i.country, coalesce(i.source_path, '') like '%/request/%' as from_door
       from public.company_need_public_intakes i
      where i.status = 'new'
        and i.created_at > now() - interval '7 days'
     union all
-    select 'organization_claims', c.id, c.created_at, o.country, false
+    select 'organization_claims', c.id, c.created_at, '', o.country, false
       from public.organization_claims c
       join public.organizations o on o.id = c.organization_id
      where c.state = 'requested'
        and c.created_at > now() - interval '7 days'
     union all
-    select 'companies', co.id, co.requested_at, co.country, false
+    select 'companies', co.id, co.requested_at,
+           to_char(co.requested_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US'), co.country, false
       from public.companies co
      where co.verification_status = 'pending_verification'
        and co.requested_at is not null
@@ -91,48 +137,47 @@ as $$
   ), staged as (
     select w.*, floor(extract(epoch from (now() - w.since)) / 3600)::integer as age_hours
       from waiting w
+  ), with_stage as (
+    select s.*,
+           case when s.age_hours < 24 then 'immediate'
+                when s.age_hours < 48 then 'reminder_24h'
+                else 'escalation_48h' end as stage
+      from staged s
+     where not (s.from_door and s.age_hours < 24)
   )
-  select s.entity, s.entity_id,
-         case when s.age_hours < 24 then 'immediate'
-              when s.age_hours < 48 then 'reminder_24h'
-              else 'escalation_48h' end as stage,
-         s.age_hours, nullif(btrim(s.country), '') as country, s.from_door
-    from staged s
-   where not (s.from_door and s.age_hours < 24)
-   order by s.since
+  select x.entity, x.entity_id, x.stage, x.age_hours, nullif(btrim(x.country), '') as country, x.from_door
+    from with_stage x
+   where not (
+           case
+             when exists (select 1 from public.operator_alert_recipients_v1(x.entity, x.stage)) then
+               not exists (
+                 select 1 from public.operator_alert_recipients_v1(x.entity, x.stage) r
+                  where not exists (
+                          select 1 from public.audit_logs a
+                           where a.action = 'operator_alert.sent'
+                             and a.entity = x.entity and a.entity_id = x.entity_id
+                             and a.payload ->> 'stage' = x.stage
+                             and coalesce(a.payload ->> 'generation', '') = x.generation
+                             and a.payload ->> 'recipient' = r.profile_id::text)
+                    and (select count(*) from public.audit_logs a
+                          where a.action = 'operator_alert.failed'
+                            and a.entity = x.entity and a.entity_id = x.entity_id
+                            and a.payload ->> 'stage' = x.stage
+                            and coalesce(a.payload ->> 'generation', '') = x.generation
+                            and a.payload ->> 'recipient' = r.profile_id::text) < 5)
+             else exists (
+                    select 1 from public.audit_logs a
+                     where a.action = 'operator_alert.skipped_no_recipient'
+                       and a.entity = x.entity and a.entity_id = x.entity_id
+                       and a.payload ->> 'stage' = x.stage
+                       and coalesce(a.payload ->> 'generation', '') = x.generation)
+           end)
+   order by x.since
    limit 200;
 $$;
 
--- 2. Who may receive it, from the rights valid now ------------------------------------------------
-create or replace function public.operator_alert_recipients_v1(p_stage text)
-returns table (profile_id uuid, email text)
-language sql
-stable
-security definer
-set search_path = public, pg_temp
-as $$
-  select p.id, btrim(p.email)
-    from public.profiles p
-   where nullif(btrim(p.email), '') is not null
-     and position('@' in p.email) > 1
-     and case
-           -- immediate and reminder: operators holding the import / claim authority right now
-           when p_stage in ('immediate', 'reminder_24h') then exists (
-                  select 1 from public.platform_capability_grants g
-                   where g.profile_id = p.id
-                     and g.capability = 'marketplace_company_ingest'
-                     and g.revoked_at is null)
-           -- escalation: admins, by the same two signals as public.is_admin()
-           when p_stage = 'escalation_48h' then (
-                  p.active_role = 'admin'
-                  or exists (select 1 from public.profile_roles r
-                              where r.profile_id = p.id and r.role = 'admin'))
-           else false
-         end
-   order by p.id;
-$$;
-
 -- 3. The ledger -----------------------------------------------------------------------------------
+-- Every row carries the application's generation (see 2), and every lookup matches it.
 create or replace function public.record_operator_alert_v1(
   p_event      text,   -- 'reserve' | 'sent' | 'failed' | 'skipped_no_recipient'
   p_entity     text,
@@ -149,6 +194,7 @@ set search_path = public, pg_temp
 as $$
 declare
   v_key       text;
+  v_gen       text := '';
   v_reserved  public.audit_logs%rowtype;
   v_failures  integer;
   v_token     uuid;
@@ -162,20 +208,26 @@ begin
   if p_entity_id is null then
     raise exception 'entity id required' using errcode = '22023';
   end if;
+  if p_entity = 'companies' then
+    select coalesce(to_char(co.requested_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US'), '')
+      into v_gen from public.companies co where co.id = p_entity_id;
+    v_gen := coalesce(v_gen, '');
+  end if;
 
-  v_key := p_entity || ':' || p_entity_id::text || ':' || p_stage || ':' || coalesce(p_recipient::text, '-');
+  v_key := p_entity || ':' || p_entity_id::text || ':' || v_gen || ':' || p_stage || ':' || coalesce(p_recipient::text, '-');
   perform pg_advisory_xact_lock(hashtextextended('operator_alert:' || v_key, 0));
 
   if p_event = 'skipped_no_recipient' then
     if exists (select 1 from public.audit_logs a
                 where a.action = 'operator_alert.skipped_no_recipient'
                   and a.entity = p_entity and a.entity_id = p_entity_id
-                  and a.payload ->> 'stage' = p_stage) then
+                  and a.payload ->> 'stage' = p_stage
+                  and coalesce(a.payload ->> 'generation', '') = v_gen) then
       return jsonb_build_object('outcome', 'already_logged');
     end if;
     insert into public.audit_logs (actor_id, action, entity, entity_id, payload, occurred_at)
     values (null, 'operator_alert.skipped_no_recipient', p_entity, p_entity_id,
-            jsonb_build_object('stage', p_stage), now());
+            jsonb_build_object('stage', p_stage, 'generation', v_gen), now());
     return jsonb_build_object('outcome', 'logged');
   end if;
 
@@ -188,6 +240,7 @@ begin
                 where a.action = 'operator_alert.sent'
                   and a.entity = p_entity and a.entity_id = p_entity_id
                   and a.payload ->> 'stage' = p_stage
+                  and coalesce(a.payload ->> 'generation', '') = v_gen
                   and a.payload ->> 'recipient' = p_recipient::text) then
       return jsonb_build_object('outcome', 'already_sent');
     end if;
@@ -196,6 +249,7 @@ begin
                 where a.action = 'operator_alert.reserved'
                   and a.entity = p_entity and a.entity_id = p_entity_id
                   and a.payload ->> 'stage' = p_stage
+                  and coalesce(a.payload ->> 'generation', '') = v_gen
                   and a.payload ->> 'recipient' = p_recipient::text
                   and a.occurred_at > now() - interval '15 minutes'
                   and not exists (select 1 from public.audit_logs o
@@ -208,6 +262,7 @@ begin
      where a.action = 'operator_alert.failed'
        and a.entity = p_entity and a.entity_id = p_entity_id
        and a.payload ->> 'stage' = p_stage
+       and coalesce(a.payload ->> 'generation', '') = v_gen
        and a.payload ->> 'recipient' = p_recipient::text;
     if v_failures >= 5 then
       return jsonb_build_object('outcome', 'gave_up');
@@ -215,7 +270,7 @@ begin
     v_token := gen_random_uuid();
     insert into public.audit_logs (actor_id, action, entity, entity_id, payload, occurred_at)
     values (null, 'operator_alert.reserved', p_entity, p_entity_id,
-            jsonb_build_object('stage', p_stage, 'recipient', p_recipient::text,
+            jsonb_build_object('stage', p_stage, 'generation', v_gen, 'recipient', p_recipient::text,
                                'token', v_token::text, 'attempt', v_failures + 1), now());
     return jsonb_build_object('outcome', 'reserved', 'token', v_token);
   end if;
@@ -224,6 +279,7 @@ begin
     if p_token is null then
       raise exception 'token required' using errcode = '22023';
     end if;
+    -- The token alone names the reservation, so an outcome lands on the generation it was reserved for.
     select * into v_reserved from public.audit_logs a
      where a.action = 'operator_alert.reserved'
        and a.entity = p_entity and a.entity_id = p_entity_id
@@ -241,7 +297,9 @@ begin
     end if;
     insert into public.audit_logs (actor_id, action, entity, entity_id, payload, occurred_at)
     values (null, 'operator_alert.' || p_event, p_entity, p_entity_id,
-            jsonb_build_object('stage', p_stage, 'recipient', p_recipient::text, 'token', p_token::text,
+            jsonb_build_object('stage', p_stage,
+                               'generation', coalesce(v_reserved.payload ->> 'generation', ''),
+                               'recipient', p_recipient::text, 'token', p_token::text,
                                'reason', left(coalesce(p_reason, ''), 120)), now());
     return jsonb_build_object('outcome', 'recorded');
   end if;
@@ -252,10 +310,10 @@ $$;
 
 -- Service only. No client role may list what waits, read operators' addresses or write the ledger.
 revoke all on function public.operator_alerts_due_v1() from public, anon, authenticated;
-revoke all on function public.operator_alert_recipients_v1(text) from public, anon, authenticated;
+revoke all on function public.operator_alert_recipients_v1(text, text) from public, anon, authenticated;
 revoke all on function public.record_operator_alert_v1(text, text, uuid, text, uuid, uuid, text) from public, anon, authenticated;
 grant execute on function public.operator_alerts_due_v1() to service_role;
-grant execute on function public.operator_alert_recipients_v1(text) to service_role;
+grant execute on function public.operator_alert_recipients_v1(text, text) to service_role;
 grant execute on function public.record_operator_alert_v1(text, text, uuid, text, uuid, uuid, text) to service_role;
 
 commit;

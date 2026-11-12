@@ -428,6 +428,13 @@ audit.
   admin link and that flag (`lib/staffing/commercial-requests-feed.ts`). Touches no
   chat table and sends nothing.
 
+- `app/api/internal/operator-alerts/v1/route.ts` (2026-11-12, draft #3230) — operator e-mail
+  alerts for applications that wait on a human. Behind its own `OPERATOR_ALERTS_TRIGGER_TOKEN`
+  machine secret (fail-closed while unset). Service role is needed because the three alert
+  functions are executable by service_role only (`20261112090000`). It reads what waits (type,
+  age, country), the reviewers' addresses, and writes the ledger in `audit_logs`. Touches no
+  chat table; the mail goes through the existing SMTP sender only.
+
 - `app/api/internal/capability-readback/v1/route.ts` (2026-10-22) — the
   Agentai OS capability readback. Behind the same `SUPPLY_FEED_BEARER_TOKEN`
   machine secret (503 while unset, 401 on a wrong token). Service role is

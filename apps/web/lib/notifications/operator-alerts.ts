@@ -4,7 +4,7 @@
  *
  * The database decides everything that matters (migration 20261112090000):
  *   operator_alerts_due_v1()             what waits on a human, and at which stage
- *   operator_alert_recipients_v1(stage)  who may receive it, from the rights valid now
+ *   operator_alert_recipients_v1(entity, stage)  who can review it, from the rights valid now
  *   record_operator_alert_v1(...)        reserved / sent / failed / skipped_no_recipient, in audit_logs
  * This module only groups, renders and sends. It never chooses a recipient and never invents an
  * address: with no recipient the stage is logged as skipped and stays open.
@@ -136,24 +136,35 @@ export async function runOperatorAlertSweep(rpc: Rpc, send: Send, origin: string
     const stageItems = items.filter((i) => i.stage === stage);
     if (stageItems.length === 0) continue;
 
-    const rec = await rpc("operator_alert_recipients_v1", { p_stage: stage });
-    if (rec.error) return { kind: "unavailable", reason: "recipients_read_failed" };
-    const recipients = ((rec.data ?? []) as Recipient[]).filter((r) => typeof r.email === "string" && r.email.includes("@"));
+    // Recipients follow each application's review authority, so they are read per entity; one
+    // reviewer still gets one mail per stage covering every entity they may review.
+    const byRecipient = new Map<string, { recipient: Recipient; items: DueItem[] }>();
+    for (const entity of [...new Set(stageItems.map((i) => i.entity))]) {
+      const entityItems = stageItems.filter((i) => i.entity === entity);
+      const rec = await rpc("operator_alert_recipients_v1", { p_entity: entity, p_stage: stage });
+      if (rec.error) return { kind: "unavailable", reason: "recipients_read_failed" };
+      const recipients = ((rec.data ?? []) as Recipient[]).filter((r) => typeof r.email === "string" && r.email.includes("@"));
 
-    if (recipients.length === 0) {
-      for (const item of stageItems) {
-        const r = await rpc("record_operator_alert_v1", {
-          p_event: "skipped_no_recipient", p_entity: item.entity, p_entity_id: item.entity_id, p_stage: stage,
-        });
-        if (r.error) counts.ledger_errors++;
-        else counts.skipped_no_recipient++;
+      if (recipients.length === 0) {
+        for (const item of entityItems) {
+          const r = await rpc("record_operator_alert_v1", {
+            p_event: "skipped_no_recipient", p_entity: item.entity, p_entity_id: item.entity_id, p_stage: stage,
+          });
+          if (r.error) counts.ledger_errors++;
+          else counts.skipped_no_recipient++;
+        }
+        continue;
       }
-      continue;
+      for (const recipient of recipients) {
+        const slot = byRecipient.get(recipient.profile_id) ?? { recipient, items: [] };
+        slot.items.push(...entityItems);
+        byRecipient.set(recipient.profile_id, slot);
+      }
     }
 
-    for (const recipient of recipients) {
+    for (const { recipient, items: recipientItems } of byRecipient.values()) {
       const held: { item: DueItem; token: string }[] = [];
-      for (const item of stageItems) {
+      for (const item of recipientItems) {
         if (held.length >= MAX_ITEMS_PER_MAIL) break;
         const r = await rpc("record_operator_alert_v1", {
           p_event: "reserve", p_entity: item.entity, p_entity_id: item.entity_id, p_stage: stage,

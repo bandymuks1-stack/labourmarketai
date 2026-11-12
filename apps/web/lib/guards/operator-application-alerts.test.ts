@@ -20,7 +20,7 @@ const route = read("apps", "web", "app", "api", "internal", "operator-alerts", "
 const auth = read("apps", "web", "lib", "api", "operator-alerts-auth.ts");
 const FUNCS = [
   "operator_alerts_due_v1()",
-  "operator_alert_recipients_v1(text)",
+  "operator_alert_recipients_v1(text, text)",
   "record_operator_alert_v1(text, text, uuid, text, uuid, uuid, text)",
 ];
 

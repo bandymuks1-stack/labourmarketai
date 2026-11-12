@@ -4,6 +4,6 @@
 -- sends nothing.
 begin;
 drop function if exists public.record_operator_alert_v1(text, text, uuid, text, uuid, uuid, text);
-drop function if exists public.operator_alert_recipients_v1(text);
+drop function if exists public.operator_alert_recipients_v1(text, text);
 drop function if exists public.operator_alerts_due_v1();
 commit;

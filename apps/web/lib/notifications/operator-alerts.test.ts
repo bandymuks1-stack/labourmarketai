@@ -19,7 +19,9 @@ function fakeDb(due: DueItem[], recipients: Partial<Record<string, Recipient[]>>
   let n = 0;
   const rpc: Rpc = async (fn, args = {}) => {
     if (fn === "operator_alerts_due_v1") return { data: due, error: null };
-    if (fn === "operator_alert_recipients_v1") return { data: recipients[String(args.p_stage)] ?? [], error: null };
+    // recipients are keyed "entity|stage", or by stage alone when every entity shares them
+    if (fn === "operator_alert_recipients_v1")
+      return { data: recipients[`${String(args.p_entity)}|${String(args.p_stage)}`] ?? recipients[String(args.p_stage)] ?? [], error: null };
     const a = args as Record<string, string>;
     const key = `${a.p_entity}:${a.p_entity_id}:${a.p_stage}:${a.p_recipient ?? "-"}`;
     if (a.p_event === "skipped_no_recipient") {
@@ -113,6 +115,33 @@ describe("stages", () => {
       ["operator@ops.example", "Priminimas"],
       ["admin@ops.example", "Eskalacija"],
     ]);
+  });
+});
+
+describe("recipients follow each application's review authority", () => {
+  it("an intake goes to admins only, a claim also to the claim operator; one mail per reviewer", async () => {
+    const claim: DueItem = { entity: "organization_claims", entity_id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc", stage: "immediate", age_hours: 1, country: "IT" };
+    const db = fakeDb(
+      [intake("dddddddd-dddd-4ddd-8ddd-dddddddddddd", "immediate", 1), claim],
+      { "company_need_public_intakes|immediate": [ADMIN], "organization_claims|immediate": [OP, ADMIN] },
+    );
+    const mail = recordingSend();
+    await runOperatorAlertSweep(db.rpc, mail.send, ORIGIN);
+    const byTo = Object.fromEntries(mail.sent.map((m) => [m.to, m.text]));
+    expect(Object.keys(byTo).sort()).toEqual(["admin@ops.example", "operator@ops.example"]);
+    expect(byTo["operator@ops.example"]).not.toContain("nr. dddddddd");
+    expect(byTo["operator@ops.example"]).toContain("cccccccc");
+    expect(byTo["admin@ops.example"]).toContain("nr. dddddddd");
+    expect(byTo["admin@ops.example"]).toContain("cccccccc");
+  });
+
+  it("an entity nobody can review is skipped while the others are still sent", async () => {
+    const claim: DueItem = { entity: "organization_claims", entity_id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee", stage: "immediate", age_hours: 1, country: "IT" };
+    const db = fakeDb([intake("ffffffff-ffff-4fff-8fff-ffffffffffff", "immediate", 1), claim], { "organization_claims|immediate": [OP] });
+    const mail = recordingSend();
+    const r = await runOperatorAlertSweep(db.rpc, mail.send, ORIGIN);
+    expect(r.kind === "ok" && r.counts.skipped_no_recipient).toBe(1);
+    expect(mail.sent).toHaveLength(1);
   });
 });
 
