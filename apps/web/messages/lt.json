@@ -20558,7 +20558,16 @@
       "open": "Atidaryti",
       "more": "Daugiau darbų kitame puslapyje.",
       "from": "nuo",
-      "upTo": "iki"
+      "upTo": "iki",
+      "employmentForm": {
+        "permanent": "Neterminuota",
+        "temporary": "Terminuota",
+        "seasonal": "Sezoninis"
+      },
+      "workingTime": {
+        "full_time": "Visa darbo diena",
+        "part_time": "Ne visa darbo diena"
+      }
     }
   }
 }

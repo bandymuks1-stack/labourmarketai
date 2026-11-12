@@ -20558,7 +20558,16 @@
       "open": "Öffnen",
       "more": "Weitere Stellen auf der nächsten Seite.",
       "from": "ab",
-      "upTo": "bis"
+      "upTo": "bis",
+      "employmentForm": {
+        "permanent": "Unbefristet",
+        "temporary": "Befristet",
+        "seasonal": "Saisonal"
+      },
+      "workingTime": {
+        "full_time": "Vollzeit",
+        "part_time": "Teilzeit"
+      }
     }
   }
 }

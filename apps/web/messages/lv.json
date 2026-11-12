@@ -7951,7 +7951,16 @@
       "open": "Atvērt",
       "more": "Vairāk vakanču nākamajā lapā.",
       "from": "no",
-      "upTo": "līdz"
+      "upTo": "līdz",
+      "employmentForm": {
+        "permanent": "Beztermiņa",
+        "temporary": "Uz noteiktu laiku",
+        "seasonal": "Sezonāls"
+      },
+      "workingTime": {
+        "full_time": "Pilna slodze",
+        "part_time": "Nepilna slodze"
+      }
     }
   }
 }

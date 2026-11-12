@@ -98,6 +98,19 @@ describe("job-list widget rendering", () => {
     expect(text).not.toMatch(/No open jobs/);
   });
 
+  it("Codex P1: employment form and working time read as words, unknown slugs are left out", () => {
+    const facts = (over: Record<string, unknown>, locale: string) =>
+      render({ ok: true, data: { jobs: [job({ compensationCurrency: null, ...over })] } }, locale).filter(
+        (l) => l !== "Welder" && l !== String(LABELS[locale.slice(0, 2)]?.open),
+      );
+    const ru = LABELS.ru as Record<string, Record<string, string>>;
+    expect(facts({ employmentForm: "permanent", workingTime: "full_time", positions: 3 }, "ru")).toEqual([
+      `${ru.employmentForm!.permanent} · ${ru.workingTime!.full_time} · 3 ${LABELS.ru!.positions}`,
+    ]);
+    const leaked = facts({ employmentForm: "unknown", workingTime: "shift_work_xyz" }, "ru").join(" ");
+    expect(leaked).not.toMatch(/unknown|shift_work_xyz|_/);
+  });
+
   it("draws nothing before the host has handed over a result", () => {
     expect(render(undefined)).toEqual([]);
   });

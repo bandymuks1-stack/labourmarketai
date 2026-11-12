@@ -31,18 +31,40 @@ export const JOBS_WIDGET_TOOLS = ["jobs_search", "jobs_get"] as const;
  *  source (`messages/<locale>.json` → `mcpWidget.jobs`), never a second table
  *  (doctrine §2.4). The host's `openai.locale` picks one; an unrouted
  *  language reads English. */
-export type JobsWidgetLabels = Readonly<Record<string, Readonly<Record<string, string>>>>;
+export type JobsWidgetLabels = Readonly<
+  Record<string, Readonly<Record<string, string | Readonly<Record<string, string>>>>>
+>;
 
 const LABEL_KEYS = ["empty", "unavailable", "positions", "open", "more", "from", "upTo"] as const;
+/** Fact words keyed by the projection's slugs; an unknown slug is omitted,
+ *  never shown as an internal identifier (same rule as the job card). */
+const FACT_GROUPS = ["employmentForm", "workingTime"] as const;
 
 export async function loadJobsWidgetLabels(): Promise<JobsWidgetLabels> {
   const entries = await Promise.all(
     activeLocales.map(async (locale) => {
       const mod = (await import(`../../messages/${locale}.json`)) as {
-        default: { mcpWidget?: { jobs?: Record<string, string> } };
+        default: { mcpWidget?: { jobs?: Record<string, unknown> } };
       };
       const jobs = mod.default.mcpWidget?.jobs ?? {};
-      return [locale, Object.fromEntries(LABEL_KEYS.map((k) => [k, jobs[k] ?? ""]))] as const;
+      const words = Object.fromEntries(
+        LABEL_KEYS.map((k) => [k, typeof jobs[k] === "string" ? (jobs[k] as string) : ""]),
+      );
+      const facts = Object.fromEntries(
+        FACT_GROUPS.map((g) => {
+          const group = jobs[g];
+          const map =
+            group && typeof group === "object"
+              ? Object.fromEntries(
+                  Object.entries(group as Record<string, unknown>).filter(
+                    (e): e is [string, string] => typeof e[1] === "string",
+                  ),
+                )
+              : {};
+          return [g, map];
+        }),
+      );
+      return [locale, { ...words, ...facts }] as const;
     }),
   );
   return Object.fromEntries(entries);
@@ -101,7 +123,9 @@ p{margin:12px;color:var(--muted)}
     jobs.forEach(function(j){
       var li=el("li"), info=el("div");
       info.appendChild(el("div","t",j.occupation||j.professionSlug||""));
-      var meta=[j.employmentForm,j.workingTime,j.positions?j.positions+" "+L.positions:null,pay(j,L)].filter(Boolean).join(" · ");
+      // Fact words from the catalog by slug; an unknown slug is left out.
+      function fact(group,slug){ var m=L[group]; return slug&&m&&typeof m[slug]==="string"?m[slug]:null; }
+      var meta=[pay(j,L),fact("employmentForm",j.employmentForm),fact("workingTime",j.workingTime),j.positions>1?j.positions+" "+L.positions:null].filter(Boolean).join(" · ");
       if(meta) info.appendChild(el("div","m",meta));
       var b=el("button",null,L.open); b.addEventListener("click",function(){open(j.webPath);});
       li.appendChild(info); li.appendChild(b); ul.appendChild(li);

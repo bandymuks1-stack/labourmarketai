@@ -20558,7 +20558,16 @@
       "open": "Open",
       "more": "More jobs on the next page.",
       "from": "from",
-      "upTo": "up to"
+      "upTo": "up to",
+      "employmentForm": {
+        "permanent": "Permanent",
+        "temporary": "Temporary",
+        "seasonal": "Seasonal"
+      },
+      "workingTime": {
+        "full_time": "Full time",
+        "part_time": "Part time"
+      }
     }
   }
 }

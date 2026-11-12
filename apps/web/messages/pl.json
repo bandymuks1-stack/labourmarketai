@@ -20558,7 +20558,16 @@
       "open": "Otwórz",
       "more": "Więcej ofert na następnej stronie.",
       "from": "od",
-      "upTo": "do"
+      "upTo": "do",
+      "employmentForm": {
+        "permanent": "Na czas nieokreślony",
+        "temporary": "Na czas określony",
+        "seasonal": "Sezonowa"
+      },
+      "workingTime": {
+        "full_time": "Pełny etat",
+        "part_time": "Niepełny etat"
+      }
     }
   }
 }

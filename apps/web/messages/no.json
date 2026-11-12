@@ -7951,7 +7951,16 @@
       "open": "Åpne",
       "more": "Flere jobber på neste side.",
       "from": "fra",
-      "upTo": "opptil"
+      "upTo": "opptil",
+      "employmentForm": {
+        "permanent": "Fast",
+        "temporary": "Midlertidig",
+        "seasonal": "Sesongarbeid"
+      },
+      "workingTime": {
+        "full_time": "Heltid",
+        "part_time": "Deltid"
+      }
     }
   }
 }

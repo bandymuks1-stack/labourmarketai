@@ -7951,7 +7951,16 @@
       "open": "Ava",
       "more": "Rohkem töid järgmisel lehel.",
       "from": "alates",
-      "upTo": "kuni"
+      "upTo": "kuni",
+      "employmentForm": {
+        "permanent": "Tähtajatu",
+        "temporary": "Tähtajaline",
+        "seasonal": "Hooajatöö"
+      },
+      "workingTime": {
+        "full_time": "Täistööaeg",
+        "part_time": "Osaline tööaeg"
+      }
     }
   }
 }

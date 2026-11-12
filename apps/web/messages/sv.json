@@ -7951,7 +7951,16 @@
       "open": "Öppna",
       "more": "Fler jobb på nästa sida.",
       "from": "från",
-      "upTo": "upp till"
+      "upTo": "upp till",
+      "employmentForm": {
+        "permanent": "Tillsvidare",
+        "temporary": "Tidsbegränsad",
+        "seasonal": "Säsongsarbete"
+      },
+      "workingTime": {
+        "full_time": "Heltid",
+        "part_time": "Deltid"
+      }
     }
   }
 }

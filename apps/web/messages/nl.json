@@ -20558,7 +20558,16 @@
       "open": "Openen",
       "more": "Meer vacatures op de volgende pagina.",
       "from": "vanaf",
-      "upTo": "tot"
+      "upTo": "tot",
+      "employmentForm": {
+        "permanent": "Vast",
+        "temporary": "Tijdelijk",
+        "seasonal": "Seizoenswerk"
+      },
+      "workingTime": {
+        "full_time": "Voltijd",
+        "part_time": "Deeltijd"
+      }
     }
   }
 }

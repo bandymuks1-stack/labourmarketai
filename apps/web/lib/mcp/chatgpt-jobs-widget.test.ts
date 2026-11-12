@@ -45,7 +45,15 @@ describe("the job-list widget template", () => {
 describe("job-list widget labels come from the canonical catalogs", () => {
   it.each(activeLocales)("%s has every widget word", (locale) => {
     for (const key of ["empty", "unavailable", "positions", "open", "more", "from", "upTo"]) {
-      expect(LABELS[locale]?.[key]?.trim(), `${locale}.${key}`).toBeTruthy();
+      const word = LABELS[locale]?.[key];
+      expect(typeof word === "string" && word.trim().length > 0, `${locale}.${key}`).toBe(true);
+    }
+    for (const [group, slugs] of [
+      ["employmentForm", ["permanent", "temporary", "seasonal"]],
+      ["workingTime", ["full_time", "part_time"]],
+    ] as const) {
+      const map = LABELS[locale]?.[group] as Record<string, string> | undefined;
+      for (const slug of slugs) expect(map?.[slug]?.trim(), `${locale}.${group}.${slug}`).toBeTruthy();
     }
   });
 
