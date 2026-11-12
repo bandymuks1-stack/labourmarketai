@@ -14342,7 +14342,8 @@
         "errorStale": "Tijdens het controleren is er iets veranderd (bijvoorbeeld de actieve werkruimte). Er is niets opgeslagen — begin opnieuw.",
         "errorConflict": "Deze waarde verschilt al. Open geavanceerde modus om te vervangen.",
         "errorOpenNeedLimitUpgrade": "Het gratis plan van deze organisatie staat 1 actieve positie toe. Sluit er een, of activeer het plan Organisatie (€99/maand) in je organisatieaccount.",
-        "errorOpenNeedLimitIndividual": "Deze organisatie heeft de limiet voor actieve posities van haar plan bereikt. Er is niets afgeschreven of gewijzigd. Neem contact met ons op."
+        "errorOpenNeedLimitIndividual": "Deze organisatie heeft de limiet voor actieve posities van haar plan bereikt. Er is niets afgeschreven of gewijzigd. Neem contact met ons op.",
+        "errorCountryRequired": "Vul het land van de locatie in (naam of code, bijv. Zweden of SE)."
       },
       "urgency": {
         "flexible": "Flexibel",

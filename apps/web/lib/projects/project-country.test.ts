@@ -84,6 +84,19 @@ describe("every create interface carries the country to the core", () => {
     expect(inline).toContain("l.countryRequired");
   });
 
+  it("chat keeps a typed non-country for the core to refuse, and says why, not 'not allowed'", () => {
+    const forms = read("lib", "conversation", "company-forms.ts");
+    expect(forms).toContain("country: resolveCountryCode(s(st.country)) ?? (s(st.country) || null),");
+    const exec = read("lib", "conversation", "company-executors.ts");
+    const map = exec.slice(exec.indexOf("function mapProjectCreate"));
+    expect(map.indexOf('if (r.code === "country_required") return { ok: false, code: "country_required" };')).toBeLessThan(
+      map.indexOf('return { ok: false, code: "not_authorized" };'),
+    );
+    expect(read("components", "app", "conversation", "inline-action-form.tsx")).toContain(
+      'country_required: "conversation.forms.ui.errorCountryRequired",',
+    );
+  });
+
   it("chat and MCP pass it; the MCP draft names it as missing instead of minting a token", () => {
     expect(read("lib", "conversation", "company-executors.ts")).toContain('country: input.country ?? ""');
     expect(read("lib", "conversation", "company-forms.ts")).toContain('labelKey: "conversation.forms.fields.projectCountry"');

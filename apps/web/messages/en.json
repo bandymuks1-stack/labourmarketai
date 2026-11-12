@@ -14342,7 +14342,8 @@
         "errorStale": "Something changed while you were reviewing (for example, the active workspace). Nothing was saved — start again.",
         "errorConflict": "This value already differs. Open advanced mode to replace it.",
         "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month) in your organization account.",
-        "errorOpenNeedLimitIndividual": "This organization has reached the active-position limit of its plan. Nothing was charged or changed. Contact us."
+        "errorOpenNeedLimitIndividual": "This organization has reached the active-position limit of its plan. Nothing was charged or changed. Contact us.",
+        "errorCountryRequired": "Add the country of the place (a name or a code, e.g. Sweden or SE)."
       },
       "urgency": {
         "flexible": "Flexible",

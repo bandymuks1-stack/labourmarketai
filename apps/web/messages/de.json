@@ -14342,7 +14342,8 @@
         "errorStale": "Während der Prüfung hat sich etwas geändert (zum Beispiel der aktive Arbeitsbereich). Es wurde nichts gespeichert — bitte neu beginnen.",
         "errorConflict": "Dieser Wert weicht bereits ab. Öffnen Sie den erweiterten Modus zum Ersetzen.",
         "errorOpenNeedLimitUpgrade": "Der kostenlose Plan dieser Organisation erlaubt 1 aktive Position. Schließen Sie eine oder aktivieren Sie den Plan „Organisation“ (99 €/Monat) im Organisationskonto.",
-        "errorOpenNeedLimitIndividual": "Diese Organisation hat die Grenze für aktive Positionen ihres Plans erreicht. Nichts wurde belastet oder geändert. Kontaktieren Sie uns."
+        "errorOpenNeedLimitIndividual": "Diese Organisation hat die Grenze für aktive Positionen ihres Plans erreicht. Nichts wurde belastet oder geändert. Kontaktieren Sie uns.",
+        "errorCountryRequired": "Geben Sie das Land des Ortes an (Name oder Code, z. B. Schweden oder SE)."
       },
       "urgency": {
         "flexible": "Flexibel",

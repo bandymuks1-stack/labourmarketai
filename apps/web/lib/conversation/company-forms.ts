@@ -305,7 +305,10 @@ export const AGENCY_FORMS: readonly WorkerFormSpec[] = [
     build: (st: FormState) => ({
       title: s(st.title),
       city: s(st.city) || null,
-      country: resolveCountryCode(s(st.country)) ?? null,
+      // Resolved to ISO; a typed value that is NOT a country travels as typed
+      // so the canonical core refuses it (country_required), instead of
+      // reading as "no country" and silently creating a project without one.
+      country: resolveCountryCode(s(st.country)) ?? (s(st.country) || null),
     }),
   },
 ] as const;

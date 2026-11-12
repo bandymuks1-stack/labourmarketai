@@ -14342,7 +14342,8 @@
         "errorStale": "Podczas sprawdzania coś się zmieniło (na przykład aktywna przestrzeń robocza). Nic nie zostało zapisane — zacznij od nowa.",
         "errorConflict": "Ta wartość jest już inna. Otwórz tryb zaawansowany, aby ją zastąpić.",
         "errorOpenNeedLimitUpgrade": "Plan bezpłatny tej organizacji pozwala na 1 aktywną pozycję. Zamknij jedną lub aktywuj plan Organizacja (99 €/mies.) na koncie organizacji.",
-        "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit aktywnych pozycji swojego planu. Nic nie pobrano ani nie zmieniono. Skontaktuj się z nami."
+        "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit aktywnych pozycji swojego planu. Nic nie pobrano ani nie zmieniono. Skontaktuj się z nami.",
+        "errorCountryRequired": "Podaj kraj miejsca (nazwę lub kod, np. Szwecja lub SE)."
       },
       "urgency": {
         "flexible": "Elastycznie",
