@@ -628,6 +628,12 @@ test("N-6. a pin survives sign-out and sign-in, and a second session shows it", 
     pinned = await add.getAttribute("data-ref");
     expect(pinned, "the home offers something to pin").toBeTruthy();
     await add.click();
+    // While managing the shortcut is an editable chip; "Done" makes it a
+    // shortcut again.
+    await expect(
+      first.page.locator(`[data-testid="my-space-edit-item"][data-ref="${pinned}"]`),
+    ).toBeVisible({ timeout: 30_000 });
+    await first.page.getByTestId("my-space-manage").click();
     const chip = (page: Page) => page.locator(`[data-testid="my-space-pin"][data-ref="${pinned}"]`);
     await expect(chip(first.page)).toBeVisible({ timeout: 30_000 });
 
