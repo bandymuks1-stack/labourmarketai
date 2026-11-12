@@ -17,7 +17,7 @@ import { StartingContextsBand } from "@/components/marketing/starting-contexts-b
 /* `PublicMarketMapBand` is deliberately NOT imported: the band is withdrawn
    from the landing (owner decision 2026-09-27, reasoning at the render site).
    The component file and the map capability are untouched. */
-import { LandingPrimaryActions, LandingClosingBand } from "@/components/marketing/landing-primary-actions";
+import { LandingClosingBand } from "@/components/marketing/landing-primary-actions";
 import { LandingOpenJobsBand } from "@/components/marketing/landing-open-jobs-band";
 import {
   MARKETING_CLIENT_MESSAGE_ROOTS,
@@ -25,7 +25,7 @@ import {
 } from "@/lib/i18n/client-messages";
 import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
-import { LandingThreeWays } from "@/components/marketing/landing-three-ways";
+import { LandingIntentChoice } from "@/components/marketing/landing-intent-choice";
 import { LandingRequestDoors } from "@/components/marketing/landing-request-doors";
 import { BRAND_NAME } from "@/lib/seo/metadata";
 
@@ -92,28 +92,24 @@ export async function FocusLanding({
     getTranslations("common"),
     getTranslations("landing.hero"),
   ]);
-  const tRequest = await getTranslations("landing.requestDoors");
 
-  // THE PROMISE — one headline, one sub, one set of primary doors, whichever
-  // hero carries it (the living worker hero, or the entry hero without it).
-  // `text-hero` was never defined (no token, no Tailwind entry): the h1
-  // rendered at body size. A real display scale now.
+  // THE FIRST SCREEN IS THE CHOICE (owner instruction 2026-11-12: "Sumažink
+  // pagrindinio puslapio sudėtingumą. Pašalink nereikalingus tekstus,
+  // abstrakčius šūkius ir pasikartojančius blokus. Pirmame ekrane turi būti
+  // aiškus pasirinkimas, ką žmogus nori atlikti."). One line that says what
+  // the site is — the owner's own headline, at a reading size instead of a
+  // display size — and then the goal navigator. The second paragraph, the
+  // hero's "Start now" pair, the link down to the request doors and the three
+  // abstract cards left this screen with that instruction; the request doors
+  // themselves, the sentence entry and every later section stay.
   const promise = (
     <>
       <p className="font-mono text-meta uppercase tracking-label text-brand-blue" data-testid="landing-hero-eyebrow">
         {BRAND_NAME}
       </p>
-      <h1 className="font-display text-4xl font-bold leading-[1.04] tracking-tightest text-text-primary sm:text-5xl lg:text-6xl mt-2">
+      <h1 className="mt-2 max-w-3xl font-display text-2xl font-bold leading-tight tracking-tightest text-text-primary sm:text-3xl lg:text-4xl">
         {tHero("headline")}
       </h1>
-      <p className="mt-3 text-lead text-text-secondary">{tHero("sub")}</p>
-      <div className="mt-6">
-        <LandingPrimaryActions locale={locale} surface="landing_hero" />
-      </div>
-      {/* The doors sit further down: from the first screen, one plain way to them. */}
-      <a href="#request" className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-text-secondary underline underline-offset-4 hover:text-text-primary" data-testid="landing-request-doors-link">
-        {tRequest("promise")}
-      </a>
     </>
   );
 
@@ -169,9 +165,12 @@ export async function FocusLanding({
                   now the phone order — promise → entry → doors — and from `xl`
                   the entry takes the right column beside the promise, with the
                   three ways and the request doors full width beneath. */}
-              <section className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] xl:items-center">
-                <div className="max-w-3xl">{promise}</div>
-                <div className="scroll-mt-24" id="find">
+              <section className="flex min-w-0 flex-col gap-6">
+                <div className="min-w-0">{promise}</div>
+                <div className="min-w-0">
+                  <LandingIntentChoice />
+                </div>
+                <div className="scroll-mt-24 max-w-2xl" id="find">
                 <PublicEntry
                   supply={
                     market.activeVacancies !== null && market.distinctEmployers !== null
@@ -184,8 +183,7 @@ export async function FocusLanding({
                   }
                 />
                 </div>
-                <div className="-mt-8 xl:col-span-2">
-                  <LandingThreeWays />
+                <div>
                   <LandingRequestDoors locale={locale} />
                 </div>
               </section>

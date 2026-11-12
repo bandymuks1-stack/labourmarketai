@@ -5120,86 +5120,86 @@
         "line2": "eine Karte, die für Sie spricht."
       },
       "subcopy": "Ihre Karte entsteht aus Ihrer tatsächlich abgeschlossenen Arbeit und Ihren Arbeitsnachweisen, nicht aus einem selbst verfassten Lebenslauf. Passungssignale werden im Kontext angezeigt — Abdeckung und Einsatzbereitschaft für einen konkreten Bedarf, nie eine universelle Gesamtbewertung.",
-      "bullets": [
-        "Arbeitsbereitschaft — ehrliche Signale (erfüllt von insgesamt) mit einem klaren nächsten Schritt. Nie eine universelle Gesamtbewertung.",
-        "Was ich kann — angegebene Fähigkeiten, durch das Arbeitsjournal gestützte Fähigkeiten und echte Bestätigungen, nicht nur ein selbst verfasster Lebenslauf.",
-        "Wann und wo ich arbeiten kann — Verfügbarkeit, Startdatum und Land, immer aktuell.",
-        "Nachweise der Erfahrung — Arbeitshistorie, Dokumente und eine Wachstumskurve aus echten Einträgen."
-      ]
+      "bullets": {
+        "0": "Arbeitsbereitschaft — ehrliche Signale (erfüllt von insgesamt) mit einem klaren nächsten Schritt. Nie eine universelle Gesamtbewertung.",
+        "1": "Was ich kann — angegebene Fähigkeiten, durch das Arbeitsjournal gestützte Fähigkeiten und echte Bestätigungen, nicht nur ein selbst verfasster Lebenslauf.",
+        "2": "Wann und wo ich arbeiten kann — Verfügbarkeit, Startdatum und Land, immer aktuell.",
+        "3": "Nachweise der Erfahrung — Arbeitshistorie, Dokumente und eine Wachstumskurve aus echten Einträgen."
+      }
     },
     "journey": {
       "eyebrow": "Ihr Weg",
       "headline": "Ihr Weg: von der Registrierung bis zur Einstellung",
-      "steps": [
-        {
+      "steps": {
+        "0": {
           "title": "Profil erstellen (5 Min.)",
           "desc": "Geben Sie Ihr Gewerk, Ihre Erfahrung und Ihre Verfügbarkeit an."
         },
-        {
+        "1": {
           "title": "Arbeitsnachweise aufbauen",
           "desc": "Ihre Arbeitsnachweise und Zertifikate zeigen, was Sie können."
         },
-        {
+        "2": {
           "title": "Passungsrichtung zu Chancen sehen",
           "desc": "Rollen, die zu Ihrem Gewerk, Ihrem Satz und Ihrem Standort passen, finden den Weg zu Ihnen."
         },
-        {
+        "3": {
           "title": "Arbeiten, verdienen, aufsteigen",
           "desc": "Abgeschlossene Arbeit stärkt Ihre Nachweise und Ihre Einsatzbereitschaft."
         }
-      ]
+      }
     },
     "features": {
       "eyebrow": "Was Sie bekommen",
       "headline": "Für die Arbeitskraft gebaut, nicht für den Vermittler",
-      "items": [
-        {
+      "items": {
+        "0": {
           "title": "Einsatzbereitschaft aus echter Arbeit",
           "desc": "Ihre Einsatzbereitschaft spiegelt abgeschlossene Arbeit und Nachweise wider, im Kontext angezeigt — keine Versprechen."
         },
-        {
+        "1": {
           "title": "Nachweisgestützte Fähigkeiten",
           "desc": "Auf Basis Ihrer Arbeitsnachweise und Zertifikate."
         },
-        {
+        "2": {
           "title": "Chancen über Grenzen hinweg",
           "desc": "Für grenzüberschreitende Arbeit in ganz Europa."
         },
-        {
+        "3": {
           "title": "Direkter Kontakt zum Arbeitgeber",
           "desc": "Keine undurchsichtigen Vermittler dazwischen."
         },
-        {
+        "4": {
           "title": "Erklärbare Passung",
           "desc": "Sehen Sie, warum eine Rolle zu Ihnen passen könnte."
         },
-        {
+        "5": {
           "title": "Wachsende Erfolgsbilanz",
           "desc": "Jeder Auftrag baut eine mitnehmbare Historie auf."
         }
-      ]
+      }
     },
     "faq": {
       "eyebrow": "FAQ für Arbeitskräfte",
       "headline": "Klare Antworten",
-      "items": [
-        {
+      "items": {
+        "0": {
           "q": "Woher kommen die Fähigkeitssignale?",
           "a": "Aus Ihren Arbeitsjournal-Einträgen zu abgeschlossener Arbeit und hochgeladenen Zertifikaten — nie allein aus einer selbst verfassten Angabe."
         },
-        {
+        "1": {
           "q": "Was kostet es Arbeitskräfte?",
           "a": "Für Einzelpersonen ist alles kostenlos — Profil, Matches, Suche und Nachrichten kosten eine Arbeitskraft niemals etwas. Bezahlte Pläne gibt es nur für Organisationen; sie stehen auf der Preisseite."
         },
-        {
+        "2": {
           "q": "Wer sieht mein Profil?",
           "a": "Nur registrierte Arbeitgeber und Personalagenturen, für die Sie sichtbar sind — Sie steuern Ihre Verfügbarkeit und Ihre Sichtbarkeit."
         },
-        {
+        "3": {
           "q": "Kann ich für mehrere Unternehmen arbeiten?",
           "a": "Ja. Ihr Profil gehört Ihnen; Sie können Rollen von jedem Unternehmen auf der Plattform annehmen."
         }
-      ]
+      }
     },
     "cta": {
       "headline": {
@@ -5218,86 +5218,86 @@
         "line2": "aus."
       },
       "subcopy": "Veröffentlichen Sie, was jedes Projekt braucht, und sehen Sie erklärbare Passungsrichtung von verfügbaren Arbeitskräften und Personalagenturen — in Stunden, nicht in Wochen.",
-      "bullets": [
-        "Projekt + Standort — grenzen Sie jeden Bedarf präzise ein.",
-        "Personalstärke — wie viele Personen Sie pro Rolle brauchen.",
-        "Erforderliche Fähigkeiten — abgeglichen mit den Fähigkeitsnachweisen der Arbeitskräfte.",
-        "Passungsrichtung — Arbeitskräfte, deren Fähigkeiten zu diesem Bedarf passen könnten."
-      ]
+      "bullets": {
+        "0": "Projekt + Standort — grenzen Sie jeden Bedarf präzise ein.",
+        "1": "Personalstärke — wie viele Personen Sie pro Rolle brauchen.",
+        "2": "Erforderliche Fähigkeiten — abgeglichen mit den Fähigkeitsnachweisen der Arbeitskräfte.",
+        "3": "Passungsrichtung — Arbeitskräfte, deren Fähigkeiten zu diesem Bedarf passen könnten."
+      }
     },
     "journey": {
       "eyebrow": "So funktioniert Passungsrichtung für Sie",
       "headline": "Vom Bedarf zur Einstellung",
-      "steps": [
-        {
+      "steps": {
+        "0": {
           "title": "Projekt anlegen + Bedarf veröffentlichen",
           "desc": "Definieren Sie Rollen, Personalstärke und Fähigkeiten."
         },
-        {
+        "1": {
           "title": "Sehen, wer passt",
           "desc": "Arbeitskräfte und Agenturen, deren Angaben zu Ihrem Bedarf passen, werden nach Passung mit Begründung gelistet — ein Hinweis, keine Garantie. Wen Sie kontaktieren, entscheiden Sie."
         },
-        {
+        "2": {
           "title": "Direkt Kontakt aufnehmen",
           "desc": "Kontaktieren Sie die Personen, die Sie möchten — ohne Gatekeeper."
         },
-        {
+        "3": {
           "title": "Schneller einstellen",
           "desc": "Besetzen Sie Rollen in Tagen, mit nachvollziehbaren Entscheidungen."
         }
-      ]
+      }
     },
     "features": {
       "eyebrow": "Warum Unternehmen",
       "headline": "Angebot, mit dem Sie arbeiten können",
-      "items": [
-        {
+      "items": {
+        "0": {
           "title": "Erklärbare Passungsrichtung",
           "desc": "Jedes Passungssignal zeigt die Gründe dahinter."
         },
-        {
+        "1": {
           "title": "Grenzüberschreitender Arbeitskräftepool",
           "desc": "Angebot aus jedem Markt, in dem wir tätig sind — an einem Ort."
         },
-        {
+        "2": {
           "title": "Keine undurchsichtigen Zwischenhändler",
           "desc": "Sie sehen die Beziehung, und sie gehört Ihnen."
         },
-        {
+        "3": {
           "title": "Fähigkeitsnachweise + Passungssignale",
           "desc": "Stellen Sie auf Basis von Nachweisen ein, nicht von Behauptungen."
         },
-        {
+        "4": {
           "title": "Angebotssignale",
           "desc": "Sehen Sie die angegebene Verfügbarkeit der Arbeitskräfte, sobald Profile aktualisiert werden."
         },
-        {
+        "5": {
           "title": "Direkter Kontakt",
           "desc": "Die Beziehung zur Arbeitskraft gehört Ihnen."
         }
-      ]
+      }
     },
     "faq": {
       "eyebrow": "FAQ für Unternehmen",
       "headline": "Klare Antworten",
-      "items": [
-        {
+      "items": {
+        "0": {
           "q": "Wie werden Passungssignale angezeigt?",
           "a": "Immer bezogen auf einen konkreten Bedarf: Abdeckung und Passung aus den Fähigkeitsnachweisen, der Zuverlässigkeit und den Vor-Ort-Nachweisen der Arbeitskräfte, mit Begründung. Nie eine universelle, zwischen Personen vergleichbare Gesamtbewertung."
         },
-        {
+        "1": {
           "q": "Was kostet es?",
           "a": "Die Preise stehen auf der Preisseite: eine aktive Position pro Organisation ist kostenlos; für mehr Positionen braucht es den Organisationsplan, der im Konto aktiviert wird. Einen Personalbedarf einzureichen ist kostenlos."
         },
-        {
+        "2": {
           "q": "Können wir nach Standort filtern?",
           "a": "Ja — nach Land und Region, abgeglichen mit dem Standort der Arbeitskräfte und ihrer Umzugsbereitschaft."
         },
-        {
+        "3": {
           "q": "Wie wird die Erfahrung der Arbeitskräfte dargestellt?",
           "a": "Über die Fähigkeitsnachweise der Arbeitskräfte, strukturierte Arbeitshistorie und kontextbezogene Passungssignale — nicht über selbst verfasste Lebensläufe."
         }
-      ]
+      }
     },
     "cta": {
       "headline": {
@@ -5316,86 +5316,86 @@
         "line2": "in einem Raum."
       },
       "subcopy": "Verwalten Sie Ihre Arbeitskräfte, verbinden Sie sie mit Kundenbedarfen und vermitteln Sie Kontakte — ohne Übersicht oder Kontrolle zu verlieren.",
-      "bullets": [
-        "Poolgröße — jede verwaltete Arbeitskraft auf einen Blick.",
-        "Gewerke-Aufschlüsselung — Kapazität nach Fähigkeit, live.",
-        "Einsatzstatus — Aktiv, Ausstehend, Verfügbar.",
-        "Mehrere Kunden — setzen Sie die richtigen Leute bei verschiedenen Kunden ein."
-      ]
+      "bullets": {
+        "0": "Poolgröße — jede verwaltete Arbeitskraft auf einen Blick.",
+        "1": "Gewerke-Aufschlüsselung — Kapazität nach Fähigkeit, live.",
+        "2": "Einsatzstatus — Aktiv, Ausstehend, Verfügbar.",
+        "3": "Mehrere Kunden — setzen Sie die richtigen Leute bei verschiedenen Kunden ein."
+      }
     },
     "journey": {
       "eyebrow": "Personalagentur-Workflow",
       "headline": "Führen Sie Ihren Pool wie einen Desk",
-      "steps": [
-        {
+      "steps": {
+        "0": {
           "title": "Arbeitskräfte onboarden",
           "desc": "Bringen Sie Ihren verwalteten Pool in einen Arbeitsbereich."
         },
-        {
+        "1": {
           "title": "Mit Kundennachfrage verbinden",
           "desc": "Lenken Sie Ihre Leute zu offenen Positionen bei Kunden."
         },
-        {
+        "2": {
           "title": "Einsätze verwalten",
           "desc": "Verfolgen Sie Aktiv, Ausstehend und Verfügbar."
         },
-        {
+        "3": {
           "title": "Pool vergrößern",
           "desc": "Bauen Sie Kapazität dort auf, wo die Nachfrage steigt."
         }
-      ]
+      }
     },
     "features": {
       "eyebrow": "Warum Personalagenturen",
       "headline": "Hebelwirkung statt Kontrollverlust",
-      "items": [
-        {
+      "items": {
+        "0": {
           "title": "Ihren Pool verwalten",
           "desc": "Arbeitskräfte, Verfügbarkeit und Status an einem Ort."
         },
-        {
+        "1": {
           "title": "Im Auftrag von Kunden veröffentlichen",
           "desc": "Vermitteln Sie Nachfrage, ohne die Kundenbeziehung zu verlieren."
         },
-        {
+        "2": {
           "title": "Passgenaue Vermittlung",
           "desc": "Setzen Sie die richtigen Leute schneller ein."
         },
-        {
+        "3": {
           "title": "Sichtbarkeitseinstellungen",
           "desc": "Öffentlich, nur für Personalagenturen oder direkt — Sie entscheiden."
         },
-        {
+        "4": {
           "title": "Grenzüberschreitende Reichweite",
           "desc": "Auftraggeber und Arbeitskräfte in jedem Markt, in dem wir tätig sind."
         },
-        {
+        "5": {
           "title": "Ihren Desk ausbauen",
           "desc": "Kapazitätseinblicke, wenn sich die Nachfrage verschiebt."
         }
-      ]
+      }
     },
     "faq": {
       "eyebrow": "Personalagentur-FAQ",
       "headline": "Klare Antworten",
-      "items": [
-        {
+      "items": {
+        "0": {
           "q": "Behalten wir unsere Kundenbeziehungen?",
           "a": "Ja. Sie vermitteln und behalten die Kontrolle — die Plattform umgeht Sie niemals."
         },
-        {
+        "1": {
           "q": "Was kostet es Personalagenturen?",
           "a": "Eine Agentur ist eine Organisation und nutzt dieselben Pläne: eine aktive Position ist kostenlos, für mehr braucht es den Organisationsplan von der Preisseite. Einen separaten Agenturtarif gibt es nicht."
         },
-        {
+        "2": {
           "q": "Können wir die Sichtbarkeit der Arbeitskräfte steuern?",
           "a": "Ja — öffentlich, nur für Personalagenturen oder direkt, pro Arbeitskraft und pro Bedarf."
         },
-        {
+        "3": {
           "q": "Kann eine Arbeitskraft mehrere Kunden bedienen?",
           "a": "Ja, mit Einsatzstatus-Verfolgung, damit nichts doppelt gebucht wird."
         }
-      ]
+      }
     },
     "cta": {
       "headline": {
@@ -5553,24 +5553,24 @@
       "title": "Arbeit finden",
       "titleAccent": "mit einem kostenlosen Profil.",
       "subcopy": "Erstellen Sie ein Profil, legen Sie Ihre Verfügbarkeit fest und lassen Sie sich von echter Nachfrage über Grenzen hinweg finden.",
-      "benefits": [
-        {
+      "benefits": {
+        "0": {
           "title": "Ein Profil, jeder Markt",
           "body": "Pflegen Sie einen einzigen Avatar mit nachweisgestützten Fähigkeiten und Verfügbarkeit — sichtbar für registrierte Arbeitgeber über Grenzen hinweg."
         },
-        {
+        "1": {
           "title": "Echte Nachfrage",
           "body": "Sehen Sie offene Personalbedarfe, die zu Ihrem Gewerk, Ihren Fähigkeiten und Ihrer Stadt passen — und bekunden Sie mit einem Klick Ihr Interesse."
         },
-        {
+        "2": {
           "title": "Ehrliche Signale",
           "body": "Transparente, kontextbezogene Passungssignale — keine aufgeblähten Behauptungen, keine universelle Gesamtbewertung, kein bezahltes Ranking."
         },
-        {
+        "3": {
           "title": "Wächst, während Sie arbeiten",
           "body": "Halten Sie erledigte Arbeiten und Ergebnisse fest — Ihre berufliche Historie wird reicher, und die Suche nach Möglichkeiten wird immer präziser, auch wenn Sie nicht aktiv suchen."
         }
-      ],
+      },
       "screenshot": "Avatar-Ablauf für Arbeitskräfte",
       "cta": "Kostenloses Profil erstellen"
     },
@@ -5579,20 +5579,20 @@
       "title": "Arbeitskräfte finden,",
       "titleAccent": "die Ihre Projekte brauchen.",
       "subcopy": "Sagen Sie uns, welche Fachkräfte jedes Projekt braucht, wie viele und ab wann. Die Anfrage ist kostenlos und braucht kein Konto; mit einem kostenlosen Konto sehen Sie außerdem, welche verfügbaren Arbeitskräfte und Personalagenturen passen.",
-      "benefits": [
-        {
+      "benefits": {
+        "0": {
           "title": "Bedarf pro Projekt veröffentlichen",
           "body": "Definieren Sie Rollen, Personalstärke und Fähigkeiten pro Projekt — keine vagen Stellenanzeigen."
         },
-        {
+        "1": {
           "title": "Passung zum konkreten Auftrag",
           "body": "Sie sehen, welche verfügbaren Arbeitskräfte und Personalagenturen zu jedem konkreten Bedarf passen — ehrlich, pro Bedarf."
         },
-        {
+        "2": {
           "title": "Personalagenturen, wenn Sie sie brauchen",
           "body": "Greifen Sie für Spitzenbedarf auf die Pools registrierter Personalagenturen zu, ohne die Übersicht zu verlieren."
         }
-      ],
+      },
       "screenshot": "Bedarfsablauf für Unternehmen",
       "cta": "Benötigte Arbeitskräfte beschreiben",
       "calculatorBody": "Bevor Sie Arbeit anfragen, schätzen Sie sie ein: Arbeitsstunden, Material, Geräte und Reisen — mit Ihren eigenen Zahlen.",
@@ -5606,11 +5606,11 @@
           "titleAccent": "in Luxemburg.",
           "subcopy": "Für Bauunternehmen und Subunternehmer. Sagen Sie uns, welche Fachkräfte Sie brauchen — Schweißer, Elektriker, Zimmerer, Gerüstbauer —, wie viele, wo und ab wann.",
           "cta": "Benötigte Arbeitskräfte beschreiben",
-          "points": [
-            "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
-            "Wir suchen Menschen, deren erfasste Arbeit zu Ihrem Bedarf passt. Gibt es noch keine passende Person, sagen wir es Ihnen.",
-            "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
-          ]
+          "points": {
+            "0": "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
+            "1": "Wir suchen Menschen, deren erfasste Arbeit zu Ihrem Bedarf passt. Gibt es noch keine passende Person, sagen wir es Ihnen.",
+            "2": "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
+          }
         },
         "nl": {
           "metaTitle": "Fachkräfte für Baustellen in den Niederlanden",
@@ -5620,11 +5620,11 @@
           "titleAccent": "in den Niederlanden.",
           "subcopy": "Für Bauunternehmen und Subunternehmer. Sagen Sie uns, welche Fachkräfte Sie brauchen — Schweißer, Elektriker, Zimmerer, Gerüstbauer —, wie viele, wo und ab wann.",
           "cta": "Benötigte Arbeitskräfte beschreiben",
-          "points": [
-            "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
-            "Wir suchen Menschen, deren erfasste Arbeit zu Ihrem Bedarf passt. Gibt es noch keine passende Person, sagen wir es Ihnen.",
-            "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
-          ]
+          "points": {
+            "0": "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
+            "1": "Wir suchen Menschen, deren erfasste Arbeit zu Ihrem Bedarf passt. Gibt es noch keine passende Person, sagen wir es Ihnen.",
+            "2": "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
+          }
         },
         "dk": {
           "metaTitle": "Fachkräfte für Baustellen in Dänemark",
@@ -5634,11 +5634,11 @@
           "titleAccent": "in Dänemark.",
           "subcopy": "Für Bauunternehmen und Subunternehmer. Sagen Sie uns, welche Fachkräfte Sie brauchen — Schweißer, Elektriker, Zimmerer, Gerüstbauer —, wie viele, wo und ab wann.",
           "cta": "Benötigte Arbeitskräfte beschreiben",
-          "points": [
-            "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
-            "Wir suchen Menschen, deren erfasste Arbeit zu Ihrem Bedarf passt. Gibt es noch keine passende Person, sagen wir es Ihnen.",
-            "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
-          ]
+          "points": {
+            "0": "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
+            "1": "Wir suchen Menschen, deren erfasste Arbeit zu Ihrem Bedarf passt. Gibt es noch keine passende Person, sagen wir es Ihnen.",
+            "2": "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
+          }
         }
       }
     },
@@ -5647,20 +5647,20 @@
       "title": "Ihr Pool,",
       "titleAccent": "in Bewegung.",
       "subcopy": "Verwalten Sie Ihre betreuten Arbeitskräfte, veröffentlichen Sie Bedarf im Auftrag von Kunden und vermitteln Sie Kontakte — alles an einem Ort.",
-      "benefits": [
-        {
+      "benefits": {
+        "0": {
           "title": "Pool verwalten",
           "body": "Halten Sie Ihre betreuten Arbeitskräfte, Verfügbarkeiten und Status in einem Arbeitsbereich organisiert."
         },
-        {
+        "1": {
           "title": "Mit Vorsprung vermitteln",
           "body": "Teilen Sie Kundenbedarfe und platzieren Sie die richtigen Personen schneller — mit erklärbarer Passungsrichtung."
         },
-        {
+        "2": {
           "title": "Sichtbarkeitssteuerung",
           "body": "Wählen Sie, was öffentlich, nur für Agenturen oder direkt sichtbar ist — Sie steuern die Sichtbarkeit."
         }
-      ],
+      },
       "screenshot": "Agenturmodus-Ablauf",
       "cta": "Agenturkonto erstellen"
     },
@@ -5670,39 +5670,39 @@
       "titleAccent": "kostenlos.",
       "subcopy": "Erstellen Sie einen Lebenslauf von Grund auf oder importieren Sie Ihr vorhandenes PDF oder DOCX. Prüfen Sie jeden extrahierten Fakt, wählen Sie eine klare Vorlage und laden Sie als PDF herunter — kostenlos. Auf Wunsch kann dieselbe Information Ihr Arbeitskraft-Profil aufbauen und echte Stellenanzeigen aus offiziellen öffentlichen Quellen zeigen.",
       "cta": "Meinen Lebenslauf erstellen — kostenlos",
-      "benefits": [
-        {
+      "benefits": {
+        "0": {
           "title": "Importieren oder neu beginnen",
           "body": "Laden Sie einen vorhandenen Lebenslauf hoch (PDF, DOCX oder Text) oder beginnen Sie mit einer leeren Seite. Extrahierte Fakten bleiben Vorschläge, bis Sie sie übernehmen."
         },
-        {
+        "1": {
           "title": "Ehrliche Struktur",
           "body": "Ihre Erfahrung, Ausbildung, Sprachen und Fähigkeiten werden zur Prüfung strukturiert — nichts wird erfunden und nichts ohne Ihre Zustimmung gespeichert."
         },
-        {
+        "2": {
           "title": "Klare Vorlagen, echtes PDF",
           "body": "Wählen Sie eine professionelle Vorlage und exportieren Sie über den Browser als A4-PDF — ohne Wasserzeichen, ohne Bezahlschranke."
         },
-        {
+        "3": {
           "title": "Mehr als ein Dokument",
           "body": "Mit Ihrer ausdrücklichen Zustimmung können dieselben Fakten Ihr Arbeitskraft-Profil aufbauen, Ihre Fähigkeiten mit dem gemeinsamen europäischen Fähigkeitenkatalog verbinden und passende öffentliche Stellenanzeigen zeigen. Indem Sie erledigte Arbeiten festhalten, wächst Ihre berufliche Historie stetig — und die Suche nach Möglichkeiten wird immer besser."
         }
-      ],
+      },
       "stepsTitle": "So funktioniert es",
-      "steps": [
-        {
+      "steps": {
+        "0": {
           "title": "Kostenlos registrieren",
           "body": "Ein Konto hält Ihren Lebenslauf bearbeitbar und Ihre Daten unter Ihrer Kontrolle — Sie können sie jederzeit löschen."
         },
-        {
+        "1": {
           "title": "Erfahrung hinzufügen",
           "body": "Importieren Sie Ihren alten Lebenslauf oder tragen Sie ihn ein — prüfen Sie dann jeden Fakt und entscheiden Sie vor der Verwendung, was bleibt."
         },
-        {
+        "2": {
           "title": "Herunterladen und entscheiden",
           "body": "Exportieren Sie Ihren Lebenslauf als PDF. Für Arbeitgeber sichtbar zu werden bleibt eine separate, optionale Entscheidung."
         }
-      ],
+      },
       "privacyNote": "Ihr Lebenslauf bleibt standardmäßig privat. Nichts wird an Arbeitgeber weitergegeben, bis Sie die Sichtbarkeit ausdrücklich aktivieren — und Sie können sie jederzeit deaktivieren."
     }
   },
@@ -5723,63 +5723,63 @@
       "free": {
         "name": "Kostenlos",
         "tagline": "Für den Einstieg",
-        "features": [
-          "1 aktive Position",
-          "Matching-Shortlist und Kandidatenkontakt",
-          "Buchungen, Projekte, Anweisungen",
-          "Arbeitsbestätigung und bestätigte Fähigkeiten"
-        ]
+        "features": {
+          "0": "1 aktive Position",
+          "1": "Matching-Shortlist und Kandidatenkontakt",
+          "2": "Buchungen, Projekte, Anweisungen",
+          "3": "Arbeitsbestätigung und bestätigte Fähigkeiten"
+        }
       },
       "business": {
         "name": "Organisation",
         "tagline": "Für Organisationen, die aktiv einstellen und Teams aufbauen",
-        "features": [
-          "Keine feste Obergrenze für aktive Positionen",
-          "Alles aus Kostenlos, im Betriebsmaßstab",
-          "Ein Plan für jede Art von Organisation",
-          "Projektbetrieb, Berichte und CSV-Export"
-        ]
+        "features": {
+          "0": "Keine feste Obergrenze für aktive Positionen",
+          "1": "Alles aus Kostenlos, im Betriebsmaßstab",
+          "2": "Ein Plan für jede Art von Organisation",
+          "3": "Projektbetrieb, Berichte und CSV-Export"
+        }
       },
       "agency": {
         "name": "Agentur",
         "tagline": "Für Personalpartner.",
-        "features": [
-          "Unbegrenzt betreute Arbeitskräfte",
-          "Vermittlungstools",
-          "Arbeitskräfte-Suche",
-          "Prioritäts-Support"
-        ]
+        "features": {
+          "0": "Unbegrenzt betreute Arbeitskräfte",
+          "1": "Vermittlungstools",
+          "2": "Arbeitskräfte-Suche",
+          "3": "Prioritäts-Support"
+        }
       },
       "enterprise": {
         "name": "Enterprise",
         "tagline": "Für Skalierung und Kontrolle.",
-        "features": [
-          "Unbegrenzte Projekte",
-          "SSO",
-          "SLA",
-          "Dedizierter Support"
-        ]
+        "features": {
+          "0": "Unbegrenzte Projekte",
+          "1": "SSO",
+          "2": "SLA",
+          "3": "Dedizierter Support"
+        }
       }
     },
     "faqTitle": "FAQ zu den Preisen",
-    "faq": [
-      {
+    "faq": {
+      "0": {
         "q": "Warum nur ein bezahlter Plan?",
         "a": "Jede Organisation — Arbeitgeber, Personaldienstleister, Auftragnehmer oder Bildungsträger — erhält dasselbe Produkt. Nur der Umfang unterscheidet sich: 1 aktive Position kostenlos, für 99 €/Monat ohne feste Obergrenze für aktive Positionen."
       },
-      {
+      "1": {
         "q": "Bleibt der kostenlose Plan kostenlos?",
         "a": "Ja. Personen bleiben kostenlos, und eine Organisation kann eine aktive Position ohne Kosten führen."
       },
-      {
+      "2": {
         "q": "Wie wird abgerechnet?",
         "a": "Kartenzahlung über Stripe. Rechnungen, Zahlungsverlauf und Kündigung finden Sie im Organisationskonto."
       },
-      {
+      "3": {
         "q": "Gibt es eine Obergrenze für aktive Positionen?",
         "a": "Kostenlos ist 1 aktive Position enthalten. Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Übliche Schutzmaßnahmen gegen Missbrauch, etwa Anfragelimits, gelten weiterhin."
       }
-    ],
+    },
     "priceState": {
       "draft_pricing": "Die Preise werden vorbereitet — es kann noch nichts gekauft werden.",
       "owner_confirmed": "Preise vom Eigentümer bestätigt. Die Aktivierung erfolgt im Organisationskonto; auf dieser Seite wird nichts belastet."
@@ -5874,190 +5874,190 @@
     "marketplaceRules": {
       "title": "Marktplatzregeln",
       "intro": "Diese Regeln halten den Marktplatz sicher und fair. Sie gelten für alle Benutzer und Angebote.",
-      "rules": [
-        "Das System bestätigt niemals eine Arbeitserlaubnis oder rechtliche Berechtigung ohne die erforderlichen Dokumente.",
-        "Ein Verifiziert-Status erscheint nur nach einer echten menschlichen Prüfung — niemals automatisch.",
-        "Kontakte werden nicht ohne die Erlaubnis des Benutzers angezeigt.",
-        "Öffentliche Angebote erscheinen erst nach Moderation; nicht vertrauenswürdige oder verdächtige Angebote werden ausgeblendet.",
-        "Der Handel mit regulierten oder illegalen Waren und Dienstleistungen ist verboten.",
-        "Ein Kartenpunkt erscheint nur mit verifizierten Koordinaten — keine gefälschten Markierungen.",
-        "Zahlungen zwischen Nutzern laufen nicht über die Plattform; über sie werden nur Entgelte für Plattformleistungen gezahlt.",
-        "Unangemessenes Verhalten oder verdächtige Aktivitäten können gemeldet werden — Moderatoren prüfen sie."
-      ]
+      "rules": {
+        "0": "Das System bestätigt niemals eine Arbeitserlaubnis oder rechtliche Berechtigung ohne die erforderlichen Dokumente.",
+        "1": "Ein Verifiziert-Status erscheint nur nach einer echten menschlichen Prüfung — niemals automatisch.",
+        "2": "Kontakte werden nicht ohne die Erlaubnis des Benutzers angezeigt.",
+        "3": "Öffentliche Angebote erscheinen erst nach Moderation; nicht vertrauenswürdige oder verdächtige Angebote werden ausgeblendet.",
+        "4": "Der Handel mit regulierten oder illegalen Waren und Dienstleistungen ist verboten.",
+        "5": "Ein Kartenpunkt erscheint nur mit verifizierten Koordinaten — keine gefälschten Markierungen.",
+        "6": "Zahlungen zwischen Nutzern laufen nicht über die Plattform; über sie werden nur Entgelte für Plattformleistungen gezahlt.",
+        "7": "Unangemessenes Verhalten oder verdächtige Aktivitäten können gemeldet werden — Moderatoren prüfen sie."
+      }
     },
     "terms": {
       "metaDescription": "Ihr Vertrag über jede Plattformleistung kommt mit der UAB „Nonstop Group“ zustande. Sie stellt auch die Rechnungen aus und empfängt die Zahlungen.",
       "title": "Nutzungsbedingungen",
-      "sections": [
-        {
+      "sections": {
+        "0": {
           "heading": "Mit wem Sie den Vertrag schließen",
-          "items": [
-            "Alle Plattformleistungen werden kommerziell erbracht und verkauft von der UAB „Nonstop Group“, Unternehmenscode 302676973, USt LT100010790613, eingetragener Sitz Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litauen.",
-            "Ihr Vertrag über jede Plattformleistung kommt mit der UAB „Nonstop Group“ zustande. Rechnungen stellt die UAB „Nonstop Group“ aus; Zahlungen empfängt die UAB „Nonstop Group“.",
-            "Der Labour Market AI Sp. z o.o. (Warschau, Polen; KRS 0001218752) gehören die LabourMarket.ai-Software, die Marke und zugehöriges geistiges Eigentum; sie lizenziert diese an die UAB „Nonstop Group“. Sie ist nicht Partei Ihres Vertrags."
-          ]
+          "items": {
+            "0": "Alle Plattformleistungen werden kommerziell erbracht und verkauft von der UAB „Nonstop Group“, Unternehmenscode 302676973, USt LT100010790613, eingetragener Sitz Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litauen.",
+            "1": "Ihr Vertrag über jede Plattformleistung kommt mit der UAB „Nonstop Group“ zustande. Rechnungen stellt die UAB „Nonstop Group“ aus; Zahlungen empfängt die UAB „Nonstop Group“.",
+            "2": "Der Labour Market AI Sp. z o.o. (Warschau, Polen; KRS 0001218752) gehören die LabourMarket.ai-Software, die Marke und zugehöriges geistiges Eigentum; sie lizenziert diese an die UAB „Nonstop Group“. Sie ist nicht Partei Ihres Vertrags."
+          }
         },
-        {
+        "1": {
           "heading": "Anwendbares Recht und Streitigkeiten",
-          "items": [
-            "Für diese Bedingungen und jeden Kundenvertrag gilt das Recht der Republik Litauen; Streitigkeiten entscheiden die zuständigen litauischen Gerichte, soweit nicht zwingendes Verbraucher-, Arbeits-, Datenschutz- oder sonstiges anwendbares Recht Ihnen unentziehbare Rechte oder einen anderen Gerichtsstand gewährt.",
-            "Als Verbraucher behalten Sie stets die zwingenden Rechte des Landes, in dem Sie wohnen."
-          ]
+          "items": {
+            "0": "Für diese Bedingungen und jeden Kundenvertrag gilt das Recht der Republik Litauen; Streitigkeiten entscheiden die zuständigen litauischen Gerichte, soweit nicht zwingendes Verbraucher-, Arbeits-, Datenschutz- oder sonstiges anwendbares Recht Ihnen unentziehbare Rechte oder einen anderen Gerichtsstand gewährt.",
+            "1": "Als Verbraucher behalten Sie stets die zwingenden Rechte des Landes, in dem Sie wohnen."
+          }
         },
-        {
+        "2": {
           "heading": "Was die Plattform ist und was nicht",
-          "items": [
-            "Die Plattform unterstützt das Finden, Präsentieren und Koordinieren von Arbeitsmarktchancen unter Mitwirkung eines menschlichen Operators.",
-            "Die Nutzung der Plattform begründet für sich genommen kein Arbeitsverhältnis und ist keine Garantie für Arbeit oder Arbeitskräfte.",
-            "Profile, Lebensläufe und Kontaktdaten von Arbeitskräften werden nur nach den Einwilligungsregeln der Plattform weitergegeben — siehe Datenschutzerklärung."
-          ]
+          "items": {
+            "0": "Die Plattform unterstützt das Finden, Präsentieren und Koordinieren von Arbeitsmarktchancen unter Mitwirkung eines menschlichen Operators.",
+            "1": "Die Nutzung der Plattform begründet für sich genommen kein Arbeitsverhältnis und ist keine Garantie für Arbeit oder Arbeitskräfte.",
+            "2": "Profile, Lebensläufe und Kontaktdaten von Arbeitskräften werden nur nach den Einwilligungsregeln der Plattform weitergegeben — siehe Datenschutzerklärung."
+          }
         }
-      ]
+      }
     },
     "privacy": {
       "title": "Datenschutzerklärung",
       "metaDescription": "In einfacher Sprache: welche personenbezogenen Daten LabourMarket.ai verwendet, warum und welche Rechte Sie haben. Die Plattform, wie sie heute funktioniert.",
       "intro": "Diese Seite erklärt in einfacher Sprache, welche personenbezogenen Daten Labour Market AI verwendet, warum sie verwendet werden und welche Rechte Sie haben. Sie beschreibt die Plattform, wie sie heute funktioniert.",
-      "sections": [
-        {
+      "sections": {
+        "0": {
           "heading": "Wer für Ihre Daten verantwortlich ist",
-          "items": [
-            "Verantwortliche für die Datenverarbeitung der LabourMarket.ai-Plattform ist die UAB „Nonstop Group“, Unternehmenscode 302676973, eingetragener Sitz Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litauen.",
-            "Datenschutzkontakt: info@labourmarket.ai. Ein Datenschutzbeauftragter ist nicht bestellt.",
-            "Der Labour Market AI Sp. z o.o. (Warschau, Polen) gehören die Plattformsoftware und die Marke; sie lizenziert diese an die UAB „Nonstop Group“. Das IP-Eigentum verschafft ihr keinen Zugriff auf Ihre personenbezogenen Daten: sie hat keinen routinemäßigen Zugriff auf die Produktionsdatenbank, Profile, Lebensläufe, Kontaktdaten oder Dokumente.",
-            "Sie haben das Recht, sich bei Ihrer Aufsichtsbehörde zu beschweren; für die Niederlassung der Verantwortlichen ist dies die litauische Datenschutzbehörde (VDAI)."
-          ]
+          "items": {
+            "0": "Verantwortliche für die Datenverarbeitung der LabourMarket.ai-Plattform ist die UAB „Nonstop Group“, Unternehmenscode 302676973, eingetragener Sitz Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litauen.",
+            "1": "Datenschutzkontakt: info@labourmarket.ai. Ein Datenschutzbeauftragter ist nicht bestellt.",
+            "2": "Der Labour Market AI Sp. z o.o. (Warschau, Polen) gehören die Plattformsoftware und die Marke; sie lizenziert diese an die UAB „Nonstop Group“. Das IP-Eigentum verschafft ihr keinen Zugriff auf Ihre personenbezogenen Daten: sie hat keinen routinemäßigen Zugriff auf die Produktionsdatenbank, Profile, Lebensläufe, Kontaktdaten oder Dokumente.",
+            "3": "Sie haben das Recht, sich bei Ihrer Aufsichtsbehörde zu beschweren; für die Niederlassung der Verantwortlichen ist dies die litauische Datenschutzbehörde (VDAI)."
+          }
         },
-        {
+        "1": {
           "heading": "Welche Daten die Plattform verwendet",
-          "items": [
-            "Kontodaten: Ihre E-Mail-Adresse und die damit verknüpfte Anmeldung.",
-            "Inhalte, die Sie selbst eingeben: Profil- und Lebenslaufangaben, Fähigkeiten, Arbeitsjournal-Einträge, Fotos, die Sie an Einträge anhängen, und die Dokumente, die Sie in Ihrem Dokumentenverzeichnis auflisten.",
-            "Unternehmensinformationen, die von Unternehmensbenutzern eingegeben werden: Unternehmensangaben, Bedarfe, Projekte und Buchungen.",
-            "Nachrichten, die Sie auf der Plattform senden und empfangen.",
-            "Einwilligungsaufzeichnungen: Wenn Sie eine Einwilligung erteilen oder widerrufen, werden die Aktion und ihr Zeitpunkt gespeichert.",
-            "Technische Daten, die für den Betrieb des Dienstes nötig sind, etwa Anmelde-Cookies (siehe Cookie-Richtlinie).",
-            "Nur mit Ihrer Einwilligung: Nutzungsmessung auf unseren eigenen Servern (erreichte Seiten und Schritte, tägliche Aktivität) und die Kampagne, die Sie gebracht hat, gespeichert bei Ihrem Konto. Siehe Cookie-Richtlinie."
-          ]
+          "items": {
+            "0": "Kontodaten: Ihre E-Mail-Adresse und die damit verknüpfte Anmeldung.",
+            "1": "Inhalte, die Sie selbst eingeben: Profil- und Lebenslaufangaben, Fähigkeiten, Arbeitsjournal-Einträge, Fotos, die Sie an Einträge anhängen, und die Dokumente, die Sie in Ihrem Dokumentenverzeichnis auflisten.",
+            "2": "Unternehmensinformationen, die von Unternehmensbenutzern eingegeben werden: Unternehmensangaben, Bedarfe, Projekte und Buchungen.",
+            "3": "Nachrichten, die Sie auf der Plattform senden und empfangen.",
+            "4": "Einwilligungsaufzeichnungen: Wenn Sie eine Einwilligung erteilen oder widerrufen, werden die Aktion und ihr Zeitpunkt gespeichert.",
+            "5": "Technische Daten, die für den Betrieb des Dienstes nötig sind, etwa Anmelde-Cookies (siehe Cookie-Richtlinie).",
+            "6": "Nur mit Ihrer Einwilligung: Nutzungsmessung auf unseren eigenen Servern (erreichte Seiten und Schritte, tägliche Aktivität) und die Kampagne, die Sie gebracht hat, gespeichert bei Ihrem Konto. Siehe Cookie-Richtlinie."
+          }
         },
-        {
+        "2": {
           "heading": "Anmeldung mit Google, Facebook oder LinkedIn",
-          "items": [
-            "Sie können ein Konto erstellen und sich mit Ihrem Google-, Facebook- oder LinkedIn-Konto anmelden, statt sich mit Ihrer E-Mail-Adresse anzumelden. Dies dient nur Ihrer Anmeldung.",
-            "Wenn Sie einen davon wählen, bestätigt dieser Anbieter Ihre Identität und übermittelt der Plattform Ihre E-Mail-Adresse, Ihren Namen und die Kennung Ihres Kontos bei diesem Anbieter. Die Plattform fordert keine zusätzlichen Berechtigungen an — keinen Zugriff auf Ihre Freunde oder Kontakte, Beiträge oder Seiten — und veröffentlicht nie etwas in Ihrem Namen.",
-            "Ihre E-Mail-Adresse wird zur E-Mail-Adresse Ihres Kontos. Der Name vom Anbieter wird nur verwendet, um einen aus Ihrer E-Mail-Adresse abgeleiteten Platzhalternamen zu ersetzen; ein selbst eingegebener Name wird nie überschrieben. Den Anmeldedatensatz (den Anbieter, Ihre Kontokennung dort und die von ihm übermittelten Angaben) speichert unser Authentifizierungsdienst Supabase, verknüpft mit Ihrem Konto.",
-            "Um diese Daten zu löschen, löschen Sie Ihr LabourMarket.ai-Konto — die Schritte stehen auf der Seite „Konto- und Datenlöschung“. Wenn Sie LabourMarket.ai in Ihren Facebook-, Google- oder LinkedIn-Einstellungen entfernen, werden Ihr LabourMarket.ai-Konto und seine Daten dadurch allein nicht gelöscht."
-          ]
+          "items": {
+            "0": "Sie können ein Konto erstellen und sich mit Ihrem Google-, Facebook- oder LinkedIn-Konto anmelden, statt sich mit Ihrer E-Mail-Adresse anzumelden. Dies dient nur Ihrer Anmeldung.",
+            "1": "Wenn Sie einen davon wählen, bestätigt dieser Anbieter Ihre Identität und übermittelt der Plattform Ihre E-Mail-Adresse, Ihren Namen und die Kennung Ihres Kontos bei diesem Anbieter. Die Plattform fordert keine zusätzlichen Berechtigungen an — keinen Zugriff auf Ihre Freunde oder Kontakte, Beiträge oder Seiten — und veröffentlicht nie etwas in Ihrem Namen.",
+            "2": "Ihre E-Mail-Adresse wird zur E-Mail-Adresse Ihres Kontos. Der Name vom Anbieter wird nur verwendet, um einen aus Ihrer E-Mail-Adresse abgeleiteten Platzhalternamen zu ersetzen; ein selbst eingegebener Name wird nie überschrieben. Den Anmeldedatensatz (den Anbieter, Ihre Kontokennung dort und die von ihm übermittelten Angaben) speichert unser Authentifizierungsdienst Supabase, verknüpft mit Ihrem Konto.",
+            "3": "Um diese Daten zu löschen, löschen Sie Ihr LabourMarket.ai-Konto — die Schritte stehen auf der Seite „Konto- und Datenlöschung“. Wenn Sie LabourMarket.ai in Ihren Facebook-, Google- oder LinkedIn-Einstellungen entfernen, werden Ihr LabourMarket.ai-Konto und seine Daten dadurch allein nicht gelöscht."
+          }
         },
-        {
+        "3": {
           "heading": "Wofür die Daten verwendet werden",
-          "items": [
-            "Für den Betrieb der Funktionen, die Sie nutzen: Profil und Lebenslauf, Arbeitsjournal, von Ihnen bestätigte Fähigkeitsvorschläge, Marktkarte, Projekte, Teams, Buchungen und Nachrichten.",
-            "Um Ihre Informationen nur Personen zu zeigen, denen eine ausdrückliche Zugriffsregel dies erlaubt — siehe die Seite „Ihre Daten und wer sie sehen kann“.",
-            "Um eine ehrliche Historie der Einwilligungen und wichtiger Zugriffsänderungen zu führen.",
-            "Die Plattform verwendet keine Werbe- oder Analyse-Tracker von Drittanbietern und erstellt keine Verhaltensprofile."
-          ]
+          "items": {
+            "0": "Für den Betrieb der Funktionen, die Sie nutzen: Profil und Lebenslauf, Arbeitsjournal, von Ihnen bestätigte Fähigkeitsvorschläge, Marktkarte, Projekte, Teams, Buchungen und Nachrichten.",
+            "1": "Um Ihre Informationen nur Personen zu zeigen, denen eine ausdrückliche Zugriffsregel dies erlaubt — siehe die Seite „Ihre Daten und wer sie sehen kann“.",
+            "2": "Um eine ehrliche Historie der Einwilligungen und wichtiger Zugriffsänderungen zu führen.",
+            "3": "Die Plattform verwendet keine Werbe- oder Analyse-Tracker von Drittanbietern und erstellt keine Verhaltensprofile."
+          }
         },
-        {
+        "4": {
           "heading": "Wer Ihre Daten sehen kann",
-          "items": [
-            "Der Zugriff ist standardmäßig geschlossen: Von Ihnen eingegebene Daten gehören zu Ihrem Konto; andere Nutzer sehen nichts, sofern keine konkrete Regel es erlaubt.",
-            "Ihr berufliches Profil ist standardmäßig NICHT für Unternehmen oder Agenturen sichtbar. Es kann in Unternehmenssuchen nur erscheinen, nachdem Sie selbst die Arbeitgeber-Sichtbarkeit in den Datenschutzeinstellungen eingeschaltet haben — Registrierung, das Akzeptieren der Bedingungen oder das Ausfüllen des Profils machen es niemals sichtbar.",
-            "Auch bei eingeschalteter Sichtbarkeit sehen Unternehmen nur eine begrenzte berufliche Zusammenfassung (Beruf, Erfahrung, Fähigkeiten, ungefähre Region, Verfügbarkeit, Sprachen, Gehaltsvorstellung, falls angegeben). Nachname, Telefon, E-Mail, genaue Adresse, Lebenslauf-Datei und Dokumente gehören nie dazu.",
-            "Ihr Lebenslauf, Ihre Kontaktdaten oder Dokumente erreichen ein bestimmtes Unternehmen erst nach Ihrer gesonderten Bestätigung für dieses Unternehmen und diese Anfrage. Jede durchgeführte Übermittlung wird in einem für Sie sichtbaren Übermittlungsprotokoll festgehalten.",
-            "Dokumente von Arbeitskräften werden Arbeitgebern oder Agenturen ohne Einwilligung nicht gezeigt, und Arbeitgeber können die gespeicherten Orte einer Arbeitskraft nicht einsehen.",
-            "Nachrichten sind nur für die Gesprächsteilnehmer sichtbar."
-          ]
+          "items": {
+            "0": "Der Zugriff ist standardmäßig geschlossen: Von Ihnen eingegebene Daten gehören zu Ihrem Konto; andere Nutzer sehen nichts, sofern keine konkrete Regel es erlaubt.",
+            "1": "Ihr berufliches Profil ist standardmäßig NICHT für Unternehmen oder Agenturen sichtbar. Es kann in Unternehmenssuchen nur erscheinen, nachdem Sie selbst die Arbeitgeber-Sichtbarkeit in den Datenschutzeinstellungen eingeschaltet haben — Registrierung, das Akzeptieren der Bedingungen oder das Ausfüllen des Profils machen es niemals sichtbar.",
+            "2": "Auch bei eingeschalteter Sichtbarkeit sehen Unternehmen nur eine begrenzte berufliche Zusammenfassung (Beruf, Erfahrung, Fähigkeiten, ungefähre Region, Verfügbarkeit, Sprachen, Gehaltsvorstellung, falls angegeben). Nachname, Telefon, E-Mail, genaue Adresse, Lebenslauf-Datei und Dokumente gehören nie dazu.",
+            "3": "Ihr Lebenslauf, Ihre Kontaktdaten oder Dokumente erreichen ein bestimmtes Unternehmen erst nach Ihrer gesonderten Bestätigung für dieses Unternehmen und diese Anfrage. Jede durchgeführte Übermittlung wird in einem für Sie sichtbaren Übermittlungsprotokoll festgehalten.",
+            "4": "Dokumente von Arbeitskräften werden Arbeitgebern oder Agenturen ohne Einwilligung nicht gezeigt, und Arbeitgeber können die gespeicherten Orte einer Arbeitskraft nicht einsehen.",
+            "5": "Nachrichten sind nur für die Gesprächsteilnehmer sichtbar."
+          }
         },
-        {
+        "5": {
           "heading": "Einwilligung",
-          "items": [
-            "Einwilligungszwecke sind getrennt: die Arbeitgeber-Sichtbarkeit Ihres beruflichen Profils und eine Datenübermittlung an ein bestimmtes Unternehmen sind zwei verschiedene Entscheidungen — keine ist mit den Bedingungen gebündelt, vorangekreuzt oder für die Nutzung von Konto, Lebenslauf oder Arbeitstagebuch erforderlich.",
-            "Jeder Einwilligungsbildschirm zeigt den exakten versionierten Text, was sichtbar wird, was privat bleibt, und beide Optionen nebeneinander (einschalten / jetzt nicht). Eine Ablehnung ändert nichts an Ihrem Konto.",
-            "Sie können jede Einwilligung jederzeit in den Datenschutzeinstellungen in einem Schritt widerrufen. Nach dem Widerruf erscheint Ihr Profil sofort nicht mehr in neuen Unternehmenssuchen; Daten, die ein Unternehmen rechtmäßig erhielt, solange die Erlaubnis galt, können dort verbleiben.",
-            "Der Einwilligungsverlauf ist nur-anfügend: jede Erteilung und jeder Widerruf ist ein eigener unveränderlicher Eintrag mit Textversion, Sprache, Zeitpunkt und Zweck. Niemand — auch Administratoren nicht — kann ihn bearbeiten oder löschen, und kein Administrator kann in Ihrem Namen einwilligen."
-          ]
+          "items": {
+            "0": "Einwilligungszwecke sind getrennt: die Arbeitgeber-Sichtbarkeit Ihres beruflichen Profils und eine Datenübermittlung an ein bestimmtes Unternehmen sind zwei verschiedene Entscheidungen — keine ist mit den Bedingungen gebündelt, vorangekreuzt oder für die Nutzung von Konto, Lebenslauf oder Arbeitstagebuch erforderlich.",
+            "1": "Jeder Einwilligungsbildschirm zeigt den exakten versionierten Text, was sichtbar wird, was privat bleibt, und beide Optionen nebeneinander (einschalten / jetzt nicht). Eine Ablehnung ändert nichts an Ihrem Konto.",
+            "2": "Sie können jede Einwilligung jederzeit in den Datenschutzeinstellungen in einem Schritt widerrufen. Nach dem Widerruf erscheint Ihr Profil sofort nicht mehr in neuen Unternehmenssuchen; Daten, die ein Unternehmen rechtmäßig erhielt, solange die Erlaubnis galt, können dort verbleiben.",
+            "3": "Der Einwilligungsverlauf ist nur-anfügend: jede Erteilung und jeder Widerruf ist ein eigener unveränderlicher Eintrag mit Textversion, Sprache, Zeitpunkt und Zweck. Niemand — auch Administratoren nicht — kann ihn bearbeiten oder löschen, und kein Administrator kann in Ihrem Namen einwilligen."
+          }
         },
-        {
+        "6": {
           "heading": "Dienstleister, die Daten für die Plattform verarbeiten",
-          "items": [
-            "Supabase — Datenbank, Nutzeranmeldung und Dateispeicher.",
-            "Cloudflare — das Netzwerk vor der Website (Domain-Namensdienst, Verschlüsselung bei der Übertragung, Caching und Schutz vor Angriffen); jede Anfrage an die Website läuft darüber.",
-            "Stripe — Zahlungsabwicklung für kostenpflichtige Plattformleistungen. Wenn eine Organisation einen Checkout beginnt, erhält Stripe die E-Mail-Adresse des zahlenden Nutzers und eine interne Kontokennung; Kartendaten werden auf Stripes eigener Zahlungsseite eingegeben und von der Plattform nicht gespeichert.",
-            "Google, Facebook (Meta) und LinkedIn — nur wenn Sie sich mit ihnen anmelden, wie oben beschrieben.",
-            "Google (Gemini-API) — nur wie unten im Abschnitt über KI beschrieben.",
-            "Die vollständige Liste der Infrastrukturanbieter steht auf der Seite „Datenschutz“."
-          ]
+          "items": {
+            "0": "Supabase — Datenbank, Nutzeranmeldung und Dateispeicher.",
+            "1": "Cloudflare — das Netzwerk vor der Website (Domain-Namensdienst, Verschlüsselung bei der Übertragung, Caching und Schutz vor Angriffen); jede Anfrage an die Website läuft darüber.",
+            "2": "Stripe — Zahlungsabwicklung für kostenpflichtige Plattformleistungen. Wenn eine Organisation einen Checkout beginnt, erhält Stripe die E-Mail-Adresse des zahlenden Nutzers und eine interne Kontokennung; Kartendaten werden auf Stripes eigener Zahlungsseite eingegeben und von der Plattform nicht gespeichert.",
+            "3": "Google, Facebook (Meta) und LinkedIn — nur wenn Sie sich mit ihnen anmelden, wie oben beschrieben.",
+            "4": "Google (Gemini-API) — nur wie unten im Abschnitt über KI beschrieben.",
+            "5": "Die vollständige Liste der Infrastrukturanbieter steht auf der Seite „Datenschutz“."
+          }
         },
-        {
+        "7": {
           "heading": "Ihre Rechte",
-          "items": [
-            "Sie können verlangen, die über Sie gespeicherten Daten einzusehen, sie zu berichtigen, eine Kopie davon zu erhalten, ihre Nutzung einzuschränken oder sie löschen zu lassen.",
-            "Sie können eine Kopie Ihrer eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei selbst aus Ihrem Konto herunterladen. Die Löschung Ihres Kontos können Sie auf der Datenschutz-Seite Ihres Kontos beantragen und nach erneuter Anmeldung bestätigen; 30 Tage nach der Bestätigung löscht das System das Konto automatisch (bis dahin können Sie den Antrag auf der Datenschutz-Seite stornieren) und sendet eine Bestätigung an die E-Mail-Adresse des Kontos. Nach der endgültigen Löschung können gelöschte Daten noch bis zu 7 Tage in verschlüsselten Datenbank-Backups verbleiben; sie werden dort nicht verwendet und anschließend überschrieben. Müssen Daten gesetzlich aufbewahrt werden oder betreffen sie andere Personen, wird der Antrag geprüft und Sie erhalten die Entscheidung innerhalb eines Monats. Sie können uns auch kontaktieren — siehe die Seite „Konto- und Datenlöschung“.",
-            "Wo die Verarbeitung auf einer Einwilligung beruht, können Sie diese Einwilligung jederzeit widerrufen."
-          ]
+          "items": {
+            "0": "Sie können verlangen, die über Sie gespeicherten Daten einzusehen, sie zu berichtigen, eine Kopie davon zu erhalten, ihre Nutzung einzuschränken oder sie löschen zu lassen.",
+            "1": "Sie können eine Kopie Ihrer eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei selbst aus Ihrem Konto herunterladen. Die Löschung Ihres Kontos können Sie auf der Datenschutz-Seite Ihres Kontos beantragen und nach erneuter Anmeldung bestätigen; 30 Tage nach der Bestätigung löscht das System das Konto automatisch (bis dahin können Sie den Antrag auf der Datenschutz-Seite stornieren) und sendet eine Bestätigung an die E-Mail-Adresse des Kontos. Nach der endgültigen Löschung können gelöschte Daten noch bis zu 7 Tage in verschlüsselten Datenbank-Backups verbleiben; sie werden dort nicht verwendet und anschließend überschrieben. Müssen Daten gesetzlich aufbewahrt werden oder betreffen sie andere Personen, wird der Antrag geprüft und Sie erhalten die Entscheidung innerhalb eines Monats. Sie können uns auch kontaktieren — siehe die Seite „Konto- und Datenlöschung“.",
+            "2": "Wo die Verarbeitung auf einer Einwilligung beruht, können Sie diese Einwilligung jederzeit widerrufen."
+          }
         },
-        {
+        "8": {
           "heading": "Wie lange Daten aufbewahrt werden",
-          "items": [
-            "Daten werden aufbewahrt, solange Ihr Konto aktiv ist und die zugehörige Funktion sie noch verwendet.",
-            "Einwilligungs- und Prüfaufzeichnungen werden als Historie aufbewahrt: Ein Widerruf wird aufgezeichnet, statt den Eintrag zu löschen."
-          ]
+          "items": {
+            "0": "Daten werden aufbewahrt, solange Ihr Konto aktiv ist und die zugehörige Funktion sie noch verwendet.",
+            "1": "Einwilligungs- und Prüfaufzeichnungen werden als Historie aufbewahrt: Ein Widerruf wird aufgezeichnet, statt den Eintrag zu löschen."
+          }
         },
-        {
+        "9": {
           "heading": "KI und verbundene KI-Assistenten",
-          "items": [
-            "Einige Funktionen nutzen ein KI-Modell von Google (die Gemini-API). Heute erhält es nur öffentliche Marktstatistiken — zum Beispiel, wie viele offene Stellen ein Beruf hat —, um eine kurze Erläuterung zu verfassen. Das Übersetzen von Nachrichten und Stellenanzeigen sowie das Deuten eines im Chat eingegebenen Satzes sind vorbereitet, aber abgeschaltet: dafür werden weder Nachrichtentext noch personenbezogene Daten gesendet. Wird eine dieser Funktionen eingeschaltet, sagt dieser Hinweis das, und gesendet würde nur der Text, den diese Aufgabe braucht. Jedes Ergebnis ist ein Vorschlag — nichts wird als Tatsache über Sie gespeichert, bevor Sie es bestätigen.",
-            "Sie können LabourMarket.ai mit einem KI-Assistenten wie ChatGPT oder Claude verbinden. Jede Verbindung bestätigen Sie selbst auf einer Einwilligungsseite; der Assistent handelt dann nur mit Ihren eigenen Berechtigungen, und folgenreiche Aktionen brauchen eine gesonderte Bestätigung. Verbundene Apps sehen und trennen Sie jederzeit in Ihren Kontoeinstellungen.",
-            "Was der Anbieter eines KI-Assistenten mit Ihrem Gespräch tut, regeln dessen eigene Datenschutzbestimmungen."
-          ]
+          "items": {
+            "0": "Einige Funktionen nutzen ein KI-Modell von Google (die Gemini-API). Heute erhält es nur öffentliche Marktstatistiken — zum Beispiel, wie viele offene Stellen ein Beruf hat —, um eine kurze Erläuterung zu verfassen. Das Übersetzen von Nachrichten und Stellenanzeigen sowie das Deuten eines im Chat eingegebenen Satzes sind vorbereitet, aber abgeschaltet: dafür werden weder Nachrichtentext noch personenbezogene Daten gesendet. Wird eine dieser Funktionen eingeschaltet, sagt dieser Hinweis das, und gesendet würde nur der Text, den diese Aufgabe braucht. Jedes Ergebnis ist ein Vorschlag — nichts wird als Tatsache über Sie gespeichert, bevor Sie es bestätigen.",
+            "1": "Sie können LabourMarket.ai mit einem KI-Assistenten wie ChatGPT oder Claude verbinden. Jede Verbindung bestätigen Sie selbst auf einer Einwilligungsseite; der Assistent handelt dann nur mit Ihren eigenen Berechtigungen, und folgenreiche Aktionen brauchen eine gesonderte Bestätigung. Verbundene Apps sehen und trennen Sie jederzeit in Ihren Kontoeinstellungen.",
+            "2": "Was der Anbieter eines KI-Assistenten mit Ihrem Gespräch tut, regeln dessen eigene Datenschutzbestimmungen."
+          }
         }
-      ]
+      }
     },
     "cookies": {
       "title": "Cookie-Richtlinie",
       "intro": "Diese Seite listet auf, was die Plattform heute tatsächlich in Ihrem Browser speichert. Es ist absichtlich wenig.",
-      "items": [
-        {
+      "items": {
+        "0": {
           "name": "Anmelde-Cookies",
           "purpose": "Werden beim Anmelden gesetzt, damit Sie beim Wechsel zwischen Seiten angemeldet bleiben. Unverzichtbar — ohne sie kann der Dienst Sie nicht angemeldet halten."
         },
-        {
+        "1": {
           "name": "Sprach-Cookie (NEXT_LOCALE)",
           "purpose": "Kann gesetzt werden, um Ihre Sprachwahl zu speichern, damit Seiten in Ihrer Sprache öffnen."
         },
-        {
+        "2": {
           "name": "Administrator-Anzeigeeinstellung (lm_hide_admin_ui)",
           "purpose": "Wird nur bei Administratorkonten verwendet. Merkt sich, ob Administrator-Steuerelemente ausgeblendet sind, und ändert nichts an Berechtigungen."
         },
-        {
+        "3": {
           "name": "Anmeldeversuch-Marker (lm.oauth.trace)",
           "purpose": "Tab-Speicher, wird beim Schließen des Tabs entfernt. Ein zufälliger Code, der einen Anmeldeversuch mit seinem Ergebnis verknüpft, damit eine fehlgeschlagene Anmeldung untersucht werden kann. Für die von Ihnen begonnene Anmeldung erforderlich; er enthält keine Kontodaten."
         }
-      ],
+      },
       "localStorageNote": "Im eigenen Speicher Ihres Browsers (keine Cookies) liegen außerdem einige Einträge, die Sie selbst gewählt haben: Ihre Wahl des hellen oder dunklen Designs, Ihre Entscheidung zur Nutzungsmessung und kleine Annehmlichkeiten wie ausgeblendete Hinweise, zuletzt angesehene Einträge und Ihre Spracheingabesprache. Sie bleiben auf Ihrem Gerät, und Sie können sie jederzeit über Ihren Browser löschen.",
       "noTracking": "Auf der Plattform gibt es keine Werbe- oder Drittanbieter-Tracking-Cookies, und nichts wird zu Werbezwecken an Dritte weitergegeben.",
       "settingsLink": "Cookie-Einstellungen",
       "analyticsTitle": "Nutzungsmessung — nur mit Ihrer Einwilligung",
       "analyticsIntro": "Mit Ihrer Einwilligung messen wir, wie das Produkt genutzt wird: welche Seiten und Schritte erreicht werden, die Schritte der Registrierung, die tägliche Aktivität und welche Kampagne einen Besucher gebracht hat. Die Ereignisse werden auf unseren eigenen Servern gespeichert und, wenn Sie angemeldet sind, Ihrem Konto zugeordnet. Ohne Ihre Einwilligung wird keiner der folgenden Einträge geschrieben und kein Messereignis aus Ihrem Browser gesendet.",
-      "analyticsItems": [
-        {
+      "analyticsItems": {
+        "0": {
           "name": "Kampagne des ersten Besuchs (lm.attr.first)",
           "purpose": "Browserspeicher. Die Kampagnen-Tags (utm_*), die verweisende Website und die Einstiegsseite Ihres ersten Besuchs. Bei der Registrierung werden sie in Ihren eigenen Kontodatensatz übernommen, damit die Kampagne, die Sie gebracht hat, gezählt werden kann."
         },
-        {
+        "1": {
           "name": "Sitzungskennung (lm.pilot.session)",
           "purpose": "Tab-Speicher, wird beim Schließen des Tabs entfernt. Eine zufällige Kennung, die mit jedem Messereignis gesendet wird, damit die Schritte in einem Tab zusammen gezählt werden können."
         },
-        {
+        "2": {
           "name": "Aktivitätsmarker (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
           "purpose": "Browserspeicher. Der letzte Tag, an dem Sie aktiv waren, und ein Marker, dass eine Registrierung läuft."
         },
-        {
+        "3": {
           "name": "Einmal-Zählmarker (lm.funnel.*)",
           "purpose": "Tab-Speicher. Verhindert, dass dasselbe Messereignis doppelt gezählt wird."
         }
-      ],
+      },
       "analyticsBasis": "Eine Ablehnung oder ein Widerruf entfernt diese Einträge sofort von diesem Gerät; wenn Sie angemeldet sind, wird auch die bei Ihrem Konto gespeicherte Kampagne gelöscht. Die Messung selbst beruht auf unserem berechtigten Interesse an der Verbesserung des Produkts (Art. 6 Abs. 1 lit. f DSGVO), und Sie können ihr wie in der Datenschutzerklärung beschrieben widersprechen."
     },
     "requestContact": "Um eine Frage zu stellen oder einen Antrag zu Ihren Daten zu stellen, kontaktieren Sie uns — ein Mensch wird ihn prüfen.",
@@ -6070,116 +6070,116 @@
       "title": "Datenschutz",
       "metaDescription": "In einfachen Worten: wie Daten innerhalb von LabourMarket.ai geschützt werden. Beschrieben ist nur, was heute tatsächlich in die Plattform eingebaut ist.",
       "intro": "Diese Seite erklärt in einfachen Worten, wie Daten innerhalb von Labour Market AI geschützt werden. Sie beschreibt nur, was heute tatsächlich in die Plattform eingebaut ist.",
-      "sections": [
-        {
+      "sections": {
+        "0": {
           "heading": "Standardmäßig geschlossen",
-          "items": [
-            "Benutzerdatentabellen sind durch Zugriffsregeln in der Datenbank selbst geschützt. Wenn keine Regel den Zugriff ausdrücklich gewährt, sind die Daten nicht sichtbar — auch nicht für andere angemeldete Benutzer.",
-            "Diese Regeln wirken auf Datenbankebene, nicht nur in der Oberfläche, und sind durch automatisierte Tests abgedeckt."
-          ]
+          "items": {
+            "0": "Benutzerdatentabellen sind durch Zugriffsregeln in der Datenbank selbst geschützt. Wenn keine Regel den Zugriff ausdrücklich gewährt, sind die Daten nicht sichtbar — auch nicht für andere angemeldete Benutzer.",
+            "1": "Diese Regeln wirken auf Datenbankebene, nicht nur in der Oberfläche, und sind durch automatisierte Tests abgedeckt."
+          }
         },
-        {
+        "1": {
           "heading": "Historie statt stiller Änderungen",
-          "items": [
-            "Zugriffsgewährungen sind Aufzeichnungen, keine Schalter: Wird ein Zugriff entzogen, wird der Eintrag als widerrufen markiert statt gelöscht, sodass die Historie nachvollziehbar bleibt.",
-            "Die Einwilligungshistorie wird auf dieselbe Weise geführt."
-          ]
+          "items": {
+            "0": "Zugriffsgewährungen sind Aufzeichnungen, keine Schalter: Wird ein Zugriff entzogen, wird der Eintrag als widerrufen markiert statt gelöscht, sodass die Historie nachvollziehbar bleibt.",
+            "1": "Die Einwilligungshistorie wird auf dieselbe Weise geführt."
+          }
         },
-        {
+        "2": {
           "heading": "Keine Tracker, kein Profiling",
-          "items": [
-            "Die Plattform enthält keine Werbe- oder Analyse-Tracker von Drittanbietern, keine Sitzungsaufzeichnungs-Tools und kein Verhaltens-Scoring."
-          ]
+          "items": {
+            "0": "Die Plattform enthält keine Werbe- oder Analyse-Tracker von Drittanbietern, keine Sitzungsaufzeichnungs-Tools und kein Verhaltens-Scoring."
+          }
         },
-        {
+        "3": {
           "heading": "Statistiken, die Einzelpersonen schützen",
-          "items": [
-            "Marktstatistiken werden aggregiert. Durchschnittswerte werden nicht für Stichproben angezeigt, die so klein sind, dass sie auf eine einzelne Person hinweisen könnten, und kleine Stichproben werden gekennzeichnet.",
-            "Forschungsdatensätze sind strukturell anonym: Sie enthalten keine Namen, E-Mail-Adressen oder persönlichen Kennungen."
-          ]
+          "items": {
+            "0": "Marktstatistiken werden aggregiert. Durchschnittswerte werden nicht für Stichproben angezeigt, die so klein sind, dass sie auf eine einzelne Person hinweisen könnten, und kleine Stichproben werden gekennzeichnet.",
+            "1": "Forschungsdatensätze sind strukturell anonym: Sie enthalten keine Namen, E-Mail-Adressen oder persönlichen Kennungen."
+          }
         },
-        {
+        "4": {
           "heading": "Dateien und Fotos",
-          "items": [
-            "Fotos und Dateien werden in privatem Speicher aufbewahrt und über kurzlebige Links geöffnet, nicht über öffentliche Adressen."
-          ]
+          "items": {
+            "0": "Fotos und Dateien werden in privatem Speicher aufbewahrt und über kurzlebige Links geöffnet, nicht über öffentliche Adressen."
+          }
         },
-        {
+        "5": {
           "heading": "Administratorzugriff",
-          "items": [
-            "Administrator-Ansichten sind auf eine kleine Gruppe von Plattform-Administratoren beschränkt und schließen im Fehlerfall: Ohne die Administratorrolle sind sie nicht erreichbar."
-          ]
+          "items": {
+            "0": "Administrator-Ansichten sind auf eine kleine Gruppe von Plattform-Administratoren beschränkt und schließen im Fehlerfall: Ohne die Administratorrolle sind sie nicht erreichbar."
+          }
         },
-        {
+        "6": {
           "heading": "Export und Löschung",
-          "items": [
-            "Sie können Ihre eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei aus Ihrem Konto herunterladen. Die Kontolöschung wird im Konto beantragt und nach erneuter Anmeldung bestätigt; das System löscht das Konto dann automatisch. Einen Antrag, der Daten betrifft, die gesetzlich aufbewahrt werden müssen oder andere Personen betreffen, prüft ein Mensch. Sie können uns auch kontaktieren, und ein Mensch bearbeitet den Antrag."
-          ]
+          "items": {
+            "0": "Sie können Ihre eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei aus Ihrem Konto herunterladen. Die Kontolöschung wird im Konto beantragt und nach erneuter Anmeldung bestätigt; das System löscht das Konto dann automatisch. Einen Antrag, der Daten betrifft, die gesetzlich aufbewahrt werden müssen oder andere Personen betreffen, prüft ein Mensch. Sie können uns auch kontaktieren, und ein Mensch bearbeitet den Antrag."
+          }
         },
-        {
+        "7": {
           "heading": "Infrastrukturanbieter (Unterauftragsverarbeiter)",
-          "items": [
-            "Supabase — Datenbank, Nutzeranmeldung und Dateispeicher. Die Daten werden in der Europäischen Union gehostet (Region eu-west-1).",
-            "Hostinger — der virtuelle private Server (VPS), auf dem die Anwendung läuft.",
-            "Cloudflare — das Netzwerk vor der Website: Domain-Namensdienst, Verschlüsselung bei der Übertragung, Caching und Schutz vor Angriffen. Jede Anfrage an die Website läuft darüber.",
-            "GitHub — Speicherung des Quellcodes. Nutzerdaten werden dort nicht gespeichert.",
-            "Google (Gemini-API) — KI-Verarbeitung zum Übersetzen von Nachrichten und Stellenanzeigen und zum Vorschlagen, worum ein im Chat eingegebener Satz bittet. Gesendet wird nur der Text, den die Aufgabe braucht.",
-            "Stripe — Zahlungsabwicklung. Ein Kundendatensatz entsteht nur, wenn eine Organisation einen Abonnement-Checkout beginnt.",
-            "Kein weiterer E-Mail-, KI-, Übersetzungs- oder Zahlungsanbieter ist aktiv. Wird einer aktiviert, wird zuerst diese Liste aktualisiert."
-          ]
+          "items": {
+            "0": "Supabase — Datenbank, Nutzeranmeldung und Dateispeicher. Die Daten werden in der Europäischen Union gehostet (Region eu-west-1).",
+            "1": "Hostinger — der virtuelle private Server (VPS), auf dem die Anwendung läuft.",
+            "2": "Cloudflare — das Netzwerk vor der Website: Domain-Namensdienst, Verschlüsselung bei der Übertragung, Caching und Schutz vor Angriffen. Jede Anfrage an die Website läuft darüber.",
+            "3": "GitHub — Speicherung des Quellcodes. Nutzerdaten werden dort nicht gespeichert.",
+            "4": "Google (Gemini-API) — KI-Verarbeitung zum Übersetzen von Nachrichten und Stellenanzeigen und zum Vorschlagen, worum ein im Chat eingegebener Satz bittet. Gesendet wird nur der Text, den die Aufgabe braucht.",
+            "5": "Stripe — Zahlungsabwicklung. Ein Kundendatensatz entsteht nur, wenn eine Organisation einen Abonnement-Checkout beginnt.",
+            "6": "Kein weiterer E-Mail-, KI-, Übersetzungs- oder Zahlungsanbieter ist aktiv. Wird einer aktiviert, wird zuerst diese Liste aktualisiert."
+          }
         },
-        {
+        "8": {
           "heading": "Ehrliche Grenzen",
-          "items": [
-            "Kein System kann absolute Sicherheit versprechen. Wenn Sie ein Problem bemerken, kontaktieren Sie uns — ein Mensch wird es prüfen."
-          ]
+          "items": {
+            "0": "Kein System kann absolute Sicherheit versprechen. Wenn Sie ein Problem bemerken, kontaktieren Sie uns — ein Mensch wird es prüfen."
+          }
         }
-      ]
+      }
     },
     "dataAccess": {
       "title": "Ihre Daten und wer sie sehen kann",
       "intro": "Eine Zusammenfassung in einfacher Sprache der Zugriffsregeln, die die Plattform heute tatsächlich durchsetzt. Sie behauptet nichts, was über die Regeln hinausgeht.",
-      "sections": [
-        {
+      "sections": {
+        "0": {
           "heading": "Der Ausgangspunkt",
-          "items": [
-            "Ihre Datensätze gehören Ihnen: Daten, die Sie eingeben, gehören zu Ihrem Konto. Andere Nutzer sehen nichts, sofern nicht eine bestimmte Zugriffsregel es erlaubt."
-          ]
+          "items": {
+            "0": "Ihre Datensätze gehören Ihnen: Daten, die Sie eingeben, gehören zu Ihrem Konto. Andere Nutzer sehen nichts, sofern nicht eine bestimmte Zugriffsregel es erlaubt."
+          }
         },
-        {
+        "1": {
           "heading": "Was Unternehmen über Arbeitskräfte sehen können",
-          "items": [
-            "In Scouting-Ansichten erscheinen Informationen zu Arbeitskräften in anonymisierter Form, und Kontaktdaten werden niemals ohne Erlaubnis der Arbeitskraft angezeigt.",
-            "Arbeitgeber können die gespeicherten Standorte einer Arbeitskraft nicht einsehen.",
-            "Dokumente von Arbeitskräften werden Arbeitgebern oder Personalagenturen nicht ohne Zustimmung der Arbeitskraft angezeigt — höchstens Anzahlen, deren Weitergabe die Arbeitskraft zugestimmt hat."
-          ]
+          "items": {
+            "0": "In Scouting-Ansichten erscheinen Informationen zu Arbeitskräften in anonymisierter Form, und Kontaktdaten werden niemals ohne Erlaubnis der Arbeitskraft angezeigt.",
+            "1": "Arbeitgeber können die gespeicherten Standorte einer Arbeitskraft nicht einsehen.",
+            "2": "Dokumente von Arbeitskräften werden Arbeitgebern oder Personalagenturen nicht ohne Zustimmung der Arbeitskraft angezeigt — höchstens Anzahlen, deren Weitergabe die Arbeitskraft zugestimmt hat."
+          }
         },
-        {
+        "2": {
           "heading": "Was Arbeitskräfte über Unternehmen sehen können",
-          "items": [
-            "Arbeitskräfte sehen, was ein Unternehmen veröffentlicht: Öffentliche Bedarfe und Angebote erscheinen erst nach der Moderation."
-          ]
+          "items": {
+            "0": "Arbeitskräfte sehen, was ein Unternehmen veröffentlicht: Öffentliche Bedarfe und Angebote erscheinen erst nach der Moderation."
+          }
         },
-        {
+        "3": {
           "heading": "Nachrichten",
-          "items": [
-            "Eine Unterhaltung ist nur für ihre Teilnehmer sichtbar. Kollegen aus demselben Unternehmen, die nicht teilnehmen, sehen nichts — nicht einmal, dass die Unterhaltung existiert.",
-            "Wenn einer zusätzlichen Person Zugriff gewährt wird (zum Beispiel dem Objekteigentümer), gilt dieser Zugriff nur, solange die Gewährung aktiv ist. Wird sie widerrufen, endet der Zugriff, und der Verlauf bleibt aufgezeichnet."
-          ]
+          "items": {
+            "0": "Eine Unterhaltung ist nur für ihre Teilnehmer sichtbar. Kollegen aus demselben Unternehmen, die nicht teilnehmen, sehen nichts — nicht einmal, dass die Unterhaltung existiert.",
+            "1": "Wenn einer zusätzlichen Person Zugriff gewährt wird (zum Beispiel dem Objekteigentümer), gilt dieser Zugriff nur, solange die Gewährung aktiv ist. Wird sie widerrufen, endet der Zugriff, und der Verlauf bleibt aufgezeichnet."
+          }
         },
-        {
+        "4": {
           "heading": "Administratoren",
-          "items": [
-            "Eine kleine Gruppe von Plattform-Administratoren kann die operativen Warteschlangen sehen, die für den Betrieb der Plattform nötig sind, etwa Support- und Prüfwarteschlangen. Administratorseiten sind zugriffsbeschränkt und bleiben im Zweifelsfall geschlossen."
-          ]
+          "items": {
+            "0": "Eine kleine Gruppe von Plattform-Administratoren kann die operativen Warteschlangen sehen, die für den Betrieb der Plattform nötig sind, etwa Support- und Prüfwarteschlangen. Administratorseiten sind zugriffsbeschränkt und bleiben im Zweifelsfall geschlossen."
+          }
         },
-        {
+        "5": {
           "heading": "Wenn etwas falsch aussieht",
-          "items": [
-            "Die Zugriffsregeln in der Datenbank sind die maßgebliche Quelle, und diese Seite folgt ihnen. Wenn etwas hier nicht mit dem übereinstimmt, was Sie sehen, kontaktieren Sie uns — ein Mensch wird es prüfen."
-          ]
+          "items": {
+            "0": "Die Zugriffsregeln in der Datenbank sind die maßgebliche Quelle, und diese Seite folgt ihnen. Wenn etwas hier nicht mit dem übereinstimmt, was Sie sehen, kontaktieren Sie uns — ein Mensch wird es prüfen."
+          }
         }
-      ],
+      },
       "matrix": {
         "title": "Berechtigungsmatrix: Wer kann was sehen und ändern",
         "intro": "Die folgende Tabelle listet die wichtigsten Produktbereiche auf und zeigt für jede Rolle, was diese Rolle sehen und was sie ändern kann. Sie ist anhand der tatsächlichen Zugriffsregeln in der Datenbank und in den Routen-Guards verfasst — jede Zeile verweist auf die genaue Regel, die sie durchsetzt. Wo eine Regel enger ist, als ein kurzes Label ausdrücken kann, erklärt die Anmerkung der Zeile die Grenze in einfachen Worten.",
@@ -6313,12 +6313,12 @@
       "description": "So beantragen Sie die Löschung Ihres LabourMarket.ai-Kontos und Ihrer personenbezogenen Daten.",
       "intro": "Sie können LabourMarket.ai bitten, Ihr Konto und Ihre personenbezogenen Daten zu löschen. Wenn Sie sich anmelden können, können Sie den Antrag selbst stellen: Öffnen Sie die Datenschutz-Seite Ihres Kontos (in der mobilen App: Einstellungen → Datenschutz), wählen Sie die Kontolöschung und bestätigen Sie sie nach erneuter Anmeldung. 30 Tage nach der Bestätigung löscht das System das Konto automatisch (bis dahin können Sie den Antrag auf der Datenschutz-Seite stornieren) und sendet eine Bestätigung an die E-Mail-Adresse des Kontos; müssen Daten gesetzlich aufbewahrt werden oder betreffen sie andere Personen, wird der Antrag geprüft und Sie erhalten die Entscheidung innerhalb eines Monats. Nach der endgültigen Löschung können gelöschte Daten noch bis zu 7 Tage in verschlüsselten Datenbank-Backups verbleiben; sie werden dort nicht verwendet und anschließend überschrieben. Sie können die Löschung auch per E-Mail beantragen, wie unten beschrieben; ein Mensch antwortet innerhalb eines Monats.",
       "howTitle": "So beantragen Sie die Löschung",
-      "howSteps": [
-        "Schreiben Sie an {email} von der E-Mail-Adresse, die mit Ihrem LabourMarket.ai-Konto verknüpft ist.",
-        "Verwenden Sie den Betreff „Antrag auf Konto- und Datenlöschung“ und erklären Sie, dass Ihr LabourMarket.ai-Konto und Ihre personenbezogenen Daten gelöscht werden sollen.",
-        "Vor der Bearbeitung müssen wir gegebenenfalls prüfen, ob der Antrag vom Kontoinhaber stammt.",
-        "Eine Person prüft und bearbeitet den Antrag und meldet sich bei Ihnen, falls eine Verifizierung oder Klärung nötig ist."
-      ],
+      "howSteps": {
+        "0": "Schreiben Sie an {email} von der E-Mail-Adresse, die mit Ihrem LabourMarket.ai-Konto verknüpft ist.",
+        "1": "Verwenden Sie den Betreff „Antrag auf Konto- und Datenlöschung“ und erklären Sie, dass Ihr LabourMarket.ai-Konto und Ihre personenbezogenen Daten gelöscht werden sollen.",
+        "2": "Vor der Bearbeitung müssen wir gegebenenfalls prüfen, ob der Antrag vom Kontoinhaber stammt.",
+        "3": "Eine Person prüft und bearbeitet den Antrag und meldet sich bei Ihnen, falls eine Verifizierung oder Klärung nötig ist."
+      },
       "mailSubject": "Antrag auf Konto- und Datenlöschung",
       "coversTitle": "Was die Löschung umfasst",
       "coversBody": "Der Antrag betrifft Ihr LabourMarket.ai-Konto und die von der Plattform gespeicherten personenbezogenen Daten. Einige Aufzeichnungen müssen möglicherweise aufbewahrt werden, wenn geltendes Recht dies verlangt oder wenn ein Prüf-, Einwilligungs-, Sicherheits-, Streit- oder sonstiger Nachweis rechtmäßig aufbewahrt werden muss. Daten, die bereits rechtmäßig an einen anderen unabhängigen Empfänger weitergegeben wurden, können weiterhin dessen eigenen rechtlichen Pflichten unterliegen.",
@@ -8049,63 +8049,63 @@
     "includesLabel": "Enthält",
     "cta": "Angebot anfordern",
     "note": "Preise sind unverbindliche Ausgangspunkte für ein typisches Projekt. Der endgültige Umfang und Preis werden gemeinsam vereinbart, bevor die Arbeit beginnt, und eine Abrechnung wird hier niemals für Sie gestartet — jedes Paket beginnt mit einem Gespräch.",
-    "offers": [
-      {
+    "offers": {
+      "0": {
         "name": "KI-Workflow-Automatisierung",
         "summary": "Wir erfassen eine wiederkehrende Aufgabe in Ihrem Unternehmen und ersetzen die manuellen Schritte durch einen zuverlässigen automatisierten Workflow, der Ihnen gehört.",
         "priceFrom": "Ab 900 €",
         "timeline": "Typische Lieferzeit 1–3 Wochen",
-        "includes": [
-          "Prozessaufnahme & Scoping-Gespräch",
-          "Ein durchgängig automatisierter Workflow",
-          "Übergabedokumentation + kurze Einführung"
-        ]
+        "includes": {
+          "0": "Prozessaufnahme & Scoping-Gespräch",
+          "1": "Ein durchgängig automatisierter Workflow",
+          "2": "Übergabedokumentation + kurze Einführung"
+        }
       },
-      {
+      "1": {
         "name": "Integrationen · n8n · API-Workflows",
         "summary": "Wir verbinden die Tools, die Sie bereits nutzen — CRM, E-Mail, Tabellen, interne Apps — über n8n oder direkte APIs, damit Daten ohne Copy-Paste fließen.",
         "priceFrom": "Ab 600 €",
         "timeline": "Typische Lieferzeit 1–2 Wochen",
-        "includes": [
-          "Bis zu 3 verbundene Systeme",
-          "n8n- oder individueller API-Workflow",
-          "Fehlerbenachrichtigungen + Wiederholungslogik"
-        ]
+        "includes": {
+          "0": "Bis zu 3 verbundene Systeme",
+          "1": "n8n- oder individueller API-Workflow",
+          "2": "Fehlerbenachrichtigungen + Wiederholungslogik"
+        }
       },
-      {
+      "2": {
         "name": "Geschäftsprozess-Automatisierung",
         "summary": "Ein größeres Projekt: mehrere verbundene Workflows, die Ihrem Team einen ganzen Prozess — Aufnahme, Weiterleitung, Nachverfolgung — abnehmen.",
         "priceFrom": "Ab 1.200 €",
         "timeline": "Typische Lieferzeit 2–5 Wochen",
-        "includes": [
-          "Mehrstufige Prozessautomatisierung",
-          "Dashboards & Statusübersicht",
-          "Zwei Iterationsrunden nach dem Start"
-        ]
+        "includes": {
+          "0": "Mehrstufige Prozessautomatisierung",
+          "1": "Dashboards & Statusübersicht",
+          "2": "Zwei Iterationsrunden nach dem Start"
+        }
       },
-      {
+      "3": {
         "name": "Individueller KI-Assistent",
         "summary": "Ein interner Assistent, der auf Ihren eigenen Dokumenten und Daten basiert und Fragen beantwortet sowie Arbeitsentwürfe für Ihr Team erstellt — kein öffentlicher Chatbot.",
         "priceFrom": "Ab 1.500 €",
         "timeline": "Typische Lieferzeit 2–4 Wochen",
-        "includes": [
-          "Assistent basiert auf Ihren Inhalten",
-          "Private, zugriffskontrollierte Bereitstellung",
-          "Prompt- + Guardrail-Feinabstimmung"
-        ]
+        "includes": {
+          "0": "Assistent basiert auf Ihren Inhalten",
+          "1": "Private, zugriffskontrollierte Bereitstellung",
+          "2": "Prompt- + Guardrail-Feinabstimmung"
+        }
       },
-      {
+      "4": {
         "name": "Website + Marketing-Automatisierung",
         "summary": "Eine moderne Website kombiniert mit den Automatisierungen dahinter — Lead-Erfassung, Follow-up-Sequenzen und Reporting miteinander verbunden.",
         "priceFrom": "Ab 1.900 €",
         "timeline": "Typische Lieferzeit 3–6 Wochen",
-        "includes": [
-          "Marketing-Website oder Landingpage-Erstellung",
-          "Lead-Erfassung + Follow-up-Automatisierung",
-          "Analytics- & Reporting-Einrichtung"
-        ]
+        "includes": {
+          "0": "Marketing-Website oder Landingpage-Erstellung",
+          "1": "Lead-Erfassung + Follow-up-Automatisierung",
+          "2": "Analytics- & Reporting-Einrichtung"
+        }
       }
-    ]
+    }
   },
   "playerCard": {
     "pageTitle": "Mein Berufsprofil",
@@ -9834,24 +9834,24 @@
       "cta": "Personalanfrage einreichen"
     },
     "title": "So funktioniert der erste bezahlte Service",
-    "steps": [
-      {
+    "steps": {
+      "0": {
         "title": "Reichen Sie Ihre Anfrage kostenlos ein",
         "body": "Beschreiben Sie, welche Arbeitskräfte oder welche Kolonne Sie brauchen. Keine Gebühr, keine Karte, nichts wird automatisch veröffentlicht."
       },
-      {
+      "1": {
         "title": "Ein Mensch prüft ihn",
         "body": "Ein Operator liest jede Anfrage, kontaktiert Sie und klärt Umfang, Zeitplan und Bedingungen, bevor irgendetwas weitergeht."
       },
-      {
+      "2": {
         "title": "Sie erhalten eine manuell geprüfte Shortlist",
         "body": "Echte Kandidaten oder Kolonnen, von einem Menschen gegen Ihre Anfrage geprüft. Wenn wir keine passende Shortlist zusammenstellen können, fällt keine Gebühr an — und wir versprechen nie, dass immer ein Kandidat gefunden wird."
       },
-      {
+      "3": {
         "title": "Sie zahlen nur für erbrachte Leistung",
         "body": "Pro eingestellter Arbeitskraft, Kolonne oder Unternehmensvermittlung gilt eine feste Erfolgsgebühr. Eine separate Koordinationsgebühr fällt nur an, wenn Dokumenten- oder Onboarding-Koordination tatsächlich erbracht wird. Der endgültige Preis wird bestätigt, bevor bezahlte Arbeit beginnt."
       }
-    ],
+    },
     "note": "Zwei Dinge laufen nebeneinander, und diese Seite beschreibt das zweite. Die Plattform selbst arbeitet automatisch: die Stellenübersicht ist öffentlich, die Match-Vorschau ist ohne Konto zugänglich, und eine gestellte Anfrage ergibt eine sortierte Kandidatenliste mit Begründung, warum jemand passt — eine aktive Position kostenfrei. Der bezahlte Service oben ist der menschliche Teil: ein Mitarbeiter liest Ihre Anfrage, nimmt Kontakt auf und prüft die Liste von Hand, bevor jemand vorgeschlagen wird. Eine ganze Kolonne kann sich bereits als eine Einheit auf Ihre Anfrage anbieten und, sobald beide Seiten einig sind, Ihrem Projekt als ein Team beitreten; die automatische Kandidatenliste schlägt noch nicht ganze Kolonnen vor — sie ordnet Personen einzeln.",
     "ctaLabel": "Personalanfrage einreichen →"
   },
@@ -9972,36 +9972,36 @@
     "titleAccent": "Schritt für Schritt",
     "subcopy": "In ganz Europa zu arbeiten ist einer der Wege, die LabourMarket.ai eröffnet. Erstellen Sie ein Arbeitsprofil, sehen Sie, was jedes Land braucht, und lassen Sie Arbeitgeber Sie erreichen, wenn Sie bereit sind. Wir versprechen niemals einen Job oder einen Lohn — wir helfen Ihnen, sich vorzubereiten und gematcht zu werden.",
     "stepsTitle": "So funktioniert es",
-    "steps": [
-      {
+    "steps": {
+      "0": {
         "title": "1. Nennen Sie uns Ihren Beruf",
         "body": "Geben Sie Ihren Beruf, Ihre Erfahrung und Ihre Verfügbarkeit an. Das dauert nur wenige Minuten."
       },
-      {
+      "1": {
         "title": "2. KI erstellt einen Entwurf",
         "body": "Der Assistent verwandelt Ihre Angaben in ein strukturiertes Profil und einen Lebenslauf-Entwurf — ein Vorschlag, den Sie prüfen und bearbeiten. Er erfindet niemals Erfahrung."
       },
-      {
+      "2": {
         "title": "3. Länderbereitschaft prüfen",
         "body": "Sehen Sie, welche Dokumente und Schritte für Ihr Wunschland voraussichtlich erforderlich sind — mit Quellenangaben, und keine Rechtsberatung."
       },
-      {
+      "3": {
         "title": "4. Gematcht werden",
         "body": "Wenn der Bedarf eines Arbeitgebers zu Ihrem Beruf, Ihrer Verfügbarkeit, Unterkunft, Ihrem Transport und Ihrer Sprache passt, erscheint er auf Ihrer Chancen-Übersicht mit einer ehrlichen Erklärung der Passung."
       },
-      {
+      "4": {
         "title": "5. Interesse und Kontakt",
         "body": "Bekunden Sie Interesse an einem passenden Bedarf. Das Unternehmen prüft es, und Sie sehen den ehrlichen Status — geprüft oder kontaktiert. Verträge und Bezahlung bleiben vorerst außerhalb der Plattform."
       }
-    ],
+    },
     "needTitle": "Was Sie möglicherweise brauchen",
-    "needItems": [
-      "Einen Beruf, in dem Sie arbeiten",
-      "Ihre Verfügbarkeit ab einem Datum",
-      "Ob Sie eine Unterkunft benötigen oder eine eigene haben",
-      "Transport: eigener, ein Führerschein oder eine Abholung",
-      "Dokumente, die für das Land erforderlich sein können"
-    ],
+    "needItems": {
+      "0": "Einen Beruf, in dem Sie arbeiten",
+      "1": "Ihre Verfügbarkeit ab einem Datum",
+      "2": "Ob Sie eine Unterkunft benötigen oder eine eigene haben",
+      "3": "Transport: eigener, ein Führerschein oder eine Abholung",
+      "4": "Dokumente, die für das Land erforderlich sein können"
+    },
     "directionsTitle": "Wo Menschen arbeiten",
     "directionsNote": "Öffnen Sie die Länderseiten, um quellenbasierte Arbeitsmarkt-Signale zu sehen.",
     "directionsCta": "Länder ansehen",
@@ -11084,227 +11084,227 @@
       "lead": "Der berufliche Wert eines Menschen sollte nicht jedes Mal verschwinden, wenn er den Arbeitgeber wechselt. Echte Arbeit kann zu dauerhafter beruflicher Geschichte werden: was die Person getan hat, wo, wann, wie lange, in welcher Rolle, mit welchen Fähigkeiten und welche Nachweise und Bestätigungen das stützen.",
       "leadOrg": "Für Organisationen baut dieselbe echte Arbeit die Historie dessen auf, was das Unternehmen tatsächlich geleistet hat: Projekte, Teams, ausgeführte Arbeiten, Stunden, Kompetenzen und Nachweise.",
       "railPeopleLabel": "Für Personen",
-      "railPeople": [
-        "Menschen",
-        "Chancen",
-        "Echte Arbeit",
-        "Nachweise",
-        "Berufliches Wachstum"
-      ],
+      "railPeople": {
+        "0": "Menschen",
+        "1": "Chancen",
+        "2": "Echte Arbeit",
+        "3": "Nachweise",
+        "4": "Berufliches Wachstum"
+      },
       "railCompaniesLabel": "Für Unternehmen",
-      "railCompanies": [
-        "Unternehmen",
-        "Menschen",
-        "Projekte",
-        "Bestätigte Arbeit",
-        "Leistungsfähigkeit der Organisation"
-      ],
+      "railCompanies": {
+        "0": "Unternehmen",
+        "1": "Menschen",
+        "2": "Projekte",
+        "3": "Bestätigte Arbeit",
+        "4": "Leistungsfähigkeit der Organisation"
+      },
       "accumulate": "Jeder echte Arbeitszeitraum ergänzt die Geschichte — sie endet nicht mit dem Arbeitgeberwechsel.",
       "railAria": "Wie Menschen und Unternehmen aus echter Arbeit wachsen"
     },
     "lifecycle": {
       "label": "Der gesamte Lebenszyklus beruflicher Arbeit",
-      "steps": [
-        "Chance",
-        "Beschäftigung / Zusammenarbeit",
-        "Echte Arbeit",
-        "Arbeitsjournal",
-        "Projekte und Aufgaben",
-        "Arbeitszeit",
-        "Arbeitsnachweise",
-        "Bestätigungen",
-        "Fähigkeiten und Kompetenzen",
-        "Living CV — ein lebendiger beruflicher Lebenslauf",
-        "Neue Chancen",
-        "Teams",
-        "Leistungsfähigkeit des Unternehmens",
-        "Arbeitsmarktdienste"
-      ],
+      "steps": {
+        "0": "Chance",
+        "1": "Beschäftigung / Zusammenarbeit",
+        "2": "Echte Arbeit",
+        "3": "Arbeitsjournal",
+        "4": "Projekte und Aufgaben",
+        "5": "Arbeitszeit",
+        "6": "Arbeitsnachweise",
+        "7": "Bestätigungen",
+        "8": "Fähigkeiten und Kompetenzen",
+        "9": "Living CV — ein lebendiger beruflicher Lebenslauf",
+        "10": "Neue Chancen",
+        "11": "Teams",
+        "12": "Leistungsfähigkeit des Unternehmens",
+        "13": "Arbeitsmarktdienste"
+      },
       "note": "Das erklärt das System; es ist nicht seine Grenze. Weitere Teile des Arbeitsmarkts erweitern die Kette."
     },
-    "loops": [
-      {
+    "loops": {
+      "0": {
         "id": "people",
         "heading": "Für Menschen",
         "lead": "Ein berufliches Profil ist keine Karte und keine Punktzahl, sondern Erfahrung, Arbeitshistorie und Nachweise eines echten Menschen.",
-        "flow": [
-          "Chancen finden",
-          "Berufserfahrung darstellen",
-          "Arbeiten",
-          "Tatsächlich geleistete Arbeit erfassen",
-          "Nachweise bewahren",
-          "Bestätigungen erhalten, wo zutreffend",
-          "Berufliche Geschichte aufbauen — Living CV",
-          "Gesammelte Erfahrung für neue Chancen nutzen"
-        ],
+        "flow": {
+          "0": "Chancen finden",
+          "1": "Berufserfahrung darstellen",
+          "2": "Arbeiten",
+          "3": "Tatsächlich geleistete Arbeit erfassen",
+          "4": "Nachweise bewahren",
+          "5": "Bestätigungen erhalten, wo zutreffend",
+          "6": "Berufliche Geschichte aufbauen — Living CV",
+          "7": "Gesammelte Erfahrung für neue Chancen nutzen"
+        },
         "pointsLabel": "Was ein berufliches Profil abbildet",
-        "points": [
-          "Erfahrung und Arbeitshistorie;",
-          "Fähigkeiten und Kompetenzen;",
-          "Qualifikationen und Zertifikate, wo erfasst;",
-          "geleistete Arbeit, Stunden, Projekte und Objekte;",
-          "Nachweise und Bestätigungen;",
-          "Verfügbarkeit und berufliche Präferenzen, wo zutreffend."
-        ]
+        "points": {
+          "0": "Erfahrung und Arbeitshistorie;",
+          "1": "Fähigkeiten und Kompetenzen;",
+          "2": "Qualifikationen und Zertifikate, wo erfasst;",
+          "3": "geleistete Arbeit, Stunden, Projekte und Objekte;",
+          "4": "Nachweise und Bestätigungen;",
+          "5": "Verfügbarkeit und berufliche Präferenzen, wo zutreffend."
+        }
       },
-      {
+      "1": {
         "id": "employers",
         "heading": "Für Arbeitgeber",
         "lead": "Der Wert für Arbeitgeber liegt nicht nur im Ausschreiben von Stellen. Wichtig ist, das Wissen zu bewahren, wer gearbeitet hat, was getan wurde, wo, wann, wie lange, was abgeschlossen ist, welche Nachweise es gibt und welche Leistungsfähigkeit die Organisation aufgebaut hat.",
-        "flow": [
-          "Bedarf",
-          "Menschen",
-          "Team",
-          "Projekt / Objekt",
-          "Arbeit",
-          "Stunden und Fortschritt",
-          "Nachweise",
-          "Bestätigung",
-          "Die Historie der tatsächlich geleisteten Arbeit des Unternehmens",
-          "Künftige Personalplanung (eine Richtung)"
-        ],
+        "flow": {
+          "0": "Bedarf",
+          "1": "Menschen",
+          "2": "Team",
+          "3": "Projekt / Objekt",
+          "4": "Arbeit",
+          "5": "Stunden und Fortschritt",
+          "6": "Nachweise",
+          "7": "Bestätigung",
+          "8": "Die Historie der tatsächlich geleisteten Arbeit des Unternehmens",
+          "9": "Künftige Personalplanung (eine Richtung)"
+        },
         "pointsLabel": "Was die Organisation bewahrt",
-        "points": [
-          "wer gearbeitet hat und in welcher Rolle;",
-          "welche Arbeiten wo und wann ausgeführt wurden;",
-          "wie viele Stunden und welcher Fortschritt;",
-          "welche Nachweise und Bestätigungen es gibt;",
-          "welche Fähigkeiten das Team tatsächlich aufgebaut hat."
-        ]
+        "points": {
+          "0": "wer gearbeitet hat und in welcher Rolle;",
+          "1": "welche Arbeiten wo und wann ausgeführt wurden;",
+          "2": "wie viele Stunden und welcher Fortschritt;",
+          "3": "welche Nachweise und Bestätigungen es gibt;",
+          "4": "welche Fähigkeiten das Team tatsächlich aufgebaut hat."
+        }
       },
-      {
+      "2": {
         "id": "network",
         "heading": "Für Agenturen und andere Arbeitsmarktteilnehmer",
         "lead": "LabourMarket.ai ist nicht nur ein System für Beschäftigte und Arbeitgeber. Auch andere legitime Teilnehmer haben ihren Platz im selben Arbeitsmarktnetzwerk.",
-        "flow": [],
-        "participants": [
-          "Personalvermittlungs- und Auswahlagenturen",
-          "Zeitarbeitsunternehmen",
-          "Auftragnehmer und Subunternehmer",
-          "Weiterbildungsanbieter",
-          "Schulen und berufsbildende Einrichtungen",
-          "Selbstständige Fachleute",
-          "Anbieter von Arbeitsmarktdiensten",
-          "Weitere legitime Arbeitsmarktteilnehmer"
-        ],
+        "flow": {},
+        "participants": {
+          "0": "Personalvermittlungs- und Auswahlagenturen",
+          "1": "Zeitarbeitsunternehmen",
+          "2": "Auftragnehmer und Subunternehmer",
+          "3": "Weiterbildungsanbieter",
+          "4": "Schulen und berufsbildende Einrichtungen",
+          "5": "Selbstständige Fachleute",
+          "6": "Anbieter von Arbeitsmarktdiensten",
+          "7": "Weitere legitime Arbeitsmarktteilnehmer"
+        },
         "pointsLabel": "Ihr Platz im selben Netzwerk",
-        "points": [
-          "sie arbeiten mit denselben echten Arbeitsaufzeichnungen, nicht mit getrennten Dateien;",
-          "Rollen und Verantwortung bleiben klar getrennt: wer veröffentlicht hat, wer gearbeitet hat, wer bestätigt hat."
-        ]
+        "points": {
+          "0": "sie arbeiten mit denselben echten Arbeitsaufzeichnungen, nicht mit getrennten Dateien;",
+          "1": "Rollen und Verantwortung bleiben klar getrennt: wer veröffentlicht hat, wer gearbeitet hat, wer bestätigt hat."
+        }
       }
-    ],
+    },
     "evidence": {
       "heading": "Echte Arbeit wird zum beruflichen Nachweis",
       "lead": "Ein Arbeitsereignis ist ein Datensatz. Er kann mehrere Ansichten speisen, wird aber nie kopiert und nie aus dem Nichts erzeugt.",
       "chainLabel": "Die Nachweiskette",
-      "chain": [
-        "Person",
-        "Datum / Zeitraum",
-        "Stunden",
-        "Projekt / Objekt",
-        "Ausgeführte Arbeit",
-        "Fähigkeiten und Kompetenzen",
-        "Quelle / Nachweis",
-        "Bestätigung",
-        "Berufliche Geschichte — Living CV"
-      ],
+      "chain": {
+        "0": "Person",
+        "1": "Datum / Zeitraum",
+        "2": "Stunden",
+        "3": "Projekt / Objekt",
+        "4": "Ausgeführte Arbeit",
+        "5": "Fähigkeiten und Kompetenzen",
+        "6": "Quelle / Nachweis",
+        "7": "Bestätigung",
+        "8": "Berufliche Geschichte — Living CV"
+      },
       "projectionsLabel": "Derselbe Datensatz — mehrere Ansichten",
-      "projections": [
-        "Die berufliche Geschichte der Person",
-        "Teamhistorie",
-        "Projekthistorie",
-        "Historie der Unternehmensleistung"
-      ],
+      "projections": {
+        "0": "Die berufliche Geschichte der Person",
+        "1": "Teamhistorie",
+        "2": "Projekthistorie",
+        "3": "Historie der Unternehmensleistung"
+      },
       "note": "Ein Arbeitsereignis kann mehrere Ansichten speisen. Nachweise werden nie dupliziert oder erfunden."
     },
     "afterHire": {
       "heading": "Warum nutzen, wenn die Arbeit schon gefunden ist?",
       "lead": "Eine herkömmliche Jobbörse liefert ihren größten Nutzen vor der Einstellung. LabourMarket.ai soll nützlicher werden, sobald echte Arbeit beginnt.",
       "boardLabel": "Eine herkömmliche Jobbörse",
-      "boardPoints": [
-        "Der Nutzen ist bei der Suche am größten.",
-        "Nach der Einstellung bleibt die Geschichte in getrennten Systemen.",
-        "Ein neuer Arbeitgeber beginnt bei null."
-      ],
-      "platformPoints": [
-        "Jeder echte Arbeitszeitraum ergänzt die berufliche Geschichte.",
-        "Nachweise, Kompetenzen und der Living CV wachsen.",
-        "Die Arbeitshistorie von Team und Unternehmen wächst mit.",
-        "Gesammelte Erfahrung wird Kontext für neue Chancen."
-      ],
-      "stages": [
-        "Suche",
-        "Einstellung",
-        "Arbeit",
-        "Spätere Chancen"
-      ],
+      "boardPoints": {
+        "0": "Der Nutzen ist bei der Suche am größten.",
+        "1": "Nach der Einstellung bleibt die Geschichte in getrennten Systemen.",
+        "2": "Ein neuer Arbeitgeber beginnt bei null."
+      },
+      "platformPoints": {
+        "0": "Jeder echte Arbeitszeitraum ergänzt die berufliche Geschichte.",
+        "1": "Nachweise, Kompetenzen und der Living CV wachsen.",
+        "2": "Die Arbeitshistorie von Team und Unternehmen wächst mit.",
+        "3": "Gesammelte Erfahrung wird Kontext für neue Chancen."
+      },
+      "stages": {
+        "0": "Suche",
+        "1": "Einstellung",
+        "2": "Arbeit",
+        "3": "Spätere Chancen"
+      },
       "schematicNote": "Schema — keine Messung.",
       "conclusion": "Der Wert endet nicht mit der Einstellungsentscheidung — er wächst an jedem Tag, an dem gearbeitet wird."
     },
     "trust": {
       "heading": "Vertrauen: Fakt ≠ abgeleitet ≠ bestätigt",
       "lead": "Die ursprünglichen Nachweise und ihre Quelle bleiben erhalten. Was die Quelle angab, bleibt stets getrennt von dem, was das System ableitete, und von dem, was eine Person oder Organisation bestätigte. Eine KI-Interpretation gilt nie als Fakt.",
-      "tiers": [
-        {
+      "tiers": {
+        "0": {
           "term": "Fakt",
           "meaning": "Was die Quelle selbst angab: ein Datum, Stunden, eine Beschreibung der Arbeit.",
           "example": "Zum Beispiel „8 Std., 2025-03-12“ in der Quelltabelle."
         },
-        {
+        "1": {
           "term": "Abgeleitet",
           "meaning": "Eine Interpretation durch das System oder durch Regeln. Immer als abgeleitet gekennzeichnet und nie ein Fakt.",
           "example": "Zum Beispiel eine Fähigkeit, die aus dem Text einer Arbeitsbeschreibung erkannt wurde."
         },
-        {
+        "2": {
           "term": "Bestätigt",
           "meaning": "Bestätigung durch eine Person oder Organisation. Getrennt von dem, was die Person selbst angab.",
           "example": "Zum Beispiel bestätigte eine Führungskraft den Arbeitszeitraum."
         }
-      ],
+      },
       "noLabel": "Was es hier nicht gibt",
-      "no": [
-        "Keine Sternebewertungen.",
-        "Keine Punkte.",
-        "Keine Ranglisten von Beschäftigten.",
-        "Keine künstliche Rangfolge des Wertes eines Menschen."
-      ]
+      "no": {
+        "0": "Keine Sternebewertungen.",
+        "1": "Keine Punkte.",
+        "2": "Keine Ranglisten von Beschäftigten.",
+        "3": "Keine künstliche Rangfolge des Wertes eines Menschen."
+      }
     },
     "privacy": {
       "heading": "Datenschutz",
       "lead": "Berufliche Nachweise können privat detailliert sein. Öffentliche Auffindbarkeit legt nicht offen, was geschützt werden muss.",
       "privateLabel": "Nur privat detailliert",
-      "private": [
-        "Vollständige Arbeitsaufzeichnungen und Nachweise.",
-        "Das Arbeitsjournal.",
-        "Projekt- und Objektdetails."
-      ],
+      "private": {
+        "0": "Vollständige Arbeitsaufzeichnungen und Nachweise.",
+        "1": "Das Arbeitsjournal.",
+        "2": "Projekt- und Objektdetails."
+      },
       "publicNotLabel": "Die öffentliche Suche legt nicht offen",
-      "publicNot": [
-        "private Kontakte;",
-        "vertrauliche Kunden;",
-        "private Angaben aus dem Arbeitsjournal;",
-        "eingeschränkte persönliche Angaben;",
-        "vertrauliche Projektinformationen."
-      ],
+      "publicNot": {
+        "0": "private Kontakte;",
+        "1": "vertrauliche Kunden;",
+        "2": "private Angaben aus dem Arbeitsjournal;",
+        "3": "eingeschränkte persönliche Angaben;",
+        "4": "vertrauliche Projektinformationen."
+      },
       "control": "Menschen und Organisationen behalten angemessene Kontrolle darüber, was öffentlich ist."
     },
     "europe": {
       "heading": "Der europäische Arbeitsmarkt",
       "body": "LabourMarket.ai wird zuerst für Europa gebaut und kann weltweit wachsen. Es ist nicht die Jobbörse eines einzelnen Landes: Ziel ist es, Arbeitsmarktteilnehmer über Länder, Berufe und Branchen hinweg zu verbinden.",
-      "points": [
-        "Eine mehrsprachige Oberfläche; der Originaltext bleibt immer erhalten.",
-        "Erläuterungen zu Dokumenten und Anforderungen je Land.",
-        "Quellen öffentlicher Stellenanzeigen werden Land für Land angebunden — erst wenn die Bedingungen der Quelle bestätigt sind."
-      ]
+      "points": {
+        "0": "Eine mehrsprachige Oberfläche; der Originaltext bleibt immer erhalten.",
+        "1": "Erläuterungen zu Dokumenten und Anforderungen je Land.",
+        "2": "Quellen öffentlicher Stellenanzeigen werden Land für Land angebunden — erst wenn die Bedingungen der Quelle bestätigt sind."
+      }
     },
     "notYet": {
       "heading": "Was die Plattform nicht tut",
-      "points": [
-        "Sie markiert selbst nie etwas als bestätigt — ein bestätigter Zustand kommt immer von einer echten Person.",
-        "Sie gibt keine Rechtsberatung. Dokumenthinweise dienen nur der Information.",
-        "Sie bewertet Menschen nicht mit Punkten oder Rankings."
-      ]
+      "points": {
+        "0": "Sie markiert selbst nie etwas als bestätigt — ein bestätigter Zustand kommt immer von einer echten Person.",
+        "1": "Sie gibt keine Rechtsberatung. Dokumenthinweise dienen nur der Information.",
+        "2": "Sie bewertet Menschen nicht mit Punkten oder Rankings."
+      }
     },
     "data": {
       "heading": "Ihre Daten",
@@ -18978,25 +18978,25 @@
       "country": "Norwegen",
       "pay": "ab 2.800 €"
     },
-    "opportunities": [
-      {
+    "opportunities": {
+      "0": {
         "role": "Köchin",
         "place": "Restaurant · Oslo (Norwegen)",
-        "fits": [
-          "Beruf",
-          "Land",
-          "Lohn"
-        ]
+        "fits": {
+          "0": "Beruf",
+          "1": "Land",
+          "2": "Lohn"
+        }
       },
-      {
+      "1": {
         "role": "Küchenhilfe",
         "place": "Hotel · Bergen (Norwegen)",
-        "fits": [
-          "Land",
-          "Lohn"
-        ]
+        "fits": {
+          "0": "Land",
+          "1": "Lohn"
+        }
       }
-    ],
+    },
     "conversation": {
       "employer": "Könnten Sie am 6. Oktober anfangen?",
       "person": "Ja, gern."
@@ -19009,15 +19009,15 @@
     "week": {
       "label": "Diese Woche",
       "total": "40 Std.",
-      "days": [
-        "Mo.",
-        "Di.",
-        "Mi.",
-        "Do.",
-        "Fr.",
-        "Sa.",
-        "So."
-      ]
+      "days": {
+        "0": "Mo.",
+        "1": "Di.",
+        "2": "Mi.",
+        "3": "Do.",
+        "4": "Fr.",
+        "5": "Sa.",
+        "6": "So."
+      }
     },
     "confirmedBy": "Die Leitung bestätigte 5 Arbeitsbuch-Einträge",
     "facts": {
@@ -19025,18 +19025,18 @@
       "confirmed": "Std. mit Eintrag der Leitung",
       "days": "Arbeitstage"
     },
-    "cv": [
-      {
+    "cv": {
+      "0": {
         "org": "Restaurant Zum Fjord · Oslo",
         "period": "2026 — heute",
         "standing": "Arbeitsbuch-Einträge von der Leitung bestätigt"
       },
-      {
+      "1": {
         "org": "Restaurant Ąžuolas · Vilnius (Litauen)",
         "period": "2021 bis 2026",
         "standing": "Von ihr selbst angegeben"
       }
-    ],
+    },
     "next": {
       "role": "Oberköchin",
       "place": "Restaurant · Bergen (Norwegen)",
@@ -20640,6 +20640,78 @@
       "allProjects": "Alle Projekte",
       "allNeeds": "Alle Bedarfe",
       "untitledProject": "Projekt ohne Namen"
+    }
+  },
+  "siteNav": {
+    "trigger": "Hauptauswahl",
+    "account": "Nach Anmeldung",
+    "intents": {
+      "work": {
+        "title": "Ich suche Arbeit",
+        "description": "Finden Sie Stellen und zeigen Sie, was Sie können.",
+        "short": "Arbeit finden"
+      },
+      "workers": {
+        "title": "Ich suche Arbeitskräfte",
+        "description": "Beschreiben Sie, welche Arbeit Sie brauchen.",
+        "short": "Personal finden"
+      },
+      "services": {
+        "title": "Ich biete Leistungen an",
+        "description": "Veröffentlichen Sie Ihr Angebot und beantworten Sie Anfragen.",
+        "short": "Leistungen anbieten"
+      },
+      "orders": {
+        "title": "Ich suche Aufträge und Verträge",
+        "description": "Finden Sie Arbeitsanfragen und halten Sie Angebote beisammen.",
+        "short": "Aufträge finden"
+      },
+      "partners": {
+        "title": "Ich suche Partner",
+        "description": "Vernetzen Sie sich mit Menschen und Organisationen, mit denen Sie arbeiten.",
+        "short": "Partner finden"
+      },
+      "agencies": {
+        "title": "Für Agenturen",
+        "description": "Verwalten Sie Personal, Kunden und Angebote Ihrer Agentur.",
+        "short": "Für Agenturen"
+      }
+    },
+    "links": {
+      "jobs": "Stellenbörse",
+      "workOpportunities": "Arbeitsmöglichkeiten",
+      "createCv": "Kostenlosen Lebenslauf erstellen",
+      "workAbroad": "Arbeiten im Ausland",
+      "forWorkers": "So funktioniert es für Arbeitskräfte",
+      "companyNeed": "Bedarf beschreiben",
+      "forCompanies": "So funktioniert es für Unternehmen",
+      "labourMarket": "Arbeitsmarkt nach Land",
+      "myServices": "Ihre Leistungen",
+      "serviceRequests": "Leistungsanfragen",
+      "marketListings": "Marktangebote",
+      "commercial": "Angebote und Verträge",
+      "network": "Ihr Netzwerk",
+      "partnerWithUs": "Partner werden",
+      "forAgencies": "So funktioniert es für Agenturen",
+      "setUpAgency": "Agentur einrichten"
+    },
+    "assistant": "Assistenten fragen",
+    "start": {
+      "searchLabel": "Stellen suchen",
+      "searchPlaceholder": "Jobtitel oder Stichwort",
+      "searchSubmit": "Suchen",
+      "viewAll": "Alle Stellen"
+    },
+    "nav": {
+      "heading": "Was möchten Sie tun?",
+      "swipe": "Wischen",
+      "close": "Schließen",
+      "functions": "Funktionen",
+      "professions": "Berufe",
+      "opensNow": "Öffnet sofort",
+      "signInWhenOpen": "Anmeldung beim Öffnen",
+      "allSectors": "Alle Branchen",
+      "fullList": "Vollständige Liste"
     }
   }
 }

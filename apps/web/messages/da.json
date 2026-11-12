@@ -40,84 +40,84 @@
     "faq": {
       "eyebrow": "[EN] Agency FAQ",
       "headline": "[EN] Straight answers",
-      "items": [
-        {
+      "items": {
+        "0": {
           "a": "[EN] Yes. You broker and stay in control — the platform never disintermediates you.",
           "q": "[EN] Do we keep our client relationships?"
         },
-        {
+        "1": {
           "a": "[EN] Pricing is announced at launch; waitlist partners get early-access terms.",
           "q": "[EN] How much does it cost agencies?"
         },
-        {
+        "2": {
           "a": "[EN] Yes — public, agencies-only or direct, per worker and per demand.",
           "q": "[EN] Can we control worker visibility?"
         },
-        {
+        "3": {
           "a": "[EN] Yes, with assignment status tracking so nothing is double-booked.",
           "q": "[EN] Can one worker serve multiple clients?"
         }
-      ]
+      }
     },
     "features": {
       "eyebrow": "[EN] Why agencies",
       "headline": "[EN] Leverage, not loss of control",
-      "items": [
-        {
+      "items": {
+        "0": {
           "desc": "[EN] Workers, availability and status in one place.",
           "title": "[EN] Manage your pool"
         },
-        {
+        "1": {
           "desc": "[EN] Broker demand without losing the relationship.",
           "title": "[EN] Post on behalf of clients"
         },
-        {
+        "2": {
           "desc": "[EN] Place the right people faster.",
           "title": "[EN] Fit direction"
         },
-        {
+        "3": {
           "desc": "[EN] Public, agencies-only or direct — your call.",
           "title": "[EN] Visibility controls"
         },
-        {
+        "4": {
           "desc": "[EN] Baltic + Nordic clients and workers.",
           "title": "[EN] Cross-border reach"
         },
-        {
+        "5": {
           "desc": "[EN] Capacity insights as demand shifts.",
           "title": "[EN] Grow your desk"
         }
-      ]
+      }
     },
     "journey": {
       "eyebrow": "[EN] Agency workflow",
       "headline": "[EN] Run your pool like a desk",
-      "steps": [
-        {
+      "steps": {
+        "0": {
           "desc": "[EN] Bring your managed pool into one workspace.",
           "title": "[EN] Onboard your workers"
         },
-        {
+        "1": {
           "desc": "[EN] Direct your people toward open client roles.",
           "title": "[EN] Connect to client demand"
         },
-        {
+        "2": {
           "desc": "[EN] Track active, pending and available.",
           "title": "[EN] Manage assignments"
         },
-        {
+        "3": {
           "desc": "[EN] Add capacity where demand is rising.",
           "title": "[EN] Grow your pool"
         }
-      ]
+      }
     },
     "pool": {
-      "bullets": [
-        "[EN] Pool size — every managed worker at a glance.",
-        "[EN] Trade breakdown — capacity by skill, live.",
-        "[EN] Assignment status — Active, Pending, Available.",
-        "[EN] Multi-client — place the right people across clients."
-      ],
+      "bullets": {
+        "0": "[EN] Pool size — every managed worker at a glance.",
+        "1": "[EN] Trade breakdown — capacity by skill, live.",
+        "2": "[EN] Assignment status — Active, Pending, Available.",
+        "3": "[EN] Multi-client — place the right people across clients."
+      },
       "eyebrow": "[EN] Your control room",
       "headline": {
         "line1": "[EN] Your whole pool,",
@@ -594,12 +594,12 @@
       "subcopy": "[EN] Create a company account, post a work need and see which available workers fit it."
     },
     "demand": {
-      "bullets": [
-        "[EN] Project + location — scope each demand precisely.",
-        "[EN] Headcount — how many of each role you need.",
-        "[EN] Required skills — compared with confirmed worker skills.",
-        "[EN] Ranked matches: 47 — workers already fitting this demand now."
-      ],
+      "bullets": {
+        "0": "[EN] Project + location — scope each demand precisely.",
+        "1": "[EN] Headcount — how many of each role you need.",
+        "2": "[EN] Required skills — compared with confirmed worker skills.",
+        "3": "[EN] Ranked matches: 47 — workers already fitting this demand now."
+      },
       "eyebrow": "[EN] Live demand",
       "headline": {
         "line1": "[EN] Here's what live demand",
@@ -610,76 +610,76 @@
     "faq": {
       "eyebrow": "[EN] Company FAQ",
       "headline": "[EN] Straight answers",
-      "items": [
-        {
+      "items": {
+        "0": {
           "a": "[EN] Always against a specific need: coverage and fit from confirmed skills, reliability and on-site proof, with the reasons. Never one universal rating comparable across people.",
           "q": "[EN] How are fit signals shown?"
         },
-        {
+        "1": {
           "a": "[EN] Pricing is announced at launch. Waitlist signups get early-access pricing.",
           "q": "[EN] How much does it cost?"
         },
-        {
+        "2": {
           "a": "[EN] Yes — by country and region, matched to worker location and willingness to relocate.",
           "q": "[EN] Can we filter by location?"
         },
-        {
+        "3": {
           "a": "[EN] Through confirmed skills, employer-confirmed history and contextual fit signals — not self-reported CVs.",
           "q": "[EN] How is worker experience guaranteed?"
         }
-      ]
+      }
     },
     "features": {
       "eyebrow": "[EN] Why companies",
       "headline": "[EN] Supply you can act on",
-      "items": [
-        {
+      "items": {
+        "0": {
           "desc": "[EN] Every fit signal shows the reasons behind it.",
           "title": "[EN] Explainable fit direction"
         },
-        {
+        "1": {
           "desc": "[EN] Baltic + Nordic supply in one place.",
           "title": "[EN] Cross-border worker pool"
         },
-        {
+        "2": {
           "desc": "[EN] You see and own the relationship.",
           "title": "[EN] No opaque middlemen"
         },
-        {
+        "3": {
           "desc": "[EN] Hire on evidence, not on claims.",
           "title": "[EN] Confirmed skills + fit signals"
         },
-        {
+        "4": {
           "desc": "[EN] See availability shift as it happens.",
           "title": "[EN] Real-time supply signals"
         },
-        {
+        "5": {
           "desc": "[EN] You own the worker relationship.",
           "title": "[EN] Direct contact"
         }
-      ]
+      }
     },
     "journey": {
       "eyebrow": "[EN] How fit direction works for you",
       "headline": "[EN] From demand to hire",
-      "steps": [
-        {
+      "steps": {
+        "0": {
           "desc": "[EN] Define roles, headcount and skills.",
           "title": "[EN] Create project + post demand"
         },
-        {
+        "1": {
           "desc": "[EN] Workers and agencies scored against your demand.",
           "title": "[EN] System ranks best matches"
         },
-        {
+        "2": {
           "desc": "[EN] Contact the people you want — no gatekeeper.",
           "title": "[EN] Reach out directly"
         },
-        {
+        "3": {
           "desc": "[EN] Close roles in days, with accountable decisions.",
           "title": "[EN] Hire faster"
         }
-      ]
+      }
     }
   },
   "company": {
@@ -894,20 +894,20 @@
   },
   "pages": {
     "agencies": {
-      "benefits": [
-        {
+      "benefits": {
+        "0": {
           "body": "[EN] Keep your managed workers, availability and statuses organised in one workspace.",
           "title": "[EN] Manage your pool"
         },
-        {
+        "1": {
           "body": "[EN] Share client needs and place the right people faster with explainable fit direction.",
           "title": "[EN] Broker with leverage"
         },
-        {
+        "2": {
           "body": "[EN] Choose what is public, agencies-only, or direct — you control exposure.",
           "title": "[EN] Visibility controls"
         }
-      ],
+      },
       "cta": "[EN] Create an agency account",
       "eyebrow": "[EN] For agencies",
       "screenshot": "[EN] Agency mode flow",
@@ -916,20 +916,20 @@
       "titleAccent": "[EN] in motion."
     },
     "companies": {
-      "benefits": [
-        {
+      "benefits": {
+        "0": {
           "body": "[EN] Define roles, headcount and skills per project — not vague job ads.",
           "title": "[EN] Post demand per project"
         },
-        {
+        "1": {
           "title": "[EN] Fit to the specific job",
           "body": "[EN] You see which available workers and agencies fit each concrete need — honestly, per need."
         },
-        {
+        "2": {
           "body": "[EN] Tap vetted agency pools for surge capacity without losing visibility.",
           "title": "[EN] Agencies, when you need them"
         }
-      ],
+      },
       "cta": "[EN] Start a work need",
       "eyebrow": "[EN] For companies",
       "screenshot": "[EN] Company demand flow",
@@ -940,24 +940,24 @@
       "calculatorLink": "Beregn et projekts pris"
     },
     "workers": {
-      "benefits": [
-        {
+      "benefits": {
+        "0": {
           "body": "[EN] Maintain a single avatar with records-backed skills and availability — visible to registered employers across borders.",
           "title": "[EN] One profile, every market"
         },
-        {
+        "1": {
           "body": "[EN] See open work needs matched to your trade, skills and city — and express interest in one click.",
           "title": "[EN] Real demand, real-time"
         },
-        {
+        "2": {
           "body": "[EN] Transparent, contextual fit signals — no inflated claims, no universal rating, no pay-to-rank.",
           "title": "[EN] Honest signals"
         },
-        {
+        "3": {
           "title": "Vokser, mens du arbejder",
           "body": "Registrér udført arbejde og resultater — din faglige historik bliver rigere, og søgningen efter muligheder bliver stadig mere præcis, selv når du ikke aktivt søger job."
         }
-      ],
+      },
       "cta": "[EN] Start now",
       "eyebrow": "[EN] For workers",
       "screenshot": "[EN] Worker avatar flow",
@@ -971,39 +971,39 @@
       "titleAccent": "gratis.",
       "subcopy": "Opret et CV fra bunden eller importér dit eksisterende PDF eller DOCX. Gennemgå hvert udtrukket faktum, vælg en ren skabelon og download som PDF — gratis. Hvis du vil, kan de samme oplysninger opbygge din arbejdstagerprofil og vise ægte jobopslag fra officielle offentlige kilder.",
       "cta": "Opret mit CV — gratis",
-      "benefits": [
-        {
+      "benefits": {
+        "0": {
           "title": "Importér eller start forfra",
           "body": "Upload et eksisterende CV (PDF, DOCX eller tekst) eller start med en tom side. Udtrukne fakta forbliver forslag, indtil du accepterer dem."
         },
-        {
+        "1": {
           "title": "Ærlig struktur",
           "body": "Din erfaring, uddannelse, sprog og færdigheder struktureres til din gennemgang — intet opdigtes, og intet gemmes uden dit samtykke."
         },
-        {
+        "2": {
           "title": "Rene skabeloner, ægte PDF",
           "body": "Vælg en professionel skabelon og eksportér til A4-PDF via din browser — uden vandmærke, uden betalingsmur."
         },
-        {
+        "3": {
           "title": "Mere end et dokument",
           "body": "Med dit udtrykkelige samtykke kan de samme fakta opbygge din arbejdstagerprofil, forbinde dine færdigheder med det fælles europæiske færdighedskatalog og vise relevante offentlige jobopslag."
         }
-      ],
+      },
       "stepsTitle": "Sådan fungerer det",
-      "steps": [
-        {
+      "steps": {
+        "0": {
           "title": "Tilmeld dig gratis",
           "body": "En konto holder dit CV redigerbart og dine data under din kontrol — du kan slette dem når som helst."
         },
-        {
+        "1": {
           "title": "Tilføj din erfaring",
           "body": "Importér dit gamle CV eller skriv det ind — gennemgå derefter hvert faktum og beslut, hvad der bliver, før det bruges."
         },
-        {
+        "2": {
           "title": "Download og beslut",
           "body": "Eksportér dit CV som PDF. At blive synlig for arbejdsgivere er et separat, valgfrit valg."
         }
-      ],
+      },
       "privacyNote": "Dit CV forbliver privat som standard. Intet deles med arbejdsgivere, før du udtrykkeligt slår synlighed til — og du kan slå den fra når som helst."
     }
   },
@@ -1025,67 +1025,67 @@
       "cancelled": "Betalingen blev annulleret — der blev ikke trukket noget, og intet er ændret på din konto."
     },
     "eyebrow": "[EN] Pricing",
-    "faq": [
-      {
+    "faq": {
+      "0": {
         "q": "Hvorfor kun én betalt plan?",
         "a": "Alle organisationer — arbejdsgivere, vikarbureauer, entreprenører og uddannelsesudbydere — får det samme produkt. Det, der ændrer sig, er omfanget: 1 aktiv stilling gratis og ingen fast grænse for aktive stillinger for 99 €/måned."
       },
-      {
+      "1": {
         "q": "Forbliver gratisniveauet gratis?",
         "a": "Ja. Personer forbliver gratis, og en organisation kan have én aktiv stilling uden omkostninger."
       },
-      {
+      "2": {
         "q": "Hvordan håndteres betaling?",
         "a": "Kortbetaling via Stripe. Fakturaer, betalingshistorik og opsigelse findes i din organisationskonto."
       },
-      {
+      "3": {
         "q": "Er der en grænse for aktive stillinger?",
         "a": "Gratis omfatter 1 aktiv stilling. Planen „Organisation“ har ingen fast grænse for aktive stillinger. Almindelig beskyttelse mod misbrug, f.eks. begrænsning af antal forespørgsler, gælder stadig."
       }
-    ],
+    },
     "faqTitle": "[EN] Pricing FAQ",
     "featuresLabel": "[EN] Includes",
     "planCta": "Skriv dig på ventelisten for denne plan",
     "plans": {
       "agency": {
-        "features": [
-          "[EN] Unlimited managed workers",
-          "[EN] Broker tools",
-          "[EN] Worker search",
-          "[EN] Priority support"
-        ],
+        "features": {
+          "0": "[EN] Unlimited managed workers",
+          "1": "[EN] Broker tools",
+          "2": "[EN] Worker search",
+          "3": "[EN] Priority support"
+        },
         "name": "[EN] Agency",
         "tagline": "[EN] For staffing partners."
       },
       "business": {
         "name": "Organization",
         "tagline": "For organizations actively hiring and building teams",
-        "features": [
-          "Ingen fast grænse for aktive stillinger",
-          "Alt fra Gratis, i driftsskala",
-          "Én plan til alle slags organisationer",
-          "Projektdrift, rapporter og CSV-eksport"
-        ]
+        "features": {
+          "0": "Ingen fast grænse for aktive stillinger",
+          "1": "Alt fra Gratis, i driftsskala",
+          "2": "Én plan til alle slags organisationer",
+          "3": "Projektdrift, rapporter og CSV-eksport"
+        }
       },
       "enterprise": {
-        "features": [
-          "[EN] Unlimited projects",
-          "[EN] SSO",
-          "[EN] SLA",
-          "[EN] Dedicated support"
-        ],
+        "features": {
+          "0": "[EN] Unlimited projects",
+          "1": "[EN] SSO",
+          "2": "[EN] SLA",
+          "3": "[EN] Dedicated support"
+        },
         "name": "[EN] Enterprise",
         "tagline": "[EN] For scale and control."
       },
       "free": {
         "name": "Free",
         "tagline": "For getting started",
-        "features": [
-          "1 active position",
-          "Matching shortlist and candidate contact",
-          "Bookings, projects, instructions",
-          "Work confirmation by the employer"
-        ]
+        "features": {
+          "0": "1 active position",
+          "1": "Matching shortlist and candidate contact",
+          "2": "Bookings, projects, instructions",
+          "3": "Work confirmation by the employer"
+        }
       }
     },
     "subcopyLive": "Priserne er bekræftet af ejeren og gælder. Aktivering sker i organisationskontoen via en sikker Stripe-betaling; intet trækkes på denne side.",
@@ -1244,84 +1244,84 @@
     "faq": {
       "eyebrow": "[EN] Worker FAQ",
       "headline": "[EN] Straight answers",
-      "items": [
-        {
+      "items": {
+        "0": {
           "a": "[EN] Through employer confirmations on completed work and uploaded certificates — never self-claim alone.",
           "q": "[EN] How are skills verified?"
         },
-        {
+        "1": {
           "a": "[EN] The core is free — your profile, matches, search and messaging never cost workers anything. Premium extras (photo + video galleries, the AI profile assistant, VIP visibility) carry a small fee. Final pricing is published before full launch.",
           "q": "[EN] How much does it cost workers?"
         },
-        {
+        "2": {
           "a": "[EN] Only verified employers and agencies you're visible to — you control your availability and exposure.",
           "q": "[EN] Who sees my profile?"
         },
-        {
+        "3": {
           "a": "[EN] Yes. Your profile is yours; you can take roles from any company on the platform.",
           "q": "[EN] Can I work for multiple companies?"
         }
-      ]
+      }
     },
     "features": {
       "eyebrow": "[EN] What you get",
       "headline": "[EN] Built around the worker, not the middleman",
-      "items": [
-        {
+      "items": {
+        "0": {
           "desc": "[EN] Your rating reflects completed work, not promises.",
           "title": "[EN] Readiness from real work"
         },
-        {
+        "1": {
           "desc": "[EN] Built from confirmed work and certificates.",
           "title": "[EN] Evidence-backed skills"
         },
-        {
+        "2": {
           "desc": "[EN] NL, DK, DE, SE, NO and more.",
           "title": "[EN] Cross-border opportunities"
         },
-        {
+        "3": {
           "desc": "[EN] No opaque agents in the middle.",
           "title": "[EN] Direct employer contact"
         },
-        {
+        "4": {
           "desc": "[EN] See why a role may fit you.",
           "title": "[EN] Explainable fit"
         },
-        {
+        "5": {
           "desc": "[EN] Every job builds a portable history.",
           "title": "[EN] Growing track record"
         }
-      ]
+      }
     },
     "journey": {
       "eyebrow": "[EN] Your journey",
       "headline": "[EN] Your journey: from signup to hire",
-      "steps": [
-        {
+      "steps": {
+        "0": {
           "desc": "[EN] Add your trade, experience and availability.",
           "title": "[EN] Build your profile (5 min)"
         },
-        {
+        "1": {
           "desc": "[EN] Employers and certificates confirm what you can do.",
           "title": "[EN] Verify your skills"
         },
-        {
+        "2": {
           "desc": "[EN] Roles that fit your trade, rate and location find you.",
           "title": "[EN] See opportunity-fit direction"
         },
-        {
+        "3": {
           "desc": "[EN] Completed work strengthens your proof and readiness.",
           "title": "[EN] Work, earn, build your record"
         }
-      ]
+      }
     },
     "profile": {
-      "bullets": [
-        "[EN] Work readiness — honest signals (met out of total) with a clear next step. Never one universal rating.",
-        "[EN] What I can do — declared skills, journal-supported skills and real confirmations, not just a self-written CV.",
-        "[EN] When and where I can work — availability, a from-date and the country, always current.",
-        "[EN] Evidence of experience — work history, documents and a growth timeline built from real entries."
-      ],
+      "bullets": {
+        "0": "[EN] Work readiness — honest signals (met out of total) with a clear next step. Never one universal rating.",
+        "1": "[EN] What I can do — declared skills, journal-supported skills and real confirmations, not just a self-written CV.",
+        "2": "[EN] When and where I can work — availability, a from-date and the country, always current.",
+        "3": "[EN] Evidence of experience — work history, documents and a growth timeline built from real entries."
+      },
       "eyebrow": "[EN] Your profile",
       "headline": {
         "line1": "[EN] Here's what you'll look like —",
@@ -8033,6 +8033,78 @@
       "allProjects": "Alle projekter",
       "allNeeds": "Alle behov",
       "untitledProject": "Projekt uden navn"
+    }
+  },
+  "siteNav": {
+    "trigger": "Hovedvalg",
+    "account": "Efter login",
+    "intents": {
+      "work": {
+        "title": "Jeg søger arbejde",
+        "description": "Find job og vis, hvad du kan.",
+        "short": "Find arbejde"
+      },
+      "workers": {
+        "title": "Jeg søger medarbejdere",
+        "description": "Beskriv, hvilket arbejde du har brug for.",
+        "short": "Find medarbejdere"
+      },
+      "services": {
+        "title": "Jeg tilbyder ydelser",
+        "description": "Offentliggør dit tilbud og besvar forespørgsler.",
+        "short": "Tilbyd ydelser"
+      },
+      "orders": {
+        "title": "Jeg søger opgaver og kontrakter",
+        "description": "Find arbejdsforespørgsler og hold tilbud samlet.",
+        "short": "Find opgaver"
+      },
+      "partners": {
+        "title": "Jeg søger partnere",
+        "description": "Forbind dig med de mennesker og organisationer, du arbejder med.",
+        "short": "Find partnere"
+      },
+      "agencies": {
+        "title": "For bureauer",
+        "description": "Styr bureauets folk, kunder og tilbud.",
+        "short": "For bureauer"
+      }
+    },
+    "links": {
+      "jobs": "Jobopslag",
+      "workOpportunities": "Jobmuligheder",
+      "createCv": "Lav et gratis CV",
+      "workAbroad": "Arbejde i udlandet",
+      "forWorkers": "Sådan virker det for medarbejdere",
+      "companyNeed": "Beskriv dit behov",
+      "forCompanies": "Sådan virker det for virksomheder",
+      "labourMarket": "Arbejdsmarked pr. land",
+      "myServices": "Dine ydelser",
+      "serviceRequests": "Forespørgsler på ydelser",
+      "marketListings": "Markedsopslag",
+      "commercial": "Tilbud og kontrakter",
+      "network": "Dit netværk",
+      "partnerWithUs": "Bliv partner",
+      "forAgencies": "Sådan virker det for bureauer",
+      "setUpAgency": "Opret dit bureau"
+    },
+    "assistant": "Spørg assistenten",
+    "start": {
+      "searchLabel": "Søg job",
+      "searchPlaceholder": "Jobtitel eller søgeord",
+      "searchSubmit": "Søg",
+      "viewAll": "Alle job"
+    },
+    "nav": {
+      "heading": "Hvad vil du gøre?",
+      "swipe": "Stryg",
+      "close": "Luk",
+      "functions": "Funktioner",
+      "professions": "Fag",
+      "opensNow": "Åbner med det samme",
+      "signInWhenOpen": "Log ind ved åbning",
+      "allSectors": "Alle brancher",
+      "fullList": "Fuld liste"
     }
   }
 }

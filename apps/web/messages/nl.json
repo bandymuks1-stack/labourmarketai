@@ -5120,86 +5120,86 @@
         "line2": "een kaart die voor je spreekt."
       },
       "subcopy": "Je kaart wordt opgebouwd uit je echte afgeronde werk en werkrecords, niet uit een zelfgeschreven cv. Fit-signalen worden in context getoond — dekking en gereedheid voor een specifieke behoefte, nooit één universele beoordeling.",
-      "bullets": [
-        "Werkgereedheid — eerlijke signalen (behaald van totaal) met een duidelijke volgende stap. Nooit één universele beoordeling.",
-        "Wat ik kan — opgegeven vaardigheden, door het werkjournaal onderbouwde vaardigheden en echte bevestigingen, niet alleen een zelfgeschreven cv.",
-        "Wanneer en waar ik kan werken — beschikbaarheid, startdatum en land, altijd actueel.",
-        "Bewijs van ervaring — werkgeschiedenis, documenten en een groeitijdlijn uit echte registraties."
-      ]
+      "bullets": {
+        "0": "Werkgereedheid — eerlijke signalen (behaald van totaal) met een duidelijke volgende stap. Nooit één universele beoordeling.",
+        "1": "Wat ik kan — opgegeven vaardigheden, door het werkjournaal onderbouwde vaardigheden en echte bevestigingen, niet alleen een zelfgeschreven cv.",
+        "2": "Wanneer en waar ik kan werken — beschikbaarheid, startdatum en land, altijd actueel.",
+        "3": "Bewijs van ervaring — werkgeschiedenis, documenten en een groeitijdlijn uit echte registraties."
+      }
     },
     "journey": {
       "eyebrow": "Jouw traject",
       "headline": "Jouw traject: van aanmelding tot aanstelling",
-      "steps": [
-        {
+      "steps": {
+        "0": {
           "title": "Bouw je profiel (5 min)",
           "desc": "Voeg je vak, ervaring en beschikbaarheid toe."
         },
-        {
+        "1": {
           "title": "Bouw je werkrecords op",
           "desc": "Je werkrecords en certificaten laten zien wat je kunt."
         },
-        {
+        "2": {
           "title": "Zie de fit-richting van kansen",
           "desc": "Rollen die passen bij je vak, tarief en locatie vinden jou."
         },
-        {
+        "3": {
           "title": "Werk, verdien, groei door",
           "desc": "Afgerond werk versterkt je records en gereedheid."
         }
-      ]
+      }
     },
     "features": {
       "eyebrow": "Wat je krijgt",
       "headline": "Gebouwd rond de werknemer, niet de tussenpersoon",
-      "items": [
-        {
+      "items": {
+        "0": {
           "title": "Gereedheid uit echt werk",
           "desc": "Je gereedheid weerspiegelt afgerond werk en records, getoond in context — geen beloftes."
         },
-        {
+        "1": {
           "title": "Vaardigheden onderbouwd met records",
           "desc": "Opgebouwd uit je werkrecords en certificaten."
         },
-        {
+        "2": {
           "title": "Kansen over de grens",
           "desc": "Gemaakt voor grensoverschrijdend werk in heel Europa."
         },
-        {
+        "3": {
           "title": "Direct contact met de werkgever",
           "desc": "Geen ondoorzichtige tussenpersonen ertussen."
         },
-        {
+        "4": {
           "title": "Uitlegbare fit",
           "desc": "Zie waarom een rol bij je kan passen."
         },
-        {
+        "5": {
           "title": "Groeiende staat van dienst",
           "desc": "Elke klus bouwt aan een meeneembare historie."
         }
-      ]
+      }
     },
     "faq": {
       "eyebrow": "FAQ voor werknemers",
       "headline": "Eerlijke antwoorden",
-      "items": [
-        {
+      "items": {
+        "0": {
           "q": "Waar komen vaardigheidssignalen vandaan?",
           "a": "Uit je werkjournaalrecords over afgerond werk en geüploade certificaten — nooit alleen een zelfgeschreven claim."
         },
-        {
+        "1": {
           "q": "Hoeveel kost het voor werknemers?",
           "a": "Voor personen is alles gratis — je profiel, matches, zoeken en berichten kosten een werknemer nooit iets. Betaalde plannen bestaan alleen voor organisaties en staan op de prijzenpagina."
         },
-        {
+        "2": {
           "q": "Wie ziet mijn profiel?",
           "a": "Alleen geregistreerde werkgevers en uitzendbureaus voor wie je zichtbaar bent — jij bepaalt je beschikbaarheid en zichtbaarheid."
         },
-        {
+        "3": {
           "q": "Kan ik voor meerdere bedrijven werken?",
           "a": "Ja. Je profiel is van jou; je kunt rollen aannemen van elk bedrijf op het platform."
         }
-      ]
+      }
     },
     "cta": {
       "headline": {
@@ -5218,86 +5218,86 @@
         "line2": "van kansen eruit."
       },
       "subcopy": "Plaats wat elk project nodig heeft en zie uitlegbare fit-richting van beschikbare werknemers en uitzendbureaus — binnen uren, niet weken.",
-      "bullets": [
-        "Project + locatie — baken elke behoefte precies af.",
-        "Aantal mensen — hoeveel je van elke rol nodig hebt.",
-        "Vereiste vaardigheden — vergeleken met de vaardigheidsrecords van werknemers.",
-        "Fit-richting — werknemers wier capaciteiten bij deze behoefte kunnen passen."
-      ]
+      "bullets": {
+        "0": "Project + locatie — baken elke behoefte precies af.",
+        "1": "Aantal mensen — hoeveel je van elke rol nodig hebt.",
+        "2": "Vereiste vaardigheden — vergeleken met de vaardigheidsrecords van werknemers.",
+        "3": "Fit-richting — werknemers wier capaciteiten bij deze behoefte kunnen passen."
+      }
     },
     "journey": {
       "eyebrow": "Hoe fit-richting voor jou werkt",
       "headline": "Van vraag naar aanstelling",
-      "steps": [
-        {
+      "steps": {
+        "0": {
           "title": "Maak een project + plaats je vraag",
           "desc": "Definieer rollen, aantal mensen en vaardigheden."
         },
-        {
+        "1": {
           "title": "Zie wie past",
           "desc": "Werknemers en uitzendbureaus waarvan de gegevens bij je vraag passen, worden op passendheid gerangschikt, met de redenen — een signaal, geen garantie. Jij beslist wie je benadert."
         },
-        {
+        "2": {
           "title": "Neem direct contact op",
           "desc": "Benader de mensen die je wilt — zonder poortwachter."
         },
-        {
+        "3": {
           "title": "Sneller aannemen",
           "desc": "Vul rollen in dagen, met verantwoorde beslissingen."
         }
-      ]
+      }
     },
     "features": {
       "eyebrow": "Waarom bedrijven",
       "headline": "Aanbod waar je op kunt handelen",
-      "items": [
-        {
+      "items": {
+        "0": {
           "title": "Uitlegbare fit-richting",
           "desc": "Elk fit-signaal toont de redenen erachter."
         },
-        {
+        "1": {
           "title": "Werknemerspool over de grens",
           "desc": "Aanbod uit elke markt waarin we actief zijn, op één plek."
         },
-        {
+        "2": {
           "title": "Geen ondoorzichtige tussenpersonen",
           "desc": "Jij ziet en bezit de relatie."
         },
-        {
+        "3": {
           "title": "Vaardigheidsrecords + fit-signalen",
           "desc": "Neem aan op basis van records, niet op basis van claims."
         },
-        {
+        "4": {
           "title": "Aanbodsignalen",
           "desc": "Zie de opgegeven beschikbaarheid van werknemers terwijl profielen worden bijgewerkt."
         },
-        {
+        "5": {
           "title": "Direct contact",
           "desc": "Jij bezit de relatie met de werknemer."
         }
-      ]
+      }
     },
     "faq": {
       "eyebrow": "FAQ voor bedrijven",
       "headline": "Eerlijke antwoorden",
-      "items": [
-        {
+      "items": {
+        "0": {
           "q": "Hoe worden fit-signalen getoond?",
           "a": "Altijd ten opzichte van een specifieke behoefte: dekking en fit op basis van de vaardigheidsrecords, betrouwbaarheid en records op de werkplek van werknemers, met de redenen erbij. Nooit één universele beoordeling die tussen mensen vergelijkbaar is."
         },
-        {
+        "1": {
           "q": "Hoeveel kost het?",
           "a": "De prijzen staan op de prijzenpagina: één actieve positie per organisatie is gratis; voor meer posities is het organisatieplan nodig, dat je in je account activeert. Een personeelsbehoefte indienen is gratis."
         },
-        {
+        "2": {
           "q": "Kunnen we filteren op locatie?",
           "a": "Ja — op land en regio, gematcht op de locatie van werknemers en hun bereidheid om te verhuizen."
         },
-        {
+        "3": {
           "q": "Hoe wordt werkervaring getoond?",
           "a": "Via de vaardigheidsrecords van werknemers, gestructureerde werkhistorie en contextuele fit-signalen — geen zelfgerapporteerde cv's."
         }
-      ]
+      }
     },
     "cta": {
       "headline": {
@@ -5316,86 +5316,86 @@
         "line2": "in één ruimte."
       },
       "subcopy": "Beheer je werknemers, koppel ze aan klantbehoeften en bemiddel kennismakingen — zonder zicht of controle te verliezen.",
-      "bullets": [
-        "Poolomvang — elke beheerde werknemer in één oogopslag.",
-        "Verdeling per vak — capaciteit per vaardigheid, live.",
-        "Opdrachtstatus — Actief, In afwachting, Beschikbaar.",
-        "Meerdere klanten — plaats de juiste mensen bij verschillende klanten."
-      ]
+      "bullets": {
+        "0": "Poolomvang — elke beheerde werknemer in één oogopslag.",
+        "1": "Verdeling per vak — capaciteit per vaardigheid, live.",
+        "2": "Opdrachtstatus — Actief, In afwachting, Beschikbaar.",
+        "3": "Meerdere klanten — plaats de juiste mensen bij verschillende klanten."
+      }
     },
     "journey": {
       "eyebrow": "Workflow voor uitzendbureaus",
       "headline": "Run je pool als een desk",
-      "steps": [
-        {
+      "steps": {
+        "0": {
           "title": "Onboard je werknemers",
           "desc": "Breng je beheerde pool samen in één werkruimte."
         },
-        {
+        "1": {
           "title": "Koppel aan klantvraag",
           "desc": "Stuur je mensen naar openstaande rollen bij klanten."
         },
-        {
+        "2": {
           "title": "Beheer opdrachten",
           "desc": "Volg actief, in afwachting en beschikbaar."
         },
-        {
+        "3": {
           "title": "Laat je pool groeien",
           "desc": "Voeg capaciteit toe waar de vraag stijgt."
         }
-      ]
+      }
     },
     "features": {
       "eyebrow": "Waarom uitzendbureaus",
       "headline": "Meer slagkracht, geen controleverlies",
-      "items": [
-        {
+      "items": {
+        "0": {
           "title": "Beheer je pool",
           "desc": "Werknemers, beschikbaarheid en status op één plek."
         },
-        {
+        "1": {
           "title": "Plaats namens klanten",
           "desc": "Bemiddel in vraag zonder de relatie te verliezen."
         },
-        {
+        "2": {
           "title": "Gerichte matching",
           "desc": "Plaats de juiste mensen sneller."
         },
-        {
+        "3": {
           "title": "Zichtbaarheidsinstellingen",
           "desc": "Openbaar, alleen voor uitzendbureaus of direct — jij beslist."
         },
-        {
+        "4": {
           "title": "Grensoverschrijdend bereik",
           "desc": "Opdrachtgevers en werknemers in elke markt waarin we actief zijn."
         },
-        {
+        "5": {
           "title": "Laat je desk groeien",
           "desc": "Capaciteitsinzichten wanneer de vraag verschuift."
         }
-      ]
+      }
     },
     "faq": {
       "eyebrow": "FAQ voor uitzendbureaus",
       "headline": "Duidelijke antwoorden",
-      "items": [
-        {
+      "items": {
+        "0": {
           "q": "Behouden we onze klantrelaties?",
           "a": "Ja. Jij bemiddelt en houdt de controle — het platform passeert je nooit."
         },
-        {
+        "1": {
           "q": "Wat kost het voor uitzendbureaus?",
           "a": "Een bureau is een organisatie en gebruikt dezelfde plannen: één actieve positie is gratis, voor meer is het organisatieplan van de prijzenpagina nodig. Er is geen apart bureautarief."
         },
-        {
+        "2": {
           "q": "Kunnen we de zichtbaarheid van werknemers bepalen?",
           "a": "Ja — openbaar, alleen voor uitzendbureaus of direct, per werknemer en per vraag."
         },
-        {
+        "3": {
           "q": "Kan één werknemer meerdere klanten bedienen?",
           "a": "Ja, met registratie van de opdrachtstatus zodat niets dubbel wordt geboekt."
         }
-      ]
+      }
     },
     "cta": {
       "headline": {
@@ -5553,24 +5553,24 @@
       "title": "Vind werk",
       "titleAccent": "met één gratis profiel.",
       "subcopy": "Bouw één profiel, stel je beschikbaarheid in en laat echte vraag jou over de grens vinden.",
-      "benefits": [
-        {
+      "benefits": {
+        "0": {
           "title": "Eén profiel, elke markt",
           "body": "Onderhoud één avatar met door records onderbouwde vaardigheden en beschikbaarheid — zichtbaar voor geregistreerde werkgevers over de grens."
         },
-        {
+        "1": {
           "title": "Echte vraag",
           "body": "Zie open personeelsbehoeften die relevant zijn voor jouw vak, vaardigheden en stad — en toon interesse met één klik."
         },
-        {
+        "2": {
           "title": "Eerlijke signalen",
           "body": "Transparante, contextuele fit-signalen — geen opgeblazen claims, geen universele beoordeling, geen betalen-voor-ranking."
         },
-        {
+        "3": {
           "title": "Groeit terwijl je werkt",
           "body": "Leg afgerond werk en resultaten vast — je professionele geschiedenis wordt rijker en het zoeken naar kansen wordt steeds preciezer, ook als je niet actief op zoek bent."
         }
-      ],
+      },
       "screenshot": "Werknemer-avatarflow",
       "cta": "Maak gratis profiel"
     },
@@ -5579,20 +5579,20 @@
       "title": "Vind de mensen",
       "titleAccent": "die je projecten nodig hebben.",
       "subcopy": "Vertel ons welke vakmensen elk project nodig heeft, hoeveel en vanaf wanneer. De aanvraag is gratis en zonder account; met een gratis account zie je ook welke beschikbare werknemers en uitzendbureaus passen.",
-      "benefits": [
-        {
+      "benefits": {
+        "0": {
           "title": "Plaats je vraag per project",
           "body": "Definieer rollen, aantal mensen en vaardigheden per project — geen vage vacatures."
         },
-        {
+        "1": {
           "title": "Fit op de specifieke klus",
           "body": "Je ziet welke beschikbare werknemers en uitzendbureaus bij elke concrete behoefte passen — eerlijk, per behoefte."
         },
-        {
+        "2": {
           "title": "Uitzendbureaus, wanneer je ze nodig hebt",
           "body": "Benut de pools van geregistreerde uitzendbureaus voor piekcapaciteit zonder zicht te verliezen."
         }
-      ],
+      },
       "screenshot": "Bedrijfsvraagflow",
       "cta": "Beschrijf welke mensen je nodig hebt",
       "calculatorBody": "Schat het werk in voordat je het uitvraagt: arbeidsuren, materialen, materieel en reizen, met je eigen cijfers.",
@@ -5606,11 +5606,11 @@
           "titleAccent": "in Luxemburg.",
           "subcopy": "Voor aannemers en onderaannemers. Vertel ons welke vakmensen u nodig hebt — lassers, elektriciens, timmerlieden, steigerbouwers — hoeveel, waar en vanaf wanneer.",
           "cta": "Beschrijf de mensen die u zoekt",
-          "points": [
-            "Een aanvraag versturen is gratis en vraagt geen account, alleen een contact-e-mailadres. Niets wordt automatisch gepubliceerd.",
-            "Wij zoeken mensen van wie het vastgelegde werk past bij uw behoefte. Is er nog geen passende match, dan zeggen we dat.",
-            "Bij bouwaanvragen kan ons partnerbedrijf documenten en inwerken coördineren, met een mens die elke stap begeleidt."
-          ]
+          "points": {
+            "0": "Een aanvraag versturen is gratis en vraagt geen account, alleen een contact-e-mailadres. Niets wordt automatisch gepubliceerd.",
+            "1": "Wij zoeken mensen van wie het vastgelegde werk past bij uw behoefte. Is er nog geen passende match, dan zeggen we dat.",
+            "2": "Bij bouwaanvragen kan ons partnerbedrijf documenten en inwerken coördineren, met een mens die elke stap begeleidt."
+          }
         },
         "nl": {
           "metaTitle": "Vakmensen voor bouwplaatsen in Nederland",
@@ -5620,11 +5620,11 @@
           "titleAccent": "in Nederland.",
           "subcopy": "Voor aannemers en onderaannemers. Vertel ons welke vakmensen u nodig hebt — lassers, elektriciens, timmerlieden, steigerbouwers — hoeveel, waar en vanaf wanneer.",
           "cta": "Beschrijf de mensen die u zoekt",
-          "points": [
-            "Een aanvraag versturen is gratis en vraagt geen account, alleen een contact-e-mailadres. Niets wordt automatisch gepubliceerd.",
-            "Wij zoeken mensen van wie het vastgelegde werk past bij uw behoefte. Is er nog geen passende match, dan zeggen we dat.",
-            "Bij bouwaanvragen kan ons partnerbedrijf documenten en inwerken coördineren, met een mens die elke stap begeleidt."
-          ]
+          "points": {
+            "0": "Een aanvraag versturen is gratis en vraagt geen account, alleen een contact-e-mailadres. Niets wordt automatisch gepubliceerd.",
+            "1": "Wij zoeken mensen van wie het vastgelegde werk past bij uw behoefte. Is er nog geen passende match, dan zeggen we dat.",
+            "2": "Bij bouwaanvragen kan ons partnerbedrijf documenten en inwerken coördineren, met een mens die elke stap begeleidt."
+          }
         },
         "dk": {
           "metaTitle": "Vakmensen voor bouwplaatsen in Denemarken",
@@ -5634,11 +5634,11 @@
           "titleAccent": "in Denemarken.",
           "subcopy": "Voor aannemers en onderaannemers. Vertel ons welke vakmensen u nodig hebt — lassers, elektriciens, timmerlieden, steigerbouwers — hoeveel, waar en vanaf wanneer.",
           "cta": "Beschrijf de mensen die u zoekt",
-          "points": [
-            "Een aanvraag versturen is gratis en vraagt geen account, alleen een contact-e-mailadres. Niets wordt automatisch gepubliceerd.",
-            "Wij zoeken mensen van wie het vastgelegde werk past bij uw behoefte. Is er nog geen passende match, dan zeggen we dat.",
-            "Bij bouwaanvragen kan ons partnerbedrijf documenten en inwerken coördineren, met een mens die elke stap begeleidt."
-          ]
+          "points": {
+            "0": "Een aanvraag versturen is gratis en vraagt geen account, alleen een contact-e-mailadres. Niets wordt automatisch gepubliceerd.",
+            "1": "Wij zoeken mensen van wie het vastgelegde werk past bij uw behoefte. Is er nog geen passende match, dan zeggen we dat.",
+            "2": "Bij bouwaanvragen kan ons partnerbedrijf documenten en inwerken coördineren, met een mens die elke stap begeleidt."
+          }
         }
       }
     },
@@ -5647,20 +5647,20 @@
       "title": "Jouw pool,",
       "titleAccent": "in beweging.",
       "subcopy": "Beheer je werknemers, plaats vraag namens klanten en verzorg introducties — alles op één plek.",
-      "benefits": [
-        {
+      "benefits": {
+        "0": {
           "title": "Beheer je pool",
           "body": "Houd je beheerde werknemers, beschikbaarheid en statussen georganiseerd in één werkruimte."
         },
-        {
+        "1": {
           "title": "Bemiddel met voorsprong",
           "body": "Deel klantbehoeften en plaats sneller de juiste mensen met uitlegbare fit-richting."
         },
-        {
+        "2": {
           "title": "Zichtbaarheidsinstellingen",
           "body": "Kies wat openbaar, alleen voor uitzendbureaus of direct is — jij bepaalt de zichtbaarheid."
         }
-      ],
+      },
       "screenshot": "Uitzendbureau-modusflow",
       "cta": "Maak een uitzendbureau-account aan"
     },
@@ -5670,39 +5670,39 @@
       "titleAccent": "gratis.",
       "subcopy": "Maak een cv vanaf nul of importeer je bestaande PDF of DOCX. Controleer elk geëxtraheerd feit, kies een strakke template en download als PDF — gratis. Als je wilt, kan dezelfde informatie je werknemersprofiel opbouwen en echte vacatures uit officiële publieke bronnen tonen.",
       "cta": "Maak mijn cv — gratis",
-      "benefits": [
-        {
+      "benefits": {
+        "0": {
           "title": "Importeer of begin opnieuw",
           "body": "Upload een bestaand cv (PDF, DOCX of tekst) of begin met een leeg blad. Geëxtraheerde feiten blijven suggesties totdat jij ze accepteert."
         },
-        {
+        "1": {
           "title": "Eerlijke structuur",
           "body": "Je ervaring, opleiding, talen en vaardigheden worden gestructureerd voor jouw controle — niets wordt verzonnen en niets wordt opgeslagen zonder jouw toestemming."
         },
-        {
+        "2": {
           "title": "Strakke templates, echte PDF",
           "body": "Kies een professionele template en exporteer naar A4-PDF via je browser — zonder watermerk, zonder betaalmuur."
         },
-        {
+        "3": {
           "title": "Meer dan een document",
           "body": "Met jouw uitdrukkelijke toestemming kunnen dezelfde feiten je werknemersprofiel opbouwen, je vaardigheden koppelen aan de gemeenschappelijke Europese vaardighedencatalogus en passende publieke vacatures tonen. Door afgerond werk vast te leggen groeit je professionele geschiedenis — en wordt het zoeken naar kansen steeds beter."
         }
-      ],
+      },
       "stepsTitle": "Hoe het werkt",
-      "steps": [
-        {
+      "steps": {
+        "0": {
           "title": "Meld je gratis aan",
           "body": "Met een account blijft je cv bewerkbaar en houd jij je gegevens onder controle — je kunt ze op elk moment verwijderen."
         },
-        {
+        "1": {
           "title": "Voeg je ervaring toe",
           "body": "Importeer je oude cv of typ het in — bekijk daarna elk feit en bepaal wat je houdt voordat het wordt gebruikt."
         },
-        {
+        "2": {
           "title": "Download en beslis",
           "body": "Exporteer je cv als PDF. Vindbaar worden voor werkgevers blijft een aparte, optionele keuze."
         }
-      ],
+      },
       "privacyNote": "Je cv blijft standaard privé. Er wordt niets met werkgevers gedeeld totdat jij vindbaarheid expliciet inschakelt, en je kunt dit op elk moment uitzetten."
     }
   },
@@ -5723,63 +5723,63 @@
       "free": {
         "name": "Gratis",
         "tagline": "Om te beginnen",
-        "features": [
-          "1 actieve positie",
-          "Matching-shortlist en kandidaatcontact",
-          "Boekingen, projecten, instructies",
-          "Werkbevestiging en bevestigde vaardigheden"
-        ]
+        "features": {
+          "0": "1 actieve positie",
+          "1": "Matching-shortlist en kandidaatcontact",
+          "2": "Boekingen, projecten, instructies",
+          "3": "Werkbevestiging en bevestigde vaardigheden"
+        }
       },
       "business": {
         "name": "Organisatie",
         "tagline": "Voor organisaties die actief werven en teams bouwen",
-        "features": [
-          "Geen vaste limiet op actieve posities",
-          "Alles uit Gratis, op werkschaal",
-          "Eén plan voor elke soort organisatie",
-          "Projectbeheer, rapporten en CSV-export"
-        ]
+        "features": {
+          "0": "Geen vaste limiet op actieve posities",
+          "1": "Alles uit Gratis, op werkschaal",
+          "2": "Eén plan voor elke soort organisatie",
+          "3": "Projectbeheer, rapporten en CSV-export"
+        }
       },
       "agency": {
         "name": "Bureau",
         "tagline": "Voor uitzendpartners.",
-        "features": [
-          "Onbeperkt beheerde werknemers",
-          "Bemiddelingstools",
-          "Werknemers zoeken",
-          "Prioriteitssupport"
-        ]
+        "features": {
+          "0": "Onbeperkt beheerde werknemers",
+          "1": "Bemiddelingstools",
+          "2": "Werknemers zoeken",
+          "3": "Prioriteitssupport"
+        }
       },
       "enterprise": {
         "name": "Enterprise",
         "tagline": "Voor schaal en controle.",
-        "features": [
-          "Onbeperkt projecten",
-          "SSO",
-          "SLA",
-          "Toegewijde support"
-        ]
+        "features": {
+          "0": "Onbeperkt projecten",
+          "1": "SSO",
+          "2": "SLA",
+          "3": "Toegewijde support"
+        }
       }
     },
     "faqTitle": "Prijzen-FAQ",
-    "faq": [
-      {
+    "faq": {
+      "0": {
         "q": "Waarom maar één betaald plan?",
         "a": "Elke organisatie — werkgever, uitzender, aannemer of opleider — krijgt hetzelfde product. Alleen de schaal verschilt: 1 actieve positie gratis, en voor €99/maand geen vaste limiet op actieve posities."
       },
-      {
+      "1": {
         "q": "Blijft Gratis gratis?",
         "a": "Ja. Personen blijven gratis en een organisatie kan één actieve positie zonder kosten voeren."
       },
-      {
+      "2": {
         "q": "Hoe verloopt de facturering?",
         "a": "Kaartbetaling via Stripe. Facturen, betalingsgeschiedenis en opzegging vind je in je organisatieaccount."
       },
-      {
+      "3": {
         "q": "Is er een limiet op actieve posities?",
         "a": "Gratis bevat 1 actieve positie. Het plan Organisatie kent geen vaste limiet op actieve posities. Gebruikelijke bescherming tegen misbruik, zoals limieten op het aantal verzoeken, blijft gelden."
       }
-    ],
+    },
     "priceState": {
       "draft_pricing": "De prijzen worden voorbereid — er kan nog niets worden gekocht.",
       "owner_confirmed": "Prijzen bevestigd door de eigenaar. Activeren gebeurt in uw organisatieaccount; op deze pagina wordt niets afgeschreven."
@@ -5874,190 +5874,190 @@
     "marketplaceRules": {
       "title": "Marktplaatsregels",
       "intro": "Deze regels houden de marktplaats veilig en eerlijk. Ze gelden voor alle gebruikers en aanbiedingen.",
-      "rules": [
-        "Het systeem bevestigt nooit het recht om te werken of juridische geschiktheid zonder de vereiste documenten.",
-        "Een geverifieerde status verschijnt alleen na een echte menselijke controle — nooit automatisch.",
-        "Contactgegevens worden niet getoond zonder toestemming van de gebruiker.",
-        "Openbare aanbiedingen verschijnen pas na moderatie; niet-vertrouwde of verdachte aanbiedingen worden verborgen.",
-        "Handel in gereguleerde of illegale goederen en diensten is verboden.",
-        "Een kaartpunt verschijnt alleen met geverifieerde coördinaten — geen valse markeringen.",
-        "Betalingen tussen gebruikers lopen niet via het platform; via het platform worden alleen vergoedingen voor platformdiensten betaald.",
-        "Ongepast gedrag of verdachte activiteit kan worden gemeld — moderators beoordelen het."
-      ]
+      "rules": {
+        "0": "Het systeem bevestigt nooit het recht om te werken of juridische geschiktheid zonder de vereiste documenten.",
+        "1": "Een geverifieerde status verschijnt alleen na een echte menselijke controle — nooit automatisch.",
+        "2": "Contactgegevens worden niet getoond zonder toestemming van de gebruiker.",
+        "3": "Openbare aanbiedingen verschijnen pas na moderatie; niet-vertrouwde of verdachte aanbiedingen worden verborgen.",
+        "4": "Handel in gereguleerde of illegale goederen en diensten is verboden.",
+        "5": "Een kaartpunt verschijnt alleen met geverifieerde coördinaten — geen valse markeringen.",
+        "6": "Betalingen tussen gebruikers lopen niet via het platform; via het platform worden alleen vergoedingen voor platformdiensten betaald.",
+        "7": "Ongepast gedrag of verdachte activiteit kan worden gemeld — moderators beoordelen het."
+      }
     },
     "terms": {
       "metaDescription": "Uw overeenkomst voor elke platformdienst wordt gesloten met UAB “Nonstop Group”. Facturen worden opgesteld door en betalingen ontvangen door UAB “Nonstop Group”.",
       "title": "Gebruiksvoorwaarden",
-      "sections": [
-        {
+      "sections": {
+        "0": {
           "heading": "Met wie u een overeenkomst sluit",
-          "items": [
-            "Alle platformdiensten worden commercieel geleverd en verkocht door UAB “Nonstop Group”, bedrijfscode 302676973, btw LT100010790613, statutaire zetel Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litouwen.",
-            "Uw overeenkomst voor elke platformdienst wordt gesloten met UAB “Nonstop Group”. Facturen worden opgesteld door en betalingen ontvangen door UAB “Nonstop Group”.",
-            "Labour Market AI Sp. z o.o. (Warschau, Polen; KRS 0001218752) bezit de LabourMarket.ai-software, het merk en gerelateerde intellectuele eigendom en licentieert deze aan UAB “Nonstop Group”. Zij is geen partij bij uw overeenkomst."
-          ]
+          "items": {
+            "0": "Alle platformdiensten worden commercieel geleverd en verkocht door UAB “Nonstop Group”, bedrijfscode 302676973, btw LT100010790613, statutaire zetel Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litouwen.",
+            "1": "Uw overeenkomst voor elke platformdienst wordt gesloten met UAB “Nonstop Group”. Facturen worden opgesteld door en betalingen ontvangen door UAB “Nonstop Group”.",
+            "2": "Labour Market AI Sp. z o.o. (Warschau, Polen; KRS 0001218752) bezit de LabourMarket.ai-software, het merk en gerelateerde intellectuele eigendom en licentieert deze aan UAB “Nonstop Group”. Zij is geen partij bij uw overeenkomst."
+          }
         },
-        {
+        "1": {
           "heading": "Toepasselijk recht en geschillen",
-          "items": [
-            "Op deze voorwaarden en elke klantovereenkomst is het recht van de Republiek Litouwen van toepassing; geschillen worden beslecht door de bevoegde Litouwse rechter, behalve waar dwingend consumenten-, arbeids-, gegevensbeschermings- of ander toepasselijk recht u onvervreemdbare rechten of een ander forum geeft.",
-            "Bent u consument, dan behoudt u altijd de dwingende rechten van het land waar u woont."
-          ]
+          "items": {
+            "0": "Op deze voorwaarden en elke klantovereenkomst is het recht van de Republiek Litouwen van toepassing; geschillen worden beslecht door de bevoegde Litouwse rechter, behalve waar dwingend consumenten-, arbeids-, gegevensbeschermings- of ander toepasselijk recht u onvervreemdbare rechten of een ander forum geeft.",
+            "1": "Bent u consument, dan behoudt u altijd de dwingende rechten van het land waar u woont."
+          }
         },
-        {
+        "2": {
           "heading": "Wat het platform wel en niet is",
-          "items": [
-            "Het platform ondersteunt het vinden, presenteren en coördineren van arbeidsmarktkansen met een menselijke operator.",
-            "Het gebruik van het platform schept op zichzelf geen arbeidsrelatie en is geen garantie op werk of op werkkrachten.",
-            "Werknemersprofielen, cv's en contactgegevens worden alleen gedeeld volgens de toestemmingsregels van het platform — zie het Privacybeleid."
-          ]
+          "items": {
+            "0": "Het platform ondersteunt het vinden, presenteren en coördineren van arbeidsmarktkansen met een menselijke operator.",
+            "1": "Het gebruik van het platform schept op zichzelf geen arbeidsrelatie en is geen garantie op werk of op werkkrachten.",
+            "2": "Werknemersprofielen, cv's en contactgegevens worden alleen gedeeld volgens de toestemmingsregels van het platform — zie het Privacybeleid."
+          }
         }
-      ]
+      }
     },
     "privacy": {
       "title": "Privacybeleid",
       "metaDescription": "In gewone taal: welke persoonsgegevens LabourMarket.ai gebruikt, waarom, en welke rechten je hebt. Het platform zoals het vandaag werkt.",
       "intro": "Deze pagina legt in gewone taal uit welke persoonsgegevens Labour Market AI gebruikt, waarom, en welke rechten je hebt. De pagina beschrijft het platform zoals het vandaag werkt.",
-      "sections": [
-        {
+      "sections": {
+        "0": {
           "heading": "Wie verantwoordelijk is voor uw gegevens",
-          "items": [
-            "De verwerkingsverantwoordelijke van het LabourMarket.ai-platform is UAB “Nonstop Group”, bedrijfscode 302676973, statutaire zetel Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litouwen.",
-            "Privacycontact: info@labourmarket.ai. Er is geen functionaris voor gegevensbescherming aangesteld.",
-            "Labour Market AI Sp. z o.o. (Warschau, Polen) bezit de platformsoftware en het merk en licentieert deze aan UAB “Nonstop Group”. IP-eigendom geeft haar geen toegang tot uw persoonsgegevens: zij heeft geen routinematige toegang tot de productiedatabase, profielen, cv's, contactgegevens of documenten.",
-            "U heeft het recht een klacht in te dienen bij uw toezichthouder; voor de vestiging van de verantwoordelijke is dat de Litouwse gegevensbeschermingsautoriteit (VDAI)."
-          ]
+          "items": {
+            "0": "De verwerkingsverantwoordelijke van het LabourMarket.ai-platform is UAB “Nonstop Group”, bedrijfscode 302676973, statutaire zetel Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litouwen.",
+            "1": "Privacycontact: info@labourmarket.ai. Er is geen functionaris voor gegevensbescherming aangesteld.",
+            "2": "Labour Market AI Sp. z o.o. (Warschau, Polen) bezit de platformsoftware en het merk en licentieert deze aan UAB “Nonstop Group”. IP-eigendom geeft haar geen toegang tot uw persoonsgegevens: zij heeft geen routinematige toegang tot de productiedatabase, profielen, cv's, contactgegevens of documenten.",
+            "3": "U heeft het recht een klacht in te dienen bij uw toezichthouder; voor de vestiging van de verantwoordelijke is dat de Litouwse gegevensbeschermingsautoriteit (VDAI)."
+          }
         },
-        {
+        "1": {
           "heading": "Welke gegevens het platform gebruikt",
-          "items": [
-            "Accountgegevens: je e-mailadres en de inlogmethode die eraan gekoppeld is.",
-            "Inhoud die je zelf invoert: profiel- en cv-gegevens, vaardigheden, werkjournaalregistraties, foto's die je aan registraties toevoegt en de documenten die je in je documentenoverzicht opneemt.",
-            "Bedrijfsinformatie die door bedrijfsgebruikers is ingevoerd: bedrijfsgegevens, behoeften, projecten en boekingen.",
-            "Berichten die je op het platform verstuurt en ontvangt.",
-            "Toestemmingsrecords: wanneer je een toestemming geeft of intrekt, worden de actie en het tijdstip opgeslagen.",
-            "Technische gegevens die nodig zijn om de dienst te laten draaien, zoals inlogcookies (zie het cookiebeleid).",
-            "Alleen met je toestemming: gebruiksmeting op onze eigen servers (bereikte pagina's en stappen, dagelijkse activiteit) en de campagne die je bracht, bewaard bij je account. Zie het cookiebeleid."
-          ]
+          "items": {
+            "0": "Accountgegevens: je e-mailadres en de inlogmethode die eraan gekoppeld is.",
+            "1": "Inhoud die je zelf invoert: profiel- en cv-gegevens, vaardigheden, werkjournaalregistraties, foto's die je aan registraties toevoegt en de documenten die je in je documentenoverzicht opneemt.",
+            "2": "Bedrijfsinformatie die door bedrijfsgebruikers is ingevoerd: bedrijfsgegevens, behoeften, projecten en boekingen.",
+            "3": "Berichten die je op het platform verstuurt en ontvangt.",
+            "4": "Toestemmingsrecords: wanneer je een toestemming geeft of intrekt, worden de actie en het tijdstip opgeslagen.",
+            "5": "Technische gegevens die nodig zijn om de dienst te laten draaien, zoals inlogcookies (zie het cookiebeleid).",
+            "6": "Alleen met je toestemming: gebruiksmeting op onze eigen servers (bereikte pagina's en stappen, dagelijkse activiteit) en de campagne die je bracht, bewaard bij je account. Zie het cookiebeleid."
+          }
         },
-        {
+        "2": {
           "heading": "Inloggen met Google, Facebook of LinkedIn",
-          "items": [
-            "Je kunt een account aanmaken en inloggen met je Google-, Facebook- of LinkedIn-account in plaats van met je e-mailadres. Dit wordt alleen gebruikt om je in te loggen.",
-            "Als je er een kiest, bevestigt die aanbieder je identiteit en geeft hij het platform je e-mailadres, je naam en de identificatie van je account bij die aanbieder door. Het platform vraagt geen extra machtigingen — geen toegang tot je vrienden of contacten, berichten of pagina's — en plaatst nooit iets namens jou.",
-            "Je e-mailadres wordt het e-mailadres van je account. De naam van de aanbieder wordt alleen gebruikt om een tijdelijke naam te vervangen die uit je e-mailadres is afgeleid; een naam die je zelf hebt ingevoerd, wordt nooit overschreven. Het inlogrecord (de aanbieder, je accountidentificatie daar en de gegevens die hij doorgaf) wordt bewaard door onze authenticatiedienst Supabase, gekoppeld aan je account.",
-            "Om deze gegevens te verwijderen, verwijder je je LabourMarket.ai-account — de stappen staan op de pagina „Account en gegevens verwijderen”. LabourMarket.ai verwijderen uit je Facebook-, Google- of LinkedIn-instellingen verwijdert op zichzelf je LabourMarket.ai-account en de gegevens ervan niet."
-          ]
+          "items": {
+            "0": "Je kunt een account aanmaken en inloggen met je Google-, Facebook- of LinkedIn-account in plaats van met je e-mailadres. Dit wordt alleen gebruikt om je in te loggen.",
+            "1": "Als je er een kiest, bevestigt die aanbieder je identiteit en geeft hij het platform je e-mailadres, je naam en de identificatie van je account bij die aanbieder door. Het platform vraagt geen extra machtigingen — geen toegang tot je vrienden of contacten, berichten of pagina's — en plaatst nooit iets namens jou.",
+            "2": "Je e-mailadres wordt het e-mailadres van je account. De naam van de aanbieder wordt alleen gebruikt om een tijdelijke naam te vervangen die uit je e-mailadres is afgeleid; een naam die je zelf hebt ingevoerd, wordt nooit overschreven. Het inlogrecord (de aanbieder, je accountidentificatie daar en de gegevens die hij doorgaf) wordt bewaard door onze authenticatiedienst Supabase, gekoppeld aan je account.",
+            "3": "Om deze gegevens te verwijderen, verwijder je je LabourMarket.ai-account — de stappen staan op de pagina „Account en gegevens verwijderen”. LabourMarket.ai verwijderen uit je Facebook-, Google- of LinkedIn-instellingen verwijdert op zichzelf je LabourMarket.ai-account en de gegevens ervan niet."
+          }
         },
-        {
+        "3": {
           "heading": "Waarvoor de gegevens worden gebruikt",
-          "items": [
-            "Om de functies te laten werken die je gebruikt: profiel en cv, werkjournaal, vaardigheidssuggesties die jij bevestigt, marktkaart, projecten, ploegen, boekingen en berichten.",
-            "Om je informatie alleen te tonen aan mensen die een expliciete toegangsregel toestaat — zie de pagina “Je gegevens en wie ze kan zien”.",
-            "Om een eerlijke geschiedenis van toestemmingen en belangrijke toegangswijzigingen bij te houden.",
-            "Het platform gebruikt geen advertentie- of analysetrackers van derden en bouwt geen gedragsprofielen op."
-          ]
+          "items": {
+            "0": "Om de functies te laten werken die je gebruikt: profiel en cv, werkjournaal, vaardigheidssuggesties die jij bevestigt, marktkaart, projecten, ploegen, boekingen en berichten.",
+            "1": "Om je informatie alleen te tonen aan mensen die een expliciete toegangsregel toestaat — zie de pagina “Je gegevens en wie ze kan zien”.",
+            "2": "Om een eerlijke geschiedenis van toestemmingen en belangrijke toegangswijzigingen bij te houden.",
+            "3": "Het platform gebruikt geen advertentie- of analysetrackers van derden en bouwt geen gedragsprofielen op."
+          }
         },
-        {
+        "4": {
           "heading": "Wie je gegevens kan zien",
-          "items": [
-            "Toegang is standaard gesloten: gegevens die u invoert horen bij uw account; andere gebruikers zien niets tenzij een specifieke regel dat toestaat.",
-            "Uw professionele profiel is standaard NIET zichtbaar voor bedrijven of bureaus. Het kan alleen in bedrijfszoekopdrachten verschijnen nadat u zelf de werkgeverszichtbaarheid inschakelt in uw privacy-instellingen — registratie, het accepteren van de voorwaarden of het invullen van uw profiel maakt het nooit zichtbaar.",
-            "Ook met zichtbaarheid aan zien bedrijven alleen een beperkte professionele samenvatting (beroep, ervaring, vaardigheden, globale regio, beschikbaarheid, talen, loonverwachting als u die invulde). Uw achternaam, telefoon, e-mail, exacte adres, cv-bestand en documenten horen daar nooit bij.",
-            "Uw cv, contactgegevens of documenten bereiken een specifiek bedrijf pas na uw afzonderlijke bevestiging voor dat bedrijf en die aanvraag. Elke uitgevoerde overdracht wordt vastgelegd in een voor u zichtbaar overdrachtenlogboek.",
-            "Werknemersdocumenten worden niet aan werkgevers of bureaus getoond zonder toestemming van de werknemer, en werkgevers kunnen de opgeslagen locaties van een werknemer niet inzien.",
-            "Berichten zijn alleen zichtbaar voor de deelnemers aan het gesprek."
-          ]
+          "items": {
+            "0": "Toegang is standaard gesloten: gegevens die u invoert horen bij uw account; andere gebruikers zien niets tenzij een specifieke regel dat toestaat.",
+            "1": "Uw professionele profiel is standaard NIET zichtbaar voor bedrijven of bureaus. Het kan alleen in bedrijfszoekopdrachten verschijnen nadat u zelf de werkgeverszichtbaarheid inschakelt in uw privacy-instellingen — registratie, het accepteren van de voorwaarden of het invullen van uw profiel maakt het nooit zichtbaar.",
+            "2": "Ook met zichtbaarheid aan zien bedrijven alleen een beperkte professionele samenvatting (beroep, ervaring, vaardigheden, globale regio, beschikbaarheid, talen, loonverwachting als u die invulde). Uw achternaam, telefoon, e-mail, exacte adres, cv-bestand en documenten horen daar nooit bij.",
+            "3": "Uw cv, contactgegevens of documenten bereiken een specifiek bedrijf pas na uw afzonderlijke bevestiging voor dat bedrijf en die aanvraag. Elke uitgevoerde overdracht wordt vastgelegd in een voor u zichtbaar overdrachtenlogboek.",
+            "4": "Werknemersdocumenten worden niet aan werkgevers of bureaus getoond zonder toestemming van de werknemer, en werkgevers kunnen de opgeslagen locaties van een werknemer niet inzien.",
+            "5": "Berichten zijn alleen zichtbaar voor de deelnemers aan het gesprek."
+          }
         },
-        {
+        "5": {
           "heading": "Toestemming",
-          "items": [
-            "Toestemmingsdoelen zijn gescheiden: werkgeverszichtbaarheid van uw professionele profiel en een gegevensoverdracht aan een specifiek bedrijf zijn twee verschillende keuzes — geen van beide is gebundeld met de voorwaarden, vooraf aangevinkt of vereist om uw account, cv of werkdagboek te gebruiken.",
-            "Elk toestemmingsscherm toont de exacte geversioneerde tekst, wat zichtbaar wordt, wat privé blijft, en beide keuzes naast elkaar (inschakelen / niet nu). Weigeren verandert niets aan uw account.",
-            "U kunt elke toestemming op elk moment in één stap intrekken in uw privacy-instellingen. Na intrekking verschijnt uw profiel direct niet meer in nieuwe bedrijfszoekopdrachten; gegevens die een bedrijf rechtmatig ontving terwijl de toestemming geldig was, kunnen bij dat bedrijf blijven.",
-            "De toestemmingsgeschiedenis is alleen-toevoegen: elke verlening en elke intrekking is een afzonderlijke permanente registratie met tekstversie, taal, tijd en doel. Niemand — ook beheerders niet — kan haar bewerken of verwijderen, en een beheerder kan geen toestemming namens u geven."
-          ]
+          "items": {
+            "0": "Toestemmingsdoelen zijn gescheiden: werkgeverszichtbaarheid van uw professionele profiel en een gegevensoverdracht aan een specifiek bedrijf zijn twee verschillende keuzes — geen van beide is gebundeld met de voorwaarden, vooraf aangevinkt of vereist om uw account, cv of werkdagboek te gebruiken.",
+            "1": "Elk toestemmingsscherm toont de exacte geversioneerde tekst, wat zichtbaar wordt, wat privé blijft, en beide keuzes naast elkaar (inschakelen / niet nu). Weigeren verandert niets aan uw account.",
+            "2": "U kunt elke toestemming op elk moment in één stap intrekken in uw privacy-instellingen. Na intrekking verschijnt uw profiel direct niet meer in nieuwe bedrijfszoekopdrachten; gegevens die een bedrijf rechtmatig ontving terwijl de toestemming geldig was, kunnen bij dat bedrijf blijven.",
+            "3": "De toestemmingsgeschiedenis is alleen-toevoegen: elke verlening en elke intrekking is een afzonderlijke permanente registratie met tekstversie, taal, tijd en doel. Niemand — ook beheerders niet — kan haar bewerken of verwijderen, en een beheerder kan geen toestemming namens u geven."
+          }
         },
-        {
+        "6": {
           "heading": "Dienstverleners die gegevens voor het platform verwerken",
-          "items": [
-            "Supabase — database, gebruikersaanmelding en bestandsopslag.",
-            "Cloudflare — het netwerk vóór de website (domeinnaamdienst, versleuteling tijdens verzending, caching en bescherming tegen aanvallen); elk verzoek aan de website loopt erdoorheen.",
-            "Stripe — betalingsverwerking voor betaalde platformdiensten. Wanneer een organisatie een betaling start, ontvangt Stripe het e-mailadres van de betalende gebruiker en een interne accountidentificatie; kaartgegevens worden ingevoerd op de eigen betaalpagina van Stripe en niet door het platform opgeslagen.",
-            "Google, Facebook (Meta) en LinkedIn — alleen als je ervoor kiest met hen in te loggen, zoals hierboven beschreven.",
-            "Google (Gemini API) — alleen zoals hieronder beschreven in het onderdeel over AI.",
-            "De volledige lijst van infrastructuurleveranciers staat op de pagina „Gegevensbescherming”."
-          ]
+          "items": {
+            "0": "Supabase — database, gebruikersaanmelding en bestandsopslag.",
+            "1": "Cloudflare — het netwerk vóór de website (domeinnaamdienst, versleuteling tijdens verzending, caching en bescherming tegen aanvallen); elk verzoek aan de website loopt erdoorheen.",
+            "2": "Stripe — betalingsverwerking voor betaalde platformdiensten. Wanneer een organisatie een betaling start, ontvangt Stripe het e-mailadres van de betalende gebruiker en een interne accountidentificatie; kaartgegevens worden ingevoerd op de eigen betaalpagina van Stripe en niet door het platform opgeslagen.",
+            "3": "Google, Facebook (Meta) en LinkedIn — alleen als je ervoor kiest met hen in te loggen, zoals hierboven beschreven.",
+            "4": "Google (Gemini API) — alleen zoals hieronder beschreven in het onderdeel over AI.",
+            "5": "De volledige lijst van infrastructuurleveranciers staat op de pagina „Gegevensbescherming”."
+          }
         },
-        {
+        "7": {
           "heading": "Je rechten",
-          "items": [
-            "Je kunt vragen om de gegevens die over je worden bewaard in te zien, te corrigeren, er een kopie van te ontvangen, het gebruik ervan te beperken of ze te laten verwijderen.",
-            "Je kunt zelf vanuit je account een kopie van je eigen gegevens downloaden als JSON-bestand en je werkjournaal als CSV-bestand. Je kunt verwijdering van je account aanvragen op de privacypagina van je account en het verzoek bevestigen nadat je opnieuw bent ingelogd; 30 dagen na bevestiging verwijdert het systeem het account automatisch (tot die tijd kun je het verzoek op de privacypagina annuleren) en stuurt een bevestiging naar het e-mailadres van het account. Na de definitieve verwijdering kunnen verwijderde gegevens nog tot 7 dagen in versleutelde databaseback-ups staan; ze worden daar niet gebruikt en daarna overschreven. Als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Je kunt ook contact met ons opnemen — zie de pagina „Account en gegevens verwijderen”.",
-            "Waar verwerking op toestemming is gebaseerd, kun je die toestemming op elk moment intrekken."
-          ]
+          "items": {
+            "0": "Je kunt vragen om de gegevens die over je worden bewaard in te zien, te corrigeren, er een kopie van te ontvangen, het gebruik ervan te beperken of ze te laten verwijderen.",
+            "1": "Je kunt zelf vanuit je account een kopie van je eigen gegevens downloaden als JSON-bestand en je werkjournaal als CSV-bestand. Je kunt verwijdering van je account aanvragen op de privacypagina van je account en het verzoek bevestigen nadat je opnieuw bent ingelogd; 30 dagen na bevestiging verwijdert het systeem het account automatisch (tot die tijd kun je het verzoek op de privacypagina annuleren) en stuurt een bevestiging naar het e-mailadres van het account. Na de definitieve verwijdering kunnen verwijderde gegevens nog tot 7 dagen in versleutelde databaseback-ups staan; ze worden daar niet gebruikt en daarna overschreven. Als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Je kunt ook contact met ons opnemen — zie de pagina „Account en gegevens verwijderen”.",
+            "2": "Waar verwerking op toestemming is gebaseerd, kun je die toestemming op elk moment intrekken."
+          }
         },
-        {
+        "8": {
           "heading": "Hoe lang gegevens worden bewaard",
-          "items": [
-            "Gegevens worden bewaard zolang je account actief is en de functie waar ze bij horen ze nog gebruikt.",
-            "Toestemmings- en auditrecords worden als geschiedenis bewaard: een intrekking wordt vastgelegd in plaats van dat het record wordt gewist."
-          ]
+          "items": {
+            "0": "Gegevens worden bewaard zolang je account actief is en de functie waar ze bij horen ze nog gebruikt.",
+            "1": "Toestemmings- en auditrecords worden als geschiedenis bewaard: een intrekking wordt vastgelegd in plaats van dat het record wordt gewist."
+          }
         },
-        {
+        "9": {
           "heading": "AI en verbonden AI-assistenten",
-          "items": [
-            "Sommige functies gebruiken een AI-model van Google (de Gemini API). Vandaag ontvangt het alleen openbare marktstatistieken — bijvoorbeeld hoeveel openstaande posities een beroep heeft — om een korte toelichting op te stellen. Het vertalen van berichten en vacatures en het interpreteren van een zin die je in de chat typt zijn voorbereid maar uitgeschakeld: daarvoor wordt geen berichttekst en geen persoonsgegeven verstuurd. Als een ervan wordt ingeschakeld, vermeldt deze kennisgeving dat, en zou alleen de tekst die die taak nodig heeft worden verstuurd. Elk resultaat is een voorstel — niets wordt als feit over jou opgeslagen voordat je het bevestigt.",
-            "Je kunt LabourMarket.ai verbinden met een AI-assistent zoals ChatGPT of Claude. Elke verbinding keur je zelf goed op een toestemmingsscherm; de assistent handelt dan alleen met jouw eigen rechten, en acties met gevolgen vragen een aparte bevestiging. Verbonden apps zie en ontkoppel je op elk moment in je accountinstellingen.",
-            "Wat de aanbieder van een AI-assistent met je gesprek doet, valt onder de eigen privacyvoorwaarden van die aanbieder."
-          ]
+          "items": {
+            "0": "Sommige functies gebruiken een AI-model van Google (de Gemini API). Vandaag ontvangt het alleen openbare marktstatistieken — bijvoorbeeld hoeveel openstaande posities een beroep heeft — om een korte toelichting op te stellen. Het vertalen van berichten en vacatures en het interpreteren van een zin die je in de chat typt zijn voorbereid maar uitgeschakeld: daarvoor wordt geen berichttekst en geen persoonsgegeven verstuurd. Als een ervan wordt ingeschakeld, vermeldt deze kennisgeving dat, en zou alleen de tekst die die taak nodig heeft worden verstuurd. Elk resultaat is een voorstel — niets wordt als feit over jou opgeslagen voordat je het bevestigt.",
+            "1": "Je kunt LabourMarket.ai verbinden met een AI-assistent zoals ChatGPT of Claude. Elke verbinding keur je zelf goed op een toestemmingsscherm; de assistent handelt dan alleen met jouw eigen rechten, en acties met gevolgen vragen een aparte bevestiging. Verbonden apps zie en ontkoppel je op elk moment in je accountinstellingen.",
+            "2": "Wat de aanbieder van een AI-assistent met je gesprek doet, valt onder de eigen privacyvoorwaarden van die aanbieder."
+          }
         }
-      ]
+      }
     },
     "cookies": {
       "title": "Cookiebeleid",
       "intro": "Deze pagina toont wat het platform vandaag daadwerkelijk in je browser opslaat. Dat is bewust weinig.",
-      "items": [
-        {
+      "items": {
+        "0": {
           "name": "Inlogcookies",
           "purpose": "Worden ingesteld wanneer je inlogt, zodat je ingelogd blijft terwijl je tussen pagina's navigeert. Essentieel — zonder deze cookies kan de dienst je niet ingelogd houden."
         },
-        {
+        "1": {
           "name": "Taalcookie (NEXT_LOCALE)",
           "purpose": "Kan worden ingesteld om je taalkeuze te onthouden, zodat pagina's in jouw taal openen."
         },
-        {
+        "2": {
           "name": "Weergavevoorkeur voor beheerders (lm_hide_admin_ui)",
           "purpose": "Wordt alleen gebruikt op beheerdersaccounts. Onthoudt of beheerdersbedieningen verborgen zijn en verandert niets aan rechten."
         },
-        {
+        "3": {
           "name": "Inlogpoging-markering (lm.oauth.trace)",
           "purpose": "Tabbladopslag, verwijderd als het tabblad sluit. Een willekeurige code die één inlogpoging aan het resultaat koppelt, zodat een mislukte inlog kan worden onderzocht. Nodig voor de inlog die je startte; bevat geen accountgegevens."
         }
-      ],
+      },
       "localStorageNote": "De eigen opslag van je browser (geen cookies) bevat daarnaast een paar items waar je zelf om vroeg: je keuze voor een licht of donker thema, je keuze over gebruiksmeting en kleine gemakken zoals weggeklikte meldingen, recent bekeken items en de taal van spraakinvoer. Ze blijven op je apparaat en je kunt ze op elk moment via je browser wissen.",
       "noTracking": "Er zijn op het platform geen advertentie- of trackingcookies van derden, en niets wordt voor advertenties met derden gedeeld.",
       "settingsLink": "Cookie-instellingen",
       "analyticsTitle": "Gebruiksmeting — alleen met je toestemming",
       "analyticsIntro": "Met je toestemming meten we hoe het product wordt gebruikt: welke pagina's en stappen mensen bereiken, de stappen van de registratie, dagelijkse activiteit en welke campagne een bezoeker bracht. Gebeurtenissen worden op onze eigen servers bewaard en, als je bent ingelogd, aan je account gekoppeld. Zonder je toestemming wordt geen van de onderstaande items geschreven en wordt er geen meetgebeurtenis vanuit je browser verzonden.",
-      "analyticsItems": [
-        {
+      "analyticsItems": {
+        "0": {
           "name": "Campagne van het eerste bezoek (lm.attr.first)",
           "purpose": "Browseropslag. De campagnetags (utm_*), de verwijzende site en de landingspagina van je eerste bezoek. Bij registratie worden ze naar je eigen accountgegevens gekopieerd, zodat de campagne die je bracht kan worden geteld."
         },
-        {
+        "1": {
           "name": "Sessie-ID (lm.pilot.session)",
           "purpose": "Tabbladopslag, verwijderd als het tabblad sluit. Een willekeurige code die met elke meetgebeurtenis wordt meegestuurd, zodat de stappen in één tabblad samen kunnen worden geteld."
         },
-        {
+        "2": {
           "name": "Activiteitsmarkeringen (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
           "purpose": "Browseropslag. De laatste dag dat je actief was, en een markering dat een registratie bezig is."
         },
-        {
+        "3": {
           "name": "Eenmaal-tellen-markeringen (lm.funnel.*)",
           "purpose": "Tabbladopslag. Voorkomt dat dezelfde meetgebeurtenis twee keer wordt geteld."
         }
-      ],
+      },
       "analyticsBasis": "Weigeren of intrekken verwijdert deze items direct van dit apparaat; als je bent ingelogd, wordt ook de campagne bij je account gewist. De meting zelf is gebaseerd op ons gerechtvaardigd belang bij het verbeteren van het product (art. 6, lid 1, onder f, AVG), en je kunt er bezwaar tegen maken zoals beschreven in het privacybeleid."
     },
     "requestContact": "Neem contact met ons op om een vraag te stellen of een verzoek over je gegevens in te dienen — een persoon zal het beoordelen.",
@@ -6070,116 +6070,116 @@
       "title": "Gegevensbescherming",
       "metaDescription": "Deze pagina legt in gewone woorden uit hoe gegevens binnen LabourMarket.ai worden beschermd. Ze beschrijft alleen wat vandaag daadwerkelijk in het platform is ingebouwd.",
       "intro": "Deze pagina legt in gewone woorden uit hoe gegevens binnen Labour Market AI worden beschermd. Ze beschrijft alleen wat vandaag daadwerkelijk in het platform is ingebouwd.",
-      "sections": [
-        {
+      "sections": {
+        "0": {
           "heading": "Standaard gesloten",
-          "items": [
-            "Tabellen met gebruikersgegevens worden beschermd door toegangsregels in de database zelf. Als geen regel expliciet toegang verleent, zijn de gegevens niet zichtbaar — zelfs niet voor andere ingelogde gebruikers.",
-            "Deze regels werken op databaseniveau, niet alleen in de interface, en worden gedekt door geautomatiseerde tests."
-          ]
+          "items": {
+            "0": "Tabellen met gebruikersgegevens worden beschermd door toegangsregels in de database zelf. Als geen regel expliciet toegang verleent, zijn de gegevens niet zichtbaar — zelfs niet voor andere ingelogde gebruikers.",
+            "1": "Deze regels werken op databaseniveau, niet alleen in de interface, en worden gedekt door geautomatiseerde tests."
+          }
         },
-        {
+        "1": {
           "heading": "Geschiedenis in plaats van stille wijzigingen",
-          "items": [
-            "Toegangsverleningen zijn records, geen schakelaars: wanneer toegang wordt ingetrokken, wordt het record gemarkeerd als ingetrokken in plaats van verwijderd, zodat de geschiedenis traceerbaar blijft.",
-            "De toestemmingsgeschiedenis wordt op dezelfde manier bewaard."
-          ]
+          "items": {
+            "0": "Toegangsverleningen zijn records, geen schakelaars: wanneer toegang wordt ingetrokken, wordt het record gemarkeerd als ingetrokken in plaats van verwijderd, zodat de geschiedenis traceerbaar blijft.",
+            "1": "De toestemmingsgeschiedenis wordt op dezelfde manier bewaard."
+          }
         },
-        {
+        "2": {
           "heading": "Geen trackers, geen profilering",
-          "items": [
-            "Het platform bevat geen advertentie- of analysetrackers van derden, geen tools voor sessieopnames en geen gedragsscores."
-          ]
+          "items": {
+            "0": "Het platform bevat geen advertentie- of analysetrackers van derden, geen tools voor sessieopnames en geen gedragsscores."
+          }
         },
-        {
+        "3": {
           "heading": "Statistieken die individuen beschermen",
-          "items": [
-            "Marktstatistieken zijn geaggregeerd. Gemiddelden worden niet getoond voor steekproeven die zo klein zijn dat ze naar één persoon kunnen wijzen, en kleine steekproeven worden gemarkeerd.",
-            "Datasets voor onderzoek zijn structureel anoniem: ze bevatten geen namen, e-mailadressen of persoonlijke identificatoren."
-          ]
+          "items": {
+            "0": "Marktstatistieken zijn geaggregeerd. Gemiddelden worden niet getoond voor steekproeven die zo klein zijn dat ze naar één persoon kunnen wijzen, en kleine steekproeven worden gemarkeerd.",
+            "1": "Datasets voor onderzoek zijn structureel anoniem: ze bevatten geen namen, e-mailadressen of persoonlijke identificatoren."
+          }
         },
-        {
+        "4": {
           "heading": "Bestanden en foto's",
-          "items": [
-            "Foto's en bestanden worden bewaard in privéopslag en geopend via kortlopende links, niet via openbare adressen."
-          ]
+          "items": {
+            "0": "Foto's en bestanden worden bewaard in privéopslag en geopend via kortlopende links, niet via openbare adressen."
+          }
         },
-        {
+        "5": {
           "heading": "Beheerderstoegang",
-          "items": [
-            "Beheerdersschermen zijn beperkt tot een kleine groep platformbeheerders en falen gesloten: zonder de beheerdersrol zijn ze niet bereikbaar."
-          ]
+          "items": {
+            "0": "Beheerdersschermen zijn beperkt tot een kleine groep platformbeheerders en falen gesloten: zonder de beheerdersrol zijn ze niet bereikbaar."
+          }
         },
-        {
+        "6": {
           "heading": "Export en verwijdering",
-          "items": [
-            "Je kunt je eigen gegevens als JSON-bestand en je werkjournaal als CSV-bestand downloaden vanuit je account. Verwijdering van een account wordt in het account aangevraagd en bevestigd na opnieuw inloggen; het systeem verwijdert het account dan automatisch. Een verzoek over gegevens die wettelijk bewaard moeten worden of andere mensen betreffen, wordt door een persoon beoordeeld. Je kunt ook contact met ons opnemen en een persoon zal het verzoek verwerken."
-          ]
+          "items": {
+            "0": "Je kunt je eigen gegevens als JSON-bestand en je werkjournaal als CSV-bestand downloaden vanuit je account. Verwijdering van een account wordt in het account aangevraagd en bevestigd na opnieuw inloggen; het systeem verwijdert het account dan automatisch. Een verzoek over gegevens die wettelijk bewaard moeten worden of andere mensen betreffen, wordt door een persoon beoordeeld. Je kunt ook contact met ons opnemen en een persoon zal het verzoek verwerken."
+          }
         },
-        {
+        "7": {
           "heading": "Infrastructuurleveranciers (subverwerkers)",
-          "items": [
-            "Supabase — database, gebruikersaanmelding en bestandsopslag. Gegevens worden gehost in de Europese Unie (regio eu-west-1).",
-            "Hostinger — de virtuele privéserver (VPS) waarop de applicatie draait.",
-            "Cloudflare — het netwerk vóór de website: domeinnaamdienst, versleuteling tijdens verzending, caching en bescherming tegen aanvallen. Elk verzoek aan de website loopt erdoorheen.",
-            "GitHub — opslag van de broncode. Er worden daar geen gebruikersgegevens bewaard.",
-            "Google (Gemini API) — AI-verwerking voor het vertalen van berichten en vacatures en voor het voorstellen waar een getypte chatzin om vraagt. Alleen de tekst die de taak nodig heeft, wordt verstuurd.",
-            "Stripe — betalingsverwerking. Een klantrecord ontstaat alleen wanneer een organisatie een abonnementsbetaling start.",
-            "Geen andere e-mail-, AI-, vertaal- of betalingsleverancier is actief. Wordt er een geactiveerd, dan wordt eerst deze lijst bijgewerkt."
-          ]
+          "items": {
+            "0": "Supabase — database, gebruikersaanmelding en bestandsopslag. Gegevens worden gehost in de Europese Unie (regio eu-west-1).",
+            "1": "Hostinger — de virtuele privéserver (VPS) waarop de applicatie draait.",
+            "2": "Cloudflare — het netwerk vóór de website: domeinnaamdienst, versleuteling tijdens verzending, caching en bescherming tegen aanvallen. Elk verzoek aan de website loopt erdoorheen.",
+            "3": "GitHub — opslag van de broncode. Er worden daar geen gebruikersgegevens bewaard.",
+            "4": "Google (Gemini API) — AI-verwerking voor het vertalen van berichten en vacatures en voor het voorstellen waar een getypte chatzin om vraagt. Alleen de tekst die de taak nodig heeft, wordt verstuurd.",
+            "5": "Stripe — betalingsverwerking. Een klantrecord ontstaat alleen wanneer een organisatie een abonnementsbetaling start.",
+            "6": "Geen andere e-mail-, AI-, vertaal- of betalingsleverancier is actief. Wordt er een geactiveerd, dan wordt eerst deze lijst bijgewerkt."
+          }
         },
-        {
+        "8": {
           "heading": "Eerlijke grenzen",
-          "items": [
-            "Geen enkel systeem kan absolute veiligheid beloven. Als je een probleem opmerkt, neem dan contact met ons op — een persoon zal het beoordelen."
-          ]
+          "items": {
+            "0": "Geen enkel systeem kan absolute veiligheid beloven. Als je een probleem opmerkt, neem dan contact met ons op — een persoon zal het beoordelen."
+          }
         }
-      ]
+      }
     },
     "dataAccess": {
       "title": "Je gegevens en wie ze kan zien",
       "intro": "Een samenvatting in gewone taal van de toegangsregels die het platform vandaag daadwerkelijk afdwingt. Er wordt niets breders geclaimd dan wat de regels doen.",
-      "sections": [
-        {
+      "sections": {
+        "0": {
           "heading": "Het uitgangspunt",
-          "items": [
-            "Jouw rijen zijn van jou: gegevens die je invoert horen bij jouw account. Andere gebruikers zien niets, tenzij een specifieke toegangsregel dat toestaat."
-          ]
+          "items": {
+            "0": "Jouw rijen zijn van jou: gegevens die je invoert horen bij jouw account. Andere gebruikers zien niets, tenzij een specifieke toegangsregel dat toestaat."
+          }
         },
-        {
+        "1": {
           "heading": "Wat bedrijven over werknemers kunnen zien",
-          "items": [
-            "In scoutingweergaven verschijnt werknemersinformatie in geanonimiseerde vorm, en contactgegevens worden nooit getoond zonder toestemming van de werknemer.",
-            "Werkgevers kunnen de opgeslagen locaties van een werknemer niet lezen.",
-            "Documenten van werknemers worden niet getoond aan werkgevers of uitzendbureaus zonder toestemming van de werknemer — hooguit aantallen waarmee de werknemer akkoord ging om te delen."
-          ]
+          "items": {
+            "0": "In scoutingweergaven verschijnt werknemersinformatie in geanonimiseerde vorm, en contactgegevens worden nooit getoond zonder toestemming van de werknemer.",
+            "1": "Werkgevers kunnen de opgeslagen locaties van een werknemer niet lezen.",
+            "2": "Documenten van werknemers worden niet getoond aan werkgevers of uitzendbureaus zonder toestemming van de werknemer — hooguit aantallen waarmee de werknemer akkoord ging om te delen."
+          }
         },
-        {
+        "2": {
           "heading": "Wat werknemers over bedrijven kunnen zien",
-          "items": [
-            "Werknemers zien wat een bedrijf kiest te publiceren: openbare behoeften en aanbiedingen verschijnen pas na moderatie."
-          ]
+          "items": {
+            "0": "Werknemers zien wat een bedrijf kiest te publiceren: openbare behoeften en aanbiedingen verschijnen pas na moderatie."
+          }
         },
-        {
+        "3": {
           "heading": "Berichten",
-          "items": [
-            "Een gesprek is alleen zichtbaar voor de deelnemers. Collega's van hetzelfde bedrijf die geen deelnemer zijn, zien niets — zelfs niet dat het gesprek bestaat.",
-            "Als een extra persoon toegang krijgt (bijvoorbeeld de objecteigenaar), geldt die toegang alleen zolang de verlening actief is. Wanneer die wordt ingetrokken, eindigt de toegang en blijft de geschiedenis vastgelegd."
-          ]
+          "items": {
+            "0": "Een gesprek is alleen zichtbaar voor de deelnemers. Collega's van hetzelfde bedrijf die geen deelnemer zijn, zien niets — zelfs niet dat het gesprek bestaat.",
+            "1": "Als een extra persoon toegang krijgt (bijvoorbeeld de objecteigenaar), geldt die toegang alleen zolang de verlening actief is. Wanneer die wordt ingetrokken, eindigt de toegang en blijft de geschiedenis vastgelegd."
+          }
         },
-        {
+        "4": {
           "heading": "Beheerders",
-          "items": [
-            "Een kleine groep platformbeheerders kan de operationele wachtrijen zien die nodig zijn om het platform te runnen, zoals support- en beoordelingswachtrijen. Beheerderspagina's zijn beperkt en falen gesloten."
-          ]
+          "items": {
+            "0": "Een kleine groep platformbeheerders kan de operationele wachtrijen zien die nodig zijn om het platform te runnen, zoals support- en beoordelingswachtrijen. Beheerderspagina's zijn beperkt en falen gesloten."
+          }
         },
-        {
+        "5": {
           "heading": "Als iets er niet goed uitziet",
-          "items": [
-            "De toegangsregels in de database zijn de bron van waarheid, en deze pagina volgt ze. Als iets hier niet overeenkomt met wat je ziet, neem dan contact met ons op — een persoon zal het beoordelen."
-          ]
+          "items": {
+            "0": "De toegangsregels in de database zijn de bron van waarheid, en deze pagina volgt ze. Als iets hier niet overeenkomt met wat je ziet, neem dan contact met ons op — een persoon zal het beoordelen."
+          }
         }
-      ],
+      },
       "matrix": {
         "title": "Rechtenmatrix: wie kan wat zien en wijzigen",
         "intro": "De tabel hieronder toont de belangrijkste productonderdelen en, per rol, wat die rol kan zien en wat die kan wijzigen. Ze is geschreven op basis van de daadwerkelijke toegangsregels in de database en in de route-guards — elke rij verwijst naar de exacte regel die haar afdwingt. Waar een regel smaller is dan een kort label kan uitdrukken, legt de notitie bij de rij de grens in gewone woorden uit.",
@@ -6313,12 +6313,12 @@
       "description": "Hoe u verwijdering van uw LabourMarket.ai-account en persoonsgegevens aanvraagt.",
       "intro": "U kunt LabourMarket.ai vragen uw account en persoonsgegevens te verwijderen. Als je kunt inloggen, kun je het verzoek zelf indienen: open de privacypagina van je account (in de mobiele app: Instellingen → Privacy), kies voor het verwijderen van je account en bevestig dit nadat je opnieuw bent ingelogd. 30 dagen na bevestiging verwijdert het systeem het account automatisch (tot die tijd kun je het verzoek op de privacypagina annuleren) en stuurt een bevestiging naar het e-mailadres van het account; als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Na de definitieve verwijdering kunnen verwijderde gegevens nog tot 7 dagen in versleutelde databaseback-ups staan; ze worden daar niet gebruikt en daarna overschreven. Je kunt verwijdering ook per e-mail aanvragen zoals hieronder beschreven; een mens antwoordt binnen één maand.",
       "howTitle": "Hoe u verwijdering aanvraagt",
-      "howSteps": [
-        "Stuur een e-mail naar {email} vanaf het e-mailadres dat aan uw LabourMarket.ai-account is gekoppeld.",
-        "Gebruik als onderwerp “Verzoek tot verwijdering van account en gegevens” en geef aan dat u wilt dat uw LabourMarket.ai-account en persoonsgegevens worden verwijderd.",
-        "Mogelijk moeten wij eerst verifiëren dat het verzoek van de accounthouder afkomstig is.",
-        "Een persoon beoordeelt en verwerkt het verzoek en neemt contact met u op als verificatie of verduidelijking nodig is."
-      ],
+      "howSteps": {
+        "0": "Stuur een e-mail naar {email} vanaf het e-mailadres dat aan uw LabourMarket.ai-account is gekoppeld.",
+        "1": "Gebruik als onderwerp “Verzoek tot verwijdering van account en gegevens” en geef aan dat u wilt dat uw LabourMarket.ai-account en persoonsgegevens worden verwijderd.",
+        "2": "Mogelijk moeten wij eerst verifiëren dat het verzoek van de accounthouder afkomstig is.",
+        "3": "Een persoon beoordeelt en verwerkt het verzoek en neemt contact met u op als verificatie of verduidelijking nodig is."
+      },
       "mailSubject": "Verzoek tot verwijdering van account en gegevens",
       "coversTitle": "Wat verwijdering omvat",
       "coversBody": "Het verzoek geldt voor uw LabourMarket.ai-account en de persoonsgegevens die het platform bewaart. Sommige gegevens moeten mogelijk worden bewaard wanneer de toepasselijke wetgeving dat vereist of wanneer een audit-, toestemmings-, beveiligings-, geschil- of ander record rechtmatig bewaard moet blijven. Gegevens die al rechtmatig aan een andere onafhankelijke ontvanger zijn verstrekt, kunnen onder de eigen wettelijke verplichtingen van die ontvanger blijven vallen.",
@@ -8049,63 +8049,63 @@
     "includesLabel": "Inbegrepen",
     "cta": "Vraag een voorstel aan",
     "note": "Prijzen zijn indicatieve vanafprijzen voor een typisch project. De definitieve scope en prijs worden samen afgesproken voordat het werk begint, en facturering wordt hier nooit voor je gestart — elk pakket begint met een gesprek.",
-    "offers": [
-      {
+    "offers": {
+      "0": {
         "name": "AI-workflowautomatisering",
         "summary": "We brengen een repetitieve taak in je bedrijf in kaart en vervangen de handmatige stappen door een betrouwbare geautomatiseerde workflow die van jou is.",
         "priceFrom": "Vanaf € 900",
         "timeline": "Typische levertijd 1–3 weken",
-        "includes": [
-          "Procesmapping & scopinggesprek",
-          "Eén end-to-end geautomatiseerde workflow",
-          "Overdrachtsdocumentatie + een korte rondleiding"
-        ]
+        "includes": {
+          "0": "Procesmapping & scopinggesprek",
+          "1": "Eén end-to-end geautomatiseerde workflow",
+          "2": "Overdrachtsdocumentatie + een korte rondleiding"
+        }
       },
-      {
+      "1": {
         "name": "Integraties · n8n · API-workflows",
         "summary": "We verbinden de tools die je al gebruikt — CRM, e-mail, spreadsheets, interne apps — via n8n of directe API's, zodat data beweegt zonder knip- en plakwerk.",
         "priceFrom": "Vanaf € 600",
         "timeline": "Typische levertijd 1–2 weken",
-        "includes": [
-          "Tot 3 gekoppelde systemen",
-          "n8n- of maatwerk-API-workflow",
-          "Foutmeldingen + retry-afhandeling"
-        ]
+        "includes": {
+          "0": "Tot 3 gekoppelde systemen",
+          "1": "n8n- of maatwerk-API-workflow",
+          "2": "Foutmeldingen + retry-afhandeling"
+        }
       },
-      {
+      "2": {
         "name": "Bedrijfsprocesautomatisering",
         "summary": "Een groter traject: meerdere gekoppelde workflows die een heel proces — intake, routering, opvolging — uit handen van je team nemen.",
         "priceFrom": "Vanaf € 1.200",
         "timeline": "Typische levertijd 2–5 weken",
-        "includes": [
-          "Meerstaps procesautomatisering",
-          "Dashboards & statusinzicht",
-          "Twee iteratierondes na lancering"
-        ]
+        "includes": {
+          "0": "Meerstaps procesautomatisering",
+          "1": "Dashboards & statusinzicht",
+          "2": "Twee iteratierondes na lancering"
+        }
       },
-      {
+      "3": {
         "name": "AI-assistent op maat",
         "summary": "Een interne assistent gebaseerd op je eigen documenten en data, gebouwd om vragen te beantwoorden en werk voor je team op te stellen — geen openbare chatbot.",
         "priceFrom": "Vanaf €1.500",
         "timeline": "Gebruikelijke levertijd 2–4 weken",
-        "includes": [
-          "Assistent gebaseerd op jouw content",
-          "Privé-implementatie met toegangsbeheer",
-          "Afstemming van prompts + guardrails"
-        ]
+        "includes": {
+          "0": "Assistent gebaseerd op jouw content",
+          "1": "Privé-implementatie met toegangsbeheer",
+          "2": "Afstemming van prompts + guardrails"
+        }
       },
-      {
+      "4": {
         "name": "Website + marketingautomatisering",
         "summary": "Een moderne site samen met de automatiseringen erachter — leadregistratie, opvolgsequenties en rapportage aan elkaar gekoppeld.",
         "priceFrom": "Vanaf €1.900",
         "timeline": "Gebruikelijke levertijd 3–6 weken",
-        "includes": [
-          "Bouw van marketingsite of landingspagina",
-          "Leadregistratie + opvolgautomatisering",
-          "Inrichting van analytics & rapportage"
-        ]
+        "includes": {
+          "0": "Bouw van marketingsite of landingspagina",
+          "1": "Leadregistratie + opvolgautomatisering",
+          "2": "Inrichting van analytics & rapportage"
+        }
       }
-    ]
+    }
   },
   "playerCard": {
     "pageTitle": "Mijn professionele profiel",
@@ -9834,24 +9834,24 @@
       "cta": "Dien een personeelsaanvraag in"
     },
     "title": "Hoe de eerste betaalde dienst werkt",
-    "steps": [
-      {
+    "steps": {
+      "0": {
         "title": "Dien je aanvraag gratis in",
         "body": "Beschrijf welke werknemers of ploeg je nodig hebt. Geen kosten, geen kaart, niets wordt automatisch gepubliceerd."
       },
-      {
+      "1": {
         "title": "Een mens beoordeelt hem",
         "body": "Een operator leest elke aanvraag, neemt contact met je op en verheldert omvang, timing en voorwaarden voordat er iets in gang wordt gezet."
       },
-      {
+      "2": {
         "title": "Je krijgt een handmatig gecontroleerde shortlist",
         "body": "Echte kandidaten of ploegen, door een mens gecontroleerd aan de hand van jouw aanvraag. Als we geen geschikte shortlist kunnen samenstellen, betaal je niets — en we beloven nooit dat er altijd een kandidaat wordt gevonden."
       },
-      {
+      "3": {
         "title": "Je betaalt alleen voor geleverde dienstverlening",
         "body": "Per aangenomen werknemer, ploeg of bedrijfsplaatsing geldt een vaste succesfee. Een aparte coördinatievergoeding geldt alleen wanneer document- of onboardingcoördinatie daadwerkelijk wordt geleverd. De definitieve prijs wordt bevestigd voordat betaald werk begint."
       }
-    ],
+    },
     "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — één actieve positie kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest uw aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een hele ploeg kan zich al als één geheel op uw aanvraag aanbieden en, zodra beide kanten akkoord zijn, als één team in uw project instappen; de automatische kandidatenlijst stelt nog niet hele ploegen voor — ze rangschikt mensen één voor één.",
     "ctaLabel": "Dien een personeelsaanvraag in →"
   },
@@ -9972,36 +9972,36 @@
     "titleAccent": "stap voor stap",
     "subcopy": "Werken in heel Europa is een van de paden die LabourMarket.ai opent. Bouw één werkprofiel, zie wat elk land nodig heeft en laat werkgevers je bereiken wanneer je er klaar voor bent. We beloven nooit een baan of een loon — we helpen je om klaar te zijn en gematcht te worden.",
     "stepsTitle": "Hoe het werkt",
-    "steps": [
-      {
+    "steps": {
+      "0": {
         "title": "1. Vertel ons je beroep",
         "body": "Voeg je beroep, ervaring en beschikbaarheid toe. Het duurt maar een paar minuten."
       },
-      {
+      "1": {
         "title": "2. AI bereidt een concept voor",
         "body": "De assistent zet je woorden om in een gestructureerd profiel en cv-concept — een suggestie die je bekijkt en bewerkt. Hij verzint nooit ervaring."
       },
-      {
+      "2": {
         "title": "3. Controleer de landgereedheid",
         "body": "Zie welke documenten en stappen waarschijnlijk vereist zijn voor het land dat je wilt — met bronvermelding, en geen juridisch advies."
       },
-      {
+      "3": {
         "title": "4. Word gematcht",
         "body": "Wanneer de behoefte van een werkgever past bij je beroep, beschikbaarheid, huisvesting, vervoer en taal, verschijnt die op je kansenbord met een eerlijke uitleg van de match."
       },
-      {
+      "4": {
         "title": "5. Interesse en contact",
         "body": "Toon interesse in een behoefte die past. Het bedrijf beoordeelt die en jij ziet de eerlijke status — beoordeeld of gecontacteerd. Contracten en betaling blijven voorlopig buiten het platform."
       }
-    ],
+    },
     "needTitle": "Wat je mogelijk nodig hebt",
-    "needItems": [
-      "Een beroep waarin je werkt",
-      "Je beschikbaarheid vanaf een datum",
-      "Of je huisvesting nodig hebt of zelf hebt",
-      "Vervoer: eigen vervoer, een rijbewijs of een ophaalservice",
-      "Documenten die mogelijk vereist zijn voor het land"
-    ],
+    "needItems": {
+      "0": "Een beroep waarin je werkt",
+      "1": "Je beschikbaarheid vanaf een datum",
+      "2": "Of je huisvesting nodig hebt of zelf hebt",
+      "3": "Vervoer: eigen vervoer, een rijbewijs of een ophaalservice",
+      "4": "Documenten die mogelijk vereist zijn voor het land"
+    },
     "directionsTitle": "Waar mensen werken",
     "directionsNote": "Open de pagina's per land om arbeidsmarktsignalen met bronvermelding te zien.",
     "directionsCta": "Bekijk landen",
@@ -11084,227 +11084,227 @@
       "lead": "De professionele waarde van een persoon mag niet verdwijnen telkens wanneer die van werkgever wisselt. Echt werk kan blijvende professionele geschiedenis worden: wat de persoon deed, waar, wanneer, hoe lang, in welke rol, met welke vaardigheden en welk bewijs en welke bevestiging dat ondersteunt.",
       "leadOrg": "Voor organisaties bouwt datzelfde echte werk het overzicht op van wat het bedrijf werkelijk heeft gedaan: projecten, teams, uitgevoerd werk, uren, competenties en bewijs.",
       "railPeopleLabel": "Voor een persoon",
-      "railPeople": [
-        "Mensen",
-        "Kansen",
-        "Echt werk",
-        "Bewijs",
-        "Professionele groei"
-      ],
+      "railPeople": {
+        "0": "Mensen",
+        "1": "Kansen",
+        "2": "Echt werk",
+        "3": "Bewijs",
+        "4": "Professionele groei"
+      },
       "railCompaniesLabel": "Voor een bedrijf",
-      "railCompanies": [
-        "Bedrijven",
-        "Mensen",
-        "Projecten",
-        "Geverifieerd werk",
-        "Organisatiecapaciteit"
-      ],
+      "railCompanies": {
+        "0": "Bedrijven",
+        "1": "Mensen",
+        "2": "Projecten",
+        "3": "Geverifieerd werk",
+        "4": "Organisatiecapaciteit"
+      },
       "accumulate": "Elke echte werkperiode voegt iets toe aan de geschiedenis — die stopt niet als de werkgever wisselt.",
       "railAria": "Hoe mensen en bedrijven groeien uit echt werk"
     },
     "lifecycle": {
       "label": "De hele levenscyclus van professioneel werk",
-      "steps": [
-        "Kans",
-        "Dienstverband / samenwerking",
-        "Echt werk",
-        "Werkjournaal",
-        "Projecten en taken",
-        "Werktijd",
-        "Bewijs van werk",
-        "Bevestigingen",
-        "Vaardigheden en competenties",
-        "Living CV — een levend professioneel cv",
-        "Nieuwe kansen",
-        "Teams",
-        "Bedrijfscapaciteit",
-        "Arbeidsmarktdiensten"
-      ],
+      "steps": {
+        "0": "Kans",
+        "1": "Dienstverband / samenwerking",
+        "2": "Echt werk",
+        "3": "Werkjournaal",
+        "4": "Projecten en taken",
+        "5": "Werktijd",
+        "6": "Bewijs van werk",
+        "7": "Bevestigingen",
+        "8": "Vaardigheden en competenties",
+        "9": "Living CV — een levend professioneel cv",
+        "10": "Nieuwe kansen",
+        "11": "Teams",
+        "12": "Bedrijfscapaciteit",
+        "13": "Arbeidsmarktdiensten"
+      },
       "note": "Dit legt het systeem uit; het is niet de grens ervan. Andere delen van de arbeidsmarkt breiden de keten uit."
     },
-    "loops": [
-      {
+    "loops": {
+      "0": {
         "id": "people",
         "heading": "Voor mensen",
         "lead": "Een professioneel profiel is geen kaart of score. Het is de ervaring, werkgeschiedenis en het bewijs van een echt persoon.",
-        "flow": [
-          "Kansen vinden",
-          "Professionele ervaring presenteren",
-          "Werken",
-          "Het werkelijk gedane werk vastleggen",
-          "Bewijs bewaren",
-          "Bevestigingen ontvangen waar van toepassing",
-          "Professionele geschiedenis opbouwen — Living CV",
-          "Opgebouwde ervaring gebruiken voor nieuwe kansen"
-        ],
+        "flow": {
+          "0": "Kansen vinden",
+          "1": "Professionele ervaring presenteren",
+          "2": "Werken",
+          "3": "Het werkelijk gedane werk vastleggen",
+          "4": "Bewijs bewaren",
+          "5": "Bevestigingen ontvangen waar van toepassing",
+          "6": "Professionele geschiedenis opbouwen — Living CV",
+          "7": "Opgebouwde ervaring gebruiken voor nieuwe kansen"
+        },
         "pointsLabel": "Wat een professioneel profiel weergeeft",
-        "points": [
-          "ervaring en werkgeschiedenis;",
-          "vaardigheden en competenties;",
-          "kwalificaties en certificaten, waar vastgelegd;",
-          "uitgevoerd werk, uren, projecten en objecten;",
-          "bewijs en bevestigingen;",
-          "beschikbaarheid en professionele voorkeuren, waar van toepassing."
-        ]
+        "points": {
+          "0": "ervaring en werkgeschiedenis;",
+          "1": "vaardigheden en competenties;",
+          "2": "kwalificaties en certificaten, waar vastgelegd;",
+          "3": "uitgevoerd werk, uren, projecten en objecten;",
+          "4": "bewijs en bevestigingen;",
+          "5": "beschikbaarheid en professionele voorkeuren, waar van toepassing."
+        }
       },
-      {
+      "1": {
         "id": "employers",
         "heading": "Voor werkgevers",
         "lead": "De waarde voor een werkgever is niet alleen vacatures plaatsen. Het gaat erom te bewaren wie er werkte, wat er gedaan is, waar, wanneer, hoe lang, wat is afgerond, welk bewijs bestaat en welke capaciteit de organisatie heeft opgebouwd.",
-        "flow": [
-          "Behoefte",
-          "Mensen",
-          "Team",
-          "Project / object",
-          "Werk",
-          "Uren en voortgang",
-          "Bewijs",
-          "Bevestiging",
-          "De geschiedenis van werkelijk uitgevoerd werk van het bedrijf",
-          "Toekomstige personeelsplanning (een richting)"
-        ],
+        "flow": {
+          "0": "Behoefte",
+          "1": "Mensen",
+          "2": "Team",
+          "3": "Project / object",
+          "4": "Werk",
+          "5": "Uren en voortgang",
+          "6": "Bewijs",
+          "7": "Bevestiging",
+          "8": "De geschiedenis van werkelijk uitgevoerd werk van het bedrijf",
+          "9": "Toekomstige personeelsplanning (een richting)"
+        },
         "pointsLabel": "Wat de organisatie bewaart",
-        "points": [
-          "wie er werkte en in welke rol;",
-          "welk werk is gedaan, waar en wanneer;",
-          "hoeveel uren en welke voortgang;",
-          "welk bewijs en welke bevestigingen bestaan;",
-          "welke capaciteiten het team echt heeft opgebouwd."
-        ]
+        "points": {
+          "0": "wie er werkte en in welke rol;",
+          "1": "welk werk is gedaan, waar en wanneer;",
+          "2": "hoeveel uren en welke voortgang;",
+          "3": "welk bewijs en welke bevestigingen bestaan;",
+          "4": "welke capaciteiten het team echt heeft opgebouwd."
+        }
       },
-      {
+      "2": {
         "id": "network",
         "heading": "Voor bureaus en andere arbeidsmarktpartijen",
         "lead": "LabourMarket.ai is niet alleen een systeem voor werknemer en werkgever. Andere legitieme partijen hebben een plaats in hetzelfde arbeidsmarktnetwerk.",
-        "flow": [],
-        "participants": [
-          "Werving- en selectiebureaus",
-          "Uitzendbureaus",
-          "Aannemers en onderaannemers",
-          "Opleidingsaanbieders",
-          "Scholen en beroepsonderwijs",
-          "Zelfstandige professionals",
-          "Aanbieders van arbeidsmarktdiensten",
-          "Andere legitieme arbeidsmarktpartijen"
-        ],
+        "flow": {},
+        "participants": {
+          "0": "Werving- en selectiebureaus",
+          "1": "Uitzendbureaus",
+          "2": "Aannemers en onderaannemers",
+          "3": "Opleidingsaanbieders",
+          "4": "Scholen en beroepsonderwijs",
+          "5": "Zelfstandige professionals",
+          "6": "Aanbieders van arbeidsmarktdiensten",
+          "7": "Andere legitieme arbeidsmarktpartijen"
+        },
         "pointsLabel": "Hun plaats in hetzelfde netwerk",
-        "points": [
-          "ze werken met dezelfde echte werkregistraties, niet met losse bestanden;",
-          "rollen en verantwoordelijkheid blijven duidelijk gescheiden: wie publiceerde, wie werkte, wie bevestigde."
-        ]
+        "points": {
+          "0": "ze werken met dezelfde echte werkregistraties, niet met losse bestanden;",
+          "1": "rollen en verantwoordelijkheid blijven duidelijk gescheiden: wie publiceerde, wie werkte, wie bevestigde."
+        }
       }
-    ],
+    },
     "evidence": {
       "heading": "Echt werk wordt professioneel bewijs",
       "lead": "Eén werkgebeurtenis is één registratie. Ze kan meerdere weergaven voeden, maar wordt nooit gekopieerd en nooit uit het niets aangemaakt.",
       "chainLabel": "De bewijsketen",
-      "chain": [
-        "Persoon",
-        "Datum / periode",
-        "Uren",
-        "Project / object",
-        "Uitgevoerd werk",
-        "Vaardigheden en competenties",
-        "Bron / bewijs",
-        "Bevestiging",
-        "Professionele geschiedenis — Living CV"
-      ],
+      "chain": {
+        "0": "Persoon",
+        "1": "Datum / periode",
+        "2": "Uren",
+        "3": "Project / object",
+        "4": "Uitgevoerd werk",
+        "5": "Vaardigheden en competenties",
+        "6": "Bron / bewijs",
+        "7": "Bevestiging",
+        "8": "Professionele geschiedenis — Living CV"
+      },
       "projectionsLabel": "Dezelfde registratie — meerdere weergaven",
-      "projections": [
-        "De professionele geschiedenis van de persoon",
-        "Teamgeschiedenis",
-        "Projectgeschiedenis",
-        "Geschiedenis van bedrijfscapaciteit"
-      ],
+      "projections": {
+        "0": "De professionele geschiedenis van de persoon",
+        "1": "Teamgeschiedenis",
+        "2": "Projectgeschiedenis",
+        "3": "Geschiedenis van bedrijfscapaciteit"
+      },
       "note": "Eén werkgebeurtenis kan meerdere weergaven voeden. Bewijs wordt nooit gedupliceerd of verzonnen."
     },
     "afterHire": {
       "heading": "Waarom gebruiken nadat u werk hebt gevonden?",
       "lead": "Een gewone vacaturesite levert de meeste waarde vóór de aanname. LabourMarket.ai moet nuttiger worden zodra het echte werk begint.",
       "boardLabel": "Een gewone vacaturesite",
-      "boardPoints": [
-        "De waarde is het hoogst tijdens het zoeken.",
-        "Na de aanname blijft de geschiedenis in aparte systemen.",
-        "Een nieuwe werkgever begint bij nul."
-      ],
-      "platformPoints": [
-        "Elke echte werkperiode voegt toe aan de professionele geschiedenis.",
-        "Bewijs, competenties en het Living CV groeien.",
-        "De werkgeschiedenis van team en bedrijf groeit mee.",
-        "Opgebouwde ervaring wordt context voor nieuwe kansen."
-      ],
-      "stages": [
-        "Zoeken",
-        "Aanname",
-        "Werk",
-        "Latere kansen"
-      ],
+      "boardPoints": {
+        "0": "De waarde is het hoogst tijdens het zoeken.",
+        "1": "Na de aanname blijft de geschiedenis in aparte systemen.",
+        "2": "Een nieuwe werkgever begint bij nul."
+      },
+      "platformPoints": {
+        "0": "Elke echte werkperiode voegt toe aan de professionele geschiedenis.",
+        "1": "Bewijs, competenties en het Living CV groeien.",
+        "2": "De werkgeschiedenis van team en bedrijf groeit mee.",
+        "3": "Opgebouwde ervaring wordt context voor nieuwe kansen."
+      },
+      "stages": {
+        "0": "Zoeken",
+        "1": "Aanname",
+        "2": "Werk",
+        "3": "Latere kansen"
+      },
       "schematicNote": "Schematisch — geen meting.",
       "conclusion": "De waarde eindigt niet bij de aannamebeslissing — ze groeit elke dag dat er gewerkt wordt."
     },
     "trust": {
       "heading": "Vertrouwen: feit ≠ afgeleid ≠ bevestigd",
       "lead": "Het oorspronkelijke bewijs en de bron blijven bewaard. Wat de bron aangaf, blijft altijd gescheiden van wat het systeem afleidde en van wat een persoon of organisatie bevestigde. Een AI-interpretatie wordt nooit als feit behandeld.",
-      "tiers": [
-        {
+      "tiers": {
+        "0": {
           "term": "Feit",
           "meaning": "Wat de bron zelf aangaf: een datum, uren, een beschrijving van het werk.",
           "example": "Bijvoorbeeld “8 u, 2025-03-12” in de brontabel."
         },
-        {
+        "1": {
           "term": "Afgeleid",
           "meaning": "Een interpretatie door het systeem of door regels. Altijd gemarkeerd als afgeleid en nooit een feit.",
           "example": "Bijvoorbeeld een vaardigheid herkend uit de tekst van een werkbeschrijving."
         },
-        {
+        "2": {
           "term": "Bevestigd",
           "meaning": "Bevestiging door een persoon of organisatie. Gescheiden van wat de persoon zelf opgaf.",
           "example": "Bijvoorbeeld een leidinggevende bevestigde de werkperiode."
         }
-      ],
+      },
       "noLabel": "Wat hier niet is",
-      "no": [
-        "Geen sterbeoordelingen.",
-        "Geen punten.",
-        "Geen ranglijsten van werknemers.",
-        "Geen kunstmatige rangschikking van de waarde van een persoon."
-      ]
+      "no": {
+        "0": "Geen sterbeoordelingen.",
+        "1": "Geen punten.",
+        "2": "Geen ranglijsten van werknemers.",
+        "3": "Geen kunstmatige rangschikking van de waarde van een persoon."
+      }
     },
     "privacy": {
       "heading": "Privacy en controle",
       "lead": "Professioneel bewijs kan privé gedetailleerd zijn. Publieke vindbaarheid onthult niet wat beschermd moet worden.",
       "privateLabel": "Alleen privé gedetailleerd",
-      "private": [
-        "Volledige werkregistraties en bewijs.",
-        "Het werkjournaal.",
-        "Project- en objectdetails."
-      ],
+      "private": {
+        "0": "Volledige werkregistraties en bewijs.",
+        "1": "Het werkjournaal.",
+        "2": "Project- en objectdetails."
+      },
       "publicNotLabel": "Publiek zoeken onthult niet",
-      "publicNot": [
-        "privécontacten;",
-        "vertrouwelijke klanten;",
-        "privé-informatie uit het werkjournaal;",
-        "beperkte persoonlijke informatie;",
-        "vertrouwelijke projectinformatie."
-      ],
+      "publicNot": {
+        "0": "privécontacten;",
+        "1": "vertrouwelijke klanten;",
+        "2": "privé-informatie uit het werkjournaal;",
+        "3": "beperkte persoonlijke informatie;",
+        "4": "vertrouwelijke projectinformatie."
+      },
       "control": "Mensen en organisaties houden passende controle over wat openbaar is."
     },
     "europe": {
       "heading": "De Europese arbeidsmarkt",
       "body": "LabourMarket.ai is eerst voor Europa gebouwd en kan wereldwijd uitbreiden. Het is niet de vacaturesite van één land: het doel is arbeidsmarktpartijen te verbinden over landen, beroepen en sectoren heen.",
-      "points": [
-        "Een meertalige interface; de oorspronkelijke tekst blijft altijd bewaard.",
-        "Uitleg over documenten en vereisten per land.",
-        "Bronnen van openbare vacatures worden land voor land aangesloten — alleen zodra de voorwaarden van de bron zijn bevestigd."
-      ]
+      "points": {
+        "0": "Een meertalige interface; de oorspronkelijke tekst blijft altijd bewaard.",
+        "1": "Uitleg over documenten en vereisten per land.",
+        "2": "Bronnen van openbare vacatures worden land voor land aangesloten — alleen zodra de voorwaarden van de bron zijn bevestigd."
+      }
     },
     "notYet": {
       "heading": "Wat het platform niet doet",
-      "points": [
-        "Het markeert zelf nooit iets als bevestigd — een bevestigde status komt altijd van een echt persoon.",
-        "Het geeft geen juridisch advies. Documentbegeleiding is alleen informatief.",
-        "Het beoordeelt mensen niet met punten of rangschikkingen."
-      ]
+      "points": {
+        "0": "Het markeert zelf nooit iets als bevestigd — een bevestigde status komt altijd van een echt persoon.",
+        "1": "Het geeft geen juridisch advies. Documentbegeleiding is alleen informatief.",
+        "2": "Het beoordeelt mensen niet met punten of rangschikkingen."
+      }
     },
     "data": {
       "heading": "Uw gegevens",
@@ -18978,25 +18978,25 @@
       "country": "Noorwegen",
       "pay": "vanaf € 2.800"
     },
-    "opportunities": [
-      {
+    "opportunities": {
+      "0": {
         "role": "Kok",
         "place": "Restaurant · Oslo (Noorwegen)",
-        "fits": [
-          "Beroep",
-          "Land",
-          "Loon"
-        ]
+        "fits": {
+          "0": "Beroep",
+          "1": "Land",
+          "2": "Loon"
+        }
       },
-      {
+      "1": {
         "role": "Keukenmedewerker",
         "place": "Hotel · Bergen (Noorwegen)",
-        "fits": [
-          "Land",
-          "Loon"
-        ]
+        "fits": {
+          "0": "Land",
+          "1": "Loon"
+        }
       }
-    ],
+    },
     "conversation": {
       "employer": "Kunt u op 6 oktober beginnen?",
       "person": "Ja, dat kan."
@@ -19009,15 +19009,15 @@
     "week": {
       "label": "Deze week",
       "total": "40 u",
-      "days": [
-        "Ma",
-        "Di",
-        "Wo",
-        "Do",
-        "Vr",
-        "Za",
-        "Zo"
-      ]
+      "days": {
+        "0": "Ma",
+        "1": "Di",
+        "2": "Wo",
+        "3": "Do",
+        "4": "Vr",
+        "5": "Za",
+        "6": "Zo"
+      }
     },
     "confirmedBy": "Een leidinggevende bevestigde 5 logboekregistraties",
     "facts": {
@@ -19025,18 +19025,18 @@
       "confirmed": "u met registratie van leidinggevende",
       "days": "werkdagen"
     },
-    "cv": [
-      {
+    "cv": {
+      "0": {
         "org": "Restaurant De Fjord · Oslo",
         "period": "2026 — nu",
         "standing": "Logboekregistraties bevestigd door leidinggevende"
       },
-      {
+      "1": {
         "org": "Restaurant Ąžuolas · Vilnius (Litouwen)",
         "period": "2021 tot 2026",
         "standing": "Door haarzelf opgegeven"
       }
-    ],
+    },
     "next": {
       "role": "Chef-kok",
       "place": "Restaurant · Bergen (Noorwegen)",
@@ -20640,6 +20640,78 @@
       "allProjects": "Alle projecten",
       "allNeeds": "Alle behoeften",
       "untitledProject": "Project zonder naam"
+    }
+  },
+  "siteNav": {
+    "trigger": "Hoofdkeuzes",
+    "account": "Na inloggen",
+    "intents": {
+      "work": {
+        "title": "Ik zoek werk",
+        "description": "Vind vacatures en laat zien wat je kunt.",
+        "short": "Werk zoeken"
+      },
+      "workers": {
+        "title": "Ik zoek medewerkers",
+        "description": "Beschrijf welk werk je nodig hebt.",
+        "short": "Mensen zoeken"
+      },
+      "services": {
+        "title": "Ik bied diensten aan",
+        "description": "Publiceer wat je aanbiedt en beantwoord aanvragen.",
+        "short": "Diensten aanbieden"
+      },
+      "orders": {
+        "title": "Ik zoek opdrachten en contracten",
+        "description": "Vind werkaanvragen en houd voorstellen bij elkaar.",
+        "short": "Opdrachten zoeken"
+      },
+      "partners": {
+        "title": "Ik zoek partners",
+        "description": "Verbind je met de mensen en organisaties waarmee je werkt.",
+        "short": "Partners zoeken"
+      },
+      "agencies": {
+        "title": "Voor bureaus",
+        "description": "Beheer de mensen, klanten en aanbiedingen van je bureau.",
+        "short": "Voor bureaus"
+      }
+    },
+    "links": {
+      "jobs": "Vacaturebank",
+      "workOpportunities": "Werkmogelijkheden",
+      "createCv": "Maak een gratis cv",
+      "workAbroad": "Werken in het buitenland",
+      "forWorkers": "Zo werkt het voor werknemers",
+      "companyNeed": "Beschrijf je behoefte",
+      "forCompanies": "Zo werkt het voor bedrijven",
+      "labourMarket": "Arbeidsmarkt per land",
+      "myServices": "Jouw diensten",
+      "serviceRequests": "Dienstaanvragen",
+      "marketListings": "Marktaanbod",
+      "commercial": "Voorstellen en contracten",
+      "network": "Jouw netwerk",
+      "partnerWithUs": "Word partner",
+      "forAgencies": "Zo werkt het voor bureaus",
+      "setUpAgency": "Richt je bureau in"
+    },
+    "assistant": "Vraag de assistent",
+    "start": {
+      "searchLabel": "Vacatures zoeken",
+      "searchPlaceholder": "Functie of trefwoord",
+      "searchSubmit": "Zoeken",
+      "viewAll": "Alle vacatures"
+    },
+    "nav": {
+      "heading": "Wat wil je doen?",
+      "swipe": "Veeg",
+      "close": "Sluiten",
+      "functions": "Functies",
+      "professions": "Beroepen",
+      "opensNow": "Opent direct",
+      "signInWhenOpen": "Inloggen bij openen",
+      "allSectors": "Alle sectoren",
+      "fullList": "Volledige lijst"
     }
   }
 }
