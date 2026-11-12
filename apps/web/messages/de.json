@@ -3847,6 +3847,7 @@
       "blockedLabel": "Blockiert",
       "nonWorkerLabel": "Unternehmens- / Agentur- / Kundenbereiche",
       "nonWorkerStatus": "In Vorbereitung",
+      "nonWorkerStatusActive": "In Betrieb",
       "fakeClaimsLabel": "Gefälschte KI / gefälschtes Matching / gefälschte Reputation",
       "fakeClaimsStatus": "Nie verwendet"
     },
@@ -3886,67 +3887,116 @@
     "preparing_badge": "In Vorbereitung",
     "overview": {
       "label": "Übersicht",
-      "description": "Hauptansicht mit den ersten Schritten, Vorschlägen und Chancen."
+      "description": "Ihre Startansicht öffnet sich für jede Rolle, die Sie haben.",
+      "claims": {
+        "home_per_role": "Ihre Startansicht öffnet sich für jede Rolle, die Sie haben."
+      }
     },
     "market_map": {
       "label": "Marktkarte",
-      "description": "Eine einheitliche Arbeitsmarktkarte — Ihr eigenes Signal, Personalbedarfe von Unternehmen und echte Daten nach Land / Region."
+      "description": "Eine Karte markiert, wo es Arbeit und Menschen gibt.",
+      "claims": {
+        "map": "Eine Karte markiert, wo es Arbeit und Menschen gibt."
+      }
     },
     "profile_text_first": {
       "label": "Profil",
-      "description": "Beschreiben Sie sich in eigenen Worten oder fügen Sie einen Lebenslauf ein. Das System schlägt Fähigkeiten vor, aber Sie wählen sie aus."
+      "description": "Beschreiben Sie Ihre Arbeit in eigenen Worten und erstellen Sie Ihr berufliches Profil.",
+      "claims": {
+        "profile": "Beschreiben Sie Ihre Arbeit in eigenen Worten und erstellen Sie Ihr berufliches Profil."
+      }
     },
     "journal_text_first": {
       "label": "Arbeits- oder Tätigkeitseintrag",
-      "description": "Erfassen Sie die heutige Arbeit oder Tätigkeit. Das System hilft Ihnen bei der Strukturierung, aber Sie entscheiden über die Fakten."
+      "description": "Halten Sie fest, was Sie heute gearbeitet haben — der Eintrag fließt in Ihren Living CV.",
+      "claims": {
+        "entry_to_cv": "Halten Sie fest, was Sie heute gearbeitet haben — der Eintrag fließt in Ihren Living CV."
+      }
     },
     "communication": {
       "label": "Nachrichten",
-      "description": "Unterhaltungen und Anfragen, die Sie erhalten. Wenn Ihnen jemand schreibt oder eine Anfrage sendet, finden Sie sie hier."
+      "description": "Schreiben Sie Personen und Unternehmen — das Gespräch bleibt in einem Verlauf.",
+      "claims": {
+        "threads": "Schreiben Sie Personen und Unternehmen — das Gespräch bleibt in einem Verlauf."
+      }
     },
     "account_roles": {
       "label": "Rollen",
-      "description": "Überprüfen Sie Ihre Rollen. Das Arbeiten als Person ist heute aktiv; weitere Aktionen werden Schritt für Schritt hinzugefügt."
+      "description": "Ein Konto enthält mehrere Rollen, zwischen denen Sie wechseln.",
+      "claims": {
+        "several_roles": "Ein Konto enthält mehrere Rollen, zwischen denen Sie wechseln."
+      }
     },
     "role_expansion": {
       "label": "Weitere Rollen",
-      "description": "Später können Sie Aktionen für Unternehmen, Personalagenturen und Einkauf hinzufügen, sobald sie bereit sind."
+      "description": "Sie können vom selben Konto aus ein Unternehmen anlegen. Sie können vom selben Konto aus Leistungen einkaufen.",
+      "claims": {
+        "add_company": "Sie können vom selben Konto aus ein Unternehmen anlegen.",
+        "add_buying": "Sie können vom selben Konto aus Leistungen einkaufen."
+      }
     },
     "external_confirmation": {
       "label": "Arbeitseinträge von anderen",
-      "description": "Ein Vorgesetzter, Kunde oder Partner kann später Ihre Arbeitseinträge ergänzen."
+      "description": "Eine berechtigte Führungskraft Ihrer Organisation bestätigt die Arbeit, die Sie erfasst haben.",
+      "claims": {
+        "manager_confirms": "Eine berechtigte Führungskraft Ihrer Organisation bestätigt die Arbeit, die Sie erfasst haben."
+      }
     },
     "company_workspace": {
       "label": "Unternehmensbereich",
-      "description": "Team-, Projekt- und Bedarfsverwaltung für Unternehmen."
+      "description": "Legen Sie Ihre Organisation an und veröffentlichen Sie ihren ersten Bedarf. Die Unternehmensstartseite öffnet sich für die Leute der Organisation.",
+      "claims": {
+        "setup_and_need": "Legen Sie Ihre Organisation an und veröffentlichen Sie ihren ersten Bedarf.",
+        "company_home": "Die Unternehmensstartseite öffnet sich für die Leute der Organisation."
+      }
     },
     "agency_workspace": {
       "label": "Agenturbereich",
-      "description": "Kandidatenpool- und Serviceangebotsverwaltung für Personalagenturen."
+      "description": "Eine Agentur führt ihre Leute, verbindet sich mit Kunden und bietet Leute für den Bedarf eines Kunden an.",
+      "claims": {
+        "roster_clients_offers": "Eine Agentur führt ihre Leute, verbindet sich mit Kunden und bietet Leute für den Bedarf eines Kunden an."
+      }
     },
     "customer_workspace": {
       "label": "Kundenbereich",
-      "description": "Serviceanfragen und Berichte für Kunden."
+      "description": "Speichern Sie Ihre Angaben als Auftraggeber und führen Sie Ihre Anfragen in Ihrer eigenen Liste.",
+      "claims": {
+        "record_and_requests": "Speichern Sie Ihre Angaben als Auftraggeber und führen Sie Ihre Anfragen in Ihrer eigenen Liste."
+      }
     },
     "document_records": {
       "label": "Dokumenteneinträge",
-      "description": "Ein Ort für Zertifikate und Dokumente."
+      "description": "Bewahren Sie Ihre Dokumente auf und sehen Sie, wann jedes abläuft. Ein Unternehmen führt ein Register seiner Dokumente.",
+      "claims": {
+        "own_documents": "Bewahren Sie Ihre Dokumente auf und sehen Sie, wann jedes abläuft.",
+        "company_register": "Ein Unternehmen führt ein Register seiner Dokumente."
+      }
     },
     "team_offers": {
       "label": "Teamangebote",
-      "description": "Ein Ort, um Teams zu bilden und gemeinsame Angebote zu veröffentlichen."
+      "description": "Ein Team wird für einen Bedarf angeboten und als eine Einheit übernommen.",
+      "claims": {
+        "team_as_unit": "Ein Team wird für einen Bedarf angeboten und als eine Einheit übernommen."
+      }
     },
     "work_needs": {
       "label": "Arbeitsbedarf",
-      "description": "Ein Ort, um festzuhalten, welche Arbeit oder Hilfe Sie benötigen."
+      "description": "Ein Unternehmen beschreibt an einer Stelle, welche Leute es braucht. Interessierte Personen melden sich auf den Bedarf.",
+      "claims": {
+        "one_form": "Ein Unternehmen beschreibt an einer Stelle, welche Leute es braucht.",
+        "people_answer": "Interessierte Personen melden sich auf den Bedarf."
+      }
     },
     "service_offers": {
       "label": "Serviceangebote",
-      "description": "Ein Ort, um die von Ihnen angebotenen Dienstleistungen zu veröffentlichen."
+      "description": "Veröffentlichen Sie Ihre Leistungen und erhalten Sie Anfragen dazu.",
+      "claims": {
+        "offer_and_requests": "Veröffentlichen Sie Ihre Leistungen und erhalten Sie Anfragen dazu."
+      }
     },
     "matching": {
-      "label": "Matching",
-      "description": "Dieses Produkt hat keine Matching-/Ranking-Engine und wird keine haben, bis eine ehrlich ausgeliefert werden kann."
+      "label": "KI-Matching",
+      "description": "KI-gestütztes Matching von Menschen und Bedarf."
     },
     "marketplace": {
       "label": "Marktplatz",
@@ -3954,16 +4004,35 @@
     },
     "marketplace_hub": {
       "label": "Marktplatz",
-      "description": "Ein kompakter Hub, der die Karte, Chancen und Ihre Unternehmen verbindet."
+      "description": "Führt Sie zur Karte, die Arbeit und Menschen zeigt.",
+      "claims": {
+        "map": "Führt Sie zur Karte, die Arbeit und Menschen zeigt."
+      }
     },
     "planning": {
       "label": "Kalender",
-      "description": "Ein Kalender: Buchungen, Projekte, Aufgaben, Journaleinträge, Einladungen und Zahlungsfristen."
+      "description": "Ein Unternehmen plant die Arbeit seiner Leute im Kalender. Sie sehen Ihre eigene Arbeit im Kalender.",
+      "claims": {
+        "company_calendar": "Ein Unternehmen plant die Arbeit seiner Leute im Kalender.",
+        "own_calendar": "Sie sehen Ihre eigene Arbeit im Kalender."
+      }
     },
     "network": {
       "label": "Netzwerk",
-      "description": "Personen und Unternehmen: Suche, Einladungen und Ihre Beziehungen."
-    }
+      "description": "Einladungen in das Team eines Unternehmens kommen hier an, und hier nehmen Sie sie an.",
+      "claims": {
+        "invitations": "Einladungen in das Team eines Unternehmens kommen hier an, und hier nehmen Sie sie an."
+      }
+    },
+    "rule_matching": {
+      "label": "Kandidaten-Shortlist",
+      "description": "Ein beschriebener Bedarf erhält eine Kurzliste passender Personen, mit dem Grund für jede.",
+      "claims": {
+        "shortlist_with_reason": "Ein beschriebener Bedarf erhält eine Kurzliste passender Personen, mit dem Grund für jede."
+      }
+    },
+    "matching_reason": "Ausgeschaltet: Es ist kein KI-Dienst angebunden. Die Kandidaten-Shortlist funktioniert bereits.",
+    "notCheckedYet": "Dieser Teil ist im Live-Betrieb noch nicht geprüft."
   },
   "structuring": {
     "groupEyebrow": "Vorgeschlagene Fähigkeiten",
@@ -7163,6 +7232,10 @@
       "title": "Unterhaltung konnte nicht geöffnet werden",
       "body": "Möglicherweise haben Sie keine Berechtigung, dieser Person zu schreiben, oder sie ist nicht mehr verfügbar. Es wurde nichts gesendet."
     },
+    "noLongerAvailable": {
+      "title": "Diese Unterhaltung ist nicht mehr verfügbar",
+      "body": "Sie nehmen nicht mehr daran teil, daher werden ihre Nachrichten nicht angezeigt."
+    },
     "scope": {
       "support": "Support-Kanal",
       "unknown": "Kontext nicht angegeben",
@@ -7202,7 +7275,16 @@
         "blockedFailed": "Entfernen Sie den fehlgeschlagenen Anhang oder laden Sie ihn erneut hoch.",
         "partialFailure": "Die Nachricht wurde gesendet, aber einige Anhänge konnten nicht angehängt werden. Versuchen Sie, sie erneut zu senden."
       },
-      "languageLabel": "Ich schreibe auf"
+      "languageLabel": "Ich schreibe auf",
+      "errors": {
+        "notAuthenticated": "Ihre Sitzung ist abgelaufen. Melden Sie sich erneut an und senden Sie die Nachricht.",
+        "invalidInput": "Diese Nachricht kann nicht gesendet werden: Sie ist möglicherweise zu lang, oder ein Anhang wird nicht unterstützt.",
+        "notParticipant": "Sie können in dieser Unterhaltung nicht schreiben — Sie haben keinen Zugriff darauf.",
+        "rateLimited": "Sie haben in der letzten Stunde viele Nachrichten gesendet. Warten Sie kurz und versuchen Sie es erneut.",
+        "rateCheckUnavailable": "Die Sicherheitsprüfung konnte nicht ausgeführt werden, daher wurde nichts gesendet. Versuchen Sie es erneut.",
+        "attachmentsUnavailable": "Das Senden von Anhängen ist hier noch nicht aktiviert — fügen Sie der Nachricht Text hinzu.",
+        "sendFailed": "Die Nachricht konnte nicht gesendet werden. Ihr Text ist noch da — versuchen Sie es erneut."
+      }
     },
     "launcher": {
       "openLabel": "Support kontaktieren",
@@ -20466,6 +20548,49 @@
       "undecided": "Sie haben noch nicht gewählt, daher wird für die Messung nichts gespeichert.",
       "allow": "Erlauben",
       "refuse": "Ablehnen"
+    }
+  },
+  "companyClaim": {
+    "email": {
+      "subject": "Übernehmen Sie das Profil von {company} auf LabourMarket.ai",
+      "intro": "Sie sind eingeladen, das Profil von {company} auf LabourMarket.ai zu verwalten. Das ist kostenlos.",
+      "open": "Öffnen Sie diesen einmaligen Link:",
+      "validity": "Der Link gilt 14 Tage und funktioniert nur mit dieser E-Mail-Adresse.",
+      "notYou": "Wenn Sie dieses Unternehmen nicht vertreten, tun Sie nichts: Ohne Sie ändert sich nichts."
+    },
+    "invite": {
+      "eyebrow": "Unternehmensprofil",
+      "title": "Profil von {company} übernehmen",
+      "body": "Bestätigen Sie, dass Sie dieses Unternehmen vertreten. Das ist eine Anfrage: Ein anderer LabourMarket.ai-Operator prüft sie, erst dann werden Sie Inhaber des Profils.",
+      "verifyFirst": "Bestätigen Sie zuerst, dass diese E-Mail-Adresse Ihnen gehört.",
+      "roleLabel": "Ihre Funktion im Unternehmen",
+      "rolePlaceholder": "Zum Beispiel Geschäftsführer",
+      "authorityLabel": "Ich bestätige, dass ich {company} vertreten darf.",
+      "submit": "Anfrage senden",
+      "decidedBy": "Es entscheidet ein anderer Operator, nicht der, der Sie eingeladen hat.",
+      "expires": "Die Einladung gilt bis {date}.",
+      "requestedTitle": "Anfrage gesendet",
+      "requestedBody": "Ein Operator prüft Ihre Anfrage. Nach der Bestätigung verwalten Sie das Profil. Bis dahin ändert sich nichts.",
+      "closedTitle": "Diese Einladung kann nicht mehr verwendet werden",
+      "verifySend": "Bestätigungslink senden",
+      "pending": "Wird gesendet…",
+      "outcome": {
+        "claim_requested": "Anfrage gesendet.",
+        "already_requested": "Sie haben bereits eine Anfrage gesendet.",
+        "already_used": "Diese Einladung wurde bereits verwendet.",
+        "expired": "Die Einladung ist abgelaufen. Bitten Sie um eine neue.",
+        "revoked": "Die Einladung wurde zurückgezogen.",
+        "email_mismatch": "Diese Einladung gilt für eine andere E-Mail-Adresse. Melden Sie sich mit der Adresse an, an die die E-Mail ging.",
+        "email_not_verified": "Bestätigen Sie zuerst Ihre E-Mail-Adresse.",
+        "authority_not_confirmed": "Bestätigen Sie, dass Sie das Unternehmen vertreten dürfen.",
+        "invalid_role": "Geben Sie Ihre Funktion an (2–80 Zeichen).",
+        "not_claimable": "Dieses Unternehmensprofil kann nicht mehr übernommen werden.",
+        "inviter_cannot_claim": "Der Operator, der die Einladung gesendet hat, kann sie nicht selbst verwenden.",
+        "operator_cannot_claim": "Eine Person mit Operator-Rechten kann kein Unternehmen übernehmen.",
+        "verify_sent": "Wir haben Ihnen einen Link geschickt. Öffnen Sie ihn, dann kommen Sie hierher zurück.",
+        "verify_rate_limited": "Wir haben gerade erst einen Link gesendet. Prüfen Sie Ihre E-Mails oder versuchen Sie es später.",
+        "error": "Das hat nicht geklappt. Versuchen Sie es später erneut."
+      }
     }
   }
 }
