@@ -311,7 +311,7 @@ All prices are **monthly, ex VAT**. EUR is converted at 11 SEK per EUR and round
 ## 7. What is already finished in test mode (Lane D, 2026-11-12)
 
 **Proved offline by the real modules chained** (`apps/web/lib/billing/test-mode-chain.integration.test.ts`; only the I/O edges are faked):
-- Checkout bound to the organization at the server price, with Stripe Tax (`automatic_tax`), a required billing address and VAT-id collection (EU reverse charge).
+- Checkout bound to the organization at the server price. It requests Stripe Tax (`automatic_tax`), a required billing address and VAT-id collection (EU reverse charge). Whether the live account has Stripe Tax active is an open owner question (§8.1 item 0).
 - Signed webhook, idempotency and replay.
 - Trial → active.
 - Paid invoice.
@@ -336,6 +336,17 @@ This consolidates gate G-8 in [`payments-price-table-gate.md`](../human-gates/pa
 **Never paste a secret** into chat, a file or a PR. Set values on the VPS with `lm-env-set.sh` and `read -s` [R].
 
 ### 8.1 Facts the owner must confirm first (tax and legal)
+
+0. **Resolve the Stripe Tax contradiction first. This blocks everything below.**
+   - **What the repository says:**
+     - [R] `docs/launch/SAFE_CHECKPOINT_2026-09-05_window2.md` records "Stripe Tax ACTIVE (pre-existing, reused)" on the live account.
+     - The public-claims registry later records the owner's position: "Stripe Tax is NOT configured and the owner refused Stripe Tax registration (2026-10-23)" ([R] `apps/web/lib/public-claims/registry.ts`, the retired claim `employer.vat-via-stripe-tax`).
+     - Checkout always sends `automatic_tax: { enabled: true }` ([R] `lib/billing/providers/stripe-test.ts`).
+   - **Why it matters:** if Stripe Tax is not active on the live account, the live checkout is expected to fail when the session is created **(to verify in test mode with Tax off)**.
+   - **The owner chooses one:**
+     - **(i)** Activate Stripe Tax with the Lithuanian and OSS registrations below. No code change is needed.
+     - **(ii)** Keep Stripe Tax off. A separate owner-gated PR then makes `automatic_tax` conditional, and VAT is handled by manual Stripe tax rates or by the accountant's invoicing. That PR is **not** part of this lane, and no agent writes it without the owner's choice.
+   - **What this lane assumed:** steps 2 and 8.3 step 2 below assume (i).
 
 1. **Seller identity:** UAB "Nonstop Group", VAT **LT100010790613** [R]. Confirm Stripe account KYC is complete for this entity, and confirm the payout bank account (EUR IBAN).
 2. **VAT registrations to add in Stripe Tax** (Settings → Tax → Registrations):
@@ -364,7 +375,7 @@ Have legal review the existing `/legal/terms` and `/legal/privacy` and confirm e
 ### 8.3 Stripe dashboard (LIVE mode)
 
 1. **Products:** "LabourMarket.ai — Organization", recurring **€99.00/month** EUR, tax behaviour **exclusive**. Copy the `price_…` id.
-2. **Settings → Tax:**
+2. **Settings → Tax** (only under choice (i) in 8.1 item 0):
    - Enable Stripe Tax.
    - Add the registrations from 8.1.
    - Set the head office to Lithuania.
