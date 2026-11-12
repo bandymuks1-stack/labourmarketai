@@ -81,7 +81,7 @@ begin
   select provider_id, status into v_provider, v_status
     from public.service_offering_requests
    where id = p_request_id
-   for share;
+   for update; -- row lock: two concurrent calls serialize, so the open-proposal check below cannot be raced into a duplicate
   if v_provider is null or v_provider <> v_uid then
     -- Same answer for "no such request" and "not yours": no existence oracle.
     raise exception 'request not found' using errcode = '42501';

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 /**
@@ -39,6 +39,14 @@ describe("service request → proposal link (RED-1)", () => {
     // Status is the column default ('draft'): nothing is sent from here.
     expect(fn).not.toMatch(/'sent'\s*\)|status\s*=\s*'sent'|sent_at/);
     expect(fn).toMatch(/set search_path = public, pg_temp/);
+  });
+
+  it("locks the request row so two concurrent calls cannot both insert", () => {
+    // `for share` let two callers pass the open-proposal check together (PG16
+    // proof: scripts/db-proof/service-request-proposal-link-v1.sh, 2 rows).
+    expect(fn).toMatch(/from public\.service_offering_requests\s+where id = p_request_id\s+for update;/);
+    expect(fn).not.toMatch(/for share/);
+    expect(existsSync(resolve(ROOT, "scripts/db-proof/service-request-proposal-link-v1.sh"))).toBe(true);
   });
 
   it("returns the open proposal instead of a duplicate", () => {
