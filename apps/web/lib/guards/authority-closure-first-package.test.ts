@@ -215,6 +215,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261110140000_",
       // 2026-11-10 partner registration Slice 1: company takeover invitation, two-operator decision, link (RED draft #3211, needs-human-gate, NOT applied).
       "20261110190000_",
+      // 20261111230000 (offer_notification_types_v1: B2B offer notification types, strict CHECK superset, no grant; draft #3227, NOT applied).
+      "20261111230000_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
       "20261104060000_",
       // #2913 restored six production-applied migrations byte-exact (owner option 2, 2026-11-01): historical restorations dated after the package, not pending work of it.
