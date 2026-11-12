@@ -5,7 +5,7 @@ import { test, expect, type Browser, type BrowserContext, type Page } from "./pr
 
 import { chatWalkCleanup } from "../../lib/testing/chat-walk-cleanup";
 
-import { bearerOf, qaApi, qaServiceAddParticipants, qaStorage, subOf } from "./prod-qa-api";
+import { bearerOf, qaApi, qaApiOrigin, qaServiceAddParticipants, qaStorage, subOf } from "./prod-qa-api";
 
 /**
  * PRODUCTION — A PERSON REMOVED FROM A THREAD LOSES IT AT ONCE (P0 chat
@@ -189,6 +189,16 @@ test("3. B and C read message 1 and its attachment, and hold a bell row", async 
     await expect.poll(() => bellRows(t), { timeout: 60_000 }).toBeGreaterThan(0);
   }
   expect(await bellLinksToThread(browser, "worker2", true), "C's bell links to the thread before removal").toBeGreaterThan(0);
+  // The link C's browser actually holds: the thread page hands participants a
+  // short-lived signed URL (lib/communication/attachments.ts, 300 s).
+  const { ctx, page } = await as(browser, "worker2");
+  await page.goto(`/lt/dashboard/communication/${conv}`);
+  const link = page.locator('[data-testid^="message-attachments-"] a').first();
+  await expect(link).toBeVisible({ timeout: 60_000 });
+  cSignedUrl = (await link.getAttribute("href")) ?? "";
+  cSignedAt = Date.now();
+  await ctx.close();
+  expect((await fetchSigned(cSignedUrl)).status, "C's signed link serves the file before removal").toBe(200);
 });
 
 test("4. A removes C", async () => {
@@ -198,7 +208,29 @@ test("4. A removes C", async () => {
   });
   expect(res.status, "the creator's removal answered").toBe(200);
   expect(await res.json()).toBe("ok");
+  // Immediately after the removal (before any wait): the link C already held.
+  const status = (await fetchSigned(cSignedUrl)).status;
+  if (status === 200) {
+    test.info().annotations.push({
+      type: "KNOWN LIMIT",
+      description:
+        "4/7 (attachment): a signed link issued to C BEFORE the removal still serves the file until it expires (<=300 s); " +
+        "new access is refused (step 7). Checked to expire in step 7b.",
+    });
+  }
 });
+
+let cSignedUrl = "";
+let cSignedAt = 0;
+/** lib/communication/attachments.ts signs participant links for 300 s. */
+const SIGNED_URL_TTL_MS = 300_000;
+
+/** Fetch a signed Storage link (the signature is the credential; no bearer).
+ *  Only links on the vetted production API origin are followed. */
+async function fetchSigned(url: string): Promise<Response> {
+  expect(url.startsWith(`${qaApiOrigin()}/storage/v1/object/sign/`), "a production signed link").toBe(true);
+  return fetch(url, { redirect: "error" });
+}
 
 let bellConclusive = false;
 let cBellsBefore = 0;
@@ -236,6 +268,12 @@ test("7. C cannot read the thread, any message or any attachment", async () => {
   expect(((await att.json()) as unknown[]).length, "attachment rows hidden").toBe(0);
   const file = await qaStorage(`/storage/v1/object/authenticated/${BUCKET}/${attachmentPath}`, c);
   expect(file.status, "the stored file is not served").not.toBe(200);
+});
+
+test("7b. the signed link C held before the removal has expired", async () => {
+  const left = cSignedAt + SIGNED_URL_TTL_MS + 5_000 - Date.now();
+  if (left > 0) await new Promise((r) => setTimeout(r, left));
+  expect((await fetchSigned(cSignedUrl)).status, "the pre-removal link no longer serves the file").not.toBe(200);
 });
 
 test("8. C gets no new bell; e-mail and push are reported, not assumed", async () => {
