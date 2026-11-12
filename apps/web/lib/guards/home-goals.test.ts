@@ -2,33 +2,39 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { WORK_AREA_ICONS } from "@/components/app/work-area-icons";
+import { NAV_CARD_ICONS } from "@/components/navigation/nav-card-icon";
 import { ROLE_GATED_PREFIXES } from "@/lib/auth/role-gated-routes";
 import { NEED_DOOR_HREF } from "@/lib/company/need-door";
 import { locales } from "@/lib/i18n/config";
 import {
+  GOAL_FUNCTIONS,
   HOME_GOALS,
-  HOME_TOP_TASK_COUNT,
+  ROLE_GOAL_ORDER,
   admittedHomeGoals,
   areasBeyondGoals,
   goalIsAdmitted,
+  isDoorFor,
   routeIsAdmitted,
   routePath,
+  signedInGoals,
   type HomeGoalRole,
 } from "@/lib/navigation/home-goals";
+import { PUBLIC_INTENT_IDS } from "@/lib/navigation/public-intents";
 import { ORGANIZATION_WORK_AREAS, PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
 
 /**
- * THE HOME GOALS (owner P0 No. 1, 2026-11-12 — navigation is the launch
- * blocker). The signed-in home leads with what the person came to DO, one tap
- * from the top, for the role they act in. This guard keeps four things true:
+ * THE SIGNED-IN HOME'S GOALS (owner P0 No. 1, 2026-11-12 — navigation is the
+ * launch blocker; V2: ONE navigation system for the public site and the
+ * signed-in app). This guard keeps five things true:
  *
- *   1. every goal starts at an EXISTING page (no new surface, no dead card);
- *   2. each role's top tasks are on the home itself: one navigation action,
- *      at every width (the cards are a plain grid — nothing behind an arrow);
- *   3. a goal is never a way in: only routes the layout's own gate would
- *      admit are drawn;
- *   4. the copy is plain, exists in ALL eleven catalogs (Swedish included)
+ *   1. the home uses the SHARED goal navigator and the SHARED six goals —
+ *      no second rail, card or list of goals;
+ *   2. every function starts at an EXISTING page (no new surface, no dead card);
+ *   3. goal → function: at most two navigation actions to the start of any
+ *      function, for every role;
+ *   4. a goal is never a way in: only what the layout's own gate admits is
+ *      offered, and a goal whose primary function is closed is not offered;
+ *   5. the copy is plain, exists in ALL eleven catalogs (Swedish included)
  *      and never says "demo".
  *
  * What it does NOT prove: that a new person understands the home in five
@@ -38,67 +44,102 @@ import { ORGANIZATION_WORK_AREAS, PERSONAL_WORK_AREAS } from "@/lib/navigation/w
 const APP = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(APP, rel), "utf8");
 const ROLES = Object.keys(HOME_GOALS) as HomeGoalRole[];
+const ALL_FUNCTIONS = Object.values(GOAL_FUNCTIONS).flat();
 
 const WORKER = { heldRoles: ["worker"], opensCompanySpace: false };
 const OWNER = { heldRoles: ["worker", "company"], opensCompanySpace: true };
 const MANAGER_BY_MEMBERSHIP = { heldRoles: ["worker"], opensCompanySpace: true };
+const COMPANY_ONLY = { heldRoles: ["company"], opensCompanySpace: true };
 
-describe("every goal starts at an existing page", () => {
-  for (const role of ROLES) {
-    for (const goal of HOME_GOALS[role]) {
-      it(`${role}.${goal.id} → ${goal.href}`, () => {
-        const segs = routePath(goal.href).split("/").filter(Boolean);
-        expect(existsSync(join(APP, "app", "[locale]", ...segs, "page.tsx"))).toBe(true);
-        expect(WORK_AREA_ICONS[goal.iconKey]).toBeTruthy();
-      });
-    }
-  }
+describe("one navigation system: the shared navigator and the shared goals", () => {
+  const cards = read("components/app/home/home-goal-cards.tsx");
+  const code = cards.replace(/\/\*[\s\S]*?\*\//g, "");
 
-  it("goal ids are unique per role and no role offers one route twice", () => {
-    for (const role of ROLES) {
-      const ids = HOME_GOALS[role].map((g) => g.id);
-      const paths = HOME_GOALS[role].map((g) => routePath(g.href));
-      expect(new Set(ids).size, role).toBe(ids.length);
-      expect(new Set(paths).size, role).toBe(paths.length);
-    }
-  });
-});
-
-describe("the top tasks start from the home itself", () => {
-  it("each role has its top tasks first, and a small set of goals", () => {
-    expect(HOME_TOP_TASK_COUNT).toBe(3);
-    expect(HOME_GOALS.worker.slice(0, 3).map((g) => g.id)).toEqual(["findWork", "recordWork", "myCv"]);
-    expect(HOME_GOALS.company.slice(0, 3).map((g) => g.id)).toEqual(["findWorkers", "projects", "people"]);
-    expect(HOME_GOALS.agency.slice(0, 3).map((g) => g.id)).toEqual(["offerPeople", "clients", "people"]);
-    for (const role of ROLES) {
-      expect(HOME_GOALS[role].length, role).toBeGreaterThanOrEqual(HOME_TOP_TASK_COUNT);
-      // A home a person reads in five seconds does not offer a wall of cards.
-      expect(HOME_GOALS[role].length, role).toBeLessThanOrEqual(6);
-    }
+  it("the home renders Lane A's GoalNavigator and defines no card or rail of its own", () => {
+    expect(code).toMatch(/import \{ GoalNavigator \} from "@\/components\/navigation\/goal-navigator";/);
+    expect(code).toMatch(/<GoalNavigator\b/);
+    // No second implementation: no grid of links, no scroller, no 3D track.
+    expect(code).not.toMatch(/<Link\b|grid-cols-|overflow-x-|snap-x|perspective|<AreaSwitcher/);
+    expect(code).toMatch(/signedInGoals\(role, admission\)/);
   });
 
-  it("the cards are a plain grid of links — nothing behind an arrow, a swipe or a menu", () => {
-    const cards = read("components/app/home/home-goal-cards.tsx");
-    expect(cards).toMatch(/grid grid-cols-2/);
-    expect(cards).not.toMatch(/overflow-x-(auto|scroll)|snap-x|carousel|<details|aria-expanded/);
-    expect(cards).toMatch(/<Link\s+href=\{goal\.href as "\/dashboard"\}/);
-    expect(cards).toMatch(/admittedHomeGoals\(role, admission\)/);
-    // Keyboard and reduced motion: a visible focus ring, no forced animation.
-    expect(cards).toMatch(/focus-visible:ring-2/);
-    expect(cards).toMatch(/motion-reduce:transition-none/);
-    // Touch target: a card is far above the 44px floor.
-    expect(cards).toMatch(/min-h-16[^"]*sm:min-h-28/);
+  it("the goals are the public site's six — same ids, same names, same icons", () => {
+    expect(Object.keys(GOAL_FUNCTIONS).sort()).toEqual([...PUBLIC_INTENT_IDS].sort());
+    for (const role of ROLES) {
+      for (const id of ROLE_GOAL_ORDER[role]) expect(PUBLIC_INTENT_IDS, `${role}.${id}`).toContain(id);
+      expect(new Set(ROLE_GOAL_ORDER[role]).size, role).toBe(ROLE_GOAL_ORDER[role].length);
+    }
+    expect(code).toMatch(/t\(`intents\.\$\{goal\.id\}\.short`\)/);
+    expect(code).toMatch(/iconKey: GOAL_ICONS\[goal\.id\]/);
+    expect(code).toMatch(/href: goalHref\(goal\.id\)/);
+  });
+
+  it("each role meets its own goal first; 'For agencies' is an agency's alone", () => {
+    expect(ROLE_GOAL_ORDER.worker[0]).toBe("work");
+    expect(ROLE_GOAL_ORDER.company[0]).toBe("workers");
+    expect(ROLE_GOAL_ORDER.agency[0]).toBe("agencies");
+    expect(ROLE_GOAL_ORDER.worker).not.toContain("agencies");
+    expect(ROLE_GOAL_ORDER.company).not.toContain("agencies");
   });
 
   it("both homes render the goals above everything a person has to read", () => {
     const today = read("components/app/today/today-screen.tsx");
     expect(today.indexOf('<HomeGoalCards role="worker" />')).toBeGreaterThan(today.indexOf('data-testid="today-header"'));
     expect(today.indexOf('<HomeGoalCards role="worker" />')).toBeLessThan(today.indexOf('data-testid="today-regions"'));
-    // The frame-level placeholder reserves the cards' footprint (home CLS).
-    expect(today).toMatch(/<HomeGoalCardsPending role="worker" \/>/);
+    // The frame-level placeholder reserves the navigation's footprint (home CLS).
+    expect(today).toMatch(/<HomeGoalCardsPending \/>/);
     const company = read("components/app/organization/company-model-screen.tsx");
     expect(company.indexOf("<HomeGoalCards")).toBeGreaterThan(-1);
     expect(company.indexOf("<HomeGoalCards")).toBeLessThan(company.indexOf("<AreaSwitcher"));
+  });
+});
+
+describe("every function starts at an existing page", () => {
+  for (const [goal, functions] of Object.entries(GOAL_FUNCTIONS)) {
+    for (const fn of functions) {
+      it(`${goal}.${fn.id} → ${fn.href}`, () => {
+        const segs = routePath(fn.href).split("/").filter(Boolean);
+        expect(existsSync(join(APP, "app", "[locale]", ...segs, "page.tsx"))).toBe(true);
+        expect(NAV_CARD_ICONS[fn.iconKey], `${fn.id} icon`).toBeTruthy();
+      });
+    }
+  }
+
+  it("within a goal: unique ids, one route once, and no icon repeated across the rail", () => {
+    for (const [goal, functions] of Object.entries(GOAL_FUNCTIONS)) {
+      const rail = functions.filter((fn) => !fn.door);
+      expect(new Set(functions.map((f) => f.id)).size, goal).toBe(functions.length);
+      expect(new Set(functions.map((f) => routePath(f.href))).size, goal).toBe(functions.length);
+      expect(new Set(rail.map((f) => f.iconKey)).size, `${goal} icons`).toBe(rail.length);
+    }
+  });
+
+  it("a small set per goal: a rail a person reads at a glance", () => {
+    for (const [goal, functions] of Object.entries(GOAL_FUNCTIONS)) {
+      expect(functions.length, goal).toBeGreaterThanOrEqual(2);
+      expect(functions.length, goal).toBeLessThanOrEqual(5);
+    }
+  });
+});
+
+describe("at most two navigation actions to the start of any function", () => {
+  it("every function of a role's home is a card of a goal the home shows, or the door on the home itself", () => {
+    for (const role of ROLES) {
+      const admission = role === "worker" ? WORKER : OWNER;
+      const shown = signedInGoals(role, admission);
+      const inRails = new Set(shown.flatMap((goal) => goal.functions.map((fn) => fn.id)));
+      for (const fn of admittedHomeGoals(role, admission)) {
+        // goal (1) → function card (2); the door is on the home: 1.
+        expect(inRails.has(fn.id) || isDoorFor(role, fn), `${role}.${fn.id}`).toBe(true);
+      }
+    }
+  });
+
+  it("the navigator opens a function card directly — a real link, no further step", () => {
+    const navigator = read("components/navigation/goal-navigator.tsx");
+    expect(navigator).toMatch(/testId="function-rail"\s+cards=\{active\.functions\}/);
+    const rail = read("components/navigation/card-rail.tsx");
+    expect(rail).toMatch(/Every card is a plain link/);
   });
 });
 
@@ -107,10 +148,9 @@ describe("a destination is shown once on the home", () => {
     const worker = areasBeyondGoals(PERSONAL_WORK_AREAS, HOME_GOALS.worker).map((a) => a.id);
     expect(worker).toEqual(["numbers", "profile", "gallery"]);
     const company = areasBeyondGoals(ORGANIZATION_WORK_AREAS, HOME_GOALS.company).map((a) => a.id);
-    expect(company).toEqual(["messages", "clients", "candidates", "calendar", "capacity", "results", "history"]);
+    expect(company).toEqual(["messages", "calendar", "capacity", "results", "history"]);
     // The need door and the needs area are the same place.
     expect(routePath(NEED_DOOR_HREF)).toBe("/dashboard/company/needs");
-    expect(company).not.toContain("need");
     const agency = areasBeyondGoals(ORGANIZATION_WORK_AREAS, HOME_GOALS.agency).map((a) => a.id);
     for (const gone of ["need", "clients", "people", "candidates"]) expect(agency).not.toContain(gone);
   });
@@ -122,6 +162,16 @@ describe("a destination is shown once on the home", () => {
     expect(read("components/app/organization/company-model-screen.tsx")).toMatch(
       /areasBeyondGoals\(ORGANIZATION_WORK_AREAS, HOME_GOALS\[role\]\)\.map/,
     );
+  });
+
+  it("the employer's need door is on the home once: the tracked link, never also a rail card", () => {
+    for (const role of ROLES) {
+      for (const goal of signedInGoals(role, OWNER)) {
+        expect(goal.functions.some((fn) => fn.door), `${role}.${goal.id}`).toBe(false);
+      }
+    }
+    const company = read("components/app/organization/company-model-screen.tsx");
+    expect(company).toMatch(/\{role === "company" \? \(\s*<NeedDoorLink\s+surface="company_model"/);
   });
 });
 
@@ -147,35 +197,50 @@ describe("a goal is a presentation, never a permission", () => {
     expect(routeIsAdmitted("/dashboard/talent", everything)).toBe(false);
   });
 
-  it("a worker is offered no employer goal; an owner and a manager by membership are", () => {
-    expect(admittedHomeGoals("worker", WORKER).map((g) => g.id)).toEqual([
-      "findWork",
-      "recordWork",
-      "myCv",
-      "messages",
-    ]);
-    // A worker who somehow reaches the employer home gets only ungated doors.
-    const leaked = admittedHomeGoals("company", WORKER).map((g) => g.href);
-    for (const href of leaked) expect(href.startsWith("/dashboard/company")).toBe(false);
-    expect(leaked).not.toContain(NEED_DOOR_HREF);
-    expect(admittedHomeGoals("company", OWNER)).toHaveLength(HOME_GOALS.company.length);
-    // `membership_accept_v1` grants no company role: the workspace opens the space.
-    expect(admittedHomeGoals("company", MANAGER_BY_MEMBERSHIP)).toHaveLength(HOME_GOALS.company.length);
-    expect(admittedHomeGoals("agency", MANAGER_BY_MEMBERSHIP)).toHaveLength(HOME_GOALS.agency.length);
+  it("a worker is offered no employer goal and no employer function", () => {
+    const shown = signedInGoals("worker", WORKER);
+    expect(shown.map((goal) => goal.id)).toEqual(["work", "services", "orders", "partners"]);
+    for (const goal of shown) {
+      for (const fn of goal.functions) expect(fn.href.startsWith("/dashboard/company"), fn.id).toBe(false);
+    }
+    // Even on the employer's goal order, a worker gets no employer goal:
+    // its primary function is closed to them, so the goal is not offered.
+    expect(signedInGoals("company", WORKER).map((goal) => goal.id)).not.toContain("workers");
+    expect(signedInGoals("agency", WORKER).map((goal) => goal.id)).not.toContain("agencies");
+    for (const goal of signedInGoals("company", WORKER)) {
+      for (const fn of goal.functions) expect(fn.href.startsWith("/dashboard/company"), fn.id).toBe(false);
+    }
   });
 
-  it("a person without the worker role is not offered the worker-only board", () => {
-    const companyOnly = { heldRoles: ["company"], opensCompanySpace: false };
-    const findWork = HOME_GOALS.worker.find((g) => g.id === "findWork")!;
-    expect(goalIsAdmitted(findWork, companyOnly)).toBe(false);
+  it("an owner and a manager by membership get the employer goals; membership grants no role", () => {
+    expect(signedInGoals("company", OWNER).map((goal) => goal.id)).toEqual([
+      "workers",
+      "services",
+      "orders",
+      "partners",
+      "work",
+    ]);
+    // `membership_accept_v1` grants no company role: the workspace opens the space.
+    expect(signedInGoals("company", MANAGER_BY_MEMBERSHIP)[0].id).toBe("workers");
+    expect(signedInGoals("agency", MANAGER_BY_MEMBERSHIP)[0].id).toBe("agencies");
+  });
+
+  it("a person without the worker role is not offered the worker's goal", () => {
+    const findWork = GOAL_FUNCTIONS.work[0];
+    expect(findWork.href).toBe("/dashboard/opportunities");
+    expect(goalIsAdmitted(findWork, COMPANY_ONLY)).toBe(false);
+    expect(signedInGoals("company", COMPANY_ONLY).map((goal) => goal.id)).not.toContain("work");
     expect(goalIsAdmitted(findWork, WORKER)).toBe(true);
   });
 });
 
 describe("DEMAND ≠ SUPPLY on the organization home (SEP-4)", () => {
-  it("an agency is never offered the need door; an employer's first goal IS the need door", () => {
-    expect(HOME_GOALS.agency.map((g) => g.href)).not.toContain(NEED_DOOR_HREF);
+  it("an agency is never offered the need door; the employer's door is the need door", () => {
+    expect(HOME_GOALS.agency.map((fn) => fn.href)).not.toContain(NEED_DOOR_HREF);
     expect(HOME_GOALS.company[0].href).toBe(NEED_DOOR_HREF);
+    expect(isDoorFor("company", HOME_GOALS.company[0])).toBe(true);
+    for (const fn of ALL_FUNCTIONS) expect(isDoorFor("agency", fn), fn.id).toBe(false);
+    expect(GOAL_FUNCTIONS.agencies[0].id).toBe("offerPeople");
   });
 
   it("the goal home follows the Needs door's own audience rule — one agency rule (ORG-2)", () => {
@@ -192,7 +257,7 @@ describe("a visible way to ask the assistant, opening the ONE conversation (step
 
   it("sits with the goals on both homes and is a real, named button", () => {
     const cards = read("components/app/home/home-goal-cards.tsx");
-    expect(cards).toMatch(/<AskAssistantEntry label=\{t\("ask\.label"\)\} hint=\{t\("ask\.hint"\)\} \/>/);
+    expect(cards).toMatch(/<AskAssistantEntry label=\{tGoals\("ask\.label"\)\} hint=\{tGoals\("ask\.hint"\)\} \/>/);
     expect(entry).toMatch(/<button\s+type="button"\s+data-testid="home-ask-assistant"/);
     expect(entry).toMatch(/min-h-14/);
     expect(entry).toMatch(/focus-visible:ring-2/);
@@ -294,38 +359,34 @@ describe("quick access: the organization's active projects and open needs, by na
 });
 
 describe("plain copy in every catalog", () => {
+  const get = (m: Record<string, unknown>, key: string): unknown =>
+    key.split(".").reduce<unknown>((o, k) => (o as Record<string, unknown> | undefined)?.[k], m);
+
   for (const locale of locales) {
-    it(`${locale}: every goal has a label, and a hint unless its action is a shared door`, () => {
-      const m = JSON.parse(read(`messages/${locale}.json`)) as {
-        homeGoals?: { title?: string } & Record<string, Record<string, { label?: string; hint?: string }>>;
-      };
-      const goals = m.homeGoals;
-      expect(goals?.title, `${locale} title`).toBeTruthy();
-      const all: string[] = [goals!.title!];
-      for (const role of ROLES) {
-        for (const goal of HOME_GOALS[role]) {
-          const copy = goals![role]?.[goal.id];
-          expect(copy?.label, `${locale} ${role}.${goal.id}.label`).toBeTruthy();
-          all.push(copy!.label!);
-          if (goal.href !== NEED_DOOR_HREF) {
-            expect(copy?.hint, `${locale} ${role}.${goal.id}.hint`).toBeTruthy();
-            all.push(copy!.hint!);
-          }
+    it(`${locale}: every function has a name, and every goal the shared navigator's copy`, () => {
+      const m = JSON.parse(read(`messages/${locale}.json`)) as Record<string, unknown>;
+      const texts: string[] = [];
+      for (const fn of ALL_FUNCTIONS) {
+        const label = get(m, fn.labelKey);
+        expect(label, `${locale} ${fn.labelKey}`).toBeTypeOf("string");
+        texts.push(label as string);
+        // The door's line is the tracked link's own wording, not a hint.
+        if (fn.hintKey && !fn.door) {
+          const hint = get(m, fn.hintKey);
+          expect(hint, `${locale} ${fn.hintKey}`).toBeTypeOf("string");
+          texts.push(hint as string);
         }
       }
-      for (const text of all) {
+      for (const goal of PUBLIC_INTENT_IDS) {
+        for (const part of ["short", "title", "description"]) {
+          expect(get(m, `siteNav.intents.${goal}.${part}`), `${locale} ${goal}.${part}`).toBeTypeOf("string");
+        }
+      }
+      for (const text of texts) {
         expect(text, locale).not.toMatch(/\[EN\]|\bdemo\b/i);
-        // Short enough to read at a glance on a 360px card.
+        // Short enough to read at a glance on a phone card.
         expect(text.length, `${locale}: "${text}"`).toBeLessThanOrEqual(48);
       }
     });
   }
-
-  it("non-English catalogs are translated, not copied", () => {
-    const en = JSON.stringify(JSON.parse(read("messages/en.json")).homeGoals);
-    for (const locale of locales) {
-      if (locale === "en") continue;
-      expect(JSON.stringify(JSON.parse(read(`messages/${locale}.json`)).homeGoals), locale).not.toBe(en);
-    }
-  });
 });

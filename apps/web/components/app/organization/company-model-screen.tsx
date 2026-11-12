@@ -7,7 +7,7 @@ import { NeedDoorLink } from "@/components/app/need-door-link";
 import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
 import { HOME_GOALS, areasBeyondGoals } from "@/lib/navigation/home-goals";
 import { loadOrganizationGoalRole } from "@/lib/navigation/home-goals-server";
-import { HOME_GOAL_SLOT_LINK, HomeGoalCards } from "@/components/app/home/home-goal-cards";
+import { HomeGoalCards } from "@/components/app/home/home-goal-cards";
 import { HomeQuickAccess } from "@/components/app/home/home-quick-access";
 
 /**
@@ -55,17 +55,19 @@ export async function CompanyModelScreen() {
       {/* What needs the owner first: the real reviewable-entry queue, approved
           right here (honest unknown when unreadable, says why when empty). */}
       <OrganizationApprovalsCard />
-      {/* THE GOALS — one tap to the start of each. The employer's first goal
-          is the ONE need door: the card's action is the shared, tracked link
-          (address, click event and wording are one thing by contract). */}
-      <HomeGoalCards
-        role={role}
-        slots={{
-          findWorkers: (
-            <NeedDoorLink surface="company_model" testId="company-model-primary" className={HOME_GOAL_SLOT_LINK} />
-          ),
-        }}
-      />
+      {/* The employer's ONE need door — the shared, tracked link (address,
+          click event and wording are one thing by contract). An agency is
+          never shown it: its goals open on what it offers (SEP-4). */}
+      {role === "company" ? (
+        <NeedDoorLink
+          surface="company_model"
+          testId="company-model-primary"
+          className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-blue px-5 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
+        />
+      ) : null}
+      {/* THE GOALS — the shared goal navigator, in this role's order, opening
+          the product's own functions. */}
+      <HomeGoalCards role={role} />
       {/* Every other door of the company as the light 3D area switcher — one
           source: ORGANIZATION_WORK_AREAS, minus the doors the goals above
           already offer (a destination is shown once). */}

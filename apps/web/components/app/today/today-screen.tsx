@@ -118,7 +118,7 @@ function TodayScreenPending() {
         <span className="h-9 w-56 animate-pulse rounded bg-ink-700 motion-reduce:animate-none sm:h-10" />
         <span className="h-5 w-40 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
       </div>
-      <HomeGoalCardsPending role="worker" />
+      <HomeGoalCardsPending />
       <div className="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-7 lg:gap-6">
           <HomeRegionPending size="action" />

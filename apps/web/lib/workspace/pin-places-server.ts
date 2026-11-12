@@ -4,7 +4,6 @@ import { getTranslations } from "next-intl/server";
 
 import {
   HOME_GOALS,
-  homeGoalLabelKey,
   routeIsAdmitted,
   routePath,
   type GoalAdmission,
@@ -51,7 +50,7 @@ export async function loadPinPlaces(input: {
 }): Promise<readonly PinPlace[]> {
   if (!input.home) return [];
   const role: HomeGoalRole = input.home === "worker" ? "worker" : await loadOrganizationGoalRole();
-  const [tGoals, tAll] = await Promise.all([getTranslations("homeGoals"), getTranslations()]);
+  const tAll = await getTranslations();
   const out: PinPlace[] = [];
   const seen = new Set<string>();
   const add = (href: string, label: string, onHome: boolean) => {
@@ -61,7 +60,7 @@ export async function loadPinPlaces(input: {
     seen.add(path);
     out.push({ ref, href, label, onHome });
   };
-  for (const goal of HOME_GOALS[role]) add(goal.href, tGoals(homeGoalLabelKey(role, goal)), true);
+  for (const goal of HOME_GOALS[role]) add(goal.href, tAll(goal.labelKey), true);
   for (const area of workAreasFor(input.home === "worker" ? "personal" : "organization")) {
     add(area.href, tAll(area.labelKey), false);
   }
