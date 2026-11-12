@@ -47,9 +47,10 @@ jobs:
         run: |
           set -euo pipefail
           body=$(curl -sS --max-time 30 https://labourmarket.ai/api/health)
-          build=$(printf '%s' "$body" | grep -oE '"build":"[0-9a-f]+"' | cut -d'"' -f4)
+          # The TOP-LEVEL ok: a nested probe can be ok while the whole answer is not.
+          printf '%s' "$body" | jq -e '.ok == true' >/dev/null || { echo "::error::/api/health is not ok"; exit 1; }
+          build=$(printf '%s' "$body" | jq -r '.build // empty')
           [ -n "$build" ] || { echo "::error::/api/health did not name a build"; exit 1; }
-          printf '%s' "$body" | grep -q '"ok":true' || { echo "::error::/api/health is not ok"; exit 1; }
           echo "build=$build" >> "$GITHUB_OUTPUT"
           echo "### Release check — production build \`$build\` ($(date -u +%Y-%m-%dT%H:%MZ))" >> "$GITHUB_STEP_SUMMARY"
 
@@ -115,10 +116,10 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          after=$(curl -sS --max-time 30 https://labourmarket.ai/api/health | grep -oE '"build":"[0-9a-f]+"' | cut -d'"' -f4 || true)
+          after=$(curl -sS --max-time 30 https://labourmarket.ai/api/health | jq -r 'if .ok == true then .build else empty end' || true)
           {
             echo "#### /${{ matrix.locale }} — build \`${{ needs.identity.outputs.build }}\`"
-            if [ "$after" != "${{ needs.identity.outputs.build }}" ]; then echo "**The build changed during the crawl (now \`${after:-unreadable}\`): do not cite this run.**"; fi
+            if [ "$after" != "${{ needs.identity.outputs.build }}" ]; then echo "**The build changed during the crawl (now \`${after:-unreadable or not ok}\`): do not cite this run.**"; fi
             echo '```'
             if [ -f crawl.log ]; then sed -n '/^pages crawled/,$p' crawl.log | head -150; else echo "the crawl produced no log"; fi
             echo '```'
