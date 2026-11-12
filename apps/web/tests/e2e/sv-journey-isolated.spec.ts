@@ -59,7 +59,7 @@ async function expectSwedish(page: Page): Promise<void> {
   // Any such token on the page, other than a host name, is an unresolved key.
   // Segments of 3+ letters, so Swedish abbreviations (fr.o.m., t.o.m., o.s.v.) do not count.
   const keyLike = (text.match(/\b[a-zA-Z][a-zA-Z0-9]{2,}(?:\.[a-zA-Z][a-zA-Z0-9_]{2,}){2,}\b/g) ?? []).filter(
-    (token) => !/labourmarket|\.(?:ai|com|se|eu|org|net|lt)$/i.test(token),
+    (token) => !token.toLowerCase().includes("labourmarket") && !/\.(?:ai|com|se|eu|org|net|lt)$/i.test(token),
   );
   expect(keyLike, "no unresolved message key on the page").toEqual([]);
 }
