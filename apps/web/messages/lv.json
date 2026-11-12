@@ -8044,6 +8044,15 @@
       "outside": "Nav komandā"
     },
     "addSearch": "Meklēt cilvēkus",
-    "addSearchNone": "Neviens neatbilst."
+    "addSearchNone": "Neviens neatbilst.",
+    "removeMember": {
+      "label": "Noņemt",
+      "question": "Noņemt {name} no šīs komandas? Darba vēsture paliek. Ja komanda strādā projektā, šis cilvēks tajā caur komandu vairs nepiedalās.",
+      "confirm": "Jā, noņemt",
+      "cancel": "Atcelt",
+      "done": "Noņemts no komandas.",
+      "notAllowed": "Šo dalībnieku nevarat noņemt.",
+      "failed": "Neizdevās noņemt. Mēģiniet vēlreiz."
+    }
   }
 }

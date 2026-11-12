@@ -7706,7 +7706,16 @@
       "outside": "Poza zespołem"
     },
     "addSearch": "Szukaj osób",
-    "addSearchNone": "Nikt nie pasuje."
+    "addSearchNone": "Nikt nie pasuje.",
+    "removeMember": {
+      "label": "Usuń",
+      "question": "Usunąć {name} z tego zespołu? Historia pracy zostaje. Jeśli zespół pracuje w projekcie, ta osoba nie będzie już w nim przez zespół.",
+      "confirm": "Tak, usuń",
+      "cancel": "Anuluj",
+      "done": "Usunięto z zespołu.",
+      "notAllowed": "Nie możesz usunąć tego członka.",
+      "failed": "Nie udało się usunąć. Spróbuj ponownie."
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Zapytaj ten zespół o pracę",

@@ -479,3 +479,64 @@ test("T-14. another organization sees neither the team, its people nor the proje
     "team invitations",
   ).toEqual([]);
 });
+
+// ── T-R ─────────────────────────────────────────────────────────────────────
+
+test("T-R. the owner removes ONE member: the team stays, the history stays, the person leaves the project", async () => {
+  expect(teamMembers(), "T-4 left one member").toEqual([s.w1Id]);
+  const co = as(CO);
+  await co.goto(`${BASE}/en/dashboard/company/people`);
+  const card = co.getByTestId(`team-brigade-${s.teamId}`);
+  await expect(card).toBeVisible({ timeout: 30_000 });
+  const [membership] = sql<{ id: string }>(
+    `select id from public.engagement_contexts
+      where organization_id = ${lit(s.teamId)} and profile_id = ${lit(s.w1Id)} and status = 'active'`,
+  );
+  expect(membership?.id, "the member's team membership").toBeTruthy();
+  const row = card.getByTestId(`team-member-${membership!.id}`);
+  await expect(row).toContainText(W1_NAME);
+
+  // Two steps: the first press only asks; cancelling changes nothing.
+  await row.getByTestId(`team-member-remove-${membership!.id}`).click();
+  await expect(row, "the question names the person and what happens").toContainText(W1_NAME);
+  await row.getByRole("button", { name: "Cancel" }).click();
+  expect(teamMembers(), "cancel removes nobody").toEqual([s.w1Id]);
+
+  await row.getByTestId(`team-member-remove-${membership!.id}`).click();
+  await row.getByRole("button", { name: "Yes, remove" }).click();
+  await expect.poll(() => teamMembers(), { message: "the membership is ended", timeout: 30_000 }).toEqual([]);
+
+  // Ended, not deleted: the row and the accepted invitation are history.
+  const after = sql<{ status: string; ended_at: string | null }>(
+    `select status, ended_at from public.engagement_contexts where id = ${lit(membership!.id)}`,
+  );
+  expect(after.length, "the membership row still exists").toBe(1);
+  expect(after[0]!.status).toBe("ended");
+  expect(after[0]!.ended_at).toBeTruthy();
+  expect(teamInvites().find((i) => i.invited_email === W1)?.status, "the invitation history is untouched").toBe(
+    "accepted",
+  );
+  // The team itself and the person's place in the COMPANY are untouched.
+  expect(
+    sql<{ n: number }>(`select count(*)::int as n from public.organizations where id = ${lit(s.teamId)}`)[0]?.n,
+  ).toBe(1);
+  expect(
+    sql<{ n: number }>(
+      `select count(*)::int as n from public.engagement_contexts
+        where profile_id = ${lit(s.w1Id)} and organization_id = ${lit(s.coOrgId)} and status = 'active'`,
+    )[0]?.n,
+    "still the company's employee",
+  ).toBe(1);
+
+  await co.goto(`${BASE}/en/dashboard/company/people`);
+  await expect(co.getByTestId(`team-brigade-${s.teamId}`), "the team is still listed").toBeVisible({ timeout: 30_000 });
+  await expect(co.getByTestId(`team-member-${membership!.id}`)).toHaveCount(0);
+
+  // The team is still on the project; the removed person is no longer there through it.
+  await co.goto(`${BASE}/en/dashboard/projects/${s.projectId}`);
+  const tree = co.getByTestId("stadium-structure");
+  await expect(tree).toBeVisible({ timeout: 30_000 });
+  await expect(tree.getByTestId("stadium-team")).toContainText(TEAM);
+  await expect(tree.getByTestId("stadium-team-member")).toHaveCount(0);
+  await expect(co.getByTestId("stadium-field")).not.toContainText(W1_NAME);
+});

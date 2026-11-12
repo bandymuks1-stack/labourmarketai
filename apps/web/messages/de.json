@@ -7706,7 +7706,16 @@
       "outside": "In keinem Team"
     },
     "addSearch": "Personen suchen",
-    "addSearchNone": "Keine Treffer."
+    "addSearchNone": "Keine Treffer.",
+    "removeMember": {
+      "label": "Entfernen",
+      "question": "{name} aus diesem Team entfernen? Der Arbeitsverlauf bleibt. Ist das Team in einem Projekt, gehört die Person über das Team nicht mehr dazu.",
+      "confirm": "Ja, entfernen",
+      "cancel": "Abbrechen",
+      "done": "Aus dem Team entfernt.",
+      "notAllowed": "Sie können dieses Mitglied nicht entfernen.",
+      "failed": "Entfernen fehlgeschlagen. Bitte erneut versuchen."
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Dieser Kolonne eine Anfrage senden",

@@ -8044,6 +8044,15 @@
       "outside": "Meeskonnata"
     },
     "addSearch": "Otsi inimesi",
-    "addSearchNone": "Vasteid pole."
+    "addSearchNone": "Vasteid pole.",
+    "removeMember": {
+      "label": "Eemalda",
+      "question": "Kas eemaldada {name} sellest meeskonnast? Tööajalugu jääb alles. Kui meeskond on projektis, ei ole inimene seal enam meeskonna kaudu.",
+      "confirm": "Jah, eemalda",
+      "cancel": "Tühista",
+      "done": "Meeskonnast eemaldatud.",
+      "notAllowed": "Te ei saa seda liiget eemaldada.",
+      "failed": "Eemaldamine ebaõnnestus. Proovige uuesti."
+    }
   }
 }

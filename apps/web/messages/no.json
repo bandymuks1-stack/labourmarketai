@@ -8044,6 +8044,15 @@
       "outside": "Ikke i noe team"
     },
     "addSearch": "Søk personer",
-    "addSearchNone": "Ingen treff."
+    "addSearchNone": "Ingen treff.",
+    "removeMember": {
+      "label": "Fjern",
+      "question": "Fjerne {name} fra teamet? Arbeidshistorikken blir stående. Hvis teamet er på et prosjekt, er personen ikke lenger med via teamet.",
+      "confirm": "Ja, fjern",
+      "cancel": "Avbryt",
+      "done": "Fjernet fra teamet.",
+      "notAllowed": "Du kan ikke fjerne dette medlemmet.",
+      "failed": "Kunne ikke fjerne. Prøv igjen."
+    }
   }
 }

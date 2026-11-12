@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Check, Copy } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
+import { InlineConfirm } from "@/components/ui/InlineConfirm";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
@@ -14,6 +15,7 @@ import {
   disbandTeamAction,
   inviteWorkerToTeamAction,
 } from "@/lib/company/team-brigade-actions";
+import { endOrgMembership } from "@/lib/operations/org-membership";
 import type { DisbandedTeam, TeamBrigade } from "@/lib/company/team-brigades";
 import { TeamDetailsForm } from "@/components/app/team-details-form";
 import { TeamEnquiryInbox } from "@/components/app/team-enquiry-inbox";
@@ -144,6 +146,18 @@ export function TeamBrigadesPanel({
     });
   }
 
+  function removeMember(engagementId: string) {
+    setMsg(null);
+    startTransition(async () => {
+      const res = await endOrgMembership(engagementId, null);
+      if (res.ok) setMsg(t("removeMember.done"));
+      else if (res.code === "not_authorized") setMsg(t("removeMember.notAllowed"));
+      else if (res.code === "needs_migration") setMsg(t("outcome.needsMigration"));
+      else setMsg(t("removeMember.failed"));
+      router.refresh();
+    });
+  }
+
   function invite(teamId: string) {
     const workerId = selected[teamId] ?? "";
     if (!workerId) return;
@@ -221,8 +235,12 @@ export function TeamBrigadesPanel({
               ) : (
                 <ul className="flex flex-col gap-0.5">
                   {team.members.map((m) => (
-                    <li key={m.engagementId} className="text-xs text-text-primary">
-                      {m.name}
+                    <li
+                      key={m.engagementId}
+                      className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-primary"
+                      data-testid={`team-member-${m.engagementId}`}
+                    >
+                      <span className="min-w-0 break-words">{m.name}</span>
                       {m.provenance === "invited" && (
                         <span className="ml-1.5 text-meta text-state-success">
                           {t("provenance.invited")}
@@ -233,6 +251,21 @@ export function TeamBrigadesPanel({
                           {t("provenance.direct")}
                         </span>
                       )}
+                      {/* Remove ONE member (the team stays). The same canonical
+                          membership end the organization's member list uses;
+                          the database decides who may. Two steps, in place. */}
+                      <InlineConfirm
+                        label={t("removeMember.label")}
+                        question={t("removeMember.question", { name: m.name })}
+                        confirmLabel={t("removeMember.confirm")}
+                        cancelLabel={t("removeMember.cancel")}
+                        tier="important_write"
+                        touch
+                        disabled={pending}
+                        onConfirm={() => removeMember(m.engagementId)}
+                        className="ml-auto inline-flex min-h-11 items-center rounded-md px-2 text-meta text-text-secondary underline-offset-4 hover:text-text-primary hover:underline sm:min-h-9"
+                        testId={`team-member-remove-${m.engagementId}`}
+                      />
                     </li>
                   ))}
                 </ul>

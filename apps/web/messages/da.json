@@ -8044,6 +8044,15 @@
       "outside": "Ikke på et hold"
     },
     "addSearch": "Søg personer",
-    "addSearchNone": "Ingen matcher."
+    "addSearchNone": "Ingen matcher.",
+    "removeMember": {
+      "label": "Fjern",
+      "question": "Fjern {name} fra holdet? Arbejdshistorikken bliver. Hvis holdet er på et projekt, er personen ikke længere med via holdet.",
+      "confirm": "Ja, fjern",
+      "cancel": "Annuller",
+      "done": "Fjernet fra holdet.",
+      "notAllowed": "Du kan ikke fjerne dette medlem.",
+      "failed": "Kunne ikke fjerne. Prøv igen."
+    }
   }
 }

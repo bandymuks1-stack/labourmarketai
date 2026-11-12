@@ -7706,7 +7706,16 @@
       "outside": "Not in a team"
     },
     "addSearch": "Search people",
-    "addSearchNone": "No one matches."
+    "addSearchNone": "No one matches.",
+    "removeMember": {
+      "label": "Remove",
+      "question": "Remove {name} from this team? Their work history stays. If the team is on a project, they are no longer on it through the team.",
+      "confirm": "Yes, remove",
+      "cancel": "Cancel",
+      "done": "Removed from the team.",
+      "notAllowed": "You cannot remove this member.",
+      "failed": "Could not remove. Try again."
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Ask this team about work",

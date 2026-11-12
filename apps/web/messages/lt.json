@@ -7706,7 +7706,16 @@
       "outside": "Ne komandoje"
     },
     "addSearch": "Ieškoti žmonių",
-    "addSearchNone": "Niekas neatitinka."
+    "addSearchNone": "Niekas neatitinka.",
+    "removeMember": {
+      "label": "Pašalinti",
+      "question": "Pašalinti {name} iš šios komandos? Darbo istorija lieka. Jei komanda dirba projekte, per komandą šis žmogus jame nebedalyvaus.",
+      "confirm": "Taip, pašalinti",
+      "cancel": "Atšaukti",
+      "done": "Pašalinta iš komandos.",
+      "notAllowed": "Šio nario pašalinti negalite.",
+      "failed": "Pašalinti nepavyko. Bandykite dar kartą."
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Pateikti užklausą šiai komandai",
