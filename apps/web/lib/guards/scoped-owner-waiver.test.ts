@@ -612,7 +612,11 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
       3154,
       3171,
       3123,
+      3256,
     ]);
+    // #3256 (2026-11-12): added to the waiver by the coordinator's commit 52cefd01b on the
+    // owner's conditional approval recorded there (not by the PR's author); this pin only
+    // mirrors that list. It does not approve the PR's migration or its merge.
     // #3123 (2026-11-09) on the owner's verbatim approval: "I approve adding ONLY PR 3123 to the existing public-acquisition-route-jobs waiver pullRequests list."
     // #3171 (2026-11-09) on the owner's verbatim approval: "I approve adding ONLY PR 3171 to the existing public-acquisition-route-jobs waiver pullRequests list."
     // #3154 (2026-11-08) on the owner's verbatim approval: "I approve adding ONLY PR 3154 to the existing public-acquisition-route-jobs waiver pullRequests list."
