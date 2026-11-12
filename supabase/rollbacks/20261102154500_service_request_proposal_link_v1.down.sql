@@ -8,6 +8,7 @@ begin;
 
 drop function if exists public.create_proposal_from_service_request_v1(uuid, text, bigint, text, text, date);
 
+drop index if exists public.proposals_one_open_per_service_request;
 drop index if exists public.proposals_service_offering_request_idx;
 
 do $$

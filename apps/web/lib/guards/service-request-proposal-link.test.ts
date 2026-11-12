@@ -53,6 +53,13 @@ describe("service request → proposal link (RED-1)", () => {
     expect(fn).toMatch(/where service_offering_request_id = p_request_id\s+and owner_id = v_uid\s+and status in \('draft','sent','accepted'\)/);
   });
 
+  it("the database itself allows one open proposal per request (status changes included)", () => {
+    expect(up).toMatch(
+      /create unique index if not exists proposals_one_open_per_service_request\s+on public\.proposals \(service_offering_request_id\)\s+where service_offering_request_id is not null\s+and status in \('draft','sent','accepted'\);/,
+    );
+    expect(down).toMatch(/drop index if exists public\.proposals_one_open_per_service_request;/);
+  });
+
   it("is callable by signed-in users only", () => {
     expect(up).toMatch(/revoke all on function public\.create_proposal_from_service_request_v1\(uuid, text, bigint, text, text, date\)\s+from public, anon;/);
     expect(up).toMatch(/grant execute on function public\.create_proposal_from_service_request_v1\(uuid, text, bigint, text, text, date\)\s+to authenticated;/);

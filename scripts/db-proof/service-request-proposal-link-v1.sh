@@ -97,6 +97,9 @@ as $PR "select public.set_proposal_status_v1('$ID1','withdrawn');" >/dev/null
 check "after withdrawal a NEW draft may be made" "ok" "$(mk $PR $RA)"
 check "… and it is a different row" "2" "$(q "select count(*) from public.proposals where service_offering_request_id='$RA';")"
 LAST="$(q "select id from public.proposals where service_offering_request_id='$RA' and status='draft';")"
+check "reopening the withdrawn proposal next to its replacement is REFUSED (unique index)" "duplicate key" "$(as $PR "select public.set_proposal_status_v1('$ID1','sent');" | grep -o 'duplicate key')"
+check "… so there is still exactly one open proposal for the request" "1" "$(q "select count(*) from public.proposals where service_offering_request_id='$RA' and status in ('draft','sent','accepted');")"
+check "unlinked proposals are not constrained (two open plain proposals)" "t" "$(as $PR "select public.create_proposal_v1('Plain two', 1) is not null;")"
 CT="$(as $PR "select public.create_contract_v1('Contract', 150000, '$LAST');")"
 check "a contract made from the proposal reaches the request through proposal_id" "$RA" "$(q "select p.service_offering_request_id from public.contracts c join public.proposals p on p.id=c.proposal_id where c.id='$CT';")"
 reset_state

@@ -39,6 +39,7 @@
 -- (drops the function, the index, then the column — the column drop refuses
 -- while any proposal carries a link, so no linked record is silently erased).
 --   drop function if exists public.create_proposal_from_service_request_v1(uuid, text, bigint, text, text, date);
+--   drop index if exists public.proposals_one_open_per_service_request;
 --   drop index if exists public.proposals_service_offering_request_idx;
 --   alter table public.proposals drop column if exists service_offering_request_id;
 -- Apply via Supabase MCP apply_migration only.
@@ -52,6 +53,15 @@ alter table public.proposals
 create index if not exists proposals_service_offering_request_idx
   on public.proposals (service_offering_request_id)
   where service_offering_request_id is not null;
+
+-- One OPEN proposal per request, enforced by the database on every path —
+-- including set_proposal_status_v1 (unchanged), which could otherwise reopen a
+-- withdrawn/rejected proposal next to its replacement. The column is new, so
+-- no existing row is constrained.
+create unique index if not exists proposals_one_open_per_service_request
+  on public.proposals (service_offering_request_id)
+  where service_offering_request_id is not null
+    and status in ('draft','sent','accepted');
 
 create or replace function public.create_proposal_from_service_request_v1(
   p_request_id     uuid,
