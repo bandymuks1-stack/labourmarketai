@@ -113,7 +113,14 @@ export function OffersScreen() {
         answer.kind === "booking"
           ? { bookingId: answer.offer.id, decision: answer.decision }
           : // A union input travels wrapped as { input } (MCP needs an object).
-            { input: { ...answer.offer.ref, decision: "accepted" } };
+            // The review notice rides along exactly when it was shown.
+            {
+              input: {
+                ...answer.offer.ref,
+                decision: "accepted",
+                ...(showsStaffReviewNotice(answer.offer) ? { reviewNotice: REVIEW_NOTICE_VERSION } : {}),
+              },
+            };
       const result = await capability<RespondPrepareData>({
         name: `${capabilityOf(answer)}.prepare`,
         args,
@@ -305,6 +312,25 @@ function BookingSummary({ offer }: { offer: BookingOffer }) {
   );
 }
 
+/**
+ * THE STAFF REVIEW NOTICE (owner decision 1, web `lib/operations/auto-review-model.ts`).
+ * Accepting a staff invitation of a named organization means a manager of it
+ * may read and sign off the work the person records for them; the web shows
+ * that sentence before the accept and sends its version with the answer, which
+ * is what records the notice and turns on the review. Mirrored here (the phone
+ * cannot import the web module); `apps/web/lib/guards/mobile-offers-review-notice.test.ts`
+ * pins these two constants to the web's own.
+ */
+const REVIEW_NOTICE_VERSION = "staff-review-notice-v1";
+const STAFF_INVITATION_TYPES: readonly string[] = ["join_organization", "join_team", "join_as_employee"];
+
+function showsStaffReviewNotice(offer: InvitationOffer): boolean {
+  if (offer.ref.source !== "invitation") return false;
+  if (!offer.organizationName?.trim()) return false;
+  if (!offer.invitationType || !STAFF_INVITATION_TYPES.includes(offer.invitationType)) return false;
+  return offer.relationshipSlug == null || offer.relationshipSlug === "employee";
+}
+
 /** The web's twelve relationship types (relationship-types.json). An unknown
  *  slug shows nothing rather than a raw code. */
 const RELATIONSHIP_SLUGS = new Set([
@@ -328,6 +354,9 @@ function InvitationSummary({ offer }: { offer: InvitationOffer }) {
         <Body>
           {t("offers.as")}: {relationship}
         </Body>
+      ) : null}
+      {showsStaffReviewNotice(offer) ? (
+        <Body muted>{t("offers.reviewNotice").replace("{organization}", offer.organizationName ?? "")}</Body>
       ) : null}
       {offer.projectTitle !== null ? <Body muted>{offer.projectTitle}</Body> : null}
       {offer.inviterName !== null && offer.organizationName !== null ? (
