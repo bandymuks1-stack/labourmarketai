@@ -14534,6 +14534,13 @@
           "this_week": "deze week",
           "next_month": "volgende maand"
         },
+        "ask": {
+          "location": "Waar (stad of land)?",
+          "window": "Wanneer — welke week of maand?",
+          "quantity": "Hoeveel is het?",
+          "headcount": "Hoeveel mensen zijn er nodig?",
+          "team_size": "Hoeveel ploegen en hoeveel mensen per ploeg?"
+        },
         "unclear": "Ik weet niet zeker of je iets aanbiedt of iets zoekt. Schrijf wat je hebt of wat je nodig hebt.",
         "goodsChannelGated": "Je kunt dit op het advertentiebord plaatsen onder Goederen — mensen die het bord bekijken zien het daar. Er wordt niets opgeslagen tot je het publiceert.",
         "chipListings": "Advertenties openen",
@@ -20557,10 +20564,6 @@
     }
   },
   "siteNav": {
-    "ask": {
-      "placeholder": "Schrijf wat u nodig hebt",
-      "submit": "Vragen"
-    },
     "signUp": "Registreren",
     "trigger": "Hoofdkeuzes",
     "account": "Na inloggen",
