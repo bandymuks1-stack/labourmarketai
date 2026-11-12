@@ -138,6 +138,13 @@ describe("desktop and mobile render ONE list", () => {
     expect(mega).toMatch(/\?\.focus\(\)/);
   });
 
+  it("ONE navigation: the older links sit behind the bar's More, not in a second row", () => {
+    expect(nav).not.toMatch(/<nav className="hidden[^"]*:flex/);
+    expect(nav).toMatch(/more=\{\{\s*label: tIntent\("more"\),\s*links: links\.map\(/);
+    expect(mega).toMatch(/data-testid="intent-toggle-more"/);
+    expect(mega).toMatch(/data-testid="intent-more-links"/);
+  });
+
   it("the assistant entry is the existing conversation home, on both menus", () => {
     expect(nav).toMatch(/href: ASSISTANT_HREF, label: tIntent\("assistant"\)/);
     expect(ASSISTANT_HREF).toBe(CANONICAL_HOME);
@@ -211,6 +218,7 @@ describe("labels exist and are translated in all 11 locales", () => {
     trigger: string;
     account: string;
     assistant: string;
+    more: string;
     intents: Record<string, { title: string; short: string; description: string }>;
     links: Record<string, string>;
   };
@@ -223,6 +231,7 @@ describe("labels exist and are translated in all 11 locales", () => {
       ["trigger", s.trigger],
       ["account", s.account],
       ["assistant", s.assistant],
+      ["more", s.more],
     ];
     for (const id of PUBLIC_INTENT_IDS) {
       out.push([`intents.${id}.title`, s.intents?.[id]?.title]);

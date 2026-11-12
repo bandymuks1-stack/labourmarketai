@@ -405,12 +405,13 @@ describe("§22 the first screen says what this is, then offers one next step", (
     expect(focus.match(/<LandingIntentChoice\b/g) ?? []).toHaveLength(1);
     const body = focus.slice(bodyStart);
     expect(body).not.toContain("<LivingWorkerHero");
-    for (const branch of [body.indexOf('<section className="flex min-w-0 flex-col gap-6">')]) {
+    for (const branch of [body.indexOf('<section className="flex min-w-0 flex-col gap-5">')]) {
       expect(branch).toBeGreaterThan(-1);
       const from = body.slice(branch);
-      expect(from.indexOf("{promise}")).toBeGreaterThan(-1);
-      expect(from.indexOf("{promise}")).toBeLessThan(from.indexOf("<LandingIntentChoice"));
-      expect(from.indexOf("<LandingIntentChoice")).toBeLessThan(from.indexOf("<PublicEntry"));
+      // The choice (with the page's h1) first, then the one line, then the entry.
+      expect(from.indexOf("<LandingIntentChoice")).toBeGreaterThan(-1);
+      expect(from.indexOf("<LandingIntentChoice")).toBeLessThan(from.indexOf("{promise}"));
+      expect(from.indexOf("{promise}")).toBeLessThan(from.indexOf("<PublicEntry"));
     }
     expect(focus.indexOf("<LandingClosingBand")).toBeGreaterThan(focus.indexOf("<TrustBand"));
     // And still no per-request read: the landing stays static.

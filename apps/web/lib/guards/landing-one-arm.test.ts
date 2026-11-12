@@ -155,9 +155,10 @@ describe("the landing has one arm", () => {
     expect(focus).toContain("<MarketingFunnelBeacon />");
     expect(focus).toContain('id="main-content"');
     expect(focus).toContain("MARKETING_CLIENT_MESSAGE_ROOTS");
-    // The historical wrapper + the #how-it-works anchor it carried.
+    // The historical wrapper + the #how-it-works anchor it carried. Its top
+    // padding shrank on phones on 2026-11-12 (owner fix list 2026-11-12 (one navigation; whole logo; Sign in visible on a phone; shorter first screen)).
     expect(focus).toContain(
-      'className="mx-auto max-w-container px-6 py-14 sm:px-12"',
+      'className="mx-auto max-w-container px-4 pb-14 pt-5 sm:px-12 sm:pt-10"',
     );
     expect(focus).toContain('id="how-it-works"');
     expect(focus).toContain("provenance: 7179882");

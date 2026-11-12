@@ -112,37 +112,43 @@ export async function SiteNav() {
   // ONE definition, rendered in exactly one place at any given width: in the
   // header from `sm` up, inside the disclosure below it. Sharing the fragment
   // is what keeps the two mounts from drifting into different destinations.
-  const authCtas = (
-    <NavAuthCtas
-      guest={
-        <>
-          <AuthCtaLink
-            relPath={`/${locale}/auth/login`}
-            className="flex min-h-11 items-center text-sm text-text-secondary transition-colors hover:text-text-primary sm:min-h-0"
-          >
-            {t("login")}
-          </AuthCtaLink>
-          <AuthCtaLink
-            relPath={`/${locale}/auth/signup`}
-            className={buttonLinkClassName("primary", "sm")}
-          >
-            {t("startNow")}
-          </AuthCtaLink>
-        </>
-      }
-      member={
-        <AuthCtaLink
-          relPath={`/${locale}/dashboard`}
-          className={buttonLinkClassName("primary", "sm")}
-        >
-          {tSpace("overview")}
-        </AuthCtaLink>
-      }
-    />
+  // Each destination is defined ONCE and placed where the width allows:
+  //   every width  — Sign in (or, signed in, "My space") in the header row;
+  //   from `sm`    — Sign up beside it;
+  //   below `sm`   — Sign up is the first thing in the menu.
+  // Owner fix list 2026-11-12: on a phone neither was visible in the header.
+  const loginCta = (
+    <AuthCtaLink
+      relPath={`/${locale}/auth/login`}
+      className="flex min-h-11 items-center whitespace-nowrap rounded-control px-1 text-sm font-medium text-text-primary transition-colors hover:text-brand-blue sm:px-0 sm:font-normal sm:text-text-secondary sm:hover:text-text-primary"
+    >
+      {t("login")}
+    </AuthCtaLink>
   );
+  const signupCta = (
+    <AuthCtaLink
+      relPath={`/${locale}/auth/signup`}
+      className={buttonLinkClassName("primary", "sm")}
+    >
+      {t("startNow")}
+    </AuthCtaLink>
+  );
+  const memberCta = (
+    <AuthCtaLink
+      relPath={`/${locale}/dashboard`}
+      className={buttonLinkClassName("primary", "sm")}
+    >
+      {tSpace("overview")}
+    </AuthCtaLink>
+  );
+  const themeLabels = { toDark: t("themeToDark"), toLight: t("themeToLight") };
 
   return (
     <header className="relative z-20 border-b border-ink-600/60">
+      {/* ONE NAVIGATION (owner fix list 2026-11-12): the row below carries the
+          brand and the account controls only; the six goals are the one
+          navigation bar, and the older links (jobs, market, how it works,
+          pricing, about) sit behind its "More" and in the footer. */}
       {/* Beta foundation audit M1 (measured 2026-08-08): at 320px this row's
           contents were 545px wide, and `html { overflow-x: hidden }` CLIPPED
           the excess rather than scrolling it — so the theme toggle and the
@@ -150,10 +156,10 @@ export async function SiteNav() {
           added anything. The mobile gap/padding are tightened here (same
           pattern the dashboard header already uses) and the auth CTAs move
           into the disclosure below `sm`, which is what buys the room. */}
-      <div className="mx-auto flex max-w-container items-center gap-2 px-4 py-4 sm:gap-6 sm:px-12">
+      <div className="mx-auto flex max-w-container items-center gap-2 px-3 py-3 sm:gap-6 sm:px-12 sm:py-4">
         <Link
           href="/"
-          className="flex min-w-0 shrink items-center gap-1.5 font-display text-base font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
+          className="flex shrink-0 items-center gap-1.5 font-display text-sm font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
         >
           {/* The mark is decorative here — the wordmark beside it already
               names the product, so announcing both would read it twice. */}
@@ -164,42 +170,39 @@ export async function SiteNav() {
               room from 360px up (124/124px measured); under 360px there is no
               room beside the three header controls, so only the mark shows and
               the name stays for screen readers. */}
-          <span className="truncate max-[359px]:sr-only">
+          {/* THE NAME IS NEVER CUT (owner fix list 2026-11-12): the wordmark
+              is whole at every width from 360px — it does not shrink or
+              truncate; the controls beside it were made to fit instead (theme
+              toggle in the menu below `sm`, a compact language chip). Under
+              360px only the mark shows and the name stays for screen readers. */}
+          <span className="whitespace-nowrap max-[359px]:sr-only">
             LabourMarket<span className="text-gradient-accent">.ai</span>
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 lg:flex">
-          {links.map((l) => (
-            <Link
-              key={l.key}
-              href={l.href}
-              className="text-sm text-text-secondary transition-colors hover:text-text-primary"
-            >
-              {t(l.key)}
-            </Link>
-          ))}
-        </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3 md:gap-4">
           {/* Auth CTAs pin to the app origin on marketing hosts so OAuth's
-              PKCE round-trip stays same-origin (see AuthCtaLink).
-
-              Below `sm` they render inside the disclosure instead (same two
-              links, one tap away) — see `authCtas` and the measurement note
-              on the row above. Keeping them here at every width is what made
-              the header 545px wide on a 320px screen. */}
-          <div className="hidden items-center gap-3 sm:flex sm:gap-4">{authCtas}</div>
-          {/* F1: the public header must always offer the theme toggle —
-              visible on every viewport, never folded into the mobile menu. */}
-          <ThemeToggleIcon
-            labels={{ toDark: t("themeToDark"), toLight: t("themeToLight") }}
-          />
-          {/* Pre-Advertising Launch Readiness v1: the language switcher must
-              be reachable on mobile too. A LT/PL/RU worker arriving from a paid
-              ad on the wrong locale had no way to change language below 640px.
-              Stays visible on every viewport, never folded into the mobile
-              menu. */}
+              PKCE round-trip stays same-origin (see AuthCtaLink). Sign in is
+              in this row at every width; Sign up joins it from `sm` and is the
+              first thing in the menu below that. */}
+          <div className="flex items-center gap-2 sm:gap-4" data-testid="header-auth">
+            <NavAuthCtas
+              guest={
+                <>
+                  {loginCta}
+                  <span className="hidden sm:inline-flex">{signupCta}</span>
+                </>
+              }
+              member={memberCta}
+            />
+          </div>
+          {/* The theme toggle is in the header from `sm` up and inside the
+              menu below it (owner fix list 2026-11-12: on a 360px phone it
+              took the slot Sign in needs). Still one tap away at every width. */}
+          <span className="hidden sm:inline-flex">
+            <ThemeToggleIcon labels={themeLabels} />
+          </span>
           <LocaleSwitcher className="flex" compactBelowSm />
           {/* Beta foundation audit M1: below lg the primary links above are
               display:none, which used to leave a phone visitor with NO path to
@@ -231,9 +234,10 @@ export async function SiteNav() {
               <div
                 key="mobile-nav-auth"
                 data-testid="mobile-nav-auth"
-                className="mt-1.5 flex flex-col items-start gap-2 border-t border-ink-600 px-3 pb-1 pt-3 sm:hidden"
+                className="mb-1.5 flex flex-wrap items-center justify-between gap-2 border-b border-ink-600 px-3 pb-3 pt-1.5 sm:hidden"
               >
-                {authCtas}
+                <NavAuthCtas guest={signupCta} member={null} />
+                <ThemeToggleIcon labels={themeLabels} testId="menu-theme-toggle" />
               </div>
             }
           />
@@ -250,6 +254,10 @@ export async function SiteNav() {
         navLabel={tIntent("trigger")}
         accountLabel={tIntent("account")}
         assistant={assistant}
+        more={{
+          label: tIntent("more"),
+          links: links.map((l) => ({ key: l.key, href: l.href, label: t(l.key) })),
+        }}
       />
     </header>
   );

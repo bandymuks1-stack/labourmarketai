@@ -23,8 +23,9 @@ import { join } from "node:path";
  * The first screen is the choice (owner instruction 2026-11-12: "Sumažink pagrindinio
  * puslapio sudėtingumą. Pašalink nereikalingus tekstus, abstrakčius šūkius ir
  * pasikartojančius blokus. Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori
- * atlikti."): the goal navigator under the owner's headline (now at a reading size);
- * the second paragraph, the hero's "Start now" pair, the link down to the request doors
+ * atlikti."): the goal navigator is first and carries the page's h1 (the question);
+ * the owner's headline is the one supporting line under it; the brand eyebrow, the
+ * second paragraph, the hero's "Start now" pair, the link down to the request doors
  * and the three abstract cards left the first screen. EXACTLY ONE hash moved:
  * focus-landing.tsx. No copy changed and no namespace moved (the labels are `siteNav`).
  *

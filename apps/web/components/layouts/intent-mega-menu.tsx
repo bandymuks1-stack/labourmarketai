@@ -34,6 +34,7 @@ export function IntentMegaMenu({
   navLabel,
   accountLabel,
   assistant,
+  more,
   className,
 }: {
   intents: readonly RenderedIntent[];
@@ -43,6 +44,11 @@ export function IntentMegaMenu({
   accountLabel: string;
   /** The "ask the assistant" entry — the existing conversation home. */
   assistant?: { readonly href: string; readonly label: string };
+  /** The secondary links (jobs, pricing, about …) behind one "More". */
+  more?: {
+    readonly label: string;
+    readonly links: ReadonlyArray<{ readonly key: string; readonly href: string; readonly label: string }>;
+  };
   className?: string;
 }) {
   const [active, setActive] = useState<string | null>(null);
@@ -119,6 +125,28 @@ export function IntentMegaMenu({
               </li>
             );
           })}
+          {more && more.links.length > 0 && (
+            <li>
+              <button
+                type="button"
+                aria-expanded={active === "more"}
+                aria-controls={panelId}
+                data-testid="intent-toggle-more"
+                onClick={(e) => {
+                  openerRef.current = e.currentTarget;
+                  setActive(active === "more" ? null : "more");
+                }}
+                className={cn(
+                  "inline-flex min-h-11 items-center rounded-control px-2 text-sm font-medium transition-colors motion-reduce:transition-none xl:px-3",
+                  active === "more"
+                    ? "bg-ink-800 text-text-primary"
+                    : "text-text-muted hover:bg-ink-800/60 hover:text-text-primary",
+                )}
+              >
+                <span className="whitespace-nowrap">{more.label}</span>
+              </button>
+            </li>
+          )}
         </ul>
         {assistant && (
           <Link
@@ -194,6 +222,25 @@ export function IntentMegaMenu({
               );
             })}
           </ul>
+          {more && more.links.length > 0 && (
+            <ul
+              data-testid="intent-more-links"
+              data-intent-column="more"
+              className="mx-auto flex max-w-container flex-wrap gap-x-2 border-t border-ink-600/70 px-12 py-3"
+            >
+              {more.links.map((link) => (
+                <li key={link.key}>
+                  <Link
+                    href={link.href}
+                    onClick={() => setActive(null)}
+                    className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary motion-reduce:transition-none"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </nav>

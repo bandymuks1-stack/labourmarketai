@@ -41,13 +41,13 @@ const server = read("components/navigation/goal-navigation.tsx");
 const rail = read("components/navigation/card-rail.tsx");
 
 describe("the choice is the first screen", () => {
-  it("mounts once, under the headline and before the sentence entry", () => {
+  it("mounts once, first, carrying the page's h1; the owner's line and the entry follow", () => {
     expect(landing.match(/<LandingIntentChoice \/>/g)).toHaveLength(1);
-    const headline = landing.indexOf('{tHero("headline")}');
     const body = landing.slice(landing.lastIndexOf("<NextIntlClientProvider"));
-    expect(headline).toBeGreaterThan(-1);
-    expect(body.indexOf("{promise}")).toBeLessThan(body.indexOf("<LandingIntentChoice />"));
-    expect(body.indexOf("<LandingIntentChoice />")).toBeLessThan(body.indexOf("<PublicEntry"));
+    expect(landing).toContain('{tHero("headline")}');
+    expect(landing).not.toMatch(/<h1\b/);
+    expect(body.indexOf("<LandingIntentChoice />")).toBeLessThan(body.indexOf("{promise}"));
+    expect(body.indexOf("{promise}")).toBeLessThan(body.indexOf("<PublicEntry"));
   });
 
   it("the sentence entry and the request doors stay", () => {
@@ -56,7 +56,7 @@ describe("the choice is the first screen", () => {
   });
 
   it("the home mounts the one navigator; no second goal view or page exists", () => {
-    expect(choice).toMatch(/<GoalNavigation \/>/);
+    expect(choice).toMatch(/<GoalNavigation headingLevel="h1" \/>/);
     expect(existsSync(join(APP_ROOT, "components/navigation/goal-rail.tsx"))).toBe(false);
     // A new public screen is an owner decision (constitution A-09): the goal
     // state is a fragment of this page, not a route.

@@ -27,7 +27,6 @@ import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing"
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { LandingIntentChoice } from "@/components/marketing/landing-intent-choice";
 import { LandingRequestDoors } from "@/components/marketing/landing-request-doors";
-import { BRAND_NAME } from "@/lib/seo/metadata";
 
 /**
  * FOCUS — the previous production landing, RESTORED.
@@ -96,21 +95,20 @@ export async function FocusLanding({
   // THE FIRST SCREEN IS THE CHOICE (owner instruction 2026-11-12: "Sumažink
   // pagrindinio puslapio sudėtingumą. Pašalink nereikalingus tekstus,
   // abstrakčius šūkius ir pasikartojančius blokus. Pirmame ekrane turi būti
-  // aiškus pasirinkimas, ką žmogus nori atlikti."). One line that says what
-  // the site is — the owner's own headline, at a reading size instead of a
-  // display size — and then the goal navigator. The second paragraph, the
+  // aiškus pasirinkimas, ką žmogus nori atlikti."). The page's h1 IS the
+  // question ("What do you want to do?", in the goal navigator); the owner's
+  // own headline is the one supporting line under the goals, and the brand
+  // eyebrow is gone (the logo is right above). The second paragraph, the
   // hero's "Start now" pair, the link down to the request doors and the three
   // abstract cards left this screen with that instruction; the request doors
   // themselves, the sentence entry and every later section stay.
   const promise = (
-    <>
-      <p className="font-mono text-meta uppercase tracking-label text-brand-blue" data-testid="landing-hero-eyebrow">
-        {BRAND_NAME}
-      </p>
-      <h1 className="mt-2 max-w-3xl font-display text-2xl font-bold leading-tight tracking-tightest text-text-primary sm:text-3xl lg:text-4xl">
-        {tHero("headline")}
-      </h1>
-    </>
+    <p
+      className="max-w-3xl text-sm leading-snug text-text-secondary sm:text-base"
+      data-testid="landing-hero-line"
+    >
+      {tHero("headline")}
+    </p>
   );
 
   return (
@@ -132,7 +130,7 @@ export async function FocusLanding({
         <SiteNav />
         <main id="main-content" className="relative">
           {/* ── The restored landing body, verbatim from 7179882 ────────── */}
-          <div className="mx-auto max-w-container px-6 py-14 sm:px-12">
+          <div className="mx-auto max-w-container px-4 pb-14 pt-5 sm:px-12 sm:pt-10">
             {/* ── VALUE FIRST (owner directive 2026-09-23, landing §22 "fix
                    the story, not CSS"). The h1 says WHAT this is and WHO it
                    is for; the sub says what a person accomplishes here and
@@ -165,11 +163,11 @@ export async function FocusLanding({
                   now the phone order — promise → entry → doors — and from `xl`
                   the entry takes the right column beside the promise, with the
                   three ways and the request doors full width beneath. */}
-              <section className="flex min-w-0 flex-col gap-6">
-                <div className="min-w-0">{promise}</div>
+              <section className="flex min-w-0 flex-col gap-5">
                 <div className="min-w-0">
                   <LandingIntentChoice />
                 </div>
+                <div className="min-w-0">{promise}</div>
                 <div className="scroll-mt-24 max-w-2xl" id="find">
                 <PublicEntry
                   supply={
