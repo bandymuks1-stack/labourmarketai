@@ -562,7 +562,7 @@ test("N-5. a worker adds a shortcut, moves it, and removes it — each change is
         .locator(`[data-testid="my-space-edit-item"][data-ref="${ref}"]`)
         .getByTestId("my-space-remove")
         .click();
-      await expect(page.locator(`[data-testid="my-space-pin"][data-ref="${ref}"]`)).toHaveCount(0);
+      await expect(page.locator(`[data-testid="my-space-edit-item"][data-ref="${ref}"]`)).toHaveCount(0, { timeout: 30_000 });
     }
     await expect.poll(stored, { message: "the pins are deleted", timeout: 30_000 }).toEqual([]);
   } finally {
@@ -658,6 +658,18 @@ test("N-6. a pin survives sign-out and sign-in, and a second session shows it", 
         .locator(`[data-testid="my-space-edit-item"][data-ref="${pinned}"]`)
         .getByTestId("my-space-remove")
         .click();
+      // Wait for the removal itself (the editable chip goes once the stored
+      // row is deleted) — while managing, the plain chip is absent anyway.
+      await expect(second.locator(`[data-testid="my-space-edit-item"][data-ref="${pinned}"]`)).toHaveCount(0, {
+        timeout: 30_000,
+      });
+      await expect
+        .poll(
+          () =>
+            sql<{ n: number }>(`select count(*)::int as n from public.workspace_pins where profile_id = ${lit(workerId)}`)[0]?.n,
+          { message: "the removal is stored", timeout: 30_000 },
+        )
+        .toBe(0);
       await expect(chip(second)).toHaveCount(0);
     } finally {
       await secondCtx.close();
