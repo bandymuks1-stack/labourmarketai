@@ -19,7 +19,8 @@
  * are editorial and need no external source. No HIGH-risk content.
  */
 import type { LocalizedAnswer, AnswerEvidenceSource } from "@/lib/answer-engine/publishing";
-import type { ActiveLocale } from "@/lib/i18n/config";
+import { answerReviewStatusFor } from "@/lib/answer-engine/contract";
+import { activeLocales, type ActiveLocale } from "@/lib/i18n/config";
 
 type Loc = ActiveLocale;
 type Body = {
@@ -179,6 +180,18 @@ const DRAFTS: readonly Draft[] = [
         title: "Swoboda przepływu pracowników w UE — wyjaśnienie",
         desc: "Co oznacza swoboda przepływu pracowników w UE: obywatele UE mogą pracować w innym państwie UE bez zezwolenia, na równych warunkach — zasada ogólna, oficjalne źródła.",
       },
+      sv: {
+        slug: "vad-ar-fri-rorlighet-for-arbetstagare-i-eu",
+        h1: "Vad är fri rörlighet för arbetstagare i EU?",
+        short: "Fri rörlighet för arbetstagare är en rättighet i EU som gör att medborgare i ett EU-land kan arbeta i ett annat EU-land utan arbetstillstånd, på samma villkor som landets egna medborgare.",
+        full: [
+          "Som EU-medborgare behöver du inget arbetstillstånd för att ta ett jobb — som anställd eller egenföretagare — i ett annat EU-land. Du har också rätt till likabehandling med lokala arbetstagare när det gäller tillgång till arbete, arbetsvillkor, lön och sociala förmåner. Rättigheten gäller i hela EU och i praktiken även i det bredare EES (Island, Liechtenstein, Norge) och Schweiz.",
+          "Fri rörlighet är en allmän regel, inte en garanti för ett visst jobb, och vissa frågor beror fortfarande på nationell lagstiftning — till exempel kan vissa tjänster i offentlig sektor vara förbehållna landets medborgare, och om ditt yrke är reglerat kan du behöva få dina kvalifikationer erkända först. Kontrollera de officiella EU-källorna nedan för de regler som gäller i din situation just nu.",
+        ],
+        limitations: "Detta är allmän information på EU-nivå, inte råd i ett enskilt fall. Nationella regler och undantag gäller; bekräfta detaljerna för ditt land och ditt yrke i de officiella källorna.",
+        title: "Fri rörlighet för arbetstagare i EU förklarad",
+        desc: "Vad fri rörlighet för arbetstagare i EU innebär: EU-medborgare kan arbeta i ett annat EU-land utan tillstånd och med likabehandling — allmän regel, officiella källor.",
+      },
     },
   },
   {
@@ -256,6 +269,18 @@ const DRAFTS: readonly Draft[] = [
         limitations: "Ogólna informacja na poziomie UE, a nie porada prawna. To, czy i jak Twoje kwalifikacje zostaną uznane, zależy od zawodu i konkretnego kraju — sprawdź oficjalne źródło dla swojej sytuacji.",
         title: "Uznawanie Twoich kwalifikacji w UE",
         desc: "Jak działa uznawanie kwalifikacji w UE: potrzebne tylko dla zawodów regulowanych, decyduje organ kraju przyjmującego, część zawodów automatycznie — oficjalne źródło.",
+      },
+      sv: {
+        slug: "hur-erkanns-mina-kvalifikationer-i-ett-annat-eu-land",
+        h1: "Hur förstår jag erkännande av mina kvalifikationer utomlands?",
+        short: "I EU krävs ett formellt erkännande bara om ditt yrke är reglerat i det land där du vill arbeta. För reglerade yrken ansöker du hos det landets behöriga myndighet; vissa yrken erkänns automatiskt.",
+        full: [
+          "Om du behöver ett erkännande beror på yrket, inte på dig. Om yrket inte är reglerat i värdlandet krävs inget formellt erkännande — du kan söka arbete direkt. Om det är reglerat (till exempel lärare, jurist, ingenjör och vissa yrken inom hälso- och sjukvård) ansöker du hos den behöriga myndigheten där, som har upp till fyra månader på sig att besluta och kan begära ytterligare yrkeserfarenhet, en kurs eller ett lämplighetsprov om utbildningen skiljer sig väsentligt.",
+          "Några yrken — som läkare, sjuksköterskor med ansvar för allmän hälso- och sjukvård, tandläkare, barnmorskor, veterinärer, farmaceuter och arkitekter — erkänns i princip automatiskt i hela EU. Eftersom reglerna varierar mellan yrken och länder bör du alltid bekräfta ditt eget fall i den officiella EU-källan nedan i stället för att förlita dig på allmän vägledning.",
+        ],
+        limitations: "Allmän information på EU-nivå, inte juridisk rådgivning. Om och hur din kvalifikation erkänns beror på yrket och det aktuella landet — kontrollera den officiella källan för ditt fall.",
+        title: "Erkännande av dina kvalifikationer i EU",
+        desc: "Så fungerar erkännande av kvalifikationer i EU: krävs bara för reglerade yrken, beslutas av värdlandets myndighet, vissa yrken erkänns automatiskt — officiell källa.",
       },
     },
   },
@@ -365,6 +390,23 @@ const DRAFTS: readonly Draft[] = [
         title: "Które kraje najbardziej potrzebują Twojego zawodu",
         desc: "Jak sprawdzić, które kraje UE najbardziej potrzebują Twojego zawodu, korzystając z oficjalnych danych EURES i CEDEFOP o niedoborach — sygnał rynkowy, nie gwarancja pracy.",
       },
+      sv: {
+        slug: "vilka-lander-behover-mitt-yrke-mest",
+        h1: "Hur ser jag vilka länder som behöver mitt yrke mest?",
+        short: "Använd officiella EU-uppgifter om brist på arbetskraft: EURES och CEDEFOP publicerar vilka yrken det råder brist på i varje land, så att du kan se var ditt yrke efterfrågas mest i stället för att gissa.",
+        full: [
+          "Efterfrågan är ojämnt fördelad i Europa och förändras över tid, så det pålitliga sättet att bedöma den är officiella uppgifter, inte enskilda berättelser. EURES publicerar brist- och överskottsyrken per land, och CEDEFOP följer efterfrågan på yrken utifrån lediga jobb som annonseras på nätet. Tillsammans visar de var ett visst yrke saknar personal.",
+          "På LabourMarket.ai utgår du från ditt verkliga yrke och dina färdigheter; sedan kan du läsa de officiella bristuppgifterna för de länder du är öppen för och väga dem mot språk, ort och dina egna önskemål. Se siffrorna som en signal om marknaden, inte som ett löfte om ett visst jobb.",
+        ],
+        steps: [
+          "Bekräfta ditt yrke och dina färdigheter i profilen.",
+          "Titta på EURES bristlista och CEDEFOP:s uppgifter om efterfrågan för de länder du är öppen för.",
+          "Väg efterfrågan mot språk, ort och dina önskemål innan du bestämmer dig.",
+        ],
+        limitations: "Uppgifter om brist är en marknadssignal, inte en garanti för ett jobb, och de förändras över tid. Kontrollera publiceringsdatumet i de officiella källorna.",
+        title: "Vilka länder behöver ditt yrke mest",
+        desc: "Så ser du vilka EU-länder som behöver ditt yrke mest med hjälp av officiella bristuppgifter från EURES och CEDEFOP — en marknadssignal, ingen jobbgaranti.",
+      },
     },
   },
   {
@@ -473,6 +515,23 @@ const DRAFTS: readonly Draft[] = [
         title: "Jakie zawody są potrzebne tam, gdzie chcesz pracować",
         desc: "Jak znaleźć poszukiwane zawody w danym kraju przy użyciu oficjalnych danych EURES i CEDEFOP — ugruntowany obraz rynku, a nie gwarancja pracy.",
       },
+      sv: {
+        slug: "vilka-yrken-efterfragas-dar-jag-vill-arbeta",
+        h1: "Hur tar jag reda på vilka yrken som efterfrågas där jag vill arbeta?",
+        short: "Titta i officiella EU-källor för landet: EURES listar bristyrken och CEDEFOP följer efterfrågan utifrån platsannonser på nätet, så att du kan se vilka yrken det landet faktiskt saknar.",
+        full: [
+          "I stället för att lita på en rubrik om \"framtidens jobb\" kan du titta på det land du är intresserad av i officiella uppgifter. EURES publicerar brist- och överskottsyrken per land, och CEDEFOP:s verktyg för efterfrågan på yrken bygger på verkliga platsannonser på nätet. Om du läser båda får du en välgrundad bild av vilka yrken ett visst land behöver.",
+          "Använd den bilden tillsammans med din egen profil på LabourMarket.ai: profilen visar möjligheter som passar dina färdigheter, medan de officiella uppgifterna visar hur stark efterfrågan på ditt yrke är på en viss plats. Efterfrågan förändras, så notera när uppgifterna publicerades.",
+        ],
+        steps: [
+          "Välj det eller de länder du överväger.",
+          "Läs EURES bristlista och CEDEFOP:s uppgifter om efterfrågan för dem.",
+          "Jämför den efterfrågan med ditt eget yrke och dina färdigheter.",
+        ],
+        limitations: "Uppgifter om efterfrågan speglar en viss period och garanterar inget jobb hos ett enskilt företag. Kontrollera alltid källans datum.",
+        title: "Vilka yrken efterfrågas där du vill arbeta",
+        desc: "Så hittar du efterfrågade yrken i ett land med officiella uppgifter från EURES och CEDEFOP — en välgrundad bild av marknaden, ingen jobbgaranti.",
+      },
     },
   },
   {
@@ -550,6 +609,18 @@ const DRAFTS: readonly Draft[] = [
         limitations: "To wyjaśnia ogólne przyczyny, a nie prognozę dla konkretnej firmy czy roku. Sprawdź datę i zakres krajowy oficjalnej analizy.",
         title: "Dlaczego zapotrzebowanie na pracę różni się między krajami",
         desc: "Jak rozumieć różnice zapotrzebowania na pracę między krajami UE — starzenie się społeczeństw, mobilność pracowników i struktura gospodarki, według oficjalnych analiz CEDEFOP i EURES.",
+      },
+      sv: {
+        slug: "varfor-skiljer-sig-efterfragan-mellan-lander",
+        h1: "Hur förstår jag skillnader i efterfrågan mellan länder?",
+        short: "Efterfrågan skiljer sig åt på grund av en åldrande befolkning, att yrkeskunniga flyttar mellan länder och varje ekonomis struktur. Officiella EU-analyser förklarar dessa drivkrafter, så skillnaderna går att förstå i stället för att verka slumpmässiga.",
+        full: [
+          "Samma yrke kan vara ett bristyrke i ett land men inte i ett annat. Officiella EU-analyser pekar på några återkommande drivkrafter: en åldrande befolkning ökar efterfrågan inom vård och undervisning; yrkeskunniga som flyttar mellan länder kan lämna luckor efter sig; och varje lands näringslivsstruktur påverkar vilka yrken det behöver. CEDEFOP och EURES beskriver dessa mönster för hela Europa.",
+          "När du själv ska välja, läs efterfrågan på ditt yrke land för land i stället för att utgå från en enda europeisk trend. LabourMarket.ai hjälper dig att jämföra platser mot dina färdigheter, medan de officiella källorna förklarar varför efterfrågan ser ut som den gör. Notera publiceringsdatumet, eftersom mönstren förändras över åren.",
+        ],
+        limitations: "Detta förklarar allmänna drivkrafter, inte en prognos för ett visst företag eller år. Kontrollera datum och vilka länder den officiella analysen gäller.",
+        title: "Varför efterfrågan på arbetskraft skiljer sig mellan länder",
+        desc: "Så förstår du varför efterfrågan på arbetskraft skiljer sig mellan EU-länder — åldrande befolkning, rörlighet och ekonomisk struktur, förklarat av officiella analyser från CEDEFOP och EURES.",
       },
     },
   },
@@ -629,6 +700,18 @@ const DRAFTS: readonly Draft[] = [
         limitations: "Wymagania językowe różnią się w zależności od pracodawcy, branży i roli. To ogólna wskazówka dla Holandii; sprawdź konkretną ofertę pracy i oficjalne informacje krajowe EURES.",
         title: "Czy do pracy w Holandii potrzebny jest niderlandzki?",
         desc: "Czy do pracy w Holandii potrzebny jest niderlandzki: zależy od roli — angielski wystarcza w wielu międzynarodowych zawodach, w pracy z klientem oczekuje się niderlandzkiego. Oficjalne źródło EURES.",
+      },
+      sv: {
+        slug: "maste-jag-kunna-nederlandska-for-att-arbeta-i-nederlanderna",
+        h1: "Måste jag kunna det lokala språket för att arbeta i Nederländerna?",
+        short: "Det beror på jobbet. Engelska används i stor utsträckning i många internationella och tekniska roller i Nederländerna, men nederländska förväntas ofta i kundnära arbete, i offentlig sektor och i många vardagliga jobb.",
+        full: [
+          "Det finns ingen enskild språkregel för att arbeta i Nederländerna — kravet kommer från arbetsgivaren och rollen, inte från ett nationellt tillstånd. I internationella företag, inom IT, forskning och viss ingenjörsverksamhet räcker engelska ofta. Inom vård och omsorg, utbildning, handel, hotell och restaurang samt offentlig service förväntas oftast nederländska, eftersom du arbetar direkt med människor.",
+          "Se varje konkret uppgift om ett jobb som något som kommer från just den platsannonsen, inte från en allmän regel. För levnads- och arbetsvillkor i Nederländerna, inklusive språk och praktiska frågor, är EURES officiella sidor den pålitliga referensen; på LabourMarket.ai kan du också ange vilka språk du talar, så att möjligheterna matchar din verkliga nivå.",
+        ],
+        limitations: "Språkkraven varierar mellan arbetsgivare, branscher och roller. Detta är allmän vägledning för Nederländerna; kontrollera den aktuella platsannonsen och EURES officiella landsinformation.",
+        title: "Behöver du kunna nederländska för att arbeta i Nederländerna?",
+        desc: "Om du behöver kunna nederländska för att arbeta i Nederländerna: det beror på rollen — engelska räcker i många internationella jobb, nederländska förväntas i kundnära arbete. Officiell referens från EURES.",
       },
     },
   },
@@ -738,6 +821,23 @@ const DRAFTS: readonly Draft[] = [
         title: "Szukanie pracy bez formalnych kwalifikacji",
         desc: "Jak znaleźć pracę bez formalnych kwalifikacji: zacznij od wykazanych umiejętności i dowodów. LabourMarket.ai buduje Twój profil wokół tego, co potrafisz.",
       },
+      sv: {
+        slug: "hur-hittar-jag-arbete-utan-formella-kvalifikationer",
+        h1: "Hur hittar jag arbete om jag saknar formella kvalifikationer?",
+        short: "Lyft fram det du faktiskt kan. Många jobb värdesätter visade färdigheter och pålitlighet mer än intyg, och på LabourMarket.ai kan du visa färdigheter med belägg i stället för att bara lista examina.",
+        full: [
+          "Att sakna en formell kvalifikation betyder inte att du saknar färdigheter. Arbete du har utfört — betalt eller obetalt, hemma eller när du har hjälpt andra — bygger verkliga, användbara färdigheter. Det viktiga är att benämna dem tydligt och, där det går, styrka dem med belägg i stället för att bara presentera dig genom dokument du inte har.",
+          "På LabourMarket.ai byggs din profil kring färdigheter och det du kan visa, inte kring examina. Du kan registrera arbete, ärligt ange färdigheter och få dem bekräftade utifrån verklig aktivitet, så att arbetsgivare som bryr sig om förmåga kan se den. Vissa yrken är reglerade och kräver en formell kvalifikation — i de fallen är plattformen ärlig om gapet i stället för att dölja det.",
+        ],
+        steps: [
+          "Skriv ner de konkreta saker du kan göra, från alla typer av arbete.",
+          "Lägg till dem som färdigheter i profilen och styrk dem med verkliga exempel.",
+          "Fokusera på möjligheter som värdesätter visade färdigheter mer än formella intyg.",
+        ],
+        limitations: "Vissa reglerade yrken kräver enligt lag en formell kvalifikation; där kan ingen profil ersätta den.",
+        title: "Hitta arbete utan formella kvalifikationer",
+        desc: "Så hittar du arbete utan formella kvalifikationer: lyft fram visade färdigheter och belägg. LabourMarket.ai bygger din profil kring det du kan.",
+      },
     },
   },
   {
@@ -838,6 +938,22 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Uczciwe przedstawienie przerwy w karierze",
         desc: "Jak uczciwie przedstawić przerwę w karierze: krótka, rzeczowa notka plus wszystko pożyteczne z tego okresu. Na LabourMarket.ai prowadzą Twoje umiejętności, a nie przerwa.",
+      },
+      sv: {
+        slug: "hur-beskriver-jag-ett-uppehall-i-karriaren-arligt",
+        h1: "Hur beskriver jag ett uppehåll i karriären på ett ärligt sätt?",
+        short: "Nämn det kort och sakligt, ta upp något användbart som du gjorde eller lärde dig, och gå vidare. Uppehåll är vanliga, och att vara ärlig om dem ger ett bättre intryck än att dölja eller fylla ut dem.",
+        full: [
+          "Tid borta från betalt arbete — för att ta hand om någon, av hälsoskäl, för studier, resor eller på grund av en svår arbetsmarknad — är normalt, och de flesta arbetsgivare har sett det förut. Misstaget är att försöka dölja det, vilket ofta ser värre ut än själva uppehållet. En kort, enkel förklaring tar bort frågetecknet.",
+          "Om tiden gav något användbart — en kurs, volontärarbete, omsorgsansvar, ett eget projekt — nämn det, eftersom det är verklig erfarenhet. På LabourMarket.ai kan du hålla profilen aktuell och visa färdigheter med belägg, så att en period utan formell anställning inte suddar ut det du kan.",
+        ],
+        steps: [
+          "Nämn uppehållet kort och sakligt, utan att förklara för mycket.",
+          "Lägg till sådant användbart som du gjorde eller lärde dig under tiden som verklig erfarenhet.",
+          "Håll profilen aktuell så att dina färdigheter, inte uppehållet, står i centrum.",
+        ],
+        title: "Beskriv ett uppehåll i karriären ärligt",
+        desc: "Så beskriver du ett uppehåll i karriären ärligt: en kort, saklig notering plus det användbara du gjorde. På LabourMarket.ai är det dina färdigheter som står i centrum, inte uppehållet.",
       },
     },
   },
@@ -940,6 +1056,22 @@ const DRAFTS: readonly Draft[] = [
         title: "Rozpoznawanie umiejętności przenoszalnych",
         desc: "Jak rozpoznać umiejętności przenoszalne, które możesz zabrać do każdego zawodu — zdolności niezwiązane z jedną nazwą stanowiska. LabourMarket.ai stawia je w centrum.",
       },
+      sv: {
+        slug: "hur-kanner-jag-igen-overforbara-fardigheter",
+        h1: "Hur känner jag igen färdigheter som jag kan ta med mig till vilket yrke som helst?",
+        short: "Leta efter det du gör oavsett jobb — att organisera, lösa problem, kommunicera, arbeta med verktyg eller med människor. Sådana överförbara färdigheter följer med dig till nya roller.",
+        full: [
+          "Överförbara färdigheter är förmågor som inte är bundna till en enda yrkestitel: att planera och organisera, lösa problem, kommunicera, lära sig snabbt, hantera verktyg noggrant eller samordna med människor. Du bygger upp dem i allt arbete, och det är just därför de följer med till ett annat yrke.",
+          "Ett bra sätt att hitta dina är att beskriva vad du faktiskt gjorde, inte bara vad jobbet hette, och lägga märke till vilka verb som återkommer. På LabourMarket.ai står de här färdigheterna i centrum av din profil, och plattformen använder dem för att föreslå närliggande inriktningar — yrken som dina nuvarande färdigheter redan delvis passar.",
+        ],
+        steps: [
+          "Beskriv konkreta uppgifter du har utfört, med enkla verb.",
+          "Plocka ut dem som skulle spela roll i många olika jobb.",
+          "Lägg till dem som färdigheter så att de kan ge matchningar och närliggande inriktningar.",
+        ],
+        title: "Känn igen dina överförbara färdigheter",
+        desc: "Så känner du igen överförbara färdigheter som du kan ta med dig till vilket yrke som helst — förmågor som inte är bundna till en yrkestitel. LabourMarket.ai sätter dem i centrum.",
+      },
     },
   },
   {
@@ -1010,6 +1142,17 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Umiejętności praktyczne a formalne kwalifikacje",
         desc: "Jak umiejętności praktyczne mają się do formalnych kwalifikacji na LabourMarket.ai: oba pokazywane uczciwie i trzymane osobno, żadne nie jest przerabiane na drugie.",
+      },
+      sv: {
+        slug: "praktiska-fardigheter-och-formella-kvalifikationer",
+        h1: "Hur förhåller sig praktiska färdigheter till formella kvalifikationer här?",
+        short: "Båda räknas, och plattformen håller isär dem. Praktiska färdigheter visas som belägg från verkligt arbete; formella kvalifikationer visas som det de är — ingen av dem förfalskas eller blåses upp till den andra.",
+        full: [
+          "En formell kvalifikation säger att någon har genomgått en erkänd utbildning; en praktisk färdighet säger att personen faktiskt kan göra något. LabourMarket.ai rankar inte generellt det ena över det andra — båda visas ärligt. Praktiska färdigheter visas som självdeklarerade eller bekräftade utifrån verkligt arbete, och kvalifikationer visas som kvalifikationer.",
+          "Det spelar roll eftersom många roller värdesätter visad förmåga, medan vissa reglerade yrken enligt lag kräver en viss kvalifikation. När de två hålls isär kan en arbetsgivare väga vad rollen faktiskt kräver, och du kan visa styrka där du har den, utan att det ena förklär sig till det andra.",
+        ],
+        title: "Praktiska färdigheter och formella kvalifikationer",
+        desc: "Så förhåller sig praktiska färdigheter till formella kvalifikationer på LabourMarket.ai: båda visas ärligt och hålls isär, ingen blåses upp till den andra.",
       },
     },
   },
@@ -1112,6 +1255,22 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Przedstawienie dyplomu w profilu",
         desc: "Jak przedstawić dyplom lub kwalifikację na LabourMarket.ai: prawdziwa nazwa, instytucja i rok, pokazane obok Twoich umiejętności. Europass pomaga w całej Europie.",
+      },
+      sv: {
+        slug: "hur-visar-jag-en-examen-i-min-profil",
+        h1: "Hur visar jag en examen eller kvalifikation i min profil?",
+        short: "Lägg till den som en kvalifikation med den verkliga benämningen, utfärdande lärosäte eller institution och år. Håll det sakligt och låt dina färdigheter stå bredvid, så att läsaren ser både vad du har studerat och vad du kan.",
+        full: [
+          "En kvalifikation är mest användbar när den är exakt: det faktiska namnet på examen eller intyget, vem som utfärdade det och när. Undvik att blåsa upp en titel till något den inte är — det är korrektheten som gör den trovärdig för en arbetsgivare, och den är lätt att kontrollera.",
+          "På LabourMarket.ai är en examen en del av din profil och visas bredvid de färdigheter du kan visa upp. Om du flyttar mellan länder hjälper EU:s Europass-verktyg dig att presentera kvalifikationer i ett gemensamt europeiskt format som arbetsgivare i hela Europa känner igen. Plattformen håller en kvalifikation åtskild från en bekräftad färdighet, så att den ena inte misstas för den andra.",
+        ],
+        steps: [
+          "Lägg till kvalifikationen med dess verkliga benämning, institution och år.",
+          "Håll texten saklig — blås inte upp nivån eller ämnesområdet.",
+          "Visa dina påvisbara färdigheter bredvid den för att ge en helhetsbild.",
+        ],
+        title: "Visa en examen i din profil",
+        desc: "Så visar du en examen eller kvalifikation på LabourMarket.ai: verklig benämning, institution och år, bredvid dina färdigheter. Europass hjälper i hela Europa.",
       },
     },
   },
@@ -1221,11 +1380,28 @@ const DRAFTS: readonly Draft[] = [
         title: "Jak nie uczyć się umiejętności bez zapotrzebowania",
         desc: "Jak uniknąć nauki umiejętności bez zapotrzebowania: wykorzystaj oficjalne dane EURES i CEDEFOP, by skierować naukę tam, gdzie jest realna potrzeba.",
       },
+      sv: {
+        slug: "hur-undviker-jag-att-lara-mig-fardigheter-som-inte-efterfragas",
+        h1: "Hur undviker jag att lära mig färdigheter som inte efterfrågas?",
+        short: "Kontrollera efterfrågan innan du satsar: officiella EU-källor visar vilka yrken och färdigheter det råder brist på i Europa, så att du kan rikta ditt lärande dit där det finns ett verkligt och varaktigt behov.",
+        full: [
+          "Att lära sig tar tid, så det lönar sig att rikta det mot färdigheter som arbetsgivare faktiskt behöver. Officiella EU-källor — EURES om brist på arbetskraft och CEDEFOP om efterfrågan utifrån platsannonser på nätet — visar vilka yrken och färdigheter det råder brist på, och var. Det är en stabilare grund än en trendrubrik eller en enskild åsikt på nätet.",
+          "Kombinera det med din egen utgångspunkt: på LabourMarket.ai ser du vilka färdigheter du redan har och vilka närliggande inriktningar de öppnar, och sedan väljer du lärande som fyller ett verkligt gap mot efterfrågat arbete. Efterfrågan förändras, så se den som en aktuell signal och kontrollera källans datum igen i stället för att anta att den är fast.",
+        ],
+        steps: [
+          "Läs de officiella uppgifterna om efterfrågan från EURES och CEDEFOP för ditt område.",
+          "Jämför dem med de färdigheter du redan har i profilen.",
+          "Välj lärande som fyller ett verkligt gap mot efterfrågat arbete.",
+        ],
+        limitations: "Uppgifter om efterfrågan speglar en viss period och är en signal, inte en garanti. Kontrollera källans datum igen innan du fattar långsiktiga beslut om lärande.",
+        title: "Undvik att lära dig färdigheter som inte efterfrågas",
+        desc: "Så undviker du att lära dig färdigheter som inte efterfrågas: använd officiella uppgifter från EURES och CEDEFOP för att rikta ditt lärande dit där det finns ett verkligt behov.",
+      },
     },
   },
 ];
 
-const LOCALES: Loc[] = ["lt", "en", "ru", "nl", "de", "pl"];
+const LOCALES: readonly Loc[] = activeLocales;
 
 export const WAVE2C_ANSWERS: readonly LocalizedAnswer[] = DRAFTS.flatMap((d) =>
   LOCALES.map((locale): LocalizedAnswer => {
@@ -1242,7 +1418,7 @@ export const WAVE2C_ANSWERS: readonly LocalizedAnswer[] = DRAFTS.flatMap((d) =>
       countryScope: d.country,
       title: b.title,
       description: b.desc,
-      reviewStatus: "HUMAN_APPROVED",
+      reviewStatus: answerReviewStatusFor(locale),
       reviewDate: REVIEWED,
       editorialResponsibility: EDITORIAL,
       evidenceSources: d.ev,

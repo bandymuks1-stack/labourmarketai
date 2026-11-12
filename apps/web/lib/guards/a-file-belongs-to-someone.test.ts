@@ -300,7 +300,7 @@ describe("the chat renders the rule it was given", () => {
       "fileNotYetOrganization",
       "fileNotYetOther",
     ] as const;
-    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const chat = (
         JSON.parse(read(join("messages", `${locale}.json`))) as {
           conversation: { chat: Record<string, string> };

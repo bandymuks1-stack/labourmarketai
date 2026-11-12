@@ -24,7 +24,7 @@ const TERRITORY = read("lib/market-map/territory-view.ts");
 const WORLD_UI = read("components/app/market-map/world-discovery.tsx");
 const PAGE = read("app/[locale]/dashboard/market-map/page.tsx");
 
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 const mmEntities = (loc: string) =>
   JSON.parse(read(`messages/${loc}.json`)).marketMap?.entities;
 

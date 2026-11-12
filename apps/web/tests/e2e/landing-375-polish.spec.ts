@@ -19,7 +19,7 @@ import { expect, test } from "@playwright/test";
 
 const ENABLED = process.env.E2E_PUBLIC_LANDING === "1";
 const BASE = (process.env.E2E_PUBLIC_LANDING_URL ?? "https://labourmarket.ai").replace(/\/$/, "");
-const LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 test.describe("@375px the public landing", () => {
   test.skip(!ENABLED, "anonymous read-only walk of a deployed landing; set E2E_PUBLIC_LANDING=1");

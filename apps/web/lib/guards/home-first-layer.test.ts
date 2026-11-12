@@ -50,7 +50,7 @@ describe("a quiet home takes no room", () => {
 });
 
 describe("the found-postings heading does not deny an assessment that happened", () => {
-  const locales = ["lt", "en", "de", "nl", "pl", "ru"];
+  const locales = ["lt", "en", "de", "nl", "pl", "ru", "sv"];
   for (const locale of locales) {
     it(`${locale}: titleDiscovery makes no "not yet assessed" claim`, () => {
       const messages = JSON.parse(read(`messages/${locale}.json`)) as {

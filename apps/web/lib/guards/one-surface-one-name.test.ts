@@ -41,7 +41,7 @@ import { join } from "node:path";
 
 const MESSAGES = join(__dirname, "..", "..", "messages");
 /** The locales that actually serve these namespaces. */
-const ROUTED_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ROUTED_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 type Json = Record<string, unknown>;
 const load = (locale: string): Json =>

@@ -143,6 +143,7 @@ describe("#7 — the empty journal and the journal funnel", () => {
       nl: /hieronder/i,
       de: /\bunten\b/i,
       pl: /poniżej/i,
+      sv: /\bnedan\b|nedanför/i,
     };
     const ABOVE: Record<string, RegExp> = {
       lt: /viršuje/i,
@@ -151,6 +152,7 @@ describe("#7 — the empty journal and the journal funnel", () => {
       nl: /hierboven/i,
       de: /\boben\b/i,
       pl: /powyżej/i,
+      sv: /\bovan\b|ovanför/i,
     };
     for (const loc of activeLocales) {
       const next = journal(loc).listEmptyNext as string;

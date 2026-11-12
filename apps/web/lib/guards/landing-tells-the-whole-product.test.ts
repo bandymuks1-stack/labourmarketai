@@ -48,7 +48,7 @@ vi.mock("next-intl/server", () => ({
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 // 2026-09-20: PL is an active UI locale; the Polish catalog reached full parity in the same PR, so pl is covered here like the other five.
-const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 const catalog = (loc: string) =>
   JSON.parse(read(`messages/${loc}.json`)) as Record<string, never>;
 const at = (o: unknown, path: string): unknown =>
@@ -214,6 +214,7 @@ describe("§17 the public map is real geography and claims no activity", () => {
       nl: word("niet|geen"),
       de: word("nicht|keine?"),
       pl: word("nie"),
+      sv: word("inte|inga?"),
     };
     for (const loc of ACTIVE) {
       const v = at(catalog(loc), "landing.marketMap.shows") as string;

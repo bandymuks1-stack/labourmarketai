@@ -212,7 +212,7 @@ describe("the first need is the first door", () => {
 });
 
 describe("one honest label per locale", () => {
-  const PUBLISH = /publish|paskelb|опубликов|publiceer|veröffentlich|opublik/i;
+  const PUBLISH = /publish|paskelb|опубликов|publiceer|veröffentlich|opublik|publicer/i;
   for (const loc of activeLocales) {
     it(`${loc}: every need door says the same thing, and it does not say "publish"`, () => {
       const m = JSON.parse(read(`messages/${loc}.json`)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any

@@ -36,7 +36,8 @@ const BANNED: ReadonlyArray<{ name: string; rx: RegExp }> = [
   { name: "LT grandinė (tech)", rx: /grandin\w*/i },
   // 2026-09-20 (PL active): Polish "formularz" is the ordinary word for a form (EN "form" is
   // allowed too); the banned concept is "formuła", which `formuł` still catches.
-  { name: "formula language", rx: /formul(?!arz)\w*|∩|\boverlap\b/i },
+  // 2026-11-12 (SV active): Swedish "formulär" is the same ordinary word for a form.
+  { name: "formula language", rx: /formul(?!arz|är)\w*|∩|\boverlap\b/i },
   { name: "pyramid logic", rx: /piramid\w*|pyramid/i },
   { name: "storage/RLS internals", rx: /append-only|\bRLS\b|security definer/i },
   { name: "real-time matching claim", rx: /real-?time matching|atitikimas realiu laiku|matching engine/i },

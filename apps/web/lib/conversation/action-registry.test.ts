@@ -30,7 +30,7 @@ const TIERS: ConfirmationTier[] = [
 ];
 
 const APP_ROOT = process.cwd();
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 function loadMessages(locale: string): Record<string, unknown> {
   return JSON.parse(readFileSync(join(APP_ROOT, "messages", `${locale}.json`), "utf8"));

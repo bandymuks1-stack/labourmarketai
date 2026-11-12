@@ -84,7 +84,7 @@ describe("P0 work-category taxonomy is broad, not construction-only", () => {
     // Owner order 2026-10-23: LT is one market's language, not a default for
     // other readers. A later-activated locale must not be served Lithuanian.
     const en = buildWorkCategoryOptions("en");
-    expect(buildWorkCategoryOptions("sv")[0].sector).toBe(en[0].sector);
+    expect(buildWorkCategoryOptions("da")[0].sector).toBe(en[0].sector);
     expect(buildWorkCategoryOptions("uk")[0].options[0].label).toBe(en[0].options[0].label);
   });
 

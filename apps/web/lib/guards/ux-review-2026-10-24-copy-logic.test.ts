@@ -10,7 +10,7 @@ const root = join(__dirname, "..", "..");
 const read = (p: string) => readFileSync(join(root, p), "utf8");
 const catalog = (l: string) =>
   JSON.parse(read(`messages/${l}.json`)) as Record<string, Record<string, unknown>>;
-const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 describe("1.4 onboarding: the missing-field error sits AT the field; no e-mail handle as a name", () => {
   const wizard = read("components/app/onboarding-wizard.tsx");

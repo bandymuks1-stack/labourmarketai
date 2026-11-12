@@ -67,9 +67,9 @@ describe("native settings — privacy, terms and support reach the canonical web
       "account.openFailed",
     ]) {
       expect(settings).toContain(`t("${key}")`);
-      // One definition per active locale (six since PL, 2026-09-20 #1810) — parity is the
+      // One definition per active locale (seven since SV, 2026-11-12; six since PL, 2026-09-20 #1810) — parity is the
       // compiler's (`Record<ActiveLocale, Catalogue>`), presence is ours.
-      expect(messages.split(`"${key}":`).length - 1, `${key} is not defined in all six locales`).toBe(6);
+      expect(messages.split(`"${key}":`).length - 1, `${key} is not defined in all seven locales`).toBe(7);
     }
   });
 });
@@ -119,14 +119,14 @@ describe("native account surfaces — what the store reviews look for", () => {
     }
   });
 
-  it("every new label exists in all six locales", () => {
+  it("every new label exists in all seven locales", () => {
     for (const key of [
       "account.deletionInfo",
       "account.privacyPolicy",
       "auth.signIn.forgot",
       "auth.register.legal",
     ]) {
-      expect(messages.split(`"${key}":`).length - 1, `${key} is not defined in all six locales`).toBe(6);
+      expect(messages.split(`"${key}":`).length - 1, `${key} is not defined in all seven locales`).toBe(7);
     }
   });
 });

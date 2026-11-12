@@ -5,8 +5,8 @@ type L = Record<ActiveLocale, string>;
 
 /** Pay range words. The publisher states no period on the stored row, so the
  *  card says none either: the range and the currency, exactly as supplied. */
-const PAY_FROM: L = { en: "from", lt: "nuo", ru: "от", nl: "vanaf", de: "ab", pl: "od" };
-const PAY_UP_TO: L = { en: "up to", lt: "iki", ru: "до", nl: "tot", de: "bis", pl: "do" };
+const PAY_FROM: L = { en: "from", lt: "nuo", ru: "от", nl: "vanaf", de: "ab", pl: "od", sv: "från" };
+const PAY_UP_TO: L = { en: "up to", lt: "iki", ru: "до", nl: "tot", de: "bis", pl: "do", sv: "upp till" };
 
 /**
  * THE ONE pay wording (audit 2026-11-03: job cards and job alerts used to

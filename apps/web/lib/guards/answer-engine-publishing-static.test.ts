@@ -18,7 +18,7 @@ const read = (rel: string) => readFileSync(resolve(webRoot, rel), "utf-8");
 
 // 2026-09-20: pl added — PL is an active UI locale and the answer-engine
 // content layer now carries a reviewed pl body for every published question.
-const ACTIVE = ["de", "en", "lt", "nl", "pl", "ru"];
+const ACTIVE = ["de", "en", "lt", "nl", "pl", "ru", "sv"];
 const registryById = new Map(ANSWER_QUESTIONS.map((q) => [q.canonicalQuestionId, q]));
 
 describe("publishing engine — static invariants", () => {
@@ -135,7 +135,7 @@ describe("publishing engine — static invariants", () => {
     }
   });
 
-  it("sitemap lists every indexable page (no truncation) within the sitemaps.org limit; 6 active locales", () => {
+  it("sitemap lists every indexable page (no truncation) within the sitemaps.org limit; 7 active locales", () => {
     // The cap is a safety ceiling (sitemaps.org 50,000/file), not a content cap:
     // it must never truncate the real published set.
     expect(ANSWER_SITEMAP_MAX).toBeLessThanOrEqual(50000);

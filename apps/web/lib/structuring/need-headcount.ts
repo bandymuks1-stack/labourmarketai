@@ -55,9 +55,9 @@ export interface NeedHeadcount {
  * asked, never 1 ("dozen" is no number word here, so it is asked too).
  */
 const PLURAL_QUANTIFIER =
-  /^(?:few|couple|dozen|dozens|several|some|many|multiple|various|keli|kelis|kelios|keletas|keleta|keliu|keleto|keleriems|daug|nemazai|несколько|нескольких|пару|пара|много|einige|einigen|mehrere|mehreren|paar|viele|kilka|kilku|kilkoro|kilkunastu|paru|wielu|enkele|aantal|meerdere|verschillende|veel)$/u;
+  /^(?:few|couple|dozen|dozens|several|some|many|multiple|various|keli|kelis|kelios|keletas|keleta|keliu|keleto|keleriems|daug|nemazai|несколько|нескольких|пару|пара|много|einige|einigen|mehrere|mehreren|paar|viele|kilka|kilku|kilkoro|kilkunastu|paru|wielu|enkele|aantal|meerdere|verschillende|veel|nagra|flera|manga|diverse)$/u;
 
-type DemandLanguage = "lt" | "en" | "ru" | "de" | "pl" | "nl";
+type DemandLanguage = "lt" | "en" | "ru" | "de" | "pl" | "nl" | "sv";
 
 /** Demand verbs per locale, folded. The verb names the language whose
  *  grammar decides whether the occupation is singular. */
@@ -69,6 +69,8 @@ const DEMAND_VERBS: ReadonlyArray<{ lang: DemandLanguage; re: RegExp }> = (
   { lang: "de", re: /\b(suchen|brauchen|gesucht|benotigen|benotigt|stellen ein)\b/ },
   { lang: "pl", re: /\b(szukamy|potrzebujemy|poszukujemy|potrzebny|potrzebna|zatrudnimy|zatrudni)\b/ },
   { lang: "nl", re: /\b(zoeken|gezocht|nodig|gevraagd|zoekt)\b/ },
+  // Folded: söker → soker, behöver → behover.
+  { lang: "sv", re: /\b(soker|sokes|behover|behovs|anstaller|rekryterar)\b/ },
   ] as const satisfies ReadonlyArray<{ lang: DemandLanguage; re: RegExp }>
 ).map(({ lang, re }) => ({ lang, re: withUnicodeBoundaries(re) }));
 
@@ -83,6 +85,7 @@ const ONE_BEFORE: Record<DemandLanguage, RegExp> = {
   de: /^(ein|eine|einen|einem|einer)$/u,
   pl: /^(jeden|jedna|jednego)$/u,
   nl: /^een$/u,
+  sv: /^(en|ett)$/u,
 };
 
 /** Is this occupation token singular in that language? (folded token) */
@@ -113,6 +116,10 @@ function isSingularToken(lang: DemandLanguage, token: string, before: readonly s
     // Dutch agent nouns form the plural with -s (lassers, metselaars).
     case "nl":
       return !/s$/u.test(token);
+    // Swedish agent nouns are the same in the plural ("två svetsare"): only
+    // the article says one, as in German.
+    case "sv":
+      return false;
   }
 }
 

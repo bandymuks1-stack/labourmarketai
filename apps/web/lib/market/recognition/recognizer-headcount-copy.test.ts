@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { recognizeIntent } from "./index";
 
 const WEB = join(__dirname, "..", "..", "..");
-const LOCALES = ["lt", "en", "ru", "de", "pl", "nl"] as const;
+const LOCALES = ["lt", "en", "ru", "de", "pl", "nl", "sv"] as const;
 const messages = (locale: string) =>
   JSON.parse(readFileSync(join(WEB, "messages", `${locale}.json`), "utf8")) as Record<string, unknown>;
 
@@ -28,7 +28,7 @@ function translator(locale: string, namespace: string): LooseTranslator {
  * stated size — and ASKS when teams are not sized. Every line is real copy in
  * all six active locales.
  */
-describe("recognize page headcount copy, six locales", () => {
+describe("recognize page headcount copy, every active locale", () => {
   const expected: Record<(typeof LOCALES)[number], { one: string; teams: string }> = {
     lt: { one: "Darbuotojų: 1", teams: "Darbuotojų: 12 (3 brigados po 4)" },
     en: { one: "Workers: 1", teams: "Workers: 12 (3 teams of 4)" },
@@ -36,6 +36,7 @@ describe("recognize page headcount copy, six locales", () => {
     de: { one: "Arbeitskräfte: 1", teams: "Arbeitskräfte: 12 (3 Teams à 4)" },
     pl: { one: "Pracowników: 1", teams: "Pracowników: 12 (3 brygady po 4)" },
     nl: { one: "Werknemers: 1", teams: "Werknemers: 12 (3 ploegen van 4)" },
+    sv: { one: "Arbetstagare: 1", teams: "Arbetstagare: 12 (3 arbetslag om 4)" },
   };
 
   it.each(LOCALES)("%s", (locale) => {

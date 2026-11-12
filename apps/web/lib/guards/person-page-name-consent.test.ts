@@ -36,7 +36,7 @@ describe("person page — name only with a working relationship", () => {
       expect(value, locale).toMatch(/^\S.* \{token\}$/);
       expect(value, `${locale} is not English copied over`).not.toBe(english);
     }
-    for (const locale of ["lt", "en", "ru", "pl", "de", "nl"]) {
+    for (const locale of ["lt", "en", "ru", "pl", "de", "nl", "sv"]) {
       const consent = JSON.parse(read(`messages/${locale}.json`)).privacyConsent.preview.anonymousValue as string;
       expect(consent, locale).toBe(JSON.parse(read(`messages/${locale}.json`)).people.anonymousName);
     }

@@ -16,7 +16,7 @@ const stripComments = (s: string) =>
 
 const MATRIX = "components/marketing/country-readiness-requirements.tsx";
 const READING = "components/marketing/country-readiness-reading.tsx";
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 const OFF_REASONS = [
   "not_authenticated",
   "rate_limited",

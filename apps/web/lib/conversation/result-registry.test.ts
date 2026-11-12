@@ -22,7 +22,7 @@ import { CONVERSATION_ACTION_IDS } from "@/lib/conversation/action-registry";
  */
 
 const APP_ROOT = process.cwd();
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 const CONTEXTS = ["personal", "organization", "project"] as const;
 
 function loadMessages(locale: string): Record<string, unknown> {

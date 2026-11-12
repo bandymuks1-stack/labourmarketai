@@ -122,7 +122,7 @@ describe("§11 — one calendar, scoped by rights", () => {
   it("the two are named differently to a person, in every routed locale", () => {
     // The §4 lesson: two real objects must never share a human name. A company
     // person must be able to tell "Kalendorius" from "Darbo jėgos planavimas".
-    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const m = JSON.parse(read(`messages/${locale}.json`)) as Record<
         string,
         Record<string, unknown>

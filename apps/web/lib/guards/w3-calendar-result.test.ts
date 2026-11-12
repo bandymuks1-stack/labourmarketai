@@ -81,7 +81,7 @@ describe("W3 calendar result — one calculation, two presentations", () => {
   });
 
   it("every active locale carries the calendar panel copy", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const messages = JSON.parse(read(`messages/${locale}.json`)) as {
         conversation: { results: Record<string, string> };
       };

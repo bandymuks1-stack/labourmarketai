@@ -1121,7 +1121,7 @@
     },
     "headcount": {
       "total": "Arbetstagare: {count}",
-      "teams": "Arbetstagare: {total} ({teams, plural, one {# arbetslag} other {# arbetslag}} med {perTeam})"
+      "teams": "Arbetstagare: {total} ({teams, plural, one {# arbetslag} other {# arbetslag}} om {perTeam})"
     },
     "clarify": {
       "title": "Förtydliga",
@@ -1968,7 +1968,7 @@
     }
   },
   "demandReadback": {
-    "notVerifiedYet": "Ditt företag är ännu inte verifierat, så de behov du skickar in här visas inte för arbetare förrän verifieringen är klar.",
+    "notVerifiedYet": "Ditt företag är ännu inte verifierat, så de förfrågningar du skickar in här visas inte för arbetare förrän verifieringen är klar.",
     "notVerifiedHowTo": "Lägg till organisationsnummer och begär en granskning",
     "statusOther": "Under granskning",
     "heading": "Dina inskickade förfrågningar",
@@ -6007,7 +6007,7 @@
         {
           "heading": "AI och anslutna AI-assistenter",
           "items": [
-            "Vissa funktioner använder en AI-modell från Google (Gemini API). I dag får den endast offentlig marknadsstatistik — till exempel hur många lediga tjänster ett yrke har — för att formulera en kort förklaring. Översättning av meddelanden och jobbannonser samt tolkning av en mening som du skriver i chatten är förberedda men används inte: ingen meddelandetext och inga personuppgifter skickas för dem. Om någon av dem tas i bruk kommer detta meddelande att säga det, och endast den text som uppgiften behöver skulle skickas. Varje resultat är ett förslag — ingenting sparas som ett faktum om dig förrän du bekräftar det.",
+            "Vissa funktioner använder en AI-modell från Google (Gemini API). I dag får den endast offentlig marknadsstatistik — till exempel hur många lediga tjänster ett yrke har — för att skriva en kort förklaring. Översättning av meddelanden och jobbannonser samt tolkning av en mening som du skriver i chatten är förberedda men används inte: ingen meddelandetext och inga personuppgifter skickas för dem. Om någon av dem tas i bruk kommer detta meddelande att säga det, och endast den text som uppgiften behöver skulle skickas. Varje resultat är ett förslag — ingenting sparas som ett faktum om dig förrän du bekräftar det.",
             "Du kan ansluta LabourMarket.ai till en AI-assistent som ChatGPT eller Claude. Du godkänner själv varje anslutning på en samtyckesskärm; assistenten agerar sedan endast med dina egna behörigheter, och åtgärder med konsekvenser kräver en separat bekräftelse. Du kan när som helst se och koppla från anslutna appar i dina kontoinställningar.",
             "Vad en AI-assistents leverantör gör med din konversation regleras av den leverantörens egna integritetsvillkor."
           ]
@@ -8122,7 +8122,7 @@
     "workCardLabel": "Arbetskort",
     "workCardConfirmed": "Arbetskort registrerat",
     "workCardPending": "Arbetskort inte tillagt",
-    "namePlaceholder": "Namn inte tillagt än",
+    "namePlaceholder": "Namn har inte lagts till ännu",
     "candidateLabel": "Kandidatfärdigheter",
     "candidateHint": "Färdigheter som du har lagt till med egna ord (behöver förtydligas, inte granskade än).",
     "thermoLabel": "Marknadsaktivitet",
@@ -9852,7 +9852,7 @@
         "body": "En fast framgångsavgift gäller per anställd arbetstagare, arbetslag eller företagsplacering. En separat samordningsavgift gäller endast när samordning av dokument eller introduktion faktiskt har levererats. Det slutliga priset bekräftas innan betalt arbete påbörjas."
       }
     ],
-    "note": "Två saker löper parallellt, och den här sidan beskriver den andra. Själva plattformen är automatisk: jobbtavlan är offentlig, förhandsvisningen av matchningar är öppen utan konto, och ett angivet behov ger en rangordnad kortlista som förklarar varför varje person passar – en aktiv tjänst utan kostnad. Den betalda tjänsten ovan är den mänskliga: en operatör läser din förfrågan, kontaktar dig och kontrollerar kortlistan manuellt innan någon föreslås för dig. Ett helt arbetslag kan redan erbjuda sig mot din förfrågan som en enhet och, när båda parter är överens, ansluta till ditt projekt som ett team; den automatiska kortlistan föreslår ännu inte hela arbetslag – den rangordnar personer en och en.",
+    "note": "Två saker löper parallellt, och den här sidan beskriver den andra. Själva plattformen är automatisk: jobbtavlan är offentlig, förhandsvisningen av matchningar är öppen utan konto, och en angiven förfrågan ger en rangordnad kortlista som förklarar varför varje person passar – en aktiv tjänst utan kostnad. Den betalda tjänsten ovan är den mänskliga: en operatör läser din förfrågan, kontaktar dig och kontrollerar kortlistan manuellt innan någon föreslås för dig. Ett helt arbetslag kan redan erbjuda sig mot din förfrågan som en enhet och, när båda parter är överens, ansluta till ditt projekt som ett team; den automatiska kortlistan föreslår ännu inte hela arbetslag – den rangordnar personer en och en.",
     "ctaLabel": "Skicka en förfrågan om arbetskraft →"
   },
   "adminLaunchReadiness": {
@@ -10266,7 +10266,7 @@
         "insufficient_data": "Kan inte jämföras ännu"
       },
       "basis": "{matched} av {total} krävda färdigheter matchar ({confirmed} bekräftade av chef)",
-      "recognizedNote": "krav som känts igen ur behovets text – inte bekräftade ännu",
+      "recognizedNote": "krav som känts igen ur förfrågans text – inte bekräftade ännu",
       "missingPrefix": "saknas:",
       "formalTitle": "Formella krav",
       "formalLicence": "Körkort {categories}: ett formellt krav. Registrerat arbete ersätter det inte.",
@@ -14435,7 +14435,7 @@
       "agendaConflicts": "⚠ {count, plural, one {# överlappande åtagande hittades} other {# överlappande åtaganden hittades}} — denna plan är fysiskt omöjlig; kontrollera kalendern.",
       "chipAgenda": "Min plan",
       "userAgenda": "Visa min plan",
-      "chipNeedWorkers": "Jag behöver arbetare",
+      "chipNeedWorkers": "Beskriv ett behov",
       "chipCandidates": "Kandidater",
       "chipCompanyHub": "Företagsyta",
       "chipEduInviteLearner": "Bjud in en studerande",
@@ -14546,7 +14546,7 @@
         "chipServices": "Öppna tjänstetavlan",
         "corrected": "Uppdaterat: {changes}.",
         "changeInsteadOf": "{next} (i stället för {previous})",
-        "teams": "{teams, plural, one {# team} other {# team}} med {perTeam}"
+        "teams": "{teams, plural, one {# arbetslag} other {# arbetslag}} om {perTeam}"
       },
       "createOrganizationHint": "Jag kan skapa en organisation tillsammans med dig — uppgifterna och verifieringen finns på en sida.",
       "chipCreateOrganization": "Skapa en organisation",
@@ -16445,7 +16445,7 @@
       "label": "Arbetsberedskap",
       "known": "Redan angett:",
       "next": "Viktigast nu:",
-      "complete": "Allt viktigt är redan angett.",
+      "complete": "Alla {count} områden på ditt arbetskort är angivna. Dokument och väntande förfrågningar räknas separat.",
       "unavailable": "Arbetsberedskapen kunde inte visas just nu. Samtalet fungerar som alltid."
     },
     "action": {

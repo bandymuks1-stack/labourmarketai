@@ -246,7 +246,7 @@ describe("proof harness + app wiring", () => {
   });
 
   it("i18n: both new block messages exist in every locale that has the journal namespace", () => {
-    for (const loc of ["de", "en", "lt", "nl", "pl", "ru"]) {
+    for (const loc of ["de", "en", "lt", "nl", "pl", "ru", "sv"]) {
       const json = JSON.parse(read(`apps/web/messages/${loc}/journal.json`));
       for (const k of ["selfReviewNotAllowed", "reviewAuthorityNotEstablished", "alreadyAccepted"]) {
         expect(typeof json.inbox.result[k]).toBe("string");
