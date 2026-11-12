@@ -4713,11 +4713,7 @@
           "errorOpenNeedLimitIndividual": "Den här organisationen har nått gränsen för aktiva positioner i sin plan. Inget har debiterats eller ändrats. Kontakta oss.",
           "openNeedUsage": "Aktiva positioner: {used} av {limit} använda · {remaining} kvar",
           "openNeedUsageUpgradeCta": "Aktivera planen Organisation",
-          "openNeedUsageIndividual": "Du har nått gränsen för din plan. Kontakta oss för att diskutera dina behov.",
-          "title": "[EN] Tell us what you need",
-          "body": "[EN] Describe what you're looking for. Your request is saved and visible in your space right away — you're first here, so everything you create is real.",
-          "cta": "[EN] Submit your need",
-          "done": "[EN] Saved. Your need is now visible in your space."
+          "openNeedUsageIndividual": "Du har nått gränsen för din plan. Kontakta oss för att diskutera dina behov."
         }
       },
       "greeting": "Välkommen tillbaka, {name}",
@@ -4867,8 +4863,7 @@
         "network": "Nätverk",
         "playerCard": "Min yrkesprofil",
         "companyProfile": "Företagsprofil",
-        "adminPlatform": "Plattformsadministration",
-        "advanced": "Avancerad hantering"
+        "adminPlatform": "Plattformsadministration"
       },
       "roleNotice": {
         "needs_worker_role": "Den länken öppnar arbetstagarytan, som ditt konto inte har ännu. Lägg till arbetstagarrollen i ytnavet.",
@@ -5021,10 +5016,6 @@
             "desc": "Ditt företag"
           }
         }
-      },
-      "moreSection": {
-        "title": "Detaljerad översikt",
-        "hint": "Status, förfrågningar och extra kort"
       }
     },
     "middleware": {
@@ -5554,8 +5545,7 @@
     "rexora": "Byggs tillsammans: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai drivs och tillhandahålls kommersiellt av UAB “Nonstop Group”. Programvaran LabourMarket.ai och tillhörande immateriella rättigheter ägs av Labour Market AI Sp. z o.o. och används av UAB “Nonstop Group” under licens.",
     "ipNotice": "Immateriella rättigheter. Plattformen drivs under licens av UAB “Nonstop Group”.",
-    "legalNotice": "Juridisk information",
-    "preview": "[EN] M0 preview build — not a public launch."
+    "legalNotice": "Juridisk information"
   },
   "pages": {
     "workers": {
@@ -6339,8 +6329,7 @@
       "relatedLabel": "Relaterade sidor",
       "relatedPrivacy": "Integritetspolicy",
       "relatedDataAccess": "Dina uppgifter och vem som kan se dem"
-    },
-    "draftNote": "[EN] This document is a draft. The final, binding text will be reviewed by legal counsel before public launch (M5)."
+    }
   },
   "instructions": {
     "workerTitle": "Mina instruktioner",
@@ -8950,13 +8939,7 @@
         "none": "Inget nästa steg att visa ännu. Mer registrerat arbete ger mer att gå på.",
         "unknown": "Kunde inte läsas just nu."
       }
-    },
-    "tierHints": {
-      "confirmed": "bekräftad av en chef utifrån en verklig arbetspost",
-      "evidence": "arbetsjournalens poster stöder denna färdighet; ännu inte bekräftad av en chef",
-      "declared": "personens egen uppgift, inte externt bekräftad"
-    },
-    "verifyNote": "Bekräftelser kan kontrolleras på plattformen."
+    }
   },
   "todayScreen": {
     "eyebrow": "Idag",
@@ -9420,9 +9403,7 @@
       "skillCount": "{matched} av {total} efterfrågade färdigheter",
       "nameHidden": "Namn och kontaktuppgifter visas först när personen tillåter det.",
       "appliedToYou": "Har ansökt om detta behov — namn och foto följer med ansökan. Telefon och e-post förblir dolda.",
-      "skillUnknown": "Inga färdigheter angivna · behöver {total}",
-      "noRecords": "Inga arbetsregistreringar ännu",
-      "noManagerRecord": "Ännu ingen registrering från chefen"
+      "skillUnknown": "Inga färdigheter angivna · behöver {total}"
     },
     "readinessChecks": {
       "outstanding": "Beredskap (separat från matchning): {count} att kontrollera, först inför {stage}. Inget filter – ingen dokumentkopia behövs för att bli övervägd.",
@@ -15100,8 +15081,7 @@
       "whatChangedUnavailable": "Jag kunde inte kontrollera vad som ändrades just nu. Dina registreringar är säkra – försök igen om en stund eller öppna journalen.",
       "planIntro": "{count, plural, one {Det är # steg.} other {Det är # steg, i ordning. Här är det första – tryck på nästa när du är redo.}}",
       "planNextOffer": "Nästa steg:",
-      "planStep": "Steg {n} av {count}",
-      "advanced": "[EN] Advanced mode"
+      "planStep": "Steg {n} av {count}"
     },
     "worklog": {
       "understood": "Så här uppfattade jag det – spara?",
@@ -15178,10 +15158,7 @@
         "missing_requirement": "ett krav saknas: {count}",
         "conflict": "konflikt: {count}",
         "not_assessed": "inte bedömda ännu: {count}"
-      },
-      "intro": "[EN] I found {count} suitable options. Best matches:",
-      "introOne": "[EN] I found 1 suitable option:",
-      "introExternal": "Det finns {count} offentliga platsannonser från officiella källor i panelen — ansökan sker via den ursprungliga annonsen."
+      }
     },
     "summary": {
       "introProfile": "Så här ser din profil ut just nu: {done} av {total} grundläggande uppgifter är sparade.",
