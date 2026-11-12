@@ -90,7 +90,7 @@ export type McpDoorConfig = {
    * built for the request's public origin — the curated door's widget.
    * Absent = no resources capability (the full door).
    */
-  readonly resources?: (origin: string) => readonly McpResource[];
+  readonly resources?: (origin: string) => readonly McpResource[] | Promise<readonly McpResource[]>;
   /** Extra tool `_meta` by tool name (e.g. the widget's output template). */
   readonly toolMeta?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
 };
@@ -433,7 +433,7 @@ export function createMcpDoor(config: McpDoorConfig) {
       transportProtocolVersion: req.headers.get("mcp-protocol-version"),
       serverInfo: serverInfo(requestPublicOrigin(req), toolsetVersion()),
       instructions: config.instructions,
-      resources: config.resources?.(requestPublicOrigin(req)),
+      resources: await config.resources?.(requestPublicOrigin(req)),
       tools: toolDefs(),
       callTool: async (name, args) => {
         const capabilityId = capabilityIdForTool(name);
@@ -565,7 +565,7 @@ export function createMcpDoor(config: McpDoorConfig) {
       transportProtocolVersion: req.headers.get("mcp-protocol-version"),
       serverInfo: serverInfo(origin, toolsetVersion()),
       instructions: config.instructions,
-      resources: config.resources?.(requestPublicOrigin(req)),
+      resources: await config.resources?.(requestPublicOrigin(req)),
       tools: toolDefs(),
       callTool: async (name, args) => {
         const capabilityId = capabilityIdForTool(name);

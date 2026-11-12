@@ -7942,5 +7942,16 @@
       "allow": "Atļaut",
       "refuse": "Atteikties"
     }
+  },
+  "mcpWidget": {
+    "jobs": {
+      "empty": "Šim meklējumam neatbilst neviena brīva vakance.",
+      "unavailable": "Vakanču tāfeli pašlaik neizdevās nolasīt. Nekas netika meklēts — mēģiniet vēlreiz.",
+      "positions": "vietas",
+      "open": "Atvērt",
+      "more": "Vairāk vakanču nākamajā lapā.",
+      "from": "no",
+      "upTo": "līdz"
+    }
   }
 }

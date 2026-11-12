@@ -20549,5 +20549,16 @@
         "error": "Nie udało się. Spróbuj później."
       }
     }
+  },
+  "mcpWidget": {
+    "jobs": {
+      "empty": "Brak otwartych ofert dla tego wyszukiwania.",
+      "unavailable": "Nie udało się teraz odczytać tablicy ofert. Nic nie zostało wyszukane — spróbuj ponownie.",
+      "positions": "miejsc",
+      "open": "Otwórz",
+      "more": "Więcej ofert na następnej stronie.",
+      "from": "od",
+      "upTo": "do"
+    }
   }
 }

@@ -1,7 +1,9 @@
 import { runInNewContext } from "node:vm";
 import { describe, expect, it } from "vitest";
 
-import { jobsWidgetResource } from "./chatgpt-jobs-widget";
+import { jobsWidgetResource, loadJobsWidgetLabels } from "./chatgpt-jobs-widget";
+
+const LABELS = await loadJobsWidgetLabels();
 
 /**
  * Runs the widget's own inline script against a minimal DOM, with the tool
@@ -15,7 +17,7 @@ import { jobsWidgetResource } from "./chatgpt-jobs-widget";
 type Node = { tag: string; className?: string; textContent: string; children: Node[] };
 
 function render(toolOutput: unknown, locale = "en"): string[] {
-  const html = jobsWidgetResource("https://labourmarket.ai").text;
+  const html = jobsWidgetResource("https://labourmarket.ai", LABELS).text;
   const cfg = /<script type="application\/json" id="cfg">([\s\S]*?)<\/script>/.exec(html)![1]!;
   const script = /<script>\n([\s\S]*?)<\/script>/.exec(html)![1]!;
   const make = (tag: string): Node => {
@@ -88,6 +90,12 @@ describe("job-list widget rendering", () => {
   it("Lithuanian readers get the Lithuanian bound words", () => {
     const lines = render({ ok: true, data: { jobs: [job({ compensationMax: 3200 })] } }, "lt-LT");
     expect(lines).toContain("iki 3200 EUR");
+  });
+
+  it("a Russian ChatGPT session reads Russian (Codex P1: no English fallback for an active locale)", () => {
+    const text = render({ ok: true, data: { jobs: [] } }, "ru").join(" ");
+    expect(text).toBe(LABELS.ru!.empty);
+    expect(text).not.toMatch(/No open jobs/);
   });
 
   it("draws nothing before the host has handed over a result", () => {

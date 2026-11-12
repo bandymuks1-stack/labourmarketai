@@ -20549,5 +20549,16 @@
         "error": "That didn't work. Try again later."
       }
     }
+  },
+  "mcpWidget": {
+    "jobs": {
+      "empty": "No open jobs match this search.",
+      "unavailable": "The job board could not be read just now. Nothing was searched — try again.",
+      "positions": "positions",
+      "open": "Open",
+      "more": "More jobs on the next page.",
+      "from": "from",
+      "upTo": "up to"
+    }
   }
 }

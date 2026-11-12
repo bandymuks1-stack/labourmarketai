@@ -1,3 +1,5 @@
+import { activeLocales } from "@/lib/i18n/config";
+
 import type { McpResource } from "./protocol";
 
 /**
@@ -25,14 +27,30 @@ export const JOBS_WIDGET_TOOL_META = {
 /** The tools that render with the widget (both public job reads). */
 export const JOBS_WIDGET_TOOLS = ["jobs_search", "jobs_get"] as const;
 
-const LABELS = {
-  en: { empty: "No open jobs match this search.", unavailable: "The job board could not be read just now. Nothing was searched — try again.", positions: "positions", open: "Open", more: "More jobs on the next page.", from: "from", upTo: "up to" },
-  lt: { empty: "Šios paieškos neatitinka nė vienas atviras darbas.", unavailable: "Darbų lentos šiuo metu nepavyko perskaityti. Niekas neieškota — bandykite dar kartą.", positions: "vietos", open: "Atidaryti", more: "Daugiau darbų kitame puslapyje.", from: "nuo", upTo: "iki" },
-} as const;
+/** The words the widget draws, per routed locale — read from the ONE copy
+ *  source (`messages/<locale>.json` → `mcpWidget.jobs`), never a second table
+ *  (doctrine §2.4). The host's `openai.locale` picks one; an unrouted
+ *  language reads English. */
+export type JobsWidgetLabels = Readonly<Record<string, Readonly<Record<string, string>>>>;
 
-function widgetHtml(origin: string): string {
+const LABEL_KEYS = ["empty", "unavailable", "positions", "open", "more", "from", "upTo"] as const;
+
+export async function loadJobsWidgetLabels(): Promise<JobsWidgetLabels> {
+  const entries = await Promise.all(
+    activeLocales.map(async (locale) => {
+      const mod = (await import(`../../messages/${locale}.json`)) as {
+        default: { mcpWidget?: { jobs?: Record<string, string> } };
+      };
+      const jobs = mod.default.mcpWidget?.jobs ?? {};
+      return [locale, Object.fromEntries(LABEL_KEYS.map((k) => [k, jobs[k] ?? ""]))] as const;
+    }),
+  );
+  return Object.fromEntries(entries);
+}
+
+function widgetHtml(origin: string, labels: JobsWidgetLabels): string {
   // Values reach the page only as JSON in a data block, read with JSON.parse.
-  const config = JSON.stringify({ origin, labels: LABELS }).replace(/</g, "\\u003c");
+  const config = JSON.stringify({ origin, labels }).replace(/</g, "\\u003c");
   return `<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
@@ -98,13 +116,13 @@ p{margin:12px;color:var(--muted)}
 }
 
 /** The widget as an MCP resource for this door's public origin. */
-export function jobsWidgetResource(origin: string): McpResource {
+export function jobsWidgetResource(origin: string, labels: JobsWidgetLabels): McpResource {
   return {
     uri: JOBS_WIDGET_URI,
     name: "LabourMarket.ai job list",
     description: "Renders a public job search result as a list.",
     mimeType: "text/html+skybridge",
-    text: widgetHtml(origin),
+    text: widgetHtml(origin, labels),
     _meta: {
       "openai/widgetDescription": "A list of open jobs from the public LabourMarket.ai board.",
       "openai/widgetPrefersBorder": true,

@@ -20549,5 +20549,16 @@
         "error": "Das hat nicht geklappt. Versuchen Sie es später erneut."
       }
     }
+  },
+  "mcpWidget": {
+    "jobs": {
+      "empty": "Keine offenen Stellen für diese Suche.",
+      "unavailable": "Die Stellenbörse konnte gerade nicht gelesen werden. Es wurde nichts gesucht — versuchen Sie es erneut.",
+      "positions": "Stellen",
+      "open": "Öffnen",
+      "more": "Weitere Stellen auf der nächsten Seite.",
+      "from": "ab",
+      "upTo": "bis"
+    }
   }
 }

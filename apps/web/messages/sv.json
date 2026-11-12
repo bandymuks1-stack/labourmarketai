@@ -7942,5 +7942,16 @@
       "allow": "Tillåt",
       "refuse": "Avböj"
     }
+  },
+  "mcpWidget": {
+    "jobs": {
+      "empty": "Inga lediga jobb matchar den här sökningen.",
+      "unavailable": "Jobbtavlan kunde inte läsas just nu. Ingenting söktes — försök igen.",
+      "positions": "platser",
+      "open": "Öppna",
+      "more": "Fler jobb på nästa sida.",
+      "from": "från",
+      "upTo": "upp till"
+    }
   }
 }

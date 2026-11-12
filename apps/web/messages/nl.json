@@ -20549,5 +20549,16 @@
         "error": "Dat lukte niet. Probeer het later opnieuw."
       }
     }
+  },
+  "mcpWidget": {
+    "jobs": {
+      "empty": "Geen openstaande vacatures voor deze zoekopdracht.",
+      "unavailable": "Het vacaturebord kon nu niet worden gelezen. Er is niets gezocht — probeer het opnieuw.",
+      "positions": "plaatsen",
+      "open": "Openen",
+      "more": "Meer vacatures op de volgende pagina.",
+      "from": "vanaf",
+      "upTo": "tot"
+    }
   }
 }
