@@ -1,0 +1,152 @@
+name: Post-deploy smoke (public critical path, read-only)
+
+# A STABLE VERIFICATION WINDOW AFTER EVERY DEPLOY (owner 2026-11-12: "after each
+# deploy make sure there is a stable check window and record the result with the
+# production commit").
+#
+# Why this exists. The signed-in production walk (prod-qa-walk.yml) starts 120
+# minutes after the LAST push to main, and every newer push cancels the waiting
+# one — by design, so a merge burst spends one walk, not ten. On a day with a
+# merge every hour that walk never starts, and no deploy gets a recorded result.
+# This workflow is the part that can run after EVERY deploy, because it costs
+# nothing the walk's limits protect: no account, no secret, no write, no walk
+# budget, about a dozen public page loads.
+#
+# What it checks, about 5 minutes, signed out:
+#   - which build production serves, at the start and at the end (a result is
+#     only recorded for a build that did not change underneath it);
+#   - the security headers a stranger's browser receives;
+#   - route-group chunks under both spellings of their path, when that probe is
+#     in the tree (.github/scripts/encoded-chunk-probe.mjs);
+#   - the first-visitor and sign-up path in lt and en at 360 and 1440 px: home,
+#     for-workers, for-companies, company-need, jobs, pricing, sign-in, sign-up
+#     — error screens, failed scripts, broken link targets, dead buttons.
+#
+# What it does NOT check: anything signed in. Worker, employer need posting,
+# messaging and the other journeys stay with prod-qa-walk.yml, unchanged.
+#
+# QUEUEING, NOT CANCELLING: runs share one concurrency group with
+# cancel-in-progress false, so a smoke that has started always finishes and
+# records its build. GitHub keeps one waiting run per group; if three deploys
+# land while one smoke runs, the newest waits and the middle one is dropped —
+# the newest is the build production serves by then, so nothing is lost.
+
+on:
+  workflow_run:
+    workflows: ["Deploy to VPS"]
+    types: [completed]
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/post-deploy-smoke.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: post-deploy-smoke-${{ github.event_name == 'pull_request' && github.ref || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    # A deploy that failed rolled itself back; there is no new build to record.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The blue/green switch has just ended: give the old server its drain time,
+      # then require three healthy answers in a row from ONE build.
+      - name: Production is settled on one build
+        id: build
+        run: |
+          set -euo pipefail
+          [ "${{ github.event_name }}" = "workflow_run" ] && sleep 60
+          last=""; same=0
+          for i in $(seq 1 12); do
+            body=$(curl -sS --max-time 20 https://labourmarket.ai/api/health || true)
+            b=$(printf '%s' "$body" | jq -r 'if .ok == true then .build else empty end' 2>/dev/null || true)
+            if [ -n "$b" ] && [ "$b" = "$last" ]; then same=$((same+1)); else same=0; fi
+            last="$b"
+            [ "$same" -ge 2 ] && break
+            sleep 10
+          done
+          [ "$same" -ge 2 ] || { echo "::error::production did not give three healthy answers from one build"; exit 1; }
+          echo "build=$last" >> "$GITHUB_OUTPUT"
+          echo "### Post-deploy smoke — production build \`$last\` ($(date -u +%Y-%m-%dT%H:%MZ))" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Security headers a stranger's browser receives
+        run: |
+          set -euo pipefail
+          h=$(curl -sS -o /dev/null -D - --max-time 30 https://labourmarket.ai/en | tr -d '\r')
+          fail=0
+          need() {
+            if printf '%s\n' "$h" | grep -qiE "^$1: .*$2"; then echo "ok   $1"; else echo "FAIL $1 (expected to contain: $2)"; fail=1; fi
+          }
+          need "x-frame-options" "DENY"
+          need "x-content-type-options" "nosniff"
+          need "referrer-policy" "strict-origin-when-cross-origin"
+          need "strict-transport-security" "max-age="
+          need "permissions-policy" "."
+          [ "$fail" -eq 0 ]
+
+      - name: Route-group chunks under both spellings (when the probe is in the tree)
+        run: |
+          set -euo pipefail
+          if [ -f .github/scripts/encoded-chunk-probe.mjs ]; then
+            node .github/scripts/encoded-chunk-probe.mjs https://labourmarket.ai
+          else
+            echo "probe not in this tree yet: skipped" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.33.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter=!mobile
+
+      - name: Install Playwright chromium
+        run: pnpm -F web exec playwright install --with-deps chromium
+
+      - name: First visitor and sign-up path, lt and en, 360 and 1440 px
+        run: |
+          set -euo pipefail
+          pages=""
+          for l in lt en; do
+            for p in "" /for-workers /for-companies /company-need /jobs /pricing /auth/login /auth/signup; do
+              pages="${pages:+$pages,}/$l$p"
+            done
+          done
+          node apps/web/scripts/public-cta-crawl.mjs --origin https://labourmarket.ai --locales lt,en --only "$pages" --no-discover --out smoke.json | tee smoke.log
+
+      - name: Record the result against the build
+        if: always()
+        run: |
+          set -euo pipefail
+          after=$(curl -sS --max-time 30 https://labourmarket.ai/api/health | jq -r 'if .ok == true then .build else empty end' || true)
+          {
+            if [ "$after" != "${{ steps.build.outputs.build }}" ]; then echo "**The build changed during the smoke (now \`${after:-unreadable or not ok}\`): this run records nothing.**"; fi
+            echo '```'
+            if [ -f smoke.log ]; then sed -n '/^pages crawled/,$p' smoke.log | head -80; else echo "the page check did not run"; fi
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ -n "${{ steps.build.outputs.build }}" ] && [ "$after" = "${{ steps.build.outputs.build }}" ]
+
+      - name: Keep the report (14 days)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: post-deploy-smoke-${{ steps.build.outputs.build || 'unknown' }}
+          path: smoke.json
+          if-no-files-found: ignore
+          retention-days: 14
