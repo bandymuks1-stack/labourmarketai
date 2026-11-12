@@ -175,17 +175,26 @@ async function inviteToTeam(co: Page, name: string, address: string, previousLin
   const code = co.getByTestId("team-invite-link").locator("code");
   const typed = co.getByTestId(`team-invite-email-${s.teamId}`);
   const fresher = async () => {
-    const text = (await code.innerText().catch(() => "")).trim();
+    // count() first: innerText() on a link that is not there yet WAITS for it,
+    // and the address question would never be noticed.
+    if ((await code.count()) === 0) return "";
+    const text = (await code.first().innerText().catch(() => "")).trim();
     return text && text !== previousLink ? text : "";
   };
   // The owner may not be able to read the person's address; the product then
   // asks for it and the owner types it.
-  await expect
-    .poll(async () => (await fresher()) !== "" || (await typed.isVisible().catch(() => false)), {
-      message: "the product answers with a link or asks for the address",
-      timeout: 30_000,
-    })
-    .toBe(true);
+  const answered = await expect
+    .poll(async () => (await fresher()) !== "" || (await typed.isVisible().catch(() => false)), { timeout: 30_000 })
+    .toBe(true)
+    .then(() => true)
+    .catch(() => false);
+  if (!answered) {
+    // Say what the product said instead (synthetic names only), so a refusal
+    // is read from the run and not guessed.
+    const said = await co.getByTestId("team-brigades-msg").innerText().catch(() => "(no message)");
+    const state = `picked=${await pick.inputValue()} add-disabled=${await add.isDisabled()}`;
+    throw new Error(`no link and no address question after "add"; the product said: ${said} [${state}]`);
+  }
   if ((await fresher()) === "") {
     await typed.fill(address);
     await add.click();
