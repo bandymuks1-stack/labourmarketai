@@ -220,6 +220,7 @@ export async function offerTeamToDemand(input: {
     await emitOfferReceivedNotification({
       kind: "team",
       offerId: parsed.offerId,
+      requestId: input.requestId,
       recipientProfileId: await teamOfferCounterpart(ctx.supabase, parsed.offerId),
       actorProfileId: ctx.userId,
     });

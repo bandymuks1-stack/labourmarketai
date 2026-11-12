@@ -361,6 +361,15 @@ export function notificationEventHref(
   ) {
     return `/dashboard/communication/${metadata.conversationId}`;
   }
+  // v12: an offer received opens scouting ON THE NEED it is for, where the
+  // employer answers it (the page's default selection may be another need).
+  if (
+    (entityType === "team_demand_offer" || entityType === "agency_candidate_offer") &&
+    typeof metadata?.requestId === "string" &&
+    VACANCY_ID_RE.test(metadata.requestId)
+  ) {
+    return `/dashboard/company/scouting?request=${metadata.requestId}`;
+  }
   return NOTIFICATION_ENTITY_HREF[entityType as NotificationEntityType];
 }
 
@@ -412,6 +421,9 @@ const SAFE_METADATA_KEYS = [
   // v10 message: the thread's own (opaque uuid) id — a link target, never
   // content. Validated as a uuid again when the href is built.
   "conversationId",
+  // v12 offer received: the (opaque uuid) id of the need the offer is for,
+  // a link target only. Validated as a uuid again when the href is built.
+  "requestId",
   // v10 journal review: one of JOURNAL_REVIEW_DECISIONS — which outcome the
   // worker is being told about. Never the reviewer's note.
   "decision",

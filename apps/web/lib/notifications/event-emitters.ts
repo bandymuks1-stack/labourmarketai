@@ -2164,8 +2164,8 @@ export async function emitJobAlertNotificationsForCron(): Promise<JobAlertCronRe
  * organization-wide fan-out. Idempotent: the entity is the OFFER, so a retried
  * write re-emits the same (type, offer) key and the store's UNIQUE
  * (recipient, dedupe_key) turns it into a no-op. The row carries no name, no
- * contact, no CV field: the received event no metadata at all, the answer
- * only `decision`.
+ * contact, no CV field: the received event carries only the need's opaque
+ * id (its link target), the answer only `decision`.
  *
  * Inert until the v12 constraint is applied: the insert fails its CHECK and
  * the result says so, the v2..v11 precedent.
@@ -2220,13 +2220,14 @@ async function deliverOfferEvent(
   }
 }
 
-/** A NEW offer reached the demand owner. No metadata: the offer itself is read
- *  on scouting, under the owner's own RLS. */
+/** A NEW offer reached the demand owner. The only metadata is the need's id,
+ *  so the bell opens scouting on that need; the offer itself is read there,
+ *  under the owner's own RLS. */
 export async function emitOfferReceivedNotification(
-  facts: OfferNotificationFacts,
+  facts: OfferNotificationFacts & { readonly requestId: string | null },
 ): Promise<NotificationEmitResult> {
   const { eventType, entityType } = OFFER_RECEIVED[facts.kind];
-  return deliverOfferEvent(eventType, entityType, facts);
+  return deliverOfferEvent(eventType, entityType, facts, facts.requestId ? { requestId: facts.requestId } : undefined);
 }
 
 /** The company answered; the one who offered hears which answer. */

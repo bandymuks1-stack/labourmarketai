@@ -53,6 +53,7 @@ vi.mock("@/lib/notifications/web-push-dispatch", () => ({
 import {
   NOTIFICATION_ENTITY_HREF,
   NOTIFICATION_EVENT_TYPES,
+  notificationEventHref,
   notificationRenderedType,
 } from "@/lib/notifications/events";
 import {
@@ -83,6 +84,7 @@ const ENTITIES = ["team_demand_offer", "team_demand_offer_response", "agency_can
 const OWNER = "11111111-1111-4111-8111-111111111111";
 const AGENT = "22222222-2222-4222-8222-222222222222";
 const OFFER = "33333333-3333-4333-8333-333333333333";
+const NEED = "44444444-4444-4444-8444-444444444444";
 
 beforeEach(() => {
   store.length = 0;
@@ -93,7 +95,7 @@ beforeEach(() => {
 describe("(a) recipient scope", () => {
   it("(a1) the received event goes to the one resolved recipient and nobody else", async () => {
     const r = await emitOfferReceivedNotification({
-      kind: "candidate", offerId: OFFER, recipientProfileId: OWNER, actorProfileId: AGENT,
+      kind: "candidate", offerId: OFFER, requestId: NEED, recipientProfileId: OWNER, actorProfileId: AGENT,
     });
     expect(r).toMatchObject({ delivered: true, outcome: "written", recipients: 1 });
     expect(store).toHaveLength(1);
@@ -109,7 +111,7 @@ describe("(a) recipient scope", () => {
 
   it("(a3) an unresolved recipient sends nothing and never widens to an organization", async () => {
     const r = await emitOfferReceivedNotification({
-      kind: "team", offerId: OFFER, recipientProfileId: null, actorProfileId: AGENT,
+      kind: "team", offerId: OFFER, requestId: NEED, recipientProfileId: null, actorProfileId: AGENT,
     });
     expect(r).toEqual({ delivered: false, reason: "recipient_unresolved" });
     expect(store).toHaveLength(0);
@@ -124,7 +126,7 @@ describe("(a) recipient scope", () => {
   });
 
   it("(a5) the emitter reads no offer, demand, membership or profile table with service privileges", async () => {
-    await emitOfferReceivedNotification({ kind: "team", offerId: OFFER, recipientProfileId: OWNER, actorProfileId: AGENT });
+    await emitOfferReceivedNotification({ kind: "team", offerId: OFFER, requestId: NEED, recipientProfileId: OWNER, actorProfileId: AGENT });
     await emitOfferAnsweredNotification({
       kind: "candidate", offerId: OFFER, recipientProfileId: AGENT, actorProfileId: OWNER, decision: "accepted",
     });
@@ -155,7 +157,7 @@ describe("(a) recipient scope", () => {
 
 describe("(b) no duplicates", () => {
   it("(b1) a retried write of the same offer and event is a no-op", async () => {
-    const facts = { kind: "candidate" as const, offerId: OFFER, recipientProfileId: OWNER, actorProfileId: AGENT };
+    const facts = { kind: "candidate" as const, offerId: OFFER, requestId: NEED, recipientProfileId: OWNER, actorProfileId: AGENT };
     const first = await emitOfferReceivedNotification(facts);
     const second = await emitOfferReceivedNotification(facts);
     expect(first).toMatchObject({ outcome: "written" });
@@ -165,7 +167,7 @@ describe("(b) no duplicates", () => {
   });
 
   it("(b2) received and answered for one offer are two facts, each once", async () => {
-    await emitOfferReceivedNotification({ kind: "team", offerId: OFFER, recipientProfileId: OWNER, actorProfileId: AGENT });
+    await emitOfferReceivedNotification({ kind: "team", offerId: OFFER, requestId: NEED, recipientProfileId: OWNER, actorProfileId: AGENT });
     for (let i = 0; i < 2; i++) {
       await emitOfferAnsweredNotification({
         kind: "team", offerId: OFFER, recipientProfileId: AGENT, actorProfileId: OWNER, decision: "accepted",
@@ -188,15 +190,15 @@ describe("(b) no duplicates", () => {
 });
 
 describe("(c) no private data", () => {
-  it("(c1) the stored row holds ids, the type and at most the decision", async () => {
-    await emitOfferReceivedNotification({ kind: "candidate", offerId: OFFER, recipientProfileId: OWNER, actorProfileId: AGENT });
+  it("(c1) the stored row holds ids, the type and at most the need's id or the decision", async () => {
+    await emitOfferReceivedNotification({ kind: "candidate", offerId: OFFER, requestId: NEED, recipientProfileId: OWNER, actorProfileId: AGENT });
     await emitOfferAnsweredNotification({
       kind: "candidate", offerId: OFFER, recipientProfileId: AGENT, actorProfileId: OWNER, decision: "declined",
     });
     expect(Object.keys(store[0]).sort()).toEqual(
       ["dedupe_key", "entity_id", "entity_type", "event_type", "metadata", "recipient_profile_id"],
     );
-    expect(store[0].metadata).toEqual({});
+    expect(store[0].metadata).toEqual({ requestId: NEED });
     expect(store[1].metadata).toEqual({ decision: "declined" });
   });
 
@@ -215,10 +217,10 @@ describe("(c) no private data", () => {
     ]);
   });
 
-  it("(c3) the received emitter passes no metadata, the answer only the decision", () => {
+  it("(c3) the received emitter passes only the need's id, the answer only the decision", () => {
     const src = read("lib", "notifications", "event-emitters.ts");
     const block = src.slice(src.indexOf("export type OfferNotificationKind"));
-    expect(block).toContain("return deliverOfferEvent(eventType, entityType, facts);");
+    expect(block).toContain("facts.requestId ? { requestId: facts.requestId } : undefined");
     expect(block).toContain("return deliverOfferEvent(eventType, entityType, facts, { decision: facts.decision });");
   });
 });
@@ -241,6 +243,10 @@ describe("rides the existing store, with no grant", () => {
     expect(NOTIFICATION_ENTITY_HREF.team_demand_offer).toBe("/dashboard/company/scouting");
     expect(NOTIFICATION_ENTITY_HREF.agency_candidate_offer).toBe("/dashboard/company/scouting");
     expect(NOTIFICATION_ENTITY_HREF.team_demand_offer_response).toBe("/dashboard/company/people");
+    // A received offer opens scouting ON its need; a non-uuid falls back.
+    expect(notificationEventHref("agency_candidate_offer", { requestId: NEED })).toBe(`/dashboard/company/scouting?request=${NEED}`);
+    expect(notificationEventHref("team_demand_offer", { requestId: NEED })).toBe(`/dashboard/company/scouting?request=${NEED}`);
+    expect(notificationEventHref("team_demand_offer", { requestId: "x/../../admin" })).toBe("/dashboard/company/scouting");
     expect(NOTIFICATION_ENTITY_HREF.agency_candidate_offer_response).toBe("/dashboard/company/partners");
   });
 

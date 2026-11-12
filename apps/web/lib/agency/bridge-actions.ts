@@ -329,6 +329,7 @@ export async function submitOfferAction(
       await emitOfferReceivedNotification({
         kind: "candidate",
         offerId,
+        requestId,
         recipientProfileId: (need as { profile_id?: string | null } | null)?.profile_id ?? null,
         actorProfileId: auth.user.id,
       });
