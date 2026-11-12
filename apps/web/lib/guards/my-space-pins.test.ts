@@ -43,12 +43,18 @@ describe("the pinned row is a reference row over the ONE chip handler", () => {
     expect(ROW).toMatch(/aria-keyshortcuts="ArrowLeft ArrowRight"/);
     expect(ROW).toMatch(/e\.key === "ArrowLeft" \|\| e\.key === "ArrowUp" \? -1/);
     expect(ROW).toMatch(/onPointerDown=\{\(e\) => onHandleDown\(e, p\.ref\)\}/);
-    expect(ROW).toMatch(/setPointerCapture\(e\.pointerId\)/);
+    // Followed on the window, so a re-order that moves the chip in the DOM,
+    // or a release outside the row, still ends the drag.
+    expect(ROW).toMatch(/window\.addEventListener\("pointerup", end\)/);
+    expect(ROW).toMatch(/window\.addEventListener\("pointercancel", end\)/);
+    expect(ROW).toMatch(/window\.removeEventListener\("pointermove", onMove\)/);
+    expect(rowCode).not.toMatch(/setPointerCapture/);
+    expect(ROW).toMatch(/useEffect\(\(\) => \(\) => drag\.current\?\.\(\), \[\]\);/);
     expect(ROW).toMatch(/touch-none/);
     expect(ROW).toMatch(/refocus\.current = pins\[index\]\.ref;/);
     expect(ROW).toMatch(/handleEls\.current\.get\(refocus\.current\)\?\.focus\(\)/);
     // One stored write per gesture: the drag previews locally and saves on release.
-    expect(ROW).toMatch(/if \(d\.moved && next\) saveOrder\(next\);/);
+    expect(ROW).toMatch(/if \(ev\.type === "pointerup" && moved\) saveOrder\(order\);/);
     expect(rowCode).not.toMatch(/my-space-move-earlier|my-space-move-later|draggable/);
     // The remove control is small to look at and a full 44px to press.
     expect(ROW).toMatch(/flex size-11 flex-none[^"]*"\s*data-testid="my-space-remove"/);

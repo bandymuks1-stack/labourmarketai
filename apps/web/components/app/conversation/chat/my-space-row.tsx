@@ -119,7 +119,9 @@ export function MySpaceRow({
   /** The order shown while a chip is being dragged (stored on release). */
   const [draft, setDraft] = useState<readonly MySpacePinView[] | null>(null);
   const [dragging, setDragging] = useState<string | null>(null);
-  const drag = useRef<{ ref: string; x: number; y: number; moved: boolean } | null>(null);
+  /** Ends the drag in progress (removes its window listeners), if any. */
+  const drag = useRef<(() => void) | null>(null);
+  useEffect(() => () => drag.current?.(), []);
   const itemEls = useRef(new Map<string, HTMLElement>());
   const handleEls = useRef(new Map<string, HTMLButtonElement>());
   /** The chip to give the focus back to after a keyboard move re-ordered it. */
@@ -273,39 +275,52 @@ export function MySpaceRow({
 
   // DRAG with a mouse or a finger (pointer events, so it works on touch where
   // HTML drag-and-drop does not). While dragging the row shows the order as
-  // it would be; it is stored once, on release.
+  // it would be; it is stored once, on release. The gesture is followed on
+  // the WINDOW, not on the chip: re-ordering moves the chip in the DOM, which
+  // can drop a pointer capture, and a release over a gap or outside the row
+  // must still end the drag and save what is shown.
   const onHandleDown = (e: PointerEvent<HTMLButtonElement>, ref: string) => {
-    if (busy || (e.pointerType === "mouse" && e.button !== 0)) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = { ref, x: e.clientX, y: e.clientY, moved: false };
-  };
-  const onHandleMove = (e: PointerEvent<HTMLButtonElement>) => {
-    const d = drag.current;
-    if (!d) return;
-    if (!d.moved && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 8) return;
-    if (!d.moved) setDragging(d.ref);
-    d.moved = true;
-    const order = draft ?? pins;
-    const over = order.find((p) => {
-      const r = itemEls.current.get(p.ref)?.getBoundingClientRect();
-      return r && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-    });
-    if (!over || over.ref === d.ref) return;
-    const from = order.findIndex((p) => p.ref === d.ref);
-    const to = order.findIndex((p) => p.ref === over.ref);
-    if (from < 0 || to < 0) return;
-    const next = [...order];
-    next.splice(to, 0, next.splice(from, 1)[0]);
-    setDraft(next);
-  };
-  const onHandleUp = () => {
-    const d = drag.current;
-    drag.current = null;
-    if (!d) return;
-    const next = draft;
-    setDraft(null);
-    setDragging(null);
-    if (d.moved && next) saveOrder(next);
+    if (busy || drag.current || (e.pointerType === "mouse" && e.button !== 0)) return;
+    const pointerId = e.pointerId;
+    const start = { x: e.clientX, y: e.clientY };
+    let moved = false;
+    let order: readonly MySpacePinView[] = pins;
+    const onMove = (ev: globalThis.PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      if (!moved && Math.hypot(ev.clientX - start.x, ev.clientY - start.y) < 8) return;
+      if (!moved) setDragging(ref);
+      moved = true;
+      const over = order.find((p) => {
+        const r = itemEls.current.get(p.ref)?.getBoundingClientRect();
+        return r && ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom;
+      });
+      if (!over || over.ref === ref) return;
+      const from = order.findIndex((p) => p.ref === ref);
+      const to = order.findIndex((p) => p.ref === over.ref);
+      if (from < 0 || to < 0) return;
+      const next = [...order];
+      next.splice(to, 0, next.splice(from, 1)[0]);
+      order = next;
+      setDraft(next);
+    };
+    const end = (ev: globalThis.PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      stop();
+      // A cancelled gesture (the browser took it over) saves nothing.
+      if (ev.type === "pointerup" && moved) saveOrder(order);
+    };
+    const stop = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", end);
+      window.removeEventListener("pointercancel", end);
+      drag.current = null;
+      setDraft(null);
+      setDragging(null);
+    };
+    drag.current = stop;
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
   };
 
   const shown = draft ?? pins;
@@ -347,9 +362,6 @@ export function MySpaceRow({
                   aria-disabled={busy || undefined}
                   onKeyDown={(e) => onHandleKey(e, i)}
                   onPointerDown={(e) => onHandleDown(e, p.ref)}
-                  onPointerMove={onHandleMove}
-                  onPointerUp={onHandleUp}
-                  onPointerCancel={onHandleUp}
                   className="min-h-11 cursor-grab touch-none select-none rounded-l-full pl-4 pr-1 text-support font-medium text-text-primary outline-none focus-visible:ring-2 focus-visible:ring-brand-blue active:cursor-grabbing"
                   data-testid="my-space-handle"
                 >
