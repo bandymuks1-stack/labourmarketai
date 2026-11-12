@@ -7245,7 +7245,16 @@
         "blockedFailed": "Pašalink arba iš naujo įkelk nepavykusį priedą.",
         "partialFailure": "Žinutė išsiųsta, bet dalies priedų prisegti nepavyko. Pabandyk juos išsiųsti dar kartą."
       },
-      "languageLabel": "Rašau"
+      "languageLabel": "Rašau",
+      "errors": {
+        "notAuthenticated": "Sesija baigėsi. Prisijunk iš naujo ir išsiųsk žinutę.",
+        "invalidInput": "Šios žinutės išsiųsti negalima: ji gali būti per ilga arba priedas nepalaikomas.",
+        "notParticipant": "Šiame pokalbyje rašyti negali — neturi prieigos.",
+        "rateLimited": "Per pastarąją valandą išsiuntei daug žinučių. Šiek tiek palauk ir bandyk dar kartą.",
+        "rateCheckUnavailable": "Saugumo patikros atlikti nepavyko, todėl niekas neišsiųsta. Bandyk dar kartą.",
+        "attachmentsUnavailable": "Priedų siuntimas čia dar neįjungtas — įrašyk ir tekstą.",
+        "sendFailed": "Žinutės išsiųsti nepavyko. Tavo tekstas liko — bandyk dar kartą."
+      }
     },
     "launcher": {
       "openLabel": "Susisiekti su pagalba",
@@ -7305,19 +7314,7 @@
     "translatedFrom": "Mašininis vertimas iš {lang}",
     "showOriginal": "Originalas ({lang})",
     "translationUnavailable": "Originalas ({lang}) — vertimo nėra",
-    "loadError": "Šiuo metu žinučių įkelti nepavyko. Tai, ką matai, nėra visas vaizdas — bandyk dar kartą.",
-    "errors": {
-      "invalid_input": "Žinutė tuščia arba per ilga. Patikrink ir siųsk dar kartą.",
-      "no_permission": "Pokalbio su šiuo asmeniu dar pradėti negali: tarp jūsų nėra darbo ryšio, paraiškos ar sujungimo.",
-      "rate_limited": "Per trumpą laiką išsiuntei daug žinučių arba pradėjai daug pokalbių. Palauk ir bandyk dar kartą.",
-      "rate_check_unavailable": "Saugumo patikra neatlikta, todėl niekas neišsiųsta. Bandyk dar kartą.",
-      "insert_failed": "Žinutė neišsiųsta. Bandyk dar kartą.",
-      "not_a_participant": "Šiame pokalbyje rašyti negali: tu jame nedalyvauji.",
-      "rpc_unavailable": "Žinutės šiuo metu nepasiekiamos. Bandyk vėliau.",
-      "not_authenticated": "Sesija baigėsi. Prisijunk iš naujo.",
-      "update_failed": "Pakeitimas neišsaugotas. Bandyk dar kartą.",
-      "generic": "Kažkas nepavyko. Bandyk dar kartą."
-    }
+    "loadError": "Šiuo metu žinučių įkelti nepavyko. Tai, ką matai, nėra visas vaizdas — bandyk dar kartą."
   },
   "orgTier1Warning": {
     "eyebrow": "Tavo organizacija",

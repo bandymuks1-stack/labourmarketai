@@ -1791,19 +1791,7 @@
       "sent": "[EN] Reply sent."
     },
     "translationUnavailable": "Original ({lang}) — ingen oversettelse tilgjengelig",
-    "loadError": "Meldingene kunne ikke lastes nå. Det du ser er ikke hele bildet — prøv igjen.",
-    "errors": {
-      "invalid_input": "Meldingen er tom eller for lang. Sjekk den og send på nytt.",
-      "no_permission": "Du kan ikke starte en samtale med denne personen ennå: det finnes ingen arbeidsrelasjon, søknad eller kobling mellom dere.",
-      "rate_limited": "Du har sendt mange meldinger eller startet mange samtaler på kort tid. Vent litt og prøv igjen.",
-      "rate_check_unavailable": "Sikkerhetskontrollen kunne ikke kjøres, så ingenting ble sendt. Prøv igjen.",
-      "insert_failed": "Meldingen ble ikke sendt. Prøv igjen.",
-      "not_a_participant": "Du kan ikke skrive i denne samtalen: du deltar ikke i den.",
-      "rpc_unavailable": "Meldinger er ikke tilgjengelige akkurat nå. Prøv senere.",
-      "not_authenticated": "Økten din er utløpt. Logg inn på nytt.",
-      "update_failed": "Endringen ble ikke lagret. Prøv igjen.",
-      "generic": "Noe gikk galt. Prøv igjen."
-    }
+    "loadError": "Meldingene kunne ikke lastes nå. Det du ser er ikke hele bildet — prøv igjen."
   },
   "trust": {
     "unreadHint": "Noe av dette kunne ikke telles akkurat nå og vises som «—». Det betyr ikke at du ikke har noen — tallene kunne bare ikke leses. Last inn på nytt om et øyeblikk.",

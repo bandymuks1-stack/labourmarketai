@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { communicationErrorKey } from "@/lib/communication/error-copy";
 import { useRouter } from "next/navigation";
 import { Paperclip, RotateCw, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { sendMessage } from "@/lib/communication/actions";
+import { composerErrorKey } from "@/lib/communication/composer-error-key";
 import {
   communicationLanguageNames,
   communicationLocales,
@@ -69,9 +69,14 @@ export function CommunicationComposer({
   conversationId,
   locale,
   teamOfferId = null,
+  defaultWriteLanguage,
 }: {
   conversationId: string;
   locale: string;
+  /** The language to start in when this browser saved no choice — chosen by
+   *  the page (`initialWriteLanguage`: own last message, then the browser's
+   *  languages, then the UI locale). Absent = the UI locale. */
+  defaultWriteLanguage?: string;
   /** The offer this thread was opened from (party-checked by the page); each
    *  message sent here is labelled with it, the database guard deciding. */
   teamOfferId?: string | null;
@@ -84,9 +89,13 @@ export function CommunicationComposer({
   // Georgian: the choice is stamped on the message (`original_language`) so
   // every reader gets an honest badge and a correctly-sourced translation.
   // Remembered per browser as a convenience only (the truth is on each row).
-  const [writeLang, setWriteLang] = useState<string>(() =>
-    isCommunicationLocale(locale) ? locale : "",
-  );
+  const startLang =
+    defaultWriteLanguage && isCommunicationLocale(defaultWriteLanguage)
+      ? defaultWriteLanguage
+      : isCommunicationLocale(locale)
+        ? locale
+        : "";
+  const [writeLang, setWriteLang] = useState<string>(startLang);
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(WRITE_LANG_STORAGE_KEY);
@@ -98,8 +107,12 @@ export function CommunicationComposer({
   function onWriteLangChange(next: string) {
     setWriteLang(next);
     try {
-      if (next === locale) window.localStorage.removeItem(WRITE_LANG_STORAGE_KEY);
-      else window.localStorage.setItem(WRITE_LANG_STORAGE_KEY, next);
+      // Every explicit choice is remembered — also one equal to the page's
+      // locale: the starting language is no longer always the UI locale
+      // (initialWriteLanguage), so "English on /en" must not fall back to
+      // the browser's Swedish next time (Codex review on #3246).
+      if (next) window.localStorage.setItem(WRITE_LANG_STORAGE_KEY, next);
+      else window.localStorage.removeItem(WRITE_LANG_STORAGE_KEY);
     } catch {
       /* ignore */
     }
@@ -277,8 +290,9 @@ export function CommunicationComposer({
       });
       if (!result.ok) {
         // The typed text AND the uploaded tray stay intact — the user can
-        // retry the send without redoing anything.
-        setError(t(`errors.${communicationErrorKey(result.code)}`));
+        // retry the send without redoing anything. The reader's language,
+        // from the code — never the server's (Lithuanian) message text.
+        setError(t(`composer.errors.${composerErrorKey(result.code)}`));
         recordEvent("communication_message_send_error", {
           result_kind: result.code,
         });

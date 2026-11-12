@@ -173,9 +173,11 @@ describe("communication v1 — no service_role, no file upload, no fake indicato
   });
 
   it("composer surfaces the precise error for the failure (no generic blob)", () => {
-    // 2026-11-12 (Swedish employer audit N-3): precise per failure CODE, in the
-    // person's language — the server's text is a Lithuanian developer message.
-    expect(composer).toMatch(/setError\(t\(`errors\.\$\{communicationErrorKey\(result\.code\)\}`\)\)/);
+    // Precise per failure CODE, in the reader's language (chat audit
+    // 2026-11-11, defect 6) — the server's message text is Lithuanian-only
+    // and must never reach a reader as-is.
+    expect(composer).toMatch(/setError\(t\(`composer\.errors\.\$\{composerErrorKey\(result\.code\)\}`\)\)/);
+    expect(composer).not.toMatch(/setError\(result\.message\)/);
   });
 });
 

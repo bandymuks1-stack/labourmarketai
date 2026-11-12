@@ -7245,7 +7245,16 @@
         "blockedFailed": "Remove or re-upload the failed attachment.",
         "partialFailure": "The message was sent, but some attachments couldn't be attached. Try sending them again."
       },
-      "languageLabel": "I am writing in"
+      "languageLabel": "I am writing in",
+      "errors": {
+        "notAuthenticated": "Your session has ended. Sign in again and send the message.",
+        "invalidInput": "This message can't be sent: it may be too long, or an attachment isn't supported.",
+        "notParticipant": "You can't write in this conversation — you don't have access to it.",
+        "rateLimited": "You've sent many messages in the last hour. Wait a little and try again.",
+        "rateCheckUnavailable": "The safety check couldn't run, so nothing was sent. Try again.",
+        "attachmentsUnavailable": "Attachments can't be sent in this conversation yet — add some text to the message.",
+        "sendFailed": "The message couldn't be sent. Your text is still here — try again."
+      }
     },
     "launcher": {
       "openLabel": "Contact support",
@@ -7305,19 +7314,7 @@
     "translatedFrom": "Machine translation from {lang}",
     "showOriginal": "Original ({lang})",
     "translationUnavailable": "Original ({lang}) — no translation available",
-    "loadError": "Could not load messages right now. What you see is not the full picture — try again.",
-    "errors": {
-      "invalid_input": "The message is empty or too long. Check it and send again.",
-      "no_permission": "You can't start a conversation with this person yet: there is no working relationship, application or connection between you.",
-      "rate_limited": "You've sent many messages or started many conversations in a short time. Wait a while and try again.",
-      "rate_check_unavailable": "The safety check could not run, so nothing was sent. Try again.",
-      "insert_failed": "The message was not sent. Try again.",
-      "not_a_participant": "You can't write in this conversation: you are not part of it.",
-      "rpc_unavailable": "Messaging is not available right now. Try again later.",
-      "not_authenticated": "Your session ended. Sign in again.",
-      "update_failed": "The change was not saved. Try again.",
-      "generic": "Something went wrong. Try again."
-    }
+    "loadError": "Could not load messages right now. What you see is not the full picture — try again."
   },
   "orgTier1Warning": {
     "eyebrow": "Your organisation",

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { communicationErrorKey } from "@/lib/communication/error-copy";
+import { composerErrorKey } from "@/lib/communication/composer-error-key";
 import { ArrowUp } from "lucide-react";
 
 import { sendMessage } from "@/lib/communication/actions";
@@ -25,7 +25,7 @@ export function ConversationQuickReply({
   locale: string;
 }) {
   const t = useTranslations("communication.quickReply");
-  const tErr = useTranslations("communication.errors");
+  const tErr = useTranslations("communication.composer.errors");
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +66,7 @@ export function ConversationQuickReply({
         setValue("");
         setSent(true);
       } else {
-        setError(tErr(communicationErrorKey(res.code)));
+        setError(tErr(composerErrorKey(res.code)));
       }
     });
   };

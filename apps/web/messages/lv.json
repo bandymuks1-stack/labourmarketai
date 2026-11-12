@@ -1791,19 +1791,7 @@
       "sent": "[EN] Reply sent."
     },
     "translationUnavailable": "Oriģināls ({lang}) — tulkojums nav pieejams",
-    "loadError": "Ziņas šobrīd neizdevās ielādēt. Redzamais nav pilnīga aina — mēģiniet vēlreiz.",
-    "errors": {
-      "invalid_input": "Ziņa ir tukša vai pārāk gara. Pārbaudiet to un sūtiet vēlreiz.",
-      "no_permission": "Ar šo cilvēku vēl nevar sākt sarunu: starp jums nav darba attiecību, pieteikuma vai savienojuma.",
-      "rate_limited": "Īsā laikā nosūtīts daudz ziņu vai sākts daudz sarunu. Uzgaidiet un mēģiniet vēlreiz.",
-      "rate_check_unavailable": "Drošības pārbaudi nevarēja veikt, tāpēc nekas netika nosūtīts. Mēģiniet vēlreiz.",
-      "insert_failed": "Ziņa netika nosūtīta. Mēģiniet vēlreiz.",
-      "not_a_participant": "Šajā sarunā nevar rakstīt: jūs tajā nepiedalāties.",
-      "rpc_unavailable": "Ziņas pašlaik nav pieejamas. Mēģiniet vēlāk.",
-      "not_authenticated": "Sesija ir beigusies. Piesakieties vēlreiz.",
-      "update_failed": "Izmaiņas netika saglabātas. Mēģiniet vēlreiz.",
-      "generic": "Kaut kas nogāja greizi. Mēģiniet vēlreiz."
-    }
+    "loadError": "Ziņas šobrīd neizdevās ielādēt. Redzamais nav pilnīga aina — mēģiniet vēlreiz."
   },
   "trust": {
     "unreadHint": "Daļu no tā tikko neizdevās saskaitīt, un tā tiek rādīta kā “—”. Tas nenozīmē, ka jums to nav — vienkārši neizdevās nolasīt skaitļus. Pārlādējiet pēc brīža.",

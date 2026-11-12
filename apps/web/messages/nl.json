@@ -7245,7 +7245,16 @@
         "blockedFailed": "Verwijder de mislukte bijlage of upload deze opnieuw.",
         "partialFailure": "Het bericht is verzonden, maar sommige bijlagen konden niet worden toegevoegd. Probeer ze opnieuw te verzenden."
       },
-      "languageLabel": "Ik schrijf in"
+      "languageLabel": "Ik schrijf in",
+      "errors": {
+        "notAuthenticated": "Je sessie is verlopen. Log opnieuw in en verstuur het bericht.",
+        "invalidInput": "Dit bericht kan niet worden verstuurd: het is mogelijk te lang, of een bijlage wordt niet ondersteund.",
+        "notParticipant": "Je kunt in dit gesprek niet schrijven — je hebt er geen toegang toe.",
+        "rateLimited": "Je hebt het afgelopen uur veel berichten verstuurd. Wacht even en probeer het opnieuw.",
+        "rateCheckUnavailable": "De veiligheidscontrole kon niet worden uitgevoerd, dus er is niets verstuurd. Probeer het opnieuw.",
+        "attachmentsUnavailable": "Bijlagen versturen is hier nog niet ingeschakeld — voeg tekst toe aan het bericht.",
+        "sendFailed": "Het bericht kon niet worden verstuurd. Je tekst staat er nog — probeer het opnieuw."
+      }
     },
     "launcher": {
       "openLabel": "Neem contact op met support",
@@ -7305,19 +7314,7 @@
     "translatedFrom": "Machinevertaling uit {lang}",
     "showOriginal": "Origineel ({lang})",
     "translationUnavailable": "Origineel ({lang}) — geen vertaling beschikbaar",
-    "loadError": "Berichten konden nu niet worden geladen. Wat je ziet is niet het volledige beeld — probeer het opnieuw.",
-    "errors": {
-      "invalid_input": "Het bericht is leeg of te lang. Controleer het en verstuur opnieuw.",
-      "no_permission": "Je kunt nog geen gesprek met deze persoon beginnen: er is geen werkrelatie, sollicitatie of koppeling tussen jullie.",
-      "rate_limited": "Je hebt in korte tijd veel berichten verstuurd of gesprekken gestart. Wacht even en probeer het opnieuw.",
-      "rate_check_unavailable": "De veiligheidscontrole kon niet worden uitgevoerd, dus er is niets verstuurd. Probeer het opnieuw.",
-      "insert_failed": "Het bericht is niet verstuurd. Probeer het opnieuw.",
-      "not_a_participant": "Je kunt niet in dit gesprek schrijven: je neemt er niet aan deel.",
-      "rpc_unavailable": "Berichten zijn nu niet beschikbaar. Probeer het later opnieuw.",
-      "not_authenticated": "Je sessie is verlopen. Log opnieuw in.",
-      "update_failed": "De wijziging is niet opgeslagen. Probeer het opnieuw.",
-      "generic": "Er ging iets mis. Probeer het opnieuw."
-    }
+    "loadError": "Berichten konden nu niet worden geladen. Wat je ziet is niet het volledige beeld — probeer het opnieuw."
   },
   "orgTier1Warning": {
     "eyebrow": "Jouw organisatie",

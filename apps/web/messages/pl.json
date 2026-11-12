@@ -7245,7 +7245,16 @@
         "blockedFailed": "Usuń lub prześlij ponownie nieudany załącznik.",
         "partialFailure": "Wiadomość została wysłana, ale niektórych załączników nie udało się dołączyć. Spróbuj wysłać je ponownie."
       },
-      "languageLabel": "Piszę w języku"
+      "languageLabel": "Piszę w języku",
+      "errors": {
+        "notAuthenticated": "Sesja wygasła. Zaloguj się ponownie i wyślij wiadomość.",
+        "invalidInput": "Tej wiadomości nie można wysłać: może być za długa albo załącznik nie jest obsługiwany.",
+        "notParticipant": "Nie możesz pisać w tej rozmowie — nie masz do niej dostępu.",
+        "rateLimited": "W ostatniej godzinie wysłałeś wiele wiadomości. Poczekaj chwilę i spróbuj ponownie.",
+        "rateCheckUnavailable": "Nie udało się przeprowadzić kontroli bezpieczeństwa, więc nic nie zostało wysłane. Spróbuj ponownie.",
+        "attachmentsUnavailable": "Wysyłanie załączników nie jest tu jeszcze włączone — dodaj tekst do wiadomości.",
+        "sendFailed": "Nie udało się wysłać wiadomości. Twój tekst został zachowany — spróbuj ponownie."
+      }
     },
     "launcher": {
       "openLabel": "Skontaktuj się ze wsparciem",
@@ -7305,19 +7314,7 @@
     "translatedFrom": "Tłumaczenie maszynowe z {lang}",
     "showOriginal": "Oryginał ({lang})",
     "translationUnavailable": "Oryginał ({lang}) — brak tłumaczenia",
-    "loadError": "Nie udało się teraz wczytać wiadomości. To, co widzisz, nie jest pełnym obrazem — spróbuj ponownie.",
-    "errors": {
-      "invalid_input": "Wiadomość jest pusta lub zbyt długa. Sprawdź ją i wyślij ponownie.",
-      "no_permission": "Nie możesz jeszcze rozpocząć rozmowy z tą osobą: nie łączy was relacja zawodowa, zgłoszenie ani połączenie.",
-      "rate_limited": "W krótkim czasie wysłano wiele wiadomości lub rozpoczęto wiele rozmów. Odczekaj chwilę i spróbuj ponownie.",
-      "rate_check_unavailable": "Nie udało się przeprowadzić kontroli bezpieczeństwa, więc nic nie wysłano. Spróbuj ponownie.",
-      "insert_failed": "Wiadomość nie została wysłana. Spróbuj ponownie.",
-      "not_a_participant": "Nie możesz pisać w tej rozmowie: nie bierzesz w niej udziału.",
-      "rpc_unavailable": "Wiadomości są teraz niedostępne. Spróbuj później.",
-      "not_authenticated": "Sesja wygasła. Zaloguj się ponownie.",
-      "update_failed": "Zmiana nie została zapisana. Spróbuj ponownie.",
-      "generic": "Coś poszło nie tak. Spróbuj ponownie."
-    }
+    "loadError": "Nie udało się teraz wczytać wiadomości. To, co widzisz, nie jest pełnym obrazem — spróbuj ponownie."
   },
   "orgTier1Warning": {
     "eyebrow": "Twoja organizacja",

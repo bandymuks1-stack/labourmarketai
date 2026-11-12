@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { communicationErrorKey } from "@/lib/communication/error-copy";
+import { composerErrorKey } from "@/lib/communication/composer-error-key";
 import { Link } from "@/lib/i18n/navigation";
 
 import { sendMessage } from "@/lib/communication/actions";
@@ -49,7 +49,7 @@ function ThreadReply({
   locale: string;
   t: ReturnType<typeof useTranslations>;
 }) {
-  const tErr = useTranslations("communication.errors");
+  const tErr = useTranslations("communication.composer.errors");
   const [draft, setDraft] = useState("");
   const [confirming, setConfirming] = useState(false);
   const [sent, setSent] = useState(false);
@@ -70,7 +70,7 @@ function ThreadReply({
         setSent(true);
         setConfirming(false);
       } else {
-        setError(tErr(communicationErrorKey(res.code)));
+        setError(tErr(composerErrorKey(res.code)));
         setConfirming(false);
       }
     });
