@@ -175,7 +175,11 @@ describe("canonical demand funnel — action CTAs route to /company-need only", 
   it("PageHero supports the companyNeed CTA kind and links the canonical route", () => {
     const hero = read("components/marketing/page-hero.tsx");
     expect(hero).toContain('ctaKind === "companyNeed"');
-    expect(hero).toContain('href="/company-need"');
+    // The one route, optionally with the form's own bounded prefill query
+    // (an employer market page preselects its country) — never another path.
+    expect(hero).toContain(
+      'href={ctaNeedQuery ? `/company-need?${ctaNeedQuery}` : "/company-need"}',
+    );
   });
 });
 

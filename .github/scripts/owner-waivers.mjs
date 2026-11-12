@@ -687,6 +687,35 @@ export const SCOPED_OWNER_WAIVERS = [
       // numbers are added; axiom, codes, surfaces, files, expiry and subset rule
       // are unchanged.
       2984, 2991,
+      // OWNER APPROVAL 2026-11-04, verbatim (given to the coordinator in its own
+      // session): "I approve adding ONLY PR 3087 to the existing
+      // public-acquisition-route-jobs waiver pullRequests list." #3087: the signed-in
+      // board search starts alongside the session reads; the page shows the same
+      // content. Only the number is added; axiom, codes, surfaces, files, expiry and
+      // subset rule are unchanged.
+      3087,
+      // OWNER APPROVAL 2026-11-08, verbatim (given to the coordinator in its own
+      // session): "I approve adding ONLY PR 3149 to the existing public-acquisition-route-jobs waiver pullRequests list."
+      // #3149: a job id that does not exist gets the not-found page title. Only
+      // the number is added; axiom, codes, surfaces, files, expiry and subset
+      // rule are unchanged.
+      3149,
+      // OWNER APPROVAL 2026-11-08, verbatim (given to the coordinator in its own
+      // session): "I approve adding ONLY PR 3154 to the existing public-acquisition-route-jobs waiver pullRequests list."
+      // #3154: the not-found page of a missing job gets the not-found title and
+      // noindex. Only the number is added; axiom, codes, surfaces, files, expiry
+      // and subset rule are unchanged.
+      3154,
+      // OWNER APPROVAL 2026-11-09, verbatim (given to the coordinator in its own
+      // session): "I approve adding ONLY PR 3171 to the existing public-acquisition-route-jobs waiver pullRequests list."
+      // #3171: a ?country= link says country filtering is not available yet instead of looking applied. Only the number is added; axiom, codes, surfaces, files,
+      // expiry and subset rule are unchanged.
+      3171,
+      // OWNER APPROVAL 2026-11-09, verbatim (given to the coordinator in its own
+      // session): "I approve adding ONLY PR 3123 to the existing public-acquisition-route-jobs waiver pullRequests list."
+      // #3123: a typed profession word keeps its page (SR-4). Only the number is
+      // added; axiom, codes, surfaces, files, expiry and subset rule are unchanged.
+      3123,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
@@ -980,7 +1009,12 @@ export const SCOPED_OWNER_WAIVERS = [
     // project creation, which never creates a site, so it looped back to the
     // same empty state; it now opens the existing sites form. Only that dead
     // end, like #2101; the three waived answers are unchanged.
-    pullRequests: [1344, 2101, 2159, 2234, 2526],
+    // #3140 — OWNER APPROVAL 2026-11-07, verbatim: "/dashboard/hours: leidžiu pridėti
+    // viršuje aiškiai matomą nuorodą „Laukia patvirtinimo: N“, vedančią į patvirtinimo
+    // eilę, jei N skaičiuojamas pagal realiai šiam naudotojui leidžiamas patvirtinti
+    // ataskaitas. Nekeisti duomenų, teisių ar esamos patvirtinimo verslo logikos."
+    // Only that link; the three waived answers are unchanged.
+    pullRequests: [1344, 2101, 2159, 2234, 2526, 3140],
     // Deliberately empty — the waiver lives IN the branch whose CI must
     // honour it, so pinning the head SHA would change the head SHA.
     approvedHeadShas: [],

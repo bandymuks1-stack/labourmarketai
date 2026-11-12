@@ -1,0 +1,11 @@
+# Daily. Persistent: a run missed while the host was down happens at the next start.
+[Unit]
+Description=LabourMarket SEO watch, daily
+
+[Timer]
+OnCalendar=*-*-* 05:37:00 UTC
+Persistent=true
+Unit=lm-seo-watch.service
+
+[Install]
+WantedBy=timers.target

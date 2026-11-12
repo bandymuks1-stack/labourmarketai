@@ -1777,6 +1777,18 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-04: one scan for the free-text job search (SECURITY DEFINER replace). RED draft,
       // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
       "20261104160100_search_public_vacancy_previews_live_scan_v5.sql",
+      // 2026-11-05: narrow search table for the free-text job search. RED draft, NOT applied.
+      "20261105100000_public_vacancy_search_table_v1.sql",
+      "20261105100100_search_public_vacancy_previews_narrow_v6.sql",
+      // 2026-11-09: the holder cancels their own account-deletion request; 30-day grace (owner decision); row lock
+      // in the erasure runner and executor. RED draft #3172, the marker is the human-gate acknowledgement, NOT applied.
+      "20261109120000_privacy_cancel_account_deletion.sql",
+      // 2026-11-10: the company-need intake keeps the visitor's locale (SECURITY DEFINER replace, one line).
+      // RED draft #3195, the marker is the human-gate acknowledgement, NOT applied.
+      "20261110140000_company_need_intake_keep_locale_v1.sql",
+      // 2026-11-10: partner registration Slice 1, company takeover invitation + two-operator decision + link.
+      // RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261110190000_organization_claim_invitation_v1.sql",
 ]);
   });
 

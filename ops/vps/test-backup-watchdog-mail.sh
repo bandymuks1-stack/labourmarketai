@@ -2,12 +2,13 @@
 # Sends exactly TWO test mails through the backup watchdog: one alert, one recovery message.
 #   sh test-backup-watchdog-mail.sh <address>
 # Invented files in a temporary directory; real backups and the real watchdog state are not touched. It
-# reads the existing mailbox settings from /root/lm-prod/env through a link, and never prints them.
+# reads the alerts-only mail settings from /var/lib/lm-watch/env through a link, and never prints them.
+# Run as the watchdog's user: runuser -u lmwatch -- sh test-backup-watchdog-mail.sh <address>
 # "mail=sent" proves only that the mail server accepted it. PASS is someone seeing both mails arrive,
 # with the sending mailbox checked for a bounce. Tell whoever reads that mailbox before running this.
 set -eu
 umask 077
-ROOT=/root/lm-prod; W="$ROOT/bin/lm-backup-watchdog.sh"
+ROOT=/var/lib/lm-watch; W=/opt/lm-watch/lm-backup-watchdog.sh
 TO="${1:-}"
 case "$TO" in ?*@?*.?*) ;; *) echo "usage: sh test-backup-watchdog-mail.sh <address>"; exit 64;; esac
 [ -f "$W" ] || { echo "STOP: install the watchdog first"; exit 1; }

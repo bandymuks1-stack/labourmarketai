@@ -8,6 +8,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 let rpcResult: { data: unknown; error: { code?: string } | null } = { data: [], error: null };
 let throws = false;
 
+// The count is scoped to the active organization (decision 0024). This suite is about the
+// RPC read, so no organization is active here: the whole set is the scope.
+vi.mock("@/lib/company/active-organization", () => ({
+  getActiveOrganizationContext: async () => ({ activeOrganizationId: null }),
+}));
+
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(async () => ({
     rpc: async () => {

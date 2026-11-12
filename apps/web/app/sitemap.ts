@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
 import { activeLocales } from "@/lib/i18n/config";
 import { localizedUrl, hreflangAlternates } from "@/lib/seo/metadata";
-import { SUPPORTED_COUNTRIES } from "@/lib/labour-market/country-evidence";
+import { SUPPORTED_COUNTRIES, isCountryPageIndexable } from "@/lib/labour-market/country-evidence";
 import { isVisionPublic } from "@/lib/config/vision-publication";
 import { publishedCategories } from "@/lib/answer-engine/publishing";
+import { EMPLOYER_MARKET_PATHS } from "@/lib/marketing/employer-markets";
 
 /**
  * /sitemap.xml — only public, indexable marketing pages, on the apex
@@ -95,8 +96,9 @@ function answerCategoryEntries(): MetadataRoute.Sitemap {
   return entries;
 }
 
-/** Per-country labour-market evidence pages, e.g. /labour-market/lt. */
-const COUNTRY_PATHS: readonly string[] = SUPPORTED_COUNTRIES.map(
+/** Per-country labour-market evidence pages, e.g. /labour-market/lt — only the
+ *  ones with enough text of their own to be indexed (IDX-20). */
+const COUNTRY_PATHS: readonly string[] = SUPPORTED_COUNTRIES.filter(isCountryPageIndexable).map(
   (c) => `/labour-market/${c.toLowerCase()}`,
 );
 
@@ -124,7 +126,9 @@ function priorityFor(path: string): number {
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const paths = [...STATIC_PATHS, ...FLAGGED_PATHS, ...COUNTRY_PATHS];
+  // EMPLOYER_MARKET_PATHS: the LU/NL/DK employer versions of /for-companies,
+  // each its own self-canonical page (lib/marketing/employer-markets.ts).
+  const paths = [...STATIC_PATHS, ...FLAGGED_PATHS, ...COUNTRY_PATHS, ...EMPLOYER_MARKET_PATHS];
   const entries: MetadataRoute.Sitemap = [];
 
   for (const path of paths) {

@@ -102,6 +102,23 @@ describe("scalar normalization refuses placeholders instead of guessing", () => 
     expect(normalizeIsoDate(null)).toBeNull();
   });
 
+  it("free text never becomes a date, even when Date.parse would accept it", () => {
+    for (const text of [
+      "Utbildningen startar 270111",
+      "Enligt överenskommelse 1 mars",
+      "01.02.2026",
+      "202611-05",
+      "+270111-01-11T00:00:00Z",
+      "0000-01-01T00:00:00Z",
+    ]) {
+      expect(normalizeIsoTimestamp(text), text).toBeNull();
+      expect(normalizeIsoDate(text), text).toBeNull();
+    }
+    // An offset can carry a valid input past year 9999.
+    expect(normalizeIsoTimestamp("9999-12-31T23:00:00-05:00")).toBeNull();
+    expect(normalizeIsoDate("2026-09-15")).toBe("2026-09-15");
+  });
+
   it("currency must be ISO-4217-shaped; amounts must be finite and non-negative", () => {
     expect(normalizeCurrency("sek")).toBe("SEK");
     expect(normalizeCurrency("kronor")).toBeNull();

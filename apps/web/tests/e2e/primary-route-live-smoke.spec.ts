@@ -30,7 +30,6 @@ const PUBLIC_ROUTES: readonly string[] = [
   "/lt/for-companies",
   "/lt/for-agencies",
   "/lt/pricing",
-  "/lt/vision",
   "/lt/auth/login",
   "/lt/auth/signup",
 ];
@@ -64,6 +63,15 @@ test.describe("primary route live-render smoke — public routes", () => {
   }
 });
 
+// The unpublished internal preview: an anonymous visitor gets a plain 404
+// (lib/guards/vision-internal-only.test.ts), never the page and never a 500.
+test.describe("primary route live-render smoke — internal preview", () => {
+  test("/lt/vision answers 404 to an anonymous visitor", async ({ page }) => {
+    const response = await page.goto("/lt/vision", { waitUntil: "domcontentloaded" });
+    expect(response?.status()).toBe(404);
+  });
+});
+
 test.describe("primary route live-render smoke — auth-gated routes", () => {
   for (const route of AUTH_GATED_ROUTES) {
     test(`${route} bounces anonymous visitor to /auth/login`, async ({ page }) => {
@@ -72,3 +80,27 @@ test.describe("primary route live-render smoke — auth-gated routes", () => {
     });
   }
 });
+
+/**
+ * AN ADDRESS NOTHING CAN ANSWER (UX-9): complete HTML with a 404, and it stays put. A
+ * 404 on the router's own fetch made this page reload itself on a first visit, and
+ * every single-request check still passed, so this counts the documents it loads.
+ */
+test("an unknown address is a real 404 page and does not reload itself", async ({ page }) => {
+  let documents = 0;
+  page.on("request", (r) => {
+    if (r.isNavigationRequest() && r.frame() === page.mainFrame()) documents++;
+  });
+  const response = await page.goto("/lt/sita-adresa-niekas-neatsako");
+  expect(response?.status()).toBe(404);
+  const html = await response!.text();
+  expect(html).not.toContain("__next_error__");
+  expect(html).toMatch(/<html[^>]*lang="lt"/);
+  expect(html).toMatch(/<h1/);
+  expect(html).toContain("<title>Puslapis nerastas");
+  await expect(page.getByTestId("branded-not-found").first()).toBeVisible();
+  await page.waitForTimeout(3000);
+  expect(documents).toBe(1);
+  await expect(page.getByTestId("not-found-home-cta").first()).toBeVisible();
+});
+

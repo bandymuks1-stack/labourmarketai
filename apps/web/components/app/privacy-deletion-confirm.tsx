@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   confirmAccountDeletion,
   startDeletionReauth,
@@ -16,8 +17,12 @@ import {
 export function PrivacyDeletionConfirm({
   locale,
   labels,
+  refreshAfterConfirm = false,
 }: {
   locale: string;
+  /** With the 30-day waiting period live, refresh after confirming so the
+   *  section shows the scheduled date and the cancel control. */
+  refreshAfterConfirm?: boolean;
   labels: {
     body: string;
     confirm: string;
@@ -28,6 +33,7 @@ export function PrivacyDeletionConfirm({
     error: string;
   };
 }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [state, setState] = useState<"idle" | "reauth" | "confirmed" | "error">("idle");
 
@@ -72,7 +78,10 @@ export function PrivacyDeletionConfirm({
           onClick={() =>
             startTransition(async () => {
               const res = await confirmAccountDeletion();
-              if (res.kind === "confirmed") setState("confirmed");
+              if (res.kind === "confirmed") {
+                setState("confirmed");
+                if (refreshAfterConfirm) router.refresh();
+              }
               else if (res.kind === "reauth-required") setState("reauth");
               else setState("error");
             })

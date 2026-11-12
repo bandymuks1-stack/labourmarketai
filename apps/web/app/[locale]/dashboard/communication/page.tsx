@@ -67,6 +67,9 @@ export default async function CommunicationListPage({
   // bounce, never a fake "sent".
   const { notice } = await searchParams;
   const showCannotOpen = notice === "cannot_open";
+  // A thread the person was removed from (its page redirects here): say so,
+  // with nothing about the thread itself.
+  const showUnavailable = notice === "unavailable";
   setRequestLocale(locale);
   const t = await getTranslations("communication");
   const supabase = await createClient();
@@ -416,6 +419,25 @@ export default async function CommunicationListPage({
               {t("cannotOpen.title")}
             </span>
             <span className="text-text-muted">{t("cannotOpen.body")}</span>
+          </span>
+        </div>
+      )}
+      {showUnavailable && (
+        <div
+          role="status"
+          data-testid="communication-unavailable"
+          className="flex items-start gap-2 rounded-md border border-ink-600/60 bg-ink-800/40 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+        >
+          <Lock
+            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-muted"
+            strokeWidth={2}
+            aria-hidden
+          />
+          <span className="flex flex-col gap-0.5">
+            <span className="font-medium text-text-primary">
+              {t("noLongerAvailable.title")}
+            </span>
+            <span className="text-text-muted">{t("noLongerAvailable.body")}</span>
           </span>
         </div>
       )}

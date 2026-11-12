@@ -152,7 +152,11 @@ describe("Guard: the manager sees a receipt after the tap (window 6 prod finding
   });
 
   it("a receipt is created ONLY from a card's successful action state", () => {
-    expect(card).toMatch(/if \(!confirmed \|\| reported\.current\) return;/);
+    // From the action's own answer: the result and the refreshed queue commit together,
+    // so an effect after the result renders never runs (production walk 42414193078).
+    expect(card).toMatch(/const result = await quickConfirmEntry\(previous, formData\);\s+if \(result\.ok\) report\("approved"/);
+    expect(card).toMatch(/const result = await reviewJournalEntry\(previous, formData\);\s+if \(result\.ok\) report\("rejected"/);
+    expect(card).not.toMatch(/useEffect/);
     expect(card).toContain("onConfirmed?.({");
     expect(queueView).toContain("onConfirmed={onConfirmed}");
     expect(queueView).toContain("quick-receipt-");
