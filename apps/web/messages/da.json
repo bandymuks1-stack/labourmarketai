@@ -227,7 +227,10 @@
           "errorOpenNeedLimitIndividual": "Denne organisation har nået grænsen for aktive stillinger i sin plan. Intet blev opkrævet eller ændret. Kontakt os.",
           "openNeedUsage": "Aktive stillinger: {used} af {limit} brugt · {remaining} tilbage",
           "openNeedUsageUpgradeCta": "Aktivér planen „Organisation“",
-          "openNeedUsageIndividual": "Du har nået grænsen for din plan. Kontakt os for at drøfte dine behov."
+          "openNeedUsageIndividual": "Du har nået grænsen for din plan. Kontakt os for at drøfte dine behov.",
+          "form": {
+            "countryRequired": "Vælg det land, hvor arbejdet udføres."
+          }
         }
       },
       "account": {

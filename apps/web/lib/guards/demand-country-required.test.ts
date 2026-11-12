@@ -45,6 +45,11 @@ describe("company-need wizard requires the country", () => {
         /Lithuania|Lietuva|Литва|Litauen|Litwa|Litouwen|Vilni|Вильн|Wilno/,
       );
     }
+    // Doctrine §2.4: a new UI key lands in all 11 catalogs in the same PR.
+    for (const l of ["sv", "da", "no", "et", "lv"]) {
+      const form = JSON.parse(read(`messages/${l}.json`)).auth.dashboard.wow.demand.form;
+      expect(form?.countryRequired, `${l} countryRequired`).toBeTruthy();
+    }
     const en = JSON.parse(read("messages/en.json")).auth.dashboard.wow.demand.form;
     expect(en.locationLabel).not.toMatch(/country/i);
   });
