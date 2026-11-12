@@ -37,6 +37,6 @@ describe("the need's pay currency follows its country", () => {
     expect(DEMAND_CURRENCY_OPTIONS).toContain("SEK");
     const wizard = readFileSync(join(WEB, "components", "app", "demand-request-button.tsx"), "utf8");
     expect(wizard).toContain("const currency = defaultCurrencyForCountry(country);");
-    expect(wizard).toMatch(/prev\.compMin\.trim\(\) === "" && prev\.compMax\.trim\(\) === ""/);
+    expect(wizard).toContain("[prev.compMin, prev.compMax, prev.guaranteedBase, prev.perDiem].every((v) => v.trim() === \"\")");
   });
 });

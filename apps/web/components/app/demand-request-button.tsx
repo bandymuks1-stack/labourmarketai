@@ -198,8 +198,12 @@ export function DemandRequestButton({
   useEffect(() => {
     const currency = defaultCurrencyForCountry(country);
     if (!currency) return;
+    // EVERY amount the currency applies to (buildStructuredV2Input prices the
+    // pay range, the guaranteed base and the per diem in `adv.currency`): any
+    // of them typed means the currency is the person's, and stays.
     setAdv((prev) =>
-      prev.compMin.trim() === "" && prev.compMax.trim() === "" && prev.currency !== currency
+      [prev.compMin, prev.compMax, prev.guaranteedBase, prev.perDiem].every((v) => v.trim() === "") &&
+      prev.currency !== currency
         ? { ...prev, currency }
         : prev,
     );
