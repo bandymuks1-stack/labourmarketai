@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
-import { renderNotificationEmail } from "./notification-email";
+import { defaultLocale } from "@/lib/i18n/config";
+import { notificationEmailLocale, renderNotificationEmail } from "./notification-email";
 
 /**
  * Notification email renderer — the load-bearing claims:
@@ -34,7 +35,7 @@ describe("renderNotificationEmail", () => {
     );
   });
 
-  it("defaults to the platform default locale when none (or an inactive one) is given", async () => {
+  it("defaults to the platform default locale when none is given, and to English for an unrouted one", async () => {
     const rendered = await renderNotificationEmail({
       eventType: "booking_proposed",
       entityType: "booking_request",
@@ -49,8 +50,10 @@ describe("renderNotificationEmail", () => {
       entityType: "booking_request",
       locale: "xx",
     });
+    // A stored but unrouted language reads English, like the pages
+    // (lib/i18n/entry-locale.ts) — never Lithuanian (chat audit 2026-11-11).
     expect(inactive!.deepLink).toBe(
-      `${CANONICAL_ORIGIN}/lt/dashboard/bookings`,
+      `${CANONICAL_ORIGIN}/en/dashboard/bookings`,
     );
   });
 
@@ -74,5 +77,24 @@ describe("renderNotificationEmail", () => {
     expect(rendered!.deepLink).toBe(
       `${CANONICAL_ORIGIN}/en/dashboard/activity`,
     );
+  });
+});
+
+describe("notificationEmailLocale (chat audit 2026-11-11, defect 5)", () => {
+  it("keeps a routed locale, region tags resolve to their base", () => {
+    expect(notificationEmailLocale("lt")).toBe("lt");
+    expect(notificationEmailLocale("en-GB")).toBe("en");
+    expect(notificationEmailLocale("PL")).toBe("pl");
+  });
+
+  it("a stored but unrouted language reads English, never Lithuanian", () => {
+    expect(notificationEmailLocale("da")).toBe("en");
+    expect(notificationEmailLocale("fi")).toBe("en");
+  });
+
+  it("no stored locale keeps the platform default", () => {
+    expect(notificationEmailLocale(null)).toBe(defaultLocale);
+    expect(notificationEmailLocale(undefined)).toBe(defaultLocale);
+    expect(notificationEmailLocale("  ")).toBe(defaultLocale);
   });
 });
