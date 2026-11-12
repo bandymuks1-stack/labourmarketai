@@ -166,7 +166,7 @@ export async function qaStorage(
       authorization: `Bearer ${token}`,
       ...(init.contentType ? { "content-type": init.contentType } : {}),
     },
-    ...(init.body ? { body: init.body } : {}),
+    ...(init.body ? { body: new Uint8Array(init.body) } : {}),
   });
 }
 

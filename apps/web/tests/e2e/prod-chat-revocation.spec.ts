@@ -295,18 +295,40 @@ test("cleanup dry-run: exactly the rows the owner SQL would delete, all of this 
   );
 });
 
-test("cleanup: the file goes, the bells are read; the thread is an owner SQL step", async () => {
-  if (attachmentPath) {
-    const del = await qaStorage(`/storage/v1/object/${BUCKET}/${attachmentPath}`, bearerOf("owner"), {
-      method: "DELETE",
-    });
-    expect(del.status, "A deletes the uploaded file").toBeLessThan(300);
+test("cleanup (thread): an owner SQL step", async () => {
+  notTested("cleanup (thread)", `no role holds DELETE on the chat tables; owner SQL removes ${conv}`);
+});
+
+/**
+ * ALWAYS-RUN cleanup (Codex review on #3239): it runs even when a step above
+ * failed, so a failed walk never leaves its file or unread bells behind. It
+ * keeps no state from the steps: the thread id is set right after creation,
+ * and the stored files are re-read here with A's own token (A stays a
+ * participant), so a failure between the upload and step 3 still deletes the
+ * file. Best-effort per item; the outcome goes to the log, never a token.
+ */
+test.afterAll(async () => {
+  if (!conv) return;
+  const a = bearerOf("owner");
+  const res = await qaApi(
+    `/rest/v1/conversation_message_attachments?select=storage_path&conversation_id=eq.${conv}`,
+    a,
+  ).catch(() => null);
+  const paths = res && res.ok ? ((await res.json()) as { storage_path: string }[]).map((r) => r.storage_path) : [];
+  if (attachmentPath && !paths.includes(attachmentPath)) paths.push(attachmentPath);
+  let deleted = 0;
+  for (const p of paths) {
+    const del = await qaStorage(`/storage/v1/object/${BUCKET}/${p}`, a, { method: "DELETE" }).catch(() => null);
+    if (del && del.status < 300) deleted += 1;
   }
   for (const slot of ["worker", "worker2"]) {
     await qaApi(`/rest/v1/notification_events?metadata->>conversationId=eq.${conv}&read_at=is.null`, bearerOf(slot), {
       method: "PATCH",
       body: { read_at: new Date().toISOString() },
-    });
+    }).catch(() => null);
   }
-  notTested("cleanup (thread)", `no role holds DELETE on the chat tables; owner SQL removes ${conv}`);
+  console.info(
+    `[chat-revocation] cleanup: files deleted ${deleted}/${paths.length}; bells marked read; ` +
+      `thread ${conv} left for the owner SQL step`,
+  );
 });
