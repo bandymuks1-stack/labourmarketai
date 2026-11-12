@@ -26,6 +26,10 @@ on:
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
       - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
       - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
+      - "apps/web/tests/e2e/worker-cv-isolated.spec.ts"
+      - "apps/web/app/*/dashboard/people/**"
+      - "apps/web/app/*/dashboard/profile/**"
+      - "apps/web/app/*/cv/**"
       - "apps/web/lib/journal/entry-skill-retraction.ts"
       - "apps/web/lib/journal/journal-entry-skills-actions.ts"
       - "apps/web/lib/journal/skill-pipeline-actions.ts"
@@ -93,7 +97,7 @@ jobs:
       # Web A walks, the role journeys, and the journal -> skills -> Living CV
       # -> matching -> dispute chain (skills-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/worker-cv-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
