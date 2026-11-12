@@ -19,7 +19,7 @@ import { join, resolve } from "node:path";
  *     when one is empty.
  */
 
-import type { Field as FieldComponent } from "@/components/ui/Field";
+import type { Field as FieldComponent, FieldControlProps } from "@/components/ui/Field";
 
 type FieldProps = Parameters<typeof FieldComponent>[0];
 
@@ -95,7 +95,7 @@ describe("the primitives render what they promise", () => {
       createElement(
         Field,
         { label: "Email", hint: "We never show it", error: "Enter an email" } as FieldProps,
-        ((control) => createElement("input", { name: "email", ...control })) as unknown as ReactNode,
+        ((control: FieldControlProps) => createElement("input", { name: "email", ...control })) as unknown as ReactNode,
       ),
     );
     const id = /<label[^>]*for="([^"]+)"/.exec(html)?.[1];
@@ -112,7 +112,7 @@ describe("the primitives render what they promise", () => {
       createElement(
         Field,
         { label: "City" } as FieldProps,
-        ((control) => createElement("input", { ...control })) as unknown as ReactNode,
+        ((control: FieldControlProps) => createElement("input", { ...control })) as unknown as ReactNode,
       ),
     );
     expect(html).not.toContain("aria-invalid");
