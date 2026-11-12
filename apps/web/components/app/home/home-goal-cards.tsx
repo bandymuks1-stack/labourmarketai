@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
-import { AskAssistantEntry } from "@/components/app/home/ask-assistant-entry";
+import { AskAssistantEntry } from "@/components/app/home/ask-composer-entry";
 import { WORK_AREA_ICONS } from "@/components/app/work-area-icons";
 import { iconControl } from "@/components/app/conversation/chat/icon-scale";
 import { NavLinkPending } from "@/components/app/nav-link-pending";
