@@ -209,7 +209,13 @@ jobs:
           echo "migration files=$files ledger rows=$rows"
           [ "$files" -eq "$rows" ] || { echo "::error::replay incomplete"; exit 1; }
 
+      # The same heap the other build jobs give `next build` (quality.yml, e2e-smoke.yml,
+      # deploy-vps.yml). Its type-check worker passes 2 GB on this code base; without the
+      # setting the build depends on Node's default for the runner's memory, next to a
+      # running Supabase stack.
       - name: Build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build
 
       - name: Guard — the build inlined the local Supabase URL
@@ -287,7 +293,7 @@ jobs:
           git archive FETCH_HEAD | tar -x -C "$RUNNER_TEMP/main"
           cd "$RUNNER_TEMP/main"
           pnpm install --frozen-lockfile --filter=!mobile > "$RUNNER_TEMP/main-install.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/main-install.log"; exit 1; }
-          pnpm -F web build > "$RUNNER_TEMP/main-build.log" 2>&1 || { grep -viE "key|secret|jwt|token|password|eyJ" "$RUNNER_TEMP/main-build.log" | tail -n 60; exit 1; }
+          NODE_OPTIONS=--max-old-space-size=6144 pnpm -F web build > "$RUNNER_TEMP/main-build.log" 2>&1 || { grep -viE "key|secret|jwt|token|password|eyJ" "$RUNNER_TEMP/main-build.log" | tail -n 60; exit 1; }
           grep -rqF "127.0.0.1:54321" apps/web/.next/static apps/web/.next/server || { echo "::error::main build lacks the local Supabase URL"; exit 1; }
           pnpm -F web exec next start -H 127.0.0.1 -p 3002 > "$RUNNER_TEMP/next-main.log" 2>&1 &
           echo $! > "$RUNNER_TEMP/next-main.pid"
