@@ -15090,7 +15090,18 @@
       "whatChangedUnavailable": "Ich konnte gerade nicht prüfen, was sich geändert hat. Ihre Einträge sind sicher – versuchen Sie es gleich erneut oder öffnen Sie das Journal.",
       "planIntro": "{count, plural, one {Das ist # Schritt.} other {Das sind # Schritte, der Reihe nach. Hier ist der erste — tippen Sie auf den nächsten, wenn Sie so weit sind.}}",
       "planNextOffer": "Nächster Schritt:",
-      "planStep": "Schritt {n} von {count}"
+      "planStep": "Schritt {n} von {count}",
+      "pinAdd": "Verknüpfung hinzufügen",
+      "pinEditDone": "Fertig",
+      "pinAddHeading": "Eine Verknüpfung hinzufügen",
+      "pinAddNone": "Hier ist bereits alles hinzugefügt.",
+      "pinRecent": "Zuletzt",
+      "pinMoveHandle": "„{label}“: ziehen oder mit den Pfeiltasten verschieben",
+      "pinManageHint": "Ziehen Sie einen Schnellzugriff oder verschieben Sie ihn mit den Pfeiltasten. ✕ entfernt ihn.",
+      "pinRemove": "„{label}“ entfernen",
+      "pinAdded": "Hinzugefügt.",
+      "pinMoved": "Reihenfolge gespeichert.",
+      "pinHiddenHeading": "Für Sie derzeit nicht verfügbar"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
@@ -20106,7 +20117,8 @@
     "waiting": {
       "title": "Wartet auf Sie",
       "clear": "Nichts wartet auf Sie.",
-      "unknown": "Was auf Sie wartet, konnte nicht gelesen werden."
+      "unknown": "Was auf Sie wartet, konnte nicht gelesen werden.",
+      "confirmEmail": "Bestätigen Sie Ihre E-Mail-Adresse, um an Sie gesendete Einladungen zu sehen"
     },
     "running": {
       "title": "Läuft gerade",
@@ -20561,6 +20573,101 @@
         "verify_rate_limited": "Wir haben gerade erst einen Link gesendet. Prüfen Sie Ihre E-Mails oder versuchen Sie es später.",
         "error": "Das hat nicht geklappt. Versuchen Sie es später erneut."
       }
+    }
+  },
+  "homeGoals": {
+    "title": "Was möchten Sie tun?",
+    "worker": {
+      "findWork": {
+        "label": "Arbeit finden",
+        "hint": "Arbeit, die zu Ihren Fähigkeiten passt"
+      },
+      "recordWork": {
+        "label": "Arbeit eintragen",
+        "hint": "Tragen Sie die heutige Arbeit ins Journal ein"
+      },
+      "myCv": {
+        "label": "Mein Lebenslauf",
+        "hint": "Lebenslauf ansehen und teilen"
+      },
+      "messages": {
+        "label": "Nachrichten",
+        "hint": "Ihre Unterhaltungen"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Arbeitskräfte finden"
+      },
+      "projects": {
+        "label": "Projekte und Teams",
+        "hint": "Baustellen, Aufgaben und wer wo arbeitet"
+      },
+      "people": {
+        "label": "Meine Leute",
+        "hint": "Ihr Team und Einladungen"
+      },
+      "hours": {
+        "label": "Arbeit und Stunden",
+        "hint": "Eingetragene Arbeit und Stunden"
+      },
+      "offerServices": {
+        "label": "Leistungen anbieten",
+        "hint": "Was Ihr Unternehmen anbietet"
+      },
+      "orders": {
+        "label": "Anfragen und Aufträge",
+        "hint": "Leistungsanfragen, gesendet und erhalten"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Eigene Leute anbieten",
+        "hint": "Geben Sie an, wer wann frei ist"
+      },
+      "clients": {
+        "label": "Kunden",
+        "hint": "Unternehmen, für die Sie arbeiten"
+      },
+      "people": {
+        "label": "Meine Leute",
+        "hint": "Ihre Leute und Einladungen"
+      },
+      "candidates": {
+        "label": "Kandidaten finden",
+        "hint": "Nach Personen suchen"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Meine Anfragen",
+        "hint": "Was Sie angefragt haben und wer geantwortet hat"
+      }
+    },
+    "areas": {
+      "calendar": "Kalender",
+      "numbers": "Meine Tätigkeit in Zahlen",
+      "profile": "Mein Profil",
+      "gallery": "Galerie",
+      "capacity": "Kapazität",
+      "results": "Ergebnisse",
+      "history": "Verlauf"
+    },
+    "ask": {
+      "label": "Assistenten fragen",
+      "hint": "Schreiben Sie in eigenen Worten, was Sie brauchen"
+    },
+    "quick": {
+      "title": "Machen Sie dort weiter, wo Sie aufgehört haben",
+      "projects": "Laufende Projekte",
+      "needs": "Offene Bedarfe",
+      "allProjects": "Alle Projekte",
+      "allNeeds": "Alle Bedarfe",
+      "untitledProject": "Projekt ohne Namen"
+    },
+    "pin": {
+      "add": "„{label}“ zu Ihren Schnellzugriffen hinzufügen",
+      "remove": "„{label}“ aus Ihren Schnellzugriffen entfernen"
     }
   },
   "siteNav": {

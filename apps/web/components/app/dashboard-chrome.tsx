@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname } from "@/lib/i18n/navigation";
 import { dashboardChromeMode } from "@/lib/config/navigation";
 import {
+  APP_CONTENT_ID,
   ConversationHeader,
   type ConversationNavLabels,
 } from "@/components/app/conversation/chat/conversation-header";
@@ -151,7 +152,7 @@ export function DashboardChrome({
     return (
       <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="simple" data-surface={mode}>
         <ConversationHeader title={headerTitle} nav={nav} />
-        <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
+        <main id={APP_CONTENT_ID} tabIndex={-1} className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] outline-none sm:px-12 md:pb-8">
           <SlotBoundary>
             {children}
             {/* The Rexora product credit (owner directive 2026-07-14, pinned by
@@ -178,7 +179,7 @@ export function DashboardChrome({
   return (
     <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="full" data-surface={mode}>
       <ConversationHeader title={headerTitle} nav={nav} />
-      <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
+      <main id={APP_CONTENT_ID} tabIndex={-1} className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] outline-none sm:px-12 md:pb-8">
         <SlotBoundary>
           {children}
           {rexora}

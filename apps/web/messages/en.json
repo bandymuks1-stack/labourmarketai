@@ -15090,7 +15090,18 @@
       "whatChangedUnavailable": "I couldn't check what changed right now. Your records are safe; try again in a moment or open the journal.",
       "planIntro": "{count, plural, one {That is # step.} other {That is # steps, in order. Here is the first — tap the next one when you are ready.}}",
       "planNextOffer": "Next step:",
-      "planStep": "Step {n} of {count}"
+      "planStep": "Step {n} of {count}",
+      "pinAdd": "Add shortcut",
+      "pinEditDone": "Done",
+      "pinAddHeading": "Add a shortcut",
+      "pinAddNone": "Everything here is already added.",
+      "pinRecent": "Recent",
+      "pinMoveHandle": "“{label}”: drag it or use the arrow keys to move it",
+      "pinManageHint": "Drag a shortcut or use the arrow keys to move it. ✕ removes it.",
+      "pinRemove": "Remove “{label}”",
+      "pinAdded": "Added.",
+      "pinMoved": "Order saved.",
+      "pinHiddenHeading": "Not available to you right now"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -20106,7 +20117,8 @@
     "waiting": {
       "title": "Waiting on you",
       "clear": "Nothing is waiting on you.",
-      "unknown": "What is waiting on you could not be read."
+      "unknown": "What is waiting on you could not be read.",
+      "confirmEmail": "Confirm your e-mail address to see invitations sent to you"
     },
     "running": {
       "title": "Running now",
@@ -20561,6 +20573,101 @@
         "verify_rate_limited": "We sent a link a moment ago. Check your e-mail or try again later.",
         "error": "That didn't work. Try again later."
       }
+    }
+  },
+  "homeGoals": {
+    "title": "What do you want to do?",
+    "worker": {
+      "findWork": {
+        "label": "Find work",
+        "hint": "Jobs that fit your skills"
+      },
+      "recordWork": {
+        "label": "Record work",
+        "hint": "Add today's work to your journal"
+      },
+      "myCv": {
+        "label": "My CV",
+        "hint": "See and share your CV"
+      },
+      "messages": {
+        "label": "Messages",
+        "hint": "Your conversations"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Find workers"
+      },
+      "projects": {
+        "label": "Projects and teams",
+        "hint": "Sites, tasks and who works where"
+      },
+      "people": {
+        "label": "My people",
+        "hint": "Your team and invitations"
+      },
+      "hours": {
+        "label": "Work and hours",
+        "hint": "Recorded work and hours"
+      },
+      "offerServices": {
+        "label": "Offer services",
+        "hint": "What your company offers"
+      },
+      "orders": {
+        "label": "Requests and orders",
+        "hint": "Service requests, sent and received"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Offer your people",
+        "hint": "Say who is free and when"
+      },
+      "clients": {
+        "label": "Clients",
+        "hint": "Companies you work for"
+      },
+      "people": {
+        "label": "My people",
+        "hint": "Your people and invitations"
+      },
+      "candidates": {
+        "label": "Find candidates",
+        "hint": "Search for people"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "My requests",
+        "hint": "What you asked for and who answered"
+      }
+    },
+    "areas": {
+      "calendar": "Calendar",
+      "numbers": "My activity in numbers",
+      "profile": "My profile",
+      "gallery": "Gallery",
+      "capacity": "Capacity",
+      "results": "Results",
+      "history": "History"
+    },
+    "ask": {
+      "label": "Ask the assistant",
+      "hint": "Write what you need in your own words"
+    },
+    "quick": {
+      "title": "Pick up where you left off",
+      "projects": "Active projects",
+      "needs": "Open needs",
+      "allProjects": "All projects",
+      "allNeeds": "All needs",
+      "untitledProject": "Project without a name"
+    },
+    "pin": {
+      "add": "Add “{label}” to your shortcuts",
+      "remove": "Remove “{label}” from your shortcuts"
     }
   },
   "siteNav": {

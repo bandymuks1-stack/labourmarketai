@@ -571,7 +571,7 @@
     "localeSwitch": "[EN] Language",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
-    "skipToContent": "[EN] Skip to content",
+    "skipToContent": "Hopp til innhold",
     "loading": "Laster inn…",
     "dashboardSections": "Oversiktens seksjoner",
     "nav": {
@@ -4403,7 +4403,18 @@
       "teamOfferThreadFailed": "Denne samtalen kan ikke åpnes.",
       "whatChangedIntro": "{count, plural, one {Her er kjeden fra ditt siste arbeid: hva du gjorde, hva som endret seg, hva det åpnet.} other {Her er # kjeder fra ditt siste arbeid: hva du gjorde, hva som endret seg, hva det åpnet.}}",
       "whatChangedNone": "Ingenting nytt kom ut av arbeidet ditt de siste 14 dagene. Når du registrerer arbeid og det blir bekreftet, viser jeg hva det endret.",
-      "whatChangedUnavailable": "Jeg kunne ikke sjekke hva som endret seg akkurat nå. Registreringene dine er trygge – prøv igjen om litt eller åpne journalen."
+      "whatChangedUnavailable": "Jeg kunne ikke sjekke hva som endret seg akkurat nå. Registreringene dine er trygge – prøv igjen om litt eller åpne journalen.",
+      "pinAdd": "Legg til snarvei",
+      "pinEditDone": "Ferdig",
+      "pinAddHeading": "Legg til en snarvei",
+      "pinAddNone": "Alt her er allerede lagt til.",
+      "pinRecent": "Nylige",
+      "pinMoveHandle": "«{label}»: dra eller flytt med piltastene",
+      "pinManageHint": "Dra en snarvei, eller flytt den med piltastene. ✕ fjerner den.",
+      "pinRemove": "Fjern «{label}»",
+      "pinAdded": "Lagt til.",
+      "pinMoved": "Rekkefølgen er lagret.",
+      "pinHiddenHeading": "Ikke tilgjengelig for deg akkurat nå"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -7603,7 +7614,8 @@
     "waiting": {
       "title": "Venter på deg",
       "clear": "Ingenting venter på deg.",
-      "unknown": "Det som venter på deg, kunne ikke leses."
+      "unknown": "Det som venter på deg, kunne ikke leses.",
+      "confirmEmail": "Bekreft e-postadressen din for å se invitasjoner som er sendt til deg"
     },
     "running": {
       "title": "Pågår nå",
@@ -7945,6 +7957,101 @@
       "undecided": "Du har ikke valgt ennå, så ingenting for måling lagres.",
       "allow": "Tillat",
       "refuse": "Avslå"
+    }
+  },
+  "homeGoals": {
+    "title": "Hva vil du gjøre?",
+    "worker": {
+      "findWork": {
+        "label": "Finn arbeid",
+        "hint": "Arbeid som passer ferdighetene dine"
+      },
+      "recordWork": {
+        "label": "Registrer arbeid",
+        "hint": "Legg dagens arbeid inn i journalen"
+      },
+      "myCv": {
+        "label": "Min CV",
+        "hint": "Se og del CV-en din"
+      },
+      "messages": {
+        "label": "Meldinger",
+        "hint": "Samtalene dine"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Finn arbeidere"
+      },
+      "projects": {
+        "label": "Prosjekter og team",
+        "hint": "Arbeidssteder, oppgaver og hvem som jobber hvor"
+      },
+      "people": {
+        "label": "Mine folk",
+        "hint": "Teamet ditt og invitasjoner"
+      },
+      "hours": {
+        "label": "Arbeid og timer",
+        "hint": "Registrert arbeid og timer"
+      },
+      "offerServices": {
+        "label": "Tilby tjenester",
+        "hint": "Hva bedriften din tilbyr"
+      },
+      "orders": {
+        "label": "Forespørsler og bestillinger",
+        "hint": "Tjenesteforespørsler, sendte og mottatte"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Tilby folkene dine",
+        "hint": "Oppgi hvem som er ledig og når"
+      },
+      "clients": {
+        "label": "Kunder",
+        "hint": "Bedrifter du jobber for"
+      },
+      "people": {
+        "label": "Mine folk",
+        "hint": "Folkene dine og invitasjoner"
+      },
+      "candidates": {
+        "label": "Finn kandidater",
+        "hint": "Søk etter personer"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Mine forespørsler",
+        "hint": "Hva du har bedt om, og hvem som svarte"
+      }
+    },
+    "areas": {
+      "calendar": "Kalender",
+      "numbers": "Min aktivitet i tall",
+      "profile": "Min profil",
+      "gallery": "Galleri",
+      "capacity": "Kapasitet",
+      "results": "Resultater",
+      "history": "Historikk"
+    },
+    "ask": {
+      "label": "Spør assistenten",
+      "hint": "Skriv med egne ord hva du trenger"
+    },
+    "quick": {
+      "title": "Fortsett der du slapp",
+      "projects": "Aktive prosjekter",
+      "needs": "Åpne behov",
+      "allProjects": "Alle prosjekter",
+      "allNeeds": "Alle behov",
+      "untitledProject": "Prosjekt uten navn"
+    },
+    "pin": {
+      "add": "Legg til «{label}» i snarveiene dine",
+      "remove": "Fjern «{label}» fra snarveiene dine"
     }
   },
   "siteNav": {

@@ -168,8 +168,15 @@ import { Region, Unreadable, retryLabels, type RetryLabels } from "@/components/
 // ───────────────────────── 01 · WAITING ─────────────────────────
 
 export async function HomeWaiting({ locale }: { readonly locale: ActiveLocale }) {
-  const { region, unknownDoors } = await loadHomeWaiting();
-  return <HomeWaitingView locale={locale} region={region} unknownDoors={unknownDoors} />;
+  const { region, unknownDoors, emailProofNeeded } = await loadHomeWaiting();
+  return (
+    <HomeWaitingView
+      locale={locale}
+      region={region}
+      unknownDoors={unknownDoors}
+      emailProofNeeded={emailProofNeeded}
+    />
+  );
 }
 
 /** Data-driven view, so every state is provable without a database
@@ -178,10 +185,15 @@ export async function HomeWaitingView({
   locale,
   region,
   unknownDoors,
+  emailProofNeeded = false,
 }: {
   readonly locale: ActiveLocale;
   readonly region: WaitingRegion;
   readonly unknownDoors: readonly TodayDoorKind[];
+  /** The person's e-mail is not confirmed, so invitations sent to it cannot
+   *  be shown. A step for the person — named, with the place to do it —
+   *  never an "unreadable" line with a retry that cannot help. */
+  readonly emailProofNeeded?: boolean;
 }) {
   const [t, tRegion, tCard, tJournal, tUnits] = await Promise.all([
     getTranslations("todayScreen.home"),
@@ -323,7 +335,21 @@ export async function HomeWaitingView({
         </div>
       ) : null}
 
-      {!next && open.length === 0 && !openUnknown && !region.nextUnknown ? (
+      {emailProofNeeded ? (
+        <div className={cn(open.length > 0 || next || openUnknown ? "border-t border-ink-600/60 pt-2" : "")}>
+          <Link href={"/dashboard/network" as "/dashboard"} data-testid="today-open-confirm-email" className={ROW_LINK}>
+            <span className="flex min-w-0 items-center gap-3">
+              <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-text-muted" />
+              <span className="min-w-0">{tRegion("confirmEmail")}</span>
+            </span>
+            <span aria-hidden className={ARROW}>
+              →
+            </span>
+          </Link>
+        </div>
+      ) : null}
+
+      {!next && open.length === 0 && !openUnknown && !region.nextUnknown && !emailProofNeeded ? (
         <p className={NOTE} data-testid="home-waiting-clear">
           {tRegion("clear")}
         </p>

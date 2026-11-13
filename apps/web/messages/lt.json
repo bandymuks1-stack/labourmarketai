@@ -15090,7 +15090,18 @@
       "whatChangedUnavailable": "Dabar nepavyko patikrinti, kas pasikeitė. Tavo įrašai niekur nedingo — pabandyk po akimirkos arba atidaryk žurnalą.",
       "planIntro": "{count, plural, one {Tai # žingsnis.} few {Tai # žingsniai, iš eilės. Štai pirmasis — paspausk kitą, kai būsi pasiruošęs.} other {Tai # žingsnių, iš eilės. Štai pirmasis — paspausk kitą, kai būsi pasiruošęs.}}",
       "planNextOffer": "Kitas žingsnis:",
-      "planStep": "{n} žingsnis iš {count}"
+      "planStep": "{n} žingsnis iš {count}",
+      "pinAdd": "Pridėti nuorodą",
+      "pinEditDone": "Baigta",
+      "pinAddHeading": "Pridėti nuorodą",
+      "pinAddNone": "Čia viskas jau pridėta.",
+      "pinRecent": "Neseniai",
+      "pinMoveHandle": "„{label}“: vilk arba perkelk rodyklių klavišais",
+      "pinManageHint": "Vilk nuorodą arba perkelk ją rodyklių klavišais. ✕ ją pašalina.",
+      "pinRemove": "Pašalinti „{label}“",
+      "pinAdded": "Pridėta.",
+      "pinMoved": "Tvarka išsaugota.",
+      "pinHiddenHeading": "Šiuo metu tau nepasiekiama"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -20106,7 +20117,8 @@
     "waiting": {
       "title": "Laukia tavęs",
       "clear": "Niekas tavęs nelaukia.",
-      "unknown": "Nepavyko nuskaityti, kas tavęs laukia."
+      "unknown": "Nepavyko nuskaityti, kas tavęs laukia.",
+      "confirmEmail": "Patvirtink savo el. pašto adresą, kad matytum tau išsiųstus kvietimus"
     },
     "running": {
       "title": "Vyksta dabar",
@@ -20561,6 +20573,101 @@
         "verify_rate_limited": "Nuorodą neseniai jau siuntėme. Patikrink el. paštą arba bandyk vėliau.",
         "error": "Nepavyko. Bandyk dar kartą vėliau."
       }
+    }
+  },
+  "homeGoals": {
+    "title": "Ką nori daryti?",
+    "worker": {
+      "findWork": {
+        "label": "Rasti darbą",
+        "hint": "Darbai pagal tavo įgūdžius"
+      },
+      "recordWork": {
+        "label": "Įrašyti darbą",
+        "hint": "Pridėk šiandienos darbą į žurnalą"
+      },
+      "myCv": {
+        "label": "Mano CV",
+        "hint": "Peržiūrėk ir pasidalyk savo CV"
+      },
+      "messages": {
+        "label": "Žinutės",
+        "hint": "Tavo pokalbiai"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Rasti darbuotojų"
+      },
+      "projects": {
+        "label": "Projektai ir komandos",
+        "hint": "Objektai, užduotys ir kas kur dirba"
+      },
+      "people": {
+        "label": "Mano žmonės",
+        "hint": "Tavo komanda ir kvietimai"
+      },
+      "hours": {
+        "label": "Darbas ir valandos",
+        "hint": "Įrašytas darbas ir valandos"
+      },
+      "offerServices": {
+        "label": "Siūlyti paslaugas",
+        "hint": "Ką siūlo tavo įmonė"
+      },
+      "orders": {
+        "label": "Užklausos ir užsakymai",
+        "hint": "Išsiųstos ir gautos paslaugų užklausos"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Siūlyti savo žmones",
+        "hint": "Nurodyk, kas laisvas ir kada"
+      },
+      "clients": {
+        "label": "Klientai",
+        "hint": "Įmonės, kurioms dirbi"
+      },
+      "people": {
+        "label": "Mano žmonės",
+        "hint": "Tavo žmonės ir kvietimai"
+      },
+      "candidates": {
+        "label": "Rasti kandidatų",
+        "hint": "Ieškok žmonių"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Mano užklausos",
+        "hint": "Ko prašei ir kas atsakė"
+      }
+    },
+    "areas": {
+      "calendar": "Kalendorius",
+      "numbers": "Mano veikla skaičiais",
+      "profile": "Mano profilis",
+      "gallery": "Galerija",
+      "capacity": "Pajėgumai",
+      "results": "Rezultatai",
+      "history": "Istorija"
+    },
+    "ask": {
+      "label": "Paklausk asistento",
+      "hint": "Parašyk savais žodžiais, ko tau reikia"
+    },
+    "quick": {
+      "title": "Tęsk ten, kur baigei",
+      "projects": "Vykdomi projektai",
+      "needs": "Atviri poreikiai",
+      "allProjects": "Visi projektai",
+      "allNeeds": "Visi poreikiai",
+      "untitledProject": "Projektas be pavadinimo"
+    },
+    "pin": {
+      "add": "Pridėti „{label}“ prie savo nuorodų",
+      "remove": "Pašalinti „{label}“ iš savo nuorodų"
     }
   },
   "siteNav": {

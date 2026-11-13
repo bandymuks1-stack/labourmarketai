@@ -227,7 +227,7 @@ describe("e2e specs never wait on a testid the product cannot render", () => {
     // (owner decision 0017); the retired 3-tab bar must NOT resolve.
     expect(resolvesExact("today-screen")).toBe(true);
     expect(resolvesExact("today-next-cta")).toBe(true);
-    expect(resolvesExact("today-station-journal")).toBe(true);
+    expect(resolvesExact("today-header")).toBe(true);
     expect(resolvesExact("shell-logo-home")).toBe(true);
     expect(resolvesExact("worker-bottom-nav")).toBe(false);
     // Negative control: a plausible id nothing renders must NOT resolve.

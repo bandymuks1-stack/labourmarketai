@@ -571,7 +571,7 @@
     "localeSwitch": "[EN] Language",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
-    "skipToContent": "[EN] Skip to content",
+    "skipToContent": "Gå til indhold",
     "loading": "Indlæser…",
     "dashboardSections": "Oversigtens sektioner",
     "nav": {
@@ -4403,7 +4403,18 @@
       "teamOfferThreadFailed": "Denne samtale kan ikke åbnes.",
       "whatChangedIntro": "{count, plural, one {Her er kæden fra dit seneste arbejde: hvad du gjorde, hvad der ændrede sig, hvad det åbnede.} other {Her er # kæder fra dit seneste arbejde: hvad du gjorde, hvad der ændrede sig, hvad det åbnede.}}",
       "whatChangedNone": "Der kom intet nyt ud af dit arbejde de seneste 14 dage. Når du registrerer arbejde, og det bliver bekræftet, viser jeg, hvad det ændrede.",
-      "whatChangedUnavailable": "Jeg kunne ikke tjekke, hvad der ændrede sig lige nu. Dine registreringer er i sikkerhed – prøv igen om lidt eller åbn journalen."
+      "whatChangedUnavailable": "Jeg kunne ikke tjekke, hvad der ændrede sig lige nu. Dine registreringer er i sikkerhed – prøv igen om lidt eller åbn journalen.",
+      "pinAdd": "Tilføj genvej",
+      "pinEditDone": "Færdig",
+      "pinAddHeading": "Tilføj en genvej",
+      "pinAddNone": "Alt her er allerede tilføjet.",
+      "pinRecent": "Seneste",
+      "pinMoveHandle": "“{label}”: træk eller flyt med piletasterne",
+      "pinManageHint": "Træk en genvej, eller flyt den med piletasterne. ✕ fjerner den.",
+      "pinRemove": "Fjern “{label}”",
+      "pinAdded": "Tilføjet.",
+      "pinMoved": "Rækkefølgen er gemt.",
+      "pinHiddenHeading": "Ikke tilgængeligt for dig lige nu"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -7603,7 +7614,8 @@
     "waiting": {
       "title": "Venter på dig",
       "clear": "Intet venter på dig.",
-      "unknown": "Det, der venter på dig, kunne ikke læses."
+      "unknown": "Det, der venter på dig, kunne ikke læses.",
+      "confirmEmail": "Bekræft din e-mailadresse for at se invitationer, der er sendt til dig"
     },
     "running": {
       "title": "I gang nu",
@@ -7945,6 +7957,101 @@
       "undecided": "Du har ikke valgt endnu, så intet til måling gemmes.",
       "allow": "Tillad",
       "refuse": "Afvis"
+    }
+  },
+  "homeGoals": {
+    "title": "Hvad vil du gøre?",
+    "worker": {
+      "findWork": {
+        "label": "Find arbejde",
+        "hint": "Arbejde, der passer til dine færdigheder"
+      },
+      "recordWork": {
+        "label": "Registrer arbejde",
+        "hint": "Tilføj dagens arbejde til din journal"
+      },
+      "myCv": {
+        "label": "Mit CV",
+        "hint": "Se og del dit CV"
+      },
+      "messages": {
+        "label": "Beskeder",
+        "hint": "Dine samtaler"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Find medarbejdere"
+      },
+      "projects": {
+        "label": "Projekter og teams",
+        "hint": "Pladser, opgaver og hvem der arbejder hvor"
+      },
+      "people": {
+        "label": "Mine folk",
+        "hint": "Dit team og invitationer"
+      },
+      "hours": {
+        "label": "Arbejde og timer",
+        "hint": "Registreret arbejde og timer"
+      },
+      "offerServices": {
+        "label": "Tilbyd ydelser",
+        "hint": "Hvad din virksomhed tilbyder"
+      },
+      "orders": {
+        "label": "Forespørgsler og ordrer",
+        "hint": "Forespørgsler om ydelser, sendte og modtagne"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Tilbyd dine folk",
+        "hint": "Angiv, hvem der er ledig og hvornår"
+      },
+      "clients": {
+        "label": "Kunder",
+        "hint": "Virksomheder, du arbejder for"
+      },
+      "people": {
+        "label": "Mine folk",
+        "hint": "Dine folk og invitationer"
+      },
+      "candidates": {
+        "label": "Find kandidater",
+        "hint": "Søg efter personer"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Mine forespørgsler",
+        "hint": "Hvad du har bedt om, og hvem der svarede"
+      }
+    },
+    "areas": {
+      "calendar": "Kalender",
+      "numbers": "Min aktivitet i tal",
+      "profile": "Min profil",
+      "gallery": "Galleri",
+      "capacity": "Kapacitet",
+      "results": "Resultater",
+      "history": "Historik"
+    },
+    "ask": {
+      "label": "Spørg assistenten",
+      "hint": "Skriv med dine egne ord, hvad du har brug for"
+    },
+    "quick": {
+      "title": "Fortsæt, hvor du slap",
+      "projects": "Aktive projekter",
+      "needs": "Åbne behov",
+      "allProjects": "Alle projekter",
+      "allNeeds": "Alle behov",
+      "untitledProject": "Projekt uden navn"
+    },
+    "pin": {
+      "add": "Føj “{label}” til dine genveje",
+      "remove": "Fjern “{label}” fra dine genveje"
     }
   },
   "siteNav": {

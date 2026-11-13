@@ -1,62 +1,518 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { Plus, X } from "lucide-react";
+
+import { Link } from "@/lib/i18n/navigation";
+import { pinAction, reorderPinsAction, unpinAction } from "@/lib/workspace/pins-actions";
+import { PIN_CAP } from "@/lib/workspace/pins-model";
+import { publishPinned, setPinToggleHandler, type PinToggleHandler } from "@/lib/workspace/pin-sync";
+import {
+  parseRecentPlaces,
+  recentPlacesKey,
+  resolveRecentPlaces,
+} from "@/lib/workspace/recent-places";
+import { iconControl } from "./icon-scale";
+
 /**
- * MY SPACE — the pinned row (owner contract 2026-09-04 §4C).
+ * MY SPACE — the pinned row (owner contract 2026-09-04 §4C; pin to home, owner
+ * P0 No. 1, 2026-11-12).
  *
  * "A simple personal workspace analogous to a computer desktop": the
  * person's OWN shortcuts, always visible above the conversation, each one a
- * reference the chat already understands (`handleChip` vocabulary). It
- * renders nothing when there is nothing pinned — the desktop is never
- * pre-filled. Tapping a pin runs the same handler its chip runs; "manage"
- * opens the unpin chips inside the conversation. No second action system.
+ * reference the chat already understands (`handleChip` vocabulary). The
+ * desktop is never pre-filled: with nothing pinned the row holds only the way
+ * to add a shortcut. Tapping a pin runs the same handler its chip runs — no
+ * second action system.
+ *
+ * EDITING IS DIRECT (2026-11-12): "Manage" turns the row's own chips into
+ * the editor — a chip is moved by dragging it (mouse or finger) or, focused,
+ * with the arrow keys; a small ✕ on the chip removes it; "Done" ends it.
+ * Adding is a list under the row. All of it goes through the same three
+ * server actions the chat's pin chips call (`pinAction` · `unpinAction` · `reorderPinsAction`, rows in
+ * `workspace_pins`, so the result follows the person to every device).
+ * Editing never writes into the conversation, so it never replaces the home
+ * the person is looking at. Every control is a real button with a name, at
+ * least 44px, reachable by keyboard; the outcome is announced politely.
+ *
+ * WHAT CAN BE ADDED is handed in by the server (`places`): destinations the
+ * person is already admitted to. A pin never grants access — the server also
+ * drops any stored pin the person is not admitted to before this row sees it.
+ *
+ * RECENT is a convenience of this browser (`lib/workspace/recent-places.ts`):
+ * the last areas opened, minus what is pinned or already on the home.
  */
 export interface MySpacePinView {
   readonly ref: string;
   readonly label: string;
 }
 
+export interface MySpacePlace {
+  readonly ref: string;
+  readonly href: string;
+  readonly label: string;
+  /** Already offered by the home's goal cards. */
+  readonly onHome: boolean;
+}
+
+export interface MySpaceEditLabels {
+  readonly add: string;
+  readonly done: string;
+  readonly addHeading: string;
+  readonly addNone: string;
+  readonly recent: string;
+  /** Carry `{label}`. */
+  readonly moveHandle: string;
+  readonly remove: string;
+  /** One line: how to move and remove while managing. */
+  readonly manageHint: string;
+  readonly added: string;
+  readonly removed: string;
+  readonly moved: string;
+  readonly hiddenHeading: string;
+  /** Carries `{max}`. */
+  readonly cap: string;
+  readonly unavailable: string;
+}
+
+export interface MySpaceEditor {
+  readonly places: readonly MySpacePlace[];
+  /** Stored pins the home does not draw for this person right now. They still
+   *  count toward the cap, so they can be REMOVED here — and only removed. */
+  readonly withheld: readonly MySpacePinView[];
+  readonly onWithheldRemoved: (ref: string) => void;
+  readonly labels: MySpaceEditLabels;
+  /** The workspace the screen was rendered for (stale-screen refusal). */
+  readonly expectedWorkspaceId?: string;
+  /** The signed-in user, for the per-user recents of this browser. */
+  readonly userId: string | null;
+  /** The row's pins after a successful change, in order. */
+  readonly onChange: (pins: readonly MySpacePinView[]) => void;
+}
+
+const CHIP =
+  "ua-press min-h-11 shrink-0 rounded-full border border-ink-500 bg-ink-800 px-4 text-support font-medium text-text-primary outline-none hover:border-brand-blue hover:text-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue";
+const QUIET =
+  "ua-press min-h-11 shrink-0 rounded-full px-3 text-support text-text-muted outline-none hover:text-text-primary focus-visible:ring-2 focus-visible:ring-brand-blue";
+const ICON_BUTTON =
+  "ua-press flex size-11 flex-none items-center justify-center rounded-full border border-ink-500 text-text-secondary outline-none hover:border-brand-blue hover:text-text-primary focus-visible:ring-2 focus-visible:ring-brand-blue disabled:cursor-default disabled:opacity-40";
+
 export function MySpaceRow({
   pins,
   title,
   manageLabel,
   onPin,
-  onManage,
+  editor,
 }: {
   pins: readonly MySpacePinView[];
   title: string;
   manageLabel: string;
   onPin: (ref: string) => void;
-  onManage: () => void;
+  /** `null` when the pin store cannot be read: no row to edit, no ask. */
+  editor: MySpaceEditor | null;
 }) {
-  if (pins.length === 0) return null;
+  const [editing, setEditing] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState("");
+  const [recent, setRecent] = useState<readonly MySpacePlace[]>([]);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  /** The order shown while a chip is being dragged (stored on release). */
+  const [draft, setDraft] = useState<readonly MySpacePinView[] | null>(null);
+  const [dragging, setDragging] = useState<string | null>(null);
+  /** Ends the drag in progress (removes its window listeners), if any. */
+  const drag = useRef<(() => void) | null>(null);
+  useEffect(() => () => drag.current?.(), []);
+  const itemEls = useRef(new Map<string, HTMLElement>());
+  const handleEls = useRef(new Map<string, HTMLButtonElement>());
+  /** The chip to give the focus back to after a keyboard move re-ordered it. */
+  const refocus = useRef<string | null>(null);
+  useEffect(() => {
+    if (!refocus.current) return;
+    handleEls.current.get(refocus.current)?.focus();
+    refocus.current = null;
+  }, [pins]);
+
+  const pinnedRefs = useMemo(() => new Set(pins.map((p) => p.ref)), [pins]);
+  const places = editor?.places;
+  const userId = editor?.userId ?? null;
+
+  // Recents are read after mount (they live in this browser only), so the
+  // server and the first client render agree.
+  useEffect(() => {
+    if (!places || !userId) return;
+    try {
+      const stored = parseRecentPlaces(localStorage.getItem(recentPlacesKey(userId)));
+      const skip = new Set(places.filter((p) => p.onHome || pinnedRefs.has(p.ref)).map((p) => p.href));
+      setRecent(resolveRecentPlaces(stored, places, skip));
+    } catch {
+      setRecent([]);
+    }
+  }, [places, userId, pinnedRefs]);
+
+  // The function cards of the home draw a pin toggle from THIS row's state and
+  // ask this row to change it (`lib/workspace/pin-sync.ts`): one list, one
+  // writer. Without an editor nothing is published, so no card offers one.
+  const canEdit = editor !== null;
+  useEffect(() => {
+    publishPinned(canEdit ? pins.map((p) => p.ref) : null);
+  }, [pins, canEdit]);
+  useEffect(() => () => publishPinned(null), []);
+  const toggleFromCard = useRef<PinToggleHandler>(async () => ({ ok: false }));
+  useEffect(() => setPinToggleHandler((request) => toggleFromCard.current(request)), []);
+
+  const onCardToggle: PinToggleHandler = async ({ ref, label }) => {
+    if (!editor || busy) return { ok: false };
+    const labels = editor.labels;
+    const isPinned = pinnedRefs.has(ref);
+    setBusy(true);
+    try {
+      const result = isPinned
+        ? await unpinAction({ ref, expectedWorkspaceId: editor.expectedWorkspaceId })
+        : await pinAction({ ref, label, expectedWorkspaceId: editor.expectedWorkspaceId });
+      if (result.ok) {
+        editor.onChange(isPinned ? pins.filter((p) => p.ref !== ref) : [...pins, { ref, label }]);
+        setStatus(isPinned ? labels.removed : labels.added);
+        return { ok: true };
+      }
+      return {
+        ok: false,
+        message: result.code === "cap" ? labels.cap.replace("{max}", String(PIN_CAP)) : labels.unavailable,
+      };
+    } catch {
+      return { ok: false, message: labels.unavailable };
+    } finally {
+      setBusy(false);
+    }
+  };
+  useEffect(() => {
+    toggleFromCard.current = onCardToggle;
+  });
+
+  // Nothing pinned, nothing recent, nothing to tidy: the row is absent, so on
+  // a phone the goals are not pushed down by an empty row. The first shortcut
+  // is made from a function card's pin toggle; the row appears with it.
+  if (pins.length === 0 && recent.length === 0 && (!editor || editor.withheld.length === 0)) return null;
+
+  const labels = editor?.labels;
+  const addable = (places ?? []).filter((p) => !pinnedRefs.has(p.ref));
+
+  const run = async (
+    work: () => Promise<{ ok: boolean; code?: string }>,
+    next: readonly MySpacePinView[],
+    done: string,
+  ) => {
+    if (!editor || !labels || busy) return;
+    setBusy(true);
+    setStatus("");
+    try {
+      const result = await work();
+      if (result.ok) {
+        editor.onChange(next);
+        setStatus(done);
+      } else {
+        setStatus(result.code === "cap" ? labels.cap.replace("{max}", String(PIN_CAP)) : labels.unavailable);
+      }
+    } catch {
+      setStatus(labels.unavailable);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const add = (place: MySpacePlace) =>
+    run(
+      () => pinAction({ ref: place.ref, label: place.label, expectedWorkspaceId: editor?.expectedWorkspaceId }),
+      [...pins, { ref: place.ref, label: place.label }],
+      labels?.added ?? "",
+    );
+  const remove = (ref: string) =>
+    run(
+      () => unpinAction({ ref, expectedWorkspaceId: editor?.expectedWorkspaceId }),
+      pins.filter((p) => p.ref !== ref),
+      labels?.removed ?? "",
+    );
+  const removeWithheld = async (ref: string) => {
+    if (!editor || !labels || busy) return;
+    setBusy(true);
+    setStatus("");
+    try {
+      const result = await unpinAction({ ref, expectedWorkspaceId: editor.expectedWorkspaceId });
+      if (result.ok) {
+        editor.onWithheldRemoved(ref);
+        setStatus(labels.removed);
+      } else {
+        setStatus(labels.unavailable);
+      }
+    } catch {
+      setStatus(labels.unavailable);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const sameOrder = (a: readonly MySpacePinView[], b: readonly MySpacePinView[]) =>
+    a.length === b.length && a.every((p, i) => p.ref === b[i].ref);
+  const saveOrder = (next: readonly MySpacePinView[]) => {
+    if (sameOrder(next, pins)) return;
+    void run(
+      () => reorderPinsAction({ refs: next.map((p) => p.ref), expectedWorkspaceId: editor?.expectedWorkspaceId }),
+      next,
+      labels?.moved ?? "",
+    );
+  };
+
+  // ARROW KEYS on a focused chip move it one place. The chip keeps the focus
+  // through the re-order (see the effect above), so a person can keep pressing.
+  const onHandleKey = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const delta =
+      e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : 0;
+    if (delta === 0) return;
+    e.preventDefault();
+    const to = index + delta;
+    if (busy || to < 0 || to >= pins.length) return;
+    const next = [...pins];
+    [next[index], next[to]] = [next[to], next[index]];
+    refocus.current = pins[index].ref;
+    saveOrder(next);
+  };
+
+  // DRAG with a mouse or a finger (pointer events, so it works on touch where
+  // HTML drag-and-drop does not). While dragging the row shows the order as
+  // it would be; it is stored once, on release. The gesture is followed on
+  // the WINDOW, not on the chip: re-ordering moves the chip in the DOM, which
+  // can drop a pointer capture, and a release over a gap or outside the row
+  // must still end the drag and save what is shown.
+  const onHandleDown = (e: PointerEvent<HTMLButtonElement>, ref: string) => {
+    if (busy || drag.current || (e.pointerType === "mouse" && e.button !== 0)) return;
+    const pointerId = e.pointerId;
+    const start = { x: e.clientX, y: e.clientY };
+    let moved = false;
+    let order: readonly MySpacePinView[] = pins;
+    const onMove = (ev: globalThis.PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      if (!moved && Math.hypot(ev.clientX - start.x, ev.clientY - start.y) < 8) return;
+      if (!moved) setDragging(ref);
+      moved = true;
+      const over = order.find((p) => {
+        const r = itemEls.current.get(p.ref)?.getBoundingClientRect();
+        return r && ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom;
+      });
+      if (!over || over.ref === ref) return;
+      const from = order.findIndex((p) => p.ref === ref);
+      const to = order.findIndex((p) => p.ref === over.ref);
+      if (from < 0 || to < 0) return;
+      const next = [...order];
+      next.splice(to, 0, next.splice(from, 1)[0]);
+      order = next;
+      setDraft(next);
+    };
+    const end = (ev: globalThis.PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      stop();
+      // A cancelled gesture (the browser took it over) saves nothing.
+      if (ev.type === "pointerup" && moved) saveOrder(order);
+    };
+    const stop = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", end);
+      window.removeEventListener("pointercancel", end);
+      drag.current = null;
+      setDraft(null);
+      setDragging(null);
+    };
+    drag.current = stop;
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
+  };
+
+  const shown = draft ?? pins;
+
   return (
-    <div
-      className="flex flex-wrap items-center gap-2 border-b border-border-subtle px-3 py-2"
-      data-testid="my-space-row"
-      role="toolbar"
-      aria-label={title}
-    >
-      <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">{title}</span>
-      {pins.map((p) => (
-        <button
-          key={p.ref}
-          type="button"
-          onClick={() => onPin(p.ref)}
-          className="ua-press min-h-11 shrink-0 rounded-full border border-ink-500 bg-ink-800 px-4 text-support font-medium text-text-primary hover:border-brand-blue hover:text-brand-blue"
-          data-testid="my-space-pin"
-          data-ref={p.ref}
-        >
-          {p.label}
-        </button>
-      ))}
-      <button
-        type="button"
-        onClick={onManage}
-        className="ua-press min-h-11 shrink-0 rounded-full px-3 text-support text-text-muted hover:text-text-primary"
-        data-testid="my-space-manage"
+    <div className="border-b border-ink-600" data-testid="my-space">
+      <div
+        className="flex flex-wrap items-center gap-2 px-3 py-2"
+        data-testid="my-space-row"
+        // A labelled group, not a toolbar: every chip is its own Tab stop and
+        // the arrow keys mean "move this chip" while managing.
+        role="group"
+        aria-label={title}
       >
-        {manageLabel}
-      </button>
+        {(pins.length > 0 || recent.length > 0) && (
+          <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">{title}</span>
+        )}
+        {editing && labels
+          ? shown.map((p, i) => (
+              // MANAGE: the chip is a handle (drag, or arrow keys) with its
+              // own small remove control. It opens nothing while managing.
+              <span
+                key={p.ref}
+                ref={(el) => {
+                  if (el) itemEls.current.set(p.ref, el);
+                  else itemEls.current.delete(p.ref);
+                }}
+                data-testid="my-space-edit-item"
+                data-ref={p.ref}
+                data-dragging={dragging === p.ref ? true : undefined}
+                className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-dashed border-ink-500 bg-ink-800 data-[dragging]:border-brand-blue"
+              >
+                <button
+                  type="button"
+                  ref={(el) => {
+                    if (el) handleEls.current.set(p.ref, el);
+                    else handleEls.current.delete(p.ref);
+                  }}
+                  aria-label={labels.moveHandle.replace("{label}", p.label)}
+                  aria-keyshortcuts="ArrowLeft ArrowRight"
+                  aria-disabled={busy || undefined}
+                  onKeyDown={(e) => onHandleKey(e, i)}
+                  onPointerDown={(e) => onHandleDown(e, p.ref)}
+                  className="min-h-11 cursor-grab touch-none select-none rounded-l-full pl-4 pr-1 text-support font-medium text-text-primary outline-none focus-visible:ring-2 focus-visible:ring-brand-blue active:cursor-grabbing"
+                  data-testid="my-space-handle"
+                >
+                  {p.label}
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void remove(p.ref)}
+                  aria-label={labels.remove.replace("{label}", p.label)}
+                  title={labels.remove.replace("{label}", p.label)}
+                  className="flex size-11 flex-none items-center justify-center rounded-full text-text-muted outline-none hover:text-text-primary focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-40"
+                  data-testid="my-space-remove"
+                >
+                  <X aria-hidden className="size-3.5" />
+                </button>
+              </span>
+            ))
+          : pins.map((p) => (
+              <button
+                key={p.ref}
+                type="button"
+                onClick={() => onPin(p.ref)}
+                className={CHIP}
+                data-testid="my-space-pin"
+                data-ref={p.ref}
+              >
+                {p.label}
+              </button>
+            ))}
+        {recent.length > 0 && labels && (
+          <>
+            <span className="shrink-0 pl-1 text-meta text-text-muted">{labels.recent}</span>
+            {recent.map((place) => (
+              <Link
+                key={place.ref}
+                href={place.href as "/dashboard"}
+                className={`${CHIP} inline-flex items-center border-dashed`}
+                data-testid="my-space-recent"
+                data-ref={place.ref}
+              >
+                {place.label}
+              </Link>
+            ))}
+          </>
+        )}
+        {editor && labels && (
+          <button
+            ref={toggleRef}
+            type="button"
+            aria-expanded={editing}
+            aria-controls="my-space-editor"
+            onClick={() => {
+              setEditing((v) => !v);
+              setStatus("");
+            }}
+            className={`${QUIET} inline-flex items-center gap-1.5`}
+            data-testid="my-space-manage"
+          >
+            {pins.length === 0 && !editing ? <Plus {...iconControl()} aria-hidden /> : null}
+            {editing ? labels.done : pins.length === 0 ? labels.add : manageLabel}
+          </button>
+        )}
+      </div>
+
+      {editor && labels && editing && (
+        <div
+          id="my-space-editor"
+          data-testid="my-space-editor"
+          aria-busy={busy}
+          className="flex flex-col gap-3 border-t border-ink-600 px-3 py-3"
+          onKeyDown={(e) => {
+            if (e.key !== "Escape") return;
+            setEditing(false);
+            toggleRef.current?.focus();
+          }}
+        >
+          {pins.length > 0 && (
+            <p data-testid="my-space-manage-hint" className="text-support text-text-secondary">
+              {labels.manageHint}
+            </p>
+          )}
+
+          {editor.withheld.length > 0 && (
+            <section aria-label={labels.hiddenHeading} className="flex flex-col gap-1.5">
+              <h3 className="text-meta font-medium text-text-muted">{labels.hiddenHeading}</h3>
+              <ul className="flex flex-col gap-1.5">
+                {editor.withheld.map((p) => (
+                  <li
+                    key={p.ref}
+                    data-testid="my-space-withheld-item"
+                    data-ref={p.ref}
+                    className="flex items-center gap-1.5"
+                  >
+                    {/* Text only: a withheld pin is never something to press. */}
+                    <span className="min-w-0 flex-1 truncate text-support text-text-secondary">{p.label}</span>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void removeWithheld(p.ref)}
+                      aria-label={labels.remove.replace("{label}", p.label)}
+                      title={labels.remove.replace("{label}", p.label)}
+                      className={ICON_BUTTON}
+                      data-testid="my-space-withheld-remove"
+                    >
+                      <X {...iconControl()} aria-hidden />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {(places?.length ?? 0) > 0 && (
+            <section aria-label={labels.addHeading} className="flex flex-col gap-1.5">
+              <h3 className="text-meta font-medium text-text-muted">{labels.addHeading}</h3>
+              {addable.length === 0 ? (
+                <p className="text-support text-text-secondary">{labels.addNone}</p>
+              ) : (
+                <ul className="flex flex-wrap gap-2">
+                  {addable.map((place) => (
+                    <li key={place.ref}>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void add(place)}
+                        className={`${CHIP} inline-flex items-center gap-1.5 disabled:opacity-60`}
+                        data-testid="my-space-add"
+                        data-ref={place.ref}
+                      >
+                        <Plus {...iconControl()} aria-hidden />
+                        {place.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
+
+          {/* Always one line tall (a non-breaking space when silent), so an
+              outcome arriving never moves the buttons under the finger. */}
+          <p role="status" aria-live="polite" data-testid="my-space-status" className="text-support text-text-secondary">
+            {status || "\u00a0"}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

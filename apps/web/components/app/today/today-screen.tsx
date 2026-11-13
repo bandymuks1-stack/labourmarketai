@@ -13,9 +13,8 @@ import {
   HomeWaiting,
 } from "@/components/app/home/home-regions";
 import type { ActiveLocale } from "@/lib/i18n/config";
-import { AreaSwitcher } from "@/components/app/area-switcher";
 import { deriveTodayState } from "@/lib/today/today-model";
-import { PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
+import { HomeGoalCards, HomeGoalCardsPending } from "@/components/app/home/home-goal-cards";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import {
   loadTodayDisplayName,
@@ -36,6 +35,9 @@ import {
  *
  *   1. header      name · profession · today's state
  *                  (replaces the opening intro card for the worker)
+ *   1a. GOALS      what the person came to do — find work, record work, my
+ *                  CV, messages — as large cards, one tap each (owner P0
+ *                  No. 1, 2026-11-12; `lib/navigation/home-goals.ts`)
  *   2. WAITING     the work-card's ONE next action (the one gold action) +
  *                  what is waiting on the person (offers · invitations ·
  *                  unread · journal items)
@@ -43,8 +45,8 @@ import {
  *   4. BECAUSE     what happened and — only where the event's own fact IS a
  *                  state change — event → consequence → state
  *   5. OUTSIDE     the market: one opportunity sentence with band counts
- *   6. stations    the contextual workspaces, as text links, one tap —
- *                  opportunities (the former PASAULIS tab) first
+ *   6. stations    the contextual workspaces the goals do not already
+ *                  offer, one tap each (a destination is shown once)
  *
  * Regions 2–5 are the owner-FROZEN four-region home (design class
  * 4e695e261), re-ported through main's readers and the restraint directives
@@ -61,7 +63,9 @@ import {
  * md up the regions read in their canonical order.
  *
  * There is no "ask" door any more: the composer IS the door, and the
- * conversation is the home (the former PAKLAUSK tab is retired).
+ * conversation is the home (the former PAKLAUSK tab is retired). The goals'
+ * "Ask the assistant" entry (2026-11-12) is not a door either — it puts the
+ * cursor in that same composer.
  *
  * Every figure is a reader's figure (`lib/today/today-server.ts`) read
  * through the pure model (`lib/today/today-model.ts`); a reader that could
@@ -106,6 +110,7 @@ function TodayScreenPending() {
       data-testid="today-screen-pending"
       className="mx-auto flex w-full max-w-6xl flex-col gap-4 sm:gap-5 lg:gap-6"
     >
+      <HomeGoalCardsPending />
       <div className="flex flex-col gap-1">
         <span className="h-5 w-24 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
         <span className="h-9 w-56 animate-pulse rounded bg-ink-700 motion-reduce:animate-none sm:h-10" />
@@ -121,10 +126,6 @@ function TodayScreenPending() {
         <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-5 lg:gap-6">
           <HomeRegionPending />
         </div>
-      </div>
-      <div data-testid="today-stations-pending" className="border-t border-ink-600/70 pt-4 sm:pt-5">
-        <span className="block h-5 w-32 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
-        <div className="mt-2 h-40" />
       </div>
     </div>
   );
@@ -142,14 +143,22 @@ export function TodayScreen({ locale }: { locale: ActiveLocale }) {
  *  only (`home-cls-stability.test.ts` pins that no player-card read is
  *  awaited here). The slow readers stream inside the frame it draws. */
 async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
-  const [t, tNav, displayName] = await Promise.all([
+  const [t, displayName] = await Promise.all([
     getTranslations("todayScreen.home"),
-    getTranslations("common.nav"),
     loadTodayDisplayName(),
   ]);
 
   return (
     <div data-testid="today-screen" className="mx-auto flex w-full max-w-6xl flex-col gap-4 sm:gap-5 lg:gap-6">
+      {/* 0 · GOALS — what the person came to do, before anything they have
+          to read (owner P0 No. 1, 2026-11-12). FIRST on the screen, above
+          the person's own header: on a phone the conversation's composer
+          covers the bottom of the first screen, and the goals must be whole
+          above it (integrated check 2026-11-12). No boundary of its own: its
+          only reads are the request-cached ones the layout already ran, and
+          the frame-level placeholder reserves the same footprint. */}
+      <HomeGoalCards role="worker" />
+
       {/* 1 · HEADER — who, what they do, where today stands. The name is in
           hand at once; the profession and the state each stream into the
           SAME line behind a same-line placeholder, so the header's height is
@@ -233,28 +242,6 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
             <HomeBecause locale={locale} plainOnly />
           </Suspense>
         </div>
-      </div>
-
-      {/* 6 · STATIONS — the contextual workspaces, one tap each, as the light
-          3D area switcher (owner order 2026-10-25): cards with depth, the
-          chosen one in front, from the ONE area model (`PERSONAL_WORK_AREAS`,
-          derived from TODAY_STATIONS — opportunities first). Rendered at once:
-          no read stands behind it, and its track is a fixed height. */}
-      <div data-testid="today-stations" className="border-t border-ink-600/70 pt-4 sm:pt-5">
-        <AreaSwitcher
-          title={t("stations.title")}
-          prevLabel={tNav("previous")}
-          nextLabel={tNav("next")}
-          hereLabel={tNav("youAreHere")}
-          testId="today-area-switcher"
-          items={PERSONAL_WORK_AREAS.map((s) => ({
-            id: s.id,
-            href: s.href,
-            iconKey: s.iconKey,
-            label: t(`stations.${s.id}`),
-            testId: `today-station-${s.id}`,
-          }))}
-        />
       </div>
 
       {/* PARTIAL vs TOTAL unavailability — from the same request-cached

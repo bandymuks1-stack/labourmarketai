@@ -47,6 +47,9 @@ import {
   personHasUsableProfile,
 } from "@/lib/conversation/starters";
 import { listMyPins } from "@/lib/workspace/pins";
+import { admittedPins, withheldPins } from "@/lib/workspace/pin-admission";
+import { loadPinPlaces } from "@/lib/workspace/pin-places-server";
+import { loadGoalAdmission } from "@/lib/navigation/home-goals-server";
 import { Link } from "@/lib/i18n/navigation";
 import { WorkspaceChip } from "@/components/app/conversation/chat/workspace-chip";
 import {
@@ -60,6 +63,7 @@ import {
 } from "@/lib/auth/dashboard-role-decision";
 import { TodayScreen } from "@/components/app/today/today-screen";
 import { CompanyModelScreen } from "@/components/app/organization/company-model-screen";
+import { HomeGoalCards } from "@/components/app/home/home-goal-cards";
 import { PilotPassInvite } from "@/components/app/pilot-pass-invite";
 import { conversationOpeningContext } from "@/lib/today/today-route";
 import { AccessRefusalNotice } from "@/components/app/access-refusal-notice";
@@ -285,6 +289,38 @@ export default async function DashboardHomePage({
     getTranslations("relationshipTypes"),
   ]);
   const pins = pinsRead.kind === "ok" ? pinsRead.pins : null;
+  // A PIN NEVER GRANTS ACCESS (owner P0 No. 1, 2026-11-12). The row draws a
+  // stored pin only when the gates that already exist admit the person to
+  // what it points at — the same two facts the layout's gate used for this
+  // request (no new read). A role that was removed, or a workspace the person
+  // no longer governs, takes its pins off the home; the row itself stays, so
+  // they can still be managed once access returns. What CAN be pinned from
+  // this home is resolved the same way: the acting role's goals and areas,
+  // already filtered to the admitted ones.
+  const goalAdmission = await loadGoalAdmission();
+  // EVERYONE ELSE gets the goals too (owner P0 No. 1, 2026-11-12): a person
+  // inside an organization they work for but do not manage, and a customer
+  // with no organization, had no opening context at all — only the header.
+  // They get the same shared goal navigator, with their own functions, and
+  // nothing else is invented for them. Which list: the customer's when the
+  // person acts as a customer, otherwise the person's own.
+  const goalsOnlyRole: "worker" | "customer" | null =
+    workerToday || (activeOrgWorkspace && identity === "company")
+      ? null
+      : activeRole === "customer"
+        ? "customer"
+        : "worker";
+  const drawnPins = pins ? admittedPins(pins, goalAdmission) : null;
+  // The pins NOT drawn are still the person's rows and still count toward the
+  // cap, so the row's edit panel lists them with "remove" only — a reference
+  // and a label, never something that opens.
+  const withheld = pins ? withheldPins(pins, goalAdmission) : [];
+  const pinPlaces = pins
+    ? await loadPinPlaces({
+        home: workerToday ? "worker" : activeOrgWorkspace && identity === "company" ? "organization" : goalsOnlyRole,
+        admission: goalAdmission,
+      })
+    : [];
   const tReservationLabels = await getTranslations("projects.assign.reservation");
   const labels = resolveChatLabels(tChat, tReservationLabels);
   const workLogLabels = resolveWorkLogLabels(tWorkLog);
@@ -412,12 +448,22 @@ export default async function DashboardHomePage({
     activeOrgWorkspace && identity === "company" ? <CompanyModelScreen /> : null;
   // The pilot pass pointer leads it — the employer home is where an owner
   // looks first, and it renders nothing unless the pass is theirs to start.
+  // A person with no role home (an employee inside an organization, a
+  // customer with no organization) opens on the shared goal navigator alone.
+  const goalsOnlyHome =
+    !companyModel && goalsOnlyRole ? (
+      <section data-testid="goals-home" className="mx-auto flex w-full max-w-6xl flex-col gap-4">
+        <HomeGoalCards role={goalsOnlyRole} />
+      </section>
+    ) : null;
   const companyOpeningContext = companyModel ? (
     <>
       <PilotPassInvite className="mb-4" />
       {companyModel}
     </>
-  ) : null;
+  ) : (
+    goalsOnlyHome
+  );
   const conversationKey = `${rootWorkspace.activeWorkspaceId}:${identity}`;
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
@@ -452,7 +498,7 @@ export default async function DashboardHomePage({
         // chat's own opening composition (the worker's "now" above the
         // greeting and the composer). One home, one conversation.
         openingContext={workerToday ? <TodayScreen locale={locale as ActiveLocale} /> : companyOpeningContext}
-        openingContextWide={Boolean(workerToday)}
+        openingContextWide={Boolean(workerToday || companyOpeningContext)}
         countryLabels={countryLabels}
         educationWorkspace={educationWorkspace}
         agencyWorkspace={agencyWorkspace}
@@ -462,7 +508,9 @@ export default async function DashboardHomePage({
         }
         contextFallback={contextFallback}
         workspaceContextLine={workspaceContextLine}
-        pins={pins}
+        pins={drawnPins}
+        pinPlaces={pinPlaces}
+        withheldPins={withheld}
       />
     </>
   );

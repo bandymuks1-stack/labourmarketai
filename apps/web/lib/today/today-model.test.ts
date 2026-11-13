@@ -240,6 +240,13 @@ describe("the doors — who is waiting on the person, from the domain readers' o
     expect(unknownTodayDoors(partial)).toEqual(["offers", "unread"]);
     expect(unknownTodayDoors(null)).toEqual(["offers", "invitations", "unread"]);
     expect(unknownTodayDoors(ATTENTION)).toEqual([]);
+    // An unconfirmed e-mail address is not a failed read: invitations are
+    // unknown for a reason the person can act on, so the door is NOT listed
+    // among the readers that "could not answer" — while a plain failed
+    // invitation read still is.
+    const unproven = { offers: 0, invitations: null, invitationsNeedEmailProof: true, unread: { count: 0, onlyId: null } };
+    expect(unknownTodayDoors(unproven)).toEqual([]);
+    expect(unknownTodayDoors({ ...unproven, invitationsNeedEmailProof: false })).toEqual(["invitations"]);
     // NEGATIVE CONTROL: nothing in a null reader ever reads as a count.
     expect(JSON.stringify(deriveTodayDoors({ offers: null, invitations: null, unread: null }))).toBe("[]");
   });

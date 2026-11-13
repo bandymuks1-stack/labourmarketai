@@ -571,7 +571,7 @@
     "localeSwitch": "[EN] Language",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
-    "skipToContent": "[EN] Skip to content",
+    "skipToContent": "Pāriet uz saturu",
     "loading": "Ielādē…",
     "dashboardSections": "Paneļa sadaļas",
     "nav": {
@@ -4403,7 +4403,18 @@
       "teamOfferThreadFailed": "Šo saraksti nevar atvērt.",
       "whatChangedIntro": "{count, plural, zero {Lūk, # ķēdes no jūsu nesenā darba: ko izdarījāt, kas mainījās, ko tas atvēra.} one {Lūk, # ķēde no jūsu nesenā darba: ko izdarījāt, kas mainījās, ko tas atvēra.} other {Lūk, # ķēdes no jūsu nesenā darba: ko izdarījāt, kas mainījās, ko tas atvēra.}}",
       "whatChangedNone": "Pēdējās 14 dienās no jūsu darba nekas jauns neradās. Kad ierakstīsiet darbu un to apstiprinās, parādīšu, ko tas mainīja.",
-      "whatChangedUnavailable": "Pašlaik neizdevās pārbaudīt, kas mainījās. Jūsu ieraksti ir drošībā — mēģiniet pēc brīža vai atveriet žurnālu."
+      "whatChangedUnavailable": "Pašlaik neizdevās pārbaudīt, kas mainījās. Jūsu ieraksti ir drošībā — mēģiniet pēc brīža vai atveriet žurnālu.",
+      "pinAdd": "Pievienot saīsni",
+      "pinEditDone": "Gatavs",
+      "pinAddHeading": "Pievienot saīsni",
+      "pinAddNone": "Šeit viss jau ir pievienots.",
+      "pinRecent": "Nesenie",
+      "pinMoveHandle": "“{label}”: velciet vai pārvietojiet ar bulttaustiņiem",
+      "pinManageHint": "Velciet saīsni vai pārvietojiet to ar bulttaustiņiem. ✕ to noņem.",
+      "pinRemove": "Noņemt “{label}”",
+      "pinAdded": "Pievienots.",
+      "pinMoved": "Secība saglabāta.",
+      "pinHiddenHeading": "Pašlaik jums nav pieejams"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -7603,7 +7614,8 @@
     "waiting": {
       "title": "Gaida jūs",
       "clear": "Nekas jūs negaida.",
-      "unknown": "Neizdevās nolasīt, kas jūs gaida."
+      "unknown": "Neizdevās nolasīt, kas jūs gaida.",
+      "confirmEmail": "Apstipriniet savu e-pasta adresi, lai redzētu jums nosūtītos ielūgumus"
     },
     "running": {
       "title": "Notiek tagad",
@@ -7945,6 +7957,101 @@
       "undecided": "Jūs vēl neesat izvēlējušies, tāpēc mērīšanai nekas netiek glabāts.",
       "allow": "Atļaut",
       "refuse": "Atteikties"
+    }
+  },
+  "homeGoals": {
+    "title": "Ko vēlaties darīt?",
+    "worker": {
+      "findWork": {
+        "label": "Atrast darbu",
+        "hint": "Darbs, kas atbilst jūsu prasmēm"
+      },
+      "recordWork": {
+        "label": "Ierakstīt darbu",
+        "hint": "Pievienojiet šodienas darbu žurnālam"
+      },
+      "myCv": {
+        "label": "Mans CV",
+        "hint": "Apskatiet savu CV un dalieties ar to"
+      },
+      "messages": {
+        "label": "Ziņas",
+        "hint": "Jūsu sarunas"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Atrast darbiniekus"
+      },
+      "projects": {
+        "label": "Projekti un komandas",
+        "hint": "Objekti, uzdevumi un kas kur strādā"
+      },
+      "people": {
+        "label": "Mani cilvēki",
+        "hint": "Jūsu komanda un ielūgumi"
+      },
+      "hours": {
+        "label": "Darbs un stundas",
+        "hint": "Ierakstītais darbs un stundas"
+      },
+      "offerServices": {
+        "label": "Piedāvāt pakalpojumus",
+        "hint": "Ko piedāvā jūsu uzņēmums"
+      },
+      "orders": {
+        "label": "Pieprasījumi un pasūtījumi",
+        "hint": "Pakalpojumu pieprasījumi, nosūtītie un saņemtie"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Piedāvāt savus cilvēkus",
+        "hint": "Norādiet, kas ir brīvs un kad"
+      },
+      "clients": {
+        "label": "Klienti",
+        "hint": "Uzņēmumi, kuriem jūs strādājat"
+      },
+      "people": {
+        "label": "Mani cilvēki",
+        "hint": "Jūsu cilvēki un ielūgumi"
+      },
+      "candidates": {
+        "label": "Atrast kandidātus",
+        "hint": "Meklējiet cilvēkus"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Mani pieprasījumi",
+        "hint": "Ko jūs lūdzāt un kas atbildēja"
+      }
+    },
+    "areas": {
+      "calendar": "Kalendārs",
+      "numbers": "Mana darbība skaitļos",
+      "profile": "Mans profils",
+      "gallery": "Galerija",
+      "capacity": "Kapacitāte",
+      "results": "Rezultāti",
+      "history": "Vēsture"
+    },
+    "ask": {
+      "label": "Jautāt asistentam",
+      "hint": "Uzrakstiet saviem vārdiem, kas jums vajadzīgs"
+    },
+    "quick": {
+      "title": "Turpiniet, kur beidzāt",
+      "projects": "Aktīvie projekti",
+      "needs": "Atvērtās vajadzības",
+      "allProjects": "Visi projekti",
+      "allNeeds": "Visas vajadzības",
+      "untitledProject": "Projekts bez nosaukuma"
+    },
+    "pin": {
+      "add": "Pievienot “{label}” savām saīsnēm",
+      "remove": "Noņemt “{label}” no savām saīsnēm"
     }
   },
   "siteNav": {

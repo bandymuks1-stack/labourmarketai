@@ -15090,7 +15090,18 @@
       "whatChangedUnavailable": "Ik kon nu niet nagaan wat er veranderde. Je registraties zijn veilig — probeer het zo opnieuw of open het logboek.",
       "planIntro": "{count, plural, one {Dat is # stap.} other {Dat zijn # stappen, op volgorde. Hier is de eerste — tik op de volgende wanneer je klaar bent.}}",
       "planNextOffer": "Volgende stap:",
-      "planStep": "Stap {n} van {count}"
+      "planStep": "Stap {n} van {count}",
+      "pinAdd": "Snelkoppeling toevoegen",
+      "pinEditDone": "Klaar",
+      "pinAddHeading": "Een snelkoppeling toevoegen",
+      "pinAddNone": "Alles hier is al toegevoegd.",
+      "pinRecent": "Onlangs",
+      "pinMoveHandle": "“{label}”: sleep of verplaats met de pijltjestoetsen",
+      "pinManageHint": "Sleep een snelkoppeling of verplaats die met de pijltjestoetsen. ✕ verwijdert die.",
+      "pinRemove": "‘{label}’ verwijderen",
+      "pinAdded": "Toegevoegd.",
+      "pinMoved": "Volgorde opgeslagen.",
+      "pinHiddenHeading": "Nu niet beschikbaar voor jou"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -20106,7 +20117,8 @@
     "waiting": {
       "title": "Wacht op je",
       "clear": "Er wacht niets op je.",
-      "unknown": "Wat op je wacht, kon niet worden gelezen."
+      "unknown": "Wat op je wacht, kon niet worden gelezen.",
+      "confirmEmail": "Bevestig je e-mailadres om uitnodigingen aan jou te zien"
     },
     "running": {
       "title": "Loopt nu",
@@ -20561,6 +20573,101 @@
         "verify_rate_limited": "We hebben net een link gestuurd. Kijk in je e-mail of probeer het later opnieuw.",
         "error": "Dat lukte niet. Probeer het later opnieuw."
       }
+    }
+  },
+  "homeGoals": {
+    "title": "Wat wil je doen?",
+    "worker": {
+      "findWork": {
+        "label": "Werk vinden",
+        "hint": "Werk dat bij je vaardigheden past"
+      },
+      "recordWork": {
+        "label": "Werk vastleggen",
+        "hint": "Zet het werk van vandaag in je logboek"
+      },
+      "myCv": {
+        "label": "Mijn cv",
+        "hint": "Bekijk en deel je cv"
+      },
+      "messages": {
+        "label": "Berichten",
+        "hint": "Je gesprekken"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Werknemers vinden"
+      },
+      "projects": {
+        "label": "Projecten en teams",
+        "hint": "Locaties, taken en wie waar werkt"
+      },
+      "people": {
+        "label": "Mijn mensen",
+        "hint": "Je team en uitnodigingen"
+      },
+      "hours": {
+        "label": "Werk en uren",
+        "hint": "Vastgelegd werk en uren"
+      },
+      "offerServices": {
+        "label": "Diensten aanbieden",
+        "hint": "Wat je bedrijf aanbiedt"
+      },
+      "orders": {
+        "label": "Aanvragen en opdrachten",
+        "hint": "Dienstaanvragen, verstuurd en ontvangen"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Je mensen aanbieden",
+        "hint": "Geef aan wie vrij is en wanneer"
+      },
+      "clients": {
+        "label": "Klanten",
+        "hint": "Bedrijven waarvoor je werkt"
+      },
+      "people": {
+        "label": "Mijn mensen",
+        "hint": "Je mensen en uitnodigingen"
+      },
+      "candidates": {
+        "label": "Kandidaten vinden",
+        "hint": "Zoek naar mensen"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Mijn aanvragen",
+        "hint": "Wat je hebt gevraagd en wie antwoordde"
+      }
+    },
+    "areas": {
+      "calendar": "Agenda",
+      "numbers": "Mijn activiteit in cijfers",
+      "profile": "Mijn profiel",
+      "gallery": "Galerij",
+      "capacity": "Capaciteit",
+      "results": "Resultaten",
+      "history": "Geschiedenis"
+    },
+    "ask": {
+      "label": "Vraag het de assistent",
+      "hint": "Schrijf in je eigen woorden wat je nodig hebt"
+    },
+    "quick": {
+      "title": "Ga verder waar je was gebleven",
+      "projects": "Lopende projecten",
+      "needs": "Open behoeften",
+      "allProjects": "Alle projecten",
+      "allNeeds": "Alle behoeften",
+      "untitledProject": "Project zonder naam"
+    },
+    "pin": {
+      "add": "“{label}” aan je snelkoppelingen toevoegen",
+      "remove": "“{label}” uit je snelkoppelingen verwijderen"
     }
   },
   "siteNav": {

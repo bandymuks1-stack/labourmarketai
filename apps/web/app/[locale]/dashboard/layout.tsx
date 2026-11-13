@@ -9,6 +9,7 @@ import { pickClientMessages } from "@/lib/i18n/client-messages";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { LanguageFeedbackWidget } from "@/components/app/language-feedback-widget";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
+import { RecentPlacesRecorder } from "@/components/app/recent-places-recorder";
 import { SpineStream } from "@/components/app/spine-stream";
 import { DashboardChrome } from "@/components/app/dashboard-chrome";
 import type { ConversationNavLabels } from "@/components/app/conversation/chat/conversation-header";
@@ -331,6 +332,9 @@ export default async function DashboardLayout({
           <SpineStream activeRole={activeRole} />
         </Suspense>
         <SessionTelemetry />
+        {/* Notes the area just opened, in this browser only, so the home can
+            offer it back under "Recent" (lib/workspace/recent-places.ts). */}
+        <RecentPlacesRecorder />
         {/* A page from the build before a deploy reloads once instead of
             failing its next action ("Failed to find Server Action"). */}
         <StaleBuildRecovery />

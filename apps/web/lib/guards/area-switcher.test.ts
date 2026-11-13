@@ -128,9 +128,14 @@ describe("the switcher is a chooser, not a sideways strip", () => {
   });
 });
 
-describe("the home surfaces use it", () => {
-  it("the worker's ŠIANDIEN stations and the company home doors render the switcher", () => {
-    expect(read("components/app/today/today-screen.tsx")).toMatch(/<AreaSwitcher\b/);
-    expect(read("components/app/organization/company-model-screen.tsx")).toMatch(/<AreaSwitcher\b/);
+describe("the homes no longer mount it (V2, owner decision 2026-11-12: one rail)", () => {
+  // One navigation system means one rail. The two homes that mounted this
+  // switcher (owner order 2026-10-25) now reach every area through a goal's
+  // function panel. The component is kept but mounted nowhere; retiring the
+  // file is the navigation lead's call.
+  it("neither home mounts the switcher or any rail of areas", () => {
+    for (const file of ["components/app/today/today-screen.tsx", "components/app/organization/company-model-screen.tsx"]) {
+      expect(read(file), file).not.toMatch(/<AreaSwitcher\b|HomeAreaRail/);
+    }
   });
 });

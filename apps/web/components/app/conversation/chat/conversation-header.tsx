@@ -26,6 +26,11 @@ import { MobileSheet } from "@/components/ui/MobileSheet";
 import { WorkspaceChip } from "./workspace-chip";
 import { iconControl } from "./icon-scale";
 
+/** The id the header's skip link points at: the start of the screen's own
+ *  content, right under the one top bar. Each shell that mounts the header
+ *  puts it on exactly one element. */
+export const APP_CONTENT_ID = "app-content";
+
 export type ConversationNavLabels = {
   chat: string;
   journal: string;
@@ -120,6 +125,28 @@ export function ConversationHeader({
         !mobile && "md:flex-nowrap md:gap-x-3",
       )}
     >
+      {/* SKIP LINK — the first focus stop of every signed-in screen (WCAG
+          2.4.1): one key press past the header's destinations to the screen's
+          own content (`APP_CONTENT_ID`, set by whichever shell mounts this
+          header). Out of the flow until focused, so the bar's layout is
+          untouched; the same look as the public shell's skip link. */}
+      <a
+        href={`#${APP_CONTENT_ID}`}
+        data-testid="app-skip-link"
+        // Move the focus without touching the address: the home keeps its
+        // open goal in the URL fragment (`#goal=…`), and a plain fragment
+        // jump would close it. The href stays as the no-script fallback.
+        onClick={(e) => {
+          const target = document.getElementById(APP_CONTENT_ID);
+          if (!target) return;
+          e.preventDefault();
+          target.focus();
+          target.scrollIntoView({ block: "start" });
+        }}
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:border focus:border-brand-blue focus:bg-ink-800 focus:px-4 focus:py-2 focus:font-mono focus:text-meta focus:uppercase focus:tracking-label focus:text-text-primary"
+      >
+        {t("common.skipToContent")}
+      </a>
       {/* IDENTITY — never shrinks, so the logo is never cut ("Labour…"). */}
       <span className={cn("order-1 flex flex-none items-center gap-2", !mobile && "md:order-none")}>
         {isProjection && (
@@ -148,7 +175,23 @@ export function ConversationHeader({
           {/* The canonical mark (owner §19) — never a letter standing in for
               it. Decorative: the Link's aria-label already names the product. */}
           <LmLogo title="" className="h-6 w-auto shrink-0" />
-          <span className={`whitespace-nowrap font-display text-card-title font-bold tracking-tightest text-text-primary ${mobile ? "hidden" : "hidden min-[1800px]:inline"}`}>{title}</span>
+          {/* THE ORIGINAL FULL LOGO, AS ON THE PUBLIC BAR (owner rule,
+              2026-11-13): the mark and the whole name "LabourMarket.ai", the
+              same words and the same accent on ".ai" as the public header.
+              Shown whole or not at all, never cut:
+                · from 360px on a phone (its first row is the brand and the
+                  right cluster), exactly as the public header;
+                · NOT between 768px and 1023px, where the workspace, the core
+                  icons and the right cluster share one row and there is no
+                  room for it — the mark alone shows there;
+                · from 1024px up.
+              Where it is not drawn it stays for screen readers. */}
+          <span
+            data-testid="shell-logo-wordmark"
+            className={`whitespace-nowrap font-display font-bold tracking-tightest text-text-primary max-[359px]:sr-only ${mobile ? "text-support" : "text-support md:max-lg:sr-only lg:text-card-title"}`}
+          >
+            LabourMarket<span className="text-gradient-accent">.ai</span>
+          </span>
         </Link>
       </span>
 
@@ -267,8 +310,12 @@ export function ConversationHeader({
 
 /** Label shown beside the icon on every item once the bar fits every locale. */
 const WIDE_LABEL = "hidden min-[1800px]:inline";
-/** The core loop names itself from `xl`: three-second clarity on a laptop. */
-const CORE_LABEL = "hidden xl:inline";
+/** The core loop is ICONS with names for assistive technology and a tooltip
+ *  (one header rule, 2026-11-12): the goals are the main navigation; home,
+ *  journal, calendar and messages stay one tap away in the top row but must
+ *  not read as a second menu beside the goals. The destination the person
+ *  stands in still names itself (`ACTIVE_LABEL`). */
+const CORE_LABEL = "sr-only";
 /** The ACTIVE destination names itself as soon as the row has room for one
  *  label (`lg`); below that its filled pill is the "you are here" mark and the
  *  page title right under the bar names it. */

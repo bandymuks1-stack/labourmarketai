@@ -141,9 +141,13 @@ describe("ONE home — the conversation; ŠIANDIEN is its opening context (owner
       "/dashboard/gallery",
     ]);
     const screen = read("components/app/today/today-screen.tsx");
-    expect(screen).toMatch(/PERSONAL_WORK_AREAS\.map/);
+    // Since 2026-11-12 the goal cards lead the home (find work — the former
+    // PASAULIS — is the first of them), and every other station is a function
+    // card of the "work" goal: one rail, each station two actions away.
+    expect(screen).toMatch(/<HomeGoalCards role="worker" \/>/);
     expect(read("lib/navigation/work-areas.ts")).toMatch(/TODAY_STATIONS\.map/);
-    expect(screen).toMatch(/today-station-\$\{s\.id\}/);
+    const goals = read("lib/navigation/home-goals.ts");
+    for (const s of TODAY_STATIONS) expect(goals, s.href).toContain(`"${s.href}"`);
     // Every station has a human label in LT and EN (the former tab label
     // "Pasaulis" / "World" moved here, so nothing was retyped by a machine).
     for (const s of TODAY_STATIONS) {

@@ -253,6 +253,18 @@ const CHAT_KEYS = [
   "unpinDone",
   "pinFirstPrefix",
   "reorderDone",
+  // Pin to home (owner P0 No. 1, 2026-11-12): the row's own edit mode.
+  "pinAdd",
+  "pinEditDone",
+  "pinAddHeading",
+  "pinAddNone",
+  "pinRecent",
+  "pinMoveHandle",
+  "pinManageHint",
+  "pinRemove",
+  "pinAdded",
+  "pinMoved",
+  "pinHiddenHeading",
   "projectCreateIntro",
   "projectCreatedNext",
   "clientOffersIntro",
@@ -453,6 +465,23 @@ const WORKLOG_KEYS = [
   "hoursUnit",
 ] as const;
 
+/**
+ * The pin labels that carry a placeholder the CLIENT fills in (`{max}`,
+ * `{label}`): the bag hands over the template itself. `t(key)` without the
+ * value is a formatting error — a production build happens to return the
+ * template, a development build returns the message KEY, and the row's
+ * buttons would then be named "conversation.chat.pinRemove" (Codex P2 on
+ * #3264). `t.raw` returns the template in both. Only the keys this slice's row
+ * substitutes are listed; the other templated chat labels keep their
+ * historical path.
+ */
+const PIN_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
+  "pinCap",
+  "reorderDone",
+  "pinMoveHandle",
+  "pinRemove",
+]);
+
 /** Resolve the flat chat label bag from a `conversation.chat`-scoped translator.
  *
  *  `greetingNamed` carries a `{name}` placeholder, so it is resolved separately
@@ -460,7 +489,7 @@ const WORKLOG_KEYS = [
  *  the raw placeholder showing. */
 export function resolveChatLabels(t: T, tReservation: T): ChatLabels {
   const out = {} as Record<(typeof CHAT_KEYS)[number], string>;
-  for (const k of CHAT_KEYS) out[k] = t(k);
+  for (const k of CHAT_KEYS) out[k] = PIN_TEMPLATE_KEYS.has(k) ? String(t.raw(k)) : t(k);
   // The knowing-keep chips reuse the page's closed reason labels (one source,
   // every locale): `projects.assign.reservation.reason.*` / `reasonNone`.
   return {

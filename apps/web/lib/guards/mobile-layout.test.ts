@@ -42,7 +42,15 @@ describe("mobile layout invariants", () => {
       expect(link, "the brand Link").not.toBeNull();
       expect(link![0]).toMatch(/className="flex flex-none items-center/);
       expect(link![0]).not.toMatch(/truncate/);
-      expect(link![0]).toMatch(/whitespace-nowrap[^`]*"hidden min-\[1800px\]:inline"/);
+      // The original full logo, as on the public bar: "LabourMarket.ai" with
+      // the accent on ".ai"; whole from 360px on a phone and from 1024px up,
+      // the mark alone in between and under 360px. Never cut.
+      expect(link![0]).toMatch(/LabourMarket<span className="text-gradient-accent">\.ai<\/span>/);
+      expect(link![0]).toMatch(/max-\[359px\]:sr-only/);
+      expect(link![0]).toMatch(/"text-support md:max-lg:sr-only lg:text-card-title"/);
+      expect(link![0]).toMatch(/className=\{`whitespace-nowrap /);
+      // The same words and accent as the public header's wordmark.
+      expect(read("components/layouts/site-nav.tsx")).toMatch(/LabourMarket<span className="text-gradient-accent">\.ai<\/span>/);
       expect(link![0]).toMatch(/<LmLogo[^>]*className="[^"]*shrink-0[^"]*"/);
     });
 

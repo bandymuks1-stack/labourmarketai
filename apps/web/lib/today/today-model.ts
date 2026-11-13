@@ -87,6 +87,13 @@ export type TodayAttention = {
   readonly offers: number | null;
   /** Pending invitations addressed to the person (both invitation systems). */
   readonly invitations: number | null;
+  /**
+   * True when `invitations` is null for ONE known reason: the person has not
+   * confirmed their e-mail address yet, so invitations sent to it cannot be
+   * shown. That is a step for the person, not a failed read — the home names
+   * it and never offers "read again" for it.
+   */
+  readonly invitationsNeedEmailProof?: boolean;
   /** Unread conversations; `onlyId` when exactly one, so the door opens it. */
   readonly unread: { readonly count: number; readonly onlyId: string | null } | null;
 };
@@ -249,7 +256,7 @@ export function unknownTodayDoors(attention: TodayAttention | null): TodayDoorKi
   if (!attention) return ["offers", "invitations", "unread"];
   const out: TodayDoorKind[] = [];
   if (attention.offers === null) out.push("offers");
-  if (attention.invitations === null) out.push("invitations");
+  if (attention.invitations === null && !attention.invitationsNeedEmailProof) out.push("invitations");
   if (attention.unread === null) out.push("unread");
   return out;
 }

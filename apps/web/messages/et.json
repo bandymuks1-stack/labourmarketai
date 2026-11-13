@@ -571,7 +571,7 @@
     "localeSwitch": "[EN] Language",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
-    "skipToContent": "[EN] Skip to content",
+    "skipToContent": "Liigu sisu juurde",
     "loading": "Laadimine…",
     "dashboardSections": "Töölaua jaotised",
     "nav": {
@@ -4403,7 +4403,18 @@
       "teamOfferThreadFailed": "Seda vestlust ei saa avada.",
       "whatChangedIntro": "{count, plural, one {Siin on ahel sinu hiljutisest tööst: mida tegid, mis muutus, mida see avas.} other {Siin on # ahelat sinu hiljutisest tööst: mida tegid, mis muutus, mida see avas.}}",
       "whatChangedNone": "Viimase 14 päeva jooksul ei tulnud sinu tööst midagi uut. Kui salvestad töö ja see kinnitatakse, näitan, mida see muutis.",
-      "whatChangedUnavailable": "Praegu ei õnnestunud kontrollida, mis muutus. Sinu kirjed on alles — proovi hetke pärast uuesti või ava tööpäevik."
+      "whatChangedUnavailable": "Praegu ei õnnestunud kontrollida, mis muutus. Sinu kirjed on alles — proovi hetke pärast uuesti või ava tööpäevik.",
+      "pinAdd": "Lisa otsetee",
+      "pinEditDone": "Valmis",
+      "pinAddHeading": "Lisa otsetee",
+      "pinAddNone": "Siin on kõik juba lisatud.",
+      "pinRecent": "Hiljutised",
+      "pinMoveHandle": "„{label}“: lohista või liiguta nooleklahvidega",
+      "pinManageHint": "Lohista otseteed või liiguta seda nooleklahvidega. ✕ eemaldab selle.",
+      "pinRemove": "Eemalda „{label}“",
+      "pinAdded": "Lisatud.",
+      "pinMoved": "Järjekord salvestatud.",
+      "pinHiddenHeading": "Praegu sulle kättesaamatu"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -7603,7 +7614,8 @@
     "waiting": {
       "title": "Ootab sind",
       "clear": "Miski ei oota sind.",
-      "unknown": "Seda, mis sind ootab, ei õnnestunud lugeda."
+      "unknown": "Seda, mis sind ootab, ei õnnestunud lugeda.",
+      "confirmEmail": "Kinnita oma e-posti aadress, et näha sulle saadetud kutseid"
     },
     "running": {
       "title": "Käimas praegu",
@@ -7945,6 +7957,101 @@
       "undecided": "Sa pole veel valinud, seega mõõtmiseks ei salvestata midagi.",
       "allow": "Luba",
       "refuse": "Keeldu"
+    }
+  },
+  "homeGoals": {
+    "title": "Mida soovid teha?",
+    "worker": {
+      "findWork": {
+        "label": "Leia tööd",
+        "hint": "Sinu oskustele sobiv töö"
+      },
+      "recordWork": {
+        "label": "Kirjuta töö üles",
+        "hint": "Lisa tänane töö päevikusse"
+      },
+      "myCv": {
+        "label": "Minu CV",
+        "hint": "Vaata ja jaga oma CV-d"
+      },
+      "messages": {
+        "label": "Sõnumid",
+        "hint": "Sinu vestlused"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Leia töötajaid"
+      },
+      "projects": {
+        "label": "Projektid ja meeskonnad",
+        "hint": "Objektid, ülesanded ja kes kus töötab"
+      },
+      "people": {
+        "label": "Minu inimesed",
+        "hint": "Sinu meeskond ja kutsed"
+      },
+      "hours": {
+        "label": "Töö ja tunnid",
+        "hint": "Kirja pandud töö ja tunnid"
+      },
+      "offerServices": {
+        "label": "Paku teenuseid",
+        "hint": "Mida sinu ettevõte pakub"
+      },
+      "orders": {
+        "label": "Päringud ja tellimused",
+        "hint": "Teenusepäringud, saadetud ja saadud"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Paku oma inimesi",
+        "hint": "Märgi, kes on vaba ja millal"
+      },
+      "clients": {
+        "label": "Kliendid",
+        "hint": "Ettevõtted, kelle heaks töötad"
+      },
+      "people": {
+        "label": "Minu inimesed",
+        "hint": "Sinu inimesed ja kutsed"
+      },
+      "candidates": {
+        "label": "Leia kandidaate",
+        "hint": "Otsi inimesi"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Minu päringud",
+        "hint": "Mida sa küsisid ja kes vastas"
+      }
+    },
+    "areas": {
+      "calendar": "Kalender",
+      "numbers": "Minu tegevus arvudes",
+      "profile": "Minu profiil",
+      "gallery": "Galerii",
+      "capacity": "Võimekus",
+      "results": "Tulemused",
+      "history": "Ajalugu"
+    },
+    "ask": {
+      "label": "Küsi assistendilt",
+      "hint": "Kirjuta oma sõnadega, mida vajad"
+    },
+    "quick": {
+      "title": "Jätka sealt, kus pooleli jäi",
+      "projects": "Käimasolevad projektid",
+      "needs": "Avatud vajadused",
+      "allProjects": "Kõik projektid",
+      "allNeeds": "Kõik vajadused",
+      "untitledProject": "Nimetu projekt"
+    },
+    "pin": {
+      "add": "Lisa „{label}“ oma otseteede hulka",
+      "remove": "Eemalda „{label}“ oma otseteede hulgast"
     }
   },
   "siteNav": {

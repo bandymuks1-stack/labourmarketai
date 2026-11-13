@@ -39,6 +39,10 @@ const REF_PATTERNS: ReadonlyArray<{ re: RegExp; kind: PinKind }> = [
   { re: /^(agency:demand|agency:progress|edu:create|edu:cohort|edu:assign|documents-centre|compass-page)$/, kind: "action" },
   { re: /^(project|demand):[0-9a-f-]{36}$/, kind: "entity" },
   { re: /^link:\/dashboard(\/[a-z0-9-]+)*(\?[a-z0-9=&-]*)?(#[a-z0-9-]+)?$/, kind: "view" },
+  // The person's own CV page — the one signed-in destination that lives
+  // outside /dashboard. Exactly this path, nothing else outside the dashboard
+  // (the bare `cv` reference above is a different thing: the CV IMPORT flow).
+  { re: /^link:\/cv$/, kind: "view" },
 ];
 
 export function pinKindFor(ref: string): PinKind | null {

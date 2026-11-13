@@ -15090,7 +15090,18 @@
       "whatChangedUnavailable": "Nie udało się teraz sprawdzić, co się zmieniło. Twoje wpisy są bezpieczne — spróbuj za chwilę lub otwórz dziennik.",
       "planIntro": "{count, plural, one {To # krok.} few {To # kroki, po kolei. Oto pierwszy — dotknij następnego, gdy będziesz gotowy.} many {To # kroków, po kolei. Oto pierwszy — dotknij następnego, gdy będziesz gotowy.} other {To # kroku, po kolei. Oto pierwszy — dotknij następnego, gdy będziesz gotowy.}}",
       "planNextOffer": "Następny krok:",
-      "planStep": "Krok {n} z {count}"
+      "planStep": "Krok {n} z {count}",
+      "pinAdd": "Dodaj skrót",
+      "pinEditDone": "Gotowe",
+      "pinAddHeading": "Dodaj skrót",
+      "pinAddNone": "Wszystko tutaj jest już dodane.",
+      "pinRecent": "Ostatnie",
+      "pinMoveHandle": "„{label}”: przeciągnij lub przesuń klawiszami strzałek",
+      "pinManageHint": "Przeciągnij skrót lub przesuń go klawiszami strzałek. ✕ go usuwa.",
+      "pinRemove": "Usuń „{label}”",
+      "pinAdded": "Dodano.",
+      "pinMoved": "Kolejność zapisana.",
+      "pinHiddenHeading": "Teraz dla ciebie niedostępne"
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",
@@ -20106,7 +20117,8 @@
     "waiting": {
       "title": "Czeka na Ciebie",
       "clear": "Nic na Ciebie nie czeka.",
-      "unknown": "Nie udało się odczytać, co na Ciebie czeka."
+      "unknown": "Nie udało się odczytać, co na Ciebie czeka.",
+      "confirmEmail": "Potwierdź swój adres e-mail, aby zobaczyć wysłane do ciebie zaproszenia"
     },
     "running": {
       "title": "Trwa teraz",
@@ -20561,6 +20573,101 @@
         "verify_rate_limited": "Link został wysłany przed chwilą. Sprawdź e-mail lub spróbuj później.",
         "error": "Nie udało się. Spróbuj później."
       }
+    }
+  },
+  "homeGoals": {
+    "title": "Co chcesz zrobić?",
+    "worker": {
+      "findWork": {
+        "label": "Znajdź pracę",
+        "hint": "Praca dopasowana do twoich umiejętności"
+      },
+      "recordWork": {
+        "label": "Zapisz pracę",
+        "hint": "Dodaj dzisiejszą pracę do dziennika"
+      },
+      "myCv": {
+        "label": "Moje CV",
+        "hint": "Zobacz i udostępnij swoje CV"
+      },
+      "messages": {
+        "label": "Wiadomości",
+        "hint": "Twoje rozmowy"
+      }
+    },
+    "company": {
+      "findWorkers": {
+        "label": "Znajdź pracowników"
+      },
+      "projects": {
+        "label": "Projekty i zespoły",
+        "hint": "Obiekty, zadania i kto gdzie pracuje"
+      },
+      "people": {
+        "label": "Moi ludzie",
+        "hint": "Twój zespół i zaproszenia"
+      },
+      "hours": {
+        "label": "Praca i godziny",
+        "hint": "Zapisana praca i godziny"
+      },
+      "offerServices": {
+        "label": "Zaoferuj usługi",
+        "hint": "Co oferuje twoja firma"
+      },
+      "orders": {
+        "label": "Zapytania i zlecenia",
+        "hint": "Zapytania o usługi, wysłane i otrzymane"
+      }
+    },
+    "agency": {
+      "offerPeople": {
+        "label": "Zaoferuj swoich ludzi",
+        "hint": "Podaj, kto jest wolny i kiedy"
+      },
+      "clients": {
+        "label": "Klienci",
+        "hint": "Firmy, dla których pracujesz"
+      },
+      "people": {
+        "label": "Moi ludzie",
+        "hint": "Twoi ludzie i zaproszenia"
+      },
+      "candidates": {
+        "label": "Znajdź kandydatów",
+        "hint": "Szukaj ludzi"
+      }
+    },
+    "customer": {
+      "myRequests": {
+        "label": "Moje zapytania",
+        "hint": "O co pytasz i kto odpowiedział"
+      }
+    },
+    "areas": {
+      "calendar": "Kalendarz",
+      "numbers": "Moja aktywność w liczbach",
+      "profile": "Mój profil",
+      "gallery": "Galeria",
+      "capacity": "Zdolności",
+      "results": "Wyniki",
+      "history": "Historia"
+    },
+    "ask": {
+      "label": "Zapytaj asystenta",
+      "hint": "Napisz własnymi słowami, czego potrzebujesz"
+    },
+    "quick": {
+      "title": "Kontynuuj rozpoczętą pracę",
+      "projects": "Aktywne projekty",
+      "needs": "Otwarte potrzeby",
+      "allProjects": "Wszystkie projekty",
+      "allNeeds": "Wszystkie potrzeby",
+      "untitledProject": "Projekt bez nazwy"
+    },
+    "pin": {
+      "add": "Dodaj „{label}” do swoich skrótów",
+      "remove": "Usuń „{label}” ze swoich skrótów"
     }
   },
   "siteNav": {

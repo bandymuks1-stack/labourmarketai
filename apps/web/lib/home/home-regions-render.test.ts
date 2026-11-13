@@ -412,3 +412,61 @@ describe("evidence first — a new worker's ONE gold action is the first work en
     expect(w).not.toContain('data-testid="today-next-secondary"');
   });
 });
+
+describe("an unconfirmed e-mail address is named, never shown as a failed read", () => {
+  const CLEAR = deriveWaiting({ kind: "unknown" }, { kind: "known", items: [] });
+
+  it("says what to do and where, with no 'could not be read' line and no retry", async () => {
+    const waiting = html(
+      await HomeWaitingView({
+        locale: "en",
+        region: deriveWaiting(NEXT, { kind: "known", items: [] }),
+        unknownDoors: [],
+        emailProofNeeded: true,
+      }),
+    );
+    expect(waiting).toContain('data-testid="today-open-confirm-email"');
+    expect(waiting).toContain('href="/dashboard/network"');
+    expect(waiting).toContain("Confirm your e-mail address to see invitations sent to you");
+    expect(waiting).not.toContain('data-testid="today-open-unknown"');
+    expect(waiting).not.toContain("Open items could not be read");
+    expect(waiting).not.toContain("Read again");
+  });
+
+  it("is not 'nothing is waiting on you': invitations are unknown, not zero", async () => {
+    const waiting = html(
+      await HomeWaitingView({ locale: "en", region: CLEAR, unknownDoors: [], emailProofNeeded: true }),
+    );
+    expect(waiting).toContain('data-testid="today-open-confirm-email"');
+    expect(waiting).not.toContain('data-testid="home-waiting-clear"');
+  });
+
+  it("a real failed read still says so, beside the e-mail step", async () => {
+    const waiting = html(
+      await HomeWaitingView({ locale: "en", region: CLEAR, unknownDoors: ["offers"], emailProofNeeded: true }),
+    );
+    expect(waiting).toContain('data-testid="today-open-unknown"');
+    expect(waiting).toContain('data-testid="today-open-confirm-email"');
+  });
+
+  it("the chain carries the reason from the invitations reader to the home", () => {
+    const read = (rel: string) => readFileSync(join(__dirname, "..", "..", rel), "utf8");
+    expect(read("lib/invitations/attention.ts")).toMatch(
+      /if \(canonical\.status === "email_unverified"\) return \{ status: "error", reason: "email_unverified" \};/,
+    );
+    expect(read("lib/today/today-server.ts")).toMatch(/needEmailProof: res\.status === "error" && res\.reason === "email_unverified"/);
+    expect(read("lib/today/today-model.ts")).toMatch(
+      /if \(attention\.invitations === null && !attention\.invitationsNeedEmailProof\) out\.push\("invitations"\);/,
+    );
+    expect(read("lib/home/home-server.ts")).toMatch(/emailProofNeeded: attention\.invitationsNeedEmailProof === true/);
+  });
+
+  it("the step has its text in every catalog", () => {
+    const read = (rel: string) => readFileSync(join(__dirname, "..", "..", rel), "utf8");
+    for (const locale of ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"]) {
+      const text = JSON.parse(read(`messages/${locale}.json`)).homeRegions.waiting.confirmEmail as string;
+      expect(text, locale).toBeTruthy();
+      expect(text, locale).not.toMatch(/^\[EN\]/);
+    }
+  });
+});

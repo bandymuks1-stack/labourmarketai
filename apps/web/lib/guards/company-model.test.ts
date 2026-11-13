@@ -7,7 +7,7 @@ const read = (rel: string): string => readFileSync(join(WEB, rel), "utf8");
 
 describe("the company context's centre is the company model, over existing surfaces", () => {
   // The doors moved into the ONE area model (2026-10-25, phase 2 of the one
-  // navigation system); the screen renders them through the area switcher.
+  // navigation system); the screen renders them on the shared rail.
   const screen = read("lib/navigation/work-areas.ts");
   it("every entry is an existing canonical route", () => {
     const hrefs = [...screen.matchAll(/href: "(\/dashboard[^"]*)"/g)].map((m) => m[1]);
@@ -21,11 +21,17 @@ describe("the company context's centre is the company model, over existing surfa
     expect(screen).toMatch(/id: "calendar", href: "\/dashboard\/planning"/);
     expect(screen).toMatch(/id: "capacity", href: "\/dashboard\/company\/planning"/);
   });
-  it("the screen renders every door from the area model, through the area switcher", () => {
+  it("every door of the company is reached from the goals: one rail, no second list", () => {
     const view = read("components/app/organization/company-model-screen.tsx");
-    expect(view).toMatch(/ORGANIZATION_WORK_AREAS\.map/);
-    expect(view).toMatch(/<AreaSwitcher\b/);
-    expect(view).toMatch(/testId: `company-model-\$\{a\.id\}`/);
+    // V2 (2026-11-12): the goals lead and each area is a function card of the
+    // goal it belongs to (lib/navigation/home-goals.ts); the screen draws no
+    // rail of areas of its own.
+    expect(view).toMatch(/<HomeGoalCards role=\{role\} \/>/);
+    expect(view).not.toMatch(/<AreaSwitcher\b|HomeAreaRail|areasBeyondGoals/);
+    const goals = read("lib/navigation/home-goals.ts");
+    for (const href of ["/dashboard/company/planning", "/dashboard/reports", "/dashboard/company/history", "/dashboard/planning"]) {
+      expect(goals, href).toContain(`"${href}"`);
+    }
   });
   it("is mounted as the opening context only inside a company organization workspace", () => {
     const page = read("app/[locale]/dashboard/page.tsx");
