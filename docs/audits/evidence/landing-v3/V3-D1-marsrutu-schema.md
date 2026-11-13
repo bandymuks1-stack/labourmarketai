@@ -12,11 +12,11 @@ Maršrutai patikrinti pagal pagrindinės šakos kodą (`apps/web/lib/navigation/
 | | | Paslaugų užklausos | `/dashboard/service-requests` | reikia |
 | Ieškau užsakymų (`orders`) | Vykdytojui | Rinkos skelbimai | `/dashboard/listings` | reikia |
 | | | Pasiūlymai ir sutartys | `/dashboard/commercial` | reikia |
-| Pateikti poreikį (trys formos) | Pirkėjui | Darbuotojų paieškos užklausa | `/request/worker-search` | nereikia |
-| | | Verslo paslaugų užklausa (B2B) | `/request/b2b` | nereikia |
-| | | Individualaus projekto užklausa | `/request/project` | nereikia |
+| Pateikti poreikį (trys formos) | Pirkėjui | Darbuotojų paieškos užklausa | pagrindinio puslapio blokas `#request`, forma atveriama mygtuku | nereikia |
+| | | Verslo paslaugų užklausa (B2B) | tas pats blokas `#request` | nereikia |
+| | | Individualaus projekto užklausa | tas pats blokas `#request` | nereikia |
 
-Pirkėjo **tikslo** tikslų sąraše šiandien nėra: pirkėjas formas pasiekia tik per bloką „Pateikti poreikį“.
+Pirkėjo **tikslo** tikslų sąraše šiandien nėra: pirkėjas formas pasiekia tik per bloką „Pateikti poreikį“. Formos atsiveria tame pačiame puslapyje; atskiro adreso kiekviena forma neturi.
 
 ## 2. Siūloma: du atskiri keliai
 
@@ -24,8 +24,8 @@ Pirkėjo **tikslo** tikslų sąraše šiandien nėra: pirkėjas formas pasiekia 
 flowchart LR
   subgraph P["Pirkėjas"]
     P1["Tikslas: Ieškau paslaugų ar vykdytojų"]
-    P2["Verslo paslaugų užklausa (B2B)\n/request/b2b · be paskyros"]
-    P3["Individualaus projekto užklausa\n/request/project · be paskyros"]
+    P2["Verslo paslaugų užklausa (B2B)\nblokas #request · be paskyros"]
+    P3["Individualaus projekto užklausa\nblokas #request · be paskyros"]
     P1 --> P2
     P1 --> P3
   end
@@ -42,12 +42,12 @@ flowchart LR
 
 | Tikslas | LT | EN | Veiksmas | Maršrutas | Žyma |
 |---|---|---|---|---|---|
-| Pirkėjas (naujas) | Ieškau paslaugų ar vykdytojų | Find services or contractors | Verslo paslaugų užklausa (B2B) | `/request/b2b` | Paskyros nereikia |
-| | | | Individualaus projekto užklausa | `/request/project` | Paskyros nereikia |
+| Pirkėjas (naujas) | Ieškau paslaugų ar vykdytojų | Find services or contractors | Verslo paslaugų užklausa (B2B) | blokas `#request`, B2B forma | Paskyros nereikia |
+| | | | Individualaus projekto užklausa | blokas `#request`, projekto forma | Paskyros nereikia |
 | Vykdytojas (esamas) | Ieškau užsakymų | Find orders | Rinkos skelbimai | `/dashboard/listings` | Reikia prisijungti |
 | | | | Pasiūlymai ir sutartys | `/dashboard/commercial` | Reikia prisijungti |
 
-Pirkėjo tikslas naudoja jau veikiančias formas — naujos formos, lentelės ar maršruto kurti nereikia. Vykdytojo tikslo veiksmai nekeičiami.
+Pirkėjo tikslas naudoja jau veikiančias formas — naujos formos ar lentelės kurti nereikia. Vienintelis papildymas: tikslo veiksmas turi nuvesti į bloką ir iškart atverti reikiamą formą (šiandien forma atveriama tik mygtuku bloke). Vykdytojo tikslo veiksmai nekeičiami.
 
 ## 3. Išdėstymo variantai (savininko sprendimas)
 
