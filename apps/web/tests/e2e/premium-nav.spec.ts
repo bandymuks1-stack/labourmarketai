@@ -102,6 +102,17 @@ for (const width of [1024, 1280, 1440] as const) {
     test("More holds the older links: pricing and about are two actions away", async ({ page }) => {
       await page.goto("/en");
       const more = page.getByTestId("intent-toggle-more");
+      // The key is pressed once the menu's script is attached: a key pressed
+      // in the moment between the page loading and that is not taken (seen
+      // on a production build, about one run in nine).
+      await more.evaluate(
+        (el) =>
+          new Promise<void>((done) => {
+            const alive = () => Object.keys(el).some((k) => k.startsWith("__reactProps$"));
+            const wait = () => (alive() ? done() : requestAnimationFrame(wait));
+            wait();
+          }),
+      );
       await more.focus();
       await page.keyboard.press("Enter");
       const links = page.getByTestId("intent-more-links");

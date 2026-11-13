@@ -62,6 +62,10 @@ describe("the choice is the first screen", () => {
     // the goals again). The block carries the title and the #request anchor.
     expect(landing).toMatch(/<LandingRequestDoors locale=\{locale\} embedded \/>/);
     expect(landing).toMatch(/<details\s+id="request"\s+data-testid="landing-request-block"/);
+    // Sent open (wide screens show the doors without a tap; also the safe
+    // state with no script) and folded on a narrow screen before first paint.
+    expect(landing).toMatch(/data-testid="landing-request-block"\s+open\s/);
+    expect(landing).toMatch(/window\.matchMedia\("\(max-width: 1023px\)"\)\.matches\)d\.removeAttribute\("open"\)/);
     expect(landing.match(/<LandingRequestDoors /g)).toHaveLength(1);
   });
 

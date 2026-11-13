@@ -27,6 +27,11 @@ import { LandingRequestDoors } from "@/components/marketing/landing-request-door
 import { LandingFirstFacts } from "@/components/marketing/landing-first-facts";
 import { ChevronDown } from "lucide-react";
 
+/** Folds the request block on a narrow screen, before first paint. It is
+ *  sent open; `lg` (1024px) is where it moves beside the sentence field. */
+const REQUEST_BLOCK_FOLD_SCRIPT =
+  '(function(){try{var d=document.getElementById("request");if(d&&window.matchMedia("(max-width: 1023px)").matches)d.removeAttribute("open")}catch(e){}})()';
+
 /**
  * FOCUS — the previous production landing, RESTORED.
  *
@@ -187,9 +192,19 @@ export async function FocusLanding({
                   }
                 />
                   </div>
+                  {/* OPEN ON DESKTOP, FOLDED ON PHONES (coordinator, 2026-11-13).
+                      The three request doors — "Order a worker search" among
+                      them — are reachable only here, so on a wide screen,
+                      where this block sits beside the sentence field, they
+                      are visible without a tap. On a phone the block is
+                      below the first screen and stays one tap. The markup
+                      is sent open (the safe state with no script); the line
+                      after it folds it on a narrow screen before first paint. */}
                   <details
                     id="request"
                     data-testid="landing-request-block"
+                    open
+                    suppressHydrationWarning
                     className="group min-w-0 scroll-mt-24 rounded-2xl border border-ink-600 bg-ink-900/60"
                   >
                     <summary className="flex min-h-11 cursor-pointer list-none items-start justify-between gap-3 rounded-2xl p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue sm:p-6 [&::-webkit-details-marker]:hidden">
@@ -216,6 +231,9 @@ export async function FocusLanding({
                       <LandingRequestDoors locale={locale} embedded />
                     </div>
                   </details>
+                  <script
+                    dangerouslySetInnerHTML={{ __html: REQUEST_BLOCK_FOLD_SCRIPT }}
+                  />
                 </div>
               </section>
 

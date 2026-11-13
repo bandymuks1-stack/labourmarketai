@@ -76,6 +76,7 @@ export async function LandingRequestDoors({
         </>
       )}
       <LandingRequestDoorsForm
+        compact={embedded}
         labels={labels}
         countries={countries}
         notice={t.rich("notice", {

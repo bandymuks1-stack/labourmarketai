@@ -104,7 +104,7 @@ test.describe("the landing's first screen says who, how much and how", () => {
     await context.close();
   });
 
-  test("desktop 1440: the sentence field and ONE closed request block share a row; the doors are one click away", async ({ page }) => {
+  test("desktop 1440: the sentence field and ONE request block share a row; the doors are visible without a tap", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/en");
     const entry = (await page.getByTestId("public-entry").boundingBox())!;
@@ -113,12 +113,25 @@ test.describe("the landing's first screen says who, how much and how", () => {
     // Side by side: the right half is no longer empty.
     expect(blockBox.x).toBeGreaterThan(entry.x + entry.width - 1);
     expect(Math.abs(blockBox.y - entry.y)).toBeLessThan(40);
-    // Closed at rest: no three cards that read like the goals again.
-    await expect(page.getByTestId("request-door-worker-search-open")).toBeHidden();
+    // Open on a wide screen: "Order a worker search" is reachable only here,
+    // so it must not sit behind a tap.
+    await expect(page.getByTestId("request-door-worker-search-open").first()).toBeVisible();
     await expect(page.getByTestId("entry-example")).toHaveCount(2);
     await expect(page.getByTestId("entry-more-examples")).toHaveCount(0);
+    // Still one block that can be folded away.
     await block.locator("summary").click();
+    await expect(page.getByTestId("request-door-worker-search-open").first()).toBeHidden();
+  });
+
+  test("phone 375: the request block is folded; one tap shows the doors", async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 375, height: 740 }, hasTouch: true, isMobile: true });
+    const page = await context.newPage();
+    await page.goto("/en");
+    const block = page.getByTestId("landing-request-block");
+    await expect(page.getByTestId("request-door-worker-search-open").first()).toBeHidden();
+    await block.locator("summary").tap();
     await expect(page.getByTestId("request-door-worker-search-open").first()).toBeVisible();
+    await context.close();
   });
 
   test("the example is not a construction one", async ({ page }) => {
