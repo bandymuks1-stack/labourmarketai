@@ -9855,7 +9855,8 @@
       "body": "Public payments are not enabled yet. First clients are served directly: submitting a workforce inquiry is free, and the final price is always confirmed with you before any paid work starts.",
       "cta": "Submit a workforce inquiry"
     },
-    "title": "How the first paid service works",
+    "title": "Recruitment service by UAB “Nonstop Group”",
+    "separate": "This is a separate service, not a LabourMarket.ai plan. The platform plans above do not include it, and using the platform does not require it.",
     "steps": [
       {
         "title": "Submit your inquiry for free",

@@ -74,6 +74,20 @@ describe("closed online payment is said as closed", () => {
     }
   });
 
+  it("the recruitment service is a separate, labelled block below the platform plans (owner correction 2026-11-13)", () => {
+    // A recruitment success fee is the service's, never a platform fee: the
+    // block renders AFTER the plans and says in words that it is not a plan.
+    expect(page.indexOf("<ConciergeOfferSection />")).toBeGreaterThan(page.indexOf("<PricingTable />"));
+    expect(read("components/marketing/concierge-offer.tsx")).toContain('{t("separate")}');
+    for (const locale of activeLocales) {
+      const c = JSON.parse(read(`messages/${locale}.json`)).conciergeOffer;
+      expect(c.title, `${locale}: names the provider`).toContain("Nonstop Group");
+      expect(c.separate, `${locale}: says it is not a platform plan`).toContain("LabourMarket.ai");
+      // No tariff figure anywhere in the block: the public wording is the owner's.
+      expect(JSON.stringify(c), `${locale}: no figure`).not.toMatch(/\d{2,}/);
+    }
+  });
+
   for (const locale of activeLocales) {
     it(`${locale}: free registration and posting are said, the paid plan is not purchasable, prices are ex VAT`, () => {
       const m = JSON.parse(read(`messages/${locale}.json`));

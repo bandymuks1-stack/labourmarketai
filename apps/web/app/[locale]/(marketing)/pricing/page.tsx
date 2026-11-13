@@ -115,12 +115,15 @@ export default async function PricingPage({
           and the Stripe TEST checkout moved to the superadmin-gated
           /dashboard/admin/billing (launch repair Scope C). */}
       <ConciergeAccessBanner />
-      <ConciergeOfferSection />
       <PricingTable />
       {/* The pre-payment boundary explained "payments not enabled"; once the
           Stripe adapter is LIVE that sentence would be false, so the block is
           not rendered — the canonical PricingTable above is the truth. */}
       {billingLive ? null : <PrePaymentPlanBoundary />}
+      {/* The recruitment SERVICE of UAB "Nonstop Group" is not a platform plan
+          (owner correction 2026-11-13): it sits BELOW the plans in its own
+          labelled block, so a service fee is never read as platform pricing. */}
+      <ConciergeOfferSection />
       {/* M7 (beta foundation audit 2026-08-08): <ServiceOffers /> — the
           AI-automation agency offer list (€900–€1,900) — is NOT rendered on
           the beta labour-market pricing page. Concrete service prices next to
