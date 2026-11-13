@@ -16,7 +16,7 @@ export const NEED_WALK_SOURCE_PATH = "/en/company-need";
 
 const clean = (v: string | undefined, fallback: string) => (/^[a-z0-9]{1,24}$/i.test(v ?? "") ? (v as string).toLowerCase() : fallback);
 
-export function needWalkRun(env: NodeJS.ProcessEnv = process.env): string {
+export function needWalkRun(env: Readonly<Record<string, string | undefined>> = process.env): string {
   return `${clean(env.GITHUB_RUN_ID, "local")}.${clean(env.GITHUB_RUN_ATTEMPT, "1")}`;
 }
 

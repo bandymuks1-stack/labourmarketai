@@ -9,11 +9,11 @@ const REPO = join(__dirname, "..", "..", "..", "..");
 const read = (p: string) => readFileSync(join(REPO, p), "utf8");
 
 describe("the need-intake walk's synthetic mark", () => {
-  const run = needWalkRun({ GITHUB_RUN_ID: "43300000001", GITHUB_RUN_ATTEMPT: "2" } as NodeJS.ProcessEnv);
+  const run = needWalkRun({ GITHUB_RUN_ID: "43300000001", GITHUB_RUN_ATTEMPT: "2" });
 
   it("is unique per run attempt and never takes an unexpected value from the environment", () => {
     expect(run).toBe("43300000001.2");
-    expect(needWalkRun({ GITHUB_RUN_ID: "a b@c", GITHUB_RUN_ATTEMPT: "" } as NodeJS.ProcessEnv)).toBe("local.1");
+    expect(needWalkRun({ GITHUB_RUN_ID: "a b@c", GITHUB_RUN_ATTEMPT: "" })).toBe("local.1");
   });
 
   it("uses an address that can receive no mail, in the shape the clean-up script and the owner's SQL match", () => {
