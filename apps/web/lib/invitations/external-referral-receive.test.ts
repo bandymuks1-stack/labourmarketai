@@ -29,6 +29,7 @@ function db(reserve: { data?: unknown; error?: { code: string } }) {
     if (fn === "receive_external_referral_v1") return { data: { outcome: "created", invitation_id: "inv-2" }, error: null };
     if (fn === "reserve_external_referral_send_v1") return { data: reserve.data ?? null, error: reserve.error ?? null };
     if (fn === "mark_external_referral_delivery_v1") return { data: "ok", error: null };
+    if (fn === "record_invitation_delivery_attempt_v1") return { data: "ok", error: null };
     throw new Error(`unexpected rpc ${fn}`);
   });
 }
@@ -72,5 +73,44 @@ describe("partner intake — one mail per address (20261028070000)", () => {
     const r = await receiveExternalReferral(input);
     expect(send).not.toHaveBeenCalled();
     expect(r).toMatchObject({ delivery: "not_sent" });
+  });
+});
+
+describe("partner intake — a failed send keeps its reason (owner P0 2026-11-13, invitation 862a91f4)", () => {
+  beforeEach(() => {
+    rpc.mockReset();
+    send.mockClear();
+  });
+
+  it("a TEMPORARY failure is marked delivery_failed, its reason stored and a bounded retry scheduled", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    db({ data: "ok" });
+    send.mockResolvedValueOnce({ status: "failed", reason: "timeout" } as never);
+    const r = await receiveExternalReferral(input);
+    expect(r).toMatchObject({ outcome: "created", delivery: "delivery_failed" });
+    expect(rpc).toHaveBeenCalledWith("mark_external_referral_delivery_v1", { p_invitation_id: "inv-2", p_outcome: "delivery_failed" });
+    expect(rpc).toHaveBeenCalledWith(
+      "record_invitation_delivery_attempt_v1",
+      expect.objectContaining({
+        p_invitation_id: "inv-2",
+        p_path: "intake",
+        p_outcome: "delivery_failed",
+        p_reason: "timeout",
+        p_failure_class: "TEMPORARY",
+        p_next_retry_at: expect.any(String),
+      }),
+    );
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it("a PERMANENT failure is stored with no retry", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    db({ data: "ok" });
+    send.mockResolvedValueOnce({ status: "failed", reason: "smtp_rcpt_to_550" } as never);
+    await receiveExternalReferral(input);
+    expect(rpc).toHaveBeenCalledWith(
+      "record_invitation_delivery_attempt_v1",
+      expect.objectContaining({ p_failure_class: "PERMANENT", p_next_retry_at: null }),
+    );
   });
 });

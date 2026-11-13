@@ -5,7 +5,8 @@ import { getTranslations } from "next-intl/server";
 
 import { hashRecipient } from "@/lib/email/durable-send-guard";
 import { guardedSendTransactionalEmail } from "@/lib/email/send-ledger-store";
-import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
+import { isTransactionalEmailConfigured, type TransactionalSendResult } from "@/lib/email/transactional";
+import { recordDeliveryAttempt } from "@/lib/invitations/delivery-attempts";
 import { activeLocales } from "@/lib/i18n/config";
 import { buildInvitationBody, buildInvitationSubject } from "@/lib/invitations/email-content";
 import {
@@ -94,6 +95,7 @@ export async function runExternalReferralReprocess(input: {
   // chosen by the same rule the batch would use first.
   const control = selection.eligible[0]?.id;
 
+  let lastResult: TransactionalSendResult | null = null;
   const report = await reprocessExternalReferrals(
     selection,
     input.mode === "dry_run"
@@ -125,6 +127,7 @@ export async function runExternalReferralReprocess(input: {
           },
           { kind: "invitation", requireLedger: true },
         );
+        lastResult = sent;
         return sent.status === "sent";
       },
       mark: async (id, outcome) => {
@@ -133,6 +136,18 @@ export async function runExternalReferralReprocess(input: {
           p_outcome: outcome,
         });
         if (r.error || r.data !== "ok") throw new Error("mark_failed");
+        // The loop is sequential: lastResult is this row's own provider result.
+        if (lastResult) {
+          await recordDeliveryAttempt({
+            invitationId: id,
+            path: "reprocess",
+            result: lastResult,
+            attempts: 1,
+            autoRetry: true,
+            client: admin,
+          });
+          lastResult = null;
+        }
       },
       resolveLocale: (l) => ((activeLocales as readonly string[]).includes(l ?? "") ? (l as string) : "en"),
     },
@@ -172,3 +187,4 @@ async function resolveReservations(admin: SupabaseClient): Promise<ReprocessRunR
   }
   return { kind: "resolved", reserved: reserved.length, outcomes };
 }
+
