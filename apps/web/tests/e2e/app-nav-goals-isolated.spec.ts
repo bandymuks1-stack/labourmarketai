@@ -5,6 +5,7 @@ import { expect, test, type Browser, type BrowserContext, type Page } from "@pla
 
 import {
   BASE,
+  PASSWORD,
   isolatedStack,
   lit,
   onboard,
@@ -1099,5 +1100,68 @@ test("N-11. a person who holds the customer role is offered their requests; with
     }
   } finally {
     sqlExec(`delete from public.profile_roles where profile_id = ${lit(workerId)} and role = 'customer'`);
+  }
+});
+
+// ── N-12 · the chosen function survives sign-in ─────────────────────────────
+//
+// A signed-out person picks a function that needs an account on the public
+// home; the product asks them to sign in and then opens THAT function, not
+// the home. An address that leaves the product is never followed.
+
+test("N-12. signed out: a chosen function asks for sign-in and opens that function afterwards; an outside address is refused", async ({ browser }) => {
+  const address = email("worker");
+
+  // 1 · The public home, signed out: a goal, then a function that needs an account.
+  const ctx = await browser.newContext({ viewport: VIEWPORTS[1] });
+  const page = await ctx.newPage();
+  try {
+    await page.goto(`${BASE}/en`);
+    await page.getByTestId("goal-rail").locator('[data-card-id="services"]').click();
+    await expect(page.getByTestId("goal-panel")).toBeVisible({ timeout: 15_000 });
+    const cards = page.getByTestId("function-rail").locator("a[data-card-id]");
+    const hrefs = await cards.evaluateAll((els) => els.map((e) => e.getAttribute("href") ?? ""));
+    const index = hrefs.findIndex((h) => /\/dashboard\//.test(h));
+    expect(index, `the goal offers a function that lives in the signed-in product (${hrefs.join(", ")})`).toBeGreaterThanOrEqual(0);
+    const chosen = new URL(hrefs[index], BASE).pathname;
+    await cards.nth(index).click();
+
+    // The product asks for sign-in and remembers where the person was going.
+    await page.waitForURL(/\/en\/auth\/login/, { timeout: 60_000 });
+    const next = new URL(page.url()).searchParams.get("next");
+    // The same path, with or without the locale segment (the reader adds it).
+    expect(
+      (next ?? "").endsWith(chosen.slice("/en".length)),
+      `the sign-in page carries the chosen function (next=${next}, chosen=${chosen})`,
+    ).toBe(true);
+
+    await page.locator('input[name="email"]').fill(address);
+    await page.locator('input[name="password"]').fill(PASSWORD);
+    await page.locator('form button[type="submit"]').first().click();
+    await page.waitForURL((url) => url.pathname === chosen, { timeout: 60_000 });
+    expect(page.url(), "the function opened, it did not refuse").not.toContain("notice=");
+    await expect(page.getByRole("main").first()).toBeVisible({ timeout: 30_000 });
+    console.log(`[app-nav-walk] return after sign-in: chose ${chosen} signed out, signed in, landed on ${new URL(page.url()).pathname}`);
+  } finally {
+    await ctx.close();
+  }
+
+  // 2 · A return address that leaves the product, or is not a path, is not followed.
+  for (const bad of ["https://evil.example/steal", "//evil.example/steal", "/en/auth/login"]) {
+    const other = await browser.newContext({ viewport: VIEWPORTS[1] });
+    const p = await other.newPage();
+    try {
+      await p.goto(`${BASE}/en/auth/login?next=${encodeURIComponent(bad)}`);
+      await p.locator('input[name="email"]').fill(address);
+      await p.locator('input[name="password"]').fill(PASSWORD);
+      await p.locator('form button[type="submit"]').first().click();
+      await p.waitForURL((url) => !url.pathname.includes("/auth/"), { timeout: 60_000 });
+      const landed = new URL(p.url());
+      expect(landed.origin, `"${bad}" does not leave the product`).toBe(new URL(BASE).origin);
+      expect(landed.pathname, `"${bad}" falls back to the home`).toBe("/en/dashboard");
+      console.log(`[app-nav-walk] return after sign-in: next=${bad} refused, landed on ${landed.pathname}`);
+    } finally {
+      await other.close();
+    }
   }
 });
