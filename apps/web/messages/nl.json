@@ -5287,7 +5287,7 @@
         },
         {
           "q": "Hoeveel kost het?",
-          "a": "De prijzen staan op de prijzenpagina: één actieve positie per organisatie is gratis; voor meer posities is het organisatieplan nodig, dat je in je account activeert. Een personeelsbehoefte indienen is gratis."
+          "a": "Registreren en een personeelsbehoefte indienen zijn gratis. Het betaalde organisatieplan, de prijs en of het vandaag al kan worden geactiveerd, staan op de prijzenpagina."
         },
         {
           "q": "Kunnen we filteren op locatie?",
@@ -5385,7 +5385,7 @@
         },
         {
           "q": "Wat kost het voor uitzendbureaus?",
-          "a": "Een bureau is een organisatie en gebruikt dezelfde plannen: één actieve positie is gratis, voor meer is het organisatieplan van de prijzenpagina nodig. Er is geen apart bureautarief."
+          "a": "Een bureau is een organisatie en gebruikt dezelfde plannen. Registreren en het personeel vermelden dat je kunt leveren zijn gratis; het betaalde organisatieplan, de prijs en of het vandaag al kan worden geactiveerd, staan op de prijzenpagina. Er is geen apart bureautarief."
         },
         {
           "q": "Kunnen we de zichtbaarheid van werknemers bepalen?",
@@ -5715,7 +5715,7 @@
     "titleAccent": "eerlijk vastgesteld.",
     "subcopyLive": "De prijzen zijn door de eigenaar bevestigd en gelden. Activering gebeurt in het organisatieaccount via een veilige Stripe-betaling; op deze pagina wordt niets afgeschreven.",
     "subcopy": "De prijzen zijn nog niet definitief en facturering wordt op deze pagina nooit voor je gestart. De niveaus hieronder beschrijven de omvang; activering gebeurt handmatig — neem contact op en we bevestigen prijs en omvang met je voordat er iets start.",
-    "subcopyConfirmed": "De prijzen zijn bevestigd. Online activering is nog niet geopend — zet je op de wachtlijst, dan nemen we contact op en starten we je organisatie handmatig; op deze pagina wordt niets afgeschreven.",
+    "subcopyConfirmed": "Registreren is gratis voor personen en voor organisaties, en personeelsbehoeften plaatsen is gratis. Er is één betaald plan, het staat hieronder. Het kan nog niet online worden gekocht, en op deze pagina wordt niets afgeschreven.",
     "trialNote": "Het eerste abonnement van een organisatie begint met een proefperiode van 14 dagen. Daarna wordt je kaart belast met de maandprijs; je kunt opzeggen voordat de proefperiode eindigt.",
     "planCta": "Zet je op de wachtlijst voor dit plan",
     "featuresLabel": "Inbegrepen",
@@ -5725,6 +5725,12 @@
         "tagline": "Om te beginnen",
         "features": [
           "1 actieve positie",
+          "Matching-shortlist en kandidaatcontact",
+          "Boekingen, projecten, instructies",
+          "Werkbevestiging en bevestigde vaardigheden"
+        ],
+        "featuresClosed": [
+          "Personeelsbehoeften plaatsen",
           "Matching-shortlist en kandidaatcontact",
           "Boekingen, projecten, instructies",
           "Werkbevestiging en bevestigde vaardigheden"
@@ -5782,7 +5788,8 @@
     ],
     "priceState": {
       "draft_pricing": "De prijzen worden voorbereid — er kan nog niets worden gekocht.",
-      "owner_confirmed": "Prijzen bevestigd door de eigenaar. Activeren gebeurt in uw organisatieaccount; op deze pagina wordt niets afgeschreven."
+      "owner_confirmed": "Prijzen bevestigd door de eigenaar. Activeren gebeurt in uw organisatieaccount; op deze pagina wordt niets afgeschreven. Prijzen zijn exclusief btw.",
+      "owner_confirmed_closed": "Online betalen is nog niet geopend; op deze pagina wordt niets afgeschreven. Prijzen zijn exclusief btw."
     },
     "individual": {
       "name": "Bijzondere wensen",
@@ -5794,7 +5801,13 @@
     "priceFree": "€ 0",
     "pricePerMonth": "€{price}/maand",
     "ctaStartFree": "Gratis starten in uw organisatieaccount",
-    "ctaSubscribe": "Activeren in uw organisatieaccount"
+    "ctaSubscribe": "Activeren in uw organisatieaccount",
+    "faqClosed": [
+      "Elke organisatie — werkgever, uitzender, aannemer of opleider — krijgt hetzelfde product en hetzelfde ene betaalde plan. Online betalen is nog niet open, dus vandaag wordt niets in rekening gebracht.",
+      "Ja. Personen blijven gratis, en een organisatie registreren en haar personeelsbehoeften plaatsen is gratis.",
+      "Online betalen is nog niet open voor het publiek, dus hier kan niets worden gekocht. Registratie en het plaatsen van personeelsbehoeften zijn gratis.",
+      "Het plan Organisatie kent geen vaste limiet op actieve posities. Online betalen is nog niet open; een limiet van het gratis plan geldt alleen voor een organisatie waarvan het account facturering als actief toont, en dat account toont dan die limiet. Gebruikelijke bescherming tegen misbruik, zoals limieten op het aantal verzoeken, blijft gelden."
+    ]
   },
   "privacySelfService": {
     "title": "Privacy en je gegevens",
@@ -9434,20 +9447,20 @@
     }
   },
   "planBoundary": {
-    "title": "Wat betaalde plannen omvatten",
-    "subcopy": "Betalingen zijn nog niet ingeschakeld — geen betaalpagina en geen kaart. Betaalde plannen worden getoond zodat je de omvang kent; pilottoegang wordt handmatig verleend.",
+    "title": "Wat elk plan omvat",
+    "subcopy": "Op deze pagina kan niets worden gekocht en er wordt geen kaart gevraagd. Het betaalde plan wordt getoond zodat je weet wat het omvat.",
     "note": "Plannen beschrijven omvang, geen actieve facturering. Op deze pagina wordt niets in rekening gebracht.",
     "plans": {
       "free_worker": "Gratis Werknemer",
-      "worker_plus": "Persoon plus (niet aangeboden)",
+      "worker_plus": "Extra functies voor personen (niet aangeboden)",
       "company_pilot": "Organisatie",
-      "agency_pilot": "Bureau-tier (niet aangeboden)",
+      "agency_pilot": "Apart bureauplan (niet aangeboden)",
       "admin_internal": "Admin / Intern",
       "free_organization": "Organisatie (gratis)"
     },
     "access": {
       "free": "Gratis",
-      "payment_not_enabled": "Betaling niet ingeschakeld",
+      "payment_not_enabled": "Nog niet te koop",
       "internal": "Intern"
     },
     "audience": {
@@ -9458,22 +9471,22 @@
     },
     "cta": {
       "use": "Nu beschikbaar",
-      "request_pilot_access": "Pilottoegang — handmatig verleend",
+      "request_pilot_access": "Eerste klanten worden door het team ingericht",
       "contact": "Individueel geregeld"
     },
     "readiness": {
       "draft_pricing": "Plannen zijn voorbereid, niet koopbaar. Geen enkele prijs hier is definitief en er kan niets worden gekocht.",
-      "owner_confirmed": "De plannen zijn alleen voorbereid — er kan niets worden gekocht totdat betalingen zijn ingeschakeld."
+      "owner_confirmed": "Het betaalde plan kan niet worden gekocht totdat online betalen is geopend."
     },
-    "featuresLabel": "Inbegrepen in deze afbakening",
-    "limitValue": "tot {count}",
+    "featuresLabel": "Omvat",
+    "limitValue": "tot {count} zodra betaalde plannen starten",
     "freeToday": {
       "freeTitle": "Vandaag gratis",
-      "free": "Alles wat je op dit moment in het product kunt gebruiken is gratis — de pilot draait zonder betalingen en niets vraagt om een kaart.",
-      "paidTitle": "Voorbereide betaalde plannen",
-      "paid": "Momenteel niet beschikbaar.",
-      "preparedTitle": "Voorbereid, niet koopbaar",
-      "prepared": "Er is geen betaalpagina en er kan niets worden gekocht. Pilottoegang tot de omvang van betaalde plannen wordt handmatig door het team verleend."
+      "free": "Alles wat je vandaag in het product kunt gebruiken is gratis, en er wordt geen kaart gevraagd.",
+      "paidTitle": "Betaald plan",
+      "paid": "Nog niet te koop.",
+      "preparedTitle": "Betaald, nog niet te koop",
+      "prepared": "Er is geen betaalpagina en er kan niets worden gekocht. Eerste klanten krijgen de functies van het betaalde plan rechtstreeks van het team."
     },
     "features": {
       "worker_profile": "Werknemersprofiel",
@@ -9500,7 +9513,7 @@
     "enforcement": {
       "free_surface": "Vandaag in het product",
       "server_gate": "Vandaag in het product, met rechtencontrole",
-      "declared_boundary_only": "Voorbereid — start pas met facturering",
+      "declared_boundary_only": "Nog niet beschikbaar",
       "admin_rbac": "Intern, alleen admin"
     }
   },
@@ -9842,11 +9855,12 @@
       "body": "Publieke betalingen zijn nog niet ingeschakeld. De eerste klanten worden direct bediend: een personeelsaanvraag indienen is gratis, en de definitieve prijs wordt altijd met je bevestigd voordat betaald werk begint.",
       "cta": "Dien een personeelsaanvraag in"
     },
-    "title": "Hoe de eerste betaalde dienst werkt",
+    "title": "Wervingsdienst van UAB “Nonstop Group”",
+    "separate": "Dit is een aparte dienst en geen LabourMarket.ai-plan. De platformplannen hierboven bevatten deze dienst niet, en voor het gebruik van het platform is hij niet nodig.",
     "steps": [
       {
         "title": "Dien je aanvraag gratis in",
-        "body": "Beschrijf welke werknemers of ploeg je nodig hebt. Geen kosten, geen kaart, niets wordt automatisch gepubliceerd."
+        "body": "Beschrijf welke mensen of welk team je nodig hebt. Geen kosten, geen kaart, niets wordt automatisch gepubliceerd."
       },
       {
         "title": "Een mens beoordeelt hem",
@@ -9854,14 +9868,14 @@
       },
       {
         "title": "Je krijgt een handmatig gecontroleerde shortlist",
-        "body": "Echte kandidaten of ploegen, door een mens gecontroleerd aan de hand van jouw aanvraag. Als we geen geschikte shortlist kunnen samenstellen, betaal je niets — en we beloven nooit dat er altijd een kandidaat wordt gevonden."
+        "body": "Echte kandidaten of teams, door een mens gecontroleerd aan de hand van jouw aanvraag. Als we geen geschikte shortlist kunnen samenstellen, betaal je niets — en we beloven nooit dat er altijd een kandidaat wordt gevonden."
       },
       {
         "title": "Je betaalt alleen voor geleverde dienstverlening",
-        "body": "Per aangenomen werknemer, ploeg of bedrijfsplaatsing geldt een vaste succesfee. Een aparte coördinatievergoeding geldt alleen wanneer document- of onboardingcoördinatie daadwerkelijk wordt geleverd. De definitieve prijs wordt bevestigd voordat betaald werk begint."
+        "body": "Een vergoeding voor een geslaagde aanname geldt alleen wanneer die vooraf met je is afgesproken. Het bedrag en de voorwaarden worden schriftelijk bevestigd voordat betaald werk begint. Een aparte coördinatievergoeding geldt alleen wanneer document- of onboardingcoördinatie daadwerkelijk wordt geleverd."
       }
     ],
-    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — één actieve positie kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest uw aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een hele ploeg kan zich al als één geheel op uw aanvraag aanbieden en, zodra beide kanten akkoord zijn, als één team in uw project instappen; de automatische kandidatenlijst stelt nog niet hele ploegen voor — ze rangschikt mensen één voor één.",
+    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — een aanvraag indienen is kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest uw aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een heel team kan zich al als één geheel op uw aanvraag aanbieden en, zodra beide kanten akkoord zijn, als één team in uw project instappen; de automatische kandidatenlijst stelt nog niet hele teams voor — ze rangschikt mensen één voor één.",
     "ctaLabel": "Dien een personeelsaanvraag in →"
   },
   "adminLaunchReadiness": {

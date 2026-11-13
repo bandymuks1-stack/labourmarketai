@@ -5287,7 +5287,7 @@
         },
         {
           "q": "How much does it cost?",
-          "a": "Prices are published on the pricing page: one active position per organisation is free; more positions need the organisation plan, activated in your account. Submitting a workforce need is free."
+          "a": "Registering and submitting a workforce need are free. The paid organisation plan, its price and whether it can be activated today are shown on the pricing page."
         },
         {
           "q": "Can we filter by location?",
@@ -5385,7 +5385,7 @@
         },
         {
           "q": "How much does it cost agencies?",
-          "a": "An agency is an organisation and uses the same plans: one active position is free, more need the organisation plan from the pricing page. There is no separate agency tariff."
+          "a": "An agency is an organisation and uses the same plans. Registering and stating the workforce you can supply are free; the paid organisation plan, its price and whether it can be activated today are on the pricing page. There is no separate agency tariff."
         },
         {
           "q": "Can we control worker visibility?",
@@ -5715,7 +5715,7 @@
     "titleAccent": "set fairly.",
     "subcopyLive": "Prices are confirmed by the owner and in force. Activation happens in the organization account through a secure Stripe payment; nothing is charged on this page.",
     "subcopy": "Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
-    "subcopyConfirmed": "Prices are confirmed. Online activation is not open yet — join the waitlist and we will contact you to start your organization manually; nothing is charged on this page.",
+    "subcopyConfirmed": "Registration is free for people and for organizations, and posting workforce needs is free. There is one paid plan, shown below. It cannot be bought online yet, and nothing is charged on this page.",
     "trialNote": "An organization's first subscription starts with a 14-day trial. Your card is charged the monthly price after the trial, and you can cancel before it ends.",
     "planCta": "Join the waitlist for this plan",
     "featuresLabel": "Includes",
@@ -5725,6 +5725,12 @@
         "tagline": "For getting started",
         "features": [
           "1 active position",
+          "Matching shortlist and candidate contact",
+          "Bookings, projects, instructions",
+          "Work confirmation by the employer"
+        ],
+        "featuresClosed": [
+          "Post workforce needs",
           "Matching shortlist and candidate contact",
           "Bookings, projects, instructions",
           "Work confirmation by the employer"
@@ -5782,7 +5788,8 @@
     ],
     "priceState": {
       "draft_pricing": "Prices are being prepared — nothing can be bought yet.",
-      "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page."
+      "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page. Prices are shown without VAT.",
+      "owner_confirmed_closed": "Online payment is not open yet; nothing is charged on this page. Prices are shown without VAT."
     },
     "individual": {
       "name": "Special requirements",
@@ -5794,7 +5801,13 @@
     "priceFree": "€0",
     "pricePerMonth": "€{price}/month",
     "ctaStartFree": "Start free in your organization account",
-    "ctaSubscribe": "Activate in your organization account"
+    "ctaSubscribe": "Activate in your organization account",
+    "faqClosed": [
+      "Every organization — employer, staffing provider, contractor or training provider — gets the same product and the same one paid plan. Online payment is not open yet, so nothing is charged today.",
+      "Yes. Persons stay free, and registering an organization and posting its workforce needs are free.",
+      "Online payment is not open to the public yet, so nothing can be bought here. Registration and posting workforce needs are free.",
+      "The Organization plan has no fixed limit on active positions. Online payment is not open yet; a free-plan limit applies only to an organization whose account shows billing as active, and that account then shows the limit. Normal protections against abuse, such as request rate limits, still apply."
+    ]
   },
   "privacySelfService": {
     "title": "Privacy and your data",
@@ -9434,20 +9447,20 @@
     }
   },
   "planBoundary": {
-    "title": "What paid plans include",
-    "subcopy": "Payments are not enabled yet — no payment page and no card. Paid plans are shown so you know the scope; pilot access is granted manually.",
+    "title": "What each plan covers",
+    "subcopy": "Nothing on this page can be bought and no card is asked for. The paid plan is shown so you know what it covers.",
     "note": "Plans describe scope, not active billing. Nothing is charged on this page.",
     "plans": {
       "free_worker": "Free Worker",
-      "worker_plus": "Person plus (not offered)",
+      "worker_plus": "Extra features for persons (not offered)",
       "company_pilot": "Organization",
-      "agency_pilot": "Agency tier (not offered)",
+      "agency_pilot": "Separate agency plan (not offered)",
       "admin_internal": "Admin / Internal",
       "free_organization": "Organization Free"
     },
     "access": {
       "free": "Free",
-      "payment_not_enabled": "Payment not enabled",
+      "payment_not_enabled": "Not yet purchasable",
       "internal": "Internal"
     },
     "audience": {
@@ -9458,22 +9471,22 @@
     },
     "cta": {
       "use": "Available now",
-      "request_pilot_access": "Pilot access — granted manually",
+      "request_pilot_access": "First clients are set up by the team",
       "contact": "Arranged individually"
     },
     "readiness": {
       "draft_pricing": "Plans are prepared, not purchasable. No price here is final and nothing can be bought.",
-      "owner_confirmed": "Plans are prepared only — nothing can be bought until payments are enabled."
+      "owner_confirmed": "The paid plan cannot be bought until online payment opens."
     },
-    "featuresLabel": "Included in this boundary",
-    "limitValue": "up to {count}",
+    "featuresLabel": "Includes",
+    "limitValue": "up to {count} once paid plans start",
     "freeToday": {
       "freeTitle": "Free today",
-      "free": "Everything you can currently use in the product is free — the pilot runs without payments and nothing asks for a card.",
-      "paidTitle": "Prepared paid plans",
-      "paid": "Not available right now.",
-      "preparedTitle": "Prepared, not purchasable",
-      "prepared": "There is no payment page and nothing can be bought. Pilot access to paid-plan scope is granted manually by the team."
+      "free": "Everything you can use in the product today is free, and nothing asks for a card.",
+      "paidTitle": "Paid plan",
+      "paid": "Not available to buy yet.",
+      "preparedTitle": "Paid, not yet purchasable",
+      "prepared": "There is no payment page and nothing can be bought. First clients get the paid plan's features directly from the team."
     },
     "features": {
       "worker_profile": "Worker profile",
@@ -9500,7 +9513,7 @@
     "enforcement": {
       "free_surface": "Available today",
       "server_gate": "Available today, depending on your permissions",
-      "declared_boundary_only": "Prepared — starts only with billing",
+      "declared_boundary_only": "Not available yet",
       "admin_rbac": "Internal, admin only"
     }
   },
@@ -9842,11 +9855,12 @@
       "body": "Public payments are not enabled yet. First clients are served directly: submitting a workforce inquiry is free, and the final price is always confirmed with you before any paid work starts.",
       "cta": "Submit a workforce inquiry"
     },
-    "title": "How the first paid service works",
+    "title": "Recruitment service by UAB “Nonstop Group”",
+    "separate": "This is a separate service, not a LabourMarket.ai plan. The platform plans above do not include it, and using the platform does not require it.",
     "steps": [
       {
         "title": "Submit your inquiry for free",
-        "body": "Describe the workers or crew you need in the inquiry form. No fee, no card, nothing is published automatically."
+        "body": "Describe the people or the team you need in the inquiry form. No fee, no card, nothing is published automatically."
       },
       {
         "title": "A person reviews it",
@@ -9854,14 +9868,14 @@
       },
       {
         "title": "You get a manually checked shortlist",
-        "body": "Real candidates or crews, checked by a person against your inquiry. If we cannot put together a suitable shortlist, there is no fee — and we never promise that a candidate will always be found."
+        "body": "Real candidates or teams, checked by a person against your inquiry. If we cannot put together a suitable shortlist, there is no fee — and we never promise that a candidate will always be found."
       },
       {
         "title": "You pay only for delivered service",
-        "body": "A fixed success fee applies per hired worker, crew or company placement. A separate coordination fee applies only when document or onboarding coordination is actually delivered. The final price is confirmed before paid work starts."
+        "body": "A success fee per hire applies only when it has been agreed with you in advance. Its amount and conditions are confirmed with you in writing before any paid work starts. A separate coordination fee applies only when document or onboarding coordination is actually delivered."
       }
     ],
-    "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — one active position at no cost. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. A whole crew can already offer itself against your inquiry as one unit and, once both sides agree, join your project as one team; the automatic shortlist does not yet propose whole crews — it ranks people one by one.",
+    "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — and this part is free. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. A whole team can already offer itself against your inquiry as one unit and, once both sides agree, join your project as one team; the automatic shortlist does not yet propose whole teams — it ranks people one by one.",
     "ctaLabel": "Submit a workforce inquiry →"
   },
   "adminLaunchReadiness": {
