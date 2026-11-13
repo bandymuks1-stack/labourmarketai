@@ -174,3 +174,32 @@ State words: LIVE (in production, checked) · READY (PR green, waits for owner m
 - Any real phone; real-visitor speed.
 - Payments in TEST mode (0 of 4).
 - E-mail delivery of sign-up confirmation in ru/pl/de/nl (one LT/EN template).
+
+## Anonymous request queue — owner-approved clean-up, 2026-11-13
+
+Table `company_need_public_intakes`, 15 rows. The table has no reason or note column, so the reasons are recorded here. Rows are numbered by arrival order; no row was deleted and no content was changed, only `status`. No personal data below.
+
+| Row | Arrived | Classification | Reason | Status now |
+|---|---|---|---|---|
+| 1 | 2026-07-13 | test | company name carries an end-to-end test marker; contact domain is not deliverable | rejected |
+| 2 | 2026-08-10 | likely genuine | a small company asks for a design and marketing-visuals subcontractor, ongoing, EN/LT | new (reply held by the owner) |
+| 3 | 2026-09-24 | advertising | sells a business-contacts database, with a link; no labour or service need | rejected |
+| 4 | 2026-10-04 | advertising | same product, lifetime-access offer | rejected |
+| 5 | 2026-10-10 | advertising | same product, affiliate programme and browser extension | rejected |
+| 6 | 2026-10-12 | advertising | company-data scraping tool, download link | rejected |
+| 7 | 2026-11-04 | advertising | same tool; the text itself says it is unsolicited | rejected |
+| 8–15 | 2026-11-07 … 11-10 | test | `QA-SYNTHETIC` marker, reserved test e-mail domain | rejected |
+
+Rows 3–7 all arrived through the German version of the older company-need form with an implausible country and a random profession: its spam screen lets advertising through (noted for Lane B).
+
+### Reply draft for row 2 — NOT SENT, waits for the owner
+
+> Hello,
+>
+> Thank you for your enquiry to LabourMarket.ai about design and marketing visuals, and please accept our apologies for the late reply — your message reached us on 10 August.
+>
+> Is this still something you need? If so, could you tell us a little more: the kind of work (brand, social media, print), the expected volume per month and your preferred way of working (freelancer or agency)? With that we can help you post the request on the platform, where registration and basic request posting are free.
+>
+> Kind regards,
+> LabourMarket.ai team
+> info@labourmarket.ai
