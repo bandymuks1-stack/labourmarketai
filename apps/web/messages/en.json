@@ -4220,7 +4220,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "Continue with LinkedIn",
-      "continueWithFacebook": "Continue with Facebook"
+      "continueWithFacebook": "Continue with Facebook",
+      "inAppBrowser": "You are in an app's built-in browser, where Google sign-in often doesn't work. Open this page in your phone's browser (Safari or Chrome), or use your email and password below."
     },
     "legalNotice": {
       "signup": "By creating an account you confirm that you have read the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>.",
@@ -4242,7 +4243,9 @@
         "cancelled": "Sign-in was cancelled. Nothing happened to your account.",
         "unknown": "Couldn't sign in. Please try again.",
         "link_expired": "This confirmation link has expired or was already used. If you already confirmed your email, just sign in. Otherwise request a new link below.",
-        "confirmed_sign_in": "Your email is confirmed. This device didn't start the signup, so sign in here to continue."
+        "confirmed_sign_in": "Your email is confirmed. This device didn't start the signup, so sign in here to continue.",
+        "confirm_link_opened": "This confirmation link has been opened. Your email is most likely confirmed already, so try signing in. If that doesn't work, request a new link below.",
+        "provider_error": "The sign-in service couldn't complete this sign-in, and trying again will probably end the same way. Sign in the way you first registered, or with your email and password."
       },
       "emailNotConfirmed": "Your email isn't confirmed yet. Open the confirmation link we sent you, or request a new one below."
     },

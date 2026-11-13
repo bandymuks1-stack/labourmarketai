@@ -129,7 +129,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "[EN] Continue with LinkedIn",
-      "continueWithFacebook": "[EN] Continue with Facebook"
+      "continueWithFacebook": "[EN] Continue with Facebook",
+      "inAppBrowser": "Du är i en apps inbyggda webbläsare, där inloggning med Google ofta inte fungerar. Öppna sidan i telefonens webbläsare (Safari eller Chrome), eller använd e-post och lösenord nedan."
     },
     "callback": {
       "error_body": "[EN] This link is invalid or expired. Please try again.",
@@ -314,7 +315,9 @@
       "oauth": {
         "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
         "link_expired": "Den här bekräftelselänken har gått ut eller redan använts. Har du redan bekräftat din e-post, logga bara in. Annars kan du begära en ny länk nedan.",
-        "confirmed_sign_in": "Din e-postadress är bekräftad. Registreringen påbörjades på en annan enhet, så logga in här för att fortsätta."
+        "confirmed_sign_in": "Din e-postadress är bekräftad. Registreringen påbörjades på en annan enhet, så logga in här för att fortsätta.",
+        "confirm_link_opened": "Den här bekräftelselänken har öppnats. Din e-postadress är med största sannolikhet redan bekräftad, så prova att logga in. Fungerar det inte kan du begära en ny länk nedan.",
+        "provider_error": "Inloggningstjänsten kunde inte slutföra den här inloggningen, och ett nytt försök slutar troligen likadant. Logga in på det sätt du först registrerade dig med, eller med e-post och lösenord."
       },
       "emailNotConfirmed": "Din e-postadress är inte bekräftad ännu. Öppna bekräftelselänken vi skickade, eller begär en ny nedan."
     },

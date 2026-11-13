@@ -4220,7 +4220,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "Tęsti su LinkedIn",
-      "continueWithFacebook": "Tęsti su Facebook"
+      "continueWithFacebook": "Tęsti su Facebook",
+      "inAppBrowser": "Esi programėlės vidinėje naršyklėje, kurioje prisijungimas per „Google“ dažnai neveikia. Atidaryk šį puslapį telefono naršyklėje („Safari“ arba „Chrome“) arba žemiau naudok el. paštą ir slaptažodį."
     },
     "legalNotice": {
       "signup": "Kuriant paskyrą patvirtini, kad susipažinai su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
@@ -4242,7 +4243,9 @@
         "cancelled": "Prisijungimas atšauktas. Su tavo paskyra nieko neįvyko.",
         "unknown": "Prisijungti nepavyko. Pabandyk dar kartą.",
         "link_expired": "Ši patvirtinimo nuoroda nebegalioja arba jau buvo panaudota. Jei el. paštą jau patvirtinai, tiesiog prisijunk. Kitu atveju paprašyk naujos nuorodos žemiau.",
-        "confirmed_sign_in": "Tavo el. paštas patvirtintas. Registracija buvo pradėta kitame įrenginyje, todėl čia prisijunk, kad tęstum."
+        "confirmed_sign_in": "Tavo el. paštas patvirtintas. Registracija buvo pradėta kitame įrenginyje, todėl čia prisijunk, kad tęstum.",
+        "confirm_link_opened": "Ši patvirtinimo nuoroda atidaryta. Tavo el. paštas greičiausiai jau patvirtintas, todėl pabandyk prisijungti. Jei nepavyks, paprašyk naujos nuorodos žemiau.",
+        "provider_error": "Prisijungimo paslauga negalėjo užbaigti šio prisijungimo, ir pakartojus greičiausiai bus tas pats. Prisijunk tuo būdu, kuriuo registravaisi pirmą kartą, arba el. paštu ir slaptažodžiu."
       },
       "emailNotConfirmed": "Tavo el. paštas dar nepatvirtintas. Atidaryk atsiųstą patvirtinimo nuorodą arba paprašyk naujos žemiau."
     },

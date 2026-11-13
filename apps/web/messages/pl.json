@@ -4220,7 +4220,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "Kontynuuj przez LinkedIn",
-      "continueWithFacebook": "Kontynuuj przez Facebook"
+      "continueWithFacebook": "Kontynuuj przez Facebook",
+      "inAppBrowser": "Jesteś we wbudowanej przeglądarce aplikacji, w której logowanie przez Google często nie działa. Otwórz tę stronę w przeglądarce telefonu (Safari lub Chrome) albo użyj poniżej e-maila i hasła."
     },
     "legalNotice": {
       "signup": "Zakładając konto potwierdzasz, że znasz <terms>Regulamin</terms> oraz <privacy>Politykę prywatności</privacy>.",
@@ -4242,7 +4243,9 @@
         "cancelled": "Logowanie zostało anulowane. Nic nie zmieniło się na Twoim koncie.",
         "unknown": "Nie udało się zalogować. Spróbuj ponownie.",
         "link_expired": "Ten link potwierdzający wygasł lub został już użyty. Jeśli już potwierdzono e-mail, po prostu się zaloguj. W przeciwnym razie poproś poniżej o nowy link.",
-        "confirmed_sign_in": "Twój e-mail został potwierdzony. Rejestrację rozpoczęto na innym urządzeniu, więc zaloguj się tutaj, aby kontynuować."
+        "confirmed_sign_in": "Twój e-mail został potwierdzony. Rejestrację rozpoczęto na innym urządzeniu, więc zaloguj się tutaj, aby kontynuować.",
+        "confirm_link_opened": "Ten link potwierdzający został otwarty. Twój e-mail jest najprawdopodobniej już potwierdzony, więc spróbuj się zalogować. Jeśli się nie uda, poproś poniżej o nowy link.",
+        "provider_error": "Usługa logowania nie mogła dokończyć tego logowania, a ponowna próba najpewniej skończy się tak samo. Zaloguj się w sposób, w jaki zarejestrowano konto, albo e-mailem i hasłem."
       },
       "emailNotConfirmed": "Twój e-mail nie został jeszcze potwierdzony. Otwórz przesłany link potwierdzający lub poproś poniżej o nowy."
     },
