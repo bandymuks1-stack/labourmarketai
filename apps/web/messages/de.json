@@ -8737,6 +8737,7 @@
     },
     "languagesTitle": "Sprachen",
     "languagesSelfStated": "Sprachen laut Angabe des Arbeiters.",
+    "educationSelfStated": "Ausbildung laut Angabe der Arbeitskraft.",
     "certificatesTitle": "Zertifikate & Lizenzen",
     "declaredCertHint": "Selbst angegeben",
     "documentSelfSuppliedHint": "Dokument von der Person selbst eingereicht",
