@@ -7,7 +7,10 @@
 
 ## What appeared
 
-_No new product surface was added by this PR._
+| What appeared | Kind | Why it appeared | Why it cannot be a conversation | Permitting axiom | Declared |
+|---|---|---|---|---|---|
+| `/for-education` | screen | The public page an education institution reads before choosing its sign-up door: which functions work today (programmes, groups, practice review, competency recognition, report), how to start, what is free, and what is not available yet. | There is no conversation before authentication. The reader is an anonymous visitor deciding whether to sign up; nothing exists yet for an assistant to act on. After sign-up the assistant and the workspace take over. | A-04 | yes |
+| `/for-service-providers` | screen | The public page an independent specialist, crew or service company reads before signing up: which functions work today (service offerings, requests, shared search, proposals and contracts, cost calculator), how to start, what is free, and what is not available yet. | There is no conversation before authentication. The reader is an anonymous visitor deciding whether to sign up; nothing exists yet for an assistant to act on. After sign-up the assistant and the workspace take over. | A-04 | yes |
 
 ## Axiom checks
 
@@ -18,6 +21,16 @@ _No new product surface was added by this PR._
 | `not_ai_controlled` | A-01 | `/create-cv` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
 | `requires_leaving_workspace` | A-01 | `/create-cv` | certain | "usableWithoutLeavingWorkspace" is false — AI-first, one workspace, no page switching |
 | `requires_new_page` | A-01 | `/create-cv` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
+| `not_world_state_driven` | A-01 | `/for-education` | certain | "changesWorldState" is false — AI-first, one workspace, no page switching |
+| `not_reflected_on_map` | A-01 | `/for-education` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
+| `not_ai_controlled` | A-01 | `/for-education` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
+| `requires_leaving_workspace` | A-01 | `/for-education` | certain | "usableWithoutLeavingWorkspace" is false — AI-first, one workspace, no page switching |
+| `requires_new_page` | A-01 | `/for-education` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
+| `not_world_state_driven` | A-01 | `/for-service-providers` | certain | "changesWorldState" is false — AI-first, one workspace, no page switching |
+| `not_reflected_on_map` | A-01 | `/for-service-providers` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
+| `not_ai_controlled` | A-01 | `/for-service-providers` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
+| `requires_leaving_workspace` | A-01 | `/for-service-providers` | certain | "usableWithoutLeavingWorkspace" is false — AI-first, one workspace, no page switching |
+| `requires_new_page` | A-01 | `/for-service-providers` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
 | `not_world_state_driven` | A-01 | `/jobs` | certain | "changesWorldState" is false — AI-first, one workspace, no page switching |
 | `not_reflected_on_map` | A-01 | `/jobs` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
 | `not_ai_controlled` | A-01 | `/jobs` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
@@ -54,6 +67,8 @@ _No new product surface was added by this PR._
 | `ai_cannot_work_with_entity` | A-09 | `/oauth/consent` | certain | "aiCanWorkWithIt" is false — Entity is the only base thing in the world |
 | `ai_cannot_work_with_entity` | A-09 | `components/app/journal/journal-photo-viewer.tsx` | certain | "aiCanWorkWithIt" is false — Entity is the only base thing in the world |
 | `world_state_cannot_control_it` | A-01 | `/create-cv` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
+| `world_state_cannot_control_it` | A-01 | `/for-education` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
+| `world_state_cannot_control_it` | A-01 | `/for-service-providers` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
 | `world_state_cannot_control_it` | A-01 | `/jobs` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
 | `world_state_cannot_control_it` | A-01 | `/jobs/[id]` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
 | `world_state_cannot_control_it` | A-01 | `components/marketing/public-vacancy-card.tsx` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
@@ -98,6 +113,8 @@ _No new product surface was added by this PR._
 - `not_world_state_driven` on `components/app/counterparty-review-card.tsx` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
 - `not_reflected_on_map` on `components/app/counterparty-review-card.tsx` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
 - `requires_new_page` on `components/app/counterparty-review-card.tsx` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `components/ui/premium-action-card.tsx` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `components/ui/premium-action-card.tsx` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
 - `world_state_cannot_control_it` on `components/app/historical-player-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `components/app/identity/person-identity-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `/dashboard/work-in-numbers` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
@@ -110,6 +127,7 @@ _No new product surface was added by this PR._
 - `world_state_cannot_control_it` on `/dashboard/company/settings` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `/dashboard/inbox/counterparty` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `components/app/counterparty-review-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `components/ui/premium-action-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 
 ## Rules that were checked
 
