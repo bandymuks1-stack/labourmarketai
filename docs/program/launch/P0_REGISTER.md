@@ -120,3 +120,57 @@ corrections, no disputes; 46 of them carry the third-entity employer label, 16 c
 Nothing was moved, renamed or merged. Any re-attribution is a data change that needs: the owner's list per
 legal employer, a preview with counts per person, preserved provenance (original supplier, file, hash
 chain), and a separate approval.
+
+## Launch coordination register — 2026-11-13 16:15 UTC
+
+Production build `59b1c759` (= `main`). Sources: lane entries on issue #3265, open-PR list (158 open), lane session transcripts, read-only production checks. Counts and states only; no personal data. Nothing below is merged or deployed unless the row says so. Merges, deploys, migrations and commercial e-mails need a separate owner approval.
+
+State words: LIVE (in production, checked) · READY (PR green, waits for owner merge decision) · IN PROGRESS · NOT STARTED · BLOCKED (named blocker) · NOT TESTED.
+
+### P0 — needed for the first commercial launch
+
+| # | Work | Lane | State | Evidence / PR | Depends on | Done when |
+|---|---|---|---|---|---|---|
+| 1 | V2 first-visitor navigation | A | LIVE | #3266, build `59b1c759`; live checks 375/1440 PASS | — | closed |
+| 2 | V3 landing (design, D1 variant A, approved LT–EN copy, six locales) | A | IN PROGRESS | built locally, final spec run and speed comparison running; no PR yet; copy source `evidence/landing-v3-preview` `d23570a8e` | — | one draft PR, CI green, screenshots 375/1440 light/dark × 6 locales, speed vs `59b1c759`, Lane R verdict on final head |
+| 3 | Legal wording: cookie sentence (1.1), data-visibility sentence (8.9) | owner + lawyer | BLOCKED | owner-approved variant A texts implemented in #2; server-side usage events are recorded without consent | lawyer | written confirmation of both sentences |
+| 4 | Sign-up faults: re-sent confirmation link, Google sign-in in in-app browsers, provider errors that never succeed on retry | F | NOT STARTED (found in code audit) | Lane F entry 11-13 | owner go-ahead in Lane F scope | fixes in PR, isolated sign-up run green, one production sign-up walk |
+| 5 | Onboarding on a phone: Continue 1.7–2.1 screens down, submit 2.7–3.4 screens down | F / A2 | NOT STARTED (measured, #3312 measures only) | #3312 `c1d08a4` | — | primary button visible without scrolling at 375 px |
+| 6 | 43 signed-in people stopped at role choice (30-day audit) | F | NOT STARTED | trust audit | #4, #5 | role step completion measured after fix |
+| 7 | Company activation: 27 companies, 0 with description, 0 invitations | B | BLOCKED | welcome + notification e-mails not started: Lane B waits for the owner's direct "tvirtinu" in its own window | owner | both e-mails in PR, six locales, send recorded |
+| 8 | Request intake control: same alert from both forms, send ledger, unhandled count and age for the admin | B | BLOCKED | same as #7; 7 non-test requests all `new`, oldest 123 days, no delivery evidence | owner (may be RED: additive columns) | PR green; admin sees count/age; alert send recorded |
+| 9 | Seven old requests answered or rejected | owner | BLOCKED | reply draft prepared, not sent | owner decisions (read texts, who sends, mark rejected) | every row has a final status |
+| 10 | Needs set to `in_review` are hidden from workers with no exit for the employer; 4 rows waiting 3–19 days | F / owner | NOT STARTED | Lane F entry | owner: who reviews | reviewer named; rows decided |
+| 11 | €99 Organization plan cannot be bought | D | BLOCKED | #3284 `768dbeb`, #3305, #3302, #3252 green, RED | `STRIPE_TEST_SECRET_KEY` (owner, secrets manager only); per-PR owner decisions; Stripe Tax decision | TEST-mode checkout, portal, refund, failed payment pass 4 of 4 |
+| 12 | Public pricing copy shows only what works | D | READY (RED) | #3302 `9e8581e` (instead of #3250) | owner decision | merged + live check in six locales |
+| 13 | Function 2.24 experience disputes | C | READY | #3301 `19f9ab9`, CI green, no migration, no review yet | Lane R review; owner merge decision | merged + walk |
+| 14 | Former worker can claim imported history | H | BLOCKED (RED) | #3311 `fe30e06`: `quality` red (undeclared surface, needs owner ruling), `signup-isolated` red; migration unapplied | owner ruling, R2 review | CI green, R2 no blocking, owner SQL approval |
+| 15 | Signed-in home on goal navigator | A2 | READY with 9 owed visual items | #3270 `416e5c0`, CI green, walk 79/0/1; Lane R verdict is on an older head (void) | rebase on main, Lane R re-review | owner visual approval |
+| 16 | Language errors on live pages (154 findings in six locales) | E | READY | #3304 `2f5aeec`, CI green, review owed | Lane R | merged + re-check |
+| 17 | CV shows what was measured (project line, five overstated places) | G | READY | #3309 `b03f386`, #3310 `a5088dd`, CI green | Lane R | merged |
+| 18 | Post-deploy smoke of the main journeys | F | READY | #3263 `3149a24` then #3271 `46a9ab1`, #3293 `393335f` | owner (#3271 is outside substitute review) | runs after every deploy |
+| 19 | Production walks on build `59b1c759` | J-2 | BLOCKED | six public walks proposed again; dispatch needs the owner's approval typed in the J-2 window | owner | six walks 0 failed |
+
+### P1 — after launch or not blocking it
+
+| # | Work | Lane | State | PR |
+|---|---|---|---|---|
+| 20 | Audience pages for education and service providers | B | READY | #3307 `d23afa3` (1 answered thread to resolve) |
+| 21 | Chat reads: work history, plan, search | B | READY | #3254 `d6a977d` |
+| 22 | Swedish locale | E | READY | #3261 `5fc1445` |
+| 23 | Unconfirmed-company needs by consent | V1 | BLOCKED | #3256 `1b1d15a`, 2 × P2 open, ON HOLD |
+| 24 | Public organization profiles; anon grant on business services (P1 security) | V1 | NOT STARTED | owner decisions per organization |
+| 25 | Company search for signed-in users | — | READY (RED) | #3214 `3f463af`; needs a new deploy-window approval |
+| 26 | RED chain: #2946, #3231, #3232, #3248 | C / UX | READY (RED) | each needs its own owner decision |
+| 27 | Font preload, login form in server HTML, real-visitor speed sample | S / A | READY, not measured | #3308, #3294, #3296, #3300 |
+| 28 | Shared UI primitives rollout (G and H refactors) | G / H | READY | #3273 and dependants |
+| 29 | Flaky forecast test | — | READY | #3313 `ca8c854` (unblocks `quality` on #3297) |
+| 30 | Imported history attribution per legal employer; #2362 dates | owner | BLOCKED | owner list per employer |
+| 31 | Inner-page goal bar; seven visual defects; 40-person test; activity measurement | A / A2 | NOT STARTED | post-launch by owner decision |
+
+### Not tested on the current build
+
+- Signed-in journeys on `59b1c759` (last full signed-in walks were on `1ab03ffb`: profile-cv 28/0, company-chain 17/0, journal-confirm 4/0, brigade-formation 19/0, project-execution 18/0).
+- Any real phone; real-visitor speed.
+- Payments in TEST mode (0 of 4).
+- E-mail delivery of sign-up confirmation in ru/pl/de/nl (one LT/EN template).
