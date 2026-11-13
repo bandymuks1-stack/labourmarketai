@@ -88,7 +88,7 @@ const CLASSIFICATION: Record<
   },
   "cron/invitation-delivery-retry/route.ts": {
     class: "public",
-    why: "Called only by the VPS (ops/vps/lm-invitation-delivery-retry.sh, scheduled solely after the owner installs /etc/cron.d/labourmarket-invitation-delivery); nginx 404s /api/cron/* from the internet. Identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. POST only; health (default) sends nothing; retry re-sends at most 10 partner referrals whose own send was authorised, whose LAST failure was a confirmed temporary one and whose link was never opened, through the service-role-only reissue under the address lock. Answers counts, reason codes and alert codes only, no ids, no addresses.",
+    why: "Called only by the VPS (ops/vps/lm-invitation-delivery-retry.sh, scheduled solely after the owner installs /etc/cron.d/labourmarket-invitation-delivery); nginx 404s /api/cron/* from the internet. Identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. POST only; health (default) sends nothing; retry re-sends at most 10 partner referrals whose own send was authorised, whose LAST failure was a confirmed temporary one and whose link was never opened, through the service-role-only reissue under the address lock; bounces reads delivery reports from the sender mailbox READ-ONLY (IMAP EXAMINE + BODY.PEEK) and marks only our own Message-IDs; notify computes the alerts server-side (never client-supplied) and sends codes and counters to the owner. Answers counts, reason codes and alert codes only, no ids, no addresses.",
   },
   "cron/referral-reprocess/route.ts": {
     class: "public",
