@@ -81,7 +81,7 @@ export async function runInvitationDeliveryRetry(input: {
         due: 0,
         attempted: 0,
         sent: 0,
-        failed: { TEMPORARY: 0, PERMANENT: 0, CONFIGURATION: 0 },
+        failed: { TEMPORARY: 0, PERMANENT: 0, CONFIGURATION: 0, UNKNOWN_OUTCOME: 0 },
         deadLettered: 0,
         refused: {},
         stoppedBy: null,

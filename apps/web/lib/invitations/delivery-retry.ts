@@ -22,9 +22,15 @@ import { MAX_DELIVERY_ATTEMPTS } from "@/lib/email/delivery-failure";
  *   - a recipient who already OPENED the link is never retried: a retry
  *     rotates the token and would break the link they hold.
  *
- * Circuit breaker: a CONFIGURATION failure, or two consecutive TEMPORARY
- * failures, ends the run at once — a provider outage must not burn every
- * row's attempts in one pass. The next scheduled run tries again.
+ * Circuit breaker — ISOLATED to this partner-referral retry run (owner correction 2026-11-13
+ * item 5). It is per-run state only: nothing is persisted, no global flag is set, and no other
+ * sender reads it. LabourMarket.ai / Nonstop Group first-contact campaigns, the intake path,
+ * the inviter's own sends and the manual reprocess are never paused by it. A CONFIGURATION
+ * failure, an UNKNOWN_OUTCOME, or two consecutive TEMPORARY failures end THIS run; the next
+ * scheduled run evaluates afresh.
+ *
+ * UNKNOWN_OUTCOME (owner correction item 3): a retry whose result is unclear is recorded as such
+ * and never retried — it waits for reconciliation (a bounce for its Message-ID, or the owner).
  *
  * Pure apart from the injected dependencies.
  */
@@ -66,7 +72,12 @@ export type RetryReport = {
   readonly deadLettered: number;
   readonly refused: Readonly<Record<string, number>>;
   /** Why the run ended before its batch was done, if it did. */
-  readonly stoppedBy: "configuration_failure" | "consecutive_temporary_failures" | "mark_failed" | null;
+  readonly stoppedBy:
+    | "configuration_failure"
+    | "unknown_outcome"
+    | "consecutive_temporary_failures"
+    | "mark_failed"
+    | null;
 };
 
 export async function retryDueDeliveries(
@@ -74,7 +85,12 @@ export async function retryDueDeliveries(
   deps: RetryDeps,
   options: { readonly limit?: number } = {},
 ): Promise<RetryReport> {
-  const failed: Record<DeliveryFailureClass, number> = { TEMPORARY: 0, PERMANENT: 0, CONFIGURATION: 0 };
+  const failed: Record<DeliveryFailureClass, number> = {
+    TEMPORARY: 0,
+    PERMANENT: 0,
+    CONFIGURATION: 0,
+    UNKNOWN_OUTCOME: 0,
+  };
   const refused: Record<string, number> = {};
   const limit = Math.max(0, Math.min(options.limit ?? MAX_RETRIES_PER_RUN, MAX_RETRIES_PER_RUN));
   // One row per address, whatever the candidate read returned.
@@ -125,6 +141,7 @@ export async function retryDueDeliveries(
     try {
       result = await deps.send(row.invitedEmail.trim(), locale, deps.buildLink(locale, token));
     } catch {
+      // The send threw: it may have left. No diagnostics → classified UNKNOWN_OUTCOME.
       result = { status: "failed", reason: "transport_error" };
     }
     const ok = result.status === "sent";
@@ -143,10 +160,14 @@ export async function retryDueDeliveries(
       consecutiveTemporary = 0;
       continue;
     }
-    const cls: DeliveryFailureClass = failureClass ?? "TEMPORARY";
+    const cls: DeliveryFailureClass = failureClass ?? "UNKNOWN_OUTCOME";
     failed[cls] += 1;
     if (cls === "CONFIGURATION") {
       stoppedBy = "configuration_failure";
+      break;
+    }
+    if (cls === "UNKNOWN_OUTCOME") {
+      stoppedBy = "unknown_outcome";
       break;
     }
     if (cls === "TEMPORARY") {
@@ -163,16 +184,21 @@ export async function retryDueDeliveries(
 }
 
 export type DeliveryHealth = {
+  readonly window_hours?: number;
   readonly attempts: number;
   readonly sent: number;
   readonly failed_temporary: number;
   readonly failed_permanent: number;
   readonly failed_configuration: number;
+  readonly failed_unknown_outcome: number;
   readonly failed_last_hour: number;
   readonly retry_due: number;
   readonly retry_scheduled: number;
   readonly dead_letter: number;
-  readonly failed_unclassified: number;
+  /** Pending rows whose failure may or may not have left (incl. unclassified old failures). */
+  readonly unknown_outcome_open: number;
+  /** Bounces recorded in the window. */
+  readonly bounced: number;
   readonly stuck_reservations: number;
   readonly reasons: Readonly<Record<string, number>>;
 };
@@ -182,7 +208,8 @@ export type DeliveryAlert =
   | "configuration_failure"
   | "dead_letter_present"
   | "stuck_reservation"
-  | "unclassified_failures"
+  | "unknown_outcome_open"
+  | "bounced"
   | "low_success_rate";
 
 /** Alert threshold: this many failed attempts within one hour. */
@@ -195,7 +222,8 @@ export function deliveryAlerts(h: DeliveryHealth): DeliveryAlert[] {
   if (h.failed_configuration > 0) out.push("configuration_failure");
   if (h.dead_letter > 0) out.push("dead_letter_present");
   if (h.stuck_reservations > 0) out.push("stuck_reservation");
-  if (h.failed_unclassified > 0) out.push("unclassified_failures");
+  if (h.unknown_outcome_open > 0) out.push("unknown_outcome_open");
+  if (h.bounced > 0) out.push("bounced");
   if (h.attempts >= 5 && h.sent / h.attempts < 0.9) out.push("low_success_rate");
   return out;
 }

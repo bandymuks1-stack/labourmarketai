@@ -47,10 +47,19 @@ export async function runExternalReferralReprocess(input: {
   // v2 adds `address_already_sent`: an older duplicate row of an address that
   // was already mailed must never be mailed again. v3 (20261028070000) adds the
   // send reservation; before it is applied the runner reads v2 as before.
-  let { data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v3");
+  // v4 (20261113190000) adds first_opened_at and the last failure class. Without them a
+  // reissue could break a link the person already opened, or re-mail an unknown outcome, so
+  // only the dry run (counts) and the reservation recovery (sends nothing) run on v3 / v2.
+  let { data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v4");
+  let hasV4 = !error;
   if (error && (error.code === "42883" || error.code === "PGRST202")) {
-    if (input.mode === "resolve_reservations") return { kind: "needs_migration" };
-    ({ data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v2"));
+    if (input.mode === "control" || input.mode === "batch") return { kind: "needs_migration" };
+    hasV4 = false;
+    ({ data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v3"));
+    if (error && (error.code === "42883" || error.code === "PGRST202")) {
+      if (input.mode === "resolve_reservations") return { kind: "needs_migration" };
+      ({ data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v2"));
+    }
   }
   if (error) {
     return error.code === "42883" || error.code === "PGRST202"
@@ -68,6 +77,8 @@ export async function runExternalReferralReprocess(input: {
     deliveryStatus: String(r.delivery_status),
     consentGiven: r.consent_given === true,
     externalSource: (r.external_source_slug as string | null) ?? null,
+    firstOpenedAt: hasV4 ? ((r.first_opened_at as string | null) ?? null) : null,
+    failureClass: hasV4 ? ((r.delivery_failure_class as string | null) ?? null) : null,
   }));
   const existingAccountEmails = new Set(
     raw

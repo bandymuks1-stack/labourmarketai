@@ -85,7 +85,11 @@ describe("partner intake — a failed send keeps its reason (owner P0 2026-11-13
   it("a TEMPORARY failure is marked delivery_failed, its reason stored and a bounded retry scheduled", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     db({ data: "ok" });
-    send.mockResolvedValueOnce({ status: "failed", reason: "timeout" } as never);
+    send.mockResolvedValueOnce({
+      status: "failed",
+      reason: "timeout",
+      detail: { provider: "smtp", step: "rcpt_to", messageTransmitted: false },
+    } as never);
     const r = await receiveExternalReferral(input);
     expect(r).toMatchObject({ outcome: "created", delivery: "delivery_failed" });
     expect(rpc).toHaveBeenCalledWith("mark_external_referral_delivery_v1", { p_invitation_id: "inv-2", p_outcome: "delivery_failed" });
@@ -112,5 +116,42 @@ describe("partner intake — a failed send keeps its reason (owner P0 2026-11-13
       "record_invitation_delivery_attempt_v1",
       expect.objectContaining({ p_failure_class: "PERMANENT", p_next_retry_at: null }),
     );
+  });
+});
+
+describe("partner intake — an unclear SMTP result is never retried (owner correction item 3)", () => {
+  beforeEach(() => {
+    rpc.mockReset();
+    send.mockClear();
+  });
+
+  it("a connection lost after the body was handed over → UNKNOWN_OUTCOME, no retry scheduled", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    db({ data: "ok" });
+    send.mockResolvedValueOnce({
+      status: "failed",
+      reason: "connection_closed",
+      detail: { provider: "smtp", step: "data_end", messageTransmitted: true, messageId: "<a1b2c3@labourmarket.ai>" },
+    } as never);
+    const r = await receiveExternalReferral(input);
+    expect(r).toMatchObject({ delivery: "delivery_failed" });
+    expect(rpc).toHaveBeenCalledWith(
+      "record_invitation_delivery_attempt_v1",
+      expect.objectContaining({
+        p_failure_class: "UNKNOWN_OUTCOME",
+        p_next_retry_at: null,
+        p_detail: expect.objectContaining({ step: "data_end", message_transmitted: true, message_id: "<a1b2c3@labourmarket.ai>" }),
+      }),
+    );
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it("the invite link handed to the partner is the one minted at intake — a failed mail does not rotate it", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    db({ data: "ok" });
+    send.mockResolvedValueOnce({ status: "failed", reason: "timeout" } as never);
+    const r = await receiveExternalReferral(input);
+    expect(r).toMatchObject({ outcome: "created", inviteUrl: expect.stringMatching(/^https:\/\/labourmarket\.ai\/en\/invite\//) });
+    expect(rpc).not.toHaveBeenCalledWith("reissue_external_referral_v1", expect.anything());
   });
 });

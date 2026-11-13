@@ -59,7 +59,7 @@ function deps(db: ReturnType<typeof fakeDb>, results: TransactionalSendResult[])
     mark: (id, o) => db.mark(id, o),
     record: async (id, result, attempts) => {
       db.records.push({ id, result, attempts });
-      return result.status === "failed" ? classifyDeliveryFailure(result.reason).failureClass : null;
+      return result.status === "failed" ? classifyDeliveryFailure(result.reason, result.detail).failureClass : null;
     },
     deadLetter: async (id, reason) => {
       db.deadLetters.push({ id, reason });
@@ -69,6 +69,19 @@ function deps(db: ReturnType<typeof fakeDb>, results: TransactionalSendResult[])
 }
 
 const cand = (id: string, email: string, attempts = 1): RetryCandidate => ({ id, invitedEmail: email, locale: "en", attempts });
+
+/** A CONFIRMED temporary failure: the connection broke before the message body was handed over. */
+const tmp = (reason: string): TransactionalSendResult => ({
+  status: "failed",
+  reason,
+  detail: { provider: "smtp", step: "rcpt_to", messageTransmitted: false },
+});
+/** An UNCLEAR result: the connection broke after the body was handed over. */
+const unknown = (reason: string): TransactionalSendResult => ({
+  status: "failed",
+  reason,
+  detail: { provider: "smtp", step: "data_end", messageTransmitted: true },
+});
 
 describe("retryDueDeliveries — temporary failures are retried", () => {
   it("a due TEMPORARY failure is mailed again and recorded as the next attempt", async () => {
@@ -82,9 +95,9 @@ describe("retryDueDeliveries — temporary failures are retried", () => {
 
   it("a retry that fails again is recorded with its reason (the next backoff is the recorder's job)", async () => {
     const db = fakeDb([{ id: "a", email: "a@example.test" }]);
-    const report = await retryDueDeliveries([cand("a", "a@example.test")], deps(db, [{ status: "failed", reason: "timeout" }]));
-    expect(report.failed).toEqual({ TEMPORARY: 1, PERMANENT: 0, CONFIGURATION: 0 });
-    expect(db.records[0]).toMatchObject({ attempts: 2, result: { status: "failed", reason: "timeout" } });
+    const report = await retryDueDeliveries([cand("a", "a@example.test")], deps(db, [tmp("timeout")]));
+    expect(report.failed).toEqual({ TEMPORARY: 1, PERMANENT: 0, CONFIGURATION: 0, UNKNOWN_OUTCOME: 0 });
+    expect(db.records[0]).toMatchObject({ attempts: 2, result: tmp("timeout") });
     expect(db.state.get("a")).toMatchObject({ status: "delivery_failed", reserved: false });
   });
 });
@@ -122,8 +135,8 @@ describe("retryDueDeliveries — permanent and configuration failures stop", () 
     const report = await retryDueDeliveries(
       [cand("a", "a@example.test"), cand("b", "b@example.test"), cand("c", "c@example.test")],
       deps(db, [
-        { status: "failed", reason: "timeout" },
-        { status: "failed", reason: "connection_closed" },
+        tmp("timeout"),
+        tmp("connection_closed"),
       ]),
     );
     expect(report.stoppedBy).toBe("consecutive_temporary_failures");
@@ -152,7 +165,7 @@ describe("retryDueDeliveries — repeated failures end in the dead letter", () =
     const db = fakeDb([{ id: "a", email: "a@example.test" }]);
     let attempts = 1; // the intake send failed
     for (let run = 0; run < 6; run += 1) {
-      await retryDueDeliveries([cand("a", "a@example.test", attempts)], deps(db, [{ status: "failed", reason: "timeout" }]));
+      await retryDueDeliveries([cand("a", "a@example.test", attempts)], deps(db, [tmp("timeout")]));
       attempts = Math.min(attempts + 1, MAX_DELIVERY_ATTEMPTS);
     }
     expect(db.mails).toHaveLength(MAX_DELIVERY_ATTEMPTS - 1);
@@ -215,11 +228,13 @@ describe("deliveryAlerts", () => {
     failed_temporary: 0,
     failed_permanent: 0,
     failed_configuration: 0,
+    failed_unknown_outcome: 0,
     failed_last_hour: 0,
     retry_due: 0,
     retry_scheduled: 0,
     dead_letter: 0,
-    failed_unclassified: 0,
+    unknown_outcome_open: 0,
+    bounced: 0,
     stuck_reservations: 0,
     reasons: {},
   };
@@ -235,15 +250,100 @@ describe("deliveryAlerts", () => {
         failed_configuration: 1,
         dead_letter: 1,
         stuck_reservations: 1,
-        failed_unclassified: 1,
+        unknown_outcome_open: 1,
+        bounced: 1,
       }),
     ).toEqual([
       "repeated_failures",
       "configuration_failure",
       "dead_letter_present",
       "stuck_reservation",
-      "unclassified_failures",
+      "unknown_outcome_open",
+      "bounced",
       "low_success_rate",
     ]);
+  });
+});
+
+describe("retryDueDeliveries — UNKNOWN_OUTCOME is reconciled, never retried (owner item 3)", () => {
+  it("a retry whose connection broke after the body was handed over is recorded UNKNOWN and ends the run", async () => {
+    const db = fakeDb([
+      { id: "a", email: "a@example.test" },
+      { id: "b", email: "b@example.test" },
+    ]);
+    const report = await retryDueDeliveries(
+      [cand("a", "a@example.test"), cand("b", "b@example.test")],
+      deps(db, [unknown("connection_closed")]),
+    );
+    expect(report.failed.UNKNOWN_OUTCOME).toBe(1);
+    expect(report.stoppedBy).toBe("unknown_outcome");
+    expect(db.mails).toEqual(["a@example.test"]);
+  });
+
+  it("a send that THROWS is treated as unknown (it may have left), not as temporary", async () => {
+    const db = fakeDb([{ id: "a", email: "a@example.test" }]);
+    const d = deps(db, []);
+    const report = await retryDueDeliveries([cand("a", "a@example.test")], {
+      ...d,
+      send: async () => {
+        throw new Error("socket hang up");
+      },
+    });
+    expect(report.failed.UNKNOWN_OUTCOME).toBe(1);
+    expect(report.stoppedBy).toBe("unknown_outcome");
+  });
+});
+
+describe("retryDueDeliveries — re-running is safe (owner item 8)", () => {
+  it("a second run over a stale list after a successful retry mails nobody again", async () => {
+    const db = fakeDb([{ id: "a", email: "a@example.test" }]);
+    await retryDueDeliveries([cand("a", "a@example.test")], deps(db, [{ status: "sent" }]));
+    const again = await retryDueDeliveries([cand("a", "a@example.test", 2)], deps(db, [{ status: "sent" }]));
+    expect(again.refused).toEqual({ already_sent: 1 });
+    expect(db.mails).toEqual(["a@example.test"]);
+  });
+
+  it("five concurrent runs over the same row mail it exactly once", async () => {
+    const db = fakeDb([{ id: "a", email: "a@example.test" }]);
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    const runs = Array.from({ length: 5 }, () => {
+      const d = deps(db, [{ status: "sent" }]);
+      return retryDueDeliveries([cand("a", "a@example.test")], {
+        ...d,
+        send: async (...args) => {
+          await gate;
+          return d.send(...args);
+        },
+      });
+    });
+    release();
+    const reports = await Promise.all(runs);
+    expect(reports.reduce((n, r) => n + r.sent, 0)).toBe(1);
+    expect(db.mails).toEqual(["a@example.test"]);
+  });
+});
+
+describe("circuit breaker is isolated to the partner-referral retry run (owner item 5)", () => {
+  it("is per-run state: a run stopped by the breaker does not stop the next run", async () => {
+    const db = fakeDb([
+      { id: "a", email: "a@example.test" },
+      { id: "b", email: "b@example.test" },
+      { id: "c", email: "c@example.test" },
+    ]);
+    const first = await retryDueDeliveries(
+      [cand("a", "a@example.test"), cand("b", "b@example.test"), cand("c", "c@example.test")],
+      deps(db, [tmp("timeout"), tmp("timeout")]),
+    );
+    expect(first.stoppedBy).toBe("consecutive_temporary_failures");
+    const second = await retryDueDeliveries([cand("c", "c@example.test")], deps(db, [{ status: "sent" }]));
+    expect(second.sent).toBe(1);
+  });
+
+  it("the module exports no global pause, flag or shared state other senders could read", async () => {
+    const mod = await import("@/lib/invitations/delivery-retry");
+    expect(Object.keys(mod).sort()).toEqual(
+      ["MAX_RETRIES_PER_RUN", "REPEATED_FAILURES_PER_HOUR", "deliveryAlerts", "retryDueDeliveries"].sort(),
+    );
   });
 });
