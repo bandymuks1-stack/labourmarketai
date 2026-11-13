@@ -54,6 +54,8 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   { id: "for-workers", urlPattern: "/for-workers", sourceFile: "app/[locale]/(marketing)/for-workers/page.tsx", requiresAuth: false, kind: "public" },
   { id: "for-companies", urlPattern: "/for-companies", sourceFile: "app/[locale]/(marketing)/for-companies/page.tsx", requiresAuth: false, kind: "public" },
   { id: "for-agencies", urlPattern: "/for-agencies", sourceFile: "app/[locale]/(marketing)/for-agencies/page.tsx", requiresAuth: false, kind: "public" },
+  { id: "for-education", urlPattern: "/for-education", sourceFile: "app/[locale]/(marketing)/for-education/page.tsx", requiresAuth: false, kind: "public" },
+  { id: "for-service-providers", urlPattern: "/for-service-providers", sourceFile: "app/[locale]/(marketing)/for-service-providers/page.tsx", requiresAuth: false, kind: "public" },
   { id: "pricing", urlPattern: "/pricing", sourceFile: "app/[locale]/(marketing)/pricing/page.tsx", requiresAuth: false, kind: "public" },
   { id: "vision", urlPattern: "/vision", sourceFile: "app/[locale]/(marketing)/vision/page.tsx", requiresAuth: false, kind: "public" },
 

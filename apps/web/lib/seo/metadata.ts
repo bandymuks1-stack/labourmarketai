@@ -145,6 +145,8 @@ export type PageKey =
   | "workers"
   | "companies"
   | "agencies"
+  | "education"
+  | "serviceProviders"
   | "workAbroad"
   | "companyNeed"
   | "workerIntake"
