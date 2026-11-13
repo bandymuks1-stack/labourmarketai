@@ -147,16 +147,28 @@ test("H-1. a company holds recorded work for somebody who no longer works there"
   s.personId = sql<{ id: string }>(
     `select id from public.organization_people where organization_id = ${lit(s.orgId)} and display_name = ${lit(ROSTER_NAME)}`,
   )[0]!.id;
+  // One import session and two records with every column the live table
+  // requires (source, language, supplier capacity, fingerprint, hash). The
+  // values are synthetic; the shape is the real one.
+  const sessionId = sql<{ id: string }>(`select gen_random_uuid()::text as id`)[0]!.id;
   sqlExec(
-    `insert into public.organization_evidence_records
-       (organization_id, organization_person_id, evidence_state, supplied_by_organization_id, imported_by_profile_id, hours, period_start, period_end)
-     values (${lit(s.orgId)}, ${lit(s.personId)}, 'ORGANIZATION_REPORTED', ${lit(s.orgId)}, ${lit(s.mgrId)}, 1680, '2019-03-01', '2021-06-30')`,
+    `insert into public.evidence_import_sessions
+       (id, organization_id, source_kind, source_fingerprint, source_language, supplied_by_organization_id, supplier_role, created_by)
+     values (${lit(sessionId)}, ${lit(s.orgId)}, 'manual', ${lit(`qa-synthetic-session-${RUN}-0000`)}, 'en', ${lit(s.orgId)}, 'employer', ${lit(s.mgrId)})`,
   );
-  sqlExec(
-    `insert into public.organization_evidence_records
-       (organization_id, organization_person_id, evidence_state, supplied_by_organization_id, imported_by_profile_id, hours, activity_date)
-     values (${lit(s.orgId)}, ${lit(s.personId)}, 'ORGANIZATION_REPORTED', ${lit(s.orgId)}, ${lit(s.mgrId)}, 8, '2020-05-14')`,
-  );
+  const record = (when: string, hours: number, n: number) =>
+    sqlExec(
+      `insert into public.organization_evidence_records
+         (organization_id, organization_person_id, original_text, original_language, evidence_state,
+          supplied_by_organization_id, supplier_role, imported_by_profile_id, session_id, source_kind,
+          source_fact, record_fingerprint, hash_self, hours, ${when.includes("..") ? "period_start, period_end" : "activity_date"})
+       values (${lit(s.orgId)}, ${lit(s.personId)}, ${lit(`QA-SYNTHETIC recorded work ${n}`)}, 'en', 'ORGANIZATION_REPORTED',
+          ${lit(s.orgId)}, 'employer', ${lit(s.mgrId)}, ${lit(sessionId)}, 'manual',
+          '{"qa":"synthetic"}'::jsonb, ${lit(`qa-synthetic-record-${RUN}-${n}-0000`)}, ${lit(`qa-synthetic-hash-${RUN}-${n}`)}, ${hours},
+          ${when.includes("..") ? when.split("..").map((d) => lit(d)).join(", ") : lit(when)})`,
+    );
+  record("2019-03-01..2021-06-30", 1680, 1);
+  record("2020-05-14", 8, 2);
   FP0 = fingerprint();
   expect(FP0.startsWith("2|"), `two records: ${FP0}`).toBe(true);
 
