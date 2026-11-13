@@ -550,7 +550,7 @@ export function OnboardingWizard({
 
   if (step === 1) {
     return (
-      <div className="flex flex-col gap-6 pb-24 sm:pb-0">
+      <div className="flex flex-col gap-6 pb-32 sm:pb-0">
         <header className="flex flex-col gap-3">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("rolePicker.intentHeading")}
@@ -700,6 +700,15 @@ export function OnboardingWizard({
           {error && (
             <p className="text-xs text-state-danger" role="alert">
               {error}
+            </p>
+          )}
+          {/* The disabled button explains itself: until something is chosen
+              the bar says what to do first (the sentence the step already
+              used when a person got here without a choice). It goes away
+              with the first pick, when the button becomes active. */}
+          {!error && intents.size === 0 && (
+            <p className="text-xs leading-relaxed text-text-muted" data-testid="onboarding-continue-hint">
+              {t("error_role_required")}
             </p>
           )}
           <Button

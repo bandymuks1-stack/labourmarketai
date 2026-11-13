@@ -380,8 +380,13 @@ for (const phone of [
           }),
         );
         const before = await box("onboarding-intents-continue");
+        // The role step says what to do while nothing is chosen, and stops saying it after the first pick.
+        await expect(page.getByTestId("onboarding-continue-hint"), `${locale}: the bar says to choose first`).toBeVisible();
+        await expect(page.getByTestId("onboarding-intents-continue")).toBeDisabled();
         await page.getByTestId("onboarding-intent-work").tap();
         await expect(page.getByTestId("onboarding-intent-work")).toHaveAttribute("aria-pressed", "true");
+        await expect(page.getByTestId("onboarding-continue-hint"), `${locale}: the hint goes with the first pick`).toHaveCount(0);
+        await expect(page.getByTestId("onboarding-intents-continue")).toBeEnabled();
         const after = await box("onboarding-intents-continue");
         const scrollAfterPick = await page.evaluate(() => Math.round(window.scrollY));
         console.info(
