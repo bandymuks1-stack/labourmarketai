@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { inviteCapGate } from "./invite-cap";
 import { chooseWorkContextIfAsked } from "./worklog-context";
 import { bearerOf, qaApi } from "./prod-qa-api";
+import { closeOwnNeed, findOwnNeed } from "./prod-need-close";
 import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
 
 /**
@@ -572,4 +573,36 @@ test("B2B-10. the buyer ends this run's team assignment (history kept), so the n
   await row.getByTestId("project-team-end").click();
   await expect(page.getByTestId("project-team-row").filter({ hasText: TEAM })).toHaveCount(0, { timeout: 30_000 });
   await ctx.close();
+});
+
+/**
+ * THE WALK CLOSES ITS OWN NEED. B2B-1 posts "QA-SYNTHETIC murininkai <run>"
+ * for the synthetic buyer and nothing above ever closed it: it stayed
+ * submitted until another walk's leftover sweep happened to reach it (run
+ * 43369620376), and on the buyer's one-open-need plan it refused the next
+ * walk's need in the meantime. Whatever step the walk reached, the buyer now
+ * closes this run's need through the product's own control, and the walk
+ * fails if the need is not closed afterwards. The brigade itself stays: the
+ * next run's step 0 disbands it, as designed.
+ */
+test.afterAll(async ({ browser }) => {
+  if (!ENABLED) return;
+  test.setTimeout(180_000);
+  const { ctx, page } = await as(browser, "manager");
+  try {
+    await useWorkspace(page, GAMA, "/lt/dashboard/company/scouting");
+    // B2B-2 learns the id; a walk that stopped before it looks the need up on
+    // the buyer's own list by its run-unique title, then by the run id alone
+    // (the list may show the normalised trade instead of the typed title).
+    const id = needId || (await findOwnNeed(page, NEED_ROLE)) || (await findOwnNeed(page, RUN));
+    if (!id) {
+      console.info("[b2b] need cleanup: no need of this run is on the buyer's list (none posted, or B2B-1 met the open-need limit)");
+      return;
+    }
+    console.info(`[b2b] need cleanup: ${await closeOwnNeed(page, id)}`);
+    // Read again from a fresh page load: the need really is closed, not only its button pressed.
+    expect(await closeOwnNeed(page, id), "this run's need is closed").toBe("already-closed");
+  } finally {
+    await ctx.close();
+  }
 });

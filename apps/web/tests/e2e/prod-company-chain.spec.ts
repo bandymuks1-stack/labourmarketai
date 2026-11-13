@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
+import { closeOwnNeed, requestIdOf } from "./prod-need-close";
 
 /**
  * PRODUCTION COMPANY CHAIN — the three company-path steps the Product Master
@@ -95,9 +96,6 @@ test("C-0. the worker's own worker id (own row, own token)", async () => {
   workerId = rows[0].id;
 });
 
-function requestIdOf(href: string | null): string {
-  return /request=([0-9a-f-]{36})/.exec(href ?? "")?.[1] ?? "";
-}
 
 /**
  * Post a need through Gama's demand intake (Gama is the active workspace) and
@@ -161,32 +159,9 @@ async function postNeed(page: Page, role: string, description: string, marker: s
 
 /** Close one need through its own lifecycle controls (Gama is the active workspace). */
 async function closeNeed(page: Page, id: string): Promise<"closed" | "already-closed"> {
-  await page.goto(`/lt/dashboard/company/scouting?request=${id}`);
-  const controls = inMain(page).getByTestId("demand-lifecycle-controls").first();
-  const unstructured = inMain(page).getByTestId("scouting-not-structured").first();
-  await expect(controls.or(unstructured).first()).toBeVisible({ timeout: 30_000 });
-  if (await controls.isVisible()) {
-    if ((await controls.getAttribute("data-demand-status")) === "closed") return "already-closed";
-    await controls.getByTestId("demand-close").click();
-    await expect(controls).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
-    closedHere.add(id);
-    return "closed";
-  }
-  // A need that names no trade: the scouting page draws its lifecycle controls
-  // only for a structured need, so it is closed where the product offers that
-  // for every submitted need — the chat workspace's candidates result
-  // (`?result=candidates&demand=`, `company.close-demand`).
-  await page.goto(`/lt/dashboard?result=candidates&demand=${id}`);
-  const close = inMain(page).getByTestId("candidates-close-demand").filter({ visible: true }).first();
-  const reopen = inMain(page).getByTestId("candidates-reopen-demand").filter({ visible: true }).first();
-  await expect(close.or(reopen).first(), "the need's own close/reopen action").toBeVisible({ timeout: 60_000 });
-  if (await reopen.isVisible()) return "already-closed";
-  await close.click();
-  const error = inMain(page).getByTestId("candidates-close-demand-error").first();
-  await expect(reopen.or(error).first()).toBeVisible({ timeout: 30_000 });
-  if (await error.isVisible()) throw new Error(`close refused: ${(await error.innerText()).slice(0, 120)}`);
-  closedHere.add(id);
-  return "closed";
+  const outcome = await closeOwnNeed(page, id);
+  if (outcome === "closed") closedHere.add(id);
+  return outcome;
 }
 
 /** Needs this run already closed — afterAll never revisits them. */
