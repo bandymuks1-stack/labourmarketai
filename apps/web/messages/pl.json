@@ -14534,6 +14534,13 @@
           "this_week": "w tym tygodniu",
           "next_month": "w przyszłym miesiącu"
         },
+        "ask": {
+          "location": "Gdzie (miasto lub kraj)?",
+          "window": "Kiedy — który tydzień lub miesiąc?",
+          "quantity": "Ile to wynosi?",
+          "headcount": "Ile osób jest potrzebnych?",
+          "team_size": "Ile brygad i ile osób w każdej?"
+        },
         "unclear": "Nie jestem pewien, czy coś oferujesz, czy czegoś szukasz. Powiedz, co masz, albo czego potrzebujesz.",
         "goodsChannelGated": "Możesz wystawić to na tablicy ogłoszeń w dziale „Towary” — zobaczą to osoby przeglądające tablicę. Nic nie jest zapisywane, dopóki sam/a nie opublikujesz.",
         "chipListings": "Otwórz ogłoszenia",
@@ -20663,10 +20670,6 @@
     }
   },
   "siteNav": {
-    "ask": {
-      "placeholder": "Napisz, czego potrzebujesz",
-      "submit": "Zapytaj"
-    },
     "signUp": "Zarejestruj się",
     "trigger": "Główne wybory",
     "account": "Po zalogowaniu",

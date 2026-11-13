@@ -130,6 +130,18 @@ describe("the URL is the state — a fragment, not a page", () => {
     expect(navigator).toMatch(/addEventListener\("popstate", onChange\)/);
   });
 
+  it("a goal chosen while the page is starting is kept", () => {
+    // The fragment the person last asked for is put back if the router drops
+    // it silently — only during start-up, and never after a Close or Back.
+    expect(navigator).toMatch(/const \[bootFragment\] = useState\(\(\) =>/);
+    expect(navigator).toMatch(/askedFragment = goalIdFromFragment\(now\) \? now : "";/);
+    expect(navigator).toMatch(/const wanted = askedFragment \?\? \(goalIdFromFragment\(bootFragment\) \? bootFragment : ""\);/);
+    expect(navigator).toMatch(/if \(!wanted \|\| window\.location\.hash !== ""\) return;/);
+    // One-off checks during start-up only — no repeating timer.
+    expect(navigator).toMatch(/STARTUP_CHECKS_MS\.map\(\(ms\) => window\.setTimeout\(restore, ms\)\)/);
+    expect(navigator).toMatch(/STARTUP_CHECKS_MS = \[[^\]]*5000\] as const/);
+  });
+
   it("goal cards are real links to that fragment; only known goals open a panel", () => {
     expect(server).toMatch(/href: goalHref\(intent\.id\)/);
     for (const id of PUBLIC_INTENT_IDS) {

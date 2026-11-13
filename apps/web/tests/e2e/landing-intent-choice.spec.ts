@@ -293,6 +293,44 @@ test("an unknown goal in the address opens nothing", async ({ page }) => {
   await expect(page.getByTestId("goal-panel")).toHaveCount(0);
 });
 
+test("a goal chosen before the page finished starting still opens", async ({ page }) => {
+  // The goal cards are real links: a tap before the scripts attach sets the
+  // fragment natively, and the router then rewrites the address without it.
+  // The choice must survive that.
+  await page.goto("/en");
+  await page.getByTestId("goal-rail").waitFor();
+  await page.goto("/en#goal=workers"); // at once: the page is still starting
+  const panel = page.getByTestId("goal-panel");
+  await expect(panel).toBeVisible();
+  await expect(panel).toHaveAttribute("data-goal", "workers");
+  await expect(page).toHaveURL(/\/en#goal=workers$/, { timeout: 10_000 });
+  // …and it does not come back after the person closes it.
+  await page.getByTestId("goal-panel-close").click();
+  await expect(panel).toHaveCount(0);
+  await page.waitForTimeout(3000);
+  await expect(panel).toHaveCount(0);
+  await expect(page).toHaveURL(/\/en$/);
+});
+
+test.describe("coming back to the landing", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+  test("a goal left open is not reopened after visiting another page", async ({ page }) => {
+    await page.goto("/en");
+    await page.getByTestId("goal-rail").locator('[data-card-id="workers"]').click();
+    await expect(page.getByTestId("goal-panel")).toBeVisible();
+    // An in-app link away (More → Pricing), then the logo back home.
+    await page.getByTestId("intent-toggle-more").click();
+    await page.getByTestId("intent-more-links").getByRole("link", { name: "Pricing" }).click();
+    await expect(page).toHaveURL(/\/en\/pricing$/);
+    await page.locator("header a").first().click();
+    await expect(page).toHaveURL(/\/en$/);
+    await expect(page.getByTestId("goal-rail")).toBeVisible();
+    await page.waitForTimeout(1500);
+    await expect(page.getByTestId("goal-panel")).toHaveCount(0);
+    await expect(page).toHaveURL(/\/en$/);
+  });
+});
+
 // Evidence only: the same screens in the dark theme at every checked width,
 // and the phone menu.
 for (const vp of [

@@ -14534,6 +14534,13 @@
           "this_week": "šią savaitę",
           "next_month": "kitą mėnesį"
         },
+        "ask": {
+          "location": "Kur (miestas ar šalis)?",
+          "window": "Kada — kurią savaitę ar mėnesį?",
+          "quantity": "Koks kiekis?",
+          "headcount": "Kiek žmonių reikia?",
+          "team_size": "Kiek brigadų ir kiek žmonių kiekvienoje?"
+        },
         "unclear": "Nesu tikras, ar kažką siūlai, ar ko nors ieškai. Parašyk, ką turi arba ko reikia.",
         "goodsChannelGated": "Tai gali paskelbti skelbimų lentoje, skiltyje „Prekės“ — ten matytų lentą naršantys žmonės. Niekas neišsaugoma, kol pats nepaskelbi.",
         "chipListings": "Atidaryti skelbimus",
@@ -20663,10 +20670,6 @@
     }
   },
   "siteNav": {
-    "ask": {
-      "placeholder": "Parašykite, ko jums reikia",
-      "submit": "Klausti"
-    },
     "signUp": "Registruotis",
     "trigger": "Pagrindiniai pasirinkimai",
     "account": "Prisijungus",

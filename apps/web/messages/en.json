@@ -14534,6 +14534,13 @@
           "this_week": "this week",
           "next_month": "next month"
         },
+        "ask": {
+          "location": "Where (city or country)?",
+          "window": "When — which week or month?",
+          "quantity": "How much is it?",
+          "headcount": "How many people are needed?",
+          "team_size": "How many teams, and how many people in each?"
+        },
         "unclear": "I am not sure whether you are offering something or looking for something. Tell me what you have, or what you need.",
         "goodsChannelGated": "You can list this on the marketplace board under Goods — people browsing the board would see it there. Nothing is saved until you publish it.",
         "chipListings": "Open the listings",
@@ -20663,10 +20670,6 @@
     }
   },
   "siteNav": {
-    "ask": {
-      "placeholder": "Say what you need",
-      "submit": "Ask"
-    },
     "signUp": "Sign up",
     "trigger": "Main choices",
     "account": "After sign-in",
