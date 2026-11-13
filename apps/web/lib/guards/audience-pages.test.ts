@@ -41,8 +41,15 @@ function catalog(locale: string): { pages: Record<string, AudiencePage> } {
   return JSON.parse(readFileSync(join(WEB, "messages", `${locale}.json`), "utf8"));
 }
 
+/** The register's own tables start at its first domain section. Earlier
+ *  parts of the file are summaries and triage lists that repeat row ids; a
+ *  stale summary must never answer for the row itself. */
+const REGISTER_TABLES = REGISTER.slice(REGISTER.indexOf("\n## Identity, sign-up & organizations"));
+
 function registerStatus(row: string): string | null {
-  const m = REGISTER.match(new RegExp(`^\\| ${row.replace(".", "\\.")} \\| [^|]+ \\| (\\w+) \\|`, "m"));
+  const m = REGISTER_TABLES.match(
+    new RegExp(`^\\| ${row.replace(".", "\\.")} \\| [^|]+ \\| (\\w+) \\| [^|]* \\| [^|]* \\| [^|]* \\| [^|]* \\|$`, "m"),
+  );
   return m ? m[1] : null;
 }
 
@@ -82,7 +89,7 @@ describe("every audience page gives the five plain answers", () => {
 });
 
 describe("no price, no placeholder", () => {
-  const MONEY = /(\d[\d.,]*\s*(€|eur\b|euro|usd|\$))|((€|\$)\s*\d)/i;
+  const MONEY = /(\d[\d.,]*\s*(€|eur\b|euro\b|usd\b|\$|zł|pln\b|kr\b|sek\b|руб))|((€|\$)\s*\d)/i;
   for (const a of AUDIENCES) {
     for (const locale of CATALOGS) {
       it(`${a.key} / ${locale}: the facts name no price and are translated`, () => {
@@ -129,6 +136,17 @@ const CLAIMS = {
   },
 } as const;
 
+/**
+ * The three older pages: what their facts block names under "not available
+ * yet", and the one function the reworded agency copy now rests on. A row
+ * that becomes verified must leave the "not available yet" answer.
+ */
+const OLDER_PAGES = {
+  workers: { works: [] as string[], notYet: ["2.30", "5.5"] }, // voice journal, message translation
+  companies: { works: [] as string[], notYet: ["5.5", "5.8"] }, // message translation, push
+  agencies: { works: ["4.15"], notYet: ["4.30"] }, // agency ↔ client bridge; commissions, agency-to-agency
+} as const;
+
 describe("each 'you can do this today' card is a verified function", () => {
   for (const [key, claim] of Object.entries(CLAIMS)) {
     it(`${key}: one register mapping per card, in every catalog`, () => {
@@ -145,6 +163,28 @@ describe("each 'you can do this today' card is a verified function", () => {
       }
     });
 
+    for (const row of claim.notYet) {
+      it(`${key}: register ${row} is named 'not available yet' and is indeed not verified`, () => {
+        const status = registerStatus(row);
+        expect(status, `row ${row} not found`).not.toBeNull();
+        expect(status, `row ${row} now works — move it out of 'not available yet'`).not.toBe("LIVE_VERIFIED");
+      });
+    }
+  }
+});
+
+describe("the older pages' facts rest on the register too", () => {
+  it("the register tables were found (the anchor heading still exists)", () => {
+    expect(REGISTER_TABLES.length).toBeGreaterThan(1000);
+    expect(REGISTER_TABLES.length).toBeLessThan(REGISTER.length);
+  });
+
+  for (const [key, claim] of Object.entries(OLDER_PAGES)) {
+    for (const row of claim.works) {
+      it(`${key}: register ${row} is LIVE_VERIFIED`, () => {
+        expect(registerStatus(row)).toBe("LIVE_VERIFIED");
+      });
+    }
     for (const row of claim.notYet) {
       it(`${key}: register ${row} is named 'not available yet' and is indeed not verified`, () => {
         const status = registerStatus(row);

@@ -47,15 +47,15 @@
         },
         {
           "a": "Ett bemanningsföretag är en organisation och använder samma planer: ett eget öppet behov är gratis; fler kräver organisationsplanen som beskrivs på prissidan. Det finns ingen särskild taxa för bemanningsföretag.",
-          "q": "[EN] How much does it cost agencies?"
+          "q": "Vad kostar det för bemanningsföretag?"
         },
         {
           "a": "Varje person bestämmer själv om arbetsgivare kan hitta profilen — det är på eller av och kan ändras när som helst. Synlighetsinställningar per kund är inte tillgängliga än.",
-          "q": "[EN] Can we control worker visibility?"
+          "q": "Kan vi styra arbetstagarnas synlighet?"
         },
         {
           "a": "Ja — du kan föreslå samma person till flera kunders behov. Plattformen förhindrar ännu inte dubbelbokning åt dig, så kontrollera tillgängligheten innan du föreslår någon.",
-          "q": "[EN] Can one worker serve multiple clients?"
+          "q": "Kan en arbetstagare arbeta för flera kunder?"
         }
       ]
     },
@@ -68,7 +68,7 @@
           "title": "[EN] Manage your pool"
         },
         {
-          "desc": "Kunder delar behov med dig; du föreslår kandidater och ser deras beslut.",
+          "desc": "Kunder delar behov med dig; du föreslår kandidater och ser kundens beslut.",
           "title": "Arbeta med kundbehov"
         },
         {
@@ -84,8 +84,8 @@
           "title": "Flera språk"
         },
         {
-          "desc": "Bekräftade arbetsanteckningar bygger upp varje persons historik.",
-          "title": "Bekräftat arbete"
+          "desc": "Anteckningar i Arbetsjournalen bygger upp varje persons historik.",
+          "title": "Arbetshistorik"
         }
       ]
     },
@@ -617,7 +617,7 @@
         },
         {
           "a": "En aktiv position per organisation är gratis; fler positioner kräver organisationsplanen som beskrivs på prissidan. Att skicka in ett personalbehov är gratis.",
-          "q": "[EN] How much does it cost?"
+          "q": "Vad kostar det?"
         },
         {
           "a": "[EN] Yes — by country and region, matched to worker location and willingness to relocate.",
@@ -638,8 +638,8 @@
           "title": "[EN] Explainable fit direction"
         },
         {
-          "desc": "Tillgängliga arbetstagare och kopplade bemanningsföretag för samma behov, sida vid sida.",
-          "title": "Personer och bemanningsföretag på ett ställe"
+          "desc": "Tillgängliga arbetstagare och kandidater som kopplade bemanningsföretag har föreslagit för samma behov, sida vid sida.",
+          "title": "Personer och bemanningsföretagens kandidater på ett ställe"
         },
         {
           "desc": "[EN] You see and own the relationship.",
@@ -1118,7 +1118,7 @@
           },
           {
             "title": "Så börjar du",
-            "body": "Skapa ett konto och bekräfta din e-postadress. Fyll i den korta profilen och lägg sedan upp din organisation — alternativet utbildningsanordnare är redan valt. Öppna sedan utbildningsdelen av arbetsytan och skapa ditt första program."
+            "body": "Skapa ett konto och öppna länken vi skickar till din e-postadress. Fyll i den korta profilen och lägg sedan upp din organisation — alternativet utbildningsanordnare är redan valt. Öppna sedan utbildningsdelen av arbetsytan och skapa ditt första program."
           },
           {
             "title": "Vad som är gratis",
@@ -1152,7 +1152,7 @@
         },
         {
           "title": "En gemensam sökning",
-          "body": "Publicerade erbjudanden och annonser visas i plattformens gemensamma sökning, bredvid personalbehov."
+          "body": "Publicerade erbjudanden och annonser visas i den gemensamma sökning som inloggade medlemmar använder, bredvid personalbehov."
         },
         {
           "title": "Offerter och kontrakt",
@@ -1172,7 +1172,7 @@
           },
           {
             "title": "Så börjar du",
-            "body": "Skapa ett konto och bekräfta din e-postadress. Fyll i den korta profilen, öppna sedan dina tjänsteerbjudanden och skriv ditt första erbjudande."
+            "body": "Skapa ett konto och öppna länken vi skickar till din e-postadress. Fyll i den korta profilen; sedan kommer du till dina tjänsteerbjudanden och kan skriva det första."
           },
           {
             "title": "Vad som är gratis",

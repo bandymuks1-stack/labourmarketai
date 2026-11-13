@@ -5256,8 +5256,8 @@
           "desc": "Kiekvienas atitikimo signalas pateikia priežastis."
         },
         {
-          "title": "Žmonės ir agentūros vienoje vietoje",
-          "desc": "Laisvi darbuotojai ir prisijungusios agentūros tam pačiam poreikiui – greta."
+          "title": "Žmonės ir agentūrų kandidatai vienoje vietoje",
+          "desc": "Laisvi darbuotojai ir prisijungusių agentūrų pasiūlyti kandidatai tam pačiam poreikiui – greta."
         },
         {
           "title": "Be neskaidrių tarpininkų",
@@ -5355,7 +5355,7 @@
         },
         {
           "title": "Dirbk su klientų poreikiais",
-          "desc": "Klientai dalijasi poreikiais su tavimi; tu siūlai kandidatus ir matai jų sprendimą."
+          "desc": "Klientai dalijasi poreikiais su tavimi; tu siūlai kandidatus ir matai kliento sprendimą."
         },
         {
           "title": "Atitikimo kryptis",
@@ -5586,7 +5586,7 @@
           },
           {
             "title": "Kas nemokama",
-            "body": "Profilis, Darbo žurnalas, gyvasis CV ir susidomėjimo darbu pareiškimas yra nemokami."
+            "body": "Profilis, Darbo žurnalas, gyvas CV ir susidomėjimo darbu pareiškimas yra nemokami."
           },
           {
             "title": "Mokamos paslaugos",
@@ -5696,7 +5696,7 @@
       "eyebrow": "Agentūroms",
       "title": "Tavo rezervas —",
       "titleAccent": "judantis.",
-      "subcopy": "Laikyk savo žmones viename sąraše, susisiek su įmonėmis klientėmis ir siūlyk kandidatus jų pasidalintiems poreikiams – viskas vienoje vietoje.",
+      "subcopy": "Laikyk savo žmones viename sąraše, susijunk su įmonėmis klientėmis ir siūlyk kandidatus jų pasidalintiems poreikiams – viskas vienoje vietoje.",
       "benefits": [
         {
           "title": "Valdyk rezervą",
@@ -5817,7 +5817,7 @@
           },
           {
             "title": "Kaip pradėti",
-            "body": "Sukurk paskyrą ir atidaryk el. paštu atsiųstą nuorodą. Užpildyk trumpą profilį, tada sukurk organizaciją – mokymo teikėjo pasirinkimas jau pažymėtas. Atidaryk „Mokymai ir programos“ ir sukurk pirmąją programą."
+            "body": "Sukurk paskyrą ir atidaryk el. paštu atsiųstą nuorodą. Užpildyk trumpą profilį, tada sukurk organizaciją – mokymo teikėjo pasirinkimas jau pažymėtas. Organizacijos darbo erdvėje atidaryk „Mokymai“ ir sukurk pirmąją programą."
           },
           {
             "title": "Kas nemokama",
@@ -5851,7 +5851,7 @@
         },
         {
           "title": "Viena bendra paieška",
-          "body": "Paskelbti pasiūlymai ir skelbimai rodomi bendroje platformos paieškoje, šalia darbo poreikių."
+          "body": "Paskelbti pasiūlymai ir skelbimai rodomi bendroje paieškoje, kuria naudojasi prisijungę nariai, šalia darbo poreikių."
         },
         {
           "title": "Pasiūlymai ir sutartys",
@@ -5871,7 +5871,7 @@
           },
           {
             "title": "Kaip pradėti",
-            "body": "Sukurk paskyrą ir atidaryk el. paštu atsiųstą nuorodą. Užpildyk trumpą profilį, tada atidaryk „Tavo paslaugų pasiūlymai“ ir parašyk pirmąjį pasiūlymą."
+            "body": "Sukurk paskyrą ir atidaryk el. paštu atsiųstą nuorodą. Užpildyk trumpą profilį – po to atsidursi savo paslaugų pasiūlymuose ir galėsi parašyti pirmąjį."
           },
           {
             "title": "Kas nemokama",
@@ -5879,7 +5879,7 @@
           },
           {
             "title": "Mokamos paslaugos",
-            "body": "Paslaugoms siūlyti jokios mokamos paslaugos nereikia ir ji neparduodama. Platforma netvarko mokėjimų tarp tavęs ir tavo kliento."
+            "body": "Paslaugoms siūlyti jokios mokamos paslaugos nereikia, ir jokia tam neparduodama. Platforma netvarko mokėjimų tarp tavęs ir tavo kliento."
           },
           {
             "title": "Dar neveikia",

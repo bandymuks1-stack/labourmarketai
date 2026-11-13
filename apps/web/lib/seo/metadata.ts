@@ -322,7 +322,7 @@ export const PAGE_SEO: Readonly<
     de: {
       title: "Dienstleister und Teams — Leistung anbieten",
       description:
-        "Selbstständige Fachkräfte, Kolonnen und Dienstleister: Leistungsangebot veröffentlichen, Anfragen beantworten, Angebote und Verträge an einem Ort führen.",
+        "Selbstständige Fachkräfte, Teams und Dienstleister: Leistungsangebot veröffentlichen, Anfragen beantworten, Angebote und Verträge an einem Ort führen.",
     },
     pl: {
       title: "Dla usługodawców i zespołów — zaoferuj swoją usługę",

@@ -5256,8 +5256,8 @@
           "desc": "Każdy sygnał dopasowania pokazuje powody, które za nim stoją."
         },
         {
-          "title": "Ludzie i agencje w jednym miejscu",
-          "desc": "Dostępni pracownicy i połączone agencje dla tego samego zapotrzebowania, obok siebie."
+          "title": "Ludzie i kandydaci agencji w jednym miejscu",
+          "desc": "Dostępni pracownicy i kandydaci zaproponowani przez połączone agencje dla tego samego zapotrzebowania, obok siebie."
         },
         {
           "title": "Bez nieprzejrzystych pośredników",
@@ -5355,7 +5355,7 @@
         },
         {
           "title": "Pracuj z zapotrzebowaniami klientów",
-          "desc": "Klienci udostępniają Ci zapotrzebowania; Ty proponujesz kandydatów i widzisz ich decyzję."
+          "desc": "Klienci udostępniają Ci zapotrzebowania; Ty proponujesz kandydatów i widzisz decyzję klienta."
         },
         {
           "title": "Kierunek dopasowania",
@@ -5367,11 +5367,11 @@
         },
         {
           "title": "Kilka języków",
-          "desc": "Miejsce pracy jest dostępne w kilku językach."
+          "desc": "Przestrzeń robocza jest dostępna w kilku językach."
         },
         {
-          "title": "Potwierdzona praca",
-          "desc": "Potwierdzone wpisy pracy budują historię każdej osoby."
+          "title": "Historia pracy",
+          "desc": "Wpisy w Dzienniku pracy budują historię każdej osoby."
         }
       ]
     },
@@ -5675,7 +5675,7 @@
           },
           {
             "title": "Jak zacząć",
-            "body": "Opisz zapotrzebowanie bez konta albo utwórz bezpłatne konto, skonfiguruj organizację i opublikuj zapotrzebowanie w swoim miejscu pracy."
+            "body": "Opisz zapotrzebowanie bez konta albo utwórz bezpłatne konto, skonfiguruj organizację i opublikuj zapotrzebowanie w swojej przestrzeni roboczej."
           },
           {
             "title": "Co jest bezpłatne",
@@ -5783,7 +5783,7 @@
     "education": {
       "eyebrow": "Dla placówek edukacyjnych",
       "title": "Programy, grupy i praktyka",
-      "titleAccent": "w jednym miejscu pracy.",
+      "titleAccent": "w jednej przestrzeni roboczej.",
       "subcopy": "Dla szkół, kolegiów, uczelni i organizatorów szkoleń: twórz programy i grupy, sprawdzaj praktykę zapisywaną przez uczących się, uznawaj kompetencje i eksportuj raport.",
       "cta": "Utwórz konto placówki",
       "benefits": [
@@ -5817,7 +5817,7 @@
           },
           {
             "title": "Jak zacząć",
-            "body": "Utwórz konto i potwierdź adres e-mail. Uzupełnij krótki profil, a następnie skonfiguruj organizację — opcja organizatora szkoleń jest już zaznaczona. Otwórz „Nauka i programy” i utwórz pierwszy program."
+            "body": "Utwórz konto i otwórz link, który wyślemy na Twój adres e-mail. Uzupełnij krótki profil, a następnie skonfiguruj organizację — opcja organizatora szkoleń jest już zaznaczona. Otwórz „Nauka” w przestrzeni roboczej organizacji i utwórz pierwszy program."
           },
           {
             "title": "Co jest bezpłatne",
@@ -5851,7 +5851,7 @@
         },
         {
           "title": "Jedno wspólne wyszukiwanie",
-          "body": "Opublikowane oferty i ogłoszenia są widoczne we wspólnym wyszukiwaniu platformy, obok zapotrzebowań na pracowników."
+          "body": "Opublikowane oferty i ogłoszenia są widoczne we wspólnym wyszukiwaniu, z którego korzystają zalogowani członkowie, obok zapotrzebowań na pracowników."
         },
         {
           "title": "Oferty i umowy",
@@ -5871,7 +5871,7 @@
           },
           {
             "title": "Jak zacząć",
-            "body": "Utwórz konto i potwierdź adres e-mail. Uzupełnij krótki profil, a następnie otwórz „Twoje oferty usług” i napisz pierwszą ofertę."
+            "body": "Utwórz konto i otwórz link, który wyślemy na Twój adres e-mail. Uzupełnij krótki profil; potem trafisz do swoich ofert usług i możesz napisać pierwszą."
           },
           {
             "title": "Co jest bezpłatne",

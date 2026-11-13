@@ -5256,8 +5256,8 @@
           "desc": "Every fit signal shows the reasons behind it."
         },
         {
-          "title": "People and agencies in one place",
-          "desc": "Available workers and connected agencies for the same need, side by side."
+          "title": "People and agency candidates in one place",
+          "desc": "Available workers and candidates offered by connected agencies for the same need, side by side."
         },
         {
           "title": "No opaque middlemen",
@@ -5355,7 +5355,7 @@
         },
         {
           "title": "Work with client needs",
-          "desc": "Clients share needs with you; you offer candidates and see their decision."
+          "desc": "Clients share needs with you; you offer candidates and see each client's decision."
         },
         {
           "title": "Fit direction",
@@ -5817,7 +5817,7 @@
           },
           {
             "title": "How to start",
-            "body": "Create an account and open the link we send to your e-mail. Complete the short profile, then set up your organisation — the training-provider option is already selected. Open “Learning and programmes” and create your first programme."
+            "body": "Create an account and open the link we send to your e-mail. Complete the short profile, then set up your organisation — the training-provider option is already selected. Open “Learning” in your organisation's workspace and create your first programme."
           },
           {
             "title": "What is free",
@@ -5851,7 +5851,7 @@
         },
         {
           "title": "One shared search",
-          "body": "Published offerings and listings appear in the platform's shared search, next to work needs."
+          "body": "Published offerings and listings appear in the shared search that signed-in members use, next to work needs."
         },
         {
           "title": "Proposals and contracts",
@@ -5871,7 +5871,7 @@
           },
           {
             "title": "How to start",
-            "body": "Create an account and open the link we send to your e-mail. Complete the short profile, then open “Your service offerings” and write your first offering."
+            "body": "Create an account and open the link we send to your e-mail. Complete the short profile; you then land on your service offerings and can write the first one."
           },
           {
             "title": "What is free",

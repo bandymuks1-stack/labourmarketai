@@ -5256,8 +5256,8 @@
           "desc": "Jedes Passungssignal zeigt die Gründe dahinter."
         },
         {
-          "title": "Menschen und Agenturen an einem Ort",
-          "desc": "Verfügbare Arbeitskräfte und verbundene Agenturen für dieselbe Anfrage, nebeneinander."
+          "title": "Menschen und Agenturkandidaten an einem Ort",
+          "desc": "Verfügbare Arbeitskräfte und von verbundenen Agenturen vorgeschlagene Kandidaten für dieselbe Anfrage, nebeneinander."
         },
         {
           "title": "Keine undurchsichtigen Zwischenhändler",
@@ -5355,7 +5355,7 @@
         },
         {
           "title": "Mit Kundenanfragen arbeiten",
-          "desc": "Kunden teilen Anfragen mit Ihnen; Sie schlagen Kandidaten vor und sehen deren Entscheidung."
+          "desc": "Kunden teilen Anfragen mit Ihnen; Sie schlagen Kandidaten vor und sehen die Entscheidung des Kunden."
         },
         {
           "title": "Passgenaue Vermittlung",
@@ -5370,8 +5370,8 @@
           "desc": "Der Arbeitsbereich ist in mehreren Sprachen verfügbar."
         },
         {
-          "title": "Bestätigte Arbeit",
-          "desc": "Bestätigte Arbeitseinträge bauen den Nachweis jeder Person auf."
+          "title": "Arbeitshistorie",
+          "desc": "Einträge im Arbeitsjournal bauen die Historie jeder Person auf."
         }
       ]
     },
@@ -5586,7 +5586,7 @@
           },
           {
             "title": "Was kostenlos ist",
-            "body": "Das Profil, das Arbeitsjournal, der lebende Lebenslauf und das Bekunden von Interesse an Arbeit sind kostenlos."
+            "body": "Das Profil, das Arbeitsjournal, der lebendige Lebenslauf und das Bekunden von Interesse an Arbeit sind kostenlos."
           },
           {
             "title": "Kostenpflichtige Leistungen",
@@ -5817,7 +5817,7 @@
           },
           {
             "title": "So starten Sie",
-            "body": "Erstellen Sie ein Konto und bestätigen Sie Ihre E-Mail-Adresse. Füllen Sie das kurze Profil aus und richten Sie dann Ihre Organisation ein — die Option Bildungsanbieter ist bereits ausgewählt. Öffnen Sie „Ausbildung und Programme“ und legen Sie Ihr erstes Programm an."
+            "body": "Erstellen Sie ein Konto und öffnen Sie den Link, den wir an Ihre E-Mail-Adresse senden. Füllen Sie das kurze Profil aus und richten Sie dann Ihre Organisation ein — die Option Bildungsanbieter ist bereits ausgewählt. Öffnen Sie „Ausbildung“ im Arbeitsbereich Ihrer Organisation und legen Sie Ihr erstes Programm an."
           },
           {
             "title": "Was kostenlos ist",
@@ -5838,7 +5838,7 @@
       "eyebrow": "Für Dienstleister und Teams",
       "title": "Bieten Sie Ihre Leistung an",
       "titleAccent": "und beantworten Sie echte Anfragen.",
-      "subcopy": "Für selbstständige Fachkräfte, Kolonnen und Dienstleistungsunternehmen in jedem Bereich: Veröffentlichen Sie, was Sie tun, erhalten Sie Anfragen, beantworten Sie sie und verwalten Sie Angebote und Verträge an einem Ort.",
+      "subcopy": "Für selbstständige Fachkräfte, Teams und Dienstleistungsunternehmen in jedem Bereich: Veröffentlichen Sie, was Sie tun, erhalten Sie Anfragen, beantworten Sie sie und verwalten Sie Angebote und Verträge an einem Ort.",
       "cta": "Kostenloses Konto erstellen",
       "benefits": [
         {
@@ -5851,7 +5851,7 @@
         },
         {
           "title": "Eine gemeinsame Suche",
-          "body": "Veröffentlichte Angebote und Anzeigen erscheinen in der gemeinsamen Suche der Plattform, neben Personalanfragen."
+          "body": "Veröffentlichte Angebote und Anzeigen erscheinen in der gemeinsamen Suche, die angemeldete Mitglieder nutzen, neben Personalanfragen."
         },
         {
           "title": "Angebote und Verträge",
@@ -5867,11 +5867,11 @@
         "items": [
           {
             "title": "Für wen",
-            "body": "Selbstständige Fachkräfte, Kolonnen und Dienstleistungsunternehmen, in jedem Gewerk oder Beruf."
+            "body": "Selbstständige Fachkräfte, Teams und Dienstleistungsunternehmen, in jedem Gewerk oder Beruf."
           },
           {
             "title": "So starten Sie",
-            "body": "Erstellen Sie ein Konto und bestätigen Sie Ihre E-Mail-Adresse. Füllen Sie das kurze Profil aus, öffnen Sie dann „Ihre Dienstleistungsangebote“ und schreiben Sie Ihr erstes Angebot."
+            "body": "Erstellen Sie ein Konto und öffnen Sie den Link, den wir an Ihre E-Mail-Adresse senden. Füllen Sie das kurze Profil aus; danach gelangen Sie zu Ihren Dienstleistungsangeboten und können das erste schreiben."
           },
           {
             "title": "Was kostenlos ist",

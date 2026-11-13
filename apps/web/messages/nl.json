@@ -5256,8 +5256,8 @@
           "desc": "Elk fit-signaal toont de redenen erachter."
         },
         {
-          "title": "Mensen en bureaus op één plek",
-          "desc": "Beschikbare werknemers en gekoppelde bureaus voor dezelfde behoefte, naast elkaar."
+          "title": "Mensen en bureaukandidaten op één plek",
+          "desc": "Beschikbare werknemers en kandidaten van gekoppelde bureaus voor dezelfde behoefte, naast elkaar."
         },
         {
           "title": "Geen ondoorzichtige tussenpersonen",
@@ -5355,7 +5355,7 @@
         },
         {
           "title": "Werk met klantbehoeften",
-          "desc": "Klanten delen behoeften met je; jij stelt kandidaten voor en ziet hun beslissing."
+          "desc": "Klanten delen behoeften met je; jij stelt kandidaten voor en ziet de beslissing van de klant."
         },
         {
           "title": "Gerichte matching",
@@ -5370,8 +5370,8 @@
           "desc": "De werkruimte is beschikbaar in meerdere talen."
         },
         {
-          "title": "Bevestigd werk",
-          "desc": "Bevestigde werkaantekeningen bouwen het dossier van elke persoon op."
+          "title": "Werkgeschiedenis",
+          "desc": "Aantekeningen in het Werkjournaal bouwen de geschiedenis van elke persoon op."
         }
       ]
     },
@@ -5805,7 +5805,7 @@
         },
         {
           "title": "Rapport over vraag en resultaten",
-          "body": "Bekijk open vacatures in de richtingen waarvoor je opleidingen opleiden en de resultaten van je lerenden, en exporteer het rapport als bestand."
+          "body": "Bekijk open vacatures in de richtingen waar je opleidingen voor opleiden en de resultaten van je lerenden, en exporteer het rapport als bestand."
         }
       ],
       "facts": {
@@ -5817,7 +5817,7 @@
           },
           {
             "title": "Zo begin je",
-            "body": "Maak een account en bevestig je e-mailadres. Vul het korte profiel in en richt daarna je organisatie in — de optie opleider is al geselecteerd. Open ‘Opleiding en programma's’ en maak je eerste opleiding aan."
+            "body": "Maak een account en open de link die we naar je e-mailadres sturen. Vul het korte profiel in en richt daarna je organisatie in — de optie opleider is al geselecteerd. Open ‘Opleiding’ in de werkruimte van je organisatie en maak je eerste opleiding aan."
           },
           {
             "title": "Wat is gratis",
@@ -5851,7 +5851,7 @@
         },
         {
           "title": "Eén gedeelde zoekfunctie",
-          "body": "Gepubliceerde diensten en advertenties verschijnen in de gedeelde zoekfunctie van het platform, naast personeelsbehoeften."
+          "body": "Gepubliceerde diensten en advertenties verschijnen in de gedeelde zoekfunctie die ingelogde leden gebruiken, naast personeelsbehoeften."
         },
         {
           "title": "Voorstellen en contracten",
@@ -5871,7 +5871,7 @@
           },
           {
             "title": "Zo begin je",
-            "body": "Maak een account en bevestig je e-mailadres. Vul het korte profiel in, open daarna ‘Jouw dienstenaanbod’ en schrijf je eerste aanbod."
+            "body": "Maak een account en open de link die we naar je e-mailadres sturen. Vul het korte profiel in; daarna kom je bij je dienstenaanbod uit en kun je het eerste aanbod schrijven."
           },
           {
             "title": "Wat is gratis",
