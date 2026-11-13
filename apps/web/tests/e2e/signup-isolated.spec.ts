@@ -332,3 +332,76 @@ test("M-0. seed: a synthetic company for the isolated mobile need journey", asyn
   const needs = await db<Array<{ id: string }>>(`customer_requests?profile_id=eq.${id}&select=id`);
   expect(needs.length, "the seed company starts with no need").toBe(0);
 });
+
+/**
+ * P-1. MEASUREMENT, not a gate (trust and sign-up audit, 2026-11-13): where the
+ * controls of the two onboarding steps sit on a phone, in English and in
+ * Lithuanian. People who signed in and never finished onboarding cannot be
+ * located by the database (the chosen role is stored only by the final
+ * submit) and the step telemetry needs analytics consent, so the layout is
+ * measured here instead. The viewport heights are the VISIBLE page area of a
+ * small Android phone and of a 390 x 844 phone with the browser's bars shown.
+ * The numbers are printed for the audit; the only assertions are that the
+ * controls exist. A follow-up change that moves a control then has a baseline.
+ */
+for (const phone of [
+  { name: "360x560", width: 360, height: 560 },
+  { name: "390x664", width: 390, height: 664 },
+] as const) {
+  test(`P-1. onboarding on a phone, measured (${phone.name})`, async ({ browser }) => {
+    const ctx = await browser.newContext({ viewport: { width: phone.width, height: phone.height }, isMobile: true, hasTouch: true });
+    const page = await ctx.newPage();
+    try {
+      await signUp(page, email(`phone${phone.width}`));
+      const box = async (testId: string) =>
+        page.getByTestId(testId).first().evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return { top: Math.round(r.top), bottom: Math.round(r.bottom), visible: r.top >= 0 && r.bottom <= window.innerHeight };
+        });
+      for (const locale of ["en", "lt"] as const) {
+        // The wizard restores an unfinished draft (and its step); each pass starts as a first visit.
+        await page.evaluate(() => {
+          window.localStorage.clear();
+          window.sessionStorage.clear();
+        });
+        await page.goto(`${BASE}/${locale}/onboarding`);
+        await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+        await page.evaluate(() => window.scrollTo(0, 0));
+        const cards = await page.locator('[data-testid^="onboarding-intent-"]:not([data-testid="onboarding-intents-continue"])').evaluateAll((els) =>
+          els.map((el) => {
+            const r = el.getBoundingClientRect();
+            return r.top >= 0 && r.bottom <= window.innerHeight;
+          }),
+        );
+        const before = await box("onboarding-intents-continue");
+        await page.getByTestId("onboarding-intent-work").tap();
+        await expect(page.getByTestId("onboarding-intent-work")).toHaveAttribute("aria-pressed", "true");
+        const after = await box("onboarding-intents-continue");
+        const scrollAfterPick = await page.evaluate(() => Math.round(window.scrollY));
+        console.info(
+          `[onboarding-phone] ${JSON.stringify({ phone: phone.name, locale, step: "role", viewport: phone.height, cardsTotal: cards.length, cardsFullyVisible: cards.filter(Boolean).length, continueBeforePick: before, continueAfterPick: after, scrollAfterPick, pageHeight: await page.evaluate(() => document.documentElement.scrollHeight) })}`,
+        );
+
+        await page.getByTestId("onboarding-intents-continue").click();
+        await expect(page.getByTestId("onboarding-display-name")).toBeVisible({ timeout: 30_000 });
+        await page.evaluate(() => window.scrollTo(0, 0));
+        const submit = await box("onboarding-submit");
+        const name = await box("onboarding-display-name");
+        const country = await box("onboarding-country");
+        await page.getByTestId("onboarding-country").tap();
+        const option = page.getByRole("option").first();
+        await expect(option, "the country list opens").toBeVisible({ timeout: 15_000 });
+        const list = await option.evaluate((el) => {
+          const r = (el.closest('[role="listbox"]') ?? el).getBoundingClientRect();
+          return { top: Math.round(r.top), bottom: Math.round(r.bottom), fitsViewport: r.top >= 0 && r.bottom <= window.innerHeight };
+        });
+        console.info(
+          `[onboarding-phone] ${JSON.stringify({ phone: phone.name, locale, step: "profile", viewport: phone.height, name, country, submit, countryList: list, pageHeight: await page.evaluate(() => document.documentElement.scrollHeight) })}`,
+        );
+        await page.keyboard.press("Escape");
+      }
+    } finally {
+      await ctx.close();
+    }
+  });
+}
