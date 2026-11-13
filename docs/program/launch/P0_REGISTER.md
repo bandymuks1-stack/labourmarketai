@@ -97,3 +97,26 @@ Fix in progress: Lane H, RED draft PR "former worker to organization history lin
 manager offers from a former-employee roster row; the person confirms; ended relationship with its period;
 no active engagement; no linking on a name or e-mail match; safe claim for a different e-mail or Google
 sign-in; reversal with audit trail). Review: Lane R2. No merge, migration or deploy without the owner.
+
+## Audit 35a — attribution of the imported work history (2026-11-13, read-only, counts only)
+
+Owner's rule (2026-11-13, replaces the earlier work-country reading): workers from one country belong to
+one of the two operating organizations, workers from other countries to the other.
+
+What production holds: all imported people (43) and all imported records (3,096, years 2022–2026, about
+31,000 hours, every record "organization reported", supplier role "employer", 6 source files, 180 work
+objects, no project link) sit under ONE organization record; the other operating organization holds none.
+Roster kinds: 35 "other", 7 "employee" (1 linked, 1 link offered), 1 "former employee". 675 records of 16
+people carry an employer party label that names a THIRD legal entity; the other 2,421 records carry no
+employer party.
+
+Cannot be verified from platform data: the owner's rule itself. A roster person has no nationality,
+citizenship or country-of-origin attribute, and names are not a lawful or reliable basis. The split needs a
+source the owner supplies (payroll or contract lists per legal employer).
+
+Former-worker case: 62 records, 2024-08-19 to 2024-11-15, 520 hours, all "organization reported", no
+corrections, no disputes; 46 of them carry the third-entity employer label, 16 carry none.
+
+Nothing was moved, renamed or merged. Any re-attribution is a data change that needs: the owner's list per
+legal employer, a preview with counts per person, preserved provenance (original supplier, file, hash
+chain), and a separate approval.
