@@ -54,10 +54,18 @@ const accent = Instrument_Serif({
   weight: "400",
   style: ["normal", "italic"],
   variable: "--font-accent",
+  // Not preloaded: the accent face draws one word of an editorial heading
+  // and nothing on a first screen. Preloaded, its four files were fetched
+  // ahead of the page's scripts on every page (measured 2026-11-13).
+  preload: false,
 });
 const mono = JetBrains_Mono({
   subsets: ["latin", "latin-ext", "cyrillic"],
   variable: "--font-mono",
+  // Not preloaded: small labels and numbers only. The browser still fetches
+  // the subset a page really draws, when it draws it — just not all three
+  // ahead of the scripts.
+  preload: false,
 });
 
 // Brand SEO defaults for the whole locale subtree. Per-page canonical +
