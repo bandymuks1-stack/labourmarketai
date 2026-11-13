@@ -41,7 +41,7 @@ const landing = read("app/[locale]/focus-landing/focus-landing.tsx");
 const choice = read("components/marketing/landing-intent-choice.tsx");
 const navigator = read("components/navigation/goal-navigator.tsx");
 /** CardRail mounts in the navigator: goals, functions, professions. */
-const navigatorRails = 3;
+const navigatorRails = 4;
 const server = read("components/navigation/goal-navigation.tsx");
 const rail = read("components/navigation/card-rail.tsx");
 
@@ -76,7 +76,9 @@ describe("the choice is the first screen", () => {
 
 describe("one rail, one panel", () => {
   it("goals, functions and professions all use the one card rail", () => {
-    expect(navigator.match(/<CardRail\b/g)).toHaveLength(3);
+    // Goals, the live panel's functions and professions, and the functions of
+    // the early (pre-script) panels.
+    expect(navigator.match(/<CardRail\b/g)).toHaveLength(4);
     expect(navigator).toMatch(/testId="goal-rail"/);
     expect(navigator).toMatch(/testId="function-rail"/);
     expect(navigator).toMatch(/testId="profession-rail"/);
@@ -152,6 +154,23 @@ describe("the URL is the state — a fragment, not a page", () => {
     // One-off checks during start-up only — no repeating timer.
     expect(navigator).toMatch(/STARTUP_CHECKS_MS\.map\(\(ms\) => window\.setTimeout\(restore, ms\)\)/);
     expect(navigator).toMatch(/STARTUP_CHECKS_MS = \[[^\]]*5000\] as const/);
+  });
+
+  it("the first tap does not wait for the scripts: every goal's panel is sent, shown by :target", () => {
+    // An anchor carrying the goal's fragment as its id, directly followed by
+    // that goal's panel, hidden until the address targets the anchor.
+    expect(navigator).toMatch(/id=\{`\$\{GOAL_FRAGMENT_PREFIX\.slice\(1\)\}\$\{goal\.id\}`\}\s+data-goal-anchor=""/);
+    expect(navigator).toMatch(/data-testid="goal-panel-early"/);
+    expect(navigator).toMatch(/"hidden \[\[data-goal-anchor\]:target\+&\]:flex"/);
+    // Close works with no script: a plain link to the navigator's own
+    // anchor, which targets no goal (and is not a dead `#`).
+    expect(navigator).toMatch(/const NAVIGATOR_ID = "goals";/);
+    expect(navigator).toMatch(/id=\{NAVIGATOR_ID\}/);
+    expect(navigator).toMatch(/href=\{`#\$\{NAVIGATOR_ID\}`\}\s+data-testid="goal-panel-early-close"/);
+    // Taken out for good once the component is alive, and never beside the
+    // live panel.
+    expect(navigator).toMatch(/\{!started &&\s+!active &&\s+goals\.map\(/);
+    expect(navigator).toMatch(/const \[started, setStarted\] = useState\(false\);/);
   });
 
   it("goal cards are real links to that fragment; only known goals open a panel", () => {
