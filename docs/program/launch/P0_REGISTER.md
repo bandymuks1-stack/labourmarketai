@@ -29,7 +29,7 @@ approval. Statuses: DONE (with evidence) · IN PROGRESS · BLOCKED · NOT TESTED
 | 20 | FREE limit transition (30 days, nothing paused) | D | owner activation | IN PROGRESS: impact measured (3 organizations above the limit) | notice, date and usage line built; tests pin each rule |
 | 21 | Billing PRs #3284, #3250, #3252 (decision cards), #2441, #2685 (rebase) | D, R2 | owner per-PR decision | BLOCKED: owner decision | one card per PR, then a recommendation |
 | 22 | PR #3214 company search (`3f463af0eb`) | coordinator | owner window approval | BLOCKED: owner decision | merge → deploy → search check → migration → final checks |
-| 23 | Register row 2.24 experience records and disputes (mandatory for V2) | C | — | NOT STARTED: no report from the lane yet | cause, fix, proof; dispute process with roles, audit, abuse protection |
+| 23 | Register row 2.24 experience records and disputes (mandatory for V2) | C | — | NOT TESTED: state of PR #3301 and its CI requested from the lane, not yet reported | cause, fix, proof; dispute process with roles, audit, abuse protection |
 | 24 | Production walks: owner's five | J-2 | — | DONE on `1ab03ffb`: 86 tests, 0 failed (runs 43366745180, 43368073843, 43368883913, 43369620376, 43370312079) | — |
 | 25 | Production walks: group 1 (public and search), six walks | J-2 | — | DONE on `1ab03ffb`: 52 tests, 0 failed, 2 skipped (runs 43393371161, 43393766379, 43394904519, 43395374040, 43397026038, 43397628491) | — |
 | 26 | Production walks: remaining groups | J-2 | owner approval per group in the J-2 window | BLOCKED: owner decision | PASS / FAIL, run IDs, leftovers per group |
@@ -39,12 +39,50 @@ approval. Statuses: DONE (with evidence) · IN PROGRESS · BLOCKED · NOT TESTED
 | 30 | Row 1.1 sign-up through the form in production | F | new walk spec, owner run | IN PROGRESS: draft spec | walk with mailbox confirmation and cleanup in the same job |
 | 31 | brigade-formation closes its own need | F | — | NOT STARTED | test-only draft PR |
 | 32 | Synthetic rows invisible to an ordinary signed-in user | — | owner decision (a non-synthetic test account) | NOT TESTED: no account exists; code guards only | browser proof |
-| 33 | Worker CV shows real history; new worker's CV honest | not yet assigned | 12 | NOT STARTED | two example CVs on synthetic accounts; four evidence kinds visibly apart |
-| 34 | Invited former worker: CV readiness before first sign-in | not yet assigned | 33 | NOT STARTED | linking, own history only, no duplicates, phone and desktop, view / edit / export; no private data in reports |
-| 35 | Public profiles of the two operating organizations | not yet assigned | rows 6.21 / 8.9 (blocked), publishing rights | NOT STARTED | only publishable facts; sources named; nothing invented |
+| 33 | Worker CV shows real history; new worker's CV honest | G | 12 | IN PROGRESS: audit started 2026-11-13 | two example CVs on synthetic accounts; four evidence kinds visibly apart |
+| 34 | Invited former worker: CV readiness before first sign-in | coordinator (audit), then a RED lane | owner decision on the linking route | BLOCKED: audit done 2026-11-13 (read-only, counts only): NOT READY, see "Audit 34" below | on first sign-in the person sees his own organization-supplied history, as a past role, with provenance; no duplicates; phone and desktop; view / edit / export |
+| 35 | Public profiles of the two operating organizations | V1 | rows 6.21 / 8.9 (blocked), publishing rights | IN PROGRESS: audit started 2026-11-13 | only publishable facts; sources named; nothing invented |
 | 36 | #3256 public needs of unconfirmed companies | V1, R2 | two P2 | IN PROGRESS | P2 fixed; re-review; owner decision |
 | 37 | #3231, #3232, #3295 (RED queue) | R2 | owner | BLOCKED: owner decision | — |
 | 38 | Function register update, PR #3282; design assessment of unassessed rows | register lane | — | IN PROGRESS | seven team / project rows added; counts recomputed |
 | 39 | Activity measurement (employers, active workers, needs, contacts, agreements, hires) | S | 1, 3 deployed | NOT STARTED (after V2) | definitions and a first reading |
 | 40 | Forty-person usability test | owner, coordinator | V2 stable | NOT STARTED (after V2) | real results only |
 | 41 | Future modules P14 / P15 | — | owner | NOT STARTED (specification only) | — |
+
+## Audit 34 — invited former worker, CV readiness (2026-11-13, production build `1ab03ffb`)
+
+Read-only; states and counts only; no account was opened and nobody was impersonated.
+
+How the product links a person to organization-supplied history today (code on `main`): an invitation
+is matched by its token and the invited e-mail address only; accepting it never links a roster person;
+the history becomes visible to the person only when a manager offers a link on the roster row and the
+person accepts it; the database admits that offer only for a profile that already has an ACTIVE
+engagement or membership in that organization; a roster row of kind `former_employee` cannot be invited
+from the roster screen at all.
+
+What production holds for this case:
+
+| Check | Result |
+|---|---|
+| Pending invitation | 1, type "join the platform" (no organization, no relationship), not expired, 13 days left |
+| Account for the invited address | none yet |
+| Roster row for the former employee | 1, kind `former_employee`, state `unlinked` |
+| Organization-supplied records on that row | 62, all in one year, state "organization reported" |
+| Duplicate roster rows with the same name | 0 |
+| Path from this invitation to that roster row | none: the invitation carries no organization, so acceptance creates an account only |
+
+Verdict: **NOT READY.** If the person signs in today he gets an empty new-worker CV; the 62 records stay
+invisible to him, and no control in the product can link a former employee who has no active relationship
+with the organization. Sending an "employee" invitation instead would link him but would show the
+organization as his CURRENT job, which is false.
+
+Not verified: that this invitation and this roster row are the same person (matched on the start of the
+name only; the owner must confirm); how the CV looks with these records (no linked account exists to look
+at); view / edit / export for this person.
+
+Smallest fix, for decision (RED: it changes who may be linked and an access rule; draft PR only after the
+owner's choice): let an authorised manager offer a link from a `former_employee` roster row to a person
+identified by an invitation addressed to that row, creating an ENDED relationship (past role, with its
+period) and no active engagement; the person still accepts the link himself. Acceptance: isolated e2e of
+the whole route on synthetic people; RLS proof that he reads only his own row's records; no change for
+current employees.
