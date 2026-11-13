@@ -116,3 +116,11 @@ revoke all on function public.is_synthetic_viewer_v1() from public, anon, authen
 
 create or replace function public.demand_structured_v2_public(p jsonb) returns jsonb
 language sql immutable set search_path = public as $$ select p $$;
+
+-- Production indexes on the tables the readers touch (mirrored so timings are honest).
+create index if not exists customer_requests_organization_idx
+  on public.customer_requests (organization_id) where organization_id is not null;
+create index if not exists customer_requests_profile_idx
+  on public.customer_requests (profile_id, created_at desc);
+create index if not exists company_demand_locations_request_idx
+  on public.company_demand_locations (request_id);

@@ -56,18 +56,29 @@ describe("V-1: one eligibility rule in the database", () => {
 
   it("no reader keeps its own verified-only gate", () => {
     // The board's join no longer requires verification; verification is only a cheap
-    // prefilter beside "has a publication event" (R2 P2-4), then the one rule decides.
+    // candidate superset beside "has a publication event" (R2 P2-4), then the one rule decides.
     const board = fnBody("list_open_demand_for_workers");
     expect(board).not.toMatch(/on c\.id = public\.demand_company_id_v1\(cr\.organization_id, cr\.profile_id\)\s+and c\.verification_status/);
-    expect(board).toMatch(/and \(c\.verification_status = 'verified'\s+or exists \(select 1 from public\.customer_request_publications p where p\.request_id = cr\.id\)\)/);
+    expect(board).toMatch(/and \(exists \(select 1 from public\.customer_request_publications p where p\.request_id = cr\.id\)\s+or cr\.organization_id in \(/);
+    // R2 P2 (bounded cost): a lazy newest-first walk stops at the board's 100 rows; the rule
+    // decides inside the walk AND again in the final statement.
+    expect(board).toMatch(/order by cr\.created_at desc\s+loop\s+exit when cardinality\(v_ids\) >= 100;/);
+    expect(board).toMatch(/continue when v_state is null or v_state not in \('verified', 'unconfirmed_public'\);/);
+    expect(board).toMatch(/where cr\.id = any\(v_ids\)/);
     // The worker board keeps verified needs exactly as before, plus admitted unconfirmed ones.
-    expect(fnBody("list_open_demand_for_workers")).toMatch(/st\.state in \('verified', 'unconfirmed_public'\)/);
+    expect(board).toMatch(/st\.state in \('verified', 'unconfirmed_public'\)/);
   });
 
   it("principle C (7): the signed-out reader never returns a verified company's need", () => {
     const body = fnBody("list_public_company_needs_v1");
-    expect(body).toMatch(/and st\.state = 'unconfirmed_public'/);
+    expect(body).toMatch(/continue when v_state is distinct from 'unconfirmed_public';/);
     expect(body).toMatch(/and c\.verification_status is distinct from 'verified'/);
+    // R2 P2 (bounded cost): at most 50 rows, at most 500 rule evaluations, candidates taken
+    // round-robin by organization so one flooding organization cannot empty the page.
+    expect(body).toMatch(/v_limit\s+constant int := 50;/);
+    expect(body).toMatch(/v_examine\s+constant int := 500;/);
+    expect(body).toMatch(/exit when cardinality\(v_ids\) >= v_limit or v_seen >= v_examine;/);
+    expect(body).toMatch(/order by row_number\(\) over \(partition by coalesce\(cr\.organization_id, cr\.profile_id\)/);
     expect(body).not.toMatch(/st\.state in \('verified'/);
     // R2 P1-2: only a closed start value reaches a signed-out caller.
     expect(body).toMatch(/case when cr\.start_period in \('flexible', 'this_week', 'urgent'\) then cr\.start_period end/);
@@ -92,6 +103,20 @@ describe("V-1: one eligibility rule in the database", () => {
     const writes = up.match(/insert into public\.customer_request_publications/g) ?? [];
     expect(writes.length, "only the door writes a choice").toBe(1);
     expect(fnBody("set_need_public_publication_v1")).toMatch(/insert into public\.customer_request_publications/);
+  });
+
+  it("R2 P2: the rate and duplicate checks are index probes, bounded by one organization / one text", () => {
+    const rule = fnBody("need_public_state_v1");
+    // Duplicate: the same summary key, through its index — never a scan of every publication.
+    expect(rule).toMatch(/where public\.need_summary_key_v1\(o\.need_summary\) = v_summary/);
+    expect(up).toMatch(/create index if not exists customer_requests_need_summary_key_idx\s+on public\.customer_requests \(public\.need_summary_key_v1\(need_summary\)\)/);
+    // The key function keeps EXECUTE for writers: an index expression runs as the writing role.
+    expect(up).not.toMatch(/revoke [^;]*need_summary_key_v1/);
+    // Rate: one organization's own publish events, stopped at the 6th.
+    expect(rule).toMatch(/where p\.organization_id = r\.organization_id[\s\S]*?group by p\.request_id\s+limit 6\) w;/);
+    expect(up).toMatch(/customer_request_publications_org_request_idx\s+on public\.customer_request_publications \(organization_id, request_id, created_at\) where action = 'publish'/);
+    // The organization key of an event is set from the need by trigger, never by the caller.
+    expect(fnBody("need_publication_set_organization_v1")).toMatch(/new\.organization_id := \(select r\.organization_id from public\.customer_requests r where r\.id = new\.request_id\)/);
   });
 
   it("principle C: only the author or an active org owner / admin / manager may choose", () => {

@@ -74,6 +74,19 @@
 -- Never: contact e-mail/phone, the poster, title, summary, notes, payload, pay, registration
 -- code, website, address. Max 50 rows, bounded inputs. Synthetic QA fixtures never returned.
 --
+-- ── BOUNDED COST (R2 re-review of e35a196) ───────────────────────────────
+-- Target: 5,000 published needs among 50,000, signed-out call under 1 s (PG16 proof:
+-- scripts/db-proof/unconfirmed-company-public-needs-v1.sh, worst of 10 calls per plan mode).
+--   * duplicate check: an index probe on an immutable summary key (customer_requests_need_
+--     summary_key_idx), never a comparison against every publication;
+--   * rate check: one organization's own publish events (organization key set from the need
+--     by trigger; index on organization, need, time), stopped at the 6th;
+--   * signed-out reader: evaluates the rule lazily for at most 500 candidates, taken
+--     round-robin by organization (one organization's flood cannot empty the page), and stops
+--     at 50 admitted; returns them newest first;
+--   * worker board: the same lazy walk newest first over a candidate superset, stopping at its
+--     100 rows — the same rows as before, with the projection built for 100 rows only.
+--
 -- Rollback: supabase/rollbacks/20261112100000_unconfirmed_company_public_needs_v1.down.sql
 
 begin;
@@ -125,8 +138,16 @@ create table if not exists public.customer_request_publications (
   action     text not null check (action in ('publish', 'withdraw')),
   actor_id   uuid references public.profiles(id) on delete set null,
   -- Wall clock of the insert (not the transaction start), server-set.
-  created_at timestamptz not null default clock_timestamp()
+  created_at timestamptz not null default clock_timestamp(),
+  -- The need's organization at the moment of the event, set by the insert trigger below from
+  -- the need itself (never by the caller). Keys the rate check to one organization's own
+  -- publications (R2 P2: bounded cost). An organization, not a person; no FK on purpose — it
+  -- is a snapshot, and the row is removed with its need.
+  organization_id uuid
 );
+
+-- Re-apply over a table kept by the rollback (evidence) adds the key if it is missing.
+alter table public.customer_request_publications add column if not exists organization_id uuid;
 
 comment on table public.customer_request_publications is
   'The company''s explicit "Publish publicly" choice per need of an unconfirmed company (owner principle C, 2026-11-12). Append-only publish/withdraw events; the latest decides; none = not published. Written only by set_need_public_publication_v1, read only by need_public_state_v1.';
@@ -134,9 +155,9 @@ comment on table public.customer_request_publications is
 -- @plan-cache-proof: n/a — one latest-event probe per need on a table that grows by explicit company clicks; no search plan depends on it.
 create index if not exists customer_request_publications_request_idx
   on public.customer_request_publications (request_id, seq desc);
--- @plan-cache-proof: n/a — serves the 24 h rate window and the earlier-publication duplicate probe inside need_public_state_v1 (bounded by publications, see the PG16 timing proof); no search plan.
-create index if not exists customer_request_publications_publish_time_idx
-  on public.customer_request_publications (created_at, request_id) where action = 'publish';
+-- @plan-cache-proof: n/a — serves the 24 h rate window of ONE organization inside need_public_state_v1 (bounded by that organization's own publications, see the PG16 timing proof); no search plan.
+create index if not exists customer_request_publications_org_request_idx
+  on public.customer_request_publications (organization_id, request_id, created_at) where action = 'publish';
 
 alter table public.customer_request_publications enable row level security;
 revoke all on public.customer_request_publications from public, anon, authenticated, service_role;
@@ -192,6 +213,25 @@ end
 $function$;
 
 revoke all on function public.need_public_history_append_only_v1() from public, anon, authenticated, service_role;
+
+-- The organization key of an event comes from the need itself, whatever the caller sent.
+create or replace function public.need_publication_set_organization_v1()
+returns trigger
+language plpgsql
+set search_path to 'public'
+as $function$
+begin
+  new.organization_id := (select r.organization_id from public.customer_requests r where r.id = new.request_id);
+  return new;
+end
+$function$;
+
+revoke all on function public.need_publication_set_organization_v1() from public, anon, authenticated, service_role;
+
+drop trigger if exists customer_request_publications_set_organization on public.customer_request_publications;
+create trigger customer_request_publications_set_organization
+  before insert on public.customer_request_publications
+  for each row execute function public.need_publication_set_organization_v1();
 
 drop trigger if exists customer_request_publications_append_only on public.customer_request_publications;
 create trigger customer_request_publications_append_only
@@ -249,6 +289,31 @@ as $function$
     false)
 $function$;
 
+-- The duplicate-check key of a summary: md5 of the trimmed, lower-cased, whitespace-collapsed
+-- text, or NULL when it is too short to compare (< 40 characters). Immutable, so it can key an
+-- index: the duplicate check is an index probe, never a comparison against every need (R2 P2).
+create or replace function public.need_summary_key_v1(p_summary text)
+returns text
+language sql
+immutable
+parallel safe
+set search_path to ''
+as $function$
+  select case
+           when pg_catalog.char_length(pg_catalog.lower(pg_catalog.regexp_replace(pg_catalog.btrim(coalesce(p_summary, '')), '\s+', ' ', 'g'))) >= 40
+           then pg_catalog.md5(pg_catalog.lower(pg_catalog.regexp_replace(pg_catalog.btrim(coalesce(p_summary, '')), '\s+', ' ', 'g')))
+         end
+$function$;
+
+-- EXECUTE stays with the default grant ON PURPOSE: an index expression is evaluated as the
+-- writing role on every insert / update of customer_requests, so revoking it would break every
+-- need write. The function is pure (md5 of its own argument) and reads no table.
+
+-- @plan-cache-proof: n/a — serves one equality probe per published need inside need_public_state_v1 (the duplicate check); no RPC search term reaches it. Timing: scripts/db-proof/unconfirmed-company-public-needs-v1.sh (50,000 needs / 5,000 published).
+create index if not exists customer_requests_need_summary_key_idx
+  on public.customer_requests (public.need_summary_key_v1(need_summary))
+  where public.need_summary_key_v1(need_summary) is not null;
+
 -- ── 3. THE ONE RULE ──────────────────────────────────────────────────────
 create or replace function public.need_public_state_v1(p_request_id uuid)
 returns table(state text, reasons text[], company_confirmed boolean, content_hash text)
@@ -271,6 +336,7 @@ declare
   v_summary   text;
   v_published boolean;
   v_first_pub timestamptz;
+  v_rate      bigint;
 begin
   select * into r from public.customer_requests x where x.id = p_request_id;
   if not found
@@ -347,36 +413,58 @@ begin
 
   -- (3) rate: more than 5 needs of one organization first PUBLISHED within the 24 h up to this
   --     need's first publication — server times only (R2 P2-3).
-  -- Driven from the publication events in the 24 h window (index on created_at), joined to
-  -- needs by primary key: bounded by the publications in that window, never by all needs.
-  if (select count(distinct p.request_id)
+  -- Driven from THIS organization's own publish events (index on organization, need, time,
+  -- read in need order), grouped per need and stopped at the 6th in the window: bounded by one organization's own
+  -- activity, never by the whole window or all needs (R2 P2, 5,000 published among 50,000).
+  -- A need without an organization cannot be published by the door (it requires membership);
+  -- its branch counts the poster's own needs and is kept only for completeness.
+  if r.organization_id is not null then
+    select count(*) into v_rate from (
+      select p.request_id
         from public.customer_request_publications p
         join public.customer_requests o on o.id = p.request_id
-       where p.action = 'publish'
+       where p.organization_id = r.organization_id
+         and p.action = 'publish'
          and p.created_at >  v_first_pub - interval '24 hours'
          and p.created_at <= v_first_pub
-         and coalesce(o.organization_id, o.profile_id) = coalesce(r.organization_id, r.profile_id)
-         and (o.kind is null or o.kind in ('company_request', 'buyer_request'))) > 5 then
+         and (o.kind is null or o.kind in ('company_request', 'buyer_request'))
+       group by p.request_id
+       limit 6) w;
+  else
+    select count(*) into v_rate from (
+      select 1
+        from public.customer_requests o
+       where o.profile_id = r.profile_id
+         and o.organization_id is null
+         and (o.kind is null or o.kind in ('company_request', 'buyer_request'))
+         and exists (select 1 from public.customer_request_publications p
+                      where p.request_id = o.id
+                        and p.action = 'publish'
+                        and p.created_at >  v_first_pub - interval '24 hours'
+                        and p.created_at <= v_first_pub)
+       limit 6) w;
+  end if;
+  if v_rate > 5 then
     v_reasons := v_reasons || 'rate'::text;
   end if;
 
   -- (4) duplicate: the same summary first PUBLISHED EARLIER (server time) by another
-  --     organization. Only published needs are compared (bounded cost; R2 P2-3/P2-4).
-  v_summary := lower(regexp_replace(trim(coalesce(r.need_summary, '')), '\s+', ' ', 'g'));
-  -- Driven from the publish events that came BEFORE this need's first one (index on
-  -- created_at), joined to needs by primary key: bounded by earlier publications only.
-  if char_length(v_summary) >= 40 and exists (
+  --     organization. Only published needs count (R2 P2-3/P2-4). An index probe on the summary
+  --     key finds the needs with the same text; each is checked for an earlier publication.
+  v_summary := public.need_summary_key_v1(r.need_summary);
+  if v_summary is not null and exists (
        select 1
-         from (select p.request_id, min(p.created_at) as first_pub
-                 from public.customer_request_publications p
-                where p.action = 'publish' and p.created_at <= v_first_pub
-                group by p.request_id) op
-         join public.customer_requests o on o.id = op.request_id
-        where o.id <> r.id
+         from public.customer_requests o
+         cross join lateral (
+           select min(p.created_at) as first_pub
+             from public.customer_request_publications p
+            where p.request_id = o.id and p.action = 'publish') op
+        where public.need_summary_key_v1(o.need_summary) = v_summary
+          and o.id <> r.id
           and o.status = 'submitted'
           and coalesce(o.organization_id, o.profile_id) <> coalesce(r.organization_id, r.profile_id)
-          and (op.first_pub < v_first_pub or (op.first_pub = v_first_pub and o.id < r.id))
-          and lower(regexp_replace(trim(coalesce(o.need_summary, '')), '\s+', ' ', 'g')) = v_summary) then
+          and op.first_pub is not null
+          and (op.first_pub < v_first_pub or (op.first_pub = v_first_pub and o.id < r.id))) then
     v_reasons := v_reasons || 'duplicate_text'::text;
   end if;
 
@@ -415,11 +503,15 @@ revoke all on function public.need_public_state_v1(uuid) from public, anon, auth
 
 -- ── 4. Worker board — the verified-only join becomes the one rule ────────
 -- Same signature, same columns, same caller gate, filters, projection, LIMIT and grants as
--- 20261029190000 (production md5 recorded there). Two changes only:
+-- 20261029190000 (production md5 recorded there). Three changes only:
 --   * the company join no longer requires verification; the WHERE admits
 --     need_public_state_v1 in ('verified', 'unconfirmed_public');
 --   * route_status says which: 'approved_direct_partner' (verified, as before) or
---     'unconfirmed_company' (labelled, never badged).
+--     'unconfirmed_company' (labelled, never badged);
+--   * bounded cost (R2 P2): a newest-first walk over a superset of candidates applies the
+--     rule and the fixture filter lazily and stops at 100 rows; the original statement then
+--     runs for those ids only. Same rows, same order — and the projection (skills, locations,
+--     structured) is built for 100 rows instead of every candidate.
 -- The return type is unchanged, so CREATE OR REPLACE keeps the one dependant policy
 -- (demand_interest_signals_worker_insert) untouched.
 CREATE OR REPLACE FUNCTION public.list_open_demand_for_workers()
@@ -432,6 +524,12 @@ declare
   uid      uuid := auth.uid();
   v_worker uuid;
   v_sees_fixtures boolean;
+  -- V-1 BOUNDED COST (R2 P2): the rule is evaluated lazily, newest first, only until the
+  -- board's 100 rows are found. Same rows as evaluating it for every need (same filters,
+  -- same order, same LIMIT); the projection below runs for those rows only.
+  v_ids    uuid[] := '{}';
+  v_state  text;
+  rec      record;
 begin
   if uid is null then
     raise exception 'Not authenticated' using errcode = '42501';
@@ -442,6 +540,33 @@ begin
   end if;
   -- A synthetic QA identity keeps seeing fixtures; nobody else (20261028123000).
   v_sees_fixtures := public.is_synthetic_viewer_v1();
+
+  -- Candidates: a SUPERSET of what the rule can admit — needs a company chose to publish, and
+  -- needs of a verified company (demand_company_id_v1 is the need's organization's company,
+  -- 20261020015000). The rule itself decides each one below.
+  for rec in
+    select cr.id, cr.organization_id, cr.profile_id
+      from public.customer_requests cr
+     where cr.status = 'submitted'
+       and (cr.kind is null or cr.kind in ('company_request', 'buyer_request'))
+       and (exists (select 1 from public.customer_request_publications p where p.request_id = cr.id)
+            or cr.organization_id in (
+                 select o.id
+                   from public.organizations o
+                   join public.companies vc on vc.id = o.legacy_company_id
+                  where vc.verification_status = 'verified'))
+     order by cr.created_at desc
+  loop
+    exit when cardinality(v_ids) >= 100;
+    -- NULL-safe: an unknown answer skips the need, never admits it.
+    continue when not coalesce((v_sees_fixtures
+                                or not public.demand_is_synthetic_fixture_v1(rec.organization_id, rec.profile_id)
+                                or rec.profile_id = uid
+                                or coalesce(public.has_org_demand_access(rec.organization_id), false)), false);
+    select st.state into v_state from public.need_public_state_v1(rec.id) st;
+    continue when v_state is null or v_state not in ('verified', 'unconfirmed_public');
+    v_ids := v_ids || rec.id;
+  end loop;
 
   return query
   select cr.id,
@@ -503,8 +628,8 @@ begin
     -- THE NEED'S OWN COMPANY — the one rule (20261020010000).
     join public.companies c
       on c.id = public.demand_company_id_v1(cr.organization_id, cr.profile_id)
-    -- WHO MAY SEE IT — the one rule (20261112100000, principle C), evaluated only for a
-    -- verified company's need or one that has a publication event (bounded cost, R2 P2-4).
+    -- WHO MAY SEE IT — the one rule (20261112100000, principle C), re-checked here for the
+    -- (at most 100) rows the bounded walk above admitted.
     cross join lateral public.need_public_state_v1(cr.id) st
     -- 1. the company's confirmed set; 2. the set derived at intake.
     left join lateral (
@@ -548,9 +673,8 @@ begin
                else null
              end as source
     ) ns
-   where cr.status = 'submitted'
-     and (c.verification_status = 'verified'
-          or exists (select 1 from public.customer_request_publications p where p.request_id = cr.id))
+   where cr.id = any(v_ids)
+     and cr.status = 'submitted'
      and st.state in ('verified', 'unconfirmed_public')
      -- DIRECTION OF THE MARKET (owner window 7 section 4). A worker board
      -- shows DEMAND. agency_offer is an agency offering the people it HAS -
@@ -584,9 +708,49 @@ security definer
 set search_path to 'public'
 as $function$
 declare
-  v_q       text := nullif(regexp_replace(lower(left(coalesce(p_query, ''), 80)), '[^[:alnum:] -]+', '', 'g'), '');
-  v_country text := case when p_country ~ '^[A-Z]{2}$' then p_country else null end;
+  v_q        text := nullif(regexp_replace(lower(left(coalesce(p_query, ''), 80)), '[^[:alnum:] -]+', '', 'g'), '');
+  v_country  text := case when p_country ~ '^[A-Z]{2}$' then p_country else null end;
+  -- BOUNDED COST (R2 P2: 5,000 published among 50,000 needs, signed-out call < 1 s).
+  -- The one rule is evaluated lazily, candidate by candidate, until 50 needs are admitted,
+  -- and for at most 500 candidates. Candidates are taken ROUND-ROBIN by organization (every
+  -- organization's newest published need, then every organization's second newest, ...), so
+  -- one organization flooding publications cannot push everyone else off this page. The
+  -- admitted needs are returned newest first. This page never shows more than the rule
+  -- admits; a need it does not reach stays on the signed-in worker board (same rule).
+  v_limit    constant int := 50;
+  v_examine  constant int := 500;
+  v_seen     int := 0;
+  v_ids      uuid[] := '{}';
+  v_state    text;
+  rec        record;
 begin
+  for rec in
+    select cr.id, cr.organization_id, cr.profile_id
+      -- Driven from the publication events: only needs a company ever chose to publish are
+      -- looked up, by primary key — the read never scans all needs.
+      from (select distinct p.request_id from public.customer_request_publications p) pub
+      join public.customer_requests cr on cr.id = pub.request_id
+     where cr.status = 'submitted'
+       and (cr.kind is null or cr.kind in ('company_request', 'buyer_request'))
+       and (v_country is null or cr.country = v_country)
+       and (v_q is null
+            or strpos(lower(coalesce(cr.role_or_work_type, '')), v_q) > 0
+            or strpos(lower(replace(coalesce(cr.role_or_work_type, ''), '-', ' ')), v_q) > 0)
+     order by row_number() over (partition by coalesce(cr.organization_id, cr.profile_id)
+                                 order by cr.created_at desc, cr.id),
+              cr.created_at desc, cr.id
+  loop
+    exit when cardinality(v_ids) >= v_limit or v_seen >= v_examine;
+    v_seen := v_seen + 1;
+    -- THE ONE RULE: the company's current choice, verification, required fields, checks and
+    -- operator decisions. Only 'unconfirmed_public' is listed here.
+    select st.state into v_state from public.need_public_state_v1(rec.id) st;
+    continue when v_state is distinct from 'unconfirmed_public';
+    -- A synthetic QA fixture is never market reality here (checked before it takes a slot).
+    continue when coalesce(public.demand_is_synthetic_fixture_v1(rec.organization_id, rec.profile_id), true);
+    v_ids := v_ids || rec.id;
+  end loop;
+
   return query
   select cr.id,
          cr.role_or_work_type,
@@ -604,27 +768,15 @@ begin
          cr.created_at,
          coalesce(nullif(trim(c.display_name), ''), nullif(trim(c.legal_name), '')) as company_name,
          false as company_confirmed
-    -- Driven from the publication events (R2 re-review P2): only needs a company ever chose
-    -- to publish are looked up, by primary key — the read never scans all needs.
-    from (select distinct p.request_id from public.customer_request_publications p) pub
-    join public.customer_requests cr on cr.id = pub.request_id
+    from public.customer_requests cr
     join public.companies c
       on c.id = public.demand_company_id_v1(cr.organization_id, cr.profile_id)
-    cross join lateral public.need_public_state_v1(cr.id) st
-   where cr.status = 'submitted'
-     and (cr.kind is null or cr.kind in ('company_request', 'buyer_request'))
-     and c.verification_status is distinct from 'verified'
+   where cr.id = any(v_ids)
      -- Principle C (7): verified companies' needs keep their existing visibility — the
-     -- worker board only. This reader returns ONLY published, admitted needs of
-     -- unconfirmed companies.
-     and st.state = 'unconfirmed_public'
+     -- worker board only (the rule already says 'verified' for them; kept explicit).
+     and c.verification_status is distinct from 'verified'
      and not public.demand_is_synthetic_fixture_v1(cr.organization_id, cr.profile_id)
-     and (v_country is null or cr.country = v_country)
-     and (v_q is null
-          or strpos(lower(coalesce(cr.role_or_work_type, '')), v_q) > 0
-          or strpos(lower(replace(coalesce(cr.role_or_work_type, ''), '-', ' ')), v_q) > 0)
-   order by cr.created_at desc
-   limit 50;
+   order by cr.created_at desc, cr.id;
 end
 $function$;
 

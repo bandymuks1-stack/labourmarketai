@@ -167,6 +167,18 @@ drop function if exists public.need_public_state_v1(uuid);
 -- the trigger function is dropped only when neither table remains (end of this file).
 drop function if exists public.is_disposable_email_domain_v1(text);
 drop function if exists public.need_public_text_flags_v1(text);
+-- The duplicate-check key: its index first (it depends on the function), then the function.
+drop index if exists public.customer_requests_need_summary_key_idx;
+drop function if exists public.need_summary_key_v1(text);
+-- The organization-key trigger is not protection: it goes even when the table is kept.
+do $$
+begin
+  if to_regclass('public.customer_request_publications') is not null then
+    drop trigger if exists customer_request_publications_set_organization on public.customer_request_publications;
+  end if;
+end
+$$;
+drop function if exists public.need_publication_set_organization_v1();
 
 do $$
 begin

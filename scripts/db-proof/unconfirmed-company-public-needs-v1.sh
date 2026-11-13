@@ -11,7 +11,11 @@
 #   * signed-out visitors read only the public reader, 9 columns, no contact;
 #   * the company reads its own state ("waiting for review"), nobody else's;
 #   * only an admin reads the queue and decides; an approval binds to content;
-#   * rollback restores the verified-only board, keeps decisions; re-apply works.
+#   * rollback restores the verified-only board, keeps decisions; re-apply works;
+#   * bounded cost at 50,000 needs / 5,000 published (…-v1.scale.sql, adversarial: one
+#     organization's 1,000-need burst, 200 copies of one summary): signed-out call and worker
+#     board, worst of 10 calls under plan_cache_mode auto AND force_generic_plan; the worker
+#     board returns exactly the rows the rule admits (compared with a brute-force evaluation).
 #
 # Usage:
 #   initdb -D $DIR/data -U postgres --auth=trust -E UTF8
@@ -301,20 +305,74 @@ q "update public.companies set verification_status = 'needs_checks' where displa
 check "needs_checks company: held for review, not public" "held_review:company_checks_pending" "$(st $(rid $UNC))"
 check "...and not on the signed-out reader" "0" "$(anon "select count(*) from public.list_public_company_needs_v1() where company_name = 'Clean UAB';")"
 q "update public.companies set verification_status = 'active_unverified' where display_name = 'Clean UAB';" >/dev/null
-# P2 (1): scale — 7,000 needs, 100 published.
-$PSQL -c "insert into public.customer_requests(profile_id, organization_id, title, role_or_work_type, country, location, need_summary, status, kind)
-  select '$NOP', o.id, 'scale ' || g, 'helper', 'LT', 'Utena', 'Scale need number ' || g || ' with enough text to compare', 'submitted', 'company_request'
-    from generate_series(1, 7000) g, public.organizations o where o.display_name = 'Quiet UAB';" >/dev/null
-$PSQL -c "insert into public.customer_request_publications(request_id, action, actor_id)
-  select id, 'publish', profile_id from public.customer_requests where title like 'scale %' order by title limit 100;" >/dev/null
-$PSQL -c "analyze;" >/dev/null
-T1=$(printf '%s\n' "set role anon; \\timing on" "select count(*) from public.list_public_company_needs_v1();" | $PSQL -f - 2>&1 | grep -oE 'Time: [0-9.]+' | head -1 | grep -oE '[0-9.]+')
-if [ -n "$T1" ] && awk "BEGIN{exit !($T1 < 1000)}"; then echo "  PASS  P2 signed-out call, 7,000 needs / 100 published: ${T1} ms (< 1000)"; pass=$((pass+1)); else echo "  FAIL  P2 signed-out call too slow: [${T1}] ms"; fail=$((fail+1)); fi
-T2=$(printf '%s\n' "set role authenticated; set request.jwt.claim.sub='$WRK'; \\timing on" "select count(*) from public.list_open_demand_for_workers();" | $PSQL -f - 2>&1 | grep -oE 'Time: [0-9.]+' | head -1 | grep -oE '[0-9.]+')
-if [ -n "$T2" ] && awk "BEGIN{exit !($T2 < 1500)}"; then echo "  PASS  P2 worker board, 7,000 needs / 100 published: ${T2} ms (< 1500)"; pass=$((pass+1)); else echo "  FAIL  P2 worker board too slow: [${T2}] ms"; fail=$((fail+1)); fi
-PLAN=$($PSQL -c "explain select p.request_id from public.customer_request_publications p where p.action = 'publish' and p.created_at <= now() group by p.request_id;" 2>&1 | tr -d '\r')
-has "P2 plan: the earlier-publication probe uses the publication time index" "publish_time_idx|Index|Seq Scan on customer_request_publications" "$PLAN"
+
+echo; echo "== R2 re-review of e35a196: bounded cost at 50,000 needs / 5,000 published"
+# The organization key of a publication comes from the need, whatever the caller writes.
+q "insert into public.customer_request_publications(request_id, action, actor_id, organization_id) values ('$(rid $NOP)', 'withdraw', '$NOP', gen_random_uuid());" >/dev/null
+check "a publication's organization is the need's own (set by the trigger)" "t" "$(q "select organization_id = (select organization_id from public.customer_requests where id = '$(rid $NOP)') from public.customer_request_publications where request_id = '$(rid $NOP)' order by seq desc limit 1;")"
+has "...and cannot be changed afterwards" "append_only" "$(q "update public.customer_request_publications set organization_id = null where request_id = '$(rid $NOP)';")"
+# The summary-key index is evaluated as the writing role: a company still edits its own need.
+check "a company can still edit its own need's summary (index expression runs as the writer)" "UPDATE 1" \
+  "$(printf '%s\n' "begin; set local role authenticated; set local request.jwt.claim.sub='$UNC';" "update public.customer_requests set need_summary = need_summary || ' ' where id = '$(rid $UNC)';" "rollback;" | psql -h $PGPROOF_HOST -p $PGPROOF_PORT -U postgres -d postgres -tA -f - 2>&1 | grep -oE 'UPDATE [0-9]+|ERROR.*' | head -1)"
+
+apply "$HERE/unconfirmed-company-public-needs-v1.scale.sql"
+check "fixture: 50,000+ needs, 5,000+ published" "t|t" \
+  "$(q "select count(*) >= 50000 from public.customer_requests;")|$(q "select count(distinct request_id) >= 5000 from public.customer_request_publications;")"
+
+# worst of 10 calls on ONE connection, under plan_cache_mode auto AND force_generic_plan
+worst() { # $1 role-setup  $2 statement
+  local w=0 t mode
+  for mode in auto force_generic_plan; do
+    t=$( { printf '%s\n' "set plan_cache_mode = $mode; $1" '\timing on'; for _ in 1 2 3 4 5 6 7 8 9 10; do printf '%s\n' "$2"; done; } \
+         | $PSQL -f - 2>&1 | grep -oE 'Time: [0-9.]+' | grep -oE '[0-9.]+' | sort -n | tail -1)
+    w=$(awk "BEGIN{print ($t > $w) ? $t : $w}")
+  done
+  echo "$w"
+}
+under() { # $1 label  $2 ms  $3 limit
+  if [ -n "$2" ] && awk "BEGIN{exit !($2 < $3)}"; then echo "  PASS  $1: worst ${2} ms (< $3)"; pass=$((pass+1)); else echo "  FAIL  $1: worst [${2}] ms (limit $3)"; fail=$((fail+1)); fi
+}
+ANON="set role anon;"
+BOARD="set role authenticated; set request.jwt.claim.sub='$WRK';"
+under "signed-out call, 50,000 needs / 5,000 published" "$(worst "$ANON" "select count(*) from public.list_public_company_needs_v1();")" 1000
+under "signed-out call, short term 'h'" "$(worst "$ANON" "select count(*) from public.list_public_company_needs_v1('h');")" 1000
+under "signed-out call, term + country" "$(worst "$ANON" "select count(*) from public.list_public_company_needs_v1('electr', 'LT');")" 1000
+check "the page is full (50) although the newest 1,000 publications are one org's held burst" "50" "$(anon "select count(*) from public.list_public_company_needs_v1();")"
+check "...from many organizations, the burst org at most 5 times (its rate-clean needs)" "t|t" \
+  "$(anon "select count(distinct company_name) >= 45 from public.list_public_company_needs_v1();")|$(anon "select count(*) <= 5 from public.list_public_company_needs_v1() where company_name = 'Scale Org 4001';")"
+check "every row the reader returns is admitted by the one rule" "0" \
+  "$(q "select count(*) from public.list_public_company_needs_v1() l where (select state from public.need_public_state_v1(l.id)) <> 'unconfirmed_public';")"
+check "duplicates: of 200 published copies of one summary, exactly one is public" "1|199" \
+  "$(q "select count(*) from public.customer_requests cr where cr.need_summary like 'Identical copied summary%' and (select state from public.need_public_state_v1(cr.id)) = 'unconfirmed_public';")|$(q "select count(*) from public.customer_requests cr where cr.need_summary like 'Identical copied summary%' and (select 'duplicate_text' = any(st.reasons) from public.need_public_state_v1(cr.id) st);")"
+check "rate: of the burst org's 1,000 publications, exactly 5 are public" "5" \
+  "$(q "select count(*) from public.customer_requests cr where cr.title like 'scale burst/%' and (select state from public.need_public_state_v1(cr.id)) = 'unconfirmed_public';")"
+# Flood isolated by the search term: every candidate is the burst org's held need (500 walked).
+q "update public.customer_requests set role_or_work_type = 'floodrole' where title like 'scale burst/%';" >/dev/null
+under "signed-out call, a term only the flooding org matches (walks the 500 cap)" "$(worst "$ANON" "select count(*) from public.list_public_company_needs_v1('floodrole');")" 1000
+q "update public.customer_requests set role_or_work_type = 'helper' where title like 'scale burst/%';" >/dev/null
+# Every candidate held: the walk examines its full 500 and returns nothing.
+q "update public.companies set verification_status = 'needs_checks' where display_name like 'Scale Org %';" >/dev/null
+under "signed-out call, every published need held (full 500 walked)" "$(worst "$ANON" "select count(*) from public.list_public_company_needs_v1();")" 1000
+q "update public.companies set verification_status = 'active_unverified' where display_name like 'Scale Org %';" >/dev/null
+# The worker board: same rows as evaluating the rule for every need, newest first, 100.
+BRUTE="select string_agg(id::text, ',' order by created_at desc, id) from (select cr.id, cr.created_at from public.customer_requests cr where cr.status = 'submitted' and (cr.kind is null or cr.kind in ('company_request','buyer_request')) and (select state from public.need_public_state_v1(cr.id)) in ('verified','unconfirmed_public') and not public.demand_is_synthetic_fixture_v1(cr.organization_id, cr.profile_id) order by cr.created_at desc limit 100) x;"
+GOT=$(printf '%s\n' "$BOARD" "select string_agg(id::text, ',' order by created_at desc, id) from public.list_open_demand_for_workers();" | $PSQL -f - 2>&1 | tail -1)
+check "worker board: exactly the rows the rule admits, newest 100 (0 verified)" "$(q "$BRUTE")" "$GOT"
+under "worker board, 50,000 needs / 5,000 published" "$(worst "$BOARD" "select count(*) from public.list_open_demand_for_workers();")" 1500
+q "update public.companies set verification_status = 'verified' where display_name like 'Scale Org %' and substring(display_name from 11)::int % 2 = 0;" >/dev/null
+q "analyze;" >/dev/null
+GOT=$(printf '%s\n' "$BOARD" "select string_agg(id::text, ',' order by created_at desc, id) from public.list_open_demand_for_workers();" | $PSQL -f - 2>&1 | tail -1)
+check "worker board: exactly the rows the rule admits (half the organizations verified)" "$(q "$BRUTE")" "$GOT"
+under "worker board, 22,000 needs of verified companies" "$(worst "$BOARD" "select count(*) from public.list_open_demand_for_workers();")" 1500
+under "signed-out call, half the organizations verified" "$(worst "$ANON" "select count(*) from public.list_public_company_needs_v1();")" 1000
+check "verified companies' needs never on the signed-out reader" "0" \
+  "$(q "select count(*) from public.list_public_company_needs_v1() l join public.companies c on c.display_name = l.company_name where c.verification_status = 'verified';")"
+PLAN=$($PSQL -c "explain select count(*) from (select p.request_id from public.customer_request_publications p where p.organization_id = 'e0000000-0000-4000-8000-000000000fa1' and p.action = 'publish' and p.created_at > now() - interval '24 hours' and p.created_at <= now() group by p.request_id limit 6) w;" 2>&1 | tr -d '\r')
+has "plan: the rate check reads one organization through its index" "customer_request_publications_org_request_idx" "$PLAN"
+PLAN=$($PSQL -c "explain select 1 from public.customer_requests o where public.need_summary_key_v1(o.need_summary) = md5('x');" 2>&1 | tr -d '\r')
+has "plan: the duplicate check is an index probe on the summary key" "customer_requests_need_summary_key_idx" "$PLAN"
 q "delete from public.customer_requests where title like 'scale %';" >/dev/null
+q "delete from public.organizations where display_name like 'Scale Org %'; delete from public.companies where display_name like 'Scale Org %';" >/dev/null
 
 echo; echo "RESULT: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]
