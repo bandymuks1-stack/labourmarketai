@@ -4263,7 +4263,7 @@
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
       "email_label": "E-Mail-Adresse",
-      "email_placeholder": "name@beispiel.de",
+      "email_placeholder": "ihr.name@example.com",
       "password_label": "Passwort",
       "password_help": "Min. 8 Zeichen, 1 Großbuchstabe, 1 Zahl, 1 Sonderzeichen (!@#$%).",
       "confirm_password_label": "Passwort bestätigen",

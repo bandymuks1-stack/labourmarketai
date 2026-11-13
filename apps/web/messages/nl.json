@@ -4235,9 +4235,9 @@
       "rateLimited": "Te veel pogingen. Probeer het later opnieuw.",
       "generic": "Er is iets misgegaan. Probeer het opnieuw.",
       "oauth": {
-        "missing_code": "De aanmelddienst kwam terug zonder aanmeldcode. Probeer het opnieuw — als het zich herhaalt, laad de pagina dan opnieuw.",
-        "exchange_failed": "Aanmelden is niet gelukt. Probeer het opnieuw — de aanmeldcode werkt één keer en verloopt snel.",
-        "no_user": "Je bent aangemeld, maar je account is niet bereikbaar. Log uit en weer in.",
+        "missing_code": "De inlogdienst kwam terug zonder inlogcode. Probeer het opnieuw — als het zich herhaalt, laad de pagina dan opnieuw.",
+        "exchange_failed": "Inloggen is niet gelukt. Probeer het opnieuw — de inlogcode werkt één keer en verloopt snel.",
+        "no_user": "Je bent ingelogd, maar je account is niet bereikbaar. Log uit en weer in.",
         "callback": "Onverwachte fout tijdens het inloggen. Probeer het opnieuw — als het aanhoudt, deel dan het trace-ID hieronder.",
         "cancelled": "Inloggen is geannuleerd. Er is niets met je account gebeurd.",
         "unknown": "Kon niet inloggen. Probeer het opnieuw.",
@@ -4263,7 +4263,7 @@
       "google_redirecting": "Doorsturen...",
       "divider": "of",
       "email_label": "E-mailadres",
-      "email_placeholder": "naam@voorbeeld.nl",
+      "email_placeholder": "naam@example.com",
       "password_label": "Wachtwoord",
       "password_help": "Min. 8 tekens, 1 hoofdletter, 1 cijfer, 1 speciaal teken (!@#$%).",
       "confirm_password_label": "Bevestig wachtwoord",
@@ -4341,7 +4341,7 @@
       "error_generic": "Er is iets misgegaan. Probeer het zo opnieuw."
     },
     "callback": {
-      "verifying": "Je aanmeldlink wordt gecontroleerd...",
+      "verifying": "Je inloglink wordt gecontroleerd...",
       "error_title": "Inloggen mislukt",
       "error_body": "Deze link is ongeldig of verlopen. Probeer het opnieuw.",
       "retry": "Opnieuw proberen"

@@ -4238,7 +4238,7 @@
         "missing_code": "Usługa logowania odesłała Cię bez kodu logowania. Spróbuj ponownie — jeśli się powtórzy, przeładuj stronę.",
         "exchange_failed": "Logowanie nie zostało dokończone. Spróbuj ponownie — kod logowania działa raz i szybko wygasa.",
         "no_user": "Logowanie się powiodło, ale nie udało się sięgnąć do Twojego konta. Wyloguj się i zaloguj ponownie.",
-        "callback": "Nieoczekiwany błąd podczas logowania. Spróbuj ponownie — jeśli się utrzymuje, podaj identyfikator śledzenia poniżej.",
+        "callback": "Nieoczekiwany błąd podczas logowania. Spróbuj ponownie — jeśli się utrzymuje, podaj identyfikator „trace” widoczny poniżej.",
         "cancelled": "Logowanie zostało anulowane. Nic nie zmieniło się na Twoim koncie.",
         "unknown": "Nie udało się zalogować. Spróbuj ponownie.",
         "link_expired": "Ten link potwierdzający wygasł lub został już użyty. Jeśli już potwierdzono e-mail, po prostu się zaloguj. W przeciwnym razie poproś poniżej o nowy link.",
@@ -20513,9 +20513,9 @@
     },
     "control": {
       "title": "Pomiar korzystania i przypisanie kampanii",
-      "granted": "Wyraziłeś zgodę. Możesz ją w każdej chwili wycofać — wtedy wpisy zostaną usunięte z tego urządzenia.",
-      "refused": "Odmówiłeś. Na tym urządzeniu nic nie jest zapisywane na potrzeby pomiaru.",
-      "undecided": "Nie dokonałeś jeszcze wyboru, więc nic nie jest zapisywane na potrzeby pomiaru.",
+      "granted": "Zgoda została wyrażona. Możesz ją w każdej chwili wycofać — wtedy wpisy zostaną usunięte z tego urządzenia.",
+      "refused": "Odmówiono zgody. Na tym urządzeniu nic nie jest zapisywane na potrzeby pomiaru.",
+      "undecided": "Wybór nie został jeszcze dokonany, więc nic nie jest zapisywane na potrzeby pomiaru.",
       "allow": "Zezwól",
       "refuse": "Odmów"
     }
