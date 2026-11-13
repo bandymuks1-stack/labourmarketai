@@ -366,6 +366,9 @@ async function crawlPage(context, path, width, discovered) {
       const a = page.locator(`a[href="${s.raw.replace(/["\\]/g, "\\$&")}"]`).filter({ visible: true }).first();
       const textOf = () => page.evaluate(() => document.body.innerText);
       let acted = false;
+      const blockedBefore = writesBlocked;
+      failedScripts.length = 0;
+      pageErrors.length = 0;
       try {
         const handle = await a.elementHandle({ timeout: 3_000 });
         const stateOf = () => handle.evaluate((el) => ["aria-current", "aria-expanded", "aria-selected", "aria-pressed"].map((k) => el.getAttribute(k)).join("|"));
@@ -378,6 +381,14 @@ async function crawlPage(context, path, width, discovered) {
         acted = false;
       }
       if (!acted) report("dead-link", path, width, `${s.label} -> #${s.id} is not on the page and pressing it changes nothing`);
+      // A link that answers but throws, or loads a script that fails, is broken
+      // all the same (as in the button pass; not when the crawl blocked a write).
+      if (writesBlocked === blockedBefore) {
+        for (const f of new Set(failedScripts)) report("script-failed", path, width, `after pressing ${s.label}: ${f}`);
+        for (const e of new Set(pageErrors)) report("page-error", path, width, `after pressing ${s.label}: ${e}`);
+      }
+      failedScripts.length = 0;
+      pageErrors.length = 0;
       if (!samePage(page.url(), url)) await page.goto(url, { waitUntil: "load", timeout: 45_000 }).catch(() => {});
     }
     // The presses opened panels: start the button pass from the page as loaded.
