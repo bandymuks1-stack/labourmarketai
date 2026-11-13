@@ -550,7 +550,7 @@ export function OnboardingWizard({
 
   if (step === 1) {
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 pb-24 sm:pb-0">
         <header className="flex flex-col gap-3">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("rolePicker.intentHeading")}
@@ -689,10 +689,14 @@ export function OnboardingWizard({
         {/* ON A PHONE THE WAY FORWARD STAYS ON SCREEN. Six cards in one column
             put this button 1.7–2.1 screens down (measured 2026-11-13, 360×560
             and 390×664), and choosing a card showed only a tick: nothing said
-            a button existed below. The bar sticks to the bottom of the screen
-            while the cards scroll under it; from `sm` up it is the ordinary
+            a button existed below. The bar is FIXED to the bottom of the
+            screen while the cards scroll under it (`sticky` cannot do this
+            here: `html` and `body` both clip overflow, which makes the body
+            the scroll container and leaves a sticky child at the end of the
+            page). The step reserves the bar's height below its content, so
+            nothing ends up underneath it. From `sm` up it is the ordinary
             in-flow button it always was. Solid background, no blur. */}
-        <div className="sticky bottom-0 z-10 -mx-6 flex flex-col gap-2 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0" data-testid="onboarding-action-bar">
+        <div className="fixed inset-x-0 bottom-0 z-10 flex flex-col gap-2 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:border-0 sm:bg-transparent sm:p-0" data-testid="onboarding-action-bar">
           {error && (
             <p className="text-xs text-state-danger" role="alert">
               {error}
@@ -727,7 +731,7 @@ export function OnboardingWizard({
         e.preventDefault();
         submit();
       }}
-      className="flex flex-col gap-5"
+      className="flex flex-col gap-5 pb-36 sm:pb-0"
       noValidate
     >
       <header>
@@ -1027,7 +1031,7 @@ export function OnboardingWizard({
       {/* The submit stays on screen on a phone (it sat 2.7–3.4 screens down,
           below fields that are mostly optional), and a refusal is said right
           above it instead of somewhere down the page. Same bar as step 1. */}
-      <div className="sticky bottom-0 z-10 -mx-6 flex flex-col gap-2 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0" data-testid="onboarding-action-bar">
+      <div className="fixed inset-x-0 bottom-0 z-10 flex flex-col gap-2 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:border-0 sm:bg-transparent sm:p-0" data-testid="onboarding-action-bar">
         {error && (
           <p className="text-xs text-state-danger" role="alert">
             {error}

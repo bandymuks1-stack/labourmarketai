@@ -356,7 +356,10 @@ for (const phone of [
       const box = async (testId: string) =>
         page.getByTestId(testId).first().evaluate((el) => {
           const r = el.getBoundingClientRect();
-          return { top: Math.round(r.top), bottom: Math.round(r.bottom), height: Math.round(r.height), visible: r.top >= 0 && r.bottom <= window.innerHeight };
+          // "visible" = inside the visible area AND nothing drawn over its centre.
+          const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          const uncovered = top !== null && (top === el || el.contains(top));
+          return { top: Math.round(r.top), bottom: Math.round(r.bottom), height: Math.round(r.height), visible: r.top >= 0 && r.bottom <= window.innerHeight && uncovered };
         });
       for (const locale of ["en", "lt"] as const) {
         // The wizard restores an unfinished draft (and its step); each pass starts as a first visit.
@@ -426,11 +429,11 @@ test("P-2. on a desktop the onboarding buttons stay where they were, in the page
     await signUp(page, email("desktop1440"));
     const bar = page.getByTestId("onboarding-action-bar");
     await expect(bar).toBeVisible({ timeout: 30_000 });
-    expect(await bar.evaluate((el) => getComputedStyle(el).position), "role step: no sticky bar on a desktop").toBe("static");
+    expect(await bar.evaluate((el) => getComputedStyle(el).position), "role step: no fixed bar on a desktop").toBe("static");
     await page.getByTestId("onboarding-intent-work").click();
     await page.getByTestId("onboarding-intents-continue").click();
     await expect(page.getByTestId("onboarding-submit")).toBeVisible({ timeout: 30_000 });
-    expect(await bar.evaluate((el) => getComputedStyle(el).position), "profile step: no sticky bar on a desktop").toBe("static");
+    expect(await bar.evaluate((el) => getComputedStyle(el).position), "profile step: no fixed bar on a desktop").toBe("static");
   } finally {
     await ctx.close();
   }
