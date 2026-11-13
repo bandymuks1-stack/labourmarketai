@@ -77,6 +77,8 @@ const UA =
   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0 Safari/537.36 lm-cta-crawl";
 
 const findings = [];
+/** Pages whose first load failed and whose second succeeded: said in the summary, not a finding. */
+const slowLoads = [];
 const seenFinding = new Set();
 function report(kind, page, width, detail) {
   const key = `${kind}|${page}|${detail}`;
@@ -187,7 +189,7 @@ async function visiblePageState(page) {
   }));
 }
 
-async function crawlPage(context, path, width, discovered) {
+async function crawlPage(context, path, width, discovered, firstFailure = null) {
   const page = await context.newPage();
   const url = ORIGIN + path;
   const failedScripts = [];
@@ -210,9 +212,18 @@ async function crawlPage(context, path, width, discovered) {
   try {
     response = await page.goto(url, { waitUntil: "load", timeout: 45_000 });
   } catch (error) {
-    report("page-unreachable", path, width, String(error?.message ?? error).split("\n")[0].slice(0, 140));
-    await page.close();
+    // One load that does not finish is not yet a page that cannot be reached: a single stall
+    // (the network, the runner, a busy server) would fail a whole release check. Loaded once
+    // more in a fresh tab; a second failure is the finding, a success is said out loud.
+    const why = String(error?.message ?? error).split("\n")[0].slice(0, 130);
+    await page.close().catch(() => {});
+    if (firstFailure === null) return crawlPage(context, path, width, discovered, why);
+    report("page-unreachable", path, width, `twice: ${why}`);
     return;
+  }
+  if (firstFailure !== null) {
+    slowLoads.push({ page: path, width, first: firstFailure });
+    console.log(`  ~ slow-load ${path} @${width} — first load failed (${firstFailure}); loaded on the second attempt`);
   }
   await page.waitForLoadState("networkidle", { timeout: 2_500 }).catch(() => {});
   lap(t0, "load");
@@ -562,6 +573,7 @@ async function main() {
   console.log(`\npages crawled: ${visited.size} × ${WIDTHS.length} widths · link targets resolved: ${resolved.size} · findings: ${findings.length}`);
   const maxAuth = authActions.length ? Math.max(...authActions) : 0;
   console.log(`acceptance: sign-in and sign-up checked on ${authActions.length} page views, most actions needed ${maxAuth}; widths ${WIDTHS.join("/")}`);
+  if (slowLoads.length) console.log(`slow loads (first attempt failed, second loaded): ${slowLoads.length} — ${slowLoads.map((x) => `${x.page} @${x.width}`).join(", ").slice(0, 600)}`);
   for (const [kind, list] of Object.entries(byKind).sort()) {
     console.log(`\n${kind} (${list.length})`);
     // The same defect on the same page in every locale reads as one line.
@@ -575,7 +587,7 @@ async function main() {
     }
     for (const [k, g] of grouped) console.log(`  [${[...g.locales].join(",")} @ ${[...g.widths].sort((a, b) => a - b).join("/")}] ${k}`);
   }
-  if (OUT) writeFileSync(OUT, JSON.stringify({ origin: ORIGIN, locales: LOCALES, widths: WIDTHS, pages: [...visited], findings: findings.map(({ key: _key, ...f }) => f) }, null, 2));
+  if (OUT) writeFileSync(OUT, JSON.stringify({ origin: ORIGIN, locales: LOCALES, widths: WIDTHS, pages: [...visited], slowLoads, findings: findings.map(({ key: _key, ...f }) => f) }, null, 2));
   process.exit(findings.length > 0 ? 1 : 0);
 }
 
