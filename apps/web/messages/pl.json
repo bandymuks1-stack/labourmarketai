@@ -20508,7 +20508,7 @@
       "text": "Korzystanie ze stron i źródło kampanii mierzymy tylko za Twoją zgodą.",
       "accept": "Zezwól na pomiar",
       "refuse": "Odmów",
-      "more": "Więcej",
+      "more": "Więcej o plikach cookie",
       "label": "Wybór dotyczący pomiaru korzystania"
     },
     "control": {
@@ -20562,5 +20562,79 @@
         "error": "Nie udało się. Spróbuj później."
       }
     }
+  },
+  "siteNav": {
+    "signUp": "Zarejestruj się",
+    "trigger": "Główne wybory",
+    "account": "Po zalogowaniu",
+    "intents": {
+      "work": {
+        "title": "Szukam pracy",
+        "description": "Znajdź oferty i pokaż, co potrafisz.",
+        "short": "Szukam pracy"
+      },
+      "workers": {
+        "title": "Szukam pracowników",
+        "description": "Opisz, jakiej pracy potrzebujesz.",
+        "short": "Szukam pracowników"
+      },
+      "services": {
+        "title": "Oferuję usługi",
+        "description": "Opublikuj swoją ofertę i odpowiadaj na zapytania.",
+        "short": "Oferuję usługi"
+      },
+      "orders": {
+        "title": "Szukam zleceń i umów",
+        "description": "Znajdź zapytania o pracę i trzymaj oferty w jednym miejscu.",
+        "short": "Szukam zleceń"
+      },
+      "partners": {
+        "title": "Szukam partnerów",
+        "description": "Połącz się z ludźmi i organizacjami, z którymi pracujesz.",
+        "short": "Szukam partnerów"
+      },
+      "agencies": {
+        "title": "Dla agencji",
+        "description": "Zarządzaj ludźmi, klientami i ofertami agencji.",
+        "short": "Dla agencji"
+      }
+    },
+    "links": {
+      "jobs": "Oferty pracy",
+      "workOpportunities": "Możliwości pracy",
+      "createCv": "Utwórz darmowe CV",
+      "workAbroad": "Praca za granicą",
+      "forWorkers": "Jak to działa dla pracowników",
+      "companyNeed": "Opisz potrzebę",
+      "forCompanies": "Jak to działa dla firm",
+      "labourMarket": "Rynek pracy według kraju",
+      "myServices": "Twoje usługi",
+      "serviceRequests": "Zapytania o usługi",
+      "marketListings": "Ogłoszenia rynkowe",
+      "commercial": "Oferty i umowy",
+      "network": "Twoja sieć",
+      "partnerWithUs": "Zostań partnerem",
+      "forAgencies": "Jak to działa dla agencji",
+      "setUpAgency": "Załóż agencję"
+    },
+    "assistant": "Zapytaj asystenta",
+    "start": {
+      "searchLabel": "Szukaj pracy",
+      "searchPlaceholder": "Stanowisko lub słowo kluczowe",
+      "searchSubmit": "Szukaj",
+      "viewAll": "Wszystkie oferty"
+    },
+    "nav": {
+      "heading": "Co chcesz zrobić?",
+      "swipe": "Przesuń",
+      "close": "Zamknij",
+      "functions": "Funkcje",
+      "professions": "Zawody",
+      "opensNow": "Otwiera się od razu",
+      "signInWhenOpen": "Logowanie przy otwarciu",
+      "allSectors": "Wszystkie branże",
+      "fullList": "Pełna lista"
+    },
+    "more": "Więcej"
   }
 }

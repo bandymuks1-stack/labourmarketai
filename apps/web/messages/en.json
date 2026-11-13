@@ -20508,7 +20508,7 @@
       "text": "We measure page use and which campaign brought you here only if you allow it.",
       "accept": "Allow measurement",
       "refuse": "Refuse",
-      "more": "More",
+      "more": "More about cookies",
       "label": "Usage measurement choice"
     },
     "control": {
@@ -20562,5 +20562,79 @@
         "error": "That didn't work. Try again later."
       }
     }
+  },
+  "siteNav": {
+    "signUp": "Sign up",
+    "trigger": "Main choices",
+    "account": "After sign-in",
+    "intents": {
+      "work": {
+        "title": "Looking for work",
+        "description": "Find jobs and show what you can do.",
+        "short": "Find work"
+      },
+      "workers": {
+        "title": "Looking for workers",
+        "description": "Describe the work you need done.",
+        "short": "Find workers"
+      },
+      "services": {
+        "title": "Offering services",
+        "description": "Publish what you offer and answer requests.",
+        "short": "Offer services"
+      },
+      "orders": {
+        "title": "Looking for orders and contracts",
+        "description": "Find work requests and keep proposals together.",
+        "short": "Find orders"
+      },
+      "partners": {
+        "title": "Looking for partners",
+        "description": "Connect with the people and organisations you work with.",
+        "short": "Find partners"
+      },
+      "agencies": {
+        "title": "For agencies",
+        "description": "Run your agency's people, clients and offers.",
+        "short": "For agencies"
+      }
+    },
+    "links": {
+      "jobs": "Job board",
+      "workOpportunities": "Work opportunities",
+      "createCv": "Create a free CV",
+      "workAbroad": "Work abroad",
+      "forWorkers": "How it works for workers",
+      "companyNeed": "Describe your need",
+      "forCompanies": "How it works for companies",
+      "labourMarket": "Labour market by country",
+      "myServices": "Your services",
+      "serviceRequests": "Service requests",
+      "marketListings": "Market listings",
+      "commercial": "Proposals and contracts",
+      "network": "Your network",
+      "partnerWithUs": "Partner with us",
+      "forAgencies": "How it works for agencies",
+      "setUpAgency": "Set up your agency"
+    },
+    "assistant": "Ask the assistant",
+    "start": {
+      "searchLabel": "Search jobs",
+      "searchPlaceholder": "Job title or keyword",
+      "searchSubmit": "Search",
+      "viewAll": "View all jobs"
+    },
+    "nav": {
+      "heading": "What do you want to do?",
+      "swipe": "Swipe",
+      "close": "Close",
+      "functions": "Functions",
+      "professions": "Professions",
+      "opensNow": "Opens now",
+      "signInWhenOpen": "Sign in when you open it",
+      "allSectors": "All sectors",
+      "fullList": "Full list"
+    },
+    "more": "More"
   }
 }

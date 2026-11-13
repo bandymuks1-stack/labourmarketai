@@ -20508,7 +20508,7 @@
       "text": "Puslapių naudojimą ir kampaniją, iš kurios atėjai, matuojame tik tau leidus.",
       "accept": "Leisti matavimą",
       "refuse": "Atsisakyti",
-      "more": "Daugiau",
+      "more": "Daugiau apie slapukus",
       "label": "Naudojimo matavimo pasirinkimas"
     },
     "control": {
@@ -20562,5 +20562,79 @@
         "error": "Nepavyko. Bandyk dar kartą vėliau."
       }
     }
+  },
+  "siteNav": {
+    "signUp": "Registruotis",
+    "trigger": "Pagrindiniai pasirinkimai",
+    "account": "Prisijungus",
+    "intents": {
+      "work": {
+        "title": "Ieškau darbo",
+        "description": "Raskite darbą ir parodykite, ką mokate.",
+        "short": "Ieškau darbo"
+      },
+      "workers": {
+        "title": "Ieškau darbuotojų",
+        "description": "Aprašykite, kokio darbo reikia.",
+        "short": "Ieškau darbuotojų"
+      },
+      "services": {
+        "title": "Siūlau paslaugas",
+        "description": "Paskelbkite, ką siūlote, ir atsakykite į užklausas.",
+        "short": "Siūlau paslaugas"
+      },
+      "orders": {
+        "title": "Ieškau užsakymų ir sutarčių",
+        "description": "Raskite darbo užklausas ir laikykite pasiūlymus vienoje vietoje.",
+        "short": "Ieškau užsakymų"
+      },
+      "partners": {
+        "title": "Ieškau partnerių",
+        "description": "Susiekite su žmonėmis ir organizacijomis, su kuriais dirbate.",
+        "short": "Ieškau partnerių"
+      },
+      "agencies": {
+        "title": "Agentūroms",
+        "description": "Valdykite agentūros žmones, klientus ir pasiūlymus.",
+        "short": "Agentūroms"
+      }
+    },
+    "links": {
+      "jobs": "Darbo skelbimai",
+      "workOpportunities": "Darbo galimybės",
+      "createCv": "Sukurti nemokamą CV",
+      "workAbroad": "Darbas užsienyje",
+      "forWorkers": "Kaip tai veikia darbuotojams",
+      "companyNeed": "Aprašyti poreikį",
+      "forCompanies": "Kaip tai veikia įmonėms",
+      "labourMarket": "Darbo rinka pagal šalį",
+      "myServices": "Jūsų paslaugos",
+      "serviceRequests": "Paslaugų užklausos",
+      "marketListings": "Rinkos skelbimai",
+      "commercial": "Pasiūlymai ir sutartys",
+      "network": "Jūsų tinklas",
+      "partnerWithUs": "Tapti partneriu",
+      "forAgencies": "Kaip tai veikia agentūroms",
+      "setUpAgency": "Sukurti agentūrą"
+    },
+    "assistant": "Klausti asistento",
+    "start": {
+      "searchLabel": "Ieškoti darbo",
+      "searchPlaceholder": "Pareigos arba raktažodis",
+      "searchSubmit": "Ieškoti",
+      "viewAll": "Visi darbo skelbimai"
+    },
+    "nav": {
+      "heading": "Ką norite padaryti?",
+      "swipe": "Braukite",
+      "close": "Uždaryti",
+      "functions": "Funkcijos",
+      "professions": "Profesijos",
+      "opensNow": "Atsidaro iškart",
+      "signInWhenOpen": "Prisijungsite atidarę",
+      "allSectors": "Visi sektoriai",
+      "fullList": "Visas sąrašas"
+    },
+    "more": "Daugiau"
   }
 }
