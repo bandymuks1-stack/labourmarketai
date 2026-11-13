@@ -347,7 +347,7 @@ test("A-1. a confirmation link that returns without a sign-in code is not report
   expect(new URL(page.url()).searchParams.get("error"), "the outcome names the confirmation link").toBe("confirm_link_opened");
   const notice = page.getByTestId("login-oauth-error");
   await expect(notice, "a calm status, not a red alert").toHaveAttribute("role", "status", { timeout: 30_000 });
-  await expect(notice).toContainText(/sign in/i);
+  await expect(notice, "it says what to do: sign in").toContainText(/signing in/i);
   await expect(page.getByTestId("login-resend-confirmation"), "a new link can be requested right here").toBeVisible();
 });
 
