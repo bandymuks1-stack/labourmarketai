@@ -194,3 +194,17 @@ The 183 strings are the landing's own texts: `landing.v3.*`, `landing.entry.*`, 
 | `landing.v3.market.line` | 'vacatures' is used for job adverts throughout. Natural, but 'vacature' can be read as an open position, while the source counts adverts collected from external sources. Decide whether the count lines (market.line, entry.numbers) need 'vacatureadvertenties'/'vacatureteksten' for precision. |
 | `landing.requestDoors.workerSearch.title` | 'Aanvraag voor het zoeken van werknemers' is correct but heavier than its two siblings ('Aanvraag zakelijke diensten (B2B)', 'Aanvraag individueel project'); 'Aanvraag personeelswerving' would be parallel but changes the worker term. |
 | `landing.entry.examples.hire` | 'We zoeken 5 magazijnmedewerkers' uses 'we' and 'zoeken'; EN has 'I need', LT is impersonal ('Reikia'). Fine in meaning; confirm the plural voice is intended. |
+
+## Changed after this review (2026-11-13, later the same day)
+
+Shortened, without changing meaning, so that on a 320 px phone the first screen holds the goals and "More options" in every language (checked by the walk in all six languages). **Not confirmed by a native speaker.**
+
+| Language | Key | Before | After |
+|---|---|---|---|
+| ru | `consent.banner.text` | Данные измерений, хранящиеся в вашем браузере, и информацию о кампаниях мы используем только с вашего согласия. | Данные измерений в вашем браузере и сведения о кампаниях используем только с вашего согласия. |
+| ru | `consent.banner.accept` | Разрешить измерение | Разрешить |
+| pl | `consent.banner.text` | Dane pomiarowe przechowywane w Państwa przeglądarce oraz informacje o kampaniach wykorzystujemy tylko za Państwa zgodą. | Dane pomiarowe z Państwa przeglądarki i informacje o kampaniach wykorzystujemy tylko za Państwa zgodą. |
+| pl | `siteNav.intents.contractors.short` (card label only; the panel heading keeps the full text) | Szukam usług lub wykonawców | Szukam wykonawców |
+| de | `landing.v3.lead` | …Die Registrierung und die Basisveröffentlichung eines Bedarfs sind kostenlos. | …Registrierung und einfache Bedarfsmeldung sind kostenlos. |
+
+Also on that day, `main` brought its own corrections to these catalogs (#3304). They are kept wherever V3 had not rewritten the string; where both had changed a string the V3 text stands (ru `consent.banner.text`; nl `conciergeOffer.note`, `landing.entry.label`, `landing.entry.understood.log-work`).

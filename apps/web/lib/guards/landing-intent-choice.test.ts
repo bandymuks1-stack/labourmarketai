@@ -174,6 +174,9 @@ describe("the URL is the state — a fragment, not a page", () => {
     // it silently — only during start-up, and never after a Close or Back.
     expect(navigator).toMatch(/const \[bootFragment\] = useState\(\(\) =>/);
     expect(navigator).toMatch(/askedFragment = goalIdFromFragment\(now\) \? now : "";/);
+    // …read from the navigation itself, so a router rewrite that lands
+    // between the navigation and its event cannot erase the choice.
+    expect(navigator).toMatch(/const now = went \? new URL\(went\)\.hash : window\.location\.hash;/);
     expect(navigator).toMatch(/const wanted = askedFragment \?\? \(goalIdFromFragment\(bootFragment\) \? bootFragment : ""\);/);
     // …and only on the page it was asked on — never written onto the next
     // page while the router is moving there.

@@ -70,8 +70,14 @@ const STARTUP_CHECKS_MS = [0, 100, 250, 500, 800, 1200, 1800, 2500, 3500, 5000] 
  *  page), what was asked there is forgotten, so coming back opens nothing. */
 let mountedNavigators = 0;
 if (typeof window !== "undefined") {
-  const note = () => {
-    const now = window.location.hash;
+  const note = (event: Event) => {
+    // A real fragment navigation says where it went (`newURL`). Read that,
+    // not the address bar: the router can rewrite the address between the
+    // navigation and this event (measured 2026-11-13: about 1 visit in 40
+    // lost the goal that way). Our own announcements carry no `newURL`, and
+    // Back / Forward arrive as popstate — for those the address is the truth.
+    const went = "newURL" in event && typeof event.newURL === "string" ? event.newURL : "";
+    const now = went ? new URL(went).hash : window.location.hash;
     askedFragment = goalIdFromFragment(now) ? now : "";
   };
   window.addEventListener("hashchange", note);

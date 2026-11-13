@@ -4229,13 +4229,13 @@
     },
     "errors": {
       "userAlreadyRegistered": "Šis el. paštas jau registruotas. Prisijunk vietoj registracijos.",
-      "passwordTooShort": "Slaptažodis per trumpas (bent {min} simbolių).",
+      "passwordTooShort": "Slaptažodis per trumpas (bent {min} simboliai).",
       "invalidCredentials": "Neteisingas el. paštas arba slaptažodis.",
       "invalidEmail": "Netaisyklingas el. pašto formatas.",
       "rateLimited": "Per daug bandymų. Pabandyk vėliau.",
       "generic": "Įvyko klaida. Bandyk dar kartą.",
       "oauth": {
-        "missing_code": "Prisijungimo paslauga grąžino atgal be prisijungimo kodo. Pabandyk dar kartą — jei kartojasi, perkrauk naršyklę.",
+        "missing_code": "Prisijungimo paslauga grąžino atgal be prisijungimo kodo. Pabandyk dar kartą — jei kartojasi, perkrauk puslapį.",
         "exchange_failed": "Prisijungti nepavyko. Pabandyk dar kartą — prisijungimo kodas galioja trumpai ir tik vieną kartą.",
         "no_user": "Prisijungti pavyko, bet paskyros pasiekti nepavyko. Atsijunk ir prisijunk iš naujo.",
         "callback": "Įvyko nelaukta klaida prisijungimo metu. Pabandyk dar kartą — jei tęsiasi, atsiųsk žemiau pateiktą trace ID.",
@@ -4263,7 +4263,7 @@
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",
       "email_label": "El. paštas",
-      "email_placeholder": "vardas@pastas.lt",
+      "email_placeholder": "vardas@example.com",
       "password_label": "Slaptažodis",
       "password_help": "Bent 8 simboliai, 1 didžioji raidė, 1 skaičius, 1 specialusis (!@#$%).",
       "confirm_password_label": "Pakartok slaptažodį",
@@ -4308,7 +4308,7 @@
       "error_password_required": "Įvesk slaptažodį.",
       "error_invalid_credentials": "Neteisingas el. paštas arba slaptažodis.",
       "google_hint": "Registravaisi su socialine paskyra („Google“, „LinkedIn“ ar „Facebook“)? Tuomet slaptažodžio nereikia — spausk tos paslaugos mygtuką viršuje.",
-      "preview_host_notice": "Esi peržiūros (preview) versijoje. Google prisijungimas veikia tik tikrojoje svetainėje — atidaryk https://labourmarket.ai ir prisijunk ten. Prisijungimas el. paštu ir slaptažodžiu čia veikia kaip įprasta.",
+      "preview_host_notice": "Esi peržiūros versijoje. Google prisijungimas veikia tik tikrojoje svetainėje — atidaryk https://labourmarket.ai ir prisijunk ten. Prisijungimas el. paštu ir slaptažodžiu čia veikia kaip įprasta.",
       "google_recovery_label": "Prisijungti per Google — atsarginis būdas (laikinas, per išorinį prisijungimo puslapį)",
       "resend_confirmation": "Siųsti naują patvirtinimo nuorodą",
       "resend_sent": "Nauja patvirtinimo nuoroda išsiųsta adresu {email}."
@@ -4343,7 +4343,7 @@
     "callback": {
       "verifying": "Tikrinama tavo prisijungimo nuoroda...",
       "error_title": "Nepavyko prisijungti",
-      "error_body": "Nuoroda nebegalioja arba sugadinta. Bandyk dar kartą.",
+      "error_body": "Ši nuoroda negalioja arba baigėsi jos galiojimas. Bandyk dar kartą.",
       "retry": "Bandyti dar kartą"
     },
     "onboarding": {
@@ -8736,6 +8736,7 @@
     },
     "languagesTitle": "Kalbos",
     "languagesSelfStated": "Kalbos, kaip jas nurodė darbuotojas.",
+    "educationSelfStated": "Išsilavinimas, kaip nurodė darbuotojas.",
     "certificatesTitle": "Sertifikatai ir pažymėjimai",
     "declaredCertHint": "Nurodyta pačių",
     "documentSelfSuppliedHint": "Dokumentą pateikė pats darbuotojas",

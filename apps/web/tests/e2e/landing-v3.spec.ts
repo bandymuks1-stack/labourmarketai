@@ -170,3 +170,40 @@ for (const locale of LOCALES) {
     }
   }
 }
+
+// THE NARROWEST PHONE, IN EVERY LANGUAGE. On 320×640 with the first-visit
+// cookie notice, the first screen must hold the four goals and "More
+// options" whole, and Sign up must follow directly, within 60px of the fold.
+// The walk that checked this ran in English only, and Russian, Polish and
+// German had quietly fallen a whole control lower (longer cookie notice,
+// stacked consent buttons, a three-line card label). Now every routed
+// language is held to the same bound.
+for (const locale of LOCALES) {
+  test(`${locale}-320: the first screen holds the goals and "More options"; Sign up follows within 60px`, async ({ browser }) => {
+    const height = 640;
+    const context = await browser.newContext({
+      viewport: { width: 320, height },
+      isMobile: true,
+      hasTouch: true,
+      reducedMotion: "reduce",
+    });
+    const page = await context.newPage();
+    await page.goto(`/${locale}`);
+    await expect(page.getByTestId("analytics-consent-banner")).toBeVisible();
+    const rail = page.getByTestId("goal-rail");
+    for (const id of ["work", "workers", "services", "contractors"]) {
+      const box = (await rail.locator(`[data-card-id="${id}"]`).boundingBox())!;
+      expect(box.x, `${id} starts on screen`).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width, `${id} ends on screen`).toBeLessThanOrEqual(320.5);
+      expect(box.y + box.height, `${id} is whole on the first screen`).toBeLessThan(height);
+    }
+    expect(await cutTexts(page, "goal-rail"), "a goal card text is cut").toEqual([]);
+    const more = (await page.getByTestId("goal-more-choices").locator("summary").boundingBox())!;
+    expect(more.y + more.height, '"More options" is whole on the first screen').toBeLessThan(height);
+    const signUp = (await page.getByTestId("landing-signup").getByRole("link").boundingBox())!;
+    expect(signUp.y - (more.y + more.height), "Sign up follows More options directly").toBeLessThan(24);
+    expect(signUp.y + signUp.height, "Sign up is within 60px of the fold").toBeLessThan(height + 60);
+    expect(await overflow(page), "the page scrolls sideways").toBeLessThanOrEqual(1);
+    await context.close();
+  });
+}

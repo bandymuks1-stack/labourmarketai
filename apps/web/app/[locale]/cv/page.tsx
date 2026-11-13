@@ -117,6 +117,7 @@ export default async function VerifiedCvPage({
   const t = await getTranslations("cvExport");
   const tProf = await getTranslations("professions");
   const tSkill = await getTranslations("skillNames");
+  const tUnits = await getTranslations("productivityUnits");
   const tRel = await getTranslations("relationshipTypes");
   const tTier = await getTranslations("evidenceTier");
   const tQuick = await getTranslations("quickNav");
@@ -228,6 +229,12 @@ export default async function VerifiedCvPage({
     { key: "managerConfirmations", value: cv.signals.managerConfirmations },
     { key: "journalEntries", value: cv.signals.journalEntries },
   ].map((s) => ({ ...s, text: s.value === null ? "—" : String(s.value) }));
+  // A brand-new CV has nothing to count. Three tiles reading "0" beside
+  // "manager-confirmed" look like a result on a document handed to an
+  // employer; the empty sentences further down already say what is missing
+  // and where it will come from. An unread value (null) is NOT nothing: it
+  // keeps the tiles, with its em dash.
+  const summaryHasFigures = summary.some((s) => s.value !== 0);
 
   // ONE guard-pinned visibility decision — a section with no data does not
   // exist on the export (no empty headers on a printed CV).
@@ -305,7 +312,11 @@ export default async function VerifiedCvPage({
     if (facts.outputs.length > 0) {
       factsSentences.push(
         t("facts.outputs", {
-          list: facts.outputs.map((o) => `${fmtNum.format(o.value)} ${o.unit}`).join(", "),
+          // The unit is named in the reader's language (the same catalogue
+          // Work in numbers uses), falling back to the stored code.
+          list: facts.outputs
+            .map((o) => `${fmtNum.format(o.value)} ${tUnits.has(o.unit as never) ? tUnits(o.unit as never) : o.unit}`)
+            .join(", "),
         }),
       );
     }
@@ -1142,7 +1153,7 @@ export default async function VerifiedCvPage({
               </p>
             </div>
           ) : null}
-          {!compact ? (
+          {!summaryHasFigures ? null : !compact ? (
             <dl className="mt-4 grid grid-cols-3 gap-3" data-testid="cv-summary">
               {summary.map((s) => (
                 <div
@@ -1347,6 +1358,7 @@ export default async function VerifiedCvPage({
                 );
               })}
             </ul>
+            <p className="text-meta text-text-muted" data-testid="cv-education-self-stated">{t("educationSelfStated")}</p>
           </section>
         ) : null}
 
@@ -1444,7 +1456,12 @@ export default async function VerifiedCvPage({
               {cv.recordedHoursTotal > 0
                 ? `${t("recordedHours", {
                     hours: fmtHours(cv.recordedHoursTotal),
-                    confirmed: fmtHours(cv.recordedHoursConfirmed ?? 0),
+                    // Unreadable is not zero: an em dash, as in the summary
+                    // tiles above, never "0 h confirmed".
+                    confirmed:
+                      cv.recordedHoursConfirmed === null
+                        ? "—"
+                        : fmtHours(cv.recordedHoursConfirmed),
                   })} ${
                     cv.journalCoverage?.truncated
                       ? t("recordedHoursScopeTruncated", {

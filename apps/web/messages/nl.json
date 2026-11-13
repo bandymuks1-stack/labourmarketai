@@ -892,7 +892,7 @@
       "evidence": {
         "title": "Profiel- en bewijscijfers",
         "totalSkills": "Vaardigheden",
-        "workSupported": "Onderbouwd door werkdagboek-invoer",
+        "workSupported": "Onderbouwd door werkjournaal-invoer",
         "confirmed": "Bevestigd",
         "journalEntries": "Journaalregels",
         "confirmations": "Door een manager bevestigde registraties",
@@ -4235,9 +4235,9 @@
       "rateLimited": "Te veel pogingen. Probeer het later opnieuw.",
       "generic": "Er is iets misgegaan. Probeer het opnieuw.",
       "oauth": {
-        "missing_code": "De aanmelddienst kwam terug zonder aanmeldcode. Probeer het opnieuw — als het zich herhaalt, laad de pagina dan opnieuw.",
-        "exchange_failed": "Aanmelden is niet gelukt. Probeer het opnieuw — de aanmeldcode werkt één keer en verloopt snel.",
-        "no_user": "Je bent aangemeld, maar je account is niet bereikbaar. Log uit en weer in.",
+        "missing_code": "De inlogdienst kwam terug zonder inlogcode. Probeer het opnieuw — als het zich herhaalt, laad de pagina dan opnieuw.",
+        "exchange_failed": "Inloggen is niet gelukt. Probeer het opnieuw — de inlogcode werkt één keer en verloopt snel.",
+        "no_user": "Je bent ingelogd, maar je account is niet bereikbaar. Log uit en weer in.",
         "callback": "Onverwachte fout tijdens het inloggen. Probeer het opnieuw — als het aanhoudt, deel dan het trace-ID hieronder.",
         "cancelled": "Inloggen is geannuleerd. Er is niets met je account gebeurd.",
         "unknown": "Kon niet inloggen. Probeer het opnieuw.",
@@ -4263,7 +4263,7 @@
       "google_redirecting": "Doorsturen...",
       "divider": "of",
       "email_label": "E-mailadres",
-      "email_placeholder": "naam@voorbeeld.nl",
+      "email_placeholder": "naam@example.com",
       "password_label": "Wachtwoord",
       "password_help": "Min. 8 tekens, 1 hoofdletter, 1 cijfer, 1 speciaal teken (!@#$%).",
       "confirm_password_label": "Bevestig wachtwoord",
@@ -4341,7 +4341,7 @@
       "error_generic": "Er is iets misgegaan. Probeer het zo opnieuw."
     },
     "callback": {
-      "verifying": "Je aanmeldlink wordt gecontroleerd...",
+      "verifying": "Je inloglink wordt gecontroleerd...",
       "error_title": "Inloggen mislukt",
       "error_body": "Deze link is ongeldig of verlopen. Probeer het opnieuw.",
       "retry": "Opnieuw proberen"
@@ -4417,7 +4417,7 @@
         "s2": "Voeg je echte vaardigheden toe",
         "s3": "Stel je beschikbaarheid in",
         "s4": "Voeg werkervaring en bewijs toe",
-        "note": "Vaardigheden beginnen als zelf opgegeven. Documenten, je werkdagboek en bevestigingen van mensen maken ze na verloop van tijd sterker."
+        "note": "Vaardigheden beginnen als zelf opgegeven. Documenten, je werkjournaal en bevestigingen van mensen maken ze na verloop van tijd sterker."
       },
       "nextStepsOrganization": {
         "eyebrow": "Hierna — je organisatie",
@@ -5318,17 +5318,17 @@
       "subcopy": "Beheer je werknemers, koppel ze aan klantbehoeften en bemiddel kennismakingen — zonder zicht of controle te verliezen.",
       "bullets": [
         "Poolomvang — elke beheerde werknemer in één oogopslag.",
-        "Verdeling per vak — capaciteit per vaardigheid, live.",
+        "Verdeling per vak — capaciteit per vaardigheid, zoals opgegeven in profielen.",
         "Opdrachtstatus — Actief, In afwachting, Beschikbaar.",
         "Meerdere klanten — plaats de juiste mensen bij verschillende klanten."
       ]
     },
     "journey": {
       "eyebrow": "Workflow voor uitzendbureaus",
-      "headline": "Run je pool als een desk",
+      "headline": "Beheer je pool als een bemiddelingsdesk",
       "steps": [
         {
-          "title": "Onboard je werknemers",
+          "title": "Voeg je werknemers toe",
           "desc": "Breng je beheerde pool samen in één werkruimte."
         },
         {
@@ -5370,7 +5370,7 @@
           "desc": "Opdrachtgevers en werknemers in elke markt waarin we actief zijn."
         },
         {
-          "title": "Laat je desk groeien",
+          "title": "Laat je bemiddeling groeien",
           "desc": "Capaciteitsinzichten wanneer de vraag verschuift."
         }
       ]
@@ -5781,13 +5781,13 @@
     ],
     "priceState": {
       "draft_pricing": "De prijzen worden voorbereid — er kan nog niets worden gekocht.",
-      "owner_confirmed": "Prijzen bevestigd door de eigenaar. Activeren gebeurt in uw organisatieaccount; op deze pagina wordt niets afgeschreven."
+      "owner_confirmed": "Prijzen bevestigd door de eigenaar. Activeren gebeurt in je organisatieaccount; op deze pagina wordt niets afgeschreven."
     },
     "individual": {
       "name": "Bijzondere wensen",
       "tagline": "Voor behoeften buiten de standaardplannen",
       "question": "Iets specifieks in gedachten?",
-      "body": "Neem contact op als u bijzondere wensen hebt — we spreken ze samen af. Geen automatische tier, geen gepubliceerde prijs.",
+      "body": "Neem contact op als je bijzondere wensen hebt — we spreken ze samen af. Geen automatisch niveau, geen gepubliceerde prijs.",
       "cta": "Neem contact op"
     },
     "priceFree": "€ 0",
@@ -8182,7 +8182,7 @@
     },
     "verifiedTitle": "Door manager bevestigde vaardigheden",
     "verifiedEmpty": "Nog geen. Ze worden opgebouwd uit je werkregistraties.",
-    "journalSupportedLabel": "Onderbouwd door werkdagboek-invoer",
+    "journalSupportedLabel": "Onderbouwd door werkjournaal-invoer",
     "journalSupportedHint": "Vaardigheden die je werklogboek ondersteunt — sterker dan zelfverklaard; wachten op bevestiging door de manager.",
     "latestEvidenceLabel": "Laatste registraties",
     "latestEvidenceEmpty": "Nog geen registraties — je eerste journaalitem wordt de eerste.",
@@ -8457,7 +8457,7 @@
     },
     "workProof": {
       "title": "Werkbewijs & exports",
-      "journalTitle": "Bewijs uit het werkdagboek",
+      "journalTitle": "Bewijs uit het werkjournaal",
       "journalCounts": "Notities: {entries} · Foto's: {photos}",
       "countsUnavailable": "Momenteel niet beschikbaar.",
       "galleryNote": "Foto's staan in je dagboeknotities; projectgalerijen vind je op de pagina van elk project."
@@ -8694,7 +8694,7 @@
     "skillsEmpty": "Nog geen vaardigheden opgeslagen.",
     "tiers": {
       "confirmed": "Bevestigd door een managersvermelding",
-      "evidence": "Onderbouwd door werkdagboek-invoer",
+      "evidence": "Onderbouwd door werkjournaal-invoer",
       "declared": "Zelf opgegeven"
     },
     "summary": {
@@ -8708,7 +8708,7 @@
     "proofRole": "Bevestigd door (rol)",
     "proofEmpty": "Nog geen bevestigde registraties.",
     "generatedAt": "Gegenereerd",
-    "notWorker": "CV-export is beschikbaar voor werknemersprofielen — het wordt opgebouwd uit het werkdagboek en bevestigde vaardigheden.",
+    "notWorker": "CV-export is beschikbaar voor werknemersprofielen — het wordt opgebouwd uit het werkjournaal en bevestigde vaardigheden.",
     "summaryTitle": "Professionele samenvatting",
     "facts": {
       "recorded": "Het werkjournaal registreert {hours} u over {count, plural, one {# record} other {# records}}.",
@@ -8947,7 +8947,8 @@
         "none": "Nog geen volgende stap te tonen. Meer geregistreerd werk geeft hier meer houvast.",
         "unknown": "Kon nu niet worden gelezen."
       }
-    }
+    },
+    "educationSelfStated": "Opleiding zoals opgegeven door de werknemer."
   },
   "todayScreen": {
     "eyebrow": "Vandaag",
@@ -9440,7 +9441,7 @@
       "free_worker": "Gratis Werknemer",
       "worker_plus": "Persoon plus (niet aangeboden)",
       "company_pilot": "Organisatie",
-      "agency_pilot": "Bureau-tier (niet aangeboden)",
+      "agency_pilot": "Bureauplan (niet aangeboden)",
       "admin_internal": "Admin / Intern",
       "free_organization": "Organisatie (gratis)"
     },
@@ -9464,7 +9465,7 @@
       "draft_pricing": "Plannen zijn voorbereid, niet koopbaar. Geen enkele prijs hier is definitief en er kan niets worden gekocht.",
       "owner_confirmed": "De plannen zijn alleen voorbereid — er kan niets worden gekocht totdat betalingen zijn ingeschakeld."
     },
-    "featuresLabel": "Inbegrepen in deze afbakening",
+    "featuresLabel": "Inbegrepen in dit plan",
     "limitValue": "tot {count}",
     "freeToday": {
       "freeTitle": "Vandaag gratis",
@@ -9498,7 +9499,7 @@
     },
     "enforcement": {
       "free_surface": "Vandaag in het product",
-      "server_gate": "Vandaag in het product, met rechtencontrole",
+      "server_gate": "Vandaag beschikbaar, afhankelijk van je rechten",
       "declared_boundary_only": "Voorbereid — start pas met facturering",
       "admin_rbac": "Intern, alleen admin"
     }
@@ -11227,7 +11228,7 @@
       "note": "Eén werkgebeurtenis kan meerdere weergaven voeden. Bewijs wordt nooit gedupliceerd of verzonnen."
     },
     "afterHire": {
-      "heading": "Waarom gebruiken nadat u werk hebt gevonden?",
+      "heading": "Waarom gebruiken nadat je werk hebt gevonden?",
       "lead": "Een gewone vacaturesite levert de meeste waarde vóór de aanname. LabourMarket.ai moet nuttiger worden zodra het echte werk begint.",
       "boardLabel": "Een gewone vacaturesite",
       "boardPoints": [
@@ -11315,7 +11316,7 @@
       ]
     },
     "data": {
-      "heading": "Uw gegevens",
+      "heading": "Je gegevens",
       "body": "Toegang tot gegevens is standaard gesloten en wordt in gewone woorden uitgelegd op de pagina's hieronder."
     },
     "links": {
@@ -12127,7 +12128,7 @@
       "workerDocuments": "Je documentregistraties",
       "financeRecords": "Je financiële registraties",
       "workerSkills": "Je gecatalogiseerde vaardigheden",
-      "workJournal": "Je werkdagboek",
+      "workJournal": "Je werkjournaal",
       "managerConfirmations": "Bevestigingen van leidinggevenden",
       "projects": "Je projecten",
       "assignments": "Actieve werknemerstoewijzingen",
@@ -12140,7 +12141,7 @@
       "worker": {
         "title": "Profiel- en bewijssamenvatting",
         "totalSkills": "Vaardigheden",
-        "workSupported": "Onderbouwd door werkdagboek-invoer",
+        "workSupported": "Onderbouwd door werkjournaal-invoer",
         "confirmed": "Bevestigd",
         "journalEntries": "Dagboekregistraties",
         "confirmations": "Bevestigingen",
@@ -12898,7 +12899,7 @@
     "skillsTitle": "Vaardigheden",
     "skillsEmpty": "Geen vaardigheden die je mag zien.",
     "skillVerified": "Bevestigd door een managersvermelding",
-    "skillWorkBacked": "Onderbouwd door werkdagboek-invoer",
+    "skillWorkBacked": "Onderbouwd door werkjournaal-invoer",
     "skillDeclared": "Zelf opgegeven",
     "skillsLegend": "Met managerregistratie — een managerregistratie hoort bij de vaardigheid. Door werk gestaafd — zichtbaar uit werkjournaal-invoeren. Zelf opgegeven — door de persoon toegevoegd.",
     "skillsReadError": "Vaardigheden konden nu niet worden geladen. Probeer het zo opnieuw.",
@@ -13365,7 +13366,7 @@
     "basis": {
       "gatedMigration": "Gegevensopslag nog niet ingeschakeld",
       "marketRateAverages": "Door de beheerder gecureerde markttariefgemiddelden",
-      "journalEvidence": "Je eigen werkdagboekbewijs",
+      "journalEvidence": "Je eigen werkjournaalbewijs",
       "fillTimeMeasurementsMissing": "Invultijdmetingen (nog niet verzameld)",
       "customerRequests": "Je eigen vraagaanvragen",
       "workerRows": "Getelde werknemersrecords",
@@ -13400,7 +13401,7 @@
       "missingForRecommendation": "Vaardigheden die de matchengine miste voor een aanbeveling"
     },
     "nextAction": {
-      "logJournalEvidence": "Leg bewijs voor deze vaardigheden vast in het werkdagboek"
+      "logJournalEvidence": "Leg bewijs voor deze vaardigheden vast in het werkjournaal"
     },
     "sources": {
       "internalPlatformAggregates": "Interne aggregaten van LabourMarket.ai",
@@ -15705,7 +15706,7 @@
     "chain": {
       "eyebrow": "De productketen",
       "title": "Werk wordt bewijs. Bewijs wordt je volgende kans.",
-      "journalNote": "Het werkdagboek is het verschil: elke vastgelegde dag wordt verifieerbare professionele geschiedenis — je volgende kans wordt beargumenteerd met wat je echt deed, niet met wat een CV beweert.",
+      "journalNote": "Het werkjournaal is het verschil: elke vastgelegde dag wordt verifieerbare professionele geschiedenis — je volgende kans wordt beargumenteerd met wat je echt deed, niet met wat een CV beweert.",
       "steps": {
         "need": {
           "title": "Een werkbehoefte",
@@ -15720,7 +15721,7 @@
           "body": "Jij werkt. Het platform staat niet in de weg."
         },
         "journal": {
-          "title": "Het werkdagboek",
+          "title": "Het werkjournaal",
           "body": "Je legt vast wat gebeurde — dat wordt je geschiedenis."
         },
         "skills": {
@@ -16273,7 +16274,7 @@
   },
   "evidenceTier": {
     "managerConfirmed": "Bevestigd door een managersvermelding",
-    "workJournal": "Onderbouwd door werkdagboek-invoer",
+    "workJournal": "Onderbouwd door werkjournaal-invoer",
     "selfDeclared": "Zelf opgegeven",
     "autoConfirmQualifier": "bevestigd volgens een vooraf ingestelde regel",
     "selfConfirmQualifier": "bevestigd door dezelfde persoon die het werk deed",
@@ -18623,7 +18624,7 @@
   },
   "teamRecordedWork": {
     "title": "Vastgelegd werk",
-    "intro": "{period}: wat de eigen werkdagboek-items van elke persoon, vastgelegd bij de werkrelaties van deze organisatie, samen opleveren — dezelfde regel en dezelfde lezer als het \"werk in cijfers\" van de persoon zelf. Items die persoonlijk of voor een andere werkgever zijn vastgelegd, komen nooit in dit beeld.",
+    "intro": "{period}: wat de eigen werkjournaal-items van elke persoon, vastgelegd bij de werkrelaties van deze organisatie, samen opleveren — dezelfde regel en dezelfde lezer als het \"werk in cijfers\" van de persoon zelf. Items die persoonlijk of voor een andere werkgever zijn vastgelegd, komen nooit in dit beeld.",
     "bound": "De eerste {shown} van {total} mensen op de lijst; open een persoon voor de volledige sectie.",
     "journalTotal": "Dagboek: {hours} u over {members, plural, one {# persoon} other {# personen}} van wie de items zijn gelezen",
     "journalTotalNone": "Dagboek: geen leesbare items in deze periode",
