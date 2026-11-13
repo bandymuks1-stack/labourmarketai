@@ -686,29 +686,37 @@ export function OnboardingWizard({
           })}
         </ul>
 
-        <Button
-          type="button"
-          disabled={intents.size === 0}
-          data-testid="onboarding-intents-continue"
-          onClick={() => {
-            // Per-step drop-off signal (Pilot Onboarding and Measurement
-            // v1): the role step is DONE the moment the user advances.
-            // Bounded metadata only — a coarse step label + the intent set.
-            trackFunnel(FUNNEL_EVENTS.onboardingStepRoleCompleted, {
-              step: "role",
-              intent: intentList.join(","),
-            });
-            setStep(2);
-          }}
-          className="w-full rounded-xl sm:w-auto sm:self-start"
-        >
-          {t("rolePicker.continue")}
-        </Button>
-        {error && (
-          <p className="text-xs text-state-danger" role="alert">
-            {error}
-          </p>
-        )}
+        {/* ON A PHONE THE WAY FORWARD STAYS ON SCREEN. Six cards in one column
+            put this button 1.7–2.1 screens down (measured 2026-11-13, 360×560
+            and 390×664), and choosing a card showed only a tick: nothing said
+            a button existed below. The bar sticks to the bottom of the screen
+            while the cards scroll under it; from `sm` up it is the ordinary
+            in-flow button it always was. Solid background, no blur. */}
+        <div className="sticky bottom-0 z-10 -mx-6 flex flex-col gap-2 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0" data-testid="onboarding-action-bar">
+          {error && (
+            <p className="text-xs text-state-danger" role="alert">
+              {error}
+            </p>
+          )}
+          <Button
+            type="button"
+            disabled={intents.size === 0}
+            data-testid="onboarding-intents-continue"
+            onClick={() => {
+              // Per-step drop-off signal (Pilot Onboarding and Measurement
+              // v1): the role step is DONE the moment the user advances.
+              // Bounded metadata only — a coarse step label + the intent set.
+              trackFunnel(FUNNEL_EVENTS.onboardingStepRoleCompleted, {
+                step: "role",
+                intent: intentList.join(","),
+              });
+              setStep(2);
+            }}
+            className="min-h-11 w-full rounded-xl sm:w-auto sm:self-start"
+          >
+            {t("rolePicker.continue")}
+          </Button>
+        </div>
       </div>
     );
   }
@@ -1012,35 +1020,39 @@ export function OnboardingWizard({
         </p>
       </div>
 
-      {error && (
-        <p className="text-xs text-state-danger" role="alert">
-          {error}
-        </p>
-      )}
-
       {invitationToken && invitationReviewNotice ? (
         <StaffReviewNotice text={invitationReviewNotice} testId="onboarding-review-notice" />
       ) : null}
 
-      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-        <Button
-          type="submit"
-          disabled={pending}
-          data-testid="onboarding-submit"
-          className="w-full rounded-xl sm:w-auto"
-        >
-          {pending ? t("saving") : t("step2.continue")}
-        </Button>
-        {!skipRoleStep && (
-          <button
-            type="button"
-            onClick={() => setStep(1)}
-            disabled={pending}
-            className="text-xs text-text-muted hover:text-text-secondary disabled:opacity-60"
-          >
-            {t("back")}
-          </button>
+      {/* The submit stays on screen on a phone (it sat 2.7–3.4 screens down,
+          below fields that are mostly optional), and a refusal is said right
+          above it instead of somewhere down the page. Same bar as step 1. */}
+      <div className="sticky bottom-0 z-10 -mx-6 flex flex-col gap-2 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0" data-testid="onboarding-action-bar">
+        {error && (
+          <p className="text-xs text-state-danger" role="alert">
+            {error}
+          </p>
         )}
+        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+          <Button
+            type="submit"
+            disabled={pending}
+            data-testid="onboarding-submit"
+            className="min-h-11 w-full rounded-xl sm:w-auto"
+          >
+            {pending ? t("saving") : t("step2.continue")}
+          </Button>
+          {!skipRoleStep && (
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              disabled={pending}
+              className="min-h-11 px-2 text-xs text-text-muted hover:text-text-secondary disabled:opacity-60"
+            >
+              {t("back")}
+            </button>
+          )}
+        </div>
       </div>
     </form>
   );
