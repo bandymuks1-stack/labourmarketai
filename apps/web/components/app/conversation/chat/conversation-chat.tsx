@@ -423,6 +423,10 @@ export type ChatLabels = {
   chipCreateOrganization: string;
   lmcHint: string;
   chipLmc: string;
+  commercialHint: string;
+  chipCommercial: string;
+  billingPlanHint: string;
+  chipBillingPlan: string;
   adminRouteHint: string;
   adminApprovalsChip: string;
   adminRequestsChip: string;
@@ -7541,6 +7545,22 @@ export function ConversationChat({
         // settings page is not an answer to "how much do I have".
         lmc: () =>
           assistant(labels.lmcHint, [
+            { id: "link:/dashboard/account#lmc", label: labels.chipLmc },
+          ]),
+        // "Parodyk mano sutartis" / "my orders" — the two canonical order
+        // screens. `link:` chips only: nothing is created, sent or accepted
+        // by the sentence (no autonomous commercial operation).
+        commercial: () =>
+          assistant(labels.commercialHint, [
+            { id: "link:/dashboard/commercial", label: labels.chipCommercial },
+            { id: "link:/dashboard/service-requests", label: labels.chipServiceRequests },
+          ]),
+        // "Kokia mano prenumerata?" — the account plan fold (its hash opener
+        // expands it). Read-only by construction: the chip is a door, and
+        // paying or cancelling stays the person's own click on that page.
+        billingPlan: () =>
+          assistant(labels.billingPlanHint, [
+            { id: "link:/dashboard/account#account-plan", label: labels.chipBillingPlan },
             { id: "link:/dashboard/account#lmc", label: labels.chipLmc },
           ]),
         // "Ką turiu patvirtinti?" — the approvals area. A `link:` chip is

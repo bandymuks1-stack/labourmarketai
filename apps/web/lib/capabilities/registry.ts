@@ -52,6 +52,7 @@ import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES } from "./conversation-action-b
 import { WORKSPACE_READ_CAPABILITIES } from "./workspace-read-capabilities";
 import { DOMAIN_ACTION_CAPABILITIES } from "./domain-action-capabilities";
 import { PUBLIC_JOBS_CAPABILITIES } from "./public-jobs-capabilities";
+import { ACCOUNT_HISTORY_READ_CAPABILITIES } from "./account-history-read-capabilities";
 import { FORECAST_CAPABILITIES } from "./forecast-capabilities";
 import {
   workerExpressInterestSchema,
@@ -1986,6 +1987,12 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // cadence (draft → confirm, administrators only, audited). See
   // forecast-capabilities.ts.
   ...FORECAST_CAPABILITIES,
+  // What a person ASKS an assistant that had no named tool (owner P0, chat as
+  // the one control layer): the one work history, the plan / subscription /
+  // credit balance (read-only — no money operation exists on this door), and
+  // the finder's own search over the caller's own records. See
+  // account-history-read-capabilities.ts.
+  ...ACCOUNT_HISTORY_READ_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

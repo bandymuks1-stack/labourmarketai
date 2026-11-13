@@ -13,6 +13,7 @@ import {
   buildSearchGroup,
   type DashboardSearchCandidate,
   type DashboardSearchGroup,
+  type DashboardSearchSource,
 } from "@/lib/search/dashboard-search-model";
 
 /**
@@ -223,6 +224,55 @@ async function searchOwnDocuments(
   }
 }
 
+/** The seven sources, in catalogue order, each read independently. */
+const SOURCE_SEARCHERS: readonly (readonly [
+  DashboardSearchSource,
+  (nq: string) => Promise<DashboardSearchGroup | null>,
+])[] = [
+  ["journal", searchOwnJournal],
+  ["projects", searchOwnProjects],
+  ["tasks", searchOwnTasks],
+  ["finance", searchOwnFinance],
+  ["conversations", searchOwnConversations],
+  ["bookings", searchOwnBookings],
+  ["documents", searchOwnDocuments],
+];
+
+export type DashboardSearchReport = {
+  readonly groups: readonly DashboardSearchGroup[];
+  /**
+   * Sources that produced NO group because they were not read: the read
+   * failed, the area is not enabled, or it does not apply to this caller (a
+   * non-worker has no document records). "Not read" is never "no match" —
+   * a consumer that reports an empty answer must name these (UNKNOWN ≠ 0).
+   */
+  readonly notRead: readonly DashboardSearchSource[];
+};
+
+/**
+ * The SAME search, with what could not be searched stated. One read path:
+ * `getDashboardSearchGroups` below is this report's `groups`.
+ */
+export async function getDashboardSearchReport(
+  nq: string,
+  only?: readonly DashboardSearchSource[],
+): Promise<DashboardSearchReport> {
+  // A requested subset is applied BEFORE the total cap: with every source
+  // searched, six full groups fill the cap and the seventh is dropped, so a
+  // caller asking for that one source alone was told "nothing" while matches
+  // existed. Sources that were not asked for are not read at all.
+  const searchers = only ? SOURCE_SEARCHERS.filter(([source]) => only.includes(source)) : SOURCE_SEARCHERS;
+  const settled = await Promise.all(
+    searchers.map(async ([source, search]) => [source, await search(nq)] as const),
+  );
+  return {
+    groups: boundSearchGroups(
+      settled.map(([, g]) => g).filter((g): g is DashboardSearchGroup => g !== null),
+    ),
+    notRead: settled.filter(([, g]) => g === null).map(([source]) => source),
+  };
+}
+
 /**
  * All grouped results for one normalized query — each source independently,
  * bounded by the model's per-source and total caps.
@@ -230,16 +280,5 @@ async function searchOwnDocuments(
 export async function getDashboardSearchGroups(
   nq: string,
 ): Promise<readonly DashboardSearchGroup[]> {
-  const groups = await Promise.all([
-    searchOwnJournal(nq),
-    searchOwnProjects(nq),
-    searchOwnTasks(nq),
-    searchOwnFinance(nq),
-    searchOwnConversations(nq),
-    searchOwnBookings(nq),
-    searchOwnDocuments(nq),
-  ]);
-  return boundSearchGroups(
-    groups.filter((g): g is DashboardSearchGroup => g !== null),
-  );
+  return (await getDashboardSearchReport(nq)).groups;
 }
