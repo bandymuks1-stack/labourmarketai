@@ -7935,7 +7935,7 @@
       "text": "Lapu lietojumu un kampaņu, kas jūs atveda, mērām tikai ar jūsu atļauju.",
       "accept": "Atļaut mērīšanu",
       "refuse": "Atteikties",
-      "more": "Vairāk",
+      "more": "Vairāk par sīkdatnēm",
       "label": "Lietošanas mērīšanas izvēle"
     },
     "control": {
@@ -7946,5 +7946,79 @@
       "allow": "Atļaut",
       "refuse": "Atteikties"
     }
+  },
+  "siteNav": {
+    "signUp": "Reģistrēties",
+    "trigger": "Galvenās izvēles",
+    "account": "Pēc pieteikšanās",
+    "intents": {
+      "work": {
+        "title": "Meklēju darbu",
+        "description": "Atrodiet darbu un parādiet, ko protat.",
+        "short": "Meklēju darbu"
+      },
+      "workers": {
+        "title": "Meklēju darbiniekus",
+        "description": "Aprakstiet, kāds darbs jāpaveic.",
+        "short": "Meklēju darbiniekus"
+      },
+      "services": {
+        "title": "Piedāvāju pakalpojumus",
+        "description": "Publicējiet savu piedāvājumu un atbildiet uz pieprasījumiem.",
+        "short": "Piedāvāju pakalpojumus"
+      },
+      "orders": {
+        "title": "Meklēju pasūtījumus un līgumus",
+        "description": "Atrodiet darba pieprasījumus un glabājiet piedāvājumus vienuviet.",
+        "short": "Meklēju pasūtījumus"
+      },
+      "partners": {
+        "title": "Meklēju partnerus",
+        "description": "Sazinieties ar cilvēkiem un organizācijām, ar kuriem strādājat.",
+        "short": "Meklēju partnerus"
+      },
+      "agencies": {
+        "title": "Aģentūrām",
+        "description": "Pārvaldiet aģentūras cilvēkus, klientus un piedāvājumus.",
+        "short": "Aģentūrām"
+      }
+    },
+    "links": {
+      "jobs": "Darba sludinājumi",
+      "workOpportunities": "Darba iespējas",
+      "createCv": "Izveidot bezmaksas CV",
+      "workAbroad": "Darbs ārzemēs",
+      "forWorkers": "Kā tas darbojas darbiniekiem",
+      "companyNeed": "Aprakstīt vajadzību",
+      "forCompanies": "Kā tas darbojas uzņēmumiem",
+      "labourMarket": "Darba tirgus pa valstīm",
+      "myServices": "Jūsu pakalpojumi",
+      "serviceRequests": "Pakalpojumu pieprasījumi",
+      "marketListings": "Tirgus sludinājumi",
+      "commercial": "Piedāvājumi un līgumi",
+      "network": "Jūsu tīkls",
+      "partnerWithUs": "Kļūt par partneri",
+      "forAgencies": "Kā tas darbojas aģentūrām",
+      "setUpAgency": "Izveidot aģentūru"
+    },
+    "assistant": "Jautāt asistentam",
+    "start": {
+      "searchLabel": "Meklēt darbu",
+      "searchPlaceholder": "Amats vai atslēgvārds",
+      "searchSubmit": "Meklēt",
+      "viewAll": "Visi sludinājumi"
+    },
+    "nav": {
+      "heading": "Ko vēlaties darīt?",
+      "swipe": "Velciet",
+      "close": "Aizvērt",
+      "functions": "Funkcijas",
+      "professions": "Profesijas",
+      "opensNow": "Atveras uzreiz",
+      "signInWhenOpen": "Pieteikšanās atverot",
+      "allSectors": "Visas nozares",
+      "fullList": "Pilns saraksts"
+    },
+    "more": "Vairāk"
   }
 }

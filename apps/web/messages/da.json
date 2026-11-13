@@ -7935,7 +7935,7 @@
       "text": "Vi måler sidebrug, og hvilken kampagne der bragte dig hertil, kun hvis du tillader det.",
       "accept": "Tillad måling",
       "refuse": "Afvis",
-      "more": "Mere",
+      "more": "Mere om cookies",
       "label": "Valg om brugsmåling"
     },
     "control": {
@@ -7946,5 +7946,79 @@
       "allow": "Tillad",
       "refuse": "Afvis"
     }
+  },
+  "siteNav": {
+    "signUp": "Opret konto",
+    "trigger": "Hovedvalg",
+    "account": "Efter login",
+    "intents": {
+      "work": {
+        "title": "Jeg søger arbejde",
+        "description": "Find job og vis, hvad du kan.",
+        "short": "Find arbejde"
+      },
+      "workers": {
+        "title": "Jeg søger medarbejdere",
+        "description": "Beskriv, hvilket arbejde du har brug for.",
+        "short": "Find medarbejdere"
+      },
+      "services": {
+        "title": "Jeg tilbyder ydelser",
+        "description": "Offentliggør dit tilbud og besvar forespørgsler.",
+        "short": "Tilbyd ydelser"
+      },
+      "orders": {
+        "title": "Jeg søger opgaver og kontrakter",
+        "description": "Find arbejdsforespørgsler og hold tilbud samlet.",
+        "short": "Find opgaver"
+      },
+      "partners": {
+        "title": "Jeg søger partnere",
+        "description": "Forbind dig med de mennesker og organisationer, du arbejder med.",
+        "short": "Find partnere"
+      },
+      "agencies": {
+        "title": "For bureauer",
+        "description": "Styr bureauets folk, kunder og tilbud.",
+        "short": "For bureauer"
+      }
+    },
+    "links": {
+      "jobs": "Jobopslag",
+      "workOpportunities": "Jobmuligheder",
+      "createCv": "Lav et gratis CV",
+      "workAbroad": "Arbejde i udlandet",
+      "forWorkers": "Sådan virker det for medarbejdere",
+      "companyNeed": "Beskriv dit behov",
+      "forCompanies": "Sådan virker det for virksomheder",
+      "labourMarket": "Arbejdsmarked pr. land",
+      "myServices": "Dine ydelser",
+      "serviceRequests": "Forespørgsler på ydelser",
+      "marketListings": "Markedsopslag",
+      "commercial": "Tilbud og kontrakter",
+      "network": "Dit netværk",
+      "partnerWithUs": "Bliv partner",
+      "forAgencies": "Sådan virker det for bureauer",
+      "setUpAgency": "Opret dit bureau"
+    },
+    "assistant": "Spørg assistenten",
+    "start": {
+      "searchLabel": "Søg job",
+      "searchPlaceholder": "Jobtitel eller søgeord",
+      "searchSubmit": "Søg",
+      "viewAll": "Alle job"
+    },
+    "nav": {
+      "heading": "Hvad vil du gøre?",
+      "swipe": "Stryg",
+      "close": "Luk",
+      "functions": "Funktioner",
+      "professions": "Fag",
+      "opensNow": "Åbner med det samme",
+      "signInWhenOpen": "Log ind ved åbning",
+      "allSectors": "Alle brancher",
+      "fullList": "Fuld liste"
+    },
+    "more": "Mere"
   }
 }

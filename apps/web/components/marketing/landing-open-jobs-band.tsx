@@ -6,7 +6,7 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import type { LiveMarketVacancySample } from "@/lib/market/live-market-landing";
 import { PublicVacancyCard } from "@/components/marketing/public-vacancy-card";
 import { displayLanguageName } from "@/lib/i18n/language-name";
-import { Reveal } from "@/components/marketing/reveal";
+import { Reveal } from "@/components/marketing/lazy-motion";
 
 /**
  * REAL OPPORTUNITIES — a few live vacancies, on the landing, from the board.
