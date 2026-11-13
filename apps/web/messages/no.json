@@ -1774,6 +1774,10 @@
       "title": "Kunne ikke åpne samtalen",
       "body": "Du har kanskje ikke tillatelse til å sende melding til denne personen, eller personen er ikke lenger tilgjengelig. Ingenting ble sendt."
     },
+    "noLongerAvailable": {
+      "title": "Denne samtalen er ikke lenger tilgjengelig",
+      "body": "Du deltar ikke lenger i den, så meldingene vises ikke."
+    },
     "originalLanguage": "[EN] Original ({lang})",
     "priority": {
       "awaitingYou": "[EN] Awaiting your reply",
@@ -7931,7 +7935,7 @@
       "text": "Vi måler sidebruk, og hvilken kampanje som brakte deg hit, bare hvis du tillater det.",
       "accept": "Tillat måling",
       "refuse": "Avslå",
-      "more": "Mer",
+      "more": "Mer om informasjonskapsler",
       "label": "Valg om bruksmåling"
     },
     "control": {

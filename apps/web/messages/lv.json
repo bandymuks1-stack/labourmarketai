@@ -1774,6 +1774,10 @@
       "title": "Neizdevās atvērt sarunu",
       "body": "Iespējams, jums nav atļaujas rakstīt šai personai vai tā vairs nav pieejama. Nekas netika nosūtīts."
     },
+    "noLongerAvailable": {
+      "title": "Šī saruna jums vairs nav pieejama",
+      "body": "Jūs vairs neesat tās dalībnieks, tāpēc tās ziņas netiek rādītas."
+    },
     "originalLanguage": "[EN] Original ({lang})",
     "priority": {
       "awaitingYou": "[EN] Awaiting your reply",
@@ -7931,7 +7935,7 @@
       "text": "Lapu lietojumu un kampaņu, kas jūs atveda, mērām tikai ar jūsu atļauju.",
       "accept": "Atļaut mērīšanu",
       "refuse": "Atteikties",
-      "more": "Vairāk",
+      "more": "Vairāk par sīkdatnēm",
       "label": "Lietošanas mērīšanas izvēle"
     },
     "control": {

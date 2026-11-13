@@ -1774,6 +1774,10 @@
       "title": "Kunne ikke åbne samtalen",
       "body": "Du har muligvis ikke tilladelse til at skrive til denne person, eller personen er ikke længere tilgængelig. Der blev ikke sendt noget."
     },
+    "noLongerAvailable": {
+      "title": "Denne samtale er ikke længere tilgængelig",
+      "body": "Du deltager ikke længere i den, så dens beskeder vises ikke."
+    },
     "originalLanguage": "[EN] Original ({lang})",
     "priority": {
       "awaitingYou": "[EN] Awaiting your reply",
@@ -7931,7 +7935,7 @@
       "text": "Vi måler sidebrug, og hvilken kampagne der bragte dig hertil, kun hvis du tillader det.",
       "accept": "Tillad måling",
       "refuse": "Afvis",
-      "more": "Mere",
+      "more": "Mere om cookies",
       "label": "Valg om brugsmåling"
     },
     "control": {

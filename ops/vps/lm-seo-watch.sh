@@ -83,8 +83,9 @@ fetch "$BASE/jobs-sitemap.xml"
 if [ "$CODE" != "200" ]; then
   problem "jobs_index:$CODE"
 else
-  sed -n 's#.*<loc>\([^<]*jobs-sitemap/[0-9]*\.xml\)</loc>.*#\1#p' "$T/b" > "$T/shards"
-  [ -s "$T/shards" ] || tr '>' '>\n' < "$T/b" | sed -n 's#^\(.*jobs-sitemap/[0-9]*\.xml\)</loc$#\1#p' > "$T/shards"
+  # One shard per line whatever the layout: production serves the index on ONE line, which a per-line sed
+  # read as at most one shard (and `tr '>' '>\n'` splits nothing), so every run alerted jobs_shards falsely.
+  tr '>' '\n' < "$T/b" | sed -n 's#^\(.*jobs-sitemap/[0-9]*\.xml\)</loc$#\1#p' > "$T/shards"
   n=$(wc -l < "$T/shards" | tr -d ' ')
   [ "$n" -ge "$MIN_JOB_SHARDS" ] || problem "jobs_shards:$n"
   last=$(tail -n 1 "$T/shards")
