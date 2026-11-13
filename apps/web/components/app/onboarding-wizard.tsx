@@ -725,13 +725,20 @@ export function OnboardingWizard({
     );
   }
 
+  // A person joining through a staff invitation must MEET the review notice
+  // before they can accept: submitting records that it was shown. The notice
+  // sits right above the submit, in the page flow, so for them the button
+  // stays in the flow too — fixing it to the screen would let them submit
+  // with the notice still below the fold.
+  const reviewNoticeShown = Boolean(invitationToken && invitationReviewNotice);
+
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         submit();
       }}
-      className="flex flex-col gap-5 pb-36 sm:pb-0"
+      className={cn("flex flex-col gap-5", !reviewNoticeShown && "pb-36 sm:pb-0")}
       noValidate
     >
       <header>
@@ -1030,8 +1037,17 @@ export function OnboardingWizard({
 
       {/* The submit stays on screen on a phone (it sat 2.7–3.4 screens down,
           below fields that are mostly optional), and a refusal is said right
-          above it instead of somewhere down the page. Same bar as step 1. */}
-      <div className="fixed inset-x-0 bottom-0 z-10 flex flex-col gap-2 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:border-0 sm:bg-transparent sm:p-0" data-testid="onboarding-action-bar">
+          above it instead of somewhere down the page. Same bar as step 1 —
+          except for an invited staff member, who keeps the in-flow button
+          directly under the review notice (see reviewNoticeShown). */}
+      <div
+        className={cn(
+          "flex flex-col gap-2",
+          !reviewNoticeShown &&
+            "fixed inset-x-0 bottom-0 z-10 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:border-0 sm:bg-transparent sm:p-0",
+        )}
+        data-testid="onboarding-action-bar"
+      >
         {error && (
           <p className="text-xs text-state-danger" role="alert">
             {error}
