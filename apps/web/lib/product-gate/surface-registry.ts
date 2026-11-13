@@ -367,7 +367,8 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
   // Two public explanation pages. The same category as `/create-cv` and the
   // grandfathered `/for-workers`, `/for-companies`, `/for-agencies`: pre-auth
   // pages the five World-State questions were not written for. Declared with
-  // honest answers; the A-01 findings they produce need an OWNER waiver.
+  // honest answers; the A-01 findings they produce are excused by ONE scoped
+  // owner waiver in `.github/scripts/owner-waivers.mjs`.
   {
     id: "/for-education",
     kind: "screen",
@@ -412,8 +413,9 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
 
     // All five are "no", honestly, for the reason recorded on `/create-cv`: an
     // anonymous visitor has no World State, map, assistant or workspace, and
-    // the page is by definition a new page. NOT excused by this declaration:
-    // an owner waiver is required and none is added by this change.
+    // the page is by definition a new page. Excused by the scoped owner
+    // waiver `public-audience-pages-education-service-providers` (owner
+    // approval 2026-11-13), never by a rewritten answer.
     changesWorldState: false,
     reflectedOnMap: false,
     aiControlled: false,
@@ -473,8 +475,9 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
 
     // All five are "no", honestly, for the reason recorded on `/create-cv`: an
     // anonymous visitor has no World State, map, assistant or workspace, and
-    // the page is by definition a new page. NOT excused by this declaration:
-    // an owner waiver is required and none is added by this change.
+    // the page is by definition a new page. Excused by the scoped owner
+    // waiver `public-audience-pages-education-service-providers` (owner
+    // approval 2026-11-13), never by a rewritten answer.
     changesWorldState: false,
     reflectedOnMap: false,
     aiControlled: false,

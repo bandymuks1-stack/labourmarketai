@@ -308,7 +308,14 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // "no" answers and refused to waive itself; the waiver record arrived
     // WITH the owner approval, in the same commit that carries the
     // @human-gate-approved annotation on the RED migration.
-    expect(SCOPED_OWNER_WAIVERS).toHaveLength(7);
+    // The EIGHTH record exists because an eighth owner ruling exists — the
+    // 2026-11-13 approval, verbatim: "Tvirtinu A-01 išimtį tik šiems
+    // LabourMarket.ai viešiesiems puslapiams: "/for-education",
+    // "/for-service-providers". PR #3307" and "A-01 IŠIMTIS PATVIRTINTA."
+    // The two audience pages declared their honest "no" answers and the PR
+    // stayed red, with no waiver, until that approval arrived. Its boundary
+    // is asserted below, executable rather than trusted.
+    expect(SCOPED_OWNER_WAIVERS).toHaveLength(8);
     expect(SCOPED_OWNER_WAIVERS.map((r) => r.id)).toEqual([
       "public-acquisition-route-create-cv",
       "public-acquisition-route-jobs",
@@ -317,7 +324,37 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
       "oauth-consent-auth-infrastructure",
       "work-hours-allocation-surface",
       "journal-photo-viewer-modal",
+      "public-audience-pages-education-service-providers",
     ]);
+
+    // The 2026-11-13 boundary: two routes, six codes each, A-01 only, one PR.
+    const audience = SCOPED_OWNER_WAIVERS[7];
+    expect(audience.axioms).toEqual(["A-01"]);
+    expect(audience.pullRequests).toEqual([3307]);
+    expect(audience.files.filter((f) => f.startsWith("/"))).toEqual(["/for-education", "/for-service-providers"]);
+    expect(audience.expectedFindings).toHaveLength(12);
+    for (const route of ["/for-education", "/for-service-providers"]) {
+      expect(audience.expectedFindings.filter((f) => f.file === route).map((f) => f.code).sort()).toEqual([
+        "not_ai_controlled",
+        "not_reflected_on_map",
+        "not_world_state_driven",
+        "requires_leaving_workspace",
+        "requires_new_page",
+        "world_state_cannot_control_it",
+      ]);
+    }
+    // It covers no other surface and no other PR: the same finding on another
+    // route, or these findings in another PR that touches the pages, block.
+    const today = new Date().toISOString().slice(0, 10);
+    const finding = { code: "not_ai_controlled", axiom: "A-01", what: "/for-education" };
+    expect(decideWaiver(finding, { pullRequest: 3307, branch: null, headSha: null, today, changedFiles: null }).waived).toBe(true);
+    expect(decideWaiver(finding, { pullRequest: 9999, branch: null, headSha: null, today, changedFiles: null }).waived).toBe(false);
+    expect(
+      decideWaiver({ ...finding, what: "/for-workers" }, { pullRequest: 3307, branch: null, headSha: null, today, changedFiles: null }).waived,
+    ).toBe(false);
+    expect(
+      decideWaiver({ ...finding, code: "undeclared_surface" }, { pullRequest: 3307, branch: null, headSha: null, today, changedFiles: null }).waived,
+    ).toBe(false);
 
     // The 2026-08-31 boundary, executable rather than trusted: three codes,
     // one route (plus its page path for diff matching), one PR, A-01 only.
