@@ -4,7 +4,11 @@ import { useTranslations } from "next-intl";
 
 import { ExperienceDisputeItem } from "@/components/app/experience-dispute-item";
 import { ExperienceModerationItem } from "@/components/app/experience-moderation-item";
-import type { ExperienceListState } from "@/lib/trust/experience-records";
+import { ExperienceResponseModerationItem } from "@/components/app/experience-response-moderation-item";
+import type {
+  ExperienceListState,
+  ExperienceResponseQueueState,
+} from "@/lib/trust/experience-records";
 
 /**
  * W6 slice 3 — the experience moderator queue, as a BAND on the EXISTING
@@ -18,6 +22,9 @@ import type { ExperienceListState } from "@/lib/trust/experience-records";
  * items awaiting a moderator decision is a band-2 action queue, the same slot
  * `FollowUpQueuePanel` and `SalesIntakePanel` occupy. It needed a home, not a
  * route.
+ *
+ * A THIRD QUEUE for REPLIES (register 2.24): a subject's reply has its own
+ * moderation state and its own decision; it never rides on the record's.
  *
  * TWO QUEUES, NOT ONE LIST, because moderation and disputes are separate
  * dimensions: a record can be sitting in the dispute queue while its
@@ -36,9 +43,11 @@ import type { ExperienceListState } from "@/lib/trust/experience-records";
 export function ExperienceModerationPanel({
   queue,
   disputes,
+  responses,
 }: {
   queue: ExperienceListState;
   disputes: ExperienceListState;
+  responses: ExperienceResponseQueueState;
 }) {
   const t = useTranslations("experience");
 
@@ -113,6 +122,40 @@ export function ExperienceModerationPanel({
                       body={r.body}
                       moderationStatus={r.moderationStatus}
                       disputeStatus={r.disputeStatus}
+                      disputeReason={r.disputeReason}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div
+            className="flex flex-col gap-3"
+            data-testid="experience-response-queue"
+            data-readiness={responses.state}
+          >
+            <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+              {t("moderation.responseQueueTitle")}
+            </h3>
+            {responses.state !== "list" ? (
+              // A failed read is never shown as an empty queue.
+              <p className="text-meta leading-relaxed text-text-secondary" role="status">
+                {t("moderation.unavailable")}
+              </p>
+            ) : responses.items.length === 0 ? (
+              <p className="text-meta leading-relaxed text-text-secondary">
+                {t("moderation.responseQueueEmpty")}
+              </p>
+            ) : (
+              <ul className="flex flex-col gap-3">
+                {responses.items.map((r) => (
+                  <li key={r.id}>
+                    <ExperienceResponseModerationItem
+                      id={r.id}
+                      body={r.body}
+                      moderationStatus={r.moderationStatus}
+                      recordBody={r.recordBody}
                     />
                   </li>
                 ))}

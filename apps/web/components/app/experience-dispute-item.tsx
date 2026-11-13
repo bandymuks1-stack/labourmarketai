@@ -2,7 +2,11 @@
 
 import { useActionState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { resolveDisputeAction, type ExperienceFormState } from "@/lib/trust/experience-actions";
+import {
+  resolveDisputeAction,
+  startDisputeReviewAction,
+  type ExperienceFormState,
+} from "@/lib/trust/experience-actions";
 
 /**
  * W6 slice 3B — one dispute item in the moderator queue.
@@ -11,6 +15,11 @@ import { resolveDisputeAction, type ExperienceFormState } from "@/lib/trust/expe
  * replaced by it: a disputed record is still `published` until a moderator
  * decides otherwise. Every resolution requires a reason and writes an audit
  * row; `removed` hides the record from public counts without deleting it.
+ *
+ * TWO STEPS, like the moderation item, because the database has two:
+ * `opened` → take into review, `under_review` → decide. A decision sent while
+ * the dispute is still `opened` is refused (`invalid_transition`); this item
+ * used to offer only that, so no dispute could be decided.
  */
 export function ExperienceDisputeItem({
   id,
@@ -18,12 +27,16 @@ export function ExperienceDisputeItem({
   body,
   moderationStatus,
   disputeStatus,
+  disputeReason,
 }: {
   id: string;
   sentiment: "positive" | "negative";
   body: string;
   moderationStatus: string;
   disputeStatus: string;
+  /** The subject's reason. Undefined/null = not read; the item then says
+   *  nothing about it rather than implying there was none. */
+  disputeReason?: string | null;
 }) {
   const locale = useLocale();
   const t = useTranslations("experience");
@@ -31,6 +44,11 @@ export function ExperienceDisputeItem({
     resolveDisputeAction,
     null,
   );
+  const [startState, startAction, startPending] = useActionState<ExperienceFormState, FormData>(
+    startDisputeReviewAction,
+    null,
+  );
+  const status = startState?.ok ? "under_review" : disputeStatus;
 
   return (
     <article
@@ -38,7 +56,7 @@ export function ExperienceDisputeItem({
       data-testid="experience-dispute-item"
       data-experience-id={id}
       data-moderation={moderationStatus}
-      data-dispute={state?.ok ? "resolved" : disputeStatus}
+      data-dispute={state?.ok ? "resolved" : status}
     >
       <div className="flex flex-wrap items-baseline gap-x-2">
         <span className="text-basis font-medium text-text-primary">
@@ -49,10 +67,18 @@ export function ExperienceDisputeItem({
           · {t(`moderation.${moderationStatus}`)}
         </span>
         <span className="text-meta text-state-warning" data-testid="dispute-item-dispute">
-          · {t(`dispute.${disputeStatus}`)}
+          · {t(`dispute.${status}`)}
         </span>
       </div>
       <p className="text-sm leading-relaxed text-text-secondary break-words">{body}</p>
+      {disputeReason ? (
+        <div className="flex flex-col gap-1" data-testid="experience-dispute-reason">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("moderation.disputeReasonLabel")}
+          </span>
+          <p className="text-sm leading-relaxed text-text-primary break-words">{disputeReason}</p>
+        </div>
+      ) : null}
 
       {state?.ok ? (
         <p
@@ -62,6 +88,30 @@ export function ExperienceDisputeItem({
         >
           {t("moderation.decidedWithAudit")}
         </p>
+      ) : status === "opened" ? (
+        <form action={startAction} className="flex flex-col gap-2">
+          <input type="hidden" name="locale" value={locale} />
+          <input type="hidden" name="experience_id" value={id} />
+          <div>
+            <button
+              type="submit"
+              disabled={startPending}
+              data-testid="experience-dispute-start-review"
+              className="inline-flex min-h-[2.75rem] items-center rounded-md border border-border px-4 text-sm font-medium text-text-primary transition-colors hover:bg-surface-1 disabled:opacity-60 motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"
+            >
+              {t("moderation.takeDispute")}
+            </button>
+          </div>
+          {startState && !startState.ok ? (
+            <p
+              role="alert"
+              className="text-meta text-state-danger"
+              data-testid={`experience-dispute-start-error-${startState.code}`}
+            >
+              {t(`moderation.errors.${startState.code}`)}
+            </p>
+          ) : null}
+        </form>
       ) : (
         <form action={action} className="flex flex-col gap-2">
           <input type="hidden" name="locale" value={locale} />

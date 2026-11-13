@@ -175,6 +175,39 @@ export async function openExperienceDispute(args: {
   return mapRpc(data, error);
 }
 
+/**
+ * opened -> under_review. The database refuses a decision on a dispute that is
+ * still 'opened' (`resolve_experience_dispute` answers invalid_transition), so
+ * this step is not optional: without a caller no dispute could ever be
+ * decided. Authorization is the RPC's `is_admin()`.
+ */
+export async function startExperienceDisputeReview(id: string): Promise<ExperienceActionResult> {
+  const sb = await createClient();
+  const { data, error } = await rpc(sb, "review_experience_dispute", { p_id: id });
+  return mapRpc(data, error);
+}
+
+/**
+ * Publish or reject a subject's REPLY. `moderate_experience_response` shipped
+ * with the v1 schema and had no caller, so a reply stayed 'submitted' for good
+ * and the experience's author could never read it. Authorization is the RPC's
+ * `is_admin()`; a reason is mandatory and lands in the audit trail.
+ */
+export async function moderateExperienceResponse(args: {
+  id: string;
+  decision: "published" | "rejected";
+  reason: string;
+}): Promise<ExperienceActionResult> {
+  if (args.reason.trim().length < 1) return { ok: false, code: "reason_required" };
+  const sb = await createClient();
+  const { data, error } = await rpc(sb, "moderate_experience_response", {
+    p_id: args.id,
+    p_decision: args.decision,
+    p_reason: args.reason.trim(),
+  });
+  return mapRpc(data, error);
+}
+
 export async function resolveExperienceDispute(args: {
   id: string;
   resolution: "upheld" | "changed" | "removed";
@@ -283,6 +316,12 @@ export type ExperienceRow = {
    * means nothing about replies is known here.
    */
   readonly response: ExperienceResponse | null;
+  /**
+   * Why the subject disputes the record. Read ONLY by the moderator's dispute
+   * queue — the person deciding must see what is contested. Absent (undefined)
+   * on every other list: those do not select the column.
+   */
+  readonly disputeReason?: string | null;
 };
 
 /**
@@ -339,6 +378,7 @@ type RawRows =
  */
 async function readExperienceRows(
   build: (q: unknown) => unknown,
+  extraColumns = "",
 ): Promise<RawRows> {
   const sb = await createClient();
   const query = (select: string) =>
@@ -349,10 +389,10 @@ async function readExperienceRows(
     }>;
 
   let authorSideKnown = true;
-  let { data, error } = await query(EXTENDED_SELECT);
+  let { data, error } = await query(EXTENDED_SELECT + extraColumns);
   if (error && (error.code ?? "") === UNDEFINED_COLUMN_CODE) {
     authorSideKnown = false;
-    ({ data, error } = await query(BASE_SELECT));
+    ({ data, error } = await query(BASE_SELECT + extraColumns));
   }
   if (error) {
     if (ABSENT_CODES.has(error.code ?? "")) return { state: "needs_migration" };
@@ -384,6 +424,9 @@ function mapRow(
         ? "organization"
         : "person",
     response: responses?.get(String(r.id)) ?? null,
+    ...("dispute_reason" in r
+      ? { disputeReason: (r.dispute_reason as string | null) ?? null }
+      : {}),
   };
 }
 
@@ -475,6 +518,9 @@ export async function listDisputeQueue(): Promise<ExperienceListState> {
       .in("dispute_status", ["opened", "under_review"])
       .order("submitted_at", { ascending: true })
       .limit(100),
+    // The subject's reason (a v1 column). The moderator cannot decide a
+    // dispute without reading what is contested.
+    ", dispute_reason",
   );
   if ("state" in res) return res;
   return {
@@ -484,5 +530,65 @@ export async function listDisputeQueue(): Promise<ExperienceListState> {
     // The queues moderate the RECORD. They do not read replies, so they claim
     // nothing about them — `false` is "not known here", not "there are none".
     responsesRead: false,
+  };
+}
+
+/** A reply waiting for a moderator, with the experience it answers. */
+export type ExperienceResponseQueueItem = {
+  readonly id: string;
+  readonly body: string;
+  readonly moderationStatus: "submitted" | "in_moderation";
+  readonly createdAt: string | null;
+  /** The experience the reply answers; null when that read failed. */
+  readonly recordBody: string | null;
+};
+
+export type ExperienceResponseQueueState =
+  | { readonly state: "list"; readonly items: ExperienceResponseQueueItem[] }
+  | { readonly state: "needs_migration" }
+  | { readonly state: "error" };
+
+/**
+ * Replies needing a moderator decision. Authorization is the select policy's
+ * `is_admin()` branch — a non-admin gets only their own replies back, never the
+ * queue. The reply's author is never selected: the moderator decides on the
+ * text, and the audit trail records the decision.
+ */
+export async function listResponseQueue(): Promise<ExperienceResponseQueueState> {
+  const sb = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (sb as any)
+    .from("experience_responses")
+    .select("id, experience_record_id, body, moderation_status, created_at")
+    .in("moderation_status", ["submitted", "in_moderation"])
+    .order("created_at", { ascending: true })
+    .limit(100);
+  if (error) {
+    if (ABSENT_CODES.has(error.code ?? "")) return { state: "needs_migration" };
+    return { state: "error" };
+  }
+  const rows = (data ?? []) as Record<string, unknown>[];
+  const recordIds = [...new Set(rows.map((r) => String(r.experience_record_id)))];
+  const bodies = new Map<string, string>();
+  if (recordIds.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rec = await (sb as any)
+      .from("experience_records")
+      .select("id, body")
+      .in("id", recordIds)
+      .limit(recordIds.length);
+    for (const r of ((rec.data ?? []) as Record<string, unknown>[])) {
+      bodies.set(String(r.id), String(r.body ?? ""));
+    }
+  }
+  return {
+    state: "list",
+    items: rows.map((r) => ({
+      id: String(r.id),
+      body: String(r.body ?? ""),
+      moderationStatus: r.moderation_status as ExperienceResponseQueueItem["moderationStatus"],
+      createdAt: (r.created_at as string | null) ?? null,
+      recordBody: bodies.get(String(r.experience_record_id)) ?? null,
+    })),
   };
 }

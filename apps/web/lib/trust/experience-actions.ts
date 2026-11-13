@@ -9,6 +9,8 @@ import {
   startExperienceModeration,
   decideExperienceModeration,
   resolveExperienceDispute,
+  startExperienceDisputeReview,
+  moderateExperienceResponse,
   type ExperienceActionResult,
 } from "./experience-records";
 import type { EligibleInteractionKind } from "./experience-eligibility";
@@ -152,5 +154,38 @@ export async function resolveDisputeAction(
     reason: str(formData, "reason"),
   });
   if (result.ok) revalidatePath(`/${locale}/dashboard/admin`);
+  return result;
+}
+
+/** opened -> under_review: the step the database requires before a decision. */
+export async function startDisputeReviewAction(
+  _prev: ExperienceFormState,
+  formData: FormData,
+): Promise<ExperienceFormState> {
+  const locale = str(formData, "locale") || "lt";
+  const result = await startExperienceDisputeReview(str(formData, "experience_id"));
+  if (result.ok) revalidatePath(`/${locale}/dashboard/admin`);
+  return result;
+}
+
+/** Publish or reject a subject's reply — authorization is the RPC's `is_admin()`. */
+export async function moderateResponseAction(
+  _prev: ExperienceFormState,
+  formData: FormData,
+): Promise<ExperienceFormState> {
+  const locale = str(formData, "locale") || "lt";
+  const decision = str(formData, "decision");
+  if (decision !== "published" && decision !== "rejected") {
+    return { ok: false, code: "invalid" };
+  }
+  const result = await moderateExperienceResponse({
+    id: str(formData, "response_id"),
+    decision,
+    reason: str(formData, "reason"),
+  });
+  if (result.ok) {
+    revalidatePath(`/${locale}/dashboard/admin`);
+    revalidatePath(`/${locale}/dashboard`);
+  }
   return result;
 }
