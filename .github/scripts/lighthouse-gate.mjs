@@ -63,8 +63,11 @@ for (const arg of pageArgs) {
   const indexable = !arg.startsWith("!");
   const page = indexable ? arg : arg.slice(1);
   const got = [];
+  // The verdict is a median of <runs> measurements, so it needs all of them:
+  // each failed measurement gets ONE more try, and a page whose sample stays
+  // short is reported INCOMPLETE and fails — never judged on what was left.
   for (let i = 0; i < runs; i++) {
-    const m = measure(origin + page, i);
+    const m = measure(origin + page, i) ?? measure(origin + page, i);
     if (m) got.push(m);
   }
   if (got.length === 0) {
@@ -78,9 +81,15 @@ for (const arg of pageArgs) {
   if (indexable && m.seo < GATES.seo) misses.push("SEO");
   if (m.lcpMs > GATES.lcpMs) misses.push("LCP");
   if (m.cls > GATES.cls) misses.push("CLS");
-  if (misses.length) failed++;
+  const incomplete = got.length < runs;
+  if (misses.length || incomplete) failed++;
+  const verdict = incomplete
+    ? `INCOMPLETE: ${got.length} of ${runs} measurements${misses.length ? `; misses ${misses.join(", ")}` : ""}`
+    : misses.length
+      ? `FAIL: ${misses.join(", ")}`
+      : "PASS";
   console.log(
-    `${page} | ${got.length} | ${m.accessibility} | ${indexable ? m.seo : `${m.seo} (not gated)`} | ${m.lcpMs} | ${m.cls} | ${m.tbtMs} | ${misses.length ? `FAIL: ${misses.join(", ")}` : "PASS"}`,
+    `${page} | ${got.length} | ${m.accessibility} | ${indexable ? m.seo : `${m.seo} (not gated)`} | ${m.lcpMs} | ${m.cls} | ${m.tbtMs} | ${verdict}`,
   );
 }
 console.log(`\ngates: accessibility >= ${GATES.accessibility}, SEO >= ${GATES.seo} (indexable pages), LCP <= ${GATES.lcpMs} ms, CLS <= ${GATES.cls}. Lab medians, PRELIMINARY. INP: not measurable in a lab run.`);

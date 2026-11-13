@@ -193,6 +193,13 @@ async function crawlPage(context, path, width, discovered) {
   page.on("response", (res) => {
     if (res.status() >= 400 && /\/_next\/static\//.test(res.url())) failedScripts.push(`${res.status()} ${new URL(res.url()).pathname}`);
   });
+  // A chunk that dies without any HTTP answer (reset, DNS) is seen by neither
+  // the status check above nor, necessarily, a page error. ERR_ABORTED is a
+  // request the browser dropped on navigation, or one this crawler blocked.
+  page.on("requestfailed", (req) => {
+    const why = req.failure()?.errorText ?? "failed";
+    if (/\/_next\/static\//.test(req.url()) && !/ERR_ABORTED/i.test(why)) failedScripts.push(`no answer ${new URL(req.url()).pathname} (${why})`);
+  });
   page.on("pageerror", (e) => pageErrors.push(String(e).slice(0, 160)));
   page.on("dialog", (d) => d.dismiss().catch(() => {}));
 
@@ -303,6 +310,7 @@ async function crawlPage(context, path, width, discovered) {
     }
   }).filter(Boolean))];
   for (let i = 0; i < ownTargets.length; i += 6) await Promise.all(ownTargets.slice(i, i + 6).map((t) => resolveTarget(context.request, t)));
+  const stateLinks = [];
   for (const link of links) {
     const label = `"${link.text || "(no text)"}"`;
     if (link.raw === null || link.raw.trim() === "" || link.raw.trim() === "#") {
@@ -328,8 +336,13 @@ async function crawlPage(context, path, width, discovered) {
     const targetPath = target.pathname + target.search;
     if (target.hash && samePage(targetPath, path)) {
       const id = decodeURIComponent(target.hash.slice(1));
-      if (id && !(await page.evaluate((i) => !!document.getElementById(i) || !!document.querySelector(`[name="${CSS.escape(i)}"]`), id)))
-        report("dead-link", path, width, `${label} -> #${id} is not on the page`);
+      if (id && !(await page.evaluate((i) => !!document.getElementById(i) || !!document.querySelector(`[name="${CSS.escape(i)}"]`), id))) {
+        // No anchor with that name. It may still be a STATE link the page
+        // itself answers (the goal navigator's `#goal=work` opens a panel), so
+        // it is judged by pressing it, after every other link has been read.
+        if (link.visible && !stateLinks.some((x) => x.raw === link.raw)) stateLinks.push({ raw: link.raw, id, label });
+        else if (!link.visible) report("dead-link", path, width, `${label} -> #${id} is not on the page`);
+      }
       continue;
     }
     const res = await resolveTarget(context.request, ORIGIN + targetPath);
@@ -341,6 +354,37 @@ async function crawlPage(context, path, width, discovered) {
     if (LOCALES.includes(from) && activeLocaleSet.has(to) && to !== from && link.visible && !/^[a-z]{2}$/i.test(link.text) && !languageNames.test(link.text))
       report("locale-leak", path, width, `${label} -> ${targetPath} lands in /${to}`);
     if (!NOT_A_PUBLIC_PAGE.test(targetPath) && LOCALES.includes(localeOf(targetPath)) && res.status === 200) discovered.add(targetPath.split("#")[0]);
+  }
+
+  // ---- same-page links with no anchor: do they do anything? ----------------
+  // Pressed (a press sends no request the route lock would not allow). The
+  // link is alive when the page visibly answers: its text changes, or the link
+  // itself reports a new state. Without presses (--no-clicks) nothing can be
+  // said about them, so nothing is reported.
+  if (CLICKS && stateLinks.length > 0) {
+    for (const s of stateLinks.slice(0, 12)) {
+      const a = page.locator(`a[href="${s.raw.replace(/["\\]/g, "\\$&")}"]`).filter({ visible: true }).first();
+      const textOf = () => page.evaluate(() => document.body.innerText);
+      let acted = false;
+      try {
+        const handle = await a.elementHandle({ timeout: 3_000 });
+        const stateOf = () => handle.evaluate((el) => ["aria-current", "aria-expanded", "aria-selected", "aria-pressed"].map((k) => el.getAttribute(k)).join("|"));
+        const before = { text: await textOf(), state: await stateOf() };
+        await a.click({ timeout: 3_000 });
+        await page.waitForTimeout(700);
+        const after = { text: await textOf(), state: await stateOf().catch(() => "gone") };
+        acted = !samePage(page.url(), url) || after.text !== before.text || after.state !== before.state;
+      } catch {
+        acted = false;
+      }
+      if (!acted) report("dead-link", path, width, `${s.label} -> #${s.id} is not on the page and pressing it changes nothing`);
+      if (!samePage(page.url(), url)) await page.goto(url, { waitUntil: "load", timeout: 45_000 }).catch(() => {});
+    }
+    // The presses opened panels: start the button pass from the page as loaded.
+    await page.goto(url, { waitUntil: "load", timeout: 45_000 }).catch(() => {});
+    await page.waitForLoadState("networkidle", { timeout: 2_500 }).catch(() => {});
+    failedScripts.length = 0;
+    pageErrors.length = 0;
   }
 
   lap(t0, `links (${links.length}, own targets ${ownTargets.length})`);
