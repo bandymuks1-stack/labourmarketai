@@ -40,15 +40,22 @@ const navSrc = read("components/layouts/site-nav.tsx");
 const menuSrc = read("components/layouts/mobile-nav-menu.tsx");
 
 describe("the mobile menu covers exactly the viewports the desktop nav hides", () => {
+  // owner fix list 2026-11-12 (one navigation; whole logo; Sign in visible on a phone; shorter first screen):
+  // the desktop navigation is the ONE goal bar (`<IntentMegaMenu>`), not a row
+  // of links beside it, so the breakpoint is derived from that bar.
+  const DESKTOP_BAR = /<IntentMegaMenu\s+className="hidden [^"]*\b(sm|md|lg|xl):block\b/;
+
   it("desktop nav is still breakpoint-gated (the condition that creates the need)", () => {
-    expect(navSrc).toMatch(/className="hidden [^"]*\b(sm|md|lg|xl):flex\b/);
+    expect(navSrc).toMatch(DESKTOP_BAR);
+    // One navigation: no second row of links in the header.
+    expect(navSrc).not.toMatch(/<nav className="hidden[^"]*:flex/);
   });
 
   it("the mobile mount's breakpoint is the complement of the desktop nav's", () => {
     // DERIVED from the source on both sides. A future PR that moves the
-    // desktop nav to another breakpoint without moving the mobile menu
+    // desktop bar to another breakpoint without moving the mobile menu
     // re-opens the dead zone — and fails here.
-    const desktop = navSrc.match(/className="hidden [^"]*\b(sm|md|lg|xl):flex\b/);
+    const desktop = navSrc.match(DESKTOP_BAR);
     const mobile = navSrc.match(/<MobileNavMenu[\s\S]*?className="([^"]*)"/);
     expect(desktop?.[1], "desktop nav reveal breakpoint").toBeTruthy();
     expect(mobile?.[1], "MobileNavMenu className").toBeTruthy();
@@ -65,18 +72,16 @@ describe("the mobile menu covers exactly the viewports the desktop nav hides", (
     // locale switcher were off-screen, and a menu button added there would
     // have been unreachable too. Proven live by tests/e2e/mobile-marketing-nav.
     expect(navSrc).toMatch(/gap-2[^"]*sm:gap-6/);
-    expect(navSrc).toMatch(/px-4[^"]*sm:px-12/);
-    // The logo yields space instead of pushing the controls off-screen.
-    // The brand is now a MARK + wordmark (black/gold visual system), so the
-    // shrink contract moved one level in rather than disappearing: the link
-    // still refuses to claim space (`min-w-0 shrink`), the wordmark is what
-    // actually truncates, and the mark is `shrink-0` so it degrades to the
-    // logo alone instead of squashing into an unreadable sliver.
-    expect(navSrc).toMatch(/min-w-0 shrink items-center/);
-    // 2026-10-28: a cut brand ("LabourMarket…") is worse than the mark alone —
-    // under 360px the wordmark becomes screen-reader only; it still truncates
-    // rather than push the controls, from 360px up it fits whole.
-    expect(navSrc).toMatch(/<span className="truncate max-\[359px\]:sr-only">/);
+    expect(navSrc).toMatch(/px-3[^"]*sm:px-12/);
+    // 2026-11-12 (owner fix list 2026-11-12 (one navigation; whole logo; Sign in visible on a phone; shorter first screen)):
+    // the wordmark is NEVER cut. It no longer shrinks or truncates; the
+    // controls were made to fit beside it instead (theme toggle in the menu
+    // below `sm`, a code-only language chip). Under 360px only the mark shows
+    // and the name stays for screen readers. Measured at 360/375 in six
+    // locales by tests/e2e/premium-nav.spec.ts.
+    expect(navSrc).toMatch(/className="flex shrink-0 items-center gap-1\.5 font-display text-sm/);
+    expect(navSrc).toMatch(/<span className="whitespace-nowrap max-\[359px\]:sr-only">/);
+    expect(navSrc).not.toMatch(/<span className="truncate/);
     expect(navSrc).toMatch(/<LmLogo[^/]*shrink-0/);
     // The locale switcher shows the CODE below sm here, and ONLY here.
     expect(navSrc).toMatch(/<LocaleSwitcher[^/]*compactBelowSm/);
@@ -97,15 +102,18 @@ describe("the mobile menu covers exactly the viewports the desktop nav hides", (
     }
   });
 
-  it("the auth CTAs move into the panel below sm, and are defined ONCE", () => {
+  it("Sign in is in the header at every width; Sign up joins from sm and leads the menu below it; each defined ONCE", () => {
     // A second literal would be free to drift to a different destination.
     expect(navSrc.match(/relPath=\{`\/\$\{locale\}\/auth\/login`\}/g)).toHaveLength(1);
     expect(navSrc.match(/relPath=\{`\/\$\{locale\}\/auth\/signup`\}/g)).toHaveLength(1);
-    // Header mount: hidden below sm. Panel mount: hidden from sm up. Exactly
-    // one of the two is live at any width, so the CTAs are never duplicated
-    // to a sighted user and never absent.
-    expect(navSrc).toMatch(/className="hidden items-center gap-3 sm:flex[^"]*">\{authCtas\}/);
-    expect(navSrc).toMatch(/data-testid="mobile-nav-auth"[\s\S]{0,200}sm:hidden/);
+    // 2026-11-12 (owner fix list 2026-11-12 (one navigation; whole logo; Sign in visible on a phone; shorter first screen)):
+    // the header row always carries Sign in; Sign up is beside it from `sm`
+    // and is the first thing in the panel below `sm` — never both at once,
+    // never neither.
+    expect(navSrc).toMatch(/data-testid="header-auth">[\s\S]{0,200}\{loginCta\}\s*<span className="hidden sm:inline-flex">\{signupCta\}<\/span>/);
+    expect(navSrc).toMatch(/data-testid="mobile-nav-auth"[\s\S]{0,200}sm:hidden[\s\S]{0,80}<NavAuthCtas guest=\{signupCta\}/);
+    // The panel renders the auth slot before the goals.
+    expect(menuSrc.indexOf("{authSection}")).toBeLessThan(menuSrc.indexOf("{intents.length > 0 && ("));
   });
 
   it("the auth slot element carries a key (RSC Flight elements cannot be validated)", () => {
@@ -115,21 +123,20 @@ describe("the mobile menu covers exactly the viewports the desktop nav hides", (
     expect(navSrc).toMatch(/key="mobile-nav-auth"/);
   });
 
-  it("the theme toggle and locale switcher stay OUT of the menu (F1 + ad-locale rules)", () => {
-    // Both must remain directly in the header at every viewport; folding
-    // them into a disclosure would regress two earlier fixes. Checked as JSX
-    // USAGE (`<Name`), not as a mention — a doc comment naming either
-    // component is not a regression, rendering one inside the menu is.
+  it("the theme toggle is always one tap away and the locale switcher never leaves the header", () => {
+    // F1 (the public site must always offer the theme toggle) still holds, in
+    // a new place below `sm`: 2026-11-12 (owner fix list 2026-11-12 (one navigation; whole logo; Sign in visible on a phone; shorter first screen))
+    // moved it from the phone header row into the menu's first row, because at
+    // 360px it took the slot Sign in needs. From `sm` up it is in the header.
+    expect(navSrc).toMatch(/<span className="hidden sm:inline-flex">\s*<ThemeToggleIcon labels=\{themeLabels\} \/>/);
+    expect(navSrc).toMatch(/data-testid="mobile-nav-auth"[\s\S]{0,300}<ThemeToggleIcon labels=\{themeLabels\} testId="menu-theme-toggle" \/>/);
+    // The menu component itself still imports neither control: SiteNav hands
+    // the toggle in as a slot, so where it shows stays SiteNav's decision.
     expect(menuSrc).not.toMatch(/<ThemeToggleIcon\b/);
     expect(menuSrc).not.toMatch(/<LocaleSwitcher\b/);
-    // In the header the two controls are SIBLINGS of the menu, never
-    // children of it — the mount must be a self-closing element.
-    const mount = navSrc.match(/<MobileNavMenu[\s\S]*?\/>/);
-    expect(mount?.[0], "MobileNavMenu mount").toBeTruthy();
-    expect(mount?.[0]).not.toMatch(/<ThemeToggleIcon\b/);
-    expect(mount?.[0]).not.toMatch(/<LocaleSwitcher\b/);
-    expect(navSrc).toMatch(/<ThemeToggleIcon\b/);
-    expect(navSrc).toMatch(/<LocaleSwitcher\b/);
+    // The language switcher is in the header row at every width (ad-locale rule).
+    expect(navSrc).toMatch(/<LocaleSwitcher className="flex" compactBelowSm \/>/);
+    expect(navSrc.match(/<LocaleSwitcher\b/g)).toHaveLength(1);
   });
 });
 
@@ -195,7 +202,7 @@ describe("the disclosure button is accessible and 44px (real render)", () => {
     expect(menuSrc).toMatch(/min-h-11/);
     // The panel's Sign in link is a bare text link, so it needs the floor
     // stated explicitly — the button below it is already tall enough.
-    expect(navSrc).toMatch(/min-h-11 items-center text-sm/);
+    expect(navSrc).toMatch(/className="flex min-h-11 items-center whitespace-nowrap/);
   });
 });
 
