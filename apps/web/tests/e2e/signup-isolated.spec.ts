@@ -358,7 +358,10 @@ for (const phone of [
           const r = el.getBoundingClientRect();
           // "visible" = inside the visible area AND nothing drawn over its centre.
           const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-          const uncovered = top !== null && (top === el || el.contains(top));
+          // A disabled button ignores pointer events, so the hit test lands on
+          // its own bar behind it: that is still "nothing foreign on top".
+          const bar = el.closest('[data-testid="onboarding-action-bar"]');
+          const uncovered = top !== null && (el.contains(top) || (bar !== null && bar.contains(top)));
           return { top: Math.round(r.top), bottom: Math.round(r.bottom), height: Math.round(r.height), visible: r.top >= 0 && r.bottom <= window.innerHeight && uncovered };
         });
       for (const locale of ["en", "lt"] as const) {
@@ -381,6 +384,9 @@ for (const phone of [
         await expect(page.getByTestId("onboarding-intent-work")).toHaveAttribute("aria-pressed", "true");
         const after = await box("onboarding-intents-continue");
         const scrollAfterPick = await page.evaluate(() => Math.round(window.scrollY));
+        console.info(
+          `[onboarding-phone] ${JSON.stringify({ phone: phone.name, locale, step: "role", viewport: phone.height, cardsTotal: cards.length, cardsFullyVisible: cards.filter(Boolean).length, continueBeforePick: before, continueAfterPick: after, scrollAfterPick, pageHeight: await page.evaluate(() => document.documentElement.scrollHeight) })}`,
+        );
         expect(before.visible, `${locale}: Continue is on screen before anything is chosen`).toBe(true);
         expect(after.visible, `${locale}: Continue is on screen after a card is chosen, without scrolling`).toBe(true);
         expect(after.height, `${locale}: Continue keeps the 44 px touch floor`).toBeGreaterThanOrEqual(44);
@@ -390,9 +396,6 @@ for (const phone of [
         const barTop = await page.getByTestId("onboarding-action-bar").evaluate((el) => Math.round(el.getBoundingClientRect().top));
         expect(lastCardBottom, `${locale}: the last card is not covered by the bar`).toBeLessThanOrEqual(barTop);
         await page.evaluate(() => window.scrollTo(0, 0));
-        console.info(
-          `[onboarding-phone] ${JSON.stringify({ phone: phone.name, locale, step: "role", viewport: phone.height, cardsTotal: cards.length, cardsFullyVisible: cards.filter(Boolean).length, continueBeforePick: before, continueAfterPick: after, scrollAfterPick, pageHeight: await page.evaluate(() => document.documentElement.scrollHeight) })}`,
-        );
 
         await page.getByTestId("onboarding-intents-continue").click();
         await expect(page.getByTestId("onboarding-display-name")).toBeVisible({ timeout: 30_000 });
@@ -400,9 +403,6 @@ for (const phone of [
         const submit = await box("onboarding-submit");
         const name = await box("onboarding-display-name");
         const country = await box("onboarding-country");
-        expect(submit.visible, `${locale}: the submit button is on screen when the profile step opens`).toBe(true);
-        expect(submit.height, `${locale}: the submit button keeps the 44 px touch floor`).toBeGreaterThanOrEqual(44);
-        expect(name.visible && name.bottom <= submit.top, `${locale}: the name field is clear of the bar`).toBe(true);
         await page.getByTestId("onboarding-country").tap();
         const option = page.getByRole("option").first();
         await expect(option, "the country list opens").toBeVisible({ timeout: 15_000 });
@@ -413,6 +413,9 @@ for (const phone of [
         console.info(
           `[onboarding-phone] ${JSON.stringify({ phone: phone.name, locale, step: "profile", viewport: phone.height, name, country, submit, countryList: list, pageHeight: await page.evaluate(() => document.documentElement.scrollHeight) })}`,
         );
+        expect(submit.visible, `${locale}: the submit button is on screen when the profile step opens`).toBe(true);
+        expect(submit.height, `${locale}: the submit button keeps the 44 px touch floor`).toBeGreaterThanOrEqual(44);
+        expect(name.visible && name.bottom <= submit.top, `${locale}: the name field is clear of the bar`).toBe(true);
         await page.keyboard.press("Escape");
       }
     } finally {
