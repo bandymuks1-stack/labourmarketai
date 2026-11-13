@@ -15773,7 +15773,7 @@
       "sub": "Ieškokite darbo, specialistų, darbuotojų, klientų ar projektų partnerių Lietuvoje ir visame pasaulyje. Kurkite savo profesinį profilį, pristatykite patirtį, siūlykite paslaugas ir atraskite naujas galimybes."
     },
     "entry": {
-      "label": "Parašyk, ko reikia — savais žodžiais",
+      "label": "Parašykite, ko reikia — savais žodžiais",
       "placeholder": "Pvz.: reikia 5 sandėlio darbuotojų Vilniuje",
       "submit": "Suprasti",
       "examplesLabel": "Pavyzdžiui:",
@@ -15828,10 +15828,10 @@
         "student": "Kalbi apie mokymąsi ir kelią į darbą.",
         "education": "Atstovauji mokymo įstaigai."
       },
-      "nextHint": "Kad poreikį išsaugotume ir galėtume į jį atsakyti, reikia paskyros. Sakinys keliaus kartu su tavimi.",
+      "nextHint": "Kad poreikį išsaugotume ir galėtume į jį atsakyti, reikia paskyros. Sakinys keliaus kartu su jumis.",
       "signup": "Sukurti paskyrą",
       "login": "Turiu paskyrą — prisijungti",
-      "unrecognised": "Nesupratau iš pirmo karto. Ko ieškai?",
+      "unrecognised": "Nesupratau iš pirmo karto. Ko ieškote?",
       "chips": {
         "work": "Ieškau darbo",
         "hire": "Reikia darbuotojų"

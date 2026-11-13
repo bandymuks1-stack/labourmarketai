@@ -23,9 +23,13 @@ const CATALOGUE_GOALS = new Set(["work"]);
 export async function GoalNavigation({
   headingLevel = "h2",
   phoneLayout = "rail",
+  phoneMore,
+  lead,
 }: {
   headingLevel?: "h1" | "h2";
   phoneLayout?: "rail" | "grid";
+  phoneMore?: { readonly ids: readonly string[]; readonly label: string };
+  lead?: string;
 }) {
   const [t, tNav, tProf, locale] = await Promise.all([
     getTranslations("siteNav"),
@@ -44,6 +48,8 @@ export async function GoalNavigation({
       locale={locale}
       headingLevel={headingLevel}
       phoneLayout={phoneLayout}
+      phoneMore={phoneMore}
+      lead={lead}
       goals={PUBLIC_INTENTS.map((intent) => ({
         id: intent.id,
         href: goalHref(intent.id),

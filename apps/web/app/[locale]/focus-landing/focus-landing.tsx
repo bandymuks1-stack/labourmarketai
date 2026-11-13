@@ -24,7 +24,8 @@ import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing"
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { LandingIntentChoice } from "@/components/marketing/landing-intent-choice";
 import { LandingRequestDoors } from "@/components/marketing/landing-request-doors";
-import { LandingFirstFacts } from "@/components/marketing/landing-first-facts";
+import { LandingHow, LandingMarketFacts, LandingNeedPath } from "@/components/marketing/landing-v3";
+import { landingV3Copy } from "@/lib/marketing/landing-v3-copy";
 import { ChevronDown } from "lucide-react";
 
 /** Folds the request block on a narrow screen, before first paint. It is
@@ -97,6 +98,20 @@ export async function FocusLanding({
     getTranslations("landing.requestDoors"),
   ]);
 
+  const v3 = landingV3Copy(locale);
+  // PREVIEW ONLY: this branch is rendered with no database behind it, so the
+  // canonical snapshot is empty. To look at the block with real figures the
+  // screenshot run passes the numbers production showed at capture time
+  // (`LANDING_V3_PREVIEW_MARKET="adverts,employers,ISO date"`). Removed with
+  // the prototype; the real page reads only the canonical snapshot.
+  const previewMarket = process.env.LANDING_V3_PREVIEW_MARKET?.split(",");
+  const marketFacts =
+    market.activeVacancies !== null && market.distinctEmployers !== null
+      ? { adverts: market.activeVacancies, employers: market.distinctEmployers, refreshedAt: market.lastRefreshedAt }
+      : previewMarket && previewMarket.length === 3
+        ? { adverts: Number(previewMarket[0]), employers: Number(previewMarket[1]), refreshedAt: previewMarket[2] ?? null }
+        : null;
+
   // THE FIRST SCREEN IS THE CHOICE (owner instruction 2026-11-12: "Sumažink
   // pagrindinio puslapio sudėtingumą. Pašalink nereikalingus tekstus,
   // abstrakčius šūkius ir pasikartojančius blokus. Pirmame ekrane turi būti
@@ -165,161 +180,40 @@ export async function FocusLanding({
                   now the phone order — promise → entry → doors — and from `xl`
                   the entry takes the right column beside the promise, with the
                   three ways and the request doors full width beneath. */}
-              <section className="flex min-w-0 flex-col gap-5">
-                <div className="min-w-0">
-                  <LandingIntentChoice />
-                </div>
-                <div className="min-w-0">{promise}</div>
-                <LandingFirstFacts />
-                {/* ONE SECONDARY BLOCK (owner P0 2026-11-13): the sentence
-                    field and, beside it from `lg`, one closed "send a
-                    request" block. Before, the field filled the left half
-                    with the right half empty, and three request cards
-                    followed that read like the goals again. The request
-                    doors and their form are unchanged inside the block. */}
+              {/* ── LANDING V3 PREVIEW (prototype; see
+                     docs/audits/evidence/landing-v3/OUTLINE.md) ──────────
+                     1. ONE goal centre: the question, one line saying who it
+                        is for and what is free, the goals (phone: four first,
+                        the rest under "more choices"), and — as an
+                        ALTERNATIVE way into the same actions — the sentence
+                        field.
+                     2. ONE "submit a need" path (the three services behind it).
+                     3. Market figures in ONE place, with their source.
+                     4. ONE compact explanation with links to the detail. */}
+              <section className="flex min-w-0 flex-col gap-4">
+                <LandingIntentChoice
+                  lead={v3.lead}
+                  phoneMore={{ ids: ["orders", "partners"], label: v3.moreChoices }}
+                />
+                <p className="flex items-center gap-3 text-xs font-medium uppercase tracking-label text-text-muted">
+                  <span aria-hidden className="h-px flex-1 bg-ink-600" />
+                  {v3.or}
+                  <span aria-hidden className="h-px flex-1 bg-ink-600" />
+                </p>
+                {/* The two ways to SAY a need sit side by side on a wide
+                    screen: in your own words, or through the short form. */}
                 <div className="grid min-w-0 gap-4 lg:grid-cols-2 lg:items-start">
                   <div className="min-w-0 scroll-mt-24" id="find">
-                    <PublicEntry
-                      examples="short"
-                  supply={
-                    market.activeVacancies !== null && market.distinctEmployers !== null
-                      ? {
-                          vacancies: market.activeVacancies,
-                          employers: market.distinctEmployers,
-                          refreshedAt: market.lastRefreshedAt,
-                        }
-                      : null
-                  }
-                />
+                    <PublicEntry examples="none" supply={null} />
                   </div>
-                  {/* OPEN ON DESKTOP, FOLDED ON PHONES (coordinator, 2026-11-13).
-                      The three request doors — "Order a worker search" among
-                      them — are reachable only here, so on a wide screen,
-                      where this block sits beside the sentence field, they
-                      are visible without a tap. On a phone the block is
-                      below the first screen and stays one tap. The markup
-                      is sent open (the safe state with no script); the line
-                      after it folds it on a narrow screen before first paint. */}
-                  <details
-                    id="request"
-                    data-testid="landing-request-block"
-                    open
-                    suppressHydrationWarning
-                    className="group min-w-0 scroll-mt-24 rounded-2xl border border-ink-600 bg-ink-900/60"
-                  >
-                    <summary className="flex min-h-11 cursor-pointer list-none items-start justify-between gap-3 rounded-2xl p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue sm:p-6 [&::-webkit-details-marker]:hidden">
-                      <span className="min-w-0">
-                        <h2
-                          id="request-doors-title"
-                          className="font-display text-lg font-semibold text-text-primary"
-                        >
-                          {tRequest("title")}
-                        </h2>
-                        <span
-                          className="mt-1 block text-sm leading-relaxed text-text-secondary"
-                          data-testid="request-doors-promise"
-                        >
-                          {tRequest("promise")}
-                        </span>
-                      </span>
-                      <ChevronDown
-                        aria-hidden
-                        className="mt-1 size-5 shrink-0 text-text-muted transition-transform group-open:rotate-180 motion-reduce:transition-none"
-                      />
-                    </summary>
-                    <div className="px-4 pb-4 sm:px-6 sm:pb-6">
-                      <LandingRequestDoors locale={locale} embedded />
-                    </div>
-                  </details>
-                  <script
-                    dangerouslySetInnerHTML={{ __html: REQUEST_BLOCK_FOLD_SCRIPT }}
-                  />
+                  <LandingNeedPath locale={locale} copy={v3} />
                 </div>
               </section>
-
-            {/* ── §17 THE MARKET, IN PLACES ─────────────────────────────
-                   Second, directly under the entry, because it answers the
-                   question a visitor has immediately after "what is this?" —
-                   *does it work where I am?* The canonical <MarketMap> draws
-                   the markets this product operates in, at real centroids,
-                   and says in words what it is NOT showing.
-
-                   The market PROOF renders INSIDE it. That is the §16 move:
-                   46k vacancies and 8k employers used to be a section of their
-                   own, which made the counts read as the product's definition.
-                   As evidence under the map they support the story instead of
-                   being it. Nothing was removed — same band, same canonical
-                   snapshot, same figures. ─────────────────────────────── */}
-            {/* ── THE MAP BAND IS WITHDRAWN FROM THE LANDING (owner decision
-                   2026-09-27). Its code and the map capability are UNTOUCHED:
-                   `public-market-map-band.tsx`, `<MarketMap>` and
-                   `publicCoverageView()` all still exist, and /dashboard/market-map
-                   is unaffected. It is simply no longer rendered to a visitor.
-
-                   WHY. The band could only draw `MARKET_COUNTRIES` centroids —
-                   markets the product serves, never activity, because the anon
-                   boundary publishes no country, region, city or coordinate. A
-                   map that cannot show work geography then needed THREE lines of
-                   copy to explain what its markers were not:
-                   "Darbo rinka egzistuoja tikrose vietose", "Žmonės, darbai ir
-                   poreikiai yra kažkur", "Tai rinkos, ne šios dienos veikla".
-                   That is the product explaining its own data model to a
-                   visitor, which is exactly what the owner banned — and a
-                   decorative map that requires an explanation is the thing the
-                   explanation was compensating for.
-
-                   NOTHING OF VALUE WAS REMOVED WITH IT. The market PROOF — the
-                   real vacancy and employer counts from the canonical snapshot —
-                   was already a self-contained `<section>` with its own heading;
-                   it just rendered inside the map band. It now stands on its own
-                   and carries the `#market` anchor the public nav links to.
-
-                   It comes back when it can show a visitor real opportunity
-                   geography, which is a boundary decision, not a copy change. */}
-            {/* TWO SIDES, ONE SPINE (premium completion 2026-10-02): the lifecycle
-                shared by professionals and companies — placed directly under
-                the entry, before the market proof. Presentation only. */}
-            <TwoSidesSection />
-
-            <MarketProofBand market={market} locale={locale} />
-
-            {/* ── REAL OPPORTUNITIES (owner directive 2026-09-23,
-                   PUBLIC_LANDING_REAL_JOB_DISCOVERY). Right after the market
-                   says it exists, a few of its real, current vacancies —
-                   the board's own first page through the board's own card,
-                   read once by the SAME snapshot reader above. Omitted when
-                   that read could not answer; never a placeholder. ───────── */}
-            <LandingOpenJobsBand sample={market.sample} locale={activeLocale} />
-
-            {/* ── §20 STARTING CONTEXTS ─────────────────────────────────
-                   Moved UP, from the very bottom of a 4,967px page to the
-                   third screen. A visitor who does not want to type a sentence
-                   had to scroll past everything to find a door; §19 asks how
-                   long it takes before someone understands how to start, and
-                   the honest answer was "too long". Same five real
-                   destinations, reframed as contexts (§20). ────────────── */}
-            <StartingContextsBand />
-
-            {/* ── The product chain — six links, journal as pivot. Carries
-                   the #how-it-works nav anchor.
-
-                   Now BELOW the map and the doors (§19). All six steps and all
-                   six bodies are intact — this is a change of order, not of
-                   content: the chain explains the product to someone who has
-                   decided to care, and it was standing between the entry and
-                   the reason to use it. ─────────────────────────────────── */}
-            <div id="how-it-works" className="scroll-mt-24">
-              <ProductChainBand />
-            </div>
-
-            {/* ── Trust & security — verifiable claims only ─────────────── */}
-            <TrustBand />
-
-            {/* ── The page ends on what to do next, not on a claim ──────── */}
-            <LandingClosingBand locale={locale} />
+            <LandingMarketFacts locale={locale} copy={v3} market={marketFacts} />
+            <LandingHow copy={v3} />
           </div>
         </main>
-        <SiteFooter />
+        <SiteFooter compact />
       </div>
     </NextIntlClientProvider>
   );

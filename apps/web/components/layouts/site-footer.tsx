@@ -48,10 +48,55 @@ function ActivityMap() {
   );
 }
 
-export async function SiteFooter() {
+export async function SiteFooter({
+  compact = false,
+}: {
+  /**
+   * LANDING V3 PREVIEW (owner, 2026-11-13): on the home page the footer
+   * carries ONLY the necessary legal information, the privacy policy, the
+   * terms of use and contacts. No decorative strip, no brand paragraph, no
+   * product columns, no "built together" line. The legal sentence and the
+   * copyright line are the same words as on every other page — the legal
+   * facts are not changed here.
+   */
+  compact?: boolean;
+} = {}) {
   const t = await getTranslations("footer");
   const nav = await getTranslations("nav");
   const legal = await getTranslations("legal");
+
+  if (compact) {
+    const link = "inline-flex min-h-11 items-center text-sm text-text-secondary hover:text-text-primary";
+    return (
+      <footer className="relative z-10 mt-4 border-t border-ink-600/60" data-testid="site-footer-compact">
+        <div className="mx-auto max-w-container px-4 sm:px-12">
+          <nav aria-label={t("legalGroup")} className="flex flex-wrap gap-x-6 gap-y-0 py-4">
+            <Link href="/legal/privacy" className={link}>
+              {legal("privacy.title")}
+            </Link>
+            <Link href="/legal/terms" className={link}>
+              {legal("terms.title")}
+            </Link>
+            <Link href="/legal/cookies#analytics-consent" className={link}>
+              {legal("cookies.settingsLink")}
+            </Link>
+            <Link href="/legal/legal-notice" className={link}>
+              {t("legalNotice")}
+            </Link>
+            <a href={`mailto:${PRIVACY_CONTACT_EMAIL}`} className={link} data-testid="footer-contact">
+              {t("contact")}
+            </a>
+          </nav>
+          <div className="flex flex-col gap-1.5 border-t border-ink-600/60 py-4 text-xs text-text-muted">
+            <p data-testid="footer-entity-disclosure">{t("operatedBy")}</p>
+            <p data-testid="footer-copyright">
+              {copyrightLine(new Date().getFullYear())} {t("ipNotice")}
+            </p>
+          </div>
+        </div>
+      </footer>
+    );
+  }
 
   return (
     <footer className="relative z-10 mt-24 border-t border-ink-600/60">

@@ -176,7 +176,7 @@ export function PublicEntry({
    * screen): two example chips and no "more examples". `standard`: the four
    * defaults with the rest one tap away.
    */
-  readonly examples?: "standard" | "short";
+  readonly examples?: "standard" | "short" | "none";
 }) {
   const t = useTranslations("landing.entry");
   const locale = useLocale();
@@ -339,7 +339,7 @@ export function PublicEntry({
           >
             {t("label")}
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
               ref={inputRef}
               id={inputId}
@@ -356,7 +356,7 @@ export function PublicEntry({
               // viewport (measured 2026-08-09; proven by
               // tests/e2e/landing-mobile-overflow.spec.ts). `flex-1` still
               // grows the field to fill the row.
-              className="min-h-11 w-0 min-w-0 flex-1 rounded-full border border-ink-500 bg-ink-900/60 px-4 text-basis text-text-primary placeholder:text-text-muted focus:border-brand-blue"
+              className="min-h-11 w-full min-w-0 rounded-full sm:w-0 sm:flex-1 border border-ink-500 bg-ink-900/60 px-4 text-basis text-text-primary placeholder:text-text-muted focus:border-brand-blue"
             />
             <button
               type="submit"
@@ -407,7 +407,11 @@ export function PublicEntry({
 
                The labels are ordinary speech, never the product's vocabulary:
                no SUPPLY, no DEMAND, no "capacity", no "evidence" (§18). */}
-        <div id={examplesId} className="flex flex-wrap items-center gap-1.5">
+        <div
+          id={examplesId}
+          hidden={exampleSet === "none"}
+          className={exampleSet === "none" ? "hidden" : "flex flex-wrap items-center gap-1.5"}
+        >
           <span className="text-meta text-text-muted">{t("examplesLabel")}</span>
           {examples.map((key) => {
             const example = t(`examples.${key}`);

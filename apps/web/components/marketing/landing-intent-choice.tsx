@@ -17,11 +17,17 @@ import { buttonLinkClassName } from "@/components/ui/Button";
  * the header carries both and this row is not rendered. A signed-in person
  * does not see it.
  */
-export async function LandingIntentChoice() {
+export async function LandingIntentChoice({
+  lead,
+  phoneMore,
+}: {
+  lead?: string;
+  phoneMore?: { readonly ids: readonly string[]; readonly label: string };
+} = {}) {
   const [locale, t] = await Promise.all([getLocale(), getTranslations("siteNav")]);
   return (
     <div data-testid="landing-intent-choice">
-      <GoalNavigation headingLevel="h1" phoneLayout="grid" />
+      <GoalNavigation headingLevel="h1" phoneLayout="grid" lead={lead} phoneMore={phoneMore} />
       <div className="mt-3 sm:hidden" data-testid="landing-signup">
         <NavAuthCtas
           guest={
