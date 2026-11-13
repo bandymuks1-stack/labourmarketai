@@ -24,7 +24,8 @@ import {
  * Supabase MCP, the function does not exist (42883) / the table does not
  * exist (42P01). We surface that as `code: "unavailable"` so the caller can
  * fall back to the honest "prepared — create an account to submit" state
- * instead of claiming a false success. No outbound side effects.
+ * instead of claiming a false success. No outbound side effects here: the two
+ * callers raise the internal alert (`notifyTeamOfStoredIntake`) for a stored row.
  *
  * The client is intentionally UNTYPED for the RPC call: the generated
  * Database types do not yet include this not-applied function, and typing it
@@ -54,7 +55,7 @@ export type PublicIntakeInput = {
 
 export type PublicIntakeResult =
   /** `advertising` stays in the shape for callers; a new advert is refused, so it is false. */
-  | { ok: true; advertising: boolean }
+  | { ok: true; advertising: boolean; intakeId: string | null }
   /** `rejected`: the spam guard refused it. Nothing was stored; the caller tells it
    *  the same generic "could not send" it tells a rate-limited sender. */
   | { ok: false; code: "unavailable" | "invalid" | "error" | "rate_limited" | "rejected" };
@@ -122,7 +123,7 @@ export async function persistPublicCompanyNeed(
   });
 
   try {
-    const { error } = await supabase.rpc("submit_company_need_public_v1", {
+    const { data, error } = await supabase.rpc("submit_company_need_public_v1", {
       p_locale: input.locale,
       p_company_name: input.companyName,
       p_contact_name: input.contactName ?? null,
@@ -144,7 +145,9 @@ export async function persistPublicCompanyNeed(
     });
 
     // An advert was refused above, so a stored row is never one.
-    if (!error) return { ok: true, advertising: false };
+    // The RPC returns the stored row's id (the SAME id for an exact repeat within
+    // 24 h — which is what makes "one request, one alert" hold across a re-send).
+    if (!error) return { ok: true, advertising: false, intakeId: typeof data === "string" ? data : null };
 
     if (NOT_APPLIED.has(error.code ?? "")) {
       // Backend not applied yet — the caller degrades to the prepared state.

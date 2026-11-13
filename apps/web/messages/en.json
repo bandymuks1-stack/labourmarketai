@@ -3069,7 +3069,9 @@
         "companies": "Companies",
         "demand": "Open demand",
         "reviewQueue": "Awaiting review",
-        "claims": "Skill claims"
+        "claims": "Skill claims",
+        "unhandledRequests": "Unhandled requests",
+        "emailFailures": "Notification e-mails not sent"
       },
       "internalBadge": "Internal",
       "internalNote": "Internal diagnostics — technical detail for the owner, not a product surface.",
@@ -3077,6 +3079,19 @@
         "title": "Waiting for a decision",
         "none": "Nothing is waiting for an operator decision right now.",
         "summary": "{people} active people · {companies} organizations · {drafts} operational drafts · {claims} skill declarations"
+      },
+      "emailDelivery": {
+        "title": "Notification e-mail delivery",
+        "attempts": "{count, plural, one {# attempt} other {# attempts}}",
+        "status": {
+          "failed": "Not sent",
+          "retry_wait": "Will be retried"
+        },
+        "kind": {
+          "company_registration_notice": "New company notice",
+          "company_welcome": "Welcome e-mail to a company",
+          "intake_alert": "New request alert"
+        }
       }
     },
     "eyebrow": "OPERATIONS CONTROL",
@@ -3290,6 +3305,16 @@
         "notFound": "Record not found.",
         "needsMigration": "Couldn’t complete the action. Please try again.",
         "error": "Something went wrong. Please try again."
+      },
+      "oldestWaiting": "oldest has waited {age}",
+      "waiting": "Waiting {age}",
+      "overdue": "Overdue",
+      "overdueCount": "{count, plural, one {# has} other {# have}} waited more than {hours} h",
+      "statusChanged": "Status changed by {who}, {when} UTC",
+      "statusChangedUnknown": "unidentified operator",
+      "age": {
+        "hours": "{count} h",
+        "days": "{count} d"
       }
     },
     "matching": {

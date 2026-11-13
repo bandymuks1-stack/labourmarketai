@@ -1428,10 +1428,25 @@
         "companies": "[EN] Companies",
         "demand": "[EN] Open demand",
         "reviewQueue": "[EN] Awaiting review",
-        "claims": "[EN] Skill claims"
+        "claims": "[EN] Skill claims",
+        "unhandledRequests": "[EN] Unhandled requests",
+        "emailFailures": "[EN] Notification e-mails not sent"
       },
       "internalBadge": "[EN] Internal",
-      "internalNote": "[EN] Internal diagnostics — technical detail for the owner, not a product surface."
+      "internalNote": "[EN] Internal diagnostics — technical detail for the owner, not a product surface.",
+      "emailDelivery": {
+        "title": "[EN] Notification e-mail delivery",
+        "attempts": "[EN] {count, plural, one {# attempt} other {# attempts}}",
+        "status": {
+          "failed": "[EN] Not sent",
+          "retry_wait": "[EN] Will be retried"
+        },
+        "kind": {
+          "company_registration_notice": "[EN] New company notice",
+          "company_welcome": "[EN] Welcome e-mail to a company",
+          "intake_alert": "[EN] New request alert"
+        }
+      }
     },
     "matching": {
       "eyebrow": "[EN] ADMIN · PHASE 3",

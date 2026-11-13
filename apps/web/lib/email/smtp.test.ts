@@ -104,4 +104,51 @@ describe("SMTP transport (Hostinger mailbox)", () => {
     expect(m.split("\r\n\r\n")[1].split("\r\n").every((l) => !l.startsWith("."))).toBe(true);
     expect(addressOf(CFG.from)).toBe("info@labourmarket.ai");
   });
+
+  it("without html, Reply-To or extra headers the message is exactly the plain one it always was", () => {
+    const m = buildMessage(CFG, { to: "p@example.test", subject: "s", text: "t" }, "<id@labourmarket.ai>", new Date("2026-10-19T12:00:00Z"));
+    expect(m).toContain("Content-Type: text/plain; charset=UTF-8");
+    expect(m).not.toContain("multipart");
+    expect(m).not.toContain("Reply-To");
+  });
+
+  it("with html it is multipart/alternative: text first, then html, both base64", () => {
+    const html = "<p>Sveiki, ąčęėįšųūž</p>";
+    const m = buildMessage(CFG, { to: "p@example.test", subject: "s", text: "Sveiki", html, replyTo: "info@labourmarket.ai", headers: { "X-LabourMarket-Notification": "request" } }, "<abc-123@labourmarket.ai>", new Date("2026-11-13T12:00:00Z"));
+    const boundary = /Content-Type: multipart\/alternative; boundary="([^"]+)"/.exec(m)?.[1];
+    expect(boundary).toBeTruthy();
+    expect(m).toContain("Reply-To: <info@labourmarket.ai>");
+    expect(m).toContain("X-LabourMarket-Notification: request");
+    expect(m).toContain("From: =?UTF-8?B?");
+    const parts = m.split(`--${boundary}`);
+    expect(parts).toHaveLength(4); // headers, text, html, closing "--"
+    expect(parts[1]).toContain("Content-Type: text/plain; charset=UTF-8");
+    expect(parts[2]).toContain("Content-Type: text/html; charset=UTF-8");
+    expect(parts[3].startsWith("--")).toBe(true);
+    const decode = (part: string) => Buffer.from(part.split("\r\n\r\n")[1].replace(/\r\n/g, ""), "base64").toString("utf8");
+    expect(decode(parts[1])).toBe("Sveiki");
+    expect(decode(parts[2])).toBe(html);
+    // no line of the body can end the DATA phase early
+    expect(m.split("\r\n").every((l) => l !== ".")).toBe(true);
+  });
+
+  it("refuses an unsafe Reply-To or header before connecting", async () => {
+    let connected = false;
+    const connect = () => {
+      connected = true;
+      return new PassThrough();
+    };
+    expect(await sendSmtp(CFG, { to: "p@example.test", subject: "s", text: "t", replyTo: "a@example.test\r\nBcc: x@example.test" }, { connect })).toEqual({ status: "failed", reason: "invalid_reply_to" });
+    expect(await sendSmtp(CFG, { to: "p@example.test", subject: "s", text: "t", headers: { "X-A": "v\r\nBcc: x@example.test" } }, { connect })).toEqual({ status: "failed", reason: "invalid_header" });
+    expect(await sendSmtp(CFG, { to: "p@example.test", subject: "s", text: "t", headers: { Bcc: "x@example.test" } }, { connect })).toEqual({ status: "failed", reason: "invalid_header" });
+    expect(connected).toBe(false);
+  });
+
+  it("sends an html message through the same conversation and gets the server's 250", async () => {
+    const log: string[] = [];
+    const res = await sendSmtp(CFG, { to: "person@example.test", subject: "s", text: "t", html: "<p>t</p>", replyTo: "info@labourmarket.ai" }, {
+      connect: fakeServer({ EHLO: "250-hello\r\n250 AUTH PLAIN\r\n", AUTH: "235 ok\r\n", DATA: "354 go\r\n", QUIT: "221 bye\r\n" }, log),
+    });
+    expect(res.status).toBe("sent");
+  });
 });

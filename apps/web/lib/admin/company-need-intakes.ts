@@ -3,10 +3,12 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { isSuperadmin } from "@/lib/auth/superadmin";
 import {
   COMPANY_NEED_INTAKE_STATUSES,
   COMPANY_NEED_INTAKE_OPERATOR_STATUSES,
+  compareIntakesForQueue,
   type CompanyNeedIntakeStatus,
 } from "./company-need-intake-shared";
 
@@ -54,6 +56,10 @@ const RELATION_ABSENT = "42P01";
 // the owner queue — and MUST NOT be masked as the benign "being prepared"
 // (needs-migration) state. See Pre-Advertising Launch Readiness v1 audit P0-3.
 const INSUFFICIENT_PRIVILEGE = "42501";
+// The who/when columns (migration 20261113220000) are not in this environment
+// yet: Postgres 42703, or PostgREST PGRST204 when its schema cache lacks them.
+// The queue then works exactly as before that migration — status only.
+const COLUMN_ABSENT = new Set(["42703", "PGRST204"]);
 
 // The generated `Database` type does not carry company_need_public_intakes
 // (the table postdates the last `db:types` run) — same service-role
@@ -86,6 +92,10 @@ export interface CompanyNeedIntakeRow {
   readonly description: string | null;
   readonly sourcePath: string | null;
   readonly status: CompanyNeedIntakeStatus;
+  /** When the status was last changed by an operator; null = never, or not recorded. */
+  readonly statusChangedAt: string | null;
+  /** The operator who changed it (address, superadmin view only); null = not recorded. */
+  readonly statusChangedBy: string | null;
 }
 
 export type CompanyNeedIntakeListResult =
@@ -107,14 +117,7 @@ export type SetIntakeStatusResult =
 const SELECT_COLUMNS =
   "id, created_at, locale, company_name, contact_name, contact_email, contact_phone, country, city_or_region, sector, headcount, start_window, expected_duration, urgency, accommodation, transport_needed, languages, engagement_type, description, source_path, status";
 
-/** Queue ordering: unactioned (new) first, then most recent first. */
-const STATUS_ORDER: Record<CompanyNeedIntakeStatus, number> = {
-  new: 0,
-  contacted: 1,
-  qualified: 2,
-  converted: 3,
-  rejected: 4,
-};
+const AUDIT_COLUMNS = ", status_changed_at, status_changed_by";
 
 function normaliseStatus(v: unknown): CompanyNeedIntakeStatus {
   return (COMPANY_NEED_INTAKE_STATUSES as readonly string[]).includes(
@@ -152,7 +155,20 @@ function mapRow(r: any): CompanyNeedIntakeRow {
     description: (r.description as string | null) ?? null,
     sourcePath: (r.source_path as string | null) ?? null,
     status: normaliseStatus(r.status),
+    statusChangedAt: (r.status_changed_at as string | null) ?? null,
+    statusChangedBy: (r.status_changed_by as string | null) ?? null,
   };
+}
+
+/** The signed-in operator's profile id, or null when it cannot be read. */
+async function currentOperatorId(): Promise<string | null> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    return data.user?.id ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -166,9 +182,14 @@ export async function listCompanyNeedIntakes(): Promise<CompanyNeedIntakeListRes
   if (!(await isSuperadmin())) return { kind: "not-admin" };
 
   const sb = createAdminClient();
-  const { data, error } = await intakes(sb)
-    .select(SELECT_COLUMNS)
+  let { data, error } = await intakes(sb)
+    .select(SELECT_COLUMNS + AUDIT_COLUMNS)
     .order("created_at", { ascending: false });
+  if (error && COLUMN_ABSENT.has(error.code ?? "")) {
+    ({ data, error } = await intakes(sb)
+      .select(SELECT_COLUMNS)
+      .order("created_at", { ascending: false }));
+  }
   if (error) {
     if (error.code === RELATION_ABSENT) return { kind: "needs-migration" };
     if (error.code === INSUFFICIENT_PRIVILEGE) return { kind: "grant-required" };
@@ -177,11 +198,23 @@ export async function listCompanyNeedIntakes(): Promise<CompanyNeedIntakeListRes
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rows = ((data ?? []) as any[]).map(mapRow);
-  rows.sort((a, b) => {
-    const so = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
-    if (so !== 0) return so;
-    return b.createdAt.localeCompare(a.createdAt);
-  });
+  rows.sort(compareIntakesForQueue);
+
+  // Who changed a status is stored as a profile id; the queue names the operator.
+  // A failed lookup leaves the id out — it never fails the queue.
+  const operatorIds = [...new Set(rows.map((r) => r.statusChangedBy).filter((v): v is string => !!v))];
+  if (operatorIds.length > 0) {
+    const { data: operators } = await sb.from("profiles").select("id, email").in("id", operatorIds);
+    const byId = new Map(
+      ((operators ?? []) as { id: string; email: string | null }[]).map((o) => [o.id, o.email]),
+    );
+    return {
+      kind: "ok",
+      rows: rows.map((r) =>
+        r.statusChangedBy ? { ...r, statusChangedBy: byId.get(r.statusChangedBy) ?? null } : r,
+      ),
+    };
+  }
   return { kind: "ok", rows };
 }
 
@@ -208,10 +241,17 @@ export async function setCompanyNeedIntakeStatus(
   }
 
   const sb = createAdminClient();
-  const { data, error } = await intakes(sb)
-    .update({ status })
+  // WHO AND WHEN (owner P0 2026-11-13): the operator and the server time go on
+  // the row with the status. Until migration 20261113220000 is applied the
+  // columns do not exist; the status is then saved alone, as before.
+  const operatorId = await currentOperatorId();
+  let { data, error } = await intakes(sb)
+    .update({ status, status_changed_at: new Date().toISOString(), status_changed_by: operatorId })
     .eq("id", id)
     .select("id");
+  if (error && (COLUMN_ABSENT.has(error.code ?? "") || error.code === INSUFFICIENT_PRIVILEGE)) {
+    ({ data, error } = await intakes(sb).update({ status }).eq("id", id).select("id"));
+  }
   if (error) {
     if (error.code === RELATION_ABSENT) return { kind: "needs-migration" };
     if (error.code === INSUFFICIENT_PRIVILEGE) return { kind: "grant-required" };

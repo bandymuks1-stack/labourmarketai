@@ -102,6 +102,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it every 5 minutes; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. It recomputes FORECASTS only (derived readings, SEP-1) through three service-only database doors, bounded to 25 projects / 60 s per pass, and never writes a fact. Answers counts only — no ids, no names, no project numbers.",
   },
+  "cron/platform-email-retry/route.ts": {
+    class: "public",
+    why: "The VPS cron bundle (ops/vps/labourmarket.cron) calls it every 10 minutes; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. It retries only e-mails an earlier event already recorded and did not send (bounded: 20 per call, 5 tries per e-mail), creates no event, and answers counts only.",
+  },
   "cron/job-alerts/route.ts": {
     class: "public",
     why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. Answers counts and a reason code only.",

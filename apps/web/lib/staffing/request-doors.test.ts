@@ -12,15 +12,14 @@ import {
 } from "./request-doors";
 
 const persist = vi.fn();
-const sendSmtp = vi.fn();
-const smtpConfig = vi.fn();
+const notify = vi.fn();
 vi.mock("server-only", () => ({}));
 vi.mock("next-intl/server", () => ({ getLocale: async () => "de" }));
 vi.mock("./company-need-public-intake", () => ({ persistPublicCompanyNeed: (i: unknown) => persist(i) }));
-vi.mock("../email/smtp", () => ({
-  smtpConfigFromEnv: () => smtpConfig(),
-  sendSmtp: (c: unknown, m: unknown) => sendSmtp(c, m),
-}));
+// The alert is one recorded event per stored row (lib/staffing/intake-alert.ts);
+// what it sends, to whom and how it retries is proven in lib/email/*.test.ts and
+// lib/staffing/intake-alert-paths.test.ts.
+vi.mock("./intake-alert", () => ({ notifyTeamOfStoredIntake: (id: unknown) => notify(id) }));
 
 import { submitRequestDoorAction } from "./request-door-actions";
 
@@ -123,66 +122,67 @@ describe("the action never claims what did not happen", () => {
   let info: ReturnType<typeof vi.spyOn>;
   beforeEach(() => {
     persist.mockReset();
-    sendSmtp.mockReset();
-    smtpConfig.mockReset();
-    persist.mockResolvedValue({ ok: true });
-    smtpConfig.mockReturnValue({ host: "fixture" });
-    sendSmtp.mockResolvedValue({ status: "sent" });
+    notify.mockReset();
+    persist.mockResolvedValue({ ok: true, advertising: false, intakeId: "00000000-0000-4000-8000-0000000000d9" });
+    notify.mockResolvedValue("sent");
     info = vi.spyOn(console, "info").mockImplementation(() => undefined);
   });
   const send = (extra: Record<string, string> = {}) =>
     submitRequestDoorAction(form({ door: "b2b", ...VALID.b2b, started: String(Date.now() - 10_000), ...extra }));
 
-  it("received: stored once, with the active locale in the path", async () => {
+  it("received: stored once, with the active locale in the path, and one alert for that row", async () => {
     expect(await send()).toBe("received");
     expect(persist).toHaveBeenCalledTimes(1);
     expect(persist.mock.calls[0][0].sourcePath).toBe("/de/request/b2b");
-    expect(sendSmtp).toHaveBeenCalledTimes(1);
+    expect(notify).toHaveBeenCalledTimes(1);
+    expect(notify).toHaveBeenCalledWith("00000000-0000-4000-8000-0000000000d9");
   });
 
-  it("the alert goes to the one mailbox with the door and the queue link, and nothing of the person's", async () => {
+  it("the alert is given the stored row's id and nothing of the person's", async () => {
     await send({ phone: "+37060000000" });
-    const [, mail] = sendSmtp.mock.calls[0];
-    expect(mail.to).toBe("info@labourmarket.ai");
-    const body = `${mail.subject} ${mail.text}`;
-    expect(body).toContain("B2B");
-    expect(body).toContain("/dashboard/admin/company-need-intakes");
+    const passed = JSON.stringify(notify.mock.calls);
     for (const secret of ["UAB Testas", "a@b.lt", "+37060000000", "Fasadai", "2000 m2", "Vilnius", "kovas"]) {
-      expect(body).not.toContain(secret);
+      expect(passed).not.toContain(secret);
     }
   });
 
-  it("an advert is stored and told it was received, and no mail goes out", async () => {
-    persist.mockResolvedValue({ ok: true, advertising: true });
-    expect(await send()).toBe("received");
-    expect(persist).toHaveBeenCalledTimes(1);
-    expect(sendSmtp).not.toHaveBeenCalled();
-    expect(info).toHaveBeenCalledWith("[request-door] stored", { door: "b2b", alerted: false });
+  it("the recipient is configuration, not a constant in the action", () => {
+    const src = readFileSync(resolve(__dirname, "request-door-actions.ts"), "utf8");
+    expect(src).not.toMatch(/@labourmarket\.ai/);
+    expect(src).not.toMatch(/sendSmtp|smtpConfigFromEnv/);
   });
 
-  it("logs whether anyone was told, and nothing else", async () => {
+  it("an advert is stored and told it was received, and no alert is raised", async () => {
+    persist.mockResolvedValue({ ok: true, advertising: true, intakeId: "00000000-0000-4000-8000-0000000000d9" });
+    expect(await send()).toBe("received");
+    expect(persist).toHaveBeenCalledTimes(1);
+    expect(notify).not.toHaveBeenCalled();
+    expect(info).toHaveBeenCalledWith("[request-door] stored", { door: "b2b", alert: "not_sent" });
+  });
+
+  it("logs what happened to the alert, and nothing else", async () => {
     await send();
-    expect(info).toHaveBeenCalledWith("[request-door] stored", { door: "b2b", alerted: true });
+    expect(info).toHaveBeenCalledWith("[request-door] stored", { door: "b2b", alert: "sent" });
   });
 
   it("not stored is never received, and no one is alerted", async () => {
     for (const [code, answer] of [["rate_limited", "limited"], ["rejected", "unavailable"], ["unavailable", "unavailable"], ["error", "unavailable"], ["invalid", "invalid"]]) {
-      sendSmtp.mockClear();
+      notify.mockClear();
       persist.mockResolvedValue({ ok: false, code });
       expect(await send()).toBe(answer);
-      expect(sendSmtp).not.toHaveBeenCalled();
+      expect(notify).not.toHaveBeenCalled();
     }
   });
 
   it.each([
-    ["the sender throws", () => sendSmtp.mockRejectedValue(new Error("down"))],
-    ["the server refuses", () => sendSmtp.mockResolvedValue({ status: "failed", reason: "x" })],
-    ["no mailbox is set up", () => smtpConfig.mockReturnValue(null)],
-  ])("%s: the stored request stands, and the log says no one was told", async (_n, arrange) => {
-    arrange();
+    ["the alert could not be sent", "not_sent"],
+    ["the alert is still on its way", "pending"],
+    ["the same row was already alerted", "duplicate"],
+  ])("%s: the stored request stands, and the log says so", async (_n, outcome) => {
+    notify.mockResolvedValue(outcome);
     expect(await send()).toBe("received");
     expect(persist).toHaveBeenCalledTimes(1);
-    expect(info).toHaveBeenCalledWith("[request-door] stored", { door: "b2b", alerted: false });
+    expect(info).toHaveBeenCalledWith("[request-door] stored", { door: "b2b", alert: outcome });
   });
 
   it("an unknown door stores nothing", async () => {
@@ -197,7 +197,7 @@ describe("the action never claims what did not happen", () => {
     expect(await send({ started: String(Date.now()) })).toBe("unavailable");
     expect(await send({ started: "" })).toBe("unavailable");
     expect(persist).not.toHaveBeenCalled();
-    expect(sendSmtp).not.toHaveBeenCalled();
+    expect(notify).not.toHaveBeenCalled();
   });
 
   it("a person who took their time gets through", async () => {

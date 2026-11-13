@@ -3069,7 +3069,9 @@
         "companies": "Įmonės",
         "demand": "Atvira paklausa",
         "reviewQueue": "Laukia peržiūros",
-        "claims": "Įgūdžių deklaracijos"
+        "claims": "Įgūdžių deklaracijos",
+        "unhandledRequests": "Neapdorotos užklausos",
+        "emailFailures": "Neišsiųsti pranešimų laiškai"
       },
       "internalBadge": "Vidinis",
       "internalNote": "Vidinė diagnostika — techninė informacija savininkui, ne produkto paviršius.",
@@ -3077,6 +3079,19 @@
         "title": "Laukia sprendimo",
         "none": "Šiuo metu nieko nelaukia operatoriaus sprendimo.",
         "summary": "{people} aktyvūs žmonės · {companies} organizacijos · {drafts} operaciniai juodraščiai · {claims} įgūdžių deklaracijos"
+      },
+      "emailDelivery": {
+        "title": "Pranešimų laiškų siuntimas",
+        "attempts": "{count, plural, one {# bandymas} few {# bandymai} other {# bandymų}}",
+        "status": {
+          "failed": "Neišsiųsta",
+          "retry_wait": "Bus kartojama"
+        },
+        "kind": {
+          "company_registration_notice": "Pranešimas apie naują įmonę",
+          "company_welcome": "Pasveikinimo laiškas įmonei",
+          "intake_alert": "Pranešimas apie naują užklausą"
+        }
       }
     },
     "eyebrow": "OPERACIJŲ VALDYMAS",
@@ -3290,6 +3305,16 @@
         "notFound": "Įrašas nerastas.",
         "needsMigration": "Nepavyko atlikti veiksmo. Bandyk dar kartą.",
         "error": "Įvyko klaida. Pabandyk dar kartą."
+      },
+      "oldestWaiting": "seniausia laukia {age}",
+      "waiting": "Laukia {age}",
+      "overdue": "Vėluoja",
+      "overdueCount": "{count, plural, one {# laukia} few {# laukia} other {# laukia}} ilgiau nei {hours} val.",
+      "statusChanged": "Būseną pakeitė {who}, {when} UTC",
+      "statusChangedUnknown": "nenustatytas operatorius",
+      "age": {
+        "hours": "{count} val.",
+        "days": "{count} d."
       }
     },
     "matching": {

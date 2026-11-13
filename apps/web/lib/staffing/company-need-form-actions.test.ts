@@ -13,6 +13,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const persistPublicCompanyNeed = vi.fn();
 const draftVacancyFromNeed = vi.fn();
 const sendCompanyNeedOwnerAlert = vi.fn();
+const notifyTeamOfStoredIntake = vi.fn();
 
 vi.mock("next-intl/server", () => ({ getLocale: async () => "en" }));
 vi.mock("./company-need-public-intake", () => ({
@@ -24,6 +25,10 @@ vi.mock("./company-need-actions", () => ({
 vi.mock("../security/ai-action-throttle", () => ({ aiActionRateLimited: async () => false }));
 vi.mock("../notifications/telegram-owner-alerts", () => ({
   sendCompanyNeedOwnerAlert: (...a: unknown[]) => sendCompanyNeedOwnerAlert(...a),
+}));
+
+vi.mock("./intake-alert", () => ({
+  notifyTeamOfStoredIntake: (...a: unknown[]) => notifyTeamOfStoredIntake(...a),
 }));
 
 import { submitCompanyNeedAction } from "./company-need-form-actions";
@@ -46,6 +51,7 @@ beforeEach(() => {
   persistPublicCompanyNeed.mockReset().mockResolvedValue({ ok: true, advertising: false });
   draftVacancyFromNeed.mockReset();
   sendCompanyNeedOwnerAlert.mockReset();
+  notifyTeamOfStoredIntake.mockReset().mockResolvedValue("sent");
 });
 
 describe("who is alerted about a stored need", () => {
