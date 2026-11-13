@@ -20564,6 +20564,10 @@
     }
   },
   "siteNav": {
+    "ask": {
+      "placeholder": "Parašykite, ko jums reikia",
+      "submit": "Klausti"
+    },
     "signUp": "Registruotis",
     "trigger": "Pagrindiniai pasirinkimai",
     "account": "Prisijungus",

@@ -5,8 +5,10 @@ import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
 import { NavAuthCtas } from "@/components/layouts/nav-auth-ctas";
 import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
 import { IntentMegaMenu } from "@/components/layouts/intent-mega-menu";
+import { AssistantAsk } from "@/components/layouts/assistant-ask";
 import type { RenderedIntent } from "@/components/layouts/intent-icons";
 import { ASSISTANT_HREF, PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
+import { PUBLIC_ENTRY_MAX_CHARS, PUBLIC_ENTRY_SAY_PARAM } from "@/lib/marketing/public-entry";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
 import { LmLogo } from "@/components/ui/lm-logo";
@@ -151,6 +153,18 @@ export async function SiteNav({
       {tSpace("overview")}
     </AuthCtaLink>
   );
+  // THE ASSISTANT INPUT (coordinator decision 2026-11-12): inner pages only —
+  // one field in the header from `lg`, a bottom bar below it. The landing
+  // keeps its one sentence field and mounts neither. Same destination and
+  // the same `say` parameter the landing's sentence travels in.
+  const askProps = {
+    action: `/${locale}${ASSISTANT_HREF}`,
+    name: PUBLIC_ENTRY_SAY_PARAM,
+    maxLength: PUBLIC_ENTRY_MAX_CHARS,
+    label: tIntent("assistant"),
+    placeholder: tIntent("ask.placeholder"),
+    submitLabel: tIntent("ask.submit"),
+  };
   // ONE goal bar element, placed by the page: the header's second row on
   // inner pages; on the landing (no goals in it) it sits in the first row.
   const megaMenu = (
@@ -158,6 +172,7 @@ export async function SiteNav({
       className="hidden lg:block"
       intents={intents}
       goalsOnPage={goalsOnPage}
+      askInHeader={!goalsOnPage}
       navLabel={tIntent("trigger")}
       accountLabel={tIntent("account")}
       assistant={assistant}
@@ -206,7 +221,7 @@ export async function SiteNav({
           </span>
         </Link>
 
-        {goalsOnPage && megaMenu}
+        {goalsOnPage ? megaMenu : <AssistantAsk variant="header" {...askProps} />}
 
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3 md:gap-4">
           {/* Auth CTAs pin to the app origin on marketing hosts so OAuth's
@@ -276,6 +291,7 @@ export async function SiteNav({
           the same six open the menu above. The panel anchors to the <header>
           (the nearest positioned box), so it spans the full width. */}
       {!goalsOnPage && megaMenu}
+      {!goalsOnPage && <AssistantAsk variant="bar" {...askProps} />}
     </header>
   );
 }

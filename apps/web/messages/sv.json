@@ -7948,6 +7948,10 @@
     }
   },
   "siteNav": {
+    "ask": {
+      "placeholder": "Skriv vad du behöver",
+      "submit": "Fråga"
+    },
     "signUp": "Registrera dig",
     "trigger": "Huvudval",
     "account": "Efter inloggning",

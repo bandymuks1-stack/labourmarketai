@@ -36,6 +36,7 @@ import {
 export function IntentMegaMenu({
   intents: allIntents,
   goalsOnPage = false,
+  askInHeader = false,
   lead = [],
   navLabel,
   accountLabel,
@@ -47,6 +48,9 @@ export function IntentMegaMenu({
   /** True where the page itself shows the six goals (the landing): the bar
    *  then carries only "More" and the assistant, so the goals appear once. */
   goalsOnPage?: boolean;
+  /** True where the header row carries the assistant INPUT (inner pages):
+   *  the bar then shows no second "ask the assistant" entry. */
+  askInHeader?: boolean;
   /** The first group: direct links shown before the goals (signed-in: home,
    *  journal, calendar, messages). Shown on every page, also where the goals
    *  are on the page itself. */
@@ -195,7 +199,7 @@ export function IntentMegaMenu({
             </li>
           )}
         </ul>
-        {assistant && (
+        {assistant && !askInHeader && (
           <Link
             href={assistant.href}
             // The conversation home is behind sign-in: never prefetch it from

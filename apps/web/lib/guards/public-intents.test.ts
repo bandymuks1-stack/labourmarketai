@@ -163,8 +163,29 @@ describe("desktop and mobile render ONE list", () => {
     // ONE goal bar element: the header's second row on inner pages, folded
     // into the first row on the landing (no sparse second row there).
     expect(nav.match(/<IntentMegaMenu/g)).toHaveLength(1);
-    expect(nav).toMatch(/\{goalsOnPage && megaMenu\}/);
+    expect(nav).toMatch(/\{goalsOnPage \? megaMenu : <AssistantAsk variant="header"/);
     expect(nav).toMatch(/\{!goalsOnPage && megaMenu\}/);
+  });
+
+  it("the assistant input is on inner pages only and sends the words the landing's field sends", () => {
+    // Header field and bottom bar: both only where the page has no sentence
+    // field of its own.
+    expect(nav).toMatch(/\{!goalsOnPage && <AssistantAsk variant="bar"/);
+    expect(nav.match(/<AssistantAsk /g)).toHaveLength(2);
+    expect(nav).toMatch(/name: PUBLIC_ENTRY_SAY_PARAM/);
+    expect(nav).toMatch(/action: `\/\$\{locale\}\$\{ASSISTANT_HREF\}`/);
+    // No second "ask the assistant" entry beside the input.
+    expect(nav).toMatch(/askInHeader=\{!goalsOnPage\}/);
+    expect(mega).toMatch(/\{assistant && !askInHeader && \(/);
+    const ask = read("components/layouts/assistant-ask.tsx");
+    expect(ask).toMatch(/method="get"/);
+    expect(ask).not.toMatch(/href[=:]\s*["'`]\//);
+    expect(ask).not.toMatch(/useTranslations/);
+    // The bar leaves while another field has focus, and never covers the footer.
+    expect(ask).toMatch(/focusin/);
+    expect(ask).toMatch(/fieldBusy && "hidden"/);
+    expect(ask).toMatch(/min-h-11/);
+    expect(read("app/[locale]/(marketing)/layout.tsx")).toMatch(/aria-hidden className="h-16 lg:hidden"/);
   });
 
   it("the account-creating action is named Sign up, in the header and on the phone's first screen", () => {
@@ -288,6 +309,8 @@ describe("labels exist and are translated in all 11 locales", () => {
   function leaves(s: SiteNav): Array<[string, string]> {
     const out: Array<[string, string]> = [
       ["signUp", (s as unknown as { signUp: string }).signUp],
+      ["ask.placeholder", (s as unknown as { ask: { placeholder: string } }).ask?.placeholder],
+      ["ask.submit", (s as unknown as { ask: { submit: string } }).ask?.submit],
       ["trigger", s.trigger],
       ["account", s.account],
       ["assistant", s.assistant],

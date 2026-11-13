@@ -20564,6 +20564,10 @@
     }
   },
   "siteNav": {
+    "ask": {
+      "placeholder": "Schrijf wat u nodig hebt",
+      "submit": "Vragen"
+    },
     "signUp": "Registreren",
     "trigger": "Hoofdkeuzes",
     "account": "Na inloggen",

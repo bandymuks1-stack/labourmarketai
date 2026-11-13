@@ -20564,6 +20564,10 @@
     }
   },
   "siteNav": {
+    "ask": {
+      "placeholder": "Napisz, czego potrzebujesz",
+      "submit": "Zapytaj"
+    },
     "signUp": "Zarejestruj się",
     "trigger": "Główne wybory",
     "account": "Po zalogowaniu",
