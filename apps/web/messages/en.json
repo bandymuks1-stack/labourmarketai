@@ -20117,7 +20117,8 @@
     "waiting": {
       "title": "Waiting on you",
       "clear": "Nothing is waiting on you.",
-      "unknown": "What is waiting on you could not be read."
+      "unknown": "What is waiting on you could not be read.",
+      "confirmEmail": "Confirm your e-mail address to see invitations sent to you"
     },
     "running": {
       "title": "Running now",

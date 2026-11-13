@@ -20117,7 +20117,8 @@
     "waiting": {
       "title": "Wartet auf Sie",
       "clear": "Nichts wartet auf Sie.",
-      "unknown": "Was auf Sie wartet, konnte nicht gelesen werden."
+      "unknown": "Was auf Sie wartet, konnte nicht gelesen werden.",
+      "confirmEmail": "Bestätigen Sie Ihre E-Mail-Adresse, um an Sie gesendete Einladungen zu sehen"
     },
     "running": {
       "title": "Läuft gerade",

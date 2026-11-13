@@ -20117,7 +20117,8 @@
     "waiting": {
       "title": "Wacht op je",
       "clear": "Er wacht niets op je.",
-      "unknown": "Wat op je wacht, kon niet worden gelezen."
+      "unknown": "Wat op je wacht, kon niet worden gelezen.",
+      "confirmEmail": "Bevestig je e-mailadres om uitnodigingen aan jou te zien"
     },
     "running": {
       "title": "Loopt nu",

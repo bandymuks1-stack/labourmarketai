@@ -7614,7 +7614,8 @@
     "waiting": {
       "title": "Gaida jūs",
       "clear": "Nekas jūs negaida.",
-      "unknown": "Neizdevās nolasīt, kas jūs gaida."
+      "unknown": "Neizdevās nolasīt, kas jūs gaida.",
+      "confirmEmail": "Apstipriniet savu e-pasta adresi, lai redzētu jums nosūtītos ielūgumus"
     },
     "running": {
       "title": "Notiek tagad",

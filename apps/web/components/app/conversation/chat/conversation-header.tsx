@@ -175,18 +175,22 @@ export function ConversationHeader({
           {/* The canonical mark (owner §19) — never a letter standing in for
               it. Decorative: the Link's aria-label already names the product. */}
           <LmLogo title="" className="h-6 w-auto shrink-0" />
-          {/* THE WHOLE LOGO WHERE IT FITS (integrated check 2026-11-12: the
-              phone showed the mark alone while the landing shows mark and
-              name). A phone's first row holds only the brand and the right
-              cluster, so the name fits there at the landing's own phone size;
-              from `md` the core navigation shares the row and the name
-              returns only once the row is wide enough for all of it. It is
-              shown whole or not at all. */}
+          {/* THE ORIGINAL FULL LOGO, AS ON THE PUBLIC BAR (owner rule,
+              2026-11-13): the mark and the whole name "LabourMarket.ai", the
+              same words and the same accent on ".ai" as the public header.
+              Shown whole or not at all, never cut:
+                · from 360px on a phone (its first row is the brand and the
+                  right cluster), exactly as the public header;
+                · NOT between 768px and 1023px, where the workspace, the core
+                  icons and the right cluster share one row and there is no
+                  room for it — the mark alone shows there;
+                · from 1024px up.
+              Where it is not drawn it stays for screen readers. */}
           <span
             data-testid="shell-logo-wordmark"
-            className={`whitespace-nowrap font-display font-bold tracking-tightest text-text-primary ${mobile ? "inline text-support" : "inline text-support md:hidden min-[1800px]:inline min-[1800px]:text-card-title"}`}
+            className={`whitespace-nowrap font-display font-bold tracking-tightest text-text-primary max-[359px]:sr-only ${mobile ? "text-support" : "text-support md:max-lg:sr-only lg:text-card-title"}`}
           >
-            {title}
+            LabourMarket<span className="text-gradient-accent">.ai</span>
           </span>
         </Link>
       </span>

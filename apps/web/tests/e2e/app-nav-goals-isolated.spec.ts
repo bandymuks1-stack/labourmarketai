@@ -284,6 +284,12 @@ test("N-0a. a worker signs up and lands on a home that leads with goal cards", a
   await onboard(page, "work", `QA-SYNTHETIC Nav Worker ${RUN}`);
   await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
   await openHome(page, "worker", "today-screen");
+  // A new account has not confirmed its e-mail address yet. The home says
+  // THAT, with the place to do it — never "Open items could not be read"
+  // with a retry that cannot help (integrated check 2026-11-13).
+  await expect(page.getByTestId("today-open-confirm-email"), "the e-mail step is named").toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId("today-open-unknown"), "no read-error line on the first screen").toHaveCount(0);
+  await expect(page.getByTestId("today-open-confirm-email")).toHaveAttribute("href", /\/dashboard\/network$/);
   sessions.set("worker", await ctx.storageState());
   await ctx.close();
 });
@@ -907,6 +913,7 @@ for (const { role, person, home } of ROLES.filter((r) => r.role !== "service bus
       // The whole logo: mark and name, on one line, nothing cut.
       const wordmark = phone.page.getByTestId("shell-logo-wordmark").first();
       await expect(wordmark, "the product's name is beside the mark on a phone").toBeVisible();
+      await expect(wordmark, "the full original name, as on the public bar").toHaveText("LabourMarket.ai");
       const fits = await wordmark.evaluate((el) => el.scrollWidth <= el.clientWidth + 1 && el.getBoundingClientRect().right <= window.innerWidth);
       expect(fits, "the name is whole and inside the screen").toBe(true);
       const sideways = await phone.page.evaluate(
@@ -937,6 +944,12 @@ for (const { role, person, home } of ROLES.filter((r) => r.role !== "service bus
       console.log(
         `[app-nav-walk] ${role} @ 1440px: ${row.cards} goals in ${row.tops} row, rail ${row.width}px wide, overflow ${row.overflow}px, arrows ${row.arrows}`,
       );
+      // The full original logo on the desktop header too.
+      const deskMark = desk.page.getByTestId("shell-logo-wordmark").first();
+      await expect(deskMark, "the name is beside the mark at 1440").toBeVisible();
+      await expect(deskMark).toHaveText("LabourMarket.ai");
+      const headerFits = await desk.page.getByTestId("app-header").evaluate((el) => el.scrollWidth <= el.clientWidth + 1);
+      expect(headerFits, "the header row is not pushed wider than the screen").toBe(true);
       // EXACTLY ONE RAIL at rest: the goals. Nothing else on the home is a rail.
       const rails = await desk.page.locator('[data-rail-part="track"]').count();
       console.log(`[app-nav-walk] ${role} @ 1440px: ${rails} rail on the home at rest`);

@@ -20117,7 +20117,8 @@
     "waiting": {
       "title": "Czeka na Ciebie",
       "clear": "Nic na Ciebie nie czeka.",
-      "unknown": "Nie udało się odczytać, co na Ciebie czeka."
+      "unknown": "Nie udało się odczytać, co na Ciebie czeka.",
+      "confirmEmail": "Potwierdź swój adres e-mail, aby zobaczyć wysłane do ciebie zaproszenia"
     },
     "running": {
       "title": "Trwa teraz",

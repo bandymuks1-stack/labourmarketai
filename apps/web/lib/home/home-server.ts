@@ -88,6 +88,8 @@ export const loadHomeWaiting = cache(async () => {
     region: deriveWaiting(deriveTodayNext(head.workCard), deriveTodayOpenItems(workIntelligence, attention)),
     /** Which door counters could not be read — named, never rendered as 0. */
     unknownDoors: unknownTodayDoors(attention),
+    /** The person has not confirmed their e-mail: say that, not "unreadable". */
+    emailProofNeeded: attention.invitationsNeedEmailProof === true,
   };
 });
 

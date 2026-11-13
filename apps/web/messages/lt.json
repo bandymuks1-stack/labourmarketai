@@ -20117,7 +20117,8 @@
     "waiting": {
       "title": "Laukia tavęs",
       "clear": "Niekas tavęs nelaukia.",
-      "unknown": "Nepavyko nuskaityti, kas tavęs laukia."
+      "unknown": "Nepavyko nuskaityti, kas tavęs laukia.",
+      "confirmEmail": "Patvirtink savo el. pašto adresą, kad matytum tau išsiųstus kvietimus"
     },
     "running": {
       "title": "Vyksta dabar",

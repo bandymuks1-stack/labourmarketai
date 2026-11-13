@@ -7614,7 +7614,8 @@
     "waiting": {
       "title": "Ootab sind",
       "clear": "Miski ei oota sind.",
-      "unknown": "Seda, mis sind ootab, ei õnnestunud lugeda."
+      "unknown": "Seda, mis sind ootab, ei õnnestunud lugeda.",
+      "confirmEmail": "Kinnita oma e-posti aadress, et näha sulle saadetud kutseid"
     },
     "running": {
       "title": "Käimas praegu",

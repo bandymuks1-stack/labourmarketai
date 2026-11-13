@@ -7614,7 +7614,8 @@
     "waiting": {
       "title": "Venter på deg",
       "clear": "Ingenting venter på deg.",
-      "unknown": "Det som venter på deg, kunne ikke leses."
+      "unknown": "Det som venter på deg, kunne ikke leses.",
+      "confirmEmail": "Bekreft e-postadressen din for å se invitasjoner som er sendt til deg"
     },
     "running": {
       "title": "Pågår nå",

@@ -55,7 +55,14 @@ export type InvitationsAddressedToMe =
   | { readonly status: "ok"; readonly items: readonly AttentionInvitation[]; readonly total: number }
   /** The canonical invitations migration is not applied — an honest "not enabled". */
   | { readonly status: "unavailable" }
-  | { readonly status: "error" };
+  /**
+   * `reason: "email_unverified"` — not a failed read: the caller has not yet
+   * proved their e-mail address, so the invitations sent to it cannot be
+   * shown. A surface with room for it says THAT (and where to confirm)
+   * instead of "could not be read"; every other consumer keeps treating it as
+   * the honest unknown it always was.
+   */
+  | { readonly status: "error"; readonly reason?: "email_unverified" };
 
 function refKey(ref: InvitationRef): string {
   return ref.source === "invitation" ? `invitation:${ref.invitationId}` : `${ref.source}:${ref.orgId}`;
@@ -66,7 +73,7 @@ function refKey(ref: InvitationRef): string {
 async function readAll(): Promise<
   | { readonly status: "ok"; readonly items: readonly AttentionInvitation[] }
   | { readonly status: "unavailable" }
-  | { readonly status: "error" }
+  | { readonly status: "error"; readonly reason?: "email_unverified" }
 > {
   const [canonical, roster] = await Promise.all([listInvitationsForMe(), listMyPendingWorkerInvitations()]);
   if (canonical.status === "needs-migration") return { status: "unavailable" };
@@ -74,6 +81,7 @@ async function readAll(): Promise<
   // takes the honest "could not read" path here: chat / brief / today never
   // claim "no invitations" for a mailbox that was simply not proven. The
   // network page, which has room for it, renders the progressive proof prompt.
+  if (canonical.status === "email_unverified") return { status: "error", reason: "email_unverified" };
   if (canonical.status !== "ok") return { status: "error" };
   const items: AttentionInvitation[] = [
     ...canonical.items.map((i) => ({
