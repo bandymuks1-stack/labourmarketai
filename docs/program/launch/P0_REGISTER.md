@@ -203,3 +203,40 @@ Rows 3–7 all arrived through the German version of the older company-need form
 > Kind regards,
 > LabourMarket.ai team
 > info@labourmarket.ai
+
+## Consent and payments — facts checked 2026-11-13 (owner directive: remove unfounded V3 blockers)
+
+### Cookies and consent, measured on production build `59b1c759` (lt, en, de; fresh browser, 375 px)
+
+| Check | Result |
+|---|---|
+| Stored before any choice | two first-party cookies: `NEXT_LOCALE` (language), `lm_tz` (time zone). No localStorage, no sessionStorage |
+| Requests to other sites | none |
+| Refuse and Allow | two buttons of the same style and height in one row; refusing is one press |
+| After Refuse, visit with campaign parameters | nothing added except the stored choice itself (`lm.consent.analytics.v1`); the banner does not return |
+| Withdrawal | control on the cookies page, linked from the footer |
+| External analytics | none in the product |
+| Server side | first-party usage events are recorded without the browser choice (no device storage involved) |
+
+Design decision recorded: the banner asks only for what needs consent under ePrivacy (storing or reading measurement and campaign data on the device). Server-side first-party usage records store nothing on the device; they are a data-protection disclosure matter (purpose, legal basis, right to object in the privacy notice), not a banner matter. The V3 sentence says exactly that scope.
+
+Legal review is **not** a deploy blocker for V3 (owner, 2026-11-13). Open legal questions, tracked separately:
+
+| # | Question | Needed from |
+|---|---|---|
+| L1 | Legal basis and privacy-notice wording for server-side first-party usage events | lawyer |
+| L2 | Is the `lm_tz` time-zone cookie strictly necessary, or a preference to list as such | lawyer |
+| L3 | Final wording of the consent sentence and of the "Your data and privacy" step | lawyer |
+| L4 | Retention period of usage events and of anonymous request rows | owner + lawyer |
+
+### Stripe, read-only from production records (no keys read, no payment made)
+
+| Record | Fact |
+|---|---|
+| LIVE webhook events | 3, all on 2026-10-23, all processed, none with an error: `checkout.session.completed`, `invoice.paid`, `invoice.payment_succeeded` |
+| LIVE subscription | 1, plan `company_pilot`, status active, tied to an organization, period 2026-10-23 to 2026-11-22, **set to end at period end (no renewal)** |
+| Gaps in that row | payment status and amount are empty |
+| LIVE checkout operations | 3, none marked completed: 1 expired (2026-09-05), 2 still `open` (2026-09-22, 2026-10-02) although a checkout completed on 2026-10-23 |
+| Billing code on `main` since 2026-10-22 | one product change (#2933) and one CI change (#2696); the paid path is the same integration |
+
+Conclusions: the LIVE integration took a real payment and activated the plan. A TEST key is needed only for Lane D's four hosted scenarios (checkout, portal, refund, failed payment), which cannot be exercised on LIVE without real money; it does not block V3 or any non-billing work. Three defects for Lane D: checkout operation not closed on completion, empty payment status and amount on the subscription row, and the one paying organization losing its plan on 2026-11-22 unless that is intended.
