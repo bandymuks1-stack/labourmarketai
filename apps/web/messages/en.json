@@ -1969,11 +1969,13 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Your company is not verified yet, so the inquiries you submit here are not shown to workers until verification is complete.",
+    "notVerifiedYetUnconfirmedShown": "Your company is not verified yet. An inquiry you choose to “Publish publicly” is shown to workers and on the public job board, marked “Company not confirmed”, once its required fields are filled and the automatic checks pass; otherwise it waits for review by our team. Nothing is public until you choose.",
     "notVerifiedHowTo": "Add your registration code and request a review",
     "statusOther": "In review",
     "heading": "Your submitted inquiries",
     "note": "Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
     "workerVisibilityNote": "Honest status: inquiries from verified companies are shown to workers on their opportunities board. Verification is a manual review — until your company is verified, your inquiries stay private to you and the review team.",
+    "workerVisibilityNoteUnconfirmedShown": "Honest status: inquiries from verified companies are shown to workers. An inquiry from a company that is not verified is shown only if you choose “Publish publicly” for it, marked “Company not confirmed”, once its required fields are filled and the automatic checks pass. Each inquiry below says whether it is published, shown or waiting for review.",
     "empty": "No inquiries submitted yet. Submit your inquiry above and it will appear here with its status.",
     "created": "Created",
     "manageHelp": "Complete an inquiry, remove it from the market or publish it again right here in the list; a draft can be continued or discarded. Confirming its recognized skills is done from its scouting view. Editing submitted text is not available yet.",
@@ -1998,7 +2000,38 @@
     "supplyHeading": "Capacity you have offered",
     "supplyNote": "These are people you told the market you HAVE, not people you asked for. They are stored and visible to you here. Employers cannot search offered capacity yet, so nobody has been contacted about these.",
     "capacityNeeded": "{count} needed",
-    "capacityInterested": "{count} interested"
+    "capacityInterested": "{count} interested",
+    "publicState": {
+      "not_published": "Not public: you have not chosen to publish it",
+      "unconfirmed_public": "Shown publicly · marked “Company not confirmed”",
+      "held_incomplete": "Waiting for review: a required field is missing",
+      "held_review": "Waiting for review by our team",
+      "rejected": "Not shown publicly after review"
+    },
+    "publicReason": {
+      "missing_role": "role or work missing",
+      "missing_country": "country missing",
+      "missing_location": "place missing",
+      "missing_company_name": "company name missing",
+      "missing_company_country": "company country missing",
+      "company_draft": "company profile not activated yet",
+      "company_checks_pending": "the company’s own checks have not passed yet",
+      "link": "a link in the shown text",
+      "email": "an e-mail address in the shown text",
+      "phone": "a phone number in the shown text",
+      "contact_channel": "a messenger contact in the shown text",
+      "pitch": "reads like an advertisement",
+      "rate": "many inquiries in 24 hours",
+      "duplicate_text": "the same text was posted earlier by another company",
+      "disposable_email": "signed up with a disposable e-mail address"
+    },
+    "publication": {
+      "publish": "Publish publicly",
+      "withdraw": "Stop publishing",
+      "explain": "Publishing shows this inquiry on the public job board and to workers, marked “Company not confirmed”: type of work, country, place, team size, start, date and your company’s name. Signed-in workers also see the terms you entered (pay, schedule, accommodation, transport, requirements). Your contacts, description, notes and documents are never shown. Our checks run first and may hold it for review. You can stop publishing at any time.",
+      "failed": "Your choice was not saved. Nothing changed.",
+      "saving": "Saving…"
+    }
   },
   "journey": {
     "eyebrow": "How it works",
@@ -3219,6 +3252,17 @@
         "needsMigration": "Couldn’t complete the action. Please try again.",
         "saving": "Saving…",
         "error": "Something went wrong. Please try again."
+      },
+      "needsQueue": {
+        "title": "Needs held for public review",
+        "subtitle": "Needs of companies that are not verified, held by the automatic checks. Approve to show one marked “Company not confirmed”; reject to keep it private. A decision applies to the current text only: an edit is checked again.",
+        "empty": "No needs are waiting for review.",
+        "unavailable": "The review queue could not be read. That is not the same as an empty queue.",
+        "approve": "Approve: show as not confirmed",
+        "reject": "Reject",
+        "reasonsLabel": "Why held",
+        "saved": "Decision saved.",
+        "failed": "The decision was not saved. Nothing changed."
       }
     },
     "companyNeedIntakes": {
@@ -10574,7 +10618,8 @@
       "emptyTitle": "Nothing relevant right now",
       "emptyBody": "No opportunity we checked fits your information well enough to recommend. Add your profession, skills or the countries you want to work in — or look through the whole market.",
       "improveProfile": "Improve my profile"
-    }
+    },
+    "companyNotConfirmed": "Company not confirmed"
   },
   "workerIntake": {
     "title": "Worker intake",
@@ -20562,5 +20607,13 @@
         "error": "That didn't work. Try again later."
       }
     }
+  },
+  "publicCompanyNeeds": {
+    "title": "Needs posted by companies on LabourMarket.ai",
+    "intro": "Posted directly by companies. “Company not confirmed” means we have not verified the company yet; its need passed our automatic checks. Contact details are never shown here — sign in to respond.",
+    "people": "{count, plural, one {# person} other {# people}}",
+    "respond": "Sign in to respond",
+    "openBoard": "Open in your opportunities",
+    "roleUnknown": "Work"
   }
 }

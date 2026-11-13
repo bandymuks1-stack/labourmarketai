@@ -17,6 +17,8 @@ import { Card } from "@/components/ui/Card";
 import { MarketEntryChip } from "@/components/app/market-entry-lifecycle";
 import { DemandEntryLifecycle } from "@/components/app/demand-entry-lifecycle";
 import { demandAdapter, demandReachesWorkers } from "@/lib/market-lifecycle/adapters";
+import type { NeedPublicReason, NeedPublicState } from "@/lib/opportunities/public-company-needs-model";
+import { NeedPublicationToggle, type NeedPublicationLabels } from "@/components/app/need-publication-toggle";
 
 /** The statuses the owner moves (lifecycle contract); the rest are the admin
  *  review pipeline and keep their own honest label. */
@@ -101,7 +103,20 @@ export interface DemandRequestsReadbackLabels {
   readonly urgencyValues: Readonly<Record<string, string>>;
   /** Localized labels for `structured_v2.opportunity_type` (closed set). */
   readonly opportunityTypeValues: Readonly<Record<string, string>>;
+  /** Owner decision V-1: what the database's one rule says about a need of a
+   *  company that is not verified — shown, waiting for review, or rejected —
+   *  and why it is held. Optional: absent → the row renders as before. */
+  readonly publicState?: Readonly<Partial<Record<NeedPublicState, string>>>;
+  readonly publicReason?: Readonly<Partial<Record<NeedPublicReason, string>>>;
+  /** The company's explicit per-need "Publish publicly" choice (principle C). */
+  readonly publication?: NeedPublicationLabels;
 }
+
+/** One need's state under the V-1 rule (get_my_need_public_states_v1). */
+export type NeedPublicStateEntry = {
+  readonly state: NeedPublicState;
+  readonly reasons: readonly NeedPublicReason[];
+};
 
 /** A single label/value row inside the submitted-details list. */
 function DetailRow({ label, value }: { label: string; value: string }) {
@@ -130,8 +145,11 @@ function RequestRow({
   pendingInterest,
   scoutable,
   gateMet,
+  publicState,
 }: {
   r: CustomerRequestRow;
+  /** V-1 state of this need, when the company is not verified. */
+  publicState?: NeedPublicStateEntry | null;
   labels: DemandRequestsReadbackLabels;
   locale: string;
   pendingInterest?: ReadonlyMap<string, { count: number; label: string }>;
@@ -205,6 +223,40 @@ function RequestRow({
           </span>
         )}
       </div>
+      {/* OWNER DECISION V-1: a need of a company that is not verified says
+          whether it is shown (labelled "Company not confirmed"), waiting for
+          review — and why — or rejected. The state is the database's one
+          rule (need_public_state_v1); nothing here re-derives it. */}
+      {publicState && labels.publicState?.[publicState.state] ? (
+        <p
+          className={`rounded-md border px-2 py-1 text-meta leading-relaxed ${
+            publicState.state === "unconfirmed_public"
+              ? "border-border-subtle text-text-secondary"
+              : "border-state-warning/40 bg-state-warning/5 text-state-warning"
+          }`}
+          data-testid={`demand-public-state-${r.id}`}
+          data-public-state={publicState.state}
+        >
+          {labels.publicState[publicState.state]}
+          {publicState.state !== "unconfirmed_public" &&
+          publicState.state !== "not_published" &&
+          publicState.reasons.length > 0
+            ? `: ${publicState.reasons
+                .map((code) => labels.publicReason?.[code])
+                .filter(Boolean)
+                .join(", ")}`
+            : null}
+        </p>
+      ) : null}
+      {/* PRINCIPLE C: nothing is public until the company chooses, per need.
+          The door re-checks who may choose; withdrawal is one click. */}
+      {publicState && labels.publication && r.status === "submitted" ? (
+        <NeedPublicationToggle
+          requestId={r.id}
+          published={publicState.state !== "not_published"}
+          labels={labels.publication}
+        />
+      ) : null}
       {/* THE ONE LIFECYCLE CONTRACT on the row itself: whether workers can
           find it, and complete / remove from market / publish again /
           discard — the same words as every other own need or offer. */}
@@ -320,8 +372,12 @@ export function DemandRequestsReadback({
   pendingInterest,
   locale,
   companyVerificationStatus = null,
+  publicStates,
 }: {
   result: CustomerRequestsListResult;
+  /** Owner decision V-1: requestId → the need's state under the one rule.
+   *  Absent → rows use the company-level verification gate as before. */
+  publicStates?: ReadonlyMap<string, NeedPublicStateEntry>;
   labels: DemandRequestsReadbackLabels;
   /** The company's verification status, read through the demand adapter's
    *  `demandReachesWorkers`. Absent → a row never claims a
@@ -390,7 +446,10 @@ export function DemandRequestsReadback({
                 locale={locale}
                 pendingInterest={pendingInterest}
                 scoutable
-                gateMet={workersSeeNeeds}
+                gateMet={
+                  workersSeeNeeds || publicStates?.get(r.id)?.state === "unconfirmed_public"
+                }
+                publicState={workersSeeNeeds ? null : (publicStates?.get(r.id) ?? null)}
               />
             ))}
           </ul>

@@ -155,6 +155,13 @@ async function main(): Promise<void> {
               .map((s) => `"${s}"`)
               .join(", ")}. Re-review the function, then update the allowlist.`,
           );
+        } else if (allowed.get(sig)?.pendingApplyMigration) {
+          // Reviewed, owner-gated, NOT YET APPLIED: absent is the expected state until the
+          // owner applies the named migration. Nothing is permitted by this branch — once the
+          // function exists, conditions 1, 2, 4 and 5 apply to it in full.
+          console.log(
+            `  pending apply — "${sig}" (created by ${allowed.get(sig)?.pendingApplyMigration}); absent here, as expected before the owner's apply`,
+          );
         } else {
           fail(
             3,

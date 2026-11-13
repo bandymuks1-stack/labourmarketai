@@ -1,6 +1,7 @@
 {
   "demandReadback": {
     "notVerifiedYet": "Ditt företag är ännu inte verifierat, så de behov du skickar in här visas inte för arbetare förrän verifieringen är klar.",
+    "notVerifiedYetUnconfirmedShown": "Ditt företag är inte verifierat ännu. En förfrågan som du väljer att ”Publicera offentligt” visas för arbetstagare och på den offentliga jobbtavlan, märkt ”Företaget är inte bekräftat”, när de obligatoriska fälten är ifyllda och de automatiska kontrollerna godkänts; annars väntar den på granskning av vårt team. Inget är offentligt förrän du väljer det.",
     "notVerifiedHowTo": "Lägg till organisationsnummer och begär en granskning",
     "heading": "[EN] Your submitted requests",
     "note": "[EN] Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
@@ -17,7 +18,39 @@
     "supplyHeading": "Kapacitet du har erbjudit",
     "supplyNote": "Det här är personer som du har sagt till marknaden att du HAR, inte personer du söker. De är sparade och synliga för dig. Arbetsgivare kan ännu inte söka bland erbjuden kapacitet, så ingen har hört av sig om dessa.",
     "capacityNeeded": "{count} behövs",
-    "capacityInterested": "{count} intresserade"
+    "capacityInterested": "{count} intresserade",
+    "workerVisibilityNoteUnconfirmedShown": "Ärlig status: förfrågningar från verifierade företag visas för arbetstagare. En förfrågan från ett företag som inte är verifierat visas bara om du väljer ”Publicera offentligt” för den, märkt ”Företaget är inte bekräftat”, när de obligatoriska fälten är ifyllda och de automatiska kontrollerna godkänts. Vid varje förfrågan står om den är publicerad, visas eller väntar på granskning.",
+    "publicState": {
+      "not_published": "Inte offentlig: du har inte valt att publicera",
+      "unconfirmed_public": "Visas offentligt · märkt ”Företaget är inte bekräftat”",
+      "held_incomplete": "Väntar på granskning: ett obligatoriskt fält saknas",
+      "held_review": "Väntar på granskning av vårt team",
+      "rejected": "Visas inte offentligt efter granskning"
+    },
+    "publicReason": {
+      "missing_role": "yrke saknas",
+      "missing_country": "land saknas",
+      "missing_location": "ort saknas",
+      "missing_company_name": "företagsnamn saknas",
+      "missing_company_country": "företagets land saknas",
+      "company_draft": "företagsprofilen är inte aktiverad ännu",
+      "company_checks_pending": "företagets kontroller är inte godkända ännu",
+      "link": "en länk i den visade texten",
+      "email": "en e-postadress i den visade texten",
+      "phone": "ett telefonnummer i den visade texten",
+      "contact_channel": "en meddelandekontakt i den visade texten",
+      "pitch": "läses som en annons",
+      "rate": "många förfrågningar på 24 timmar",
+      "duplicate_text": "samma text publicerades tidigare av ett annat företag",
+      "disposable_email": "registrerad med en engångsadress för e-post"
+    },
+    "publication": {
+      "publish": "Publicera offentligt",
+      "withdraw": "Sluta publicera",
+      "explain": "När förfrågan publiceras visas den på den offentliga jobbtavlan och för arbetstagare, märkt ”Företaget är inte bekräftat”: typ av arbete, land, ort, lagstorlek, start, datum och ditt företags namn. Inloggade arbetstagare ser även villkoren du angav (lön, schema, boende, transport, krav). Dina kontaktuppgifter, beskrivning, anteckningar och dokument visas aldrig. Våra kontroller körs först och kan hålla den för granskning. Du kan sluta publicera när som helst.",
+      "failed": "Ditt val sparades inte. Inget ändrades.",
+      "saving": "Sparar…"
+    }
   },
   "journey": {
     "eyebrow": "Så fungerar det",
@@ -2423,7 +2456,8 @@
       "profession": "vilket arbete du gör",
       "country": "vilka länder du vill arbeta i",
       "cta": "Fyll i mina önskemål"
-    }
+    },
+    "companyNotConfirmed": "Företaget är inte bekräftat"
   },
   "scouting": {
     "pool": {
@@ -7946,5 +7980,13 @@
       "allow": "Tillåt",
       "refuse": "Avböj"
     }
+  },
+  "publicCompanyNeeds": {
+    "title": "Behov som företag publicerat på LabourMarket.ai",
+    "intro": "Publicerat direkt av företag. ”Företaget är inte bekräftat” betyder att vi inte har verifierat företaget ännu; dess behov har klarat våra automatiska kontroller. Kontaktuppgifter visas aldrig här — logga in för att svara.",
+    "people": "{count, plural, one {# person} other {# personer}}",
+    "respond": "Logga in för att svara",
+    "openBoard": "Öppna i dina möjligheter",
+    "roleUnknown": "Arbete"
   }
 }

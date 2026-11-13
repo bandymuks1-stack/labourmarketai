@@ -1969,11 +1969,13 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Twoja firma nie jest jeszcze zweryfikowana, dlatego zgłoszone tu zapytania nie są pokazywane pracownikom do czasu zakończenia weryfikacji.",
+    "notVerifiedYetUnconfirmedShown": "Twoja firma nie jest jeszcze zweryfikowana. Zapytanie, dla którego wybierzesz „Opublikuj publicznie”, jest pokazywane pracownikom i na publicznej tablicy ofert z oznaczeniem „Firma niepotwierdzona”, gdy wymagane pola są wypełnione, a automatyczne kontrole przejdą; w przeciwnym razie czeka na przegląd przez nasz zespół. Nic nie jest publiczne, dopóki tego nie wybierzesz.",
     "notVerifiedHowTo": "Dodaj numer rejestrowy i poproś o weryfikację",
     "statusOther": "W trakcie przeglądu",
     "heading": "Twoje przesłane zapytania",
     "note": "Zapisane w Twojej prywatnej przestrzeni i sprawdzane ręcznie — nie proponujemy kandydatów automatycznie. Aktualizacje statusu pojawiają się tutaj.",
     "workerVisibilityNote": "Rzetelny status: zapytania od zweryfikowanych firm są pokazywane pracownikom na ich tablicy ofert. Weryfikacja to ręczny przegląd — dopóki Twoja firma nie zostanie zweryfikowana, Twoje zapytania pozostają widoczne tylko dla Ciebie i zespołu przeglądającego.",
+    "workerVisibilityNoteUnconfirmedShown": "Uczciwy status: zapytania zweryfikowanych firm są pokazywane pracownikom. Zapytanie firmy niezweryfikowanej jest pokazywane tylko wtedy, gdy wybierzesz dla niego „Opublikuj publicznie”, z oznaczeniem „Firma niepotwierdzona”, gdy wymagane pola są wypełnione, a automatyczne kontrole przejdą. Przy każdym zapytaniu widać, czy jest opublikowane, pokazywane, czy czeka na przegląd.",
     "empty": "Nie przesłano jeszcze żadnych zapytań. Prześlij zapytanie powyżej, a pojawi się tutaj wraz ze statusem.",
     "created": "Utworzono",
     "manageHelp": "Zakończ zapytanie, usuń je z rynku lub opublikuj ponownie bezpośrednio na tej liście; szkic możesz kontynuować lub odrzucić. Potwierdzenie rozpoznanych umiejętności odbywa się w widoku scoutingu. Edycja przesłanego tekstu nie jest jeszcze dostępna.",
@@ -1998,7 +2000,38 @@
     "supplyHeading": "Zaoferowane przez Ciebie zasoby",
     "supplyNote": "To osoby, o których powiedziałeś rynkowi, że je MASZ, a nie te, których szukasz. Są zapisane i widoczne dla Ciebie. Pracodawcy nie mogą jeszcze wyszukiwać oferowanych zasobów, więc nikt się w tej sprawie nie skontaktował.",
     "capacityNeeded": "Potrzeba {count}",
-    "capacityInterested": "{count} zainteresowanych"
+    "capacityInterested": "{count} zainteresowanych",
+    "publicState": {
+      "not_published": "Niepubliczne: nie wybrano publikacji",
+      "unconfirmed_public": "Pokazywane publicznie · z oznaczeniem „Firma niepotwierdzona”",
+      "held_incomplete": "Czeka na przegląd: brakuje wymaganego pola",
+      "held_review": "Czeka na przegląd przez nasz zespół",
+      "rejected": "Po przeglądzie nie jest pokazywane publicznie"
+    },
+    "publicReason": {
+      "missing_role": "brak stanowiska",
+      "missing_country": "brak kraju",
+      "missing_location": "brak miejsca",
+      "missing_company_name": "brak nazwy firmy",
+      "missing_company_country": "brak kraju firmy",
+      "company_draft": "profil firmy nie jest jeszcze aktywowany",
+      "company_checks_pending": "kontrole firmy jeszcze nie przeszły",
+      "link": "link w pokazywanym tekście",
+      "email": "adres e-mail w pokazywanym tekście",
+      "phone": "numer telefonu w pokazywanym tekście",
+      "contact_channel": "kontakt komunikatora w pokazywanym tekście",
+      "pitch": "wygląda jak reklama",
+      "rate": "wiele zapytań w 24 godziny",
+      "duplicate_text": "ten sam tekst opublikowała wcześniej inna firma",
+      "disposable_email": "rejestracja z jednorazowym adresem e-mail"
+    },
+    "publication": {
+      "publish": "Opublikuj publicznie",
+      "withdraw": "Przestań publikować",
+      "explain": "Po publikacji to zapytanie jest widoczne na publicznej tablicy ofert i dla pracowników, z oznaczeniem „Firma niepotwierdzona”: rodzaj pracy, kraj, miejsce, wielkość zespołu, początek, data i nazwa Twojej firmy. Zalogowani pracownicy widzą też wpisane warunki (wynagrodzenie, grafik, zakwaterowanie, transport, wymagania). Twoje kontakty, opis, notatki i dokumenty nigdy nie są pokazywane. Najpierw działają nasze kontrole, które mogą wstrzymać je do przeglądu. Publikację możesz zakończyć w każdej chwili.",
+      "failed": "Twój wybór nie został zapisany. Nic się nie zmieniło.",
+      "saving": "Zapisywanie…"
+    }
   },
   "journey": {
     "eyebrow": "Jak to działa",
@@ -3219,6 +3252,17 @@
         "needsMigration": "Nie udało się wykonać działania. Spróbuj ponownie.",
         "saving": "Zapisywanie…",
         "error": "Coś poszło nie tak. Spróbuj ponownie."
+      },
+      "needsQueue": {
+        "title": "Potrzeby czekające na przegląd przed publikacją",
+        "subtitle": "Potrzeby niezweryfikowanych firm wstrzymane przez automatyczne kontrole. Zatwierdź, aby pokazać z oznaczeniem „Firma niepotwierdzona”; odrzuć, aby pozostała prywatna. Decyzja dotyczy tylko obecnego tekstu: zmiana jest sprawdzana ponownie.",
+        "empty": "Żadne potrzeby nie czekają na przegląd.",
+        "unavailable": "Nie udało się odczytać kolejki przeglądu. To nie to samo co pusta kolejka.",
+        "approve": "Zatwierdź: pokaż jako niepotwierdzoną",
+        "reject": "Odrzuć",
+        "reasonsLabel": "Dlaczego wstrzymane",
+        "saved": "Decyzja zapisana.",
+        "failed": "Decyzja nie została zapisana. Nic się nie zmieniło."
       }
     },
     "companyNeedIntakes": {
@@ -10574,7 +10618,8 @@
       "emptyTitle": "Teraz nic pasującego",
       "emptyBody": "Żadna sprawdzona możliwość nie pasuje wystarczająco do Twoich danych, by ją polecić. Uzupełnij zawód, umiejętności lub kraje, w których chcesz pracować — albo przejrzyj cały rynek.",
       "improveProfile": "Uzupełnij profil"
-    }
+    },
+    "companyNotConfirmed": "Firma niepotwierdzona"
   },
   "workerIntake": {
     "title": "Zgłoszenie pracownika",
@@ -20562,5 +20607,13 @@
         "error": "Nie udało się. Spróbuj później."
       }
     }
+  },
+  "publicCompanyNeeds": {
+    "title": "Potrzeby opublikowane przez firmy na LabourMarket.ai",
+    "intro": "Opublikowane bezpośrednio przez firmy. „Firma niepotwierdzona” oznacza, że jeszcze nie zweryfikowaliśmy firmy; jej potrzeba przeszła nasze automatyczne kontrole. Dane kontaktowe nigdy nie są tu pokazywane — zaloguj się, aby odpowiedzieć.",
+    "people": "{count, plural, one {# osoba} few {# osoby} other {# osób}}",
+    "respond": "Zaloguj się, aby odpowiedzieć",
+    "openBoard": "Otwórz w swoich możliwościach",
+    "roleUnknown": "Praca"
   }
 }

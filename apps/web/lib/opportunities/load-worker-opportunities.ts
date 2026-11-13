@@ -47,6 +47,7 @@ import {
   loadExternalVacancyCards,
   type ExternalVacanciesResultV1,
 } from "./external-vacancies";
+import { getTranslations } from "next-intl/server";
 
 /**
  * Worker-facing opportunities loader. READ-ONLY, own-data only.
@@ -247,6 +248,7 @@ async function loadBoard(
 
   const ctx = await buildOwnWorkerContext(supabase, user.id);
   if (!ctx) return { kind: "no-worker" };
+  const notConfirmedLabel = await readNotConfirmedLabel();
 
   // EVERY read below depends only on `ctx` — none on another's result — so
   // they start together and are awaited once. They used to run as ~8
@@ -433,7 +435,8 @@ async function loadBoard(
                   (s): s is string => typeof s === "string",
                 )
               : null,
-            companyName: safeApprovedCompanyName(row),
+            // Condition 9: the label travels with the name to every surface.
+            companyName: safeApprovedCompanyName(row, notConfirmedLabel),
             // Present only after the PR8 location-label RPC is applied.
             locationLabel: (row.location_label as string | null) ?? null,
             routeStatus: (row.route_status as string | null) ?? null,
@@ -536,4 +539,15 @@ async function loadBoard(
     opportunities,
     externalVacancies,
   };
+}
+
+/** The localized "Company not confirmed" label (condition 9). Never throws: a
+ *  render outside a request locale falls back to the English catalogue text. */
+async function readNotConfirmedLabel(): Promise<string> {
+  try {
+    const t = await getTranslations("opportunities");
+    return t("companyNotConfirmed");
+  } catch {
+    return "Company not confirmed";
+  }
 }

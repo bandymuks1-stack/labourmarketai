@@ -161,6 +161,7 @@ export async function findWorkForCapability(
         "fitStatus is the matching engine's verdict; only 'strong' and 'possible' may be called a fit. " +
         "matchedSkillSlugs are skills the worker's own record holds; needSkillsUnconfirmed=true means the " +
         "need's skills were recognized from its text and the company has not confirmed them. " +
+        "companyConfirmed=false means the company is NOT verified: say 'Company not confirmed' and never call it verified. " +
         "To express interest use interest.express_draft with a requestId from matches.",
     },
   };

@@ -1,6 +1,7 @@
 {
   "demandReadback": {
     "notVerifiedYet": "Jūsu uzņēmums vēl nav verificēts, tāpēc šeit iesniegtās vajadzības darbiniekiem netiek rādītas, kamēr verifikācija nav pabeigta.",
+    "notVerifiedYetUnconfirmedShown": "Tavs uzņēmums vēl nav verificēts. Pieprasījums, kuram izvēlies “Publicēt publiski”, tiek rādīts darbiniekiem un publiskajā darba sludinājumu dēlī ar atzīmi “Uzņēmums nav apstiprināts”, kad obligātie lauki ir aizpildīti un automātiskās pārbaudes ir izietas; pretējā gadījumā tas gaida mūsu komandas pārskatīšanu. Nekas nav publisks, kamēr tu to neizvēlies.",
     "notVerifiedHowTo": "Pievienot reģistrācijas numuru un pieprasīt pārbaudi",
     "heading": "[EN] Your submitted requests",
     "note": "[EN] Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
@@ -17,7 +18,39 @@
     "supplyHeading": "Jūsu piedāvātā kapacitāte",
     "supplyNote": "Šie ir cilvēki, kurus jūs tirgum norādījāt kā PIEEJAMUS, nevis tie, kurus meklējat. Tie ir saglabāti un redzami jums. Darba devēji pagaidām nevar meklēt piedāvāto kapacitāti, tāpēc par tiem vēl neviens nav sazinājies.",
     "capacityNeeded": "Nepieciešami {count}",
-    "capacityInterested": "{count} ieinteresēti"
+    "capacityInterested": "{count} ieinteresēti",
+    "workerVisibilityNoteUnconfirmedShown": "Godīgs statuss: verificētu uzņēmumu pieprasījumi tiek rādīti darbiniekiem. Neverificēta uzņēmuma pieprasījums tiek rādīts tikai tad, ja tam izvēlies “Publicēt publiski”, ar atzīmi “Uzņēmums nav apstiprināts”, kad obligātie lauki ir aizpildīti un automātiskās pārbaudes ir izietas. Pie katra pieprasījuma ir rakstīts, vai tas ir publicēts, tiek rādīts vai gaida pārskatīšanu.",
+    "publicState": {
+      "not_published": "Nav publisks: tu neesi izvēlējies publicēt",
+      "unconfirmed_public": "Rādīts publiski · ar atzīmi “Uzņēmums nav apstiprināts”",
+      "held_incomplete": "Gaida pārskatīšanu: trūkst obligāta lauka",
+      "held_review": "Gaida mūsu komandas pārskatīšanu",
+      "rejected": "Pēc pārskatīšanas publiski netiek rādīts"
+    },
+    "publicReason": {
+      "missing_role": "nav norādīts darbs",
+      "missing_country": "nav norādīta valsts",
+      "missing_location": "nav norādīta vieta",
+      "missing_company_name": "nav norādīts uzņēmuma nosaukums",
+      "missing_company_country": "nav norādīta uzņēmuma valsts",
+      "company_draft": "uzņēmuma profils vēl nav aktivizēts",
+      "company_checks_pending": "uzņēmuma pārbaudes vēl nav izietas",
+      "link": "saite rādītajā tekstā",
+      "email": "e-pasta adrese rādītajā tekstā",
+      "phone": "tālruņa numurs rādītajā tekstā",
+      "contact_channel": "ziņapmaiņas kontakts rādītajā tekstā",
+      "pitch": "izskatās pēc reklāmas",
+      "rate": "daudz pieprasījumu 24 stundās",
+      "duplicate_text": "to pašu tekstu agrāk publicēja cits uzņēmums",
+      "disposable_email": "reģistrēts ar vienreizējas lietošanas e-pasta adresi"
+    },
+    "publication": {
+      "publish": "Publicēt publiski",
+      "withdraw": "Pārtraukt publicēšanu",
+      "explain": "Publicējot šis pieprasījums tiek rādīts publiskajā darba sludinājumu dēlī un darbiniekiem ar atzīmi “Uzņēmums nav apstiprināts”: darba veids, valsts, vieta, komandas lielums, sākums, datums un tava uzņēmuma nosaukums. Pieslēgušies darbinieki redz arī ievadītos nosacījumus (atalgojumu, grafiku, izmitināšanu, transportu, prasības). Tavi kontakti, apraksts, piezīmes un dokumenti nekad netiek rādīti. Vispirms darbojas mūsu pārbaudes, kas var to aizturēt pārskatīšanai. Publicēšanu vari pārtraukt jebkurā laikā.",
+      "failed": "Tava izvēle netika saglabāta. Nekas nemainījās.",
+      "saving": "Saglabā…"
+    }
   },
   "journey": {
     "eyebrow": "Kā tas darbojas",
@@ -2423,7 +2456,8 @@
       "profession": "kādu darbu jūs darāt",
       "country": "kurās valstīs vēlaties strādāt",
       "cta": "Aizpildīt manas vēlmes"
-    }
+    },
+    "companyNotConfirmed": "Uzņēmums nav apstiprināts"
   },
   "scouting": {
     "pool": {
@@ -7946,5 +7980,13 @@
       "allow": "Atļaut",
       "refuse": "Atteikties"
     }
+  },
+  "publicCompanyNeeds": {
+    "title": "Uzņēmumu vajadzības LabourMarket.ai",
+    "intro": "Publicējuši tieši uzņēmumi. “Uzņēmums nav apstiprināts” nozīmē, ka mēs uzņēmumu vēl neesam verificējuši; tā vajadzība izgāja mūsu automātiskās pārbaudes. Kontaktinformācija šeit nekad netiek rādīta — pieslēdzies, lai atbildētu.",
+    "people": "{count, plural, zero {# cilvēku} one {# cilvēks} other {# cilvēki}}",
+    "respond": "Pieslēdzies, lai atbildētu",
+    "openBoard": "Atvērt tavās iespējās",
+    "roleUnknown": "Darbs"
   }
 }

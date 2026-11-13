@@ -1969,11 +1969,13 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Tavo įmonė dar neverifikuota, todėl čia pateiktos užklausos darbuotojams nerodomos, kol verifikacija nebaigta.",
+    "notVerifiedYetUnconfirmedShown": "Tavo įmonė dar neverifikuota. Užklausa, kurią pasirenki „Skelbti viešai“, rodoma darbuotojams ir viešoje darbo skelbimų lentoje su žyma „Įmonė nepatvirtinta“, kai užpildyti privalomi laukai ir praeina automatinės patikros; kitaip ji laukia mūsų komandos peržiūros. Niekas nerodoma viešai, kol nepasirenki.",
     "notVerifiedHowTo": "Pridėti registracijos kodą ir prašyti peržiūros",
     "statusOther": "Peržiūrima",
     "heading": "Tavo pateiktos užklausos",
     "note": "Išsaugoma tavo privačioje erdvėje ir peržiūrima rankiniu būdu — kandidatų nesiūlome automatiškai. Būsenos atnaujinimai matomi čia.",
     "workerVisibilityNote": "Sąžininga būsena: patvirtintų (verifikuotų) įmonių užklausas darbuotojai mato savo galimybių lentoje. Verifikacija — rankinė peržiūra; kol tavo įmonė neverifikuota, užklausos matomos tik tau ir peržiūros komandai.",
+    "workerVisibilityNoteUnconfirmedShown": "Sąžininga būsena: verifikuotų įmonių užklausos rodomos darbuotojams. Neverifikuotos įmonės užklausa rodoma tik jei jai pasirenki „Skelbti viešai“, su žyma „Įmonė nepatvirtinta“, kai užpildyti privalomi laukai ir praeina automatinės patikros. Prie kiekvienos užklausos parašyta, ar ji paskelbta, rodoma ar laukia peržiūros.",
     "empty": "Dar nepateikei nė vienos užklausos. Pateik užklausą viršuje ir ji atsiras čia su savo būsena.",
     "created": "Sukurta",
     "manageHelp": "Užbaik užklausą, pašalink ją iš rinkos arba paskelbk iš naujo tiesiai šiame sąraše; juodraštį gali tęsti arba atmesti. Atpažintų įgūdžių patvirtinimas atliekamas jos kandidatų atrankos vaizde. Pateikto teksto redagavimas dar negalimas.",
@@ -1998,7 +2000,38 @@
     "supplyHeading": "Tavo pasiūlyti pajėgumai",
     "supplyNote": "Čia žmonės, kuriuos rinkai nurodei TURINTYS, o ne tie, kurių ieškai. Jie išsaugoti ir matomi tau. Darbdaviai kol kas negali ieškoti pasiūlytų pajėgumų, todėl dėl jų dar niekas nesusisiekė.",
     "capacityNeeded": "Reikia {count}",
-    "capacityInterested": "{count} pareiškė norą"
+    "capacityInterested": "{count} pareiškė norą",
+    "publicState": {
+      "not_published": "Neskelbiama viešai: nepasirinkai jos skelbti",
+      "unconfirmed_public": "Rodoma viešai · su žyma „Įmonė nepatvirtinta“",
+      "held_incomplete": "Laukia peržiūros: trūksta privalomo lauko",
+      "held_review": "Laukia mūsų komandos peržiūros",
+      "rejected": "Po peržiūros viešai nerodoma"
+    },
+    "publicReason": {
+      "missing_role": "nenurodytas darbas",
+      "missing_country": "nenurodyta šalis",
+      "missing_location": "nenurodyta vieta",
+      "missing_company_name": "nenurodytas įmonės pavadinimas",
+      "missing_company_country": "nenurodyta įmonės šalis",
+      "company_draft": "įmonės profilis dar neaktyvuotas",
+      "company_checks_pending": "įmonės patikros dar nepraėjo",
+      "link": "nuoroda rodomame tekste",
+      "email": "el. pašto adresas rodomame tekste",
+      "phone": "telefono numeris rodomame tekste",
+      "contact_channel": "pokalbių programos kontaktas rodomame tekste",
+      "pitch": "atrodo kaip reklama",
+      "rate": "daug užklausų per 24 valandas",
+      "duplicate_text": "tą patį tekstą anksčiau paskelbė kita įmonė",
+      "disposable_email": "užsiregistruota su vienkartiniu el. pašto adresu"
+    },
+    "publication": {
+      "publish": "Skelbti viešai",
+      "withdraw": "Nebeskelbti viešai",
+      "explain": "Paskelbus ši užklausa rodoma viešoje darbo skelbimų lentoje ir darbuotojams su žyma „Įmonė nepatvirtinta“: darbo rūšis, šalis, vieta, komandos dydis, pradžia, data ir tavo įmonės pavadinimas. Prisijungę darbuotojai taip pat mato tavo įvestas sąlygas (atlyginimą, grafiką, apgyvendinimą, transportą, reikalavimus). Tavo kontaktai, aprašymas, pastabos ir dokumentai niekada nerodomi. Pirmiausia vykdomos mūsų patikros, jos gali sulaikyti užklausą peržiūrai. Skelbti nustoti gali bet kada.",
+      "failed": "Tavo pasirinkimas neišsaugotas. Niekas nepasikeitė.",
+      "saving": "Saugoma…"
+    }
   },
   "journey": {
     "eyebrow": "Kaip tai veikia",
@@ -3219,6 +3252,17 @@
         "needsMigration": "Nepavyko atlikti veiksmo. Bandyk dar kartą.",
         "saving": "Išsaugoma…",
         "error": "Įvyko klaida. Pabandyk dar kartą."
+      },
+      "needsQueue": {
+        "title": "Poreikiai, laukiantys viešinimo peržiūros",
+        "subtitle": "Neverifikuotų įmonių poreikiai, sulaikyti automatinių patikrų. Patvirtink, kad būtų rodomas su žyma „Įmonė nepatvirtinta“; atmesk, kad liktų privatus. Sprendimas galioja tik dabartiniam tekstui: pakeitus tekstą, jis tikrinamas iš naujo.",
+        "empty": "Peržiūros laukiančių poreikių nėra.",
+        "unavailable": "Peržiūros eilės nepavyko nuskaityti. Tai nereiškia, kad eilė tuščia.",
+        "approve": "Patvirtinti: rodyti kaip nepatvirtintą",
+        "reject": "Atmesti",
+        "reasonsLabel": "Kodėl sulaikyta",
+        "saved": "Sprendimas išsaugotas.",
+        "failed": "Sprendimas neišsaugotas. Niekas nepasikeitė."
       }
     },
     "companyNeedIntakes": {
@@ -10574,7 +10618,8 @@
       "emptyTitle": "Šiuo metu nieko tinkamo",
       "emptyBody": "Nė viena patikrinta galimybė nepakankamai atitinka tavo informacijos, kad galėtume ją rekomenduoti. Nurodyk profesiją, gebėjimus ar šalis, kuriose nori dirbti — arba peržiūrėk visą rinką.",
       "improveProfile": "Papildyti profilį"
-    }
+    },
+    "companyNotConfirmed": "Įmonė nepatvirtinta"
   },
   "workerIntake": {
     "title": "Darbuotojo registracija",
@@ -20562,5 +20607,13 @@
         "error": "Nepavyko. Bandyk dar kartą vėliau."
       }
     }
+  },
+  "publicCompanyNeeds": {
+    "title": "Įmonių poreikiai LabourMarket.ai",
+    "intro": "Paskelbta tiesiogiai įmonių. „Įmonė nepatvirtinta“ reiškia, kad įmonės dar nepatikrinome; jos poreikis praėjo mūsų automatines patikras. Kontaktai čia niekada nerodomi — prisijunk, kad atsakytum.",
+    "people": "{count, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
+    "respond": "Prisijunk, kad atsakytum",
+    "openBoard": "Atidaryti tavo galimybėse",
+    "roleUnknown": "Darbas"
   }
 }

@@ -53,6 +53,16 @@ export type AnonSecdefContract = {
   readonly definerJustification: string;
   /** Known residual risk accepted by the owner. */
   readonly residualRisk: string;
+  /**
+   * NOT YET APPLIED. The repo path of the reviewed RED migration that creates
+   * this function and grants it to anon. While the function does not exist in
+   * the checked database, the live guard reports it as "pending apply" instead
+   * of a stale entry. The moment the function exists, EVERY other condition is
+   * enforced in full (anon grant present, no PUBLIC, exact signature). The
+   * static guard requires the file to exist and to grant anon exactly this
+   * signature. Remove this field in the first change after the apply.
+   */
+  readonly pendingApplyMigration?: string;
 };
 
 /**
@@ -217,6 +227,24 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
       "Required. `company_need_public_intakes` deliberately grants nothing to anon and has no INSERT policy; DEFINER is the only write path, which is what keeps the table otherwise sealed.",
     residualRisk:
       "Bounded spam: at most 30 rows/hour platform-wide of ≤ ~8 KB each, and unsolicited PII may still arrive within that bound. Returns only the row's own id (the earlier one on an exact resubmission), so it is not an enumeration oracle.",
+  },
+  {
+    name: "list_public_company_needs_v1",
+    identityArgs: "p_query text, p_country text",
+    mutates: false,
+    publicCaller:
+      "Owner principle C (2026-11-12): the 'Needs posted by companies' section of the public job board (app/[locale]/(marketing)/jobs) and the MCP `jobs.search` capability. Lists ONLY needs of unconfirmed companies that the company itself chose to 'Publish publicly' and that the one rule admitted, labelled 'Company not confirmed'. Verified companies' needs are not listed (their visibility is unchanged).",
+    authorization:
+      "Every row passes `need_public_state_v1` (the ONE rule, 20261112100000): submitted, a demand kind, a company resolved through the need's own organization, an unconfirmed company, the company's explicit per-need 'Publish publicly' choice (latest event in customer_request_publications), required fields filled and the deterministic checks passed (or an operator approved this exact content). Verified companies' needs are excluded. Synthetic QA fixtures are always excluded. Drafts, closed needs, supply offers, held and rejected needs are never returned.",
+    inputValidation:
+      "`p_query` truncated to 80 chars, lower-cased and stripped to letters, digits, spaces and hyphens before a `strpos` match (no LIKE wildcard reaches the plan); `p_country` used only when it matches ^[A-Z]{2}$, otherwise ignored. Bounded by `limit 50`.",
+    abuseControls:
+      "No DB-level rate limit. Read-only and idempotent; at most 50 rows of nine non-contact columns, so the abuse ceiling is scraping of needs their companies posted to the market.",
+    definerJustification:
+      "`customer_requests` and `companies` have no anon grant or anon policy; DEFINER is what narrows anonymous access to exactly nine columns of eligible needs instead of opening either table.",
+    pendingApplyMigration: "supabase/migrations/20261112100000_unconfirmed_company_public_needs_v1.sql",
+    residualRisk:
+      "Exposes the company's display name next to a need, including for a company that is not verified (labelled as such). Contact e-mail and phone, the poster, title, description, notes and payload are never returned. The antispam rule is deterministic and can be evaded by a careful spammer; such a need would still carry the 'Company not confirmed' label and no contact data.",
   },
 ] as const;
 

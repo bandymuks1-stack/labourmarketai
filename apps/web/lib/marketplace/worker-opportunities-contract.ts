@@ -293,6 +293,9 @@ export interface OpportunitiesResultMatch {
   /** The company name, when the demand carries one. The result IS the answer
    *  to "find me work" now, so a row must name who is hiring. */
   readonly companyName: string | null;
+  /** False when the company is not verified (owner decision V-1): the row is
+   *  labelled "Company not confirmed" and must never be called verified. */
+  readonly companyConfirmed: boolean;
   /** The canonical match status behind the basis — carried so a badge can be
    *  coloured HONESTLY. A weak fit painted success-green tells the worker the
    *  opposite of what the use case said. */

@@ -453,6 +453,10 @@ const FWD_POLICY_CHECK = PROD_POLICY_CHECK.replace("required_tools, structured)"
 const MIGRATION_FILE = "../../supabase/migrations/20261029190000_worker_board_need_skill_slugs_v1.sql";
 const ROLLBACK_FILE = "../../supabase/rollbacks/20261029190000_worker_board_need_skill_slugs_v1.down.sql";
 const FN = "public.list_open_demand_for_workers()";
+/** The NEWER migration that replaces this reader's body after 20261029190000 (owner decision V-1,
+ *  same signature, same columns, same policy). `supabase db reset` lands on ITS body, so the replay
+ *  below first pins the 20261029190000 forward state, and the last step puts the newer body back. */
+const NEWER_READER_FILE = "../../supabase/migrations/20261112100000_unconfirmed_company_public_needs_v1.sql";
 
 function sqlRows<T>(query: string): T[] {
   const wrapped = `select coalesce(json_agg(t), '[]'::json) from (${query}) t`;
@@ -548,6 +552,9 @@ function cloneNeed(fromId: string, patch: { role: string; summary: string; paylo
 const before: { state?: DbState; fwd?: DbState; requests?: { n: number; md5: string }; rows?: ReaderRow[]; fits?: Record<string, string | null> } = {};
 
 test("G-1. the rollback (run twice) restores production's current reader, ACL and dependent policy", async () => {
+  // The reset database carries the NEWEST reader body (NEWER_READER_FILE). This replay is about
+  // 20261029190000 alone, so its own forward state is pinned first — the file is idempotent (G-3).
+  runFile(MIGRATION_FILE);
   before.fwd = dbState();
   expect(before.fwd.check, "replayed forward state: the policy reads the widened reader").toBe(FWD_POLICY_CHECK);
   runFile(ROLLBACK_FILE);
@@ -654,4 +661,13 @@ test("G-5. the reader's only SQL dependant is the worker-insert policy (pg_depen
       where refobjid = '${FN}'::regprocedure and deptype = 'n' order by 1`,
   ).map((r) => r.d);
   expect(deps).toEqual(["policy demand_interest_signals_worker_insert on table demand_interest_signals"]);
+});
+
+test("G-6. the newer reader migration re-applied: the database is back at the repo's current state", async () => {
+  runFile(NEWER_READER_FILE);
+  const s = dbState();
+  expect(s.acl, "ACL unchanged").toBe(PROD_ACL);
+  expect(s.check, "the dependent policy is untouched by the newer body (same signature)").toBe(FWD_POLICY_CHECK);
+  const def = sqlRows<{ d: string }>(`select pg_get_functiondef('${FN}'::regprocedure) as d`)[0]!.d;
+  expect(def, "the current reader goes through the one eligibility rule").toMatch(/need_public_state_v1\(cr\.id\)/);
 });

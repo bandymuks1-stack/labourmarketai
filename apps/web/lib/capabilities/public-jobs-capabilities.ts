@@ -9,6 +9,7 @@ import {
   searchPublicVacancyPreviews,
   type PublicVacancyPreview,
 } from "@/lib/vacancy-store/public-vacancy-preview";
+import { listPublicCompanyNeeds } from "@/lib/opportunities/public-company-needs";
 
 import type { CapabilityAnnotations, CapabilityCaller, CapabilityDescriptor } from "./contract";
 
@@ -99,13 +100,21 @@ const jobsSearch: CapabilityDescriptor = {
     "Optional free-text `query`, a `profession` work-type slug, and a 1-based " +
     "`page` of " +
     PUBLIC_VACANCY_PAGE_SIZE +
-    ". Answers totalCount and hasMore. Reads nothing about the caller; writes nothing.",
+    ". Answers totalCount and hasMore. On page 1 it also answers `companyNeeds`: needs that companies " +
+    "NOT yet verified chose to publish publicly on LabourMarket.ai (role, place, team size, company name). " +
+    "Every one has companyConfirmed=false — say 'Company not confirmed' and never call it verified; " +
+    "such a need passed automatic checks only. No contact details are returned. " +
+    "Reads nothing about the caller; writes nothing.",
   exposed: true,
   annotations: READ,
   inputSchema: jobsSearchInput,
   run: async (caller, input): Promise<ExecResult> => {
     const f = jobsSearchInput.parse(input);
     const page = f.page ?? 1;
+    const companyNeedsRead =
+      page === 1
+        ? listPublicCompanyNeeds({ query: f.query ?? null }, caller.supabase)
+        : Promise.resolve(null);
     const result = await searchPublicVacancyPreviews(
       {
         query: f.query && f.query !== "" ? f.query : null,
@@ -126,6 +135,25 @@ const jobsSearch: CapabilityDescriptor = {
         // Never point a client at a page this capability's own schema refuses.
         hasMore: result.hasMore && page < MAX_PAGE,
         jobs: result.vacancies.map((v) => jobOf(caller, v)),
+        // Owner decision V-1: the SAME reader the public /jobs section uses.
+        // `null` = not read (page > 1) or not readable — never "none".
+        companyNeeds: await companyNeedsRead.then((r) =>
+          r && r.status === "ok"
+            ? r.needs.map((n) => ({
+                id: n.id,
+                roleSlug: n.roleText,
+                country: n.country,
+                locationLabel: n.locationLabel,
+                teamSize: n.teamSize,
+                startPeriod: n.startPeriod,
+                createdAt: n.createdAt,
+                companyName: n.companyName,
+                companyConfirmed: n.companyConfirmed,
+                companyStatus: n.companyConfirmed ? "verified" : "not_confirmed",
+                webPath: `/${caller.locale}/dashboard/opportunities`,
+              }))
+            : null,
+        ),
       },
     };
   },

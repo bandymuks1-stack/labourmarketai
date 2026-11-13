@@ -166,6 +166,10 @@ export function workerOpportunityNextAction(input: {
 
 export const WORKER_VISIBLE_ROUTE_STATUSES: readonly string[] = [
   "approved_direct_partner",
+  // Owner decision V-1 (2026-11-12): a need of a company that is NOT verified,
+  // admitted by the database's one rule (need_public_state_v1). Shown with a
+  // "Company not confirmed" label, never with the verified badge.
+  "unconfirmed_company",
   "trusted_partner",
   "works_through_approved_route",
   "our_operating_company_approved",
@@ -185,9 +189,22 @@ export function isApprovedRouteRow(row: Record<string, unknown>): boolean {
 }
 
 /** The approved company/partner name is read ONLY from the dedicated safe RPC
- *  column (present only for approved routes) — never from free text. */
-export function safeApprovedCompanyName(row: Record<string, unknown>): string | null {
-  return typeof row.company_name === "string" && row.company_name.trim() !== ""
-    ? row.company_name
-    : null;
+ *  column (present only for approved routes) — never from free text.
+ *
+ *  Owner condition 9 (principle C): when the row is a need of a company that is
+ *  NOT verified and the caller passes the localized "Company not confirmed"
+ *  label, the label travels WITH the name, so every surface that shows the
+ *  company (board, comparison, map, compass, recommendations, chat text, the
+ *  worker's own interest list) says it — and a row without a name still says
+ *  it instead of falling back to an unlabelled role. */
+export function safeApprovedCompanyName(
+  row: Record<string, unknown>,
+  notConfirmedLabel?: string,
+): string | null {
+  const name =
+    typeof row.company_name === "string" && row.company_name.trim() !== "" ? row.company_name : null;
+  if (notConfirmedLabel && row.route_status === "unconfirmed_company") {
+    return name ? `${name} · ${notConfirmedLabel}` : notConfirmedLabel;
+  }
+  return name;
 }

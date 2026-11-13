@@ -1,6 +1,7 @@
 {
   "demandReadback": {
     "notVerifiedYet": "Teie ettevõte ei ole veel kinnitatud, seega siin esitatud vajadusi töötajatele enne kinnitamise lõppu ei näidata.",
+    "notVerifiedYetUnconfirmedShown": "Sinu ettevõte pole veel kontrollitud. Päringut, mille puhul valid „Avalda avalikult“, näidatakse töötajatele ja avalikul tööpakkumiste tahvlil märkega „Ettevõte pole kinnitatud“, kui kohustuslikud väljad on täidetud ja automaatsed kontrollid läbitud; muidu ootab see meie meeskonna ülevaatust. Midagi pole avalik enne, kui sa seda valid.",
     "notVerifiedHowTo": "Lisa registrikood ja taotle ülevaatust",
     "heading": "[EN] Your submitted requests",
     "note": "[EN] Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
@@ -17,7 +18,39 @@
     "supplyHeading": "Teie pakutud võimekus",
     "supplyNote": "Need on inimesed, kelle kohta ütlesite turule, et teil ON, mitte need, keda otsite. Need on salvestatud ja teile nähtavad. Tööandjad ei saa pakutud võimekust veel otsida, seega pole nende pärast keegi ühendust võtnud.",
     "capacityNeeded": "{count} vajall",
-    "capacityInterested": "{count} huvitatud"
+    "capacityInterested": "{count} huvitatud",
+    "workerVisibilityNoteUnconfirmedShown": "Aus olek: kontrollitud ettevõtete päringuid näidatakse töötajatele. Kontrollimata ettevõtte päringut näidatakse ainult siis, kui valid selle jaoks „Avalda avalikult“, märkega „Ettevõte pole kinnitatud“, kui kohustuslikud väljad on täidetud ja automaatsed kontrollid läbitud. Iga päringu juures on kirjas, kas see on avaldatud, nähtav või ootab ülevaatust.",
+    "publicState": {
+      "not_published": "Pole avalik: sa ei ole avaldamist valinud",
+      "unconfirmed_public": "Näidatakse avalikult · märkega „Ettevõte pole kinnitatud“",
+      "held_incomplete": "Ootab ülevaatust: kohustuslik väli puudub",
+      "held_review": "Ootab meie meeskonna ülevaatust",
+      "rejected": "Pärast ülevaatust avalikult ei näidata"
+    },
+    "publicReason": {
+      "missing_role": "töö puudub",
+      "missing_country": "riik puudub",
+      "missing_location": "koht puudub",
+      "missing_company_name": "ettevõtte nimi puudub",
+      "missing_company_country": "ettevõtte riik puudub",
+      "company_draft": "ettevõtte profiil pole veel aktiveeritud",
+      "company_checks_pending": "ettevõtte kontrollid pole veel läbitud",
+      "link": "link näidatavas tekstis",
+      "email": "e-posti aadress näidatavas tekstis",
+      "phone": "telefoninumber näidatavas tekstis",
+      "contact_channel": "sõnumirakenduse kontakt näidatavas tekstis",
+      "pitch": "paistab reklaamina",
+      "rate": "palju päringuid 24 tunni jooksul",
+      "duplicate_text": "sama teksti avaldas varem teine ettevõte",
+      "disposable_email": "registreeritud ühekordse e-posti aadressiga"
+    },
+    "publication": {
+      "publish": "Avalda avalikult",
+      "withdraw": "Lõpeta avaldamine",
+      "explain": "Avaldamisel näidatakse seda päringut avalikul tööpakkumiste tahvlil ja töötajatele märkega „Ettevõte pole kinnitatud“: töö liik, riik, koht, meeskonna suurus, algus, kuupäev ja sinu ettevõtte nimi. Sisse loginud töötajad näevad ka sisestatud tingimusi (palk, ajakava, majutus, transport, nõuded). Sinu kontakte, kirjeldust, märkmeid ja dokumente ei näidata kunagi. Esmalt käivituvad meie kontrollid, mis võivad selle ülevaatuseks kinni pidada. Avaldamise saad igal ajal lõpetada.",
+      "failed": "Sinu valikut ei salvestatud. Midagi ei muutunud.",
+      "saving": "Salvestamine…"
+    }
   },
   "journey": {
     "eyebrow": "Kuidas see töötab",
@@ -2423,7 +2456,8 @@
       "profession": "mis tööd sa teed",
       "country": "millistes riikides tahad töötada",
       "cta": "Täida minu eelistused"
-    }
+    },
+    "companyNotConfirmed": "Ettevõte pole kinnitatud"
   },
   "scouting": {
     "pool": {
@@ -7946,5 +7980,13 @@
       "allow": "Luba",
       "refuse": "Keeldu"
     }
+  },
+  "publicCompanyNeeds": {
+    "title": "Ettevõtete vajadused LabourMarket.ai-s",
+    "intro": "Avaldatud otse ettevõtete poolt. „Ettevõte pole kinnitatud“ tähendab, et me pole ettevõtet veel kontrollinud; selle vajadus läbis meie automaatsed kontrollid. Kontaktandmeid siin kunagi ei näidata — logi sisse, et vastata.",
+    "people": "{count, plural, one {# inimene} other {# inimest}}",
+    "respond": "Logi sisse, et vastata",
+    "openBoard": "Ava oma võimalustes",
+    "roleUnknown": "Töö"
   }
 }

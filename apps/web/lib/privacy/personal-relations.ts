@@ -710,6 +710,13 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
  * them names a subject, the table must be exported or withheld instead.
  */
 export const ACTOR_ONLY_RELATIONS: readonly string[] = [
+  // Operator decisions on whether a need of an unconfirmed company may be
+  // shown publicly (owner decision V-1, 20261112100000): `decided_by` is the
+  // operator; the subject is a NEED, never the person.
+  "customer_request_public_reviews",
+  // The company's explicit per-need "Publish publicly" choice (owner principle
+  // C, 20261112100000): `actor_id` is who chose; the subject is a NEED.
+  "customer_request_publications",
   // Spent confirmation tokens: `spent_by` is who confirmed; a digest, no
   // content, purged after a day (20261013120000).
   "confirmation_spends",

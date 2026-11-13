@@ -34,6 +34,7 @@ import {
   type MatchReason,
   type MatchResultV1,
 } from "@/lib/market/match-v1";
+import { isUnconfirmedCompanyRoute } from "./public-company-needs-model";
 
 /** Near-miss window: a below-"possible" skill coverage still surfaces when
  *  at most this many required skills are missing (the worker can close the
@@ -55,6 +56,9 @@ export interface RecommendationSourceNeed {
   readonly locationLabel?: string | null;
   readonly startPeriod: string | null;
   readonly companyName?: string | null;
+  /** The board row's route status — `unconfirmed_company` for a need of a
+   *  company that is not verified (owner decision V-1). */
+  readonly routeStatus?: string | null;
   readonly createdAt?: string | null;
 }
 
@@ -93,6 +97,9 @@ export interface JobRecommendation {
   readonly locationLabel: string | null;
   readonly startPeriod: string | null;
   readonly companyName: string | null;
+  /** False for a need of a company that is not verified (owner decision V-1):
+   *  every surface labels it "Company not confirmed" and never badges it. */
+  readonly companyConfirmed: boolean;
   /** The demand's DECLARED opportunity type (employment, internship,
    *  apprenticeship, …) from its structured projection — `null` when the
    *  employer did not state one. Never inferred from text. */
@@ -177,6 +184,7 @@ export function deriveJobRecommendations(
         locationLabel: s.need.locationLabel ?? null,
         startPeriod: s.need.startPeriod,
         companyName: s.need.companyName ?? null,
+        companyConfirmed: !isUnconfirmedCompanyRoute(s.need.routeStatus),
         opportunityType: s.structured?.opportunity_type ?? null,
         status: s.match.status,
         basis: {

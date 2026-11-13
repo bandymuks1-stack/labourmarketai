@@ -369,6 +369,9 @@ function MatchRow({
         >
           {tFind(FIT_LABEL[match.fitStatus] ?? FIT_LABEL.insufficient)}
         </span>
+        {/* Condition 9: an unconfirmed company's label travels inside
+            companyName (lib/opportunities/opportunity-fit.ts), so the heading
+            says it — with or without a company name. */}
         {claimNovelty && match.isNew && (
           <span
             className="rounded-full bg-brand-cyan/15 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
