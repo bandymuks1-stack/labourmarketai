@@ -9,7 +9,10 @@ import { isStripeActive } from "@/lib/billing/config-core";
 /**
  * /pricing — the owner's LAUNCH table (approved 2026-09-05):
  *
- *   €0          for getting started            1 active position
+ *   €0          for getting started            1 active position (shown only
+ *                                              while activation is open —
+ *                                              the limit is enforced only
+ *                                              where billing is armed)
  *   €99/month   for organizations actively     no fixed limit on active positions
  *               hiring / building teams
  *   Special requirements?  contact us (no public tier, no price)
@@ -39,7 +42,16 @@ export async function PricingTable() {
         const dbName =
           locale === "lt" ? row?.name_lt : locale === "en" ? row?.name_en : undefined;
         const name = dbName ?? t(`plans.${slug}.name`);
-        const features = t.raw(`plans.${slug}.features`) as string[];
+        // The free card's "1 active position" is enforced only where billing
+        // is armed (open-needs-gate is permissive otherwise), so while online
+        // activation is closed the card lists what a free organization really
+        // gets today (owner approval 2026-11-12 (b)).
+        const closedKey = `plans.${slug}.featuresClosed`;
+        const features = (
+          !(billingOn && confirmed) && t.has(closedKey as never)
+            ? t.raw(closedKey as never)
+            : t.raw(`plans.${slug}.features`)
+        ) as string[];
         const price = confirmed && typeof row?.price_eur_monthly === "number" ? row.price_eur_monthly : null;
 
         return (
@@ -66,7 +78,12 @@ export async function PricingTable() {
               data-testid={`pricing-price-state-${slug}`}
               data-state={PRICING_READINESS_STATE}
             >
-              {t(`priceState.${PRICING_READINESS_STATE}` as never)}
+              {/* Confirmed prices while online payment is closed must not say
+                  "activation happens in your organization account" (owner P0
+                  2026-11-10): the closed state has its own sentence. */}
+              {confirmed && !billingOn
+                ? t("priceState.owner_confirmed_closed")
+                : t(`priceState.${PRICING_READINESS_STATE}` as never)}
             </p>
 
             <p className="mt-6 font-mono text-meta uppercase tracking-label text-text-muted">

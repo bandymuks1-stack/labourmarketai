@@ -60,8 +60,18 @@ export default async function PricingPage({
   const activationOpen = pricesConfirmed && billingLive;
   setRequestLocale(locale);
   const t = await getTranslations("pricing");
-  const faq = t.raw("faq") as { q: string; a: string }[];
-  // The same items the list below renders (AEO, decision 0009).
+  // The live answers ("card payment through Stripe, invoices in your
+  // account", "1 active position free") are true only once activation is
+  // open: the free-plan limit is enforced only where billing is armed
+  // (lib/billing/open-needs-gate.ts is permissive otherwise). Until then
+  // every question keeps its wording and gets its closed-state answer, by
+  // position (owner P0 2026-11-10 + owner approval 2026-11-12 (b)).
+  const faqClosed = t.raw("faqClosed") as string[];
+  const faq = (t.raw("faq") as { q: string; a: string }[]).map((item, i) =>
+    activationOpen ? item : { q: item.q, a: faqClosed[i] ?? item.a },
+  );
+  // The same items the list below renders (AEO, decision 0009) — including
+  // the closed-state answers, so search engines read what visitors read.
   const faqLd = faqPageJsonLd(faq, locale);
 
   return (

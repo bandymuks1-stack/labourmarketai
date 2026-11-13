@@ -5287,7 +5287,7 @@
         },
         {
           "q": "Was kostet es?",
-          "a": "Die Preise stehen auf der Preisseite: eine aktive Position pro Organisation ist kostenlos; für mehr Positionen braucht es den Organisationsplan, der im Konto aktiviert wird. Einen Personalbedarf einzureichen ist kostenlos."
+          "a": "Registrierung und das Einreichen eines Personalbedarfs sind kostenlos. Der bezahlte Organisationsplan, sein Preis und ob er heute schon aktiviert werden kann, stehen auf der Preisseite."
         },
         {
           "q": "Können wir nach Standort filtern?",
@@ -5385,7 +5385,7 @@
         },
         {
           "q": "Was kostet es Personalagenturen?",
-          "a": "Eine Agentur ist eine Organisation und nutzt dieselben Pläne: eine aktive Position ist kostenlos, für mehr braucht es den Organisationsplan von der Preisseite. Einen separaten Agenturtarif gibt es nicht."
+          "a": "Eine Agentur ist eine Organisation und nutzt dieselben Pläne. Registrierung und das Angeben des Personals, das Sie stellen können, sind kostenlos; der bezahlte Organisationsplan, sein Preis und ob er heute schon aktiviert werden kann, stehen auf der Preisseite. Einen separaten Agenturtarif gibt es nicht."
         },
         {
           "q": "Können wir die Sichtbarkeit der Arbeitskräfte steuern?",
@@ -5728,6 +5728,12 @@
           "Matching-Shortlist und Kandidatenkontakt",
           "Buchungen, Projekte, Anweisungen",
           "Arbeitsbestätigung und bestätigte Fähigkeiten"
+        ],
+        "featuresClosed": [
+          "Personalbedarf veröffentlichen",
+          "Matching-Shortlist und Kandidatenkontakt",
+          "Buchungen, Projekte, Anweisungen",
+          "Arbeitsbestätigung und bestätigte Fähigkeiten"
         ]
       },
       "business": {
@@ -5782,7 +5788,8 @@
     ],
     "priceState": {
       "draft_pricing": "Die Preise werden vorbereitet — es kann noch nichts gekauft werden.",
-      "owner_confirmed": "Preise vom Eigentümer bestätigt. Die Aktivierung erfolgt im Organisationskonto; auf dieser Seite wird nichts belastet."
+      "owner_confirmed": "Preise vom Eigentümer bestätigt. Die Aktivierung erfolgt im Organisationskonto; auf dieser Seite wird nichts belastet.",
+      "owner_confirmed_closed": "Preise vom Eigentümer bestätigt. Die Online-Zahlung ist noch nicht geöffnet; auf dieser Seite wird nichts belastet."
     },
     "individual": {
       "name": "Besondere Anforderungen",
@@ -5794,7 +5801,13 @@
     "priceFree": "0 €",
     "pricePerMonth": "{price} €/Monat",
     "ctaStartFree": "Kostenlos im Organisationskonto starten",
-    "ctaSubscribe": "Im Organisationskonto aktivieren"
+    "ctaSubscribe": "Im Organisationskonto aktivieren",
+    "faqClosed": [
+      "Jede Organisation — Arbeitgeber, Personaldienstleister, Auftragnehmer oder Bildungsträger — erhält dasselbe Produkt und denselben einen bezahlten Plan. Die Online-Zahlung ist noch nicht geöffnet, daher wird heute nichts belastet.",
+      "Ja. Personen bleiben kostenlos, und die Registrierung einer Organisation sowie das Veröffentlichen ihres Personalbedarfs sind kostenlos.",
+      "Die Online-Zahlung ist für die Öffentlichkeit noch nicht geöffnet, hier kann also nichts gekauft werden. Registrierung und das Veröffentlichen von Personalbedarf sind kostenlos. Für bezahlte Leistungen betreuen wir erste Kunden direkt und bestätigen den Preis mit Ihnen, bevor etwas beginnt.",
+      "Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Die Online-Zahlung ist noch nicht geöffnet; eine Obergrenze des kostenlosen Plans gilt nur für eine Organisation, deren Konto die Abrechnung als aktiv zeigt, und dieses Konto zeigt die Obergrenze dann an. Übliche Schutzmaßnahmen gegen Missbrauch, etwa Anfragelimits, gelten weiterhin."
+    ]
   },
   "privacySelfService": {
     "title": "Datenschutz und Ihre Daten",
@@ -9466,7 +9479,7 @@
       "owner_confirmed": "Die Pläne sind nur vorbereitet — es kann nichts gekauft werden, bis Zahlungen aktiviert sind."
     },
     "featuresLabel": "In dieser Plangrenze enthalten",
-    "limitValue": "bis zu {count}",
+    "limitValue": "bis zu {count}, sobald bezahlte Pläne starten",
     "freeToday": {
       "freeTitle": "Heute kostenlos",
       "free": "Alles, was Sie im Produkt derzeit nutzen können, ist kostenlos — der Pilot läuft ohne Zahlungen, und nichts fragt nach einer Karte.",
@@ -9861,7 +9874,7 @@
         "body": "Pro eingestellter Arbeitskraft, Kolonne oder Unternehmensvermittlung gilt eine feste Erfolgsgebühr. Eine separate Koordinationsgebühr fällt nur an, wenn Dokumenten- oder Onboarding-Koordination tatsächlich erbracht wird. Der endgültige Preis wird bestätigt, bevor bezahlte Arbeit beginnt."
       }
     ],
-    "note": "Zwei Dinge laufen nebeneinander, und diese Seite beschreibt das zweite. Die Plattform selbst arbeitet automatisch: die Stellenübersicht ist öffentlich, die Match-Vorschau ist ohne Konto zugänglich, und eine gestellte Anfrage ergibt eine sortierte Kandidatenliste mit Begründung, warum jemand passt — eine aktive Position kostenfrei. Der bezahlte Service oben ist der menschliche Teil: ein Mitarbeiter liest Ihre Anfrage, nimmt Kontakt auf und prüft die Liste von Hand, bevor jemand vorgeschlagen wird. Eine ganze Kolonne kann sich bereits als eine Einheit auf Ihre Anfrage anbieten und, sobald beide Seiten einig sind, Ihrem Projekt als ein Team beitreten; die automatische Kandidatenliste schlägt noch nicht ganze Kolonnen vor — sie ordnet Personen einzeln.",
+    "note": "Zwei Dinge laufen nebeneinander, und diese Seite beschreibt das zweite. Die Plattform selbst arbeitet automatisch: die Stellenübersicht ist öffentlich, die Match-Vorschau ist ohne Konto zugänglich, und eine gestellte Anfrage ergibt eine sortierte Kandidatenliste mit Begründung, warum jemand passt — eine Anfrage zu stellen ist kostenlos. Der bezahlte Service oben ist der menschliche Teil: ein Mitarbeiter liest Ihre Anfrage, nimmt Kontakt auf und prüft die Liste von Hand, bevor jemand vorgeschlagen wird. Eine ganze Kolonne kann sich bereits als eine Einheit auf Ihre Anfrage anbieten und, sobald beide Seiten einig sind, Ihrem Projekt als ein Team beitreten; die automatische Kandidatenliste schlägt noch nicht ganze Kolonnen vor — sie ordnet Personen einzeln.",
     "ctaLabel": "Personalanfrage einreichen →"
   },
   "adminLaunchReadiness": {
