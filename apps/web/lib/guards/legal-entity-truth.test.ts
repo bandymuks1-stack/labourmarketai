@@ -86,10 +86,16 @@ describe("footer discloses operator + IP owner and owns the © correctly", () =>
   // the other two partners' names at Rexora's site. Hence `t.rich` + a
   // `<rexora>` tag in the message instead of `{t("rexora")}` inside an `<a>`.
   const ALL_THREE = /Nonstop Group/;
-  it("footer credits all three collaborators, with Rexora as a safe external link", () => {
-    expect(footer).toContain('href="https://aiprocessautomation.eu"');
-    expect(footer).toContain('rel="noopener noreferrer"');
-    expect(footer).toContain('t.rich("rexora"');
+  // OWNER DECISION 2026-11-13 (supersedes the 2026-07-14 / 2026-09-27 footer
+  // credit): LabourMarket.ai is presented as one independent platform, so the
+  // PUBLIC footer no longer carries the "built together" line and advertises
+  // no other company. The legal sentence and the copyright line — who
+  // operates the platform, who owns the software — are asserted above and
+  // are unchanged. The signed-in shell below is a different surface and was
+  // not part of that decision.
+  it("the public footer carries no \"built together\" line and links to no other company", () => {
+    expect(footer).not.toContain('t.rich("rexora"');
+    expect(footer).not.toContain("aiprocessautomation.eu");
   });
 
   it("dashboard shell credits them the same way, with the same safe link", () => {

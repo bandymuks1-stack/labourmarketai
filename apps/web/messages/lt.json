@@ -15774,7 +15774,7 @@
     },
     "entry": {
       "label": "Parašykite, ko reikia — savais žodžiais",
-      "placeholder": "Pvz.: reikia 5 sandėlio darbuotojų Vilniuje",
+      "placeholder": "Pvz.: reikia 5 sandėlio darbuotojų",
       "submit": "Suprasti",
       "examplesLabel": "Pavyzdžiui:",
       "examples": {
@@ -20505,7 +20505,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Puslapių naudojimą ir kampaniją, iš kurios atėjai, matuojame tik tau leidus.",
+      "text": "Puslapių naudojimą ir kampaniją, iš kurios atėjote, matuojame tik jums leidus.",
       "accept": "Leisti matavimą",
       "refuse": "Atsisakyti",
       "more": "Daugiau apie slapukus",

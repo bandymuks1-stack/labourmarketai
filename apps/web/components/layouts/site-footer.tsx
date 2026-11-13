@@ -214,29 +214,9 @@ export async function SiteFooter({
               {/* The entity name already ends in "o.o." — no second full stop. */}
               {copyrightLine(new Date().getFullYear())} {t("ipNotice")}
             </span>
-            {/* Created by Rexora — owner-approved URL (2026-07-14):
-                https://aiprocessautomation.eu. External link, so a plain <a>
-                (not the locale-aware Link) with noopener/noreferrer. Pinned by
-                legal-entity-truth.test.ts. */}
-            {/* Meaning corrected 2026-09-27: the line names all three
-                collaborators (LabourMarket.ai × Nonstop Group × Rexora) instead
-                of crediting Rexora as sole author, and only REXORA carries the
-                link — the approved URL is Rexora's, so wrapping the whole
-                sentence would point the other partners' names at their site. */}
-            <p>
-              {t.rich("rexora", {
-                rexora: (chunks) => (
-                  <a
-                    href="https://aiprocessautomation.eu"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-text-secondary hover:underline"
-                  >
-                    {chunks}
-                  </a>
-                ),
-              })}
-            </p>
+            {/* The "built together" line left the public footer on the owner's
+                decision of 2026-11-13: LabourMarket.ai is presented as one
+                independent platform. The legal sentence above is unchanged. */}
           </div>
         </div>
       </div>

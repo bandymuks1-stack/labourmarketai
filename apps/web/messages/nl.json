@@ -15774,7 +15774,7 @@
     },
     "entry": {
       "label": "Schrijf wat u nodig heeft — in uw eigen woorden",
-      "placeholder": "Bijv.: we zoeken 5 magazijnmedewerkers in Vilnius",
+      "placeholder": "Bijv.: 5 magazijnmedewerkers",
       "submit": "Begrijpen",
       "examplesLabel": "Bijvoorbeeld:",
       "examples": {
@@ -20505,7 +20505,7 @@
   },
   "consent": {
     "banner": {
-      "text": "We meten paginagebruik en via welke campagne je kwam alleen als je dat toestaat.",
+      "text": "We meten paginagebruik en via welke campagne u kwam alleen als u dat toestaat.",
       "accept": "Meting toestaan",
       "refuse": "Weigeren",
       "more": "Meer over cookies",

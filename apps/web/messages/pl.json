@@ -15773,8 +15773,8 @@
       "sub": "Szukaj pracy, specjalistów, pracowników, klientów lub partnerów do projektów w swoim kraju i na całym świecie. Stwórz swój profil zawodowy, pokaż doświadczenie, oferuj usługi i odkrywaj nowe możliwości."
     },
     "entry": {
-      "label": "Napisz, czego potrzebujesz — własnymi słowami",
-      "placeholder": "Np. Potrzebuję 5 pracowników magazynu w Wilnie",
+      "label": "Proszę napisać, czego Państwo potrzebują — własnymi słowami",
+      "placeholder": "Np. potrzebuję 5 magazynierów",
       "submit": "Zrozum",
       "examplesLabel": "Na przykład:",
       "examples": {
@@ -15828,10 +15828,10 @@
         "student": "Mówisz o nauce i drodze do pracy.",
         "education": "Reprezentujesz instytucję edukacyjną."
       },
-      "nextHint": "Aby zachować zapotrzebowanie i móc na nie odpowiedzieć, potrzebne jest konto. Twoje zdanie idzie razem z Tobą.",
+      "nextHint": "Aby zachować zapotrzebowanie i móc na nie odpowiedzieć, potrzebne jest konto. Państwa zdanie zostanie zachowane.",
       "signup": "Utwórz konto",
       "login": "Mam konto — zaloguj się",
-      "unrecognised": "Za pierwszym razem nie zrozumiałem. Czego szukasz?",
+      "unrecognised": "Za pierwszym razem nie zrozumiałem. Czego Państwo szukają?",
       "chips": {
         "work": "Szukam pracy",
         "hire": "Potrzebuję pracowników"
@@ -20505,7 +20505,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Korzystanie ze stron i źródło kampanii mierzymy tylko za Twoją zgodą.",
+      "text": "Korzystanie ze stron i źródło kampanii mierzymy tylko za Państwa zgodą.",
       "accept": "Zezwól na pomiar",
       "refuse": "Odmów",
       "more": "Więcej o plikach cookie",

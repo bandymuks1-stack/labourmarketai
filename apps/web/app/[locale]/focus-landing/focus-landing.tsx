@@ -112,6 +112,16 @@ export async function FocusLanding({
         ? { adverts: Number(previewMarket[0]), employers: Number(previewMarket[1]), refreshedAt: previewMarket[2] ?? null }
         : null;
 
+  // PREVIEW ONLY (same reason as the figures above): the adverts the live
+  // page showed at capture time, in the canonical preview shape.
+  const previewAdverts = process.env.LANDING_V3_PREVIEW_ADVERTS;
+  const advertSample: typeof market.sample =
+    market.sample.basis === "live"
+      ? market.sample
+      : previewAdverts
+        ? { basis: "live", vacancies: JSON.parse(previewAdverts) }
+        : market.sample;
+
   // THE FIRST SCREEN IS THE CHOICE (owner instruction 2026-11-12: "Sumažink
   // pagrindinio puslapio sudėtingumą. Pašalink nereikalingus tekstus,
   // abstrakčius šūkius ir pasikartojančius blokus. Pirmame ekrane turi būti
@@ -193,7 +203,7 @@ export async function FocusLanding({
               <section className="flex min-w-0 flex-col gap-4">
                 <LandingIntentChoice
                   lead={v3.lead}
-                  phoneMore={{ ids: ["orders", "partners"], label: v3.moreChoices }}
+                  phoneMore={{ ids: ["partners", "agencies"], label: v3.moreChoices }}
                 />
                 <p className="flex items-center gap-3 text-xs font-medium uppercase tracking-label text-text-muted">
                   <span aria-hidden className="h-px flex-1 bg-ink-600" />
@@ -209,7 +219,16 @@ export async function FocusLanding({
                   <LandingNeedPath locale={locale} copy={v3} />
                 </div>
               </section>
-            <LandingMarketFacts locale={locale} copy={v3} market={marketFacts} />
+            <LandingMarketFacts
+              locale={locale}
+              copy={v3}
+              market={marketFacts}
+              adverts={
+                advertSample.basis === "live" && advertSample.vacancies.length > 0 ? (
+                  <LandingOpenJobsBand sample={advertSample} locale={activeLocale} compact />
+                ) : undefined
+              }
+            />
             <LandingHow copy={v3} />
           </div>
         </main>

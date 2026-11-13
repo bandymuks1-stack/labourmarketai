@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { ArrowRight, ChevronDown } from "lucide-react";
 
 import { LandingRequestDoors } from "@/components/marketing/landing-request-doors";
@@ -10,13 +11,22 @@ import type { LandingV3Copy } from "@/lib/marketing/landing-v3-copy";
  * `docs/audits/evidence/landing-v3/OUTLINE.md`.
  */
 
+const NEED_FOLD_SCRIPT =
+  '(function(){try{var d=document.getElementById("request");if(d&&window.matchMedia("(max-width: 1023px)").matches)d.removeAttribute("open")}catch(e){}})()';
+
 /** ONE "submit a need" path. The three request services keep their own
  *  forms, rules and routes; they are the step behind this one entry. */
 export function LandingNeedPath({ locale, copy }: { locale: string; copy: LandingV3Copy }) {
   return (
+    <>
+    {/* Sent open: on a wide screen the three services are visible with no
+        tap (owner, 2026-11-13). The line after it folds it on a narrow
+        screen before first paint; with no script it simply stays open. */}
     <details
       id="request"
       data-testid="landing-need-path"
+      open
+      suppressHydrationWarning
       className="group min-w-0 scroll-mt-24 rounded-2xl border border-ink-600 bg-ink-900/60"
     >
       <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-2xl p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue sm:p-5 [&::-webkit-details-marker]:hidden">
@@ -38,6 +48,8 @@ export function LandingNeedPath({ locale, copy }: { locale: string; copy: Landin
         <LandingRequestDoors locale={locale} embedded />
       </div>
     </details>
+    <script dangerouslySetInnerHTML={{ __html: NEED_FOLD_SCRIPT }} />
+    </>
   );
 }
 
@@ -47,10 +59,14 @@ export function LandingMarketFacts({
   locale,
   copy,
   market,
+  adverts,
 }: {
   locale: string;
   copy: LandingV3Copy;
   market: { adverts: number; employers: number; refreshedAt: string | null } | null;
+  /** Two or three real, current adverts from the canonical reader — or
+   *  nothing, and then the block ends with the link to the search. */
+  adverts?: ReactNode;
 }) {
   const n = new Intl.NumberFormat(locale);
   const date = market?.refreshedAt
@@ -75,13 +91,15 @@ export function LandingMarketFacts({
       ) : (
         <p className="mt-2 text-sm text-text-secondary">{copy.market.none}</p>
       )}
-      <Link
-        href="/jobs"
-        className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand-blue underline-offset-4 hover:underline"
-      >
-        {copy.market.link}
-        <ArrowRight className="size-3.5 shrink-0" aria-hidden />
-      </Link>
+      {adverts ?? (
+        <Link
+          href="/jobs"
+          className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand-blue underline-offset-4 hover:underline"
+        >
+          {copy.market.link}
+          <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+        </Link>
+      )}
     </section>
   );
 }
