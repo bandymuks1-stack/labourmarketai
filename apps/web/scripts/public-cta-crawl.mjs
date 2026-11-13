@@ -435,6 +435,10 @@ async function crawlPage(context, path, width, discovered, firstFailure = null) 
           // The step, tab or option a person is already on: pressing it rightly changes nothing.
           current: el.hasAttribute("aria-current") && el.getAttribute("aria-current") !== "false" || el.getAttribute("aria-selected") === "true",
           testid: el.getAttribute("data-testid") ?? "",
+          // Site furniture (header, footer, navigation, a dialog such as the cookie bar) is the
+          // same control on every page; a button in the page's own content is not, even when
+          // it happens to sit at the same place in the markup as one on another page.
+          shared: !!el.closest("header, footer, nav, [role=banner], [role=contentinfo], [role=navigation], [role=dialog], [role=alertdialog]"),
           // Where the control sits, without its words: the same header or footer control on
           // another page or in another language has the same signature.
           signature: (() => {
@@ -449,10 +453,14 @@ async function crawlPage(context, path, width, discovered, firstFailure = null) 
       // A shared control (header, footer, cookie bar) is pressed on the first pages that
       // carry it, not on all of them: twice per width and page shape proves it.
       const sigKey = `${width}|${pageShape(path)}|${info.signature}`;
-      const pressed = (pressCount.get(sigKey) ?? 0) + (pressCount.get(`${width}|*|${info.signature}`) ?? 0);
+      const anyPage = `${width}|*|${info.signature}`;
+      const pressed = (pressCount.get(sigKey) ?? 0) + (info.shared ? pressCount.get(anyPage) ?? 0 : 0);
       if (pressed >= 2) continue;
       pressCount.set(sigKey, (pressCount.get(sigKey) ?? 0) + 1);
-      pressCount.set(`${width}|*|${info.signature}`, (pressCount.get(`${width}|*|${info.signature}`) ?? 0) + 0.25);
+      // Only site furniture is counted across page shapes. Counting a content button that way
+      // would, after a few pages, skip every later button at the same place in the markup,
+      // and a dead one among them would pass.
+      if (info.shared) pressCount.set(anyPage, (pressCount.get(anyPage) ?? 0) + 0.25);
       const blockedBefore = writesBlocked;
       // Focus first: a press always moves focus to the control, and that alone is not an effect.
       await button.focus({ timeout: 800 }).catch(() => {});
