@@ -16304,6 +16304,9 @@
       "responseQueueTitle": "Replies awaiting moderation",
       "responseQueueEmpty": "No reply is waiting for moderation.",
       "replyToLabel": "Reply to this experience",
+      "disputeOpenedLabel": "Dispute opened",
+      "disputeReviewStartedLabel": "Review started",
+      "conflictNotice": "You are a party to this record, so you cannot decide it. Another administrator must take it.",
       "take": "Take into moderation",
       "publish": "Publish",
       "reject": "Reject",
@@ -16329,6 +16332,7 @@
         "dispute_exists": "A dispute is already open.",
         "reason_required": "A reason is required.",
         "invalid_transition": "That step is not possible from the current state.",
+        "conflict_of_interest": "You are a party to this record. Another administrator must decide.",
         "not_found": "Not found.",
         "error": "Something went wrong. Nothing was saved."
       }
@@ -16345,6 +16349,7 @@
       "cta": "Open a dispute",
       "sending": "Opening…",
       "openedNote": "Dispute opened. The experience stays published until a moderator decides.",
+      "decisionReasonLabel": "Reason for the decision",
       "errors": {
         "needs_migration": "Not available right now. Nothing was saved.",
         "not_authenticated": "Please sign in first.",
@@ -16359,6 +16364,7 @@
         "dispute_exists": "A dispute is already open.",
         "reason_required": "A reason is required.",
         "invalid_transition": "That step is not possible from the current state.",
+        "conflict_of_interest": "You are a party to this record. Another administrator must decide.",
         "not_found": "Not found.",
         "error": "Something went wrong. Nothing was saved."
       }
@@ -16383,6 +16389,7 @@
         "dispute_exists": "A dispute is already open.",
         "reason_required": "A reason is required.",
         "invalid_transition": "That step is not possible from the current state.",
+        "conflict_of_interest": "You are a party to this record. Another administrator must decide.",
         "not_found": "Not found.",
         "error": "Something went wrong. Nothing was saved."
       },
@@ -16417,6 +16424,7 @@
         "dispute_exists": "A dispute is already open.",
         "reason_required": "A reason is required.",
         "invalid_transition": "That step is not possible from the current state.",
+        "conflict_of_interest": "You are a party to this record. Another administrator must decide.",
         "not_found": "Not found.",
         "error": "Something went wrong. Nothing was saved."
       }

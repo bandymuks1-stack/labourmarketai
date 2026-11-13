@@ -16304,6 +16304,9 @@
       "responseQueueTitle": "Antworten, die auf Moderation warten",
       "responseQueueEmpty": "Keine Antwort wartet auf Moderation.",
       "replyToLabel": "Antwort auf diese Erfahrung",
+      "disputeOpenedLabel": "Einspruch eingereicht",
+      "disputeReviewStartedLabel": "Prüfung begonnen",
+      "conflictNotice": "Sie sind an diesem Eintrag beteiligt und können nicht darüber entscheiden. Ein anderer Administrator muss ihn übernehmen.",
       "take": "In Moderation nehmen",
       "publish": "Veröffentlichen",
       "reject": "Ablehnen",
@@ -16329,6 +16332,7 @@
         "dispute_exists": "Ein Streitfall ist bereits offen.",
         "reason_required": "Eine Begründung ist erforderlich.",
         "invalid_transition": "Dieser Schritt ist aus dem aktuellen Status nicht möglich.",
+        "conflict_of_interest": "Sie sind an diesem Eintrag beteiligt. Ein anderer Administrator muss entscheiden.",
         "not_found": "Nicht gefunden.",
         "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
       }
@@ -16345,6 +16349,7 @@
       "cta": "Streitfall eröffnen",
       "sending": "Wird eröffnet…",
       "openedNote": "Streitfall eröffnet. Die Erfahrung bleibt veröffentlicht, bis ein Moderator entscheidet.",
+      "decisionReasonLabel": "Begründung der Entscheidung",
       "errors": {
         "needs_migration": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
         "not_authenticated": "Bitte melden Sie sich zuerst an.",
@@ -16359,6 +16364,7 @@
         "dispute_exists": "Ein Streitfall ist bereits offen.",
         "reason_required": "Eine Begründung ist erforderlich.",
         "invalid_transition": "Dieser Schritt ist aus dem aktuellen Status nicht möglich.",
+        "conflict_of_interest": "Sie sind an diesem Eintrag beteiligt. Ein anderer Administrator muss entscheiden.",
         "not_found": "Nicht gefunden.",
         "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
       }
@@ -16383,6 +16389,7 @@
         "dispute_exists": "Ein Streitfall ist bereits offen.",
         "reason_required": "Eine Begründung ist erforderlich.",
         "invalid_transition": "Dieser Schritt ist aus dem aktuellen Status nicht möglich.",
+        "conflict_of_interest": "Sie sind an diesem Eintrag beteiligt. Ein anderer Administrator muss entscheiden.",
         "not_found": "Nicht gefunden.",
         "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
       },
@@ -16417,6 +16424,7 @@
         "dispute_exists": "Ein Streitfall ist bereits offen.",
         "reason_required": "Eine Begründung ist erforderlich.",
         "invalid_transition": "Dieser Schritt ist aus dem aktuellen Status nicht möglich.",
+        "conflict_of_interest": "Sie sind an diesem Eintrag beteiligt. Ein anderer Administrator muss entscheiden.",
         "not_found": "Nicht gefunden.",
         "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
       }

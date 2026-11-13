@@ -59,8 +59,8 @@ describe("a dispute can be decided", () => {
     expect(disputeItem).toContain('data-testid="experience-dispute-start-review"');
   });
   it("the moderator reads the subject's reason; no other list selects it", () => {
-    expect(records).toMatch(/\.in\("dispute_status", \["opened", "under_review"\]\)[\s\S]{0,400}", dispute_reason"/);
-    expect(records.match(/", dispute_reason"/g)?.length).toBe(1);
+    expect(records).toMatch(/\.in\("dispute_status", \["opened", "under_review"\]\)[\s\S]{0,400}", dispute_reason,/);
+    expect(records.match(/", dispute_reason,/g)?.length).toBe(1);
     expect(disputeItem).toContain('data-testid="experience-dispute-reason"');
     expect(panel).toContain("disputeReason={r.disputeReason}");
   });
@@ -76,10 +76,12 @@ describe("a reply can be published", () => {
     expect(panel).toContain('data-testid="experience-response-queue"');
     expect(panel).toMatch(/responses\.state !== "list" \? \(/);
   });
-  it("the reply queue does not select who wrote the reply", () => {
-    const fn = records.slice(records.indexOf("export async function listResponseQueue("));
-    expect(fn).toContain('.select("id, experience_record_id, body, moderation_status, created_at")');
-    expect(fn).not.toMatch(/author_profile_id/);
+  it("the reply queue never hands the reply's author to the page", () => {
+    // The author id is read on the server for the conflict check only; the
+    // item type the page receives does not carry it.
+    const type = records.slice(records.indexOf("export type ExperienceResponseQueueItem = {"));
+    expect(type.slice(0, type.indexOf("};"))).not.toMatch(/author/i);
+    expect(replyItem).not.toMatch(/author_profile_id|authorProfileId/);
   });
   it("a decision needs a reason before the RPC is called", () => {
     const fn = records.slice(records.indexOf("export async function moderateExperienceResponse("));
@@ -88,12 +90,64 @@ describe("a reply can be published", () => {
   });
 });
 
+describe("owner rules of 2026-11-13", () => {
+  const result = read("components", "app", "workspace", "experiences-result.tsx");
+  it("1 — all three moderator steps refuse a party before the RPC is called", () => {
+    for (const fn of ["startExperienceDisputeReview", "resolveExperienceDispute", "moderateExperienceResponse"]) {
+      const body = records.slice(records.indexOf(`export async function ${fn}(`));
+      const call = body.indexOf("await rpc(");
+      const refuse = body.indexOf("if (refused) return refused;");
+      expect(refuse, fn).toBeGreaterThan(-1);
+      expect(refuse, `${fn}: the refusal must come before the RPC`).toBeLessThan(call);
+    }
+    // Unknown is not clear.
+    expect(records).toMatch(/if \(conflict === "unknown"\) return \{ ok: false, code: "error" \};/);
+    expect(disputeItem).toContain('data-testid="experience-dispute-conflict"');
+    expect(replyItem).toContain('data-testid="experience-response-moderation-conflict"');
+  });
+  it("2 — the moderator sees the date and the age of the dispute's current step", () => {
+    expect(disputeItem).toContain('data-testid="experience-dispute-age"');
+    expect(disputeItem).toMatch(/format\.relativeTime\(new Date\(stepAt\), new Date\(now\)\)/);
+    // No automatic decision: nothing in this domain decides by elapsed time.
+    expect(records).not.toMatch(/deadline|expires|auto_?resolve/i);
+  });
+  it("3 — a disputed record keeps its marker on the parties' own list", () => {
+    expect(result).toContain('data-testid="experience-dispute-marker"');
+  });
+  it("4 — 'changed' is neither offered nor accepted", () => {
+    expect(disputeItem).toMatch(/\(\["upheld", "removed"\] as const\)\.map/);
+    expect(disputeItem).not.toMatch(/"changed"\]/);
+    expect(actions).toMatch(/if \(resolution !== "upheld" && resolution !== "removed"\) \{\s+return \{ ok: false, code: "invalid" \};/);
+    expect(records).toMatch(/resolution: "upheld" \| "removed";/);
+  });
+  it("5 — both parties read the decision's reason", () => {
+    expect(records).toMatch(/", dispute_resolution_reason"/);
+    expect(result).toContain('data-testid="experience-dispute-decision"');
+    expect(result).toMatch(/row\.disputeStatus\.startsWith\("resolved_"\) && row\.disputeResolutionReason/);
+  });
+  it("a failed dispute read is not shown as an empty queue", () => {
+    expect(panel).toContain('data-testid="experience-dispute-queue-unavailable"');
+  });
+});
+
 describe("copy and proof", () => {
-  const KEYS = ["takeDispute", "disputeReasonLabel", "responseQueueTitle", "responseQueueEmpty", "replyToLabel"];
+  const KEYS = [
+    "takeDispute",
+    "disputeReasonLabel",
+    "responseQueueTitle",
+    "responseQueueEmpty",
+    "replyToLabel",
+    "disputeOpenedLabel",
+    "disputeReviewStartedLabel",
+    "conflictNotice",
+  ];
   for (const loc of ["en", "lt", "lv", "et", "de", "nl", "pl", "ru", "da", "no", "sv"]) {
     it(`${loc} carries the moderator strings`, () => {
       const m = JSON.parse(read("messages", `${loc}.json`)).experience.moderation;
       for (const k of KEYS) expect(m[k], `${loc}.${k}`).toBeTruthy();
+      const exp = JSON.parse(read("messages", `${loc}.json`)).experience;
+      expect(exp.dispute.decisionReasonLabel, loc).toBeTruthy();
+      expect(m.errors.conflict_of_interest, loc).toBeTruthy();
     });
   }
   it("the PG16 proof ships with the change", () => {

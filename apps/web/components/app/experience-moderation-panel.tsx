@@ -44,10 +44,13 @@ export function ExperienceModerationPanel({
   queue,
   disputes,
   responses,
+  now,
 }: {
   queue: ExperienceListState;
   disputes: ExperienceListState;
   responses: ExperienceResponseQueueState;
+  /** The server's clock at render (ISO), for the age of each dispute. */
+  now: string;
 }) {
   const t = useTranslations("experience");
 
@@ -108,7 +111,16 @@ export function ExperienceModerationPanel({
             <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("moderation.disputeQueueTitle")}
             </h3>
-            {disputes.state !== "list" || disputes.aboutMe.length === 0 ? (
+            {disputes.state !== "list" ? (
+              // A failed read is never shown as "no open disputes".
+              <p
+                className="text-meta leading-relaxed text-text-secondary"
+                role="status"
+                data-testid="experience-dispute-queue-unavailable"
+              >
+                {t("moderation.unavailable")}
+              </p>
+            ) : disputes.aboutMe.length === 0 ? (
               <p className="text-meta leading-relaxed text-text-secondary">
                 {t("moderation.disputeQueueEmpty")}
               </p>
@@ -123,6 +135,9 @@ export function ExperienceModerationPanel({
                       moderationStatus={r.moderationStatus}
                       disputeStatus={r.disputeStatus}
                       disputeReason={r.disputeReason}
+                      stepAt={r.disputeStepAt}
+                      now={now}
+                      conflict={r.conflict}
                     />
                   </li>
                 ))}
@@ -156,6 +171,7 @@ export function ExperienceModerationPanel({
                       body={r.body}
                       moderationStatus={r.moderationStatus}
                       recordBody={r.recordBody}
+                      conflict={r.conflict}
                     />
                   </li>
                 ))}

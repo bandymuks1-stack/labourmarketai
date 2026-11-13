@@ -443,17 +443,35 @@ function ExperienceCard({
       </div>
       <p className="text-sm leading-relaxed text-text-secondary break-words">{row.body}</p>
 
+      {/* THE DECISION AND ITS REASON, to both parties (owner rule 2026-11-13).
+          The marker above names the outcome; this is why. RLS returns this row
+          only to the author and to the subject side. */}
+      {row.disputeStatus.startsWith("resolved_") && row.disputeResolutionReason ? (
+        <div
+          className="flex flex-col gap-1 rounded-md border border-border-subtle bg-surface-2/40 p-2"
+          data-testid="experience-dispute-decision"
+          data-dispute={row.disputeStatus}
+        >
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("dispute.decisionReasonLabel")}
+          </span>
+          <p className="text-sm leading-relaxed text-text-primary break-words">
+            {row.disputeResolutionReason}
+          </p>
+        </div>
+      ) : null}
+
       {/* THE RIGHT OF REPLY, RENDERED.
           A reply is shown to the person who WROTE it in every state, and to the
           author of the experience only once it is PUBLISHED. That second
-          condition is enforced here rather than left to RLS, because the v1
-          select policy's third branch compares the unqualified
-          `moderation_status` inside a subquery over `experience_records` — so
-          Postgres resolves it to the RECORD's status, and the policy hands the
-          experience's author a reply that is still submitted, in moderation, or
-          rejected. Correcting the policy is a schema change and belongs at the
-          human gate; until then this surface does not disclose what moderation
-          has not released. Recorded on EVID-6.
+          condition is enforced here AS WELL AS by RLS. The v1 select policy
+          compared an unqualified `moderation_status` inside a subquery over
+          `experience_records`, so it resolved to the RECORD's status and
+          handed the experience's author a reply still submitted, in moderation
+          or rejected. The policy was corrected in production on 2026-10-03
+          (EVID-6, ledger 20261003090939, read back 2026-11-13); this check
+          stays as the second line, so the surface never discloses what
+          moderation has not released even on a stack without that migration.
           `experience_responses` shipped with a schema, an RPC and a form, and
           no reader: a person could reply and nobody — including them — ever saw
           it again. The reply carries its own moderation state, because a

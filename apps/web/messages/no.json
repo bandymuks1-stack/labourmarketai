@@ -5122,6 +5122,9 @@
       "responseQueueTitle": "Svar som venter på moderering",
       "responseQueueEmpty": "Ingen svar venter på moderering.",
       "replyToLabel": "Svar på denne erfaringen",
+      "disputeOpenedLabel": "Innsigelse levert",
+      "disputeReviewStartedLabel": "Behandling startet",
+      "conflictNotice": "Du er part i denne erfaringen og kan ikke avgjøre den. En annen administrator må overta.",
       "take": "[EN] Take into moderation",
       "publish": "[EN] Publish",
       "reject": "[EN] Reject",
@@ -5147,6 +5150,7 @@
         "dispute_exists": "[EN] A dispute is already open.",
         "reason_required": "[EN] A reason is required.",
         "invalid_transition": "[EN] That step is not possible from the current state.",
+        "conflict_of_interest": "Du er part i denne erfaringen. En annen administrator må avgjøre.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
       }
@@ -5163,6 +5167,7 @@
       "cta": "[EN] Open a dispute",
       "sending": "[EN] Opening…",
       "openedNote": "[EN] Dispute opened. The experience stays published until a moderator decides.",
+      "decisionReasonLabel": "Begrunnelse for avgjørelsen",
       "errors": {
         "needs_migration": "Ikke tilgjengelig akkurat nå. Ingenting ble lagret.",
         "not_authenticated": "[EN] Please sign in first.",
@@ -5177,6 +5182,7 @@
         "dispute_exists": "[EN] A dispute is already open.",
         "reason_required": "[EN] A reason is required.",
         "invalid_transition": "[EN] That step is not possible from the current state.",
+        "conflict_of_interest": "Du er part i denne erfaringen. En annen administrator må avgjøre.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
       }
@@ -5201,6 +5207,7 @@
         "dispute_exists": "[EN] A dispute is already open.",
         "reason_required": "[EN] A reason is required.",
         "invalid_transition": "[EN] That step is not possible from the current state.",
+        "conflict_of_interest": "Du er part i denne erfaringen. En annen administrator må avgjøre.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
       },
@@ -5235,6 +5242,7 @@
         "dispute_exists": "[EN] A dispute is already open.",
         "reason_required": "[EN] A reason is required.",
         "invalid_transition": "[EN] That step is not possible from the current state.",
+        "conflict_of_interest": "Du er part i denne erfaringen. En annen administrator må avgjøre.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
       }

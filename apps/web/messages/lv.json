@@ -5122,6 +5122,9 @@
       "responseQueueTitle": "Atbildes, kas gaida moderēšanu",
       "responseQueueEmpty": "Neviena atbilde negaida moderēšanu.",
       "replyToLabel": "Atbilde uz šo pieredzi",
+      "disputeOpenedLabel": "Strīds iesniegts",
+      "disputeReviewStartedLabel": "Izskatīšana sākta",
+      "conflictNotice": "Jūs esat šī ieraksta puse, tāpēc nevarat to izskatīt. Tas jāpārņem citam administratoram.",
       "take": "[EN] Take into moderation",
       "publish": "[EN] Publish",
       "reject": "[EN] Reject",
@@ -5147,6 +5150,7 @@
         "dispute_exists": "[EN] A dispute is already open.",
         "reason_required": "[EN] A reason is required.",
         "invalid_transition": "[EN] That step is not possible from the current state.",
+        "conflict_of_interest": "Jūs esat šī ieraksta puse. Lēmums jāpieņem citam administratoram.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
       }
@@ -5163,6 +5167,7 @@
       "cta": "[EN] Open a dispute",
       "sending": "[EN] Opening…",
       "openedNote": "[EN] Dispute opened. The experience stays published until a moderator decides.",
+      "decisionReasonLabel": "Lēmuma pamatojums",
       "errors": {
         "needs_migration": "Pašlaik nav pieejams. Nekas netika saglabāts.",
         "not_authenticated": "[EN] Please sign in first.",
@@ -5177,6 +5182,7 @@
         "dispute_exists": "[EN] A dispute is already open.",
         "reason_required": "[EN] A reason is required.",
         "invalid_transition": "[EN] That step is not possible from the current state.",
+        "conflict_of_interest": "Jūs esat šī ieraksta puse. Lēmums jāpieņem citam administratoram.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
       }
@@ -5201,6 +5207,7 @@
         "dispute_exists": "[EN] A dispute is already open.",
         "reason_required": "[EN] A reason is required.",
         "invalid_transition": "[EN] That step is not possible from the current state.",
+        "conflict_of_interest": "Jūs esat šī ieraksta puse. Lēmums jāpieņem citam administratoram.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
       },
@@ -5235,6 +5242,7 @@
         "dispute_exists": "[EN] A dispute is already open.",
         "reason_required": "[EN] A reason is required.",
         "invalid_transition": "[EN] That step is not possible from the current state.",
+        "conflict_of_interest": "Jūs esat šī ieraksta puse. Lēmums jāpieņem citam administratoram.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
       }

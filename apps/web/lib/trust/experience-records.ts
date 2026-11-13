@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { partyConflict, type PartyRow } from "./experience-conflict";
 import {
   ELIGIBLE_INTERACTION_KINDS,
   type EligibleInteractionKind,
@@ -56,6 +57,7 @@ export type ExperienceActionResult =
         | "reason_required"
         | "invalid_transition"
         | "not_found"
+        | "conflict_of_interest"
         | "error";
     };
 
@@ -127,6 +129,68 @@ export async function submitExperienceRecord(args: {
   return mapRpc(data, error);
 }
 
+/**
+ * CONFLICT OF INTEREST (owner rule 2026-11-13). A platform administrator who is
+ * a PARTY to a record does not review its dispute or moderate its reply; an
+ * independent administrator takes it. A party is: the experience's author, the
+ * person it is about, the reply's author, or a manager of the organization on
+ * either side.
+ *
+ * Resolved on the server from the row and the caller's own session, never from
+ * the form. "unknown" (a read failed) is NOT "clear": the caller refuses.
+ * `lib/guards/experience-dispute-decidable.test.ts` pins that all three
+ * moderator steps go through here.
+ */
+export type ExperienceConflict = "clear" | "conflict" | "unknown";
+
+const PARTY_COLUMNS =
+  "id, author_profile_id, subject_profile_id, subject_organization_id, author_organization_id";
+
+async function managedOrganizations(
+  sb: Db,
+  organizationIds: readonly string[],
+): Promise<Set<string> | null> {
+  const managed = new Set<string>();
+  for (const org of new Set(organizationIds)) {
+    const { data, error } = await rpc(sb, "manages_organization", { org });
+    if (error) return null;
+    if (data === true) managed.add(org);
+  }
+  return managed;
+}
+
+async function conflictForRecord(
+  sb: Db,
+  recordId: string,
+  alsoParty?: string | null,
+): Promise<ExperienceConflict> {
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  if (!user) return "unknown";
+  if (alsoParty && alsoParty === user.id) return "conflict";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (sb as any)
+    .from("experience_records")
+    .select(PARTY_COLUMNS)
+    .eq("id", recordId)
+    .maybeSingle();
+  if (error || !data) return "unknown";
+  const row = data as PartyRow;
+  const orgs = [row.subject_organization_id, row.author_organization_id].filter(
+    (o): o is string => !!o,
+  );
+  const managed = await managedOrganizations(sb, orgs);
+  if (managed === null) return "unknown";
+  return partyConflict(row, user.id, managed) ? "conflict" : "clear";
+}
+
+function refusalFor(conflict: ExperienceConflict): ExperienceActionResult | null {
+  if (conflict === "conflict") return { ok: false, code: "conflict_of_interest" };
+  if (conflict === "unknown") return { ok: false, code: "error" };
+  return null;
+}
+
 export async function startExperienceModeration(id: string): Promise<ExperienceActionResult> {
   const sb = await createClient();
   const { data, error } = await rpc(sb, "start_experience_moderation", { p_id: id });
@@ -183,6 +247,8 @@ export async function openExperienceDispute(args: {
  */
 export async function startExperienceDisputeReview(id: string): Promise<ExperienceActionResult> {
   const sb = await createClient();
+  const refused = refusalFor(await conflictForRecord(sb, id));
+  if (refused) return refused;
   const { data, error } = await rpc(sb, "review_experience_dispute", { p_id: id });
   return mapRpc(data, error);
 }
@@ -200,6 +266,23 @@ export async function moderateExperienceResponse(args: {
 }): Promise<ExperienceActionResult> {
   if (args.reason.trim().length < 1) return { ok: false, code: "reason_required" };
   const sb = await createClient();
+  // The reply names its record and its author; both sides are parties.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const reply = await (sb as any)
+    .from("experience_responses")
+    .select("experience_record_id, author_profile_id")
+    .eq("id", args.id)
+    .maybeSingle();
+  if (reply.error) return { ok: false, code: "error" };
+  if (!reply.data) return { ok: false, code: "not_found" };
+  const refused = refusalFor(
+    await conflictForRecord(
+      sb,
+      String(reply.data.experience_record_id),
+      reply.data.author_profile_id as string | null,
+    ),
+  );
+  if (refused) return refused;
   const { data, error } = await rpc(sb, "moderate_experience_response", {
     p_id: args.id,
     p_decision: args.decision,
@@ -208,13 +291,20 @@ export async function moderateExperienceResponse(args: {
   return mapRpc(data, error);
 }
 
+/**
+ * `changed` is NOT offered (owner rule 2026-11-13): the schema accepts the
+ * word but nothing changes the text, so it would record a correction that
+ * never happened. The two real outcomes are upheld and removed.
+ */
 export async function resolveExperienceDispute(args: {
   id: string;
-  resolution: "upheld" | "changed" | "removed";
+  resolution: "upheld" | "removed";
   reason: string;
 }): Promise<ExperienceActionResult> {
   if (args.reason.trim().length < 1) return { ok: false, code: "reason_required" };
   const sb = await createClient();
+  const refused = refusalFor(await conflictForRecord(sb, args.id));
+  if (refused) return refused;
   const { data, error } = await rpc(sb, "resolve_experience_dispute", {
     p_id: args.id,
     p_resolution: args.resolution,
@@ -322,6 +412,17 @@ export type ExperienceRow = {
    * on every other list: those do not select the column.
    */
   readonly disputeReason?: string | null;
+  /**
+   * The moderator's reason for the dispute decision — shown to BOTH parties
+   * (owner rule 2026-11-13). Null while there is no decision.
+   */
+  readonly disputeResolutionReason?: string | null;
+  /** Moderator queue only: when the dispute entered its CURRENT step (opened,
+   *  or review started). Null = not known; never replaced by today's date. */
+  readonly disputeStepAt?: string | null;
+  /** Moderator queue only: the signed-in administrator is a party to this
+   *  record and may not decide it. */
+  readonly conflict?: boolean;
 };
 
 /**
@@ -427,6 +528,9 @@ function mapRow(
     ...("dispute_reason" in r
       ? { disputeReason: (r.dispute_reason as string | null) ?? null }
       : {}),
+    ...("dispute_resolution_reason" in r
+      ? { disputeResolutionReason: (r.dispute_resolution_reason as string | null) ?? null }
+      : {}),
   };
 }
 
@@ -475,6 +579,9 @@ export async function listExperiencesForViewer(
   const res = await readExperienceRows((q) =>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (q as any).order("submitted_at", { ascending: false }).limit(100),
+    // The decision's reason, for both parties. RLS already returns this row
+    // to exactly those two sides (and to no one else).
+    ", dispute_resolution_reason",
   );
   if ("state" in res) return res;
   const responses = await readResponsesFor(res.rows.map((r) => String(r.id)));
@@ -520,13 +627,34 @@ export async function listDisputeQueue(): Promise<ExperienceListState> {
       .limit(100),
     // The subject's reason (a v1 column). The moderator cannot decide a
     // dispute without reading what is contested.
-    ", dispute_reason",
+    ", dispute_reason, updated_at, subject_profile_id, subject_organization_id, author_organization_id",
   );
   if ("state" in res) return res;
+  const sb = await createClient();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  const managed = await managedOrganizations(
+    sb,
+    res.rows.flatMap((r) =>
+      [r.subject_organization_id, r.author_organization_id].filter((o): o is string => !!o),
+    ),
+  );
   return {
     state: "list",
     mine: [],
-    aboutMe: res.rows.map((r) => mapRow(r, res.authorSideKnown, null)),
+    aboutMe: res.rows.map((r) => ({
+      ...mapRow(r, res.authorSideKnown, null),
+      // The row's updated_at is written by the dispute step itself: for an
+      // 'opened' dispute it IS when it was opened; once the review starts it
+      // is when the review started. The item labels it accordingly — the
+      // opening date of a dispute already under review is in the audit trail,
+      // which this session cannot read.
+      disputeStepAt: (r.updated_at as string | null) ?? null,
+      // Unknown is not clear: when the party check could not run the item
+      // offers no decision.
+      conflict: !user || managed === null ? true : partyConflict(r as PartyRow, user.id, managed),
+    })),
     // The queues moderate the RECORD. They do not read replies, so they claim
     // nothing about them — `false` is "not known here", not "there are none".
     responsesRead: false,
@@ -541,6 +669,8 @@ export type ExperienceResponseQueueItem = {
   readonly createdAt: string | null;
   /** The experience the reply answers; null when that read failed. */
   readonly recordBody: string | null;
+  /** The signed-in administrator is a party to the reply or its record. */
+  readonly conflict: boolean;
 };
 
 export type ExperienceResponseQueueState =
@@ -559,7 +689,7 @@ export async function listResponseQueue(): Promise<ExperienceResponseQueueState>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (sb as any)
     .from("experience_responses")
-    .select("id, experience_record_id, body, moderation_status, created_at")
+    .select("id, experience_record_id, author_profile_id, body, moderation_status, created_at")
     .in("moderation_status", ["submitted", "in_moderation"])
     .order("created_at", { ascending: true })
     .limit(100);
@@ -570,17 +700,34 @@ export async function listResponseQueue(): Promise<ExperienceResponseQueueState>
   const rows = (data ?? []) as Record<string, unknown>[];
   const recordIds = [...new Set(rows.map((r) => String(r.experience_record_id)))];
   const bodies = new Map<string, string>();
+  const parties = new Map<string, PartyRow>();
   if (recordIds.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rec = await (sb as any)
       .from("experience_records")
-      .select("id, body")
+      .select(`${PARTY_COLUMNS}, body`)
       .in("id", recordIds)
       .limit(recordIds.length);
     for (const r of ((rec.data ?? []) as Record<string, unknown>[])) {
       bodies.set(String(r.id), String(r.body ?? ""));
+      parties.set(String(r.id), r as PartyRow);
     }
   }
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  const managed = await managedOrganizations(
+    sb,
+    [...parties.values()].flatMap((r) =>
+      [r.subject_organization_id, r.author_organization_id].filter((o): o is string => !!o),
+    ),
+  );
+  const conflictOf = (r: Record<string, unknown>): boolean => {
+    const party = parties.get(String(r.experience_record_id));
+    // Unknown is not clear.
+    if (!user || managed === null || !party) return true;
+    return r.author_profile_id === user.id || partyConflict(party, user.id, managed);
+  };
   return {
     state: "list",
     items: rows.map((r) => ({
@@ -589,6 +736,7 @@ export async function listResponseQueue(): Promise<ExperienceResponseQueueState>
       moderationStatus: r.moderation_status as ExperienceResponseQueueItem["moderationStatus"],
       createdAt: (r.created_at as string | null) ?? null,
       recordBody: bodies.get(String(r.experience_record_id)) ?? null,
+      conflict: conflictOf(r),
     })),
   };
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import {
   resolveDisputeAction,
   startDisputeReviewAction,
@@ -28,6 +28,9 @@ export function ExperienceDisputeItem({
   moderationStatus,
   disputeStatus,
   disputeReason,
+  stepAt,
+  now,
+  conflict,
 }: {
   id: string;
   sentiment: "positive" | "negative";
@@ -37,7 +40,14 @@ export function ExperienceDisputeItem({
   /** The subject's reason. Undefined/null = not read; the item then says
    *  nothing about it rather than implying there was none. */
   disputeReason?: string | null;
+  /** When the dispute entered its current step; null = not known. */
+  stepAt?: string | null;
+  /** The server's clock at render, so the age is the same on both renders. */
+  now: string;
+  /** The signed-in administrator is a party to this record. */
+  conflict?: boolean;
 }) {
+  const format = useFormatter();
   const locale = useLocale();
   const t = useTranslations("experience");
   const [state, action, pending] = useActionState<ExperienceFormState, FormData>(
@@ -71,6 +81,17 @@ export function ExperienceDisputeItem({
         </span>
       </div>
       <p className="text-sm leading-relaxed text-text-secondary break-words">{body}</p>
+      {stepAt ? (
+        <p className="text-meta text-text-muted" data-testid="experience-dispute-age">
+          {t(status === "opened" ? "moderation.disputeOpenedLabel" : "moderation.disputeReviewStartedLabel")}
+          {": "}
+          <time dateTime={stepAt}>
+            {format.dateTime(new Date(stepAt), { dateStyle: "medium" })}
+          </time>
+          {" · "}
+          {format.relativeTime(new Date(stepAt), new Date(now))}
+        </p>
+      ) : null}
       {disputeReason ? (
         <div className="flex flex-col gap-1" data-testid="experience-dispute-reason">
           <span className="font-mono text-meta uppercase tracking-label text-text-muted">
@@ -80,7 +101,17 @@ export function ExperienceDisputeItem({
         </div>
       ) : null}
 
-      {state?.ok ? (
+      {conflict ? (
+        // A party to the record does not decide its dispute. The server
+        // refuses the step as well; this is the explanation, not the control.
+        <p
+          className="text-meta leading-relaxed text-state-warning"
+          role="status"
+          data-testid="experience-dispute-conflict"
+        >
+          {t("moderation.conflictNotice")}
+        </p>
+      ) : state?.ok ? (
         <p
           className="text-meta text-state-success"
           role="status"
@@ -130,7 +161,9 @@ export function ExperienceDisputeItem({
             />
           </label>
           <div className="flex flex-wrap gap-2">
-            {(["upheld", "changed", "removed"] as const).map((r) => (
+            {/* "changed" is not offered: nothing changes the text, so it would
+                record a correction that never happened. */}
+            {(["upheld", "removed"] as const).map((r) => (
               <button
                 key={r}
                 type="submit"

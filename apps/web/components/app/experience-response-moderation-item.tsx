@@ -20,6 +20,7 @@ export function ExperienceResponseModerationItem({
   body,
   moderationStatus,
   recordBody,
+  conflict,
 }: {
   id: string;
   body: string;
@@ -27,6 +28,8 @@ export function ExperienceResponseModerationItem({
   /** The experience the reply answers. Null = that read failed; the item says
    *  nothing about it rather than showing an empty quote. */
   recordBody: string | null;
+  /** The signed-in administrator is a party to the reply or its record. */
+  conflict?: boolean;
 }) {
   const locale = useLocale();
   const t = useTranslations("experience");
@@ -58,7 +61,15 @@ export function ExperienceResponseModerationItem({
         {body}
       </p>
 
-      {state?.ok ? (
+      {conflict ? (
+        <p
+          className="text-meta leading-relaxed text-state-warning"
+          role="status"
+          data-testid="experience-response-moderation-conflict"
+        >
+          {t("moderation.conflictNotice")}
+        </p>
+      ) : state?.ok ? (
         <p
           className="text-meta text-state-success"
           role="status"

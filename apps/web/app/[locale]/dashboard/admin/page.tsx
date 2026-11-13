@@ -623,6 +623,7 @@ export default async function AdminDashboardPage({
         queue={experienceQueue}
         disputes={experienceDisputes}
         responses={experienceResponses}
+        now={new Date().toISOString()}
       />
 
       <section className="flex flex-col gap-3" data-testid="admin-pilot-drafts">

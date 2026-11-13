@@ -16304,6 +16304,9 @@
       "responseQueueTitle": "Odpowiedzi oczekujące na moderację",
       "responseQueueEmpty": "Żadna odpowiedź nie czeka na moderację.",
       "replyToLabel": "Odpowiedź na to doświadczenie",
+      "disputeOpenedLabel": "Spór zgłoszony",
+      "disputeReviewStartedLabel": "Rozpatrywanie rozpoczęte",
+      "conflictNotice": "Jesteś stroną tego wpisu, więc nie możesz go rozstrzygać. Musi go przejąć inny administrator.",
       "take": "Weź do moderacji",
       "publish": "Opublikuj",
       "reject": "Odrzuć",
@@ -16329,6 +16332,7 @@
         "dispute_exists": "Spór jest już otwarty.",
         "reason_required": "Uzasadnienie jest wymagane.",
         "invalid_transition": "Ten krok nie jest możliwy z obecnego stanu.",
+        "conflict_of_interest": "Jesteś stroną tego wpisu. Decyzję musi podjąć inny administrator.",
         "not_found": "Nie znaleziono.",
         "error": "Coś poszło nie tak. Nic nie zostało zapisane."
       }
@@ -16345,6 +16349,7 @@
       "cta": "Otwórz spór",
       "sending": "Otwieranie…",
       "openedNote": "Spór otwarty. Doświadczenie pozostaje opublikowane do czasu decyzji moderatora.",
+      "decisionReasonLabel": "Uzasadnienie decyzji",
       "errors": {
         "needs_migration": "Chwilowo niedostępne. Nic nie zapisano.",
         "not_authenticated": "Najpierw się zaloguj.",
@@ -16359,6 +16364,7 @@
         "dispute_exists": "Spór jest już otwarty.",
         "reason_required": "Uzasadnienie jest wymagane.",
         "invalid_transition": "Ten krok nie jest możliwy z obecnego stanu.",
+        "conflict_of_interest": "Jesteś stroną tego wpisu. Decyzję musi podjąć inny administrator.",
         "not_found": "Nie znaleziono.",
         "error": "Coś poszło nie tak. Nic nie zostało zapisane."
       }
@@ -16383,6 +16389,7 @@
         "dispute_exists": "Spór jest już otwarty.",
         "reason_required": "Uzasadnienie jest wymagane.",
         "invalid_transition": "Ten krok nie jest możliwy z obecnego stanu.",
+        "conflict_of_interest": "Jesteś stroną tego wpisu. Decyzję musi podjąć inny administrator.",
         "not_found": "Nie znaleziono.",
         "error": "Coś poszło nie tak. Nic nie zostało zapisane."
       },
@@ -16417,6 +16424,7 @@
         "dispute_exists": "Spór jest już otwarty.",
         "reason_required": "Uzasadnienie jest wymagane.",
         "invalid_transition": "Ten krok nie jest możliwy z obecnego stanu.",
+        "conflict_of_interest": "Jesteś stroną tego wpisu. Decyzję musi podjąć inny administrator.",
         "not_found": "Nie znaleziono.",
         "error": "Coś poszło nie tak. Nic nie zostało zapisane."
       }

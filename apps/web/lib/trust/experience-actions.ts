@@ -145,7 +145,9 @@ export async function resolveDisputeAction(
 ): Promise<ExperienceFormState> {
   const locale = str(formData, "locale") || "lt";
   const resolution = str(formData, "resolution");
-  if (resolution !== "upheld" && resolution !== "changed" && resolution !== "removed") {
+  // "changed" is refused here as well as hidden in the UI: nothing changes the
+  // text, so it must not be recordable as if a correction had been made.
+  if (resolution !== "upheld" && resolution !== "removed") {
     return { ok: false, code: "invalid" };
   }
   const result = await resolveExperienceDispute({
@@ -153,7 +155,11 @@ export async function resolveDisputeAction(
     resolution,
     reason: str(formData, "reason"),
   });
-  if (result.ok) revalidatePath(`/${locale}/dashboard/admin`);
+  if (result.ok) {
+    revalidatePath(`/${locale}/dashboard/admin`);
+    // Both parties read the decision and its reason on their own result.
+    revalidatePath(`/${locale}/dashboard`);
+  }
   return result;
 }
 
