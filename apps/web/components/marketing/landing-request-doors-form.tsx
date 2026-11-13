@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useState, useTransition, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, useTransition, type FormEvent, type ReactNode } from "react";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { submitRequestDoorAction, type RequestDoorResult } from "@/lib/staffing/request-door-actions";
 import { REQUEST_DOORS, type RequestDoor } from "@/lib/staffing/request-doors";
+import { REQUEST_DOOR_FRAGMENT_PREFIX, requestDoorFromFragment } from "@/lib/staffing/request-door-link";
 
 export type RequestDoorLabels = {
   readonly doors: Readonly<Record<RequestDoor, { readonly title: string; readonly body: string }>>;
@@ -86,6 +87,43 @@ export function LandingRequestDoorsForm({
     setDoor(next);
     setResult(null);
   }
+
+  // A LINK CAN OPEN A FORM. `#request=b2b` (a goal's action, from this page
+  // or another) opens the block, opens that form and brings it into view.
+  // Read when this mounts, on every announced change of the address, and
+  // after a click on any such link — the router changes the address for an
+  // in-page link without announcing it.
+  useEffect(() => {
+    const fromAddress = () => {
+      const wanted = requestDoorFromFragment(window.location.hash);
+      if (!wanted) return;
+      const block = document.getElementById("request");
+      if (block instanceof HTMLDetailsElement) block.open = true;
+      openedAt.current = Date.now();
+      shown.current = wanted;
+      setDoor(wanted);
+      setResult(null);
+      window.requestAnimationFrame(() => {
+        (document.getElementById("request-door-form") ?? block)?.scrollIntoView({
+          block: "start",
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        });
+      });
+    };
+    const afterClick = (event: MouseEvent) => {
+      const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
+      if (link?.getAttribute("href")?.includes(REQUEST_DOOR_FRAGMENT_PREFIX)) window.setTimeout(fromAddress, 0);
+    };
+    fromAddress();
+    window.addEventListener("hashchange", fromAddress);
+    window.addEventListener("popstate", fromAddress);
+    document.addEventListener("click", afterClick);
+    return () => {
+      window.removeEventListener("hashchange", fromAddress);
+      window.removeEventListener("popstate", fromAddress);
+      document.removeEventListener("click", afterClick);
+    };
+  }, []);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

@@ -30,13 +30,15 @@ describe("landing entry", () => {
     // one supporting line under the goals.
     expect(readFileSync(join(ROOT, "components/marketing/landing-intent-choice.tsx"), "utf8")).toContain(
       // Phones show all the goals as a grid (owner P0 2026-11-13).
-      '<GoalNavigation headingLevel="h1" phoneLayout="grid" />',
+      '<GoalNavigation headingLevel="h1" phoneLayout="grid" lead={lead} phoneMore={phoneMore} />',
     );
     expect(FOCUS).not.toMatch(/<h1\b/);
-    expect(FOCUS).toContain('{tHero("headline")}');
+    // Landing V3 (owner, 2026-11-13): the supporting line is the approved
+    // "who it is for / what is free" sentence, passed to the navigator so it
+    // sits directly under the h1.
+    expect(FOCUS).toContain('lead={tV3("lead")}');
     const body = FOCUS.slice(FOCUS.lastIndexOf("<NextIntlClientProvider"));
-    expect(body.indexOf("<LandingIntentChoice />")).toBeGreaterThan(-1);
-    expect(body.indexOf("<LandingIntentChoice />")).toBeLessThan(body.indexOf("{promise}"));
-    expect(body.indexOf("{promise}")).toBeLessThan(body.indexOf("<PublicEntry"));
+    expect(body.indexOf("<LandingIntentChoice")).toBeGreaterThan(-1);
+    expect(body.indexOf("<LandingIntentChoice")).toBeLessThan(body.indexOf("<PublicEntry"));
   });
 });

@@ -60,7 +60,9 @@ export async function GoalNavigation({
         hasCatalogue: CATALOGUE_GOALS.has(intent.id),
         functions: intent.links.map((link) => ({
           id: link.id,
-          href: link.href,
+          // A link to a fragment of the landing is a fragment of THIS page
+          // here: a plain in-page link, announced by the browser.
+          href: link.href.startsWith("/#") ? link.href.slice(1) : link.href,
           label: t(`links.${link.id}`),
           note: link.account ? t("nav.signInWhenOpen") : t("nav.opensNow"),
           iconKey: FUNCTION_ICONS[link.id as keyof typeof FUNCTION_ICONS],

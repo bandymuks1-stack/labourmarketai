@@ -48,19 +48,19 @@ test.describe("@375px phone", () => {
     await page.screenshot({ path: join(SHOTS, "lt-375-first-screen.png"), fullPage: false });
   });
 
-  test("two example chips on the landing, one for each side, and nothing more to open", async ({ page }) => {
-    // Owner P0 2026-11-13: less noise on the first screen. The component's
-    // standard set (four chips, the rest on demand) is still covered by its
-    // guard; the landing mounts the short set.
+  test("no example chips on the landing: the goals are the choice", async ({ page }) => {
+    // Landing V3 (owner, 2026-11-13): the chips repeated the goals. The
+    // component's chip sets are still covered by its guard.
     await page.goto("/lt");
-    await expect(page.getByTestId("entry-example")).toHaveCount(2);
+    await expect(page.getByTestId("entry-input")).toBeVisible();
+    await expect(page.getByTestId("entry-example")).toHaveCount(0);
     await expect(page.getByTestId("entry-more-examples")).toHaveCount(0);
   });
 
   test("a looking-for-work reading offers the public board beside sign-up", async ({ page }) => {
     await page.goto("/lt");
-    // The second default chip is the looking-for-work sentence.
-    await page.getByTestId("entry-example").nth(1).click();
+    await page.getByTestId("entry-input").fill("Ieškau darbo Norvegijoje");
+    await page.getByTestId("entry-submit").click();
     await expect(page.getByTestId("entry-understanding")).toBeVisible();
     await expect(page.getByTestId("entry-signup")).toBeVisible();
     const jobs = page.getByTestId("entry-jobs").locator("a");
@@ -72,30 +72,48 @@ test.describe("@375px phone", () => {
 test.describe("@1440px desktop", () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test("real jobs come from the board, and the page ends on the next step", async ({ page }) => {
+  test("market figures are printed once, with real adverts or the link to the search", async ({ page }) => {
     await page.goto("/lt");
+
+    const market = page.getByTestId("landing-market-facts");
+    await expect(market).toBeVisible();
+    // The counts are in this block or nowhere: never inside the sentence box.
+    await expect(page.getByTestId("entry-numbers")).toHaveCount(0);
+    const line = page.getByTestId("landing-market-line");
+    if ((await line.count()) > 0) {
+      await expect(page.getByTestId("landing-market-source")).toContainText("LabourMarket.ai");
+      await expect(page.getByTestId("landing-market-none")).toHaveCount(0);
+    } else {
+      // The canonical reader could not answer: the page says so, and shows
+      // no number at all.
+      await expect(page.getByTestId("landing-market-none")).toBeVisible();
+      await expect(market).not.toContainText(/\d{3}/);
+    }
 
     const band = page.getByTestId("landing-open-jobs");
     if ((await band.count()) > 0) {
-      // Omitted entirely when the market reader could not answer — so only a
-      // PRESENT band is measured.
       const cards = band.getByTestId("landing-open-job");
       const n = await cards.count();
       expect(n).toBeGreaterThan(0);
-      expect(n).toBeLessThanOrEqual(4);
+      expect(n).toBeLessThanOrEqual(3);
       for (let i = 0; i < n; i += 1) {
         await expect(cards.nth(i).locator("a").first()).toHaveAttribute("href", /\/jobs\/[0-9a-f-]{36}$/);
       }
       await expect(page.getByTestId("landing-open-jobs-all")).toHaveAttribute("href", /\/jobs$/);
+      await expect(page.getByTestId("landing-market-search")).toHaveCount(0);
       await band.scrollIntoViewIfNeeded();
       await page.screenshot({ path: join(SHOTS, "lt-1440-open-jobs.png"), fullPage: false });
+    } else {
+      // No live adverts: the link to the search, never a placeholder advert.
+      await expect(page.getByTestId("landing-market-search")).toHaveAttribute("href", /\/jobs$/);
     }
 
-    const close = page.getByTestId("landing-close");
-    await close.scrollIntoViewIfNeeded();
-    await expect(close).toBeVisible();
-    await expect(close.getByTestId("landing-actions").locator("a")).toHaveCount(2);
-    await expect(close.getByTestId("landing-actions")).toHaveAttribute("data-surface", "landing_close");
-
+    // The page ends on "How it works" and the short footer — no second or
+    // third start button.
+    await expect(page.getByTestId("landing-how")).toBeVisible();
+    await expect(page.getByTestId("landing-close")).toHaveCount(0);
+    await expect(page.getByTestId("site-footer-compact")).toBeVisible();
+    await expect(page.getByTestId("footer-entity-disclosure")).toBeVisible();
+    await expect(page.getByTestId("footer-copyright")).toBeVisible();
   });
 });

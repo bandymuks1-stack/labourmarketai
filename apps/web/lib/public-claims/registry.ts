@@ -334,7 +334,7 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
       capabilityId: null,
       status: "LIVE",
       structural: null,
-      pages: [{ path: P.root, locales: [locale], fragments: [k("landing.hero.headline")] }],
+      pages: [{ path: P.root, locales: [locale], fragments: [k("landing.v3.lead")] }],
     }),
   ),
   {

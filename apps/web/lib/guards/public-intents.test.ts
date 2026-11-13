@@ -8,7 +8,11 @@ import {
   ASSISTANT_HREF,
   PUBLIC_INTENTS,
   PUBLIC_INTENT_IDS,
+  GOAL_ID_ALIASES,
+  canonicalGoalId,
+  goalFromFragment,
 } from "@/lib/navigation/public-intents";
+import { requestDoorFromFragment } from "@/lib/staffing/request-door-link";
 import { CANONICAL_HOME } from "@/lib/config/navigation";
 import { routeRequirement } from "@/lib/auth/role-gated-routes";
 
@@ -55,10 +59,40 @@ describe("the six intents", () => {
       "work",
       "workers",
       "services",
-      "orders",
+      // Owner decision D1, variant A (2026-11-13): the fourth goal is the
+      // BUYER's — someone who needs a service or a contractor. The old fourth
+      // goal ("orders") was the provider's; its two areas moved into
+      // "services", and its id still resolves there (see below).
+      "contractors",
       "partners",
       "agencies",
     ]);
+  });
+
+  it("the provider's order-finding areas live in \"services\"; the buyer's goal opens the request forms", () => {
+    const links = (id: string) => PUBLIC_INTENTS.find((i) => i.id === id)!.links.map((l) => [l.id, l.href, l.account]);
+    expect(links("services")).toEqual([
+      ["myServices", "/dashboard/services", true],
+      ["serviceRequests", "/dashboard/service-requests", true],
+      ["marketListings", "/dashboard/listings", true],
+      ["commercial", "/dashboard/commercial", true],
+    ]);
+    expect(links("contractors")).toEqual([
+      ["b2bEnquiry", "/#request=b2b", false],
+      ["projectEnquiry", "/#request=project", false],
+    ]);
+  });
+
+  it("an old link to the retired goal opens the goal that now holds its areas", () => {
+    expect(GOAL_ID_ALIASES).toEqual({ orders: "services" });
+    expect(canonicalGoalId("orders")).toBe("services");
+    expect(canonicalGoalId("work")).toBe("work");
+    expect(canonicalGoalId(null)).toBeNull();
+    expect(goalFromFragment("#goal=orders")).toBe("services");
+    expect(requestDoorFromFragment("#request=b2b")).toBe("b2b");
+    expect(requestDoorFromFragment("#request=project")).toBe("project");
+    expect(requestDoorFromFragment("#request=nope")).toBeNull();
+    expect(requestDoorFromFragment("#goal=work")).toBeNull();
   });
 
   it("each intent has at least one destination and unique link ids", () => {

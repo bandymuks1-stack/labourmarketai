@@ -47,7 +47,7 @@ const EMPLOYMENT_FORM: Record<string, L> = {
   },
   seasonal: {
     en: "Seasonal",
-    lt: "Sezoninis",
+    lt: "Sezoninė",
     ru: "Сезонная",
     nl: "Seizoenswerk",
     de: "Saisonal",

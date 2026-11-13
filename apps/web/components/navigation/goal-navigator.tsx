@@ -7,6 +7,7 @@ import { Link } from "@/lib/i18n/navigation";
 import {
   GOAL_FRAGMENT_PREFIX,
   MORE_GOAL_ID,
+  canonicalGoalId,
   goalIdFromFragment,
 } from "@/lib/navigation/public-intents";
 import { CardRail, type RailCard } from "@/components/navigation/card-rail";
@@ -154,7 +155,8 @@ export function GoalNavigator({
     [ownGoals, more],
   );
   // The fragment names a card of THIS navigator, or nothing is open.
-  const active = goals.find((g) => g.id === goalIdFromFragment(fragment)) ?? null;
+  const active =
+    goals.find((g) => g.id === canonicalGoalId(goalIdFromFragment(fragment))) ?? null;
   const activeId = active?.id ?? null;
   // A GOAL CHOSEN WHILE THE PAGE IS STARTING IS NOT LOST. The goal cards are
   // real links, so a tap before the scripts attach sets the fragment
@@ -192,7 +194,20 @@ export function GoalNavigator({
       // What the person last asked for; before any announcement, the address
       // this component first saw.
       const wanted = askedFragment ?? (goalIdFromFragment(bootFragment) ? bootFragment : "");
-      if (!wanted || window.location.hash !== "" || window.location.pathname !== bootPath) return;
+      if (window.location.pathname !== bootPath) return;
+      // The other way round: the person closed the goal while the page was
+      // still starting, and the router then wrote its remembered address
+      // (with the goal) back. What was asked last wins — no goal.
+      if (askedFragment === "" && goalIdFromFragment(window.location.hash)) {
+        window.history.replaceState(
+          window.history.state,
+          "",
+          window.location.pathname + window.location.search,
+        );
+        window.dispatchEvent(new HashChangeEvent("hashchange"));
+        return;
+      }
+      if (!wanted || window.location.hash !== "") return;
       window.history.replaceState(
         window.history.state,
         "",

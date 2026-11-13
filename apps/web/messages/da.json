@@ -890,7 +890,8 @@
     "themeToLight": "Lyst tema",
     "how": "Sådan fungerer det",
     "menuOpen": "Menu",
-    "menuClose": "Luk menu"
+    "menuClose": "Luk menu",
+    "market": "Arbejdsmarked"
   },
   "pages": {
     "agencies": {
@@ -4831,6 +4832,42 @@
         "goods": "Varer"
       },
       "lasting": "Din erfaring og dine muligheder forbliver tilgængelige — når du skifter job, projekt eller land."
+    },
+    "v3": {
+      "lead": "For arbejdstagere, arbejdsgivere og tjenesteudbydere i alle erhverv og brancher. Registrering er gratis; den gratis plan for organisationer omfatter én aktiv forespørgsel.",
+      "moreChoices": "Flere muligheder",
+      "or": "eller beskriv det med dine egne ord",
+      "needFree": "Du kan sende en forespørgsel uden at registrere dig. Det er gratis at sende den; vilkår og pris for ydelserne aftales særskilt.",
+      "market": {
+        "title": "Jobopslag på markedet",
+        "line": "{adverts} aktive jobopslag fra eksterne kilder. Opslagene nævner {employers} forskellige arbejdsgivernavne.",
+        "source": "Opslagene er indsamlet fra offentlige eksterne jobkilder. Tallet er ikke antallet af arbejdsgivere eller kunder, der er registreret hos LabourMarket.ai. Opslagene er senest opdateret: {date}.",
+        "none": "Markedsdata er ikke tilgængelige i øjeblikket.",
+        "search": "Søg i jobopslag"
+      },
+      "adverts": {
+        "title": "Nogle aktive opslag",
+        "sub": "Du kan se opslagene uden en konto. Log ind for at se arbejdsgiveren, stedet, den fulde beskrivelse og hvordan du søger."
+      },
+      "how": {
+        "title": "Sådan fungerer det",
+        "s1": {
+          "title": "Find og aftal",
+          "body": "Find arbejde, medarbejdere eller ydelser, og administrer tilbud og aftaler på platformen."
+        },
+        "s2": {
+          "title": "Registrer arbejdet",
+          "body": "Du kan registrere udført arbejde i arbejdsjournalen."
+        },
+        "s3": {
+          "title": "Bekræft",
+          "body": "En leder i arbejdsgiverens organisation bekræfter registreringerne. En kunde kan godkende arbejde, der er indsendt til kunden; det registreres særskilt. Bekræftet arbejde bliver dokumentation for din erfaring."
+        },
+        "s4": {
+          "title": "Du styrer dine data",
+          "body": "Assistenten kommer med forslag; du træffer beslutningerne. Dataenes synlighed afhænger af dine valg og platformens adgangsregler."
+        }
+      }
     }
   },
   "workspace": {
@@ -5338,7 +5375,7 @@
     },
     "language": {
       "translatedFrom": "[EN] Translated from {language}",
-      "originalIn": "[EN] Advertisement language: {language}",
+      "originalIn": "Opslagets sprog: {language}",
       "showOriginal": "[EN] Show original",
       "hideOriginal": "[EN] Hide original",
       "machineNote": "[EN] Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
@@ -7932,7 +7969,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Vi måler sidebrug, og hvilken kampagne der bragte dig hertil, kun hvis du tillader det.",
+      "text": "Vi måler brugen af webstedet og kampagneresultater kun med dit samtykke.",
       "accept": "Tillad måling",
       "refuse": "Afvis",
       "more": "Mere om cookies",
@@ -7948,45 +7985,40 @@
     }
   },
   "siteNav": {
-    "facts": {
-      "audience": { "title": "For hvem:", "body": "alle erhverv og brancher — medarbejdere, arbejdsgivere, tjenesteudbydere, bureauer og uddannelsessteder." },
-      "price": { "title": "Pris:", "body": "gratis for personer; en organisation har én aktiv stilling gratis." },
-      "start": { "title": "Sådan starter du:", "body": "vælg et mål ovenfor, eller skriv, hvad du har brug for." }
-    },
-    "education": "For uddannelsessteder",
+    "education": "For uddannelsesinstitutioner",
     "signUp": "Opret konto",
-    "trigger": "Hovedvalg",
-    "account": "Efter login",
+    "trigger": "Hovedmål",
+    "account": "For brugere, der er logget ind",
     "intents": {
       "work": {
         "title": "Jeg søger arbejde",
-        "description": "Find job og vis, hvad du kan.",
+        "description": "Søg arbejde, og præsenter din erfaring.",
         "short": "Find arbejde"
       },
       "workers": {
         "title": "Jeg søger medarbejdere",
-        "description": "Beskriv, hvilket arbejde du har brug for.",
+        "description": "Angiv, hvilke medarbejdere du har brug for, hvor og hvornår.",
         "short": "Find medarbejdere"
       },
       "services": {
         "title": "Jeg tilbyder ydelser",
-        "description": "Offentliggør dit tilbud og besvar forespørgsler.",
+        "description": "Præsenter dine ydelser, find ordrer, og besvar forespørgsler.",
         "short": "Tilbyd ydelser"
-      },
-      "orders": {
-        "title": "Jeg søger opgaver og kontrakter",
-        "description": "Find arbejdsforespørgsler og hold tilbud samlet.",
-        "short": "Find opgaver"
       },
       "partners": {
         "title": "Jeg søger partnere",
-        "description": "Forbind dig med de mennesker og organisationer, du arbejder med.",
+        "description": "Find partnere, og vedligehold samarbejdet.",
         "short": "Find partnere"
       },
       "agencies": {
         "title": "For bureauer",
-        "description": "Styr bureauets folk, kunder og tilbud.",
+        "description": "Administrer bureauets kunder og kandidattilbud.",
         "short": "For bureauer"
+      },
+      "contractors": {
+        "short": "Jeg søger ydelser eller leverandører",
+        "title": "Jeg søger ydelser eller leverandører",
+        "description": "Beskriv, hvilken ydelse eller leverandør du har brug for."
       }
     },
     "links": {
@@ -8005,11 +8037,13 @@
       "network": "Dit netværk",
       "partnerWithUs": "Bliv partner",
       "forAgencies": "Sådan virker det for bureauer",
-      "setUpAgency": "Opret dit bureau"
+      "setUpAgency": "Registrer dit bureau",
+      "b2bEnquiry": "Forespørgsel om erhvervsydelser (B2B)",
+      "projectEnquiry": "Forespørgsel om individuelt projekt"
     },
     "assistant": "Spørg assistenten",
     "start": {
-      "searchLabel": "Søg job",
+      "searchLabel": "Søg i jobopslag",
       "searchPlaceholder": "Jobtitel eller søgeord",
       "searchSubmit": "Søg",
       "viewAll": "Alle job"
@@ -8018,10 +8052,10 @@
       "heading": "Hvad vil du gøre?",
       "swipe": "Stryg",
       "close": "Luk",
-      "functions": "Funktioner",
+      "functions": "Handlinger",
       "professions": "Fag",
-      "opensNow": "Åbner med det samme",
-      "signInWhenOpen": "Log ind ved åbning",
+      "opensNow": "Kræver ingen konto",
+      "signInWhenOpen": "Kræver login",
       "allSectors": "Alle brancher",
       "fullList": "Fuld liste"
     },

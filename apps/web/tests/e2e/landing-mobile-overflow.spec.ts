@@ -162,18 +162,16 @@ for (const width of MOBILE_WIDTHS) {
       await expect(page.getByTestId("public-entry")).toBeVisible();
       await expect(page.getByTestId("entry-input")).toBeVisible();
       await expect(page.getByTestId("entry-submit")).toBeVisible();
-      await expect(page.getByTestId("entry-example").first()).toBeVisible();
       // The understanding card (with its two door links) is the widest thing
-      // the entry renders, so it is produced — by routing the first example
-      // sentence live — BEFORE anything is measured.
-      await page.getByTestId("entry-example").first().click();
-      await expect(page.getByTestId("entry-understanding")).toBeVisible();
-      // Since 2026-09-23 the entry MOUNTS four chips and the rest on demand
-      // (owner directive, landing §22). Open them before measuring, so the
-      // per-chip box assertions below cover all ten, not only the default four.
-      // The landing mounts the short set since 2026-11-13: two chips, no more.
-      await expect(page.getByTestId("entry-example")).toHaveCount(2);
+      // the entry renders, so it is produced — by sending a real sentence
+      // through the router — BEFORE anything is measured. Since landing V3
+      // (owner, 2026-11-13) the entry has no example chips: the goals above
+      // it are the choice.
+      await expect(page.getByTestId("entry-example")).toHaveCount(0);
       await expect(page.getByTestId("entry-more-examples")).toHaveCount(0);
+      await page.getByTestId("entry-input").fill("Reikia 5 sandėlio darbuotojų");
+      await page.getByTestId("entry-submit").click();
+      await expect(page.getByTestId("entry-understanding")).toBeVisible();
 
       const offenders = await pageOverflow(page);
       expect(
@@ -190,7 +188,10 @@ for (const width of MOBILE_WIDTHS) {
        * — so a future regression reads as itself rather than as a statistic.
        */
       const named: ReadonlyArray<readonly [string, string]> = [
-        ["entry example chips", "[data-testid='entry-example']"],
+        // V3: the goal cards and the phone's "more" control are the choice.
+        ["goal cards", "[data-testid='goal-rail'] a[data-rail-card]:visible"],
+        ["more goals control", "[data-testid='goal-more-choices'] summary"],
+        ["request entry", "[data-testid='landing-need-path'] summary"],
         ["entry Suprasti submit", "[data-testid='entry-submit']"],
         ["entry understanding card", "[data-testid='entry-understanding']"],
         // Scoped to the entry: the header carries its own (mobile-hidden)
@@ -241,10 +242,11 @@ for (const width of MOBILE_WIDTHS) {
 
     test(`the entry row stays usable at ${width}px`, async ({ page }) => {
       /**
-       * The fix works by giving the sentence input `w-0` and letting `flex-1`
-       * grow it. That is only correct if the field still ends up a real,
-       * typable control — a 0px input that never grows would "fix" the
-       * overflow by destroying the one interactive element on the landing.
+       * From `sm` up the sentence input is `w-0` and `flex-1` grows it; below
+       * `sm` it is full width with the button under it. Either way the field
+       * must end up a real, typable control — a 0px input that never grows
+       * would "fix" an overflow by destroying the one free-text control on
+       * the landing.
        */
       await page.goto("/lt");
 
@@ -279,15 +281,17 @@ for (const width of MOBILE_WIDTHS) {
         `ask input width at ${width}px — it must still fill the row`,
       ).toBeGreaterThan(100);
 
-      // Input and submit share one row without colliding or wrapping.
+      // Landing V3: on a phone the button sits UNDER the field, so the whole
+      // example is readable in it (the owner saw it cut off on a phone); the
+      // two never overlap and both span the card.
       expect(
-        row.submit!.x,
-        `submit must sit to the right of the input at ${width}px`,
-      ).toBeGreaterThanOrEqual(row.input!.x + row.input!.width - 0.5);
+        row.submit!.y,
+        `submit must sit below the input at ${width}px`,
+      ).toBeGreaterThan(row.input!.y + 30);
       expect(
-        Math.abs(row.submit!.y - row.input!.y),
-        `input and submit must stay on one row at ${width}px`,
-      ).toBeLessThan(8);
+        row.input!.width,
+        `the field must span the card at ${width}px`,
+      ).toBeGreaterThan(width - 120);
 
       // It genuinely accepts input.
       await input.fill("Kur trūksta suvirintojų?");

@@ -41,18 +41,24 @@ const landing = read("app/[locale]/focus-landing/focus-landing.tsx");
 const choice = read("components/marketing/landing-intent-choice.tsx");
 const navigator = read("components/navigation/goal-navigator.tsx");
 /** CardRail mounts in the navigator: goals, functions, professions. */
-const navigatorRails = 4;
+const navigatorRails = 5;
 const server = read("components/navigation/goal-navigation.tsx");
 const rail = read("components/navigation/card-rail.tsx");
 
 describe("the choice is the first screen", () => {
   it("mounts once, first, carrying the page's h1; the owner's line and the entry follow", () => {
-    expect(landing.match(/<LandingIntentChoice \/>/g)).toHaveLength(1);
+    // Landing V3 (owner, 2026-11-13): the one line now sits directly under
+    // the h1, INSIDE the navigator (`lead`), so it is read before the choice;
+    // the sentence entry follows as the alternative way to say the same need.
+    expect(landing.match(/<LandingIntentChoice\b/g)).toHaveLength(1);
     const body = landing.slice(landing.lastIndexOf("<NextIntlClientProvider"));
-    expect(landing).toContain('{tHero("headline")}');
+    expect(body).toMatch(/<LandingIntentChoice\s+lead=\{tV3\("lead"\)\}/);
     expect(landing).not.toMatch(/<h1\b/);
-    expect(body.indexOf("<LandingIntentChoice />")).toBeLessThan(body.indexOf("{promise}"));
-    expect(body.indexOf("{promise}")).toBeLessThan(body.indexOf("<PublicEntry"));
+    expect(body.indexOf("<LandingIntentChoice")).toBeLessThan(body.indexOf("<PublicEntry"));
+    expect(navigator).toMatch(/\{lead && \(\s*<p\s+data-testid="goal-lead"/);
+    // On a phone the first four goals show whole, two across; the other two
+    // sit under one "more" control — never a carousel.
+    expect(body).toMatch(/phoneMore=\{\{ ids: \["partners", "agencies"\], label: tV3\("moreChoices"\) \}\}/);
   });
 
   it("the sentence entry and the request doors stay", () => {
@@ -60,17 +66,29 @@ describe("the choice is the first screen", () => {
     // The request doors stay, inside ONE closed "send a request" block beside
     // the sentence field (owner P0 2026-11-13: no three cards that read like
     // the goals again). The block carries the title and the #request anchor.
-    expect(landing).toMatch(/<LandingRequestDoors locale=\{locale\} embedded \/>/);
-    expect(landing).toMatch(/<details\s+id="request"\s+data-testid="landing-request-block"/);
-    // Sent open (wide screens show the doors without a tap; also the safe
-    // state with no script) and folded on a narrow screen before first paint.
-    expect(landing).toMatch(/data-testid="landing-request-block"\s+open\s/);
-    expect(landing).toMatch(/window\.matchMedia\("\(max-width: 1023px\)"\)\.matches\)d\.removeAttribute\("open"\)/);
-    expect(landing.match(/<LandingRequestDoors /g)).toHaveLength(1);
+    // The three request doors live behind ONE "submit a request" entry.
+    expect(landing).toMatch(/<LandingNeedPath locale=\{locale\} \/>/);
+    expect(readFileSync(join(APP_ROOT, "components/marketing/landing-v3.tsx"), "utf8")).toMatch(
+      /<LandingRequestDoors locale=\{locale\} embedded \/>/,
+    );
+    const need = readFileSync(join(APP_ROOT, "components/marketing/landing-v3.tsx"), "utf8");
+    expect(need).toMatch(/<details\s+id="request"\s+data-testid="landing-need-path"/);
+    // Sent open (wide screens show the services without a tap; also the safe
+    // state with no script) and folded on a narrow screen before first paint
+    // — unless the address asks for one of its forms.
+    expect(need).toMatch(/data-testid="landing-need-path"\s+open\s/);
+    expect(need).toMatch(/window\.matchMedia\("\(max-width: 1023px\)"\)\.matches&&location\.hash\.indexOf\("#request"\)!==0\)d\.removeAttribute\("open"\)/);
+    expect(need.match(/<LandingRequestDoors /g)).toHaveLength(1);
+    // A goal's action can open one form directly: `/#request=b2b`.
+    const form = readFileSync(join(APP_ROOT, "components/marketing/landing-request-doors-form.tsx"), "utf8");
+    expect(form).toMatch(/const wanted = requestDoorFromFragment\(window\.location\.hash\);/);
+    expect(form).toMatch(/if \(block instanceof HTMLDetailsElement\) block\.open = true;/);
   });
 
   it("the home mounts the one navigator; no second goal view or page exists", () => {
-    expect(choice).toMatch(/<GoalNavigation headingLevel="h1" phoneLayout="grid" \/>/);
+    expect(choice).toMatch(
+      /<GoalNavigation headingLevel="h1" phoneLayout="grid" lead=\{lead\} phoneMore=\{phoneMore\} \/>/,
+    );
     expect(existsSync(join(APP_ROOT, "components/navigation/goal-rail.tsx"))).toBe(false);
     // A new public screen is an owner decision (constitution A-09): the goal
     // state is a fragment of this page, not a route.
@@ -82,7 +100,9 @@ describe("one rail, one panel", () => {
   it("goals, functions and professions all use the one card rail", () => {
     // Goals, the live panel's functions and professions, and the functions of
     // the early (pre-script) panels.
-    expect(navigator.match(/<CardRail\b/g)).toHaveLength(4);
+    // … plus the phone's "more" part, which shows the remaining goals in the
+    // same cards (Landing V3).
+    expect(navigator.match(/<CardRail\b/g)).toHaveLength(5);
     expect(navigator).toMatch(/testId="goal-rail"/);
     expect(navigator).toMatch(/testId="function-rail"/);
     expect(navigator).toMatch(/testId="profession-rail"/);
@@ -92,7 +112,9 @@ describe("one rail, one panel", () => {
     expect(navigator).toMatch(/\{active && \(\s*<div\s+data-testid="goal-panel"/);
     expect(navigator).toMatch(/\{!showProfessions && \(\s*<CardRail/);
     expect(navigator).toMatch(/\{showProfessions && \(/);
-    expect(navigator).toMatch(/\{!fullList && \(\s*<CardRail/);
+    // (On a phone in the no-swipe layout the profession rail is replaced by
+    // the list, so the rail sits in a wrapper that hides it there.)
+    expect(navigator).toMatch(/\{!fullList && \(\s*<div className=\{phoneMore \? "max-sm:hidden" : undefined\}>\s*<CardRail/);
   });
 
   it("the switch appears only for a goal with a catalogue; Close is a named button", () => {
@@ -129,7 +151,11 @@ describe("the URL is the state — a fragment, not a page", () => {
   it("the active goal is read from the fragment; choosing pushes it without a jump", () => {
     expect(navigator).toMatch(/useSyncExternalStore\(subscribeToFragment, readFragment, readServerFragment\)/);
     // The fragment names a card of THIS navigator, or nothing opens.
-    expect(navigator).toMatch(/goals\.find\(\(g\) => g\.id === goalIdFromFragment\(fragment\)\) \?\? null/);
+    // A goal id that no longer exists (`orders`) resolves to the goal that
+    // now holds what it held, so an old link never opens nothing.
+    expect(navigator).toMatch(
+      /goals\.find\(\(g\) => g\.id === canonicalGoalId\(goalIdFromFragment\(fragment\)\)\) \?\? null/,
+    );
     expect(navigator).toMatch(/window\.history\.pushState\(\s*(?:\/\/[^\n]*\n\s*)*\{ \[GOAL_DEPTH_KEY\]: goalDepth\(\) \+ 1 \},/);
     // Close reads the depth from the CURRENT history entry (Codex P2 on
     // c1caca4): a running count of selections went too far after Back.
@@ -204,7 +230,7 @@ describe("the URL is the state — a fragment, not a page", () => {
 describe("two actions to a function", () => {
   it("a function card is the function itself, built from the one intent list", () => {
     expect(server).toMatch(/PUBLIC_INTENTS\.map\(/);
-    expect(server).toMatch(/functions: intent\.links\.map\(\(link\) => \(\{[\s\S]{0,80}href: link\.href/);
+    expect(server).toMatch(/functions: intent\.links\.map\(\(link\) => \(\{[\s\S]{0,260}href: link\.href\.startsWith\("\/#"\) \? link\.href\.slice\(1\) : link\.href/);
     expect(server + navigator).not.toMatch(/href[=:]\s*["'`]\/(?!jobs["'`]|["'`])/);
   });
 

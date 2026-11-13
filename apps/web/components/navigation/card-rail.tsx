@@ -243,13 +243,13 @@ export function CardRail({
                     <Icon className="size-5" />
                   </span>
                   <span className="flex min-w-0 flex-col gap-0.5">
-                    <span className="line-clamp-2 text-sm font-semibold leading-snug text-text-primary">
+                    <span className="line-clamp-3 hyphens-auto text-sm font-semibold leading-snug text-text-primary [overflow-wrap:anywhere]">
                       {card.label}
                     </span>
                     {card.description && (
                       <span
                         className={cn(
-                          "line-clamp-2 text-xs leading-snug text-text-muted",
+                          "line-clamp-3 text-xs leading-snug text-text-muted",
                           compact && "hidden sm:[display:-webkit-box]",
                         )}
                       >

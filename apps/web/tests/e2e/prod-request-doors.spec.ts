@@ -47,7 +47,7 @@ async function open(browser: Browser, path: string, viewport: { width: number; h
   // request" block: open on a wide screen, folded on a phone. Open it when it
   // is folded. On a build without the block the doors are already on the
   // page and this step does nothing.
-  const block = page.getByTestId("landing-request-block");
+  const block = page.getByTestId("landing-need-path");
   if ((await block.count()) > 0 && !(await block.evaluate((el) => (el as HTMLDetailsElement).open))) {
     await block.locator("summary").click();
   }

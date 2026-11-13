@@ -890,7 +890,8 @@
     "themeToLight": "Hele teema",
     "how": "Kuidas see töötab",
     "menuOpen": "Menüü",
-    "menuClose": "Sulge menüü"
+    "menuClose": "Sulge menüü",
+    "market": "Tööturg"
   },
   "pages": {
     "agencies": {
@@ -4831,6 +4832,42 @@
         "goods": "Kaubad"
       },
       "lasting": "Sinu kogemus ja võimalused jäävad alati kättesaadavaks — kui vahetad tööd, projekti või riiki."
+    },
+    "v3": {
+      "lead": "Töötajatele, tööandjatele ja teenusepakkujatele – kõigil kutsealadel ja kõigis sektorites. Registreerimine on tasuta; organisatsiooni tasuta paketis on üks aktiivne päring.",
+      "moreChoices": "Rohkem valikuid",
+      "or": "või kirjeldage oma sõnadega",
+      "needFree": "Päringu saate esitada registreerimata. Esitamine on tasuta; teenuse tingimused ja hind lepitakse kokku eraldi.",
+      "market": {
+        "title": "Töökuulutused turul",
+        "line": "{adverts} aktiivset töökuulutust välistest allikatest. Kuulutustes on nimetatud {employers} erinevat tööandja nime.",
+        "source": "Kuulutused on kogutud avalikest välistest töökuulutuste allikatest. See ei ole LabourMarket.ai-s registreeritud tööandjate ega klientide arv. Kuulutusi uuendati viimati: {date}.",
+        "none": "Turuandmed ei ole praegu kättesaadavad.",
+        "search": "Otsi töökuulutusi"
+      },
+      "adverts": {
+        "title": "Mõned aktiivsed kuulutused",
+        "sub": "Kuulutusi saate sirvida ilma kontota. Sisse logides näete tööandjat, asukohta, täielikku kirjeldust ja kandideerimise viisi."
+      },
+      "how": {
+        "title": "Kuidas see töötab",
+        "s1": {
+          "title": "Leidke ja leppige kokku",
+          "body": "Otsige tööd, töötajaid või teenuseid ning hallake pakkumisi ja kokkuleppeid platvormil."
+        },
+        "s2": {
+          "title": "Kirjendage töö",
+          "body": "Tehtud töö saate kirjendada tööpäevikus."
+        },
+        "s3": {
+          "title": "Kinnitage",
+          "body": "Kanded kinnitab tööandja organisatsiooni juht. Tellija võib talle esitatud töö vastu võtta – see märgitakse eraldi. Kinnitatud töö on teie kogemuse tõend."
+        },
+        "s4": {
+          "title": "Teie kontrollite oma andmeid",
+          "body": "Assistent teeb ettepanekuid, otsused langetate teie. Andmete nähtavus sõltub teie valikutest ja platvormi juurdepääsureeglitest."
+        }
+      }
     }
   },
   "workspace": {
@@ -5338,7 +5375,7 @@
     },
     "language": {
       "translatedFrom": "[EN] Translated from {language}",
-      "originalIn": "[EN] Advertisement language: {language}",
+      "originalIn": "Kuulutuse keel: {language}",
       "showOriginal": "[EN] Show original",
       "hideOriginal": "[EN] Hide original",
       "machineNote": "[EN] Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
@@ -7932,7 +7969,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Lehtede kasutust ja kampaaniat, mis sind siia tõi, mõõdame ainult sinu loal.",
+      "text": "Saidi kasutusstatistikat ja kampaaniate tulemusi mõõdame ainult teie nõusolekul.",
       "accept": "Luba mõõtmine",
       "refuse": "Keeldu",
       "more": "Lähemalt küpsistest",
@@ -7948,45 +7985,40 @@
     }
   },
   "siteNav": {
-    "facts": {
-      "audience": { "title": "Kellele:", "body": "kõik ametid ja sektorid — töötajad, tööandjad, teenusepakkujad, agentuurid ja õppeasutused." },
-      "price": { "title": "Hind:", "body": "inimestele tasuta; organisatsioonil on üks aktiivne ametikoht tasuta." },
-      "start": { "title": "Kuidas alustada:", "body": "valige ülal eesmärk või kirjutage, mida vajate." }
-    },
     "education": "Õppeasutustele",
     "signUp": "Registreeru",
-    "trigger": "Peamised valikud",
-    "account": "Pärast sisselogimist",
+    "trigger": "Peamised eesmärgid",
+    "account": "Sisseloginud kasutajatele",
     "intents": {
       "work": {
         "title": "Otsin tööd",
-        "description": "Leia tööpakkumisi ja näita, mida oskad.",
+        "description": "Otsige tööd ja tutvustage oma kogemust.",
         "short": "Otsin tööd"
       },
       "workers": {
         "title": "Otsin töötajaid",
-        "description": "Kirjelda, millist tööd on vaja.",
+        "description": "Märkige, milliseid töötajaid, kus ja millal vajate.",
         "short": "Otsin töötajaid"
       },
       "services": {
         "title": "Pakun teenuseid",
-        "description": "Avalda oma pakkumine ja vasta päringutele.",
+        "description": "Tutvustage oma teenuseid, leidke tellimusi ja vastake päringutele.",
         "short": "Pakun teenuseid"
-      },
-      "orders": {
-        "title": "Otsin tellimusi ja lepinguid",
-        "description": "Leia tööpäringuid ja hoia pakkumised ühes kohas.",
-        "short": "Otsin tellimusi"
       },
       "partners": {
         "title": "Otsin partnereid",
-        "description": "Ühendu inimeste ja organisatsioonidega, kellega töötad.",
+        "description": "Leidke partnereid ja hoidke koostööd.",
         "short": "Otsin partnereid"
       },
       "agencies": {
         "title": "Agentuuridele",
-        "description": "Halda agentuuri inimesi, kliente ja pakkumisi.",
+        "description": "Hallake agentuuri kliente ja kandidaadipakkumisi.",
         "short": "Agentuuridele"
+      },
+      "contractors": {
+        "short": "Otsin teenuseid või töövõtjaid",
+        "title": "Otsin teenuseid või töövõtjaid",
+        "description": "Kirjeldage, millist teenust või töövõtjat vajate."
       }
     },
     "links": {
@@ -8005,11 +8037,13 @@
       "network": "Sinu võrgustik",
       "partnerWithUs": "Hakka partneriks",
       "forAgencies": "Kuidas see agentuuridele toimib",
-      "setUpAgency": "Loo agentuur"
+      "setUpAgency": "Registreeri agentuur",
+      "b2bEnquiry": "Äriteenuste päring (B2B)",
+      "projectEnquiry": "Individuaalse projekti päring"
     },
     "assistant": "Küsi assistendilt",
     "start": {
-      "searchLabel": "Otsi tööd",
+      "searchLabel": "Otsi töökuulutusi",
       "searchPlaceholder": "Ametinimetus või märksõna",
       "searchSubmit": "Otsi",
       "viewAll": "Kõik kuulutused"
@@ -8018,10 +8052,10 @@
       "heading": "Mida soovid teha?",
       "swipe": "Libista",
       "close": "Sulge",
-      "functions": "Funktsioonid",
+      "functions": "Tegevused",
       "professions": "Ametid",
-      "opensNow": "Avaneb kohe",
-      "signInWhenOpen": "Sisselogimine avamisel",
+      "opensNow": "Kontot ei ole vaja",
+      "signInWhenOpen": "Vajalik on sisselogimine",
       "allSectors": "Kõik sektorid",
       "fullList": "Täielik nimekiri"
     },

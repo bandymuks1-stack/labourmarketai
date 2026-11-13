@@ -890,7 +890,8 @@
     "themeToLight": "Lyst tema",
     "how": "Slik fungerer det",
     "menuOpen": "Meny",
-    "menuClose": "Lukk meny"
+    "menuClose": "Lukk meny",
+    "market": "Arbeidsmarked"
   },
   "pages": {
     "agencies": {
@@ -4831,6 +4832,42 @@
         "goods": "Varer"
       },
       "lasting": "Erfaringen og mulighetene dine forblir tilgjengelige — når du bytter jobb, prosjekt eller land."
+    },
+    "v3": {
+      "lead": "For arbeidstakere, arbeidsgivere og tjenesteleverandører i alle yrker og bransjer. Registrering er gratis; gratisplanen for organisasjoner omfatter én aktiv forespørsel.",
+      "moreChoices": "Flere valg",
+      "or": "eller beskriv det med egne ord",
+      "needFree": "Du kan sende en forespørsel uten å registrere deg. Det er gratis å sende den; vilkår og pris for tjenestene avtales separat.",
+      "market": {
+        "title": "Stillingsannonser i markedet",
+        "line": "{adverts} aktive stillingsannonser fra eksterne kilder. Annonsene oppgir {employers} ulike arbeidsgivernavn.",
+        "source": "Annonsene er samlet inn fra offentlige eksterne stillingskilder. Dette er ikke antallet arbeidsgivere eller kunder som er registrert hos LabourMarket.ai. Annonsene ble sist oppdatert: {date}.",
+        "none": "Markedsdata er ikke tilgjengelige for øyeblikket.",
+        "search": "Søk i stillingsannonser"
+      },
+      "adverts": {
+        "title": "Noen aktive annonser",
+        "sub": "Du kan se annonsene uten konto. Logg inn for å se arbeidsgiveren, stedet, hele beskrivelsen og hvordan du søker."
+      },
+      "how": {
+        "title": "Slik fungerer det",
+        "s1": {
+          "title": "Finn og avtal",
+          "body": "Finn arbeid, arbeidstakere eller tjenester, og administrer tilbud og avtaler på plattformen."
+        },
+        "s2": {
+          "title": "Registrer arbeidet",
+          "body": "Du kan registrere utført arbeid i arbeidsjournalen."
+        },
+        "s3": {
+          "title": "Bekreft",
+          "body": "En leder i arbeidsgiverens organisasjon bekrefter registreringene. En oppdragsgiver kan godkjenne arbeid som er sendt inn til oppdragsgiveren; dette registreres separat. Bekreftet arbeid blir dokumentasjon på erfaringen din."
+        },
+        "s4": {
+          "title": "Du styrer dataene dine",
+          "body": "Assistenten kommer med forslag; du tar beslutningene. Synligheten av dataene avhenger av valgene dine og plattformens tilgangsregler."
+        }
+      }
     }
   },
   "workspace": {
@@ -5338,7 +5375,7 @@
     },
     "language": {
       "translatedFrom": "[EN] Translated from {language}",
-      "originalIn": "[EN] Advertisement language: {language}",
+      "originalIn": "Annonsens språk: {language}",
       "showOriginal": "[EN] Show original",
       "hideOriginal": "[EN] Hide original",
       "machineNote": "[EN] Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
@@ -7932,7 +7969,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Vi måler sidebruk, og hvilken kampanje som brakte deg hit, bare hvis du tillater det.",
+      "text": "Vi måler bruken av nettstedet og kampanjeresultater kun med ditt samtykke.",
       "accept": "Tillat måling",
       "refuse": "Avslå",
       "more": "Mer om informasjonskapsler",
@@ -7948,45 +7985,40 @@
     }
   },
   "siteNav": {
-    "facts": {
-      "audience": { "title": "For hvem:", "body": "alle yrker og bransjer — arbeidstakere, arbeidsgivere, tjenesteleverandører, byråer og utdanningsinstitusjoner." },
-      "price": { "title": "Pris:", "body": "gratis for personer; en organisasjon har én aktiv stilling gratis." },
-      "start": { "title": "Slik starter du:", "body": "velg et mål ovenfor, eller skriv hva du trenger." }
-    },
     "education": "For utdanningsinstitusjoner",
     "signUp": "Registrer deg",
-    "trigger": "Hovedvalg",
-    "account": "Etter innlogging",
+    "trigger": "Hovedmål",
+    "account": "For innloggede brukere",
     "intents": {
       "work": {
         "title": "Jeg søker arbeid",
-        "description": "Finn jobber og vis hva du kan.",
+        "description": "Søk arbeid og presenter erfaringen din.",
         "short": "Finn arbeid"
       },
       "workers": {
         "title": "Jeg søker arbeidstakere",
-        "description": "Beskriv hvilket arbeid du trenger.",
+        "description": "Oppgi hvilke arbeidstakere du trenger, hvor og når.",
         "short": "Finn arbeidstakere"
       },
       "services": {
         "title": "Jeg tilbyr tjenester",
-        "description": "Publiser tilbudet ditt og svar på forespørsler.",
+        "description": "Presenter tjenestene dine, finn oppdrag og svar på forespørsler.",
         "short": "Tilby tjenester"
-      },
-      "orders": {
-        "title": "Jeg søker oppdrag og kontrakter",
-        "description": "Finn arbeidsforespørsler og hold tilbud samlet.",
-        "short": "Finn oppdrag"
       },
       "partners": {
         "title": "Jeg søker partnere",
-        "description": "Knytt deg til menneskene og organisasjonene du jobber med.",
+        "description": "Finn partnere og hold samarbeidet ved like.",
         "short": "Finn partnere"
       },
       "agencies": {
         "title": "For byråer",
-        "description": "Styr byråets folk, kunder og tilbud.",
+        "description": "Administrer byråets kunder og kandidattilbud.",
         "short": "For byråer"
+      },
+      "contractors": {
+        "short": "Jeg søker tjenester eller utførende",
+        "title": "Jeg søker tjenester eller utførende",
+        "description": "Beskriv hvilken tjeneste eller utførende du trenger."
       }
     },
     "links": {
@@ -8005,11 +8037,13 @@
       "network": "Ditt nettverk",
       "partnerWithUs": "Bli partner",
       "forAgencies": "Slik fungerer det for byråer",
-      "setUpAgency": "Opprett byrået ditt"
+      "setUpAgency": "Registrer byrået ditt",
+      "b2bEnquiry": "Forespørsel om bedriftstjenester (B2B)",
+      "projectEnquiry": "Forespørsel om individuelt prosjekt"
     },
     "assistant": "Spør assistenten",
     "start": {
-      "searchLabel": "Søk jobber",
+      "searchLabel": "Søk i stillingsannonser",
       "searchPlaceholder": "Stillingstittel eller søkeord",
       "searchSubmit": "Søk",
       "viewAll": "Alle jobber"
@@ -8018,10 +8052,10 @@
       "heading": "Hva vil du gjøre?",
       "swipe": "Sveip",
       "close": "Lukk",
-      "functions": "Funksjoner",
+      "functions": "Handlinger",
       "professions": "Yrker",
-      "opensNow": "Åpnes med en gang",
-      "signInWhenOpen": "Logg inn ved åpning",
+      "opensNow": "Krever ingen konto",
+      "signInWhenOpen": "Krever innlogging",
       "allSectors": "Alle bransjer",
       "fullList": "Full liste"
     },
