@@ -218,7 +218,22 @@ test.describe("3 — the administrator reviews, decides and moderates", () => {
 
     await item.getByTestId("experience-dispute-resolve-reason").fill(DECISION);
     await item.getByTestId("experience-dispute-resolve-removed").click();
-    await expect(item.getByTestId("experience-dispute-resolved")).toBeVisible({ timeout: 60_000 });
+    // A decided dispute leaves the queue on the next render, so the proof is
+    // the stored state, then the queue no longer listing it.
+    await expect
+      .poll(
+        async () =>
+          (
+            (await (
+              await dbOk("GET", `experience_records?id=eq.${independentId}&select=dispute_status`)
+            ).json()) as { dispute_status: string }[]
+          )[0]?.dispute_status,
+        { timeout: 60_000 },
+      )
+      .toBe("resolved_removed");
+    await page.goto(ADMIN);
+    await expect(page.getByTestId("experience-dispute-queue")).toBeVisible({ timeout: 90_000 });
+    await expect(item).toHaveCount(0);
 
     const rows = (await (
       await dbOk(
@@ -258,9 +273,20 @@ test.describe("3 — the administrator reviews, decides and moderates", () => {
     await expect(item).toBeVisible();
     await item.getByTestId("experience-response-moderation-reason").fill(`${MARK} atitinka taisykles.`);
     await item.getByTestId("experience-response-moderation-publish").click();
-    await expect(item.getByTestId("experience-response-moderation-decided")).toBeVisible({
-      timeout: 60_000,
-    });
+    await expect
+      .poll(
+        async () =>
+          (
+            (await (
+              await dbOk(
+                "GET",
+                `experience_responses?experience_record_id=eq.${independentId}&select=moderation_status`,
+              )
+            ).json()) as { moderation_status: string }[]
+          )[0]?.moderation_status,
+        { timeout: 60_000 },
+      )
+      .toBe("published");
   });
 });
 
