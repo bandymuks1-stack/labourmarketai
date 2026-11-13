@@ -732,7 +732,6 @@
     "legalGroup": "[EN] Legal",
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
-    "rexora": "Veidots kopā: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
@@ -4219,7 +4218,7 @@
       "eduOutcomesConnected": "Pievienotie studenti: {count}.",
       "eduOutcomesUnavailable": "Rezultātus šobrīd neizdodas nolasīt. Tas nenozīmē, ka to nav.",
       "eduStudentsPrivacy": "Iestāde neredz studentu prasmes, dokumentus vai žurnālu — tie ir viņu pašu dati. Jūs redzat dalību un rezultātu skaitļus; kurš der, redz pats darba devējs savai vajadzībai.",
-      "eduPracticeHow": "Prakses vietas publicē darba devēji: partneris izveido uzņēmuma kontu un publicē vajadzību ar tipu “prakse” (viena vajadzība bez maksas). Jūsu studenti to redz savā dēlī, kad darba devējs ir apstiprināts.",
+      "eduPracticeHow": "Prakses vietas publicē darba devēji: partneris izveido uzņēmuma kontu un publicē vajadzību ar tipu “prakse” (vajadzības publicēšana ir bez maksas). Jūsu studenti to redz savā dēlī, kad darba devējs ir apstiprināts.",
       "eduNext": "Kas tālāk?",
       "chipCreateProgramme": "Izveidot programmu",
       "chipCreateCohort": "Izveidot grupu",

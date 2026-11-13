@@ -5542,7 +5542,6 @@
     "about": "About",
     "contact": "Contact",
     "rights": "All rights reserved.",
-    "rexora": "Built together: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai is operated and commercially provided by UAB “Nonstop Group”. The LabourMarket.ai software and related intellectual property are owned by Labour Market AI Sp. z o.o. and used by UAB “Nonstop Group” under licence.",
     "ipNotice": "Intellectual property rights. The platform is operated under licence by UAB “Nonstop Group”.",
     "legalNotice": "Legal notice"
@@ -14789,7 +14788,7 @@
       "eduOutcomesConnected": "Connected students: {count}.",
       "eduOutcomesUnavailable": "Outcomes cannot be read right now. That does not mean there are none.",
       "eduStudentsPrivacy": "The institution does not see students' skills, documents or journal — that is their own data. You see participation and outcome counts; which people fit is what the employer sees for its own need.",
-      "eduPracticeHow": "Internships are posted by employers: a partner creates a company account and posts a need with the type “internship” (one need free). Your students see it on their board once the employer is verified.",
+      "eduPracticeHow": "Internships are posted by employers: a partner creates a company account and posts a need with the type “internship” (posting a need is free). Your students see it on their board once the employer is verified.",
       "eduNext": "What next?",
       "chipCreateProgramme": "Create a programme",
       "chipCreateCohort": "Create a cohort",

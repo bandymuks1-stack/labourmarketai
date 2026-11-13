@@ -5542,7 +5542,6 @@
     "about": "O nas",
     "contact": "Kontakt",
     "rights": "Wszelkie prawa zastrzeżone.",
-    "rexora": "Tworzone wspólnie: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai jest prowadzona i komercyjnie świadczona przez UAB „Nonstop Group”. Oprogramowanie LabourMarket.ai oraz powiązana własność intelektualna należą do Labour Market AI Sp. z o.o. i są używane przez UAB „Nonstop Group” na podstawie licencji.",
     "ipNotice": "Prawa własności intelektualnej. Platforma jest prowadzona na podstawie licencji przez UAB „Nonstop Group”.",
     "legalNotice": "Nota prawna"
@@ -14789,7 +14788,7 @@
       "eduOutcomesConnected": "Połączeni studenci: {count}.",
       "eduOutcomesUnavailable": "Nie można teraz odczytać wyników. To nie znaczy, że ich nie ma.",
       "eduStudentsPrivacy": "Uczelnia nie widzi umiejętności, dokumentów ani dziennika studentów — to ich własne dane. Widzisz udział i liczby wyników; kto pasuje, widzi sam pracodawca dla swojej potrzeby.",
-      "eduPracticeHow": "Praktyki publikują pracodawcy: partner zakłada konto firmy i publikuje potrzebę typu „praktyka” (jedna potrzeba bezpłatnie). Twoi studenci widzą ją na swojej tablicy, gdy pracodawca jest zweryfikowany.",
+      "eduPracticeHow": "Praktyki publikują pracodawcy: partner zakłada konto firmy i publikuje potrzebę typu „praktyka” (publikacja potrzeby jest bezpłatna). Twoi studenci widzą ją na swojej tablicy, gdy pracodawca jest zweryfikowany.",
       "eduNext": "Co dalej?",
       "chipCreateProgramme": "Utwórz program",
       "chipCreateCohort": "Utwórz grupę",
@@ -15514,7 +15513,7 @@
   "landing": {
     "requestDoors": {
       "workerSearch": {
-        "title": "Zapytanie o poszukiwanie pracowników",
+        "title": "Zapytanie o rekrutację pracowników",
         "body": "Proszę podać zawód, liczbę pracowników, kraj i termin rozpoczęcia pracy."
       },
       "b2b": {
@@ -15531,7 +15530,7 @@
       "email": "E-mail",
       "phone": "Telefon",
       "country": "Kraj",
-      "countryChoose": "Wybierz kraj",
+      "countryChoose": "Proszę wybrać kraj",
       "city": "Miasto",
       "profession": "Zawód lub specjalność",
       "workers": "Liczba pracowników",
@@ -15781,7 +15780,7 @@
         "hire": "Potrzebuję 5 pracowników magazynu w Wilnie",
         "work": "Szukam pracy w Norwegii",
         "internship": "Gdzie mogę odbyć praktykę?",
-        "professional": "Jestem księgowym i szukam pracy w Wilnie",
+        "professional": "Jestem księgową i szukam pracy w Wilnie",
         "needService": "Potrzebuję kogoś do naprawy dachu",
         "offerService": "Oferuję usługi księgowe",
         "offerCapacity": "Mamy 7 wolnych elektryków od poniedziałku",
@@ -15796,7 +15795,7 @@
         "candidates": "Chcą Państwo przejrzeć kandydatów do swojego zapotrzebowania.",
         "find-work": "Szukają Państwo pracy. Pokażemy możliwości według Państwa zawodu i miejsca.",
         "opportunities": "Szukają Państwo pracy, praktyki lub innych możliwości zawodowych.",
-        "need-service": "Potrzebują Państwo wykonawcy pracy. Po zalogowaniu zobaczą Państwo, kto oferuje taką usługę.",
+        "need-service": "Potrzebują Państwo kogoś, kto wykona pracę. Po zalogowaniu zobaczą Państwo, kto oferuje taką usługę.",
         "offer-value": "Chcą Państwo zaoferować usługi lub swoje kompetencje. Ofertę można złożyć na platformie.",
         "create-project": "Chcą Państwo utworzyć projekt lub obiekt z miejscem, terminami i ludźmi.",
         "projects": "Chcą Państwo zobaczyć projekty swojej firmy.",
@@ -15816,7 +15815,7 @@
         "client-demand": "Chcą Państwo zobaczyć, czego potrzebują Państwa klienci.",
         "invite-student": "Reprezentują Państwo placówkę edukacyjną i chcą zaprosić ucznia lub studenta.",
         "programmes": "Reprezentują Państwo placówkę edukacyjną: programy, grupy, uczniowie.",
-        "offer-capacity": "Mają Państwo wolnych pracowników lub wolne moce. Można złożyć swoją ofertę.",
+        "offer-capacity": "Mają Państwo wolnych pracowników lub wolne zasoby. Można złożyć swoją ofertę.",
         "who-verifies-work": "Pytają Państwo, kto może potwierdzić wykonaną przez Państwa pracę. Pokażemy, komu ją przekazać.",
         "cv-view": "Chcą Państwo zobaczyć swoje CV – to, które system już ma. Nic nie zostanie wgrane ani zmienione.",
         "cv-choose": "Chodzi o Państwa CV. Zapytamy, czy chcą Państwo je zobaczyć, wgrać nowe, czy uzupełnić profil."
@@ -15836,10 +15835,10 @@
         "work": "Szukam pracy",
         "hire": "Potrzebuję pracowników"
       },
-      "numbers": "Teraz na platformie: {vacancies} aktywnych ogłoszeń o pracę · {employers} pracodawców",
-      "refreshed": "odświeżono {date}",
+      "numbers": "Teraz na platformie – aktywne oferty pracy: {vacancies} · pracodawcy: {employers}",
+      "refreshed": "zaktualizowano {date}",
       "moreExamples": "Więcej przykładów",
-      "browseJobs": "Przegląd ofert pracy",
+      "browseJobs": "Przeglądanie ofert pracy",
       "exampleLabels": {
         "hire": "Potrzebuję pracowników",
         "work": "Szukam pracy",
@@ -15855,8 +15854,8 @@
     },
     "openJobs": {
       "eyebrow": "Oferty pracy",
-      "title": "Prawdziwe oferty pracy, otwarte teraz.",
-      "sub": "Przeglądanie nie wymaga konta; po zalogowaniu zobaczysz pracodawcę, miejsce i sposób aplikowania.",
+      "title": "Prawdziwe oferty pracy, aktywne teraz.",
+      "sub": "Przeglądanie nie wymaga konta; po zalogowaniu widoczni są pracodawca, miejsce i sposób aplikowania.",
       "all": "Wszystkie oferty pracy"
     },
     "marketProof": {
@@ -16556,7 +16555,7 @@
     },
     "language": {
       "translatedFrom": "Przetłumaczono z: {language}",
-      "originalIn": "Język ogłoszenia: {language}",
+      "originalIn": "Język oferty: {language}",
       "showOriginal": "Pokaż oryginał",
       "hideOriginal": "Ukryj oryginał",
       "machineNote": "Tłumaczenie automatyczne. Liczby, waluta, daty i nazwy jak w oryginale; oryginał pozostaje faktem.",
@@ -20542,10 +20541,10 @@
   "consent": {
     "banner": {
       "text": "Dane pomiarowe przechowywane w Państwa przeglądarce oraz informacje o kampaniach wykorzystujemy tylko za Państwa zgodą.",
-      "accept": "Zezwól na pomiar",
-      "refuse": "Odmów",
+      "accept": "Zezwalam na pomiar",
+      "refuse": "Odmawiam",
       "more": "Więcej o plikach cookie",
-      "label": "Wybór dotyczący pomiaru korzystania"
+      "label": "Wybór dotyczący pomiaru korzystania z serwisu"
     },
     "control": {
       "title": "Pomiar korzystania i przypisanie kampanii",
@@ -20627,7 +20626,7 @@
       },
       "agencies": {
         "title": "Dla agencji",
-        "description": "Zarządzanie klientami agencji i ofertami kandydatów.",
+        "description": "Zarządzanie klientami agencji i propozycjami kandydatów.",
         "short": "Dla agencji"
       },
       "contractors": {
@@ -20639,18 +20638,18 @@
     "links": {
       "jobs": "Oferty pracy",
       "workOpportunities": "Możliwości pracy",
-      "createCv": "Utwórz darmowe CV",
+      "createCv": "Tworzenie bezpłatnego CV",
       "workAbroad": "Praca za granicą",
       "forWorkers": "Jak to działa dla pracowników",
-      "companyNeed": "Opisz potrzebę",
+      "companyNeed": "Opis zapotrzebowania",
       "forCompanies": "Jak to działa dla firm",
       "labourMarket": "Rynek pracy według kraju",
       "myServices": "Państwa usługi",
       "serviceRequests": "Zapytania o usługi",
       "marketListings": "Ogłoszenia rynkowe",
       "commercial": "Oferty i umowy",
-      "network": "Twoja sieć",
-      "partnerWithUs": "Zostań partnerem",
+      "network": "Państwa sieć",
+      "partnerWithUs": "Zostać partnerem",
       "forAgencies": "Jak to działa dla agencji",
       "setUpAgency": "Rejestracja agencji",
       "b2bEnquiry": "Zapytanie o usługi dla firm (B2B)",
@@ -20661,7 +20660,7 @@
       "searchLabel": "Wyszukiwanie ofert pracy",
       "searchPlaceholder": "Stanowisko lub słowo kluczowe",
       "searchSubmit": "Szukaj",
-      "viewAll": "Wszystkie oferty"
+      "viewAll": "Wszystkie oferty pracy"
     },
     "nav": {
       "heading": "Co chcą Państwo zrobić?",

@@ -732,7 +732,6 @@
     "legalGroup": "[EN] Legal",
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
-    "rexora": "Byggs tillsammans: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
@@ -4219,7 +4218,7 @@
       "eduOutcomesConnected": "Anslutna studenter: {count}.",
       "eduOutcomesUnavailable": "Resultaten kan inte läsas just nu. Det betyder inte att det inte finns några.",
       "eduStudentsPrivacy": "Institutionen ser inte studenternas färdigheter, dokument eller journal — det är deras egna uppgifter. Du ser deltagande och resultatsiffror; vem som passar ser arbetsgivaren själv för sitt eget behov.",
-      "eduPracticeHow": "Praktikplatser läggs upp av arbetsgivare: en partner skapar ett företagskonto och lägger upp ett behov av typen ”praktik” (ett behov gratis). Dina studenter ser det på sin tavla när arbetsgivaren är verifierad.",
+      "eduPracticeHow": "Praktikplatser läggs upp av arbetsgivare: en partner skapar ett företagskonto och lägger upp ett behov av typen ”praktik” (det är gratis att lägga upp ett behov). Dina studenter ser det på sin tavla när arbetsgivaren är verifierad.",
       "eduNext": "Vad händer nu?",
       "chipCreateProgramme": "Skapa program",
       "chipCreateCohort": "Skapa grupp",

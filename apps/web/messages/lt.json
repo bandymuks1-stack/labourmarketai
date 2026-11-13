@@ -5542,7 +5542,6 @@
     "about": "Apie",
     "contact": "Kontaktai",
     "rights": "Visos teisės saugomos.",
-    "rexora": "Kuriama kartu: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai platformą valdo ir jos komercines paslaugas teikia UAB „Nonstop Group“. LabourMarket.ai programinė įranga ir susijusi intelektinė nuosavybė priklauso Labour Market AI Sp. z o.o. ir yra naudojama UAB „Nonstop Group“ pagal licenciją.",
     "ipNotice": "Intelektinės nuosavybės teisės. Platformą pagal licenciją valdo UAB „Nonstop Group“.",
     "legalNotice": "Teisinė informacija"
@@ -14789,7 +14788,7 @@
       "eduOutcomesConnected": "Prisijungę studentai: {count}.",
       "eduOutcomesUnavailable": "Rezultatų dabar perskaityti nepavyksta. Tai nereiškia, kad jų nėra.",
       "eduStudentsPrivacy": "Įstaiga nemato studentų įgūdžių, dokumentų ar žurnalo — tai jų pačių duomenys. Tu matai dalyvavimą ir rezultatų skaičius; kurie žmonės tinka, mato pats darbdavys savo poreikiui.",
-      "eduPracticeHow": "Praktikos vietas skelbia darbdaviai: partneris susikuria įmonės paskyrą ir paskelbia poreikį su tipu „praktika“ (vienas poreikis nemokamai). Tavo studentai jį mato savo lentoje, kai darbdavys patvirtintas.",
+      "eduPracticeHow": "Praktikos vietas skelbia darbdaviai: partneris susikuria įmonės paskyrą ir paskelbia poreikį su tipu „praktika“ (poreikio skelbimas nemokamas). Tavo studentai jį mato savo lentoje, kai darbdavys patvirtintas.",
       "eduNext": "Kas toliau?",
       "chipCreateProgramme": "Sukurti programą",
       "chipCreateCohort": "Sukurti grupę",

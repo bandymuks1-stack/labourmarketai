@@ -732,7 +732,6 @@
     "legalGroup": "[EN] Legal",
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
-    "rexora": "Loodud koostöös: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
@@ -4219,7 +4218,7 @@
       "eduOutcomesConnected": "Ühendatud õppijaid: {count}.",
       "eduOutcomesUnavailable": "Tulemusi ei õnnestu praegu lugeda. See ei tähenda, et neid pole.",
       "eduStudentsPrivacy": "Asutus ei näe õppijate oskusi, dokumente ega päevikut — need on nende endi andmed. Sina näed osalust ja tulemuste arve; kes sobib, näeb tööandja ise oma vajaduse jaoks.",
-      "eduPracticeHow": "Praktikakohti avaldavad tööandjad: partner loob ettevõtte konto ja avaldab vajaduse tüübiga „praktika“ (üks vajadus tasuta). Sinu õppijad näevad seda oma tahvlil, kui tööandja on kinnitatud.",
+      "eduPracticeHow": "Praktikakohti avaldavad tööandjad: partner loob ettevõtte konto ja avaldab vajaduse tüübiga „praktika“ (vajaduse avaldamine on tasuta). Sinu õppijad näevad seda oma tahvlil, kui tööandja on kinnitatud.",
       "eduNext": "Mis edasi?",
       "chipCreateProgramme": "Loo programm",
       "chipCreateCohort": "Loo rühm",

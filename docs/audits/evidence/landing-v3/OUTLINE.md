@@ -65,11 +65,27 @@ no database behind it. The state with figures and adverts is covered by guards, 
 
 `before-59b1c759-*.png` — the live page before this change.
 
+## After the owner's answers of 2026-11-13
+
+- **Second review of ru / pl / de / nl.** Each language was read by a separate automated
+  reviewer that had not written it; 183 strings per language. Changed: ru 19, pl 20, de 12,
+  nl 12. The full table, what was not applied and why, and the open questions are in
+  `translation-review.md`. No native speaker has read these texts.
+- **"Built together" line.** Removed from the signed-in shell too and from every catalog; it
+  was a marketing credit. The legal statements (operator, software owner, copyright) are
+  unchanged and still pinned by guards.
+- **Free-plan limit statements.** The limit is enforced only for organisations admitted to
+  billing; elsewhere a second need is saved. Pricing and FAQ statements that say otherwise are
+  rewritten by the separate pricing work (#3302 / #3250), not here. The one statement those
+  do not cover — the assistant's internship answer, "(one need free)" — now says posting a
+  need is free. The limit messages shown only when the gate refuses are true and unchanged.
+- **#3306** closed as replaced; its head is an ancestor of this branch.
+
 ## Not done, not claimed
 
 - Usability with people: NOT TESTED.
 - ru, pl, de, nl (and the five non-routed catalogs) were translated in this work and have
-  not been read by native speakers.
+  not been read by native speakers; see `translation-review.md`.
 - Legal review of the cookie sentence, the "Your data and privacy" point and the footer's
   legal sentence: pending.
 - `V3-D1-marsrutu-schema.md` and `V3-LT-EN-redakcijos-rekomendacijos.md` are the records

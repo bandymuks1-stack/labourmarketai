@@ -5542,7 +5542,6 @@
     "about": "Über uns",
     "contact": "Kontakt",
     "rights": "Alle Rechte vorbehalten.",
-    "rexora": "Gemeinsam entwickelt: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai wird von der UAB „Nonstop Group“ betrieben und kommerziell angeboten. Die LabourMarket.ai-Software und die zugehörige geistige Eigentumsrechte gehören der Labour Market AI Sp. z o.o. und werden von der UAB „Nonstop Group“ in Lizenz genutzt.",
     "ipNotice": "Rechte des geistigen Eigentums. Die Plattform wird in Lizenz von der UAB „Nonstop Group“ betrieben.",
     "legalNotice": "Impressum"
@@ -14789,7 +14788,7 @@
       "eduOutcomesConnected": "Verbundene Studierende: {count}.",
       "eduOutcomesUnavailable": "Die Ergebnisse können gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
       "eduStudentsPrivacy": "Die Einrichtung sieht weder Fähigkeiten, Dokumente noch das Journal der Studierenden — das sind ihre eigenen Daten. Sie sehen Teilnahme und Ergebniszahlen; wer passt, sieht der Arbeitgeber selbst für seinen Bedarf.",
-      "eduPracticeHow": "Praktika werden von Arbeitgebern ausgeschrieben: ein Partner legt ein Unternehmenskonto an und veröffentlicht einen Bedarf mit dem Typ „Praktikum“ (ein Bedarf kostenlos). Ihre Studierenden sehen ihn auf ihrem Board, sobald der Arbeitgeber verifiziert ist.",
+      "eduPracticeHow": "Praktika werden von Arbeitgebern ausgeschrieben: ein Partner legt ein Unternehmenskonto an und veröffentlicht einen Bedarf mit dem Typ „Praktikum“ (das Veröffentlichen eines Bedarfs ist kostenlos). Ihre Studierenden sehen ihn auf ihrem Board, sobald der Arbeitgeber verifiziert ist.",
       "eduNext": "Was als Nächstes?",
       "chipCreateProgramme": "Programm anlegen",
       "chipCreateCohort": "Gruppe anlegen",
@@ -15553,7 +15552,7 @@
       "invalid": "Bitte prüfen Sie die Felder und versuchen Sie es erneut. Ihre Eingaben sind im Formular erhalten geblieben.",
       "limited": "Derzeit gehen zu viele Anfragen ein. Bitte versuchen Sie es später erneut – Ihre Eingaben sind im Formular erhalten geblieben.",
       "unavailable": "Die Anfrage konnte nicht gesendet werden und ist bei uns nicht eingegangen. Ihre Eingaben sind im Formular erhalten geblieben – bitte versuchen Sie es erneut.",
-      "notice": "Mit dem Senden bestätigen Sie, dass Sie die <privacy>Datenschutzerklärung</privacy> gelesen haben."
+      "notice": "Mit dem Senden der Anfrage bestätigen Sie, dass Sie die <privacy>Datenschutzerklärung</privacy> gelesen haben."
     },
     "audienceValueEyebrow": "Wert für jede Seite der Arbeit",
     "audienceValueTitle": "Was jede Zielgruppe bekommt",
@@ -15778,7 +15777,7 @@
       "submit": "Weiter",
       "examplesLabel": "Zum Beispiel:",
       "examples": {
-        "hire": "Wir brauchen 5 Lagerarbeiter in Vilnius",
+        "hire": "Wir brauchen 5 Lagerkräfte in Vilnius",
         "work": "Ich suche Arbeit in Norwegen",
         "internship": "Wo kann ich ein Praktikum machen?",
         "professional": "Ich bin Buchhalterin und suche Arbeit in Vilnius",
@@ -15786,7 +15785,7 @@
         "offerService": "Ich biete Buchhaltungsdienstleistungen an",
         "offerCapacity": "Wir haben 7 Elektriker ab Montag frei",
         "brigade": "Ich suche eine Kolonne für die Baustelle",
-        "logWork": "Heute habe ich 8 Stunden an der Green Tower gearbeitet",
+        "logWork": "Heute habe ich 8 Stunden auf der Baustelle Green Tower gearbeitet",
         "verifyWork": "Wer könnte meine Erfahrung bestätigen?"
       },
       "understoodLabel": "Das haben wir verstanden",
@@ -15794,7 +15793,7 @@
         "need-workers": "Sie suchen Arbeitskräfte. Geben Sie Beruf, Anzahl, Ort und geplanten Beginn an.",
         "find-workers": "Sie suchen Arbeitskräfte. Melden Sie sich an und beschreiben Sie Ihren Bedarf – Kandidaten werden beim jeweiligen Bedarf angezeigt, sofern es welche gibt.",
         "candidates": "Sie möchten die Kandidaten für Ihren Bedarf ansehen.",
-        "find-work": "Sie suchen Arbeit. Wir zeigen Ihnen Möglichkeiten nach Ihrem Beruf und Ort.",
+        "find-work": "Sie suchen Arbeit. Wir zeigen Ihnen Möglichkeiten, die zu Ihrem Beruf und Ort passen.",
         "opportunities": "Sie suchen Arbeit, ein Praktikum oder andere berufliche Möglichkeiten.",
         "need-service": "Sie brauchen jemanden, der eine Arbeit ausführt. Nach der Anmeldung sehen Sie, wer diese Dienstleistung anbietet.",
         "offer-value": "Sie möchten Dienstleistungen oder Ihre Kompetenz anbieten. Sie können auf der Plattform ein Angebot einreichen.",
@@ -15825,7 +15824,7 @@
         "work": "Sie sprechen über Ihre Arbeit und Ihren beruflichen Weg.",
         "hire": "Sie sprechen als Arbeitgeber oder Unternehmen: über Personen, Projekte oder Bedarf.",
         "agency": "Sie sprechen als Agentur: über Kunden und Kandidaten.",
-        "student": "Sie sprechen über das Lernen und den Weg in die Arbeit.",
+        "student": "Sie sprechen über das Lernen und den Weg in den Beruf.",
         "education": "Sie vertreten eine Bildungseinrichtung."
       },
       "nextHint": "Um Ihren Bedarf zu speichern, melden Sie sich an oder erstellen Sie ein Konto. Der eingegebene Satz bleibt auch nach der Anmeldung erhalten.",
@@ -15854,9 +15853,9 @@
       }
     },
     "openJobs": {
-      "eyebrow": "Stellenangebote",
+      "eyebrow": "Stellenanzeigen",
       "title": "Echte Stellen, jetzt offen.",
-      "sub": "Ansehen geht ohne Konto; melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+      "sub": "Ansehen ist ohne Konto möglich; melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
       "all": "Alle Stellenanzeigen"
     },
     "marketProof": {
@@ -15916,7 +15915,7 @@
       "lasting": "Ihre Erfahrung und Möglichkeiten bleiben erreichbar — beim Wechsel von Job, Projekt oder Land."
     },
     "v3": {
-      "lead": "Für Arbeitskräfte, Arbeitgeber und Dienstleister aller Berufe und Branchen. Die Registrierung und das einfache Melden eines Bedarfs sind kostenlos.",
+      "lead": "Für Arbeitskräfte, Arbeitgeber und Dienstleister aller Berufe und Branchen. Die Registrierung und die Basisveröffentlichung eines Bedarfs sind kostenlos.",
       "moreChoices": "Weitere Optionen",
       "or": "oder beschreiben Sie es in eigenen Worten",
       "needFree": "Sie können eine Anfrage ohne Registrierung einreichen. Das Einreichen ist kostenlos; Bedingungen und Preis der Dienstleistungen werden gesondert vereinbart.",
@@ -20613,7 +20612,7 @@
       "workers": {
         "title": "Ich suche Arbeitskräfte",
         "description": "Geben Sie an, welche Arbeitskräfte Sie wo und wann brauchen.",
-        "short": "Personal finden"
+        "short": "Arbeitskräfte finden"
       },
       "services": {
         "title": "Ich biete Leistungen an",
@@ -20627,7 +20626,7 @@
       },
       "agencies": {
         "title": "Für Agenturen",
-        "description": "Verwalten Sie die Kunden Ihrer Agentur und Kandidatenangebote.",
+        "description": "Verwalten Sie die Kunden Ihrer Agentur und Kandidatenvorschläge.",
         "short": "Für Agenturen"
       },
       "contractors": {
@@ -20639,14 +20638,14 @@
     "links": {
       "jobs": "Stellenanzeigen",
       "workOpportunities": "Arbeitsmöglichkeiten",
-      "createCv": "Kostenlosen Lebenslauf erstellen",
+      "createCv": "Lebenslauf kostenlos erstellen",
       "workAbroad": "Arbeiten im Ausland",
       "forWorkers": "So funktioniert es für Arbeitskräfte",
       "companyNeed": "Bedarf beschreiben",
       "forCompanies": "So funktioniert es für Unternehmen",
       "labourMarket": "Arbeitsmarkt nach Land",
       "myServices": "Ihre Leistungen",
-      "serviceRequests": "Leistungsanfragen",
+      "serviceRequests": "Dienstleistungsanfragen",
       "marketListings": "Marktangebote",
       "commercial": "Angebote und Verträge",
       "network": "Ihr Netzwerk",

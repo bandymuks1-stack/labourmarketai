@@ -5542,7 +5542,6 @@
     "about": "Over ons",
     "contact": "Contact",
     "rights": "Alle rechten voorbehouden.",
-    "rexora": "Samen gebouwd: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai wordt geëxploiteerd en commercieel aangeboden door UAB “Nonstop Group”. De LabourMarket.ai-software en gerelateerde intellectuele eigendom zijn eigendom van Labour Market AI Sp. z o.o. en worden door UAB “Nonstop Group” onder licentie gebruikt.",
     "ipNotice": "Intellectuele-eigendomsrechten. Het platform wordt onder licentie geëxploiteerd door UAB “Nonstop Group”.",
     "legalNotice": "Juridische informatie"
@@ -14789,7 +14788,7 @@
       "eduOutcomesConnected": "Verbonden studenten: {count}.",
       "eduOutcomesUnavailable": "De resultaten kunnen nu niet worden gelezen. Dat betekent niet dat er geen zijn.",
       "eduStudentsPrivacy": "De instelling ziet de vaardigheden, documenten of het logboek van studenten niet — dat zijn hun eigen gegevens. Je ziet deelname en resultaatcijfers; wie past, ziet de werkgever zelf voor zijn eigen behoefte.",
-      "eduPracticeHow": "Stages worden geplaatst door werkgevers: een partner maakt een bedrijfsaccount aan en plaatst een behoefte met het type ‘stage’ (één behoefte gratis). Je studenten zien die op hun bord zodra de werkgever geverifieerd is.",
+      "eduPracticeHow": "Stages worden geplaatst door werkgevers: een partner maakt een bedrijfsaccount aan en plaatst een behoefte met het type ‘stage’ (een behoefte plaatsen is gratis). Je studenten zien die op hun bord zodra de werkgever geverifieerd is.",
       "eduNext": "Wat nu?",
       "chipCreateProgramme": "Opleiding aanmaken",
       "chipCreateCohort": "Groep aanmaken",
@@ -15553,7 +15552,7 @@
       "invalid": "Controleer de velden en probeer het opnieuw. Wat u heeft ingevuld, staat nog in het formulier.",
       "limited": "Er komen op dit moment te veel aanvragen binnen. Probeer het later opnieuw – wat u heeft ingevuld, staat nog in het formulier.",
       "unavailable": "De aanvraag kon niet worden verzonden en wij hebben deze niet ontvangen. Wat u heeft ingevuld, staat nog in het formulier – probeer het opnieuw.",
-      "notice": "Door een aanvraag te versturen bevestigt u dat u het <privacy>Privacybeleid</privacy> hebt gelezen."
+      "notice": "Door een aanvraag te versturen bevestigt u dat u het <privacy>Privacybeleid</privacy> heeft gelezen."
     },
     "audienceValueEyebrow": "Waarde voor elke kant van werk",
     "audienceValueTitle": "Wat elke doelgroep krijgt",
@@ -15786,7 +15785,7 @@
         "offerService": "Ik bied boekhoudkundige diensten aan",
         "offerCapacity": "Wij hebben 7 elektriciens vrij vanaf maandag",
         "brigade": "Ik zoek een ploeg voor het project",
-        "logWork": "Vandaag heb ik 8 uur op de Green Tower gewerkt",
+        "logWork": "Vandaag heb ik 8 uur op de werklocatie Green Tower gewerkt",
         "verifyWork": "Wie zou mijn ervaring kunnen bevestigen?"
       },
       "understoodLabel": "Dit hebben we begrepen",
@@ -15796,7 +15795,7 @@
         "candidates": "U wilt de kandidaten voor uw behoefte bekijken.",
         "find-work": "U zoekt werk. We tonen mogelijkheden op basis van uw beroep en plaats.",
         "opportunities": "U zoekt werk, een stage of andere professionele mogelijkheden.",
-        "need-service": "U heeft iemand nodig die een klus uitvoert. Na het inloggen ziet u wie die dienst aanbiedt.",
+        "need-service": "U heeft iemand nodig die een opdracht uitvoert. Na het inloggen ziet u wie die dienst aanbiedt.",
         "offer-value": "U wilt diensten of uw deskundigheid aanbieden. U kunt op het platform een aanbod indienen.",
         "create-project": "U wilt een project of werklocatie aanmaken met plaats, data en mensen.",
         "projects": "U wilt de projecten van uw bedrijf zien.",
@@ -15841,7 +15840,7 @@
       "moreExamples": "Meer voorbeelden",
       "browseJobs": "Vacatures bekijken",
       "exampleLabels": {
-        "hire": "Ik heb mensen nodig",
+        "hire": "Ik zoek werknemers",
         "work": "Ik zoek werk",
         "internship": "Waar stage lopen",
         "professional": "Ik heb een vak",
@@ -15856,7 +15855,7 @@
     "openJobs": {
       "eyebrow": "Vacatures",
       "title": "Echte vacatures, nu open.",
-      "sub": "Bekijken kan zonder account; log in om de werkgever, de plek en de sollicitatiewijze te zien.",
+      "sub": "Bekijken kan zonder account; log in om de werkgever, de plaats en de sollicitatiewijze te zien.",
       "all": "Alle vacatures"
     },
     "marketProof": {
@@ -15916,7 +15915,7 @@
       "lasting": "Je ervaring en kansen blijven bereikbaar — als je van baan, project of land wisselt."
     },
     "v3": {
-      "lead": "Voor werkenden, werkgevers en dienstverleners in alle beroepen en sectoren. Registreren en een behoefte plaatsen zijn in de basis gratis.",
+      "lead": "Voor werkenden, werkgevers en dienstverleners in alle beroepen en sectoren. Registreren en de basisplaatsing van een behoefte zijn gratis.",
       "moreChoices": "Meer opties",
       "or": "of beschrijf het in uw eigen woorden",
       "needFree": "U kunt zonder registratie een aanvraag indienen. Indienen is gratis; de voorwaarden en de prijs van de diensten worden apart afgesproken.",
@@ -15935,7 +15934,7 @@
         "title": "Hoe het werkt",
         "s1": {
           "title": "Vinden en afspreken",
-          "body": "Zoek werk, werknemers of diensten en beheer aanbiedingen en afspraken op het platform."
+          "body": "Zoek werk, werknemers of diensten en beheer voorstellen en afspraken op het platform."
         },
         "s2": {
           "title": "Werk vastleggen",
@@ -16556,7 +16555,7 @@
     },
     "language": {
       "translatedFrom": "Vertaald uit het {language}",
-      "originalIn": "Taal van de advertentie: {language}",
+      "originalIn": "Taal van de vacature: {language}",
       "showOriginal": "Origineel tonen",
       "hideOriginal": "Origineel verbergen",
       "machineNote": "Automatische vertaling. Getallen, valuta, data en namen zoals in het origineel; het origineel blijft het feit.",
@@ -20611,9 +20610,9 @@
         "short": "Werk zoeken"
       },
       "workers": {
-        "title": "Ik zoek medewerkers",
+        "title": "Ik zoek werknemers",
         "description": "Geef aan welke werknemers u nodig heeft, waar en wanneer.",
-        "short": "Mensen zoeken"
+        "short": "Werknemers zoeken"
       },
       "services": {
         "title": "Ik bied diensten aan",
@@ -20642,14 +20641,14 @@
       "createCv": "Maak een gratis cv",
       "workAbroad": "Werken in het buitenland",
       "forWorkers": "Zo werkt het voor werknemers",
-      "companyNeed": "Beschrijf je behoefte",
+      "companyNeed": "Beschrijf uw behoefte",
       "forCompanies": "Zo werkt het voor bedrijven",
       "labourMarket": "Arbeidsmarkt per land",
       "myServices": "Uw diensten",
       "serviceRequests": "Dienstaanvragen",
       "marketListings": "Marktaanbod",
       "commercial": "Voorstellen en contracten",
-      "network": "Jouw netwerk",
+      "network": "Uw netwerk",
       "partnerWithUs": "Word partner",
       "forAgencies": "Zo werkt het voor bureaus",
       "setUpAgency": "Bureau registreren",
