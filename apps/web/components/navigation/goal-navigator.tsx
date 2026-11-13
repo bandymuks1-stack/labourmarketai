@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { Fragment, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { X } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -77,7 +77,17 @@ if (typeof window !== "undefined") {
   window.addEventListener("popstate", note);
 }
 
-/** The server renders no fragment: nothing chosen, the rail alone. */
+const PANEL_CLASS =
+  "min-w-0 flex-col gap-4 rounded-2xl border border-ink-600 bg-ink-900/60 p-4 sm:p-6";
+const PANEL_TITLE_CLASS = "font-display text-lg font-semibold text-text-primary sm:text-xl";
+const PANEL_CLOSE_CLASS =
+  "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-ink-500 px-3 text-sm font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary motion-reduce:transition-none";
+const TAB_CLASS =
+  "inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium transition-colors motion-reduce:transition-none";
+const TAB_ON_CLASS = "bg-brand-blue text-text-on-brand";
+const TAB_OFF_CLASS = "text-text-secondary hover:text-text-primary";
+
+/** The server renders no fragment: nothing chosen, no goal marked as open. */
 const readServerFragment = () => "";
 
 /**
@@ -140,6 +150,19 @@ export function GoalNavigator({
   const [bootFragment] = useState(() =>
     typeof window === "undefined" ? "" : window.location.hash,
   );
+  // THE FIRST TAP DOES NOT WAIT FOR THE SCRIPTS. On a slow phone connection
+  // this component comes alive seconds after the page is painted (measured
+  // 2026-11-13: about 4 s), and until then a tapped goal showed nothing. So
+  // the server also sends every goal's panel, hidden, each right after an
+  // anchor carrying that goal's fragment as its id; the goal cards are real
+  // links to those fragments, and plain CSS (`:target`) shows the panel the
+  // moment the address changes — no script involved. Once this component is
+  // alive it draws the one live panel itself and these are taken out for good
+  // (`started`), so the address works exactly as before from then on.
+  const [started, setStarted] = useState(false);
+  useEffect(() => {
+    setStarted(true);
+  }, []);
   useEffect(() => {
     mountedNavigators += 1;
     const restore = () => {
@@ -230,7 +253,7 @@ export function GoalNavigator({
     "inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm font-medium transition-colors motion-reduce:transition-none";
 
   return (
-    <section data-testid="goal-navigator" className="flex min-w-0 flex-col gap-4">
+    <section data-testid="goal-navigator" className="relative flex min-w-0 flex-col gap-4">
       <Heading className="font-display text-xl font-bold tracking-tightest text-text-primary sm:text-2xl">
         {labels.heading}
       </Heading>
@@ -247,24 +270,73 @@ export function GoalNavigator({
         nextLabel={labels.next}
       />
 
-      {active && (
-        <div
-          data-testid="goal-panel"
-          data-goal={active.id}
-          className="flex min-w-0 flex-col gap-4 rounded-2xl border border-ink-600 bg-ink-900/60 p-4 sm:p-6"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <h2
-              aria-live="polite"
-              className="font-display text-lg font-semibold text-text-primary sm:text-xl"
+      {/* Before the scripts are alive: one hidden panel per goal, shown by
+          `:target` alone. The anchor sits at the top of the navigator so the
+          browser has nowhere to jump to; the panel follows it directly so
+          one rule pairs them. Same frame as the live panel below, so nothing
+          moves when the live one takes over. */}
+      {!started &&
+        !active &&
+        goals.map((goal) => (
+          <Fragment key={goal.id}>
+            <span
+              id={`${GOAL_FRAGMENT_PREFIX.slice(1)}${goal.id}`}
+              data-goal-anchor=""
+              aria-hidden
+              className="pointer-events-none absolute left-0 top-0 scroll-mt-32"
+            />
+            <div
+              data-testid="goal-panel-early"
+              data-goal={goal.id}
+              className={cn("hidden [[data-goal-anchor]:target+&]:flex", PANEL_CLASS)}
             >
+              <div className="flex items-start justify-between gap-3">
+                <h2 className={PANEL_TITLE_CLASS}>{goal.title}</h2>
+                {/* A plain link to the page without a fragment: Close with no script. */}
+                <a href="#" data-testid="goal-panel-early-close" className={PANEL_CLOSE_CLASS}>
+                  <X aria-hidden className="size-4" />
+                  {labels.close}
+                </a>
+              </div>
+              {goal.hasCatalogue && (
+                // Same switch as the live panel, in its place so nothing
+                // shifts; it starts working when the live panel takes over.
+                <div role="group" aria-label={goal.title} className="flex w-fit rounded-full border border-ink-600 p-1">
+                  {(["functions", "professions"] as const).map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-pressed={key === "functions"}
+                      className={cn(TAB_CLASS, key === "functions" ? TAB_ON_CLASS : TAB_OFF_CLASS)}
+                    >
+                      {labels[key]}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <CardRail
+                label={labels.functions}
+                testId="function-rail-early"
+                cards={goal.functions}
+                swipeHint={labels.swipe}
+                prevLabel={labels.previous}
+                nextLabel={labels.next}
+              />
+            </div>
+          </Fragment>
+        ))}
+
+      {active && (
+        <div data-testid="goal-panel" data-goal={active.id} className={cn("flex", PANEL_CLASS)}>
+          <div className="flex items-start justify-between gap-3">
+            <h2 aria-live="polite" className={PANEL_TITLE_CLASS}>
               {active.title}
             </h2>
             <button
               type="button"
               onClick={close}
               data-testid="goal-panel-close"
-              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-ink-500 px-3 text-sm font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary motion-reduce:transition-none"
+              className={PANEL_CLOSE_CLASS}
             >
               <X aria-hidden className="size-4" />
               {labels.close}
@@ -280,12 +352,7 @@ export function GoalNavigator({
                   aria-pressed={tab === key}
                   onClick={() => setTab(key)}
                   data-testid={`goal-tab-${key}`}
-                  className={cn(
-                    "inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium transition-colors motion-reduce:transition-none",
-                    tab === key
-                      ? "bg-brand-blue text-text-on-brand"
-                      : "text-text-secondary hover:text-text-primary",
-                  )}
+                  className={cn(TAB_CLASS, tab === key ? TAB_ON_CLASS : TAB_OFF_CLASS)}
                 >
                   {labels[key]}
                 </button>

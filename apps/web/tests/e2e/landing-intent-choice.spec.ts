@@ -312,6 +312,57 @@ test("a goal chosen before the page finished starting still opens", async ({ pag
   await expect(page).toHaveURL(/\/en$/);
 });
 
+// THE FIRST TAP NEEDS NO SCRIPT. On a slow phone connection the page is
+// painted seconds before its scripts are alive; a goal tapped in that time
+// must open at once. Proven the strict way: with scripts switched off.
+test.describe("with scripts switched off", () => {
+  test.use({ javaScriptEnabled: false, viewport: { width: 375, height: 740 }, hasTouch: true, isMobile: true });
+
+  test("tapping a goal opens its panel with its functions, and Close closes it", async ({ page }) => {
+    await page.goto("/en");
+    const early = page.getByTestId("goal-panel-early").locator("visible=true");
+    await expect(early).toHaveCount(0);
+    await page.getByTestId("goal-rail").locator('[data-card-id="workers"]').tap();
+    await expect(page).toHaveURL(/\/en#goal=workers$/);
+    await expect(early).toHaveCount(1);
+    await expect(early).toHaveAttribute("data-goal", "workers");
+    await expect(early.getByTestId("function-rail-early").locator("a").first()).toBeVisible();
+    // The page did not jump away from the goal cards.
+    await expect(page.getByTestId("goal-rail")).toBeInViewport();
+    // Another goal replaces it; never two at once.
+    await page.getByTestId("goal-rail").locator('[data-card-id="work"]').tap();
+    await expect(early).toHaveCount(1);
+    await expect(early).toHaveAttribute("data-goal", "work");
+    await early.getByTestId("goal-panel-early-close").tap();
+    await expect(early).toHaveCount(0);
+  });
+
+  test("a shared goal link shows its panel in the first paint", async ({ page }) => {
+    await page.goto("/en#goal=services");
+    const early = page.getByTestId("goal-panel-early").locator("visible=true");
+    await expect(early).toHaveCount(1);
+    await expect(early).toHaveAttribute("data-goal", "services");
+  });
+
+  test("a function inside the panel is a real link", async ({ page }) => {
+    await page.goto("/en#goal=work");
+    const first = page.getByTestId("goal-panel-early").locator("visible=true").getByTestId("function-rail-early").locator("a").first();
+    const href = await first.getAttribute("href");
+    expect(href).toBeTruthy();
+    await first.tap();
+    await expect(page).not.toHaveURL(/#goal=/);
+  });
+});
+
+test("when the scripts are alive there is exactly one panel, the live one", async ({ page }) => {
+  await page.goto("/en#goal=work");
+  await expect(page.getByTestId("goal-panel")).toBeVisible();
+  await expect(page.getByTestId("goal-panel-early")).toHaveCount(0);
+  await page.getByTestId("goal-panel-close").click();
+  await expect(page.getByTestId("goal-panel")).toHaveCount(0);
+  await expect(page.getByTestId("goal-panel-early")).toHaveCount(0);
+});
+
 test.describe("coming back to the landing", () => {
   test.use({ viewport: { width: 1440, height: 900 } });
   test("a goal left open is not reopened after visiting another page", async ({ page }) => {
