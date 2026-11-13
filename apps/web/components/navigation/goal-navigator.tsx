@@ -77,6 +77,8 @@ if (typeof window !== "undefined") {
   window.addEventListener("popstate", note);
 }
 
+/** The navigator's own anchor: where the early panels' Close points. */
+const NAVIGATOR_ID = "goals";
 const PANEL_CLASS =
   "min-w-0 flex-col gap-4 rounded-2xl border border-ink-600 bg-ink-900/60 p-4 sm:p-6";
 const PANEL_TITLE_CLASS = "font-display text-lg font-semibold text-text-primary sm:text-xl";
@@ -253,7 +255,11 @@ export function GoalNavigator({
     "inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm font-medium transition-colors motion-reduce:transition-none";
 
   return (
-    <section data-testid="goal-navigator" className="relative flex min-w-0 flex-col gap-4">
+    <section
+      id={NAVIGATOR_ID}
+      data-testid="goal-navigator"
+      className="relative flex min-w-0 scroll-mt-32 flex-col gap-4"
+    >
       <Heading className="font-display text-xl font-bold tracking-tightest text-text-primary sm:text-2xl">
         {labels.heading}
       </Heading>
@@ -292,8 +298,13 @@ export function GoalNavigator({
             >
               <div className="flex items-start justify-between gap-3">
                 <h2 className={PANEL_TITLE_CLASS}>{goal.title}</h2>
-                {/* A plain link to the page without a fragment: Close with no script. */}
-                <a href="#" data-testid="goal-panel-early-close" className={PANEL_CLOSE_CLASS}>
+                {/* Close with no script: a plain link to the navigator itself,
+                    so no goal is targeted any more and the page stays here. */}
+                <a
+                  href={`#${NAVIGATOR_ID}`}
+                  data-testid="goal-panel-early-close"
+                  className={PANEL_CLOSE_CLASS}
+                >
                   <X aria-hidden className="size-4" />
                   {labels.close}
                 </a>

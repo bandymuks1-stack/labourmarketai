@@ -150,8 +150,11 @@ describe("the URL is the state — a fragment, not a page", () => {
     expect(navigator).toMatch(/id=\{`\$\{GOAL_FRAGMENT_PREFIX\.slice\(1\)\}\$\{goal\.id\}`\}\s+data-goal-anchor=""/);
     expect(navigator).toMatch(/data-testid="goal-panel-early"/);
     expect(navigator).toMatch(/"hidden \[\[data-goal-anchor\]:target\+&\]:flex"/);
-    // Close works with no script: a plain link to the page without a fragment.
-    expect(navigator).toMatch(/<a href="#" data-testid="goal-panel-early-close"/);
+    // Close works with no script: a plain link to the navigator's own
+    // anchor, which targets no goal (and is not a dead `#`).
+    expect(navigator).toMatch(/const NAVIGATOR_ID = "goals";/);
+    expect(navigator).toMatch(/id=\{NAVIGATOR_ID\}/);
+    expect(navigator).toMatch(/href=\{`#\$\{NAVIGATOR_ID\}`\}\s+data-testid="goal-panel-early-close"/);
     // Taken out for good once the component is alive, and never beside the
     // live panel.
     expect(navigator).toMatch(/\{!started &&\s+!active &&\s+goals\.map\(/);
