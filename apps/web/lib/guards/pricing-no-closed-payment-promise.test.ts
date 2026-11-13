@@ -56,6 +56,37 @@ describe("closed online payment is said as closed", () => {
     expect(entry.slice(0, entry.indexOf("},"))).toMatch(/status: "RETIRED"[\s\S]*pages: \[\]/);
   });
 
+  it("the public pricing copy carries no internal wording (owner P0 2026-11-13)", () => {
+    const m = JSON.parse(read("messages/en.json"));
+    const b = m.planBoundary;
+    // What a visitor can be shown while payment is closed (the admin plan and
+    // the draft-pricing sentence are never rendered publicly).
+    const shown = [
+      b.title, b.subcopy, b.note, b.featuresLabel, b.readiness.owner_confirmed,
+      b.plans.free_worker, b.plans.worker_plus, b.plans.company_pilot, b.plans.agency_pilot, b.plans.free_organization,
+      b.access.free, b.access.payment_not_enabled, ...Object.values(b.cta), ...Object.values(b.freeToday),
+      b.enforcement.free_surface, b.enforcement.server_gate, b.enforcement.declared_boundary_only,
+      m.pricing.priceState.owner_confirmed_closed, m.pricing.subcopyConfirmed,
+      ...m.conciergeOffer.steps.map((x: { body: string }) => x.body),
+    ].join(" | ");
+    for (const jargon of [/boundary/i, /starts only with billing/i, /prepared/i, /\bpilot\b/i, /by the owner/i, /\bcrews?\b/i]) {
+      expect(shown, String(jargon)).not.toMatch(jargon);
+    }
+  });
+
+  for (const locale of activeLocales) {
+    it(`${locale}: free registration and posting are said, the paid plan is not purchasable, prices are ex VAT`, () => {
+      const m = JSON.parse(read(`messages/${locale}.json`));
+      // One sentence per fact, in every routed language.
+      expect(m.pricing.subcopyConfirmed.split(". ").length, "free / one paid plan / not purchasable").toBeGreaterThanOrEqual(3);
+      expect(m.pricing.priceState.owner_confirmed_closed).toMatch(/VAT|PVM|НДС|MwSt|btw/);
+      expect(m.pricing.priceState.owner_confirmed).toMatch(/VAT|PVM|НДС|MwSt|btw/);
+      // A hiring fee is never stated without "agreed in advance"; no figure is published.
+      const fee = m.conciergeOffer.steps[3].body;
+      expect(fee, `${locale}: no fee figure`).not.toMatch(/\d/);
+    });
+  }
+
   for (const locale of activeLocales) {
     it(`${locale}: closed sentences promise no payment and no unenforced limit`, () => {
       const m = JSON.parse(read(`messages/${locale}.json`));

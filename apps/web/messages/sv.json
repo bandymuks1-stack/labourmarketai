@@ -1096,7 +1096,7 @@
     },
     "subcopyLive": "Priserna är bekräftade av ägaren och gäller. Aktivering sker i organisationskontot genom en säker Stripe-betalning; inget debiteras på den här sidan.",
     "subcopy": "Priserna är inte slutgiltiga, och fakturering startas aldrig åt dig på den här sidan. Nivåerna nedan beskriver omfattning; aktiveringen är manuell – hör av dig så bekräftar vi pris och omfattning med dig innan något startar.",
-    "subcopyConfirmed": "Priserna är bekräftade. Aktivering online är inte öppen ännu – gå med i väntelistan så kontaktar vi dig för att starta din organisation manuellt; inget debiteras på den här sidan.",
+    "subcopyConfirmed": "Registrering är gratis för personer och för organisationer, och det är gratis att publicera personalbehov. Det finns en betald plan, den visas nedan. Den kan ännu inte köpas online, och inget debiteras på den här sidan.",
     "trialNote": "En organisations första prenumeration börjar med en 14 dagars provperiod. Därefter debiteras kortet månadspriset, och du kan avsluta innan provperioden tar slut.",
     "title": "Enkla nivåer,",
     "titleAccent": "satta rättvist.",
@@ -1112,8 +1112,8 @@
     "ctaStartFree": "Kom igång gratis i ditt organisationskonto",
     "ctaSubscribe": "Aktivera i ditt organisationskonto",
     "priceState": {
-      "owner_confirmed": "Priserna är bekräftade av ägaren. Aktivering sker i ditt organisationskonto; inget debiteras på den här sidan.",
-      "owner_confirmed_closed": "Priserna är bekräftade av ägaren. Onlinebetalning är inte öppen ännu; inget debiteras på den här sidan."
+      "owner_confirmed": "Priserna är bekräftade av ägaren. Aktivering sker i ditt organisationskonto; inget debiteras på den här sidan. Priserna anges exklusive moms.",
+      "owner_confirmed_closed": "Onlinebetalning är inte öppen ännu; inget debiteras på den här sidan. Priserna anges exklusive moms."
     },
     "faqClosed": [
       "Varje organisation – arbetsgivare, bemanningsföretag, entreprenör eller utbildningsanordnare – får samma produkt och samma enda betalda plan. Onlinebetalning är inte öppen ännu, så inget debiteras i dag.",

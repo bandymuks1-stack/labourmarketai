@@ -5715,7 +5715,7 @@
     "titleAccent": "ustalone uczciwie.",
     "subcopyLive": "Ceny są potwierdzone przez właściciela i obowiązują. Aktywacja odbywa się na koncie organizacji poprzez bezpieczną płatność Stripe; na tej stronie nic nie jest pobierane.",
     "subcopy": "Ceny nie są jeszcze ostateczne, a rozliczenie nigdy nie jest tu uruchamiane za Ciebie. Poniższe plany opisują zakres; aktywacja jest ręczna — skontaktuj się, a przed rozpoczęciem potwierdzimy z Tobą cenę i zakres.",
-    "subcopyConfirmed": "Ceny są potwierdzone. Aktywacja online nie jest jeszcze otwarta — dołącz do listy oczekujących, skontaktujemy się i uruchomimy organizację ręcznie; na tej stronie nic nie jest pobierane.",
+    "subcopyConfirmed": "Rejestracja jest bezpłatna dla osób i dla organizacji, a publikowanie zapotrzebowania na pracowników jest bezpłatne. Jest jeden płatny plan, pokazany poniżej. Nie można go jeszcze kupić online i na tej stronie nic nie jest pobierane.",
     "trialNote": "Pierwsza subskrypcja organizacji zaczyna się od 14-dniowego okresu próbnego. Po nim z karty pobierana jest cena miesięczna; można zrezygnować przed jego końcem.",
     "planCta": "Dołącz do listy oczekujących na ten plan",
     "featuresLabel": "Zawiera",
@@ -5788,8 +5788,8 @@
     ],
     "priceState": {
       "draft_pricing": "Ceny są przygotowywane — nic nie można jeszcze kupić.",
-      "owner_confirmed": "Ceny potwierdzone przez właściciela. Aktywacja odbywa się na koncie organizacji; na tej stronie nic nie jest pobierane.",
-      "owner_confirmed_closed": "Ceny potwierdzone przez właściciela. Płatność online nie jest jeszcze otwarta; na tej stronie nic nie jest pobierane."
+      "owner_confirmed": "Ceny potwierdzone przez właściciela. Aktywacja odbywa się na koncie organizacji; na tej stronie nic nie jest pobierane. Ceny podano bez VAT.",
+      "owner_confirmed_closed": "Płatność online nie jest jeszcze otwarta; na tej stronie nic nie jest pobierane. Ceny podano bez VAT."
     },
     "individual": {
       "name": "Szczególne wymagania",
@@ -9447,20 +9447,20 @@
     }
   },
   "planBoundary": {
-    "title": "Co obejmują płatne plany",
-    "subcopy": "Płatności nie są jeszcze włączone — brak strony płatności i karty. Płatne plany są pokazane, abyś znał ich zakres; dostęp pilotażowy jest nadawany ręcznie.",
+    "title": "Co obejmuje każdy plan",
+    "subcopy": "Na tej stronie nic nie można kupić i nikt nie prosi o kartę. Płatny plan jest pokazany, abyś wiedział, co obejmuje.",
     "note": "Plany opisują zakres, a nie aktywne rozliczenia. Na tej stronie nic nie jest naliczane.",
     "plans": {
       "free_worker": "Darmowy pracownik",
-      "worker_plus": "Osoba plus (niedostępne)",
+      "worker_plus": "Dodatkowe funkcje dla osób (niedostępne)",
       "company_pilot": "Organizacja",
-      "agency_pilot": "Poziom agencji (niedostępne)",
+      "agency_pilot": "Osobny plan dla agencji (niedostępny)",
       "admin_internal": "Administrator / Wewnętrzny",
       "free_organization": "Organizacja darmowa"
     },
     "access": {
       "free": "Darmowe",
-      "payment_not_enabled": "Płatność niewłączona",
+      "payment_not_enabled": "Jeszcze niedostępne do zakupu",
       "internal": "Wewnętrzne"
     },
     "audience": {
@@ -9471,22 +9471,22 @@
     },
     "cta": {
       "use": "Dostępne teraz",
-      "request_pilot_access": "Dostęp pilotażowy — nadawany ręcznie",
+      "request_pilot_access": "Pierwszych klientów podłącza zespół",
       "contact": "Ustalane indywidualnie"
     },
     "readiness": {
       "draft_pricing": "Plany są przygotowane, ale niedostępne do zakupu. Żadna cena tutaj nie jest ostateczna i niczego nie można kupić.",
-      "owner_confirmed": "Plany są tylko przygotowane — nic nie można kupić, dopóki płatności nie zostaną włączone."
+      "owner_confirmed": "Płatnego planu nie można kupić, dopóki płatność online nie zostanie otwarta."
     },
-    "featuresLabel": "W zakresie tego planu",
+    "featuresLabel": "Obejmuje",
     "limitValue": "do {count}, gdy ruszą płatne plany",
     "freeToday": {
       "freeTitle": "Darmowe dziś",
-      "free": "Wszystko, co obecnie możesz wykorzystać w produkcie, jest darmowe — pilotaż działa bez płatności i nic nie prosi o kartę.",
-      "paidTitle": "Przygotowane płatne plany",
-      "paid": "Chwilowo niedostępne.",
-      "preparedTitle": "Przygotowane, niedostępne do zakupu",
-      "prepared": "Nie ma strony płatności i niczego nie można kupić. Dostęp pilotażowy do zakresu płatnego planu jest nadawany ręcznie przez zespół."
+      "free": "Wszystko, z czego możesz dziś korzystać w produkcie, jest bezpłatne i nikt nie prosi o kartę.",
+      "paidTitle": "Płatny plan",
+      "paid": "Nie można go jeszcze kupić.",
+      "preparedTitle": "Płatne, jeszcze niedostępne do zakupu",
+      "prepared": "Nie ma strony płatności i niczego nie można kupić. Pierwszym klientom funkcje płatnego planu zespół udostępnia bezpośrednio."
     },
     "features": {
       "worker_profile": "Profil pracownika",
@@ -9513,7 +9513,7 @@
     "enforcement": {
       "free_surface": "W produkcie już dziś",
       "server_gate": "W produkcie już dziś, sprawdzane pod kątem uprawnień",
-      "declared_boundary_only": "Przygotowane — zacznie działać dopiero z rozliczeniami",
+      "declared_boundary_only": "Jeszcze niedostępne",
       "admin_rbac": "Wewnętrzne, tylko dla administratora"
     }
   },
@@ -9859,7 +9859,7 @@
     "steps": [
       {
         "title": "Zgłoś zapytanie bezpłatnie",
-        "body": "Opisz w formularzu zapytania, jakich pracowników lub jakiej brygady potrzebujesz. Bez opłat, bez karty, nic nie jest publikowane automatycznie."
+        "body": "Opisz w formularzu zapytania, jakich osób lub jakiego zespołu potrzebujesz. Bez opłat, bez karty, nic nie jest publikowane automatycznie."
       },
       {
         "title": "Zapytanie sprawdza człowiek",
@@ -9867,11 +9867,11 @@
       },
       {
         "title": "Otrzymujesz ręcznie sprawdzoną krótką listę",
-        "body": "Prawdziwi kandydaci lub brygady, sprawdzeni przez człowieka pod kątem Twojego zapytania. Jeśli nie uda nam się zebrać odpowiedniej krótkiej listy, nie ma opłaty — i nigdy nie obiecujemy, że kandydat zawsze się znajdzie."
+        "body": "Prawdziwi kandydaci lub zespoły, sprawdzeni przez człowieka pod kątem Twojego zapytania. Jeśli nie uda nam się zebrać odpowiedniej krótkiej listy, nie ma opłaty — i nigdy nie obiecujemy, że kandydat zawsze się znajdzie."
       },
       {
         "title": "Płacisz tylko za zrealizowaną usługę",
-        "body": "Stała opłata za sukces obowiązuje za każdego zatrudnionego pracownika, brygadę lub skierowaną firmę. Osobna opłata koordynacyjna obowiązuje wyłącznie wtedy, gdy koordynacja dokumentów lub wdrożenia zostanie faktycznie zrealizowana. Ostateczna cena jest potwierdzana przed rozpoczęciem płatnych prac."
+        "body": "Opłata za skuteczne zatrudnienie obowiązuje tylko wtedy, gdy została z Tobą wcześniej uzgodniona. Jej wysokość i warunki są potwierdzane na piśmie przed rozpoczęciem jakichkolwiek płatnych prac. Osobna opłata koordynacyjna obowiązuje wyłącznie wtedy, gdy koordynacja dokumentów lub wdrożenia zostanie faktycznie zrealizowana."
       }
     ],
     "note": "Dwie rzeczy działają równolegle, a ta strona opisuje drugą z nich. Sama platforma jest automatyczna: tablica ofert pracy jest publiczna, podgląd dopasowania jest otwarty bez konta, a podane zapytanie tworzy uporządkowaną krótką listę, która wyjaśnia, dlaczego każda osoba pasuje — podanie zapytania jest bezpłatne. Powyższa płatna usługa jest usługą ludzką: operator czyta Twoje zapytanie, kontaktuje się z Tobą i ręcznie sprawdza krótką listę, zanim ktokolwiek zostanie Ci zaproponowany. Cała ekipa może już zaoferować się na Twoje zapytanie jako jedna jednostka i, gdy obie strony się porozumieją, dołączyć do Twojego projektu jako jeden zespół; automatyczna krótka lista nie proponuje jeszcze całych ekip — porządkuje osoby pojedynczo.",
