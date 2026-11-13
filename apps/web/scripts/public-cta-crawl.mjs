@@ -182,6 +182,11 @@ async function visiblePageState(page) {
     theme: document.documentElement.className + (document.documentElement.getAttribute("data-theme") ?? ""),
     focus: document.activeElement ? document.activeElement.tagName + (document.activeElement.id ?? "") : "",
     scroll: Math.round(window.scrollY),
+    // What the fields hold: a control whose whole effect is to fill or clear a field (an
+    // example prompt, a "clear" button) changes no markup, and is not dead.
+    fields: [...document.querySelectorAll("input:not([type=hidden]):not([type=password]), textarea, select")]
+      .map((e) => (e.type === "checkbox" || e.type === "radio" ? (e.checked ? "1" : "0") : String(e.value ?? "")))
+      .join("\u0001"),
   }));
 }
 
@@ -477,7 +482,8 @@ async function crawlPage(context, path, width, discovered) {
         if (!after) break;
         const changed =
           popup || requests > 0 || after.url !== before.url || after.html !== before.html || after.open !== before.open ||
-          after.pressed !== before.pressed || after.theme !== before.theme || after.focus !== before.focus || after.scroll !== before.scroll;
+          after.pressed !== before.pressed || after.theme !== before.theme || after.focus !== before.focus || after.scroll !== before.scroll ||
+          after.fields !== before.fields;
         opened = after.open > before.open;
         dead = !changed;
         if (changed) break;
