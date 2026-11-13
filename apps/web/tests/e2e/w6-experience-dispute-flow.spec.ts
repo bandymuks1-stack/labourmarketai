@@ -101,6 +101,7 @@ test.beforeAll(async () => {
         interaction_id: "aaaaaaaa-0000-0000-0000-0000000e2401",
         body: `${MARK} nepriklausomo autoriaus įrašas.`,
         dispute_status: "none",
+        dispute_reason: null,
       },
       {
         // Written by the account that will act as administrator: a party.
