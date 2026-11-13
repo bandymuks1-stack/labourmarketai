@@ -3847,6 +3847,7 @@
       "blockedLabel": "Blocked",
       "nonWorkerLabel": "Company / agency / customer spaces",
       "nonWorkerStatus": "Coming soon",
+      "nonWorkerStatusActive": "Working",
       "fakeClaimsLabel": "Fake AI / fake matching / fake reputation",
       "fakeClaimsStatus": "Never used"
     },
@@ -3886,67 +3887,116 @@
     "preparing_badge": "Coming soon",
     "overview": {
       "label": "Overview",
-      "description": "Main view with the starting steps, suggestions and opportunities."
+      "description": "Your starting view opens for every role you hold.",
+      "claims": {
+        "home_per_role": "Your starting view opens for every role you hold."
+      }
     },
     "market_map": {
       "label": "Market map",
-      "description": "One unified labour-market map — your own signal, company needs and real data by country / region."
+      "description": "A map marks where work and people are.",
+      "claims": {
+        "map": "A map marks where work and people are."
+      }
     },
     "profile_text_first": {
       "label": "Profile",
-      "description": "Describe yourself in your own words or paste a CV. The system suggests skills, but you select them."
+      "description": "Describe your work in your own words and build your professional profile.",
+      "claims": {
+        "profile": "Describe your work in your own words and build your professional profile."
+      }
     },
     "journal_text_first": {
       "label": "Work or activity record",
-      "description": "Record today's work or activity. The system helps you structure it, but you decide the facts."
+      "description": "Record the work you did today — the entry goes into your Living CV.",
+      "claims": {
+        "entry_to_cv": "Record the work you did today — the entry goes into your Living CV."
+      }
     },
     "communication": {
       "label": "Messages",
-      "description": "Conversations and requests you receive. When someone messages you or sends a request, you'll find it here."
+      "description": "Write to people and companies — the conversation stays in one thread.",
+      "claims": {
+        "threads": "Write to people and companies — the conversation stays in one thread."
+      }
     },
     "account_roles": {
       "label": "Roles",
-      "description": "Review your roles. Working as a person is active today; other actions are added step by step."
+      "description": "One account holds several roles, and you switch between them.",
+      "claims": {
+        "several_roles": "One account holds several roles, and you switch between them."
+      }
     },
     "role_expansion": {
       "label": "More roles",
-      "description": "Later you'll be able to add company, agency and buying actions when they are ready."
+      "description": "You can set up a company from the same account. You can start buying services from the same account.",
+      "claims": {
+        "add_company": "You can set up a company from the same account.",
+        "add_buying": "You can start buying services from the same account."
+      }
     },
     "external_confirmation": {
       "label": "Work records from others",
-      "description": "A manager, client or partner will later be able to add to your work records."
+      "description": "An authorised manager in your organisation confirms the work you recorded.",
+      "claims": {
+        "manager_confirms": "An authorised manager in your organisation confirms the work you recorded."
+      }
     },
     "company_workspace": {
       "label": "Company space",
-      "description": "Team, project and need management for companies."
+      "description": "Set up your organisation and post its first need. The company home opens for the organisation's people.",
+      "claims": {
+        "setup_and_need": "Set up your organisation and post its first need.",
+        "company_home": "The company home opens for the organisation's people."
+      }
     },
     "agency_workspace": {
       "label": "Agency space",
-      "description": "Candidate pool and service offer management for agencies."
+      "description": "An agency keeps its people, connects with clients and offers people for a client's need.",
+      "claims": {
+        "roster_clients_offers": "An agency keeps its people, connects with clients and offers people for a client's need."
+      }
     },
     "customer_workspace": {
       "label": "Customer space",
-      "description": "Service requests and reports for customers."
+      "description": "Save your buyer details and keep your requests in your own list.",
+      "claims": {
+        "record_and_requests": "Save your buyer details and keep your requests in your own list."
+      }
     },
     "document_records": {
       "label": "Document records",
-      "description": "A place for certificates and documents."
+      "description": "Keep your documents and see when each one expires. A company keeps a register of its documents.",
+      "claims": {
+        "own_documents": "Keep your documents and see when each one expires.",
+        "company_register": "A company keeps a register of its documents."
+      }
     },
     "team_offers": {
       "label": "Team offers",
-      "description": "A place to form teams and post joint offers."
+      "description": "A team is offered for a need and taken on as one unit.",
+      "claims": {
+        "team_as_unit": "A team is offered for a need and taken on as one unit."
+      }
     },
     "work_needs": {
       "label": "Work needs",
-      "description": "A place to record what work or help you need."
+      "description": "A company describes the people it needs in one place. People who are interested answer the need.",
+      "claims": {
+        "one_form": "A company describes the people it needs in one place.",
+        "people_answer": "People who are interested answer the need."
+      }
     },
     "service_offers": {
       "label": "Service offers",
-      "description": "A place to publish the services you provide."
+      "description": "Publish the services you offer and receive requests for them.",
+      "claims": {
+        "offer_and_requests": "Publish the services you offer and receive requests for them."
+      }
     },
     "matching": {
-      "label": "Matching",
-      "description": "This product has no matching / ranking engine and will not until one can ship honestly."
+      "label": "Matching with AI",
+      "description": "AI-assisted matching of people and needs."
     },
     "marketplace": {
       "label": "Marketplace",
@@ -3954,16 +4004,35 @@
     },
     "marketplace_hub": {
       "label": "Marketplace",
-      "description": "A compact hub connecting the map, opportunities and your companies."
+      "description": "Takes you to the map that shows work and people.",
+      "claims": {
+        "map": "Takes you to the map that shows work and people."
+      }
     },
     "planning": {
       "label": "Calendar",
-      "description": "One calendar: bookings, projects, tasks, journal entries, invitations and payment deadlines."
+      "description": "A company plans its people's work on a calendar. You see your own work on a calendar.",
+      "claims": {
+        "company_calendar": "A company plans its people's work on a calendar.",
+        "own_calendar": "You see your own work on a calendar."
+      }
     },
     "network": {
       "label": "Network",
-      "description": "People and companies: search, invitations and your relationships."
-    }
+      "description": "Invitations to join a company's team arrive here, and you accept them here.",
+      "claims": {
+        "invitations": "Invitations to join a company's team arrive here, and you accept them here."
+      }
+    },
+    "rule_matching": {
+      "label": "Candidate shortlist",
+      "description": "A stated need gets a shortlist of people who fit it, with the reason for each.",
+      "claims": {
+        "shortlist_with_reason": "A stated need gets a shortlist of people who fit it, with the reason for each."
+      }
+    },
+    "matching_reason": "Switched off: no AI service is connected. The candidate shortlist works meanwhile.",
+    "notCheckedYet": "This part has not been checked in production."
   },
   "structuring": {
     "groupEyebrow": "Suggested skills",
@@ -7135,6 +7204,10 @@
       "title": "Couldn't open that conversation",
       "body": "You may not have permission to message this person, or they're no longer available. Nothing was sent."
     },
+    "noLongerAvailable": {
+      "title": "This conversation is no longer available",
+      "body": "You are no longer a participant in it, so its messages are not shown."
+    },
     "scope": {
       "support": "Support channel",
       "unknown": "Context not specified",
@@ -7174,7 +7247,16 @@
         "blockedFailed": "Remove or re-upload the failed attachment.",
         "partialFailure": "The message was sent, but some attachments couldn't be attached. Try sending them again."
       },
-      "languageLabel": "I am writing in"
+      "languageLabel": "I am writing in",
+      "errors": {
+        "notAuthenticated": "Your session has ended. Sign in again and send the message.",
+        "invalidInput": "This message can't be sent: it may be too long, or an attachment isn't supported.",
+        "notParticipant": "You can't write in this conversation — you don't have access to it.",
+        "rateLimited": "You've sent many messages in the last hour. Wait a little and try again.",
+        "rateCheckUnavailable": "The safety check couldn't run, so nothing was sent. Try again.",
+        "attachmentsUnavailable": "Attachments can't be sent in this conversation yet — add some text to the message.",
+        "sendFailed": "The message couldn't be sent. Your text is still here — try again."
+      }
     },
     "launcher": {
       "openLabel": "Contact support",
@@ -8657,6 +8739,7 @@
     },
     "languagesTitle": "Languages",
     "languagesSelfStated": "Languages as stated by the worker.",
+    "educationSelfStated": "Education as stated by the worker.",
     "certificatesTitle": "Certificates & licences",
     "declaredCertHint": "Listed by the worker",
     "documentSelfSuppliedHint": "Document supplied by the worker",
@@ -20428,7 +20511,7 @@
       "text": "We measure page use and which campaign brought you here only if you allow it.",
       "accept": "Allow measurement",
       "refuse": "Refuse",
-      "more": "More",
+      "more": "More about cookies",
       "label": "Usage measurement choice"
     },
     "control": {
@@ -20439,5 +20522,122 @@
       "allow": "Allow",
       "refuse": "Refuse"
     }
+  },
+  "companyClaim": {
+    "email": {
+      "subject": "Take over the {company} profile on LabourMarket.ai",
+      "intro": "You are invited to manage the profile of {company} on LabourMarket.ai. It is free.",
+      "open": "Open this one-time link:",
+      "validity": "The link is valid for 14 days and works only with this e-mail address.",
+      "notYou": "If you don't represent this company, do nothing: nothing changes without you."
+    },
+    "invite": {
+      "eyebrow": "Company profile",
+      "title": "Take over the {company} profile",
+      "body": "Confirm that you represent this company. This is a request: another LabourMarket.ai operator checks it, and only then do you become the profile's owner.",
+      "verifyFirst": "First confirm that this e-mail address is yours.",
+      "roleLabel": "Your role in the company",
+      "rolePlaceholder": "For example, managing director",
+      "authorityLabel": "I confirm that I may act for {company}.",
+      "submit": "Send the request",
+      "decidedBy": "Another operator decides, not the one who invited you.",
+      "expires": "The invitation is valid until {date}.",
+      "requestedTitle": "Request sent",
+      "requestedBody": "An operator will check your request. Once it is approved, you manage the profile. Until then nothing changes.",
+      "closedTitle": "This invitation can no longer be used",
+      "verifySend": "Send the confirmation link",
+      "pending": "Sending…",
+      "outcome": {
+        "claim_requested": "Request sent.",
+        "already_requested": "You have already sent a request.",
+        "already_used": "This invitation has already been used.",
+        "expired": "The invitation has expired. Ask for a new one.",
+        "revoked": "The invitation was withdrawn.",
+        "email_mismatch": "This invitation is for another e-mail address. Sign in with the address the e-mail was sent to.",
+        "email_not_verified": "First confirm your e-mail address.",
+        "authority_not_confirmed": "Tick the box to confirm that you may act for the company.",
+        "invalid_role": "Enter your role (2–80 characters).",
+        "not_claimable": "This company profile can no longer be taken over.",
+        "inviter_cannot_claim": "The operator who sent the invitation cannot use it to take over the company.",
+        "operator_cannot_claim": "A person with operator rights cannot take over a company.",
+        "verify_sent": "We sent a link to your e-mail. Open it and you'll come back here.",
+        "verify_rate_limited": "We sent a link a moment ago. Check your e-mail or try again later.",
+        "error": "That didn't work. Try again later."
+      }
+    }
+  },
+  "siteNav": {
+    "signUp": "Sign up",
+    "trigger": "Main choices",
+    "account": "After sign-in",
+    "intents": {
+      "work": {
+        "title": "Looking for work",
+        "description": "Find jobs and show what you can do.",
+        "short": "Find work"
+      },
+      "workers": {
+        "title": "Looking for workers",
+        "description": "Describe the work you need done.",
+        "short": "Find workers"
+      },
+      "services": {
+        "title": "Offering services",
+        "description": "Publish what you offer and answer requests.",
+        "short": "Offer services"
+      },
+      "orders": {
+        "title": "Looking for orders and contracts",
+        "description": "Find work requests and keep proposals together.",
+        "short": "Find orders"
+      },
+      "partners": {
+        "title": "Looking for partners",
+        "description": "Connect with the people and organisations you work with.",
+        "short": "Find partners"
+      },
+      "agencies": {
+        "title": "For agencies",
+        "description": "Run your agency's people, clients and offers.",
+        "short": "For agencies"
+      }
+    },
+    "links": {
+      "jobs": "Job board",
+      "workOpportunities": "Work opportunities",
+      "createCv": "Create a free CV",
+      "workAbroad": "Work abroad",
+      "forWorkers": "How it works for workers",
+      "companyNeed": "Describe your need",
+      "forCompanies": "How it works for companies",
+      "labourMarket": "Labour market by country",
+      "myServices": "Your services",
+      "serviceRequests": "Service requests",
+      "marketListings": "Market listings",
+      "commercial": "Proposals and contracts",
+      "network": "Your network",
+      "partnerWithUs": "Partner with us",
+      "forAgencies": "How it works for agencies",
+      "setUpAgency": "Set up your agency"
+    },
+    "assistant": "Ask the assistant",
+    "start": {
+      "searchLabel": "Search jobs",
+      "searchPlaceholder": "Job title or keyword",
+      "searchSubmit": "Search",
+      "viewAll": "View all jobs"
+    },
+    "nav": {
+      "heading": "What do you want to do?",
+      "swipe": "Swipe",
+      "close": "Close",
+      "functions": "Functions",
+      "professions": "Professions",
+      "opensNow": "Opens now",
+      "signInWhenOpen": "Sign in when you open it",
+      "allSectors": "All sectors",
+      "fullList": "Full list"
+    },
+    "more": "More"
   }
 }

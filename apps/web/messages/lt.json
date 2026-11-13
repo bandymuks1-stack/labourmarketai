@@ -3847,6 +3847,7 @@
       "blockedLabel": "Užblokuota",
       "nonWorkerLabel": "Įmonės / agentūros / pirkėjo erdvės",
       "nonWorkerStatus": "Netrukus",
+      "nonWorkerStatusActive": "Veikia",
       "fakeClaimsLabel": "Netikras dirbtinis intelektas / netikras atitikimas / netikra reputacija",
       "fakeClaimsStatus": "Niekada nenaudojama"
     },
@@ -3886,67 +3887,116 @@
     "preparing_badge": "Netrukus",
     "overview": {
       "label": "Apžvalga",
-      "description": "Pagrindinis langas su pradžia, pasiūlymais ir galimybėmis."
+      "description": "Pradžios vaizdas atsidaro kiekvienam tavo turimam vaidmeniui.",
+      "claims": {
+        "home_per_role": "Pradžios vaizdas atsidaro kiekvienam tavo turimam vaidmeniui."
+      }
     },
     "market_map": {
       "label": "Rinkos žemėlapis",
-      "description": "Vieningas darbo rinkos žemėlapis — tavo signalas, įmonių poreikiai ir realūs duomenys pagal šalį / regioną."
+      "description": "Žemėlapis žymekliais rodo, kur yra darbo ir žmonių.",
+      "claims": {
+        "map": "Žemėlapis žymekliais rodo, kur yra darbo ir žmonių."
+      }
     },
     "profile_text_first": {
       "label": "Profilis",
-      "description": "Apibūdink save savais žodžiais arba įklijuok CV. Sistema pasiūlys įgūdžius, kuriuos pasirinksi tu."
+      "description": "Savais žodžiais aprašyk savo darbą ir susikurk profesinį profilį.",
+      "claims": {
+        "profile": "Savais žodžiais aprašyk savo darbą ir susikurk profesinį profilį."
+      }
     },
     "journal_text_first": {
       "label": "Darbo ar veiklos įrašas",
-      "description": "Užfiksuok šiandienos darbą arba veiklą. Sistema padės struktūruoti, bet faktus nustatai tu."
+      "description": "Užsirašyk, ką šiandien dirbai — įrašas patenka į tavo Gyvą CV.",
+      "claims": {
+        "entry_to_cv": "Užsirašyk, ką šiandien dirbai — įrašas patenka į tavo Gyvą CV."
+      }
     },
     "communication": {
       "label": "Žinutės",
-      "description": "Pokalbiai ir gauti prašymai. Kai kas nors tau parašo arba atsiunčia prašymą, jį rasi čia."
+      "description": "Rašyk žmonėms ir įmonėms — pokalbis lieka vienoje gijoje.",
+      "claims": {
+        "threads": "Rašyk žmonėms ir įmonėms — pokalbis lieka vienoje gijoje."
+      }
     },
     "account_roles": {
       "label": "Vaidmenys",
-      "description": "Peržiūrėk savo vaidmenis. Veikla kaip asmuo aktyvi šiandien; kiti veiksmai pridedami palaipsniui."
+      "description": "Vienoje paskyroje gali būti keli vaidmenys, o tarp jų persijungi.",
+      "claims": {
+        "several_roles": "Vienoje paskyroje gali būti keli vaidmenys, o tarp jų persijungi."
+      }
     },
     "role_expansion": {
       "label": "Daugiau vaidmenų",
-      "description": "Vėliau galėsi pridėti įmonės, agentūros ir pirkimo veiksmus, kai jie bus paruošti."
+      "description": "Iš tos pačios paskyros gali susikurti įmonę. Iš tos pačios paskyros gali pradėti pirkti paslaugas.",
+      "claims": {
+        "add_company": "Iš tos pačios paskyros gali susikurti įmonę.",
+        "add_buying": "Iš tos pačios paskyros gali pradėti pirkti paslaugas."
+      }
     },
     "external_confirmation": {
       "label": "Darbo įrašai iš kitų",
-      "description": "Vadovas, klientas ar partneris vėliau galės papildyti tavo darbo įrašus."
+      "description": "Įgaliotas tavo organizacijos vadovas patvirtina darbą, kurį užrašei.",
+      "claims": {
+        "manager_confirms": "Įgaliotas tavo organizacijos vadovas patvirtina darbą, kurį užrašei."
+      }
     },
     "company_workspace": {
       "label": "Įmonės erdvė",
-      "description": "Komandų, projektų ir poreikių valdymo erdvė įmonėms."
+      "description": "Susikurk organizaciją ir paskelbk pirmą jos poreikį. Įmonės pradžia atsidaro organizacijos žmonėms.",
+      "claims": {
+        "setup_and_need": "Susikurk organizaciją ir paskelbk pirmą jos poreikį.",
+        "company_home": "Įmonės pradžia atsidaro organizacijos žmonėms."
+      }
     },
     "agency_workspace": {
       "label": "Agentūros erdvė",
-      "description": "Kandidatų ir paslaugų pasiūlos valdymo erdvė agentūroms."
+      "description": "Agentūra turi savo žmones, susijungia su klientais ir siūlo žmones kliento poreikiui.",
+      "claims": {
+        "roster_clients_offers": "Agentūra turi savo žmones, susijungia su klientais ir siūlo žmones kliento poreikiui."
+      }
     },
     "customer_workspace": {
       "label": "Pirkėjo erdvė",
-      "description": "Paslaugų užklausų ir ataskaitų erdvė klientams."
+      "description": "Išsaugok savo pirkėjo duomenis ir laikyk užklausas savo sąraše.",
+      "claims": {
+        "record_and_requests": "Išsaugok savo pirkėjo duomenis ir laikyk užklausas savo sąraše."
+      }
     },
     "document_records": {
       "label": "Dokumentų įrašai",
-      "description": "Pažymėjimų ir dokumentų saugojimo erdvė."
+      "description": "Laikyk savo dokumentus ir matyk, kada baigiasi kiekvieno galiojimas. Įmonė veda savo dokumentų registrą.",
+      "claims": {
+        "own_documents": "Laikyk savo dokumentus ir matyk, kada baigiasi kiekvieno galiojimas.",
+        "company_register": "Įmonė veda savo dokumentų registrą."
+      }
     },
     "team_offers": {
       "label": "Komandos pasiūlymai",
-      "description": "Komandų suformavimo ir bendrų pasiūlymų erdvė."
+      "description": "Komanda pasiūloma ir priimama poreikiui kaip vienas vienetas.",
+      "claims": {
+        "team_as_unit": "Komanda pasiūloma ir priimama poreikiui kaip vienas vienetas."
+      }
     },
     "work_needs": {
       "label": "Darbo poreikiai",
-      "description": "Vieta užfiksuoti, kokio darbo ar pagalbos tau reikia."
+      "description": "Įmonė vienoje vietoje aprašo, kokių žmonių jai reikia. Susidomėję žmonės atsiliepia į poreikį.",
+      "claims": {
+        "one_form": "Įmonė vienoje vietoje aprašo, kokių žmonių jai reikia.",
+        "people_answer": "Susidomėję žmonės atsiliepia į poreikį."
+      }
     },
     "service_offers": {
       "label": "Paslaugų pasiūla",
-      "description": "Vieta paskelbti tavo teikiamas paslaugas."
+      "description": "Paskelbk paslaugas, kurias teiki, ir gauk jų užklausas.",
+      "claims": {
+        "offer_and_requests": "Paskelbk paslaugas, kurias teiki, ir gauk jų užklausas."
+      }
     },
     "matching": {
-      "label": "Atitikimas",
-      "description": "Šiame produkte nėra atitikimo / reitingavimo variklio ir nebus, kol jis nebus padarytas sąžiningai."
+      "label": "DI atitikimas",
+      "description": "Žmonių ir poreikių atitikimas padedant dirbtiniam intelektui."
     },
     "marketplace": {
       "label": "Prekyvietė",
@@ -3954,16 +4004,35 @@
     },
     "marketplace_hub": {
       "label": "Prekyvietė",
-      "description": "Kompaktiškas centras, jungiantis žemėlapį, galimybes ir tavo įmones."
+      "description": "Atveda į žemėlapį, kuriame matyti darbai ir žmonės.",
+      "claims": {
+        "map": "Atveda į žemėlapį, kuriame matyti darbai ir žmonės."
+      }
     },
     "planning": {
       "label": "Kalendorius",
-      "description": "Vienas kalendorius: rezervacijos, projektai, užduotys, žurnalo įrašai, kvietimai ir mokėjimų terminai."
+      "description": "Įmonė planuoja savo žmonių darbus kalendoriuje. Savo darbus matai kalendoriuje.",
+      "claims": {
+        "company_calendar": "Įmonė planuoja savo žmonių darbus kalendoriuje.",
+        "own_calendar": "Savo darbus matai kalendoriuje."
+      }
     },
     "network": {
       "label": "Ryšiai",
-      "description": "Žmonės ir įmonės: paieška, kvietimai ir tavo ryšiai."
-    }
+      "description": "Čia gauni kvietimus prisijungti prie įmonės komandos ir juos priimi.",
+      "claims": {
+        "invitations": "Čia gauni kvietimus prisijungti prie įmonės komandos ir juos priimi."
+      }
+    },
+    "rule_matching": {
+      "label": "Kandidatų trumpasis sąrašas",
+      "description": "Aprašytam poreikiui sudaromas tinkamų žmonių sąrašas su kiekvieno priežastimi.",
+      "claims": {
+        "shortlist_with_reason": "Aprašytam poreikiui sudaromas tinkamų žmonių sąrašas su kiekvieno priežastimi."
+      }
+    },
+    "matching_reason": "Išjungta: neprijungta jokia DI paslauga. Kol kas veikia kandidatų trumpasis sąrašas.",
+    "notCheckedYet": "Ši dalis produkcijoje dar nepatikrinta."
   },
   "structuring": {
     "groupEyebrow": "Siūlomi įgūdžiai",
@@ -4160,13 +4229,13 @@
     },
     "errors": {
       "userAlreadyRegistered": "Šis el. paštas jau registruotas. Prisijunk vietoj registracijos.",
-      "passwordTooShort": "Slaptažodis per trumpas (bent {min} simbolių).",
+      "passwordTooShort": "Slaptažodis per trumpas (bent {min} simboliai).",
       "invalidCredentials": "Neteisingas el. paštas arba slaptažodis.",
       "invalidEmail": "Netaisyklingas el. pašto formatas.",
       "rateLimited": "Per daug bandymų. Pabandyk vėliau.",
       "generic": "Įvyko klaida. Bandyk dar kartą.",
       "oauth": {
-        "missing_code": "Prisijungimo paslauga grąžino atgal be prisijungimo kodo. Pabandyk dar kartą — jei kartojasi, perkrauk naršyklę.",
+        "missing_code": "Prisijungimo paslauga grąžino atgal be prisijungimo kodo. Pabandyk dar kartą — jei kartojasi, perkrauk puslapį.",
         "exchange_failed": "Prisijungti nepavyko. Pabandyk dar kartą — prisijungimo kodas galioja trumpai ir tik vieną kartą.",
         "no_user": "Prisijungti pavyko, bet paskyros pasiekti nepavyko. Atsijunk ir prisijunk iš naujo.",
         "callback": "Įvyko nelaukta klaida prisijungimo metu. Pabandyk dar kartą — jei tęsiasi, atsiųsk žemiau pateiktą trace ID.",
@@ -4194,7 +4263,7 @@
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",
       "email_label": "El. paštas",
-      "email_placeholder": "vardas@pastas.lt",
+      "email_placeholder": "vardas@example.com",
       "password_label": "Slaptažodis",
       "password_help": "Bent 8 simboliai, 1 didžioji raidė, 1 skaičius, 1 specialusis (!@#$%).",
       "confirm_password_label": "Pakartok slaptažodį",
@@ -4239,7 +4308,7 @@
       "error_password_required": "Įvesk slaptažodį.",
       "error_invalid_credentials": "Neteisingas el. paštas arba slaptažodis.",
       "google_hint": "Registravaisi su socialine paskyra („Google“, „LinkedIn“ ar „Facebook“)? Tuomet slaptažodžio nereikia — spausk tos paslaugos mygtuką viršuje.",
-      "preview_host_notice": "Esi peržiūros (preview) versijoje. Google prisijungimas veikia tik tikrojoje svetainėje — atidaryk https://labourmarket.ai ir prisijunk ten. Prisijungimas el. paštu ir slaptažodžiu čia veikia kaip įprasta.",
+      "preview_host_notice": "Esi peržiūros versijoje. Google prisijungimas veikia tik tikrojoje svetainėje — atidaryk https://labourmarket.ai ir prisijunk ten. Prisijungimas el. paštu ir slaptažodžiu čia veikia kaip įprasta.",
       "google_recovery_label": "Prisijungti per Google — atsarginis būdas (laikinas, per išorinį prisijungimo puslapį)",
       "resend_confirmation": "Siųsti naują patvirtinimo nuorodą",
       "resend_sent": "Nauja patvirtinimo nuoroda išsiųsta adresu {email}."
@@ -4274,7 +4343,7 @@
     "callback": {
       "verifying": "Tikrinama tavo prisijungimo nuoroda...",
       "error_title": "Nepavyko prisijungti",
-      "error_body": "Nuoroda nebegalioja arba sugadinta. Bandyk dar kartą.",
+      "error_body": "Ši nuoroda negalioja arba baigėsi jos galiojimas. Bandyk dar kartą.",
       "retry": "Bandyti dar kartą"
     },
     "onboarding": {
@@ -7135,6 +7204,10 @@
       "title": "Nepavyko atidaryti pokalbio",
       "body": "Galbūt neturi teisės rašyti šiam asmeniui arba jis nebepasiekiamas. Niekas neišsiųsta."
     },
+    "noLongerAvailable": {
+      "title": "Šis pokalbis jums nebepasiekiamas",
+      "body": "Jūs nebe šio pokalbio dalyvis, todėl jo žinutės nerodomos."
+    },
     "scope": {
       "support": "Pagalbos kanalas",
       "unknown": "Kontekstas nepatikslintas",
@@ -7174,7 +7247,16 @@
         "blockedFailed": "Pašalink arba iš naujo įkelk nepavykusį priedą.",
         "partialFailure": "Žinutė išsiųsta, bet dalies priedų prisegti nepavyko. Pabandyk juos išsiųsti dar kartą."
       },
-      "languageLabel": "Rašau"
+      "languageLabel": "Rašau",
+      "errors": {
+        "notAuthenticated": "Sesija baigėsi. Prisijunk iš naujo ir išsiųsk žinutę.",
+        "invalidInput": "Šios žinutės išsiųsti negalima: ji gali būti per ilga arba priedas nepalaikomas.",
+        "notParticipant": "Šiame pokalbyje rašyti negali — neturi prieigos.",
+        "rateLimited": "Per pastarąją valandą išsiuntei daug žinučių. Šiek tiek palauk ir bandyk dar kartą.",
+        "rateCheckUnavailable": "Saugumo patikros atlikti nepavyko, todėl niekas neišsiųsta. Bandyk dar kartą.",
+        "attachmentsUnavailable": "Priedų siuntimas čia dar neįjungtas — įrašyk ir tekstą.",
+        "sendFailed": "Žinutės išsiųsti nepavyko. Tavo tekstas liko — bandyk dar kartą."
+      }
     },
     "launcher": {
       "openLabel": "Susisiekti su pagalba",
@@ -8657,6 +8739,7 @@
     },
     "languagesTitle": "Kalbos",
     "languagesSelfStated": "Kalbos, kaip jas nurodė darbuotojas.",
+    "educationSelfStated": "Išsilavinimas, kaip nurodė darbuotojas.",
     "certificatesTitle": "Sertifikatai ir pažymėjimai",
     "declaredCertHint": "Nurodyta pačių",
     "documentSelfSuppliedHint": "Dokumentą pateikė pats darbuotojas",
@@ -20428,7 +20511,7 @@
       "text": "Puslapių naudojimą ir kampaniją, iš kurios atėjai, matuojame tik tau leidus.",
       "accept": "Leisti matavimą",
       "refuse": "Atsisakyti",
-      "more": "Daugiau",
+      "more": "Daugiau apie slapukus",
       "label": "Naudojimo matavimo pasirinkimas"
     },
     "control": {
@@ -20439,5 +20522,122 @@
       "allow": "Leisti",
       "refuse": "Atsisakyti"
     }
+  },
+  "companyClaim": {
+    "email": {
+      "subject": "Perimk {company} profilį LabourMarket.ai",
+      "intro": "Tave pakvietė valdyti įmonės {company} profilį LabourMarket.ai. Tai nemokama.",
+      "open": "Atidaryk šią vienkartinę nuorodą:",
+      "validity": "Nuoroda galioja 14 dienų ir veikia tik su šiuo el. pašto adresu.",
+      "notYou": "Jei tu neatstovauji šiai įmonei, nieko nedaryk: be tavęs niekas nepasikeis."
+    },
+    "invite": {
+      "eyebrow": "Įmonės profilis",
+      "title": "Perimk {company} profilį",
+      "body": "Patvirtink, kad atstovauji šiai įmonei. Tai prašymas: kitas LabourMarket.ai operatorius jį patikrins, ir tik tada tapsi profilio savininku.",
+      "verifyFirst": "Pirmiausia patvirtink, kad šis el. pašto adresas tavo.",
+      "roleLabel": "Tavo pareigos įmonėje",
+      "rolePlaceholder": "Pvz., direktorius",
+      "authorityLabel": "Patvirtinu, kad turiu teisę atstovauti įmonei {company}.",
+      "submit": "Pateikti prašymą",
+      "decidedBy": "Sprendžia kitas operatorius, ne tas, kuris tave pakvietė.",
+      "expires": "Kvietimas galioja iki {date}.",
+      "requestedTitle": "Prašymas pateiktas",
+      "requestedBody": "Operatorius patikrins tavo prašymą. Kai jis bus patvirtintas, profilį valdysi tu. Iki tol niekas nepasikeis.",
+      "closedTitle": "Šio kvietimo naudoti nebegalima",
+      "verifySend": "Siųsti patvirtinimo nuorodą",
+      "pending": "Siunčiama…",
+      "outcome": {
+        "claim_requested": "Prašymas pateiktas.",
+        "already_requested": "Prašymą jau pateikei.",
+        "already_used": "Šis kvietimas jau panaudotas.",
+        "expired": "Kvietimo galiojimas baigėsi. Paprašyk naujo.",
+        "revoked": "Kvietimas atšauktas.",
+        "email_mismatch": "Šis kvietimas skirtas kitam el. pašto adresui. Prisijunk su tuo adresu, kuriuo gavai laišką.",
+        "email_not_verified": "Pirmiausia patvirtink savo el. pašto adresą.",
+        "authority_not_confirmed": "Pažymėk, kad turi teisę atstovauti įmonei.",
+        "invalid_role": "Įrašyk savo pareigas (2–80 simbolių).",
+        "not_claimable": "Šios įmonės profilio perimti nebegalima.",
+        "inviter_cannot_claim": "Kvietimą siuntęs operatorius negali juo perimti įmonės.",
+        "operator_cannot_claim": "Operatoriaus teises turintis asmuo negali perimti įmonės.",
+        "verify_sent": "Išsiuntėme nuorodą į tavo el. paštą. Atidaryk ją ir grįši čia.",
+        "verify_rate_limited": "Nuorodą neseniai jau siuntėme. Patikrink el. paštą arba bandyk vėliau.",
+        "error": "Nepavyko. Bandyk dar kartą vėliau."
+      }
+    }
+  },
+  "siteNav": {
+    "signUp": "Registruotis",
+    "trigger": "Pagrindiniai pasirinkimai",
+    "account": "Prisijungus",
+    "intents": {
+      "work": {
+        "title": "Ieškau darbo",
+        "description": "Raskite darbą ir parodykite, ką mokate.",
+        "short": "Ieškau darbo"
+      },
+      "workers": {
+        "title": "Ieškau darbuotojų",
+        "description": "Aprašykite, kokio darbo reikia.",
+        "short": "Ieškau darbuotojų"
+      },
+      "services": {
+        "title": "Siūlau paslaugas",
+        "description": "Paskelbkite, ką siūlote, ir atsakykite į užklausas.",
+        "short": "Siūlau paslaugas"
+      },
+      "orders": {
+        "title": "Ieškau užsakymų ir sutarčių",
+        "description": "Raskite darbo užklausas ir laikykite pasiūlymus vienoje vietoje.",
+        "short": "Ieškau užsakymų"
+      },
+      "partners": {
+        "title": "Ieškau partnerių",
+        "description": "Susiekite su žmonėmis ir organizacijomis, su kuriais dirbate.",
+        "short": "Ieškau partnerių"
+      },
+      "agencies": {
+        "title": "Agentūroms",
+        "description": "Valdykite agentūros žmones, klientus ir pasiūlymus.",
+        "short": "Agentūroms"
+      }
+    },
+    "links": {
+      "jobs": "Darbo skelbimai",
+      "workOpportunities": "Darbo galimybės",
+      "createCv": "Sukurti nemokamą CV",
+      "workAbroad": "Darbas užsienyje",
+      "forWorkers": "Kaip tai veikia darbuotojams",
+      "companyNeed": "Aprašyti poreikį",
+      "forCompanies": "Kaip tai veikia įmonėms",
+      "labourMarket": "Darbo rinka pagal šalį",
+      "myServices": "Jūsų paslaugos",
+      "serviceRequests": "Paslaugų užklausos",
+      "marketListings": "Rinkos skelbimai",
+      "commercial": "Pasiūlymai ir sutartys",
+      "network": "Jūsų tinklas",
+      "partnerWithUs": "Tapti partneriu",
+      "forAgencies": "Kaip tai veikia agentūroms",
+      "setUpAgency": "Sukurti agentūrą"
+    },
+    "assistant": "Klausti asistento",
+    "start": {
+      "searchLabel": "Ieškoti darbo",
+      "searchPlaceholder": "Pareigos arba raktažodis",
+      "searchSubmit": "Ieškoti",
+      "viewAll": "Visi darbo skelbimai"
+    },
+    "nav": {
+      "heading": "Ką norite padaryti?",
+      "swipe": "Braukite",
+      "close": "Uždaryti",
+      "functions": "Funkcijos",
+      "professions": "Profesijos",
+      "opensNow": "Atsidaro iškart",
+      "signInWhenOpen": "Prisijungsite atidarę",
+      "allSectors": "Visi sektoriai",
+      "fullList": "Visas sąrašas"
+    },
+    "more": "Daugiau"
   }
 }

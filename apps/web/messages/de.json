@@ -3847,6 +3847,7 @@
       "blockedLabel": "Blockiert",
       "nonWorkerLabel": "Unternehmens- / Agentur- / Kundenbereiche",
       "nonWorkerStatus": "In Vorbereitung",
+      "nonWorkerStatusActive": "In Betrieb",
       "fakeClaimsLabel": "Gefälschte KI / gefälschtes Matching / gefälschte Reputation",
       "fakeClaimsStatus": "Nie verwendet"
     },
@@ -3886,67 +3887,116 @@
     "preparing_badge": "In Vorbereitung",
     "overview": {
       "label": "Übersicht",
-      "description": "Hauptansicht mit den ersten Schritten, Vorschlägen und Chancen."
+      "description": "Ihre Startansicht öffnet sich für jede Rolle, die Sie haben.",
+      "claims": {
+        "home_per_role": "Ihre Startansicht öffnet sich für jede Rolle, die Sie haben."
+      }
     },
     "market_map": {
       "label": "Marktkarte",
-      "description": "Eine einheitliche Arbeitsmarktkarte — Ihr eigenes Signal, Personalbedarfe von Unternehmen und echte Daten nach Land / Region."
+      "description": "Eine Karte markiert, wo es Arbeit und Menschen gibt.",
+      "claims": {
+        "map": "Eine Karte markiert, wo es Arbeit und Menschen gibt."
+      }
     },
     "profile_text_first": {
       "label": "Profil",
-      "description": "Beschreiben Sie sich in eigenen Worten oder fügen Sie einen Lebenslauf ein. Das System schlägt Fähigkeiten vor, aber Sie wählen sie aus."
+      "description": "Beschreiben Sie Ihre Arbeit in eigenen Worten und erstellen Sie Ihr berufliches Profil.",
+      "claims": {
+        "profile": "Beschreiben Sie Ihre Arbeit in eigenen Worten und erstellen Sie Ihr berufliches Profil."
+      }
     },
     "journal_text_first": {
       "label": "Arbeits- oder Tätigkeitseintrag",
-      "description": "Erfassen Sie die heutige Arbeit oder Tätigkeit. Das System hilft Ihnen bei der Strukturierung, aber Sie entscheiden über die Fakten."
+      "description": "Halten Sie fest, was Sie heute gearbeitet haben — der Eintrag fließt in Ihren Living CV.",
+      "claims": {
+        "entry_to_cv": "Halten Sie fest, was Sie heute gearbeitet haben — der Eintrag fließt in Ihren Living CV."
+      }
     },
     "communication": {
       "label": "Nachrichten",
-      "description": "Unterhaltungen und Anfragen, die Sie erhalten. Wenn Ihnen jemand schreibt oder eine Anfrage sendet, finden Sie sie hier."
+      "description": "Schreiben Sie Personen und Unternehmen — das Gespräch bleibt in einem Verlauf.",
+      "claims": {
+        "threads": "Schreiben Sie Personen und Unternehmen — das Gespräch bleibt in einem Verlauf."
+      }
     },
     "account_roles": {
       "label": "Rollen",
-      "description": "Überprüfen Sie Ihre Rollen. Das Arbeiten als Person ist heute aktiv; weitere Aktionen werden Schritt für Schritt hinzugefügt."
+      "description": "Ein Konto enthält mehrere Rollen, zwischen denen Sie wechseln.",
+      "claims": {
+        "several_roles": "Ein Konto enthält mehrere Rollen, zwischen denen Sie wechseln."
+      }
     },
     "role_expansion": {
       "label": "Weitere Rollen",
-      "description": "Später können Sie Aktionen für Unternehmen, Personalagenturen und Einkauf hinzufügen, sobald sie bereit sind."
+      "description": "Sie können vom selben Konto aus ein Unternehmen anlegen. Sie können vom selben Konto aus Leistungen einkaufen.",
+      "claims": {
+        "add_company": "Sie können vom selben Konto aus ein Unternehmen anlegen.",
+        "add_buying": "Sie können vom selben Konto aus Leistungen einkaufen."
+      }
     },
     "external_confirmation": {
       "label": "Arbeitseinträge von anderen",
-      "description": "Ein Vorgesetzter, Kunde oder Partner kann später Ihre Arbeitseinträge ergänzen."
+      "description": "Eine berechtigte Führungskraft Ihrer Organisation bestätigt die Arbeit, die Sie erfasst haben.",
+      "claims": {
+        "manager_confirms": "Eine berechtigte Führungskraft Ihrer Organisation bestätigt die Arbeit, die Sie erfasst haben."
+      }
     },
     "company_workspace": {
       "label": "Unternehmensbereich",
-      "description": "Team-, Projekt- und Bedarfsverwaltung für Unternehmen."
+      "description": "Legen Sie Ihre Organisation an und veröffentlichen Sie ihren ersten Bedarf. Die Unternehmensstartseite öffnet sich für die Leute der Organisation.",
+      "claims": {
+        "setup_and_need": "Legen Sie Ihre Organisation an und veröffentlichen Sie ihren ersten Bedarf.",
+        "company_home": "Die Unternehmensstartseite öffnet sich für die Leute der Organisation."
+      }
     },
     "agency_workspace": {
       "label": "Agenturbereich",
-      "description": "Kandidatenpool- und Serviceangebotsverwaltung für Personalagenturen."
+      "description": "Eine Agentur führt ihre Leute, verbindet sich mit Kunden und bietet Leute für den Bedarf eines Kunden an.",
+      "claims": {
+        "roster_clients_offers": "Eine Agentur führt ihre Leute, verbindet sich mit Kunden und bietet Leute für den Bedarf eines Kunden an."
+      }
     },
     "customer_workspace": {
       "label": "Kundenbereich",
-      "description": "Serviceanfragen und Berichte für Kunden."
+      "description": "Speichern Sie Ihre Angaben als Auftraggeber und führen Sie Ihre Anfragen in Ihrer eigenen Liste.",
+      "claims": {
+        "record_and_requests": "Speichern Sie Ihre Angaben als Auftraggeber und führen Sie Ihre Anfragen in Ihrer eigenen Liste."
+      }
     },
     "document_records": {
       "label": "Dokumenteneinträge",
-      "description": "Ein Ort für Zertifikate und Dokumente."
+      "description": "Bewahren Sie Ihre Dokumente auf und sehen Sie, wann jedes abläuft. Ein Unternehmen führt ein Register seiner Dokumente.",
+      "claims": {
+        "own_documents": "Bewahren Sie Ihre Dokumente auf und sehen Sie, wann jedes abläuft.",
+        "company_register": "Ein Unternehmen führt ein Register seiner Dokumente."
+      }
     },
     "team_offers": {
       "label": "Teamangebote",
-      "description": "Ein Ort, um Teams zu bilden und gemeinsame Angebote zu veröffentlichen."
+      "description": "Ein Team wird für einen Bedarf angeboten und als eine Einheit übernommen.",
+      "claims": {
+        "team_as_unit": "Ein Team wird für einen Bedarf angeboten und als eine Einheit übernommen."
+      }
     },
     "work_needs": {
       "label": "Arbeitsbedarf",
-      "description": "Ein Ort, um festzuhalten, welche Arbeit oder Hilfe Sie benötigen."
+      "description": "Ein Unternehmen beschreibt an einer Stelle, welche Leute es braucht. Interessierte Personen melden sich auf den Bedarf.",
+      "claims": {
+        "one_form": "Ein Unternehmen beschreibt an einer Stelle, welche Leute es braucht.",
+        "people_answer": "Interessierte Personen melden sich auf den Bedarf."
+      }
     },
     "service_offers": {
       "label": "Serviceangebote",
-      "description": "Ein Ort, um die von Ihnen angebotenen Dienstleistungen zu veröffentlichen."
+      "description": "Veröffentlichen Sie Ihre Leistungen und erhalten Sie Anfragen dazu.",
+      "claims": {
+        "offer_and_requests": "Veröffentlichen Sie Ihre Leistungen und erhalten Sie Anfragen dazu."
+      }
     },
     "matching": {
-      "label": "Matching",
-      "description": "Dieses Produkt hat keine Matching-/Ranking-Engine und wird keine haben, bis eine ehrlich ausgeliefert werden kann."
+      "label": "KI-Matching",
+      "description": "KI-gestütztes Matching von Menschen und Bedarf."
     },
     "marketplace": {
       "label": "Marktplatz",
@@ -3954,16 +4004,35 @@
     },
     "marketplace_hub": {
       "label": "Marktplatz",
-      "description": "Ein kompakter Hub, der die Karte, Chancen und Ihre Unternehmen verbindet."
+      "description": "Führt Sie zur Karte, die Arbeit und Menschen zeigt.",
+      "claims": {
+        "map": "Führt Sie zur Karte, die Arbeit und Menschen zeigt."
+      }
     },
     "planning": {
       "label": "Kalender",
-      "description": "Ein Kalender: Buchungen, Projekte, Aufgaben, Journaleinträge, Einladungen und Zahlungsfristen."
+      "description": "Ein Unternehmen plant die Arbeit seiner Leute im Kalender. Sie sehen Ihre eigene Arbeit im Kalender.",
+      "claims": {
+        "company_calendar": "Ein Unternehmen plant die Arbeit seiner Leute im Kalender.",
+        "own_calendar": "Sie sehen Ihre eigene Arbeit im Kalender."
+      }
     },
     "network": {
       "label": "Netzwerk",
-      "description": "Personen und Unternehmen: Suche, Einladungen und Ihre Beziehungen."
-    }
+      "description": "Einladungen in das Team eines Unternehmens kommen hier an, und hier nehmen Sie sie an.",
+      "claims": {
+        "invitations": "Einladungen in das Team eines Unternehmens kommen hier an, und hier nehmen Sie sie an."
+      }
+    },
+    "rule_matching": {
+      "label": "Kandidaten-Shortlist",
+      "description": "Ein beschriebener Bedarf erhält eine Kurzliste passender Personen, mit dem Grund für jede.",
+      "claims": {
+        "shortlist_with_reason": "Ein beschriebener Bedarf erhält eine Kurzliste passender Personen, mit dem Grund für jede."
+      }
+    },
+    "matching_reason": "Ausgeschaltet: Es ist kein KI-Dienst angebunden. Die Kandidaten-Shortlist funktioniert bereits.",
+    "notCheckedYet": "Dieser Teil ist im Live-Betrieb noch nicht geprüft."
   },
   "structuring": {
     "groupEyebrow": "Vorgeschlagene Fähigkeiten",
@@ -4194,7 +4263,7 @@
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
       "email_label": "E-Mail-Adresse",
-      "email_placeholder": "name@beispiel.de",
+      "email_placeholder": "ihr.name@example.com",
       "password_label": "Passwort",
       "password_help": "Min. 8 Zeichen, 1 Großbuchstabe, 1 Zahl, 1 Sonderzeichen (!@#$%).",
       "confirm_password_label": "Passwort bestätigen",
@@ -5249,7 +5318,7 @@
       "subcopy": "Verwalten Sie Ihre Arbeitskräfte, verbinden Sie sie mit Kundenbedarfen und vermitteln Sie Kontakte — ohne Übersicht oder Kontrolle zu verlieren.",
       "bullets": [
         "Poolgröße — jede verwaltete Arbeitskraft auf einen Blick.",
-        "Gewerke-Aufschlüsselung — Kapazität nach Fähigkeit, live.",
+        "Aufschlüsselung nach Beruf — Kapazität nach Fähigkeit, wie in den Profilen angegeben.",
         "Einsatzstatus — Aktiv, Ausstehend, Verfügbar.",
         "Mehrere Kunden — setzen Sie die richtigen Leute bei verschiedenen Kunden ein."
       ]
@@ -5474,7 +5543,7 @@
     "contact": "Kontakt",
     "rights": "Alle Rechte vorbehalten.",
     "rexora": "Gemeinsam entwickelt: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
-    "operatedBy": "LabourMarket.ai wird von der UAB „Nonstop Group“ betrieben und kommerziell angeboten. Die LabourMarket.ai-Software und die zugehörige geistige Eigentumsrechte gehören der Labour Market AI Sp. z o.o. und werden von der UAB „Nonstop Group“ in Lizenz genutzt.",
+    "operatedBy": "LabourMarket.ai wird von der UAB „Nonstop Group“ betrieben und kommerziell angeboten. Die LabourMarket.ai-Software und die zugehörigen geistigen Eigentumsrechte gehören der Labour Market AI Sp. z o.o. und werden von der UAB „Nonstop Group“ in Lizenz genutzt.",
     "ipNotice": "Rechte des geistigen Eigentums. Die Plattform wird in Lizenz von der UAB „Nonstop Group“ betrieben.",
     "legalNotice": "Impressum"
   },
@@ -5527,7 +5596,7 @@
       "screenshot": "Bedarfsablauf für Unternehmen",
       "cta": "Benötigte Arbeitskräfte beschreiben",
       "calculatorBody": "Bevor Sie Arbeit anfragen, schätzen Sie sie ein: Arbeitsstunden, Material, Geräte und Reisen — mit Ihren eigenen Zahlen.",
-      "calculatorLink": "Projektkosten berechnen",
+      "calculatorLink": "Projektkosten schätzen",
       "markets": {
         "lu": {
           "metaTitle": "Fachkräfte für Baustellen in Luxemburg",
@@ -5708,7 +5777,7 @@
       },
       {
         "q": "Gibt es eine Obergrenze für aktive Positionen?",
-        "a": "Kostenlos ist 1 aktive Position enthalten. Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Übliche Schutzmaßnahmen gegen Missbrauch, etwa Anfragelimits, gelten weiterhin."
+        "a": "Kostenlos ist 1 aktive Position enthalten. Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Übliche Schutzmaßnahmen gegen Missbrauch, etwa technische Begrenzungen der Zugriffshäufigkeit, gelten weiterhin."
       }
     ],
     "priceState": {
@@ -7135,6 +7204,10 @@
       "title": "Unterhaltung konnte nicht geöffnet werden",
       "body": "Möglicherweise haben Sie keine Berechtigung, dieser Person zu schreiben, oder sie ist nicht mehr verfügbar. Es wurde nichts gesendet."
     },
+    "noLongerAvailable": {
+      "title": "Diese Unterhaltung ist nicht mehr verfügbar",
+      "body": "Sie nehmen nicht mehr daran teil, daher werden ihre Nachrichten nicht angezeigt."
+    },
     "scope": {
       "support": "Support-Kanal",
       "unknown": "Kontext nicht angegeben",
@@ -7174,7 +7247,16 @@
         "blockedFailed": "Entfernen Sie den fehlgeschlagenen Anhang oder laden Sie ihn erneut hoch.",
         "partialFailure": "Die Nachricht wurde gesendet, aber einige Anhänge konnten nicht angehängt werden. Versuchen Sie, sie erneut zu senden."
       },
-      "languageLabel": "Ich schreibe auf"
+      "languageLabel": "Ich schreibe auf",
+      "errors": {
+        "notAuthenticated": "Ihre Sitzung ist abgelaufen. Melden Sie sich erneut an und senden Sie die Nachricht.",
+        "invalidInput": "Diese Nachricht kann nicht gesendet werden: Sie ist möglicherweise zu lang, oder ein Anhang wird nicht unterstützt.",
+        "notParticipant": "Sie können in dieser Unterhaltung nicht schreiben — Sie haben keinen Zugriff darauf.",
+        "rateLimited": "Sie haben in der letzten Stunde viele Nachrichten gesendet. Warten Sie kurz und versuchen Sie es erneut.",
+        "rateCheckUnavailable": "Die Sicherheitsprüfung konnte nicht ausgeführt werden, daher wurde nichts gesendet. Versuchen Sie es erneut.",
+        "attachmentsUnavailable": "Das Senden von Anhängen ist hier noch nicht aktiviert — fügen Sie der Nachricht Text hinzu.",
+        "sendFailed": "Die Nachricht konnte nicht gesendet werden. Ihr Text ist noch da — versuchen Sie es erneut."
+      }
     },
     "launcher": {
       "openLabel": "Support kontaktieren",
@@ -8657,6 +8739,7 @@
     },
     "languagesTitle": "Sprachen",
     "languagesSelfStated": "Sprachen laut Angabe des Arbeiters.",
+    "educationSelfStated": "Ausbildung laut Angabe der Arbeitskraft.",
     "certificatesTitle": "Zertifikate & Lizenzen",
     "declaredCertHint": "Selbst angegeben",
     "documentSelfSuppliedHint": "Dokument von der Person selbst eingereicht",
@@ -9385,7 +9468,7 @@
       "draft_pricing": "Die Pläne sind vorbereitet, nicht kaufbar. Kein Preis hier ist endgültig, und es kann nichts gekauft werden.",
       "owner_confirmed": "Die Pläne sind nur vorbereitet — es kann nichts gekauft werden, bis Zahlungen aktiviert sind."
     },
-    "featuresLabel": "In dieser Plangrenze enthalten",
+    "featuresLabel": "In diesem Plan enthalten",
     "limitValue": "bis zu {count}",
     "freeToday": {
       "freeTitle": "Heute kostenlos",
@@ -9419,7 +9502,7 @@
     },
     "enforcement": {
       "free_surface": "Heute im Produkt",
-      "server_gate": "Heute im Produkt, mit Berechtigungsprüfung",
+      "server_gate": "Heute verfügbar, je nach Ihren Berechtigungen",
       "declared_boundary_only": "Vorbereitet — startet erst mit der Abrechnung",
       "admin_rbac": "Intern, nur für Admins"
     }
@@ -9769,7 +9852,7 @@
         "body": "Beschreiben Sie, welche Arbeitskräfte oder welche Kolonne Sie brauchen. Keine Gebühr, keine Karte, nichts wird automatisch veröffentlicht."
       },
       {
-        "title": "Ein Mensch prüft ihn",
+        "title": "Ein Mensch prüft sie",
         "body": "Ein Operator liest jede Anfrage, kontaktiert Sie und klärt Umfang, Zeitplan und Bedingungen, bevor irgendetwas weitergeht."
       },
       {
@@ -11116,7 +11199,7 @@
           "Anbieter von Arbeitsmarktdiensten",
           "Weitere legitime Arbeitsmarktteilnehmer"
         ],
-        "pointsLabel": "Ihr Platz im selben Netzwerk",
+        "pointsLabel": "Der Platz dieser Teilnehmer im selben Netzwerk",
         "points": [
           "sie arbeiten mit denselben echten Arbeitsaufzeichnungen, nicht mit getrennten Dateien;",
           "Rollen und Verantwortung bleiben klar getrennt: wer veröffentlicht hat, wer gearbeitet hat, wer bestätigt hat."
@@ -11240,7 +11323,7 @@
       "body": "Der Zugriff auf Daten ist standardmäßig geschlossen und wird auf den Seiten unten in einfachen Worten erklärt."
     },
     "links": {
-      "workers": "Für Beschäftigte",
+      "workers": "Für Arbeitskräfte",
       "companies": "Für Unternehmen",
       "agencies": "Für Agenturen"
     }
@@ -19348,7 +19431,7 @@
     "steps": {
       "find": {
         "label": "Finden",
-        "worker": "Findet Arbeit, die zu dem passt, was sie wirklich geleistet haben",
+        "worker": "Findet Arbeit, die zu dem passt, was sie wirklich geleistet hat",
         "company": "Findet Menschen, deren tatsächliche Arbeit zum Bedarf passt"
       },
       "connect": {
@@ -20428,7 +20511,7 @@
       "text": "Seitennutzung und die Kampagne, über die Sie kamen, messen wir nur mit Ihrer Erlaubnis.",
       "accept": "Messung erlauben",
       "refuse": "Ablehnen",
-      "more": "Mehr",
+      "more": "Mehr über Cookies",
       "label": "Auswahl zur Nutzungsmessung"
     },
     "control": {
@@ -20439,5 +20522,122 @@
       "allow": "Erlauben",
       "refuse": "Ablehnen"
     }
+  },
+  "companyClaim": {
+    "email": {
+      "subject": "Übernehmen Sie das Profil von {company} auf LabourMarket.ai",
+      "intro": "Sie sind eingeladen, das Profil von {company} auf LabourMarket.ai zu verwalten. Das ist kostenlos.",
+      "open": "Öffnen Sie diesen einmaligen Link:",
+      "validity": "Der Link gilt 14 Tage und funktioniert nur mit dieser E-Mail-Adresse.",
+      "notYou": "Wenn Sie dieses Unternehmen nicht vertreten, tun Sie nichts: Ohne Sie ändert sich nichts."
+    },
+    "invite": {
+      "eyebrow": "Unternehmensprofil",
+      "title": "Profil von {company} übernehmen",
+      "body": "Bestätigen Sie, dass Sie dieses Unternehmen vertreten. Das ist eine Anfrage: Ein anderer LabourMarket.ai-Operator prüft sie, erst dann werden Sie Inhaber des Profils.",
+      "verifyFirst": "Bestätigen Sie zuerst, dass diese E-Mail-Adresse Ihnen gehört.",
+      "roleLabel": "Ihre Funktion im Unternehmen",
+      "rolePlaceholder": "Zum Beispiel Geschäftsführer",
+      "authorityLabel": "Ich bestätige, dass ich {company} vertreten darf.",
+      "submit": "Anfrage senden",
+      "decidedBy": "Es entscheidet ein anderer Operator, nicht der, der Sie eingeladen hat.",
+      "expires": "Die Einladung gilt bis {date}.",
+      "requestedTitle": "Anfrage gesendet",
+      "requestedBody": "Ein Operator prüft Ihre Anfrage. Nach der Bestätigung verwalten Sie das Profil. Bis dahin ändert sich nichts.",
+      "closedTitle": "Diese Einladung kann nicht mehr verwendet werden",
+      "verifySend": "Bestätigungslink senden",
+      "pending": "Wird gesendet…",
+      "outcome": {
+        "claim_requested": "Anfrage gesendet.",
+        "already_requested": "Sie haben bereits eine Anfrage gesendet.",
+        "already_used": "Diese Einladung wurde bereits verwendet.",
+        "expired": "Die Einladung ist abgelaufen. Bitten Sie um eine neue.",
+        "revoked": "Die Einladung wurde zurückgezogen.",
+        "email_mismatch": "Diese Einladung gilt für eine andere E-Mail-Adresse. Melden Sie sich mit der Adresse an, an die die E-Mail ging.",
+        "email_not_verified": "Bestätigen Sie zuerst Ihre E-Mail-Adresse.",
+        "authority_not_confirmed": "Bestätigen Sie, dass Sie das Unternehmen vertreten dürfen.",
+        "invalid_role": "Geben Sie Ihre Funktion an (2–80 Zeichen).",
+        "not_claimable": "Dieses Unternehmensprofil kann nicht mehr übernommen werden.",
+        "inviter_cannot_claim": "Der Operator, der die Einladung gesendet hat, kann sie nicht selbst verwenden.",
+        "operator_cannot_claim": "Eine Person mit Operator-Rechten kann kein Unternehmen übernehmen.",
+        "verify_sent": "Wir haben Ihnen einen Link geschickt. Öffnen Sie ihn, dann kommen Sie hierher zurück.",
+        "verify_rate_limited": "Wir haben gerade erst einen Link gesendet. Prüfen Sie Ihre E-Mails oder versuchen Sie es später.",
+        "error": "Das hat nicht geklappt. Versuchen Sie es später erneut."
+      }
+    }
+  },
+  "siteNav": {
+    "signUp": "Registrieren",
+    "trigger": "Hauptauswahl",
+    "account": "Nach Anmeldung",
+    "intents": {
+      "work": {
+        "title": "Ich suche Arbeit",
+        "description": "Finden Sie Stellen und zeigen Sie, was Sie können.",
+        "short": "Arbeit finden"
+      },
+      "workers": {
+        "title": "Ich suche Arbeitskräfte",
+        "description": "Beschreiben Sie, welche Arbeit Sie brauchen.",
+        "short": "Personal finden"
+      },
+      "services": {
+        "title": "Ich biete Leistungen an",
+        "description": "Veröffentlichen Sie Ihr Angebot und beantworten Sie Anfragen.",
+        "short": "Leistungen anbieten"
+      },
+      "orders": {
+        "title": "Ich suche Aufträge und Verträge",
+        "description": "Finden Sie Arbeitsanfragen und halten Sie Angebote beisammen.",
+        "short": "Aufträge finden"
+      },
+      "partners": {
+        "title": "Ich suche Partner",
+        "description": "Vernetzen Sie sich mit Menschen und Organisationen, mit denen Sie arbeiten.",
+        "short": "Partner finden"
+      },
+      "agencies": {
+        "title": "Für Agenturen",
+        "description": "Verwalten Sie Personal, Kunden und Angebote Ihrer Agentur.",
+        "short": "Für Agenturen"
+      }
+    },
+    "links": {
+      "jobs": "Stellenbörse",
+      "workOpportunities": "Arbeitsmöglichkeiten",
+      "createCv": "Kostenlosen Lebenslauf erstellen",
+      "workAbroad": "Arbeiten im Ausland",
+      "forWorkers": "So funktioniert es für Arbeitskräfte",
+      "companyNeed": "Bedarf beschreiben",
+      "forCompanies": "So funktioniert es für Unternehmen",
+      "labourMarket": "Arbeitsmarkt nach Land",
+      "myServices": "Ihre Leistungen",
+      "serviceRequests": "Leistungsanfragen",
+      "marketListings": "Marktangebote",
+      "commercial": "Angebote und Verträge",
+      "network": "Ihr Netzwerk",
+      "partnerWithUs": "Partner werden",
+      "forAgencies": "So funktioniert es für Agenturen",
+      "setUpAgency": "Agentur einrichten"
+    },
+    "assistant": "Assistenten fragen",
+    "start": {
+      "searchLabel": "Stellen suchen",
+      "searchPlaceholder": "Jobtitel oder Stichwort",
+      "searchSubmit": "Suchen",
+      "viewAll": "Alle Stellen"
+    },
+    "nav": {
+      "heading": "Was möchten Sie tun?",
+      "swipe": "Wischen",
+      "close": "Schließen",
+      "functions": "Funktionen",
+      "professions": "Berufe",
+      "opensNow": "Öffnet sofort",
+      "signInWhenOpen": "Anmeldung beim Öffnen",
+      "allSectors": "Alle Branchen",
+      "fullList": "Vollständige Liste"
+    },
+    "more": "Mehr"
   }
 }
