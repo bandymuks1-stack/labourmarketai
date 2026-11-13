@@ -46,15 +46,15 @@
           "q": "[EN] Do we keep our client relationships?"
         },
         {
-          "a": "[EN] Pricing is announced at launch; waitlist partners get early-access terms.",
+          "a": "Ett bemanningsföretag är en organisation och använder samma planer: ett eget öppet behov är gratis; fler kräver organisationsplanen som beskrivs på prissidan. Det finns ingen särskild taxa för bemanningsföretag.",
           "q": "[EN] How much does it cost agencies?"
         },
         {
-          "a": "[EN] Yes — public, agencies-only or direct, per worker and per demand.",
+          "a": "Varje person bestämmer själv om arbetsgivare kan hitta profilen — det är på eller av och kan ändras när som helst. Synlighetsinställningar per kund är inte tillgängliga än.",
           "q": "[EN] Can we control worker visibility?"
         },
         {
-          "a": "[EN] Yes, with assignment status tracking so nothing is double-booked.",
+          "a": "Ja — du kan föreslå samma person till flera kunders behov. Plattformen förhindrar ännu inte dubbelbokning åt dig, så kontrollera tillgängligheten innan du föreslår någon.",
           "q": "[EN] Can one worker serve multiple clients?"
         }
       ]
@@ -68,24 +68,24 @@
           "title": "[EN] Manage your pool"
         },
         {
-          "desc": "[EN] Broker demand without losing the relationship.",
-          "title": "[EN] Post on behalf of clients"
+          "desc": "Kunder delar behov med dig; du föreslår kandidater och ser deras beslut.",
+          "title": "Arbeta med kundbehov"
         },
         {
           "desc": "[EN] Place the right people faster.",
           "title": "[EN] Fit direction"
         },
         {
-          "desc": "[EN] Public, agencies-only or direct — your call.",
-          "title": "[EN] Visibility controls"
+          "desc": "En persons profil är synlig för arbetsgivare bara när personen själv tillåter det.",
+          "title": "Samtycke först"
         },
         {
-          "desc": "[EN] Baltic + Nordic clients and workers.",
-          "title": "[EN] Cross-border reach"
+          "desc": "Arbetsytan finns på flera språk.",
+          "title": "Flera språk"
         },
         {
-          "desc": "[EN] Capacity insights as demand shifts.",
-          "title": "[EN] Grow your desk"
+          "desc": "Bekräftade arbetsanteckningar bygger upp varje persons historik.",
+          "title": "Bekräftat arbete"
         }
       ]
     },
@@ -102,21 +102,21 @@
           "title": "[EN] Connect to client demand"
         },
         {
-          "desc": "[EN] Track active, pending and available.",
-          "title": "[EN] Manage assignments"
+          "desc": "Föreslå personer till ett delat behov och följ kundens beslut.",
+          "title": "Föreslå kandidater"
         },
         {
-          "desc": "[EN] Add capacity where demand is rising.",
-          "title": "[EN] Grow your pool"
+          "desc": "Bjud in fler kundföretag när ditt arbete växer.",
+          "title": "Lägg till kunder"
         }
       ]
     },
     "pool": {
       "bullets": [
-        "[EN] Pool size — every managed worker at a glance.",
-        "[EN] Trade breakdown — capacity by skill, live.",
-        "[EN] Assignment status — Active, Pending, Available.",
-        "[EN] Multi-client — place the right people across clients."
+        "Lista — varje person du hanterar, med kopplingsstatus.",
+        "Tillgänglighet — så som varje person själv har angett den.",
+        "Kundbehov — de behov som kopplade kunder har delat med dig.",
+        "Förslag — kandidaterna du har föreslagit och varje kunds beslut."
       ],
       "eyebrow": "[EN] Your control room",
       "headline": {
@@ -588,8 +588,8 @@
     "cta": {
       "button": "[EN] Create a company account",
       "headline": {
-        "line1": "[EN] Stop waiting weeks",
-        "line2": "[EN] to fill a role."
+        "line1": "Beskriv arbetet,",
+        "line2": "se vem som passar."
       },
       "subcopy": "[EN] Create a company account, post a work need and see which available workers fit it."
     },
@@ -605,7 +605,7 @@
         "line1": "[EN] Here's what live demand",
         "line2": "[EN] looks like."
       },
-      "subcopy": "[EN] Post what each project needs and receive ranked, explainable matches from available workers and agencies — in hours, not weeks."
+      "subcopy": "Publicera vad varje projekt behöver och se en förklarlig passningsriktning från tillgängliga arbetstagare och bemanningsföretag."
     },
     "faq": {
       "eyebrow": "[EN] Company FAQ",
@@ -616,7 +616,7 @@
           "q": "[EN] How are fit signals shown?"
         },
         {
-          "a": "[EN] Pricing is announced at launch. Waitlist signups get early-access pricing.",
+          "a": "En aktiv position per organisation är gratis; fler positioner kräver organisationsplanen som beskrivs på prissidan. Att skicka in ett personalbehov är gratis.",
           "q": "[EN] How much does it cost?"
         },
         {
@@ -638,8 +638,8 @@
           "title": "[EN] Explainable fit direction"
         },
         {
-          "desc": "[EN] Baltic + Nordic supply in one place.",
-          "title": "[EN] Cross-border worker pool"
+          "desc": "Tillgängliga arbetstagare och kopplade bemanningsföretag för samma behov, sida vid sida.",
+          "title": "Personer och bemanningsföretag på ett ställe"
         },
         {
           "desc": "[EN] You see and own the relationship.",
@@ -676,8 +676,8 @@
           "title": "[EN] Reach out directly"
         },
         {
-          "desc": "[EN] Close roles in days, with accountable decisions.",
-          "title": "[EN] Hire faster"
+          "desc": "Välj vem du kontaktar och ta nästa steg själv.",
+          "title": "Bestäm"
         }
       ]
     }
@@ -904,16 +904,41 @@
           "title": "[EN] Broker with leverage"
         },
         {
-          "body": "[EN] Choose what is public, agencies-only, or direct — you control exposure.",
-          "title": "[EN] Visibility controls"
+          "body": "Bjud in ett kundföretag. När ni är kopplade delar kunden ett behov med dig och du föreslår kandidater till det.",
+          "title": "Kundkopplingar"
         }
       ],
       "cta": "[EN] Create an agency account",
       "eyebrow": "[EN] For agencies",
       "screenshot": "[EN] Agency mode flow",
-      "subcopy": "[EN] Manage your managed workers, post demand on behalf of clients, and broker introductions — all in one place.",
+      "subcopy": "Håll dina personer i en lista, koppla ihop dig med kundföretag och föreslå kandidater till de behov de delar — allt på ett ställe.",
       "title": "[EN] Your pool,",
-      "titleAccent": "[EN] in motion."
+      "titleAccent": "[EN] in motion.",
+      "facts": {
+        "headline": "Start, kostnad och begränsningar",
+        "items": [
+          {
+            "title": "Vem det är för",
+            "body": "Bemannings- och rekryteringsföretag och andra organisationer som förmedlar människor, i alla branscher."
+          },
+          {
+            "title": "Så börjar du",
+            "body": "Skapa ett konto — alternativet bemanningsföretag är redan valt — och lägg upp din organisation som bemanningsföretag. Bjud sedan in ett kundföretag eller lägg till dina personer i listan."
+          },
+          {
+            "title": "Vad som är gratis",
+            "body": "Kontot, personlistan, kundkopplingar och att föreslå kandidater är gratis. Ett eget öppet behov är gratis."
+          },
+          {
+            "title": "Betaltjänster",
+            "body": "Det finns ingen särskild taxa för bemanningsföretag och ingen säljs. Mer än ett eget öppet behov kräver organisationsplanen som beskrivs på prissidan."
+          },
+          {
+            "title": "Inte tillgängligt än",
+            "body": "Provisioner, samarbete mellan bemanningsföretag och synlighetsinställningar per kund är inte tillgängliga än."
+          }
+        ]
+      }
     },
     "companies": {
       "benefits": [
@@ -937,13 +962,38 @@
       "title": "[EN] Live demand,",
       "titleAccent": "[EN] in context.",
       "calculatorBody": "Innan du efterfrågar arbete, uppskatta det: arbetstimmar, material, utrustning och resor — med dina egna siffror.",
-      "calculatorLink": "Beräkna ett projekts kostnad"
+      "calculatorLink": "Beräkna ett projekts kostnad",
+      "facts": {
+        "headline": "Start, kostnad och begränsningar",
+        "items": [
+          {
+            "title": "Vem det är för",
+            "body": "Företag och arbetsgivare i alla branscher som behöver människor för konkret arbete."
+          },
+          {
+            "title": "Så börjar du",
+            "body": "Beskriv ett behov utan konto, eller skapa ett gratis konto, lägg upp din organisation och publicera behovet från din arbetsyta."
+          },
+          {
+            "title": "Vad som är gratis",
+            "body": "Ett öppet behov per organisation, teamlistan, projekt och granskning av arbetsanteckningar är gratis."
+          },
+          {
+            "title": "Betaltjänster",
+            "body": "Mer än ett öppet behov samtidigt kräver organisationsplanen. Prissidan beskriver den och visar om den kan beställas nu."
+          },
+          {
+            "title": "Inte tillgängligt än",
+            "body": "Automatisk översättning av meddelanden och pushnotiser är inte tillgängliga än."
+          }
+        ]
+      }
     },
     "workers": {
       "benefits": [
         {
-          "body": "[EN] Maintain a single avatar with records-backed skills and availability — visible to registered employers across borders.",
-          "title": "[EN] One profile, every market"
+          "body": "Sköt en enda avatar med kompetenser som stöds av anteckningar och tillgänglighet — synlig för registrerade arbetsgivare när du tillåter det.",
+          "title": "En profil, över gränser"
         },
         {
           "body": "[EN] See open work needs matched to your trade, skills and city — and express interest in one click.",
@@ -963,7 +1013,32 @@
       "screenshot": "[EN] Worker avatar flow",
       "subcopy": "[EN] Build one profile, set your availability, and let real demand find you across borders — no recruiters in the middle.",
       "title": "[EN] Your skills,",
-      "titleAccent": "[EN] discoverable."
+      "titleAccent": "[EN] discoverable.",
+      "facts": {
+        "headline": "Start, kostnad och begränsningar",
+        "items": [
+          {
+            "title": "Vem det är för",
+            "body": "Människor som arbetar eller vill arbeta, inom alla yrken: anställda, specialister, frilansare och studenter."
+          },
+          {
+            "title": "Så börjar du",
+            "body": "Skapa ett gratis konto och bekräfta din e-postadress, och fyll sedan i den korta profilen. Därefter kan du registrera din första arbetsdag eller titta på öppna personalbehov."
+          },
+          {
+            "title": "Vad som är gratis",
+            "body": "Profilen, Arbetsjournalen, det levande cv:t och att visa intresse för arbete är gratis."
+          },
+          {
+            "title": "Betaltjänster",
+            "body": "Ingen betalplan för arbetstagare säljs."
+          },
+          {
+            "title": "Inte tillgängligt än",
+            "body": "Röstinmatning i Arbetsjournalen och automatisk översättning av meddelanden är inte tillgängliga än."
+          }
+        ]
+      }
     },
     "createCv": {
       "eyebrow": "Gratis CV-byggare",
@@ -1005,6 +1080,114 @@
         }
       ],
       "privacyNote": "Ditt CV förblir privat som standard. Inget delas med arbetsgivare förrän du uttryckligen slår på synlighet — och du kan stänga av den när som helst."
+    },
+    "education": {
+      "eyebrow": "För utbildningsanordnare",
+      "title": "Program, grupper och praktik",
+      "titleAccent": "i en arbetsyta.",
+      "subcopy": "För skolor, högskolor, universitet och utbildningsföretag: skapa program och grupper, granska den praktik dina deltagare registrerar, erkänn kompetenser och exportera en rapport.",
+      "cta": "Skapa ett konto för utbildningsanordnare",
+      "benefits": [
+        {
+          "title": "Program och grupper",
+          "body": "Skapa dina program och öppna en grupp för varje antagning. Uppgifterna om ett program kan du rätta senare."
+        },
+        {
+          "title": "Deltagare",
+          "body": "Bjud in deltagare eller godkänn en deltagares egen begäran om att gå med i en grupp. En begäran ger ingen åtkomst förrän din behöriga person godkänner den."
+        },
+        {
+          "title": "Dokumenterad praktik",
+          "body": "Deltagarna registrerar sina praktikdagar i sin egen Arbetsjournal. Din behöriga person granskar och signerar varje anteckning."
+        },
+        {
+          "title": "Erkännande av kompetens",
+          "body": "Registrera ett erkännande utifrån praktik som du har signerat. Det är ett separat beslut av din bedömare, aldrig automatiskt, och deltagaren ser det."
+        },
+        {
+          "title": "Rapport om efterfrågan och resultat",
+          "body": "Se lediga jobb i de inriktningar som dina program förbereder för och dina deltagares resultat, och exportera rapporten som en fil."
+        }
+      ],
+      "facts": {
+        "headline": "Start, kostnad och begränsningar",
+        "items": [
+          {
+            "title": "Vem det är för",
+            "body": "Skolor, högskolor, universitet och andra utbildningsanordnare, inom alla ämnesområden."
+          },
+          {
+            "title": "Så börjar du",
+            "body": "Skapa ett konto och bekräfta din e-postadress. Fyll i den korta profilen och lägg sedan upp din organisation — alternativet utbildningsanordnare är redan valt. Öppna sedan utbildningsdelen av arbetsytan och skapa ditt första program."
+          },
+          {
+            "title": "Vad som är gratis",
+            "body": "Kontot, program, grupper, granskning av praktik, erkännande av kompetens och rapporten är gratis."
+          },
+          {
+            "title": "Betaltjänster",
+            "body": "Det finns ingen betalplan för utbildningsanordnare och ingen av dessa funktioner kräver en. Organisationsplanen på prissidan gäller bara öppna personalbehov."
+          },
+          {
+            "title": "Inte tillgängligt än",
+            "body": "Ett utbildnings- och certifikatregister för personer som inte är medlemmar i din organisation och formell validering av tidigare lärande är inte tillgängliga än. Ett erkännande som registreras här är ingen statligt erkänd kvalifikation."
+          }
+        ]
+      }
+    },
+    "serviceProviders": {
+      "eyebrow": "För tjänsteleverantörer och team",
+      "title": "Erbjud din tjänst",
+      "titleAccent": "och svara på riktiga förfrågningar.",
+      "subcopy": "För självständiga specialister, arbetslag och tjänsteföretag inom alla områden: publicera vad du gör, ta emot förfrågningar, svara på dem och samla offerter och kontrakt på ett ställe.",
+      "cta": "Skapa ett gratis konto",
+      "benefits": [
+        {
+          "title": "Publicera ett tjänsteerbjudande",
+          "body": "Beskriv en tjänst du utför och publicera den när den är klar. Du kan pausa eller dra tillbaka den när som helst."
+        },
+        {
+          "title": "Ta emot och besvara förfrågningar",
+          "body": "En kund skickar en förfrågan till ditt erbjudande. Du accepterar eller avböjer den; inget är överenskommet förrän du svarar."
+        },
+        {
+          "title": "En gemensam sökning",
+          "body": "Publicerade erbjudanden och annonser visas i plattformens gemensamma sökning, bredvid personalbehov."
+        },
+        {
+          "title": "Offerter och kontrakt",
+          "body": "Ta fram en offert, markera den som skickad eller accepterad och för en kontraktspost med status. Det är en post, inte en elektronisk signatur."
+        },
+        {
+          "title": "Beräkna ett uppdrag",
+          "body": "Uppskatta ett uppdrag med projektkostnadskalkylatorn: arbetstimmar, material, utrustning och resor, med dina egna siffror."
+        }
+      ],
+      "facts": {
+        "headline": "Start, kostnad och begränsningar",
+        "items": [
+          {
+            "title": "Vem det är för",
+            "body": "Självständiga specialister, arbetslag och tjänsteföretag, inom alla yrken."
+          },
+          {
+            "title": "Så börjar du",
+            "body": "Skapa ett konto och bekräfta din e-postadress. Fyll i den korta profilen, öppna sedan dina tjänsteerbjudanden och skriv ditt första erbjudande."
+          },
+          {
+            "title": "Vad som är gratis",
+            "body": "Kontot, tjänsteerbjudanden, förfrågningar, offerter, kontraktsposter och kalkylatorn är gratis."
+          },
+          {
+            "title": "Betaltjänster",
+            "body": "Ingen betaltjänst behövs för att erbjuda tjänster, och ingen säljs för det. Plattformen hanterar inga betalningar mellan dig och din kund."
+          },
+          {
+            "title": "Inte tillgängligt än",
+            "body": "Betyg, avbokning och tvistlösning för tjänsteuppdrag, beställning av varor, logistik och en offentlig företagssida är inte tillgängliga än."
+          }
+        ]
+      }
     }
   },
   "playercards": {

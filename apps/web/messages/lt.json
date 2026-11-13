@@ -5217,7 +5217,7 @@
         "line1": "Štai kaip atrodo",
         "line2": "galimybių srautas."
       },
-      "subcopy": "Nurodyk, ko reikia kiekvienam projektui, ir matyk paaiškinamą atitikimo kryptį iš laisvų darbuotojų ir agentūrų — per valandas, ne savaites.",
+      "subcopy": "Paskelbk, ko reikia kiekvienam projektui, ir matyk paaiškinamą laisvų darbuotojų bei agentūrų tinkamumo kryptį.",
       "bullets": [
         "Projektas + vieta — tiksliai apibrėžk poreikį.",
         "Žmonių skaičius — kiek kiekvienos pareigybės reikia.",
@@ -5242,8 +5242,8 @@
           "desc": "Susisiek su norimais žmonėmis — be tarpininko."
         },
         {
-          "title": "Samdyk greičiau",
-          "desc": "Užpildyk pareigybes per dienas, atsekamai."
+          "title": "Nuspręsk",
+          "desc": "Pasirink, su kuo susisiekti, ir kitą žingsnį ženk pats."
         }
       ]
     },
@@ -5256,8 +5256,8 @@
           "desc": "Kiekvienas atitikimo signalas pateikia priežastis."
         },
         {
-          "title": "Tarpvalstybinis darbuotojų rezervas",
-          "desc": "Pasiūla iš visų rinkų, kuriose veikiame, vienoje vietoje."
+          "title": "Žmonės ir agentūros vienoje vietoje",
+          "desc": "Laisvi darbuotojai ir prisijungusios agentūros tam pačiam poreikiui – greta."
         },
         {
           "title": "Be neskaidrių tarpininkų",
@@ -5287,7 +5287,7 @@
         },
         {
           "q": "Kiek kainuoja įmonei?",
-          "a": "Kainos paskelbtos kainodaros puslapyje: viena aktyvi pozicija organizacijai — nemokamai, daugiau pozicijų — organizacijos planas, kurį aktyvuoji paskyroje. Darbuotojų užklausa pateikiama nemokamai."
+          "a": "Viena aktyvi pozicija organizacijai nemokama; daugiau pozicijų – su organizacijos planu, aprašytu kainų puslapyje. Pateikti darbuotojų poreikį nemokama."
         },
         {
           "q": "Ar galima atrinkti pagal lokaciją?",
@@ -5301,8 +5301,8 @@
     },
     "cta": {
       "headline": {
-        "line1": "Nustok laukti savaites",
-        "line2": "kol užpildysi pareigybę."
+        "line1": "Aprašyk darbą –",
+        "line2": "matyk, kas tinka."
       },
       "subcopy": "Sukurk įmonės paskyrą, paskelbk darbo poreikį ir matyk, kurie prieinami darbuotojai jį atitinka.",
       "button": "Sukurti įmonės paskyrą"
@@ -5317,10 +5317,10 @@
       },
       "subcopy": "Valdyk darbuotojus, susiek juos su klientų poreikiu ir tarpininkauk — neprarasdamas matomumo ir kontrolės.",
       "bullets": [
-        "Rezervo dydis — visi kuruojami darbuotojai iškart.",
-        "Pasiskirstymas pagal profesiją — pajėgumas pagal įgūdį.",
-        "Paskyrimų būsena — Aktyvūs, Laukiantys, Laisvi.",
-        "Keli klientai — tinkami žmonės skirtingiems klientams."
+        "Sąrašas – kiekvienas tavo valdomas žmogus ir jo ryšio būsena.",
+        "Prieinamumas – toks, kokį nurodė pats žmogus.",
+        "Klientų poreikiai – poreikiai, kuriais su tavimi pasidalino prisijungę klientai.",
+        "Pasiūlymai – tavo pasiūlyti kandidatai ir kiekvieno kliento sprendimas."
       ]
     },
     "journey": {
@@ -5336,12 +5336,12 @@
           "desc": "Priderink žmones prie klientų poreikių."
         },
         {
-          "title": "Valdyk paskyrimus",
-          "desc": "Sek aktyvius, laukiančius ir laisvus."
+          "title": "Siūlyk kandidatus",
+          "desc": "Siūlyk žmones pasidalintam poreikiui ir sek kliento sprendimą."
         },
         {
-          "title": "Augink savo rezervą",
-          "desc": "Pridėk pajėgumo, kur auga paklausa."
+          "title": "Pridėk klientų",
+          "desc": "Kviesk daugiau įmonių klienčių, kai darbo daugėja."
         }
       ]
     },
@@ -5354,24 +5354,24 @@
           "desc": "Darbuotojai, prieinamumas ir būsena vienoje vietoje."
         },
         {
-          "title": "Skelbk klientų vardu",
-          "desc": "Tarpininkauk neprarasdamas santykio."
+          "title": "Dirbk su klientų poreikiais",
+          "desc": "Klientai dalijasi poreikiais su tavimi; tu siūlai kandidatus ir matai jų sprendimą."
         },
         {
           "title": "Atitikimo kryptis",
           "desc": "Greičiau įdarbink tinkamus."
         },
         {
-          "title": "Matomumo valdymas",
-          "desc": "Vieša, tik agentūroms ar tiesioginė — tavo sprendimas."
+          "title": "Pirmiausia sutikimas",
+          "desc": "Žmogaus profilis darbdaviams matomas tik tada, kai pats žmogus tai leidžia."
         },
         {
-          "title": "Tarpvalstybinis pasiekiamumas",
-          "desc": "Klientai ir darbuotojai visose rinkose, kuriose veikiame."
+          "title": "Kelios kalbos",
+          "desc": "Darbo erdvė veikia keliomis kalbomis."
         },
         {
-          "title": "Augink biurą",
-          "desc": "Pajėgumo įžvalgos keičiantis paklausai."
+          "title": "Darbo istorija",
+          "desc": "Darbo žurnalo įrašai kuria kiekvieno žmogaus istoriją."
         }
       ]
     },
@@ -5385,15 +5385,15 @@
         },
         {
           "q": "Kiek kainuoja agentūroms?",
-          "a": "Agentūra yra organizacija ir naudojasi tais pačiais planais: viena aktyvi pozicija — nemokamai, daugiau — organizacijos planas iš kainodaros puslapio. Atskiro agentūrų tarifo nėra."
+          "a": "Agentūra yra organizacija ir naudojasi tais pačiais planais: vienas atviras nuosavas poreikis nemokamas, daugiau – su organizacijos planu, aprašytu kainų puslapyje. Atskiro agentūrų tarifo nėra."
         },
         {
           "q": "Ar galime valdyti darbuotojų matomumą?",
-          "a": "Taip — vieša, tik agentūroms ar tiesioginė, kiekvienam darbuotojui ir poreikiui."
+          "a": "Kiekvienas žmogus pats sprendžia, ar darbdaviai gali rasti jo profilį – tai įjungta arba išjungta, ir jis gali bet kada pakeisti. Matomumo nustatymai atskiram klientui dar neveikia."
         },
         {
           "q": "Ar darbuotojas gali aptarnauti kelis klientus?",
-          "a": "Taip, su paskyrimų būsenos sekimu, kad nebūtų dvigubų rezervacijų."
+          "a": "Taip – tą patį žmogų gali siūlyti kelių klientų poreikiams. Platforma kol kas neapsaugo nuo dvigubo užimtumo, todėl prieš siūlydamas patikrink prieinamumą."
         }
       ]
     },
@@ -5555,8 +5555,8 @@
       "subcopy": "Susikurk vieną profilį, nurodyk, kada esi laisvas, ir leisk realiai paklausai tave surasti – ir kitose šalyse.",
       "benefits": [
         {
-          "title": "Vienas profilis visoms rinkoms",
-          "body": "Vienas avataras su įrašais paremtais įgūdžiais ir prieinamumu — matomas registruotiems darbdaviams įvairiose šalyse."
+          "title": "Vienas profilis, per sienas",
+          "body": "Tvarkyk vieną avatarą su įrašais pagrįstais įgūdžiais ir prieinamumu – matomą registruotiems darbdaviams, kai pats tai leidi."
         },
         {
           "title": "Reali paklausa",
@@ -5572,7 +5572,32 @@
         }
       ],
       "screenshot": "Darbuotojo profilio srautas",
-      "cta": "Sukurti nemokamą profilį"
+      "cta": "Sukurti nemokamą profilį",
+      "facts": {
+        "headline": "Pradžia, kaina ir ribos",
+        "items": [
+          {
+            "title": "Kam skirta",
+            "body": "Žmonėms, kurie dirba arba nori dirbti, – bet kurios profesijos: darbuotojams, specialistams, laisvai samdomiems ir studentams."
+          },
+          {
+            "title": "Kaip pradėti",
+            "body": "Sukurk nemokamą paskyrą ir atidaryk el. paštu atsiųstą nuorodą, tada užpildyk trumpą profilį. Po to gali užfiksuoti pirmąją darbo dieną arba peržiūrėti atvirus darbo poreikius."
+          },
+          {
+            "title": "Kas nemokama",
+            "body": "Profilis, Darbo žurnalas, gyvasis CV ir susidomėjimo darbu pareiškimas yra nemokami."
+          },
+          {
+            "title": "Mokamos paslaugos",
+            "body": "Mokamas planas darbuotojams neparduodamas."
+          },
+          {
+            "title": "Dar neveikia",
+            "body": "Darbo žurnalo pildymas balsu ir automatinis žinučių vertimas dar neveikia."
+          }
+        ]
+      }
     },
     "companies": {
       "eyebrow": "Įmonėms",
@@ -5640,13 +5665,38 @@
             "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
           ]
         }
+      },
+      "facts": {
+        "headline": "Pradžia, kaina ir ribos",
+        "items": [
+          {
+            "title": "Kam skirta",
+            "body": "Įmonėms ir darbdaviams bet kuriame sektoriuje, kuriems reikia žmonių konkrečiam darbui."
+          },
+          {
+            "title": "Kaip pradėti",
+            "body": "Aprašyk poreikį be paskyros arba sukurk nemokamą paskyrą, sukurk organizaciją ir paskelbk poreikį savo darbo erdvėje."
+          },
+          {
+            "title": "Kas nemokama",
+            "body": "Vienas atviras poreikis organizacijai, komandos sąrašas, projektai ir darbo įrašų peržiūra yra nemokami."
+          },
+          {
+            "title": "Mokamos paslaugos",
+            "body": "Daugiau nei vienam atviram poreikiu vienu metu reikia organizacijos plano. Kainų puslapyje jis aprašytas ir nurodyta, ar jį šiuo metu galima užsisakyti."
+          },
+          {
+            "title": "Dar neveikia",
+            "body": "Automatinis žinučių vertimas ir tiesioginiai (push) pranešimai dar neveikia."
+          }
+        ]
       }
     },
     "agencies": {
       "eyebrow": "Agentūroms",
       "title": "Tavo rezervas —",
       "titleAccent": "judantis.",
-      "subcopy": "Valdyk kuruojamus darbuotojus, skelbk paklausą klientų vardu ir tarpininkauk — viskas vienoje vietoje.",
+      "subcopy": "Laikyk savo žmones viename sąraše, susisiek su įmonėmis klientėmis ir siūlyk kandidatus jų pasidalintiems poreikiams – viskas vienoje vietoje.",
       "benefits": [
         {
           "title": "Valdyk rezervą",
@@ -5657,12 +5707,37 @@
           "body": "Dalinkis klientų poreikiais ir greičiau įdarbink tinkamus žmones su paaiškinama atitikimo kryptimi."
         },
         {
-          "title": "Matomumo valdymas",
-          "body": "Pasirink, kas vieša, tik agentūroms ar tiesioginė — matomumą valdai tu."
+          "title": "Ryšiai su klientais",
+          "body": "Pakviesk įmonę klientę. Kai susijungsite, klientas pasidalins su tavimi poreikiu, o tu pasiūlysi jam kandidatus."
         }
       ],
       "screenshot": "Agentūros režimo srautas",
-      "cta": "Sukurti agentūros paskyrą"
+      "cta": "Sukurti agentūros paskyrą",
+      "facts": {
+        "headline": "Pradžia, kaina ir ribos",
+        "items": [
+          {
+            "title": "Kam skirta",
+            "body": "Įdarbinimo ir personalo atrankos agentūroms bei kitoms organizacijoms, tiekiančioms žmones, – bet kuriame sektoriuje."
+          },
+          {
+            "title": "Kaip pradėti",
+            "body": "Sukurk paskyrą – agentūros pasirinkimas jau pažymėtas – ir sukurk organizaciją kaip įdarbinimo agentūrą. Tada pakviesk įmonę klientę arba įtrauk savo žmones į sąrašą."
+          },
+          {
+            "title": "Kas nemokama",
+            "body": "Agentūros paskyra, žmonių sąrašas, ryšiai su klientais ir kandidatų siūlymas yra nemokami. Vienas atviras nuosavas poreikis nemokamas."
+          },
+          {
+            "title": "Mokamos paslaugos",
+            "body": "Atskiro agentūrų tarifo nėra ir jis neparduodamas. Daugiau nei vienam atviram nuosavam poreikiui reikia organizacijos plano, aprašyto kainų puslapyje."
+          },
+          {
+            "title": "Dar neveikia",
+            "body": "Agentūrų komisiniai, agentūrų tarpusavio bendradarbiavimas ir matomumo nustatymai atskiram klientui dar neveikia."
+          }
+        ]
+      }
     },
     "createCv": {
       "eyebrow": "Nemokamas CV kūrimas",
@@ -5704,6 +5779,114 @@
         }
       ],
       "privacyNote": "Tavo CV pagal nutylėjimą lieka privatus. Niekas nesidalinama su darbdaviais, kol pats neįjungi matomumo, o jį bet kada gali išjungti."
+    },
+    "education": {
+      "eyebrow": "Švietimo įstaigoms",
+      "title": "Programos, grupės ir praktika",
+      "titleAccent": "vienoje darbo erdvėje.",
+      "subcopy": "Mokykloms, kolegijoms, universitetams ir mokymo teikėjams: kurk programas ir grupes, peržiūrėk besimokančiųjų užfiksuotą praktiką, pripažink kompetencijas ir eksportuok ataskaitą.",
+      "cta": "Sukurti įstaigos paskyrą",
+      "benefits": [
+        {
+          "title": "Programos ir grupės",
+          "body": "Sukurk programas ir kiekvienam priėmimui atidaryk grupę. Programos duomenis vėliau galima pataisyti."
+        },
+        {
+          "title": "Besimokantieji",
+          "body": "Pakviesk besimokančiuosius arba priimk jų pačių prašymą prisijungti prie grupės. Prašymas nesuteikia jokios prieigos, kol jo nepriima įstaigos įgaliotas asmuo."
+        },
+        {
+          "title": "Dokumentuota praktika",
+          "body": "Besimokantieji praktikos dienas fiksuoja savo Darbo žurnale. Įstaigos įgaliotas asmuo kiekvieną įrašą peržiūri ir patvirtina."
+        },
+        {
+          "title": "Kompetencijų pripažinimas",
+          "body": "Užregistruok pripažinimą pagal įstaigos pasirašytą praktiką. Tai atskiras vertintojo sprendimas, niekada ne automatinis, ir besimokantysis jį mato."
+        },
+        {
+          "title": "Paklausos ir rezultatų ataskaita",
+          "body": "Matyk atviras darbo vietas kryptyse, kurioms ruošia tavo programos, ir besimokančiųjų rezultatus, o ataskaitą eksportuok failu."
+        }
+      ],
+      "facts": {
+        "headline": "Pradžia, kaina ir ribos",
+        "items": [
+          {
+            "title": "Kam skirta",
+            "body": "Mokykloms, kolegijoms, universitetams ir kitiems mokymo teikėjams – bet kurioje studijų ar mokymo srityje."
+          },
+          {
+            "title": "Kaip pradėti",
+            "body": "Sukurk paskyrą ir atidaryk el. paštu atsiųstą nuorodą. Užpildyk trumpą profilį, tada sukurk organizaciją – mokymo teikėjo pasirinkimas jau pažymėtas. Atidaryk „Mokymai ir programos“ ir sukurk pirmąją programą."
+          },
+          {
+            "title": "Kas nemokama",
+            "body": "Įstaigos paskyra, programos, grupės, praktikos peržiūra, kompetencijų pripažinimas ir ataskaita yra nemokami."
+          },
+          {
+            "title": "Mokamos paslaugos",
+            "body": "Švietimo įstaigoms mokamo plano nėra, ir nė viena iš šių funkcijų jo nereikalauja. Kainų puslapyje aprašytas organizacijos planas susijęs tik su atvirais darbo poreikiais."
+          },
+          {
+            "title": "Dar neveikia",
+            "body": "Mokymų ir pažymėjimų registras žmonėms, kurie nėra tavo organizacijos nariai, ir formalus ankstesnio mokymosi įskaitymas dar neveikia. Čia užregistruotas pripažinimas nėra valstybės pripažinta kvalifikacija."
+          }
+        ]
+      }
+    },
+    "serviceProviders": {
+      "eyebrow": "Paslaugų teikėjams ir komandoms",
+      "title": "Siūlyk savo paslaugą",
+      "titleAccent": "ir atsakyk į tikras užklausas.",
+      "subcopy": "Savarankiškiems specialistams, brigadoms ir paslaugų įmonėms bet kurioje srityje: paskelbk, ką darai, gauk užklausas, atsakyk į jas ir laikyk pasiūlymus bei sutartis vienoje vietoje.",
+      "cta": "Sukurti nemokamą paskyrą",
+      "benefits": [
+        {
+          "title": "Paskelbk paslaugos pasiūlymą",
+          "body": "Aprašyk teikiamą paslaugą ir paskelbk, kai ji paruošta. Bet kada galima ją sustabdyti arba atsiimti."
+        },
+        {
+          "title": "Gauk užklausas ir atsakyk",
+          "body": "Klientas atsiunčia užklausą tavo pasiūlymui. Tu ją priimi arba atmeti; kol neatsakei, niekas nesutarta."
+        },
+        {
+          "title": "Viena bendra paieška",
+          "body": "Paskelbti pasiūlymai ir skelbimai rodomi bendroje platformos paieškoje, šalia darbo poreikių."
+        },
+        {
+          "title": "Pasiūlymai ir sutartys",
+          "body": "Parenk komercinį pasiūlymą, pažymėk jį išsiųstu ar priimtu ir laikyk sutarties įrašą su jo būsena. Tai įrašas, o ne elektroninis parašas."
+        },
+        {
+          "title": "Įvertink darbą",
+          "body": "Įvertink darbo apimtį projekto sąnaudų skaičiuokle: darbo valandos, medžiagos, įranga ir kelionės – tavo paties skaičiais."
+        }
+      ],
+      "facts": {
+        "headline": "Pradžia, kaina ir ribos",
+        "items": [
+          {
+            "title": "Kam skirta",
+            "body": "Savarankiškiems specialistams, brigadoms ir paslaugų įmonėms – bet kurio amato ar profesijos."
+          },
+          {
+            "title": "Kaip pradėti",
+            "body": "Sukurk paskyrą ir atidaryk el. paštu atsiųstą nuorodą. Užpildyk trumpą profilį, tada atidaryk „Tavo paslaugų pasiūlymai“ ir parašyk pirmąjį pasiūlymą."
+          },
+          {
+            "title": "Kas nemokama",
+            "body": "Paskyra, paslaugų pasiūlymai, užklausos, komerciniai pasiūlymai, sutarčių įrašai ir skaičiuoklė yra nemokami."
+          },
+          {
+            "title": "Mokamos paslaugos",
+            "body": "Paslaugoms siūlyti jokios mokamos paslaugos nereikia ir ji neparduodama. Platforma netvarko mokėjimų tarp tavęs ir tavo kliento."
+          },
+          {
+            "title": "Dar neveikia",
+            "body": "Paslaugų užsakymų vertinimai, atšaukimas ir ginčų sprendimas, prekių užsakymas, logistika ir viešas verslo puslapis dar neveikia."
+          }
+        ]
+      }
     }
   },
   "pricing": {

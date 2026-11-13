@@ -34,6 +34,7 @@ export async function generateMetadata({
     description: t(`${market}.metaDescription`),
   });
 }
+import { AudienceFacts, type AudienceFactsCopy } from "@/components/marketing/audience-facts";
 import { PageHero } from "@/components/marketing/page-hero";
 import { RoleEnrichment } from "@/components/marketing/role-enrichment";
 
@@ -81,6 +82,7 @@ export default async function ForCompaniesPage({
           </Link>
         </Card>
       </section>
+      <AudienceFacts copy={t.raw("facts") as AudienceFactsCopy} />
       <RoleEnrichment
         root="companies"
         previewKey="demand"

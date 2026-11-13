@@ -5217,7 +5217,7 @@
         "line1": "Zo ziet de stroom",
         "line2": "van kansen eruit."
       },
-      "subcopy": "Plaats wat elk project nodig heeft en zie uitlegbare fit-richting van beschikbare werknemers en uitzendbureaus — binnen uren, niet weken.",
+      "subcopy": "Plaats wat elk project nodig heeft en zie een uitlegbare geschiktheidsrichting van beschikbare werknemers en bureaus.",
       "bullets": [
         "Project + locatie — baken elke behoefte precies af.",
         "Aantal mensen — hoeveel je van elke rol nodig hebt.",
@@ -5242,8 +5242,8 @@
           "desc": "Benader de mensen die je wilt — zonder poortwachter."
         },
         {
-          "title": "Sneller aannemen",
-          "desc": "Vul rollen in dagen, met verantwoorde beslissingen."
+          "title": "Beslis",
+          "desc": "Kies met wie je contact opneemt en zet zelf de volgende stap."
         }
       ]
     },
@@ -5256,8 +5256,8 @@
           "desc": "Elk fit-signaal toont de redenen erachter."
         },
         {
-          "title": "Werknemerspool over de grens",
-          "desc": "Aanbod uit elke markt waarin we actief zijn, op één plek."
+          "title": "Mensen en bureaus op één plek",
+          "desc": "Beschikbare werknemers en gekoppelde bureaus voor dezelfde behoefte, naast elkaar."
         },
         {
           "title": "Geen ondoorzichtige tussenpersonen",
@@ -5287,7 +5287,7 @@
         },
         {
           "q": "Hoeveel kost het?",
-          "a": "De prijzen staan op de prijzenpagina: één actieve positie per organisatie is gratis; voor meer posities is het organisatieplan nodig, dat je in je account activeert. Een personeelsbehoefte indienen is gratis."
+          "a": "Eén actieve positie per organisatie is gratis; voor meer posities is het organisatieabonnement nodig, beschreven op de prijspagina. Een personeelsbehoefte indienen is gratis."
         },
         {
           "q": "Kunnen we filteren op locatie?",
@@ -5301,8 +5301,8 @@
     },
     "cta": {
       "headline": {
-        "line1": "Stop met weken wachten",
-        "line2": "om een rol te vullen."
+        "line1": "Beschrijf het werk,",
+        "line2": "zie wie past."
       },
       "subcopy": "Maak een bedrijfsaccount aan, plaats een personeelsbehoefte en zie welke beschikbare werknemers erbij passen.",
       "button": "Maak een bedrijfsaccount aan"
@@ -5317,10 +5317,10 @@
       },
       "subcopy": "Beheer je werknemers, koppel ze aan klantbehoeften en bemiddel kennismakingen — zonder zicht of controle te verliezen.",
       "bullets": [
-        "Poolomvang — elke beheerde werknemer in één oogopslag.",
-        "Verdeling per vak — capaciteit per vaardigheid, live.",
-        "Opdrachtstatus — Actief, In afwachting, Beschikbaar.",
-        "Meerdere klanten — plaats de juiste mensen bij verschillende klanten."
+        "Overzicht — iedere persoon die je beheert, met de koppelstatus.",
+        "Beschikbaarheid — zoals elke persoon die zelf heeft opgegeven.",
+        "Klantbehoeften — de behoeften die gekoppelde klanten met je hebben gedeeld.",
+        "Voorstellen — de kandidaten die je hebt voorgesteld en de beslissing van elke klant."
       ]
     },
     "journey": {
@@ -5336,12 +5336,12 @@
           "desc": "Stuur je mensen naar openstaande rollen bij klanten."
         },
         {
-          "title": "Beheer opdrachten",
-          "desc": "Volg actief, in afwachting en beschikbaar."
+          "title": "Stel kandidaten voor",
+          "desc": "Stel mensen voor bij een gedeelde behoefte en volg de beslissing van de klant."
         },
         {
-          "title": "Laat je pool groeien",
-          "desc": "Voeg capaciteit toe waar de vraag stijgt."
+          "title": "Voeg klanten toe",
+          "desc": "Nodig meer klantbedrijven uit naarmate je werk groeit."
         }
       ]
     },
@@ -5354,24 +5354,24 @@
           "desc": "Werknemers, beschikbaarheid en status op één plek."
         },
         {
-          "title": "Plaats namens klanten",
-          "desc": "Bemiddel in vraag zonder de relatie te verliezen."
+          "title": "Werk met klantbehoeften",
+          "desc": "Klanten delen behoeften met je; jij stelt kandidaten voor en ziet hun beslissing."
         },
         {
           "title": "Gerichte matching",
           "desc": "Plaats de juiste mensen sneller."
         },
         {
-          "title": "Zichtbaarheidsinstellingen",
-          "desc": "Openbaar, alleen voor uitzendbureaus of direct — jij beslist."
+          "title": "Eerst toestemming",
+          "desc": "Het profiel van een persoon is alleen zichtbaar voor werkgevers als die persoon dat toestaat."
         },
         {
-          "title": "Grensoverschrijdend bereik",
-          "desc": "Opdrachtgevers en werknemers in elke markt waarin we actief zijn."
+          "title": "Meerdere talen",
+          "desc": "De werkruimte is beschikbaar in meerdere talen."
         },
         {
-          "title": "Laat je desk groeien",
-          "desc": "Capaciteitsinzichten wanneer de vraag verschuift."
+          "title": "Bevestigd werk",
+          "desc": "Bevestigde werkaantekeningen bouwen het dossier van elke persoon op."
         }
       ]
     },
@@ -5385,15 +5385,15 @@
         },
         {
           "q": "Wat kost het voor uitzendbureaus?",
-          "a": "Een bureau is een organisatie en gebruikt dezelfde plannen: één actieve positie is gratis, voor meer is het organisatieplan van de prijzenpagina nodig. Er is geen apart bureautarief."
+          "a": "Een bureau is een organisatie en gebruikt dezelfde abonnementen: één eigen open behoefte is gratis; voor meer is het organisatieabonnement nodig dat op de prijspagina staat beschreven. Er is geen apart bureautarief."
         },
         {
           "q": "Kunnen we de zichtbaarheid van werknemers bepalen?",
-          "a": "Ja — openbaar, alleen voor uitzendbureaus of direct, per werknemer en per vraag."
+          "a": "Elke persoon bepaalt zelf of werkgevers het profiel kunnen vinden — het staat aan of uit en kan altijd worden gewijzigd. Zichtbaarheidsinstellingen per klant zijn nog niet beschikbaar."
         },
         {
           "q": "Kan één werknemer meerdere klanten bedienen?",
-          "a": "Ja, met registratie van de opdrachtstatus zodat niets dubbel wordt geboekt."
+          "a": "Ja — je kunt dezelfde persoon voorstellen bij behoeften van meerdere klanten. Het platform voorkomt dubbele boekingen nog niet voor je, dus controleer de beschikbaarheid voordat je iemand voorstelt."
         }
       ]
     },
@@ -5555,8 +5555,8 @@
       "subcopy": "Bouw één profiel, stel je beschikbaarheid in en laat echte vraag jou over de grens vinden.",
       "benefits": [
         {
-          "title": "Eén profiel, elke markt",
-          "body": "Onderhoud één avatar met door records onderbouwde vaardigheden en beschikbaarheid — zichtbaar voor geregistreerde werkgevers over de grens."
+          "title": "Eén profiel, over grenzen heen",
+          "body": "Onderhoud één avatar met door aantekeningen onderbouwde vaardigheden en beschikbaarheid — zichtbaar voor geregistreerde werkgevers wanneer jij dat toestaat."
         },
         {
           "title": "Echte vraag",
@@ -5572,7 +5572,32 @@
         }
       ],
       "screenshot": "Werknemer-avatarflow",
-      "cta": "Maak gratis profiel"
+      "cta": "Maak gratis profiel",
+      "facts": {
+        "headline": "Start, kosten en grenzen",
+        "items": [
+          {
+            "title": "Voor wie",
+            "body": "Mensen die werken of willen werken, in elk beroep: werknemers, specialisten, freelancers en studenten."
+          },
+          {
+            "title": "Zo begin je",
+            "body": "Maak een gratis account en bevestig je e-mailadres, en vul daarna het korte profiel in. Daarna kun je je eerste werkdag vastleggen of open personeelsbehoeften bekijken."
+          },
+          {
+            "title": "Wat is gratis",
+            "body": "Het profiel, het Werkjournaal, het levende cv en interesse tonen in werk zijn gratis."
+          },
+          {
+            "title": "Betaalde diensten",
+            "body": "Er wordt geen betaald abonnement voor werknemers verkocht."
+          },
+          {
+            "title": "Nog niet beschikbaar",
+            "body": "Spraakinvoer voor het Werkjournaal en automatische vertaling van berichten zijn nog niet beschikbaar."
+          }
+        ]
+      }
     },
     "companies": {
       "eyebrow": "Voor bedrijven",
@@ -5640,13 +5665,38 @@
             "Bij bouwaanvragen kan ons partnerbedrijf documenten en inwerken coördineren, met een mens die elke stap begeleidt."
           ]
         }
+      },
+      "facts": {
+        "headline": "Start, kosten en grenzen",
+        "items": [
+          {
+            "title": "Voor wie",
+            "body": "Bedrijven en werkgevers in elke sector die mensen nodig hebben voor concreet werk."
+          },
+          {
+            "title": "Zo begin je",
+            "body": "Beschrijf een behoefte zonder account, of maak een gratis account, richt je organisatie in en plaats de behoefte vanuit je werkruimte."
+          },
+          {
+            "title": "Wat is gratis",
+            "body": "Eén open behoefte per organisatie, het teamoverzicht, projecten en het beoordelen van werkaantekeningen zijn gratis."
+          },
+          {
+            "title": "Betaalde diensten",
+            "body": "Voor meer dan één open behoefte tegelijk is het organisatieabonnement nodig. De prijspagina beschrijft het en laat zien of het nu besteld kan worden."
+          },
+          {
+            "title": "Nog niet beschikbaar",
+            "body": "Automatische vertaling van berichten en pushmeldingen zijn nog niet beschikbaar."
+          }
+        ]
       }
     },
     "agencies": {
       "eyebrow": "Voor uitzendbureaus",
       "title": "Jouw pool,",
       "titleAccent": "in beweging.",
-      "subcopy": "Beheer je werknemers, plaats vraag namens klanten en verzorg introducties — alles op één plek.",
+      "subcopy": "Houd je mensen in één overzicht, koppel met klantbedrijven en stel kandidaten voor bij de behoeften die zij delen — alles op één plek.",
       "benefits": [
         {
           "title": "Beheer je pool",
@@ -5657,12 +5707,37 @@
           "body": "Deel klantbehoeften en plaats sneller de juiste mensen met uitlegbare fit-richting."
         },
         {
-          "title": "Zichtbaarheidsinstellingen",
-          "body": "Kies wat openbaar, alleen voor uitzendbureaus of direct is — jij bepaalt de zichtbaarheid."
+          "title": "Klantkoppelingen",
+          "body": "Nodig een klantbedrijf uit. Na de koppeling deelt de klant een behoefte met je en stel jij er kandidaten voor."
         }
       ],
       "screenshot": "Uitzendbureau-modusflow",
-      "cta": "Maak een uitzendbureau-account aan"
+      "cta": "Maak een uitzendbureau-account aan",
+      "facts": {
+        "headline": "Start, kosten en grenzen",
+        "items": [
+          {
+            "title": "Voor wie",
+            "body": "Uitzend- en wervingsbureaus en andere organisaties die mensen leveren, in elke sector."
+          },
+          {
+            "title": "Zo begin je",
+            "body": "Maak een account — de optie bureau is al geselecteerd — en richt je organisatie in als uitzendbureau. Nodig daarna een klantbedrijf uit of voeg je mensen toe aan het overzicht."
+          },
+          {
+            "title": "Wat is gratis",
+            "body": "Het bureau-account, het overzicht van je mensen, klantkoppelingen en het voorstellen van kandidaten zijn gratis. Eén eigen open behoefte is gratis."
+          },
+          {
+            "title": "Betaalde diensten",
+            "body": "Er is geen bureautarief en er wordt er geen verkocht. Voor meer dan één eigen open behoefte is het organisatieabonnement nodig dat op de prijspagina staat beschreven."
+          },
+          {
+            "title": "Nog niet beschikbaar",
+            "body": "Bureaucommissies, samenwerking tussen bureaus en zichtbaarheidsinstellingen per klant zijn nog niet beschikbaar."
+          }
+        ]
+      }
     },
     "createCv": {
       "eyebrow": "Gratis cv-maker",
@@ -5704,6 +5779,114 @@
         }
       ],
       "privacyNote": "Je cv blijft standaard privé. Er wordt niets met werkgevers gedeeld totdat jij vindbaarheid expliciet inschakelt, en je kunt dit op elk moment uitzetten."
+    },
+    "education": {
+      "eyebrow": "Voor onderwijsinstellingen",
+      "title": "Opleidingen, groepen en praktijk",
+      "titleAccent": "in één werkruimte.",
+      "subcopy": "Voor scholen, hogescholen, universiteiten en opleiders: maak opleidingen en groepen aan, beoordeel de praktijk die je lerenden vastleggen, erken competenties en exporteer een rapport.",
+      "cta": "Maak een instellingsaccount",
+      "benefits": [
+        {
+          "title": "Opleidingen en groepen",
+          "body": "Maak je opleidingen aan en open een groep per instroom. De gegevens van een opleiding kun je later aanpassen."
+        },
+        {
+          "title": "Lerenden",
+          "body": "Nodig lerenden uit of accepteer het verzoek van een lerende om bij een groep te komen. Een verzoek geeft geen toegang totdat je bevoegde medewerker het accepteert."
+        },
+        {
+          "title": "Vastgelegde praktijk",
+          "body": "Lerenden leggen hun praktijkdagen vast in hun eigen Werkjournaal. Je bevoegde medewerker bekijkt elke aantekening en tekent die af."
+        },
+        {
+          "title": "Erkenning van competenties",
+          "body": "Leg een erkenning vast op basis van praktijk die je hebt afgetekend. Het is een apart besluit van je beoordelaar, nooit automatisch, en de lerende ziet het."
+        },
+        {
+          "title": "Rapport over vraag en resultaten",
+          "body": "Bekijk open vacatures in de richtingen waarvoor je opleidingen opleiden en de resultaten van je lerenden, en exporteer het rapport als bestand."
+        }
+      ],
+      "facts": {
+        "headline": "Start, kosten en grenzen",
+        "items": [
+          {
+            "title": "Voor wie",
+            "body": "Scholen, hogescholen, universiteiten en andere opleiders, in elk vakgebied."
+          },
+          {
+            "title": "Zo begin je",
+            "body": "Maak een account en bevestig je e-mailadres. Vul het korte profiel in en richt daarna je organisatie in — de optie opleider is al geselecteerd. Open ‘Opleiding en programma's’ en maak je eerste opleiding aan."
+          },
+          {
+            "title": "Wat is gratis",
+            "body": "Het instellingsaccount, opleidingen, groepen, praktijkbeoordeling, erkenning van competenties en het rapport zijn gratis."
+          },
+          {
+            "title": "Betaalde diensten",
+            "body": "Er is geen betaald abonnement voor onderwijsinstellingen en geen van deze functies vereist er een. Het organisatieabonnement op de prijspagina gaat alleen over open personeelsbehoeften."
+          },
+          {
+            "title": "Nog niet beschikbaar",
+            "body": "Een opleidings- en certificatenregister voor mensen die geen lid zijn van je organisatie en formele erkenning van eerder verworven competenties zijn nog niet beschikbaar. Een hier vastgelegde erkenning is geen door de overheid erkende kwalificatie."
+          }
+        ]
+      }
+    },
+    "serviceProviders": {
+      "eyebrow": "Voor dienstverleners en teams",
+      "title": "Bied je dienst aan",
+      "titleAccent": "en beantwoord echte aanvragen.",
+      "subcopy": "Voor zelfstandige specialisten, ploegen en dienstverlenende bedrijven in elk vakgebied: publiceer wat je doet, ontvang aanvragen, beantwoord ze en bewaar voorstellen en contracten op één plek.",
+      "cta": "Maak een gratis account",
+      "benefits": [
+        {
+          "title": "Publiceer een dienstaanbod",
+          "body": "Beschrijf een dienst die je levert en publiceer die zodra hij klaar is. Je kunt hem op elk moment pauzeren of intrekken."
+        },
+        {
+          "title": "Ontvang en beantwoord aanvragen",
+          "body": "Een klant stuurt een aanvraag naar je aanbod. Je accepteert of weigert die; er is niets afgesproken totdat je antwoordt."
+        },
+        {
+          "title": "Eén gedeelde zoekfunctie",
+          "body": "Gepubliceerde diensten en advertenties verschijnen in de gedeelde zoekfunctie van het platform, naast personeelsbehoeften."
+        },
+        {
+          "title": "Voorstellen en contracten",
+          "body": "Stel een commercieel voorstel op, markeer het als verzonden of geaccepteerd en bewaar een contractregistratie met de status. Het is een registratie, geen elektronische handtekening."
+        },
+        {
+          "title": "Schat een klus in",
+          "body": "Bepaal de omvang van een klus met de projectkostencalculator: arbeidsuren, materialen, materieel en reizen, met je eigen cijfers."
+        }
+      ],
+      "facts": {
+        "headline": "Start, kosten en grenzen",
+        "items": [
+          {
+            "title": "Voor wie",
+            "body": "Zelfstandige specialisten, ploegen en dienstverlenende bedrijven, in elk vak of beroep."
+          },
+          {
+            "title": "Zo begin je",
+            "body": "Maak een account en bevestig je e-mailadres. Vul het korte profiel in, open daarna ‘Jouw dienstenaanbod’ en schrijf je eerste aanbod."
+          },
+          {
+            "title": "Wat is gratis",
+            "body": "Het account, dienstaanbod, aanvragen, voorstellen, contractregistraties en de calculator zijn gratis."
+          },
+          {
+            "title": "Betaalde diensten",
+            "body": "Om diensten aan te bieden is geen betaalde dienst nodig en er wordt er ook geen voor verkocht. Het platform verwerkt geen betalingen tussen jou en je klant."
+          },
+          {
+            "title": "Nog niet beschikbaar",
+            "body": "Beoordelingen, annulering en geschilafhandeling voor dienstorders, het bestellen van goederen, logistiek en een openbare bedrijfspagina zijn nog niet beschikbaar."
+          }
+        ]
+      }
     }
   },
   "pricing": {

@@ -12,6 +12,7 @@ export async function generateMetadata({
   return buildPageMetadataFor("agencies", locale, "/for-agencies");
 }
 import { PageHero } from "@/components/marketing/page-hero";
+import { AudienceFacts, type AudienceFactsCopy } from "@/components/marketing/audience-facts";
 import { RoleEnrichment } from "@/components/marketing/role-enrichment";
 import { AGENCY_DOOR_NEXT } from "@/lib/marketing/public-doors";
 
@@ -39,6 +40,7 @@ export default async function ForAgenciesPage({
         ctaAudience="agencies"
       />
       <BenefitCards items={benefits} />
+      <AudienceFacts copy={t.raw("facts") as AudienceFactsCopy} />
       <RoleEnrichment
         root="agencies"
         previewKey="pool"

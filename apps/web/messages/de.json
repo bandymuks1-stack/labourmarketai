@@ -5217,7 +5217,7 @@
         "line1": "So sieht der Chancenfluss",
         "line2": "aus."
       },
-      "subcopy": "Veröffentlichen Sie, was jedes Projekt braucht, und sehen Sie erklärbare Passungsrichtung von verfügbaren Arbeitskräften und Personalagenturen — in Stunden, nicht in Wochen.",
+      "subcopy": "Veröffentlichen Sie, was jedes Projekt braucht, und sehen Sie eine erklärbare Passungsrichtung von verfügbaren Arbeitskräften und Agenturen.",
       "bullets": [
         "Projekt + Standort — grenzen Sie jeden Bedarf präzise ein.",
         "Personalstärke — wie viele Personen Sie pro Rolle brauchen.",
@@ -5242,8 +5242,8 @@
           "desc": "Kontaktieren Sie die Personen, die Sie möchten — ohne Gatekeeper."
         },
         {
-          "title": "Schneller einstellen",
-          "desc": "Besetzen Sie Rollen in Tagen, mit nachvollziehbaren Entscheidungen."
+          "title": "Entscheiden",
+          "desc": "Wählen Sie, wen Sie kontaktieren, und gehen Sie den nächsten Schritt selbst."
         }
       ]
     },
@@ -5256,8 +5256,8 @@
           "desc": "Jedes Passungssignal zeigt die Gründe dahinter."
         },
         {
-          "title": "Grenzüberschreitender Arbeitskräftepool",
-          "desc": "Angebot aus jedem Markt, in dem wir tätig sind — an einem Ort."
+          "title": "Menschen und Agenturen an einem Ort",
+          "desc": "Verfügbare Arbeitskräfte und verbundene Agenturen für dieselbe Anfrage, nebeneinander."
         },
         {
           "title": "Keine undurchsichtigen Zwischenhändler",
@@ -5287,7 +5287,7 @@
         },
         {
           "q": "Was kostet es?",
-          "a": "Die Preise stehen auf der Preisseite: eine aktive Position pro Organisation ist kostenlos; für mehr Positionen braucht es den Organisationsplan, der im Konto aktiviert wird. Einen Personalbedarf einzureichen ist kostenlos."
+          "a": "Eine aktive Position pro Organisation ist kostenlos; für weitere Positionen ist der Organisationstarif nötig, der auf der Preisseite beschrieben ist. Eine Personalanfrage einzureichen ist kostenlos."
         },
         {
           "q": "Können wir nach Standort filtern?",
@@ -5301,8 +5301,8 @@
     },
     "cta": {
       "headline": {
-        "line1": "Schluss mit wochenlangem Warten,",
-        "line2": "um eine Rolle zu besetzen."
+        "line1": "Beschreiben Sie die Arbeit,",
+        "line2": "sehen Sie, wer passt."
       },
       "subcopy": "Erstellen Sie ein Unternehmenskonto, veröffentlichen Sie einen Personalbedarf und sehen Sie, welche verfügbaren Arbeitskräfte dazu passen.",
       "button": "Unternehmenskonto erstellen"
@@ -5317,10 +5317,10 @@
       },
       "subcopy": "Verwalten Sie Ihre Arbeitskräfte, verbinden Sie sie mit Kundenbedarfen und vermitteln Sie Kontakte — ohne Übersicht oder Kontrolle zu verlieren.",
       "bullets": [
-        "Poolgröße — jede verwaltete Arbeitskraft auf einen Blick.",
-        "Gewerke-Aufschlüsselung — Kapazität nach Fähigkeit, live.",
-        "Einsatzstatus — Aktiv, Ausstehend, Verfügbar.",
-        "Mehrere Kunden — setzen Sie die richtigen Leute bei verschiedenen Kunden ein."
+        "Liste — jede Person, die Sie betreuen, mit ihrem Verbindungsstatus.",
+        "Verfügbarkeit — so, wie jede Person sie selbst angegeben hat.",
+        "Kundenanfragen — die Anfragen, die verbundene Kunden mit Ihnen geteilt haben.",
+        "Vorschläge — die von Ihnen vorgeschlagenen Kandidaten und die Entscheidung jedes Kunden."
       ]
     },
     "journey": {
@@ -5336,12 +5336,12 @@
           "desc": "Lenken Sie Ihre Leute zu offenen Positionen bei Kunden."
         },
         {
-          "title": "Einsätze verwalten",
-          "desc": "Verfolgen Sie Aktiv, Ausstehend und Verfügbar."
+          "title": "Kandidaten vorschlagen",
+          "desc": "Schlagen Sie Personen für eine geteilte Anfrage vor und verfolgen Sie die Entscheidung des Kunden."
         },
         {
-          "title": "Pool vergrößern",
-          "desc": "Bauen Sie Kapazität dort auf, wo die Nachfrage steigt."
+          "title": "Kunden hinzufügen",
+          "desc": "Laden Sie weitere Kundenunternehmen ein, wenn Ihre Arbeit wächst."
         }
       ]
     },
@@ -5354,24 +5354,24 @@
           "desc": "Arbeitskräfte, Verfügbarkeit und Status an einem Ort."
         },
         {
-          "title": "Im Auftrag von Kunden veröffentlichen",
-          "desc": "Vermitteln Sie Nachfrage, ohne die Kundenbeziehung zu verlieren."
+          "title": "Mit Kundenanfragen arbeiten",
+          "desc": "Kunden teilen Anfragen mit Ihnen; Sie schlagen Kandidaten vor und sehen deren Entscheidung."
         },
         {
           "title": "Passgenaue Vermittlung",
           "desc": "Setzen Sie die richtigen Leute schneller ein."
         },
         {
-          "title": "Sichtbarkeitseinstellungen",
-          "desc": "Öffentlich, nur für Personalagenturen oder direkt — Sie entscheiden."
+          "title": "Zuerst die Einwilligung",
+          "desc": "Das Profil einer Person ist für Arbeitgeber nur sichtbar, wenn diese Person es erlaubt."
         },
         {
-          "title": "Grenzüberschreitende Reichweite",
-          "desc": "Auftraggeber und Arbeitskräfte in jedem Markt, in dem wir tätig sind."
+          "title": "Mehrere Sprachen",
+          "desc": "Der Arbeitsbereich ist in mehreren Sprachen verfügbar."
         },
         {
-          "title": "Ihren Desk ausbauen",
-          "desc": "Kapazitätseinblicke, wenn sich die Nachfrage verschiebt."
+          "title": "Bestätigte Arbeit",
+          "desc": "Bestätigte Arbeitseinträge bauen den Nachweis jeder Person auf."
         }
       ]
     },
@@ -5385,15 +5385,15 @@
         },
         {
           "q": "Was kostet es Personalagenturen?",
-          "a": "Eine Agentur ist eine Organisation und nutzt dieselben Pläne: eine aktive Position ist kostenlos, für mehr braucht es den Organisationsplan von der Preisseite. Einen separaten Agenturtarif gibt es nicht."
+          "a": "Eine Agentur ist eine Organisation und nutzt dieselben Tarife: Eine eigene offene Personalanfrage ist kostenlos; für mehr ist der auf der Preisseite beschriebene Organisationstarif nötig. Einen eigenen Agenturtarif gibt es nicht."
         },
         {
           "q": "Können wir die Sichtbarkeit der Arbeitskräfte steuern?",
-          "a": "Ja — öffentlich, nur für Personalagenturen oder direkt, pro Arbeitskraft und pro Bedarf."
+          "a": "Jede Person entscheidet selbst, ob Arbeitgeber ihr Profil finden können — es ist ein- oder ausgeschaltet und jederzeit änderbar. Sichtbarkeitseinstellungen pro Kunde sind noch nicht verfügbar."
         },
         {
           "q": "Kann eine Arbeitskraft mehrere Kunden bedienen?",
-          "a": "Ja, mit Einsatzstatus-Verfolgung, damit nichts doppelt gebucht wird."
+          "a": "Ja — Sie können dieselbe Person für Anfragen mehrerer Kunden vorschlagen. Die Plattform verhindert Doppelbuchungen noch nicht für Sie; prüfen Sie daher die Verfügbarkeit, bevor Sie jemanden vorschlagen."
         }
       ]
     },
@@ -5555,8 +5555,8 @@
       "subcopy": "Erstellen Sie ein Profil, legen Sie Ihre Verfügbarkeit fest und lassen Sie sich von echter Nachfrage über Grenzen hinweg finden.",
       "benefits": [
         {
-          "title": "Ein Profil, jeder Markt",
-          "body": "Pflegen Sie einen einzigen Avatar mit nachweisgestützten Fähigkeiten und Verfügbarkeit — sichtbar für registrierte Arbeitgeber über Grenzen hinweg."
+          "title": "Ein Profil, über Grenzen hinweg",
+          "body": "Pflegen Sie einen einzigen Avatar mit durch Einträge belegten Fähigkeiten und Verfügbarkeit — sichtbar für registrierte Arbeitgeber, wenn Sie es erlauben."
         },
         {
           "title": "Echte Nachfrage",
@@ -5572,7 +5572,32 @@
         }
       ],
       "screenshot": "Avatar-Ablauf für Arbeitskräfte",
-      "cta": "Kostenloses Profil erstellen"
+      "cta": "Kostenloses Profil erstellen",
+      "facts": {
+        "headline": "Start, Kosten und Grenzen",
+        "items": [
+          {
+            "title": "Für wen",
+            "body": "Menschen, die arbeiten oder arbeiten möchten, in jedem Beruf: Beschäftigte, Fachkräfte, Freiberufler und Studierende."
+          },
+          {
+            "title": "So starten Sie",
+            "body": "Erstellen Sie ein kostenloses Konto und bestätigen Sie Ihre E-Mail-Adresse, dann füllen Sie das kurze Profil aus. Danach können Sie Ihren ersten Arbeitstag erfassen oder offene Personalanfragen ansehen."
+          },
+          {
+            "title": "Was kostenlos ist",
+            "body": "Das Profil, das Arbeitsjournal, der lebende Lebenslauf und das Bekunden von Interesse an Arbeit sind kostenlos."
+          },
+          {
+            "title": "Kostenpflichtige Leistungen",
+            "body": "Ein kostenpflichtiger Tarif für Arbeitskräfte wird nicht verkauft."
+          },
+          {
+            "title": "Noch nicht verfügbar",
+            "body": "Spracheingabe für das Arbeitsjournal und die automatische Übersetzung von Nachrichten sind noch nicht verfügbar."
+          }
+        ]
+      }
     },
     "companies": {
       "eyebrow": "Für Unternehmen",
@@ -5640,13 +5665,38 @@
             "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
           ]
         }
+      },
+      "facts": {
+        "headline": "Start, Kosten und Grenzen",
+        "items": [
+          {
+            "title": "Für wen",
+            "body": "Unternehmen und Arbeitgeber in jeder Branche, die Menschen für konkrete Arbeit brauchen."
+          },
+          {
+            "title": "So starten Sie",
+            "body": "Beschreiben Sie einen Bedarf ohne Konto, oder erstellen Sie ein kostenloses Konto, richten Sie Ihre Organisation ein und veröffentlichen Sie den Bedarf in Ihrem Arbeitsbereich."
+          },
+          {
+            "title": "Was kostenlos ist",
+            "body": "Eine offene Personalanfrage pro Organisation, die Teamliste, Projekte und die Prüfung von Arbeitseinträgen sind kostenlos."
+          },
+          {
+            "title": "Kostenpflichtige Leistungen",
+            "body": "Für mehr als eine offene Personalanfrage gleichzeitig ist der Organisationstarif nötig. Die Preisseite beschreibt ihn und zeigt, ob er derzeit bestellt werden kann."
+          },
+          {
+            "title": "Noch nicht verfügbar",
+            "body": "Die automatische Übersetzung von Nachrichten und Push-Benachrichtigungen sind noch nicht verfügbar."
+          }
+        ]
       }
     },
     "agencies": {
       "eyebrow": "Für Personalagenturen",
       "title": "Ihr Pool,",
       "titleAccent": "in Bewegung.",
-      "subcopy": "Verwalten Sie Ihre betreuten Arbeitskräfte, veröffentlichen Sie Bedarf im Auftrag von Kunden und vermitteln Sie Kontakte — alles an einem Ort.",
+      "subcopy": "Führen Sie Ihre Leute in einer Liste, verbinden Sie sich mit Kundenunternehmen und schlagen Sie Kandidaten für deren geteilte Anfragen vor — alles an einem Ort.",
       "benefits": [
         {
           "title": "Pool verwalten",
@@ -5657,12 +5707,37 @@
           "body": "Teilen Sie Kundenbedarfe und platzieren Sie die richtigen Personen schneller — mit erklärbarer Passungsrichtung."
         },
         {
-          "title": "Sichtbarkeitssteuerung",
-          "body": "Wählen Sie, was öffentlich, nur für Agenturen oder direkt sichtbar ist — Sie steuern die Sichtbarkeit."
+          "title": "Kundenverbindungen",
+          "body": "Laden Sie ein Kundenunternehmen ein. Nach der Verbindung teilt der Kunde eine Anfrage mit Ihnen, und Sie schlagen Kandidaten dafür vor."
         }
       ],
       "screenshot": "Agenturmodus-Ablauf",
-      "cta": "Agenturkonto erstellen"
+      "cta": "Agenturkonto erstellen",
+      "facts": {
+        "headline": "Start, Kosten und Grenzen",
+        "items": [
+          {
+            "title": "Für wen",
+            "body": "Personaldienstleister und Personalvermittlungen sowie andere Organisationen, die Menschen stellen, in jeder Branche."
+          },
+          {
+            "title": "So starten Sie",
+            "body": "Erstellen Sie ein Konto — die Option Agentur ist bereits ausgewählt — und richten Sie Ihre Organisation als Personalagentur ein. Laden Sie dann ein Kundenunternehmen ein oder nehmen Sie Ihre Leute in die Liste auf."
+          },
+          {
+            "title": "Was kostenlos ist",
+            "body": "Das Agenturkonto, die Personenliste, Kundenverbindungen und das Vorschlagen von Kandidaten sind kostenlos. Eine eigene offene Personalanfrage ist kostenlos."
+          },
+          {
+            "title": "Kostenpflichtige Leistungen",
+            "body": "Es gibt keinen Agenturtarif, und es wird keiner verkauft. Für mehr als eine eigene offene Personalanfrage ist der auf der Preisseite beschriebene Organisationstarif nötig."
+          },
+          {
+            "title": "Noch nicht verfügbar",
+            "body": "Agenturprovisionen, die Zusammenarbeit zwischen Agenturen und Sichtbarkeitseinstellungen pro Kunde sind noch nicht verfügbar."
+          }
+        ]
+      }
     },
     "createCv": {
       "eyebrow": "Kostenloser Lebenslauf-Generator",
@@ -5704,6 +5779,114 @@
         }
       ],
       "privacyNote": "Ihr Lebenslauf bleibt standardmäßig privat. Nichts wird an Arbeitgeber weitergegeben, bis Sie die Sichtbarkeit ausdrücklich aktivieren — und Sie können sie jederzeit deaktivieren."
+    },
+    "education": {
+      "eyebrow": "Für Bildungseinrichtungen",
+      "title": "Programme, Gruppen und Praxis",
+      "titleAccent": "in einem Arbeitsbereich.",
+      "subcopy": "Für Schulen, Hochschulen, Universitäten und Bildungsanbieter: Programme und Gruppen anlegen, die von Lernenden erfasste Praxis prüfen, Kompetenzen anerkennen und einen Bericht exportieren.",
+      "cta": "Konto für Bildungseinrichtung erstellen",
+      "benefits": [
+        {
+          "title": "Programme und Gruppen",
+          "body": "Legen Sie Ihre Programme an und eröffnen Sie für jeden Jahrgang eine Gruppe. Die Angaben eines Programms können Sie später korrigieren."
+        },
+        {
+          "title": "Lernende",
+          "body": "Laden Sie Lernende ein oder nehmen Sie deren eigene Anfrage zum Gruppenbeitritt an. Eine Anfrage gewährt keinen Zugriff, bis Ihre berechtigte Person sie annimmt."
+        },
+        {
+          "title": "Dokumentierte Praxis",
+          "body": "Lernende erfassen ihre Praxistage im eigenen Arbeitsjournal. Ihre berechtigte Person prüft jeden Eintrag und zeichnet ihn ab."
+        },
+        {
+          "title": "Anerkennung von Kompetenzen",
+          "body": "Erfassen Sie eine Anerkennung auf Grundlage abgezeichneter Praxis. Sie ist eine eigene Entscheidung Ihrer prüfenden Person, nie automatisch, und für die lernende Person sichtbar."
+        },
+        {
+          "title": "Bericht zu Nachfrage und Ergebnissen",
+          "body": "Sehen Sie offene Stellen in den Richtungen, auf die Ihre Programme vorbereiten, sowie die Ergebnisse Ihrer Lernenden, und exportieren Sie den Bericht als Datei."
+        }
+      ],
+      "facts": {
+        "headline": "Start, Kosten und Grenzen",
+        "items": [
+          {
+            "title": "Für wen",
+            "body": "Schulen, Hochschulen, Universitäten und andere Bildungsanbieter, in jedem Fachgebiet."
+          },
+          {
+            "title": "So starten Sie",
+            "body": "Erstellen Sie ein Konto und bestätigen Sie Ihre E-Mail-Adresse. Füllen Sie das kurze Profil aus und richten Sie dann Ihre Organisation ein — die Option Bildungsanbieter ist bereits ausgewählt. Öffnen Sie „Ausbildung und Programme“ und legen Sie Ihr erstes Programm an."
+          },
+          {
+            "title": "Was kostenlos ist",
+            "body": "Das Konto der Einrichtung, Programme, Gruppen, Praxisprüfung, Anerkennung von Kompetenzen und der Bericht sind kostenlos."
+          },
+          {
+            "title": "Kostenpflichtige Leistungen",
+            "body": "Es gibt keinen kostenpflichtigen Tarif für Bildungseinrichtungen, und keine dieser Funktionen setzt einen voraus. Der Organisationstarif auf der Preisseite betrifft nur offene Personalanfragen."
+          },
+          {
+            "title": "Noch nicht verfügbar",
+            "body": "Ein Schulungs- und Zertifikatsregister für Personen, die nicht Mitglied Ihrer Organisation sind, und die formale Anrechnung früheren Lernens sind noch nicht verfügbar. Eine hier erfasste Anerkennung ist keine staatlich anerkannte Qualifikation."
+          }
+        ]
+      }
+    },
+    "serviceProviders": {
+      "eyebrow": "Für Dienstleister und Teams",
+      "title": "Bieten Sie Ihre Leistung an",
+      "titleAccent": "und beantworten Sie echte Anfragen.",
+      "subcopy": "Für selbstständige Fachkräfte, Kolonnen und Dienstleistungsunternehmen in jedem Bereich: Veröffentlichen Sie, was Sie tun, erhalten Sie Anfragen, beantworten Sie sie und verwalten Sie Angebote und Verträge an einem Ort.",
+      "cta": "Kostenloses Konto erstellen",
+      "benefits": [
+        {
+          "title": "Leistungsangebot veröffentlichen",
+          "body": "Beschreiben Sie eine Leistung, die Sie erbringen, und veröffentlichen Sie sie, sobald sie fertig ist. Sie können sie jederzeit pausieren oder zurückziehen."
+        },
+        {
+          "title": "Anfragen erhalten und beantworten",
+          "body": "Ein Kunde sendet eine Anfrage zu Ihrem Angebot. Sie nehmen sie an oder lehnen sie ab; bis zu Ihrer Antwort ist nichts vereinbart."
+        },
+        {
+          "title": "Eine gemeinsame Suche",
+          "body": "Veröffentlichte Angebote und Anzeigen erscheinen in der gemeinsamen Suche der Plattform, neben Personalanfragen."
+        },
+        {
+          "title": "Angebote und Verträge",
+          "body": "Erstellen Sie ein kommerzielles Angebot, markieren Sie es als gesendet oder angenommen und führen Sie einen Vertragseintrag mit Status. Es ist ein Eintrag, keine elektronische Signatur."
+        },
+        {
+          "title": "Auftrag kalkulieren",
+          "body": "Schätzen Sie einen Auftrag mit dem Projektkostenrechner: Arbeitsstunden, Material, Geräte und Anfahrt, mit Ihren eigenen Zahlen."
+        }
+      ],
+      "facts": {
+        "headline": "Start, Kosten und Grenzen",
+        "items": [
+          {
+            "title": "Für wen",
+            "body": "Selbstständige Fachkräfte, Kolonnen und Dienstleistungsunternehmen, in jedem Gewerk oder Beruf."
+          },
+          {
+            "title": "So starten Sie",
+            "body": "Erstellen Sie ein Konto und bestätigen Sie Ihre E-Mail-Adresse. Füllen Sie das kurze Profil aus, öffnen Sie dann „Ihre Dienstleistungsangebote“ und schreiben Sie Ihr erstes Angebot."
+          },
+          {
+            "title": "Was kostenlos ist",
+            "body": "Das Konto, Leistungsangebote, Anfragen, Angebote, Vertragseinträge und der Rechner sind kostenlos."
+          },
+          {
+            "title": "Kostenpflichtige Leistungen",
+            "body": "Um Leistungen anzubieten, ist keine kostenpflichtige Leistung nötig, und es wird keine dafür verkauft. Die Plattform wickelt keine Zahlungen zwischen Ihnen und Ihrem Kunden ab."
+          },
+          {
+            "title": "Noch nicht verfügbar",
+            "body": "Bewertungen, Stornierung und Streitbeilegung für Dienstleistungsaufträge, die Bestellung von Waren, Logistik und eine öffentliche Unternehmensseite sind noch nicht verfügbar."
+          }
+        ]
+      }
     }
   },
   "pricing": {

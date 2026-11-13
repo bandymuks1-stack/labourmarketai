@@ -5217,7 +5217,7 @@
         "line1": "Here's what the opportunity flow",
         "line2": "looks like."
       },
-      "subcopy": "Post what each project needs and see explainable fit direction from available workers and agencies — in hours, not weeks.",
+      "subcopy": "Post what each project needs and see explainable fit direction from available workers and agencies.",
       "bullets": [
         "Project + location — scope each need precisely.",
         "Headcount — how many of each role you need.",
@@ -5242,8 +5242,8 @@
           "desc": "Contact the people you want — no gatekeeper."
         },
         {
-          "title": "Hire faster",
-          "desc": "Close roles in days, with accountable decisions."
+          "title": "Decide",
+          "desc": "Choose whom to contact and take the next step yourself."
         }
       ]
     },
@@ -5256,8 +5256,8 @@
           "desc": "Every fit signal shows the reasons behind it."
         },
         {
-          "title": "Cross-border worker pool",
-          "desc": "Supply from every market we operate in, in one place."
+          "title": "People and agencies in one place",
+          "desc": "Available workers and connected agencies for the same need, side by side."
         },
         {
           "title": "No opaque middlemen",
@@ -5287,7 +5287,7 @@
         },
         {
           "q": "How much does it cost?",
-          "a": "Prices are published on the pricing page: one active position per organisation is free; more positions need the organisation plan, activated in your account. Submitting a workforce need is free."
+          "a": "One active position per organisation is free; more positions need the organisation plan, described on the pricing page. Submitting a workforce need is free."
         },
         {
           "q": "Can we filter by location?",
@@ -5301,8 +5301,8 @@
     },
     "cta": {
       "headline": {
-        "line1": "Stop waiting weeks",
-        "line2": "to fill a role."
+        "line1": "Describe the work,",
+        "line2": "see who fits."
       },
       "subcopy": "Create a company account, post a work need and see which available workers fit it.",
       "button": "Create a company account"
@@ -5317,10 +5317,10 @@
       },
       "subcopy": "Manage your workers, connect them to client needs and broker introductions — without losing visibility or control.",
       "bullets": [
-        "Pool size — every managed worker at a glance.",
-        "Trade breakdown — capacity by skill, as declared in profiles.",
-        "Assignment status — Active, Pending, Available.",
-        "Multi-client — place the right people across clients."
+        "Roster — every person you manage, with their link status.",
+        "Availability — as each person declared it.",
+        "Client needs — the needs connected clients shared with you.",
+        "Offers — the candidates you offered and each client's decision."
       ]
     },
     "journey": {
@@ -5336,12 +5336,12 @@
           "desc": "Direct your people toward open client roles."
         },
         {
-          "title": "Manage assignments",
-          "desc": "Track active, pending and available."
+          "title": "Offer candidates",
+          "desc": "Offer people for a shared need and follow the client's decision."
         },
         {
-          "title": "Grow your pool",
-          "desc": "Add capacity where demand is rising."
+          "title": "Add clients",
+          "desc": "Invite further client companies as your work grows."
         }
       ]
     },
@@ -5354,24 +5354,24 @@
           "desc": "Workers, availability and status in one place."
         },
         {
-          "title": "Post on behalf of clients",
-          "desc": "Broker demand without losing the relationship."
+          "title": "Work with client needs",
+          "desc": "Clients share needs with you; you offer candidates and see their decision."
         },
         {
           "title": "Fit direction",
           "desc": "Place the right people faster."
         },
         {
-          "title": "Visibility controls",
-          "desc": "Public, agencies-only or direct — your call."
+          "title": "Consent first",
+          "desc": "A person's profile is visible to employers only when that person allows it."
         },
         {
-          "title": "Cross-border reach",
-          "desc": "Clients and workers across every market we operate in."
+          "title": "Several languages",
+          "desc": "The workspace is available in several languages."
         },
         {
-          "title": "Grow your desk",
-          "desc": "Capacity insights as demand shifts."
+          "title": "Work history",
+          "desc": "Entries in the Work Journal build each person's history."
         }
       ]
     },
@@ -5385,15 +5385,15 @@
         },
         {
           "q": "How much does it cost agencies?",
-          "a": "An agency is an organisation and uses the same plans: one active position is free, more need the organisation plan from the pricing page. There is no separate agency tariff."
+          "a": "An agency is an organisation and uses the same plans: one open need of your own is free; more need the organisation plan described on the pricing page. There is no separate agency tariff."
         },
         {
           "q": "Can we control worker visibility?",
-          "a": "Yes — public, agencies-only or direct, per worker and per demand."
+          "a": "Each person decides whether employers can find their profile — it is on or off, and they can change it at any time. Visibility settings per client are not available yet."
         },
         {
           "q": "Can one worker serve multiple clients?",
-          "a": "Yes, with assignment status tracking so nothing is double-booked."
+          "a": "Yes — you can offer the same person for several clients' needs. The platform does not yet prevent double-booking for you, so check availability before you offer."
         }
       ]
     },
@@ -5555,8 +5555,8 @@
       "subcopy": "Build one profile, set your availability, and let real demand find you across borders.",
       "benefits": [
         {
-          "title": "One profile, every market",
-          "body": "Maintain a single avatar with records-backed skills and availability — visible to registered employers across borders."
+          "title": "One profile, across borders",
+          "body": "Maintain a single avatar with records-backed skills and availability — visible to registered employers when you allow it."
         },
         {
           "title": "Real demand",
@@ -5572,7 +5572,32 @@
         }
       ],
       "screenshot": "Worker avatar flow",
-      "cta": "Create free profile"
+      "cta": "Create free profile",
+      "facts": {
+        "headline": "Start, cost and limits",
+        "items": [
+          {
+            "title": "Who it is for",
+            "body": "People who work or want to work, in any profession: employees, specialists, freelancers and students."
+          },
+          {
+            "title": "How to start",
+            "body": "Create a free account and open the link we send to your e-mail, then complete the short profile. After that you can record your first work day or look at open work needs."
+          },
+          {
+            "title": "What is free",
+            "body": "The profile, the Work Journal, the living CV and showing interest in work are free."
+          },
+          {
+            "title": "Paid services",
+            "body": "No paid plan for workers is sold."
+          },
+          {
+            "title": "Not available yet",
+            "body": "Voice entry to the Work Journal and automatic translation of messages are not available yet."
+          }
+        ]
+      }
     },
     "companies": {
       "eyebrow": "For companies",
@@ -5640,13 +5665,38 @@
             "For construction inquiries, our partner company can coordinate documents and onboarding, with a person handling each step."
           ]
         }
+      },
+      "facts": {
+        "headline": "Start, cost and limits",
+        "items": [
+          {
+            "title": "Who it is for",
+            "body": "Companies and employers in any sector that need people for concrete work."
+          },
+          {
+            "title": "How to start",
+            "body": "Describe a need without an account, or create a free account, set up your organisation and post the need from your workspace."
+          },
+          {
+            "title": "What is free",
+            "body": "One open need per organisation, the team roster, projects and the review of work entries are free."
+          },
+          {
+            "title": "Paid services",
+            "body": "More than one open need at a time requires the organisation plan. The pricing page describes it and shows whether it can be ordered now."
+          },
+          {
+            "title": "Not available yet",
+            "body": "Automatic translation of messages and push notifications are not available yet."
+          }
+        ]
       }
     },
     "agencies": {
       "eyebrow": "For agencies",
       "title": "Your pool,",
       "titleAccent": "in motion.",
-      "subcopy": "Manage your managed workers, post demand on behalf of clients, and broker introductions — all in one place.",
+      "subcopy": "Keep your people on one roster, connect with client companies, and offer candidates for the needs they share — all in one place.",
       "benefits": [
         {
           "title": "Manage your pool",
@@ -5657,12 +5707,37 @@
           "body": "Share client needs and place the right people faster with explainable fit direction."
         },
         {
-          "title": "Visibility controls",
-          "body": "Choose what is public, agencies-only, or direct — you control exposure."
+          "title": "Client connections",
+          "body": "Invite a client company. Once connected, the client shares a need with you and you offer candidates for it."
         }
       ],
       "screenshot": "Agency mode flow",
-      "cta": "Create an agency account"
+      "cta": "Create an agency account",
+      "facts": {
+        "headline": "Start, cost and limits",
+        "items": [
+          {
+            "title": "Who it is for",
+            "body": "Staffing and recruitment agencies and other organisations that supply people, in any sector."
+          },
+          {
+            "title": "How to start",
+            "body": "Create an account — the agency option is already selected — and set up your organisation as a staffing agency. Then invite a client company or add your people to the roster."
+          },
+          {
+            "title": "What is free",
+            "body": "The agency account, the roster, client connections and offering candidates are free. One open need of your own is free."
+          },
+          {
+            "title": "Paid services",
+            "body": "There is no agency tariff and none is sold. More than one open need of your own requires the organisation plan described on the pricing page."
+          },
+          {
+            "title": "Not available yet",
+            "body": "Agency commissions, cooperation between agencies and per-client visibility settings are not available yet."
+          }
+        ]
+      }
     },
     "createCv": {
       "eyebrow": "Free CV builder",
@@ -5704,6 +5779,114 @@
         }
       ],
       "privacyNote": "Your CV stays private by default. Nothing is shared with employers unless you explicitly turn on discoverability, and you can turn it off at any time."
+    },
+    "education": {
+      "eyebrow": "For education institutions",
+      "title": "Programmes, groups and practice",
+      "titleAccent": "in one workspace.",
+      "subcopy": "For schools, colleges, universities and training providers: open programmes and groups, review the practice your learners record, recognise competencies and export a report.",
+      "cta": "Create an institution account",
+      "benefits": [
+        {
+          "title": "Programmes and groups",
+          "body": "Create your programmes and open a group for each intake. You can correct a programme's details later."
+        },
+        {
+          "title": "Learners",
+          "body": "Invite learners, or accept a learner's own request to join a group. A request gives no access until your authorised person accepts it."
+        },
+        {
+          "title": "Documented practice",
+          "body": "Learners record their practice days in their own Work Journal. Your authorised person reviews each entry and signs it off."
+        },
+        {
+          "title": "Competency recognition",
+          "body": "Record a recognition against practice you have signed off. It is a separate decision of your assessor, never automatic, and the learner sees it."
+        },
+        {
+          "title": "Demand and outcomes report",
+          "body": "See open vacancies in the directions your programmes prepare for and your learners' outcomes, and export the report as a file."
+        }
+      ],
+      "facts": {
+        "headline": "Start, cost and limits",
+        "items": [
+          {
+            "title": "Who it is for",
+            "body": "Schools, colleges, universities and other training providers, in any field of study."
+          },
+          {
+            "title": "How to start",
+            "body": "Create an account and open the link we send to your e-mail. Complete the short profile, then set up your organisation — the training-provider option is already selected. Open “Learning and programmes” and create your first programme."
+          },
+          {
+            "title": "What is free",
+            "body": "The institution account, programmes, groups, practice review, competency recognition and the report are free."
+          },
+          {
+            "title": "Paid services",
+            "body": "There is no paid plan for education institutions, and none of these functions requires one. The organisation plan on the pricing page concerns open work needs only."
+          },
+          {
+            "title": "Not available yet",
+            "body": "A training and certificate register for people who are not members of your organisation, and formal equivalence of prior learning, are not available yet. A recognition recorded here is not a state qualification."
+          }
+        ]
+      }
+    },
+    "serviceProviders": {
+      "eyebrow": "For service providers and teams",
+      "title": "Offer your service",
+      "titleAccent": "and answer real requests.",
+      "subcopy": "For independent specialists, crews and service companies in any field: publish what you do, receive requests, answer them, and keep proposals and contracts in one place.",
+      "cta": "Create a free account",
+      "benefits": [
+        {
+          "title": "Publish a service offering",
+          "body": "Describe a service you provide and publish it when it is ready. You can pause or withdraw it at any time."
+        },
+        {
+          "title": "Receive and answer requests",
+          "body": "A customer sends a request to your offering. You accept or decline it; nothing is agreed until you answer."
+        },
+        {
+          "title": "One shared search",
+          "body": "Published offerings and listings appear in the platform's shared search, next to work needs."
+        },
+        {
+          "title": "Proposals and contracts",
+          "body": "Prepare a commercial proposal, mark it sent or accepted, and keep a contract record with its status. It is a record, not an electronic signature."
+        },
+        {
+          "title": "Estimate a job",
+          "body": "Size a job with the project-cost calculator: labour hours, materials, equipment and travel, in your own numbers."
+        }
+      ],
+      "facts": {
+        "headline": "Start, cost and limits",
+        "items": [
+          {
+            "title": "Who it is for",
+            "body": "Independent specialists, crews and service companies, in any trade or profession."
+          },
+          {
+            "title": "How to start",
+            "body": "Create an account and open the link we send to your e-mail. Complete the short profile, then open “Your service offerings” and write your first offering."
+          },
+          {
+            "title": "What is free",
+            "body": "The account, service offerings, requests, proposals, contract records and the calculator are free."
+          },
+          {
+            "title": "Paid services",
+            "body": "No paid service is needed to offer services, and none is sold for it. The platform does not handle payments between you and your customer."
+          },
+          {
+            "title": "Not available yet",
+            "body": "Ratings, cancellation and dispute handling for service orders, ordering goods, logistics and a public business page are not available yet."
+          }
+        ]
+      }
     }
   },
   "pricing": {

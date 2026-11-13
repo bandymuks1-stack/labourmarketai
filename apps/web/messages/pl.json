@@ -5217,7 +5217,7 @@
         "line1": "Tak wygląda przepływ",
         "line2": "ofert."
       },
-      "subcopy": "Opublikuj, czego potrzebuje każdy projekt, i zobacz wyjaśnialny kierunek dopasowania od dostępnych pracowników i agencji — w godziny, nie tygodnie.",
+      "subcopy": "Opublikuj, czego potrzebuje każdy projekt, i zobacz wyjaśnialny kierunek dopasowania dostępnych pracowników i agencji.",
       "bullets": [
         "Projekt + lokalizacja — precyzyjnie określ zakres każdego zapotrzebowania.",
         "Liczba osób — ilu pracowników potrzebujesz w każdej roli.",
@@ -5242,8 +5242,8 @@
           "desc": "Kontaktuj się z osobami, które wybierzesz — bez pośrednika kontrolującego dostęp."
         },
         {
-          "title": "Zatrudniaj szybciej",
-          "desc": "Zamykaj rekrutacje w kilka dni, podejmując decyzje, za które można wziąć odpowiedzialność."
+          "title": "Zdecyduj",
+          "desc": "Wybierz, z kim się skontaktować, i sam wykonaj następny krok."
         }
       ]
     },
@@ -5256,8 +5256,8 @@
           "desc": "Każdy sygnał dopasowania pokazuje powody, które za nim stoją."
         },
         {
-          "title": "Transgraniczna pula pracowników",
-          "desc": "Podaż ze wszystkich rynków, na których działamy, w jednym miejscu."
+          "title": "Ludzie i agencje w jednym miejscu",
+          "desc": "Dostępni pracownicy i połączone agencje dla tego samego zapotrzebowania, obok siebie."
         },
         {
           "title": "Bez nieprzejrzystych pośredników",
@@ -5287,7 +5287,7 @@
         },
         {
           "q": "Ile to kosztuje?",
-          "a": "Ceny są opublikowane na stronie cennika: jedno aktywne stanowisko na organizację jest bezpłatne; więcej stanowisk wymaga planu dla organizacji, aktywowanego na Twoim koncie. Zgłoszenie zapotrzebowania na pracowników jest bezpłatne."
+          "a": "Jedno aktywne stanowisko na organizację jest bezpłatne; więcej stanowisk wymaga planu organizacji opisanego na stronie z cenami. Zgłoszenie zapotrzebowania na pracowników jest bezpłatne."
         },
         {
           "q": "Czy możemy filtrować według lokalizacji?",
@@ -5301,8 +5301,8 @@
     },
     "cta": {
       "headline": {
-        "line1": "Przestań czekać tygodniami",
-        "line2": "na obsadzenie stanowiska."
+        "line1": "Opisz pracę,",
+        "line2": "zobacz, kto pasuje."
       },
       "subcopy": "Utwórz konto firmy, opublikuj zapotrzebowanie na pracowników i zobacz, którzy dostępni pracownicy pasują.",
       "button": "Utwórz konto firmy"
@@ -5317,10 +5317,10 @@
       },
       "subcopy": "Zarządzaj swoimi pracownikami, łącz ich z zapotrzebowaniami klientów i pośrednicz w przedstawieniach — bez utraty widoczności czy kontroli.",
       "bullets": [
-        "Wielkość puli — wszyscy zarządzani pracownicy na pierwszy rzut oka.",
-        "Podział na zawody — zasoby według umiejętności, zgodnie z deklaracjami w profilach.",
-        "Status przydziału — Aktywny, Oczekujący, Dostępny.",
-        "Wielu klientów — kieruj właściwe osoby do różnych klientów."
+        "Lista — każda osoba, którą zarządzasz, wraz ze statusem połączenia.",
+        "Dostępność — taka, jaką zadeklarowała sama osoba.",
+        "Zapotrzebowania klientów — zapotrzebowania udostępnione Ci przez połączonych klientów.",
+        "Propozycje — zaproponowani przez Ciebie kandydaci i decyzja każdego klienta."
       ]
     },
     "journey": {
@@ -5336,12 +5336,12 @@
           "desc": "Kieruj swoich ludzi do otwartych ról u klientów."
         },
         {
-          "title": "Zarządzaj przydziałami",
-          "desc": "Śledź osoby aktywne, oczekujące i dostępne."
+          "title": "Proponuj kandydatów",
+          "desc": "Proponuj osoby do udostępnionego zapotrzebowania i śledź decyzję klienta."
         },
         {
-          "title": "Powiększaj swoją pulę",
-          "desc": "Dodawaj moce tam, gdzie rośnie popyt."
+          "title": "Dodawaj klientów",
+          "desc": "Zapraszaj kolejne firmy klientów, gdy pracy przybywa."
         }
       ]
     },
@@ -5354,24 +5354,24 @@
           "desc": "Pracownicy, dostępność i status w jednym miejscu."
         },
         {
-          "title": "Publikuj w imieniu klientów",
-          "desc": "Pośrednicz w zapotrzebowaniu, nie tracąc relacji."
+          "title": "Pracuj z zapotrzebowaniami klientów",
+          "desc": "Klienci udostępniają Ci zapotrzebowania; Ty proponujesz kandydatów i widzisz ich decyzję."
         },
         {
           "title": "Kierunek dopasowania",
           "desc": "Szybciej kieruj właściwe osoby do pracy."
         },
         {
-          "title": "Kontrola widoczności",
-          "desc": "Publicznie, tylko dla agencji lub bezpośrednio — decydujesz Ty."
+          "title": "Najpierw zgoda",
+          "desc": "Profil osoby jest widoczny dla pracodawców tylko wtedy, gdy ta osoba na to pozwala."
         },
         {
-          "title": "Zasięg transgraniczny",
-          "desc": "Klienci i pracownicy na wszystkich rynkach, na których działamy."
+          "title": "Kilka języków",
+          "desc": "Miejsce pracy jest dostępne w kilku językach."
         },
         {
-          "title": "Rozwijaj swój dział",
-          "desc": "Wgląd w dostępne moce w miarę zmian popytu."
+          "title": "Potwierdzona praca",
+          "desc": "Potwierdzone wpisy pracy budują historię każdej osoby."
         }
       ]
     },
@@ -5385,15 +5385,15 @@
         },
         {
           "q": "Ile to kosztuje agencje?",
-          "a": "Agencja jest organizacją i korzysta z tych samych planów: jedno aktywne stanowisko jest bezpłatne, więcej wymaga planu dla organizacji ze strony cennika. Nie ma osobnej taryfy dla agencji."
+          "a": "Agencja jest organizacją i korzysta z tych samych planów: jedno własne otwarte zapotrzebowanie jest bezpłatne; więcej wymaga planu organizacji opisanego na stronie z cenami. Nie ma osobnej taryfy dla agencji."
         },
         {
           "q": "Czy możemy kontrolować widoczność pracowników?",
-          "a": "Tak — publicznie, tylko dla agencji lub bezpośrednio, osobno dla każdego pracownika i każdego zapotrzebowania."
+          "a": "Każda osoba sama decyduje, czy pracodawcy mogą znaleźć jej profil — jest to włączone lub wyłączone i można to zmienić w każdej chwili. Ustawienia widoczności dla poszczególnych klientów nie są jeszcze dostępne."
         },
         {
           "q": "Czy jeden pracownik może obsługiwać kilku klientów?",
-          "a": "Tak, ze śledzeniem statusu przydziałów, aby nic nie zostało zarezerwowane podwójnie."
+          "a": "Tak — tę samą osobę możesz proponować do zapotrzebowań kilku klientów. Platforma nie zapobiega jeszcze podwójnym rezerwacjom za Ciebie, więc sprawdź dostępność, zanim kogoś zaproponujesz."
         }
       ]
     },
@@ -5555,8 +5555,8 @@
       "subcopy": "Zbuduj jeden profil, ustaw dostępność i pozwól, by realne zapotrzebowanie znalazło Cię ponad granicami.",
       "benefits": [
         {
-          "title": "Jeden profil, wszystkie rynki",
-          "body": "Utrzymuj jeden awatar z umiejętnościami popartymi zapisami i z dostępnością — widoczny dla zarejestrowanych pracodawców ponad granicami."
+          "title": "Jeden profil, ponad granicami",
+          "body": "Prowadź jeden awatar z umiejętnościami popartymi wpisami i dostępnością — widoczny dla zarejestrowanych pracodawców, gdy na to pozwalasz."
         },
         {
           "title": "Realny popyt",
@@ -5572,7 +5572,32 @@
         }
       ],
       "screenshot": "Ścieżka awatara pracownika",
-      "cta": "Utwórz darmowy profil"
+      "cta": "Utwórz darmowy profil",
+      "facts": {
+        "headline": "Start, koszty i ograniczenia",
+        "items": [
+          {
+            "title": "Dla kogo",
+            "body": "Osoby, które pracują lub chcą pracować, w każdym zawodzie: pracownicy, specjaliści, freelancerzy i studenci."
+          },
+          {
+            "title": "Jak zacząć",
+            "body": "Utwórz bezpłatne konto i potwierdź adres e-mail, a następnie uzupełnij krótki profil. Potem możesz zapisać pierwszy dzień pracy albo przejrzeć otwarte zapotrzebowania na pracowników."
+          },
+          {
+            "title": "Co jest bezpłatne",
+            "body": "Profil, Dziennik pracy, żywe CV i zgłaszanie zainteresowania pracą są bezpłatne."
+          },
+          {
+            "title": "Usługi płatne",
+            "body": "Płatny plan dla pracowników nie jest sprzedawany."
+          },
+          {
+            "title": "Jeszcze niedostępne",
+            "body": "Głosowe uzupełnianie Dziennika pracy i automatyczne tłumaczenie wiadomości nie są jeszcze dostępne."
+          }
+        ]
+      }
     },
     "companies": {
       "eyebrow": "Dla firm",
@@ -5640,13 +5665,38 @@
             "Przy zapytaniach budowlanych nasza firma partnerska może koordynować dokumenty i wdrożenie — każdy krok prowadzi człowiek."
           ]
         }
+      },
+      "facts": {
+        "headline": "Start, koszty i ograniczenia",
+        "items": [
+          {
+            "title": "Dla kogo",
+            "body": "Firmy i pracodawcy w każdej branży, którzy potrzebują ludzi do konkretnej pracy."
+          },
+          {
+            "title": "Jak zacząć",
+            "body": "Opisz zapotrzebowanie bez konta albo utwórz bezpłatne konto, skonfiguruj organizację i opublikuj zapotrzebowanie w swoim miejscu pracy."
+          },
+          {
+            "title": "Co jest bezpłatne",
+            "body": "Jedno otwarte zapotrzebowanie na organizację, lista zespołu, projekty i sprawdzanie wpisów pracy są bezpłatne."
+          },
+          {
+            "title": "Usługi płatne",
+            "body": "Więcej niż jedno otwarte zapotrzebowanie jednocześnie wymaga planu organizacji. Strona z cenami opisuje go i pokazuje, czy można go teraz zamówić."
+          },
+          {
+            "title": "Jeszcze niedostępne",
+            "body": "Automatyczne tłumaczenie wiadomości i powiadomienia push nie są jeszcze dostępne."
+          }
+        ]
       }
     },
     "agencies": {
       "eyebrow": "Dla agencji",
       "title": "Twoja baza,",
       "titleAccent": "w ruchu.",
-      "subcopy": "Zarządzaj swoimi pracownikami, zgłaszaj zapotrzebowanie w imieniu klientów i kojarz strony — wszystko w jednym miejscu.",
+      "subcopy": "Trzymaj swoich ludzi na jednej liście, łącz się z firmami klientów i proponuj kandydatów do zapotrzebowań, które udostępniają — wszystko w jednym miejscu.",
       "benefits": [
         {
           "title": "Zarządzaj swoją pulą",
@@ -5657,12 +5707,37 @@
           "body": "Udostępniaj zapotrzebowania klientów i szybciej kieruj właściwe osoby dzięki wyjaśnialnemu kierunkowi dopasowania."
         },
         {
-          "title": "Kontrola widoczności",
-          "body": "Wybierz, co jest publiczne, dostępne tylko dla agencji lub bezpośrednie — to Ty kontrolujesz widoczność."
+          "title": "Połączenia z klientami",
+          "body": "Zaproś firmę klienta. Po połączeniu klient udostępnia Ci zapotrzebowanie, a Ty proponujesz do niego kandydatów."
         }
       ],
       "screenshot": "Ścieżka trybu agencji",
-      "cta": "Utwórz konto agencji"
+      "cta": "Utwórz konto agencji",
+      "facts": {
+        "headline": "Start, koszty i ograniczenia",
+        "items": [
+          {
+            "title": "Dla kogo",
+            "body": "Agencje pracy i rekrutacyjne oraz inne organizacje dostarczające ludzi, w każdej branży."
+          },
+          {
+            "title": "Jak zacząć",
+            "body": "Utwórz konto — opcja agencji jest już zaznaczona — i skonfiguruj organizację jako agencję pracy. Następnie zaproś firmę klienta albo dodaj swoich ludzi do listy."
+          },
+          {
+            "title": "Co jest bezpłatne",
+            "body": "Konto agencji, lista osób, połączenia z klientami i proponowanie kandydatów są bezpłatne. Jedno własne otwarte zapotrzebowanie jest bezpłatne."
+          },
+          {
+            "title": "Usługi płatne",
+            "body": "Nie ma taryfy dla agencji i żadna nie jest sprzedawana. Więcej niż jedno własne otwarte zapotrzebowanie wymaga planu organizacji opisanego na stronie z cenami."
+          },
+          {
+            "title": "Jeszcze niedostępne",
+            "body": "Prowizje agencji, współpraca między agencjami i ustawienia widoczności dla poszczególnych klientów nie są jeszcze dostępne."
+          }
+        ]
+      }
     },
     "createCv": {
       "eyebrow": "Darmowy kreator CV",
@@ -5704,6 +5779,114 @@
         }
       ],
       "privacyNote": "Twoje CV domyślnie pozostaje prywatne. Nic nie jest udostępniane pracodawcom, dopóki wyraźnie nie włączysz widoczności — a możesz ją wyłączyć w każdej chwili."
+    },
+    "education": {
+      "eyebrow": "Dla placówek edukacyjnych",
+      "title": "Programy, grupy i praktyka",
+      "titleAccent": "w jednym miejscu pracy.",
+      "subcopy": "Dla szkół, kolegiów, uczelni i organizatorów szkoleń: twórz programy i grupy, sprawdzaj praktykę zapisywaną przez uczących się, uznawaj kompetencje i eksportuj raport.",
+      "cta": "Utwórz konto placówki",
+      "benefits": [
+        {
+          "title": "Programy i grupy",
+          "body": "Utwórz programy i otwórz grupę dla każdego naboru. Dane programu możesz później poprawić."
+        },
+        {
+          "title": "Uczący się",
+          "body": "Zaproś uczących się lub przyjmij ich własną prośbę o dołączenie do grupy. Prośba nie daje żadnego dostępu, dopóki nie przyjmie jej upoważniona osoba z placówki."
+        },
+        {
+          "title": "Udokumentowana praktyka",
+          "body": "Uczący się zapisują dni praktyki we własnym Dzienniku pracy. Upoważniona osoba z placówki sprawdza i zatwierdza każdy wpis."
+        },
+        {
+          "title": "Uznawanie kompetencji",
+          "body": "Zapisz uznanie na podstawie zatwierdzonej przez Ciebie praktyki. To odrębna decyzja Twojego asesora, nigdy automatyczna, a uczący się ją widzi."
+        },
+        {
+          "title": "Raport o popycie i wynikach",
+          "body": "Zobacz otwarte oferty pracy w kierunkach, do których przygotowują Twoje programy, oraz wyniki uczących się, a raport wyeksportuj do pliku."
+        }
+      ],
+      "facts": {
+        "headline": "Start, koszty i ograniczenia",
+        "items": [
+          {
+            "title": "Dla kogo",
+            "body": "Szkoły, kolegia, uczelnie i inni organizatorzy szkoleń — w każdej dziedzinie."
+          },
+          {
+            "title": "Jak zacząć",
+            "body": "Utwórz konto i potwierdź adres e-mail. Uzupełnij krótki profil, a następnie skonfiguruj organizację — opcja organizatora szkoleń jest już zaznaczona. Otwórz „Nauka i programy” i utwórz pierwszy program."
+          },
+          {
+            "title": "Co jest bezpłatne",
+            "body": "Konto placówki, programy, grupy, sprawdzanie praktyki, uznawanie kompetencji i raport są bezpłatne."
+          },
+          {
+            "title": "Usługi płatne",
+            "body": "Nie ma płatnego planu dla placówek edukacyjnych i żadna z tych funkcji go nie wymaga. Plan organizacji na stronie z cenami dotyczy wyłącznie otwartych zapotrzebowań na pracowników."
+          },
+          {
+            "title": "Jeszcze niedostępne",
+            "body": "Rejestr szkoleń i certyfikatów dla osób, które nie są członkami Twojej organizacji, oraz formalne zaliczanie wcześniejszego uczenia się nie są jeszcze dostępne. Zapisane tu uznanie nie jest kwalifikacją państwową."
+          }
+        ]
+      }
+    },
+    "serviceProviders": {
+      "eyebrow": "Dla usługodawców i zespołów",
+      "title": "Zaoferuj swoją usługę",
+      "titleAccent": "i odpowiadaj na prawdziwe zapytania.",
+      "subcopy": "Dla niezależnych specjalistów, brygad i firm usługowych w każdej branży: opublikuj, czym się zajmujesz, odbieraj zapytania, odpowiadaj na nie i trzymaj oferty oraz umowy w jednym miejscu.",
+      "cta": "Utwórz bezpłatne konto",
+      "benefits": [
+        {
+          "title": "Opublikuj ofertę usługi",
+          "body": "Opisz usługę, którą świadczysz, i opublikuj ją, gdy będzie gotowa. W każdej chwili możesz ją wstrzymać lub wycofać."
+        },
+        {
+          "title": "Odbieraj zapytania i odpowiadaj",
+          "body": "Klient wysyła zapytanie do Twojej oferty. Przyjmujesz je lub odrzucasz; dopóki nie odpowiesz, nic nie jest uzgodnione."
+        },
+        {
+          "title": "Jedno wspólne wyszukiwanie",
+          "body": "Opublikowane oferty i ogłoszenia są widoczne we wspólnym wyszukiwaniu platformy, obok zapotrzebowań na pracowników."
+        },
+        {
+          "title": "Oferty i umowy",
+          "body": "Przygotuj ofertę handlową, oznacz ją jako wysłaną lub przyjętą i prowadź zapis umowy z jej statusem. To zapis, a nie podpis elektroniczny."
+        },
+        {
+          "title": "Wyceń zlecenie",
+          "body": "Oszacuj zlecenie w kalkulatorze kosztów projektu: godziny pracy, materiały, sprzęt i dojazdy — na własnych liczbach."
+        }
+      ],
+      "facts": {
+        "headline": "Start, koszty i ograniczenia",
+        "items": [
+          {
+            "title": "Dla kogo",
+            "body": "Niezależni specjaliści, brygady i firmy usługowe — w każdym fachu i zawodzie."
+          },
+          {
+            "title": "Jak zacząć",
+            "body": "Utwórz konto i potwierdź adres e-mail. Uzupełnij krótki profil, a następnie otwórz „Twoje oferty usług” i napisz pierwszą ofertę."
+          },
+          {
+            "title": "Co jest bezpłatne",
+            "body": "Konto, oferty usług, zapytania, oferty handlowe, zapisy umów i kalkulator są bezpłatne."
+          },
+          {
+            "title": "Usługi płatne",
+            "body": "Do oferowania usług nie jest potrzebna żadna płatna usługa i żadna nie jest w tym celu sprzedawana. Platforma nie obsługuje płatności między Tobą a Twoim klientem."
+          },
+          {
+            "title": "Jeszcze niedostępne",
+            "body": "Oceny, anulowanie i rozstrzyganie sporów dotyczących zleceń usług, zamawianie towarów, logistyka i publiczna strona firmy nie są jeszcze dostępne."
+          }
+        ]
+      }
     }
   },
   "pricing": {

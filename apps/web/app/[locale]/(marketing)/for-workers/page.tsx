@@ -13,6 +13,7 @@ export async function generateMetadata({
   return buildPageMetadataFor("workers", locale, "/for-workers");
 }
 import { PageHero } from "@/components/marketing/page-hero";
+import { AudienceFacts, type AudienceFactsCopy } from "@/components/marketing/audience-facts";
 
 export default async function ForWorkersPage({
   params,
@@ -37,6 +38,7 @@ export default async function ForWorkersPage({
       />
       <WorkLifecycleSection audience="workers" />
       <BenefitCards items={benefits} />
+      <AudienceFacts copy={t.raw("facts") as AudienceFactsCopy} />
     </>
   );
 }

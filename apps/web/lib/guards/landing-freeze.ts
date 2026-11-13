@@ -20,6 +20,13 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * Institution door "learn more" (owner order 2026-11-13, audience presentation):
+ * the institution was the only starting context with no audience page to read
+ * first. `/for-education` now exists and the door's `learnMore` names it, so the
+ * band's existing "learn more" line gains one link with the existing door label.
+ * EXACTLY ONE hash moved: lib/marketing/public-doors.ts (one field). No copy, no
+ * namespace, no component.
+ *
  * No reply-time promise (owner decision 2026-11-10): the request doors no longer
  * promise contact "within 24 hours" — the request is received and the team gets
  * in touch after reviewing it. `requestDoors.promise` and `receivedBody` only.
