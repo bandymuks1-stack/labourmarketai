@@ -255,9 +255,15 @@ export type DashboardSearchReport = {
  */
 export async function getDashboardSearchReport(
   nq: string,
+  only?: readonly DashboardSearchSource[],
 ): Promise<DashboardSearchReport> {
+  // A requested subset is applied BEFORE the total cap: with every source
+  // searched, six full groups fill the cap and the seventh is dropped, so a
+  // caller asking for that one source alone was told "nothing" while matches
+  // existed. Sources that were not asked for are not read at all.
+  const searchers = only ? SOURCE_SEARCHERS.filter(([source]) => only.includes(source)) : SOURCE_SEARCHERS;
   const settled = await Promise.all(
-    SOURCE_SEARCHERS.map(async ([source, search]) => [source, await search(nq)] as const),
+    searchers.map(async ([source, search]) => [source, await search(nq)] as const),
   );
   return {
     groups: boundSearchGroups(

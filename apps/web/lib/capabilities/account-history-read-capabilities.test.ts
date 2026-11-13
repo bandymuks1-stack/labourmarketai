@@ -37,8 +37,10 @@ vi.mock("@/lib/billing/config", () => ({ getBillingConfigFor: (org: string | nul
 const lmcAccount = vi.fn(async (): Promise<unknown> => ({ state: "no_account" }));
 vi.mock("@/lib/lmc/lmc-account", () => ({ readOwnLmcAccount: () => lmcAccount() }));
 
-const searchReport = vi.fn(async (_nq: string): Promise<unknown> => ({ groups: [], notRead: [] }));
-vi.mock("@/lib/search/dashboard-search", () => ({ getDashboardSearchReport: (nq: string) => searchReport(nq) }));
+const searchReport = vi.fn(async (_nq: string, _only?: readonly string[]): Promise<unknown> => ({ groups: [], notRead: [] }));
+vi.mock("@/lib/search/dashboard-search", () => ({
+  getDashboardSearchReport: (nq: string, only?: readonly string[]) => searchReport(nq, only),
+}));
 
 import { runAsBearerCaller } from "@/lib/api/bearer-caller-scope";
 
@@ -266,6 +268,9 @@ describe("search — the finder's own search, parameters validated", () => {
       notRead: ["finance"],
     });
     const r = await inScope(() => runCapability("search.query", bearer, { query: "tiles", sources: ["documents"] }));
+    // The subset reaches the search itself, so it is applied BEFORE the total
+    // cap: six full groups can no longer crowd out the one that was asked for.
+    expect(searchReport).toHaveBeenCalledWith("tiles", ["documents"]);
     expect(r).toMatchObject({ ok: true, data: { total: 1, searched: ["documents"], notRead: [] } });
     expect((r as unknown as { data: { groups: { source: string }[] } }).data.groups.map((g) => g.source)).toEqual(["documents"]);
   });

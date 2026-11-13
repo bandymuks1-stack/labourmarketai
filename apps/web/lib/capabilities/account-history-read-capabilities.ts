@@ -197,7 +197,9 @@ export const ACCOUNT_HISTORY_READ_CAPABILITIES: readonly CapabilityDescriptor[] 
         return { ok: false, code: "query_too_short", message: `Give at least ${DASHBOARD_SEARCH_MIN_QUERY_CHARS} letters or digits to search for. Nothing was read.` };
       }
       const { getDashboardSearchReport } = await import("@/lib/search/dashboard-search");
-      const report = await getDashboardSearchReport(nq);
+      // The subset is applied by the search itself, before its total cap, so
+      // matches in sources the caller did not ask for cannot crowd these out.
+      const report = await getDashboardSearchReport(nq, sources);
       const wanted = new Set<string>(sources ?? DASHBOARD_SEARCH_SOURCES);
       const groups = report.groups.filter((g) => wanted.has(g.source));
       const notRead = report.notRead.filter((s) => wanted.has(s));
