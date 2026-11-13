@@ -7948,6 +7948,12 @@
     }
   },
   "siteNav": {
+    "facts": {
+      "audience": { "title": "Kam:", "body": "visām profesijām un nozarēm — darbiniekiem, darba devējiem, pakalpojumu sniedzējiem, aģentūrām un mācību iestādēm." },
+      "price": { "title": "Cena:", "body": "cilvēkiem bez maksas; organizācijai viena aktīva vakance ir bez maksas." },
+      "start": { "title": "Kā sākt:", "body": "izvēlieties mērķi augstāk vai uzrakstiet, kas jums vajadzīgs." }
+    },
+    "education": "Mācību iestādēm",
     "signUp": "Reģistrēties",
     "trigger": "Galvenās izvēles",
     "account": "Pēc pieteikšanās",

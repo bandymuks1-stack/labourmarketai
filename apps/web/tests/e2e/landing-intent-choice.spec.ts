@@ -81,11 +81,16 @@ for (const vp of [
       await expect(page.getByTestId("goal-panel")).toHaveCount(0);
       expect(await sidewaysOverflow(page), "page scrolls sideways").toBeLessThanOrEqual(1);
       if (vp.width < 700) {
-        // Three whole cards and part of a fourth; the hint says there is more.
-        const fourth = (await card(page, "goal-rail", "orders").boundingBox())!;
-        expect(fourth.x).toBeLessThan(vp.width);
-        expect(fourth.x + fourth.width).toBeGreaterThan(vp.width - 16);
-        await expect(part(page, "goal-rail", "hint")).toBeVisible();
+        // Phones: ALL six goals are on the first screen, as a grid of three
+        // columns — nothing to swipe, so no hint (owner P0 2026-11-13).
+        for (const id of ["work", "workers", "services", "orders", "partners", "agencies"]) {
+          const box = (await card(page, "goal-rail", id).boundingBox())!;
+          expect(box.x, `${id} starts inside the screen`).toBeGreaterThanOrEqual(0);
+          expect(box.x + box.width, `${id} ends inside the screen`).toBeLessThanOrEqual(vp.width + 0.5);
+          expect(box.y + box.height, `${id} is above the fold`).toBeLessThan(vp.height);
+          expect(box.height, `${id} is a comfortable target`).toBeGreaterThanOrEqual(44);
+        }
+        await expect(part(page, "goal-rail", "hint")).toHaveCount(0);
       }
       if (vp.width >= 1440) {
         // Wide: all six in one row, no arrows.
@@ -263,9 +268,12 @@ test.describe("Close after arriving on a shared goal link", () => {
 
 test.describe("swipe", () => {
   test.use({ viewport: { width: 360, height: 740 }, hasTouch: true, isMobile: true });
-  test("a sideways swipe moves the goal rail and the page stays put", async ({ page }) => {
-    await page.goto("/en");
-    const track = part(page, "goal-rail", "track");
+  test("a sideways swipe moves a rail and the page stays put", async ({ page }) => {
+    // The goals are a grid on a phone; the functions of a goal are a rail.
+    await page.goto("/en#goal=work");
+    await expect(page.getByTestId("goal-panel")).toBeVisible();
+    const track = part(page, "function-rail", "track");
+    await track.scrollIntoViewIfNeeded();
     const box = (await track.boundingBox())!;
     // A real finger: touchstart, a run of touchmoves to the left, touchend.
     const client = await page.context().newCDPSession(page);

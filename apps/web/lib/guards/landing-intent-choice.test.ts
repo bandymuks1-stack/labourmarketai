@@ -57,11 +57,16 @@ describe("the choice is the first screen", () => {
 
   it("the sentence entry and the request doors stay", () => {
     expect(landing).toMatch(/<PublicEntry/);
-    expect(landing).toMatch(/<LandingRequestDoors locale=\{locale\} \/>/);
+    // The request doors stay, inside ONE closed "send a request" block beside
+    // the sentence field (owner P0 2026-11-13: no three cards that read like
+    // the goals again). The block carries the title and the #request anchor.
+    expect(landing).toMatch(/<LandingRequestDoors locale=\{locale\} embedded \/>/);
+    expect(landing).toMatch(/<details\s+id="request"\s+data-testid="landing-request-block"/);
+    expect(landing.match(/<LandingRequestDoors /g)).toHaveLength(1);
   });
 
   it("the home mounts the one navigator; no second goal view or page exists", () => {
-    expect(choice).toMatch(/<GoalNavigation headingLevel="h1" \/>/);
+    expect(choice).toMatch(/<GoalNavigation headingLevel="h1" phoneLayout="grid" \/>/);
     expect(existsSync(join(APP_ROOT, "components/navigation/goal-rail.tsx"))).toBe(false);
     // A new public screen is an owner decision (constitution A-09): the goal
     // state is a fragment of this page, not a route.
@@ -101,7 +106,9 @@ describe("one rail, one panel", () => {
   });
 
   it("phone goal cards are compact with no description; wide cards carry it", () => {
-    expect(rail).toMatch(/w-\[5\.75rem\] sm:w-auto/);
+    expect(rail).toMatch(/phoneGrid \? "w-auto" : "w-\[5\.75rem\]", "sm:w-auto sm:min-w-40 sm:flex-1"/);
+    // The grid is phones only: from `sm` the track is the same flex rail.
+    expect(rail).toMatch(/phoneGrid \? "grid grid-cols-3 sm:flex" : "flex"/);
     expect(rail).toMatch(/compact && "hidden sm:\[display:-webkit-box\]"/);
   });
 
@@ -136,7 +143,12 @@ describe("the URL is the state — a fragment, not a page", () => {
     expect(navigator).toMatch(/const \[bootFragment\] = useState\(\(\) =>/);
     expect(navigator).toMatch(/askedFragment = goalIdFromFragment\(now\) \? now : "";/);
     expect(navigator).toMatch(/const wanted = askedFragment \?\? \(goalIdFromFragment\(bootFragment\) \? bootFragment : ""\);/);
-    expect(navigator).toMatch(/if \(!wanted \|\| window\.location\.hash !== ""\) return;/);
+    // …and only on the page it was asked on — never written onto the next
+    // page while the router is moving there.
+    expect(navigator).toMatch(/const \[bootPath\] = useState\(\(\) =>/);
+    expect(navigator).toMatch(
+      /if \(!wanted \|\| window\.location\.hash !== "" \|\| window\.location\.pathname !== bootPath\) return;/,
+    );
     // One-off checks during start-up only — no repeating timer.
     expect(navigator).toMatch(/STARTUP_CHECKS_MS\.map\(\(ms\) => window\.setTimeout\(restore, ms\)\)/);
     expect(navigator).toMatch(/STARTUP_CHECKS_MS = \[[^\]]*5000\] as const/);

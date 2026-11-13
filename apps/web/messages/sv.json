@@ -7948,6 +7948,12 @@
     }
   },
   "siteNav": {
+    "facts": {
+      "audience": { "title": "För vem:", "body": "alla yrken och branscher — arbetstagare, arbetsgivare, tjänsteleverantörer, bemanningsföretag och utbildningsanordnare." },
+      "price": { "title": "Pris:", "body": "gratis för privatpersoner; en organisation har en aktiv tjänst gratis." },
+      "start": { "title": "Så börjar du:", "body": "välj ett mål ovan eller skriv vad du behöver." }
+    },
+    "education": "För utbildningsanordnare",
     "signUp": "Registrera dig",
     "trigger": "Huvudval",
     "account": "Efter inloggning",

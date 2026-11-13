@@ -15774,11 +15774,11 @@
     },
     "entry": {
       "label": "Schreiben Sie, was Sie brauchen — in Ihren eigenen Worten",
-      "placeholder": "Z. B.: Wir brauchen 12 Gerüstbauer in Rotterdam",
+      "placeholder": "Z. B.: Wir brauchen 5 Lagerarbeiter in Vilnius",
       "submit": "Verstehen",
       "examplesLabel": "Zum Beispiel:",
       "examples": {
-        "hire": "Wir brauchen 12 Gerüstbauer in Rotterdam",
+        "hire": "Wir brauchen 5 Lagerarbeiter in Vilnius",
         "work": "Ich suche Arbeit in Norwegen",
         "internship": "Wo kann ich ein Praktikum machen?",
         "professional": "Ich bin Buchhalterin und suche Arbeit in Vilnius",
@@ -20564,6 +20564,12 @@
     }
   },
   "siteNav": {
+    "facts": {
+      "audience": { "title": "Für wen:", "body": "alle Berufe und Branchen — Arbeitnehmer, Arbeitgeber, Dienstleister, Agenturen und Bildungseinrichtungen." },
+      "price": { "title": "Preis:", "body": "für Personen kostenlos; eine Organisation führt eine aktive Position kostenlos." },
+      "start": { "title": "So starten Sie:", "body": "wählen Sie oben ein Ziel oder schreiben Sie, was Sie brauchen." }
+    },
+    "education": "Für Bildungseinrichtungen",
     "signUp": "Registrieren",
     "trigger": "Hauptauswahl",
     "account": "Nach Anmeldung",

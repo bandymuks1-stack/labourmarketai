@@ -33,30 +33,28 @@ test.describe("@375px phone", () => {
     await page.goto("/lt");
     const h1 = page.getByRole("heading", { level: 1 });
     await expect(h1).toBeVisible();
-    const actions = page.locator('[data-testid="landing-actions"][data-surface="landing_hero"]');
-    await expect(actions).toBeVisible();
-
-    // The header folds its sign-up into the menu below 640px, so the hero's
-    // own action is the phone's visible next step — it must be ON the first
-    // screen, not below it.
-    const box = await actions.locator("a").first().boundingBox();
-    expect(box, "hero primary action box").not.toBeNull();
-    expect(box!.y + box!.height, "hero primary action is below the first screen").toBeLessThanOrEqual(812);
-    await expect(actions.locator("a").first()).toHaveAttribute("href", "/lt/auth/signup");
+    // The V2 first screen: the goal cards are the next step, and the phone's
+    // sign-up row sits under them — both ON the first screen, not below it.
+    const rail = page.getByTestId("goal-rail");
+    await expect(rail).toBeVisible();
+    const box = await rail.boundingBox();
+    expect(box, "goal cards box").not.toBeNull();
+    expect(box!.y + box!.height, "goal cards end below the first screen").toBeLessThanOrEqual(812);
+    const signup = page.getByTestId("landing-signup");
+    await expect(signup).toBeVisible();
+    const sb = await signup.boundingBox();
+    expect(sb!.y + sb!.height, "sign-up row is below the first screen").toBeLessThanOrEqual(812);
 
     await page.screenshot({ path: join(SHOTS, "lt-375-first-screen.png"), fullPage: false });
   });
 
-  test("four chips by default; the other six mount on demand", async ({ page }) => {
+  test("two example chips on the landing, one for each side, and nothing more to open", async ({ page }) => {
+    // Owner P0 2026-11-13: less noise on the first screen. The component's
+    // standard set (four chips, the rest on demand) is still covered by its
+    // guard; the landing mounts the short set.
     await page.goto("/lt");
-    await expect(page.getByTestId("entry-example")).toHaveCount(4);
-    const more = page.getByTestId("entry-more-examples");
-    await expect(more).toHaveAttribute("aria-expanded", "false");
-    await more.click();
-    await expect(page.getByTestId("entry-example")).toHaveCount(10);
+    await expect(page.getByTestId("entry-example")).toHaveCount(2);
     await expect(page.getByTestId("entry-more-examples")).toHaveCount(0);
-    // Focus moved to the first newly mounted chip, not lost with the control.
-    await expect(page.getByTestId("entry-example").nth(4)).toBeFocused();
   });
 
   test("a looking-for-work reading offers the public board beside sign-up", async ({ page }) => {

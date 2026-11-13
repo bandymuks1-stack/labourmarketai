@@ -15774,11 +15774,11 @@
     },
     "entry": {
       "label": "Parašyk, ko reikia — savais žodžiais",
-      "placeholder": "Pvz.: reikia 12 pastolininkų Roterdame",
+      "placeholder": "Pvz.: reikia 5 sandėlio darbuotojų Vilniuje",
       "submit": "Suprasti",
       "examplesLabel": "Pavyzdžiui:",
       "examples": {
-        "hire": "Reikia 12 pastolininkų Roterdame",
+        "hire": "Reikia 5 sandėlio darbuotojų Vilniuje",
         "work": "Ieškau darbo Norvegijoje",
         "internship": "Kur galiu atlikti praktiką?",
         "professional": "Esu buhalterė, ieškau darbo Vilniuje",
@@ -20564,6 +20564,12 @@
     }
   },
   "siteNav": {
+    "facts": {
+      "audience": { "title": "Kam:", "body": "visoms profesijoms ir sektoriams — darbuotojams, darbdaviams, paslaugų teikėjams, agentūroms ir mokymo įstaigoms." },
+      "price": { "title": "Kaina:", "body": "žmonėms nemokama; organizacija vieną aktyvią poziciją turi nemokamai." },
+      "start": { "title": "Kaip pradėti:", "body": "pasirinkite tikslą viršuje arba parašykite, ko jums reikia." }
+    },
+    "education": "Mokymo įstaigoms",
     "signUp": "Registruotis",
     "trigger": "Pagrindiniai pasirinkimai",
     "account": "Prisijungus",

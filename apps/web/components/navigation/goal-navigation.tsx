@@ -20,7 +20,13 @@ const CATALOGUE_GOALS = new Set(["work"]);
  * `nav-card-icons.ts`); nothing is spelled here. Mounted on the public home; the
  * signed-in home (Lane A2) mounts the same component.
  */
-export async function GoalNavigation({ headingLevel = "h2" }: { headingLevel?: "h1" | "h2" }) {
+export async function GoalNavigation({
+  headingLevel = "h2",
+  phoneLayout = "rail",
+}: {
+  headingLevel?: "h1" | "h2";
+  phoneLayout?: "rail" | "grid";
+}) {
   const [t, tNav, tProf, locale] = await Promise.all([
     getTranslations("siteNav"),
     getTranslations("common.nav"),
@@ -37,6 +43,7 @@ export async function GoalNavigation({ headingLevel = "h2" }: { headingLevel?: "
     <GoalNavigator
       locale={locale}
       headingLevel={headingLevel}
+      phoneLayout={phoneLayout}
       goals={PUBLIC_INTENTS.map((intent) => ({
         id: intent.id,
         href: goalHref(intent.id),

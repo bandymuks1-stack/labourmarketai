@@ -15774,11 +15774,11 @@
     },
     "entry": {
       "label": "Schrijf wat u nodig heeft — in uw eigen woorden",
-      "placeholder": "Bijv.: we zoeken 12 steigerbouwers in Rotterdam",
+      "placeholder": "Bijv.: we zoeken 5 magazijnmedewerkers in Vilnius",
       "submit": "Begrijpen",
       "examplesLabel": "Bijvoorbeeld:",
       "examples": {
-        "hire": "We zoeken 12 steigerbouwers in Rotterdam",
+        "hire": "We zoeken 5 magazijnmedewerkers in Vilnius",
         "work": "Ik zoek werk in Noorwegen",
         "internship": "Waar kan ik stage lopen?",
         "professional": "Ik ben accountant en zoek werk in Vilnius",
@@ -20564,6 +20564,12 @@
     }
   },
   "siteNav": {
+    "facts": {
+      "audience": { "title": "Voor wie:", "body": "elk beroep en elke sector — werknemers, werkgevers, dienstverleners, bureaus en opleidingsinstellingen." },
+      "price": { "title": "Prijs:", "body": "gratis voor personen; een organisatie heeft één actieve positie gratis." },
+      "start": { "title": "Zo begint u:", "body": "kies hierboven een doel of schrijf wat u nodig hebt." }
+    },
+    "education": "Voor opleidingsinstellingen",
     "signUp": "Registreren",
     "trigger": "Hoofdkeuzes",
     "account": "Na inloggen",

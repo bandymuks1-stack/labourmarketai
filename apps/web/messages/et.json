@@ -7948,6 +7948,12 @@
     }
   },
   "siteNav": {
+    "facts": {
+      "audience": { "title": "Kellele:", "body": "kõik ametid ja sektorid — töötajad, tööandjad, teenusepakkujad, agentuurid ja õppeasutused." },
+      "price": { "title": "Hind:", "body": "inimestele tasuta; organisatsioonil on üks aktiivne ametikoht tasuta." },
+      "start": { "title": "Kuidas alustada:", "body": "valige ülal eesmärk või kirjutage, mida vajate." }
+    },
+    "education": "Õppeasutustele",
     "signUp": "Registreeru",
     "trigger": "Peamised valikud",
     "account": "Pärast sisselogimist",

@@ -21,7 +21,7 @@ export async function LandingIntentChoice() {
   const [locale, t] = await Promise.all([getLocale(), getTranslations("siteNav")]);
   return (
     <div data-testid="landing-intent-choice">
-      <GoalNavigation headingLevel="h1" />
+      <GoalNavigation headingLevel="h1" phoneLayout="grid" />
       <div className="mt-3 sm:hidden" data-testid="landing-signup">
         <NavAuthCtas
           guest={

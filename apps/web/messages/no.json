@@ -7948,6 +7948,12 @@
     }
   },
   "siteNav": {
+    "facts": {
+      "audience": { "title": "For hvem:", "body": "alle yrker og bransjer — arbeidstakere, arbeidsgivere, tjenesteleverandører, byråer og utdanningsinstitusjoner." },
+      "price": { "title": "Pris:", "body": "gratis for personer; en organisasjon har én aktiv stilling gratis." },
+      "start": { "title": "Slik starter du:", "body": "velg et mål ovenfor, eller skriv hva du trenger." }
+    },
+    "education": "For utdanningsinstitusjoner",
     "signUp": "Registrer deg",
     "trigger": "Hovedvalg",
     "account": "Etter innlogging",

@@ -15774,11 +15774,11 @@
     },
     "entry": {
       "label": "Napisz, czego potrzebujesz — własnymi słowami",
-      "placeholder": "Np. Potrzebuję 12 monterów rusztowań w Rotterdamie",
+      "placeholder": "Np. Potrzebuję 5 pracowników magazynu w Wilnie",
       "submit": "Zrozum",
       "examplesLabel": "Na przykład:",
       "examples": {
-        "hire": "Potrzebuję 12 monterów rusztowań w Rotterdamie",
+        "hire": "Potrzebuję 5 pracowników magazynu w Wilnie",
         "work": "Szukam pracy w Norwegii",
         "internship": "Gdzie mogę odbyć praktykę?",
         "professional": "Jestem księgowym i szukam pracy w Wilnie",
@@ -20564,6 +20564,12 @@
     }
   },
   "siteNav": {
+    "facts": {
+      "audience": { "title": "Dla kogo:", "body": "wszystkie zawody i branże — pracownicy, pracodawcy, usługodawcy, agencje i placówki edukacyjne." },
+      "price": { "title": "Cena:", "body": "dla osób bezpłatnie; organizacja prowadzi jedno aktywne stanowisko bezpłatnie." },
+      "start": { "title": "Jak zacząć:", "body": "wybierz cel powyżej lub napisz, czego potrzebujesz." }
+    },
+    "education": "Dla placówek edukacyjnych",
     "signUp": "Zarejestruj się",
     "trigger": "Główne wybory",
     "account": "Po zalogowaniu",

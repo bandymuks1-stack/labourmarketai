@@ -24,6 +24,8 @@ import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing"
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { LandingIntentChoice } from "@/components/marketing/landing-intent-choice";
 import { LandingRequestDoors } from "@/components/marketing/landing-request-doors";
+import { LandingFirstFacts } from "@/components/marketing/landing-first-facts";
+import { ChevronDown } from "lucide-react";
 
 /**
  * FOCUS — the previous production landing, RESTORED.
@@ -81,12 +83,13 @@ export async function FocusLanding({
   const activeLocale = resolveActiveLocale(locale);
   // The ONE canonical market snapshot, through its 300 s `unstable_cache`
   // entry — one market truth, one freshness window (owner command §9/§12).
-  const [market, t, tHero] = await Promise.all([
+  const [market, t, tHero, tRequest] = await Promise.all([
     // The landing renders the supply counts only; it reads `professions`
     // nowhere, so it does not pay for the per-profession reads.
     readLiveMarketLandingSnapshot({ resolveProfessions: false }),
     getTranslations("common"),
     getTranslations("landing.hero"),
+    getTranslations("landing.requestDoors"),
   ]);
 
   // THE FIRST SCREEN IS THE CHOICE (owner instruction 2026-11-12: "Sumažink
@@ -162,8 +165,17 @@ export async function FocusLanding({
                   <LandingIntentChoice />
                 </div>
                 <div className="min-w-0">{promise}</div>
-                <div className="scroll-mt-24 max-w-2xl" id="find">
-                <PublicEntry
+                <LandingFirstFacts />
+                {/* ONE SECONDARY BLOCK (owner P0 2026-11-13): the sentence
+                    field and, beside it from `lg`, one closed "send a
+                    request" block. Before, the field filled the left half
+                    with the right half empty, and three request cards
+                    followed that read like the goals again. The request
+                    doors and their form are unchanged inside the block. */}
+                <div className="grid min-w-0 gap-4 lg:grid-cols-2 lg:items-start">
+                  <div className="min-w-0 scroll-mt-24" id="find">
+                    <PublicEntry
+                      examples="short"
                   supply={
                     market.activeVacancies !== null && market.distinctEmployers !== null
                       ? {
@@ -174,9 +186,36 @@ export async function FocusLanding({
                       : null
                   }
                 />
-                </div>
-                <div>
-                  <LandingRequestDoors locale={locale} />
+                  </div>
+                  <details
+                    id="request"
+                    data-testid="landing-request-block"
+                    className="group min-w-0 scroll-mt-24 rounded-2xl border border-ink-600 bg-ink-900/60"
+                  >
+                    <summary className="flex min-h-11 cursor-pointer list-none items-start justify-between gap-3 rounded-2xl p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue sm:p-6 [&::-webkit-details-marker]:hidden">
+                      <span className="min-w-0">
+                        <h2
+                          id="request-doors-title"
+                          className="font-display text-lg font-semibold text-text-primary"
+                        >
+                          {tRequest("title")}
+                        </h2>
+                        <span
+                          className="mt-1 block text-sm leading-relaxed text-text-secondary"
+                          data-testid="request-doors-promise"
+                        >
+                          {tRequest("promise")}
+                        </span>
+                      </span>
+                      <ChevronDown
+                        aria-hidden
+                        className="mt-1 size-5 shrink-0 text-text-muted transition-transform group-open:rotate-180 motion-reduce:transition-none"
+                      />
+                    </summary>
+                    <div className="px-4 pb-4 sm:px-6 sm:pb-6">
+                      <LandingRequestDoors locale={locale} embedded />
+                    </div>
+                  </details>
                 </div>
               </section>
 

@@ -140,7 +140,12 @@ describe("desktop and mobile render ONE list", () => {
 
   it("ONE navigation: the older links sit behind the bar's More, not in a second row", () => {
     expect(nav).not.toMatch(/<nav className="hidden[^"]*:flex/);
-    expect(nav).toMatch(/more=\{\{\s*label: tIntent\("more"\),\s*links: links\.map\(/);
+    expect(nav).toMatch(/more=\{\{\s*label: tIntent\("more"\),\s*links: moreLinks,/);
+    expect(nav).toMatch(/const moreLinks = \[\s*\.\.\.links\.map\(/);
+    // Education institutions have a door behind More — the existing
+    // institution setup, derived, not a seventh goal.
+    expect(nav).toMatch(/\{ key: "education", href: INSTITUTION_DOOR_NEXT, label: tIntent\("education"\) \}/);
+    expect(PUBLIC_INTENT_IDS).toHaveLength(6);
     expect(mega).toMatch(/data-testid="intent-toggle-more"/);
     expect(mega).toMatch(/data-testid="intent-more-links"/);
   });

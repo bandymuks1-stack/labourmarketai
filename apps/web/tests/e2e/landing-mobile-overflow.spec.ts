@@ -171,9 +171,9 @@ for (const width of MOBILE_WIDTHS) {
       // Since 2026-09-23 the entry MOUNTS four chips and the rest on demand
       // (owner directive, landing §22). Open them before measuring, so the
       // per-chip box assertions below cover all ten, not only the default four.
-      await expect(page.getByTestId("entry-example")).toHaveCount(4);
-      await page.getByTestId("entry-more-examples").click();
-      await expect(page.getByTestId("entry-example")).toHaveCount(10);
+      // The landing mounts the short set since 2026-11-13: two chips, no more.
+      await expect(page.getByTestId("entry-example")).toHaveCount(2);
+      await expect(page.getByTestId("entry-more-examples")).toHaveCount(0);
 
       const offenders = await pageOverflow(page);
       expect(

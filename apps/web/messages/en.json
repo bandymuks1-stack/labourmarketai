@@ -15774,11 +15774,11 @@
     },
     "entry": {
       "label": "Write what you need — in your own words",
-      "placeholder": "E.g. I need 12 scaffolders in Rotterdam",
+      "placeholder": "E.g. I need 5 warehouse workers in Vilnius",
       "submit": "Understand",
       "examplesLabel": "For example:",
       "examples": {
-        "hire": "I need 12 scaffolders in Rotterdam",
+        "hire": "I need 5 warehouse workers in Vilnius",
         "work": "Looking for a job in Norway",
         "internship": "Where can I do an internship?",
         "professional": "I am an accountant looking for work in Vilnius",
@@ -20564,6 +20564,12 @@
     }
   },
   "siteNav": {
+    "facts": {
+      "audience": { "title": "For whom:", "body": "every profession and sector — workers, employers, service providers, agencies and schools." },
+      "price": { "title": "Price:", "body": "free for people; an organization runs one active position free." },
+      "start": { "title": "How to start:", "body": "choose a goal above or write what you need." }
+    },
+    "education": "For schools and training providers",
     "signUp": "Sign up",
     "trigger": "Main choices",
     "account": "After sign-in",

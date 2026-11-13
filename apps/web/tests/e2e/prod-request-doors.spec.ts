@@ -43,6 +43,11 @@ async function open(browser: Browser, path: string, viewport: { width: number; h
     if (!e.message.includes("#418")) crashes.push(e.name);
   });
   await page.goto(path);
+  // Since the V2 presentation fixes the three doors sit inside ONE closed
+  // "send a request" block; open it. On a build without the block the doors
+  // are already on the page and this step does nothing.
+  const block = page.getByTestId("landing-request-block");
+  if ((await block.count()) > 0) await block.locator("summary").click();
   await expect(page.getByTestId("request-door-worker-search-open").first()).toBeVisible({ timeout: 60_000 });
   return { ctx, page, crashes };
 }

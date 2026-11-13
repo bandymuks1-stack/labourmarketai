@@ -7948,6 +7948,12 @@
     }
   },
   "siteNav": {
+    "facts": {
+      "audience": { "title": "For hvem:", "body": "alle erhverv og brancher — medarbejdere, arbejdsgivere, tjenesteudbydere, bureauer og uddannelsessteder." },
+      "price": { "title": "Pris:", "body": "gratis for personer; en organisation har én aktiv stilling gratis." },
+      "start": { "title": "Sådan starter du:", "body": "vælg et mål ovenfor, eller skriv, hvad du har brug for." }
+    },
+    "education": "For uddannelsessteder",
     "signUp": "Opret konto",
     "trigger": "Hovedvalg",
     "account": "Efter login",

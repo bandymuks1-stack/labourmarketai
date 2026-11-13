@@ -163,7 +163,21 @@ export function LandingCtaCapture({
   );
 }
 
-export function PublicEntry({ supply }: { readonly supply: EntrySupply | null }) {
+/** The two chips of the short variant: one for each side of the market. */
+export const SHORT_EXAMPLE_KEYS = ["hire", "work"] as const satisfies readonly EntryExampleKey[];
+
+export function PublicEntry({
+  supply,
+  examples: exampleSet = "standard",
+}: {
+  readonly supply: EntrySupply | null;
+  /**
+   * `short` (the landing since 2026-11-13, owner: less noise on the first
+   * screen): two example chips and no "more examples". `standard`: the four
+   * defaults with the rest one tap away.
+   */
+  readonly examples?: "standard" | "short";
+}) {
   const t = useTranslations("landing.entry");
   const locale = useLocale();
   const inputId = useId();
@@ -287,7 +301,10 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
     </LandingCtaCapture>
   );
 
-  const examples = visibleExampleKeys(showAllExamples);
+  const short = exampleSet === "short";
+  const examples: readonly EntryExampleKey[] = short
+    ? SHORT_EXAMPLE_KEYS
+    : visibleExampleKeys(showAllExamples);
   const firstMoreKey = visibleExampleKeys(true)[DEFAULT_EXAMPLE_KEYS.length];
 
   return (
@@ -445,7 +462,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
           })}
           {/* The rest of the graph, one tap away. Quieter than a chip on
               purpose: it is a way to see more, not a fifth thing to choose. */}
-          {showAllExamples ? null : (
+          {showAllExamples || short ? null : (
             <button
               type="button"
               data-testid="entry-more-examples"

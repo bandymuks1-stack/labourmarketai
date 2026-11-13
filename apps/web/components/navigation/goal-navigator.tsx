@@ -105,6 +105,7 @@ export function GoalNavigator({
   labels,
   locale,
   headingLevel = "h2",
+  phoneLayout = "rail",
 }: {
   goals: readonly NavigatorGoal[];
   /**
@@ -120,6 +121,9 @@ export function GoalNavigator({
   labels: NavigatorLabels;
   locale: string;
   headingLevel?: "h1" | "h2";
+  /** How the goal cards are laid out below `sm`: one scrolling rail, or all
+   *  of them in a three-column grid (no swipe). Wider screens are the same. */
+  phoneLayout?: "rail" | "grid";
 }) {
   const fragment = useSyncExternalStore(subscribeToFragment, readFragment, readServerFragment);
   const goals = useMemo<readonly NavigatorGoal[]>(
@@ -140,13 +144,19 @@ export function GoalNavigator({
   const [bootFragment] = useState(() =>
     typeof window === "undefined" ? "" : window.location.hash,
   );
+  // …and only on the page it was asked on: while the router is moving to
+  // another page the address already names that page for a moment before
+  // this component is taken down, and a goal must never be written onto it.
+  const [bootPath] = useState(() =>
+    typeof window === "undefined" ? "" : window.location.pathname,
+  );
   useEffect(() => {
     mountedNavigators += 1;
     const restore = () => {
       // What the person last asked for; before any announcement, the address
       // this component first saw.
       const wanted = askedFragment ?? (goalIdFromFragment(bootFragment) ? bootFragment : "");
-      if (!wanted || window.location.hash !== "") return;
+      if (!wanted || window.location.hash !== "" || window.location.pathname !== bootPath) return;
       window.history.replaceState(
         window.history.state,
         "",
@@ -166,7 +176,7 @@ export function GoalNavigator({
         if (mountedNavigators === 0) askedFragment = null;
       }, 0);
     };
-  }, [bootFragment]);
+  }, [bootFragment, bootPath]);
 
   const [tab, setTab] = useState<"functions" | "professions">("functions");
   const [sector, setSector] = useState<string | null>(null);
@@ -239,6 +249,7 @@ export function GoalNavigator({
         label={labels.heading}
         testId="goal-rail"
         size="compact"
+        phoneGrid={phoneLayout === "grid"}
         cards={goals}
         activeId={activeId}
         onSelect={select}

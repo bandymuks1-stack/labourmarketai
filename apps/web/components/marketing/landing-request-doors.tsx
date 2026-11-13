@@ -13,7 +13,15 @@ import { countryOptionsForLocale } from "@/lib/location/country-options";
  * themselves. The form and its rules: `landing-request-doors-form.tsx`,
  * `lib/staffing/request-doors.ts`. No documents: no safe public upload path exists.
  */
-export async function LandingRequestDoors({ locale }: { readonly locale: string }) {
+export async function LandingRequestDoors({
+  locale,
+  embedded = false,
+}: {
+  readonly locale: string;
+  /** True inside the landing's one "send a request" block, which carries the
+   *  title, the promise and the `#request` anchor itself. */
+  readonly embedded?: boolean;
+}) {
   const t = await getTranslations("landing.requestDoors");
   const labels: RequestDoorLabels = {
     doors: {
@@ -50,13 +58,23 @@ export async function LandingRequestDoors({ locale }: { readonly locale: string 
   };
   const countries = countryOptionsForLocale(locale).map((o) => ({ code: o.value, label: o.label }));
   return (
-    <section className="mt-8 scroll-mt-24" id="request" aria-labelledby="request-doors-title" data-testid="landing-request-doors">
-      <h2 id="request-doors-title" className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h2>
-      <p className="mb-4 mt-1 text-sm leading-relaxed text-text-secondary" data-testid="request-doors-promise">
-        {t("promise")}
-      </p>
+    <section
+      className={embedded ? undefined : "mt-8 scroll-mt-24"}
+      id={embedded ? undefined : "request"}
+      aria-labelledby={embedded ? undefined : "request-doors-title"}
+      aria-label={embedded ? t("title") : undefined}
+      data-testid="landing-request-doors"
+    >
+      {embedded ? null : (
+        <>
+          <h2 id="request-doors-title" className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+            {t("title")}
+          </h2>
+          <p className="mb-4 mt-1 text-sm leading-relaxed text-text-secondary" data-testid="request-doors-promise">
+            {t("promise")}
+          </p>
+        </>
+      )}
       <LandingRequestDoorsForm
         labels={labels}
         countries={countries}

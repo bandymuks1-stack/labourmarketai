@@ -29,7 +29,8 @@ describe("landing entry", () => {
     // The h1 is the goal navigator's own heading; the owner's headline is the
     // one supporting line under the goals.
     expect(readFileSync(join(ROOT, "components/marketing/landing-intent-choice.tsx"), "utf8")).toContain(
-      '<GoalNavigation headingLevel="h1" />',
+      // Phones show all the goals as a grid (owner P0 2026-11-13).
+      '<GoalNavigation headingLevel="h1" phoneLayout="grid" />',
     );
     expect(FOCUS).not.toMatch(/<h1\b/);
     expect(FOCUS).toContain('{tHero("headline")}');
