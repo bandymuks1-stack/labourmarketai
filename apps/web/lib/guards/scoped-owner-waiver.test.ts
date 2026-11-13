@@ -612,8 +612,10 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
       3154,
       3171,
       3123,
+      3255,
       3256,
     ]);
+    // #3255 (2026-11-12) on the owner's approval given to the coordinator in its own session; only the number is added.
     // #3256 (2026-11-12): added to the waiver by the coordinator's commit 52cefd01b on the
     // owner's conditional approval recorded there (not by the PR's author); this pin only
     // mirrors that list. It does not approve the PR's migration or its merge.

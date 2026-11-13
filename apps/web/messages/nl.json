@@ -7289,7 +7289,16 @@
         "blockedFailed": "Verwijder de mislukte bijlage of upload deze opnieuw.",
         "partialFailure": "Het bericht is verzonden, maar sommige bijlagen konden niet worden toegevoegd. Probeer ze opnieuw te verzenden."
       },
-      "languageLabel": "Ik schrijf in"
+      "languageLabel": "Ik schrijf in",
+      "errors": {
+        "notAuthenticated": "Je sessie is verlopen. Log opnieuw in en verstuur het bericht.",
+        "invalidInput": "Dit bericht kan niet worden verstuurd: het is mogelijk te lang, of een bijlage wordt niet ondersteund.",
+        "notParticipant": "Je kunt in dit gesprek niet schrijven — je hebt er geen toegang toe.",
+        "rateLimited": "Je hebt het afgelopen uur veel berichten verstuurd. Wacht even en probeer het opnieuw.",
+        "rateCheckUnavailable": "De veiligheidscontrole kon niet worden uitgevoerd, dus er is niets verstuurd. Probeer het opnieuw.",
+        "attachmentsUnavailable": "Bijlagen versturen is hier nog niet ingeschakeld — voeg tekst toe aan het bericht.",
+        "sendFailed": "Het bericht kon niet worden verstuurd. Je tekst staat er nog — probeer het opnieuw."
+      }
     },
     "launcher": {
       "openLabel": "Neem contact op met support",
@@ -20544,7 +20553,7 @@
       "text": "We meten paginagebruik en via welke campagne je kwam alleen als je dat toestaat.",
       "accept": "Meting toestaan",
       "refuse": "Weigeren",
-      "more": "Meer",
+      "more": "Meer over cookies",
       "label": "Keuze over gebruiksmeting"
     },
     "control": {

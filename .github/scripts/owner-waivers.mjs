@@ -717,6 +717,16 @@ export const SCOPED_OWNER_WAIVERS = [
       // added; axiom, codes, surfaces, files, expiry and subset rule are unchanged.
       3123,
       // OWNER APPROVAL 2026-11-12, verbatim (given to the coordinator in its own
+      // session): "Pakartotinai patvirtinu savininko leidimą įtraukti PR #3255 į public-acquisition-route-jobs išimčių sąrašą, laikantis anksčiau patvirtintų sąlygų."
+      // Checked before the change by running the gate on head fac8740f5 twice:
+      // as PR 3255 → 18 findings, every one with the single reason
+      // `pr-not-covered`; as an already listed PR → pass, zero new findings.
+      // #3255: a /jobs profession listing gets its own canonical, title, h1 and
+      // description, and is indexable only from 10 live ads. No new route. Only
+      // the number is added; axiom, codes, surfaces, files, expiry and subset
+      // rule are unchanged; `product-gate.mjs` is not touched.
+      3255,
+      // OWNER APPROVAL 2026-11-12, verbatim (given to the coordinator in its own
       // session): "Leidžiu tikslinį #3256 įtraukimą į produkto vartų išimtį, jeigu nepriklausoma patikra patvirtina, kad tai nekeičia ir nesusilpnina saugumo taisyklių."
       // Checked by the coordinator (not the author) on head 1d8d50e5f, gate run
       // twice: as PR 3256 → 18 findings, every one with the single reason

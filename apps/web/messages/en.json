@@ -7289,7 +7289,16 @@
         "blockedFailed": "Remove or re-upload the failed attachment.",
         "partialFailure": "The message was sent, but some attachments couldn't be attached. Try sending them again."
       },
-      "languageLabel": "I am writing in"
+      "languageLabel": "I am writing in",
+      "errors": {
+        "notAuthenticated": "Your session has ended. Sign in again and send the message.",
+        "invalidInput": "This message can't be sent: it may be too long, or an attachment isn't supported.",
+        "notParticipant": "You can't write in this conversation — you don't have access to it.",
+        "rateLimited": "You've sent many messages in the last hour. Wait a little and try again.",
+        "rateCheckUnavailable": "The safety check couldn't run, so nothing was sent. Try again.",
+        "attachmentsUnavailable": "Attachments can't be sent in this conversation yet — add some text to the message.",
+        "sendFailed": "The message couldn't be sent. Your text is still here — try again."
+      }
     },
     "launcher": {
       "openLabel": "Contact support",
@@ -20544,7 +20553,7 @@
       "text": "We measure page use and which campaign brought you here only if you allow it.",
       "accept": "Allow measurement",
       "refuse": "Refuse",
-      "more": "More",
+      "more": "More about cookies",
       "label": "Usage measurement choice"
     },
     "control": {

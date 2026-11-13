@@ -7289,7 +7289,16 @@
         "blockedFailed": "Entfernen Sie den fehlgeschlagenen Anhang oder laden Sie ihn erneut hoch.",
         "partialFailure": "Die Nachricht wurde gesendet, aber einige Anhänge konnten nicht angehängt werden. Versuchen Sie, sie erneut zu senden."
       },
-      "languageLabel": "Ich schreibe auf"
+      "languageLabel": "Ich schreibe auf",
+      "errors": {
+        "notAuthenticated": "Ihre Sitzung ist abgelaufen. Melden Sie sich erneut an und senden Sie die Nachricht.",
+        "invalidInput": "Diese Nachricht kann nicht gesendet werden: Sie ist möglicherweise zu lang, oder ein Anhang wird nicht unterstützt.",
+        "notParticipant": "Sie können in dieser Unterhaltung nicht schreiben — Sie haben keinen Zugriff darauf.",
+        "rateLimited": "Sie haben in der letzten Stunde viele Nachrichten gesendet. Warten Sie kurz und versuchen Sie es erneut.",
+        "rateCheckUnavailable": "Die Sicherheitsprüfung konnte nicht ausgeführt werden, daher wurde nichts gesendet. Versuchen Sie es erneut.",
+        "attachmentsUnavailable": "Das Senden von Anhängen ist hier noch nicht aktiviert — fügen Sie der Nachricht Text hinzu.",
+        "sendFailed": "Die Nachricht konnte nicht gesendet werden. Ihr Text ist noch da — versuchen Sie es erneut."
+      }
     },
     "launcher": {
       "openLabel": "Support kontaktieren",
@@ -20544,7 +20553,7 @@
       "text": "Seitennutzung und die Kampagne, über die Sie kamen, messen wir nur mit Ihrer Erlaubnis.",
       "accept": "Messung erlauben",
       "refuse": "Ablehnen",
-      "more": "Mehr",
+      "more": "Mehr über Cookies",
       "label": "Auswahl zur Nutzungsmessung"
     },
     "control": {

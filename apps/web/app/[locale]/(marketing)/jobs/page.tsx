@@ -8,8 +8,14 @@ import {
 import { readCountryParam } from "@/lib/vacancy-store/public-vacancy-country-param";
 import { activeLocales } from "@/lib/i18n/config";
 import { buttonLinkClassName } from "@/components/ui/Button";
-import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
+import { buildPageMetadata, buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
 import { jobsCanonicalPath } from "@/lib/seo/jobs-canonical";
+import {
+  browseByProfessionHeading,
+  isProfessionPageIndexable,
+  knownLiveCount,
+  professionPageCopy,
+} from "@/lib/seo/jobs-profession-page";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import {
   searchPublicVacancyPreviews,
@@ -65,7 +71,40 @@ export async function generateMetadata({
   searchParams: Promise<{ q?: string; page?: string; saved?: string; profession?: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return buildPageMetadataFor("jobs", locale, jobsCanonicalPath(await searchParams));
+  const sp = await searchParams;
+  const profession = readProfessionSlugParam(sp.profession);
+  const path = jobsCanonicalPath({ ...sp, profession });
+  // A free-text search or the saved view is the board; so is an unknown slug.
+  if (!profession || sp.q || sp.saved) return buildPageMetadataFor("jobs", locale, path);
+
+  // THE PROFESSION PAGE (owner P0, 2026-11-12): its own title, description and
+  // canonical, indexable only while it has real demand. This is the SAME read
+  // the page body makes, with the same arguments, so the search's in-process
+  // cache answers one of the two and the database is asked once.
+  const active = resolveActiveLocale(locale);
+  const read = await searchPublicVacancyPreviews({
+    query: "",
+    professionSlug: profession,
+    page: boardPage(sp.page),
+  });
+  const t = await getTranslations({ locale: active, namespace: "professions" });
+  const name = t.has(profession as never) ? t(profession as never) : profession;
+  const copy = professionPageCopy(active, name, knownLiveCount(read));
+  const metadata = buildPageMetadata({
+    locale: active,
+    path,
+    title: copy.heading,
+    description: copy.description,
+  });
+  // Thin or empty: people still reach it, a search engine does not list it.
+  return isProfessionPageIndexable(read)
+    ? metadata
+    : { ...metadata, robots: { index: false, follow: true } };
+}
+
+/** The page number the board reads, from the raw `?page=`. */
+function boardPage(raw: string | undefined): number {
+  return Math.max(1, Number.parseInt(raw ?? "1", 10) || 1);
 }
 
 type L = Record<ActiveLocale, string>;
@@ -413,7 +452,7 @@ export default async function JobsPage({
     const mapped = matchProfessionAcrossLocales(query, professionOptions, others);
     if (mapped) redirect({ href: professionRedirectHref(mapped, sp.page), locale: active });
   }
-  const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
+  const page = boardPage(sp.page);
   const wantsSaved = sp.saved === "1";
 
   // ── THE RETURN PATH ────────────────────────────────────────────────────────
@@ -522,6 +561,18 @@ export default async function JobsPage({
     redirect({ href: pageHref(1), locale: active });
   }
 
+  // The profession version of the board: its own heading and scope line, the
+  // same ones its <head> carries. A free-text search inside a profession is a
+  // search result, not that page.
+  const professionCopy =
+    profession && !query && !showSaved
+      ? professionPageCopy(
+          active,
+          professionName(profession),
+          result.status === "ok" ? result.totalCount : null,
+        )
+      : null;
+
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       {/* Anonymous-safe structured data (owner 2026-10-14 §8; port of #1433):
@@ -537,8 +588,9 @@ export default async function JobsPage({
               buildJobsListJsonLd({
                 origin: MARKETING_ORIGIN,
                 locale: active,
-                name: H1[active],
-                description: INTRO[active],
+                name: professionCopy?.heading ?? H1[active],
+                description: professionCopy?.description ?? INTRO[active],
+                path: professionCopy ? pageHref(1) : undefined,
                 previews: result.vacancies,
                 genericTitle: GENERIC_TITLE[active],
               }),
@@ -561,11 +613,22 @@ export default async function JobsPage({
         }}
       />
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-        {H1[active]}
+        {professionCopy?.heading ?? H1[active]}
       </h1>
       <p className="mt-3 max-w-2xl text-sm text-text-muted sm:text-base">
         {(user ? INTRO_MEMBER : INTRO)[active]}
       </p>
+      {professionCopy && (
+        <p
+          data-testid="public-jobs-profession-scope"
+          className="mt-2 max-w-2xl text-sm text-text-muted"
+        >
+          {professionCopy.scopeNote}{" "}
+          <Link href="/jobs" className="underline underline-offset-4">
+            {professionCopy.allJobsLink}
+          </Link>
+        </p>
+      )}
 
       {/* A PLAIN GET FORM, no client JS. The board is the crawler-facing
           surface and the first thing a worker with a poor connection loads;
@@ -777,6 +840,34 @@ export default async function JobsPage({
             </nav>
           )}
         </>
+      )}
+
+      {/* EVERY PROFESSION IS ONE PLAIN LINK AWAY. The filter above is a select
+          inside a form, which a crawler does not submit, so without these
+          links no profession page could be found from the board. */}
+      {!showSaved && (
+        <nav
+          aria-labelledby="jobs-by-profession"
+          data-testid="public-jobs-by-profession"
+          className="mt-12 border-t border-border-subtle pt-8"
+        >
+          <h2 id="jobs-by-profession" className="text-lg font-semibold tracking-tight">
+            {browseByProfessionHeading(active)}
+          </h2>
+          <ul className="mt-3 flex flex-wrap gap-x-4 text-sm">
+            {professionOptions.map((o) => (
+              <li key={o.slug}>
+                <Link
+                  href={`/jobs?profession=${o.slug}`}
+                  aria-current={o.slug === profession && !query ? "page" : undefined}
+                  className="inline-block py-1.5 text-text-muted underline underline-offset-4 hover:text-text-primary"
+                >
+                  {o.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       )}
     </div>
   );
