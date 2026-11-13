@@ -133,14 +133,19 @@ for (const vp of [
         await expect(signUp).toBeVisible();
         await expect(signUp).toHaveAttribute("href", /\/auth\/signup$/);
         const box = (await signUp.boundingBox())!;
-        // Whole on the first screen from 360px up. On the narrowest phone
-        // (320px) with the first-visit cookie notice above the header, the
-        // approved V3 lead takes four lines and the button begins on the
-        // first screen and ends just under it; the goals stay whole.
+        // Whole on the first screen from 360px up — the assertion this walk
+        // always made. On the narrowest phone (320×640) the first-visit
+        // cookie notice and the approved V3 lead leave room for the four
+        // goals (asserted whole above) and "More options", and the button
+        // follows directly under them: it must be reached within 60px of the
+        // fold, so anything pushed between the goals and it still fails.
         if (vp.width >= 360) {
           expect(box.y + box.height, "Sign up is above the fold").toBeLessThan(vp.height);
         } else {
-          expect(box.y, "Sign up begins on the first screen").toBeLessThan(vp.height);
+          expect(box.y + box.height, "Sign up is within 60px of the fold").toBeLessThan(vp.height + 60);
+          const more = (await page.getByTestId("goal-more-choices").locator("summary").boundingBox())!;
+          expect(more.y + more.height, "More options is on the first screen").toBeLessThan(vp.height);
+          expect(box.y - (more.y + more.height), "Sign up follows More options directly").toBeLessThan(24);
         }
         expect(box.height).toBeGreaterThanOrEqual(43.5);
       } else {

@@ -5287,7 +5287,7 @@
         },
         {
           "q": "Ile to kosztuje?",
-          "a": "Ceny są opublikowane na stronie cennika: jedno aktywne stanowisko na organizację jest bezpłatne; więcej stanowisk wymaga planu dla organizacji, aktywowanego na Twoim koncie. Zgłoszenie zapotrzebowania na pracowników jest bezpłatne."
+          "a": "Rejestracja i zgłoszenie zapotrzebowania na pracowników są bezpłatne. Płatny plan dla organizacji, jego cena i to, czy można go już dziś aktywować, są na stronie cennika."
         },
         {
           "q": "Czy możemy filtrować według lokalizacji?",
@@ -5385,7 +5385,7 @@
         },
         {
           "q": "Ile to kosztuje agencje?",
-          "a": "Agencja jest organizacją i korzysta z tych samych planów: jedno aktywne stanowisko jest bezpłatne, więcej wymaga planu dla organizacji ze strony cennika. Nie ma osobnej taryfy dla agencji."
+          "a": "Agencja jest organizacją i korzysta z tych samych planów. Rejestracja i podanie pracowników, których możesz zapewnić, są bezpłatne; płatny plan dla organizacji, jego cena i to, czy można go już dziś aktywować, są na stronie cennika. Nie ma osobnej taryfy dla agencji."
         },
         {
           "q": "Czy możemy kontrolować widoczność pracowników?",
@@ -9860,7 +9860,7 @@
         "body": "Stała opłata za sukces obowiązuje za każdego zatrudnionego pracownika, brygadę lub skierowaną firmę. Osobna opłata koordynacyjna obowiązuje wyłącznie wtedy, gdy koordynacja dokumentów lub wdrożenia zostanie faktycznie zrealizowana. Ostateczna cena jest potwierdzana przed rozpoczęciem płatnych prac."
       }
     ],
-    "note": "Dwie rzeczy działają równolegle, a ta strona opisuje drugą z nich. Sama platforma jest automatyczna: tablica ofert pracy jest publiczna, podgląd dopasowania jest otwarty bez konta, a podane zapytanie tworzy uporządkowaną krótką listę, która wyjaśnia, dlaczego każda osoba pasuje — jedno aktywne stanowisko bezpłatnie. Powyższa płatna usługa jest usługą ludzką: operator czyta Twoje zapytanie, kontaktuje się z Tobą i ręcznie sprawdza krótką listę, zanim ktokolwiek zostanie Ci zaproponowany. Cała ekipa może już zaoferować się na Twoje zapytanie jako jedna jednostka i, gdy obie strony się porozumieją, dołączyć do Twojego projektu jako jeden zespół; automatyczna krótka lista nie proponuje jeszcze całych ekip — porządkuje osoby pojedynczo.",
+    "note": "Dwie rzeczy działają równolegle, a ta strona opisuje drugą z nich. Sama platforma jest automatyczna: tablica ofert pracy jest publiczna, podgląd dopasowania jest otwarty bez konta, a podane zapytanie tworzy uporządkowaną krótką listę, która wyjaśnia, dlaczego każda osoba pasuje — podanie zapytania jest bezpłatne. Powyższa płatna usługa jest usługą ludzką: operator czyta Twoje zapytanie, kontaktuje się z Tobą i ręcznie sprawdza krótką listę, zanim ktokolwiek zostanie Ci zaproponowany. Cała ekipa może już zaoferować się na Twoje zapytanie jako jedna jednostka i, gdy obie strony się porozumieją, dołączyć do Twojego projektu jako jeden zespół; automatyczna krótka lista nie proponuje jeszcze całych ekip — porządkuje osoby pojedynczo.",
     "ctaLabel": "Złóż zapytanie o siłę roboczą →"
   },
   "adminLaunchReadiness": {

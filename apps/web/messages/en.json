@@ -5287,7 +5287,7 @@
         },
         {
           "q": "How much does it cost?",
-          "a": "Prices are published on the pricing page: one active position per organisation is free; more positions need the organisation plan, activated in your account. Submitting a workforce need is free."
+          "a": "Registering and submitting a workforce need are free. The paid organisation plan, its price and whether it can be activated today are shown on the pricing page."
         },
         {
           "q": "Can we filter by location?",
@@ -5385,7 +5385,7 @@
         },
         {
           "q": "How much does it cost agencies?",
-          "a": "An agency is an organisation and uses the same plans: one active position is free, more need the organisation plan from the pricing page. There is no separate agency tariff."
+          "a": "An agency is an organisation and uses the same plans. Registering and stating the workforce you can supply are free; the paid organisation plan, its price and whether it can be activated today are on the pricing page. There is no separate agency tariff."
         },
         {
           "q": "Can we control worker visibility?",
@@ -9860,7 +9860,7 @@
         "body": "A fixed success fee applies per hired worker, crew or company placement. A separate coordination fee applies only when document or onboarding coordination is actually delivered. The final price is confirmed before paid work starts."
       }
     ],
-    "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — one active position at no cost. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. A whole crew can already offer itself against your inquiry as one unit and, once both sides agree, join your project as one team; the automatic shortlist does not yet propose whole crews — it ranks people one by one.",
+    "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — and this part is free. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. A whole team can already offer itself against your inquiry as one unit and, once both sides agree, join your project as one team; the automatic shortlist does not yet propose whole teams — it ranks people one by one.",
     "ctaLabel": "Submit a workforce inquiry →"
   },
   "adminLaunchReadiness": {
