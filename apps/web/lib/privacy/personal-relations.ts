@@ -278,6 +278,15 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   },
   { table: "experience_responses", key: "profile_id", column: "author_profile_id" },
   { table: "organization_people", key: "profile_id", column: "linked_profile_id" },
+  // The person's own act of claiming a former employer's record: that they
+  // opened a one-time link, and what the organization answered. Exported
+  // keyed on the redeemer; `created_by` / `decided_by` are the organization's
+  // actors, not subjects (ACTOR_ONLY columns of the same table).
+  {
+    table: "organization_person_history_claims",
+    key: "profile_id",
+    column: "redeemed_by_profile_id",
+  },
   { table: "organization_evidence_records", key: "organization_person_id" },
   { table: "organization_evidence_events", key: "organization_evidence_record_id" },
   { table: "candidate_drafts", key: "profile_id", column: "linked_profile_id" },

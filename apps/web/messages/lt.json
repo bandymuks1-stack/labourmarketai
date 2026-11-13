@@ -18546,7 +18546,58 @@
         "needs_migration": "Šiuo metu nepasiekiama"
       }
     },
-    "openHistory": "Atidaryti istoriją"
+    "openHistory": "Atidaryti istoriją",
+    "historyClaim": {
+      "title": "Istorijos nuorodos buvusiems darbuotojams",
+      "intro": "Žmogaus, kuris čia nebedirba, negalima pakviesti kaip darbuotojo. Duokite vienkartinę nuorodą: jis ją atidaro, jūs patvirtinate, kas atėjo, o jis pats priima savo profilyje.",
+      "none": "Atvirų istorijos nuorodų nėra.",
+      "unavailable": "Istorijos nuorodų įkelti nepavyko. Bandykite dar kartą.",
+      "waiting": "Laukia jūsų atsakymo",
+      "open": "Nuoroda perduota",
+      "openHint": "Šios nuorodos dar niekas neatidarė.",
+      "came": "{name} ({email}) atidarė nuorodą ir sako, kad šis įrašas yra jo.",
+      "approve": "Taip, tai tas pats žmogus",
+      "reject": "Ne, tai kitas žmogus",
+      "revoke": "Atšaukti nuorodą",
+      "noteLabel": "Pastaba (nebūtina)",
+      "notePlaceholder": "Kaip atpažinote",
+      "approved": "Pasiūlyta jam. Dabar jis pats priima arba atsisako savo profilyje.",
+      "rejected": "Atmesta. Įraše niekas nepasikeitė.",
+      "revoked": "Nuoroda nebeveikia.",
+      "expires": "Galioja iki {date}.",
+      "offer": "Duoti istorijos nuorodą",
+      "offering": "Ruošiama…",
+      "offerHint": "Žmogui, kuris čia nebedirba.",
+      "created": "Nuoroda paruošta. Perduokite ją tam žmogui.",
+      "linkLabel": "Vienkartinė istorijos nuoroda",
+      "onceOnly": "Parodoma vieną kartą ir veikia vieną kartą.",
+      "unlink": {
+        "open": "Atšaukti šį susiejimą",
+        "reasonLabel": "Priežastis",
+        "reasonPlaceholder": "Kodėl šis susiejimas klaidingas",
+        "confirm": "Atšaukti susiejimą",
+        "cancel": "Atšaukti",
+        "done": "Susiejimas atšauktas. Įrašai tam žmogui neberodomi.",
+        "note": "Įrašai, jų šaltinis ir būsena lieka tokie patys. Tik tas žmogus jų nebemato.",
+        "reasonRequired": "Nurodykite priežastį.",
+        "notLinked": "Šis žmogus nesusietas."
+      },
+      "errors": {
+        "auth": "Prisijunkite dar kartą.",
+        "invalid": "Užklausoje kažkas buvo ne taip.",
+        "notFound": "Nerasta.",
+        "notAwaitingDecision": "Ši nuoroda nelaukia atsakymo.",
+        "cannotDecideOwn": "Negalite atsakyti į savo nuorodą.",
+        "noLongerPossible": "Tai nebeįmanoma. Patikrinkite įrašą.",
+        "alreadyOnRoster": "Tas žmogus jau yra šiame sąraše.",
+        "notLive": "Ši nuoroda nebegalioja.",
+        "needsMigration": "Ši funkcija dar neveikia.",
+        "error": "Nepavyko. Bandykite dar kartą.",
+        "alreadyLinked": "Šis įrašas jau susietas.",
+        "awaitingDecision": "Ankstesnę nuorodą jau kažkas atidarė. Pirmiau atsakykite jam.",
+        "rateLimited": "Per daug nuorodų šiandien. Bandykite rytoj."
+      }
+    }
   },
   "peopleImport": {
     "alreadyThere": "Jau yra tavo sąraše: {count}",
@@ -20636,5 +20687,34 @@
       "fullList": "Visas sąrašas"
     },
     "more": "Daugiau"
+  },
+  "historyClaim": {
+    "pageTitle": "Jūsų darbo istorija",
+    "title": "Jūsų darbo istorija pas buvusį darbdavį",
+    "organization": "{name} išsaugojo įrašą apie jūsų ten atliktą darbą.",
+    "explain": "Jei tai apie jus, pasakykite tai žemiau. Kol kas niekas nerodoma ir nepridedama: įmonė patvirtins, kad įraše esate jūs, o tada jūs pats savo profilyje priimsite arba atsisakysite.",
+    "redeem": "Tai aš",
+    "redeeming": "Siunčiama…",
+    "redeemedTitle": "Išsiųsta įmonei",
+    "redeemedHint": "Ji patvirtins, kad įraše esate jūs. Tada įrašas ateis į jūsų profilį, kur jį priimsite arba atsisakysite.",
+    "waitingForOrganization": "Įmonė tikrina, ar įraše esate jūs.",
+    "approvedGoToProfile": "Įmonė patvirtino. Atidarykite profilį, kad priimtumėte arba atsisakytumėte įrašo.",
+    "rejectedByOrganization": "Įmonė šio susiejimo nepatvirtino. Jei tai klaida, kreipkitės į ją tiesiogiai.",
+    "openProfile": "Atidaryti mano profilį",
+    "toDashboard": "Į mano puslapį",
+    "unavailable": "Ši nuoroda neveikia. Ji galėjo būti panaudota, atšaukta arba nebegalioti.",
+    "unnamedOrganization": "Įmonė",
+    "privacyNote": "Kol įmonė nepatvirtina, kad tai jūs, šis puslapis apie įrašą nieko nerodo.",
+    "errors": {
+      "auth": "Prisijunkite dar kartą.",
+      "unavailable": "Ši nuoroda nebeveikia.",
+      "emailNotVerified": "Pirmiau patvirtinkite savo el. pašto adresą ir atidarykite nuorodą iš naujo.",
+      "creatorCannotRedeem": "Šią nuorodą sukūrėte jūs, todėl ji ne jums.",
+      "noWorkerProfile": "Pirmiau užbaikite profilio kūrimą ir atidarykite nuorodą iš naujo.",
+      "alreadyOnRoster": "Jūs jau esate šios įmonės sąraše.",
+      "rateLimited": "Per daug bandymų šiandien. Bandykite rytoj.",
+      "needsMigration": "Ši funkcija dar neveikia.",
+      "error": "Nepavyko. Bandykite dar kartą."
+    }
   }
 }

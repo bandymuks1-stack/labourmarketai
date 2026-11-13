@@ -311,6 +311,9 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
         join(LOCALE_DIR, "business"),
         join(LOCALE_DIR, "cv"),
         join(LOCALE_DIR, "invite"),
+        // A former employer's one-time history link: a server component with
+        // one small client form, inside the root layout's minimal pick.
+        join(LOCALE_DIR, "history-claim"),
         join(LOCALE_DIR, "[...rest]"),
         // OAuth consent (owner directive 2026-08-29 §4) — a pure server
         // component: every oauthConsent string renders on the server, the
@@ -340,6 +343,7 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
       "cv",
       "dashboard",
       "focus-landing",
+      "history-claim",
       "invite",
       "oauth",
       "onboarding",

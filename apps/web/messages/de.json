@@ -18546,7 +18546,58 @@
         "needs_migration": "Derzeit nicht verfügbar"
       }
     },
-    "openHistory": "Historie öffnen"
+    "openHistory": "Historie öffnen",
+    "historyClaim": {
+      "title": "Verlaufs-Links für ehemalige Mitarbeitende",
+      "intro": "Wer hier nicht mehr arbeitet, kann nicht als Mitarbeitende Person eingeladen werden. Geben Sie stattdessen einen einmaligen Link: die Person öffnet ihn, Sie bestätigen, wer gekommen ist, und sie nimmt ihn im eigenen Profil an.",
+      "none": "Es sind keine Verlaufs-Links offen.",
+      "unavailable": "Die Verlaufs-Links konnten nicht geladen werden. Bitte erneut versuchen.",
+      "waiting": "Wartet auf Ihre Antwort",
+      "open": "Link übergeben",
+      "openHint": "Diesen Link hat noch niemand geöffnet.",
+      "came": "{name} ({email}) hat den Link geöffnet und sagt, dieser Eintrag gehöre ihr oder ihm.",
+      "approve": "Ja, dieselbe Person",
+      "reject": "Nein, jemand anderes",
+      "revoke": "Link zurückziehen",
+      "noteLabel": "Notiz (optional)",
+      "notePlaceholder": "Woran Sie die Person erkannt haben",
+      "approved": "Angeboten. Die Person nimmt es nun im eigenen Profil an oder lehnt ab.",
+      "rejected": "Abgelehnt. Am Eintrag hat sich nichts geändert.",
+      "revoked": "Der Link funktioniert nicht mehr.",
+      "expires": "Gültig bis {date}.",
+      "offer": "Verlaufs-Link geben",
+      "offering": "Wird vorbereitet…",
+      "offerHint": "Für eine Person, die hier nicht mehr arbeitet.",
+      "created": "Link bereit. Geben Sie ihn dieser Person.",
+      "linkLabel": "Einmaliger Verlaufs-Link",
+      "onceOnly": "Wird einmal gezeigt und funktioniert einmal.",
+      "unlink": {
+        "open": "Verknüpfung aufheben",
+        "reasonLabel": "Grund",
+        "reasonPlaceholder": "Warum diese Verknüpfung falsch ist",
+        "confirm": "Verknüpfung aufheben",
+        "cancel": "Abbrechen",
+        "done": "Die Verknüpfung ist aufgehoben. Der Person werden die Einträge nicht mehr gezeigt.",
+        "note": "Die Einträge, ihre Quelle und ihr Zustand bleiben genau wie sie sind. Nur diese Person sieht sie nicht mehr.",
+        "reasonRequired": "Bitte geben Sie einen Grund an.",
+        "notLinked": "Diese Person ist nicht verknüpft."
+      },
+      "errors": {
+        "auth": "Bitte melden Sie sich erneut an.",
+        "invalid": "An der Anfrage stimmte etwas nicht.",
+        "notFound": "Nicht gefunden.",
+        "notAwaitingDecision": "Dieser Link wartet auf keine Antwort.",
+        "cannotDecideOwn": "Sie können Ihren eigenen Link nicht beantworten.",
+        "noLongerPossible": "Das ist nicht mehr möglich. Prüfen Sie den Eintrag.",
+        "alreadyOnRoster": "Diese Person steht bereits auf der Liste.",
+        "notLive": "Dieser Link ist nicht mehr offen.",
+        "needsMigration": "Diese Funktion ist noch nicht verfügbar.",
+        "error": "Es hat nicht geklappt. Bitte erneut versuchen.",
+        "alreadyLinked": "Dieser Eintrag ist bereits verknüpft.",
+        "awaitingDecision": "Den vorherigen Link hat bereits jemand geöffnet. Antworten Sie zuerst dort.",
+        "rateLimited": "Zu viele Links für heute. Versuchen Sie es morgen."
+      }
+    }
   },
   "peopleImport": {
     "alreadyThere": "{count} stehen bereits auf Ihrer Liste",
@@ -20636,5 +20687,34 @@
       "fullList": "Vollständige Liste"
     },
     "more": "Mehr"
+  },
+  "historyClaim": {
+    "pageTitle": "Ihr Arbeitsverlauf",
+    "title": "Ihr Arbeitsverlauf bei einem früheren Arbeitgeber",
+    "organization": "{name} hat einen Eintrag über Ihre dortige Arbeit aufbewahrt.",
+    "explain": "Wenn es um Sie geht, sagen Sie es unten. Noch wird nichts gezeigt und nichts hinzugefügt: das Unternehmen bestätigt, dass Sie die Person im Eintrag sind, und danach nehmen Sie ihn im eigenen Profil an oder lehnen ab.",
+    "redeem": "Das bin ich",
+    "redeeming": "Wird gesendet…",
+    "redeemedTitle": "An das Unternehmen gesendet",
+    "redeemedHint": "Es bestätigt, dass Sie die Person im Eintrag sind. Danach kommt der Eintrag in Ihr Profil, wo Sie ihn annehmen oder ablehnen.",
+    "waitingForOrganization": "Das Unternehmen prüft, ob Sie die Person im Eintrag sind.",
+    "approvedGoToProfile": "Das Unternehmen hat bestätigt. Öffnen Sie Ihr Profil, um den Eintrag anzunehmen oder abzulehnen.",
+    "rejectedByOrganization": "Das Unternehmen hat diese Verknüpfung nicht bestätigt. Wenn das ein Irrtum ist, wenden Sie sich direkt an das Unternehmen.",
+    "openProfile": "Mein Profil öffnen",
+    "toDashboard": "Zu meiner Seite",
+    "unavailable": "Dieser Link funktioniert nicht. Vielleicht wurde er benutzt, zurückgezogen, oder er ist abgelaufen.",
+    "unnamedOrganization": "Ein Unternehmen",
+    "privacyNote": "Solange das Unternehmen nicht bestätigt hat, dass Sie es sind, zeigt diese Seite nichts über den Eintrag.",
+    "errors": {
+      "auth": "Bitte melden Sie sich erneut an.",
+      "unavailable": "Dieser Link funktioniert nicht mehr.",
+      "emailNotVerified": "Bestätigen Sie zuerst Ihre E-Mail-Adresse und öffnen Sie den Link dann erneut.",
+      "creatorCannotRedeem": "Diesen Link haben Sie erstellt, er ist also nicht für Sie.",
+      "noWorkerProfile": "Richten Sie zuerst Ihr Profil fertig ein und öffnen Sie den Link dann erneut.",
+      "alreadyOnRoster": "Sie stehen bereits auf der Liste dieses Unternehmens.",
+      "rateLimited": "Zu viele Versuche heute. Versuchen Sie es morgen.",
+      "needsMigration": "Diese Funktion ist noch nicht verfügbar.",
+      "error": "Es hat nicht geklappt. Bitte erneut versuchen."
+    }
   }
 }
