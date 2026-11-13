@@ -40,7 +40,7 @@ approval. Statuses: DONE (with evidence) · IN PROGRESS · BLOCKED · NOT TESTED
 | 31 | brigade-formation closes its own need | F | — | NOT STARTED | test-only draft PR |
 | 32 | Synthetic rows invisible to an ordinary signed-in user | — | owner decision (a non-synthetic test account) | NOT TESTED: no account exists; code guards only | browser proof |
 | 33 | Worker CV shows real history; new worker's CV honest | G | 12 | IN PROGRESS: audit started 2026-11-13 | two example CVs on synthetic accounts; four evidence kinds visibly apart |
-| 34 | Invited former worker: CV readiness before first sign-in | coordinator (audit), then a RED lane | owner decision on the linking route | BLOCKED: audit done 2026-11-13 (read-only, counts only): NOT READY, see "Audit 34" below | on first sign-in the person sees his own organization-supplied history, as a past role, with provenance; no duplicates; phone and desktop; view / edit / export |
+| 34 | Invited former worker: CV readiness before first sign-in | coordinator (audit), H (RED draft PR), R2 (review) | the fix; which organization record is the former employer | IN PROGRESS: audit done 2026-11-13 (read-only, counts only): NOT READY, see "Audit 34" below | on first sign-in the person sees his own organization-supplied history, as a past role, with provenance; no duplicates; phone and desktop; view / edit / export |
 | 35 | Public profiles of the two operating organizations | V1 | rows 6.21 / 8.9 (blocked), publishing rights | IN PROGRESS: audit started 2026-11-13 | only publishable facts; sources named; nothing invented |
 | 36 | #3256 public needs of unconfirmed companies | V1, R2 | two P2 | IN PROGRESS | P2 fixed; re-review; owner decision |
 | 37 | #3231, #3232, #3295 (RED queue) | R2 | owner | BLOCKED: owner decision | — |
@@ -76,8 +76,9 @@ invisible to him, and no control in the product can link a former employee who h
 with the organization. Sending an "employee" invitation instead would link him but would show the
 organization as his CURRENT job, which is false.
 
-Not verified: that this invitation and this roster row are the same person (matched on the start of the
-name only; the owner must confirm); how the CV looks with these records (no linked account exists to look
+Confirmed by the owner on 2026-11-13: the invitation and the roster row are the same person.
+
+Not verified: how the CV looks with these records (no linked account exists to look
 at); view / edit / export for this person.
 
 Smallest fix, for decision (RED: it changes who may be linked and an access rule; draft PR only after the
@@ -86,3 +87,13 @@ identified by an invitation addressed to that row, creating an ENDED relationshi
 period) and no active engagement; the person still accepts the link himself. Acceptance: isolated e2e of
 the whole route on synthetic people; RLS proof that he reads only his own row's records; no change for
 current employees.
+
+Open point found on 2026-11-13 (read-only): the roster row and its 62 records belong to an organization
+whose name does not contain the employer name the owner expects to see in the CV; the two organizations
+that carry that name hold no roster people and no records. Which organization record is the real former
+employer, and under which name it should appear, is an owner question; no data was changed.
+
+Fix in progress: Lane H, RED draft PR "former worker to organization history link" (general function:
+manager offers from a former-employee roster row; the person confirms; ended relationship with its period;
+no active engagement; no linking on a name or e-mail match; safe claim for a different e-mail or Google
+sign-in; reversal with audit trail). Review: Lane R2. No merge, migration or deploy without the owner.
