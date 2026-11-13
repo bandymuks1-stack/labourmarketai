@@ -545,12 +545,15 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   ];
   const projectNamesRes =
     contextProjectIds.length > 0
-      ? await tolerant<{ id: string; name: string | null }[]>(
-          sb.from("projects").select("id, name").in("id", contextProjectIds),
+      ? // `projects` names a project in `title`; there is no `name` column.
+        // Asking for `name` failed, the tolerant wrapper turned the failure
+        // into "no rows", and no job on the CV ever showed its project.
+        await tolerant<{ id: string; title: string | null }[]>(
+          sb.from("projects").select("id, title").in("id", contextProjectIds),
         )
       : { data: null };
   const projectNameById = new Map(
-    (projectNamesRes.data ?? []).map((p) => [p.id, p.name?.trim() || null] as const),
+    (projectNamesRes.data ?? []).map((p) => [p.id, p.title?.trim() || null] as const),
   );
   // The journal's per-context figures (canonical reader; null = unreadable).
   // Real work a manager independently confirmed, as facts (entries + distinct
