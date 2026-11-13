@@ -28,8 +28,8 @@ export function ExperienceResponseModerationItem({
   /** The experience the reply answers. Null = that read failed; the item says
    *  nothing about it rather than showing an empty quote. */
   recordBody: string | null;
-  /** The signed-in administrator is a party to the reply or its record. */
-  conflict?: boolean;
+  /** Whether the signed-in moderator is a party to the reply or its experience. */
+  conflict?: "clear" | "conflict" | "unknown";
 }) {
   const locale = useLocale();
   const t = useTranslations("experience");
@@ -61,13 +61,17 @@ export function ExperienceResponseModerationItem({
         {body}
       </p>
 
-      {conflict ? (
+      {conflict === "conflict" || conflict === "unknown" ? (
+        // A party to the experience does not decide here, and neither does a
+        // moderator whose tie could not be checked. The server refuses the
+        // step as well; this is the explanation, not the control.
         <p
           className="text-meta leading-relaxed text-state-warning"
           role="status"
           data-testid="experience-response-moderation-conflict"
+          data-conflict={conflict}
         >
-          {t("moderation.conflictNotice")}
+          {t(conflict === "conflict" ? "moderation.conflictNotice" : "moderation.conflictUnknown")}
         </p>
       ) : state?.ok ? (
         <p

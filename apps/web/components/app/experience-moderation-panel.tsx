@@ -100,6 +100,7 @@ export function ExperienceModerationPanel({
                       interactionKind={r.interactionKind}
                       subjectType={r.subjectType}
                       authorSide={r.authorSide}
+                      conflict={r.conflict}
                     />
                   </li>
                 ))}

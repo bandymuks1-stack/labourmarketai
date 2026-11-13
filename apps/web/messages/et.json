@@ -5117,14 +5117,16 @@
       "queueEmpty": "[EN] Nothing is waiting for moderation.",
       "disputeQueueTitle": "[EN] Disputes",
       "disputeQueueEmpty": "[EN] No open disputes.",
-      "takeDispute": "Võta vaidlus läbivaatamisele",
-      "disputeReasonLabel": "Miks kirjet vaidlustatakse",
-      "responseQueueTitle": "Modereerimist ootavad vastused",
-      "responseQueueEmpty": "Ükski vastus ei oota modereerimist.",
-      "replyToLabel": "Vastus sellele kogemusele",
-      "disputeOpenedLabel": "Vaidlus esitatud",
-      "disputeReviewStartedLabel": "Läbivaatamine alustatud",
-      "conflictNotice": "Olete selle kirje osapool ega saa seda otsustada. Selle peab üle võtma teine administraator.",
+      "takeDispute": "[EN] Take the dispute into review",
+      "disputeReasonLabel": "[EN] Reason for the dispute",
+      "responseQueueTitle": "[EN] Replies awaiting moderation",
+      "responseQueueEmpty": "[EN] No reply is waiting for moderation.",
+      "replyToLabel": "[EN] Reply to this experience",
+      "disputeOpenedLabel": "[EN] Dispute opened",
+      "disputeReviewStartedLabel": "[EN] Review started",
+      "conflictNotice": "[EN] You are a party to this experience, so you cannot decide here. Another moderator must take it.",
+      "conflictUnknown": "[EN] Could not check whether you are a party to this experience. No decision is possible right now.",
+      "disputeReasonShared": "[EN] The reason is shown to both sides and recorded in the audit trail.",
       "take": "[EN] Take into moderation",
       "publish": "[EN] Publish",
       "reject": "[EN] Reject",
@@ -5150,7 +5152,7 @@
         "dispute_exists": "[EN] A dispute is already open.",
         "reason_required": "[EN] A reason is required.",
         "invalid_transition": "[EN] That step is not possible from the current state.",
-        "conflict_of_interest": "Olete selle kirje osapool. Otsuse peab tegema teine administraator.",
+        "conflict_of_interest": "[EN] You are a party to this experience. Another moderator must decide.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
       }
@@ -5167,7 +5169,7 @@
       "cta": "[EN] Open a dispute",
       "sending": "[EN] Opening…",
       "openedNote": "[EN] Dispute opened. The experience stays published until a moderator decides.",
-      "decisionReasonLabel": "Otsuse põhjendus",
+      "decisionReasonLabel": "[EN] Reason for the decision",
       "errors": {
         "needs_migration": "Praegu pole saadaval. Midagi ei salvestatud.",
         "not_authenticated": "[EN] Please sign in first.",
@@ -5182,7 +5184,7 @@
         "dispute_exists": "[EN] A dispute is already open.",
         "reason_required": "[EN] A reason is required.",
         "invalid_transition": "[EN] That step is not possible from the current state.",
-        "conflict_of_interest": "Olete selle kirje osapool. Otsuse peab tegema teine administraator.",
+        "conflict_of_interest": "[EN] You are a party to this experience. Another moderator must decide.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
       }
@@ -5207,7 +5209,7 @@
         "dispute_exists": "[EN] A dispute is already open.",
         "reason_required": "[EN] A reason is required.",
         "invalid_transition": "[EN] That step is not possible from the current state.",
-        "conflict_of_interest": "Olete selle kirje osapool. Otsuse peab tegema teine administraator.",
+        "conflict_of_interest": "[EN] You are a party to this experience. Another moderator must decide.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
       },
@@ -5242,7 +5244,7 @@
         "dispute_exists": "[EN] A dispute is already open.",
         "reason_required": "[EN] A reason is required.",
         "invalid_transition": "[EN] That step is not possible from the current state.",
-        "conflict_of_interest": "Olete selle kirje osapool. Otsuse peab tegema teine administraator.",
+        "conflict_of_interest": "[EN] You are a party to this experience. Another moderator must decide.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
       }

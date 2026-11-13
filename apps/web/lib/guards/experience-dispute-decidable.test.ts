@@ -92,22 +92,39 @@ describe("a reply can be published", () => {
 
 describe("owner rules of 2026-11-13", () => {
   const result = read("components", "app", "workspace", "experiences-result.tsx");
-  it("1 — all three moderator steps refuse a party before the RPC is called", () => {
-    for (const fn of ["startExperienceDisputeReview", "resolveExperienceDispute", "moderateExperienceResponse"]) {
+  it("1 — every moderator step refuses a party before the RPC is called", () => {
+    // Record moderation is covered too: publishing one's own experience, or
+    // rejecting one about oneself, is the same conflict.
+    for (const fn of [
+      "startExperienceModeration",
+      "decideExperienceModeration",
+      "startExperienceDisputeReview",
+      "resolveExperienceDispute",
+      "moderateExperienceResponse",
+    ]) {
       const body = records.slice(records.indexOf(`export async function ${fn}(`));
       const call = body.indexOf("await rpc(");
       const refuse = body.indexOf("if (refused) return refused;");
       expect(refuse, fn).toBeGreaterThan(-1);
       expect(refuse, `${fn}: the refusal must come before the RPC`).toBeLessThan(call);
     }
-    // Unknown is not clear.
-    expect(records).toMatch(/if \(conflict === "unknown"\) return \{ ok: false, code: "error" \};/);
+    // Unknown is not clear, and a refusal leaves a server trace (ids only).
+    expect(records).toMatch(/if \(conflict === "clear"\) return null;/);
+    expect(records).toMatch(/console\.warn\("\[experience\] moderator step refused", \{ step, recordId, conflict \}\);/);
+    // A failed check is shown as "could not check", never as "you are a party".
+    expect(records).toMatch(/if \(!viewerId \|\| managed === null\) return "unknown";/);
+    expect(disputeItem).toContain('"moderation.conflictUnknown"');
+    expect(read("components", "app", "experience-moderation-item.tsx")).toContain(
+      'data-testid="experience-moderation-conflict"',
+    );
     expect(disputeItem).toContain('data-testid="experience-dispute-conflict"');
     expect(replyItem).toContain('data-testid="experience-response-moderation-conflict"');
   });
   it("2 — the moderator sees the date and the age of the dispute's current step", () => {
     expect(disputeItem).toContain('data-testid="experience-dispute-age"');
     expect(disputeItem).toMatch(/format\.relativeTime\(new Date\(stepAt\), new Date\(now\)\)/);
+    // The same date on the server and in any browser time zone.
+    expect(disputeItem).toMatch(/dateStyle: "medium", timeZone: "UTC"/);
     // No automatic decision: nothing in this domain decides by elapsed time.
     expect(records).not.toMatch(/deadline|expires|auto_?resolve/i);
   });
@@ -119,6 +136,10 @@ describe("owner rules of 2026-11-13", () => {
     expect(disputeItem).not.toMatch(/"changed"\]/);
     expect(actions).toMatch(/if \(resolution !== "upheld" && resolution !== "removed"\) \{\s+return \{ ok: false, code: "invalid" \};/);
     expect(records).toMatch(/resolution: "upheld" \| "removed";/);
+  });
+  it("5 — the moderator is told the decision's reason is shown to both sides", () => {
+    expect(disputeItem).toContain('"moderation.disputeReasonShared"');
+    expect(disputeItem).not.toContain('"moderation.reasonNotPublic"');
   });
   it("5 — both parties read the decision's reason", () => {
     expect(records).toMatch(/", dispute_resolution_reason"/);
@@ -140,6 +161,8 @@ describe("copy and proof", () => {
     "disputeOpenedLabel",
     "disputeReviewStartedLabel",
     "conflictNotice",
+    "conflictUnknown",
+    "disputeReasonShared",
   ];
   for (const loc of ["en", "lt", "lv", "et", "de", "nl", "pl", "ru", "da", "no", "sv"]) {
     it(`${loc} carries the moderator strings`, () => {

@@ -44,8 +44,8 @@ export function ExperienceDisputeItem({
   stepAt?: string | null;
   /** The server's clock at render, so the age is the same on both renders. */
   now: string;
-  /** The signed-in administrator is a party to this record. */
-  conflict?: boolean;
+  /** Whether the signed-in moderator is a party to this experience. */
+  conflict?: "clear" | "conflict" | "unknown";
 }) {
   const format = useFormatter();
   const locale = useLocale();
@@ -86,7 +86,8 @@ export function ExperienceDisputeItem({
           {t(status === "opened" ? "moderation.disputeOpenedLabel" : "moderation.disputeReviewStartedLabel")}
           {": "}
           <time dateTime={stepAt}>
-            {format.dateTime(new Date(stepAt), { dateStyle: "medium" })}
+            {/* UTC on both renders: the server and the browser must agree. */}
+            {format.dateTime(new Date(stepAt), { dateStyle: "medium", timeZone: "UTC" })}
           </time>
           {" · "}
           {format.relativeTime(new Date(stepAt), new Date(now))}
@@ -101,15 +102,17 @@ export function ExperienceDisputeItem({
         </div>
       ) : null}
 
-      {conflict ? (
-        // A party to the record does not decide its dispute. The server
-        // refuses the step as well; this is the explanation, not the control.
+      {conflict === "conflict" || conflict === "unknown" ? (
+        // A party to the experience does not decide here, and neither does a
+        // moderator whose tie could not be checked. The server refuses the
+        // step as well; this is the explanation, not the control.
         <p
           className="text-meta leading-relaxed text-state-warning"
           role="status"
           data-testid="experience-dispute-conflict"
+          data-conflict={conflict}
         >
-          {t("moderation.conflictNotice")}
+          {t(conflict === "conflict" ? "moderation.conflictNotice" : "moderation.conflictUnknown")}
         </p>
       ) : state?.ok ? (
         <p
@@ -160,6 +163,10 @@ export function ExperienceDisputeItem({
               className="rounded-md border border-border bg-surface-1 p-2 text-sm text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"
             />
           </label>
+          {/* Unlike a moderation reason, this one is read by both sides. */}
+          <p className="text-meta leading-relaxed text-text-muted" data-testid="experience-dispute-reason-shared">
+            {t("moderation.disputeReasonShared")}
+          </p>
           <div className="flex flex-wrap gap-2">
             {/* "changed" is not offered: nothing changes the text, so it would
                 record a correction that never happened. */}

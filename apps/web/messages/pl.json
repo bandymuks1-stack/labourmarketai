@@ -16299,14 +16299,16 @@
       "queueEmpty": "Nic nie oczekuje na moderację.",
       "disputeQueueTitle": "Spory",
       "disputeQueueEmpty": "Brak otwartych sporów.",
-      "takeDispute": "Przyjmij spór do rozpatrzenia",
-      "disputeReasonLabel": "Dlaczego wpis jest kwestionowany",
+      "takeDispute": "Weź spór do rozpatrzenia",
+      "disputeReasonLabel": "Uzasadnienie sporu",
       "responseQueueTitle": "Odpowiedzi oczekujące na moderację",
-      "responseQueueEmpty": "Żadna odpowiedź nie czeka na moderację.",
+      "responseQueueEmpty": "Żadna odpowiedź nie oczekuje na moderację.",
       "replyToLabel": "Odpowiedź na to doświadczenie",
-      "disputeOpenedLabel": "Spór zgłoszony",
+      "disputeOpenedLabel": "Spór otwarty",
       "disputeReviewStartedLabel": "Rozpatrywanie rozpoczęte",
-      "conflictNotice": "Jesteś stroną tego wpisu, więc nie możesz go rozstrzygać. Musi go przejąć inny administrator.",
+      "conflictNotice": "Jesteś stroną tego doświadczenia, więc nie możesz tu decydować. Musi je przejąć inny moderator.",
+      "conflictUnknown": "Nie udało się sprawdzić, czy jesteś stroną tego doświadczenia. Decyzja nie jest teraz możliwa.",
+      "disputeReasonShared": "Uzasadnienie jest pokazywane obu stronom i zapisywane w dzienniku audytu.",
       "take": "Weź do moderacji",
       "publish": "Opublikuj",
       "reject": "Odrzuć",
@@ -16332,7 +16334,7 @@
         "dispute_exists": "Spór jest już otwarty.",
         "reason_required": "Uzasadnienie jest wymagane.",
         "invalid_transition": "Ten krok nie jest możliwy z obecnego stanu.",
-        "conflict_of_interest": "Jesteś stroną tego wpisu. Decyzję musi podjąć inny administrator.",
+        "conflict_of_interest": "Jesteś stroną tego doświadczenia. Decyzję musi podjąć inny moderator.",
         "not_found": "Nie znaleziono.",
         "error": "Coś poszło nie tak. Nic nie zostało zapisane."
       }
@@ -16364,7 +16366,7 @@
         "dispute_exists": "Spór jest już otwarty.",
         "reason_required": "Uzasadnienie jest wymagane.",
         "invalid_transition": "Ten krok nie jest możliwy z obecnego stanu.",
-        "conflict_of_interest": "Jesteś stroną tego wpisu. Decyzję musi podjąć inny administrator.",
+        "conflict_of_interest": "Jesteś stroną tego doświadczenia. Decyzję musi podjąć inny moderator.",
         "not_found": "Nie znaleziono.",
         "error": "Coś poszło nie tak. Nic nie zostało zapisane."
       }
@@ -16389,7 +16391,7 @@
         "dispute_exists": "Spór jest już otwarty.",
         "reason_required": "Uzasadnienie jest wymagane.",
         "invalid_transition": "Ten krok nie jest możliwy z obecnego stanu.",
-        "conflict_of_interest": "Jesteś stroną tego wpisu. Decyzję musi podjąć inny administrator.",
+        "conflict_of_interest": "Jesteś stroną tego doświadczenia. Decyzję musi podjąć inny moderator.",
         "not_found": "Nie znaleziono.",
         "error": "Coś poszło nie tak. Nic nie zostało zapisane."
       },
@@ -16424,7 +16426,7 @@
         "dispute_exists": "Spór jest już otwarty.",
         "reason_required": "Uzasadnienie jest wymagane.",
         "invalid_transition": "Ten krok nie jest możliwy z obecnego stanu.",
-        "conflict_of_interest": "Jesteś stroną tego wpisu. Decyzję musi podjąć inny administrator.",
+        "conflict_of_interest": "Jesteś stroną tego doświadczenia. Decyzję musi podjąć inny moderator.",
         "not_found": "Nie znaleziono.",
         "error": "Coś poszło nie tak. Nic nie zostało zapisane."
       }

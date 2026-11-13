@@ -26,6 +26,7 @@ export function ExperienceModerationItem({
   interactionKind,
   subjectType,
   authorSide,
+  conflict,
 }: {
   id: string;
   sentiment: "positive" | "negative";
@@ -38,6 +39,8 @@ export function ExperienceModerationItem({
   /** Null = the author-side column is not applied on this stack — the label
    *  is omitted rather than guessed. */
   authorSide: "person" | "organization" | null;
+  /** Whether the signed-in moderator is a party to this experience. */
+  conflict?: "clear" | "conflict" | "unknown";
 }) {
   const locale = useLocale();
   const t = useTranslations("experience");
@@ -85,7 +88,19 @@ export function ExperienceModerationItem({
       </div>
       <p className="text-sm leading-relaxed text-text-secondary break-words">{body}</p>
 
-      {decided ? (
+      {conflict === "conflict" || conflict === "unknown" ? (
+        // A party to the experience does not decide here, and neither does a
+        // moderator whose tie could not be checked. The server refuses the
+        // step as well; this is the explanation, not the control.
+        <p
+          className="text-meta leading-relaxed text-state-warning"
+          role="status"
+          data-testid="experience-moderation-conflict"
+          data-conflict={conflict}
+        >
+          {t(conflict === "conflict" ? "moderation.conflictNotice" : "moderation.conflictUnknown")}
+        </p>
+      ) : decided ? (
         <p
           className="text-meta text-state-success"
           role="status"

@@ -16299,14 +16299,16 @@
       "queueEmpty": "Er wacht niets op moderatie.",
       "disputeQueueTitle": "Geschillen",
       "disputeQueueEmpty": "Geen open geschillen.",
-      "takeDispute": "Bezwaar in behandeling nemen",
-      "disputeReasonLabel": "Waarom de ervaring wordt betwist",
+      "takeDispute": "Geschil in behandeling nemen",
+      "disputeReasonLabel": "Reden voor het geschil",
       "responseQueueTitle": "Reacties die op moderatie wachten",
       "responseQueueEmpty": "Er wacht geen reactie op moderatie.",
       "replyToLabel": "Reactie op deze ervaring",
-      "disputeOpenedLabel": "Bezwaar ingediend",
+      "disputeOpenedLabel": "Geschil geopend",
       "disputeReviewStartedLabel": "Behandeling gestart",
-      "conflictNotice": "U bent partij bij deze ervaring en kunt er niet over beslissen. Een andere beheerder moet dit overnemen.",
+      "conflictNotice": "Je bent partij bij deze ervaring en kunt hier niet beslissen. Een andere moderator moet dit overnemen.",
+      "conflictUnknown": "Er kon niet worden nagegaan of je partij bent bij deze ervaring. Beslissen is nu niet mogelijk.",
+      "disputeReasonShared": "De reden wordt aan beide partijen getoond en vastgelegd in het auditspoor.",
       "take": "In moderatie nemen",
       "publish": "Publiceren",
       "reject": "Afwijzen",
@@ -16332,7 +16334,7 @@
         "dispute_exists": "Er loopt al een geschil.",
         "reason_required": "Een reden is verplicht.",
         "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
-        "conflict_of_interest": "U bent partij bij deze ervaring. Een andere beheerder moet beslissen.",
+        "conflict_of_interest": "Je bent partij bij deze ervaring. Een andere moderator moet beslissen.",
         "not_found": "Niet gevonden.",
         "error": "Er ging iets mis. Er is niets opgeslagen."
       }
@@ -16349,7 +16351,7 @@
       "cta": "Geschil openen",
       "sending": "Bezig…",
       "openedNote": "Geschil geopend. De ervaring blijft gepubliceerd tot een moderator beslist.",
-      "decisionReasonLabel": "Motivering van de beslissing",
+      "decisionReasonLabel": "Reden voor het besluit",
       "errors": {
         "needs_migration": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
         "not_authenticated": "Log eerst in.",
@@ -16364,7 +16366,7 @@
         "dispute_exists": "Er loopt al een geschil.",
         "reason_required": "Een reden is verplicht.",
         "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
-        "conflict_of_interest": "U bent partij bij deze ervaring. Een andere beheerder moet beslissen.",
+        "conflict_of_interest": "Je bent partij bij deze ervaring. Een andere moderator moet beslissen.",
         "not_found": "Niet gevonden.",
         "error": "Er ging iets mis. Er is niets opgeslagen."
       }
@@ -16389,7 +16391,7 @@
         "dispute_exists": "Er loopt al een geschil.",
         "reason_required": "Een reden is verplicht.",
         "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
-        "conflict_of_interest": "U bent partij bij deze ervaring. Een andere beheerder moet beslissen.",
+        "conflict_of_interest": "Je bent partij bij deze ervaring. Een andere moderator moet beslissen.",
         "not_found": "Niet gevonden.",
         "error": "Er ging iets mis. Er is niets opgeslagen."
       },
@@ -16424,7 +16426,7 @@
         "dispute_exists": "Er loopt al een geschil.",
         "reason_required": "Een reden is verplicht.",
         "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
-        "conflict_of_interest": "U bent partij bij deze ervaring. Een andere beheerder moet beslissen.",
+        "conflict_of_interest": "Je bent partij bij deze ervaring. Een andere moderator moet beslissen.",
         "not_found": "Niet gevonden.",
         "error": "Er ging iets mis. Er is niets opgeslagen."
       }

@@ -5117,14 +5117,16 @@
       "queueEmpty": "Intet venter på moderation.",
       "disputeQueueTitle": "Tvister",
       "disputeQueueEmpty": "Ingen åbne tvister.",
-      "takeDispute": "Tag indsigelsen til behandling",
-      "disputeReasonLabel": "Hvorfor oplevelsen bestrides",
-      "responseQueueTitle": "Svar, der afventer moderation",
-      "responseQueueEmpty": "Ingen svar afventer moderation.",
-      "replyToLabel": "Svar på denne oplevelse",
-      "disputeOpenedLabel": "Indsigelse indgivet",
+      "takeDispute": "Tag tvisten til behandling",
+      "disputeReasonLabel": "Begrundelse for tvisten",
+      "responseQueueTitle": "Svar, der venter på moderation",
+      "responseQueueEmpty": "Ingen svar venter på moderation.",
+      "replyToLabel": "Svar på denne erfaring",
+      "disputeOpenedLabel": "Tvist åbnet",
       "disputeReviewStartedLabel": "Behandling påbegyndt",
-      "conflictNotice": "Du er part i denne oplevelse og kan ikke afgøre den. En anden administrator skal overtage den.",
+      "conflictNotice": "Du er part i denne erfaring og kan ikke beslutte her. En anden moderator skal overtage den.",
+      "conflictUnknown": "Det kunne ikke kontrolleres, om du er part i denne erfaring. Der kan ikke træffes en beslutning lige nu.",
+      "disputeReasonShared": "Begrundelsen vises for begge parter og registreres i revisionssporet.",
       "take": "Tag til moderation",
       "publish": "Offentliggør",
       "reject": "Afvis",
@@ -5150,7 +5152,7 @@
         "dispute_exists": "En tvist er allerede åben.",
         "reason_required": "En begrundelse er påkrævet.",
         "invalid_transition": "Det trin er ikke muligt fra den nuværende tilstand.",
-        "conflict_of_interest": "Du er part i denne oplevelse. En anden administrator skal træffe afgørelsen.",
+        "conflict_of_interest": "Du er part i denne erfaring. En anden moderator skal beslutte.",
         "not_found": "Ikke fundet.",
         "error": "Noget gik galt. Intet blev gemt."
       }
@@ -5167,7 +5169,7 @@
       "cta": "Åbn en tvist",
       "sending": "Åbner…",
       "openedNote": "Tvist åbnet. Erfaringen forbliver offentliggjort, indtil en moderator beslutter.",
-      "decisionReasonLabel": "Begrundelse for afgørelsen",
+      "decisionReasonLabel": "Begrundelse for beslutningen",
       "errors": {
         "needs_migration": "Ikke tilgængelig lige nu. Intet blev gemt.",
         "not_authenticated": "Log venligst ind først.",
@@ -5182,7 +5184,7 @@
         "dispute_exists": "En tvist er allerede åben.",
         "reason_required": "En begrundelse er påkrævet.",
         "invalid_transition": "Det trin er ikke muligt fra den nuværende tilstand.",
-        "conflict_of_interest": "Du er part i denne oplevelse. En anden administrator skal træffe afgørelsen.",
+        "conflict_of_interest": "Du er part i denne erfaring. En anden moderator skal beslutte.",
         "not_found": "Ikke fundet.",
         "error": "Noget gik galt. Intet blev gemt."
       }
@@ -5207,7 +5209,7 @@
         "dispute_exists": "En tvist er allerede åben.",
         "reason_required": "En begrundelse er påkrævet.",
         "invalid_transition": "Det trin er ikke muligt fra den nuværende tilstand.",
-        "conflict_of_interest": "Du er part i denne oplevelse. En anden administrator skal træffe afgørelsen.",
+        "conflict_of_interest": "Du er part i denne erfaring. En anden moderator skal beslutte.",
         "not_found": "Ikke fundet.",
         "error": "Noget gik galt. Intet blev gemt."
       },
@@ -5242,7 +5244,7 @@
         "dispute_exists": "En tvist er allerede åben.",
         "reason_required": "En begrundelse er påkrævet.",
         "invalid_transition": "Det trin er ikke muligt fra den nuværende tilstand.",
-        "conflict_of_interest": "Du er part i denne oplevelse. En anden administrator skal træffe afgørelsen.",
+        "conflict_of_interest": "Du er part i denne erfaring. En anden moderator skal beslutte.",
         "not_found": "Ikke fundet.",
         "error": "Noget gik galt. Intet blev gemt."
       }

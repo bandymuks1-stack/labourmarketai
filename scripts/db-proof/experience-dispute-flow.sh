@@ -17,6 +17,12 @@
 #   * a decision never rewrites the record (body, sentiment, moderation state);
 #   * a reply is invisible to the record's author until an admin publishes it.
 #
+# What it does NOT prove: the conflict-of-interest rule (a moderator who is a
+# party does not decide). That rule lives in the web app
+# (lib/trust/experience-conflict.ts); the database lets ANY admin decide, as
+# the checks below show. is_admin / manages_organization are the prelude's
+# copies of production, not the migrations themselves.
+#
 #   PGPROOF_HOST=127.0.0.1 PGPROOF_PORT=54301 bash scripts/db-proof/experience-dispute-flow.sh
 # Uses database `expdisp` (dropped and rebuilt). Refuses non-local hosts.
 # ============================================================================
@@ -136,5 +142,9 @@ check "now the record's author reads it" "1" "$(as $A "select count(*) from publ
 check "a decided reply cannot be decided again" "invalid_transition" "$(ok "$(as $ADM "select public.moderate_experience_response('$RP','rejected','changed my mind');")")"
 check "the reply did not change the counts or the record" "1:0:1" "$(as $O "select (c->>'negative')||':'||(c->>'disputed')||':'||(c->>'total_considered') from public.get_experience_counts('organization','$ORGX') c;")"
 check "reply moderation left its audit row" "1" "$(audit $RP response_moderated)"
+RJ="$(as $S "select public.submit_experience_response('$R1','a reply that will be rejected')->>'id';")"
+check "admin rejects another reply" "ok" "$(ok "$(as $ADM "select public.moderate_experience_response('$RJ','rejected','outside the rules');")")"
+check "a REJECTED reply stays hidden from the record's author" "0" "$(as $A "select count(*) from public.experience_responses where id='$RJ';")"
+check "… and its own author still reads it" "1" "$(as $S "select count(*) from public.experience_responses where id='$RJ';")"
 echo; echo "RESULT: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]
