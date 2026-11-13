@@ -152,6 +152,12 @@ function safetyColumnsFor(u: SubscriptionUpsert): Record<string, unknown> {
     cols.provider_price_id = u.providerPriceId;
     cols.unit_amount_cents = u.unitAmountCents ?? null;
     cols.currency = u.currency ?? null;
+  } else if (typeof u.unitAmountCents === "number") {
+    // A one-time payment (the pilot pass) has an amount and NO saved price:
+    // the amount evidence must not depend on a price id (2026-10-23: the paid
+    // 1 EUR pass was stored with an empty amount).
+    cols.unit_amount_cents = u.unitAmountCents;
+    cols.currency = u.currency ?? null;
   }
   return cols;
 }
@@ -258,6 +264,9 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
   // unapplied (42703) the org-bound event stays unprocessed (needs-migration)
   // instead of being persisted subject-less.
   if (u.organizationId) row.organization_id = u.organizationId;
+  // Only when the caller KNOWS the outcome (a paid one-time session); every
+  // subscription keeps receiving it from its invoice events, as before.
+  if (u.lastPaymentStatus) row.last_payment_status = u.lastPaymentStatus;
   const safety = safetyAvailable ? safetyColumnsFor(u) : {};
   const hasSafety = Object.keys(safety).length > 0;
 
