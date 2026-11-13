@@ -348,6 +348,9 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
       test_mode: u.testMode,
       updated_at: new Date().toISOString(),
     };
+    // The superseded row's old outcome (possibly "failed") must not survive a
+    // paid one-time session: no later invoice event would correct it.
+    if (u.lastPaymentStatus) patch.last_payment_status = u.lastPaymentStatus;
     const scoped = (p: Record<string, unknown>) => {
       let q = sb
         .from("billing_subscriptions")
