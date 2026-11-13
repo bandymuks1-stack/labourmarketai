@@ -4834,7 +4834,7 @@
       "lasting": "Sinu kogemus ja võimalused jäävad alati kättesaadavaks — kui vahetad tööd, projekti või riiki."
     },
     "v3": {
-      "lead": "Töötajatele, tööandjatele ja teenusepakkujatele – kõigil kutsealadel ja kõigis sektorites. Registreerimine on tasuta; organisatsiooni tasuta paketis on üks aktiivne päring.",
+      "lead": "Töötajatele, tööandjatele ja teenusepakkujatele – kõigil kutsealadel ja kõigis sektorites. Registreerimine ja põhivajaduse avaldamine on tasuta.",
       "moreChoices": "Rohkem valikuid",
       "or": "või kirjeldage oma sõnadega",
       "needFree": "Päringu saate esitada registreerimata. Esitamine on tasuta; teenuse tingimused ja hind lepitakse kokku eraldi.",
@@ -4864,8 +4864,8 @@
           "body": "Kanded kinnitab tööandja organisatsiooni juht. Tellija võib talle esitatud töö vastu võtta – see märgitakse eraldi. Kinnitatud töö on teie kogemuse tõend."
         },
         "s4": {
-          "title": "Teie kontrollite oma andmeid",
-          "body": "Assistent teeb ettepanekuid, otsused langetate teie. Andmete nähtavus sõltub teie valikutest ja platvormi juurdepääsureeglitest."
+          "title": "Teie andmed ja privaatsus",
+          "body": "Assistent teeb ettepanekuid, otsused teete teie. Teie otsustate, kas tööandjad saavad teid leida ja kas kontaktandmeid jagatakse. Töökirjeid näeb organisatsioon, kus te töötate."
         }
       }
     }
@@ -7969,7 +7969,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Saidi kasutusstatistikat ja kampaaniate tulemusi mõõdame ainult teie nõusolekul.",
+      "text": "Brauseris salvestatud mõõtmisandmeid ja kampaaniateavet kasutame ainult teie nõusolekul.",
       "accept": "Luba mõõtmine",
       "refuse": "Keeldu",
       "more": "Lähemalt küpsistest",

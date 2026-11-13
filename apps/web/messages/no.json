@@ -4834,7 +4834,7 @@
       "lasting": "Erfaringen og mulighetene dine forblir tilgjengelige — når du bytter jobb, prosjekt eller land."
     },
     "v3": {
-      "lead": "For arbeidstakere, arbeidsgivere og tjenesteleverandører i alle yrker og bransjer. Registrering er gratis; gratisplanen for organisasjoner omfatter én aktiv forespørsel.",
+      "lead": "For arbeidstakere, arbeidsgivere og tjenesteleverandører i alle yrker og bransjer. Registrering og grunnleggende publisering av et behov er gratis.",
       "moreChoices": "Flere valg",
       "or": "eller beskriv det med egne ord",
       "needFree": "Du kan sende en forespørsel uten å registrere deg. Det er gratis å sende den; vilkår og pris for tjenestene avtales separat.",
@@ -4864,8 +4864,8 @@
           "body": "En leder i arbeidsgiverens organisasjon bekrefter registreringene. En oppdragsgiver kan godkjenne arbeid som er sendt inn til oppdragsgiveren; dette registreres separat. Bekreftet arbeid blir dokumentasjon på erfaringen din."
         },
         "s4": {
-          "title": "Du styrer dataene dine",
-          "body": "Assistenten kommer med forslag; du tar beslutningene. Synligheten av dataene avhenger av valgene dine og plattformens tilgangsregler."
+          "title": "Deres data og personvern",
+          "body": "Assistenten kommer med forslag; dere tar avgjørelsene. Dere bestemmer om arbeidsgivere kan finne dere, og om kontaktopplysningene deles. Arbeidsoppføringer er synlige for organisasjonen dere arbeider for."
         }
       }
     }
@@ -7969,7 +7969,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Vi måler bruken av nettstedet og kampanjeresultater kun med ditt samtykke.",
+      "text": "Måledata som er lagret i nettleseren deres, og kampanjeinformasjon bruker vi bare med deres samtykke.",
       "accept": "Tillat måling",
       "refuse": "Avslå",
       "more": "Mer om informasjonskapsler",

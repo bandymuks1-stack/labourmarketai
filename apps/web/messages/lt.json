@@ -15916,7 +15916,7 @@
       "lasting": "Tavo patirtis ir galimybės išlieka pasiekiamos nuolat — keičiant darbą, projektą ar šalį."
     },
     "v3": {
-      "lead": "Darbuotojams, darbdaviams ir paslaugų teikėjams – visų profesijų ir sektorių. Registracija nemokama; organizacijos nemokamame plane – vienas aktyvus poreikis.",
+      "lead": "Darbuotojams, darbdaviams ir paslaugų teikėjams – visų profesijų ir sektorių. Registracija ir pagrindinis poreikio skelbimas nemokami.",
       "moreChoices": "Daugiau pasirinkimų",
       "or": "arba aprašykite savo žodžiais",
       "needFree": "Užklausą galite pateikti be registracijos. Pateikimas nemokamas; paslaugų sąlygos ir kaina derinamos atskirai.",
@@ -15946,8 +15946,8 @@
           "body": "Įrašus patvirtina darbdavio organizacijos vadovas. Užsakovas gali priimti jam pateiktą darbą – tai žymima atskirai. Patvirtintas darbas tampa jūsų patirties įrodymu."
         },
         "s4": {
-          "title": "Jūs valdote savo duomenis",
-          "body": "Asistentas pateikia pasiūlymus, o sprendimus priimate jūs. Duomenų matomumas priklauso nuo jūsų pasirinkimų ir platformos prieigos taisyklių."
+          "title": "Jūsų duomenys ir privatumas",
+          "body": "Asistentas pateikia pasiūlymus, o sprendimus priimate jūs. Jūs sprendžiate, ar jus gali rasti darbdaviai ir ar atskleisti kontaktus. Darbo įrašus mato organizacija, kurioje dirbate."
         }
       }
     }
@@ -20541,7 +20541,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Svetainės naudojimo statistiką ir kampanijų rezultatus matuojame tik gavę jūsų sutikimą.",
+      "text": "Naršyklėje saugomus matavimo duomenis ir kampanijų informaciją naudojame tik gavę jūsų sutikimą.",
       "accept": "Leisti matavimą",
       "refuse": "Atsisakyti",
       "more": "Daugiau apie slapukus",

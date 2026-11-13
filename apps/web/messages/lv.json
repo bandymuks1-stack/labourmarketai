@@ -4834,7 +4834,7 @@
       "lasting": "Tava pieredze un iespējas vienmēr paliek pieejamas — mainot darbu, projektu vai valsti."
     },
     "v3": {
-      "lead": "Darbiniekiem, darba devējiem un pakalpojumu sniedzējiem – visās profesijās un nozarēs. Reģistrācija ir bez maksas; organizāciju bezmaksas plānā ir viens aktīvs pieprasījums.",
+      "lead": "Darbiniekiem, darba devējiem un pakalpojumu sniedzējiem — visās profesijās un nozarēs. Reģistrācija un pamata vajadzības publicēšana ir bez maksas.",
       "moreChoices": "Vairāk iespēju",
       "or": "vai aprakstiet saviem vārdiem",
       "needFree": "Pieprasījumu varat iesniegt bez reģistrācijas. Iesniegšana ir bez maksas; pakalpojumu nosacījumi un cena tiek saskaņoti atsevišķi.",
@@ -4864,8 +4864,8 @@
           "body": "Ierakstus apstiprina darba devēja organizācijas vadītājs. Pasūtītājs var pieņemt viņam iesniegto darbu – tas tiek atzīmēts atsevišķi. Apstiprināts darbs kļūst par jūsu pieredzes pierādījumu."
         },
         "s4": {
-          "title": "Jūs pārvaldāt savus datus",
-          "body": "Asistents sniedz ieteikumus, bet lēmumus pieņemat jūs. Datu redzamība ir atkarīga no jūsu izvēlēm un platformas piekļuves noteikumiem."
+          "title": "Jūsu dati un privātums",
+          "body": "Asistents sniedz ieteikumus, bet lēmumus pieņemat jūs. Jūs izlemjat, vai darba devēji var jūs atrast un vai atklāt kontaktinformāciju. Darba ierakstus redz organizācija, kurā strādājat."
         }
       }
     }
@@ -7969,7 +7969,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Vietnes lietojuma statistiku un kampaņu rezultātus mērām tikai ar jūsu piekrišanu.",
+      "text": "Pārlūkā saglabātos mērījumu datus un kampaņu informāciju izmantojam tikai ar jūsu piekrišanu.",
       "accept": "Atļaut mērīšanu",
       "refuse": "Atteikties",
       "more": "Vairāk par sīkdatnēm",

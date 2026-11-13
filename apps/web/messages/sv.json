@@ -4834,7 +4834,7 @@
       "lasting": "Din erfarenhet och dina möjligheter förblir tillgängliga — när du byter jobb, projekt eller land."
     },
     "v3": {
-      "lead": "För arbetstagare, arbetsgivare och tjänsteleverantörer i alla yrken och branscher. Registrering är kostnadsfri; den kostnadsfria planen för organisationer omfattar en aktiv förfrågan.",
+      "lead": "För arbetstagare, arbetsgivare och tjänsteleverantörer i alla yrken och branscher. Registrering och grundläggande publicering av ett behov är gratis.",
       "moreChoices": "Fler alternativ",
       "or": "eller beskriv det med egna ord",
       "needFree": "Du kan skicka en förfrågan utan att registrera dig. Det är kostnadsfritt att skicka den; villkor och pris för tjänsterna avtalas separat.",
@@ -4864,8 +4864,8 @@
           "body": "En chef i arbetsgivarens organisation bekräftar registreringarna. En beställare kan godkänna arbete som har lämnats in till beställaren; det registreras separat. Bekräftat arbete blir ett bevis på din erfarenhet."
         },
         "s4": {
-          "title": "Du styr över dina uppgifter",
-          "body": "Assistenten ger förslag; du fattar besluten. Uppgifternas synlighet beror på dina val och plattformens åtkomstregler."
+          "title": "Era uppgifter och integritet",
+          "body": "Assistenten ger förslag; ni fattar besluten. Ni avgör om arbetsgivare kan hitta er och om era kontaktuppgifter delas. Arbetsposter är synliga för den organisation ni arbetar för."
         }
       }
     }
@@ -7969,7 +7969,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Vi mäter användningen av webbplatsen och kampanjresultat endast med ditt samtycke.",
+      "text": "Mätdata som lagras i er webbläsare och kampanjinformation använder vi endast med ert samtycke.",
       "accept": "Tillåt mätning",
       "refuse": "Avböj",
       "more": "Mer om cookies",

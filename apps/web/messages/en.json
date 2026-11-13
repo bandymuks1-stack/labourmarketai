@@ -15916,7 +15916,7 @@
       "lasting": "Your experience and opportunities stay within reach — when you change job, project or country."
     },
     "v3": {
-      "lead": "For workers, employers and service providers in every profession and sector. Registration is free; the free organisation plan includes one active request.",
+      "lead": "For workers, employers and service providers in every profession and sector. Registration and basic request posting are free.",
       "moreChoices": "More options",
       "or": "or describe it in your own words",
       "needFree": "You can submit an enquiry without registering. Submission is free; service terms and price are agreed separately.",
@@ -15946,8 +15946,8 @@
           "body": "A manager of the employer organisation confirms the entries. A client can accept work submitted to them; this is recorded separately. Confirmed work becomes evidence of your experience."
         },
         "s4": {
-          "title": "You control your data",
-          "body": "The assistant offers suggestions; you make the decisions. Data visibility depends on your choices and the platform’s access rules."
+          "title": "Your data and privacy",
+          "body": "The assistant offers suggestions; you make the decisions. You decide whether employers can find you and whether your contact details are shared. Work records are visible to the organisation you work for."
         }
       }
     }
@@ -20541,7 +20541,7 @@
   },
   "consent": {
     "banner": {
-      "text": "We measure site usage and campaign performance only with your consent.",
+      "text": "We use measurement data stored in your browser and campaign information only with your consent.",
       "accept": "Allow measurement",
       "refuse": "Decline",
       "more": "More about cookies",

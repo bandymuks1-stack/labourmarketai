@@ -15916,7 +15916,7 @@
       "lasting": "Twoje doświadczenie i możliwości pozostają stale dostępne — przy zmianie pracy, projektu czy kraju."
     },
     "v3": {
-      "lead": "Dla pracowników, pracodawców i usługodawców – ze wszystkich zawodów i branż. Rejestracja jest bezpłatna; bezpłatny plan dla organizacji obejmuje jedno aktywne zapotrzebowanie.",
+      "lead": "Dla pracowników, pracodawców i usługodawców – ze wszystkich zawodów i branż. Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
       "moreChoices": "Więcej opcji",
       "or": "lub proszę opisać własnymi słowami",
       "needFree": "Zapytanie można wysłać bez rejestracji. Wysłanie jest bezpłatne; warunki i cena usług są uzgadniane osobno.",
@@ -15946,8 +15946,8 @@
           "body": "Wpisy potwierdza kierownik organizacji pracodawcy. Zamawiający może przyjąć przekazaną mu pracę – jest to oznaczane osobno. Potwierdzona praca staje się dowodem Państwa doświadczenia."
         },
         "s4": {
-          "title": "Państwo zarządzają swoimi danymi",
-          "body": "Asystent przedstawia propozycje, a decyzje podejmują Państwo. Widoczność danych zależy od Państwa wyborów i zasad dostępu platformy."
+          "title": "Państwa dane i prywatność",
+          "body": "Asystent przedstawia propozycje, a decyzje podejmują Państwo. To Państwo decydują, czy pracodawcy mogą Państwa znaleźć i czy udostępnić dane kontaktowe. Wpisy o pracy widzi organizacja, w której Państwo pracują."
         }
       }
     }
@@ -20541,7 +20541,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Statystyki korzystania z serwisu i wyniki kampanii mierzymy tylko za Państwa zgodą.",
+      "text": "Dane pomiarowe przechowywane w Państwa przeglądarce oraz informacje o kampaniach wykorzystujemy tylko za Państwa zgodą.",
       "accept": "Zezwól na pomiar",
       "refuse": "Odmów",
       "more": "Więcej o plikach cookie",

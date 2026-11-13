@@ -4834,7 +4834,7 @@
       "lasting": "Din erfaring og dine muligheder forbliver tilgængelige — når du skifter job, projekt eller land."
     },
     "v3": {
-      "lead": "For arbejdstagere, arbejdsgivere og tjenesteudbydere i alle erhverv og brancher. Registrering er gratis; den gratis plan for organisationer omfatter én aktiv forespørgsel.",
+      "lead": "For medarbejdere, arbejdsgivere og tjenesteudbydere i alle fag og sektorer. Registrering og grundlæggende opslag af et behov er gratis.",
       "moreChoices": "Flere muligheder",
       "or": "eller beskriv det med dine egne ord",
       "needFree": "Du kan sende en forespørgsel uden at registrere dig. Det er gratis at sende den; vilkår og pris for ydelserne aftales særskilt.",
@@ -4864,8 +4864,8 @@
           "body": "En leder i arbejdsgiverens organisation bekræfter registreringerne. En kunde kan godkende arbejde, der er indsendt til kunden; det registreres særskilt. Bekræftet arbejde bliver dokumentation for din erfaring."
         },
         "s4": {
-          "title": "Du styrer dine data",
-          "body": "Assistenten kommer med forslag; du træffer beslutningerne. Dataenes synlighed afhænger af dine valg og platformens adgangsregler."
+          "title": "Deres data og privatliv",
+          "body": "Assistenten kommer med forslag; De træffer beslutningerne. De bestemmer, om arbejdsgivere kan finde Dem, og om Deres kontaktoplysninger deles. Arbejdsregistreringer kan ses af den organisation, De arbejder for."
         }
       }
     }
@@ -7969,7 +7969,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Vi måler brugen af webstedet og kampagneresultater kun med dit samtykke.",
+      "text": "Måledata, der er gemt i Deres browser, og kampagneoplysninger bruger vi kun med Deres samtykke.",
       "accept": "Tillad måling",
       "refuse": "Afvis",
       "more": "Mere om cookies",

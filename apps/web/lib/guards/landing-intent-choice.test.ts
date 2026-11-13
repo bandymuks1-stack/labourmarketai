@@ -178,9 +178,11 @@ describe("the URL is the state — a fragment, not a page", () => {
     // …and only on the page it was asked on — never written onto the next
     // page while the router is moving there.
     expect(navigator).toMatch(/const \[bootPath\] = useState\(\(\) =>/);
-    expect(navigator).toMatch(
-      /if \(!wanted \|\| window\.location\.hash !== "" \|\| window\.location\.pathname !== bootPath\) return;/,
-    );
+    expect(navigator).toMatch(/if \(window\.location\.pathname !== bootPath\) return;/);
+    expect(navigator).toMatch(/if \(!wanted \|\| window\.location\.hash !== ""\) return;/);
+    // The other way round: a goal closed during start-up stays closed even
+    // if the router writes its remembered address back.
+    expect(navigator).toMatch(/if \(askedFragment === "" && goalIdFromFragment\(window\.location\.hash\)\) \{/);
     // One-off checks during start-up only — no repeating timer.
     expect(navigator).toMatch(/STARTUP_CHECKS_MS\.map\(\(ms\) => window\.setTimeout\(restore, ms\)\)/);
     expect(navigator).toMatch(/STARTUP_CHECKS_MS = \[[^\]]*5000\] as const/);

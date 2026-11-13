@@ -15916,7 +15916,7 @@
       "lasting": "Je ervaring en kansen blijven bereikbaar — als je van baan, project of land wisselt."
     },
     "v3": {
-      "lead": "Voor werkenden, werkgevers en dienstverleners in alle beroepen en sectoren. Registreren is gratis; het gratis plan voor organisaties omvat één actieve behoefte.",
+      "lead": "Voor werkenden, werkgevers en dienstverleners in alle beroepen en sectoren. Registreren en een behoefte plaatsen zijn in de basis gratis.",
       "moreChoices": "Meer opties",
       "or": "of beschrijf het in uw eigen woorden",
       "needFree": "U kunt zonder registratie een aanvraag indienen. Indienen is gratis; de voorwaarden en de prijs van de diensten worden apart afgesproken.",
@@ -15946,8 +15946,8 @@
           "body": "Een leidinggevende van de werkgeversorganisatie bevestigt de registraties. Een opdrachtgever kan het voorgelegde werk accepteren – dat wordt apart vastgelegd. Bevestigd werk wordt bewijs van uw ervaring."
         },
         "s4": {
-          "title": "U beheert uw eigen gegevens",
-          "body": "De assistent doet voorstellen; u neemt de beslissingen. De zichtbaarheid van gegevens hangt af van uw keuzes en de toegangsregels van het platform."
+          "title": "Uw gegevens en privacy",
+          "body": "De assistent doet voorstellen; u neemt de beslissingen. U bepaalt of werkgevers u kunnen vinden en of uw contactgegevens worden gedeeld. Werkregistraties zijn zichtbaar voor de organisatie waarvoor u werkt."
         }
       }
     }
@@ -20541,7 +20541,7 @@
   },
   "consent": {
     "banner": {
-      "text": "We meten het gebruik van de website en de resultaten van campagnes alleen met uw toestemming.",
+      "text": "Meetgegevens die in uw browser zijn opgeslagen en campagne-informatie gebruiken we alleen met uw toestemming.",
       "accept": "Meting toestaan",
       "refuse": "Weigeren",
       "more": "Meer over cookies",

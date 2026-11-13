@@ -15916,7 +15916,7 @@
       "lasting": "Ihre Erfahrung und Möglichkeiten bleiben erreichbar — beim Wechsel von Job, Projekt oder Land."
     },
     "v3": {
-      "lead": "Für Arbeitskräfte, Arbeitgeber und Dienstleister aller Berufe und Branchen. Die Registrierung ist kostenlos; der kostenlose Plan für Organisationen umfasst einen aktiven Bedarf.",
+      "lead": "Für Arbeitskräfte, Arbeitgeber und Dienstleister aller Berufe und Branchen. Die Registrierung und das einfache Melden eines Bedarfs sind kostenlos.",
       "moreChoices": "Weitere Optionen",
       "or": "oder beschreiben Sie es in eigenen Worten",
       "needFree": "Sie können eine Anfrage ohne Registrierung einreichen. Das Einreichen ist kostenlos; Bedingungen und Preis der Dienstleistungen werden gesondert vereinbart.",
@@ -15946,8 +15946,8 @@
           "body": "Die Einträge bestätigt eine Führungskraft der Arbeitgeberorganisation. Ein Auftraggeber kann die ihm vorgelegte Arbeit abnehmen – das wird gesondert vermerkt. Bestätigte Arbeit wird zum Nachweis Ihrer Erfahrung."
         },
         "s4": {
-          "title": "Sie bestimmen über Ihre Daten",
-          "body": "Der Assistent macht Vorschläge, die Entscheidungen treffen Sie. Die Sichtbarkeit der Daten hängt von Ihrer Auswahl und den Zugriffsregeln der Plattform ab."
+          "title": "Ihre Daten und Privatsphäre",
+          "body": "Der Assistent macht Vorschläge, die Entscheidungen treffen Sie. Sie entscheiden, ob Arbeitgeber Sie finden können und ob Ihre Kontaktdaten weitergegeben werden. Arbeitseinträge sieht die Organisation, für die Sie arbeiten."
         }
       }
     }
@@ -20541,7 +20541,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Die Nutzung der Website und die Ergebnisse von Kampagnen messen wir nur mit Ihrer Einwilligung.",
+      "text": "Im Browser gespeicherte Messdaten und Kampagneninformationen verwenden wir nur mit Ihrer Einwilligung.",
       "accept": "Messung erlauben",
       "refuse": "Ablehnen",
       "more": "Mehr über Cookies",
