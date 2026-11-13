@@ -8737,6 +8737,7 @@
     },
     "languagesTitle": "Talen",
     "languagesSelfStated": "Talen zoals opgegeven door de werker.",
+    "educationSelfStated": "Opleiding zoals opgegeven door de werknemer.",
     "certificatesTitle": "Certificaten en licenties",
     "declaredCertHint": "Zelf opgegeven",
     "documentSelfSuppliedHint": "Document aangeleverd door de werknemer",

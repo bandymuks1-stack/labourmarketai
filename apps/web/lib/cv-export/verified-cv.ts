@@ -633,9 +633,10 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       }),
     );
 
-  const personName =
-    profileRes.data?.full_name ??
-    (profileRes.data?.email ? profileRes.data.email.split("@")[0] : "—");
+  // No saved name is "—": the page then says the name is not provided. The
+  // part of the e-mail address before "@" is not a name, and this document is
+  // handed to an employer, so it is never printed in its place.
+  const personName = profileRes.data?.full_name?.trim() || "—";
 
   const professionalSummary =
     (

@@ -8737,6 +8737,7 @@
     },
     "languagesTitle": "Языки",
     "languagesSelfStated": "Языки, как их указал работник.",
+    "educationSelfStated": "Образование указано самим работником.",
     "certificatesTitle": "Сертификаты и удостоверения",
     "declaredCertHint": "Указано работником",
     "documentSelfSuppliedHint": "Документ предоставлен самим работником",
