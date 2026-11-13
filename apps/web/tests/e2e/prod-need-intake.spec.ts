@@ -69,16 +69,29 @@ test("N-1 (4.8). a signed-out visitor sends one marked need and the page says it
     await form.getByTestId("company-need-country").selectOption("LT");
     await form.locator('input[name="number_of_workers"]').fill("1");
     await form.locator('textarea[name="description"]').fill(needWalkDescription(RUN));
-    // The form's spam guard refuses a send inside 3 s of the fill time. The
-    // walk waits it out like a person would; it never edits the hidden stamp.
-    await page.waitForTimeout(3_500);
+    // The form's spam guard refuses a send inside 3 s of the fill time the
+    // page stamped at hydration. The walk waits until that stamp is 3.5 s old,
+    // like a person still typing; it reads the hidden stamp and never edits it.
+    await page.waitForFunction(
+      () => {
+        const started = Number((document.querySelector('input[name="started"]') as HTMLInputElement | null)?.value ?? "");
+        return Number.isFinite(started) && started > 0 && Date.now() - started >= 3_500;
+      },
+      undefined,
+      { timeout: 30_000 },
+    );
     await form.getByTestId("company-need-submit").click();
 
-    await expect(page.getByTestId("company-need-result"), "the form answers the visitor").toBeVisible({ timeout: 60_000 });
-    // "received" is shown only for a stored row; a refused or failed send
-    // shows "prepared" instead, with the same friendly wording around it.
-    await expect(page.getByTestId("company-need-received"), "the need was stored, not only prepared").toBeVisible();
-    await expect(page.getByTestId("company-need-prepared")).toHaveCount(0);
+    const result = page.getByTestId("company-need-result");
+    await expect(result, "the form answers the visitor").toBeVisible({ timeout: 60_000 });
+    // The answer's body is marked "received" only for a stored row; a refused
+    // or failed send is marked "prepared", with the same friendly wording
+    // around it. The mark is computed in the component, so it is read as an
+    // attribute here.
+    await expect(result.locator("div[data-testid]").first(), "the need was stored, not only prepared").toHaveAttribute(
+      "data-testid",
+      "company-need-received",
+    );
   } finally {
     await ctx.close();
   }
