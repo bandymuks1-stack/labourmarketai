@@ -150,10 +150,16 @@ export async function OrganizationRosterSection({
     return notice(reason, org.options);
   }
 
-  const res = await listRosterPeople(caller, {
-    organizationId: org.organizationId,
-    limit: ROSTER_LIMIT,
-  });
+  // The roster and the organization's live history claims are independent
+  // reads: ONE wave, never one after the other (request budget:
+  // lib/perf/dashboard-render-request-count.test.ts).
+  const [res, claims] = await Promise.all([
+    listRosterPeople(caller, {
+      organizationId: org.organizationId,
+      limit: ROSTER_LIMIT,
+    }),
+    readHistoryClaims(org.organizationId),
+  ]);
   if (res.kind !== "ok") {
     // A store that is not provisioned, a refusal, and a broken read are three
     // different statements. None of them is "this organization has nobody".
@@ -168,10 +174,8 @@ export async function OrganizationRosterSection({
     return notice(reason, res.kind === "choice-required" ? res.options : undefined);
   }
 
-  // Live history claims of THIS organization: who was offered a link and who
-  // came for one. A failed read is unknown, never "none" (SEP-7).
-  const claims = await readHistoryClaims(org.organizationId);
-
+  // `claims`: who was offered a history link and who came for one. A failed
+  // read is unknown, never "none" (SEP-7).
   const claimLabels = {
     title: t("historyClaim.title"),
     intro: t("historyClaim.intro"),
