@@ -74,7 +74,13 @@ async function signUp(
   await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 }).catch(async (cause: unknown) => {
     // Say what the page said instead of a bare timeout (synthetic account, local stack).
     const said = (await page.locator("form").first().innerText().catch(() => "")).replace(/\s+/g, " ");
-    throw new Error(`sign-up did not reach onboarding; at ${new URL(page.url()).pathname}; form says: ${said.slice(0, 600)}`, { cause });
+    const alerts = (await page.locator('[role="alert"], [role="status"], [aria-live]').allInnerTexts().catch(() => []))
+      .map((t) => t.replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+    throw new Error(
+      `sign-up did not reach onboarding; at ${new URL(page.url()).pathname}; alerts: ${JSON.stringify(alerts).slice(0, 400)}; form ends: ${said.slice(-400)}`,
+      { cause },
+    );
   });
   await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
 }
