@@ -344,7 +344,9 @@ export function GoalNavigator({
               className="size-4 text-text-muted transition-transform group-open:rotate-180 motion-reduce:transition-none"
             />
           </summary>
-          <div className="pt-2">
+          {/* Not displayed while folded (rather than only unpainted), so a
+              folded card is neither seen nor pressable by anything. */}
+          <div className="hidden pt-2 group-open:block">
             <CardRail
               label={phoneMore.label}
               testId="goal-rail-more"
@@ -366,9 +368,12 @@ export function GoalNavigator({
           browser has nowhere to jump to; the panel follows it directly so
           one rule pairs them. Same frame as the live panel below, so nothing
           moves when the live one takes over. */}
-      {!started &&
-        !active &&
-        goals.map((goal) => (
+      {/* The anchors stay after the scripts are alive: every goal card is a
+          real link to `#goal=…`, and a link must point at something on the
+          page (a link checker reads a card hidden at this width, or the
+          "more choices" copy of it, as a dead link otherwise). The cards'
+          own clicks never jump to them, and they sit at the navigator's top. */}
+      {goals.map((goal) => (
           <Fragment key={goal.id}>
             <span
               id={`${GOAL_FRAGMENT_PREFIX.slice(1)}${goal.id}`}
@@ -376,50 +381,52 @@ export function GoalNavigator({
               aria-hidden
               className="pointer-events-none absolute left-0 top-0 scroll-mt-32"
             />
-            <div
-              data-testid="goal-panel-early"
-              data-goal={goal.id}
-              className={cn("hidden [[data-goal-anchor]:target+&]:flex", PANEL_CLASS)}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <h2 className={PANEL_TITLE_CLASS}>{goal.title}</h2>
-                {/* Close with no script: a plain link to the navigator itself,
-                    so no goal is targeted any more and the page stays here. */}
-                <a
-                  href={`#${NAVIGATOR_ID}`}
-                  data-testid="goal-panel-early-close"
-                  className={PANEL_CLOSE_CLASS}
-                >
-                  <X aria-hidden className="size-4" />
-                  {labels.close}
-                </a>
-              </div>
-              {goal.hasCatalogue && (
-                // Same switch as the live panel, in its place so nothing
-                // shifts; it starts working when the live panel takes over.
-                <div role="group" aria-label={goal.title} className="flex w-fit rounded-full border border-ink-600 p-1">
-                  {(["functions", "professions"] as const).map((key) => (
-                    <button
-                      key={key}
-                      type="button"
-                      aria-pressed={key === "functions"}
-                      className={cn(TAB_CLASS, key === "functions" ? TAB_ON_CLASS : TAB_OFF_CLASS)}
-                    >
-                      {labels[key]}
-                    </button>
-                  ))}
+            {!started && !active && (
+              <div
+                data-testid="goal-panel-early"
+                data-goal={goal.id}
+                className={cn("hidden [[data-goal-anchor]:target+&]:flex", PANEL_CLASS)}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className={PANEL_TITLE_CLASS}>{goal.title}</h2>
+                  {/* Close with no script: a plain link to the navigator itself,
+                      so no goal is targeted any more and the page stays here. */}
+                  <a
+                    href={`#${NAVIGATOR_ID}`}
+                    data-testid="goal-panel-early-close"
+                    className={PANEL_CLOSE_CLASS}
+                  >
+                    <X aria-hidden className="size-4" />
+                    {labels.close}
+                  </a>
                 </div>
-              )}
-              <CardRail
-                label={labels.functions}
-                testId="function-rail-early"
-                phoneGrid={phoneMore ? 2 : false}
-                cards={goal.functions}
-                swipeHint={labels.swipe}
-                prevLabel={labels.previous}
-                nextLabel={labels.next}
-              />
-            </div>
+                {goal.hasCatalogue && (
+                  // Same switch as the live panel, in its place so nothing
+                  // shifts; it starts working when the live panel takes over.
+                  <div role="group" aria-label={goal.title} className="flex w-fit rounded-full border border-ink-600 p-1">
+                    {(["functions", "professions"] as const).map((key) => (
+                      <button
+                        key={key}
+                        type="button"
+                        aria-pressed={key === "functions"}
+                        className={cn(TAB_CLASS, key === "functions" ? TAB_ON_CLASS : TAB_OFF_CLASS)}
+                      >
+                        {labels[key]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <CardRail
+                  label={labels.functions}
+                  testId="function-rail-early"
+                  phoneGrid={phoneMore ? 2 : false}
+                  cards={goal.functions}
+                  swipeHint={labels.swipe}
+                  prevLabel={labels.previous}
+                  nextLabel={labels.next}
+                />
+              </div>
+            )}
           </Fragment>
         ))}
 

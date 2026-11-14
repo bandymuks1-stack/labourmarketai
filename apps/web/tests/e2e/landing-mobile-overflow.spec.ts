@@ -325,3 +325,49 @@ test.describe("@1280px desktop", () => {
     ).toEqual([]);
   });
 });
+
+// WHAT A LINK CHECKER SEES (release-check crawl, 2026-11-14, build fbc779ae).
+// A closed <details> stops painting its content but keeps its boxes, so the
+// crawl counted the folded request doors and the folded "more choices" goal
+// cards as shown, could not press them, and read the hidden copies of the
+// partner / agency cards as links to anchors that were not on the page.
+// Folded content is now display:none, and every goal card's anchor stays.
+for (const width of [320, 360, 375, 390, 1280] as const) {
+  test.describe(`@${width}px what a link checker sees`, () => {
+    test.use({ viewport: { width, height: 800 }, hasTouch: width < 640, isMobile: width < 640 });
+    for (const locale of ["lt", "en"] as const) {
+      test(`/${locale}: nothing folded counts as shown; every same-page link has a target; the doors open`, async ({ page }) => {
+        await page.goto(`/${locale}`);
+        await page.getByTestId("goal-rail").locator("a[data-rail-card]").first().evaluate(
+          (el) =>
+            new Promise<void>((done) => {
+              const ready = () => Object.keys(el).some((k) => k.startsWith("__reactProps$"));
+              const wait = () => (ready() ? done() : requestAnimationFrame(wait));
+              wait();
+            }),
+        );
+        const seen = await page.evaluate(() => {
+          const shown = (el: Element) => {
+            const h = el as HTMLElement;
+            return !!(h.offsetWidth || h.offsetHeight || h.getClientRects().length);
+          };
+          const foldedButShown = [...document.querySelectorAll("details:not([open]) a, details:not([open]) button")]
+            .filter((el) => !el.closest("summary") && shown(el))
+            .map((el) => el.getAttribute("data-testid") || el.getAttribute("href") || el.tagName);
+          const noTarget = [...document.querySelectorAll("a[href^='#']")]
+            .map((a) => decodeURIComponent((a.getAttribute("href") ?? "").slice(1)))
+            .filter((id) => id && !document.getElementById(id));
+          return { foldedButShown, noTarget: [...new Set(noTarget)] };
+        });
+        expect(seen.foldedButShown, "controls inside a folded block that still count as shown").toEqual([]);
+        expect(seen.noTarget, "same-page links whose target is not on the page").toEqual([]);
+        // Each request door can be pressed once its block is open.
+        const block = page.getByTestId("landing-need-path");
+        if ((await block.getAttribute("open")) === null) await block.locator("summary").click();
+        for (const door of ["worker-search", "b2b", "project"]) {
+          await page.getByTestId(`request-door-${door}-open`).first().click({ trial: true, timeout: 5_000 });
+        }
+      });
+    }
+  });
+}

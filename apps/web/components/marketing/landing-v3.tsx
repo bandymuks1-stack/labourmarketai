@@ -63,7 +63,9 @@ export async function LandingNeedPath({ locale }: { locale: string }) {
             />
           </span>
         </summary>
-        <div className="px-4 pb-4 sm:px-5 sm:pb-5">
+        {/* Not displayed while folded (rather than only unpainted): a folded
+            door is neither seen nor pressable by anything. */}
+        <div className="hidden px-4 pb-4 group-open:block sm:px-5 sm:pb-5">
           <LandingRequestDoors locale={locale} embedded />
         </div>
       </details>

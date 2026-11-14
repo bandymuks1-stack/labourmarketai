@@ -202,10 +202,20 @@ describe("the URL is the state — a fragment, not a page", () => {
     expect(navigator).toMatch(/const NAVIGATOR_ID = "goals";/);
     expect(navigator).toMatch(/id=\{NAVIGATOR_ID\}/);
     expect(navigator).toMatch(/href=\{`#\$\{NAVIGATOR_ID\}`\}\s+data-testid="goal-panel-early-close"/);
-    // Taken out for good once the component is alive, and never beside the
-    // live panel.
-    expect(navigator).toMatch(/\{!started &&\s+!active &&\s+goals\.map\(/);
+    // The early PANELS are taken out for good once the component is alive,
+    // and never shown beside the live panel. The ANCHORS stay: every goal
+    // card links to its fragment, and a link must have a target on the page.
+    expect(navigator).toMatch(/\{goals\.map\(\(goal\) => \(\s+<Fragment key=\{goal\.id\}>\s+<span\s+id=/);
+    expect(navigator).toMatch(/\{!started && !active && \(\s+<div\s+data-testid="goal-panel-early"/);
     expect(navigator).toMatch(/const \[started, setStarted\] = useState\(false\);/);
+  });
+
+  it("a folded block hides its content outright, so nothing in it is shown or pressable", () => {
+    // A closed <details> only stops painting its content; a link checker (or
+    // an assistive tool) still finds boxes there. Folded content is display:none.
+    expect(navigator).toMatch(/<div className="hidden pt-2 group-open:block">\s+<CardRail\s+label=\{phoneMore\.label\}/);
+    const needPath = readFileSync(resolve(APP_ROOT, "components/marketing/landing-v3.tsx"), "utf8");
+    expect(needPath).toMatch(/<div className="hidden px-4 pb-4 group-open:block sm:px-5 sm:pb-5">\s+<LandingRequestDoors/);
   });
 
   it("goal cards are real links to that fragment; only known goals open a panel", () => {
