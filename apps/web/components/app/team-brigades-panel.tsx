@@ -579,6 +579,7 @@ export function TeamBrigadesPanel({
               type="button"
               variant="secondary"
               size="sm"
+              className="min-h-11"
               data-testid="team-invite-copy-link"
               onClick={() => {
                 void navigator.clipboard?.writeText(link.url).then(

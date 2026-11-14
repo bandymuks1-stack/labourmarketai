@@ -133,9 +133,17 @@ describe("the Work page: two tiers, navigation stays navigation", () => {
     const teams = read("components/app/project-team-assignments.tsx");
     expect(teams).not.toMatch(/bg-gradient-cta/);
     expect(teams).not.toMatch(/<button\b/);
-    const buttons = teams.match(/<Button\b[^>]*>/g) ?? [];
+    // An opening tag may hold an arrow function (`onClick={() => …}`): the
+    // tag ends at the first ">" that is not part of "=>".
+    const OPENING_TAG = /<Button\b(?:=>|[^>])*>/g;
+    expect('<Button onClick={() => go()} variant="secondary">'.match(OPENING_TAG)?.[0]).toContain('variant="secondary"');
+    const buttons = teams.match(OPENING_TAG) ?? [];
     expect(buttons.length).toBeGreaterThanOrEqual(4);
-    for (const b of buttons) expect(b).toMatch(/variant="secondary"/);
+    for (const b of buttons) {
+      expect(b).toMatch(/variant="secondary"/);
+      // The shared small Button is 40 px on a phone; these keep the 44 px touch floor.
+      expect(b).toMatch(/className="min-h-11"/);
+    }
   });
 
   it("the deck copy exists in every active locale", () => {

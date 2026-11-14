@@ -173,6 +173,7 @@ export function ProjectTeamAssignments({
                       type="button"
                       variant="secondary"
                       size="sm"
+                      className="min-h-11"
                       disabled={pending || teams.length === 0}
                       aria-expanded={replaceFor === a.id}
                       onClick={() => setReplaceFor(replaceFor === a.id ? null : a.id)}
@@ -184,6 +185,7 @@ export function ProjectTeamAssignments({
                       type="button"
                       variant="secondary"
                       size="sm"
+                      className="min-h-11"
                       disabled={pending}
                       onClick={() => end(a)}
                       data-testid="project-team-end"
@@ -234,6 +236,7 @@ export function ProjectTeamAssignments({
                       type="button"
                       variant="secondary"
                       size="sm"
+                      className="min-h-11"
                       disabled={pending || !replaceTeam}
                       onClick={() => replace(a)}
                     >
@@ -313,6 +316,7 @@ export function ProjectTeamAssignments({
               type="button"
               variant="secondary"
               size="sm"
+              className="min-h-11"
               disabled={pending || !teamId || (scope === "task" && !taskId)}
               onClick={assign}
               data-testid="project-team-submit"
