@@ -9585,6 +9585,7 @@
       "withdraw": "Atšaukti pasiūlymą",
       "findAnother": "Ieškoti kito darbuotojo",
       "proposeAgain": "Siūlyti iš naujo su naujomis datomis",
+      "needClosed": "Darbdavys šį poreikį uždarė, todėl pasiūlymo priimti nebegali. Vis dar gali jį atmesti.",
       "planning": "Peržiūrėti kalendoriuje"
     },
     "connections": {
