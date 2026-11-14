@@ -7,12 +7,15 @@
 
 ## What appeared
 
-_No new product surface was added by this PR._
+| What appeared | Kind | Why it appeared | Why it cannot be a conversation | Permitting axiom | Declared |
+|---|---|---|---|---|---|
+| `/history-claim/[token]` | screen | — | — | — | **NO** |
 
 ## Axiom checks
 
 | Finding | Axiom | Where | Certainty | Detail |
 |---|---|---|---|---|
+| `undeclared_surface` | A-09 | `/history-claim/[token]` | certain | new screen with no declaration in the surface registry (origin_axiom / purpose / why_not_chat / why_not_existing_component / owner) |
 | `not_world_state_driven` | A-01 | `/create-cv` | certain | "changesWorldState" is false — AI-first, one workspace, no page switching |
 | `not_reflected_on_map` | A-01 | `/create-cv` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
 | `not_ai_controlled` | A-01 | `/create-cv` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
@@ -98,6 +101,8 @@ _No new product surface was added by this PR._
 - `not_world_state_driven` on `components/app/counterparty-review-card.tsx` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
 - `not_reflected_on_map` on `components/app/counterparty-review-card.tsx` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
 - `requires_new_page` on `components/app/counterparty-review-card.tsx` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `components/ui/premium-action-card.tsx` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `components/ui/premium-action-card.tsx` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
 - `world_state_cannot_control_it` on `components/app/historical-player-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `components/app/identity/person-identity-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `/dashboard/work-in-numbers` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
@@ -110,6 +115,7 @@ _No new product surface was added by this PR._
 - `world_state_cannot_control_it` on `/dashboard/company/settings` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `/dashboard/inbox/counterparty` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `components/app/counterparty-review-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `components/ui/premium-action-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 
 ## Rules that were checked
 

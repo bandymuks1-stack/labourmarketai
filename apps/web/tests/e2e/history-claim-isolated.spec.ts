@@ -183,7 +183,7 @@ test("H-1. a company holds recorded work for somebody who no longer works there"
   const link = mgr.getByTestId(`history-claim-link-${s.personId}`);
   await expect(link, "the link is shown once").toBeVisible({ timeout: 30_000 });
   s.claimLink = (await link.inputValue()).trim();
-  expect(s.claimLink).toMatch(/\/en\/history-claim\//);
+  expect(s.claimLink).toMatch(/\/en\/dashboard\/profile\?history_claim=/);
 
   const claims = sql<{ status: string; n: number }>(
     `select status, count(*)::int as n from public.organization_person_history_claims

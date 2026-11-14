@@ -20689,7 +20689,6 @@
     "more": "Więcej"
   },
   "historyClaim": {
-    "pageTitle": "Twoja historia pracy",
     "title": "Twoja historia pracy u byłego pracodawcy",
     "organization": "{name} zachowała zapis Twojej pracy w tym miejscu.",
     "explain": "Jeśli to o Tobie, powiedz o tym poniżej. Na razie nic nie jest pokazywane ani dodawane: firma potwierdzi, że to Ty jesteś osobą z zapisu, a potem przyjmiesz go lub odrzucisz w swoim profilu.",
@@ -20698,10 +20697,7 @@
     "redeemedTitle": "Wysłano do firmy",
     "redeemedHint": "Firma potwierdzi, że to Ty jesteś osobą z zapisu. Potem zapis trafi do Twojego profilu, gdzie go przyjmiesz lub odrzucisz.",
     "waitingForOrganization": "Firma sprawdza, czy to Ty jesteś osobą z zapisu.",
-    "approvedGoToProfile": "Firma potwierdziła. Otwórz profil, aby przyjąć lub odrzucić zapis.",
     "rejectedByOrganization": "Firma nie potwierdziła tego powiązania. Jeśli to pomyłka, skontaktuj się z nią bezpośrednio.",
-    "openProfile": "Otwórz mój profil",
-    "toDashboard": "Do mojej strony",
     "unavailable": "Ten link nie działa. Mógł zostać użyty, wycofany albo stracić ważność.",
     "unnamedOrganization": "Firma",
     "privacyNote": "Dopóki firma nie potwierdzi, że to Ty, ta strona nie pokazuje nic o zapisie.",

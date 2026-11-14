@@ -13,7 +13,6 @@ export const KNOWN_FIRST_SEGMENTS: ReadonlyMap<string, number> = new Map([
   ["cv", 1],
   ["dashboard", Infinity],
   ["focus-landing", 0],
-  ["history-claim", 2],
   ["invite", 2],
   ["oauth", 2],
   ["onboarding", 1],

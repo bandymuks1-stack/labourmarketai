@@ -98,7 +98,7 @@ export async function createHistoryClaimAction(
   revalidatePath("/[locale]/dashboard/company/people", "page");
   return {
     ok: true,
-    link: `${origin.replace(/\/+$/, "")}/${locale}/history-claim/${token}`,
+    link: `${origin.replace(/\/+$/, "")}/${locale}/dashboard/profile?history_claim=${token}`,
     expiresAt: ((data as { expires_at?: unknown } | null)?.expires_at as string | null) ?? null,
   };
 }
@@ -214,7 +214,7 @@ export async function redeemHistoryClaimAction(
   if (error) return { ok: false, code: missing(error) ? "needs_migration" : "error" };
   const outcome = outcomeOf(data);
   if (outcome === "redeemed") {
-    revalidatePath("/[locale]/history-claim/[token]", "page");
+    revalidatePath("/[locale]/dashboard/profile", "page");
     return { ok: true };
   }
   const known = [

@@ -20689,7 +20689,6 @@
     "more": "Daugiau"
   },
   "historyClaim": {
-    "pageTitle": "Jūsų darbo istorija",
     "title": "Jūsų darbo istorija pas buvusį darbdavį",
     "organization": "{name} išsaugojo įrašą apie jūsų ten atliktą darbą.",
     "explain": "Jei tai apie jus, pasakykite tai žemiau. Kol kas niekas nerodoma ir nepridedama: įmonė patvirtins, kad įraše esate jūs, o tada jūs pats savo profilyje priimsite arba atsisakysite.",
@@ -20698,10 +20697,7 @@
     "redeemedTitle": "Išsiųsta įmonei",
     "redeemedHint": "Ji patvirtins, kad įraše esate jūs. Tada įrašas ateis į jūsų profilį, kur jį priimsite arba atsisakysite.",
     "waitingForOrganization": "Įmonė tikrina, ar įraše esate jūs.",
-    "approvedGoToProfile": "Įmonė patvirtino. Atidarykite profilį, kad priimtumėte arba atsisakytumėte įrašo.",
     "rejectedByOrganization": "Įmonė šio susiejimo nepatvirtino. Jei tai klaida, kreipkitės į ją tiesiogiai.",
-    "openProfile": "Atidaryti mano profilį",
-    "toDashboard": "Į mano puslapį",
     "unavailable": "Ši nuoroda neveikia. Ji galėjo būti panaudota, atšaukta arba nebegalioti.",
     "unnamedOrganization": "Įmonė",
     "privacyNote": "Kol įmonė nepatvirtina, kad tai jūs, šis puslapis apie įrašą nieko nerodo.",

@@ -20689,7 +20689,6 @@
     "more": "Mehr"
   },
   "historyClaim": {
-    "pageTitle": "Ihr Arbeitsverlauf",
     "title": "Ihr Arbeitsverlauf bei einem früheren Arbeitgeber",
     "organization": "{name} hat einen Eintrag über Ihre dortige Arbeit aufbewahrt.",
     "explain": "Wenn es um Sie geht, sagen Sie es unten. Noch wird nichts gezeigt und nichts hinzugefügt: das Unternehmen bestätigt, dass Sie die Person im Eintrag sind, und danach nehmen Sie ihn im eigenen Profil an oder lehnen ab.",
@@ -20698,10 +20697,7 @@
     "redeemedTitle": "An das Unternehmen gesendet",
     "redeemedHint": "Es bestätigt, dass Sie die Person im Eintrag sind. Danach kommt der Eintrag in Ihr Profil, wo Sie ihn annehmen oder ablehnen.",
     "waitingForOrganization": "Das Unternehmen prüft, ob Sie die Person im Eintrag sind.",
-    "approvedGoToProfile": "Das Unternehmen hat bestätigt. Öffnen Sie Ihr Profil, um den Eintrag anzunehmen oder abzulehnen.",
     "rejectedByOrganization": "Das Unternehmen hat diese Verknüpfung nicht bestätigt. Wenn das ein Irrtum ist, wenden Sie sich direkt an das Unternehmen.",
-    "openProfile": "Mein Profil öffnen",
-    "toDashboard": "Zu meiner Seite",
     "unavailable": "Dieser Link funktioniert nicht. Vielleicht wurde er benutzt, zurückgezogen, oder er ist abgelaufen.",
     "unnamedOrganization": "Ein Unternehmen",
     "privacyNote": "Solange das Unternehmen nicht bestätigt hat, dass Sie es sind, zeigt diese Seite nichts über den Eintrag.",

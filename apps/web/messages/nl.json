@@ -20689,7 +20689,6 @@
     "more": "Meer"
   },
   "historyClaim": {
-    "pageTitle": "Jouw werkverleden",
     "title": "Jouw werkverleden bij een vorige werkgever",
     "organization": "{name} bewaarde een record van werk dat je daar deed.",
     "explain": "Als dit over jou gaat, zeg dat hieronder. Er wordt nog niets getoond of toegevoegd: het bedrijf bevestigt dat jij de persoon in het record bent, en daarna accepteer of weiger je het op je eigen profiel.",
@@ -20698,10 +20697,7 @@
     "redeemedTitle": "Naar het bedrijf gestuurd",
     "redeemedHint": "Zij bevestigen dat jij de persoon in het record bent. Daarna komt het record naar je profiel, waar je het accepteert of weigert.",
     "waitingForOrganization": "Het bedrijf controleert of jij de persoon in het record bent.",
-    "approvedGoToProfile": "Het bedrijf heeft het bevestigd. Open je profiel om het record te accepteren of te weigeren.",
     "rejectedByOrganization": "Het bedrijf heeft deze koppeling niet bevestigd. Als dat een vergissing is, neem dan rechtstreeks contact op.",
-    "openProfile": "Mijn profiel openen",
-    "toDashboard": "Naar mijn pagina",
     "unavailable": "Deze link werkt niet. Hij is misschien gebruikt, ingetrokken of verlopen.",
     "unnamedOrganization": "Een bedrijf",
     "privacyNote": "Zolang het bedrijf niet bevestigt dat jij het bent, toont deze pagina niets over het record.",

@@ -93,6 +93,10 @@ import { listMyOrganizationEvidence } from "@/lib/organization-evidence/import-c
 import { OrganizationHistorySkillSuggestionsSection } from "@/components/app/organization-history-skill-suggestions-section";
 import { listMyTeamLinks } from "@/lib/company/team-links";
 import { TeamLinkWithdrawals } from "@/components/app/roster-link-end";
+import {
+  HistoryClaimAnswer,
+  historyClaimTokenFrom,
+} from "@/components/app/organization/history-claim-answer";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
 import type { ContextWorkTime, WorkPeriodTotals } from "@/lib/journal/work-intelligence";
 import {
@@ -147,10 +151,15 @@ const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
  *  always equal what is persisted (refreshed after each save). */
 export default async function ProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ history_claim?: string | string[] }>;
 }) {
-  const { locale } = await params;
+  // A former employer's one-time history link lands here (`?history_claim=`):
+  // this page is where roster links are decided, so it is answered here too.
+  const [{ locale }, query] = await Promise.all([params, searchParams]);
+  const historyClaimToken = historyClaimTokenFrom(query?.history_claim);
   setRequestLocale(locale);
 
   /**
@@ -1104,6 +1113,7 @@ export default async function ProfilePage({
           target opened this page and saw nothing to accept or refuse. Same
           read, same offer, same action; only where it stands changed. Empty
           when nothing is pending. */}
+      {historyClaimToken ? <HistoryClaimAnswer token={historyClaimToken} /> : null}
       <RosterLinkOffers
         offers={myOrgEvidence.kind === "ok" ? myOrgEvidence.pendingOffers : []}
       />

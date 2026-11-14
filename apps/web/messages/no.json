@@ -8022,7 +8022,6 @@
     "more": "Mer"
   },
   "historyClaim": {
-    "pageTitle": "Your work history",
     "title": "Your work history at a former employer",
     "organization": "{name} kept a record of work you did there.",
     "explain": "If this is about you, say so below. Nothing is shown or added yet: the company then confirms that you are the person in the record, and after that you accept or refuse it on your own profile.",
@@ -8031,10 +8030,7 @@
     "redeemedTitle": "Sent to the company",
     "redeemedHint": "They will confirm that you are the person in the record. When they do, the record comes to your profile, where you accept or refuse it.",
     "waitingForOrganization": "The company is checking that you are the person in the record.",
-    "approvedGoToProfile": "The company confirmed it. Open your profile to accept or refuse the record.",
     "rejectedByOrganization": "The company did not confirm this link. If that is a mistake, ask them directly.",
-    "openProfile": "Open my profile",
-    "toDashboard": "Go to my page",
     "unavailable": "This link does not work. It may have been used, taken back, or it may have expired.",
     "unnamedOrganization": "A company",
     "privacyNote": "Until the company confirms it is you, this page shows nothing about the record.",

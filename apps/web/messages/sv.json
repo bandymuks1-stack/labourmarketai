@@ -8022,7 +8022,6 @@
     "more": "Mer"
   },
   "historyClaim": {
-    "pageTitle": "Din arbetshistorik",
     "title": "Din arbetshistorik hos en tidigare arbetsgivare",
     "organization": "{name} har sparat en post om arbete du gjorde där.",
     "explain": "Om det gäller dig, säg det nedan. Inget visas eller läggs till ännu: företaget bekräftar att du är personen i posten, och därefter tackar du ja eller nej på din egen profil.",
@@ -8031,10 +8030,7 @@
     "redeemedTitle": "Skickat till företaget",
     "redeemedHint": "De bekräftar att du är personen i posten. Sedan kommer posten till din profil, där du tackar ja eller nej.",
     "waitingForOrganization": "Företaget kontrollerar att du är personen i posten.",
-    "approvedGoToProfile": "Företaget har bekräftat. Öppna din profil för att tacka ja eller nej till posten.",
     "rejectedByOrganization": "Företaget bekräftade inte kopplingen. Om det är ett misstag, kontakta dem direkt.",
-    "openProfile": "Öppna min profil",
-    "toDashboard": "Till min sida",
     "unavailable": "Länken fungerar inte. Den kan vara använd, tillbakatagen eller ha gått ut.",
     "unnamedOrganization": "Ett företag",
     "privacyNote": "Tills företaget bekräftar att det är du visar den här sidan inget om posten.",
