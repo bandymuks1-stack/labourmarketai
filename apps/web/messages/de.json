@@ -5782,7 +5782,8 @@
     ],
     "priceState": {
       "draft_pricing": "Die Preise werden vorbereitet — es kann noch nichts gekauft werden.",
-      "owner_confirmed": "Preise vom Eigentümer bestätigt. Die Aktivierung erfolgt im Organisationskonto; auf dieser Seite wird nichts belastet."
+      "owner_confirmed": "Preise vom Eigentümer bestätigt. Die Aktivierung erfolgt im Organisationskonto; auf dieser Seite wird nichts belastet.",
+      "owner_confirmed_closed": "Preise vom Eigentümer bestätigt. Die Online-Zahlung ist noch nicht geöffnet; auf dieser Seite wird nichts belastet."
     },
     "individual": {
       "name": "Besondere Anforderungen",
@@ -5794,7 +5795,8 @@
     "priceFree": "0 €",
     "pricePerMonth": "{price} €/Monat",
     "ctaStartFree": "Kostenlos im Organisationskonto starten",
-    "ctaSubscribe": "Im Organisationskonto aktivieren"
+    "ctaSubscribe": "Im Organisationskonto aktivieren",
+    "faqBillingClosed": "Die Online-Zahlung ist für die Öffentlichkeit noch nicht geöffnet, hier kann also nichts gekauft werden. Registrierung und eine aktive Stelle sind kostenlos. Für bezahlte Leistungen betreuen wir erste Kunden direkt und bestätigen den Preis mit Ihnen, bevor etwas beginnt."
   },
   "privacySelfService": {
     "title": "Datenschutz und Ihre Daten",

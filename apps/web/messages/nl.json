@@ -5782,7 +5782,8 @@
     ],
     "priceState": {
       "draft_pricing": "De prijzen worden voorbereid — er kan nog niets worden gekocht.",
-      "owner_confirmed": "Prijzen bevestigd door de eigenaar. Activeren gebeurt in je organisatieaccount; op deze pagina wordt niets afgeschreven."
+      "owner_confirmed": "Prijzen bevestigd door de eigenaar. Activeren gebeurt in je organisatieaccount; op deze pagina wordt niets afgeschreven.",
+      "owner_confirmed_closed": "Prijzen bevestigd door de eigenaar. Online betalen is nog niet geopend; op deze pagina wordt niets afgeschreven."
     },
     "individual": {
       "name": "Bijzondere wensen",
@@ -5794,7 +5795,8 @@
     "priceFree": "€ 0",
     "pricePerMonth": "€{price}/maand",
     "ctaStartFree": "Gratis starten in uw organisatieaccount",
-    "ctaSubscribe": "Activeren in uw organisatieaccount"
+    "ctaSubscribe": "Activeren in uw organisatieaccount",
+    "faqBillingClosed": "Online betalen is nog niet open voor het publiek, dus hier kan niets worden gekocht. Registratie en één actieve positie zijn gratis. Voor betaald werk helpen we eerste klanten rechtstreeks en bevestigen we de prijs met je voordat er iets begint."
   },
   "privacySelfService": {
     "title": "Privacy en je gegevens",

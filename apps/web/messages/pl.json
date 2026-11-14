@@ -5782,7 +5782,8 @@
     ],
     "priceState": {
       "draft_pricing": "Ceny są przygotowywane — nic nie można jeszcze kupić.",
-      "owner_confirmed": "Ceny potwierdzone przez właściciela. Aktywacja odbywa się na koncie organizacji; na tej stronie nic nie jest pobierane."
+      "owner_confirmed": "Ceny potwierdzone przez właściciela. Aktywacja odbywa się na koncie organizacji; na tej stronie nic nie jest pobierane.",
+      "owner_confirmed_closed": "Ceny potwierdzone przez właściciela. Płatność online nie jest jeszcze otwarta; na tej stronie nic nie jest pobierane."
     },
     "individual": {
       "name": "Szczególne wymagania",
@@ -5794,7 +5795,8 @@
     "priceFree": "0 €",
     "pricePerMonth": "{price} €/mies.",
     "ctaStartFree": "Zacznij bezpłatnie na koncie organizacji",
-    "ctaSubscribe": "Aktywuj na koncie organizacji"
+    "ctaSubscribe": "Aktywuj na koncie organizacji",
+    "faqBillingClosed": "Płatność online nie jest jeszcze publicznie dostępna, więc nic tu nie można kupić. Rejestracja i jedno aktywne stanowisko są bezpłatne. Przy płatnej pracy pierwszych klientów obsługujemy bezpośrednio, a cenę potwierdzamy z Tobą przed rozpoczęciem."
   },
   "privacySelfService": {
     "title": "Prywatność i Twoje dane",
