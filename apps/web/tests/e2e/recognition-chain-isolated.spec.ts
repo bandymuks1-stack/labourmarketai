@@ -1,4 +1,4 @@
-import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
 
 /**
  * A POSITIVE RECOGNITION FROM REAL EVIDENCE — THE WRITE PATH, on a THROWAWAY LOCAL Supabase stack
@@ -52,11 +52,12 @@ const PRACTICE = `Practice day ${PRACTICE_MARK}: built a block partition wall un
 const RECOGNITION_KEY = `isolated-practice-${RUN}`;
 
 /** learnerId is the profile (auth) id; learnerWorkerId is `workers.id`, which journal rows reference. */
-const s: { schoolId: string; orgId: string; learnerId: string; learnerWorkerId: string; entryId: string } = {
+const s: { schoolId: string; orgId: string; learnerId: string; learnerWorkerId: string; engagementId: string; entryId: string } = {
   schoolId: "",
   orgId: "",
   learnerId: "",
   learnerWorkerId: "",
+  engagementId: "",
   entryId: "",
 };
 
@@ -101,11 +102,29 @@ async function signIn(page: Page, address: string): Promise<void> {
   await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
 }
 
+/**
+ * One sign-in per person per run: later steps reuse that browser session. The local auth server
+ * limits sign-ins per address and IP, and the walks in this job share one stack.
+ */
+const sessions = new Map<string, Awaited<ReturnType<BrowserContext["storageState"]>>>();
+
 async function as(browser: Browser, address: string): Promise<{ page: Page; close: () => Promise<void> }> {
-  const ctx = await browser.newContext({ timezoneId: "UTC" });
+  const saved = sessions.get(address);
+  const ctx = await browser.newContext({ timezoneId: "UTC", ...(saved ? { storageState: saved } : {}) });
   const page = await ctx.newPage();
-  await signIn(page, address);
-  return { page, close: () => ctx.close() };
+  if (saved) {
+    await page.goto(`${BASE}/en/dashboard`);
+    await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+  } else {
+    await signIn(page, address);
+  }
+  return {
+    page,
+    close: async () => {
+      sessions.set(address, await ctx.storageState());
+      await ctx.close();
+    },
+  };
 }
 
 /** Click until the expected result shows: a click before hydration is a silent no-op. */
@@ -160,6 +179,7 @@ test("I-1. an education institution signs up through its own door, and its organ
   // organization that does not train people.
   await page.goto(`${BASE}/en/dashboard/company/education`);
   await expect(page.getByTestId("company-education"), "the education home opens for this organization").toBeVisible({ timeout: 30_000 });
+  sessions.set(SCHOOL, await ctx.storageState());
   await ctx.close();
 });
 
@@ -205,6 +225,7 @@ test("I-2. the institution invites a person as a learner by link; they register 
     const accept = page.getByTestId("invite-accept");
     if (await accept.isVisible().catch(() => false)) await accept.click();
   }
+  sessions.set(LEARNER, await ctx.storageState());
   await ctx.close();
   s.learnerId = await userId(LEARNER);
   await expect
@@ -218,15 +239,28 @@ test("I-2. the institution invites a person as a learner by link; they register 
       { message: "registering through the link connects the person as a learner", timeout: 30_000 },
     )
     .toContain("student:active");
+  const [eng] = await db<Array<{ id: string }>>(
+    `engagement_contexts?profile_id=eq.${s.learnerId}&organization_id=eq.${s.orgId}&relationship_slug=eq.student&status=eq.active&select=id`,
+  );
+  s.engagementId = eng!.id;
 });
 
 test("I-3. the institution switches review on for the learner through the audited manual door", async ({ browser }) => {
   const { page, close } = await as(browser, SCHOOL);
   await page.goto(`${BASE}/en/dashboard/company/people#org-members`);
-  const row = page.locator('[data-testid^="org-member-"][data-role="student"]', { hasText: LEARNER_NAME }).first();
+  // The members panel sits in the page's "more tools" fold; open it as a person would.
+  const fold = page.getByTestId("people-more");
+  await expect(fold).toBeAttached({ timeout: 30_000 });
+  if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
+  // The row is the learning relationship itself (engagement_contexts.id from I-2).
+  const row = page.getByTestId(`org-member-${s.engagementId}`);
   await expect(row, "the learner is listed among the institution's people").toBeVisible({ timeout: 30_000 });
+  test.info().annotations.push({
+    type: "learner-row",
+    description: `role=${await row.getAttribute("data-role")} name=${((await row.innerText()) || "").split("\n")[0]}`,
+  });
   if ((await row.getAttribute("data-review")) !== "on") {
-    await row.locator('[data-testid^="toggle-review-"]').click();
+    await row.getByTestId(`toggle-review-${s.engagementId}`).click();
   }
   await expect(row, "review is on for the learner").toHaveAttribute("data-review", "on", { timeout: 30_000 });
   await close();
