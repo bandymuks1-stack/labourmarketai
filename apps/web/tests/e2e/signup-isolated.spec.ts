@@ -71,7 +71,11 @@ async function signUp(
   await page.locator('input[name="password"]').fill(password);
   await page.locator('input[name="confirm_password"]').fill(password);
   await page.locator('form button[type="submit"]').click();
-  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
+  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 }).catch(async (cause: unknown) => {
+    // Say what the page said instead of a bare timeout (synthetic account, local stack).
+    const said = (await page.locator("form").first().innerText().catch(() => "")).replace(/\s+/g, " ");
+    throw new Error(`sign-up did not reach onboarding; at ${new URL(page.url()).pathname}; form says: ${said.slice(0, 600)}`, { cause });
+  });
   await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
 }
 
