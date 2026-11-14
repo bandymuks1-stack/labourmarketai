@@ -199,3 +199,33 @@ describe("more ways to say a part is inside the day", () => {
     expect(minutes("Dirbau 15 val. be pertraukų. Iš viso 15 val.")).toBe(15 * 60);
   });
 });
+
+/**
+ * Second review of #3355: an inclusion word belongs to the figure RIGHT before
+ * it; a cue or total word counts only in front of the figure it speaks about;
+ * brackets are a signal only under a labelled day; a lowercase sentence still
+ * ends a list.
+ */
+describe("the signal belongs to the figure it stands next to", () => {
+  it.each([
+    ["'of which' after a different item: 2 of the 6, not of the 8", "Dirbau 8 val. Klijavau plyteles 6 val., iš jų 2 val. vonioje.", 8 * 60],
+    ["a bracketed item after a different item", "Dirbau 8 val. Klijavau plyteles 6 val., glaisčiau sienas (2 val.).", 8 * 60],
+    ["the same in English", "Worked 8 h. Tiling 6 h, grouting (2 h).", 8 * 60],
+    ["brackets as style under an unlabelled day", "Dirbau 8 val. objekte. Vakare vairavau (2 val.).", 10 * 60],
+    ["'together with' is not 'in total'", "Ryte 4 val. Vakare 4 val. kartu su kolega.", 8 * 60],
+    ["'included' about something else", "Worked 4 h in the morning. In the evening 4 h with travel included.", 8 * 60],
+    ["a lowercase sentence ends the 'of which' list", "dirbau 8 val., iš jų 2 val. vairavau. vakare 3 val. tvarkiau sandėlį.", 11 * 60],
+  ])("%s", (_name, text, expected) => {
+    expect(minutes(text)).toBe(expected);
+    expect(intakeMinutes(text)).toBe(expected);
+  });
+
+  it("a figure in words after 'iš jų' is a part too", () => {
+    expect(minutes("Dirbau 15 val., iš jų dvi valandos koordinavimas.")).toBe(15 * 60);
+  });
+
+  it("a bare total before 'iš jų' is never glued onto the part", () => {
+    const s = extractJournalSuggestions("15 val., iš jų 2 val. koordinavimas.");
+    expect(s.fragments.filter((f) => f.time).map((f) => f.time!.value).sort((a, b) => a - b)).toEqual([2, 13]);
+  });
+});

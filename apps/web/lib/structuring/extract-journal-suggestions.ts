@@ -787,7 +787,9 @@ function mergeContinuationFragments(
       cur.activitySlug === null && cur.activityLabel === null;
     const curIsTimeOnly =
       cur.time !== null && curHasNoActivity && isTimeOnlyFragment(cur.rawPhrase);
-    if (curIsTimeOnly && next && next.time !== null) {
+    // A phrase that opens with "iš jų" / "including" is a part OF the figure
+    // before it, never its continuation: "15 val., iš jų 2 val. …" stays 13 + 2.
+    if (curIsTimeOnly && next && next.time !== null && !opensAsIncludedPart(next.rawPhrase)) {
       const mergedTime = addTimes(cur.time!, next.time);
       const mergedRaw = `${cur.rawPhrase} ir ${next.rawPhrase}`.trim();
       out.push({
@@ -828,6 +830,14 @@ function timeInMinutes(t: {
  *  paperwork including invoices" is not a part). */
 const INCLUDED_PART_RX =
   /(?<!\p{L})(?:iš\s+jų|is\s+ju|iš\s+kurių|is\s+kuriu|įskaitant|iskaitant|tame\s+skaičiuje|tame\s+skaiciuje|including|incl\.?|of\s+which|of\s+these|в\s+том\s+числе|из\s+них|из\s+которых|включая|waarvan|inclusief|davon|inkl\.?|inklusive|einschließlich|einschliesslich|w\s+tym|z\s+czego)(?!\p{L})/iu;
+/** The same words OPENING a phrase: "iš jų dvi valandos …" (a figure in
+ *  words has no digit to stand in front of). */
+const OPENS_WITH_INCLUDED_PART_RX = new RegExp(`^\\s*(?:${INCLUDED_PART_RX.source.replace(/^\(\?<!\\p\{L\}\)/, "")})`, "iu");
+/** True when a phrase introduces itself as part of the figure before it. */
+function opensAsIncludedPart(rawPhrase: string): boolean {
+  const digit = rawPhrase.search(/\d/);
+  return OPENS_WITH_INCLUDED_PART_RX.test(rawPhrase) || (digit > 0 && INCLUDED_PART_RX.test(rawPhrase.slice(0, digit)));
+}
 /** A part whose DURATION is written in brackets: "… koordinavimas (2 val. per
  *  dieną)". A bracketed count of anything else ("(2 sluoksniai)") is not. */
 const BRACKETED_DURATION_RX = new RegExp(
@@ -850,6 +860,10 @@ const EXTRA_WORK_RX =
 const RESTATED_TOTAL_WORD_RX =
   /(?<!\p{L})(?:iš\s+viso|is\s+viso|viso|kartu|in\s+total|total|altogether|всего|итого|totaal|insgesamt|łącznie|lacznie)(?!\p{L})/iu;
 
+/** A total word standing RIGHT in front of a figure: "iš viso 15", "kartu:
+ *  15", "in total 15", "altogether 15". */
+const RESTATED_TOTAL_LEAD_RX = new RegExp(`(?:${RESTATED_TOTAL_WORD_RX.source})\\s*[:–-]?\\s*$`, "iu");
+
 /** Minutes back in the unit a person reads best. */
 function minutesAsTime(minutes: number): { value: number; unitSlug: "hours" | "minutes" } {
   return minutes % 15 === 0
@@ -865,11 +879,23 @@ export type FragmentSentences = {
   readonly sentences: readonly string[];
 };
 
-const SENTENCE_BOUNDARY_RX = /[.!?…]+\s+(?=[\p{Lu}\d])|\n+/gu;
+/** Abbreviations that end with a dot inside a sentence ("2 val. vairavau"). */
+const ABBREVIATION_BEFORE_DOT_RX =
+  /(?:^|[^\p{L}])(?:val|min|h|hr|hrs|std|godz|ч|час|мин|d|nr|pvz|vnt|kt|t\.\s?y|etc|incl|inkl)$/iu;
 
 function sentenceStarts(text: string): number[] {
   const starts = [0];
-  for (const m of text.matchAll(SENTENCE_BOUNDARY_RX)) starts.push((m.index ?? 0) + m[0].length);
+  for (const m of text.matchAll(/\n+|[!?…]+\s+|\.+\s+/gu)) {
+    const at = m.index ?? 0;
+    const end = at + m[0].length;
+    if (m[0].startsWith(".")) {
+      const before = text.slice(Math.max(0, at - 12), at);
+      const next = text.slice(end, end + 1);
+      // "2 val. vairavau" goes on; "2 val. Vakare …" and "vairavau. vakare …" end.
+      if (ABBREVIATION_BEFORE_DOT_RX.test(before) && !/\p{Lu}/u.test(next)) continue;
+    }
+    starts.push(end);
+  }
   return starts;
 }
 
@@ -932,8 +958,13 @@ function containedTotal(
     const equalsAnother = later.some((g) => g !== f && same(minutesOf(g), m));
     const sentence = sentenceText(f);
     const sentenceNamesTheTotal = numbersIn(sentence).some((n) => n === total.time!.value);
+    // Said again AS the total: the cue or the total word stands right in front
+    // of the figure ("tai įeina į 15 valandų", "kartu 15 valandų", "iš viso
+    // 15 val."), not anywhere in the phrase ("4 val. kartu su kolega").
+    const digit = f.rawPhrase.search(/\d/);
+    const lead = digit > 0 ? f.rawPhrase.slice(0, digit) : "";
     if (
-      (equalsTotal && (RESTATEMENT_CUE_RX.test(f.rawPhrase) || RESTATED_TOTAL_WORD_RX.test(f.rawPhrase))) ||
+      (equalsTotal && (RESTATEMENT_CUE_RX.test(lead) || RESTATED_TOTAL_LEAD_RX.test(lead))) ||
       (equalsAnother && RESTATEMENT_CUE_RX.test(sentence) && sentenceNamesTheTotal)
     ) {
       restatements.add(f);
@@ -942,25 +973,27 @@ function containedTotal(
 
   // 2. The parts.
   const candidates = later.filter((f) => !restatements.has(f) && !EXTRA_WORK_RX.test(f.rawPhrase));
-  const marked = (f: JournalFragmentSuggestion): boolean => {
-    const digit = f.rawPhrase.search(/\d/);
-    const lead = digit > 0 ? f.rawPhrase.slice(0, digit) : "";
-    return INCLUDED_PART_RX.test(lead) || BRACKETED_DURATION_RX.test(f.rawPhrase);
-  };
+  // Brackets are a signal only under a LABELLED day ("Darbo laikas: 15
+  // valandų. … (2 valandos …)"); after "Dirbau 8 val." they are only style.
+  const totalSentence = sentenceText(total);
+  const totalLabelled =
+    /^[^:\n]{1,60}:\s*(?:\p{L}+\s+){0,2}\d/u.test(totalSentence.trim()) || RESTATED_TOTAL_LEAD_RX.test(
+      total.rawPhrase.slice(0, Math.max(0, total.rawPhrase.search(/\d/))),
+    );
+  const marked = (f: JournalFragmentSuggestion): boolean =>
+    opensAsIncludedPart(f.rawPhrase) || (totalLabelled && BRACKETED_DURATION_RX.test(f.rawPhrase));
   let parts: JournalFragmentSuggestion[];
   if (restatements.size > 0) {
     parts = candidates;
   } else {
-    const opened = new Map<number, number>(); // sentence → position of its first marked part
-    later.forEach((f, i) => {
-      if (marked(f) && !opened.has(sentenceIndex(f))) opened.set(sentenceIndex(f), i);
-    });
-    if (opened.size === 0) return null;
-    parts = candidates.filter((f) => {
-      if (marked(f)) return true;
-      const from = opened.get(sentenceIndex(f));
-      return from !== undefined && later.indexOf(f) > from;
-    });
+    // "Of which" belongs to the figure right before it: the list must open
+    // straight after the total. "Dirbau 8 val. Klijavau plyteles 6 val., iš jų
+    // 2 val. vonioje" says 2 of the 6, not of the 8.
+    const firstAfterTotal = later.find((f) => !restatements.has(f));
+    if (!firstAfterTotal || !marked(firstAfterTotal)) return null;
+    const opened = sentenceIndex(firstAfterTotal);
+    const from = later.indexOf(firstAfterTotal);
+    parts = candidates.filter((f) => marked(f) || (sentenceIndex(f) === opened && later.indexOf(f) > from));
   }
   if (parts.some((p) => minutesOf(p) >= totalMin)) return null;
   const partsMin = parts.reduce((sum, p) => sum + minutesOf(p), 0);
