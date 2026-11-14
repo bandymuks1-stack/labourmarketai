@@ -157,9 +157,28 @@ async function walkPublic(
 
 // ───────────────────────────── public rows ─────────────────────────────
 
+/**
+ * The landing's first screen rendered in this locale: since the V2/V3 landing
+ * (#3266, #3314) it is the goal centre — the page's h1 is its question and the
+ * goal cards follow it. The old hero eyebrow no longer exists.
+ */
+async function landingFirstScreenProbe(page: Page, locale: Locale): Promise<string[]> {
+  const problems: string[] = [];
+  const centre = page.getByTestId("goal-navigator");
+  if (!(await centre.locator("h1").first().isVisible().catch(() => false))) problems.push("the h1 is not the goal centre's question");
+  if ((await page.locator("html").getAttribute("lang").catch(() => null)) !== locale) problems.push(`html lang is not ${locale}`);
+  const cards = page.getByTestId("goal-rail").locator("a[data-rail-card]");
+  let visible = 0;
+  for (const id of ["work", "workers", "services", "contractors"]) {
+    if (await cards.and(page.locator(`[data-card-id="${id}"]`)).first().isVisible().catch(() => false)) visible += 1;
+  }
+  if (visible < 4) problems.push(`only ${visible} of the first four goal cards visible`);
+  return problems;
+}
+
 test("U-1 (8.10). the landing and the four marketing pages open in LT/EN/RU at 390 and 1280 px", async ({ browser }) => {
   await walkPublic(browser, "marketing", [
-    { path: "", landmark: "landing-hero-eyebrow" },
+    { path: "", landmark: "goal-navigator", probe: landingFirstScreenProbe },
     { path: "/for-workers" },
     { path: "/for-companies" },
     { path: "/for-agencies" },
