@@ -159,6 +159,10 @@ describe("the feature sends nothing outbound and adds no DB weakening", () => {
       // locale instead of folding de/nl/pl to 'lt'. Grants nothing, adds no
       // policy, every ceiling unchanged (lib/guards/company-need-intake-keep-locale.test.ts).
       "20261110140000_company_need_intake_keep_locale_v1.sql",
+      // operator_application_alerts_v1 (2026-11-12, RED draft, NOT applied): a service_role-only
+      // READ of status/created_at/country/source_path to alert operators about waiting intakes.
+      // Grants nothing on the table, adds no policy (lib/guards/operator-application-alerts.test.ts).
+      "20261112090000_operator_application_alerts_v1.sql",
     ]);
     const grants = readFileSync(
       join(migDir, "20260713190000_company_need_intake_service_grants.sql"),

@@ -1,0 +1,60 @@
+name: operator-alerts-cadence
+# OPERATOR ALERTS (owner decision 2026-11-11, P1): every 5 minutes, ask the app to mail the responsible
+# operators about new company applications, a reminder at 24 h and an escalation to admins at 48 h.
+# The app does the work (POST /api/internal/operator-alerts/v1); this job only knocks.
+#
+# INERT until the owner switches it on. Two switches, both owner-only:
+#   * repository variable OPERATOR_ALERTS_SCHEDULE_ENABLED = 'true' (without it every run is skipped);
+#   * environment `operator-alerts` secret OPERATOR_ALERTS_TRIGGER_TOKEN (>= 32 random characters),
+#     the SAME value as OPERATOR_ALERTS_TRIGGER_TOKEN in the production app environment.
+# The token only starts this sweep: it is not CRON_SECRET and opens no other route. The sweep is
+# idempotent per application, stage and recipient, so an extra or late run sends nothing twice.
+#
+# GitHub schedules are best effort: runs can start late or be dropped under load. 5 minutes is a target,
+# not a promise. Resending is prevented by the database ledger, not by timing.
+# Cost: the repository is public, so GitHub-hosted Actions minutes are free (~288 short runs a day).
+#
+# Why /api/internal/ and its own token, not /api/cron/ with CRON_SECRET: nginx answers 404 for
+# /api/cron/* from the internet (ops/vps/labourmarket.ai.nginx.conf), so GitHub cannot reach a cron
+# route without a VPS change; and CRON_SECRET authorises every local cron route (privacy erasure
+# among them), which is not a minimal-scope secret to copy into GitHub.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: operator-alerts
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    if: vars.OPERATOR_ALERTS_SCHEDULE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    environment: operator-alerts
+    steps:
+      - name: Run the operator alerts sweep
+        env:
+          TOKEN: ${{ secrets.OPERATOR_ALERTS_TRIGGER_TOKEN }}
+        # No `set -x`: the token must never reach the log. GitHub masks secrets already; the explicit
+        # add-mask is a second lock in case a value is ever passed through another variable.
+        run: |
+          set +x
+          if [ -z "$TOKEN" ]; then
+            echo "Skipped: OPERATOR_ALERTS_TRIGGER_TOKEN is not set (the owner creates it). Nothing was sent." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "::add-mask::$TOKEN"
+          code=$(curl -sS -o body.json -w '%{http_code}' --max-time 120 -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            https://labourmarket.ai/api/internal/operator-alerts/v1) || code=000
+          # The body is counts and a reason code only: no id, no address.
+          { echo "Operator alerts sweep: HTTP $code"; cat body.json 2>/dev/null; echo; } | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$code" != "200" ]; then
+            echo "::error::operator alerts sweep answered $code"
+            exit 1
+          fi
