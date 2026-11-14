@@ -142,7 +142,10 @@ describe("the mobile menu covers exactly the viewports the desktop nav hides", (
 
 describe("the menu renders the SAME links as the desktop nav", () => {
   it("items are mapped from the shared `links` list, not a second literal", () => {
-    expect(navSrc).toMatch(/<MobileNavMenu[\s\S]*?items=\{links\.map\(/);
+    // The More list is the shared `links` plus the one door for education
+    // institutions — built once, handed to both menus.
+    expect(navSrc).toMatch(/const moreLinks = \[\s*\.\.\.links\.map\(/);
+    expect(navSrc).toMatch(/<MobileNavMenu[\s\S]*?items=\{moreLinks\}/);
   });
 
   it("the menu component hardcodes no href of its own", () => {

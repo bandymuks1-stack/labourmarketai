@@ -33,36 +33,34 @@ test.describe("@375px phone", () => {
     await page.goto("/lt");
     const h1 = page.getByRole("heading", { level: 1 });
     await expect(h1).toBeVisible();
-    const actions = page.locator('[data-testid="landing-actions"][data-surface="landing_hero"]');
-    await expect(actions).toBeVisible();
-
-    // The header folds its sign-up into the menu below 640px, so the hero's
-    // own action is the phone's visible next step — it must be ON the first
-    // screen, not below it.
-    const box = await actions.locator("a").first().boundingBox();
-    expect(box, "hero primary action box").not.toBeNull();
-    expect(box!.y + box!.height, "hero primary action is below the first screen").toBeLessThanOrEqual(812);
-    await expect(actions.locator("a").first()).toHaveAttribute("href", "/lt/auth/signup");
+    // The V2 first screen: the goal cards are the next step, and the phone's
+    // sign-up row sits under them — both ON the first screen, not below it.
+    const rail = page.getByTestId("goal-rail");
+    await expect(rail).toBeVisible();
+    const box = await rail.boundingBox();
+    expect(box, "goal cards box").not.toBeNull();
+    expect(box!.y + box!.height, "goal cards end below the first screen").toBeLessThanOrEqual(812);
+    const signup = page.getByTestId("landing-signup");
+    await expect(signup).toBeVisible();
+    const sb = await signup.boundingBox();
+    expect(sb!.y + sb!.height, "sign-up row is below the first screen").toBeLessThanOrEqual(812);
 
     await page.screenshot({ path: join(SHOTS, "lt-375-first-screen.png"), fullPage: false });
   });
 
-  test("four chips by default; the other six mount on demand", async ({ page }) => {
+  test("no example chips on the landing: the goals are the choice", async ({ page }) => {
+    // Landing V3 (owner, 2026-11-13): the chips repeated the goals. The
+    // component's chip sets are still covered by its guard.
     await page.goto("/lt");
-    await expect(page.getByTestId("entry-example")).toHaveCount(4);
-    const more = page.getByTestId("entry-more-examples");
-    await expect(more).toHaveAttribute("aria-expanded", "false");
-    await more.click();
-    await expect(page.getByTestId("entry-example")).toHaveCount(10);
+    await expect(page.getByTestId("entry-input")).toBeVisible();
+    await expect(page.getByTestId("entry-example")).toHaveCount(0);
     await expect(page.getByTestId("entry-more-examples")).toHaveCount(0);
-    // Focus moved to the first newly mounted chip, not lost with the control.
-    await expect(page.getByTestId("entry-example").nth(4)).toBeFocused();
   });
 
   test("a looking-for-work reading offers the public board beside sign-up", async ({ page }) => {
     await page.goto("/lt");
-    // The second default chip is the looking-for-work sentence.
-    await page.getByTestId("entry-example").nth(1).click();
+    await page.getByTestId("entry-input").fill("Ieškau darbo Norvegijoje");
+    await page.getByTestId("entry-submit").click();
     await expect(page.getByTestId("entry-understanding")).toBeVisible();
     await expect(page.getByTestId("entry-signup")).toBeVisible();
     const jobs = page.getByTestId("entry-jobs").locator("a");
@@ -74,30 +72,48 @@ test.describe("@375px phone", () => {
 test.describe("@1440px desktop", () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test("real jobs come from the board, and the page ends on the next step", async ({ page }) => {
+  test("market figures are printed once, with real adverts or the link to the search", async ({ page }) => {
     await page.goto("/lt");
+
+    const market = page.getByTestId("landing-market-facts");
+    await expect(market).toBeVisible();
+    // The counts are in this block or nowhere: never inside the sentence box.
+    await expect(page.getByTestId("entry-numbers")).toHaveCount(0);
+    const line = page.getByTestId("landing-market-line");
+    if ((await line.count()) > 0) {
+      await expect(page.getByTestId("landing-market-source")).toContainText("LabourMarket.ai");
+      await expect(page.getByTestId("landing-market-none")).toHaveCount(0);
+    } else {
+      // The canonical reader could not answer: the page says so, and shows
+      // no number at all.
+      await expect(page.getByTestId("landing-market-none")).toBeVisible();
+      await expect(market).not.toContainText(/\d{3}/);
+    }
 
     const band = page.getByTestId("landing-open-jobs");
     if ((await band.count()) > 0) {
-      // Omitted entirely when the market reader could not answer — so only a
-      // PRESENT band is measured.
       const cards = band.getByTestId("landing-open-job");
       const n = await cards.count();
       expect(n).toBeGreaterThan(0);
-      expect(n).toBeLessThanOrEqual(4);
+      expect(n).toBeLessThanOrEqual(3);
       for (let i = 0; i < n; i += 1) {
         await expect(cards.nth(i).locator("a").first()).toHaveAttribute("href", /\/jobs\/[0-9a-f-]{36}$/);
       }
       await expect(page.getByTestId("landing-open-jobs-all")).toHaveAttribute("href", /\/jobs$/);
+      await expect(page.getByTestId("landing-market-search")).toHaveCount(0);
       await band.scrollIntoViewIfNeeded();
       await page.screenshot({ path: join(SHOTS, "lt-1440-open-jobs.png"), fullPage: false });
+    } else {
+      // No live adverts: the link to the search, never a placeholder advert.
+      await expect(page.getByTestId("landing-market-search")).toHaveAttribute("href", /\/jobs$/);
     }
 
-    const close = page.getByTestId("landing-close");
-    await close.scrollIntoViewIfNeeded();
-    await expect(close).toBeVisible();
-    await expect(close.getByTestId("landing-actions").locator("a")).toHaveCount(2);
-    await expect(close.getByTestId("landing-actions")).toHaveAttribute("data-surface", "landing_close");
-
+    // The page ends on "How it works" and the short footer — no second or
+    // third start button.
+    await expect(page.getByTestId("landing-how")).toBeVisible();
+    await expect(page.getByTestId("landing-close")).toHaveCount(0);
+    await expect(page.getByTestId("site-footer-compact")).toBeVisible();
+    await expect(page.getByTestId("footer-entity-disclosure")).toBeVisible();
+    await expect(page.getByTestId("footer-copyright")).toBeVisible();
   });
 });

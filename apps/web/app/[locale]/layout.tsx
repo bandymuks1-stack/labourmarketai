@@ -13,6 +13,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/lib/i18n/routing";
 import { ThemeReapply } from "@/components/app/theme-reapply";
 import { ViewerTimeZone } from "@/components/app/viewer-time-zone";
+import { WebVitalsBeacon } from "@/components/app/web-vitals-beacon";
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/answer-engine/answer-seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
@@ -41,8 +42,16 @@ const display = Bricolage_Grotesque({
   variable: "--font-display",
   adjustFontFallback: false,
 });
+//
+// PRELOAD ONLY WHAT THE FIRST SCREEN NEEDS (speed P0, 2026-11-12). `subsets`
+// decides which files get a `<link rel="preload">`; every subset's @font-face
+// is in the stylesheet either way, so a Cyrillic glyph still loads Inter, on
+// demand. Before this, every page preloaded 13 font files (about 358 KB): on a
+// slow phone connection they competed with the stylesheet and held back the
+// first paint. Now 4 are preloaded (display and body, latin + latin-ext); the
+// mono and accent faces and the Cyrillic subsets load when a page uses them.
 const sans = Inter({
-  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-sans",
 });
 // ACCENT ONLY (frozen premium design class 4e695e261): the one accent word of
@@ -54,10 +63,12 @@ const accent = Instrument_Serif({
   weight: "400",
   style: ["normal", "italic"],
   variable: "--font-accent",
+  preload: false,
 });
 const mono = JetBrains_Mono({
   subsets: ["latin", "latin-ext", "cyrillic"],
   variable: "--font-mono",
+  preload: false,
 });
 
 // Brand SEO defaults for the whole locale subtree. Per-page canonical +
@@ -205,6 +216,7 @@ export default async function LocaleLayout({
             watcher restores the saved theme before the next paint. */}
         <ThemeReapply />
         <ViewerTimeZone />
+        <WebVitalsBeacon />
         {/* Performance Reality Audit v1+v2: v1 replaced the FULL runtime
             message tree (~440 KB minified serialized into EVERY page's RSC
             flight payload) with the union client allowlist. v2 moves the

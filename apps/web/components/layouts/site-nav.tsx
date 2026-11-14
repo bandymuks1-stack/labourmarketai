@@ -7,6 +7,7 @@ import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
 import { IntentMegaMenu } from "@/components/layouts/intent-mega-menu";
 import type { RenderedIntent } from "@/components/layouts/intent-icons";
 import { ASSISTANT_HREF, PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
+import { INSTITUTION_DOOR_NEXT } from "@/lib/marketing/public-doors";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
 import { LmLogo } from "@/components/ui/lm-logo";
@@ -151,6 +152,15 @@ export async function SiteNav({
       {tSpace("overview")}
     </AuthCtaLink>
   );
+  // Behind "More" and in the phone menu: the older links, then the one door
+  // for schools, colleges and universities (owner P0 2026-11-13: they can
+  // register but had no entry). It opens the existing institution setup —
+  // sign-in first for a visitor — until the audience page exists; it is not
+  // a seventh goal.
+  const moreLinks = [
+    ...links.map((l) => ({ key: l.key as string, href: l.href, label: t(l.key) })),
+    { key: "education", href: INSTITUTION_DOOR_NEXT, label: tIntent("education") },
+  ];
   // ONE goal bar element, placed by the page: the header's second row on
   // inner pages; on the landing (no goals in it) it sits in the first row.
   const megaMenu = (
@@ -163,7 +173,7 @@ export async function SiteNav({
       assistant={assistant}
       more={{
         label: tIntent("more"),
-        links: links.map((l) => ({ key: l.key, href: l.href, label: t(l.key) })),
+        links: moreLinks,
       }}
     />
   );
@@ -238,7 +248,7 @@ export async function SiteNav({
               here so this server component stays the single source of truth. */}
           <MobileNavMenu
             className="lg:hidden"
-            items={links.map((l) => ({ key: l.key, href: l.href, label: t(l.key) }))}
+            items={moreLinks}
             openLabel={t("menuOpen")}
             closeLabel={t("menuClose")}
             intents={intents}
