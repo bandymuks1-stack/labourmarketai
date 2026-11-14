@@ -72,6 +72,16 @@ describe("commercial code: honest degradation, no finance duplication", () => {
   });
 });
 
+describe("copy promises only what the web UI does (B2B chain)", () => {
+  it("the page intro does not claim links to demand and projects the panel cannot make", () => {
+    const panel = read("components/app/commercial-panel.tsx");
+    // The claim may come back only together with the controls that make it true.
+    const canLink = /customerRequestId:|projectId:/.test(panel);
+    const intro = JSON.parse(read("messages/en.json")).commercial.pageIntro as string;
+    if (!canLink) expect(intro).not.toMatch(/linked to demand|projects/i);
+  });
+});
+
 describe("commercial strings exist in every active-parity locale", () => {
   for (const loc of activeLocales) {
     it(`${loc} has commercial with proposal + contract statuses`, () => {
