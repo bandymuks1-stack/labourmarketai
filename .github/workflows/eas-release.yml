@@ -1,0 +1,140 @@
+name: EAS release build
+
+# Signed, UPLOADABLE store builds of the existing Expo app (apps/mobile) on
+# Expo's build service (EAS). The route is chosen in
+# docs/launch/RELEASE_SUBMISSION_PACK_2026-10-14.md §0: the owner has no Mac,
+# and EAS keeps every signing credential (iOS certificate + profile, Android
+# upload keystore) and every store key (App Store Connect API key, Play service
+# account) in the OWNER'S Expo account. This repository is public, so GitHub
+# holds exactly ONE secret for this workflow: EXPO_TOKEN.
+#
+# SKIPS CLEANLY UNTIL THE OWNER STEPS LAND. With no EXPO_TOKEN secret, or no
+# `extra.eas.projectId` in apps/mobile/app.json (written by `eas init`), the
+# job writes which value is missing to its summary and exits 0. It never
+# fails a run for a missing secret and never invents one.
+#
+# OWNER-STARTED ONLY. workflow_dispatch is the only trigger: no push, no pull
+# request, no schedule. The job runs in the `store-release` environment; the
+# owner adds themself as its required reviewer (Settings → Environments), so a
+# run an agent dispatches still waits for the owner's click.
+#
+# UPLOAD IS OFF BY DEFAULT. `submit: true` hands the finished build to EAS
+# Submit with the `production` submit profile in eas.json: TestFlight on iOS,
+# the Play INTERNAL track as a DRAFT release on Android. Nothing reaches
+# external testers or production without a further click in each console.
+#
+# PUBLIC BUILD CONFIGURATION. EXPO_PUBLIC_* values are inlined on the EAS
+# worker, not here, so they come from the EAS `production` environment
+# (eas.json build.production.environment) that the owner fills with
+# `eas env:create` — public values only, see §0.1 O-5.
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Which store build to make"
+        type: choice
+        options: [android, ios, all]
+        default: all
+      submit:
+        description: "Also upload the build (TestFlight / Play internal track as a draft)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eas-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: EAS build (${{ inputs.platform }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: store-release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check owner prerequisites
+        id: pre
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          PLATFORM: ${{ inputs.platform }}
+          SUBMIT: ${{ inputs.submit }}
+          ASC_APP_ID: ${{ vars.ASC_APP_ID }}
+        run: |
+          missing=""
+          if [ -z "$EXPO_TOKEN" ]; then
+            missing="${missing}- GitHub secret EXPO_TOKEN (expo.dev → Access tokens)\n"
+          fi
+          PROJECT_ID=$(node -e 'const a=require("./apps/mobile/app.json");process.stdout.write(String(a.expo?.extra?.eas?.projectId??""))')
+          if [ -z "$PROJECT_ID" ]; then
+            missing="${missing}- extra.eas.projectId in apps/mobile/app.json (run eas init in apps/mobile)\n"
+          fi
+          # A non-interactive iOS upload needs the App Store Connect app id in
+          # the submit profile (Expo: "In non-interactive mode, your submission
+          # profile also needs ascAppId"). eas.json holds no account id (pinned
+          # by mobile-release-config.test.ts), so it comes from the repository
+          # VARIABLE ASC_APP_ID and is written into the runner's copy only.
+          if [ "$SUBMIT" = "true" ] && [ "$PLATFORM" != "android" ] && ! printf '%s' "$ASC_APP_ID" | grep -Eq '^[0-9]{6,}$'; then
+            missing="${missing}- repository variable ASC_APP_ID (App Store Connect, the app, App Information, Apple ID; digits only), needed to upload to TestFlight\n"
+          fi
+          if [ -n "$missing" ]; then
+            {
+              echo "### EAS release build skipped"
+              echo ""
+              echo "Owner prerequisites not set yet, nothing was built or uploaded:"
+              printf "%b" "$missing"
+              echo ""
+              echo "See docs/launch/RELEASE_SUBMISSION_PACK_2026-10-14.md §0.1."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up pnpm
+        if: steps.pre.outputs.ready == 'true'
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.33.2
+
+      - name: Set up Node
+        if: steps.pre.outputs.ready == 'true'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.pre.outputs.ready == 'true'
+        run: pnpm install --frozen-lockfile --filter=mobile... --filter=@labourmarket/client-core...
+
+      - name: Build on EAS
+        if: steps.pre.outputs.ready == 'true'
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          PLATFORM: ${{ inputs.platform }}
+          SUBMIT: ${{ inputs.submit }}
+          ASC_APP_ID: ${{ vars.ASC_APP_ID }}
+        run: |
+          set -euo pipefail
+          args="--platform $PLATFORM --profile production --non-interactive --no-wait"
+          if [ "$SUBMIT" = "true" ]; then
+            args="$args --auto-submit"
+            if [ "$PLATFORM" != "android" ]; then
+              # Runner copy only; never committed (checked digits-only above).
+              node -e 'const f="eas.json",fs=require("fs"),e=JSON.parse(fs.readFileSync(f,"utf8"));e.submit.production.ios={ascAppId:process.env.ASC_APP_ID};fs.writeFileSync(f,JSON.stringify(e,null,2))'
+            fi
+          fi
+          npx --yes eas-cli@25.3.0 build $args
+          {
+            echo "### EAS release build queued"
+            echo ""
+            echo "Platform: $PLATFORM. Upload: $SUBMIT."
+            echo "Follow the build on expo.dev. With upload on, iOS lands in TestFlight and Android in the Play internal track as a DRAFT release: rolling it out is a click in Play Console."
+          } >> "$GITHUB_STEP_SUMMARY"

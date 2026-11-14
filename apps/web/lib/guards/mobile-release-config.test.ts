@@ -310,3 +310,52 @@ describe("iOS CI proves a DEVICE archive, not only a simulator build", () => {
     expect(wf).toContain("IOS_DEVICE_ARCHIVE_BUILT");
   });
 });
+
+describe("store builds are owner-started, skip without secrets and upload to internal tracks only", () => {
+  // The route is docs/launch/RELEASE_SUBMISSION_PACK_2026-10-14.md §0: EAS
+  // holds signing and store keys in the owner's Expo account. The repository
+  // is public, so the workflow may read ONE secret and must run without it.
+  const wf = readFileSync(resolve(REPO, ".github/workflows/eas-release.yml"), "utf8");
+
+  it("only the owner can start it: workflow_dispatch alone, inside the store-release environment", () => {
+    const triggers = wf.slice(wf.indexOf("\non:"), wf.indexOf("\npermissions:"));
+    expect(triggers).toContain("workflow_dispatch:");
+    expect(triggers).not.toMatch(/^\s{2}(push|pull_request|pull_request_target|schedule|workflow_run):/m);
+    expect(wf).toContain("environment: store-release");
+  });
+
+  it("reads no secret but EXPO_TOKEN and skips with a summary, not a failure, when prerequisites are missing", () => {
+    const secrets = [...wf.matchAll(/secrets\.([A-Z_]+)/g)].map((m) => m[1]);
+    expect(new Set(secrets)).toEqual(new Set(["EXPO_TOKEN"]));
+    expect(wf).toContain("extra?.eas?.projectId");
+    expect(wf).toContain("ready=false");
+    expect(wf).toContain("EAS release build skipped");
+    // Every step after the check is gated on it, so a skip builds nothing.
+    const afterCheck = wf.slice(wf.indexOf("- name: Set up pnpm"));
+    const steps = afterCheck.split("\n      - name:").length;
+    const gated = (afterCheck.match(/if: steps\.pre\.outputs\.ready == 'true'/g) ?? []).length;
+    expect(gated).toBe(steps);
+  });
+
+  it("upload is opt-in and lands on internal tracks as a draft", () => {
+    // The `submit` input block runs from its key to the next top-level key.
+    const submitInput = wf.slice(wf.indexOf("      submit:"), wf.indexOf("\npermissions:"));
+    expect(submitInput).toContain("type: boolean");
+    expect(submitInput).toContain("default: false");
+    expect(wf).toContain('if [ "$SUBMIT" = "true" ]');
+    expect(eas.submit.production.android).toEqual({ track: "internal", releaseStatus: "draft" });
+    expect(eas.build.production.environment).toBe("production");
+  });
+
+  it("an iOS upload waits for the App Store Connect app id, which never lands in eas.json", () => {
+    // Non-interactive iOS submit needs `ascAppId`; eas.json carries no account
+    // id (asserted above), so the id is a repository VARIABLE, checked in the
+    // prerequisite step and written into the runner's copy only.
+    const check = wf.slice(wf.indexOf("- name: Check owner prerequisites"), wf.indexOf("- name: Set up pnpm"));
+    expect(check).toContain("ASC_APP_ID: ${{ vars.ASC_APP_ID }}");
+    expect(check).toMatch(/\[ "\$SUBMIT" = "true" \] && \[ "\$PLATFORM" != "android" \]/);
+    expect(check).toContain("repository variable ASC_APP_ID");
+    expect(wf).toContain("ascAppId:process.env.ASC_APP_ID");
+    expect(eas.submit.production.ios).toBeUndefined();
+  });
+});
