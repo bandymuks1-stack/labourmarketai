@@ -19,7 +19,7 @@ import {
  * (.github/workflows/signup-isolated.yml). Owner 2026-11-14: "Patikrinti prisijungusio naudotojo
  * profilį, CV, darbo paiešką, kandidatavimą ir susirašinėjimą. Tikrinti 375 ir 390 px pločiu."
  *
- * Once, at a desktop (setup, not the walk): a company signs up, posts a need and is verified by the
+ * For each width, first at a desktop (setup, not the walk): a company signs up, posts a need and is verified by the
  * local operator, so the need reaches the worker board.
  *
  * Then, for EACH phone — 375 × 667 and 390 × 844, touch, a phone's user agent — a new worker:
@@ -47,9 +47,6 @@ test.setTimeout(300_000);
 
 const RUN = Date.now().toString(36);
 const email = (who: string) => `phone.${who}.${RUN}@local.test`;
-const COMPANY = email("company");
-const COMPANY_ORG = `Synthetic Phone Builders ${RUN}`;
-const NEED_ROLE = `Phone walk tiler ${RUN}`;
 
 const USER_AGENT =
   "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36";
@@ -57,8 +54,6 @@ const PHONES = [
   { name: "375", viewport: { width: 375, height: 667 }, deviceScaleFactor: 2 },
   { name: "390", viewport: { width: 390, height: 844 }, deviceScaleFactor: 3 },
 ] as const;
-
-const shared: { companyId: string; needId: string } = { companyId: "", needId: "" };
 
 async function onPhone(
   browser: Browser,
@@ -154,25 +149,13 @@ async function accountMenu(page: Page, link: "account-menu-profile-link" | "acco
   await target.tap();
 }
 
-test("M-0. setup at a desktop: a verified company posts a need", async ({ browser }) => {
-  const ctx = await browser.newContext({ timezoneId: "UTC" });
-  const page = await ctx.newPage();
-  await signUp(page, BASE, COMPANY);
-  await onboard(page, "hire", `Synthetic Phone Owner ${RUN}`);
-  await setUpCompany(page, COMPANY_ORG);
-  await publishNeed(page, BASE, NEED_ROLE, "LT");
-  sessions.set(COMPANY, await ctx.storageState());
-  await ctx.close();
-  shared.companyId = await verifyCompanyAsLocalAdmin(COMPANY, email("admin"));
-  const owner = await userId(COMPANY);
-  const needs = sql<{ id: string }>(
-    `select id from public.customer_requests where (title = ${lit(NEED_ROLE)} or role_or_work_type = ${lit(NEED_ROLE)}) and profile_id = ${lit(owner)}`,
-  );
-  expect(needs, "the need is stored once").toHaveLength(1);
-  shared.needId = needs[0]!.id;
-});
-
 for (const phone of PHONES) {
+  // Each width is self-contained: Playwright replaces the worker process after a failure, so
+  // nothing a group needs may live in another group's module state (Codex P2).
+  const COMPANY = email(`company${phone.name}`);
+  const COMPANY_ORG = `Synthetic Phone Builders ${phone.name} ${RUN}`;
+  const NEED_ROLE = `Phone walk tiler ${phone.name} ${RUN}`;
+  const shared: { companyId: string; needId: string } = { companyId: "", needId: "" };
   const worker = email(`worker${phone.name}`);
   const workerName = `Synthetic Phone Worker ${phone.name} ${RUN}`;
   const headline = `Tiler and waterproofer ${phone.name} ${RUN}`;
@@ -183,6 +166,24 @@ for (const phone of PHONES) {
 
   test.describe(`at ${phone.viewport.width} × ${phone.viewport.height}`, () => {
     test.describe.configure({ mode: "serial" });
+    test(`M-0 (${phone.name}). setup at a desktop: a verified company posts a need`, async ({ browser }) => {
+      const ctx = await browser.newContext({ timezoneId: "UTC" });
+      const page = await ctx.newPage();
+      await signUp(page, BASE, COMPANY);
+      await onboard(page, "hire", `Synthetic Phone Owner ${phone.name} ${RUN}`);
+      await setUpCompany(page, COMPANY_ORG);
+      await publishNeed(page, BASE, NEED_ROLE, "LT");
+      sessions.set(COMPANY, await ctx.storageState());
+      await ctx.close();
+      shared.companyId = await verifyCompanyAsLocalAdmin(COMPANY, email(`admin${phone.name}`));
+      const owner = await userId(COMPANY);
+      const needs = sql<{ id: string }>(
+        `select id from public.customer_requests where (title = ${lit(NEED_ROLE)} or role_or_work_type = ${lit(NEED_ROLE)}) and profile_id = ${lit(owner)}`,
+      );
+      expect(needs, "the need is stored once").toHaveLength(1);
+      shared.needId = needs[0]!.id;
+    });
+
     test(`M-1 (${phone.name}). a new worker opens their profile from the avatar menu and saves a public headline`, async ({ browser }) => {
       const { ctx, page } = await onPhone(browser, phone);
       await signUp(page, BASE, worker);
