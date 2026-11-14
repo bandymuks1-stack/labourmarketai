@@ -99,6 +99,12 @@ describe("1. the client invitation is delivered through the one invitation primi
       // 2026-10-27: the owner's by-hand reprocess — three service_role-only RPCs, no table read.
       "lib/invitations/external-referral-reprocess-run.ts",
       "lib/invitations/signup-bridge.ts",
+      // 2026-11-13 (owner P0 invitation delivery reliability): keeps why a send failed — one
+      // service_role-only RPC, record_invitation_delivery_attempt_v1; no table read or write.
+      "lib/invitations/delivery-attempts.ts",
+      // 2026-11-13: the scheduled retry of confirmed-temporary partner referral failures — only
+      // service_role-only RPCs (candidates, reissue, mark, record, dead letter, health); no table.
+      "lib/invitations/delivery-retry-run.ts",
     ]);
     for (const rel of [...walk("lib/invitations"), ...walk("lib/agency")]) {
       const src = stripTs(read(rel));

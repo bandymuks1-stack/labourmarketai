@@ -37,6 +37,12 @@ export type ReferralRow = {
   readonly deliveryStatus: string;
   readonly consentGiven: boolean;
   readonly externalSource: string | null;
+  /** The recipient opened the link (candidates v4). A reissue rotates the token and would break
+   *  the link they hold — owner correction 2026-11-13 item 4 (incident 862a91f4). */
+  readonly firstOpenedAt?: string | null;
+  /** The LAST failure's class (candidates v4). Only a send that provably never left may be sent
+   *  again; an UNKNOWN_OUTCOME (or an unclassified old failure) is reconciled first. */
+  readonly failureClass?: string | null;
 };
 
 export type ExclusionReason =
@@ -50,7 +56,10 @@ export type ExclusionReason =
   | "has_account"
   | "already_mailed_address"
   | "reserved_address"
-  | "duplicate_address";
+  | "duplicate_address"
+  | "link_opened"
+  | "outcome_unknown"
+  | "permanent_failure";
 
 export type Selection = {
   readonly eligible: readonly ReferralRow[];
@@ -81,6 +90,14 @@ export function selectReprocessCandidates(
     if (!row.externalSource) skip("not_partner_referral");
     else if (row.status !== "pending") skip("not_pending");
     else if (row.deliveryStatus === "sent") skip("already_sent");
+    else if (row.firstOpenedAt) skip("link_opened");
+    else if (row.deliveryStatus === "delivery_failed" && row.failureClass === "PERMANENT") skip("permanent_failure");
+    else if (
+      row.deliveryStatus === "delivery_failed" &&
+      row.failureClass !== "TEMPORARY" &&
+      row.failureClass !== "CONFIGURATION"
+    )
+      skip("outcome_unknown");
     else if (!row.consentGiven) skip("no_consent");
     else if (!row.expiresAt || new Date(row.expiresAt) <= input.now) skip("expired");
     else if (!address) skip("no_address");

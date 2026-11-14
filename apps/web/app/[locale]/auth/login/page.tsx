@@ -34,11 +34,43 @@ export default async function LoginPage({
   setRequestLocale(locale);
   const providers = await getEnabledProviders();
   return (
-    <Suspense fallback={null}>
+    // The form reads the URL on the client, so it is not in the server's HTML: it
+    // appears once the scripts have run (5–6 s on a slow phone). Until then the page
+    // shows the form's outline AT THE FORM'S HEIGHT, not nothing. With nothing there,
+    // the consent notice below the form sat where the form would be and jumped down
+    // when it arrived (a measured layout shift of 0.11 on every load).
+    <Suspense fallback={<LoginFormSkeleton />}>
       <LoginForm
         linkedinEnabled={providers.linkedin_oidc}
         facebookEnabled={providers.facebook}
       />
     </Suspense>
+  );
+}
+
+/**
+ * The sign-in form's outline. Its height is the height of the shortest real form
+ * (measured on the live page: 778–875 px across four languages and four widths), so
+ * what follows the form starts where it will stay. Decorative: hidden from assistive
+ * technology, which is told the region is loading.
+ */
+function LoginFormSkeleton() {
+  return (
+    <div className="flex min-h-[48.5rem] flex-col gap-5 sm:gap-6" aria-busy="true" data-testid="login-form-skeleton">
+      <div aria-hidden className="flex flex-col gap-3">
+        <div className="h-9 w-2/3 animate-pulse rounded-md bg-ink-700/40" />
+        <div className="h-4 w-full animate-pulse rounded-md bg-ink-700/30" />
+      </div>
+      <div aria-hidden className="flex flex-col gap-3">
+        <div className="h-11 w-full animate-pulse rounded-md bg-ink-700/30" />
+        <div className="h-11 w-full animate-pulse rounded-md bg-ink-700/30" />
+        <div className="h-11 w-full animate-pulse rounded-md bg-ink-700/30" />
+      </div>
+      <div aria-hidden className="flex flex-col gap-4">
+        <div className="h-11 w-full animate-pulse rounded-md bg-ink-700/30" />
+        <div className="h-11 w-full animate-pulse rounded-md bg-ink-700/30" />
+        <div className="h-11 w-full animate-pulse rounded-md bg-ink-700/50" />
+      </div>
+    </div>
   );
 }

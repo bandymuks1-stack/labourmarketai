@@ -99,6 +99,8 @@ export async function applyPilotPass(
     eventCreated: input.evidence.created,
     unitAmountCents: grant.amountTotal,
     currency: grant.currency,
+    // parsePilotPassGrant returns a grant only for payment_status "paid".
+    lastPaymentStatus: "succeeded",
   });
 }
 

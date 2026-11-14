@@ -26,27 +26,23 @@ test.describe("@375px the public landing", () => {
   test.use({ viewport: { width: 375, height: 812 } });
 
   for (const locale of LOCALES) {
-    test(`/${locale}: every example chip is fully readable`, async ({ page }) => {
+    test(`/${locale}: the example in the field is fully readable`, async ({ page }) => {
+      // Landing V3 (owner, 2026-11-13): no example chips; the one example is
+      // the field's placeholder, and the owner saw it cut off on a phone.
       await page.goto(`${BASE}/${locale}`, { waitUntil: "networkidle" });
-      await expect(page.getByTestId("entry-example").first()).toBeVisible();
-      const chips = await page.getByTestId("entry-example").evaluateAll((els) =>
-        els.map((el) => {
-          const r = el.getBoundingClientRect();
-          const lineHeight = parseFloat(getComputedStyle(el).lineHeight);
-          return {
-            label: (el.textContent ?? "").trim(),
-            cut: el.scrollWidth > el.clientWidth + 1,
-            lines: Math.round((r.height - 12 - 2) / lineHeight),
-            right: r.right,
-          };
-        }),
-      );
-      expect(chips.length).toBeGreaterThan(0);
-      for (const chip of chips) {
-        expect(chip.cut, `"${chip.label}" is cut with an ellipsis`).toBe(false);
-        expect(chip.lines, `"${chip.label}" needs more than two lines`).toBeLessThanOrEqual(2);
-        expect(chip.right, `"${chip.label}" escapes the viewport`).toBeLessThanOrEqual(375.5);
-      }
+      const input = page.getByTestId("entry-input");
+      await expect(input).toBeVisible();
+      await expect(page.getByTestId("entry-example")).toHaveCount(0);
+      const fits = await input.evaluate((el) => {
+        const field = el as HTMLInputElement;
+        const style = getComputedStyle(field);
+        const canvas = document.createElement("canvas").getContext("2d")!;
+        canvas.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+        const room = field.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+        return { text: field.placeholder, width: canvas.measureText(field.placeholder).width, room };
+      });
+      expect(fits.text.length).toBeGreaterThan(0);
+      expect(fits.width, `"${fits.text}" is wider than the field`).toBeLessThanOrEqual(fits.room);
     });
 
     // The LIVE / FOCUS control that once covered the counter line is gone
@@ -66,7 +62,7 @@ test.describe("@375px the public landing", () => {
         els.map((el) => (el.textContent ?? "").replace(/\s+/g, " ").trim()),
       );
       expect(new Set(texts).size, `identical cards:\n${texts.join("\n")}`).toBe(texts.length);
-      expect(n).toBeLessThanOrEqual(4);
+      expect(n).toBeLessThanOrEqual(3);
     });
   }
 });
