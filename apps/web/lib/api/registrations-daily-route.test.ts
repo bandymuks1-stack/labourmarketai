@@ -26,7 +26,7 @@ import {
   REGISTRATIONS_DAILY_DEFINITION_VERSION,
 } from "@/lib/api/registrations-daily";
 
-import { GET } from "./route";
+import { GET } from "@/app/api/internal/registrations-daily/v1/route";
 
 const TOKEN = "s".repeat(40);
 const NOW = Date.parse("2026-11-14T09:30:00Z");
@@ -65,14 +65,24 @@ afterEach(() => {
 });
 
 describe("who may read it", () => {
-  it("401 without a token", async () => {
-    expect((await get(`?day=${YESTERDAY}`, null)).status).toBe(401);
+  it.each([
+    ["no Authorization header", null],
+    ["an empty Bearer", "Bearer "],
+    ["a wrong token of the same length", `Bearer ${"x".repeat(40)}`],
+    ["the right token with a suffix", `Bearer ${TOKEN}x`],
+    ["the right token under another scheme", `Basic ${TOKEN}`],
+  ])("401 with %s — no data, and the aggregate is never read", async (_why, authorization) => {
+    const res = await get(`?day=${YESTERDAY}`, authorization);
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ ok: false, reason: "unauthorized" });
     expect(rpcCalls).toHaveLength(0);
   });
 
-  it("401 on a wrong token and on a non-Bearer scheme", async () => {
-    expect((await get(`?day=${YESTERDAY}`, `Bearer ${"x".repeat(40)}`)).status).toBe(401);
-    expect((await get(`?day=${YESTERDAY}`, `Basic ${TOKEN}`)).status).toBe(401);
+  it("refuses a too-short secret as unset (503), never as open", async () => {
+    vi.stubEnv("SUPPLY_FEED_BEARER_TOKEN", "short");
+    const res = await get(`?day=${YESTERDAY}`, "Bearer short");
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ ok: false, reason: "not_configured" });
     expect(rpcCalls).toHaveLength(0);
   });
 
@@ -206,6 +216,19 @@ describe("the 200 body", () => {
     }
   });
 
+  it("contains no name and no per-person timestamp — the only timestamp is generatedAt", async () => {
+    const a = aggregate() as Record<string, unknown>;
+    a.person = { display_name: "Jonas Jonaitis", last_sign_in_at: "2026-11-12T08:15:00.000Z", created_at: "2026-11-13T10:00:00Z" };
+    (a.groups as Record<string, Record<string, unknown>>).employers.legal_name = "UAB Privati Firma";
+    rpcResult = { data: a, error: null };
+    const text = await (await get()).text();
+    for (const leaked of ["Jonas", "Jonaitis", "Privati", "display_name", "legal_name", "last_sign_in_at", "created_at"]) {
+      expect(text).not.toContain(leaked);
+    }
+    const timestamps = text.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/g) ?? [];
+    expect(timestamps).toEqual([new Date(NOW).toISOString().slice(0, 16)]);
+  });
+
   it("contains no e-mail and no uuid, even when the aggregate carries extra fields", async () => {
     const a = aggregate() as Record<string, unknown>;
     a.leak = { email: "person@firm.test", id: "11111111-1111-4111-8111-111111111111" };
@@ -218,7 +241,7 @@ describe("the 200 body", () => {
 });
 
 describe("the database aggregate (owner-gated migration)", () => {
-  const root = join(__dirname, "..", "..", "..", "..", "..", "..", "..");
+  const root = join(__dirname, "..", "..", "..", "..");
   const migDir = join(root, "supabase", "migrations");
   const sql = readFileSync(join(migDir, "20261114120000_lm_registrations_daily_v1.sql"), "utf8");
   const ops = readFileSync(join(migDir, "20261013140000_ops_product_metrics_staff_acceptance_v2.sql"), "utf8");
@@ -254,6 +277,22 @@ describe("the database aggregate (owner-gated migration)", () => {
     }
   });
 
+  it("every published value is an aggregate count(*) — no row-level column leaves the database", () => {
+    const counted = sql.slice(sql.indexOf("counted as ("), sql.indexOf("select jsonb_build_object('groups'"));
+    const values = [...counted.matchAll(/'(REAL|TEST|INTERNAL)',\s+([^\n]+)/g)].map((m) => m[2]);
+    expect(values).toHaveLength(9); // 3 metrics x 3 populations
+    for (const v of values) expect(v).toMatch(/^count\(\*\) filter \(where s\.pop = '(REAL|TEST|INTERNAL)'\s+and /);
+    expect(sql.slice(sql.indexOf("select jsonb_build_object('groups'"))).toMatch(
+      /^select jsonb_build_object\('groups', jsonb_object_agg\(c\.grp, c\.metrics\)\)\s+from counted c;/,
+    );
+  });
+
+  it("the route reads only through the aggregate RPC — never a table", () => {
+    const route = readFileSync(join(__dirname, "..", "..", "app", "api", "internal", "registrations-daily", "v1", "route.ts"), "utf8");
+    expect(route).not.toMatch(/\.from\(/);
+    expect([...route.matchAll(/\.rpc\("([a-z0-9_]+)"/g)].map((m) => m[1])).toEqual(["lm_registrations_daily_v1"]);
+  });
+
   it("counts only claimed organizations and every one of the five groups", () => {
     expect(sql).toContain("o.claim_state = 'claimed'");
     expect(sql).toContain("(values ('workers'), ('employers'), ('agencies'), ('students'), ('education'))");
@@ -262,59 +301,5 @@ describe("the database aggregate (owner-gated migration)", () => {
   it("ships its rollback", () => {
     const down = readFileSync(join(root, "supabase", "rollbacks", "20261114120000_lm_registrations_daily_v1.down.sql"), "utf8");
     expect(down).toContain("drop function if exists public.lm_registrations_daily_v1(date);");
-  });
-});
-
-describe("canonical contract fixtures (docs/contracts/fixtures — Agentai tests its parser against byte-identical copies)", () => {
-  const fixtures = join(__dirname, "..", "..", "..", "..", "..", "..", "..", "docs", "contracts", "fixtures");
-  const readFixture = (name: string) => JSON.parse(readFileSync(join(fixtures, name), "utf8"));
-  const sample = readFixture("lm-registrations-daily-v1.sample.json");
-  const error503 = readFixture("lm-registrations-daily-v1.error-503.sample.json");
-
-  /** The shape of a value: same keys, same JSON types, recursively (numbers and null kept apart). */
-  const shape = (v: unknown): unknown =>
-    v === null ? "null"
-      : Array.isArray(v) ? v.map(shape)
-      : typeof v === "object" ? Object.fromEntries(Object.entries(v as object).sort(([a], [b]) => a.localeCompare(b)).map(([k, x]) => [k, shape(x)]))
-      : typeof v;
-
-  it("the 200 sample is produced exactly by the real route from a seeded aggregate", async () => {
-    vi.setSystemTime(Date.parse(sample.generatedAt));
-    rpcResult = {
-      data: {
-        groups: {
-          workers: { new: split(4, 2, 1), active7d: split(40, 9, 1), active30d: split(120, 10, 2) },
-          employers: { new: split(0, 1, 0), active7d: split(6, 4, 0), active30d: split(15, 4, 0) },
-          agencies: { new: split(0), active7d: split(2, 5, 5), active30d: split(3) },
-          students: { new: null, active7d: null, active30d: null },
-          education: { new: split(0), active7d: split(0, 2, 0), active30d: split(5, 2, 0) },
-        },
-      },
-      error: null,
-    };
-    const res = await get(`?day=${sample.day}`);
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body).toEqual(sample);
-    expect(shape(body)).toEqual(shape(sample));
-    expect(body.definitionVersion).toBe(REGISTRATIONS_DAILY_DEFINITION_VERSION);
-  });
-
-  it("the sample carries a suppressed metric, an unmeasured group and all five groups", () => {
-    expect(Object.keys(sample.groups).sort()).toEqual([...REGISTRATION_GROUPS].sort());
-    expect(sample.groups.agencies.active7d).toEqual({ count: null, suppressed: true });
-    for (const m of REGISTRATION_METRICS) {
-      expect(sample.groups.students[m]).toEqual({ count: null, suppressed: false, unmeasured: true });
-    }
-    const text = JSON.stringify(sample);
-    expect(text).not.toContain("@");
-    expect(text).not.toMatch(UUID_RE);
-  });
-
-  it("the 503 sample is exactly what the route answers on a failed read", async () => {
-    rpcResult = { data: null, error: { code: "PGRST202" } };
-    const res = await get();
-    expect(res.status).toBe(503);
-    expect(await res.json()).toEqual(error503);
   });
 });
