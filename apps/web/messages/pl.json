@@ -5640,6 +5640,36 @@
             "Przy zapytaniach budowlanych nasza firma partnerska może koordynować dokumenty i wdrożenie — każdy krok prowadzi człowiek."
           ]
         }
+      },
+      "needs": {
+        "subcontracting": {
+          "metaTitle": "Podwykonawcy budowlani i brygady w Europie",
+          "metaDescription": "Opisz zakres prac, miejsce i terminy. Podwykonawcy i agencje mogą zaoferować całą brygadę; porównujesz oferty i uzgadniasz warunki. Bezpłatnie.",
+          "eyebrow": "Dla wykonawców",
+          "title": "Podwykonawcy i brygady",
+          "titleAccent": "do Twojego projektu.",
+          "subcopy": "Dla generalnych wykonawców i firm, które zlecają zakres prac. Podaj branżę, zakres, miejsce i terminy — oraz czy potrzebujesz jednego podwykonawcy, czy całej brygady.",
+          "cta": "Opisz zakres prac",
+          "points": [
+            "Wysłanie zakresu prac jest bezpłatne i nie wymaga konta, tylko adresu e-mail do kontaktu. Nic nie jest publikowane automatycznie.",
+            "Z bezpłatnym kontem firmowym podwykonawcy i agencje mogą zaoferować Ci brygadę jako jedną całość. Porównujesz oferty i uzgadniasz warunki bezpośrednio z nimi.",
+            "Gdy brygada pracuje w Twoim projekcie, jej członkowie zapisują tam godziny, a Ty je widzisz. Jeśli nie ma jeszcze odpowiedniej brygady, mówimy o tym wprost."
+          ]
+        },
+        "agency": {
+          "metaTitle": "Agencja pracy jako partner w Europie",
+          "metaDescription": "Opisz, jakich osób potrzebujesz, i wybierz dostawę przez agencję. Agencje na LabourMarket.ai podają, jakich pracowników mogą zapewnić. Bezpłatnie.",
+          "eyebrow": "Dla pracodawców szukających agencji",
+          "title": "Partner kadrowy",
+          "titleAccent": "dla potrzebnych Ci ludzi.",
+          "subcopy": "Dla firm, które chcą, by agencja dostarczyła lub zrekrutowała pracowników. Napisz, kogo potrzebujesz, ilu, gdzie i od kiedy, i wybierz dostawę przez agencję.",
+          "cta": "Opisz, kogo potrzebujesz",
+          "points": [
+            "Wysłanie zapytania jest bezpłatne i nie wymaga konta, tylko adresu e-mail do kontaktu. Nic nie jest publikowane automatycznie.",
+            "Agencje pracy na LabourMarket.ai podają, jakich pracowników mogą zapewnić. Z bezpłatnym kontem firmowym widzisz tę ofertę.",
+            "Pracownicy, firmy i agencje korzystają z tej samej platformy. Jeśli nie ma jeszcze odpowiedniego partnera, mówimy o tym wprost — nie wymyślamy dopasowań."
+          ]
+        }
       }
     },
     "agencies": {

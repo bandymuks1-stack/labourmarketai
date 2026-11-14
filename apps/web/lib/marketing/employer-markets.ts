@@ -51,6 +51,55 @@ export function employerMarketNeedQuery(market: EmployerMarket): string {
   return `country=${EMPLOYER_MARKETS[market].country}`;
 }
 
+/**
+ * EMPLOYER INTENTS (owner P1 2026-11-11, SEO/AEO positioning): the B2B
+ * searches that had no page, as versions of `/for-companies` in the same way as
+ * the markets: `?need=<intent>`, self-canonical, in the sitemap, ONE call to
+ * action. That action is the existing inquiry with its existing engagement
+ * model preselected (`engagement_model` in company-need-form), so no second
+ * intake exists.
+ *
+ *   subcontracting  "find construction subcontractors" and "find a crew": one
+ *                   page, not two thin twins. A crew can be offered as one unit
+ *                   and its hours reach the buyer (DEM-6, production walks), but
+ *                   production holds 0 real teams, so the copy never says a crew
+ *                   IS available.
+ *   agency          "find a recruitment / staffing partner": the employer side.
+ *                   `/for-agencies` speaks to the agency itself. An employer
+ *                   sees the supply agencies declared (DEM-9).
+ *
+ * A market takes precedence over an intent when a URL carries both.
+ */
+export const EMPLOYER_INTENTS = {
+  subcontracting: { engagement: "subcontracting" },
+  agency: { engagement: "agency_supply" },
+} as const;
+
+export type EmployerIntent = keyof typeof EMPLOYER_INTENTS;
+
+/** The intent a `?need=` value names, or null. Case-insensitive; the first value of a repeated parameter. */
+export function readEmployerIntent(raw: unknown): EmployerIntent | null {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof value !== "string") return null;
+  const code = value.trim().toLowerCase();
+  return Object.hasOwn(EMPLOYER_INTENTS, code) ? (code as EmployerIntent) : null;
+}
+
+/** An intent version's own indexable address (canonical, hreflang, sitemap). */
+export function employerIntentPath(intent: EmployerIntent): string {
+  return `/for-companies?need=${intent}`;
+}
+
+/** Every intent version's address, for the sitemap. */
+export const EMPLOYER_INTENT_PATHS: readonly string[] = (
+  Object.keys(EMPLOYER_INTENTS) as EmployerIntent[]
+).map(employerIntentPath);
+
+/** The company-need query an intent page's one call to action carries. */
+export function employerIntentNeedQuery(intent: EmployerIntent): string {
+  return `engagement=${EMPLOYER_INTENTS[intent].engagement}`;
+}
+
 /** UTM convention for employer adverts: one source/medium pair per channel. */
 export const EMPLOYER_AD_CHANNELS = {
   google: { utm_source: "google", utm_medium: "cpc" },

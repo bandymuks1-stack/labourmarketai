@@ -5640,6 +5640,36 @@
             "For construction inquiries, our partner company can coordinate documents and onboarding, with a person handling each step."
           ]
         }
+      },
+      "needs": {
+        "subcontracting": {
+          "metaTitle": "Construction subcontractors and crews in Europe",
+          "metaDescription": "Describe the work package, place and dates. Subcontractors and agencies can offer a whole crew; you compare the offers and agree terms. Free to submit.",
+          "eyebrow": "For contractors",
+          "title": "Subcontractors and crews",
+          "titleAccent": "for your project.",
+          "subcopy": "For main contractors and companies with a work package to hand over. Tell us the trade, the scope, the place and the dates — and whether you want one subcontractor or a whole crew.",
+          "cta": "Describe the work package",
+          "points": [
+            "Submitting the work package is free and needs no account, only a contact e-mail. Nothing is published automatically.",
+            "With a free company account, subcontractors and agencies can offer you a crew as one unit. You compare the offers and agree the terms with them directly.",
+            "Once a crew works on your project, its members record their hours there and you see them. If no suitable crew is available yet, we say so."
+          ]
+        },
+        "agency": {
+          "metaTitle": "Find a staffing or recruitment partner in Europe",
+          "metaDescription": "Describe the people you need and choose agency supply. Staffing agencies on LabourMarket.ai declare the workers they can supply. Free to submit.",
+          "eyebrow": "For employers looking for an agency",
+          "title": "A staffing partner",
+          "titleAccent": "for the people you need.",
+          "subcopy": "For companies that want an agency to supply or recruit workers. Tell us which people you need, how many, where and from when, and choose agency supply.",
+          "cta": "Describe the people you need",
+          "points": [
+            "Submitting an inquiry is free and needs no account, only a contact e-mail. Nothing is published automatically.",
+            "Staffing agencies on LabourMarket.ai declare the workers they can supply. With a free company account you see that supply.",
+            "Workers, companies and agencies use the same platform. If no suitable partner is available yet, we say so — we never invent a match."
+          ]
+        }
       }
     },
     "agencies": {

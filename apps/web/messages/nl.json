@@ -5640,6 +5640,36 @@
             "Bij bouwaanvragen kan ons partnerbedrijf documenten en inwerken coördineren, met een mens die elke stap begeleidt."
           ]
         }
+      },
+      "needs": {
+        "subcontracting": {
+          "metaTitle": "Onderaannemers en bouwploegen in Europa",
+          "metaDescription": "Beschrijf het werkpakket, de plaats en de planning. Onderaannemers en bureaus kunnen een hele ploeg aanbieden; u vergelijkt en spreekt voorwaarden af. Gratis.",
+          "eyebrow": "Voor aannemers",
+          "title": "Onderaannemers en ploegen",
+          "titleAccent": "voor uw project.",
+          "subcopy": "Voor hoofdaannemers en bedrijven die een werkpakket uitbesteden. Noem het vak, de omvang, de plaats en de planning — en of u één onderaannemer of een hele ploeg zoekt.",
+          "cta": "Beschrijf het werkpakket",
+          "points": [
+            "Het werkpakket versturen is gratis en vraagt geen account, alleen een contact-e-mailadres. Niets wordt automatisch gepubliceerd.",
+            "Met een gratis bedrijfsaccount kunnen onderaannemers en bureaus u een ploeg als één geheel aanbieden. U vergelijkt de aanbiedingen en spreekt de voorwaarden rechtstreeks met hen af.",
+            "Werkt een ploeg in uw project, dan registreren de leden daar hun uren en ziet u ze. Is er nog geen passende ploeg, dan zeggen we dat."
+          ]
+        },
+        "agency": {
+          "metaTitle": "Een uitzend- of wervingspartner vinden in Europa",
+          "metaDescription": "Beschrijf welke mensen u zoekt en kies levering via een bureau. Uitzendbureaus op LabourMarket.ai geven aan welke mensen zij kunnen leveren. Gratis.",
+          "eyebrow": "Voor werkgevers die een bureau zoeken",
+          "title": "Een personeelspartner",
+          "titleAccent": "voor de mensen die u zoekt.",
+          "subcopy": "Voor bedrijven die via een bureau mensen willen inlenen of laten werven. Vertel ons welke mensen u nodig hebt, hoeveel, waar en vanaf wanneer, en kies levering via een uitzendbureau.",
+          "cta": "Beschrijf de mensen die u zoekt",
+          "points": [
+            "Een aanvraag versturen is gratis en vraagt geen account, alleen een contact-e-mailadres. Niets wordt automatisch gepubliceerd.",
+            "Uitzendbureaus op LabourMarket.ai geven aan welke mensen zij kunnen leveren. Met een gratis bedrijfsaccount ziet u dat aanbod.",
+            "Werknemers, bedrijven en bureaus gebruiken hetzelfde platform. Is er nog geen passende partner, dan zeggen we dat — we verzinnen geen match."
+          ]
+        }
       }
     },
     "agencies": {
