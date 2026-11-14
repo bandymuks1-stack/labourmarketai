@@ -36,3 +36,23 @@ describe("scouting: the contact button is offered only where the server accepts 
     }
   });
 });
+
+describe("scouting: proposing dates is offered only where the database accepts it", () => {
+  const repo = join(web, "..", "..");
+  const fn = readFileSync(
+    join(repo, "supabase/migrations/20261021095200_booking_propose_reachable_open_v1.sql"),
+    "utf8",
+  );
+
+  it("the database function still accepts only the need's author", () => {
+    expect(fn).toMatch(/where cr\.id = p_request_id and cr\.profile_id = uid;/);
+    expect(fn).toContain("raise exception 'Not your demand'");
+  });
+
+  it("every propose-dates button on the page sits behind the author check", () => {
+    const buttons = page.split("<ProposeBookingButton").length - 1;
+    expect(buttons).toBe(3);
+    const guarded = page.match(/\{result(\?\.kind === "ok" && result)?\.demand\.ownedByCaller \? \(\s+<ProposeBookingButton/g);
+    expect(guarded?.length).toBe(buttons);
+  });
+});
