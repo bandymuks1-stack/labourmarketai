@@ -446,3 +446,271 @@ test("P-2. on a desktop the onboarding buttons stay where they were, in the page
     await ctx.close();
   }
 });
+
+// ── Education: institution ↔ student acceptance (owner direction 2026-11-14, Lane L) ──
+//
+// One institution and one student, both created here and gone with the job.
+// Order is deliberate: E-1 links them, E-3 turns the student into a worker,
+// E-4 ends the student link, and E-2 (student-initiated messaging) runs LAST
+// with its own fresh student, so that an open product gap in messaging cannot
+// hide the history and access proofs behind a serial skip.
+
+const EDU = {
+  institution: email("edu.institution"),
+  student: email("edu.student"),
+  student2: email("edu.student2"),
+  orgName: `Synthetic Training Centre ${RUN}`,
+  studiesAt: `Synthetic Vocational School ${RUN}`,
+  learnerName: `Synthetic Learner ${RUN}`,
+};
+const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+
+/** A REST read AS a signed-in person (their own JWT, their own RLS). */
+async function asPerson<T>(address: string, path: string): Promise<T> {
+  const tok = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: { apikey: ANON, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: address, password: PASSWORD }),
+  });
+  const { access_token } = (await tok.json()) as { access_token?: string };
+  if (!access_token) throw new Error(`no session for the synthetic person (${tok.status})`);
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    headers: { apikey: ANON, Authorization: `Bearer ${access_token}` },
+  });
+  if (!r.ok) throw new Error(`person read ${path.split("?")[0]} → ${r.status}`);
+  return (await r.json()) as T;
+}
+
+/** A service read that some tables refuse even to the service key: null = not readable here. */
+async function dbOrNull<T>(path: string): Promise<T | null> {
+  try {
+    return await db<T>(path);
+  } catch (e) {
+    console.info(`[edu] ${String(e)} — falling back to what the screens show`);
+    return null;
+  }
+}
+
+async function signUpStudent(page: Page, address: string, displayName: string): Promise<void> {
+  await signUp(page, address);
+  await page.getByTestId("onboarding-intent-student").click();
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill(displayName);
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await page.getByTestId("onboarding-institution").fill(EDU.studiesAt);
+  await page.getByTestId("onboarding-submit").click();
+  await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+}
+
+/** The institution's learner invitation by link (no e-mail), as in prod L-2. */
+async function inviteLearnerLink(page: Page, name: string): Promise<string> {
+  await page.goto(`${BASE}/en/dashboard/company/education`);
+  await expect(page.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("institution-learners-invite").click();
+  await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
+  const open = page.getByTestId("invite-panel-open");
+  if (await open.isVisible().catch(() => false)) await open.click();
+  await expect(page.getByTestId("invite-capacity")).toHaveValue("student", { timeout: 30_000 });
+  const linkMode = page.getByTestId("invite-mode-link");
+  if (await linkMode.isVisible().catch(() => false)) await linkMode.click();
+  const nameField = page.getByTestId("invite-name");
+  if (await nameField.isVisible().catch(() => false)) await nameField.fill(name);
+  await page.getByTestId("invite-submit").click();
+  const copy = page.getByTestId("invite-copy-link").first();
+  await expect(copy, "the learner invitation link is handed over").toBeVisible({ timeout: 30_000 });
+  const u = new URL((await copy.getAttribute("data-invite-link")) ?? "");
+  return `${BASE}${u.pathname}${u.search}`;
+}
+
+async function acceptInvite(page: Page, link: string): Promise<void> {
+  await page.goto(link);
+  await expect(page.getByTestId("invite-page")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("invite-accept").click();
+  await page.waitForURL((u) => !u.pathname.includes("/invite/"), { timeout: 30_000 });
+}
+
+let eduStudentWorkerId = "";
+
+test("E-1. an institution trains people and invites a learner by link; a student accepts it", async ({ browser }) => {
+  // The institution: sign-up → "education" intent → organisation setup with the training-provider preset.
+  const a = await browser.newContext();
+  const inst = await a.newPage();
+  await signUp(inst, EDU.institution);
+  await onboard(inst, "education", "Synthetic Lecturer");
+  await inst.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+  await inst.getByTestId("company-setup-legal-name").fill(EDU.orgName);
+  await inst.getByTestId("company-setup-country").selectOption("LT");
+  await inst.getByTestId("company-setup-save-draft").click();
+  await expect(inst.getByTestId("company-setup-next")).toBeVisible({ timeout: 30_000 });
+  await inst.goto(`${BASE}/en/dashboard/company/education`);
+  if (!/\/company\/education/.test(inst.url())) {
+    // The preset did not land: declare it where the product offers it (as prod L-1 does).
+    await inst.goto(`${BASE}/en/dashboard/company/settings`);
+    const more = inst.getByTestId("settings-more");
+    if ((await more.getAttribute("open")) === null) await more.locator("summary").first().click();
+    await inst.getByTestId("org-capability-checkbox-training_provider").check();
+    await inst.getByTestId("org-capabilities-save").click();
+    await expect(inst.getByTestId("org-capabilities-saved")).toBeVisible({ timeout: 30_000 });
+  }
+  const link = await inviteLearnerLink(inst, EDU.learnerName);
+  await a.close();
+
+  // The student: registers as a student, then joins through the link.
+  const b = await browser.newContext();
+  const stu = await b.newPage();
+  await signUpStudent(stu, EDU.student, "Synthetic Student");
+  await acceptInvite(stu, link);
+  await b.close();
+
+  const sid = await userId(EDU.student);
+  const [worker] = await db<Array<{ id: string }>>(`workers?profile_id=eq.${sid}&select=id`);
+  expect(worker?.id, "the student is a person with a worker record").toBeTruthy();
+  eduStudentWorkerId = worker!.id;
+  const inv = await db<Array<{ status: string; accepted_by_profile_id: string | null }>>(
+    `invitations?invited_name=eq.${encodeURIComponent(EDU.learnerName)}&select=status,accepted_by_profile_id`,
+  );
+  expect(inv[0], "the learner invitation is accepted by the student").toEqual({ status: "accepted", accepted_by_profile_id: sid });
+
+  // The institution sees one connected learner.
+  const c = await browser.newContext();
+  const again = await c.newPage();
+  await signIn(again, EDU.institution, PASSWORD);
+  await again.goto(`${BASE}/en/dashboard/company/education`);
+  await expect(again.getByTestId("institution-learners-counts")).toContainText("1 connected", { timeout: 30_000 });
+  await c.close();
+});
+
+test("E-3. the student becomes a worker: studies end, work is recorded, and nothing of the history is lost", async ({ page }) => {
+  await signIn(page, EDU.student, PASSWORD);
+  // Studies end — the student's own education editor.
+  await page.goto(`${BASE}/en/dashboard/profile`);
+  const row = page.getByTestId("worker-education-row").filter({ hasText: EDU.studiesAt });
+  await expect(row).toHaveCount(1, { timeout: 30_000 });
+  await row.getByRole("button", { name: "Edit" }).click();
+  const form = page.getByTestId("worker-education-form");
+  await expect(form).toBeVisible();
+  await form.getByRole("checkbox").uncheck();
+  await form.locator('input[aria-labelledby="education-end-year-label"]').fill(String(new Date().getUTCFullYear()));
+  await form.getByTestId("worker-education-save").click();
+  await expect(row, "the study is now finished, not current").not.toContainText("Currently studying", { timeout: 30_000 });
+
+  // First work as a worker — the Work Journal (pattern S-7).
+  await page.goto(`${BASE}/en/dashboard/journal`);
+  const main = page.getByRole("main");
+  await main.getByTestId("journal-quick-record-text").fill(`Assembled 8 office desks at the client's site, 6 hours (edu ${RUN})`);
+  await main.getByTestId("journal-quick-record-understand").click();
+  await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
+  await main.getByTestId("worklog-save").click();
+  await main.getByTestId("worklog-confirm").click();
+  await expect(main.getByTestId("worklog-done"), "the first work day is saved").toBeVisible({ timeout: 30_000 });
+
+  // Stored: one study row (ended, kept), the student link kept, the work entry.
+  const sid = await userId(EDU.student);
+  const studies = await db<Array<{ institution_name: string; is_current: boolean }>>(
+    `worker_education?profile_id=eq.${sid}&select=institution_name,is_current`,
+  );
+  expect(studies, "the study is kept, now finished").toEqual([{ institution_name: EDU.studiesAt, is_current: false }]);
+  const work = await db<Array<{ id: string }>>(`journal_entries?worker_id=eq.${eduStudentWorkerId}&select=id`);
+  expect(work.length, "the work day is stored on the same person").toBeGreaterThan(0);
+  const links = await dbOrNull<Array<{ relationship_slug: string; status: string }>>(
+    `engagement_contexts?profile_id=eq.${sid}&select=relationship_slug,status`,
+  );
+  if (links) expect(links.map((l) => l.relationship_slug), "the student period is kept").toContain("student");
+
+  // One history on the Living CV: the study, the student period at the institution, and the work.
+  await page.goto(`${BASE}/en/cv`);
+  await expect(page.getByTestId("cv-education-row").filter({ hasText: EDU.studiesAt }), "the study on the CV").toHaveCount(1, { timeout: 30_000 });
+  const periods = page
+    .locator('[data-testid="cv-practice-history"], [data-testid="cv-organizations-roles"], [data-testid="cv-work-history"]')
+    .filter({ hasText: EDU.orgName });
+  await expect(periods.first(), "the student period at the institution stays in the one history").toBeVisible({ timeout: 30_000 });
+});
+
+test("E-4. the institution ends the student link: it loses access, the learner keeps their history", async ({ browser }) => {
+  const a = await browser.newContext();
+  const inst = await a.newPage();
+  await signIn(inst, EDU.institution, PASSWORD);
+  await inst.goto(`${BASE}/en/dashboard/company/people`);
+  // The lifecycle list sits in folded sections; unfold them.
+  for (let i = 0; i < 12; i++) {
+    const closed = inst.locator("main details:not([open]) > summary");
+    if ((await closed.count()) === 0) break;
+    await closed.first().click();
+  }
+  const member = inst.getByTestId("lifecycle-member").filter({ hasText: "Student" });
+  await expect(member, "the institution's learner is in its people lifecycle").toHaveCount(1, { timeout: 30_000 });
+  await member.getByRole("button", { name: "End employment" }).click();
+  await inst.waitForLoadState("networkidle").catch(() => undefined);
+
+  const sid = await userId(EDU.student);
+  const links = await dbOrNull<Array<{ relationship_slug: string; status: string }>>(
+    `engagement_contexts?profile_id=eq.${sid}&relationship_slug=eq.student&select=relationship_slug,status`,
+  );
+  if (links) expect(links, "the link is ended, not deleted").toEqual([{ relationship_slug: "student", status: "ended" }]);
+
+  await inst.goto(`${BASE}/en/dashboard/company/education`);
+  await expect(inst.getByTestId("institution-learners-counts"), "no connected learner remains").toContainText("0 connected", { timeout: 30_000 });
+  await a.close();
+
+  // Access, read under the institution's own RLS: no active link, none of the learner's journal.
+  const activeLinks = await asPerson<Array<{ id: string }>>(
+    EDU.institution,
+    `engagement_contexts?profile_id=eq.${sid}&status=eq.active&select=id`,
+  );
+  expect(activeLinks, "the institution sees no active link to the learner").toEqual([]);
+  const journal = await asPerson<Array<{ id: string }>>(
+    EDU.institution,
+    `journal_entries?worker_id=eq.${eduStudentWorkerId}&select=id`,
+  );
+  expect(journal, "the institution reads none of the learner's journal").toEqual([]);
+
+  // The learner keeps their own history.
+  const own = await asPerson<Array<{ id: string }>>(EDU.student, `journal_entries?worker_id=eq.${eduStudentWorkerId}&select=id`);
+  expect(own.length, "the learner still reads their own work").toBeGreaterThan(0);
+  const b = await browser.newContext();
+  const stu = await b.newPage();
+  await signIn(stu, EDU.student, PASSWORD);
+  await stu.goto(`${BASE}/en/cv`);
+  await expect(stu.getByTestId("cv-education-row").filter({ hasText: EDU.studiesAt })).toHaveCount(1, { timeout: 30_000 });
+  await b.close();
+});
+
+test("E-2. a student writes first to their own institution, and the institution's person sees the message", async ({ browser }) => {
+  // A second learner of the same institution, linked now (E-4 ended the first one).
+  const a = await browser.newContext();
+  const inst = await a.newPage();
+  await signIn(inst, EDU.institution, PASSWORD);
+  const link = await inviteLearnerLink(inst, `${EDU.learnerName} two`);
+  await a.close();
+
+  const b = await browser.newContext();
+  const stu = await b.newPage();
+  await signUpStudent(stu, EDU.student2, "Synthetic Student Two");
+  await acceptInvite(stu, link);
+
+  // The requirement: from their relationships, the learner opens a conversation with the institution.
+  await stu.goto(`${BASE}/en/dashboard/network`);
+  const rel = stu.getByTestId("network-relationships");
+  await expect(
+    rel.locator('[data-testid^="network-engagement-"]').filter({ hasText: EDU.orgName }),
+    "the institution is among the learner's relationships",
+  ).toHaveCount(1, { timeout: 30_000 });
+  const door = rel.locator('[data-testid^="message-button-"]');
+  await expect(door.first(), "a door to write to the institution").toBeVisible({ timeout: 30_000 });
+  await door.first().click();
+  await stu.waitForURL(/\/dashboard\/inbox/, { timeout: 30_000 });
+  const text = `Question about my placement (edu ${RUN})`;
+  const composer = stu.getByRole("main").getByRole("textbox").first();
+  await composer.fill(text);
+  await composer.press("Enter");
+  await expect(stu.getByText(text).first(), "the message is sent").toBeVisible({ timeout: 30_000 });
+  await b.close();
+
+  const c = await browser.newContext();
+  const again = await c.newPage();
+  await signIn(again, EDU.institution, PASSWORD);
+  await again.goto(`${BASE}/en/dashboard/inbox`);
+  await expect(again.getByText(/Question about my placement/).first(), "the institution's person sees it").toBeVisible({ timeout: 30_000 });
+  await c.close();
+});
