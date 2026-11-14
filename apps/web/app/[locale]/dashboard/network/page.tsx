@@ -555,6 +555,19 @@ export default async function NetworkPage({
                         {c.country && (
                           <span className="text-meta text-text-muted">{c.country}</span>
                         )}
+                        {/* Owner decision 2026-11-11 (D2): a company that has
+                            not taken over its profile is findable only here,
+                            signed in, and says so — never as if it used the
+                            platform. */}
+                        {c.confirmed === false && (
+                          <span
+                            className="text-meta text-text-muted"
+                            title={t("search.unconfirmedHint")}
+                            data-testid={`network-company-unconfirmed-${c.organizationId}`}
+                          >
+                            {t("search.unconfirmed")}
+                          </span>
+                        )}
                         {/* Trust Connect Teams v1: where a TEAM is already
                             legitimately visible (this public-display search),
                             the structured enquiry replaces off-platform

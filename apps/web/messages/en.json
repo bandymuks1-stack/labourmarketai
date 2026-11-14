@@ -12633,6 +12633,8 @@
         "team": "Team",
         "other": "Organization"
       },
+      "unconfirmed": "Unconfirmed",
+      "unconfirmedHint": "Unconfirmed: the company has not taken over this profile yet. Only public data is shown.",
       "visibilityReason": "Only people who consented to be discoverable, or who have a real work relationship with you, are shown.",
       "noContactYet": "Messaging opens only after an invitation or shared work. Invite them — or request one of their services."
     },

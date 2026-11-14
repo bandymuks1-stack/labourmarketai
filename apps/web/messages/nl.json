@@ -12633,6 +12633,8 @@
         "team": "Team",
         "other": "Organisatie"
       },
+      "unconfirmed": "Niet bevestigd",
+      "unconfirmedHint": "Niet bevestigd: het bedrijf heeft dit profiel nog niet overgenomen. Alleen openbare gegevens worden getoond.",
       "visibilityReason": "Alleen mensen die vindbaar willen zijn of een echte werkrelatie met jou hebben, worden getoond.",
       "noContactYet": "Berichten kan pas na een uitnodiging of samenwerking. Nodig uit — of vraag een van hun diensten aan."
     },

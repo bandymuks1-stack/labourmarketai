@@ -12633,6 +12633,8 @@
         "team": "Zespół",
         "other": "Organizacja"
       },
+      "unconfirmed": "Niepotwierdzona",
+      "unconfirmedHint": "Niepotwierdzona: firma nie przejęła jeszcze tego profilu. Pokazujemy tylko dane publiczne.",
       "visibilityReason": "Pokazywane są tylko osoby, które wyraziły zgodę na bycie widocznymi, lub które mają z Tobą rzeczywistą relację zawodową.",
       "noContactYet": "Wiadomości są możliwe dopiero po zaproszeniu lub wspólnej pracy. Zaproś — albo poproś o usługę."
     },
