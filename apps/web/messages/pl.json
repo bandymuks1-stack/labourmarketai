@@ -2049,6 +2049,7 @@
     "addError": "Nie udało się dodać. Spróbuj ponownie.",
     "addExperienceTitle": "Dodaj doświadczenie zawodowe",
     "expTitleLabel": "Stanowisko",
+    "expKindLabel": "Rodzaj zaangażowania",
     "expTitlePlaceholder": "np. spawacz, pielęgniarka, pracownik magazynu, programista",
     "expStartLabel": "Od (miesiąc / rok)",
     "expEndLabel": "Do (miesiąc / rok)",

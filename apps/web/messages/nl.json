@@ -2049,6 +2049,7 @@
     "addError": "Toevoegen is niet gelukt. Probeer het opnieuw.",
     "addExperienceTitle": "Werkervaring toevoegen",
     "expTitleLabel": "Functie",
+    "expKindLabel": "Soort dienstverband",
     "expTitlePlaceholder": "Bijv. lasser, verpleegkundige, magazijnmedewerker, ontwikkelaar",
     "expStartLabel": "Van (maand / jaar)",
     "expEndLabel": "Tot (maand / jaar)",
