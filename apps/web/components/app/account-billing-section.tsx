@@ -6,6 +6,8 @@ import { findBillingCustomer } from "@/lib/billing/customer-store";
 import { BillingPortalButton } from "@/components/app/billing-portal-button";
 import { RefreshBillingStatusButton } from "@/components/app/refresh-billing-status-button";
 import { TestCheckoutButton } from "@/components/marketing/test-checkout-button";
+import { AccountBillingInvoices } from "@/components/app/account-billing-invoices";
+import { readOrganizationInvoices } from "@/lib/billing/org-invoices";
 import { resolveBillingSubject } from "@/lib/billing/billing-subject";
 import { ORGANIZATION_PLAN_KEY } from "@/lib/billing/plans";
 import { subscriptionBlocksCheckout } from "@/lib/billing/checkout-operations-core";
@@ -89,6 +91,10 @@ export async function AccountBillingSection({
     const lookup = await findBillingCustomer(ent.profileId);
     portalAvailable = lookup.status === "found";
   }
+  // Registry 7.20: the organization's own Stripe invoices, read live for its
+  // billing managers only (org-invoices.ts resolves the organization, the
+  // authority and the customers on the server; a non-manager gets nothing).
+  const invoices = await readOrganizationInvoices();
   // Owner launch pricing 2026-09-05: the ONE paid plan (ORGANIZATION, €99 —
   // the figure lives in plans.price_eur_monthly, never here) is ordered HERE,
   // server-bound to the organization the person acts for with billing
@@ -235,6 +241,37 @@ export async function AccountBillingSection({
           ) : null}
         </div>
       )}
+
+      <AccountBillingInvoices
+        result={invoices}
+        locale={await getLocale()}
+        labels={{
+          title: t("invoices.title"),
+          billingOff: t("invoices.billingOff"),
+          noCustomer: t("invoices.noCustomer"),
+          unknown: t("invoices.unknown"),
+          empty: t("invoices.empty"),
+          incomplete: t("invoices.incomplete"),
+          number: t("invoices.number"),
+          noNumber: t("invoices.noNumber"),
+          date: t("invoices.date"),
+          period: t("invoices.period"),
+          oneTime: t("invoices.oneTime"),
+          excludingVat: t("invoices.excludingVat"),
+          vat: t("invoices.vat"),
+          total: t("invoices.total"),
+          notReported: t("invoices.notReported"),
+          view: t("invoices.view"),
+          pdf: t("invoices.pdf"),
+          opensStripe: t("invoices.opensStripe"),
+          status: {
+            paid: t("invoices.status.paid"),
+            open: t("invoices.status.open"),
+            void: t("invoices.status.void"),
+            uncollectible: t("invoices.status.uncollectible"),
+          },
+        }}
+      />
       </section>
     </Card>
   );
