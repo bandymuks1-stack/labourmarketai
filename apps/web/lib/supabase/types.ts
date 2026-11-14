@@ -11954,6 +11954,7 @@ export type Database = {
         Args: { p_organization_id: string }
         Returns: Json
       }
+      invitation_known_historical_unknown_v1: { Args: { p_ids: string[] }; Returns: number }
       invitation_org_authority_v1: {
         Args: { p_organization_id: string }
         Returns: boolean

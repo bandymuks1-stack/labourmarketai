@@ -76,8 +76,13 @@ tail -5 /root/lm-prod/invitation-delivery.log          # mode=retry http=200 …
 tail -5 /root/lm-prod/invitation-delivery-alerts.log   # ALERT / NOTIFY agentai-inbox / CLEAR lines, if any
 ls /var/lib/docker/volumes/agentai_agentai-runtime/_data/inbox/project-events/processed | grep invitation-delivery | tail -3
 ```
-- `unknown_outcome_open` ≥ 1 is EXPECTED right after step 1: invitation 862a91f4 is an unclassified old
-  failure. It is never re-sent automatically (its link was opened); the owner decides.
+- Invitation 862a91f4 is an unclassified pre-ledger failure. **Owner decision 2026-11-14: NO RESEND** —
+  the link stays valid, its UNKNOWN_OUTCOME state and open history are kept, it is never marked
+  delivered. It is registered in `apps/web/lib/invitations/known-historical-outcomes.ts` as
+  `KNOWN_HISTORICAL_UNKNOWN_OUTCOME`: health shows it as `known_historical_unknown_outcome: 1`
+  (diagnostics) and it no longer raises `unknown_outcome_open`. It falls back to an ordinary alerting row
+  the moment it gets a ledgered attempt, a failure class or a bounce. Any OTHER unknown outcome, bounce or
+  dead letter alerts at once. To register another reviewed case: owner decision first, then a PR.
 
 ## Rollback (any stage, independent)
 
