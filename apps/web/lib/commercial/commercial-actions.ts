@@ -34,7 +34,8 @@ function mapError(error: { code?: string; message?: string }): CommercialActionR
   }
   const msg = (error.message ?? "").toLowerCase();
   if (error.code === "42501" || msg.includes("not authorized")) return { ok: false, code: "not_authorized" };
-  if (msg.includes("required") || msg.includes("invalid")) return { ok: false, code: "invalid" };
+  // 23505: reopening a proposal while another one is open for the same service request.
+  if (error.code === "23505" || msg.includes("required") || msg.includes("invalid")) return { ok: false, code: "invalid" };
   console.error("[commercial] write failed:", error.message);
   return { ok: false, code: "error", message: error.message };
 }

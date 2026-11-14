@@ -191,6 +191,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261028123000_",
       // 2026-10-29 (RED, owner-approved, APPLIED ledger 20261029180012): the worker reader projects the need's required skills as catalogue slugs.
       "20261029190000_",
+      // 2026-11-02 (RED-1 J-13, needs-human-gate, NOT applied): accepted service request → proposal link.
+      "20261102154500_",
       // 2026-11-02 (RED draft #2959, NOT applied): J-12 learner join requests on the existing cohort membership row.
       "20261102160000_",
       // 2026-11-03 (RED draft, NOT applied): J-12 follow-up — set_education_cohort_member_v1 refuses request rows.
