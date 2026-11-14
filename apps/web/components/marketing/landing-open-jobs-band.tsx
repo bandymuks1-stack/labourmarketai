@@ -6,7 +6,7 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import type { LiveMarketVacancySample } from "@/lib/market/live-market-landing";
 import { PublicVacancyCard } from "@/components/marketing/public-vacancy-card";
 import { displayLanguageName } from "@/lib/i18n/language-name";
-import { Reveal } from "@/components/marketing/reveal";
+import { Reveal } from "@/components/marketing/lazy-motion";
 
 /**
  * REAL OPPORTUNITIES — a few live vacancies, on the landing, from the board.
@@ -36,9 +36,13 @@ import { Reveal } from "@/components/marketing/reveal";
 export async function LandingOpenJobsBand({
   sample,
   locale,
+  compact = false,
 }: {
   readonly sample: LiveMarketVacancySample;
   readonly locale: ActiveLocale;
+  /** Landing V3: at most three adverts in one row, no heading of their own
+   *  (they sit inside the market block). Same reader, same card. */
+  readonly compact?: boolean;
 }) {
   if (sample.basis !== "live" || sample.vacancies.length === 0) return null;
 
@@ -62,6 +66,33 @@ export async function LandingOpenJobsBand({
           language: displayLanguageName(code, locale),
         })
       : undefined;
+
+  if (compact) {
+    return (
+      <div data-testid="landing-open-jobs" className="mt-4">
+        <ul className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+          {sample.vacancies.slice(0, 3).map((vacancy) => (
+            <li key={vacancy.id} data-testid="landing-open-job" className="min-w-0 [overflow-wrap:anywhere]">
+              <PublicVacancyCard
+                vacancy={vacancy}
+                locale={locale}
+                headingFallback={professionName(vacancy.professionSlug)}
+                sourceLanguageLabel={sourceLanguageLabel(vacancy.sourceLanguage)}
+              />
+            </li>
+          ))}
+        </ul>
+        <Link
+          href="/jobs"
+          data-testid="landing-open-jobs-all"
+          className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand-blue underline-offset-4 hover:underline"
+        >
+          {t("all")}
+          <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <section
