@@ -10711,7 +10711,8 @@
     "receivedTitle": "Užklausa gauta",
     "receivedBody": "Gavome tavo užklausą ir laikome ją tolesniam kontaktui su tavimi. Kad matytum ir tvarkytum ją, susikurk paskyrą arba prisijunk žemiau.",
     "partnerRouteTitle": "Statybų užklausoms — partnerių įmonių kelias",
-    "partnerRouteBody": "Jeigu tinkamo tiesioginio darbuotojo atitikmens dar nėra, statybų užklausoms pirmiausia galime rekomenduoti kreiptis į mūsų partnerę UAB „Nonstop Group“ (LT) — platformos operatorę. Tai padeda greičiau suderinti dokumentus, atsakomybes ir įdarbinimo eigą, kiekvieną žingsnį koordinuojant žmogui."
+    "partnerRouteBody": "Jeigu tinkamo tiesioginio darbuotojo atitikmens dar nėra, statybų užklausoms pirmiausia galime rekomenduoti kreiptis į mūsų partnerę UAB „Nonstop Group“ (LT) — platformos operatorę. Tai padeda greičiau suderinti dokumentus, atsakomybes ir įdarbinimo eigą, kiekvieną žingsnį koordinuojant žmogui.",
+    "notSpecified": "Nenurodyta"
   },
   "candidatePool": {
     "title": "Kandidatų telkinys",

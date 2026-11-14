@@ -40,14 +40,15 @@ export type PublicIntakeInput = {
   readonly country: string;
   readonly cityRegion?: string;
   readonly sector: string;
-  readonly headcount: number;
+  /** NULL / absent = the company did not say (never a default). */
+  readonly headcount: number | null;
   readonly startWindow?: string;
   readonly expectedDuration?: string;
-  readonly urgency: string;
-  readonly accommodation: string;
-  readonly transportNeeded: boolean;
+  readonly urgency: string | null;
+  readonly accommodation: string | null;
+  readonly transportNeeded: boolean | null;
   readonly languages?: string;
-  readonly engagementType: string;
+  readonly engagementType: string | null;
   readonly description: string;
   readonly sourcePath: string;
 };

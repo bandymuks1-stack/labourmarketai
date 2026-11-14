@@ -70,9 +70,11 @@ export function requestDoorIntake(door: RequestDoor, locale: string, read: Read)
     contactPhone: phone || undefined,
     country,
     cityRegion: city || undefined,
-    urgency: "flexible",
-    accommodation: "not_provided",
-    transportNeeded: false,
+    // The doors ask none of these, so none is stored (owner P0 2026-11-10):
+    // NULL = not answered, never an invented default.
+    urgency: null,
+    accommodation: null,
+    transportNeeded: null,
     sourcePath: requestDoorSourcePath(locale, door),
   };
   // The place is in the text on purpose. The RPC treats the same name, e-mail and
@@ -94,7 +96,7 @@ export function requestDoorIntake(door: RequestDoor, locale: string, read: Read)
       sector: profession,
       headcount: workers,
       startWindow: start || undefined,
-      engagementType: "employment",
+      engagementType: null,
       description: describe([`Specialybė: ${profession}`, `Darbuotojų: ${workers}`, !!start && `Pradžia: ${start}`, !!extra && extra]),
     };
   }
@@ -108,7 +110,7 @@ export function requestDoorIntake(door: RequestDoor, locale: string, read: Read)
     return {
       ...base,
       sector: work,
-      headcount: 1,
+      headcount: null,
       startWindow: deadline || undefined,
       engagementType: "subcontracting",
       description: describe([`Darbų pobūdis: ${work}`, !!scope && `Apimtis: ${scope}`, !!deadline && `Terminai: ${deadline}`]),
@@ -121,8 +123,8 @@ export function requestDoorIntake(door: RequestDoor, locale: string, read: Read)
   return {
     ...base,
     sector: "individual-project",
-    headcount: 1,
-    engagementType: "employment",
+    headcount: null,
+    engagementType: null,
     description: describe([`Užsakovas: ${customer}`, need]),
   };
 }
