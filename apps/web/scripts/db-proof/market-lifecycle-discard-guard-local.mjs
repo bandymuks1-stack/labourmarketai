@@ -136,11 +136,10 @@ const newDemand = (db, status, outcome = null) => psql(db, `insert into public.c
   values ('${OWNER}', 'company_request', 'synthetic need', '${status}', ${outcome ? `'${outcome}'` : "null"}) returning id`).out;
 const demandRow = (db, id) => psql(db, `select status || '/' || coalesce(closed_outcome, '-') from public.customer_requests where id = '${id}'`).out;
 const ownerSet = (db, id, set) => psql(db, asUser(OWNER, `update public.customer_requests set ${set} where id = '${id}'`), { allowFail: true });
-const newListing = (db, status, outcome = null, category = "tools") => {
-  const out = psql(db, `insert into public.marketplace_listings (owner_id, status, category) values ('${OWNER}', '${status}', '${category}') returning id`).out;
-  if (outcome) psql(db, `update public.marketplace_listings set closed_outcome = '${outcome}' where id = '${out}'`);
-  return out;
-};
+// fixtures are INSERTed with their outcome (the guards watch UPDATE only)
+const newListing = (db, status, outcome = null, category = "tools") =>
+  psql(db, `insert into public.marketplace_listings (owner_id, status, category${outcome ? ", closed_outcome" : ""})
+    values ('${OWNER}', '${status}', '${category}'${outcome ? `, '${outcome}'` : ""}) returning id`).out;
 const listingRow = (db, id) => psql(db, `select status || '/' || coalesce(closed_outcome, '-') from public.marketplace_listings where id = '${id}'`).out;
 const v3 = (db, id, status, outcome) =>
   psql(db, asUser(OWNER, `select public.set_marketplace_listing_status_v3('${id}', '${status}'${outcome ? `, '${outcome}'` : ""})`), { allowFail: true });
@@ -177,7 +176,8 @@ function demandCases(db, tag) {
   const legacy = newDemand(db, "closed");
   ok(ownerSet(db, legacy, "status = 'submitted'").status === 0, `${tag} d8 a legacy closed row (outcome NULL) still reopens (nothing inferred about history)`);
   const withdrawn = newDemand(db, "closed", "withdrawn");
-  ok(ownerSet(db, withdrawn, "status = 'submitted'").status === 0, `${tag} d9 a withdrawn need still reopens`);
+  ok(ownerSet(db, withdrawn, "status = 'submitted'").status === 0 && demandRow(db, withdrawn) === "submitted/-",
+    `${tag} d9 a withdrawn need still reopens, and its outcome is cleared`);
   const live = newDemand(db, "draft");
   ok(ownerSet(db, live, "status = 'submitted'").status === 0 && ownerSet(db, live, "status = 'closed', closed_outcome = 'completed'").status === 0,
     `${tag} d10 draft -> submitted -> closed (completed) still works`);
@@ -185,11 +185,25 @@ function demandCases(db, tag) {
   ok(psql(db, asUser(OTHER, `with u as (update public.customer_requests set status = 'submitted' where id = '${draft}' returning 1) select count(*) from u`)).out === "0",
     `${tag} d12 another user's update reaches 0 rows (RLS)`);
   const forAdmin = newDemand(db, "closed", "discarded");
-  ok(psql(db, asUser(ADMIN, `update public.customer_requests set status = 'submitted' where id = '${forAdmin}'`), { allowFail: true }).status === 0,
-    `${tag} d13 admin passes, as with the transition guard`);
+  ok(psql(db, asUser(ADMIN, `update public.customer_requests set status = 'submitted' where id = '${forAdmin}'`), { allowFail: true }).status === 0
+    && demandRow(db, forAdmin) === "submitted/-", `${tag} d13 admin passes, as with the transition guard, and no stale outcome is left`);
   const forSystem = newDemand(db, "closed", "discarded");
   ok(psql(db, `update public.customer_requests set status = 'submitted' where id = '${forSystem}'`, { allowFail: true }).status === 0,
     `${tag} d14 a call without a signed-in user (runner / service role) passes, as with the transition guard`);
+  const unlabelled = newDemand(db, "draft");
+  ok(ownerSet(db, unlabelled, "status = 'closed'").status === 0 && demandRow(db, unlabelled) === "closed/discarded",
+    `${tag} d15 a draft closed WITHOUT an outcome (raw PATCH, no-column fallback) is recorded as discarded`);
+  ok(refused(ownerSet(db, unlabelled, "status = 'submitted'"), /a discarded draft cannot be reopened/), `${tag} d16 ... and cannot be reopened`);
+  const misnamed = newDemand(db, "draft");
+  ok(ownerSet(db, misnamed, "status = 'closed', closed_outcome = 'completed'").status === 0 && demandRow(db, misnamed) === "closed/discarded",
+    `${tag} d17 a draft closed as 'completed' is still recorded as discarded (a draft was never in the market)`);
+  const open = newDemand(db, "submitted");
+  ok(refused(ownerSet(db, open, "closed_outcome = 'discarded'"), /only a draft can be discarded/)
+    && refused(ownerSet(db, open, "status = 'closed', closed_outcome = 'discarded'"), /only a draft can be discarded/),
+    `${tag} d18 a submitted need cannot be labelled discarded (it would lock the owner's own row)`);
+  const done = newDemand(db, "closed", "completed");
+  ok(refused(ownerSet(db, done, "closed_outcome = 'discarded'"), /only a draft can be discarded/) && demandRow(db, done) === "closed/completed",
+    `${tag} d19 a completed need cannot be relabelled discarded`);
 }
 
 /** (p) privacy: the holder cancels their own account deletion exactly as 20261109120000 intends */
@@ -237,6 +251,16 @@ function listingCases(db, tag) {
   const forSystem = newListing(db, "closed", "discarded");
   ok(psql(db, `update public.marketplace_listings set status = 'draft' where id = '${forSystem}'`, { allowFail: true }).status === 0
     && listingRow(db, forSystem) === "draft/-", `${tag} l11 a call without a signed-in user passes and the outcome is cleared`);
+  const viaV2 = newListing(db, "draft");
+  ok(v2(db, viaV2, "closed").status === 0 && listingRow(db, viaV2) === "closed/discarded",
+    `${tag} l12 a draft closed through v2 directly (no outcome) is recorded as discarded`);
+  ok(refused(v2(db, viaV2, "active"), /a discarded draft cannot be published/), `${tag} l13 ... and cannot be published`);
+  const live = newListing(db, "active");
+  ok(refused(v3(db, live, "closed", "discarded"), /only a draft can be discarded/) && listingRow(db, live) === "active/-",
+    `${tag} l14 an active listing cannot be closed as discarded (the whole call rolls back)`);
+  const leftover = newListing(db, "active", "discarded"); // only possible after a rollback + re-apply
+  ok(v3(db, leftover, "paused").status === 0 && listingRow(db, leftover) === "paused/-",
+    `${tag} l15 an open listing carrying a stale 'discarded' is not locked: it pauses and the outcome is cleared`);
 }
 
 async function main() {

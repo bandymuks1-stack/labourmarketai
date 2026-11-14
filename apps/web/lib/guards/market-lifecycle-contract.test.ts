@@ -160,6 +160,9 @@ describe("RED half (20261024100000, human-gated): listing outcome + discarded-dr
     // the outcome itself is protected: clearing or rewriting it first is no way back in
     expect(ddl).toMatch(/new\.closed_outcome is distinct from old\.closed_outcome/);
     expect(ddl).toMatch(/new\.closed_outcome is distinct from 'discarded'/);
+    // no door leaves a closed draft unlabelled, and nothing else can be discarded
+    expect(ddl.match(/if old\.status = 'draft' and new\.status = 'closed' then\s+new\.closed_outcome := 'discarded';/g)?.length).toBe(2);
+    expect(ddl.match(/raise exception 'only a draft can be discarded'/g)?.length).toBe(2);
     expect(ddl.match(/set search_path = public/g)?.length).toBe(3);
     const down = readFileSync(
       join(REPO, "supabase", "rollbacks", "20261024100000_market_lifecycle_listing_outcome_and_discard_guard_v1.down.sql"),

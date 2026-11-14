@@ -20,11 +20,13 @@
 --      any closed row, so "reopen" could publish a draft nobody submitted. The
 --      app already refuses (contract); the triggers make every door refuse
 --      (PostgREST, v2, v3, reopen_demand_v1, a colleague's call), including the
---      two-step path of first rewriting or clearing the outcome. Rows closed
---      before outcomes were recorded (closed_outcome NULL) keep today's
---      behaviour: nothing is inferred about history. Admin and calls without a
---      signed-in user (service role, runners) pass, exactly as the existing
---      demand transition guard lets them.
+--      two-step path of first rewriting or clearing the outcome. A draft that
+--      is closed by ANY door is recorded as `discarded` by the trigger, so no
+--      door can leave it unlabelled; `discarded` is refused for anything that
+--      was not a draft. Rows closed before this migration (closed_outcome
+--      NULL) keep today's behaviour: nothing is inferred about history. Admin
+--      and calls without a signed-in user (service role, runners) pass the
+--      refusal, exactly as the existing demand transition guard lets them.
 --
 -- OWN TRIGGERS, NOT A REPLACED GUARD (owner decision 2026-11-14): this file
 -- never replaces customer_requests_status_transition_guard. That function also
@@ -40,8 +42,9 @@
 -- SAFETY: additive nullable column (NULL for every existing row, no backfill);
 -- v3 calls v2 for every check, so the publish policy stays ONE; the triggers
 -- add refusals only for rows already closed as `discarded` (none exist when
--- this is applied for listings) and clear a stale outcome when a listing
--- leaves `closed`; every function pins search_path = public (20260727120000
+-- this is applied for listings), label a draft closed from now on, and clear
+-- a stale outcome when a row leaves `closed`; no existing row is rewritten
+-- by this file; every function pins search_path = public (20260727120000
 -- L-08). Re-running this file is a no-op.
 -- ROLLBACK: supabase/rollbacks/20261024100000_market_lifecycle_listing_outcome_and_discard_guard_v1.down.sql
 -- POST-APPLY:
@@ -106,7 +109,15 @@ grant  execute on function public.set_marketplace_listing_status_v3(uuid, text, 
 create or replace function public.marketplace_listings_discarded_guard()
 returns trigger language plpgsql set search_path = public as $$
 begin
-  if old.closed_outcome = 'discarded'
+  -- A draft that leaves for closed was never on the market: it is discarded,
+  -- whichever door closed it (v1, v2, v3). Only a draft can be discarded.
+  if old.status = 'draft' and new.status = 'closed' then
+    new.closed_outcome := 'discarded';
+  elsif new.closed_outcome = 'discarded' and old.closed_outcome is distinct from 'discarded' then
+    raise exception 'only a draft can be discarded'
+      using errcode = '23514';
+  end if;
+  if old.status = 'closed' and old.closed_outcome = 'discarded'
      and (new.status is distinct from 'closed' or new.closed_outcome is distinct from 'discarded')
      and auth.uid() is not null and not public.is_admin() then
     raise exception 'a discarded draft cannot be published'
@@ -127,11 +138,25 @@ create or replace trigger marketplace_listings_discarded_guard_trg
 create or replace function public.customer_requests_discarded_draft_guard()
 returns trigger language plpgsql set search_path = public as $$
 begin
+  -- A draft that leaves for closed was never in the market: it is discarded,
+  -- whichever door closed it (the app, a raw PATCH). Only a draft can be
+  -- discarded.
+  if old.status = 'draft' and new.status = 'closed' then
+    new.closed_outcome := 'discarded';
+  elsif new.closed_outcome = 'discarded' and old.closed_outcome is distinct from 'discarded' then
+    raise exception 'only a draft can be discarded'
+      using errcode = '23514';
+  end if;
   if old.status = 'closed' and old.closed_outcome = 'discarded'
      and (new.status is distinct from old.status or new.closed_outcome is distinct from old.closed_outcome)
      and auth.uid() is not null and not public.is_admin() then
     raise exception 'a discarded draft cannot be reopened'
       using errcode = '23514';
+  end if;
+  -- An outcome describes a closed need only (reopens by a colleague, an
+  -- admin or a runner no longer leave a stale outcome behind).
+  if new.status is distinct from 'closed' then
+    new.closed_outcome := null;
   end if;
   return new;
 end; $$;

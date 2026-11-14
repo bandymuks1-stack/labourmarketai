@@ -1,5 +1,5 @@
-market-lifecycle-discard-guard-local — 2026-11-14T11:02:23.286Z
-cluster: <repo>/.tmp/pgdiscard-43484 (port 5518, throwaway, synthetic ids only)
+market-lifecycle-discard-guard-local — 2026-11-14T11:21:34.227Z
+cluster: <repo>/.tmp/pgdiscard-30612 (port 5518, throwaway, synthetic ids only)
 server: PostgreSQL 16.13
 PASS  base: both databases start from the same transition guard
 
@@ -24,12 +24,17 @@ PASS  A d5 both in one statement -> refused
 PASS  A d6 the discarded row is unchanged after every attempt
 PASS  A d7 other columns of a discarded row stay editable (guard fires on status / outcome only)
 PASS  A d8 a legacy closed row (outcome NULL) still reopens (nothing inferred about history)
-PASS  A d9 a withdrawn need still reopens
+PASS  A d9 a withdrawn need still reopens, and its outcome is cleared
 PASS  A d10 draft -> submitted -> closed (completed) still works
 PASS  A d11 the transition guard still refuses closed -> approved
 PASS  A d12 another user's update reaches 0 rows (RLS)
-PASS  A d13 admin passes, as with the transition guard
+PASS  A d13 admin passes, as with the transition guard, and no stale outcome is left
 PASS  A d14 a call without a signed-in user (runner / service role) passes, as with the transition guard
+PASS  A d15 a draft closed WITHOUT an outcome (raw PATCH, no-column fallback) is recorded as discarded
+PASS  A d16 ... and cannot be reopened
+PASS  A d17 a draft closed as 'completed' is still recorded as discarded (a draft was never in the market)
+PASS  A d18 a submitted need cannot be labelled discarded (it would lock the owner's own row)
+PASS  A d19 a completed need cannot be relabelled discarded
 
 [A p] privacy cancel
 PASS  A p1 the holder submits and confirms an account-deletion request
@@ -56,6 +61,10 @@ PASS  A l8 a legacy closed listing (outcome NULL) republishes
 PASS  A l9 the publish policy still applies (inactive category refused)
 PASS  A l10 an outcome is accepted only with closed
 PASS  A l11 a call without a signed-in user passes and the outcome is cleared
+PASS  A l12 a draft closed through v2 directly (no outcome) is recorded as discarded
+PASS  A l13 ... and cannot be published
+PASS  A l14 an active listing cannot be closed as discarded (the whole call rolls back)
+PASS  A l15 an open listing carrying a stale 'discarded' is not locked: it pauses and the outcome is cleared
 
 [B d] demand
 PASS  B d1 the owner discards a draft (draft -> closed, outcome discarded), as lib/demand does
@@ -66,12 +75,17 @@ PASS  B d5 both in one statement -> refused
 PASS  B d6 the discarded row is unchanged after every attempt
 PASS  B d7 other columns of a discarded row stay editable (guard fires on status / outcome only)
 PASS  B d8 a legacy closed row (outcome NULL) still reopens (nothing inferred about history)
-PASS  B d9 a withdrawn need still reopens
+PASS  B d9 a withdrawn need still reopens, and its outcome is cleared
 PASS  B d10 draft -> submitted -> closed (completed) still works
 PASS  B d11 the transition guard still refuses closed -> approved
 PASS  B d12 another user's update reaches 0 rows (RLS)
-PASS  B d13 admin passes, as with the transition guard
+PASS  B d13 admin passes, as with the transition guard, and no stale outcome is left
 PASS  B d14 a call without a signed-in user (runner / service role) passes, as with the transition guard
+PASS  B d15 a draft closed WITHOUT an outcome (raw PATCH, no-column fallback) is recorded as discarded
+PASS  B d16 ... and cannot be reopened
+PASS  B d17 a draft closed as 'completed' is still recorded as discarded (a draft was never in the market)
+PASS  B d18 a submitted need cannot be labelled discarded (it would lock the owner's own row)
+PASS  B d19 a completed need cannot be relabelled discarded
 
 [B p] privacy cancel
 PASS  B p1 the holder submits and confirms an account-deletion request
@@ -98,6 +112,10 @@ PASS  B l8 a legacy closed listing (outcome NULL) republishes
 PASS  B l9 the publish policy still applies (inactive category refused)
 PASS  B l10 an outcome is accepted only with closed
 PASS  B l11 a call without a signed-in user passes and the outcome is cleared
+PASS  B l12 a draft closed through v2 directly (no outcome) is recorded as discarded
+PASS  B l13 ... and cannot be published
+PASS  B l14 an active listing cannot be closed as discarded (the whole call rolls back)
+PASS  B l15 an open listing carrying a stale 'discarded' is not locked: it pauses and the outcome is cleared
 
 [i] re-apply is a no-op
 PASS  i1 20261024100000 runs a second time without error and changes nothing (no duplicate trigger)
@@ -127,13 +145,18 @@ PASS  r d5 both in one statement -> refused
 PASS  r d6 the discarded row is unchanged after every attempt
 PASS  r d7 other columns of a discarded row stay editable (guard fires on status / outcome only)
 PASS  r d8 a legacy closed row (outcome NULL) still reopens (nothing inferred about history)
-PASS  r d9 a withdrawn need still reopens
+PASS  r d9 a withdrawn need still reopens, and its outcome is cleared
 PASS  r d10 draft -> submitted -> closed (completed) still works
 PASS  r d11 the transition guard still refuses closed -> approved
 PASS  r d12 another user's update reaches 0 rows (RLS)
-PASS  r d13 admin passes, as with the transition guard
+PASS  r d13 admin passes, as with the transition guard, and no stale outcome is left
 PASS  r d14 a call without a signed-in user (runner / service role) passes, as with the transition guard
+PASS  r d15 a draft closed WITHOUT an outcome (raw PATCH, no-column fallback) is recorded as discarded
+PASS  r d16 ... and cannot be reopened
+PASS  r d17 a draft closed as 'completed' is still recorded as discarded (a draft was never in the market)
+PASS  r d18 a submitted need cannot be labelled discarded (it would lock the owner's own row)
+PASS  r d19 a completed need cannot be relabelled discarded
 PASS  r7 20261109120000 re-applies and both orders still end in the same schema
 PASS  no deadlock reported by the server
 
-SUMMARY: 108 PASS, 0 FAIL  (finished 2026-11-14T11:03:51.583Z)
+SUMMARY: 131 PASS, 0 FAIL  (finished 2026-11-14T11:22:18.462Z)
