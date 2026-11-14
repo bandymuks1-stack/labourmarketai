@@ -13,6 +13,10 @@ import {
   type RosterLinkCandidate,
 } from "@/components/app/roster-link-offer-form";
 import { RosterClaimInviteForm } from "@/components/app/roster-claim-invite-form";
+import { HistoryClaimOfferForm } from "@/components/app/organization/history-claim-offer-form";
+import { HistoryClaimInbox } from "@/components/app/organization/history-claim-inbox";
+import { RosterUnlinkForm } from "@/components/app/organization/roster-unlink-form";
+import { readHistoryClaims } from "@/lib/organization-evidence/history-claim-actions";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
 
 /**
@@ -146,10 +150,16 @@ export async function OrganizationRosterSection({
     return notice(reason, org.options);
   }
 
-  const res = await listRosterPeople(caller, {
-    organizationId: org.organizationId,
-    limit: ROSTER_LIMIT,
-  });
+  // The roster and the organization's live history claims are independent
+  // reads: ONE wave, never one after the other (request budget:
+  // lib/perf/dashboard-render-request-count.test.ts).
+  const [res, claims] = await Promise.all([
+    listRosterPeople(caller, {
+      organizationId: org.organizationId,
+      limit: ROSTER_LIMIT,
+    }),
+    readHistoryClaims(org.organizationId),
+  ]);
   if (res.kind !== "ok") {
     // A store that is not provisioned, a refusal, and a broken read are three
     // different statements. None of them is "this organization has nobody".
@@ -163,6 +173,40 @@ export async function OrganizationRosterSection({
             : "unavailable";
     return notice(reason, res.kind === "choice-required" ? res.options : undefined);
   }
+
+  // `claims`: who was offered a history link and who came for one. A failed
+  // read is unknown, never "none" (SEP-7).
+  const claimLabels = {
+    title: t("historyClaim.title"),
+    intro: t("historyClaim.intro"),
+    none: t("historyClaim.none"),
+    unavailable: t("historyClaim.unavailable"),
+    waiting: t("historyClaim.waiting"),
+    open: t("historyClaim.open"),
+    openHint: t("historyClaim.openHint"),
+    came: t("historyClaim.came"),
+    approve: t("historyClaim.approve"),
+    reject: t("historyClaim.reject"),
+    revoke: t("historyClaim.revoke"),
+    noteLabel: t("historyClaim.noteLabel"),
+    notePlaceholder: t("historyClaim.notePlaceholder"),
+    approved: t("historyClaim.approved"),
+    rejected: t("historyClaim.rejected"),
+    revoked: t("historyClaim.revoked"),
+    expires: t("historyClaim.expires"),
+    errors: {
+      auth: t("historyClaim.errors.auth"),
+      invalid: t("historyClaim.errors.invalid"),
+      not_found: t("historyClaim.errors.notFound"),
+      not_awaiting_decision: t("historyClaim.errors.notAwaitingDecision"),
+      cannot_decide_own: t("historyClaim.errors.cannotDecideOwn"),
+      no_longer_possible: t("historyClaim.errors.noLongerPossible"),
+      already_on_roster: t("historyClaim.errors.alreadyOnRoster"),
+      not_live: t("historyClaim.errors.notLive"),
+      needs_migration: t("historyClaim.errors.needsMigration"),
+      error: t("historyClaim.errors.error"),
+    },
+  } as const;
 
   const actingFor = (
     <p className="text-xs text-text-muted" data-testid="organization-roster-acting-for">
@@ -256,6 +300,54 @@ export async function OrganizationRosterSection({
                   }}
                 />
               ) : null}
+              {/* A person who no longer works here cannot be offered the
+                  link the ordinary way (the offer above needs a live
+                  relationship) and cannot be invited as an employee, which
+                  would read as a current job. This gives them a one-time
+                  link instead; the organization then confirms who came and
+                  the person still accepts on their own profile. */}
+              {linkStateKey(p.linkState) === "unlinked" ? (
+                <HistoryClaimOfferForm
+                  personId={p.id}
+                  locale={locale}
+                  labels={{
+                    offer: t("historyClaim.offer"),
+                    offering: t("historyClaim.offering"),
+                    hint: t("historyClaim.offerHint"),
+                    created: t("historyClaim.created"),
+                    linkLabel: t("historyClaim.linkLabel"),
+                    onceOnly: t("historyClaim.onceOnly"),
+                    expires: t("historyClaim.expires"),
+                    errors: claimLabels.errors,
+                  }}
+                />
+              ) : null}
+              {/* REVERSAL by the organization: a link made to the wrong person
+                  is taken back, with a reason, on the audit trail. The
+                  person's own reversal stays on their profile. */}
+              {linkStateKey(p.linkState) !== "unlinked" ? (
+                <RosterUnlinkForm
+                  personId={p.id}
+                  labels={{
+                    open: t("historyClaim.unlink.open"),
+                    reasonLabel: t("historyClaim.unlink.reasonLabel"),
+                    reasonPlaceholder: t("historyClaim.unlink.reasonPlaceholder"),
+                    confirm: t("historyClaim.unlink.confirm"),
+                    cancel: t("historyClaim.unlink.cancel"),
+                    done: t("historyClaim.unlink.done"),
+                    note: t("historyClaim.unlink.note"),
+                    errors: {
+                      auth: claimLabels.errors.auth,
+                      invalid: claimLabels.errors.invalid,
+                      reason_required: t("historyClaim.unlink.reasonRequired"),
+                      not_found: claimLabels.errors.not_found,
+                      not_linked: t("historyClaim.unlink.notLinked"),
+                      needs_migration: claimLabels.errors.needs_migration,
+                      error: claimLabels.errors.error,
+                    },
+                  }}
+                />
+              ) : null}
               {/* The FIRST step for a name with no account: the ordinary
                   invitation. It links nothing; the offer above and the
                   person's own answer still decide. */}
@@ -287,6 +379,7 @@ export async function OrganizationRosterSection({
             </li>
           ))}
         </ul>
+        <HistoryClaimInbox rows={claims.rows} unavailable={claims.unavailable} labels={claimLabels} />
         <p className="text-xs leading-relaxed text-text-muted" data-testid="organization-roster-meaning">
           {t("meaning")}
         </p>

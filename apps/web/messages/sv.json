@@ -8020,5 +8020,83 @@
       "fullList": "Hela listan"
     },
     "more": "Mer"
+  },
+  "historyClaim": {
+    "title": "Din arbetshistorik hos en tidigare arbetsgivare",
+    "organization": "{name} har sparat en post om arbete du gjorde där.",
+    "explain": "Om det gäller dig, säg det nedan. Inget visas eller läggs till ännu: företaget bekräftar att du är personen i posten, och därefter tackar du ja eller nej på din egen profil.",
+    "redeem": "Det är jag",
+    "redeeming": "Skickar…",
+    "redeemedTitle": "Skickat till företaget",
+    "redeemedHint": "De bekräftar att du är personen i posten. Sedan kommer posten till din profil, där du tackar ja eller nej.",
+    "waitingForOrganization": "Företaget kontrollerar att du är personen i posten.",
+    "rejectedByOrganization": "Företaget bekräftade inte kopplingen. Om det är ett misstag, kontakta dem direkt.",
+    "unavailable": "Länken fungerar inte. Den kan vara använd, tillbakatagen eller ha gått ut.",
+    "unnamedOrganization": "Ett företag",
+    "privacyNote": "Tills företaget bekräftar att det är du visar den här sidan inget om posten.",
+    "errors": {
+      "auth": "Logga in igen.",
+      "unavailable": "Länken fungerar inte längre.",
+      "emailNotVerified": "Bekräfta din e-postadress först och öppna sedan länken igen.",
+      "creatorCannotRedeem": "Du skapade länken själv, så den är inte till dig.",
+      "noWorkerProfile": "Gör klart din profil först och öppna sedan länken igen.",
+      "alreadyOnRoster": "Du finns redan i företagets lista.",
+      "rateLimited": "För många försök i dag. Försök i morgon.",
+      "needsMigration": "Funktionen är inte tillgänglig ännu.",
+      "error": "Det gick inte. Försök igen."
+    }
+  },
+  "organizationRoster": {
+    "historyClaim": {
+      "title": "Historiklänkar för tidigare medarbetare",
+      "intro": "En person som inte längre arbetar här kan inte bjudas in som anställd. Ge i stället en engångslänk: personen öppnar den, du bekräftar vem som kom, och personen tackar ja på sin egen profil.",
+      "none": "Inga historiklänkar är öppna.",
+      "unavailable": "Historiklänkarna kunde inte läsas in. Försök igen.",
+      "waiting": "Väntar på ditt svar",
+      "open": "Länken är lämnad",
+      "openHint": "Ingen har öppnat den här länken ännu.",
+      "came": "{name} ({email}) öppnade länken och säger att posten gäller hen.",
+      "approve": "Ja, det är samma person",
+      "reject": "Nej, det är någon annan",
+      "revoke": "Ta tillbaka länken",
+      "noteLabel": "Anteckning (frivillig)",
+      "notePlaceholder": "Hur du kände igen personen",
+      "approved": "Erbjuden. Personen tackar nu ja eller nej på sin egen profil.",
+      "rejected": "Avvisad. Inget ändrades i posten.",
+      "revoked": "Länken fungerar inte längre.",
+      "expires": "Giltig till {date}.",
+      "offer": "Ge en historiklänk",
+      "offering": "Förbereder…",
+      "offerHint": "För en person som inte längre arbetar här.",
+      "created": "Länken är klar. Lämna den till personen.",
+      "linkLabel": "Engångslänk till historiken",
+      "onceOnly": "Visas en gång och fungerar en gång.",
+      "unlink": {
+        "open": "Ångra kopplingen",
+        "reasonLabel": "Skäl",
+        "reasonPlaceholder": "Varför kopplingen är fel",
+        "confirm": "Ångra kopplingen",
+        "cancel": "Avbryt",
+        "done": "Kopplingen är ångrad. Posterna visas inte längre för personen.",
+        "note": "Posterna, deras källa och tillstånd är kvar precis som de är. Bara den personen slutar se dem.",
+        "reasonRequired": "Ange ett skäl.",
+        "notLinked": "Den här personen är inte kopplad."
+      },
+      "errors": {
+        "auth": "Logga in igen.",
+        "invalid": "Något stämde inte i förfrågan.",
+        "notFound": "Hittades inte.",
+        "notAwaitingDecision": "Den här länken väntar inte på svar.",
+        "cannotDecideOwn": "Du kan inte svara på din egen länk.",
+        "noLongerPossible": "Det går inte längre. Kontrollera posten.",
+        "alreadyOnRoster": "Personen finns redan i listan.",
+        "notLive": "Den här länken är inte öppen längre.",
+        "needsMigration": "Funktionen är inte tillgänglig ännu.",
+        "error": "Det gick inte. Försök igen.",
+        "alreadyLinked": "Posten är redan kopplad.",
+        "awaitingDecision": "Någon har redan öppnat den förra länken. Svara den personen först.",
+        "rateLimited": "För många länkar i dag. Försök i morgon."
+      }
+    }
   }
 }

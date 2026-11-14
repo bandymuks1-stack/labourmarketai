@@ -18546,7 +18546,58 @@
         "needs_migration": "Not available right now"
       }
     },
-    "openHistory": "Open history"
+    "openHistory": "Open history",
+    "historyClaim": {
+      "title": "History links for former workers",
+      "intro": "A person who no longer works here cannot be invited as an employee. Give them a one-time link instead: they open it, you confirm who came, and they accept on their own profile.",
+      "none": "No history links are open.",
+      "unavailable": "The history links could not be loaded. Try again.",
+      "waiting": "Waiting for your answer",
+      "open": "Link handed out",
+      "openHint": "Nobody has opened this link yet.",
+      "came": "{name} ({email}) opened the link and says this record is theirs.",
+      "approve": "Yes, this is the same person",
+      "reject": "No, this is somebody else",
+      "revoke": "Take the link back",
+      "noteLabel": "Note (optional)",
+      "notePlaceholder": "How you recognised them",
+      "approved": "Offered to them. They now accept or refuse it on their own profile.",
+      "rejected": "Rejected. Nothing changed on the record.",
+      "revoked": "The link no longer works.",
+      "expires": "Valid until {date}.",
+      "offer": "Give a history link",
+      "offering": "Preparing…",
+      "offerHint": "For a person who no longer works here.",
+      "created": "Link ready. Hand it to that person.",
+      "linkLabel": "One-time history link",
+      "onceOnly": "It is shown once and works once.",
+      "unlink": {
+        "open": "Undo this link",
+        "reasonLabel": "Reason",
+        "reasonPlaceholder": "Why this link is wrong",
+        "confirm": "Undo the link",
+        "cancel": "Cancel",
+        "done": "The link is undone. The records are no longer shown to that person.",
+        "note": "The records, their source and their state stay exactly as they are. Only that person stops seeing them.",
+        "reasonRequired": "Please give a reason.",
+        "notLinked": "This person is not linked."
+      },
+      "errors": {
+        "auth": "Please sign in again.",
+        "invalid": "Something was wrong with the request.",
+        "notFound": "Not found.",
+        "notAwaitingDecision": "This link is not waiting for an answer.",
+        "cannotDecideOwn": "You cannot answer your own link.",
+        "noLongerPossible": "This is no longer possible. Check the record.",
+        "alreadyOnRoster": "That person is already on this list.",
+        "notLive": "This link is no longer open.",
+        "needsMigration": "This function is not available yet.",
+        "error": "It did not work. Try again.",
+        "alreadyLinked": "This record is already linked.",
+        "awaitingDecision": "Somebody has already opened the previous link. Answer them first.",
+        "rateLimited": "Too many links for today. Try again tomorrow."
+      }
+    }
   },
   "peopleImport": {
     "alreadyThere": "{count} are already on your list",
@@ -20636,5 +20687,30 @@
       "fullList": "Full list"
     },
     "more": "More"
+  },
+  "historyClaim": {
+    "title": "Your work history at a former employer",
+    "organization": "{name} kept a record of work you did there.",
+    "explain": "If this is about you, say so below. Nothing is shown or added yet: the company then confirms that you are the person in the record, and after that you accept or refuse it on your own profile.",
+    "redeem": "This is me",
+    "redeeming": "Sending…",
+    "redeemedTitle": "Sent to the company",
+    "redeemedHint": "They will confirm that you are the person in the record. When they do, the record comes to your profile, where you accept or refuse it.",
+    "waitingForOrganization": "The company is checking that you are the person in the record.",
+    "rejectedByOrganization": "The company did not confirm this link. If that is a mistake, ask them directly.",
+    "unavailable": "This link does not work. It may have been used, taken back, or it may have expired.",
+    "unnamedOrganization": "A company",
+    "privacyNote": "Until the company confirms it is you, this page shows nothing about the record.",
+    "errors": {
+      "auth": "Please sign in again.",
+      "unavailable": "This link does not work any more.",
+      "emailNotVerified": "Confirm your e-mail address first, then open this link again.",
+      "creatorCannotRedeem": "This link was made by you, so it is not for you.",
+      "noWorkerProfile": "Finish setting up your profile first, then open this link again.",
+      "alreadyOnRoster": "You are already on this company’s list.",
+      "rateLimited": "Too many attempts today. Try again tomorrow.",
+      "needsMigration": "This function is not available yet.",
+      "error": "It did not work. Try again."
+    }
   }
 }

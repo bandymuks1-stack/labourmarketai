@@ -26,6 +26,11 @@ on:
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
       - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
       - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
+      - "apps/web/tests/e2e/history-claim-isolated.spec.ts"
+      - "apps/web/lib/organization-evidence/history-claim-actions.ts"
+      - "apps/web/components/app/organization/history-claim-*.tsx"
+      - "apps/web/components/app/organization/roster-unlink-form.tsx"
+      - "supabase/migrations/20261113100000_roster_history_claim_v1.sql"
       - "apps/web/lib/journal/entry-skill-retraction.ts"
       - "apps/web/lib/journal/journal-entry-skills-actions.ts"
       - "apps/web/lib/journal/skill-pipeline-actions.ts"
@@ -93,7 +98,7 @@ jobs:
       # Web A walks, the role journeys, and the journal -> skills -> Living CV
       # -> matching -> dispute chain (skills-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/history-claim-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -210,6 +215,10 @@ jobs:
           [ "$files" -eq "$rows" ] || { echo "::error::replay incomplete"; exit 1; }
 
       - name: Build
+        env:
+          # Same heap as e2e-smoke.yml and deploy-vps.yml: the default of about
+          # 2 GB runs out during the production build now and then.
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build
 
       - name: Guard — the build inlined the local Supabase URL
@@ -279,6 +288,9 @@ jobs:
       - name: App-rollback compatibility — build the pre-#2887 app against the migrated stack
         env:
           PRE_JOBFIT_SHA: 88a60b567edbe5c6894d087d0c679da54c90ea67
+          # The same heap as the main build above: the default of about 2 GB
+          # runs out building this app too.
+          NODE_OPTIONS: --max-old-space-size=6144
         run: |
           set -euo pipefail
           git fetch --no-tags --depth=1 origin "$PRE_JOBFIT_SHA"

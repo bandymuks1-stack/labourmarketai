@@ -487,5 +487,8 @@ const BOUNDS: Record<"layout" | PagePath, { calls: number; waves: number }> = {
   // its queue, skills, links, metrics and exception reads run only when something waits.
   // It skips the default page's reads, so it costs less than the page it lives on.
   "/dashboard/company?view=today": { calls: 39, waves: 5 },
-  "/dashboard/company/people": { calls: 47, waves: 7 },
+  // +1 (2026-11-13, RED draft, not applied): the organization's live history claims
+  // (who was offered a former-worker link, who came). It shares the roster's wave,
+  // so the waves stay at 7.
+  "/dashboard/company/people": { calls: 48, waves: 7 },
 };
