@@ -325,14 +325,33 @@ export async function respondCandidateOfferAction(
   const note = validateOfferNote(String(formData.get("note") ?? ""));
   if (!isBridgeUuid(offerId)) return { status: "invalid" };
   if (decision !== "accepted" && decision !== "declined") return { status: "invalid" };
+  // The agency's placement term the employer was shown and ticked, if the
+  // agency states one (migration 20261114120000). v2 refuses an accept that
+  // does not name the agency's CURRENT term, and records the one accepted.
+  const termRaw = String(formData.get("acceptedTermId") ?? "").trim();
+  const acceptedTermId = isBridgeUuid(termRaw) ? termRaw : null;
+  if (decision === "accepted" && termRaw.length > 0 && formData.get("termsAccepted") !== "yes") {
+    return { status: "error", reason: "placement_term_not_accepted" };
+  }
   const supabase = await createClient();
-  const { data: decided, error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v1", {
+  let { data: decided, error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v2", {
     p_offer_id: offerId,
     p_decision: decision,
     p_note: note,
+    p_accepted_term_id: decision === "accepted" ? acceptedTermId : null,
   });
+  // A database without v2 has no term table either: the decision is v1's,
+  // exactly as before.
+  if (error && isMissingRpcCode(error.code) && !acceptedTermId) {
+    ({ data: decided, error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v1", {
+      p_offer_id: offerId,
+      p_decision: decision,
+      p_note: note,
+    }));
+  }
   if (error) {
     const m = (error.message ?? "").toLowerCase();
+    if (m.includes("placement_term_not_accepted")) return { status: "error", reason: "placement_term_not_accepted" };
     if (m.includes("offer_not_open") || m.includes("offer_not_found")) return { status: "not-found" };
     return mapErr(error.code, error.message);
   }

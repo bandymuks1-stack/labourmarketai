@@ -13121,6 +13121,17 @@
       "declined": "werknemer heeft afgewezen",
       "withdrawn": "voorstel ingetrokken",
       "expired": "voorstel verlopen"
+    },
+    "placementTerm": {
+      "title": "Plaatsingsvergoeding van {agency}",
+      "feeLine": "Plaatsingsvergoeding – {fee} per succesvol geplaatste werknemer.",
+      "conditionLabel": "Voorwaarde:",
+      "termsLink": "Volledige voorwaarden van het bureau",
+      "termsPending": "Het bureau heeft zijn volledige voorwaarden nog niet gepubliceerd.",
+      "onlyOnPlacement": "Alleen verschuldigd als deze werknemer echt bij u wordt geplaatst — niet voor bekijken, contact of dit aanbod.",
+      "accept": "Ik accepteer de plaatsingsvergoeding en voorwaarde van dit bureau voor deze kandidaat.",
+      "mustAccept": "Accepteer eerst de plaatsingsvergoeding van het bureau om deze kandidaat aan te nemen.",
+      "changed": "De plaatsingsvergoeding van het bureau is gewijzigd. Herlaad de pagina om hem te zien voordat u beslist."
     }
   },
   "cvSections": {
@@ -20690,5 +20701,52 @@
       "fullList": "Volledige lijst"
     },
     "more": "Meer"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Uitzend- en wervingsbureau",
+    "title": "{agency} — wilt u op de kandidatenlijst?",
+    "body": "Een wervingsbureau stelt zijn kandidaten voor aan werkgevers die mensen zoeken. Als u zich aansluit, ziet {agency} uw profiel en kan het u voorstellen voor passend werk.",
+    "leave": "Uw keuze, niets is voor u aangevinkt. U kunt de lijst altijd verlaten via uw profiel.",
+    "consent": "Ik ga akkoord om op de kandidatenlijst van {agency} te staan.",
+    "join": "Aansluiten bij de lijst",
+    "joining": "Bezig met aansluiten…",
+    "notNow": "Niet nu",
+    "joined": "U staat op de kandidatenlijst van {agency}. U kunt die verlaten via uw profiel.",
+    "errors": {
+      "consentRequired": "Vink eerst het vakje aan als u zich wilt aansluiten.",
+      "consentTextChanged": "De tekst is gewijzigd. Herlaad de pagina en lees hem opnieuw.",
+      "representedElsewhere": "Een ander bureau vertegenwoordigt u al, daarom wordt deze lijst niet aangeboden.",
+      "alreadyKnown": "U hebt dit bureau al geantwoord.",
+      "notAvailable": "Dit is nu niet beschikbaar.",
+      "noWorkerProfile": "Maak eerst uw profiel af.",
+      "auth": "Log opnieuw in.",
+      "error": "Dat is niet gelukt. Probeer het opnieuw."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Uw plaatsingsvergoeding",
+    "intro": "Wat werkgevers bij uw kandidaten zien. Een werkgever accepteert hem alleen bij het aannemen van een van uw kandidaten, en hij geldt alleen voor iemand die echt geplaatst wordt — nooit voor een weergave, contact of sollicitatie.",
+    "current": "Nu getoond aan werkgevers",
+    "none": "U hebt geen plaatsingsvergoeding opgegeven. Werkgevers zien er geen.",
+    "amount": "Bedrag",
+    "currency": "Valuta",
+    "condition": "Wanneer de vergoeding geldt",
+    "conditionHint": "Uw eigen woorden, aan de werkgever getoond zoals geschreven.",
+    "termsUrl": "Link naar uw volledige voorwaarden (optioneel)",
+    "termsUrlHint": "Laat u dit leeg, dan krijgen werkgevers te horen dat de volledige voorwaarden niet zijn gepubliceerd.",
+    "save": "Opslaan",
+    "saving": "Bezig met opslaan…",
+    "retire": "Geen vergoeding meer tonen",
+    "saved": "Opgeslagen. Werkgevers zien deze vergoeding nu bij uw kandidaten.",
+    "retired": "Werkgevers zien geen vergoeding meer.",
+    "unavailable": "Plaatsingsvergoedingen zijn nog niet beschikbaar.",
+    "feeLine": "Plaatsingsvergoeding – {fee} per succesvol geplaatste werknemer.",
+    "errors": {
+      "invalid": "Controleer het bedrag, de valuta van drie letters en de link (https://).",
+      "notAgency": "Alleen een bureau kan een plaatsingsvergoeding opgeven.",
+      "notFound": "U kunt de vergoeding van deze organisatie niet wijzigen.",
+      "auth": "Log opnieuw in.",
+      "error": "Niet opgeslagen. Probeer het opnieuw."
+    }
   }
 }

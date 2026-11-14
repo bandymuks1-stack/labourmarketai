@@ -8074,5 +8074,52 @@
       "fullList": "Hela listan"
     },
     "more": "Mer"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Rekryteringsbyrå",
+    "title": "{agency} – vill du stå på dess kandidatlista?",
+    "body": "En rekryteringsbyrå föreslår sina kandidater för arbetsgivare som söker folk. Om du går med ser {agency} din profil och kan föreslå dig för passande arbete.",
+    "leave": "Ditt val, inget är ikryssat åt dig. Du kan lämna listan när som helst i din profil.",
+    "consent": "Jag samtycker till att stå på {agency}s kandidatlista.",
+    "join": "Gå med i listan",
+    "joining": "Går med…",
+    "notNow": "Inte nu",
+    "joined": "Du står på {agency}s kandidatlista. Du kan lämna den i din profil.",
+    "errors": {
+      "consentRequired": "Kryssa först i rutan om du vill gå med.",
+      "consentTextChanged": "Texten har ändrats. Ladda om sidan och läs den igen.",
+      "representedElsewhere": "En annan byrå representerar dig redan, så den här listan erbjuds inte.",
+      "alreadyKnown": "Du har redan svarat den här byrån.",
+      "notAvailable": "Det är inte tillgängligt just nu.",
+      "noWorkerProfile": "Gör först klart din profil.",
+      "auth": "Logga in igen.",
+      "error": "Det gick inte. Försök igen."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Din förmedlingsavgift",
+    "intro": "Det arbetsgivare ser vid dina kandidater. En arbetsgivare godtar den bara när den tar emot en av dina kandidater, och den gäller bara en person som faktiskt anställs – aldrig en visning, kontakt eller ansökan.",
+    "current": "Visas för arbetsgivare nu",
+    "none": "Du har inte angett någon förmedlingsavgift. Arbetsgivare ser ingen.",
+    "amount": "Belopp",
+    "currency": "Valuta",
+    "condition": "När avgiften gäller",
+    "conditionHint": "Dina egna ord, visas för arbetsgivaren som de är skrivna.",
+    "termsUrl": "Länk till dina fullständiga villkor (valfritt)",
+    "termsUrlHint": "Lämnar du fältet tomt får arbetsgivare veta att de fullständiga villkoren inte är publicerade.",
+    "save": "Spara",
+    "saving": "Sparar…",
+    "retire": "Sluta visa en avgift",
+    "saved": "Sparat. Arbetsgivare ser nu avgiften vid dina kandidater.",
+    "retired": "Arbetsgivare ser inte längre någon avgift.",
+    "unavailable": "Förmedlingsavgifter är inte tillgängliga ännu.",
+    "feeLine": "Förmedlingsavgift – {fee} per framgångsrikt anställd medarbetare.",
+    "errors": {
+      "invalid": "Kontrollera beloppet, valutan med tre bokstäver och länken (https://).",
+      "notAgency": "Bara en byrå kan ange en förmedlingsavgift.",
+      "notFound": "Du kan inte ändra den här organisationens avgift.",
+      "auth": "Logga in igen.",
+      "error": "Det sparades inte. Försök igen."
+    }
   }
 }

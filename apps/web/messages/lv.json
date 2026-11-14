@@ -8074,5 +8074,52 @@
       "fullList": "Pilns saraksts"
     },
     "more": "Vairāk"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Darbā iekārtošanas aģentūra",
+    "title": "{agency} – vai vēlaties pievienoties tās kandidātu sarakstam?",
+    "body": "Darbā iekārtošanas aģentūra piedāvā savus kandidātus darba devējiem, kas meklē cilvēkus. Ja pievienosieties, {agency} redzēs jūsu profilu un varēs jūs piedāvāt piemērotam darbam.",
+    "leave": "Izvēle ir jūsu, nekas nav atzīmēts jūsu vietā. Sarakstu varat atstāt jebkurā laikā savā profilā.",
+    "consent": "Piekrītu būt {agency} kandidātu sarakstā.",
+    "join": "Pievienoties sarakstam",
+    "joining": "Pievieno…",
+    "notNow": "Ne tagad",
+    "joined": "Jūs esat {agency} kandidātu sarakstā. To varat atstāt savā profilā.",
+    "errors": {
+      "consentRequired": "Ja vēlaties pievienoties, vispirms atzīmējiet lodziņu.",
+      "consentTextChanged": "Teksts ir mainījies. Pārlādējiet lapu un izlasiet to vēlreiz.",
+      "representedElsewhere": "Jūs jau pārstāv cita aģentūra, tāpēc šis saraksts netiek piedāvāts.",
+      "alreadyKnown": "Jūs jau esat atbildējis šai aģentūrai.",
+      "notAvailable": "Pašlaik tas nav pieejams.",
+      "noWorkerProfile": "Vispirms pabeidziet sava profila izveidi.",
+      "auth": "Lūdzu, piesakieties vēlreiz.",
+      "error": "Neizdevās. Mēģiniet vēlreiz."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Jūsu iekārtošanas maksa",
+    "intro": "Ko darba devēji redz pie jūsu kandidātiem. Darba devējs to pieņem tikai pieņemot kādu no jūsu kandidātiem, un tā attiecas tikai uz faktiski iekārtotu darbinieku – nekad uz apskati, kontaktu vai pieteikumu.",
+    "current": "Pašlaik rādīts darba devējiem",
+    "none": "Jūs neesat norādījis iekārtošanas maksu. Darba devēji to neredz.",
+    "amount": "Summa",
+    "currency": "Valūta",
+    "condition": "Kad maksa tiek piemērota",
+    "conditionHint": "Jūsu pašu vārdi, darba devējam rādīti tā, kā uzrakstīti.",
+    "termsUrl": "Saite uz jūsu pilnajiem noteikumiem (nav obligāti)",
+    "termsUrlHint": "Ja atstāsiet tukšu, darba devējiem tiks pateikts, ka pilnie noteikumi nav publicēti.",
+    "save": "Saglabāt",
+    "saving": "Saglabā…",
+    "retire": "Vairs nerādīt maksu",
+    "saved": "Saglabāts. Darba devēji tagad redz šo maksu pie jūsu kandidātiem.",
+    "retired": "Darba devēji vairs neredz maksu.",
+    "unavailable": "Iekārtošanas maksas vēl nav pieejamas.",
+    "feeLine": "Iekārtošanas maksa – {fee} par katru veiksmīgi iekārtotu darbinieku.",
+    "errors": {
+      "invalid": "Pārbaudiet summu, trīs burtu valūtu un saiti (https://).",
+      "notAgency": "Iekārtošanas maksu var norādīt tikai aģentūra.",
+      "notFound": "Jūs nevarat mainīt šīs organizācijas maksu.",
+      "auth": "Lūdzu, piesakieties vēlreiz.",
+      "error": "Netika saglabāts. Mēģiniet vēlreiz."
+    }
   }
 }

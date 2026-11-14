@@ -13121,6 +13121,17 @@
       "declined": "worker declined",
       "withdrawn": "proposal withdrawn",
       "expired": "proposal expired"
+    },
+    "placementTerm": {
+      "title": "{agency}'s placement fee",
+      "feeLine": "Placement fee – {fee} per successfully placed worker.",
+      "conditionLabel": "Condition:",
+      "termsLink": "The agency's full terms",
+      "termsPending": "The agency has not published its full terms yet.",
+      "onlyOnPlacement": "Due only if this worker is actually placed with you — not for viewing, contacting or this offer.",
+      "accept": "I accept this agency's placement fee and condition for this candidate.",
+      "mustAccept": "To accept this candidate, first accept the agency's placement fee.",
+      "changed": "The agency's placement fee has changed. Reload the page to see it before deciding."
     }
   },
   "cvSections": {
@@ -20690,5 +20701,52 @@
       "fullList": "Full list"
     },
     "more": "More"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Recruitment agency",
+    "title": "{agency} — would you like to join its list of candidates?",
+    "body": "A recruitment agency puts its candidates forward to employers who are looking for people. If you join, {agency} can see your profile and offer you for suitable work.",
+    "leave": "Your choice, nothing is ticked for you. You can leave the list at any time on your profile.",
+    "consent": "I agree to be on {agency}'s list of candidates.",
+    "join": "Join the list",
+    "joining": "Joining…",
+    "notNow": "Not now",
+    "joined": "You are on {agency}'s list of candidates. You can leave it on your profile.",
+    "errors": {
+      "consentRequired": "Tick the box first if you want to join.",
+      "consentTextChanged": "The text has changed. Reload the page and read it again.",
+      "representedElsewhere": "Another agency already represents you, so this list is not offered.",
+      "alreadyKnown": "You have already answered this agency.",
+      "notAvailable": "This is not available right now.",
+      "noWorkerProfile": "Finish setting up your profile first.",
+      "auth": "Please sign in again.",
+      "error": "It did not work. Try again."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Your placement fee",
+    "intro": "What employers see on your candidates. An employer accepts it only when accepting one of your candidates, and it applies only to a worker actually placed — never to a view, a contact or an application.",
+    "current": "Shown to employers now",
+    "none": "You have not stated a placement fee. Employers see none.",
+    "amount": "Amount",
+    "currency": "Currency",
+    "condition": "When the fee applies",
+    "conditionHint": "Your own words, shown to the employer as written.",
+    "termsUrl": "Link to your full terms (optional)",
+    "termsUrlHint": "If you leave it empty, employers are told that the full terms have not been published.",
+    "save": "Save",
+    "saving": "Saving…",
+    "retire": "Stop showing a fee",
+    "saved": "Saved. Employers now see this fee on your candidates.",
+    "retired": "Employers no longer see a fee.",
+    "unavailable": "Placement fees are not available yet.",
+    "feeLine": "Placement fee – {fee} per successfully placed worker.",
+    "errors": {
+      "invalid": "Check the amount, the three-letter currency and the link (https://).",
+      "notAgency": "Only an agency can state a placement fee.",
+      "notFound": "You cannot change this organization's fee.",
+      "auth": "Please sign in again.",
+      "error": "It did not save. Try again."
+    }
   }
 }

@@ -8074,5 +8074,52 @@
       "fullList": "Täielik nimekiri"
     },
     "more": "Veel"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Värbamisagentuur",
+    "title": "{agency} – kas soovite liituda selle kandidaatide nimekirjaga?",
+    "body": "Värbamisagentuur pakub oma kandidaate tööandjatele, kes otsivad inimesi. Kui liitute, näeb {agency} teie profiili ja saab teid pakkuda sobivale tööle.",
+    "leave": "Otsustate teie, midagi pole teie eest märgitud. Nimekirjast saate igal ajal oma profiilil lahkuda.",
+    "consent": "Nõustun olema {agency} kandidaatide nimekirjas.",
+    "join": "Liitu nimekirjaga",
+    "joining": "Liitumine…",
+    "notNow": "Mitte praegu",
+    "joined": "Olete {agency} kandidaatide nimekirjas. Lahkuda saate oma profiilil.",
+    "errors": {
+      "consentRequired": "Kui soovite liituda, märkige kõigepealt ruut.",
+      "consentTextChanged": "Tekst on muutunud. Laadige leht uuesti ja lugege see uuesti läbi.",
+      "representedElsewhere": "Teid esindab juba teine agentuur, seega seda nimekirja ei pakuta.",
+      "alreadyKnown": "Olete sellele agentuurile juba vastanud.",
+      "notAvailable": "See pole praegu saadaval.",
+      "noWorkerProfile": "Lõpetage kõigepealt oma profiili loomine.",
+      "auth": "Logige uuesti sisse.",
+      "error": "See ei õnnestunud. Proovige uuesti."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Teie vahendustasu",
+    "intro": "Mida tööandjad teie kandidaatide juures näevad. Tööandja aktsepteerib selle ainult teie kandidaadi vastuvõtmisel ja see kehtib ainult tegelikult tööle võetud inimese kohta – mitte kunagi vaatamise, kontakti ega kandideerimise eest.",
+    "current": "Praegu tööandjatele näidatud",
+    "none": "Te pole vahendustasu märkinud. Tööandjad ei näe seda.",
+    "amount": "Summa",
+    "currency": "Valuuta",
+    "condition": "Millal tasu kehtib",
+    "conditionHint": "Teie enda sõnad, tööandjale näidatakse neid nii, nagu need on kirjutatud.",
+    "termsUrl": "Link teie täielikele tingimustele (valikuline)",
+    "termsUrlHint": "Kui jätate tühjaks, öeldakse tööandjatele, et täielikke tingimusi pole avaldatud.",
+    "save": "Salvesta",
+    "saving": "Salvestamine…",
+    "retire": "Lõpeta tasu näitamine",
+    "saved": "Salvestatud. Tööandjad näevad nüüd seda tasu teie kandidaatide juures.",
+    "retired": "Tööandjad ei näe enam tasu.",
+    "unavailable": "Vahendustasud pole veel saadaval.",
+    "feeLine": "Vahendustasu – {fee} iga edukalt tööle võetud töötaja eest.",
+    "errors": {
+      "invalid": "Kontrollige summat, kolmetähelist valuutat ja linki (https://).",
+      "notAgency": "Vahendustasu saab märkida ainult agentuur.",
+      "notFound": "Te ei saa selle organisatsiooni tasu muuta.",
+      "auth": "Logige uuesti sisse.",
+      "error": "Ei salvestatud. Proovige uuesti."
+    }
   }
 }

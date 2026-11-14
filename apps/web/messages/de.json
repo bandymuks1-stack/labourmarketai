@@ -13121,6 +13121,17 @@
       "declined": "Arbeitskraft hat abgelehnt",
       "withdrawn": "Angebot zurückgezogen",
       "expired": "Angebot abgelaufen"
+    },
+    "placementTerm": {
+      "title": "Vermittlungsgebühr von {agency}",
+      "feeLine": "Vermittlungsgebühr – {fee} pro erfolgreich vermittelter Arbeitskraft.",
+      "conditionLabel": "Bedingung:",
+      "termsLink": "Vollständige Bedingungen der Agentur",
+      "termsPending": "Die Agentur hat ihre vollständigen Bedingungen noch nicht veröffentlicht.",
+      "onlyOnPlacement": "Fällig nur, wenn diese Person tatsächlich bei Ihnen eingestellt wird – nicht für Ansicht, Kontakt oder dieses Angebot.",
+      "accept": "Ich akzeptiere die Vermittlungsgebühr und die Bedingung dieser Agentur für diesen Kandidaten.",
+      "mustAccept": "Um diesen Kandidaten anzunehmen, akzeptieren Sie zuerst die Vermittlungsgebühr der Agentur.",
+      "changed": "Die Vermittlungsgebühr der Agentur hat sich geändert. Laden Sie die Seite neu, um sie vor der Entscheidung zu sehen."
     }
   },
   "cvSections": {
@@ -20690,5 +20701,52 @@
       "fullList": "Vollständige Liste"
     },
     "more": "Mehr"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Personalvermittlung",
+    "title": "{agency} – möchten Sie in die Kandidatenliste aufgenommen werden?",
+    "body": "Eine Personalvermittlung schlägt ihre Kandidaten Arbeitgebern vor, die Leute suchen. Wenn Sie beitreten, sieht {agency} Ihr Profil und kann Sie für passende Arbeit vorschlagen.",
+    "leave": "Ihre Entscheidung, nichts ist für Sie angekreuzt. Sie können die Liste jederzeit in Ihrem Profil verlassen.",
+    "consent": "Ich bin einverstanden, auf der Kandidatenliste von {agency} zu stehen.",
+    "join": "Der Liste beitreten",
+    "joining": "Wird beigetreten…",
+    "notNow": "Nicht jetzt",
+    "joined": "Sie stehen auf der Kandidatenliste von {agency}. Sie können sie in Ihrem Profil verlassen.",
+    "errors": {
+      "consentRequired": "Kreuzen Sie zuerst das Kästchen an, wenn Sie beitreten möchten.",
+      "consentTextChanged": "Der Text hat sich geändert. Laden Sie die Seite neu und lesen Sie ihn erneut.",
+      "representedElsewhere": "Eine andere Agentur vertritt Sie bereits, daher wird diese Liste nicht angeboten.",
+      "alreadyKnown": "Sie haben dieser Agentur bereits geantwortet.",
+      "notAvailable": "Das ist derzeit nicht verfügbar.",
+      "noWorkerProfile": "Richten Sie zuerst Ihr Profil fertig ein.",
+      "auth": "Bitte melden Sie sich erneut an.",
+      "error": "Das hat nicht geklappt. Versuchen Sie es erneut."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Ihre Vermittlungsgebühr",
+    "intro": "Was Arbeitgeber bei Ihren Kandidaten sehen. Ein Arbeitgeber akzeptiert sie nur, wenn er einen Ihrer Kandidaten annimmt, und sie gilt nur für eine tatsächlich vermittelte Person – nie für eine Ansicht, einen Kontakt oder eine Bewerbung.",
+    "current": "Arbeitgebern derzeit angezeigt",
+    "none": "Sie haben keine Vermittlungsgebühr angegeben. Arbeitgeber sehen keine.",
+    "amount": "Betrag",
+    "currency": "Währung",
+    "condition": "Wann die Gebühr gilt",
+    "conditionHint": "Ihre eigenen Worte, dem Arbeitgeber so gezeigt, wie geschrieben.",
+    "termsUrl": "Link zu Ihren vollständigen Bedingungen (optional)",
+    "termsUrlHint": "Bleibt das Feld leer, wird Arbeitgebern gesagt, dass die vollständigen Bedingungen noch nicht veröffentlicht sind.",
+    "save": "Speichern",
+    "saving": "Wird gespeichert…",
+    "retire": "Keine Gebühr mehr anzeigen",
+    "saved": "Gespeichert. Arbeitgeber sehen diese Gebühr jetzt bei Ihren Kandidaten.",
+    "retired": "Arbeitgeber sehen keine Gebühr mehr.",
+    "unavailable": "Vermittlungsgebühren sind noch nicht verfügbar.",
+    "feeLine": "Vermittlungsgebühr – {fee} pro erfolgreich vermittelter Arbeitskraft.",
+    "errors": {
+      "invalid": "Prüfen Sie den Betrag, die dreistellige Währung und den Link (https://).",
+      "notAgency": "Nur eine Agentur kann eine Vermittlungsgebühr angeben.",
+      "notFound": "Sie können die Gebühr dieser Organisation nicht ändern.",
+      "auth": "Bitte melden Sie sich erneut an.",
+      "error": "Nicht gespeichert. Versuchen Sie es erneut."
+    }
   }
 }
