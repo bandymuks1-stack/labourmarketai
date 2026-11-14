@@ -1,0 +1,169 @@
+market-lifecycle-discard-guard-local — 2026-11-14T11:28:42.312Z
+cluster: <repo>/.tmp/pgdiscard-126980 (port 5518, throwaway, synthetic ids only)
+server: PostgreSQL 16.13
+PASS  base: both databases start from the same transition guard
+
+[order A] 20261024100000, then 20261109120000
+PASS  A1 20261024100000 leaves customer_requests_status_transition_guard untouched
+
+[order B] 20261109120000, then 20261024100000
+PASS  B1 20261109120000 replaces the transition guard (its withdraw branch)
+PASS  B2 20261024100000 applied afterwards keeps 20261109120000's guard byte-identical
+
+[f] same schema in both orders
+PASS  f1 functions (md5), triggers and the listing column are identical in both orders
+PASS  f2 in both orders the transition guard is 20261109120000's
+PASS  f3 each guard trigger exists exactly once
+
+[A d] demand
+PASS  A d1 the owner discards a draft (draft -> closed, outcome discarded), as lib/demand does
+PASS  A d2 owner reopen of the discarded draft -> refused
+PASS  A d3 owner clearing the outcome first -> refused
+PASS  A d4 owner rewriting the outcome -> refused
+PASS  A d5 both in one statement -> refused
+PASS  A d6 the discarded row is unchanged after every attempt
+PASS  A d7 other columns of a discarded row stay editable (guard fires on status / outcome only)
+PASS  A d8 a legacy closed row (outcome NULL) still reopens (nothing inferred about history)
+PASS  A d9 a withdrawn need still reopens, and its outcome is cleared
+PASS  A d10 draft -> submitted -> closed (completed) still works
+PASS  A d11 the transition guard still refuses closed -> approved
+PASS  A d12 another user's update reaches 0 rows (RLS)
+PASS  A d13 admin passes, as with the transition guard, and no stale outcome is left
+PASS  A d14 a call without a signed-in user (runner / service role) passes, as with the transition guard
+PASS  A d15 a draft closed WITHOUT an outcome (raw PATCH, no-column fallback) is recorded as discarded
+PASS  A d16 ... and cannot be reopened
+PASS  A d17 a draft closed as 'completed' is still recorded as discarded (a draft was never in the market)
+PASS  A d18 a submitted need cannot be labelled discarded (it would lock the owner's own row)
+PASS  A d19 a completed need cannot be relabelled discarded
+PASS  A d20 closing an open need with a stale 'discarded' does not lock it; the app's outcome write then lands
+
+[A p] privacy cancel
+PASS  A p1 the holder submits and confirms an account-deletion request
+PASS  A p2 cancel -> {status:ok}
+PASS  A p3 the request is closed as withdrawn
+PASS  A p4 a second cancel -> ok_already and writes nothing (no duplicate log entry)
+PASS  A p5 a raw owner PATCH of a privacy row is still refused
+PASS  A p6 the RPC withdraws the new request
+
+[A l] listings
+PASS  A l1 v3 discards a draft (closed, outcome discarded)
+PASS  A l2 v3 active on a discarded draft -> refused
+PASS  A l2 v2 active on a discarded draft -> refused
+PASS  A l2 v3 draft on a discarded draft -> refused
+PASS  A l2 v3 paused on a discarded draft -> refused
+PASS  A l2 v2 draft on a discarded draft -> refused
+PASS  A l3 closing again without an outcome keeps 'discarded'
+PASS  A l3b closing again as 'completed' keeps 'discarded' (v3 never relabels a discarded draft)
+PASS  A l4 the raw table stays read-only for authenticated
+PASS  A l5 an active listing closes as withdrawn
+PASS  A l6 a withdrawn listing republishes and its outcome is cleared
+PASS  A l7 a completed listing republished through v2 directly also loses the stale outcome
+PASS  A l8 a legacy closed listing (outcome NULL) republishes
+PASS  A l9 the publish policy still applies (inactive category refused)
+PASS  A l10 an outcome is accepted only with closed
+PASS  A l11 a call without a signed-in user passes and the outcome is cleared
+PASS  A l12 a draft closed through v2 directly (no outcome) is recorded as discarded
+PASS  A l13 ... and cannot be published
+PASS  A l14 an active listing cannot be closed as discarded (the whole call rolls back)
+PASS  A l15 an open listing carrying a stale 'discarded' is not locked: it pauses and the outcome is cleared
+PASS  A l16 closing an open listing with a stale 'discarded' does not lock it (closed, no outcome, republishes)
+PASS  A l17 a draft closed through v3 as 'withdrawn' is recorded discarded, without an error (as for demand)
+
+[B d] demand
+PASS  B d1 the owner discards a draft (draft -> closed, outcome discarded), as lib/demand does
+PASS  B d2 owner reopen of the discarded draft -> refused
+PASS  B d3 owner clearing the outcome first -> refused
+PASS  B d4 owner rewriting the outcome -> refused
+PASS  B d5 both in one statement -> refused
+PASS  B d6 the discarded row is unchanged after every attempt
+PASS  B d7 other columns of a discarded row stay editable (guard fires on status / outcome only)
+PASS  B d8 a legacy closed row (outcome NULL) still reopens (nothing inferred about history)
+PASS  B d9 a withdrawn need still reopens, and its outcome is cleared
+PASS  B d10 draft -> submitted -> closed (completed) still works
+PASS  B d11 the transition guard still refuses closed -> approved
+PASS  B d12 another user's update reaches 0 rows (RLS)
+PASS  B d13 admin passes, as with the transition guard, and no stale outcome is left
+PASS  B d14 a call without a signed-in user (runner / service role) passes, as with the transition guard
+PASS  B d15 a draft closed WITHOUT an outcome (raw PATCH, no-column fallback) is recorded as discarded
+PASS  B d16 ... and cannot be reopened
+PASS  B d17 a draft closed as 'completed' is still recorded as discarded (a draft was never in the market)
+PASS  B d18 a submitted need cannot be labelled discarded (it would lock the owner's own row)
+PASS  B d19 a completed need cannot be relabelled discarded
+PASS  B d20 closing an open need with a stale 'discarded' does not lock it; the app's outcome write then lands
+
+[B p] privacy cancel
+PASS  B p1 the holder submits and confirms an account-deletion request
+PASS  B p2 cancel -> {status:ok}
+PASS  B p3 the request is closed as withdrawn
+PASS  B p4 a second cancel -> ok_already and writes nothing (no duplicate log entry)
+PASS  B p5 a raw owner PATCH of a privacy row is still refused
+PASS  B p6 the RPC withdraws the new request
+
+[B l] listings
+PASS  B l1 v3 discards a draft (closed, outcome discarded)
+PASS  B l2 v3 active on a discarded draft -> refused
+PASS  B l2 v2 active on a discarded draft -> refused
+PASS  B l2 v3 draft on a discarded draft -> refused
+PASS  B l2 v3 paused on a discarded draft -> refused
+PASS  B l2 v2 draft on a discarded draft -> refused
+PASS  B l3 closing again without an outcome keeps 'discarded'
+PASS  B l3b closing again as 'completed' keeps 'discarded' (v3 never relabels a discarded draft)
+PASS  B l4 the raw table stays read-only for authenticated
+PASS  B l5 an active listing closes as withdrawn
+PASS  B l6 a withdrawn listing republishes and its outcome is cleared
+PASS  B l7 a completed listing republished through v2 directly also loses the stale outcome
+PASS  B l8 a legacy closed listing (outcome NULL) republishes
+PASS  B l9 the publish policy still applies (inactive category refused)
+PASS  B l10 an outcome is accepted only with closed
+PASS  B l11 a call without a signed-in user passes and the outcome is cleared
+PASS  B l12 a draft closed through v2 directly (no outcome) is recorded as discarded
+PASS  B l13 ... and cannot be published
+PASS  B l14 an active listing cannot be closed as discarded (the whole call rolls back)
+PASS  B l15 an open listing carrying a stale 'discarded' is not locked: it pauses and the outcome is cleared
+PASS  B l16 closing an open listing with a stale 'discarded' does not lock it (closed, no outcome, republishes)
+PASS  B l17 a draft closed through v3 as 'withdrawn' is recorded discarded, without an error (as for demand)
+
+[i] re-apply is a no-op
+PASS  i1 20261024100000 runs a second time without error and changes nothing (no duplicate trigger)
+
+[r] each rollback removes only its own objects (database order_a)
+PASS  r1 rolling back 20261024100000 keeps 20261109120000's guard
+PASS  r2 its triggers, trigger functions and v3 are gone
+PASS  r3 the listing outcome column stays because outcomes are recorded (the rollback says so)
+
+[r p] privacy cancel
+PASS  r p1 the holder submits and confirms an account-deletion request
+PASS  r p2 cancel -> {status:ok}
+PASS  r p3 the request is closed as withdrawn
+PASS  r p4 a second cancel -> ok_already and writes nothing (no duplicate log entry)
+PASS  r p5 a raw owner PATCH of a privacy row is still refused
+PASS  r p6 the RPC withdraws the new request
+PASS  r4 without the guard a discarded draft reopens again (pre-migration behaviour)
+PASS  r5 20261024100000 re-applies to the same schema
+PASS  r6 rolling back 20261109120000 restores the 20260705150000 guard
+
+[r d] demand
+PASS  r d1 the owner discards a draft (draft -> closed, outcome discarded), as lib/demand does
+PASS  r d2 owner reopen of the discarded draft -> refused
+PASS  r d3 owner clearing the outcome first -> refused
+PASS  r d4 owner rewriting the outcome -> refused
+PASS  r d5 both in one statement -> refused
+PASS  r d6 the discarded row is unchanged after every attempt
+PASS  r d7 other columns of a discarded row stay editable (guard fires on status / outcome only)
+PASS  r d8 a legacy closed row (outcome NULL) still reopens (nothing inferred about history)
+PASS  r d9 a withdrawn need still reopens, and its outcome is cleared
+PASS  r d10 draft -> submitted -> closed (completed) still works
+PASS  r d11 the transition guard still refuses closed -> approved
+PASS  r d12 another user's update reaches 0 rows (RLS)
+PASS  r d13 admin passes, as with the transition guard, and no stale outcome is left
+PASS  r d14 a call without a signed-in user (runner / service role) passes, as with the transition guard
+PASS  r d15 a draft closed WITHOUT an outcome (raw PATCH, no-column fallback) is recorded as discarded
+PASS  r d16 ... and cannot be reopened
+PASS  r d17 a draft closed as 'completed' is still recorded as discarded (a draft was never in the market)
+PASS  r d18 a submitted need cannot be labelled discarded (it would lock the owner's own row)
+PASS  r d19 a completed need cannot be relabelled discarded
+PASS  r d20 closing an open need with a stale 'discarded' does not lock it; the app's outcome write then lands
+PASS  r7 20261109120000 re-applies and both orders still end in the same schema
+PASS  no deadlock reported by the server
+
+SUMMARY: 138 PASS, 0 FAIL  (finished 2026-11-14T11:29:34.024Z)

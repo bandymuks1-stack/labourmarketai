@@ -58,6 +58,9 @@ export interface MarketplaceListingRow {
   readonly unit: string | null;
   readonly expiresAt: string | null;
   readonly status: ListingStatus;
+  /** Why a closed listing is closed (lifecycle contract); null when open or
+   *  closed before outcomes were recorded / while the column is absent. */
+  readonly closedOutcome?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

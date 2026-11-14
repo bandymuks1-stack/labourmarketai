@@ -96,7 +96,10 @@ describe("SERVER: every status door re-checks the contract (UI, MCP, any caller)
 
   it("listings: the status door refuses what no contract action produces", () => {
     const src = read("lib/marketplace/listings.ts");
-    expect(src).toMatch(/if \(!actionForStatus\(adapter, adapter\.facts\(\{ status: String\(row\.status\) \}\), status\)\)/);
+    // The facts include the stored closed outcome, so a discarded draft has
+    // no `resume` here either.
+    expect(src).toMatch(/adapter\.facts\(\{ status: String\(row\.status\), closedOutcome: row\.closed_outcome \?\? null \}\)/);
+    expect(src).toMatch(/if \(!actionForStatus\(adapter, facts, status, outcomeForClose\)\)/);
   });
 
   it("demand: reopen refuses a discarded draft by the contract", () => {
@@ -129,6 +132,51 @@ describe("DATA: hiding is never deletion", () => {
     expect(sql).toMatch(/closed_outcome in \('completed', 'withdrawn', 'discarded'\)/);
     const ddl = sql.replace(/--.*$/gm, "");
     expect(ddl).not.toMatch(/\b(update|delete from|drop table|drop column|grant|revoke|security definer|create policy)\b/i);
+  });
+});
+
+describe("RED half (20261024100000, human-gated): listing outcome + discarded-draft guard", () => {
+  const sql = () =>
+    readFileSync(
+      join(REPO, "supabase", "migrations", "20261024100000_market_lifecycle_listing_outcome_and_discard_guard_v1.sql"),
+      "utf8",
+    );
+
+  it("v3 keeps every v2 check (one publish policy) and refuses to publish a discarded draft", () => {
+    expect(sql()).toMatch(/perform public\.set_marketplace_listing_status_v2\(p_id, p_status\);/);
+    expect(sql()).toMatch(/a discarded draft cannot be published/);
+    expect(sql()).toMatch(/grant\s+execute on function public\.set_marketplace_listing_status_v3\(uuid, text, text\) to authenticated;/);
+    expect(sql()).toMatch(/revoke execute on function public\.set_marketplace_listing_status_v3\(uuid, text, text\) from anon;/);
+  });
+
+  it("the discarded refusals are OWN triggers on both tables, never a replaced transition guard", () => {
+    const s = sql();
+    const ddl = s.replace(/--.*$/gm, "");
+    // 20261109120000 also replaces customer_requests_status_transition_guard: a
+    // second CREATE OR REPLACE here would drop whichever branch was applied first.
+    expect(ddl).not.toMatch(/function\s+public\.customer_requests_status_transition_guard/);
+    expect(ddl).toMatch(/create or replace trigger customer_requests_discarded_draft_guard_trg\s+before update of status, closed_outcome on public\.customer_requests/);
+    expect(ddl).toMatch(/create or replace trigger marketplace_listings_discarded_guard_trg\s+before update of status, closed_outcome on public\.marketplace_listings/);
+    // the outcome itself is protected: clearing or rewriting it first is no way back in
+    expect(ddl).toMatch(/new\.closed_outcome is distinct from old\.closed_outcome/);
+    expect(ddl).toMatch(/new\.closed_outcome is distinct from 'discarded'/);
+    // no door leaves a closed draft unlabelled, and nothing else can be discarded
+    expect(ddl.match(/if old\.status = 'draft' and new\.status = 'closed' then\s+new\.closed_outcome := 'discarded';/g)?.length).toBe(2);
+    expect(ddl.match(/raise exception 'only a draft can be discarded'/g)?.length).toBe(2);
+    expect(ddl.match(/set search_path = public/g)?.length).toBe(3);
+    const down = readFileSync(
+      join(REPO, "supabase", "rollbacks", "20261024100000_market_lifecycle_listing_outcome_and_discard_guard_v1.down.sql"),
+      "utf8",
+    ).replace(/--.*$/gm, "");
+    expect(down).not.toMatch(/customer_requests_status_transition_guard/);
+  });
+
+  it("the listing status door tries v3 and falls back to v2 while v3 is absent", () => {
+    const src = read("lib/marketplace/listings.ts");
+    const v3 = src.indexOf('rpc("set_marketplace_listing_status_v3"');
+    const v2 = src.indexOf('rpc("set_marketplace_listing_status_v2"');
+    expect(v3).toBeGreaterThan(0);
+    expect(v2).toBeGreaterThan(v3);
   });
 });
 
