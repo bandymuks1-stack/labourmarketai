@@ -227,7 +227,10 @@
           "errorOpenNeedLimitIndividual": "Den här organisationen har nått gränsen för aktiva positioner i sin plan. Inget har debiterats eller ändrats. Kontakta oss.",
           "openNeedUsage": "Aktiva positioner: {used} av {limit} använda · {remaining} kvar",
           "openNeedUsageUpgradeCta": "Aktivera planen Organisation",
-          "openNeedUsageIndividual": "Du har nått gränsen för din plan. Kontakta oss för att diskutera dina behov."
+          "openNeedUsageIndividual": "Du har nått gränsen för din plan. Kontakta oss för att diskutera dina behov.",
+          "form": {
+            "countryRequired": "Välj landet där arbetet utförs."
+          }
         }
       },
       "account": {
@@ -3910,7 +3913,9 @@
         "supplyRole": "Vilket yrke",
         "supplyRolePlaceholder": "T.ex. svetsare",
         "supplyTeamSize": "Hur många personer ni har",
-        "supplyLocation": "Var de kan arbeta"
+        "supplyLocation": "Var de kan arbeta",
+        "demandCountry": "Land där arbetet utförs",
+        "demandCountryPlaceholder": "t.ex. Sverige eller SE"
       },
       "availability": {
         "available": "[EN] Available",

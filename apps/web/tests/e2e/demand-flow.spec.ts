@@ -21,6 +21,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 // The COMPANY-actor session file, not the shared `.storage-state.json`: the
 // generic file's identity is whatever the last mint chose (the 2026-08-31
@@ -93,6 +94,7 @@ test("demand flow: empty blocked → describe → criteria → review → create
   await page.getByTestId("demand-location").fill("Vilnius, Lietuva");
   await page.getByTestId("demand-skills").fill("Krautuvo pažymėjimas, lietuvių kalba");
   await page.getByTestId("demand-notes").fill("Pradžia kitą savaitę");
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
 
   // ── Step 3 — review shows the entered values.

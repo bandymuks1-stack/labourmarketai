@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 import { expect, type Page } from "@playwright/test";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * Shared helpers for the *-isolated-web-a.spec.ts walks
@@ -119,6 +120,7 @@ export async function publishNeed(page: Page, origin: string, role: string, coun
     await main.getByTestId("demand-country-select").click();
     await page.getByRole("option", { name: /Lithuania/ }).first().click();
   }
+  await chooseDemandCountryIfEmpty(page);
   await main.getByTestId("demand-next").click();
   await main.getByTestId("demand-create").click();
   await expect(main.getByTestId("demand-done"), "the need is accepted").toBeVisible({ timeout: 30_000 });

@@ -227,7 +227,10 @@
           "errorOpenNeedLimitIndividual": "Šī organizācija ir sasniegusi sava plāna aktīvo pozīciju ierobežojumu. Nekas netika iekasēts vai mainīts. Sazinieties ar mums.",
           "openNeedUsage": "Aktīvās pozīcijas: izmantotas {used} no {limit} · atlikušas {remaining}",
           "openNeedUsageUpgradeCta": "Aktivizēt plānu „Organizācija”",
-          "openNeedUsageIndividual": "Jūs esat sasniedzis sava plāna ierobežojumu. Sazinieties ar mums, lai pārrunātu savas vajadzības."
+          "openNeedUsageIndividual": "Jūs esat sasniedzis sava plāna ierobežojumu. Sazinieties ar mums, lai pārrunātu savas vajadzības.",
+          "form": {
+            "countryRequired": "Izvēlieties valsti, kurā tiks veikts darbs."
+          }
         }
       },
       "account": {
@@ -3910,7 +3913,9 @@
         "supplyRole": "Kāda profesija",
         "supplyRolePlaceholder": "Piem., metinātājs",
         "supplyTeamSize": "Cik cilvēku jums ir",
-        "supplyLocation": "Kur viņi var strādāt"
+        "supplyLocation": "Kur viņi var strādāt",
+        "demandCountry": "Valsts, kurā tiks veikts darbs",
+        "demandCountryPlaceholder": "piem., Zviedrija vai SE"
       },
       "availability": {
         "available": "[EN] Available",

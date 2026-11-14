@@ -4571,10 +4571,11 @@
             "back": "Back",
             "next": "Next",
             "descRequired": "Add a description to continue.",
+            "countryRequired": "Choose the country where the work takes place.",
             "optionalTag": "(optional)",
             "reviewIntro": "Review and create. The request stays private in your space.",
-            "locationLabel": "Location or country",
-            "locationPlaceholder": "e.g. Vilnius, Lithuania",
+            "locationLabel": "City or site",
+            "locationPlaceholder": "e.g. city, district or site",
             "skillsLabel": "Required skills or criteria",
             "skillsPlaceholder": "e.g. driving licence, English, experience",
             "urgencyLabel": "When you need it",
@@ -14310,7 +14311,9 @@
         "supplyRole": "What profession",
         "supplyRolePlaceholder": "E.g. welder",
         "supplyTeamSize": "How many people you have",
-        "supplyLocation": "Where they can work"
+        "supplyLocation": "Where they can work",
+        "demandCountry": "Country where the work is",
+        "demandCountryPlaceholder": "e.g. Sweden or SE"
       },
       "availability": {
         "available": "Available",

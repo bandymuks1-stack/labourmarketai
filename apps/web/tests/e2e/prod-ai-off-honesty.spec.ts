@@ -5,6 +5,7 @@ import { test, expect, type Browser, type BrowserContext, type Locator, type Pag
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 import { makeDocx } from "../../lib/cv/__fixtures__/cv-fixtures";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * PRODUCTION — AI-DEPENDENT FUNCTIONS WITH THE AI RUNTIME OFF (owner order
@@ -182,6 +183,7 @@ async function submitNeed(page: Page): Promise<"done" | "limit"> {
   await inMain(page).getByTestId("demand-next").click();
   const size = inMain(page).getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await chooseDemandCountryIfEmpty(page);
   await inMain(page).getByTestId("demand-next").click();
   await inMain(page).getByTestId("demand-create").click();
   const done = inMain(page).getByTestId("demand-done");

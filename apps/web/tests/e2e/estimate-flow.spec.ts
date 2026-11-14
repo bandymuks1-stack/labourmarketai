@@ -22,6 +22,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 // The COMPANY-actor session file, not the shared `.storage-state.json` — the
 // exact pinning demand-flow.spec.ts documents: the generic file's identity is
@@ -120,6 +121,7 @@ test("estimate flow: criteria estimate → total + range → review → create �
   ).toBeVisible();
   await shot(page, "01-estimate-criteria");
 
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
 
   // ── Step 3 — review shows the estimate summary with the same total.

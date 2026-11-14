@@ -5,6 +5,7 @@ import { test, expect, type Browser, type BrowserContext, type Locator, type Pag
 import { proveActionTiles } from "./action-tile-proof";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * PRODUCTION ORDERS, BOOKINGS, EXECUTION — owner area 12 (registry rows 5.13,
@@ -191,6 +192,7 @@ async function submitNeed(page: Page): Promise<"done" | "limit"> {
   await page.getByTestId("demand-next").click();
   const size = page.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
   await page.getByTestId("demand-create").click();
   const done = page.getByTestId("demand-done");

@@ -1,4 +1,5 @@
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * CROSS-ROLE INTEGRATION JOURNEYS, end to end, on a THROWAWAY LOCAL Supabase
@@ -257,6 +258,7 @@ async function postNeed(page: Page, role: string, opts: { doubleSubmit?: boolean
   await main.getByTestId("demand-next").click();
   const size = main.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("2");
+  await chooseDemandCountryIfEmpty(page);
   await main.getByTestId("demand-next").click();
   if (opts.doubleSubmit) await main.getByTestId("demand-create").dblclick();
   else await main.getByTestId("demand-create").click();

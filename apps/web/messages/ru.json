@@ -4571,10 +4571,11 @@
             "back": "Назад",
             "next": "Далее",
             "descRequired": "Добавьте описание, чтобы продолжить.",
+            "countryRequired": "Выберите страну, где будет выполняться работа.",
             "optionalTag": "(необязательно)",
             "reviewIntro": "Проверьте и создайте. Заявка остаётся приватной в вашем пространстве.",
-            "locationLabel": "Местоположение или страна",
-            "locationPlaceholder": "напр., Вильнюс, Литва",
+            "locationLabel": "Город или объект",
+            "locationPlaceholder": "напр., город, район или объект",
             "skillsLabel": "Требуемые навыки или критерии",
             "skillsPlaceholder": "напр., водительские права, английский, опыт",
             "urgencyLabel": "Когда нужно",
@@ -14310,7 +14311,9 @@
         "supplyRole": "Какая профессия",
         "supplyRolePlaceholder": "Например: сварщик",
         "supplyTeamSize": "Сколько человек у вас есть",
-        "supplyLocation": "Где они могут работать"
+        "supplyLocation": "Где они могут работать",
+        "demandCountry": "Страна, где будет работа",
+        "demandCountryPlaceholder": "напр., Швеция или SE"
       },
       "availability": {
         "available": "Доступен",

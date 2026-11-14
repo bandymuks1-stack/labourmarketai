@@ -227,7 +227,10 @@
           "errorOpenNeedLimitIndividual": "Denne organisation har nået grænsen for aktive stillinger i sin plan. Intet blev opkrævet eller ændret. Kontakt os.",
           "openNeedUsage": "Aktive stillinger: {used} af {limit} brugt · {remaining} tilbage",
           "openNeedUsageUpgradeCta": "Aktivér planen „Organisation“",
-          "openNeedUsageIndividual": "Du har nået grænsen for din plan. Kontakt os for at drøfte dine behov."
+          "openNeedUsageIndividual": "Du har nået grænsen for din plan. Kontakt os for at drøfte dine behov.",
+          "form": {
+            "countryRequired": "Vælg det land, hvor arbejdet udføres."
+          }
         }
       },
       "account": {
@@ -3910,7 +3913,9 @@
         "supplyRole": "Hvilket fag",
         "supplyRolePlaceholder": "F.eks. svejser",
         "supplyTeamSize": "Hvor mange folk I har",
-        "supplyLocation": "Hvor de kan arbejde"
+        "supplyLocation": "Hvor de kan arbejde",
+        "demandCountry": "Land, hvor arbejdet udføres",
+        "demandCountryPlaceholder": "f.eks. Sverige eller SE"
       },
       "availability": {
         "available": "[EN] Available",

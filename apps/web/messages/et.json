@@ -227,7 +227,10 @@
           "errorOpenNeedLimitIndividual": "See organisatsioon on saavutanud oma plaani aktiivsete ametikohtade piiri. Midagi ei võetud ega muudetud. Võta meiega ühendust.",
           "openNeedUsage": "Aktiivsed ametikohad: kasutatud {used} / {limit} · jäänud {remaining}",
           "openNeedUsageUpgradeCta": "Aktiveeri plaan „Organisatsioon“",
-          "openNeedUsageIndividual": "Oled jõudnud oma plaani piirini. Võta meiega ühendust, et oma vajadusi arutada."
+          "openNeedUsageIndividual": "Oled jõudnud oma plaani piirini. Võta meiega ühendust, et oma vajadusi arutada.",
+          "form": {
+            "countryRequired": "Valige riik, kus tööd tehakse."
+          }
         }
       },
       "account": {
@@ -3910,7 +3913,9 @@
         "supplyRole": "Milline amet",
         "supplyRolePlaceholder": "Nt keevitaja",
         "supplyTeamSize": "Kui palju inimesi sul on",
-        "supplyLocation": "Kus nad saavad töötada"
+        "supplyLocation": "Kus nad saavad töötada",
+        "demandCountry": "Riik, kus tööd tehakse",
+        "demandCountryPlaceholder": "nt Rootsi või SE"
       },
       "availability": {
         "available": "[EN] Available",
