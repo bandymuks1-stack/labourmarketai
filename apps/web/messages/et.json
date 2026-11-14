@@ -129,7 +129,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "[EN] Continue with LinkedIn",
-      "continueWithFacebook": "[EN] Continue with Facebook"
+      "continueWithFacebook": "[EN] Continue with Facebook",
+      "inAppBrowser": "Oled rakenduse sisseehitatud brauseris, kus Google'iga sisselogimine sageli ei tööta. Ava see leht telefoni brauseris (Safari või Chrome) või kasuta allpool e-posti ja parooli."
     },
     "callback": {
       "error_body": "[EN] This link is invalid or expired. Please try again.",
@@ -314,7 +315,9 @@
       "oauth": {
         "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
         "link_expired": "See kinnituslink on aegunud või juba kasutatud. Kui oled e-posti juba kinnitanud, logi lihtsalt sisse. Muidu küsi allpool uus link.",
-        "confirmed_sign_in": "Sinu e-post on kinnitatud. Registreerumine alustati teises seadmes, seega logi jätkamiseks siin sisse."
+        "confirmed_sign_in": "Sinu e-post on kinnitatud. Registreerumine alustati teises seadmes, seega logi jätkamiseks siin sisse.",
+        "confirm_link_opened": "See kinnituslink on avatud. Sinu e-posti aadress on suure tõenäosusega juba kinnitatud, seega proovi sisse logida. Kui see ei õnnestu, küsi allpool uus link.",
+        "provider_error": "Sisselogimisteenus ei saanud seda sisselogimist lõpule viia ja uuesti proovimine lõpeb tõenäoliselt samamoodi. Logi sisse sel viisil, millega esmalt registreerusid, või e-posti ja parooliga."
       },
       "emailNotConfirmed": "Sinu e-post pole veel kinnitatud. Ava saadetud kinnituslink või küsi allpool uus."
     },

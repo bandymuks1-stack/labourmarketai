@@ -4220,7 +4220,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "Doorgaan met LinkedIn",
-      "continueWithFacebook": "Doorgaan met Facebook"
+      "continueWithFacebook": "Doorgaan met Facebook",
+      "inAppBrowser": "Je zit in de ingebouwde browser van een app, waar inloggen met Google vaak niet werkt. Open deze pagina in de browser van je telefoon (Safari of Chrome), of gebruik hieronder je e-mailadres en wachtwoord."
     },
     "legalNotice": {
       "signup": "Door een account aan te maken bevestig je dat je de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> hebt gelezen.",
@@ -4242,7 +4243,9 @@
         "cancelled": "Inloggen is geannuleerd. Er is niets met je account gebeurd.",
         "unknown": "Kon niet inloggen. Probeer het opnieuw.",
         "link_expired": "Deze bevestigingslink is verlopen of al gebruikt. Heb je je e-mailadres al bevestigd, log dan gewoon in. Vraag anders hieronder een nieuwe link aan.",
-        "confirmed_sign_in": "Je e-mailadres is bevestigd. De registratie is op een ander apparaat gestart; log hier in om verder te gaan."
+        "confirmed_sign_in": "Je e-mailadres is bevestigd. De registratie is op een ander apparaat gestart; log hier in om verder te gaan.",
+        "confirm_link_opened": "Deze bevestigingslink is geopend. Je e-mailadres is hoogstwaarschijnlijk al bevestigd, dus probeer in te loggen. Lukt dat niet, vraag dan hieronder een nieuwe link aan.",
+        "provider_error": "De inlogdienst kon deze aanmelding niet afronden, en opnieuw proberen loopt waarschijnlijk op hetzelfde uit. Log in op de manier waarop je je eerst hebt geregistreerd, of met je e-mailadres en wachtwoord."
       },
       "emailNotConfirmed": "Je e-mailadres is nog niet bevestigd. Open de bevestigingslink die we je stuurden, of vraag hieronder een nieuwe aan."
     },

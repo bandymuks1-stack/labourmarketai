@@ -129,7 +129,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "[EN] Continue with LinkedIn",
-      "continueWithFacebook": "[EN] Continue with Facebook"
+      "continueWithFacebook": "[EN] Continue with Facebook",
+      "inAppBrowser": "Tu esi lietotnes iebūvētajā pārlūkā, kur pieslēgšanās ar Google bieži nedarbojas. Atver šo lapu tālruņa pārlūkā (Safari vai Chrome) vai zemāk izmanto e-pastu un paroli."
     },
     "callback": {
       "error_body": "[EN] This link is invalid or expired. Please try again.",
@@ -314,7 +315,9 @@
       "oauth": {
         "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
         "link_expired": "Šī apstiprinājuma saite ir beigusies vai jau izmantota. Ja e-pastu jau apstiprinājāt, vienkārši pierakstieties. Citādi pieprasiet jaunu saiti zemāk.",
-        "confirmed_sign_in": "Jūsu e-pasts ir apstiprināts. Reģistrācija tika sākta citā ierīcē, tāpēc pierakstieties šeit, lai turpinātu."
+        "confirmed_sign_in": "Jūsu e-pasts ir apstiprināts. Reģistrācija tika sākta citā ierīcē, tāpēc pierakstieties šeit, lai turpinātu.",
+        "confirm_link_opened": "Šī apstiprinājuma saite ir atvērta. Tava e-pasta adrese, visticamāk, jau ir apstiprināta, tāpēc mēģini pieslēgties. Ja neizdodas, zemāk pieprasi jaunu saiti.",
+        "provider_error": "Pieslēgšanās pakalpojums nevarēja pabeigt šo pieslēgšanos, un atkārtots mēģinājums, visticamāk, beigsies tāpat. Pieslēdzies tādā veidā, kādā reģistrējies pirmo reizi, vai ar e-pastu un paroli."
       },
       "emailNotConfirmed": "Jūsu e-pasts vēl nav apstiprināts. Atveriet nosūtīto apstiprinājuma saiti vai pieprasiet jaunu zemāk."
     },

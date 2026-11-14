@@ -4220,7 +4220,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "Mit LinkedIn fortfahren",
-      "continueWithFacebook": "Mit Facebook fortfahren"
+      "continueWithFacebook": "Mit Facebook fortfahren",
+      "inAppBrowser": "Sie befinden sich im eingebauten Browser einer App, in dem die Anmeldung mit Google oft nicht funktioniert. Öffnen Sie diese Seite im Browser Ihres Telefons (Safari oder Chrome) oder verwenden Sie unten E-Mail-Adresse und Passwort."
     },
     "legalNotice": {
       "signup": "Mit der Erstellung eines Kontos bestätigen Sie, dass Sie die <terms>Nutzungsbedingungen</terms> und die <privacy>Datenschutzerklärung</privacy> gelesen haben.",
@@ -4242,7 +4243,9 @@
         "cancelled": "Die Anmeldung wurde abgebrochen. An Ihrem Konto hat sich nichts geändert.",
         "unknown": "Anmeldung nicht möglich. Bitte versuchen Sie es erneut.",
         "link_expired": "Dieser Bestätigungslink ist abgelaufen oder wurde bereits verwendet. Wenn Sie Ihre E-Mail-Adresse schon bestätigt haben, melden Sie sich einfach an. Andernfalls fordern Sie unten einen neuen Link an.",
-        "confirmed_sign_in": "Ihre E-Mail-Adresse ist bestätigt. Die Registrierung wurde auf einem anderen Gerät begonnen. Melden Sie sich hier an, um fortzufahren."
+        "confirmed_sign_in": "Ihre E-Mail-Adresse ist bestätigt. Die Registrierung wurde auf einem anderen Gerät begonnen. Melden Sie sich hier an, um fortzufahren.",
+        "confirm_link_opened": "Dieser Bestätigungslink wurde geöffnet. Ihre E-Mail-Adresse ist höchstwahrscheinlich bereits bestätigt – versuchen Sie, sich anzumelden. Falls das nicht klappt, fordern Sie unten einen neuen Link an.",
+        "provider_error": "Der Anmeldedienst konnte diese Anmeldung nicht abschließen, und ein erneuter Versuch endet wahrscheinlich genauso. Melden Sie sich auf dem Weg an, mit dem Sie sich zuerst registriert haben, oder mit E-Mail-Adresse und Passwort."
       },
       "emailNotConfirmed": "Ihre E-Mail-Adresse ist noch nicht bestätigt. Öffnen Sie den zugesandten Bestätigungslink oder fordern Sie unten einen neuen an."
     },

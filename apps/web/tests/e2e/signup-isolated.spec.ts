@@ -334,6 +334,66 @@ test("M-0. seed: a synthetic company for the isolated mobile need journey", asyn
 });
 
 /**
+ * A-1..A-4. THE THREE SIGN-UP FAULTS OF THE 2026-11-13 TRUST AUDIT, each as the
+ * person meets it. None needs an account: they are what the sign-in page says
+ * after the auth server sends the browser back.
+ */
+test("A-1. a confirmation link that returns without a sign-in code is not reported as a fault", async ({ page }) => {
+  // What a RE-SENT confirmation link does: the auth server confirms the address
+  // and returns to the callback with nothing the server can read (the client
+  // library sends a resend without the code challenge).
+  await page.goto(`${BASE}/en/auth/callback?flow=email_confirm`);
+  await page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+  expect(new URL(page.url()).searchParams.get("error"), "the outcome names the confirmation link").toBe("confirm_link_opened");
+  const notice = page.getByTestId("login-oauth-error");
+  await expect(notice, "a calm status, not a red alert").toHaveAttribute("role", "status", { timeout: 30_000 });
+  await expect(notice, "it says what to do: sign in").toContainText(/signing in/i);
+  await expect(page.getByTestId("login-resend-confirmation"), "a new link can be requested right here").toBeVisible();
+});
+
+test("A-2. a bare callback with nothing in it is still reported as a failed sign-in", async ({ page }) => {
+  await page.goto(`${BASE}/en/auth/callback`);
+  await page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+  expect(new URL(page.url()).searchParams.get("error")).toBe("missing_code");
+  await expect(page.getByTestId("login-oauth-error")).toHaveAttribute("role", "alert", { timeout: 30_000 });
+});
+
+test("A-3. a provider failure that a retry cannot fix says what to do instead", async ({ page }) => {
+  await page.goto(`${BASE}/en/auth/callback?error=server_error&error_code=unexpected_failure&error_description=Database+error+saving+new+user`);
+  await page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+  expect(new URL(page.url()).searchParams.get("error")).toBe("provider_error");
+  const alert = page.getByTestId("login-oauth-error");
+  await expect(alert).toBeVisible({ timeout: 30_000 });
+  await expect(alert, "not the bare 'please try again'").not.toHaveText("Couldn't sign in. Please try again.");
+  await expect(alert, "it names the way that works").toContainText(/email and password/i);
+  await expect(alert, "the provider's own free text is never shown").not.toContainText(/database error/i);
+});
+
+test("A-4. inside an app's built-in browser the sign-up and sign-in pages say Google sign-in needs the phone's browser", async ({ browser }) => {
+  const facebookApp =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [FBAN/FBIOS;FBAV/470.0.0.30.109;FBDV/iPhone14,5;FBSN/iOS;FBSV/17.5;IABMV/1]";
+  const inApp = await browser.newContext({ userAgent: facebookApp, viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true });
+  const plain = await browser.newContext({ viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true });
+  try {
+    for (const path of ["/en/auth/signup", "/en/auth/login"]) {
+      const inside = await inApp.newPage();
+      await inside.goto(`${BASE}${path}`);
+      await expect(inside.getByTestId("auth-inapp-browser-notice"), `${path}: the notice shows inside the app's browser`).toBeVisible({ timeout: 30_000 });
+      await expect(inside.locator('input[name="email"]'), `${path}: e-mail sign-in stays available`).toBeVisible();
+      await inside.close();
+      const outside = await plain.newPage();
+      await outside.goto(`${BASE}${path}`);
+      await expect(outside.locator('input[name="email"]')).toBeVisible({ timeout: 30_000 });
+      await expect(outside.getByTestId("auth-inapp-browser-notice"), `${path}: an ordinary browser sees no notice`).toHaveCount(0);
+      await outside.close();
+    }
+  } finally {
+    await inApp.close();
+    await plain.close();
+  }
+});
+
+/**
  * P-1. THE WAY FORWARD IS ON SCREEN ON A PHONE (trust and sign-up audit,
  * 2026-11-13). Measured before the fix: the role step's Continue sat 1.7–2.1
  * screens down and choosing a card did not bring it into view; the profile

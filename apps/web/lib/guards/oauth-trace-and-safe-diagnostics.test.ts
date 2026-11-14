@@ -250,13 +250,13 @@ describe("Guard: LT + EN auth.errors.oauth + auth.login.preview_host_notice pres
   const en = JSON.parse(read("messages/en.json"));
 
   it("LT exposes oauth.* error keys", () => {
-    for (const k of ["missing_code", "exchange_failed", "no_user", "callback", "cancelled", "unknown", "link_expired", "confirmed_sign_in"]) {
+    for (const k of ["missing_code", "exchange_failed", "no_user", "callback", "cancelled", "unknown", "link_expired", "confirmed_sign_in", "confirm_link_opened", "provider_error"]) {
       expect(lt.auth?.errors?.oauth?.[k]).toBeTruthy();
     }
   });
 
   it("EN exposes oauth.* error keys", () => {
-    for (const k of ["missing_code", "exchange_failed", "no_user", "callback", "cancelled", "unknown", "link_expired", "confirmed_sign_in"]) {
+    for (const k of ["missing_code", "exchange_failed", "no_user", "callback", "cancelled", "unknown", "link_expired", "confirmed_sign_in", "confirm_link_opened", "provider_error"]) {
       expect(en.auth?.errors?.oauth?.[k]).toBeTruthy();
     }
   });
@@ -264,7 +264,7 @@ describe("Guard: LT + EN auth.errors.oauth + auth.login.preview_host_notice pres
   it("every catalog carries the e-mail confirmation outcomes + resend copy (all 11 locales)", () => {
     for (const locale of ["lt", "en", "ru", "nl", "de", "da", "lv", "et", "no", "sv", "pl"]) {
       const cat = JSON.parse(read(`messages/${locale}.json`));
-      for (const k of ["link_expired", "confirmed_sign_in"]) {
+      for (const k of ["link_expired", "confirmed_sign_in", "confirm_link_opened", "provider_error"]) {
         expect(cat.auth?.errors?.oauth?.[k], `${locale} auth.errors.oauth.${k}`).toBeTruthy();
       }
       expect(cat.auth?.errors?.emailNotConfirmed, `${locale} emailNotConfirmed`).toBeTruthy();
