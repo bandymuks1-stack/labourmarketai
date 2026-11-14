@@ -2205,7 +2205,7 @@
         },
         "noCompany": {
           "title": "Starten Sie Ihr Unternehmensprofil",
-          "body": "Sie haben noch kein Unternehmensprofil. Erstellen Sie eines — es ist sofort aktiv und nutzbar, ohne Warten auf eine Freigabe.",
+          "body": "Sie haben noch kein Unternehmensprofil. Erstellen Sie eines: Sie können es sofort nutzen. Arbeitskräfte sehen Ihre Bedarfe, sobald Ihr Unternehmen verifiziert ist.",
           "cta": "Unternehmenseinrichtung starten"
         },
         "personalSpace": {
@@ -2240,7 +2240,7 @@
         "formTitle": "Unternehmensprofil-Anfrage",
         "formTitleCreate": "Unternehmensprofil erstellen",
         "formTitleEdit": "Unternehmensprofil bearbeiten",
-        "formSubtitle": "Erstellen Sie Ihr Organisationsprofil aus Ihrem persönlichen Konto. Es ist sofort aktiv und nutzbar — ohne Warten auf eine Freigabe. Die Verifizierung ist ein stärkerer, separater Vertrauensschritt.",
+        "formSubtitle": "Erstellen Sie Ihr Organisationsprofil aus Ihrem persönlichen Konto. Sie können es sofort nutzen: Projekte, Team, Arbeitsjournal. Arbeitskräfte sehen Ihre Bedarfe, sobald Ihr Unternehmen verifiziert ist; fordern Sie die Verifizierung unten an.",
         "existingHeading": "Unternehmensprofil",
         "legalName": "Offizieller Unternehmensname",
         "legalNameHelp": "Erforderlich. 2–200 Zeichen.",
@@ -2294,7 +2294,7 @@
         "agencyConnectionPending": "Einladung angenommen. Eine Personalagentur möchte sich mit Ihrem Unternehmen verbinden — legen Sie zuerst Ihr Unternehmensprofil an; die Verbindungsanfrage wartet danach auf Ihrer Partnerseite, wo Sie sie mit diesem Unternehmen bestätigen.",
         "legalLockedNotice": "Dieses Unternehmen ist verifiziert. Seine rechtlichen Angaben (offizieller Name, Registrierungsnummer, Land und eingetragene Adresse) sind hier gesperrt und können nicht überschrieben werden — kontaktieren Sie den Support, um eine rechtliche Änderung zu beantragen. Kontakte, Website, Unternehmenstyp und Ihre Rolle können Sie weiterhin aktualisieren.",
         "saveDraft": "Unternehmen speichern",
-        "submitRequest": "Manuelle Prüfung anfordern (optional)",
+        "submitRequest": "Verifizierung anfordern (Arbeitskräfte sehen Ihre Bedarfe danach)",
         "statusDraftSaved": "Unternehmen gespeichert — es ist jetzt aktiv und nutzbar.",
         "statusSubmitted": "Manuelle Prüfung angefordert (optional). Ihr Unternehmen bleibt in der Zwischenzeit nutzbar.",
         "statusNeedsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
@@ -2315,7 +2315,7 @@
           "draft": "Entwurf. Speichern Sie, um Ihr Unternehmen zu aktivieren — es wird sofort nutzbar.",
           "active_unverified": "Jetzt aktiv und nutzbar. Grundlegende automatische Prüfungen bestanden. Noch nicht identitätsverifiziert — das ist ein separater, stärkerer Schritt. Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
           "needs_checks": "Aktiv und nutzbar, aber eine grundlegende Prüfung benötigt Aufmerksamkeit (z. B. Land ergänzen oder eine fehlerhafte Nummer / Website / E-Mail korrigieren). Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
-          "pending_verification": "Sie haben eine optionale manuelle Prüfung angefordert. Ihr Unternehmen bleibt währenddessen voll nutzbar. Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
+          "pending_verification": "Sie haben die Verifizierung angefordert. Ihr Unternehmen bleibt währenddessen voll nutzbar. Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
           "unverified": "Nicht verifiziert. Sie können Ihr Unternehmen normal weiter nutzen. Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
           "verified": "Verifiziert — ein stärkerer Vertrauensstatus, der nur nach einer echten Prüfung vergeben wird."
         },
