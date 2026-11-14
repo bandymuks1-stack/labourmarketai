@@ -54,8 +54,9 @@ same e2e controls as the mobile bearer seam.
 |---|---|---|
 | Capability contract | `apps/web/lib/capabilities/contract.ts` | pure vocabulary: id, kind (`read`/`draft`/`confirm`/`execute`), zod input, caller-scoped handler |
 | Capability registry | `apps/web/lib/capabilities/registry.ts` | the ONE execution path; additions happen in review |
-| MCP adapter | `apps/web/lib/mcp/protocol.ts` + `app/api/mcp/route.ts` | thin, vendor-neutral protocol translation; hand-rolled stateless subset (initialize / ping / tools/list / tools/call / notifications), swappable for the SDK without touching product code |
+| MCP adapter | `apps/web/lib/mcp/protocol.ts` + `lib/mcp/http-door.ts` (bound by `app/api/mcp/route.ts`) | thin, vendor-neutral protocol translation; hand-rolled stateless subset (initialize / ping / tools/list / tools/call / notifications), swappable for the SDK without touching product code |
 | OAuth discovery | `app/.well-known/oauth-protected-resource/route.ts` | RFC 9728 document pointing at Supabase Auth; public config only |
+| Curated ChatGPT door (2026-11-11) | `lib/mcp/chatgpt-profile.ts` + `app/api/mcp/chatgpt/route.ts` | the SAME door implementation at `/api/mcp/chatgpt`, listing and accepting only the 22-tool profile (job search, worker and B2B team search, company need draft→confirm, candidates and offers, workspace); own RFC 9728 document at `/.well-known/oauth-protected-resource/api/mcp/chatgpt`. `/api/mcp` and its 236 tools are unchanged. Pinned by `lib/mcp/chatgpt-profile.test.ts` |
 
 ChatGPT-the-client is fully independent of OpenAI-the-model-provider: the
 platform's AI runtime (`lib/ai/runtime/`) stays provider-neutral and this

@@ -178,8 +178,9 @@ export function classifyRefusal(reason: ApiIdentityFailure): AuthRefusal {
 export function wwwAuthenticateChallenge(
   origin: string,
   errorClass: ResourceServerAuthClass,
+  metadataPath: string = "/.well-known/oauth-protected-resource",
 ): string | null {
-  const resource = `resource_metadata="${origin}/.well-known/oauth-protected-resource"`;
+  const resource = `resource_metadata="${origin}${metadataPath}"`;
   switch (errorClass) {
     case "CREDENTIALS_MISSING":
       return `Bearer ${resource}`;
