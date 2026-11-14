@@ -5287,7 +5287,7 @@
         },
         {
           "q": "Hoeveel kost het?",
-          "a": "Registreren en een personeelsbehoefte indienen zijn gratis. Het betaalde organisatieplan, de prijs en of het vandaag al kan worden geactiveerd, staan op de prijzenpagina."
+          "a": "De prijzen staan op de prijzenpagina: één actieve positie per organisatie is gratis; voor meer posities is het organisatieplan nodig, dat je in je account activeert. Een personeelsbehoefte indienen is gratis."
         },
         {
           "q": "Kunnen we filteren op locatie?",
@@ -5385,7 +5385,7 @@
         },
         {
           "q": "Wat kost het voor uitzendbureaus?",
-          "a": "Een bureau is een organisatie en gebruikt dezelfde plannen. Registreren en het personeel vermelden dat je kunt leveren zijn gratis; het betaalde organisatieplan, de prijs en of het vandaag al kan worden geactiveerd, staan op de prijzenpagina. Er is geen apart bureautarief."
+          "a": "Een bureau is een organisatie en gebruikt dezelfde plannen: één actieve positie is gratis, voor meer is het organisatieplan van de prijzenpagina nodig. Er is geen apart bureautarief."
         },
         {
           "q": "Kunnen we de zichtbaarheid van werknemers bepalen?",
@@ -5764,11 +5764,11 @@
     "faq": [
       {
         "q": "Waarom maar één betaald plan?",
-        "a": "Elke organisatie — werkgever, uitzender, aannemer of opleider — krijgt hetzelfde product en hetzelfde ene betaalde plan."
+        "a": "Elke organisatie — werkgever, uitzender, aannemer of opleider — krijgt hetzelfde product. Alleen de schaal verschilt: 1 actieve positie gratis, en voor €99/maand geen vaste limiet op actieve posities."
       },
       {
         "q": "Blijft Gratis gratis?",
-        "a": "Ja. Personen blijven gratis, en een organisatie registreren en haar personeelsbehoeften plaatsen is gratis."
+        "a": "Ja. Personen blijven gratis en een organisatie kan één actieve positie zonder kosten voeren."
       },
       {
         "q": "Hoe verloopt de facturering?",
@@ -5776,7 +5776,7 @@
       },
       {
         "q": "Is er een limiet op actieve posities?",
-        "a": "Het plan Organisatie kent geen vaste limiet op actieve posities. Een limiet van het gratis plan geldt alleen voor een organisatie waarvan het account facturering als actief toont, en dat account toont dan die limiet. Gebruikelijke bescherming tegen misbruik, zoals limieten op het aantal verzoeken, blijft gelden."
+        "a": "Gratis bevat 1 actieve positie. Het plan Organisatie kent geen vaste limiet op actieve posities. Gebruikelijke bescherming tegen misbruik, zoals limieten op het aantal verzoeken, blijft gelden."
       }
     ],
     "priceState": {
@@ -6870,6 +6870,16 @@
         "into": "Deze regel is samengevoegd met",
         "canonical": "het behouden project",
         "includes": "{count, plural, one {Bevat # samengevoegde projectregel — de registraties staan hier.} other {Bevat # samengevoegde projectregels — de registraties staan hier.}}"
+      },
+      "teams": {
+        "title": "Ploegen op dit project",
+        "members": "{n, plural, one {# persoon} other {# personen}}",
+        "personTeam": "Ploeg: {team}",
+        "unnamed": "Ploeg zonder naam",
+        "unnamedMember": "Lid",
+        "noMembers": "Nu geen leden.",
+        "unavailable": "De ploegen konden niet worden geladen. Probeer het opnieuw.",
+        "manage": "Ploegen wijzigen"
       }
     },
     "workerView": {
@@ -9861,7 +9871,7 @@
         "body": "Per aangenomen werknemer, ploeg of bedrijfsplaatsing geldt een vaste succesfee. Een aparte coördinatievergoeding geldt alleen wanneer document- of onboardingcoördinatie daadwerkelijk wordt geleverd. De definitieve prijs wordt bevestigd voordat betaald werk begint."
       }
     ],
-    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — een aanvraag indienen is kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest je aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een hele ploeg kan zich al als één geheel op je aanvraag aanbieden en, zodra beide kanten akkoord zijn, als één team in je project instappen; de automatische kandidatenlijst stelt nog niet hele ploegen voor — ze rangschikt mensen één voor één.",
+    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — één actieve positie kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest je aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een hele ploeg kan zich al als één geheel op je aanvraag aanbieden en, zodra beide kanten akkoord zijn, als één team in je project instappen; de automatische kandidatenlijst stelt nog niet hele ploegen voor — ze rangschikt mensen één voor één.",
     "ctaLabel": "Dien een personeelsaanvraag in →"
   },
   "adminLaunchReadiness": {
@@ -12918,6 +12928,7 @@
     "servicesTitle": "Wat deze persoon kan doen",
     "servicesEmpty": "Nog niets aangeboden",
     "servicesUnavailable": "Aangeboden diensten konden niet worden geladen",
+    "sharedAfterWork": "Diensten, werkfoto's en vastgelegd werk worden getoond zodra jullie samenwerken.",
     "serviceRemote": "Op afstand",
     "photoAlt": "Foto van uitgevoerd werk",
     "historyTitle": "Geïmporteerde geschiedenis",
@@ -14789,7 +14800,7 @@
       "eduOutcomesConnected": "Verbonden studenten: {count}.",
       "eduOutcomesUnavailable": "De resultaten kunnen nu niet worden gelezen. Dat betekent niet dat er geen zijn.",
       "eduStudentsPrivacy": "De instelling ziet de vaardigheden, documenten of het logboek van studenten niet — dat zijn hun eigen gegevens. Je ziet deelname en resultaatcijfers; wie past, ziet de werkgever zelf voor zijn eigen behoefte.",
-      "eduPracticeHow": "Stages worden geplaatst door werkgevers: een partner maakt een bedrijfsaccount aan en plaatst een behoefte met het type ‘stage’ (een behoefte plaatsen is gratis). Je studenten zien die op hun bord zodra de werkgever geverifieerd is.",
+      "eduPracticeHow": "Stages worden geplaatst door werkgevers: een partner maakt een bedrijfsaccount aan en plaatst een behoefte met het type ‘stage’ (één behoefte gratis). Je studenten zien die op hun bord zodra de werkgever geverifieerd is.",
       "eduNext": "Wat nu?",
       "chipCreateProgramme": "Opleiding aanmaken",
       "chipCreateCohort": "Groep aanmaken",

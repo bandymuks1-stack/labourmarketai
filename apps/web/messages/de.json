@@ -5287,7 +5287,7 @@
         },
         {
           "q": "Was kostet es?",
-          "a": "Registrierung und das Einreichen eines Personalbedarfs sind kostenlos. Der bezahlte Organisationsplan, sein Preis und ob er heute schon aktiviert werden kann, stehen auf der Preisseite."
+          "a": "Die Preise stehen auf der Preisseite: eine aktive Position pro Organisation ist kostenlos; für mehr Positionen braucht es den Organisationsplan, der im Konto aktiviert wird. Einen Personalbedarf einzureichen ist kostenlos."
         },
         {
           "q": "Können wir nach Standort filtern?",
@@ -5385,7 +5385,7 @@
         },
         {
           "q": "Was kostet es Personalagenturen?",
-          "a": "Eine Agentur ist eine Organisation und nutzt dieselben Pläne. Registrierung und das Angeben des Personals, das Sie stellen können, sind kostenlos; der bezahlte Organisationsplan, sein Preis und ob er heute schon aktiviert werden kann, stehen auf der Preisseite. Einen separaten Agenturtarif gibt es nicht."
+          "a": "Eine Agentur ist eine Organisation und nutzt dieselben Pläne: eine aktive Position ist kostenlos, für mehr braucht es den Organisationsplan von der Preisseite. Einen separaten Agenturtarif gibt es nicht."
         },
         {
           "q": "Können wir die Sichtbarkeit der Arbeitskräfte steuern?",
@@ -5764,11 +5764,11 @@
     "faq": [
       {
         "q": "Warum nur ein bezahlter Plan?",
-        "a": "Jede Organisation — Arbeitgeber, Personaldienstleister, Auftragnehmer oder Bildungsträger — erhält dasselbe Produkt und denselben einen bezahlten Plan."
+        "a": "Jede Organisation — Arbeitgeber, Personaldienstleister, Auftragnehmer oder Bildungsträger — erhält dasselbe Produkt. Nur der Umfang unterscheidet sich: 1 aktive Position kostenlos, für 99 €/Monat ohne feste Obergrenze für aktive Positionen."
       },
       {
         "q": "Bleibt der kostenlose Plan kostenlos?",
-        "a": "Ja. Personen bleiben kostenlos, und die Registrierung einer Organisation sowie das Veröffentlichen ihres Personalbedarfs sind kostenlos."
+        "a": "Ja. Personen bleiben kostenlos, und eine Organisation kann eine aktive Position ohne Kosten führen."
       },
       {
         "q": "Wie wird abgerechnet?",
@@ -5776,7 +5776,7 @@
       },
       {
         "q": "Gibt es eine Obergrenze für aktive Positionen?",
-        "a": "Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Eine Obergrenze des kostenlosen Plans gilt nur für eine Organisation, deren Konto die Abrechnung als aktiv zeigt, und dieses Konto zeigt die Obergrenze dann an. Übliche Schutzmaßnahmen gegen Missbrauch, etwa technische Begrenzungen der Zugriffshäufigkeit, gelten weiterhin."
+        "a": "Kostenlos ist 1 aktive Position enthalten. Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Übliche Schutzmaßnahmen gegen Missbrauch, etwa technische Begrenzungen der Zugriffshäufigkeit, gelten weiterhin."
       }
     ],
     "priceState": {
@@ -6870,6 +6870,16 @@
         "into": "Diese Zeile wurde zusammengeführt in",
         "canonical": "das beibehaltene Projekt",
         "includes": "{count, plural, one {Enthält # zusammengeführte Projektzeile — ihre Nachweise stehen hier.} other {Enthält # zusammengeführte Projektzeilen — ihre Nachweise stehen hier.}}"
+      },
+      "teams": {
+        "title": "Teams in diesem Projekt",
+        "members": "{n, plural, one {# Person} other {# Personen}}",
+        "personTeam": "Team: {team}",
+        "unnamed": "Team ohne Namen",
+        "unnamedMember": "Mitglied",
+        "noMembers": "Derzeit keine Mitglieder.",
+        "unavailable": "Die Teams konnten nicht geladen werden. Bitte erneut versuchen.",
+        "manage": "Teams ändern"
       }
     },
     "workerView": {
@@ -9861,7 +9871,7 @@
         "body": "Pro eingestellter Arbeitskraft, Kolonne oder Unternehmensvermittlung gilt eine feste Erfolgsgebühr. Eine separate Koordinationsgebühr fällt nur an, wenn Dokumenten- oder Onboarding-Koordination tatsächlich erbracht wird. Der endgültige Preis wird bestätigt, bevor bezahlte Arbeit beginnt."
       }
     ],
-    "note": "Zwei Dinge laufen nebeneinander, und diese Seite beschreibt das zweite. Die Plattform selbst arbeitet automatisch: die Stellenübersicht ist öffentlich, die Match-Vorschau ist ohne Konto zugänglich, und eine gestellte Anfrage ergibt eine sortierte Kandidatenliste mit Begründung, warum jemand passt — eine Anfrage zu stellen ist kostenlos. Der bezahlte Service oben ist der menschliche Teil: ein Mitarbeiter liest Ihre Anfrage, nimmt Kontakt auf und prüft die Liste von Hand, bevor jemand vorgeschlagen wird. Ein ganzes Team kann sich bereits als eine Einheit auf Ihre Anfrage anbieten und, sobald beide Seiten einig sind, Ihrem Projekt als ein Team beitreten; die automatische Kandidatenliste schlägt noch nicht ganze Teams vor — sie ordnet Personen einzeln.",
+    "note": "Zwei Dinge laufen nebeneinander, und diese Seite beschreibt das zweite. Die Plattform selbst arbeitet automatisch: die Stellenübersicht ist öffentlich, die Match-Vorschau ist ohne Konto zugänglich, und eine gestellte Anfrage ergibt eine sortierte Kandidatenliste mit Begründung, warum jemand passt — eine aktive Position kostenfrei. Der bezahlte Service oben ist der menschliche Teil: ein Mitarbeiter liest Ihre Anfrage, nimmt Kontakt auf und prüft die Liste von Hand, bevor jemand vorgeschlagen wird. Eine ganze Kolonne kann sich bereits als eine Einheit auf Ihre Anfrage anbieten und, sobald beide Seiten einig sind, Ihrem Projekt als ein Team beitreten; die automatische Kandidatenliste schlägt noch nicht ganze Kolonnen vor — sie ordnet Personen einzeln.",
     "ctaLabel": "Personalanfrage einreichen →"
   },
   "adminLaunchReadiness": {
@@ -12918,6 +12928,7 @@
     "servicesTitle": "Was diese Person kann",
     "servicesEmpty": "Noch nichts angeboten",
     "servicesUnavailable": "Angebotene Leistungen konnten nicht geladen werden",
+    "sharedAfterWork": "Leistungen, Arbeitsfotos und erfasste Arbeit werden angezeigt, sobald Sie zusammenarbeiten.",
     "serviceRemote": "Ortsunabhängig",
     "photoAlt": "Foto abgeschlossener Arbeit",
     "historyTitle": "Importierter Verlauf",
@@ -14789,7 +14800,7 @@
       "eduOutcomesConnected": "Verbundene Studierende: {count}.",
       "eduOutcomesUnavailable": "Die Ergebnisse können gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
       "eduStudentsPrivacy": "Die Einrichtung sieht weder Fähigkeiten, Dokumente noch das Journal der Studierenden — das sind ihre eigenen Daten. Sie sehen Teilnahme und Ergebniszahlen; wer passt, sieht der Arbeitgeber selbst für seinen Bedarf.",
-      "eduPracticeHow": "Praktika werden von Arbeitgebern ausgeschrieben: ein Partner legt ein Unternehmenskonto an und veröffentlicht einen Bedarf mit dem Typ „Praktikum“ (das Veröffentlichen eines Bedarfs ist kostenlos). Ihre Studierenden sehen ihn auf ihrem Board, sobald der Arbeitgeber verifiziert ist.",
+      "eduPracticeHow": "Praktika werden von Arbeitgebern ausgeschrieben: ein Partner legt ein Unternehmenskonto an und veröffentlicht einen Bedarf mit dem Typ „Praktikum“ (ein Bedarf kostenlos). Ihre Studierenden sehen ihn auf ihrem Board, sobald der Arbeitgeber verifiziert ist.",
       "eduNext": "Was als Nächstes?",
       "chipCreateProgramme": "Programm anlegen",
       "chipCreateCohort": "Gruppe anlegen",

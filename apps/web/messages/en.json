@@ -5287,7 +5287,7 @@
         },
         {
           "q": "How much does it cost?",
-          "a": "Registering and submitting a workforce need are free. The paid organisation plan, its price and whether it can be activated today are shown on the pricing page."
+          "a": "Prices are published on the pricing page: one active position per organisation is free; more positions need the organisation plan, activated in your account. Submitting a workforce need is free."
         },
         {
           "q": "Can we filter by location?",
@@ -5385,7 +5385,7 @@
         },
         {
           "q": "How much does it cost agencies?",
-          "a": "An agency is an organisation and uses the same plans. Registering and stating the workforce you can supply are free; the paid organisation plan, its price and whether it can be activated today are on the pricing page. There is no separate agency tariff."
+          "a": "An agency is an organisation and uses the same plans: one active position is free, more need the organisation plan from the pricing page. There is no separate agency tariff."
         },
         {
           "q": "Can we control worker visibility?",
@@ -5764,11 +5764,11 @@
     "faq": [
       {
         "q": "Why only one paid plan?",
-        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product and the same one paid plan."
+        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product. What changes is scale: 1 active position free, and no fixed limit on active positions for €99/month."
       },
       {
         "q": "Will the Free tier stay free?",
-        "a": "Yes. Persons stay free, and registering an organization and posting its workforce needs are free."
+        "a": "Yes. Persons stay free, and an organization can run one active position at no cost."
       },
       {
         "q": "How is billing handled?",
@@ -5776,7 +5776,7 @@
       },
       {
         "q": "Is there a limit on active positions?",
-        "a": "The Organization plan has no fixed limit on active positions. A free-plan limit applies only to an organization whose account shows billing as active, and that account then shows the limit. Normal protections against abuse, such as request rate limits, still apply."
+        "a": "Free includes 1 active position. The Organization plan has no fixed limit on active positions. Normal protections against abuse, such as request rate limits, still apply."
       }
     ],
     "priceState": {
@@ -6870,6 +6870,16 @@
         "into": "This row was merged into",
         "canonical": "the kept project",
         "includes": "{count, plural, one {Includes # merged project row — its records are shown here.} other {Includes # merged project rows — their records are shown here.}}"
+      },
+      "teams": {
+        "title": "Teams on this project",
+        "members": "{n, plural, one {# person} other {# people}}",
+        "personTeam": "On team: {team}",
+        "unnamed": "Unnamed team",
+        "unnamedMember": "Member",
+        "noMembers": "No members right now.",
+        "unavailable": "The teams could not be loaded. Try again.",
+        "manage": "Change teams"
       }
     },
     "workerView": {
@@ -9861,7 +9871,7 @@
         "body": "A fixed success fee applies per hired worker, crew or company placement. A separate coordination fee applies only when document or onboarding coordination is actually delivered. The final price is confirmed before paid work starts."
       }
     ],
-    "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — and this part is free. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. A whole team can already offer itself against your inquiry as one unit and, once both sides agree, join your project as one team; the automatic shortlist does not yet propose whole teams — it ranks people one by one.",
+    "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — one active position at no cost. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. A whole crew can already offer itself against your inquiry as one unit and, once both sides agree, join your project as one team; the automatic shortlist does not yet propose whole crews — it ranks people one by one.",
     "ctaLabel": "Submit a workforce inquiry →"
   },
   "adminLaunchReadiness": {
@@ -12918,6 +12928,7 @@
     "servicesTitle": "What they can do",
     "servicesEmpty": "Nothing offered yet",
     "servicesUnavailable": "Offered services could not be loaded",
+    "sharedAfterWork": "Services, work photos and recorded work are shown once you work together.",
     "serviceRemote": "Remote",
     "photoAlt": "Photo of completed work",
     "historyTitle": "Imported history",
@@ -14789,7 +14800,7 @@
       "eduOutcomesConnected": "Connected students: {count}.",
       "eduOutcomesUnavailable": "Outcomes cannot be read right now. That does not mean there are none.",
       "eduStudentsPrivacy": "The institution does not see students' skills, documents or journal — that is their own data. You see participation and outcome counts; which people fit is what the employer sees for its own need.",
-      "eduPracticeHow": "Internships are posted by employers: a partner creates a company account and posts a need with the type “internship” (posting a need is free). Your students see it on their board once the employer is verified.",
+      "eduPracticeHow": "Internships are posted by employers: a partner creates a company account and posts a need with the type “internship” (one need free). Your students see it on their board once the employer is verified.",
       "eduNext": "What next?",
       "chipCreateProgramme": "Create a programme",
       "chipCreateCohort": "Create a cohort",

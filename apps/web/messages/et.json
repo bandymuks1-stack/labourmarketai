@@ -2086,6 +2086,16 @@
         "into": "See rida liideti projektiga",
         "canonical": "säilitatud projekt",
         "includes": "{count, plural, one {Sisaldab # liidetud projektirida — selle kirjed on siin.} other {Sisaldab # liidetud projektirida — nende kirjed on siin.}}"
+      },
+      "teams": {
+        "title": "Meeskonnad selles projektis",
+        "members": "{n, plural, one {# inimene} other {# inimest}}",
+        "personTeam": "Meeskond: {team}",
+        "unnamed": "Meeskond",
+        "unnamedMember": "Liige",
+        "noMembers": "Praegu liikmeid pole.",
+        "unavailable": "Meeskondi ei õnnestunud laadida. Proovige uuesti.",
+        "manage": "Muuda meeskondi"
       }
     },
     "workerView": {
@@ -2973,6 +2983,7 @@
     "servicesTitle": "Mida see inimene oskab",
     "servicesEmpty": "Veel pole midagi pakutud",
     "servicesUnavailable": "Pakutavaid teenuseid ei õnnestunud laadida",
+    "sharedAfterWork": "Teenused, tööfotod ja kirja pandud töö kuvatakse, kui hakkate koos töötama.",
     "serviceRemote": "Kaugtöö",
     "photoAlt": "Tehtud töö foto",
     "historyTitle": "Imporditud ajalugu",
@@ -4218,7 +4229,7 @@
       "eduOutcomesConnected": "Ühendatud õppijaid: {count}.",
       "eduOutcomesUnavailable": "Tulemusi ei õnnestu praegu lugeda. See ei tähenda, et neid pole.",
       "eduStudentsPrivacy": "Asutus ei näe õppijate oskusi, dokumente ega päevikut — need on nende endi andmed. Sina näed osalust ja tulemuste arve; kes sobib, näeb tööandja ise oma vajaduse jaoks.",
-      "eduPracticeHow": "Praktikakohti avaldavad tööandjad: partner loob ettevõtte konto ja avaldab vajaduse tüübiga „praktika“ (vajaduse avaldamine on tasuta). Sinu õppijad näevad seda oma tahvlil, kui tööandja on kinnitatud.",
+      "eduPracticeHow": "Praktikakohti avaldavad tööandjad: partner loob ettevõtte konto ja avaldab vajaduse tüübiga „praktika“ (üks vajadus tasuta). Sinu õppijad näevad seda oma tahvlil, kui tööandja on kinnitatud.",
       "eduNext": "Mis edasi?",
       "chipCreateProgramme": "Loo programm",
       "chipCreateCohort": "Loo rühm",

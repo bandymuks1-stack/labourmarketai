@@ -2086,6 +2086,16 @@
         "into": "Šī rinda apvienota ar",
         "canonical": "saglabāto projektu",
         "includes": "{count, plural, zero {Ietver # apvienotu projekta rindu — ieraksti redzami šeit.} one {Ietver # apvienotu projekta rindu — tās ieraksti redzami šeit.} other {Ietver # apvienotas projekta rindas — to ieraksti redzami šeit.}}"
+      },
+      "teams": {
+        "title": "Komandas šajā projektā",
+        "members": "{n, plural, zero {# cilvēku} one {# cilvēks} other {# cilvēki}}",
+        "personTeam": "Komanda: {team}",
+        "unnamed": "Komanda",
+        "unnamedMember": "Dalībnieks",
+        "noMembers": "Pašlaik dalībnieku nav.",
+        "unavailable": "Komandas neizdevās ielādēt. Mēģiniet vēlreiz.",
+        "manage": "Mainīt komandas"
       }
     },
     "workerView": {
@@ -2973,6 +2983,7 @@
     "servicesTitle": "Ko šī persona prot",
     "servicesEmpty": "Vēl nekas nav piedāvāts",
     "servicesUnavailable": "Neizdevās ielādēt piedāvātos pakalpojumus",
+    "sharedAfterWork": "Pakalpojumi, darbu foto un reģistrētais darbs tiek rādīti, kad sākat strādāt kopā.",
     "serviceRemote": "Attālināti",
     "photoAlt": "Paveiktā darba fotoattēls",
     "historyTitle": "Importētā vēsture",
@@ -4218,7 +4229,7 @@
       "eduOutcomesConnected": "Pievienotie studenti: {count}.",
       "eduOutcomesUnavailable": "Rezultātus šobrīd neizdodas nolasīt. Tas nenozīmē, ka to nav.",
       "eduStudentsPrivacy": "Iestāde neredz studentu prasmes, dokumentus vai žurnālu — tie ir viņu pašu dati. Jūs redzat dalību un rezultātu skaitļus; kurš der, redz pats darba devējs savai vajadzībai.",
-      "eduPracticeHow": "Prakses vietas publicē darba devēji: partneris izveido uzņēmuma kontu un publicē vajadzību ar tipu “prakse” (vajadzības publicēšana ir bez maksas). Jūsu studenti to redz savā dēlī, kad darba devējs ir apstiprināts.",
+      "eduPracticeHow": "Prakses vietas publicē darba devēji: partneris izveido uzņēmuma kontu un publicē vajadzību ar tipu “prakse” (viena vajadzība bez maksas). Jūsu studenti to redz savā dēlī, kad darba devējs ir apstiprināts.",
       "eduNext": "Kas tālāk?",
       "chipCreateProgramme": "Izveidot programmu",
       "chipCreateCohort": "Izveidot grupu",

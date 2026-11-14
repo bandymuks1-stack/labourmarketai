@@ -74,11 +74,12 @@ no database behind it. The state with figures and adverts is covered by guards, 
 - **"Built together" line.** Removed from the signed-in shell too and from every catalog; it
   was a marketing credit. The legal statements (operator, software owner, copyright) are
   unchanged and still pinned by guards.
-- **Free-plan limit statements.** The limit is enforced only for organisations admitted to
-  billing; elsewhere a second need is saved. Pricing and FAQ statements that say otherwise are
-  rewritten by the separate pricing work (#3302 / #3250), not here. The one statement those
-  do not cover — the assistant's internship answer, "(one need free)" — now says posting a
-  need is free. The limit messages shown only when the gate refuses are true and unchanged.
+- **Free-plan limit statements.** Left to the pricing work (#3302). On 2026-11-14 the
+  coordinator took the independent review's option A: this PR does not change any price
+  statement. The pricing answers, the companies and agencies answers, the staffing-service
+  note and the assistant's internship answer are as on `main`. The landing's own lines
+  ("Registration and basic request posting are free", "Submission is free") stay: they are
+  true for a first need.
 - **#3306** closed as replaced; its head is an ancestor of this branch.
 
 ## Not done, not claimed

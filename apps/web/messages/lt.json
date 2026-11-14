@@ -5287,7 +5287,7 @@
         },
         {
           "q": "Kiek kainuoja įmonei?",
-          "a": "Registracija ir darbuotojų užklausos pateikimas nemokami. Mokamas organizacijos planas, jo kaina ir ar jį šiandien galima aktyvuoti — kainodaros puslapyje."
+          "a": "Kainos paskelbtos kainodaros puslapyje: viena aktyvi pozicija organizacijai — nemokamai, daugiau pozicijų — organizacijos planas, kurį aktyvuoji paskyroje. Darbuotojų užklausa pateikiama nemokamai."
         },
         {
           "q": "Ar galima atrinkti pagal lokaciją?",
@@ -5385,7 +5385,7 @@
         },
         {
           "q": "Kiek kainuoja agentūroms?",
-          "a": "Agentūra yra organizacija ir naudojasi tais pačiais planais. Registracija ir turimų darbuotojų pajėgumų paskelbimas nemokami; mokamas organizacijos planas, jo kaina ir ar jį šiandien galima aktyvuoti — kainodaros puslapyje. Atskiro agentūrų tarifo nėra."
+          "a": "Agentūra yra organizacija ir naudojasi tais pačiais planais: viena aktyvi pozicija — nemokamai, daugiau — organizacijos planas iš kainodaros puslapio. Atskiro agentūrų tarifo nėra."
         },
         {
           "q": "Ar galime valdyti darbuotojų matomumą?",
@@ -5764,11 +5764,11 @@
     "faq": [
       {
         "q": "Kodėl tik vienas mokamas planas?",
-        "a": "Kiekviena organizacija — darbdavys, personalo tiekėjas, rangovas ar mokymo įstaiga — gauna tą patį produktą ir tą patį vienintelį mokamą planą."
+        "a": "Kiekviena organizacija — darbdavys, personalo tiekėjas, rangovas ar mokymo įstaiga — gauna tą patį produktą. Skiriasi tik mastas: 1 aktyvi pozicija nemokamai, o už 99 €/mėn. — be fiksuoto aktyvių pozicijų limito."
       },
       {
         "q": "Ar nemokamas planas liks nemokamas?",
-        "a": "Taip. Asmenims viskas nemokama, o organizacijos registracija ir darbuotojų poreikių skelbimas — nemokami."
+        "a": "Taip. Asmenims viskas nemokama, o organizacija gali turėti vieną aktyvią poziciją be jokio mokesčio."
       },
       {
         "q": "Kaip vyks atsiskaitymai?",
@@ -5776,7 +5776,7 @@
       },
       {
         "q": "Ar yra aktyvių pozicijų limitas?",
-        "a": "Plane „Organizacija“ nėra fiksuoto aktyvių pozicijų limito. Nemokamo plano limitas taikomas tik organizacijai, kurios paskyroje atsiskaitymai rodomi kaip aktyvūs, ir tada paskyra tą limitą parodo. Įprastos apsaugos nuo piktnaudžiavimo, pavyzdžiui, užklausų skaičiaus ribos, ir toliau galioja."
+        "a": "Nemokamas planas apima 1 aktyvią poziciją. Plane „Organizacija“ nėra fiksuoto aktyvių pozicijų limito. Įprastos apsaugos nuo piktnaudžiavimo, pavyzdžiui, užklausų skaičiaus ribos, ir toliau galioja."
       }
     ],
     "priceState": {
@@ -6870,6 +6870,16 @@
         "into": "Ši eilutė sujungta į",
         "canonical": "išlaikomą projektą",
         "includes": "{count, plural, one {Apima # sujungtą projekto eilutę — jos įrašai rodomi čia.} few {Apima # sujungtas projekto eilutes — jų įrašai rodomi čia.} other {Apima # sujungtų projekto eilučių — jų įrašai rodomi čia.}}"
+      },
+      "teams": {
+        "title": "Komandos šiame projekte",
+        "members": "{n, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
+        "personTeam": "Komanda: {team}",
+        "unnamed": "Komanda",
+        "unnamedMember": "Narys",
+        "noMembers": "Šiuo metu narių nėra.",
+        "unavailable": "Komandų įkelti nepavyko. Bandykite dar kartą.",
+        "manage": "Keisti komandas"
       }
     },
     "workerView": {
@@ -9861,7 +9871,7 @@
         "body": "Fiksuotas sėkmės mokestis taikomas už įdarbintą darbuotoją, brigadą ar įmonę. Atskiras koordinavimo mokestis taikomas tik tada, kai realiai atliekamas dokumentų ar įvedimo koordinavimas. Galutinė kaina patvirtinama prieš pradedant mokamą darbą."
       }
     ],
-    "note": "Kartu veikia du dalykai, o šiame puslapyje aprašytas antrasis. Pati platforma veikia automatiškai: darbo skelbimai yra vieši, atitikimo peržiūra atidaryta be paskyros, o įvardyta užklausa sugeneruoja surikiuotą kandidatų sąrašą su paaiškinimu, kodėl kiekvienas žmogus tinka — užklausa pateikiama be mokesčio. Mokama paslauga aukščiau yra žmogaus darbas: operatorius perskaito tavo užklausą, susisiekia su tavimi ir sąrašą patikrina rankomis, prieš pasiūlydamas bet kurį kandidatą. Visa komanda jau gali pasiūlyti save tavo užklausai kaip vienas vienetas ir, abiem pusėms susitarus, prisijungti prie tavo projekto kaip viena komanda; automatinio visų komandų siūlymo sąraše dar nėra — sąrašas rikiuoja žmones po vieną.",
+    "note": "Kartu veikia du dalykai, o šiame puslapyje aprašytas antrasis. Pati platforma veikia automatiškai: darbo skelbimai yra vieši, atitikimo peržiūra atidaryta be paskyros, o įvardyta užklausa sugeneruoja surikiuotą kandidatų sąrašą su paaiškinimu, kodėl kiekvienas žmogus tinka — viena aktyvi pozicija be mokesčio. Mokama paslauga aukščiau yra žmogaus darbas: operatorius perskaito tavo užklausą, susisiekia su tavimi ir sąrašą patikrina rankomis, prieš pasiūlydamas bet kurį kandidatą. Visa brigada jau gali pasiūlyti save tavo užklausai kaip vienas vienetas ir, abiem pusėms susitarus, prisijungti prie tavo projekto kaip viena komanda; automatinio visų brigadų siūlymo sąraše dar nėra — sąrašas rikiuoja žmones po vieną.",
     "ctaLabel": "Pateikti darbuotojų užklausą →"
   },
   "adminLaunchReadiness": {
@@ -12918,6 +12928,7 @@
     "servicesTitle": "Ką jie gali padaryti",
     "servicesEmpty": "Kol kas nieko nesiūloma",
     "servicesUnavailable": "Nepavyko įkelti siūlomų paslaugų",
+    "sharedAfterWork": "Paslaugos, darbų nuotraukos ir užfiksuoti darbai rodomi, kai pradedate dirbti kartu.",
     "serviceRemote": "Nuotoliniu būdu",
     "photoAlt": "Atlikto darbo nuotrauka",
     "historyTitle": "Įkelta istorija",
@@ -14789,7 +14800,7 @@
       "eduOutcomesConnected": "Prisijungę studentai: {count}.",
       "eduOutcomesUnavailable": "Rezultatų dabar perskaityti nepavyksta. Tai nereiškia, kad jų nėra.",
       "eduStudentsPrivacy": "Įstaiga nemato studentų įgūdžių, dokumentų ar žurnalo — tai jų pačių duomenys. Tu matai dalyvavimą ir rezultatų skaičius; kurie žmonės tinka, mato pats darbdavys savo poreikiui.",
-      "eduPracticeHow": "Praktikos vietas skelbia darbdaviai: partneris susikuria įmonės paskyrą ir paskelbia poreikį su tipu „praktika“ (poreikio skelbimas nemokamas). Tavo studentai jį mato savo lentoje, kai darbdavys patvirtintas.",
+      "eduPracticeHow": "Praktikos vietas skelbia darbdaviai: partneris susikuria įmonės paskyrą ir paskelbia poreikį su tipu „praktika“ (vienas poreikis nemokamai). Tavo studentai jį mato savo lentoje, kai darbdavys patvirtintas.",
       "eduNext": "Kas toliau?",
       "chipCreateProgramme": "Sukurti programą",
       "chipCreateCohort": "Sukurti grupę",

@@ -5287,7 +5287,7 @@
         },
         {
           "q": "Ile to kosztuje?",
-          "a": "Rejestracja i zgłoszenie zapotrzebowania na pracowników są bezpłatne. Płatny plan dla organizacji, jego cena i to, czy można go już dziś aktywować, są na stronie cennika."
+          "a": "Ceny są opublikowane na stronie cennika: jedno aktywne stanowisko na organizację jest bezpłatne; więcej stanowisk wymaga planu dla organizacji, aktywowanego na Twoim koncie. Zgłoszenie zapotrzebowania na pracowników jest bezpłatne."
         },
         {
           "q": "Czy możemy filtrować według lokalizacji?",
@@ -5385,7 +5385,7 @@
         },
         {
           "q": "Ile to kosztuje agencje?",
-          "a": "Agencja jest organizacją i korzysta z tych samych planów. Rejestracja i podanie pracowników, których możesz zapewnić, są bezpłatne; płatny plan dla organizacji, jego cena i to, czy można go już dziś aktywować, są na stronie cennika. Nie ma osobnej taryfy dla agencji."
+          "a": "Agencja jest organizacją i korzysta z tych samych planów: jedno aktywne stanowisko jest bezpłatne, więcej wymaga planu dla organizacji ze strony cennika. Nie ma osobnej taryfy dla agencji."
         },
         {
           "q": "Czy możemy kontrolować widoczność pracowników?",
@@ -5764,11 +5764,11 @@
     "faq": [
       {
         "q": "Dlaczego tylko jeden płatny plan?",
-        "a": "Każda organizacja — pracodawca, dostawca pracowników, wykonawca czy instytucja szkoleniowa — otrzymuje ten sam produkt i ten sam jeden płatny plan."
+        "a": "Każda organizacja — pracodawca, dostawca pracowników, wykonawca czy instytucja szkoleniowa — otrzymuje ten sam produkt. Zmienia się tylko skala: 1 aktywne stanowisko bezpłatnie, a za 99 €/miesiąc — bez stałego limitu aktywnych stanowisk."
       },
       {
         "q": "Czy plan bezpłatny pozostanie bezpłatny?",
-        "a": "Tak. Dla osób fizycznych pozostaje bezpłatny, a rejestracja organizacji i publikowanie jej zapotrzebowania na pracowników są bezpłatne."
+        "a": "Tak. Dla osób fizycznych pozostaje bezpłatny, a organizacja może bez opłat prowadzić jedno aktywne stanowisko."
       },
       {
         "q": "Jak przebiegają rozliczenia?",
@@ -5776,7 +5776,7 @@
       },
       {
         "q": "Czy jest limit aktywnych stanowisk?",
-        "a": "Plan Organizacja nie ma stałego limitu aktywnych stanowisk. Limit planu bezpłatnego dotyczy tylko organizacji, której konto pokazuje rozliczenia jako aktywne, i wtedy to konto pokazuje ten limit. Nadal obowiązują zwykłe zabezpieczenia przed nadużyciami, takie jak techniczne limity częstotliwości żądań."
+        "a": "Plan bezpłatny obejmuje 1 aktywne stanowisko. Plan Organizacja nie ma stałego limitu aktywnych stanowisk. Nadal obowiązują zwykłe zabezpieczenia przed nadużyciami, takie jak techniczne limity częstotliwości żądań."
       }
     ],
     "priceState": {
@@ -6870,6 +6870,16 @@
         "into": "Ten wiersz scalono z",
         "canonical": "zachowanym projektem",
         "includes": "{count, plural, one {Obejmuje # scalony wiersz projektu — jego wpisy są tutaj.} few {Obejmuje # scalone wiersze projektu — ich wpisy są tutaj.} many {Obejmuje # scalonych wierszy projektu — ich wpisy są tutaj.} other {Obejmuje # scalonego wiersza projektu — wpisy są tutaj.}}"
+      },
+      "teams": {
+        "title": "Zespoły w tym projekcie",
+        "members": "{n, plural, one {# osoba} few {# osoby} other {# osób}}",
+        "personTeam": "Zespół: {team}",
+        "unnamed": "Zespół",
+        "unnamedMember": "Członek",
+        "noMembers": "Obecnie brak członków.",
+        "unavailable": "Nie udało się wczytać zespołów. Spróbuj ponownie.",
+        "manage": "Zmień zespoły"
       }
     },
     "workerView": {
@@ -9861,7 +9871,7 @@
         "body": "Stała opłata za sukces obowiązuje za każdego zatrudnionego pracownika, brygadę lub skierowaną firmę. Osobna opłata koordynacyjna obowiązuje wyłącznie wtedy, gdy koordynacja dokumentów lub wdrożenia zostanie faktycznie zrealizowana. Ostateczna cena jest potwierdzana przed rozpoczęciem płatnych prac."
       }
     ],
-    "note": "Dwie rzeczy działają równolegle, a ta strona opisuje drugą z nich. Sama platforma jest automatyczna: tablica ofert pracy jest publiczna, podgląd dopasowania jest otwarty bez konta, a podane zapytanie tworzy uporządkowaną krótką listę, która wyjaśnia, dlaczego każda osoba pasuje — podanie zapytania jest bezpłatne. Powyższa płatna usługa jest usługą ludzką: operator czyta Twoje zapytanie, kontaktuje się z Tobą i ręcznie sprawdza krótką listę, zanim ktokolwiek zostanie Ci zaproponowany. Cała ekipa może już zaoferować się na Twoje zapytanie jako jedna jednostka i, gdy obie strony się porozumieją, dołączyć do Twojego projektu jako jeden zespół; automatyczna krótka lista nie proponuje jeszcze całych ekip — porządkuje osoby pojedynczo.",
+    "note": "Dwie rzeczy działają równolegle, a ta strona opisuje drugą z nich. Sama platforma jest automatyczna: tablica ofert pracy jest publiczna, podgląd dopasowania jest otwarty bez konta, a podane zapytanie tworzy uporządkowaną krótką listę, która wyjaśnia, dlaczego każda osoba pasuje — jedno aktywne stanowisko bezpłatnie. Powyższa płatna usługa jest usługą ludzką: operator czyta Twoje zapytanie, kontaktuje się z Tobą i ręcznie sprawdza krótką listę, zanim ktokolwiek zostanie Ci zaproponowany. Cała ekipa może już zaoferować się na Twoje zapytanie jako jedna jednostka i, gdy obie strony się porozumieją, dołączyć do Twojego projektu jako jeden zespół; automatyczna krótka lista nie proponuje jeszcze całych ekip — porządkuje osoby pojedynczo.",
     "ctaLabel": "Złóż zapytanie o siłę roboczą →"
   },
   "adminLaunchReadiness": {
@@ -12918,6 +12928,7 @@
     "servicesTitle": "Co ta osoba potrafi",
     "servicesEmpty": "Nic jeszcze nie zaoferowano",
     "servicesUnavailable": "Nie udało się wczytać oferowanych usług",
+    "sharedAfterWork": "Usługi, zdjęcia prac i zapisana praca są widoczne, gdy zaczniecie współpracę.",
     "serviceRemote": "Zdalnie",
     "photoAlt": "Zdjęcie wykonanej pracy",
     "historyTitle": "Zaimportowana historia",
@@ -14789,7 +14800,7 @@
       "eduOutcomesConnected": "Połączeni studenci: {count}.",
       "eduOutcomesUnavailable": "Nie można teraz odczytać wyników. To nie znaczy, że ich nie ma.",
       "eduStudentsPrivacy": "Uczelnia nie widzi umiejętności, dokumentów ani dziennika studentów — to ich własne dane. Widzisz udział i liczby wyników; kto pasuje, widzi sam pracodawca dla swojej potrzeby.",
-      "eduPracticeHow": "Praktyki publikują pracodawcy: partner zakłada konto firmy i publikuje potrzebę typu „praktyka” (publikacja potrzeby jest bezpłatna). Twoi studenci widzą ją na swojej tablicy, gdy pracodawca jest zweryfikowany.",
+      "eduPracticeHow": "Praktyki publikują pracodawcy: partner zakłada konto firmy i publikuje potrzebę typu „praktyka” (jedna potrzeba bezpłatnie). Twoi studenci widzą ją na swojej tablicy, gdy pracodawca jest zweryfikowany.",
       "eduNext": "Co dalej?",
       "chipCreateProgramme": "Utwórz program",
       "chipCreateCohort": "Utwórz grupę",

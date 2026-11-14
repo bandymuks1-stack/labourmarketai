@@ -2086,6 +2086,16 @@
         "into": "Raden slogs ihop med",
         "canonical": "det behållna projektet",
         "includes": "{count, plural, one {Omfattar # sammanslagen projektrad — dess poster visas här.} other {Omfattar # sammanslagna projektrader — deras poster visas här.}}"
+      },
+      "teams": {
+        "title": "Team i det här projektet",
+        "members": "{n, plural, one {# person} other {# personer}}",
+        "personTeam": "Team: {team}",
+        "unnamed": "Team utan namn",
+        "unnamedMember": "Medlem",
+        "noMembers": "Inga medlemmar just nu.",
+        "unavailable": "Teamen kunde inte läsas in. Försök igen.",
+        "manage": "Ändra team"
       }
     },
     "workerView": {
@@ -2973,6 +2983,7 @@
     "servicesTitle": "Vad personen kan",
     "servicesEmpty": "Inget erbjudet ännu",
     "servicesUnavailable": "Kunde inte ladda erbjudna tjänster",
+    "sharedAfterWork": "Tjänster, arbetsfoton och registrerat arbete visas när ni arbetar tillsammans.",
     "serviceRemote": "På distans",
     "photoAlt": "Foto på utfört arbete",
     "historyTitle": "Importerad historik",
@@ -4218,7 +4229,7 @@
       "eduOutcomesConnected": "Anslutna studenter: {count}.",
       "eduOutcomesUnavailable": "Resultaten kan inte läsas just nu. Det betyder inte att det inte finns några.",
       "eduStudentsPrivacy": "Institutionen ser inte studenternas färdigheter, dokument eller journal — det är deras egna uppgifter. Du ser deltagande och resultatsiffror; vem som passar ser arbetsgivaren själv för sitt eget behov.",
-      "eduPracticeHow": "Praktikplatser läggs upp av arbetsgivare: en partner skapar ett företagskonto och lägger upp ett behov av typen ”praktik” (det är gratis att lägga upp ett behov). Dina studenter ser det på sin tavla när arbetsgivaren är verifierad.",
+      "eduPracticeHow": "Praktikplatser läggs upp av arbetsgivare: en partner skapar ett företagskonto och lägger upp ett behov av typen ”praktik” (ett behov gratis). Dina studenter ser det på sin tavla när arbetsgivaren är verifierad.",
       "eduNext": "Vad händer nu?",
       "chipCreateProgramme": "Skapa program",
       "chipCreateCohort": "Skapa grupp",

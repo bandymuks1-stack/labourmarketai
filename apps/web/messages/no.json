@@ -2086,6 +2086,16 @@
         "into": "Raden er slått sammen med",
         "canonical": "det beholdte prosjektet",
         "includes": "{count, plural, one {Omfatter # sammenslått prosjektrad — postene vises her.} other {Omfatter # sammenslåtte prosjektrader — postene vises her.}}"
+      },
+      "teams": {
+        "title": "Team på dette prosjektet",
+        "members": "{n, plural, one {# person} other {# personer}}",
+        "personTeam": "Team: {team}",
+        "unnamed": "Team uten navn",
+        "unnamedMember": "Medlem",
+        "noMembers": "Ingen medlemmer akkurat nå.",
+        "unavailable": "Teamene kunne ikke lastes inn. Prøv igjen.",
+        "manage": "Endre team"
       }
     },
     "workerView": {
@@ -2973,6 +2983,7 @@
     "servicesTitle": "Hva personen kan",
     "servicesEmpty": "Ingenting tilbudt ennå",
     "servicesUnavailable": "Kunne ikke laste tilbudte tjenester",
+    "sharedAfterWork": "Tjenester, arbeidsbilder og registrert arbeid vises når dere jobber sammen.",
     "serviceRemote": "Eksternt",
     "photoAlt": "Bilde av utført arbeid",
     "historyTitle": "Importert historikk",
@@ -4218,7 +4229,7 @@
       "eduOutcomesConnected": "Tilknyttede studenter: {count}.",
       "eduOutcomesUnavailable": "Resultatene kan ikke leses nå. Det betyr ikke at det ikke finnes noen.",
       "eduStudentsPrivacy": "Institusjonen ser ikke studentenes ferdigheter, dokumenter eller journal — det er deres egne data. Du ser deltakelse og resultattall; hvem som passer, ser arbeidsgiveren selv for sitt eget behov.",
-      "eduPracticeHow": "Praksisplasser legges ut av arbeidsgivere: en partner oppretter en bedriftskonto og legger ut et behov med typen «praksis» (det er gratis å legge ut et behov). Studentene dine ser det på tavlen sin når arbeidsgiveren er verifisert.",
+      "eduPracticeHow": "Praksisplasser legges ut av arbeidsgivere: en partner oppretter en bedriftskonto og legger ut et behov med typen «praksis» (ett behov gratis). Studentene dine ser det på tavlen sin når arbeidsgiveren er verifisert.",
       "eduNext": "Hva nå?",
       "chipCreateProgramme": "Opprett program",
       "chipCreateCohort": "Opprett gruppe",

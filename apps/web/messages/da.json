@@ -2086,6 +2086,16 @@
         "into": "Rækken er lagt sammen med",
         "canonical": "det beholdte projekt",
         "includes": "{count, plural, one {Omfatter # sammenlagt projektrække — dens poster vises her.} other {Omfatter # sammenlagte projektrækker — deres poster vises her.}}"
+      },
+      "teams": {
+        "title": "Hold på dette projekt",
+        "members": "{n, plural, one {# person} other {# personer}}",
+        "personTeam": "Hold: {team}",
+        "unnamed": "Hold",
+        "unnamedMember": "Medlem",
+        "noMembers": "Ingen medlemmer lige nu.",
+        "unavailable": "Holdene kunne ikke indlæses. Prøv igen.",
+        "manage": "Skift hold"
       }
     },
     "workerView": {
@@ -2973,6 +2983,7 @@
     "servicesTitle": "Hvad personen kan",
     "servicesEmpty": "Intet tilbudt endnu",
     "servicesUnavailable": "Tilbudte ydelser kunne ikke indlæses",
+    "sharedAfterWork": "Ydelser, arbejdsfotos og registreret arbejde vises, når I arbejder sammen.",
     "serviceRemote": "Fjernarbejde",
     "photoAlt": "Foto af udført arbejde",
     "historyTitle": "Importeret historik",
@@ -4218,7 +4229,7 @@
       "eduOutcomesConnected": "Tilknyttede studerende: {count}.",
       "eduOutcomesUnavailable": "Resultaterne kan ikke læses lige nu. Det betyder ikke, at der ingen er.",
       "eduStudentsPrivacy": "Institutionen ser ikke de studerendes færdigheder, dokumenter eller journal — det er deres egne data. Du ser deltagelse og resultattal; hvem der passer, ser arbejdsgiveren selv for sit eget behov.",
-      "eduPracticeHow": "Praktikpladser slås op af arbejdsgivere: en partner opretter en virksomhedskonto og slår et behov op med typen \"praktik\" (det er gratis at slå et behov op). Dine studerende ser det på deres tavle, når arbejdsgiveren er verificeret.",
+      "eduPracticeHow": "Praktikpladser slås op af arbejdsgivere: en partner opretter en virksomhedskonto og slår et behov op med typen \"praktik\" (ét behov gratis). Dine studerende ser det på deres tavle, når arbejdsgiveren er verificeret.",
       "eduNext": "Hvad nu?",
       "chipCreateProgramme": "Opret program",
       "chipCreateCohort": "Opret hold",
