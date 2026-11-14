@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 12-hour full status report (owner order 2026-11-14, P0: reports at 08:00 and 20:00 Lithuanian time).
+ * 12-hour full status report (owner order 2026-11-14, P0; schedule 09:38 and 21:38 Europe/Vilnius, owner change 2026-11-14).
  *
  * ONE canonical output: docs/program/STATUS_REPORT.md (overwritten each run; its git history is the
  * report history). Source of truth for every function stays docs/program/FUNCTION_REGISTER.md —

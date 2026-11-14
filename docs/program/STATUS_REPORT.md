@@ -20,7 +20,7 @@ Funkcijų būsenų pokyčių registre nėra.
 
 ## B. Trumpa vadovo suvestinė
 
-**Pradinė ataskaita, 2026-11-14 vakaras.** Generatorius sukurtas šiandien. Pirmoji pilna 12 valandų ataskaita bus 2026-11-15 08:00.
+**Pradinė ataskaita, 2026-11-14 vakaras.** Generatorius sukurtas šiandien. Pirmoji pilna 12 valandų ataskaita – 2026-11-15 09:38. Grafikas: kasdien 09:38 ir 21:38 Lietuvos laiku (Europe/Vilnius, vasaros ir žiemos laikas – automatiškai).
 
 - **Užbaigta šiandien (įrodyta produkcijoje):**
   - V3 pagrindinis puslapis ir tekstai (#3314);
