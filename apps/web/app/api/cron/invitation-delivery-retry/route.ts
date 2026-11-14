@@ -2,11 +2,7 @@ import { NextResponse } from "next/server";
 
 import { authorizeCronRequest } from "@/lib/api/cron-auth";
 import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
-import {
-  runBounceReconciliation,
-  runInvitationDeliveryRetry,
-  runOwnerDeliveryAlert,
-} from "@/lib/invitations/delivery-retry-run";
+import { runBounceReconciliation, runInvitationDeliveryRetry } from "@/lib/invitations/delivery-retry-run";
 
 /**
  * INVITATION DELIVERY — scheduled retry, bounce reconciliation, health and owner alerts
@@ -20,12 +16,12 @@ import {
  *   retry            — at most 10 due CONFIRMED-TEMPORARY failures of already-authorised partner
  *                      referral sends (never an opened link, never an unknown outcome);
  *   bounces          — reads recent delivery reports from the sender mailbox (read-only) and marks
- *                      OUR messages BOUNCED / DELIVERED_CONFIRMED; sends nothing;
- *   notify           — computes the alerts server-side and delivers them to the owner's configured
- *                      channels (the VPS script de-duplicates: same alert set at most every 6 h).
+ *                      OUR messages BOUNCED / DELIVERED_CONFIRMED; sends nothing.
+ * The app never messages the owner itself (owner 2026-11-14): the VPS script turns NEW alerts into one
+ * agentai-project-event/v1 file in the Agentai OS inbox, and Agentai OS's one bot delivers it.
  * The body is counts, reason codes and alert codes only — no ids, no addresses.
  */
-const MODES = ["health", "retry", "bounces", "notify"] as const;
+const MODES = ["health", "retry", "bounces"] as const;
 
 export async function POST(request: Request): Promise<NextResponse> {
   const auth = authorizeCronRequest(request);
@@ -41,10 +37,6 @@ export async function POST(request: Request): Promise<NextResponse> {
     if (r.kind === "not_configured") return NextResponse.json({ ok: false, mode, reason: "not_configured" }, { status: 503 });
     if (r.kind === "failed") return NextResponse.json({ ok: false, mode, reason: r.reason }, { status: 502 });
     return NextResponse.json({ ok: true, mode, scanned: r.scanned, reports: r.reports, outcomes: r.outcomes }, { status: 200 });
-  }
-  if (mode === "notify") {
-    const r = await runOwnerDeliveryAlert();
-    return NextResponse.json({ ok: true, mode, ...r }, { status: 200 });
   }
   // The link carries a raw capability token: canonical origin always.
   const result = await runInvitationDeliveryRetry({ origin: CANONICAL_ORIGIN, healthOnly: mode === "health" });

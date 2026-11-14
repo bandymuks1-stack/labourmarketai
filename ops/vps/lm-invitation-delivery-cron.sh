@@ -8,9 +8,12 @@
 #   sh lm-invitation-delivery-cron.sh status      show it (changes nothing)
 #   sh lm-invitation-delivery-cron.sh --remove    uninstall (rollback); the app and its data stay as they are
 set -eu
-DST=/etc/cron.d/labourmarket-invitation-delivery
-RUN=/root/lm-prod/bin/lm-invitation-delivery-retry.sh
-PORT=$(cat /root/lm-prod/active-port 2>/dev/null || echo 3200)
+# LM_ROOT / CRON_DST / AGENTAI_PROJECT_EVENT_DIR are overridable for the synthetic test only.
+R="${LM_ROOT:-/root/lm-prod}"
+DST="${CRON_DST:-/etc/cron.d/labourmarket-invitation-delivery}"
+RUN=$R/bin/lm-invitation-delivery-retry.sh
+INBOX="${AGENTAI_PROJECT_EVENT_DIR:-/var/lib/docker/volumes/agentai_agentai-runtime/_data/inbox/project-events}"
+PORT=$(cat $R/active-port 2>/dev/null || echo 3200)
 MODE="${1:-}"
 case "$MODE" in
   --remove)
@@ -21,14 +24,17 @@ case "$MODE" in
   *) echo "usage: sh lm-invitation-delivery-cron.sh --dry-run|install|status|--remove"; exit 2 ;;
 esac
 [ -f "$RUN" ] || { echo "STOP: $RUN missing (install -m 700 ops/vps/lm-invitation-delivery-retry.sh $RUN)"; exit 1; }
-[ "$(stat -c %a /root/lm-prod/env)" = "600" ] || { echo "STOP: env not 600"; exit 1; }
-grep -q '^CRON_SECRET=.\{32,\}' /root/lm-prod/env || { echo "STOP: CRON_SECRET missing or short"; exit 1; }
+[ "$(stat -c %a $R/env)" = "600" ] || { echo "STOP: env not 600"; exit 1; }
+grep -q '^CRON_SECRET=.\{32,\}' $R/env || { echo "STOP: CRON_SECRET missing or short"; exit 1; }
 [ "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$PORT/api/health")" = "200" ] || { echo "STOP: container health not 200"; exit 1; }
 noauth=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Host: labourmarket.ai' "http://127.0.0.1:$PORT/api/cron/invitation-delivery-retry?mode=health")
 [ "$noauth" = "401" ] || { echo "STOP: route without secret answered $noauth (expected 401) — is the new release deployed?"; exit 1; }
 echo "route: unauthenticated=401 OK"
+command -v jq >/dev/null || { echo "STOP: jq missing (the alert step needs it)"; exit 1; }
+[ -d "$INBOX" ] && [ -w "$INBOX" ] || { echo "STOP: Agentai OS project-event inbox $INBOX missing or not writable (owner alerts would not arrive)"; exit 1; }
+echo "owner alerts: Agentai OS inbox writable OK"
 # One authenticated READ-ONLY call: the migration must be applied (503 needs_migration otherwise).
-sh "$RUN" health && echo "health: authenticated 200 OK" || { echo "STOP: health call failed — see /root/lm-prod/invitation-delivery.log (migration applied?)"; exit 1; }
+sh "$RUN" health && echo "health: authenticated 200 OK" || { echo "STOP: health call failed — see $R/invitation-delivery.log (migration applied?)"; exit 1; }
 if [ "$MODE" = "--dry-run" ]; then echo "dry-run OK: nothing installed"; exit 0; fi
 umask 022
 cat > "$DST" <<CRON

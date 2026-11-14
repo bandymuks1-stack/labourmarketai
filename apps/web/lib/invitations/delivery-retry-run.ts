@@ -18,7 +18,6 @@ import {
 } from "@/lib/invitations/delivery-retry";
 import { buildInvitationBody, buildInvitationSubject } from "@/lib/invitations/email-content";
 import { buildInviteLink } from "@/lib/invitations/model";
-import { sendOwnerDeliveryAlert } from "@/lib/notifications/owner-ops-alert";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -174,16 +173,4 @@ export async function runBounceReconciliation(): Promise<BounceRunResult> {
     outcomes[key] = (outcomes[key] ?? 0) + 1;
   }
   return { kind: "bounces", scanned: read.scanned, reports: read.facts.length, outcomes };
-}
-
-/** Computes the current alerts server-side and delivers them to the owner (never client-supplied). */
-export async function runOwnerDeliveryAlert(): Promise<{
-  readonly alerts: readonly DeliveryAlert[];
-  readonly delivered: readonly string[];
-  readonly configured: { readonly telegram: boolean; readonly email: boolean };
-}> {
-  const health = await readInvitationDeliveryHealth(createAdminClient(), 24);
-  const alerts = health ? deliveryAlerts(health) : [];
-  const r = await sendOwnerDeliveryAlert(alerts, health);
-  return { alerts, delivered: r.delivered, configured: r.configured };
 }
