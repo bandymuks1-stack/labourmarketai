@@ -72,6 +72,30 @@ describe("commercial code: honest degradation, no finance duplication", () => {
   });
 });
 
+describe("an accepted proposal becomes a contract without retyping (B2B chain)", () => {
+  it("the reader carries contracts.proposal_id", () => {
+    expect(read("lib/commercial/commercial.ts")).toMatch(/proposalId:\s*r\.proposal_id/);
+  });
+  it("the panel offers the step only on an accepted proposal that has no contract, and passes its id", () => {
+    const panel = read("components/app/commercial-panel.tsx");
+    expect(panel).toMatch(/p\.status === "accepted" && !contracted\.has\(p\.id\)/);
+    expect(panel).toMatch(/createContractAction\(\{ title: p\.title, valueCents: p\.amountCents, proposalId: p\.id \}\)/);
+    expect(panel).toMatch(/contract-from-proposal/);
+  });
+  it("uses the existing contract door, no second one", () => {
+    const actions = read("lib/commercial/commercial-actions.ts");
+    expect(actions.match(/rpc\("create_contract_v1"/g)?.length).toBe(1);
+    expect(actions).toMatch(/p_proposal_id: input\.proposalId \|\| null/);
+  });
+  for (const loc of ["en", "lt", "de", "nl", "pl", "ru"]) {
+    it(`${loc} names the step and the link`, () => {
+      const msgs = JSON.parse(read(`messages/${loc}.json`));
+      expect(msgs.commercial?.contractFromProposal, loc).toBeTruthy();
+      expect(msgs.commercial?.fromProposal, loc).toContain("{title}");
+    });
+  }
+});
+
 describe("commercial strings exist in every active-parity locale", () => {
   for (const loc of activeLocales) {
     it(`${loc} has commercial with proposal + contract statuses`, () => {

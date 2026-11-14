@@ -62,6 +62,10 @@ export function CommercialPanel({ data }: { data: CommercialData }) {
     });
 
   const parseEur = (s: string) => Math.round(Number(s.replace(",", ".")) * 100);
+  // An accepted proposal becomes a contract in one step, carrying its id
+  // (contracts.proposal_id) — never retyped as an unconnected record.
+  const contracted = new Set(data.applied ? data.contracts.map((c) => c.proposalId).filter(Boolean) : []);
+  const proposalTitle = new Map(data.applied ? data.proposals.map((p) => [p.id, p.title] as const) : []);
 
   return (
     <div className="flex flex-col gap-6" data-testid="commercial">
@@ -91,6 +95,11 @@ export function CommercialPanel({ data }: { data: CommercialData }) {
                       className="ml-auto rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" data-testid="proposal-status">
                       {PROPOSAL_STATUSES.map((s) => (<option key={s} value={s}>{t(`proposalStatus.${s}`)}</option>))}
                     </select>
+                    {p.status === "accepted" && !contracted.has(p.id) ? (
+                      <Button type="button" size="sm" variant="secondary" disabled={pending}
+                        onClick={() => run(() => createContractAction({ title: p.title, valueCents: p.amountCents, proposalId: p.id }))}
+                        data-testid="proposal-to-contract">{t("contractFromProposal")}</Button>
+                    ) : null}
                     <button type="button" disabled={pending} onClick={() => run(() => deleteProposalAction({ proposalId: p.id }))}
                       className="rounded-md border border-ink-500 px-2 py-1 text-meta text-text-muted hover:border-state-danger hover:text-state-danger" data-testid="proposal-delete">{t("delete")}</button>
                   </li>
@@ -124,6 +133,9 @@ export function CommercialPanel({ data }: { data: CommercialData }) {
                   <li key={c.id} className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3" data-testid="contract-row">
                     <span className="text-sm font-semibold text-text-primary">{c.title}</span>
                     <span className="font-mono text-sm text-text-secondary">{eur(c.valueCents)}</span>
+                    {c.proposalId && proposalTitle.has(c.proposalId) ? (
+                      <span className="text-meta text-text-muted" data-testid="contract-from-proposal">{t("fromProposal", { title: proposalTitle.get(c.proposalId) ?? "" })}</span>
+                    ) : null}
                     {c.signedDocumentRef ? <span className="text-meta text-text-muted">{t("docRef")}: {c.signedDocumentRef}</span> : null}
                     <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${CONTRACT_TONE[c.status]}`}>{t(`contractStatus.${c.status}`)}</span>
                     <select aria-label={t("statusLabel")} value={c.status} disabled={pending}

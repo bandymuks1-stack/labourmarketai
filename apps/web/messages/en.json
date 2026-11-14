@@ -405,6 +405,8 @@
     "noSignatureNote": "Contracts store a status and an optional document reference. No electronic signature is created or claimed.",
     "contractsEmpty": "No contracts yet.",
     "addContract": "Add a contract",
+    "contractFromProposal": "Create contract",
+    "fromProposal": "From proposal: {title}",
     "contractTitlePlaceholder": "Contract title",
     "docRef": "Doc ref",
     "docRefLabel": "Document reference",

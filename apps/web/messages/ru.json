@@ -405,6 +405,8 @@
     "noSignatureNote": "Договоры хранят статус и необязательную ссылку на документ. Электронная подпись не создаётся и не заявляется.",
     "contractsEmpty": "Договоров пока нет.",
     "addContract": "Добавить договор",
+    "contractFromProposal": "Создать договор",
+    "fromProposal": "Из предложения: {title}",
     "contractTitlePlaceholder": "Название договора",
     "docRef": "Ссылка",
     "docRefLabel": "Ссылка на документ",
