@@ -60,7 +60,7 @@ describe("public copy avoids forbidden positioning", () => {
     const m = msg(l);
     const text = [
       m.hero.chip, m.hero.headline, m.hero.headlineAccent, m.hero.subcopy,
-      m.footer.tagline, m.footer.rexora,
+      m.footer.tagline, m.footer.operatedBy,
     ].join(" ");
     for (const re of FORBIDDEN) {
       expect(re.test(text), `${l}: forbidden positioning matched ${re}`).toBe(false);
@@ -68,10 +68,14 @@ describe("public copy avoids forbidden positioning", () => {
   });
 });
 
-describe("footer attribution + rights", () => {
-  it.each([...activeLocales])("%s footer has Rexora attribution and reserved rights", (l) => {
+describe("footer legal statement + rights", () => {
+  // The "built together" credit was removed on the owner's decision of
+  // 2026-11-13 (pinned in legal-entity-truth.test.ts). What every footer must
+  // still carry is the legal statement and the reserved-rights line.
+  it.each([...activeLocales])("%s footer names the operator, carries no credit line, and reserves rights", (l) => {
     const f = msg(l).footer;
-    expect(f.rexora, `${l} footer.rexora`).toMatch(/Rexora/);
+    expect(f.rexora, `${l} footer.rexora`).toBeUndefined();
+    expect(f.operatedBy, `${l} footer.operatedBy`).toMatch(/Nonstop Group/);
     expect(typeof f.rights === "string" && f.rights.length > 0, `${l} footer.rights`).toBe(true);
   });
 });

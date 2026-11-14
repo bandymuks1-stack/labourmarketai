@@ -732,7 +732,6 @@
     "legalGroup": "[EN] Legal",
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
-    "rexora": "Bygget sammen: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
@@ -890,7 +889,8 @@
     "themeToLight": "Lyst tema",
     "how": "Sådan fungerer det",
     "menuOpen": "Menu",
-    "menuClose": "Luk menu"
+    "menuClose": "Luk menu",
+    "market": "Arbejdsmarked"
   },
   "pages": {
     "agencies": {
@@ -2086,6 +2086,16 @@
         "into": "Rækken er lagt sammen med",
         "canonical": "det beholdte projekt",
         "includes": "{count, plural, one {Omfatter # sammenlagt projektrække — dens poster vises her.} other {Omfatter # sammenlagte projektrækker — deres poster vises her.}}"
+      },
+      "teams": {
+        "title": "Hold på dette projekt",
+        "members": "{n, plural, one {# person} other {# personer}}",
+        "personTeam": "Hold: {team}",
+        "unnamed": "Hold",
+        "unnamedMember": "Medlem",
+        "noMembers": "Ingen medlemmer lige nu.",
+        "unavailable": "Holdene kunne ikke indlæses. Prøv igen.",
+        "manage": "Skift hold"
       }
     },
     "workerView": {
@@ -2973,6 +2983,7 @@
     "servicesTitle": "Hvad personen kan",
     "servicesEmpty": "Intet tilbudt endnu",
     "servicesUnavailable": "Tilbudte ydelser kunne ikke indlæses",
+    "sharedAfterWork": "Ydelser, arbejdsfotos og registreret arbejde vises, når I arbejder sammen.",
     "serviceRemote": "Fjernarbejde",
     "photoAlt": "Foto af udført arbejde",
     "historyTitle": "Importeret historik",
@@ -4831,6 +4842,42 @@
         "goods": "Varer"
       },
       "lasting": "Din erfaring og dine muligheder forbliver tilgængelige — når du skifter job, projekt eller land."
+    },
+    "v3": {
+      "lead": "For medarbejdere, arbejdsgivere og tjenesteudbydere i alle fag og sektorer. Registrering og grundlæggende opslag af et behov er gratis.",
+      "moreChoices": "Flere muligheder",
+      "or": "eller beskriv det med dine egne ord",
+      "needFree": "Du kan sende en forespørgsel uden at registrere dig. Det er gratis at sende den; vilkår og pris for ydelserne aftales særskilt.",
+      "market": {
+        "title": "Jobopslag på markedet",
+        "line": "{adverts} aktive jobopslag fra eksterne kilder. Opslagene nævner {employers} forskellige arbejdsgivernavne.",
+        "source": "Opslagene er indsamlet fra offentlige eksterne jobkilder. Tallet er ikke antallet af arbejdsgivere eller kunder, der er registreret hos LabourMarket.ai. Opslagene er senest opdateret: {date}.",
+        "none": "Markedsdata er ikke tilgængelige i øjeblikket.",
+        "search": "Søg i jobopslag"
+      },
+      "adverts": {
+        "title": "Nogle aktive opslag",
+        "sub": "Du kan se opslagene uden en konto. Log ind for at se arbejdsgiveren, stedet, den fulde beskrivelse og hvordan du søger."
+      },
+      "how": {
+        "title": "Sådan fungerer det",
+        "s1": {
+          "title": "Find og aftal",
+          "body": "Find arbejde, medarbejdere eller ydelser, og administrer tilbud og aftaler på platformen."
+        },
+        "s2": {
+          "title": "Registrer arbejdet",
+          "body": "Du kan registrere udført arbejde i arbejdsjournalen."
+        },
+        "s3": {
+          "title": "Bekræft",
+          "body": "En leder i arbejdsgiverens organisation bekræfter registreringerne. En kunde kan godkende arbejde, der er indsendt til kunden; det registreres særskilt. Bekræftet arbejde bliver dokumentation for din erfaring."
+        },
+        "s4": {
+          "title": "Deres data og privatliv",
+          "body": "Assistenten kommer med forslag; De træffer beslutningerne. De bestemmer, om arbejdsgivere kan finde Dem, og om Deres kontaktoplysninger deles. Arbejdsregistreringer kan ses af den organisation, De arbejder for."
+        }
+      }
     }
   },
   "workspace": {
@@ -5338,7 +5385,7 @@
     },
     "language": {
       "translatedFrom": "[EN] Translated from {language}",
-      "originalIn": "[EN] Advertisement language: {language}",
+      "originalIn": "Opslagets sprog: {language}",
       "showOriginal": "[EN] Show original",
       "hideOriginal": "[EN] Hide original",
       "machineNote": "[EN] Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
@@ -7932,10 +7979,10 @@
   },
   "consent": {
     "banner": {
-      "text": "Vi måler sidebrug, og hvilken kampagne der bragte dig hertil, kun hvis du tillader det.",
+      "text": "Måledata, der er gemt i Deres browser, og kampagneoplysninger bruger vi kun med Deres samtykke.",
       "accept": "Tillad måling",
       "refuse": "Afvis",
-      "more": "Mere",
+      "more": "Mere om cookies",
       "label": "Valg om brugsmåling"
     },
     "control": {
@@ -7946,5 +7993,82 @@
       "allow": "Tillad",
       "refuse": "Afvis"
     }
+  },
+  "siteNav": {
+    "education": "For uddannelsesinstitutioner",
+    "signUp": "Opret konto",
+    "trigger": "Hovedmål",
+    "account": "For brugere, der er logget ind",
+    "intents": {
+      "work": {
+        "title": "Jeg søger arbejde",
+        "description": "Søg arbejde, og præsenter din erfaring.",
+        "short": "Find arbejde"
+      },
+      "workers": {
+        "title": "Jeg søger medarbejdere",
+        "description": "Angiv, hvilke medarbejdere du har brug for, hvor og hvornår.",
+        "short": "Find medarbejdere"
+      },
+      "services": {
+        "title": "Jeg tilbyder ydelser",
+        "description": "Præsenter dine ydelser, find ordrer, og besvar forespørgsler.",
+        "short": "Tilbyd ydelser"
+      },
+      "partners": {
+        "title": "Jeg søger partnere",
+        "description": "Find partnere, og vedligehold samarbejdet.",
+        "short": "Find partnere"
+      },
+      "agencies": {
+        "title": "For bureauer",
+        "description": "Administrer bureauets kunder og kandidattilbud.",
+        "short": "For bureauer"
+      },
+      "contractors": {
+        "short": "Jeg søger ydelser eller leverandører",
+        "title": "Jeg søger ydelser eller leverandører",
+        "description": "Beskriv, hvilken ydelse eller leverandør du har brug for."
+      }
+    },
+    "links": {
+      "jobs": "Jobopslag",
+      "workOpportunities": "Jobmuligheder",
+      "createCv": "Lav et gratis CV",
+      "workAbroad": "Arbejde i udlandet",
+      "forWorkers": "Sådan virker det for medarbejdere",
+      "companyNeed": "Beskriv dit behov",
+      "forCompanies": "Sådan virker det for virksomheder",
+      "labourMarket": "Arbejdsmarked pr. land",
+      "myServices": "Dine ydelser",
+      "serviceRequests": "Forespørgsler på ydelser",
+      "marketListings": "Markedsopslag",
+      "commercial": "Tilbud og kontrakter",
+      "network": "Dit netværk",
+      "partnerWithUs": "Bliv partner",
+      "forAgencies": "Sådan virker det for bureauer",
+      "setUpAgency": "Registrer dit bureau",
+      "b2bEnquiry": "Forespørgsel om erhvervsydelser (B2B)",
+      "projectEnquiry": "Forespørgsel om individuelt projekt"
+    },
+    "assistant": "Spørg assistenten",
+    "start": {
+      "searchLabel": "Søg i jobopslag",
+      "searchPlaceholder": "Jobtitel eller søgeord",
+      "searchSubmit": "Søg",
+      "viewAll": "Alle job"
+    },
+    "nav": {
+      "heading": "Hvad vil du gøre?",
+      "swipe": "Stryg",
+      "close": "Luk",
+      "functions": "Handlinger",
+      "professions": "Fag",
+      "opensNow": "Kræver ingen konto",
+      "signInWhenOpen": "Kræver login",
+      "allSectors": "Alle brancher",
+      "fullList": "Fuld liste"
+    },
+    "more": "Mere"
   }
 }

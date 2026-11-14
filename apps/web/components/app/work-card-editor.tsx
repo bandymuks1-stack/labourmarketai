@@ -13,6 +13,10 @@ import {
 } from "./work-card-plausibility-note";
 
 import { Link } from "@/lib/i18n/navigation";
+import { Button, buttonLinkClassName } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { Select } from "@/components/ui/Select";
 import {
   saveWorkerCardAction,
   confirmWorkerCardAction,
@@ -79,14 +83,6 @@ export interface WorkCardLabels {
   /** The one-time "should employers find you?" ask shown after a save. */
   visibilityAsk: EmployerVisibilityAskLabels;
 }
-
-// The canonical primary CTA fill (2026-09-22): the brand gradient with its
-// readable foreground. The retired gold→cyan sweep put cyan — the EVIDENCE
-// colour — on a button, which read as a claim about the record.
-const primaryCta =
-  "inline-flex w-fit items-center gap-2 rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-transform hover:-translate-y-0.5";
-const secondaryBtn =
-  "inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue";
 
 /** Fired after a save the server confirmed — a surface that read the card
  *  BEFORE the save (the chat's result panel) re-reads it. */
@@ -163,7 +159,7 @@ export function WorkCardEditor({
       <div className="flex flex-col gap-2">
         <Link
           href={nextHref as "/dashboard/profile"}
-          className={primaryCta}
+          className={buttonLinkClassName("primary", "sm")}
           data-testid="work-card-next"
           onClick={() =>
             trackFunnel(FUNNEL_EVENTS.firstActionCardClicked, {
@@ -177,14 +173,16 @@ export function WorkCardEditor({
       </div>
     ) : (
       <div className="flex flex-col gap-2">
-        <button
+        <Button
           type="button"
-          className={primaryCta}
+          variant="primary"
+          size="sm"
+          className="min-h-11 w-fit"
           data-testid="work-card-next"
           onClick={() => setOpen(true)}
         >
           {labels.nextLabel}
-        </button>
+        </Button>
         {why}
       </div>
     );
@@ -206,9 +204,11 @@ export function WorkCardEditor({
             {labels.staleBody}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-2">
-            <button
+            <Button
               type="button"
-              className={primaryCta}
+              variant="primary"
+              size="sm"
+              className="min-h-11 w-fit"
               disabled={confirmPending || confirmDone}
               data-testid="work-card-confirm-yes"
               onClick={() =>
@@ -219,15 +219,17 @@ export function WorkCardEditor({
               }
             >
               {confirmDone ? labels.staleSaved : labels.yes}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className={secondaryBtn}
+              variant="secondary"
+              size="sm"
+              className="min-h-11 w-fit"
               onClick={() => setOpen(true)}
               data-testid="work-card-confirm-change"
             >
               {labels.change}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -252,15 +254,17 @@ export function WorkCardEditor({
 
       {/* ── Secondary/collapsed editor (always available, never primary) ── */}
       <div id="work-card-editor-section">
-        <button
+        <Button
           type="button"
-          className={secondaryBtn}
+          variant="secondary"
+          size="sm"
+          className="min-h-11 w-fit"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
           data-testid="work-card-editor-toggle"
         >
           {labels.editorOpen}
-        </button>
+        </Button>
 
         {open && (
           <form
@@ -289,13 +293,10 @@ export function WorkCardEditor({
             ) : null}
             {/* kada — availability */}
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-mono uppercase tracking-label text-text-muted">
-                {labels.availabilityLabel}
-              </span>
-              <select
+              <Label>{labels.availabilityLabel}</Label>
+              <Select
                 name="availability_status"
                 defaultValue={values.availabilityStatus ?? ""}
-                className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
               >
                 {values.availabilityStatus ? null : (
                   <option value="">{labels.availabilityOptionNone}</option>
@@ -307,32 +308,26 @@ export function WorkCardEditor({
                 <option value="unavailable">
                   {labels.availabilityOptionUnavailable}
                 </option>
-              </select>
+              </Select>
             </label>
 
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-mono uppercase tracking-label text-text-muted">
-                {labels.availableFromLabel}
-              </span>
-              <input
+              <Label>{labels.availableFromLabel}</Label>
+              <Input
                 type="date"
                 name="available_from"
                 defaultValue={values.availableFrom ?? ""}
-                className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
               />
             </label>
 
             {/* kur — location */}
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-mono uppercase tracking-label text-text-muted">
-                {labels.locationLabel}
-              </span>
+              <Label>{labels.locationLabel}</Label>
               {labels.locationOptions && labels.locationOptions.length > 0 ? (
-                <select
+                <Select
                   name="location_country"
                   defaultValue={values.locationCountry ?? ""}
                   data-testid="work-card-location-select"
-                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
                 >
                   <option value="">—</option>
                   {labels.locationOptions.map((c) => (
@@ -340,30 +335,27 @@ export function WorkCardEditor({
                       {c.label}
                     </option>
                   ))}
-                </select>
+                </Select>
               ) : (
-                <input
+                <Input
                   type="text"
                   name="location_country"
                   maxLength={80}
                   placeholder={labels.locationHint}
                   defaultValue={values.locationCountry ?? ""}
-                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
                 />
               )}
             </label>
 
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-mono uppercase tracking-label text-text-muted">
-                {labels.preferredLabel}
-              </span>
-              <input
+              <Label>{labels.preferredLabel}</Label>
+              <Input
                 type="text"
                 name="preferred_countries"
                 placeholder={labels.preferredHint}
                 defaultValue={values.preferredCountries.join(", ")}
                 onChange={(e) => setTypedCountries(e.target.value)}
-                className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm uppercase text-text-primary"
+                className="uppercase"
               />
             </label>
 
@@ -375,39 +367,41 @@ export function WorkCardEditor({
             {/* kiek — pay */}
             <div className="grid grid-cols-2 gap-3">
               <label className="flex flex-col gap-1 text-xs">
-                <span className="font-mono uppercase tracking-label text-text-muted">
-                  {labels.salaryMinLabel}
-                </span>
-                <input
+                <Label>{labels.salaryMinLabel}</Label>
+                <Input
                   type="number"
                   name="salary_min"
                   min={0}
                   inputMode="numeric"
                   placeholder="1500"
                   defaultValue={values.salaryMin ?? ""}
-                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted"
                 />
               </label>
               <label className="flex flex-col gap-1 text-xs">
-                <span className="font-mono uppercase tracking-label text-text-muted">
-                  {labels.salaryMaxLabel}
-                </span>
-                <input
+                <Label>{labels.salaryMaxLabel}</Label>
+                <Input
                   type="number"
                   name="salary_max"
                   min={0}
                   inputMode="numeric"
                   placeholder="2500"
                   defaultValue={values.salaryMax ?? ""}
-                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted"
                 />
               </label>
             </div>
 
             <div className="flex items-center gap-3">
-              <button type="submit" className={primaryCta} disabled={savePending} data-testid="work-card-save">
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                className="min-h-11 w-fit"
+                loading={savePending}
+                disabled={savePending}
+                data-testid="work-card-save"
+              >
                 {savePending ? labels.saving : labels.save}
-              </button>
+              </Button>
               {saveState?.ok && (
                 <span className="text-xs text-state-success" role="status" data-testid="work-card-saved">
                   {labels.saved}

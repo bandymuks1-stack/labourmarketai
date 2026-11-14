@@ -150,6 +150,10 @@ on:
           # Owner P0 2026-11-09: account-deletion self-cancel on the synthetic worker2 only (files, confirms when the minted sign-in
           # is fresh, reads the 30-day date, cancels; afterAll always cancels) + the public 30-day / 7-day copy. Dispatch only.
           - deletion-cancel
+          # Lane F inventory 2026-11-12: "My Space" pin to home (one workspace_pins row on the synthetic worker, removed
+          # at the end) and a Swedish visitor (signed out, read-only). Dispatch only, never in the rotation.
+          - pin-to-home
+          - swedish-visitor
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -509,6 +513,8 @@ jobs:
             review-scope) SPEC=tests/e2e/prod-review-scope.spec.ts ;;
             search-regression) SPEC=tests/e2e/prod-search-regression.spec.ts ;;
             deletion-cancel) SPEC=tests/e2e/prod-deletion-cancel.spec.ts ;;
+            pin-to-home) SPEC=tests/e2e/prod-pin-to-home.spec.ts ;;
+            swedish-visitor) SPEC=tests/e2e/prod-swedish-visitor.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that

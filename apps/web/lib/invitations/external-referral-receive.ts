@@ -8,6 +8,7 @@ import {
   isTransactionalEmailConfigured,
 } from "@/lib/email/transactional";
 import { guardedSendTransactionalEmail } from "@/lib/email/send-ledger-store";
+import { recordDeliveryAttempt } from "@/lib/invitations/delivery-attempts";
 import { getTranslations } from "next-intl/server";
 import { activeLocales } from "@/lib/i18n/config";
 import type { ExternalReferralSource } from "@/lib/invitations/external-sources";
@@ -164,6 +165,17 @@ export async function receiveExternalReferral(input: {
       await asAny(admin).rpc("mark_external_referral_delivery_v1", {
         p_invitation_id: invitationId,
         p_outcome: delivery,
+      });
+      // The reason code is kept and a TEMPORARY failure gets a scheduled,
+      // bounded retry of THIS already-authorised send (the partner's consented
+      // referral); permanent / configuration failures stop here.
+      await recordDeliveryAttempt({
+        invitationId,
+        path: "intake",
+        result: sent,
+        attempts: 1,
+        autoRetry: true,
+        client: admin,
       });
     }
   }

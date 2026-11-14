@@ -46,7 +46,7 @@ export default async function CommercialPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/${locale}/auth/login`);
+  if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/commercial`);
 
   const data = await getMyCommercial();
 
