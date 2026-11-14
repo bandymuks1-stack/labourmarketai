@@ -171,8 +171,14 @@ test("P-2. a new worker is offered the agency, nothing ticked, and joins by thei
 
   await tick.check();
   await card.getByTestId("agency-suggestion-join").click();
-  await expect(w1.getByTestId("agency-suggestion-joined")).toBeVisible({ timeout: 30_000 });
-  expect(rosterStatus(s.agCompanyId, s.w1WorkerId), "on the agency's EXISTING roster").toBe("active");
+  await expect(card.getByTestId("agency-suggestion-error"), "the join is not refused").toHaveCount(0);
+  await expect
+    .poll(() => rosterStatus(s.agCompanyId, s.w1WorkerId), {
+      message: "on the agency's EXISTING roster",
+      timeout: 30_000,
+    })
+    .toBe("active");
+  await expect(w1.getByTestId("agency-suggestion-joined"), "the person is told").toBeVisible({ timeout: 30_000 });
   expect(
     sql<{ v: string }>(
       `select payload->>'consent_text_version' as v from public.audit_logs
@@ -233,6 +239,9 @@ test("P-4. a worker who joined can leave through the existing withdrawal, and is
   await expect(card).toBeVisible({ timeout: 60_000 });
   await card.getByTestId("agency-suggestion-consent").check();
   await card.getByTestId("agency-suggestion-join").click();
+  await expect
+    .poll(() => rosterStatus(s.agCompanyId, s.w3WorkerId), { message: "joined", timeout: 30_000 })
+    .toBe("active");
   await expect(w3.getByTestId("agency-suggestion-joined")).toBeVisible({ timeout: 30_000 });
 
   await w3.goto(`${BASE}/en/dashboard/profile`);
@@ -337,8 +346,14 @@ test("P-5. the employer sees the fee on that agency's candidate and accepts it o
 
   await co.getByTestId(`offer-placement-accept-${s.offerId}`).check();
   await co.getByTestId(`offer-accept-${s.offerId}`).click();
-  await expect(co.getByTestId("offer-decision-done")).toBeVisible({ timeout: 30_000 });
-  expect(recorded(), "the exact term is recorded with the decision").toBe(`accepted/${s.termId}`);
+  // The page re-reads the offer after the decision; an accepted offer has no
+  // decision buttons left, so its own status line is what shows.
+  await expect
+    .poll(recorded, { message: "the exact term is recorded with the decision", timeout: 30_000 })
+    .toBe(`accepted/${s.termId}`);
+  await expect(co.getByTestId("scouting-agency-offers").getByTestId("scout-offer-status-accepted")).toBeVisible({
+    timeout: 30_000,
+  });
   s.bookingId = sql<{ id: string }>(
     `select booking_id as id from public.agency_candidate_offers where id = ${lit(s.offerId)}`,
   )[0]!.id;

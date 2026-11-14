@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -66,8 +64,10 @@ export async function joinSuggestedAgencyAction(
       ? String((data as { outcome: unknown }).outcome)
       : "";
   if (outcome === "joined") {
-    revalidatePath("/[locale]/dashboard", "page");
-    revalidatePath("/[locale]/dashboard/profile", "page");
+    // No revalidation: re-rendering the home now would render no suggestion
+    // (the worker is on the roster) and unmount this card before it can say
+    // "you joined". Both pages are rendered per request, so the next visit
+    // reads the new roster row.
     return { status: "ok" };
   }
   return {
