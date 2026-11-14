@@ -55,8 +55,13 @@ const PHONES = [
 
 const shared: { companyId: string; needId: string } = { companyId: "", needId: "" };
 
-async function onPhone(browser: Browser, phone: (typeof PHONES)[number]): Promise<{ ctx: BrowserContext; page: Page }> {
+async function onPhone(
+  browser: Browser,
+  phone: (typeof PHONES)[number],
+  storageState?: Awaited<ReturnType<BrowserContext["storageState"]>>,
+): Promise<{ ctx: BrowserContext; page: Page }> {
   const ctx = await browser.newContext({
+    ...(storageState ? { storageState } : {}),
     viewport: phone.viewport,
     deviceScaleFactor: phone.deviceScaleFactor,
     isMobile: true,
@@ -65,6 +70,32 @@ async function onPhone(browser: Browser, phone: (typeof PHONES)[number]): Promis
     timezoneId: "UTC",
   });
   return { ctx, page: await ctx.newPage() };
+}
+
+/**
+ * One sign-in per person per run: later steps reuse that browser session (cookies and storage do
+ * not depend on the screen). The local auth server limits sign-ins per IP, and every walk in this
+ * job shares one stack.
+ */
+const sessions = new Map<string, Awaited<ReturnType<BrowserContext["storageState"]>>>();
+
+async function signedInOnPhone(browser: Browser, phone: (typeof PHONES)[number], address: string): Promise<{ ctx: BrowserContext; page: Page; done: () => Promise<void> }> {
+  const saved = sessions.get(address);
+  const { ctx, page } = await onPhone(browser, phone, saved);
+  if (saved) {
+    await page.goto(`${BASE}/en/dashboard`);
+    await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+  } else {
+    await signIn(page, BASE, address);
+  }
+  return {
+    ctx,
+    page,
+    done: async () => {
+      sessions.set(address, await ctx.storageState());
+      await ctx.close();
+    },
+  };
 }
 
 /** The page is never wider than the phone: nothing scrolls sideways. */
@@ -96,6 +127,7 @@ test("M-0. setup at a desktop: a verified company posts a need", async ({ browse
   await onboard(page, "hire", `Synthetic Phone Owner ${RUN}`);
   await setUpCompany(page, COMPANY_ORG);
   await publishNeed(page, BASE, NEED_ROLE, "LT");
+  sessions.set(COMPANY, await ctx.storageState());
   await ctx.close();
   shared.companyId = await verifyCompanyAsLocalAdmin(COMPANY, email("admin"));
   const owner = await userId(COMPANY);
@@ -139,12 +171,12 @@ for (const phone of PHONES) {
       const rows = sql<{ id: string; headline: string | null }>(`select id, headline from public.workers where profile_id = ${lit(s.profileId)}`);
       expect(rows.map((r) => r.headline), "the headline is stored on the worker").toEqual([headline]);
       s.workerId = rows[0]!.id;
+      sessions.set(worker, await ctx.storageState());
       await ctx.close();
     });
 
     test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {
-      const { ctx, page } = await onPhone(browser, phone);
-      await signIn(page, BASE, worker);
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
       await accountMenu(page, "account-menu-cv-link");
       await page.waitForURL(/\/en\/cv/, { timeout: 30_000 });
       await expect(page.getByTestId("cv-back-link")).toBeVisible({ timeout: 30_000 });
@@ -153,12 +185,11 @@ for (const phone of PHONES) {
       await page.waitForURL(/template=eu/, { timeout: 30_000 });
       await expect(page.getByTestId("cv-eu-format"), "the EU-format CV renders").toBeVisible({ timeout: 30_000 });
       await fitsTheScreen(page, "the EU-format CV");
-      await ctx.close();
+      await done();
     });
 
     test(`M-3 (${phone.name}). the worker finds the company's need on the work board and opens its details`, async ({ browser }) => {
-      const { ctx, page } = await onPhone(browser, phone);
-      await signIn(page, BASE, worker);
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
       await page.goto(`${BASE}/en/dashboard/opportunities?view=all`);
       await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
       await fitsTheScreen(page, "the work board");
@@ -169,12 +200,11 @@ for (const phone of PHONES) {
       await details.tap();
       await expect(details, "its details open").toHaveAttribute("aria-expanded", "true", { timeout: 30_000 });
       await fitsTheScreen(page, "the work board with a need's details open");
-      await ctx.close();
+      await done();
     });
 
     test(`M-4 (${phone.name}). the worker applies: interest in the need is expressed and stored`, async ({ browser }) => {
-      const { ctx, page } = await onPhone(browser, phone);
-      await signIn(page, BASE, worker);
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
       await page.goto(`${BASE}/en/dashboard/opportunities?view=all`);
       const card = page.locator(`li[id="opp-${shared.needId}"]`).first();
       await expect(card).toBeVisible({ timeout: 60_000 });
@@ -185,13 +215,12 @@ for (const phone of PHONES) {
         `select status from public.demand_interest_signals where request_id = ${lit(shared.needId)} and worker_id = ${lit(s.workerId)}`,
       );
       expect(rows.map((r) => r.status), "one interest row, interested").toEqual(["interested"]);
-      await ctx.close();
+      await done();
     });
 
     test(`M-5 (${phone.name}). messages: the worker writes from the application, the company answers from its phone, the worker reads it`, async ({ browser }) => {
       // The worker writes to the employer from their application.
-      const w = await onPhone(browser, phone);
-      await signIn(w.page, BASE, worker);
+      const w = await signedInOnPhone(browser, phone, worker);
       await w.page.goto(`${BASE}/en/dashboard/opportunities?view=all`);
       const box = w.page.locator(`li[id="opp-${shared.needId}"]`).first().getByTestId(`interest-${shared.needId}`);
       await expect(box.getByTestId("interest-contact-employer")).toBeVisible({ timeout: 60_000 });
@@ -204,7 +233,7 @@ for (const phone of PHONES) {
       await expect(w.page.locator('[data-testid^="message-text-"]', { hasText: message }), "the message shows in the thread").toBeVisible({
         timeout: 30_000,
       });
-      await w.ctx.close();
+      await w.done();
       await expect
         .poll(
           () =>
@@ -216,8 +245,7 @@ for (const phone of PHONES) {
         .toEqual([message]);
 
       // The company finds the thread in its messages, on its own phone, and answers.
-      const c = await onPhone(browser, phone);
-      await signIn(c.page, BASE, COMPANY);
+      const c = await signedInOnPhone(browser, phone, COMPANY);
       await c.page.goto(`${BASE}/en/dashboard/communication`);
       const row = c.page.getByTestId(`conversation-row-${s.conversationId}`);
       await expect(row, "the thread is in the company's messages").toBeVisible({ timeout: 60_000 });
@@ -230,11 +258,10 @@ for (const phone of PHONES) {
       await c.page.getByTestId("communication-composer-input").fill(answer);
       await c.page.getByRole("button", { name: "Send", exact: true }).tap();
       await expect(c.page.locator('[data-testid^="message-text-"]', { hasText: answer })).toBeVisible({ timeout: 30_000 });
-      await c.ctx.close();
+      await c.done();
 
       // The worker reaches messages through the phone's area sheet (the desktop nav is hidden) and reads it.
-      const w2 = await onPhone(browser, phone);
-      await signIn(w2.page, BASE, worker);
+      const w2 = await signedInOnPhone(browser, phone, worker);
       const sheetItem = w2.page.getByTestId("header-nav-sheet-communication");
       await tapUntil(w2.page.getByTestId("header-nav-sheet-trigger"), sheetItem);
       await sheetItem.tap();
@@ -246,7 +273,7 @@ for (const phone of PHONES) {
         timeout: 30_000,
       });
       await fitsTheScreen(w2.page, "the worker's thread with the answer");
-      await w2.ctx.close();
+      await w2.done();
     });
   });
 }
