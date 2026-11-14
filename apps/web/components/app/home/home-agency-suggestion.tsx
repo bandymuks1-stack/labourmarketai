@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { AgencySuggestionCard } from "@/components/app/home/agency-suggestion-card";
+import { AgencySuggestionAsk } from "@/components/app/home/agency-suggestion-ask";
 import { readAgencySuggestionsForMe } from "@/lib/agency/agency-suggestion";
 
 /**
@@ -19,7 +19,7 @@ export async function HomeAgencySuggestion() {
   const t = await getTranslations("agencySuggestion");
   const agency = first.agencyName;
   return (
-    <AgencySuggestionCard
+    <AgencySuggestionAsk
       companyId={first.companyId}
       consentTextVersion={first.consentTextVersion}
       labels={{

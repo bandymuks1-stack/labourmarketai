@@ -10,7 +10,8 @@ import {
 } from "@/lib/agency/agency-suggestion-actions";
 
 /**
- * A RECRUITMENT AGENCY THE WORKER MAY CHOOSE TO JOIN — never pre-selected,
+ * A RECRUITMENT AGENCY THE WORKER MAY CHOOSE TO JOIN — the once-only ask
+ * pattern of employer-visibility-ask.tsx on the same home: never pre-selected,
  * never blocking anything, gone for good with "not now".
  *
  * Joining is the person's own tick plus one press: they go onto the agency's
@@ -33,7 +34,7 @@ export type AgencySuggestionLabels = {
 const IDLE: JoinSuggestedAgencyState = { status: "idle" };
 const storageKey = (companyId: string) => `lm:agency-suggestion:${companyId}`;
 
-export function AgencySuggestionCard({
+export function AgencySuggestionAsk({
   companyId,
   consentTextVersion,
   labels,
