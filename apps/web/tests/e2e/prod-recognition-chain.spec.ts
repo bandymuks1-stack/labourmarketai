@@ -121,25 +121,6 @@ test.afterAll(async ({ browser }) => {
   }
 });
 
-test("R-3c. what an earlier run left: a signed-off practice day, a recognition, both or neither", async ({ browser }) => {
-  // Read-only. Decides whether R-4…R-6 write or reuse; the two facts are independent.
-  const beta = await as(browser, "owner");
-  const form = await recognitionForm(beta.page);
-  // Offered as evidence = signed off (a current approval) and readable by Beta.
-  signedOffExists = (await form.locator("label", { hasText: PRACTICE_MARK }).getByTestId("recognition-evidence-option").count()) > 0;
-  await beta.close();
-  const learner = await as(browser, "worker2");
-  await learner.page.goto("/lt/dashboard/documents");
-  await expect(learner.page.getByTestId("own-recognitions")).toBeVisible({ timeout: 30_000 });
-  const list = learner.page.getByTestId("own-recognitions-list");
-  recognitionExists = (await list.count()) > 0 && (await list.innerText()).includes(RECOGNITION_KEY);
-  await learner.close();
-  console.info(`[recognition] earlier run left: signed-off practice day=${signedOffExists} recognition=${recognitionExists}`);
-  // A recognition without the evidence it cites would be a broken record, not a state to walk past.
-  if (recognitionExists) expect(signedOffExists, "the recognition's own evidence is still signed off and readable by Beta").toBe(true);
-});
-
-
 test("R-1. Beta declares it trains people", async ({ browser }) => {
   const { page, close } = await as(browser, "owner");
   await page.goto("/lt/dashboard");
@@ -228,6 +209,27 @@ test("R-3b. Beta switches review on for the learner through the audited manual d
   console.info(`[recognition] Beta learner review: ${await row.getAttribute("data-review")}`);
   await close();
 });
+
+test("R-3c. what an earlier run left: a signed-off practice day, a recognition, both or neither", async ({ browser }) => {
+  // Read-only. Decides whether R-4…R-6 write or reuse; the two facts are independent. It runs
+  // AFTER R-1…R-3b: on a first run Beta has no training capability and no learner until those
+  // steps establish them, and the recognition form shows nothing without a learner.
+  const beta = await as(browser, "owner");
+  const form = await recognitionForm(beta.page);
+  // Offered as evidence = signed off (a current approval) and readable by Beta.
+  signedOffExists = (await form.locator("label", { hasText: PRACTICE_MARK }).getByTestId("recognition-evidence-option").count()) > 0;
+  await beta.close();
+  const learner = await as(browser, "worker2");
+  await learner.page.goto("/lt/dashboard/documents");
+  await expect(learner.page.getByTestId("own-recognitions")).toBeVisible({ timeout: 30_000 });
+  const list = learner.page.getByTestId("own-recognitions-list");
+  recognitionExists = (await list.count()) > 0 && (await list.innerText()).includes(RECOGNITION_KEY);
+  await learner.close();
+  console.info(`[recognition] earlier run left: signed-off practice day=${signedOffExists} recognition=${recognitionExists}`);
+  // A recognition without the evidence it cites would be a broken record, not a state to walk past.
+  if (recognitionExists) expect(signedOffExists, "the recognition's own evidence is still signed off and readable by Beta").toBe(true);
+});
+
 
 test("R-4. the learner records a practice day in the Beta learning relationship", async ({ browser }) => {
   if (signedOffExists) {
