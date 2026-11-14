@@ -291,3 +291,40 @@ describe("address-level send guard (concurrency, idempotency)", () => {
     expect(r.refused).toEqual({ address_reserved: 1 });
   });
 });
+
+describe("owner corrections 2026-11-13 — the manual reprocess never breaks an opened link or re-mails an unknown outcome", () => {
+  it("incident 862a91f4: delivery_failed, unclassified, link opened 21 s after creation → never eligible", () => {
+    const incident = row({
+      deliveryStatus: "delivery_failed",
+      failureClass: null,
+      firstOpenedAt: "2026-10-27T08:00:21Z",
+    });
+    const s = select([incident]);
+    expect(s.eligible).toEqual([]);
+    expect(s.excluded).toEqual({ link_opened: 1 });
+  });
+
+  it("an opened link is kept valid even when its mail was never sent", () => {
+    const s = select([row({ deliveryStatus: "not_sent", firstOpenedAt: "2026-10-27T09:00:00Z" })]);
+    expect(s.excluded).toEqual({ link_opened: 1 });
+  });
+
+  it("an UNKNOWN_OUTCOME or unclassified failure waits for reconciliation; PERMANENT is never re-sent", () => {
+    const s = select([
+      row({ deliveryStatus: "delivery_failed", failureClass: "UNKNOWN_OUTCOME" }),
+      row({ deliveryStatus: "delivery_failed", failureClass: null }),
+      row({ deliveryStatus: "delivery_failed", failureClass: "PERMANENT" }),
+    ]);
+    expect(s.eligible).toEqual([]);
+    expect(s.excluded).toEqual({ outcome_unknown: 2, permanent_failure: 1 });
+  });
+
+  it("a CONFIRMED temporary or configuration failure stays eligible for the owner's manual run", () => {
+    const s = select([
+      row({ deliveryStatus: "delivery_failed", failureClass: "TEMPORARY" }),
+      row({ deliveryStatus: "delivery_failed", failureClass: "CONFIGURATION" }),
+      row({ deliveryStatus: "not_sent" }),
+    ]);
+    expect(s.eligible).toHaveLength(3);
+  });
+});

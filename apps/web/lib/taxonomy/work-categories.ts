@@ -34,6 +34,11 @@ export type WorkCategoryKey =
   | "hospitality_food"
   | "care_support"
   | "machinery_operators"
+  | "office_business"
+  | "retail_sales"
+  | "it_digital"
+  | "education_training"
+  | "beauty_personal"
   | "other";
 
 export interface WorkLabel {
@@ -204,6 +209,78 @@ export const WORK_CATEGORIES: readonly WorkCategory[] = [
       { slug: "crane_operator", lt: "Krano operatorius", en: "Crane operator", ru: "Крановщик", nl: "Kraanmachinist", de: "Kranführer", pl: "Operator dźwigu" },
       { slug: "excavator_operator", lt: "Ekskavatoriaus operatorius", en: "Excavator operator", ru: "Экскаваторщик", nl: "Graafmachinist", de: "Baggerfahrer", pl: "Operator koparki" },
       { slug: "heavy_equipment_operator", lt: "Sunkiosios technikos operatorius", en: "Heavy equipment operator", ru: "Оператор спецтехники", nl: "Machinist zwaar materieel", de: "Baumaschinenführer", pl: "Operator maszyn ciężkich" },
+    ],
+  },
+  // Owner P0 2026-11-12 (premium navigation, "every sector, not one trade"):
+  // five sectors the profession catalogue already had people and live ads in
+  // (office, retail, IT, education, beauty) but this list filed under "other".
+  // Slugs and names are the catalogue's own (messages/{locale}/professions.json).
+  {
+    key: "office_business",
+    lt: "Biuras ir verslas",
+    en: "Office & business",
+    ru: "Офис и бизнес",
+    nl: "Kantoor en zakelijk",
+    de: "Büro und Verwaltung",
+    pl: "Biuro i biznes",
+    types: [
+      { slug: "office_administrator", lt: "Biuro administratorius", en: "Office administrator", ru: "Офисный администратор", nl: "Officemanager", de: "Büroadministrator", pl: "Administrator biura" },
+      { slug: "receptionist", lt: "Registratorius", en: "Receptionist", ru: "Администратор ресепшн", nl: "Receptionist", de: "Empfangsmitarbeiter", pl: "Recepcjonista" },
+      { slug: "recruiter", lt: "Personalo atrankos specialistas", en: "Recruiter", ru: "Рекрутер", nl: "Recruiter", de: "Recruiter", pl: "Rekruter" },
+      { slug: "translator", lt: "Vertėjas", en: "Translator", ru: "Переводчик", nl: "Vertaler", de: "Übersetzer", pl: "Tłumacz" },
+      { slug: "call_centre_agent", lt: "Skambučių centro operatorius", en: "Call centre agent", ru: "Оператор колл-центра", nl: "Callcentermedewerker", de: "Callcenter-Agent", pl: "Konsultant call center" },
+      { slug: "customer_service_specialist", lt: "Klientų aptarnavimo specialistas", en: "Customer service specialist", ru: "Специалист по обслуживанию клиентов", nl: "Klantenservicespecialist", de: "Kundenservice-Spezialist", pl: "Specjalista obsługi klienta" },
+    ],
+  },
+  {
+    key: "retail_sales",
+    lt: "Prekyba ir pardavimai",
+    en: "Retail & sales",
+    ru: "Торговля и продажи",
+    nl: "Detailhandel en verkoop",
+    de: "Handel und Verkauf",
+    pl: "Handel i sprzedaż",
+    types: [
+      { slug: "sales_assistant", lt: "Pardavėjas konsultantas", en: "Sales assistant", ru: "Продавец-консультант", nl: "Verkoopmedewerker", de: "Verkäufer", pl: "Sprzedawca" },
+      { slug: "merchandiser", lt: "Prekių išdėliotojas", en: "Merchandiser", ru: "Мерчандайзер", nl: "Merchandiser", de: "Merchandiser", pl: "Merchandiser" },
+    ],
+  },
+  {
+    key: "it_digital",
+    lt: "IT ir skaitmeninės paslaugos",
+    en: "IT & digital",
+    ru: "IT и цифровые услуги",
+    nl: "IT en digitaal",
+    de: "IT und Digitales",
+    pl: "IT i usługi cyfrowe",
+    types: [
+      { slug: "software_developer", lt: "Programuotojas", en: "Software developer", ru: "Программист", nl: "Softwareontwikkelaar", de: "Softwareentwickler", pl: "Programista" },
+    ],
+  },
+  {
+    key: "education_training",
+    lt: "Švietimas ir mokymai",
+    en: "Education & training",
+    ru: "Образование и обучение",
+    nl: "Onderwijs en training",
+    de: "Bildung und Schulung",
+    pl: "Edukacja i szkolenia",
+    types: [
+      { slug: "teacher", lt: "Mokytojas", en: "Teacher", ru: "Преподаватель", nl: "Leraar", de: "Lehrer", pl: "Nauczyciel" },
+    ],
+  },
+  {
+    key: "beauty_personal",
+    lt: "Grožis ir asmens priežiūra",
+    en: "Beauty & personal care",
+    ru: "Красота и уход",
+    nl: "Schoonheid en verzorging",
+    de: "Schönheit und Körperpflege",
+    pl: "Uroda i pielęgnacja",
+    types: [
+      { slug: "hairdresser", lt: "Kirpėjas", en: "Hairdresser", ru: "Парикмахер", nl: "Kapper", de: "Friseur", pl: "Fryzjer" },
+      { slug: "barber", lt: "Barberis", en: "Barber", ru: "Барбер", nl: "Barbier", de: "Barbier", pl: "Barber" },
+      { slug: "nail_technician", lt: "Manikiūrininkas", en: "Nail technician", ru: "Мастер маникюра", nl: "Nagelstylist", de: "Nageldesigner", pl: "Stylista paznokci" },
     ],
   },
   {

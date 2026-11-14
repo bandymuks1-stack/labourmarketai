@@ -110,49 +110,55 @@ describe("the landing has one arm", () => {
      * `#market` anchor `site-nav.tsx` links to — so the withdrawal cost the
      * visitor no figures and no navigation.
      */
-    for (const original of [
-      "PublicEntry",
-      "ProductChainBand",
-      "MarketProofBand",
-      "TrustBand",
-      "StartingContextsBand",
-      "LandingOpenJobsBand",
-    ]) {
-      expect(focus).toContain(
-        `import { ${original} } from "@/components/marketing/`,
-      );
+    // LANDING V3 (owner-approved structure, 2026-11-13) SUPERSEDES the
+    // window-11 list of bands. The owner looked at the live page on a phone
+    // — eleven screens, four role choices, two chains, numbers twice — and
+    // approved three blocks instead of ten. The product chain, the trust
+    // band, the starting contexts, the two-sides lifecycle and the closing
+    // band left the PAGE (their components stay in the repository); the
+    // market figures, the real adverts and the sentence entry stayed, in
+    // their one place each. What is pinned now is that V3 composition.
+    for (const [symbol, from] of [
+      ["PublicEntry", "@/components/marketing/public-entry"],
+      ["LandingOpenJobsBand", "@/components/marketing/landing-open-jobs-band"],
+      ["LandingIntentChoice", "@/components/marketing/landing-intent-choice"],
+    ] as const) {
+      expect(focus).toContain(`import { ${symbol} } from "${from}"`);
     }
     expect(focus).toContain(
-      'import { LandingPrimaryActions, LandingClosingBand } from "@/components/marketing/landing-primary-actions"',
+      'import { LandingHow, LandingMarketFacts, LandingNeedPath } from "@/components/marketing/landing-v3"',
     );
+    // One of each, in the approved order: goals → sentence → request →
+    // market → how it works.
+    const at = (tag: string) => code(focus).indexOf(`<${tag}`);
+    const order = ["LandingIntentChoice", "PublicEntry", "LandingNeedPath", "LandingMarketFacts", "LandingHow"];
+    for (const tag of order) expect(code(focus).split(`<${tag}`).length - 1, tag).toBe(1);
+    expect(order.map(at)).toEqual([...order.map(at)].sort((a, b) => a - b));
+    // The sections the owner removed are not mounted again by accident.
+    for (const gone of ["ProductChainBand", "TrustBand", "StartingContextsBand", "TwoSidesSection", "LandingClosingBand", "MarketProofBand"]) {
+      expect(code(focus), gone).not.toContain(`<${gone}`);
+    }
     // Code only — the file's own history may NAME the retired hero in prose.
     expect(code(focus)).not.toContain("HeroLiveDemo");
-    const order = [
-      "LandingPrimaryActions",
-      "PublicEntry",
-      "MarketProofBand",
-      "LandingOpenJobsBand",
-      "StartingContextsBand",
-      "ProductChainBand",
-      "TrustBand",
-      "LandingClosingBand",
-    ].map((c) => code(focus).search(new RegExp(`<${c}[\\s/>]`)));
-    expect(order.every((i) => i > 0)).toBe(true);
-    expect([...order].sort((a, b) => a - b)).toEqual(order);
     // The next step is in the hero, BEFORE the entry — not inside it.
-    expect(code(focus).match(/<LandingPrimaryActions[\s/>]/g) ?? []).toHaveLength(1);
+    expect(code(focus).match(/<LandingIntentChoice[\s/>]/g) ?? []).toHaveLength(1);
+    expect(code(focus).match(/<LandingPrimaryActions[\s/>]/g) ?? []).toHaveLength(0);
     // Its chrome is the (marketing) layout's, reproduced — not approximated.
     expect(focus).toContain("<AmbientGlow />");
-    expect(focus).toContain("<SiteNav />");
-    expect(focus).toContain("<SiteFooter />");
+    // The landing shows the six goals as cards, so its header bar does not
+    // repeat them (owner gate 2026-11-12: no duplicated main menu).
+    expect(focus).toContain("<SiteNav goalsOnPage />");
+    // The home page footer carries only the necessary legal links (V3).
+    expect(focus).toContain("<SiteFooter compact />");
     expect(focus).toContain("<MarketingFunnelBeacon />");
     expect(focus).toContain('id="main-content"');
-    expect(focus).toContain("MARKETING_CLIENT_MESSAGE_ROOTS");
-    // The historical wrapper + the #how-it-works anchor it carried.
+    // The landing ships its own, smaller client pick (2026-11-12).
+    expect(focus).toContain("pickLandingMessages(await getMessages())");
+    // The wrapper; its bottom padding shrank with V3's shorter page.
     expect(focus).toContain(
-      'className="mx-auto max-w-container px-6 py-14 sm:px-12"',
+      'className="mx-auto max-w-container px-4 pb-10 pt-5 sm:px-12 sm:pt-10"',
     );
-    expect(focus).toContain('id="how-it-works"');
-    expect(focus).toContain("provenance: 7179882");
+    // The #how-it-works anchor the header links to is on the compact block.
+    expect(focus).toMatch(/<LandingHow\s*\/>/);
   });
 });

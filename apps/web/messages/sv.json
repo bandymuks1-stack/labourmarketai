@@ -129,7 +129,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "[EN] Continue with LinkedIn",
-      "continueWithFacebook": "[EN] Continue with Facebook"
+      "continueWithFacebook": "[EN] Continue with Facebook",
+      "inAppBrowser": "Du är i en apps inbyggda webbläsare, där inloggning med Google ofta inte fungerar. Öppna sidan i telefonens webbläsare (Safari eller Chrome), eller använd e-post och lösenord nedan."
     },
     "callback": {
       "error_body": "[EN] This link is invalid or expired. Please try again.",
@@ -314,7 +315,9 @@
       "oauth": {
         "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
         "link_expired": "Den här bekräftelselänken har gått ut eller redan använts. Har du redan bekräftat din e-post, logga bara in. Annars kan du begära en ny länk nedan.",
-        "confirmed_sign_in": "Din e-postadress är bekräftad. Registreringen påbörjades på en annan enhet, så logga in här för att fortsätta."
+        "confirmed_sign_in": "Din e-postadress är bekräftad. Registreringen påbörjades på en annan enhet, så logga in här för att fortsätta.",
+        "confirm_link_opened": "Den här bekräftelselänken har öppnats. Din e-postadress är med största sannolikhet redan bekräftad, så prova att logga in. Fungerar det inte kan du begära en ny länk nedan.",
+        "provider_error": "Inloggningstjänsten kunde inte slutföra den här inloggningen, och ett nytt försök slutar troligen likadant. Logga in på det sätt du först registrerade dig med, eller med e-post och lösenord."
       },
       "emailNotConfirmed": "Din e-postadress är inte bekräftad ännu. Öppna bekräftelselänken vi skickade, eller begär en ny nedan."
     },
@@ -417,6 +420,7 @@
       "country_search_empty": "Inget land hittades. Prova ett annat namn.",
       "error_country_required": "Välj ett land.",
       "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
+      "role_step_hint": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Vad är ditt yrke eller din arbetslivserfarenhet?",
       "profession_placeholder": "Skriv ett yrke eller arbetsområde",
       "profession_add": "Lägg till",
@@ -732,7 +736,6 @@
     "legalGroup": "[EN] Legal",
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
-    "rexora": "Byggs tillsammans: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
@@ -890,7 +893,8 @@
     "themeToLight": "Ljust tema",
     "how": "Så fungerar det",
     "menuOpen": "Meny",
-    "menuClose": "Stäng meny"
+    "menuClose": "Stäng meny",
+    "market": "Arbetsmarknad"
   },
   "pages": {
     "agencies": {
@@ -1774,6 +1778,10 @@
       "title": "Det gick inte att öppna konversationen",
       "body": "Du kanske inte har behörighet att meddela den här personen, eller så är personen inte längre tillgänglig. Inget skickades."
     },
+    "noLongerAvailable": {
+      "title": "Den här konversationen är inte längre tillgänglig",
+      "body": "Du deltar inte längre i den, så dess meddelanden visas inte."
+    },
     "originalLanguage": "[EN] Original ({lang})",
     "priority": {
       "awaitingYou": "[EN] Awaiting your reply",
@@ -2082,6 +2090,16 @@
         "into": "Raden slogs ihop med",
         "canonical": "det behållna projektet",
         "includes": "{count, plural, one {Omfattar # sammanslagen projektrad — dess poster visas här.} other {Omfattar # sammanslagna projektrader — deras poster visas här.}}"
+      },
+      "teams": {
+        "title": "Team i det här projektet",
+        "members": "{n, plural, one {# person} other {# personer}}",
+        "personTeam": "Team: {team}",
+        "unnamed": "Team utan namn",
+        "unnamedMember": "Medlem",
+        "noMembers": "Inga medlemmar just nu.",
+        "unavailable": "Teamen kunde inte läsas in. Försök igen.",
+        "manage": "Ändra team"
       }
     },
     "workerView": {
@@ -2969,6 +2987,7 @@
     "servicesTitle": "Vad personen kan",
     "servicesEmpty": "Inget erbjudet ännu",
     "servicesUnavailable": "Kunde inte ladda erbjudna tjänster",
+    "sharedAfterWork": "Tjänster, arbetsfoton och registrerat arbete visas när ni arbetar tillsammans.",
     "serviceRemote": "På distans",
     "photoAlt": "Foto på utfört arbete",
     "historyTitle": "Importerad historik",
@@ -4827,6 +4846,42 @@
         "goods": "Varor"
       },
       "lasting": "Din erfarenhet och dina möjligheter förblir tillgängliga — när du byter jobb, projekt eller land."
+    },
+    "v3": {
+      "lead": "För arbetstagare, arbetsgivare och tjänsteleverantörer i alla yrken och branscher. Registrering och grundläggande publicering av ett behov är gratis.",
+      "moreChoices": "Fler alternativ",
+      "or": "eller beskriv det med egna ord",
+      "needFree": "Du kan skicka en förfrågan utan att registrera dig. Det är kostnadsfritt att skicka den; villkor och pris för tjänsterna avtalas separat.",
+      "market": {
+        "title": "Platsannonser på marknaden",
+        "line": "{adverts} aktiva platsannonser från externa källor. I annonserna anges {employers} olika arbetsgivarnamn.",
+        "source": "Annonserna är insamlade från offentliga externa jobbkällor. Det är inte antalet arbetsgivare eller kunder som är registrerade hos LabourMarket.ai. Annonserna uppdaterades senast: {date}.",
+        "none": "Marknadsdata är inte tillgängliga just nu.",
+        "search": "Sök platsannonser"
+      },
+      "adverts": {
+        "title": "Några aktiva annonser",
+        "sub": "Du kan bläddra bland annonserna utan konto. Logga in för att se arbetsgivaren, platsen, hela beskrivningen och hur du ansöker."
+      },
+      "how": {
+        "title": "Så fungerar det",
+        "s1": {
+          "title": "Hitta och kom överens",
+          "body": "Hitta arbete, medarbetare eller tjänster och hantera erbjudanden och överenskommelser på plattformen."
+        },
+        "s2": {
+          "title": "Registrera arbetet",
+          "body": "Du kan registrera utfört arbete i arbetsjournalen."
+        },
+        "s3": {
+          "title": "Bekräfta",
+          "body": "En chef i arbetsgivarens organisation bekräftar registreringarna. En beställare kan godkänna arbete som har lämnats in till beställaren; det registreras separat. Bekräftat arbete blir ett bevis på din erfarenhet."
+        },
+        "s4": {
+          "title": "Era uppgifter och integritet",
+          "body": "Assistenten ger förslag; ni fattar besluten. Ni avgör om arbetsgivare kan hitta er och om era kontaktuppgifter delas. Arbetsposter är synliga för den organisation ni arbetar för."
+        }
+      }
     }
   },
   "workspace": {
@@ -5334,7 +5389,7 @@
     },
     "language": {
       "translatedFrom": "[EN] Translated from {language}",
-      "originalIn": "[EN] Advertisement language: {language}",
+      "originalIn": "Annonsens språk: {language}",
       "showOriginal": "[EN] Show original",
       "hideOriginal": "[EN] Hide original",
       "machineNote": "[EN] Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
@@ -7928,10 +7983,10 @@
   },
   "consent": {
     "banner": {
-      "text": "Vi mäter sidanvändning och vilken kampanj som förde dig hit bara om du tillåter det.",
+      "text": "Mätdata som lagras i er webbläsare och kampanjinformation använder vi endast med ert samtycke.",
       "accept": "Tillåt mätning",
       "refuse": "Avböj",
-      "more": "Mer",
+      "more": "Mer om cookies",
       "label": "Val om användningsmätning"
     },
     "control": {
@@ -7942,5 +7997,82 @@
       "allow": "Tillåt",
       "refuse": "Avböj"
     }
+  },
+  "siteNav": {
+    "education": "För utbildningsanordnare",
+    "signUp": "Registrera dig",
+    "trigger": "Huvudmål",
+    "account": "För inloggade användare",
+    "intents": {
+      "work": {
+        "title": "Jag söker arbete",
+        "description": "Sök arbete och presentera din erfarenhet.",
+        "short": "Hitta arbete"
+      },
+      "workers": {
+        "title": "Jag söker medarbetare",
+        "description": "Ange vilka medarbetare du behöver, var och när.",
+        "short": "Hitta medarbetare"
+      },
+      "services": {
+        "title": "Jag erbjuder tjänster",
+        "description": "Presentera dina tjänster, hitta uppdrag och svara på förfrågningar.",
+        "short": "Erbjud tjänster"
+      },
+      "partners": {
+        "title": "Jag söker partner",
+        "description": "Hitta partner och upprätthåll samarbetet.",
+        "short": "Hitta partner"
+      },
+      "agencies": {
+        "title": "För bemanningsföretag",
+        "description": "Hantera byråns kunder och kandidaterbjudanden.",
+        "short": "För bemanning"
+      },
+      "contractors": {
+        "short": "Jag söker tjänster eller utförare",
+        "title": "Jag söker tjänster eller utförare",
+        "description": "Beskriv vilken tjänst eller utförare du behöver."
+      }
+    },
+    "links": {
+      "jobs": "Platsannonser",
+      "workOpportunities": "Jobbmöjligheter",
+      "createCv": "Skapa ett gratis CV",
+      "workAbroad": "Arbeta utomlands",
+      "forWorkers": "Så fungerar det för arbetstagare",
+      "companyNeed": "Beskriv ditt behov",
+      "forCompanies": "Så fungerar det för företag",
+      "labourMarket": "Arbetsmarknad per land",
+      "myServices": "Dina tjänster",
+      "serviceRequests": "Tjänsteförfrågningar",
+      "marketListings": "Marknadsannonser",
+      "commercial": "Offerter och kontrakt",
+      "network": "Ditt nätverk",
+      "partnerWithUs": "Bli partner",
+      "forAgencies": "Så fungerar det för bemanningsföretag",
+      "setUpAgency": "Registrera ditt bemanningsföretag",
+      "b2bEnquiry": "Förfrågan om företagstjänster (B2B)",
+      "projectEnquiry": "Förfrågan om individuellt projekt"
+    },
+    "assistant": "Fråga assistenten",
+    "start": {
+      "searchLabel": "Sök platsannonser",
+      "searchPlaceholder": "Jobbtitel eller sökord",
+      "searchSubmit": "Sök",
+      "viewAll": "Alla jobb"
+    },
+    "nav": {
+      "heading": "Vad vill du göra?",
+      "swipe": "Svep",
+      "close": "Stäng",
+      "functions": "Åtgärder",
+      "professions": "Yrken",
+      "opensNow": "Inget konto krävs",
+      "signInWhenOpen": "Inloggning krävs",
+      "allSectors": "Alla branscher",
+      "fullList": "Hela listan"
+    },
+    "more": "Mer"
   }
 }
