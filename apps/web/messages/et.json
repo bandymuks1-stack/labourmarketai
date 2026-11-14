@@ -2274,6 +2274,7 @@
         "accommodation": "[EN] Accommodation",
         "transport": "[EN] Transport",
         "tool": "[EN] Required tools",
+        "opportunityType": "Võimaluse tüüp",
         "activeCount": "[EN] Active filters: {count}",
         "reset": "[EN] Reset filters"
       },
@@ -2572,6 +2573,9 @@
       "skillCount": "{matched} / {total} nõutud oskust",
       "nameHidden": "Nimi ja kontaktandmed ilmuvad alles siis, kui inimene seda lubab.",
       "appliedToYou": "Esitas sellele vajadusele avalduse — nimi ja foto tulevad avaldusega. Telefon ja e-post jäävad peidetuks."
+    },
+    "filters": {
+      "noMatchesCountry": "Nähtavas pakkumises pole veel kedagi riigis {country}. Näita kõiki või laienda vajadust."
     }
   },
   "waze": {

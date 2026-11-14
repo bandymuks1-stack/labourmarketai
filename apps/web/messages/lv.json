@@ -2274,6 +2274,7 @@
         "accommodation": "[EN] Accommodation",
         "transport": "[EN] Transport",
         "tool": "[EN] Required tools",
+        "opportunityType": "Iespējas veids",
         "activeCount": "[EN] Active filters: {count}",
         "reset": "[EN] Reset filters"
       },
@@ -2572,6 +2573,9 @@
       "skillCount": "{matched} no {total} nepieciešamajām prasmēm",
       "nameHidden": "Vārds un kontaktinformācija parādās tikai tad, kad persona to atļauj.",
       "appliedToYou": "Iesniedza pieteikumu šai vajadzībai — vārds un foto nāk ar pieteikumu. Tālrunis un e-pasts paliek paslēpti."
+    },
+    "filters": {
+      "noMatchesCountry": "Redzamajā piedāvājumā vēl nav neviena valstī {country}. Rādīt visus vai paplašināt vajadzību."
     }
   },
   "waze": {

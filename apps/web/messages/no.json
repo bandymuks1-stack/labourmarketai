@@ -2274,6 +2274,7 @@
         "accommodation": "[EN] Accommodation",
         "transport": "[EN] Transport",
         "tool": "[EN] Required tools",
+        "opportunityType": "Type mulighet",
         "activeCount": "[EN] Active filters: {count}",
         "reset": "[EN] Reset filters"
       },
@@ -2572,6 +2573,9 @@
       "skillCount": "{matched} av {total} nødvendige ferdigheter",
       "nameHidden": "Navn og kontaktopplysninger vises først når personen tillater det.",
       "appliedToYou": "Har søkt på dette behovet — navn og bilde følger med søknaden. Telefon og e-post forblir skjult."
+    },
+    "filters": {
+      "noMatchesCountry": "Ingen i det synlige tilbudet er i {country} ennå. Vis alle, eller utvid behovet."
     }
   },
   "waze": {
