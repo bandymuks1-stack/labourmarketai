@@ -7,7 +7,7 @@
  * this script never invents a status, it only reads the register rows, the Lithuanian function map,
  * the journeys table and the fetched GitHub/production facts, and adds the coordinator's narrative.
  *
- *   node .github/scripts/status-report-fetch.mjs --out /tmp/sr.json
+ *   node .github/scripts/status-report-fetch.mjs > /tmp/sr.json
  *   node .github/scripts/status-report.mjs --data /tmp/sr.json --narrative <coordinator.md> [--out <file>]
  *
  * The narrative file holds the judgement parts, each after a marker line `<!-- section:NAME -->`:
@@ -317,7 +317,11 @@ try {
 }
 
 // ---------------------------------------------------------------- render
-const esc = (s) => String(s ?? "").replace(/\|/g, "\\|").replace(/\n/g, " ");
+const esc = (s) =>
+  String(s ?? "")
+    .replace(/\\/g, "\\\\")
+    .replace(/\|/g, "\\|")
+    .replace(/\n/g, " ");
 const vilnius = (iso) =>
   new Date(iso).toLocaleString("lt-LT", { timeZone: "Europe/Vilnius", dateStyle: "short", timeStyle: "short" });
 const countStates = (list) => {

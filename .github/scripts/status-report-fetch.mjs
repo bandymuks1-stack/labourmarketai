@@ -7,10 +7,11 @@
  * Writes one JSON file for status-report.mjs. No database, no production writes, no secrets
  * printed (gh uses its own token; nothing is echoed).
  *
- *   node .github/scripts/status-report-fetch.mjs --out <file.json> [--since-hours 12]
+ *   node .github/scripts/status-report-fetch.mjs [--since-hours 12] > <file.json>
+ *
+ * The JSON goes to stdout (the caller redirects it); progress goes to stderr. The script itself writes no file.
  */
 import { execFile } from "node:child_process";
-import { writeFileSync } from "node:fs";
 import { promisify } from "node:util";
 
 const run = promisify(execFile);
@@ -22,12 +23,7 @@ const arg = (name, fallback) => {
   const i = args.indexOf(name);
   return i >= 0 ? args[i + 1] : fallback;
 };
-const OUT = arg("--out");
 const SINCE_HOURS = Number(arg("--since-hours", "12"));
-if (!OUT) {
-  console.error("usage: status-report-fetch.mjs --out <file.json> [--since-hours 12]");
-  process.exit(2);
-}
 
 async function ghOnce(path) {
   const { stdout } = await run("gh", ["api", "-X", "GET", path], { maxBuffer: 256 * 1024 * 1024 });
@@ -162,8 +158,7 @@ try {
   health = { ok: false, error: String(e?.message ?? e).slice(0, 120) };
 }
 
-writeFileSync(
-  OUT,
-  JSON.stringify({ fetchedAt: new Date().toISOString(), sinceIso, health, deploys, walks, merged, prs }, null, 1),
+process.stdout.write(
+  JSON.stringify({ fetchedAt: new Date().toISOString(), sinceIso, health, deploys, walks, merged, prs }, null, 1) + "\n",
 );
-console.log(`open PRs ${prs.length}, merged ${merged.length}, deploys ${deploys.length}, walks ${walks.length}`);
+console.error(`open PRs ${prs.length}, merged ${merged.length}, deploys ${deploys.length}, walks ${walks.length}`);
