@@ -82,3 +82,27 @@ describe("the board's discovery filter can see the declared type", () => {
     expect(at).toBeLessThan(loader.indexOf("const need: OpportunityNeed = {"));
   });
 });
+
+describe("the board offers the type filter, with a label every catalog has", () => {
+  const page = read("apps/web/app/[locale]/dashboard/opportunities/page.tsx");
+
+  it("the type is one of the filter groups on the page", () => {
+    // It used to work only for someone who typed `?opportunityType=` by hand.
+    expect(page).toContain('{ dim: "opportunityType", values: facets.opportunityTypes }');
+  });
+
+  it("its heading is read from the catalogue that has it in every locale", () => {
+    expect(page).toMatch(/dim === "opportunityType"\s+\? sd\("opportunityTypeLabel"\)/);
+    // No direct read of a discovery.filters key by dimension is left: that
+    // namespace has no opportunityType entry and printed the raw key.
+    expect(page).not.toMatch(/t\(`discovery\.filters\.\$\{(g\.)?dim\}` as never\)\}/);
+    for (const locale of ["en", "lt", "ru", "nl", "de", "pl", "sv", "da", "no", "et", "lv"]) {
+      const m = JSON.parse(read(`apps/web/messages/${locale}.json`)) as {
+        structuredDemand?: { opportunityTypeLabel?: string; opportunityType?: Record<string, string> };
+      };
+      expect(m.structuredDemand?.opportunityTypeLabel, locale).toBeTruthy();
+      expect(m.structuredDemand?.opportunityType?.internship, locale).toBeTruthy();
+      expect(m.structuredDemand?.opportunityType?.apprenticeship, locale).toBeTruthy();
+    }
+  });
+});
