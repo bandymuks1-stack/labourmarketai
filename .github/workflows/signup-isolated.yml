@@ -2,7 +2,7 @@ name: Signup Isolated (local Supabase)
 
 # SELF-SERVE SIGN-UP, end to end, against a throwaway LOCAL Supabase stack that
 # lives and dies inside this job (apps/web/tests/e2e/signup-isolated.spec.ts):
-# a worker, a company and an agency each fill the real sign-up form, onboard,
+# a worker, a student, a company and an agency each fill the real sign-up form, onboard,
 # and reach their first surface; the stored rows are checked. The same stack
 # then walks agency roles and permissions (agency-roles-isolated.spec.ts):
 # invite by link, a limited governance seat, refusals, cross-org isolation.
@@ -23,9 +23,19 @@ on:
     paths:
       - ".github/workflows/signup-isolated.yml"
       - "apps/web/tests/e2e/signup-isolated.spec.ts"
+      - "apps/web/lib/onboarding/**"
+      - "apps/web/components/app/onboarding-wizard.tsx"
+      - "apps/web/components/app/worker-education-section.tsx"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
       - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
       - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
+      - "apps/web/tests/e2e/teams-projects-isolated.spec.ts"
+      - "apps/web/app/*/dashboard/projects/**"
+      - "apps/web/components/app/team-*.tsx"
+      - "apps/web/components/app/project-team-assignments.tsx"
+      - "apps/web/lib/projects/project-page-teams.ts"
+      - "apps/web/lib/projects/team-assignment*"
+      - "apps/web/lib/company/team-brigade*"
       - "apps/web/lib/journal/entry-skill-retraction.ts"
       - "apps/web/lib/journal/journal-entry-skills-actions.ts"
       - "apps/web/lib/journal/skill-pipeline-actions.ts"
@@ -93,7 +103,7 @@ jobs:
       # Web A walks, the role journeys, and the journal -> skills -> Living CV
       # -> matching -> dispute chain (skills-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.

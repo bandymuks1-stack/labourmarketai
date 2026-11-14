@@ -17,7 +17,12 @@ import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibilit
 // Real two-subject bridge (issue #859): candidates a connected agency proposed
 // for THIS demand (which the client owns) — reviewed with the SAME canonical
 // controls below, keyed on (requestId, workerId).
-import { listOfferedCandidatesForRequest, readOfferBookingStatuses } from "@/lib/agency/bridge-read";
+import {
+  countOpenCandidateOffersByRequest,
+  listOfferedCandidatesForRequest,
+  readOfferBookingStatuses,
+} from "@/lib/agency/bridge-read";
+import { mostOfferedOpenRequest } from "@/lib/agency/bridge-model";
 import { TeamOffersReceived } from "@/components/app/team-offers-received";
 import { loadTeamOffersForDemand, countOpenTeamOffersByDemand } from "@/lib/company/team-offer";
 import { listManagedProjects } from "@/lib/projects/projects";
@@ -192,7 +197,18 @@ export default async function CompanyScoutingPage({
    */
   // A brigade / team that OFFERED ITSELF waits for this company's own answer
   // first — an organization's offer outranks a worker's interest signal.
-  const teamOffersWaiting = await countOpenTeamOffersByDemand(demands.map((d) => d.id));
+  // An agency's offered candidate waits the same way. The bell's link carries
+  // no `?request=` (its href is per signal type), so without this the page
+  // opened whichever need the rules below picked and the offer the bell
+  // announced was nowhere on it.
+  const [teamOffersWaiting, agencyOffersWaiting] = await Promise.all([
+    countOpenTeamOffersByDemand(demands.map((d) => d.id)),
+    countOpenCandidateOffersByRequest(employerContext.companyId),
+  ]);
+  const mostAgencyOffered = mostOfferedOpenRequest(
+    agencyOffersWaiting,
+    demands.filter((d) => d.status !== "closed").map((d) => d.id),
+  );
   const mostTeamOffered = [...teamOffersWaiting.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0];
   const mostAwaited = [...pendingInterest.entries()]
@@ -201,6 +217,7 @@ export default async function CompanyScoutingPage({
   const selected =
     request ??
     mostTeamOffered ??
+    mostAgencyOffered ??
     mostAwaited ??
     demands.find((d) => d.structured)?.id ??
     demands[0]?.id ??
@@ -1074,7 +1091,16 @@ export default async function CompanyScoutingPage({
                 {/* The client's decision on THIS candidate (agency first value):
                     accept proposes the canonical booking to the worker, decline
                     closes the offer. Renders only while the offer is open. */}
-                {oc.offerStatus === "offered" ? (
+                {oc.offerStatus === "offered" && !needOpen ? (
+                  /* A closed need takes no decision: the database refuses it.
+                     The offer is still open on the agency's side, so the card
+                     says why there is no control instead of offering one
+                     that fails. */
+                  <p className="text-meta text-text-muted" data-testid={`scout-offered-need-closed-${oc.offerId}`}>
+                    {tOffered("decision.closed")}
+                  </p>
+                ) : null}
+                {oc.offerStatus === "offered" && needOpen ? (
                   <OfferDecisionButtons
                     offerId={oc.offerId}
                     labels={{
@@ -1085,6 +1111,8 @@ export default async function CompanyScoutingPage({
                     }}
                   />
                 ) : null}
+                {/* Contact, dates and shortlist are for an OPEN need only. */}
+                {needOpen ? (
                 <div className="flex flex-col gap-2">
                   {/* SAME rule as the candidate card: the server gate needs the
                       worker on THIS company's shortlist. An offered person who
@@ -1147,6 +1175,7 @@ export default async function CompanyScoutingPage({
                     }}
                   />
                 </div>
+                ) : null}
               </li>
             ))}
           </ul>
@@ -1452,7 +1481,10 @@ export default async function CompanyScoutingPage({
                 {/* Company acknowledgement of a REAL worker interest signal
                     (PR7) — internal record only; never rendered without an
                     actual signal, nothing is sent anywhere. */}
-                {!actsForClient && result.interestByWorker[c.workerId] ? (
+                {/* Not on a closed need: its people are history (the interest
+                    badge above still says they raised a hand), and a control
+                    that changes the record of a closed need is not offered. */}
+                {needOpen && !actsForClient && result.interestByWorker[c.workerId] ? (
                   <CompanyInterestAck
                     locale={locale}
                     requestId={result.demand.id}

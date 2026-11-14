@@ -220,6 +220,12 @@ export default async function PersonPage({
   // Permission is the database's: `engagement_contexts` select RLS returns
   // only the engagements this viewer is entitled to (their own, or an
   // organization they manage). Nothing is loosened to render it.
+  // A person found through the visibility consent comes back with NO profile
+  // id (see above), so their services, photos and recorded work are not read
+  // at all. An unread record is not an empty one (SEP-7, SEP-8): the three
+  // sections are withheld and one sentence says when they appear, instead of
+  // "Nothing offered yet" / "No recorded work yet" about a record never read.
+  const recordReadable = Boolean(worker.profile_id);
   const recordedWork = await readRecordedWorkFor(
     (worker.profile_id as string | null) ?? "",
   );
@@ -449,6 +455,7 @@ export default async function PersonPage({
           Only ACTIVE offerings: the table's own discovery policy publishes
           those and withholds drafts, so the filter matches the permission
           rather than widening past it. */}
+      {recordReadable ? (
       <section className="flex flex-col gap-3" data-testid="person-services">
         <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <Hammer className="h-3.5 w-3.5" aria-hidden />
@@ -516,12 +523,20 @@ export default async function PersonPage({
           </ul>
         )}
       </section>
+      ) : (
+        <Card variant="muted" compact>
+          <p className="text-sm text-text-secondary" data-testid="person-shared-after-work">
+            {t("sharedAfterWork")}
+          </p>
+        </Card>
+      )}
 
       {/* REAL WORK — photographs of work actually done, from the SAME journal
           evidence store the author's own gallery reads. No portfolio model, no
           second upload path, and no journal text: this page selects no private
           narrative, and a photo of a finished weld is not the sentence the
           person wrote about their day. */}
+      {recordReadable ? (
       <section className="flex flex-col gap-3" data-testid="person-photos">
         <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <Images className="h-3.5 w-3.5" aria-hidden />
@@ -572,6 +587,7 @@ export default async function PersonPage({
           </>
         )}
       </section>
+      ) : null}
 
       {/* WHAT THEIR RECORDED WORK ADDS UP TO — in this organization's own
           records. Hours, kinds of work, the skills the hours reach and what
@@ -644,6 +660,7 @@ export default async function PersonPage({
           is what they did, and the page carried none of it. The rows come from
           the SAME `engagement_contexts` spine the person's own card, CV and
           profile read — one history, not a fourth variant of it. */}
+      {recordReadable ? (
       <section className="flex flex-col gap-3" data-testid="person-work">
         <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <History className="h-3.5 w-3.5" aria-hidden />
@@ -706,6 +723,7 @@ export default async function PersonPage({
           {t("workScopeNote")}
         </p>
       </section>
+      ) : null}
 
       {/* WHAT THIS ORGANIZATION IMPORTED ABOUT THEM. The page read no
           imported history at all (2026-09-20): the ONE evidence read, through

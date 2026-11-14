@@ -169,6 +169,13 @@ describe("no new invitation system", () => {
   // accept/decline RPCs. Admitted only under the structural assertions
   // below, so a real invitation model could never enter through this door.
   const ACCEPTANCE_LEDGER = "invitation_acceptances";
+  // 2026-11-13 (owner P0 invitation delivery reliability, #3318): `invitation_delivery_attempts_v1`
+  // matches the name shape but is NOT an invitation system either: it is the append-only SEND LOG
+  // of the canonical token system — one row per transport attempt of ONE existing invitation, with
+  // reason / SMTP codes only. No token, no addressee, no target, no expiry; RLS on with no policy
+  // (service_role only); written only by record_invitation_delivery_attempt_v1. Admitted only under
+  // the structural assertions below.
+  const DELIVERY_LOG = "invitation_delivery_attempts_v1";
 
   it("invitation-shaped tables are the known three + the acceptance ledger", () => {
     expect(
@@ -182,8 +189,24 @@ describe("no new invitation system", () => {
       "agency_worker_invitations",
       "company_worker_invitations",
       ACCEPTANCE_LEDGER,
+      DELIVERY_LOG,
       "invitations",
     ]);
+  });
+
+  it("the delivery log is a send log, not an invitation", () => {
+    const sql =
+      MIGRATIONS.find((m) => m.name === "20261113190000_invitation_delivery_attempts_v1.sql")?.code ?? "";
+    const ddl = /create table if not exists public\.invitation_delivery_attempts_v1 \(([\s\S]*?)\n\);/.exec(sql)?.[1] ?? "";
+    expect(ddl.length, "the delivery log DDL must be present").toBeGreaterThan(0);
+    expect(ddl).toMatch(/invitation_id\s+uuid not null references public\.invitations\(id\)/);
+    for (const forbidden of ["token", "email", "address", "organization_id", "project_id", "target_request_id", "expires_at", "profile_id"]) {
+      expect(ddl, `${DELIVERY_LOG} must not carry ${forbidden}`).not.toContain(forbidden);
+    }
+    // No policy at all (service_role only) and never an UPDATE / DELETE grant.
+    expect(sql).not.toMatch(/create policy [^;]* on public\.invitation_delivery_attempts_v1/i);
+    expect(sql).not.toMatch(/grant [^;]*(update|delete)[^;]* on (table )?public\.invitation_delivery_attempts_v1/i);
+    expect(sql).toMatch(/alter table public\.invitation_delivery_attempts_v1 enable row level security/i);
   });
 
   it("the acceptance ledger is a ledger, not an invitation", () => {
