@@ -1099,6 +1099,86 @@ export const SCOPED_OWNER_WAIVERS = [
     owner:
       "Owner decision 2026-09-30, in chat — selected 'Scoped owner waiver #2026 (Recommended)' for the Journal photo viewer modal (scope: #2026 / journal-photo-viewer.tsx only).",
   },
+
+  {
+    id: "public-audience-pages-education-service-providers",
+    axioms: ["A-01"],
+    /**
+     * PUBLIC AUDIENCE PAGES — `/for-education` and `/for-service-providers`.
+     *
+     * OWNER APPROVAL, 2026-11-13, verbatim (Lithuanian, the owner's own words):
+     *   "Tvirtinu A-01 išimtį tik šiems LabourMarket.ai viešiesiems puslapiams:
+     *    - "/for-education" - "/for-service-providers"
+     *    PR #3307, dabartinis head "ec0681eb3"."
+     *   "Leidžiu į "owner-waivers.mjs" įrašyti vieną aiškiai apribotą išimtį,
+     *    apimančią tik šiuos du maršrutus, 12 nurodytų radinių ir A-01 aksiomą."
+     *   "A-01 IŠIMTIS PATVIRTINTA."
+     * and the conditions attached, equally binding:
+     *   1. it must not weaken the product gate or any other safety check;
+     *   2. it holds for no other page and no other finding;
+     *   3. the full CI, the tests and the production build run after the change;
+     *   4. any other error that remains is NOT worked around;
+     *   5. the launch register (#3265) records the reason, scope and approval;
+     *   6. it grants NO permission to merge or deploy PR #3307.
+     * The owner also set the purpose it serves: the two pages "must clearly
+     * explain the real benefit of LabourMarket.ai, not artificially imitate
+     * functions merely to pass the product gate".
+     *
+     * The surfaces themselves were ordered by the owner the same day ("Sukurti
+     * "/for-education" puslapį mokykloms, kolegijoms ir universitetams",
+     * "Sukurti "/for-service-providers" puslapį"). That order built the pages;
+     * THIS approval, given separately and explicitly after the gate stopped the
+     * PR at head ec0681eb3, is what excuses the findings. It inherits nothing
+     * from the /create-cv or public-job-board records.
+     *
+     * WHAT IS EXCUSED — the same category error as those two records, not the
+     * axiom. A-01's questions describe a surface INSIDE the authenticated
+     * workspace. These pages are read by a visitor with no account: no World
+     * State, no map, no assistant, no workspace, and by definition a new page.
+     * `surface-registry.ts` records all six answers as "no" rather than
+     * rewriting them to green (A-06 forbids that lie).
+     *
+     * WHY IT IS BOUNDED. Twelve findings, exactly: six codes on each of two
+     * routes, axiom A-01, PR #3307. A thirteenth finding anywhere — on these
+     * routes included — is not covered and blocks the run. No other route, PR
+     * or axiom inherits anything. `approvedHeadShas` stays empty for the reason
+     * this file's header gives (writing the SHA down changes the SHA); the
+     * owner-reviewed head is recorded above. `postMergeBranches` only keeps
+     * `main` from blocking itself IF the owner later merges the PR — it is not
+     * a merge permission.
+     */
+    scope:
+      "The public audience pages /for-education and /for-service-providers (owner approval 2026-11-13, PR #3307)",
+    pullRequests: [3307],
+    approvedHeadShas: [],
+    postMergeBranches: ["main"],
+    files: [
+      "/for-education",
+      "/for-service-providers",
+      "apps/web/app/[locale]/(marketing)/for-education/page.tsx",
+      "apps/web/app/[locale]/(marketing)/for-service-providers/page.tsx",
+    ],
+    expectedFindings: [
+      { code: "not_world_state_driven", file: "/for-education" },
+      { code: "not_reflected_on_map", file: "/for-education" },
+      { code: "not_ai_controlled", file: "/for-education" },
+      { code: "requires_leaving_workspace", file: "/for-education" },
+      { code: "requires_new_page", file: "/for-education" },
+      { code: "world_state_cannot_control_it", file: "/for-education" },
+      { code: "not_world_state_driven", file: "/for-service-providers" },
+      { code: "not_reflected_on_map", file: "/for-service-providers" },
+      { code: "not_ai_controlled", file: "/for-service-providers" },
+      { code: "requires_leaving_workspace", file: "/for-service-providers" },
+      { code: "requires_new_page", file: "/for-service-providers" },
+      { code: "world_state_cannot_control_it", file: "/for-service-providers" },
+    ],
+    reason:
+      "A pre-authentication public audience page cannot satisfy questions that presuppose an authenticated workspace. The owner ordered both pages and then approved this exception explicitly; the honest declarations answer all six 'no'; this record excuses those twelve answers for these two routes and nothing else.",
+    resolvedBy: "gate-learns-public-acquisition-route-category (owner constitution decision)",
+    approvedAt: "2026-11-13",
+    owner:
+      "Owner approval 2026-11-13 — A-01 exception for /for-education and /for-service-providers only, PR #3307, twelve named findings; no merge or deploy permission.",
+  },
 ];
 
 /**

@@ -36,6 +36,10 @@ function audienceFromPath(pathname: string): string {
     return "workers";
   if (top === "for-companies" || top === "company-need") return "companies";
   if (top === "for-agencies") return "agencies";
+  // The same labels the two pages' hero CTAs report (owner P0 2026-11-13),
+  // so a landing and the click that follows it are counted as one audience.
+  if (top === "for-education") return "education";
+  if (top === "for-service-providers") return "service_providers";
   if (!top) return "home";
   return "other";
 }

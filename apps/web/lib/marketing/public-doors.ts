@@ -99,7 +99,10 @@ export const STARTING_CONTEXTS: ReadonlyArray<{
     key: "institution",
     href: `/auth/signup?next=${encodeURIComponent(INSTITUTION_DOOR_NEXT)}`,
     variant: "secondary",
-    learnMore: null,
+    // The institution door was the only one with nothing to read first
+    // (owner P0 2026-11-13): an institution could choose it and could not
+    // tell what it would be able to do.
+    learnMore: "/for-education",
   },
 ];
 

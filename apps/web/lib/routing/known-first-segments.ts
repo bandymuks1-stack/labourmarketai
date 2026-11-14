@@ -25,6 +25,8 @@ export const KNOWN_FIRST_SEGMENTS: ReadonlyMap<string, number> = new Map([
   ["create-cv", 1],
   ["for-agencies", 1],
   ["for-companies", 1],
+  ["for-education", 1],
+  ["for-service-providers", 1],
   ["for-workers", 1],
   ["jobs", 2],
   ["labour-market", 2],

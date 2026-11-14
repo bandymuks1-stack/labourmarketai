@@ -317,11 +317,12 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
     ],
   },
   {
-    claimId: "partner.manage-post-broker",
+    claimId: "partner.roster-connect-offer",
     audience: "PARTNER",
     capabilityId: "ORG-8",
     status: "LIVE",
     structural: null,
+    note: "The /for-agencies hero sentence since 2026-11-13: one roster, connections with client companies, candidates offered for the needs clients share (the agency ↔ client bridge walked on production). Replaces partner.manage-post-broker.",
     pages: [{ path: P.agencies, locales: ALL, fragments: [k("pages.agencies.subcopy")] }],
   },
   // ── PLATFORM ──────────────────────────────────────────────────────────────
@@ -346,6 +347,15 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
     pages: [],
   },
   // ── RETIRED — listed so a consumer stops citing them; never deleted ──────
+  {
+    claimId: "partner.manage-post-broker",
+    audience: "PARTNER",
+    capabilityId: "ORG-8",
+    status: "RETIRED",
+    structural: null,
+    note: "Promised that an agency can \"post demand on behalf of clients\". The page stopped saying it on 2026-11-13: drafting a need for a client to confirm is built but was never walked in production and has no function-register row. Superseded by partner.roster-connect-offer.",
+    pages: [],
+  },
   {
     claimId: "employer.organization-plan-price",
     audience: "EMPLOYER",

@@ -78,6 +78,9 @@ describe("GET /api/public/claims/v1", () => {
     expect(retired.map((c) => c.claimId).sort()).toEqual([
       "employer.organization-plan-price",
       "employer.vat-via-stripe-tax",
+      // 2026-11-13: /for-agencies stopped promising "post demand on behalf of
+      // clients" (built, never walked in production).
+      "partner.manage-post-broker",
       "platform.four-entry-paths",
     ]);
     for (const c of retired) {

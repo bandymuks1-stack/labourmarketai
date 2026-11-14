@@ -20,6 +20,8 @@ export const LLMS_TXT_PUBLIC_PATHS: ReadonlyArray<{ path: string; label: string 
   { path: "/for-workers", label: "For workers — Work Journal, living CV, opportunities" },
   { path: "/for-companies", label: "For companies — describe a workforce need, reach matching people" },
   { path: "/for-agencies", label: "For staffing and recruitment agencies" },
+  { path: "/for-education", label: "For schools, colleges, universities and training providers" },
+  { path: "/for-service-providers", label: "For service providers and teams" },
   { path: "/jobs", label: "Public job board (imported market vacancies)" },
   { path: "/professions", label: "Professions and skills vocabulary" },
   { path: "/questions", label: "Answers — labour-market questions, editorially approved" },
