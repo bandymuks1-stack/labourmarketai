@@ -51,21 +51,29 @@ vi.mock("@/lib/env", () => ({
     url: "https://stub.invalid",
     anonKey: "stub-anon-key",
   }),
+  env: { PUBLIC_ORIGIN: "https://labourmarket.ai" },
 }));
 
-import { refusalStatus, resolveApiIdentity } from "./api-identity";
+import { audienceAccepted, refusalStatus, resolveApiIdentity, tokenAudiences } from "./api-identity";
 
-const WELL_FORMED = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ4In0.c2lnbmF0dXJl";
+/** A JWS-shaped token with these claims (the stubbed auth server judges it). */
+function jwt(claims: Record<string, unknown>): string {
+  const seg = (v: unknown) => Buffer.from(JSON.stringify(v)).toString("base64url");
+  return `${seg({ alg: "HS256" })}.${seg(claims)}.c2lnbmF0dXJl`;
+}
+
+// Every user token Supabase Auth issues carries the platform audience.
+const WELL_FORMED = `Bearer ${jwt({ sub: "x", aud: "authenticated" })}`;
 
 // Each request gets its own forwarded-for so the failure limiter judges each
 // test alone — the limiter itself is real and stays in the path on purpose.
 let requestSeq = 0;
-function bearerRequest(): Request {
+function bearerRequest(authorization = WELL_FORMED, url = "https://app.invalid/api/x"): Request {
   requestSeq += 1;
   const headers = new Headers();
-  headers.set("authorization", WELL_FORMED);
+  headers.set("authorization", authorization);
   headers.set("x-forwarded-for", `test-client-${requestSeq}`);
-  return new Request("https://app.invalid/api/x", { headers });
+  return new Request(url, { headers });
 }
 
 beforeEach(() => {
@@ -188,5 +196,49 @@ describe("refusalStatus — the one refusal→HTTP mapping", () => {
   it("a brake is 429 and an unasked question is 503 — neither says anything about the token", () => {
     expect(refusalStatus("rate-limited")).toBe(429);
     expect(refusalStatus("identity-unavailable")).toBe(503);
+  });
+});
+
+describe("the token's audience (C-3): a verified token is admitted only where it was meant for", () => {
+  const verifiedUser = { data: { user: { id: "00000000-0000-4000-8000-000000000003" } }, error: null };
+  const MCP = "https://labourmarket.ai/api/mcp";
+  beforeEach(() => {
+    bearerAuthResult = verifiedUser;
+  });
+
+  it("positive control: the platform audience every existing client carries, as a string or a list", async () => {
+    expect((await resolveApiIdentity(bearerRequest(`Bearer ${jwt({ sub: "x", aud: "authenticated" })}`, MCP))).ok).toBe(true);
+    expect((await resolveApiIdentity(bearerRequest(`Bearer ${jwt({ sub: "x", aud: ["authenticated"] })}`, MCP))).ok).toBe(true);
+  });
+
+  it("positive control: a token bound to THIS door's public URL", async () => {
+    const r = await resolveApiIdentity(bearerRequest(`Bearer ${jwt({ sub: "x", aud: MCP })}`, MCP));
+    expect(r.ok).toBe(true);
+  });
+
+  it.each<[Record<string, unknown>, string]>([
+    [{ sub: "x" }, "no audience at all"],
+    [{ sub: "x", aud: [] }, "an empty audience"],
+    [{ sub: "x", aud: "anon" }, "a different platform audience"],
+    [{ sub: "x", aud: "https://labourmarket.ai/api/mcp/chatgpt" }, "another door of ours"],
+    [{ sub: "x", aud: "https://other.example/api/mcp" }, "another server's resource"],
+    [{ sub: "x", aud: 42 }, "a non-string audience"],
+  ])("NEGATIVE CONTROL: a token the auth server verified is still refused for %j (%s)", async (claims, _why) => {
+    const r = await resolveApiIdentity(bearerRequest(`Bearer ${jwt(claims)}`, MCP));
+    expect(r).toEqual({ ok: false, reason: "invalid-bearer" });
+  });
+
+  it("the bind host is never the resource: the public origin decides, not req.url", async () => {
+    const r = await resolveApiIdentity(
+      bearerRequest(`Bearer ${jwt({ sub: "x", aud: "http://0.0.0.0:3000/api/mcp" })}`, "http://0.0.0.0:3000/api/mcp"),
+    );
+    expect(r).toEqual({ ok: false, reason: "invalid-bearer" });
+  });
+
+  it("the pure pieces: unreadable payloads are null, and null is never accepted", () => {
+    expect(tokenAudiences("a.%%%.c")).toBeNull();
+    expect(tokenAudiences(jwt({ aud: ["authenticated", "x"] }))).toEqual(["authenticated", "x"]);
+    expect(audienceAccepted(null, () => MCP)).toBe(false);
+    expect(audienceAccepted([`${MCP}/`], () => MCP)).toBe(true);
   });
 });
