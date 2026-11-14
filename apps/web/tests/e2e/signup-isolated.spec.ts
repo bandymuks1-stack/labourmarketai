@@ -695,7 +695,9 @@ test("P-2. on a desktop the onboarding buttons stay where they were, in the page
 // ── Student / intern (#3322 item 6): the SAME account and worker record ─────
 
 test("ST-1. a student signs up, keeps one worker record with no company, and the school reaches the profile, the CV and the board", async ({ page }) => {
-  const address = email("student");
+  // Its own address: S-3b already signs up as email("student") in this file, and both
+  // run in one worker (same RUN), so a shared address is "already registered".
+  const address = email("student-intern");
   const school = `Synthetic Vocational School ${RUN}`;
   await signUp(page, address);
   await page.getByTestId("onboarding-intent-student").click();
