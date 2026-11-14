@@ -17,11 +17,7 @@ import {
   type RetryReport,
 } from "@/lib/invitations/delivery-retry";
 import { buildInvitationBody, buildInvitationSubject } from "@/lib/invitations/email-content";
-import {
-  countKnownHistorical,
-  KNOWN_HISTORICAL_OUTCOMES,
-  withKnownHistorical,
-} from "@/lib/invitations/known-historical-outcomes";
+import { KNOWN_HISTORICAL_OUTCOMES, withKnownHistorical } from "@/lib/invitations/known-historical-outcomes";
 import { buildInviteLink } from "@/lib/invitations/model";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -29,7 +25,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * The server wiring of `delivery-retry.ts` (owner P0 2026-11-13): the service-role reads and
  * writes — invitation_delivery_retry_candidates_v1, reissue_external_referral_v1,
  * mark_external_referral_delivery_v1, record_invitation_delivery_attempt_v1,
- * dead_letter_invitation_delivery_v1, invitation_delivery_health_v1 — and the ledgered provider
+ * dead_letter_invitation_delivery_v1, invitation_delivery_health_v1,
+ * invitation_known_historical_unknown_v1 — and the ledgered provider
  * path. Every decision lives in the pure module.
  */
 
@@ -50,33 +47,18 @@ export type DeliveryRetryRunResult =
 
 /**
  * How many owner-registered historical unknown outcomes are still exactly as reviewed (read only;
- * see known-historical-outcomes.ts). null = could not be read — the caller then keeps the alert.
+ * see known-historical-outcomes.ts). One service_role-only aggregate RPC,
+ * invitation_known_historical_unknown_v1 (migration 20261114150000): service_role holds no SELECT
+ * on `invitations`, so a table read could never work. It applies the same conditions as
+ * countKnownHistorical and returns one integer. null = could not be read (RPC missing, error, or not
+ * a non-negative integer) — the caller then keeps the alert.
  */
 export async function readKnownHistoricalCount(admin: SupabaseClient): Promise<number | null> {
-  const ids = KNOWN_HISTORICAL_OUTCOMES.map((r) => r.invitationId);
-  if (ids.length === 0) return 0;
-  const rows = await asAny(admin)
-    .from("invitations")
-    .select("id, delivery_failure_class")
-    .in("id", ids)
-    .eq("status", "pending")
-    .eq("delivery_status", "delivery_failed")
-    .is("delivery_bounced_at", null);
-  if (rows.error || !Array.isArray(rows.data)) return null;
-  const open = rows.data as Array<{ id: string; delivery_failure_class: string | null }>;
-  if (open.length === 0) return 0;
-  const attempts = await asAny(admin)
-    .from("invitation_delivery_attempts_v1")
-    .select("invitation_id")
-    .in("invitation_id", open.map((r) => r.id));
-  if (attempts.error || !Array.isArray(attempts.data)) return null;
-  const perInvitation = new Map<string, number>();
-  for (const a of attempts.data as Array<{ invitation_id: string }>) {
-    perInvitation.set(a.invitation_id, (perInvitation.get(a.invitation_id) ?? 0) + 1);
-  }
-  return countKnownHistorical(
-    open.map((r) => ({ id: r.id, delivery_failure_class: r.delivery_failure_class, ledgered_attempts: perInvitation.get(r.id) ?? 0 })),
-  );
+  const p_ids = KNOWN_HISTORICAL_OUTCOMES.map((r) => r.invitationId);
+  if (p_ids.length === 0) return 0;
+  const { data, error } = await asAny(admin).rpc("invitation_known_historical_unknown_v1", { p_ids });
+  if (error || typeof data !== "number" || !Number.isSafeInteger(data) || data < 0) return null;
+  return Math.min(data, p_ids.length);
 }
 
 /**

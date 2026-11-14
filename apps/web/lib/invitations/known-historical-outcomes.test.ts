@@ -90,37 +90,49 @@ describe("withKnownHistorical + deliveryAlerts", () => {
   });
 });
 
-/** A read-only fake of the service-role client: rpc + from(...).select().in().eq().is(). */
+/**
+ * A read-only fake of the service-role client: rpc ONLY. `invitation_known_historical_unknown_v1`
+ * is simulated with the same conditions the SQL applies (in p_ids, class null, no ledgered attempt);
+ * any `.from(` call is recorded — the module must never make one (service_role has no table grant).
+ */
 function fakeAdmin(opts: {
   health: DeliveryHealth;
   invitations?: Array<{ id: string; delivery_failure_class: string | null }>;
   attempts?: Array<{ invitation_id: string }>;
   invitationsError?: boolean;
+  knownData?: unknown;
 }) {
   const writes: string[] = [];
-  const query = (table: string) => {
-    const result =
-      table === "invitations"
-        ? opts.invitationsError
-          ? { data: null, error: { message: "boom" } }
-          : { data: opts.invitations ?? [], error: null }
-        : { data: opts.attempts ?? [], error: null };
-    const chain: Record<string, unknown> = {};
-    for (const m of ["select", "in", "eq", "is"]) chain[m] = () => chain;
-    for (const m of ["update", "insert", "upsert", "delete"]) chain[m] = () => (writes.push(`${m}:${table}`), chain);
-    chain.then = (res: (v: unknown) => unknown) => Promise.resolve(result).then(res);
-    return chain;
-  };
+  const fromCalls: string[] = [];
+  const rpcCalls: Array<{ fn: string; args: unknown }> = [];
   const client = {
-    rpc: async () => ({ data: opts.health, error: null }),
-    from: query,
+    rpc: async (fn: string, args: unknown) => {
+      rpcCalls.push({ fn, args });
+      if (fn === "invitation_delivery_health_v1") return { data: opts.health, error: null };
+      if (fn === "invitation_known_historical_unknown_v1") {
+        if (opts.invitationsError) return { data: null, error: { message: "boom" } };
+        if ("knownData" in opts) return { data: opts.knownData, error: null };
+        const ids = new Set((args as { p_ids: string[] }).p_ids);
+        const attempted = new Set((opts.attempts ?? []).map((a) => a.invitation_id));
+        const n = (opts.invitations ?? []).filter(
+          (r) => ids.has(r.id) && r.delivery_failure_class === null && !attempted.has(r.id),
+        ).length;
+        return { data: n, error: null };
+      }
+      writes.push(`rpc:${fn}`);
+      return { data: null, error: { message: "unexpected rpc" } };
+    },
+    from: (table: string) => {
+      fromCalls.push(table);
+      throw new Error(`.from(${table}) must not be called`);
+    },
   } as unknown as SupabaseClient;
-  return { client, writes };
+  return { client, writes, fromCalls, rpcCalls };
 }
 
 describe("readInvitationDeliveryHealth (server wiring, read only)", () => {
   it("moves the reviewed 862a91f4 row to diagnostics and writes nothing", async () => {
-    const { client, writes } = fakeAdmin({
+    const { client, writes, fromCalls, rpcCalls } = fakeAdmin({
       health: health(),
       invitations: [{ id: ID, delivery_failure_class: null }],
       attempts: [],
@@ -130,20 +142,48 @@ describe("readInvitationDeliveryHealth (server wiring, read only)", () => {
     expect(h?.known_historical_unknown_outcome).toBe(1);
     expect(deliveryAlerts(h!)).toEqual([]);
     expect(writes).toEqual([]);
+    expect(fromCalls).toEqual([]);
+    expect(rpcCalls).toEqual([
+      { fn: "invitation_delivery_health_v1", args: { p_hours: 24 } },
+      { fn: "invitation_known_historical_unknown_v1", args: { p_ids: [ID] } },
+    ]);
   });
   it("once the row has a ledgered attempt, it alerts again", async () => {
-    const { client } = fakeAdmin({
+    const { client, fromCalls } = fakeAdmin({
       health: health(),
       invitations: [{ id: ID, delivery_failure_class: null }],
       attempts: [{ invitation_id: ID }],
     });
     const h = await readInvitationDeliveryHealth(client);
     expect(deliveryAlerts(h!)).toEqual(["unknown_outcome_open"]);
+    expect(fromCalls).toEqual([]);
   });
-  it("a lookup error keeps the alert", async () => {
-    const { client } = fakeAdmin({ health: health(), invitationsError: true });
+  it("once the row has a failure class, it alerts again", async () => {
+    const { client } = fakeAdmin({ health: health(), invitations: [{ id: ID, delivery_failure_class: "UNKNOWN_OUTCOME" }] });
+    const h = await readInvitationDeliveryHealth(client);
+    expect(deliveryAlerts(h!)).toEqual(["unknown_outcome_open"]);
+  });
+  it("a lookup error (e.g. the RPC is not applied yet) keeps the alert", async () => {
+    const { client, fromCalls } = fakeAdmin({ health: health(), invitationsError: true });
     const h = await readInvitationDeliveryHealth(client);
     expect(h?.unknown_outcome_open).toBe(1);
     expect(deliveryAlerts(h!)).toEqual(["unknown_outcome_open"]);
+    expect(fromCalls).toEqual([]);
+  });
+  it.each([["a string", "1"], ["a negative", -1], ["a fraction", 0.5], ["null", null], ["an object", { n: 1 }]])(
+    "a non-integer RPC answer (%s) keeps the alert",
+    async (_why, knownData) => {
+      const { client } = fakeAdmin({ health: health(), knownData });
+      const h = await readInvitationDeliveryHealth(client);
+      expect(h?.unknown_outcome_open).toBe(1);
+      expect(deliveryAlerts(h!)).toEqual(["unknown_outcome_open"]);
+    },
+  );
+  it("the module source makes no `.from(` call", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const src = readFileSync(join(__dirname, "delivery-retry-run.ts"), "utf8");
+    expect(src).not.toMatch(/\.from\(/);
+    expect(src).toMatch(/\.rpc\("invitation_known_historical_unknown_v1", \{ p_ids \}\)/);
   });
 });
