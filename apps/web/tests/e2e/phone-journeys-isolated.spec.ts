@@ -456,11 +456,6 @@ for (const phone of PHONES) {
     test.describe.configure({ mode: "serial" });
     test(`A-1 (${phone.name}). setup at a desktop: a staffing agency`, async ({ browser }) => {
       Object.assign(a, await newOrganisation(browser, AGENCY, "agency", `Synthetic Agency Owner ${phone.name} ${RUN}`, `Synthetic Staffing ${phone.name} ${RUN}`));
-      // The organisation is bound to its company record (agency-roles-isolated A-1 reads it the same way).
-      const [c] = sql<{ t: string | null }>(
-        `select c.company_type as t from public.companies c join public.organizations o on o.legacy_company_id = c.id where o.id = ${lit(a.orgId)}`,
-      );
-      expect(c?.t, "an agency, not a hiring company").toBe("staffing_agency");
     });
     test(`A-2 (${phone.name}). the area sheet leads to clients (partners)`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, AGENCY);
@@ -502,6 +497,20 @@ for (const phone of PHONES) {
       const { page, done } = await signedInOnPhone(browser, phone, AGENCY);
       await messagesBySheet(page, "the agency");
       await done();
+    });
+    test(`A-6 (${phone.name}). the organisation is recorded as a staffing agency`, async () => {
+      // The organisation is bound to its company record (agency-roles-isolated A-1 reads it the same
+      // way). Two runs found no agency company behind it; the failure now says what the rows hold.
+      const facts = () =>
+        sql<{ organization_type: string | null; legacy_company_id: string | null; via_legacy: string | null; by_owner: string | null }>(
+          `select o.organization_type, o.legacy_company_id,
+                  (select c.company_type from public.companies c where c.id = o.legacy_company_id) as via_legacy,
+                  (select string_agg(coalesce(c.company_type, 'null'), ',') from public.companies c where c.profile_id = o.owner_profile_id) as by_owner
+             from public.organizations o where o.id = ${lit(a.orgId)}`,
+        )[0];
+      await expect
+        .poll(() => facts()?.via_legacy ?? null, { message: `an agency, not a hiring company; rows: ${JSON.stringify(facts())}`, timeout: 15_000 })
+        .toBe("staffing_agency");
     });
   });
 
