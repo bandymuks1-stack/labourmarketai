@@ -500,7 +500,9 @@ for (const phone of PHONES) {
     });
     test(`A-6 (${phone.name}). the organisation is recorded as a staffing agency`, async () => {
       // The organisation is bound to its company record (agency-roles-isolated A-1 reads it the same
-      // way). Two runs found no agency company behind it; the failure now says what the rows hold.
+      // way). NEVER alias a column `t` here: sql() wraps the query as `json_agg(t) from (…) t`, and a
+      // column named t is aggregated instead of the row (two runs read undefined that way; the agency
+      // was created correctly). The failure message names what the rows hold.
       const facts = () =>
         sql<{ organization_type: string | null; legacy_company_id: string | null; via_legacy: string | null; by_owner: string | null }>(
           `select o.organization_type, o.legacy_company_id,
