@@ -93,6 +93,15 @@ async function verifyEmail(page: Page, address: string): Promise<void> {
   });
 }
 
+/** "This is me" was taken. The form says so, and once the page has read the
+ *  claim again the same fact stands as its state — either is the answer. */
+async function expectRedeemed(page: Page): Promise<void> {
+  await expect(
+    page.getByTestId("history-claim-redeemed").or(page.getByTestId("history-claim-state-redeemed")),
+  ).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("history-claim-redeem-error")).toHaveCount(0);
+}
+
 /** The organization's history for the roster row: what must never change. */
 function fingerprint(): string {
   const rows = sql<{ fp: string }>(
@@ -223,7 +232,7 @@ test("H-2. a bystander who is forwarded the link learns nothing and cannot use i
   // A bystander CAN press it — and that is the point of the next step: the
   // company, not the link, decides who the record is about.
   await oth.getByTestId("history-claim-redeem").click();
-  await expect(oth.getByTestId("history-claim-redeemed")).toBeVisible({ timeout: 30_000 });
+  await expectRedeemed(oth);
   expect(linkState(), "redeeming links nobody").toBe("unlinked/-/-");
   expect(fingerprint(), "and changes no record").toBe(FP0);
 
@@ -279,7 +288,7 @@ test("H-3/H-4/H-5. the former worker joins with ANOTHER address, is confirmed, a
   await ex.goto(local(s.claimLink));
   await expect(ex.getByTestId("history-claim-page")).toBeVisible({ timeout: 30_000 });
   await ex.getByTestId("history-claim-redeem").click();
-  await expect(ex.getByTestId("history-claim-redeemed")).toBeVisible({ timeout: 30_000 });
+  await expectRedeemed(ex);
   expect(linkState(), "saying 'this is me' links nothing yet").toBe("unlinked/-/-");
 
   // The company confirms who came.
@@ -408,7 +417,7 @@ test("H-7. reversal by the person and by the company closes the access, keeping 
   await expect(link).toBeVisible({ timeout: 30_000 });
   await ex.goto(local((await link.inputValue()).trim()));
   await ex.getByTestId("history-claim-redeem").click();
-  await expect(ex.getByTestId("history-claim-redeemed")).toBeVisible({ timeout: 30_000 });
+  await expectRedeemed(ex);
   const claimId = sql<{ id: string }>(
     `select id from public.organization_person_history_claims
       where organization_person_id = ${lit(s.personId)} and status = 'redeemed'`,
