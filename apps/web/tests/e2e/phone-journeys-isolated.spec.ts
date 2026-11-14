@@ -30,6 +30,10 @@ import {
  *   M-5 MESSAGES writes to the employer from that application; the company answers from ITS phone;
  *                the worker reaches the thread through the phone's area sheet and reads the answer.
  *
+ * M-2 runs LAST in each group (first run 2026-11-14: the CV page stopped answering at 375 px), so a
+ * CV fault cannot hide search, applying and messages; if it stops answering again, the step says
+ * whether the same CV answers at a desktop width.
+ *
  * On every page the walk also asserts that nothing scrolls sideways (the page is never wider than
  * the phone). Controls are TAPPED, not clicked. Outcomes are read back from the local database —
  * the page saying "done" is not the proof. It refuses to run anywhere but the local stack (owner
@@ -37,7 +41,8 @@ import {
  */
 
 test.skip(!isolatedStack(), "local stack only (SIGNUP_ISOLATED=1, app and Supabase on 127.0.0.1)");
-test.describe.configure({ mode: "serial" });
+// One worker runs this file in order (playwright.config: E2E_LOCAL_STACK → workers 1). Each phone is
+// its own serial group, so a failure at 375 px does not hide the 390 px walk.
 test.setTimeout(300_000);
 
 const RUN = Date.now().toString(36);
@@ -69,7 +74,25 @@ async function onPhone(
     userAgent: USER_AGENT,
     timezoneId: "UTC",
   });
-  return { ctx, page: await ctx.newPage() };
+  const page = await ctx.newPage();
+  watch(page);
+  return { ctx, page };
+}
+
+/** What the page said while the walk was on it: uncaught errors, console errors, dialogs. */
+const heard = new WeakMap<Page, string[]>();
+function watch(page: Page): void {
+  const notes: string[] = [];
+  heard.set(page, notes);
+  page.on("pageerror", (e) => notes.push(`pageerror: ${String(e.message).slice(0, 200)}`));
+  page.on("console", (m) => {
+    if (m.type() === "error") notes.push(`console: ${m.text().slice(0, 200)}`);
+  });
+  // A dialog blocks the page; it is recorded and dismissed, and the step that met it fails below.
+  page.on("dialog", (d) => {
+    notes.push(`dialog: ${d.type()} ${d.message().slice(0, 120)}`);
+    void d.dismiss().catch(() => {});
+  });
 }
 
 /**
@@ -98,11 +121,22 @@ async function signedInOnPhone(browser: Browser, phone: (typeof PHONES)[number],
   };
 }
 
+/** The page answers within 20 s; if not, say so with what the page reported, instead of hanging. */
+async function answers(page: Page): Promise<{ scroll: number; inner: number } | null> {
+  return Promise.race([
+    page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: window.innerWidth })),
+    new Promise<null>((r) => setTimeout(() => r(null), 20_000)),
+  ]);
+}
+
 /** The page is never wider than the phone: nothing scrolls sideways. */
 async function fitsTheScreen(page: Page, where: string): Promise<void> {
-  await page.waitForLoadState("networkidle").catch(() => {});
-  const { scroll, inner } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: window.innerWidth }));
-  expect(scroll, `${where}: the page is ${scroll} px wide on a ${inner} px screen`).toBeLessThanOrEqual(inner + 1);
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+  const got = await answers(page);
+  const notes = (heard.get(page) ?? []).join(" | ") || "none";
+  if (got === null) throw new Error(`${where}: the page stopped answering for 20 s (busy main thread or an open dialog). The page reported: ${notes}`);
+  expect(notes.includes("dialog:"), `${where}: no dialog opened (${notes})`).toBe(false);
+  expect(got.scroll, `${where}: the page is ${got.scroll} px wide on a ${got.inner} px screen`).toBeLessThanOrEqual(got.inner + 1);
 }
 
 /** Tap until the expected result shows: a tap before hydration is a silent no-op. */
@@ -148,6 +182,7 @@ for (const phone of PHONES) {
   const s: { profileId: string; workerId: string; conversationId: string } = { profileId: "", workerId: "", conversationId: "" };
 
   test.describe(`at ${phone.viewport.width} × ${phone.viewport.height}`, () => {
+    test.describe.configure({ mode: "serial" });
     test(`M-1 (${phone.name}). a new worker opens their profile from the avatar menu and saves a public headline`, async ({ browser }) => {
       const { ctx, page } = await onPhone(browser, phone);
       await signUp(page, BASE, worker);
@@ -173,19 +208,6 @@ for (const phone of PHONES) {
       s.workerId = rows[0]!.id;
       sessions.set(worker, await ctx.storageState());
       await ctx.close();
-    });
-
-    test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {
-      const { page, done } = await signedInOnPhone(browser, phone, worker);
-      await accountMenu(page, "account-menu-cv-link");
-      await page.waitForURL(/\/en\/cv/, { timeout: 30_000 });
-      await expect(page.getByTestId("cv-back-link")).toBeVisible({ timeout: 30_000 });
-      await fitsTheScreen(page, "the Living CV");
-      await page.getByTestId("cv-template-eu").tap();
-      await page.waitForURL(/template=eu/, { timeout: 30_000 });
-      await expect(page.getByTestId("cv-eu-format"), "the EU-format CV renders").toBeVisible({ timeout: 30_000 });
-      await fitsTheScreen(page, "the EU-format CV");
-      await done();
     });
 
     test(`M-3 (${phone.name}). the worker finds the company's need on the work board and opens its details`, async ({ browser }) => {
@@ -277,6 +299,31 @@ for (const phone of PHONES) {
       });
       await fitsTheScreen(w2.page, "the worker's thread with the answer");
       await w2.done();
+    });
+    test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      await accountMenu(page, "account-menu-cv-link");
+      await page.waitForURL(/\/en\/cv/, { timeout: 30_000 });
+      await expect(page.getByTestId("cv-back-link")).toBeVisible({ timeout: 30_000 });
+      try {
+        await fitsTheScreen(page, "the Living CV");
+      } catch (phoneError) {
+        // Is it the phone, or this CV? The same session opens the same page at a desktop width.
+        const desk = await browser.newContext({ storageState: await page.context().storageState(), timezoneId: "UTC" });
+        const dp = await desk.newPage();
+        watch(dp);
+        await dp.goto(`${BASE}/en/cv`);
+        await dp.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+        const atDesk = await answers(dp);
+        await desk.close();
+        await page.context().close();
+        throw new Error(`${(phoneError as Error).message}\nThe same CV at 1280 × 720: ${atDesk === null ? "ALSO stops answering" : "answers"}.`);
+      }
+      await page.getByTestId("cv-template-eu").tap();
+      await page.waitForURL(/template=eu/, { timeout: 30_000 });
+      await expect(page.getByTestId("cv-eu-format"), "the EU-format CV renders").toBeVisible({ timeout: 30_000 });
+      await fitsTheScreen(page, "the EU-format CV");
+      await done();
     });
   });
 }
