@@ -643,10 +643,12 @@ test("EX-3. W1's CV joins the confirmed imported history to the journal: 8 + 18 
 
 test("EX-4. A's company surfaces: R1 opens W1's own page (confirmed), R2 stays a name without one, W2 is A's person; B sees none of A's records", async () => {
   const o = as(O);
+  // Inside <main> only: a dashboard page streams through a hidden copy of its
+  // content beside the rendered one, so a bare test id can match twice.
 
   // The history door, read for A by name.
   await o.goto(`${BASE}/en/dashboard/company/history?org=${s.orgA}`);
-  const history = o.getByTestId("company-work-history");
+  const history = o.getByRole("main").getByTestId("company-work-history");
   await expect(history).toHaveAttribute("data-state", "ready", { timeout: 60_000 });
   await expect(history, "every imported record of A, linked or not").toHaveAttribute(
     "data-records",
@@ -655,18 +657,18 @@ test("EX-4. A's company surfaces: R1 opens W1's own page (confirmed), R2 stays a
 
   // The roster read back: R1 linked, R2 unlinked, each with A's own card.
   await o.goto(`${BASE}/en/dashboard/company/people#people-import-section`);
-  await expect(o.getByTestId(`organization-roster-person-${s.r1}`).locator('[data-link-state="linked"]')).toBeAttached({
+  await expect(o.getByRole("main").getByTestId(`organization-roster-person-${s.r1}`).locator('[data-link-state="linked"]')).toBeAttached({
     timeout: 60_000,
   });
-  await expect(o.getByTestId(`organization-roster-person-${s.r2}`).locator('[data-link-state="unlinked"]')).toBeAttached();
-  await expect(o.getByTestId(`organization-roster-person-${s.r2}`)).toContainText(R2_NAME);
+  await expect(o.getByRole("main").getByTestId(`organization-roster-person-${s.r2}`).locator('[data-link-state="unlinked"]')).toBeAttached();
+  await expect(o.getByRole("main").getByTestId(`organization-roster-person-${s.r2}`)).toContainText(R2_NAME);
   const people = o.getByRole("main");
   await expect(people, "W1 is A's person").toContainText(W1_NAME);
   await expect(people, "W2 is A's person").toContainText(W2_NAME);
 
   // R1's card: confirmed → a door to W1's own page.
   await o.goto(`${BASE}/en/dashboard/company/people/${s.r1}`);
-  const r1 = o.getByTestId("company-person");
+  const r1 = o.getByRole("main").getByTestId("company-person");
   await expect(r1).toHaveAttribute("data-link-state", "linked", { timeout: 60_000 });
   await expect(r1.getByTestId("company-person-name")).toContainText(R1_NAME);
   await expect(r1.getByTestId("company-person-open-profile")).toHaveAttribute(
@@ -676,7 +678,7 @@ test("EX-4. A's company surfaces: R1 opens W1's own page (confirmed), R2 stays a
 
   // R2's card: the name, the history, and NO person-page link.
   await o.goto(`${BASE}/en/dashboard/company/people/${s.r2}`);
-  const r2 = o.getByTestId("company-person");
+  const r2 = o.getByRole("main").getByTestId("company-person");
   await expect(r2).toHaveAttribute("data-link-state", "unlinked", { timeout: 60_000 });
   await expect(r2.getByTestId("company-person-name")).toContainText(R2_NAME);
   await expect(r2.getByTestId("company-person-open-profile"), "an unconfirmed name links to nobody").toHaveCount(0);
@@ -684,7 +686,7 @@ test("EX-4. A's company surfaces: R1 opens W1's own page (confirmed), R2 stays a
   // B: its own history holds none of A's records, and A's cards refuse P.
   const p = as(P);
   await p.goto(`${BASE}/en/dashboard/company/history`);
-  const bHistory = p.getByTestId("company-work-history");
+  const bHistory = p.getByRole("main").getByTestId("company-work-history");
   await expect(bHistory, "B has no imported history of its own").toHaveAttribute("data-state", "empty", { timeout: 60_000 });
   const bText = (await p.getByRole("main").textContent()) ?? "";
   for (const secret of [ORG_A, R1_NAME, R2_NAME, W1_NAME]) expect(bText).not.toContain(secret);
