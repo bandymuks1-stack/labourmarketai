@@ -2,6 +2,7 @@
 -- The marker above is the human-gate ACKNOWLEDGEMENT, not an approval. NO OWNER APPROVAL OF THIS SQL
 -- EXISTS YET (owner 2026-11-13: "NO MERGE / NO MIGRATION / NO DEPLOY YET"). Draft PR #3318 +
 -- needs-human-gate. NOT applied. Apply only via Supabase MCP apply_migration.
+-- @plan-cache-proof: n/a — the five indexes serve only the service_role-only cron / health functions of this migration; no client-facing or anon RPC filters by them and no existing plan changes
 -- ============================================================================
 -- 20261113190000_invitation_delivery_attempts_v1
 --
