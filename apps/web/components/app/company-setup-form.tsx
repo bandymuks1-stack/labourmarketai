@@ -229,7 +229,7 @@ export function CompanySetupForm({
           placeholder={labels.legalNamePlaceholder}
           readOnly={legalLocked}
           aria-readonly={legalLocked}
-          className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
+          className={`rounded-md border px-3 py-2 text-sm outline-none max-sm:min-h-11 max-sm:text-base ${lockedInputCls}`}
           data-testid="company-setup-legal-name"
         />
         <span className="text-meta text-text-muted">{labels.legalNameHelp}</span>
@@ -273,7 +273,7 @@ export function CompanySetupForm({
           defaultValue={existing?.country ?? ""}
           disabled={legalLocked}
           aria-disabled={legalLocked}
-          className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
+          className={`rounded-md border px-3 py-2 text-sm outline-none max-sm:min-h-11 max-sm:text-base ${lockedInputCls}`}
           data-testid="company-setup-country"
         >
           <option value="" disabled>
@@ -296,7 +296,7 @@ export function CompanySetupForm({
           defaultValue={existing?.registrationCode ?? ""}
           readOnly={legalLocked}
           aria-readonly={legalLocked}
-          className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
+          className={`rounded-md border px-3 py-2 text-sm outline-none max-sm:min-h-11 max-sm:text-base ${lockedInputCls}`}
           data-testid="company-setup-registration-code"
         />
         <span className="text-meta text-text-muted">
@@ -314,7 +314,7 @@ export function CompanySetupForm({
           placeholder={labels.addressPlaceholder}
           readOnly={legalLocked}
           aria-readonly={legalLocked}
-          className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
+          className={`rounded-md border px-3 py-2 text-sm outline-none max-sm:min-h-11 max-sm:text-base ${lockedInputCls}`}
           data-testid="company-setup-address"
         />
       </label>

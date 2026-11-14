@@ -547,7 +547,7 @@ export function CompanyWorkersSection({
                 name="email"
                 required
                 placeholder={labels.inviteEmailPlaceholder}
-                className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue max-sm:min-h-11 max-sm:text-base"
                 data-testid="company-workers-invite-email"
               />
             </label>

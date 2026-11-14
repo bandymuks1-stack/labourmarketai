@@ -1036,7 +1036,7 @@ export function OnboardingWizard({
             type="button"
             onClick={() => setStep(1)}
             disabled={pending}
-            className="text-xs text-text-muted hover:text-text-secondary disabled:opacity-60"
+            className="inline-flex min-h-11 items-center px-2 text-sm text-text-muted hover:text-text-secondary disabled:opacity-60"
           >
             {t("back")}
           </button>

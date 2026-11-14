@@ -545,7 +545,7 @@ export function TeamBrigadesPanel({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t("createPlaceholder")}
-            className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary"
+            className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary max-sm:min-h-11 max-sm:text-base"
             data-testid="team-create-name"
           />
         </div>
