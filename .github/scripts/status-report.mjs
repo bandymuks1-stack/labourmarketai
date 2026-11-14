@@ -299,6 +299,23 @@ if (NARRATIVE) {
 }
 const nar = (k) => narrative[k] || "_Koordinatorius šios dalies šiam laikotarpiui neparašė._";
 
+// ---------------------------------------------------------------- previous report (for "what changed")
+const prev = { states: new Map(), live: null, openPrs: null, at: null };
+try {
+  const old = readFileSync(OUT, "utf8").split("\n");
+  const a7 = old.findIndex((l) => /^## A7\./.test(l));
+  for (const l of a7 >= 0 ? old.slice(a7) : []) {
+    if (!ROW_ID.test(l)) continue;
+    const c = cells(l);
+    prev.states.set(c[0], { lt: c[1], state: c[10] });
+  }
+  prev.live = Number((old.find((l) => l.startsWith("**Funkcijos:**"))?.match(/įrodyta\) (\d+)/) ?? [])[1]) || null;
+  prev.openPrs = Number((old.find((l) => /^### Atviri PR \(/.test(l))?.match(/\((\d+)\)/) ?? [])[1]) || null;
+  prev.at = (old.find((l) => l.startsWith("Sugeneruota "))?.match(/^Sugeneruota ([^(]+)/) ?? [])[1]?.trim() ?? null;
+} catch {
+  // first report: nothing to compare
+}
+
 // ---------------------------------------------------------------- render
 const esc = (s) => String(s ?? "").replace(/\|/g, "\\|").replace(/\n/g, " ");
 const vilnius = (iso) =>
@@ -313,6 +330,28 @@ const stateRow = (label, list) => {
   return `| ${label} | ${list.length} | ${STATE_ORDER.map((s) => c[s]).join(" | ")} |`;
 };
 const stateHead = `| Sritis | Iš viso | ${STATE_ORDER.join(" | ")} |\n|---|---|${STATE_ORDER.map(() => "---").join("|")}|`;
+
+function changesBlock() {
+  if (!prev.states.size) return ["Ankstesnės ataskaitos nėra — tai pirmoji; pokyčiai bus rodomi nuo kitos."];
+  const out = [`Lyginama su ataskaita, sugeneruota ${prev.at ?? "?"}.`, ""];
+  const changed = [];
+  for (const f of fns) {
+    const p = prev.states.get(f.id);
+    if (!p) changed.push(`- **Nauja funkcija** ${f.id} ${f.lt} — ${f.state}`);
+    else if (p.state !== f.state) changed.push(`- ${f.id} ${f.lt}: ${p.state} → **${f.state}**`);
+  }
+  for (const [id, p] of prev.states) if (!fnById.has(id)) changed.push(`- **Išimta iš registro** ${id} ${p.lt}`);
+  const liveNow = fns.filter((f) => f.state === "VEIKIA PRODUKCIJOJE").length;
+  out.push(
+    `- Veikia produkcijoje: ${prev.live ?? "?"} → ${liveNow}.`,
+    `- Atvirų PR: ${prev.openPrs ?? "?"} → ${data.prs.length}; sujungta per laikotarpį ${data.merged.length}.`,
+    `- Produkcijos diegimų per laikotarpį: ${data.deploys.filter((d) => d.conclusion === "success").length} sėkmingi, ${data.deploys.filter((d) => d.conclusion === "failure").length} nepavykę.`,
+    "",
+    changed.length ? "Funkcijų būsenų pokyčiai:" : "Funkcijų būsenų pokyčių registre nėra.",
+    ...changed,
+  );
+  return out;
+}
 
 const L = [];
 const P = (...x) => L.push(...x);
@@ -332,6 +371,10 @@ P(
   `**Produkcija:** versija \`${data.health?.build ?? "nežinoma"}\`, sveikata ${data.health?.ok ? "gera" : "BLOGA"} (DB ${data.health?.dbMs ?? "?"} ms), patikrinta ${data.health?.at ? vilnius(data.health.at) : "?"}.`,
   "",
   `**Funkcijos:** ${countedFns.length} privalomos apimties funkcijų; veikia produkcijoje (įrodyta) ${live} (${((live / countedFns.length) * 100).toFixed(1)} %). Tai nėra užbaigimo procentas: likusios ${countedFns.length - live} funkcijų išvardytos A7 dalyje.`,
+  "",
+  "## Pokyčiai nuo ankstesnės ataskaitos",
+  "",
+  ...changesBlock(),
   "",
   "## B. Trumpa vadovo suvestinė",
   "",
