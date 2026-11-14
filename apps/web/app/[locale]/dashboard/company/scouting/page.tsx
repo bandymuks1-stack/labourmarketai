@@ -896,16 +896,25 @@ export default async function CompanyScoutingPage({
                             {h.canContact ? (
                               <div className="flex flex-col gap-2">
                                 {isShortlistedForContact(h.shortlistStatus) ? (
-                                  <RequestCommunicationButton
-                                    locale={locale}
-                                    requestId={result.demand.id}
-                                    workerId={h.workerId}
-                                    labels={{
-                                      button: t("request.button"), opening: t("request.opening"),
-                                      opened: t("request.opened"), view: t("request.view"),
-                                      error: t("request.error"), limitReached: t("request.limitReached"),
-                                    }}
-                                  />
+                                  result.demand.ownedByCaller ? (
+                                    <RequestCommunicationButton
+                                      locale={locale}
+                                      requestId={result.demand.id}
+                                      workerId={h.workerId}
+                                      labels={{
+                                        button: t("request.button"), opening: t("request.opening"),
+                                        opened: t("request.opened"), view: t("request.view"),
+                                        error: t("request.error"), limitReached: t("request.limitReached"),
+                                      }}
+                                    />
+                                  ) : (
+                                    // The server starts a conversation only for the need's author
+                                    // (request-worker-conversation.ts). A colleague who may shortlist
+                                    // is told so instead of being given a button that always refuses.
+                                    <p className="text-meta text-text-muted" data-testid="scout-contact-author-only">
+                                      {t("request.authorOnly")}
+                                    </p>
+                                  )
                                 ) : inConversation || interestDoor ? null : (
                                   <p className="text-meta text-text-muted" data-testid={`scout-shortlist-first-${h.workerId}`}>
                                     {t("request.shortlistFirst")}
@@ -1097,16 +1106,25 @@ export default async function CompanyScoutingPage({
                       ? (result.candidates.find((c) => c.workerId === oc.workerId)?.shortlistStatus ?? null)
                       : null,
                   ) ? (
-                    <RequestCommunicationButton
-                      locale={locale}
-                      requestId={selected}
-                      workerId={oc.workerId}
-                      labels={{
-                        button: t("request.button"), opening: t("request.opening"),
-                        opened: t("request.opened"), view: t("request.view"),
-                        error: t("request.error"), limitReached: t("request.limitReached"),
-                      }}
-                    />
+                    result?.kind === "ok" && result.demand.ownedByCaller ? (
+                      <RequestCommunicationButton
+                        locale={locale}
+                        requestId={selected}
+                        workerId={oc.workerId}
+                        labels={{
+                          button: t("request.button"), opening: t("request.opening"),
+                          opened: t("request.opened"), view: t("request.view"),
+                          error: t("request.error"), limitReached: t("request.limitReached"),
+                        }}
+                      />
+                    ) : (
+                      // The server starts a conversation only for the need's author
+                      // (request-worker-conversation.ts). A colleague who may shortlist
+                      // is told so instead of being given a button that always refuses.
+                      <p className="text-meta text-text-muted" data-testid="scout-contact-author-only">
+                        {t("request.authorOnly")}
+                      </p>
+                    )
                   ) : result?.kind === "ok" && result.candidates.some((c) => c.workerId === oc.workerId) ? (
                     <p
                       className="text-meta text-text-muted"
@@ -1364,19 +1382,28 @@ export default async function CompanyScoutingPage({
                           the worker is on the shortlist; until then the page
                           says what to do — the shortlist control is below. */}
                       {isShortlistedForContact(c.shortlistStatus) ? (
-                        <RequestCommunicationButton
-                          locale={locale}
-                          requestId={result.demand.id}
-                          workerId={c.workerId}
-                          labels={{
-                            button: t("request.button"),
-                            opening: t("request.opening"),
-                            opened: t("request.opened"),
-                            view: t("request.view"),
-                            error: t("request.error"),
-                            limitReached: t("request.limitReached"),
-                          }}
-                        />
+                        result.demand.ownedByCaller ? (
+                          <RequestCommunicationButton
+                            locale={locale}
+                            requestId={result.demand.id}
+                            workerId={c.workerId}
+                            labels={{
+                              button: t("request.button"),
+                              opening: t("request.opening"),
+                              opened: t("request.opened"),
+                              view: t("request.view"),
+                              error: t("request.error"),
+                              limitReached: t("request.limitReached"),
+                            }}
+                          />
+                        ) : (
+                          // The server starts a conversation only for the need's author
+                          // (request-worker-conversation.ts). A colleague who may shortlist
+                          // is told so instead of being given a button that always refuses.
+                          <p className="text-meta text-text-muted" data-testid="scout-contact-author-only">
+                            {t("request.authorOnly")}
+                          </p>
+                        )
                       ) : inConversation || interestDoor ? null : (
                         // A conversation that already exists is the fact: no
                         // "shortlist first" under it (scouting walk 2026-10-09);

@@ -9239,6 +9239,7 @@
       "view": "Open conversation",
       "error": "Couldn't open the conversation. Please try again.",
       "limitReached": "Daily limit for new conversations reached. Try again tomorrow.",
+      "authorOnly": "Only the person who posted this need can start the conversation.",
       "shortlistFirst": "Add the worker to your shortlist first, then you can request to communicate."
     },
     "how": {

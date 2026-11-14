@@ -13,7 +13,9 @@ describe("scouting: the request-to-communicate button matches its server gate", 
     // The server gate (requestWorkerConversationAction) refuses a worker who is
     // not on the owner's shortlist; offering the button earlier produced a
     // generic error and no conversation (production walk 2026-10-01).
-    expect(page).toMatch(/isShortlistedForContact\(c\.shortlistStatus\)\s*\?\s*\(\s*<RequestCommunicationButton/);
+    // Inside the shortlist condition the button is further limited to the need's
+    // author (scouting-contact-author-only.test.ts).
+    expect(page).toMatch(/isShortlistedForContact\(c\.shortlistStatus\)\s*\?\s*\(\s*(result\.demand\.ownedByCaller\s*\?\s*\(\s*)?<RequestCommunicationButton/);
     expect(page).toMatch(/request\.shortlistFirst/);
   });
 

@@ -9239,6 +9239,7 @@
       "view": "Otwórz rozmowę",
       "error": "Nie udało się otworzyć rozmowy. Spróbuj ponownie.",
       "limitReached": "Osiągnięto dzienny limit nowych rozmów. Spróbuj ponownie jutro.",
+      "authorOnly": "Rozmowę może rozpocząć tylko osoba, która dodała tę potrzebę.",
       "shortlistFirst": "Najpierw dodaj osobę do krótkiej listy, wtedy możesz poprosić o rozmowę."
     },
     "how": {
