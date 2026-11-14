@@ -20,7 +20,17 @@ const CATALOGUE_GOALS = new Set(["work"]);
  * `nav-card-icons.ts`); nothing is spelled here. Mounted on the public home; the
  * signed-in home (Lane A2) mounts the same component.
  */
-export async function GoalNavigation({ headingLevel = "h2" }: { headingLevel?: "h1" | "h2" }) {
+export async function GoalNavigation({
+  headingLevel = "h2",
+  phoneLayout = "rail",
+  phoneMore,
+  lead,
+}: {
+  headingLevel?: "h1" | "h2";
+  phoneLayout?: "rail" | "grid";
+  phoneMore?: { readonly ids: readonly string[]; readonly label: string };
+  lead?: string;
+}) {
   const [t, tNav, tProf, locale] = await Promise.all([
     getTranslations("siteNav"),
     getTranslations("common.nav"),
@@ -37,6 +47,9 @@ export async function GoalNavigation({ headingLevel = "h2" }: { headingLevel?: "
     <GoalNavigator
       locale={locale}
       headingLevel={headingLevel}
+      phoneLayout={phoneLayout}
+      phoneMore={phoneMore}
+      lead={lead}
       goals={PUBLIC_INTENTS.map((intent) => ({
         id: intent.id,
         href: goalHref(intent.id),
@@ -47,7 +60,9 @@ export async function GoalNavigation({ headingLevel = "h2" }: { headingLevel?: "
         hasCatalogue: CATALOGUE_GOALS.has(intent.id),
         functions: intent.links.map((link) => ({
           id: link.id,
-          href: link.href,
+          // A link to a fragment of the landing is a fragment of THIS page
+          // here: a plain in-page link, announced by the browser.
+          href: link.href.startsWith("/#") ? link.href.slice(1) : link.href,
           label: t(`links.${link.id}`),
           note: link.account ? t("nav.signInWhenOpen") : t("nav.opensNow"),
           iconKey: FUNCTION_ICONS[link.id as keyof typeof FUNCTION_ICONS],
