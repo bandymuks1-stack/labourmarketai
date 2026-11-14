@@ -116,6 +116,10 @@ export const CLIENT_MESSAGE_ROOTS = [
   "organizationCapabilities",
   // Roster ingestion panel on /dashboard/company (people-import-panel).
   "peopleImport",
+  // The work behind an organization's record (HistoryContextBlock). It renders
+  // inside client sections (the profile's organization history), so its words
+  // must reach the browser or the person reads raw keys.
+  "historyContext",
   "opportunities",
   "playercards",
   "productivityUnits",

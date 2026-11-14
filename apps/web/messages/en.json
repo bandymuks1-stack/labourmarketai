@@ -79,6 +79,7 @@
     "fitStrong": "strong fit",
     "fitPossible": "possible fit",
     "openBoard": "Open platform requests",
+    "openInternships": "Internships and apprenticeships",
     "missing": "What you are missing",
     "missingFromOpportunities": "Asked for by the opportunities above, not yet in your records:",
     "missingFromProfession": "Usual for your direction, not yet in your records:",
@@ -394,7 +395,7 @@
   },
   "commercial": {
     "pageTitle": "Commercial",
-    "pageIntro": "Your proposals and contracts, linked to demand and projects. Invoices and payments are recorded in Finance.",
+    "pageIntro": "Your proposals and contracts in one place. Invoices and payments are recorded in Finance.",
     "preApply": "Commercial CRM will be available once the commercial update is applied.",
     "proposalsTitle": "Proposals",
     "honestNote": "A proposal moves draft → sent → accepted/rejected only when you set it. Nothing is sent to anyone automatically.",
@@ -2802,7 +2803,7 @@
         "fieldNeedSummary": "Request summary",
         "fieldNeedSummaryPlaceholder": "Briefly what you are looking for.",
         "fieldCountry": "Country",
-        "fieldCountryPlaceholder": "e.g. LT",
+        "fieldCountryPlaceholder": "Choose a country",
         "fieldLocation": "Location / region",
         "fieldLocationPlaceholder": "e.g. Vilnius",
         "fieldRole": "Role / work type",
@@ -4220,7 +4221,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "Continue with LinkedIn",
-      "continueWithFacebook": "Continue with Facebook"
+      "continueWithFacebook": "Continue with Facebook",
+      "inAppBrowser": "You are in an app's built-in browser, where Google sign-in often doesn't work. Open this page in your phone's browser (Safari or Chrome), or use your email and password below."
     },
     "legalNotice": {
       "signup": "By creating an account you confirm that you have read the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>.",
@@ -4242,7 +4244,9 @@
         "cancelled": "Sign-in was cancelled. Nothing happened to your account.",
         "unknown": "Couldn't sign in. Please try again.",
         "link_expired": "This confirmation link has expired or was already used. If you already confirmed your email, just sign in. Otherwise request a new link below.",
-        "confirmed_sign_in": "Your email is confirmed. This device didn't start the signup, so sign in here to continue."
+        "confirmed_sign_in": "Your email is confirmed. This device didn't start the signup, so sign in here to continue.",
+        "confirm_link_opened": "This confirmation link has been opened. Your email is most likely confirmed already, so try signing in. If that doesn't work, request a new link below.",
+        "provider_error": "The sign-in service couldn't complete this sign-in, and trying again will probably end the same way. Sign in the way you first registered, or with your email and password."
       },
       "emailNotConfirmed": "Your email isn't confirmed yet. Open the confirmation link we sent you, or request a new one below."
     },
@@ -4434,6 +4438,7 @@
       "country_search_empty": "No country found. Try another name.",
       "error_country_required": "Please choose a country.",
       "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
+      "role_step_hint": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "What is your profession or work experience?",
       "profession_placeholder": "Type a profession or field of work",
       "profession_add": "Add",
@@ -9248,6 +9253,7 @@
       "view": "Open conversation",
       "error": "Couldn't open the conversation. Please try again.",
       "limitReached": "Daily limit for new conversations reached. Try again tomorrow.",
+      "authorOnly": "Only the person who posted this need can start the conversation.",
       "shortlistFirst": "Add the worker to your shortlist first, then you can request to communicate."
     },
     "how": {
@@ -9329,7 +9335,8 @@
       "title": "Narrow the list",
       "availableNow": "Available now",
       "clear": "Clear filters",
-      "noMatches": "No candidates match the selected filters."
+      "noMatches": "No candidates match the selected filters.",
+      "noMatchesCountry": "No one in the visible supply is in {country} yet. Show everyone, or broaden the need."
     },
     "pool": {
       "factsUnreadable": "Some of what these people have recorded could not be read just now, so this order is not reliable. Nobody here has been shown as having less than they do — the facts behind the comparison are simply missing. Reload in a moment.",
@@ -10117,6 +10124,7 @@
         "accommodation": "Accommodation",
         "transport": "Transport",
         "tool": "Required tools",
+        "opportunityType": "Opportunity type",
         "activeCount": "Active filters: {count}",
         "reset": "Reset filters"
       },
@@ -10588,7 +10596,7 @@
   },
   "workerIntake": {
     "title": "Worker intake",
-    "subtitle": "Tell us your trade and availability, then create your free profile to save it — nothing is published automatically.",
+    "subtitle": "Tell us your trade and availability to check your details. This form saves nothing — to be found by employers, create your free profile and add them there.",
     "fullName": "Full name",
     "profession": "Sector & work type",
     "professionPlaceholder": "Choose your sector and work type",
@@ -10618,7 +10626,7 @@
     "submit": "Check my details",
     "aiBadge": "AI suggestion",
     "aiNotVerified": "Review before saving — nothing is saved automatically.",
-    "aiDisabled": "Nothing from this form has been saved, and no automatic suggestion is available right now. To save your details, create your free worker profile below.",
+    "aiDisabled": "Nothing from this form has been saved, and no automatic suggestion is available right now. To be found by employers, create your free worker profile below and enter your details there.",
     "aiHeadline": "Suggested headline",
     "aiSkills": "Suggested skills",
     "aiMissing": "Still missing",
@@ -10711,14 +10719,14 @@
     "aiNone": "No suggestion was produced — please review your details.",
     "statusInvalid": "Some details need fixing. Please check the form.",
     "statusError": "Something went wrong. Please try again.",
-    "bridgeNote": "Sending the form submits your inquiry — no account needed. A free account lets you follow and manage it, post jobs and save candidates. Already have one? Sign in.",
+    "bridgeNote": "Sending the form submits your inquiry — no account needed. A free company account with the same e-mail address can take the inquiry over once you have shown that the address is yours, then post jobs and save candidates. Already have one? Sign in.",
     "bridgeSignup": "Create a free account",
     "bridgeLogin": "Already have an account? Sign in",
     "autoSuggested": "Suggested from your description — please check and adjust if needed. Nothing is submitted automatically.",
     "preparedTitle": "Your inquiry is prepared",
     "preparedBody": "We've organised your inquiry. To submit it for follow-up, create a free account or sign in below — then it reaches the team.",
     "receivedTitle": "Inquiry received",
-    "receivedBody": "We've received your inquiry and are keeping it for follow-up with you. To view and manage it, create an account or sign in below.",
+    "receivedBody": "We've received your inquiry and keep it for follow-up with you. To see it in an account, create a company account or sign in with the same e-mail address you entered here. Once you have shown that the address is yours, the inquiry appears among the inquiries in your account and you can take it over there. It is not linked automatically, and an account with another address does not see it.",
     "partnerRouteTitle": "For construction inquiries — a partner-company route",
     "partnerRouteBody": "If a suitable direct worker match isn't available yet, for construction inquiries we may first recommend contacting our partner company UAB “Nonstop Group” (LT) — the platform's operator. This can help coordinate documents, responsibilities and onboarding faster, with a human coordinating each step."
   },
