@@ -2266,6 +2266,7 @@
         "accommodation": "Indkvartering",
         "transport": "Transport",
         "tool": "Nødvendigt værktøj",
+        "opportunityType": "Mulighedstype",
         "activeCount": "Aktive filtre: {count}",
         "reset": "Nulstil filtre"
       },

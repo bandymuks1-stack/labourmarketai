@@ -3,6 +3,7 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { CLIENT_MESSAGE_ROOTS } from "@/lib/i18n/client-messages";
 import { activeLocales } from "@/lib/i18n/config";
 
 /**
@@ -82,4 +83,13 @@ describe("historyContext words exist in every active locale", () => {
       }
     });
   }
+});
+
+describe("historyContext words reach the browser", () => {
+  // The block renders inside client sections (the profile's organization
+  // history). Without its namespace in the client pick, every label printed
+  // as a raw key ("historyContext.source") on the person's own profile.
+  it("the client message pick ships the historyContext namespace", () => {
+    expect(CLIENT_MESSAGE_ROOTS).toContain("historyContext");
+  });
 });

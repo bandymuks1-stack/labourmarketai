@@ -79,6 +79,7 @@
     "fitStrong": "starke Übereinstimmung",
     "fitPossible": "mögliche Übereinstimmung",
     "openBoard": "Plattform-Anfragen öffnen",
+    "openInternships": "Praktika und Ausbildungsplätze",
     "missing": "Was Ihnen fehlt",
     "missingFromOpportunities": "Von den Chancen oben verlangt, noch nicht in Ihren Aufzeichnungen:",
     "missingFromProfession": "Üblich für Ihre Richtung, noch nicht in Ihren Aufzeichnungen:",
@@ -10121,6 +10122,7 @@
         "accommodation": "Unterkunft",
         "transport": "Transport",
         "tool": "Benötigte Werkzeuge",
+        "opportunityType": "Art der Chance",
         "activeCount": "Aktive Filter: {count}",
         "reset": "Filter zurücksetzen"
       },

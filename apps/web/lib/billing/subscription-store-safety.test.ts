@@ -136,6 +136,27 @@ describe("upsertSubscription — ordering", () => {
     expect(row.currency).toBe("eur");
   });
 
+  it("a one-time payment keeps its amount and outcome although it has no saved price (pilot pass, 2026-10-23)", async () => {
+    const calls = installFakeAdmin((c) => (c.op === "select" ? { data: null } : {}));
+    const pass: SubscriptionUpsert = {
+      ...SUB, providerSubscriptionId: "pilotpass_cs_live_1", providerPriceId: null,
+      unitAmountCents: 100, currency: "eur", cancelAtPeriodEnd: true, lastPaymentStatus: "succeeded",
+    };
+    expect(await upsertSubscription(pass)).toBe("ok");
+    const row = calls.find((c) => c.op === "upsert")!.args[0] as Record<string, unknown>;
+    expect(row.unit_amount_cents).toBe(100);
+    expect(row.currency).toBe("eur");
+    expect(row.last_payment_status).toBe("succeeded");
+    expect(row).not.toHaveProperty("provider_price_id");
+  });
+
+  it("a subscription write never sets the payment outcome itself — its invoice events do", async () => {
+    const calls = installFakeAdmin((c) => (c.op === "select" ? { data: null } : {}));
+    expect(await upsertSubscription({ ...SUB })).toBe("ok");
+    const row = calls.find((c) => c.op === "upsert")!.args[0] as Record<string, unknown>;
+    expect(row).not.toHaveProperty("last_payment_status");
+  });
+
   it("a fresh row applies (no existing) and the legacy caller shape still works", async () => {
     const calls = installFakeAdmin((c) => (c.op === "select" ? { data: null } : {}));
     const legacy: SubscriptionUpsert = { ...SUB, eventId: undefined, eventCreated: undefined, providerPriceId: undefined, unitAmountCents: undefined, currency: undefined };

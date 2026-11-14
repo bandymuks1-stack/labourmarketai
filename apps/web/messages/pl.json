@@ -79,6 +79,7 @@
     "fitStrong": "silne dopasowanie",
     "fitPossible": "możliwe dopasowanie",
     "openBoard": "Otwórz zapytania platformy",
+    "openInternships": "Staże i praktyki zawodowe",
     "missing": "Czego Ci brakuje",
     "missingFromOpportunities": "Wymagane przez powyższe możliwości, jeszcze nieobecne w Twoich zapisach:",
     "missingFromProfession": "Typowe dla Twojego kierunku, jeszcze nieobecne w Twoich zapisach:",
@@ -10121,6 +10122,7 @@
         "accommodation": "Zakwaterowanie",
         "transport": "Dojazd",
         "tool": "Wymagane narzędzia",
+        "opportunityType": "Rodzaj możliwości",
         "activeCount": "Aktywne filtry: {count}",
         "reset": "Wyczyść filtry"
       },

@@ -752,6 +752,7 @@ export default async function VerifiedCvPage({
         orgName: e.orgName,
         title: e.title,
         relationshipLabel: tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship,
+        practice: e.kind === "practice",
       });
       const from = e.orgName ? monthYear(e.startedAt) : statedDateLabel(e.startedAt, "start", locale, "month");
       const to = !e.endedAt
@@ -851,6 +852,7 @@ export default async function VerifiedCvPage({
           orgName: e.orgName,
           title: e.title,
           relationshipLabel: tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship,
+          practice: e.kind === "practice",
         });
         const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
         const key = `own:${e.id ?? i}`;

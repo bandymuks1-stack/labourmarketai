@@ -183,9 +183,23 @@ export async function LearningCompassSection({
               ))}
             </ul>
           )}
-          <Link href="/dashboard/opportunities" className="text-xs font-medium text-text-primary underline-offset-4 hover:underline" data-testid="compass-open-board">
-            {t("openBoard")} →
-          </Link>
+          {/* The student's own door to practice places (owner 2026-11-14,
+              group 4: a dedicated internship discovery path). It is the ONE
+              board narrowed by the type the employer stated — the same
+              filters, the same interest button and the same conversation
+              with the employer — never a second listing engine. */}
+          <div className="flex flex-wrap gap-x-4">
+            <Link
+              href="/dashboard/opportunities?opportunityType=internship"
+              className="inline-flex min-h-11 items-center text-xs font-medium text-text-primary underline-offset-4 hover:underline"
+              data-testid="compass-open-internships"
+            >
+              {t("openInternships")} →
+            </Link>
+            <Link href="/dashboard/opportunities" className="inline-flex min-h-11 items-center text-xs font-medium text-text-primary underline-offset-4 hover:underline" data-testid="compass-open-board">
+              {t("openBoard")} →
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-col gap-1" data-testid="compass-missing">

@@ -3,6 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getTranslations } from "next-intl/server";
 
+import { readRecentDeliveryReports } from "@/lib/email/bounce-reader";
 import { guardedSendTransactionalEmail } from "@/lib/email/send-ledger-store";
 import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
 import { activeLocales } from "@/lib/i18n/config";
@@ -139,4 +140,37 @@ export async function runInvitationDeliveryRetry(input: {
       });
   const health = await readInvitationDeliveryHealth(admin, 24);
   return { kind: "retry", report, health, alerts: health ? deliveryAlerts(health) : [] };
+}
+
+export type BounceRunResult =
+  | { readonly kind: "not_configured" }
+  | { readonly kind: "failed"; readonly reason: string }
+  | {
+      readonly kind: "bounces";
+      readonly scanned: number;
+      readonly reports: number;
+      readonly outcomes: Readonly<Record<string, number>>;
+    };
+
+/**
+ * BOUNCE RECONCILIATION (owner correction 2026-11-13 item 6): read recent delivery reports from
+ * the sender mailbox (read-only) and mark OUR messages by Message-ID — 'failed' → BOUNCED (and no
+ * further automatic retry), 'delivered' → DELIVERED_CONFIRMED. Idempotent; sends nothing.
+ */
+export async function runBounceReconciliation(): Promise<BounceRunResult> {
+  const read = await readRecentDeliveryReports();
+  if (read.status === "not_configured") return { kind: "not_configured" };
+  if (read.status === "failed") return { kind: "failed", reason: read.reason };
+  const admin = createAdminClient();
+  const outcomes: Record<string, number> = {};
+  for (const f of read.facts) {
+    const r = await asAny(admin).rpc("record_invitation_dsn_v1", {
+      p_message_id: f.messageId,
+      p_action: f.action,
+      p_status: f.status,
+    });
+    const key = r.error ? (r.error.code === "PGRST202" || r.error.code === "42883" ? "needs_migration" : "error") : String(r.data ?? "error");
+    outcomes[key] = (outcomes[key] ?? 0) + 1;
+  }
+  return { kind: "bounces", scanned: read.scanned, reports: read.facts.length, outcomes };
 }
