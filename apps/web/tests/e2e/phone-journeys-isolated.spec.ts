@@ -112,7 +112,8 @@ for (const phone of PHONES) {
   const headline = `Tiler and waterproofer ${phone.name} ${RUN}`;
   const message = `Hello from a ${phone.name} px phone ${RUN}`;
   const answer = `Answer to the ${phone.name} px phone ${RUN}`;
-  const s: { workerId: string; conversationId: string } = { workerId: "", conversationId: "" };
+  /** profileId is the auth/profile id; workerId is `workers.id`, which interest rows reference. */
+  const s: { profileId: string; workerId: string; conversationId: string } = { profileId: "", workerId: "", conversationId: "" };
 
   test.describe(`at ${phone.viewport.width} × ${phone.viewport.height}`, () => {
     test(`M-1 (${phone.name}). a new worker opens their profile from the avatar menu and saves a public headline`, async ({ browser }) => {
@@ -120,7 +121,7 @@ for (const phone of PHONES) {
       await signUp(page, BASE, worker);
       await onboard(page, "work", workerName);
       await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
-      s.workerId = await userId(worker);
+      s.profileId = await userId(worker);
       await fitsTheScreen(page, "the worker's home");
 
       await accountMenu(page, "account-menu-profile-link");
@@ -135,8 +136,9 @@ for (const phone of PHONES) {
       await section.getByTestId("profile-public-headline").fill(headline);
       await section.getByTestId("profile-public-summary-save").tap();
       await expect(section.getByTestId("profile-public-summary-saved"), "the headline is saved").toBeVisible({ timeout: 30_000 });
-      const rows = sql<{ headline: string | null }>(`select headline from public.workers where profile_id = ${lit(s.workerId)}`);
+      const rows = sql<{ id: string; headline: string | null }>(`select id, headline from public.workers where profile_id = ${lit(s.profileId)}`);
       expect(rows.map((r) => r.headline), "the headline is stored on the worker").toEqual([headline]);
+      s.workerId = rows[0]!.id;
       await ctx.close();
     });
 
@@ -207,7 +209,7 @@ for (const phone of PHONES) {
         .poll(
           () =>
             sql<{ body: string }>(
-              `select body from public.conversation_messages where conversation_id = ${lit(s.conversationId)} and author_id = ${lit(s.workerId)}`,
+              `select body from public.conversation_messages where conversation_id = ${lit(s.conversationId)} and author_id = ${lit(s.profileId)}`,
             ).map((r) => r.body),
           { message: "the worker's message is stored in that conversation", timeout: 30_000 },
         )
