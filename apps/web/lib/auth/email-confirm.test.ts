@@ -142,3 +142,14 @@ describe("classifyExchangeFailure", () => {
     expect(classifyExchangeFailure(null, true)).toBe("exchange_failed");
   });
 });
+
+describe("classifyMissingCode — a callback reached with nothing to verify", () => {
+  it("on the e-mail confirmation return it is a re-sent link: sign in, not a fault", async () => {
+    const { classifyMissingCode } = await import("./email-confirm");
+    expect(classifyMissingCode(true)).toBe("confirm_link_opened");
+  });
+  it("anywhere else it stays a failed sign-in", async () => {
+    const { classifyMissingCode } = await import("./email-confirm");
+    expect(classifyMissingCode(false)).toBe("missing_code");
+  });
+});

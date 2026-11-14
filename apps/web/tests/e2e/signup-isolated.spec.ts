@@ -133,6 +133,77 @@ test("S-3. an agency signs up through the form and its organization is an agency
   expect(orgs.length, "the agency's organization is stored").toBeGreaterThan(0);
 });
 
+test("S-3b. a student signs up, names where they study, and lands on their learning compass with the study stored", async ({ page }) => {
+  const address = email("student");
+  await signUp(page, address);
+  await page.getByTestId("onboarding-intent-student").click();
+  await expect(page.getByTestId("onboarding-intent-student")).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill("Synthetic Signup Student");
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await expect(page.getByTestId("onboarding-student-fields")).toBeVisible();
+  await page.getByTestId("onboarding-institution").fill(`Synthetic College ${RUN}`);
+  await page.getByTestId("onboarding-program").fill("Synthetic programme");
+  await page.getByTestId("onboarding-submit").click();
+  await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
+  await expect(page.getByTestId("learning-compass"), "the student home is on the profile").toBeVisible({ timeout: 30_000 });
+  const id = await userId(address);
+  const [profile] = await db<Array<{ onboarded: boolean | null; active_role: string | null }>>(
+    `profiles?id=eq.${id}&select=onboarded,active_role`,
+  );
+  expect(profile?.onboarded).toBe(true);
+  expect(profile?.active_role, "a student is a person (worker identity), not a separate account kind").toBe("worker");
+  const studies = await db<Array<{ institution_name: string; is_current: boolean }>>(
+    `worker_education?profile_id=eq.${id}&select=institution_name,is_current`,
+  );
+  expect(studies, "exactly one study record, marked current").toEqual([
+    { institution_name: `Synthetic College ${RUN}`, is_current: true },
+  ]);
+});
+
+test("S-3c. an education institution signs up through its own door, and its organization trains people", async ({ page }) => {
+  const address = email("institution");
+  // The landing's institution door: sign-up carrying the organisation setup
+  // with the training-provider preset as its return path.
+  const door = "/dashboard/start/company?capability=training_provider";
+  await page.goto(`${BASE}/en/auth/signup?next=${encodeURIComponent(door)}`);
+  await page.locator('input[type="email"]').fill(address);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+  await page.locator('form button[type="submit"]').click();
+  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
+  await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+  // The door already said what they came for; tick it only if it is not ticked.
+  const intent = page.getByTestId("onboarding-intent-education");
+  if ((await intent.getAttribute("aria-pressed")) !== "true") await intent.click();
+  await expect(intent).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill("Synthetic Signup Lecturer");
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await page.getByTestId("onboarding-submit").click();
+  await page.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+  expect(new URL(page.url()).searchParams.get("capability"), "the preset survives sign-up and onboarding").toBe("training_provider");
+  await expect(page.getByTestId("company-setup-form")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("company-setup-legal-name").fill(`Synthetic Signup College ${RUN}`);
+  await page.getByTestId("company-setup-country").selectOption("LT");
+  await page.getByTestId("company-setup-save-draft").click();
+  const next = page.getByTestId("company-setup-next");
+  await expect(next).toBeVisible({ timeout: 30_000 });
+  const id = await userId(address);
+  const orgs = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${id}&select=id`);
+  expect(orgs.length, "the institution's organization is stored").toBeGreaterThan(0);
+  // The declaration is proven by what it opens, not by reading the table
+  // (the capability table is not readable through the REST door, by design):
+  // the form names the education home as the next door only on a confirmed
+  // declaration, and that page sends away any organization without it.
+  await expect(next).toHaveAttribute("data-first-door", "education");
+  await page.getByTestId("company-setup-go-workspace").click();
+  await page.waitForURL(/\/en\/dashboard\/company\/education/, { timeout: 60_000 });
+  await expect(page.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
+});
+
 test("S-4. an address that already has an account is sent to sign in, not to a mail that never comes", async ({ page }) => {
   await page.goto(`${BASE}/en/auth/signup`);
   await page.locator('input[type="email"]').fill(email("worker"));
@@ -334,6 +405,66 @@ test("M-0. seed: a synthetic company for the isolated mobile need journey", asyn
 });
 
 /**
+ * A-1..A-4. THE THREE SIGN-UP FAULTS OF THE 2026-11-13 TRUST AUDIT, each as the
+ * person meets it. None needs an account: they are what the sign-in page says
+ * after the auth server sends the browser back.
+ */
+test("A-1. a confirmation link that returns without a sign-in code is not reported as a fault", async ({ page }) => {
+  // What a RE-SENT confirmation link does: the auth server confirms the address
+  // and returns to the callback with nothing the server can read (the client
+  // library sends a resend without the code challenge).
+  await page.goto(`${BASE}/en/auth/callback?flow=email_confirm`);
+  await page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+  expect(new URL(page.url()).searchParams.get("error"), "the outcome names the confirmation link").toBe("confirm_link_opened");
+  const notice = page.getByTestId("login-oauth-error");
+  await expect(notice, "a calm status, not a red alert").toHaveAttribute("role", "status", { timeout: 30_000 });
+  await expect(notice, "it says what to do: sign in").toContainText(/signing in/i);
+  await expect(page.getByTestId("login-resend-confirmation"), "a new link can be requested right here").toBeVisible();
+});
+
+test("A-2. a bare callback with nothing in it is still reported as a failed sign-in", async ({ page }) => {
+  await page.goto(`${BASE}/en/auth/callback`);
+  await page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+  expect(new URL(page.url()).searchParams.get("error")).toBe("missing_code");
+  await expect(page.getByTestId("login-oauth-error")).toHaveAttribute("role", "alert", { timeout: 30_000 });
+});
+
+test("A-3. a provider failure that a retry cannot fix says what to do instead", async ({ page }) => {
+  await page.goto(`${BASE}/en/auth/callback?error=server_error&error_code=unexpected_failure&error_description=Database+error+saving+new+user`);
+  await page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+  expect(new URL(page.url()).searchParams.get("error")).toBe("provider_error");
+  const alert = page.getByTestId("login-oauth-error");
+  await expect(alert).toBeVisible({ timeout: 30_000 });
+  await expect(alert, "not the bare 'please try again'").not.toHaveText("Couldn't sign in. Please try again.");
+  await expect(alert, "it names the way that works").toContainText(/email and password/i);
+  await expect(alert, "the provider's own free text is never shown").not.toContainText(/database error/i);
+});
+
+test("A-4. inside an app's built-in browser the sign-up and sign-in pages say Google sign-in needs the phone's browser", async ({ browser }) => {
+  const facebookApp =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [FBAN/FBIOS;FBAV/470.0.0.30.109;FBDV/iPhone14,5;FBSN/iOS;FBSV/17.5;IABMV/1]";
+  const inApp = await browser.newContext({ userAgent: facebookApp, viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true });
+  const plain = await browser.newContext({ viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true });
+  try {
+    for (const path of ["/en/auth/signup", "/en/auth/login"]) {
+      const inside = await inApp.newPage();
+      await inside.goto(`${BASE}${path}`);
+      await expect(inside.getByTestId("auth-inapp-browser-notice"), `${path}: the notice shows inside the app's browser`).toBeVisible({ timeout: 30_000 });
+      await expect(inside.locator('input[name="email"]'), `${path}: e-mail sign-in stays available`).toBeVisible();
+      await inside.close();
+      const outside = await plain.newPage();
+      await outside.goto(`${BASE}${path}`);
+      await expect(outside.locator('input[name="email"]')).toBeVisible({ timeout: 30_000 });
+      await expect(outside.getByTestId("auth-inapp-browser-notice"), `${path}: an ordinary browser sees no notice`).toHaveCount(0);
+      await outside.close();
+    }
+  } finally {
+    await inApp.close();
+    await plain.close();
+  }
+});
+
+/**
  * P-1. THE WAY FORWARD IS ON SCREEN ON A PHONE (trust and sign-up audit,
  * 2026-11-13). Measured before the fix: the role step's Continue sat 1.7–2.1
  * screens down and choosing a card did not bring it into view; the profile
@@ -429,6 +560,110 @@ for (const phone of [
   });
 }
 
+/**
+ * P-3. THE BAR NEVER HIDES WHAT A PERSON IS WORKING ON (independent review of the
+ * phone bar, 2026-11-14, three findings). On the smallest phone, on the profile
+ * step: (1) with a refusal showing above the buttons the bar is at its tallest,
+ * and the end of the form must still be clear of it — the step reserves the
+ * bar's measured height, not a fixed guess; (2) every field that takes focus
+ * ends up above the bar; (3) the country list, opened with its field low on
+ * the screen, is drawn over the bar, not under it.
+ */
+test("P-3. onboarding on a phone: the bar covers neither the end of the form, a focused field, nor an open list (360x560)", async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 360, height: 560 }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  try {
+    await signUp(page, email("phonebar360"));
+    await page.evaluate(() => {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+    });
+    await page.goto(`${BASE}/en/onboarding`);
+    await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+    // "I study": the one choice whose profile step can refuse IN THE BAR (a missing name or
+    // country is said beside its own field; a missing institution is said above the button).
+    await page.getByTestId("onboarding-intent-student").tap();
+    await page.getByTestId("onboarding-intents-continue").click();
+    await expect(page.getByTestId("onboarding-display-name")).toBeVisible({ timeout: 30_000 });
+    const bar = page.getByTestId("onboarding-action-bar");
+    expect(await bar.evaluate((el) => getComputedStyle(el).position), "the profile step's bar is fixed on a phone").toBe("fixed");
+    const barBox = () => bar.evaluate((el) => ({ top: Math.round(el.getBoundingClientRect().top), height: Math.round(el.getBoundingClientRect().height) }));
+    const quiet = await barBox();
+
+    // (1) A refusal makes the bar taller: name and country given, the institution left empty.
+    await page.getByTestId("onboarding-display-name").fill("QA-SYNTHETIC Phone bar");
+    await page.getByTestId("onboarding-country").tap();
+    await page.getByRole("option", { name: /Lithuania/ }).first().click();
+    await expect(page.getByTestId("onboarding-institution"), "the study choice asks for an institution").toBeVisible();
+    await page.getByTestId("onboarding-submit").click();
+    await expect(bar.getByRole("alert"), "the refusal is said in the bar, above the button").toBeVisible({ timeout: 15_000 });
+    const loud = await barBox();
+    expect(loud.height, "the bar grows with the refusal").toBeGreaterThan(quiet.height);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const formEnd = await bar.evaluate((el) => {
+      const form = el.closest("form");
+      if (!form) return null;
+      // The last thing in the form that is not the bar itself.
+      const rest = [...form.querySelectorAll<HTMLElement>("input, select, textarea, button, [role=combobox], label, p")].filter((n) => !el.contains(n) && n.getClientRects().length > 0);
+      const last = rest.reduce<number>((max, n) => Math.max(max, n.getBoundingClientRect().bottom), 0);
+      return Math.round(last);
+    });
+    console.info(`[onboarding-phone] ${JSON.stringify({ phone: "360x560", step: "profile-bar", barQuiet: quiet, barWithRefusal: loud, formEndAtPageBottom: formEnd })}`);
+    expect(formEnd, "the profile form was found").not.toBeNull();
+    expect(formEnd!, "with the refusal showing, the end of the form is clear of the bar").toBeLessThanOrEqual(loud.top);
+
+    // (2) Whatever takes focus is brought above the bar.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const covered = await bar.evaluate(async (el) => {
+      const form = el.closest("form");
+      if (!form) return ["no form"];
+      const fields = [...form.querySelectorAll<HTMLElement>("input:not([type=hidden]), select, textarea, [role=combobox]")].filter(
+        (n) => !el.contains(n) && n.getClientRects().length > 0 && !(n as HTMLInputElement).disabled,
+      );
+      const bad: string[] = [];
+      for (const field of fields) {
+        // As a keyboard user arrives: programmatic focus counts as keyboard focus (:focus-visible).
+        field.focus({ focusVisible: true } as FocusOptions);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const r = field.getBoundingClientRect();
+        const barTop = el.getBoundingClientRect().top;
+        if (r.bottom > barTop || r.top < 0) bad.push(`${field.getAttribute("data-testid") ?? field.getAttribute("name") ?? field.tagName}: ${Math.round(r.top)}–${Math.round(r.bottom)} against bar top ${Math.round(barTop)}`);
+      }
+      return [`fields:${fields.length}`, ...bad];
+    });
+    console.info(`[onboarding-phone] ${JSON.stringify({ phone: "360x560", step: "profile-focus", result: covered })}`);
+    expect(Number(covered[0]?.split(":")[1] ?? 0), "the profile step has fields to focus").toBeGreaterThan(2);
+    expect(covered.slice(1), "no focused field is left under the bar or above the screen").toEqual([]);
+
+    // (3) The country list opened low on the screen is drawn over the bar.
+    await page.keyboard.press("Escape");
+    const country = page.getByTestId("onboarding-country");
+    await country.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      // Put the field just above the bar, so the list must open across it.
+      const bar = document.querySelector('[data-testid="onboarding-action-bar"]')!.getBoundingClientRect();
+      window.scrollBy(0, r.bottom - (bar.top - 12));
+    });
+    await country.tap();
+    const option = page.getByRole("option").first();
+    await expect(option, "the country list opens").toBeVisible({ timeout: 15_000 });
+    const overlap = await option.evaluate((el) => {
+      const list = (el.closest('[role="listbox"]') ?? el) as HTMLElement;
+      const l = list.getBoundingClientRect();
+      const bar = document.querySelector('[data-testid="onboarding-action-bar"]')!.getBoundingClientRect();
+      const y = Math.min(l.bottom, window.innerHeight) - 6;
+      const crossesBar = y > bar.top && l.top < bar.bottom;
+      const top = crossesBar ? document.elementFromPoint(l.left + l.width / 2, y) : null;
+      const popover = list.parentElement ?? list;
+      return { crossesBar, listTop: Math.round(l.top), listBottom: Math.round(l.bottom), barTop: Math.round(bar.top), onTop: crossesBar ? (top !== null && popover.contains(top) ? "list" : "bar-or-other") : "n/a" };
+    });
+    console.info(`[onboarding-phone] ${JSON.stringify({ phone: "360x560", step: "profile-list", overlap })}`);
+    if (overlap.crossesBar) expect(overlap.onTop, "where the open list crosses the bar, the list is on top").toBe("list");
+    await page.keyboard.press("Escape");
+  } finally {
+    await ctx.close();
+  }
+});
 
 test("P-2. on a desktop the onboarding buttons stay where they were, in the page flow", async ({ browser }) => {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
@@ -445,4 +680,60 @@ test("P-2. on a desktop the onboarding buttons stay where they were, in the page
   } finally {
     await ctx.close();
   }
+});
+
+// ── Student / intern (#3322 item 6): the SAME account and worker record ─────
+
+test("ST-1. a student signs up, keeps one worker record with no company, and the school reaches the profile, the CV and the board", async ({ page }) => {
+  const address = email("student");
+  const school = `Synthetic Vocational School ${RUN}`;
+  await signUp(page, address);
+  await page.getByTestId("onboarding-intent-student").click();
+  await expect(page.getByTestId("onboarding-intent-student")).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill("Synthetic Signup Student");
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await expect(page.getByTestId("onboarding-student-fields")).toBeVisible();
+  await page.getByTestId("onboarding-institution").fill(school);
+  await page.getByTestId("onboarding-program").fill("Hospitality and catering");
+  await page.getByTestId("onboarding-submit").click();
+  await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
+
+  // The stored rows, not the page, are the proof.
+  const id = await userId(address);
+  const [profile] = await db<Array<{ onboarded: boolean | null; active_role: string | null }>>(
+    `profiles?id=eq.${id}&select=onboarded,active_role`,
+  );
+  expect(profile?.onboarded).toBe(true);
+  expect(profile?.active_role, "a student is a worker identity, not a separate kind of account").toBe("worker");
+  const workers = await db<Array<{ id: string }>>(`workers?profile_id=eq.${id}&select=id`);
+  expect(workers.length, "exactly one worker record").toBe(1);
+  const orgs = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${id}&select=id`);
+  expect(orgs.length, "a new student starts without a company").toBe(0);
+  const edu = await db<Array<{ institution_name: string; is_current: boolean }>>(
+    `worker_education?profile_id=eq.${id}&select=institution_name,is_current`,
+  );
+  expect(edu.map((e) => e.institution_name), "the school is stored once, as current").toEqual([school]);
+  expect(edu[0]?.is_current).toBe(true);
+
+  // Profile: the school is listed and marked as the person's own statement.
+  // The editor sits in the collapsed CV details; its anchor opens it (the same
+  // way the profile-cv-history walk reaches it). A real load, not a hash-only
+  // navigation on the page the tab is already on.
+  await page.goto(`${BASE}/en/dashboard/profile#cv-education`);
+  await page.reload();
+  await expect(page.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("worker-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("worker-education-self-stated")).toBeVisible();
+
+  // CV with zero work history: the education block is there, labelled the same way.
+  await page.goto(`${BASE}/en/cv`);
+  await expect(page.getByTestId("cv-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("cv-education-self-stated")).toBeVisible();
+
+  // The board opens for a student exactly as for any worker: no "not a worker" wall.
+  await page.goto(`${BASE}/en/dashboard/opportunities?opportunityType=internship`);
+  await expect(page.getByTestId("opportunities-no-worker")).toHaveCount(0);
+  expect(page.url()).toContain("/en/dashboard/opportunities");
 });
