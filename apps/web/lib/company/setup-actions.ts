@@ -95,8 +95,12 @@ export async function saveCompanySetupAction(
         ctx.organizations.find((o) => o.legacyCompanyId === r.companyId)?.id ??
         null;
       if (orgId) {
-        await declareOrganizationCapabilities(orgId, [capability]);
-        capabilityDeclared = true;
+        // The declaration REPORTS a refusal ({ ok: false }) instead of
+        // throwing, so "declared" is its answer, never an assumption — an
+        // institution whose capability was refused must see the hint, not a
+        // workspace without its education home and no explanation.
+        const declared = await declareOrganizationCapabilities(orgId, [capability]);
+        capabilityDeclared = declared.ok;
       }
     } catch (e) {
       console.error("[saveCompanySetupAction] capability preset failed", {

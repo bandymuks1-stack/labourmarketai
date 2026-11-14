@@ -172,7 +172,15 @@ describe("the sentence never enters telemetry", () => {
 });
 
 describe("the sentence reaches the conversation through the existing return path", () => {
-  const hook = stripComments(read(HOOK));
+  // The carry half (return path, sign-in links) was split from the reading
+  // half on 2026-11-12 so the landing can render the field without loading
+  // the router; the hook re-exports it. Same contract, read where it lives.
+  const hook = stripComments(read("lib/marketing/public-entry-carry.ts"));
+  it("the reading module still exposes the carry half as its own API", () => {
+    expect(stripComments(read(HOOK))).toMatch(
+      /export \{[\s\S]*entryDoorHref,[\s\S]*entryReturnPath,[\s\S]*\} from "\.\/public-entry-carry"/,
+    );
+  });
 
   it("uses lib/auth/redirect's buildReturnValue and the conversation root", () => {
     expect(hook).toContain('from "@/lib/auth/redirect"');
