@@ -539,6 +539,9 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "app/api/internal/commercial-requests/v1/route.ts",
       // 2026-10-29: Agentai OS daily growth export — aggregate counts only, small cells rolled up.
       "app/api/internal/growth-daily/v1/route.ts",
+      // 2026-11-14: registrations daily, aggregate counts only through the service_role-only
+      // lm_registrations_daily_v1 RPC; reads no chat table.
+      "app/api/internal/registrations-daily/v1/route.ts",
       "components/admin/product-metrics-section.tsx",
       "components/admin/vacancy-sources-section.tsx",
       "lib/admin/billing-actions.ts",
