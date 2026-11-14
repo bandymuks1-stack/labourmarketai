@@ -9,7 +9,6 @@ import {
   isolatedStack,
   lit,
   onboard,
-  recordJournal,
   setUpCompany,
   signUp,
   sql,
@@ -410,13 +409,44 @@ test("T-8. the organization's CV lists its project, and the project leads back t
 });
 
 test("T-8b. the organization's CV carries its people's journal work as one figure, with no name", async () => {
-  expect(s.coOrgId, "the company exists").toBeTruthy();
-  // A synthetic worker of the company records one day of work.
-  await recordJournal(as(W1), BASE, `Prepared the banquet cold kitchen, 6 hours (${RUN})`);
+  expect(s.coOrgId && s.w1Id, "the company and its worker exist").toBeTruthy();
+  // The worker's engagement with THE COMPANY (they are also in its team, a
+  // second organization): the contract files an entry under an organization
+  // only through its engagement.
+  const engagement = sql<{ id: string }>(
+    `select id from public.engagement_contexts
+      where profile_id = ${lit(s.w1Id)} and organization_id = ${lit(s.coOrgId)}
+        and relationship_slug = 'employee' and status = 'active'`,
+  )[0]?.id;
+  expect(engagement, "the worker is the company's employee").toBeTruthy();
 
-  // The contract: an entry belongs to an organization only through its
-  // engagement. Count what the company holds that way (it may be none when
-  // the entry went to another of the worker's workspaces).
+  // A synthetic worker records one day of work. With two organizations the
+  // form does not guess (Rule C): the person chooses the company.
+  const w = as(W1);
+  await w.goto(`${BASE}/en/dashboard/journal`);
+  const main = w.getByRole("main");
+  await main.getByTestId("journal-quick-record-text").fill(`Prepared the banquet cold kitchen, 6 hours (${RUN})`);
+  await main.getByTestId("journal-quick-record-understand").click();
+  await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
+  const context = main.getByTestId("worklog-context");
+  await expect(context, "two organizations: the form asks which one").toBeVisible({ timeout: 30_000 });
+  await context.selectOption(engagement!);
+  // The company's project, if the form asks (one project is filed on its own).
+  const project = main.getByTestId("worklog-project");
+  if (await project.isVisible()) {
+    const values = await project.locator("option").evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
+    await project.selectOption(values.includes(s.projectId) ? s.projectId : "none");
+  }
+  await main.getByTestId("worklog-save").click();
+  await main.getByTestId("worklog-confirm").click({ timeout: 30_000 });
+  const done = main.getByTestId("worklog-done");
+  await expect(done.or(main.getByTestId("worklog-error")).or(main.getByTestId("worklog-blocked"))).toBeVisible({
+    timeout: 30_000,
+  });
+  await expect(done, "the journal entry is saved").toBeVisible();
+
+  // The entry is the company's through the worker's engagement, and nobody
+  // has approved it yet.
   const held =
     sql<{ n: number }>(
       `select count(*)::int as n from public.journal_entries j
@@ -424,6 +454,7 @@ test("T-8b. the organization's CV carries its people's journal work as one figur
         where e.organization_id = ${lit(s.coOrgId)}
           and j.deleted_at is null and j.superseded_by is null`,
     )[0]?.n ?? 0;
+  expect(held, "the entry is filed under the company").toBeGreaterThanOrEqual(1);
 
   const co = as(CO);
   await co.goto(`${BASE}/en/dashboard/company/history`);
@@ -431,12 +462,11 @@ test("T-8b. the organization's CV carries its people's journal work as one figur
   // The read works under the company's own session: never "could not be read".
   await expect(co.getByTestId("company-work-history-journal-unavailable")).toHaveCount(0);
   const journal = co.getByTestId("company-work-history-journal");
-  if (held === 0) {
-    await expect(journal, "no entry under the company, no journal figure").toHaveCount(0);
-    return;
-  }
   await expect(journal).toBeVisible();
   await expect(journal).toHaveAttribute("data-people", "1");
+  // Recorded, not confirmed: the organization has not approved it.
+  await expect(journal).toHaveAttribute("data-confirmed-hours", "0");
+  expect(Number(await journal.getAttribute("data-hours")), "the recorded hours reach the figure").toBeGreaterThan(0);
   await expect(co.getByTestId("company-work-history-journal-basis")).toContainText(String(held));
   // One aggregate: no person is named on the organization's figure.
   for (const name of [W1_NAME, W2_NAME]) await expect(journal).not.toContainText(name);
