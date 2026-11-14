@@ -6,6 +6,7 @@ import {
   professionRedirectHref,
 } from "@/lib/vacancy-store/public-vacancy-profession-match";
 import { readCountryParam } from "@/lib/vacancy-store/public-vacancy-country-param";
+import { publisherTermsForTypedWord } from "@/lib/vacancy-store/public-vacancy-source-terms";
 import { activeLocales } from "@/lib/i18n/config";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadata, buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
@@ -267,6 +268,21 @@ const EMPTY: L = {
   pl: "Żadna oferta pracy nie pasuje teraz do tego wyszukiwania. Spróbuj ogólniejszej nazwy stanowiska.",
 };
 
+/**
+ * A typed job word the catalogue has no profession for (`slaugytoja`,
+ * `Buchhalter`): the same job as each publisher writes it, every language side
+ * by side, each a normal search (lib/vacancy-store/public-vacancy-source-terms.ts).
+ * An action, not a disclaimer: without it the visitor read "0 vacancies".
+ */
+const SAME_JOB_SEARCH: L = {
+  en: "Search the same job:",
+  lt: "Ieškok to paties darbo:",
+  ru: "Искать ту же работу:",
+  nl: "Zoek dezelfde functie:",
+  de: "Dieselbe Tätigkeit suchen:",
+  pl: "Szukaj tej samej pracy:",
+};
+
 /** Honest state: the feature is not switched on — NOT "there are no jobs". */
 const NOT_PROVISIONED: L = {
   en: "The public job board is not enabled yet.",
@@ -504,6 +520,11 @@ export default async function JobsPage({
   const result = showSaved
     ? { status: "ok" as const, vacancies: [], totalCount: 0, hasMore: false }
     : (earlyBoardSearch ?? (await runBoardSearch()));
+
+  // The same job in the publishers' own words, when the typed word has no
+  // catalogue profession. Empty for every other search.
+  const publisherTerms =
+    !profession && query && !wantsSaved ? publisherTermsForTypedWord(query) : [];
 
   const pageHref = (p: number) => {
     const qs = new URLSearchParams();
@@ -754,6 +775,23 @@ export default async function JobsPage({
           <p role="status" className="mt-6 text-sm text-text-muted">
             {new Intl.NumberFormat(active).format(result.totalCount)} {RESULTS[active]}
           </p>
+          {publisherTerms.length > 0 && (
+            <p
+              data-testid="public-jobs-same-job-search"
+              className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-text-secondary"
+            >
+              <span>{SAME_JOB_SEARCH[active]}</span>
+              {publisherTerms.map((t) => (
+                <Link
+                  key={`${t.language}:${t.term}`}
+                  href={`/jobs?q=${encodeURIComponent(t.term)}`}
+                  className="inline-block py-1.5 underline underline-offset-4 hover:text-text-primary"
+                >
+                  <span lang={t.language}>{t.term}</span> ({displayLanguageName(t.language, active)})
+                </Link>
+              ))}
+            </p>
+          )}
 
           {result.vacancies.length === 0 ? (
             <div className="mt-8 rounded-md border border-dashed p-6 text-sm text-text-muted">

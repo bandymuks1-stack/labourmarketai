@@ -57,7 +57,15 @@ function matchFolded(q: string, folded: readonly { slug: string; l: string }[]):
     if (q.length >= 4 && o.l.startsWith(q)) return true;
     // An inflected form of the label ("valytoja", "kepeju"): the label minus
     // its 2-letter ending is the stem the declension keeps.
-    if (o.l.length >= 6 && !o.l.includes(" ") && q.startsWith(o.l.slice(0, -2))) {
+    // One word, about as long as the label: `kierownik projektu` (project manager) shares
+    // the stem of `kierowca` (driver) and was sent to the drivers (production, 2026-11-14).
+    if (
+      o.l.length >= 6 &&
+      !o.l.includes(" ") &&
+      !q.includes(" ") &&
+      q.length <= o.l.length + 3 &&
+      q.startsWith(o.l.slice(0, -2))
+    ) {
       return true;
     }
     return false;
@@ -88,7 +96,18 @@ const TYPED_WORDS: Readonly<Record<string, readonly string[]>> = {
   cook: ["küchenchef", "szef kuchni", "шеф-повар"],
   software_developer: ["entwickler", "softwareentwickler", "ontwikkelaar", "softwareontwikkelaar"],
   teacher: ["учитель"],
-  warehouse_worker: ["sandėlininkas", "sandėlininkė", "magazynier", "кладовщик"],
+  warehouse_worker: [
+    "sandėlininkas",
+    "sandėlininkė",
+    "magazynier",
+    "кладовщик",
+    // 2026-11-14 production: each of these answered 0 on a board with 1,166 such ads.
+    "warehouse operative",
+    "warehouse operator",
+    "warehouse associate",
+  ],
+  cleaner: ["janitor"],
+  caregiver: ["care assistant", "care worker", "carer"],
 };
 
 const TYPED_WORD_SLUG: ReadonlyMap<string, string> = new Map(
