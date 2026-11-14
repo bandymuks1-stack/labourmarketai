@@ -1557,11 +1557,11 @@ Not filled yet: `Map: stages`. `Map: blockers` holds open PRs linked to function
 | 10.27 | Žemėlapiai | Matai vietas žemėlapyje. | darbuotojas, ieškantis darbo, įmonė |  | isidarbinimas | eisena | nenustatyta |  | registras |
 | 11.1 | Mokymo įstaiga ir besimokantysis | Mokymo įstaiga susieja su savo besimokančiais. | mokymo įstaiga, besimokantis | /dashboard/company/education | mokymasis | eisena | nenustatyta |  | kodas |
 | 11.2 | Programos ir srautai | Mokymo įstaiga kuria programas ir grupes. | mokymo įstaiga | /dashboard/company/education | mokymasis | eisena | nenustatyta |  | kodas |
-| 11.3 | Mokymosi kompasas | Matai, ką mokytis toliau. | besimokantis, darbuotojas, ieškantis darbo | /dashboard/learning | mokymasis,tobulejimas,karjeros-keitimas,pirmas-darbas | eisena | nenustatyta |  | kodas |
+| 11.3 | Mokymosi kompasas | Matai, ką mokytis toliau. | besimokantis, darbuotojas, ieškantis darbo | /dashboard/profile | mokymasis,tobulejimas,karjeros-keitimas,pirmas-darbas | eisena | nenustatyta |  | kodas |
 | 11.4 | Praktikos vietos | Įmonė pasiūlo vietų praktikai. | įmonė, mokymo įstaiga, besimokantis | /dashboard/company/education | mokymasis,pirmas-darbas | eisena | nenustatyta |  | kodas |
-| 11.5 | Besimokančiųjų rezultatai | Matai, kaip sekasi besimokantiems. | mokymo įstaiga, besimokantis | /dashboard/learning | mokymasis | eisena | nenustatyta |  | kodas |
+| 11.5 | Besimokančiųjų rezultatai | Matai, kaip sekasi besimokantiems. | mokymo įstaiga, besimokantis | /dashboard/company/education | mokymasis | eisena | nenustatyta |  | kodas |
 | 11.6 | Mokymo įstaigos ataskaitos | Mokymo įstaiga gauna ataskaitas. | mokymo įstaiga | /dashboard/reports | mokymasis | eisena | nenustatyta |  | kodas |
-| 11.7 | Praktika virsta gebėjimu | Atlikta praktika parodo įgytą gebėjimą. | besimokantis, mokymo įstaiga | /dashboard/learning | mokymasis,pirmas-darbas,tobulejimas | eisena | nenustatyta |  | kodas |
+| 11.7 | Praktika virsta gebėjimu | Atlikta praktika parodo įgytą gebėjimą. | besimokantis, mokymo įstaiga | /dashboard/documents | mokymasis,pirmas-darbas,tobulejimas | eisena | nenustatyta |  | kodas |
 | 11.8 | Mokymų ir pažymėjimų sąrašas | Laikai mokymus ir pažymėjimus vienoje vietoje. | besimokantis, darbuotojas, mokymo įstaiga | /dashboard/learning | mokymasis,tobulejimas | eisena | nenustatyta | Savininkas, paskui koordinatorius | kodas |
 | 11.9 | Mokymosi peržiūra žmogaus akimis | Žmogus peržiūri mokymosi rekomendacijas. | besimokantis, mokymo įstaiga |  | mokymasis | ne | nenustatyta | Savininkas, paskui koordinatorius | registras |
 | 11.10 | Ankstesnio mokymosi pripažinimas | Pripažįstamas anksčiau įgytas mokymasis. | besimokantis, darbuotojas |  | mokymasis,karjeros-keitimas | ne | nenustatyta | Niekas dabar; savininkas, jei norės | registras |

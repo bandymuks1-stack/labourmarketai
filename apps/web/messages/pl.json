@@ -10122,6 +10122,7 @@
         "accommodation": "Zakwaterowanie",
         "transport": "Dojazd",
         "tool": "Wymagane narzędzia",
+        "opportunityType": "Rodzaj możliwości",
         "activeCount": "Aktywne filtry: {count}",
         "reset": "Wyczyść filtry"
       },

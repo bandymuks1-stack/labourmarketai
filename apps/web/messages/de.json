@@ -10122,6 +10122,7 @@
         "accommodation": "Unterkunft",
         "transport": "Transport",
         "tool": "Benötigte Werkzeuge",
+        "opportunityType": "Art der Chance",
         "activeCount": "Aktive Filter: {count}",
         "reset": "Filter zurücksetzen"
       },

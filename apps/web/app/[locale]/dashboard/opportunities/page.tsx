@@ -1095,6 +1095,16 @@ export default async function OpportunitiesPage({
                   filters.country,
                 ),
               },
+              // Internship / apprenticeship / employment … — the type the
+              // employer stated on the need. The filter was already parsed
+              // and applied from the URL but had no control and no heading,
+              // so a student could narrow the board to internships only by
+              // typing the address. The active value stays listed so it can
+              // always be switched off.
+              {
+                dim: "opportunityType",
+                values: withValues(facets.opportunityTypes, [], filters.opportunityType),
+              },
               { dim: "start", values: facets.starts },
               { dim: "accommodation", values: facets.accommodations },
               { dim: "transport", values: facets.transports },

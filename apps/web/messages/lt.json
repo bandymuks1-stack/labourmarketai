@@ -10122,6 +10122,7 @@
         "accommodation": "Apgyvendinimas",
         "transport": "Transportas",
         "tool": "Reikalingi įrankiai",
+        "opportunityType": "Galimybės tipas",
         "activeCount": "Aktyvūs filtrai: {count}",
         "reset": "Išvalyti filtrus"
       },

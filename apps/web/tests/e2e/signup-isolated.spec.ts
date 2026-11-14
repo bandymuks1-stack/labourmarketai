@@ -133,6 +133,77 @@ test("S-3. an agency signs up through the form and its organization is an agency
   expect(orgs.length, "the agency's organization is stored").toBeGreaterThan(0);
 });
 
+test("S-3b. a student signs up, names where they study, and lands on their learning compass with the study stored", async ({ page }) => {
+  const address = email("student");
+  await signUp(page, address);
+  await page.getByTestId("onboarding-intent-student").click();
+  await expect(page.getByTestId("onboarding-intent-student")).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill("Synthetic Signup Student");
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await expect(page.getByTestId("onboarding-student-fields")).toBeVisible();
+  await page.getByTestId("onboarding-institution").fill(`Synthetic College ${RUN}`);
+  await page.getByTestId("onboarding-program").fill("Synthetic programme");
+  await page.getByTestId("onboarding-submit").click();
+  await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
+  await expect(page.getByTestId("learning-compass"), "the student home is on the profile").toBeVisible({ timeout: 30_000 });
+  const id = await userId(address);
+  const [profile] = await db<Array<{ onboarded: boolean | null; active_role: string | null }>>(
+    `profiles?id=eq.${id}&select=onboarded,active_role`,
+  );
+  expect(profile?.onboarded).toBe(true);
+  expect(profile?.active_role, "a student is a person (worker identity), not a separate account kind").toBe("worker");
+  const studies = await db<Array<{ institution_name: string; is_current: boolean }>>(
+    `worker_education?profile_id=eq.${id}&select=institution_name,is_current`,
+  );
+  expect(studies, "exactly one study record, marked current").toEqual([
+    { institution_name: `Synthetic College ${RUN}`, is_current: true },
+  ]);
+});
+
+test("S-3c. an education institution signs up through its own door, and its organization trains people", async ({ page }) => {
+  const address = email("institution");
+  // The landing's institution door: sign-up carrying the organisation setup
+  // with the training-provider preset as its return path.
+  const door = "/dashboard/start/company?capability=training_provider";
+  await page.goto(`${BASE}/en/auth/signup?next=${encodeURIComponent(door)}`);
+  await page.locator('input[type="email"]').fill(address);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+  await page.locator('form button[type="submit"]').click();
+  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
+  await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+  // The door already said what they came for; tick it only if it is not ticked.
+  const intent = page.getByTestId("onboarding-intent-education");
+  if ((await intent.getAttribute("aria-pressed")) !== "true") await intent.click();
+  await expect(intent).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill("Synthetic Signup Lecturer");
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await page.getByTestId("onboarding-submit").click();
+  await page.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+  expect(new URL(page.url()).searchParams.get("capability"), "the preset survives sign-up and onboarding").toBe("training_provider");
+  await expect(page.getByTestId("company-setup-form")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("company-setup-legal-name").fill(`Synthetic Signup College ${RUN}`);
+  await page.getByTestId("company-setup-country").selectOption("LT");
+  await page.getByTestId("company-setup-save-draft").click();
+  const next = page.getByTestId("company-setup-next");
+  await expect(next).toBeVisible({ timeout: 30_000 });
+  const id = await userId(address);
+  const orgs = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${id}&select=id`);
+  expect(orgs.length, "the institution's organization is stored").toBeGreaterThan(0);
+  // The declaration is proven by what it opens, not by reading the table
+  // (the capability table is not readable through the REST door, by design):
+  // the form names the education home as the next door only on a confirmed
+  // declaration, and that page sends away any organization without it.
+  await expect(next).toHaveAttribute("data-first-door", "education");
+  await page.getByTestId("company-setup-go-workspace").click();
+  await page.waitForURL(/\/en\/dashboard\/company\/education/, { timeout: 60_000 });
+  await expect(page.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
+});
+
 test("S-4. an address that already has an account is sent to sign in, not to a mail that never comes", async ({ page }) => {
   await page.goto(`${BASE}/en/auth/signup`);
   await page.locator('input[type="email"]').fill(email("worker"));
