@@ -732,7 +732,6 @@
     "legalGroup": "[EN] Legal",
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
-    "rexora": "Bygget sammen: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
@@ -890,7 +889,8 @@
     "themeToLight": "Lyst tema",
     "how": "Slik fungerer det",
     "menuOpen": "Meny",
-    "menuClose": "Lukk meny"
+    "menuClose": "Lukk meny",
+    "market": "Arbeidsmarked"
   },
   "pages": {
     "agencies": {
@@ -2086,6 +2086,16 @@
         "into": "Raden er slått sammen med",
         "canonical": "det beholdte prosjektet",
         "includes": "{count, plural, one {Omfatter # sammenslått prosjektrad — postene vises her.} other {Omfatter # sammenslåtte prosjektrader — postene vises her.}}"
+      },
+      "teams": {
+        "title": "Team på dette prosjektet",
+        "members": "{n, plural, one {# person} other {# personer}}",
+        "personTeam": "Team: {team}",
+        "unnamed": "Team uten navn",
+        "unnamedMember": "Medlem",
+        "noMembers": "Ingen medlemmer akkurat nå.",
+        "unavailable": "Teamene kunne ikke lastes inn. Prøv igjen.",
+        "manage": "Endre team"
       }
     },
     "workerView": {
@@ -2973,6 +2983,7 @@
     "servicesTitle": "Hva personen kan",
     "servicesEmpty": "Ingenting tilbudt ennå",
     "servicesUnavailable": "Kunne ikke laste tilbudte tjenester",
+    "sharedAfterWork": "Tjenester, arbeidsbilder og registrert arbeid vises når dere jobber sammen.",
     "serviceRemote": "Eksternt",
     "photoAlt": "Bilde av utført arbeid",
     "historyTitle": "Importert historikk",
@@ -4831,6 +4842,42 @@
         "goods": "Varer"
       },
       "lasting": "Erfaringen og mulighetene dine forblir tilgjengelige — når du bytter jobb, prosjekt eller land."
+    },
+    "v3": {
+      "lead": "For arbeidstakere, arbeidsgivere og tjenesteleverandører i alle yrker og bransjer. Registrering og grunnleggende publisering av et behov er gratis.",
+      "moreChoices": "Flere valg",
+      "or": "eller beskriv det med egne ord",
+      "needFree": "Du kan sende en forespørsel uten å registrere deg. Det er gratis å sende den; vilkår og pris for tjenestene avtales separat.",
+      "market": {
+        "title": "Stillingsannonser i markedet",
+        "line": "{adverts} aktive stillingsannonser fra eksterne kilder. Annonsene oppgir {employers} ulike arbeidsgivernavn.",
+        "source": "Annonsene er samlet inn fra offentlige eksterne stillingskilder. Dette er ikke antallet arbeidsgivere eller kunder som er registrert hos LabourMarket.ai. Annonsene ble sist oppdatert: {date}.",
+        "none": "Markedsdata er ikke tilgjengelige for øyeblikket.",
+        "search": "Søk i stillingsannonser"
+      },
+      "adverts": {
+        "title": "Noen aktive annonser",
+        "sub": "Du kan se annonsene uten konto. Logg inn for å se arbeidsgiveren, stedet, hele beskrivelsen og hvordan du søker."
+      },
+      "how": {
+        "title": "Slik fungerer det",
+        "s1": {
+          "title": "Finn og avtal",
+          "body": "Finn arbeid, arbeidstakere eller tjenester, og administrer tilbud og avtaler på plattformen."
+        },
+        "s2": {
+          "title": "Registrer arbeidet",
+          "body": "Du kan registrere utført arbeid i arbeidsjournalen."
+        },
+        "s3": {
+          "title": "Bekreft",
+          "body": "En leder i arbeidsgiverens organisasjon bekrefter registreringene. En oppdragsgiver kan godkjenne arbeid som er sendt inn til oppdragsgiveren; dette registreres separat. Bekreftet arbeid blir dokumentasjon på erfaringen din."
+        },
+        "s4": {
+          "title": "Deres data og personvern",
+          "body": "Assistenten kommer med forslag; dere tar avgjørelsene. Dere bestemmer om arbeidsgivere kan finne dere, og om kontaktopplysningene deles. Arbeidsoppføringer er synlige for organisasjonen dere arbeider for."
+        }
+      }
     }
   },
   "workspace": {
@@ -5338,7 +5385,7 @@
     },
     "language": {
       "translatedFrom": "[EN] Translated from {language}",
-      "originalIn": "[EN] Advertisement language: {language}",
+      "originalIn": "Annonsens språk: {language}",
       "showOriginal": "[EN] Show original",
       "hideOriginal": "[EN] Hide original",
       "machineNote": "[EN] Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
@@ -7932,10 +7979,10 @@
   },
   "consent": {
     "banner": {
-      "text": "Vi måler sidebruk, og hvilken kampanje som brakte deg hit, bare hvis du tillater det.",
+      "text": "Måledata som er lagret i nettleseren deres, og kampanjeinformasjon bruker vi bare med deres samtykke.",
       "accept": "Tillat måling",
       "refuse": "Avslå",
-      "more": "Mer",
+      "more": "Mer om informasjonskapsler",
       "label": "Valg om bruksmåling"
     },
     "control": {
@@ -7946,5 +7993,82 @@
       "allow": "Tillat",
       "refuse": "Avslå"
     }
+  },
+  "siteNav": {
+    "education": "For utdanningsinstitusjoner",
+    "signUp": "Registrer deg",
+    "trigger": "Hovedmål",
+    "account": "For innloggede brukere",
+    "intents": {
+      "work": {
+        "title": "Jeg søker arbeid",
+        "description": "Søk arbeid og presenter erfaringen din.",
+        "short": "Finn arbeid"
+      },
+      "workers": {
+        "title": "Jeg søker arbeidstakere",
+        "description": "Oppgi hvilke arbeidstakere du trenger, hvor og når.",
+        "short": "Finn arbeidstakere"
+      },
+      "services": {
+        "title": "Jeg tilbyr tjenester",
+        "description": "Presenter tjenestene dine, finn oppdrag og svar på forespørsler.",
+        "short": "Tilby tjenester"
+      },
+      "partners": {
+        "title": "Jeg søker partnere",
+        "description": "Finn partnere og hold samarbeidet ved like.",
+        "short": "Finn partnere"
+      },
+      "agencies": {
+        "title": "For byråer",
+        "description": "Administrer byråets kunder og kandidattilbud.",
+        "short": "For byråer"
+      },
+      "contractors": {
+        "short": "Jeg søker tjenester eller utførende",
+        "title": "Jeg søker tjenester eller utførende",
+        "description": "Beskriv hvilken tjeneste eller utførende du trenger."
+      }
+    },
+    "links": {
+      "jobs": "Stillingsannonser",
+      "workOpportunities": "Jobbmuligheter",
+      "createCv": "Lag en gratis CV",
+      "workAbroad": "Arbeid i utlandet",
+      "forWorkers": "Slik fungerer det for arbeidstakere",
+      "companyNeed": "Beskriv behovet ditt",
+      "forCompanies": "Slik fungerer det for bedrifter",
+      "labourMarket": "Arbeidsmarked per land",
+      "myServices": "Dine tjenester",
+      "serviceRequests": "Tjenesteforespørsler",
+      "marketListings": "Markedsannonser",
+      "commercial": "Tilbud og kontrakter",
+      "network": "Ditt nettverk",
+      "partnerWithUs": "Bli partner",
+      "forAgencies": "Slik fungerer det for byråer",
+      "setUpAgency": "Registrer byrået ditt",
+      "b2bEnquiry": "Forespørsel om bedriftstjenester (B2B)",
+      "projectEnquiry": "Forespørsel om individuelt prosjekt"
+    },
+    "assistant": "Spør assistenten",
+    "start": {
+      "searchLabel": "Søk i stillingsannonser",
+      "searchPlaceholder": "Stillingstittel eller søkeord",
+      "searchSubmit": "Søk",
+      "viewAll": "Alle jobber"
+    },
+    "nav": {
+      "heading": "Hva vil du gjøre?",
+      "swipe": "Sveip",
+      "close": "Lukk",
+      "functions": "Handlinger",
+      "professions": "Yrker",
+      "opensNow": "Krever ingen konto",
+      "signInWhenOpen": "Krever innlogging",
+      "allSectors": "Alle bransjer",
+      "fullList": "Full liste"
+    },
+    "more": "Mer"
   }
 }

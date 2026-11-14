@@ -456,6 +456,17 @@ audit.
   still-usable addressed invitation, and grants nothing: acceptance still needs
   the session e-mail to equal the invited address (`20261003151100`).
 
+- **2026-11-13 — `lib/invitations/delivery-attempts.ts` and
+  `lib/invitations/delivery-retry-run.ts`** (invitation delivery reliability, owner
+  P0). The first records WHY a send failed through one service_role-only function,
+  `record_invitation_delivery_attempt_v1` (reason code, class, next retry — never an
+  address, never `delivery_status`). The second is the CRON_SECRET-only scheduled retry of
+  TEMPORARY failures of already-authorised partner referral sends; it calls only
+  service_role-only functions from migration `20261113190000` (RED, unapplied at the time
+  of writing) plus the existing `reissue_external_referral_v1` /
+  `mark_external_referral_delivery_v1`. Neither reads or writes a table directly or
+  touches a chat table. Pinned in the `chat-visibility-rls.test.ts` caller inventory.
+
 - **2026-09-17 — `lib/invitations/external-referral-receive.ts` and
   `lib/invitations/public-preview.ts`** (universal invitation / referral
   network v1). Both call service_role-ONLY SECURITY DEFINER functions from
