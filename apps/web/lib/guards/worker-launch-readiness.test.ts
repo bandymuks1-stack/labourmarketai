@@ -46,10 +46,21 @@ describe("worker launch — manual work-experience entry (no CV required)", () =
     // Supports an ongoing/current role (no forced end date).
     expect(src).toContain("expCurrent");
   });
+  it("the form says what the engagement was, so a placement is not stored as employment", () => {
+    // The save function defaults a missing kind to `employee`; the form sent
+    // none, so study practice or volunteering typed here became a job claim.
+    expect(src).toMatch(/isCurrent: expCurrent,\s+relationship: expKind,/);
+    expect(src).toContain('data-testid="add-experience-kind"');
+    expect(src).toContain("SELF_DECLARED_RELATIONSHIPS.map((slug) => (");
+    // The row shown before the page reloads carries the chosen kind too.
+    expect(src).not.toMatch(/orgName: title,\s+relationship: "employee",/);
+  });
+
   it("every active locale defines the add-experience keys with parity", () => {
     const keys = [
       "addExperienceTitle",
       "expTitleLabel",
+      "expKindLabel",
       "expTitlePlaceholder",
       "expStartLabel",
       "expEndLabel",

@@ -2049,6 +2049,7 @@
     "addError": "Could not add. Please try again.",
     "addExperienceTitle": "Add work experience",
     "expTitleLabel": "Job title",
+    "expKindLabel": "Kind of engagement",
     "expTitlePlaceholder": "e.g. welder, nurse, warehouse worker, developer",
     "expStartLabel": "From (month / year)",
     "expEndLabel": "To (month / year)",
