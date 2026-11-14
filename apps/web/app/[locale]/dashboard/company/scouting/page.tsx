@@ -920,19 +920,24 @@ export default async function CompanyScoutingPage({
                                     {t("request.shortlistFirst")}
                                   </p>
                                 )}
-                                <ProposeBookingButton
-                                  locale={locale}
-                                  requestId={result.demand.id}
-                                  workerId={h.workerId}
-                                  countryCode={null}
-                                  labels={{
-                                    open: t("booking.open"), startDate: t("booking.startDate"),
-                                    note: t("booking.note"), send: t("booking.send"),
-                                    sending: t("booking.sending"), sent: t("booking.sent"),
-                                    unavailable: t("booking.unavailable"), notEntitled: t("booking.notEntitled"),
-                                    error: t("booking.error"), cancel: t("booking.cancel"),
-                                  }}
-                                />
+                                {/* Proposing dates is the need author's act: the database function
+                                    refuses anyone else ("Not your demand"). A colleague is not
+                                    given a button that always fails; the line above says who can. */}
+                                {result.demand.ownedByCaller ? (
+                                  <ProposeBookingButton
+                                    locale={locale}
+                                    requestId={result.demand.id}
+                                    workerId={h.workerId}
+                                    countryCode={null}
+                                    labels={{
+                                      open: t("booking.open"), startDate: t("booking.startDate"),
+                                      note: t("booking.note"), send: t("booking.send"),
+                                      sending: t("booking.sending"), sent: t("booking.sent"),
+                                      unavailable: t("booking.unavailable"), notEntitled: t("booking.notEntitled"),
+                                      error: t("booking.error"), cancel: t("booking.cancel"),
+                                    }}
+                                  />
+                                ) : null}
                                 <RequestContactDetailsButton
                                   locale={locale}
                                   requestId={result.demand.id}
@@ -1133,19 +1138,24 @@ export default async function CompanyScoutingPage({
                       {t("request.shortlistFirst")}
                     </p>
                   ) : null}
-                  <ProposeBookingButton
-                    locale={locale}
-                    requestId={selected}
-                    workerId={oc.workerId}
-                    countryCode={null}
-                    labels={{
-                      open: t("booking.open"), startDate: t("booking.startDate"),
-                      note: t("booking.note"), send: t("booking.send"),
-                      sending: t("booking.sending"), sent: t("booking.sent"),
-                      unavailable: t("booking.unavailable"), notEntitled: t("booking.notEntitled"),
-                      error: t("booking.error"), cancel: t("booking.cancel"),
-                    }}
-                  />
+                  {/* Proposing dates is the need author's act: the database function
+                      refuses anyone else ("Not your demand"). A colleague is not
+                      given a button that always fails; the line above says who can. */}
+                  {result?.kind === "ok" && result.demand.ownedByCaller ? (
+                    <ProposeBookingButton
+                      locale={locale}
+                      requestId={selected}
+                      workerId={oc.workerId}
+                      countryCode={null}
+                      labels={{
+                        open: t("booking.open"), startDate: t("booking.startDate"),
+                        note: t("booking.note"), send: t("booking.send"),
+                        sending: t("booking.sending"), sent: t("booking.sent"),
+                        unavailable: t("booking.unavailable"), notEntitled: t("booking.notEntitled"),
+                        error: t("booking.error"), cancel: t("booking.cancel"),
+                      }}
+                    />
+                  ) : null}
                   <ScoutingShortlistButtons
                     locale={locale}
                     requestId={selected}
@@ -1415,24 +1425,29 @@ export default async function CompanyScoutingPage({
                           {t("request.shortlistFirst")}
                         </p>
                       )}
-                      <ProposeBookingButton
-                        locale={locale}
-                        requestId={result.demand.id}
-                        workerId={c.workerId}
-                        countryCode={c.readiness.countryFit === "match" ? p.location : null}
-                        labels={{
-                          open: t("booking.open"),
-                          startDate: t("booking.startDate"),
-                          note: t("booking.note"),
-                          send: t("booking.send"),
-                          sending: t("booking.sending"),
-                          sent: t("booking.sent"),
-                          unavailable: t("booking.unavailable"),
-                          notEntitled: t("booking.notEntitled"),
-                          error: t("booking.error"),
-                          cancel: t("booking.cancel"),
-                        }}
-                      />
+                      {/* Proposing dates is the need author's act: the database function
+                          refuses anyone else ("Not your demand"). A colleague is not
+                          given a button that always fails; the line above says who can. */}
+                      {result.demand.ownedByCaller ? (
+                        <ProposeBookingButton
+                          locale={locale}
+                          requestId={result.demand.id}
+                          workerId={c.workerId}
+                          countryCode={c.readiness.countryFit === "match" ? p.location : null}
+                          labels={{
+                            open: t("booking.open"),
+                            startDate: t("booking.startDate"),
+                            note: t("booking.note"),
+                            send: t("booking.send"),
+                            sending: t("booking.sending"),
+                            sent: t("booking.sent"),
+                            unavailable: t("booking.unavailable"),
+                            notEntitled: t("booking.notEntitled"),
+                            error: t("booking.error"),
+                            cancel: t("booking.cancel"),
+                          }}
+                        />
+                      ) : null}
                       {/* Contact-detail ASK (Wagon 1): the worker alone
                           answers on their privacy screen; a grant never
                           shows contact data here — server-enforced. */}
