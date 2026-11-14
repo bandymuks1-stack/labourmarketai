@@ -12138,6 +12138,7 @@ export type Database = {
         }[]
       }
       list_team_enquiries_for_my_teams_v1: { Args: never; Returns: Json }
+      lm_registrations_daily_v1: { Args: { p_day: string }; Returns: Json }
       lmc_admin_grant_existing_v1: {
         Args: {
           p_actor: string
