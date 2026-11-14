@@ -478,17 +478,29 @@ test("H-8. a current employee of the same company is untouched by all of this", 
   await onboard(mgr2, "work", `QA-SYNTHETIC Current ${RUN}`);
   await mgr2.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
   const mgr2Id = await userId(MGR2);
+  const activeHere = () =>
+    sql<{ n: number }>(
+      `select count(*)::int as n from public.engagement_contexts
+        where organization_id = ${lit(s.orgId)} and status = 'active'`,
+    )[0]!.n;
+  const before = activeHere();
+  // The row in the live table's real shape (hash_self is required), the way
+  // the product's own functions write one.
   sqlExec(
-    `insert into public.engagement_contexts (profile_id, organization_id, status, relationship_slug)
-     values (${lit(mgr2Id)}, ${lit(s.orgId)}, 'active', 'employee')`,
+    `insert into public.engagement_contexts (profile_id, organization_id, status, relationship_slug, is_primary, hash_self)
+     values (${lit(mgr2Id)}, ${lit(s.orgId)}, 'active', 'employee', false,
+             encode(extensions.digest(${lit(mgr2Id)} || ':employee:' || ${lit(s.orgId)}, 'sha256'), 'hex'))`,
+  );
+  expect(activeHere(), "the company's live relationships are its own, untouched by the claim route").toBe(
+    before + 1,
   );
   expect(
     sql<{ n: number }>(
       `select count(*)::int as n from public.engagement_contexts
-        where organization_id = ${lit(s.orgId)} and status = 'active'`,
+        where organization_id = ${lit(s.orgId)} and profile_id = ${lit(s.exId)} and status = 'active'`,
     )[0]!.n,
-    "the company's live relationships are its own, untouched by the claim route",
-  ).toBe(1);
+    "the former worker gained no live relationship",
+  ).toBe(0);
   expect(
     sql<{ n: number }>(
       `select count(*)::int as n from public.organization_people
