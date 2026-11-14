@@ -279,6 +279,9 @@ describe("app: every acceptance door the product calls is one of the gated doors
     "accept_invitation_by_id_v1", // already requires invited_email = session e-mail
     "decline_invitation_v2", // gated here
     "decline_invitation_v1", // gated here
+    // The by-id decline (20261112180000, RED draft): its own body requires a verified
+    // mailbox and invited_email = session e-mail, pinned in decline-invitation-from-list.test.ts.
+    "decline_invitation_by_id_v1",
     "get_invitation_preview_v2", // gated here
     "get_invitation_preview_v1", // gated here
   ]);
