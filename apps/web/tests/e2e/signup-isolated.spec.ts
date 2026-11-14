@@ -449,7 +449,9 @@ test("P-3. onboarding on a phone: the bar covers neither the end of the form, a 
     });
     await page.goto(`${BASE}/en/onboarding`);
     await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
-    await page.getByTestId("onboarding-intent-work").tap();
+    // "I study": the one choice whose profile step can refuse IN THE BAR (a missing name or
+    // country is said beside its own field; a missing institution is said above the button).
+    await page.getByTestId("onboarding-intent-student").tap();
     await page.getByTestId("onboarding-intents-continue").click();
     await expect(page.getByTestId("onboarding-display-name")).toBeVisible({ timeout: 30_000 });
     const bar = page.getByTestId("onboarding-action-bar");
@@ -457,7 +459,11 @@ test("P-3. onboarding on a phone: the bar covers neither the end of the form, a 
     const barBox = () => bar.evaluate((el) => ({ top: Math.round(el.getBoundingClientRect().top), height: Math.round(el.getBoundingClientRect().height) }));
     const quiet = await barBox();
 
-    // (1) A refusal makes the bar taller: submit with the required fields empty.
+    // (1) A refusal makes the bar taller: name and country given, the institution left empty.
+    await page.getByTestId("onboarding-display-name").fill("QA-SYNTHETIC Phone bar");
+    await page.getByTestId("onboarding-country").tap();
+    await page.getByRole("option", { name: /Lithuania/ }).first().click();
+    await expect(page.getByTestId("onboarding-institution"), "the study choice asks for an institution").toBeVisible();
     await page.getByTestId("onboarding-submit").click();
     await expect(bar.getByRole("alert"), "the refusal is said in the bar, above the button").toBeVisible({ timeout: 15_000 });
     const loud = await barBox();
