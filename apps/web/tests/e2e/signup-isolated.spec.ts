@@ -610,3 +610,59 @@ test("P-2. on a desktop the onboarding buttons stay where they were, in the page
     await ctx.close();
   }
 });
+
+// ── Student / intern (#3322 item 6): the SAME account and worker record ─────
+
+test("ST-1. a student signs up, keeps one worker record with no company, and the school reaches the profile, the CV and the board", async ({ page }) => {
+  const address = email("student");
+  const school = `Synthetic Vocational School ${RUN}`;
+  await signUp(page, address);
+  await page.getByTestId("onboarding-intent-student").click();
+  await expect(page.getByTestId("onboarding-intent-student")).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill("Synthetic Signup Student");
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await expect(page.getByTestId("onboarding-student-fields")).toBeVisible();
+  await page.getByTestId("onboarding-institution").fill(school);
+  await page.getByTestId("onboarding-program").fill("Hospitality and catering");
+  await page.getByTestId("onboarding-submit").click();
+  await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
+
+  // The stored rows, not the page, are the proof.
+  const id = await userId(address);
+  const [profile] = await db<Array<{ onboarded: boolean | null; active_role: string | null }>>(
+    `profiles?id=eq.${id}&select=onboarded,active_role`,
+  );
+  expect(profile?.onboarded).toBe(true);
+  expect(profile?.active_role, "a student is a worker identity, not a separate kind of account").toBe("worker");
+  const workers = await db<Array<{ id: string }>>(`workers?profile_id=eq.${id}&select=id`);
+  expect(workers.length, "exactly one worker record").toBe(1);
+  const orgs = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${id}&select=id`);
+  expect(orgs.length, "a new student starts without a company").toBe(0);
+  const edu = await db<Array<{ institution_name: string; is_current: boolean }>>(
+    `worker_education?profile_id=eq.${id}&select=institution_name,is_current`,
+  );
+  expect(edu.map((e) => e.institution_name), "the school is stored once, as current").toEqual([school]);
+  expect(edu[0]?.is_current).toBe(true);
+
+  // Profile: the school is listed and marked as the person's own statement.
+  // The editor sits in the collapsed CV details; its anchor opens it (the same
+  // way the profile-cv-history walk reaches it). A real load, not a hash-only
+  // navigation on the page the tab is already on.
+  await page.goto(`${BASE}/en/dashboard/profile#cv-education`);
+  await page.reload();
+  await expect(page.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("worker-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("worker-education-self-stated")).toBeVisible();
+
+  // CV with zero work history: the education block is there, labelled the same way.
+  await page.goto(`${BASE}/en/cv`);
+  await expect(page.getByTestId("cv-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("cv-education-self-stated")).toBeVisible();
+
+  // The board opens for a student exactly as for any worker: no "not a worker" wall.
+  await page.goto(`${BASE}/en/dashboard/opportunities?opportunityType=internship`);
+  await expect(page.getByTestId("opportunities-no-worker")).toHaveCount(0);
+  expect(page.url()).toContain("/en/dashboard/opportunities");
+});
