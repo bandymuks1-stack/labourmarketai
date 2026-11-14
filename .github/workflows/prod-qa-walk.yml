@@ -158,6 +158,22 @@ on:
           # It raises the REAL internal owner alert (nothing suppresses it) and the row stays until the owner deletes it
           # (docs/qa/need-intake-walk-cleanup.sql). Dispatch only, never in the rotation.
           - need-intake
+          # Lane F inventory 2026-11-12: "My Space" pin to home (one workspace_pins row on the synthetic worker, removed
+          # at the end) and a Swedish visitor (signed out, read-only). Dispatch only, never in the rotation.
+          - pin-to-home
+          - swedish-visitor
+      # The screen the walk runs on. `phone` runs the SAME spec, accounts and writes at
+      # 390 × 844 with touch, `phone-375` at 375 × 667 (apps/web/lib/testing/prod-qa-walk-device.ts). Automatic walks
+      # (push, schedule) are always desktop. A phone walk counts in the daily budget and
+      # obeys every brake like any other walk.
+      device:
+        description: "Screen: desktop (default), a 390 px touch phone, or a 375 px one"
+        type: choice
+        default: desktop
+        options:
+          - desktop
+          - phone
+          - phone-375
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -460,9 +476,12 @@ jobs:
           # Each of the two writing walks runs only under its own name.
           PROD_QA_SIGNUP_WALK: ${{ needs.debounce.outputs.spec == 'signup-form' && '1' || '0' }}
           PROD_QA_NEED_WALK: ${{ needs.debounce.outputs.spec == 'need-intake' && '1' || '0' }}
+          # desktop unless a person dispatched the walk for a phone (a choice input: no free text).
+          PROD_QA_DEVICE: ${{ github.event_name == 'workflow_dispatch' && inputs.device || 'desktop' }}
           SR1_READINGS_FILE: ${{ github.workspace }}/sr1-readings.jsonl
         run: |
           set -uo pipefail
+          echo "device: ${PROD_QA_DEVICE}" >> "$GITHUB_STEP_SUMMARY"
           cd apps/web
           case "${{ needs.debounce.outputs.spec }}" in
             brigade-formation) SPEC=tests/e2e/prod-brigade-formation.spec.ts ;;
@@ -534,6 +553,8 @@ jobs:
             deletion-cancel) SPEC=tests/e2e/prod-deletion-cancel.spec.ts ;;
             signup-form) SPEC=tests/e2e/prod-signup-form.spec.ts ;;
             need-intake) SPEC=tests/e2e/prod-need-intake.spec.ts ;;
+            pin-to-home) SPEC=tests/e2e/prod-pin-to-home.spec.ts ;;
+            swedish-visitor) SPEC=tests/e2e/prod-swedish-visitor.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that

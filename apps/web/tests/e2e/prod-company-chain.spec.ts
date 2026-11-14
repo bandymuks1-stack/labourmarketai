@@ -51,11 +51,17 @@ test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted 
 test.describe.configure({ mode: "serial", timeout: 240_000, retries: 0 });
 test.use({ actionTimeout: 30_000 });
 
-async function as(browser: Browser, slot: string, mobile = false): Promise<{ ctx: BrowserContext; page: Page }> {
+/**
+ * `screen`: unset = the walk's device (a desktop, or a phone when the walk is dispatched for
+ * one); "phone" / "desktop" = this step is ABOUT that screen and runs on it on every walk.
+ */
+async function as(browser: Browser, slot: string, screen?: boolean | "phone" | "desktop"): Promise<{ ctx: BrowserContext; page: Page }> {
+  const named = screen === true ? "phone" : screen || undefined;
   const ctx = await browser.newContext({
     storageState: state(slot),
     locale: "lt-LT",
-    ...(mobile ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : {}),
+    ...(named === "phone" ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : {}),
+    ...(named === "desktop" ? { viewport: { width: 1280, height: 720 } } : {}),
   });
   return { ctx, page: await ctx.newPage() };
 }
@@ -369,7 +375,9 @@ for (const { slot, org, label, kinds } of [
   { slot: "agency", org: AGENCY, label: "the agency", kinds: ["company"] as const },
 ]) {
   test(`N-1 (P0-2). ${label}: the core loop stays; the organization's doors lead "More"`, async ({ browser }) => {
-    const { ctx, page } = await as(browser, slot);
+    // The header bar and its "More" menu exist from the `md` width up, so this step is a
+    // desktop claim on every walk. The phone's own form of it is N-2 (the area sheet).
+    const { ctx, page } = await as(browser, slot, "desktop");
     await useWorkspace(page, org);
     await page.goto("/lt/dashboard/projects");
     const core = page.getByTestId("header-core-nav");

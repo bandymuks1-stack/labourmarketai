@@ -258,3 +258,71 @@ test("L-10 (11.6). the institution downloads its programme report as a CSV", asy
   expect(csv, "no learner is named in the file").not.toMatch(LEARNER);
   await close();
 });
+
+/**
+ * THE SAME TWO PEOPLE ON A PHONE (owner instruction 2026-11-14: every user
+ * group needs a signed-in scenario on a phone and on a computer). READ-ONLY:
+ * the steps above already created everything these read. Both phone widths
+ * the acceptance names (375 and 390 px).
+ */
+const PHONES = [
+  { width: 375, height: 667 },
+  { width: 390, height: 844 },
+] as const;
+
+async function onPhone(browser: Browser, slot: string, vp: { width: number; height: number }): Promise<{ page: Page; close: () => Promise<void> }> {
+  const ctx = await browser.newContext({ storageState: state(slot), locale: "lt-LT", viewport: vp, isMobile: true, hasTouch: true });
+  return { page: await ctx.newPage(), close: () => ctx.close() };
+}
+
+/** The page is never wider than the phone (no sideways scroll). */
+async function fitsPhone(page: Page, label: string): Promise<void> {
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  const m = await page.evaluate(() => ({ doc: document.documentElement.scrollWidth, vw: window.innerWidth }));
+  expect(m.doc, `${label}: the page is wider than the phone (${m.doc} > ${m.vw})`).toBeLessThanOrEqual(m.vw + 1);
+}
+
+test("L-11. the learner on a phone: the compass with the group, and the board narrowed to internships", async ({ browser }) => {
+  for (const vp of PHONES) {
+    const { page, close } = await onPhone(browser, "worker2", vp);
+    await page.goto("/lt/dashboard/profile");
+    const compass = page.getByTestId("learning-compass");
+    await expect(compass, `compass @${vp.width}`).toBeVisible({ timeout: 30_000 });
+    await expect(compass).toContainText(COHORT, { timeout: 30_000 });
+    await fitsPhone(page, `/dashboard/profile @${vp.width}`);
+
+    // "Where can I do an internship?" — the board narrowed by the stated type.
+    await page.goto("/lt/dashboard/opportunities?opportunityType=internship");
+    await fitsPhone(page, `/dashboard/opportunities @${vp.width}`);
+    const chip = page.locator('[data-testid="opportunities-filter-opportunityType"][data-active="true"]');
+    await expect(chip, `the internship filter is a visible, switch-off-able control @${vp.width}`).toBeVisible({ timeout: 30_000 });
+    const box = await chip.boundingBox();
+    expect(box && box.x + box.width, "the control is inside the phone").toBeLessThanOrEqual(vp.width);
+    const body = await page.evaluate(() => document.body.innerText);
+    expect(body, "no untranslated key is shown").not.toMatch(/discovery\.filters\./);
+    const rows = await page.locator('[data-testid^="opportunity-rank-"]').count();
+    const empty = await page.getByTestId("opportunities-filtered-empty").count();
+    console.info(`[learning] phone ${vp.width}: internship board rows=${rows} filtered-empty=${empty}`);
+    await close();
+  }
+});
+
+test("L-12. the institution on a phone: its education home, programme and learner invitation are usable", async ({ browser }) => {
+  for (const vp of PHONES) {
+    const { page, close } = await onPhone(browser, "owner", vp);
+    await page.goto("/lt/dashboard");
+    await workspace(page, ALFA);
+    await page.goto("/lt/dashboard/company/education");
+    await expect(page.getByTestId("company-education"), `education home @${vp.width}`).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(PROGRAM).first()).toBeVisible({ timeout: 30_000 });
+    await fitsPhone(page, `/dashboard/company/education @${vp.width}`);
+    for (const id of ["institution-learners-invite", "program-create"]) {
+      const el = page.getByTestId(id).first();
+      await el.scrollIntoViewIfNeeded();
+      await expect(el, `${id} @${vp.width}`).toBeVisible();
+      const box = await el.boundingBox();
+      expect(box && box.x >= 0 && box.x + box.width <= vp.width, `${id} is inside the phone @${vp.width}`).toBe(true);
+    }
+    await close();
+  }
+});

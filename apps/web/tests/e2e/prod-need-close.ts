@@ -1,3 +1,4 @@
+import { contextPanel } from "./prod-context-panel";
 import { expect, type Page } from "./prod-walk";
 
 /**
@@ -31,11 +32,17 @@ export async function closeOwnNeed(page: Page, id: string): Promise<"closed" | "
   // for every submitted need — the chat workspace's candidates result
   // (`?result=candidates&demand=`, `company.close-demand`).
   await page.goto(`/lt/dashboard?result=candidates&demand=${id}`);
+  // The candidates result is in the context panel: a sheet on a phone, opened if it is not.
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  await contextPanel(page, "open");
   const close = main.getByTestId("candidates-close-demand").filter({ visible: true }).first();
   const reopen = main.getByTestId("candidates-reopen-demand").filter({ visible: true }).first();
   await expect(close.or(reopen).first(), "the need's own close/reopen action").toBeVisible({ timeout: 60_000 });
   if (await reopen.isVisible()) return "already-closed";
   await close.click();
+  // An answer in the conversation can fold the sheet again; the outcome is read with it open.
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  await contextPanel(page, "open");
   const error = main.getByTestId("candidates-close-demand-error").first();
   await expect(reopen.or(error).first()).toBeVisible({ timeout: 30_000 });
   if (await error.isVisible()) throw new Error(`close refused: ${(await error.innerText()).slice(0, 120)}`);
