@@ -17,12 +17,34 @@ import { test, expect, type Browser, type Page } from "./prod-walk";
  *
  * Runs only in `.github/workflows/prod-qa-walk.yml` (spec=recognition-chain). One invitation per
  * run at most (the learner link); the invitation cap reports BLOCKED, never FAIL.
+ *
+ * ONE MARKED RECORD, REUSED (coordinator 2026-11-14). Nothing this chain writes can be removed:
+ * a signed-off journal entry offers no delete (and a journal row is never hard-deleted), a
+ * sign-off is append-only, and a recognition can only be revoked, which keeps the row. Until
+ * now every run therefore left three NEW permanent rows in production. The practice day and the
+ * recognition now carry one FIXED QA-SYNTHETIC text and key instead of the run id:
+ *
+ *   - the first run writes them (R-4 records, R-5 signs off, R-6 recognises);
+ *   - every later run finds them and writes NOTHING. It still proves, on that build: the
+ *     relationship and the review switch (R-1…R-3b), that Beta is still offered the signed-off
+ *     practice as citable evidence (R-6 — it needs a current approval and the right to read
+ *     it), and that the learner still sees the recognition (R-7).
+ *   - a later run does NOT prove the three writes again: the quick record, the approval in the
+ *     review queue, and `record_competency_recognition_v1`. Each such step says so in its
+ *     annotation ("reused") and in the log, so a reader never takes a reuse run for a write run.
+ *
+ * A run that stops between R-4 and R-5 removes its undecided practice day afterwards (an
+ * undecided entry does offer a delete). A run that stops after R-5 leaves a signed-off entry
+ * with no recognition; the next run finds it in Beta's evidence list and only records the
+ * recognition. The rows of runs before this change (text and key with a run id) stay: they
+ * cannot be removed either.
  */
-const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const BETA = "QA-SYNTHETIC Beta";
 const LEARNER = /QA-SYNTHETIC (Worker|mokinys)/;
-const PRACTICE = `QA-SYNTHETIC ${RUN}: praktikoje 4 valandas mūrijau blokelių pertvarą prižiūrint meistrui`;
-const RECOGNITION_KEY = `qa-synthetic-practice-${RUN}`;
+/** The fixed marker: no run id, so every run meets the same record. */
+const PRACTICE_MARK = "QA-SYNTHETIC praktikos diena (viena, naudojama pakartotinai)";
+const PRACTICE = `${PRACTICE_MARK}: praktikoje 4 valandas mūrijau blokelių pertvarą prižiūrint meistrui`;
+const RECOGNITION_KEY = "qa-synthetic-practice-reused";
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["owner", "worker2"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
@@ -46,6 +68,77 @@ async function workspace(page: Page, orgName: string): Promise<void> {
 
 let link = "";
 let practiceEntryId = "";
+/** What an earlier run left, read before anything is written (R-3c). */
+let signedOffExists = false;
+let recognitionExists = false;
+/** This run wrote the practice day / saw its approval stored: decides the clean-up. */
+let wroteEntry = false;
+let approvedThisRun = false;
+
+/** Beta's recognition form with the learner chosen, so the evidence list is theirs. */
+async function recognitionForm(page: Page) {
+  await page.goto("/lt/dashboard");
+  await workspace(page, BETA);
+  await page.goto("/lt/dashboard/company/education");
+  const form = page.getByTestId("record-recognition");
+  await expect(form).toBeVisible({ timeout: 30_000 });
+  await form.locator("summary").click();
+  const subject = form.locator('select[name="subjectProfileId"]');
+  const options = await subject.locator("option").evaluateAll((os) =>
+    (os as HTMLOptionElement[]).filter((o) => o.value).map((o) => ({ v: o.value, t: (o.textContent ?? "").trim() })),
+  );
+  const pick = (options.find((o) => LEARNER.test(o.t)) ?? (options.length === 1 ? options[0] : undefined))?.v;
+  expect(pick, `the learner is offered as the subject: ${options.map((o) => o.t).join(" | ")}`).toBeTruthy();
+  await subject.selectOption(pick!);
+  return form;
+}
+
+function reused(what: string): void {
+  test.info().annotations.push({ type: "reused", description: what });
+  console.info(`[recognition] REUSED, nothing written: ${what}`);
+}
+
+test.afterAll(async ({ browser }) => {
+  // Only an entry THIS run wrote and nobody decided can be removed; a decided one stays as evidence.
+  if (!wroteEntry || approvedThisRun || !practiceEntryId) return;
+  const { page, close } = await as(browser, "worker2");
+  try {
+    await page.goto("/lt/dashboard/journal");
+    const main = page.getByRole("main");
+    await expect(main.locator(`[data-testid="journal-entry-card-${practiceEntryId}"]`)).toBeVisible({ timeout: 30_000 });
+    const del = main.getByTestId(`journal-entry-delete-${practiceEntryId}`);
+    if ((await del.count()) === 0) {
+      console.info("[cleanup] the practice day is decided, so it stays (the next run reuses it)");
+      return;
+    }
+    if (!(await del.isVisible())) await main.getByTestId(`journal-entry-more-${practiceEntryId}`).locator("summary").first().click();
+    await del.click();
+    await main.getByTestId(`journal-entry-delete-${practiceEntryId}-yes`).click();
+    await expect(main.getByTestId(`journal-entry-deleted-${practiceEntryId}`)).toBeVisible({ timeout: 30_000 });
+    console.info("[cleanup] the undecided practice day was removed");
+  } finally {
+    await close();
+  }
+});
+
+test("R-3c. what an earlier run left: a signed-off practice day, a recognition, both or neither", async ({ browser }) => {
+  // Read-only. Decides whether R-4…R-6 write or reuse; the two facts are independent.
+  const beta = await as(browser, "owner");
+  const form = await recognitionForm(beta.page);
+  // Offered as evidence = signed off (a current approval) and readable by Beta.
+  signedOffExists = (await form.locator("label", { hasText: PRACTICE_MARK }).getByTestId("recognition-evidence-option").count()) > 0;
+  await beta.close();
+  const learner = await as(browser, "worker2");
+  await learner.page.goto("/lt/dashboard/documents");
+  await expect(learner.page.getByTestId("own-recognitions")).toBeVisible({ timeout: 30_000 });
+  const list = learner.page.getByTestId("own-recognitions-list");
+  recognitionExists = (await list.count()) > 0 && (await list.innerText()).includes(RECOGNITION_KEY);
+  await learner.close();
+  console.info(`[recognition] earlier run left: signed-off practice day=${signedOffExists} recognition=${recognitionExists}`);
+  // A recognition without the evidence it cites would be a broken record, not a state to walk past.
+  if (recognitionExists) expect(signedOffExists, "the recognition's own evidence is still signed off and readable by Beta").toBe(true);
+});
+
 
 test("R-1. Beta declares it trains people", async ({ browser }) => {
   const { page, close } = await as(browser, "owner");
@@ -137,6 +230,10 @@ test("R-3b. Beta switches review on for the learner through the audited manual d
 });
 
 test("R-4. the learner records a practice day in the Beta learning relationship", async ({ browser }) => {
+  if (signedOffExists) {
+    reused("the signed-off QA-SYNTHETIC practice day of an earlier run (the quick record is not exercised by this run)");
+    return;
+  }
   const { page, close } = await as(browser, "worker2");
   await page.goto("/lt/dashboard/journal");
   await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
@@ -168,13 +265,19 @@ test("R-4. the learner records a practice day in the Beta learning relationship"
   await expect(done.or(failed)).toBeVisible({ timeout: 45_000 });
   if (!(await done.isVisible())) throw new Error(`practice not saved: ${await failed.innerText()}`);
   await page.goto("/lt/dashboard/journal");
-  const card = page.locator('[data-testid^="journal-entry-card-"]', { hasText: RUN }).first();
+  // Newest first: the card with the marker at the top is the one just written.
+  const card = page.locator('[data-testid^="journal-entry-card-"]', { hasText: PRACTICE_MARK }).first();
   await expect(card).toBeVisible({ timeout: 30_000 });
   practiceEntryId = (await card.getAttribute("data-testid"))!.replace("journal-entry-card-", "");
+  wroteEntry = true;
   await close();
 });
 
 test("R-5. Beta signs the practice off in its review queue", async ({ browser }) => {
+  if (signedOffExists) {
+    reused("the sign-off of an earlier run (the review queue and the approval are not exercised by this run)");
+    return;
+  }
   const { page, close } = await as(browser, "owner");
   await page.goto("/lt/dashboard");
   await workspace(page, BETA);
@@ -191,26 +294,21 @@ test("R-5. Beta signs the practice off in its review queue", async ({ browser })
       { timeout: 45_000, intervals: [3_000] },
     )
     .toBe(0);
+  approvedThisRun = true;
   await close();
 });
 
 test("R-6. Beta picks THAT signed-off practice from the list and records the recognition", async ({ browser }) => {
   const { page, close } = await as(browser, "owner");
-  await page.goto("/lt/dashboard");
-  await workspace(page, BETA);
-  await page.goto("/lt/dashboard/company/education");
-  const form = page.getByTestId("record-recognition");
-  await expect(form).toBeVisible({ timeout: 30_000 });
-  await form.locator("summary").click();
-  const subject = form.locator('select[name="subjectProfileId"]');
-  const options = await subject.locator("option").evaluateAll((os) =>
-    (os as HTMLOptionElement[]).filter((o) => o.value).map((o) => ({ v: o.value, t: (o.textContent ?? "").trim() })),
-  );
-  const pick = (options.find((o) => LEARNER.test(o.t)) ?? (options.length === 1 ? options[0] : undefined))?.v;
-  expect(pick, `the learner is offered as the subject: ${options.map((o) => o.t).join(" | ")}`).toBeTruthy();
-  await subject.selectOption(pick!);
-  const ours = form.locator("label", { hasText: "pertvar" }).getByTestId("recognition-evidence-option").first();
+  const form = await recognitionForm(page);
+  // Asserted on EVERY run: the signed-off practice is still citable by Beta.
+  const ours = form.locator("label", { hasText: PRACTICE_MARK }).getByTestId("recognition-evidence-option").first();
   await expect(ours, "the signed-off practice is offered as evidence").toBeVisible({ timeout: 30_000 });
+  if (recognitionExists) {
+    reused(`the recognition "${RECOGNITION_KEY}" of an earlier run (record_competency_recognition_v1 is not exercised by this run)`);
+    await close();
+    return;
+  }
   await ours.check();
   await form.locator('select[name="requirementKind"]').selectOption("skill");
   await form.locator('input[name="requirementKey"]').fill(RECOGNITION_KEY);
