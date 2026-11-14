@@ -462,8 +462,10 @@ test("H-7. reversal by the person and by the company closes the access, keeping 
       `select count(*)::int as n from public.organization_person_history_claims
         where organization_person_id = ${lit(s.personId)}`,
     )[0]!.n,
-    "no claim row was deleted",
-  ).toBe(4);
+    // One offer in H-1 (redeemed by the bystander, rejected), one in H-3
+    // (approved, accepted), one in H-7 (approved, accepted, then reversed).
+    "no claim row was deleted: three offers, three rows",
+  ).toBe(3);
 });
 
 // ── H-8 ─────────────────────────────────────────────────────────────────────
