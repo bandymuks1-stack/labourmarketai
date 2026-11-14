@@ -13,18 +13,65 @@
 //
 // Anonymous GETs of public pages only. Exit 1 when a gate is missed or a page
 // could not be measured.
+//
+// REPORT-ONLY GATES. `LH_REPORT_ONLY=LCP,SEO` names gates the live site is KNOWN not
+// to meet yet. Such a miss is still measured, printed on the page's row as NOT MET,
+// counted in a closing line and raised as a workflow warning, but it does not fail the
+// run. Nothing else is softened: accessibility, CLS and a short sample still fail, and
+// a gate that is not on the list fails as before. The list lives in the workflow, in
+// plain sight, and is emptied when the site meets the gate. A check that is red from
+// its first day teaches people to ignore it; a hidden number would be worse.
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
+export const GATES = { accessibility: 95, seo: 95, lcpMs: 2500, cls: 0.1 };
+export const GATE_NAMES = ["accessibility", "SEO", "LCP", "CLS"];
+
+/** The gates a run may report without failing. Unknown names are an error, not ignored. */
+export function parseReportOnly(raw) {
+  const names = (raw ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  const unknown = names.filter((n) => !GATE_NAMES.includes(n));
+  if (unknown.length) throw new Error(`LH_REPORT_ONLY names no gate: ${unknown.join(", ")} (known: ${GATE_NAMES.join(", ")})`);
+  return new Set(names);
+}
+
+/**
+ * One page's verdict from its median numbers. `fails` is what turns the run red.
+ * A report-only miss never does; a short sample always does.
+ */
+export function verdictFor({ m, indexable, got, runs, reportOnly }) {
+  const misses = [];
+  if (m.accessibility < GATES.accessibility) misses.push("accessibility");
+  if (indexable && m.seo < GATES.seo) misses.push("SEO");
+  if (m.lcpMs > GATES.lcpMs) misses.push("LCP");
+  if (m.cls > GATES.cls) misses.push("CLS");
+  const gating = misses.filter((x) => !reportOnly.has(x));
+  const reported = misses.filter((x) => reportOnly.has(x));
+  const incomplete = got < runs;
+  const notMet = reported.length ? `NOT MET (report-only): ${reported.join(", ")}` : "";
+  const text = incomplete
+    ? `INCOMPLETE: ${got} of ${runs} measurements${misses.length ? `; misses ${misses.join(", ")}` : ""}`
+    : gating.length
+      ? `FAIL: ${gating.join(", ")}${notMet ? `; ${notMet}` : ""}`
+      : notMet || "PASS";
+  return { fails: incomplete || gating.length > 0, reported, text };
+}
+
+const isMain = process.argv[1] ? import.meta.url === pathToFileURL(process.argv[1]).href : false;
+if (isMain) await main();
+
+async function main() {
 const [origin, runsArg, ...pageArgs] = process.argv.slice(2);
 const runs = Number(runsArg);
 if (!origin || !Number.isInteger(runs) || runs < 1 || pageArgs.length === 0) {
   console.error("usage: lighthouse-gate.mjs <origin> <runs> <page> [<page> ...]");
   process.exit(2);
 }
-export const GATES = { accessibility: 95, seo: 95, lcpMs: 2500, cls: 0.1 };
+const reportOnly = parseReportOnly(process.env.LH_REPORT_ONLY);
+const notMetPages = new Map();
 const median = (xs) => {
   const s = [...xs].sort((a, b) => a - b);
   return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
@@ -76,21 +123,26 @@ for (const arg of pageArgs) {
     continue;
   }
   const m = Object.fromEntries(["accessibility", "seo", "lcpMs", "cls", "tbtMs"].map((k) => [k, median(got.map((g) => g[k]))]));
-  const misses = [];
-  if (m.accessibility < GATES.accessibility) misses.push("accessibility");
-  if (indexable && m.seo < GATES.seo) misses.push("SEO");
-  if (m.lcpMs > GATES.lcpMs) misses.push("LCP");
-  if (m.cls > GATES.cls) misses.push("CLS");
-  const incomplete = got.length < runs;
-  if (misses.length || incomplete) failed++;
-  const verdict = incomplete
-    ? `INCOMPLETE: ${got.length} of ${runs} measurements${misses.length ? `; misses ${misses.join(", ")}` : ""}`
-    : misses.length
-      ? `FAIL: ${misses.join(", ")}`
-      : "PASS";
+  const v = verdictFor({ m, indexable, got: got.length, runs, reportOnly });
+  if (v.fails) failed++;
+  for (const gate of v.reported) notMetPages.set(gate, (notMetPages.get(gate) ?? 0) + 1);
+  const verdict = v.text;
   console.log(
     `${page} | ${got.length} | ${m.accessibility} | ${indexable ? m.seo : `${m.seo} (not gated)`} | ${m.lcpMs} | ${m.cls} | ${m.tbtMs} | ${verdict}`,
   );
 }
 console.log(`\ngates: accessibility >= ${GATES.accessibility}, SEO >= ${GATES.seo} (indexable pages), LCP <= ${GATES.lcpMs} ms, CLS <= ${GATES.cls}. Lab medians, PRELIMINARY. INP: not measurable in a lab run.`);
+if (reportOnly.size) {
+  const met = [...reportOnly].filter((g) => !notMetPages.has(g));
+  const lines = [...notMetPages].map(([g, n]) => `${g} on ${n} of ${pageArgs.length} pages`);
+  console.log(
+    lines.length
+      ? `\nREPORT-ONLY, NOT MET: ${lines.join("; ")}. The live site does not meet ${lines.length > 1 ? "these gates" : "this gate"}; the run is not failed for it. This is a known open defect, not a pass.`
+      : "\nREPORT-ONLY: every report-only gate was met on every page.",
+  );
+  // Seen on the run page, not only in the log.
+  for (const [g, n] of notMetPages) console.log(`::warning title=Lighthouse gate not met (report-only)::${g} is not met on ${n} of ${pageArgs.length} pages`);
+  if (met.length) console.log(`::warning title=Report-only gate is now met::${met.join(", ")} met on every page in this run: remove it from LH_REPORT_ONLY so it fails again when it regresses`);
+}
 process.exit(failed > 0 ? 1 : 0);
+}
