@@ -59,6 +59,11 @@ export type JournalSuggestions = {
     unitSlug: "hours" | "days" | "minutes";
     rawPhrase: string;
     matchesFragments: boolean;
+    /** The total CONTAINS the parts (#3354: "15 val., iš jų 2 val.
+     *  koordinavimas" is a 15 h day, never 17). The parts keep their own
+     *  time; the rest of the day stays one item in the person's own words,
+     *  so the items add up to the stated total. */
+    includesParts?: boolean;
   } | null;
   /** Explicit self-declared capabilities/specializations the worker NAMED in
    *  the text (e.g. "lietuviškos virtuvės gamyba", "vairavimas", "pardavimai",
@@ -816,6 +821,116 @@ function timeInMinutes(t: {
   return null;
 }
 
+/** Words that say a figure is PART of the one before it: "iš jų", "įskaitant",
+ *  "including", "of which", "в том числе", "из них", "waarvan", "inclusief",
+ *  "davon", "inkl.", "einschließlich", "w tym". */
+const INCLUDED_PART_RX =
+  /(?<!\p{L})(?:iš\s+jų|is\s+ju|įskaitant|iskaitant|tame\s+skaičiuje|tame\s+skaiciuje|including|incl\.?|of\s+which|в\s+том\s+числе|из\s+них|waarvan|inclusief|davon|inkl\.?|einschließlich|einschliesslich|w\s+tym)(?!\p{L})/iu;
+/** A part written in brackets: "… koordinavimas (2 val. per dieną)". */
+const BRACKETED_TIME_RX = /\(\s*\d+(?:[.,]\d+)?\s*\p{L}/u;
+/** A fragment that is nothing but a duration: "15 valandų", "15 val", "15 h". */
+const PURE_DURATION_RX = /^\s*\d+(?:[.,]\d+)?\s*[\p{L}.]{1,12}\s*$/u;
+
+/** Minutes back in the unit a person reads best. */
+function minutesAsTime(minutes: number): { value: number; unitSlug: "hours" | "minutes" } {
+  return minutes % 15 === 0
+    ? { value: minutes / 60, unitSlug: "hours" }
+    : { value: minutes, unitSlug: "minutes" };
+}
+
+/** Words that mark a figure as the WHOLE day: "iš viso", "viso", "in total",
+ *  "total", "всего", "totaal", "insgesamt", "łącznie". */
+const DAY_TOTAL_WORD_RX =
+  /(?<!\p{L})(?:iš\s+viso|is\s+viso|viso|in\s+total|total|всего|итого|totaal|insgesamt|łącznie|lacznie)(?!\p{L})/iu;
+
+/**
+ * A DAY TOTAL THAT CONTAINS ITS PARTS (#3354). "15 val., iš jų 2 val.
+ * koordinavimas", "Darbo laikas: 15 valandų. … (2 valandos koordinavimo)" and
+ * "iš viso 15 valandų: 13 val. …, 2 val. koordinavimui. Šios 2 valandos įeina
+ * į 15 valandų" each state ONE 15-hour day. Read as items, every mention of a
+ * figure was one more item, and the day summed to 17, 19, 32 hours.
+ *
+ * The total is the first timed phrase, and it names no work of its own. It is
+ * recognised only on an explicit signal, never on size alone ("8 val. …, 2
+ * val. …" stays two items):
+ *   - the total says it is the whole day ("iš viso", "in total"…), or stands
+ *     alone ("15 valandų") right after a label colon; or
+ *   - a part carries an inclusion word ("iš jų", "including"…) or states its
+ *     time in brackets; or
+ *   - a later phrase that names no work only REPEATS the total or a part
+ *     already counted ("Šios 2 valandos įeina į 15 valandų") — the person is
+ *     explaining the day, not adding to it.
+ * Such repetitions are not items. Every remaining part must be smaller than
+ * the total and together they must not exceed it. The parts keep their time;
+ * the rest of the day becomes one item carrying the total's own words, so the
+ * items add up to exactly the total the person stated.
+ *
+ * A colon header ALONE is not a signal here: "9 val. …: 5 val. …, 2 val. …"
+ * keeps the #1689 rule (`separateStatedTotal` below) — the itemised parts
+ * count and an unmatched header is set aside visibly, never filled in.
+ */
+function containedTotal(
+  fragments: JournalFragmentSuggestion[],
+  timed: JournalFragmentSuggestion[],
+  headerPhrases: ReadonlySet<string>,
+): { fragments: JournalFragmentSuggestion[]; statedTotal: JournalSuggestions["statedTotal"] } | null {
+  if (timed.length < 2) return null;
+  const total = timed[0];
+  const namesNoWork = (f: JournalFragmentSuggestion) => f.activitySlug === null && f.activityLabel === null;
+  if (!namesNoWork(total)) return null;
+  const totalMin = timeInMinutes(total.time!);
+  if (totalMin === null || totalMin <= 0) return null;
+  const parts: JournalFragmentSuggestion[] = [];
+  const restatements = new Set<JournalFragmentSuggestion>();
+  const counted: number[] = [];
+  let partsMin = 0;
+  for (const f of timed.slice(1)) {
+    const m = timeInMinutes(f.time!);
+    if (m === null) return null;
+    const repeats = Math.abs(m - totalMin) < 1 || counted.some((c) => Math.abs(c - m) < 1);
+    if (namesNoWork(f) && repeats) {
+      restatements.add(f);
+      continue;
+    }
+    if (m >= totalMin) return null;
+    parts.push(f);
+    counted.push(m);
+    partsMin += m;
+  }
+  if (parts.length === 0 && restatements.size === 0) return null;
+  if (partsMin > totalMin) return null;
+  const labelled =
+    PURE_DURATION_RX.test(total.rawPhrase) && headerPhrases.size > 0 && !headerPhrases.has(total.rawPhrase);
+  const signalled =
+    labelled ||
+    DAY_TOTAL_WORD_RX.test(total.rawPhrase) ||
+    restatements.size > 0 ||
+    parts.some((p) => INCLUDED_PART_RX.test(p.rawPhrase) || BRACKETED_TIME_RX.test(p.rawPhrase));
+  if (!signalled) return null;
+  const restMin = totalMin - partsMin;
+  const out: JournalFragmentSuggestion[] = [];
+  for (const f of fragments) {
+    if (restatements.has(f)) continue;
+    if (f !== total) {
+      out.push(f);
+      continue;
+    }
+    // The rest of the day, in the person's own words; nothing when the parts
+    // already fill it.
+    if (restMin > 0) out.push({ ...f, time: minutesAsTime(restMin), isUnknown: false });
+  }
+  return {
+    fragments: out,
+    statedTotal: {
+      value: total.time!.value,
+      unitSlug: total.time!.unitSlug,
+      rawPhrase: total.rawPhrase,
+      matchesFragments: true,
+      includesParts: true,
+    },
+  };
+}
+
 /**
  * Take the STATED TOTAL out of the fragment list (issue #1689). A fragment is
  * the total — not one more work item — when the entry has at least two other
@@ -841,6 +956,8 @@ function separateStatedTotal(
   statedTotal: JournalSuggestions["statedTotal"];
 } {
   const timed = fragments.filter((f) => f.time !== null);
+  const contained = containedTotal(fragments, timed, headerPhrases);
+  if (contained) return contained;
   if (timed.length < 3) return { fragments, statedTotal: null };
   const noActivity = (f: JournalFragmentSuggestion) =>
     f.activitySlug === null && f.activityLabel === null;
