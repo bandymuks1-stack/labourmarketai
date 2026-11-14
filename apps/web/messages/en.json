@@ -2802,7 +2802,7 @@
         "fieldNeedSummary": "Request summary",
         "fieldNeedSummaryPlaceholder": "Briefly what you are looking for.",
         "fieldCountry": "Country",
-        "fieldCountryPlaceholder": "e.g. LT",
+        "fieldCountryPlaceholder": "Choose a country",
         "fieldLocation": "Location / region",
         "fieldLocationPlaceholder": "e.g. Vilnius",
         "fieldRole": "Role / work type",
