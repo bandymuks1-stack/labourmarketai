@@ -2882,7 +2882,8 @@
     },
     "actions": {
       "planning": "[EN] View in planning",
-      "proposeAgain": "[EN] Propose again with new dates"
+      "proposeAgain": "[EN] Propose again with new dates",
+      "needClosed": "Arbetsgivaren har stängt detta behov, så förslaget kan inte längre accepteras. Du kan fortfarande tacka nej."
     },
     "propose": {
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",

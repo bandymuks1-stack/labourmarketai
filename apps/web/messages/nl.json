@@ -9582,6 +9582,7 @@
       "withdraw": "Voorstel intrekken",
       "findAnother": "Andere werknemer zoeken",
       "proposeAgain": "Opnieuw voorstellen met nieuwe datums",
+      "needClosed": "De werkgever heeft deze vraag gesloten, dus je kunt het voorstel niet meer accepteren. Afwijzen kan nog wel.",
       "planning": "Bekijk in kalender"
     },
     "connections": {

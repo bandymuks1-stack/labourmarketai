@@ -23,6 +23,9 @@ on:
     paths:
       - ".github/workflows/signup-isolated.yml"
       - "apps/web/tests/e2e/signup-isolated.spec.ts"
+      - "supabase/tests/20261114100000_booking_refuses_closed_need_*"
+      - "supabase/migrations/20261114100000_booking_refuses_closed_need_v1.sql"
+      - "apps/web/lib/booking/**"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
       - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
       - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
@@ -215,6 +218,19 @@ jobs:
           rows=$(docker exec supabase_db_labourmarketai psql -U postgres -tAc "select count(*) from supabase_migrations.schema_migrations")
           echo "migration files=$files ledger rows=$rows"
           [ "$files" -eq "$rows" ] || { echo "::error::replay incomplete"; exit 1; }
+
+      # A CLOSED NEED REFUSES A NEW PROPOSAL OR A FIRST ACCEPT
+      # (20261114100000_booking_refuses_closed_need_v1). Database-level cases in
+      # one rolled-back transaction, then two real sessions racing a close
+      # against an accept in both orders. Synthetic rows only, this stack only.
+      - name: Closed need refuses an accept — database cases
+        run: |
+          set -euo pipefail
+          docker exec -i supabase_db_labourmarketai psql -U postgres -X -q -v ON_ERROR_STOP=1 \
+            < supabase/tests/20261114100000_booking_refuses_closed_need_regression.sql
+
+      - name: Closed need refuses an accept — concurrent close and accept
+        run: bash supabase/tests/20261114100000_booking_refuses_closed_need_race.sh
 
       - name: Build
         run: pnpm -F web build

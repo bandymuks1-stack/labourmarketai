@@ -9582,6 +9582,7 @@
       "withdraw": "Vorschlag zurückziehen",
       "findAnother": "Andere Arbeitskraft finden",
       "proposeAgain": "Erneut mit neuen Terminen vorschlagen",
+      "needClosed": "Der Arbeitgeber hat diesen Bedarf geschlossen, daher kann der Vorschlag nicht mehr angenommen werden. Ablehnen ist weiterhin möglich.",
       "planning": "Im Kalender ansehen"
     },
     "connections": {

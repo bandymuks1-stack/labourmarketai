@@ -9582,6 +9582,7 @@
       "withdraw": "Withdraw proposal",
       "findAnother": "Find another worker",
       "proposeAgain": "Propose again with new dates",
+      "needClosed": "The employer closed this need, so it can no longer be accepted. You can still decline it.",
       "planning": "View in calendar"
     },
     "connections": {

@@ -2882,7 +2882,8 @@
     },
     "actions": {
       "planning": "Se i planlægning",
-      "proposeAgain": "Foreslå igen med nye datoer"
+      "proposeAgain": "Foreslå igen med nye datoer",
+      "needClosed": "Arbejdsgiveren har lukket dette behov, så forslaget kan ikke længere accepteres. Du kan stadig afvise det."
     },
     "propose": {
       "modeNote": "Dette er et bookingforslag med datoer — arbejdstageren bekræfter eller afviser det. Intet er booket, før arbejdstageren accepterer.",

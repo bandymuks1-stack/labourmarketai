@@ -9582,6 +9582,7 @@
       "withdraw": "Wycofaj propozycję",
       "findAnother": "Znajdź innego pracownika",
       "proposeAgain": "Zaproponuj ponownie z nowymi datami",
+      "needClosed": "Pracodawca zamknął to zapotrzebowanie, więc nie można go już przyjąć. Nadal możesz je odrzucić.",
       "planning": "Zobacz w kalendarzu"
     },
     "connections": {

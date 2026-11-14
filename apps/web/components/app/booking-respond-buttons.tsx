@@ -61,6 +61,7 @@ export function BookingRespondButtons({
      *  record the overlapping accept. Terminal for accepting: the
      *  acknowledgement button is NOT shown again, so it cannot loop. */
     | { kind: "overlap-not-recordable" }
+    | { kind: "need-closed" }
     | { kind: "unavailable" }
     | { kind: "error" }
   >({ kind: "idle" });
@@ -113,6 +114,13 @@ export function BookingRespondButtons({
         // change its dates; the booking itself is still `proposed`.
         setDeclineOpen(false);
         setState({ kind: "overlap-not-recordable" });
+      } else if (res.kind === "need-closed") {
+        // The employer closed the need before the answer arrived; the database
+        // refused the accept. Say so, keep decline, and offer no accept again:
+        // it can only be refused the same way.
+        setAcceptOpen(false);
+        setState({ kind: "need-closed" });
+        router.refresh();
       } else if (res.kind === "needs-migration") {
         setState({ kind: "unavailable" });
       } else {
@@ -230,6 +238,29 @@ export function BookingRespondButtons({
             disabled={pending}
             onClick={() => setDeclineOpen(true)}
             data-testid="booking-overlap-decline-open"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+          >
+            {labels.decline}
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (state.kind === "need-closed") {
+    return (
+      <div className="flex flex-col gap-1.5" data-testid="booking-need-closed-decision">
+        <span className="text-meta text-state-warning" role="status" data-testid="booking-need-closed">
+          {t("actions.needClosed")}
+        </span>
+        {declineOpen ? (
+          declineForm()
+        ) : (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => setDeclineOpen(true)}
+            data-testid="booking-need-closed-decline-open"
             className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
           >
             {labels.decline}
