@@ -10579,7 +10579,7 @@
   },
   "workerIntake": {
     "title": "Arbeitskraft-Aufnahme",
-    "subtitle": "Nennen Sie uns Ihr Gewerk und Ihre Verfügbarkeit und erstellen Sie dann Ihr kostenloses Profil, um alles zu speichern — nichts wird automatisch veröffentlicht.",
+    "subtitle": "Nennen Sie uns Ihr Gewerk und Ihre Verfügbarkeit, um Ihre Angaben zu prüfen. Dieses Formular speichert nichts — damit Arbeitgeber Sie finden, erstellen Sie Ihr kostenloses Profil und tragen Sie Ihre Angaben dort ein.",
     "fullName": "Vollständiger Name",
     "profession": "Branche & Arbeitsart",
     "professionPlaceholder": "Wählen Sie Branche und Arbeitsart",
@@ -10609,7 +10609,7 @@
     "submit": "Angaben prüfen",
     "aiBadge": "KI-Vorschlag",
     "aiNotVerified": "Vor dem Speichern prüfen — nichts wird automatisch gespeichert.",
-    "aiDisabled": "Aus diesem Formular wurde nichts gespeichert, und ein automatischer Vorschlag ist derzeit nicht verfügbar. Um Ihre Angaben zu speichern, erstellen Sie unten Ihr kostenloses Arbeitskraft-Profil.",
+    "aiDisabled": "Aus diesem Formular wurde nichts gespeichert, und ein automatischer Vorschlag ist derzeit nicht verfügbar. Damit Arbeitgeber Sie finden, erstellen Sie unten Ihr kostenloses Arbeitskraft-Profil und tragen Sie Ihre Angaben dort ein.",
     "aiHeadline": "Vorgeschlagene Überschrift",
     "aiSkills": "Vorgeschlagene Fähigkeiten",
     "aiMissing": "Fehlt noch",

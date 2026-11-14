@@ -10579,7 +10579,7 @@
   },
   "workerIntake": {
     "title": "Werknemersintake",
-    "subtitle": "Vertel ons je vak en beschikbaarheid en maak dan je gratis profiel aan om alles op te slaan — niets wordt automatisch gepubliceerd.",
+    "subtitle": "Vertel ons je vak en beschikbaarheid om je gegevens te controleren. Dit formulier slaat niets op — maak je gratis profiel aan en vul je gegevens daar in, zodat werkgevers je vinden.",
     "fullName": "Volledige naam",
     "profession": "Sector & type werk",
     "professionPlaceholder": "Kies je sector en type werk",
@@ -10609,7 +10609,7 @@
     "submit": "Mijn gegevens controleren",
     "aiBadge": "AI-suggestie",
     "aiNotVerified": "Beoordeel voordat je opslaat — niets wordt automatisch opgeslagen.",
-    "aiDisabled": "Er is niets uit dit formulier opgeslagen en er is nu geen automatisch voorstel beschikbaar. Maak hieronder je gratis werknemersprofiel aan om je gegevens op te slaan.",
+    "aiDisabled": "Er is niets uit dit formulier opgeslagen en er is nu geen automatisch voorstel beschikbaar. Maak hieronder je gratis werknemersprofiel aan en vul je gegevens daar in, zodat werkgevers je vinden.",
     "aiHeadline": "Voorgestelde kopregel",
     "aiSkills": "Voorgestelde vaardigheden",
     "aiMissing": "Ontbreekt nog",

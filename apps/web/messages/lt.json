@@ -10579,7 +10579,7 @@
   },
   "workerIntake": {
     "title": "Darbuotojo registracija",
-    "subtitle": "Nurodyk savo amatą ir kada esi laisvas, tada susikurk nemokamą profilį, kad viską išsaugotum — niekas nepublikuojama automatiškai.",
+    "subtitle": "Nurodyk savo amatą ir kada esi laisvas, kad pasitikrintum duomenis. Ši forma nieko neišsaugo — kad tave rastų darbdaviai, susikurk nemokamą profilį ir įrašyk duomenis jame.",
     "fullName": "Vardas ir pavardė",
     "profession": "Sektorius ir darbo tipas",
     "professionPlaceholder": "Pasirink sektorių ir darbo tipą",
@@ -10609,7 +10609,7 @@
     "submit": "Patikrinti duomenis",
     "aiBadge": "AI pasiūlymas",
     "aiNotVerified": "Peržiūrėk prieš išsaugant — niekas neišsaugoma automatiškai.",
-    "aiDisabled": "Iš šios formos niekas neišsaugota, o automatinio pasiūlymo dabar nėra. Kad išsaugotum duomenis, žemiau susikurk nemokamą darbuotojo profilį.",
+    "aiDisabled": "Iš šios formos niekas neišsaugota, o automatinio pasiūlymo dabar nėra. Kad tave rastų darbdaviai, žemiau susikurk nemokamą darbuotojo profilį ir įrašyk duomenis jame.",
     "aiHeadline": "Siūloma antraštė",
     "aiSkills": "Siūlomi įgūdžiai",
     "aiMissing": "Vis dar trūksta",
