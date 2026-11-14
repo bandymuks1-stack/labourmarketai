@@ -94,10 +94,14 @@ begin
   -- v2's, unchanged: one policy, one door behind both versions. A discarded
   -- draft is refused by marketplace_listings_discarded_guard on either door.
   perform public.set_marketplace_listing_status_v2(p_id, p_status);
-  -- Closing again without naming an outcome keeps the recorded one.
+  -- Closing again without naming an outcome keeps the recorded one. A draft
+  -- that was just closed is already recorded as discarded by the trigger and
+  -- stays discarded, whatever outcome was named (as for demand).
   update public.marketplace_listings
-     set closed_outcome = case when p_status = 'closed'
-                               then coalesce(p_closed_outcome, closed_outcome) end
+     set closed_outcome = case when p_status = 'closed' then
+                            case when closed_outcome = 'discarded' then 'discarded'
+                                 else coalesce(p_closed_outcome, closed_outcome) end
+                          end
    where id = p_id and owner_id = auth.uid();
 end; $$;
 
@@ -109,6 +113,12 @@ grant  execute on function public.set_marketplace_listing_status_v3(uuid, text, 
 create or replace function public.marketplace_listings_discarded_guard()
 returns trigger language plpgsql set search_path = public as $$
 begin
+  -- A stale `discarded` on an open row (left by a reopen before this
+  -- migration) says nothing about this update: drop it, never lock the row.
+  if old.status is distinct from 'closed' and old.closed_outcome = 'discarded'
+     and new.closed_outcome is not distinct from old.closed_outcome then
+    new.closed_outcome := null;
+  end if;
   -- A draft that leaves for closed was never on the market: it is discarded,
   -- whichever door closed it (v1, v2, v3). Only a draft can be discarded.
   if old.status = 'draft' and new.status = 'closed' then
@@ -138,6 +148,12 @@ create or replace trigger marketplace_listings_discarded_guard_trg
 create or replace function public.customer_requests_discarded_draft_guard()
 returns trigger language plpgsql set search_path = public as $$
 begin
+  -- A stale `discarded` on an open row (left by a reopen before this
+  -- migration) says nothing about this update: drop it, never lock the row.
+  if old.status is distinct from 'closed' and old.closed_outcome = 'discarded'
+     and new.closed_outcome is not distinct from old.closed_outcome then
+    new.closed_outcome := null;
+  end if;
   -- A draft that leaves for closed was never in the market: it is discarded,
   -- whichever door closed it (the app, a raw PATCH). Only a draft can be
   -- discarded.

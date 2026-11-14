@@ -204,6 +204,10 @@ function demandCases(db, tag) {
   const done = newDemand(db, "closed", "completed");
   ok(refused(ownerSet(db, done, "closed_outcome = 'discarded'"), /only a draft can be discarded/) && demandRow(db, done) === "closed/completed",
     `${tag} d19 a completed need cannot be relabelled discarded`);
+  const stale = newDemand(db, "submitted", "discarded"); // a reopen before this migration left the label
+  ok(ownerSet(db, stale, "status = 'closed'").status === 0 && demandRow(db, stale) === "closed/-"
+    && ownerSet(db, stale, "closed_outcome = 'completed'").status === 0 && demandRow(db, stale) === "closed/completed",
+    `${tag} d20 closing an open need with a stale 'discarded' does not lock it; the app's outcome write then lands`);
 }
 
 /** (p) privacy: the holder cancels their own account deletion exactly as 20261109120000 intends */
@@ -233,9 +237,11 @@ function listingCases(db, tag) {
   for (const [label, r] of [
     ["v3 active", () => v3(db, d, "active")], ["v2 active", () => v2(db, d, "active")],
     ["v3 draft", () => v3(db, d, "draft")], ["v3 paused", () => v3(db, d, "paused")],
-    ["v2 draft", () => v2(db, d, "draft")], ["v3 closed as completed", () => v3(db, d, "closed", "completed")],
+    ["v2 draft", () => v2(db, d, "draft")],
   ]) ok(refused(r(), /a discarded draft cannot be published/), `${tag} l2 ${label} on a discarded draft -> refused`);
   ok(v3(db, d, "closed").status === 0 && listingRow(db, d) === "closed/discarded", `${tag} l3 closing again without an outcome keeps 'discarded'`);
+  ok(v3(db, d, "closed", "completed").status === 0 && listingRow(db, d) === "closed/discarded",
+    `${tag} l3b closing again as 'completed' keeps 'discarded' (v3 never relabels a discarded draft)`);
   ok(refused(psql(db, asUser(OWNER, `update public.marketplace_listings set status = 'active' where id = '${d}'`), { allowFail: true }), /permission denied/),
     `${tag} l4 the raw table stays read-only for authenticated`);
   const a = newListing(db, "active");
@@ -261,6 +267,12 @@ function listingCases(db, tag) {
   const leftover = newListing(db, "active", "discarded"); // only possible after a rollback + re-apply
   ok(v3(db, leftover, "paused").status === 0 && listingRow(db, leftover) === "paused/-",
     `${tag} l15 an open listing carrying a stale 'discarded' is not locked: it pauses and the outcome is cleared`);
+  const staleClose = newListing(db, "active", "discarded");
+  ok(v2(db, staleClose, "closed").status === 0 && listingRow(db, staleClose) === "closed/-" && v3(db, staleClose, "active").status === 0,
+    `${tag} l16 closing an open listing with a stale 'discarded' does not lock it (closed, no outcome, republishes)`);
+  const named = newListing(db, "draft");
+  ok(v3(db, named, "closed", "withdrawn").status === 0 && listingRow(db, named) === "closed/discarded",
+    `${tag} l17 a draft closed through v3 as 'withdrawn' is recorded discarded, without an error (as for demand)`);
 }
 
 async function main() {

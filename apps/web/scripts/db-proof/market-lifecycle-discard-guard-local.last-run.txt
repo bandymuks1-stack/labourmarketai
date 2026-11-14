@@ -1,5 +1,5 @@
-market-lifecycle-discard-guard-local — 2026-11-14T11:21:34.227Z
-cluster: <repo>/.tmp/pgdiscard-30612 (port 5518, throwaway, synthetic ids only)
+market-lifecycle-discard-guard-local — 2026-11-14T11:28:42.312Z
+cluster: <repo>/.tmp/pgdiscard-126980 (port 5518, throwaway, synthetic ids only)
 server: PostgreSQL 16.13
 PASS  base: both databases start from the same transition guard
 
@@ -35,6 +35,7 @@ PASS  A d16 ... and cannot be reopened
 PASS  A d17 a draft closed as 'completed' is still recorded as discarded (a draft was never in the market)
 PASS  A d18 a submitted need cannot be labelled discarded (it would lock the owner's own row)
 PASS  A d19 a completed need cannot be relabelled discarded
+PASS  A d20 closing an open need with a stale 'discarded' does not lock it; the app's outcome write then lands
 
 [A p] privacy cancel
 PASS  A p1 the holder submits and confirms an account-deletion request
@@ -51,8 +52,8 @@ PASS  A l2 v2 active on a discarded draft -> refused
 PASS  A l2 v3 draft on a discarded draft -> refused
 PASS  A l2 v3 paused on a discarded draft -> refused
 PASS  A l2 v2 draft on a discarded draft -> refused
-PASS  A l2 v3 closed as completed on a discarded draft -> refused
 PASS  A l3 closing again without an outcome keeps 'discarded'
+PASS  A l3b closing again as 'completed' keeps 'discarded' (v3 never relabels a discarded draft)
 PASS  A l4 the raw table stays read-only for authenticated
 PASS  A l5 an active listing closes as withdrawn
 PASS  A l6 a withdrawn listing republishes and its outcome is cleared
@@ -65,6 +66,8 @@ PASS  A l12 a draft closed through v2 directly (no outcome) is recorded as disca
 PASS  A l13 ... and cannot be published
 PASS  A l14 an active listing cannot be closed as discarded (the whole call rolls back)
 PASS  A l15 an open listing carrying a stale 'discarded' is not locked: it pauses and the outcome is cleared
+PASS  A l16 closing an open listing with a stale 'discarded' does not lock it (closed, no outcome, republishes)
+PASS  A l17 a draft closed through v3 as 'withdrawn' is recorded discarded, without an error (as for demand)
 
 [B d] demand
 PASS  B d1 the owner discards a draft (draft -> closed, outcome discarded), as lib/demand does
@@ -86,6 +89,7 @@ PASS  B d16 ... and cannot be reopened
 PASS  B d17 a draft closed as 'completed' is still recorded as discarded (a draft was never in the market)
 PASS  B d18 a submitted need cannot be labelled discarded (it would lock the owner's own row)
 PASS  B d19 a completed need cannot be relabelled discarded
+PASS  B d20 closing an open need with a stale 'discarded' does not lock it; the app's outcome write then lands
 
 [B p] privacy cancel
 PASS  B p1 the holder submits and confirms an account-deletion request
@@ -102,8 +106,8 @@ PASS  B l2 v2 active on a discarded draft -> refused
 PASS  B l2 v3 draft on a discarded draft -> refused
 PASS  B l2 v3 paused on a discarded draft -> refused
 PASS  B l2 v2 draft on a discarded draft -> refused
-PASS  B l2 v3 closed as completed on a discarded draft -> refused
 PASS  B l3 closing again without an outcome keeps 'discarded'
+PASS  B l3b closing again as 'completed' keeps 'discarded' (v3 never relabels a discarded draft)
 PASS  B l4 the raw table stays read-only for authenticated
 PASS  B l5 an active listing closes as withdrawn
 PASS  B l6 a withdrawn listing republishes and its outcome is cleared
@@ -116,6 +120,8 @@ PASS  B l12 a draft closed through v2 directly (no outcome) is recorded as disca
 PASS  B l13 ... and cannot be published
 PASS  B l14 an active listing cannot be closed as discarded (the whole call rolls back)
 PASS  B l15 an open listing carrying a stale 'discarded' is not locked: it pauses and the outcome is cleared
+PASS  B l16 closing an open listing with a stale 'discarded' does not lock it (closed, no outcome, republishes)
+PASS  B l17 a draft closed through v3 as 'withdrawn' is recorded discarded, without an error (as for demand)
 
 [i] re-apply is a no-op
 PASS  i1 20261024100000 runs a second time without error and changes nothing (no duplicate trigger)
@@ -156,7 +162,8 @@ PASS  r d16 ... and cannot be reopened
 PASS  r d17 a draft closed as 'completed' is still recorded as discarded (a draft was never in the market)
 PASS  r d18 a submitted need cannot be labelled discarded (it would lock the owner's own row)
 PASS  r d19 a completed need cannot be relabelled discarded
+PASS  r d20 closing an open need with a stale 'discarded' does not lock it; the app's outcome write then lands
 PASS  r7 20261109120000 re-applies and both orders still end in the same schema
 PASS  no deadlock reported by the server
 
-SUMMARY: 131 PASS, 0 FAIL  (finished 2026-11-14T11:22:18.462Z)
+SUMMARY: 138 PASS, 0 FAIL  (finished 2026-11-14T11:29:34.024Z)
