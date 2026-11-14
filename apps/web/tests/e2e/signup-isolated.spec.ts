@@ -134,7 +134,10 @@ test("S-3. an agency signs up through the form and its organization is an agency
 });
 
 test("S-3b. a student signs up, names where they study, and lands on their learning compass with the study stored", async ({ page }) => {
-  const address = email("student");
+  // Its own address: ST-1 below also registers a student, and two tests that
+  // register the same address in one run make the second a sign-in, never an
+  // onboarding (lib/guards/signup-walk-unique-addresses.test.ts).
+  const address = email("student-compass");
   await signUp(page, address);
   await page.getByTestId("onboarding-intent-student").click();
   await expect(page.getByTestId("onboarding-intent-student")).toHaveAttribute("aria-pressed", "true");
