@@ -476,9 +476,19 @@ for (const phone of PHONES) {
       const main = page.getByRole("main");
       await expect(main.getByTestId("company-workers-invite-email")).toBeVisible({ timeout: 30_000 });
       await fitsTheScreen(page, "the agency's people page");
-      await main.getByTestId("company-workers-invite-email").fill(email(`rostered${phone.name}`));
+      const rostered = email(`rostered${phone.name}`);
+      await main.getByTestId("company-workers-invite-email").fill(rostered);
       await main.getByTestId("company-workers-invite-submit").tap();
-      await expect(main.getByTestId("company-workers-invite-result"), "the roster invitation is answered").toBeVisible({ timeout: 30_000 });
+      const result = main.getByTestId("company-workers-invite-result");
+      await expect(result, "the roster invitation is answered").toBeVisible({ timeout: 30_000 });
+      // The result shows for refusals too (not_owner, needs_migration, errors): only the stored row
+      // and the success state prove an invitation was made (Codex P2).
+      test.info().annotations.push({ type: "roster-invite-outcome", description: (await result.innerText()).slice(0, 160) });
+      await expect(result, "the outcome is the success state").toHaveClass(/state-success/);
+      const stored = sql<{ status: string }>(
+        `select i.status from public.company_worker_invitations i join public.organizations o on o.legacy_company_id = i.company_id where o.id = ${lit(a.orgId)} and lower(i.invited_email) = lower(${lit(rostered)})`,
+      );
+      expect(stored.map((r) => r.status), "one pending roster invitation for that address").toEqual(["pending"]);
       await done();
     });
     test(`A-4 (${phone.name}). the agency posts a need on the phone`, async ({ browser }) => {
