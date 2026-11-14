@@ -131,9 +131,14 @@ async function signedInOnPhone(browser: Browser, phone: (typeof PHONES)[number],
 }
 
 /** The page answers within 20 s; if not, say so with what the page reported, instead of hanging. */
+/**
+ * How far the BODY reaches past the screen. Not `documentElement.scrollWidth`: globals.css clips the
+ * root (html, body { overflow-x: hidden }), so that reads the screen width while content runs off it
+ * (authenticated-mobile-overflow.spec.ts, the same measure, Codex P2 on #3366).
+ */
 async function answers(page: Page): Promise<{ scroll: number; inner: number } | null> {
   return Promise.race([
-    page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: window.innerWidth })),
+    page.evaluate(() => ({ scroll: document.body.scrollWidth, inner: document.documentElement.clientWidth })),
     new Promise<null>((r) => setTimeout(() => r(null), 20_000)),
   ]);
 }
@@ -145,7 +150,7 @@ async function fitsTheScreen(page: Page, where: string): Promise<void> {
   const notes = (heard.get(page) ?? []).join(" | ") || "none";
   if (got === null) throw new Error(`${where}: the page stopped answering for 20 s (busy main thread or an open dialog). The page reported: ${notes}`);
   expect(notes.includes("dialog:"), `${where}: no dialog opened (${notes})`).toBe(false);
-  expect(got.scroll, `${where}: the page is ${got.scroll} px wide on a ${got.inner} px screen`).toBeLessThanOrEqual(got.inner + 1);
+  expect(got.scroll - got.inner, `${where}: the body reaches ${got.scroll - got.inner} px past a ${got.inner} px screen`).toBeLessThanOrEqual(1);
 }
 
 /** Tap until the expected result shows: a tap before hydration is a silent no-op. */
@@ -489,9 +494,21 @@ for (const phone of PHONES) {
 
   // ── STUDENT ───────────────────────────────────────────────────────────────
   const STUDENT = email(`student${phone.name}`);
-  const st: { profileId: string; workerId: string } = { profileId: "", workerId: "" };
+  const st: { profileId: string; workerId: string; needId: string } = { profileId: "", workerId: "", needId: "" };
+  const STUDENT_NEED = `Phone student placement ${phone.name} ${RUN}`;
   test.describe(`student at ${phone.viewport.width} × ${phone.viewport.height}`, () => {
     test.describe.configure({ mode: "serial" });
+    test(`S-0 (${phone.name}). setup at a desktop: a verified company posts the need the student will apply to`, async ({ browser }) => {
+      // The student group owns its need: another group's failure (and the worker restart it causes)
+      // cannot skip the student's application (Codex P2).
+      const owner = email(`studentco${phone.name}`);
+      const org = await newOrganisation(browser, owner, "hire", `Synthetic Placement Owner ${phone.name} ${RUN}`, `Synthetic Placement Co ${phone.name} ${RUN}`);
+      const { page, done } = await signedInOnPhone(browser, phone, owner);
+      await page.goto(`${BASE}/en/dashboard/company/needs?audience=need#demand-intake`);
+      st.needId = await postNeedOnPhone(page, org.profileId, STUDENT_NEED);
+      await done();
+      await verifyCompanyAsLocalAdmin(owner, email(`studentadmin${phone.name}`));
+    });
     test(`S-1 (${phone.name}). a student signs up ON THE PHONE, names where they study, lands on the learning compass`, async ({ browser }) => {
       const { ctx, page } = await onPhone(browser, phone);
       await signUp(page, BASE, STUDENT);
@@ -525,12 +542,11 @@ for (const phone of PHONES) {
       await done();
     });
     test(`S-3 (${phone.name}). the student applies to an open need (interest stored)`, async ({ browser }) => {
-      test.skip(!shared.needId, "the worker group's need for this width was not set up");
       const { page, done } = await signedInOnPhone(browser, phone, STUDENT);
       await page.goto(`${BASE}/en/dashboard/opportunities?view=all`);
-      const box = page.getByRole("main").locator(`li[id="opp-${shared.needId}"]`).first().getByTestId(`interest-${shared.needId}`);
+      const box = page.getByRole("main").locator(`li[id="opp-${st.needId}"]`).first().getByTestId(`interest-${st.needId}`);
       await tapUntil(box.getByTestId("interest-express"), box.getByTestId("interest-sent"));
-      const rows = sql<{ status: string }>(`select status from public.demand_interest_signals where request_id = ${lit(shared.needId)} and worker_id = ${lit(st.workerId)}`);
+      const rows = sql<{ status: string }>(`select status from public.demand_interest_signals where request_id = ${lit(st.needId)} and worker_id = ${lit(st.workerId)}`);
       expect(rows.map((r) => r.status)).toEqual(["interested"]);
       await done();
     });
