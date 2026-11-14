@@ -33,6 +33,8 @@
 --   * invitation_delivery_health_v1(hours) — counters for monitoring and alerts.
 --   * All functions: SECURITY DEFINER, search_path = public, pg_temp, service_role only.
 --
+-- @plan-cache-proof: n/a — NOT measured with the probe. The five indexes serve service_role cron functions only: the retry-candidate and health functions take no filter argument (one plan either way), and the DSN and attempt lookups are equality on Message-ID / invitation id. No anon or authenticated RPC filters by them.
+--
 -- COMPATIBILITY: every new invitations column is nullable or has a constant default (PG 11+
 -- metadata-only add, no table rewrite); every new CHECK holds for NULL, so existing rows pass.
 -- The currently deployed app references none of these objects; the new app treats a missing

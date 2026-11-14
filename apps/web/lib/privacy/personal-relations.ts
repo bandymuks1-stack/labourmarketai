@@ -786,6 +786,11 @@ export type ReviewedChild = {
 };
 export const CHILD_TABLES_NOT_EXPORTED: readonly ReviewedChild[] = [
   {
+    table: "invitation_delivery_attempts_v1",
+    reason:
+      "the platform's own transport diagnostics for sending an invitation e-mail: step, reply codes, timings and the platform's Message-ID only — no address, no mail text, no account id; the invitation it belongs to is exported to the person who sent it",
+  },
+  {
     table: "decision_document_links",
     reason:
       "links an organization's management decision to a document: the decision is the organization's record and the person appears on it only as the responsible party",
