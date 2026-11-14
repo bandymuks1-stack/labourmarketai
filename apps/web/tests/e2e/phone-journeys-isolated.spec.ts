@@ -456,7 +456,10 @@ for (const phone of PHONES) {
     test.describe.configure({ mode: "serial" });
     test(`A-1 (${phone.name}). setup at a desktop: a staffing agency`, async ({ browser }) => {
       Object.assign(a, await newOrganisation(browser, AGENCY, "agency", `Synthetic Agency Owner ${phone.name} ${RUN}`, `Synthetic Staffing ${phone.name} ${RUN}`));
-      const [c] = sql<{ t: string | null }>(`select company_type as t from public.companies where profile_id = ${lit(a.profileId)}`);
+      // The organisation is bound to its company record (agency-roles-isolated A-1 reads it the same way).
+      const [c] = sql<{ t: string | null }>(
+        `select c.company_type as t from public.companies c join public.organizations o on o.legacy_company_id = c.id where o.id = ${lit(a.orgId)}`,
+      );
       expect(c?.t, "an agency, not a hiring company").toBe("staffing_agency");
     });
     test(`A-2 (${phone.name}). the area sheet leads to clients (partners)`, async ({ browser }) => {
