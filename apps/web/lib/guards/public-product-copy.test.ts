@@ -105,11 +105,12 @@ describe("public positioning is local AND international (not work-abroad-only)",
   }
 });
 
-describe("footer is clean (no early-platform stamp; Rexora credit kept)", () => {
+describe("footer is clean (no early-platform stamp; no credit line since 2026-11-13; legal statement kept)", () => {
   for (const loc of ACTIVE) {
-    it(`${loc}: footer has the Rexora credit and no 'preview'/early-platform key`, () => {
+    it(`${loc}: footer keeps the legal statement and has no credit line or 'preview'/early-platform key`, () => {
       const footer = (load(loc).footer ?? {}) as Record<string, string>;
-      expect(footer.rexora, `${loc} footer.rexora must stay`).toMatch(/Rexora/);
+      expect(footer.rexora, `${loc} footer.rexora was removed on the owner's decision`).toBeUndefined();
+      expect(footer.operatedBy, `${loc} footer.operatedBy must stay`).toMatch(/Nonstop Group/);
       expect(footer.preview, `${loc} footer.preview early-platform stamp must be gone`).toBeUndefined();
     });
   }
