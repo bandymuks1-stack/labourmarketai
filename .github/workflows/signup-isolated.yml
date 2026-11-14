@@ -290,7 +290,7 @@ jobs:
           name: experience-integration
           path: |
             apps/web/test-results/experience-integration/
-            apps/web/test-results/experience-integration-*/error-context.md
+            apps/web/test-results/*/error-context.md
           if-no-files-found: warn
           retention-days: 14
 

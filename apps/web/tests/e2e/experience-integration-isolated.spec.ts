@@ -514,15 +514,13 @@ test("EX-0. two organizations, two owners, two workers, the journal, and A's imp
   );
   expect(seat.map((m) => `${m.role}:${m.status}`), "the seat waits for O's own acceptance").toEqual(["manager:invited"]);
   s.membershipId = seat[0]!.id;
-  let panelFound = false;
-  for (const path of ["/en/dashboard/start", "/en/dashboard/company/settings"]) {
-    await o.goto(`${BASE}${path}`);
-    if (await o.getByTestId(`membership-accept-${s.membershipId}`).isVisible({ timeout: 20_000 }).catch(() => false)) {
-      panelFound = true;
-      break;
-    }
-  }
-  expect(panelFound, "O meets the seat on their own start or settings page").toBe(true);
+  // The start hub lists seats addressed to the caller in any workspace. A
+  // locator check does not wait, so the page is reloaded until it shows.
+  const accept = o.getByTestId(`membership-accept-${s.membershipId}`);
+  await expect(async () => {
+    await o.goto(`${BASE}/en/dashboard/start`);
+    await expect(accept).toBeVisible({ timeout: 10_000 });
+  }, "O meets the seat on their own start page").toPass({ timeout: 90_000 });
   await o.getByTestId(`membership-accept-${s.membershipId}`).click();
   await expect(o.getByTestId("membership-invitations-result")).toBeVisible({ timeout: 30_000 });
   await expect
