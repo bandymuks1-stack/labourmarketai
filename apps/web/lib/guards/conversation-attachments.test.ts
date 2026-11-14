@@ -147,7 +147,8 @@ describe("app flow — composer honesty", () => {
 
 describe("app flow — private read path", () => {
   it("service reads via RLS + short-lived signed URLs; degrades pre-migration", () => {
-    expect(service).toMatch(/createSignedUrl\(row\.storage_path, 300\)/);
+    // Short-lived: one named constant (<= 60 s), see attachment-link-lifetime.test.ts.
+    expect(service).toMatch(/createSignedUrl\(row\.storage_path, CONVERSATION_ATTACHMENT_SIGNED_URL_TTL_SECONDS\)/);
     expect(service).toMatch(/needs-migration/);
   });
   it("no public URL API anywhere in the communication read/write path", () => {
