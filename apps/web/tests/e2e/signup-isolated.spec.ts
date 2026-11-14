@@ -491,7 +491,8 @@ test("P-3. onboarding on a phone: the bar covers neither the end of the form, a 
       );
       const bad: string[] = [];
       for (const field of fields) {
-        field.focus();
+        // As a keyboard user arrives: programmatic focus counts as keyboard focus (:focus-visible).
+        field.focus({ focusVisible: true } as FocusOptions);
         await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
         const r = field.getBoundingClientRect();
         const barTop = el.getBoundingClientRect().top;

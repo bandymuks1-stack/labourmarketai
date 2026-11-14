@@ -574,6 +574,10 @@ export function OnboardingWizard({
     if (!actionBar || getComputedStyle(actionBar).position !== "fixed") return;
     const target = event.target as HTMLElement;
     if (actionBar.contains(target)) return;
+    // Keyboard focus only. A tap or a click focuses what it lands on as well, and moving the
+    // page between the press and the release makes the browser drop the click: the card a
+    // person tapped would not be chosen (isolated walk P-1, 2026-11-14).
+    if (!target.matches(":focus-visible")) return;
     const barTop = actionBar.getBoundingClientRect().top;
     if (target.getBoundingClientRect().bottom > barTop - 8) target.scrollIntoView({ block: "center" });
   };

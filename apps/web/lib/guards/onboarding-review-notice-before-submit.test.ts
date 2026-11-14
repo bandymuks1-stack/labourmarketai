@@ -49,6 +49,8 @@ describe("onboarding: the staff-review notice is met before the submit", () => {
 
   it("a focused field is moved clear of the bar only while the bar is fixed", () => {
     expect(wizard).toMatch(/getComputedStyle\(actionBar\)\.position !== "fixed"\) return;/);
+    // ...and only for keyboard focus: moving the page under a tap drops the tap's click.
+    expect(wizard).toMatch(/if \(!target\.matches\(":focus-visible"\)\) return;/);
     expect(wizard.match(/onFocus=\{keepFocusClearOfBar\}/g) ?? []).toHaveLength(2);
   });
 
