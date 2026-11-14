@@ -732,7 +732,6 @@
     "legalGroup": "[EN] Legal",
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
-    "rexora": "Veidots kopā: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
@@ -890,7 +889,8 @@
     "themeToLight": "Gaišais motīvs",
     "how": "Kā tas darbojas",
     "menuOpen": "Izvēlne",
-    "menuClose": "Aizvērt izvēlni"
+    "menuClose": "Aizvērt izvēlni",
+    "market": "Darba tirgus"
   },
   "pages": {
     "agencies": {
@@ -4842,6 +4842,42 @@
         "goods": "Preces"
       },
       "lasting": "Tava pieredze un iespējas vienmēr paliek pieejamas — mainot darbu, projektu vai valsti."
+    },
+    "v3": {
+      "lead": "Darbiniekiem, darba devējiem un pakalpojumu sniedzējiem — visās profesijās un nozarēs. Reģistrācija un pamata vajadzības publicēšana ir bez maksas.",
+      "moreChoices": "Vairāk iespēju",
+      "or": "vai aprakstiet saviem vārdiem",
+      "needFree": "Pieprasījumu varat iesniegt bez reģistrācijas. Iesniegšana ir bez maksas; pakalpojumu nosacījumi un cena tiek saskaņoti atsevišķi.",
+      "market": {
+        "title": "Darba sludinājumi tirgū",
+        "line": "{adverts} aktīvi darba sludinājumi no ārējiem avotiem. Sludinājumos norādīti {employers} dažādi darba devēju nosaukumi.",
+        "source": "Sludinājumi apkopoti no publiskiem ārējiem darba sludinājumu avotiem. Tas nav LabourMarket.ai reģistrēto darba devēju vai klientu skaits. Sludinājumi pēdējoreiz atjaunināti: {date}.",
+        "none": "Tirgus dati pašlaik nav pieejami.",
+        "search": "Meklēt darba sludinājumus"
+      },
+      "adverts": {
+        "title": "Daži aktīvi sludinājumi",
+        "sub": "Sludinājumus varat pārlūkot bez konta. Pēc pieteikšanās redzēsiet darba devēju, vietu, pilnu aprakstu un to, kā pieteikties."
+      },
+      "how": {
+        "title": "Kā tas darbojas",
+        "s1": {
+          "title": "Atrodiet un vienojieties",
+          "body": "Meklējiet darbu, darbiniekus vai pakalpojumus un pārvaldiet piedāvājumus un vienošanās platformā."
+        },
+        "s2": {
+          "title": "Reģistrējiet darbu",
+          "body": "Paveikto darbu varat reģistrēt darba žurnālā."
+        },
+        "s3": {
+          "title": "Apstipriniet",
+          "body": "Ierakstus apstiprina darba devēja organizācijas vadītājs. Pasūtītājs var pieņemt viņam iesniegto darbu – tas tiek atzīmēts atsevišķi. Apstiprināts darbs kļūst par jūsu pieredzes pierādījumu."
+        },
+        "s4": {
+          "title": "Jūsu dati un privātums",
+          "body": "Asistents sniedz ieteikumus, bet lēmumus pieņemat jūs. Jūs izlemjat, vai darba devēji var jūs atrast un vai atklāt kontaktinformāciju. Darba ierakstus redz organizācija, kurā strādājat."
+        }
+      }
     }
   },
   "workspace": {
@@ -5349,7 +5385,7 @@
     },
     "language": {
       "translatedFrom": "[EN] Translated from {language}",
-      "originalIn": "[EN] Advertisement language: {language}",
+      "originalIn": "Sludinājuma valoda: {language}",
       "showOriginal": "[EN] Show original",
       "hideOriginal": "[EN] Hide original",
       "machineNote": "[EN] Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
@@ -7943,7 +7979,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Lapu lietojumu un kampaņu, kas jūs atveda, mērām tikai ar jūsu atļauju.",
+      "text": "Pārlūkā saglabātos mērījumu datus un kampaņu informāciju izmantojam tikai ar jūsu piekrišanu.",
       "accept": "Atļaut mērīšanu",
       "refuse": "Atteikties",
       "more": "Vairāk par sīkdatnēm",
@@ -7959,39 +7995,40 @@
     }
   },
   "siteNav": {
+    "education": "Izglītības iestādēm",
     "signUp": "Reģistrēties",
-    "trigger": "Galvenās izvēles",
-    "account": "Pēc pieteikšanās",
+    "trigger": "Galvenie mērķi",
+    "account": "Lietotājiem, kas pieteikušies",
     "intents": {
       "work": {
         "title": "Meklēju darbu",
-        "description": "Atrodiet darbu un parādiet, ko protat.",
+        "description": "Meklējiet darbu un iepazīstiniet ar savu pieredzi.",
         "short": "Meklēju darbu"
       },
       "workers": {
         "title": "Meklēju darbiniekus",
-        "description": "Aprakstiet, kāds darbs jāpaveic.",
+        "description": "Norādiet, kādi darbinieki, kur un kad ir nepieciešami.",
         "short": "Meklēju darbiniekus"
       },
       "services": {
         "title": "Piedāvāju pakalpojumus",
-        "description": "Publicējiet savu piedāvājumu un atbildiet uz pieprasījumiem.",
+        "description": "Iepazīstiniet ar saviem pakalpojumiem, atrodiet pasūtījumus un atbildiet uz pieprasījumiem.",
         "short": "Piedāvāju pakalpojumus"
-      },
-      "orders": {
-        "title": "Meklēju pasūtījumus un līgumus",
-        "description": "Atrodiet darba pieprasījumus un glabājiet piedāvājumus vienuviet.",
-        "short": "Meklēju pasūtījumus"
       },
       "partners": {
         "title": "Meklēju partnerus",
-        "description": "Sazinieties ar cilvēkiem un organizācijām, ar kuriem strādājat.",
+        "description": "Atrodiet partnerus un uzturiet sadarbību.",
         "short": "Meklēju partnerus"
       },
       "agencies": {
         "title": "Aģentūrām",
-        "description": "Pārvaldiet aģentūras cilvēkus, klientus un piedāvājumus.",
+        "description": "Pārvaldiet aģentūras klientus un kandidātu piedāvājumus.",
         "short": "Aģentūrām"
+      },
+      "contractors": {
+        "short": "Meklēju pakalpojumus vai izpildītājus",
+        "title": "Meklēju pakalpojumus vai izpildītājus",
+        "description": "Aprakstiet, kāds pakalpojums vai darbu izpildītājs ir nepieciešams."
       }
     },
     "links": {
@@ -8010,11 +8047,13 @@
       "network": "Jūsu tīkls",
       "partnerWithUs": "Kļūt par partneri",
       "forAgencies": "Kā tas darbojas aģentūrām",
-      "setUpAgency": "Izveidot aģentūru"
+      "setUpAgency": "Reģistrēt aģentūru",
+      "b2bEnquiry": "Uzņēmējdarbības pakalpojumu pieprasījums (B2B)",
+      "projectEnquiry": "Individuāla projekta pieprasījums"
     },
     "assistant": "Jautāt asistentam",
     "start": {
-      "searchLabel": "Meklēt darbu",
+      "searchLabel": "Meklēt darba sludinājumus",
       "searchPlaceholder": "Amats vai atslēgvārds",
       "searchSubmit": "Meklēt",
       "viewAll": "Visi sludinājumi"
@@ -8023,10 +8062,10 @@
       "heading": "Ko vēlaties darīt?",
       "swipe": "Velciet",
       "close": "Aizvērt",
-      "functions": "Funkcijas",
+      "functions": "Darbības",
       "professions": "Profesijas",
-      "opensNow": "Atveras uzreiz",
-      "signInWhenOpen": "Pieteikšanās atverot",
+      "opensNow": "Konts nav nepieciešams",
+      "signInWhenOpen": "Jāpiesakās",
       "allSectors": "Visas nozares",
       "fullList": "Pilns saraksts"
     },

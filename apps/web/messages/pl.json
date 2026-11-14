@@ -5421,7 +5421,7 @@
     "how": "Jak to działa",
     "menuOpen": "Menu",
     "menuClose": "Zamknij menu",
-    "market": "Rynek"
+    "market": "Rynek pracy"
   },
   "livingMarketReview": {
     "tagline": "Żywy rynek pracy Europy",
@@ -5542,7 +5542,6 @@
     "about": "O nas",
     "contact": "Kontakt",
     "rights": "Wszelkie prawa zastrzeżone.",
-    "rexora": "Tworzone wspólnie: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai jest prowadzona i komercyjnie świadczona przez UAB „Nonstop Group”. Oprogramowanie LabourMarket.ai oraz powiązana własność intelektualna należą do Labour Market AI Sp. z o.o. i są używane przez UAB „Nonstop Group” na podstawie licencji.",
     "ipNotice": "Prawa własności intelektualnej. Platforma jest prowadzona na podstawie licencji przez UAB „Nonstop Group”.",
     "legalNotice": "Nota prawna"
@@ -15526,26 +15525,26 @@
   "landing": {
     "requestDoors": {
       "workerSearch": {
-        "title": "Zamów poszukiwanie pracowników",
-        "body": "Podaj zawód, liczbę osób, kraj i termin rozpoczęcia pracy."
+        "title": "Zapytanie o rekrutację pracowników",
+        "body": "Proszę podać zawód, liczbę pracowników, kraj i termin rozpoczęcia pracy."
       },
       "b2b": {
-        "title": "Wyślij zapytanie B2B",
-        "body": "Opisz rodzaj prac, miejsce, zakres i terminy."
+        "title": "Zapytanie o usługi dla firm (B2B)",
+        "body": "Proszę opisać rodzaj prac, miejsce, zakres i terminy."
       },
       "project": {
-        "title": "Zamów realizację indywidualnego projektu",
-        "body": "Dla klientów prywatnych i firm: opisz potrzebny projekt lub usługę."
+        "title": "Zapytanie o projekt indywidualny",
+        "body": "Dla klientów prywatnych i firm: proszę opisać, jakiego projektu lub usługi Państwo potrzebują."
       },
-      "title": "Wyślij zapytanie",
-      "promise": "Wyślij zapytanie – nasz zespół je przeanalizuje i skontaktuje się z tobą.",
-      "name": "Imię lub firma",
+      "title": "Zgłoszenie zapotrzebowania",
+      "promise": "Proszę opisać, jakich pracowników, usług lub realizacji projektu Państwo potrzebują. Zapytanie jest przekazywane zespołowi LabourMarket.ai do rozpatrzenia.",
+      "name": "Imię i nazwisko lub nazwa firmy",
       "email": "E-mail",
       "phone": "Telefon",
       "country": "Kraj",
-      "countryChoose": "Wybierz kraj",
+      "countryChoose": "Proszę wybrać kraj",
       "city": "Miasto",
-      "profession": "Zawód",
+      "profession": "Zawód lub specjalność",
       "workers": "Liczba pracowników",
       "start": "Rozpoczęcie pracy",
       "details": "Dodatkowe wymagania",
@@ -15553,19 +15552,19 @@
       "place": "Miejsce",
       "scope": "Zakres",
       "deadline": "Terminy",
-      "need": "Potrzebny projekt lub usługa",
+      "need": "Jaki projekt lub usługa są potrzebne",
       "customer": "Klient",
       "customerPrivate": "Osoba prywatna",
       "customerBusiness": "Firma",
       "optional": "opcjonalnie",
       "send": "Wyślij zapytanie",
       "sending": "Wysyłanie…",
-      "receivedTitle": "Otrzymaliśmy twoje zapytanie",
-      "receivedBody": "Twoje zapytanie zostało przyjęte. Nasz zespół je przeanalizuje i skontaktuje się z tobą, korzystając z podanych danych.",
-      "invalid": "Sprawdź pola i spróbuj ponownie. Wpisane dane zostają w formularzu.",
-      "limited": "Teraz jest zbyt wiele zapytań. Spróbuj później: wpisane dane zostają w formularzu.",
-      "unavailable": "Nie udało się wysłać zapytania i nie zostało ono odebrane. Wpisane dane zostają w formularzu, spróbuj ponownie.",
-      "notice": "Wysyłając zapytanie, potwierdzasz, że zapoznałeś się z <privacy>Polityką prywatności</privacy>."
+      "receivedTitle": "Otrzymaliśmy Państwa zapytanie",
+      "receivedBody": "Państwa zapytanie zostało odebrane i przekazane zespołowi LabourMarket.ai do rozpatrzenia.",
+      "invalid": "Proszę sprawdzić pola i spróbować ponownie. Wpisane dane pozostały w formularzu.",
+      "limited": "Obecnie otrzymujemy zbyt wiele zapytań. Proszę spróbować później – wpisane dane pozostały w formularzu.",
+      "unavailable": "Nie udało się wysłać zapytania i nie otrzymaliśmy go. Wpisane dane pozostały w formularzu – proszę spróbować ponownie.",
+      "notice": "Wysyłając zapytanie, potwierdzają Państwo zapoznanie się z <privacy>Polityką prywatności</privacy>."
     },
     "audienceValueEyebrow": "Wartość dla każdej strony pracy",
     "audienceValueTitle": "Co zyskuje każda grupa",
@@ -15785,15 +15784,15 @@
       "sub": "Szukaj pracy, specjalistów, pracowników, klientów lub partnerów do projektów w swoim kraju i na całym świecie. Stwórz swój profil zawodowy, pokaż doświadczenie, oferuj usługi i odkrywaj nowe możliwości."
     },
     "entry": {
-      "label": "Napisz, czego potrzebujesz — własnymi słowami",
-      "placeholder": "Np. Potrzebuję 12 monterów rusztowań w Rotterdamie",
-      "submit": "Zrozum",
+      "label": "Czego Państwo potrzebują?",
+      "placeholder": "Np. potrzebujemy 5 magazynierów",
+      "submit": "Dalej",
       "examplesLabel": "Na przykład:",
       "examples": {
-        "hire": "Potrzebuję 12 monterów rusztowań w Rotterdamie",
+        "hire": "Potrzebuję 5 pracowników magazynu w Wilnie",
         "work": "Szukam pracy w Norwegii",
         "internship": "Gdzie mogę odbyć praktykę?",
-        "professional": "Jestem księgowym i szukam pracy w Wilnie",
+        "professional": "Jestem księgową i szukam pracy w Wilnie",
         "needService": "Potrzebuję kogoś do naprawy dachu",
         "offerService": "Oferuję usługi księgowe",
         "offerCapacity": "Mamy 7 wolnych elektryków od poniedziałku",
@@ -15801,57 +15800,57 @@
         "logWork": "Dziś przepracowałem 8 godzin na budowie Green Tower",
         "verifyWork": "Kto mógłby potwierdzić moje doświadczenie?"
       },
-      "understoodLabel": "Zrozumiano",
+      "understoodLabel": "Oto, co zrozumieliśmy",
       "understood": {
-        "need-workers": "Potrzebujesz pracowników. Zapiszemy zapotrzebowanie — jakie osoby, ilu, gdzie i od kiedy — i poszukamy właściwych.",
-        "find-workers": "Szukasz ludzi do pracy. Pokażemy, kto pasuje zawodem i miejscem.",
-        "candidates": "Chcesz zobaczyć kandydatów do swojego zapotrzebowania.",
-        "find-work": "Szukasz pracy. Pokażemy możliwości pasujące do Twojego zawodu i miejsca.",
-        "opportunities": "Szukasz możliwości — pracy, praktyki lub innej drogi. Pokażemy, co do Ciebie pasuje.",
-        "need-service": "Potrzebujesz kogoś do wykonania pracy. Zapiszemy dokładnie, czego trzeba, i poszukamy, kto może pomóc.",
-        "offer-value": "Masz coś do zaoferowania. Zapiszemy ofertę, aby znaleźli ją ci, którzy jej potrzebują.",
-        "create-project": "Chcesz utworzyć projekt lub budowę — z miejscem, terminami i ludźmi.",
-        "projects": "Chcesz zobaczyć projekty swojej firmy.",
-        "company-overview": "Chcesz zobaczyć, co dzieje się w Twojej firmie — ludzie, projekty, zapotrzebowania.",
-        "create-organization": "Chcesz zarejestrować firmę lub organizację.",
-        "cv": "Chcesz wgrać plik CV. Odczytamy go i pokażemy, co znaleźliśmy, zanim cokolwiek zapiszemy.",
-        "log-work": "Chcesz zapisać wykonaną pracę w dzienniku pracy.",
-        "skill-gap": "Chcesz wiedzieć, których umiejętności Ci brakuje.",
-        "documents": "Mówisz o dokumentach i certyfikatach — co jest ważne, co wygasa, czego brakuje.",
-        "add-document": "Masz dokument lub certyfikat, który chcesz zapisać.",
-        "learning-compass": "Chcesz wiedzieć, czego uczyć się dalej.",
-        "profile": "Chcesz uzupełnić swój profil — język, umiejętność, doświadczenie.",
-        "who-available": "Chcesz wiedzieć, kto w Twoim zespole jest wolny.",
-        "invite-candidate": "Chcesz zaprosić osobę do swojego zespołu.",
-        "invite-client": "Chcesz zaprosić klienta — działasz jako agencja.",
-        "propose-candidate": "Chcesz zaproponować kandydata klientowi — działasz jako agencja.",
-        "client-demand": "Chcesz zobaczyć, czego potrzebują Twoi klienci.",
-        "invite-student": "Reprezentujesz instytucję edukacyjną i chcesz zaprosić ucznia.",
-        "programmes": "Reprezentujesz instytucję edukacyjną — programy, grupy, uczniowie.",
-        "offer-capacity": "Masz wolnych ludzi lub wolne moce. Zapiszemy ofertę, aby znaleźli ją ci, którzy jej potrzebują.",
-        "who-verifies-work": "Pytasz, kto może potwierdzić pracę, którą już wykonałeś. Pokażemy, do kogo ją wysłać.",
-        "cv-view": "Chcesz zobaczyć swoje CV — to, które system już ma. Nic nie jest wgrywane ani zmieniane.",
-        "cv-choose": "Wspomniałeś o swoim CV. Zapytamy, czy je pokazać, przyjąć nowy plik, czy uzupełnić profil."
+        "need-workers": "Szukają Państwo pracowników. Proszę podać zawód, liczbę osób, miejsce i planowany termin rozpoczęcia.",
+        "find-workers": "Szukają Państwo pracowników. Po zalogowaniu proszę opisać zapotrzebowanie – kandydaci są widoczni przy konkretnym zapotrzebowaniu, jeśli są dostępni.",
+        "candidates": "Chcą Państwo przejrzeć kandydatów do swojego zapotrzebowania.",
+        "find-work": "Szukają Państwo pracy. Pokażemy możliwości według Państwa zawodu i miejsca.",
+        "opportunities": "Szukają Państwo pracy, praktyki lub innych możliwości zawodowych.",
+        "need-service": "Potrzebują Państwo kogoś, kto wykona pracę. Po zalogowaniu zobaczą Państwo, kto oferuje taką usługę.",
+        "offer-value": "Chcą Państwo zaoferować usługi lub swoje kompetencje. Ofertę można złożyć na platformie.",
+        "create-project": "Chcą Państwo utworzyć projekt lub obiekt z miejscem, terminami i ludźmi.",
+        "projects": "Chcą Państwo zobaczyć projekty swojej firmy.",
+        "company-overview": "Chcą Państwo widzieć, co dzieje się w Państwa firmie: ludzie, projekty, zapotrzebowania.",
+        "create-organization": "Chcą Państwo zarejestrować firmę lub organizację.",
+        "cv": "Chcą Państwo wgrać CV. Przed zapisaniem pokażemy odczytane z niego dane do sprawdzenia.",
+        "log-work": "Chcą Państwo zapisać wykonaną pracę w dzienniku pracy.",
+        "skill-gap": "Chcą Państwo sprawdzić, jakich umiejętności Państwu brakuje.",
+        "documents": "Chodzi o dokumenty i certyfikaty: co jest ważne, co wygasa, czego brakuje.",
+        "add-document": "Mają Państwo dokument lub certyfikat, który chcą Państwo zapisać.",
+        "learning-compass": "Chcą Państwo wiedzieć, czego uczyć się dalej.",
+        "profile": "Chcą Państwo uzupełnić swój profil: język, umiejętność, doświadczenie.",
+        "who-available": "Chcą Państwo wiedzieć, kto w Państwa zespole jest dostępny.",
+        "invite-candidate": "Chcą Państwo zaprosić osobę do swojego zespołu.",
+        "invite-client": "Chcą Państwo zaprosić klienta (działają Państwo jako agencja).",
+        "propose-candidate": "Chcą Państwo zaproponować kandydata klientowi (działają Państwo jako agencja).",
+        "client-demand": "Chcą Państwo zobaczyć, czego potrzebują Państwa klienci.",
+        "invite-student": "Reprezentują Państwo placówkę edukacyjną i chcą zaprosić ucznia lub studenta.",
+        "programmes": "Reprezentują Państwo placówkę edukacyjną: programy, grupy, uczniowie.",
+        "offer-capacity": "Mają Państwo wolnych pracowników lub wolne zasoby. Można złożyć swoją ofertę.",
+        "who-verifies-work": "Pytają Państwo, kto może potwierdzić wykonaną przez Państwa pracę. Pokażemy, komu ją przekazać.",
+        "cv-view": "Chcą Państwo zobaczyć swoje CV – to, które system już ma. Nic nie zostanie wgrane ani zmienione.",
+        "cv-choose": "Chodzi o Państwa CV. Zapytamy, czy chcą Państwo je zobaczyć, wgrać nowe, czy uzupełnić profil."
       },
       "family": {
-        "work": "Mówisz o swojej pracy i ścieżce zawodowej.",
-        "hire": "Mówisz jako pracodawca lub firma — o ludziach, projektach lub zapotrzebowaniach.",
-        "agency": "Mówisz jako agencja — o klientach i kandydatach.",
-        "student": "Mówisz o nauce i drodze do pracy.",
-        "education": "Reprezentujesz instytucję edukacyjną."
+        "work": "Chodzi o Państwa pracę i ścieżkę zawodową.",
+        "hire": "Piszą Państwo jako pracodawca lub firma: o ludziach, projektach lub zapotrzebowaniach.",
+        "agency": "Piszą Państwo jako agencja: o klientach i kandydatach.",
+        "student": "Chodzi o naukę i drogę do pracy.",
+        "education": "Reprezentują Państwo placówkę edukacyjną."
       },
-      "nextHint": "Aby zachować zapotrzebowanie i móc na nie odpowiedzieć, potrzebne jest konto. Twoje zdanie idzie razem z Tobą.",
+      "nextHint": "Aby zapisać zapotrzebowanie, proszę się zalogować lub utworzyć konto. Wpisane zdanie zostanie zachowane także po zalogowaniu.",
       "signup": "Utwórz konto",
-      "login": "Mam konto — zaloguj się",
-      "unrecognised": "Za pierwszym razem nie zrozumiałem. Czego szukasz?",
+      "login": "Mam już konto",
+      "unrecognised": "Nie udało się dokładnie określić zapotrzebowania. Proszę wybrać jedną z opcji:",
       "chips": {
         "work": "Szukam pracy",
         "hire": "Potrzebuję pracowników"
       },
-      "numbers": "Teraz na platformie: {vacancies} aktywnych ogłoszeń o pracę · {employers} pracodawców",
-      "refreshed": "odświeżono {date}",
+      "numbers": "Teraz na platformie – aktywne oferty pracy: {vacancies} · pracodawcy: {employers}",
+      "refreshed": "zaktualizowano {date}",
       "moreExamples": "Więcej przykładów",
-      "browseJobs": "Przeglądaj oferty pracy",
+      "browseJobs": "Przeglądanie ofert pracy",
       "exampleLabels": {
         "hire": "Potrzebuję pracowników",
         "work": "Szukam pracy",
@@ -15867,8 +15866,8 @@
     },
     "openJobs": {
       "eyebrow": "Oferty pracy",
-      "title": "Prawdziwe oferty pracy, otwarte teraz.",
-      "sub": "Przeglądanie nie wymaga konta; po zalogowaniu zobaczysz pracodawcę, miejsce i sposób aplikowania.",
+      "title": "Prawdziwe oferty pracy, aktywne teraz.",
+      "sub": "Przeglądanie nie wymaga konta; po zalogowaniu widoczni są pracodawca, miejsce i sposób aplikowania.",
       "all": "Wszystkie oferty pracy"
     },
     "marketProof": {
@@ -15926,6 +15925,42 @@
         "goods": "Towary"
       },
       "lasting": "Twoje doświadczenie i możliwości pozostają stale dostępne — przy zmianie pracy, projektu czy kraju."
+    },
+    "v3": {
+      "lead": "Dla pracowników, pracodawców i usługodawców – ze wszystkich zawodów i branż. Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
+      "moreChoices": "Więcej opcji",
+      "or": "lub proszę opisać własnymi słowami",
+      "needFree": "Zapytanie można wysłać bez rejestracji. Wysłanie jest bezpłatne; warunki i cena usług są uzgadniane osobno.",
+      "market": {
+        "title": "Oferty pracy na rynku",
+        "line": "Aktywne oferty pracy ze źródeł zewnętrznych: {adverts}. Różne nazwy pracodawców w ofertach: {employers}.",
+        "source": "Oferty zebrano z publicznych zewnętrznych źródeł ofert pracy. Nie jest to liczba pracodawców ani klientów zarejestrowanych w LabourMarket.ai. Ostatnia aktualizacja ofert: {date}.",
+        "none": "Dane rynkowe są obecnie niedostępne.",
+        "search": "Wyszukiwanie ofert pracy"
+      },
+      "adverts": {
+        "title": "Kilka aktywnych ofert",
+        "sub": "Oferty można przeglądać bez konta. Po zalogowaniu widoczni są pracodawca, miejsce, pełny opis i sposób aplikowania."
+      },
+      "how": {
+        "title": "Jak to działa",
+        "s1": {
+          "title": "Wyszukiwanie i uzgodnienia",
+          "body": "Można szukać pracy, pracowników lub usług oraz zarządzać ofertami i uzgodnieniami na platformie."
+        },
+        "s2": {
+          "title": "Rejestrowanie pracy",
+          "body": "Wykonaną pracę można rejestrować w dzienniku pracy."
+        },
+        "s3": {
+          "title": "Potwierdzanie",
+          "body": "Wpisy potwierdza kierownik organizacji pracodawcy. Zamawiający może przyjąć przekazaną mu pracę – jest to oznaczane osobno. Potwierdzona praca staje się dowodem Państwa doświadczenia."
+        },
+        "s4": {
+          "title": "Państwa dane i prywatność",
+          "body": "Asystent przedstawia propozycje, a decyzje podejmują Państwo. To Państwo decydują, czy pracodawcy mogą Państwa znaleźć i czy udostępnić dane kontaktowe. Wpisy o pracy widzi organizacja, w której Państwo pracują."
+        }
+      }
     }
   },
   "workspace": {
@@ -16532,7 +16567,7 @@
     },
     "language": {
       "translatedFrom": "Przetłumaczono z: {language}",
-      "originalIn": "Język ogłoszenia: {language}",
+      "originalIn": "Język oferty: {language}",
       "showOriginal": "Pokaż oryginał",
       "hideOriginal": "Ukryj oryginał",
       "machineNote": "Tłumaczenie automatyczne. Liczby, waluta, daty i nazwy jak w oryginale; oryginał pozostaje faktem.",
@@ -20517,11 +20552,11 @@
   },
   "consent": {
     "banner": {
-      "text": "Korzystanie ze stron i źródło kampanii mierzymy tylko za Twoją zgodą.",
-      "accept": "Zezwól na pomiar",
-      "refuse": "Odmów",
+      "text": "Dane pomiarowe przechowywane w przeglądarce i informacje o kampaniach wykorzystujemy tylko za Państwa zgodą.",
+      "accept": "Zezwalam na pomiar",
+      "refuse": "Odmawiam",
       "more": "Więcej o plikach cookie",
-      "label": "Wybór dotyczący pomiaru korzystania"
+      "label": "Wybór dotyczący pomiaru korzystania z serwisu"
     },
     "control": {
       "title": "Pomiar korzystania i przypisanie kampanii",
@@ -20576,74 +20611,77 @@
     }
   },
   "siteNav": {
+    "education": "Dla placówek edukacyjnych",
     "signUp": "Zarejestruj się",
-    "trigger": "Główne wybory",
-    "account": "Po zalogowaniu",
+    "trigger": "Główne cele",
+    "account": "Dla zalogowanych",
     "intents": {
       "work": {
         "title": "Szukam pracy",
-        "description": "Znajdź oferty i pokaż, co potrafisz.",
+        "description": "Szukanie pracy i prezentacja swojego doświadczenia.",
         "short": "Szukam pracy"
       },
       "workers": {
         "title": "Szukam pracowników",
-        "description": "Opisz, jakiej pracy potrzebujesz.",
+        "description": "Proszę podać, jakich pracowników, gdzie i kiedy Państwo potrzebują.",
         "short": "Szukam pracowników"
       },
       "services": {
         "title": "Oferuję usługi",
-        "description": "Opublikuj swoją ofertę i odpowiadaj na zapytania.",
+        "description": "Prezentacja usług, wyszukiwanie zleceń i odpowiadanie na zapytania.",
         "short": "Oferuję usługi"
-      },
-      "orders": {
-        "title": "Szukam zleceń i umów",
-        "description": "Znajdź zapytania o pracę i trzymaj oferty w jednym miejscu.",
-        "short": "Szukam zleceń"
       },
       "partners": {
         "title": "Szukam partnerów",
-        "description": "Połącz się z ludźmi i organizacjami, z którymi pracujesz.",
+        "description": "Wyszukiwanie partnerów i utrzymywanie współpracy.",
         "short": "Szukam partnerów"
       },
       "agencies": {
         "title": "Dla agencji",
-        "description": "Zarządzaj ludźmi, klientami i ofertami agencji.",
+        "description": "Zarządzanie klientami agencji i propozycjami kandydatów.",
         "short": "Dla agencji"
+      },
+      "contractors": {
+        "short": "Szukam wykonawców",
+        "title": "Szukam usług lub wykonawców",
+        "description": "Proszę opisać, jakiej usługi lub jakiego wykonawcy Państwo potrzebują."
       }
     },
     "links": {
       "jobs": "Oferty pracy",
       "workOpportunities": "Możliwości pracy",
-      "createCv": "Utwórz darmowe CV",
+      "createCv": "Tworzenie bezpłatnego CV",
       "workAbroad": "Praca za granicą",
       "forWorkers": "Jak to działa dla pracowników",
-      "companyNeed": "Opisz potrzebę",
+      "companyNeed": "Opis zapotrzebowania",
       "forCompanies": "Jak to działa dla firm",
       "labourMarket": "Rynek pracy według kraju",
-      "myServices": "Twoje usługi",
+      "myServices": "Państwa usługi",
       "serviceRequests": "Zapytania o usługi",
       "marketListings": "Ogłoszenia rynkowe",
       "commercial": "Oferty i umowy",
-      "network": "Twoja sieć",
-      "partnerWithUs": "Zostań partnerem",
+      "network": "Państwa sieć",
+      "partnerWithUs": "Zostać partnerem",
       "forAgencies": "Jak to działa dla agencji",
-      "setUpAgency": "Załóż agencję"
+      "setUpAgency": "Rejestracja agencji",
+      "b2bEnquiry": "Zapytanie o usługi dla firm (B2B)",
+      "projectEnquiry": "Zapytanie o projekt indywidualny"
     },
     "assistant": "Zapytaj asystenta",
     "start": {
-      "searchLabel": "Szukaj pracy",
+      "searchLabel": "Wyszukiwanie ofert pracy",
       "searchPlaceholder": "Stanowisko lub słowo kluczowe",
       "searchSubmit": "Szukaj",
-      "viewAll": "Wszystkie oferty"
+      "viewAll": "Wszystkie oferty pracy"
     },
     "nav": {
-      "heading": "Co chcesz zrobić?",
+      "heading": "Co chcą Państwo zrobić?",
       "swipe": "Przesuń",
       "close": "Zamknij",
-      "functions": "Funkcje",
+      "functions": "Działania",
       "professions": "Zawody",
-      "opensNow": "Otwiera się od razu",
-      "signInWhenOpen": "Logowanie przy otwarciu",
+      "opensNow": "Konto nie jest wymagane",
+      "signInWhenOpen": "Wymagane logowanie",
       "allSectors": "Wszystkie branże",
       "fullList": "Pełna lista"
     },

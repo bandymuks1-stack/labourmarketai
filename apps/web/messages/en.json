@@ -5407,12 +5407,12 @@
     }
   },
   "nav": {
-    "jobs": "Jobs",
+    "jobs": "Job adverts",
     "workers": "For workers",
     "companies": "For companies",
     "agencies": "For agencies",
     "pricing": "Pricing",
-    "about": "About",
+    "about": "About us",
     "vision": "Vision",
     "login": "Sign in",
     "startNow": "Start now",
@@ -5421,7 +5421,7 @@
     "how": "How it works",
     "menuOpen": "Menu",
     "menuClose": "Close menu",
-    "market": "The market"
+    "market": "Job market"
   },
   "livingMarketReview": {
     "tagline": "The living labour market of Europe",
@@ -5542,7 +5542,6 @@
     "about": "About",
     "contact": "Contact",
     "rights": "All rights reserved.",
-    "rexora": "Built together: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai is operated and commercially provided by UAB “Nonstop Group”. The LabourMarket.ai software and related intellectual property are owned by Labour Market AI Sp. z o.o. and used by UAB “Nonstop Group” under licence.",
     "ipNotice": "Intellectual property rights. The platform is operated under licence by UAB “Nonstop Group”.",
     "legalNotice": "Legal notice"
@@ -15526,20 +15525,20 @@
   "landing": {
     "requestDoors": {
       "workerSearch": {
-        "title": "Order a worker search",
-        "body": "Tell us the profession, how many people you need, the country and when to start."
+        "title": "Worker recruitment enquiry",
+        "body": "Tell us the profession, number of workers, country and start date."
       },
       "b2b": {
-        "title": "Send a B2B request",
+        "title": "Business services enquiry (B2B)",
         "body": "Describe the type of work, location, scope and deadlines."
       },
       "project": {
-        "title": "Order an individual project",
+        "title": "Individual project enquiry",
         "body": "For private and business customers: describe the project or service you need."
       },
-      "title": "Send a request",
-      "promise": "Send your request – our team reviews it and gets in touch with you.",
-      "name": "Name or company",
+      "title": "Submit a request",
+      "promise": "Tell us what workers, services or project delivery you need. Your enquiry is passed to the LabourMarket.ai team for review.",
+      "name": "Name or company name",
       "email": "Email",
       "phone": "Phone",
       "country": "Country",
@@ -15547,7 +15546,7 @@
       "city": "City",
       "profession": "Profession",
       "workers": "Number of workers",
-      "start": "Work start",
+      "start": "Start date",
       "details": "Additional requirements",
       "work": "Type of work",
       "place": "Location",
@@ -15560,11 +15559,11 @@
       "optional": "optional",
       "send": "Send request",
       "sending": "Sending…",
-      "receivedTitle": "We have your request",
-      "receivedBody": "Your request has been received. Our team will review it and contact you using the details you gave.",
-      "invalid": "Check the fields and try again. What you typed is still in this form.",
-      "limited": "Too many requests right now. Please try later: what you typed stays in the form.",
-      "unavailable": "Your request could not be sent and was not received. What you typed stays in the form, so please try again.",
+      "receivedTitle": "We have received your request",
+      "receivedBody": "Your request has been received and passed to the LabourMarket.ai team for review.",
+      "invalid": "Please check the fields and try again. What you entered is still in the form.",
+      "limited": "We are receiving too many requests at the moment. Please try again later; what you entered is still in the form.",
+      "unavailable": "Your request could not be sent and we did not receive it. What you entered is still in the form; please try again.",
       "notice": "By sending a request you confirm that you have read the <privacy>Privacy Policy</privacy>."
     },
     "audienceValueEyebrow": "Value for every side of work",
@@ -15785,12 +15784,12 @@
       "sub": "Look for work, specialists, workers, clients or project partners, locally and worldwide. Build your professional profile, present your experience, offer services and discover new opportunities."
     },
     "entry": {
-      "label": "Write what you need — in your own words",
-      "placeholder": "E.g. I need 12 scaffolders in Rotterdam",
-      "submit": "Understand",
+      "label": "What do you need?",
+      "placeholder": "E.g. we need five warehouse workers",
+      "submit": "Continue",
       "examplesLabel": "For example:",
       "examples": {
-        "hire": "I need 12 scaffolders in Rotterdam",
+        "hire": "I need 5 warehouse workers in Vilnius",
         "work": "Looking for a job in Norway",
         "internship": "Where can I do an internship?",
         "professional": "I am an accountant looking for work in Vilnius",
@@ -15801,49 +15800,49 @@
         "logWork": "Today I worked 8 hours at the Green Tower site",
         "verifyWork": "Who could confirm my experience?"
       },
-      "understoodLabel": "Understood",
+      "understoodLabel": "Here is what we understood",
       "understood": {
-        "need-workers": "You need workers. We will write down the need — which people, how many, where and from when — and look for the right ones.",
-        "find-workers": "You are looking for people to do work. We will show who fits by profession and place.",
-        "candidates": "You want to see the candidates for your need.",
-        "find-work": "You are looking for work. We will show opportunities that fit your profession and place.",
-        "opportunities": "You are looking for opportunities — work, an internship or another path. We will show what fits you.",
-        "need-service": "You need someone to do a job. We will write down exactly what is needed and look for who can help.",
-        "offer-value": "You have something to offer. We will write down the offer so the people who need it can find it.",
-        "create-project": "You want to create a project or a site — with a place, dates and people.",
+        "need-workers": "You are looking for workers. Specify the role, number of people, location and intended start date.",
+        "find-workers": "You are looking for workers. Sign in and describe your request; candidates are shown against each request, where available.",
+        "candidates": "You want to review the candidates for your request.",
+        "find-work": "You are looking for work. We will show opportunities that match your profession and location.",
+        "opportunities": "You are looking for a job, internship or other career opportunities.",
+        "need-service": "You need someone to carry out a job. After signing in you can see who offers that service.",
+        "offer-value": "You want to offer services or skills. You can submit an offer on the platform.",
+        "create-project": "You want to create a project or site with a location, dates and people.",
         "projects": "You want to see your company's projects.",
-        "company-overview": "You want to see what is happening in your company — people, projects, needs.",
-        "create-organization": "You want to register a company or an organisation.",
-        "cv": "You want to upload a CV file. We will read it and show what we found before saving anything.",
-        "log-work": "You want to record work you did in the work journal.",
-        "skill-gap": "You want to know which skills you are missing.",
-        "documents": "You are talking about documents and certificates — what is valid, what expires, what is missing.",
-        "add-document": "You have a document or certificate you want to record.",
+        "company-overview": "You want an overview of your company: people, projects and needs.",
+        "create-organization": "You want to register a company or organisation.",
+        "cv": "You want to upload a CV. We will show the extracted information for review before saving it.",
+        "log-work": "You want to record completed work in the work journal.",
+        "skill-gap": "You want to find out which skills you are missing.",
+        "documents": "This is about documents and certificates: what is valid, what is expiring and what is missing.",
+        "add-document": "You have a document or certificate to record.",
         "learning-compass": "You want to know what to learn next.",
-        "profile": "You want to add to your profile — a language, a skill, experience.",
-        "who-available": "You want to know who in your team is free.",
-        "invite-candidate": "You want to invite a person to your team.",
-        "invite-client": "You want to invite a client — you work as an agency.",
-        "propose-candidate": "You want to propose a candidate to a client — you work as an agency.",
+        "profile": "You want to add to your profile: a language, a skill or experience.",
+        "who-available": "You want to know who in your team is available.",
+        "invite-candidate": "You want to invite someone to your team.",
+        "invite-client": "You want to invite a client (you work as an agency).",
+        "propose-candidate": "You want to propose a candidate to a client (you work as an agency).",
         "client-demand": "You want to see what your clients need.",
-        "invite-student": "You represent an education institution and want to invite a student.",
-        "programmes": "You represent an education institution — programmes, groups, students.",
-        "offer-capacity": "You have people or capacity free. We will record the offer so those who need it can find it.",
-        "who-verifies-work": "You are asking who can confirm work you have already done. We will show who to send it to.",
-        "cv-view": "You want to see your CV — the one the system already holds. Nothing is uploaded or changed.",
-        "cv-choose": "You mentioned your CV. We will ask whether to show it, take a new file, or add to your profile."
+        "invite-student": "You represent an education provider and want to invite a student.",
+        "programmes": "You represent an education provider: programmes, groups and students.",
+        "offer-capacity": "You have staff or capacity available. You can submit an offer.",
+        "who-verifies-work": "You are asking who can confirm work you have done. We will show you who to send it to.",
+        "cv-view": "You want to see your CV as the system currently holds it. Nothing will be uploaded or changed.",
+        "cv-choose": "This is about your CV. We will ask whether you want to view it, upload a new one or add to your profile."
       },
       "family": {
-        "work": "You are talking about your work and professional path.",
-        "hire": "You are talking as an employer or a company — about people, projects or needs.",
-        "agency": "You are talking as an agency — about clients and candidates.",
-        "student": "You are talking about learning and the path to work.",
-        "education": "You represent an education institution."
+        "work": "This is about your work and career.",
+        "hire": "You are writing as an employer or company: about people, projects or needs.",
+        "agency": "You are writing as an agency: about clients and candidates.",
+        "student": "This is about learning and the route into work.",
+        "education": "You represent an education provider."
       },
-      "nextHint": "To keep the need and be able to answer it, an account is needed. Your sentence travels with you.",
+      "nextHint": "To save your request, sign in or create an account. The sentence you typed will be carried over after you sign in.",
       "signup": "Create an account",
-      "login": "I have an account — log in",
-      "unrecognised": "I did not understand at first. What are you looking for?",
+      "login": "I already have an account",
+      "unrecognised": "We could not identify your request. Please choose an option:",
       "chips": {
         "work": "I am looking for work",
         "hire": "I need workers"
@@ -15851,7 +15850,7 @@
       "numbers": "On the platform now: {vacancies} active job listings · {employers} employers",
       "refreshed": "refreshed {date}",
       "moreExamples": "More examples",
-      "browseJobs": "Browse open jobs",
+      "browseJobs": "Browse job adverts",
       "exampleLabels": {
         "hire": "I need workers",
         "work": "I am looking for work",
@@ -15869,7 +15868,7 @@
       "eyebrow": "Open jobs",
       "title": "Real jobs, open right now.",
       "sub": "Looking needs no account; sign in to see the employer, the place and how to apply.",
-      "all": "All jobs"
+      "all": "All job adverts"
     },
     "marketProof": {
       "eyebrow": "On the platform right now",
@@ -15926,6 +15925,42 @@
         "goods": "Goods"
       },
       "lasting": "Your experience and opportunities stay within reach — when you change job, project or country."
+    },
+    "v3": {
+      "lead": "For workers, employers and service providers in every profession and sector. Registration and basic request posting are free.",
+      "moreChoices": "More options",
+      "or": "or describe it in your own words",
+      "needFree": "You can submit an enquiry without registering. Submission is free; service terms and price are agreed separately.",
+      "market": {
+        "title": "Job adverts in the market",
+        "line": "{adverts} active job adverts from external sources, listing {employers} different employer names.",
+        "source": "The adverts are collected from public external job sources. This is not a count of employers or clients registered with LabourMarket.ai. Adverts last refreshed: {date}.",
+        "none": "Market data is not available at the moment.",
+        "search": "Search job adverts"
+      },
+      "adverts": {
+        "title": "A few active adverts",
+        "sub": "You can browse adverts without an account. Sign in to see the employer, the location, the full description and how to apply."
+      },
+      "how": {
+        "title": "How it works",
+        "s1": {
+          "title": "Find and agree",
+          "body": "Find work, workers or services and manage offers and agreements on the platform."
+        },
+        "s2": {
+          "title": "Record the work",
+          "body": "You can record completed work in the work journal."
+        },
+        "s3": {
+          "title": "Confirm",
+          "body": "A manager of the employer organisation confirms the entries. A client can accept work submitted to them; this is recorded separately. Confirmed work becomes evidence of your experience."
+        },
+        "s4": {
+          "title": "Your data and privacy",
+          "body": "The assistant offers suggestions; you make the decisions. You decide whether employers can find you and whether your contact details are shared. Work records are visible to the organisation you work for."
+        }
+      }
     }
   },
   "workspace": {
@@ -16532,7 +16567,7 @@
     },
     "language": {
       "translatedFrom": "Translated from {language}",
-      "originalIn": "Advertisement language: {language}",
+      "originalIn": "Advert language: {language}",
       "showOriginal": "Show original",
       "hideOriginal": "Hide original",
       "machineNote": "Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
@@ -20517,9 +20552,9 @@
   },
   "consent": {
     "banner": {
-      "text": "We measure page use and which campaign brought you here only if you allow it.",
+      "text": "We use measurement data stored in your browser and campaign information only with your consent.",
       "accept": "Allow measurement",
-      "refuse": "Refuse",
+      "refuse": "Decline",
       "more": "More about cookies",
       "label": "Usage measurement choice"
     },
@@ -20576,43 +20611,44 @@
     }
   },
   "siteNav": {
+    "education": "For education providers",
     "signUp": "Sign up",
-    "trigger": "Main choices",
-    "account": "After sign-in",
+    "trigger": "Main goals",
+    "account": "For signed-in users",
     "intents": {
       "work": {
-        "title": "Looking for work",
-        "description": "Find jobs and show what you can do.",
+        "title": "Find work",
+        "description": "Find work and showcase your experience.",
         "short": "Find work"
       },
       "workers": {
-        "title": "Looking for workers",
-        "description": "Describe the work you need done.",
+        "title": "Find workers",
+        "description": "Tell us which workers you need, where and when.",
         "short": "Find workers"
       },
       "services": {
-        "title": "Offering services",
-        "description": "Publish what you offer and answer requests.",
+        "title": "Offer services",
+        "description": "Present your services, find orders and respond to requests.",
         "short": "Offer services"
       },
-      "orders": {
-        "title": "Looking for orders and contracts",
-        "description": "Find work requests and keep proposals together.",
-        "short": "Find orders"
-      },
       "partners": {
-        "title": "Looking for partners",
-        "description": "Connect with the people and organisations you work with.",
+        "title": "Find partners",
+        "description": "Find partners and maintain working relationships.",
         "short": "Find partners"
       },
       "agencies": {
         "title": "For agencies",
-        "description": "Run your agency's people, clients and offers.",
+        "description": "Manage your agency's clients and candidate offers.",
         "short": "For agencies"
+      },
+      "contractors": {
+        "short": "Find services or contractors",
+        "title": "Find services or contractors",
+        "description": "Describe the service or contractor you need."
       }
     },
     "links": {
-      "jobs": "Job board",
+      "jobs": "Job adverts",
       "workOpportunities": "Work opportunities",
       "createCv": "Create a free CV",
       "workAbroad": "Work abroad",
@@ -20625,25 +20661,27 @@
       "marketListings": "Market listings",
       "commercial": "Proposals and contracts",
       "network": "Your network",
-      "partnerWithUs": "Partner with us",
+      "partnerWithUs": "Become a partner",
       "forAgencies": "How it works for agencies",
-      "setUpAgency": "Set up your agency"
+      "setUpAgency": "Set up your agency",
+      "b2bEnquiry": "Business services enquiry (B2B)",
+      "projectEnquiry": "Individual project enquiry"
     },
     "assistant": "Ask the assistant",
     "start": {
-      "searchLabel": "Search jobs",
+      "searchLabel": "Search job adverts",
       "searchPlaceholder": "Job title or keyword",
       "searchSubmit": "Search",
-      "viewAll": "View all jobs"
+      "viewAll": "All job adverts"
     },
     "nav": {
-      "heading": "What do you want to do?",
+      "heading": "What would you like to do?",
       "swipe": "Swipe",
       "close": "Close",
-      "functions": "Functions",
+      "functions": "Actions",
       "professions": "Professions",
-      "opensNow": "Opens now",
-      "signInWhenOpen": "Sign in when you open it",
+      "opensNow": "No account required",
+      "signInWhenOpen": "Sign-in required",
       "allSectors": "All sectors",
       "fullList": "Full list"
     },

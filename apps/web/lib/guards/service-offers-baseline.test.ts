@@ -48,8 +48,11 @@ describe("Guard: cinematic baseline is preserved (no visual rebuild)", () => {
     const page = landingTreeSource(APP_ROOT, 2);
     // `LivingWorkerHero` left the baseline on 2026-11-09: owner order, no
     // fictional people on public pages.
+    // Landing V3 (owner, 2026-11-13): the market figures are one sentence in
+    // `LandingMarketFacts` (the big-number band left the page); the real
+    // adverts band stays.
     for (const sym of [
-      "MarketProofBand",
+      "LandingMarketFacts",
       "LandingOpenJobsBand",
     ]) {
       expect(page, `landing must keep the cinematic baseline marker ${sym}`).toContain(

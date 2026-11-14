@@ -5407,7 +5407,7 @@
     }
   },
   "nav": {
-    "jobs": "Stellenangebote",
+    "jobs": "Stellenanzeigen",
     "workers": "Für Arbeitskräfte",
     "companies": "Für Unternehmen",
     "agencies": "Für Agenturen",
@@ -5421,7 +5421,7 @@
     "how": "So funktioniert es",
     "menuOpen": "Menü",
     "menuClose": "Menü schließen",
-    "market": "Der Markt"
+    "market": "Arbeitsmarkt"
   },
   "livingMarketReview": {
     "tagline": "Europas lebendiger Arbeitsmarkt",
@@ -5542,7 +5542,6 @@
     "about": "Über uns",
     "contact": "Kontakt",
     "rights": "Alle Rechte vorbehalten.",
-    "rexora": "Gemeinsam entwickelt: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai wird von der UAB „Nonstop Group“ betrieben und kommerziell angeboten. Die LabourMarket.ai-Software und die zugehörigen geistigen Eigentumsrechte gehören der Labour Market AI Sp. z o.o. und werden von der UAB „Nonstop Group“ in Lizenz genutzt.",
     "ipNotice": "Rechte des geistigen Eigentums. Die Plattform wird in Lizenz von der UAB „Nonstop Group“ betrieben.",
     "legalNotice": "Impressum"
@@ -8747,7 +8746,6 @@
     },
     "languagesTitle": "Sprachen",
     "languagesSelfStated": "Sprachen laut Angabe des Arbeiters.",
-    "educationSelfStated": "Ausbildung laut Angabe der Arbeitskraft.",
     "certificatesTitle": "Zertifikate & Lizenzen",
     "declaredCertHint": "Selbst angegeben",
     "documentSelfSuppliedHint": "Dokument von der Person selbst eingereicht",
@@ -8959,7 +8957,8 @@
         "none": "Noch kein nächster Schritt zu zeigen. Mehr erfasste Arbeit gibt mehr Grundlage.",
         "unknown": "Konnte gerade nicht gelesen werden."
       }
-    }
+    },
+    "educationSelfStated": "Ausbildung laut Angabe der Arbeitskraft."
   },
   "todayScreen": {
     "eyebrow": "Heute",
@@ -15526,26 +15525,26 @@
   "landing": {
     "requestDoors": {
       "workerSearch": {
-        "title": "Personalsuche beauftragen",
-        "body": "Nennen Sie den Beruf, die benötigte Personenzahl, das Land und den Arbeitsbeginn."
+        "title": "Anfrage zur Personalsuche",
+        "body": "Nennen Sie Beruf, Anzahl der Arbeitskräfte, Land und Arbeitsbeginn."
       },
       "b2b": {
-        "title": "B2B-Anfrage senden",
+        "title": "Dienstleistungsanfrage für Unternehmen (B2B)",
         "body": "Beschreiben Sie Art der Arbeiten, Ort, Umfang und Fristen."
       },
       "project": {
-        "title": "Einzelprojekt beauftragen",
-        "body": "Für Privat- und Geschäftskunden: Beschreiben Sie das benötigte Projekt oder die Dienstleistung."
+        "title": "Anfrage für ein Einzelprojekt",
+        "body": "Für private und gewerbliche Auftraggeber: Beschreiben Sie, welches Projekt oder welche Dienstleistung Sie brauchen."
       },
-      "title": "Anfrage senden",
-      "promise": "Senden Sie Ihre Anfrage – unser Team prüft sie und meldet sich bei Ihnen.",
-      "name": "Name oder Firma",
+      "title": "Bedarf melden",
+      "promise": "Beschreiben Sie, welche Arbeitskräfte, Dienstleistungen oder Projektausführung Sie brauchen. Die Anfrage wird dem Team von LabourMarket.ai zur Prüfung übergeben.",
+      "name": "Vor- und Nachname oder Firmenname",
       "email": "E-Mail",
       "phone": "Telefon",
       "country": "Land",
       "countryChoose": "Land wählen",
       "city": "Ort",
-      "profession": "Beruf",
+      "profession": "Beruf oder Fachrichtung",
       "workers": "Anzahl der Arbeitskräfte",
       "start": "Arbeitsbeginn",
       "details": "Weitere Anforderungen",
@@ -15553,7 +15552,7 @@
       "place": "Einsatzort",
       "scope": "Umfang",
       "deadline": "Fristen",
-      "need": "Benötigtes Projekt oder benötigte Dienstleistung",
+      "need": "Welches Projekt oder welche Dienstleistung Sie brauchen",
       "customer": "Auftraggeber",
       "customerPrivate": "Privatperson",
       "customerBusiness": "Unternehmen",
@@ -15561,11 +15560,11 @@
       "send": "Anfrage senden",
       "sending": "Wird gesendet…",
       "receivedTitle": "Ihre Anfrage ist bei uns eingegangen",
-      "receivedBody": "Ihre Anfrage ist eingegangen. Unser Team prüft sie und meldet sich über die angegebenen Kontaktdaten bei Ihnen.",
-      "invalid": "Bitte prüfen Sie die Felder und versuchen Sie es erneut. Ihre Eingaben bleiben im Formular.",
-      "limited": "Gerade gehen zu viele Anfragen ein. Bitte versuchen Sie es später: Ihre Eingaben bleiben im Formular.",
-      "unavailable": "Ihre Anfrage konnte nicht gesendet werden und ist nicht eingegangen. Ihre Eingaben bleiben im Formular, bitte versuchen Sie es erneut.",
-      "notice": "Mit dem Senden bestätigen Sie, dass Sie die <privacy>Datenschutzerklärung</privacy> gelesen haben."
+      "receivedBody": "Ihre Anfrage ist eingegangen und wurde dem Team von LabourMarket.ai zur Prüfung übergeben.",
+      "invalid": "Bitte prüfen Sie die Felder und versuchen Sie es erneut. Ihre Eingaben sind im Formular erhalten geblieben.",
+      "limited": "Derzeit gehen zu viele Anfragen ein. Bitte versuchen Sie es später erneut – Ihre Eingaben sind im Formular erhalten geblieben.",
+      "unavailable": "Die Anfrage konnte nicht gesendet werden und ist bei uns nicht eingegangen. Ihre Eingaben sind im Formular erhalten geblieben – bitte versuchen Sie es erneut.",
+      "notice": "Mit dem Senden der Anfrage bestätigen Sie, dass Sie die <privacy>Datenschutzerklärung</privacy> gelesen haben."
     },
     "audienceValueEyebrow": "Wert für jede Seite der Arbeit",
     "audienceValueTitle": "Was jede Zielgruppe bekommt",
@@ -15785,12 +15784,12 @@
       "sub": "Suchen Sie Arbeit, Fachkräfte, Mitarbeitende, Kunden oder Projektpartner – vor Ort und weltweit. Erstellen Sie Ihr berufliches Profil, stellen Sie Ihre Erfahrung vor, bieten Sie Dienstleistungen an und entdecken Sie neue Möglichkeiten."
     },
     "entry": {
-      "label": "Schreiben Sie, was Sie brauchen — in Ihren eigenen Worten",
-      "placeholder": "Z. B.: Wir brauchen 12 Gerüstbauer in Rotterdam",
-      "submit": "Verstehen",
+      "label": "Was brauchen Sie?",
+      "placeholder": "Z. B. Wir brauchen 5 Lagerkräfte",
+      "submit": "Weiter",
       "examplesLabel": "Zum Beispiel:",
       "examples": {
-        "hire": "Wir brauchen 12 Gerüstbauer in Rotterdam",
+        "hire": "Wir brauchen 5 Lagerkräfte in Vilnius",
         "work": "Ich suche Arbeit in Norwegen",
         "internship": "Wo kann ich ein Praktikum machen?",
         "professional": "Ich bin Buchhalterin und suche Arbeit in Vilnius",
@@ -15798,52 +15797,52 @@
         "offerService": "Ich biete Buchhaltungsdienstleistungen an",
         "offerCapacity": "Wir haben 7 Elektriker ab Montag frei",
         "brigade": "Ich suche eine Kolonne für die Baustelle",
-        "logWork": "Heute habe ich 8 Stunden an der Green Tower gearbeitet",
+        "logWork": "Heute habe ich 8 Stunden auf der Baustelle Green Tower gearbeitet",
         "verifyWork": "Wer könnte meine Erfahrung bestätigen?"
       },
-      "understoodLabel": "Verstanden",
+      "understoodLabel": "Das haben wir verstanden",
       "understood": {
-        "need-workers": "Sie brauchen Arbeitskräfte. Wir halten den Bedarf fest — welche Leute, wie viele, wo und ab wann — und suchen die passenden.",
-        "find-workers": "Sie suchen Leute für Arbeit. Wir zeigen, wer nach Beruf und Ort passt.",
-        "candidates": "Sie möchten die Kandidaten für Ihren Bedarf sehen.",
-        "find-work": "Sie suchen Arbeit. Nach Ihrem Beruf und Ort zeigen wir passende Möglichkeiten.",
-        "opportunities": "Sie suchen Möglichkeiten — Arbeit, ein Praktikum oder einen anderen Weg. Wir zeigen, was zu Ihnen passt.",
-        "need-service": "Sie brauchen jemanden, der eine Arbeit erledigt. Wir halten fest, was genau nötig ist, und suchen, wer helfen kann.",
-        "offer-value": "Sie haben etwas anzubieten. Wir halten das Angebot fest, damit es die finden, die es brauchen.",
-        "create-project": "Sie möchten ein Projekt oder eine Baustelle anlegen — mit Ort, Terminen und Leuten.",
+        "need-workers": "Sie suchen Arbeitskräfte. Geben Sie Beruf, Anzahl, Ort und geplanten Beginn an.",
+        "find-workers": "Sie suchen Arbeitskräfte. Melden Sie sich an und beschreiben Sie Ihren Bedarf – Kandidaten werden beim jeweiligen Bedarf angezeigt, sofern es welche gibt.",
+        "candidates": "Sie möchten die Kandidaten für Ihren Bedarf ansehen.",
+        "find-work": "Sie suchen Arbeit. Wir zeigen Ihnen Möglichkeiten, die zu Ihrem Beruf und Ort passen.",
+        "opportunities": "Sie suchen Arbeit, ein Praktikum oder andere berufliche Möglichkeiten.",
+        "need-service": "Sie brauchen jemanden, der eine Arbeit ausführt. Nach der Anmeldung sehen Sie, wer diese Dienstleistung anbietet.",
+        "offer-value": "Sie möchten Dienstleistungen oder Ihre Kompetenz anbieten. Sie können auf der Plattform ein Angebot einreichen.",
+        "create-project": "Sie möchten ein Projekt oder Objekt mit Ort, Terminen und Personen anlegen.",
         "projects": "Sie möchten die Projekte Ihres Unternehmens sehen.",
-        "company-overview": "Sie möchten sehen, was in Ihrem Unternehmen passiert — Leute, Projekte, Bedarf.",
+        "company-overview": "Sie möchten sehen, was in Ihrem Unternehmen geschieht: Personen, Projekte, Bedarf.",
         "create-organization": "Sie möchten ein Unternehmen oder eine Organisation registrieren.",
-        "cv": "Sie möchten eine Lebenslauf-Datei hochladen. Wir lesen sie und zeigen den Fund vor dem Speichern.",
-        "log-work": "Sie möchten erledigte Arbeit im Arbeitstagebuch festhalten.",
+        "cv": "Sie möchten einen Lebenslauf hochladen. Bevor wir die daraus gewonnenen Daten speichern, zeigen wir sie Ihnen zur Prüfung.",
+        "log-work": "Sie möchten erledigte Arbeit im Arbeitsjournal festhalten.",
         "skill-gap": "Sie möchten wissen, welche Fähigkeiten Ihnen fehlen.",
-        "documents": "Sie sprechen über Dokumente und Zertifikate — was gültig ist, was abläuft, was fehlt.",
+        "documents": "Sie sprechen über Dokumente und Zertifikate: was gültig ist, was abläuft, was fehlt.",
         "add-document": "Sie haben ein Dokument oder Zertifikat, das Sie festhalten möchten.",
         "learning-compass": "Sie möchten wissen, was Sie als Nächstes lernen sollten.",
-        "profile": "Sie möchten Ihr Profil ergänzen — eine Sprache, eine Fähigkeit, Erfahrung.",
-        "who-available": "Sie möchten wissen, wer in Ihrem Team frei ist.",
+        "profile": "Sie möchten Ihr Profil ergänzen: eine Sprache, eine Fähigkeit, Erfahrung.",
+        "who-available": "Sie möchten wissen, wer in Ihrem Team verfügbar ist.",
         "invite-candidate": "Sie möchten jemanden in Ihr Team einladen.",
-        "invite-client": "Sie möchten einen Kunden einladen — Sie arbeiten als Agentur.",
-        "propose-candidate": "Sie möchten einem Kunden einen Kandidaten vorschlagen — Sie arbeiten als Agentur.",
+        "invite-client": "Sie möchten einen Kunden einladen (Sie arbeiten als Agentur).",
+        "propose-candidate": "Sie möchten einem Kunden einen Kandidaten vorschlagen (Sie arbeiten als Agentur).",
         "client-demand": "Sie möchten sehen, was Ihre Kunden brauchen.",
-        "invite-student": "Sie vertreten eine Bildungseinrichtung und möchten einen Lernenden einladen.",
-        "programmes": "Sie vertreten eine Bildungseinrichtung — Programme, Gruppen, Lernende.",
-        "offer-capacity": "Sie haben Leute oder Kapazität frei. Wir halten das Angebot fest, damit es gefunden wird.",
-        "who-verifies-work": "Sie fragen, wer bereits geleistete Arbeit bestätigen kann. Wir zeigen, wem Sie sie vorlegen.",
-        "cv-view": "Sie möchten Ihren Lebenslauf ansehen — den, den das System schon hat. Nichts wird geändert.",
-        "cv-choose": "Sie erwähnen Ihren Lebenslauf. Wir fragen: zeigen, neu hochladen oder Ihr Profil ergänzen?"
+        "invite-student": "Sie vertreten eine Bildungseinrichtung und möchten einen Lernenden oder Studierenden einladen.",
+        "programmes": "Sie vertreten eine Bildungseinrichtung: Programme, Gruppen, Lernende.",
+        "offer-capacity": "Sie haben freie Arbeitskräfte oder Kapazitäten. Sie können Ihr Angebot einreichen.",
+        "who-verifies-work": "Sie fragen, wer Ihre geleistete Arbeit bestätigen kann. Wir zeigen Ihnen, wem Sie sie vorlegen können.",
+        "cv-view": "Sie möchten Ihren Lebenslauf ansehen – den, der im System bereits vorliegt. Wir laden nichts hoch und ändern nichts.",
+        "cv-choose": "Sie sprechen über Ihren Lebenslauf. Wir fragen, ob Sie ihn ansehen, einen neuen hochladen oder Ihr Profil ergänzen möchten."
       },
       "family": {
         "work": "Sie sprechen über Ihre Arbeit und Ihren beruflichen Weg.",
-        "hire": "Sie sprechen als Arbeitgeber oder Unternehmen — über Leute, Projekte oder Bedarf.",
-        "agency": "Sie sprechen als Agentur — über Kunden und Kandidaten.",
-        "student": "Sie sprechen über das Lernen und den Weg in die Arbeit.",
+        "hire": "Sie sprechen als Arbeitgeber oder Unternehmen: über Personen, Projekte oder Bedarf.",
+        "agency": "Sie sprechen als Agentur: über Kunden und Kandidaten.",
+        "student": "Sie sprechen über das Lernen und den Weg in den Beruf.",
         "education": "Sie vertreten eine Bildungseinrichtung."
       },
-      "nextHint": "Um den Bedarf zu speichern und darauf antworten zu können, ist ein Konto nötig. Ihr Satz kommt mit.",
+      "nextHint": "Um Ihren Bedarf zu speichern, melden Sie sich an oder erstellen Sie ein Konto. Der eingegebene Satz bleibt auch nach der Anmeldung erhalten.",
       "signup": "Konto erstellen",
-      "login": "Ich habe ein Konto — anmelden",
-      "unrecognised": "Das habe ich nicht auf Anhieb verstanden. Was suchen Sie?",
+      "login": "Ich habe bereits ein Konto",
+      "unrecognised": "Wir konnten Ihren Bedarf nicht genau bestimmen. Bitte wählen Sie eine Option:",
       "chips": {
         "work": "Ich suche Arbeit",
         "hire": "Ich brauche Arbeitskräfte"
@@ -15851,7 +15850,7 @@
       "numbers": "Jetzt auf der Plattform: {vacancies} aktive Stellenanzeigen · {employers} Arbeitgeber",
       "refreshed": "aktualisiert {date}",
       "moreExamples": "Weitere Beispiele",
-      "browseJobs": "Stellenangebote ansehen",
+      "browseJobs": "Stellenanzeigen ansehen",
       "exampleLabels": {
         "hire": "Wir brauchen Leute",
         "work": "Ich suche Arbeit",
@@ -15866,10 +15865,10 @@
       }
     },
     "openJobs": {
-      "eyebrow": "Stellenangebote",
+      "eyebrow": "Stellenanzeigen",
       "title": "Echte Stellen, jetzt offen.",
-      "sub": "Ansehen geht ohne Konto; melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
-      "all": "Alle Stellenangebote"
+      "sub": "Ansehen ist ohne Konto möglich; melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+      "all": "Alle Stellenanzeigen"
     },
     "marketProof": {
       "eyebrow": "Aktuell auf der Plattform",
@@ -15926,6 +15925,42 @@
         "goods": "Waren"
       },
       "lasting": "Ihre Erfahrung und Möglichkeiten bleiben erreichbar — beim Wechsel von Job, Projekt oder Land."
+    },
+    "v3": {
+      "lead": "Für Arbeitskräfte, Arbeitgeber und Dienstleister aller Berufe und Branchen. Registrierung und Basis-Bedarfsmeldung sind kostenlos.",
+      "moreChoices": "Weitere Optionen",
+      "or": "oder beschreiben Sie es in eigenen Worten",
+      "needFree": "Sie können eine Anfrage ohne Registrierung einreichen. Das Einreichen ist kostenlos; Bedingungen und Preis der Dienstleistungen werden gesondert vereinbart.",
+      "market": {
+        "title": "Stellenanzeigen auf dem Markt",
+        "line": "{adverts} aktive Stellenanzeigen aus externen Quellen. In den Anzeigen werden {employers} verschiedene Arbeitgebernamen genannt.",
+        "source": "Die Anzeigen stammen aus öffentlichen externen Quellen für Stellenanzeigen. Das ist nicht die Zahl der bei LabourMarket.ai registrierten Arbeitgeber oder Kunden. Letzte Aktualisierung der Anzeigen: {date}.",
+        "none": "Marktdaten sind derzeit nicht verfügbar.",
+        "search": "Stellenanzeigen suchen"
+      },
+      "adverts": {
+        "title": "Einige aktive Stellenanzeigen",
+        "sub": "Sie können die Anzeigen ohne Konto ansehen. Nach der Anmeldung sehen Sie den Arbeitgeber, den Ort, die vollständige Beschreibung und wie Sie sich bewerben können."
+      },
+      "how": {
+        "title": "So funktioniert es",
+        "s1": {
+          "title": "Finden und vereinbaren",
+          "body": "Suchen Sie Arbeit, Arbeitskräfte oder Dienstleistungen und verwalten Sie Angebote und Vereinbarungen auf der Plattform."
+        },
+        "s2": {
+          "title": "Arbeit festhalten",
+          "body": "Erledigte Arbeit können Sie im Arbeitsjournal festhalten."
+        },
+        "s3": {
+          "title": "Bestätigen",
+          "body": "Die Einträge bestätigt eine Führungskraft der Arbeitgeberorganisation. Ein Auftraggeber kann die ihm vorgelegte Arbeit abnehmen – das wird gesondert vermerkt. Bestätigte Arbeit wird zum Nachweis Ihrer Erfahrung."
+        },
+        "s4": {
+          "title": "Ihre Daten und Privatsphäre",
+          "body": "Der Assistent macht Vorschläge, die Entscheidungen treffen Sie. Sie entscheiden, ob Arbeitgeber Sie finden können und ob Ihre Kontaktdaten weitergegeben werden. Arbeitseinträge sieht die Organisation, für die Sie arbeiten."
+        }
+      }
     }
   },
   "workspace": {
@@ -20517,7 +20552,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Seitennutzung und die Kampagne, über die Sie kamen, messen wir nur mit Ihrer Erlaubnis.",
+      "text": "Im Browser gespeicherte Messdaten und Kampagneninformationen verwenden wir nur mit Ihrer Einwilligung.",
       "accept": "Messung erlauben",
       "refuse": "Ablehnen",
       "more": "Mehr über Cookies",
@@ -20576,74 +20611,77 @@
     }
   },
   "siteNav": {
+    "education": "Für Bildungseinrichtungen",
     "signUp": "Registrieren",
-    "trigger": "Hauptauswahl",
-    "account": "Nach Anmeldung",
+    "trigger": "Hauptziele",
+    "account": "Für angemeldete Nutzer",
     "intents": {
       "work": {
         "title": "Ich suche Arbeit",
-        "description": "Finden Sie Stellen und zeigen Sie, was Sie können.",
+        "description": "Suchen Sie Arbeit und stellen Sie Ihre Erfahrung vor.",
         "short": "Arbeit finden"
       },
       "workers": {
         "title": "Ich suche Arbeitskräfte",
-        "description": "Beschreiben Sie, welche Arbeit Sie brauchen.",
-        "short": "Personal finden"
+        "description": "Geben Sie an, welche Arbeitskräfte Sie wo und wann brauchen.",
+        "short": "Arbeitskräfte finden"
       },
       "services": {
         "title": "Ich biete Leistungen an",
-        "description": "Veröffentlichen Sie Ihr Angebot und beantworten Sie Anfragen.",
+        "description": "Leistungen vorstellen, Aufträge finden, Anfragen beantworten.",
         "short": "Leistungen anbieten"
-      },
-      "orders": {
-        "title": "Ich suche Aufträge und Verträge",
-        "description": "Finden Sie Arbeitsanfragen und halten Sie Angebote beisammen.",
-        "short": "Aufträge finden"
       },
       "partners": {
         "title": "Ich suche Partner",
-        "description": "Vernetzen Sie sich mit Menschen und Organisationen, mit denen Sie arbeiten.",
+        "description": "Finden Sie Partner und pflegen Sie die Zusammenarbeit.",
         "short": "Partner finden"
       },
       "agencies": {
         "title": "Für Agenturen",
-        "description": "Verwalten Sie Personal, Kunden und Angebote Ihrer Agentur.",
+        "description": "Verwalten Sie die Kunden Ihrer Agentur und Kandidatenvorschläge.",
         "short": "Für Agenturen"
+      },
+      "contractors": {
+        "short": "Dienstleister finden",
+        "title": "Ich suche Dienstleistungen oder Auftragnehmer",
+        "description": "Beschreiben Sie, welche Dienstleistung oder welchen Auftragnehmer Sie brauchen."
       }
     },
     "links": {
-      "jobs": "Stellenbörse",
+      "jobs": "Stellenanzeigen",
       "workOpportunities": "Arbeitsmöglichkeiten",
-      "createCv": "Kostenlosen Lebenslauf erstellen",
+      "createCv": "Lebenslauf kostenlos erstellen",
       "workAbroad": "Arbeiten im Ausland",
       "forWorkers": "So funktioniert es für Arbeitskräfte",
       "companyNeed": "Bedarf beschreiben",
       "forCompanies": "So funktioniert es für Unternehmen",
       "labourMarket": "Arbeitsmarkt nach Land",
       "myServices": "Ihre Leistungen",
-      "serviceRequests": "Leistungsanfragen",
+      "serviceRequests": "Dienstleistungsanfragen",
       "marketListings": "Marktangebote",
       "commercial": "Angebote und Verträge",
       "network": "Ihr Netzwerk",
       "partnerWithUs": "Partner werden",
       "forAgencies": "So funktioniert es für Agenturen",
-      "setUpAgency": "Agentur einrichten"
+      "setUpAgency": "Agentur registrieren",
+      "b2bEnquiry": "B2B-Dienstleistungsanfrage",
+      "projectEnquiry": "Anfrage für ein Einzelprojekt"
     },
     "assistant": "Assistenten fragen",
     "start": {
-      "searchLabel": "Stellen suchen",
+      "searchLabel": "Stellenanzeigen suchen",
       "searchPlaceholder": "Jobtitel oder Stichwort",
       "searchSubmit": "Suchen",
-      "viewAll": "Alle Stellen"
+      "viewAll": "Alle Stellenanzeigen"
     },
     "nav": {
       "heading": "Was möchten Sie tun?",
       "swipe": "Wischen",
       "close": "Schließen",
-      "functions": "Funktionen",
+      "functions": "Aktionen",
       "professions": "Berufe",
-      "opensNow": "Öffnet sofort",
-      "signInWhenOpen": "Anmeldung beim Öffnen",
+      "opensNow": "Kein Konto erforderlich",
+      "signInWhenOpen": "Anmeldung erforderlich",
       "allSectors": "Alle Branchen",
       "fullList": "Vollständige Liste"
     },
