@@ -5764,11 +5764,11 @@
     "faq": [
       {
         "q": "Waarom maar één betaald plan?",
-        "a": "Elke organisatie — werkgever, uitzender, aannemer of opleider — krijgt hetzelfde product. Alleen de schaal verschilt: 1 actieve positie gratis, en voor €99/maand geen vaste limiet op actieve posities."
+        "a": "Elke organisatie — werkgever, uitzender, aannemer of opleider — krijgt hetzelfde product en hetzelfde ene betaalde plan."
       },
       {
         "q": "Blijft Gratis gratis?",
-        "a": "Ja. Personen blijven gratis en een organisatie kan één actieve positie zonder kosten voeren."
+        "a": "Ja. Personen blijven gratis, en een organisatie registreren en haar personeelsbehoeften plaatsen is gratis."
       },
       {
         "q": "Hoe verloopt de facturering?",
@@ -5776,7 +5776,7 @@
       },
       {
         "q": "Is er een limiet op actieve posities?",
-        "a": "Gratis bevat 1 actieve positie. Het plan Organisatie kent geen vaste limiet op actieve posities. Gebruikelijke bescherming tegen misbruik, zoals limieten op het aantal verzoeken, blijft gelden."
+        "a": "Het plan Organisatie kent geen vaste limiet op actieve posities. Een limiet van het gratis plan geldt alleen voor een organisatie waarvan het account facturering als actief toont, en dat account toont dan die limiet. Gebruikelijke bescherming tegen misbruik, zoals limieten op het aantal verzoeken, blijft gelden."
       }
     ],
     "priceState": {
@@ -9861,7 +9861,7 @@
         "body": "Per aangenomen werknemer, ploeg of bedrijfsplaatsing geldt een vaste succesfee. Een aparte coördinatievergoeding geldt alleen wanneer document- of onboardingcoördinatie daadwerkelijk wordt geleverd. De definitieve prijs wordt bevestigd voordat betaald werk begint."
       }
     ],
-    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — een aanvraag indienen is kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest uw aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een heel team kan zich al als één geheel op uw aanvraag aanbieden en, zodra beide kanten akkoord zijn, als één team in uw project instappen; de automatische kandidatenlijst stelt nog niet hele teams voor — ze rangschikt mensen één voor één.",
+    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — een aanvraag indienen is kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest je aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een hele ploeg kan zich al als één geheel op je aanvraag aanbieden en, zodra beide kanten akkoord zijn, als één team in je project instappen; de automatische kandidatenlijst stelt nog niet hele ploegen voor — ze rangschikt mensen één voor één.",
     "ctaLabel": "Dien een personeelsaanvraag in →"
   },
   "adminLaunchReadiness": {

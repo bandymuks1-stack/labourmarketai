@@ -5764,11 +5764,11 @@
     "faq": [
       {
         "q": "Why only one paid plan?",
-        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product. What changes is scale: 1 active position free, and no fixed limit on active positions for €99/month."
+        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product and the same one paid plan."
       },
       {
         "q": "Will the Free tier stay free?",
-        "a": "Yes. Persons stay free, and an organization can run one active position at no cost."
+        "a": "Yes. Persons stay free, and registering an organization and posting its workforce needs are free."
       },
       {
         "q": "How is billing handled?",
@@ -5776,7 +5776,7 @@
       },
       {
         "q": "Is there a limit on active positions?",
-        "a": "Free includes 1 active position. The Organization plan has no fixed limit on active positions. Normal protections against abuse, such as request rate limits, still apply."
+        "a": "The Organization plan has no fixed limit on active positions. A free-plan limit applies only to an organization whose account shows billing as active, and that account then shows the limit. Normal protections against abuse, such as request rate limits, still apply."
       }
     ],
     "priceState": {

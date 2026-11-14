@@ -385,6 +385,40 @@ test.describe("nothing to swipe on a phone", () => {
   });
 });
 
+// From 640px up the rails are still rails: a tablet shows the goals in one
+// row that scrolls sideways under a finger. Phones have nothing to swipe
+// (above), so the real touch swipe is exercised here.
+test.describe("swipe on a tablet", () => {
+  test.use({ viewport: { width: 768, height: 1024 }, hasTouch: true, isMobile: true });
+  test("a sideways swipe moves the goal rail and the page stays put", async ({ page }) => {
+    await page.goto("/en");
+    const track = part(page, "goal-rail", "track");
+    await expect(track).toBeVisible();
+    expect(
+      await track.evaluate((el) => el.scrollWidth - el.clientWidth),
+      "the goal rail has something to scroll at this width",
+    ).toBeGreaterThan(50);
+    const box = (await track.boundingBox())!;
+    // A real finger: touchstart, a run of touchmoves to the left, touchend.
+    const client = await page.context().newCDPSession(page);
+    const y = Math.round(box.y + box.height / 2);
+    const startX = Math.round(box.x + box.width - 40);
+    await client.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x: startX, y }],
+    });
+    for (let step = 1; step <= 12; step++) {
+      await client.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: startX - step * 20, y }],
+      });
+    }
+    await client.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await expect.poll(() => track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(50);
+    expect(await page.evaluate(() => window.scrollX)).toBe(0);
+  });
+});
+
 test("an unknown goal in the address opens nothing", async ({ page }) => {
   await page.goto("/en#goal=nothing");
   await expect(page.getByTestId("goal-rail")).toBeVisible();

@@ -5764,11 +5764,11 @@
     "faq": [
       {
         "q": "Warum nur ein bezahlter Plan?",
-        "a": "Jede Organisation — Arbeitgeber, Personaldienstleister, Auftragnehmer oder Bildungsträger — erhält dasselbe Produkt. Nur der Umfang unterscheidet sich: 1 aktive Position kostenlos, für 99 €/Monat ohne feste Obergrenze für aktive Positionen."
+        "a": "Jede Organisation — Arbeitgeber, Personaldienstleister, Auftragnehmer oder Bildungsträger — erhält dasselbe Produkt und denselben einen bezahlten Plan."
       },
       {
         "q": "Bleibt der kostenlose Plan kostenlos?",
-        "a": "Ja. Personen bleiben kostenlos, und eine Organisation kann eine aktive Position ohne Kosten führen."
+        "a": "Ja. Personen bleiben kostenlos, und die Registrierung einer Organisation sowie das Veröffentlichen ihres Personalbedarfs sind kostenlos."
       },
       {
         "q": "Wie wird abgerechnet?",
@@ -5776,7 +5776,7 @@
       },
       {
         "q": "Gibt es eine Obergrenze für aktive Positionen?",
-        "a": "Kostenlos ist 1 aktive Position enthalten. Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Übliche Schutzmaßnahmen gegen Missbrauch, etwa technische Begrenzungen der Zugriffshäufigkeit, gelten weiterhin."
+        "a": "Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Eine Obergrenze des kostenlosen Plans gilt nur für eine Organisation, deren Konto die Abrechnung als aktiv zeigt, und dieses Konto zeigt die Obergrenze dann an. Übliche Schutzmaßnahmen gegen Missbrauch, etwa technische Begrenzungen der Zugriffshäufigkeit, gelten weiterhin."
       }
     ],
     "priceState": {
@@ -15916,7 +15916,7 @@
       "lasting": "Ihre Erfahrung und Möglichkeiten bleiben erreichbar — beim Wechsel von Job, Projekt oder Land."
     },
     "v3": {
-      "lead": "Für Arbeitskräfte, Arbeitgeber und Dienstleister aller Berufe und Branchen. Registrierung und einfache Bedarfsmeldung sind kostenlos.",
+      "lead": "Für Arbeitskräfte, Arbeitgeber und Dienstleister aller Berufe und Branchen. Registrierung und Basis-Bedarfsmeldung sind kostenlos.",
       "moreChoices": "Weitere Optionen",
       "or": "oder beschreiben Sie es in eigenen Worten",
       "needFree": "Sie können eine Anfrage ohne Registrierung einreichen. Das Einreichen ist kostenlos; Bedingungen und Preis der Dienstleistungen werden gesondert vereinbart.",

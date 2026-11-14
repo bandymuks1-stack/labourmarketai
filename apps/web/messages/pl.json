@@ -5764,11 +5764,11 @@
     "faq": [
       {
         "q": "Dlaczego tylko jeden płatny plan?",
-        "a": "Każda organizacja — pracodawca, dostawca pracowników, wykonawca czy instytucja szkoleniowa — otrzymuje ten sam produkt. Zmienia się tylko skala: 1 aktywne stanowisko bezpłatnie, a za 99 €/miesiąc — bez stałego limitu aktywnych stanowisk."
+        "a": "Każda organizacja — pracodawca, dostawca pracowników, wykonawca czy instytucja szkoleniowa — otrzymuje ten sam produkt i ten sam jeden płatny plan."
       },
       {
         "q": "Czy plan bezpłatny pozostanie bezpłatny?",
-        "a": "Tak. Dla osób fizycznych pozostaje bezpłatny, a organizacja może bez opłat prowadzić jedno aktywne stanowisko."
+        "a": "Tak. Dla osób fizycznych pozostaje bezpłatny, a rejestracja organizacji i publikowanie jej zapotrzebowania na pracowników są bezpłatne."
       },
       {
         "q": "Jak przebiegają rozliczenia?",
@@ -5776,7 +5776,7 @@
       },
       {
         "q": "Czy jest limit aktywnych stanowisk?",
-        "a": "Plan bezpłatny obejmuje 1 aktywne stanowisko. Plan Organizacja nie ma stałego limitu aktywnych stanowisk. Nadal obowiązują zwykłe zabezpieczenia przed nadużyciami, takie jak techniczne limity częstotliwości żądań."
+        "a": "Plan Organizacja nie ma stałego limitu aktywnych stanowisk. Limit planu bezpłatnego dotyczy tylko organizacji, której konto pokazuje rozliczenia jako aktywne, i wtedy to konto pokazuje ten limit. Nadal obowiązują zwykłe zabezpieczenia przed nadużyciami, takie jak techniczne limity częstotliwości żądań."
       }
     ],
     "priceState": {
@@ -20541,7 +20541,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Dane pomiarowe z Państwa przeglądarki i informacje o kampaniach wykorzystujemy tylko za Państwa zgodą.",
+      "text": "Dane pomiarowe przechowywane w przeglądarce i informacje o kampaniach wykorzystujemy tylko za Państwa zgodą.",
       "accept": "Zezwalam na pomiar",
       "refuse": "Odmawiam",
       "more": "Więcej o plikach cookie",

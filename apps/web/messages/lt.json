@@ -5764,11 +5764,11 @@
     "faq": [
       {
         "q": "Kodėl tik vienas mokamas planas?",
-        "a": "Kiekviena organizacija — darbdavys, personalo tiekėjas, rangovas ar mokymo įstaiga — gauna tą patį produktą. Skiriasi tik mastas: 1 aktyvi pozicija nemokamai, o už 99 €/mėn. — be fiksuoto aktyvių pozicijų limito."
+        "a": "Kiekviena organizacija — darbdavys, personalo tiekėjas, rangovas ar mokymo įstaiga — gauna tą patį produktą ir tą patį vienintelį mokamą planą."
       },
       {
         "q": "Ar nemokamas planas liks nemokamas?",
-        "a": "Taip. Asmenims viskas nemokama, o organizacija gali turėti vieną aktyvią poziciją be jokio mokesčio."
+        "a": "Taip. Asmenims viskas nemokama, o organizacijos registracija ir darbuotojų poreikių skelbimas — nemokami."
       },
       {
         "q": "Kaip vyks atsiskaitymai?",
@@ -5776,7 +5776,7 @@
       },
       {
         "q": "Ar yra aktyvių pozicijų limitas?",
-        "a": "Nemokamas planas apima 1 aktyvią poziciją. Plane „Organizacija“ nėra fiksuoto aktyvių pozicijų limito. Įprastos apsaugos nuo piktnaudžiavimo, pavyzdžiui, užklausų skaičiaus ribos, ir toliau galioja."
+        "a": "Plane „Organizacija“ nėra fiksuoto aktyvių pozicijų limito. Nemokamo plano limitas taikomas tik organizacijai, kurios paskyroje atsiskaitymai rodomi kaip aktyvūs, ir tada paskyra tą limitą parodo. Įprastos apsaugos nuo piktnaudžiavimo, pavyzdžiui, užklausų skaičiaus ribos, ir toliau galioja."
       }
     ],
     "priceState": {

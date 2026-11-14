@@ -37,22 +37,26 @@ export async function LandingNeedPath({ locale }: { locale: string }) {
         suppressHydrationWarning
         className="group min-w-0 scroll-mt-24 rounded-2xl border border-ink-600 bg-ink-900/60"
       >
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-2xl p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue sm:p-5 [&::-webkit-details-marker]:hidden">
-          <span className="min-w-0">
-            <h2 id="request-doors-title" className="font-display text-lg font-semibold text-text-primary">
-              {t("title")}
-            </h2>
-            <span
-              className="mt-1 block text-sm leading-relaxed text-text-secondary"
-              data-testid="request-doors-promise"
-            >
-              {t("promise")}
-            </span>
-            <span className="mt-1 block text-xs leading-relaxed text-text-muted" data-testid="request-doors-free">
-              {tV3("needFree")}
-            </span>
+        {/* A summary may hold a heading only as its own child, so the title,
+            the two lines and the chevron are laid out by a grid rather than
+            wrapped in a container. */}
+        <summary className="grid min-h-11 cursor-pointer list-none grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 rounded-2xl p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue sm:p-5 [&::-webkit-details-marker]:hidden">
+          <h2 id="request-doors-title" className="col-start-1 font-display text-lg font-semibold text-text-primary">
+            {t("title")}
+          </h2>
+          <span
+            className="col-start-1 mt-1 block text-sm leading-relaxed text-text-secondary"
+            data-testid="request-doors-promise"
+          >
+            {t("promise")}
           </span>
-          <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-ink-500 text-text-secondary">
+          <span
+            className="col-start-1 mt-1 block text-xs leading-relaxed text-text-muted"
+            data-testid="request-doors-free"
+          >
+            {tV3("needFree")}
+          </span>
+          <span className="col-start-2 row-span-3 row-start-1 inline-flex size-11 shrink-0 items-center justify-center self-center rounded-full border border-ink-500 text-text-secondary">
             <ChevronDown
               aria-hidden
               className="size-5 transition-transform group-open:rotate-180 motion-reduce:transition-none"
@@ -98,16 +102,18 @@ export async function LandingMarketFacts({
       <h2 id="landing-market-title" className="font-display text-xl font-semibold text-text-primary">
         {t("market.title")}
       </h2>
-      {market ? (
+      {/* Figures are printed only together with the sentence that says what
+          they are (external adverts, not registered customers) and when they
+          were refreshed. Without a refresh date there is nothing to vouch
+          for them, so the block says the data is unavailable. */}
+      {market && date ? (
         <>
           <p className="mt-2 text-base font-medium leading-snug text-text-primary" data-testid="landing-market-line">
             {t("market.line", { adverts: n.format(market.adverts), employers: n.format(market.employers) })}
           </p>
-          {date ? (
-            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-text-secondary" data-testid="landing-market-source">
-              {t("market.source", { date })}
-            </p>
-          ) : null}
+          <p className="mt-1 max-w-3xl text-sm leading-relaxed text-text-secondary" data-testid="landing-market-source">
+            {t("market.source", { date })}
+          </p>
         </>
       ) : (
         <p className="mt-2 text-sm text-text-secondary" data-testid="landing-market-none">

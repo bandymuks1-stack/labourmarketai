@@ -104,7 +104,13 @@ export function LandingRequestDoorsForm({
       setDoor(wanted);
       setResult(null);
       window.requestAnimationFrame(() => {
-        (document.getElementById("request-door-form") ?? block)?.scrollIntoView({
+        const target = document.getElementById("request-door-form") ?? block;
+        if (!target) return;
+        // Keyboard and screen-reader users are taken there too: focus moves
+        // to the form (not into a field — that would open a phone keyboard).
+        if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+        target.focus({ preventScroll: true });
+        target.scrollIntoView({
           block: "start",
           behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
         });

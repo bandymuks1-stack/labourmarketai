@@ -195,16 +195,18 @@ The 183 strings are the landing's own texts: `landing.v3.*`, `landing.entry.*`, 
 | `landing.requestDoors.workerSearch.title` | 'Aanvraag voor het zoeken van werknemers' is correct but heavier than its two siblings ('Aanvraag zakelijke diensten (B2B)', 'Aanvraag individueel project'); 'Aanvraag personeelswerving' would be parallel but changes the worker term. |
 | `landing.entry.examples.hire` | 'We zoeken 5 magazijnmedewerkers' uses 'we' and 'zoeken'; EN has 'I need', LT is impersonal ('Reikia'). Fine in meaning; confirm the plural voice is intended. |
 
-## Changed after this review (2026-11-13, later the same day)
+## Changed after this review (2026-11-13 and 2026-11-14)
 
-Shortened, without changing meaning, so that on a 320 px phone the first screen holds the goals and "More options" in every language (checked by the walk in all six languages). **Not confirmed by a native speaker.**
+Shortened so that on a 320 px phone the first screen holds the goals and "More options" in every language (checked by the walk in all six languages). After the independent review of 2026-11-13 the consent texts keep the word "stored" and the Russian button names what is allowed again; the two buttons fit one row through narrower padding instead of a shorter label. **Not confirmed by a native speaker.**
 
 | Language | Key | Before | After |
 |---|---|---|---|
-| ru | `consent.banner.text` | Данные измерений, хранящиеся в вашем браузере, и информацию о кампаниях мы используем только с вашего согласия. | Данные измерений в вашем браузере и сведения о кампаниях используем только с вашего согласия. |
-| ru | `consent.banner.accept` | Разрешить измерение | Разрешить |
-| pl | `consent.banner.text` | Dane pomiarowe przechowywane w Państwa przeglądarce oraz informacje o kampaniach wykorzystujemy tylko za Państwa zgodą. | Dane pomiarowe z Państwa przeglądarki i informacje o kampaniach wykorzystujemy tylko za Państwa zgodą. |
+| ru | `consent.banner.text` | Данные измерений, хранящиеся в вашем браузере, и информацию о кампаниях мы используем только с вашего согласия. | Данные измерений, хранящиеся в браузере, и сведения о кампаниях используем только с вашего согласия. |
+| ru | `consent.banner.accept` | Разрешить измерение | unchanged (a shorter label was tried and withdrawn) |
+| pl | `consent.banner.text` | Dane pomiarowe przechowywane w Państwa przeglądarce oraz informacje o kampaniach wykorzystujemy tylko za Państwa zgodą. | Dane pomiarowe przechowywane w przeglądarce i informacje o kampaniach wykorzystujemy tylko za Państwa zgodą. |
 | pl | `siteNav.intents.contractors.short` (card label only; the panel heading keeps the full text) | Szukam usług lub wykonawców | Szukam wykonawców |
-| de | `landing.v3.lead` | …Die Registrierung und die Basisveröffentlichung eines Bedarfs sind kostenlos. | …Registrierung und einfache Bedarfsmeldung sind kostenlos. |
+| de | `landing.v3.lead` | …Die Registrierung und die Basisveröffentlichung eines Bedarfs sind kostenlos. | …Registrierung und Basis-Bedarfsmeldung sind kostenlos. |
 
-Also on that day, `main` brought its own corrections to these catalogs (#3304). They are kept wherever V3 had not rewritten the string; where both had changed a string the V3 text stands (ru `consent.banner.text`; nl `conciergeOffer.note`, `landing.entry.label`, `landing.entry.understood.log-work`).
+**Register of address in Dutch — open.** The V3 landing texts use the formal "u / uw" (the owner's polite-address rule for this page). `main` (#3304) moved other Dutch strings to the informal "je". Both stand side by side today; which one Dutch should use everywhere is a decision for the owner with a Dutch speaker. In `conciergeOffer.note` the informal form of #3304 is kept.
+
+`main`'s corrections to these catalogs (#3304) are kept wherever V3 had not rewritten the string: of 78 strings corrected on `main`, 74 are present word for word. Four differ because V3 rewrote the same string on purpose: ru `consent.banner.text`, nl `landing.entry.label`, nl `landing.entry.understood.log-work` (the corrected term is kept), nl `conciergeOffer.note` (only the price phrase differs; the address form of #3304 is kept). pl and de `pricing.faq.3.a` keep #3304's last sentence.
