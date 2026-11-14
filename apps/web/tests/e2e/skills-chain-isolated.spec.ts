@@ -530,12 +530,18 @@ test("K-7. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
   // Withdrawn: the link is gone, the other readings stay, the tier falls.
   // (The dispute is recorded FIRST and the link removed after it, so the
   // withdrawal is awaited on its own rather than read in the same instant.)
+  // The save replaces the entry's link set (delete, then insert the kept
+  // ones), so a read can fall between the two and see NO links at all. Wait
+  // for the settled state — flooring gone AND tiling back — in one poll.
   await expect
-    .poll(async () => (await entryLinks(state.tilerEntry)).has("flooring"), {
-      message: "the disputed evidence link is withdrawn",
-      timeout: 60_000,
-    })
-    .toBe(false);
+    .poll(
+      async () => {
+        const now = await entryLinks(state.tilerEntry);
+        return { flooring: now.has("flooring"), tiling: now.has("tiling") };
+      },
+      { message: "the disputed link is withdrawn and the undisputed readings stay", timeout: 60_000 },
+    )
+    .toEqual({ flooring: false, tiling: true });
   let links = await entryLinks(state.tilerEntry);
   expect(links.has("tiling"), "the undisputed readings stay").toBe(true);
   await expect
