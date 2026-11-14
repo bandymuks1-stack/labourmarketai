@@ -161,6 +161,8 @@ export function isRecordedEngagement(
   row: Pick<WorkHistorySourceRow, "title" | "started_at" | "ended_at"> & {
     readonly organizations?: WorkHistorySourceRow["organizations"];
     readonly organizationName?: string | null;
+    /** The organization is archived (`organizations.archived_at`). */
+    readonly organizationArchived?: boolean;
   },
 ): boolean {
   const org =
@@ -168,6 +170,17 @@ export function isRecordedEngagement(
     row.organizations?.display_name ??
     row.organizations?.legal_name ??
     null;
+  // AN ARCHIVED ORGANIZATION WITH NO NAME (#3354). Retiring a test or
+  // duplicate organization archives it and ends the person's engagement
+  // there (20260923114500 sets `ended_at` to the day of the clean-up). That
+  // system-written end date was the only thing the row still said, so the CV
+  // printed an "unnamed organization" entry. With no name and no title such a
+  // row tells a reader nothing about the person's work; it is not history.
+  // A named archived organization (a real business that closed) stays, and
+  // the row itself is never touched.
+  if (row.organizationArchived === true && nonEmpty(org) === null && nonEmpty(row.title) === null) {
+    return false;
+  }
   return (
     nonEmpty(org) !== null ||
     nonEmpty(row.title) !== null ||

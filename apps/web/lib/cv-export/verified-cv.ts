@@ -47,6 +47,7 @@ import {
   type ProfessionalExperience,
 } from "@/lib/journal/professional-experience";
 import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
+import { isArchivedOrganizationRow } from "@/lib/company/archived-organizations";
 import {
   certificateDocsForCv,
   projectsFromProof,
@@ -452,7 +453,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       supabase
         .from("engagement_contexts")
         .select(
-          "id, relationship_slug, title, description, operations_role, project_id, is_primary, started_at, ended_at, organization_id, organizations(display_name, legal_name, organization_type)",
+          "id, relationship_slug, title, description, operations_role, project_id, is_primary, started_at, ended_at, organization_id, organizations(display_name, legal_name, organization_type, archived_at)",
         )
         .eq("profile_id", user.id)
         .in("relationship_slug", PROFESSIONAL_HISTORY_RELATIONSHIPS)
@@ -593,6 +594,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
           display_name: string | null;
           legal_name: string | null;
           organization_type: string | null;
+          archived_at?: string | null;
         }
       | null;
     const row = e as typeof e & {
@@ -604,6 +606,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
     const id = row.id ?? null;
     return {
       orgName: orgDisplayName(org?.display_name, org?.legal_name),
+      organizationArchived: isArchivedOrganizationRow(org),
       organizationType: org?.organization_type ?? null,
       relationship: e.relationship_slug,
       kind: historyKindOf(e.relationship_slug),
@@ -630,8 +633,15 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         started_at: e.startedAt,
         ended_at: e.endedAt,
         organizationName: e.orgName,
+        organizationArchived: e.organizationArchived,
       }),
-    );
+    )
+    // The archived flag decided the row; it is not part of the CV's shape.
+    .map((e) => {
+      const { organizationArchived, ...rest } = e;
+      void organizationArchived;
+      return rest;
+    });
 
   // No saved name is "—": the page then says the name is not provided. The
   // part of the e-mail address before "@" is not a name, and this document is
