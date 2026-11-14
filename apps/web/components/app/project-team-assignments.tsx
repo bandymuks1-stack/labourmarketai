@@ -5,6 +5,10 @@ import { useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Label } from "@/components/ui/Label";
+import { Select } from "@/components/ui/Select";
 import { TeamMemberKeepDecision } from "@/components/app/team-member-keep-decision";
 import { assignTeamToWorkAction, endTeamAssignmentAction } from "@/lib/projects/team-assignment-actions";
 import type { AssignableTask, AssignableTeam, TeamAssignResult } from "@/lib/projects/team-assignment";
@@ -26,15 +30,11 @@ import {
  * manager chooses a person OR a team for the same project.
  */
 
-const field =
-  "min-h-11 sm:min-h-9 rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary";
-const button =
-  "inline-flex min-h-11 sm:min-h-9 items-center rounded-md border border-ink-500 px-3 py-1 text-xs font-semibold text-text-secondary hover:border-brand-blue disabled:opacity-60";
-// SECONDARY on purpose: this form repeats once per project card, so a gold
-// fill here made a dozen "main" buttons on the Work page (owner design pass
-// 2026-10-26: one primary per screen — the action deck's "New project").
-const primary =
-  "inline-flex min-h-11 sm:min-h-9 items-center rounded-md border border-brand-blue/60 px-4 py-1 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60";
+// The controls are the shared primitives (components/ui). The assign and
+// replace actions stay SECONDARY on purpose: this form repeats once per project
+// card, so a filled button here made a dozen "main" buttons on the Work page
+// (owner design pass 2026-10-26: one primary per screen).
+const picker = "min-w-0 sm:w-auto";
 
 export function ProjectTeamAssignments({
   projectId,
@@ -169,25 +169,29 @@ export function ProjectTeamAssignments({
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <button
+                    <Button
                       type="button"
-                      className={button}
+                      variant="secondary"
+                      size="sm"
+                      className="min-h-11"
                       disabled={pending || teams.length === 0}
                       aria-expanded={replaceFor === a.id}
                       onClick={() => setReplaceFor(replaceFor === a.id ? null : a.id)}
                       data-testid="project-team-replace-toggle"
                     >
                       {t("replaceLabel")}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
-                      className={button}
+                      variant="secondary"
+                      size="sm"
+                      className="min-h-11"
                       disabled={pending}
                       onClick={() => end(a)}
                       data-testid="project-team-end"
                     >
                       {pending ? t("ending") : t("end")}
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -198,11 +202,10 @@ export function ProjectTeamAssignments({
                   ) : (
                     <ul className="mt-1 flex flex-wrap gap-1.5">
                       {a.members.map((m) => (
-                        <li
-                          key={m.profileId}
-                          className="rounded-full border border-ink-600 px-2.5 py-0.5 text-xs text-text-secondary"
-                        >
-                          {m.name ?? t("unnamedMember")}
+                        <li key={m.profileId} className="min-w-0">
+                          <Badge tone="neutral" className="max-w-full break-words normal-case">
+                            {m.name ?? t("unnamedMember")}
+                          </Badge>
                         </li>
                       ))}
                     </ul>
@@ -214,9 +217,9 @@ export function ProjectTeamAssignments({
                     <label className="sr-only" htmlFor={`${uid}-replace-${a.id}`}>
                       {t("replaceLabel")}
                     </label>
-                    <select
+                    <Select
                       id={`${uid}-replace-${a.id}`}
-                      className={field}
+                      className={picker}
                       value={replaceTeam}
                       onChange={(e) => setReplaceTeam(e.target.value)}
                     >
@@ -228,15 +231,17 @@ export function ProjectTeamAssignments({
                             {x.name ?? t("unnamedTeam")}
                           </option>
                         ))}
-                    </select>
-                    <button
+                    </Select>
+                    <Button
                       type="button"
-                      className={primary}
+                      variant="secondary"
+                      size="sm"
+                      className="min-h-11"
                       disabled={pending || !replaceTeam}
                       onClick={() => replace(a)}
                     >
                       {t("replaceSubmit")}
-                    </button>
+                    </Button>
                   </div>
                 ) : null}
               </li>
@@ -253,11 +258,11 @@ export function ProjectTeamAssignments({
         <div className="flex flex-col gap-2" data-testid="project-team-assign">
           <p className="text-xs font-semibold text-text-primary">{t("assignTitle")}</p>
           <div className="flex flex-wrap items-end gap-2">
-            <label className="flex flex-col gap-1 text-xs" htmlFor={`${uid}-team`}>
-              <span className="font-mono uppercase tracking-label text-text-muted">{t("teamLabel")}</span>
-              <select
+            <div className="flex min-w-0 flex-col gap-1 max-sm:w-full">
+              <Label htmlFor={`${uid}-team`}>{t("teamLabel")}</Label>
+              <Select
                 id={`${uid}-team`}
-                className={field}
+                className={picker}
                 value={teamId}
                 onChange={(e) => setTeamId(e.target.value)}
                 data-testid="project-team-select"
@@ -268,13 +273,13 @@ export function ProjectTeamAssignments({
                     {x.name ?? t("unnamedTeam")}
                   </option>
                 ))}
-              </select>
-            </label>
-            <label className="flex flex-col gap-1 text-xs" htmlFor={`${uid}-scope`}>
-              <span className="font-mono uppercase tracking-label text-text-muted">{t("scopeLabel")}</span>
-              <select
+              </Select>
+            </div>
+            <div className="flex min-w-0 flex-col gap-1 max-sm:w-full">
+              <Label htmlFor={`${uid}-scope`}>{t("scopeLabel")}</Label>
+              <Select
                 id={`${uid}-scope`}
-                className={field}
+                className={picker}
                 value={scope}
                 onChange={(e) => {
                   setScope(e.target.value === "task" ? "task" : "project");
@@ -286,14 +291,14 @@ export function ProjectTeamAssignments({
                 <option value="task" disabled={myTasks.length === 0}>
                   {t("scopeTaskOption")}
                 </option>
-              </select>
-            </label>
+              </Select>
+            </div>
             {scope === "task" ? (
-              <label className="flex flex-col gap-1 text-xs" htmlFor={`${uid}-task`}>
-                <span className="font-mono uppercase tracking-label text-text-muted">{t("taskLabel")}</span>
-                <select
+              <div className="flex min-w-0 flex-col gap-1 max-sm:w-full">
+                <Label htmlFor={`${uid}-task`}>{t("taskLabel")}</Label>
+                <Select
                   id={`${uid}-task`}
-                  className={field}
+                  className={picker}
                   value={taskId}
                   onChange={(e) => setTaskId(e.target.value)}
                   data-testid="project-team-task-select"
@@ -304,18 +309,20 @@ export function ProjectTeamAssignments({
                       {x.title}
                     </option>
                   ))}
-                </select>
-              </label>
+                </Select>
+              </div>
             ) : null}
-            <button
+            <Button
               type="button"
-              className={primary}
+              variant="secondary"
+              size="sm"
+              className="min-h-11"
               disabled={pending || !teamId || (scope === "task" && !taskId)}
               onClick={assign}
               data-testid="project-team-submit"
             >
               {pending ? t("assigning") : t("submit")}
-            </button>
+            </Button>
           </div>
           {myTasks.length === 0 ? <p className="text-xs text-text-muted">{t("noTasks")}</p> : null}
         </div>
