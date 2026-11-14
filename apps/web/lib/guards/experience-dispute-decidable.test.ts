@@ -108,6 +108,8 @@ describe("owner rules of 2026-11-13", () => {
       expect(refuse, fn).toBeGreaterThan(-1);
       expect(refuse, `${fn}: the refusal must come before the RPC`).toBeLessThan(call);
     }
+    // The same code from the database maps to the same message.
+    expect(records).toMatch(/const KNOWN_CODES = new Set\(\[[\s\S]*?"conflict_of_interest",[\s\S]*?\]\);/);
     // Unknown is not clear, and a refusal leaves a server trace (ids only).
     expect(records).toMatch(/if \(conflict === "clear"\) return null;/);
     expect(records).toMatch(/console\.warn\("\[experience\] moderator step refused", \{ step, recordId, conflict \}\);/);

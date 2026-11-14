@@ -78,6 +78,10 @@ const KNOWN_CODES = new Set([
   "reason_required",
   "invalid_transition",
   "not_found",
+  // Also answered by the database once its own party check is applied
+  // (20261114070000, a separate RED PR): it must read as itself, not as a
+  // generic error.
+  "conflict_of_interest",
 ]);
 
 type Db = Awaited<ReturnType<typeof createClient>>;
