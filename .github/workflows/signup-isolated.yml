@@ -2,7 +2,7 @@ name: Signup Isolated (local Supabase)
 
 # SELF-SERVE SIGN-UP, end to end, against a throwaway LOCAL Supabase stack that
 # lives and dies inside this job (apps/web/tests/e2e/signup-isolated.spec.ts):
-# a worker, a company and an agency each fill the real sign-up form, onboard,
+# a worker, a student, a company and an agency each fill the real sign-up form, onboard,
 # and reach their first surface; the stored rows are checked. The same stack
 # then walks agency roles and permissions (agency-roles-isolated.spec.ts):
 # invite by link, a limited governance seat, refusals, cross-org isolation.
@@ -26,6 +26,9 @@ on:
       - "supabase/tests/20261114100000_booking_refuses_closed_need_*"
       - "supabase/migrations/20261114100000_booking_refuses_closed_need_v1.sql"
       - "apps/web/lib/booking/**"
+      - "apps/web/lib/onboarding/**"
+      - "apps/web/components/app/onboarding-wizard.tsx"
+      - "apps/web/components/app/worker-education-section.tsx"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
       - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
       - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
@@ -232,7 +235,13 @@ jobs:
       - name: Closed need refuses an accept — concurrent close and accept
         run: bash supabase/tests/20261114100000_booking_refuses_closed_need_race.sh
 
+      # The same heap the other build jobs give `next build` (quality.yml, e2e-smoke.yml,
+      # deploy-vps.yml). Its type-check worker passes 2 GB on this code base; without the
+      # setting the build depends on Node's default for the runner's memory, next to a
+      # running Supabase stack.
       - name: Build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build
 
       - name: Guard — the build inlined the local Supabase URL
@@ -310,7 +319,7 @@ jobs:
           git archive FETCH_HEAD | tar -x -C "$RUNNER_TEMP/main"
           cd "$RUNNER_TEMP/main"
           pnpm install --frozen-lockfile --filter=!mobile > "$RUNNER_TEMP/main-install.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/main-install.log"; exit 1; }
-          pnpm -F web build > "$RUNNER_TEMP/main-build.log" 2>&1 || { grep -viE "key|secret|jwt|token|password|eyJ" "$RUNNER_TEMP/main-build.log" | tail -n 60; exit 1; }
+          NODE_OPTIONS=--max-old-space-size=6144 pnpm -F web build > "$RUNNER_TEMP/main-build.log" 2>&1 || { grep -viE "key|secret|jwt|token|password|eyJ" "$RUNNER_TEMP/main-build.log" | tail -n 60; exit 1; }
           grep -rqF "127.0.0.1:54321" apps/web/.next/static apps/web/.next/server || { echo "::error::main build lacks the local Supabase URL"; exit 1; }
           pnpm -F web exec next start -H 127.0.0.1 -p 3002 > "$RUNNER_TEMP/next-main.log" 2>&1 &
           echo $! > "$RUNNER_TEMP/next-main.pid"
