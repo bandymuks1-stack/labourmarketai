@@ -88,7 +88,14 @@ describe("the board offers the type filter, with a label every catalog has", () 
 
   it("the type is one of the filter groups on the page", () => {
     // It used to work only for someone who typed `?opportunityType=` by hand.
-    expect(page).toContain('{ dim: "opportunityType", values: facets.opportunityTypes }');
+    expect(page).toMatch(/dim: "opportunityType",\s+values: withValues\(facets\.opportunityTypes, \[\], filters\.opportunityType\)/);
+  });
+
+  it("every filter dimension is ONE group (two parallel fixes once rendered the type row twice)", () => {
+    const groups = page.slice(page.indexOf("const facetGroups"), page.indexOf("const showFilterControls"));
+    const dims = [...groups.matchAll(/dim: "([a-zA-Z]+)"/g)].map((m) => m[1]);
+    expect(dims.length).toBeGreaterThan(0);
+    expect(new Set(dims).size, `duplicate facet groups: ${dims.join(",")}`).toBe(dims.length);
   });
 
   it("its heading is read from the catalogue that has it in every locale", () => {
