@@ -149,12 +149,23 @@ describe("RED half (20261024100000, human-gated): listing outcome + discarded-dr
     expect(sql()).toMatch(/revoke execute on function public\.set_marketplace_listing_status_v3\(uuid, text, text\) from anon;/);
   });
 
-  it("the demand trigger adds exactly the discarded refusal and keeps every owner transition", () => {
+  it("the discarded refusals are OWN triggers on both tables, never a replaced transition guard", () => {
     const s = sql();
-    expect(s).toMatch(/old\.closed_outcome = 'discarded'/);
-    expect(s).toMatch(/\(old\.status = 'draft' and new\.status in \('submitted', 'closed'\)\)/);
-    expect(s).toMatch(/\(old\.status = 'closed' and new\.status = 'submitted'\)/);
-    expect(s).toMatch(/set search_path = public/);
+    const ddl = s.replace(/--.*$/gm, "");
+    // 20261109120000 also replaces customer_requests_status_transition_guard: a
+    // second CREATE OR REPLACE here would drop whichever branch was applied first.
+    expect(ddl).not.toMatch(/function\s+public\.customer_requests_status_transition_guard/);
+    expect(ddl).toMatch(/create or replace trigger customer_requests_discarded_draft_guard_trg\s+before update of status, closed_outcome on public\.customer_requests/);
+    expect(ddl).toMatch(/create or replace trigger marketplace_listings_discarded_guard_trg\s+before update of status, closed_outcome on public\.marketplace_listings/);
+    // the outcome itself is protected: clearing or rewriting it first is no way back in
+    expect(ddl).toMatch(/new\.closed_outcome is distinct from old\.closed_outcome/);
+    expect(ddl).toMatch(/new\.closed_outcome is distinct from 'discarded'/);
+    expect(ddl.match(/set search_path = public/g)?.length).toBe(3);
+    const down = readFileSync(
+      join(REPO, "supabase", "rollbacks", "20261024100000_market_lifecycle_listing_outcome_and_discard_guard_v1.down.sql"),
+      "utf8",
+    ).replace(/--.*$/gm, "");
+    expect(down).not.toMatch(/customer_requests_status_transition_guard/);
   });
 
   it("the listing status door tries v3 and falls back to v2 while v3 is absent", () => {
