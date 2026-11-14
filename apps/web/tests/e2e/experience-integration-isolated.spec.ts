@@ -158,7 +158,9 @@ async function readAs<T>(address: string, path: string): Promise<T[]> {
   const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
     headers: { apikey: SB_ANON, Authorization: `Bearer ${await accessToken(address)}` },
   });
-  if (r.status === 401 || r.status === 403) return [];
+  // Both tables grant SELECT to authenticated, so row-level security answers a
+  // hidden row with an empty 200. A 401 / 403 means the token itself failed, and
+  // must fail the check instead of passing it as "nothing visible".
   if (!r.ok) throw new Error(`rls read ${path.split("?")[0]} → ${r.status}`);
   return (await r.json()) as T[];
 }
