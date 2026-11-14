@@ -11,6 +11,7 @@ import {
   type CompanyWorkHistoryLoad,
 } from "@/lib/organization-evidence/company-work-history-read";
 import { isPeriodRecord, type PlaceGroup } from "@/lib/organization-evidence/company-work-history";
+import type { OrganizationProjects } from "@/lib/organization-evidence/organization-projects";
 import { BusinessHistoryOverview } from "@/components/app/organization/business-history-overview";
 import { OpenWorkspaceButton } from "@/components/app/organization/open-workspace-button";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
@@ -99,6 +100,8 @@ export async function CompanyWorkHistory({
             </p>
           ))}
         </Card>
+        {/* A company with no imported history can still have real projects. */}
+        <OrganizationProjectsBlock projects={load.projects} t={t} />
       </section>
     );
   }
@@ -153,50 +156,7 @@ export async function CompanyWorkHistory({
         <Stat concept="calendar" value={periodLabel ?? "—"} label={t("stats.period")} />
       </div>
 
-      {/* THE ORGANIZATION'S PROJECTS (#3354): what it ran on the platform,
-          each one door to its project page. A track record, not a person's:
-          no hours or skills of anyone are shown or carried here. */}
-      {load.projects && load.projects.total > 0 ? (
-        <section className="flex flex-col gap-2" data-testid="company-work-history-projects" aria-label={t("projects.title")}>
-          <header className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="font-display text-lg font-semibold text-text-primary">{t("projects.title")}</h3>
-            <p className="text-meta text-text-muted" data-testid="company-work-history-projects-counts">
-              {t("projects.counts", { running: load.projects.running, completed: load.projects.completed })}
-            </p>
-          </header>
-          <ul className="grid gap-2 sm:grid-cols-2">
-            {load.projects.items.map((p) => (
-              <li key={p.id}>
-                <Link
-                  href={`/dashboard/projects/${p.id}` as "/dashboard"}
-                  className="flex min-h-11 items-center justify-between gap-3 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-2.5 transition-colors hover:border-brand-blue"
-                  data-testid="company-work-history-project"
-                  data-project={p.id}
-                >
-                  <span className="min-w-0">
-                    <span className="block truncate text-sm font-semibold text-text-primary">
-                      {p.title ?? t("projects.untitled")}
-                    </span>
-                    {p.city ? <span className="block truncate text-meta text-text-muted">{p.city}</span> : null}
-                  </span>
-                  <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
-                    {p.completed ? t("projects.completed") : t("projects.running")}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          {load.projects.total > load.projects.items.length ? (
-            <Link
-              href={"/dashboard/projects" as "/dashboard"}
-              className="w-fit text-meta font-semibold text-brand-blue hover:underline"
-              data-testid="company-work-history-projects-all"
-            >
-              {t("projects.all", { count: load.projects.total })} →
-            </Link>
-          ) : null}
-        </section>
-      ) : null}
+      <OrganizationProjectsBlock projects={load.projects} t={t} />
 
       <ul id="company-work-history-places" className="grid scroll-mt-20 gap-3 md:grid-cols-2" data-testid="company-work-history-places">
         {placed.map((p) => (
@@ -224,6 +184,60 @@ export async function CompanyWorkHistory({
           {t("scope.missing")}
         </p>
       </Card>
+    </section>
+  );
+}
+
+/** THE ORGANIZATION'S PROJECTS (#3354): what it ran on the platform, each one
+ *  door to its project page. A track record, not a person's: no hours or
+ *  skills of anyone are shown or carried here. */
+function OrganizationProjectsBlock({
+  projects,
+  t,
+}: {
+  projects: OrganizationProjects | null;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
+  if (!projects || projects.total === 0) return null;
+  return (
+    <section className="flex flex-col gap-2" data-testid="company-work-history-projects" aria-label={t("projects.title")}>
+      <header className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="font-display text-lg font-semibold text-text-primary">{t("projects.title")}</h3>
+        <p className="text-meta text-text-muted" data-testid="company-work-history-projects-counts">
+          {t("projects.counts", { running: projects.running, completed: projects.completed })}
+        </p>
+      </header>
+      <ul className="grid gap-2 sm:grid-cols-2">
+        {projects.items.map((p) => (
+          <li key={p.id}>
+            <Link
+              href={`/dashboard/projects/${p.id}` as "/dashboard"}
+              className="flex min-h-11 items-center justify-between gap-3 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-2.5 transition-colors hover:border-brand-blue"
+              data-testid="company-work-history-project"
+              data-project={p.id}
+            >
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-semibold text-text-primary">
+                  {p.title ?? t("projects.untitled")}
+                </span>
+                {p.city ? <span className="block truncate text-meta text-text-muted">{p.city}</span> : null}
+              </span>
+              <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
+                {p.completed ? t("projects.completed") : t("projects.running")}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {projects.total > projects.items.length ? (
+        <Link
+          href={"/dashboard/projects" as "/dashboard"}
+          className="w-fit text-meta font-semibold text-brand-blue hover:underline"
+          data-testid="company-work-history-projects-all"
+        >
+          {t("projects.all", { count: projects.total })} →
+        </Link>
+      ) : null}
     </section>
   );
 }

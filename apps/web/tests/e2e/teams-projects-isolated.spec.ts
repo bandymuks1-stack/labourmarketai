@@ -383,6 +383,31 @@ test("T-6/T-7. the company assigns the team to a project; the project page names
   await expect(co.locator("#project-teams")).toBeAttached({ timeout: 30_000 });
 });
 
+// ── T-8 ─────────────────────────────────────────────────────────────────────
+
+test("T-8. the organization's CV lists its project, and the project leads back to the organization", async () => {
+  expect(s.projectId, "T-6 created the project").toBeTruthy();
+  const co = as(CO);
+
+  // The project page names its organization, one door away.
+  await co.goto(`${BASE}/en/dashboard/projects/${s.projectId}`);
+  const back = co.getByTestId("project-organization-link");
+  await expect(back).toBeVisible({ timeout: 30_000 });
+  await back.click();
+  await co.waitForURL(/\/en\/dashboard\/company\/history/, { timeout: 30_000 });
+
+  // The organization's history carries its projects even with no imported
+  // history at all — a company's track record is what it ran.
+  const projects = co.getByTestId("company-work-history-projects");
+  await expect(projects).toBeVisible({ timeout: 30_000 });
+  const row = projects.locator(`[data-testid="company-work-history-project"][data-project="${s.projectId}"]`);
+  await expect(row).toContainText(PROJECT);
+  // No person and no hours ride on the organization's project list.
+  for (const name of [W1_NAME, W2_NAME]) await expect(projects).not.toContainText(name);
+  await row.click();
+  await co.waitForURL(new RegExp(`/en/dashboard/projects/${s.projectId}`), { timeout: 30_000 });
+});
+
 // ── T-14 ────────────────────────────────────────────────────────────────────
 
 test("T-14. another organization sees neither the team, its people nor the project", async ({ browser }) => {
