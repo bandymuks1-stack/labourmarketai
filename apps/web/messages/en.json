@@ -10728,7 +10728,8 @@
     "receivedTitle": "Inquiry received",
     "receivedBody": "We've received your inquiry and keep it for follow-up with you. To see it in an account, create a company account or sign in with the same e-mail address you entered here. Once you have shown that the address is yours, the inquiry appears among the inquiries in your account and you can take it over there. It is not linked automatically, and an account with another address does not see it.",
     "partnerRouteTitle": "For construction inquiries — a partner-company route",
-    "partnerRouteBody": "If a suitable direct worker match isn't available yet, for construction inquiries we may first recommend contacting our partner company UAB “Nonstop Group” (LT) — the platform's operator. This can help coordinate documents, responsibilities and onboarding faster, with a human coordinating each step."
+    "partnerRouteBody": "If a suitable direct worker match isn't available yet, for construction inquiries we may first recommend contacting our partner company UAB “Nonstop Group” (LT) — the platform's operator. This can help coordinate documents, responsibilities and onboarding faster, with a human coordinating each step.",
+    "notSpecified": "Not specified"
   },
   "candidatePool": {
     "title": "Candidate pool",

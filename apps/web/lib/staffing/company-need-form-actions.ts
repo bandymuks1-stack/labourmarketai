@@ -10,6 +10,7 @@
  */
 import { getLocale } from "next-intl/server";
 import { draftVacancyFromNeed } from "./company-need-actions";
+import { ACCOMMODATION_OFFERS, ENGAGEMENT_MODELS, URGENCY_LEVELS } from "./company-need";
 import { persistPublicCompanyNeed } from "./company-need-public-intake";
 import { aiActionRateLimited } from "../security/ai-action-throttle";
 import { sendCompanyNeedOwnerAlert } from "../notifications/telegram-owner-alerts";
@@ -89,26 +90,37 @@ export async function submitCompanyNeedAction(
     return notStored(str(formData.get("profession")) ?? "");
   }
 
-  const workers = Number(formData.get("number_of_workers"));
-  const urgencyRaw = str(formData.get("urgency"));
-  const urgency =
-    urgencyRaw === "asap" || urgencyRaw === "weeks" || urgencyRaw === "flexible"
-      ? urgencyRaw
-      : "flexible";
+  // AN ANSWER NOT GIVEN STAYS UNKNOWN (owner P0 2026-11-10). Each optional
+  // select starts on "not specified" (""); only a value the company chose is
+  // stored, so the intake never says "accommodation not provided" or
+  // "employment" on the company's behalf. The RPC keeps NULL as NULL
+  // (migration 20261110190000). The AI draft below still reads its own
+  // schema defaults; it is off in production and only ever a suggestion.
+  const workersRaw = str(formData.get("number_of_workers"));
+  const workers = workersRaw ? Number(workersRaw) : Number.NaN;
+  const known = <T extends string>(value: string | undefined, set: readonly T[]): T | null =>
+    value && (set as readonly string[]).includes(value) ? (value as T) : null;
+  const urgencyAnswer = known(str(formData.get("urgency")), URGENCY_LEVELS);
+  const accommodationAnswer = known(str(formData.get("accommodation")), ACCOMMODATION_OFFERS);
+  const engagementAnswer = known(str(formData.get("engagement_model")), ENGAGEMENT_MODELS);
+  const transportRaw = formData.get("transport_provided");
+  const transportAnswer = transportRaw === "yes" ? true : transportRaw === "no" ? false : null;
+  const headcountAnswer = Number.isFinite(workers) && workers > 0 ? Math.trunc(workers) : null;
+  const urgency = urgencyAnswer ?? "flexible";
   const raw = {
     companyName: str(formData.get("company_name")) ?? "",
     contactPerson: str(formData.get("contact_person")),
     country: str(formData.get("country")) ?? "",
     cityRegion: str(formData.get("city_region")),
     profession: str(formData.get("profession")) ?? "",
-    numberOfWorkers: Number.isFinite(workers) && workers > 0 ? Math.trunc(workers) : 1,
+    numberOfWorkers: headcountAnswer ?? 1,
     startDate: str(formData.get("start_date")),
     expectedDuration: str(formData.get("expected_duration")),
     urgency,
-    accommodationOffer: str(formData.get("accommodation")) ?? "not_provided",
-    transportProvided: formData.get("transport_provided") === "yes",
+    accommodationOffer: accommodationAnswer ?? "not_provided",
+    transportProvided: transportAnswer === true,
     languageRequirements: csv(formData.get("languages")),
-    engagementModel: str(formData.get("engagement_model")) ?? "employment",
+    engagementModel: engagementAnswer ?? "employment",
     description: str(formData.get("description")) ?? "",
   };
 
@@ -142,14 +154,14 @@ export async function submitCompanyNeedAction(
     country: raw.country,
     cityRegion: raw.cityRegion,
     sector: raw.profession,
-    headcount: raw.numberOfWorkers,
+    headcount: headcountAnswer,
     startWindow: raw.startDate,
     expectedDuration: raw.expectedDuration,
-    urgency: raw.urgency,
-    accommodation: raw.accommodationOffer,
-    transportNeeded: raw.transportProvided,
+    urgency: urgencyAnswer,
+    accommodation: accommodationAnswer,
+    transportNeeded: transportAnswer,
     languages: raw.languageRequirements.join(", ") || undefined,
-    engagementType: raw.engagementModel,
+    engagementType: engagementAnswer,
     description: raw.description,
     sourcePath,
   });
@@ -179,8 +191,8 @@ export async function submitCompanyNeedAction(
         sector: raw.profession,
         country: raw.country,
         cityRegion: raw.cityRegion,
-        headcount: raw.numberOfWorkers,
-        urgency: raw.urgency,
+        headcount: headcountAnswer ?? undefined,
+        urgency: urgencyAnswer ?? undefined,
         startOrDate: raw.startDate,
         duration: raw.expectedDuration,
         languages: raw.languageRequirements.join(", ") || undefined,

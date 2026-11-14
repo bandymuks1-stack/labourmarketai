@@ -71,6 +71,7 @@ export default async function CompanyNeedPage({
     transport: t("transport"),
     transportYes: t("transportYes"),
     transportNo: t("transportNo"),
+    notSpecified: t("notSpecified"),
     languages: t("languages"),
     languagesHelp: t("languagesHelp"),
     engagement: t("engagement"),

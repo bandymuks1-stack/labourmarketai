@@ -10728,7 +10728,8 @@
     "receivedTitle": "Zapytanie otrzymane",
     "receivedBody": "Otrzymaliśmy Twoje zapytanie i zachowujemy je do dalszego kontaktu z Tobą. Aby zobaczyć je na koncie, załóż konto firmowe lub zaloguj się tym samym adresem e-mail, który podano tutaj. Gdy pokażesz, że adres należy do Ciebie, zapytanie pojawi się wśród zapytań na Twoim koncie i tam możesz je przejąć. Nie jest łączone automatycznie, a konto z innym adresem go nie widzi.",
     "partnerRouteTitle": "W przypadku zapytań budowlanych — ścieżka firmy partnerskiej",
-    "partnerRouteBody": "Jeśli odpowiednie bezpośrednie dopasowanie pracownika nie jest jeszcze dostępne, w przypadku zapytań budowlanych możemy najpierw zaproponować kontakt z naszą firmą partnerską UAB „Nonstop Group” (LT) — operatorem platformy. Może to pomóc szybciej skoordynować dokumenty, obowiązki i wdrożenie, przy udziale osoby koordynującej każdy krok."
+    "partnerRouteBody": "Jeśli odpowiednie bezpośrednie dopasowanie pracownika nie jest jeszcze dostępne, w przypadku zapytań budowlanych możemy najpierw zaproponować kontakt z naszą firmą partnerską UAB „Nonstop Group” (LT) — operatorem platformy. Może to pomóc szybciej skoordynować dokumenty, obowiązki i wdrożenie, przy udziale osoby koordynującej każdy krok.",
+    "notSpecified": "Nie podano"
   },
   "candidatePool": {
     "title": "Pula kandydatów",

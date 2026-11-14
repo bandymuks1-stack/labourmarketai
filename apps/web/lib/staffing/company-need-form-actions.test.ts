@@ -192,3 +192,37 @@ describe("spam guard: one generic answer, nothing stored, no AI, no alert (owner
     info.mockRestore();
   });
 });
+
+describe("an answer the company did not give is stored as unknown (owner P0 2026-11-10)", () => {
+  it("untouched optional selects and an empty headcount reach the store as null", async () => {
+    draftVacancyFromNeed.mockResolvedValue({ ...okNeed, draft: { status: "disabled", reason: "ai_disabled" } });
+    const form = syntheticForm();
+    form.delete("number_of_workers");
+    for (const name of ["urgency", "accommodation", "transport_provided", "engagement_model"]) form.set(name, "");
+    await submitCompanyNeedAction(null, form);
+    expect(persistPublicCompanyNeed.mock.calls.at(-1)![0]).toMatchObject({
+      headcount: null,
+      urgency: null,
+      accommodation: null,
+      transportNeeded: null,
+      engagementType: null,
+    });
+  });
+
+  it("a chosen answer is stored as chosen, an unknown value as null", async () => {
+    draftVacancyFromNeed.mockResolvedValue({ ...okNeed, draft: { status: "disabled", reason: "ai_disabled" } });
+    const form = syntheticForm();
+    form.set("urgency", "asap");
+    form.set("accommodation", "not_provided");
+    form.set("transport_provided", "no");
+    form.set("engagement_model", "made_up");
+    await submitCompanyNeedAction(null, form);
+    expect(persistPublicCompanyNeed.mock.calls.at(-1)![0]).toMatchObject({
+      headcount: 2,
+      urgency: "asap",
+      accommodation: "not_provided",
+      transportNeeded: false,
+      engagementType: null,
+    });
+  });
+});

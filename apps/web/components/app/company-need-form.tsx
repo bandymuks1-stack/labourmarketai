@@ -55,6 +55,8 @@ export interface CompanyNeedFormLabels {
   readonly transport: string;
   readonly transportYes: string;
   readonly transportNo: string;
+  /** First option of every optional select: the company has not said. */
+  readonly notSpecified: string;
   readonly languages: string;
   readonly languagesHelp: string;
   readonly engagement: string;
@@ -131,7 +133,7 @@ export function CompanyNeedForm({
     setIf(
       "number_of_workers",
       prefill.numberOfWorkers != null ? String(prefill.numberOfWorkers) : undefined,
-      ["", "1"], // 1 is the untouched default
+      [""], // the field starts empty: no headcount until one is given
     );
     setIf("country", prefill.country, [""]);
     setIf("profession", prefill.profession, [""]);
@@ -252,7 +254,7 @@ export function CompanyNeedForm({
           </label>
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.numberOfWorkers}</span>
-            <input type="number" name="number_of_workers" min={1} max={1000} defaultValue={1} className={FIELD} />
+            <input type="number" name="number_of_workers" min={1} max={1000} className={FIELD} />
           </label>
         </div>
 
@@ -269,7 +271,8 @@ export function CompanyNeedForm({
           </label>
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.urgency}</span>
-            <select name="urgency" defaultValue="flexible" className={FIELD}>
+            <select name="urgency" defaultValue="" className={FIELD}>
+              <option value="">{labels.notSpecified}</option>
               <option value="asap">{labels.urgencyAsap}</option>
               <option value="weeks">{labels.urgencyWeeks}</option>
               <option value="flexible">{labels.urgencyFlexible}</option>
@@ -285,7 +288,8 @@ export function CompanyNeedForm({
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.accommodation}</span>
-          <select name="accommodation" defaultValue="not_provided" className={FIELD}>
+          <select name="accommodation" defaultValue="" className={FIELD}>
+            <option value="">{labels.notSpecified}</option>
             <option value="provided_free">{labels.accFree}</option>
             <option value="provided_paid">{labels.accPaid}</option>
             <option value="provided_deducted">{labels.accDeducted}</option>
@@ -295,7 +299,8 @@ export function CompanyNeedForm({
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.transport}</span>
-          <select name="transport_provided" defaultValue="no" className={FIELD}>
+          <select name="transport_provided" defaultValue="" className={FIELD}>
+            <option value="">{labels.notSpecified}</option>
             <option value="yes">{labels.transportYes}</option>
             <option value="no">{labels.transportNo}</option>
           </select>
@@ -309,7 +314,8 @@ export function CompanyNeedForm({
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.engagement}</span>
-          <select name="engagement_model" defaultValue="employment" className={FIELD}>
+          <select name="engagement_model" defaultValue="" className={FIELD}>
+            <option value="">{labels.notSpecified}</option>
             <option value="employment">{labels.engEmployment}</option>
             <option value="subcontracting">{labels.engSubcontracting}</option>
             <option value="agency_supply">{labels.engAgency}</option>
