@@ -183,9 +183,11 @@ jobs:
     permissions:
       contents: read
       actions: read # the deploy brake reads deploy-vps.yml runs
+    # The service-role key is NOT here: a job-level variable is handed to every step,
+    # including dependency install and the browser run. It is set only on the one step
+    # that mints the two sessions (guard: post-deploy-smoke-secret-scope).
     env:
       PROD_QA_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       PROD_QA_ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
       E2E_NO_SERVER: "1"
       E2E_BASE_URL: https://labourmarket.ai
@@ -236,6 +238,7 @@ jobs:
         id: mint
         env:
           PROD_QA_MINT_EXISTING_ONLY: "1"
+          PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           set -euo pipefail
           [ -n "${PROD_QA_ANON_KEY}" ] || { echo "::error::vars.PROD_QA_ANON_KEY is not set"; exit 1; }
