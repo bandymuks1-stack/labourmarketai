@@ -584,7 +584,10 @@ test("E-1. an institution trains people and invites a learner by link; a student
 test("E-3. the student becomes a worker: studies end, work is recorded, and nothing of the history is lost", async ({ page }) => {
   await signIn(page, EDU.student, PASSWORD);
   // Studies end — the student's own education editor.
-  await page.goto(`${BASE}/en/dashboard/profile`);
+  // The editors sit in the folded "details" part of the profile; its own deep link opens it.
+  await page.goto(`${BASE}/en/dashboard/profile#cv-details`);
+  const fold = page.locator("details#cv-details");
+  if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
   const row = page.getByTestId("worker-education-row").filter({ hasText: EDU.studiesAt });
   await expect(row).toHaveCount(1, { timeout: 30_000 });
   await row.getByRole("button", { name: "Edit" }).click();
