@@ -1100,7 +1100,9 @@ export default async function OpportunitiesPage({
               // and applied from the URL but had no control and no heading,
               // so a student could narrow the board to internships only by
               // typing the address. The active value stays listed so it can
-              // always be switched off.
+              // always be switched off. ONE group per dimension: two
+              // parallel fixes (#3334, #3338) each added this group, which
+              // rendered the row twice under one React key.
               {
                 dim: "opportunityType",
                 values: withValues(facets.opportunityTypes, [], filters.opportunityType),
@@ -1109,10 +1111,6 @@ export default async function OpportunitiesPage({
               { dim: "accommodation", values: facets.accommodations },
               { dim: "transport", values: facets.transports },
               { dim: "tool", values: facets.tools },
-              // The kind of opportunity (employment, internship, apprenticeship…).
-              // The filter always worked through the address; without a control
-              // here nobody looking for a placement could reach it.
-              { dim: "opportunityType", values: facets.opportunityTypes },
             ];
             const showFilterControls =
               active.length > 0 || facetGroups.some((g) => g.values.length > 0);
