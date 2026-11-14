@@ -73,7 +73,7 @@ async function signUp(
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 }).catch(async (cause: unknown) => {
     // Say what the page said instead of a bare timeout (synthetic account, local stack).
-    const said = (await page.locator("form").first().innerText().catch(() => "")).replace(/\s+/g, " ");
+    const said = (await page.locator("form").first().innerText({ timeout: 2_000 }).catch(() => "")).replace(/\s+/g, " ");
     const alerts = (await page.locator('[role="alert"], [role="status"], [aria-live]').allInnerTexts().catch(() => []))
       .map((t) => t.replace(/\s+/g, " ").trim())
       .filter(Boolean);

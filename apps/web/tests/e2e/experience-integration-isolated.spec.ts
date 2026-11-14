@@ -13,6 +13,7 @@ import {
   accessToken,
   isolatedStack,
   lit,
+  setUpCompany,
   signIn,
   signUp,
   sql,
@@ -97,7 +98,6 @@ const R2_RECORDS = [
   { date: "2025-04-08", hours: 4 },
 ] as const;
 const R1_HOURS = R1_RECORDS.reduce((s, r) => s + r.hours, 0); // 18
-const R2_HOURS = R2_RECORDS.reduce((s, r) => s + r.hours, 0); // 8
 
 const s = {
   oId: "",
@@ -201,7 +201,7 @@ async function signUpAndOnboard(page: Page, address: string, name: string, inten
  *  addressed by e-mail and resolves only for a verified address). */
 async function verifyEmail(page: Page, address: string): Promise<void> {
   await page.goto(`${BASE}/en/dashboard/network`);
-  const prompt = page.getByTestId("network-email-unverified");
+  const prompt = page.getByRole("main").getByTestId("network-email-unverified");
   await expect(prompt, "a new account is asked to confirm its address").toBeVisible({ timeout: 30_000 });
   await prompt.getByTestId("verify-email-send").click();
   await expect(prompt.getByTestId("verify-email-sent")).toBeVisible({ timeout: 30_000 });
@@ -214,7 +214,7 @@ async function verifyEmail(page: Page, address: string): Promise<void> {
 /** The organization's owner mints a single-use "join my organization" link. */
 async function joinLink(owner: Page, orgId: string, name: string): Promise<string> {
   await owner.goto(`${BASE}/en/dashboard/network?invite=1&type=join_organization&org=${orgId}#network-invite`);
-  const panel = owner.getByTestId("invite-panel");
+  const panel = owner.getByRole("main").getByTestId("invite-panel");
   await expect(panel).toBeVisible({ timeout: 30_000 });
   await expect(panel.getByTestId("invite-organization")).toHaveValue(orgId);
   await panel.getByTestId("invite-mode-link").click();
@@ -288,7 +288,9 @@ async function recordWork(page: Page, profileId: string, text: string, mark: str
   const context = main.getByTestId("worklog-context");
   // Every worker also holds the personal (organization-less) context, so the
   // form asks; the honest answer is the organization the work was done for.
-  if (await context.isVisible({ timeout: 10_000 }).catch(() => false)) await context.selectOption(engagement);
+  if (await context.waitFor({ state: "visible", timeout: 10_000 }).then(() => true, () => false)) {
+    await context.selectOption(engagement);
+  }
   await main.getByTestId("worklog-save").click();
   await main.getByTestId("worklog-confirm").click();
   const done = main.getByTestId("worklog-done");
@@ -378,7 +380,7 @@ async function seedRosterPerson(
 /** The Living CV's numbers page (all time), ready to read. */
 async function openWorkInNumbers(page: Page): Promise<Locator> {
   await page.goto(`${BASE}/en/dashboard/work-in-numbers?period=all`);
-  const exp = page.getByTestId("wi-experience");
+  const exp = page.getByRole("main").getByTestId("wi-experience");
   await expect(exp, "the professional-experience block").toBeAttached({ timeout: 60_000 });
   return exp;
 }
@@ -397,26 +399,6 @@ async function openCv(page: Page): Promise<Locator> {
 /** The CV's own employment line for one organization (its journal figure). */
 function cvHistoryNode(main: Locator, orgName: string): Locator {
   return main.getByTestId("cv-history-node").filter({ hasText: orgName });
-}
-
-/** The company setup form after onboarding, saved as usable now. A click that
- *  lands before the form is interactive is a no-op, so the save is retried
- *  until the form reports its result; the form updates the same draft. */
-async function setUpCompany(page: Page, legalName: string): Promise<void> {
-  await page.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
-  const form = page.getByTestId("company-setup-form");
-  await expect(form).toBeVisible({ timeout: 30_000 });
-  await page.waitForLoadState("networkidle").catch(() => {});
-  const result = page.getByTestId("company-setup-result");
-  await expect(async () => {
-    if (!(await result.isVisible().catch(() => false))) {
-      await page.getByTestId("company-setup-legal-name").fill(legalName);
-      await page.getByTestId("company-setup-country").selectOption("LT");
-      await page.getByTestId("company-setup-save-draft").click({ timeout: 5_000 });
-    }
-    await expect(result).toBeVisible({ timeout: 10_000 });
-  }).toPass({ timeout: 60_000 });
-  await expect(result, "the company is saved").not.toHaveClass(/state-warning/);
 }
 
 // ── SETUP ───────────────────────────────────────────────────────────────────
@@ -473,18 +455,18 @@ test("EX-0. two organizations, two owners, two workers, the journal, and A's imp
 
   // O OFFERS R1 to W1 on the roster (the people page's import fold).
   await o.goto(`${BASE}/en/dashboard/company/people#people-import-section`);
-  const pick = o.getByTestId(`roster-link-worker-${s.r1}`);
+  const pick = o.getByRole("main").getByTestId(`roster-link-worker-${s.r1}`);
   await expect(pick, "the roster row offers the link").toBeAttached({ timeout: 60_000 });
   await pick.selectOption({ value: `${s.w1WorkerId}:${s.w1Id}` });
-  await o.getByTestId(`roster-link-offer-${s.r1}`).locator('button[type="submit"]').click();
-  await expect(o.getByTestId(`organization-roster-person-${s.r1}`).locator('[data-link-state="link_proposed"]')).toBeAttached({
+  await o.getByRole("main").getByTestId(`roster-link-offer-${s.r1}`).locator('button[type="submit"]').click();
+  await expect(o.getByRole("main").getByTestId(`organization-roster-person-${s.r1}`).locator('[data-link-state="link_proposed"]')).toBeAttached({
     timeout: 60_000,
   });
 
   // W1 CONFIRMS it on their own profile.
   const w1 = as(W1);
   await w1.goto(`${BASE}/en/dashboard/profile`);
-  const offer = w1.locator(`[data-testid="roster-link-offer"][data-person-id="${s.r1}"]`);
+  const offer = w1.getByRole("main").locator(`[data-testid="roster-link-offer"][data-person-id="${s.r1}"]`);
   await expect(offer, "the offer waits on W1's own profile").toBeVisible({ timeout: 60_000 });
   await offer.locator('button[name="decision"][value="accept"]').click();
   await expect
@@ -503,13 +485,13 @@ test("EX-0. two organizations, two owners, two workers, the journal, and A's imp
   // P gives O a MANAGER seat in B; O proves the address and accepts it.
   await verifyEmail(o, O);
   await p.goto(`${BASE}/en/dashboard/company/settings#organization-members`);
-  const form = p.getByTestId("org-members-invite-form");
+  const form = p.getByRole("main").getByTestId("org-members-invite-form");
   await expect(form, "B's owner administers members").toBeVisible({ timeout: 30_000 });
   await form.getByTestId("org-members-invite-email").fill(O);
   await form.getByTestId("org-members-invite-role").selectOption("manager");
   await form.getByTestId("org-members-invite-submit").click();
-  await expect(p.getByTestId("org-members-invite-result")).toBeVisible({ timeout: 30_000 });
-  await expect(p.getByTestId("org-members-invite-no-account")).toHaveCount(0);
+  await expect(p.getByRole("main").getByTestId("org-members-invite-result")).toBeVisible({ timeout: 30_000 });
+  await expect(p.getByRole("main").getByTestId("org-members-invite-no-account")).toHaveCount(0);
   const seat = sql<{ id: string; role: string; status: string }>(
     `select id, role, status from public.company_memberships
       where organization_id = ${lit(s.orgB)} and profile_id = ${lit(s.oId)}`,
@@ -518,13 +500,13 @@ test("EX-0. two organizations, two owners, two workers, the journal, and A's imp
   s.membershipId = seat[0]!.id;
   // The start hub lists seats addressed to the caller in any workspace. A
   // locator check does not wait, so the page is reloaded until it shows.
-  const accept = o.getByTestId(`membership-accept-${s.membershipId}`);
+  const accept = o.getByRole("main").getByTestId(`membership-accept-${s.membershipId}`);
   await expect(async () => {
     await o.goto(`${BASE}/en/dashboard/start`);
     await expect(accept).toBeVisible({ timeout: 10_000 });
   }, "O meets the seat on their own start page").toPass({ timeout: 90_000 });
-  await o.getByTestId(`membership-accept-${s.membershipId}`).click();
-  await expect(o.getByTestId("membership-invitations-result")).toBeVisible({ timeout: 30_000 });
+  await o.getByRole("main").getByTestId(`membership-accept-${s.membershipId}`).click();
+  await expect(o.getByRole("main").getByTestId("membership-invitations-result")).toBeVisible({ timeout: 30_000 });
   await expect
     .poll(
       () =>
@@ -638,7 +620,12 @@ test("EX-3. W1's CV joins the confirmed imported history to the journal: 8 + 18 
     await readAs<{ id: string }>(W1, `organization_evidence_records?organization_person_id=eq.${s.r1}&select=id`),
     "W1 reads exactly the records they confirmed",
   ).toHaveLength(R1_RECORDS.length);
-  expect(R2_HOURS, "R2's hours exist in A's books").toBeGreaterThan(0);
+  expect(
+    sql<{ n: number }>(
+      `select count(*)::int as n from public.organization_evidence_records where organization_person_id = ${lit(s.r2)}`,
+    )[0]?.n,
+    "R2's records are in A's books",
+  ).toBe(R2_RECORDS.length);
 });
 
 // ── EX-4 ────────────────────────────────────────────────────────────────────
@@ -664,9 +651,9 @@ test("EX-4. A's company surfaces: R1 opens W1's own page (confirmed), R2 stays a
   });
   await expect(o.getByRole("main").getByTestId(`organization-roster-person-${s.r2}`).locator('[data-link-state="unlinked"]')).toBeAttached();
   await expect(o.getByRole("main").getByTestId(`organization-roster-person-${s.r2}`)).toContainText(R2_NAME);
-  const people = o.getByRole("main");
-  await expect(people, "W1 is A's person").toContainText(W1_NAME);
-  await expect(people, "W2 is A's person").toContainText(W2_NAME);
+  const roster = o.getByRole("main");
+  await expect(roster, "W1 is A's person").toContainText(W1_NAME);
+  await expect(roster, "W2 is A's person").toContainText(W2_NAME);
 
   // R1's card: confirmed → a door to W1's own page.
   await o.goto(`${BASE}/en/dashboard/company/people/${s.r1}`);

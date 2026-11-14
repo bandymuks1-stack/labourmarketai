@@ -15,7 +15,11 @@ name: Signup Isolated (local Supabase)
 #     is built or started; no project is linked, no access token is used;
 #   - the app runs with LM_ACCEPTANCE_MODE=1 and refuses a non-local target;
 #   - payments, AI providers and outbound alerts stay off;
-#   - only Playwright's list output is kept (no traces, no screenshots).
+#   - only Playwright's list output is kept (no traces), with ONE exception:
+#     experience-integration-isolated.spec.ts uploads its own screenshots and
+#     failure notes as the `experience-integration` artifact (synthetic
+#     accounts on this stack only; owner decision 2026-11-14, CV screenshots
+#     from synthetic accounts as CI artifacts). No other walk's output is kept.
 
 on:
   workflow_dispatch:
@@ -28,6 +32,18 @@ on:
       - "apps/web/components/app/worker-education-section.tsx"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
       - "apps/web/tests/e2e/experience-integration-isolated.spec.ts"
+      # The code experience-integration-isolated.spec.ts guards (#3354, decision 0025).
+      - "apps/web/app/*/cv/**"
+      - "apps/web/app/*/dashboard/work-in-numbers/**"
+      - "apps/web/app/*/dashboard/company/history/**"
+      - "apps/web/app/*/dashboard/company/people/**"
+      - "apps/web/lib/journal/professional-experience*.ts"
+      - "apps/web/components/app/work-in-numbers/**"
+      - "apps/web/components/app/organization/company-work-history.tsx"
+      - "apps/web/components/app/organization/organizations-leadership.tsx"
+      - "apps/web/components/app/organization-roster-section.tsx"
+      - "apps/web/components/app/roster-link-offer-form.tsx"
+      - "apps/web/lib/organization-evidence/**"
       - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
       - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
       - "apps/web/tests/e2e/teams-projects-isolated.spec.ts"
@@ -296,7 +312,7 @@ jobs:
           name: experience-integration
           path: |
             apps/web/test-results/experience-integration/
-            apps/web/test-results/*/error-context.md
+            apps/web/test-results/experience-integration-iso*/error-context.md
           if-no-files-found: warn
           retention-days: 14
 
