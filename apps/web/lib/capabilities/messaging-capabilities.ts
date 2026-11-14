@@ -37,6 +37,38 @@ function asAny(c: CapabilityCaller["supabase"]): any {
   return c;
 }
 
+
+/**
+ * The model reads English, by code. The communication core's `message` is a
+ * Lithuanian developer string written for the web composer; relayed as-is it
+ * reached ChatGPT / Claude (and through them the person) in Lithuanian
+ * (Swedish employer audit 2026-11-11, N-3 follow-up). The code is kept, the
+ * words come from here; an unknown code reads as the generic line.
+ */
+const MESSAGING_REFUSAL_EN: Readonly<Record<string, string>> = {
+  invalid_input: "The message is empty, too long or not valid for this conversation. Nothing was sent.",
+  no_permission:
+    "There is no working relationship, application or connection that allows starting a conversation with this person. Nothing was sent.",
+  // One code for two limits (lib/communication/rate-caps.ts): messages per
+  // rolling hour, and new conversations per rolling day. Name neither.
+  rate_limited:
+    "A sending limit was reached (too many messages, or too many new conversations, in a short time). Nothing was sent; wait and try again.",
+  rate_check_unavailable: "The safety check could not run, so nothing was sent. Try again.",
+  insert_failed: "The message could not be stored. Nothing was sent; try again.",
+  not_a_participant: "The caller is not a participant of this conversation. Nothing was sent.",
+  rpc_unavailable: "Messaging is not available on this environment right now. Nothing was sent.",
+  not_authenticated: "The session ended. Sign in again; nothing was sent.",
+  update_failed: "The change could not be saved.",
+};
+
+export function messagingRefusal(code: string): ExecResult {
+  return {
+    ok: false,
+    code,
+    message: MESSAGING_REFUSAL_EN[code] ?? "The message was not sent. Nothing was changed; try again.",
+  };
+}
+
 const readOnly = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
 
 // ── conversation.list ──────────────────────────────────────────────────────
@@ -341,12 +373,12 @@ const messageSendConfirm: CapabilityDescriptor = {
         projectId: parsed.projectId ?? null,
         locale: caller.locale,
       });
-      if (!opened.ok) return { ok: false, code: opened.code, message: opened.message };
+      if (!opened.ok) return messagingRefusal(opened.code);
       conversationId = opened.data.id;
       created = opened.data.created;
     }
     const sent = await sendMessageCore(commCaller, { conversationId, body: parsed.body, locale: caller.locale });
-    if (!sent.ok) return { ok: false, code: sent.code, message: sent.message };
+    if (!sent.ok) return messagingRefusal(sent.code);
 
     // CANONICAL READ-BACK: the message row as the database holds it, and the
     // participant row that lets the recipient read it.
