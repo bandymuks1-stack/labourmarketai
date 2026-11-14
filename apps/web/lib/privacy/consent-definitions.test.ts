@@ -8,6 +8,7 @@ import {
   CONSENT_DEFINITIONS,
   CONSENT_LOCALES,
   EMPLOYER_DATA_DISCLOSURE_V1,
+  PARTNER_SUPPLY_REPRESENTATION_V1,
   PROFILE_DISCOVERABILITY_V1,
   consentTextHash,
 } from "./consent-definitions";
@@ -58,14 +59,16 @@ function migrationSources(): { name: string; sql: string }[] {
     .map((f) => ({ name: f, sql: readFileSync(join(MIGRATIONS_DIR, f), "utf8") }));
 }
 
-describe("all six consent locales have complete consent texts (test 23)", () => {
+describe("all seven consent locales have complete consent texts (test 23)", () => {
   it.each(CONSENT_DEFINITIONS.map((d) => [d.purpose, d] as const))(
     "%s",
     (_purpose, def) => {
       // PL consent legal blocks landed 2026-09-20 on the owner's "APPROVE PL CONSENT
       // TEXTS v1 WITH REQUIRED INLINE EDITS"; the en fallback in the three readers
       // now only covers a future UI locale without its own blocks.
-      expect(CONSENT_LOCALES).toEqual(["lt", "en", "ru", "nl", "de", "pl"]);
+      // SV drafted 2026-11-12 for owner review (owner decision 2026-11-11, option A); RED re-pin
+      // 20261112210000 is NOT applied, so this registry change ships only together with it.
+      expect(CONSENT_LOCALES).toEqual(["lt", "en", "ru", "nl", "de", "pl", "sv"]);
       for (const locale of CONSENT_LOCALES) {
         const t = def.texts[locale];
         expect(t, `${def.purpose}/${locale}`).toBeTruthy();
@@ -153,6 +156,46 @@ describe("hash pinning (registry ⇄ DB, tests 19 + Phase 3)", () => {
     expect(consentTextHash(tampered)).not.toBe(
       consentTextHash(PROFILE_DISCOVERABILITY_V1),
     );
+  });
+});
+
+describe("Swedish texts are content-equivalent to the English source", () => {
+  // Facts that must survive translation verbatim: identities, numbers, addresses, placeholders.
+  const VERBATIM = [
+    "Nonstop Group", "302676973", "info@labourmarket.ai", "Labour Market AI Sp. z o.o.",
+    "LabourMarket.ai", "{companyName}", "{contextTitle}",
+  ];
+  it.each(CONSENT_DEFINITIONS.map((d) => [d.purpose, d] as const))("%s keeps every verbatim fact of en", (_p, def) => {
+    for (const [key, en] of Object.entries(def.texts.en)) {
+      const sv = (def.texts.sv as unknown as Record<string, string>)[key];
+      for (const fact of VERBATIM) {
+        if (en.includes(fact)) expect(sv, `${def.purpose}/sv/${key} lost "${fact}"`).toContain(fact);
+      }
+      // the same emphasised negation (NOT -> INTE) where en shouts one
+      if (/\bNOT\b/.test(en)) expect(sv, `${def.purpose}/sv/${key}`).toMatch(/\bINTE\b/);
+    }
+  });
+
+  it("uses the Swedish GDPR terms (IMY / GDPR sv wording)", () => {
+    for (const def of CONSENT_DEFINITIONS) {
+      expect(def.texts.sv.controller).toMatch(/personuppgiftsansvarig/i);
+      expect(def.texts.sv.withdrawal).toMatch(/integritetsinställningar/);
+      expect(def.texts.sv.withdrawal).toMatch(/återkalla|stänga av/);
+    }
+    expect(PARTNER_SUPPLY_REPRESENTATION_V1.texts.sv.withdrawal).toMatch(/samtycke/);
+  });
+
+  it("never calls the partner record anonymous (owner correction 2026-09-20 holds in sv)", () => {
+    const sv = Object.values(PARTNER_SUPPLY_REPRESENTATION_V1.texts.sv).join(" ");
+    expect(sv).not.toMatch(/anonym|avidentifier/i);
+    expect(sv).toContain("utan direkt identifierande uppgifter");
+  });
+
+  it("names the same withheld data as en for the partner network", () => {
+    const sv = PARTNER_SUPPLY_REPRESENTATION_V1.texts.sv.invisibleData;
+    for (const word of ["namn", "e-postadress", "telefonnummer", "adress", "CV-fil", "dokumentkopior", "arbetsdagbok"]) {
+      expect(sv).toContain(word);
+    }
   });
 });
 
