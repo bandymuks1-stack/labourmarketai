@@ -483,6 +483,12 @@ test("ST-1. a student signs up, keeps one worker record with no company, and the
   expect(edu[0]?.is_current).toBe(true);
 
   // Profile: the school is listed and marked as the person's own statement.
+  // The editor sits in the collapsed CV details; its anchor opens it (the same
+  // way the profile-cv-history walk reaches it). A real load, not a hash-only
+  // navigation on the page the tab is already on.
+  await page.goto(`${BASE}/en/dashboard/profile#cv-education`);
+  await page.reload();
+  await expect(page.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("worker-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("worker-education-self-stated")).toBeVisible();
 
