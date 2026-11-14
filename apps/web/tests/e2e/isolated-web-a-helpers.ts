@@ -106,8 +106,8 @@ export async function setUpCompany(page: Page, legalName: string): Promise<void>
   await expect(page.getByTestId("company-setup-result")).toBeVisible({ timeout: 30_000 });
 }
 
-/** The company's free need, through the needs page's own intake. */
-export async function publishNeed(page: Page, origin: string, role: string, country?: "LT"): Promise<void> {
+/** Fill and send the needs page's own intake; the caller asserts the outcome. */
+export async function submitNeed(page: Page, origin: string, role: string, country?: "LT"): Promise<void> {
   await page.goto(`${origin}/en/dashboard/company/needs?audience=need#demand-intake`);
   const main = page.getByRole("main");
   await main.getByTestId("demand-role").fill(role);
@@ -121,7 +121,12 @@ export async function publishNeed(page: Page, origin: string, role: string, coun
   }
   await main.getByTestId("demand-next").click();
   await main.getByTestId("demand-create").click();
-  await expect(main.getByTestId("demand-done"), "the need is accepted").toBeVisible({ timeout: 30_000 });
+}
+
+/** The company's free need, through the needs page's own intake. */
+export async function publishNeed(page: Page, origin: string, role: string, country?: "LT"): Promise<void> {
+  await submitNeed(page, origin, role, country);
+  await expect(page.getByRole("main").getByTestId("demand-done"), "the need is accepted").toBeVisible({ timeout: 30_000 });
 }
 
 /** A worker's Work Journal entry, saved through the journal's own flow. */

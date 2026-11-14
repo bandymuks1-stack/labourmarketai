@@ -141,6 +141,13 @@ export function CompanySetupForm({
   // tap away. An agency or an education institution keeps the workspace as
   // its door — their first step is clients / learners, not a need.
   const needFirst = savedType !== "staffing_agency" && presetCapability !== "training_provider";
+  // An institution whose capability really landed goes straight to its
+  // education home (programmes, groups, learners) — the page it registered
+  // for — instead of the generic workspace where it had to find that door.
+  // Only on a confirmed declaration: the education page redirects away
+  // without the capability.
+  const educationHome =
+    presetCapability === "training_provider" && state?.ok === true && state.capabilityDeclared === true;
 
   // Verified companies have LOCKED legal-registry fields (legal name,
   // country, registration code, address): rendered read-only so a normal
@@ -418,7 +425,7 @@ export function CompanySetupForm({
           — one primary action. Agencies and institutions keep the workspace
           as their primary door. */}
       {state?.ok ? (
-        <div className="flex flex-col gap-2" data-testid="company-setup-next" data-first-door={needFirst ? "need" : "workspace"}>
+        <div className="flex flex-col gap-2" data-testid="company-setup-next" data-first-door={needFirst ? "need" : educationHome ? "education" : "workspace"}>
           {state.capabilityDeclared === false ? (
             <p className="text-xs leading-relaxed text-state-warning" role="status">
               {labels.capabilityNotDeclared}
@@ -433,7 +440,7 @@ export function CompanySetupForm({
               />
             ) : null}
             <Link
-              href="/dashboard/company"
+              href={educationHome ? "/dashboard/company/education" : "/dashboard/company"}
               className={`${buttonLinkClassName(needFirst ? "secondary" : "primary", "sm")} w-fit max-md:w-full`}
               data-testid="company-setup-go-workspace"
             >

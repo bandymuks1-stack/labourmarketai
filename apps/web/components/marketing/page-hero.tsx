@@ -70,18 +70,21 @@ export function PageHero({
     ? `/auth/signup?next=${encodeURIComponent(ctaNext)}`
     : "/auth/signup";
   return (
-    <section className="relative mx-auto max-w-container px-6 pb-12 pt-16 sm:px-12">
-      <p className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
-        <span className="live-dot" aria-hidden />
-        {eyebrow}
-      </p>
-      <h1 className="mt-6 max-w-3xl font-display text-4xl font-bold leading-[1.05] tracking-tightest sm:text-6xl">
+    // V2 SCALE (owner P0 2026-11-13): the inner pages kept the old oversized
+    // hero — a 60px headline, a bordered pill with a green "live" dot, wide
+    // gaps — beside the landing's quieter first screen. Same content and
+    // order; the headline is one step above the landing's question, the
+    // eyebrow is a plain label (nothing on these pages is live), and the
+    // spacing matches the landing's.
+    <section className="relative mx-auto max-w-container px-4 pb-8 pt-8 sm:px-12 sm:pt-10">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">{eyebrow}</p>
+      <h1 className="mt-2 max-w-3xl font-display text-3xl font-bold leading-tight tracking-tightest text-text-primary sm:text-4xl">
         {title} <span className="text-gradient-accent">{accent}</span>
       </h1>
-      <p className="mt-6 max-w-xl text-base leading-relaxed text-text-secondary">
+      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-text-secondary sm:text-base">
         {subcopy}
       </p>
-      <div className="mt-8">
+      <div className="mt-6">
         {ctaKind === "signup" ? (
           <TrackedCta
             href={signupHref}
@@ -104,7 +107,7 @@ export function PageHero({
           <WaitlistModal
             trigger={ctaLabel}
             source={ctaSource}
-            triggerClassName="font-semibold text-text-primary"
+            triggerClassName={buttonLinkClassName("secondary")}
           />
         )}
       </div>
