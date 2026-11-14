@@ -37,3 +37,6 @@ enable_confirmations = false
 # (confirmation, password reset) to the local mail catcher; the CLI default of 2 per hour leaves no headroom.
 [auth.rate_limit]
 email_sent = 60
+# LOCAL STACK ONLY: the isolated walks sign many synthetic people up and in within one run; the CLI
+# default of 30 sign-ups / sign-ins per 5 minutes per address made late walks fail at sign-up.
+sign_in_sign_ups = 300
