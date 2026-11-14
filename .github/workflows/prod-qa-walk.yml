@@ -155,16 +155,17 @@ on:
           - pin-to-home
           - swedish-visitor
       # The screen the walk runs on. `phone` runs the SAME spec, accounts and writes at
-      # 390 px with touch (apps/web/lib/testing/prod-qa-walk-device.ts). Automatic walks
+      # 390 × 844 with touch, `phone-375` at 375 × 667 (apps/web/lib/testing/prod-qa-walk-device.ts). Automatic walks
       # (push, schedule) are always desktop. A phone walk counts in the daily budget and
       # obeys every brake like any other walk.
       device:
-        description: "Screen: desktop (default) or a 390 px touch phone"
+        description: "Screen: desktop (default), a 390 px touch phone, or a 375 px one"
         type: choice
         default: desktop
         options:
           - desktop
           - phone
+          - phone-375
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean

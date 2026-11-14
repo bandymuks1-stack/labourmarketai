@@ -1,7 +1,7 @@
 import type { BrowserContextOptions } from "@playwright/test";
 import { describe, expect, it } from "vitest";
 
-import { WALK_PHONE, walkDevice, withWalkDevice } from "./prod-qa-walk-device";
+import { WALK_DEVICES, WALK_PHONE, WALK_PHONE_375, walkDevice, walkPhone, withWalkDevice } from "./prod-qa-walk-device";
 
 describe("which device a production walk runs on", () => {
   it("is the desktop unless the walk is told otherwise", () => {
@@ -9,10 +9,12 @@ describe("which device a production walk runs on", () => {
     expect(walkDevice({ PROD_QA_DEVICE: "" })).toBe("desktop");
     expect(walkDevice({ PROD_QA_DEVICE: "desktop" })).toBe("desktop");
     expect(walkDevice({ PROD_QA_DEVICE: " phone " })).toBe("phone");
+    expect(walkDevice({ PROD_QA_DEVICE: "phone-375" })).toBe("phone-375");
   });
 
   it("refuses a device it does not know instead of quietly running on a desktop", () => {
-    expect(() => walkDevice({ PROD_QA_DEVICE: "tablet" })).toThrow(/must be "desktop" or "phone"/);
+    expect(() => walkDevice({ PROD_QA_DEVICE: "tablet" })).toThrow(/must be "desktop", "phone" or "phone-375"/);
+    expect(() => walkDevice({ PROD_QA_DEVICE: "phone-360" })).toThrow();
     expect(() => walkDevice({ PROD_QA_DEVICE: "Phone" })).toThrow();
   });
 });
@@ -45,8 +47,25 @@ describe("the screen a context is opened with", () => {
     expect(withWalkDevice("desktop", desktopStep, desktop)).toBe(desktopStep);
   });
 
-  it("the phone is inside the width class the acceptance gate names", () => {
-    expect(WALK_PHONE.viewport?.width).toBeGreaterThanOrEqual(375);
-    expect(WALK_PHONE.viewport?.width).toBeLessThanOrEqual(390);
+  it("phone-375 is a 375 × 667 touch phone and differs from the 390 px phone only in size", () => {
+    const made: BrowserContextOptions = withWalkDevice<BrowserContextOptions>("phone-375", { storageState: "x.json" });
+    expect(made).toEqual({ ...WALK_PHONE_375, storageState: "x.json" });
+    expect(made.viewport).toEqual({ width: 375, height: 667 });
+    expect(made.isMobile).toBe(true);
+    expect(made.hasTouch).toBe(true);
+    expect(WALK_PHONE_375.userAgent).toBe(WALK_PHONE.userAgent);
+    // A step with its own screen is shielded the same way on either phone.
+    const desktopStep = { viewport: { width: 1280, height: 800 } };
+    expect(withWalkDevice("phone-375", desktopStep)).toEqual(withWalkDevice("phone", desktopStep));
+  });
+
+  it("every phone device is inside the width range the owner named (375 to 390 px), and the desktop has none", () => {
+    expect(walkPhone("desktop")).toBeNull();
+    const widths = WALK_DEVICES.map(walkPhone).flatMap((p) => (p?.viewport ? [p.viewport.width] : []));
+    expect(widths).toEqual([390, 375]);
+    for (const w of widths) {
+      expect(w).toBeGreaterThanOrEqual(375);
+      expect(w).toBeLessThanOrEqual(390);
+    }
   });
 });

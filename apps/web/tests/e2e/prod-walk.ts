@@ -2,7 +2,7 @@ import { test as base, devices, type BrowserContextOptions } from "@playwright/t
 
 import { WALK_TIME_ZONE, seedViewerTimeZone } from "./viewer-time-zone";
 import { seedWalkAnalyticsConsent } from "./analytics-consent-seed";
-import { WALK_PHONE, walkDevice, withWalkDevice } from "../../lib/testing/prod-qa-walk-device";
+import { walkDevice, walkPhone, withWalkDevice } from "../../lib/testing/prod-qa-walk-device";
 
 /**
  * THE PRODUCTION WALK'S `test` — every browser context it opens is a returning
@@ -38,7 +38,7 @@ import { WALK_PHONE, walkDevice, withWalkDevice } from "../../lib/testing/prod-q
  * the walk sets its own), so the consent banner never covers a bottom CTA a
  * walk must press — see `analytics-consent-seed.ts`.
  *
- * THE DEVICE. `PROD_QA_DEVICE=phone` runs the same walk on a 390 px touch phone
+ * THE DEVICE. `PROD_QA_DEVICE=phone` (390 px) or `phone-375` runs the same walk on a touch phone
  * through the same two doors: the default `context` / `page` get the phone as
  * their test options, and every `browser.newContext(...)` that names no screen
  * of its own gets it in the wrapper. A step that names its own viewport keeps
@@ -71,7 +71,7 @@ const DESKTOP = { userAgent: devices["Desktop Chrome"].userAgent, deviceScaleFac
 
 export const test = base.extend({
   timezoneId: WALK_TIME_ZONE,
-  ...(DEVICE === "phone" ? WALK_PHONE : {}),
+  ...(walkPhone(DEVICE) ?? {}),
   context: async ({ context }, use) => {
     await seedViewerTimeZone(context);
     await seedWalkAnalyticsConsent(context);

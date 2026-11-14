@@ -16,7 +16,7 @@ const workflow = readFileSync(join(REPO, ".github/workflows/prod-qa-walk.yml"), 
 describe("the device is applied through both doors of the walk's `test`", () => {
   it("the default context and page take the phone as test options", () => {
     expect(fixture).toMatch(/const DEVICE = walkDevice\(process\.env\);/);
-    expect(fixture).toMatch(/\.\.\.\(DEVICE === "phone" \? WALK_PHONE : \{\}\),/);
+    expect(fixture).toContain("...(walkPhone(DEVICE) ?? {}),");
   });
 
   it("every context a spec opens itself goes through the same rule", () => {
@@ -25,11 +25,11 @@ describe("the device is applied through both doors of the walk's `test`", () => 
 });
 
 describe("the workflow", () => {
-  it("offers exactly desktop and phone, desktop by default", () => {
+  it("offers exactly desktop, phone (390 px) and phone-375, desktop by default", () => {
     const block = /\n {6}device:\n([\s\S]*?)\n {6}budget_override:/.exec(workflow)?.[1] ?? "";
     expect(block).toMatch(/type: choice/);
     expect(block).toMatch(/default: desktop/);
-    expect(block.match(/^ {10}- (\w+)$/gm)?.map((l) => l.trim())).toEqual(["- desktop", "- phone"]);
+    expect(block.match(/^ {10}- ([\w-]+)$/gm)?.map((l) => l.trim())).toEqual(["- desktop", "- phone", "- phone-375"]);
   });
 
   it("hands it to the walk step only, and automatic walks stay on the desktop", () => {
