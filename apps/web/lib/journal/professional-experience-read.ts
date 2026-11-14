@@ -6,6 +6,7 @@ import { readHistoricalOrgNames, withHistoricalOrgNames } from "@/lib/company/hi
 import { orgDisplayName } from "@/lib/company/org-display";
 import type { ExperienceRelationship } from "@/lib/journal/professional-experience";
 import { readMyLedOrganizations } from "@/lib/organization-evidence/my-organizations-read";
+import { isArchivedOrganizationRow } from "@/lib/company/archived-organizations";
 import {
   isRecordedEngagement,
   PROFESSIONAL_HISTORY_RELATIONSHIPS,
@@ -49,7 +50,7 @@ type ContextRow = {
   status: string | null;
   started_at: string | null;
   ended_at: string | null;
-  organizations: { display_name: string | null; legal_name: string | null } | null;
+  organizations: { display_name: string | null; legal_name: string | null; archived_at?: string | null } | null;
 };
 
 type WorkedPeriodRow = {
@@ -110,7 +111,7 @@ export async function readOwnExperienceRelationships(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
       .from("engagement_contexts")
-      .select("id, relationship_slug, title, organization_id, status, started_at, ended_at, organizations(display_name, legal_name)")
+      .select("id, relationship_slug, title, organization_id, status, started_at, ended_at, organizations(display_name, legal_name, archived_at)")
       .eq("profile_id", userId)
       .in("relationship_slug", [...PROFESSIONAL_HISTORY_RELATIONSHIPS, ...LEADERSHIP_RELATIONSHIPS])
       .order("started_at", { ascending: false, nullsFirst: false })
@@ -162,7 +163,15 @@ export async function readOwnExperienceRelationships(
   const out: ExperienceRelationship[] = [];
   for (const row of named) {
     const organizationName = orgDisplayName(row.organizations?.display_name, row.organizations?.legal_name);
-    if (!isRecordedEngagement({ title: row.title, started_at: row.started_at, ended_at: row.ended_at, organizationName })) {
+    if (
+      !isRecordedEngagement({
+        title: row.title,
+        started_at: row.started_at,
+        ended_at: row.ended_at,
+        organizationName,
+        organizationArchived: isArchivedOrganizationRow(row.organizations),
+      })
+    ) {
       continue;
     }
     out.push({
