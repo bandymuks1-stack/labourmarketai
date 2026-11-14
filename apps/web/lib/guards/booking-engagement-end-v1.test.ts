@@ -1786,6 +1786,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-10: partner registration Slice 1, company takeover invitation + two-operator decision + link.
       // RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261110190000_organization_claim_invitation_v1.sql",
+      // 2026-11-13: invitation delivery reliability (attempt diagnostics, retry candidates, DSN).
+      // RED draft #3318, the marker is the human-gate acknowledgement, NOT applied.
+      "20261113190000_invitation_delivery_attempts_v1.sql",
 ]);
   });
 

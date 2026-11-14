@@ -169,8 +169,15 @@ describe("no new invitation system", () => {
   // accept/decline RPCs. Admitted only under the structural assertions
   // below, so a real invitation model could never enter through this door.
   const ACCEPTANCE_LEDGER = "invitation_acceptances";
+  // `invitation_delivery_attempts_v1` (20261113190000, RED draft #3318) also
+  // matches the name shape and is NOT an invitation system either: it is the
+  // TRANSPORT DIAGNOSTICS LOG of the canonical token system — one row per send
+  // attempt of ONE canonical invitation, codes only. Admitted only under the
+  // structural assertions below (no token, no addressee, no target, no client
+  // access at all), so an invitation model cannot enter through this door.
+  const DELIVERY_ATTEMPTS = "invitation_delivery_attempts_v1";
 
-  it("invitation-shaped tables are the known three + the acceptance ledger", () => {
+  it("invitation-shaped tables are the known three + the acceptance ledger + the delivery-attempt log", () => {
     expect(
       tablesMatching(/invit/),
       "Closed set. Canonical transport is the token `invitations` system " +
@@ -182,8 +189,35 @@ describe("no new invitation system", () => {
       "agency_worker_invitations",
       "company_worker_invitations",
       ACCEPTANCE_LEDGER,
+      DELIVERY_ATTEMPTS,
       "invitations",
     ]);
+  });
+
+  it("the delivery-attempt log is a diagnostics log, not an invitation", () => {
+    const sql =
+      MIGRATIONS.find((m) => m.name === "20261113190000_invitation_delivery_attempts_v1.sql")?.code ?? "";
+    const ddl = /create table if not exists public\.invitation_delivery_attempts_v1 \(([\s\S]*?)\n\);/.exec(sql)?.[1] ?? "";
+    expect(ddl.length, "the log DDL must be present").toBeGreaterThan(0);
+    // Every row points at ONE canonical invitation and dies with it.
+    expect(ddl).toMatch(/invitation_id\s+uuid not null references public\.invitations\(id\) on delete cascade/);
+    // No token, no addressee, no target, no free text: it cannot invite anyone
+    // and it cannot hold a person's address or a mail server's reply text.
+    for (const forbidden of ["token", "email", "address", "organization_id", "project_id", "target_request_id", "expires_at", "profile_id", "reply_text", "subject", "body"]) {
+      expect(ddl, `${DELIVERY_ATTEMPTS} must not carry ${forbidden}`).not.toContain(forbidden);
+    }
+    // Every text column is a closed code: an enumerated CHECK or a strict pattern.
+    const textColumns = ddl.split("\n").filter((l) => /^\s+\w+\s+text\b/.test(l)).map((l) => l.trim().split(/\s+/)[0]);
+    expect(textColumns.sort()).toEqual(["enhanced_code", "failure_class", "message_id", "outcome", "path", "provider", "reason", "reply_code", "smtp_step"]);
+    for (const col of textColumns) {
+      expect(ddl, `${col} must be constrained by a CHECK`).toMatch(new RegExp(`\\b${col}\\s+text[^\\n]*check \\(`));
+    }
+    // No client can read or write it: RLS on, no policy, no grant below service_role.
+    expect(sql).toMatch(/alter table public\.invitation_delivery_attempts_v1 enable row level security;/);
+    expect(sql).not.toMatch(/create policy \S+\s+on public\.invitation_delivery_attempts_v1/);
+    expect(sql).toMatch(/revoke all on table public\.invitation_delivery_attempts_v1 from public, anon, authenticated;/);
+    expect(sql).not.toMatch(/grant [^;]* on table public\.invitation_delivery_attempts_v1 to (?!service_role)/i);
+    expect(sql).not.toMatch(/grant [^;]*(update|delete)[^;]* on table public\.invitation_delivery_attempts_v1/i);
   });
 
   it("the acceptance ledger is a ledger, not an invitation", () => {
