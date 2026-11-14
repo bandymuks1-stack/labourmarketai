@@ -154,7 +154,7 @@ type ProjectWithAssignments = ManagedProject & {
 const primary =
   "inline-flex min-h-11 w-fit items-center gap-2 rounded-md border border-brand-blue/60 px-4 py-2 text-sm font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60";
 const field =
-  "rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary";
+  "rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary max-sm:min-h-11 max-sm:text-base";
 
 function resultError(
   r: ProjectActionResult | null,

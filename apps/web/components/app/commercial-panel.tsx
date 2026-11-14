@@ -100,9 +100,9 @@ export function CommercialPanel({ data }: { data: CommercialData }) {
             <div className="flex flex-wrap items-center gap-2 border-t border-ink-600 pt-3">
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t("addProposal")}</span>
               <input aria-label={t("titleLabel")} value={pTitle} maxLength={200} onChange={(e) => setPTitle(e.target.value)}
-                placeholder={t("proposalTitlePlaceholder")} className="min-w-40 flex-1 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary" data-testid="proposal-title" />
+                placeholder={t("proposalTitlePlaceholder")} className="min-w-40 flex-1 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary max-sm:min-h-11 max-sm:text-base" data-testid="proposal-title" />
               <input inputMode="decimal" aria-label={t("amountLabel")} value={pAmount} onChange={(e) => setPAmount(e.target.value)}
-                placeholder="0.00" className="w-28 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary" data-testid="proposal-amount" />
+                placeholder="0.00" className="w-28 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary max-sm:min-h-11 max-sm:text-base" data-testid="proposal-amount" />
               <span className="text-xs text-text-muted">EUR</span>
               <Button type="button" size="sm" disabled={pending || !pTitle.trim()}
                 onClick={() => run(() => createProposalAction({ title: pTitle.trim(), amountCents: parseEur(pAmount || "0") }), () => { setPTitle(""); setPAmount(""); })}
@@ -140,12 +140,12 @@ export function CommercialPanel({ data }: { data: CommercialData }) {
             <div className="flex flex-wrap items-center gap-2 border-t border-ink-600 pt-3">
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t("addContract")}</span>
               <input aria-label={t("titleLabel")} value={cTitle} maxLength={200} onChange={(e) => setCTitle(e.target.value)}
-                placeholder={t("contractTitlePlaceholder")} className="min-w-40 flex-1 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary" data-testid="contract-title" />
+                placeholder={t("contractTitlePlaceholder")} className="min-w-40 flex-1 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary max-sm:min-h-11 max-sm:text-base" data-testid="contract-title" />
               <input inputMode="decimal" aria-label={t("valueLabel")} value={cValue} onChange={(e) => setCValue(e.target.value)}
-                placeholder="0.00" className="w-28 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary" data-testid="contract-value" />
+                placeholder="0.00" className="w-28 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary max-sm:min-h-11 max-sm:text-base" data-testid="contract-value" />
               <span className="text-xs text-text-muted">EUR</span>
               <input aria-label={t("docRefLabel")} value={cRef} maxLength={500} onChange={(e) => setCRef(e.target.value)}
-                placeholder={t("docRefPlaceholder")} className="w-44 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary" data-testid="contract-docref" />
+                placeholder={t("docRefPlaceholder")} className="w-44 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary max-sm:min-h-11 max-sm:text-base" data-testid="contract-docref" />
               <Button type="button" size="sm" disabled={pending || !cTitle.trim()}
                 onClick={() => run(() => createContractAction({ title: cTitle.trim(), valueCents: parseEur(cValue || "0"), signedDocumentRef: cRef.trim() || undefined }), () => { setCTitle(""); setCValue(""); setCRef(""); })}
                 data-testid="contract-create">{pending ? t("saving") : t("add")}</Button>
