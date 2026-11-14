@@ -3069,7 +3069,9 @@
         "companies": "Unternehmen",
         "demand": "Offener Bedarf",
         "reviewQueue": "Wartet auf Prüfung",
-        "claims": "Fähigkeitsangaben"
+        "claims": "Fähigkeitsangaben",
+        "unhandledRequests": "Unbearbeitete Anfragen",
+        "emailFailures": "Nicht gesendete Benachrichtigungs-E-Mails"
       },
       "internalBadge": "Intern",
       "internalNote": "Interne Diagnose — technische Details für den Inhaber, keine Produktoberfläche.",
@@ -3077,6 +3079,19 @@
         "title": "Wartet auf Entscheidung",
         "none": "Derzeit wartet nichts auf eine Entscheidung des Operators.",
         "summary": "{people} aktive Personen · {companies} Organisationen · {drafts} operative Entwürfe · {claims} Kompetenzerklärungen"
+      },
+      "emailDelivery": {
+        "title": "Versand der Benachrichtigungs-E-Mails",
+        "attempts": "{count, plural, one {# Versuch} other {# Versuche}}",
+        "status": {
+          "failed": "Nicht gesendet",
+          "retry_wait": "Wird wiederholt"
+        },
+        "kind": {
+          "company_registration_notice": "Hinweis auf ein neues Unternehmen",
+          "company_welcome": "Begrüßungs-E-Mail an ein Unternehmen",
+          "intake_alert": "Hinweis auf eine neue Anfrage"
+        }
       }
     },
     "eyebrow": "BETRIEBSSTEUERUNG",
@@ -3290,6 +3305,16 @@
         "notFound": "Datensatz nicht gefunden.",
         "needsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
         "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+      },
+      "oldestWaiting": "die älteste wartet seit {age}",
+      "waiting": "Wartet seit {age}",
+      "overdue": "Überfällig",
+      "overdueCount": "{count, plural, one {# wartet} other {# warten}} länger als {hours} Std.",
+      "statusChanged": "Status geändert von {who}, {when} UTC",
+      "statusChangedUnknown": "nicht ermittelter Bearbeiter",
+      "age": {
+        "hours": "{count} Std.",
+        "days": "{count} T."
       }
     },
     "matching": {

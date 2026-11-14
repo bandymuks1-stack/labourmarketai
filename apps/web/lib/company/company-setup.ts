@@ -12,6 +12,7 @@ import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { companyBecameHiringReady } from "@/lib/company/company-readiness";
 import { websiteHasForbiddenScheme } from "@/lib/company/public-website";
+import { deliverCompanyRegistrationEmails } from "@/lib/email/platform-email-delivery-store";
 
 /**
  * Company profile-request service.
@@ -544,6 +545,15 @@ export async function saveCompanySetup(
       source: "company-setup",
       metadata: { surface: "company_setup", entity_type: "company" },
     });
+    // THE COMPANY HAS REGISTERED (owner P0 2026-11-13): the internal notice to
+    // the owner mailbox and the welcome e-mail to the company. Same condition as
+    // the funnel event above, so an edit never sends either. Each is one recorded
+    // event keyed by the company id — a second save, a second instance or a
+    // retried request cannot send it twice (lib/email/platform-email-delivery.ts).
+    // Not awaited and never throwing: the person's save has already succeeded.
+    if (typeof data === "string") {
+      void deliverCompanyRegistrationEmails({ companyId: data }).catch(() => {});
+    }
   }
   // Funnel "useful organization": emit organization_hiring_ready ONLY on the
   // transition into computeCompanyReadiness === hiring_ready (see

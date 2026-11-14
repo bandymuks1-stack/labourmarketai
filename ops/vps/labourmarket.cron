@@ -10,3 +10,5 @@ SHELL=/bin/sh
 */10 * * * * root sh /root/lm-prod/bin/lm-cron.sh privacy-erasure
 # Project FORECAST recompute (Stage 7, owner order 2026-10-24): every 5 min; bounded (25 projects / 60 s); weekly/daily/hourly/live cadence decided per organization in the app.
 */5 * * * * root sh /root/lm-prod/bin/lm-cron.sh forecast-recompute
+# Platform e-mail retry sweep (owner P0 2026-11-13): registration notices, welcome e-mails, request alerts. Bounded (20 per run, 5 tries per e-mail); sends only what an earlier event recorded and did not send. 503 until migration 20261113220000 is applied.
+*/10 * * * * root sh /root/lm-prod/bin/lm-cron.sh platform-email-retry

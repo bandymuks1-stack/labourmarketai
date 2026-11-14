@@ -8,6 +8,12 @@ import {
   type CompanyNeedIntakeStatus,
 } from "@/lib/admin/company-need-intakes";
 import {
+  intakeOverdueHours,
+  intakeWaitingHours,
+  isIntakeOverdue,
+  unhandledIntakeSummary,
+} from "@/lib/admin/company-need-intake-shared";
+import {
   CompanyNeedIntakeStatusControl,
   type CompanyNeedIntakeStatusLabels,
 } from "@/components/app/company-need-intake-status";
@@ -58,7 +64,17 @@ export default async function AdminCompanyNeedIntakesPage({
   const tPipeline = await getTranslations("crmPipeline");
   const result = await listCompanyNeedIntakes();
   const rows = result.kind === "ok" ? result.rows : [];
-  const newCount = rows.filter((r) => r.status === "new").length;
+  // UNHANDLED CONTROL: how many wait, how long the oldest has waited, which are
+  // past the internal threshold. One clock for the whole render.
+  const nowMs = Date.now();
+  const overdueHours = intakeOverdueHours();
+  const unhandled = unhandledIntakeSummary(rows, nowMs, overdueHours);
+  const ageLabel = (hours: number | null): string =>
+    hours === null
+      ? "—"
+      : hours < 48
+        ? t("age.hours", { count: hours })
+        : t("age.days", { count: Math.floor(hours / 24) });
 
   const statusLabels: CompanyNeedIntakeStatusLabels = {
     actions: {
@@ -165,7 +181,26 @@ export default async function AdminCompanyNeedIntakesPage({
             className="text-xs text-text-secondary"
             data-testid="admin-company-need-intakes-count"
           >
-            {t("newCount", { count: newCount })}
+            {t("newCount", { count: unhandled.count })}
+            {unhandled.count > 0 ? (
+              <>
+                {" · "}
+                <span data-testid="admin-company-need-intakes-oldest">
+                  {t("oldestWaiting", { age: ageLabel(unhandled.oldestWaitingHours) })}
+                </span>
+              </>
+            ) : null}
+            {unhandled.overdueCount > 0 ? (
+              <>
+                {" · "}
+                <span
+                  className="font-semibold text-state-warning"
+                  data-testid="admin-company-need-intakes-overdue-count"
+                >
+                  {t("overdueCount", { count: unhandled.overdueCount, hours: overdueHours })}
+                </span>
+              </>
+            ) : null}
           </p>
           <ul
             className="flex flex-col gap-3"
@@ -189,7 +224,33 @@ export default async function AdminCompanyNeedIntakesPage({
                       {r.createdAt.slice(0, 16).replace("T", " ")}
                       {r.locale ? ` · ${r.locale.toUpperCase()}` : ""}
                     </span>
+                    {r.status === "new" ? (
+                      <span
+                        className="font-mono text-meta uppercase tracking-label text-text-muted"
+                        data-testid={`company-need-intake-waiting-${r.id}`}
+                      >
+                        {t("waiting", { age: ageLabel(intakeWaitingHours(r.createdAt, nowMs)) })}
+                      </span>
+                    ) : r.statusChangedAt ? (
+                      <span
+                        className="font-mono text-meta uppercase tracking-label text-text-muted"
+                        data-testid={`company-need-intake-changed-${r.id}`}
+                      >
+                        {t("statusChanged", {
+                          who: r.statusChangedBy ?? t("statusChangedUnknown"),
+                          when: r.statusChangedAt.slice(0, 16).replace("T", " "),
+                        })}
+                      </span>
+                    ) : null}
                   </div>
+                  {isIntakeOverdue(r, nowMs, overdueHours) ? (
+                    <span
+                      className="rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning"
+                      data-testid={`company-need-intake-overdue-${r.id}`}
+                    >
+                      {t("overdue")}
+                    </span>
+                  ) : null}
                   {/* Read from the text each time: no status or column holds this yet. */}
                   {looksLikeAdvertising(r.description, r.companyName, r.sector) ? (
                     <span

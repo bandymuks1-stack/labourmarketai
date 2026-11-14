@@ -31,13 +31,9 @@ export function requestDoorFromSourcePath(path: string | null | undefined): Requ
   return REQUEST_DOORS.find((d) => d === door) ?? null;
 }
 
-/** The internal alert, which says only that a request of this type is waiting. */
-export function requestDoorAlert(door: RequestDoor): { readonly subject: string; readonly text: string } {
-  const title = OPERATOR_TITLE[door];
-  return {
-    subject: `Nauja užklausa: ${title}`,
-    text: `${title} laukia atsakymo.\n\nhttps://labourmarket.ai/lt/dashboard/admin/company-need-intakes`,
-  };
+/** The operator's name for a door: the internal alert and the queue use the same one. */
+export function requestDoorOperatorTitle(door: RequestDoor): string {
+  return OPERATOR_TITLE[door];
 }
 
 export function isRequestDoor(value: unknown): value is RequestDoor {

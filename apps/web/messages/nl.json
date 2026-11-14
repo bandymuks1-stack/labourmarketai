@@ -3069,7 +3069,9 @@
         "companies": "Bedrijven",
         "demand": "Openstaande vraag",
         "reviewQueue": "Wacht op beoordeling",
-        "claims": "Vaardigheidsclaims"
+        "claims": "Vaardigheidsclaims",
+        "unhandledRequests": "Onbehandelde aanvragen",
+        "emailFailures": "Niet-verzonden meldingsmails"
       },
       "internalBadge": "Intern",
       "internalNote": "Interne diagnostiek — technische details voor de eigenaar, geen productonderdeel.",
@@ -3077,6 +3079,19 @@
         "title": "Wacht op een beslissing",
         "none": "Er wacht momenteel niets op een beslissing van de operator.",
         "summary": "{people} actieve mensen · {companies} organisaties · {drafts} operationele concepten · {claims} vaardigheidsverklaringen"
+      },
+      "emailDelivery": {
+        "title": "Verzending van meldingsmails",
+        "attempts": "{count, plural, one {# poging} other {# pogingen}}",
+        "status": {
+          "failed": "Niet verzonden",
+          "retry_wait": "Wordt opnieuw geprobeerd"
+        },
+        "kind": {
+          "company_registration_notice": "Melding van een nieuw bedrijf",
+          "company_welcome": "Welkomstmail aan een bedrijf",
+          "intake_alert": "Melding van een nieuwe aanvraag"
+        }
       }
     },
     "eyebrow": "OPERATIONS CONTROL",
@@ -3290,6 +3305,16 @@
         "notFound": "Record niet gevonden.",
         "needsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw.",
         "error": "Er is iets misgegaan. Probeer het opnieuw."
+      },
+      "oldestWaiting": "de oudste wacht {age}",
+      "waiting": "Wacht {age}",
+      "overdue": "Te laat",
+      "overdueCount": "{count, plural, one {# wacht} other {# wachten}} langer dan {hours} uur",
+      "statusChanged": "Status gewijzigd door {who}, {when} UTC",
+      "statusChangedUnknown": "onbekende medewerker",
+      "age": {
+        "hours": "{count} uur",
+        "days": "{count} dg."
       }
     },
     "matching": {

@@ -2,10 +2,10 @@
 
 import { getLocale } from "next-intl/server";
 
-import { sendSmtp, smtpConfigFromEnv } from "../email/smtp";
 import { recordPublicFormRefusal, screenPublicFormTiming } from "../security/public-form-guard";
 import { persistPublicCompanyNeed } from "./company-need-public-intake";
-import { isRequestDoor, requestDoorAlert, requestDoorIntake, type RequestDoor } from "./request-doors";
+import { notifyTeamOfStoredIntake } from "./intake-alert";
+import { isRequestDoor, requestDoorIntake } from "./request-doors";
 
 /**
  * One commercial request from the landing, with no account. A person is told "received"
@@ -15,27 +15,6 @@ import { isRequestDoor, requestDoorAlert, requestDoorIntake, type RequestDoor } 
  * generic "could not send, try again later" (`unavailable`), whichever check tripped.
  */
 export type RequestDoorResult = "received" | "invalid" | "limited" | "unavailable";
-
-/** The mailbox a person answers these from. */
-const ALERT_TO = "info@labourmarket.ai";
-/** The person is waiting for "received": a slow mail server must not hold it up. */
-const ALERT_WAIT_MS = 8000;
-
-/**
- * One internal mail: the door type and a link to the queue, never a name, a contact or
- * the request's text. Never throws, so a failed alert cannot lose a stored request.
- */
-async function alertTeam(door: RequestDoor): Promise<boolean> {
-  try {
-    const smtp = smtpConfigFromEnv();
-    if (!smtp) return false;
-    const sent = sendSmtp(smtp, { to: ALERT_TO, ...requestDoorAlert(door) }).then((r) => r.status === "sent");
-    const late = new Promise<boolean>((done) => setTimeout(() => done(false), ALERT_WAIT_MS));
-    return await Promise.race([sent, late]);
-  } catch {
-    return false;
-  }
-}
 
 export async function submitRequestDoorAction(formData: FormData): Promise<RequestDoorResult> {
   const door = formData.get("door");
@@ -57,8 +36,9 @@ export async function submitRequestDoorAction(formData: FormData): Promise<Reque
     return stored.code === "rate_limited" ? "limited" : "unavailable";
   }
 
-  // The row is the record; the alert only shortens the wait for it. The result is logged
-  // (never the content), because the 24-hour promise rests on someone being told.
-  console.info("[request-door] stored", { door, alerted: stored.advertising ? false : await alertTeam(door) });
+  // The row is the record; the alert tells the team it is there. One alert per stored
+  // row, to the configured mailbox, its outcome recorded and a failure retried
+  // (lib/staffing/intake-alert.ts). Logged without the content.
+  console.info("[request-door] stored", { door, alert: stored.advertising ? "not_sent" : await notifyTeamOfStoredIntake(stored.intakeId) });
   return "received";
 }

@@ -541,3 +541,13 @@ audit.
   entry text, review note or name. The pure engine computes the forecast in memory;
   nothing is written (no forecast row, no signal consumed), no chat table is read,
   nothing is sent outbound.
+
+- **2026-11-13 - `lib/email/platform-email-delivery-store.ts`** (platform e-mail
+  delivery record, migration `20261113220000_platform_email_deliveries_v1`, RED,
+  owner-gated, not applied). The service key is used because the retry sweep runs
+  with no signed-in user. It reads only the columns that migration grants - an
+  organization's name, country and owner; the owner's name, e-mail and locale; a
+  count of published needs; an intake's source path - and writes only its own
+  record (`platform_email_deliveries_v1`), which holds an event key, a kind, an
+  outcome and an attempt count: no address, no name, no text. No chat table is
+  read or written. Pinned in the `chat-visibility-rls.test.ts` caller inventory.

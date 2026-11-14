@@ -548,6 +548,13 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/commercial/handoff-dispatch.ts",
       "lib/communication/communication-core.ts",
       "lib/company/claim-public-intake.ts",
+      // 2026-11-13: the platform e-mail delivery record (registration notice,
+      // company welcome, request alert). Service role because the retry sweep has
+      // no signed-in user. Reads ONLY the columns migration 20261113220000 grants
+      // (organization name/country/owner, the owner's name/e-mail/locale, a
+      // published-need count, an intake's source path) and writes ONLY its own
+      // record, which holds no address, name or text. No chat table is touched.
+      "lib/email/platform-email-delivery-store.ts",
       "lib/email/send-ledger-store.ts",
       // 2026-11-01: the project forecast on read. Calls ONLY the service-role-
       // granted forecast_project_facts_v1 (opaque keys, statuses, dates, numbers;

@@ -159,6 +159,12 @@ describe("the feature sends nothing outbound and adds no DB weakening", () => {
       // locale instead of folding de/nl/pl to 'lt'. Grants nothing, adds no
       // policy, every ceiling unchanged (lib/guards/company-need-intake-keep-locale.test.ts).
       "20261110140000_company_need_intake_keep_locale_v1.sql",
+      // platform_email_deliveries_v1 (2026-11-13, RED, needs-human-gate): two
+      // nullable columns (who changed a status, and when) and UPDATE on exactly
+      // those two columns to service_role. No policy, no anon/authenticated
+      // grant; the queue's service-role-only model is unchanged
+      // (lib/guards/platform-email-deliveries-migration.test.ts).
+      "20261113220000_platform_email_deliveries_v1.sql",
     ]);
     const grants = readFileSync(
       join(migDir, "20260713190000_company_need_intake_service_grants.sql"),

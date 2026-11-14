@@ -3069,7 +3069,9 @@
         "companies": "Firmy",
         "demand": "Otwarte zapotrzebowanie",
         "reviewQueue": "Oczekuje na przegląd",
-        "claims": "Deklaracje umiejętności"
+        "claims": "Deklaracje umiejętności",
+        "unhandledRequests": "Nieobsłużone zapytania",
+        "emailFailures": "Niewysłane e-maile z powiadomieniami"
       },
       "internalBadge": "Wewnętrzne",
       "internalNote": "Diagnostyka wewnętrzna — szczegóły techniczne dla właściciela, nie część produktu.",
@@ -3077,6 +3079,19 @@
         "title": "Czeka na decyzję",
         "none": "Obecnie nic nie czeka na decyzję operatora.",
         "summary": "{people} aktywnych osób · {companies} organizacji · {drafts} szkiców operacyjnych · {claims} deklaracji umiejętności"
+      },
+      "emailDelivery": {
+        "title": "Wysyłka e-maili z powiadomieniami",
+        "attempts": "{count, plural, one {# próba} few {# próby} other {# prób}}",
+        "status": {
+          "failed": "Nie wysłano",
+          "retry_wait": "Zostanie ponowione"
+        },
+        "kind": {
+          "company_registration_notice": "Powiadomienie o nowej firmie",
+          "company_welcome": "E-mail powitalny do firmy",
+          "intake_alert": "Powiadomienie o nowym zapytaniu"
+        }
       }
     },
     "eyebrow": "CENTRUM OPERACYJNE",
@@ -3290,6 +3305,16 @@
         "notFound": "Nie znaleziono rekordu.",
         "needsMigration": "Nie udało się wykonać działania. Spróbuj ponownie.",
         "error": "Coś poszło nie tak. Spróbuj ponownie."
+      },
+      "oldestWaiting": "najstarsze czeka {age}",
+      "waiting": "Czeka {age}",
+      "overdue": "Po terminie",
+      "overdueCount": "{count, plural, one {# czeka} other {# czeka}} dłużej niż {hours} godz.",
+      "statusChanged": "Status zmienił(a) {who}, {when} UTC",
+      "statusChangedUnknown": "nieustalony operator",
+      "age": {
+        "hours": "{count} godz.",
+        "days": "{count} dn."
       }
     },
     "matching": {

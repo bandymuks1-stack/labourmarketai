@@ -3,6 +3,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
 import { PrivacyRequestsSection } from "@/components/admin/privacy-requests-section";
 import { VacancySourcesSection } from "@/components/admin/vacancy-sources-section";
+import { listCompanyNeedIntakes } from "@/lib/admin/company-need-intakes";
+import { intakeOverdueHours, unhandledIntakeSummary } from "@/lib/admin/company-need-intake-shared";
+import { listDeliveryProblems } from "@/lib/email/platform-email-delivery-store";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
 import { getDemandDraftCounts } from "@/lib/demand/demand-drafts";
@@ -191,7 +194,45 @@ export default async function AdminDashboardPage({
   // that leads nowhere is not a tile any more; the platform's size is one
   // sentence under the header. Zero waiting = the honest "nothing waits"
   // line, never fake urgency.
-  const attention: { key: string; label: string; count: number; href: string }[] = [
+  // UNHANDLED REQUESTS and E-MAILS THAT DID NOT GO OUT (owner P0 2026-11-13).
+  // Both read 0 when their source cannot be read here — the queue page itself
+  // names that state; this band never invents urgency.
+  const intakeList = await listCompanyNeedIntakes();
+  const intakeOverdueAfter = intakeOverdueHours();
+  const unhandledRequests = unhandledIntakeSummary(
+    intakeList.kind === "ok" ? intakeList.rows : [],
+    Date.now(),
+    intakeOverdueAfter,
+  );
+  const deliveryProblems = await listDeliveryProblems();
+  const failedEmails = deliveryProblems.kind === "ok" ? deliveryProblems.failed : [];
+  const waitingEmails = deliveryProblems.kind === "ok" ? deliveryProblems.waiting : [];
+  const waitedLabel = (hours: number | null): string =>
+    hours === null
+      ? "—"
+      : hours < 48
+        ? t("companyNeedIntakes.age.hours", { count: hours })
+        : t("companyNeedIntakes.age.days", { count: Math.floor(hours / 24) });
+
+  const attention: { key: string; label: string; count: number; href: string; note?: string; overdue?: boolean }[] = [
+    {
+      key: "unhandledRequests",
+      label: t("room.kpi.unhandledRequests"),
+      count: unhandledRequests.count,
+      href: `/${locale}/dashboard/admin/company-need-intakes`,
+      note:
+        unhandledRequests.overdueCount > 0
+          ? t("companyNeedIntakes.overdueCount", { count: unhandledRequests.overdueCount, hours: intakeOverdueAfter })
+          : t("companyNeedIntakes.oldestWaiting", { age: waitedLabel(unhandledRequests.oldestWaitingHours) }),
+      overdue: unhandledRequests.overdueCount > 0,
+    },
+    {
+      key: "emailFailures",
+      label: t("room.kpi.emailFailures"),
+      count: failedEmails.length,
+      href: "#admin-email-delivery",
+      overdue: true,
+    },
     {
       key: "reviewQueue",
       label: t("room.kpi.reviewQueue"),
@@ -529,11 +570,63 @@ export default async function AdminDashboardPage({
                   {num(a.count)}
                 </span>
                 {a.label}
+                {a.note ? (
+                  <span
+                    className={a.overdue ? "text-xs font-semibold text-state-warning" : "text-xs text-text-secondary"}
+                    data-testid={`admin-attention-${a.key}-note`}
+                  >
+                    {a.note}
+                  </span>
+                ) : null}
               </a>
             ))}
           </div>
         )}
       </section>
+
+      {/* E-MAILS THAT DID NOT GO OUT. Shown only when there is one: a failed
+          registration notice, welcome e-mail or request alert stays listed here
+          until a person has dealt with it — it is never silently dropped. The
+          record holds no address and no name, so none is shown. */}
+      {failedEmails.length + waitingEmails.length > 0 ? (
+        <section
+          id="admin-email-delivery"
+          className="flex flex-col gap-2"
+          data-testid="admin-email-delivery"
+        >
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("room.emailDelivery.title")}
+          </p>
+          <ul className="flex flex-col gap-1 text-sm">
+            {[...failedEmails, ...waitingEmails].map((d) => (
+              <li
+                key={d.id}
+                className="flex flex-wrap items-center gap-x-3 gap-y-1"
+                data-testid={`admin-email-delivery-${d.status}`}
+                data-kind={d.kind}
+              >
+                <span
+                  className={
+                    d.status === "failed"
+                      ? "font-semibold text-state-warning"
+                      : "text-text-secondary"
+                  }
+                >
+                  {t(`room.emailDelivery.status.${d.status === "failed" ? "failed" : "retry_wait"}`)}
+                </span>
+                <span className="text-text-primary">
+                  {t(`room.emailDelivery.kind.${d.kind}`)}
+                </span>
+                <span className="font-mono text-meta text-text-muted tabular-nums">
+                  {d.createdAt.slice(0, 16).replace("T", " ")} ·{" "}
+                  {t("room.emailDelivery.attempts", { count: d.attempts })}
+                  {d.lastError ? ` · ${d.lastError}` : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {/* BAND 2 — Action queues. The live operational signals that need a
           decision now (real rows; honest empty/unavailable states). */}

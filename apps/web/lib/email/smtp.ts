@@ -32,7 +32,21 @@ export type SmtpConfig = {
   from: string;
 };
 
-export type SmtpMessage = { to: string; subject: string; text: string };
+export type SmtpMessage = {
+  to: string;
+  subject: string;
+  text: string;
+  /** Optional HTML body: the message becomes multipart/alternative (text first). */
+  html?: string;
+  /** Optional Reply-To address (bare address; an unsafe value fails the send). */
+  replyTo?: string;
+  /**
+   * Optional `X-…` headers (e.g. the notification class a mailbox rule filters on).
+   * Name: `X-` + letters, digits and dashes. Value: printable ASCII without CR/LF.
+   * Anything else fails the send — a header is never silently dropped or rewritten.
+   */
+  headers?: Readonly<Record<string, string>>;
+};
 
 export type SmtpSendResult =
   | { status: "sent"; messageId: string; detail?: SendDiagnostics }
@@ -91,6 +105,12 @@ export function addressOf(from: string): string {
 }
 
 const SAFE_ADDRESS = /^[^\s<>@"\r\n]+@[^\s<>@"\r\n]+\.[^\s<>@"\r\n]+$/;
+const SAFE_HEADER_NAME = /^X-[A-Za-z0-9-]{1,60}$/;
+const SAFE_HEADER_VALUE = /^[\x20-\x7e]{1,200}$/;
+
+function extraHeadersSafe(headers: SmtpMessage["headers"]): boolean {
+  return Object.entries(headers ?? {}).every(([k, v]) => SAFE_HEADER_NAME.test(k) && SAFE_HEADER_VALUE.test(v));
+}
 
 function encodeHeader(value: string): string {
   // RFC 2047 B-encoding; header injection is impossible because CR/LF never
@@ -114,11 +134,21 @@ export function buildMessage(cfg: SmtpConfig, msg: SmtpMessage, messageId: strin
     `Date: ${date.toUTCString().replace("GMT", "+0000")}`,
     `Message-ID: ${messageId}`,
     "MIME-Version: 1.0",
-    "Content-Type: text/plain; charset=UTF-8",
-    "Content-Transfer-Encoding: base64",
-    "Auto-Submitted: auto-generated",
   ];
-  return `${headers.join("\r\n")}\r\n\r\n${wrap76(Buffer.from(msg.text, "utf8").toString("base64"))}`;
+  if (msg.replyTo) headers.push(`Reply-To: <${msg.replyTo}>`);
+  for (const [name, value] of Object.entries(msg.headers ?? {})) headers.push(`${name}: ${value}`);
+  const b64 = (body: string) => wrap76(Buffer.from(body, "utf8").toString("base64"));
+  if (msg.html === undefined) {
+    headers.push("Content-Type: text/plain; charset=UTF-8", "Content-Transfer-Encoding: base64", "Auto-Submitted: auto-generated");
+    return `${headers.join("\r\n")}\r\n\r\n${b64(msg.text)}`;
+  }
+  // multipart/alternative, plain text first (RFC 2046 §5.1.4: the richest part
+  // last). The boundary cannot occur in a base64 body ("=" only ends a line there).
+  const boundary = `=_lm_${messageId.replace(/[^A-Za-z0-9]/g, "").slice(0, 32)}`;
+  headers.push(`Content-Type: multipart/alternative; boundary="${boundary}"`, "Auto-Submitted: auto-generated");
+  const part = (type: string, body: string) =>
+    `--${boundary}\r\nContent-Type: ${type}; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${b64(body)}`;
+  return `${headers.join("\r\n")}\r\n\r\n${part("text/plain", msg.text)}${part("text/html", msg.html)}--${boundary}--\r\n`;
 }
 
 type Connect = (cfg: SmtpConfig) => Duplex;
@@ -139,6 +169,8 @@ export async function sendSmtp(
       detail: { provider: "smtp", step: "connect", messageTransmitted: false },
     };
   }
+  if (msg.replyTo !== undefined && !SAFE_ADDRESS.test(msg.replyTo)) return { status: "failed", reason: "invalid_reply_to", detail: { provider: "smtp", step: "connect", messageTransmitted: false } };
+  if (!extraHeadersSafe(msg.headers)) return { status: "failed", reason: "invalid_header", detail: { provider: "smtp", step: "connect", messageTransmitted: false } };
   const started = Date.now();
   // Which step is waiting for its reply, and the last reply's codes (never its text).
   let step: SmtpStep = "greeting";

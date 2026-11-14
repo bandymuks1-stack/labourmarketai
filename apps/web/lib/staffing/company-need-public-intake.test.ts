@@ -37,7 +37,16 @@ beforeEach(() => {
 
 describe("persistPublicCompanyNeed", () => {
   it("a real-looking need is stored", async () => {
-    expect(await persistPublicCompanyNeed(base)).toEqual({ ok: true, advertising: false });
+    expect(await persistPublicCompanyNeed(base)).toEqual({ ok: true, advertising: false, intakeId: null });
+  });
+
+  it("the stored row's id comes back, so its alert can be raised once", async () => {
+    rpc.mockResolvedValue({ data: "00000000-0000-4000-8000-0000000000d3", error: null });
+    expect(await persistPublicCompanyNeed(base)).toEqual({
+      ok: true,
+      advertising: false,
+      intakeId: "00000000-0000-4000-8000-0000000000d3",
+    });
     expect(rpc).toHaveBeenCalledTimes(1);
   });
 

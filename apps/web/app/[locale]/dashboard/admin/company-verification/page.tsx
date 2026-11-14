@@ -111,6 +111,8 @@ export default async function AdminCompanyVerificationPage({
               <li
                 key={r.id}
                 className="card-border flex flex-col gap-3 p-4"
+                // The registration notice e-mail links straight to this row.
+                id={`company-${r.id}`}
                 data-testid={`company-verification-row-${r.id}`}
                 data-status={r.verificationStatus}
               >

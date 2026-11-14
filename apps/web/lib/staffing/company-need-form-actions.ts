@@ -13,6 +13,7 @@ import { draftVacancyFromNeed } from "./company-need-actions";
 import { persistPublicCompanyNeed } from "./company-need-public-intake";
 import { aiActionRateLimited } from "../security/ai-action-throttle";
 import { sendCompanyNeedOwnerAlert } from "../notifications/telegram-owner-alerts";
+import { notifyTeamOfStoredIntake } from "./intake-alert";
 import { isConstructionWorkType } from "../taxonomy/work-categories";
 import { aiLocaleFor, type AiLocale } from "../ai/runtime/types";
 import { NO_JS_REVIEW_MARK, recordPublicFormRefusal, screenPublicFormTiming } from "../security/public-form-guard";
@@ -168,6 +169,12 @@ export async function submitCompanyNeedAction(
   // Fires ONLY on a persisted intake. The helper never throws and no-ops when
   // the channel is unconfigured; the extra try/catch is defense-in-depth so a
   // Telegram failure can never affect the submission, persistence, or queue.
+  if (persist.ok && !persist.advertising) {
+    // The SAME internal e-mail alert the request doors raise (owner P0
+    // 2026-11-13): one per stored row, recorded, retried on failure. It never
+    // throws and nothing is sent to the person who wrote the need.
+    await notifyTeamOfStoredIntake(persist.intakeId);
+  }
   if (persisted) {
     try {
       // An advert is refused before the store; the flag is kept as a second lock.

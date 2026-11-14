@@ -1790,6 +1790,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // retry / dead-letter / bounce fields. RED draft #3318, the marker is the human-gate
       // acknowledgement, NOT applied.
       "20261113190000_invitation_delivery_attempts_v1.sql",
+      // 2026-11-13: platform e-mail delivery record + who/when on an intake status (service_role-only
+      // GRANT/REVOKE). RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261113220000_platform_email_deliveries_v1.sql",
 ]);
   });
 
