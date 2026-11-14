@@ -1,7 +1,8 @@
-import { test as base, type BrowserContextOptions } from "@playwright/test";
+import { test as base, devices, type BrowserContextOptions } from "@playwright/test";
 
 import { WALK_TIME_ZONE, seedViewerTimeZone } from "./viewer-time-zone";
 import { seedWalkAnalyticsConsent } from "./analytics-consent-seed";
+import { WALK_PHONE, walkDevice, withWalkDevice } from "../../lib/testing/prod-qa-walk-device";
 
 /**
  * THE PRODUCTION WALK'S `test` — every browser context it opens is a returning
@@ -37,6 +38,12 @@ import { seedWalkAnalyticsConsent } from "./analytics-consent-seed";
  * the walk sets its own), so the consent banner never covers a bottom CTA a
  * walk must press — see `analytics-consent-seed.ts`.
  *
+ * THE DEVICE. `PROD_QA_DEVICE=phone` runs the same walk on a 390 px touch phone
+ * through the same two doors: the default `context` / `page` get the phone as
+ * their test options, and every `browser.newContext(...)` that names no screen
+ * of its own gets it in the wrapper. A step that names its own viewport keeps
+ * it — see `lib/testing/prod-qa-walk-device.ts`. Unset, nothing changes.
+ *
  * Overriding the worker-scoped `browser` fixture gives these tests their own
  * workers, so no test that imports the plain `@playwright/test` ever sees the
  * wrapped browser. Nothing a walk asserts changes: the page a person sees after
@@ -57,8 +64,14 @@ export function firstVisit(options: BrowserContextOptions = {}): FirstVisitConte
   return { ...options, [FIRST_VISIT]: true };
 }
 
+/** Read once per worker; an unknown value stops the walk before it opens anything. */
+const DEVICE = walkDevice(process.env);
+/** What a step with its own viewport runs as on a phone walk: the desktop browser, as on a desktop walk. */
+const DESKTOP = { userAgent: devices["Desktop Chrome"].userAgent, deviceScaleFactor: devices["Desktop Chrome"].deviceScaleFactor };
+
 export const test = base.extend({
   timezoneId: WALK_TIME_ZONE,
+  ...(DEVICE === "phone" ? WALK_PHONE : {}),
   context: async ({ context }, use) => {
     await seedViewerTimeZone(context);
     await seedWalkAnalyticsConsent(context);
@@ -69,7 +82,7 @@ export const test = base.extend({
       const newContext = browser.newContext;
       browser.newContext = async (options?: FirstVisitContextOptions) => {
         const { [FIRST_VISIT]: unseeded, ...rest } = options ?? {};
-        const ctx = await newContext.call(browser, { ...rest, timezoneId: WALK_TIME_ZONE });
+        const ctx = await newContext.call(browser, { ...withWalkDevice(DEVICE, rest, DESKTOP), timezoneId: WALK_TIME_ZONE });
         await seedViewerTimeZone(ctx);
         if (!unseeded) await seedWalkAnalyticsConsent(ctx);
         return ctx;

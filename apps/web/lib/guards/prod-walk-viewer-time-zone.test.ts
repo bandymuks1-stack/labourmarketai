@@ -144,7 +144,8 @@ describe("the mechanism — tests/e2e/prod-walk.ts", () => {
     expect(b).toMatch(/browser\.newContext = async \(options\?: FirstVisitContextOptions\) => \{/);
     // The zone comes AFTER the caller's options, so no caller can make it disagree with the cookie
     // (`rest` is the caller's options minus the first-visit marker, which only skips the consent seed).
-    expect(b).toContain("newContext.call(browser, { ...rest, timezoneId: WALK_TIME_ZONE })");
+    // The zone is spread LAST, so neither a spec's options nor the device default can replace it.
+    expect(b).toContain("newContext.call(browser, { ...withWalkDevice(DEVICE, rest, DESKTOP), timezoneId: WALK_TIME_ZONE })");
     expect(b.indexOf("await seedViewerTimeZone(ctx);")).toBeGreaterThan(0);
     expect(b.indexOf("await seedViewerTimeZone(ctx);")).toBeLessThan(b.indexOf("return ctx;"));
     // Worker-scoped: walk tests get their own workers; the original is restored afterwards.
