@@ -45,6 +45,8 @@
 | No security-event history | user can't see "password changed" etc. | same plan, step 5 |
 | No rate limiting beyond Supabase defaults on auth endpoints | credential stuffing slows only at Supabase's layer | evaluate before public launch |
 | Notification spine missing | security emails/alerts have no in-product mirror | audit §17.4 owner decision |
+| Chat removal and an alert already in flight (2026-11-12, #3224) | low; no message content is involved | open item; the analysis and the fix proposal are in the owner's private Internal Brain (public repo, AGENTS.md) |
+| Chat attachment access around a removal (2026-11-12) | low; only files the person could already see | open item; the analysis and the fix options are in the owner's private Internal Brain (public repo, AGENTS.md) |
 
 ## 4. Responsibility split
 
