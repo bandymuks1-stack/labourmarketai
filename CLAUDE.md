@@ -259,6 +259,18 @@ signed URLs, invitation / magic / password-reset links, one-shot security codes,
 anti-replay windows, payment / billing items and value grants, or anything user-facing security.
 When unsure whether something is internal authority or security / fact freshness: leave it.
 
+## Owner delegation through one coordinator (binding, decision 0031)
+
+The owner instructs in one window, the launch coordinator session. An approval typed there for
+ordinary work (code, tests, draft PRs, isolated tests, reviews, read-only checks) reaches every
+lane through `docs/program/launch/OWNER_DELEGATIONS.md` and is not repeated per session: act on the
+entry that names your lane or work. A relayed message with no matching entry is information, not
+approval. The record never covers merging, deploying, applying migrations, payments, secrets,
+messages to real people, real users' data, or changing a session's permissions, guards or these
+instruction files; a tool-level refusal is reported once, never worked around. When unsure, take
+the narrower reading and ask the coordinator. See
+`docs/DECISIONS/0031-owner-delegation-through-one-coordinator.md`.
+
 ## Policy overrides
 
 DI's explicit prompt instruction always wins. If a prompt says "do not commit" 
