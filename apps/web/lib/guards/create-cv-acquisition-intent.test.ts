@@ -127,6 +127,17 @@ describe("PageHero opts in — no other hero's CTA changed", () => {
       page: "pricing/page.tsx",
       guardedBy: "lib/billing/launch-pricing.test.ts",
     },
+    // Owner P0 2026-11-13: the institution page lands on the SAME setup the
+    // landing's institution door opens, and the service-provider page on the
+    // person's own service offerings — each asserted by the audience guard.
+    {
+      page: "for-education/page.tsx",
+      guardedBy: "lib/guards/audience-pages.test.ts",
+    },
+    {
+      page: "for-service-providers/page.tsx",
+      guardedBy: "lib/guards/audience-pages.test.ts",
+    },
   ];
 
   it("only pages with their own guard pass ctaNext", () => {

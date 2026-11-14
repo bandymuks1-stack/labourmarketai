@@ -363,6 +363,140 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     worldStateCanControlIt: false,
   },
 
+  // ══ AUDIENCE PAGES (owner order 2026-11-13) ══════════════════════════════
+  // Two public explanation pages. The same category as `/create-cv` and the
+  // grandfathered `/for-workers`, `/for-companies`, `/for-agencies`: pre-auth
+  // pages the five World-State questions were not written for. Declared with
+  // honest answers; the A-01 findings they produce are excused by ONE scoped
+  // owner waiver in `.github/scripts/owner-waivers.mjs`.
+  {
+    id: "/for-education",
+    kind: "screen",
+    // A-04: several valid entry points, suggestion not coercion. This page is
+    // an explanation before a door; it blocks no path and requires nothing.
+    originAxiom: "A-04",
+    purpose:
+      "The public page an education institution reads before choosing its sign-up door: which functions work today (programmes, groups, practice review, competency recognition, report), how to start, what is free, and what is not available yet.",
+    whyNotChat:
+      "There is no conversation before authentication. The reader is an anonymous visitor deciding whether to sign up; nothing exists yet for an assistant to act on. After sign-up the assistant and the workspace take over.",
+    whyNotExistingComponent:
+      "The institution door on the landing had no audience page at all (its `learnMore` was null), while the worker, employer and agency doors each had one. The institution workspace itself is behind authentication and cannot explain itself to a visitor.",
+    owner:
+      "Owner order 2026-11-13 (audience presentation, V2 launch readiness): create the page for schools, colleges and universities.",
+    // A pure read surface: it owns no action. Its one call to action is the
+    // existing sign-up with an existing destination.
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "It extends no new element: an institution is an organisation with the training-provider capability. What did not exist was an explanation a visitor could read before creating one.",
+    chatIntegration:
+      "One-way: the page hands the visitor to the existing sign-up with a `next` destination; from the first authenticated screen the assistant drives the same functions the page describes. It dispatches nothing and holds no conversation state.",
+    avatarEffect:
+      "None by itself. Signing up through its call to action creates the person's account and, in the existing setup, an organisation with the training-provider capability.",
+    mapEffect:
+      "None. A pre-auth explanation page draws nothing on the World Map — recorded as `reflectedOnMap: false`, not dressed up as a map effect.",
+    journalRelation:
+      "None of its own. Where it mentions the Work Journal it describes the existing journal; it writes and reads no entry.",
+
+    // The four pillars are ai_conversation / avatar / world_map / work_journal.
+    // An institution's workspace turns on the Work Journal: learners' recorded
+    // practice is what it reviews, signs off and recognises.
+    pillar: "work_journal",
+    objectType: "company",
+    registeredInObjectModel: true,
+    // The questions are about the OBJECT TYPE the page leads to, as on
+    // `/create-cv`: that object carries dated state and recorded events.
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // All five are "no", honestly, for the reason recorded on `/create-cv`: an
+    // anonymous visitor has no World State, map, assistant or workspace, and
+    // the page is by definition a new page. Excused by the scoped owner
+    // waiver `public-audience-pages-education-service-providers` (owner
+    // approval 2026-11-13), never by a rewritten answer.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    // World State cannot control a page that renders before World State exists.
+    worldStateCanControlIt: false,
+  },
+  {
+    id: "/for-service-providers",
+    kind: "screen",
+    // A-04: several valid entry points, suggestion not coercion. This page is
+    // an explanation before a door; it blocks no path and requires nothing.
+    originAxiom: "A-04",
+    purpose:
+      "The public page an independent specialist, crew or service company reads before signing up: which functions work today (service offerings, requests, shared search, proposals and contracts, cost calculator), how to start, what is free, and what is not available yet.",
+    whyNotChat:
+      "There is no conversation before authentication. The reader is an anonymous visitor deciding whether to sign up; nothing exists yet for an assistant to act on. After sign-up the assistant and the workspace take over.",
+    whyNotExistingComponent:
+      "No public page described the marketplace functions to a provider: service offerings, requests, proposals and contracts all sit behind authentication, and the three existing audience pages address workers, employers and agencies.",
+    owner:
+      "Owner order 2026-11-13 (audience presentation, V2 launch readiness): create the page for service providers and teams.",
+    // A pure read surface: it owns no action. Its one call to action is the
+    // existing sign-up with an existing destination.
+    ownsAction: null,
+
+    worldElement: "user_avatar",
+    whyNotExistingElement:
+      "It extends no new element: a service offering belongs to the person who provides it. What did not exist was an explanation a visitor could read before creating an account.",
+    chatIntegration:
+      "One-way: the page hands the visitor to the existing sign-up with a `next` destination; from the first authenticated screen the assistant drives the same functions the page describes. It dispatches nothing and holds no conversation state.",
+    avatarEffect:
+      "None by itself. Signing up through its call to action creates the person's account; a service offering exists only when that person writes one.",
+    mapEffect:
+      "None. A pre-auth explanation page draws nothing on the World Map — recorded as `reflectedOnMap: false`, not dressed up as a map effect.",
+    journalRelation:
+      "None of its own. Where it mentions the Work Journal it describes the existing journal; it writes and reads no entry.",
+
+    pillar: "avatar",
+    objectType: "avatar",
+    registeredInObjectModel: true,
+    // The questions are about the OBJECT TYPE the page leads to, as on
+    // `/create-cv`: that object carries dated state and recorded events.
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // All five are "no", honestly, for the reason recorded on `/create-cv`: an
+    // anonymous visitor has no World State, map, assistant or workspace, and
+    // the page is by definition a new page. Excused by the scoped owner
+    // waiver `public-audience-pages-education-service-providers` (owner
+    // approval 2026-11-13), never by a rewritten answer.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    // World State cannot control a page that renders before World State exists.
+    worldStateCanControlIt: false,
+  },
+
   // ══ PUBLIC JOB BOARD (owner directive 2026-08-18 §5) ══════════════════════
   // Three surfaces, one job: make the imported supply discoverable to people
   // who have not signed up. They share the same honest World-State answers as

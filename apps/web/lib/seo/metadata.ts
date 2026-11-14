@@ -145,6 +145,8 @@ export type PageKey =
   | "workers"
   | "companies"
   | "agencies"
+  | "education"
+  | "serviceProviders"
   | "workAbroad"
   | "companyNeed"
   | "workerIntake"
@@ -236,32 +238,96 @@ export const PAGE_SEO: Readonly<
     en: {
       title: "For Agencies — Coordinate workers and teams",
       description:
-        "Staffing agencies: coordinate workers, teams and employer needs in one place. LabourMarket.ai helps structure intake, matching and accommodation in Europe.",
+        "Staffing agencies: coordinate workers, teams and employer needs in one place. LabourMarket.ai keeps your roster, client links and candidate offers together.",
     },
     lt: {
       title: "Agentūroms — koordinuok darbuotojus ir brigadas",
       description:
-        "Įdarbinimo agentūros: koordinuok darbuotojus, brigadas ir darbdavių poreikius vienoje vietoje. LabourMarket.ai padeda struktūruoti priėmimą ir apgyvendinimą.",
+        "Įdarbinimo agentūros: koordinuok darbuotojus, brigadas ir darbdavių poreikius vienoje vietoje. Žmonių sąrašas, klientai ir kandidatų siūlymas kartu.",
     },
     ru: {
       title: "Агентствам — координируйте работников и бригады",
       description:
-        "Кадровые агентства: координируйте работников, бригады и потребности работодателей в одном месте. Приём, подбор и проживание — в LabourMarket.ai.",
+        "Кадровые агентства: координируйте работников, бригады и потребности работодателей в одном месте. Список людей, клиенты и предложение кандидатов вместе.",
     },
     nl: {
       title: "Uitzendbureaus — Coördineer werknemers en ploegen",
       description:
-        "Uitzendbureaus: coördineer werknemers, ploegen en personeelsbehoeften op één plek. LabourMarket.ai helpt intake, selectie en huisvesting te structureren.",
+        "Uitzendbureaus: coördineer werknemers, ploegen en personeelsbehoeften op één plek. LabourMarket.ai houdt mensen, klanten en kandidaatvoorstellen bijeen.",
     },
     de: {
       title: "Personalagenturen — Arbeitskräfte koordinieren",
       description:
-        "Personalagenturen: Arbeitskräfte, Kolonnen und Arbeitgeberbedarfe an einem Ort koordinieren. LabourMarket.ai strukturiert Aufnahme, Auswahl und Unterkunft.",
+        "Personalagenturen: Arbeitskräfte, Kolonnen und Arbeitgeberbedarfe an einem Ort koordinieren. Personenliste, Kunden und Kandidatenvorschläge zusammen.",
     },
     pl: {
       title: "Dla agencji — koordynuj pracowników i zespoły",
       description:
-        "Agencje pracy: koordynuj pracowników, zespoły i zapotrzebowanie pracodawców w jednym miejscu. LabourMarket.ai porządkuje zgłoszenia i zakwaterowanie.",
+        "Agencje pracy: koordynuj pracowników, zespoły i zapotrzebowanie pracodawców w jednym miejscu. Lista osób, klienci i propozycje kandydatów razem.",
+    },
+  },
+  education: {
+    en: {
+      title: "For Education Institutions — Programmes and practice",
+      description:
+        "Schools, colleges and universities: open programmes and groups, review the practice learners record, recognise competencies and export a report.",
+    },
+    lt: {
+      title: "Švietimo įstaigoms — programos, grupės ir praktika",
+      description:
+        "Mokykloms, kolegijoms ir universitetams: kurk programas ir grupes, peržiūrėk užfiksuotą praktiką, pripažink kompetencijas ir eksportuok ataskaitą.",
+    },
+    ru: {
+      title: "Учебным заведениям — программы, группы и практика",
+      description:
+        "Школам, колледжам и университетам: создавайте программы и группы, проверяйте записанную практику, признавайте компетенции и выгружайте отчёт.",
+    },
+    nl: {
+      title: "Onderwijsinstellingen — opleidingen en praktijk",
+      description:
+        "Scholen, hogescholen en universiteiten: maak opleidingen en groepen, beoordeel vastgelegde praktijk, erken competenties en exporteer een rapport.",
+    },
+    de: {
+      title: "Bildungseinrichtungen — Programme und Praxis",
+      description:
+        "Schulen, Hochschulen und Universitäten: Programme und Gruppen anlegen, erfasste Praxis prüfen, Kompetenzen anerkennen und einen Bericht exportieren.",
+    },
+    pl: {
+      title: "Dla placówek edukacyjnych — programy i praktyka",
+      description:
+        "Szkoły, kolegia i uczelnie: twórz programy i grupy, sprawdzaj zapisaną praktykę, uznawaj kompetencje i eksportuj raport w jednym miejscu.",
+    },
+  },
+  serviceProviders: {
+    en: {
+      title: "For Service Providers and Teams — Offer your service",
+      description:
+        "Independent specialists, crews and service companies: publish a service offering, answer requests and keep proposals and contracts in one place.",
+    },
+    lt: {
+      title: "Paslaugų teikėjams ir komandoms — siūlyk paslaugą",
+      description:
+        "Specialistams, brigadoms ir paslaugų įmonėms: paskelbk paslaugos pasiūlymą, atsakyk į užklausas ir laikyk pasiūlymus bei sutartis vienoje vietoje.",
+    },
+    ru: {
+      title: "Поставщикам услуг и командам — предложите услугу",
+      description:
+        "Специалистам, бригадам и сервисным компаниям: опубликуйте предложение услуги, отвечайте на запросы и храните предложения и контракты в одном месте.",
+    },
+    nl: {
+      title: "Dienstverleners en teams — bied je dienst aan",
+      description:
+        "Zelfstandige specialisten, ploegen en dienstverleners: publiceer een dienstaanbod, beantwoord aanvragen en bewaar voorstellen en contracten op één plek.",
+    },
+    de: {
+      title: "Dienstleister und Teams — Leistung anbieten",
+      description:
+        "Selbstständige Fachkräfte, Teams und Dienstleister: Leistungsangebot veröffentlichen, Anfragen beantworten, Angebote und Verträge an einem Ort führen.",
+    },
+    pl: {
+      title: "Dla usługodawców i zespołów — zaoferuj swoją usługę",
+      description:
+        "Specjaliści, brygady i firmy usługowe: opublikuj ofertę usługi, odpowiadaj na zapytania i trzymaj oferty oraz umowy w jednym miejscu.",
     },
   },
   workAbroad: {

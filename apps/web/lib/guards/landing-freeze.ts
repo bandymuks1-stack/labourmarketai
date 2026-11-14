@@ -20,6 +20,13 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * Institution door "learn more" (owner order 2026-11-13, audience presentation):
+ * the institution was the only starting context with no audience page to read
+ * first. `/for-education` now exists and the door's `learnMore` names it, so the
+ * band's existing "learn more" line gains one link with the existing door label.
+ * EXACTLY ONE hash moved: lib/marketing/public-doors.ts (one field). No copy, no
+ * namespace, no component.
+ *
  * The first screen is the choice (owner instruction 2026-11-12: "Sumažink pagrindinio
  * puslapio sudėtingumą. Pašalink nereikalingus tekstus, abstrakčius šūkius ir
  * pasikartojančius blokus. Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori

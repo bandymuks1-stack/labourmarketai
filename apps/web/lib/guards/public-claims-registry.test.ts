@@ -79,6 +79,8 @@ const PINNED_CLAIM_IDS = [
   "employer.vat-via-stripe-tax",
   "partner.pool-in-motion",
   "partner.manage-post-broker",
+  // 2026-11-13: the /for-agencies hero sentence that replaced it.
+  "partner.roster-connect-offer",
   "platform.headline.en",
   "platform.headline.de",
   "platform.headline.lt",
