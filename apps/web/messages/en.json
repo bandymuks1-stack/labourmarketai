@@ -10108,6 +10108,7 @@
         "accommodation": "Accommodation",
         "transport": "Transport",
         "tool": "Required tools",
+        "opportunityType": "Opportunity type",
         "activeCount": "Active filters: {count}",
         "reset": "Reset filters"
       },

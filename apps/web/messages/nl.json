@@ -10108,6 +10108,7 @@
         "accommodation": "Huisvesting",
         "transport": "Vervoer",
         "tool": "Benodigd gereedschap",
+        "opportunityType": "Soort kans",
         "activeCount": "Actieve filters: {count}",
         "reset": "Filters wissen"
       },
