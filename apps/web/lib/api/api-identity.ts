@@ -96,6 +96,7 @@ export type ApiIdentityFailure =
   | "no-credentials"
   | "malformed-bearer"
   | "invalid-bearer"
+  | "wrong-audience"
   | "rate-limited"
   | "identity-unavailable";
 
@@ -110,6 +111,7 @@ export function refusalStatus(reason: ApiIdentityFailure): 401 | 429 | 503 {
     case "no-credentials":
     case "malformed-bearer":
     case "invalid-bearer":
+    case "wrong-audience":
       return 401;
     case "rate-limited":
       return 429;
@@ -192,6 +194,89 @@ function recordBearerFailure(key: string): void {
 }
 
 /**
+ * AUDIENCE BINDING (C-3, 2026-11-01) — which resource a verified token may be
+ * spent at.
+ *
+ * `auth.getUser(jwt)` proves the token is OURS (signed by this project, not
+ * expired, user still present). It does NOT prove the token was issued FOR the
+ * resource being called. One Supabase project issues two kinds of user token:
+ *
+ *   - a FIRST-PARTY session (web, mobile): no `client_id` claim;
+ *   - an OAUTH-CLIENT token (ChatGPT, Claude, any DCR-registered client): it
+ *     carries `client_id` — Supabase's documented way to tell them apart
+ *     (supabase.com/docs/guides/auth/oauth-server/token-security, read
+ *     2026-11-01).
+ *
+ * The rule, enforced here and nowhere else:
+ *
+ *   1. `aud` must name either Supabase's user audience (`authenticated`) or
+ *      the resource being called. A token bound to ANY other audience — e.g.
+ *      once the authorization server copies an RFC 8707 `resource` into
+ *      `aud` for a different API — is refused.
+ *   2. An OAuth-client token is accepted ONLY by a door that declares itself
+ *      an OAuth protected resource (`options.resource`, today only
+ *      `/api/mcp`, the one resource the RFC 9728 document advertises). Every
+ *      other `app/api/**` route refuses it: a token a person granted to an
+ *      assistant for the MCP door is not a key to the app's private REST
+ *      surface.
+ *
+ * It narrows only. A first-party session is accepted exactly as before at
+ * every route, and nothing here widens what a caller may do — RLS still
+ * decides that. The claims are read only AFTER the auth server verified the
+ * token, so nothing unverified is ever trusted.
+ */
+export type ApiIdentityOptions = {
+  /** The canonical URL of the OAuth protected resource this door IS (the
+   *  RFC 9728 `resource`). Presence means OAuth-client tokens are accepted
+   *  here; absence means only first-party sessions are. */
+  readonly resource?: string;
+};
+
+const SUPABASE_USER_AUDIENCE = "authenticated";
+
+/** A plain OAuth client id: 1–200 characters, no whitespace. */
+const CLIENT_ID_RX = /^\S{1,200}$/;
+
+type AudienceClaims = { readonly aud: readonly string[]; readonly clientId: string | null };
+
+/** The audience-relevant claims of an ALREADY VERIFIED JWT; null if the
+ *  payload cannot be read (a verified token always can — treat as refusal). */
+export function audienceClaimsOf(token: string): AudienceClaims | null {
+  try {
+    const payload = JSON.parse(Buffer.from(token.split(".")[1] ?? "", "base64url").toString("utf8")) as {
+      aud?: unknown;
+      client_id?: unknown;
+    };
+    const aud =
+      typeof payload.aud === "string"
+        ? [payload.aud]
+        : Array.isArray(payload.aud) && payload.aud.every((a) => typeof a === "string")
+          ? (payload.aud as string[])
+          : null;
+    if (!aud) return null;
+    // Absent = a first-party session. PRESENT but not a plain id (empty, not a
+    // string, whitespace, oversized) fails CLOSED — it must never read as the
+    // person's own session (carried over from #2806's `tokenClientOf`).
+    if (!Object.prototype.hasOwnProperty.call(payload, "client_id")) return { aud, clientId: null };
+    const clientId = payload.client_id;
+    if (typeof clientId !== "string" || !CLIENT_ID_RX.test(clientId)) return null;
+    return { aud, clientId };
+  } catch {
+    return null;
+  }
+}
+
+/** PURE: may a token with these claims be spent at this door? */
+export function audienceAccepts(claims: AudienceClaims | null, options: ApiIdentityOptions): boolean {
+  if (!claims) return false;
+  const resource = options.resource?.replace(/\/$/, "");
+  const audOk = claims.aud.every((a) => a === SUPABASE_USER_AUDIENCE || (resource !== undefined && a.replace(/\/$/, "") === resource));
+  if (!audOk || claims.aud.length === 0) return false;
+  if (claims.clientId !== null && resource === undefined) return false;
+  return true;
+}
+
+/**
  * Verify a bearer token and build the caller's client.
  *
  * Verification uses the platform's OWN mechanism (`auth.getUser(jwt)` against
@@ -204,6 +289,7 @@ function recordBearerFailure(key: string): void {
  */
 async function identityFromBearer(
   token: string,
+  options: ApiIdentityOptions,
 ): Promise<ApiIdentityResult> {
   const { url, anonKey } = requireSupabaseClientEnv();
 
@@ -236,6 +322,10 @@ async function identityFromBearer(
       return { ok: false, reason: authErrorIsInfrastructure(error) ? "identity-unavailable" : "invalid-bearer" };
     }
     if (!data?.user) return { ok: false, reason: "invalid-bearer" };
+    // Verified as ours; now: issued for THIS resource? (C-3, see above.)
+    if (!audienceAccepts(audienceClaimsOf(token), options)) {
+      return { ok: false, reason: "wrong-audience" };
+    }
     // The no-argument `auth.getUser()` of a session-less client has no session
     // to read and answers "no user" — so any domain helper that asks the
     // client who is calling (the cookie client's own idiom) would see an
@@ -280,6 +370,7 @@ function authErrorIsInfrastructure(error: {
  */
 export async function resolveApiIdentity(
   req: Request,
+  options: ApiIdentityOptions = {},
 ): Promise<ApiIdentityResult> {
   const header = req.headers.get("authorization");
 
@@ -296,10 +387,10 @@ export async function resolveApiIdentity(
       return { ok: false, reason: "malformed-bearer" };
     }
 
-    const result = await identityFromBearer(bearer.token);
+    const result = await identityFromBearer(bearer.token, options);
     // A REJECTED token is a failure the caller caused; an unreachable auth
     // server is not. Only the first spends failure budget.
-    if (!result.ok && result.reason === "invalid-bearer") {
+    if (!result.ok && (result.reason === "invalid-bearer" || result.reason === "wrong-audience")) {
       recordBearerFailure(clientKey);
     }
     return result;
