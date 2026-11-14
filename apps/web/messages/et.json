@@ -8075,5 +8075,56 @@
       "fullList": "Täielik nimekiri"
     },
     "more": "Veel"
+  },
+  "commercial": {
+    "pageTitle": "[EN] Commercial",
+    "pageIntro": "[EN] Your proposals and contracts, linked to demand and projects. Invoices and payments are recorded in Finance.",
+    "preApply": "[EN] Commercial CRM will be available once the commercial update is applied.",
+    "proposalsTitle": "[EN] Proposals",
+    "honestNote": "[EN] A proposal moves draft → sent → accepted/rejected only when you set it. Nothing is sent to anyone automatically.",
+    "proposalsEmpty": "[EN] No proposals yet.",
+    "addProposal": "[EN] Add a proposal",
+    "proposalTitlePlaceholder": "[EN] Proposal title",
+    "contractsTitle": "[EN] Contracts",
+    "noSignatureNote": "[EN] Contracts store a status and an optional document reference. No electronic signature is created or claimed.",
+    "contractsEmpty": "[EN] No contracts yet.",
+    "addContract": "[EN] Add a contract",
+    "contractFromProposal": "[EN] Create contract",
+    "fromProposal": "[EN] From proposal: {title}",
+    "contractTitlePlaceholder": "[EN] Contract title",
+    "docRef": "[EN] Doc ref",
+    "docRefLabel": "[EN] Document reference",
+    "docRefPlaceholder": "[EN] Signed doc reference (optional)",
+    "invoicesTitle": "[EN] Invoices & payments",
+    "invoicesNote": "[EN] Invoices and payment records live in Finance — recorded manually, EUR. This platform moves no money.",
+    "openFinance": "[EN] Open Finance",
+    "statusLabel": "[EN] Status",
+    "titleLabel": "[EN] Title",
+    "amountLabel": "[EN] Amount (EUR)",
+    "valueLabel": "[EN] Value (EUR)",
+    "add": "[EN] Add",
+    "saving": "[EN] Saving…",
+    "delete": "[EN] Remove",
+    "proposalStatus": {
+      "draft": "[EN] Draft",
+      "sent": "[EN] Sent",
+      "accepted": "[EN] Accepted",
+      "rejected": "[EN] Rejected",
+      "withdrawn": "[EN] Withdrawn"
+    },
+    "contractStatus": {
+      "draft": "[EN] Draft",
+      "active": "[EN] Active",
+      "completed": "[EN] Completed",
+      "cancelled": "[EN] Cancelled"
+    },
+    "outcome": {
+      "saved": "[EN] Saved.",
+      "needs_migration": "[EN] Not available right now.",
+      "invalid": "[EN] Please check the details.",
+      "auth": "[EN] Please sign in again.",
+      "not_authorized": "[EN] You can only manage your own records.",
+      "error": "[EN] Something went wrong. Please try again."
+    }
   }
 }

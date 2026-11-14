@@ -64,7 +64,11 @@ export function CommercialPanel({ data }: { data: CommercialData }) {
   const parseEur = (s: string) => Math.round(Number(s.replace(",", ".")) * 100);
   // An accepted proposal becomes a contract in one step, carrying its id
   // (contracts.proposal_id) — never retyped as an unconnected record.
-  const contracted = new Set(data.applied ? data.contracts.map((c) => c.proposalId).filter(Boolean) : []);
+  const contractedKnown = data.applied && data.contractedProposalIds !== null;
+  const contracted = new Set([
+    ...(data.applied ? data.contracts.map((c) => c.proposalId).filter(Boolean) : []),
+    ...(data.applied ? (data.contractedProposalIds ?? []) : []),
+  ]);
   const proposalTitle = new Map(data.applied ? data.proposals.map((p) => [p.id, p.title] as const) : []);
 
   return (
@@ -95,7 +99,7 @@ export function CommercialPanel({ data }: { data: CommercialData }) {
                       className="ml-auto rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" data-testid="proposal-status">
                       {PROPOSAL_STATUSES.map((s) => (<option key={s} value={s}>{t(`proposalStatus.${s}`)}</option>))}
                     </select>
-                    {p.status === "accepted" && !contracted.has(p.id) ? (
+                    {p.status === "accepted" && contractedKnown && !contracted.has(p.id) ? (
                       <Button type="button" size="sm" variant="secondary" disabled={pending}
                         onClick={() => run(() => createContractAction({ title: p.title, valueCents: p.amountCents, proposalId: p.id }))}
                         data-testid="proposal-to-contract">{t("contractFromProposal")}</Button>

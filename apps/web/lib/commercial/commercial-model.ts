@@ -34,7 +34,15 @@ export interface Contract {
 
 export type CommercialData =
   | { applied: false }
-  | { applied: true; proposals: Proposal[]; contracts: Contract[] };
+  | {
+      applied: true;
+      proposals: Proposal[];
+      contracts: Contract[];
+      /** Accepted proposals that already have a contract, read independently of
+       *  the contract list's limit. Null = that read failed: no "create
+       *  contract" step is offered rather than one that may duplicate. */
+      contractedProposalIds?: string[] | null;
+    };
 
 export function isProposalStatus(v: unknown): v is ProposalStatus {
   return typeof v === "string" && (PROPOSAL_STATUSES as readonly string[]).includes(v);

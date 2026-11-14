@@ -82,5 +82,21 @@ export async function getMyCommercial(): Promise<CommercialData> {
           endDate: r.end_date,
         }));
 
-  return { applied: true, proposals, contracts };
+  // Which ACCEPTED proposals already have a contract, read for those proposals
+  // only — never inferred from the contract list above, which stops at 200 and
+  // would let an older contract fall off and the "create contract" step
+  // reappear for a proposal that already has one.
+  const acceptedIds = proposals.filter((p) => p.status === "accepted").map((p) => p.id);
+  let contractedProposalIds: string[] | null = [];
+  if (acceptedIds.length > 0) {
+    const linked = await asAny(supabase)
+      .from("contracts")
+      .select("proposal_id")
+      .in("proposal_id", acceptedIds)
+      .limit(acceptedIds.length * 50);
+    contractedProposalIds = linked.error
+      ? null
+      : [...new Set(((linked.data ?? []) as { proposal_id: string | null }[]).map((r) => r.proposal_id).filter((x): x is string => !!x))];
+  }
+  return { applied: true, proposals, contracts, contractedProposalIds };
 }
