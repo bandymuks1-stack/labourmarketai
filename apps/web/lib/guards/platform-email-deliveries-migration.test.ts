@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -186,6 +186,25 @@ describe("every send goes through the one delivery control", () => {
     expect(block).toContain("void deliverCompanyRegistrationEmails({ companyId: data }).catch(() => {});");
     // …and nowhere else: an edit can never send either e-mail
     expect(src.match(/deliverCompanyRegistrationEmails\(/g)).toHaveLength(1);
+  });
+
+  it("no existing company is e-mailed on deploy: nothing enumerates companies or backfills events", () => {
+    // The two company e-mails are raised in exactly one place (the creation
+    // branch of saveCompanySetup, above). Nothing else in the app names those
+    // kinds, and neither the delivery core nor the store reads a list of
+    // organizations to create events from.
+    const walk = (dir: string): string[] =>
+      readdirSync(join(APP, dir), { withFileTypes: true }).flatMap((e) =>
+        e.isDirectory() ? (e.name === "node_modules" || e.name.startsWith(".") ? [] : walk(join(dir, e.name))) : /\.(ts|tsx)$/.test(e.name) && !/\.test\.tsx?$/.test(e.name) ? [join(dir, e.name)] : [],
+      );
+    const raisers = [...walk("lib"), ...walk("app")].filter((f) => /deliverCompanyRegistrationEmails\(|kind: "company_(welcome|registration_notice)"/.test(code(app(f))));
+    expect(raisers.sort()).toEqual(["lib/company/company-setup.ts", "lib/email/platform-email-delivery-store.ts"]);
+    const store = code(app("lib/email/platform-email-delivery-store.ts"));
+    // the store raises them only inside deliverCompanyRegistrationEmails, for the one company it is given
+    expect(store.match(/kind: "company_(welcome|registration_notice)"/g)).toHaveLength(2);
+    expect(store).not.toMatch(/from\("organizations"\)\s*\.select\([^)]*\)\s*\.(order|limit|range)\(/);
+    const sweep = code(app("lib/email/platform-email-delivery.ts"));
+    expect(sweep.slice(sweep.indexOf("export async function retryDueDeliveries"))).not.toContain("claimNew");
   });
 
   it("both no-signup paths raise the same alert and neither talks to the mail server itself", () => {

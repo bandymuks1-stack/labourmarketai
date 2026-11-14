@@ -4,6 +4,8 @@ import { randomUUID } from "node:crypto";
 import { connect as tlsConnect } from "node:tls";
 import type { Duplex } from "node:stream";
 
+import type { SendDiagnostics, SmtpStep } from "@/lib/email/delivery-failure";
+
 /**
  * SMTP transport for the ONE existing mailbox (owner decision 2026-10-19:
  * Hostinger SMTP, info@labourmarket.ai). No dependency, no new service:
@@ -47,9 +49,11 @@ export type SmtpMessage = {
 };
 
 export type SmtpSendResult =
-  | { status: "sent"; messageId: string }
+  | { status: "sent"; messageId: string; detail?: SendDiagnostics }
   | { status: "not_configured" }
-  | { status: "failed"; reason: string };
+  /** `detail` (codes only): the failed step, the reply / enhanced status code, whether the
+   *  message body had already been handed over, our Message-ID. Never reply text. */
+  | { status: "failed"; reason: string; detail?: SendDiagnostics };
 
 const TIMEOUT_MS = 20_000;
 
@@ -159,10 +163,20 @@ export async function sendSmtp(
   opts: { connect?: Connect; now?: Date } = {},
 ): Promise<SmtpSendResult> {
   if (!SAFE_ADDRESS.test(msg.to) || !SAFE_ADDRESS.test(addressOf(cfg.from))) {
-    return { status: "failed", reason: "invalid_address" };
+    return {
+      status: "failed",
+      reason: "invalid_address",
+      detail: { provider: "smtp", step: "connect", messageTransmitted: false },
+    };
   }
-  if (msg.replyTo !== undefined && !SAFE_ADDRESS.test(msg.replyTo)) return { status: "failed", reason: "invalid_reply_to" };
-  if (!extraHeadersSafe(msg.headers)) return { status: "failed", reason: "invalid_header" };
+  if (msg.replyTo !== undefined && !SAFE_ADDRESS.test(msg.replyTo)) return { status: "failed", reason: "invalid_reply_to", detail: { provider: "smtp", step: "connect", messageTransmitted: false } };
+  if (!extraHeadersSafe(msg.headers)) return { status: "failed", reason: "invalid_header", detail: { provider: "smtp", step: "connect", messageTransmitted: false } };
+  const started = Date.now();
+  // Which step is waiting for its reply, and the last reply's codes (never its text).
+  let step: SmtpStep = "greeting";
+  let replyCode: string | null = null;
+  let enhancedCode: string | null = null;
+  let transmitted = false;
   const domain = addressOf(cfg.from).split("@")[1];
   const messageId = `<${randomUUID()}@${domain}>`;
   const socket = (opts.connect ?? defaultConnect)(cfg);
@@ -205,11 +219,23 @@ export async function sendSmtp(
       else if (failure) resolve("");
       else waiters.push(resolve);
     });
-  const expect = async (code: string, step: string) => {
+  const expect = async (code: string, at: SmtpStep) => {
+    step = at;
     const line = await reply();
     if (failure) throw new Error(failure);
-    if (!line.startsWith(code)) throw new Error(`smtp_${step}_${line.slice(0, 3) || "none"}`);
+    replyCode = /^\d{3}/.test(line) ? line.slice(0, 3) : null;
+    enhancedCode = /^\d{3}[ -]([245]\.\d{1,3}\.\d{1,3})\b/.exec(line)?.[1] ?? null;
+    if (!line.startsWith(code)) throw new Error(`smtp_${at}_${line.slice(0, 3) || "none"}`);
   };
+  const detail = (): SendDiagnostics => ({
+    provider: "smtp",
+    step,
+    replyCode,
+    enhancedCode,
+    messageTransmitted: transmitted,
+    messageId,
+    durationMs: Date.now() - started,
+  });
   const send = (line: string) => socket.write(`${line}\r\n`);
 
   try {
@@ -225,11 +251,18 @@ export async function sendSmtp(
     send("DATA");
     await expect("354", "data");
     socket.write(`${buildMessage(cfg, msg, messageId, opts.now ?? new Date())}.\r\n`);
+    // From here on the server holds the whole message: a lost answer means UNKNOWN, not "not sent".
+    transmitted = true;
     await expect("250", "data_end");
     send("QUIT");
-    return { status: "sent", messageId };
+    return { status: "sent", messageId, detail: detail() };
   } catch (e) {
-    return { status: "failed", reason: e instanceof Error ? e.message : "smtp_error" };
+    // A transport fault before any reply leaves the reply codes of the PREVIOUS step: clear them.
+    if (e instanceof Error && !e.message.startsWith("smtp_")) {
+      replyCode = null;
+      enhancedCode = null;
+    }
+    return { status: "failed", reason: e instanceof Error ? e.message : "smtp_error", detail: detail() };
   } finally {
     clearTimeout(timer);
     socket.end?.();

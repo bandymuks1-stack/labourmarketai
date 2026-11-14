@@ -4245,7 +4245,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "Doorgaan met LinkedIn",
-      "continueWithFacebook": "Doorgaan met Facebook"
+      "continueWithFacebook": "Doorgaan met Facebook",
+      "inAppBrowser": "Je zit in de ingebouwde browser van een app, waar inloggen met Google vaak niet werkt. Open deze pagina in de browser van je telefoon (Safari of Chrome), of gebruik hieronder je e-mailadres en wachtwoord."
     },
     "legalNotice": {
       "signup": "Door een account aan te maken bevestig je dat je de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> hebt gelezen.",
@@ -4267,7 +4268,9 @@
         "cancelled": "Inloggen is geannuleerd. Er is niets met je account gebeurd.",
         "unknown": "Kon niet inloggen. Probeer het opnieuw.",
         "link_expired": "Deze bevestigingslink is verlopen of al gebruikt. Heb je je e-mailadres al bevestigd, log dan gewoon in. Vraag anders hieronder een nieuwe link aan.",
-        "confirmed_sign_in": "Je e-mailadres is bevestigd. De registratie is op een ander apparaat gestart; log hier in om verder te gaan."
+        "confirmed_sign_in": "Je e-mailadres is bevestigd. De registratie is op een ander apparaat gestart; log hier in om verder te gaan.",
+        "confirm_link_opened": "Deze bevestigingslink is geopend. Je e-mailadres is hoogstwaarschijnlijk al bevestigd, dus probeer in te loggen. Lukt dat niet, vraag dan hieronder een nieuwe link aan.",
+        "provider_error": "De inlogdienst kon deze aanmelding niet afronden, en opnieuw proberen loopt waarschijnlijk op hetzelfde uit. Log in op de manier waarop je je eerst hebt geregistreerd, of met je e-mailadres en wachtwoord."
       },
       "emailNotConfirmed": "Je e-mailadres is nog niet bevestigd. Open de bevestigingslink die we je stuurden, of vraag hieronder een nieuwe aan."
     },
@@ -5446,7 +5449,7 @@
     "how": "Hoe het werkt",
     "menuOpen": "Menu",
     "menuClose": "Menu sluiten",
-    "market": "De markt"
+    "market": "Arbeidsmarkt"
   },
   "livingMarketReview": {
     "tagline": "De levende arbeidsmarkt van Europa",
@@ -5567,7 +5570,6 @@
     "about": "Over ons",
     "contact": "Contact",
     "rights": "Alle rechten voorbehouden.",
-    "rexora": "Samen gebouwd: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai wordt geëxploiteerd en commercieel aangeboden door UAB “Nonstop Group”. De LabourMarket.ai-software en gerelateerde intellectuele eigendom zijn eigendom van Labour Market AI Sp. z o.o. en worden door UAB “Nonstop Group” onder licentie gebruikt.",
     "ipNotice": "Intellectuele-eigendomsrechten. Het platform wordt onder licentie geëxploiteerd door UAB “Nonstop Group”.",
     "legalNotice": "Juridische informatie"
@@ -6896,6 +6898,16 @@
         "into": "Deze regel is samengevoegd met",
         "canonical": "het behouden project",
         "includes": "{count, plural, one {Bevat # samengevoegde projectregel — de registraties staan hier.} other {Bevat # samengevoegde projectregels — de registraties staan hier.}}"
+      },
+      "teams": {
+        "title": "Ploegen op dit project",
+        "members": "{n, plural, one {# persoon} other {# personen}}",
+        "personTeam": "Ploeg: {team}",
+        "unnamed": "Ploeg zonder naam",
+        "unnamedMember": "Lid",
+        "noMembers": "Nu geen leden.",
+        "unavailable": "De ploegen konden niet worden geladen. Probeer het opnieuw.",
+        "manage": "Ploegen wijzigen"
       }
     },
     "workerView": {
@@ -8762,7 +8774,6 @@
     },
     "languagesTitle": "Talen",
     "languagesSelfStated": "Talen zoals opgegeven door de werker.",
-    "educationSelfStated": "Opleiding zoals opgegeven door de werknemer.",
     "certificatesTitle": "Certificaten en licenties",
     "declaredCertHint": "Zelf opgegeven",
     "documentSelfSuppliedHint": "Document aangeleverd door de werknemer",
@@ -8974,7 +8985,8 @@
         "none": "Nog geen volgende stap te tonen. Meer geregistreerd werk geeft hier meer houvast.",
         "unknown": "Kon nu niet worden gelezen."
       }
-    }
+    },
+    "educationSelfStated": "Opleiding zoals opgegeven door de werknemer."
   },
   "todayScreen": {
     "eyebrow": "Vandaag",
@@ -12944,6 +12956,7 @@
     "servicesTitle": "Wat deze persoon kan doen",
     "servicesEmpty": "Nog niets aangeboden",
     "servicesUnavailable": "Aangeboden diensten konden niet worden geladen",
+    "sharedAfterWork": "Diensten, werkfoto's en vastgelegd werk worden getoond zodra jullie samenwerken.",
     "serviceRemote": "Op afstand",
     "photoAlt": "Foto van uitgevoerd werk",
     "historyTitle": "Geïmporteerde geschiedenis",
@@ -15540,26 +15553,26 @@
   "landing": {
     "requestDoors": {
       "workerSearch": {
-        "title": "Zoektocht naar werknemers aanvragen",
-        "body": "Geef het beroep, het aantal mensen, het land en de startdatum door."
+        "title": "Aanvraag voor het zoeken van werknemers",
+        "body": "Geef het beroep, het aantal werknemers, het land en de startdatum op."
       },
       "b2b": {
-        "title": "B2B-aanvraag versturen",
+        "title": "Aanvraag zakelijke diensten (B2B)",
         "body": "Beschrijf het soort werk, de locatie, de omvang en de termijnen."
       },
       "project": {
-        "title": "Individueel project aanvragen",
-        "body": "Voor particulieren en bedrijven: beschrijf welk project of welke dienst je nodig hebt."
+        "title": "Aanvraag individueel project",
+        "body": "Voor particuliere en zakelijke opdrachtgevers: beschrijf welk project of welke dienst u nodig heeft."
       },
-      "title": "Stuur een aanvraag",
-      "promise": "Stuur je aanvraag – ons team bekijkt die en neemt contact met je op.",
-      "name": "Naam of bedrijf",
+      "title": "Behoefte doorgeven",
+      "promise": "Beschrijf welke werknemers, diensten of projectuitvoering u nodig heeft. De aanvraag wordt ter beoordeling doorgegeven aan het team van LabourMarket.ai.",
+      "name": "Voor- en achternaam of bedrijfsnaam",
       "email": "E-mail",
       "phone": "Telefoon",
       "country": "Land",
       "countryChoose": "Kies een land",
       "city": "Plaats",
-      "profession": "Beroep",
+      "profession": "Beroep of specialisatie",
       "workers": "Aantal werknemers",
       "start": "Startdatum",
       "details": "Aanvullende eisen",
@@ -15567,19 +15580,19 @@
       "place": "Locatie",
       "scope": "Omvang",
       "deadline": "Termijnen",
-      "need": "Welk project of welke dienst",
+      "need": "Welk project of welke dienst u nodig heeft",
       "customer": "Opdrachtgever",
       "customerPrivate": "Particulier",
       "customerBusiness": "Bedrijf",
       "optional": "optioneel",
       "send": "Aanvraag versturen",
       "sending": "Versturen…",
-      "receivedTitle": "We hebben je aanvraag ontvangen",
-      "receivedBody": "Je aanvraag is ontvangen. Ons team bekijkt die en neemt contact met je op via de opgegeven gegevens.",
-      "invalid": "Controleer de velden en probeer het opnieuw. Wat je hebt ingevuld staat nog in dit formulier.",
-      "limited": "Er zijn nu te veel aanvragen. Probeer het later opnieuw: wat je hebt ingevuld blijft staan.",
-      "unavailable": "Je aanvraag kon niet worden verstuurd en is niet ontvangen. Wat je hebt ingevuld blijft staan, probeer het opnieuw.",
-      "notice": "Door een aanvraag te versturen bevestig je dat je het <privacy>Privacybeleid</privacy> hebt gelezen."
+      "receivedTitle": "We hebben uw aanvraag ontvangen",
+      "receivedBody": "Uw aanvraag is ontvangen en doorgegeven aan het team van LabourMarket.ai ter beoordeling.",
+      "invalid": "Controleer de velden en probeer het opnieuw. Wat u heeft ingevuld, staat nog in het formulier.",
+      "limited": "Er komen op dit moment te veel aanvragen binnen. Probeer het later opnieuw – wat u heeft ingevuld, staat nog in het formulier.",
+      "unavailable": "De aanvraag kon niet worden verzonden en wij hebben deze niet ontvangen. Wat u heeft ingevuld, staat nog in het formulier – probeer het opnieuw.",
+      "notice": "Door een aanvraag te versturen bevestigt u dat u het <privacy>Privacybeleid</privacy> heeft gelezen."
     },
     "audienceValueEyebrow": "Waarde voor elke kant van werk",
     "audienceValueTitle": "Wat elke doelgroep krijgt",
@@ -15799,12 +15812,12 @@
       "sub": "Zoek werk, specialisten, werknemers, klanten of projectpartners, dichtbij en wereldwijd. Maak je professionele profiel, laat je ervaring zien, bied diensten aan en ontdek nieuwe kansen."
     },
     "entry": {
-      "label": "Schrijf wat je nodig hebt — in je eigen woorden",
-      "placeholder": "Bijv.: we zoeken 12 steigerbouwers in Rotterdam",
-      "submit": "Begrijpen",
+      "label": "Wat heeft u nodig?",
+      "placeholder": "Bijv. 5 magazijnmedewerkers nodig",
+      "submit": "Doorgaan",
       "examplesLabel": "Bijvoorbeeld:",
       "examples": {
-        "hire": "We zoeken 12 steigerbouwers in Rotterdam",
+        "hire": "We zoeken 5 magazijnmedewerkers in Vilnius",
         "work": "Ik zoek werk in Noorwegen",
         "internship": "Waar kan ik stage lopen?",
         "professional": "Ik ben accountant en zoek werk in Vilnius",
@@ -15812,52 +15825,52 @@
         "offerService": "Ik bied boekhoudkundige diensten aan",
         "offerCapacity": "Wij hebben 7 elektriciens vrij vanaf maandag",
         "brigade": "Ik zoek een ploeg voor het project",
-        "logWork": "Vandaag heb ik 8 uur op de Green Tower gewerkt",
+        "logWork": "Vandaag heb ik 8 uur op de werklocatie Green Tower gewerkt",
         "verifyWork": "Wie zou mijn ervaring kunnen bevestigen?"
       },
-      "understoodLabel": "Begrepen",
+      "understoodLabel": "Dit hebben we begrepen",
       "understood": {
-        "need-workers": "U heeft werknemers nodig. We noteren de behoefte — welke mensen, hoeveel, waar en vanaf wanneer — en zoeken de juiste.",
-        "find-workers": "U zoekt mensen voor werk. We laten zien wie past op beroep en plaats.",
-        "candidates": "U wilt de kandidaten voor uw behoefte zien.",
-        "find-work": "U zoekt werk. Op basis van uw beroep en plaats laten we passende kansen zien.",
-        "opportunities": "U zoekt kansen — werk, een stage of een andere weg. We laten zien wat bij u past.",
-        "need-service": "U heeft iemand nodig die een klus doet. We noteren precies wat nodig is en zoeken wie kan helpen.",
-        "offer-value": "U heeft iets aan te bieden. We noteren het aanbod zodat wie het nodig heeft het kan vinden.",
-        "create-project": "U wilt een project of locatie aanmaken — met plaats, data en mensen.",
+        "need-workers": "U zoekt werknemers. Geef het beroep, het aantal, de plaats en de geplande startdatum op.",
+        "find-workers": "U zoekt werknemers. Log in en beschrijf uw behoefte – kandidaten worden bij de betreffende behoefte getoond, als die er zijn.",
+        "candidates": "U wilt de kandidaten voor uw behoefte bekijken.",
+        "find-work": "U zoekt werk. We tonen mogelijkheden op basis van uw beroep en plaats.",
+        "opportunities": "U zoekt werk, een stage of andere professionele mogelijkheden.",
+        "need-service": "U heeft iemand nodig die een opdracht uitvoert. Na het inloggen ziet u wie die dienst aanbiedt.",
+        "offer-value": "U wilt diensten of uw deskundigheid aanbieden. U kunt op het platform een aanbod indienen.",
+        "create-project": "U wilt een project of werklocatie aanmaken met plaats, data en mensen.",
         "projects": "U wilt de projecten van uw bedrijf zien.",
-        "company-overview": "U wilt zien wat er in uw bedrijf gebeurt — mensen, projecten, behoeften.",
+        "company-overview": "U wilt zien wat er in uw bedrijf gebeurt: mensen, projecten, behoeften.",
         "create-organization": "U wilt een bedrijf of organisatie registreren.",
-        "cv": "Je wilt een cv-bestand uploaden. We lezen het en tonen wat we vonden voordat we iets opslaan.",
-        "log-work": "U wilt gedaan werk in het werkjournaal vastleggen.",
+        "cv": "U wilt een cv uploaden. Voordat we de daaruit gehaalde gegevens opslaan, tonen we ze ter controle.",
+        "log-work": "U wilt uitgevoerd werk in het werkjournaal vastleggen.",
         "skill-gap": "U wilt weten welke vaardigheden u mist.",
-        "documents": "U heeft het over documenten en certificaten — wat geldig is, wat verloopt, wat ontbreekt.",
+        "documents": "U heeft het over documenten en certificaten: wat geldig is, wat verloopt, wat ontbreekt.",
         "add-document": "U heeft een document of certificaat dat u wilt vastleggen.",
-        "learning-compass": "U wilt weten wat u hierna moet leren.",
-        "profile": "U wilt uw profiel aanvullen — een taal, een vaardigheid, ervaring.",
-        "who-available": "U wilt weten wie in uw team vrij is.",
+        "learning-compass": "U wilt weten wat u hierna kunt leren.",
+        "profile": "U wilt uw profiel aanvullen: een taal, een vaardigheid, ervaring.",
+        "who-available": "U wilt weten wie in uw team beschikbaar is.",
         "invite-candidate": "U wilt iemand uitnodigen voor uw team.",
-        "invite-client": "U wilt een klant uitnodigen — u werkt als bureau.",
-        "propose-candidate": "U wilt een kandidaat aan een klant voorstellen — u werkt als bureau.",
+        "invite-client": "U wilt een klant uitnodigen (u werkt als bureau).",
+        "propose-candidate": "U wilt een kandidaat aan een klant voorstellen (u werkt als bureau).",
         "client-demand": "U wilt zien wat uw klanten nodig hebben.",
-        "invite-student": "U vertegenwoordigt een onderwijsinstelling en wilt een student uitnodigen.",
-        "programmes": "U vertegenwoordigt een onderwijsinstelling — programma's, groepen, studenten.",
-        "offer-capacity": "Je hebt mensen of capaciteit vrij. We leggen het aanbod vast zodat wie het nodig heeft het vindt.",
-        "who-verifies-work": "Je vraagt wie werk kan bevestigen dat je al hebt gedaan. We laten zien naar wie je het stuurt.",
-        "cv-view": "Je wilt je cv zien — het cv dat het systeem al heeft. Er wordt niets geüpload of gewijzigd.",
-        "cv-choose": "Je noemt je cv. We vragen of we het tonen, een nieuw bestand aannemen of je profiel aanvullen."
+        "invite-student": "U vertegenwoordigt een onderwijsinstelling en wilt een leerling of student uitnodigen.",
+        "programmes": "U vertegenwoordigt een onderwijsinstelling: programma's, groepen, leerlingen.",
+        "offer-capacity": "U heeft werknemers of capaciteit beschikbaar. U kunt uw aanbod indienen.",
+        "who-verifies-work": "U vraagt wie uw uitgevoerde werk kan bevestigen. We laten zien bij wie u het kunt indienen.",
+        "cv-view": "U wilt uw cv bekijken – het cv dat al in het systeem staat. We uploaden en wijzigen niets.",
+        "cv-choose": "U heeft het over uw cv. We vragen of u het wilt bekijken, een nieuw cv wilt uploaden of uw profiel wilt aanvullen."
       },
       "family": {
         "work": "U heeft het over uw werk en uw loopbaan.",
-        "hire": "U spreekt als werkgever of bedrijf — over mensen, projecten of behoeften.",
-        "agency": "U spreekt als bureau — over klanten en kandidaten.",
+        "hire": "U spreekt als werkgever of bedrijf: over mensen, projecten of behoeften.",
+        "agency": "U spreekt als bureau: over klanten en kandidaten.",
         "student": "U heeft het over leren en de weg naar werk.",
         "education": "U vertegenwoordigt een onderwijsinstelling."
       },
-      "nextHint": "Om de behoefte te bewaren en erop te kunnen antwoorden is een account nodig. Uw zin reist met u mee.",
+      "nextHint": "Log in of maak een account aan om uw behoefte op te slaan. De zin die u heeft ingevoerd, blijft ook na het inloggen bewaard.",
       "signup": "Account aanmaken",
-      "login": "Ik heb een account — inloggen",
-      "unrecognised": "Dat begreep ik niet meteen. Wat zoekt u?",
+      "login": "Ik heb al een account",
+      "unrecognised": "We konden uw behoefte niet precies vaststellen. Kies een optie:",
       "chips": {
         "work": "Ik zoek werk",
         "hire": "Ik zoek werknemers"
@@ -15867,7 +15880,7 @@
       "moreExamples": "Meer voorbeelden",
       "browseJobs": "Vacatures bekijken",
       "exampleLabels": {
-        "hire": "Ik heb mensen nodig",
+        "hire": "Ik zoek werknemers",
         "work": "Ik zoek werk",
         "internship": "Waar stage lopen",
         "professional": "Ik heb een vak",
@@ -15882,7 +15895,7 @@
     "openJobs": {
       "eyebrow": "Vacatures",
       "title": "Echte vacatures, nu open.",
-      "sub": "Bekijken kan zonder account; log in om de werkgever, de plek en de sollicitatiewijze te zien.",
+      "sub": "Bekijken kan zonder account; log in om de werkgever, de plaats en de sollicitatiewijze te zien.",
       "all": "Alle vacatures"
     },
     "marketProof": {
@@ -15940,6 +15953,42 @@
         "goods": "Goederen"
       },
       "lasting": "Je ervaring en kansen blijven bereikbaar — als je van baan, project of land wisselt."
+    },
+    "v3": {
+      "lead": "Voor werkenden, werkgevers en dienstverleners in alle beroepen en sectoren. Registreren en de basisplaatsing van een behoefte zijn gratis.",
+      "moreChoices": "Meer opties",
+      "or": "of beschrijf het in uw eigen woorden",
+      "needFree": "U kunt zonder registratie een aanvraag indienen. Indienen is gratis; de voorwaarden en de prijs van de diensten worden apart afgesproken.",
+      "market": {
+        "title": "Vacatures op de markt",
+        "line": "{adverts} actieve vacatures uit externe bronnen. In de vacatures worden {employers} verschillende werkgeversnamen genoemd.",
+        "source": "De vacatures zijn verzameld uit openbare externe vacaturebronnen. Dit is niet het aantal werkgevers of klanten dat bij LabourMarket.ai is geregistreerd. Laatste update van de vacatures: {date}.",
+        "none": "Marktgegevens zijn op dit moment niet beschikbaar.",
+        "search": "Vacatures zoeken"
+      },
+      "adverts": {
+        "title": "Enkele actieve vacatures",
+        "sub": "U kunt de vacatures zonder account bekijken. Na het inloggen ziet u de werkgever, de plaats, de volledige beschrijving en hoe u kunt solliciteren."
+      },
+      "how": {
+        "title": "Hoe het werkt",
+        "s1": {
+          "title": "Vinden en afspreken",
+          "body": "Zoek werk, werknemers of diensten en beheer voorstellen en afspraken op het platform."
+        },
+        "s2": {
+          "title": "Werk vastleggen",
+          "body": "Uitgevoerd werk kunt u in het werkjournaal vastleggen."
+        },
+        "s3": {
+          "title": "Bevestigen",
+          "body": "Een leidinggevende van de werkgeversorganisatie bevestigt de registraties. Een opdrachtgever kan het voorgelegde werk accepteren – dat wordt apart vastgelegd. Bevestigd werk wordt bewijs van uw ervaring."
+        },
+        "s4": {
+          "title": "Uw gegevens en privacy",
+          "body": "De assistent doet voorstellen; u neemt de beslissingen. U bepaalt of werkgevers u kunnen vinden en of uw contactgegevens worden gedeeld. Werkregistraties zijn zichtbaar voor de organisatie waarvoor u werkt."
+        }
+      }
     }
   },
   "workspace": {
@@ -16546,7 +16595,7 @@
     },
     "language": {
       "translatedFrom": "Vertaald uit het {language}",
-      "originalIn": "Taal van de advertentie: {language}",
+      "originalIn": "Taal van de vacature: {language}",
       "showOriginal": "Origineel tonen",
       "hideOriginal": "Origineel verbergen",
       "machineNote": "Automatische vertaling. Getallen, valuta, data en namen zoals in het origineel; het origineel blijft het feit.",
@@ -20531,7 +20580,7 @@
   },
   "consent": {
     "banner": {
-      "text": "We meten paginagebruik en via welke campagne je kwam alleen als je dat toestaat.",
+      "text": "Meetgegevens die in uw browser zijn opgeslagen en campagne-informatie gebruiken we alleen met uw toestemming.",
       "accept": "Meting toestaan",
       "refuse": "Weigeren",
       "more": "Meer over cookies",
@@ -20590,58 +20639,61 @@
     }
   },
   "siteNav": {
+    "education": "Voor onderwijsinstellingen",
     "signUp": "Registreren",
-    "trigger": "Hoofdkeuzes",
-    "account": "Na inloggen",
+    "trigger": "Hoofddoelen",
+    "account": "Voor ingelogde gebruikers",
     "intents": {
       "work": {
         "title": "Ik zoek werk",
-        "description": "Vind vacatures en laat zien wat je kunt.",
+        "description": "Zoek werk en presenteer uw ervaring.",
         "short": "Werk zoeken"
       },
       "workers": {
-        "title": "Ik zoek medewerkers",
-        "description": "Beschrijf welk werk je nodig hebt.",
-        "short": "Mensen zoeken"
+        "title": "Ik zoek werknemers",
+        "description": "Geef aan welke werknemers u nodig heeft, waar en wanneer.",
+        "short": "Werknemers zoeken"
       },
       "services": {
         "title": "Ik bied diensten aan",
-        "description": "Publiceer wat je aanbiedt en beantwoord aanvragen.",
+        "description": "Presenteer uw diensten, vind opdrachten en beantwoord aanvragen.",
         "short": "Diensten aanbieden"
-      },
-      "orders": {
-        "title": "Ik zoek opdrachten en contracten",
-        "description": "Vind werkaanvragen en houd voorstellen bij elkaar.",
-        "short": "Opdrachten zoeken"
       },
       "partners": {
         "title": "Ik zoek partners",
-        "description": "Verbind je met de mensen en organisaties waarmee je werkt.",
+        "description": "Vind partners en onderhoud de samenwerking.",
         "short": "Partners zoeken"
       },
       "agencies": {
         "title": "Voor bureaus",
-        "description": "Beheer de mensen, klanten en aanbiedingen van je bureau.",
+        "description": "Beheer de klanten van uw bureau en kandidaatvoorstellen.",
         "short": "Voor bureaus"
+      },
+      "contractors": {
+        "short": "Dienstverleners zoeken",
+        "title": "Ik zoek diensten of opdrachtnemers",
+        "description": "Beschrijf welke dienst of opdrachtnemer u nodig heeft."
       }
     },
     "links": {
-      "jobs": "Vacaturebank",
+      "jobs": "Vacatures",
       "workOpportunities": "Werkmogelijkheden",
       "createCv": "Maak een gratis cv",
       "workAbroad": "Werken in het buitenland",
       "forWorkers": "Zo werkt het voor werknemers",
-      "companyNeed": "Beschrijf je behoefte",
+      "companyNeed": "Beschrijf uw behoefte",
       "forCompanies": "Zo werkt het voor bedrijven",
       "labourMarket": "Arbeidsmarkt per land",
-      "myServices": "Jouw diensten",
+      "myServices": "Uw diensten",
       "serviceRequests": "Dienstaanvragen",
       "marketListings": "Marktaanbod",
       "commercial": "Voorstellen en contracten",
-      "network": "Jouw netwerk",
+      "network": "Uw netwerk",
       "partnerWithUs": "Word partner",
       "forAgencies": "Zo werkt het voor bureaus",
-      "setUpAgency": "Richt je bureau in"
+      "setUpAgency": "Bureau registreren",
+      "b2bEnquiry": "Aanvraag zakelijke diensten (B2B)",
+      "projectEnquiry": "Aanvraag individueel project"
     },
     "assistant": "Vraag de assistent",
     "start": {
@@ -20651,13 +20703,13 @@
       "viewAll": "Alle vacatures"
     },
     "nav": {
-      "heading": "Wat wil je doen?",
+      "heading": "Wat wilt u doen?",
       "swipe": "Veeg",
       "close": "Sluiten",
-      "functions": "Functies",
+      "functions": "Acties",
       "professions": "Beroepen",
-      "opensNow": "Opent direct",
-      "signInWhenOpen": "Inloggen bij openen",
+      "opensNow": "Geen account nodig",
+      "signInWhenOpen": "Inloggen vereist",
       "allSectors": "Alle sectoren",
       "fullList": "Volledige lijst"
     },

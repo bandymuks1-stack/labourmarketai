@@ -35,22 +35,21 @@ const OUT = join(
  *  entry (frozen design contract 2026-09-05, P1): the field label, the
  *  understanding of a real sentence, the doors. */
 const MUST_APPEAR = [
-  "Напишите, что вам нужно",
-  "Понял",
-  "Вам нужны работники",
+  "Что вам нужно?",
+  "Вот что мы поняли",
+  "Вы ищете работников",
   "Создать учётную запись",
-  "У меня есть учётная запись",
+  "У меня уже есть учётная запись",
 ];
 
 /** Their English originals — none of these may appear on the Russian page. */
 const MUST_BE_GONE = [
-  "Write what you need",
-  "Understood",
-  "You need workers",
+  "What do you need?",
+  "Here is what we understood",
+  "You are looking for workers",
   "Create an account",
-  "I have an account",
-  "For example:",
-  "I did not understand at first",
+  "I already have an account",
+  "We could not identify your request",
 ];
 
 test.describe("Russian landing hero renders Russian (U-15)", () => {
@@ -64,17 +63,15 @@ test.describe("Russian landing hero renders Russian (U-15)", () => {
     // THE UNDERSTANDING MUST BE PRODUCED, NOT WAITED FOR.
     //
     // Three of MUST_APPEAR — the understanding label, the understanding line
-    // and the two doors — render only after a sentence has been read. The
-    // first example chip is a real Russian sentence routed LIVE through the
-    // deterministic router (P1), so driving it keeps the assertion strong:
-    // the strings must still be Russian, and the router must still read
-    // Russian.
-    const example = page.getByTestId("entry-example").first();
-    await expect(
-      example,
-      "the entry's example sentences should be present on /ru",
-    ).toBeVisible({ timeout: 30_000 });
-    await example.click();
+    // and the two doors — render only after a sentence has been read. Since
+    // landing V3 the entry has no example chips (owner, 2026-11-13), so a
+    // real Russian sentence is typed and sent through the deterministic
+    // router: the strings must still be Russian, and the router must still
+    // read Russian.
+    const input = page.getByTestId("entry-input");
+    await expect(input, "the sentence field should be present on /ru").toBeVisible({ timeout: 30_000 });
+    await input.fill("Нужны 5 работников склада");
+    await page.getByTestId("entry-submit").click();
     await expect(
       page.getByTestId("entry-understanding"),
       "reading the example should produce an understanding",
@@ -97,7 +94,7 @@ test.describe("Russian landing hero renders Russian (U-15)", () => {
 
     // A dropped ICU placeholder renders as a literal and is invisible to a
     // "does it look Russian" glance, so it is asserted explicitly.
-    for (const placeholder of ["{vacancies}", "{employers}", "{date}"]) {
+    for (const placeholder of ["{adverts}", "{employers}", "{date}"]) {
       expect(text, `the ${placeholder} placeholder leaked as a literal`).not.toContain(placeholder);
     }
   });

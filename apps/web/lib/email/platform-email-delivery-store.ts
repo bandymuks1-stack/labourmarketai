@@ -208,6 +208,11 @@ export const mailboxSender: Sender = async (email, audience) => {
   });
   if (r.status === "sent") return { status: "sent", messageId: r.messageId };
   if (r.status === "not_configured") return { status: "failed", reason: "not_configured", retryable: true };
+  // The message body had already been handed to the server when the connection
+  // failed (lib/email/delivery-failure.ts): it may have been delivered. Sending it
+  // again could be a second e-mail, so this attempt is terminal and visible as
+  // `outcome_unknown` — the same rule as a process that died mid-send.
+  if (r.detail?.messageTransmitted) return { status: "failed", reason: "outcome_unknown", retryable: false };
   return { status: "failed", reason: r.reason, retryable: !r.reason.startsWith("invalid_") };
 };
 

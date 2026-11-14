@@ -26,7 +26,8 @@ function fakeServer(script: Record<string, string>, log: string[]): () => Duplex
           if (data.endsWith("\r\n.\r\n")) {
             inData = false;
             log.push(`DATA-BODY ${data.length}`);
-            sock.push(script["."] ?? "250 queued\r\n");
+            if (script["."] === "CLOSE") sock.destroy();
+            else sock.push(script["."] ?? "250 queued\r\n");
           }
           return cb();
         }
@@ -75,14 +76,18 @@ describe("SMTP transport (Hostinger mailbox)", () => {
     const res = await sendSmtp(CFG, { to: "person@example.test", subject: "s", text: "t" }, {
       connect: fakeServer({ AUTH: "535 bad credentials\r\n" }, []),
     });
-    expect(res).toEqual({ status: "failed", reason: "smtp_auth_535" });
+    expect(res).toMatchObject({
+      status: "failed",
+      reason: "smtp_auth_535",
+      detail: { provider: "smtp", step: "auth", replyCode: "535", messageTransmitted: false },
+    });
   });
 
   it("a refused recipient is a failure", async () => {
     const res = await sendSmtp(CFG, { to: "nobody@example.test", subject: "s", text: "t" }, {
       connect: fakeServer({ AUTH: "235 ok\r\n", RCPT: "550 no such user\r\n" }, []),
     });
-    expect(res).toEqual({ status: "failed", reason: "smtp_rcpt_to_550" });
+    expect(res).toMatchObject({ status: "failed", reason: "smtp_rcpt_to_550" });
   });
 
   it("refuses header injection in the recipient before connecting", async () => {
@@ -93,7 +98,7 @@ describe("SMTP transport (Hostinger mailbox)", () => {
         return new PassThrough();
       },
     });
-    expect(res).toEqual({ status: "failed", reason: "invalid_address" });
+    expect(res).toMatchObject({ status: "failed", reason: "invalid_address" });
     expect(connected).toBe(false);
   });
 
@@ -138,9 +143,9 @@ describe("SMTP transport (Hostinger mailbox)", () => {
       connected = true;
       return new PassThrough();
     };
-    expect(await sendSmtp(CFG, { to: "p@example.test", subject: "s", text: "t", replyTo: "a@example.test\r\nBcc: x@example.test" }, { connect })).toEqual({ status: "failed", reason: "invalid_reply_to" });
-    expect(await sendSmtp(CFG, { to: "p@example.test", subject: "s", text: "t", headers: { "X-A": "v\r\nBcc: x@example.test" } }, { connect })).toEqual({ status: "failed", reason: "invalid_header" });
-    expect(await sendSmtp(CFG, { to: "p@example.test", subject: "s", text: "t", headers: { Bcc: "x@example.test" } }, { connect })).toEqual({ status: "failed", reason: "invalid_header" });
+    expect(await sendSmtp(CFG, { to: "p@example.test", subject: "s", text: "t", replyTo: "a@example.test\r\nBcc: x@example.test" }, { connect })).toMatchObject({ status: "failed", reason: "invalid_reply_to", detail: { messageTransmitted: false } });
+    expect(await sendSmtp(CFG, { to: "p@example.test", subject: "s", text: "t", headers: { "X-A": "v\r\nBcc: x@example.test" } }, { connect })).toMatchObject({ status: "failed", reason: "invalid_header", detail: { messageTransmitted: false } });
+    expect(await sendSmtp(CFG, { to: "p@example.test", subject: "s", text: "t", headers: { Bcc: "x@example.test" } }, { connect })).toMatchObject({ status: "failed", reason: "invalid_header", detail: { messageTransmitted: false } });
     expect(connected).toBe(false);
   });
 
@@ -150,5 +155,60 @@ describe("SMTP transport (Hostinger mailbox)", () => {
       connect: fakeServer({ EHLO: "250-hello\r\n250 AUTH PLAIN\r\n", AUTH: "235 ok\r\n", DATA: "354 go\r\n", QUIT: "221 bye\r\n" }, log),
     });
     expect(res.status).toBe("sent");
+  });
+
+  it("keeps the enhanced status code of a refusal — never the reply text or the address", async () => {
+    const res = await sendSmtp(CFG, { to: "nobody@example.test", subject: "s", text: "t" }, {
+      connect: fakeServer({ AUTH: "235 ok\r\n", RCPT: "550 5.1.1 <nobody@example.test>: Recipient address rejected\r\n" }, []),
+    });
+    expect(res).toMatchObject({
+      status: "failed",
+      reason: "smtp_rcpt_to_550",
+      detail: { step: "rcpt_to", replyCode: "550", enhancedCode: "5.1.1", messageTransmitted: false },
+    });
+    expect(JSON.stringify(res)).not.toContain("nobody@");
+    expect(JSON.stringify(res)).not.toContain("rejected");
+    if (res.status === "failed") expect(res.detail?.messageId).toMatch(/^<[0-9a-f-]{36}@labourmarket\.ai>$/);
+  });
+
+  it("a connection lost AFTER the message body was handed over is marked transmitted (outcome unknown)", async () => {
+    const res = await sendSmtp(CFG, { to: "person@example.test", subject: "s", text: "t" }, {
+      connect: fakeServer({ AUTH: "235 ok\r\n", DATA: "354 go\r\n", ".": "CLOSE" }, []),
+    });
+    expect(res).toMatchObject({
+      status: "failed",
+      reason: "connection_closed",
+      detail: { step: "data_end", replyCode: null, messageTransmitted: true },
+    });
+  });
+
+  it("a connection lost BEFORE the body is marked not transmitted (safe to retry)", async () => {
+    const res = await sendSmtp(CFG, { to: "person@example.test", subject: "s", text: "t" }, {
+      connect: () => {
+        const d = new Duplex({
+          read() {},
+          write(_c, _e, cb) {
+            cb();
+          },
+        });
+        setTimeout(() => d.destroy(), 1);
+        return d;
+      },
+    });
+    expect(res).toMatchObject({
+      status: "failed",
+      reason: "connection_closed",
+      detail: { step: "greeting", messageTransmitted: false },
+    });
+  });
+
+  it("a sent message carries its diagnostics (step data_end, 250)", async () => {
+    const res = await sendSmtp(CFG, { to: "person@example.test", subject: "s", text: "t" }, {
+      connect: fakeServer({ AUTH: "235 ok\r\n", DATA: "354 go\r\n", ".": "250 2.0.0 queued\r\n" }, []),
+    });
+    expect(res).toMatchObject({
+      status: "sent",
+      detail: { step: "data_end", replyCode: "250", enhancedCode: "2.0.0", messageTransmitted: true },
+    });
   });
 });

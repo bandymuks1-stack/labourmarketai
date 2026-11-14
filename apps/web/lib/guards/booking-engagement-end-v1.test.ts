@@ -1786,6 +1786,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-10: partner registration Slice 1, company takeover invitation + two-operator decision + link.
       // RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261110190000_organization_claim_invitation_v1.sql",
+      // 2026-11-13: owner P0 invitation delivery reliability, codes-only send diagnostics +
+      // retry / dead-letter / bounce fields. RED draft #3318, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261113190000_invitation_delivery_attempts_v1.sql",
       // 2026-11-13: platform e-mail delivery record + who/when on an intake status (service_role-only
       // GRANT/REVOKE). RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261113220000_platform_email_deliveries_v1.sql",

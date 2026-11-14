@@ -308,6 +308,13 @@ describe("the mailbox sender", () => {
     expect(await mailboxSender(email, "internal")).toEqual({ status: "failed", reason: "invalid_address", retryable: false });
   });
 
+  it("a connection lost after the body was handed over is NOT retried (it may have arrived)", async () => {
+    sendSmtp.mockResolvedValue({ status: "failed", reason: "connection_closed", detail: { provider: "smtp", step: "data_end", replyCode: null, messageTransmitted: true } });
+    expect(await mailboxSender(email, "internal")).toEqual({ status: "failed", reason: "outcome_unknown", retryable: false });
+    sendSmtp.mockResolvedValue({ status: "failed", reason: "connection_closed", detail: { provider: "smtp", step: "greeting", messageTransmitted: false } });
+    expect(await mailboxSender(email, "internal")).toEqual({ status: "failed", reason: "connection_closed", retryable: true });
+  });
+
   it("a synthetic QA plus-address is never sent to", async () => {
     expect(await mailboxSender({ ...email, to: "qa.walk+run1@labourmarket.ai" }, "company")).toEqual({ status: "suppressed", reason: "synthetic_address" });
     expect(sendSmtp).not.toHaveBeenCalled();

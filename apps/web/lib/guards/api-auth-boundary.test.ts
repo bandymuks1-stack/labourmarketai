@@ -86,6 +86,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron) once payments are on — absent from it while they are off; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user - 401 while unset, so never an open trigger. It only READS Stripe and applies through the canonical subscription-apply primitive; it never creates, changes, cancels or refunds a payment. Answers counts and a reason code only, no ids.",
   },
+  "cron/invitation-delivery-retry/route.ts": {
+    class: "public",
+    why: "Called only by the VPS (ops/vps/lm-invitation-delivery-retry.sh, scheduled solely after the owner installs /etc/cron.d/labourmarket-invitation-delivery); nginx 404s /api/cron/* from the internet. Identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. POST only; health (default) sends nothing; retry re-sends at most 10 partner referrals whose own send was authorised, whose LAST failure was a confirmed temporary one and whose link was never opened, through the service-role-only reissue under the address lock. Answers counts, reason codes and alert codes only, no ids, no addresses.",
+  },
   "cron/referral-reprocess/route.ts": {
     class: "public",
     why: "Run BY HAND by the owner on the VPS (ops/vps/lm-referral-reprocess.sh) — never in the cron bundle; nginx 404s /api/cron/* from the internet. Identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. POST only; dry_run by default, control = exactly one person, batch = at most 20. Every send goes through the ledgered provider path and the service-role-only reissue function re-checks consent, expiry, account and delivery. Answers counts and reason codes only, no ids, no addresses.",
