@@ -17836,7 +17836,14 @@
     "approve": "Toestaan",
     "deny": "Weigeren",
     "errorMissingId": "Het autorisatieverzoek ontbreekt. Ga terug naar de applicatie en probeer het opnieuw.",
-    "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Het is mogelijk verlopen (verzoeken blijven enkele minuten geldig) of al gebruikt. Ga terug naar de toepassing en verbind opnieuw."
+    "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Het is mogelijk verlopen (verzoeken blijven enkele minuten geldig) of al gebruikt. Ga terug naar de toepassing en verbind opnieuw.",
+    "scope_openid": "Bevestigen dat jij het bent (je account-ID)",
+    "scope_email": "Je e-mailadres zien",
+    "scope_profile": "Je naam en profielfoto zien",
+    "scope_phone": "Je telefoonnummer zien",
+    "scope_offline_access": "Blijven werken als je haar niet gebruikt, tot je de verbinding verbreekt",
+    "scopeOther": "Ander recht: {scope}",
+    "revokeWhere": "Je kunt de verbinding op elk moment verbreken via <link>Account → Verbonden apps</link>."
   },
   "capabilities": {
     "interestChooseDemand": "Kies de vraag waarin je geïnteresseerd bent: {options}.",

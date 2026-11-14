@@ -17836,7 +17836,14 @@
     "approve": "Zezwól",
     "deny": "Odmów",
     "errorMissingId": "Brak żądania autoryzacji. Wróć do aplikacji i spróbuj ponownie.",
-    "errorUnresolved": "Nie udało się rozwiązać żądania autoryzacji. Mogło wygasnąć (żądania są ważne kilka minut) lub zostało już użyte. Wróć do aplikacji i połącz się ponownie."
+    "errorUnresolved": "Nie udało się rozwiązać żądania autoryzacji. Mogło wygasnąć (żądania są ważne kilka minut) lub zostało już użyte. Wróć do aplikacji i połącz się ponownie.",
+    "scope_openid": "Potwierdzić, że to Ty (identyfikator Twojego konta)",
+    "scope_email": "Widzieć Twój adres e-mail",
+    "scope_profile": "Widzieć Twoje imię i zdjęcie profilowe",
+    "scope_phone": "Widzieć Twój numer telefonu",
+    "scope_offline_access": "Działać także wtedy, gdy z niej nie korzystasz, dopóki jej nie odłączysz",
+    "scopeOther": "Inne uprawnienie: {scope}",
+    "revokeWhere": "Możesz ją odłączyć w dowolnym momencie: <link>Konto → Połączone aplikacje</link>."
   },
   "capabilities": {
     "interestChooseDemand": "Wybierz zapotrzebowanie, którym jesteś zainteresowany: {options}.",

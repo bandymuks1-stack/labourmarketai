@@ -17836,7 +17836,14 @@
     "approve": "Erlauben",
     "deny": "Ablehnen",
     "errorMissingId": "Die Autorisierungsanfrage fehlt. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut.",
-    "errorUnresolved": "Die Autorisierungsanfrage konnte nicht aufgelöst werden. Sie ist möglicherweise abgelaufen (Anfragen gelten einige Minuten) oder wurde bereits verwendet. Gehen Sie zurück zur Anwendung und verbinden Sie sich erneut."
+    "errorUnresolved": "Die Autorisierungsanfrage konnte nicht aufgelöst werden. Sie ist möglicherweise abgelaufen (Anfragen gelten einige Minuten) oder wurde bereits verwendet. Gehen Sie zurück zur Anwendung und verbinden Sie sich erneut.",
+    "scope_openid": "Bestätigen, dass Sie es sind (Ihre Konto-ID)",
+    "scope_email": "Ihre E-Mail-Adresse sehen",
+    "scope_profile": "Ihren Namen und Ihr Profilbild sehen",
+    "scope_phone": "Ihre Telefonnummer sehen",
+    "scope_offline_access": "Weiterarbeiten, wenn Sie sie nicht nutzen, bis Sie sie trennen",
+    "scopeOther": "Weitere Berechtigung: {scope}",
+    "revokeWhere": "Sie können die Verbindung jederzeit trennen unter <link>Konto → Verbundene Apps</link>."
   },
   "capabilities": {
     "interestChooseDemand": "Wählen Sie den Bedarf, der Sie interessiert: {options}.",
