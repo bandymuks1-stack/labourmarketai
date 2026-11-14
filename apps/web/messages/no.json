@@ -129,7 +129,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "[EN] Continue with LinkedIn",
-      "continueWithFacebook": "[EN] Continue with Facebook"
+      "continueWithFacebook": "[EN] Continue with Facebook",
+      "inAppBrowser": "Du er i den innebygde nettleseren til en app, der innlogging med Google ofte ikke virker. Åpne siden i telefonens nettleser (Safari eller Chrome), eller bruk e-post og passord nedenfor."
     },
     "callback": {
       "error_body": "[EN] This link is invalid or expired. Please try again.",
@@ -314,7 +315,9 @@
       "oauth": {
         "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
         "link_expired": "Denne bekreftelseslenken er utløpt eller allerede brukt. Har du allerede bekreftet e-posten, kan du bare logge inn. Ellers kan du be om en ny lenke nedenfor.",
-        "confirmed_sign_in": "E-postadressen din er bekreftet. Registreringen ble startet på en annen enhet, så logg inn her for å fortsette."
+        "confirmed_sign_in": "E-postadressen din er bekreftet. Registreringen ble startet på en annen enhet, så logg inn her for å fortsette.",
+        "confirm_link_opened": "Denne bekreftelseslenken er åpnet. E-postadressen din er mest sannsynlig allerede bekreftet, så prøv å logge inn. Går ikke det, kan du be om en ny lenke nedenfor.",
+        "provider_error": "Innloggingstjenesten kunne ikke fullføre denne innloggingen, og et nytt forsøk ender trolig likt. Logg inn på den måten du først registrerte deg med, eller med e-post og passord."
       },
       "emailNotConfirmed": "E-postadressen din er ikke bekreftet ennå. Åpne bekreftelseslenken vi sendte deg, eller be om en ny nedenfor."
     },
@@ -417,6 +420,7 @@
       "country_search_empty": "Fant ingen land. Prøv et annet navn.",
       "error_country_required": "Vennligst velg et land.",
       "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
+      "role_step_hint": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Hva er yrket ditt eller arbeidserfaringen din?",
       "profession_placeholder": "Skriv et yrke eller arbeidsområde",
       "profession_add": "Legg til",
@@ -732,7 +736,6 @@
     "legalGroup": "[EN] Legal",
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
-    "rexora": "Bygget sammen: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
@@ -890,7 +893,8 @@
     "themeToLight": "Lyst tema",
     "how": "Slik fungerer det",
     "menuOpen": "Meny",
-    "menuClose": "Lukk meny"
+    "menuClose": "Lukk meny",
+    "market": "Arbeidsmarked"
   },
   "pages": {
     "agencies": {
@@ -2086,6 +2090,16 @@
         "into": "Raden er slått sammen med",
         "canonical": "det beholdte prosjektet",
         "includes": "{count, plural, one {Omfatter # sammenslått prosjektrad — postene vises her.} other {Omfatter # sammenslåtte prosjektrader — postene vises her.}}"
+      },
+      "teams": {
+        "title": "Team på dette prosjektet",
+        "members": "{n, plural, one {# person} other {# personer}}",
+        "personTeam": "Team: {team}",
+        "unnamed": "Team uten navn",
+        "unnamedMember": "Medlem",
+        "noMembers": "Ingen medlemmer akkurat nå.",
+        "unavailable": "Teamene kunne ikke lastes inn. Prøv igjen.",
+        "manage": "Endre team"
       }
     },
     "workerView": {
@@ -2973,6 +2987,7 @@
     "servicesTitle": "Hva personen kan",
     "servicesEmpty": "Ingenting tilbudt ennå",
     "servicesUnavailable": "Kunne ikke laste tilbudte tjenester",
+    "sharedAfterWork": "Tjenester, arbeidsbilder og registrert arbeid vises når dere jobber sammen.",
     "serviceRemote": "Eksternt",
     "photoAlt": "Bilde av utført arbeid",
     "historyTitle": "Importert historikk",
@@ -4831,6 +4846,42 @@
         "goods": "Varer"
       },
       "lasting": "Erfaringen og mulighetene dine forblir tilgjengelige — når du bytter jobb, prosjekt eller land."
+    },
+    "v3": {
+      "lead": "For arbeidstakere, arbeidsgivere og tjenesteleverandører i alle yrker og bransjer. Registrering og grunnleggende publisering av et behov er gratis.",
+      "moreChoices": "Flere valg",
+      "or": "eller beskriv det med egne ord",
+      "needFree": "Du kan sende en forespørsel uten å registrere deg. Det er gratis å sende den; vilkår og pris for tjenestene avtales separat.",
+      "market": {
+        "title": "Stillingsannonser i markedet",
+        "line": "{adverts} aktive stillingsannonser fra eksterne kilder. Annonsene oppgir {employers} ulike arbeidsgivernavn.",
+        "source": "Annonsene er samlet inn fra offentlige eksterne stillingskilder. Dette er ikke antallet arbeidsgivere eller kunder som er registrert hos LabourMarket.ai. Annonsene ble sist oppdatert: {date}.",
+        "none": "Markedsdata er ikke tilgjengelige for øyeblikket.",
+        "search": "Søk i stillingsannonser"
+      },
+      "adverts": {
+        "title": "Noen aktive annonser",
+        "sub": "Du kan se annonsene uten konto. Logg inn for å se arbeidsgiveren, stedet, hele beskrivelsen og hvordan du søker."
+      },
+      "how": {
+        "title": "Slik fungerer det",
+        "s1": {
+          "title": "Finn og avtal",
+          "body": "Finn arbeid, arbeidstakere eller tjenester, og administrer tilbud og avtaler på plattformen."
+        },
+        "s2": {
+          "title": "Registrer arbeidet",
+          "body": "Du kan registrere utført arbeid i arbeidsjournalen."
+        },
+        "s3": {
+          "title": "Bekreft",
+          "body": "En leder i arbeidsgiverens organisasjon bekrefter registreringene. En oppdragsgiver kan godkjenne arbeid som er sendt inn til oppdragsgiveren; dette registreres separat. Bekreftet arbeid blir dokumentasjon på erfaringen din."
+        },
+        "s4": {
+          "title": "Deres data og personvern",
+          "body": "Assistenten kommer med forslag; dere tar avgjørelsene. Dere bestemmer om arbeidsgivere kan finne dere, og om kontaktopplysningene deles. Arbeidsoppføringer er synlige for organisasjonen dere arbeider for."
+        }
+      }
     }
   },
   "workspace": {
@@ -5338,7 +5389,7 @@
     },
     "language": {
       "translatedFrom": "[EN] Translated from {language}",
-      "originalIn": "[EN] Advertisement language: {language}",
+      "originalIn": "Annonsens språk: {language}",
       "showOriginal": "[EN] Show original",
       "hideOriginal": "[EN] Hide original",
       "machineNote": "[EN] Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
@@ -7932,7 +7983,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Vi måler sidebruk, og hvilken kampanje som brakte deg hit, bare hvis du tillater det.",
+      "text": "Måledata som er lagret i nettleseren deres, og kampanjeinformasjon bruker vi bare med deres samtykke.",
       "accept": "Tillat måling",
       "refuse": "Avslå",
       "more": "Mer om informasjonskapsler",
@@ -7948,39 +7999,40 @@
     }
   },
   "siteNav": {
+    "education": "For utdanningsinstitusjoner",
     "signUp": "Registrer deg",
-    "trigger": "Hovedvalg",
-    "account": "Etter innlogging",
+    "trigger": "Hovedmål",
+    "account": "For innloggede brukere",
     "intents": {
       "work": {
         "title": "Jeg søker arbeid",
-        "description": "Finn jobber og vis hva du kan.",
+        "description": "Søk arbeid og presenter erfaringen din.",
         "short": "Finn arbeid"
       },
       "workers": {
         "title": "Jeg søker arbeidstakere",
-        "description": "Beskriv hvilket arbeid du trenger.",
+        "description": "Oppgi hvilke arbeidstakere du trenger, hvor og når.",
         "short": "Finn arbeidstakere"
       },
       "services": {
         "title": "Jeg tilbyr tjenester",
-        "description": "Publiser tilbudet ditt og svar på forespørsler.",
+        "description": "Presenter tjenestene dine, finn oppdrag og svar på forespørsler.",
         "short": "Tilby tjenester"
-      },
-      "orders": {
-        "title": "Jeg søker oppdrag og kontrakter",
-        "description": "Finn arbeidsforespørsler og hold tilbud samlet.",
-        "short": "Finn oppdrag"
       },
       "partners": {
         "title": "Jeg søker partnere",
-        "description": "Knytt deg til menneskene og organisasjonene du jobber med.",
+        "description": "Finn partnere og hold samarbeidet ved like.",
         "short": "Finn partnere"
       },
       "agencies": {
         "title": "For byråer",
-        "description": "Styr byråets folk, kunder og tilbud.",
+        "description": "Administrer byråets kunder og kandidattilbud.",
         "short": "For byråer"
+      },
+      "contractors": {
+        "short": "Jeg søker tjenester eller utførende",
+        "title": "Jeg søker tjenester eller utførende",
+        "description": "Beskriv hvilken tjeneste eller utførende du trenger."
       }
     },
     "links": {
@@ -7999,11 +8051,13 @@
       "network": "Ditt nettverk",
       "partnerWithUs": "Bli partner",
       "forAgencies": "Slik fungerer det for byråer",
-      "setUpAgency": "Opprett byrået ditt"
+      "setUpAgency": "Registrer byrået ditt",
+      "b2bEnquiry": "Forespørsel om bedriftstjenester (B2B)",
+      "projectEnquiry": "Forespørsel om individuelt prosjekt"
     },
     "assistant": "Spør assistenten",
     "start": {
-      "searchLabel": "Søk jobber",
+      "searchLabel": "Søk i stillingsannonser",
       "searchPlaceholder": "Stillingstittel eller søkeord",
       "searchSubmit": "Søk",
       "viewAll": "Alle jobber"
@@ -8012,10 +8066,10 @@
       "heading": "Hva vil du gjøre?",
       "swipe": "Sveip",
       "close": "Lukk",
-      "functions": "Funksjoner",
+      "functions": "Handlinger",
       "professions": "Yrker",
-      "opensNow": "Åpnes med en gang",
-      "signInWhenOpen": "Logg inn ved åpning",
+      "opensNow": "Krever ingen konto",
+      "signInWhenOpen": "Krever innlogging",
       "allSectors": "Alle bransjer",
       "fullList": "Full liste"
     },

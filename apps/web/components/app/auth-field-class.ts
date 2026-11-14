@@ -16,6 +16,10 @@
  * account menu and the feedback trigger — this adds no new convention. The
  * padding is unchanged, so the visual design is untouched: the minimum only
  * takes effect where the box was already too short.
+ *
+ * FOCUS IS VISIBLE (2026-11-13): the field removed the browser outline and
+ * showed focus by border colour alone; it now also carries a ring, as the
+ * shared buttons do.
  */
 export const AUTH_INPUT_CLASS =
-  "w-full min-h-[2.75rem] rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue aria-[invalid=true]:border-state-danger";
+  "w-full min-h-[2.75rem] rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/60 aria-[invalid=true]:border-state-danger";

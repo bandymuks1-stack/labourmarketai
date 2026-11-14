@@ -29,7 +29,7 @@ files or a decision first.
 | 4 | Sign-up → onboarding | Sign-up is a light page; the next screen (onboarding) and the app are dark, with no choice made by the user. It reads as two different products. | M | Open — needs a decision: which theme a new account starts in |
 | 5 | Company workspace pages, phone (`/dashboard/company`, people, projects) | Four layers stand above the content: header, workspace + menu row, three wrapped rows of section chips, a "back" row and an eyebrow. The page title starts about 60% down a 844 px screen. | M | Open |
 | 6 | Forms on phones: candidate / provider drafts, proposals and contracts, team creation, project creation, company setup, worker invitation | Fields were 30–38 px high with 14 px text: hard to hit, and phones zoom the page on focus. | S | **Fixed in this change** — 44 px and 16 px below 640 px; unchanged on wider screens |
-| 7 | Onboarding step 2, all roles | "Atgal" (back) was a 16 px high text button under the form. | S | **Fixed in this change** — a 44 px target |
+| 7 | Onboarding step 2, all roles | "Atgal" (back) was a 16 px high text button under the form. | S | **Fixed on `main` by #3316** (44 px, in the new fixed action bar); this change no longer touches it |
 | 8 | Second header row, phone | The right-hand control is the navigation menu, but its label is sometimes "Meniu" and sometimes the current page's name; the workspace name on the left is cut ("Bandomoji em…"). | M | In #3270's files (`conversation-header.tsx`). **For Lane A2** |
 | 9 | Account settings, all roles | Notification choices are bare 16 px checkboxes in a grid of 14+ controls. | S–M | Open |
 | 10 | CV page, phone | Template chips are 26 px high; the back link 20 px. | S | Open |
@@ -43,12 +43,12 @@ Also seen on `main` (not in the V3 branch): the cookie notice still reads "tau l
 
 ## What this change does
 
-Items 6 and 7 only, inside existing components, phone widths only:
+Item 6 only (item 7 is fixed on `main`), inside existing components, phone widths only:
 
 - `candidate-drafts-manager.tsx`, `commercial-panel.tsx`, `team-brigades-panel.tsx`,
   `project-assignment-manager.tsx`, `company-setup-form.tsx`, `company-workers-section.tsx`:
   text fields get `max-sm:min-h-11 max-sm:text-base`.
-- `onboarding-wizard.tsx`: the back button becomes a 44 px target.
+- `onboarding-wizard.tsx`: not changed any more — #3316 on `main` already made the back button a 44 px target.
 
 Measured again after the change on the same screens: no field under 40 px remains on the
 candidate drafts form, the onboarding step, the proposal and contract forms' text fields or
@@ -58,7 +58,7 @@ and the search field on the commercial page, the file chooser on the people page
 ## Files in this folder
 
 - `employer-390-candidate-form-before-after.png`, `agency-390-commercial-before-after.png`,
-  `employer-390-onboarding-before-after.png` — left: before, right: after.
+  `employer-390-onboarding-before-after.png` — left: before, right: after (the onboarding image shows this change before #3316 reached `main`).
 - `before-{worker,employer,agency}-{390,1440}-10-dashboard.png` — the three homes as walked
   (items 1, 2, 8), and `before-employer-390-12-dashboard_company.png` (item 5).
 

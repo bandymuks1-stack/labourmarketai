@@ -133,7 +133,8 @@ describe("email adapter — provider-neutral, truthful, server-only", () => {
   });
 
   it("returns 'sent' ONLY on a provider 2xx acknowledgement", () => {
-    expect(src).toMatch(/if \(res\.ok\) return \{ status: "sent" \}/);
+    // 2026-11-13: the ack may carry codes-only diagnostics (the HTTP status), still ONLY on res.ok.
+    expect(src).toMatch(/if \(res\.ok\) return \{ status: "sent"(, detail: http\(res\.status\))? \}/);
     expect(src).toMatch(/not_configured/);
     expect(src).toMatch(/transport_error/);
   });

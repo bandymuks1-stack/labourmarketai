@@ -4220,7 +4220,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "Tęsti su LinkedIn",
-      "continueWithFacebook": "Tęsti su Facebook"
+      "continueWithFacebook": "Tęsti su Facebook",
+      "inAppBrowser": "Esi programėlės vidinėje naršyklėje, kurioje prisijungimas per „Google“ dažnai neveikia. Atidaryk šį puslapį telefono naršyklėje („Safari“ arba „Chrome“) arba žemiau naudok el. paštą ir slaptažodį."
     },
     "legalNotice": {
       "signup": "Kuriant paskyrą patvirtini, kad susipažinai su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
@@ -4242,7 +4243,9 @@
         "cancelled": "Prisijungimas atšauktas. Su tavo paskyra nieko neįvyko.",
         "unknown": "Prisijungti nepavyko. Pabandyk dar kartą.",
         "link_expired": "Ši patvirtinimo nuoroda nebegalioja arba jau buvo panaudota. Jei el. paštą jau patvirtinai, tiesiog prisijunk. Kitu atveju paprašyk naujos nuorodos žemiau.",
-        "confirmed_sign_in": "Tavo el. paštas patvirtintas. Registracija buvo pradėta kitame įrenginyje, todėl čia prisijunk, kad tęstum."
+        "confirmed_sign_in": "Tavo el. paštas patvirtintas. Registracija buvo pradėta kitame įrenginyje, todėl čia prisijunk, kad tęstum.",
+        "confirm_link_opened": "Ši patvirtinimo nuoroda atidaryta. Tavo el. paštas greičiausiai jau patvirtintas, todėl pabandyk prisijungti. Jei nepavyks, paprašyk naujos nuorodos žemiau.",
+        "provider_error": "Prisijungimo paslauga negalėjo užbaigti šio prisijungimo, ir pakartojus greičiausiai bus tas pats. Prisijunk tuo būdu, kuriuo registravaisi pirmą kartą, arba el. paštu ir slaptažodžiu."
       },
       "emailNotConfirmed": "Tavo el. paštas dar nepatvirtintas. Atidaryk atsiųstą patvirtinimo nuorodą arba paprašyk naujos žemiau."
     },
@@ -4434,6 +4437,7 @@
       "country_search_empty": "Šalies nerasta. Pabandyk kitą pavadinimą.",
       "error_country_required": "Pasirink šalį.",
       "error_role_required": "Pirmiausia pasirink, kuo nori naudotis — tada užpildysi profilį.",
+      "role_step_hint": "Pirmiausia pasirink, kuo nori naudotis — tada užpildysi profilį.",
       "profession_label": "Kokia tavo profesija ar darbo patirtis?",
       "profession_placeholder": "Įrašyk profesiją ar darbo sritį",
       "profession_add": "Pridėti",
@@ -5412,16 +5416,16 @@
     "companies": "Įmonėms",
     "agencies": "Agentūroms",
     "pricing": "Kainos",
-    "about": "Apie",
+    "about": "Apie mus",
     "vision": "Vizija",
     "login": "Prisijungti",
     "startNow": "Pradėti dabar",
     "themeToDark": "Tamsi tema",
     "themeToLight": "Šviesi tema",
-    "how": "Kaip veikia",
+    "how": "Kaip tai veikia",
     "menuOpen": "Meniu",
     "menuClose": "Uždaryti meniu",
-    "market": "Rinka"
+    "market": "Darbo rinka"
   },
   "livingMarketReview": {
     "tagline": "Gyvoji Europos darbo rinka",
@@ -5542,7 +5546,6 @@
     "about": "Apie",
     "contact": "Kontaktai",
     "rights": "Visos teisės saugomos.",
-    "rexora": "Kuriama kartu: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "operatedBy": "LabourMarket.ai platformą valdo ir jos komercines paslaugas teikia UAB „Nonstop Group“. LabourMarket.ai programinė įranga ir susijusi intelektinė nuosavybė priklauso Labour Market AI Sp. z o.o. ir yra naudojama UAB „Nonstop Group“ pagal licenciją.",
     "ipNotice": "Intelektinės nuosavybės teisės. Platformą pagal licenciją valdo UAB „Nonstop Group“.",
     "legalNotice": "Teisinė informacija"
@@ -6871,6 +6874,16 @@
         "into": "Ši eilutė sujungta į",
         "canonical": "išlaikomą projektą",
         "includes": "{count, plural, one {Apima # sujungtą projekto eilutę — jos įrašai rodomi čia.} few {Apima # sujungtas projekto eilutes — jų įrašai rodomi čia.} other {Apima # sujungtų projekto eilučių — jų įrašai rodomi čia.}}"
+      },
+      "teams": {
+        "title": "Komandos šiame projekte",
+        "members": "{n, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
+        "personTeam": "Komanda: {team}",
+        "unnamed": "Komanda",
+        "unnamedMember": "Narys",
+        "noMembers": "Šiuo metu narių nėra.",
+        "unavailable": "Komandų įkelti nepavyko. Bandykite dar kartą.",
+        "manage": "Keisti komandas"
       }
     },
     "workerView": {
@@ -12919,6 +12932,7 @@
     "servicesTitle": "Ką jie gali padaryti",
     "servicesEmpty": "Kol kas nieko nesiūloma",
     "servicesUnavailable": "Nepavyko įkelti siūlomų paslaugų",
+    "sharedAfterWork": "Paslaugos, darbų nuotraukos ir užfiksuoti darbai rodomi, kai pradedate dirbti kartu.",
     "serviceRemote": "Nuotoliniu būdu",
     "photoAlt": "Atlikto darbo nuotrauka",
     "historyTitle": "Įkelta istorija",
@@ -15515,26 +15529,26 @@
   "landing": {
     "requestDoors": {
       "workerSearch": {
-        "title": "Užsakyti darbuotojų paiešką",
-        "body": "Nurodykite specialybę, kiek žmonių reikia, šalį ir kada pradėti."
+        "title": "Darbuotojų paieškos užklausa",
+        "body": "Nurodykite profesiją, darbuotojų skaičių, šalį ir darbo pradžią."
       },
       "b2b": {
-        "title": "Pateikti B2B užklausą",
+        "title": "Verslo paslaugų užklausa (B2B)",
         "body": "Aprašykite darbų pobūdį, vietą, apimtį ir terminus."
       },
       "project": {
-        "title": "Užsakyti individualaus projekto vykdymą",
-        "body": "Privatiems ir verslo užsakovams: aprašykite projekto ar paslaugos poreikį."
+        "title": "Individualaus projekto užklausa",
+        "body": "Privatiems ir verslo užsakovams: aprašykite, kokio projekto ar paslaugos jums reikia."
       },
-      "title": "Pateikite užklausą",
-      "promise": "Pateikite užklausą – komanda ją išnagrinės ir susisieks su jumis.",
-      "name": "Vardas arba įmonė",
+      "title": "Pateikti poreikį",
+      "promise": "Aprašykite, kokių darbuotojų, paslaugų ar projekto vykdymo jums reikia. Užklausa perduodama LabourMarket.ai komandai peržiūrėti.",
+      "name": "Vardas, pavardė arba įmonės pavadinimas",
       "email": "El. paštas",
       "phone": "Telefonas",
       "country": "Šalis",
       "countryChoose": "Pasirinkite šalį",
       "city": "Miestas",
-      "profession": "Specialybė",
+      "profession": "Profesija arba specialybė",
       "workers": "Darbuotojų skaičius",
       "start": "Darbo pradžia",
       "details": "Papildomi reikalavimai",
@@ -15542,18 +15556,18 @@
       "place": "Vieta",
       "scope": "Apimtis",
       "deadline": "Terminai",
-      "need": "Projekto ar paslaugos poreikis",
+      "need": "Kokio projekto ar paslaugos reikia",
       "customer": "Užsakovas",
       "customerPrivate": "Privatus asmuo",
       "customerBusiness": "Verslas",
-      "optional": "nebūtina",
+      "optional": "neprivaloma",
       "send": "Siųsti užklausą",
       "sending": "Siunčiama…",
       "receivedTitle": "Užklausą gavome",
-      "receivedBody": "Užklausa gauta. Komanda ją išnagrinės ir susisieks su jumis nurodytais kontaktais.",
-      "invalid": "Patikrinkite laukus ir bandykite dar kartą. Jūsų įvestis išsaugota šioje formoje.",
-      "limited": "Šiuo metu gauta per daug užklausų. Bandykite vėliau: jūsų įvestis lieka formoje.",
-      "unavailable": "Užklausos išsiųsti nepavyko, ji nebuvo gauta. Jūsų įvestis lieka formoje, bandykite dar kartą.",
+      "receivedBody": "Jūsų užklausa gauta ir perduota LabourMarket.ai komandai peržiūrėti.",
+      "invalid": "Patikrinkite laukus ir bandykite dar kartą. Jūsų įvesti duomenys išliko formoje.",
+      "limited": "Šiuo metu gauname per daug užklausų. Pabandykite vėliau – jūsų įvesti duomenys išliko formoje.",
+      "unavailable": "Užklausos išsiųsti nepavyko ir mes jos negavome. Jūsų įvesti duomenys išliko formoje – pabandykite dar kartą.",
       "notice": "Pateikdami užklausą patvirtinate, kad susipažinote su <privacy>Privatumo politika</privacy>."
     },
     "audienceValueEyebrow": "Vertė kiekvienai pusei",
@@ -15774,12 +15788,12 @@
       "sub": "Ieškokite darbo, specialistų, darbuotojų, klientų ar projektų partnerių Lietuvoje ir visame pasaulyje. Kurkite savo profesinį profilį, pristatykite patirtį, siūlykite paslaugas ir atraskite naujas galimybes."
     },
     "entry": {
-      "label": "Parašyk, ko reikia — savais žodžiais",
-      "placeholder": "Pvz.: reikia 12 pastolininkų Roterdame",
-      "submit": "Suprasti",
+      "label": "Ko jums reikia?",
+      "placeholder": "Pvz., reikia 5 sandėlio darbuotojų",
+      "submit": "Tęsti",
       "examplesLabel": "Pavyzdžiui:",
       "examples": {
-        "hire": "Reikia 12 pastolininkų Roterdame",
+        "hire": "Reikia 5 sandėlio darbuotojų Vilniuje",
         "work": "Ieškau darbo Norvegijoje",
         "internship": "Kur galiu atlikti praktiką?",
         "professional": "Esu buhalterė, ieškau darbo Vilniuje",
@@ -15790,49 +15804,49 @@
         "logWork": "Šiandien Green Tower objekte dirbau 8 valandas",
         "verifyWork": "Kas galėtų patvirtinti mano patirtį?"
       },
-      "understoodLabel": "Supratau",
+      "understoodLabel": "Štai ką supratome",
       "understood": {
-        "need-workers": "Tau reikia darbuotojų. Užrašysime poreikį — kokių žmonių, kiek, kur ir nuo kada — ir ieškosime tinkamų.",
-        "find-workers": "Ieškai žmonių darbui. Parodysime, kas tinka pagal profesiją ir vietą.",
-        "candidates": "Nori pamatyti kandidatus į savo poreikį.",
-        "find-work": "Ieškai darbo. Pagal tavo profesiją ir vietą parodysime tinkamas galimybes.",
-        "opportunities": "Ieškai galimybių — darbo, praktikos ar kito kelio. Parodysime, kas tau tinka.",
-        "need-service": "Tau reikia, kad kas nors atliktų darbą. Užrašysime, ko tiksliai reikia, ir ieškosime, kas gali padėti.",
-        "offer-value": "Turi ką pasiūlyti. Užrašysime pasiūlymą, kad jį rastų tie, kam jo reikia.",
-        "create-project": "Nori sukurti projektą ar objektą — su vieta, terminais ir žmonėmis.",
-        "projects": "Nori matyti savo įmonės projektus.",
-        "company-overview": "Nori matyti, kas vyksta tavo įmonėje — žmonės, projektai, poreikiai.",
-        "create-organization": "Nori įregistruoti įmonę ar organizaciją.",
-        "cv": "Nori įkelti CV failą. Perskaitysime jį ir parodysime, ką radome, prieš ką nors išsaugodami.",
-        "log-work": "Nori užrašyti atliktą darbą į darbo žurnalą.",
-        "skill-gap": "Nori sužinoti, kokių įgūdžių tau trūksta.",
-        "documents": "Kalbi apie dokumentus ir pažymėjimus — kas galioja, kas baigiasi, ko trūksta.",
-        "add-document": "Turi dokumentą ar pažymėjimą, kurį nori užrašyti.",
-        "learning-compass": "Nori sužinoti, ko mokytis toliau.",
-        "profile": "Nori papildyti savo profilį — kalbą, įgūdį, patirtį.",
-        "who-available": "Nori žinoti, kas iš tavo komandos laisvas.",
-        "invite-candidate": "Nori pakviesti žmogų į savo komandą.",
-        "invite-client": "Nori pakviesti klientą — dirbi kaip agentūra.",
-        "propose-candidate": "Nori pasiūlyti kandidatą klientui — dirbi kaip agentūra.",
-        "client-demand": "Nori matyti, ko reikia tavo klientams.",
-        "invite-student": "Atstovauji mokymo įstaigai ir nori pakviesti mokinį.",
-        "programmes": "Atstovauji mokymo įstaigai — programos, grupės, mokiniai.",
-        "offer-capacity": "Turi laisvų žmonių ar pajėgumų. Užrašysime pasiūlymą, kad jį rastų tie, kam reikia.",
-        "who-verifies-work": "Klausi, kas gali patvirtinti tavo atliktą darbą. Parodysime, kam jį pateikti.",
-        "cv-view": "Nori pamatyti savo CV — tą, kurį sistema jau turi. Nieko neįkelsime ir nepakeisime.",
-        "cv-choose": "Kalbi apie savo CV. Paklausime, ar nori jį pamatyti, įkelti naują, ar papildyti profilį."
+        "need-workers": "Ieškote darbuotojų. Nurodykite profesiją, skaičių, vietą ir planuojamą pradžią.",
+        "find-workers": "Ieškote darbuotojų. Prisijungę aprašykite poreikį – kandidatai rodomi prie konkretaus poreikio, kai jų yra.",
+        "candidates": "Norite peržiūrėti kandidatus į savo poreikį.",
+        "find-work": "Ieškote darbo. Parodysime galimybes pagal jūsų profesiją ir vietą.",
+        "opportunities": "Ieškote darbo, praktikos ar kitų profesinių galimybių.",
+        "need-service": "Jums reikia, kad kas nors atliktų darbą. Prisijungę matysite, kas siūlo tokią paslaugą.",
+        "offer-value": "Norite pasiūlyti paslaugas ar savo kompetenciją. Galite pateikti pasiūlymą platformoje.",
+        "create-project": "Norite sukurti projektą ar objektą su vieta, terminais ir žmonėmis.",
+        "projects": "Norite matyti savo įmonės projektus.",
+        "company-overview": "Norite matyti, kas vyksta jūsų įmonėje: žmones, projektus, poreikius.",
+        "create-organization": "Norite užregistruoti įmonę ar organizaciją.",
+        "cv": "Norite įkelti CV. Prieš išsaugodami iš jo išgautus duomenis, parodysime juos peržiūrai.",
+        "log-work": "Norite įrašyti atliktą darbą į darbo žurnalą.",
+        "skill-gap": "Norite sužinoti, kokių įgūdžių jums trūksta.",
+        "documents": "Kalbate apie dokumentus ir pažymėjimus: kas galioja, kas baigiasi, ko trūksta.",
+        "add-document": "Turite dokumentą ar pažymėjimą, kurį norite įrašyti.",
+        "learning-compass": "Norite sužinoti, ko mokytis toliau.",
+        "profile": "Norite papildyti savo profilį: kalbą, įgūdį, patirtį.",
+        "who-available": "Norite sužinoti, kas iš jūsų komandos laisvas.",
+        "invite-candidate": "Norite pakviesti žmogų į savo komandą.",
+        "invite-client": "Norite pakviesti klientą (dirbate kaip agentūra).",
+        "propose-candidate": "Norite pasiūlyti kandidatą klientui (dirbate kaip agentūra).",
+        "client-demand": "Norite matyti, ko reikia jūsų klientams.",
+        "invite-student": "Atstovaujate mokymo įstaigai ir norite pakviesti mokinį ar studentą.",
+        "programmes": "Atstovaujate mokymo įstaigai: programos, grupės, mokiniai.",
+        "offer-capacity": "Turite laisvų darbuotojų ar pajėgumų. Galite pateikti savo pasiūlymą.",
+        "who-verifies-work": "Klausiate, kas gali patvirtinti jūsų atliktą darbą. Parodysime, kam jį pateikti.",
+        "cv-view": "Norite pamatyti savo CV – tą, kurį sistema jau turi. Nieko neįkelsime ir nekeisime.",
+        "cv-choose": "Kalbate apie savo CV. Paklausime, ar norite jį peržiūrėti, įkelti naują, ar papildyti profilį."
       },
       "family": {
-        "work": "Kalbi apie savo darbą ir profesinį kelią.",
-        "hire": "Kalbi kaip darbdavys ar įmonė — apie žmones, projektus ar poreikius.",
-        "agency": "Kalbi kaip agentūra — apie klientus ir kandidatus.",
-        "student": "Kalbi apie mokymąsi ir kelią į darbą.",
-        "education": "Atstovauji mokymo įstaigai."
+        "work": "Kalbate apie savo darbą ir profesinį kelią.",
+        "hire": "Kalbate kaip darbdavys ar įmonė: apie žmones, projektus ar poreikius.",
+        "agency": "Kalbate kaip agentūra: apie klientus ir kandidatus.",
+        "student": "Kalbate apie mokymąsi ir kelią į darbą.",
+        "education": "Atstovaujate mokymo įstaigai."
       },
-      "nextHint": "Kad poreikį išsaugotume ir galėtume į jį atsakyti, reikia paskyros. Sakinys keliaus kartu su tavimi.",
+      "nextHint": "Norėdami išsaugoti poreikį, prisijunkite arba susikurkite paskyrą. Jūsų įrašytas sakinys bus perkeltas ir po prisijungimo.",
       "signup": "Sukurti paskyrą",
-      "login": "Turiu paskyrą — prisijungti",
-      "unrecognised": "Nesupratau iš pirmo karto. Ko ieškai?",
+      "login": "Jau turiu paskyrą",
+      "unrecognised": "Nepavyko tiksliai nustatyti poreikio. Pasirinkite vieną variantą:",
       "chips": {
         "work": "Ieškau darbo",
         "hire": "Reikia darbuotojų"
@@ -15840,7 +15854,7 @@
       "numbers": "Dabar platformoje: {vacancies} aktyvių darbo skelbimų · {employers} darbdaviai",
       "refreshed": "atnaujinta {date}",
       "moreExamples": "Daugiau pavyzdžių",
-      "browseJobs": "Žiūrėti darbo skelbimus",
+      "browseJobs": "Peržiūrėti darbo skelbimus",
       "exampleLabels": {
         "hire": "Reikia darbuotojų",
         "work": "Ieškau darbo",
@@ -15915,6 +15929,42 @@
         "goods": "Prekės"
       },
       "lasting": "Tavo patirtis ir galimybės išlieka pasiekiamos nuolat — keičiant darbą, projektą ar šalį."
+    },
+    "v3": {
+      "lead": "Darbuotojams, darbdaviams ir paslaugų teikėjams – visų profesijų ir sektorių. Registracija ir pagrindinis poreikio skelbimas nemokami.",
+      "moreChoices": "Daugiau pasirinkimų",
+      "or": "arba aprašykite savo žodžiais",
+      "needFree": "Užklausą galite pateikti be registracijos. Pateikimas nemokamas; paslaugų sąlygos ir kaina derinamos atskirai.",
+      "market": {
+        "title": "Darbo skelbimai rinkoje",
+        "line": "{adverts} aktyvių darbo skelbimų iš išorinių šaltinių. Skelbimuose nurodyta {employers} skirtingų darbdavių pavadinimų.",
+        "source": "Skelbimai surinkti iš viešų išorinių darbo skelbimų šaltinių. Tai nėra LabourMarket.ai registruotų darbdavių ar klientų skaičius. Naujausias skelbimų atnaujinimas: {date}.",
+        "none": "Rinkos duomenys šiuo metu nepasiekiami.",
+        "search": "Ieškoti darbo skelbimų"
+      },
+      "adverts": {
+        "title": "Keli aktyvūs skelbimai",
+        "sub": "Skelbimus galite peržiūrėti be paskyros. Prisijungę matysite darbdavį, vietą, visą aprašymą ir kaip kandidatuoti."
+      },
+      "how": {
+        "title": "Kaip tai veikia",
+        "s1": {
+          "title": "Raskite ir susitarkite",
+          "body": "Ieškokite darbo, darbuotojų ar paslaugų ir tvarkykite pasiūlymus bei susitarimus platformoje."
+        },
+        "s2": {
+          "title": "Fiksuokite darbą",
+          "body": "Atliktą darbą galite registruoti darbo žurnale."
+        },
+        "s3": {
+          "title": "Patvirtinkite",
+          "body": "Įrašus patvirtina darbdavio organizacijos vadovas. Užsakovas gali priimti jam pateiktą darbą – tai žymima atskirai. Patvirtintas darbas tampa jūsų patirties įrodymu."
+        },
+        "s4": {
+          "title": "Jūsų duomenys ir privatumas",
+          "body": "Asistentas pateikia pasiūlymus, o sprendimus priimate jūs. Jūs sprendžiate, ar jus gali rasti darbdaviai ir ar atskleisti kontaktus. Darbo įrašus mato organizacija, kurioje dirbate."
+        }
+      }
     }
   },
   "workspace": {
@@ -20506,7 +20556,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Puslapių naudojimą ir kampaniją, iš kurios atėjai, matuojame tik tau leidus.",
+      "text": "Naršyklėje saugomus matavimo duomenis ir kampanijų informaciją naudojame tik gavę jūsų sutikimą.",
       "accept": "Leisti matavimą",
       "refuse": "Atsisakyti",
       "more": "Daugiau apie slapukus",
@@ -20565,39 +20615,40 @@
     }
   },
   "siteNav": {
+    "education": "Mokymo įstaigoms",
     "signUp": "Registruotis",
-    "trigger": "Pagrindiniai pasirinkimai",
-    "account": "Prisijungus",
+    "trigger": "Pagrindiniai tikslai",
+    "account": "Prisijungusiems",
     "intents": {
       "work": {
         "title": "Ieškau darbo",
-        "description": "Raskite darbą ir parodykite, ką mokate.",
+        "description": "Ieškokite darbo ir pristatykite savo patirtį.",
         "short": "Ieškau darbo"
       },
       "workers": {
         "title": "Ieškau darbuotojų",
-        "description": "Aprašykite, kokio darbo reikia.",
+        "description": "Nurodykite, kokių darbuotojų, kur ir kada reikia.",
         "short": "Ieškau darbuotojų"
       },
       "services": {
         "title": "Siūlau paslaugas",
-        "description": "Paskelbkite, ką siūlote, ir atsakykite į užklausas.",
+        "description": "Pristatykite savo paslaugas, raskite užsakymus ir atsakykite į užklausas.",
         "short": "Siūlau paslaugas"
-      },
-      "orders": {
-        "title": "Ieškau užsakymų ir sutarčių",
-        "description": "Raskite darbo užklausas ir laikykite pasiūlymus vienoje vietoje.",
-        "short": "Ieškau užsakymų"
       },
       "partners": {
         "title": "Ieškau partnerių",
-        "description": "Susiekite su žmonėmis ir organizacijomis, su kuriais dirbate.",
+        "description": "Raskite partnerius ir palaikykite bendradarbiavimą.",
         "short": "Ieškau partnerių"
       },
       "agencies": {
         "title": "Agentūroms",
-        "description": "Valdykite agentūros žmones, klientus ir pasiūlymus.",
+        "description": "Tvarkykite agentūros klientus ir kandidatų pasiūlymus.",
         "short": "Agentūroms"
+      },
+      "contractors": {
+        "short": "Ieškau paslaugų ar vykdytojų",
+        "title": "Ieškau paslaugų ar vykdytojų",
+        "description": "Aprašykite, kokios paslaugos ar darbų vykdytojo reikia."
       }
     },
     "links": {
@@ -20616,11 +20667,13 @@
       "network": "Jūsų tinklas",
       "partnerWithUs": "Tapti partneriu",
       "forAgencies": "Kaip tai veikia agentūroms",
-      "setUpAgency": "Sukurti agentūrą"
+      "setUpAgency": "Užregistruoti agentūrą",
+      "b2bEnquiry": "Verslo paslaugų užklausa (B2B)",
+      "projectEnquiry": "Individualaus projekto užklausa"
     },
     "assistant": "Klausti asistento",
     "start": {
-      "searchLabel": "Ieškoti darbo",
+      "searchLabel": "Ieškoti darbo skelbimų",
       "searchPlaceholder": "Pareigos arba raktažodis",
       "searchSubmit": "Ieškoti",
       "viewAll": "Visi darbo skelbimai"
@@ -20629,10 +20682,10 @@
       "heading": "Ką norite padaryti?",
       "swipe": "Braukite",
       "close": "Uždaryti",
-      "functions": "Funkcijos",
+      "functions": "Veiksmai",
       "professions": "Profesijos",
-      "opensNow": "Atsidaro iškart",
-      "signInWhenOpen": "Prisijungsite atidarę",
+      "opensNow": "Paskyros nereikia",
+      "signInWhenOpen": "Reikia prisijungti",
       "allSectors": "Visi sektoriai",
       "fullList": "Visas sąrašas"
     },

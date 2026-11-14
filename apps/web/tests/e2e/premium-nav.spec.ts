@@ -17,7 +17,7 @@ import { join } from "node:path";
 
 const expect = baseExpect.configure({ timeout: 15_000 });
 const MIN_TOUCH_PX = 43.5;
-const INTENTS = ["work", "workers", "services", "orders", "partners", "agencies"] as const;
+const INTENTS = ["work", "workers", "services", "contractors", "partners", "agencies"] as const;
 
 async function headerOverflow(page: Page): Promise<string[]> {
   return page.evaluate(() => {
@@ -102,6 +102,17 @@ for (const width of [1024, 1280, 1440] as const) {
     test("More holds the older links: pricing and about are two actions away", async ({ page }) => {
       await page.goto("/en");
       const more = page.getByTestId("intent-toggle-more");
+      // The key is pressed once the menu's script is attached: a key pressed
+      // in the moment between the page loading and that is not taken (seen
+      // on a production build, about one run in nine).
+      await more.evaluate(
+        (el) =>
+          new Promise<void>((done) => {
+            const alive = () => Object.keys(el).some((k) => k.startsWith("__reactProps$"));
+            const wait = () => (alive() ? done() : requestAnimationFrame(wait));
+            wait();
+          }),
+      );
       await more.focus();
       await page.keyboard.press("Enter");
       const links = page.getByTestId("intent-more-links");
@@ -210,9 +221,11 @@ test.describe("phone header", () => {
         await expect(page.getByTestId("header-auth").locator("a[href*='/auth/login']")).toBeVisible();
         await expect(page.getByTestId("header-auth").locator("a[href*='/auth/signup']")).toBeHidden();
         await expect(page.getByTestId("mobile-nav-toggle")).toBeVisible();
-        // The goals start within the first ~300px of the screen.
+        // The goals start in the upper half of the screen. Since V3
+        // (2026-11-13) the approved lead sits between the question and the
+        // goals, under the first-visit cookie notice.
         const rail = (await page.getByTestId("goal-rail").boundingBox())!;
-        expect(rail.y, "goal rail top").toBeLessThan(300);
+        expect(rail.y, "goal rail top").toBeLessThan(340);
         // Sign up and the theme toggle are the first row of the menu.
         await page.getByTestId("mobile-nav-toggle").tap();
         const auth = page.getByTestId("mobile-nav-auth");

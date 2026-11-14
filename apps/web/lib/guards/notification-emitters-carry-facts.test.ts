@@ -292,11 +292,22 @@ describe("every affected emitter takes facts and answers { delivered, reason }",
 describe("every write path resolves its facts under the CALLER's session", () => {
   it("bookings: one row read serves the booking bell and the engagement bell", () => {
     const src = lf(read("lib", "booking", "booking-actions.ts"));
-    expect(src).toMatch(/async function bookingNotificationFacts\(/);
-    const facts = src.slice(src.indexOf("async function bookingNotificationFacts("));
+    // The facts reader and `notifyBooking` live in one shared server module,
+    // so a second path that proposes a booking (a client accepting an
+    // agency's candidate) rings the same bell from the same read.
+    const notify = lf(read("lib", "booking", "booking-notify.ts"));
+    expect(notify).toMatch(/async function bookingNotificationFacts\(/);
+    const facts = notify.slice(notify.indexOf("async function bookingNotificationFacts("));
     expect(facts).toContain('.from("booking_requests")');
     expect(facts).toContain('.select("owner_id, worker_id, start_date, location_country")');
+    expect(notify).toMatch(/export async function notifyBooking\(/);
+    expect(notify).not.toMatch(/^"use server"/);
+    expect(src).toContain('import { notifyBooking } from "@/lib/booking/booking-notify";');
     expect(src).not.toMatch(/createAdminClient|supabase\/admin/);
+    expect(notify).not.toMatch(/createAdminClient|supabase\/admin/);
+    // The agency path: accepting an offer proposes a booking and tells the worker.
+    const bridge = lf(read("lib", "agency", "bridge-actions.ts"));
+    expect(bridge).toMatch(/decision === "accepted" && typeof decided === "string" && isBridgeUuid\(decided\) && decided !== offerId\) \{\s+await notifyBooking\(supabase, decided, "booking_proposed"\);/);
     // propose ×1, declined ×3, accepted ×3, withdrawn ×3, and the accepted
     // booking reopened by a date change ×1 (the worker is asked again) —
     // every lifecycle success return rings its bell through the one
