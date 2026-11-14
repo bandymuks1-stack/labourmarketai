@@ -38,6 +38,8 @@ import {
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
 import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { PlacementTermForm } from "@/components/app/agency/placement-term-form";
+import { formatPlacementFee, readOwnPlacementTerm } from "@/lib/agency/placement-terms";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
@@ -169,6 +171,8 @@ export default async function CompanyPartnersPage({
       delegatedDrafts,
       delegatedPlacements,
       tDelegation,
+      ownPlacementTerm,
+      tTerm,
     ] = await Promise.all([
       listAgencyClients(),
       listAgencyDemands(),
@@ -184,6 +188,9 @@ export default async function CompanyPartnersPage({
       listAgencyDraftedNeeds(),
       listAgencyPlacements(),
       getTranslations("agencyDelegation"),
+      // The agency's own placement term (migration 20261114120000).
+      readOwnPlacementTerm(ownCompany.id),
+      getTranslations("agencyPlacementTerm"),
     ]);
     // The agency's delegated work (owner decisions 2026-09-28 A / D): the
     // needs it drafted for connected clients, and its placements' lifecycle.
@@ -254,6 +261,51 @@ export default async function CompanyPartnersPage({
               {tCompany("agencyMode.legacyNote")}
             </p>
           </section>
+          {/* The agency's placement term: what its candidates' employers see
+              and accept only when accepting a candidate. */}
+          <PlacementTermForm
+            companyId={ownCompany.id}
+            locale={locale}
+            unavailable={ownPlacementTerm.kind !== "ok"}
+            current={
+              ownPlacementTerm.kind === "ok" && ownPlacementTerm.term
+                ? {
+                    feeLine: tTerm("feeLine", { fee: formatPlacementFee(ownPlacementTerm.term, locale) }),
+                    conditionText: ownPlacementTerm.term.conditionText,
+                    conditionLanguage: ownPlacementTerm.term.conditionLanguage,
+                    termsUrl: ownPlacementTerm.term.termsUrl,
+                    feeAmount: ownPlacementTerm.term.feeAmount,
+                    currency: ownPlacementTerm.term.currency,
+                  }
+                : null
+            }
+            labels={{
+              title: tTerm("title"),
+              intro: tTerm("intro"),
+              current: tTerm("current"),
+              none: tTerm("none"),
+              amount: tTerm("amount"),
+              currency: tTerm("currency"),
+              condition: tTerm("condition"),
+              conditionHint: tTerm("conditionHint"),
+              termsUrl: tTerm("termsUrl"),
+              termsUrlHint: tTerm("termsUrlHint"),
+              save: tTerm("save"),
+              saving: tTerm("saving"),
+              retire: tTerm("retire"),
+              saved: tTerm("saved"),
+              retired: tTerm("retired"),
+              unavailable: tTerm("unavailable"),
+              errors: {
+                invalid: tTerm("errors.invalid"),
+                not_agency: tTerm("errors.notAgency"),
+                not_found: tTerm("errors.notFound"),
+                auth: tTerm("errors.auth"),
+                needs_migration: tTerm("unavailable"),
+                error: tTerm("errors.error"),
+              },
+            }}
+          />
           {/* P5 "Klientai": client → need → candidates path for the agency. */}
           <AgencyClientsSection
             clients={agencyClientsState}

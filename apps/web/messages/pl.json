@@ -13121,6 +13121,17 @@
       "declined": "pracownik odmówił",
       "withdrawn": "propozycja wycofana",
       "expired": "propozycja wygasła"
+    },
+    "placementTerm": {
+      "title": "Opłata za zatrudnienie {agency}",
+      "feeLine": "Opłata za zatrudnienie – {fee} za każdego skutecznie zatrudnionego pracownika.",
+      "conditionLabel": "Warunek:",
+      "termsLink": "Pełne warunki agencji",
+      "termsPending": "Agencja nie opublikowała jeszcze pełnych warunków.",
+      "onlyOnPlacement": "Należna tylko, jeśli ten pracownik zostanie faktycznie u Ciebie zatrudniony – nie za wyświetlenie, kontakt ani tę ofertę.",
+      "accept": "Akceptuję opłatę za zatrudnienie i warunek tej agencji dla tego kandydata.",
+      "mustAccept": "Aby przyjąć tego kandydata, najpierw zaakceptuj opłatę agencji za zatrudnienie.",
+      "changed": "Opłata agencji za zatrudnienie się zmieniła. Odśwież stronę, aby ją zobaczyć przed decyzją."
     }
   },
   "cvSections": {
@@ -20690,5 +20701,52 @@
       "fullList": "Pełna lista"
     },
     "more": "Więcej"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Agencja rekrutacyjna",
+    "title": "{agency} – czy chcesz dołączyć do jej listy kandydatów?",
+    "body": "Agencja rekrutacyjna przedstawia swoich kandydatów pracodawcom, którzy szukają ludzi. Jeśli dołączysz, {agency} zobaczy Twój profil i będzie mogła proponować Cię do odpowiedniej pracy.",
+    "leave": "To Twój wybór, nic nie jest zaznaczone za Ciebie. Możesz opuścić listę w dowolnym momencie w swoim profilu.",
+    "consent": "Zgadzam się być na liście kandydatów {agency}.",
+    "join": "Dołącz do listy",
+    "joining": "Dołączanie…",
+    "notNow": "Nie teraz",
+    "joined": "Jesteś na liście kandydatów {agency}. Możesz ją opuścić w swoim profilu.",
+    "errors": {
+      "consentRequired": "Najpierw zaznacz pole, jeśli chcesz dołączyć.",
+      "consentTextChanged": "Tekst się zmienił. Odśwież stronę i przeczytaj go ponownie.",
+      "representedElsewhere": "Reprezentuje Cię już inna agencja, więc ta lista nie jest proponowana.",
+      "alreadyKnown": "Już odpowiedziałeś tej agencji.",
+      "notAvailable": "To jest teraz niedostępne.",
+      "noWorkerProfile": "Najpierw dokończ zakładanie profilu.",
+      "auth": "Zaloguj się ponownie.",
+      "error": "Nie udało się. Spróbuj ponownie."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Twoja opłata za zatrudnienie",
+    "intro": "To, co pracodawcy widzą przy Twoich kandydatach. Pracodawca akceptuje ją tylko przyjmując jednego z Twoich kandydatów, a dotyczy ona tylko faktycznie zatrudnionej osoby – nigdy wyświetlenia, kontaktu ani aplikacji.",
+    "current": "Teraz widoczne dla pracodawców",
+    "none": "Nie podałeś opłaty za zatrudnienie. Pracodawcy jej nie widzą.",
+    "amount": "Kwota",
+    "currency": "Waluta",
+    "condition": "Kiedy opłata obowiązuje",
+    "conditionHint": "Twoje własne słowa, pokazane pracodawcy tak, jak je napisałeś.",
+    "termsUrl": "Link do pełnych warunków (opcjonalnie)",
+    "termsUrlHint": "Jeśli zostawisz puste, pracodawcy dowiedzą się, że pełne warunki nie zostały opublikowane.",
+    "save": "Zapisz",
+    "saving": "Zapisywanie…",
+    "retire": "Przestań pokazywać opłatę",
+    "saved": "Zapisano. Pracodawcy widzą teraz tę opłatę przy Twoich kandydatach.",
+    "retired": "Pracodawcy nie widzą już opłaty.",
+    "unavailable": "Opłaty za zatrudnienie nie są jeszcze dostępne.",
+    "feeLine": "Opłata za zatrudnienie – {fee} za każdego skutecznie zatrudnionego pracownika.",
+    "errors": {
+      "invalid": "Sprawdź kwotę, trzyliterową walutę i link (https://).",
+      "notAgency": "Tylko agencja może podać opłatę za zatrudnienie.",
+      "notFound": "Nie możesz zmienić opłaty tej organizacji.",
+      "auth": "Zaloguj się ponownie.",
+      "error": "Nie zapisano. Spróbuj ponownie."
+    }
   }
 }

@@ -50,6 +50,8 @@ describe("the four migrations ship paired, gated and stated", () => {
     // (invitation signup context, already applied). Every other migration still
     // must sort strictly before these four.
     const SIBLINGS = [
+      // 2026-11-14 Lane H: agency placement term + suggested-agency opt-in (RED draft, needs-human-gate, NOT applied).
+      "20261114120000_",
       "20261006100400_",
       "20261006100500_",
       // 2026-10-07 RED tiers A2-G release: later-train siblings, applied individually.

@@ -8074,5 +8074,52 @@
       "fullList": "Full liste"
     },
     "more": "Mer"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Rekrutteringsbyrå",
+    "title": "{agency} – vil du stå på kandidatlisten?",
+    "body": "Et rekrutteringsbyrå foreslår kandidatene sine for arbeidsgivere som leter etter folk. Hvis du blir med, ser {agency} profilen din og kan foreslå deg for passende arbeid.",
+    "leave": "Ditt valg, ingenting er krysset av for deg. Du kan forlate listen når som helst på profilen din.",
+    "consent": "Jeg samtykker til å stå på kandidatlisten til {agency}.",
+    "join": "Bli med på listen",
+    "joining": "Blir med…",
+    "notNow": "Ikke nå",
+    "joined": "Du står på kandidatlisten til {agency}. Du kan forlate den på profilen din.",
+    "errors": {
+      "consentRequired": "Kryss først av i boksen hvis du vil bli med.",
+      "consentTextChanged": "Teksten er endret. Last inn siden på nytt og les den igjen.",
+      "representedElsewhere": "Et annet byrå representerer deg allerede, så denne listen tilbys ikke.",
+      "alreadyKnown": "Du har allerede svart dette byrået.",
+      "notAvailable": "Dette er ikke tilgjengelig nå.",
+      "noWorkerProfile": "Gjør først ferdig profilen din.",
+      "auth": "Logg inn igjen.",
+      "error": "Det gikk ikke. Prøv igjen."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Din formidlingsavgift",
+    "intro": "Det arbeidsgivere ser ved kandidatene dine. En arbeidsgiver godtar den bare når de tar imot en av kandidatene dine, og den gjelder bare en person som faktisk blir ansatt – aldri en visning, kontakt eller søknad.",
+    "current": "Vises for arbeidsgivere nå",
+    "none": "Du har ikke oppgitt noen formidlingsavgift. Arbeidsgivere ser ingen.",
+    "amount": "Beløp",
+    "currency": "Valuta",
+    "condition": "Når avgiften gjelder",
+    "conditionHint": "Dine egne ord, vist til arbeidsgiveren slik de er skrevet.",
+    "termsUrl": "Lenke til de fullstendige vilkårene (valgfritt)",
+    "termsUrlHint": "Hvis feltet står tomt, får arbeidsgivere beskjed om at de fullstendige vilkårene ikke er publisert.",
+    "save": "Lagre",
+    "saving": "Lagrer…",
+    "retire": "Slutt å vise en avgift",
+    "saved": "Lagret. Arbeidsgivere ser nå avgiften ved kandidatene dine.",
+    "retired": "Arbeidsgivere ser ikke lenger noen avgift.",
+    "unavailable": "Formidlingsavgifter er ikke tilgjengelige ennå.",
+    "feeLine": "Formidlingsavgift – {fee} per vellykket ansatt arbeidstaker.",
+    "errors": {
+      "invalid": "Sjekk beløpet, valutaen med tre bokstaver og lenken (https://).",
+      "notAgency": "Bare et byrå kan oppgi en formidlingsavgift.",
+      "notFound": "Du kan ikke endre avgiften til denne organisasjonen.",
+      "auth": "Logg inn igjen.",
+      "error": "Det ble ikke lagret. Prøv igjen."
+    }
   }
 }

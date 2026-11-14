@@ -8074,5 +8074,52 @@
       "fullList": "Fuld liste"
     },
     "more": "Mere"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Rekrutteringsbureau",
+    "title": "{agency} – vil du stå på kandidatlisten?",
+    "body": "Et rekrutteringsbureau foreslår sine kandidater til arbejdsgivere, der søger folk. Hvis du er med, ser {agency} din profil og kan foreslå dig til passende arbejde.",
+    "leave": "Dit valg, intet er afkrydset for dig. Du kan forlade listen når som helst på din profil.",
+    "consent": "Jeg giver samtykke til at stå på {agency}s kandidatliste.",
+    "join": "Kom på listen",
+    "joining": "Tilmelder…",
+    "notNow": "Ikke nu",
+    "joined": "Du står på {agency}s kandidatliste. Du kan forlade den på din profil.",
+    "errors": {
+      "consentRequired": "Sæt først kryds i feltet, hvis du vil være med.",
+      "consentTextChanged": "Teksten er ændret. Genindlæs siden og læs den igen.",
+      "representedElsewhere": "Et andet bureau repræsenterer dig allerede, så denne liste tilbydes ikke.",
+      "alreadyKnown": "Du har allerede svaret dette bureau.",
+      "notAvailable": "Det er ikke tilgængeligt lige nu.",
+      "noWorkerProfile": "Gør først din profil færdig.",
+      "auth": "Log ind igen.",
+      "error": "Det lykkedes ikke. Prøv igen."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Dit formidlingsgebyr",
+    "intro": "Det, arbejdsgivere ser ved dine kandidater. En arbejdsgiver accepterer det kun, når den tager imod en af dine kandidater, og det gælder kun en person, der faktisk ansættes – aldrig en visning, kontakt eller ansøgning.",
+    "current": "Vises for arbejdsgivere nu",
+    "none": "Du har ikke angivet noget formidlingsgebyr. Arbejdsgivere ser intet.",
+    "amount": "Beløb",
+    "currency": "Valuta",
+    "condition": "Hvornår gebyret gælder",
+    "conditionHint": "Dine egne ord, vist for arbejdsgiveren som skrevet.",
+    "termsUrl": "Link til dine fulde vilkår (valgfrit)",
+    "termsUrlHint": "Lader du feltet stå tomt, får arbejdsgivere at vide, at de fulde vilkår ikke er offentliggjort.",
+    "save": "Gem",
+    "saving": "Gemmer…",
+    "retire": "Stop med at vise et gebyr",
+    "saved": "Gemt. Arbejdsgivere ser nu gebyret ved dine kandidater.",
+    "retired": "Arbejdsgivere ser ikke længere noget gebyr.",
+    "unavailable": "Formidlingsgebyrer er ikke tilgængelige endnu.",
+    "feeLine": "Formidlingsgebyr – {fee} pr. vellykket ansat medarbejder.",
+    "errors": {
+      "invalid": "Tjek beløbet, valutaen på tre bogstaver og linket (https://).",
+      "notAgency": "Kun et bureau kan angive et formidlingsgebyr.",
+      "notFound": "Du kan ikke ændre denne organisations gebyr.",
+      "auth": "Log ind igen.",
+      "error": "Det blev ikke gemt. Prøv igen."
+    }
   }
 }

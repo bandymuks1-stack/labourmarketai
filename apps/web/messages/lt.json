@@ -13121,6 +13121,17 @@
       "declined": "darbuotojas atsisakė",
       "withdrawn": "pasiūlymas atšauktas",
       "expired": "pasiūlymas nebegalioja"
+    },
+    "placementTerm": {
+      "title": "{agency} įdarbinimo mokestis",
+      "feeLine": "Įdarbinimo mokestis – {fee} už sėkmingai įdarbintą darbuotoją.",
+      "conditionLabel": "Sąlyga:",
+      "termsLink": "Visos agentūros sąlygos",
+      "termsPending": "Agentūra visų sąlygų dar nepaskelbė.",
+      "onlyOnPlacement": "Mokamas tik tada, jei šis darbuotojas faktiškai įdarbinamas pas jus – ne už peržiūrą, kontaktą ar šį pasiūlymą.",
+      "accept": "Sutinku su šios agentūros įdarbinimo mokesčiu ir sąlyga šiam kandidatui.",
+      "mustAccept": "Kad priimtumėte šį kandidatą, pirmiausia sutikite su agentūros įdarbinimo mokesčiu.",
+      "changed": "Agentūros įdarbinimo mokestis pasikeitė. Perkraukite puslapį ir peržiūrėkite jį prieš spręsdami."
     }
   },
   "cvSections": {
@@ -20690,5 +20701,52 @@
       "fullList": "Visas sąrašas"
     },
     "more": "Daugiau"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Įdarbinimo agentūra",
+    "title": "{agency} – ar norite prisijungti prie jos kandidatų sąrašo?",
+    "body": "Įdarbinimo agentūra siūlo savo kandidatus darbdaviams, kurie ieško žmonių. Prisijungus {agency} matys jūsų profilį ir galės jus siūlyti tinkamam darbui.",
+    "leave": "Sprendžiate jūs, niekas nepažymėta už jus. Iš sąrašo galite išeiti bet kada savo profilyje.",
+    "consent": "Sutinku būti {agency} kandidatų sąraše.",
+    "join": "Prisijungti prie sąrašo",
+    "joining": "Jungiama…",
+    "notNow": "Ne dabar",
+    "joined": "Esate {agency} kandidatų sąraše. Išeiti galite savo profilyje.",
+    "errors": {
+      "consentRequired": "Jei norite prisijungti, pirmiausia pažymėkite langelį.",
+      "consentTextChanged": "Tekstas pasikeitė. Perkraukite puslapį ir perskaitykite jį dar kartą.",
+      "representedElsewhere": "Jus jau atstovauja kita agentūra, todėl šis sąrašas nesiūlomas.",
+      "alreadyKnown": "Šiai agentūrai jau atsakėte.",
+      "notAvailable": "Šiuo metu tai nepasiekiama.",
+      "noWorkerProfile": "Pirmiausia užbaikite kurti profilį.",
+      "auth": "Prisijunkite iš naujo.",
+      "error": "Nepavyko. Bandykite dar kartą."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Jūsų įdarbinimo mokestis",
+    "intro": "Ką darbdaviai mato prie jūsų kandidatų. Darbdavys jį priima tik priimdamas jūsų kandidatą, ir jis taikomas tik faktiškai įdarbintam darbuotojui – ne už peržiūrą, kontaktą ar kandidatavimą.",
+    "current": "Dabar rodoma darbdaviams",
+    "none": "Įdarbinimo mokesčio nenurodėte. Darbdaviai jo nemato.",
+    "amount": "Suma",
+    "currency": "Valiuta",
+    "condition": "Kada mokestis taikomas",
+    "conditionHint": "Jūsų žodžiai, darbdaviui rodomi taip, kaip parašyti.",
+    "termsUrl": "Nuoroda į visas sąlygas (nebūtina)",
+    "termsUrlHint": "Palikus tuščią, darbdaviams pranešama, kad visos sąlygos dar nepaskelbtos.",
+    "save": "Išsaugoti",
+    "saving": "Saugoma…",
+    "retire": "Nebrodyti mokesčio",
+    "saved": "Išsaugota. Darbdaviai dabar mato šį mokestį prie jūsų kandidatų.",
+    "retired": "Darbdaviai mokesčio nebemato.",
+    "unavailable": "Įdarbinimo mokesčiai dar nepasiekiami.",
+    "feeLine": "Įdarbinimo mokestis – {fee} už sėkmingai įdarbintą darbuotoją.",
+    "errors": {
+      "invalid": "Patikrinkite sumą, trijų raidžių valiutą ir nuorodą (https://).",
+      "notAgency": "Įdarbinimo mokestį gali nurodyti tik agentūra.",
+      "notFound": "Šios organizacijos mokesčio keisti negalite.",
+      "auth": "Prisijunkite iš naujo.",
+      "error": "Neišsaugota. Bandykite dar kartą."
+    }
   }
 }

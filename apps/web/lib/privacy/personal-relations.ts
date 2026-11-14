@@ -710,6 +710,11 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
  * them names a subject, the table must be exported or withheld instead.
  */
 export const ACTOR_ONLY_RELATIONS: readonly string[] = [
+  // An agency's placement term and the admin list of agencies suggested to
+  // workers: `created_by` is who stated the term or added the row; the
+  // subject is an agency (20261114120000).
+  "agency_placement_terms",
+  "platform_suggested_agencies",
   // Spent confirmation tokens: `spent_by` is who confirmed; a digest, no
   // content, purged after a day (20261013120000).
   "confirmation_spends",
