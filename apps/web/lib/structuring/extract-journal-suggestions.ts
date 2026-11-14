@@ -821,15 +821,34 @@ function timeInMinutes(t: {
   return null;
 }
 
-/** Words that say a figure is PART of the one before it: "iš jų", "įskaitant",
- *  "including", "of which", "в том числе", "из них", "waarvan", "inclusief",
- *  "davon", "inkl.", "einschließlich", "w tym". */
+/** Words that say the figure AFTER them is part of the total before:
+ *  "iš jų", "iš kurių", "įskaitant", "including", "of which", "в том числе",
+ *  "из них", "включая", "waarvan", "inclusief", "davon", "inklusive", "w tym",
+ *  "z czego". Read only in front of the part's own figure ("Then 2 hours of
+ *  paperwork including invoices" is not a part). */
 const INCLUDED_PART_RX =
-  /(?<!\p{L})(?:iš\s+jų|is\s+ju|įskaitant|iskaitant|tame\s+skaičiuje|tame\s+skaiciuje|including|incl\.?|of\s+which|в\s+том\s+числе|из\s+них|waarvan|inclusief|davon|inkl\.?|einschließlich|einschliesslich|w\s+tym)(?!\p{L})/iu;
-/** A part written in brackets: "… koordinavimas (2 val. per dieną)". */
-const BRACKETED_TIME_RX = /\(\s*\d+(?:[.,]\d+)?\s*\p{L}/u;
-/** A fragment that is nothing but a duration: "15 valandų", "15 val", "15 h". */
-const PURE_DURATION_RX = /^\s*\d+(?:[.,]\d+)?\s*[\p{L}.]{1,12}\s*$/u;
+  /(?<!\p{L})(?:iš\s+jų|is\s+ju|iš\s+kurių|is\s+kuriu|įskaitant|iskaitant|tame\s+skaičiuje|tame\s+skaiciuje|including|incl\.?|of\s+which|of\s+these|в\s+том\s+числе|из\s+них|из\s+которых|включая|waarvan|inclusief|davon|inkl\.?|inklusive|einschließlich|einschliesslich|w\s+tym|z\s+czego)(?!\p{L})/iu;
+/** A part whose DURATION is written in brackets: "… koordinavimas (2 val. per
+ *  dieną)". A bracketed count of anything else ("(2 sluoksniai)") is not. */
+const BRACKETED_DURATION_RX = new RegExp(
+  `\\(\\s*\\d+(?:[.,]\\d+)?\\s*(?:${HOUR_UNIT_RX_SRC}|${MINUTE_UNIT_RX_SRC})`,
+  "iu",
+);
+/** A sentence that SAYS figures are inside the day, not on top of it:
+ *  "šios 2 valandos įeina į 15 valandų", "tos 2 valandos yra 15 valandų
+ *  dalis", "ne papildomos", "included in", "not extra", "входят", "enthalten",
+ *  "wliczone". */
+const RESTATEMENT_CUE_RX =
+  /(?<!\p{L})(?:įeina|ieina|įeinančios|įskaičiuot\p{L}*|iskaiciuot\p{L}*|dalis|dalį|dali|ne\s+(?:\p{L}+\s+){0,3}papildom\p{L}*|neprided\p{L}*|ne\s+prided\p{L}*|included|inclusive|is\s+part\s+of|are\s+part\s+of|part\s+of\s+the|not\s+(?:\p{L}+\s+){0,2}(?:extra|additional)|not\s+on\s+top|входят|входит|включен\p{L}*|не\s+дополнительно|inbegrepen|niet\s+extra|enthalten|inbegriffen|nicht\s+zusätzlich|wliczon\p{L}*|zawart\p{L}*|nie\s+dodatkow\p{L}*)(?!\p{L})/iu;
+/** Words that put a figure ON TOP of the day ("vakare dar 2 val.",
+ *  "papildomai", "additionally", "дополнительно", "zusätzlich"): such an item
+ *  is never read as a part of the stated total. */
+const EXTRA_WORK_RX =
+  /(?<!\p{L})(?:dar|papildomai|additionally|also|extra|plus|on\s+top|ещё|еще|дополнительно|nog|zusätzlich|zusaetzlich|dodatkowo)(?!\p{L})/iu;
+/** Words that mark a figure as the WHOLE day when it is said AGAIN: "iš
+ *  viso 15", "kartu 15", "in total", "altogether", "всего", "insgesamt". */
+const RESTATED_TOTAL_WORD_RX =
+  /(?<!\p{L})(?:iš\s+viso|is\s+viso|viso|kartu|in\s+total|total|altogether|всего|итого|totaal|insgesamt|łącznie|lacznie)(?!\p{L})/iu;
 
 /** Minutes back in the unit a person reads best. */
 function minutesAsTime(minutes: number): { value: number; unitSlug: "hours" | "minutes" } {
@@ -838,75 +857,116 @@ function minutesAsTime(minutes: number): { value: number; unitSlug: "hours" | "m
     : { value: minutes, unitSlug: "minutes" };
 }
 
-/** Words that mark a figure as the WHOLE day: "iš viso", "viso", "in total",
- *  "total", "всего", "totaal", "insgesamt", "łącznie". */
-const DAY_TOTAL_WORD_RX =
-  /(?<!\p{L})(?:iš\s+viso|is\s+viso|viso|in\s+total|total|всего|итого|totaal|insgesamt|łącznie|lacznie)(?!\p{L})/iu;
+/** Where each fragment stood: the sentence it belongs to. A sentence ends at
+ *  ".", "!", "?" or "…" followed by a capital letter or a digit, or at a line
+ *  break — so "2 val. vairavau" (an abbreviation dot) never ends one. */
+export type FragmentSentences = {
+  readonly sentenceOf: ReadonlyMap<JournalFragmentSuggestion, number>;
+  readonly sentences: readonly string[];
+};
+
+const SENTENCE_BOUNDARY_RX = /[.!?…]+\s+(?=[\p{Lu}\d])|\n+/gu;
+
+function sentenceStarts(text: string): number[] {
+  const starts = [0];
+  for (const m of text.matchAll(SENTENCE_BOUNDARY_RX)) starts.push((m.index ?? 0) + m[0].length);
+  return starts;
+}
+
+function numbersIn(text: string): number[] {
+  return [...text.matchAll(/\d+(?:[.,]\d+)?/g)].map((m) => Number(m[0].replace(",", ".")));
+}
 
 /**
- * A DAY TOTAL THAT CONTAINS ITS PARTS (#3354). "15 val., iš jų 2 val.
- * koordinavimas", "Darbo laikas: 15 valandų. … (2 valandos koordinavimo)" and
- * "iš viso 15 valandų: 13 val. …, 2 val. koordinavimui. Šios 2 valandos įeina
- * į 15 valandų" each state ONE 15-hour day. Read as items, every mention of a
- * figure was one more item, and the day summed to 17, 19, 32 hours.
+ * A DAY TOTAL THAT CONTAINS ITS PARTS (#3354; owner rule 2026-11-14: a 15-hour
+ * day already includes its 2 hours of coordination — never count 17).
+ * "15 val., iš jų 2 val. koordinavimas", "Darbo laikas: 15 valandų. …
+ * (2 valandos koordinavimo)" and "15 valandų … 13 valandų …, 2 valandos …
+ * Šios 2 valandos įeina į 15 valandų" each state ONE 15-hour day.
  *
- * The total is the first timed phrase, and it names no work of its own. It is
- * recognised only on an explicit signal, never on size alone ("8 val. …, 2
- * val. …" stays two items):
- *   - the total says it is the whole day ("iš viso", "in total"…), or stands
- *     alone ("15 valandų") right after a label colon; or
- *   - a part carries an inclusion word ("iš jų", "including"…) or states its
- *     time in brackets; or
- *   - a later phrase that names no work only REPEATS the total or a part
- *     already counted ("Šios 2 valandos įeina į 15 valandų") — the person is
- *     explaining the day, not adding to it.
- * Such repetitions are not items. Every remaining part must be smaller than
- * the total and together they must not exceed it. The parts keep their time;
- * the rest of the day becomes one item carrying the total's own words, so the
- * items add up to exactly the total the person stated.
+ * Only an EXPLICIT signal makes a figure part of a total — never size or
+ * position alone ("Ryte 4 val., vakare 4 val." stays 8 h; "Darbo laikas: 8
+ * val. Viršvalandžiai: 2 val." stays 10 h):
+ *   - a part says so in front of its own figure ("iš jų 2 val.", "including
+ *     2 h") or writes its duration in brackets ("(2 val. …)"); the items that
+ *     follow it in the SAME sentence continue that list; or
+ *   - a sentence says the figures are inside the day ("Šios 2 valandos įeina
+ *     į 15 valandų", "ne 2 valandos papildomai", "kartu 15 valandų"). Such a
+ *     repetition is not an item, and the person's other figures after the
+ *     total are its parts.
+ * The total is the first figure in hours or minutes and names no work of its
+ * own (a date such as "Lapkričio 6 d." is not a total). An item that says it
+ * is on top of the day ("vakare dar 2 val.") is never a part. Every part must
+ * be smaller than the total and together they must not exceed it. The parts
+ * keep their time; the rest of the day becomes one item carrying the total's
+ * own words (still asking the person to name the work when it names none).
+ * Any other item stays an item; the stated total then no longer matches the
+ * items, and the save sets it aside visibly (#1689) instead of hiding hours.
  *
  * A colon header ALONE is not a signal here: "9 val. …: 5 val. …, 2 val. …"
- * keeps the #1689 rule (`separateStatedTotal` below) — the itemised parts
- * count and an unmatched header is set aside visibly, never filled in.
+ * keeps the #1689 rule (`separateStatedTotal` below).
  */
 function containedTotal(
   fragments: JournalFragmentSuggestion[],
-  timed: JournalFragmentSuggestion[],
-  headerPhrases: ReadonlySet<string>,
+  where: FragmentSentences,
 ): { fragments: JournalFragmentSuggestion[]; statedTotal: JournalSuggestions["statedTotal"] } | null {
-  if (timed.length < 2) return null;
-  const total = timed[0];
+  const inHoursOrMinutes = fragments.filter((f) => f.time !== null && f.time.unitSlug !== "days");
+  if (inHoursOrMinutes.length < 2) return null;
+  const total = inHoursOrMinutes[0];
   const namesNoWork = (f: JournalFragmentSuggestion) => f.activitySlug === null && f.activityLabel === null;
   if (!namesNoWork(total)) return null;
   const totalMin = timeInMinutes(total.time!);
   if (totalMin === null || totalMin <= 0) return null;
-  const parts: JournalFragmentSuggestion[] = [];
+  const later = inHoursOrMinutes.slice(1);
+  const minutesOf = (f: JournalFragmentSuggestion) => timeInMinutes(f.time!) ?? 0;
+  const sentenceIndex = (f: JournalFragmentSuggestion) => where.sentenceOf.get(f) ?? -1;
+  const sentenceText = (f: JournalFragmentSuggestion) => where.sentences[sentenceIndex(f)] ?? f.rawPhrase;
+  const same = (a: number, b: number) => Math.abs(a - b) < 1;
+
+  // 1. Repetitions the person explains as being INSIDE the day.
   const restatements = new Set<JournalFragmentSuggestion>();
-  const counted: number[] = [];
-  let partsMin = 0;
-  for (const f of timed.slice(1)) {
-    const m = timeInMinutes(f.time!);
-    if (m === null) return null;
-    const repeats = Math.abs(m - totalMin) < 1 || counted.some((c) => Math.abs(c - m) < 1);
-    if (namesNoWork(f) && repeats) {
+  for (const f of later) {
+    if (!namesNoWork(f)) continue;
+    const m = minutesOf(f);
+    const equalsTotal = same(m, totalMin);
+    const equalsAnother = later.some((g) => g !== f && same(minutesOf(g), m));
+    const sentence = sentenceText(f);
+    const sentenceNamesTheTotal = numbersIn(sentence).some((n) => n === total.time!.value);
+    if (
+      (equalsTotal && (RESTATEMENT_CUE_RX.test(f.rawPhrase) || RESTATED_TOTAL_WORD_RX.test(f.rawPhrase))) ||
+      (equalsAnother && RESTATEMENT_CUE_RX.test(sentence) && sentenceNamesTheTotal)
+    ) {
       restatements.add(f);
-      continue;
     }
-    if (m >= totalMin) return null;
-    parts.push(f);
-    counted.push(m);
-    partsMin += m;
   }
-  if (parts.length === 0 && restatements.size === 0) return null;
+
+  // 2. The parts.
+  const candidates = later.filter((f) => !restatements.has(f) && !EXTRA_WORK_RX.test(f.rawPhrase));
+  const marked = (f: JournalFragmentSuggestion): boolean => {
+    const digit = f.rawPhrase.search(/\d/);
+    const lead = digit > 0 ? f.rawPhrase.slice(0, digit) : "";
+    return INCLUDED_PART_RX.test(lead) || BRACKETED_DURATION_RX.test(f.rawPhrase);
+  };
+  let parts: JournalFragmentSuggestion[];
+  if (restatements.size > 0) {
+    parts = candidates;
+  } else {
+    const opened = new Map<number, number>(); // sentence → position of its first marked part
+    later.forEach((f, i) => {
+      if (marked(f) && !opened.has(sentenceIndex(f))) opened.set(sentenceIndex(f), i);
+    });
+    if (opened.size === 0) return null;
+    parts = candidates.filter((f) => {
+      if (marked(f)) return true;
+      const from = opened.get(sentenceIndex(f));
+      return from !== undefined && later.indexOf(f) > from;
+    });
+  }
+  if (parts.some((p) => minutesOf(p) >= totalMin)) return null;
+  const partsMin = parts.reduce((sum, p) => sum + minutesOf(p), 0);
   if (partsMin > totalMin) return null;
-  const labelled =
-    PURE_DURATION_RX.test(total.rawPhrase) && headerPhrases.size > 0 && !headerPhrases.has(total.rawPhrase);
-  const signalled =
-    labelled ||
-    DAY_TOTAL_WORD_RX.test(total.rawPhrase) ||
-    restatements.size > 0 ||
-    parts.some((p) => INCLUDED_PART_RX.test(p.rawPhrase) || BRACKETED_TIME_RX.test(p.rawPhrase));
-  if (!signalled) return null;
+  if (parts.length === 0 && restatements.size === 0) return null;
+
   const restMin = totalMin - partsMin;
   const out: JournalFragmentSuggestion[] = [];
   for (const f of fragments) {
@@ -916,16 +976,19 @@ function containedTotal(
       continue;
     }
     // The rest of the day, in the person's own words; nothing when the parts
-    // already fill it.
-    if (restMin > 0) out.push({ ...f, time: minutesAsTime(restMin), isUnknown: false });
+    // already fill it. It still names no work, so it stays `isUnknown` and the
+    // composer keeps asking the person to name it.
+    if (restMin > 0) out.push({ ...f, time: minutesAsTime(restMin) });
   }
+  const partSet = new Set(parts);
+  const onTop = later.some((f) => !restatements.has(f) && !partSet.has(f));
   return {
     fragments: out,
     statedTotal: {
       value: total.time!.value,
       unitSlug: total.time!.unitSlug,
       rawPhrase: total.rawPhrase,
-      matchesFragments: true,
+      matchesFragments: !onTop,
       includesParts: true,
     },
   };
@@ -951,12 +1014,13 @@ function containedTotal(
 function separateStatedTotal(
   fragments: JournalFragmentSuggestion[],
   headerPhrases: ReadonlySet<string>,
+  where: FragmentSentences,
 ): {
   fragments: JournalFragmentSuggestion[];
   statedTotal: JournalSuggestions["statedTotal"];
 } {
   const timed = fragments.filter((f) => f.time !== null);
-  const contained = containedTotal(fragments, timed, headerPhrases);
+  const contained = containedTotal(fragments, where);
   if (contained) return contained;
   if (timed.length < 3) return { fragments, statedTotal: null };
   const noActivity = (f: JournalFragmentSuggestion) =>
@@ -1149,7 +1213,22 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
   // the stated total below (a header without a time is simply a fragment
   // like any other, or nothing).
   const headerPhrases = new Set(rawParts.slice(0, headerCount));
+  // Which sentence each part stood in — the day-total rule reads a sentence
+  // that explains figures ("Šios 2 valandos įeina į 15 valandų").
+  const starts = sentenceStarts(text);
+  const sentences = starts.map((start, i) => text.slice(start, starts[i + 1] ?? text.length));
+  const sentenceOf = new Map<JournalFragmentSuggestion, number>();
+  let cursor = 0;
+  let lastSentence = 0;
   for (const raw of rawParts) {
+    const at = text.indexOf(raw, cursor);
+    if (at >= 0) {
+      cursor = at + raw.length;
+      let idx = 0;
+      while (idx + 1 < starts.length && starts[idx + 1] <= at) idx += 1;
+      lastSentence = idx;
+    }
+    const sentenceOfRaw = lastSentence;
     const localTime = detectFragmentTime(raw);
     // the kind of work is read off the WORK part — the time off the whole
     const work = workPartOf(raw);
@@ -1184,13 +1263,15 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     }
     const isUnknown = localTime !== null && slug === null && label === null;
     if (localTime || slug || label) {
-      initialFragments.push({
+      const fragment: JournalFragmentSuggestion = {
         rawPhrase: raw,
         time: localTime,
         activitySlug: slug,
         activityLabel: label,
         isUnknown,
-      });
+      };
+      initialFragments.push(fragment);
+      sentenceOf.set(fragment, sentenceOfRaw);
     }
   }
   // Collapse "Dvi valandas | penkiolika minučių glaiščiau sienas" into one
@@ -1201,6 +1282,7 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
   const { fragments: items, statedTotal } = separateStatedTotal(
     initialFragments,
     headerPhrases,
+    { sentenceOf, sentences },
   );
   const fragments = mergeContinuationFragments(items);
 

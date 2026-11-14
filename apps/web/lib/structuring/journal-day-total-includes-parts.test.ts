@@ -117,6 +117,8 @@ describe("a day explained in several sentences is still one 15 h day", () => {
   });
 
   it("a repeated figure that names its own work is a real item, never a restatement", () => {
+    // The total names no work; the later block of the same size does.
+    expect(minutes("Dirbau 4 val. Vakare 4 val. dažiau sienas.")).toBe(8 * 60);
     expect(minutes("Klijavau plyteles 6 val., glaisčiau sienas 2 val., dažiau lubas 2 val.")).toBe(10 * 60);
   });
 
@@ -125,5 +127,75 @@ describe("a day explained in several sentences is still one 15 h day", () => {
     expect(s.fragments.map((f) => f.time?.value)).toEqual([5, 2]);
     expect(s.statedTotal).toMatchObject({ value: 9, matchesFragments: false });
     expect(s.statedTotal?.includesParts).toBeUndefined();
+  });
+});
+
+/**
+ * Independent review of #3355 (2026-11-14): size and position alone must never
+ * fold real hours into a total. Each sentence below was read wrongly by the
+ * first version; every one keeps the hours the person wrote.
+ */
+describe("real hours are never folded into a total without an explicit signal", () => {
+  it.each([
+    ["two equal blocks that name no work", "Ryte 4 val., vakare 4 val.", 8 * 60],
+    ["two equal blocks in English", "Worked 4 h in the morning and 4 h in the evening.", 8 * 60],
+    ["one figure per day of the week", "Pirmadienį 8 val. Antradienį 8 val. Trečiadienį 8 val.", 24 * 60],
+    ["a labelled day and labelled overtime", "Darbo laikas: 8 val. Viršvalandžiai: 2 val.", 10 * 60],
+    ["the same in English", "Hours: 8 h. Overtime: 2 h.", 10 * 60],
+    ["a bracketed count that is not a duration", "Dirbau 8 val. Vakare 2 val. dažiau sienas (2 sluoksniai).", 10 * 60],
+    ["an inclusion word after the part's own figure", "Worked 8 hours. Then 2 hours of paperwork including invoices.", 10 * 60],
+  ])("%s", (_name, text, expected) => {
+    expect(minutes(text)).toBe(expected);
+    expect(intakeMinutes(text)).toBe(expected);
+    expect(extractJournalSuggestions(text).statedTotal?.includesParts).not.toBe(true);
+  });
+
+  it("hours and minutes of one figure stay one figure (unchanged)", () => {
+    for (const text of ["Darbo laikas: 8 val. 30 min.", "Iš viso 8 val. 30 min."]) {
+      expect(extractJournalSuggestions(text).statedTotal?.includesParts).not.toBe(true);
+    }
+  });
+
+  it("a list after 'iš jų' keeps every item: 10 h with 2 h driving and 2 h waiting", () => {
+    const text = "Dirbau 10 val., iš jų 2 val. vairavau, 2 val. laukiau.";
+    expect(minutes(text)).toBe(10 * 60);
+    const times = extractJournalSuggestions(text)
+      .fragments.filter((f) => f.time)
+      .map((f) => f.time!.value)
+      .sort((a, b) => a - b);
+    expect(times).toEqual([2, 2, 6]);
+  });
+
+  it("an item said to be ON TOP of the day stays on top, and the stated total is set aside visibly", () => {
+    const text = "Dirbau 15 val., iš jų 2 val. koordinavimas. Vakare dar 2 val. dažiau.";
+    expect(minutes(text)).toBe(17 * 60);
+    expect(extractJournalSuggestions(text).statedTotal).toMatchObject({ value: 15, includesParts: true, matchesFragments: false });
+  });
+});
+
+describe("more ways to say a part is inside the day", () => {
+  it.each([
+    ["Lithuanian 'iš kurių'", "Dirbau 15 val., iš kurių 2 val. koordinavimas."],
+    ["Lithuanian without diacritics", "Dirbau 15 val., is kuriu 2 val. koordinavimas."],
+    ["Russian 'включая'", "Работал 15 часов, включая 2 часа координации."],
+    ["German 'inklusive'", "15 Stunden gearbeitet, inklusive 2 Stunden Koordination."],
+    ["a date before the day", "Lapkričio 6 d. Dirbau 15 val., iš jų 2 val. koordinavimas."],
+  ])("%s", (_name, text) => {
+    const hours = extractJournalSuggestions(text).fragments.reduce(
+      (sum, f) => sum + (f.time?.unitSlug === "hours" ? f.time.value * 60 : f.time?.unitSlug === "minutes" ? f.time.value : 0),
+      0,
+    );
+    expect(hours).toBe(15 * 60);
+  });
+
+  it("the rest of the day still asks the person to name its work", () => {
+    const rest = extractJournalSuggestions("Dirbau 15 val., iš jų 2 val. koordinavimas.").fragments.find(
+      (f) => f.time?.value === 13,
+    );
+    expect(rest).toMatchObject({ activitySlug: null, activityLabel: null, isUnknown: true });
+  });
+
+  it("a total said again in other words is not one more day", () => {
+    expect(minutes("Dirbau 15 val. be pertraukų. Iš viso 15 val.")).toBe(15 * 60);
   });
 });
