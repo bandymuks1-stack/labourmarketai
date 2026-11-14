@@ -393,18 +393,16 @@ test("H-7. reversal by the person and by the company closes the access, keeping 
   const ex = as(EX_NEW);
   const mgr = as(MGR);
 
-  // The person's own reversal, through the existing control.
+  // The person's own reversal, through the existing control. It lives inside
+  // the profile's organization-history disclosure, which starts closed.
   await ex.goto(`${BASE}/en/dashboard/profile`);
-  const withdraw = ex.getByTestId("roster-link-withdraw-open").first();
-  if (await withdraw.isVisible().catch(() => false)) {
-    await withdraw.click();
-    await ex.getByTestId("roster-link-withdraw-confirm").first().click();
-  } else {
-    // The control lives behind the profile's history section; fall back to the
-    // same server action the page calls, through the product's own RPC.
-    sqlExec(`select 1`); // no-op: keep the walk honest if the control moved
-    throw new Error("the person's own withdraw control was not found on the profile");
-  }
+  const history = ex.getByTestId("organization-history-disclosure").first();
+  await expect(history).toBeAttached({ timeout: 30_000 });
+  if ((await history.getAttribute("open")) === null) await history.locator("summary").first().click();
+  const withdraw = history.getByTestId("roster-link-withdraw-open").first();
+  await expect(withdraw, "the person's own withdraw control").toBeVisible({ timeout: 30_000 });
+  await withdraw.click();
+  await history.getByTestId("roster-link-withdraw-confirm").first().click();
   await expect
     .poll(() => linkState(), { message: "the person's withdrawal unlinks the row", timeout: 30_000 })
     .toBe("unlinked/-/-");
