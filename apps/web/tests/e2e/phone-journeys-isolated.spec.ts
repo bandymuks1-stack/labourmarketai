@@ -214,9 +214,11 @@ for (const phone of PHONES) {
     test(`M-3 (${phone.name}). the worker finds the company's need on the work board and opens its details`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await page.goto(`${BASE}/en/dashboard/opportunities?view=all`);
-      await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+      // Scoped to <main>: while a section streams in, the page can briefly hold a second, hidden copy
+      // of the list outside it (run on 4b663d9, 375 px: strict-mode match of two lists).
+      await expect(page.getByRole("main").getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
       await fitsTheScreen(page, "the work board");
-      const card = page.locator(`li[id="opp-${shared.needId}"]`).first();
+      const card = page.getByRole("main").locator(`li[id="opp-${shared.needId}"]`).first();
       await expect(card, "the verified company's need is on the board").toBeVisible({ timeout: 60_000 });
       // The card is THIS need (its id) from THIS company. Its heading is the recognised profession
       // ("Tiler"), not the company's free-text title (first run, 2026-11-14), so the title is
@@ -236,7 +238,7 @@ for (const phone of PHONES) {
     test(`M-4 (${phone.name}). the worker applies: interest in the need is expressed and stored`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await page.goto(`${BASE}/en/dashboard/opportunities?view=all`);
-      const card = page.locator(`li[id="opp-${shared.needId}"]`).first();
+      const card = page.getByRole("main").locator(`li[id="opp-${shared.needId}"]`).first();
       await expect(card).toBeVisible({ timeout: 60_000 });
       const box = card.getByTestId(`interest-${shared.needId}`);
       await tapUntil(box.getByTestId("interest-express"), box.getByTestId("interest-sent"));
@@ -252,7 +254,7 @@ for (const phone of PHONES) {
       // The worker writes to the employer from their application.
       const w = await signedInOnPhone(browser, phone, worker);
       await w.page.goto(`${BASE}/en/dashboard/opportunities?view=all`);
-      const box = w.page.locator(`li[id="opp-${shared.needId}"]`).first().getByTestId(`interest-${shared.needId}`);
+      const box = w.page.getByRole("main").locator(`li[id="opp-${shared.needId}"]`).first().getByTestId(`interest-${shared.needId}`);
       await expect(box.getByTestId("interest-contact-employer")).toBeVisible({ timeout: 60_000 });
       await box.getByTestId("interest-contact-employer").tap();
       await w.page.waitForURL(/\/en\/dashboard\/communication\/[0-9a-f-]{36}/, { timeout: 60_000 });
