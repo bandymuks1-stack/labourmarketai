@@ -307,7 +307,9 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    reissue_external_referral_v1, mark_external_referral_delivery_v1,
     //    record_invitation_delivery_attempt_v1, dead_letter_invitation_delivery_v1
     //    and invitation_delivery_health_v1, plus record_invitation_dsn_v1 for bounce
-    //    reconciliation (our Message-IDs only). Touches no chat table.
+    //    reconciliation (our Message-IDs only), and invitation_known_historical_unknown_v1
+    //    (one integer: owner-registered historical unknown outcomes, 2026-11-14).
+    //    Touches no chat table.
     //  - lib/invitations/public-preview.ts — the logged-out invitation
     //    landing's read (universal network v1). A stranger holding a link has
     //    no session; the alternative — granting a preview function to anon —
