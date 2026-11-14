@@ -8740,6 +8740,7 @@
     },
     "languagesTitle": "Languages",
     "languagesSelfStated": "Languages as stated by the worker.",
+    "educationSelfStated": "Education as stated by the worker.",
     "certificatesTitle": "Certificates & licences",
     "declaredCertHint": "Listed by the worker",
     "documentSelfSuppliedHint": "Document supplied by the worker",

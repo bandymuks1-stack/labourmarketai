@@ -392,3 +392,117 @@ test("A-4. inside an app's built-in browser the sign-up and sign-in pages say Go
     await plain.close();
   }
 });
+
+/**
+ * P-1. THE WAY FORWARD IS ON SCREEN ON A PHONE (trust and sign-up audit,
+ * 2026-11-13). Measured before the fix: the role step's Continue sat 1.7–2.1
+ * screens down and choosing a card did not bring it into view; the profile
+ * step's submit sat 2.7–3.4 screens down. Both now ride in a bar at the bottom
+ * of the screen on a phone. The viewport heights are the VISIBLE page area of
+ * a small Android phone, a 375 px phone and a 390 px phone with the browser's
+ * bars shown; English and Lithuanian. The numbers are still printed, so a
+ * later change has a baseline.
+ */
+for (const phone of [
+  { name: "360x560", width: 360, height: 560 },
+  { name: "375x553", width: 375, height: 553 },
+  { name: "390x664", width: 390, height: 664 },
+] as const) {
+  test(`P-1. onboarding on a phone: the primary button is on screen (${phone.name})`, async ({ browser }) => {
+    const ctx = await browser.newContext({ viewport: { width: phone.width, height: phone.height }, isMobile: true, hasTouch: true });
+    const page = await ctx.newPage();
+    try {
+      await signUp(page, email(`phone${phone.width}`));
+      const box = async (testId: string) =>
+        page.getByTestId(testId).first().evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          // "visible" = inside the visible area AND nothing drawn over its centre.
+          const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          // A disabled button ignores pointer events, so the hit test lands on
+          // its own bar behind it: that is still "nothing foreign on top".
+          const bar = el.closest('[data-testid="onboarding-action-bar"]');
+          const uncovered = top !== null && (el.contains(top) || (bar !== null && bar.contains(top)));
+          return { top: Math.round(r.top), bottom: Math.round(r.bottom), height: Math.round(r.height), visible: r.top >= 0 && r.bottom <= window.innerHeight && uncovered };
+        });
+      for (const locale of ["en", "lt"] as const) {
+        // The wizard restores an unfinished draft (and its step); each pass starts as a first visit.
+        await page.evaluate(() => {
+          window.localStorage.clear();
+          window.sessionStorage.clear();
+        });
+        await page.goto(`${BASE}/${locale}/onboarding`);
+        await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+        await page.evaluate(() => window.scrollTo(0, 0));
+        const cards = await page.locator('[data-testid^="onboarding-intent-"]:not([data-testid="onboarding-intents-continue"])').evaluateAll((els) =>
+          els.map((el) => {
+            const r = el.getBoundingClientRect();
+            return r.top >= 0 && r.bottom <= window.innerHeight;
+          }),
+        );
+        const before = await box("onboarding-intents-continue");
+        // The role step says what to do while nothing is chosen, and stops saying it after the first pick.
+        await expect(page.getByTestId("onboarding-continue-hint"), `${locale}: the bar says to choose first`).toBeVisible();
+        await expect(page.getByTestId("onboarding-intents-continue")).toBeDisabled();
+        await page.getByTestId("onboarding-intent-work").tap();
+        await expect(page.getByTestId("onboarding-intent-work")).toHaveAttribute("aria-pressed", "true");
+        await expect(page.getByTestId("onboarding-continue-hint"), `${locale}: the hint goes with the first pick`).toHaveCount(0);
+        await expect(page.getByTestId("onboarding-intents-continue")).toBeEnabled();
+        const after = await box("onboarding-intents-continue");
+        const scrollAfterPick = await page.evaluate(() => Math.round(window.scrollY));
+        console.info(
+          `[onboarding-phone] ${JSON.stringify({ phone: phone.name, locale, step: "role", viewport: phone.height, cardsTotal: cards.length, cardsFullyVisible: cards.filter(Boolean).length, continueBeforePick: before, continueAfterPick: after, scrollAfterPick, pageHeight: await page.evaluate(() => document.documentElement.scrollHeight) })}`,
+        );
+        expect(before.visible, `${locale}: Continue is on screen before anything is chosen`).toBe(true);
+        expect(after.visible, `${locale}: Continue is on screen after a card is chosen, without scrolling`).toBe(true);
+        expect(after.height, `${locale}: Continue keeps the 44 px touch floor`).toBeGreaterThanOrEqual(44);
+        // Nothing is trapped under the bar: at the end of the page the last card is clear of it.
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+        const lastCardBottom = await page.getByTestId("onboarding-intent-education").evaluate((el) => Math.round(el.getBoundingClientRect().bottom));
+        const barTop = await page.getByTestId("onboarding-action-bar").evaluate((el) => Math.round(el.getBoundingClientRect().top));
+        expect(lastCardBottom, `${locale}: the last card is not covered by the bar`).toBeLessThanOrEqual(barTop);
+        await page.evaluate(() => window.scrollTo(0, 0));
+
+        await page.getByTestId("onboarding-intents-continue").click();
+        await expect(page.getByTestId("onboarding-display-name")).toBeVisible({ timeout: 30_000 });
+        await page.evaluate(() => window.scrollTo(0, 0));
+        const submit = await box("onboarding-submit");
+        const name = await box("onboarding-display-name");
+        const country = await box("onboarding-country");
+        await page.getByTestId("onboarding-country").tap();
+        const option = page.getByRole("option").first();
+        await expect(option, "the country list opens").toBeVisible({ timeout: 15_000 });
+        const list = await option.evaluate((el) => {
+          const r = (el.closest('[role="listbox"]') ?? el).getBoundingClientRect();
+          return { top: Math.round(r.top), bottom: Math.round(r.bottom), fitsViewport: r.top >= 0 && r.bottom <= window.innerHeight };
+        });
+        console.info(
+          `[onboarding-phone] ${JSON.stringify({ phone: phone.name, locale, step: "profile", viewport: phone.height, name, country, submit, countryList: list, pageHeight: await page.evaluate(() => document.documentElement.scrollHeight) })}`,
+        );
+        expect(submit.visible, `${locale}: the submit button is on screen when the profile step opens`).toBe(true);
+        expect(submit.height, `${locale}: the submit button keeps the 44 px touch floor`).toBeGreaterThanOrEqual(44);
+        expect(name.visible && name.bottom <= submit.top, `${locale}: the name field is clear of the bar`).toBe(true);
+        await page.keyboard.press("Escape");
+      }
+    } finally {
+      await ctx.close();
+    }
+  });
+}
+
+
+test("P-2. on a desktop the onboarding buttons stay where they were, in the page flow", async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await ctx.newPage();
+  try {
+    await signUp(page, email("desktop1440"));
+    const bar = page.getByTestId("onboarding-action-bar");
+    await expect(bar).toBeVisible({ timeout: 30_000 });
+    expect(await bar.evaluate((el) => getComputedStyle(el).position), "role step: no fixed bar on a desktop").toBe("static");
+    await page.getByTestId("onboarding-intent-work").click();
+    await page.getByTestId("onboarding-intents-continue").click();
+    await expect(page.getByTestId("onboarding-submit")).toBeVisible({ timeout: 30_000 });
+    expect(await bar.evaluate((el) => getComputedStyle(el).position), "profile step: no fixed bar on a desktop").toBe("static");
+  } finally {
+    await ctx.close();
+  }
+});
