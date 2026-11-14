@@ -203,6 +203,9 @@ const NATIVE_NAV = new Set([
   // no async submit to show a pending state for: the browser performs a full
   // navigation. Same reasoning as the agreements-register filter form above.
   "app/[locale]/(marketing)/jobs/page.tsx",
+  // Goal navigator — its ONE form is the same plain GET search, submitted to
+  // the public board: the feedback is the board itself.
+  "components/navigation/goal-navigator.tsx",
 ]);
 
 const PENDING_SIGNAL =

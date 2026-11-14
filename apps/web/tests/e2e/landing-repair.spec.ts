@@ -93,6 +93,8 @@ test("every public nav item goes somewhere real", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Partneriams" })).toHaveCount(0);
 
   // …and the one remaining landing anchor actually lands.
+  // The older links sit behind "More" in the one navigation (2026-11-12).
+  await page.getByTestId("intent-toggle-more").click();
   const how = page.getByRole("link", { name: "Kaip veikia" }).first();
   await expect(how).toBeVisible();
   await how.click();

@@ -8,13 +8,16 @@ import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
+// The field renders with the small carry half only. The READING half
+// (`readPublicEntry`, which imports the whole intent router) is loaded on
+// first use, so a visitor who never types does not download or parse it
+// (lighter landing first screen, 2026-11-12).
 import {
   entryDoorHref,
-  readPublicEntry,
   PUBLIC_ENTRY_MAX_CHARS,
   type EntryDoor,
-  type PublicEntryReading,
-} from "@/lib/marketing/public-entry";
+} from "@/lib/marketing/public-entry-carry";
+import type { PublicEntryReading } from "@/lib/marketing/public-entry";
 import type { FirstRunIntent } from "@/lib/onboarding/first-run-intent";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { trackFunnel } from "@/lib/telemetry/task";
@@ -193,8 +196,28 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
     if (typed.length > 0) setDraft(typed);
   }, []);
 
-  const ask = useCallback((text: string) => {
-    const next = readPublicEntry(text);
+  // The one reader, loaded once. Started when the field is first focused or
+  // touched, so it is normally ready before the person submits.
+  const readerRef = useRef<Promise<typeof import("@/lib/marketing/public-entry")> | null>(null);
+  const loadReader = useCallback(() => {
+    readerRef.current ??= import("@/lib/marketing/public-entry");
+    return readerRef.current;
+  }, []);
+  // The newest question wins if two are asked before the reader arrives.
+  const askSeq = useRef(0);
+
+  const ask = useCallback(async (text: string) => {
+    const seq = (askSeq.current += 1);
+    let next: PublicEntryReading;
+    try {
+      next = (await loadReader()).readPublicEntry(text);
+    } catch {
+      // The reader could not be loaded (offline, a failed request). Let the
+      // next attempt fetch it again; nothing is shown as understood.
+      readerRef.current = null;
+      return;
+    }
+    if (seq !== askSeq.current) return;
     setChosen(null);
     if (next.kind === "empty") {
       setReading(null);
@@ -209,7 +232,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
       intent: next.kind === "recognised" ? next.family : undefined,
       resolution: "deterministic",
     });
-  }, []);
+  }, [loadReader]);
 
   const choose = useCallback((family: FirstRunIntent) => {
     setChosen(family);
@@ -280,6 +303,9 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
       <Card className="flex flex-col gap-4">
         {/* ── The sentence ─────────────────────────────────────────────── */}
         <form
+          // Fetch the reader as soon as the person turns to the field.
+          onFocus={() => void loadReader()}
+          onPointerEnter={() => void loadReader()}
           className="flex flex-col gap-2"
           onSubmit={(e) => {
             e.preventDefault();
@@ -287,7 +313,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
             // effect above); `draft` mirrors it once React holds it.
             const typed = inputRef.current?.value ?? draft;
             if (typed !== draft) setDraft(typed);
-            ask(typed);
+            void ask(typed);
           }}
         >
           <label
@@ -381,7 +407,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
                 title={example}
                 onClick={() => {
                   setDraft(example);
-                  ask(example);
+                  void ask(example);
                 }}
                 // COMPACT WRAPPING, not fewer chips (owner correction,
                 // 2026-09-09). MEASURED on the built app: at 320px the ten

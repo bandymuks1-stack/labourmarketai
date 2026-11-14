@@ -4238,7 +4238,7 @@
         "missing_code": "Usługa logowania odesłała Cię bez kodu logowania. Spróbuj ponownie — jeśli się powtórzy, przeładuj stronę.",
         "exchange_failed": "Logowanie nie zostało dokończone. Spróbuj ponownie — kod logowania działa raz i szybko wygasa.",
         "no_user": "Logowanie się powiodło, ale nie udało się sięgnąć do Twojego konta. Wyloguj się i zaloguj ponownie.",
-        "callback": "Nieoczekiwany błąd podczas logowania. Spróbuj ponownie — jeśli się utrzymuje, podaj identyfikator śledzenia poniżej.",
+        "callback": "Nieoczekiwany błąd podczas logowania. Spróbuj ponownie — jeśli się utrzymuje, podaj identyfikator „trace” widoczny poniżej.",
         "cancelled": "Logowanie zostało anulowane. Nic nie zmieniło się na Twoim koncie.",
         "unknown": "Nie udało się zalogować. Spróbuj ponownie.",
         "link_expired": "Ten link potwierdzający wygasł lub został już użyty. Jeśli już potwierdzono e-mail, po prostu się zaloguj. W przeciwnym razie poproś poniżej o nowy link.",
@@ -5212,7 +5212,7 @@
   },
   "companies": {
     "demand": {
-      "eyebrow": "Radar ofert",
+      "eyebrow": "Radar możliwości",
       "headline": {
         "line1": "Tak wygląda przepływ",
         "line2": "ofert."
@@ -5283,7 +5283,7 @@
       "items": [
         {
           "q": "Jak pokazywane są sygnały dopasowania?",
-          "a": "Zawsze względem konkretnego zapotrzebowania: pokrycie i dopasowanie na podstawie zapisów umiejętności pracowników, rzetelności oraz zapisów z budowy, wraz z powodami. Nigdy jedna uniwersalna ocena porównywalna między osobami."
+          "a": "Zawsze względem konkretnego zapotrzebowania: pokrycie i dopasowanie na podstawie zapisów umiejętności pracowników, rzetelności oraz zapisów z miejsca pracy, wraz z powodami. Nigdy jedna uniwersalna ocena porównywalna między osobami."
         },
         {
           "q": "Ile to kosztuje?",
@@ -5315,7 +5315,7 @@
         "line1": "Cała Twoja pula,",
         "line2": "w jednym miejscu."
       },
-      "subcopy": "Zarządzaj swoimi pracownikami, łącz ich z zapotrzebowaniami klientów i pośrednicz w przedstawieniach — bez utraty widoczności czy kontroli.",
+      "subcopy": "Zarządzaj swoimi pracownikami, łącz ich z zapotrzebowaniami klientów i kojarz strony — bez utraty widoczności czy kontroli.",
       "bullets": [
         "Wielkość puli — wszyscy zarządzani pracownicy na pierwszy rzut oka.",
         "Podział na zawody — zasoby według umiejętności, zgodnie z deklaracjami w profilach.",
@@ -5595,7 +5595,7 @@
       ],
       "screenshot": "Ścieżka zapotrzebowania firmy",
       "cta": "Opisz, jakich pracowników potrzebujesz",
-      "calculatorBody": "Zanim poprosisz o wykonawców, oszacuj pracę: godziny, materiały, sprzęt i dojazdy — na własnych liczbach.",
+      "calculatorBody": "Zanim zgłosisz zapotrzebowanie, oszacuj pracę: godziny, materiały, sprzęt i dojazdy — na własnych liczbach.",
       "calculatorLink": "Oblicz koszt projektu",
       "markets": {
         "lu": {
@@ -5777,7 +5777,7 @@
       },
       {
         "q": "Czy jest limit aktywnych stanowisk?",
-        "a": "Plan bezpłatny obejmuje 1 aktywne stanowisko. Plan Organizacja nie ma stałego limitu aktywnych stanowisk. Nadal obowiązują zwykłe zabezpieczenia przed nadużyciami, takie jak limity liczby zapytań."
+        "a": "Plan bezpłatny obejmuje 1 aktywne stanowisko. Plan Organizacja nie ma stałego limitu aktywnych stanowisk. Nadal obowiązują zwykłe zabezpieczenia przed nadużyciami, takie jak techniczne limity częstotliwości żądań."
       }
     ],
     "priceState": {
@@ -8747,6 +8747,7 @@
     },
     "languagesTitle": "Języki",
     "languagesSelfStated": "Języki podane przez pracownika.",
+    "educationSelfStated": "Wykształcenie podane przez pracownika.",
     "certificatesTitle": "Certyfikaty i uprawnienia",
     "declaredCertHint": "Podane przez pracownika",
     "documentSelfSuppliedHint": "Dokument dostarczony przez pracownika",
@@ -9448,7 +9449,7 @@
     "subcopy": "Płatności nie są jeszcze włączone — brak strony płatności i karty. Płatne plany są pokazane, abyś znał ich zakres; dostęp pilotażowy jest nadawany ręcznie.",
     "note": "Plany opisują zakres, a nie aktywne rozliczenia. Na tej stronie nic nie jest naliczane.",
     "plans": {
-      "free_worker": "Darmowy pracownik",
+      "free_worker": "Pracownik — plan bezpłatny",
       "worker_plus": "Osoba plus (niedostępne)",
       "company_pilot": "Organizacja",
       "agency_pilot": "Poziom agencji (niedostępne)",
@@ -9509,7 +9510,7 @@
     },
     "enforcement": {
       "free_surface": "W produkcie już dziś",
-      "server_gate": "W produkcie już dziś, sprawdzane pod kątem uprawnień",
+      "server_gate": "Dostępne już dziś, zależnie od Twoich uprawnień",
       "declared_boundary_only": "Przygotowane — zacznie działać dopiero z rozliczeniami",
       "admin_rbac": "Wewnętrzne, tylko dla administratora"
     }
@@ -10574,7 +10575,7 @@
         "full_time": "Pełny etat",
         "part_time": "Niepełny etat"
       },
-      "positions": "{count} miejsc",
+      "positions": "{count, plural, one {# miejsce} few {# miejsca} many {# miejsc} other {# miejsca}}",
       "starts": "Start {date}",
       "open": "Zobacz szczegóły",
       "more": "Pokaż do {count} dla Ciebie",
@@ -11198,7 +11199,7 @@
         "flow": [],
         "participants": [
           "Agencje rekrutacji i selekcji",
-          "Firmy pracy tymczasowej",
+          "Agencje pracy tymczasowej",
           "Wykonawcy i podwykonawcy",
           "Dostawcy szkoleń",
           "Szkoły i placówki kształcenia zawodowego",
@@ -12928,6 +12929,7 @@
     "servicesTitle": "Co ta osoba potrafi",
     "servicesEmpty": "Nic jeszcze nie zaoferowano",
     "servicesUnavailable": "Nie udało się wczytać oferowanych usług",
+    "sharedAfterWork": "Usługi, zdjęcia prac i zapisana praca są widoczne, gdy zaczniecie współpracę.",
     "serviceRemote": "Zdalnie",
     "photoAlt": "Zdjęcie wykonanej pracy",
     "historyTitle": "Zaimportowana historia",
@@ -20518,14 +20520,14 @@
       "text": "Korzystanie ze stron i źródło kampanii mierzymy tylko za Twoją zgodą.",
       "accept": "Zezwól na pomiar",
       "refuse": "Odmów",
-      "more": "Więcej",
+      "more": "Więcej o plikach cookie",
       "label": "Wybór dotyczący pomiaru korzystania"
     },
     "control": {
       "title": "Pomiar korzystania i przypisanie kampanii",
-      "granted": "Wyraziłeś zgodę. Możesz ją w każdej chwili wycofać — wtedy wpisy zostaną usunięte z tego urządzenia.",
-      "refused": "Odmówiłeś. Na tym urządzeniu nic nie jest zapisywane na potrzeby pomiaru.",
-      "undecided": "Nie dokonałeś jeszcze wyboru, więc nic nie jest zapisywane na potrzeby pomiaru.",
+      "granted": "Zgoda została wyrażona. Możesz ją w każdej chwili wycofać — wtedy wpisy zostaną usunięte z tego urządzenia.",
+      "refused": "Odmówiono zgody. Na tym urządzeniu nic nie jest zapisywane na potrzeby pomiaru.",
+      "undecided": "Wybór nie został jeszcze dokonany, więc nic nie jest zapisywane na potrzeby pomiaru.",
       "allow": "Zezwól",
       "refuse": "Odmów"
     }
@@ -20572,5 +20574,79 @@
         "error": "Nie udało się. Spróbuj później."
       }
     }
+  },
+  "siteNav": {
+    "signUp": "Zarejestruj się",
+    "trigger": "Główne wybory",
+    "account": "Po zalogowaniu",
+    "intents": {
+      "work": {
+        "title": "Szukam pracy",
+        "description": "Znajdź oferty i pokaż, co potrafisz.",
+        "short": "Szukam pracy"
+      },
+      "workers": {
+        "title": "Szukam pracowników",
+        "description": "Opisz, jakiej pracy potrzebujesz.",
+        "short": "Szukam pracowników"
+      },
+      "services": {
+        "title": "Oferuję usługi",
+        "description": "Opublikuj swoją ofertę i odpowiadaj na zapytania.",
+        "short": "Oferuję usługi"
+      },
+      "orders": {
+        "title": "Szukam zleceń i umów",
+        "description": "Znajdź zapytania o pracę i trzymaj oferty w jednym miejscu.",
+        "short": "Szukam zleceń"
+      },
+      "partners": {
+        "title": "Szukam partnerów",
+        "description": "Połącz się z ludźmi i organizacjami, z którymi pracujesz.",
+        "short": "Szukam partnerów"
+      },
+      "agencies": {
+        "title": "Dla agencji",
+        "description": "Zarządzaj ludźmi, klientami i ofertami agencji.",
+        "short": "Dla agencji"
+      }
+    },
+    "links": {
+      "jobs": "Oferty pracy",
+      "workOpportunities": "Możliwości pracy",
+      "createCv": "Utwórz darmowe CV",
+      "workAbroad": "Praca za granicą",
+      "forWorkers": "Jak to działa dla pracowników",
+      "companyNeed": "Opisz potrzebę",
+      "forCompanies": "Jak to działa dla firm",
+      "labourMarket": "Rynek pracy według kraju",
+      "myServices": "Twoje usługi",
+      "serviceRequests": "Zapytania o usługi",
+      "marketListings": "Ogłoszenia rynkowe",
+      "commercial": "Oferty i umowy",
+      "network": "Twoja sieć",
+      "partnerWithUs": "Zostań partnerem",
+      "forAgencies": "Jak to działa dla agencji",
+      "setUpAgency": "Załóż agencję"
+    },
+    "assistant": "Zapytaj asystenta",
+    "start": {
+      "searchLabel": "Szukaj pracy",
+      "searchPlaceholder": "Stanowisko lub słowo kluczowe",
+      "searchSubmit": "Szukaj",
+      "viewAll": "Wszystkie oferty"
+    },
+    "nav": {
+      "heading": "Co chcesz zrobić?",
+      "swipe": "Przesuń",
+      "close": "Zamknij",
+      "functions": "Funkcje",
+      "professions": "Zawody",
+      "opensNow": "Otwiera się od razu",
+      "signInWhenOpen": "Logowanie przy otwarciu",
+      "allSectors": "Wszystkie branże",
+      "fullList": "Pełna lista"
+    },
+    "more": "Więcej"
   }
 }

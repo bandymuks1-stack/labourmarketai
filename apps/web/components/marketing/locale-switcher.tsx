@@ -153,7 +153,12 @@ export function LocaleSwitcher({
           "text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary",
         )}
       >
-        <Globe aria-hidden className="h-3.5 w-3.5 text-text-muted" />
+        {/* Compact phone header: the code alone ("LT") marks the control;
+            the globe returns from `sm`, where there is room. */}
+        <Globe
+          aria-hidden
+          className={cn("h-3.5 w-3.5 text-text-muted", compactBelowSm && "hidden sm:block")}
+        />
         {/* The button keeps its `localeSwitch` aria-label in both modes, so
             the ACCESSIBLE name never shrinks with the visible text. */}
         {compactUntilWide ? (
