@@ -441,8 +441,12 @@ test("H-7. reversal by the person and by the company closes the access, keeping 
   await mgr.getByTestId(`roster-unlink-open-${s.personId}`).click();
   await mgr.getByTestId(`roster-unlink-reason-${s.personId}`).fill("QA-SYNTHETIC: linked to the wrong person");
   await mgr.getByTestId(`roster-unlink-confirm-${s.personId}`).click();
-  await expect(mgr.getByTestId(`roster-unlink-done-${s.personId}`)).toBeVisible({ timeout: 30_000 });
-  expect(linkState(), "the company's reversal unlinks the row").toBe("unlinked/-/-");
+  // The page re-reads the roster after the action, and an unlinked row has no
+  // unlink control left to say "done" in: the row itself now reads unlinked.
+  await expect
+    .poll(() => linkState(), { message: "the company's reversal unlinks the row", timeout: 30_000 })
+    .toBe("unlinked/-/-");
+  await expect(mgr.getByTestId(`roster-unlink-open-${s.personId}`)).toHaveCount(0, { timeout: 30_000 });
   expect(await exReadsRecords(), "and closes the person's access").toBe(0);
   expect(fingerprint(), "every record still stands after both reversals").toBe(FP0);
   expect(
