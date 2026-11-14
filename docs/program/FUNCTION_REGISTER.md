@@ -712,6 +712,54 @@ Owner's unified command: judge each scenario by what a real person can actually 
 | SC-15 | Older person or pensioner finds help | FAIL | Owner | none | "senjor", "pensinink", "pensioner" appear in no text of the lt and en message files. Sign-up needs e-mail, a password with 4 character rules and 2 onboarding steps. No phone or assisted route found | **no door and no wording for this person**; depends on SC-14 | Owner: decide scope; then one plain-language page and an assisted route |
 | SC-16 | Pensioner wants to keep working | NOT VERIFIED | Coordinator | — | nothing stops the worker path (W-1), and no age filter was found; nobody has tested it with this person in mind. Inputs are 14 px | comfort for older eyes untested | A moderated test with one older person, not a walk |
 
+### Critical scenarios, seven questions (2026-11-05)
+
+Owner's order: the main criterion is that a person really reaches the goal. These rows add seven questions to SC-1..SC-16 and do not replace them. The goal column repeats the status of the SC row above, and that row stays the source.
+
+**How to read it.** A production walk is a script in Playwright Chromium that already knows what to press. It proves the path exists and the result is stored. It cannot prove that a person knows what to press next, or that it works without help, so a walk alone never gives PASS in those columns. `NOT VERIFIED` means nobody has checked; it is not a pass. No value here comes from a real person in real Chrome yet. `not applicable` means there is no path to judge.
+
+**Result today:** goal reached in 8 of 16 scenarios, 4 FAIL, 2 BLOCKED, 2 NOT VERIFIED. **Not one scenario has all seven questions answered, so none is a full PASS here.**
+
+| ID | Goal reached | Steps to the result | Clear what to press next | Shows it is running | No duplicates | Clear errors | Input not lost | Works without an agent's help | Phone |
+|---|---|---|---|---|---|---|---|---|---|
+| SC-1 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-2 | PASS | NOT VERIFIED | NOT VERIFIED | Profile saves: PASS in the walk 41994411748, row in under 1 s (no person yet) | **FAIL**: `confirmCvEducationAction` still stores a repeat CV import twice. Profile forms fixed by #3089 and proven in that walk | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-3 | **FAIL** | 1 query, measured | NOT VERIFIED | NOT VERIFIED: first try 9.4 s | not applicable | **FAIL**: `slaugytojas` says "0 found" when matching ads exist | NOT VERIFIED | **FAIL**: the word a person uses finds nothing | 390 px Chromium: same FAIL |
+| SC-4 | BLOCKED | Offer: home door, sign-up, 4 fields. Finding it signed out: no path | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | **FAIL** for the customer: no public page | 390 px Chromium: 404 |
+| SC-5 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-6 | PASS | Sign-up comes before seeing any offer | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-7 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-8 | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-9 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-10 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-11 | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| SC-12 | BLOCKED | No path | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | **FAIL**: no path | not applicable |
+| SC-13 | **FAIL** | No path | **FAIL**: no door | not applicable | not applicable | **FAIL**: 404 on 5 routes tried | not applicable | **FAIL**: no path | 390 px Chromium: 404 |
+| SC-14 | **FAIL** | No path | **FAIL**: no door | not applicable | not applicable | NOT VERIFIED | not applicable | **FAIL**: no path | NOT VERIFIED |
+| SC-15 | **FAIL** | E-mail, password with 4 rules, 2 onboarding steps, then no door | **FAIL**: no door or wording | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | **FAIL**: no assisted route | NOT VERIFIED |
+| SC-16 | NOT VERIFIED | Same as W-1, not counted | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | Inputs are 14 px; older eyes untested |
+
+**What finishes each scenario that isn't reached yet.** Done means proven the same way as the rest of this register.
+
+| ID | Now | Concrete actions, in order | Who | Done when |
+|---|---|---|---|---|
+| SC-3 | FAIL | 1. Search the ad title as well as the occupation label (SR-10, RED, on the search lane). 2. Add care and common words to `public-vacancy-profession-match.ts` (GREEN). 3. Walk `jobs-search` with a step for `slaugytojas` | Search lane; GREEN executor; coordinator walks | `slaugytojas` finds the matching ads, and a first-time word answers without a timeout (SR-1) |
+| SC-13 | FAIL | 1. Owner approves public service pages (6.21, RED RPC). 2. Build the public list, page and sitemap entries (GREEN). 3. A signed-out walk step | Owner, GREEN executor, coordinator | A signed-out visitor finds a service, and it is in the sitemap |
+| SC-14 | FAIL | 1. Owner decides whether care is in scope, and its safeguarding rules. 2. If yes: care subject and a filter (GREEN). 3. A moderated test with one family | Owner first | A family reaches a checked offer. **Until then care search does not launch** |
+| SC-15 | FAIL | 1. Owner decides scope, after SC-14. 2. One plain-language page and an assisted route. 3. A moderated test with one older person | Owner first | An older person gets help without an agent |
+| SC-4 | BLOCKED | 1. Owner approves 6.21, the same step as SC-13. 2. A self-employed door in onboarding (role `freelancer` is hidden today). 3. Owner's invoicing rules per country (7.30) | Owner, GREEN executor | A specialist publishes, and a signed-out customer finds them |
+| SC-12 | BLOCKED | 1. Owner decides the recognition structure (11.10, RED). 2. Build and walk it. Until then the product keeps saying "declared" | Owner | A qualification is checked against a named source |
+| SC-8 | NOT VERIFIED | 1. Add a step to `brigade-formation`: hours from a subcontractor's team reach the contractor's project. 2. Run it under the lane rule | GREEN executor; coordinator walks | The step passes, or the gap is recorded as FAIL |
+| SC-16 | NOT VERIFIED | 1. 16 px inputs (GREEN, UXC-1). 2. A moderated test with one older person; a walk cannot judge this | GREEN executor; owner arranges the test | That person reaches a first entry without help |
+
+**The 123 functions with no browser proof stay in `## Chrome check queue`; they are not repeated here.** Its Journey column names the scenario or journey each one proves. `(area)` means the link comes only from the function's area and needs a human look. Groups E (already proven) and F (no browser can prove it) have no scenario check on purpose.
+
+**What can close these, by risk:**
+
+1. **A moderated test with one real person in real Chrome, desktop and phone:** SC-2, SC-3, SC-5, SC-6. It is the only thing that answers "clear what to press" and "works without help". Coordinator or owner: a production browser is not available to the UX/UI session.
+2. **Walk steps, one at a time under the lane rule:** SC-8 (brigade-formation), L-4 (recognition-chain), A11Y-2 (mobile-surfaces). They close real gaps. No step is added or dispatched by this table.
+3. **Owner scope first:** SC-4, SC-13, SC-14, SC-15. A walk cannot help until a door exists.
+
 ### UX in Chromium at phone size (2026-11-04)
 
 Ordering and booking: E-4, C-1, C-2. Accessibility: A11Y-1, A11Y-2. Finding work: SC-3. Finding a worker: SC-5, SCH-2.
@@ -2087,82 +2135,82 @@ How it's tested:
 | 5 | 2.36 | Žurnalo šablonai pagal profesiją | A | walk, new step | journal-confirm | SC-2 | Profession template in the journal |
 | 6 | 4.8 | Anoniminis poreikio pateikimas | A | walk, new step | register-gaps | SC-6 | Writes one row; the walk must remove it |
 | 7 | 4.29 | Susidomėjimas virsta laisva vieta | A | walk, new step | jobs-search | J-4 | Screen only; no hand-off to the real partner |
-| 8 | 6.11 | Pasirengimas darbui užsienyje | A | existing walk, plus Chrome signed out | requirements-countries |  | Public part |
-| 9 | 8.1 | Svetainės kalbos | A | existing walk, plus Chrome signed out | public-org-locales |  | All active languages |
-| 10 | 12.2 | Darbo rinkos žinios | A | existing walk, plus Chrome signed out | public-market-direction |  |  |
-| 11 | 12.5 | Viešieji rinkos faktai | A | existing walk, plus Chrome signed out | public-market-direction |  |  |
+| 8 | 6.11 | Pasirengimas darbui užsienyje | A | existing walk, plus Chrome signed out | requirements-countries | SC-6 (area) | Public part |
+| 9 | 8.1 | Svetainės kalbos | A | existing walk, plus Chrome signed out | public-org-locales | SC-3 (area) | All active languages |
+| 10 | 12.2 | Darbo rinkos žinios | A | existing walk, plus Chrome signed out | public-market-direction | SC-3 (area) |  |
+| 11 | 12.5 | Viešieji rinkos faktai | A | existing walk, plus Chrome signed out | public-market-direction | SC-3 (area) |  |
 | 12 | 9.4 | Privatumo prašymai | B | existing walk | search-support-privacy | J-18 |  |
 | 13 | 7.2 | Nemokamas planas: vienas atviras poreikis | B | walk, new step | fresh-activation | J-5 | Needs an organization without the pilot; the QA cast's holds it |
-| 14 | 9.9 | Veiksmų žurnalas | B | walk, new step | admin-console |  | Screen only; detail in the private record |
+| 14 | 9.9 | Veiksmų žurnalas | B | walk, new step | admin-console | J-18 (area) | Screen only; detail in the private record |
 | 15 | 7.28 | Pardavėjas ir sąlygos | B | Chrome signed out |  | J-14 | Read the live terms; stays FAIL until legal text exists |
-| 16 | 9.24 | Saugumo incidentų tvarkymas | B | Chrome signed out |  |  | Response headers on public pages |
-| 17 | 13.16 | Naršyklės klaidų pranešimai | C | read the code first |  |  | Only a citation so far; may not exist |
+| 16 | 9.24 | Saugumo incidentų tvarkymas | B | Chrome signed out |  | J-18 (area) | Response headers on public pages |
+| 17 | 13.16 | Naršyklės klaidų pranešimai | C | read the code first |  | SC-10 (area) | Only a citation so far; may not exist |
 | 18 | 4.30 | Kandidatas, sprendimas, poreikio uždarymas | D | walk once unblocked |  | SC-5 | Waits; see its row |
 | 19 | 3.35 | Persidengiančių įsipareigojimų įspėjimas | D | walk once unblocked |  | SC-10 | Waits; see its row |
-| 20 | 3.36 | Įmonės gyvasis CV | D | walk once unblocked |  |  | Waits; see its row |
-| 21 | 2.10 | Nuorodos į kitus profilius | D | walk once unblocked |  |  | Waits; see its row |
-| 22 | 4.18 | Duomenų atskleidimas darbdaviui | D | walk once unblocked |  |  | Waits; see its row |
-| 23 | 2.27 | Įmonės istorinių įrašų įkėlimas | D | walk once unblocked |  |  | Waits; see its row |
-| 24 | 2.28 | Senų įrašų sujungimas | D | walk once unblocked |  |  | Waits; see its row |
-| 25 | 2.37 | Įrašo atsisakymas | D | new walk once it exists |  |  | Not built |
+| 20 | 3.36 | Įmonės gyvasis CV | D | walk once unblocked |  | SC-10 (area) | Waits; see its row |
+| 21 | 2.10 | Nuorodos į kitus profilius | D | walk once unblocked |  | SC-2 (area) | Waits; see its row |
+| 22 | 4.18 | Duomenų atskleidimas darbdaviui | D | walk once unblocked |  | SC-5 (area) | Waits; see its row |
+| 23 | 2.27 | Įmonės istorinių įrašų įkėlimas | D | walk once unblocked |  | SC-2 (area) | Waits; see its row |
+| 24 | 2.28 | Senų įrašų sujungimas | D | walk once unblocked |  | SC-2 (area) | Waits; see its row |
+| 25 | 2.37 | Įrašo atsisakymas | D | new walk once it exists |  | SC-2 (area) | Not built |
 | 26 | 6.21 | Viešas verslo puslapis | D | walk once unblocked |  | SC-4 | Waits; see its row |
-| 27 | 4.22 | Trys nemokami profilių peržiūrėjimai | D | new walk once it exists |  |  | Not built |
-| 28 | 2.17 | Europos profesijų klasifikatorius | D | walk once unblocked |  |  | Waits; see its row |
-| 29 | 5.15 | Balsas kaip lygiavertis būdas | D | walk once unblocked |  |  | Waits; see its row |
-| 30 | 2.30 | Žurnalas balsu | D | walk once unblocked |  |  | Waits; see its row |
+| 27 | 4.22 | Trys nemokami profilių peržiūrėjimai | D | new walk once it exists |  | SC-5 (area) | Not built |
+| 28 | 2.17 | Europos profesijų klasifikatorius | D | walk once unblocked |  | SC-2 (area) | Waits; see its row |
+| 29 | 5.15 | Balsas kaip lygiavertis būdas | D | walk once unblocked |  | SC-5 (area) | Waits; see its row |
+| 30 | 2.30 | Žurnalas balsu | D | walk once unblocked |  | SC-2 (area) | Waits; see its row |
 | 31 | 7.5 | Mokėjimas už planą | D | walk once unblocked |  | J-14 | Waits; see its row |
-| 32 | 7.6 | Mokėjimų įrašų atkūrimas | D | walk once unblocked |  |  | Waits; see its row |
-| 33 | 7.7 | Rankinis bandomojo plano suteikimas | D | walk once unblocked |  |  | Waits; see its row |
-| 34 | 7.8 | Kreditų sąskaita | D | walk once unblocked |  |  | Waits; see its row |
-| 35 | 7.9 | Kreditų papildymas ir planų pakopos | D | new walk once it exists |  |  | Not built |
-| 36 | 7.11 | Atidėti planai | D | new walk once it exists |  |  | Not built |
-| 37 | 7.12 | Dirbtinio intelekto kaštų skaičiavimas | D | walk once unblocked |  |  | Waits; see its row |
+| 32 | 7.6 | Mokėjimų įrašų atkūrimas | D | walk once unblocked |  | J-14 (area) | Waits; see its row |
+| 33 | 7.7 | Rankinis bandomojo plano suteikimas | D | walk once unblocked |  | J-14 (area) | Waits; see its row |
+| 34 | 7.8 | Kreditų sąskaita | D | walk once unblocked |  | J-14 (area) | Waits; see its row |
+| 35 | 7.9 | Kreditų papildymas ir planų pakopos | D | new walk once it exists |  | J-14 (area) | Not built |
+| 36 | 7.11 | Atidėti planai | D | new walk once it exists |  | J-14 (area) | Not built |
+| 37 | 7.12 | Dirbtinio intelekto kaštų skaičiavimas | D | walk once unblocked |  | J-14 (area) | Waits; see its row |
 | 38 | 7.15 | Metinė prenumerata | D | walk once unblocked |  | J-14 | Waits; see its row |
-| 39 | 7.18 | Mokėjimas keičia teises | D | walk once unblocked |  |  | Waits; see its row |
-| 40 | 7.19 | Grąžinimai ir ginčai | D | walk once unblocked |  |  | Waits; see its row |
-| 41 | 7.20 | Sąskaitos platformoje | D | new walk once it exists |  |  | Not built |
-| 42 | 7.21 | Atsiskaitymo portalas | D | walk once unblocked |  |  | Waits; see its row |
-| 43 | 7.22 | Mokamų funkcijų teisės ir ribos | D | walk once unblocked |  |  | Waits; see its row |
-| 44 | 7.23 | Kreditų pirkimas | D | new walk once it exists |  |  | Not built |
-| 45 | 7.24 | Kreditai po vieno mokėjimo | D | new walk once it exists |  |  | Not built |
-| 46 | 7.26 | Kreditų išleidimas ir grąžinimas | D | new walk once it exists |  |  | Not built |
-| 47 | 7.27 | Nemokamas VIP patvirtintoms įmonėms | D | walk once unblocked |  |  | Waits; see its row |
-| 48 | 7.29 | PVM skaičiavimas | D | walk once unblocked |  |  | Waits; see its row |
-| 49 | 7.30 | Sąskaitos ir priėmimo aktai iš žurnalo | D | new walk once it exists |  |  | Not built |
-| 50 | 7.31 | Planai darbuotojams ir įmonėms | D | new walk once it exists |  |  | Not built |
-| 51 | 1.8 | Viena organizacija, keli veiklos tipai | D | walk once unblocked |  |  | Waits; see its row |
-| 52 | 5.8 | Pranešimai telefone | D | walk once unblocked |  |  | Waits; see its row |
-| 53 | 5.16 | Įspėjimai savininkui | D | walk once unblocked |  |  | Waits; see its row |
-| 54 | 5.20 | Savos automatizacijos | D | new walk once it exists |  |  | Not built |
-| 55 | 5.21 | SMS ir WhatsApp kanalai | D | new walk once it exists |  |  | Not built |
-| 56 | 6.12 | Tarptautiniai sandoriai | D | new walk once it exists |  |  | Not built |
-| 57 | 6.13 | Prekių užsakymai | D | new walk once it exists |  |  | Not built |
-| 58 | 6.14 | Logistika | D | new walk once it exists |  |  | Not built |
-| 59 | 6.22 | Būstas | D | new walk once it exists |  |  | Not built |
-| 60 | 6.23 | Paslaugos įvertinimas ir ginčai | D | new walk once it exists |  |  | Not built |
-| 61 | 6.24 | Paslaugų srautas telefone | D | new walk once it exists |  |  | Not built |
-| 62 | 8.5 | Devynios pirmosios rinkos | D | walk once unblocked |  |  | Waits; see its row |
+| 39 | 7.18 | Mokėjimas keičia teises | D | walk once unblocked |  | J-14 (area) | Waits; see its row |
+| 40 | 7.19 | Grąžinimai ir ginčai | D | walk once unblocked |  | J-14 (area) | Waits; see its row |
+| 41 | 7.20 | Sąskaitos platformoje | D | new walk once it exists |  | J-14 (area) | Not built |
+| 42 | 7.21 | Atsiskaitymo portalas | D | walk once unblocked |  | J-14 (area) | Waits; see its row |
+| 43 | 7.22 | Mokamų funkcijų teisės ir ribos | D | walk once unblocked |  | J-14 (area) | Waits; see its row |
+| 44 | 7.23 | Kreditų pirkimas | D | new walk once it exists |  | J-14 (area) | Not built |
+| 45 | 7.24 | Kreditai po vieno mokėjimo | D | new walk once it exists |  | J-14 (area) | Not built |
+| 46 | 7.26 | Kreditų išleidimas ir grąžinimas | D | new walk once it exists |  | J-14 (area) | Not built |
+| 47 | 7.27 | Nemokamas VIP patvirtintoms įmonėms | D | walk once unblocked |  | J-14 (area) | Waits; see its row |
+| 48 | 7.29 | PVM skaičiavimas | D | walk once unblocked |  | J-14 (area) | Waits; see its row |
+| 49 | 7.30 | Sąskaitos ir priėmimo aktai iš žurnalo | D | new walk once it exists |  | J-14 (area) | Not built |
+| 50 | 7.31 | Planai darbuotojams ir įmonėms | D | new walk once it exists |  | J-14 (area) | Not built |
+| 51 | 1.8 | Viena organizacija, keli veiklos tipai | D | walk once unblocked |  | J-1 (area) | Waits; see its row |
+| 52 | 5.8 | Pranešimai telefone | D | walk once unblocked |  | SC-5 (area) | Waits; see its row |
+| 53 | 5.16 | Įspėjimai savininkui | D | walk once unblocked |  | SC-5 (area) | Waits; see its row |
+| 54 | 5.20 | Savos automatizacijos | D | new walk once it exists |  | SC-5 (area) | Not built |
+| 55 | 5.21 | SMS ir WhatsApp kanalai | D | new walk once it exists |  | SC-5 (area) | Not built |
+| 56 | 6.12 | Tarptautiniai sandoriai | D | new walk once it exists |  | SC-6 (area) | Not built |
+| 57 | 6.13 | Prekių užsakymai | D | new walk once it exists |  | SC-6 (area) | Not built |
+| 58 | 6.14 | Logistika | D | new walk once it exists |  | SC-6 (area) | Not built |
+| 59 | 6.22 | Būstas | D | new walk once it exists |  | SC-6 (area) | Not built |
+| 60 | 6.23 | Paslaugos įvertinimas ir ginčai | D | new walk once it exists |  | SC-6 (area) | Not built |
+| 61 | 6.24 | Paslaugų srautas telefone | D | new walk once it exists |  | SC-6 (area) | Not built |
+| 62 | 8.5 | Devynios pirmosios rinkos | D | walk once unblocked |  | SC-3 (area) | Waits; see its row |
 | 63 | 8.13 | Programėlė telefonui | D | walk once unblocked |  | J-17 | Waits; see its row |
 | 64 | 8.14 | Nuorodos į programėlę | D | walk once unblocked |  | J-17 | Waits; see its row |
 | 65 | 8.15 | Programėlių parduotuvės | D | walk once unblocked |  | J-17 | Waits; see its row |
-| 66 | 9.16 | Rekomendavimo sąsaja | D | walk once unblocked |  |  | Waits; see its row |
-| 67 | 10.4 | Dirbtinio intelekto leidimų sritys | D | new walk once it exists |  |  | Not built |
-| 68 | 10.5 | Sąrašai dirbtinio intelekto parduotuvėse | D | walk once unblocked |  |  | Waits; see its row |
-| 69 | 10.7 | Pokalbio ketinimų atpažinimas | D | walk once unblocked |  |  | Waits; see its row |
-| 70 | 10.8 | CV sutvarkymas dirbtiniu intelektu | D | walk once unblocked |  |  | Waits; see its row |
-| 71 | 10.9 | Žurnalo siūlymai | D | walk once unblocked |  |  | Waits; see its row |
-| 72 | 10.10 | Paaiškinimai | D | walk once unblocked |  |  | Waits; see its row |
-| 73 | 10.15 | Pagalbininkų vykdymas | D | new walk once it exists |  |  | Not built |
-| 74 | 10.16 | Pagalbininkai kaip dalyviai | D | new walk once it exists |  |  | Not built |
-| 75 | 10.21 | Statistikos importas | D | walk once unblocked |  |  | Waits; see its row |
-| 76 | 10.22 | Partnerio organizacijos sąsaja | D | walk once unblocked |  |  | Waits; see its row |
-| 77 | 10.24 | Savo serverio vertimas | D | walk once unblocked |  |  | Waits; see its row |
-| 78 | 10.25 | Debesų dirbtinis intelektas | D | walk once unblocked |  |  | Waits; see its row |
-| 79 | 10.26 | Programų konkursas | D | walk once unblocked |  |  | Waits; see its row |
-| 80 | 11.9 | Mokymosi peržiūra žmogaus akimis | D | walk once unblocked |  |  | Waits; see its row |
-| 81 | 11.10 | Ankstesnio mokymosi pripažinimas | D | new walk once it exists |  |  | Not built |
-| 82 | 13.9 | Ryšys su kodo saugykla | D | walk once unblocked |  |  | Waits; see its row |
-| 83 | 13.17 | Aplinkos suderinimas po perkėlimo | D | walk once unblocked |  |  | Waits; see its row |
+| 66 | 9.16 | Rekomendavimo sąsaja | D | walk once unblocked |  | J-18 (area) | Waits; see its row |
+| 67 | 10.4 | Dirbtinio intelekto leidimų sritys | D | new walk once it exists |  | SC-10 (area) | Not built |
+| 68 | 10.5 | Sąrašai dirbtinio intelekto parduotuvėse | D | walk once unblocked |  | SC-10 (area) | Waits; see its row |
+| 69 | 10.7 | Pokalbio ketinimų atpažinimas | D | walk once unblocked |  | SC-10 (area) | Waits; see its row |
+| 70 | 10.8 | CV sutvarkymas dirbtiniu intelektu | D | walk once unblocked |  | SC-10 (area) | Waits; see its row |
+| 71 | 10.9 | Žurnalo siūlymai | D | walk once unblocked |  | SC-10 (area) | Waits; see its row |
+| 72 | 10.10 | Paaiškinimai | D | walk once unblocked |  | SC-10 (area) | Waits; see its row |
+| 73 | 10.15 | Pagalbininkų vykdymas | D | new walk once it exists |  | SC-10 (area) | Not built |
+| 74 | 10.16 | Pagalbininkai kaip dalyviai | D | new walk once it exists |  | SC-10 (area) | Not built |
+| 75 | 10.21 | Statistikos importas | D | walk once unblocked |  | SC-10 (area) | Waits; see its row |
+| 76 | 10.22 | Partnerio organizacijos sąsaja | D | walk once unblocked |  | SC-10 (area) | Waits; see its row |
+| 77 | 10.24 | Savo serverio vertimas | D | walk once unblocked |  | SC-10 (area) | Waits; see its row |
+| 78 | 10.25 | Debesų dirbtinis intelektas | D | walk once unblocked |  | SC-10 (area) | Waits; see its row |
+| 79 | 10.26 | Programų konkursas | D | walk once unblocked |  | SC-10 (area) | Waits; see its row |
+| 80 | 11.9 | Mokymosi peržiūra žmogaus akimis | D | walk once unblocked |  | SC-1 (area) | Waits; see its row |
+| 81 | 11.10 | Ankstesnio mokymosi pripažinimas | D | new walk once it exists |  | SC-1 (area) | Not built |
+| 82 | 13.9 | Ryšys su kodo saugykla | D | walk once unblocked |  | SC-10 (area) | Waits; see its row |
+| 83 | 13.17 | Aplinkos suderinimas po perkėlimo | D | walk once unblocked |  | SC-10 (area) | Waits; see its row |
 | 84 | 3.16 | Žmonių trūkumo laiko juosta | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
 | 85 | 3.19 | Planas ir faktas | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
 | 86 | 5.12 | Prieinamumas | E | already has browser proof |  |  | Owner session or named walk that keywords missed; refresh only if the page changes |
