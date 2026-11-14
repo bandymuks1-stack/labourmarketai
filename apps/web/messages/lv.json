@@ -405,7 +405,15 @@
         "event_journal_review_decided_changes_requested": "Jūsu darba žurnāla ierakstā pieprasītas izmaiņas",
         "event_weekly_digest_profile_completion": "Lai parādītu jums piemērotus darbus, apstipriniet, kādu darbu jūs darāt",
         "event_weekly_digest_journal": "Sagatavots jūsu nedēļas darba žurnāla pārskats",
-        "event_history_link_offered": "Organizācija piedāvā sasaistīt jūsu reģistrēto darba vēsturi ar jūsu kontu"
+        "event_history_link_offered": "Organizācija piedāvā sasaistīt jūsu reģistrēto darba vēsturi ar jūsu kontu",
+        "event_team_offer_received": "Komanda piedāvāja sevi jūsu vajadzībai",
+        "event_team_offer_answered": "Uz jūsu komandas piedāvājumu ir atbildēts",
+        "event_team_offer_answered_accepted": "Jūsu komandas piedāvājums ir pieņemts",
+        "event_team_offer_answered_declined": "Jūsu komandas piedāvājums ir noraidīts",
+        "event_candidate_offer_received": "Aģentūra piedāvāja kandidātu jūsu vajadzībai",
+        "event_candidate_offer_answered": "Uz jūsu piedāvāto kandidātu ir atbildēts",
+        "event_candidate_offer_answered_accepted": "Jūsu piedāvātais kandidāts ir pieņemts",
+        "event_candidate_offer_answered_declined": "Jūsu piedāvātais kandidāts ir noraidīts"
       },
       "email": {
         "open": "Atvērt LabourMarket.ai:",

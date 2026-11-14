@@ -131,7 +131,17 @@ export type NotificationEventType =
   // work history (a roster person) to the recipient's account. Only the
   // recipient can accept or refuse; the offer otherwise waited, unseen, on
   // their profile page. Carries no name, no hours — only that an offer waits.
-  | "history_link_offered";
+  | "history_link_offered"
+  // v12 (20261111230000): B2B offers. A team (brigade) offered itself to a
+  // company need, or an agency proposed a candidate: the DEMAND OWNER hears
+  // it. The answer goes back to the person who offered. Both directions were
+  // silent — the company found offers only by opening the page, and the
+  // supplier never learned the answer. metadata.decision (accepted /
+  // declined) names the answer; the note never leaves the offer row.
+  | "team_offer_received"
+  | "team_offer_answered"
+  | "candidate_offer_received"
+  | "candidate_offer_answered";
 
 export type NotificationEntityType =
   | "booking_request"
@@ -168,7 +178,14 @@ export type NotificationEntityType =
   // v10: the reviewed journal entry — resolves to the worker's journal.
   | "journal_entry"
   // v11: one roster person an organization offered to link to the recipient.
-  | "organization_person";
+  | "organization_person"
+  // v12: one offer, seen from the demand owner's side (received) and from the
+  // supplier's side (the answer) — two entity types because the destination
+  // differs, the demand_interest_signal / _response precedent.
+  | "team_demand_offer"
+  | "team_demand_offer_response"
+  | "agency_candidate_offer"
+  | "agency_candidate_offer_response";
 
 /**
  * The canonical RUNTIME list of the code-side event types — the union above,
@@ -205,6 +222,10 @@ export const NOTIFICATION_EVENT_TYPES = [
   "message_received",
   "journal_review_decided",
   "history_link_offered",
+  "team_offer_received",
+  "team_offer_answered",
+  "candidate_offer_received",
+  "candidate_offer_answered",
 ] as const satisfies readonly NotificationEventType[];
 
 /** Compile-time exhaustiveness: a union member missing from the runtime list
@@ -289,6 +310,15 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   // v11: the profile page renders every pending roster-link offer at its TOP
   // (RosterLinkOffers), with accept / refuse — the decision the row is about.
   organization_person: "/dashboard/profile",
+  // v12: scouting renders both the team offers received on a need
+  // (TeamOffersReceived) and the agency candidates waiting for a decision.
+  team_demand_offer: "/dashboard/company/scouting",
+  agency_candidate_offer: "/dashboard/company/scouting",
+  // v12: the team's own offers and their state live on the people page
+  // (TeamDemandOfferForm); an agency's candidate offers on partners
+  // (AgencyBridgeSection).
+  team_demand_offer_response: "/dashboard/company/people",
+  agency_candidate_offer_response: "/dashboard/company/partners",
 };
 
 const VACANCY_ID_RE =
@@ -331,6 +361,15 @@ export function notificationEventHref(
   ) {
     return `/dashboard/communication/${metadata.conversationId}`;
   }
+  // v12: an offer received opens scouting ON THE NEED it is for, where the
+  // employer answers it (the page's default selection may be another need).
+  if (
+    (entityType === "team_demand_offer" || entityType === "agency_candidate_offer") &&
+    typeof metadata?.requestId === "string" &&
+    VACANCY_ID_RE.test(metadata.requestId)
+  ) {
+    return `/dashboard/company/scouting?request=${metadata.requestId}`;
+  }
   return NOTIFICATION_ENTITY_HREF[entityType as NotificationEntityType];
 }
 
@@ -349,6 +388,13 @@ export function notificationRenderedType(
     (JOURNAL_REVIEW_DECISIONS as readonly string[]).includes(metadata.decision)
   ) {
     return `event_journal_review_decided_${metadata.decision}`;
+  }
+  if (
+    (eventType === "team_offer_answered" || eventType === "candidate_offer_answered") &&
+    metadata?.decision &&
+    (OFFER_DECISIONS as readonly string[]).includes(metadata.decision)
+  ) {
+    return `event_${eventType}_${metadata.decision}`;
   }
   if (
     eventType === "weekly_digest" &&
@@ -375,6 +421,9 @@ const SAFE_METADATA_KEYS = [
   // v10 message: the thread's own (opaque uuid) id — a link target, never
   // content. Validated as a uuid again when the href is built.
   "conversationId",
+  // v12 offer received: the (opaque uuid) id of the need the offer is for,
+  // a link target only. Validated as a uuid again when the href is built.
+  "requestId",
   // v10 journal review: one of JOURNAL_REVIEW_DECISIONS — which outcome the
   // worker is being told about. Never the reviewer's note.
   "decision",
@@ -382,6 +431,10 @@ const SAFE_METADATA_KEYS = [
 
 /** The three outcomes a journal review can record (the review RPC's own
  *  vocabulary — lib/journal/review-status REVIEW_DECISIONS). */
+/** v12: the two answers an offer can get — rendered as
+ *  `event_<team|candidate>_offer_answered_<decision>`. */
+export const OFFER_DECISIONS = ["accepted", "declined"] as const;
+
 export const JOURNAL_REVIEW_DECISIONS = [
   "approved",
   "rejected",

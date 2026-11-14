@@ -588,8 +588,32 @@ test("J-AGY. an agency sees the shared need, proposes its worker; the company ac
   );
   s.offerId = offer!.id;
 
+  // N-1 (Swedish employer audit 2026-11-11): the proposal REACHES the company.
+  // Exactly one notification, for the need's owner and nobody else, keyed on
+  // the offer and carrying only the need's id (no name, contact or CV field).
+  await expect
+    .poll(
+      async () =>
+        (
+          await db<Array<{ recipient_profile_id: string; metadata: Record<string, unknown> }>>(
+            `notification_events?event_type=eq.candidate_offer_received&entity_id=eq.${s.offerId}&select=recipient_profile_id,metadata`,
+          )
+        ).map((r) => `${r.recipient_profile_id}:${JSON.stringify(r.metadata)}`),
+      { message: "one notification, to the need's owner, ids only", timeout: 30_000 },
+    )
+    .toEqual([`${s.coId}:${JSON.stringify({ requestId: s.needId })}`]);
+
+  // The company opens it from the bell and lands on THAT need's scouting page.
+  await co.goto(`${BASE}/en/dashboard`);
+  await co.getByTestId("notification-bell").first().click();
+  const bellRow = co
+    .locator('[data-testid="notification-row"][data-notification-type="event_candidate_offer_received"]')
+    .first();
+  await expect(bellRow, "the bell shows the agency's proposal").toBeVisible({ timeout: 30_000 });
+  await bellRow.locator('[data-testid^="notification-signal-"]').click();
+  await co.waitForURL(new RegExp(`/dashboard/company/scouting\\?request=${s.needId}`), { timeout: 30_000 });
+
   // The company sees the proposal on the need's scouting page and accepts it.
-  await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
   const offers = co.getByTestId("scouting-agency-offers");
   await expect(offers, "the company sees the agency's proposal").toBeVisible({ timeout: 30_000 });
   await expect(offers.getByTestId("scout-offer-status-offered")).toBeVisible();
@@ -639,6 +663,30 @@ test("J-AGY. an agency sees the shared need, proposes its worker; the company ac
   // The agency sees the outcome of its proposal.
   await ag.goto(`${BASE}/en/dashboard/company/partners`);
   await expect(ag.getByTestId("agency-bridge-decision-accepted").first()).toBeVisible({ timeout: 30_000 });
+
+  // N-2: the answer reaches the agency: one row, to the person who proposed,
+  // naming only the decision.
+  await expect
+    .poll(
+      async () =>
+        (
+          await db<Array<{ recipient_profile_id: string; metadata: Record<string, unknown> }>>(
+            `notification_events?event_type=eq.candidate_offer_answered&entity_id=eq.${s.offerId}&select=recipient_profile_id,metadata`,
+          )
+        ).map((r) => `${r.recipient_profile_id}:${JSON.stringify(r.metadata)}`),
+      { message: "one answer notification, to the agency's proposer", timeout: 30_000 },
+    )
+    .toEqual([`${agId}:${JSON.stringify({ decision: "accepted" })}`]);
+
+  // And the company can talk to the partner about it: the connection's thread
+  // opens from the partners page and a message is sent.
+  await co.goto(`${BASE}/en/dashboard/company/partners`);
+  await co.getByTestId(`client-bridge-message-${s.connectionId}`).click();
+  await co.waitForURL(/\/dashboard\/communication\//, { timeout: 30_000 });
+  const input = co.getByTestId("communication-composer-input");
+  await input.fill(`Synthetic journey ${RUN}: thank you, the worker starts Monday.`);
+  await input.locator("xpath=ancestor::form").locator('button[type="submit"]').click();
+  await expect(input, "the company's message is sent").toHaveValue("", { timeout: 30_000 });
 });
 
 // ── J-WRK ───────────────────────────────────────────────────────────────────

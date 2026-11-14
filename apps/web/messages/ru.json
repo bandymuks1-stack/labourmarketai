@@ -5073,7 +5073,15 @@
         "event_invitation_accepted": "Кто-то принял ваше приглашение",
         "event_weekly_digest_profile_completion": "Чтобы показать подходящие вакансии, подтвердите, какую работу вы выполняете",
         "event_weekly_digest_journal": "Готов обзор вашего рабочего журнала за неделю",
-        "event_history_link_offered": "Организация предложила связать зафиксированную историю вашей работы с вашим аккаунтом"
+        "event_history_link_offered": "Организация предложила связать зафиксированную историю вашей работы с вашим аккаунтом",
+        "event_team_offer_received": "Бригада предложила себя для вашей потребности",
+        "event_team_offer_answered": "На предложение вашей бригады ответили",
+        "event_team_offer_answered_accepted": "Предложение вашей бригады принято",
+        "event_team_offer_answered_declined": "Предложение вашей бригады отклонено",
+        "event_candidate_offer_received": "Агентство предложило кандидата для вашей потребности",
+        "event_candidate_offer_answered": "На предложенного вами кандидата ответили",
+        "event_candidate_offer_answered_accepted": "Предложенный вами кандидат принят",
+        "event_candidate_offer_answered_declined": "Предложенный вами кандидат отклонён"
       },
       "label": "Мои уведомления",
       "emptyTitle": "Сейчас ничего не требует вашего внимания.",

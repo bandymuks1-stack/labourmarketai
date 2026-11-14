@@ -294,6 +294,10 @@ describe("NOTIFICATION_EVENT_TYPES (runtime list)", () => {
     expect(NOTIFICATION_EVENT_TYPES).toContain("journal_review_decided");
     // v11: an organization's offer to link its recorded history to the recipient.
     expect(NOTIFICATION_EVENT_TYPES).toContain("history_link_offered");
-    expect(NOTIFICATION_EVENT_TYPES.length).toBe(26);
+    // v12: the four B2B offer events (team / candidate, received / answered).
+    for (const t of ["team_offer_received", "team_offer_answered", "candidate_offer_received", "candidate_offer_answered"]) {
+      expect(NOTIFICATION_EVENT_TYPES).toContain(t);
+    }
+    expect(NOTIFICATION_EVENT_TYPES.length).toBe(30);
   });
 });

@@ -5073,7 +5073,15 @@
         "event_invitation_accepted": "Jemand hat Ihre Einladung angenommen",
         "event_weekly_digest_profile_completion": "Damit wir Ihnen passende Jobs zeigen können, bestätigen Sie, welche Arbeit Sie machen",
         "event_weekly_digest_journal": "Die Wochenübersicht Ihres Arbeitsjournals ist fertig",
-        "event_history_link_offered": "Eine Organisation bietet an, Ihre erfasste Arbeitshistorie mit Ihrem Konto zu verbinden"
+        "event_history_link_offered": "Eine Organisation bietet an, Ihre erfasste Arbeitshistorie mit Ihrem Konto zu verbinden",
+        "event_team_offer_received": "Ein Team hat sich für Ihren Bedarf angeboten",
+        "event_team_offer_answered": "Auf das Angebot Ihres Teams wurde geantwortet",
+        "event_team_offer_answered_accepted": "Das Angebot Ihres Teams wurde angenommen",
+        "event_team_offer_answered_declined": "Das Angebot Ihres Teams wurde abgelehnt",
+        "event_candidate_offer_received": "Eine Agentur hat einen Kandidaten für Ihren Bedarf vorgeschlagen",
+        "event_candidate_offer_answered": "Auf Ihren vorgeschlagenen Kandidaten wurde geantwortet",
+        "event_candidate_offer_answered_accepted": "Ihr vorgeschlagener Kandidat wurde angenommen",
+        "event_candidate_offer_answered_declined": "Ihr vorgeschlagener Kandidat wurde abgelehnt"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",

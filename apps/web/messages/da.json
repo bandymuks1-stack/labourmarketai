@@ -405,7 +405,15 @@
         "event_journal_review_decided_changes_requested": "Der er anmodet om ændringer i din journalpost",
         "event_weekly_digest_profile_completion": "For at vise dig passende job, bekræft hvilket arbejde du udfører",
         "event_weekly_digest_journal": "Ugens oversigt over din arbejdsjournal er klar",
-        "event_history_link_offered": "En organisation tilbyder at forbinde din registrerede arbejdshistorik med din konto"
+        "event_history_link_offered": "En organisation tilbyder at forbinde din registrerede arbejdshistorik med din konto",
+        "event_team_offer_received": "Et team har tilbudt sig til dit behov",
+        "event_team_offer_answered": "Dit teams tilbud er besvaret",
+        "event_team_offer_answered_accepted": "Dit teams tilbud er accepteret",
+        "event_team_offer_answered_declined": "Dit teams tilbud er afvist",
+        "event_candidate_offer_received": "Et bureau har foreslået en kandidat til dit behov",
+        "event_candidate_offer_answered": "Den kandidat, du foreslog, er besvaret",
+        "event_candidate_offer_answered_accepted": "Den kandidat, du foreslog, er accepteret",
+        "event_candidate_offer_answered_declined": "Den kandidat, du foreslog, er afvist"
       },
       "email": {
         "open": "Åbn i LabourMarket.ai:",

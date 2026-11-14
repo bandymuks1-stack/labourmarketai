@@ -4,6 +4,10 @@ import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  emitOfferAnsweredNotification,
+  emitOfferReceivedNotification,
+} from "@/lib/notifications/event-emitters";
 
 import type { MatchNeed } from "@/lib/market/match-v1";
 import { matchTeamToNeed } from "@/lib/market/match-team-v1";
@@ -67,6 +71,20 @@ async function authed(): Promise<{ supabase: SupabaseClient; userId: string } | 
     data: { user },
   } = await supabase.auth.getUser();
   return user ? { supabase, userId: user.id } : null;
+}
+
+/**
+ * The OTHER party of a team offer, as the recipient of its notification: for
+ * the team that offered, the owner of the need; for the company answering,
+ * the person who made the offer. Neither side can read the other under its
+ * own RLS, so it comes from the gated SECURITY DEFINER
+ * `team_offer_counterpart_v1`, which answers only a party to the offer. That
+ * function is a separate owner-gated migration: until it exists this is null
+ * and the notification names an unresolved recipient instead of guessing.
+ */
+async function teamOfferCounterpart(supabase: SupabaseClient, offerId: string): Promise<string | null> {
+  const { data, error } = await asAny(supabase).rpc("team_offer_counterpart_v1", { p_offer_id: offerId });
+  return !error && typeof data === "string" ? data : null;
 }
 
 async function readRows<T>(
@@ -195,7 +213,19 @@ export async function offerTeamToDemand(input: {
   });
   if (error) return { status: offerRefusalOf(error) };
   const parsed = parseOfferResult(data);
-  return parsed ? { status: "ok", ...parsed } : { status: "error" };
+  if (!parsed) return { status: "error" };
+  // The demand owner hears of a NEW offer, after the write (an existing open
+  // offer was already announced). Awaited, never fails the offer.
+  if (parsed.outcome === "created") {
+    await emitOfferReceivedNotification({
+      kind: "team",
+      offerId: parsed.offerId,
+      requestId: input.requestId,
+      recipientProfileId: await teamOfferCounterpart(ctx.supabase, parsed.offerId),
+      actorProfileId: ctx.userId,
+    });
+  }
+  return { status: "ok", ...parsed };
 }
 
 export async function withdrawTeamOffer(
@@ -232,6 +262,16 @@ export async function respondToTeamOffer(input: {
   }
   if (error) return { status: offerRefusalOf(error) };
   if (data === "accepted" || data === "declined" || data === "already_accepted" || data === "already_declined") {
+    // The team that offered hears the answer — once, on the real decision.
+    if (data === "accepted" || data === "declined") {
+      await emitOfferAnsweredNotification({
+        kind: "team",
+        offerId: input.offerId,
+        recipientProfileId: await teamOfferCounterpart(ctx.supabase, input.offerId),
+        actorProfileId: ctx.userId,
+        decision: data,
+      });
+    }
     return { status: "ok", outcome: data };
   }
   return { status: "error" };

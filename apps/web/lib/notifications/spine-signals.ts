@@ -320,6 +320,16 @@ const ORG_SIDE_EVENT_TYPES: ReadonlySet<string> = new Set([
   "event_booking_accepted",
   "event_booking_declined",
   "event_document_ack_completed",
+  // v12 B2B offers: the demand owner, and the team / agency that offered —
+  // all act for an organization.
+  "event_team_offer_received",
+  "event_team_offer_answered",
+  "event_team_offer_answered_accepted",
+  "event_team_offer_answered_declined",
+  "event_candidate_offer_received",
+  "event_candidate_offer_answered",
+  "event_candidate_offer_answered_accepted",
+  "event_candidate_offer_answered_declined",
 ]);
 const WORKER_SIDE_EVENT_TYPES: ReadonlySet<string> = new Set([
   "event_booking_proposed",

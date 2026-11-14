@@ -5,6 +5,10 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { notifyBooking } from "@/lib/booking/booking-notify";
 import {
+  emitOfferAnsweredNotification,
+  emitOfferReceivedNotification,
+} from "@/lib/notifications/event-emitters";
+import {
   isBridgeUuid,
   isMissingRpcCode,
   toBridgeInviteDelivery,
@@ -302,13 +306,36 @@ export async function submitOfferAction(
   const note = validateOfferNote(String(formData.get("note") ?? ""));
   if (!isBridgeUuid(shareId) || !isBridgeUuid(workerId)) return { status: "invalid" };
   const supabase = await createClient();
-  const { error } = await rpc(supabase).rpc("submit_agency_candidate_offer_v1", {
+  const { data: offerId, error } = await rpc(supabase).rpc("submit_agency_candidate_offer_v1", {
     p_request_share_id: shareId,
     p_worker_id: workerId,
     p_note: note,
   });
   if (error) return mapErr(error.code, error.message);
   emitFirstRealAction("agency", "offer_candidate", "agency_candidate_offer");
+  // The client company's demand owner hears of the candidate, after the
+  // write. Resolved from the OFFER ROW, under the agency's own session: its
+  // offer names the request, and the share it holds lets it read that
+  // request's owner (customer_requests_select_agency_share). Never from input.
+  if (typeof offerId === "string" && isBridgeUuid(offerId)) {
+    const [{ data: auth }, { data: offerRow }] = await Promise.all([
+      supabase.auth.getUser(),
+      rpc(supabase).from("agency_candidate_offers").select("request_id").eq("id", offerId).maybeSingle(),
+    ]);
+    const requestId = (offerRow as { request_id?: string } | null)?.request_id ?? null;
+    const { data: need } = requestId
+      ? await rpc(supabase).from("customer_requests").select("profile_id").eq("id", requestId).maybeSingle()
+      : { data: null };
+    if (auth.user) {
+      await emitOfferReceivedNotification({
+        kind: "candidate",
+        offerId,
+        requestId,
+        recipientProfileId: (need as { profile_id?: string | null } | null)?.profile_id ?? null,
+        actorProfileId: auth.user.id,
+      });
+    }
+  }
   revalidatePath("/[locale]/dashboard/company", "page");
   return { status: "ok" };
 }
@@ -326,6 +353,12 @@ export async function respondCandidateOfferAction(
   if (!isBridgeUuid(offerId)) return { status: "invalid" };
   if (decision !== "accepted" && decision !== "declined") return { status: "invalid" };
   const supabase = await createClient();
+  // Who proposed the candidate — read BEFORE the answer, under the client's
+  // own RLS (owns_company(client_company_id)), so the agency can hear it.
+  const [{ data: auth }, { data: offerRow }] = await Promise.all([
+    supabase.auth.getUser(),
+    rpc(supabase).from("agency_candidate_offers").select("created_by").eq("id", offerId).maybeSingle(),
+  ]);
   const { data: decided, error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v1", {
     p_offer_id: offerId,
     p_decision: decision,
@@ -348,6 +381,15 @@ export async function respondCandidateOfferAction(
     await notifyBooking(supabase, decided, "booking_proposed");
   }
   emitFirstRealAction("company", "offer_" + decision, "agency_candidate_offer");
+  if (auth.user) {
+    await emitOfferAnsweredNotification({
+      kind: "candidate",
+      offerId,
+      recipientProfileId: (offerRow as { created_by?: string | null } | null)?.created_by ?? null,
+      actorProfileId: auth.user.id,
+      decision,
+    });
+  }
   revalidatePath("/[locale]/dashboard/company/scouting", "page");
   revalidatePath("/[locale]/dashboard/company", "page");
   return { status: "ok" };
