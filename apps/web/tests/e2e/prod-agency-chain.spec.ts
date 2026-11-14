@@ -166,6 +166,51 @@ test("A-2. the agency puts a person on its roster; the person accepts", async ({
   await agency.close();
 });
 
+test("A-2b. the agency reads its people's document readiness (counts only, consent-gated)", async ({ browser }) => {
+  // Register A-2 (#3004): the readiness read counts the documents of the
+  // agency's LIVE roster people who consented to share them. It names nobody
+  // and shows no document. An honest "none consented" is a pass; only the
+  // "could not be read" state is a failure.
+  const agency = await as(browser, "agency");
+  await agency.page.goto("/lt/dashboard");
+  await workspace(agency.page, AGENCY);
+  await agency.page.goto("/lt/dashboard/documents");
+  const org = agency.page.getByTestId("doc-centre-org");
+  await expect(org, "the agency sees its people's readiness block").toBeVisible({ timeout: 30_000 });
+  await expect(agency.page.getByTestId("doc-centre-org-unavailable"), "the readiness read works").toHaveCount(0);
+  const summary = agency.page.getByTestId("doc-centre-org-summary");
+  const empty = agency.page.getByTestId("doc-centre-org-empty");
+  await expect(summary.or(empty), "either counts or the honest none-consented note").toBeVisible({ timeout: 30_000 });
+  console.info(
+    `[agency] document readiness: ${(await summary.isVisible()) ? await summary.innerText() : "no consented people"}`,
+  );
+  await expect(org, "no person is named in the readiness block").not.toContainText(/Vytas/);
+  await agency.close();
+});
+
+test("A-2c. the agency keeps a client record, sees it, and removes it", async ({ browser }) => {
+  // Register A-2 (#3004): client records are the agency's own notes, under
+  // company authority. The walk leaves nothing behind: the record it adds is
+  // removed in the same step.
+  const CLIENT = `QA-SYNTHETIC Klientas ${RUN}`;
+  const agency = await as(browser, "agency");
+  await agency.page.goto("/lt/dashboard");
+  await workspace(agency.page, AGENCY);
+  await agency.page.goto("/lt/dashboard/company/partners");
+  const section = agency.page.getByTestId("agency-clients-section");
+  await expect(section).toBeVisible({ timeout: 30_000 });
+  await expect(section.getByTestId("agency-clients-gated"), "an agency is not gated out of its clients").toHaveCount(0);
+  const form = section.getByTestId("agency-client-add-form");
+  await form.locator('[name="name"]').fill(CLIENT);
+  await form.locator('[name="note"]').fill("QA-SYNTHETIC walk record, removed in the same step");
+  await form.getByTestId("agency-client-add-submit").click();
+  const row = section.getByTestId("agency-client-row").filter({ hasText: CLIENT });
+  await expect(row, "the saved record is read back").toHaveCount(1, { timeout: 30_000 });
+  await row.locator('[data-testid^="agency-client-remove-"]').click();
+  await expect(row, "the record is removed").toHaveCount(0, { timeout: 30_000 });
+  await agency.close();
+});
+
 test("A-3. the agency connects the client (link), the client accepts", async ({ browser }) => {
   const agency = await as(browser, "agency");
   await agency.page.goto("/lt/dashboard");
@@ -267,7 +312,7 @@ test("A-5. the agency sees the shared need and offers its person", async ({ brow
   const value = await select.locator("option", { hasText: /Vytas/ }).first().getAttribute("value");
   expect(value).toBeTruthy();
   await select.selectOption(value!);
-  await form.locator('input[name="note"]').fill(`QA-SYNTHETIC ${RUN}: gali pradėti nuo pirmadienio`);
+  await form.locator('[name="note"]').fill(`QA-SYNTHETIC ${RUN}: gali pradėti nuo pirmadienio`);
   await form.getByTestId("agency-bridge-offer-submit").click();
   await page.waitForTimeout(5_000);
   const error = page.getByTestId("agency-bridge-error");
