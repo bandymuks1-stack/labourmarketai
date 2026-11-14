@@ -90,6 +90,11 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   "fragment_count", // # of journal fragments parsed
   "unresolved_unknown_count", // # of unknown-phrase cards left unlabelled
   "skill_count", // # of skills the user accepted/dismissed in one action
+  // ── Real-visitor page speed (`web_vitals`, 2026-11-12). Three numbers and
+  //    nothing else; the Largest Contentful Paint rides `duration_ms`.
+  "cls", // cumulative layout shift up to the sample, unitless, 3 decimals
+  "fcp_ms", // first contentful paint, ms
+  "ttfb_ms", // time to the first byte of the document, ms
   "preview_host", // bool — was the tester on a vercel.app preview?
   "had_selection", // bool — language-feedback widget: was text highlighted?
   "comment_length", // language-feedback widget: chars typed (number only)
