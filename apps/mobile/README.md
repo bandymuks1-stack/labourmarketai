@@ -64,13 +64,21 @@ place, assignment state, what it still needs from the person (checklist rows
 verbatim) and the manager's latest instruction, which opens its thread in
 Messages.
 
+**Offers are wired** (2026-11-11): Today → Offers. It shows open job
+proposals (`booking.list`, incoming and still `proposed`) and invitations
+addressed to the person (`invitations.list`). The person answers through the
+web chat's own prepare → confirm pairs: `worker.respond-booking` (accept or
+decline) and `worker.respond-invitation` (accept; the platform has no in-app
+decline). A date clash is not overridden here; the screen sends the person to
+the website.
+
 Still NOT on the phone, by decision or not built: Google sign-in, onboarding,
 starting a new conversation, push, calendar, camera evidence, offline queue,
 voice. See `docs/mobile/STORE_RELEASE_READINESS_2026-09-13.md` §1a.
 
 **Deep links claim exactly the screens this app has** (`/`, `/sign-in`,
 `/register`, `/today`, `/journal`, `/log-work`, `/correct-entry`, `/profile`,
-`/settings`, `/opportunities`, `/availability`, `/jobs`, `/need`, `/messages`,
+`/settings`, `/opportunities`, `/offers`, `/availability`, `/jobs`, `/need`, `/messages`,
 `/conversation`, `/notifications`, `/projects`, `/project`) —
 `NATIVE_APP_PATHS` in `apps/web/lib/mobile/app-association.ts` drives both
 the Apple document and `app.json`'s Android intent filter, pinned to the route

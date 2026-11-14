@@ -540,3 +540,54 @@ export type WorkerProjectsData =
       readonly activeCount: number;
     }
   | { readonly kind: "empty" };
+
+// ── offers: proposals and invitations addressed to me ─────────────────────
+// booking.list and invitations.list are the web pages' own reads; the answer
+// goes through worker.respond-booking / worker.respond-invitation, the same
+// prepare → confirm pair the web chat card runs. Nothing new on the server.
+
+/** One booking row as `booking.list` returns it (lib/booking BookingRow). */
+export type BookingOffer = {
+  readonly id: string;
+  readonly status: "proposed" | "accepted" | "declined" | "withdrawn" | "expired";
+  readonly startDate: string | null;
+  readonly expectedEndDate: string | null;
+  readonly roleText: string | null;
+  readonly note: string | null;
+  readonly proposerName: string | null;
+  readonly responseDeadlineDate: string | null;
+};
+
+export type BookingListData = {
+  readonly kind: "ok";
+  readonly incoming: readonly BookingOffer[];
+  readonly outgoing: readonly BookingOffer[];
+};
+
+/** The server's own answer key: exactly the respond input minus `decision`. */
+export type InvitationRef =
+  | { readonly source: "invitation"; readonly invitationId: string }
+  | { readonly source: "company_roster" | "agency_roster"; readonly orgId: string };
+
+export type InvitationOffer = {
+  readonly ref: InvitationRef;
+  /** What accepting makes the person: the web's own two fields
+   *  (`invitations.list`), e.g. employee vs. intern of the same organization. */
+  readonly invitationType?: string | null;
+  readonly relationshipSlug?: string | null;
+  readonly organizationName: string | null;
+  readonly projectTitle: string | null;
+  readonly inviterName: string | null;
+  readonly personalMessage: string | null;
+  readonly expiresAt: string | null;
+};
+
+export type InvitationsListData =
+  | { readonly kind: "ok"; readonly items: readonly InvitationOffer[]; readonly total: number }
+  | { readonly kind: "empty" };
+
+/** A bridged prepare step: the exact input to confirm with, and its token. */
+export type RespondPrepareData = {
+  readonly input: unknown;
+  readonly confirmationToken: string;
+};
