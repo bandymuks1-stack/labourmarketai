@@ -4263,7 +4263,7 @@
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
       "email_label": "E-Mail-Adresse",
-      "email_placeholder": "name@beispiel.de",
+      "email_placeholder": "ihr.name@example.com",
       "password_label": "Passwort",
       "password_help": "Min. 8 Zeichen, 1 Großbuchstabe, 1 Zahl, 1 Sonderzeichen (!@#$%).",
       "confirm_password_label": "Passwort bestätigen",
@@ -5318,7 +5318,7 @@
       "subcopy": "Verwalten Sie Ihre Arbeitskräfte, verbinden Sie sie mit Kundenbedarfen und vermitteln Sie Kontakte — ohne Übersicht oder Kontrolle zu verlieren.",
       "bullets": [
         "Poolgröße — jede verwaltete Arbeitskraft auf einen Blick.",
-        "Gewerke-Aufschlüsselung — Kapazität nach Fähigkeit, live.",
+        "Aufschlüsselung nach Beruf — Kapazität nach Fähigkeit, wie in den Profilen angegeben.",
         "Einsatzstatus — Aktiv, Ausstehend, Verfügbar.",
         "Mehrere Kunden — setzen Sie die richtigen Leute bei verschiedenen Kunden ein."
       ]
@@ -5543,7 +5543,7 @@
     "contact": "Kontakt",
     "rights": "Alle Rechte vorbehalten.",
     "rexora": "Gemeinsam entwickelt: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
-    "operatedBy": "LabourMarket.ai wird von der UAB „Nonstop Group“ betrieben und kommerziell angeboten. Die LabourMarket.ai-Software und die zugehörige geistige Eigentumsrechte gehören der Labour Market AI Sp. z o.o. und werden von der UAB „Nonstop Group“ in Lizenz genutzt.",
+    "operatedBy": "LabourMarket.ai wird von der UAB „Nonstop Group“ betrieben und kommerziell angeboten. Die LabourMarket.ai-Software und die zugehörigen geistigen Eigentumsrechte gehören der Labour Market AI Sp. z o.o. und werden von der UAB „Nonstop Group“ in Lizenz genutzt.",
     "ipNotice": "Rechte des geistigen Eigentums. Die Plattform wird in Lizenz von der UAB „Nonstop Group“ betrieben.",
     "legalNotice": "Impressum"
   },
@@ -5596,7 +5596,7 @@
       "screenshot": "Bedarfsablauf für Unternehmen",
       "cta": "Benötigte Arbeitskräfte beschreiben",
       "calculatorBody": "Bevor Sie Arbeit anfragen, schätzen Sie sie ein: Arbeitsstunden, Material, Geräte und Reisen — mit Ihren eigenen Zahlen.",
-      "calculatorLink": "Projektkosten berechnen",
+      "calculatorLink": "Projektkosten schätzen",
       "markets": {
         "lu": {
           "metaTitle": "Fachkräfte für Baustellen in Luxemburg",
@@ -5777,7 +5777,7 @@
       },
       {
         "q": "Gibt es eine Obergrenze für aktive Positionen?",
-        "a": "Kostenlos ist 1 aktive Position enthalten. Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Übliche Schutzmaßnahmen gegen Missbrauch, etwa Anfragelimits, gelten weiterhin."
+        "a": "Kostenlos ist 1 aktive Position enthalten. Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Übliche Schutzmaßnahmen gegen Missbrauch, etwa technische Begrenzungen der Zugriffshäufigkeit, gelten weiterhin."
       }
     ],
     "priceState": {
@@ -6871,6 +6871,16 @@
         "into": "Diese Zeile wurde zusammengeführt in",
         "canonical": "das beibehaltene Projekt",
         "includes": "{count, plural, one {Enthält # zusammengeführte Projektzeile — ihre Nachweise stehen hier.} other {Enthält # zusammengeführte Projektzeilen — ihre Nachweise stehen hier.}}"
+      },
+      "teams": {
+        "title": "Teams in diesem Projekt",
+        "members": "{n, plural, one {# Person} other {# Personen}}",
+        "personTeam": "Team: {team}",
+        "unnamed": "Team ohne Namen",
+        "unnamedMember": "Mitglied",
+        "noMembers": "Derzeit keine Mitglieder.",
+        "unavailable": "Die Teams konnten nicht geladen werden. Bitte erneut versuchen.",
+        "manage": "Teams ändern"
       }
     },
     "workerView": {
@@ -8737,6 +8747,7 @@
     },
     "languagesTitle": "Sprachen",
     "languagesSelfStated": "Sprachen laut Angabe des Arbeiters.",
+    "educationSelfStated": "Ausbildung laut Angabe der Arbeitskraft.",
     "certificatesTitle": "Zertifikate & Lizenzen",
     "declaredCertHint": "Selbst angegeben",
     "documentSelfSuppliedHint": "Dokument von der Person selbst eingereicht",
@@ -9465,7 +9476,7 @@
       "draft_pricing": "Die Pläne sind vorbereitet, nicht kaufbar. Kein Preis hier ist endgültig, und es kann nichts gekauft werden.",
       "owner_confirmed": "Die Pläne sind nur vorbereitet — es kann nichts gekauft werden, bis Zahlungen aktiviert sind."
     },
-    "featuresLabel": "In dieser Plangrenze enthalten",
+    "featuresLabel": "In diesem Plan enthalten",
     "limitValue": "bis zu {count}",
     "freeToday": {
       "freeTitle": "Heute kostenlos",
@@ -9499,7 +9510,7 @@
     },
     "enforcement": {
       "free_surface": "Heute im Produkt",
-      "server_gate": "Heute im Produkt, mit Berechtigungsprüfung",
+      "server_gate": "Heute verfügbar, je nach Ihren Berechtigungen",
       "declared_boundary_only": "Vorbereitet — startet erst mit der Abrechnung",
       "admin_rbac": "Intern, nur für Admins"
     }
@@ -9849,7 +9860,7 @@
         "body": "Beschreiben Sie, welche Arbeitskräfte oder welche Kolonne Sie brauchen. Keine Gebühr, keine Karte, nichts wird automatisch veröffentlicht."
       },
       {
-        "title": "Ein Mensch prüft ihn",
+        "title": "Ein Mensch prüft sie",
         "body": "Ein Operator liest jede Anfrage, kontaktiert Sie und klärt Umfang, Zeitplan und Bedingungen, bevor irgendetwas weitergeht."
       },
       {
@@ -11196,7 +11207,7 @@
           "Anbieter von Arbeitsmarktdiensten",
           "Weitere legitime Arbeitsmarktteilnehmer"
         ],
-        "pointsLabel": "Ihr Platz im selben Netzwerk",
+        "pointsLabel": "Der Platz dieser Teilnehmer im selben Netzwerk",
         "points": [
           "sie arbeiten mit denselben echten Arbeitsaufzeichnungen, nicht mit getrennten Dateien;",
           "Rollen und Verantwortung bleiben klar getrennt: wer veröffentlicht hat, wer gearbeitet hat, wer bestätigt hat."
@@ -11320,7 +11331,7 @@
       "body": "Der Zugriff auf Daten ist standardmäßig geschlossen und wird auf den Seiten unten in einfachen Worten erklärt."
     },
     "links": {
-      "workers": "Für Beschäftigte",
+      "workers": "Für Arbeitskräfte",
       "companies": "Für Unternehmen",
       "agencies": "Für Agenturen"
     }
@@ -19429,7 +19440,7 @@
     "steps": {
       "find": {
         "label": "Finden",
-        "worker": "Findet Arbeit, die zu dem passt, was sie wirklich geleistet haben",
+        "worker": "Findet Arbeit, die zu dem passt, was sie wirklich geleistet hat",
         "company": "Findet Menschen, deren tatsächliche Arbeit zum Bedarf passt"
       },
       "connect": {
@@ -20509,7 +20520,7 @@
       "text": "Seitennutzung und die Kampagne, über die Sie kamen, messen wir nur mit Ihrer Erlaubnis.",
       "accept": "Messung erlauben",
       "refuse": "Ablehnen",
-      "more": "Mehr",
+      "more": "Mehr über Cookies",
       "label": "Auswahl zur Nutzungsmessung"
     },
     "control": {
@@ -20563,5 +20574,79 @@
         "error": "Das hat nicht geklappt. Versuchen Sie es später erneut."
       }
     }
+  },
+  "siteNav": {
+    "signUp": "Registrieren",
+    "trigger": "Hauptauswahl",
+    "account": "Nach Anmeldung",
+    "intents": {
+      "work": {
+        "title": "Ich suche Arbeit",
+        "description": "Finden Sie Stellen und zeigen Sie, was Sie können.",
+        "short": "Arbeit finden"
+      },
+      "workers": {
+        "title": "Ich suche Arbeitskräfte",
+        "description": "Beschreiben Sie, welche Arbeit Sie brauchen.",
+        "short": "Personal finden"
+      },
+      "services": {
+        "title": "Ich biete Leistungen an",
+        "description": "Veröffentlichen Sie Ihr Angebot und beantworten Sie Anfragen.",
+        "short": "Leistungen anbieten"
+      },
+      "orders": {
+        "title": "Ich suche Aufträge und Verträge",
+        "description": "Finden Sie Arbeitsanfragen und halten Sie Angebote beisammen.",
+        "short": "Aufträge finden"
+      },
+      "partners": {
+        "title": "Ich suche Partner",
+        "description": "Vernetzen Sie sich mit Menschen und Organisationen, mit denen Sie arbeiten.",
+        "short": "Partner finden"
+      },
+      "agencies": {
+        "title": "Für Agenturen",
+        "description": "Verwalten Sie Personal, Kunden und Angebote Ihrer Agentur.",
+        "short": "Für Agenturen"
+      }
+    },
+    "links": {
+      "jobs": "Stellenbörse",
+      "workOpportunities": "Arbeitsmöglichkeiten",
+      "createCv": "Kostenlosen Lebenslauf erstellen",
+      "workAbroad": "Arbeiten im Ausland",
+      "forWorkers": "So funktioniert es für Arbeitskräfte",
+      "companyNeed": "Bedarf beschreiben",
+      "forCompanies": "So funktioniert es für Unternehmen",
+      "labourMarket": "Arbeitsmarkt nach Land",
+      "myServices": "Ihre Leistungen",
+      "serviceRequests": "Leistungsanfragen",
+      "marketListings": "Marktangebote",
+      "commercial": "Angebote und Verträge",
+      "network": "Ihr Netzwerk",
+      "partnerWithUs": "Partner werden",
+      "forAgencies": "So funktioniert es für Agenturen",
+      "setUpAgency": "Agentur einrichten"
+    },
+    "assistant": "Assistenten fragen",
+    "start": {
+      "searchLabel": "Stellen suchen",
+      "searchPlaceholder": "Jobtitel oder Stichwort",
+      "searchSubmit": "Suchen",
+      "viewAll": "Alle Stellen"
+    },
+    "nav": {
+      "heading": "Was möchten Sie tun?",
+      "swipe": "Wischen",
+      "close": "Schließen",
+      "functions": "Funktionen",
+      "professions": "Berufe",
+      "opensNow": "Öffnet sofort",
+      "signInWhenOpen": "Anmeldung beim Öffnen",
+      "allSectors": "Alle Branchen",
+      "fullList": "Vollständige Liste"
+    },
+    "more": "Mehr"
   }
 }

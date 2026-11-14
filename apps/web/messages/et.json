@@ -2086,6 +2086,16 @@
         "into": "See rida liideti projektiga",
         "canonical": "säilitatud projekt",
         "includes": "{count, plural, one {Sisaldab # liidetud projektirida — selle kirjed on siin.} other {Sisaldab # liidetud projektirida — nende kirjed on siin.}}"
+      },
+      "teams": {
+        "title": "Meeskonnad selles projektis",
+        "members": "{n, plural, one {# inimene} other {# inimest}}",
+        "personTeam": "Meeskond: {team}",
+        "unnamed": "Meeskond",
+        "unnamedMember": "Liige",
+        "noMembers": "Praegu liikmeid pole.",
+        "unavailable": "Meeskondi ei õnnestunud laadida. Proovige uuesti.",
+        "manage": "Muuda meeskondi"
       }
     },
     "workerView": {
@@ -7936,7 +7946,7 @@
       "text": "Lehtede kasutust ja kampaaniat, mis sind siia tõi, mõõdame ainult sinu loal.",
       "accept": "Luba mõõtmine",
       "refuse": "Keeldu",
-      "more": "Rohkem",
+      "more": "Lähemalt küpsistest",
       "label": "Kasutuse mõõtmise valik"
     },
     "control": {
@@ -7947,5 +7957,79 @@
       "allow": "Luba",
       "refuse": "Keeldu"
     }
+  },
+  "siteNav": {
+    "signUp": "Registreeru",
+    "trigger": "Peamised valikud",
+    "account": "Pärast sisselogimist",
+    "intents": {
+      "work": {
+        "title": "Otsin tööd",
+        "description": "Leia tööpakkumisi ja näita, mida oskad.",
+        "short": "Otsin tööd"
+      },
+      "workers": {
+        "title": "Otsin töötajaid",
+        "description": "Kirjelda, millist tööd on vaja.",
+        "short": "Otsin töötajaid"
+      },
+      "services": {
+        "title": "Pakun teenuseid",
+        "description": "Avalda oma pakkumine ja vasta päringutele.",
+        "short": "Pakun teenuseid"
+      },
+      "orders": {
+        "title": "Otsin tellimusi ja lepinguid",
+        "description": "Leia tööpäringuid ja hoia pakkumised ühes kohas.",
+        "short": "Otsin tellimusi"
+      },
+      "partners": {
+        "title": "Otsin partnereid",
+        "description": "Ühendu inimeste ja organisatsioonidega, kellega töötad.",
+        "short": "Otsin partnereid"
+      },
+      "agencies": {
+        "title": "Agentuuridele",
+        "description": "Halda agentuuri inimesi, kliente ja pakkumisi.",
+        "short": "Agentuuridele"
+      }
+    },
+    "links": {
+      "jobs": "Töökuulutused",
+      "workOpportunities": "Töövõimalused",
+      "createCv": "Loo tasuta CV",
+      "workAbroad": "Töö välismaal",
+      "forWorkers": "Kuidas see töötajatele toimib",
+      "companyNeed": "Kirjelda vajadust",
+      "forCompanies": "Kuidas see ettevõtetele toimib",
+      "labourMarket": "Tööturg riigiti",
+      "myServices": "Sinu teenused",
+      "serviceRequests": "Teenusepäringud",
+      "marketListings": "Turu kuulutused",
+      "commercial": "Pakkumised ja lepingud",
+      "network": "Sinu võrgustik",
+      "partnerWithUs": "Hakka partneriks",
+      "forAgencies": "Kuidas see agentuuridele toimib",
+      "setUpAgency": "Loo agentuur"
+    },
+    "assistant": "Küsi assistendilt",
+    "start": {
+      "searchLabel": "Otsi tööd",
+      "searchPlaceholder": "Ametinimetus või märksõna",
+      "searchSubmit": "Otsi",
+      "viewAll": "Kõik kuulutused"
+    },
+    "nav": {
+      "heading": "Mida soovid teha?",
+      "swipe": "Libista",
+      "close": "Sulge",
+      "functions": "Funktsioonid",
+      "professions": "Ametid",
+      "opensNow": "Avaneb kohe",
+      "signInWhenOpen": "Sisselogimine avamisel",
+      "allSectors": "Kõik sektorid",
+      "fullList": "Täielik nimekiri"
+    },
+    "more": "Veel"
   }
 }

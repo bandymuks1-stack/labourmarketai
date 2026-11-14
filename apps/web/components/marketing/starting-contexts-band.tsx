@@ -4,7 +4,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { PARTNER_DOOR, STARTING_CONTEXTS } from "@/lib/marketing/public-doors";
 import { cn } from "@/lib/utils";
-import { Reveal } from "@/components/marketing/reveal";
+import { Reveal } from "@/components/marketing/lazy-motion";
 import { Card } from "@/components/ui/Card";
 
 /**
