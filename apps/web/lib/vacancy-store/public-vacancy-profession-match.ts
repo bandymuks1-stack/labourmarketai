@@ -101,7 +101,7 @@ const TYPED_WORDS: Readonly<Record<string, readonly string[]>> = {
     "sandėlininkė",
     "magazynier",
     "кладовщик",
-    // 2026-11-14 production: each of these answered 0 on a board with 1,166 such ads.
+    // 2026-11-14: each of these answered 0 on a board that held such ads.
     "warehouse operative",
     "warehouse operator",
     "warehouse associate",

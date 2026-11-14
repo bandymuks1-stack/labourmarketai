@@ -2,11 +2,10 @@
  * A TYPED JOB WORD THE CATALOGUE HAS NO PROFESSION FOR (owner P0.1, 2026-11-14).
  *
  * The catalogue names 49 professions; a word that is one of them becomes the
- * profession filter (public-vacancy-profession-match.ts). About two thirds of
- * the live ads carry no catalogue profession, and the free-text search matches
- * the publisher's own words. So `slaugytoja`, `Krankenschwester`, `бухгалтер`
- * answered "0 vacancies" on a board holding thousands of nursing and accounting
- * ads (production, 2026-11-14: 2,385 for `sjuksköterska`, 921 for `sykepleier`).
+ * profession filter (public-vacancy-profession-match.ts). Many live ads carry
+ * no catalogue profession, and the free-text search matches the publisher's
+ * own words. So `slaugytoja`, `Krankenschwester`, `бухгалтер` answered
+ * "0 vacancies" on a board that held nursing and accounting ads.
  *
  * The search takes ONE term and the supply is published in more than one
  * language, so no single redirect is right and none is made. The board offers
@@ -14,7 +13,7 @@
  * each a normal search link. No country or language is preferred: the order is
  * the order of the language codes.
  *
- * Every publisher term here returned ads on production on 2026-11-14. A term
+ * Every publisher term here returned ads when it was added. A term
  * that stops matching is a plain search with an honest zero, never an error.
  *
  * PURE: no fs / net / env.

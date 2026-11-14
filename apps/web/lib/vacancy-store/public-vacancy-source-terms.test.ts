@@ -18,7 +18,7 @@ const catalogue = (locale: string) =>
  * Production, 2026-11-14, signed out: `slaugytoja`, `медсестра`, `pielęgniarka`,
  * `Krankenschwester`, `verpleegkundige`, `buhalteris`, `бухгалтер`, `księgowy`,
  * `Buchhalter`, `boekhouder` each answered "0 vacancies" while the board held
- * 2,385 + 921 nursing ads and 206 + 41 accounting ads.
+ * nursing and accounting ads in the publishers' languages.
  */
 describe("a typed job word with no catalogue profession", () => {
   it("offers the nursing ads in every publisher language, for each reader language", () => {
