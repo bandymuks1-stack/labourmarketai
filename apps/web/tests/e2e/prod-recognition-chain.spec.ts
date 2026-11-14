@@ -216,13 +216,28 @@ test("R-3c. what an earlier run left: a signed-off practice day, a recognition, 
   // steps establish them, and the recognition form shows nothing without a learner.
   const beta = await as(browser, "owner");
   const form = await recognitionForm(beta.page);
-  // Offered as evidence = signed off (a current approval) and readable by Beta.
+  // Offered as evidence = signed off (a current approval) and readable by Beta. Only a definite
+  // answer counts: a failed evidence read renders an alert and no options, and reading that as
+  // "none" would make R-4/R-5 write a second permanent signed-off day.
+  const evidence = form.getByTestId("recognition-evidence");
+  const evidenceOptions = evidence.getByTestId("recognition-evidence-option");
+  const evidenceNone = evidence.getByTestId("recognition-evidence-none");
+  await expect(
+    evidenceOptions.first().or(evidenceNone),
+    "the evidence read answered (a list or an explicit empty state), not unavailable",
+  ).toBeVisible({ timeout: 30_000 });
   signedOffExists = (await form.locator("label", { hasText: PRACTICE_MARK }).getByTestId("recognition-evidence-option").count()) > 0;
   await beta.close();
   const learner = await as(browser, "worker2");
   await learner.page.goto("/lt/dashboard/documents");
-  await expect(learner.page.getByTestId("own-recognitions")).toBeVisible({ timeout: 30_000 });
-  const list = learner.page.getByTestId("own-recognitions-list");
+  const block = learner.page.getByTestId("own-recognitions");
+  await expect(block).toBeVisible({ timeout: 30_000 });
+  // Same rule for the recognition read: the block renders on a failed read too, so require the
+  // list or the explicit empty state. Unavailable stops the walk before anything is written,
+  // because the recording RPC inserts unconditionally and a duplicate would be permanent.
+  const list = block.getByTestId("own-recognitions-list");
+  const empty = block.getByTestId("own-recognitions-empty");
+  await expect(list.or(empty), "the learner's recognitions read answered, not unavailable").toBeVisible({ timeout: 30_000 });
   recognitionExists = (await list.count()) > 0 && (await list.innerText()).includes(RECOGNITION_KEY);
   await learner.close();
   console.info(`[recognition] earlier run left: signed-off practice day=${signedOffExists} recognition=${recognitionExists}`);
