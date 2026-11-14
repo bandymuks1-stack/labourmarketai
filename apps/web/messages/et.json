@@ -129,7 +129,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "[EN] Continue with LinkedIn",
-      "continueWithFacebook": "[EN] Continue with Facebook"
+      "continueWithFacebook": "[EN] Continue with Facebook",
+      "inAppBrowser": "Oled rakenduse sisseehitatud brauseris, kus Google'iga sisselogimine sageli ei tööta. Ava see leht telefoni brauseris (Safari või Chrome) või kasuta allpool e-posti ja parooli."
     },
     "callback": {
       "error_body": "[EN] This link is invalid or expired. Please try again.",
@@ -314,7 +315,9 @@
       "oauth": {
         "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
         "link_expired": "See kinnituslink on aegunud või juba kasutatud. Kui oled e-posti juba kinnitanud, logi lihtsalt sisse. Muidu küsi allpool uus link.",
-        "confirmed_sign_in": "Sinu e-post on kinnitatud. Registreerumine alustati teises seadmes, seega logi jätkamiseks siin sisse."
+        "confirmed_sign_in": "Sinu e-post on kinnitatud. Registreerumine alustati teises seadmes, seega logi jätkamiseks siin sisse.",
+        "confirm_link_opened": "See kinnituslink on avatud. Sinu e-posti aadress on suure tõenäosusega juba kinnitatud, seega proovi sisse logida. Kui see ei õnnestu, küsi allpool uus link.",
+        "provider_error": "Sisselogimisteenus ei saanud seda sisselogimist lõpule viia ja uuesti proovimine lõpeb tõenäoliselt samamoodi. Logi sisse sel viisil, millega esmalt registreerusid, või e-posti ja parooliga."
       },
       "emailNotConfirmed": "Sinu e-post pole veel kinnitatud. Ava saadetud kinnituslink või küsi allpool uus."
     },
@@ -417,6 +420,7 @@
       "country_search_empty": "Riiki ei leitud. Proovi teist nime.",
       "error_country_required": "Palun vali riik.",
       "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
+      "role_step_hint": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Mis on sinu amet või töökogemus?",
       "profession_placeholder": "Kirjuta amet või töövaldkond",
       "profession_add": "Lisa",
@@ -732,7 +736,6 @@
     "legalGroup": "[EN] Legal",
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
-    "rexora": "Loodud koostöös: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
@@ -890,7 +893,8 @@
     "themeToLight": "Hele teema",
     "how": "Kuidas see töötab",
     "menuOpen": "Menüü",
-    "menuClose": "Sulge menüü"
+    "menuClose": "Sulge menüü",
+    "market": "Tööturg"
   },
   "pages": {
     "agencies": {
@@ -1774,6 +1778,10 @@
       "title": "Vestlust ei õnnestunud avada",
       "body": "Võimalik, et sul pole õigust sellele inimesele kirjutada või ta pole enam saadaval. Midagi ei saadetud."
     },
+    "noLongerAvailable": {
+      "title": "See vestlus pole enam saadaval",
+      "body": "Sa ei osale selles enam, seega selle sõnumeid ei näidata."
+    },
     "originalLanguage": "[EN] Original ({lang})",
     "priority": {
       "awaitingYou": "[EN] Awaiting your reply",
@@ -2082,6 +2090,16 @@
         "into": "See rida liideti projektiga",
         "canonical": "säilitatud projekt",
         "includes": "{count, plural, one {Sisaldab # liidetud projektirida — selle kirjed on siin.} other {Sisaldab # liidetud projektirida — nende kirjed on siin.}}"
+      },
+      "teams": {
+        "title": "Meeskonnad selles projektis",
+        "members": "{n, plural, one {# inimene} other {# inimest}}",
+        "personTeam": "Meeskond: {team}",
+        "unnamed": "Meeskond",
+        "unnamedMember": "Liige",
+        "noMembers": "Praegu liikmeid pole.",
+        "unavailable": "Meeskondi ei õnnestunud laadida. Proovige uuesti.",
+        "manage": "Muuda meeskondi"
       }
     },
     "workerView": {
@@ -2969,6 +2987,7 @@
     "servicesTitle": "Mida see inimene oskab",
     "servicesEmpty": "Veel pole midagi pakutud",
     "servicesUnavailable": "Pakutavaid teenuseid ei õnnestunud laadida",
+    "sharedAfterWork": "Teenused, tööfotod ja kirja pandud töö kuvatakse, kui hakkate koos töötama.",
     "serviceRemote": "Kaugtöö",
     "photoAlt": "Tehtud töö foto",
     "historyTitle": "Imporditud ajalugu",
@@ -4827,6 +4846,42 @@
         "goods": "Kaubad"
       },
       "lasting": "Sinu kogemus ja võimalused jäävad alati kättesaadavaks — kui vahetad tööd, projekti või riiki."
+    },
+    "v3": {
+      "lead": "Töötajatele, tööandjatele ja teenusepakkujatele – kõigil kutsealadel ja kõigis sektorites. Registreerimine ja põhivajaduse avaldamine on tasuta.",
+      "moreChoices": "Rohkem valikuid",
+      "or": "või kirjeldage oma sõnadega",
+      "needFree": "Päringu saate esitada registreerimata. Esitamine on tasuta; teenuse tingimused ja hind lepitakse kokku eraldi.",
+      "market": {
+        "title": "Töökuulutused turul",
+        "line": "{adverts} aktiivset töökuulutust välistest allikatest. Kuulutustes on nimetatud {employers} erinevat tööandja nime.",
+        "source": "Kuulutused on kogutud avalikest välistest töökuulutuste allikatest. See ei ole LabourMarket.ai-s registreeritud tööandjate ega klientide arv. Kuulutusi uuendati viimati: {date}.",
+        "none": "Turuandmed ei ole praegu kättesaadavad.",
+        "search": "Otsi töökuulutusi"
+      },
+      "adverts": {
+        "title": "Mõned aktiivsed kuulutused",
+        "sub": "Kuulutusi saate sirvida ilma kontota. Sisse logides näete tööandjat, asukohta, täielikku kirjeldust ja kandideerimise viisi."
+      },
+      "how": {
+        "title": "Kuidas see töötab",
+        "s1": {
+          "title": "Leidke ja leppige kokku",
+          "body": "Otsige tööd, töötajaid või teenuseid ning hallake pakkumisi ja kokkuleppeid platvormil."
+        },
+        "s2": {
+          "title": "Kirjendage töö",
+          "body": "Tehtud töö saate kirjendada tööpäevikus."
+        },
+        "s3": {
+          "title": "Kinnitage",
+          "body": "Kanded kinnitab tööandja organisatsiooni juht. Tellija võib talle esitatud töö vastu võtta – see märgitakse eraldi. Kinnitatud töö on teie kogemuse tõend."
+        },
+        "s4": {
+          "title": "Teie andmed ja privaatsus",
+          "body": "Assistent teeb ettepanekuid, otsused teete teie. Teie otsustate, kas tööandjad saavad teid leida ja kas kontaktandmeid jagatakse. Töökirjeid näeb organisatsioon, kus te töötate."
+        }
+      }
     }
   },
   "workspace": {
@@ -5334,7 +5389,7 @@
     },
     "language": {
       "translatedFrom": "[EN] Translated from {language}",
-      "originalIn": "[EN] Advertisement language: {language}",
+      "originalIn": "Kuulutuse keel: {language}",
       "showOriginal": "[EN] Show original",
       "hideOriginal": "[EN] Hide original",
       "machineNote": "[EN] Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
@@ -7928,10 +7983,10 @@
   },
   "consent": {
     "banner": {
-      "text": "Lehtede kasutust ja kampaaniat, mis sind siia tõi, mõõdame ainult sinu loal.",
+      "text": "Brauseris salvestatud mõõtmisandmeid ja kampaaniateavet kasutame ainult teie nõusolekul.",
       "accept": "Luba mõõtmine",
       "refuse": "Keeldu",
-      "more": "Rohkem",
+      "more": "Lähemalt küpsistest",
       "label": "Kasutuse mõõtmise valik"
     },
     "control": {
@@ -7942,5 +7997,82 @@
       "allow": "Luba",
       "refuse": "Keeldu"
     }
+  },
+  "siteNav": {
+    "education": "Õppeasutustele",
+    "signUp": "Registreeru",
+    "trigger": "Peamised eesmärgid",
+    "account": "Sisseloginud kasutajatele",
+    "intents": {
+      "work": {
+        "title": "Otsin tööd",
+        "description": "Otsige tööd ja tutvustage oma kogemust.",
+        "short": "Otsin tööd"
+      },
+      "workers": {
+        "title": "Otsin töötajaid",
+        "description": "Märkige, milliseid töötajaid, kus ja millal vajate.",
+        "short": "Otsin töötajaid"
+      },
+      "services": {
+        "title": "Pakun teenuseid",
+        "description": "Tutvustage oma teenuseid, leidke tellimusi ja vastake päringutele.",
+        "short": "Pakun teenuseid"
+      },
+      "partners": {
+        "title": "Otsin partnereid",
+        "description": "Leidke partnereid ja hoidke koostööd.",
+        "short": "Otsin partnereid"
+      },
+      "agencies": {
+        "title": "Agentuuridele",
+        "description": "Hallake agentuuri kliente ja kandidaadipakkumisi.",
+        "short": "Agentuuridele"
+      },
+      "contractors": {
+        "short": "Otsin teenuseid või töövõtjaid",
+        "title": "Otsin teenuseid või töövõtjaid",
+        "description": "Kirjeldage, millist teenust või töövõtjat vajate."
+      }
+    },
+    "links": {
+      "jobs": "Töökuulutused",
+      "workOpportunities": "Töövõimalused",
+      "createCv": "Loo tasuta CV",
+      "workAbroad": "Töö välismaal",
+      "forWorkers": "Kuidas see töötajatele toimib",
+      "companyNeed": "Kirjelda vajadust",
+      "forCompanies": "Kuidas see ettevõtetele toimib",
+      "labourMarket": "Tööturg riigiti",
+      "myServices": "Sinu teenused",
+      "serviceRequests": "Teenusepäringud",
+      "marketListings": "Turu kuulutused",
+      "commercial": "Pakkumised ja lepingud",
+      "network": "Sinu võrgustik",
+      "partnerWithUs": "Hakka partneriks",
+      "forAgencies": "Kuidas see agentuuridele toimib",
+      "setUpAgency": "Registreeri agentuur",
+      "b2bEnquiry": "Äriteenuste päring (B2B)",
+      "projectEnquiry": "Individuaalse projekti päring"
+    },
+    "assistant": "Küsi assistendilt",
+    "start": {
+      "searchLabel": "Otsi töökuulutusi",
+      "searchPlaceholder": "Ametinimetus või märksõna",
+      "searchSubmit": "Otsi",
+      "viewAll": "Kõik kuulutused"
+    },
+    "nav": {
+      "heading": "Mida soovid teha?",
+      "swipe": "Libista",
+      "close": "Sulge",
+      "functions": "Tegevused",
+      "professions": "Ametid",
+      "opensNow": "Kontot ei ole vaja",
+      "signInWhenOpen": "Vajalik on sisselogimine",
+      "allSectors": "Kõik sektorid",
+      "fullList": "Täielik nimekiri"
+    },
+    "more": "Veel"
   }
 }

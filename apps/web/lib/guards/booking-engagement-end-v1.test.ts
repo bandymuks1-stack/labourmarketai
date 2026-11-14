@@ -1790,6 +1790,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // (SECURITY DEFINER + EXECUTE to authenticated). RED draft #3231, the marker is the human-gate
       // acknowledgement, NOT applied.
       "20261112213100_team_offer_counterpart_v1.sql",
+      // 2026-11-13: owner P0 invitation delivery reliability, codes-only send diagnostics +
+      // retry / dead-letter / bounce fields. RED draft #3318, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261113190000_invitation_delivery_attempts_v1.sql",
 ]);
   });
 

@@ -298,30 +298,26 @@ describe("§20 starting contexts are contexts, not identities", () => {
 describe("§19 the visitor reaches a way to start without a long scroll", () => {
   const focus = read("app/[locale]/focus-landing/focus-landing.tsx");
 
-  it("the doors come BEFORE the explanation and the chain", () => {
+  // LANDING V3 (owner-approved, 2026-11-13). The starting-contexts band and
+  // the product chain left the page: the way to start is the goal centre at
+  // the very top, so there is no scroll to it at all. What §19 asks — a way
+  // to start before any explanation — is now stricter, and is pinned so.
+  it("the way to start (the goal centre) comes BEFORE the explanation", () => {
     const i = (c: string) => focus.indexOf(`<${c}`);
-    expect(i("StartingContextsBand")).toBeGreaterThan(0);
-    expect(i("StartingContextsBand")).toBeLessThan(i("ProductChainBand"));
+    expect(i("LandingIntentChoice")).toBeGreaterThan(0);
+    expect(i("LandingIntentChoice")).toBeLessThan(i("LandingHow"));
     // The sample player-card showcase was removed from the landing (containment 2026-10-08).
     expect(i("PlayerCardShowcase")).toBe(-1);
   });
 
-  it("the market EVIDENCE comes before both, directly under the entry", () => {
-    /*
-     * This pinned the MAP band in that slot. The owner withdrew it on
-     * 2026-09-27: it could only draw market centroids, never activity, so it
-     * needed copy explaining what its markers were not — the product explaining
-     * its data model to a visitor.
-     *
-     * The SLOT is the real contract here, and it is kept: directly under the
-     * entry, before the doors, the visitor still meets the market — now as the
-     * canonical vacancy and employer figures rather than a map that had to
-     * apologise for itself. `MarketProofBand` used to render nested inside the
-     * map band; it is a section of its own again.
-     */
+  it("the market EVIDENCE comes directly after the entry, before the explanation", () => {
+    // The canonical vacancy and employer figures, now one sentence with its
+    // source (`LandingMarketFacts`), in the one place they are printed.
     const i = (c: string) => focus.indexOf(`<${c}`);
-    expect(i("PublicEntry")).toBeLessThan(i("MarketProofBand"));
-    expect(i("MarketProofBand")).toBeLessThan(i("StartingContextsBand"));
+    expect(i("PublicEntry")).toBeLessThan(i("LandingMarketFacts"));
+    expect(i("LandingMarketFacts")).toBeLessThan(i("LandingHow"));
+    // The sentence box no longer prints the counts a second time.
+    expect(focus).toMatch(/<PublicEntry examples="none" supply=\{null\} \/>/);
     // And the withdrawn band must not quietly return without a decision.
     expect(i("PublicMarketMapBand")).toBe(-1);
   });
@@ -392,29 +388,23 @@ describe("§22 the first screen says what this is, then offers one next step", (
     expect(countPrimary(`${html}${html}`)).toBe(2);
   });
 
-  it("the page mounts the pair once in the hero and once as the closing band", () => {
+  // 2026-11-12 — owner instruction 2026-11-12 ("Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori atlikti"):
+  // the first screen's one next step is now the CHOICE (the goal navigator),
+  // mounted once before the working entry; the "Start now" pair remains only
+  // as the closing band at the end of the page.
+  // Landing V3 (owner, 2026-11-13): the closing "Start now" pair is gone
+  // too — it was a third start button. The choice is offered ONCE.
+  it("the page offers the choice once, and no second or third start button", () => {
     const focus = read("app/[locale]/focus-landing/focus-landing.tsx");
-    // Owner directive 2026-09-29 (living worker hero): the pair lives in ONE
-    // `promise` element that whichever hero is shown renders — the living
-    // worker hero over its photographs, or the entry hero without them. The
-    // rule is unchanged: mounted once, as `landing_hero`, before the entry.
-    const bodyStart = focus.lastIndexOf("<NextIntlClientProvider"); // the tag, not a comment naming it
-    const promise = focus.slice(focus.indexOf("const promise = ("), bodyStart);
-    expect(promise.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(1);
-    expect(promise).toContain('surface="landing_hero"');
-    // the hero pair exists exactly once in the file; the closing band is its own component
-    expect(focus.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(1);
-    const body = focus.slice(bodyStart);
-    // the hero renders the promise before the working entry (one branch since
-    // the fictional living-worker hero was withdrawn, owner order 2026-11-09)
+    const body = focus.slice(focus.lastIndexOf("<NextIntlClientProvider")); // the tag, not a comment naming it
+    expect(body).toContain('lead={tV3("lead")}');
+    expect(focus.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(0);
+    expect(focus.match(/<LandingClosingBand\b/g) ?? []).toHaveLength(0);
+    expect(focus.match(/<LandingIntentChoice\b/g) ?? []).toHaveLength(1);
     expect(body).not.toContain("<LivingWorkerHero");
-    for (const branch of [body.indexOf('<section className="grid gap-8 xl:grid-cols-')]) {
-      expect(branch).toBeGreaterThan(-1);
-      const from = body.slice(branch);
-      expect(from.indexOf("{promise}")).toBeGreaterThan(-1);
-      expect(from.indexOf("{promise}")).toBeLessThan(from.indexOf("<PublicEntry"));
-    }
-    expect(focus.indexOf("<LandingClosingBand")).toBeGreaterThan(focus.indexOf("<TrustBand"));
+    // The choice (with the page's h1 and its one line) first, then the entry.
+    expect(body.indexOf("<LandingIntentChoice")).toBeGreaterThan(-1);
+    expect(body.indexOf("<LandingIntentChoice")).toBeLessThan(body.indexOf("<PublicEntry"));
     // And still no per-request read: the landing stays static.
     const code = focus.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
     expect(code).not.toMatch(/cookies\(|headers\(/);

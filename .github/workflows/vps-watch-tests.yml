@@ -31,3 +31,7 @@ jobs:
         run: sudo apt-get install -y -qq acl >/dev/null
       - name: Sandbox, access and alert tests
         run: sudo env GITHUB_ACTIONS="$GITHUB_ACTIONS" bash ops/vps/lm-watch-sandbox.test.sh
+      - name: Invitation delivery script (one Agentai OS event per unique alert, no secret in logs)
+        run: sh ops/vps/lm-invitation-delivery-retry.test.sh
+      - name: Invitation delivery cron install / status / remove (temp paths, nothing installed)
+        run: sh ops/vps/lm-invitation-delivery-cron.test.sh

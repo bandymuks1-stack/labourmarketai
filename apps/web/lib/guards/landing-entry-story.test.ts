@@ -22,9 +22,23 @@ describe("landing entry", () => {
     expect(code).not.toMatch(/<LandingJourney|buildSampleJourney/);
   });
 
-  it("the hero keeps its h1, its primary actions and the working sentence entry", () => {
-    expect(FOCUS).toMatch(/<h1 className="font-display text-4xl/);
-    expect(FOCUS).toContain('surface="landing_hero"');
-    expect(FOCUS).toContain("<PublicEntry");
+  // 2026-11-12: the hero's "Start now" pair gave way to the goal navigator —
+  // owner instruction 2026-11-12 ("Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori atlikti").
+  // The h1 keeps the owner's words at a reading size; the choice follows it.
+  it("the first screen is the question (the h1), the owner's line, and the working sentence entry", () => {
+    // The h1 is the goal navigator's own heading; the owner's headline is the
+    // one supporting line under the goals.
+    expect(readFileSync(join(ROOT, "components/marketing/landing-intent-choice.tsx"), "utf8")).toContain(
+      // Phones show all the goals as a grid (owner P0 2026-11-13).
+      '<GoalNavigation headingLevel="h1" phoneLayout="grid" lead={lead} phoneMore={phoneMore} />',
+    );
+    expect(FOCUS).not.toMatch(/<h1\b/);
+    // Landing V3 (owner, 2026-11-13): the supporting line is the approved
+    // "who it is for / what is free" sentence, passed to the navigator so it
+    // sits directly under the h1.
+    expect(FOCUS).toContain('lead={tV3("lead")}');
+    const body = FOCUS.slice(FOCUS.lastIndexOf("<NextIntlClientProvider"));
+    expect(body.indexOf("<LandingIntentChoice")).toBeGreaterThan(-1);
+    expect(body.indexOf("<LandingIntentChoice")).toBeLessThan(body.indexOf("<PublicEntry"));
   });
 });

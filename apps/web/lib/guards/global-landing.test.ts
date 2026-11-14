@@ -87,7 +87,10 @@ describe("(c) landing navigation and actions stay real", () => {
   });
 
   it("keeps the how-it-works anchor the navigation links to", () => {
-    expect(read(FOCUS)).toContain('id="how-it-works"');
+    // Landing V3 (owner, 2026-11-13): the anchor sits on the one compact
+    // "How it works" block, which the landing mounts.
+    expect(read(FOCUS)).toMatch(/<LandingHow\s*\/>/);
+    expect(read("components/marketing/landing-v3.tsx")).toContain('id="how-it-works"');
   });
 });
 
