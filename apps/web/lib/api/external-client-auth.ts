@@ -354,6 +354,22 @@ export type ExternalClientAuthEvent =
        *  log line throw and vanish — refusals were uncountable in production
        *  until 2026-10-13. */
       readonly result_code?: string;
+    }
+  | {
+      /** A tool call an OAuth client's scopes do not cover (lib/mcp/scopes.ts).
+       *  `would_refuse` = MCP_SCOPE_ENFORCEMENT=log (the call still ran);
+       *  `refused` = enforce (it did not). Names and classes only. */
+      readonly event: "external_client.scope";
+      readonly door: string;
+      readonly tool: string;
+      readonly outcome: "would_refuse" | "refused";
+      readonly mode: "log" | "enforce";
+      readonly grant: "oauth_scoped" | "oauth_unscoped";
+      /** Null only for a tool the coverage guard should have caught. */
+      readonly required_scope: string | null;
+      /** The OAuth client registration id — public client configuration,
+       *  never a person. */
+      readonly oauth_client: string;
     };
 
 const FORBIDDEN_LOG_KEYS = new Set([

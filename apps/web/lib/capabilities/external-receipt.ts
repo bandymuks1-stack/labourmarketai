@@ -88,7 +88,31 @@ export async function recordExternalReceipt(
   result: ExecResult,
 ): Promise<ReceiptState> {
   if (capability.kind !== "confirm" && capability.kind !== "execute") return { state: "not_applicable" };
-  const args = (rawArgs && typeof rawArgs === "object" ? rawArgs : {}) as Record<string, unknown>;
+  return writeReceipt(caller, capability.id, rawArgs, result);
+}
+
+/**
+ * THE RECEIPT FOR A SCOPE REFUSAL (`lib/mcp/scopes.ts`, MCP_SCOPE_ENFORCEMENT
+ * = enforce). Unlike a write receipt it is written for EVERY tool kind — a
+ * refused read is exactly as much a fact about what a third-party client
+ * tried as a refused write. Same RPC, same row shape, outcome
+ * `insufficient_scope`, no read-back. Nothing ran, so nothing is undone.
+ */
+export async function recordScopeRefusalReceipt(
+  caller: CapabilityCaller,
+  capabilityId: string,
+  rawArgs: unknown,
+): Promise<ReceiptState> {
+  return writeReceipt(caller, capabilityId, rawArgs, { ok: false, code: "insufficient_scope", message: "insufficient_scope" });
+}
+
+async function writeReceipt(
+  caller: CapabilityCaller,
+  capabilityId: string,
+  rawArgs: unknown,
+  result: ExecResult,
+): Promise<ReceiptState> {
+  const args =(rawArgs && typeof rawArgs === "object" ? rawArgs : {}) as Record<string, unknown>;
   const data = result.ok ? ((result.data ?? undefined) as Record<string, unknown> | undefined) : undefined;
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -106,7 +130,7 @@ export async function recordExternalReceipt(
         : null;
     const outcome = result.ok ? "ok" : ((result as { code?: string }).code ?? "error");
     const { data: id, error } = await sb.rpc("record_external_action_receipt_v1", {
-      p_capability: receiptCapabilityId(capability.id),
+      p_capability: receiptCapabilityId(capabilityId),
       p_organization_id: organizationId,
       p_entity_id: pickObjectId(args, data),
       p_confirmation_ref: confirmationRef(args.confirmationToken),

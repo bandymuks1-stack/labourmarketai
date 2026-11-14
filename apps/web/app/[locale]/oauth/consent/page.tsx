@@ -2,6 +2,12 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { decideOauthConsent } from "@/lib/auth/oauth-consent-actions";
+import { env } from "@/lib/env";
+import {
+  consentScopeMessageKey,
+  requestsProductScope,
+  scopeEnforcementModeOf,
+} from "@/lib/mcp/scopes";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -82,6 +88,7 @@ export default async function OauthConsentPage({
   const redirectUri = (details as { redirect_uri?: string }).redirect_uri ?? "";
   const scope = (details as { scope?: string }).scope ?? "";
   const scopes = scope.split(" ").filter(Boolean);
+  const scopeMode = scopeEnforcementModeOf(env.MCP_SCOPE_ENFORCEMENT);
 
   return (
     <ConsentShell title={t("title")}>
@@ -102,15 +109,37 @@ export default async function OauthConsentPage({
           <div>
             <dt className="font-medium">{t("scopesLabel")}</dt>
             <dd>
+              {/* Every requested scope in plain words, with its exact code so
+                  nothing is hidden; an unknown scope is shown verbatim and
+                  named as granting nothing — never silently dropped. */}
               <ul className="list-inside list-disc text-text-muted">
-                {scopes.map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
+                {scopes.map((s) => {
+                  const key = consentScopeMessageKey(s);
+                  return (
+                    <li key={s}>
+                      {key ? t(`scope.${key}`) : t("scopeUnknown")}{" "}
+                      <code className="text-xs">{s}</code>
+                    </li>
+                  );
+                })}
               </ul>
             </dd>
           </div>
         )}
       </dl>
+
+      {/* What this grant will actually allow, under the current setting of
+          MCP_SCOPE_ENFORCEMENT (lib/mcp/scopes.ts) — the screen never claims
+          a limit the server does not apply. */}
+      <p className="mt-4 text-sm">
+        {!requestsProductScope(scopes)
+          ? scopeMode === "enforce"
+            ? t("noProductScopesEnforced")
+            : t("noProductScopes")
+          : scopeMode === "enforce"
+            ? t("importantChangesConfirm")
+            : t("scopesNotEnforced")}
+      </p>
 
       <p className="mt-4 text-xs text-text-muted">{t("authorityNote")}</p>
 
