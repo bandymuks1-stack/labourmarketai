@@ -1786,6 +1786,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-10: partner registration Slice 1, company takeover invitation + two-operator decision + link.
       // RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261110190000_organization_claim_invitation_v1.sql",
+      // 2026-11-14 owner-chosen RED: a closed need refuses a new proposal or a first accept (draft, needs-human-gate, NOT applied).
+      "20261114100000_booking_refuses_closed_need_v1.sql",
 ]);
   });
 
