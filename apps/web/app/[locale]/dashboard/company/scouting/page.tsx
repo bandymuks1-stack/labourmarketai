@@ -1074,7 +1074,16 @@ export default async function CompanyScoutingPage({
                 {/* The client's decision on THIS candidate (agency first value):
                     accept proposes the canonical booking to the worker, decline
                     closes the offer. Renders only while the offer is open. */}
-                {oc.offerStatus === "offered" ? (
+                {oc.offerStatus === "offered" && !needOpen ? (
+                  /* A closed need takes no decision: the database refuses it.
+                     The offer is still open on the agency's side, so the card
+                     says why there is no control instead of offering one
+                     that fails. */
+                  <p className="text-meta text-text-muted" data-testid={`scout-offered-need-closed-${oc.offerId}`}>
+                    {tOffered("decision.closed")}
+                  </p>
+                ) : null}
+                {oc.offerStatus === "offered" && needOpen ? (
                   <OfferDecisionButtons
                     offerId={oc.offerId}
                     labels={{
@@ -1085,6 +1094,8 @@ export default async function CompanyScoutingPage({
                     }}
                   />
                 ) : null}
+                {/* Contact, dates and shortlist are for an OPEN need only. */}
+                {needOpen ? (
                 <div className="flex flex-col gap-2">
                   {/* SAME rule as the candidate card: the server gate needs the
                       worker on THIS company's shortlist. An offered person who
@@ -1147,6 +1158,7 @@ export default async function CompanyScoutingPage({
                     }}
                   />
                 </div>
+                ) : null}
               </li>
             ))}
           </ul>

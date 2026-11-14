@@ -32,7 +32,9 @@ const read = (...p: string[]) => readFileSync(join(WEB, ...p), "utf8");
 
 /** Every file that calls a notification emitter after a domain WRITE. */
 const WRITE_PATH_EMITTER_FILES = [
-  "lib/booking/booking-actions.ts",
+  // The booking bells are awaited in the one shared notifier; booking-actions
+  // and the agency offer decision await `notifyBooking` from it.
+  "lib/booking/booking-notify.ts",
   "lib/leave/absences-actions.ts",
   "lib/engagements/end-engagement.ts",
   "lib/tasks/task-actions.ts",
