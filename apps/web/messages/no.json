@@ -2100,7 +2100,8 @@
         "noMembers": "Ingen medlemmer akkurat nå.",
         "unavailable": "Teamene kunne ikke lastes inn. Prøv igjen.",
         "manage": "Endre team"
-      }
+      },
+      "organizationLink": "Organisasjonens historikk og prosjekter"
     },
     "workerView": {
       "eyebrow": "Mitt prosjekt",
@@ -7128,7 +7129,8 @@
       "address": "Adresse",
       "project": "Prosjekt",
       "notInSource": "Ikke i kilden",
-      "linked": "Koblet"
+      "linked": "Koblet",
+      "openProject": "Åpne prosjektet"
     },
     "whoWorked": "Hvem som jobbet her",
     "timeline": "Hva som ble gjort",
@@ -7146,7 +7148,15 @@
       "refused": "Dette kunne ikke lagres. Ingenting er endret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
     },
-    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem."
+    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem.",
+    "projects": {
+      "title": "Prosjekter på plattformen",
+      "counts": "{running} pågående · {completed} fullført",
+      "untitled": "Prosjekt uten navn",
+      "running": "Pågående",
+      "completed": "Fullført",
+      "all": "Alle {count} prosjekter"
+    }
   },
   "workLifecycle": {
     "pending": "Ikke ennå",

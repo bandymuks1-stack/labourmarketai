@@ -2,6 +2,10 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
+import {
+  summarizeOrganizationProjects,
+  type OrganizationProjects,
+} from "@/lib/organization-evidence/organization-projects";
 import { withSessionWorkspacePointer, listWorkspaceMemberships } from "@/lib/company/active-organization";
 import type { DomainCaller } from "@/lib/domain/caller";
 import type { BusinessHistoryIdentity } from "./business-history-header";
@@ -51,6 +55,9 @@ export type CompanyWorkHistoryLoad =
       readonly elsewhere: readonly { readonly id: string; readonly name: string; readonly count: number }[];
       /** Roster person id → linked worker id (only `linked` rows). */
       readonly linkedWorkers: Readonly<Record<string, string>>;
+      /** The organization's own projects on the platform (#3354: its track
+       *  record). Null when they could not be read — never shown as "none". */
+      readonly projects: OrganizationProjects | null;
       /** Records stored in ANOTHER organization's books that name this one as the performing company. */
       readonly attributedCount: number;
       /** A safety ceiling was reached while reading: the totals cover only
@@ -91,7 +98,7 @@ export async function loadCompanyWorkHistory(
   // Every read is PAGED to the end (the server answers at most 1000 rows):
   // production holds 2,944 records for one organization, and a bare
   // `.limit(1000)` made every total on this page silently wrong.
-  const [recs, objs, people] = await Promise.all([
+  const [recs, objs, people, projectRows] = await Promise.all([
     listAllEvidenceRecords(caller, { organizationId: org.organizationId }),
     readAllPages<{
       id: string;
@@ -122,8 +129,32 @@ export async function loadCompanyWorkHistory(
           .order("id", { ascending: true })
           .range(from, to),
     ),
+    // The organization's own projects on the platform — its track record
+    // (#3354). RLS decides what the caller reads; a duplicate project is a
+    // record fact, never counted twice. Unreadable -> no projects section.
+    readAllPages<{ id: string; title: string | null; city: string | null; status: string | null; created_at: string }>(
+      (from, to) =>
+        db(supabase)
+          .from("projects")
+          .select("id, title, city, status, created_at")
+          .eq("organization_id", org.organizationId)
+          .neq("record_state", "duplicate")
+          .order("id", { ascending: true })
+          .range(from, to),
+    ),
   ]);
   if (recs.kind !== "ok" || !objs || !people) return { kind: "unavailable" };
+  const projects = projectRows
+    ? summarizeOrganizationProjects(
+        projectRows.rows.map((r) => ({
+          id: r.id,
+          title: r.title,
+          city: r.city,
+          status: r.status,
+          createdAt: r.created_at,
+        })),
+      )
+    : null;
 
   // A place on a fragment project (record_state = duplicate) belongs to the
   // canonical project it was merged into: periods count real projects and
@@ -198,6 +229,7 @@ export async function loadCompanyWorkHistory(
     history,
     elsewhere,
     linkedWorkers,
+    projects,
     attributedCount: attributed.length,
     truncated: recs.truncated,
   };

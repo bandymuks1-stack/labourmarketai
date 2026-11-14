@@ -6885,7 +6885,8 @@
         "noMembers": "Šiuo metu narių nėra.",
         "unavailable": "Komandų įkelti nepavyko. Bandykite dar kartą.",
         "manage": "Keisti komandas"
-      }
+      },
+      "organizationLink": "Organizacijos istorija ir projektai"
     },
     "workerView": {
       "eyebrow": "Mano projektas",
@@ -19256,7 +19257,8 @@
       "address": "Adresas",
       "project": "Projektas",
       "notInSource": "Šaltinyje nėra",
-      "linked": "Susieta"
+      "linked": "Susieta",
+      "openProject": "Atverti projektą"
     },
     "whoWorked": "Kas čia dirbo",
     "timeline": "Kas daryta",
@@ -19337,6 +19339,14 @@
         "opening": "Atveriama…",
         "error": "Darbo erdvės atverti nepavyko."
       }
+    },
+    "projects": {
+      "title": "Projektai platformoje",
+      "counts": "{running} vykdomi · {completed} užbaigti",
+      "untitled": "Projektas be pavadinimo",
+      "running": "Vykdomas",
+      "completed": "Užbaigtas",
+      "all": "Visi {count} projektai"
     }
   },
   "workPlan": {

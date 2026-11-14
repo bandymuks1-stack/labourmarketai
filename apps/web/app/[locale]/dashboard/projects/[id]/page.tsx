@@ -243,6 +243,17 @@ export default async function ProjectStadiumPage({
             </Link>
           </p>
         ) : null}
+        {ops.project.organizationId ? (
+          /* The project's organization, one door away (#3354): its history
+             and projects. Members only, the same rule that door applies. */
+          <Link
+            href={`/${locale}/dashboard/company/history?org=${ops.project.organizationId}`}
+            className="w-fit text-sm font-medium text-brand-blue hover:underline"
+            data-testid="project-organization-link"
+          >
+            {t("organizationLink")} →
+          </Link>
+        ) : null}
         {mergedFragments > 0 ? (
           <p className="text-meta text-text-muted" data-testid="project-merged-fragments">
             {t("merged.includes", { count: mergedFragments })}

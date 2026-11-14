@@ -2100,7 +2100,8 @@
         "noMembers": "Praegu liikmeid pole.",
         "unavailable": "Meeskondi ei õnnestunud laadida. Proovige uuesti.",
         "manage": "Muuda meeskondi"
-      }
+      },
+      "organizationLink": "Organisatsiooni ajalugu ja projektid"
     },
     "workerView": {
       "eyebrow": "Minu projekt",
@@ -7128,7 +7129,8 @@
       "address": "Aadress",
       "project": "Projekt",
       "notInSource": "Allikas puudub",
-      "linked": "Seotud"
+      "linked": "Seotud",
+      "openProject": "Ava projekt"
     },
     "whoWorked": "Kes siin töötas",
     "timeline": "Mida tehti",
@@ -7146,7 +7148,15 @@
       "refused": "Salvestamine ebaõnnestus. Midagi ei muudetud.",
       "person": "{hours} h, {count, plural, one {# kirje} other {# kirjet}}"
     },
-    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid."
+    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid.",
+    "projects": {
+      "title": "Projektid platvormil",
+      "counts": "{running} käimas · {completed} lõpetatud",
+      "untitled": "Nimeta projekt",
+      "running": "Käimas",
+      "completed": "Lõpetatud",
+      "all": "Kõik {count} projekti"
+    }
   },
   "workLifecycle": {
     "pending": "Veel mitte",

@@ -6885,7 +6885,8 @@
         "noMembers": "Derzeit keine Mitglieder.",
         "unavailable": "Die Teams konnten nicht geladen werden. Bitte erneut versuchen.",
         "manage": "Teams ändern"
-      }
+      },
+      "organizationLink": "Geschichte und Projekte der Organisation"
     },
     "workerView": {
       "eyebrow": "Mein Projekt",
@@ -19256,7 +19257,8 @@
       "address": "Adresse",
       "project": "Projekt",
       "notInSource": "Nicht in der Quelle",
-      "linked": "Verknüpft"
+      "linked": "Verknüpft",
+      "openProject": "Projekt öffnen"
     },
     "whoWorked": "Wer hier gearbeitet hat",
     "timeline": "Was getan wurde",
@@ -19337,6 +19339,14 @@
         "opening": "Wird geöffnet…",
         "error": "Der Arbeitsbereich konnte nicht geöffnet werden."
       }
+    },
+    "projects": {
+      "title": "Projekte auf der Plattform",
+      "counts": "{running} laufend · {completed} abgeschlossen",
+      "untitled": "Projekt ohne Titel",
+      "running": "Laufend",
+      "completed": "Abgeschlossen",
+      "all": "Alle {count} Projekte"
     }
   },
   "workPlan": {

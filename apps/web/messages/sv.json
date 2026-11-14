@@ -2100,7 +2100,8 @@
         "noMembers": "Inga medlemmar just nu.",
         "unavailable": "Teamen kunde inte läsas in. Försök igen.",
         "manage": "Ändra team"
-      }
+      },
+      "organizationLink": "Organisationens historik och projekt"
     },
     "workerView": {
       "eyebrow": "Mitt projekt",
@@ -7128,7 +7129,8 @@
       "address": "Adress",
       "project": "Projekt",
       "notInSource": "Finns inte i källan",
-      "linked": "Länkad"
+      "linked": "Länkad",
+      "openProject": "Öppna projektet"
     },
     "whoWorked": "Vem som arbetade här",
     "timeline": "Vad som gjordes",
@@ -7146,7 +7148,15 @@
       "refused": "Det gick inte att spara. Inget ändrades.",
       "person": "{hours} h, {count, plural, one {# post} other {# poster}}"
     },
-    "truncated": "Det finns fler poster än en vy läser. De {count} lästa visas; summorna omfattar bara dem."
+    "truncated": "Det finns fler poster än en vy läser. De {count} lästa visas; summorna omfattar bara dem.",
+    "projects": {
+      "title": "Projekt på plattformen",
+      "counts": "{running} pågående · {completed} avslutade",
+      "untitled": "Projekt utan namn",
+      "running": "Pågående",
+      "completed": "Avslutat",
+      "all": "Alla {count} projekt"
+    }
   },
   "workLifecycle": {
     "pending": "Ännu inte",
