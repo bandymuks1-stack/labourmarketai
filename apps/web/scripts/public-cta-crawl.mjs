@@ -437,6 +437,12 @@ async function crawlPage(context, path, width, discovered, firstFailure = null) 
           inLink: !!el.closest("a[href]"),
           // The step, tab or option a person is already on: pressing it rightly changes nothing.
           current: el.hasAttribute("aria-current") && el.getAttribute("aria-current") !== "false" || el.getAttribute("aria-selected") === "true",
+          // The option already chosen in a set of choices (allow / refuse, a segmented switch, a
+          // radio): pressing it again rightly changes nothing. Only inside a group — a lone toggle
+          // that is "on" must still switch off when pressed, so it is still pressed and judged.
+          chosen:
+            (el.getAttribute("aria-pressed") === "true" && !!el.parentElement && el.parentElement.querySelectorAll(":scope > [aria-pressed]").length > 1) ||
+            (el.getAttribute("role") === "radio" && el.getAttribute("aria-checked") === "true"),
           testid: el.getAttribute("data-testid") ?? "",
           // Site furniture (header, footer, navigation, a dialog such as the cookie bar) is the
           // same control on every page; a button in the page's own content is not, even when
@@ -452,7 +458,7 @@ async function crawlPage(context, path, width, discovered, firstFailure = null) 
           })(),
         }), undefined, { timeout: 1_500 }) // a control that left the page is skipped, not waited for
         .catch(() => null);
-      if (!info || !info.visible || info.disabled || info.submit || info.inLink || info.current) continue;
+      if (!info || !info.visible || info.disabled || info.submit || info.inLink || info.current || info.chosen) continue;
       // A shared control (header, footer, cookie bar) is pressed on the first pages that
       // carry it, not on all of them: twice per width and page shape proves it.
       const sigKey = `${width}|${pageShape(path)}|${info.signature}`;
