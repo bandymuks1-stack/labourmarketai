@@ -1,3 +1,4 @@
+import { countryDisplayName } from "@/lib/location/country-model";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -613,7 +614,7 @@ export default async function CompanyScoutingPage({
                     : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
                 }`}
               >
-                {cc}
+                {countryDisplayName(cc, locale)}
               </Link>
             ))}
             {result.facets.skills.map((s) => (
@@ -1006,9 +1007,11 @@ export default async function CompanyScoutingPage({
           data-testid="scouting-empty"
         >
           <p className="text-sm text-text-secondary">
-            {hasActiveScoutFilters(result.filters)
-              ? t("filters.noMatches")
-              : t("noCandidates")}
+            {result.filters.country && !result.filters.skill && !result.filters.availableNow
+              ? t("filters.noMatchesCountry", { country: countryDisplayName(result.filters.country, locale) })
+              : hasActiveScoutFilters(result.filters)
+                ? t("filters.noMatches")
+                : t("noCandidates")}
           </p>
           {hasActiveScoutFilters(result.filters) ? (
             <Link

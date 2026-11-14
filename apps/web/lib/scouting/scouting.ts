@@ -32,6 +32,7 @@ import {
 } from "@/lib/scouting/candidate-actionability";
 import { readStructuredDemandV2 } from "@/lib/demand/structured-demand-v2";
 import {
+  withNeedCountryFacet,
   allowlistScoutFilters,
   applyScoutFilters,
   buildScoutFacets,
@@ -428,7 +429,7 @@ export async function runScoutingCore(
   // Facet allowlists come from the visible supply itself; the requested
   // filters are clamped to them (a probe value matching nothing is dropped)
   // and can only NARROW the already-bounded, can_view_worker-scoped list.
-  const facets = buildScoutFacets(supply);
+  const facets = withNeedCountryFacet(buildScoutFacets(supply), need.country);
   const filters = allowlistScoutFilters(requestedFilters, facets);
   const filteredSupply = applyScoutFilters(supply, filters);
 

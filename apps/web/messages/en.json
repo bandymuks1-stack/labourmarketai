@@ -9320,7 +9320,8 @@
       "title": "Narrow the list",
       "availableNow": "Available now",
       "clear": "Clear filters",
-      "noMatches": "No candidates match the selected filters."
+      "noMatches": "No candidates match the selected filters.",
+      "noMatchesCountry": "No one in the visible supply is in {country} yet. Show everyone, or broaden the need."
     },
     "pool": {
       "factsUnreadable": "Some of what these people have recorded could not be read just now, so this order is not reliable. Nobody here has been shown as having less than they do — the facts behind the comparison are simply missing. Reload in a moment.",

@@ -9320,7 +9320,8 @@
       "title": "Lijst verfijnen",
       "availableNow": "Nu beschikbaar",
       "clear": "Filters wissen",
-      "noMatches": "Geen kandidaten voldoen aan de gekozen filters."
+      "noMatches": "Geen kandidaten voldoen aan de gekozen filters.",
+      "noMatchesCountry": "In het zichtbare aanbod is nog niemand in {country}. Toon iedereen, of verbreed de vraag."
     },
     "pool": {
       "factsUnreadable": "Een deel van wat deze mensen hebben vastgelegd kon zojuist niet worden gelezen, dus deze volgorde is niet betrouwbaar. Niemand wordt hier met minder getoond dan hij heeft — de feiten achter de vergelijking ontbreken simpelweg. Laad zo meteen opnieuw.",

@@ -8,6 +8,7 @@ import {
   parseScoutFilterParams,
   SCOUT_FACET_LIMIT,
   type FilterableCandidate,
+  withNeedCountryFacet,
 } from "./scout-filters";
 
 function candidate(
@@ -86,6 +87,25 @@ describe("allowlistScoutFilters — a probe value matching no candidate is dropp
         facets,
       ),
     ).toEqual({ skill: "masonry", country: "LT", availableNow: false });
+  });
+});
+
+describe("a real country is never silently dropped (Swedish employer audit V-3)", () => {
+  const supply = [candidate(["masonry"], "LT", null), candidate(["masonry"], "DE", null)];
+
+  it("a valid ISO country absent from the supply is kept and narrows to nobody, not to everyone", () => {
+    const filters = allowlistScoutFilters({ skill: null, country: "SE", availableNow: false }, buildScoutFacets(supply));
+    expect(filters.country).toBe("SE");
+    expect(applyScoutFilters(supply, filters)).toEqual([]);
+    expect(hasActiveScoutFilters(filters)).toBe(true);
+  });
+
+  it("the need's own country is always offered, once, after the supply's own", () => {
+    const facets = buildScoutFacets(supply);
+    expect(withNeedCountryFacet(facets, "se").countries).toEqual([...facets.countries, "SE"]);
+    expect(withNeedCountryFacet(facets, "LT").countries).toEqual(facets.countries);
+    expect(withNeedCountryFacet(facets, null)).toBe(facets);
+    expect(withNeedCountryFacet(facets, "XX")).toBe(facets);
   });
 });
 
