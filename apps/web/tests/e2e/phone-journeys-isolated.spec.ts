@@ -5,6 +5,7 @@ import {
   isolatedStack,
   lit,
   onboard,
+  PASSWORD,
   publishNeed,
   setUpCompany,
   signIn,
@@ -33,6 +34,19 @@ import {
  * M-2 runs LAST in each group (first run 2026-11-14: the CV page stopped answering at 375 px), so a
  * CV fault cannot hide search, applying and messages; if it stops answering again, the step says
  * whether the same CV answers at a desktop width.
+ *
+ * THE FOUR OTHER GROUPS (owner P0, evening 2026-11-14: "visoms 5 grupėms"), each at both widths and
+ * each its own serial group, so one role's failure hides no other:
+ *   E EMPLOYER     the area sheet to needs; the need form sent on the phone; candidate search for it;
+ *                  the people page and a join-by-link invitation; messages.
+ *   A AGENCY       the area sheet to clients; the roster invite on the people page; a need posted on
+ *                  the phone; messages.
+ *   S STUDENT      signs up ON THE PHONE (study fields), the learning compass, the internship board,
+ *                  applies to an open need, the study on the Living CV; messages.
+ *   T INSTITUTION  signs up ON THE PHONE through its door and sets up its organisation; the education
+ *                  home (no header or sheet door leads there: reached by address, recorded); a learner
+ *                  invited by link; the people page with its members fold; messages.
+ * Organisation setup that is not itself under test happens at a desktop, like M-0.
  *
  * On every page the walk also asserts that nothing scrolls sideways (the page is never wider than
  * the phone). Controls are TAPPED, not clicked. Outcomes are read back from the local database —
@@ -147,6 +161,56 @@ async function accountMenu(page: Page, link: "account-menu-profile-link" | "acco
   const target = page.getByTestId(link);
   await tapUntil(page.getByTestId("account-menu-trigger"), target);
   await target.tap();
+}
+
+/** The phone's area sheet (the desktop nav is hidden below md): open it and take one door. */
+async function sheetTo(page: Page, id: string): Promise<void> {
+  const item = page.getByTestId(`header-nav-sheet-${id}`);
+  await tapUntil(page.getByTestId("header-nav-sheet-trigger"), item);
+  await item.tap();
+}
+
+/** A new organisation owner, set up at a desktop (setup, not the walk); the session is kept. */
+async function newOrganisation(browser: Browser, address: string, intent: "hire" | "agency", owner: string, legalName: string): Promise<{ profileId: string; orgId: string }> {
+  const ctx = await browser.newContext({ timezoneId: "UTC" });
+  const page = await ctx.newPage();
+  await signUp(page, BASE, address);
+  await onboard(page, intent, owner);
+  await setUpCompany(page, legalName);
+  sessions.set(address, await ctx.storageState());
+  await ctx.close();
+  const profileId = await userId(address);
+  const orgs = sql<{ id: string }>(`select id from public.organizations where owner_profile_id = ${lit(profileId)}`);
+  expect(orgs, "the organisation is stored once").toHaveLength(1);
+  return { profileId, orgId: orgs[0]!.id };
+}
+
+/** The need form, filled on the phone; returns the stored need's id. */
+async function postNeedOnPhone(page: Page, profileId: string, role: string): Promise<string> {
+  const main = page.getByRole("main");
+  await expect(main.getByTestId("demand-role")).toBeVisible({ timeout: 60_000 });
+  await fitsTheScreen(page, "the need form");
+  await main.getByTestId("demand-role").fill(role);
+  await main.getByTestId("demand-description").fill("Two people for a three-week renovation in Vilnius.");
+  await main.getByTestId("demand-next").tap();
+  const size = main.getByTestId("demand-team-size");
+  if (await size.isVisible().catch(() => false)) await size.fill("2");
+  await main.getByTestId("demand-next").tap();
+  await main.getByTestId("demand-create").tap();
+  await expect(main.getByTestId("demand-done"), "the need is accepted").toBeVisible({ timeout: 30_000 });
+  const rows = sql<{ id: string }>(
+    `select id from public.customer_requests where (title = ${lit(role)} or role_or_work_type = ${lit(role)}) and profile_id = ${lit(profileId)}`,
+  );
+  expect(rows, "the need is stored once").toHaveLength(1);
+  return rows[0]!.id;
+}
+
+/** Messages through the area sheet: the inbox opens and fits the screen. */
+async function messagesBySheet(page: Page, who: string): Promise<void> {
+  await sheetTo(page, "communication");
+  await page.waitForURL(/\/en\/dashboard\/communication/, { timeout: 30_000 });
+  await expect(page.getByTestId("communication-workspace"), `${who}: the messages page opens`).toBeVisible({ timeout: 30_000 });
+  await fitsTheScreen(page, `${who}'s messages`);
 }
 
 for (const phone of PHONES) {
@@ -333,4 +397,239 @@ for (const phone of PHONES) {
       await done();
     });
   });
+
+  // ── EMPLOYER ──────────────────────────────────────────────────────────────
+  const EMPLOYER = email(`employer${phone.name}`);
+  const e: { profileId: string; orgId: string; needId: string } = { profileId: "", orgId: "", needId: "" };
+  test.describe(`employer at ${phone.viewport.width} × ${phone.viewport.height}`, () => {
+    test.describe.configure({ mode: "serial" });
+    test(`E-1 (${phone.name}). setup at a desktop: a company owner`, async ({ browser }) => {
+      Object.assign(e, await newOrganisation(browser, EMPLOYER, "hire", `Synthetic Employer ${phone.name} ${RUN}`, `Synthetic Employer Co ${phone.name} ${RUN}`));
+    });
+    test(`E-2 (${phone.name}). the area sheet leads to needs; the need form is filled and sent on the phone`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, EMPLOYER);
+      await sheetTo(page, "area:need");
+      await page.waitForURL(/\/en\/dashboard\/company\/needs/, { timeout: 30_000 });
+      e.needId = await postNeedOnPhone(page, e.profileId, `Phone employer need ${phone.name} ${RUN}`);
+      await done();
+    });
+    test(`E-3 (${phone.name}). candidate search for that need opens on the phone`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, EMPLOYER);
+      await page.goto(`${BASE}/en/dashboard/company/scouting?request=${e.needId}`);
+      await expect(page.getByRole("main").locator('[data-testid^="scouting-"]').first(), "the scouting page renders its own content").toBeVisible({ timeout: 60_000 });
+      await fitsTheScreen(page, "the employer's candidate search");
+      await done();
+    });
+    test(`E-4 (${phone.name}). organisation management: the people page from the sheet, and a join-by-link invitation`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, EMPLOYER);
+      await sheetTo(page, "area:people");
+      await page.waitForURL(/\/en\/dashboard\/company\/people/, { timeout: 30_000 });
+      await fitsTheScreen(page, "the employer's people page");
+      await page.goto(`${BASE}/en/dashboard/network?invite=1&type=join_organization&org=${e.orgId}#network-invite`);
+      const panel = page.getByTestId("invite-panel");
+      await expect(panel).toBeVisible({ timeout: 30_000 });
+      await panel.getByTestId("invite-mode-link").tap();
+      await panel.getByTestId("invite-name").fill(`Synthetic Invitee ${phone.name} ${RUN}`);
+      await panel.getByTestId("invite-submit").tap();
+      await expect(panel.getByTestId("invite-copy-link").first(), "the invitation link is handed over").toBeVisible({ timeout: 30_000 });
+      await fitsTheScreen(page, "the invitation panel");
+      const rows = sql<{ status: string }>(`select status from public.invitations where organization_id = ${lit(e.orgId)} and invitation_type = 'join_organization'`);
+      expect(rows.length, "the invitation is stored").toBeGreaterThan(0);
+      await done();
+    });
+    test(`E-5 (${phone.name}). messages from the area sheet`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, EMPLOYER);
+      await messagesBySheet(page, "the employer");
+      await done();
+    });
+  });
+
+  // ── AGENCY ────────────────────────────────────────────────────────────────
+  const AGENCY = email(`agency${phone.name}`);
+  const a: { profileId: string; orgId: string } = { profileId: "", orgId: "" };
+  test.describe(`agency at ${phone.viewport.width} × ${phone.viewport.height}`, () => {
+    test.describe.configure({ mode: "serial" });
+    test(`A-1 (${phone.name}). setup at a desktop: a staffing agency`, async ({ browser }) => {
+      Object.assign(a, await newOrganisation(browser, AGENCY, "agency", `Synthetic Agency Owner ${phone.name} ${RUN}`, `Synthetic Staffing ${phone.name} ${RUN}`));
+      const [c] = sql<{ t: string | null }>(`select company_type as t from public.companies where profile_id = ${lit(a.profileId)}`);
+      expect(c?.t, "an agency, not a hiring company").toBe("staffing_agency");
+    });
+    test(`A-2 (${phone.name}). the area sheet leads to clients (partners)`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, AGENCY);
+      await sheetTo(page, "area:clients");
+      await page.waitForURL(/\/en\/dashboard\/company\/partners/, { timeout: 30_000 });
+      await fitsTheScreen(page, "the agency's clients");
+      await done();
+    });
+    test(`A-3 (${phone.name}). organisation management: the roster invite on the people page`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, AGENCY);
+      await sheetTo(page, "area:people");
+      await page.waitForURL(/\/en\/dashboard\/company\/people/, { timeout: 30_000 });
+      const main = page.getByRole("main");
+      await expect(main.getByTestId("company-workers-invite-email")).toBeVisible({ timeout: 30_000 });
+      await fitsTheScreen(page, "the agency's people page");
+      await main.getByTestId("company-workers-invite-email").fill(email(`rostered${phone.name}`));
+      await main.getByTestId("company-workers-invite-submit").tap();
+      await expect(main.getByTestId("company-workers-invite-result"), "the roster invitation is answered").toBeVisible({ timeout: 30_000 });
+      await done();
+    });
+    test(`A-4 (${phone.name}). the agency posts a need on the phone`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, AGENCY);
+      await sheetTo(page, "area:need");
+      await page.waitForURL(/\/en\/dashboard\/company\/needs/, { timeout: 30_000 });
+      await postNeedOnPhone(page, a.profileId, `Phone agency need ${phone.name} ${RUN}`);
+      await done();
+    });
+    test(`A-5 (${phone.name}). messages from the area sheet`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, AGENCY);
+      await messagesBySheet(page, "the agency");
+      await done();
+    });
+  });
+
+  // ── STUDENT ───────────────────────────────────────────────────────────────
+  const STUDENT = email(`student${phone.name}`);
+  const st: { profileId: string; workerId: string } = { profileId: "", workerId: "" };
+  test.describe(`student at ${phone.viewport.width} × ${phone.viewport.height}`, () => {
+    test.describe.configure({ mode: "serial" });
+    test(`S-1 (${phone.name}). a student signs up ON THE PHONE, names where they study, lands on the learning compass`, async ({ browser }) => {
+      const { ctx, page } = await onPhone(browser, phone);
+      await signUp(page, BASE, STUDENT);
+      const intent = page.getByTestId("onboarding-intent-student");
+      await intent.tap();
+      await expect(intent).toHaveAttribute("aria-pressed", "true");
+      await page.getByTestId("onboarding-intents-continue").tap();
+      await page.getByTestId("onboarding-display-name").fill(`Synthetic Student ${phone.name} ${RUN}`);
+      await page.getByTestId("onboarding-country").tap();
+      await page.getByRole("option", { name: /Lithuania/ }).first().tap();
+      await expect(page.getByTestId("onboarding-student-fields")).toBeVisible();
+      await page.getByTestId("onboarding-institution").fill(`Synthetic Phone College ${phone.name} ${RUN}`);
+      await page.getByTestId("onboarding-submit").tap();
+      await expect(page.getByTestId("learning-compass"), "the student home").toBeVisible({ timeout: 60_000 });
+      await fitsTheScreen(page, "the learning compass");
+      st.profileId = await userId(STUDENT);
+      const [w] = sql<{ id: string }>(`select id from public.workers where profile_id = ${lit(st.profileId)}`);
+      st.workerId = w!.id;
+      const edu = sql<{ is_current: boolean }>(`select is_current from public.worker_education where profile_id = ${lit(st.profileId)}`);
+      expect(edu.map((x) => x.is_current), "the study is stored, current").toEqual([true]);
+      sessions.set(STUDENT, await ctx.storageState());
+      await ctx.close();
+    });
+    test(`S-2 (${phone.name}). the compass opens the internship board, filtered`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, STUDENT);
+      await page.goto(`${BASE}/en/dashboard/profile`);
+      await page.getByTestId("compass-open-internships").first().tap();
+      await page.waitForURL(/opportunityType=/, { timeout: 30_000 });
+      await expect(page.getByRole("main").getByTestId("opportunities-list").or(page.getByRole("main").getByTestId("opportunities-filtered-empty")).first()).toBeVisible({ timeout: 60_000 });
+      await fitsTheScreen(page, "the internship board");
+      await done();
+    });
+    test(`S-3 (${phone.name}). the student applies to an open need (interest stored)`, async ({ browser }) => {
+      test.skip(!shared.needId, "the worker group's need for this width was not set up");
+      const { page, done } = await signedInOnPhone(browser, phone, STUDENT);
+      await page.goto(`${BASE}/en/dashboard/opportunities?view=all`);
+      const box = page.getByRole("main").locator(`li[id="opp-${shared.needId}"]`).first().getByTestId(`interest-${shared.needId}`);
+      await tapUntil(box.getByTestId("interest-express"), box.getByTestId("interest-sent"));
+      const rows = sql<{ status: string }>(`select status from public.demand_interest_signals where request_id = ${lit(shared.needId)} and worker_id = ${lit(st.workerId)}`);
+      expect(rows.map((r) => r.status)).toEqual(["interested"]);
+      await done();
+    });
+    test(`S-4 (${phone.name}). the Living CV shows the study`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, STUDENT);
+      await accountMenu(page, "account-menu-cv-link");
+      await page.waitForURL(/\/en\/cv/, { timeout: 30_000 });
+      await expect(page.getByTestId("cv-education-row").first(), "the study is on the CV").toBeVisible({ timeout: 30_000 });
+      await fitsTheScreen(page, "the student's CV");
+      await done();
+    });
+    test(`S-5 (${phone.name}). messages from the area sheet`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, STUDENT);
+      await messagesBySheet(page, "the student");
+      await done();
+    });
+  });
+
+  // ── TRAINING INSTITUTION ──────────────────────────────────────────────────
+  const SCHOOL = email(`school${phone.name}`);
+  const t: { profileId: string; orgId: string } = { profileId: "", orgId: "" };
+  test.describe(`training institution at ${phone.viewport.width} × ${phone.viewport.height}`, () => {
+    test.describe.configure({ mode: "serial" });
+    test(`T-1 (${phone.name}). an institution signs up ON THE PHONE through its door and sets up its organisation`, async ({ browser }) => {
+      const { ctx, page } = await onPhone(browser, phone);
+      const door = "/dashboard/start/company?capability=training_provider";
+      await page.goto(`${BASE}/en/auth/signup?next=${encodeURIComponent(door)}`);
+      await page.locator('input[type="email"]').fill(SCHOOL);
+      await page.locator('input[name="password"]').fill(PASSWORD);
+      await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+      await page.locator('form button[type="submit"]').tap();
+      await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
+      const intent = page.getByTestId("onboarding-intent-education");
+      if ((await intent.getAttribute("aria-pressed")) !== "true") await intent.tap();
+      await page.getByTestId("onboarding-intents-continue").tap();
+      await page.getByTestId("onboarding-display-name").fill(`Synthetic Lecturer ${phone.name} ${RUN}`);
+      await page.getByTestId("onboarding-country").tap();
+      await page.getByRole("option", { name: /Lithuania/ }).first().tap();
+      await page.getByTestId("onboarding-submit").tap();
+      await page.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+      await expect(page.getByTestId("company-setup-form")).toBeVisible({ timeout: 30_000 });
+      await fitsTheScreen(page, "the organisation setup form");
+      await page.getByTestId("company-setup-legal-name").fill(`Synthetic Phone Academy ${phone.name} ${RUN}`);
+      await page.getByTestId("company-setup-country").selectOption("LT");
+      await page.getByTestId("company-setup-save-draft").tap();
+      await expect(page.getByTestId("company-setup-next")).toBeVisible({ timeout: 30_000 });
+      t.profileId = await userId(SCHOOL);
+      const orgs = sql<{ id: string }>(`select id from public.organizations where owner_profile_id = ${lit(t.profileId)}`);
+      expect(orgs, "the institution's organisation is stored once").toHaveLength(1);
+      t.orgId = orgs[0]!.id;
+      sessions.set(SCHOOL, await ctx.storageState());
+      await ctx.close();
+    });
+    test(`T-2 (${phone.name}). the education home opens on the phone`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, SCHOOL);
+      // No header or area-sheet door leads here (only the setup form and chat): reached by address.
+      test.info().annotations.push({ type: "education-home-door", description: "no header or area-sheet entry; reached by address" });
+      await page.goto(`${BASE}/en/dashboard/company/education`);
+      await expect(page.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
+      await fitsTheScreen(page, "the education home");
+      await done();
+    });
+    test(`T-3 (${phone.name}). the institution invites a learner by link`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, SCHOOL);
+      await page.goto(`${BASE}/en/dashboard/company/education`);
+      await page.getByTestId("institution-learners-invite").tap();
+      await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
+      const open = page.getByTestId("invite-panel-open");
+      const capacity = page.getByTestId("invite-capacity");
+      await expect(open.or(capacity).first()).toBeVisible({ timeout: 30_000 });
+      if (await open.isVisible().catch(() => false)) await open.tap();
+      await expect(capacity, "the learner capacity").toHaveValue("student", { timeout: 30_000 });
+      const linkMode = page.getByTestId("invite-mode-link");
+      if (await linkMode.isVisible().catch(() => false)) await linkMode.tap();
+      const name = page.getByTestId("invite-name");
+      if (await name.isVisible().catch(() => false)) await name.fill(`Synthetic Learner ${phone.name} ${RUN}`);
+      await page.getByTestId("invite-submit").tap();
+      await expect(page.getByTestId("invite-copy-link").first(), "the learner's link is handed over").toBeVisible({ timeout: 30_000 });
+      await fitsTheScreen(page, "the learner invitation");
+      const rows = sql<{ status: string }>(`select status from public.invitations where organization_id = ${lit(t.orgId)}`);
+      expect(rows.length, "the invitation is stored").toBeGreaterThan(0);
+      await done();
+    });
+    test(`T-4 (${phone.name}). organisation management: the people page from the sheet, its members in the fold`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, SCHOOL);
+      await sheetTo(page, "area:people");
+      await page.waitForURL(/\/en\/dashboard\/company\/people/, { timeout: 30_000 });
+      const fold = page.getByTestId("people-more");
+      await expect(fold).toBeAttached({ timeout: 30_000 });
+      if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().tap();
+      await expect(page.locator("#org-members"), "the members panel").toBeVisible({ timeout: 30_000 });
+      await fitsTheScreen(page, "the institution's people page");
+      await done();
+    });
+    test(`T-5 (${phone.name}). messages from the area sheet`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, SCHOOL);
+      await messagesBySheet(page, "the institution");
+      await done();
+    });
+  });
+
 }
