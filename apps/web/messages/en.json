@@ -6872,6 +6872,16 @@
         "into": "This row was merged into",
         "canonical": "the kept project",
         "includes": "{count, plural, one {Includes # merged project row — its records are shown here.} other {Includes # merged project rows — their records are shown here.}}"
+      },
+      "teams": {
+        "title": "Teams on this project",
+        "members": "{n, plural, one {# person} other {# people}}",
+        "personTeam": "On team: {team}",
+        "unnamed": "Unnamed team",
+        "unnamedMember": "Member",
+        "noMembers": "No members right now.",
+        "unavailable": "The teams could not be loaded. Try again.",
+        "manage": "Change teams"
       }
     },
     "workerView": {

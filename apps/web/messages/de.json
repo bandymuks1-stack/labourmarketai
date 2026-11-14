@@ -6872,6 +6872,16 @@
         "into": "Diese Zeile wurde zusammengeführt in",
         "canonical": "das beibehaltene Projekt",
         "includes": "{count, plural, one {Enthält # zusammengeführte Projektzeile — ihre Nachweise stehen hier.} other {Enthält # zusammengeführte Projektzeilen — ihre Nachweise stehen hier.}}"
+      },
+      "teams": {
+        "title": "Teams in diesem Projekt",
+        "members": "{n, plural, one {# Person} other {# Personen}}",
+        "personTeam": "Team: {team}",
+        "unnamed": "Team ohne Namen",
+        "unnamedMember": "Mitglied",
+        "noMembers": "Derzeit keine Mitglieder.",
+        "unavailable": "Die Teams konnten nicht geladen werden. Bitte erneut versuchen.",
+        "manage": "Teams ändern"
       }
     },
     "workerView": {

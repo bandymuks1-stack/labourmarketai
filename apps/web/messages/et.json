@@ -2086,6 +2086,16 @@
         "into": "See rida liideti projektiga",
         "canonical": "säilitatud projekt",
         "includes": "{count, plural, one {Sisaldab # liidetud projektirida — selle kirjed on siin.} other {Sisaldab # liidetud projektirida — nende kirjed on siin.}}"
+      },
+      "teams": {
+        "title": "Meeskonnad selles projektis",
+        "members": "{n, plural, one {# inimene} other {# inimest}}",
+        "personTeam": "Meeskond: {team}",
+        "unnamed": "Meeskond",
+        "unnamedMember": "Liige",
+        "noMembers": "Praegu liikmeid pole.",
+        "unavailable": "Meeskondi ei õnnestunud laadida. Proovige uuesti.",
+        "manage": "Muuda meeskondi"
       }
     },
     "workerView": {
