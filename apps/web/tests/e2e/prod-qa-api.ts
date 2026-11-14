@@ -80,7 +80,12 @@ export function bearerOf(slot: string): string {
 export async function qaApi(
   path: `/${string}`,
   token: string | null,
-  init: { method?: "GET" | "POST" | "DELETE"; body?: unknown } = {},
+  init: {
+    method?: "GET" | "POST" | "PATCH" | "DELETE";
+    body?: unknown;
+    /** PostgREST `Prefer` header, e.g. `return=representation`. */
+    prefer?: string;
+  } = {},
 ): Promise<Response> {
   const origin = qaApiOrigin();
   const anon = process.env.PROD_QA_ANON_KEY ?? "";
@@ -92,8 +97,76 @@ export async function qaApi(
       apikey: anon,
       authorization: `Bearer ${token ?? anon}`,
       "content-type": "application/json",
+      ...(init.prefer ? { prefer: init.prefer } : {}),
     },
     ...(init.body === undefined ? {} : { body: JSON.stringify(init.body) }),
+  });
+}
+
+/** The profile id (`sub`) of a vetted synthetic session token. */
+export function subOf(token: string): string {
+  const sub = (claimsOf(token) as { sub?: string }).sub ?? "";
+  if (!/^[0-9a-f-]{36}$/i.test(sub)) throw new Error("prod-qa-api: the session carries no profile id");
+  return sub;
+}
+
+/**
+ * THE ONE SERVICE-ROLE WRITE A WALK MAY MAKE (chat-removal walk, owner
+ * scenario 2026-11-11): add synthetic participants to a synthetic thread —
+ * exactly the insert the app's server performs after its contact gate
+ * (`communication-core.ts`, the `service_role` INSERT grant of
+ * 20261006100100). Nothing else: no other table, no update, no delete.
+ *
+ *   - the thread must have been created by the vetted `creatorToken`'s
+ *     synthetic identity (read back with that token, under RLS);
+ *   - every added person is given as a vetted synthetic TOKEN, so only
+ *     allowlisted identities can ever be added;
+ *   - the key goes only to the vetted production origin, never logged.
+ */
+export async function qaServiceAddParticipants(
+  conversationId: string,
+  creatorToken: string,
+  memberTokens: readonly string[],
+): Promise<Response> {
+  if (!/^[0-9a-f-]{36}$/i.test(conversationId)) throw new Error("prod-qa-api: not a conversation id");
+  const creator = subOf(creatorToken);
+  const own = await qaApi(
+    `/rest/v1/conversations?select=id,created_by,subject&id=eq.${conversationId}`,
+    creatorToken,
+  );
+  const rows = (await own.json()) as { id: string; created_by: string; subject: string | null }[];
+  if (rows.length !== 1 || rows[0].created_by !== creator || !(rows[0].subject ?? "").startsWith("QA-SYNTHETIC")) {
+    throw new Error("prod-qa-api: the thread is not a synthetic thread of the creator");
+  }
+  const key = process.env.PROD_QA_SERVICE_ROLE_KEY ?? "";
+  if (!key) throw new Error("prod-qa-api: PROD_QA_SERVICE_ROLE_KEY is not set");
+  return fetch(`${qaApiOrigin()}/rest/v1/conversation_participants`, {
+    method: "POST",
+    redirect: "error",
+    headers: { apikey: key, authorization: `Bearer ${key}`, "content-type": "application/json" },
+    body: JSON.stringify(
+      memberTokens.map((t) => ({ conversation_id: conversationId, profile_id: subOf(t), added_by: creator })),
+    ),
+  });
+}
+
+/** A Storage API call with a vetted token to the vetted origin (raw body). */
+export async function qaStorage(
+  path: `/storage/v1/${string}`,
+  token: string,
+  init: { method?: "GET" | "POST" | "DELETE"; body?: Buffer; contentType?: string } = {},
+): Promise<Response> {
+  const anon = process.env.PROD_QA_ANON_KEY ?? "";
+  if (!anon) throw new Error("prod-qa-api: PROD_QA_ANON_KEY is not set");
+  return fetch(`${qaApiOrigin()}${path}`, {
+    method: init.method ?? "GET",
+    redirect: "error",
+    headers: {
+      apikey: anon,
+      authorization: `Bearer ${token}`,
+      ...(init.contentType ? { "content-type": init.contentType } : {}),
+    },
+    ...(init.body ? { body: new Uint8Array(init.body) } : {}),
   });
 }
 
