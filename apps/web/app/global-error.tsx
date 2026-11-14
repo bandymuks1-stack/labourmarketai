@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { activeLocales, defaultLocale, type ActiveLocale } from "@/lib/i18n/config";
 import { LmLogo } from "@/components/ui/lm-logo";
+import { reloadOnceForChunkError } from "@/lib/telemetry/chunk-reload";
 import { reportClientError } from "@/lib/telemetry/report-client-error";
 
 /**
@@ -77,7 +78,15 @@ export default function GlobalError({
 }) {
   console.error("[global-error-boundary]", error);
   // One sanitised crash report; never throws (2026-10-18 incident).
-  useEffect(() => reportClientError("global", error), [error]);
+  // A chunk that failed to load (a deploy replaced it, or a proxy dropped the
+  // request) is recovered by ONE reload; a second failure shows the retry
+  // screen (lib/telemetry/chunk-reload.ts holds the loop guard). The report is
+  // a beacon, so it survives the reload.
+  const [reloading, setReloading] = useState(false);
+  useEffect(() => {
+    reportClientError("global", error);
+    if (reloadOnceForChunkError(error)) setReloading(true);
+  }, [error]);
   // Read at render time so the common case — a purely client-side crash, where
   // this shell never touches the server — is correct on first paint. On the
   // SSR path the server has no pathname, so the markup is the unchanged LT/EN
@@ -122,6 +131,7 @@ export default function GlobalError({
         </p>
         <button
           type="button"
+          disabled={reloading}
           onClick={() => reset()}
           data-testid="global-error-retry"
           suppressHydrationWarning

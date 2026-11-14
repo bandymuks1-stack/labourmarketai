@@ -337,6 +337,40 @@ export const ZERO_BRIDGE_SPINE_COUNTS: BridgeSpineCounts = {
   openCandidateOffers: 0,
 };
 
+/**
+ * CLIENT: offers that can still be decided. An offer on a need the caller's
+ * own list says is closed cannot be accepted or declined any more, so it is
+ * not attention: counted, the bell would never clear. A need the list does
+ * not carry is UNKNOWN, not closed, and stays counted.
+ */
+export function countDecidableCandidateOffers(
+  offersByRequest: ReadonlyMap<string, number>,
+  closedRequestIds: ReadonlySet<string>,
+): number {
+  let n = 0;
+  for (const [requestId, count] of offersByRequest) {
+    if (!closedRequestIds.has(requestId)) n += count;
+  }
+  return n;
+}
+
+/**
+ * CLIENT: the open need with the most offers waiting, so the bell's link
+ * lands on a need that has something to decide. Ties break on the id, so
+ * the choice is the same on every load. Null when nothing waits.
+ */
+export function mostOfferedOpenRequest(
+  offersByRequest: ReadonlyMap<string, number>,
+  openRequestIds: readonly string[],
+): string | null {
+  const open = new Set(openRequestIds);
+  return (
+    [...offersByRequest.entries()]
+      .filter(([id, count]) => open.has(id) && count > 0)
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ?? null
+  );
+}
+
 /** Pending invites in an `ok` read; a failed read counts 0 — the bell never
  *  fabricates attention from an unknown. Pure. */
 export function countPendingConnectionInvites(state: ClientInvitesState): number {
