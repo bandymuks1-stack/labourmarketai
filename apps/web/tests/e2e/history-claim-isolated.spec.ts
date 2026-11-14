@@ -207,6 +207,9 @@ test("H-2. a bystander who is forwarded the link learns nothing and cannot use i
   const oth = await fresh(browser, OTH);
   await signUp(oth, BASE, OTH);
   await onboard(oth, "work", `QA-SYNTHETIC Bystander ${RUN}`);
+  // The onboarding must land before anything else is opened: leaving early
+  // abandons the submit and the person is sent back to finish it.
+  await oth.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
   await verifyEmail(oth, OTH);
 
   await oth.goto(local(s.claimLink));
@@ -268,6 +271,7 @@ test("H-3/H-4/H-5. the former worker joins with ANOTHER address, is confirmed, a
   const ex = await fresh(browser, EX_NEW);
   await signUp(ex, BASE, EX_NEW);
   await onboard(ex, "work", EX_NAME);
+  await ex.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
   s.exId = await userId(EX_NEW);
   expect(EX_NEW, "a different address from the one on the record").not.toBe(EX_OLD);
   await verifyEmail(ex, EX_NEW);
@@ -456,6 +460,7 @@ test("H-8. a current employee of the same company is untouched by all of this", 
   const mgr2 = await fresh(browser, MGR2);
   await signUp(mgr2, BASE, MGR2);
   await onboard(mgr2, "work", `QA-SYNTHETIC Current ${RUN}`);
+  await mgr2.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
   const mgr2Id = await userId(MGR2);
   sqlExec(
     `insert into public.engagement_contexts (profile_id, organization_id, status, relationship_slug)
