@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Reveal } from "@/components/marketing/reveal";
+import { Reveal } from "@/components/marketing/lazy-motion";
 
 /**
  * PR-H global landing — section A: "How it works" in four steps

@@ -8129,5 +8129,79 @@
       "allow": "Tillåt",
       "refuse": "Avböj"
     }
+  },
+  "siteNav": {
+    "signUp": "Registrera dig",
+    "trigger": "Huvudval",
+    "account": "Efter inloggning",
+    "intents": {
+      "work": {
+        "title": "Jag söker arbete",
+        "description": "Hitta jobb och visa vad du kan.",
+        "short": "Hitta arbete"
+      },
+      "workers": {
+        "title": "Jag söker medarbetare",
+        "description": "Beskriv vilket arbete du behöver.",
+        "short": "Hitta medarbetare"
+      },
+      "services": {
+        "title": "Jag erbjuder tjänster",
+        "description": "Publicera ditt erbjudande och svara på förfrågningar.",
+        "short": "Erbjud tjänster"
+      },
+      "orders": {
+        "title": "Jag söker uppdrag och kontrakt",
+        "description": "Hitta arbetsförfrågningar och håll offerter samlade.",
+        "short": "Hitta uppdrag"
+      },
+      "partners": {
+        "title": "Jag söker partner",
+        "description": "Knyt an till människorna och organisationerna du arbetar med.",
+        "short": "Hitta partner"
+      },
+      "agencies": {
+        "title": "För bemanningsföretag",
+        "description": "Hantera byråns personal, kunder och erbjudanden.",
+        "short": "För bemanning"
+      }
+    },
+    "links": {
+      "jobs": "Platsannonser",
+      "workOpportunities": "Jobbmöjligheter",
+      "createCv": "Skapa ett gratis CV",
+      "workAbroad": "Arbeta utomlands",
+      "forWorkers": "Så fungerar det för arbetstagare",
+      "companyNeed": "Beskriv ditt behov",
+      "forCompanies": "Så fungerar det för företag",
+      "labourMarket": "Arbetsmarknad per land",
+      "myServices": "Dina tjänster",
+      "serviceRequests": "Tjänsteförfrågningar",
+      "marketListings": "Marknadsannonser",
+      "commercial": "Offerter och kontrakt",
+      "network": "Ditt nätverk",
+      "partnerWithUs": "Bli partner",
+      "forAgencies": "Så fungerar det för bemanningsföretag",
+      "setUpAgency": "Starta ditt bemanningsföretag"
+    },
+    "assistant": "Fråga assistenten",
+    "start": {
+      "searchLabel": "Sök jobb",
+      "searchPlaceholder": "Jobbtitel eller sökord",
+      "searchSubmit": "Sök",
+      "viewAll": "Alla jobb"
+    },
+    "nav": {
+      "heading": "Vad vill du göra?",
+      "swipe": "Svep",
+      "close": "Stäng",
+      "functions": "Funktioner",
+      "professions": "Yrken",
+      "opensNow": "Öppnas direkt",
+      "signInWhenOpen": "Logga in vid öppning",
+      "allSectors": "Alla branscher",
+      "fullList": "Hela listan"
+    },
+    "more": "Mer"
   }
 }

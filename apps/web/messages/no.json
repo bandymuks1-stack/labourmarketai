@@ -7946,5 +7946,79 @@
       "allow": "Tillat",
       "refuse": "Avslå"
     }
+  },
+  "siteNav": {
+    "signUp": "Registrer deg",
+    "trigger": "Hovedvalg",
+    "account": "Etter innlogging",
+    "intents": {
+      "work": {
+        "title": "Jeg søker arbeid",
+        "description": "Finn jobber og vis hva du kan.",
+        "short": "Finn arbeid"
+      },
+      "workers": {
+        "title": "Jeg søker arbeidstakere",
+        "description": "Beskriv hvilket arbeid du trenger.",
+        "short": "Finn arbeidstakere"
+      },
+      "services": {
+        "title": "Jeg tilbyr tjenester",
+        "description": "Publiser tilbudet ditt og svar på forespørsler.",
+        "short": "Tilby tjenester"
+      },
+      "orders": {
+        "title": "Jeg søker oppdrag og kontrakter",
+        "description": "Finn arbeidsforespørsler og hold tilbud samlet.",
+        "short": "Finn oppdrag"
+      },
+      "partners": {
+        "title": "Jeg søker partnere",
+        "description": "Knytt deg til menneskene og organisasjonene du jobber med.",
+        "short": "Finn partnere"
+      },
+      "agencies": {
+        "title": "For byråer",
+        "description": "Styr byråets folk, kunder og tilbud.",
+        "short": "For byråer"
+      }
+    },
+    "links": {
+      "jobs": "Stillingsannonser",
+      "workOpportunities": "Jobbmuligheter",
+      "createCv": "Lag en gratis CV",
+      "workAbroad": "Arbeid i utlandet",
+      "forWorkers": "Slik fungerer det for arbeidstakere",
+      "companyNeed": "Beskriv behovet ditt",
+      "forCompanies": "Slik fungerer det for bedrifter",
+      "labourMarket": "Arbeidsmarked per land",
+      "myServices": "Dine tjenester",
+      "serviceRequests": "Tjenesteforespørsler",
+      "marketListings": "Markedsannonser",
+      "commercial": "Tilbud og kontrakter",
+      "network": "Ditt nettverk",
+      "partnerWithUs": "Bli partner",
+      "forAgencies": "Slik fungerer det for byråer",
+      "setUpAgency": "Opprett byrået ditt"
+    },
+    "assistant": "Spør assistenten",
+    "start": {
+      "searchLabel": "Søk jobber",
+      "searchPlaceholder": "Stillingstittel eller søkeord",
+      "searchSubmit": "Søk",
+      "viewAll": "Alle jobber"
+    },
+    "nav": {
+      "heading": "Hva vil du gjøre?",
+      "swipe": "Sveip",
+      "close": "Lukk",
+      "functions": "Funksjoner",
+      "professions": "Yrker",
+      "opensNow": "Åpnes med en gang",
+      "signInWhenOpen": "Logg inn ved åpning",
+      "allSectors": "Alle bransjer",
+      "fullList": "Full liste"
+    },
+    "more": "Mer"
   }
 }
