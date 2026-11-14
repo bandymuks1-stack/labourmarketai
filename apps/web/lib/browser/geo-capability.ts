@@ -52,8 +52,8 @@ export function detectInAppBrowser(userAgent: string | null | undefined): InAppB
   if (/FBAN|FBAV|FB_IAB|FBIOS/i.test(ua)) return "facebook";
   if (/Instagram/i.test(ua)) return "instagram";
   if (/TikTok|musical_ly|BytedanceWebview/i.test(ua)) return "tiktok";
-  // LINE / Snapchat / Telegram / WhatsApp / WeChat in-app webviews.
-  if (/\bLine\/|Snapchat|TelegramBot|WhatsApp|MicroMessenger/i.test(ua)) return "other-in-app";
+  // LINE / Snapchat / Telegram / WhatsApp / WeChat / LinkedIn in-app webviews.
+  if (/\bLine\/|Snapchat|TelegramBot|WhatsApp|MicroMessenger|LinkedInApp/i.test(ua)) return "other-in-app";
   // Android WebView marker ("; wv)") — an embedded webview of some app.
   if (/;\s?wv\)/.test(ua)) return "other-in-app";
   return null;

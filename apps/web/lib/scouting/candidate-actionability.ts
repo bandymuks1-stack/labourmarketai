@@ -199,3 +199,23 @@ export const ACTIONABLE_LATER_CODE = "scouting.actionability.availableFrom";
 export function mayOfferEmployerActions(a: CandidateActionabilityV1): boolean {
   return a.kind === "actionable" || a.kind === "actionable_later";
 }
+
+/**
+ * Is this person part of a CLOSED need's history?
+ *
+ * Only on a closed need (`need_closed`), and only with a fact the need
+ * actually recorded about them: an interest signal that was not withdrawn, or
+ * any shortlist decision. A withdrawn interest is the worker's own "no" and
+ * stays out, exactly as on an open need. This never makes anyone actionable:
+ * `mayOfferEmployerActions` stays false for them.
+ */
+export function isClosedNeedHistory(
+  a: CandidateActionabilityV1,
+  facts: { readonly interestStatus: string | null; readonly shortlistStatus: string | null },
+): boolean {
+  if (a.kind !== "not_actionable" || a.reason !== "need_closed") return false;
+  const interest = (facts.interestStatus ?? "").trim().toLowerCase();
+  const shortlist = (facts.shortlistStatus ?? "").trim().toLowerCase();
+  if (shortlist !== "") return true;
+  return interest !== "" && !WITHDRAWN_INTEREST.has(interest);
+}

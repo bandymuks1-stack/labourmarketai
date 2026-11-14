@@ -215,6 +215,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261110140000_",
       // 2026-11-10 partner registration Slice 1: company takeover invitation, two-operator decision, link (RED draft #3211, needs-human-gate, NOT applied).
       "20261110190000_",
+      // 2026-11-13 owner P0 invitation delivery reliability: codes-only send diagnostics, retry /
+      // dead-letter / bounce fields (RED draft #3318, needs-human-gate, NOT applied).
+      "20261113190000_",
       // 2026-11-14 a closed need refuses a new proposal or a first accept (DB trigger; RED draft, needs-human-gate, NOT applied).
       "20261114100000_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
