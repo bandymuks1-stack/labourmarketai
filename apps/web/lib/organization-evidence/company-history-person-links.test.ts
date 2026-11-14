@@ -33,9 +33,30 @@ describe("no link to a card this organization does not hold", () => {
   });
 
   it("a person from another organization's roster is shown by name, not linked", () => {
-    const block = ui.slice(ui.indexOf("const wid = load.linkedWorkers[pp.id];"), ui.indexOf("company-place-timeline"));
-    expect(block).toMatch(/load\.ownPeople\[pp\.id\] \? \(/);
-    expect(block).toContain('data-testid="company-place-person-other-roster"');
+    const block = ui.slice(ui.indexOf('data-testid="company-place-people"'), ui.indexOf("company-place-timeline"));
+    expect(block).toContain('"company-place-person-other-roster"');
+    expect(block).toMatch(/load\.ownPeople\[pp\.id\] && cardsOpen \? \(/);
+  });
+
+  it("a chip opens the company's own card, never a person's page directly (the card carries that link, on the person's own confirmation)", () => {
+    const block = ui.slice(ui.indexOf('data-testid="company-place-people"'), ui.indexOf("company-place-timeline"));
+    expect(block).toContain("href={`/dashboard/company/people/${pp.id}`");
+    expect(block).not.toContain("/dashboard/people/");
+  });
+
+  it("the card is offered only when the history shown is the active organization's (the card reads the active one)", () => {
+    expect(ui).toMatch(/const cardsOpen = activeId !== null && activeId === load\.organizationId;/);
+    const block = ui.slice(ui.indexOf('data-testid="company-place-people"'), ui.indexOf("company-place-timeline"));
+    expect(block).toContain('"company-place-person-other-workspace"');
+  });
+});
+
+describe("the company card says 'linked' only on the person's own confirmation", () => {
+  const card = read("app/[locale]/dashboard/company/people/[personId]/page.tsx");
+
+  it("the claim line follows the confirmed link, not the raw link state", () => {
+    expect(card).toMatch(/const claimState = person\.linkedWorkerId\s*\?\s*"linked"\s*:\s*person\.linkState === "linked"\s*\?\s*"link_proposed"/);
+    expect(card).toContain("t(`claim.${claimState}` as never)");
   });
 });
 
@@ -50,11 +71,21 @@ describe("the place detail is reachable from the history page", () => {
 
   it("a named organization (?org=) is kept from the tile to the detail", () => {
     expect(ui).toMatch(/href=\{placeHref\(p\.key, organizationId\)/);
-    expect(ui).toContain("loadCompanyWorkHistory(locale, organizationId)");
+    const detail = ui.slice(ui.indexOf("export async function CompanyPlaceHistory"), ui.indexOf("async function WorkspaceNotice"));
+    expect(detail).toContain("loadHistory(locale, organizationId)");
   });
 
-  it("the page keeps a single top-level heading", () => {
-    const detail = ui.slice(ui.indexOf("export async function CompanyPlaceHistory"));
+  it("the overview and the detail read the history once per request", () => {
+    expect(ui).toContain("const loadHistory = cache(loadCompanyWorkHistory);");
+    expect(ui).not.toMatch(/await loadCompanyWorkHistory\(/);
+  });
+
+  it("one top-level heading; the detail's sections sit under the place's own heading", () => {
+    const detail = ui.slice(ui.indexOf("export async function CompanyPlaceHistory"), ui.indexOf("async function WorkspaceNotice"));
     expect(detail).not.toContain("<h1");
+    expect(detail).toMatch(/<h2[^>]*>\s*\{place\.name/);
+    expect(detail).toMatch(/<h3[^>]*>\{t\("whoWorked"\)\}<\/h3>/);
+    expect(detail).toMatch(/<h3[^>]*>\{t\("timeline"\)\}<\/h3>/);
+    expect(detail).not.toMatch(/<h2[^>]*>\{t\("(whoWorked|timeline)"\)\}/);
   });
 });
