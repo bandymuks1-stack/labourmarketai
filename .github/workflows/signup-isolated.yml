@@ -288,6 +288,9 @@ jobs:
       - name: App-rollback compatibility — build the pre-#2887 app against the migrated stack
         env:
           PRE_JOBFIT_SHA: 88a60b567edbe5c6894d087d0c679da54c90ea67
+          # The same heap as the main build above: the default of about 2 GB
+          # runs out building this app too.
+          NODE_OPTIONS: --max-old-space-size=6144
         run: |
           set -euo pipefail
           git fetch --no-tags --depth=1 origin "$PRE_JOBFIT_SHA"
