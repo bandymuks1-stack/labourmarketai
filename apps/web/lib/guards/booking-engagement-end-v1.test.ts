@@ -1786,6 +1786,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-10: partner registration Slice 1, company takeover invitation + two-operator decision + link.
       // RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261110190000_organization_claim_invitation_v1.sql",
+      // 2026-11-14: register 2.24 conflict-of-interest rule in the database — RED draft, the marker is
+      // the human-gate acknowledgement, NOT an approval, NOT applied.
+      "20261114070000_experience_moderation_conflict_v1.sql",
 ]);
   });
 
