@@ -2,6 +2,7 @@
 
 import { JourneyStrip } from "@/components/app/journey-strip";
 import { useActionState } from "react";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 
 import {
   draftClientNeedAction,
@@ -138,12 +139,22 @@ export function AgencyDelegationPanel({
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted">
               {labels.country}
-              <input
+              <select
                 name="country"
-                maxLength={2}
+                required
+                defaultValue=""
                 className={input}
                 data-testid="agency-draft-country"
-              />
+              >
+                <option value="" disabled>
+                  —
+                </option>
+                {countryOptionsForLocale(locale).map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted sm:col-span-2">
               {labels.summary}
