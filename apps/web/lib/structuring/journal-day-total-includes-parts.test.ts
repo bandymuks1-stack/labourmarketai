@@ -86,3 +86,44 @@ describe("nothing is read as a total without a signal", () => {
     );
   });
 });
+
+/**
+ * The production entries explain their day: the total, the parts, then
+ * sentences that repeat figures already stated ("those 2 h are part of the
+ * 15"). Every mention was one more item: stored days of 17, 19, 32 h. The
+ * sentences below have those shapes with invented words.
+ */
+describe("a day explained in several sentences is still one 15 h day", () => {
+  it.each([
+    [
+      "'in total' + dash parts + 'together 15' + a clarifying sentence",
+      "2026-04-03. Mano darbo diena truko: iš viso 15 valandų be pertraukų. Programavimas, testavimas ir dokumentai – 13 valandų. Komandos darbų derinimas, koordinavimas su partneriais – 2 valandos, kartu 15 valandų. Tos 2 valandos yra 15 valandų dalis, ne papildomos. Rytoj tęsiu.",
+    ],
+    [
+      "'of them' + two clarifying sentences",
+      "2026-03-25. Šiandien dirbau 15 valandų darbo dieną be pertraukų. Iš jų 13 valandų programavau LabourMarket.ai, testavau, rašiau; 2 valandos skirtos koordinavimui su komanda. Šios 2 valandos įeina į 15 valandų, o ne prideda 2 valandas prie darbo laiko. Valandos teisingos, ačiū.",
+    ],
+    [
+      "colon header + parts + clarifying sentences",
+      "2026-03-17. Šiandien mano 15 valandų darbo laikas be pertraukų: 13 valandų programavimas ir testavimas, 2 valandos skirtos koordinavimui, skambučiai su partneriais. Šios 2 valandos įeina į 15 valandų; ne 2 valandos papildomai. Valandos teisingos, ačiū.",
+    ],
+    [
+      "labelled total + a part with a colon + the total restated",
+      "2026-11-01. Šios dienos darbo laikas: 15 valandų. Programavau, testavau, darbo procesus tvarkiau, rašiau, darbo planus derinau. Šios dienos koordinavimas su komanda: 2 valandos, tai įeina į 15 valandų dienos darbą. Ačiū.",
+    ],
+  ])("%s", (_name, text) => {
+    expect(minutes(text)).toBe(15 * 60);
+    expect(intakeMinutes(text)).toBe(15 * 60);
+  });
+
+  it("a repeated figure that names its own work is a real item, never a restatement", () => {
+    expect(minutes("Klijavau plyteles 6 val., glaisčiau sienas 2 val., dažiau lubas 2 val.")).toBe(10 * 60);
+  });
+
+  it("a colon header alone keeps the #1689 rule: unmatched parts count, the header is set aside", () => {
+    const s = extractJournalSuggestions("Šiandien 9 valandas dirbau LabourMarket.ai: 5 val. programavau, 2 val. testavau.");
+    expect(s.fragments.map((f) => f.time?.value)).toEqual([5, 2]);
+    expect(s.statedTotal).toMatchObject({ value: 9, matchesFragments: false });
+    expect(s.statedTotal?.includesParts).toBeUndefined();
+  });
+});

@@ -838,19 +838,36 @@ function minutesAsTime(minutes: number): { value: number; unitSlug: "hours" | "m
     : { value: minutes, unitSlug: "minutes" };
 }
 
+/** Words that mark a figure as the WHOLE day: "iš viso", "viso", "in total",
+ *  "total", "всего", "totaal", "insgesamt", "łącznie". */
+const DAY_TOTAL_WORD_RX =
+  /(?<!\p{L})(?:iš\s+viso|is\s+viso|viso|in\s+total|total|всего|итого|totaal|insgesamt|łącznie|lacznie)(?!\p{L})/iu;
+
 /**
  * A DAY TOTAL THAT CONTAINS ITS PARTS (#3354). "15 val., iš jų 2 val.
- * koordinavimas" and "Darbo laikas: 15 valandų. … (2 valandos koordinavimo)"
- * state one 15-hour day and one part of it. Read as two items, the canonical
- * rule summed them to 17. The total is recognised only on an explicit signal,
- * never on size alone ("8 val. …, 2 val. …" stays two items):
- *   - a part carries an inclusion word (INCLUDED_PART_RX), or
- *   - a part states its time in brackets, or
- *   - the total stands alone ("15 valandų") right after a label colon.
- * The total must name no work of its own, every part must be smaller and the
- * parts together must not exceed it. The parts keep their time; the rest of
- * the day becomes one item carrying the total's own words, so the items add
- * up to exactly what the person said.
+ * koordinavimas", "Darbo laikas: 15 valandų. … (2 valandos koordinavimo)" and
+ * "iš viso 15 valandų: 13 val. …, 2 val. koordinavimui. Šios 2 valandos įeina
+ * į 15 valandų" each state ONE 15-hour day. Read as items, every mention of a
+ * figure was one more item, and the day summed to 17, 19, 32 hours.
+ *
+ * The total is the first timed phrase, and it names no work of its own. It is
+ * recognised only on an explicit signal, never on size alone ("8 val. …, 2
+ * val. …" stays two items):
+ *   - the total says it is the whole day ("iš viso", "in total"…), or stands
+ *     alone ("15 valandų") right after a label colon; or
+ *   - a part carries an inclusion word ("iš jų", "including"…) or states its
+ *     time in brackets; or
+ *   - a later phrase that names no work only REPEATS the total or a part
+ *     already counted ("Šios 2 valandos įeina į 15 valandų") — the person is
+ *     explaining the day, not adding to it.
+ * Such repetitions are not items. Every remaining part must be smaller than
+ * the total and together they must not exceed it. The parts keep their time;
+ * the rest of the day becomes one item carrying the total's own words, so the
+ * items add up to exactly the total the person stated.
+ *
+ * A colon header ALONE is not a signal here: "9 val. …: 5 val. …, 2 val. …"
+ * keeps the #1689 rule (`separateStatedTotal` below) — the itemised parts
+ * count and an unmatched header is set aside visibly, never filled in.
  */
 function containedTotal(
   fragments: JournalFragmentSuggestion[],
@@ -859,28 +876,41 @@ function containedTotal(
 ): { fragments: JournalFragmentSuggestion[]; statedTotal: JournalSuggestions["statedTotal"] } | null {
   if (timed.length < 2) return null;
   const total = timed[0];
-  if (total.activitySlug !== null || total.activityLabel !== null) return null;
+  const namesNoWork = (f: JournalFragmentSuggestion) => f.activitySlug === null && f.activityLabel === null;
+  if (!namesNoWork(total)) return null;
   const totalMin = timeInMinutes(total.time!);
   if (totalMin === null || totalMin <= 0) return null;
-  const parts = timed.slice(1);
+  const parts: JournalFragmentSuggestion[] = [];
+  const restatements = new Set<JournalFragmentSuggestion>();
+  const counted: number[] = [];
   let partsMin = 0;
-  for (const p of parts) {
-    const m = timeInMinutes(p.time!);
-    if (m === null || m >= totalMin) return null;
+  for (const f of timed.slice(1)) {
+    const m = timeInMinutes(f.time!);
+    if (m === null) return null;
+    const repeats = Math.abs(m - totalMin) < 1 || counted.some((c) => Math.abs(c - m) < 1);
+    if (namesNoWork(f) && repeats) {
+      restatements.add(f);
+      continue;
+    }
+    if (m >= totalMin) return null;
+    parts.push(f);
+    counted.push(m);
     partsMin += m;
   }
+  if (parts.length === 0 && restatements.size === 0) return null;
   if (partsMin > totalMin) return null;
   const labelled =
-    PURE_DURATION_RX.test(total.rawPhrase) &&
-    headerPhrases.size > 0 &&
-    !headerPhrases.has(total.rawPhrase);
+    PURE_DURATION_RX.test(total.rawPhrase) && headerPhrases.size > 0 && !headerPhrases.has(total.rawPhrase);
   const signalled =
     labelled ||
+    DAY_TOTAL_WORD_RX.test(total.rawPhrase) ||
+    restatements.size > 0 ||
     parts.some((p) => INCLUDED_PART_RX.test(p.rawPhrase) || BRACKETED_TIME_RX.test(p.rawPhrase));
   if (!signalled) return null;
   const restMin = totalMin - partsMin;
   const out: JournalFragmentSuggestion[] = [];
   for (const f of fragments) {
+    if (restatements.has(f)) continue;
     if (f !== total) {
       out.push(f);
       continue;
