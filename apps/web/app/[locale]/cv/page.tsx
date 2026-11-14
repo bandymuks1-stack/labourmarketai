@@ -995,9 +995,9 @@ export default async function VerifiedCvPage({
               educationType: (slug) => tEduTypes(slug),
               skill: (slug) => tSkill(slug),
               profession: (slug) => tProf(slug),
-              // The standard export prints the bare code; the native name is
-              // friendlier and falls back to the same code, so the two
-              // documents never disagree about which language it is.
+              // The native name, falling back to the code: the same rule the
+              // standard template uses, so the two documents never disagree
+              // about which language it is.
               language: (code) =>
                 WORKER_LANGUAGE_NATIVE_NAMES[
                   code as keyof typeof WORKER_LANGUAGE_NATIVE_NAMES
@@ -1372,7 +1372,12 @@ export default async function VerifiedCvPage({
                   key={l.lang}
                   className="rounded-full border border-ink-500 bg-ink-700 px-2.5 py-0.5 text-xs text-text-secondary"
                 >
-                  {l.lang.toUpperCase()} · {l.level}
+                  {/* The language's own name, as on the EU template and
+                      the profile; the code only when no name is known. */}
+                  {WORKER_LANGUAGE_NATIVE_NAMES[
+                    l.lang as keyof typeof WORKER_LANGUAGE_NATIVE_NAMES
+                  ] ?? l.lang.toUpperCase()}{" "}
+                  · {l.level}
                 </span>
               ))}
             </div>
