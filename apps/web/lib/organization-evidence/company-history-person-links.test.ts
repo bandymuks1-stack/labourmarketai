@@ -38,3 +38,23 @@ describe("no link to a card this organization does not hold", () => {
     expect(block).toContain('data-testid="company-place-person-other-roster"');
   });
 });
+
+describe("the place detail is reachable from the history page", () => {
+  const page = read("app/[locale]/dashboard/company/history/page.tsx");
+  const ui = read("components/app/organization/company-work-history.tsx");
+
+  it("the page renders one place's detail at the anchor every place tile links to", () => {
+    expect(ui).toContain("#company-place-detail");
+    expect(page).toMatch(/<section id="company-place-detail"[^>]*>\s*<CompanyPlaceHistory locale=\{locale\} placeKey=\{place\} organizationId=\{org\} \/>/);
+  });
+
+  it("a named organization (?org=) is kept from the tile to the detail", () => {
+    expect(ui).toMatch(/href=\{placeHref\(p\.key, organizationId\)/);
+    expect(ui).toContain("loadCompanyWorkHistory(locale, organizationId)");
+  });
+
+  it("the page keeps a single top-level heading", () => {
+    const detail = ui.slice(ui.indexOf("export async function CompanyPlaceHistory"));
+    expect(detail).not.toContain("<h1");
+  });
+});

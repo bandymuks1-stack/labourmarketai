@@ -156,7 +156,7 @@ export async function CompanyWorkHistory({
       <ul id="company-work-history-places" className="grid scroll-mt-20 gap-3 md:grid-cols-2" data-testid="company-work-history-places">
         {placed.map((p) => (
           <li key={p.key}>
-            <PlaceTile p={p} t={t} locale={locale} maxHours={maxHours} />
+            <PlaceTile p={p} t={t} locale={locale} maxHours={maxHours} organizationId={organizationId} />
           </li>
         ))}
       </ul>
@@ -183,8 +183,11 @@ export async function CompanyWorkHistory({
   );
 }
 
-export function placeHref(key: string): string {
-  return `/dashboard/company/history?place=${encodeURIComponent(key)}#company-place-detail`;
+/** One place's detail on the same page. A named organization (`?org=`) is
+ *  kept, so the detail reads the organization whose history was opened. */
+export function placeHref(key: string, organizationId: string | null = null): string {
+  const org = organizationId ? `&org=${encodeURIComponent(organizationId)}` : "";
+  return `/dashboard/company/history?place=${encodeURIComponent(key)}${org}#company-place-detail`;
 }
 
 function PlaceTile({
@@ -192,18 +195,20 @@ function PlaceTile({
   t,
   locale,
   maxHours,
+  organizationId,
 }: {
   p: PlaceGroup;
   t: Awaited<ReturnType<typeof getTranslations>>;
   locale: string;
   maxHours: number;
+  organizationId: string | null;
 }) {
   const hours = p.dayHours;
   const when = span(p.firstDate, p.lastDate, locale);
   const latest = p.records.find((r) => r.text);
   return (
     <Link
-      href={placeHref(p.key) as "/dashboard"}
+      href={placeHref(p.key, organizationId) as "/dashboard"}
       data-testid="company-work-history-place"
       data-place={p.key}
       className="group flex h-full flex-col gap-3 rounded-card border border-ink-600 bg-ink-800/40 p-4 transition-colors hover:border-brand-blue"
@@ -248,13 +253,16 @@ function PlaceTile({
 export async function CompanyPlaceHistory({
   locale,
   placeKey,
+  organizationId = null,
   load: preloaded,
 }: {
   locale: string;
   placeKey: string;
+  /** Same rule as the overview: a named organization, else the active one. */
+  organizationId?: string | null;
   load?: CompanyWorkHistoryLoad;
 }) {
-  const load = preloaded ?? (await loadCompanyWorkHistory(locale));
+  const load = preloaded ?? (await loadCompanyWorkHistory(locale, organizationId));
   if (load.kind === "hidden") return null;
   const t = await getTranslations("companyWorkHistory");
   if (load.kind === "unavailable") {
@@ -280,9 +288,9 @@ export async function CompanyPlaceHistory({
     <div className="flex flex-col gap-5" data-testid="company-place" data-place={place.key}>
       <header className="flex flex-col gap-2">
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">{t("place")}</p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+        <h2 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {place.name ?? t("noPlaceName")}
-        </h1>
+        </h2>
         <Provenance t={t} name={load.organizationName} />
         {load.truncated ? (
           <p className="text-meta leading-relaxed text-text-muted" data-testid="company-place-truncated">
