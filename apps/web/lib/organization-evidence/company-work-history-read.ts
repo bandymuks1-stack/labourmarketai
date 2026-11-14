@@ -6,6 +6,16 @@ import {
   summarizeOrganizationProjects,
   type OrganizationProjects,
 } from "@/lib/organization-evidence/organization-projects";
+import {
+  summarizeOrganizationJournal,
+  type OrganizationJournal,
+  type OrganizationJournalRow,
+} from "@/lib/organization-evidence/organization-journal";
+import {
+  JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
+  JOURNAL_ENTRY_METRICS_EMBED,
+} from "@/lib/journal/journal-list-core";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 import { withSessionWorkspacePointer, listWorkspaceMemberships } from "@/lib/company/active-organization";
 import type { DomainCaller } from "@/lib/domain/caller";
 import type { BusinessHistoryIdentity } from "./business-history-header";
@@ -58,6 +68,11 @@ export type CompanyWorkHistoryLoad =
       /** The organization's own projects on the platform (#3354: its track
        *  record). Null when they could not be read — never shown as "none". */
       readonly projects: OrganizationProjects | null;
+      /** Work its people recorded in the journal under THIS organization's
+       *  engagements (Lane G's contract, rule 2). A separate ledger from the
+       *  imported history, never added to it. Null when it could not be read
+       *  — never shown as "no hours". */
+      readonly journal: OrganizationJournal | null;
       /** Records stored in ANOTHER organization's books that name this one as the performing company. */
       readonly attributedCount: number;
       /** A safety ceiling was reached while reading: the totals cover only
@@ -98,7 +113,7 @@ export async function loadCompanyWorkHistory(
   // Every read is PAGED to the end (the server answers at most 1000 rows):
   // production holds 2,944 records for one organization, and a bare
   // `.limit(1000)` made every total on this page silently wrong.
-  const [recs, objs, people, projectRows] = await Promise.all([
+  const [recs, objs, people, projectRows, journal] = await Promise.all([
     listAllEvidenceRecords(caller, { organizationId: org.organizationId }),
     readAllPages<{
       id: string;
@@ -142,6 +157,7 @@ export async function loadCompanyWorkHistory(
           .order("id", { ascending: true })
           .range(from, to),
     ),
+    readOrganizationJournal(supabase, org.organizationId),
   ]);
   if (recs.kind !== "ok" || !objs || !people) return { kind: "unavailable" };
   const projects = projectRows
@@ -230,9 +246,61 @@ export async function loadCompanyWorkHistory(
     elsewhere,
     linkedWorkers,
     projects,
+    journal,
     attributedCount: attributed.length,
     truncated: recs.truncated,
   };
+}
+
+/**
+ * The organization's journal work, read the one way the contract allows: its
+ * engagements (`engagement_contexts.organization_id`), then the live entries
+ * on them (`journal_entries.engagement_context_id`). An engagement's status is
+ * not filtered: work recorded under a since-ended engagement still happened
+ * here. Ids, timestamps, review rows and metric rows only: never the entry
+ * text. RLS's org-manager branch decides what comes back; nothing widens it.
+ */
+async function readOrganizationJournal(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  organizationId: string,
+): Promise<OrganizationJournal | null> {
+  try {
+    const contexts = await readAllPages<{ id: string }>((from, to) =>
+      db(supabase)
+        .from("engagement_contexts")
+        .select("id")
+        .eq("organization_id", organizationId)
+        .order("id", { ascending: true })
+        .range(from, to),
+    );
+    if (!contexts) return null;
+    const ids = contexts.rows.map((r) => r.id);
+    const select = [
+      "id, worker_id, created_at, correction_of, engagement_context_id, subject:workers(profile_id)",
+      JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
+      JOURNAL_ENTRY_METRICS_EMBED,
+    ].join(", ");
+    const rows: OrganizationJournalRow[] = [];
+    for (let i = 0; i < ids.length; i += ID_CHUNK) {
+      const chunk = ids.slice(i, i + ID_CHUNK);
+      const page = await readAllPages<OrganizationJournalRow>((from, to) =>
+        db(supabase)
+          .from("journal_entries")
+          .select(select)
+          .in("engagement_context_id", chunk)
+          .is("deleted_at", null)
+          .is("superseded_by", null)
+          .order("id", { ascending: true })
+          .range(from, to),
+      );
+      if (!page || page.truncated) return null;
+      rows.push(...page.rows);
+    }
+    const { todayIso, horizonIso } = await viewerWorkToday();
+    return summarizeOrganizationJournal(rows, todayIso, horizonIso);
+  } catch {
+    return null;
+  }
 }
 
 type PeriodRow = {

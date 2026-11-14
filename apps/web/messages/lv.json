@@ -7156,6 +7156,15 @@
       "running": "Notiek",
       "completed": "Pabeigts",
       "all": "Visi {count} projekti"
+    },
+    "journal": {
+      "title": "Žurnālā ierakstītais darbs",
+      "hours": "Ierakstītās stundas",
+      "confirmed": "Organizācijas apstiprinātās stundas",
+      "people": "Cilvēki, kas ierakstīja darbu",
+      "period": "Ierakstīts",
+      "basis": "No {entries} žurnāla ierakstiem, ko cilvēki veica šajā organizācijā. Apstiprinātās stundas ir tās, ko organizācija apstiprināja; pārējais ir pašu cilvēku ieraksts. Skaitīts atsevišķi no augstāk redzamās importētās vēstures un nekad tai nepieskaitīts.",
+      "unavailable": "Šobrīd neizdevās nolasīt šajā organizācijā žurnālā ierakstīto darbu."
     }
   },
   "workLifecycle": {

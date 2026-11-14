@@ -7156,6 +7156,15 @@
       "running": "Pågående",
       "completed": "Fullført",
       "all": "Alle {count} prosjekter"
+    },
+    "journal": {
+      "title": "Arbeid registrert i journalen",
+      "hours": "Registrerte timer",
+      "confirmed": "Timer bekreftet av organisasjonen",
+      "people": "Personer som registrerte arbeid",
+      "period": "Registrert",
+      "basis": "Fra {entries} journalinnføringer som personer registrerte under denne organisasjonen. Bekreftede timer er de organisasjonen godkjente; resten er personenes egen registrering. Telt atskilt fra den importerte historikken ovenfor og aldri lagt til den.",
+      "unavailable": "Arbeidet registrert i journalen under denne organisasjonen kunne ikke leses akkurat nå."
     }
   },
   "workLifecycle": {

@@ -12,6 +12,7 @@ import {
 } from "@/lib/organization-evidence/company-work-history-read";
 import { isPeriodRecord, type PlaceGroup } from "@/lib/organization-evidence/company-work-history";
 import type { OrganizationProjects } from "@/lib/organization-evidence/organization-projects";
+import type { OrganizationJournal } from "@/lib/organization-evidence/organization-journal";
 import { BusinessHistoryOverview } from "@/components/app/organization/business-history-overview";
 import { OpenWorkspaceButton } from "@/components/app/organization/open-workspace-button";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
@@ -100,7 +101,9 @@ export async function CompanyWorkHistory({
             </p>
           ))}
         </Card>
-        {/* A company with no imported history can still have real projects. */}
+        {/* A company with no imported history can still have real projects
+            and journal work. */}
+        <OrganizationJournalBlock journal={load.journal} t={t} locale={locale} />
         <OrganizationProjectsBlock projects={load.projects} t={t} />
       </section>
     );
@@ -156,6 +159,8 @@ export async function CompanyWorkHistory({
         <Stat concept="calendar" value={periodLabel ?? "—"} label={t("stats.period")} />
       </div>
 
+      <OrganizationJournalBlock journal={load.journal} t={t} locale={locale} />
+
       <OrganizationProjectsBlock projects={load.projects} t={t} />
 
       <ul id="company-work-history-places" className="grid scroll-mt-20 gap-3 md:grid-cols-2" data-testid="company-work-history-places">
@@ -184,6 +189,51 @@ export async function CompanyWorkHistory({
           {t("scope.missing")}
         </p>
       </Card>
+    </section>
+  );
+}
+
+/** THE ORGANIZATION'S JOURNAL WORK (#3354, contract rule 2): what its people
+ *  recorded under its engagements, as one aggregate. A separate ledger from
+ *  the imported history above, never added to it; no name and no per-person
+ *  line. An unreadable ledger says so, never "0 h". */
+function OrganizationJournalBlock({
+  journal,
+  t,
+  locale,
+}: {
+  journal: OrganizationJournal | null;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+  locale: string;
+}) {
+  if (!journal) {
+    return (
+      <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-journal-unavailable">
+        {t("journal.unavailable")}
+      </p>
+    );
+  }
+  if (journal.entries === 0) return null;
+  const when = span(journal.firstMonth ? `${journal.firstMonth}-01` : null, journal.lastMonth ? `${journal.lastMonth}-01` : null, locale);
+  return (
+    <section
+      className="flex flex-col gap-2"
+      data-testid="company-work-history-journal"
+      data-hours={journal.hours}
+      data-confirmed-hours={journal.confirmedHours}
+      data-people={journal.people}
+      aria-label={t("journal.title")}
+    >
+      <h3 className="font-display text-lg font-semibold text-text-primary">{t("journal.title")}</h3>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat concept="time" value={`${nf(journal.hours)} h`} label={t("journal.hours")} />
+        <Stat concept="time" value={`${nf(journal.confirmedHours)} h`} label={t("journal.confirmed")} />
+        <Stat concept="person" value={String(journal.people)} label={t("journal.people")} />
+        <Stat concept="calendar" value={when ?? "—"} label={t("journal.period")} />
+      </div>
+      <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-journal-basis">
+        {t("journal.basis", { entries: journal.entries })}
+      </p>
     </section>
   );
 }

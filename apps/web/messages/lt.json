@@ -19347,6 +19347,15 @@
       "running": "Vykdomas",
       "completed": "Užbaigtas",
       "all": "Visi {count} projektai"
+    },
+    "journal": {
+      "title": "Žurnale įrašytas darbas",
+      "hours": "Įrašyta valandų",
+      "confirmed": "Organizacijos patvirtinta valandų",
+      "people": "Žmonės, įrašę darbą",
+      "period": "Įrašyta",
+      "basis": "Iš {entries} žurnalo įrašų, kuriuos žmonės įrašė šioje organizacijoje. Patvirtintos valandos yra tos, kurias organizacija patvirtino; likusios yra pačių žmonių įrašai. Skaičiuojama atskirai nuo aukščiau esančios importuotos istorijos ir niekada su ja nesumuojama.",
+      "unavailable": "Šiuo metu nepavyko perskaityti šioje organizacijoje žurnale įrašyto darbo."
     }
   },
   "workPlan": {

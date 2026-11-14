@@ -29,6 +29,7 @@ const ORGANIZATION_READERS = [
   "@/lib/organization-evidence/company-work-history-read",
   "@/lib/organization-evidence/company-work-history",
   "@/lib/organization-evidence/organization-projects",
+  "@/lib/organization-evidence/organization-journal",
 ];
 
 describe("organization CV flows one way", () => {
@@ -54,5 +55,22 @@ describe("organization CV flows one way", () => {
     const query = src.slice(at, src.indexOf(".range(from, to)", at));
     expect(query).toContain('.eq("organization_id", org.organizationId)');
     expect(query).not.toMatch(/profile_id|worker_id|responsible_profile_id/);
+  });
+
+  it("the organization's journal work is read only through its engagements", () => {
+    const src = read("lib/organization-evidence/company-work-history-read.ts");
+    const fn = src.slice(src.indexOf("async function readOrganizationJournal"));
+    const ctx = fn.slice(fn.indexOf('.from("engagement_contexts")'), fn.indexOf(".range(from, to)"));
+    expect(ctx).toContain('.eq("organization_id", organizationId)');
+    const entries = fn.slice(fn.indexOf('.from("journal_entries")'));
+    expect(entries).toContain('.in("engagement_context_id", chunk)');
+    // Never the entry text, never a name: an aggregate of the organization's records.
+    expect(fn.slice(0, fn.indexOf("type PeriodRow"))).not.toMatch(/original_text|full_name|display_name/);
+  });
+
+  it("the organization's journal summary names no person and no skill", () => {
+    const src = read("lib/organization-evidence/organization-journal.ts");
+    const type = src.slice(src.indexOf("export type OrganizationJournal ="), src.indexOf("const round2"));
+    expect(type).not.toMatch(/name|skill|profile|worker/i);
   });
 });

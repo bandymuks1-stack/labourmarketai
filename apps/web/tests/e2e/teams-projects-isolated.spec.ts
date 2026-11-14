@@ -9,6 +9,7 @@ import {
   isolatedStack,
   lit,
   onboard,
+  recordJournal,
   setUpCompany,
   signUp,
   sql,
@@ -406,6 +407,39 @@ test("T-8. the organization's CV lists its project, and the project leads back t
   for (const name of [W1_NAME, W2_NAME]) await expect(projects).not.toContainText(name);
   await row.click();
   await co.waitForURL(new RegExp(`/en/dashboard/projects/${s.projectId}`), { timeout: 30_000 });
+});
+
+test("T-8b. the organization's CV carries its people's journal work as one figure, with no name", async () => {
+  expect(s.coOrgId, "the company exists").toBeTruthy();
+  // A synthetic worker of the company records one day of work.
+  await recordJournal(as(W1), BASE, `Prepared the banquet cold kitchen, 6 hours (${RUN})`);
+
+  // The contract: an entry belongs to an organization only through its
+  // engagement. Count what the company holds that way (it may be none when
+  // the entry went to another of the worker's workspaces).
+  const held =
+    sql<{ n: number }>(
+      `select count(*)::int as n from public.journal_entries j
+         join public.engagement_contexts e on e.id = j.engagement_context_id
+        where e.organization_id = ${lit(s.coOrgId)}
+          and j.deleted_at is null and j.superseded_by is null`,
+    )[0]?.n ?? 0;
+
+  const co = as(CO);
+  await co.goto(`${BASE}/en/dashboard/company/history`);
+  await expect(co.getByTestId("company-work-history")).toBeVisible({ timeout: 30_000 });
+  // The read works under the company's own session: never "could not be read".
+  await expect(co.getByTestId("company-work-history-journal-unavailable")).toHaveCount(0);
+  const journal = co.getByTestId("company-work-history-journal");
+  if (held === 0) {
+    await expect(journal, "no entry under the company, no journal figure").toHaveCount(0);
+    return;
+  }
+  await expect(journal).toBeVisible();
+  await expect(journal).toHaveAttribute("data-people", "1");
+  await expect(co.getByTestId("company-work-history-journal-basis")).toContainText(String(held));
+  // One aggregate: no person is named on the organization's figure.
+  for (const name of [W1_NAME, W2_NAME]) await expect(journal).not.toContainText(name);
 });
 
 // ── T-14 ────────────────────────────────────────────────────────────────────

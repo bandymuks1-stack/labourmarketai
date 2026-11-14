@@ -19347,6 +19347,15 @@
       "running": "Lopend",
       "completed": "Afgerond",
       "all": "Alle {count} projecten"
+    },
+    "journal": {
+      "title": "Werk vastgelegd in het logboek",
+      "hours": "Vastgelegde uren",
+      "confirmed": "Door de organisatie bevestigde uren",
+      "people": "Mensen die werk vastlegden",
+      "period": "Vastgelegd",
+      "basis": "Uit {entries} logboekregels die mensen onder deze organisatie vastlegden. Bevestigde uren zijn de uren die de organisatie goedkeurde; de rest is het eigen verslag van de mensen. Apart geteld van de geïmporteerde geschiedenis hierboven en daar nooit bij opgeteld.",
+      "unavailable": "Het werk dat onder deze organisatie in het logboek is vastgelegd, kon nu niet worden gelezen."
     }
   },
   "workPlan": {
