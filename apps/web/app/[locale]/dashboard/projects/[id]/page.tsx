@@ -18,6 +18,10 @@ import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { getProjectStadium } from "@/lib/projects/stadium";
+import { getProjectTeamAssignments } from "@/lib/projects/team-assignment";
+import { projectPageTeams, teamsByPerson } from "@/lib/projects/project-page-teams";
+import { Badge } from "@/components/ui/Badge";
+import { Card } from "@/components/ui/Card";
 import { ProjectCourseTrack } from "@/components/app/projects/project-course-track";
 import { deriveProjectCourse } from "@/lib/projects/project-course";
 import { ProjectForecastPanel } from "@/components/app/projects/project-forecast-panel";
@@ -123,7 +127,19 @@ export default async function ProjectStadiumPage({
   const hasTeam = ops.workers.length > 0;
   // Workers with a real relationship here + their active counterparty link
   // (null = unreadable, rendered as "could not load", never as "none").
-  const linkCandidates = await readLinkCandidates(supabase, id);
+  // The link candidates and the teams are independent reads: one wave.
+  const [linkCandidates, teamAssignments] = await Promise.all([
+    readLinkCandidates(supabase, id),
+    getProjectTeamAssignments([id]),
+  ]);
+  // WHICH teams work here (not only "N via team"). A read that failed is said
+  // as such below - it is never shown as "no teams" (SEP-7).
+  const teamRows = teamAssignments.status === "ok" ? (teamAssignments.byProject.get(id) ?? []) : [];
+  const pageTeams = projectPageTeams(teamRows);
+  const personTeams = teamsByPerson(teamRows);
+  const tTeam = await getTranslations("projectOps.stadium.teams");
+  const teamsOf = (w: { workerId: string; workerProfileId: string }) =>
+    personTeams.get(w.workerProfileId) ?? personTeams.get(w.workerId) ?? [];
 
   // systemic-ux-project-v1: honest location status (no fake marker) + project
   // place line, reusing the signal-only market-map mappability rule.
@@ -403,6 +419,15 @@ export default async function ProjectStadiumPage({
                     </p>
                   </div>
                 </Link>
+                {teamsOf(w).length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5" data-testid="stadium-player-teams">
+                    {teamsOf(w).map((name, i) => (
+                      <Badge key={`${name ?? "team"}-${i}`} tone="neutral" className="max-w-full break-words normal-case">
+                        {tTeam("personTeam", { team: name ?? tTeam("unnamed") })}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : null}
                 <div className="flex flex-wrap gap-2">
                   <span className="inline-flex items-center gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1 font-mono text-meta text-text-secondary">
                     <NotebookPen className="h-3 w-3" aria-hidden />
@@ -475,6 +500,57 @@ export default async function ProjectStadiumPage({
         )}
       </section>
 
+      {/* ── THE TEAMS on this project, by name, with who is in each now. The
+            same rows the assignment screen reads; changing them stays there. ── */}
+      {teamAssignments.status !== "ok" || pageTeams.length > 0 ? (
+        <section id="stadium-teams" className="flex scroll-mt-20 flex-col gap-3" data-testid="stadium-teams">
+          <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {tTeam("title")}
+          </h2>
+          {teamAssignments.status !== "ok" ? (
+            <Card compact variant="empty" data-testid="stadium-teams-unavailable">
+              <p className="text-sm leading-relaxed text-text-secondary">{tTeam("unavailable")}</p>
+            </Card>
+          ) : (
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {pageTeams.map((team) => (
+                <li key={team.teamOrgId} className="min-w-0" data-testid="stadium-team">
+                  <Card compact className="flex h-full flex-col gap-3">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <h3 className="min-w-0 break-words font-display text-lg font-semibold leading-tight text-text-primary">
+                        {team.name ?? tTeam("unnamed")}
+                      </h3>
+                      <span className="font-mono text-meta tabular-nums text-text-muted" data-testid="stadium-team-count">
+                        {tTeam("members", { n: team.members.length })}
+                      </span>
+                    </div>
+                    {team.members.length > 0 ? (
+                      <ul className="flex flex-wrap gap-1.5">
+                        {team.members.map((m) => (
+                          <li key={m.key}>
+                            <Badge tone="neutral" className="max-w-full break-words normal-case">
+                              {m.name ?? tTeam("unnamedMember")}
+                            </Badge>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-text-secondary">{tTeam("noMembers")}</p>
+                    )}
+                  </Card>
+                </li>
+              ))}
+            </ul>
+          )}
+          <Link
+            href={`/${locale}/dashboard/projects#project-teams`}
+            className="inline-flex min-h-11 items-center self-start text-sm font-medium text-brand-blue underline-offset-4 hover:underline focus-visible:underline"
+            data-testid="stadium-teams-manage"
+          >
+            {tTeam("manage")} →
+          </Link>
+        </section>
+      ) : null}
 
       {/* ── Location: a project is a real work object, with honest place
             context. NO fake marker — a map point only ever appears with
