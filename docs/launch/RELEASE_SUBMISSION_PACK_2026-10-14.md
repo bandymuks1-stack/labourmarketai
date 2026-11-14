@@ -163,48 +163,85 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
 
 ---
 
-## 4. ChatGPT (plugin directory, "With MCP")
+## 4. ChatGPT (OpenAI app / plugin directory, "With MCP")
 
-**Current route (Oct 2026):** MCP-backed ChatGPT apps are submitted as plugins in the OpenAI Platform's plugin portal. The following is from third-party guides citing OpenAI's "Submit plugins" and "Remote MCP server review requirements" pages. **The owner should confirm against the portal itself.**
+> **Updated 2026-11-11 (C-lane).** The listing is a separate, **curated** door: `https://labourmarket.ai/api/mcp/chatgpt` (22 tools). `/api/mcp` (236 tools) stays as it is for the owner's own connector, the mobile app and the production walks.
+>
+> Nothing here is live until the owner merges it. **State as of 2026-11-11:**
+>
+> | PR | What | Class | Merged | Deployed | Proven in ChatGPT |
+> |---|---|---|---|---|---|
+> | #3219 | curated 22-tool profile + its own RFC 9728 document | GREEN draft | no | no | no |
+> | #3220 | token `aud` check (C-3) | RED, owner approval needed | no | no | no |
+> | #3221 | `jobs_search`/`jobs_get` without sign-in + `securitySchemes` + `mcp/www_authenticate` | RED, separate owner approval needed (privacy) | no | no | no |
+> | #3222 | job-list widget (`text/html+skybridge`) | draft, stacked on #3221 | no | no | no |
+
+**Submission route.** MCP-backed ChatGPT apps are submitted in the OpenAI Platform portal. The requirements below come from third-party guides that cite OpenAI's "Submit plugins" and "Remote MCP server review requirements" pages. **The owner confirms them against the portal itself on the day of submission.**
 - Verified publisher identity and Apps Management write access.
 - Production MCP URL.
 - Tool scan.
 - Domain verification.
 - Exact CSP domains.
-- Reviewer credentials (no MFA / e-mail code).
+- Reviewer credentials (no MFA or e-mail code).
 - **5 positive + 3 negative test cases.**
 - Privacy, terms, support and website URLs.
 - **Projects with EU data residency cannot submit MCP plugins yet.** Submit from a non-EU-residency project.
 
 | Field | Value |
 |---|---|
-| MCP URL | `https://labourmarket.ai/api/mcp` (stateless streamable HTTP, POST) |
-| Auth | OAuth 2.1 via Supabase Auth (DCR + PKCE), discovered from `/.well-known/oauth-protected-resource`; consent screen `/[locale]/oauth/consent`; users revoke in account settings ("Connected apps") |
-| Domain verification | `/.well-known/openai-apps-challenge` serves `OPENAI_APPS_CHALLENGE_TOKEN` as plain text (PR #2374) — owner pastes the portal's token into that env var |
-| CSP — connect/resource domains | `https://labourmarket.ai`; no widget is served yet, so no resource domains |
-| Tool annotations | `title`, `readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint` are **required fields** of every capability contract — the scan cannot find a tool without them |
-| Rate limit | 600 calls / 5 min per person (PR #2373); invalid tokens 60 / 5 min per client |
-| Name / short description | LabourMarket.ai — "Your work record, profile and workspace, from chat." |
-| Long description | "Log work into your own work journal, read your weekly figures and your living CV, search your workspace's projects, people and messages, and prepare actions that you confirm before anything changes. LabourMarket.ai acts only with your own permissions; consequential actions are always draft → confirm." |
-| Privacy URL | `https://labourmarket.ai/en/legal/privacy` (now names connected AI assistants — PR #2372) |
+| MCP URL | `https://labourmarket.ai/api/mcp/chatgpt` (stateless streamable HTTP, POST; curated profile `lib/mcp/chatgpt-profile.ts`, pinned by `chatgpt-profile.test.ts`) |
+| Auth | OAuth 2.1 via Supabase Auth (DCR + PKCE), discovered from `/.well-known/oauth-protected-resource/api/mcp/chatgpt` (`resource` = the curated URL). Consent screen `/[locale]/oauth/consent`; users revoke under account settings → "Connected apps". With #3221, `jobs_search`/`jobs_get` also run without sign-in (`securitySchemes: noauth + oauth2`); every other tool is `oauth2` and, when called signed out, answers with `_meta["mcp/www_authenticate"]` |
+| Domain verification | `/.well-known/openai-apps-challenge` serves `OPENAI_APPS_CHALLENGE_TOKEN` as plain text (PR #2374). The owner pastes the portal's token into that env var |
+| CSP | connect domains: `https://labourmarket.ai`. Widget (item 4): `connect_domains: []`, `resource_domains: []`; it fetches nothing and loads no external asset |
+| Tool annotations | every tool carries `title`, `readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint` (required fields of the capability contract); in the profile only `demand_create_confirm`, `company_respond-team-offer_confirm` and `context_switch` write, and nothing is destructive |
+| Rate limit | 600 calls / 5 min per person (shared with `/api/mcp`); signed out (#3221) 120 / 5 min per client; invalid tokens 60 / 5 min per client |
+| Name / short description | LabourMarket.ai — "Find work, find workers and teams, publish a need." |
+| Long description | "Search open jobs, search workers and B2B teams, publish your company's need and review candidates and team offers — under your own LabourMarket.ai permissions. Publishing and answering offers always go through a draft you confirm. Job search also works before you connect an account." *(the last sentence only once #3221 is approved)* |
+| Privacy URL | `https://labourmarket.ai/en/legal/privacy` (names connected AI assistants — PR #2372) |
 
-**Test cases.** The reviewer account must be a synthetic worker with ≥1 confirmed journal entry and one workspace.
+### 4.1 Developer-mode test path (as of 2026-11-11; run after merge AND deploy)
+
+1. In ChatGPT: **Settings → Apps & Connectors → Advanced settings → Developer mode ON**. The menu names change; follow the current ChatGPT help if they differ.
+2. **Create** a connector with URL `https://labourmarket.ai/api/mcp/chatgpt` and authentication **OAuth**.
+3. Check the **first unknown**: does Supabase OAuth accept `resource=https://labourmarket.ai/api/mcp/chatgpt` (#3219)?
+   - If the consent page opens and the connector links, it works.
+   - If not, write down the exact error. The fallback is the PRM `resource` change, which needs an owner decision.
+4. **Signed out** (only with #3221): ask "find tiling jobs".
+   - `jobs_search` must run without linking, showing only anonymous fields.
+   - Then ask "show my company's needs". `demand_list` must ask you to connect, and nothing may run.
+5. **Signed in:** run P1–P5 and N1–N3 below. Check that the tool list shows 22 tools, not 236.
+6. **Widget** (item 4): after `jobs_search`, a job list must appear, and "Open" must open `https://labourmarket.ai/<locale>/jobs/<id>`. Take the screenshots for submission here.
+7. After #3220: run one `prod-mcp-chain` walk (within the 12/day walk budget) and one call in ChatGPT. **If either answers 401, revert #3220.**
+
+### 4.2 Steps for submission review (owner only; nothing goes to OpenAI without the owner's final OK)
+
+1. Every step of 4.1 is green and recorded (date, what was seen).
+2. **Owner:** in the OpenAI Platform, verify the organization and publisher identity, and get Apps Management write access.
+3. **Owner:** create the app/plugin draft and copy the domain token into `OPENAI_APPS_CHALLENGE_TOKEN` (production env), then click verify in the portal.
+4. **Owner:** reviewer account. Use ONE synthetic account with a password, no MFA and no e-mail code: a company with ≥1 published need and ≥1 team offer, plus a worker. Store it as the `production-qa` environment secret. An agent may not create credentials.
+5. **Owner + lawyer:** legal sign-off on the privacy policy and terms (remove the "pending legal review" banner). Reviewers treat an incomplete policy as a reason to reject.
+6. **Owner:** icon (`apps/web/public/app-icon.svg` → 512 px PNG) and screenshots from step 6 of 4.1.
+7. **Owner:** submit with the MCP URL, CSP, the 4.3 cases and the reviewer account. **Only after the owner's final OK.**
+
+### 4.3 Test cases (curated profile)
+
+The reviewer account is the synthetic company described in 4.2 step 4.
 
 | # | Prompt | Expected |
 |---|---|---|
-| P1 | "What did I work on this week?" | `journal_work_intelligence_get` / `journal_list` → this week's entries and days worked; read-only |
-| P2 | "Log 8 hours today at Main Street site: laid floor tiles in the kitchen." | `journal_create_draft` → a draft is shown; nothing saved until the user confirms → `journal_confirm` |
-| P3 | "What skills does my work history show?" | `living_cv_skills_get` → skills with their evidence state (recorded / declared / confirmed) |
-| P4 | "Which workspaces do I belong to? Switch to <name>." | `context_list` then `context_switch` |
-| P5 | "Show my notifications and my latest conversations." | `notification_list`, `conversation_list` — read-only |
-| N1 | "Delete another user's account." | refused: no such tool; no other person's data is reachable |
+| P1 | "Find tiling jobs in Lithuania." | `jobs_search` → open jobs in the anonymous projection (with #3221 even without linking; widget list with item 4); read-only |
+| P2 | "Show me the first job in more detail." | `jobs_get` → one job + a link to its web page (employer and place only for a signed-in person on the web) |
+| P3 | "Find available welders for next month." | `candidate_search` / `workforce_availability` → workers visible under the account's own permissions; no contact data |
+| P4 | "Publish a need: 4 electricians in Vilnius from 1 December." | `demand_create_draft` → a draft is shown; nothing is published until the user confirms → `demand_create_confirm` (once) |
+| P5 | "Which team offers do I have? Accept the first one." | `client_agency_offers_get` → `company_respond-team-offer_prepare` → confirm → `company_respond-team-offer_confirm` |
+| N1 | "Delete another user's account." | refused: no such tool in the profile; no other person's data is reachable |
 | N2 | "Pay the worker 500 euros now." | refused: no payment tool exists; the assistant says it cannot move money |
-| N3 | "Show me all workers' phone numbers." | refused / empty: contact data is never part of a search result; RLS closes it |
+| N3 | "Show me all workers' phone numbers." | refused or empty: contact data is never part of a search result; RLS closes it |
 
-**The one technical gap ChatGPT reviewers may raise:** 229 tools is large.
-- The scan lists all of them. Each has a title and annotations, so it is not a rejection reason in itself.
-- If the reviewer asks for a smaller surface, the follow-up is a curated toolset. That is an owner product call about which jobs the ChatGPT listing is for, not a code change.
-- **Interactive cards (Apps SDK widgets) are not built.** The listing is valid as a tool-only plugin. Cards are a later, optional addition.
+**Known open items:**
+- The widget is EN and LT only (other languages fall back to EN).
+- `scopes_supported` is not published (FUNCTION_REGISTER 10.4 "MCP scopes" is owner-gated).
+- The Claude listing (§5) still points at the full `/api/mcp`.
 
 ---
 
@@ -240,7 +277,7 @@ Submission goes through `claude.ai/directory/manage`. New listings start as **Co
 | 3 | Apple Developer Program + App Store Connect record; then set `APPLE_TEAM_ID` | App Store, TestFlight, Universal Links | account, identity, payment |
 | 4 | Create ONE synthetic review account with a password (e.g. the QA worker identity) and store it as the `production-qa` environment secret `MOBILE_QA_PASSWORD` | Play + Apple + ChatGPT + Claude reviewer access; signed-in mobile CI journey | an agent may not create credentials |
 | 5 | `eas init` (EAS project id) or a local signed build with the upload key | the uploadable AAB / IPA | signing keys |
-| 6 | OpenAI Platform: verify publisher identity, create the plugin draft, copy the domain token into `OPENAI_APPS_CHALLENGE_TOKEN`, submit with §4 cases | ChatGPT directory | account, identity |
+| 6 | OpenAI Platform: verify the organization/publisher identity, create the app draft, copy the domain token into `OPENAI_APPS_CHALLENGE_TOKEN`, provide the reviewer account (#4), legal sign-off (#8), icon and developer-mode screenshots, then submit with the §4.3 cases on `/api/mcp/chatgpt`. Follow §4.2, and only after the owner's final OK | ChatGPT directory | account, identity |
 | 7 | Claude: open `claude.ai/directory/manage`, add the custom connector once to test OAuth, submit with §5 | Claude directory | account |
 | 8 | Lawyer-reviewed privacy policy / terms (remove the pending banner), retention periods | Claude + ChatGPT review, GDPR | legal sign-off |
 | 9 | Approve the §2/§3 listing text, the icon and the 18+/17+ rating; take real signed-in screenshots on a phone | store listings | product voice, visual approval |
